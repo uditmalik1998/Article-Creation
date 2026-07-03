@@ -233,22 +233,22 @@ export async function syncVariantsToSapViaRfc(
 
         const out: SapSyncItemResult[] = [];
         for (const variant of variants) { // sequential within a generic (shared SAP lock)
-            const variantSizeStr = toStr(variant.variantSize);
-            if (variantSizeStr) {
-                const check = await validateVariantSizeOnSap(genericSapArt, variantSizeStr);
-                if (!check.ok) {
-                    console.warn(
-                        `[ZMM_VAR_RFC] ❌ Pre-flight SoT BLOCKED variantId=${variant.id} ` +
-                        `size='${variantSizeStr}' matkl='${check.matkl}' — ${check.message}`
-                    );
-                    out.push({
-                        id: variant.id,
-                        success: false,
-                        message: `Pre-flight ZART_GRID_VALUES rejected: ${check.message}`,
-                    });
-                    continue;
-                }
-            }
+            // const variantSizeStr = toStr(variant.variantSize);
+            // if (variantSizeStr) {
+            //     const check = await validateVariantSizeOnSap(genericSapArt, variantSizeStr);
+            //     if (!check.ok) {
+            //         console.warn(
+            //             `[ZMM_VAR_RFC] ❌ Pre-flight SoT BLOCKED variantId=${variant.id} ` +
+            //             `size='${variantSizeStr}' matkl='${check.matkl}' — ${check.message}`
+            //         );
+            //         out.push({
+            //             id: variant.id,
+            //             success: false,
+            //             message: `Pre-flight ZART_GRID_VALUES rejected: ${check.message}`,
+            //         });
+            //         continue;
+            //     }
+            // }
 
             const payload = buildVariantPayload(genericSapArt, variant);
 
