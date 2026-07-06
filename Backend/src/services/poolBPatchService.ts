@@ -10,9 +10,9 @@
  *   | 1110..| K         | P      | ... |   ← cells = the value to write
  *
  * For each article row we push its non-empty (characteristic → value) cells to
- * SAP via pushRawAttributesToSap (MATKL lookup → class link → patch FM).
- * Articles are processed in parallel (SAP_RFC_CONCURRENCY); each article's own
- * attributes go in a single patch call.
+ * SAP via pushRawAttributesToSap (MATKL lookup → class link → patch FM). The FM
+ * itself does an atomic-fail retry that drops locked/unknown fields, so the good
+ * values still apply. Articles are processed in parallel (SAP_RFC_CONCURRENCY).
  *
  *   parsePoolBExcel()  — pure parse. NEVER calls SAP.
  *   runPoolBPatch()    — the live push. Only on explicit commit.

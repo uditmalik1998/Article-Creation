@@ -2,7 +2,7 @@ import { getMcCodeByMajorCategory, getDivisionByMajorCategory, getSubDivisionByM
 import { prismaClient as prisma } from '../utils/prisma';
 import { parseNumericValue } from '../utils/mrpCalculator';
 import { mvgrMappingService } from './mvgrMappingService';
-import { buildArticleDescription } from '../utils/articleDescriptionBuilder';
+import { buildArticleDescription, buildReferenceArticleDescription } from '../utils/articleDescriptionBuilder';
 import { getExcludedDescriptionFields } from '../utils/categoryFieldVisibility';
 import { getSegmentByCategoryAndMrp } from '../utils/segmentRangeMapper';
 import { normalizeVendorCode } from '../utils/vendorCode';
@@ -227,7 +227,20 @@ export class FlatteningService {
               || job.category?.subDepartment?.code
               || null,
             referenceArticleNumber: resultsMap.get('reference_article_number') || null,
-            referenceArticleDescription: resultsMap.get('reference_article_description') || null,
+            // Built like ARTICLE DESC but from a different attribute sequence:
+            // M_FAB_MAIN_MVGR_2 → M_WEAVE_02 → M_BLT_TYPE → M_BLT_STYLE →
+            // M_FIT → M_BODY_STYLE → M_PRINT_PLACEMENT → M_WASH.
+            // Falls back to any extracted reference description when no attributes are present.
+            referenceArticleDescription: buildReferenceArticleDescription({
+                fabricMainMvgr: resultsMap.get('fabric_main_mvgr'),
+                mFab2:          resultsMap.get('m_fab2'),
+                fatherBelt:     resultsMap.get('father_belt'),
+                childBelt:      resultsMap.get('child_belt') || resultsMap.get('child_belt_detail'),
+                fit:            resultsMap.get('fit'),
+                bodyStyle:      resultsMap.get('pattern'),
+                printPlacement: resultsMap.get('print_placement'),
+                wash:           resultsMap.get('wash'),
+            }, 40) || resultsMap.get('reference_article_description') || null,
 
             // Auto-populated business fields
             year: String(new Date().getFullYear()),

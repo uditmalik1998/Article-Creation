@@ -83,3 +83,52 @@ export const buildArticleDescription = (
 };
 
 export const ARTICLE_DESCRIPTION_SOURCE_FIELDS = ARTICLE_DESCRIPTION_FIELDS;
+
+/**
+ * Reference Article Description Builder
+ *
+ * Same mechanism as buildArticleDescription (tokens joined with '-', sliced to
+ * 40 chars from the front, dash-only/empty values skipped) but a different,
+ * user-confirmed attribute sequence:
+ *   M_FAB_MAIN_MVGR_2 → M_WEAVE_02 → M_BLT_TYPE → M_BLT_STYLE →
+ *   M_FIT → M_BODY_STYLE → M_PRINT_PLACEMENT → M_WASH
+ */
+type ReferenceArticleDescriptionSource = {
+  fabricMainMvgr?: unknown;  // M_FAB_MAIN_MVGR_2
+  mFab2?: unknown;           // M_WEAVE_02
+  fatherBelt?: unknown;      // M_BLT_TYPE
+  childBelt?: unknown;       // M_BLT_STYLE
+  fit?: unknown;             // M_FIT
+  bodyStyle?: unknown;       // M_BODY_STYLE  (pattern column)
+  printPlacement?: unknown;  // M_PRINT_PLACEMENT
+  wash?: unknown;            // M_WASH
+};
+
+const REFERENCE_ARTICLE_DESCRIPTION_FIELDS: Array<keyof ReferenceArticleDescriptionSource> = [
+  'fabricMainMvgr', // M_FAB_MAIN_MVGR_2
+  'mFab2',          // M_WEAVE_02
+  'fatherBelt',     // M_BLT_TYPE
+  'childBelt',      // M_BLT_STYLE
+  'fit',            // M_FIT
+  'bodyStyle',      // M_BODY_STYLE
+  'printPlacement', // M_PRINT_PLACEMENT
+  'wash',           // M_WASH
+];
+
+export const buildReferenceArticleDescription = (
+  source: ReferenceArticleDescriptionSource,
+  maxLength: number = ARTICLE_DESCRIPTION_MAX_LENGTH
+): string | null => {
+  const tokens: string[] = [];
+
+  for (const field of REFERENCE_ARTICLE_DESCRIPTION_FIELDS) {
+    const token = toShortToken(source[field]);
+    if (token) tokens.push(token);
+  }
+
+  if (tokens.length === 0) return null;
+
+  return tokens.join('-').slice(0, maxLength);
+};
+
+export const REFERENCE_ARTICLE_DESCRIPTION_SOURCE_FIELDS = REFERENCE_ARTICLE_DESCRIPTION_FIELDS;
