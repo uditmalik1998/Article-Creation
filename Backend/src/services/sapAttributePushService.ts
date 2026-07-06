@@ -232,6 +232,14 @@ export const pushAttributesViaV64 = async (
     return result;
   }
 
+  // Per-ATNAM lookup of the ORIGINAL "ATNAM=value" parts, so the atomic-fail
+  // retry rebuilds from real values (SAP's plan rows echo an empty value).
+  const partByAtnam = new Map<string, string>();
+  for (const seg of built.changes.split('|')) {
+    const idx = seg.indexOf('=');
+    if (idx > 0) partByAtnam.set(seg.slice(0, idx).trim().toUpperCase(), seg);
+  }
+
   try {
     // Step 1: lookup MATKL authoritatively
     const matkl = await fetchMatkl(matnr);
@@ -261,10 +269,14 @@ export const pushAttributesViaV64 = async (
       return result;
     }
 
-    // Atomic-fail path: filter to PLANNED-only and retry once
+    // Atomic-fail path: filter to PLANNED-only and retry once — rebuild from the
+    // ORIGINAL values (partByAtnam), NOT p.value which SAP returns empty.
     const planned = first.plan.filter((p) => p.status === 'PLANNED');
     if (planned.length > 0) {
-      const filtered = planned.map((p) => `${p.atnam}=${p.value}`).join('|');
+      const filtered = planned
+        .map((p) => partByAtnam.get(p.atnam.trim().toUpperCase()))
+        .filter(Boolean)
+        .join('|');
       const second = await callV64(matnr, filtered, '');
       result.planLog = second.plan;
       const tally = tallyPlan(second.plan);
@@ -322,15 +334,21 @@ export const pushRawAttributesToSap = async (
   }
 
   // Build IV_CHANGES ("ATNAM=value|ATNAM=value") directly from the raw map.
+  // Also keep a per-ATNAM lookup of the ORIGINAL value so the atomic-fail retry
+  // can rebuild the payload from real values — SAP's returned plan rows echo an
+  // EMPTY value, so retrying from them would blank every field.
   const seen = new Set<string>();
   const parts: string[] = [];
+  const partByAtnam = new Map<string, string>();
   for (const [rawKey, rawVal] of Object.entries(changes)) {
     const atnam = String(rawKey || '').trim().toUpperCase();
     const value = sapValue(rawVal);
     if (!atnam || !value || seen.has(atnam)) continue;
     seen.add(atnam);
     const safeValue = value.replace(/\|/g, '/').replace(/=/g, '-');
-    parts.push(`${atnam}=${safeValue}`);
+    const part = `${atnam}=${safeValue}`;
+    parts.push(part);
+    partByAtnam.set(atnam, part);
   }
   if (parts.length === 0) {
     result.ok = true;
@@ -365,10 +383,14 @@ export const pushRawAttributesToSap = async (
       return result;
     }
 
-    // Atomic-fail: retry PLANNED-only once.
+    // Atomic-fail: retry PLANNED-only once — rebuild from the ORIGINAL values
+    // (partByAtnam), NOT p.value which SAP returns empty.
     const planned = first.plan.filter((p) => p.status === 'PLANNED');
     if (planned.length > 0) {
-      const filtered = planned.map((p) => `${p.atnam}=${p.value}`).join('|');
+      const filtered = planned
+        .map((p) => partByAtnam.get(p.atnam.trim().toUpperCase()))
+        .filter(Boolean)
+        .join('|');
       const second = await callV64(matnr, filtered, testMode, env);
       result.planLog = second.plan;
       const tally = tallyPlan(second.plan);

@@ -1627,7 +1627,9 @@ const ArticleCard = React.memo(
               {item.pptNumber && (
                 <Badge className="bg-amber-300 text-amber-950">PPT: {item.pptNumber}</Badge>
               )}
-              {isModifyMode && (
+              {/* Modify button permanently disabled — Created Articles are read-only.
+                  (Was: {isModifyMode && <Button onClick={handleModify}>Modify</Button>}) */}
+              {false && isModifyMode && (
                 <Button
                   size="sm"
                   onClick={handleModify}
