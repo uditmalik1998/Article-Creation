@@ -129,7 +129,19 @@ type PlanRow = { atnam: string; value: string; status: string; route?: string };
 // there's no EV_JSON (older/other response shapes).
 const unwrapBody = (body: any): any => {
   if (body && typeof body.EV_JSON === 'string') {
-    try { return JSON.parse(body.EV_JSON); } catch { /* keep raw */ }
+    try {
+      return JSON.parse(body.EV_JSON);
+    } catch {
+      // STOPGAP for a V67 proxy bug: it emits invalid JSON around matkl —
+      //   "matkl":"124040301,"merge":true   (closing quote & comma swapped).
+      // Repair that one pattern, then re-parse. Guarded: this only runs when the
+      // normal parse fails, so it auto-disables once the FM emits valid JSON.
+      // TODO: get the V67 FM/proxy fixed at the source so this can be removed.
+      try {
+        const repaired = body.EV_JSON.replace(/("matkl":"[^"]*?),"/g, '$1","');
+        return JSON.parse(repaired);
+      } catch { /* keep raw */ }
+    }
   }
   return body;
 };
@@ -342,10 +354,13 @@ export const pushRawAttributesToSap = async (
   const partByAtnam = new Map<string, string>();
   for (const [rawKey, rawVal] of Object.entries(changes)) {
     const atnam = String(rawKey || '').trim().toUpperCase();
-    const value = sapValue(rawVal);
-    if (!atnam || !value || seen.has(atnam)) continue;
+    if (!atnam || seen.has(atnam)) continue;
     seen.add(atnam);
-    const safeValue = value.replace(/\|/g, '/').replace(/=/g, '-');
+    // An EMPTY string is intentional — a "clear this field" instruction (from a
+    // BLANK cell) → emit "ATNAM=" so SAP wipes the value. Only keys ABSENT from
+    // `changes` are omitted (leaving the existing SAP value untouched).
+    const raw = rawVal == null ? '' : String(rawVal);
+    const safeValue = raw.replace(/\|/g, '/').replace(/=/g, '-');
     const part = `${atnam}=${safeValue}`;
     parts.push(part);
     partByAtnam.set(atnam, part);
