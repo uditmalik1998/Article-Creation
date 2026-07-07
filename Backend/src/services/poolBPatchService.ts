@@ -126,7 +126,11 @@ export async function parsePoolBExcel(buffer: Buffer): Promise<PoolBParseResult>
     const changes: Record<string, string> = {};
     for (let k = 0; k < attrIdxs.length; k++) {
       const val = String(row.getCell(attrIdxs[k] + 1).value ?? '').trim();
-      if (val) { changes[attributeColumns[k]] = val; totalValueCells++; }
+      if (!val) continue; // empty cell → omit → SAP keeps the existing value
+      // Literal "BLANK" (case-insensitive) → explicit CLEAR: send FIELD= (empty)
+      // so SAP wipes the current value. Any real value writes normally.
+      changes[attributeColumns[k]] = val.toUpperCase() === 'BLANK' ? '' : val;
+      totalValueCells++;
     }
     if (Object.keys(changes).length === 0) { skipped++; continue; } // article with no values
     rows.push({ matnr, changes });
