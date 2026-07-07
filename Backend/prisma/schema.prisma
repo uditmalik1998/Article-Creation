@@ -297,6 +297,7 @@ model ExtractionResultFlat {
   // ===== GARMENT ATTRIBUTE FIELDS =====
   collarStyle                 String?       @map("collar_style") @db.VarChar(100)
   sleeveFold                  String?       @map("sleeve_fold") @db.VarChar(100)
+  mSet                        String?       @map("m_set") @db.VarChar(100)
   noOfPocket                  String?       @map("no_of_pocket") @db.VarChar(50)
   extraPocket                 String?       @map("extra_pocket") @db.VarChar(100)
   dcShape                     String?       @map("dc_shape") @db.VarChar(100)
@@ -311,6 +312,8 @@ model ExtractionResultFlat {
   htrfStyle                   String?       @map("htrf_style") @db.VarChar(100)
   embPlacement                String?       @map("emb_placement") @db.VarChar(100)
   ageGroup                    String?       @map("age_group") @db.VarChar(100)
+  mNoOfSize                   String?       @map("m_no_of_size") @db.VarChar(100)
+  mNoOfClr                    String?       @map("m_no_of_clr") @db.VarChar(100)
   articleFashionType          String?       @map("article_fashion_type") @db.VarChar(100)
   articleDimension            String?       @map("article_dimension") @db.VarChar(100)
 
@@ -713,6 +716,7 @@ model ArticleBody {
   fatherBelt   String?    @map("father_belt") @db.VarChar(100)
   sleeve       String?    @db.VarChar(100)
   sleeveFold   String?    @map("sleeve_fold") @db.VarChar(100)
+  mSet         String?    @map("m_set") @db.VarChar(100)
   bottomFold   String?    @map("bottom_fold") @db.VarChar(100)
   noOfPocket   String?    @map("no_of_pocket") @db.VarChar(50)
   pocketType   String?    @map("pocket_type") @db.VarChar(100)
@@ -874,6 +878,7 @@ model Article360Flat {
   fatherBelt                    String?   @map("father_belt") @db.VarChar(100)
   sleeve                        String?   @db.VarChar(100)
   sleeveFold                    String?   @map("sleeve_fold") @db.VarChar(100)
+  mSet                          String?   @map("m_set") @db.VarChar(100)
   bottomFold                    String?   @map("bottom_fold") @db.VarChar(100)
   noOfPocket                    String?   @map("no_of_pocket") @db.VarChar(50)
   pocketType                    String?   @map("pocket_type") @db.VarChar(100)

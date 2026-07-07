@@ -13977,6 +13977,7 @@ export namespace Prisma {
     referenceArticleDescription: string | null
     collarStyle: string | null
     sleeveFold: string | null
+    mSet: string | null
     noOfPocket: string | null
     extraPocket: string | null
     dcShape: string | null
@@ -13991,6 +13992,8 @@ export namespace Prisma {
     htrfStyle: string | null
     embPlacement: string | null
     ageGroup: string | null
+    mNoOfSize: string | null
+    mNoOfClr: string | null
     articleFashionType: string | null
     articleDimension: string | null
     bodyArticle: string | null
@@ -14104,6 +14107,7 @@ export namespace Prisma {
     referenceArticleDescription: string | null
     collarStyle: string | null
     sleeveFold: string | null
+    mSet: string | null
     noOfPocket: string | null
     extraPocket: string | null
     dcShape: string | null
@@ -14118,6 +14122,8 @@ export namespace Prisma {
     htrfStyle: string | null
     embPlacement: string | null
     ageGroup: string | null
+    mNoOfSize: string | null
+    mNoOfClr: string | null
     articleFashionType: string | null
     articleDimension: string | null
     bodyArticle: string | null
@@ -14231,6 +14237,7 @@ export namespace Prisma {
     referenceArticleDescription: number
     collarStyle: number
     sleeveFold: number
+    mSet: number
     noOfPocket: number
     extraPocket: number
     dcShape: number
@@ -14245,6 +14252,8 @@ export namespace Prisma {
     htrfStyle: number
     embPlacement: number
     ageGroup: number
+    mNoOfSize: number
+    mNoOfClr: number
     articleFashionType: number
     articleDimension: number
     bodyArticle: number
@@ -14390,6 +14399,7 @@ export namespace Prisma {
     referenceArticleDescription?: true
     collarStyle?: true
     sleeveFold?: true
+    mSet?: true
     noOfPocket?: true
     extraPocket?: true
     dcShape?: true
@@ -14404,6 +14414,8 @@ export namespace Prisma {
     htrfStyle?: true
     embPlacement?: true
     ageGroup?: true
+    mNoOfSize?: true
+    mNoOfClr?: true
     articleFashionType?: true
     articleDimension?: true
     bodyArticle?: true
@@ -14517,6 +14529,7 @@ export namespace Prisma {
     referenceArticleDescription?: true
     collarStyle?: true
     sleeveFold?: true
+    mSet?: true
     noOfPocket?: true
     extraPocket?: true
     dcShape?: true
@@ -14531,6 +14544,8 @@ export namespace Prisma {
     htrfStyle?: true
     embPlacement?: true
     ageGroup?: true
+    mNoOfSize?: true
+    mNoOfClr?: true
     articleFashionType?: true
     articleDimension?: true
     bodyArticle?: true
@@ -14644,6 +14659,7 @@ export namespace Prisma {
     referenceArticleDescription?: true
     collarStyle?: true
     sleeveFold?: true
+    mSet?: true
     noOfPocket?: true
     extraPocket?: true
     dcShape?: true
@@ -14658,6 +14674,8 @@ export namespace Prisma {
     htrfStyle?: true
     embPlacement?: true
     ageGroup?: true
+    mNoOfSize?: true
+    mNoOfClr?: true
     articleFashionType?: true
     articleDimension?: true
     bodyArticle?: true
@@ -14858,6 +14876,7 @@ export namespace Prisma {
     referenceArticleDescription: string | null
     collarStyle: string | null
     sleeveFold: string | null
+    mSet: string | null
     noOfPocket: string | null
     extraPocket: string | null
     dcShape: string | null
@@ -14872,6 +14891,8 @@ export namespace Prisma {
     htrfStyle: string | null
     embPlacement: string | null
     ageGroup: string | null
+    mNoOfSize: string | null
+    mNoOfClr: string | null
     articleFashionType: string | null
     articleDimension: string | null
     bodyArticle: string | null
@@ -15004,6 +15025,7 @@ export namespace Prisma {
     referenceArticleDescription?: boolean
     collarStyle?: boolean
     sleeveFold?: boolean
+    mSet?: boolean
     noOfPocket?: boolean
     extraPocket?: boolean
     dcShape?: boolean
@@ -15018,6 +15040,8 @@ export namespace Prisma {
     htrfStyle?: boolean
     embPlacement?: boolean
     ageGroup?: boolean
+    mNoOfSize?: boolean
+    mNoOfClr?: boolean
     articleFashionType?: boolean
     articleDimension?: boolean
     bodyArticle?: boolean
@@ -15135,6 +15159,7 @@ export namespace Prisma {
     referenceArticleDescription?: boolean
     collarStyle?: boolean
     sleeveFold?: boolean
+    mSet?: boolean
     noOfPocket?: boolean
     extraPocket?: boolean
     dcShape?: boolean
@@ -15149,6 +15174,8 @@ export namespace Prisma {
     htrfStyle?: boolean
     embPlacement?: boolean
     ageGroup?: boolean
+    mNoOfSize?: boolean
+    mNoOfClr?: boolean
     articleFashionType?: boolean
     articleDimension?: boolean
     bodyArticle?: boolean
@@ -15264,6 +15291,7 @@ export namespace Prisma {
     referenceArticleDescription?: boolean
     collarStyle?: boolean
     sleeveFold?: boolean
+    mSet?: boolean
     noOfPocket?: boolean
     extraPocket?: boolean
     dcShape?: boolean
@@ -15278,6 +15306,8 @@ export namespace Prisma {
     htrfStyle?: boolean
     embPlacement?: boolean
     ageGroup?: boolean
+    mNoOfSize?: boolean
+    mNoOfClr?: boolean
     articleFashionType?: boolean
     articleDimension?: boolean
     bodyArticle?: boolean
@@ -15393,6 +15423,7 @@ export namespace Prisma {
     referenceArticleDescription?: boolean
     collarStyle?: boolean
     sleeveFold?: boolean
+    mSet?: boolean
     noOfPocket?: boolean
     extraPocket?: boolean
     dcShape?: boolean
@@ -15407,6 +15438,8 @@ export namespace Prisma {
     htrfStyle?: boolean
     embPlacement?: boolean
     ageGroup?: boolean
+    mNoOfSize?: boolean
+    mNoOfClr?: boolean
     articleFashionType?: boolean
     articleDimension?: boolean
     bodyArticle?: boolean
@@ -15444,7 +15477,7 @@ export namespace Prisma {
     srmUniqueId?: boolean
   }
 
-  export type ExtractionResultFlatOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<"id" | "jobId" | "imageName" | "imageUrl" | "articleNumber" | "extractionStatus" | "aiModel" | "avgConfidence" | "processingTimeMs" | "totalAttributes" | "extractedCount" | "inputTokens" | "outputTokens" | "totalTokens" | "apiCost" | "userId" | "userName" | "extractionDate" | "createdAt" | "updatedAt" | "majorCategory" | "vendorName" | "designNumber" | "pptNumber" | "rate" | "size" | "yarn1" | "yarn2" | "fabricMainMvgr" | "weave" | "weaveFullForm" | "composition" | "finish" | "gsm" | "macroMvgr" | "macroMvgrFullForm" | "mainMvgr" | "mainMvgrFullForm" | "mFab2" | "mFab2FullForm" | "shade" | "weight" | "lycra" | "neck" | "neckDetails" | "collar" | "placket" | "sleeve" | "bottomFold" | "frontOpenStyle" | "pocketType" | "fit" | "pattern" | "length" | "colour" | "drawcord" | "button" | "zipper" | "zipColour" | "printType" | "printStyle" | "printPlacement" | "patches" | "patchesType" | "embroidery" | "embroideryType" | "wash" | "fatherBelt" | "childBelt" | "division" | "subDivision" | "referenceArticleNumber" | "referenceArticleDescription" | "collarStyle" | "sleeveFold" | "noOfPocket" | "extraPocket" | "dcShape" | "btnColour" | "fCount" | "fConstruction" | "fOunce" | "fWidth" | "fabDiv" | "fabVdr" | "htrfType" | "htrfStyle" | "embPlacement" | "ageGroup" | "articleFashionType" | "articleDimension" | "bodyArticle" | "bodyArticleDescription" | "fabricArticleNumber" | "fabricArticleDescription" | "attrArticleNums" | "mvgrBrandVendor" | "vendorCode" | "mrp" | "impAtrbt2" | "mcCode" | "segment" | "season" | "hsnTaxCode" | "articleDescription" | "fashionGrid" | "year" | "articleType" | "approvalStatus" | "pdStatus" | "approvedBy" | "approvedAt" | "source" | "imageUncPath" | "isOldArticle" | "isGeneric" | "genericArticleId" | "variantSize" | "variantColor" | "sapSyncStatus" | "sapArticleId" | "sapSyncMessage" | "srmOriginalDesignNumber" | "srmUniqueId", ExtArgs["result"]["extractionResultFlat"]>
+  export type ExtractionResultFlatOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<"id" | "jobId" | "imageName" | "imageUrl" | "articleNumber" | "extractionStatus" | "aiModel" | "avgConfidence" | "processingTimeMs" | "totalAttributes" | "extractedCount" | "inputTokens" | "outputTokens" | "totalTokens" | "apiCost" | "userId" | "userName" | "extractionDate" | "createdAt" | "updatedAt" | "majorCategory" | "vendorName" | "designNumber" | "pptNumber" | "rate" | "size" | "yarn1" | "yarn2" | "fabricMainMvgr" | "weave" | "weaveFullForm" | "composition" | "finish" | "gsm" | "macroMvgr" | "macroMvgrFullForm" | "mainMvgr" | "mainMvgrFullForm" | "mFab2" | "mFab2FullForm" | "shade" | "weight" | "lycra" | "neck" | "neckDetails" | "collar" | "placket" | "sleeve" | "bottomFold" | "frontOpenStyle" | "pocketType" | "fit" | "pattern" | "length" | "colour" | "drawcord" | "button" | "zipper" | "zipColour" | "printType" | "printStyle" | "printPlacement" | "patches" | "patchesType" | "embroidery" | "embroideryType" | "wash" | "fatherBelt" | "childBelt" | "division" | "subDivision" | "referenceArticleNumber" | "referenceArticleDescription" | "collarStyle" | "sleeveFold" | "mSet" | "noOfPocket" | "extraPocket" | "dcShape" | "btnColour" | "fCount" | "fConstruction" | "fOunce" | "fWidth" | "fabDiv" | "fabVdr" | "htrfType" | "htrfStyle" | "embPlacement" | "ageGroup" | "mNoOfSize" | "mNoOfClr" | "articleFashionType" | "articleDimension" | "bodyArticle" | "bodyArticleDescription" | "fabricArticleNumber" | "fabricArticleDescription" | "attrArticleNums" | "mvgrBrandVendor" | "vendorCode" | "mrp" | "impAtrbt2" | "mcCode" | "segment" | "season" | "hsnTaxCode" | "articleDescription" | "fashionGrid" | "year" | "articleType" | "approvalStatus" | "pdStatus" | "approvedBy" | "approvedAt" | "source" | "imageUncPath" | "isOldArticle" | "isGeneric" | "genericArticleId" | "variantSize" | "variantColor" | "sapSyncStatus" | "sapArticleId" | "sapSyncMessage" | "srmOriginalDesignNumber" | "srmUniqueId", ExtArgs["result"]["extractionResultFlat"]>
   export type ExtractionResultFlatInclude<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
     approver?: boolean | ExtractionResultFlat$approverArgs<ExtArgs>
     job?: boolean | ExtractionResultFlat$jobArgs<ExtArgs>
@@ -15543,6 +15576,7 @@ export namespace Prisma {
       referenceArticleDescription: string | null
       collarStyle: string | null
       sleeveFold: string | null
+      mSet: string | null
       noOfPocket: string | null
       extraPocket: string | null
       dcShape: string | null
@@ -15557,6 +15591,8 @@ export namespace Prisma {
       htrfStyle: string | null
       embPlacement: string | null
       ageGroup: string | null
+      mNoOfSize: string | null
+      mNoOfClr: string | null
       articleFashionType: string | null
       articleDimension: string | null
       bodyArticle: string | null
@@ -16093,6 +16129,7 @@ export namespace Prisma {
     readonly referenceArticleDescription: FieldRef<"ExtractionResultFlat", 'String'>
     readonly collarStyle: FieldRef<"ExtractionResultFlat", 'String'>
     readonly sleeveFold: FieldRef<"ExtractionResultFlat", 'String'>
+    readonly mSet: FieldRef<"ExtractionResultFlat", 'String'>
     readonly noOfPocket: FieldRef<"ExtractionResultFlat", 'String'>
     readonly extraPocket: FieldRef<"ExtractionResultFlat", 'String'>
     readonly dcShape: FieldRef<"ExtractionResultFlat", 'String'>
@@ -16107,6 +16144,8 @@ export namespace Prisma {
     readonly htrfStyle: FieldRef<"ExtractionResultFlat", 'String'>
     readonly embPlacement: FieldRef<"ExtractionResultFlat", 'String'>
     readonly ageGroup: FieldRef<"ExtractionResultFlat", 'String'>
+    readonly mNoOfSize: FieldRef<"ExtractionResultFlat", 'String'>
+    readonly mNoOfClr: FieldRef<"ExtractionResultFlat", 'String'>
     readonly articleFashionType: FieldRef<"ExtractionResultFlat", 'String'>
     readonly articleDimension: FieldRef<"ExtractionResultFlat", 'String'>
     readonly bodyArticle: FieldRef<"ExtractionResultFlat", 'String'>
@@ -27306,6 +27345,7 @@ export namespace Prisma {
     fatherBelt: string | null
     sleeve: string | null
     sleeveFold: string | null
+    mSet: string | null
     bottomFold: string | null
     noOfPocket: string | null
     pocketType: string | null
@@ -27328,6 +27368,7 @@ export namespace Prisma {
     fatherBelt: string | null
     sleeve: string | null
     sleeveFold: string | null
+    mSet: string | null
     bottomFold: string | null
     noOfPocket: string | null
     pocketType: string | null
@@ -27350,6 +27391,7 @@ export namespace Prisma {
     fatherBelt: number
     sleeve: number
     sleeveFold: number
+    mSet: number
     bottomFold: number
     noOfPocket: number
     pocketType: number
@@ -27374,6 +27416,7 @@ export namespace Prisma {
     fatherBelt?: true
     sleeve?: true
     sleeveFold?: true
+    mSet?: true
     bottomFold?: true
     noOfPocket?: true
     pocketType?: true
@@ -27396,6 +27439,7 @@ export namespace Prisma {
     fatherBelt?: true
     sleeve?: true
     sleeveFold?: true
+    mSet?: true
     bottomFold?: true
     noOfPocket?: true
     pocketType?: true
@@ -27418,6 +27462,7 @@ export namespace Prisma {
     fatherBelt?: true
     sleeve?: true
     sleeveFold?: true
+    mSet?: true
     bottomFold?: true
     noOfPocket?: true
     pocketType?: true
@@ -27513,6 +27558,7 @@ export namespace Prisma {
     fatherBelt: string | null
     sleeve: string | null
     sleeveFold: string | null
+    mSet: string | null
     bottomFold: string | null
     noOfPocket: string | null
     pocketType: string | null
@@ -27552,6 +27598,7 @@ export namespace Prisma {
     fatherBelt?: boolean
     sleeve?: boolean
     sleeveFold?: boolean
+    mSet?: boolean
     bottomFold?: boolean
     noOfPocket?: boolean
     pocketType?: boolean
@@ -27575,6 +27622,7 @@ export namespace Prisma {
     fatherBelt?: boolean
     sleeve?: boolean
     sleeveFold?: boolean
+    mSet?: boolean
     bottomFold?: boolean
     noOfPocket?: boolean
     pocketType?: boolean
@@ -27598,6 +27646,7 @@ export namespace Prisma {
     fatherBelt?: boolean
     sleeve?: boolean
     sleeveFold?: boolean
+    mSet?: boolean
     bottomFold?: boolean
     noOfPocket?: boolean
     pocketType?: boolean
@@ -27621,6 +27670,7 @@ export namespace Prisma {
     fatherBelt?: boolean
     sleeve?: boolean
     sleeveFold?: boolean
+    mSet?: boolean
     bottomFold?: boolean
     noOfPocket?: boolean
     pocketType?: boolean
@@ -27632,7 +27682,7 @@ export namespace Prisma {
     updatedAt?: boolean
   }
 
-  export type ArticleBodyOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<"id" | "articleId" | "collar" | "collarStyle" | "neck" | "neckDetails" | "placket" | "fatherBelt" | "sleeve" | "sleeveFold" | "bottomFold" | "noOfPocket" | "pocketType" | "extraPocket" | "fit" | "bodyStyle" | "length" | "createdAt" | "updatedAt", ExtArgs["result"]["articleBody"]>
+  export type ArticleBodyOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<"id" | "articleId" | "collar" | "collarStyle" | "neck" | "neckDetails" | "placket" | "fatherBelt" | "sleeve" | "sleeveFold" | "mSet" | "bottomFold" | "noOfPocket" | "pocketType" | "extraPocket" | "fit" | "bodyStyle" | "length" | "createdAt" | "updatedAt", ExtArgs["result"]["articleBody"]>
   export type ArticleBodyInclude<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
     article?: boolean | Article360DefaultArgs<ExtArgs>
   }
@@ -27659,6 +27709,7 @@ export namespace Prisma {
       fatherBelt: string | null
       sleeve: string | null
       sleeveFold: string | null
+      mSet: string | null
       bottomFold: string | null
       noOfPocket: string | null
       pocketType: string | null
@@ -28102,6 +28153,7 @@ export namespace Prisma {
     readonly fatherBelt: FieldRef<"ArticleBody", 'String'>
     readonly sleeve: FieldRef<"ArticleBody", 'String'>
     readonly sleeveFold: FieldRef<"ArticleBody", 'String'>
+    readonly mSet: FieldRef<"ArticleBody", 'String'>
     readonly bottomFold: FieldRef<"ArticleBody", 'String'>
     readonly noOfPocket: FieldRef<"ArticleBody", 'String'>
     readonly pocketType: FieldRef<"ArticleBody", 'String'>
@@ -34275,6 +34327,7 @@ export namespace Prisma {
     fatherBelt: string | null
     sleeve: string | null
     sleeveFold: string | null
+    mSet: string | null
     bottomFold: string | null
     noOfPocket: string | null
     pocketType: string | null
@@ -34353,6 +34406,7 @@ export namespace Prisma {
     fatherBelt: string | null
     sleeve: string | null
     sleeveFold: string | null
+    mSet: string | null
     bottomFold: string | null
     noOfPocket: string | null
     pocketType: string | null
@@ -34431,6 +34485,7 @@ export namespace Prisma {
     fatherBelt: number
     sleeve: number
     sleeveFold: number
+    mSet: number
     bottomFold: number
     noOfPocket: number
     pocketType: number
@@ -34525,6 +34580,7 @@ export namespace Prisma {
     fatherBelt?: true
     sleeve?: true
     sleeveFold?: true
+    mSet?: true
     bottomFold?: true
     noOfPocket?: true
     pocketType?: true
@@ -34603,6 +34659,7 @@ export namespace Prisma {
     fatherBelt?: true
     sleeve?: true
     sleeveFold?: true
+    mSet?: true
     bottomFold?: true
     noOfPocket?: true
     pocketType?: true
@@ -34681,6 +34738,7 @@ export namespace Prisma {
     fatherBelt?: true
     sleeve?: true
     sleeveFold?: true
+    mSet?: true
     bottomFold?: true
     noOfPocket?: true
     pocketType?: true
@@ -34846,6 +34904,7 @@ export namespace Prisma {
     fatherBelt: string | null
     sleeve: string | null
     sleeveFold: string | null
+    mSet: string | null
     bottomFold: string | null
     noOfPocket: string | null
     pocketType: string | null
@@ -34943,6 +35002,7 @@ export namespace Prisma {
     fatherBelt?: boolean
     sleeve?: boolean
     sleeveFold?: boolean
+    mSet?: boolean
     bottomFold?: boolean
     noOfPocket?: boolean
     pocketType?: boolean
@@ -35021,6 +35081,7 @@ export namespace Prisma {
     fatherBelt?: boolean
     sleeve?: boolean
     sleeveFold?: boolean
+    mSet?: boolean
     bottomFold?: boolean
     noOfPocket?: boolean
     pocketType?: boolean
@@ -35099,6 +35160,7 @@ export namespace Prisma {
     fatherBelt?: boolean
     sleeve?: boolean
     sleeveFold?: boolean
+    mSet?: boolean
     bottomFold?: boolean
     noOfPocket?: boolean
     pocketType?: boolean
@@ -35177,6 +35239,7 @@ export namespace Prisma {
     fatherBelt?: boolean
     sleeve?: boolean
     sleeveFold?: boolean
+    mSet?: boolean
     bottomFold?: boolean
     noOfPocket?: boolean
     pocketType?: boolean
@@ -35211,7 +35274,7 @@ export namespace Prisma {
     updatedAt?: boolean
   }
 
-  export type Article360FlatOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<"id" | "jobId" | "flatId" | "imageName" | "imageUrl" | "division" | "subDivision" | "majorCategory" | "designNumber" | "vendorName" | "vendorCode" | "referenceArticleNumber" | "referenceArticleDescription" | "articleNumber" | "sapArticleId" | "mcCode" | "rate" | "mrp" | "impAtrbt2" | "macroMvgr" | "yarn1" | "mainMvgr" | "fabricMainMvgr" | "weave" | "mFab2" | "composition" | "fCount" | "fConstruction" | "lycra" | "finish" | "gsm" | "fOunce" | "fWidth" | "fabDiv" | "fabVdr" | "collar" | "collarStyle" | "neck" | "neckDetails" | "placket" | "fatherBelt" | "sleeve" | "sleeveFold" | "bottomFold" | "noOfPocket" | "pocketType" | "extraPocket" | "fit" | "bodyStyle" | "length" | "drawcord" | "dcShape" | "button" | "btnColour" | "zipper" | "zipColour" | "patches" | "patchesType" | "printType" | "printStyle" | "printPlacement" | "embroidery" | "embroideryType" | "wash" | "extractionStatus" | "approvalStatus" | "approvedBy" | "approvedAt" | "sapSyncStatus" | "sapSyncMessage" | "userId" | "userName" | "userEmail" | "createdAt" | "updatedAt", ExtArgs["result"]["article360Flat"]>
+  export type Article360FlatOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<"id" | "jobId" | "flatId" | "imageName" | "imageUrl" | "division" | "subDivision" | "majorCategory" | "designNumber" | "vendorName" | "vendorCode" | "referenceArticleNumber" | "referenceArticleDescription" | "articleNumber" | "sapArticleId" | "mcCode" | "rate" | "mrp" | "impAtrbt2" | "macroMvgr" | "yarn1" | "mainMvgr" | "fabricMainMvgr" | "weave" | "mFab2" | "composition" | "fCount" | "fConstruction" | "lycra" | "finish" | "gsm" | "fOunce" | "fWidth" | "fabDiv" | "fabVdr" | "collar" | "collarStyle" | "neck" | "neckDetails" | "placket" | "fatherBelt" | "sleeve" | "sleeveFold" | "mSet" | "bottomFold" | "noOfPocket" | "pocketType" | "extraPocket" | "fit" | "bodyStyle" | "length" | "drawcord" | "dcShape" | "button" | "btnColour" | "zipper" | "zipColour" | "patches" | "patchesType" | "printType" | "printStyle" | "printPlacement" | "embroidery" | "embroideryType" | "wash" | "extractionStatus" | "approvalStatus" | "approvedBy" | "approvedAt" | "sapSyncStatus" | "sapSyncMessage" | "userId" | "userName" | "userEmail" | "createdAt" | "updatedAt", ExtArgs["result"]["article360Flat"]>
 
   export type $Article360FlatPayload<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
     name: "Article360Flat"
@@ -35260,6 +35323,7 @@ export namespace Prisma {
       fatherBelt: string | null
       sleeve: string | null
       sleeveFold: string | null
+      mSet: string | null
       bottomFold: string | null
       noOfPocket: string | null
       pocketType: string | null
@@ -35758,6 +35822,7 @@ export namespace Prisma {
     readonly fatherBelt: FieldRef<"Article360Flat", 'String'>
     readonly sleeve: FieldRef<"Article360Flat", 'String'>
     readonly sleeveFold: FieldRef<"Article360Flat", 'String'>
+    readonly mSet: FieldRef<"Article360Flat", 'String'>
     readonly bottomFold: FieldRef<"Article360Flat", 'String'>
     readonly noOfPocket: FieldRef<"Article360Flat", 'String'>
     readonly pocketType: FieldRef<"Article360Flat", 'String'>
@@ -40003,6 +40068,7 @@ export namespace Prisma {
     referenceArticleDescription: 'referenceArticleDescription',
     collarStyle: 'collarStyle',
     sleeveFold: 'sleeveFold',
+    mSet: 'mSet',
     noOfPocket: 'noOfPocket',
     extraPocket: 'extraPocket',
     dcShape: 'dcShape',
@@ -40017,6 +40083,8 @@ export namespace Prisma {
     htrfStyle: 'htrfStyle',
     embPlacement: 'embPlacement',
     ageGroup: 'ageGroup',
+    mNoOfSize: 'mNoOfSize',
+    mNoOfClr: 'mNoOfClr',
     articleFashionType: 'articleFashionType',
     articleDimension: 'articleDimension',
     bodyArticle: 'bodyArticle',
@@ -40233,6 +40301,7 @@ export namespace Prisma {
     fatherBelt: 'fatherBelt',
     sleeve: 'sleeve',
     sleeveFold: 'sleeveFold',
+    mSet: 'mSet',
     bottomFold: 'bottomFold',
     noOfPocket: 'noOfPocket',
     pocketType: 'pocketType',
@@ -40366,6 +40435,7 @@ export namespace Prisma {
     fatherBelt: 'fatherBelt',
     sleeve: 'sleeve',
     sleeveFold: 'sleeveFold',
+    mSet: 'mSet',
     bottomFold: 'bottomFold',
     noOfPocket: 'noOfPocket',
     pocketType: 'pocketType',
@@ -40660,6 +40730,7 @@ export namespace Prisma {
     referenceArticleDescription: 'referenceArticleDescription',
     collarStyle: 'collarStyle',
     sleeveFold: 'sleeveFold',
+    mSet: 'mSet',
     noOfPocket: 'noOfPocket',
     extraPocket: 'extraPocket',
     dcShape: 'dcShape',
@@ -40674,6 +40745,8 @@ export namespace Prisma {
     htrfStyle: 'htrfStyle',
     embPlacement: 'embPlacement',
     ageGroup: 'ageGroup',
+    mNoOfSize: 'mNoOfSize',
+    mNoOfClr: 'mNoOfClr',
     articleFashionType: 'articleFashionType',
     articleDimension: 'articleDimension',
     bodyArticle: 'bodyArticle',
@@ -40835,6 +40908,7 @@ export namespace Prisma {
     fatherBelt: 'fatherBelt',
     sleeve: 'sleeve',
     sleeveFold: 'sleeveFold',
+    mSet: 'mSet',
     bottomFold: 'bottomFold',
     noOfPocket: 'noOfPocket',
     pocketType: 'pocketType',
@@ -40946,6 +41020,7 @@ export namespace Prisma {
     fatherBelt: 'fatherBelt',
     sleeve: 'sleeve',
     sleeveFold: 'sleeveFold',
+    mSet: 'mSet',
     bottomFold: 'bottomFold',
     noOfPocket: 'noOfPocket',
     pocketType: 'pocketType',
@@ -42166,6 +42241,7 @@ export namespace Prisma {
     referenceArticleDescription?: StringNullableFilter<"ExtractionResultFlat"> | string | null
     collarStyle?: StringNullableFilter<"ExtractionResultFlat"> | string | null
     sleeveFold?: StringNullableFilter<"ExtractionResultFlat"> | string | null
+    mSet?: StringNullableFilter<"ExtractionResultFlat"> | string | null
     noOfPocket?: StringNullableFilter<"ExtractionResultFlat"> | string | null
     extraPocket?: StringNullableFilter<"ExtractionResultFlat"> | string | null
     dcShape?: StringNullableFilter<"ExtractionResultFlat"> | string | null
@@ -42180,6 +42256,8 @@ export namespace Prisma {
     htrfStyle?: StringNullableFilter<"ExtractionResultFlat"> | string | null
     embPlacement?: StringNullableFilter<"ExtractionResultFlat"> | string | null
     ageGroup?: StringNullableFilter<"ExtractionResultFlat"> | string | null
+    mNoOfSize?: StringNullableFilter<"ExtractionResultFlat"> | string | null
+    mNoOfClr?: StringNullableFilter<"ExtractionResultFlat"> | string | null
     articleFashionType?: StringNullableFilter<"ExtractionResultFlat"> | string | null
     articleDimension?: StringNullableFilter<"ExtractionResultFlat"> | string | null
     bodyArticle?: StringNullableFilter<"ExtractionResultFlat"> | string | null
@@ -42296,6 +42374,7 @@ export namespace Prisma {
     referenceArticleDescription?: SortOrderInput | SortOrder
     collarStyle?: SortOrderInput | SortOrder
     sleeveFold?: SortOrderInput | SortOrder
+    mSet?: SortOrderInput | SortOrder
     noOfPocket?: SortOrderInput | SortOrder
     extraPocket?: SortOrderInput | SortOrder
     dcShape?: SortOrderInput | SortOrder
@@ -42310,6 +42389,8 @@ export namespace Prisma {
     htrfStyle?: SortOrderInput | SortOrder
     embPlacement?: SortOrderInput | SortOrder
     ageGroup?: SortOrderInput | SortOrder
+    mNoOfSize?: SortOrderInput | SortOrder
+    mNoOfClr?: SortOrderInput | SortOrder
     articleFashionType?: SortOrderInput | SortOrder
     articleDimension?: SortOrderInput | SortOrder
     bodyArticle?: SortOrderInput | SortOrder
@@ -42431,6 +42512,7 @@ export namespace Prisma {
     referenceArticleDescription?: StringNullableFilter<"ExtractionResultFlat"> | string | null
     collarStyle?: StringNullableFilter<"ExtractionResultFlat"> | string | null
     sleeveFold?: StringNullableFilter<"ExtractionResultFlat"> | string | null
+    mSet?: StringNullableFilter<"ExtractionResultFlat"> | string | null
     noOfPocket?: StringNullableFilter<"ExtractionResultFlat"> | string | null
     extraPocket?: StringNullableFilter<"ExtractionResultFlat"> | string | null
     dcShape?: StringNullableFilter<"ExtractionResultFlat"> | string | null
@@ -42445,6 +42527,8 @@ export namespace Prisma {
     htrfStyle?: StringNullableFilter<"ExtractionResultFlat"> | string | null
     embPlacement?: StringNullableFilter<"ExtractionResultFlat"> | string | null
     ageGroup?: StringNullableFilter<"ExtractionResultFlat"> | string | null
+    mNoOfSize?: StringNullableFilter<"ExtractionResultFlat"> | string | null
+    mNoOfClr?: StringNullableFilter<"ExtractionResultFlat"> | string | null
     articleFashionType?: StringNullableFilter<"ExtractionResultFlat"> | string | null
     articleDimension?: StringNullableFilter<"ExtractionResultFlat"> | string | null
     bodyArticle?: StringNullableFilter<"ExtractionResultFlat"> | string | null
@@ -42560,6 +42644,7 @@ export namespace Prisma {
     referenceArticleDescription?: SortOrderInput | SortOrder
     collarStyle?: SortOrderInput | SortOrder
     sleeveFold?: SortOrderInput | SortOrder
+    mSet?: SortOrderInput | SortOrder
     noOfPocket?: SortOrderInput | SortOrder
     extraPocket?: SortOrderInput | SortOrder
     dcShape?: SortOrderInput | SortOrder
@@ -42574,6 +42659,8 @@ export namespace Prisma {
     htrfStyle?: SortOrderInput | SortOrder
     embPlacement?: SortOrderInput | SortOrder
     ageGroup?: SortOrderInput | SortOrder
+    mNoOfSize?: SortOrderInput | SortOrder
+    mNoOfClr?: SortOrderInput | SortOrder
     articleFashionType?: SortOrderInput | SortOrder
     articleDimension?: SortOrderInput | SortOrder
     bodyArticle?: SortOrderInput | SortOrder
@@ -42695,6 +42782,7 @@ export namespace Prisma {
     referenceArticleDescription?: StringNullableWithAggregatesFilter<"ExtractionResultFlat"> | string | null
     collarStyle?: StringNullableWithAggregatesFilter<"ExtractionResultFlat"> | string | null
     sleeveFold?: StringNullableWithAggregatesFilter<"ExtractionResultFlat"> | string | null
+    mSet?: StringNullableWithAggregatesFilter<"ExtractionResultFlat"> | string | null
     noOfPocket?: StringNullableWithAggregatesFilter<"ExtractionResultFlat"> | string | null
     extraPocket?: StringNullableWithAggregatesFilter<"ExtractionResultFlat"> | string | null
     dcShape?: StringNullableWithAggregatesFilter<"ExtractionResultFlat"> | string | null
@@ -42709,6 +42797,8 @@ export namespace Prisma {
     htrfStyle?: StringNullableWithAggregatesFilter<"ExtractionResultFlat"> | string | null
     embPlacement?: StringNullableWithAggregatesFilter<"ExtractionResultFlat"> | string | null
     ageGroup?: StringNullableWithAggregatesFilter<"ExtractionResultFlat"> | string | null
+    mNoOfSize?: StringNullableWithAggregatesFilter<"ExtractionResultFlat"> | string | null
+    mNoOfClr?: StringNullableWithAggregatesFilter<"ExtractionResultFlat"> | string | null
     articleFashionType?: StringNullableWithAggregatesFilter<"ExtractionResultFlat"> | string | null
     articleDimension?: StringNullableWithAggregatesFilter<"ExtractionResultFlat"> | string | null
     bodyArticle?: StringNullableWithAggregatesFilter<"ExtractionResultFlat"> | string | null
@@ -43623,6 +43713,7 @@ export namespace Prisma {
     fatherBelt?: StringNullableFilter<"ArticleBody"> | string | null
     sleeve?: StringNullableFilter<"ArticleBody"> | string | null
     sleeveFold?: StringNullableFilter<"ArticleBody"> | string | null
+    mSet?: StringNullableFilter<"ArticleBody"> | string | null
     bottomFold?: StringNullableFilter<"ArticleBody"> | string | null
     noOfPocket?: StringNullableFilter<"ArticleBody"> | string | null
     pocketType?: StringNullableFilter<"ArticleBody"> | string | null
@@ -43646,6 +43737,7 @@ export namespace Prisma {
     fatherBelt?: SortOrderInput | SortOrder
     sleeve?: SortOrderInput | SortOrder
     sleeveFold?: SortOrderInput | SortOrder
+    mSet?: SortOrderInput | SortOrder
     bottomFold?: SortOrderInput | SortOrder
     noOfPocket?: SortOrderInput | SortOrder
     pocketType?: SortOrderInput | SortOrder
@@ -43673,6 +43765,7 @@ export namespace Prisma {
     fatherBelt?: StringNullableFilter<"ArticleBody"> | string | null
     sleeve?: StringNullableFilter<"ArticleBody"> | string | null
     sleeveFold?: StringNullableFilter<"ArticleBody"> | string | null
+    mSet?: StringNullableFilter<"ArticleBody"> | string | null
     bottomFold?: StringNullableFilter<"ArticleBody"> | string | null
     noOfPocket?: StringNullableFilter<"ArticleBody"> | string | null
     pocketType?: StringNullableFilter<"ArticleBody"> | string | null
@@ -43696,6 +43789,7 @@ export namespace Prisma {
     fatherBelt?: SortOrderInput | SortOrder
     sleeve?: SortOrderInput | SortOrder
     sleeveFold?: SortOrderInput | SortOrder
+    mSet?: SortOrderInput | SortOrder
     bottomFold?: SortOrderInput | SortOrder
     noOfPocket?: SortOrderInput | SortOrder
     pocketType?: SortOrderInput | SortOrder
@@ -43724,6 +43818,7 @@ export namespace Prisma {
     fatherBelt?: StringNullableWithAggregatesFilter<"ArticleBody"> | string | null
     sleeve?: StringNullableWithAggregatesFilter<"ArticleBody"> | string | null
     sleeveFold?: StringNullableWithAggregatesFilter<"ArticleBody"> | string | null
+    mSet?: StringNullableWithAggregatesFilter<"ArticleBody"> | string | null
     bottomFold?: StringNullableWithAggregatesFilter<"ArticleBody"> | string | null
     noOfPocket?: StringNullableWithAggregatesFilter<"ArticleBody"> | string | null
     pocketType?: StringNullableWithAggregatesFilter<"ArticleBody"> | string | null
@@ -44169,6 +44264,7 @@ export namespace Prisma {
     fatherBelt?: StringNullableFilter<"Article360Flat"> | string | null
     sleeve?: StringNullableFilter<"Article360Flat"> | string | null
     sleeveFold?: StringNullableFilter<"Article360Flat"> | string | null
+    mSet?: StringNullableFilter<"Article360Flat"> | string | null
     bottomFold?: StringNullableFilter<"Article360Flat"> | string | null
     noOfPocket?: StringNullableFilter<"Article360Flat"> | string | null
     pocketType?: StringNullableFilter<"Article360Flat"> | string | null
@@ -44247,6 +44343,7 @@ export namespace Prisma {
     fatherBelt?: SortOrderInput | SortOrder
     sleeve?: SortOrderInput | SortOrder
     sleeveFold?: SortOrderInput | SortOrder
+    mSet?: SortOrderInput | SortOrder
     bottomFold?: SortOrderInput | SortOrder
     noOfPocket?: SortOrderInput | SortOrder
     pocketType?: SortOrderInput | SortOrder
@@ -44329,6 +44426,7 @@ export namespace Prisma {
     fatherBelt?: StringNullableFilter<"Article360Flat"> | string | null
     sleeve?: StringNullableFilter<"Article360Flat"> | string | null
     sleeveFold?: StringNullableFilter<"Article360Flat"> | string | null
+    mSet?: StringNullableFilter<"Article360Flat"> | string | null
     bottomFold?: StringNullableFilter<"Article360Flat"> | string | null
     noOfPocket?: StringNullableFilter<"Article360Flat"> | string | null
     pocketType?: StringNullableFilter<"Article360Flat"> | string | null
@@ -44407,6 +44505,7 @@ export namespace Prisma {
     fatherBelt?: SortOrderInput | SortOrder
     sleeve?: SortOrderInput | SortOrder
     sleeveFold?: SortOrderInput | SortOrder
+    mSet?: SortOrderInput | SortOrder
     bottomFold?: SortOrderInput | SortOrder
     noOfPocket?: SortOrderInput | SortOrder
     pocketType?: SortOrderInput | SortOrder
@@ -44493,6 +44592,7 @@ export namespace Prisma {
     fatherBelt?: StringNullableWithAggregatesFilter<"Article360Flat"> | string | null
     sleeve?: StringNullableWithAggregatesFilter<"Article360Flat"> | string | null
     sleeveFold?: StringNullableWithAggregatesFilter<"Article360Flat"> | string | null
+    mSet?: StringNullableWithAggregatesFilter<"Article360Flat"> | string | null
     bottomFold?: StringNullableWithAggregatesFilter<"Article360Flat"> | string | null
     noOfPocket?: StringNullableWithAggregatesFilter<"Article360Flat"> | string | null
     pocketType?: StringNullableWithAggregatesFilter<"Article360Flat"> | string | null
@@ -45842,6 +45942,7 @@ export namespace Prisma {
     referenceArticleDescription?: string | null
     collarStyle?: string | null
     sleeveFold?: string | null
+    mSet?: string | null
     noOfPocket?: string | null
     extraPocket?: string | null
     dcShape?: string | null
@@ -45856,6 +45957,8 @@ export namespace Prisma {
     htrfStyle?: string | null
     embPlacement?: string | null
     ageGroup?: string | null
+    mNoOfSize?: string | null
+    mNoOfClr?: string | null
     articleFashionType?: string | null
     articleDimension?: string | null
     bodyArticle?: string | null
@@ -45971,6 +46074,7 @@ export namespace Prisma {
     referenceArticleDescription?: string | null
     collarStyle?: string | null
     sleeveFold?: string | null
+    mSet?: string | null
     noOfPocket?: string | null
     extraPocket?: string | null
     dcShape?: string | null
@@ -45985,6 +46089,8 @@ export namespace Prisma {
     htrfStyle?: string | null
     embPlacement?: string | null
     ageGroup?: string | null
+    mNoOfSize?: string | null
+    mNoOfClr?: string | null
     articleFashionType?: string | null
     articleDimension?: string | null
     bodyArticle?: string | null
@@ -46098,6 +46204,7 @@ export namespace Prisma {
     referenceArticleDescription?: NullableStringFieldUpdateOperationsInput | string | null
     collarStyle?: NullableStringFieldUpdateOperationsInput | string | null
     sleeveFold?: NullableStringFieldUpdateOperationsInput | string | null
+    mSet?: NullableStringFieldUpdateOperationsInput | string | null
     noOfPocket?: NullableStringFieldUpdateOperationsInput | string | null
     extraPocket?: NullableStringFieldUpdateOperationsInput | string | null
     dcShape?: NullableStringFieldUpdateOperationsInput | string | null
@@ -46112,6 +46219,8 @@ export namespace Prisma {
     htrfStyle?: NullableStringFieldUpdateOperationsInput | string | null
     embPlacement?: NullableStringFieldUpdateOperationsInput | string | null
     ageGroup?: NullableStringFieldUpdateOperationsInput | string | null
+    mNoOfSize?: NullableStringFieldUpdateOperationsInput | string | null
+    mNoOfClr?: NullableStringFieldUpdateOperationsInput | string | null
     articleFashionType?: NullableStringFieldUpdateOperationsInput | string | null
     articleDimension?: NullableStringFieldUpdateOperationsInput | string | null
     bodyArticle?: NullableStringFieldUpdateOperationsInput | string | null
@@ -46227,6 +46336,7 @@ export namespace Prisma {
     referenceArticleDescription?: NullableStringFieldUpdateOperationsInput | string | null
     collarStyle?: NullableStringFieldUpdateOperationsInput | string | null
     sleeveFold?: NullableStringFieldUpdateOperationsInput | string | null
+    mSet?: NullableStringFieldUpdateOperationsInput | string | null
     noOfPocket?: NullableStringFieldUpdateOperationsInput | string | null
     extraPocket?: NullableStringFieldUpdateOperationsInput | string | null
     dcShape?: NullableStringFieldUpdateOperationsInput | string | null
@@ -46241,6 +46351,8 @@ export namespace Prisma {
     htrfStyle?: NullableStringFieldUpdateOperationsInput | string | null
     embPlacement?: NullableStringFieldUpdateOperationsInput | string | null
     ageGroup?: NullableStringFieldUpdateOperationsInput | string | null
+    mNoOfSize?: NullableStringFieldUpdateOperationsInput | string | null
+    mNoOfClr?: NullableStringFieldUpdateOperationsInput | string | null
     articleFashionType?: NullableStringFieldUpdateOperationsInput | string | null
     articleDimension?: NullableStringFieldUpdateOperationsInput | string | null
     bodyArticle?: NullableStringFieldUpdateOperationsInput | string | null
@@ -46355,6 +46467,7 @@ export namespace Prisma {
     referenceArticleDescription?: string | null
     collarStyle?: string | null
     sleeveFold?: string | null
+    mSet?: string | null
     noOfPocket?: string | null
     extraPocket?: string | null
     dcShape?: string | null
@@ -46369,6 +46482,8 @@ export namespace Prisma {
     htrfStyle?: string | null
     embPlacement?: string | null
     ageGroup?: string | null
+    mNoOfSize?: string | null
+    mNoOfClr?: string | null
     articleFashionType?: string | null
     articleDimension?: string | null
     bodyArticle?: string | null
@@ -46481,6 +46596,7 @@ export namespace Prisma {
     referenceArticleDescription?: NullableStringFieldUpdateOperationsInput | string | null
     collarStyle?: NullableStringFieldUpdateOperationsInput | string | null
     sleeveFold?: NullableStringFieldUpdateOperationsInput | string | null
+    mSet?: NullableStringFieldUpdateOperationsInput | string | null
     noOfPocket?: NullableStringFieldUpdateOperationsInput | string | null
     extraPocket?: NullableStringFieldUpdateOperationsInput | string | null
     dcShape?: NullableStringFieldUpdateOperationsInput | string | null
@@ -46495,6 +46611,8 @@ export namespace Prisma {
     htrfStyle?: NullableStringFieldUpdateOperationsInput | string | null
     embPlacement?: NullableStringFieldUpdateOperationsInput | string | null
     ageGroup?: NullableStringFieldUpdateOperationsInput | string | null
+    mNoOfSize?: NullableStringFieldUpdateOperationsInput | string | null
+    mNoOfClr?: NullableStringFieldUpdateOperationsInput | string | null
     articleFashionType?: NullableStringFieldUpdateOperationsInput | string | null
     articleDimension?: NullableStringFieldUpdateOperationsInput | string | null
     bodyArticle?: NullableStringFieldUpdateOperationsInput | string | null
@@ -46607,6 +46725,7 @@ export namespace Prisma {
     referenceArticleDescription?: NullableStringFieldUpdateOperationsInput | string | null
     collarStyle?: NullableStringFieldUpdateOperationsInput | string | null
     sleeveFold?: NullableStringFieldUpdateOperationsInput | string | null
+    mSet?: NullableStringFieldUpdateOperationsInput | string | null
     noOfPocket?: NullableStringFieldUpdateOperationsInput | string | null
     extraPocket?: NullableStringFieldUpdateOperationsInput | string | null
     dcShape?: NullableStringFieldUpdateOperationsInput | string | null
@@ -46621,6 +46740,8 @@ export namespace Prisma {
     htrfStyle?: NullableStringFieldUpdateOperationsInput | string | null
     embPlacement?: NullableStringFieldUpdateOperationsInput | string | null
     ageGroup?: NullableStringFieldUpdateOperationsInput | string | null
+    mNoOfSize?: NullableStringFieldUpdateOperationsInput | string | null
+    mNoOfClr?: NullableStringFieldUpdateOperationsInput | string | null
     articleFashionType?: NullableStringFieldUpdateOperationsInput | string | null
     articleDimension?: NullableStringFieldUpdateOperationsInput | string | null
     bodyArticle?: NullableStringFieldUpdateOperationsInput | string | null
@@ -47653,6 +47774,7 @@ export namespace Prisma {
     fatherBelt?: string | null
     sleeve?: string | null
     sleeveFold?: string | null
+    mSet?: string | null
     bottomFold?: string | null
     noOfPocket?: string | null
     pocketType?: string | null
@@ -47676,6 +47798,7 @@ export namespace Prisma {
     fatherBelt?: string | null
     sleeve?: string | null
     sleeveFold?: string | null
+    mSet?: string | null
     bottomFold?: string | null
     noOfPocket?: string | null
     pocketType?: string | null
@@ -47697,6 +47820,7 @@ export namespace Prisma {
     fatherBelt?: NullableStringFieldUpdateOperationsInput | string | null
     sleeve?: NullableStringFieldUpdateOperationsInput | string | null
     sleeveFold?: NullableStringFieldUpdateOperationsInput | string | null
+    mSet?: NullableStringFieldUpdateOperationsInput | string | null
     bottomFold?: NullableStringFieldUpdateOperationsInput | string | null
     noOfPocket?: NullableStringFieldUpdateOperationsInput | string | null
     pocketType?: NullableStringFieldUpdateOperationsInput | string | null
@@ -47720,6 +47844,7 @@ export namespace Prisma {
     fatherBelt?: NullableStringFieldUpdateOperationsInput | string | null
     sleeve?: NullableStringFieldUpdateOperationsInput | string | null
     sleeveFold?: NullableStringFieldUpdateOperationsInput | string | null
+    mSet?: NullableStringFieldUpdateOperationsInput | string | null
     bottomFold?: NullableStringFieldUpdateOperationsInput | string | null
     noOfPocket?: NullableStringFieldUpdateOperationsInput | string | null
     pocketType?: NullableStringFieldUpdateOperationsInput | string | null
@@ -47742,6 +47867,7 @@ export namespace Prisma {
     fatherBelt?: string | null
     sleeve?: string | null
     sleeveFold?: string | null
+    mSet?: string | null
     bottomFold?: string | null
     noOfPocket?: string | null
     pocketType?: string | null
@@ -47763,6 +47889,7 @@ export namespace Prisma {
     fatherBelt?: NullableStringFieldUpdateOperationsInput | string | null
     sleeve?: NullableStringFieldUpdateOperationsInput | string | null
     sleeveFold?: NullableStringFieldUpdateOperationsInput | string | null
+    mSet?: NullableStringFieldUpdateOperationsInput | string | null
     bottomFold?: NullableStringFieldUpdateOperationsInput | string | null
     noOfPocket?: NullableStringFieldUpdateOperationsInput | string | null
     pocketType?: NullableStringFieldUpdateOperationsInput | string | null
@@ -47785,6 +47912,7 @@ export namespace Prisma {
     fatherBelt?: NullableStringFieldUpdateOperationsInput | string | null
     sleeve?: NullableStringFieldUpdateOperationsInput | string | null
     sleeveFold?: NullableStringFieldUpdateOperationsInput | string | null
+    mSet?: NullableStringFieldUpdateOperationsInput | string | null
     bottomFold?: NullableStringFieldUpdateOperationsInput | string | null
     noOfPocket?: NullableStringFieldUpdateOperationsInput | string | null
     pocketType?: NullableStringFieldUpdateOperationsInput | string | null
@@ -48254,6 +48382,7 @@ export namespace Prisma {
     fatherBelt?: string | null
     sleeve?: string | null
     sleeveFold?: string | null
+    mSet?: string | null
     bottomFold?: string | null
     noOfPocket?: string | null
     pocketType?: string | null
@@ -48332,6 +48461,7 @@ export namespace Prisma {
     fatherBelt?: string | null
     sleeve?: string | null
     sleeveFold?: string | null
+    mSet?: string | null
     bottomFold?: string | null
     noOfPocket?: string | null
     pocketType?: string | null
@@ -48410,6 +48540,7 @@ export namespace Prisma {
     fatherBelt?: NullableStringFieldUpdateOperationsInput | string | null
     sleeve?: NullableStringFieldUpdateOperationsInput | string | null
     sleeveFold?: NullableStringFieldUpdateOperationsInput | string | null
+    mSet?: NullableStringFieldUpdateOperationsInput | string | null
     bottomFold?: NullableStringFieldUpdateOperationsInput | string | null
     noOfPocket?: NullableStringFieldUpdateOperationsInput | string | null
     pocketType?: NullableStringFieldUpdateOperationsInput | string | null
@@ -48488,6 +48619,7 @@ export namespace Prisma {
     fatherBelt?: NullableStringFieldUpdateOperationsInput | string | null
     sleeve?: NullableStringFieldUpdateOperationsInput | string | null
     sleeveFold?: NullableStringFieldUpdateOperationsInput | string | null
+    mSet?: NullableStringFieldUpdateOperationsInput | string | null
     bottomFold?: NullableStringFieldUpdateOperationsInput | string | null
     noOfPocket?: NullableStringFieldUpdateOperationsInput | string | null
     pocketType?: NullableStringFieldUpdateOperationsInput | string | null
@@ -48566,6 +48698,7 @@ export namespace Prisma {
     fatherBelt?: string | null
     sleeve?: string | null
     sleeveFold?: string | null
+    mSet?: string | null
     bottomFold?: string | null
     noOfPocket?: string | null
     pocketType?: string | null
@@ -48644,6 +48777,7 @@ export namespace Prisma {
     fatherBelt?: NullableStringFieldUpdateOperationsInput | string | null
     sleeve?: NullableStringFieldUpdateOperationsInput | string | null
     sleeveFold?: NullableStringFieldUpdateOperationsInput | string | null
+    mSet?: NullableStringFieldUpdateOperationsInput | string | null
     bottomFold?: NullableStringFieldUpdateOperationsInput | string | null
     noOfPocket?: NullableStringFieldUpdateOperationsInput | string | null
     pocketType?: NullableStringFieldUpdateOperationsInput | string | null
@@ -48722,6 +48856,7 @@ export namespace Prisma {
     fatherBelt?: NullableStringFieldUpdateOperationsInput | string | null
     sleeve?: NullableStringFieldUpdateOperationsInput | string | null
     sleeveFold?: NullableStringFieldUpdateOperationsInput | string | null
+    mSet?: NullableStringFieldUpdateOperationsInput | string | null
     bottomFold?: NullableStringFieldUpdateOperationsInput | string | null
     noOfPocket?: NullableStringFieldUpdateOperationsInput | string | null
     pocketType?: NullableStringFieldUpdateOperationsInput | string | null
@@ -50260,6 +50395,7 @@ export namespace Prisma {
     referenceArticleDescription?: SortOrder
     collarStyle?: SortOrder
     sleeveFold?: SortOrder
+    mSet?: SortOrder
     noOfPocket?: SortOrder
     extraPocket?: SortOrder
     dcShape?: SortOrder
@@ -50274,6 +50410,8 @@ export namespace Prisma {
     htrfStyle?: SortOrder
     embPlacement?: SortOrder
     ageGroup?: SortOrder
+    mNoOfSize?: SortOrder
+    mNoOfClr?: SortOrder
     articleFashionType?: SortOrder
     articleDimension?: SortOrder
     bodyArticle?: SortOrder
@@ -50402,6 +50540,7 @@ export namespace Prisma {
     referenceArticleDescription?: SortOrder
     collarStyle?: SortOrder
     sleeveFold?: SortOrder
+    mSet?: SortOrder
     noOfPocket?: SortOrder
     extraPocket?: SortOrder
     dcShape?: SortOrder
@@ -50416,6 +50555,8 @@ export namespace Prisma {
     htrfStyle?: SortOrder
     embPlacement?: SortOrder
     ageGroup?: SortOrder
+    mNoOfSize?: SortOrder
+    mNoOfClr?: SortOrder
     articleFashionType?: SortOrder
     articleDimension?: SortOrder
     bodyArticle?: SortOrder
@@ -50529,6 +50670,7 @@ export namespace Prisma {
     referenceArticleDescription?: SortOrder
     collarStyle?: SortOrder
     sleeveFold?: SortOrder
+    mSet?: SortOrder
     noOfPocket?: SortOrder
     extraPocket?: SortOrder
     dcShape?: SortOrder
@@ -50543,6 +50685,8 @@ export namespace Prisma {
     htrfStyle?: SortOrder
     embPlacement?: SortOrder
     ageGroup?: SortOrder
+    mNoOfSize?: SortOrder
+    mNoOfClr?: SortOrder
     articleFashionType?: SortOrder
     articleDimension?: SortOrder
     bodyArticle?: SortOrder
@@ -51338,6 +51482,7 @@ export namespace Prisma {
     fatherBelt?: SortOrder
     sleeve?: SortOrder
     sleeveFold?: SortOrder
+    mSet?: SortOrder
     bottomFold?: SortOrder
     noOfPocket?: SortOrder
     pocketType?: SortOrder
@@ -51360,6 +51505,7 @@ export namespace Prisma {
     fatherBelt?: SortOrder
     sleeve?: SortOrder
     sleeveFold?: SortOrder
+    mSet?: SortOrder
     bottomFold?: SortOrder
     noOfPocket?: SortOrder
     pocketType?: SortOrder
@@ -51382,6 +51528,7 @@ export namespace Prisma {
     fatherBelt?: SortOrder
     sleeve?: SortOrder
     sleeveFold?: SortOrder
+    mSet?: SortOrder
     bottomFold?: SortOrder
     noOfPocket?: SortOrder
     pocketType?: SortOrder
@@ -51706,6 +51853,7 @@ export namespace Prisma {
     fatherBelt?: SortOrder
     sleeve?: SortOrder
     sleeveFold?: SortOrder
+    mSet?: SortOrder
     bottomFold?: SortOrder
     noOfPocket?: SortOrder
     pocketType?: SortOrder
@@ -51791,6 +51939,7 @@ export namespace Prisma {
     fatherBelt?: SortOrder
     sleeve?: SortOrder
     sleeveFold?: SortOrder
+    mSet?: SortOrder
     bottomFold?: SortOrder
     noOfPocket?: SortOrder
     pocketType?: SortOrder
@@ -51869,6 +52018,7 @@ export namespace Prisma {
     fatherBelt?: SortOrder
     sleeve?: SortOrder
     sleeveFold?: SortOrder
+    mSet?: SortOrder
     bottomFold?: SortOrder
     noOfPocket?: SortOrder
     pocketType?: SortOrder
@@ -55117,6 +55267,7 @@ export namespace Prisma {
     referenceArticleDescription?: string | null
     collarStyle?: string | null
     sleeveFold?: string | null
+    mSet?: string | null
     noOfPocket?: string | null
     extraPocket?: string | null
     dcShape?: string | null
@@ -55131,6 +55282,8 @@ export namespace Prisma {
     htrfStyle?: string | null
     embPlacement?: string | null
     ageGroup?: string | null
+    mNoOfSize?: string | null
+    mNoOfClr?: string | null
     articleFashionType?: string | null
     articleDimension?: string | null
     bodyArticle?: string | null
@@ -55244,6 +55397,7 @@ export namespace Prisma {
     referenceArticleDescription?: string | null
     collarStyle?: string | null
     sleeveFold?: string | null
+    mSet?: string | null
     noOfPocket?: string | null
     extraPocket?: string | null
     dcShape?: string | null
@@ -55258,6 +55412,8 @@ export namespace Prisma {
     htrfStyle?: string | null
     embPlacement?: string | null
     ageGroup?: string | null
+    mNoOfSize?: string | null
+    mNoOfClr?: string | null
     articleFashionType?: string | null
     articleDimension?: string | null
     bodyArticle?: string | null
@@ -55495,6 +55651,7 @@ export namespace Prisma {
     referenceArticleDescription?: NullableStringFieldUpdateOperationsInput | string | null
     collarStyle?: NullableStringFieldUpdateOperationsInput | string | null
     sleeveFold?: NullableStringFieldUpdateOperationsInput | string | null
+    mSet?: NullableStringFieldUpdateOperationsInput | string | null
     noOfPocket?: NullableStringFieldUpdateOperationsInput | string | null
     extraPocket?: NullableStringFieldUpdateOperationsInput | string | null
     dcShape?: NullableStringFieldUpdateOperationsInput | string | null
@@ -55509,6 +55666,8 @@ export namespace Prisma {
     htrfStyle?: NullableStringFieldUpdateOperationsInput | string | null
     embPlacement?: NullableStringFieldUpdateOperationsInput | string | null
     ageGroup?: NullableStringFieldUpdateOperationsInput | string | null
+    mNoOfSize?: NullableStringFieldUpdateOperationsInput | string | null
+    mNoOfClr?: NullableStringFieldUpdateOperationsInput | string | null
     articleFashionType?: NullableStringFieldUpdateOperationsInput | string | null
     articleDimension?: NullableStringFieldUpdateOperationsInput | string | null
     bodyArticle?: NullableStringFieldUpdateOperationsInput | string | null
@@ -55622,6 +55781,7 @@ export namespace Prisma {
     referenceArticleDescription?: NullableStringFieldUpdateOperationsInput | string | null
     collarStyle?: NullableStringFieldUpdateOperationsInput | string | null
     sleeveFold?: NullableStringFieldUpdateOperationsInput | string | null
+    mSet?: NullableStringFieldUpdateOperationsInput | string | null
     noOfPocket?: NullableStringFieldUpdateOperationsInput | string | null
     extraPocket?: NullableStringFieldUpdateOperationsInput | string | null
     dcShape?: NullableStringFieldUpdateOperationsInput | string | null
@@ -55636,6 +55796,8 @@ export namespace Prisma {
     htrfStyle?: NullableStringFieldUpdateOperationsInput | string | null
     embPlacement?: NullableStringFieldUpdateOperationsInput | string | null
     ageGroup?: NullableStringFieldUpdateOperationsInput | string | null
+    mNoOfSize?: NullableStringFieldUpdateOperationsInput | string | null
+    mNoOfClr?: NullableStringFieldUpdateOperationsInput | string | null
     articleFashionType?: NullableStringFieldUpdateOperationsInput | string | null
     articleDimension?: NullableStringFieldUpdateOperationsInput | string | null
     bodyArticle?: NullableStringFieldUpdateOperationsInput | string | null
@@ -56587,6 +56749,7 @@ export namespace Prisma {
     referenceArticleDescription?: string | null
     collarStyle?: string | null
     sleeveFold?: string | null
+    mSet?: string | null
     noOfPocket?: string | null
     extraPocket?: string | null
     dcShape?: string | null
@@ -56601,6 +56764,8 @@ export namespace Prisma {
     htrfStyle?: string | null
     embPlacement?: string | null
     ageGroup?: string | null
+    mNoOfSize?: string | null
+    mNoOfClr?: string | null
     articleFashionType?: string | null
     articleDimension?: string | null
     bodyArticle?: string | null
@@ -56715,6 +56880,7 @@ export namespace Prisma {
     referenceArticleDescription?: string | null
     collarStyle?: string | null
     sleeveFold?: string | null
+    mSet?: string | null
     noOfPocket?: string | null
     extraPocket?: string | null
     dcShape?: string | null
@@ -56729,6 +56895,8 @@ export namespace Prisma {
     htrfStyle?: string | null
     embPlacement?: string | null
     ageGroup?: string | null
+    mNoOfSize?: string | null
+    mNoOfClr?: string | null
     articleFashionType?: string | null
     articleDimension?: string | null
     bodyArticle?: string | null
@@ -56972,6 +57140,7 @@ export namespace Prisma {
     referenceArticleDescription?: StringNullableFilter<"ExtractionResultFlat"> | string | null
     collarStyle?: StringNullableFilter<"ExtractionResultFlat"> | string | null
     sleeveFold?: StringNullableFilter<"ExtractionResultFlat"> | string | null
+    mSet?: StringNullableFilter<"ExtractionResultFlat"> | string | null
     noOfPocket?: StringNullableFilter<"ExtractionResultFlat"> | string | null
     extraPocket?: StringNullableFilter<"ExtractionResultFlat"> | string | null
     dcShape?: StringNullableFilter<"ExtractionResultFlat"> | string | null
@@ -56986,6 +57155,8 @@ export namespace Prisma {
     htrfStyle?: StringNullableFilter<"ExtractionResultFlat"> | string | null
     embPlacement?: StringNullableFilter<"ExtractionResultFlat"> | string | null
     ageGroup?: StringNullableFilter<"ExtractionResultFlat"> | string | null
+    mNoOfSize?: StringNullableFilter<"ExtractionResultFlat"> | string | null
+    mNoOfClr?: StringNullableFilter<"ExtractionResultFlat"> | string | null
     articleFashionType?: StringNullableFilter<"ExtractionResultFlat"> | string | null
     articleDimension?: StringNullableFilter<"ExtractionResultFlat"> | string | null
     bodyArticle?: StringNullableFilter<"ExtractionResultFlat"> | string | null
@@ -57252,6 +57423,7 @@ export namespace Prisma {
     fatherBelt?: string | null
     sleeve?: string | null
     sleeveFold?: string | null
+    mSet?: string | null
     bottomFold?: string | null
     noOfPocket?: string | null
     pocketType?: string | null
@@ -57273,6 +57445,7 @@ export namespace Prisma {
     fatherBelt?: string | null
     sleeve?: string | null
     sleeveFold?: string | null
+    mSet?: string | null
     bottomFold?: string | null
     noOfPocket?: string | null
     pocketType?: string | null
@@ -57448,6 +57621,7 @@ export namespace Prisma {
     fatherBelt?: NullableStringFieldUpdateOperationsInput | string | null
     sleeve?: NullableStringFieldUpdateOperationsInput | string | null
     sleeveFold?: NullableStringFieldUpdateOperationsInput | string | null
+    mSet?: NullableStringFieldUpdateOperationsInput | string | null
     bottomFold?: NullableStringFieldUpdateOperationsInput | string | null
     noOfPocket?: NullableStringFieldUpdateOperationsInput | string | null
     pocketType?: NullableStringFieldUpdateOperationsInput | string | null
@@ -57469,6 +57643,7 @@ export namespace Prisma {
     fatherBelt?: NullableStringFieldUpdateOperationsInput | string | null
     sleeve?: NullableStringFieldUpdateOperationsInput | string | null
     sleeveFold?: NullableStringFieldUpdateOperationsInput | string | null
+    mSet?: NullableStringFieldUpdateOperationsInput | string | null
     bottomFold?: NullableStringFieldUpdateOperationsInput | string | null
     noOfPocket?: NullableStringFieldUpdateOperationsInput | string | null
     pocketType?: NullableStringFieldUpdateOperationsInput | string | null
@@ -58513,6 +58688,7 @@ export namespace Prisma {
     referenceArticleDescription?: string | null
     collarStyle?: string | null
     sleeveFold?: string | null
+    mSet?: string | null
     noOfPocket?: string | null
     extraPocket?: string | null
     dcShape?: string | null
@@ -58527,6 +58703,8 @@ export namespace Prisma {
     htrfStyle?: string | null
     embPlacement?: string | null
     ageGroup?: string | null
+    mNoOfSize?: string | null
+    mNoOfClr?: string | null
     articleFashionType?: string | null
     articleDimension?: string | null
     bodyArticle?: string | null
@@ -58641,6 +58819,7 @@ export namespace Prisma {
     referenceArticleDescription?: string | null
     collarStyle?: string | null
     sleeveFold?: string | null
+    mSet?: string | null
     noOfPocket?: string | null
     extraPocket?: string | null
     dcShape?: string | null
@@ -58655,6 +58834,8 @@ export namespace Prisma {
     htrfStyle?: string | null
     embPlacement?: string | null
     ageGroup?: string | null
+    mNoOfSize?: string | null
+    mNoOfClr?: string | null
     articleFashionType?: string | null
     articleDimension?: string | null
     bodyArticle?: string | null
@@ -58820,6 +59001,7 @@ export namespace Prisma {
     referenceArticleDescription?: NullableStringFieldUpdateOperationsInput | string | null
     collarStyle?: NullableStringFieldUpdateOperationsInput | string | null
     sleeveFold?: NullableStringFieldUpdateOperationsInput | string | null
+    mSet?: NullableStringFieldUpdateOperationsInput | string | null
     noOfPocket?: NullableStringFieldUpdateOperationsInput | string | null
     extraPocket?: NullableStringFieldUpdateOperationsInput | string | null
     dcShape?: NullableStringFieldUpdateOperationsInput | string | null
@@ -58834,6 +59016,8 @@ export namespace Prisma {
     htrfStyle?: NullableStringFieldUpdateOperationsInput | string | null
     embPlacement?: NullableStringFieldUpdateOperationsInput | string | null
     ageGroup?: NullableStringFieldUpdateOperationsInput | string | null
+    mNoOfSize?: NullableStringFieldUpdateOperationsInput | string | null
+    mNoOfClr?: NullableStringFieldUpdateOperationsInput | string | null
     articleFashionType?: NullableStringFieldUpdateOperationsInput | string | null
     articleDimension?: NullableStringFieldUpdateOperationsInput | string | null
     bodyArticle?: NullableStringFieldUpdateOperationsInput | string | null
@@ -58948,6 +59132,7 @@ export namespace Prisma {
     referenceArticleDescription?: NullableStringFieldUpdateOperationsInput | string | null
     collarStyle?: NullableStringFieldUpdateOperationsInput | string | null
     sleeveFold?: NullableStringFieldUpdateOperationsInput | string | null
+    mSet?: NullableStringFieldUpdateOperationsInput | string | null
     noOfPocket?: NullableStringFieldUpdateOperationsInput | string | null
     extraPocket?: NullableStringFieldUpdateOperationsInput | string | null
     dcShape?: NullableStringFieldUpdateOperationsInput | string | null
@@ -58962,6 +59147,8 @@ export namespace Prisma {
     htrfStyle?: NullableStringFieldUpdateOperationsInput | string | null
     embPlacement?: NullableStringFieldUpdateOperationsInput | string | null
     ageGroup?: NullableStringFieldUpdateOperationsInput | string | null
+    mNoOfSize?: NullableStringFieldUpdateOperationsInput | string | null
+    mNoOfClr?: NullableStringFieldUpdateOperationsInput | string | null
     articleFashionType?: NullableStringFieldUpdateOperationsInput | string | null
     articleDimension?: NullableStringFieldUpdateOperationsInput | string | null
     bodyArticle?: NullableStringFieldUpdateOperationsInput | string | null
@@ -59699,6 +59886,7 @@ export namespace Prisma {
     referenceArticleDescription?: string | null
     collarStyle?: string | null
     sleeveFold?: string | null
+    mSet?: string | null
     noOfPocket?: string | null
     extraPocket?: string | null
     dcShape?: string | null
@@ -59713,6 +59901,8 @@ export namespace Prisma {
     htrfStyle?: string | null
     embPlacement?: string | null
     ageGroup?: string | null
+    mNoOfSize?: string | null
+    mNoOfClr?: string | null
     articleFashionType?: string | null
     articleDimension?: string | null
     bodyArticle?: string | null
@@ -59986,6 +60176,7 @@ export namespace Prisma {
     referenceArticleDescription?: NullableStringFieldUpdateOperationsInput | string | null
     collarStyle?: NullableStringFieldUpdateOperationsInput | string | null
     sleeveFold?: NullableStringFieldUpdateOperationsInput | string | null
+    mSet?: NullableStringFieldUpdateOperationsInput | string | null
     noOfPocket?: NullableStringFieldUpdateOperationsInput | string | null
     extraPocket?: NullableStringFieldUpdateOperationsInput | string | null
     dcShape?: NullableStringFieldUpdateOperationsInput | string | null
@@ -60000,6 +60191,8 @@ export namespace Prisma {
     htrfStyle?: NullableStringFieldUpdateOperationsInput | string | null
     embPlacement?: NullableStringFieldUpdateOperationsInput | string | null
     ageGroup?: NullableStringFieldUpdateOperationsInput | string | null
+    mNoOfSize?: NullableStringFieldUpdateOperationsInput | string | null
+    mNoOfClr?: NullableStringFieldUpdateOperationsInput | string | null
     articleFashionType?: NullableStringFieldUpdateOperationsInput | string | null
     articleDimension?: NullableStringFieldUpdateOperationsInput | string | null
     bodyArticle?: NullableStringFieldUpdateOperationsInput | string | null
@@ -60114,6 +60307,7 @@ export namespace Prisma {
     referenceArticleDescription?: NullableStringFieldUpdateOperationsInput | string | null
     collarStyle?: NullableStringFieldUpdateOperationsInput | string | null
     sleeveFold?: NullableStringFieldUpdateOperationsInput | string | null
+    mSet?: NullableStringFieldUpdateOperationsInput | string | null
     noOfPocket?: NullableStringFieldUpdateOperationsInput | string | null
     extraPocket?: NullableStringFieldUpdateOperationsInput | string | null
     dcShape?: NullableStringFieldUpdateOperationsInput | string | null
@@ -60128,6 +60322,8 @@ export namespace Prisma {
     htrfStyle?: NullableStringFieldUpdateOperationsInput | string | null
     embPlacement?: NullableStringFieldUpdateOperationsInput | string | null
     ageGroup?: NullableStringFieldUpdateOperationsInput | string | null
+    mNoOfSize?: NullableStringFieldUpdateOperationsInput | string | null
+    mNoOfClr?: NullableStringFieldUpdateOperationsInput | string | null
     articleFashionType?: NullableStringFieldUpdateOperationsInput | string | null
     articleDimension?: NullableStringFieldUpdateOperationsInput | string | null
     bodyArticle?: NullableStringFieldUpdateOperationsInput | string | null
@@ -60241,6 +60437,7 @@ export namespace Prisma {
     referenceArticleDescription?: NullableStringFieldUpdateOperationsInput | string | null
     collarStyle?: NullableStringFieldUpdateOperationsInput | string | null
     sleeveFold?: NullableStringFieldUpdateOperationsInput | string | null
+    mSet?: NullableStringFieldUpdateOperationsInput | string | null
     noOfPocket?: NullableStringFieldUpdateOperationsInput | string | null
     extraPocket?: NullableStringFieldUpdateOperationsInput | string | null
     dcShape?: NullableStringFieldUpdateOperationsInput | string | null
@@ -60255,6 +60452,8 @@ export namespace Prisma {
     htrfStyle?: NullableStringFieldUpdateOperationsInput | string | null
     embPlacement?: NullableStringFieldUpdateOperationsInput | string | null
     ageGroup?: NullableStringFieldUpdateOperationsInput | string | null
+    mNoOfSize?: NullableStringFieldUpdateOperationsInput | string | null
+    mNoOfClr?: NullableStringFieldUpdateOperationsInput | string | null
     articleFashionType?: NullableStringFieldUpdateOperationsInput | string | null
     articleDimension?: NullableStringFieldUpdateOperationsInput | string | null
     bodyArticle?: NullableStringFieldUpdateOperationsInput | string | null

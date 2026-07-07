@@ -164,6 +164,7 @@ const ATTRIBUTE_GROUPS: { group: string; color: string; fields: { field: string;
       { field: 'childBelt', schemaKey: 'child_belt' },
       { field: 'sleeve', schemaKey: 'sleeve' },
       { field: 'sleeveFold', schemaKey: 'sleeve_fold' },
+      { field: 'mSet', schemaKey: 'set' },
       { field: 'bottomFold', schemaKey: 'bottom_fold' },
       { field: 'noOfPocket', schemaKey: 'no_of_pocket' },
       { field: 'pocketType', schemaKey: 'pocket_type' },
@@ -208,6 +209,8 @@ const ATTRIBUTE_GROUPS: { group: string; color: string; fields: { field: string;
     fields: [
       { field: 'ageGroup', schemaKey: 'age_group' },
       { field: 'articleFashionType', schemaKey: 'article_fashion_type' },
+      { field: 'mNoOfSize', schemaKey: 'no_of_size' },
+      { field: 'mNoOfClr', schemaKey: 'no_of_clr' },
       { field: 'impAtrbt2', schemaKey: 'imp_atrbt2' },
       { field: 'segment', schemaKey: 'segment', freeText: true },
     ],

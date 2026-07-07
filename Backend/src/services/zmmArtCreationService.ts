@@ -102,6 +102,7 @@ const EXCEL_ATTR_TO_RFC: Record<string, string[]> = {
     'M_BLT_STYLE':          ['M_BLT_STYLE'],
     'M_SLEEVES_MAIN_STYLE': ['M_SLEEVES_MAIN_STYLE'],
     'M_SLEEVE_FOLD':        ['M_SLEEVE_FOLD'],
+    'M_SET':                ['M_SET'],
     'M_BTM_FOLD':           ['M_BTM_FOLD'],
     'M_NO_OF_POCKET':       ['M_NO_OF_POCKET'],
     'M_POCKET':             ['M_POCKET'],
@@ -130,6 +131,8 @@ const EXCEL_ATTR_TO_RFC: Record<string, string[]> = {
     'M_WASH':               ['M_WASH'],
     // ── Business ──────────────────────────────────────────────────────────────
     'M_AGE_GROUP':          ['M_AGE_GROUP'],
+    'M_NO_OF_SIZE':         ['M_NO_OF_SIZE'],
+    'M_NO_OF_CLR':          ['M_NO_OF_CLR'],
     // Legacy / old attribute_name aliases (kept for backward compat)
     'AGE GROUP':            ['M_AGE_GROUP'],
     'BODY STYLE':           ['M_BODY_STYLE'],
@@ -544,6 +547,30 @@ function parseRfcResponse(
     };
 }
 
+// ─── Dry-run preview ────────────────────────────────────────────────────────
+
+/**
+ * Build and console.log the EXACT ZMM_ART_CREATION_RFC payload that WOULD be
+ * sent for each item — WITHOUT calling SAP. Dev aid so the generic-creation
+ * payload is visible locally (where the background sync worker doesn't run and
+ * where hitting the hardcoded prod URL would create real articles).
+ */
+export async function previewRfcPayloads(items: FlatItem[]): Promise<void> {
+    try {
+        const mandatoryGrid = await loadMandatoryGridForRfc();
+        const majCatVisible = await loadMajCatVisibleFieldsForRfc();
+        for (const item of items) {
+            const payload = buildRfcPayload(item, mandatoryGrid, majCatVisible);
+            console.log(`\n========== [ZMM_RFC] PREVIEW PAYLOAD (dry-run, NO SAP call) for flat_id=${item.id} ==========`);
+            console.log(`Would POST to : ${ZMM_RFC_URL}`);
+            console.log(JSON.stringify({ IM_DATA: [payload] }, null, 2));
+            console.log(`==================================================================================\n`);
+        }
+    } catch (err: any) {
+        console.error('[ZMM_RFC] preview payload error:', err?.message);
+    }
+}
+
 // ─── Main export ──────────────────────────────────────────────────────────────
 
 /**
@@ -563,6 +590,8 @@ export async function syncArticlesToSapViaRfc(
         }));
     }
 
+    console.log(`\n[ZMM_RFC] syncArticlesToSapViaRfc called with ${items.length} item(s): ${items.map((i) => i.id).join(', ')}`);
+
     // Load both grids once for the entire batch (cached after first call)
     const mandatoryGrid = await loadMandatoryGridForRfc();
     const majCatVisible = await loadMajCatVisibleFieldsForRfc();
@@ -577,6 +606,7 @@ export async function syncArticlesToSapViaRfc(
             return !val;
         });
         if (missing.length > 0) {
+            console.log(`[ZMM_RFC] ⏭️  Skipping flat_id=${item.id} — NO payload built (missing mandatory: ${missing.map((f) => f.label).join(', ')})`);
             return {
                 id: item.id,
                 success: false,

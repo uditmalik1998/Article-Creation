@@ -22,6 +22,7 @@ export const SCHEMA_KEY_TO_EXCEL_ATTR: Record<string, string> = {
   placket:           'M_PLACKET',
   sleeve:            'M_SLEEVES_MAIN_STYLE',
   sleeve_fold:       'M_SLEEVE_FOLD',
+  set:               'M_SET',
   bottom_fold:       'M_BTM_FOLD',
   neck:              'M_NECK_TYPE',
   neck_details:      'M_NECK_STYLE',
@@ -31,6 +32,8 @@ export const SCHEMA_KEY_TO_EXCEL_ATTR: Record<string, string> = {
   body_style:        'M_BODY_STYLE',
   pocket_type:       'M_POCKET',
   no_of_pocket:      'M_NO_OF_POCKET',
+  no_of_size:        'M_NO_OF_SIZE',
+  no_of_clr:         'M_NO_OF_CLR',
   print_type:        'M_PRINT_TYPE',
   print_style:       'M_PRINT_STYLE',
   print_placement:   'M_PRINT_PLACEMENT',
@@ -115,10 +118,13 @@ export const SAP_NAME_TO_SCHEMA_KEY: Record<string, string> = {
   // Sleeve / Bottom
   M_SLEEVES_MAIN_STYLE:'sleeve',
   M_SLEEVE_FOLD:       'sleeve_fold',
+  M_SET:               'set',
   M_BTM_FOLD:          'bottom_fold',
   // Pocket
   NO_OF_POCKET:        'no_of_pocket',      // legacy key
   M_NO_OF_POCKET:      'no_of_pocket',
+  M_NO_OF_SIZE:        'no_of_size',
+  M_NO_OF_CLR:         'no_of_clr',
   M_POCKET:            'pocket_type',
   M_EXTRA_POCKET:      'extra_pocket',
   // Fit / Pattern / Length
@@ -188,6 +194,7 @@ export const SCHEMA_KEY_TO_DB_FIELD: Record<string, string> = {
   placket:              'placket',
   sleeve:               'sleeve',
   sleeve_fold:          'sleeveFold',
+  set:                  'mSet',
   bottom_fold:          'bottomFold',
   neck:                 'neck',
   neck_details:         'neckDetails',
@@ -197,6 +204,8 @@ export const SCHEMA_KEY_TO_DB_FIELD: Record<string, string> = {
   body_style:           'pattern',
   pocket_type:          'pocketType',
   no_of_pocket:         'noOfPocket',
+  no_of_size:           'mNoOfSize',
+  no_of_clr:            'mNoOfClr',
   print_type:           'printType',
   print_style:          'printStyle',
   print_placement:      'printPlacement',
