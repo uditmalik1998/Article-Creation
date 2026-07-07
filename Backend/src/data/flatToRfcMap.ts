@@ -56,6 +56,7 @@ export const FLAT_TO_RFC: Array<{ rfc: string; flat: string }> = [
   { rfc: 'M_BLT_STYLE', flat: 'childBelt' },
   { rfc: 'M_SLEEVES_MAIN_STYLE', flat: 'sleeve' },
   { rfc: 'M_SLEEVE_FOLD', flat: 'sleeveFold' },
+  { rfc: 'M_SET', flat: 'mSet' },
   { rfc: 'M_BTM_FOLD', flat: 'bottomFold' },
   { rfc: 'M_NO_OF_POCKET', flat: 'noOfPocket' },
   { rfc: 'M_POCKET', flat: 'pocketType' },
@@ -87,6 +88,8 @@ export const FLAT_TO_RFC: Array<{ rfc: string; flat: string }> = [
 
   // Business / segment
   { rfc: 'M_AGE_GROUP', flat: 'ageGroup' },
+  { rfc: 'M_NO_OF_SIZE', flat: 'mNoOfSize' },
+  { rfc: 'M_NO_OF_CLR', flat: 'mNoOfClr' },
   { rfc: 'NET_WEIGHT', flat: 'weight' }, // renamed from G_WEIGHT in new API
 ];
 

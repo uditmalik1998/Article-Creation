@@ -7,10 +7,25 @@
  */
 
 import React, { useState, useCallback } from 'react';
-import { Upload as UploadIcon, FileSpreadsheet, ShieldAlert, CheckCircle2, XCircle, Loader2 } from 'lucide-react';
+import { Upload as UploadIcon, FileSpreadsheet, ShieldAlert, CheckCircle2, XCircle, Loader2, Download } from 'lucide-react';
 import { Button } from '../../../shared/components/ui-tw';
 import { message } from '../../../lib/message';
 import { APP_CONFIG } from '../../../constants/app/config';
+
+// Column headers for the Pool B upload template (matches the "ART" template:
+// first column = article number, the rest = SAP characteristic names).
+const TEMPLATE_HEADERS = [
+  'Matnr', 'M_FAB_DIV', 'M_YARN', 'M_FAB_MAIN_MVGR_1', 'M_FAB_MAIN_MVGR_2', 'M_WEAVE_01',
+  'M_WEAVE_02', 'M_COUNT', 'M_GSM', 'M_OUNZ', 'M_CONSTRUCTION', 'M_COMPOSITION', 'M_FINISH',
+  'M_WIDTH', 'M_LYCRA', 'M_NECK_TYPE', 'M_NECK_STYLE', 'M_COLLAR_TYPE', 'M_COLLAR_STYLE',
+  'M_SLEEVES_MAIN_STYLE', 'M_SLEEVE_FOLD', 'M_SET', 'M_PLACKET', 'M_BLT_TYPE', 'M_BLT_STYLE',
+  'M_BTM_FOLD', 'M_POCKET', 'M_NO_OF_POCKET', 'M_EXTRA_POCKET', 'M_LENGTH', 'M_FIT',
+  'M_BODY_STYLE', 'M_DC_STYLE', 'M_DC_SHAPE', 'M_ZIP_TYPE', 'M_ZIP_COL', 'M_BTN_TYPE',
+  'M_BTN_CLR', 'M_PATCH_STYLE', 'M_PATCHE_TYPE', 'M_HTRF_STYLE', 'M_HTRF_TYPE',
+  'M_PRINT_PLACEMENT', 'M_PRINT_STYLE', 'M_PRINT_TYPE', 'M_EMB_TYPE', 'M_EMBROIDERY_STYLE',
+  'M_EMB_PLACEMENT', 'M_WASH', 'M_AGE_GROUP', 'M_NO_OF_SIZE', 'M_NO_OF_CLR', 'M_IMP_ATBT',
+  'M_FAB_VDR', 'M_REF_ARTICLE', 'M_BODY_ART',
+];
 
 interface PreviewData {
   defaultEnv: string;
@@ -48,6 +63,29 @@ export default function PoolBUploaderPage() {
   const token = () => localStorage.getItem('authToken');
   const reset = () => { setPreview(null); setReport(null); };
   const onPickFile = (f: File | null) => { setFile(f); reset(); };
+
+  // Generate + download a blank upload template (header row only) client-side.
+  const downloadTemplate = useCallback(async () => {
+    try {
+      const ExcelJS = (await import('exceljs')).default;
+      const wb = new ExcelJS.Workbook();
+      const ws = wb.addWorksheet('ART');
+      ws.addRow(TEMPLATE_HEADERS);
+      ws.getRow(1).font = { bold: true };
+      ws.columns.forEach((c) => { c.width = 18; });
+      ws.views = [{ state: 'frozen', ySplit: 1 }];
+      const buf = await wb.xlsx.writeBuffer();
+      const blob = new Blob([buf], { type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = 'poolb-article-value-template.xlsx';
+      a.click();
+      URL.revokeObjectURL(url);
+    } catch (e) {
+      message.error(e instanceof Error ? e.message : 'Failed to build template');
+    }
+  }, []);
 
   const doPreview = useCallback(async () => {
     if (!file) { message.warning('Choose an Excel file first'); return; }
@@ -126,10 +164,14 @@ export default function PoolBUploaderPage() {
           <input type="file" accept=".xlsx,.xls" className="hidden" onChange={(e) => onPickFile(e.target.files?.[0] ?? null)} />
           {file && <span className="text-sm text-muted-foreground">{file.name}</span>}
         </label>
-        <div className="mt-3">
+        <div className="mt-3 flex items-center gap-2">
           <Button onClick={doPreview} disabled={!file || loading}>
             {loading ? <Loader2 className="h-4 w-4 animate-spin" /> : <FileSpreadsheet className="h-4 w-4" />}
             Preview
+          </Button>
+          <Button variant="outline" onClick={downloadTemplate}>
+            <Download className="h-4 w-4" />
+            Download Template
           </Button>
         </div>
       </div>

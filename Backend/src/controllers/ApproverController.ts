@@ -6,7 +6,7 @@ import { getHsnCodeByMcCode, getMcCodeByMajorCategory } from '../utils/mcCodeMap
 import { parseNumericValue } from '../utils/mrpCalculator';
 import { getSegmentByCategoryAndMrp } from '../utils/segmentRangeMapper';
 import { syncApprovedItemsToSap } from '../services/sapSyncService';
-import { syncArticlesToSapViaRfc, buildModifyChangesPayload } from '../services/zmmArtCreationService';
+import { syncArticlesToSapViaRfc, buildModifyChangesPayload, previewRfcPayloads } from '../services/zmmArtCreationService';
 import { patchArticleAttributes } from '../services/sapModifyService';
 import { FLAT_TO_RFC } from '../data/flatToRfcMap';
 import { syncVariantsToSapViaRfc } from '../services/zmmVarArtCreationService';
@@ -26,7 +26,7 @@ const ITEM_UPDATE_ALLOWED_FIELDS = [
     'pptNumber', 'rate', 'size', 'yarn1', 'yarn2', 'fabricMainMvgr', 'weave',
     'composition', 'finish', 'gsm', 'shade', 'weight', 'lycra', 'neck', 'neckDetails',
     // Body fields (full set)
-    'collar', 'collarStyle', 'placket', 'sleeve', 'sleeveFold', 'bottomFold',
+    'collar', 'collarStyle', 'placket', 'sleeve', 'sleeveFold', 'mSet', 'bottomFold',
     'frontOpenStyle', 'noOfPocket', 'pocketType', 'extraPocket',
     'fit', 'pattern', 'length', 'colour', 'fatherBelt', 'childBelt',
     // Fabric detail fields
@@ -40,7 +40,7 @@ const ITEM_UPDATE_ALLOWED_FIELDS = [
     'printType', 'printStyle', 'printPlacement',
     'embroidery', 'embroideryType', 'embPlacement', 'wash',
     // Business
-    'ageGroup', 'articleFashionType', 'articleDimension',
+    'ageGroup', 'articleFashionType', 'articleDimension', 'mNoOfSize', 'mNoOfClr',
     'referenceArticleNumber', 'referenceArticleDescription',
     'impAtrbt2',
     // Business / SAP fields
@@ -377,7 +377,7 @@ export class ApproverController {
             id: true,
             articleDescription: true,
             fabDiv: true, yarn1: true, fabricMainMvgr: true, weave: true, mFab2: true,
-            lycra: true, neck: true, collar: true, sleeve: true, sleeveFold: true,
+            lycra: true, neck: true, collar: true, sleeve: true, sleeveFold: true, mSet: true,
             pocketType: true, childBelt: true, length: true,
             fit: true, pattern: true, printType: true, embroideryType: true,
             embroidery: true, wash: true,
@@ -849,7 +849,7 @@ export class ApproverController {
                     neck: true,
                     neckDetails: true,
                     sleeve: true,
-                    sleeveFold: true,
+                    sleeveFold: true, mSet: true,
                     length: true,
                     collar: true,
                     collarStyle: true,
@@ -895,7 +895,7 @@ export class ApproverController {
                     embPlacement: true,
                     htrfType: true,
                     htrfStyle: true,
-                    ageGroup: true,
+                    ageGroup: true, mNoOfSize: true, mNoOfClr: true,
                     articleFashionType: true,
                     articleDimension: true,
                     mcCode: true,
@@ -1202,7 +1202,7 @@ export class ApproverController {
                     fabDiv: true,
                     // BODY extras
                     collarStyle: true,
-                    sleeveFold: true,
+                    sleeveFold: true, mSet: true,
                     noOfPocket: true,
                     extraPocket: true,
                     // VA ACC extras
@@ -1213,7 +1213,7 @@ export class ApproverController {
                     // VA PRCS extras
                     embPlacement: true,
                     // BUSINESS extras
-                    ageGroup: true,
+                    ageGroup: true, mNoOfSize: true, mNoOfClr: true,
                     articleFashionType: true,
                     mvgrBrandVendor: true,
                     // Approver identity — used by the Created Articles export
@@ -1286,7 +1286,7 @@ export class ApproverController {
                     createdAt: true, updatedAt: true, userName: true, source: true,
                     rate: true, mrp: true, size: true, colour: true,
                     fabricMainMvgr: true, pattern: true, fit: true, neck: true, neckDetails: true,
-                    sleeve: true, sleeveFold: true, length: true, collar: true, collarStyle: true,
+                    sleeve: true, sleeveFold: true, mSet: true, length: true, collar: true, collarStyle: true,
                     placket: true, bottomFold: true, frontOpenStyle: true, pocketType: true,
                     noOfPocket: true, extraPocket: true, composition: true, gsm: true, weight: true,
                     finish: true, shade: true, lycra: true, yarn1: true, yarn2: true, weave: true,
@@ -1297,7 +1297,7 @@ export class ApproverController {
                     printType: true, printStyle: true, printPlacement: true,
                     patches: true, patchesType: true, embroidery: true, embroideryType: true,
                     embPlacement: true, htrfType: true, htrfStyle: true,
-                    ageGroup: true, articleFashionType: true, articleDimension: true,
+                    ageGroup: true, mNoOfSize: true, mNoOfClr: true, articleFashionType: true, articleDimension: true,
                     mcCode: true, impAtrbt2: true, segment: true, season: true,
                     hsnTaxCode: true, articleDescription: true, fashionGrid: true,
                     year: true, articleType: true,
@@ -1447,7 +1447,7 @@ export class ApproverController {
                     collar: true,
                     collarStyle: true,
                     sleeve: true,
-                    sleeveFold: true,
+                    sleeveFold: true, mSet: true,
                     placket: true,
                     childBelt: true,
                     bottomFold: true,
@@ -1474,7 +1474,7 @@ export class ApproverController {
                     embroideryType: true,
                     embPlacement: true,
                     wash: true,
-                    ageGroup: true,
+                    ageGroup: true, mNoOfSize: true, mNoOfClr: true,
                     impAtrbt2: true,
                     // Other fields used for logic/display
                     macroMvgr: true,
@@ -1889,6 +1889,20 @@ export class ApproverController {
 
             ApproverController.itemsCache.clear();
             ApproverController.countCache.clear();
+
+            // Dev aid: log the exact ZMM_ART_CREATION_RFC payload that WOULD be sent
+            // for each approved generic — WITHOUT calling SAP. Fire-and-forget so it
+            // never delays the 202. Lets you inspect the payload locally even when the
+            // background sync worker isn't running (ENABLE_CRON=false).
+            if (approvedGenericIds.length > 0) {
+                prisma.extractionResultFlat.findMany({
+                    where: { id: { in: approvedGenericIds } },
+                    select: { id: true, majorCategory: true, ...Object.fromEntries(FLAT_TO_RFC.map((m) => [m.flat, true])) } as any,
+                })
+                    .then((rows) => previewRfcPayloads(rows as any))
+                    .catch((e: any) => console.error('[ZMM_RFC preview] failed:', e?.message));
+            }
+
             // 202 Accepted — approved and queued; the worker performs the SAP sync.
             return res.status(202).json({
                 message: 'Approved and queued for SAP creation',
@@ -1926,13 +1940,13 @@ export class ApproverController {
                     yarn1: true, fabricMainMvgr: true, weave: true, mFab2: true, composition: true,
                     finish: true, gsm: true, weight: true, lycra: true, shade: true, neck: true,
                     neckDetails: true, sleeve: true, length: true, collar: true, collarStyle: true,
-                    placket: true, sleeveFold: true, bottomFold: true, frontOpenStyle: true,
+                    placket: true, sleeveFold: true, mSet: true, bottomFold: true, frontOpenStyle: true,
                     pocketType: true, noOfPocket: true, extraPocket: true, drawcord: true,
                     dcShape: true, button: true, btnColour: true, zipper: true, zipColour: true,
                     fatherBelt: true, childBelt: true, printType: true, printStyle: true,
                     printPlacement: true, patches: true, patchesType: true, embroidery: true,
                     embroideryType: true, embPlacement: true, htrfType: true, htrfStyle: true,
-                    wash: true, fit: true, pattern: true, segment: true, ageGroup: true,
+                    wash: true, fit: true, pattern: true, segment: true, ageGroup: true, mNoOfSize: true, mNoOfClr: true,
                     articleFashionType: true, mvgrBrandVendor: true, fCount: true,
                     fConstruction: true, fOunce: true, fWidth: true, fabDiv: true, fabVdr: true, impAtrbt2: true,
                     mcCode: true, hsnTaxCode: true, articleDescription: true, fashionGrid: true,

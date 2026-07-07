@@ -124,6 +124,9 @@ export interface ApproverItem {
   fabDiv: string | null;
   fabVdr: string | null;
   sleeveFold: string | null;
+  mSet: string | null;
+  mNoOfSize: string | null;
+  mNoOfClr: string | null;
   noOfPocket: string | null;
   extraPocket: string | null;
   dcShape: string | null;
