@@ -51,14 +51,14 @@ function buildPrompt(
       ? `The garment MUST be recolored to ${colorName}. Every view (front, back, side, closeup) must show the garment in ${colorName}. This is mandatory.`
       : `The garment color MUST be IDENTICAL to the SOURCE_IMAGE. Do not change or shift the color in any view.`;
 
-  const viewMap: Record<string, string> = imageCount === '1'
-    ? { front: 'Front-facing model pose showing the front of the garment clearly.' }
-    : {
-        front: 'Front-facing model pose showing the front of the garment clearly.',
-        back: 'Back-facing model pose showing the back of the garment clearly.',
-        left_side: 'Left side profile model pose showing the side fit of the garment.',
-        closeup: 'Close-up fashion shot highlighting fabric texture, stitching and details.',
-      };
+  const viewMap: Record<string, string> = {
+    front: 'Front-facing model pose showing the front of the garment clearly.',
+    back: 'Back-facing model pose showing the back of the garment clearly.',
+    left_side: 'Left side profile model pose showing the side fit of the garment.',
+    side: 'Side profile model pose showing the side fit and full silhouette of the garment.',
+    three_quarter: 'Three-quarter (45-degree) angle model pose showing the front and one side together.',
+    closeup: 'Close-up fashion shot highlighting fabric texture, stitching and details.',
+  };
 
   let viewInstr = viewMap[viewDirection.toLowerCase()] || 'Front-facing fashion model pose.';
   viewInstr += broachPlacement
