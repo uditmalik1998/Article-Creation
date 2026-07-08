@@ -5,8 +5,7 @@ import {
   Card,
   CardContent,
   Checkbox,
-  FormItem,
-  FormLabel,
+  Label,
   Input,
   Select,
   SelectContent,
@@ -85,8 +84,8 @@ export function ArticleListPanel({ submitting, onSubmit }: Props) {
 
   return (
     <div className="flex flex-col gap-4">
-      <FormItem>
-        <FormLabel>Article list (.xlsx / .csv)</FormLabel>
+      <div className="flex flex-col gap-1.5">
+        <Label>Article list (.xlsx / .csv)</Label>
         <Input
           type="file"
           accept=".xlsx,.xls,.csv"
@@ -96,10 +95,10 @@ export function ArticleListPanel({ submitting, onSubmit }: Props) {
           <p className="text-xs text-muted-foreground mt-1">{fileCount} unique article codes detected</p>
         )}
         {fileError && <p className="text-xs text-destructive mt-1">{fileError}</p>}
-      </FormItem>
+      </div>
 
-      <FormItem>
-        <FormLabel>…or paste codes (one FINAL ART per line)</FormLabel>
+      <div className="flex flex-col gap-1.5">
+        <Label>…or paste codes (one FINAL ART per line)</Label>
         <Textarea
           rows={5}
           className="resize-y"
@@ -108,11 +107,11 @@ export function ArticleListPanel({ submitting, onSubmit }: Props) {
           onChange={(e) => setCodesText(e.target.value)}
           disabled={!!file}
         />
-      </FormItem>
+      </div>
 
       <div className="grid grid-cols-2 gap-3">
-        <FormItem>
-          <FormLabel>Gender</FormLabel>
+        <div className="flex flex-col gap-1.5">
+          <Label>Gender</Label>
           <Select value={gender} onValueChange={setGender}>
             <SelectTrigger>
               <SelectValue />
@@ -123,9 +122,9 @@ export function ArticleListPanel({ submitting, onSubmit }: Props) {
               ))}
             </SelectContent>
           </Select>
-        </FormItem>
-        <FormItem>
-          <FormLabel>Body Type</FormLabel>
+        </div>
+        <div className="flex flex-col gap-1.5">
+          <Label>Body Type</Label>
           <Select value={bodytype} onValueChange={setBodytype}>
             <SelectTrigger>
               <SelectValue />
@@ -136,7 +135,7 @@ export function ArticleListPanel({ submitting, onSubmit }: Props) {
               ))}
             </SelectContent>
           </Select>
-        </FormItem>
+        </div>
       </div>
 
       <label className="flex items-center gap-2 text-sm cursor-pointer select-none">
