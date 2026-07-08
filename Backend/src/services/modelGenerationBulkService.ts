@@ -96,12 +96,32 @@ function jobStateFile(job: BulkJob): string {
   return path.join(job.jobDir, 'job.json');
 }
 
+// Coalesced, single-writer disk persistence. Rapid persistJob() calls from concurrent
+// workers collapse into one writeFileSync per event-loop tick — this both avoids
+// concurrent-write corruption on Windows and keeps I/O cheap for large jobs.
+const dirtyJobIds = new Set<string>();
+let flushScheduled = false;
+
+function flushDirtyJobs(): void {
+  flushScheduled = false;
+  for (const id of Array.from(dirtyJobIds)) {
+    dirtyJobIds.delete(id);
+    const job = jobs.get(id);
+    if (!job) continue;
+    try {
+      fs.writeFileSync(jobStateFile(job), JSON.stringify(job, null, 2));
+    } catch (err) {
+      console.error('[ModelGenBulk] Failed to persist job', id, (err as Error).message);
+    }
+  }
+}
+
 function persistJob(job: BulkJob): void {
   job.updatedAt = Date.now();
-  try {
-    fs.writeFileSync(jobStateFile(job), JSON.stringify(job, null, 2));
-  } catch (err) {
-    console.error('[ModelGenBulk] Failed to persist job', job.id, (err as Error).message);
+  dirtyJobIds.add(job.id);
+  if (!flushScheduled) {
+    flushScheduled = true;
+    setImmediate(flushDirtyJobs);
   }
 }
 
@@ -235,6 +255,9 @@ export function createArticleJob(args: {
   sourceKeys: string[];          // parallel to codes: APPROVED-bucket keys
   params: BulkJobParams;
 }): BulkJob {
+  if (args.codes.length !== args.sourceKeys.length) {
+    throw new Error(`createArticleJob: codes (${args.codes.length}) and sourceKeys (${args.sourceKeys.length}) must have the same length`);
+  }
   const views = viewsForCount(args.params.imagesCount);
   const tasks: BulkTask[] = [];
   for (let i = 0; i < args.codes.length; i++) {
@@ -318,51 +341,56 @@ async function runTaskWithRetry(job: BulkJob, task: BulkTask): Promise<void> {
   const colorImgBuf = job.colorImagePath ? fs.readFileSync(job.colorImagePath) : undefined;
   const colorImgMime = job.colorImagePath ? mimeFromPath(job.colorImagePath) : undefined;
 
-  let imgBuf: Buffer;
-  let imgMime: string;
-  if (task.kind === 'r2key') {
-    const src = await storageService.fetchApprovedImage(task.sourceKey!);
-    if (!src) {
-      task.status = 'FAILED';
-      task.error = `source image not found in article-master bucket (${task.sourceKey})`;
-      return;
-    }
-    imgBuf = src.buffer;
-    imgMime = src.mime;
-  } else {
-    imgBuf = fs.readFileSync(task.sourcePath!);
-    imgMime = mimeFromPath(task.sourcePath!);
-  }
-
   let backoff = INITIAL_BACKOFF_MS;
+  let generatedBuf: Buffer | null = null; // cached across retries so an upload-only failure never re-generates
 
   while (task.attempts < MAX_ATTEMPTS_PER_TASK) {
     task.attempts++;
 
     try {
-      await acquireGeminiSlot();
-      console.log(`[ModelGenBulk] Job ${job.id} task ${task.fileName}/${task.view} attempt ${task.attempts}`);
-      const buf = await runSingleGeneration(
-        imgBuf,
-        imgMime,
-        job.params.gender,
-        job.params.bodytype,
-        job.params.imagesCount,
-        task.view,
-        patternBuf,
-        patternMime,
-        broachBuf,
-        broachMime,
-        job.params.broach_placement,
-        job.params.special_instructions,
-        job.params.color_name,
-        colorImgBuf,
-        colorImgMime,
-      );
+      // Generate once. On a retry that follows a successful generation (e.g. the upload
+      // failed), skip straight to the output step — do not re-fetch or re-call Gemini.
+      if (!generatedBuf) {
+        let imgBuf: Buffer;
+        let imgMime: string;
+        if (task.kind === 'r2key') {
+          const src = await storageService.fetchApprovedImage(task.sourceKey!);
+          if (!src) {
+            task.status = 'FAILED';
+            task.error = `source image not found in article-master bucket (${task.sourceKey})`;
+            return;
+          }
+          imgBuf = src.buffer;
+          imgMime = src.mime;
+        } else {
+          imgBuf = fs.readFileSync(task.sourcePath!);
+          imgMime = mimeFromPath(task.sourcePath!);
+        }
+
+        await acquireGeminiSlot();
+        console.log(`[ModelGenBulk] Job ${job.id} task ${task.fileName}/${task.view} attempt ${task.attempts}`);
+        generatedBuf = await runSingleGeneration(
+          imgBuf,
+          imgMime,
+          job.params.gender,
+          job.params.bodytype,
+          job.params.imagesCount,
+          task.view,
+          patternBuf,
+          patternMime,
+          broachBuf,
+          broachMime,
+          job.params.broach_placement,
+          job.params.special_instructions,
+          job.params.color_name,
+          colorImgBuf,
+          colorImgMime,
+        );
+      }
 
       if (task.kind === 'r2key') {
         const key = outputKeyFor(task.articleCode!, task.view);
-        const url = await storageService.uploadModelImage(key, buf, 'image/png');
+        const url = await storageService.uploadModelImage(key, generatedBuf!, 'image/png');
         task.status = 'DONE';
         task.outputUrl = url;
         task.error = undefined;
@@ -372,7 +400,7 @@ async function runTaskWithRetry(job: BulkJob, task: BulkTask): Promise<void> {
       const safeName = path.basename(task.fileName, path.extname(task.fileName)).replace(/[^a-zA-Z0-9_-]/g, '_');
       const outName = `${safeName}_${task.view.replace(/\s+/g, '_')}_${task.id.slice(0, 6)}.png`;
       const outPath = path.join(job.outputDir, outName);
-      fs.writeFileSync(outPath, buf);
+      fs.writeFileSync(outPath, generatedBuf!);
 
       task.status = 'DONE';
       task.outputUrl = `/uploads/model-generation/jobs/${job.id}/output/${outName}`;
