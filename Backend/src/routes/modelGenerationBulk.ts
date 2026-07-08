@@ -7,6 +7,7 @@ import {
   newJobId,
   createJobDirs,
   createJob,
+  createArticleJob,
   startJob,
   getJob,
   cancelJob,
@@ -15,6 +16,7 @@ import {
   listRecentJobsForUser,
   listItem,
 } from '../services/modelGenerationBulkService';
+import { parseArticleCodesFromXlsx, parseArticleCodesFromText, sourceKeyFor } from '../services/articleListParser';
 
 const router = Router();
 
@@ -75,6 +77,17 @@ const bulkFields = bulkUpload.fields([
   { name: 'broach', maxCount: 1 },
   { name: 'color_image', maxCount: 1 },
 ]);
+
+const listUpload = multer({
+  storage: multer.memoryStorage(),
+  limits: { fileSize: 10 * 1024 * 1024 },
+  fileFilter: (_req, file, cb) => {
+    const ok = /\.(xlsx|xls|csv)$/i.test(file.originalname)
+      || file.mimetype.includes('spreadsheet')
+      || file.mimetype === 'text/csv';
+    return ok ? cb(null, true) : cb(new Error('Upload an .xlsx, .xls, or .csv file'));
+  },
+});
 
 // ─── Helpers ────────────────────────────────────────────────────────────────
 function safeRm(p: string): void {
@@ -274,6 +287,60 @@ router.get('/bulk/job/:id/download-zip', (req: Request, res: Response) => {
   } catch (err: any) {
     console.error('[ModelGenBulk] Zip build failed for job', job.id, err?.message);
     res.status(500).json({ success: false, error: `Failed to build zip: ${err?.message || 'unknown error'}` });
+  }
+});
+
+// ─── POST /bulk/from-articles — list of article codes → generate from R2 source ──
+router.post('/bulk/from-articles', listUpload.single('list'), async (req: Request, res: Response, next: NextFunction) => {
+  try {
+    const { gender, bodytype, imagesCount, codesText } = req.body as Record<string, string>;
+    if (!gender || !bodytype) {
+      res.status(400).json({ success: false, error: 'gender and bodytype are required.' });
+      return;
+    }
+
+    let codes: string[] = [];
+    if (req.file) {
+      codes = /\.csv$/i.test(req.file.originalname)
+        ? parseArticleCodesFromText(req.file.buffer.toString('utf-8'))
+        : parseArticleCodesFromXlsx(req.file.buffer);
+    } else if (codesText) {
+      codes = parseArticleCodesFromText(codesText);
+    }
+
+    if (codes.length === 0) {
+      res.status(400).json({ success: false, error: 'No article codes found. Upload a file or paste codes.' });
+      return;
+    }
+
+    const jobId = newJobId();
+    const dirs = createJobDirs(jobId); // reused only for job.json persistence
+    const job = createArticleJob({
+      id: jobId,
+      userId: (req as any).user?.id,
+      jobDir: dirs.jobDir,
+      inputDir: dirs.inputDir,
+      outputDir: dirs.outputDir,
+      codes,
+      sourceKeys: codes.map(sourceKeyFor),
+      params: {
+        gender,
+        bodytype,
+        imagesCount: imagesCount || '5',
+      },
+    });
+
+    startJob(job.id);
+
+    res.status(202).json({
+      success: true,
+      jobId: job.id,
+      totalArticles: codes.length,
+      totalTasks: job.total,
+      status: job.status,
+    });
+  } catch (err) {
+    next(err);
   }
 });
 
