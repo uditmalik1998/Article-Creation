@@ -1,44 +1,44 @@
-name: zart-sot-sync
+# name: zart-sot-sync
 
-# Mirrors Supabase `maj_cat_sizes` (SoT) into SAP `ZART_GRID_VALUES`.
-# Runs hourly. Sync is idempotent (UPSERT) so duplicate fires are safe.
+# # Mirrors Supabase `maj_cat_sizes` (SoT) into SAP `ZART_GRID_VALUES`.
+# # Runs hourly. Sync is idempotent (UPSERT) so duplicate fires are safe.
 
-on:
-  schedule:
-    - cron: '7 * * * *'         # every hour at :07
-  workflow_dispatch:             # manual run from GitHub UI
-    inputs:
-      env:
-        description: 'SAP env to sync (dev / qa / prod)'
-        required: true
-        default: 'qa'
+# on:
+#   schedule:
+#     - cron: '7 * * * *'         # every hour at :07
+#   workflow_dispatch:             # manual run from GitHub UI
+#     inputs:
+#       env:
+#         description: 'SAP env to sync (dev / qa / prod)'
+#         required: true
+#         default: 'qa'
 
-jobs:
-  sync:
-    runs-on: ubuntu-latest
-    strategy:
-      fail-fast: false
-      matrix:
-        sap_env:
-          - ${{ github.event_name == 'workflow_dispatch' && github.event.inputs.env || 'qa' }}
-    steps:
-      - uses: actions/checkout@v4
+# jobs:
+#   sync:
+#     runs-on: ubuntu-latest
+#     strategy:
+#       fail-fast: false
+#       matrix:
+#         sap_env:
+#           - ${{ github.event_name == 'workflow_dispatch' && github.event.inputs.env || 'qa' }}
+#     steps:
+#       - uses: actions/checkout@v4
 
-      - uses: actions/setup-node@v4
-        with:
-          node-version: '20'
-          cache: npm
-          cache-dependency-path: Backend/package-lock.json
+#       - uses: actions/setup-node@v4
+#         with:
+#           node-version: '20'
+#           cache: npm
+#           cache-dependency-path: Backend/package-lock.json
 
-      - name: Install deps
-        working-directory: Backend
-        run: npm ci || npm install
+#       - name: Install deps
+#         working-directory: Backend
+#         run: npm ci || npm install
 
-      - name: Run sync (env=${{ matrix.sap_env }})
-        working-directory: Backend
-        env:
-          DATABASE_URL: ${{ secrets.ZART_SOT_DATABASE_URL }}
-          SAP_RFC_PROXY_URL: ${{ secrets.SAP_RFC_PROXY_URL }}
-          SAP_RFC_PROXY_KEY: ${{ secrets.SAP_RFC_PROXY_KEY }}
-          SAP_RFC_PROXY_ENV: ${{ matrix.sap_env }}
-        run: npx ts-node scripts/sync-zart-grid-values.ts
+#       - name: Run sync (env=${{ matrix.sap_env }})
+#         working-directory: Backend
+#         env:
+#           DATABASE_URL: ${{ secrets.ZART_SOT_DATABASE_URL }}
+#           SAP_RFC_PROXY_URL: ${{ secrets.SAP_RFC_PROXY_URL }}
+#           SAP_RFC_PROXY_KEY: ${{ secrets.SAP_RFC_PROXY_KEY }}
+#           SAP_RFC_PROXY_ENV: ${{ matrix.sap_env }}
+#         run: npx ts-node scripts/sync-zart-grid-values.ts
