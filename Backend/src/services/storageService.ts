@@ -54,6 +54,9 @@ export class StorageService {
     private approvedS3Client: S3Client;
     private approvedBucket: string;
     private approvedPublicUrlBase: string | undefined;
+    private modelImagesS3Client: S3Client;
+    private modelImagesBucket: string;
+    private modelImagesPublicUrlBase: string | undefined;
 
     private normalizeEnv(value?: string | null): string | undefined {
         const v = String(value || '').trim();
@@ -124,6 +127,25 @@ export class StorageService {
                 accessKeyId: approvedAccessKeyId || '',
                 secretAccessKey: approvedSecretAccessKey || ''
             }
+        });
+
+        const modelAccountId = this.normalizeAccountId(process.env.MODEL_IMAGES_R2_ACCOUNT_ID) || accountId;
+        const modelAccessKeyId = this.normalizeEnv(process.env.MODEL_IMAGES_R2_ACCESS_KEY_ID) || accessKeyId;
+        const modelSecretAccessKey = this.normalizeEnv(process.env.MODEL_IMAGES_R2_SECRET_ACCESS_KEY) || secretAccessKey;
+        this.modelImagesBucket = this.normalizeEnv(process.env.MODEL_IMAGES_R2_BUCKET_NAME) || 'model-images';
+        this.modelImagesPublicUrlBase = this.normalizeEnv(process.env.MODEL_IMAGES_R2_PUBLIC_URL_BASE);
+
+        this.modelImagesS3Client = new S3Client({
+            region: 'auto',
+            endpoint: `https://${modelAccountId}.r2.cloudflarestorage.com`,
+            forcePathStyle: true,
+            requestChecksumCalculation: 'WHEN_REQUIRED',
+            responseChecksumValidation: 'WHEN_REQUIRED',
+            requestHandler: s3RequestHandler,
+            credentials: {
+                accessKeyId: modelAccessKeyId || '',
+                secretAccessKey: modelSecretAccessKey || '',
+            },
         });
     }
 
@@ -529,6 +551,57 @@ export class StorageService {
             console.error('❌ Approved image upload failed:', error);
             throw new Error('Failed to upload approved image to storage');
         }
+    }
+
+    /**
+     * Download a source garment image from the article-master (APPROVED) bucket by key.
+     * Returns null when the object does not exist (404 / NoSuchKey) so callers can
+     * mark the task "source not found" and continue the batch.
+     */
+    async fetchApprovedImage(key: string): Promise<{ buffer: Buffer; mime: string } | null> {
+        try {
+            const res = await this.approvedS3Client.send(
+                new GetObjectCommand({ Bucket: this.approvedBucket, Key: key })
+            );
+            const chunks: Uint8Array[] = [];
+            for await (const chunk of res.Body as AsyncIterable<Uint8Array>) chunks.push(chunk);
+            return { buffer: Buffer.concat(chunks), mime: res.ContentType || 'image/jpeg' };
+        } catch (error: any) {
+            const code = String(error?.Code || error?.code || error?.name || '').toLowerCase();
+            const status = Number(error?.$metadata?.httpStatusCode || 0);
+            if (code === 'nosuchkey' || code === 'notfound' || status === 404) {
+                return null;
+            }
+            throw error;
+        }
+    }
+
+    /**
+     * Upload a generated model image to the model-images bucket at the given key
+     * (e.g. "1110097922-BLACK/front.jpg"). Returns the public URL when a public
+     * base is configured, otherwise a 7-day signed URL.
+     */
+    async uploadModelImage(key: string, buffer: Buffer, mime = 'image/jpeg'): Promise<string> {
+        try {
+            await this.modelImagesS3Client.send(new PutObjectCommand({
+                Bucket: this.modelImagesBucket,
+                Key: key,
+                Body: buffer,
+                ContentType: mime,
+            }));
+            console.log(`✅ Uploaded model image to ${this.modelImagesBucket}: ${key}`);
+        } catch (error) {
+            console.error('❌ Model image upload failed:', error);
+            throw error;
+        }
+        if (this.modelImagesPublicUrlBase) {
+            return this.buildPublicUrl(this.modelImagesPublicUrlBase, this.modelImagesBucket, key);
+        }
+        return getSignedUrl(
+            this.modelImagesS3Client,
+            new GetObjectCommand({ Bucket: this.modelImagesBucket, Key: key }),
+            { expiresIn: 604800 }
+        );
     }
 }
 

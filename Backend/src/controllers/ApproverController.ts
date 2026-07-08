@@ -981,141 +981,152 @@ export class ApproverController {
         }
     }
 
-    // Export ALL items matching current filters (no pagination) — used for bulk Excel download
-    static async exportAll(req: Request, res: Response) {
-        try {
-            const { status, division, subDivision, majorCategory, startDate, endDate, search, pathType } = req.query;
+    // Builds the shared `where` predicate for export endpoints (exportAll + exportAllWithVariants).
+    // Reads the same req.query fields and applies the same RBAC, path-type, status, date, search,
+    // majorCategory, isGeneric, imageUrl, and SRM-gate logic as the original exportAll body.
+    private static buildExportWhere(req: Request): any {
+        const { status, division, subDivision, majorCategory, startDate, endDate, search, pathType } = req.query;
 
-            const where: any = {};
+        const where: any = {};
 
-            // RBAC — ADMIN, PO_COMMITTEE and PD are unscoped (all divisions).
-            const role = String(req.user?.role || '');
-            if (role === 'ADMIN' || role === 'PO_COMMITTEE' || role === 'PD') {
-                if (division && division !== 'ALL') {
-                    const divVariants = ApproverController.getDivisionVariants(division as string);
-                    if (divVariants.length > 0) {
-                        where.AND = where.AND || [];
-                        where.AND.push({
-                            OR: divVariants.map((v: string) => ({ division: { equals: v, mode: 'insensitive' } }))
-                        });
-                    }
-                }
-                if (subDivision && subDivision !== 'ALL') where.subDivision = { equals: subDivision as string, mode: 'insensitive' };
-            } else {
-                // Apply profile-based scope first, then narrow by dropdown filters
-                ApproverController.applyApproverScope(where, req.user);
-                if (division && division !== 'ALL') {
-                    const divVariants = ApproverController.getDivisionVariants(division as string);
-                    if (divVariants.length > 0) {
-                        where.AND = where.AND || [];
-                        where.AND.push({
-                            OR: divVariants.map((v: string) => ({ division: { equals: v, mode: 'insensitive' } }))
-                        });
-                    }
-                }
-                if (subDivision && subDivision !== 'ALL') {
+        // RBAC — ADMIN, PO_COMMITTEE and PD are unscoped (all divisions).
+        const role = String(req.user?.role || '');
+        if (role === 'ADMIN' || role === 'PO_COMMITTEE' || role === 'PD') {
+            if (division && division !== 'ALL') {
+                const divVariants = ApproverController.getDivisionVariants(division as string);
+                if (divVariants.length > 0) {
                     where.AND = where.AND || [];
-                    where.AND.push({ subDivision: { equals: subDivision as string, mode: 'insensitive' } });
+                    where.AND.push({
+                        OR: divVariants.map((v: string) => ({ division: { equals: v, mode: 'insensitive' } }))
+                    });
                 }
             }
-
-            // Path-type filter — backed by the persistent `is_old_article` column
-            // (see getItems for rationale). No ILIKE scan, no giant IN/NOT IN list.
-            console.log(`[ApproverController] exportAll pathType=${pathType ?? 'none'}`);
-            if (pathType === 'old') {
-                where.isOldArticle = true;
-            } else if (pathType === 'new') {
-                where.approvalStatus = ApprovalStatus.PENDING;
-                where.isOldArticle = false;
-            } else if (pathType === 'created') {
-                where.approvalStatus = ApprovalStatus.APPROVED;
-                where.isOldArticle = false;
-            } else if (pathType === 'failed') {
-                where.isGeneric = true;
-                where.isOldArticle = false;
-                where.sapSyncStatus = SapSyncStatus.FAILED;
-                const role = (req.user as any)?.role;
-                if (role !== 'ADMIN' && role !== 'PD') {
-                    where.approvedBy = (req.user as any)?.id ? Number((req.user as any).id) : -1;
-                }
-            }
-
-            // Status filter
-            if (status && status !== 'ALL') {
-                const requestedStatuses = (status as string)
-                    .split(',')
-                    .map(s => String(s || '').trim().toUpperCase())
-                    .filter(Boolean);
-
-                const approvalStatuses = requestedStatuses.filter((s) =>
-                    s === ApprovalStatus.PENDING ||
-                    s === ApprovalStatus.APPROVED ||
-                    s === ApprovalStatus.REJECTED
-                ) as ApprovalStatus[];
-
-                const includeFailed = requestedStatuses.includes('FAILED');
-
-                if (approvalStatuses.length > 0 || includeFailed) {
-                    const statusPredicates: any[] = [];
-                    if (approvalStatuses.length > 0) {
-                        statusPredicates.push({ approvalStatus: { in: approvalStatuses } });
-                    }
-                    if (includeFailed) {
-                        statusPredicates.push({ sapSyncStatus: SapSyncStatus.FAILED });
-                    }
+            if (subDivision && subDivision !== 'ALL') where.subDivision = { equals: subDivision as string, mode: 'insensitive' };
+        } else {
+            // Apply profile-based scope first, then narrow by dropdown filters
+            ApproverController.applyApproverScope(where, req.user);
+            if (division && division !== 'ALL') {
+                const divVariants = ApproverController.getDivisionVariants(division as string);
+                if (divVariants.length > 0) {
                     where.AND = where.AND || [];
-                    where.AND.push(
-                        statusPredicates.length === 1
-                            ? statusPredicates[0]
-                            : { OR: statusPredicates }
-                    );
+                    where.AND.push({
+                        OR: divVariants.map((v: string) => ({ division: { equals: v, mode: 'insensitive' } }))
+                    });
                 }
             }
-
-            // Date range — mirror getItems(): Created tab filters by approvedAt, every other
-            // tab by createdAt. The export's date column uses the matching field per tab.
-            if (startDate && endDate) {
-                const dateField = pathType === 'created' ? 'approvedAt' : 'createdAt';
-                (where as any)[dateField] = {
-                    gte: new Date(startDate as string),
-                    lte: new Date(endDate as string)
-                };
-            }
-
-            // Text search — pushed into AND so it never overrides path/status filters
-            if (search) {
-                const searchTerm = search as string;
+            if (subDivision && subDivision !== 'ALL') {
                 where.AND = where.AND || [];
-                where.AND.push({
-                    OR: [
-                        { articleNumber: { contains: searchTerm, mode: 'insensitive' } },
-                        { designNumber: { contains: searchTerm, mode: 'insensitive' } },
-                        { vendorCode: { contains: searchTerm, mode: 'insensitive' } },
-                        { vendorName: { contains: searchTerm, mode: 'insensitive' } },
-                        { pptNumber: { contains: searchTerm, mode: 'insensitive' } },
-                        { referenceArticleNumber: { contains: searchTerm, mode: 'insensitive' } },
-                    ],
-                });
+                where.AND.push({ subDivision: { equals: subDivision as string, mode: 'insensitive' } });
             }
+        }
 
-            // Major category filter
-            if (majorCategory) where.majorCategory = majorCategory as string;
-
-            // Only generic articles (variants are sub-rows, not top-level exports)
+        // Path-type filter — backed by the persistent `is_old_article` column
+        // (see getItems for rationale). No ILIKE scan, no giant IN/NOT IN list.
+        if (pathType === 'old') {
+            where.isOldArticle = true;
+        } else if (pathType === 'new') {
+            where.approvalStatus = ApprovalStatus.PENDING;
+            where.isOldArticle = false;
+        } else if (pathType === 'created') {
+            where.approvalStatus = ApprovalStatus.APPROVED;
+            where.isOldArticle = false;
+        } else if (pathType === 'failed') {
             where.isGeneric = true;
-            where.imageUrl = { not: '' };
+            where.isOldArticle = false;
+            where.sapSyncStatus = SapSyncStatus.FAILED;
+            const role = (req.user as any)?.role;
+            if (role !== 'ADMIN' && role !== 'PD') {
+                where.approvedBy = (req.user as any)?.id ? Number((req.user as any).id) : -1;
+            }
+        }
 
-            // Same SRM extraction gate as getItems
-            const srmGateTimeExport = new Date(Date.now() - 30 * 60 * 1000);
+        // Status filter
+        if (status && status !== 'ALL') {
+            const requestedStatuses = (status as string)
+                .split(',')
+                .map(s => String(s || '').trim().toUpperCase())
+                .filter(Boolean);
+
+            const approvalStatuses = requestedStatuses.filter((s) =>
+                s === ApprovalStatus.PENDING ||
+                s === ApprovalStatus.APPROVED ||
+                s === ApprovalStatus.REJECTED
+            ) as ApprovalStatus[];
+
+            const includeFailed = requestedStatuses.includes('FAILED');
+
+            if (approvalStatuses.length > 0 || includeFailed) {
+                const statusPredicates: any[] = [];
+                if (approvalStatuses.length > 0) {
+                    statusPredicates.push({ approvalStatus: { in: approvalStatuses } });
+                }
+                if (includeFailed) {
+                    statusPredicates.push({ sapSyncStatus: SapSyncStatus.FAILED });
+                }
+                where.AND = where.AND || [];
+                where.AND.push(
+                    statusPredicates.length === 1
+                        ? statusPredicates[0]
+                        : { OR: statusPredicates }
+                );
+            }
+        }
+
+        // Date range — mirror getItems(): Created tab filters by approvedAt, every other
+        // tab by createdAt. The export's date column uses the matching field per tab.
+        if (startDate && endDate) {
+            const dateField = pathType === 'created' ? 'approvedAt' : 'createdAt';
+            (where as any)[dateField] = {
+                gte: new Date(startDate as string),
+                lte: new Date(endDate as string)
+            };
+        }
+
+        // Text search — pushed into AND so it never overrides path/status filters
+        if (search) {
+            const searchTerm = search as string;
             where.AND = where.AND || [];
             where.AND.push({
                 OR: [
-                    { source: { not: 'SRM' } },
-                    { source: null },
-                    { source: 'SRM', extractionStatus: { not: 'SRM_IMPORT' } },
-                    { source: 'SRM', extractionStatus: 'SRM_IMPORT', createdAt: { lt: srmGateTimeExport } },
-                ]
+                    { articleNumber: { contains: searchTerm, mode: 'insensitive' } },
+                    { designNumber: { contains: searchTerm, mode: 'insensitive' } },
+                    { vendorCode: { contains: searchTerm, mode: 'insensitive' } },
+                    { vendorName: { contains: searchTerm, mode: 'insensitive' } },
+                    { pptNumber: { contains: searchTerm, mode: 'insensitive' } },
+                    { referenceArticleNumber: { contains: searchTerm, mode: 'insensitive' } },
+                ],
             });
+        }
+
+        // Major category filter
+        if (majorCategory) where.majorCategory = majorCategory as string;
+
+        // Only generic articles (variants are sub-rows, not top-level exports)
+        where.isGeneric = true;
+        where.imageUrl = { not: '' };
+
+        // Same SRM extraction gate as getItems
+        const srmGateTimeExport = new Date(Date.now() - 30 * 60 * 1000);
+        where.AND = where.AND || [];
+        where.AND.push({
+            OR: [
+                { source: { not: 'SRM' } },
+                { source: null },
+                { source: 'SRM', extractionStatus: { not: 'SRM_IMPORT' } },
+                { source: 'SRM', extractionStatus: 'SRM_IMPORT', createdAt: { lt: srmGateTimeExport } },
+            ]
+        });
+
+        return where;
+    }
+
+    // Export ALL items matching current filters (no pagination) — used for bulk Excel download
+    static async exportAll(req: Request, res: Response) {
+        try {
+            const where = ApproverController.buildExportWhere(req);
+            const { pathType } = req.query;
+
+            console.log(`[ApproverController] exportAll pathType=${pathType ?? 'none'}`);
 
             // No row cap — select only the ~55 fields the frontend export uses.
             // The narrow select keeps each row small enough that even 50k+ rows stays well
@@ -1230,6 +1241,172 @@ export class ApproverController {
             console.error('Error in exportAll:', error);
             if (res.headersSent) return; // timeout fired before catch ran
             return res.status(500).json({ error: 'Failed to export items' });
+        }
+    }
+
+    // Export ALL items WITH their SAP-created variants interleaved (generic row followed immediately
+    // by its variant rows) — used by the frontend to build a single Excel with variant data.
+    // Uses the same filter/where logic as exportAll via buildExportWhere.
+    static async exportAllWithVariants(req: Request, res: Response) {
+        try {
+            const where = ApproverController.buildExportWhere(req);
+            const { pathType } = req.query;
+
+            // Shared select object — same ~65 fields as exportAll's findMany.
+            const sharedSelect = {
+                id: true,
+                articleNumber: true,
+                imageName: true,
+                division: true,
+                subDivision: true,
+                majorCategory: true,
+                approvalStatus: true,
+                vendorName: true,
+                vendorCode: true,
+                designNumber: true,
+                pptNumber: true,
+                rate: true,
+                mrp: true,
+                size: true,
+                pattern: true,
+                fit: true,
+                wash: true,
+                macroMvgr: true,
+                mainMvgr: true,
+                yarn1: true,
+                fabricMainMvgr: true,
+                weave: true,
+                mFab2: true,
+                composition: true,
+                finish: true,
+                gsm: true,
+                weight: true,
+                lycra: true,
+                shade: true,
+                neck: true,
+                neckDetails: true,
+                sleeve: true,
+                length: true,
+                collar: true,
+                placket: true,
+                bottomFold: true,
+                frontOpenStyle: true,
+                pocketType: true,
+                drawcord: true,
+                button: true,
+                zipper: true,
+                zipColour: true,
+                fatherBelt: true,
+                childBelt: true,
+                printType: true,
+                printStyle: true,
+                printPlacement: true,
+                patches: true,
+                patchesType: true,
+                embroidery: true,
+                embroideryType: true,
+                referenceArticleNumber: true,
+                referenceArticleDescription: true,
+                mcCode: true,
+                segment: true,
+                season: true,
+                hsnTaxCode: true,
+                articleDescription: true,
+                fashionGrid: true,
+                year: true,
+                articleType: true,
+                userName: true,
+                createdAt: true,
+                updatedAt: true,
+                approvedAt: true,
+                sapSyncStatus: true,
+                // BOM
+                impAtrbt2: true,
+                // FAB extras
+                fCount: true,
+                fConstruction: true,
+                fOunce: true,
+                fWidth: true,
+                fabDiv: true,
+                // BODY extras
+                collarStyle: true,
+                sleeveFold: true, mSet: true,
+                noOfPocket: true,
+                extraPocket: true,
+                // VA ACC extras
+                dcShape: true,
+                btnColour: true,
+                htrfType: true,
+                htrfStyle: true,
+                // VA PRCS extras
+                embPlacement: true,
+                // BUSINESS extras
+                ageGroup: true, mNoOfSize: true, mNoOfClr: true,
+                articleFashionType: true,
+                mvgrBrandVendor: true,
+                // Approver identity
+                approvedBy: true,
+                approver: { select: { name: true, email: true } },
+            };
+
+            // Variant-only extra fields
+            const variantSelect = {
+                ...sharedSelect,
+                variantSize: true,
+                variantColor: true,
+                sapArticleId: true,
+                genericArticleId: true,
+            };
+
+            // Same generics query as exportAll
+            const generics = await prisma.extractionResultFlat.findMany({
+                where,
+                orderBy: pathType === 'created'
+                    ? ({ approvedAt: { sort: 'desc', nulls: 'last' } } as const)
+                    : ({ createdAt: 'desc' } as const),
+                select: sharedSelect,
+            });
+
+            const genericIds = generics.map((g: any) => g.id);
+
+            // Fetch SAP-created variants (own article number present), chunked to bound the IN clause.
+            const variantsByGeneric = new Map<string, any[]>();
+            const CHUNK = 1000;
+            for (let i = 0; i < genericIds.length; i += CHUNK) {
+                const chunk = genericIds.slice(i, i + CHUNK);
+                if (chunk.length === 0) continue;
+                const vs = await prisma.extractionResultFlat.findMany({
+                    where: {
+                        genericArticleId: { in: chunk },
+                        isGeneric: false,
+                        articleNumber: { not: null },
+                        NOT: { articleNumber: '' },
+                    },
+                    orderBy: [{ variantColor: 'asc' }, { variantSize: 'asc' }],
+                    select: variantSelect,
+                });
+                for (const v of vs) {
+                    const key = (v as any).genericArticleId as string;
+                    if (!variantsByGeneric.has(key)) variantsByGeneric.set(key, []);
+                    variantsByGeneric.get(key)!.push(v);
+                }
+            }
+
+            // Interleave: each generic row immediately followed by its variant rows.
+            const rows: any[] = [];
+            for (const g of generics) {
+                rows.push({ ...g, _rowType: 'Generic', _parentArticleNumber: '' });
+                const vs = variantsByGeneric.get((g as any).id) || [];
+                for (const v of vs) rows.push({ ...v, _rowType: 'Variant', _parentArticleNumber: (g as any).articleNumber || '' });
+            }
+
+            console.log(`[ApproverController] exportAllWithVariants returning ${rows.length} rows (${generics.length} generics)`);
+            if (res.headersSent) return;
+            return res.json({ data: rows, meta: { total: rows.length, generics: generics.length } });
+        } catch (error) {
+            console.error('Error in exportAllWithVariants:', error);
+            if (res.headersSent) return;
+            return res.status(500).json({ error: 'Failed to export with variants' });
         }
     }
 
