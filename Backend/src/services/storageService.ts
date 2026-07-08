@@ -552,6 +552,7 @@ export class StorageService {
             throw new Error('Failed to upload approved image to storage');
         }
     }
+
     /**
      * Download a source garment image from the article-master (APPROVED) bucket by key.
      * Returns null when the object does not exist (404 / NoSuchKey) so callers can
@@ -566,9 +567,9 @@ export class StorageService {
             for await (const chunk of res.Body as AsyncIterable<Uint8Array>) chunks.push(chunk);
             return { buffer: Buffer.concat(chunks), mime: res.ContentType || 'image/jpeg' };
         } catch (error: any) {
-            const code = String(error?.Code || error?.name || '').toLowerCase();
+            const code = String(error?.Code || error?.code || error?.name || '').toLowerCase();
             const status = Number(error?.$metadata?.httpStatusCode || 0);
-            if (code.includes('nosuchkey') || code.includes('notfound') || status === 404) {
+            if (code === 'nosuchkey' || code === 'notfound' || status === 404) {
                 return null;
             }
             throw error;
@@ -581,12 +582,18 @@ export class StorageService {
      * base is configured, otherwise a 7-day signed URL.
      */
     async uploadModelImage(key: string, buffer: Buffer, mime = 'image/jpeg'): Promise<string> {
-        await this.modelImagesS3Client.send(new PutObjectCommand({
-            Bucket: this.modelImagesBucket,
-            Key: key,
-            Body: buffer,
-            ContentType: mime,
-        }));
+        try {
+            await this.modelImagesS3Client.send(new PutObjectCommand({
+                Bucket: this.modelImagesBucket,
+                Key: key,
+                Body: buffer,
+                ContentType: mime,
+            }));
+            console.log(`✅ Uploaded model image to ${this.modelImagesBucket}: ${key}`);
+        } catch (error) {
+            console.error('❌ Model image upload failed:', error);
+            throw error;
+        }
         if (this.modelImagesPublicUrlBase) {
             return this.buildPublicUrl(this.modelImagesPublicUrlBase, this.modelImagesBucket, key);
         }
