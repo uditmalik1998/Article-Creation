@@ -77,7 +77,9 @@ interface BulkTaskResult {
 }
 
 // Canonical view order — used to lay out cells left-to-right per garment row.
-const VIEW_ORDER = ['front', 'back', 'left_side', 'closeup'] as const;
+// Covers both the legacy 4-view garment-upload set (front/back/left_side/closeup)
+// and the 5-view article-list set (front/back/side/three_quarter/closeup).
+const VIEW_ORDER = ['front', 'back', 'side', 'three_quarter', 'left_side', 'closeup'] as const;
 type ViewName = typeof VIEW_ORDER[number];
 
 interface GarmentRow {
@@ -331,7 +333,7 @@ export default function ModelGenerationPage() {
       const ordered = VIEW_ORDER.filter((v) => set.has(v));
       return ordered.length > 0 ? ordered : ['front'];
     }
-    return imagesCount === '4' ? [...VIEW_ORDER] : ['front'];
+    return imagesCount === '4' ? ['front', 'back', 'left_side', 'closeup'] : ['front'];
   }, [job, imagesCount]);
 
   const addDesigns = (files: File[] | FileList) => {
