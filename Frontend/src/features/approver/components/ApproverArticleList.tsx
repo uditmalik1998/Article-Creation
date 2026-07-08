@@ -502,7 +502,7 @@ const ArticleCard = React.memo(
       const storedMrp = parseFloat(String((item as any).mrp ?? ''));
       const rate = parseFloat(String((item as any).rate ?? ''));
       if (isNaN(rate) || rate <= 0) return;
-      const calculatedMrp = Math.ceil((rate * 1.47) / 25) * 25;
+      const calculatedMrp = Math.ceil((rate * 1.47) / 50) * 50;
       // Skip if MRP is already saved and matches what we'd calculate — no API call needed
       if (!isNaN(storedMrp) && storedMrp > 0 && storedMrp === calculatedMrp) return;
       // Skip if MRP is already saved as any valid positive number (user may have set it manually)
@@ -892,7 +892,7 @@ const ArticleCard = React.memo(
       }
     }, [item.id]);
 
-    const calcMrpFromRate = (rate: number): number => Math.ceil((rate * 1.47) / 25) * 25;
+    const calcMrpFromRate = (rate: number): number => Math.ceil((rate * 1.47) / 50) * 50;
 
     const getValue = (field: string): string | null => {
       if (field in localValues) return localValues[field];
@@ -1016,6 +1016,10 @@ const ArticleCard = React.memo(
     const mrpNum = parseFloat(mrpVal);
     const markdown =
       !isNaN(rateNum) && !isNaN(mrpNum) && mrpNum > 0 ? (((mrpNum - rateNum) / mrpNum) * 100).toFixed(1) + '%' : '—';
+    const afterTax =
+      !isNaN(rateNum) && !isNaN(mrpNum) && mrpNum > 0
+        ? (((mrpNum - rateNum * 1.05) / mrpNum) * 100).toFixed(1) + '%'
+        : '—';
 
     const renderFabBodyField = (
       field: string,
@@ -2076,12 +2080,15 @@ const ArticleCard = React.memo(
                         { label: 'RATE / COST', field: 'rate', editable: true, mandatory: true, isDropdown: false, isColor: false, isMarkdown: false },
                         { label: 'MRP', field: 'mrp', editable: true, mandatory: true, isDropdown: false, isColor: false, isMarkdown: false },
                         { label: 'COLOUR', field: 'colour', editable: true, mandatory: true, isDropdown: true, isColor: true, isMarkdown: false },
-                        { label: 'MARKDOWN', field: '_markdown', editable: false, mandatory: false, isDropdown: false, isColor: false, isMarkdown: true },
+                        { label: 'MARKDOWN', field: '_markdown', editable: false, mandatory: false, isDropdown: false, isColor: false, isMarkdown: true, isAfterTax: false },
+                        { label: 'AFTER TAX', field: '_afterTax', editable: false, mandatory: false, isDropdown: false, isColor: false, isMarkdown: false, isAfterTax: true },
                       ].map((bom) => {
                         const isEditingBom = editingField === `bom_${bom.field}`;
                         const bomLocked = isFieldLocked(bom.field);
                         const val = bom.isMarkdown
                           ? markdown
+                          : bom.isAfterTax
+                          ? afterTax
                           : String(getValue(bom.field) ?? '').trim() || '—';
                         const isEmpty = val === '—';
                         const dropdownOptions: string[] = bom.isDropdown

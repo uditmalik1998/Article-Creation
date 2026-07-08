@@ -31,6 +31,9 @@ router.get('/items', h(ApproverController.getItems));
 // Export ALL items matching current filters (capped at 10k rows)
 router.get('/items/export-all', h(ApproverController.exportAll));
 
+// Export ALL items with SAP-created variants interleaved (generic row then its variant rows)
+router.get('/items/export-all-with-variants', h(ApproverController.exportAllWithVariants));
+
 // Get / Update / Delete a specific item
 // router.all used because Express 5 DELETE registration has a matching quirk in this setup
 router.all('/items/:id', h(async (req, res, next) => {
