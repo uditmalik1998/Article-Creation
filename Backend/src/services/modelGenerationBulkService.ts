@@ -2,12 +2,14 @@ import fs from 'fs';
 import path from 'path';
 import crypto from 'crypto';
 import { runSingleGeneration } from './modelGenerationService';
+import { storageService } from './storageService';
+import { outputKeyFor } from './articleListParser';
 
 // ─── Rate-limit / pacing config ──────────────────────────────────────────────
-// Concurrency MUST be 1 to keep a hard floor between Gemini calls.
 // MIN_GAP_MS is the minimum gap between the START of consecutive Gemini calls,
 // measured globally (across all jobs running in this process).
 const MIN_GAP_MS = parseInt(process.env.GEMINI_MIN_GAP_MS || '4000', 10);
+const CONCURRENCY = Math.max(1, parseInt(process.env.MODELGEN_CONCURRENCY || '3', 10));
 const MAX_ATTEMPTS_PER_TASK = parseInt(process.env.GEMINI_MAX_ATTEMPTS || '5', 10);
 const INITIAL_BACKOFF_MS = 2000;
 const MAX_BACKOFF_MS = 60_000;
@@ -32,6 +34,12 @@ function sleep(ms: number): Promise<void> {
   return new Promise(r => setTimeout(r, ms));
 }
 
+export function viewsForCount(imagesCount: string): string[] {
+  if (imagesCount === '5') return ['front', 'back', 'side', 'three_quarter', 'closeup'];
+  if (imagesCount === '1') return ['front'];
+  return ['front', 'back', 'left_side', 'closeup'];
+}
+
 // ─── Job + task types ────────────────────────────────────────────────────────
 export type JobStatus = 'QUEUED' | 'RUNNING' | 'DONE' | 'FAILED' | 'PARTIAL';
 export type TaskStatus = 'PENDING' | 'RUNNING' | 'DONE' | 'FAILED';
@@ -39,7 +47,10 @@ export type TaskStatus = 'PENDING' | 'RUNNING' | 'DONE' | 'FAILED';
 export interface BulkTask {
   id: string;
   fileName: string;
-  sourcePath: string;
+  sourcePath?: string;   // set for kind 'file'
+  sourceKey?: string;    // set for kind 'r2key' — key in the APPROVED bucket
+  articleCode?: string;  // set for kind 'r2key' — the FINAL ART code
+  kind: 'file' | 'r2key';
   view: string;
   status: TaskStatus;
   outputUrl?: string;
@@ -106,17 +117,19 @@ function rehydrateJobsFromDisk(): void {
     try {
       const job: BulkJob = JSON.parse(fs.readFileSync(file, 'utf-8'));
       if (job.status === 'QUEUED' || job.status === 'RUNNING') {
-        job.status = 'FAILED';
-        job.error = 'Server restarted while job was in progress';
-        job.finishedAt = Date.now();
+        // Reset in-flight tasks back to PENDING and re-queue the job so a restart resumes it.
         for (const t of job.tasks) {
-          if (t.status === 'PENDING' || t.status === 'RUNNING') {
-            t.status = 'FAILED';
-            t.error = 'Server restarted before task ran';
-            job.failed++;
-          }
+          if (t.status === 'RUNNING') t.status = 'PENDING';
         }
+        job.status = 'QUEUED';
         persistJob(job);
+        jobs.set(job.id, job);
+        if (process.env.MODELGEN_AUTO_RESUME !== 'false') {
+          console.log(`[ModelGenBulk] Resuming job ${job.id} — ${job.tasks.filter(t => t.status === 'PENDING').length} pending task(s)`);
+          startJob(job.id);
+        }
+        restored++;
+        continue;
       }
       jobs.set(job.id, job);
       restored++;
@@ -171,9 +184,7 @@ export function createJob(args: {
   broachPath?: string;
   colorImagePath?: string;
 }): BulkJob {
-  const views = args.params.imagesCount === '1'
-    ? ['front']
-    : ['front', 'back', 'left_side', 'closeup'];
+  const views = viewsForCount(args.params.imagesCount);
 
   const tasks: BulkTask[] = [];
   for (const src of args.sourceImagePaths) {
@@ -182,6 +193,7 @@ export function createJob(args: {
         id: crypto.randomBytes(6).toString('hex'),
         fileName: path.basename(src),
         sourcePath: src,
+        kind: 'file',
         view,
         status: 'PENDING',
         attempts: 0,
@@ -208,6 +220,52 @@ export function createJob(args: {
     updatedAt: Date.now(),
   };
 
+  jobs.set(job.id, job);
+  persistJob(job);
+  return job;
+}
+
+export function createArticleJob(args: {
+  id: string;
+  userId?: number | string;
+  jobDir: string;
+  inputDir: string;
+  outputDir: string;
+  codes: string[];
+  sourceKeys: string[];          // parallel to codes: APPROVED-bucket keys
+  params: BulkJobParams;
+}): BulkJob {
+  const views = viewsForCount(args.params.imagesCount);
+  const tasks: BulkTask[] = [];
+  for (let i = 0; i < args.codes.length; i++) {
+    for (const view of views) {
+      tasks.push({
+        id: crypto.randomBytes(6).toString('hex'),
+        fileName: args.codes[i],
+        sourceKey: args.sourceKeys[i],
+        articleCode: args.codes[i],
+        kind: 'r2key',
+        view,
+        status: 'PENDING',
+        attempts: 0,
+      });
+    }
+  }
+  const job: BulkJob = {
+    id: args.id,
+    userId: args.userId,
+    status: 'QUEUED',
+    total: tasks.length,
+    done: 0,
+    failed: 0,
+    params: args.params,
+    tasks,
+    inputDir: args.inputDir,
+    outputDir: args.outputDir,
+    jobDir: args.jobDir,
+    createdAt: Date.now(),
+    updatedAt: Date.now(),
+  };
   jobs.set(job.id, job);
   persistJob(job);
   return job;
@@ -260,8 +318,21 @@ async function runTaskWithRetry(job: BulkJob, task: BulkTask): Promise<void> {
   const colorImgBuf = job.colorImagePath ? fs.readFileSync(job.colorImagePath) : undefined;
   const colorImgMime = job.colorImagePath ? mimeFromPath(job.colorImagePath) : undefined;
 
-  const imgBuf = fs.readFileSync(task.sourcePath);
-  const imgMime = mimeFromPath(task.sourcePath);
+  let imgBuf: Buffer;
+  let imgMime: string;
+  if (task.kind === 'r2key') {
+    const src = await storageService.fetchApprovedImage(task.sourceKey!);
+    if (!src) {
+      task.status = 'FAILED';
+      task.error = `source image not found in article-master bucket (${task.sourceKey})`;
+      return;
+    }
+    imgBuf = src.buffer;
+    imgMime = src.mime;
+  } else {
+    imgBuf = fs.readFileSync(task.sourcePath!);
+    imgMime = mimeFromPath(task.sourcePath!);
+  }
 
   let backoff = INITIAL_BACKOFF_MS;
 
@@ -288,6 +359,15 @@ async function runTaskWithRetry(job: BulkJob, task: BulkTask): Promise<void> {
         colorImgBuf,
         colorImgMime,
       );
+
+      if (task.kind === 'r2key') {
+        const key = outputKeyFor(task.articleCode!, task.view);
+        const url = await storageService.uploadModelImage(key, buf, 'image/png');
+        task.status = 'DONE';
+        task.outputUrl = url;
+        task.error = undefined;
+        return;
+      }
 
       const safeName = path.basename(task.fileName, path.extname(task.fileName)).replace(/[^a-zA-Z0-9_-]/g, '_');
       const outName = `${safeName}_${task.view.replace(/\s+/g, '_')}_${task.id.slice(0, 6)}.png`;
@@ -338,29 +418,34 @@ export function startJob(jobId: string): void {
     persistJob(job);
     console.log(`[ModelGenBulk] Starting job ${job.id} — ${job.total} task(s), gap=${MIN_GAP_MS}ms`);
 
-    for (const task of job.tasks) {
-      if (cancelFlags.has(job.id)) {
-        console.log(`[ModelGenBulk] Job ${job.id} cancelled — stopping at task ${task.id}`);
-        if (task.status === 'PENDING') {
-          task.status = 'FAILED';
-          task.error = 'Cancelled';
-          job.failed++;
-        }
-        continue;
+    let nextIndex = 0;
+    const runWorker = async (): Promise<void> => {
+      while (true) {
+        if (cancelFlags.has(job.id)) return;
+        const i = nextIndex++;
+        if (i >= job.tasks.length) return;
+        const task = job.tasks[i];
+        if (task.status !== 'PENDING') continue;
+
+        task.status = 'RUNNING';
+        persistJob(job);
+
+        await runTaskWithRetry(job, task);
+
+        const finalStatus = task.status as TaskStatus;
+        if (finalStatus === 'DONE') job.done++;
+        else if (finalStatus === 'FAILED') job.failed++;
+        persistJob(job);
       }
-      if (task.status !== 'PENDING') continue;
+    };
 
-      task.status = 'RUNNING';
-      persistJob(job);
+    await Promise.all(Array.from({ length: CONCURRENCY }, () => runWorker()));
 
-      await runTaskWithRetry(job, task);
-
-      // runTaskWithRetry mutates task.status — re-read via the union type so TS doesn't
-      // narrow it to the 'RUNNING' value we just assigned.
-      const finalStatus = task.status as TaskStatus;
-      if (finalStatus === 'DONE') job.done++;
-      else if (finalStatus === 'FAILED') job.failed++;
-      persistJob(job);
+    // Any tasks left PENDING because the job was cancelled → mark FAILED.
+    if (cancelFlags.has(job.id)) {
+      for (const t of job.tasks) {
+        if (t.status === 'PENDING') { t.status = 'FAILED'; t.error = 'Cancelled'; job.failed++; }
+      }
     }
 
     cancelFlags.delete(job.id);
@@ -430,8 +515,8 @@ export function summarizeJob(job: BulkJob): JobSummary {
       view: t.view,
       status: t.status,
       url: t.outputUrl,
-      // Public URL of the source garment image — served from uploads/ static mount.
-      sourceUrl: `/uploads/model-generation/jobs/${job.id}/input/${path.basename(t.sourcePath)}`,
+      // Public URL of the source garment image — served from uploads/ static mount (file kind only).
+      sourceUrl: t.sourcePath ? `/uploads/model-generation/jobs/${job.id}/input/${path.basename(t.sourcePath)}` : undefined,
       error: t.error,
     };
   });
