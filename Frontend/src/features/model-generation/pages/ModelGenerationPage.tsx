@@ -13,7 +13,9 @@ import {
   Eye,
   History,
   X,
+  List,
 } from 'lucide-react';
+import { ArticleListPanel, type ArticleListSubmit } from '../components/ArticleListPanel';
 import { toast } from 'sonner';
 import {
   Alert,
@@ -182,6 +184,7 @@ export default function ModelGenerationPage() {
     },
   });
 
+  const [pageMode, setPageMode] = useState<'upload-garments' | 'from-article-list'>('upload-garments');
   const [designFiles, setDesignFiles] = useState<File[]>([]);
   const [zipFile, setZipFile] = useState<File | null>(null);
   const [patternFile, setPatternFile] = useState<File | null>(null);
@@ -498,6 +501,39 @@ export default function ModelGenerationPage() {
     }
   };
 
+  const handleArticleListSubmit = async (payload: ArticleListSubmit) => {
+    setError(null);
+    setResults([]);
+    setJob(null);
+    setLoading(true);
+
+    const token = localStorage.getItem('authToken');
+
+    try {
+      const form = new FormData();
+      form.append('gender', payload.gender);
+      form.append('bodytype', payload.bodytype);
+      form.append('imagesCount', '5');
+      if (payload.file) form.append('list', payload.file);
+      else form.append('codesText', payload.codesText);
+
+      const res = await fetch(`${API_BASE}/model-generation/bulk/from-articles`, {
+        method: 'POST',
+        headers: { Authorization: `Bearer ${token}` },
+        body: form,
+      });
+      const data = await res.json();
+      if (!res.ok || !data.success) throw new Error(data.error || 'Failed to start job');
+      localStorage.setItem(ACTIVE_JOB_KEY, data.jobId);
+      message.success(`Job created. Generating in the background…`);
+      startPolling(data.jobId, token);
+      void loadRecentJobs();
+    } catch (e: any) {
+      setError(e.message || 'Failed to start article-list job');
+      setLoading(false);
+    }
+  };
+
   const cancelJob = async () => {
     if (!job) return;
     const token = localStorage.getItem('authToken');
@@ -587,13 +623,43 @@ export default function ModelGenerationPage() {
         </p>
       </div>
 
+      {/* Mode toggle */}
+      <div className="mb-4 flex gap-2">
+        <Button
+          type="button"
+          size="sm"
+          variant={pageMode === 'upload-garments' ? 'default' : 'outline'}
+          className={cn(pageMode === 'upload-garments' && 'bg-[#FF6F61] text-white hover:bg-[#ff5b4d]')}
+          onClick={() => setPageMode('upload-garments')}
+        >
+          <UploadIcon />
+          Upload Garments
+        </Button>
+        <Button
+          type="button"
+          size="sm"
+          variant={pageMode === 'from-article-list' ? 'default' : 'outline'}
+          className={cn(pageMode === 'from-article-list' && 'bg-[#FF6F61] text-white hover:bg-[#ff5b4d]')}
+          onClick={() => setPageMode('from-article-list')}
+        >
+          <List />
+          From Article List
+        </Button>
+      </div>
+
       <div className="grid grid-cols-1 gap-6 lg:grid-cols-[9fr_15fr]">
         {/* LEFT — Config Panel */}
         <Card className="sticky top-20 self-start glass rounded-2xl border border-white/60">
           <CardHeader>
-            <CardTitle className="text-base">Generation Settings</CardTitle>
+            <CardTitle className="text-base">
+              {pageMode === 'from-article-list' ? 'Article List Settings' : 'Generation Settings'}
+            </CardTitle>
           </CardHeader>
           <CardContent>
+            {pageMode === 'from-article-list' ? (
+              <ArticleListPanel submitting={loading} onSubmit={handleArticleListSubmit} />
+            ) : null}
+            {pageMode === 'upload-garments' ? (
             <Form {...form}>
               <form onSubmit={form.handleSubmit(handleGenerate)} className="flex flex-col gap-4">
                 {/* Garment Images */}
@@ -1006,6 +1072,7 @@ export default function ModelGenerationPage() {
                 )}
               </form>
             </Form>
+            ) : null}
           </CardContent>
         </Card>
 
