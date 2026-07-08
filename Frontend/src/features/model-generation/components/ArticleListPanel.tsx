@@ -4,6 +4,7 @@ import {
   Button,
   Card,
   CardContent,
+  Checkbox,
   FormItem,
   FormLabel,
   Input,
@@ -12,6 +13,7 @@ import {
   SelectItem,
   SelectTrigger,
   SelectValue,
+  Textarea,
 } from '@/shared/components/ui-tw';
 
 export interface ArticleListSubmit {
@@ -27,12 +29,12 @@ interface Props {
 }
 
 // Client-side preview parse (backend re-parses authoritatively).
-function previewCount(text: string): number {
+function parseArticleCodes(raw: string[]): string[] {
   return Array.from(new Set(
-    text.split(/[\r\n,]+/).map(s => s.trim())
+    raw.map(s => s.trim())
       .filter(v => v && v.toLowerCase() !== 'final art')
       .map(v => v.toLowerCase())
-  )).length;
+  ));
 }
 
 const GENDER_OPTIONS = [
@@ -55,25 +57,28 @@ export function ArticleListPanel({ submitting, onSubmit }: Props) {
   const [bodytype, setBodytype] = useState('Full-Body');
   const [generate, setGenerate] = useState(false);
   const [fileCount, setFileCount] = useState<number | null>(null);
+  const [fileError, setFileError] = useState<string | null>(null);
 
-  const pastedCount = useMemo(() => previewCount(codesText), [codesText]);
+  const pastedCount = useMemo(() => parseArticleCodes(codesText.split(/[\r\n,]+/)).length, [codesText]);
   const articleCount = file ? (fileCount ?? 0) : pastedCount;
   const imageCount = articleCount * 5;
 
   async function handleFile(f: File | null) {
     setFile(f);
     setFileCount(null);
+    setFileError(null);
+    setCodesText('');            // selecting a file supersedes pasted text — clear it to avoid ambiguity
     if (!f) return;
-    const buf = await f.arrayBuffer();
-    const wb = XLSX.read(buf, { type: 'array' });
-    const sheet = wb.Sheets[wb.SheetNames[0]];
-    const matrix = XLSX.utils.sheet_to_json<string[]>(sheet, { header: 1, blankrows: false });
-    const codes = Array.from(new Set(
-      matrix.map(r => String(r?.[0] ?? '').trim())
-        .filter(v => v && v.toLowerCase() !== 'final art')
-        .map(v => v.toLowerCase())
-    ));
-    setFileCount(codes.length);
+    try {
+      const buf = await f.arrayBuffer();
+      const wb = XLSX.read(buf, { type: 'array' });
+      const sheet = wb.Sheets[wb.SheetNames[0]];
+      const matrix = XLSX.utils.sheet_to_json<string[]>(sheet, { header: 1, blankrows: false });
+      setFileCount(parseArticleCodes(matrix.map(r => String(r?.[0] ?? ''))).length);
+    } catch {
+      setFile(null);
+      setFileError('Could not read file — is it a valid .xlsx or .csv?');
+    }
   }
 
   const canSubmit = generate && !submitting && articleCount > 0;
@@ -90,13 +95,14 @@ export function ArticleListPanel({ submitting, onSubmit }: Props) {
         {file && fileCount !== null && (
           <p className="text-xs text-muted-foreground mt-1">{fileCount} unique article codes detected</p>
         )}
+        {fileError && <p className="text-xs text-destructive mt-1">{fileError}</p>}
       </FormItem>
 
       <FormItem>
         <FormLabel>…or paste codes (one FINAL ART per line)</FormLabel>
-        <textarea
+        <Textarea
           rows={5}
-          className="w-full rounded-md border border-input bg-background px-3 py-2 text-sm disabled:opacity-50 resize-y"
+          className="resize-y"
           placeholder={'1110097922-BLACK\n1110106859-DARK GREY'}
           value={codesText}
           onChange={(e) => setCodesText(e.target.value)}
@@ -134,16 +140,11 @@ export function ArticleListPanel({ submitting, onSubmit }: Props) {
       </div>
 
       <label className="flex items-center gap-2 text-sm cursor-pointer select-none">
-        <input
-          type="checkbox"
-          className="rounded"
-          checked={generate}
-          onChange={(e) => setGenerate(e.target.checked)}
-        />
+        <Checkbox checked={generate} onCheckedChange={(v) => setGenerate(!!v)} />
         Generate model images &amp; store to <code className="rounded bg-muted px-1 py-0.5 text-[11px]">model-images</code> bucket
       </label>
 
-      {articleCount > 0 && (
+      {articleCount > 0 && (!file || fileCount !== null) && (
         <Card className="border-amber-200 bg-amber-50">
           <CardContent className="p-3">
             <p className="text-sm text-amber-700">

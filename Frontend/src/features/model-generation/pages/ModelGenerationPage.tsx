@@ -524,6 +524,7 @@ export default function ModelGenerationPage() {
       });
       const data = await res.json();
       if (!res.ok || !data.success) throw new Error(data.error || 'Failed to start job');
+      if (!data.jobId) throw new Error('Server did not return a job id');
       localStorage.setItem(ACTIVE_JOB_KEY, data.jobId);
       message.success(`Job created. Generating in the background…`);
       startPolling(data.jobId, token);
