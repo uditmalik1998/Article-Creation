@@ -16,7 +16,9 @@ import {
   listRecentJobsForUser,
   listItem,
 } from '../services/modelGenerationBulkService';
-import { parseArticleCodesFromXlsx, parseArticleCodesFromText, sourceKeyFor } from '../services/articleListParser';
+import { parseArticleCodesFromXlsx, parseArticleCodesFromText } from '../services/articleListParser';
+import { resolveArticleForGeneration } from '../services/articleModelSourceService';
+import { storageService } from '../services/storageService';
 
 const router = Router();
 
@@ -247,38 +249,61 @@ router.post('/bulk/job/:id/cancel', (req: Request, res: Response) => {
 });
 
 // ─── GET /bulk/job/:id/download-zip — bundle all DONE outputs into one .zip ──
-router.get('/bulk/job/:id/download-zip', (req: Request, res: Response) => {
+// Handles both flows: garment-upload outputs live on local disk, while article-list
+// outputs live in R2 (fetched over HTTP by their public URL).
+router.get('/bulk/job/:id/download-zip', async (req: Request, res: Response) => {
   const job = getJob(req.params.id);
   if (!job) {
     res.status(404).json({ success: false, error: 'Job not found' });
     return;
   }
 
-  if (!fs.existsSync(job.outputDir)) {
-    res.status(404).json({ success: false, error: 'Job output folder no longer exists on disk' });
-    return;
-  }
-
-  // Walk outputDir, collect generated PNGs. We add a friendly per-file name
-  // based on the originating garment so the zip is easy to browse.
-  const entries = fs.readdirSync(job.outputDir).filter(f => {
-    const full = path.join(job.outputDir, f);
-    return fs.statSync(full).isFile() && /\.(png|jpe?g|webp)$/i.test(f);
-  });
-
-  if (entries.length === 0) {
+  const doneTasks = job.tasks.filter((t) => t.status === 'DONE' && t.outputUrl);
+  if (doneTasks.length === 0) {
     res.status(409).json({ success: false, error: 'No generated images yet for this job' });
     return;
   }
 
+  const safeName = (t: { articleCode?: string; fileName: string; view: string }) => {
+    const base = (t.articleCode || path.basename(t.fileName, path.extname(t.fileName))).replace(/[^a-zA-Z0-9._-]/g, '_');
+    return `${base}_${t.view.replace(/\s+/g, '_')}.png`;
+  };
+
   try {
     const zip = new AdmZip();
-    for (const name of entries) {
-      const full = path.join(job.outputDir, name);
-      zip.addLocalFile(full);
-    }
-    const buf = zip.toBuffer();
+    let added = 0;
 
+    // Fetch R2-hosted outputs in small parallel batches so large jobs stay quick.
+    const BATCH = 10;
+    for (let i = 0; i < doneTasks.length; i += BATCH) {
+      const batch = doneTasks.slice(i, i + BATCH);
+      const parts = await Promise.all(
+        batch.map(async (t) => {
+          try {
+            if (t.kind === 'file') {
+              // Local output: outputUrl is /uploads/.../output/<name>
+              const full = path.join(job.outputDir, path.basename(t.outputUrl!));
+              return fs.existsSync(full) ? { name: safeName(t), buffer: fs.readFileSync(full) } : null;
+            }
+            const r = await fetch(t.outputUrl!);
+            if (!r.ok) return null;
+            return { name: safeName(t), buffer: Buffer.from(await r.arrayBuffer()) };
+          } catch {
+            return null;
+          }
+        })
+      );
+      for (const p of parts) {
+        if (p) { zip.addFile(p.name, p.buffer); added++; }
+      }
+    }
+
+    if (added === 0) {
+      res.status(409).json({ success: false, error: 'Generated images could not be retrieved for this job' });
+      return;
+    }
+
+    const buf = zip.toBuffer();
     const safeJobName = job.id.replace(/[^a-zA-Z0-9._-]/g, '_');
     res.setHeader('Content-Type', 'application/zip');
     res.setHeader('Content-Disposition', `attachment; filename="${safeJobName}.zip"`);
@@ -293,12 +318,11 @@ router.get('/bulk/job/:id/download-zip', (req: Request, res: Response) => {
 // ─── POST /bulk/from-articles — list of article codes → generate from R2 source ──
 router.post('/bulk/from-articles', listUpload.single('list'), async (req: Request, res: Response, next: NextFunction) => {
   try {
-    const { gender, bodytype, imagesCount, codesText } = req.body as Record<string, string>;
-    if (!gender || !bodytype) {
-      res.status(400).json({ success: false, error: 'gender and bodytype are required.' });
-      return;
-    }
+    const { imagesCount, codesText } = req.body as Record<string, string>;
 
+    // Gender, body type and colour are NOT taken from the request — they are resolved
+    // per-article from extraction_results_flat (division → gender, garment → AI framing,
+    // colour → colour lock). The list only needs article numbers.
     let codes: string[] = [];
     if (req.file) {
       codes = /\.csv$/i.test(req.file.originalname)
@@ -313,6 +337,10 @@ router.post('/bulk/from-articles', listUpload.single('list'), async (req: Reques
       return;
     }
 
+    // Resolve every code against the DB (imageUrl + gender + colour + attributes).
+    const articles = await Promise.all(codes.map((c) => resolveArticleForGeneration(c)));
+    const resolvedCount = articles.filter((a) => a.found).length;
+
     const jobId = newJobId();
     const dirs = createJobDirs(jobId); // reused only for job.json persistence
     const job = createArticleJob({
@@ -321,11 +349,11 @@ router.post('/bulk/from-articles', listUpload.single('list'), async (req: Reques
       jobDir: dirs.jobDir,
       inputDir: dirs.inputDir,
       outputDir: dirs.outputDir,
-      codes,
-      sourceKeys: codes.map(sourceKeyFor),
+      articles,
       params: {
-        gender,
-        bodytype,
+        // Fallbacks only — each article task carries its own resolved gender/bodytype.
+        gender: 'female',
+        bodytype: 'auto',
         imagesCount: imagesCount || '5',
       },
     });
@@ -336,11 +364,65 @@ router.post('/bulk/from-articles', listUpload.single('list'), async (req: Reques
       success: true,
       jobId: job.id,
       totalArticles: codes.length,
+      resolvedArticles: resolvedCount,
+      skippedArticles: codes.length - resolvedCount,
       totalTasks: job.total,
       status: job.status,
     });
   } catch (err) {
     next(err);
+  }
+});
+
+// ─── GET /model-images — browse the model-images bucket (gallery) ────────────
+// Returns a page of image objects grouped client-side by article number
+// ("{articleNumber}/{view}.jpg"). Supports ?prefix= (article filter), ?cursor=, ?limit=.
+router.get('/model-images', async (req: Request, res: Response) => {
+  const prefix = String(req.query.prefix || '').trim();
+  const cursor = String(req.query.cursor || '').trim() || undefined;
+  const limit = Math.min(parseInt(String(req.query.limit ?? '300'), 10) || 300, 1000);
+
+  try {
+    const { objects, nextCursor } = await storageService.listModelImages({ prefix, cursor, limit });
+    // Attach parsed article number + view so the frontend can group without re-parsing.
+    const items = objects.map((o) => {
+      const slash = o.key.indexOf('/');
+      const articleNumber = slash > 0 ? o.key.slice(0, slash) : o.key;
+      const rest = slash > 0 ? o.key.slice(slash + 1) : o.key;
+      const view = rest.replace(/\.[^.]+$/, '');
+      return { ...o, articleNumber, view };
+    });
+    res.json({ success: true, items, nextCursor });
+  } catch (err: any) {
+    console.error('[ModelGenBulk] listModelImages failed:', err?.message);
+    res.status(500).json({ success: false, error: err?.message || 'Failed to list model images' });
+  }
+});
+
+// ─── GET /model-images/download?key= — stream one object as an attachment ────
+// R2 public URLs don't send CORS headers, so a browser can't fetch+save them
+// directly. This proxy fetches the object server-side and returns it with a
+// Content-Disposition so the browser downloads instead of navigating to it.
+router.get('/model-images/download', async (req: Request, res: Response) => {
+  const key = String(req.query.key || '').trim();
+  if (!key || key.includes('..')) {
+    res.status(400).json({ success: false, error: 'A valid key is required' });
+    return;
+  }
+  try {
+    const obj = await storageService.fetchModelImage(key);
+    if (!obj) {
+      res.status(404).json({ success: false, error: 'Image not found' });
+      return;
+    }
+    const filename = key.replace(/\//g, '_');
+    res.setHeader('Content-Type', obj.mime);
+    res.setHeader('Content-Disposition', `attachment; filename="${filename}"`);
+    res.setHeader('Content-Length', String(obj.buffer.length));
+    res.end(obj.buffer);
+  } catch (err: any) {
+    console.error('[ModelGenBulk] model-image download failed:', err?.message);
+    res.status(500).json({ success: false, error: err?.message || 'Download failed' });
   }
 });
 
