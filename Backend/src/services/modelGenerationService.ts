@@ -27,7 +27,8 @@ function buildPrompt(
   broachPlacement?: string,
   specialInstructions?: string,
   colorName?: string,
-  hasColorImage?: boolean
+  hasColorImage?: boolean,
+  attributesText?: string
 ): string {
   const genderLower = (gender || '').toLowerCase();
   let modelDesc: string;
@@ -42,7 +43,8 @@ function buildPrompt(
   switch (bodytype) {
     case 'Full-Body': framingDesc = 'full body fashion photoshoot, head to toe'; break;
     case 'Upper-Body': framingDesc = 'upper body fashion photoshoot, waist up, do NOT show below the waist'; break;
-    default: framingDesc = 'lower body fashion photoshoot, waist down to feet, do NOT show above the waist, crop tightly at the waist';
+    case 'Lower-Body': framingDesc = 'lower body fashion photoshoot, waist down to feet, do NOT show above the waist, crop tightly at the waist'; break;
+    default: framingDesc = 'fashion photoshoot; automatically choose the best framing for the garment shown in the SOURCE_IMAGE — full body (head to toe) for dresses, one-piece sets, or bottomwear worn full; upper body (waist up) for tops, shirts, and t-shirts; lower body (waist down) for standalone trousers/shorts/skirts';
   }
 
   const colorInstr = hasColorImage
@@ -59,6 +61,18 @@ function buildPrompt(
     three_quarter: 'Three-quarter (45-degree) angle model pose showing the front and one side together.',
     closeup: 'Close-up fashion shot highlighting fabric texture, stitching and details.',
   };
+
+  const framingRule = bodytype === 'Lower-Body'
+    ? 'Show ONLY from waist down to feet. Upper body must NOT appear in the frame.'
+    : bodytype === 'Upper-Body'
+      ? 'Show ONLY from waist up. Lower body must NOT appear in the frame.'
+      : bodytype === 'Full-Body'
+        ? 'Full garment must be visible, head to toe, no cropping.'
+        : 'Frame the model so the ENTIRE garment is fully visible and well-composed; choose full/upper/lower framing to suit the garment type.';
+
+  const attributesBlock = attributesText
+    ? `\n\nGARMENT ATTRIBUTES (from catalog data — the generated garment MUST stay consistent with these):\n- ${attributesText}`
+    : '';
 
   let viewInstr = viewMap[viewDirection.toLowerCase()] || 'Front-facing fashion model pose.';
   viewInstr += broachPlacement
@@ -81,7 +95,7 @@ MODEL DETAILS (STRICT):
 FRAMING & CAMERA:
 - Framing: ${framingDesc}
 - View: ${viewInstr}
-- ${bodytype === 'Lower-Body' ? 'Show ONLY from waist down to feet. Upper body must NOT appear in the frame.' : bodytype === 'Upper-Body' ? 'Show ONLY from waist up. Lower body must NOT appear in the frame.' : 'Full garment must be visible, head to toe, no cropping.'}
+- ${framingRule}
 
 IMAGE SIZE (STRICT):
 - Final output: 2:3 aspect ratio
@@ -101,7 +115,7 @@ GARMENT PRESERVATION RULES (ABSOLUTE):
 QUALITY STANDARD:
 - Ultra-HD realism
 - Marketplace catalog quality (Myntra/Ajio/Zara)
-- Clean, sharp, commercial-ready output`;
+- Clean, sharp, commercial-ready output${attributesBlock}`;
 }
 
 export async function runSingleGeneration(
@@ -119,7 +133,8 @@ export async function runSingleGeneration(
   specialInstructions?: string,
   colorName?: string,
   colorImageBuffer?: Buffer,
-  colorImageMime?: string
+  colorImageMime?: string,
+  attributesText?: string
 ): Promise<Buffer> {
   const hasColorImage = !!(colorImageBuffer && colorImageMime);
   const colorLockInstruction = hasColorImage
@@ -128,7 +143,7 @@ export async function runSingleGeneration(
       ? `MANDATORY COLOR: The garment in the output MUST be ${colorName}. Apply ${colorName} color to the entire garment. This overrides the source image color. Do NOT generate gray, beige, or any other color — only ${colorName}.`
       : `COLOR PRESERVE: Keep the garment color exactly as shown in the source image. Do not change, shift, or neutralize the color.`;
 
-  const promptText = buildPrompt(gender, bodytype, imageCount, viewDirection, broachPlacement, specialInstructions, colorName, hasColorImage);
+  const promptText = buildPrompt(gender, bodytype, imageCount, viewDirection, broachPlacement, specialInstructions, colorName, hasColorImage, attributesText);
 
   const parts: any[] = [
     { text: colorLockInstruction },

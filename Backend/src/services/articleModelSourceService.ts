@@ -1,0 +1,141 @@
+/**
+ * Resolves a bare article number into everything the model-generation worker
+ * needs, by reading extraction_results_flat:
+ *   - source image URL (imageUrl)          → what to generate from
+ *   - gender (from division / subDivision)  → male / female / kid boy / kid girl
+ *   - colour (colour / variantColor)        → colour lock (null = preserve source)
+ *   - garment attributes                    → injected into the prompt for fidelity
+ *
+ * Body type is intentionally NOT derived here — majorCategory is frequently null,
+ * so framing is left to the AI ('auto'), which decides upper/lower/full from the
+ * garment it sees.
+ */
+import { prismaClient as prisma, withPrismaRetry } from '../utils/prisma';
+
+export interface ResolvedArticle {
+  articleCode: string;
+  found: boolean;
+  imageUrl?: string;
+  gender?: string;      // 'male' | 'female' | 'kid boy' | 'kid girl'
+  bodytype?: string;    // always 'auto' — AI decides framing
+  colorName?: string;   // undefined = preserve source colour
+  attributesText?: string;
+  reason?: string;      // populated when found === false
+}
+
+/** division (+ subDivision for kids) → model gender used by the prompt builder. */
+function deriveGender(division?: string | null, subDivision?: string | null): string {
+  const d = String(division || '').toUpperCase().trim();
+  const s = String(subDivision || '').toUpperCase().trim();
+
+  if (d === 'MENS' || d === 'MEN' || d === 'MW') return 'male';
+  if (d === 'LADIES' || d === 'WOMENS' || d === 'WOMEN' || d === 'LW') return 'female';
+  if (d === 'KIDS' || d.startsWith('KID') || d.startsWith('INFANT')) {
+    if (s.startsWith('KB') || s.startsWith('IB') || s.includes('BOY')) return 'kid boy';
+    if (s.startsWith('KG') || s.startsWith('IG') || s.includes('GIRL')) return 'kid girl';
+    return 'kid boy';
+  }
+  return 'female'; // safe default
+}
+
+// Garment attributes worth reinforcing in the prompt, in [field, label] pairs.
+// Null/blank values are skipped when the string is built.
+const ATTR_FIELDS: Array<[string, string]> = [
+  ['neck', 'neck'],
+  ['neckDetails', 'neck details'],
+  ['collar', 'collar'],
+  ['collarStyle', 'collar style'],
+  ['sleeve', 'sleeve'],
+  ['sleeveFold', 'sleeve fold'],
+  ['placket', 'placket'],
+  ['fit', 'fit'],
+  ['pattern', 'pattern'],
+  ['length', 'length'],
+  ['frontOpenStyle', 'front open style'],
+  ['pocketType', 'pocket'],
+  ['bottomFold', 'bottom fold'],
+  ['printType', 'print type'],
+  ['printPlacement', 'print placement'],
+  ['embroidery', 'embroidery'],
+  ['drawcord', 'drawcord'],
+  ['wash', 'wash'],
+];
+
+function buildAttributesText(row: Record<string, any>): string | undefined {
+  const parts: string[] = [];
+  for (const [field, label] of ATTR_FIELDS) {
+    const v = String(row[field] ?? '').trim();
+    if (v && v.toUpperCase() !== 'NA' && v.toUpperCase() !== 'N/A') {
+      parts.push(`${label}: ${v}`);
+    }
+  }
+  return parts.length ? parts.join(', ') : undefined;
+}
+
+/**
+ * Look up one article number. Prefers an APPROVED row, else the most recent row;
+ * in all cases requires a usable imageUrl. Returns { found: false, reason } when
+ * the article isn't in extraction_results_flat or has no image.
+ */
+export async function resolveArticleForGeneration(code: string): Promise<ResolvedArticle> {
+  const articleCode = code.trim();
+  let rows: any[];
+  try {
+    rows = await withPrismaRetry(() =>
+      prisma.extractionResultFlat.findMany({
+        where: { articleNumber: articleCode },
+        orderBy: { createdAt: 'desc' },
+        take: 10,
+        select: {
+          articleNumber: true,
+          imageUrl: true,
+          approvalStatus: true,
+          division: true,
+          subDivision: true,
+          colour: true,
+          variantColor: true,
+          neck: true,
+          neckDetails: true,
+          collar: true,
+          collarStyle: true,
+          sleeve: true,
+          sleeveFold: true,
+          placket: true,
+          fit: true,
+          pattern: true,
+          length: true,
+          frontOpenStyle: true,
+          pocketType: true,
+          bottomFold: true,
+          printType: true,
+          printPlacement: true,
+          embroidery: true,
+          drawcord: true,
+          wash: true,
+        },
+      })
+    );
+  } catch (err: any) {
+    return { articleCode, found: false, reason: `lookup failed: ${err?.message || 'db error'}` };
+  }
+
+  const withImage = rows.filter((r) => String(r.imageUrl || '').trim());
+  if (withImage.length === 0) {
+    return { articleCode, found: false, reason: 'not found in extraction data (no image)' };
+  }
+
+  // Prefer APPROVED, else the latest (rows already sorted newest-first).
+  const row = withImage.find((r) => r.approvalStatus === 'APPROVED') || withImage[0];
+
+  const colour = String(row.colour || row.variantColor || '').trim();
+
+  return {
+    articleCode,
+    found: true,
+    imageUrl: String(row.imageUrl).trim(),
+    gender: deriveGender(row.division, row.subDivision),
+    bodytype: 'auto',
+    colorName: colour || undefined,
+    attributesText: buildAttributesText(row),
+  };
+}
