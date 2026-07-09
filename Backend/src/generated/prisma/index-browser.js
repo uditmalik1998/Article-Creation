@@ -750,6 +750,37 @@ exports.Prisma.SrmSyncRunItemScalarFieldEnum = {
   createdAt: 'createdAt'
 };
 
+exports.Prisma.PoolBJobScalarFieldEnum = {
+  id: 'id',
+  status: 'status',
+  env: 'env',
+  test: 'test',
+  totalRows: 'totalRows',
+  totalBatches: 'totalBatches',
+  batchSize: 'batchSize',
+  successRows: 'successRows',
+  failedRows: 'failedRows',
+  createdAt: 'createdAt',
+  startedAt: 'startedAt',
+  completedAt: 'completedAt'
+};
+
+exports.Prisma.PoolBBatchScalarFieldEnum = {
+  id: 'id',
+  jobId: 'jobId',
+  batchIndex: 'batchIndex',
+  status: 'status',
+  startRow: 'startRow',
+  endRow: 'endRow',
+  rowCount: 'rowCount',
+  successCount: 'successCount',
+  failedCount: 'failedCount',
+  startedAt: 'startedAt',
+  completedAt: 'completedAt',
+  results: 'results',
+  errorMessage: 'errorMessage'
+};
+
 exports.Prisma.SortOrder = {
   asc: 'asc',
   desc: 'desc'
@@ -1219,6 +1250,17 @@ exports.Prisma.SrmSyncRunItemOrderByRelevanceFieldEnum = {
   action: 'action',
   errorMessage: 'errorMessage'
 };
+
+exports.Prisma.PoolBJobOrderByRelevanceFieldEnum = {
+  id: 'id',
+  env: 'env'
+};
+
+exports.Prisma.PoolBBatchOrderByRelevanceFieldEnum = {
+  id: 'id',
+  jobId: 'jobId',
+  errorMessage: 'errorMessage'
+};
 exports.GarmentType = exports.$Enums.GarmentType = {
   UPPER: 'UPPER',
   LOWER: 'LOWER',
@@ -1284,6 +1326,21 @@ exports.RawArticleStatus = exports.$Enums.RawArticleStatus = {
   PERM_FAILED: 'PERM_FAILED'
 };
 
+exports.PoolBJobStatus = exports.$Enums.PoolBJobStatus = {
+  QUEUED: 'QUEUED',
+  PROCESSING: 'PROCESSING',
+  COMPLETED: 'COMPLETED',
+  PARTIAL: 'PARTIAL',
+  FAILED: 'FAILED'
+};
+
+exports.PoolBBatchStatus = exports.$Enums.PoolBBatchStatus = {
+  QUEUED: 'QUEUED',
+  PROCESSING: 'PROCESSING',
+  COMPLETED: 'COMPLETED',
+  FAILED: 'FAILED'
+};
+
 exports.Prisma.ModelName = {
   Department: 'Department',
   SubDepartment: 'SubDepartment',
@@ -1313,7 +1370,9 @@ exports.Prisma.ModelName = {
   Article360Flat: 'Article360Flat',
   RawArticle: 'RawArticle',
   SrmSyncRun: 'SrmSyncRun',
-  SrmSyncRunItem: 'SrmSyncRunItem'
+  SrmSyncRunItem: 'SrmSyncRunItem',
+  PoolBJob: 'PoolBJob',
+  PoolBBatch: 'PoolBBatch'
 };
 
 /**
