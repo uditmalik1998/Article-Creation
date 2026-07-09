@@ -1,5 +1,5 @@
 
-import { S3Client, PutObjectCommand, GetObjectCommand, CopyObjectCommand } from '@aws-sdk/client-s3';
+import { S3Client, PutObjectCommand, GetObjectCommand, CopyObjectCommand, ListObjectsV2Command } from '@aws-sdk/client-s3';
 import { Upload } from '@aws-sdk/lib-storage';
 import { getSignedUrl } from '@aws-sdk/s3-request-presigner';
 import { randomUUID } from 'crypto';
@@ -385,6 +385,16 @@ export class StorageService {
     }
 
     /**
+     * Public URL for a source image in the approved (article-master) bucket.
+     * Returns null when no public base is configured (caller can fall back to
+     * a signed URL via getApprovedSignedUrl).
+     */
+    getApprovedPublicUrl(key: string): string | null {
+        if (!this.approvedPublicUrlBase || this.isR2ApiStyleBaseUrl(this.approvedPublicUrlBase)) return null;
+        return this.buildPublicUrl(this.approvedPublicUrlBase, this.approvedBucket, key);
+    }
+
+    /**
      * Extracts the object key from an approved bucket public URL.
      */
     extractApprovedKeyFromUrl(url: string): string | null {
@@ -581,6 +591,53 @@ export class StorageService {
      * (e.g. "1110097922-BLACK/front.jpg"). Returns the public URL when a public
      * base is configured, otherwise a 7-day signed URL.
      */
+    /**
+     * List objects in the model-images bucket (for the gallery browser). Returns a
+     * page of image objects with public URLs, plus a cursor for the next page.
+     * `prefix` filters by key prefix (e.g. an article number).
+     */
+    async listModelImages(opts: { prefix?: string; cursor?: string; limit?: number } = {}): Promise<{
+        objects: Array<{ key: string; url: string; size?: number; lastModified?: string }>;
+        nextCursor?: string;
+    }> {
+        const res = await this.modelImagesS3Client.send(new ListObjectsV2Command({
+            Bucket: this.modelImagesBucket,
+            Prefix: opts.prefix ? opts.prefix : undefined,
+            MaxKeys: Math.min(Math.max(opts.limit ?? 200, 1), 1000),
+            ContinuationToken: opts.cursor || undefined,
+        }));
+
+        const base = this.modelImagesPublicUrlBase?.replace(/\/$/, '');
+        const contents = (res.Contents || []).filter((o) => o.Key && /\.(png|jpe?g|webp)$/i.test(o.Key));
+
+        const objects = await Promise.all(contents.map(async (o) => {
+            const key = o.Key!;
+            const url = base
+                ? `${base}/${key}`
+                : await getSignedUrl(this.modelImagesS3Client, new GetObjectCommand({ Bucket: this.modelImagesBucket, Key: key }), { expiresIn: 3600 });
+            return { key, url, size: o.Size, lastModified: o.LastModified?.toISOString() };
+        }));
+
+        return { objects, nextCursor: res.IsTruncated ? res.NextContinuationToken : undefined };
+    }
+
+    /** Download a model-image object by key (for the server-side download proxy). */
+    async fetchModelImage(key: string): Promise<{ buffer: Buffer; mime: string } | null> {
+        try {
+            const res = await this.modelImagesS3Client.send(
+                new GetObjectCommand({ Bucket: this.modelImagesBucket, Key: key })
+            );
+            const chunks: Uint8Array[] = [];
+            for await (const chunk of res.Body as AsyncIterable<Uint8Array>) chunks.push(chunk);
+            return { buffer: Buffer.concat(chunks), mime: res.ContentType || 'image/jpeg' };
+        } catch (error: any) {
+            const code = String(error?.Code || error?.code || error?.name || '').toLowerCase();
+            const status = Number(error?.$metadata?.httpStatusCode || 0);
+            if (code === 'nosuchkey' || code === 'notfound' || status === 404) return null;
+            throw error;
+        }
+    }
+
     async uploadModelImage(key: string, buffer: Buffer, mime = 'image/jpeg'): Promise<string> {
         try {
             await this.modelImagesS3Client.send(new PutObjectCommand({

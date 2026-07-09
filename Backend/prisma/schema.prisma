@@ -399,6 +399,32 @@ model ExtractionResultFlat {
   @@schema("public")
 }
 
+/// Model Generation Results: one row per article per bulk job — records whether AI
+/// model images were created for the article and, if so, the per-view output URLs.
+model ModelGenerationResult {
+  id            String   @id @default(uuid())
+  jobId         String   @map("job_id") @db.VarChar(100)
+  articleNumber String   @map("article_number") @db.VarChar(100)
+  status        String   @db.VarChar(20)              // DONE | PARTIAL | FAILED
+  viewsTotal    Int      @map("views_total")
+  viewsDone     Int      @map("views_done")
+  viewsFailed   Int      @map("views_failed")
+  imageUrls     Json?    @map("image_urls")           // { front: url, back: url, ... }
+  error         String?                                // failure reason (first failed view)
+  gender        String?  @db.VarChar(30)
+  colour        String?  @db.VarChar(100)
+  userId        Int?     @map("user_id")
+  createdAt     DateTime @default(now()) @map("created_at")
+  updatedAt     DateTime @updatedAt @map("updated_at")
+
+  @@unique([jobId, articleNumber])
+  @@index([articleNumber])
+  @@index([jobId])
+  @@index([status])
+  @@map("model_generation_results")
+  @@schema("public")
+}
+
 /// MVGR Lookup: Reference table for Macro MVGR, Main MVGR, and M_FAB2 codes
 model MvgrLookup {
   id        Int      @id @default(autoincrement())

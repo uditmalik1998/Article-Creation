@@ -7,19 +7,12 @@ import {
   Checkbox,
   Label,
   Input,
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
   Textarea,
 } from '@/shared/components/ui-tw';
 
 export interface ArticleListSubmit {
   file: File | null;
   codesText: string;
-  gender: string;
-  bodytype: string;
 }
 
 interface Props {
@@ -36,24 +29,9 @@ function parseArticleCodes(raw: string[]): string[] {
   ));
 }
 
-const GENDER_OPTIONS = [
-  { label: 'Female', value: 'female' },
-  { label: 'Male', value: 'male' },
-  { label: 'Kid Boy', value: 'kid boy' },
-  { label: 'Kid Girl', value: 'kid girl' },
-];
-
-const BODYTYPE_OPTIONS = [
-  { label: 'Full Body', value: 'Full-Body' },
-  { label: 'Upper Body', value: 'Upper-Body' },
-  { label: 'Lower Body', value: 'Lower-Body' },
-];
-
 export function ArticleListPanel({ submitting, onSubmit }: Props) {
   const [file, setFile] = useState<File | null>(null);
   const [codesText, setCodesText] = useState('');
-  const [gender, setGender] = useState('female');
-  const [bodytype, setBodytype] = useState('Full-Body');
   const [generate, setGenerate] = useState(false);
   const [fileCount, setFileCount] = useState<number | null>(null);
   const [fileError, setFileError] = useState<string | null>(null);
@@ -109,34 +87,14 @@ export function ArticleListPanel({ submitting, onSubmit }: Props) {
         />
       </div>
 
-      <div className="grid grid-cols-2 gap-3">
-        <div className="flex flex-col gap-1.5">
-          <Label>Gender</Label>
-          <Select value={gender} onValueChange={setGender}>
-            <SelectTrigger>
-              <SelectValue />
-            </SelectTrigger>
-            <SelectContent>
-              {GENDER_OPTIONS.map((o) => (
-                <SelectItem key={o.value} value={o.value}>{o.label}</SelectItem>
-              ))}
-            </SelectContent>
-          </Select>
-        </div>
-        <div className="flex flex-col gap-1.5">
-          <Label>Body Type</Label>
-          <Select value={bodytype} onValueChange={setBodytype}>
-            <SelectTrigger>
-              <SelectValue />
-            </SelectTrigger>
-            <SelectContent>
-              {BODYTYPE_OPTIONS.map((o) => (
-                <SelectItem key={o.value} value={o.value}>{o.label}</SelectItem>
-              ))}
-            </SelectContent>
-          </Select>
-        </div>
-      </div>
+      <Card className="border-sky-200 bg-sky-50">
+        <CardContent className="p-3">
+          <p className="text-xs text-sky-800">
+            Gender, colour and framing are detected automatically per article from
+            extraction data — no need to pick them here.
+          </p>
+        </CardContent>
+      </Card>
 
       <label className="flex items-center gap-2 text-sm cursor-pointer select-none">
         <Checkbox checked={generate} onCheckedChange={(v) => setGenerate(!!v)} />
@@ -158,7 +116,7 @@ export function ArticleListPanel({ submitting, onSubmit }: Props) {
         size="lg"
         className="w-full bg-[#FF6F61] text-white hover:bg-[#ff5b4d] disabled:opacity-50"
         disabled={!canSubmit}
-        onClick={() => onSubmit({ file, codesText, gender, bodytype })}
+        onClick={() => onSubmit({ file, codesText })}
       >
         {submitting ? 'Starting…' : 'Generate from list'}
       </Button>

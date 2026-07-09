@@ -381,6 +381,23 @@ exports.Prisma.ExtractionResultFlatScalarFieldEnum = {
   srmUniqueId: 'srmUniqueId'
 };
 
+exports.Prisma.ModelGenerationResultScalarFieldEnum = {
+  id: 'id',
+  jobId: 'jobId',
+  articleNumber: 'articleNumber',
+  status: 'status',
+  viewsTotal: 'viewsTotal',
+  viewsDone: 'viewsDone',
+  viewsFailed: 'viewsFailed',
+  imageUrls: 'imageUrls',
+  error: 'error',
+  gender: 'gender',
+  colour: 'colour',
+  userId: 'userId',
+  createdAt: 'createdAt',
+  updatedAt: 'updatedAt'
+};
+
 exports.Prisma.MvgrLookupScalarFieldEnum = {
   id: 'id',
   type: 'type',
@@ -933,6 +950,16 @@ exports.Prisma.ExtractionResultFlatOrderByRelevanceFieldEnum = {
   srmUniqueId: 'srmUniqueId'
 };
 
+exports.Prisma.ModelGenerationResultOrderByRelevanceFieldEnum = {
+  id: 'id',
+  jobId: 'jobId',
+  articleNumber: 'articleNumber',
+  status: 'status',
+  error: 'error',
+  gender: 'gender',
+  colour: 'colour'
+};
+
 exports.Prisma.MvgrLookupOrderByRelevanceFieldEnum = {
   type: 'type',
   code: 'code',
@@ -1267,6 +1294,7 @@ exports.Prisma.ModelName = {
   ExtractionJob: 'ExtractionJob',
   ExtractionResult: 'ExtractionResult',
   ExtractionResultFlat: 'ExtractionResultFlat',
+  ModelGenerationResult: 'ModelGenerationResult',
   MvgrLookup: 'MvgrLookup',
   MasterVendorDetail: 'MasterVendorDetail',
   User: 'User',
