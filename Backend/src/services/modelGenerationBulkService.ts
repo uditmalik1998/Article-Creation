@@ -4,6 +4,8 @@ import crypto from 'crypto';
 import { runSingleGeneration } from './modelGenerationService';
 import { storageService } from './storageService';
 import { outputKeyFor } from './articleListParser';
+import type { ResolvedArticle } from './articleModelSourceService';
+import { prismaClient as prisma, withPrismaRetry } from '../utils/prisma';
 
 // ─── Rate-limit / pacing config ──────────────────────────────────────────────
 // MIN_GAP_MS is the minimum gap between the START of consecutive Gemini calls,
@@ -49,13 +51,35 @@ export interface BulkTask {
   fileName: string;
   sourcePath?: string;   // set for kind 'file'
   sourceKey?: string;    // set for kind 'r2key' — key in the APPROVED bucket
-  articleCode?: string;  // set for kind 'r2key' — the FINAL ART code
-  kind: 'file' | 'r2key';
+  sourceUrl?: string;    // set for kind 'article' — HTTP image URL from extraction_results_flat
+  articleCode?: string;  // set for kind 'r2key' | 'article' — the article number
+  kind: 'file' | 'r2key' | 'article';
   view: string;
   status: TaskStatus;
   outputUrl?: string;
   error?: string;
   attempts: number;
+  // Per-task generation params — used by the 'article' kind, where gender/colour/etc.
+  // are resolved per-article from the DB rather than shared across the whole job.
+  gender?: string;
+  bodytype?: string;
+  colorName?: string;
+  attributesText?: string;
+}
+
+// Fetch a source image over HTTP (the article flow stores an imageUrl, not a local
+// path or an approved-bucket key). Returns null on any network/HTTP failure so the
+// task can be marked FAILED with a clear reason instead of crashing the worker.
+async function fetchImageFromUrl(url: string): Promise<{ buffer: Buffer; mime: string } | null> {
+  try {
+    const res = await fetch(url);
+    if (!res.ok) return null;
+    const ab = await res.arrayBuffer();
+    const mime = res.headers.get('content-type') || 'image/jpeg';
+    return { buffer: Buffer.from(ab), mime };
+  } catch {
+    return null;
+  }
 }
 
 export interface BulkJobParams {
@@ -251,36 +275,50 @@ export function createArticleJob(args: {
   jobDir: string;
   inputDir: string;
   outputDir: string;
-  codes: string[];
-  sourceKeys: string[];          // parallel to codes: APPROVED-bucket keys
+  articles: ResolvedArticle[];   // resolved from extraction_results_flat (found + not-found)
   params: BulkJobParams;
 }): BulkJob {
-  if (args.codes.length !== args.sourceKeys.length) {
-    throw new Error(`createArticleJob: codes (${args.codes.length}) and sourceKeys (${args.sourceKeys.length}) must have the same length`);
-  }
   const views = viewsForCount(args.params.imagesCount);
   const tasks: BulkTask[] = [];
-  for (let i = 0; i < args.codes.length; i++) {
+  let failed = 0;
+
+  for (const article of args.articles) {
     for (const view of views) {
-      tasks.push({
+      const base: BulkTask = {
         id: crypto.randomBytes(6).toString('hex'),
-        fileName: args.codes[i],
-        sourceKey: args.sourceKeys[i],
-        articleCode: args.codes[i],
-        kind: 'r2key',
+        fileName: article.articleCode,
+        articleCode: article.articleCode,
+        kind: 'article',
         view,
         status: 'PENDING',
         attempts: 0,
-      });
+      };
+
+      if (!article.found || !article.imageUrl) {
+        // Article couldn't be resolved — surface it as a FAILED task so the user
+        // sees exactly which codes were skipped and why, instead of a silent drop.
+        base.status = 'FAILED';
+        base.error = article.reason || 'not found in extraction data';
+        failed++;
+      } else {
+        base.sourceUrl = article.imageUrl;
+        base.gender = article.gender;
+        base.bodytype = article.bodytype;       // 'auto'
+        base.colorName = article.colorName;
+        base.attributesText = article.attributesText;
+      }
+
+      tasks.push(base);
     }
   }
+
   const job: BulkJob = {
     id: args.id,
     userId: args.userId,
     status: 'QUEUED',
     total: tasks.length,
     done: 0,
-    failed: 0,
+    failed,
     params: args.params,
     tasks,
     inputDir: args.inputDir,
@@ -353,7 +391,16 @@ async function runTaskWithRetry(job: BulkJob, task: BulkTask): Promise<void> {
       if (!generatedBuf) {
         let imgBuf: Buffer;
         let imgMime: string;
-        if (task.kind === 'r2key') {
+        if (task.kind === 'article') {
+          const src = await fetchImageFromUrl(task.sourceUrl!);
+          if (!src) {
+            task.status = 'FAILED';
+            task.error = `could not fetch source image from extraction data (${task.sourceUrl})`;
+            return;
+          }
+          imgBuf = src.buffer;
+          imgMime = src.mime;
+        } else if (task.kind === 'r2key') {
           const src = await storageService.fetchApprovedImage(task.sourceKey!);
           if (!src) {
             task.status = 'FAILED';
@@ -367,13 +414,22 @@ async function runTaskWithRetry(job: BulkJob, task: BulkTask): Promise<void> {
           imgMime = mimeFromPath(task.sourcePath!);
         }
 
+        // Article tasks carry per-article gender resolved from the DB; other kinds
+        // use the shared job-level params.
+        const gender = task.gender ?? job.params.gender;
+        const bodytype = task.bodytype ?? job.params.bodytype;
+        // For the article flow the source image already IS the article's colour, so we
+        // preserve it (passing the abbreviated DB colour code like "NV_BL" as a recolor
+        // instruction risks misinterpretation). Other flows keep their explicit colour.
+        const colorName = task.kind === 'article' ? undefined : job.params.color_name;
+
         await acquireGeminiSlot();
         console.log(`[ModelGenBulk] Job ${job.id} task ${task.fileName}/${task.view} attempt ${task.attempts}`);
         generatedBuf = await runSingleGeneration(
           imgBuf,
           imgMime,
-          job.params.gender,
-          job.params.bodytype,
+          gender,
+          bodytype,
           job.params.imagesCount,
           task.view,
           patternBuf,
@@ -382,13 +438,14 @@ async function runTaskWithRetry(job: BulkJob, task: BulkTask): Promise<void> {
           broachMime,
           job.params.broach_placement,
           job.params.special_instructions,
-          job.params.color_name,
+          colorName,
           colorImgBuf,
           colorImgMime,
+          task.attributesText,
         );
       }
 
-      if (task.kind === 'r2key') {
+      if (task.kind === 'r2key' || task.kind === 'article') {
         const key = outputKeyFor(task.articleCode!, task.view);
         const url = await storageService.uploadModelImage(key, generatedBuf!, 'image/png');
         task.status = 'DONE';
@@ -432,6 +489,66 @@ async function runTaskWithRetry(job: BulkJob, task: BulkTask): Promise<void> {
       await sleep(wait);
     }
   }
+}
+
+// Persist one row per article (jobId + articleNumber) to model_generation_results,
+// recording whether the article got its model images. Best-effort: a DB failure here
+// never fails the job — the results already live in memory and on disk (job.json).
+// Only runs for flows that carry a real article number (article / r2key kinds).
+async function persistJobResultsToDb(job: BulkJob): Promise<void> {
+  const byArticle = new Map<string, BulkTask[]>();
+  for (const t of job.tasks) {
+    if (!t.articleCode) continue;
+    const list = byArticle.get(t.articleCode) ?? [];
+    list.push(t);
+    byArticle.set(t.articleCode, list);
+  }
+  if (byArticle.size === 0) return;
+
+  const userId = typeof job.userId === 'number' ? job.userId : Number(job.userId);
+  const userIdVal = Number.isFinite(userId) ? userId : null;
+
+  for (const [articleNumber, tasks] of byArticle) {
+    const done = tasks.filter((t) => t.status === 'DONE');
+    const failed = tasks.filter((t) => t.status === 'FAILED');
+    const status = done.length === 0 ? 'FAILED' : failed.length > 0 ? 'PARTIAL' : 'DONE';
+    const imageUrls: Record<string, string> = {};
+    for (const t of done) if (t.outputUrl) imageUrls[t.view] = t.outputUrl;
+    const error = failed.find((t) => t.error)?.error ?? null;
+    const sample = tasks[0];
+
+    try {
+      await withPrismaRetry(() =>
+        prisma.modelGenerationResult.upsert({
+          where: { jobId_articleNumber: { jobId: job.id, articleNumber } },
+          create: {
+            jobId: job.id,
+            articleNumber,
+            status,
+            viewsTotal: tasks.length,
+            viewsDone: done.length,
+            viewsFailed: failed.length,
+            imageUrls,
+            error,
+            gender: sample.gender ?? null,
+            colour: sample.colorName ?? null,
+            userId: userIdVal,
+          },
+          update: {
+            status,
+            viewsTotal: tasks.length,
+            viewsDone: done.length,
+            viewsFailed: failed.length,
+            imageUrls,
+            error,
+          },
+        })
+      );
+    } catch (err) {
+      console.error('[ModelGenBulk] Failed to persist result for', articleNumber, (err as Error).message);
+    }
+  }
+  console.log(`[ModelGenBulk] Persisted ${byArticle.size} article result(s) to DB for job ${job.id}`);
 }
 
 export function startJob(jobId: string): void {
@@ -482,6 +599,7 @@ export function startJob(jobId: string): void {
     else job.status = 'PARTIAL';
     job.finishedAt = Date.now();
     persistJob(job);
+    void persistJobResultsToDb(job); // best-effort DB record of per-article success/failure
     console.log(`[ModelGenBulk] Job ${job.id} finished — status=${job.status} done=${job.done} failed=${job.failed}`);
   })().catch(err => {
     console.error(`[ModelGenBulk] Job ${job.id} crashed:`, err);
@@ -543,8 +661,16 @@ export function summarizeJob(job: BulkJob): JobSummary {
       view: t.view,
       status: t.status,
       url: t.outputUrl,
-      // Public URL of the source garment image — served from uploads/ static mount (file kind only).
-      sourceUrl: t.sourcePath ? `/uploads/model-generation/jobs/${job.id}/input/${path.basename(t.sourcePath)}` : undefined,
+      // Public URL of the source garment image. file kind → served from the uploads/
+      // static mount; article kind → the extraction imageUrl (already a public URL);
+      // r2key kind → public URL of the source in the article-master bucket.
+      sourceUrl: t.sourcePath
+        ? `/uploads/model-generation/jobs/${job.id}/input/${path.basename(t.sourcePath)}`
+        : t.sourceUrl
+          ? t.sourceUrl
+          : t.sourceKey
+            ? (storageService.getApprovedPublicUrl(t.sourceKey) ?? undefined)
+            : undefined,
       error: t.error,
     };
   });

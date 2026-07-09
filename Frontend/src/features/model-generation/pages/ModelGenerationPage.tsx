@@ -14,8 +14,10 @@ import {
   History,
   X,
   List,
+  Images,
 } from 'lucide-react';
 import { ArticleListPanel, type ArticleListSubmit } from '../components/ArticleListPanel';
+import { ModelImagesBrowser } from '../components/ModelImagesBrowser';
 import { toast } from 'sonner';
 import {
   Alert,
@@ -49,6 +51,15 @@ import { message } from '@/lib/message';
 
 const API_BASE = import.meta.env.VITE_API_BASE_URL || (import.meta.env.DEV ? 'http://localhost:5001/api' : '/api');
 const SERVER_BASE = API_BASE.replace(/\/api$/, '');
+
+// Resolve an image URL for rendering. The garment-upload flow stores relative
+// paths (/uploads/...) served by the backend; the article-list flow stores
+// absolute R2 URLs (https://pub-...r2.dev/...). Only relative paths get the
+// server base prepended — absolute/blob/data URLs are used as-is.
+const resolveAssetUrl = (u?: string): string => {
+  if (!u) return '';
+  return /^(https?:|blob:|data:)/i.test(u) ? u : `${SERVER_BASE}${u}`;
+};
 
 // Switch to the background-job pipeline once a request would be too large to
 // finish in one HTTP round-trip. Anything below this still uses the original
@@ -186,7 +197,7 @@ export default function ModelGenerationPage() {
     },
   });
 
-  const [pageMode, setPageMode] = useState<'upload-garments' | 'from-article-list'>('upload-garments');
+  const [pageMode, setPageMode] = useState<'upload-garments' | 'from-article-list' | 'model-images'>('upload-garments');
   const [designFiles, setDesignFiles] = useState<File[]>([]);
   const [zipFile, setZipFile] = useState<File | null>(null);
   const [patternFile, setPatternFile] = useState<File | null>(null);
@@ -335,6 +346,64 @@ export default function ModelGenerationPage() {
     }
     return imagesCount === '4' ? ['front', 'back', 'left_side', 'closeup'] : ['front'];
   }, [job, imagesCount]);
+
+  // Per-article roll-up of the current job. Task counts are per-view; this groups
+  // them by article so we can report which article numbers got NO model at all
+  // (fully failed) vs. partially generated.
+  const articleStats = useMemo(() => {
+    if (!job) return null;
+    const map = new Map<string, { done: number; failed: number; error?: string }>();
+    for (const r of job.results) {
+      const s = map.get(r.fileName) || { done: 0, failed: 0 };
+      if (r.status === 'DONE') s.done++;
+      else if (r.status === 'FAILED') {
+        s.failed++;
+        if (!s.error && r.error) s.error = r.error;
+      }
+      map.set(r.fileName, s);
+    }
+    const entries = Array.from(map.entries());
+    const failed = entries.filter(([, s]) => s.done === 0 && s.failed > 0).map(([code, s]) => ({ code, error: s.error }));
+    const partial = entries.filter(([, s]) => s.done > 0 && s.failed > 0).map(([code]) => code);
+    const complete = entries.filter(([, s]) => s.failed === 0 && s.done > 0).length;
+    const all = entries.map(([code, s]) => ({
+      code,
+      status: s.done === 0 && s.failed > 0 ? 'FAILED' : s.failed > 0 ? 'PARTIAL' : 'DONE',
+      done: s.done,
+      failed: s.failed,
+      error: s.error || '',
+    }));
+    return { total: map.size, failed, partial, complete, all };
+  }, [job]);
+
+  const copyFailedCodes = () => {
+    const codes = (articleStats?.failed || []).map((f) => f.code).join('\n');
+    if (!codes) return;
+    navigator.clipboard?.writeText(codes).then(
+      () => message.success('Failed article codes copied'),
+      () => message.error('Copy failed'),
+    );
+  };
+
+  // Export a CSV report of every article in the current job (status + view counts +
+  // failure reason). One row per article number so it can be reconciled against the
+  // input list. Reasons are quote-escaped so commas in messages don't break columns.
+  const downloadFailedReport = () => {
+    if (!articleStats || !job) return;
+    const esc = (v: string) => `"${String(v).replace(/"/g, '""')}"`;
+    const header = ['article_number', 'status', 'views_done', 'views_failed', 'reason'];
+    const lines = articleStats.all.map((r) =>
+      [esc(r.code), r.status, String(r.done), String(r.failed), esc(r.error)].join(','),
+    );
+    const csv = [header.join(','), ...lines].join('\r\n');
+    const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = `model-gen-report_${job.id}.csv`;
+    a.click();
+    URL.revokeObjectURL(url);
+  };
 
   const addDesigns = (files: File[] | FileList) => {
     const filtered = Array.from(files).filter((f) => isImage(f.name));
@@ -512,9 +581,9 @@ export default function ModelGenerationPage() {
     const token = localStorage.getItem('authToken');
 
     try {
+      // Gender / body type / colour are resolved per-article on the server from
+      // extraction_results_flat — the client only sends the article list.
       const form = new FormData();
-      form.append('gender', payload.gender);
-      form.append('bodytype', payload.bodytype);
       form.append('imagesCount', '5');
       if (payload.file) form.append('list', payload.file);
       else form.append('codesText', payload.codesText);
@@ -605,7 +674,7 @@ export default function ModelGenerationPage() {
     // fall back to looping individual downloads. Counts are small here (≤ 20 files).
     for (const img of results) {
       const filename = `${img.file.split('.')[0]}_${img.view.replace(/\s+/g, '_')}.png`;
-      await downloadImage(`${SERVER_BASE}${img.url}`, filename);
+      await downloadImage(resolveAssetUrl(img.url), filename);
     }
   };
 
@@ -648,8 +717,21 @@ export default function ModelGenerationPage() {
           <List />
           From Article List
         </Button>
+        <Button
+          type="button"
+          size="sm"
+          variant={pageMode === 'model-images' ? 'default' : 'outline'}
+          className={cn(pageMode === 'model-images' && 'bg-[#FF6F61] text-white hover:bg-[#ff5b4d]')}
+          onClick={() => setPageMode('model-images')}
+        >
+          <Images />
+          model-images
+        </Button>
       </div>
 
+      {pageMode === 'model-images' && <ModelImagesBrowser />}
+
+      {pageMode !== 'model-images' && (
       <div className="grid grid-cols-1 gap-6 lg:grid-cols-[9fr_15fr]">
         {/* LEFT — Config Panel */}
         <Card className="sticky top-20 self-start glass rounded-2xl border border-white/60">
@@ -1152,6 +1234,44 @@ export default function ModelGenerationPage() {
             </Alert>
           )}
 
+          {/* Per-article result summary — highlights which articles produced no model */}
+          {articleStats && (articleStats.failed.length > 0 || articleStats.partial.length > 0) && (
+            <Card className="mb-4 border-rose-200 bg-rose-50/60">
+              <CardHeader className="flex flex-row items-center justify-between space-y-0 py-3">
+                <CardTitle className="text-sm text-rose-800">
+                  {articleStats.failed.length} of {articleStats.total} article
+                  {articleStats.total !== 1 ? 's' : ''} failed
+                  <span className="ml-2 font-normal text-rose-600">
+                    ({articleStats.complete} done{articleStats.partial.length > 0 ? `, ${articleStats.partial.length} partial` : ''})
+                  </span>
+                </CardTitle>
+                <div className="flex gap-2">
+                  <Button type="button" size="sm" variant="outline" onClick={downloadFailedReport}>
+                    <Download />
+                    Download report
+                  </Button>
+                  {articleStats.failed.length > 0 && (
+                    <Button type="button" size="sm" variant="outline" onClick={copyFailedCodes}>
+                      Copy failed codes
+                    </Button>
+                  )}
+                </div>
+              </CardHeader>
+              {articleStats.failed.length > 0 && (
+                <CardContent className="max-h-48 overflow-y-auto py-0 pb-3">
+                  <ul className="space-y-1 text-xs">
+                    {articleStats.failed.map((f) => (
+                      <li key={f.code} className="flex items-start gap-2">
+                        <code className="shrink-0 rounded bg-rose-100 px-1 py-0.5 text-rose-800">{f.code}</code>
+                        <span className="text-rose-700">{f.error || 'generation failed'}</span>
+                      </li>
+                    ))}
+                  </ul>
+                </CardContent>
+              )}
+            </Card>
+          )}
+
           {loading && garmentRows.length === 0 && (
             <div className="py-16 text-center">
               <Spinner size="lg" />
@@ -1212,16 +1332,10 @@ export default function ModelGenerationPage() {
                           <div className="flex flex-col gap-1">
                             {row.source ? (
                               <img
-                                src={row.source.startsWith('blob:') ? row.source : `${SERVER_BASE}${row.source}`}
+                                src={resolveAssetUrl(row.source)}
                                 alt={`${row.fileName} - source`}
                                 className="aspect-[2/3] w-full cursor-pointer object-cover"
-                                onClick={() =>
-                                  setPreviewUrl(
-                                    row.source!.startsWith('blob:')
-                                      ? row.source!
-                                      : `${SERVER_BASE}${row.source}`,
-                                  )
-                                }
+                                onClick={() => setPreviewUrl(resolveAssetUrl(row.source))}
                               />
                             ) : (
                               <div className="flex aspect-[2/3] w-full items-center justify-center border border-dashed border-border bg-muted/30">
@@ -1240,10 +1354,10 @@ export default function ModelGenerationPage() {
                               return (
                                 <div key={view} className="flex flex-col gap-1">
                                   <img
-                                    src={`${SERVER_BASE}${url}`}
+                                    src={resolveAssetUrl(url)}
                                     alt={`${row.fileName} - ${view}`}
                                     className="aspect-[2/3] w-full cursor-pointer object-cover"
-                                    onClick={() => setPreviewUrl(`${SERVER_BASE}${url}`)}
+                                    onClick={() => setPreviewUrl(resolveAssetUrl(url))}
                                   />
                                   <div className="flex items-center justify-between">
                                     <Tag className="border-[#FF6F61]/30 bg-[#FF6F61]/10 text-[10px] text-[#FF6F61]">
@@ -1256,7 +1370,7 @@ export default function ModelGenerationPage() {
                                       className="h-6 w-6"
                                       onClick={() =>
                                         downloadImage(
-                                          `${SERVER_BASE}${url}`,
+                                          resolveAssetUrl(url),
                                           `${row.fileName.split('.')[0]}_${view.replace(/\s+/g, '_')}.png`,
                                         )
                                       }
@@ -1311,6 +1425,7 @@ export default function ModelGenerationPage() {
           )}
         </div>
       </div>
+      )}
 
       {/* Lightbox preview for any source/output image */}
       <Dialog open={!!previewUrl} onOpenChange={(open) => !open && setPreviewUrl(null)}>
