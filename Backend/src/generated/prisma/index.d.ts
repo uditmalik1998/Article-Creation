@@ -162,6 +162,16 @@ export type SrmSyncRun = $Result.DefaultSelection<Prisma.$SrmSyncRunPayload>
  * One row per article processed in a sync run — stable link via flat_id even after design number edits
  */
 export type SrmSyncRunItem = $Result.DefaultSelection<Prisma.$SrmSyncRunItemPayload>
+/**
+ * Model PoolBJob
+ * 
+ */
+export type PoolBJob = $Result.DefaultSelection<Prisma.$PoolBJobPayload>
+/**
+ * Model PoolBBatch
+ * 
+ */
+export type PoolBBatch = $Result.DefaultSelection<Prisma.$PoolBBatchPayload>
 
 /**
  * Enums
@@ -258,6 +268,27 @@ export const RawArticleStatus: {
 
 export type RawArticleStatus = (typeof RawArticleStatus)[keyof typeof RawArticleStatus]
 
+
+export const PoolBJobStatus: {
+  QUEUED: 'QUEUED',
+  PROCESSING: 'PROCESSING',
+  COMPLETED: 'COMPLETED',
+  PARTIAL: 'PARTIAL',
+  FAILED: 'FAILED'
+};
+
+export type PoolBJobStatus = (typeof PoolBJobStatus)[keyof typeof PoolBJobStatus]
+
+
+export const PoolBBatchStatus: {
+  QUEUED: 'QUEUED',
+  PROCESSING: 'PROCESSING',
+  COMPLETED: 'COMPLETED',
+  FAILED: 'FAILED'
+};
+
+export type PoolBBatchStatus = (typeof PoolBBatchStatus)[keyof typeof PoolBBatchStatus]
+
 }
 
 export type AttributeType = $Enums.AttributeType
@@ -295,6 +326,14 @@ export const SapSyncStatus: typeof $Enums.SapSyncStatus
 export type RawArticleStatus = $Enums.RawArticleStatus
 
 export const RawArticleStatus: typeof $Enums.RawArticleStatus
+
+export type PoolBJobStatus = $Enums.PoolBJobStatus
+
+export const PoolBJobStatus: typeof $Enums.PoolBJobStatus
+
+export type PoolBBatchStatus = $Enums.PoolBBatchStatus
+
+export const PoolBBatchStatus: typeof $Enums.PoolBBatchStatus
 
 /**
  * ##  Prisma Client ʲˢ
@@ -703,6 +742,26 @@ export class PrismaClient<
     * ```
     */
   get srmSyncRunItem(): Prisma.SrmSyncRunItemDelegate<ExtArgs, ClientOptions>;
+
+  /**
+   * `prisma.poolBJob`: Exposes CRUD operations for the **PoolBJob** model.
+    * Example usage:
+    * ```ts
+    * // Fetch zero or more PoolBJobs
+    * const poolBJobs = await prisma.poolBJob.findMany()
+    * ```
+    */
+  get poolBJob(): Prisma.PoolBJobDelegate<ExtArgs, ClientOptions>;
+
+  /**
+   * `prisma.poolBBatch`: Exposes CRUD operations for the **PoolBBatch** model.
+    * Example usage:
+    * ```ts
+    * // Fetch zero or more PoolBBatches
+    * const poolBBatches = await prisma.poolBBatch.findMany()
+    * ```
+    */
+  get poolBBatch(): Prisma.PoolBBatchDelegate<ExtArgs, ClientOptions>;
 }
 
 export namespace Prisma {
@@ -1171,7 +1230,9 @@ export namespace Prisma {
     Article360Flat: 'Article360Flat',
     RawArticle: 'RawArticle',
     SrmSyncRun: 'SrmSyncRun',
-    SrmSyncRunItem: 'SrmSyncRunItem'
+    SrmSyncRunItem: 'SrmSyncRunItem',
+    PoolBJob: 'PoolBJob',
+    PoolBBatch: 'PoolBBatch'
   };
 
   export type ModelName = (typeof ModelName)[keyof typeof ModelName]
@@ -1190,7 +1251,7 @@ export namespace Prisma {
       omit: GlobalOmitOptions
     }
     meta: {
-      modelProps: "department" | "subDepartment" | "category" | "masterAttribute" | "attributeAllowedValue" | "categoryAttribute" | "extractionJob" | "extractionResult" | "extractionResultFlat" | "modelGenerationResult" | "mvgrLookup" | "masterVendorDetail" | "user" | "auditLog" | "apiKey" | "changeHistory" | "costSummary" | "article360" | "articleFab" | "articleBody" | "articleVaAcc" | "articleVaPrcs" | "articleBom" | "sapFieldConfig" | "sapAttributeValue" | "article360Flat" | "rawArticle" | "srmSyncRun" | "srmSyncRunItem"
+      modelProps: "department" | "subDepartment" | "category" | "masterAttribute" | "attributeAllowedValue" | "categoryAttribute" | "extractionJob" | "extractionResult" | "extractionResultFlat" | "modelGenerationResult" | "mvgrLookup" | "masterVendorDetail" | "user" | "auditLog" | "apiKey" | "changeHistory" | "costSummary" | "article360" | "articleFab" | "articleBody" | "articleVaAcc" | "articleVaPrcs" | "articleBom" | "sapFieldConfig" | "sapAttributeValue" | "article360Flat" | "rawArticle" | "srmSyncRun" | "srmSyncRunItem" | "poolBJob" | "poolBBatch"
       txIsolationLevel: Prisma.TransactionIsolationLevel
     }
     model: {
@@ -3340,6 +3401,154 @@ export namespace Prisma {
           }
         }
       }
+      PoolBJob: {
+        payload: Prisma.$PoolBJobPayload<ExtArgs>
+        fields: Prisma.PoolBJobFieldRefs
+        operations: {
+          findUnique: {
+            args: Prisma.PoolBJobFindUniqueArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$PoolBJobPayload> | null
+          }
+          findUniqueOrThrow: {
+            args: Prisma.PoolBJobFindUniqueOrThrowArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$PoolBJobPayload>
+          }
+          findFirst: {
+            args: Prisma.PoolBJobFindFirstArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$PoolBJobPayload> | null
+          }
+          findFirstOrThrow: {
+            args: Prisma.PoolBJobFindFirstOrThrowArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$PoolBJobPayload>
+          }
+          findMany: {
+            args: Prisma.PoolBJobFindManyArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$PoolBJobPayload>[]
+          }
+          create: {
+            args: Prisma.PoolBJobCreateArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$PoolBJobPayload>
+          }
+          createMany: {
+            args: Prisma.PoolBJobCreateManyArgs<ExtArgs>
+            result: BatchPayload
+          }
+          createManyAndReturn: {
+            args: Prisma.PoolBJobCreateManyAndReturnArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$PoolBJobPayload>[]
+          }
+          delete: {
+            args: Prisma.PoolBJobDeleteArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$PoolBJobPayload>
+          }
+          update: {
+            args: Prisma.PoolBJobUpdateArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$PoolBJobPayload>
+          }
+          deleteMany: {
+            args: Prisma.PoolBJobDeleteManyArgs<ExtArgs>
+            result: BatchPayload
+          }
+          updateMany: {
+            args: Prisma.PoolBJobUpdateManyArgs<ExtArgs>
+            result: BatchPayload
+          }
+          updateManyAndReturn: {
+            args: Prisma.PoolBJobUpdateManyAndReturnArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$PoolBJobPayload>[]
+          }
+          upsert: {
+            args: Prisma.PoolBJobUpsertArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$PoolBJobPayload>
+          }
+          aggregate: {
+            args: Prisma.PoolBJobAggregateArgs<ExtArgs>
+            result: $Utils.Optional<AggregatePoolBJob>
+          }
+          groupBy: {
+            args: Prisma.PoolBJobGroupByArgs<ExtArgs>
+            result: $Utils.Optional<PoolBJobGroupByOutputType>[]
+          }
+          count: {
+            args: Prisma.PoolBJobCountArgs<ExtArgs>
+            result: $Utils.Optional<PoolBJobCountAggregateOutputType> | number
+          }
+        }
+      }
+      PoolBBatch: {
+        payload: Prisma.$PoolBBatchPayload<ExtArgs>
+        fields: Prisma.PoolBBatchFieldRefs
+        operations: {
+          findUnique: {
+            args: Prisma.PoolBBatchFindUniqueArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$PoolBBatchPayload> | null
+          }
+          findUniqueOrThrow: {
+            args: Prisma.PoolBBatchFindUniqueOrThrowArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$PoolBBatchPayload>
+          }
+          findFirst: {
+            args: Prisma.PoolBBatchFindFirstArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$PoolBBatchPayload> | null
+          }
+          findFirstOrThrow: {
+            args: Prisma.PoolBBatchFindFirstOrThrowArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$PoolBBatchPayload>
+          }
+          findMany: {
+            args: Prisma.PoolBBatchFindManyArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$PoolBBatchPayload>[]
+          }
+          create: {
+            args: Prisma.PoolBBatchCreateArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$PoolBBatchPayload>
+          }
+          createMany: {
+            args: Prisma.PoolBBatchCreateManyArgs<ExtArgs>
+            result: BatchPayload
+          }
+          createManyAndReturn: {
+            args: Prisma.PoolBBatchCreateManyAndReturnArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$PoolBBatchPayload>[]
+          }
+          delete: {
+            args: Prisma.PoolBBatchDeleteArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$PoolBBatchPayload>
+          }
+          update: {
+            args: Prisma.PoolBBatchUpdateArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$PoolBBatchPayload>
+          }
+          deleteMany: {
+            args: Prisma.PoolBBatchDeleteManyArgs<ExtArgs>
+            result: BatchPayload
+          }
+          updateMany: {
+            args: Prisma.PoolBBatchUpdateManyArgs<ExtArgs>
+            result: BatchPayload
+          }
+          updateManyAndReturn: {
+            args: Prisma.PoolBBatchUpdateManyAndReturnArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$PoolBBatchPayload>[]
+          }
+          upsert: {
+            args: Prisma.PoolBBatchUpsertArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$PoolBBatchPayload>
+          }
+          aggregate: {
+            args: Prisma.PoolBBatchAggregateArgs<ExtArgs>
+            result: $Utils.Optional<AggregatePoolBBatch>
+          }
+          groupBy: {
+            args: Prisma.PoolBBatchGroupByArgs<ExtArgs>
+            result: $Utils.Optional<PoolBBatchGroupByOutputType>[]
+          }
+          count: {
+            args: Prisma.PoolBBatchCountArgs<ExtArgs>
+            result: $Utils.Optional<PoolBBatchCountAggregateOutputType> | number
+          }
+        }
+      }
     }
   } & {
     other: {
@@ -3461,6 +3670,8 @@ export namespace Prisma {
     rawArticle?: RawArticleOmit
     srmSyncRun?: SrmSyncRunOmit
     srmSyncRunItem?: SrmSyncRunItemOmit
+    poolBJob?: PoolBJobOmit
+    poolBBatch?: PoolBBatchOmit
   }
 
   /* Types for Logging */
@@ -3897,6 +4108,37 @@ export namespace Prisma {
    */
   export type SrmSyncRunCountOutputTypeCountItemsArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
     where?: SrmSyncRunItemWhereInput
+  }
+
+
+  /**
+   * Count Type PoolBJobCountOutputType
+   */
+
+  export type PoolBJobCountOutputType = {
+    batches: number
+  }
+
+  export type PoolBJobCountOutputTypeSelect<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    batches?: boolean | PoolBJobCountOutputTypeCountBatchesArgs
+  }
+
+  // Custom InputTypes
+  /**
+   * PoolBJobCountOutputType without action
+   */
+  export type PoolBJobCountOutputTypeDefaultArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the PoolBJobCountOutputType
+     */
+    select?: PoolBJobCountOutputTypeSelect<ExtArgs> | null
+  }
+
+  /**
+   * PoolBJobCountOutputType without action
+   */
+  export type PoolBJobCountOutputTypeCountBatchesArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    where?: PoolBBatchWhereInput
   }
 
 
@@ -41070,6 +41312,2429 @@ export namespace Prisma {
 
 
   /**
+   * Model PoolBJob
+   */
+
+  export type AggregatePoolBJob = {
+    _count: PoolBJobCountAggregateOutputType | null
+    _avg: PoolBJobAvgAggregateOutputType | null
+    _sum: PoolBJobSumAggregateOutputType | null
+    _min: PoolBJobMinAggregateOutputType | null
+    _max: PoolBJobMaxAggregateOutputType | null
+  }
+
+  export type PoolBJobAvgAggregateOutputType = {
+    totalRows: number | null
+    totalBatches: number | null
+    batchSize: number | null
+    successRows: number | null
+    failedRows: number | null
+  }
+
+  export type PoolBJobSumAggregateOutputType = {
+    totalRows: number | null
+    totalBatches: number | null
+    batchSize: number | null
+    successRows: number | null
+    failedRows: number | null
+  }
+
+  export type PoolBJobMinAggregateOutputType = {
+    id: string | null
+    status: $Enums.PoolBJobStatus | null
+    env: string | null
+    test: boolean | null
+    totalRows: number | null
+    totalBatches: number | null
+    batchSize: number | null
+    successRows: number | null
+    failedRows: number | null
+    createdAt: Date | null
+    startedAt: Date | null
+    completedAt: Date | null
+  }
+
+  export type PoolBJobMaxAggregateOutputType = {
+    id: string | null
+    status: $Enums.PoolBJobStatus | null
+    env: string | null
+    test: boolean | null
+    totalRows: number | null
+    totalBatches: number | null
+    batchSize: number | null
+    successRows: number | null
+    failedRows: number | null
+    createdAt: Date | null
+    startedAt: Date | null
+    completedAt: Date | null
+  }
+
+  export type PoolBJobCountAggregateOutputType = {
+    id: number
+    status: number
+    env: number
+    test: number
+    totalRows: number
+    totalBatches: number
+    batchSize: number
+    successRows: number
+    failedRows: number
+    createdAt: number
+    startedAt: number
+    completedAt: number
+    _all: number
+  }
+
+
+  export type PoolBJobAvgAggregateInputType = {
+    totalRows?: true
+    totalBatches?: true
+    batchSize?: true
+    successRows?: true
+    failedRows?: true
+  }
+
+  export type PoolBJobSumAggregateInputType = {
+    totalRows?: true
+    totalBatches?: true
+    batchSize?: true
+    successRows?: true
+    failedRows?: true
+  }
+
+  export type PoolBJobMinAggregateInputType = {
+    id?: true
+    status?: true
+    env?: true
+    test?: true
+    totalRows?: true
+    totalBatches?: true
+    batchSize?: true
+    successRows?: true
+    failedRows?: true
+    createdAt?: true
+    startedAt?: true
+    completedAt?: true
+  }
+
+  export type PoolBJobMaxAggregateInputType = {
+    id?: true
+    status?: true
+    env?: true
+    test?: true
+    totalRows?: true
+    totalBatches?: true
+    batchSize?: true
+    successRows?: true
+    failedRows?: true
+    createdAt?: true
+    startedAt?: true
+    completedAt?: true
+  }
+
+  export type PoolBJobCountAggregateInputType = {
+    id?: true
+    status?: true
+    env?: true
+    test?: true
+    totalRows?: true
+    totalBatches?: true
+    batchSize?: true
+    successRows?: true
+    failedRows?: true
+    createdAt?: true
+    startedAt?: true
+    completedAt?: true
+    _all?: true
+  }
+
+  export type PoolBJobAggregateArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Filter which PoolBJob to aggregate.
+     */
+    where?: PoolBJobWhereInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
+     * 
+     * Determine the order of PoolBJobs to fetch.
+     */
+    orderBy?: PoolBJobOrderByWithRelationInput | PoolBJobOrderByWithRelationInput[]
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
+     * 
+     * Sets the start position
+     */
+    cursor?: PoolBJobWhereUniqueInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Take `±n` PoolBJobs from the position of the cursor.
+     */
+    take?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Skip the first `n` PoolBJobs.
+     */
+    skip?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     * 
+     * Count returned PoolBJobs
+    **/
+    _count?: true | PoolBJobCountAggregateInputType
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     * 
+     * Select which fields to average
+    **/
+    _avg?: PoolBJobAvgAggregateInputType
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     * 
+     * Select which fields to sum
+    **/
+    _sum?: PoolBJobSumAggregateInputType
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     * 
+     * Select which fields to find the minimum value
+    **/
+    _min?: PoolBJobMinAggregateInputType
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     * 
+     * Select which fields to find the maximum value
+    **/
+    _max?: PoolBJobMaxAggregateInputType
+  }
+
+  export type GetPoolBJobAggregateType<T extends PoolBJobAggregateArgs> = {
+        [P in keyof T & keyof AggregatePoolBJob]: P extends '_count' | 'count'
+      ? T[P] extends true
+        ? number
+        : GetScalarType<T[P], AggregatePoolBJob[P]>
+      : GetScalarType<T[P], AggregatePoolBJob[P]>
+  }
+
+
+
+
+  export type PoolBJobGroupByArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    where?: PoolBJobWhereInput
+    orderBy?: PoolBJobOrderByWithAggregationInput | PoolBJobOrderByWithAggregationInput[]
+    by: PoolBJobScalarFieldEnum[] | PoolBJobScalarFieldEnum
+    having?: PoolBJobScalarWhereWithAggregatesInput
+    take?: number
+    skip?: number
+    _count?: PoolBJobCountAggregateInputType | true
+    _avg?: PoolBJobAvgAggregateInputType
+    _sum?: PoolBJobSumAggregateInputType
+    _min?: PoolBJobMinAggregateInputType
+    _max?: PoolBJobMaxAggregateInputType
+  }
+
+  export type PoolBJobGroupByOutputType = {
+    id: string
+    status: $Enums.PoolBJobStatus
+    env: string
+    test: boolean
+    totalRows: number
+    totalBatches: number
+    batchSize: number
+    successRows: number
+    failedRows: number
+    createdAt: Date
+    startedAt: Date | null
+    completedAt: Date | null
+    _count: PoolBJobCountAggregateOutputType | null
+    _avg: PoolBJobAvgAggregateOutputType | null
+    _sum: PoolBJobSumAggregateOutputType | null
+    _min: PoolBJobMinAggregateOutputType | null
+    _max: PoolBJobMaxAggregateOutputType | null
+  }
+
+  type GetPoolBJobGroupByPayload<T extends PoolBJobGroupByArgs> = Prisma.PrismaPromise<
+    Array<
+      PickEnumerable<PoolBJobGroupByOutputType, T['by']> &
+        {
+          [P in ((keyof T) & (keyof PoolBJobGroupByOutputType))]: P extends '_count'
+            ? T[P] extends boolean
+              ? number
+              : GetScalarType<T[P], PoolBJobGroupByOutputType[P]>
+            : GetScalarType<T[P], PoolBJobGroupByOutputType[P]>
+        }
+      >
+    >
+
+
+  export type PoolBJobSelect<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
+    id?: boolean
+    status?: boolean
+    env?: boolean
+    test?: boolean
+    totalRows?: boolean
+    totalBatches?: boolean
+    batchSize?: boolean
+    successRows?: boolean
+    failedRows?: boolean
+    createdAt?: boolean
+    startedAt?: boolean
+    completedAt?: boolean
+    batches?: boolean | PoolBJob$batchesArgs<ExtArgs>
+    _count?: boolean | PoolBJobCountOutputTypeDefaultArgs<ExtArgs>
+  }, ExtArgs["result"]["poolBJob"]>
+
+  export type PoolBJobSelectCreateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
+    id?: boolean
+    status?: boolean
+    env?: boolean
+    test?: boolean
+    totalRows?: boolean
+    totalBatches?: boolean
+    batchSize?: boolean
+    successRows?: boolean
+    failedRows?: boolean
+    createdAt?: boolean
+    startedAt?: boolean
+    completedAt?: boolean
+  }, ExtArgs["result"]["poolBJob"]>
+
+  export type PoolBJobSelectUpdateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
+    id?: boolean
+    status?: boolean
+    env?: boolean
+    test?: boolean
+    totalRows?: boolean
+    totalBatches?: boolean
+    batchSize?: boolean
+    successRows?: boolean
+    failedRows?: boolean
+    createdAt?: boolean
+    startedAt?: boolean
+    completedAt?: boolean
+  }, ExtArgs["result"]["poolBJob"]>
+
+  export type PoolBJobSelectScalar = {
+    id?: boolean
+    status?: boolean
+    env?: boolean
+    test?: boolean
+    totalRows?: boolean
+    totalBatches?: boolean
+    batchSize?: boolean
+    successRows?: boolean
+    failedRows?: boolean
+    createdAt?: boolean
+    startedAt?: boolean
+    completedAt?: boolean
+  }
+
+  export type PoolBJobOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<"id" | "status" | "env" | "test" | "totalRows" | "totalBatches" | "batchSize" | "successRows" | "failedRows" | "createdAt" | "startedAt" | "completedAt", ExtArgs["result"]["poolBJob"]>
+  export type PoolBJobInclude<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    batches?: boolean | PoolBJob$batchesArgs<ExtArgs>
+    _count?: boolean | PoolBJobCountOutputTypeDefaultArgs<ExtArgs>
+  }
+  export type PoolBJobIncludeCreateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {}
+  export type PoolBJobIncludeUpdateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {}
+
+  export type $PoolBJobPayload<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    name: "PoolBJob"
+    objects: {
+      batches: Prisma.$PoolBBatchPayload<ExtArgs>[]
+    }
+    scalars: $Extensions.GetPayloadResult<{
+      id: string
+      status: $Enums.PoolBJobStatus
+      env: string
+      test: boolean
+      totalRows: number
+      totalBatches: number
+      batchSize: number
+      successRows: number
+      failedRows: number
+      createdAt: Date
+      startedAt: Date | null
+      completedAt: Date | null
+    }, ExtArgs["result"]["poolBJob"]>
+    composites: {}
+  }
+
+  type PoolBJobGetPayload<S extends boolean | null | undefined | PoolBJobDefaultArgs> = $Result.GetResult<Prisma.$PoolBJobPayload, S>
+
+  type PoolBJobCountArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> =
+    Omit<PoolBJobFindManyArgs, 'select' | 'include' | 'distinct' | 'omit'> & {
+      select?: PoolBJobCountAggregateInputType | true
+    }
+
+  export interface PoolBJobDelegate<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs, GlobalOmitOptions = {}> {
+    [K: symbol]: { types: Prisma.TypeMap<ExtArgs>['model']['PoolBJob'], meta: { name: 'PoolBJob' } }
+    /**
+     * Find zero or one PoolBJob that matches the filter.
+     * @param {PoolBJobFindUniqueArgs} args - Arguments to find a PoolBJob
+     * @example
+     * // Get one PoolBJob
+     * const poolBJob = await prisma.poolBJob.findUnique({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     */
+    findUnique<T extends PoolBJobFindUniqueArgs>(args: SelectSubset<T, PoolBJobFindUniqueArgs<ExtArgs>>): Prisma__PoolBJobClient<$Result.GetResult<Prisma.$PoolBJobPayload<ExtArgs>, T, "findUnique", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Find one PoolBJob that matches the filter or throw an error with `error.code='P2025'`
+     * if no matches were found.
+     * @param {PoolBJobFindUniqueOrThrowArgs} args - Arguments to find a PoolBJob
+     * @example
+     * // Get one PoolBJob
+     * const poolBJob = await prisma.poolBJob.findUniqueOrThrow({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     */
+    findUniqueOrThrow<T extends PoolBJobFindUniqueOrThrowArgs>(args: SelectSubset<T, PoolBJobFindUniqueOrThrowArgs<ExtArgs>>): Prisma__PoolBJobClient<$Result.GetResult<Prisma.$PoolBJobPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Find the first PoolBJob that matches the filter.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {PoolBJobFindFirstArgs} args - Arguments to find a PoolBJob
+     * @example
+     * // Get one PoolBJob
+     * const poolBJob = await prisma.poolBJob.findFirst({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     */
+    findFirst<T extends PoolBJobFindFirstArgs>(args?: SelectSubset<T, PoolBJobFindFirstArgs<ExtArgs>>): Prisma__PoolBJobClient<$Result.GetResult<Prisma.$PoolBJobPayload<ExtArgs>, T, "findFirst", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Find the first PoolBJob that matches the filter or
+     * throw `PrismaKnownClientError` with `P2025` code if no matches were found.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {PoolBJobFindFirstOrThrowArgs} args - Arguments to find a PoolBJob
+     * @example
+     * // Get one PoolBJob
+     * const poolBJob = await prisma.poolBJob.findFirstOrThrow({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     */
+    findFirstOrThrow<T extends PoolBJobFindFirstOrThrowArgs>(args?: SelectSubset<T, PoolBJobFindFirstOrThrowArgs<ExtArgs>>): Prisma__PoolBJobClient<$Result.GetResult<Prisma.$PoolBJobPayload<ExtArgs>, T, "findFirstOrThrow", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Find zero or more PoolBJobs that matches the filter.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {PoolBJobFindManyArgs} args - Arguments to filter and select certain fields only.
+     * @example
+     * // Get all PoolBJobs
+     * const poolBJobs = await prisma.poolBJob.findMany()
+     * 
+     * // Get first 10 PoolBJobs
+     * const poolBJobs = await prisma.poolBJob.findMany({ take: 10 })
+     * 
+     * // Only select the `id`
+     * const poolBJobWithIdOnly = await prisma.poolBJob.findMany({ select: { id: true } })
+     * 
+     */
+    findMany<T extends PoolBJobFindManyArgs>(args?: SelectSubset<T, PoolBJobFindManyArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$PoolBJobPayload<ExtArgs>, T, "findMany", GlobalOmitOptions>>
+
+    /**
+     * Create a PoolBJob.
+     * @param {PoolBJobCreateArgs} args - Arguments to create a PoolBJob.
+     * @example
+     * // Create one PoolBJob
+     * const PoolBJob = await prisma.poolBJob.create({
+     *   data: {
+     *     // ... data to create a PoolBJob
+     *   }
+     * })
+     * 
+     */
+    create<T extends PoolBJobCreateArgs>(args: SelectSubset<T, PoolBJobCreateArgs<ExtArgs>>): Prisma__PoolBJobClient<$Result.GetResult<Prisma.$PoolBJobPayload<ExtArgs>, T, "create", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Create many PoolBJobs.
+     * @param {PoolBJobCreateManyArgs} args - Arguments to create many PoolBJobs.
+     * @example
+     * // Create many PoolBJobs
+     * const poolBJob = await prisma.poolBJob.createMany({
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     *     
+     */
+    createMany<T extends PoolBJobCreateManyArgs>(args?: SelectSubset<T, PoolBJobCreateManyArgs<ExtArgs>>): Prisma.PrismaPromise<BatchPayload>
+
+    /**
+     * Create many PoolBJobs and returns the data saved in the database.
+     * @param {PoolBJobCreateManyAndReturnArgs} args - Arguments to create many PoolBJobs.
+     * @example
+     * // Create many PoolBJobs
+     * const poolBJob = await prisma.poolBJob.createManyAndReturn({
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     * 
+     * // Create many PoolBJobs and only return the `id`
+     * const poolBJobWithIdOnly = await prisma.poolBJob.createManyAndReturn({
+     *   select: { id: true },
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * 
+     */
+    createManyAndReturn<T extends PoolBJobCreateManyAndReturnArgs>(args?: SelectSubset<T, PoolBJobCreateManyAndReturnArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$PoolBJobPayload<ExtArgs>, T, "createManyAndReturn", GlobalOmitOptions>>
+
+    /**
+     * Delete a PoolBJob.
+     * @param {PoolBJobDeleteArgs} args - Arguments to delete one PoolBJob.
+     * @example
+     * // Delete one PoolBJob
+     * const PoolBJob = await prisma.poolBJob.delete({
+     *   where: {
+     *     // ... filter to delete one PoolBJob
+     *   }
+     * })
+     * 
+     */
+    delete<T extends PoolBJobDeleteArgs>(args: SelectSubset<T, PoolBJobDeleteArgs<ExtArgs>>): Prisma__PoolBJobClient<$Result.GetResult<Prisma.$PoolBJobPayload<ExtArgs>, T, "delete", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Update one PoolBJob.
+     * @param {PoolBJobUpdateArgs} args - Arguments to update one PoolBJob.
+     * @example
+     * // Update one PoolBJob
+     * const poolBJob = await prisma.poolBJob.update({
+     *   where: {
+     *     // ... provide filter here
+     *   },
+     *   data: {
+     *     // ... provide data here
+     *   }
+     * })
+     * 
+     */
+    update<T extends PoolBJobUpdateArgs>(args: SelectSubset<T, PoolBJobUpdateArgs<ExtArgs>>): Prisma__PoolBJobClient<$Result.GetResult<Prisma.$PoolBJobPayload<ExtArgs>, T, "update", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Delete zero or more PoolBJobs.
+     * @param {PoolBJobDeleteManyArgs} args - Arguments to filter PoolBJobs to delete.
+     * @example
+     * // Delete a few PoolBJobs
+     * const { count } = await prisma.poolBJob.deleteMany({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     * 
+     */
+    deleteMany<T extends PoolBJobDeleteManyArgs>(args?: SelectSubset<T, PoolBJobDeleteManyArgs<ExtArgs>>): Prisma.PrismaPromise<BatchPayload>
+
+    /**
+     * Update zero or more PoolBJobs.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {PoolBJobUpdateManyArgs} args - Arguments to update one or more rows.
+     * @example
+     * // Update many PoolBJobs
+     * const poolBJob = await prisma.poolBJob.updateMany({
+     *   where: {
+     *     // ... provide filter here
+     *   },
+     *   data: {
+     *     // ... provide data here
+     *   }
+     * })
+     * 
+     */
+    updateMany<T extends PoolBJobUpdateManyArgs>(args: SelectSubset<T, PoolBJobUpdateManyArgs<ExtArgs>>): Prisma.PrismaPromise<BatchPayload>
+
+    /**
+     * Update zero or more PoolBJobs and returns the data updated in the database.
+     * @param {PoolBJobUpdateManyAndReturnArgs} args - Arguments to update many PoolBJobs.
+     * @example
+     * // Update many PoolBJobs
+     * const poolBJob = await prisma.poolBJob.updateManyAndReturn({
+     *   where: {
+     *     // ... provide filter here
+     *   },
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     * 
+     * // Update zero or more PoolBJobs and only return the `id`
+     * const poolBJobWithIdOnly = await prisma.poolBJob.updateManyAndReturn({
+     *   select: { id: true },
+     *   where: {
+     *     // ... provide filter here
+     *   },
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * 
+     */
+    updateManyAndReturn<T extends PoolBJobUpdateManyAndReturnArgs>(args: SelectSubset<T, PoolBJobUpdateManyAndReturnArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$PoolBJobPayload<ExtArgs>, T, "updateManyAndReturn", GlobalOmitOptions>>
+
+    /**
+     * Create or update one PoolBJob.
+     * @param {PoolBJobUpsertArgs} args - Arguments to update or create a PoolBJob.
+     * @example
+     * // Update or create a PoolBJob
+     * const poolBJob = await prisma.poolBJob.upsert({
+     *   create: {
+     *     // ... data to create a PoolBJob
+     *   },
+     *   update: {
+     *     // ... in case it already exists, update
+     *   },
+     *   where: {
+     *     // ... the filter for the PoolBJob we want to update
+     *   }
+     * })
+     */
+    upsert<T extends PoolBJobUpsertArgs>(args: SelectSubset<T, PoolBJobUpsertArgs<ExtArgs>>): Prisma__PoolBJobClient<$Result.GetResult<Prisma.$PoolBJobPayload<ExtArgs>, T, "upsert", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+
+    /**
+     * Count the number of PoolBJobs.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {PoolBJobCountArgs} args - Arguments to filter PoolBJobs to count.
+     * @example
+     * // Count the number of PoolBJobs
+     * const count = await prisma.poolBJob.count({
+     *   where: {
+     *     // ... the filter for the PoolBJobs we want to count
+     *   }
+     * })
+    **/
+    count<T extends PoolBJobCountArgs>(
+      args?: Subset<T, PoolBJobCountArgs>,
+    ): Prisma.PrismaPromise<
+      T extends $Utils.Record<'select', any>
+        ? T['select'] extends true
+          ? number
+          : GetScalarType<T['select'], PoolBJobCountAggregateOutputType>
+        : number
+    >
+
+    /**
+     * Allows you to perform aggregations operations on a PoolBJob.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {PoolBJobAggregateArgs} args - Select which aggregations you would like to apply and on what fields.
+     * @example
+     * // Ordered by age ascending
+     * // Where email contains prisma.io
+     * // Limited to the 10 users
+     * const aggregations = await prisma.user.aggregate({
+     *   _avg: {
+     *     age: true,
+     *   },
+     *   where: {
+     *     email: {
+     *       contains: "prisma.io",
+     *     },
+     *   },
+     *   orderBy: {
+     *     age: "asc",
+     *   },
+     *   take: 10,
+     * })
+    **/
+    aggregate<T extends PoolBJobAggregateArgs>(args: Subset<T, PoolBJobAggregateArgs>): Prisma.PrismaPromise<GetPoolBJobAggregateType<T>>
+
+    /**
+     * Group by PoolBJob.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {PoolBJobGroupByArgs} args - Group by arguments.
+     * @example
+     * // Group by city, order by createdAt, get count
+     * const result = await prisma.user.groupBy({
+     *   by: ['city', 'createdAt'],
+     *   orderBy: {
+     *     createdAt: true
+     *   },
+     *   _count: {
+     *     _all: true
+     *   },
+     * })
+     * 
+    **/
+    groupBy<
+      T extends PoolBJobGroupByArgs,
+      HasSelectOrTake extends Or<
+        Extends<'skip', Keys<T>>,
+        Extends<'take', Keys<T>>
+      >,
+      OrderByArg extends True extends HasSelectOrTake
+        ? { orderBy: PoolBJobGroupByArgs['orderBy'] }
+        : { orderBy?: PoolBJobGroupByArgs['orderBy'] },
+      OrderFields extends ExcludeUnderscoreKeys<Keys<MaybeTupleToUnion<T['orderBy']>>>,
+      ByFields extends MaybeTupleToUnion<T['by']>,
+      ByValid extends Has<ByFields, OrderFields>,
+      HavingFields extends GetHavingFields<T['having']>,
+      HavingValid extends Has<ByFields, HavingFields>,
+      ByEmpty extends T['by'] extends never[] ? True : False,
+      InputErrors extends ByEmpty extends True
+      ? `Error: "by" must not be empty.`
+      : HavingValid extends False
+      ? {
+          [P in HavingFields]: P extends ByFields
+            ? never
+            : P extends string
+            ? `Error: Field "${P}" used in "having" needs to be provided in "by".`
+            : [
+                Error,
+                'Field ',
+                P,
+                ` in "having" needs to be provided in "by"`,
+              ]
+        }[HavingFields]
+      : 'take' extends Keys<T>
+      ? 'orderBy' extends Keys<T>
+        ? ByValid extends True
+          ? {}
+          : {
+              [P in OrderFields]: P extends ByFields
+                ? never
+                : `Error: Field "${P}" in "orderBy" needs to be provided in "by"`
+            }[OrderFields]
+        : 'Error: If you provide "take", you also need to provide "orderBy"'
+      : 'skip' extends Keys<T>
+      ? 'orderBy' extends Keys<T>
+        ? ByValid extends True
+          ? {}
+          : {
+              [P in OrderFields]: P extends ByFields
+                ? never
+                : `Error: Field "${P}" in "orderBy" needs to be provided in "by"`
+            }[OrderFields]
+        : 'Error: If you provide "skip", you also need to provide "orderBy"'
+      : ByValid extends True
+      ? {}
+      : {
+          [P in OrderFields]: P extends ByFields
+            ? never
+            : `Error: Field "${P}" in "orderBy" needs to be provided in "by"`
+        }[OrderFields]
+    >(args: SubsetIntersection<T, PoolBJobGroupByArgs, OrderByArg> & InputErrors): {} extends InputErrors ? GetPoolBJobGroupByPayload<T> : Prisma.PrismaPromise<InputErrors>
+  /**
+   * Fields of the PoolBJob model
+   */
+  readonly fields: PoolBJobFieldRefs;
+  }
+
+  /**
+   * The delegate class that acts as a "Promise-like" for PoolBJob.
+   * Why is this prefixed with `Prisma__`?
+   * Because we want to prevent naming conflicts as mentioned in
+   * https://github.com/prisma/prisma-client-js/issues/707
+   */
+  export interface Prisma__PoolBJobClient<T, Null = never, ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs, GlobalOmitOptions = {}> extends Prisma.PrismaPromise<T> {
+    readonly [Symbol.toStringTag]: "PrismaPromise"
+    batches<T extends PoolBJob$batchesArgs<ExtArgs> = {}>(args?: Subset<T, PoolBJob$batchesArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$PoolBBatchPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
+    /**
+     * Attaches callbacks for the resolution and/or rejection of the Promise.
+     * @param onfulfilled The callback to execute when the Promise is resolved.
+     * @param onrejected The callback to execute when the Promise is rejected.
+     * @returns A Promise for the completion of which ever callback is executed.
+     */
+    then<TResult1 = T, TResult2 = never>(onfulfilled?: ((value: T) => TResult1 | PromiseLike<TResult1>) | undefined | null, onrejected?: ((reason: any) => TResult2 | PromiseLike<TResult2>) | undefined | null): $Utils.JsPromise<TResult1 | TResult2>
+    /**
+     * Attaches a callback for only the rejection of the Promise.
+     * @param onrejected The callback to execute when the Promise is rejected.
+     * @returns A Promise for the completion of the callback.
+     */
+    catch<TResult = never>(onrejected?: ((reason: any) => TResult | PromiseLike<TResult>) | undefined | null): $Utils.JsPromise<T | TResult>
+    /**
+     * Attaches a callback that is invoked when the Promise is settled (fulfilled or rejected). The
+     * resolved value cannot be modified from the callback.
+     * @param onfinally The callback to execute when the Promise is settled (fulfilled or rejected).
+     * @returns A Promise for the completion of the callback.
+     */
+    finally(onfinally?: (() => void) | undefined | null): $Utils.JsPromise<T>
+  }
+
+
+
+
+  /**
+   * Fields of the PoolBJob model
+   */
+  interface PoolBJobFieldRefs {
+    readonly id: FieldRef<"PoolBJob", 'String'>
+    readonly status: FieldRef<"PoolBJob", 'PoolBJobStatus'>
+    readonly env: FieldRef<"PoolBJob", 'String'>
+    readonly test: FieldRef<"PoolBJob", 'Boolean'>
+    readonly totalRows: FieldRef<"PoolBJob", 'Int'>
+    readonly totalBatches: FieldRef<"PoolBJob", 'Int'>
+    readonly batchSize: FieldRef<"PoolBJob", 'Int'>
+    readonly successRows: FieldRef<"PoolBJob", 'Int'>
+    readonly failedRows: FieldRef<"PoolBJob", 'Int'>
+    readonly createdAt: FieldRef<"PoolBJob", 'DateTime'>
+    readonly startedAt: FieldRef<"PoolBJob", 'DateTime'>
+    readonly completedAt: FieldRef<"PoolBJob", 'DateTime'>
+  }
+    
+
+  // Custom InputTypes
+  /**
+   * PoolBJob findUnique
+   */
+  export type PoolBJobFindUniqueArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the PoolBJob
+     */
+    select?: PoolBJobSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the PoolBJob
+     */
+    omit?: PoolBJobOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: PoolBJobInclude<ExtArgs> | null
+    /**
+     * Filter, which PoolBJob to fetch.
+     */
+    where: PoolBJobWhereUniqueInput
+  }
+
+  /**
+   * PoolBJob findUniqueOrThrow
+   */
+  export type PoolBJobFindUniqueOrThrowArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the PoolBJob
+     */
+    select?: PoolBJobSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the PoolBJob
+     */
+    omit?: PoolBJobOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: PoolBJobInclude<ExtArgs> | null
+    /**
+     * Filter, which PoolBJob to fetch.
+     */
+    where: PoolBJobWhereUniqueInput
+  }
+
+  /**
+   * PoolBJob findFirst
+   */
+  export type PoolBJobFindFirstArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the PoolBJob
+     */
+    select?: PoolBJobSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the PoolBJob
+     */
+    omit?: PoolBJobOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: PoolBJobInclude<ExtArgs> | null
+    /**
+     * Filter, which PoolBJob to fetch.
+     */
+    where?: PoolBJobWhereInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
+     * 
+     * Determine the order of PoolBJobs to fetch.
+     */
+    orderBy?: PoolBJobOrderByWithRelationInput | PoolBJobOrderByWithRelationInput[]
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
+     * 
+     * Sets the position for searching for PoolBJobs.
+     */
+    cursor?: PoolBJobWhereUniqueInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Take `±n` PoolBJobs from the position of the cursor.
+     */
+    take?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Skip the first `n` PoolBJobs.
+     */
+    skip?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/distinct Distinct Docs}
+     * 
+     * Filter by unique combinations of PoolBJobs.
+     */
+    distinct?: PoolBJobScalarFieldEnum | PoolBJobScalarFieldEnum[]
+  }
+
+  /**
+   * PoolBJob findFirstOrThrow
+   */
+  export type PoolBJobFindFirstOrThrowArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the PoolBJob
+     */
+    select?: PoolBJobSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the PoolBJob
+     */
+    omit?: PoolBJobOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: PoolBJobInclude<ExtArgs> | null
+    /**
+     * Filter, which PoolBJob to fetch.
+     */
+    where?: PoolBJobWhereInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
+     * 
+     * Determine the order of PoolBJobs to fetch.
+     */
+    orderBy?: PoolBJobOrderByWithRelationInput | PoolBJobOrderByWithRelationInput[]
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
+     * 
+     * Sets the position for searching for PoolBJobs.
+     */
+    cursor?: PoolBJobWhereUniqueInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Take `±n` PoolBJobs from the position of the cursor.
+     */
+    take?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Skip the first `n` PoolBJobs.
+     */
+    skip?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/distinct Distinct Docs}
+     * 
+     * Filter by unique combinations of PoolBJobs.
+     */
+    distinct?: PoolBJobScalarFieldEnum | PoolBJobScalarFieldEnum[]
+  }
+
+  /**
+   * PoolBJob findMany
+   */
+  export type PoolBJobFindManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the PoolBJob
+     */
+    select?: PoolBJobSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the PoolBJob
+     */
+    omit?: PoolBJobOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: PoolBJobInclude<ExtArgs> | null
+    /**
+     * Filter, which PoolBJobs to fetch.
+     */
+    where?: PoolBJobWhereInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
+     * 
+     * Determine the order of PoolBJobs to fetch.
+     */
+    orderBy?: PoolBJobOrderByWithRelationInput | PoolBJobOrderByWithRelationInput[]
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
+     * 
+     * Sets the position for listing PoolBJobs.
+     */
+    cursor?: PoolBJobWhereUniqueInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Take `±n` PoolBJobs from the position of the cursor.
+     */
+    take?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Skip the first `n` PoolBJobs.
+     */
+    skip?: number
+    distinct?: PoolBJobScalarFieldEnum | PoolBJobScalarFieldEnum[]
+  }
+
+  /**
+   * PoolBJob create
+   */
+  export type PoolBJobCreateArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the PoolBJob
+     */
+    select?: PoolBJobSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the PoolBJob
+     */
+    omit?: PoolBJobOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: PoolBJobInclude<ExtArgs> | null
+    /**
+     * The data needed to create a PoolBJob.
+     */
+    data: XOR<PoolBJobCreateInput, PoolBJobUncheckedCreateInput>
+  }
+
+  /**
+   * PoolBJob createMany
+   */
+  export type PoolBJobCreateManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * The data used to create many PoolBJobs.
+     */
+    data: PoolBJobCreateManyInput | PoolBJobCreateManyInput[]
+    skipDuplicates?: boolean
+  }
+
+  /**
+   * PoolBJob createManyAndReturn
+   */
+  export type PoolBJobCreateManyAndReturnArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the PoolBJob
+     */
+    select?: PoolBJobSelectCreateManyAndReturn<ExtArgs> | null
+    /**
+     * Omit specific fields from the PoolBJob
+     */
+    omit?: PoolBJobOmit<ExtArgs> | null
+    /**
+     * The data used to create many PoolBJobs.
+     */
+    data: PoolBJobCreateManyInput | PoolBJobCreateManyInput[]
+    skipDuplicates?: boolean
+  }
+
+  /**
+   * PoolBJob update
+   */
+  export type PoolBJobUpdateArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the PoolBJob
+     */
+    select?: PoolBJobSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the PoolBJob
+     */
+    omit?: PoolBJobOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: PoolBJobInclude<ExtArgs> | null
+    /**
+     * The data needed to update a PoolBJob.
+     */
+    data: XOR<PoolBJobUpdateInput, PoolBJobUncheckedUpdateInput>
+    /**
+     * Choose, which PoolBJob to update.
+     */
+    where: PoolBJobWhereUniqueInput
+  }
+
+  /**
+   * PoolBJob updateMany
+   */
+  export type PoolBJobUpdateManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * The data used to update PoolBJobs.
+     */
+    data: XOR<PoolBJobUpdateManyMutationInput, PoolBJobUncheckedUpdateManyInput>
+    /**
+     * Filter which PoolBJobs to update
+     */
+    where?: PoolBJobWhereInput
+    /**
+     * Limit how many PoolBJobs to update.
+     */
+    limit?: number
+  }
+
+  /**
+   * PoolBJob updateManyAndReturn
+   */
+  export type PoolBJobUpdateManyAndReturnArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the PoolBJob
+     */
+    select?: PoolBJobSelectUpdateManyAndReturn<ExtArgs> | null
+    /**
+     * Omit specific fields from the PoolBJob
+     */
+    omit?: PoolBJobOmit<ExtArgs> | null
+    /**
+     * The data used to update PoolBJobs.
+     */
+    data: XOR<PoolBJobUpdateManyMutationInput, PoolBJobUncheckedUpdateManyInput>
+    /**
+     * Filter which PoolBJobs to update
+     */
+    where?: PoolBJobWhereInput
+    /**
+     * Limit how many PoolBJobs to update.
+     */
+    limit?: number
+  }
+
+  /**
+   * PoolBJob upsert
+   */
+  export type PoolBJobUpsertArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the PoolBJob
+     */
+    select?: PoolBJobSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the PoolBJob
+     */
+    omit?: PoolBJobOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: PoolBJobInclude<ExtArgs> | null
+    /**
+     * The filter to search for the PoolBJob to update in case it exists.
+     */
+    where: PoolBJobWhereUniqueInput
+    /**
+     * In case the PoolBJob found by the `where` argument doesn't exist, create a new PoolBJob with this data.
+     */
+    create: XOR<PoolBJobCreateInput, PoolBJobUncheckedCreateInput>
+    /**
+     * In case the PoolBJob was found with the provided `where` argument, update it with this data.
+     */
+    update: XOR<PoolBJobUpdateInput, PoolBJobUncheckedUpdateInput>
+  }
+
+  /**
+   * PoolBJob delete
+   */
+  export type PoolBJobDeleteArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the PoolBJob
+     */
+    select?: PoolBJobSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the PoolBJob
+     */
+    omit?: PoolBJobOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: PoolBJobInclude<ExtArgs> | null
+    /**
+     * Filter which PoolBJob to delete.
+     */
+    where: PoolBJobWhereUniqueInput
+  }
+
+  /**
+   * PoolBJob deleteMany
+   */
+  export type PoolBJobDeleteManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Filter which PoolBJobs to delete
+     */
+    where?: PoolBJobWhereInput
+    /**
+     * Limit how many PoolBJobs to delete.
+     */
+    limit?: number
+  }
+
+  /**
+   * PoolBJob.batches
+   */
+  export type PoolBJob$batchesArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the PoolBBatch
+     */
+    select?: PoolBBatchSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the PoolBBatch
+     */
+    omit?: PoolBBatchOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: PoolBBatchInclude<ExtArgs> | null
+    where?: PoolBBatchWhereInput
+    orderBy?: PoolBBatchOrderByWithRelationInput | PoolBBatchOrderByWithRelationInput[]
+    cursor?: PoolBBatchWhereUniqueInput
+    take?: number
+    skip?: number
+    distinct?: PoolBBatchScalarFieldEnum | PoolBBatchScalarFieldEnum[]
+  }
+
+  /**
+   * PoolBJob without action
+   */
+  export type PoolBJobDefaultArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the PoolBJob
+     */
+    select?: PoolBJobSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the PoolBJob
+     */
+    omit?: PoolBJobOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: PoolBJobInclude<ExtArgs> | null
+  }
+
+
+  /**
+   * Model PoolBBatch
+   */
+
+  export type AggregatePoolBBatch = {
+    _count: PoolBBatchCountAggregateOutputType | null
+    _avg: PoolBBatchAvgAggregateOutputType | null
+    _sum: PoolBBatchSumAggregateOutputType | null
+    _min: PoolBBatchMinAggregateOutputType | null
+    _max: PoolBBatchMaxAggregateOutputType | null
+  }
+
+  export type PoolBBatchAvgAggregateOutputType = {
+    batchIndex: number | null
+    startRow: number | null
+    endRow: number | null
+    rowCount: number | null
+    successCount: number | null
+    failedCount: number | null
+  }
+
+  export type PoolBBatchSumAggregateOutputType = {
+    batchIndex: number | null
+    startRow: number | null
+    endRow: number | null
+    rowCount: number | null
+    successCount: number | null
+    failedCount: number | null
+  }
+
+  export type PoolBBatchMinAggregateOutputType = {
+    id: string | null
+    jobId: string | null
+    batchIndex: number | null
+    status: $Enums.PoolBBatchStatus | null
+    startRow: number | null
+    endRow: number | null
+    rowCount: number | null
+    successCount: number | null
+    failedCount: number | null
+    startedAt: Date | null
+    completedAt: Date | null
+    errorMessage: string | null
+  }
+
+  export type PoolBBatchMaxAggregateOutputType = {
+    id: string | null
+    jobId: string | null
+    batchIndex: number | null
+    status: $Enums.PoolBBatchStatus | null
+    startRow: number | null
+    endRow: number | null
+    rowCount: number | null
+    successCount: number | null
+    failedCount: number | null
+    startedAt: Date | null
+    completedAt: Date | null
+    errorMessage: string | null
+  }
+
+  export type PoolBBatchCountAggregateOutputType = {
+    id: number
+    jobId: number
+    batchIndex: number
+    status: number
+    startRow: number
+    endRow: number
+    rowCount: number
+    successCount: number
+    failedCount: number
+    startedAt: number
+    completedAt: number
+    results: number
+    errorMessage: number
+    _all: number
+  }
+
+
+  export type PoolBBatchAvgAggregateInputType = {
+    batchIndex?: true
+    startRow?: true
+    endRow?: true
+    rowCount?: true
+    successCount?: true
+    failedCount?: true
+  }
+
+  export type PoolBBatchSumAggregateInputType = {
+    batchIndex?: true
+    startRow?: true
+    endRow?: true
+    rowCount?: true
+    successCount?: true
+    failedCount?: true
+  }
+
+  export type PoolBBatchMinAggregateInputType = {
+    id?: true
+    jobId?: true
+    batchIndex?: true
+    status?: true
+    startRow?: true
+    endRow?: true
+    rowCount?: true
+    successCount?: true
+    failedCount?: true
+    startedAt?: true
+    completedAt?: true
+    errorMessage?: true
+  }
+
+  export type PoolBBatchMaxAggregateInputType = {
+    id?: true
+    jobId?: true
+    batchIndex?: true
+    status?: true
+    startRow?: true
+    endRow?: true
+    rowCount?: true
+    successCount?: true
+    failedCount?: true
+    startedAt?: true
+    completedAt?: true
+    errorMessage?: true
+  }
+
+  export type PoolBBatchCountAggregateInputType = {
+    id?: true
+    jobId?: true
+    batchIndex?: true
+    status?: true
+    startRow?: true
+    endRow?: true
+    rowCount?: true
+    successCount?: true
+    failedCount?: true
+    startedAt?: true
+    completedAt?: true
+    results?: true
+    errorMessage?: true
+    _all?: true
+  }
+
+  export type PoolBBatchAggregateArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Filter which PoolBBatch to aggregate.
+     */
+    where?: PoolBBatchWhereInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
+     * 
+     * Determine the order of PoolBBatches to fetch.
+     */
+    orderBy?: PoolBBatchOrderByWithRelationInput | PoolBBatchOrderByWithRelationInput[]
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
+     * 
+     * Sets the start position
+     */
+    cursor?: PoolBBatchWhereUniqueInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Take `±n` PoolBBatches from the position of the cursor.
+     */
+    take?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Skip the first `n` PoolBBatches.
+     */
+    skip?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     * 
+     * Count returned PoolBBatches
+    **/
+    _count?: true | PoolBBatchCountAggregateInputType
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     * 
+     * Select which fields to average
+    **/
+    _avg?: PoolBBatchAvgAggregateInputType
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     * 
+     * Select which fields to sum
+    **/
+    _sum?: PoolBBatchSumAggregateInputType
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     * 
+     * Select which fields to find the minimum value
+    **/
+    _min?: PoolBBatchMinAggregateInputType
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     * 
+     * Select which fields to find the maximum value
+    **/
+    _max?: PoolBBatchMaxAggregateInputType
+  }
+
+  export type GetPoolBBatchAggregateType<T extends PoolBBatchAggregateArgs> = {
+        [P in keyof T & keyof AggregatePoolBBatch]: P extends '_count' | 'count'
+      ? T[P] extends true
+        ? number
+        : GetScalarType<T[P], AggregatePoolBBatch[P]>
+      : GetScalarType<T[P], AggregatePoolBBatch[P]>
+  }
+
+
+
+
+  export type PoolBBatchGroupByArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    where?: PoolBBatchWhereInput
+    orderBy?: PoolBBatchOrderByWithAggregationInput | PoolBBatchOrderByWithAggregationInput[]
+    by: PoolBBatchScalarFieldEnum[] | PoolBBatchScalarFieldEnum
+    having?: PoolBBatchScalarWhereWithAggregatesInput
+    take?: number
+    skip?: number
+    _count?: PoolBBatchCountAggregateInputType | true
+    _avg?: PoolBBatchAvgAggregateInputType
+    _sum?: PoolBBatchSumAggregateInputType
+    _min?: PoolBBatchMinAggregateInputType
+    _max?: PoolBBatchMaxAggregateInputType
+  }
+
+  export type PoolBBatchGroupByOutputType = {
+    id: string
+    jobId: string
+    batchIndex: number
+    status: $Enums.PoolBBatchStatus
+    startRow: number
+    endRow: number
+    rowCount: number
+    successCount: number
+    failedCount: number
+    startedAt: Date | null
+    completedAt: Date | null
+    results: JsonValue | null
+    errorMessage: string | null
+    _count: PoolBBatchCountAggregateOutputType | null
+    _avg: PoolBBatchAvgAggregateOutputType | null
+    _sum: PoolBBatchSumAggregateOutputType | null
+    _min: PoolBBatchMinAggregateOutputType | null
+    _max: PoolBBatchMaxAggregateOutputType | null
+  }
+
+  type GetPoolBBatchGroupByPayload<T extends PoolBBatchGroupByArgs> = Prisma.PrismaPromise<
+    Array<
+      PickEnumerable<PoolBBatchGroupByOutputType, T['by']> &
+        {
+          [P in ((keyof T) & (keyof PoolBBatchGroupByOutputType))]: P extends '_count'
+            ? T[P] extends boolean
+              ? number
+              : GetScalarType<T[P], PoolBBatchGroupByOutputType[P]>
+            : GetScalarType<T[P], PoolBBatchGroupByOutputType[P]>
+        }
+      >
+    >
+
+
+  export type PoolBBatchSelect<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
+    id?: boolean
+    jobId?: boolean
+    batchIndex?: boolean
+    status?: boolean
+    startRow?: boolean
+    endRow?: boolean
+    rowCount?: boolean
+    successCount?: boolean
+    failedCount?: boolean
+    startedAt?: boolean
+    completedAt?: boolean
+    results?: boolean
+    errorMessage?: boolean
+    job?: boolean | PoolBJobDefaultArgs<ExtArgs>
+  }, ExtArgs["result"]["poolBBatch"]>
+
+  export type PoolBBatchSelectCreateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
+    id?: boolean
+    jobId?: boolean
+    batchIndex?: boolean
+    status?: boolean
+    startRow?: boolean
+    endRow?: boolean
+    rowCount?: boolean
+    successCount?: boolean
+    failedCount?: boolean
+    startedAt?: boolean
+    completedAt?: boolean
+    results?: boolean
+    errorMessage?: boolean
+    job?: boolean | PoolBJobDefaultArgs<ExtArgs>
+  }, ExtArgs["result"]["poolBBatch"]>
+
+  export type PoolBBatchSelectUpdateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
+    id?: boolean
+    jobId?: boolean
+    batchIndex?: boolean
+    status?: boolean
+    startRow?: boolean
+    endRow?: boolean
+    rowCount?: boolean
+    successCount?: boolean
+    failedCount?: boolean
+    startedAt?: boolean
+    completedAt?: boolean
+    results?: boolean
+    errorMessage?: boolean
+    job?: boolean | PoolBJobDefaultArgs<ExtArgs>
+  }, ExtArgs["result"]["poolBBatch"]>
+
+  export type PoolBBatchSelectScalar = {
+    id?: boolean
+    jobId?: boolean
+    batchIndex?: boolean
+    status?: boolean
+    startRow?: boolean
+    endRow?: boolean
+    rowCount?: boolean
+    successCount?: boolean
+    failedCount?: boolean
+    startedAt?: boolean
+    completedAt?: boolean
+    results?: boolean
+    errorMessage?: boolean
+  }
+
+  export type PoolBBatchOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<"id" | "jobId" | "batchIndex" | "status" | "startRow" | "endRow" | "rowCount" | "successCount" | "failedCount" | "startedAt" | "completedAt" | "results" | "errorMessage", ExtArgs["result"]["poolBBatch"]>
+  export type PoolBBatchInclude<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    job?: boolean | PoolBJobDefaultArgs<ExtArgs>
+  }
+  export type PoolBBatchIncludeCreateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    job?: boolean | PoolBJobDefaultArgs<ExtArgs>
+  }
+  export type PoolBBatchIncludeUpdateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    job?: boolean | PoolBJobDefaultArgs<ExtArgs>
+  }
+
+  export type $PoolBBatchPayload<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    name: "PoolBBatch"
+    objects: {
+      job: Prisma.$PoolBJobPayload<ExtArgs>
+    }
+    scalars: $Extensions.GetPayloadResult<{
+      id: string
+      jobId: string
+      batchIndex: number
+      status: $Enums.PoolBBatchStatus
+      startRow: number
+      endRow: number
+      rowCount: number
+      successCount: number
+      failedCount: number
+      startedAt: Date | null
+      completedAt: Date | null
+      results: Prisma.JsonValue | null
+      errorMessage: string | null
+    }, ExtArgs["result"]["poolBBatch"]>
+    composites: {}
+  }
+
+  type PoolBBatchGetPayload<S extends boolean | null | undefined | PoolBBatchDefaultArgs> = $Result.GetResult<Prisma.$PoolBBatchPayload, S>
+
+  type PoolBBatchCountArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> =
+    Omit<PoolBBatchFindManyArgs, 'select' | 'include' | 'distinct' | 'omit'> & {
+      select?: PoolBBatchCountAggregateInputType | true
+    }
+
+  export interface PoolBBatchDelegate<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs, GlobalOmitOptions = {}> {
+    [K: symbol]: { types: Prisma.TypeMap<ExtArgs>['model']['PoolBBatch'], meta: { name: 'PoolBBatch' } }
+    /**
+     * Find zero or one PoolBBatch that matches the filter.
+     * @param {PoolBBatchFindUniqueArgs} args - Arguments to find a PoolBBatch
+     * @example
+     * // Get one PoolBBatch
+     * const poolBBatch = await prisma.poolBBatch.findUnique({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     */
+    findUnique<T extends PoolBBatchFindUniqueArgs>(args: SelectSubset<T, PoolBBatchFindUniqueArgs<ExtArgs>>): Prisma__PoolBBatchClient<$Result.GetResult<Prisma.$PoolBBatchPayload<ExtArgs>, T, "findUnique", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Find one PoolBBatch that matches the filter or throw an error with `error.code='P2025'`
+     * if no matches were found.
+     * @param {PoolBBatchFindUniqueOrThrowArgs} args - Arguments to find a PoolBBatch
+     * @example
+     * // Get one PoolBBatch
+     * const poolBBatch = await prisma.poolBBatch.findUniqueOrThrow({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     */
+    findUniqueOrThrow<T extends PoolBBatchFindUniqueOrThrowArgs>(args: SelectSubset<T, PoolBBatchFindUniqueOrThrowArgs<ExtArgs>>): Prisma__PoolBBatchClient<$Result.GetResult<Prisma.$PoolBBatchPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Find the first PoolBBatch that matches the filter.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {PoolBBatchFindFirstArgs} args - Arguments to find a PoolBBatch
+     * @example
+     * // Get one PoolBBatch
+     * const poolBBatch = await prisma.poolBBatch.findFirst({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     */
+    findFirst<T extends PoolBBatchFindFirstArgs>(args?: SelectSubset<T, PoolBBatchFindFirstArgs<ExtArgs>>): Prisma__PoolBBatchClient<$Result.GetResult<Prisma.$PoolBBatchPayload<ExtArgs>, T, "findFirst", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Find the first PoolBBatch that matches the filter or
+     * throw `PrismaKnownClientError` with `P2025` code if no matches were found.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {PoolBBatchFindFirstOrThrowArgs} args - Arguments to find a PoolBBatch
+     * @example
+     * // Get one PoolBBatch
+     * const poolBBatch = await prisma.poolBBatch.findFirstOrThrow({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     */
+    findFirstOrThrow<T extends PoolBBatchFindFirstOrThrowArgs>(args?: SelectSubset<T, PoolBBatchFindFirstOrThrowArgs<ExtArgs>>): Prisma__PoolBBatchClient<$Result.GetResult<Prisma.$PoolBBatchPayload<ExtArgs>, T, "findFirstOrThrow", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Find zero or more PoolBBatches that matches the filter.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {PoolBBatchFindManyArgs} args - Arguments to filter and select certain fields only.
+     * @example
+     * // Get all PoolBBatches
+     * const poolBBatches = await prisma.poolBBatch.findMany()
+     * 
+     * // Get first 10 PoolBBatches
+     * const poolBBatches = await prisma.poolBBatch.findMany({ take: 10 })
+     * 
+     * // Only select the `id`
+     * const poolBBatchWithIdOnly = await prisma.poolBBatch.findMany({ select: { id: true } })
+     * 
+     */
+    findMany<T extends PoolBBatchFindManyArgs>(args?: SelectSubset<T, PoolBBatchFindManyArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$PoolBBatchPayload<ExtArgs>, T, "findMany", GlobalOmitOptions>>
+
+    /**
+     * Create a PoolBBatch.
+     * @param {PoolBBatchCreateArgs} args - Arguments to create a PoolBBatch.
+     * @example
+     * // Create one PoolBBatch
+     * const PoolBBatch = await prisma.poolBBatch.create({
+     *   data: {
+     *     // ... data to create a PoolBBatch
+     *   }
+     * })
+     * 
+     */
+    create<T extends PoolBBatchCreateArgs>(args: SelectSubset<T, PoolBBatchCreateArgs<ExtArgs>>): Prisma__PoolBBatchClient<$Result.GetResult<Prisma.$PoolBBatchPayload<ExtArgs>, T, "create", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Create many PoolBBatches.
+     * @param {PoolBBatchCreateManyArgs} args - Arguments to create many PoolBBatches.
+     * @example
+     * // Create many PoolBBatches
+     * const poolBBatch = await prisma.poolBBatch.createMany({
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     *     
+     */
+    createMany<T extends PoolBBatchCreateManyArgs>(args?: SelectSubset<T, PoolBBatchCreateManyArgs<ExtArgs>>): Prisma.PrismaPromise<BatchPayload>
+
+    /**
+     * Create many PoolBBatches and returns the data saved in the database.
+     * @param {PoolBBatchCreateManyAndReturnArgs} args - Arguments to create many PoolBBatches.
+     * @example
+     * // Create many PoolBBatches
+     * const poolBBatch = await prisma.poolBBatch.createManyAndReturn({
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     * 
+     * // Create many PoolBBatches and only return the `id`
+     * const poolBBatchWithIdOnly = await prisma.poolBBatch.createManyAndReturn({
+     *   select: { id: true },
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * 
+     */
+    createManyAndReturn<T extends PoolBBatchCreateManyAndReturnArgs>(args?: SelectSubset<T, PoolBBatchCreateManyAndReturnArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$PoolBBatchPayload<ExtArgs>, T, "createManyAndReturn", GlobalOmitOptions>>
+
+    /**
+     * Delete a PoolBBatch.
+     * @param {PoolBBatchDeleteArgs} args - Arguments to delete one PoolBBatch.
+     * @example
+     * // Delete one PoolBBatch
+     * const PoolBBatch = await prisma.poolBBatch.delete({
+     *   where: {
+     *     // ... filter to delete one PoolBBatch
+     *   }
+     * })
+     * 
+     */
+    delete<T extends PoolBBatchDeleteArgs>(args: SelectSubset<T, PoolBBatchDeleteArgs<ExtArgs>>): Prisma__PoolBBatchClient<$Result.GetResult<Prisma.$PoolBBatchPayload<ExtArgs>, T, "delete", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Update one PoolBBatch.
+     * @param {PoolBBatchUpdateArgs} args - Arguments to update one PoolBBatch.
+     * @example
+     * // Update one PoolBBatch
+     * const poolBBatch = await prisma.poolBBatch.update({
+     *   where: {
+     *     // ... provide filter here
+     *   },
+     *   data: {
+     *     // ... provide data here
+     *   }
+     * })
+     * 
+     */
+    update<T extends PoolBBatchUpdateArgs>(args: SelectSubset<T, PoolBBatchUpdateArgs<ExtArgs>>): Prisma__PoolBBatchClient<$Result.GetResult<Prisma.$PoolBBatchPayload<ExtArgs>, T, "update", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Delete zero or more PoolBBatches.
+     * @param {PoolBBatchDeleteManyArgs} args - Arguments to filter PoolBBatches to delete.
+     * @example
+     * // Delete a few PoolBBatches
+     * const { count } = await prisma.poolBBatch.deleteMany({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     * 
+     */
+    deleteMany<T extends PoolBBatchDeleteManyArgs>(args?: SelectSubset<T, PoolBBatchDeleteManyArgs<ExtArgs>>): Prisma.PrismaPromise<BatchPayload>
+
+    /**
+     * Update zero or more PoolBBatches.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {PoolBBatchUpdateManyArgs} args - Arguments to update one or more rows.
+     * @example
+     * // Update many PoolBBatches
+     * const poolBBatch = await prisma.poolBBatch.updateMany({
+     *   where: {
+     *     // ... provide filter here
+     *   },
+     *   data: {
+     *     // ... provide data here
+     *   }
+     * })
+     * 
+     */
+    updateMany<T extends PoolBBatchUpdateManyArgs>(args: SelectSubset<T, PoolBBatchUpdateManyArgs<ExtArgs>>): Prisma.PrismaPromise<BatchPayload>
+
+    /**
+     * Update zero or more PoolBBatches and returns the data updated in the database.
+     * @param {PoolBBatchUpdateManyAndReturnArgs} args - Arguments to update many PoolBBatches.
+     * @example
+     * // Update many PoolBBatches
+     * const poolBBatch = await prisma.poolBBatch.updateManyAndReturn({
+     *   where: {
+     *     // ... provide filter here
+     *   },
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     * 
+     * // Update zero or more PoolBBatches and only return the `id`
+     * const poolBBatchWithIdOnly = await prisma.poolBBatch.updateManyAndReturn({
+     *   select: { id: true },
+     *   where: {
+     *     // ... provide filter here
+     *   },
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * 
+     */
+    updateManyAndReturn<T extends PoolBBatchUpdateManyAndReturnArgs>(args: SelectSubset<T, PoolBBatchUpdateManyAndReturnArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$PoolBBatchPayload<ExtArgs>, T, "updateManyAndReturn", GlobalOmitOptions>>
+
+    /**
+     * Create or update one PoolBBatch.
+     * @param {PoolBBatchUpsertArgs} args - Arguments to update or create a PoolBBatch.
+     * @example
+     * // Update or create a PoolBBatch
+     * const poolBBatch = await prisma.poolBBatch.upsert({
+     *   create: {
+     *     // ... data to create a PoolBBatch
+     *   },
+     *   update: {
+     *     // ... in case it already exists, update
+     *   },
+     *   where: {
+     *     // ... the filter for the PoolBBatch we want to update
+     *   }
+     * })
+     */
+    upsert<T extends PoolBBatchUpsertArgs>(args: SelectSubset<T, PoolBBatchUpsertArgs<ExtArgs>>): Prisma__PoolBBatchClient<$Result.GetResult<Prisma.$PoolBBatchPayload<ExtArgs>, T, "upsert", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+
+    /**
+     * Count the number of PoolBBatches.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {PoolBBatchCountArgs} args - Arguments to filter PoolBBatches to count.
+     * @example
+     * // Count the number of PoolBBatches
+     * const count = await prisma.poolBBatch.count({
+     *   where: {
+     *     // ... the filter for the PoolBBatches we want to count
+     *   }
+     * })
+    **/
+    count<T extends PoolBBatchCountArgs>(
+      args?: Subset<T, PoolBBatchCountArgs>,
+    ): Prisma.PrismaPromise<
+      T extends $Utils.Record<'select', any>
+        ? T['select'] extends true
+          ? number
+          : GetScalarType<T['select'], PoolBBatchCountAggregateOutputType>
+        : number
+    >
+
+    /**
+     * Allows you to perform aggregations operations on a PoolBBatch.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {PoolBBatchAggregateArgs} args - Select which aggregations you would like to apply and on what fields.
+     * @example
+     * // Ordered by age ascending
+     * // Where email contains prisma.io
+     * // Limited to the 10 users
+     * const aggregations = await prisma.user.aggregate({
+     *   _avg: {
+     *     age: true,
+     *   },
+     *   where: {
+     *     email: {
+     *       contains: "prisma.io",
+     *     },
+     *   },
+     *   orderBy: {
+     *     age: "asc",
+     *   },
+     *   take: 10,
+     * })
+    **/
+    aggregate<T extends PoolBBatchAggregateArgs>(args: Subset<T, PoolBBatchAggregateArgs>): Prisma.PrismaPromise<GetPoolBBatchAggregateType<T>>
+
+    /**
+     * Group by PoolBBatch.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {PoolBBatchGroupByArgs} args - Group by arguments.
+     * @example
+     * // Group by city, order by createdAt, get count
+     * const result = await prisma.user.groupBy({
+     *   by: ['city', 'createdAt'],
+     *   orderBy: {
+     *     createdAt: true
+     *   },
+     *   _count: {
+     *     _all: true
+     *   },
+     * })
+     * 
+    **/
+    groupBy<
+      T extends PoolBBatchGroupByArgs,
+      HasSelectOrTake extends Or<
+        Extends<'skip', Keys<T>>,
+        Extends<'take', Keys<T>>
+      >,
+      OrderByArg extends True extends HasSelectOrTake
+        ? { orderBy: PoolBBatchGroupByArgs['orderBy'] }
+        : { orderBy?: PoolBBatchGroupByArgs['orderBy'] },
+      OrderFields extends ExcludeUnderscoreKeys<Keys<MaybeTupleToUnion<T['orderBy']>>>,
+      ByFields extends MaybeTupleToUnion<T['by']>,
+      ByValid extends Has<ByFields, OrderFields>,
+      HavingFields extends GetHavingFields<T['having']>,
+      HavingValid extends Has<ByFields, HavingFields>,
+      ByEmpty extends T['by'] extends never[] ? True : False,
+      InputErrors extends ByEmpty extends True
+      ? `Error: "by" must not be empty.`
+      : HavingValid extends False
+      ? {
+          [P in HavingFields]: P extends ByFields
+            ? never
+            : P extends string
+            ? `Error: Field "${P}" used in "having" needs to be provided in "by".`
+            : [
+                Error,
+                'Field ',
+                P,
+                ` in "having" needs to be provided in "by"`,
+              ]
+        }[HavingFields]
+      : 'take' extends Keys<T>
+      ? 'orderBy' extends Keys<T>
+        ? ByValid extends True
+          ? {}
+          : {
+              [P in OrderFields]: P extends ByFields
+                ? never
+                : `Error: Field "${P}" in "orderBy" needs to be provided in "by"`
+            }[OrderFields]
+        : 'Error: If you provide "take", you also need to provide "orderBy"'
+      : 'skip' extends Keys<T>
+      ? 'orderBy' extends Keys<T>
+        ? ByValid extends True
+          ? {}
+          : {
+              [P in OrderFields]: P extends ByFields
+                ? never
+                : `Error: Field "${P}" in "orderBy" needs to be provided in "by"`
+            }[OrderFields]
+        : 'Error: If you provide "skip", you also need to provide "orderBy"'
+      : ByValid extends True
+      ? {}
+      : {
+          [P in OrderFields]: P extends ByFields
+            ? never
+            : `Error: Field "${P}" in "orderBy" needs to be provided in "by"`
+        }[OrderFields]
+    >(args: SubsetIntersection<T, PoolBBatchGroupByArgs, OrderByArg> & InputErrors): {} extends InputErrors ? GetPoolBBatchGroupByPayload<T> : Prisma.PrismaPromise<InputErrors>
+  /**
+   * Fields of the PoolBBatch model
+   */
+  readonly fields: PoolBBatchFieldRefs;
+  }
+
+  /**
+   * The delegate class that acts as a "Promise-like" for PoolBBatch.
+   * Why is this prefixed with `Prisma__`?
+   * Because we want to prevent naming conflicts as mentioned in
+   * https://github.com/prisma/prisma-client-js/issues/707
+   */
+  export interface Prisma__PoolBBatchClient<T, Null = never, ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs, GlobalOmitOptions = {}> extends Prisma.PrismaPromise<T> {
+    readonly [Symbol.toStringTag]: "PrismaPromise"
+    job<T extends PoolBJobDefaultArgs<ExtArgs> = {}>(args?: Subset<T, PoolBJobDefaultArgs<ExtArgs>>): Prisma__PoolBJobClient<$Result.GetResult<Prisma.$PoolBJobPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | Null, Null, ExtArgs, GlobalOmitOptions>
+    /**
+     * Attaches callbacks for the resolution and/or rejection of the Promise.
+     * @param onfulfilled The callback to execute when the Promise is resolved.
+     * @param onrejected The callback to execute when the Promise is rejected.
+     * @returns A Promise for the completion of which ever callback is executed.
+     */
+    then<TResult1 = T, TResult2 = never>(onfulfilled?: ((value: T) => TResult1 | PromiseLike<TResult1>) | undefined | null, onrejected?: ((reason: any) => TResult2 | PromiseLike<TResult2>) | undefined | null): $Utils.JsPromise<TResult1 | TResult2>
+    /**
+     * Attaches a callback for only the rejection of the Promise.
+     * @param onrejected The callback to execute when the Promise is rejected.
+     * @returns A Promise for the completion of the callback.
+     */
+    catch<TResult = never>(onrejected?: ((reason: any) => TResult | PromiseLike<TResult>) | undefined | null): $Utils.JsPromise<T | TResult>
+    /**
+     * Attaches a callback that is invoked when the Promise is settled (fulfilled or rejected). The
+     * resolved value cannot be modified from the callback.
+     * @param onfinally The callback to execute when the Promise is settled (fulfilled or rejected).
+     * @returns A Promise for the completion of the callback.
+     */
+    finally(onfinally?: (() => void) | undefined | null): $Utils.JsPromise<T>
+  }
+
+
+
+
+  /**
+   * Fields of the PoolBBatch model
+   */
+  interface PoolBBatchFieldRefs {
+    readonly id: FieldRef<"PoolBBatch", 'String'>
+    readonly jobId: FieldRef<"PoolBBatch", 'String'>
+    readonly batchIndex: FieldRef<"PoolBBatch", 'Int'>
+    readonly status: FieldRef<"PoolBBatch", 'PoolBBatchStatus'>
+    readonly startRow: FieldRef<"PoolBBatch", 'Int'>
+    readonly endRow: FieldRef<"PoolBBatch", 'Int'>
+    readonly rowCount: FieldRef<"PoolBBatch", 'Int'>
+    readonly successCount: FieldRef<"PoolBBatch", 'Int'>
+    readonly failedCount: FieldRef<"PoolBBatch", 'Int'>
+    readonly startedAt: FieldRef<"PoolBBatch", 'DateTime'>
+    readonly completedAt: FieldRef<"PoolBBatch", 'DateTime'>
+    readonly results: FieldRef<"PoolBBatch", 'Json'>
+    readonly errorMessage: FieldRef<"PoolBBatch", 'String'>
+  }
+    
+
+  // Custom InputTypes
+  /**
+   * PoolBBatch findUnique
+   */
+  export type PoolBBatchFindUniqueArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the PoolBBatch
+     */
+    select?: PoolBBatchSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the PoolBBatch
+     */
+    omit?: PoolBBatchOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: PoolBBatchInclude<ExtArgs> | null
+    /**
+     * Filter, which PoolBBatch to fetch.
+     */
+    where: PoolBBatchWhereUniqueInput
+  }
+
+  /**
+   * PoolBBatch findUniqueOrThrow
+   */
+  export type PoolBBatchFindUniqueOrThrowArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the PoolBBatch
+     */
+    select?: PoolBBatchSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the PoolBBatch
+     */
+    omit?: PoolBBatchOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: PoolBBatchInclude<ExtArgs> | null
+    /**
+     * Filter, which PoolBBatch to fetch.
+     */
+    where: PoolBBatchWhereUniqueInput
+  }
+
+  /**
+   * PoolBBatch findFirst
+   */
+  export type PoolBBatchFindFirstArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the PoolBBatch
+     */
+    select?: PoolBBatchSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the PoolBBatch
+     */
+    omit?: PoolBBatchOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: PoolBBatchInclude<ExtArgs> | null
+    /**
+     * Filter, which PoolBBatch to fetch.
+     */
+    where?: PoolBBatchWhereInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
+     * 
+     * Determine the order of PoolBBatches to fetch.
+     */
+    orderBy?: PoolBBatchOrderByWithRelationInput | PoolBBatchOrderByWithRelationInput[]
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
+     * 
+     * Sets the position for searching for PoolBBatches.
+     */
+    cursor?: PoolBBatchWhereUniqueInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Take `±n` PoolBBatches from the position of the cursor.
+     */
+    take?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Skip the first `n` PoolBBatches.
+     */
+    skip?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/distinct Distinct Docs}
+     * 
+     * Filter by unique combinations of PoolBBatches.
+     */
+    distinct?: PoolBBatchScalarFieldEnum | PoolBBatchScalarFieldEnum[]
+  }
+
+  /**
+   * PoolBBatch findFirstOrThrow
+   */
+  export type PoolBBatchFindFirstOrThrowArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the PoolBBatch
+     */
+    select?: PoolBBatchSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the PoolBBatch
+     */
+    omit?: PoolBBatchOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: PoolBBatchInclude<ExtArgs> | null
+    /**
+     * Filter, which PoolBBatch to fetch.
+     */
+    where?: PoolBBatchWhereInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
+     * 
+     * Determine the order of PoolBBatches to fetch.
+     */
+    orderBy?: PoolBBatchOrderByWithRelationInput | PoolBBatchOrderByWithRelationInput[]
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
+     * 
+     * Sets the position for searching for PoolBBatches.
+     */
+    cursor?: PoolBBatchWhereUniqueInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Take `±n` PoolBBatches from the position of the cursor.
+     */
+    take?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Skip the first `n` PoolBBatches.
+     */
+    skip?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/distinct Distinct Docs}
+     * 
+     * Filter by unique combinations of PoolBBatches.
+     */
+    distinct?: PoolBBatchScalarFieldEnum | PoolBBatchScalarFieldEnum[]
+  }
+
+  /**
+   * PoolBBatch findMany
+   */
+  export type PoolBBatchFindManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the PoolBBatch
+     */
+    select?: PoolBBatchSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the PoolBBatch
+     */
+    omit?: PoolBBatchOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: PoolBBatchInclude<ExtArgs> | null
+    /**
+     * Filter, which PoolBBatches to fetch.
+     */
+    where?: PoolBBatchWhereInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
+     * 
+     * Determine the order of PoolBBatches to fetch.
+     */
+    orderBy?: PoolBBatchOrderByWithRelationInput | PoolBBatchOrderByWithRelationInput[]
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
+     * 
+     * Sets the position for listing PoolBBatches.
+     */
+    cursor?: PoolBBatchWhereUniqueInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Take `±n` PoolBBatches from the position of the cursor.
+     */
+    take?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Skip the first `n` PoolBBatches.
+     */
+    skip?: number
+    distinct?: PoolBBatchScalarFieldEnum | PoolBBatchScalarFieldEnum[]
+  }
+
+  /**
+   * PoolBBatch create
+   */
+  export type PoolBBatchCreateArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the PoolBBatch
+     */
+    select?: PoolBBatchSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the PoolBBatch
+     */
+    omit?: PoolBBatchOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: PoolBBatchInclude<ExtArgs> | null
+    /**
+     * The data needed to create a PoolBBatch.
+     */
+    data: XOR<PoolBBatchCreateInput, PoolBBatchUncheckedCreateInput>
+  }
+
+  /**
+   * PoolBBatch createMany
+   */
+  export type PoolBBatchCreateManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * The data used to create many PoolBBatches.
+     */
+    data: PoolBBatchCreateManyInput | PoolBBatchCreateManyInput[]
+    skipDuplicates?: boolean
+  }
+
+  /**
+   * PoolBBatch createManyAndReturn
+   */
+  export type PoolBBatchCreateManyAndReturnArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the PoolBBatch
+     */
+    select?: PoolBBatchSelectCreateManyAndReturn<ExtArgs> | null
+    /**
+     * Omit specific fields from the PoolBBatch
+     */
+    omit?: PoolBBatchOmit<ExtArgs> | null
+    /**
+     * The data used to create many PoolBBatches.
+     */
+    data: PoolBBatchCreateManyInput | PoolBBatchCreateManyInput[]
+    skipDuplicates?: boolean
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: PoolBBatchIncludeCreateManyAndReturn<ExtArgs> | null
+  }
+
+  /**
+   * PoolBBatch update
+   */
+  export type PoolBBatchUpdateArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the PoolBBatch
+     */
+    select?: PoolBBatchSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the PoolBBatch
+     */
+    omit?: PoolBBatchOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: PoolBBatchInclude<ExtArgs> | null
+    /**
+     * The data needed to update a PoolBBatch.
+     */
+    data: XOR<PoolBBatchUpdateInput, PoolBBatchUncheckedUpdateInput>
+    /**
+     * Choose, which PoolBBatch to update.
+     */
+    where: PoolBBatchWhereUniqueInput
+  }
+
+  /**
+   * PoolBBatch updateMany
+   */
+  export type PoolBBatchUpdateManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * The data used to update PoolBBatches.
+     */
+    data: XOR<PoolBBatchUpdateManyMutationInput, PoolBBatchUncheckedUpdateManyInput>
+    /**
+     * Filter which PoolBBatches to update
+     */
+    where?: PoolBBatchWhereInput
+    /**
+     * Limit how many PoolBBatches to update.
+     */
+    limit?: number
+  }
+
+  /**
+   * PoolBBatch updateManyAndReturn
+   */
+  export type PoolBBatchUpdateManyAndReturnArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the PoolBBatch
+     */
+    select?: PoolBBatchSelectUpdateManyAndReturn<ExtArgs> | null
+    /**
+     * Omit specific fields from the PoolBBatch
+     */
+    omit?: PoolBBatchOmit<ExtArgs> | null
+    /**
+     * The data used to update PoolBBatches.
+     */
+    data: XOR<PoolBBatchUpdateManyMutationInput, PoolBBatchUncheckedUpdateManyInput>
+    /**
+     * Filter which PoolBBatches to update
+     */
+    where?: PoolBBatchWhereInput
+    /**
+     * Limit how many PoolBBatches to update.
+     */
+    limit?: number
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: PoolBBatchIncludeUpdateManyAndReturn<ExtArgs> | null
+  }
+
+  /**
+   * PoolBBatch upsert
+   */
+  export type PoolBBatchUpsertArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the PoolBBatch
+     */
+    select?: PoolBBatchSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the PoolBBatch
+     */
+    omit?: PoolBBatchOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: PoolBBatchInclude<ExtArgs> | null
+    /**
+     * The filter to search for the PoolBBatch to update in case it exists.
+     */
+    where: PoolBBatchWhereUniqueInput
+    /**
+     * In case the PoolBBatch found by the `where` argument doesn't exist, create a new PoolBBatch with this data.
+     */
+    create: XOR<PoolBBatchCreateInput, PoolBBatchUncheckedCreateInput>
+    /**
+     * In case the PoolBBatch was found with the provided `where` argument, update it with this data.
+     */
+    update: XOR<PoolBBatchUpdateInput, PoolBBatchUncheckedUpdateInput>
+  }
+
+  /**
+   * PoolBBatch delete
+   */
+  export type PoolBBatchDeleteArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the PoolBBatch
+     */
+    select?: PoolBBatchSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the PoolBBatch
+     */
+    omit?: PoolBBatchOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: PoolBBatchInclude<ExtArgs> | null
+    /**
+     * Filter which PoolBBatch to delete.
+     */
+    where: PoolBBatchWhereUniqueInput
+  }
+
+  /**
+   * PoolBBatch deleteMany
+   */
+  export type PoolBBatchDeleteManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Filter which PoolBBatches to delete
+     */
+    where?: PoolBBatchWhereInput
+    /**
+     * Limit how many PoolBBatches to delete.
+     */
+    limit?: number
+  }
+
+  /**
+   * PoolBBatch without action
+   */
+  export type PoolBBatchDefaultArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the PoolBBatch
+     */
+    select?: PoolBBatchSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the PoolBBatch
+     */
+    omit?: PoolBBatchOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: PoolBBatchInclude<ExtArgs> | null
+  }
+
+
+  /**
    * Enums
    */
 
@@ -41800,6 +44465,43 @@ export namespace Prisma {
   export type SrmSyncRunItemScalarFieldEnum = (typeof SrmSyncRunItemScalarFieldEnum)[keyof typeof SrmSyncRunItemScalarFieldEnum]
 
 
+  export const PoolBJobScalarFieldEnum: {
+    id: 'id',
+    status: 'status',
+    env: 'env',
+    test: 'test',
+    totalRows: 'totalRows',
+    totalBatches: 'totalBatches',
+    batchSize: 'batchSize',
+    successRows: 'successRows',
+    failedRows: 'failedRows',
+    createdAt: 'createdAt',
+    startedAt: 'startedAt',
+    completedAt: 'completedAt'
+  };
+
+  export type PoolBJobScalarFieldEnum = (typeof PoolBJobScalarFieldEnum)[keyof typeof PoolBJobScalarFieldEnum]
+
+
+  export const PoolBBatchScalarFieldEnum: {
+    id: 'id',
+    jobId: 'jobId',
+    batchIndex: 'batchIndex',
+    status: 'status',
+    startRow: 'startRow',
+    endRow: 'endRow',
+    rowCount: 'rowCount',
+    successCount: 'successCount',
+    failedCount: 'failedCount',
+    startedAt: 'startedAt',
+    completedAt: 'completedAt',
+    results: 'results',
+    errorMessage: 'errorMessage'
+  };
+
+  export type PoolBBatchScalarFieldEnum = (typeof PoolBBatchScalarFieldEnum)[keyof typeof PoolBBatchScalarFieldEnum]
+
+
   export const SortOrder: {
     asc: 'asc',
     desc: 'desc'
@@ -42375,6 +45077,23 @@ export namespace Prisma {
   export type SrmSyncRunItemOrderByRelevanceFieldEnum = (typeof SrmSyncRunItemOrderByRelevanceFieldEnum)[keyof typeof SrmSyncRunItemOrderByRelevanceFieldEnum]
 
 
+  export const PoolBJobOrderByRelevanceFieldEnum: {
+    id: 'id',
+    env: 'env'
+  };
+
+  export type PoolBJobOrderByRelevanceFieldEnum = (typeof PoolBJobOrderByRelevanceFieldEnum)[keyof typeof PoolBJobOrderByRelevanceFieldEnum]
+
+
+  export const PoolBBatchOrderByRelevanceFieldEnum: {
+    id: 'id',
+    jobId: 'jobId',
+    errorMessage: 'errorMessage'
+  };
+
+  export type PoolBBatchOrderByRelevanceFieldEnum = (typeof PoolBBatchOrderByRelevanceFieldEnum)[keyof typeof PoolBBatchOrderByRelevanceFieldEnum]
+
+
   /**
    * Field references
    */
@@ -42580,6 +45299,34 @@ export namespace Prisma {
    * Reference to a field of type 'RawArticleStatus[]'
    */
   export type ListEnumRawArticleStatusFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'RawArticleStatus[]'>
+    
+
+
+  /**
+   * Reference to a field of type 'PoolBJobStatus'
+   */
+  export type EnumPoolBJobStatusFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'PoolBJobStatus'>
+    
+
+
+  /**
+   * Reference to a field of type 'PoolBJobStatus[]'
+   */
+  export type ListEnumPoolBJobStatusFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'PoolBJobStatus[]'>
+    
+
+
+  /**
+   * Reference to a field of type 'PoolBBatchStatus'
+   */
+  export type EnumPoolBBatchStatusFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'PoolBBatchStatus'>
+    
+
+
+  /**
+   * Reference to a field of type 'PoolBBatchStatus[]'
+   */
+  export type ListEnumPoolBBatchStatusFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'PoolBBatchStatus[]'>
     
 
 
@@ -46317,6 +49064,197 @@ export namespace Prisma {
     action?: StringWithAggregatesFilter<"SrmSyncRunItem"> | string
     errorMessage?: StringNullableWithAggregatesFilter<"SrmSyncRunItem"> | string | null
     createdAt?: DateTimeWithAggregatesFilter<"SrmSyncRunItem"> | Date | string
+  }
+
+  export type PoolBJobWhereInput = {
+    AND?: PoolBJobWhereInput | PoolBJobWhereInput[]
+    OR?: PoolBJobWhereInput[]
+    NOT?: PoolBJobWhereInput | PoolBJobWhereInput[]
+    id?: UuidFilter<"PoolBJob"> | string
+    status?: EnumPoolBJobStatusFilter<"PoolBJob"> | $Enums.PoolBJobStatus
+    env?: StringFilter<"PoolBJob"> | string
+    test?: BoolFilter<"PoolBJob"> | boolean
+    totalRows?: IntFilter<"PoolBJob"> | number
+    totalBatches?: IntFilter<"PoolBJob"> | number
+    batchSize?: IntFilter<"PoolBJob"> | number
+    successRows?: IntFilter<"PoolBJob"> | number
+    failedRows?: IntFilter<"PoolBJob"> | number
+    createdAt?: DateTimeFilter<"PoolBJob"> | Date | string
+    startedAt?: DateTimeNullableFilter<"PoolBJob"> | Date | string | null
+    completedAt?: DateTimeNullableFilter<"PoolBJob"> | Date | string | null
+    batches?: PoolBBatchListRelationFilter
+  }
+
+  export type PoolBJobOrderByWithRelationInput = {
+    id?: SortOrder
+    status?: SortOrder
+    env?: SortOrder
+    test?: SortOrder
+    totalRows?: SortOrder
+    totalBatches?: SortOrder
+    batchSize?: SortOrder
+    successRows?: SortOrder
+    failedRows?: SortOrder
+    createdAt?: SortOrder
+    startedAt?: SortOrderInput | SortOrder
+    completedAt?: SortOrderInput | SortOrder
+    batches?: PoolBBatchOrderByRelationAggregateInput
+    _relevance?: PoolBJobOrderByRelevanceInput
+  }
+
+  export type PoolBJobWhereUniqueInput = Prisma.AtLeast<{
+    id?: string
+    AND?: PoolBJobWhereInput | PoolBJobWhereInput[]
+    OR?: PoolBJobWhereInput[]
+    NOT?: PoolBJobWhereInput | PoolBJobWhereInput[]
+    status?: EnumPoolBJobStatusFilter<"PoolBJob"> | $Enums.PoolBJobStatus
+    env?: StringFilter<"PoolBJob"> | string
+    test?: BoolFilter<"PoolBJob"> | boolean
+    totalRows?: IntFilter<"PoolBJob"> | number
+    totalBatches?: IntFilter<"PoolBJob"> | number
+    batchSize?: IntFilter<"PoolBJob"> | number
+    successRows?: IntFilter<"PoolBJob"> | number
+    failedRows?: IntFilter<"PoolBJob"> | number
+    createdAt?: DateTimeFilter<"PoolBJob"> | Date | string
+    startedAt?: DateTimeNullableFilter<"PoolBJob"> | Date | string | null
+    completedAt?: DateTimeNullableFilter<"PoolBJob"> | Date | string | null
+    batches?: PoolBBatchListRelationFilter
+  }, "id">
+
+  export type PoolBJobOrderByWithAggregationInput = {
+    id?: SortOrder
+    status?: SortOrder
+    env?: SortOrder
+    test?: SortOrder
+    totalRows?: SortOrder
+    totalBatches?: SortOrder
+    batchSize?: SortOrder
+    successRows?: SortOrder
+    failedRows?: SortOrder
+    createdAt?: SortOrder
+    startedAt?: SortOrderInput | SortOrder
+    completedAt?: SortOrderInput | SortOrder
+    _count?: PoolBJobCountOrderByAggregateInput
+    _avg?: PoolBJobAvgOrderByAggregateInput
+    _max?: PoolBJobMaxOrderByAggregateInput
+    _min?: PoolBJobMinOrderByAggregateInput
+    _sum?: PoolBJobSumOrderByAggregateInput
+  }
+
+  export type PoolBJobScalarWhereWithAggregatesInput = {
+    AND?: PoolBJobScalarWhereWithAggregatesInput | PoolBJobScalarWhereWithAggregatesInput[]
+    OR?: PoolBJobScalarWhereWithAggregatesInput[]
+    NOT?: PoolBJobScalarWhereWithAggregatesInput | PoolBJobScalarWhereWithAggregatesInput[]
+    id?: UuidWithAggregatesFilter<"PoolBJob"> | string
+    status?: EnumPoolBJobStatusWithAggregatesFilter<"PoolBJob"> | $Enums.PoolBJobStatus
+    env?: StringWithAggregatesFilter<"PoolBJob"> | string
+    test?: BoolWithAggregatesFilter<"PoolBJob"> | boolean
+    totalRows?: IntWithAggregatesFilter<"PoolBJob"> | number
+    totalBatches?: IntWithAggregatesFilter<"PoolBJob"> | number
+    batchSize?: IntWithAggregatesFilter<"PoolBJob"> | number
+    successRows?: IntWithAggregatesFilter<"PoolBJob"> | number
+    failedRows?: IntWithAggregatesFilter<"PoolBJob"> | number
+    createdAt?: DateTimeWithAggregatesFilter<"PoolBJob"> | Date | string
+    startedAt?: DateTimeNullableWithAggregatesFilter<"PoolBJob"> | Date | string | null
+    completedAt?: DateTimeNullableWithAggregatesFilter<"PoolBJob"> | Date | string | null
+  }
+
+  export type PoolBBatchWhereInput = {
+    AND?: PoolBBatchWhereInput | PoolBBatchWhereInput[]
+    OR?: PoolBBatchWhereInput[]
+    NOT?: PoolBBatchWhereInput | PoolBBatchWhereInput[]
+    id?: UuidFilter<"PoolBBatch"> | string
+    jobId?: UuidFilter<"PoolBBatch"> | string
+    batchIndex?: IntFilter<"PoolBBatch"> | number
+    status?: EnumPoolBBatchStatusFilter<"PoolBBatch"> | $Enums.PoolBBatchStatus
+    startRow?: IntFilter<"PoolBBatch"> | number
+    endRow?: IntFilter<"PoolBBatch"> | number
+    rowCount?: IntFilter<"PoolBBatch"> | number
+    successCount?: IntFilter<"PoolBBatch"> | number
+    failedCount?: IntFilter<"PoolBBatch"> | number
+    startedAt?: DateTimeNullableFilter<"PoolBBatch"> | Date | string | null
+    completedAt?: DateTimeNullableFilter<"PoolBBatch"> | Date | string | null
+    results?: JsonNullableFilter<"PoolBBatch">
+    errorMessage?: StringNullableFilter<"PoolBBatch"> | string | null
+    job?: XOR<PoolBJobScalarRelationFilter, PoolBJobWhereInput>
+  }
+
+  export type PoolBBatchOrderByWithRelationInput = {
+    id?: SortOrder
+    jobId?: SortOrder
+    batchIndex?: SortOrder
+    status?: SortOrder
+    startRow?: SortOrder
+    endRow?: SortOrder
+    rowCount?: SortOrder
+    successCount?: SortOrder
+    failedCount?: SortOrder
+    startedAt?: SortOrderInput | SortOrder
+    completedAt?: SortOrderInput | SortOrder
+    results?: SortOrderInput | SortOrder
+    errorMessage?: SortOrderInput | SortOrder
+    job?: PoolBJobOrderByWithRelationInput
+    _relevance?: PoolBBatchOrderByRelevanceInput
+  }
+
+  export type PoolBBatchWhereUniqueInput = Prisma.AtLeast<{
+    id?: string
+    AND?: PoolBBatchWhereInput | PoolBBatchWhereInput[]
+    OR?: PoolBBatchWhereInput[]
+    NOT?: PoolBBatchWhereInput | PoolBBatchWhereInput[]
+    jobId?: UuidFilter<"PoolBBatch"> | string
+    batchIndex?: IntFilter<"PoolBBatch"> | number
+    status?: EnumPoolBBatchStatusFilter<"PoolBBatch"> | $Enums.PoolBBatchStatus
+    startRow?: IntFilter<"PoolBBatch"> | number
+    endRow?: IntFilter<"PoolBBatch"> | number
+    rowCount?: IntFilter<"PoolBBatch"> | number
+    successCount?: IntFilter<"PoolBBatch"> | number
+    failedCount?: IntFilter<"PoolBBatch"> | number
+    startedAt?: DateTimeNullableFilter<"PoolBBatch"> | Date | string | null
+    completedAt?: DateTimeNullableFilter<"PoolBBatch"> | Date | string | null
+    results?: JsonNullableFilter<"PoolBBatch">
+    errorMessage?: StringNullableFilter<"PoolBBatch"> | string | null
+    job?: XOR<PoolBJobScalarRelationFilter, PoolBJobWhereInput>
+  }, "id">
+
+  export type PoolBBatchOrderByWithAggregationInput = {
+    id?: SortOrder
+    jobId?: SortOrder
+    batchIndex?: SortOrder
+    status?: SortOrder
+    startRow?: SortOrder
+    endRow?: SortOrder
+    rowCount?: SortOrder
+    successCount?: SortOrder
+    failedCount?: SortOrder
+    startedAt?: SortOrderInput | SortOrder
+    completedAt?: SortOrderInput | SortOrder
+    results?: SortOrderInput | SortOrder
+    errorMessage?: SortOrderInput | SortOrder
+    _count?: PoolBBatchCountOrderByAggregateInput
+    _avg?: PoolBBatchAvgOrderByAggregateInput
+    _max?: PoolBBatchMaxOrderByAggregateInput
+    _min?: PoolBBatchMinOrderByAggregateInput
+    _sum?: PoolBBatchSumOrderByAggregateInput
+  }
+
+  export type PoolBBatchScalarWhereWithAggregatesInput = {
+    AND?: PoolBBatchScalarWhereWithAggregatesInput | PoolBBatchScalarWhereWithAggregatesInput[]
+    OR?: PoolBBatchScalarWhereWithAggregatesInput[]
+    NOT?: PoolBBatchScalarWhereWithAggregatesInput | PoolBBatchScalarWhereWithAggregatesInput[]
+    id?: UuidWithAggregatesFilter<"PoolBBatch"> | string
+    jobId?: UuidWithAggregatesFilter<"PoolBBatch"> | string
+    batchIndex?: IntWithAggregatesFilter<"PoolBBatch"> | number
+    status?: EnumPoolBBatchStatusWithAggregatesFilter<"PoolBBatch"> | $Enums.PoolBBatchStatus
+    startRow?: IntWithAggregatesFilter<"PoolBBatch"> | number
+    endRow?: IntWithAggregatesFilter<"PoolBBatch"> | number
+    rowCount?: IntWithAggregatesFilter<"PoolBBatch"> | number
+    successCount?: IntWithAggregatesFilter<"PoolBBatch"> | number
+    failedCount?: IntWithAggregatesFilter<"PoolBBatch"> | number
+    startedAt?: DateTimeNullableWithAggregatesFilter<"PoolBBatch"> | Date | string | null
+    completedAt?: DateTimeNullableWithAggregatesFilter<"PoolBBatch"> | Date | string | null
+    results?: JsonNullableWithAggregatesFilter<"PoolBBatch">
+    errorMessage?: StringNullableWithAggregatesFilter<"PoolBBatch"> | string | null
   }
 
   export type DepartmentCreateInput = {
@@ -50756,6 +53694,226 @@ export namespace Prisma {
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
   }
 
+  export type PoolBJobCreateInput = {
+    id?: string
+    status?: $Enums.PoolBJobStatus
+    env: string
+    test?: boolean
+    totalRows: number
+    totalBatches: number
+    batchSize: number
+    successRows?: number
+    failedRows?: number
+    createdAt?: Date | string
+    startedAt?: Date | string | null
+    completedAt?: Date | string | null
+    batches?: PoolBBatchCreateNestedManyWithoutJobInput
+  }
+
+  export type PoolBJobUncheckedCreateInput = {
+    id?: string
+    status?: $Enums.PoolBJobStatus
+    env: string
+    test?: boolean
+    totalRows: number
+    totalBatches: number
+    batchSize: number
+    successRows?: number
+    failedRows?: number
+    createdAt?: Date | string
+    startedAt?: Date | string | null
+    completedAt?: Date | string | null
+    batches?: PoolBBatchUncheckedCreateNestedManyWithoutJobInput
+  }
+
+  export type PoolBJobUpdateInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    status?: EnumPoolBJobStatusFieldUpdateOperationsInput | $Enums.PoolBJobStatus
+    env?: StringFieldUpdateOperationsInput | string
+    test?: BoolFieldUpdateOperationsInput | boolean
+    totalRows?: IntFieldUpdateOperationsInput | number
+    totalBatches?: IntFieldUpdateOperationsInput | number
+    batchSize?: IntFieldUpdateOperationsInput | number
+    successRows?: IntFieldUpdateOperationsInput | number
+    failedRows?: IntFieldUpdateOperationsInput | number
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    startedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    completedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    batches?: PoolBBatchUpdateManyWithoutJobNestedInput
+  }
+
+  export type PoolBJobUncheckedUpdateInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    status?: EnumPoolBJobStatusFieldUpdateOperationsInput | $Enums.PoolBJobStatus
+    env?: StringFieldUpdateOperationsInput | string
+    test?: BoolFieldUpdateOperationsInput | boolean
+    totalRows?: IntFieldUpdateOperationsInput | number
+    totalBatches?: IntFieldUpdateOperationsInput | number
+    batchSize?: IntFieldUpdateOperationsInput | number
+    successRows?: IntFieldUpdateOperationsInput | number
+    failedRows?: IntFieldUpdateOperationsInput | number
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    startedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    completedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    batches?: PoolBBatchUncheckedUpdateManyWithoutJobNestedInput
+  }
+
+  export type PoolBJobCreateManyInput = {
+    id?: string
+    status?: $Enums.PoolBJobStatus
+    env: string
+    test?: boolean
+    totalRows: number
+    totalBatches: number
+    batchSize: number
+    successRows?: number
+    failedRows?: number
+    createdAt?: Date | string
+    startedAt?: Date | string | null
+    completedAt?: Date | string | null
+  }
+
+  export type PoolBJobUpdateManyMutationInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    status?: EnumPoolBJobStatusFieldUpdateOperationsInput | $Enums.PoolBJobStatus
+    env?: StringFieldUpdateOperationsInput | string
+    test?: BoolFieldUpdateOperationsInput | boolean
+    totalRows?: IntFieldUpdateOperationsInput | number
+    totalBatches?: IntFieldUpdateOperationsInput | number
+    batchSize?: IntFieldUpdateOperationsInput | number
+    successRows?: IntFieldUpdateOperationsInput | number
+    failedRows?: IntFieldUpdateOperationsInput | number
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    startedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    completedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  }
+
+  export type PoolBJobUncheckedUpdateManyInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    status?: EnumPoolBJobStatusFieldUpdateOperationsInput | $Enums.PoolBJobStatus
+    env?: StringFieldUpdateOperationsInput | string
+    test?: BoolFieldUpdateOperationsInput | boolean
+    totalRows?: IntFieldUpdateOperationsInput | number
+    totalBatches?: IntFieldUpdateOperationsInput | number
+    batchSize?: IntFieldUpdateOperationsInput | number
+    successRows?: IntFieldUpdateOperationsInput | number
+    failedRows?: IntFieldUpdateOperationsInput | number
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    startedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    completedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  }
+
+  export type PoolBBatchCreateInput = {
+    id?: string
+    batchIndex: number
+    status?: $Enums.PoolBBatchStatus
+    startRow: number
+    endRow: number
+    rowCount: number
+    successCount?: number
+    failedCount?: number
+    startedAt?: Date | string | null
+    completedAt?: Date | string | null
+    results?: NullableJsonNullValueInput | InputJsonValue
+    errorMessage?: string | null
+    job: PoolBJobCreateNestedOneWithoutBatchesInput
+  }
+
+  export type PoolBBatchUncheckedCreateInput = {
+    id?: string
+    jobId: string
+    batchIndex: number
+    status?: $Enums.PoolBBatchStatus
+    startRow: number
+    endRow: number
+    rowCount: number
+    successCount?: number
+    failedCount?: number
+    startedAt?: Date | string | null
+    completedAt?: Date | string | null
+    results?: NullableJsonNullValueInput | InputJsonValue
+    errorMessage?: string | null
+  }
+
+  export type PoolBBatchUpdateInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    batchIndex?: IntFieldUpdateOperationsInput | number
+    status?: EnumPoolBBatchStatusFieldUpdateOperationsInput | $Enums.PoolBBatchStatus
+    startRow?: IntFieldUpdateOperationsInput | number
+    endRow?: IntFieldUpdateOperationsInput | number
+    rowCount?: IntFieldUpdateOperationsInput | number
+    successCount?: IntFieldUpdateOperationsInput | number
+    failedCount?: IntFieldUpdateOperationsInput | number
+    startedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    completedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    results?: NullableJsonNullValueInput | InputJsonValue
+    errorMessage?: NullableStringFieldUpdateOperationsInput | string | null
+    job?: PoolBJobUpdateOneRequiredWithoutBatchesNestedInput
+  }
+
+  export type PoolBBatchUncheckedUpdateInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    jobId?: StringFieldUpdateOperationsInput | string
+    batchIndex?: IntFieldUpdateOperationsInput | number
+    status?: EnumPoolBBatchStatusFieldUpdateOperationsInput | $Enums.PoolBBatchStatus
+    startRow?: IntFieldUpdateOperationsInput | number
+    endRow?: IntFieldUpdateOperationsInput | number
+    rowCount?: IntFieldUpdateOperationsInput | number
+    successCount?: IntFieldUpdateOperationsInput | number
+    failedCount?: IntFieldUpdateOperationsInput | number
+    startedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    completedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    results?: NullableJsonNullValueInput | InputJsonValue
+    errorMessage?: NullableStringFieldUpdateOperationsInput | string | null
+  }
+
+  export type PoolBBatchCreateManyInput = {
+    id?: string
+    jobId: string
+    batchIndex: number
+    status?: $Enums.PoolBBatchStatus
+    startRow: number
+    endRow: number
+    rowCount: number
+    successCount?: number
+    failedCount?: number
+    startedAt?: Date | string | null
+    completedAt?: Date | string | null
+    results?: NullableJsonNullValueInput | InputJsonValue
+    errorMessage?: string | null
+  }
+
+  export type PoolBBatchUpdateManyMutationInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    batchIndex?: IntFieldUpdateOperationsInput | number
+    status?: EnumPoolBBatchStatusFieldUpdateOperationsInput | $Enums.PoolBBatchStatus
+    startRow?: IntFieldUpdateOperationsInput | number
+    endRow?: IntFieldUpdateOperationsInput | number
+    rowCount?: IntFieldUpdateOperationsInput | number
+    successCount?: IntFieldUpdateOperationsInput | number
+    failedCount?: IntFieldUpdateOperationsInput | number
+    startedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    completedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    results?: NullableJsonNullValueInput | InputJsonValue
+    errorMessage?: NullableStringFieldUpdateOperationsInput | string | null
+  }
+
+  export type PoolBBatchUncheckedUpdateManyInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    jobId?: StringFieldUpdateOperationsInput | string
+    batchIndex?: IntFieldUpdateOperationsInput | number
+    status?: EnumPoolBBatchStatusFieldUpdateOperationsInput | $Enums.PoolBBatchStatus
+    startRow?: IntFieldUpdateOperationsInput | number
+    endRow?: IntFieldUpdateOperationsInput | number
+    rowCount?: IntFieldUpdateOperationsInput | number
+    successCount?: IntFieldUpdateOperationsInput | number
+    failedCount?: IntFieldUpdateOperationsInput | number
+    startedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    completedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    results?: NullableJsonNullValueInput | InputJsonValue
+    errorMessage?: NullableStringFieldUpdateOperationsInput | string | null
+  }
+
   export type IntFilter<$PrismaModel = never> = {
     equals?: number | IntFieldRefInput<$PrismaModel>
     in?: number[] | ListIntFieldRefInput<$PrismaModel>
@@ -53855,6 +57013,221 @@ export namespace Prisma {
     createdAt?: SortOrder
   }
 
+  export type UuidFilter<$PrismaModel = never> = {
+    equals?: string | StringFieldRefInput<$PrismaModel>
+    in?: string[] | ListStringFieldRefInput<$PrismaModel>
+    notIn?: string[] | ListStringFieldRefInput<$PrismaModel>
+    lt?: string | StringFieldRefInput<$PrismaModel>
+    lte?: string | StringFieldRefInput<$PrismaModel>
+    gt?: string | StringFieldRefInput<$PrismaModel>
+    gte?: string | StringFieldRefInput<$PrismaModel>
+    search?: string
+    mode?: QueryMode
+    not?: NestedUuidFilter<$PrismaModel> | string
+  }
+
+  export type EnumPoolBJobStatusFilter<$PrismaModel = never> = {
+    equals?: $Enums.PoolBJobStatus | EnumPoolBJobStatusFieldRefInput<$PrismaModel>
+    in?: $Enums.PoolBJobStatus[] | ListEnumPoolBJobStatusFieldRefInput<$PrismaModel>
+    notIn?: $Enums.PoolBJobStatus[] | ListEnumPoolBJobStatusFieldRefInput<$PrismaModel>
+    not?: NestedEnumPoolBJobStatusFilter<$PrismaModel> | $Enums.PoolBJobStatus
+  }
+
+  export type PoolBBatchListRelationFilter = {
+    every?: PoolBBatchWhereInput
+    some?: PoolBBatchWhereInput
+    none?: PoolBBatchWhereInput
+  }
+
+  export type PoolBBatchOrderByRelationAggregateInput = {
+    _count?: SortOrder
+  }
+
+  export type PoolBJobOrderByRelevanceInput = {
+    fields: PoolBJobOrderByRelevanceFieldEnum | PoolBJobOrderByRelevanceFieldEnum[]
+    sort: SortOrder
+    search: string
+  }
+
+  export type PoolBJobCountOrderByAggregateInput = {
+    id?: SortOrder
+    status?: SortOrder
+    env?: SortOrder
+    test?: SortOrder
+    totalRows?: SortOrder
+    totalBatches?: SortOrder
+    batchSize?: SortOrder
+    successRows?: SortOrder
+    failedRows?: SortOrder
+    createdAt?: SortOrder
+    startedAt?: SortOrder
+    completedAt?: SortOrder
+  }
+
+  export type PoolBJobAvgOrderByAggregateInput = {
+    totalRows?: SortOrder
+    totalBatches?: SortOrder
+    batchSize?: SortOrder
+    successRows?: SortOrder
+    failedRows?: SortOrder
+  }
+
+  export type PoolBJobMaxOrderByAggregateInput = {
+    id?: SortOrder
+    status?: SortOrder
+    env?: SortOrder
+    test?: SortOrder
+    totalRows?: SortOrder
+    totalBatches?: SortOrder
+    batchSize?: SortOrder
+    successRows?: SortOrder
+    failedRows?: SortOrder
+    createdAt?: SortOrder
+    startedAt?: SortOrder
+    completedAt?: SortOrder
+  }
+
+  export type PoolBJobMinOrderByAggregateInput = {
+    id?: SortOrder
+    status?: SortOrder
+    env?: SortOrder
+    test?: SortOrder
+    totalRows?: SortOrder
+    totalBatches?: SortOrder
+    batchSize?: SortOrder
+    successRows?: SortOrder
+    failedRows?: SortOrder
+    createdAt?: SortOrder
+    startedAt?: SortOrder
+    completedAt?: SortOrder
+  }
+
+  export type PoolBJobSumOrderByAggregateInput = {
+    totalRows?: SortOrder
+    totalBatches?: SortOrder
+    batchSize?: SortOrder
+    successRows?: SortOrder
+    failedRows?: SortOrder
+  }
+
+  export type UuidWithAggregatesFilter<$PrismaModel = never> = {
+    equals?: string | StringFieldRefInput<$PrismaModel>
+    in?: string[] | ListStringFieldRefInput<$PrismaModel>
+    notIn?: string[] | ListStringFieldRefInput<$PrismaModel>
+    lt?: string | StringFieldRefInput<$PrismaModel>
+    lte?: string | StringFieldRefInput<$PrismaModel>
+    gt?: string | StringFieldRefInput<$PrismaModel>
+    gte?: string | StringFieldRefInput<$PrismaModel>
+    search?: string
+    mode?: QueryMode
+    not?: NestedUuidWithAggregatesFilter<$PrismaModel> | string
+    _count?: NestedIntFilter<$PrismaModel>
+    _min?: NestedStringFilter<$PrismaModel>
+    _max?: NestedStringFilter<$PrismaModel>
+  }
+
+  export type EnumPoolBJobStatusWithAggregatesFilter<$PrismaModel = never> = {
+    equals?: $Enums.PoolBJobStatus | EnumPoolBJobStatusFieldRefInput<$PrismaModel>
+    in?: $Enums.PoolBJobStatus[] | ListEnumPoolBJobStatusFieldRefInput<$PrismaModel>
+    notIn?: $Enums.PoolBJobStatus[] | ListEnumPoolBJobStatusFieldRefInput<$PrismaModel>
+    not?: NestedEnumPoolBJobStatusWithAggregatesFilter<$PrismaModel> | $Enums.PoolBJobStatus
+    _count?: NestedIntFilter<$PrismaModel>
+    _min?: NestedEnumPoolBJobStatusFilter<$PrismaModel>
+    _max?: NestedEnumPoolBJobStatusFilter<$PrismaModel>
+  }
+
+  export type EnumPoolBBatchStatusFilter<$PrismaModel = never> = {
+    equals?: $Enums.PoolBBatchStatus | EnumPoolBBatchStatusFieldRefInput<$PrismaModel>
+    in?: $Enums.PoolBBatchStatus[] | ListEnumPoolBBatchStatusFieldRefInput<$PrismaModel>
+    notIn?: $Enums.PoolBBatchStatus[] | ListEnumPoolBBatchStatusFieldRefInput<$PrismaModel>
+    not?: NestedEnumPoolBBatchStatusFilter<$PrismaModel> | $Enums.PoolBBatchStatus
+  }
+
+  export type PoolBJobScalarRelationFilter = {
+    is?: PoolBJobWhereInput
+    isNot?: PoolBJobWhereInput
+  }
+
+  export type PoolBBatchOrderByRelevanceInput = {
+    fields: PoolBBatchOrderByRelevanceFieldEnum | PoolBBatchOrderByRelevanceFieldEnum[]
+    sort: SortOrder
+    search: string
+  }
+
+  export type PoolBBatchCountOrderByAggregateInput = {
+    id?: SortOrder
+    jobId?: SortOrder
+    batchIndex?: SortOrder
+    status?: SortOrder
+    startRow?: SortOrder
+    endRow?: SortOrder
+    rowCount?: SortOrder
+    successCount?: SortOrder
+    failedCount?: SortOrder
+    startedAt?: SortOrder
+    completedAt?: SortOrder
+    results?: SortOrder
+    errorMessage?: SortOrder
+  }
+
+  export type PoolBBatchAvgOrderByAggregateInput = {
+    batchIndex?: SortOrder
+    startRow?: SortOrder
+    endRow?: SortOrder
+    rowCount?: SortOrder
+    successCount?: SortOrder
+    failedCount?: SortOrder
+  }
+
+  export type PoolBBatchMaxOrderByAggregateInput = {
+    id?: SortOrder
+    jobId?: SortOrder
+    batchIndex?: SortOrder
+    status?: SortOrder
+    startRow?: SortOrder
+    endRow?: SortOrder
+    rowCount?: SortOrder
+    successCount?: SortOrder
+    failedCount?: SortOrder
+    startedAt?: SortOrder
+    completedAt?: SortOrder
+    errorMessage?: SortOrder
+  }
+
+  export type PoolBBatchMinOrderByAggregateInput = {
+    id?: SortOrder
+    jobId?: SortOrder
+    batchIndex?: SortOrder
+    status?: SortOrder
+    startRow?: SortOrder
+    endRow?: SortOrder
+    rowCount?: SortOrder
+    successCount?: SortOrder
+    failedCount?: SortOrder
+    startedAt?: SortOrder
+    completedAt?: SortOrder
+    errorMessage?: SortOrder
+  }
+
+  export type PoolBBatchSumOrderByAggregateInput = {
+    batchIndex?: SortOrder
+    startRow?: SortOrder
+    endRow?: SortOrder
+    rowCount?: SortOrder
+    successCount?: SortOrder
+    failedCount?: SortOrder
+  }
+
+  export type EnumPoolBBatchStatusWithAggregatesFilter<$PrismaModel = never> = {
+    equals?: $Enums.PoolBBatchStatus | EnumPoolBBatchStatusFieldRefInput<$PrismaModel>
+    in?: $Enums.PoolBBatchStatus[] | ListEnumPoolBBatchStatusFieldRefInput<$PrismaModel>
+    notIn?: $Enums.PoolBBatchStatus[] | ListEnumPoolBBatchStatusFieldRefInput<$PrismaModel>
+    not?: NestedEnumPoolBBatchStatusWithAggregatesFilter<$PrismaModel> | $Enums.PoolBBatchStatus
+    _count?: NestedIntFilter<$PrismaModel>
+    _min?: NestedEnumPoolBBatchStatusFilter<$PrismaModel>
+    _max?: NestedEnumPoolBBatchStatusFilter<$PrismaModel>
+  }
+
   export type SubDepartmentCreateNestedManyWithoutDepartmentInput = {
     create?: XOR<SubDepartmentCreateWithoutDepartmentInput, SubDepartmentUncheckedCreateWithoutDepartmentInput> | SubDepartmentCreateWithoutDepartmentInput[] | SubDepartmentUncheckedCreateWithoutDepartmentInput[]
     connectOrCreate?: SubDepartmentCreateOrConnectWithoutDepartmentInput | SubDepartmentCreateOrConnectWithoutDepartmentInput[]
@@ -55184,6 +58557,70 @@ export namespace Prisma {
     update?: XOR<XOR<ExtractionResultFlatUpdateToOneWithWhereWithoutSrmSyncRunItemsInput, ExtractionResultFlatUpdateWithoutSrmSyncRunItemsInput>, ExtractionResultFlatUncheckedUpdateWithoutSrmSyncRunItemsInput>
   }
 
+  export type PoolBBatchCreateNestedManyWithoutJobInput = {
+    create?: XOR<PoolBBatchCreateWithoutJobInput, PoolBBatchUncheckedCreateWithoutJobInput> | PoolBBatchCreateWithoutJobInput[] | PoolBBatchUncheckedCreateWithoutJobInput[]
+    connectOrCreate?: PoolBBatchCreateOrConnectWithoutJobInput | PoolBBatchCreateOrConnectWithoutJobInput[]
+    createMany?: PoolBBatchCreateManyJobInputEnvelope
+    connect?: PoolBBatchWhereUniqueInput | PoolBBatchWhereUniqueInput[]
+  }
+
+  export type PoolBBatchUncheckedCreateNestedManyWithoutJobInput = {
+    create?: XOR<PoolBBatchCreateWithoutJobInput, PoolBBatchUncheckedCreateWithoutJobInput> | PoolBBatchCreateWithoutJobInput[] | PoolBBatchUncheckedCreateWithoutJobInput[]
+    connectOrCreate?: PoolBBatchCreateOrConnectWithoutJobInput | PoolBBatchCreateOrConnectWithoutJobInput[]
+    createMany?: PoolBBatchCreateManyJobInputEnvelope
+    connect?: PoolBBatchWhereUniqueInput | PoolBBatchWhereUniqueInput[]
+  }
+
+  export type EnumPoolBJobStatusFieldUpdateOperationsInput = {
+    set?: $Enums.PoolBJobStatus
+  }
+
+  export type PoolBBatchUpdateManyWithoutJobNestedInput = {
+    create?: XOR<PoolBBatchCreateWithoutJobInput, PoolBBatchUncheckedCreateWithoutJobInput> | PoolBBatchCreateWithoutJobInput[] | PoolBBatchUncheckedCreateWithoutJobInput[]
+    connectOrCreate?: PoolBBatchCreateOrConnectWithoutJobInput | PoolBBatchCreateOrConnectWithoutJobInput[]
+    upsert?: PoolBBatchUpsertWithWhereUniqueWithoutJobInput | PoolBBatchUpsertWithWhereUniqueWithoutJobInput[]
+    createMany?: PoolBBatchCreateManyJobInputEnvelope
+    set?: PoolBBatchWhereUniqueInput | PoolBBatchWhereUniqueInput[]
+    disconnect?: PoolBBatchWhereUniqueInput | PoolBBatchWhereUniqueInput[]
+    delete?: PoolBBatchWhereUniqueInput | PoolBBatchWhereUniqueInput[]
+    connect?: PoolBBatchWhereUniqueInput | PoolBBatchWhereUniqueInput[]
+    update?: PoolBBatchUpdateWithWhereUniqueWithoutJobInput | PoolBBatchUpdateWithWhereUniqueWithoutJobInput[]
+    updateMany?: PoolBBatchUpdateManyWithWhereWithoutJobInput | PoolBBatchUpdateManyWithWhereWithoutJobInput[]
+    deleteMany?: PoolBBatchScalarWhereInput | PoolBBatchScalarWhereInput[]
+  }
+
+  export type PoolBBatchUncheckedUpdateManyWithoutJobNestedInput = {
+    create?: XOR<PoolBBatchCreateWithoutJobInput, PoolBBatchUncheckedCreateWithoutJobInput> | PoolBBatchCreateWithoutJobInput[] | PoolBBatchUncheckedCreateWithoutJobInput[]
+    connectOrCreate?: PoolBBatchCreateOrConnectWithoutJobInput | PoolBBatchCreateOrConnectWithoutJobInput[]
+    upsert?: PoolBBatchUpsertWithWhereUniqueWithoutJobInput | PoolBBatchUpsertWithWhereUniqueWithoutJobInput[]
+    createMany?: PoolBBatchCreateManyJobInputEnvelope
+    set?: PoolBBatchWhereUniqueInput | PoolBBatchWhereUniqueInput[]
+    disconnect?: PoolBBatchWhereUniqueInput | PoolBBatchWhereUniqueInput[]
+    delete?: PoolBBatchWhereUniqueInput | PoolBBatchWhereUniqueInput[]
+    connect?: PoolBBatchWhereUniqueInput | PoolBBatchWhereUniqueInput[]
+    update?: PoolBBatchUpdateWithWhereUniqueWithoutJobInput | PoolBBatchUpdateWithWhereUniqueWithoutJobInput[]
+    updateMany?: PoolBBatchUpdateManyWithWhereWithoutJobInput | PoolBBatchUpdateManyWithWhereWithoutJobInput[]
+    deleteMany?: PoolBBatchScalarWhereInput | PoolBBatchScalarWhereInput[]
+  }
+
+  export type PoolBJobCreateNestedOneWithoutBatchesInput = {
+    create?: XOR<PoolBJobCreateWithoutBatchesInput, PoolBJobUncheckedCreateWithoutBatchesInput>
+    connectOrCreate?: PoolBJobCreateOrConnectWithoutBatchesInput
+    connect?: PoolBJobWhereUniqueInput
+  }
+
+  export type EnumPoolBBatchStatusFieldUpdateOperationsInput = {
+    set?: $Enums.PoolBBatchStatus
+  }
+
+  export type PoolBJobUpdateOneRequiredWithoutBatchesNestedInput = {
+    create?: XOR<PoolBJobCreateWithoutBatchesInput, PoolBJobUncheckedCreateWithoutBatchesInput>
+    connectOrCreate?: PoolBJobCreateOrConnectWithoutBatchesInput
+    upsert?: PoolBJobUpsertWithoutBatchesInput
+    connect?: PoolBJobWhereUniqueInput
+    update?: XOR<XOR<PoolBJobUpdateToOneWithWhereWithoutBatchesInput, PoolBJobUpdateWithoutBatchesInput>, PoolBJobUncheckedUpdateWithoutBatchesInput>
+  }
+
   export type NestedIntFilter<$PrismaModel = never> = {
     equals?: number | IntFieldRefInput<$PrismaModel>
     in?: number[] | ListIntFieldRefInput<$PrismaModel>
@@ -55640,6 +59077,67 @@ export namespace Prisma {
     _count?: NestedIntFilter<$PrismaModel>
     _min?: NestedEnumRawArticleStatusFilter<$PrismaModel>
     _max?: NestedEnumRawArticleStatusFilter<$PrismaModel>
+  }
+
+  export type NestedUuidFilter<$PrismaModel = never> = {
+    equals?: string | StringFieldRefInput<$PrismaModel>
+    in?: string[] | ListStringFieldRefInput<$PrismaModel>
+    notIn?: string[] | ListStringFieldRefInput<$PrismaModel>
+    lt?: string | StringFieldRefInput<$PrismaModel>
+    lte?: string | StringFieldRefInput<$PrismaModel>
+    gt?: string | StringFieldRefInput<$PrismaModel>
+    gte?: string | StringFieldRefInput<$PrismaModel>
+    search?: string
+    not?: NestedUuidFilter<$PrismaModel> | string
+  }
+
+  export type NestedEnumPoolBJobStatusFilter<$PrismaModel = never> = {
+    equals?: $Enums.PoolBJobStatus | EnumPoolBJobStatusFieldRefInput<$PrismaModel>
+    in?: $Enums.PoolBJobStatus[] | ListEnumPoolBJobStatusFieldRefInput<$PrismaModel>
+    notIn?: $Enums.PoolBJobStatus[] | ListEnumPoolBJobStatusFieldRefInput<$PrismaModel>
+    not?: NestedEnumPoolBJobStatusFilter<$PrismaModel> | $Enums.PoolBJobStatus
+  }
+
+  export type NestedUuidWithAggregatesFilter<$PrismaModel = never> = {
+    equals?: string | StringFieldRefInput<$PrismaModel>
+    in?: string[] | ListStringFieldRefInput<$PrismaModel>
+    notIn?: string[] | ListStringFieldRefInput<$PrismaModel>
+    lt?: string | StringFieldRefInput<$PrismaModel>
+    lte?: string | StringFieldRefInput<$PrismaModel>
+    gt?: string | StringFieldRefInput<$PrismaModel>
+    gte?: string | StringFieldRefInput<$PrismaModel>
+    search?: string
+    not?: NestedUuidWithAggregatesFilter<$PrismaModel> | string
+    _count?: NestedIntFilter<$PrismaModel>
+    _min?: NestedStringFilter<$PrismaModel>
+    _max?: NestedStringFilter<$PrismaModel>
+  }
+
+  export type NestedEnumPoolBJobStatusWithAggregatesFilter<$PrismaModel = never> = {
+    equals?: $Enums.PoolBJobStatus | EnumPoolBJobStatusFieldRefInput<$PrismaModel>
+    in?: $Enums.PoolBJobStatus[] | ListEnumPoolBJobStatusFieldRefInput<$PrismaModel>
+    notIn?: $Enums.PoolBJobStatus[] | ListEnumPoolBJobStatusFieldRefInput<$PrismaModel>
+    not?: NestedEnumPoolBJobStatusWithAggregatesFilter<$PrismaModel> | $Enums.PoolBJobStatus
+    _count?: NestedIntFilter<$PrismaModel>
+    _min?: NestedEnumPoolBJobStatusFilter<$PrismaModel>
+    _max?: NestedEnumPoolBJobStatusFilter<$PrismaModel>
+  }
+
+  export type NestedEnumPoolBBatchStatusFilter<$PrismaModel = never> = {
+    equals?: $Enums.PoolBBatchStatus | EnumPoolBBatchStatusFieldRefInput<$PrismaModel>
+    in?: $Enums.PoolBBatchStatus[] | ListEnumPoolBBatchStatusFieldRefInput<$PrismaModel>
+    notIn?: $Enums.PoolBBatchStatus[] | ListEnumPoolBBatchStatusFieldRefInput<$PrismaModel>
+    not?: NestedEnumPoolBBatchStatusFilter<$PrismaModel> | $Enums.PoolBBatchStatus
+  }
+
+  export type NestedEnumPoolBBatchStatusWithAggregatesFilter<$PrismaModel = never> = {
+    equals?: $Enums.PoolBBatchStatus | EnumPoolBBatchStatusFieldRefInput<$PrismaModel>
+    in?: $Enums.PoolBBatchStatus[] | ListEnumPoolBBatchStatusFieldRefInput<$PrismaModel>
+    notIn?: $Enums.PoolBBatchStatus[] | ListEnumPoolBBatchStatusFieldRefInput<$PrismaModel>
+    not?: NestedEnumPoolBBatchStatusWithAggregatesFilter<$PrismaModel> | $Enums.PoolBBatchStatus
+    _count?: NestedIntFilter<$PrismaModel>
+    _min?: NestedEnumPoolBBatchStatusFilter<$PrismaModel>
+    _max?: NestedEnumPoolBBatchStatusFilter<$PrismaModel>
   }
 
   export type SubDepartmentCreateWithoutDepartmentInput = {
@@ -60759,6 +64257,157 @@ export namespace Prisma {
     srmUniqueId?: NullableStringFieldUpdateOperationsInput | string | null
   }
 
+  export type PoolBBatchCreateWithoutJobInput = {
+    id?: string
+    batchIndex: number
+    status?: $Enums.PoolBBatchStatus
+    startRow: number
+    endRow: number
+    rowCount: number
+    successCount?: number
+    failedCount?: number
+    startedAt?: Date | string | null
+    completedAt?: Date | string | null
+    results?: NullableJsonNullValueInput | InputJsonValue
+    errorMessage?: string | null
+  }
+
+  export type PoolBBatchUncheckedCreateWithoutJobInput = {
+    id?: string
+    batchIndex: number
+    status?: $Enums.PoolBBatchStatus
+    startRow: number
+    endRow: number
+    rowCount: number
+    successCount?: number
+    failedCount?: number
+    startedAt?: Date | string | null
+    completedAt?: Date | string | null
+    results?: NullableJsonNullValueInput | InputJsonValue
+    errorMessage?: string | null
+  }
+
+  export type PoolBBatchCreateOrConnectWithoutJobInput = {
+    where: PoolBBatchWhereUniqueInput
+    create: XOR<PoolBBatchCreateWithoutJobInput, PoolBBatchUncheckedCreateWithoutJobInput>
+  }
+
+  export type PoolBBatchCreateManyJobInputEnvelope = {
+    data: PoolBBatchCreateManyJobInput | PoolBBatchCreateManyJobInput[]
+    skipDuplicates?: boolean
+  }
+
+  export type PoolBBatchUpsertWithWhereUniqueWithoutJobInput = {
+    where: PoolBBatchWhereUniqueInput
+    update: XOR<PoolBBatchUpdateWithoutJobInput, PoolBBatchUncheckedUpdateWithoutJobInput>
+    create: XOR<PoolBBatchCreateWithoutJobInput, PoolBBatchUncheckedCreateWithoutJobInput>
+  }
+
+  export type PoolBBatchUpdateWithWhereUniqueWithoutJobInput = {
+    where: PoolBBatchWhereUniqueInput
+    data: XOR<PoolBBatchUpdateWithoutJobInput, PoolBBatchUncheckedUpdateWithoutJobInput>
+  }
+
+  export type PoolBBatchUpdateManyWithWhereWithoutJobInput = {
+    where: PoolBBatchScalarWhereInput
+    data: XOR<PoolBBatchUpdateManyMutationInput, PoolBBatchUncheckedUpdateManyWithoutJobInput>
+  }
+
+  export type PoolBBatchScalarWhereInput = {
+    AND?: PoolBBatchScalarWhereInput | PoolBBatchScalarWhereInput[]
+    OR?: PoolBBatchScalarWhereInput[]
+    NOT?: PoolBBatchScalarWhereInput | PoolBBatchScalarWhereInput[]
+    id?: UuidFilter<"PoolBBatch"> | string
+    jobId?: UuidFilter<"PoolBBatch"> | string
+    batchIndex?: IntFilter<"PoolBBatch"> | number
+    status?: EnumPoolBBatchStatusFilter<"PoolBBatch"> | $Enums.PoolBBatchStatus
+    startRow?: IntFilter<"PoolBBatch"> | number
+    endRow?: IntFilter<"PoolBBatch"> | number
+    rowCount?: IntFilter<"PoolBBatch"> | number
+    successCount?: IntFilter<"PoolBBatch"> | number
+    failedCount?: IntFilter<"PoolBBatch"> | number
+    startedAt?: DateTimeNullableFilter<"PoolBBatch"> | Date | string | null
+    completedAt?: DateTimeNullableFilter<"PoolBBatch"> | Date | string | null
+    results?: JsonNullableFilter<"PoolBBatch">
+    errorMessage?: StringNullableFilter<"PoolBBatch"> | string | null
+  }
+
+  export type PoolBJobCreateWithoutBatchesInput = {
+    id?: string
+    status?: $Enums.PoolBJobStatus
+    env: string
+    test?: boolean
+    totalRows: number
+    totalBatches: number
+    batchSize: number
+    successRows?: number
+    failedRows?: number
+    createdAt?: Date | string
+    startedAt?: Date | string | null
+    completedAt?: Date | string | null
+  }
+
+  export type PoolBJobUncheckedCreateWithoutBatchesInput = {
+    id?: string
+    status?: $Enums.PoolBJobStatus
+    env: string
+    test?: boolean
+    totalRows: number
+    totalBatches: number
+    batchSize: number
+    successRows?: number
+    failedRows?: number
+    createdAt?: Date | string
+    startedAt?: Date | string | null
+    completedAt?: Date | string | null
+  }
+
+  export type PoolBJobCreateOrConnectWithoutBatchesInput = {
+    where: PoolBJobWhereUniqueInput
+    create: XOR<PoolBJobCreateWithoutBatchesInput, PoolBJobUncheckedCreateWithoutBatchesInput>
+  }
+
+  export type PoolBJobUpsertWithoutBatchesInput = {
+    update: XOR<PoolBJobUpdateWithoutBatchesInput, PoolBJobUncheckedUpdateWithoutBatchesInput>
+    create: XOR<PoolBJobCreateWithoutBatchesInput, PoolBJobUncheckedCreateWithoutBatchesInput>
+    where?: PoolBJobWhereInput
+  }
+
+  export type PoolBJobUpdateToOneWithWhereWithoutBatchesInput = {
+    where?: PoolBJobWhereInput
+    data: XOR<PoolBJobUpdateWithoutBatchesInput, PoolBJobUncheckedUpdateWithoutBatchesInput>
+  }
+
+  export type PoolBJobUpdateWithoutBatchesInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    status?: EnumPoolBJobStatusFieldUpdateOperationsInput | $Enums.PoolBJobStatus
+    env?: StringFieldUpdateOperationsInput | string
+    test?: BoolFieldUpdateOperationsInput | boolean
+    totalRows?: IntFieldUpdateOperationsInput | number
+    totalBatches?: IntFieldUpdateOperationsInput | number
+    batchSize?: IntFieldUpdateOperationsInput | number
+    successRows?: IntFieldUpdateOperationsInput | number
+    failedRows?: IntFieldUpdateOperationsInput | number
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    startedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    completedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  }
+
+  export type PoolBJobUncheckedUpdateWithoutBatchesInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    status?: EnumPoolBJobStatusFieldUpdateOperationsInput | $Enums.PoolBJobStatus
+    env?: StringFieldUpdateOperationsInput | string
+    test?: BoolFieldUpdateOperationsInput | boolean
+    totalRows?: IntFieldUpdateOperationsInput | number
+    totalBatches?: IntFieldUpdateOperationsInput | number
+    batchSize?: IntFieldUpdateOperationsInput | number
+    successRows?: IntFieldUpdateOperationsInput | number
+    failedRows?: IntFieldUpdateOperationsInput | number
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    startedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    completedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  }
+
   export type SubDepartmentCreateManyDepartmentInput = {
     id?: number
     code: string
@@ -62136,6 +65785,66 @@ export namespace Prisma {
     action?: StringFieldUpdateOperationsInput | string
     errorMessage?: NullableStringFieldUpdateOperationsInput | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+  }
+
+  export type PoolBBatchCreateManyJobInput = {
+    id?: string
+    batchIndex: number
+    status?: $Enums.PoolBBatchStatus
+    startRow: number
+    endRow: number
+    rowCount: number
+    successCount?: number
+    failedCount?: number
+    startedAt?: Date | string | null
+    completedAt?: Date | string | null
+    results?: NullableJsonNullValueInput | InputJsonValue
+    errorMessage?: string | null
+  }
+
+  export type PoolBBatchUpdateWithoutJobInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    batchIndex?: IntFieldUpdateOperationsInput | number
+    status?: EnumPoolBBatchStatusFieldUpdateOperationsInput | $Enums.PoolBBatchStatus
+    startRow?: IntFieldUpdateOperationsInput | number
+    endRow?: IntFieldUpdateOperationsInput | number
+    rowCount?: IntFieldUpdateOperationsInput | number
+    successCount?: IntFieldUpdateOperationsInput | number
+    failedCount?: IntFieldUpdateOperationsInput | number
+    startedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    completedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    results?: NullableJsonNullValueInput | InputJsonValue
+    errorMessage?: NullableStringFieldUpdateOperationsInput | string | null
+  }
+
+  export type PoolBBatchUncheckedUpdateWithoutJobInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    batchIndex?: IntFieldUpdateOperationsInput | number
+    status?: EnumPoolBBatchStatusFieldUpdateOperationsInput | $Enums.PoolBBatchStatus
+    startRow?: IntFieldUpdateOperationsInput | number
+    endRow?: IntFieldUpdateOperationsInput | number
+    rowCount?: IntFieldUpdateOperationsInput | number
+    successCount?: IntFieldUpdateOperationsInput | number
+    failedCount?: IntFieldUpdateOperationsInput | number
+    startedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    completedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    results?: NullableJsonNullValueInput | InputJsonValue
+    errorMessage?: NullableStringFieldUpdateOperationsInput | string | null
+  }
+
+  export type PoolBBatchUncheckedUpdateManyWithoutJobInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    batchIndex?: IntFieldUpdateOperationsInput | number
+    status?: EnumPoolBBatchStatusFieldUpdateOperationsInput | $Enums.PoolBBatchStatus
+    startRow?: IntFieldUpdateOperationsInput | number
+    endRow?: IntFieldUpdateOperationsInput | number
+    rowCount?: IntFieldUpdateOperationsInput | number
+    successCount?: IntFieldUpdateOperationsInput | number
+    failedCount?: IntFieldUpdateOperationsInput | number
+    startedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    completedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    results?: NullableJsonNullValueInput | InputJsonValue
+    errorMessage?: NullableStringFieldUpdateOperationsInput | string | null
   }
 
 

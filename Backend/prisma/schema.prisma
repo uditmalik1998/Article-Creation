@@ -1069,3 +1069,64 @@ model SrmSyncRunItem {
   @@schema("public")
 }
 
+// ── Pool B Bulk Jobs ──────────────────────────────────────────────────────────
+
+enum PoolBJobStatus {
+  QUEUED
+  PROCESSING
+  COMPLETED
+  PARTIAL
+  FAILED
+
+  @@schema("public")
+}
+
+enum PoolBBatchStatus {
+  QUEUED
+  PROCESSING
+  COMPLETED
+  FAILED
+
+  @@schema("public")
+}
+
+model PoolBJob {
+  id           String         @id @default(uuid()) @db.Uuid
+  status       PoolBJobStatus @default(QUEUED)
+  env          String
+  test         Boolean        @default(false)
+  totalRows    Int            @map("total_rows")
+  totalBatches Int            @map("total_batches")
+  batchSize    Int            @map("batch_size")
+  successRows  Int            @default(0) @map("success_rows")
+  failedRows   Int            @default(0) @map("failed_rows")
+  createdAt    DateTime       @default(now()) @map("created_at")
+  startedAt    DateTime?      @map("started_at")
+  completedAt  DateTime?      @map("completed_at")
+  batches      PoolBBatch[]
+
+  @@map("pool_b_jobs")
+  @@schema("public")
+}
+
+model PoolBBatch {
+  id           String           @id @default(uuid()) @db.Uuid
+  jobId        String           @db.Uuid @map("job_id")
+  batchIndex   Int              @map("batch_index")
+  status       PoolBBatchStatus @default(QUEUED)
+  startRow     Int              @map("start_row")
+  endRow       Int              @map("end_row")
+  rowCount     Int              @map("row_count")
+  successCount Int              @default(0) @map("success_count")
+  failedCount  Int              @default(0) @map("failed_count")
+  startedAt    DateTime?        @map("started_at")
+  completedAt  DateTime?        @map("completed_at")
+  results      Json?
+  errorMessage String?          @map("error_message")
+  job          PoolBJob         @relation(fields: [jobId], references: [id], onDelete: Cascade)
+
+  @@index([jobId])
+  @@map("pool_b_batches")
+  @@schema("public")
+}
+

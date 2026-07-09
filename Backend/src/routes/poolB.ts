@@ -1,8 +1,10 @@
 /**
  * Pool B article-attribute-value uploader routes (Admin only).
  *
- *   POST /api/poolb/preview  — parse the Matnr×value grid (no SAP call)
- *   POST /api/poolb/commit   — live AUSP patch per article
+ *   POST /api/poolb/preview    — parse (no SAP call)
+ *   POST /api/poolb/commit     — sync (≤500 rows) or async job (>500 rows)
+ *   GET  /api/poolb/job/:jobId — poll async job status
+ *   GET  /api/poolb/jobs       — list recent jobs
  *
  * Mounted in index.ts behind `authenticate, requireAdmin`.
  */
@@ -33,5 +35,7 @@ const router = Router();
 
 router.post('/preview', excelUpload.single('file'), asyncHandler(PoolBController.preview));
 router.post('/commit', excelUpload.single('file'), asyncHandler(PoolBController.commit));
+router.get('/jobs', asyncHandler(PoolBController.listJobs));
+router.get('/job/:jobId', asyncHandler(PoolBController.getJob));
 
 export default router;
