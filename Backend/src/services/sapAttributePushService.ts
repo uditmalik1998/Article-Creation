@@ -121,14 +121,16 @@ const linkMatnrToClass = async (matnr: string, matkl: string, env?: string): Pro
   return { ok: true, message: msg || 'linked' };
 };
 
-type PlanRow = { atnam: string; value: string; status: string; route?: string };
+type PlanRow = { atnam: string; value: string; status: string; route?: string; msg?: string };
 
 // The RFC proxy wraps the FM's structured output inside EV_JSON (a JSON string):
 //   { "EV_JSON": "{ \"ok\": false, \"plan\": [ { \"fn\": \"M_YARN\", \"status\": \"PLANNED\" } ] }" }
-// Unwrap it so callers see the inner object. Falls back to the raw body if
+// Newer FM versions (V69+) return EV_JSON already parsed as an object.
+// Unwrap either form so callers see the inner object. Falls back to the raw body if
 // there's no EV_JSON (older/other response shapes).
 const unwrapBody = (body: any): any => {
-  if (body && typeof body.EV_JSON === 'string') {
+  if (!body) return body;
+  if (typeof body.EV_JSON === 'string') {
     try {
       return JSON.parse(body.EV_JSON);
     } catch {
@@ -142,6 +144,10 @@ const unwrapBody = (body: any): any => {
         return JSON.parse(repaired);
       } catch { /* keep raw */ }
     }
+  }
+  // V69+: EV_JSON is already a parsed object in the proxy response
+  if (body.EV_JSON && typeof body.EV_JSON === 'object') {
+    return body.EV_JSON;
   }
   return body;
 };
@@ -157,6 +163,7 @@ const parsePlan = (body: any): PlanRow[] => {
     value: String(row.value ?? row.VALUE ?? row.ATWRT ?? '').trim(),
     status: String(row.status ?? row.STATUS ?? '').trim().toUpperCase(),
     route: row.route ?? row.ROUTE,
+    msg: row.msg ?? row.MSG ?? row.message ?? row.MESSAGE ?? undefined,
   })).filter((r: PlanRow) => r.atnam);
 };
 
@@ -297,7 +304,8 @@ export const pushAttributesViaV64 = async (
       result.nicCount = (first.plan.length - planned.length) + tally.nicCount;
       result.lockedCount = tally.lockedCount;
       if (!second.ok) {
-        result.errorMessage = `V64 retry returned ok:false (${tally.writtenCount} written, ${tally.nicCount} nic)`;
+        const msgs = second.plan.map((p) => p.msg).filter(Boolean).join('; ');
+        result.errorMessage = `V64 retry returned ok:false (${tally.writtenCount} written, ${tally.nicCount} nic)` + (msgs ? ` | ${msgs}` : '');
       }
       return result;
     }
@@ -306,7 +314,8 @@ export const pushAttributesViaV64 = async (
     result.writtenCount = 0;
     result.nicCount = tally.nicCount;
     result.lockedCount = tally.lockedCount;
-    result.errorMessage = `V64 atomic-fail: 0 PLANNED, ${tally.nicCount} NIC, ${tally.lockedCount} LOCKED`;
+    const v64PlanMsgs = first.plan.map((p) => p.msg).filter(Boolean).join('; ');
+    result.errorMessage = `V64 atomic-fail: 0 PLANNED, ${tally.nicCount} NIC, ${tally.lockedCount} LOCKED` + (v64PlanMsgs ? ` | ${v64PlanMsgs}` : '');
     return result;
   } catch (err) {
     result.errorMessage = err instanceof Error ? err.message : 'unknown V64 push error';
@@ -413,7 +422,10 @@ export const pushRawAttributesToSap = async (
       result.writtenCount = tally.writtenCount;
       result.nicCount = (first.plan.length - planned.length) + tally.nicCount;
       result.lockedCount = tally.lockedCount;
-      if (!second.ok) result.errorMessage = `patch retry ok:false (${tally.writtenCount} written, ${tally.nicCount} nic)`;
+      if (!second.ok) {
+        const msgs = second.plan.map((p) => p.msg).filter(Boolean).join('; ');
+        result.errorMessage = `patch retry ok:false (${tally.writtenCount} written, ${tally.nicCount} nic)` + (msgs ? ` | ${msgs}` : '');
+      }
       return result;
     }
 
@@ -424,8 +436,10 @@ export const pushRawAttributesToSap = async (
     // (e.g. FM not found on this env, or a different response shape).
     let rawSnippet = '';
     try { rawSnippet = JSON.stringify(first.raw).slice(0, 400); } catch { rawSnippet = String(first.raw).slice(0, 400); }
+    const planMsgs = first.plan.map((p) => p.msg).filter(Boolean).join('; ');
     result.errorMessage =
       `atomic-fail: 0 PLANNED, ${tally.nicCount} NIC, ${tally.lockedCount} LOCKED` +
+      (planMsgs ? ` | ${planMsgs}` : '') +
       (first.plan.length === 0 ? ` | empty plan — SAP raw: ${rawSnippet}` : '');
     return result;
   } catch (err) {
