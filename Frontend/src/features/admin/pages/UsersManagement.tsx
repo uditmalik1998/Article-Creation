@@ -3,7 +3,7 @@ import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
-import { Plus, User, Store, LayoutGrid, Pencil, Download, Upload as UploadIcon, Search } from 'lucide-react';
+import { Plus, User, LayoutGrid, Pencil, Download, Upload as UploadIcon, Search } from 'lucide-react';
 import {
   Badge,
   Button,
@@ -70,6 +70,9 @@ export default function UsersManagement() {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [selectedUser, setSelectedUser] = useState<AdminUser | null>(null);
   const [searchTerm, setSearchTerm] = useState<string>('');
+  const [pendingRemoveDivision, setPendingRemoveDivision] = useState<string | null>(null);
+  const [pendingOrphans, setPendingOrphans] = useState<string[]>([]);
+  const pendingDivisionChangeRef = useRef<{ newIds: string[]; orphans: string[] } | null>(null);
   const fileInputRef = useRef<HTMLInputElement | null>(null);
 
   const form = useForm<UserValues>({
@@ -132,6 +135,9 @@ export default function UsersManagement() {
     setIsModalOpen(false);
     setSelectedUser(null);
     form.reset({ name: '', email: '', password: '', role: 'CREATOR', divisionIds: [], subDivision: [] });
+    pendingDivisionChangeRef.current = null;
+    setPendingRemoveDivision(null);
+    setPendingOrphans([]);
   };
 
   const createUserMutation = useMutation({
@@ -204,6 +210,53 @@ export default function UsersManagement() {
       password: '',
     });
     setIsModalOpen(true);
+  };
+
+  const handleDivisionChange = (newIds: string[]) => {
+    const currentIds = form.getValues('divisionIds') ?? [];
+    const removed = currentIds.find((id) => !newIds.includes(id));
+
+    if (!removed) {
+      form.setValue('divisionIds', newIds, { shouldValidate: true });
+      return;
+    }
+
+    const normalise = (s: string) => s.trim().toUpperCase().replace(/S$/, '');
+    const removedDept = departments.find((d) => normalise(String(d.name || '')) === normalise(removed));
+    const removedCodes = new Set((removedDept?.subDepartments || []).map((s) => s.code));
+
+    const remainingDepts = departments.filter((d) =>
+      newIds.some((id) => normalise(String(d.name || '')) === normalise(id))
+    );
+    const remainingCodes = new Set(remainingDepts.flatMap((d) => (d.subDepartments || []).map((s) => s.code)));
+
+    const currentSubDivisions = form.getValues('subDivision') ?? [];
+    const orphans = currentSubDivisions.filter((code) => removedCodes.has(code) && !remainingCodes.has(code));
+
+    if (orphans.length > 0) {
+      pendingDivisionChangeRef.current = { newIds, orphans };
+      setPendingOrphans(orphans);
+      setPendingRemoveDivision(removed);
+    } else {
+      form.setValue('divisionIds', newIds, { shouldValidate: true });
+    }
+  };
+
+  const confirmDivisionRemoval = () => {
+    const pending = pendingDivisionChangeRef.current;
+    if (!pending) return;
+    form.setValue('divisionIds', pending.newIds, { shouldValidate: true });
+    const currentSubDivisions = form.getValues('subDivision') ?? [];
+    form.setValue('subDivision', currentSubDivisions.filter((c) => !pending.orphans.includes(c)));
+    pendingDivisionChangeRef.current = null;
+    setPendingRemoveDivision(null);
+    setPendingOrphans([]);
+  };
+
+  const cancelDivisionRemoval = () => {
+    pendingDivisionChangeRef.current = null;
+    setPendingRemoveDivision(null);
+    setPendingOrphans([]);
   };
 
   const downloadBulkTemplate = async () => {
@@ -595,11 +648,9 @@ export default function UsersManagement() {
                         <MultiSelect
                           options={divisionNames.map((name) => ({ value: name, label: name }))}
                           value={field.value ?? []}
-                          onChange={(v) => {
-                            field.onChange(v);
-                            form.setValue('subDivision', []);
-                          }}
+                          onChange={handleDivisionChange}
                           placeholder="Select Division(s)"
+                          searchable
                         />
                       </FormControl>
                       <FormMessage />
@@ -645,6 +696,27 @@ export default function UsersManagement() {
           </Form>
           {/* Keep imports referenced */}
           {false && <LayoutGrid />}
+        </DialogContent>
+      </Dialog>
+
+      <Dialog open={!!pendingRemoveDivision} onOpenChange={(o) => !o && cancelDivisionRemoval()}>
+        <DialogContent className="max-w-[400px]">
+          <DialogHeader>
+            <DialogTitle>Remove Division</DialogTitle>
+          </DialogHeader>
+          <p className="text-sm text-muted-foreground">
+            Removing <strong>{pendingRemoveDivision}</strong> will also deselect{' '}
+            {pendingOrphans.length} sub-division(s):{' '}
+            <strong>{pendingOrphans.join(', ')}</strong>. Continue?
+          </p>
+          <DialogFooter>
+            <Button type="button" variant="outline" onClick={cancelDivisionRemoval}>
+              Cancel
+            </Button>
+            <Button type="button" variant="destructive" onClick={confirmDivisionRemoval}>
+              Remove
+            </Button>
+          </DialogFooter>
         </DialogContent>
       </Dialog>
     </div>
