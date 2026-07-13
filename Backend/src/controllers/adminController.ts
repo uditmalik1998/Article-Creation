@@ -1282,7 +1282,7 @@ export const updateUser = async (req: Request, res: Response): Promise<void> => 
     const updateData: any = {
       name: validated.name,
       role: validated.role as any,
-      division: finalRole === 'PO_COMMITTEE' ? null : (validated.division !== undefined ? normalizeDivisionInput(validated.division) : undefined),
+      division: finalRole === 'PO_COMMITTEE' ? null : (validated.division !== undefined ? finalDivision : undefined),
       subDivision: (finalRole === 'CATEGORY_HEAD' || finalRole === 'PO_COMMITTEE' || finalRole === 'ADMIN') ? null : (validated.subDivision !== undefined ? normalizeSubDivisionInput(validated.subDivision) : undefined),
       email: validated.email ? validated.email.toLowerCase() : undefined,
     };

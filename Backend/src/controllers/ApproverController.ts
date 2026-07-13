@@ -1263,7 +1263,13 @@ export class ApproverController {
     static async exportAllWithVariants(req: Request, res: Response) {
         try {
             const where = ApproverController.buildExportWhere(req);
-            const { pathType } = req.query;
+            const { pathType, ids } = req.query;
+
+            // When specific article IDs are provided, scope the export to those only
+            if (ids && typeof ids === 'string') {
+                const idList = ids.split(',').map((id) => id.trim()).filter(Boolean);
+                if (idList.length > 0) where.id = { in: idList };
+            }
 
             // Shared select object — same ~65 fields as exportAll's findMany.
             const sharedSelect = {
