@@ -3,7 +3,7 @@ import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
-import { Plus, User, Store, LayoutGrid, Pencil, Download, Upload as UploadIcon, Search } from 'lucide-react';
+import { Plus, User, LayoutGrid, Pencil, Download, Upload as UploadIcon, Search } from 'lucide-react';
 import {
   Badge,
   Button,
@@ -60,7 +60,7 @@ const userSchema = z.object({
   email: z.string().email('Enter a valid email').min(1, 'Please enter email'),
   password: z.string().optional(),
   role: z.enum(['CREATOR', 'PO_COMMITTEE', 'APPROVER', 'CATEGORY_HEAD', 'SUB_DIVISION_HEAD', 'ADMIN', 'PD_DESIGNER', 'PD']),
-  departmentId: z.string().optional(),
+  divisionIds: z.array(z.string()).optional(),
   subDivision: z.array(z.string()).optional(),
 });
 type UserValues = z.infer<typeof userSchema>;
@@ -70,14 +70,17 @@ export default function UsersManagement() {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [selectedUser, setSelectedUser] = useState<AdminUser | null>(null);
   const [searchTerm, setSearchTerm] = useState<string>('');
+  const [pendingRemoveDivision, setPendingRemoveDivision] = useState<string | null>(null);
+  const [pendingOrphans, setPendingOrphans] = useState<string[]>([]);
+  const pendingDivisionChangeRef = useRef<{ newIds: string[]; orphans: string[] } | null>(null);
   const fileInputRef = useRef<HTMLInputElement | null>(null);
 
   const form = useForm<UserValues>({
     resolver: zodResolver(userSchema),
-    defaultValues: { name: '', email: '', password: '', role: 'CREATOR', departmentId: '', subDivision: [] },
+    defaultValues: { name: '', email: '', password: '', role: 'CREATOR', divisionIds: [], subDivision: [] },
   });
   const selectedRole = form.watch('role');
-  const selectedDeptId = form.watch('departmentId');
+  const selectedDivisionIds = form.watch('divisionIds') ?? [];
 
   const user = localStorage.getItem('user');
   const userData = user ? JSON.parse(user) : null;
@@ -93,16 +96,18 @@ export default function UsersManagement() {
   });
 
   const availableSubDepts = useMemo(() => {
-    if (!selectedDeptId) return [];
+    if (!selectedDivisionIds.length) return [];
     const normalise = (s: string) => s.trim().toUpperCase().replace(/S$/, '');
-    const dept = departments.find((d) => normalise(String(d.name || '')) === normalise(selectedDeptId));
-    const fromDept: { id: number; code: string; name: string }[] = dept?.subDepartments || [];
+    const matchedDepts = departments.filter((d) =>
+      selectedDivisionIds.some((id) => normalise(String(d.name || '')) === normalise(id))
+    );
+    const fromDepts: { id: number; code: string; name: string }[] = matchedDepts.flatMap((d) => d.subDepartments || []);
     const existingCodes = form.getValues('subDivision') ?? [];
     const extra = existingCodes
-      .filter((code) => !fromDept.some((s) => s.code === code))
+      .filter((code) => !fromDepts.some((s) => s.code === code))
       .map((code) => ({ id: -1, code, name: code }));
-    return [...fromDept, ...extra];
-  }, [selectedDeptId, departments, form]);
+    return [...fromDepts, ...extra];
+  }, [selectedDivisionIds, departments, form]);
 
   const filteredUsers = useMemo(() => {
     if (!searchTerm.trim()) {
@@ -129,7 +134,10 @@ export default function UsersManagement() {
   const closeModal = () => {
     setIsModalOpen(false);
     setSelectedUser(null);
-    form.reset({ name: '', email: '', password: '', role: 'CREATOR', departmentId: '', subDivision: [] });
+    form.reset({ name: '', email: '', password: '', role: 'CREATOR', divisionIds: [], subDivision: [] });
+    pendingDivisionChangeRef.current = null;
+    setPendingRemoveDivision(null);
+    setPendingOrphans([]);
   };
 
   const createUserMutation = useMutation({
@@ -179,7 +187,7 @@ export default function UsersManagement() {
       email: values.email,
       name: values.name,
       role: values.role,
-      division: values.departmentId || undefined,
+      division: values.divisionIds?.length ? values.divisionIds : undefined,
       subDivision: values.subDivision,
     };
     if (values.password) payload.password = values.password;
@@ -190,16 +198,65 @@ export default function UsersManagement() {
 
   const handleEditUser = (u: AdminUser) => {
     setSelectedUser(u);
-    const divisionValue = formatDivisionLabel(String(u.division || '').trim()).toUpperCase() || '';
+    const divisionIds = parseSubDivisionList(u.division).map((d) =>
+      formatDivisionLabel(d.trim()).toUpperCase()
+    );
     form.reset({
       name: u.name,
       email: u.email,
       role: u.role as UserValues['role'],
-      departmentId: divisionValue,
+      divisionIds,
       subDivision: parseSubDivisionList(u.subDivision),
       password: '',
     });
     setIsModalOpen(true);
+  };
+
+  const handleDivisionChange = (newIds: string[]) => {
+    const currentIds = form.getValues('divisionIds') ?? [];
+    const removed = currentIds.find((id) => !newIds.includes(id));
+
+    if (!removed) {
+      form.setValue('divisionIds', newIds, { shouldValidate: true });
+      return;
+    }
+
+    const normalise = (s: string) => s.trim().toUpperCase().replace(/S$/, '');
+    const removedDept = departments.find((d) => normalise(String(d.name || '')) === normalise(removed));
+    const removedCodes = new Set((removedDept?.subDepartments || []).map((s) => s.code));
+
+    const remainingDepts = departments.filter((d) =>
+      newIds.some((id) => normalise(String(d.name || '')) === normalise(id))
+    );
+    const remainingCodes = new Set(remainingDepts.flatMap((d) => (d.subDepartments || []).map((s) => s.code)));
+
+    const currentSubDivisions = form.getValues('subDivision') ?? [];
+    const orphans = currentSubDivisions.filter((code) => removedCodes.has(code) && !remainingCodes.has(code));
+
+    if (orphans.length > 0) {
+      pendingDivisionChangeRef.current = { newIds, orphans };
+      setPendingOrphans(orphans);
+      setPendingRemoveDivision(removed);
+    } else {
+      form.setValue('divisionIds', newIds, { shouldValidate: true });
+    }
+  };
+
+  const confirmDivisionRemoval = () => {
+    const pending = pendingDivisionChangeRef.current;
+    if (!pending) return;
+    form.setValue('divisionIds', pending.newIds, { shouldValidate: true });
+    const currentSubDivisions = form.getValues('subDivision') ?? [];
+    form.setValue('subDivision', currentSubDivisions.filter((c) => !pending.orphans.includes(c)));
+    pendingDivisionChangeRef.current = null;
+    setPendingRemoveDivision(null);
+    setPendingOrphans([]);
+  };
+
+  const cancelDivisionRemoval = () => {
+    pendingDivisionChangeRef.current = null;
+    setPendingRemoveDivision(null);
+    setPendingOrphans([]);
   };
 
   const downloadBulkTemplate = async () => {
@@ -583,32 +640,18 @@ export default function UsersManagement() {
               {needsDivision && (
                 <FormField
                   control={form.control}
-                  name="departmentId"
+                  name="divisionIds"
                   render={({ field }) => (
                     <FormItem>
                       <FormLabel>Division</FormLabel>
                       <FormControl>
-                        <Select
-                          onValueChange={(v) => {
-                            field.onChange(v);
-                            form.setValue('subDivision', []);
-                          }}
-                          value={field.value}
-                        >
-                          <SelectTrigger>
-                            <div className="flex items-center gap-2">
-                              <Store className="h-4 w-4 text-muted-foreground" />
-                              <SelectValue placeholder="Select Division" />
-                            </div>
-                          </SelectTrigger>
-                          <SelectContent>
-                            {divisionNames.map((name) => (
-                              <SelectItem key={name} value={name}>
-                                {name}
-                              </SelectItem>
-                            ))}
-                          </SelectContent>
-                        </Select>
+                        <MultiSelect
+                          options={divisionNames.map((name) => ({ value: name, label: name }))}
+                          value={field.value ?? []}
+                          onChange={handleDivisionChange}
+                          placeholder="Select Division(s)"
+                          searchable
+                        />
                       </FormControl>
                       <FormMessage />
                     </FormItem>
@@ -631,7 +674,7 @@ export default function UsersManagement() {
                           }))}
                           value={field.value ?? []}
                           onChange={field.onChange}
-                          disabled={!selectedDeptId}
+                          disabled={!selectedDivisionIds.length}
                           placeholder="Select Sub-Division"
                         />
                       </FormControl>
@@ -653,6 +696,27 @@ export default function UsersManagement() {
           </Form>
           {/* Keep imports referenced */}
           {false && <LayoutGrid />}
+        </DialogContent>
+      </Dialog>
+
+      <Dialog open={!!pendingRemoveDivision} onOpenChange={(o) => !o && cancelDivisionRemoval()}>
+        <DialogContent className="max-w-[400px]">
+          <DialogHeader>
+            <DialogTitle>Remove Division</DialogTitle>
+          </DialogHeader>
+          <p className="text-sm text-muted-foreground">
+            Removing <strong>{pendingRemoveDivision}</strong> will also deselect{' '}
+            {pendingOrphans.length} sub-division(s):{' '}
+            <strong>{pendingOrphans.join(', ')}</strong>. Continue?
+          </p>
+          <DialogFooter>
+            <Button type="button" variant="outline" onClick={cancelDivisionRemoval}>
+              Cancel
+            </Button>
+            <Button type="button" variant="destructive" onClick={confirmDivisionRemoval}>
+              Remove
+            </Button>
+          </DialogFooter>
         </DialogContent>
       </Dialog>
     </div>

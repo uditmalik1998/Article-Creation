@@ -153,6 +153,15 @@ export class FlatExtractionController {
         return Array.from(new Set(tokens));
     }
 
+    private parseDivisions(value: unknown): string[] {
+        if (value === null || value === undefined) return [];
+        const tokens = String(value)
+            .split(/[;,|]+/)
+            .map((item) => item.trim())
+            .filter(Boolean);
+        return Array.from(new Set(tokens));
+    }
+
     private extractNumericWeight(input: unknown): string | null {
         if (input === null || input === undefined) return null;
         const text = String(input).trim();
@@ -193,7 +202,12 @@ export class FlatExtractionController {
                 where.userId = userId;
             } else if (role === 'APPROVER') {
                 // Approvers see extractions within their assigned scope
-                if (division) where.division = division;
+                const divisionList = this.parseDivisions(division);
+                if (divisionList.length === 1) {
+                    where.division = divisionList[0];
+                } else if (divisionList.length > 1) {
+                    where.division = { in: divisionList };
+                }
                 const subDivisionList = this.parseSubDivisions(subDivision);
                 if (subDivisionList.length === 1) {
                     where.subDivision = subDivisionList[0];
@@ -202,7 +216,12 @@ export class FlatExtractionController {
                 }
             } else if (role === 'CATEGORY_HEAD') {
                 // Category heads see all extractions within their assigned division
-                if (division) where.division = division;
+                const divisionList = this.parseDivisions(division);
+                if (divisionList.length === 1) {
+                    where.division = divisionList[0];
+                } else if (divisionList.length > 1) {
+                    where.division = { in: divisionList };
+                }
             } else if (role === 'ADMIN') {
                 // Admins see all - no filters applied
             } else {
@@ -340,9 +359,12 @@ export class FlatExtractionController {
                     return;
                 }
             } else if (role === 'APPROVER') {
-                if (division && existing.division && String(existing.division).toLowerCase() !== String(division).toLowerCase()) {
-                    res.status(403).json({ success: false, error: 'Access denied: Division mismatch.' });
-                    return;
+                if (division && existing.division) {
+                    const userDivList = this.parseDivisions(division).map((d) => d.toLowerCase());
+                    if (userDivList.length > 0 && !userDivList.includes(String(existing.division).toLowerCase())) {
+                        res.status(403).json({ success: false, error: 'Access denied: Division mismatch.' });
+                        return;
+                    }
                 }
                 const subDivisionList = this.parseSubDivisions(subDivision).map((item) => item.toLowerCase());
                 if (subDivisionList.length > 0 && existing.subDivision) {
@@ -353,9 +375,12 @@ export class FlatExtractionController {
                     }
                 }
             } else if (role === 'CATEGORY_HEAD') {
-                if (division && existing.division && String(existing.division).toLowerCase() !== String(division).toLowerCase()) {
-                    res.status(403).json({ success: false, error: 'Access denied: Division mismatch.' });
-                    return;
+                if (division && existing.division) {
+                    const userDivList = this.parseDivisions(division).map((d) => d.toLowerCase());
+                    if (userDivList.length > 0 && !userDivList.includes(String(existing.division).toLowerCase())) {
+                        res.status(403).json({ success: false, error: 'Access denied: Division mismatch.' });
+                        return;
+                    }
                 }
             }
 
@@ -482,9 +507,12 @@ export class FlatExtractionController {
                     return;
                 }
             } else if (role === 'APPROVER') {
-                if (division && existing.division && String(existing.division).toLowerCase() !== String(division).toLowerCase()) {
-                    res.status(403).json({ success: false, error: 'Access denied: Division mismatch.' });
-                    return;
+                if (division && existing.division) {
+                    const userDivList = this.parseDivisions(division).map((d) => d.toLowerCase());
+                    if (userDivList.length > 0 && !userDivList.includes(String(existing.division).toLowerCase())) {
+                        res.status(403).json({ success: false, error: 'Access denied: Division mismatch.' });
+                        return;
+                    }
                 }
                 const subDivisionList = this.parseSubDivisions(subDivision).map((item) => item.toLowerCase());
                 if (subDivisionList.length > 0 && existing.subDivision) {
@@ -495,9 +523,12 @@ export class FlatExtractionController {
                     }
                 }
             } else if (role === 'CATEGORY_HEAD') {
-                if (division && existing.division && String(existing.division).toLowerCase() !== String(division).toLowerCase()) {
-                    res.status(403).json({ success: false, error: 'Access denied: Division mismatch.' });
-                    return;
+                if (division && existing.division) {
+                    const userDivList = this.parseDivisions(division).map((d) => d.toLowerCase());
+                    if (userDivList.length > 0 && !userDivList.includes(String(existing.division).toLowerCase())) {
+                        res.status(403).json({ success: false, error: 'Access denied: Division mismatch.' });
+                        return;
+                    }
                 }
             }
 

@@ -92,14 +92,27 @@ export class ApproverController {
     }
 
     private static getDivisionVariants(value?: string | null): string[] {
-        const normalized = ApproverController.normalizeText(value);
-        if (!normalized) return [];
+        if (!value) return [];
 
-        if (normalized === 'MEN' || normalized === 'MENS') return ['MEN', 'MENS'];
-        if (normalized === 'LADIES' || normalized === 'WOMEN' || normalized === 'WOMAN') return ['LADIES', 'WOMEN'];
-        if (normalized === 'KID' || normalized === 'KIDS') return ['KID', 'KIDS'];
+        const tokens = String(value)
+            .split(/[;,|]+/)
+            .map((t) => ApproverController.normalizeText(t))
+            .filter(Boolean);
 
-        return [normalized];
+        const variants: string[] = [];
+        for (const token of tokens) {
+            if (token === 'MEN' || token === 'MENS') {
+                variants.push('MEN', 'MENS');
+            } else if (token === 'LADIES' || token === 'WOMEN' || token === 'WOMAN') {
+                variants.push('LADIES', 'WOMEN');
+            } else if (token === 'KID' || token === 'KIDS') {
+                variants.push('KID', 'KIDS');
+            } else {
+                variants.push(token);
+            }
+        }
+
+        return Array.from(new Set(variants));
     }
 
     private static getSubDivisionVariants(value?: string | null): string[] {
@@ -1250,7 +1263,13 @@ export class ApproverController {
     static async exportAllWithVariants(req: Request, res: Response) {
         try {
             const where = ApproverController.buildExportWhere(req);
-            const { pathType } = req.query;
+            const { pathType, ids } = req.query;
+
+            // When specific article IDs are provided, scope the export to those only
+            if (ids && typeof ids === 'string') {
+                const idList = ids.split(',').map((id) => id.trim()).filter(Boolean);
+                if (idList.length > 0) where.id = { in: idList };
+            }
 
             // Shared select object — same ~65 fields as exportAll's findMany.
             const sharedSelect = {

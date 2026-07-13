@@ -609,7 +609,22 @@ export class EnhancedExtractionController {
       const currentUser = req.user;
       if (userRole === 'CREATOR') {
         if (currentUser?.division) {
-          enforcedDepartment = currentUser.division;
+          const userDivisions = String(currentUser.division).split(/[;,|]+/).map((d) => d.trim()).filter(Boolean);
+          if (userDivisions.length === 1) {
+            enforcedDepartment = userDivisions[0];
+          } else {
+            const isAllowed = userDivisions.some(
+              (d) => d.toUpperCase() === String(department || '').trim().toUpperCase()
+            );
+            if (!isAllowed) {
+              res.status(403).json({
+                success: false,
+                error: `Access denied. You can only extract for your assigned divisions: ${userDivisions.join(', ')}.`,
+                timestamp: Date.now()
+              });
+              return;
+            }
+          }
         }
         // Use the user's selected sub-division from the request (dropdown selection).
         // Only fall back to profile sub-division if nothing was selected AND it's a single value.
@@ -855,7 +870,22 @@ export class EnhancedExtractionController {
       const currentUser = req.user;
       if (userRole === 'CREATOR') {
         if (currentUser?.division) {
-          enforcedDepartment = currentUser.division;
+          const userDivisions = String(currentUser.division).split(/[;,|]+/).map((d) => d.trim()).filter(Boolean);
+          if (userDivisions.length === 1) {
+            enforcedDepartment = userDivisions[0];
+          } else {
+            const isAllowed = userDivisions.some(
+              (d) => d.toUpperCase() === String(department || '').trim().toUpperCase()
+            );
+            if (!isAllowed) {
+              res.status(403).json({
+                success: false,
+                error: `Access denied. You can only extract for your assigned divisions: ${userDivisions.join(', ')}.`,
+                timestamp: Date.now()
+              });
+              return;
+            }
+          }
         }
         // Use the user's selected sub-division from the request (dropdown selection).
         // Only fall back to profile sub-division if nothing was selected AND it's a single value.
@@ -1118,13 +1148,19 @@ export class EnhancedExtractionController {
       const userRole = String(req.user?.role || '');
       const currentUser = req.user;
       if (userRole === 'CREATOR') {
-        if (currentUser?.division && category.department.name.toLowerCase() !== currentUser.division.toLowerCase()) {
-          res.status(403).json({
-            success: false,
-            error: `Access denied. You can only access categories in ${currentUser.division}.`,
-            timestamp: Date.now()
-          });
-          return;
+        if (currentUser?.division) {
+          const userDivisions = String(currentUser.division)
+            .split(/[;,|]+/)
+            .map((d) => d.trim().toLowerCase())
+            .filter(Boolean);
+          if (userDivisions.length > 0 && !userDivisions.includes(category.department.name.toLowerCase())) {
+            res.status(403).json({
+              success: false,
+              error: `Access denied. You can only access categories in ${currentUser.division}.`,
+              timestamp: Date.now()
+            });
+            return;
+          }
         }
         if (currentUser?.subDivision && category.subDepartment.code.toLowerCase() !== currentUser.subDivision.toLowerCase()) {
           res.status(403).json({
