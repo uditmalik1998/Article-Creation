@@ -608,7 +608,7 @@ export class EnhancedExtractionController {
       const userRole = String(req.user?.role || '');
       const currentUser = req.user;
       if (userRole === 'CREATOR') {
-        if (currentUser?.division) {
+        if (currentUser?.division && !String(currentUser.division).includes(',')) {
           enforcedDepartment = currentUser.division;
         }
         // Use the user's selected sub-division from the request (dropdown selection).
@@ -854,7 +854,7 @@ export class EnhancedExtractionController {
       const userRole = String(req.user?.role || '');
       const currentUser = req.user;
       if (userRole === 'CREATOR') {
-        if (currentUser?.division) {
+        if (currentUser?.division && !String(currentUser.division).includes(',')) {
           enforcedDepartment = currentUser.division;
         }
         // Use the user's selected sub-division from the request (dropdown selection).
@@ -1118,13 +1118,19 @@ export class EnhancedExtractionController {
       const userRole = String(req.user?.role || '');
       const currentUser = req.user;
       if (userRole === 'CREATOR') {
-        if (currentUser?.division && category.department.name.toLowerCase() !== currentUser.division.toLowerCase()) {
-          res.status(403).json({
-            success: false,
-            error: `Access denied. You can only access categories in ${currentUser.division}.`,
-            timestamp: Date.now()
-          });
-          return;
+        if (currentUser?.division) {
+          const userDivisions = String(currentUser.division)
+            .split(/[;,|]+/)
+            .map((d) => d.trim().toLowerCase())
+            .filter(Boolean);
+          if (userDivisions.length > 0 && !userDivisions.includes(category.department.name.toLowerCase())) {
+            res.status(403).json({
+              success: false,
+              error: `Access denied. You can only access categories in ${currentUser.division}.`,
+              timestamp: Date.now()
+            });
+            return;
+          }
         }
         if (currentUser?.subDivision && category.subDepartment.code.toLowerCase() !== currentUser.subDivision.toLowerCase()) {
           res.status(403).json({
