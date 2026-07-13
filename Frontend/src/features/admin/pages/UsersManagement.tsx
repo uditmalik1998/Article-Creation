@@ -60,7 +60,7 @@ const userSchema = z.object({
   email: z.string().email('Enter a valid email').min(1, 'Please enter email'),
   password: z.string().optional(),
   role: z.enum(['CREATOR', 'PO_COMMITTEE', 'APPROVER', 'CATEGORY_HEAD', 'SUB_DIVISION_HEAD', 'ADMIN', 'PD_DESIGNER', 'PD']),
-  departmentId: z.string().optional(),
+  divisionIds: z.array(z.string()).optional(),
   subDivision: z.array(z.string()).optional(),
 });
 type UserValues = z.infer<typeof userSchema>;
@@ -74,10 +74,10 @@ export default function UsersManagement() {
 
   const form = useForm<UserValues>({
     resolver: zodResolver(userSchema),
-    defaultValues: { name: '', email: '', password: '', role: 'CREATOR', departmentId: '', subDivision: [] },
+    defaultValues: { name: '', email: '', password: '', role: 'CREATOR', divisionIds: [], subDivision: [] },
   });
   const selectedRole = form.watch('role');
-  const selectedDeptId = form.watch('departmentId');
+  const selectedDivisionIds = form.watch('divisionIds') ?? [];
 
   const user = localStorage.getItem('user');
   const userData = user ? JSON.parse(user) : null;
@@ -93,16 +93,18 @@ export default function UsersManagement() {
   });
 
   const availableSubDepts = useMemo(() => {
-    if (!selectedDeptId) return [];
+    if (!selectedDivisionIds.length) return [];
     const normalise = (s: string) => s.trim().toUpperCase().replace(/S$/, '');
-    const dept = departments.find((d) => normalise(String(d.name || '')) === normalise(selectedDeptId));
-    const fromDept: { id: number; code: string; name: string }[] = dept?.subDepartments || [];
+    const matchedDepts = departments.filter((d) =>
+      selectedDivisionIds.some((id) => normalise(String(d.name || '')) === normalise(id))
+    );
+    const fromDepts: { id: number; code: string; name: string }[] = matchedDepts.flatMap((d) => d.subDepartments || []);
     const existingCodes = form.getValues('subDivision') ?? [];
     const extra = existingCodes
-      .filter((code) => !fromDept.some((s) => s.code === code))
+      .filter((code) => !fromDepts.some((s) => s.code === code))
       .map((code) => ({ id: -1, code, name: code }));
-    return [...fromDept, ...extra];
-  }, [selectedDeptId, departments, form]);
+    return [...fromDepts, ...extra];
+  }, [selectedDivisionIds, departments, form]);
 
   const filteredUsers = useMemo(() => {
     if (!searchTerm.trim()) {
@@ -129,7 +131,7 @@ export default function UsersManagement() {
   const closeModal = () => {
     setIsModalOpen(false);
     setSelectedUser(null);
-    form.reset({ name: '', email: '', password: '', role: 'CREATOR', departmentId: '', subDivision: [] });
+    form.reset({ name: '', email: '', password: '', role: 'CREATOR', divisionIds: [], subDivision: [] });
   };
 
   const createUserMutation = useMutation({
@@ -179,7 +181,7 @@ export default function UsersManagement() {
       email: values.email,
       name: values.name,
       role: values.role,
-      division: values.departmentId || undefined,
+      division: values.divisionIds?.length ? values.divisionIds : undefined,
       subDivision: values.subDivision,
     };
     if (values.password) payload.password = values.password;
@@ -190,12 +192,14 @@ export default function UsersManagement() {
 
   const handleEditUser = (u: AdminUser) => {
     setSelectedUser(u);
-    const divisionValue = formatDivisionLabel(String(u.division || '').trim()).toUpperCase() || '';
+    const divisionIds = parseSubDivisionList(u.division).map((d) =>
+      formatDivisionLabel(d.trim()).toUpperCase()
+    );
     form.reset({
       name: u.name,
       email: u.email,
       role: u.role as UserValues['role'],
-      departmentId: divisionValue,
+      divisionIds,
       subDivision: parseSubDivisionList(u.subDivision),
       password: '',
     });
@@ -583,32 +587,20 @@ export default function UsersManagement() {
               {needsDivision && (
                 <FormField
                   control={form.control}
-                  name="departmentId"
+                  name="divisionIds"
                   render={({ field }) => (
                     <FormItem>
                       <FormLabel>Division</FormLabel>
                       <FormControl>
-                        <Select
-                          onValueChange={(v) => {
+                        <MultiSelect
+                          options={divisionNames.map((name) => ({ value: name, label: name }))}
+                          value={field.value ?? []}
+                          onChange={(v) => {
                             field.onChange(v);
                             form.setValue('subDivision', []);
                           }}
-                          value={field.value}
-                        >
-                          <SelectTrigger>
-                            <div className="flex items-center gap-2">
-                              <Store className="h-4 w-4 text-muted-foreground" />
-                              <SelectValue placeholder="Select Division" />
-                            </div>
-                          </SelectTrigger>
-                          <SelectContent>
-                            {divisionNames.map((name) => (
-                              <SelectItem key={name} value={name}>
-                                {name}
-                              </SelectItem>
-                            ))}
-                          </SelectContent>
-                        </Select>
+                          placeholder="Select Division(s)"
+                        />
                       </FormControl>
                       <FormMessage />
                     </FormItem>
@@ -631,7 +623,7 @@ export default function UsersManagement() {
                           }))}
                           value={field.value ?? []}
                           onChange={field.onChange}
-                          disabled={!selectedDeptId}
+                          disabled={!selectedDivisionIds.length}
                           placeholder="Select Sub-Division"
                         />
                       </FormControl>
