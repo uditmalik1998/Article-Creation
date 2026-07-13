@@ -66,17 +66,29 @@ const AdminCreateUserSchema = z.object({
   password: z.string().min(6).max(128),
   name: z.string().min(1).max(100),
   role: z.enum(['ADMIN', 'USER', 'CREATOR', 'PO_COMMITTEE', 'APPROVER', 'CATEGORY_HEAD', 'SUB_DIVISION_HEAD', 'PD_DESIGNER', 'PD']).optional().default('USER'),
-  division: z.string().optional().nullable(),
+  division: z.union([z.string(), z.array(z.string())]).optional().nullable(),
   subDivision: z.union([z.string(), z.array(z.string())]).optional().nullable(),
 });
 
 const AdminUpdateUserSchema = AdminCreateUserSchema.partial().extend({
-
-
   password: z.string().min(6).max(128).optional(),
 });
 
 const normalizeSubDivisionInput = (value: unknown): string | null => {
+  if (value === null || value === undefined) return null;
+
+  const tokens = Array.isArray(value)
+    ? value.map((item) => String(item || '').trim())
+    : String(value)
+        .split(/[;,|]+/)
+        .map((item) => String(item || '').trim());
+
+  const unique = Array.from(new Set(tokens.filter(Boolean)));
+  if (unique.length === 0) return null;
+  return unique.join(',');
+};
+
+const normalizeDivisionInput = (value: unknown): string | null => {
   if (value === null || value === undefined) return null;
 
   const tokens = Array.isArray(value)
@@ -1147,14 +1159,15 @@ export const getAllUsers = async (req: Request, res: Response): Promise<void> =>
 export const createUser = async (req: Request, res: Response): Promise<void> => {
   try {
     const validated = AdminCreateUserSchema.parse(req.body);
+    const normalizedDivision = normalizeDivisionInput(validated.division);
     const normalizedSubDivision = normalizeSubDivisionInput(validated.subDivision);
 
-    if ((validated.role === 'CREATOR' || validated.role === 'APPROVER' || validated.role === 'SUB_DIVISION_HEAD') && (!validated.division || !normalizedSubDivision)) {
+    if ((validated.role === 'CREATOR' || validated.role === 'APPROVER' || validated.role === 'SUB_DIVISION_HEAD') && (!normalizedDivision || !normalizedSubDivision)) {
       res.status(400).json({ success: false, error: 'Division and Sub-Division are required for this role' });
       return;
     }
 
-    if (validated.role === 'CATEGORY_HEAD' && !validated.division) {
+    if (validated.role === 'CATEGORY_HEAD' && !normalizedDivision) {
       res.status(400).json({ success: false, error: 'Division is required for Category Head' });
       return;
     }
@@ -1179,7 +1192,7 @@ export const createUser = async (req: Request, res: Response): Promise<void> => 
           password: hashedPassword,
           name: validated.name,
           role: validated.role as any,
-          division: validated.role === 'PO_COMMITTEE' ? null : validated.division,
+          division: validated.role === 'PO_COMMITTEE' ? null : normalizedDivision,
           subDivision: (validated.role === 'CATEGORY_HEAD' || validated.role === 'PO_COMMITTEE' || validated.role === 'ADMIN') ? null : normalizedSubDivision,
           isActive: true,
         },
@@ -1205,7 +1218,7 @@ export const createUser = async (req: Request, res: Response): Promise<void> => 
         password: hashedPassword,
         name: validated.name,
         role: validated.role as any,
-        division: validated.role === 'PO_COMMITTEE' ? null : validated.division,
+        division: validated.role === 'PO_COMMITTEE' ? null : normalizedDivision,
         subDivision: (validated.role === 'CATEGORY_HEAD' || validated.role === 'PO_COMMITTEE' || validated.role === 'ADMIN') ? null : normalizedSubDivision,
         isActive: true,
       },
@@ -1249,7 +1262,9 @@ export const updateUser = async (req: Request, res: Response): Promise<void> => 
     }
 
     const finalRole = validated.role ?? existingUser.role;
-    const finalDivision = validated.division !== undefined ? validated.division : existingUser.division;
+    const finalDivision = validated.division !== undefined
+      ? normalizeDivisionInput(validated.division)
+      : existingUser.division;
     const finalSubDivision = validated.subDivision !== undefined
       ? normalizeSubDivisionInput(validated.subDivision)
       : existingUser.subDivision;
@@ -1264,11 +1279,10 @@ export const updateUser = async (req: Request, res: Response): Promise<void> => 
       return;
     }
 
-    // Prepare update data
     const updateData: any = {
       name: validated.name,
       role: validated.role as any,
-      division: finalRole === 'PO_COMMITTEE' ? null : validated.division,
+      division: finalRole === 'PO_COMMITTEE' ? null : (validated.division !== undefined ? normalizeDivisionInput(validated.division) : undefined),
       subDivision: (finalRole === 'CATEGORY_HEAD' || finalRole === 'PO_COMMITTEE' || finalRole === 'ADMIN') ? null : (validated.subDivision !== undefined ? normalizeSubDivisionInput(validated.subDivision) : undefined),
       email: validated.email ? validated.email.toLowerCase() : undefined,
     };
