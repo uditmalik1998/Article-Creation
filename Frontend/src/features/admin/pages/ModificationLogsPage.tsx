@@ -142,14 +142,20 @@ function DetailDialog({ groupId, onClose }: DetailDialogProps) {
                       <Tag className="font-mono text-xs">{log.labelName}</Tag>
                     </TableCell>
                     <TableCell>
-                      <span className="text-red-600 text-sm">
-                        {log.oldValue ?? <span className="text-muted-foreground italic">—</span>}
-                      </span>
+                      {/* Old value */}
+                      {log.oldValue ? (
+                        <span className="text-red-600 text-sm font-medium">{log.oldValue}</span>
+                      ) : (
+                        <span className="text-muted-foreground italic text-sm">—</span>
+                      )}
                     </TableCell>
                     <TableCell>
-                      <span className="text-green-600 text-sm">
-                        {log.newValue ?? <span className="text-muted-foreground italic">—</span>}
-                      </span>
+                      {/* New value */}
+                      {log.newValue ? (
+                        <span className="text-green-600 text-sm font-medium">{log.newValue}</span>
+                      ) : (
+                        <span className="text-muted-foreground italic text-sm">—</span>
+                      )}
                     </TableCell>
                     <TableCell>
                       <SapStatusBadge status={log.sapStatus} />
@@ -190,7 +196,18 @@ export default function ModificationLogsPage() {
   };
 
   const { data, isLoading, isError } = useQuery({
-    queryKey: ['modify-logs', queryParams],
+    queryKey: [
+      'modify-logs',
+      page,
+      appliedFilters.search ?? '',
+      appliedFilters.articleNumber ?? '',
+      appliedFilters.labelName ?? '',
+      appliedFilters.modifiedByName ?? '',
+      appliedFilters.modifiedByEmail ?? '',
+      appliedFilters.sapStatus ?? '',
+      appliedFilters.dateFrom ?? '',
+      appliedFilters.dateTo ?? '',
+    ],
     queryFn: () => getModifyLogs(queryParams),
     placeholderData: keepPreviousData,
   });
@@ -234,6 +251,10 @@ export default function ModificationLogsPage() {
       if (rows.length === 0) {
         message.warning('No data to export.');
         return;
+      }
+
+      if (result.total > 10000) {
+        message.warning(`Only the first 10,000 of ${result.total.toLocaleString()} records were exported.`);
       }
 
       const { utils, writeFile } = await import('xlsx');
