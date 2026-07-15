@@ -28,7 +28,8 @@ function buildPrompt(
   specialInstructions?: string,
   colorName?: string,
   hasColorImage?: boolean,
-  attributesText?: string
+  attributesText?: string,
+  hasStyleReference?: boolean
 ): string {
   const genderLower = (gender || '').toLowerCase();
   let modelDesc: string;
@@ -39,18 +40,24 @@ function buildPrompt(
     default: modelDesc = 'a professional female fashion model';
   }
 
+  const isCloseup = viewDirection.toLowerCase() === 'closeup';
+
   let framingDesc: string;
-  switch (bodytype) {
-    case 'Full-Body': framingDesc = 'full body fashion photoshoot, head to toe'; break;
-    case 'Upper-Body': framingDesc = 'upper body fashion photoshoot, waist up, do NOT show below the waist'; break;
-    case 'Lower-Body': framingDesc = 'lower body fashion photoshoot, waist down to feet, do NOT show above the waist, crop tightly at the waist'; break;
-    default: framingDesc = 'fashion photoshoot; automatically choose the best framing for the garment shown in the SOURCE_IMAGE — full body (head to toe) for dresses, one-piece sets, or bottomwear worn full; upper body (waist up) for tops, shirts, and t-shirts; lower body (waist down) for standalone trousers/shorts/skirts';
+  if (isCloseup) {
+    framingDesc = 'extreme close-up macro fashion detail shot — NOT a full-body or upper-body shot';
+  } else {
+    switch (bodytype) {
+      case 'Full-Body': framingDesc = 'full body fashion photoshoot, head to toe'; break;
+      case 'Upper-Body': framingDesc = 'upper body fashion photoshoot, waist up, do NOT show below the waist'; break;
+      case 'Lower-Body': framingDesc = 'lower body fashion photoshoot, waist down to feet, do NOT show above the waist, crop tightly at the waist'; break;
+      default: framingDesc = 'fashion photoshoot; automatically choose the best framing for the garment shown in the SOURCE_IMAGE — full body (head to toe) for dresses, one-piece sets, or bottomwear worn full; upper body (waist up) for tops, shirts, and t-shirts; lower body (waist down) for standalone trousers/shorts/skirts';
+    }
   }
 
   const colorInstr = hasColorImage
-    ? `The garment MUST be recolored to match the dominant color of the COLOR_REFERENCE image included in this request. Sample the color from COLOR_REFERENCE and apply it uniformly to the entire garment in every view. Ignore the shape, pattern, texture, or content of COLOR_REFERENCE — use it ONLY as a color swatch. This overrides the source image color.`
+    ? `The garment MUST be recolored to match the dominant color of the COLOR_REFERENCE image included in this request. Sample the color from COLOR_REFERENCE and apply it uniformly to the entire garment in every view. Ignore the shape, pattern, texture, or content of COLOR_REFERENCE — use it ONLY as a color swatch. This overrides the source image color. This is a COLOR SWAP ONLY: the fabric's weave/knit structure, stripe or print pattern, yarn grain, and surface texture from the SOURCE_IMAGE must stay pixel-faithful and fully intact — do not flatten, smooth, or simplify the fabric into a solid untextured block of color.`
     : colorName
-      ? `The garment MUST be recolored to ${colorName}. Every view (front, back, side, closeup) must show the garment in ${colorName}. This is mandatory.`
+      ? `The garment's base color MUST change to ${colorName} in every view (front, back, side, closeup). This is a COLOR SWAP ONLY: the fabric's weave/knit structure, stripe or print pattern, yarn grain, and surface texture from the SOURCE_IMAGE must stay pixel-faithful and fully intact — do not flatten, smooth, or simplify the fabric into a solid untextured block of color.`
       : `The garment color MUST be IDENTICAL to the SOURCE_IMAGE. Do not change or shift the color in any view.`;
 
   const viewMap: Record<string, string> = {
@@ -59,16 +66,18 @@ function buildPrompt(
     left_side: 'Left side profile model pose showing the side fit of the garment.',
     side: 'Side profile model pose showing the side fit and full silhouette of the garment.',
     three_quarter: 'Three-quarter (45-degree) angle model pose showing the front and one side together.',
-    closeup: 'Close-up fashion shot highlighting fabric texture, stitching and details.',
+    closeup: 'Tightly cropped macro close-up on one representative section of the garment (e.g. collar, placket, chest, or sleeve cuff) — frame it like a product-detail shot: fabric weave, stitching, buttons, and print/stripe pattern fill most of the frame at high magnification.',
   };
 
-  const framingRule = bodytype === 'Lower-Body'
-    ? 'Show ONLY from waist down to feet. Upper body must NOT appear in the frame.'
-    : bodytype === 'Upper-Body'
-      ? 'Show ONLY from waist up. Lower body must NOT appear in the frame.'
-      : bodytype === 'Full-Body'
-        ? 'Full garment must be visible, head to toe, no cropping.'
-        : 'Frame the model so the ENTIRE garment is fully visible and well-composed; choose full/upper/lower framing to suit the garment type.';
+  const framingRule = isCloseup
+    ? 'Crop TIGHT on the fabric/collar/placket area — the model\'s full body, full garment, legs, and most of the face must NOT be in frame. This must look like a zoomed-in product-detail shot, clearly tighter and closer than the front/back/side views, not another full or upper-body shot.'
+    : bodytype === 'Lower-Body'
+      ? 'Show ONLY from waist down to feet. Upper body must NOT appear in the frame.'
+      : bodytype === 'Upper-Body'
+        ? 'Show ONLY from waist up. Lower body must NOT appear in the frame.'
+        : bodytype === 'Full-Body'
+          ? 'Full garment must be visible, head to toe, no cropping.'
+          : 'Frame the model so the ENTIRE garment is fully visible and well-composed; choose full/upper/lower framing to suit the garment type.';
 
   const attributesBlock = attributesText
     ? `\n\nGARMENT ATTRIBUTES (from catalog data — the generated garment MUST stay consistent with these):\n- ${attributesText}`
@@ -81,6 +90,9 @@ function buildPrompt(
   viewInstr += specialInstructions
     ? ` Additional instructions: ${specialInstructions}`
     : ' No additional special instructions.';
+  viewInstr += hasStyleReference
+    ? ` A VIEW_CONSISTENCY_REFERENCE image is attached — copy ONLY its color, pattern scale, and fabric texture from it. Its pose, body angle, and framing are IRRELEVANT and must be IGNORED. This output's pose/angle must follow the "${viewDirection}" instruction above and must look visibly different from the reference image's pose — do not reproduce the same body orientation, camera angle, or crop as the reference.`
+    : '';
 
   return `You are a world-class fashion photographer and AI fashion director.
 
@@ -108,8 +120,8 @@ BACKGROUND:
 
 GARMENT PRESERVATION RULES (ABSOLUTE):
 - Color: ${colorInstr}
-- Fabric texture must remain unchanged
-- Pattern must remain identical
+- Fabric texture, weave/knit structure, and surface grain MUST remain fully intact and unchanged from the SOURCE_IMAGE — this holds true even when the color above is being changed; a colour change must never flatten or smooth away the woven texture
+- Pattern MUST match the SOURCE_IMAGE exactly at the same scale: replicate the same stripe/print WIDTH, SPACING, and DENSITY relative to the garment's width — do not widen, thin, stretch, respace, or redraw the pattern at a different scale. Count and reproduce the same number of visible stripes/repeats as the source. Stripes must stay straight and run in their original direction (e.g. vertical), following the natural drape of the fabric — no unnatural warping, twisting, or curving around body contours.
 - NO redesign, NO styling alteration, NO added accessories
 
 QUALITY STANDARD:
@@ -134,16 +146,19 @@ export async function runSingleGeneration(
   colorName?: string,
   colorImageBuffer?: Buffer,
   colorImageMime?: string,
-  attributesText?: string
+  attributesText?: string,
+  styleReferenceBuffer?: Buffer,
+  styleReferenceMime?: string
 ): Promise<Buffer> {
   const hasColorImage = !!(colorImageBuffer && colorImageMime);
   const colorLockInstruction = hasColorImage
-    ? `MANDATORY COLOR (FROM IMAGE): The garment in the output MUST be recolored to match the dominant color of the COLOR_REFERENCE image that follows. Use COLOR_REFERENCE ONLY as a color swatch — ignore its shape, pattern, and content. This overrides the source image color and any text color name.`
+    ? `MANDATORY COLOR (FROM IMAGE): The garment in the output MUST be recolored to match the dominant color of the COLOR_REFERENCE image that follows. Use COLOR_REFERENCE ONLY as a color swatch — ignore its shape, pattern, and content. This overrides the source image color and any text color name. This is a COLOR SWAP ONLY — the fabric's weave/knit texture, stripe or print pattern, yarn grain, and surface detail from the source image MUST be preserved pixel-faithfully; do not flatten or smooth the fabric into a solid untextured block of color.`
     : colorName
-      ? `MANDATORY COLOR: The garment in the output MUST be ${colorName}. Apply ${colorName} color to the entire garment. This overrides the source image color. Do NOT generate gray, beige, or any other color — only ${colorName}.`
+      ? `MANDATORY COLOR: Recolor ONLY the base garment color to ${colorName} — apply it as the new uniform base tone. This is a COLOR SWAP ONLY: do NOT flatten, smooth, or simplify the fabric — the weave/knit structure, stripe or print pattern, yarn grain, and surface texture from the source image MUST remain fully intact and pixel-faithful, just tinted to ${colorName} instead of the original color. The output must still look like a textured woven/knit fabric, never a flat solid-color block.`
       : `COLOR PRESERVE: Keep the garment color exactly as shown in the source image. Do not change, shift, or neutralize the color.`;
 
-  const promptText = buildPrompt(gender, bodytype, imageCount, viewDirection, broachPlacement, specialInstructions, colorName, hasColorImage, attributesText);
+  const hasStyleReference = !!(styleReferenceBuffer && styleReferenceMime);
+  const promptText = buildPrompt(gender, bodytype, imageCount, viewDirection, broachPlacement, specialInstructions, colorName, hasColorImage, attributesText, hasStyleReference);
 
   const parts: any[] = [
     { text: colorLockInstruction },
@@ -168,13 +183,25 @@ export async function runSingleGeneration(
     parts.push({ inlineData: { mimeType: accessoryMime, data: accessoryBuffer.toString('base64') } });
   }
 
+  // A previously generated view of this SAME garment, provided so all views of one
+  // garment agree with each other on color and pattern scale instead of each being
+  // an independent re-interpretation of the source photo. This must NEVER be read as
+  // a pose reference — only as a color/pattern/texture swatch.
+  if (hasStyleReference) {
+    parts.push({
+      text: `VIEW_CONSISTENCY_REFERENCE follows — a fashion photo already generated for a DIFFERENT view of this EXACT same garment. Use it for exactly ONE purpose: match its color, its stripe/print pattern width/spacing/density, and its fabric texture. Do NOT redraw the pattern at a different scale or shift the color.
+IGNORE EVERYTHING ELSE about this reference image: its pose, body angle, camera angle, crop, and framing are NOT to be copied. This output is the "${viewDirection}" view — its pose and framing MUST follow the View instruction below and MUST look visibly different from this reference photo's pose. Reproducing the same body orientation/angle as the reference is a FAILURE.`,
+    });
+    parts.push({ inlineData: { mimeType: styleReferenceMime as string, data: (styleReferenceBuffer as Buffer).toString('base64') } });
+  }
+
   parts.push({ text: promptText });
 
   const ai = getAIClient();
   const imageSizeKB = Math.round(imageBuffer.length / 1024);
   const base64SizeKB = Math.round((imageBuffer.length * 4 / 3) / 1024);
   console.log(`[ModelGen] Calling Gemini model: ${GEMINI_IMAGE_MODEL}, view: ${viewDirection}, gender: ${gender}, bodytype: ${bodytype}`);
-  console.log(`[ModelGen] color mode: ${hasColorImage ? 'IMAGE' : colorName ? `NAME(${colorName})` : 'SOURCE'}`);
+  console.log(`[ModelGen] color mode: ${hasColorImage ? 'IMAGE' : colorName ? `NAME(${colorName})` : 'SOURCE'} | style reference: ${hasStyleReference}`);
   console.log(`[ModelGen] Image size: ${imageSizeKB} KB | base64 payload: ~${base64SizeKB} KB | Parts count: ${parts.length}`);
 
   let response: any;

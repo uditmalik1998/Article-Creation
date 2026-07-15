@@ -8,7 +8,8 @@ import { getSegmentByCategoryAndMrp } from '../utils/segmentRangeMapper';
 import { syncApprovedItemsToSap } from '../services/sapSyncService';
 import { syncArticlesToSapViaRfc, buildModifyChangesPayload, previewRfcPayloads } from '../services/zmmArtCreationService';
 import { patchArticleAttributes } from '../services/sapModifyService';
-import { FLAT_TO_RFC } from '../data/flatToRfcMap';
+import { FLAT_TO_RFC, FLAT_TO_SAP_KEY } from '../data/flatToRfcMap';
+import { randomUUID } from 'crypto';
 import { syncVariantsToSapViaRfc } from '../services/zmmVarArtCreationService';
 import { storageService, type WatermarkLabel } from '../services/storageService';
 import { ARTICLE_DESCRIPTION_SOURCE_FIELDS, buildArticleDescription } from '../utils/articleDescriptionBuilder';
@@ -1836,6 +1837,7 @@ export class ApproverController {
         try {
             const { id } = req.params;
             const changes = req.body?.changes;
+            const skipSap: boolean = req.body?.skipSap === true;
 
             if (!changes || typeof changes !== 'object' || Array.isArray(changes) || Object.keys(changes).length === 0) {
                 return res.status(400).json({ error: 'No changes provided' });
@@ -1850,7 +1852,6 @@ export class ApproverController {
                 'rate',          // cost / PURCH_PRICE
                 'colour',        // colour
                 'designNumber',  // design / DSG_NO
-                'fabDiv',        // M_FAB_DIV
                 'division',      // division (MENS/LADIES/…)
                 'subDivision',   // sub-division / SUB_DIV
                 'majorCategory', // major category
@@ -1934,29 +1935,24 @@ export class ApproverController {
                 if (segment) data.segment = segment;
             }
 
-            // ── Build the FULL Changes payload from the merged record. ──
-            // The user's edits (`data`) are merged over the current DB record, then
-            // buildModifyChangesPayload emits EVERY field applicable to this article
-            // (all identity/price/business fields + the garment characteristics valid
-            // for its major category), including empties. So changing one field still
-            // sends the complete attribute set to SAP.
-            const mergedItem = { ...(existingItem as any), ...data };
-            const sapChanges = await buildModifyChangesPayload(mergedItem);
+            let sapResult: { applied: number; message: string } = { applied: 0, message: 'Skipped (RFC proxy already applied)' };
 
-            // Modify flow only: these keys must NOT be sent to SAP on modification.
-            // Identity/price fields (VENDOR, MRP, DSG_NO, ...) are set at creation
-            // time and must not be altered via patch-bulk. ARTICLE_DES1 and M_FAB_DIV
-            // are likewise excluded from the modify payload.
-            for (const k of ['HSN_CODE', 'SUB_DIV', 'MC_CD', 'SEASON', 'PRICE_BAND_CATEGORY', 'PURCH_PRICE', 'NET_WEIGHT', 'VENDOR', 'MRP', 'DSG_NO', 'ARTICLE_DES1', 'M_FAB_DIV']) {
-                delete (sapChanges as any)[k];
-            }
+            if (!skipSap) {
+                // ── Build the FULL Changes payload from the merged record. ──
+                const mergedItem = { ...(existingItem as any), ...data };
+                const sapChanges = await buildModifyChangesPayload(mergedItem);
 
-            // ── Call SAP FIRST. Only persist locally on success. ──
-            const result = await patchArticleAttributes(matnr, sapChanges);
-            if (!result.ok) {
-                return res.status(502).json({ error: result.message || 'SAP modification failed', sap: result.raw });
+                for (const k of ['HSN_CODE', 'SUB_DIV', 'MC_CD', 'SEASON', 'PRICE_BAND_CATEGORY', 'PURCH_PRICE', 'NET_WEIGHT', 'VENDOR', 'MRP', 'DSG_NO', 'ARTICLE_DES1']) {
+                    delete (sapChanges as any)[k];
+                }
+
+                // ── Call SAP FIRST. Only persist locally on success. ──
+                const result = await patchArticleAttributes(matnr, sapChanges);
+                if (!result.ok) {
+                    return res.status(502).json({ error: result.message || 'SAP modification failed', sap: result.raw });
+                }
+                sapResult = { applied: result.applied, message: result.message };
             }
-            const sapResult: { applied: number; message: string } = { applied: result.applied, message: result.message };
 
             // Rebuild article description from the merged attribute values.
             const descriptionSource: any = {};
@@ -1967,6 +1963,42 @@ export class ApproverController {
             data.articleDescription = buildArticleDescription(descriptionSource, 40, {
                 excludeFields: await getExcludedDescriptionFields(majCatForDescCheck) as any,
             });
+
+            // ── Audit log: compute per-field diff and store in modify_logs ──
+            const modGroupId = randomUUID();
+            const auditEntries: {
+                modificationGroupId: string;
+                articleNumber: string;
+                labelName: string;
+                oldValue: string | null;
+                newValue: string | null;
+                modifiedByName: string;
+                modifiedByEmail: string;
+                sapStatus: string;
+            }[] = [];
+
+            for (const [field, newVal] of Object.entries(data)) {
+                // articleDescription is auto-rebuilt from other fields — not a user label change
+                if (field === 'articleDescription') continue;
+                const oldVal = (existingItem as any)[field];
+                const oldStr = oldVal == null ? null : String(oldVal);
+                const newStr = newVal == null ? null : String(newVal);
+                if (oldStr === newStr) continue;
+                auditEntries.push({
+                    modificationGroupId: modGroupId,
+                    articleNumber: matnr,
+                    labelName: FLAT_TO_SAP_KEY[field] ?? field,
+                    oldValue: oldStr,
+                    newValue: newStr,
+                    modifiedByName: req.user?.name ?? 'Unknown',
+                    modifiedByEmail: req.user?.email ?? 'unknown@unknown.com',
+                    sapStatus: 'SUCCESS',
+                });
+            }
+
+            if (auditEntries.length > 0) {
+                await prisma.modifyLog.createMany({ data: auditEntries });
+            }
 
             const updated = await prisma.extractionResultFlat.update({ where: { id }, data });
 

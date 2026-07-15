@@ -146,6 +146,66 @@ const ATTRIBUTE_FIELDS: { formName: string; label: string; schemaKey: string }[]
 
 const PAGE_SIZE = 50;
 
+// DB field name → SAP characteristic name for every field visible in the Modify form.
+const MODIFY_FIELDS: { field: string; sapName: string }[] = [
+  // FAB
+  { field: 'fabDiv',             sapName: 'M_FAB_DIV' },
+  { field: 'yarn1',              sapName: 'M_YARN' },
+  { field: 'mainMvgr',          sapName: 'M_FAB_MAIN_MVGR_1' },
+  { field: 'fabricMainMvgr',    sapName: 'M_FAB_MAIN_MVGR_2' },
+  { field: 'fabVdr',            sapName: 'M_FAB_VDR' },
+  { field: 'weave',             sapName: 'M_WEAVE_01' },
+  { field: 'mFab2',             sapName: 'M_WEAVE_02' },
+  { field: 'fCount',            sapName: 'M_COUNT' },
+  { field: 'gsm',               sapName: 'M_GSM' },
+  { field: 'fOunce',            sapName: 'M_OUNZ' },
+  { field: 'fConstruction',     sapName: 'M_CONSTRUCTION' },
+  { field: 'composition',       sapName: 'M_COMPOSITION' },
+  { field: 'finish',            sapName: 'M_FINISH' },
+  { field: 'fWidth',            sapName: 'M_WIDTH' },
+  { field: 'lycra',             sapName: 'M_LYCRA' },
+  // BODY
+  { field: 'collar',            sapName: 'M_COLLAR_TYPE' },
+  { field: 'collarStyle',       sapName: 'M_COLLAR_STYLE' },
+  { field: 'neckDetails',       sapName: 'M_NECK_STYLE' },
+  { field: 'neck',              sapName: 'M_NECK_TYPE' },
+  { field: 'placket',           sapName: 'M_PLACKET' },
+  { field: 'fatherBelt',        sapName: 'M_BLT_TYPE' },
+  { field: 'childBelt',         sapName: 'M_BLT_STYLE' },
+  { field: 'sleeve',            sapName: 'M_SLEEVES_MAIN_STYLE' },
+  { field: 'sleeveFold',        sapName: 'M_SLEEVE_FOLD' },
+  { field: 'mSet',              sapName: 'M_SET' },
+  { field: 'bottomFold',        sapName: 'M_BTM_FOLD' },
+  { field: 'noOfPocket',        sapName: 'M_NO_OF_POCKET' },
+  { field: 'pocketType',        sapName: 'M_POCKET' },
+  { field: 'extraPocket',       sapName: 'M_EXTRA_POCKET' },
+  { field: 'fit',               sapName: 'M_FIT' },
+  { field: 'pattern',           sapName: 'M_BODY_STYLE' },
+  { field: 'length',            sapName: 'M_LENGTH' },
+  // VA ACC.
+  { field: 'drawcord',          sapName: 'M_DC_STYLE' },
+  { field: 'dcShape',           sapName: 'M_DC_SHAPE' },
+  { field: 'button',            sapName: 'M_BTN_TYPE' },
+  { field: 'btnColour',         sapName: 'M_BTN_CLR' },
+  { field: 'zipper',            sapName: 'M_ZIP_TYPE' },
+  { field: 'zipColour',         sapName: 'M_ZIP_COL' },
+  { field: 'patchesType',       sapName: 'M_PATCH_STYLE' },
+  { field: 'patches',           sapName: 'M_PATCHE_TYPE' },
+  { field: 'htrfType',          sapName: 'M_HTRF_TYPE' },
+  { field: 'htrfStyle',         sapName: 'M_HTRF_STYLE' },
+  // VA PRCS
+  { field: 'printType',         sapName: 'M_PRINT_TYPE' },
+  { field: 'printStyle',        sapName: 'M_PRINT_STYLE' },
+  { field: 'printPlacement',    sapName: 'M_PRINT_PLACEMENT' },
+  { field: 'embroidery',        sapName: 'M_EMB_TYPE' },
+  { field: 'embroideryType',    sapName: 'M_EMBROIDERY_STYLE' },
+  { field: 'embPlacement',      sapName: 'M_EMB_PLACEMENT' },
+  { field: 'wash',              sapName: 'M_WASH' },
+  // BUSINESS
+  { field: 'ageGroup',          sapName: 'M_AGE_GROUP' },
+  { field: 'impAtrbt2',         sapName: 'M_IMP_ATBT' },
+];
+
 // ─── Types ────────────────────────────────────────────────────────────────────
 
 type ConfirmDialog =
@@ -915,12 +975,37 @@ export default function ArticleDetailPage() {
           onDuplicate={async () => {}}
           onModify={async (row, changes) => {
             if (!changes || Object.keys(changes).length === 0) return;
-            const token = localStorage.getItem('authToken');
+
+            // Run the same mandatory-field validation as Save & Submit.
+            const mergedItem = { ...row, ...(changes as any) };
+            const missing = getMissingMandatoryFields(mergedItem);
+            if (!mergedItem.vendorCode) missing.unshift('VENDOR CODE');
+            if (missing.length > 0) {
+              const articleId = mergedItem.sapArticleId || mergedItem.articleNumber || mergedItem.id;
+              setInfoDialog({ kind: 'mandatoryMissing', errors: [{ articleId, missing }] });
+              throw new Error('Mandatory fields missing');
+            }
+
+            const ivMatnr = String(row.articleNumber ?? '').padStart(18, '0');
+            const ivChanges = MODIFY_FIELDS
+              .map(({ field, sapName }) => {
+                const val = field in changes ? changes[field] : (row as any)[field];
+                return `${sapName}=${val != null ? String(val) : ''}`;
+              })
+              .join('|');
             try {
-              const r = await fetch(`${APP_CONFIG.api.baseURL}/approver/items/${row.id}/modify`, {
+              const r = await fetch('https://sap-api.v2retail.net/api/rfc/proxy?env=prod', {
                 method: 'POST',
-                headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` },
-                body: JSON.stringify({ changes }),
+                headers: {
+                  'Content-Type': 'application/json',
+                  'X-RFC-Key': 'v2-rfc-proxy-2026',
+                },
+                body: JSON.stringify({
+                  bapiname: 'Z_ART_PATCH_RFC_V69',
+                  IV_MATNR: ivMatnr,
+                  IV_CHANGES: ivChanges,
+                  IV_TEST_MODE: '',
+                }),
               });
               if (!r.ok) {
                 let errMsg = 'Failed to modify article in SAP';
@@ -928,17 +1013,40 @@ export default function ArticleDetailPage() {
                 message.error(errMsg);
                 throw new Error(errMsg);
               }
-              const saved = await r.json();
+              const body = await r.json();
+              let evJson: any = body.EV_JSON ?? {};
+              if (typeof evJson === 'string') {
+                try { evJson = JSON.parse(evJson); } catch { evJson = {}; }
+              }
+              const exReturn = body.EX_RETURN ?? {};
+              if (evJson.ok === false || exReturn.TYPE === 'E' || exReturn.TYPE === 'A') {
+                const errMsg = exReturn.MESSAGE || 'SAP modification failed';
+                message.error(errMsg);
+                throw new Error(errMsg);
+              }
+              // SAP succeeded via RFC proxy — now persist the changes to the DB only.
+              const token = localStorage.getItem('authToken');
+              const dbRes = await fetch(`${APP_CONFIG.api.baseURL}/approver/items/${row.id}/modify`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` },
+                body: JSON.stringify({ changes, skipSap: true }),
+              });
+              if (!dbRes.ok) {
+                let errMsg = 'SAP updated but failed to save to database';
+                try { const p = await dbRes.json(); if (p?.error) errMsg = p.error; } catch { /* skip */ }
+                message.error(errMsg);
+                throw new Error(errMsg);
+              }
+              const saved = await dbRes.json();
               setItems(prev => {
-                const idx = prev.findIndex(i => i.id === saved.id);
+                const idx = prev.findIndex(i => i.id === row.id);
                 if (idx === -1) return prev;
                 const copy = [...prev];
                 copy[idx] = { ...copy[idx], ...saved, mcCode: saved.mcCode || inferMcCode(saved.majorCategory) || copy[idx].mcCode || '' };
                 return copy;
               });
-              message.success(saved?.sapModify?.message || 'Article modified in SAP');
+              message.success('Article modified in SAP and database');
             } catch (err) {
-              // Re-throw so the card keeps the staged changes for a retry.
               throw err instanceof Error ? err : new Error('Failed to modify');
             }
           }}

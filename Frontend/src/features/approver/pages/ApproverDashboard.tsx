@@ -32,12 +32,14 @@ const inferMcCode = (majorCategory?: string | null) => getMcCodeByMajorCategory(
 const normalizeText = (value?: string | null): string => String(value || '').trim().toUpperCase();
 
 const getDivisionVariants = (value?: string | null): string[] => {
-  const n = normalizeText(value);
-  if (!n) return [];
-  if (n === 'MEN' || n === 'MENS') return ['MEN', 'MENS'];
-  if (n === 'LADIES' || n === 'WOMEN' || n === 'WOMAN') return ['LADIES', 'WOMEN'];
-  if (n === 'KID' || n === 'KIDS') return ['KID', 'KIDS'];
-  return [n];
+  const parts = String(value || '').split(/[;,|]+/).map(normalizeText).filter(Boolean);
+  const canonical = parts.map(n => {
+    if (n === 'MEN' || n === 'MENS') return 'MENS';
+    if (n === 'LADIES' || n === 'WOMEN' || n === 'WOMAN') return 'LADIES';
+    if (n === 'KID' || n === 'KIDS') return 'KIDS';
+    return n;
+  });
+  return Array.from(new Set(canonical));
 };
 
 const getSubDivisionVariants = (value?: string | null): string[] =>
