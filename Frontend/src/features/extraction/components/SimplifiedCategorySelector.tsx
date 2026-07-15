@@ -48,6 +48,13 @@ const normalizeDivision = (division?: string): string | null => {
   return division;
 };
 
+// Parse a potentially comma-separated division string into normalized division names.
+const parseDivisionList = (raw: unknown): string[] => {
+  if (!raw) return [];
+  const parts = String(raw).split(',').map((v) => v.trim()).filter(Boolean);
+  return parts.map((p) => normalizeDivision(p) ?? p);
+};
+
 const parseSubDivisions = (rawSubDivision: unknown): string[] => {
   if (Array.isArray(rawSubDivision)) return rawSubDivision.map((v) => String(v).trim()).filter(Boolean);
   if (typeof rawSubDivision === 'string') return rawSubDivision.split(',').map((v) => v.trim()).filter(Boolean);
@@ -105,9 +112,12 @@ export const SimplifiedCategorySelector: React.FC<SimplifiedCategorySelectorProp
   const creatorScope = useMemo(() => {
     const user = JSON.parse(localStorage.getItem('user') || '{}');
     const isCreator = user.role === 'CREATOR';
-    const defaultDivision = normalizeDivision(user.division) ?? null;
+    const divisionList = parseDivisionList(user.division);
+    // Single division → auto-select and lock. Multiple → user must pick from their list.
+    const defaultDivision = divisionList.length === 1 ? divisionList[0] : null;
+    const allowedDivisions = divisionList; // empty = no restriction (show all)
     const allowedSubDivisions = parseSubDivisions(user.subDivision);
-    return { isCreator, defaultDivision, allowedSubDivisions };
+    return { isCreator, defaultDivision, allowedDivisions, allowedSubDivisions };
   }, []);
 
   useEffect(() => {
@@ -133,14 +143,20 @@ export const SimplifiedCategorySelector: React.FC<SimplifiedCategorySelectorProp
     });
   };
 
-  // Division is auto-assigned from role — no dropdown needed in that case
+  // Single assigned division → show as read-only. Multiple → show restricted dropdown.
   const hasPinnedDivision = !!creatorScope.defaultDivision;
+  const hasMultipleDivisions = creatorScope.allowedDivisions.length > 1;
   const canContinue = !!selectedDepartment;
+
+  // Departments shown in the dropdown: restrict to user's assigned divisions when applicable.
+  const visibleDepartments = hasMultipleDivisions
+    ? departments.filter((d) => creatorScope.allowedDivisions.includes(d))
+    : departments;
 
   return (
     <Spinner spinning={hierarchyLoading} tip="Loading categories...">
       <div className="grid gap-5">
-        {/* Division — read-only label if role has a pinned division, dropdown otherwise */}
+        {/* Division — read-only for single-division users, restricted dropdown for multi-division */}
         <div>
           <span className="mb-2 block text-sm font-semibold">1. Division</span>
           {hasPinnedDivision ? (
@@ -154,7 +170,7 @@ export const SimplifiedCategorySelector: React.FC<SimplifiedCategorySelectorProp
                 <SelectValue placeholder="Select Division (Kids, Ladies, MENS)" />
               </SelectTrigger>
               <SelectContent>
-                {departments.map((dept) => (
+                {visibleDepartments.map((dept) => (
                   <SelectItem key={dept} value={dept}>
                     {dept}
                   </SelectItem>
