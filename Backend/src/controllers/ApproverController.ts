@@ -1992,12 +1992,15 @@ export class ApproverController {
                     newValue: newStr,
                     modifiedByName: req.user?.name ?? 'Unknown',
                     modifiedByEmail: req.user?.email ?? 'unknown@unknown.com',
-                    sapStatus: 'SUCCESS',
+                    sapStatus: 'SUCCESS', // correct for both paths: skipSap=true means frontend already confirmed SAP success
                 });
             }
 
             if (auditEntries.length > 0) {
-                await prisma.modifyLog.createMany({ data: auditEntries });
+                // Fire-and-forget: audit failure must never block a successful SAP+DB modify
+                void prisma.modifyLog.createMany({ data: auditEntries }).catch((err: any) =>
+                    console.error('[modifyLog] audit insert failed:', err?.message),
+                );
             }
 
             const updated = await prisma.extractionResultFlat.update({ where: { id }, data });
