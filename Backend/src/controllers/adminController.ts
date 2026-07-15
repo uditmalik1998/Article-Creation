@@ -3933,3 +3933,94 @@ export const uploadHierarchyExcel = async (req: Request, res: Response): Promise
     res.status(500).json({ success: false, error: error.message });
   }
 };
+
+// ═══════════════════════════════════════════════════════
+// MODIFY LOGS
+// ═══════════════════════════════════════════════════════
+
+export async function getModifyLogs(req: Request, res: Response) {
+    const {
+        page,
+        limit,
+        articleNumber,
+        labelName,
+        modifiedByName,
+        modifiedByEmail,
+        sapStatus,
+        dateFrom,
+        dateTo,
+        search,
+    } = req.query as Record<string, string | undefined>;
+
+    const pageNum  = Math.max(1, parseInt(page  ?? '1',  10) || 1);
+    const limitNum = Math.min(200, Math.max(1, parseInt(limit ?? '50', 10) || 50));
+    const skip     = (pageNum - 1) * limitNum;
+
+    const andConditions: object[] = [];
+
+    if (articleNumber) andConditions.push({ articleNumber: { contains: articleNumber, mode: 'insensitive' } });
+    if (labelName)       andConditions.push({ labelName:      { contains: labelName,      mode: 'insensitive' } });
+    if (modifiedByName)  andConditions.push({ modifiedByName:  { contains: modifiedByName,  mode: 'insensitive' } });
+    if (modifiedByEmail) andConditions.push({ modifiedByEmail: { contains: modifiedByEmail, mode: 'insensitive' } });
+    if (sapStatus)       andConditions.push({ sapStatus });
+
+    if (dateFrom || dateTo) {
+        const dateFilter: Record<string, Date> = {};
+        if (dateFrom) dateFilter.gte = new Date(dateFrom);
+        if (dateTo) {
+            const to = new Date(dateTo);
+            to.setHours(23, 59, 59, 999);
+            dateFilter.lte = to;
+        }
+        andConditions.push({ modifiedAt: dateFilter });
+    }
+
+    if (search) {
+        andConditions.push({
+            OR: [
+                { articleNumber:  { contains: search, mode: 'insensitive' } },
+                { labelName:      { contains: search, mode: 'insensitive' } },
+                { oldValue:       { contains: search, mode: 'insensitive' } },
+                { newValue:       { contains: search, mode: 'insensitive' } },
+                { modifiedByName: { contains: search, mode: 'insensitive' } },
+                { modifiedByEmail:{ contains: search, mode: 'insensitive' } },
+            ],
+        });
+    }
+
+    const where = andConditions.length > 0 ? { AND: andConditions } : {};
+
+    const [total, logs] = await withPrismaRetry(() =>
+        prisma.$transaction([
+            prisma.modifyLog.count({ where }),
+            prisma.modifyLog.findMany({
+                where,
+                orderBy: { modifiedAt: 'desc' },
+                skip,
+                take: limitNum,
+            }),
+        ])
+    );
+
+    return res.json({
+        data: logs,
+        total,
+        page: pageNum,
+        limit: limitNum,
+        totalPages: Math.ceil(total / limitNum),
+    });
+}
+
+export async function getModifyLogsByGroup(req: Request, res: Response) {
+    const { groupId } = req.params;
+    if (!groupId) return res.status(400).json({ error: 'groupId is required' });
+
+    const logs = await withPrismaRetry(() =>
+        prisma.modifyLog.findMany({
+            where: { modificationGroupId: groupId },
+            orderBy: { modifiedAt: 'asc' },
+        })
+    );
+
+    return res.json({ data: logs });
+}
