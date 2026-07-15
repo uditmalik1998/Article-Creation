@@ -136,16 +136,21 @@ const BASE_SIMPLIFIED_SCHEMA: SchemaItem[] = [
   { key: 'wash', label: 'M_WASH', type: 'select' },
 ];
 
-// Detect CREATOR with a pre-assigned division — they skip Step 1 entirely.
+// Detect CREATOR with exactly ONE pre-assigned division — they skip Step 1 entirely.
+// Multi-division CREATORs must select a division manually so this returns null for them.
 const getCreatorDivision = (): string | null => {
   try {
     const user = JSON.parse(localStorage.getItem('user') || '{}');
     if (user.role !== 'CREATOR') return null;
-    const div = String(user.division || '').toUpperCase();
-    if (div === 'MEN' || div === 'MENS') return 'MENS';
-    if (div === 'KIDS') return 'Kids';
-    if (div === 'LADIES') return 'Ladies';
-    return user.division || null;
+    const raw = String(user.division || '').trim();
+    if (!raw) return null;
+    // Multiple divisions (comma-separated) → do not auto-select
+    if (raw.includes(',')) return null;
+    const upper = raw.toUpperCase();
+    if (upper === 'MEN' || upper === 'MENS') return 'MENS';
+    if (upper === 'KIDS') return 'Kids';
+    if (upper === 'LADIES') return 'Ladies';
+    return raw;
   } catch {
     return null;
   }
