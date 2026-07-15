@@ -558,4 +558,56 @@ export const deactivateUser = async (id: number): Promise<void> => {
   await adminApi.delete(`/users/${id}`);
 };
 
+// ═══════════════════════════════════════════════════════
+// MODIFY LOGS
+// ═══════════════════════════════════════════════════════
+
+export interface ModifyLog {
+  id: number;
+  modificationGroupId: string;
+  articleNumber: string;
+  labelName: string;
+  oldValue: string | null;
+  newValue: string | null;
+  modifiedByName: string;
+  modifiedByEmail: string;
+  modifiedAt: string;
+  sapStatus: string;
+}
+
+export interface ModifyLogsParams {
+  page?: number;
+  limit?: number;
+  articleNumber?: string;
+  labelName?: string;
+  modifiedByName?: string;
+  modifiedByEmail?: string;
+  sapStatus?: string;
+  dateFrom?: string;
+  dateTo?: string;
+  search?: string;
+}
+
+export interface ModifyLogsResponse {
+  data: ModifyLog[];
+  total: number;
+  page: number;
+  limit: number;
+  totalPages: number;
+}
+
+export async function getModifyLogs(params: ModifyLogsParams = {}): Promise<ModifyLogsResponse> {
+  const query = new URLSearchParams();
+  Object.entries(params).forEach(([k, v]) => {
+    if (v !== undefined && v !== null && v !== '') query.set(k, String(v));
+  });
+  const res = await adminApi.get<ModifyLogsResponse>(`/modify-logs?${query.toString()}`);
+  return res.data;
+}
+
+export async function getModifyLogsByGroup(groupId: string): Promise<{ data: ModifyLog[] }> {
+  const res = await adminApi.get<{ data: ModifyLog[] }>(`/modify-logs/group/${encodeURIComponent(groupId)}`);
+  return res.data;
+}
+
 export default adminApi;
