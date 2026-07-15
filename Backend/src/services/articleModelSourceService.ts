@@ -21,6 +21,11 @@ export interface ResolvedArticle {
   colorName?: string;   // undefined = preserve source colour
   attributesText?: string;
   reason?: string;      // populated when found === false
+  // true when no row exists for the exact code (article+colour) but a sibling
+  // row for the same base article number was found and reused as the source
+  // image — colorName is then the user-requested colour and MUST be actively
+  // enforced by the generation prompt instead of just preserved from source.
+  isColorFallback?: boolean;
 }
 
 /** division (+ subDivision for kids) → model gender used by the prompt builder. */
@@ -72,62 +77,113 @@ function buildAttributesText(row: Record<string, any>): string | undefined {
   return parts.length ? parts.join(', ') : undefined;
 }
 
+const ARTICLE_SELECT = {
+  articleNumber: true,
+  imageUrl: true,
+  approvalStatus: true,
+  division: true,
+  subDivision: true,
+  colour: true,
+  variantColor: true,
+  neck: true,
+  neckDetails: true,
+  collar: true,
+  collarStyle: true,
+  sleeve: true,
+  sleeveFold: true,
+  placket: true,
+  fit: true,
+  pattern: true,
+  length: true,
+  frontOpenStyle: true,
+  pocketType: true,
+  bottomFold: true,
+  printType: true,
+  printPlacement: true,
+  embroidery: true,
+  drawcord: true,
+  wash: true,
+} as const;
+
+async function findRowsByArticleNumber(articleNumber: string): Promise<any[]> {
+  const rows = await withPrismaRetry(() =>
+    prisma.extractionResultFlat.findMany({
+      where: { articleNumber: { equals: articleNumber, mode: 'insensitive' } },
+      orderBy: { createdAt: 'desc' },
+      take: 10,
+      select: ARTICLE_SELECT,
+    })
+  );
+  return rows.filter((r) => String(r.imageUrl || '').trim());
+}
+
 /**
  * Look up one article number. Prefers an APPROVED row, else the most recent row;
  * in all cases requires a usable imageUrl. Returns { found: false, reason } when
  * the article isn't in extraction_results_flat or has no image.
+ *
+ * The input code is typically "BASEARTICLE-COLOUR" (e.g. "1110097922-BLACK"). If
+ * no row exists for that exact code, but a sibling row for the same base article
+ * number DOES exist (extracted in a different colour), we reuse that sibling's
+ * photo as the source image and force-recolour it to the colour the user asked
+ * for (isColorFallback: true) instead of failing the whole code.
  */
 export async function resolveArticleForGeneration(code: string): Promise<ResolvedArticle> {
   const articleCode = code.trim();
-  let rows: any[];
+
+  let withImage: any[];
   try {
-    rows = await withPrismaRetry(() =>
+    withImage = await findRowsByArticleNumber(articleCode);
+  } catch (err: any) {
+    return { articleCode, found: false, reason: `lookup failed: ${err?.message || 'db error'}` };
+  }
+
+  if (withImage.length > 0) {
+    // Prefer APPROVED, else the latest (rows already sorted newest-first).
+    const row = withImage.find((r) => r.approvalStatus === 'APPROVED') || withImage[0];
+    const colour = String(row.colour || row.variantColor || '').trim();
+
+    return {
+      articleCode,
+      found: true,
+      imageUrl: String(row.imageUrl).trim(),
+      gender: deriveGender(row.division, row.subDivision),
+      bodytype: 'auto',
+      colorName: colour || undefined,
+      attributesText: buildAttributesText(row),
+    };
+  }
+
+  // No exact match — try falling back to a sibling colour variant of the same
+  // base article number (split on the first "-").
+  const dashIdx = articleCode.indexOf('-');
+  if (dashIdx <= 0 || dashIdx === articleCode.length - 1) {
+    return { articleCode, found: false, reason: 'not found in extraction data (no image)' };
+  }
+  const baseArticleNumber = articleCode.slice(0, dashIdx).trim();
+  const requestedColor = articleCode.slice(dashIdx + 1).trim();
+
+  let siblingRows: any[];
+  try {
+    siblingRows = await withPrismaRetry(() =>
       prisma.extractionResultFlat.findMany({
-        where: { articleNumber: articleCode },
+        where: { articleNumber: { startsWith: baseArticleNumber, mode: 'insensitive' } },
         orderBy: { createdAt: 'desc' },
         take: 10,
-        select: {
-          articleNumber: true,
-          imageUrl: true,
-          approvalStatus: true,
-          division: true,
-          subDivision: true,
-          colour: true,
-          variantColor: true,
-          neck: true,
-          neckDetails: true,
-          collar: true,
-          collarStyle: true,
-          sleeve: true,
-          sleeveFold: true,
-          placket: true,
-          fit: true,
-          pattern: true,
-          length: true,
-          frontOpenStyle: true,
-          pocketType: true,
-          bottomFold: true,
-          printType: true,
-          printPlacement: true,
-          embroidery: true,
-          drawcord: true,
-          wash: true,
-        },
+        select: ARTICLE_SELECT,
       })
     );
   } catch (err: any) {
     return { articleCode, found: false, reason: `lookup failed: ${err?.message || 'db error'}` };
   }
+  siblingRows = siblingRows.filter((r) => String(r.imageUrl || '').trim());
 
-  const withImage = rows.filter((r) => String(r.imageUrl || '').trim());
-  if (withImage.length === 0) {
+  if (siblingRows.length === 0) {
     return { articleCode, found: false, reason: 'not found in extraction data (no image)' };
   }
 
-  // Prefer APPROVED, else the latest (rows already sorted newest-first).
-  const row = withImage.find((r) => r.approvalStatus === 'APPROVED') || withImage[0];
-
-  const colour = String(row.colour || row.variantColor || '').trim();
+  // Prefer APPROVED, else the latest — same rule as the exact-match path.
+  const row = siblingRows.find((r) => r.approvalStatus === 'APPROVED') || siblingRows[0];
 
   return {
     articleCode,
@@ -135,7 +191,8 @@ export async function resolveArticleForGeneration(code: string): Promise<Resolve
     imageUrl: String(row.imageUrl).trim(),
     gender: deriveGender(row.division, row.subDivision),
     bodytype: 'auto',
-    colorName: colour || undefined,
+    colorName: requestedColor || undefined,
     attributesText: buildAttributesText(row),
+    isColorFallback: true,
   };
 }
