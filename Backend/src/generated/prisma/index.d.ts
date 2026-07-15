@@ -172,6 +172,11 @@ export type PoolBJob = $Result.DefaultSelection<Prisma.$PoolBJobPayload>
  * 
  */
 export type PoolBBatch = $Result.DefaultSelection<Prisma.$PoolBBatchPayload>
+/**
+ * Model ModifyLog
+ * ModifyLog: One row per changed label per successful article modification
+ */
+export type ModifyLog = $Result.DefaultSelection<Prisma.$ModifyLogPayload>
 
 /**
  * Enums
@@ -762,6 +767,16 @@ export class PrismaClient<
     * ```
     */
   get poolBBatch(): Prisma.PoolBBatchDelegate<ExtArgs, ClientOptions>;
+
+  /**
+   * `prisma.modifyLog`: Exposes CRUD operations for the **ModifyLog** model.
+    * Example usage:
+    * ```ts
+    * // Fetch zero or more ModifyLogs
+    * const modifyLogs = await prisma.modifyLog.findMany()
+    * ```
+    */
+  get modifyLog(): Prisma.ModifyLogDelegate<ExtArgs, ClientOptions>;
 }
 
 export namespace Prisma {
@@ -1232,7 +1247,8 @@ export namespace Prisma {
     SrmSyncRun: 'SrmSyncRun',
     SrmSyncRunItem: 'SrmSyncRunItem',
     PoolBJob: 'PoolBJob',
-    PoolBBatch: 'PoolBBatch'
+    PoolBBatch: 'PoolBBatch',
+    ModifyLog: 'ModifyLog'
   };
 
   export type ModelName = (typeof ModelName)[keyof typeof ModelName]
@@ -1251,7 +1267,7 @@ export namespace Prisma {
       omit: GlobalOmitOptions
     }
     meta: {
-      modelProps: "department" | "subDepartment" | "category" | "masterAttribute" | "attributeAllowedValue" | "categoryAttribute" | "extractionJob" | "extractionResult" | "extractionResultFlat" | "modelGenerationResult" | "mvgrLookup" | "masterVendorDetail" | "user" | "auditLog" | "apiKey" | "changeHistory" | "costSummary" | "article360" | "articleFab" | "articleBody" | "articleVaAcc" | "articleVaPrcs" | "articleBom" | "sapFieldConfig" | "sapAttributeValue" | "article360Flat" | "rawArticle" | "srmSyncRun" | "srmSyncRunItem" | "poolBJob" | "poolBBatch"
+      modelProps: "department" | "subDepartment" | "category" | "masterAttribute" | "attributeAllowedValue" | "categoryAttribute" | "extractionJob" | "extractionResult" | "extractionResultFlat" | "modelGenerationResult" | "mvgrLookup" | "masterVendorDetail" | "user" | "auditLog" | "apiKey" | "changeHistory" | "costSummary" | "article360" | "articleFab" | "articleBody" | "articleVaAcc" | "articleVaPrcs" | "articleBom" | "sapFieldConfig" | "sapAttributeValue" | "article360Flat" | "rawArticle" | "srmSyncRun" | "srmSyncRunItem" | "poolBJob" | "poolBBatch" | "modifyLog"
       txIsolationLevel: Prisma.TransactionIsolationLevel
     }
     model: {
@@ -3549,6 +3565,80 @@ export namespace Prisma {
           }
         }
       }
+      ModifyLog: {
+        payload: Prisma.$ModifyLogPayload<ExtArgs>
+        fields: Prisma.ModifyLogFieldRefs
+        operations: {
+          findUnique: {
+            args: Prisma.ModifyLogFindUniqueArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$ModifyLogPayload> | null
+          }
+          findUniqueOrThrow: {
+            args: Prisma.ModifyLogFindUniqueOrThrowArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$ModifyLogPayload>
+          }
+          findFirst: {
+            args: Prisma.ModifyLogFindFirstArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$ModifyLogPayload> | null
+          }
+          findFirstOrThrow: {
+            args: Prisma.ModifyLogFindFirstOrThrowArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$ModifyLogPayload>
+          }
+          findMany: {
+            args: Prisma.ModifyLogFindManyArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$ModifyLogPayload>[]
+          }
+          create: {
+            args: Prisma.ModifyLogCreateArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$ModifyLogPayload>
+          }
+          createMany: {
+            args: Prisma.ModifyLogCreateManyArgs<ExtArgs>
+            result: BatchPayload
+          }
+          createManyAndReturn: {
+            args: Prisma.ModifyLogCreateManyAndReturnArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$ModifyLogPayload>[]
+          }
+          delete: {
+            args: Prisma.ModifyLogDeleteArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$ModifyLogPayload>
+          }
+          update: {
+            args: Prisma.ModifyLogUpdateArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$ModifyLogPayload>
+          }
+          deleteMany: {
+            args: Prisma.ModifyLogDeleteManyArgs<ExtArgs>
+            result: BatchPayload
+          }
+          updateMany: {
+            args: Prisma.ModifyLogUpdateManyArgs<ExtArgs>
+            result: BatchPayload
+          }
+          updateManyAndReturn: {
+            args: Prisma.ModifyLogUpdateManyAndReturnArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$ModifyLogPayload>[]
+          }
+          upsert: {
+            args: Prisma.ModifyLogUpsertArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$ModifyLogPayload>
+          }
+          aggregate: {
+            args: Prisma.ModifyLogAggregateArgs<ExtArgs>
+            result: $Utils.Optional<AggregateModifyLog>
+          }
+          groupBy: {
+            args: Prisma.ModifyLogGroupByArgs<ExtArgs>
+            result: $Utils.Optional<ModifyLogGroupByOutputType>[]
+          }
+          count: {
+            args: Prisma.ModifyLogCountArgs<ExtArgs>
+            result: $Utils.Optional<ModifyLogCountAggregateOutputType> | number
+          }
+        }
+      }
     }
   } & {
     other: {
@@ -3672,6 +3762,7 @@ export namespace Prisma {
     srmSyncRunItem?: SrmSyncRunItemOmit
     poolBJob?: PoolBJobOmit
     poolBBatch?: PoolBBatchOmit
+    modifyLog?: ModifyLogOmit
   }
 
   /* Types for Logging */
@@ -43735,6 +43826,1100 @@ export namespace Prisma {
 
 
   /**
+   * Model ModifyLog
+   */
+
+  export type AggregateModifyLog = {
+    _count: ModifyLogCountAggregateOutputType | null
+    _avg: ModifyLogAvgAggregateOutputType | null
+    _sum: ModifyLogSumAggregateOutputType | null
+    _min: ModifyLogMinAggregateOutputType | null
+    _max: ModifyLogMaxAggregateOutputType | null
+  }
+
+  export type ModifyLogAvgAggregateOutputType = {
+    id: number | null
+  }
+
+  export type ModifyLogSumAggregateOutputType = {
+    id: number | null
+  }
+
+  export type ModifyLogMinAggregateOutputType = {
+    id: number | null
+    modificationGroupId: string | null
+    articleNumber: string | null
+    labelName: string | null
+    oldValue: string | null
+    newValue: string | null
+    modifiedByName: string | null
+    modifiedByEmail: string | null
+    modifiedAt: Date | null
+    sapStatus: string | null
+  }
+
+  export type ModifyLogMaxAggregateOutputType = {
+    id: number | null
+    modificationGroupId: string | null
+    articleNumber: string | null
+    labelName: string | null
+    oldValue: string | null
+    newValue: string | null
+    modifiedByName: string | null
+    modifiedByEmail: string | null
+    modifiedAt: Date | null
+    sapStatus: string | null
+  }
+
+  export type ModifyLogCountAggregateOutputType = {
+    id: number
+    modificationGroupId: number
+    articleNumber: number
+    labelName: number
+    oldValue: number
+    newValue: number
+    modifiedByName: number
+    modifiedByEmail: number
+    modifiedAt: number
+    sapStatus: number
+    _all: number
+  }
+
+
+  export type ModifyLogAvgAggregateInputType = {
+    id?: true
+  }
+
+  export type ModifyLogSumAggregateInputType = {
+    id?: true
+  }
+
+  export type ModifyLogMinAggregateInputType = {
+    id?: true
+    modificationGroupId?: true
+    articleNumber?: true
+    labelName?: true
+    oldValue?: true
+    newValue?: true
+    modifiedByName?: true
+    modifiedByEmail?: true
+    modifiedAt?: true
+    sapStatus?: true
+  }
+
+  export type ModifyLogMaxAggregateInputType = {
+    id?: true
+    modificationGroupId?: true
+    articleNumber?: true
+    labelName?: true
+    oldValue?: true
+    newValue?: true
+    modifiedByName?: true
+    modifiedByEmail?: true
+    modifiedAt?: true
+    sapStatus?: true
+  }
+
+  export type ModifyLogCountAggregateInputType = {
+    id?: true
+    modificationGroupId?: true
+    articleNumber?: true
+    labelName?: true
+    oldValue?: true
+    newValue?: true
+    modifiedByName?: true
+    modifiedByEmail?: true
+    modifiedAt?: true
+    sapStatus?: true
+    _all?: true
+  }
+
+  export type ModifyLogAggregateArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Filter which ModifyLog to aggregate.
+     */
+    where?: ModifyLogWhereInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
+     * 
+     * Determine the order of ModifyLogs to fetch.
+     */
+    orderBy?: ModifyLogOrderByWithRelationInput | ModifyLogOrderByWithRelationInput[]
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
+     * 
+     * Sets the start position
+     */
+    cursor?: ModifyLogWhereUniqueInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Take `±n` ModifyLogs from the position of the cursor.
+     */
+    take?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Skip the first `n` ModifyLogs.
+     */
+    skip?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     * 
+     * Count returned ModifyLogs
+    **/
+    _count?: true | ModifyLogCountAggregateInputType
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     * 
+     * Select which fields to average
+    **/
+    _avg?: ModifyLogAvgAggregateInputType
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     * 
+     * Select which fields to sum
+    **/
+    _sum?: ModifyLogSumAggregateInputType
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     * 
+     * Select which fields to find the minimum value
+    **/
+    _min?: ModifyLogMinAggregateInputType
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     * 
+     * Select which fields to find the maximum value
+    **/
+    _max?: ModifyLogMaxAggregateInputType
+  }
+
+  export type GetModifyLogAggregateType<T extends ModifyLogAggregateArgs> = {
+        [P in keyof T & keyof AggregateModifyLog]: P extends '_count' | 'count'
+      ? T[P] extends true
+        ? number
+        : GetScalarType<T[P], AggregateModifyLog[P]>
+      : GetScalarType<T[P], AggregateModifyLog[P]>
+  }
+
+
+
+
+  export type ModifyLogGroupByArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    where?: ModifyLogWhereInput
+    orderBy?: ModifyLogOrderByWithAggregationInput | ModifyLogOrderByWithAggregationInput[]
+    by: ModifyLogScalarFieldEnum[] | ModifyLogScalarFieldEnum
+    having?: ModifyLogScalarWhereWithAggregatesInput
+    take?: number
+    skip?: number
+    _count?: ModifyLogCountAggregateInputType | true
+    _avg?: ModifyLogAvgAggregateInputType
+    _sum?: ModifyLogSumAggregateInputType
+    _min?: ModifyLogMinAggregateInputType
+    _max?: ModifyLogMaxAggregateInputType
+  }
+
+  export type ModifyLogGroupByOutputType = {
+    id: number
+    modificationGroupId: string
+    articleNumber: string
+    labelName: string
+    oldValue: string | null
+    newValue: string | null
+    modifiedByName: string
+    modifiedByEmail: string
+    modifiedAt: Date
+    sapStatus: string
+    _count: ModifyLogCountAggregateOutputType | null
+    _avg: ModifyLogAvgAggregateOutputType | null
+    _sum: ModifyLogSumAggregateOutputType | null
+    _min: ModifyLogMinAggregateOutputType | null
+    _max: ModifyLogMaxAggregateOutputType | null
+  }
+
+  type GetModifyLogGroupByPayload<T extends ModifyLogGroupByArgs> = Prisma.PrismaPromise<
+    Array<
+      PickEnumerable<ModifyLogGroupByOutputType, T['by']> &
+        {
+          [P in ((keyof T) & (keyof ModifyLogGroupByOutputType))]: P extends '_count'
+            ? T[P] extends boolean
+              ? number
+              : GetScalarType<T[P], ModifyLogGroupByOutputType[P]>
+            : GetScalarType<T[P], ModifyLogGroupByOutputType[P]>
+        }
+      >
+    >
+
+
+  export type ModifyLogSelect<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
+    id?: boolean
+    modificationGroupId?: boolean
+    articleNumber?: boolean
+    labelName?: boolean
+    oldValue?: boolean
+    newValue?: boolean
+    modifiedByName?: boolean
+    modifiedByEmail?: boolean
+    modifiedAt?: boolean
+    sapStatus?: boolean
+  }, ExtArgs["result"]["modifyLog"]>
+
+  export type ModifyLogSelectCreateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
+    id?: boolean
+    modificationGroupId?: boolean
+    articleNumber?: boolean
+    labelName?: boolean
+    oldValue?: boolean
+    newValue?: boolean
+    modifiedByName?: boolean
+    modifiedByEmail?: boolean
+    modifiedAt?: boolean
+    sapStatus?: boolean
+  }, ExtArgs["result"]["modifyLog"]>
+
+  export type ModifyLogSelectUpdateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
+    id?: boolean
+    modificationGroupId?: boolean
+    articleNumber?: boolean
+    labelName?: boolean
+    oldValue?: boolean
+    newValue?: boolean
+    modifiedByName?: boolean
+    modifiedByEmail?: boolean
+    modifiedAt?: boolean
+    sapStatus?: boolean
+  }, ExtArgs["result"]["modifyLog"]>
+
+  export type ModifyLogSelectScalar = {
+    id?: boolean
+    modificationGroupId?: boolean
+    articleNumber?: boolean
+    labelName?: boolean
+    oldValue?: boolean
+    newValue?: boolean
+    modifiedByName?: boolean
+    modifiedByEmail?: boolean
+    modifiedAt?: boolean
+    sapStatus?: boolean
+  }
+
+  export type ModifyLogOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<"id" | "modificationGroupId" | "articleNumber" | "labelName" | "oldValue" | "newValue" | "modifiedByName" | "modifiedByEmail" | "modifiedAt" | "sapStatus", ExtArgs["result"]["modifyLog"]>
+
+  export type $ModifyLogPayload<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    name: "ModifyLog"
+    objects: {}
+    scalars: $Extensions.GetPayloadResult<{
+      id: number
+      modificationGroupId: string
+      articleNumber: string
+      labelName: string
+      oldValue: string | null
+      newValue: string | null
+      modifiedByName: string
+      modifiedByEmail: string
+      modifiedAt: Date
+      sapStatus: string
+    }, ExtArgs["result"]["modifyLog"]>
+    composites: {}
+  }
+
+  type ModifyLogGetPayload<S extends boolean | null | undefined | ModifyLogDefaultArgs> = $Result.GetResult<Prisma.$ModifyLogPayload, S>
+
+  type ModifyLogCountArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> =
+    Omit<ModifyLogFindManyArgs, 'select' | 'include' | 'distinct' | 'omit'> & {
+      select?: ModifyLogCountAggregateInputType | true
+    }
+
+  export interface ModifyLogDelegate<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs, GlobalOmitOptions = {}> {
+    [K: symbol]: { types: Prisma.TypeMap<ExtArgs>['model']['ModifyLog'], meta: { name: 'ModifyLog' } }
+    /**
+     * Find zero or one ModifyLog that matches the filter.
+     * @param {ModifyLogFindUniqueArgs} args - Arguments to find a ModifyLog
+     * @example
+     * // Get one ModifyLog
+     * const modifyLog = await prisma.modifyLog.findUnique({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     */
+    findUnique<T extends ModifyLogFindUniqueArgs>(args: SelectSubset<T, ModifyLogFindUniqueArgs<ExtArgs>>): Prisma__ModifyLogClient<$Result.GetResult<Prisma.$ModifyLogPayload<ExtArgs>, T, "findUnique", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Find one ModifyLog that matches the filter or throw an error with `error.code='P2025'`
+     * if no matches were found.
+     * @param {ModifyLogFindUniqueOrThrowArgs} args - Arguments to find a ModifyLog
+     * @example
+     * // Get one ModifyLog
+     * const modifyLog = await prisma.modifyLog.findUniqueOrThrow({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     */
+    findUniqueOrThrow<T extends ModifyLogFindUniqueOrThrowArgs>(args: SelectSubset<T, ModifyLogFindUniqueOrThrowArgs<ExtArgs>>): Prisma__ModifyLogClient<$Result.GetResult<Prisma.$ModifyLogPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Find the first ModifyLog that matches the filter.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {ModifyLogFindFirstArgs} args - Arguments to find a ModifyLog
+     * @example
+     * // Get one ModifyLog
+     * const modifyLog = await prisma.modifyLog.findFirst({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     */
+    findFirst<T extends ModifyLogFindFirstArgs>(args?: SelectSubset<T, ModifyLogFindFirstArgs<ExtArgs>>): Prisma__ModifyLogClient<$Result.GetResult<Prisma.$ModifyLogPayload<ExtArgs>, T, "findFirst", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Find the first ModifyLog that matches the filter or
+     * throw `PrismaKnownClientError` with `P2025` code if no matches were found.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {ModifyLogFindFirstOrThrowArgs} args - Arguments to find a ModifyLog
+     * @example
+     * // Get one ModifyLog
+     * const modifyLog = await prisma.modifyLog.findFirstOrThrow({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     */
+    findFirstOrThrow<T extends ModifyLogFindFirstOrThrowArgs>(args?: SelectSubset<T, ModifyLogFindFirstOrThrowArgs<ExtArgs>>): Prisma__ModifyLogClient<$Result.GetResult<Prisma.$ModifyLogPayload<ExtArgs>, T, "findFirstOrThrow", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Find zero or more ModifyLogs that matches the filter.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {ModifyLogFindManyArgs} args - Arguments to filter and select certain fields only.
+     * @example
+     * // Get all ModifyLogs
+     * const modifyLogs = await prisma.modifyLog.findMany()
+     * 
+     * // Get first 10 ModifyLogs
+     * const modifyLogs = await prisma.modifyLog.findMany({ take: 10 })
+     * 
+     * // Only select the `id`
+     * const modifyLogWithIdOnly = await prisma.modifyLog.findMany({ select: { id: true } })
+     * 
+     */
+    findMany<T extends ModifyLogFindManyArgs>(args?: SelectSubset<T, ModifyLogFindManyArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$ModifyLogPayload<ExtArgs>, T, "findMany", GlobalOmitOptions>>
+
+    /**
+     * Create a ModifyLog.
+     * @param {ModifyLogCreateArgs} args - Arguments to create a ModifyLog.
+     * @example
+     * // Create one ModifyLog
+     * const ModifyLog = await prisma.modifyLog.create({
+     *   data: {
+     *     // ... data to create a ModifyLog
+     *   }
+     * })
+     * 
+     */
+    create<T extends ModifyLogCreateArgs>(args: SelectSubset<T, ModifyLogCreateArgs<ExtArgs>>): Prisma__ModifyLogClient<$Result.GetResult<Prisma.$ModifyLogPayload<ExtArgs>, T, "create", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Create many ModifyLogs.
+     * @param {ModifyLogCreateManyArgs} args - Arguments to create many ModifyLogs.
+     * @example
+     * // Create many ModifyLogs
+     * const modifyLog = await prisma.modifyLog.createMany({
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     *     
+     */
+    createMany<T extends ModifyLogCreateManyArgs>(args?: SelectSubset<T, ModifyLogCreateManyArgs<ExtArgs>>): Prisma.PrismaPromise<BatchPayload>
+
+    /**
+     * Create many ModifyLogs and returns the data saved in the database.
+     * @param {ModifyLogCreateManyAndReturnArgs} args - Arguments to create many ModifyLogs.
+     * @example
+     * // Create many ModifyLogs
+     * const modifyLog = await prisma.modifyLog.createManyAndReturn({
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     * 
+     * // Create many ModifyLogs and only return the `id`
+     * const modifyLogWithIdOnly = await prisma.modifyLog.createManyAndReturn({
+     *   select: { id: true },
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * 
+     */
+    createManyAndReturn<T extends ModifyLogCreateManyAndReturnArgs>(args?: SelectSubset<T, ModifyLogCreateManyAndReturnArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$ModifyLogPayload<ExtArgs>, T, "createManyAndReturn", GlobalOmitOptions>>
+
+    /**
+     * Delete a ModifyLog.
+     * @param {ModifyLogDeleteArgs} args - Arguments to delete one ModifyLog.
+     * @example
+     * // Delete one ModifyLog
+     * const ModifyLog = await prisma.modifyLog.delete({
+     *   where: {
+     *     // ... filter to delete one ModifyLog
+     *   }
+     * })
+     * 
+     */
+    delete<T extends ModifyLogDeleteArgs>(args: SelectSubset<T, ModifyLogDeleteArgs<ExtArgs>>): Prisma__ModifyLogClient<$Result.GetResult<Prisma.$ModifyLogPayload<ExtArgs>, T, "delete", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Update one ModifyLog.
+     * @param {ModifyLogUpdateArgs} args - Arguments to update one ModifyLog.
+     * @example
+     * // Update one ModifyLog
+     * const modifyLog = await prisma.modifyLog.update({
+     *   where: {
+     *     // ... provide filter here
+     *   },
+     *   data: {
+     *     // ... provide data here
+     *   }
+     * })
+     * 
+     */
+    update<T extends ModifyLogUpdateArgs>(args: SelectSubset<T, ModifyLogUpdateArgs<ExtArgs>>): Prisma__ModifyLogClient<$Result.GetResult<Prisma.$ModifyLogPayload<ExtArgs>, T, "update", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Delete zero or more ModifyLogs.
+     * @param {ModifyLogDeleteManyArgs} args - Arguments to filter ModifyLogs to delete.
+     * @example
+     * // Delete a few ModifyLogs
+     * const { count } = await prisma.modifyLog.deleteMany({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     * 
+     */
+    deleteMany<T extends ModifyLogDeleteManyArgs>(args?: SelectSubset<T, ModifyLogDeleteManyArgs<ExtArgs>>): Prisma.PrismaPromise<BatchPayload>
+
+    /**
+     * Update zero or more ModifyLogs.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {ModifyLogUpdateManyArgs} args - Arguments to update one or more rows.
+     * @example
+     * // Update many ModifyLogs
+     * const modifyLog = await prisma.modifyLog.updateMany({
+     *   where: {
+     *     // ... provide filter here
+     *   },
+     *   data: {
+     *     // ... provide data here
+     *   }
+     * })
+     * 
+     */
+    updateMany<T extends ModifyLogUpdateManyArgs>(args: SelectSubset<T, ModifyLogUpdateManyArgs<ExtArgs>>): Prisma.PrismaPromise<BatchPayload>
+
+    /**
+     * Update zero or more ModifyLogs and returns the data updated in the database.
+     * @param {ModifyLogUpdateManyAndReturnArgs} args - Arguments to update many ModifyLogs.
+     * @example
+     * // Update many ModifyLogs
+     * const modifyLog = await prisma.modifyLog.updateManyAndReturn({
+     *   where: {
+     *     // ... provide filter here
+     *   },
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     * 
+     * // Update zero or more ModifyLogs and only return the `id`
+     * const modifyLogWithIdOnly = await prisma.modifyLog.updateManyAndReturn({
+     *   select: { id: true },
+     *   where: {
+     *     // ... provide filter here
+     *   },
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * 
+     */
+    updateManyAndReturn<T extends ModifyLogUpdateManyAndReturnArgs>(args: SelectSubset<T, ModifyLogUpdateManyAndReturnArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$ModifyLogPayload<ExtArgs>, T, "updateManyAndReturn", GlobalOmitOptions>>
+
+    /**
+     * Create or update one ModifyLog.
+     * @param {ModifyLogUpsertArgs} args - Arguments to update or create a ModifyLog.
+     * @example
+     * // Update or create a ModifyLog
+     * const modifyLog = await prisma.modifyLog.upsert({
+     *   create: {
+     *     // ... data to create a ModifyLog
+     *   },
+     *   update: {
+     *     // ... in case it already exists, update
+     *   },
+     *   where: {
+     *     // ... the filter for the ModifyLog we want to update
+     *   }
+     * })
+     */
+    upsert<T extends ModifyLogUpsertArgs>(args: SelectSubset<T, ModifyLogUpsertArgs<ExtArgs>>): Prisma__ModifyLogClient<$Result.GetResult<Prisma.$ModifyLogPayload<ExtArgs>, T, "upsert", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+
+    /**
+     * Count the number of ModifyLogs.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {ModifyLogCountArgs} args - Arguments to filter ModifyLogs to count.
+     * @example
+     * // Count the number of ModifyLogs
+     * const count = await prisma.modifyLog.count({
+     *   where: {
+     *     // ... the filter for the ModifyLogs we want to count
+     *   }
+     * })
+    **/
+    count<T extends ModifyLogCountArgs>(
+      args?: Subset<T, ModifyLogCountArgs>,
+    ): Prisma.PrismaPromise<
+      T extends $Utils.Record<'select', any>
+        ? T['select'] extends true
+          ? number
+          : GetScalarType<T['select'], ModifyLogCountAggregateOutputType>
+        : number
+    >
+
+    /**
+     * Allows you to perform aggregations operations on a ModifyLog.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {ModifyLogAggregateArgs} args - Select which aggregations you would like to apply and on what fields.
+     * @example
+     * // Ordered by age ascending
+     * // Where email contains prisma.io
+     * // Limited to the 10 users
+     * const aggregations = await prisma.user.aggregate({
+     *   _avg: {
+     *     age: true,
+     *   },
+     *   where: {
+     *     email: {
+     *       contains: "prisma.io",
+     *     },
+     *   },
+     *   orderBy: {
+     *     age: "asc",
+     *   },
+     *   take: 10,
+     * })
+    **/
+    aggregate<T extends ModifyLogAggregateArgs>(args: Subset<T, ModifyLogAggregateArgs>): Prisma.PrismaPromise<GetModifyLogAggregateType<T>>
+
+    /**
+     * Group by ModifyLog.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {ModifyLogGroupByArgs} args - Group by arguments.
+     * @example
+     * // Group by city, order by createdAt, get count
+     * const result = await prisma.user.groupBy({
+     *   by: ['city', 'createdAt'],
+     *   orderBy: {
+     *     createdAt: true
+     *   },
+     *   _count: {
+     *     _all: true
+     *   },
+     * })
+     * 
+    **/
+    groupBy<
+      T extends ModifyLogGroupByArgs,
+      HasSelectOrTake extends Or<
+        Extends<'skip', Keys<T>>,
+        Extends<'take', Keys<T>>
+      >,
+      OrderByArg extends True extends HasSelectOrTake
+        ? { orderBy: ModifyLogGroupByArgs['orderBy'] }
+        : { orderBy?: ModifyLogGroupByArgs['orderBy'] },
+      OrderFields extends ExcludeUnderscoreKeys<Keys<MaybeTupleToUnion<T['orderBy']>>>,
+      ByFields extends MaybeTupleToUnion<T['by']>,
+      ByValid extends Has<ByFields, OrderFields>,
+      HavingFields extends GetHavingFields<T['having']>,
+      HavingValid extends Has<ByFields, HavingFields>,
+      ByEmpty extends T['by'] extends never[] ? True : False,
+      InputErrors extends ByEmpty extends True
+      ? `Error: "by" must not be empty.`
+      : HavingValid extends False
+      ? {
+          [P in HavingFields]: P extends ByFields
+            ? never
+            : P extends string
+            ? `Error: Field "${P}" used in "having" needs to be provided in "by".`
+            : [
+                Error,
+                'Field ',
+                P,
+                ` in "having" needs to be provided in "by"`,
+              ]
+        }[HavingFields]
+      : 'take' extends Keys<T>
+      ? 'orderBy' extends Keys<T>
+        ? ByValid extends True
+          ? {}
+          : {
+              [P in OrderFields]: P extends ByFields
+                ? never
+                : `Error: Field "${P}" in "orderBy" needs to be provided in "by"`
+            }[OrderFields]
+        : 'Error: If you provide "take", you also need to provide "orderBy"'
+      : 'skip' extends Keys<T>
+      ? 'orderBy' extends Keys<T>
+        ? ByValid extends True
+          ? {}
+          : {
+              [P in OrderFields]: P extends ByFields
+                ? never
+                : `Error: Field "${P}" in "orderBy" needs to be provided in "by"`
+            }[OrderFields]
+        : 'Error: If you provide "skip", you also need to provide "orderBy"'
+      : ByValid extends True
+      ? {}
+      : {
+          [P in OrderFields]: P extends ByFields
+            ? never
+            : `Error: Field "${P}" in "orderBy" needs to be provided in "by"`
+        }[OrderFields]
+    >(args: SubsetIntersection<T, ModifyLogGroupByArgs, OrderByArg> & InputErrors): {} extends InputErrors ? GetModifyLogGroupByPayload<T> : Prisma.PrismaPromise<InputErrors>
+  /**
+   * Fields of the ModifyLog model
+   */
+  readonly fields: ModifyLogFieldRefs;
+  }
+
+  /**
+   * The delegate class that acts as a "Promise-like" for ModifyLog.
+   * Why is this prefixed with `Prisma__`?
+   * Because we want to prevent naming conflicts as mentioned in
+   * https://github.com/prisma/prisma-client-js/issues/707
+   */
+  export interface Prisma__ModifyLogClient<T, Null = never, ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs, GlobalOmitOptions = {}> extends Prisma.PrismaPromise<T> {
+    readonly [Symbol.toStringTag]: "PrismaPromise"
+    /**
+     * Attaches callbacks for the resolution and/or rejection of the Promise.
+     * @param onfulfilled The callback to execute when the Promise is resolved.
+     * @param onrejected The callback to execute when the Promise is rejected.
+     * @returns A Promise for the completion of which ever callback is executed.
+     */
+    then<TResult1 = T, TResult2 = never>(onfulfilled?: ((value: T) => TResult1 | PromiseLike<TResult1>) | undefined | null, onrejected?: ((reason: any) => TResult2 | PromiseLike<TResult2>) | undefined | null): $Utils.JsPromise<TResult1 | TResult2>
+    /**
+     * Attaches a callback for only the rejection of the Promise.
+     * @param onrejected The callback to execute when the Promise is rejected.
+     * @returns A Promise for the completion of the callback.
+     */
+    catch<TResult = never>(onrejected?: ((reason: any) => TResult | PromiseLike<TResult>) | undefined | null): $Utils.JsPromise<T | TResult>
+    /**
+     * Attaches a callback that is invoked when the Promise is settled (fulfilled or rejected). The
+     * resolved value cannot be modified from the callback.
+     * @param onfinally The callback to execute when the Promise is settled (fulfilled or rejected).
+     * @returns A Promise for the completion of the callback.
+     */
+    finally(onfinally?: (() => void) | undefined | null): $Utils.JsPromise<T>
+  }
+
+
+
+
+  /**
+   * Fields of the ModifyLog model
+   */
+  interface ModifyLogFieldRefs {
+    readonly id: FieldRef<"ModifyLog", 'Int'>
+    readonly modificationGroupId: FieldRef<"ModifyLog", 'String'>
+    readonly articleNumber: FieldRef<"ModifyLog", 'String'>
+    readonly labelName: FieldRef<"ModifyLog", 'String'>
+    readonly oldValue: FieldRef<"ModifyLog", 'String'>
+    readonly newValue: FieldRef<"ModifyLog", 'String'>
+    readonly modifiedByName: FieldRef<"ModifyLog", 'String'>
+    readonly modifiedByEmail: FieldRef<"ModifyLog", 'String'>
+    readonly modifiedAt: FieldRef<"ModifyLog", 'DateTime'>
+    readonly sapStatus: FieldRef<"ModifyLog", 'String'>
+  }
+    
+
+  // Custom InputTypes
+  /**
+   * ModifyLog findUnique
+   */
+  export type ModifyLogFindUniqueArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the ModifyLog
+     */
+    select?: ModifyLogSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the ModifyLog
+     */
+    omit?: ModifyLogOmit<ExtArgs> | null
+    /**
+     * Filter, which ModifyLog to fetch.
+     */
+    where: ModifyLogWhereUniqueInput
+  }
+
+  /**
+   * ModifyLog findUniqueOrThrow
+   */
+  export type ModifyLogFindUniqueOrThrowArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the ModifyLog
+     */
+    select?: ModifyLogSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the ModifyLog
+     */
+    omit?: ModifyLogOmit<ExtArgs> | null
+    /**
+     * Filter, which ModifyLog to fetch.
+     */
+    where: ModifyLogWhereUniqueInput
+  }
+
+  /**
+   * ModifyLog findFirst
+   */
+  export type ModifyLogFindFirstArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the ModifyLog
+     */
+    select?: ModifyLogSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the ModifyLog
+     */
+    omit?: ModifyLogOmit<ExtArgs> | null
+    /**
+     * Filter, which ModifyLog to fetch.
+     */
+    where?: ModifyLogWhereInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
+     * 
+     * Determine the order of ModifyLogs to fetch.
+     */
+    orderBy?: ModifyLogOrderByWithRelationInput | ModifyLogOrderByWithRelationInput[]
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
+     * 
+     * Sets the position for searching for ModifyLogs.
+     */
+    cursor?: ModifyLogWhereUniqueInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Take `±n` ModifyLogs from the position of the cursor.
+     */
+    take?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Skip the first `n` ModifyLogs.
+     */
+    skip?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/distinct Distinct Docs}
+     * 
+     * Filter by unique combinations of ModifyLogs.
+     */
+    distinct?: ModifyLogScalarFieldEnum | ModifyLogScalarFieldEnum[]
+  }
+
+  /**
+   * ModifyLog findFirstOrThrow
+   */
+  export type ModifyLogFindFirstOrThrowArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the ModifyLog
+     */
+    select?: ModifyLogSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the ModifyLog
+     */
+    omit?: ModifyLogOmit<ExtArgs> | null
+    /**
+     * Filter, which ModifyLog to fetch.
+     */
+    where?: ModifyLogWhereInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
+     * 
+     * Determine the order of ModifyLogs to fetch.
+     */
+    orderBy?: ModifyLogOrderByWithRelationInput | ModifyLogOrderByWithRelationInput[]
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
+     * 
+     * Sets the position for searching for ModifyLogs.
+     */
+    cursor?: ModifyLogWhereUniqueInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Take `±n` ModifyLogs from the position of the cursor.
+     */
+    take?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Skip the first `n` ModifyLogs.
+     */
+    skip?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/distinct Distinct Docs}
+     * 
+     * Filter by unique combinations of ModifyLogs.
+     */
+    distinct?: ModifyLogScalarFieldEnum | ModifyLogScalarFieldEnum[]
+  }
+
+  /**
+   * ModifyLog findMany
+   */
+  export type ModifyLogFindManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the ModifyLog
+     */
+    select?: ModifyLogSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the ModifyLog
+     */
+    omit?: ModifyLogOmit<ExtArgs> | null
+    /**
+     * Filter, which ModifyLogs to fetch.
+     */
+    where?: ModifyLogWhereInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
+     * 
+     * Determine the order of ModifyLogs to fetch.
+     */
+    orderBy?: ModifyLogOrderByWithRelationInput | ModifyLogOrderByWithRelationInput[]
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
+     * 
+     * Sets the position for listing ModifyLogs.
+     */
+    cursor?: ModifyLogWhereUniqueInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Take `±n` ModifyLogs from the position of the cursor.
+     */
+    take?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Skip the first `n` ModifyLogs.
+     */
+    skip?: number
+    distinct?: ModifyLogScalarFieldEnum | ModifyLogScalarFieldEnum[]
+  }
+
+  /**
+   * ModifyLog create
+   */
+  export type ModifyLogCreateArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the ModifyLog
+     */
+    select?: ModifyLogSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the ModifyLog
+     */
+    omit?: ModifyLogOmit<ExtArgs> | null
+    /**
+     * The data needed to create a ModifyLog.
+     */
+    data: XOR<ModifyLogCreateInput, ModifyLogUncheckedCreateInput>
+  }
+
+  /**
+   * ModifyLog createMany
+   */
+  export type ModifyLogCreateManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * The data used to create many ModifyLogs.
+     */
+    data: ModifyLogCreateManyInput | ModifyLogCreateManyInput[]
+    skipDuplicates?: boolean
+  }
+
+  /**
+   * ModifyLog createManyAndReturn
+   */
+  export type ModifyLogCreateManyAndReturnArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the ModifyLog
+     */
+    select?: ModifyLogSelectCreateManyAndReturn<ExtArgs> | null
+    /**
+     * Omit specific fields from the ModifyLog
+     */
+    omit?: ModifyLogOmit<ExtArgs> | null
+    /**
+     * The data used to create many ModifyLogs.
+     */
+    data: ModifyLogCreateManyInput | ModifyLogCreateManyInput[]
+    skipDuplicates?: boolean
+  }
+
+  /**
+   * ModifyLog update
+   */
+  export type ModifyLogUpdateArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the ModifyLog
+     */
+    select?: ModifyLogSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the ModifyLog
+     */
+    omit?: ModifyLogOmit<ExtArgs> | null
+    /**
+     * The data needed to update a ModifyLog.
+     */
+    data: XOR<ModifyLogUpdateInput, ModifyLogUncheckedUpdateInput>
+    /**
+     * Choose, which ModifyLog to update.
+     */
+    where: ModifyLogWhereUniqueInput
+  }
+
+  /**
+   * ModifyLog updateMany
+   */
+  export type ModifyLogUpdateManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * The data used to update ModifyLogs.
+     */
+    data: XOR<ModifyLogUpdateManyMutationInput, ModifyLogUncheckedUpdateManyInput>
+    /**
+     * Filter which ModifyLogs to update
+     */
+    where?: ModifyLogWhereInput
+    /**
+     * Limit how many ModifyLogs to update.
+     */
+    limit?: number
+  }
+
+  /**
+   * ModifyLog updateManyAndReturn
+   */
+  export type ModifyLogUpdateManyAndReturnArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the ModifyLog
+     */
+    select?: ModifyLogSelectUpdateManyAndReturn<ExtArgs> | null
+    /**
+     * Omit specific fields from the ModifyLog
+     */
+    omit?: ModifyLogOmit<ExtArgs> | null
+    /**
+     * The data used to update ModifyLogs.
+     */
+    data: XOR<ModifyLogUpdateManyMutationInput, ModifyLogUncheckedUpdateManyInput>
+    /**
+     * Filter which ModifyLogs to update
+     */
+    where?: ModifyLogWhereInput
+    /**
+     * Limit how many ModifyLogs to update.
+     */
+    limit?: number
+  }
+
+  /**
+   * ModifyLog upsert
+   */
+  export type ModifyLogUpsertArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the ModifyLog
+     */
+    select?: ModifyLogSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the ModifyLog
+     */
+    omit?: ModifyLogOmit<ExtArgs> | null
+    /**
+     * The filter to search for the ModifyLog to update in case it exists.
+     */
+    where: ModifyLogWhereUniqueInput
+    /**
+     * In case the ModifyLog found by the `where` argument doesn't exist, create a new ModifyLog with this data.
+     */
+    create: XOR<ModifyLogCreateInput, ModifyLogUncheckedCreateInput>
+    /**
+     * In case the ModifyLog was found with the provided `where` argument, update it with this data.
+     */
+    update: XOR<ModifyLogUpdateInput, ModifyLogUncheckedUpdateInput>
+  }
+
+  /**
+   * ModifyLog delete
+   */
+  export type ModifyLogDeleteArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the ModifyLog
+     */
+    select?: ModifyLogSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the ModifyLog
+     */
+    omit?: ModifyLogOmit<ExtArgs> | null
+    /**
+     * Filter which ModifyLog to delete.
+     */
+    where: ModifyLogWhereUniqueInput
+  }
+
+  /**
+   * ModifyLog deleteMany
+   */
+  export type ModifyLogDeleteManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Filter which ModifyLogs to delete
+     */
+    where?: ModifyLogWhereInput
+    /**
+     * Limit how many ModifyLogs to delete.
+     */
+    limit?: number
+  }
+
+  /**
+   * ModifyLog without action
+   */
+  export type ModifyLogDefaultArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the ModifyLog
+     */
+    select?: ModifyLogSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the ModifyLog
+     */
+    omit?: ModifyLogOmit<ExtArgs> | null
+  }
+
+
+  /**
    * Enums
    */
 
@@ -44502,6 +45687,22 @@ export namespace Prisma {
   export type PoolBBatchScalarFieldEnum = (typeof PoolBBatchScalarFieldEnum)[keyof typeof PoolBBatchScalarFieldEnum]
 
 
+  export const ModifyLogScalarFieldEnum: {
+    id: 'id',
+    modificationGroupId: 'modificationGroupId',
+    articleNumber: 'articleNumber',
+    labelName: 'labelName',
+    oldValue: 'oldValue',
+    newValue: 'newValue',
+    modifiedByName: 'modifiedByName',
+    modifiedByEmail: 'modifiedByEmail',
+    modifiedAt: 'modifiedAt',
+    sapStatus: 'sapStatus'
+  };
+
+  export type ModifyLogScalarFieldEnum = (typeof ModifyLogScalarFieldEnum)[keyof typeof ModifyLogScalarFieldEnum]
+
+
   export const SortOrder: {
     asc: 'asc',
     desc: 'desc'
@@ -45092,6 +46293,20 @@ export namespace Prisma {
   };
 
   export type PoolBBatchOrderByRelevanceFieldEnum = (typeof PoolBBatchOrderByRelevanceFieldEnum)[keyof typeof PoolBBatchOrderByRelevanceFieldEnum]
+
+
+  export const ModifyLogOrderByRelevanceFieldEnum: {
+    modificationGroupId: 'modificationGroupId',
+    articleNumber: 'articleNumber',
+    labelName: 'labelName',
+    oldValue: 'oldValue',
+    newValue: 'newValue',
+    modifiedByName: 'modifiedByName',
+    modifiedByEmail: 'modifiedByEmail',
+    sapStatus: 'sapStatus'
+  };
+
+  export type ModifyLogOrderByRelevanceFieldEnum = (typeof ModifyLogOrderByRelevanceFieldEnum)[keyof typeof ModifyLogOrderByRelevanceFieldEnum]
 
 
   /**
@@ -49255,6 +50470,86 @@ export namespace Prisma {
     completedAt?: DateTimeNullableWithAggregatesFilter<"PoolBBatch"> | Date | string | null
     results?: JsonNullableWithAggregatesFilter<"PoolBBatch">
     errorMessage?: StringNullableWithAggregatesFilter<"PoolBBatch"> | string | null
+  }
+
+  export type ModifyLogWhereInput = {
+    AND?: ModifyLogWhereInput | ModifyLogWhereInput[]
+    OR?: ModifyLogWhereInput[]
+    NOT?: ModifyLogWhereInput | ModifyLogWhereInput[]
+    id?: IntFilter<"ModifyLog"> | number
+    modificationGroupId?: UuidFilter<"ModifyLog"> | string
+    articleNumber?: StringFilter<"ModifyLog"> | string
+    labelName?: StringFilter<"ModifyLog"> | string
+    oldValue?: StringNullableFilter<"ModifyLog"> | string | null
+    newValue?: StringNullableFilter<"ModifyLog"> | string | null
+    modifiedByName?: StringFilter<"ModifyLog"> | string
+    modifiedByEmail?: StringFilter<"ModifyLog"> | string
+    modifiedAt?: DateTimeFilter<"ModifyLog"> | Date | string
+    sapStatus?: StringFilter<"ModifyLog"> | string
+  }
+
+  export type ModifyLogOrderByWithRelationInput = {
+    id?: SortOrder
+    modificationGroupId?: SortOrder
+    articleNumber?: SortOrder
+    labelName?: SortOrder
+    oldValue?: SortOrderInput | SortOrder
+    newValue?: SortOrderInput | SortOrder
+    modifiedByName?: SortOrder
+    modifiedByEmail?: SortOrder
+    modifiedAt?: SortOrder
+    sapStatus?: SortOrder
+    _relevance?: ModifyLogOrderByRelevanceInput
+  }
+
+  export type ModifyLogWhereUniqueInput = Prisma.AtLeast<{
+    id?: number
+    AND?: ModifyLogWhereInput | ModifyLogWhereInput[]
+    OR?: ModifyLogWhereInput[]
+    NOT?: ModifyLogWhereInput | ModifyLogWhereInput[]
+    modificationGroupId?: UuidFilter<"ModifyLog"> | string
+    articleNumber?: StringFilter<"ModifyLog"> | string
+    labelName?: StringFilter<"ModifyLog"> | string
+    oldValue?: StringNullableFilter<"ModifyLog"> | string | null
+    newValue?: StringNullableFilter<"ModifyLog"> | string | null
+    modifiedByName?: StringFilter<"ModifyLog"> | string
+    modifiedByEmail?: StringFilter<"ModifyLog"> | string
+    modifiedAt?: DateTimeFilter<"ModifyLog"> | Date | string
+    sapStatus?: StringFilter<"ModifyLog"> | string
+  }, "id">
+
+  export type ModifyLogOrderByWithAggregationInput = {
+    id?: SortOrder
+    modificationGroupId?: SortOrder
+    articleNumber?: SortOrder
+    labelName?: SortOrder
+    oldValue?: SortOrderInput | SortOrder
+    newValue?: SortOrderInput | SortOrder
+    modifiedByName?: SortOrder
+    modifiedByEmail?: SortOrder
+    modifiedAt?: SortOrder
+    sapStatus?: SortOrder
+    _count?: ModifyLogCountOrderByAggregateInput
+    _avg?: ModifyLogAvgOrderByAggregateInput
+    _max?: ModifyLogMaxOrderByAggregateInput
+    _min?: ModifyLogMinOrderByAggregateInput
+    _sum?: ModifyLogSumOrderByAggregateInput
+  }
+
+  export type ModifyLogScalarWhereWithAggregatesInput = {
+    AND?: ModifyLogScalarWhereWithAggregatesInput | ModifyLogScalarWhereWithAggregatesInput[]
+    OR?: ModifyLogScalarWhereWithAggregatesInput[]
+    NOT?: ModifyLogScalarWhereWithAggregatesInput | ModifyLogScalarWhereWithAggregatesInput[]
+    id?: IntWithAggregatesFilter<"ModifyLog"> | number
+    modificationGroupId?: UuidWithAggregatesFilter<"ModifyLog"> | string
+    articleNumber?: StringWithAggregatesFilter<"ModifyLog"> | string
+    labelName?: StringWithAggregatesFilter<"ModifyLog"> | string
+    oldValue?: StringNullableWithAggregatesFilter<"ModifyLog"> | string | null
+    newValue?: StringNullableWithAggregatesFilter<"ModifyLog"> | string | null
+    modifiedByName?: StringWithAggregatesFilter<"ModifyLog"> | string
+    modifiedByEmail?: StringWithAggregatesFilter<"ModifyLog"> | string
+    modifiedAt?: DateTimeWithAggregatesFilter<"ModifyLog"> | Date | string
+    sapStatus?: StringWithAggregatesFilter<"ModifyLog"> | string
   }
 
   export type DepartmentCreateInput = {
@@ -53914,6 +55209,94 @@ export namespace Prisma {
     errorMessage?: NullableStringFieldUpdateOperationsInput | string | null
   }
 
+  export type ModifyLogCreateInput = {
+    modificationGroupId: string
+    articleNumber: string
+    labelName: string
+    oldValue?: string | null
+    newValue?: string | null
+    modifiedByName?: string
+    modifiedByEmail?: string
+    modifiedAt?: Date | string
+    sapStatus?: string
+  }
+
+  export type ModifyLogUncheckedCreateInput = {
+    id?: number
+    modificationGroupId: string
+    articleNumber: string
+    labelName: string
+    oldValue?: string | null
+    newValue?: string | null
+    modifiedByName?: string
+    modifiedByEmail?: string
+    modifiedAt?: Date | string
+    sapStatus?: string
+  }
+
+  export type ModifyLogUpdateInput = {
+    modificationGroupId?: StringFieldUpdateOperationsInput | string
+    articleNumber?: StringFieldUpdateOperationsInput | string
+    labelName?: StringFieldUpdateOperationsInput | string
+    oldValue?: NullableStringFieldUpdateOperationsInput | string | null
+    newValue?: NullableStringFieldUpdateOperationsInput | string | null
+    modifiedByName?: StringFieldUpdateOperationsInput | string
+    modifiedByEmail?: StringFieldUpdateOperationsInput | string
+    modifiedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    sapStatus?: StringFieldUpdateOperationsInput | string
+  }
+
+  export type ModifyLogUncheckedUpdateInput = {
+    id?: IntFieldUpdateOperationsInput | number
+    modificationGroupId?: StringFieldUpdateOperationsInput | string
+    articleNumber?: StringFieldUpdateOperationsInput | string
+    labelName?: StringFieldUpdateOperationsInput | string
+    oldValue?: NullableStringFieldUpdateOperationsInput | string | null
+    newValue?: NullableStringFieldUpdateOperationsInput | string | null
+    modifiedByName?: StringFieldUpdateOperationsInput | string
+    modifiedByEmail?: StringFieldUpdateOperationsInput | string
+    modifiedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    sapStatus?: StringFieldUpdateOperationsInput | string
+  }
+
+  export type ModifyLogCreateManyInput = {
+    id?: number
+    modificationGroupId: string
+    articleNumber: string
+    labelName: string
+    oldValue?: string | null
+    newValue?: string | null
+    modifiedByName?: string
+    modifiedByEmail?: string
+    modifiedAt?: Date | string
+    sapStatus?: string
+  }
+
+  export type ModifyLogUpdateManyMutationInput = {
+    modificationGroupId?: StringFieldUpdateOperationsInput | string
+    articleNumber?: StringFieldUpdateOperationsInput | string
+    labelName?: StringFieldUpdateOperationsInput | string
+    oldValue?: NullableStringFieldUpdateOperationsInput | string | null
+    newValue?: NullableStringFieldUpdateOperationsInput | string | null
+    modifiedByName?: StringFieldUpdateOperationsInput | string
+    modifiedByEmail?: StringFieldUpdateOperationsInput | string
+    modifiedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    sapStatus?: StringFieldUpdateOperationsInput | string
+  }
+
+  export type ModifyLogUncheckedUpdateManyInput = {
+    id?: IntFieldUpdateOperationsInput | number
+    modificationGroupId?: StringFieldUpdateOperationsInput | string
+    articleNumber?: StringFieldUpdateOperationsInput | string
+    labelName?: StringFieldUpdateOperationsInput | string
+    oldValue?: NullableStringFieldUpdateOperationsInput | string | null
+    newValue?: NullableStringFieldUpdateOperationsInput | string | null
+    modifiedByName?: StringFieldUpdateOperationsInput | string
+    modifiedByEmail?: StringFieldUpdateOperationsInput | string
+    modifiedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    sapStatus?: StringFieldUpdateOperationsInput | string
+  }
+
   export type IntFilter<$PrismaModel = never> = {
     equals?: number | IntFieldRefInput<$PrismaModel>
     in?: number[] | ListIntFieldRefInput<$PrismaModel>
@@ -57226,6 +58609,59 @@ export namespace Prisma {
     _count?: NestedIntFilter<$PrismaModel>
     _min?: NestedEnumPoolBBatchStatusFilter<$PrismaModel>
     _max?: NestedEnumPoolBBatchStatusFilter<$PrismaModel>
+  }
+
+  export type ModifyLogOrderByRelevanceInput = {
+    fields: ModifyLogOrderByRelevanceFieldEnum | ModifyLogOrderByRelevanceFieldEnum[]
+    sort: SortOrder
+    search: string
+  }
+
+  export type ModifyLogCountOrderByAggregateInput = {
+    id?: SortOrder
+    modificationGroupId?: SortOrder
+    articleNumber?: SortOrder
+    labelName?: SortOrder
+    oldValue?: SortOrder
+    newValue?: SortOrder
+    modifiedByName?: SortOrder
+    modifiedByEmail?: SortOrder
+    modifiedAt?: SortOrder
+    sapStatus?: SortOrder
+  }
+
+  export type ModifyLogAvgOrderByAggregateInput = {
+    id?: SortOrder
+  }
+
+  export type ModifyLogMaxOrderByAggregateInput = {
+    id?: SortOrder
+    modificationGroupId?: SortOrder
+    articleNumber?: SortOrder
+    labelName?: SortOrder
+    oldValue?: SortOrder
+    newValue?: SortOrder
+    modifiedByName?: SortOrder
+    modifiedByEmail?: SortOrder
+    modifiedAt?: SortOrder
+    sapStatus?: SortOrder
+  }
+
+  export type ModifyLogMinOrderByAggregateInput = {
+    id?: SortOrder
+    modificationGroupId?: SortOrder
+    articleNumber?: SortOrder
+    labelName?: SortOrder
+    oldValue?: SortOrder
+    newValue?: SortOrder
+    modifiedByName?: SortOrder
+    modifiedByEmail?: SortOrder
+    modifiedAt?: SortOrder
+    sapStatus?: SortOrder
+  }
+
+  export type ModifyLogSumOrderByAggregateInput = {
+    id?: SortOrder
   }
 
   export type SubDepartmentCreateNestedManyWithoutDepartmentInput = {

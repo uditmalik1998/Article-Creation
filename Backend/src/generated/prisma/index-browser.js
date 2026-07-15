@@ -781,6 +781,19 @@ exports.Prisma.PoolBBatchScalarFieldEnum = {
   errorMessage: 'errorMessage'
 };
 
+exports.Prisma.ModifyLogScalarFieldEnum = {
+  id: 'id',
+  modificationGroupId: 'modificationGroupId',
+  articleNumber: 'articleNumber',
+  labelName: 'labelName',
+  oldValue: 'oldValue',
+  newValue: 'newValue',
+  modifiedByName: 'modifiedByName',
+  modifiedByEmail: 'modifiedByEmail',
+  modifiedAt: 'modifiedAt',
+  sapStatus: 'sapStatus'
+};
+
 exports.Prisma.SortOrder = {
   asc: 'asc',
   desc: 'desc'
@@ -1261,6 +1274,17 @@ exports.Prisma.PoolBBatchOrderByRelevanceFieldEnum = {
   jobId: 'jobId',
   errorMessage: 'errorMessage'
 };
+
+exports.Prisma.ModifyLogOrderByRelevanceFieldEnum = {
+  modificationGroupId: 'modificationGroupId',
+  articleNumber: 'articleNumber',
+  labelName: 'labelName',
+  oldValue: 'oldValue',
+  newValue: 'newValue',
+  modifiedByName: 'modifiedByName',
+  modifiedByEmail: 'modifiedByEmail',
+  sapStatus: 'sapStatus'
+};
 exports.GarmentType = exports.$Enums.GarmentType = {
   UPPER: 'UPPER',
   LOWER: 'LOWER',
@@ -1372,7 +1396,8 @@ exports.Prisma.ModelName = {
   SrmSyncRun: 'SrmSyncRun',
   SrmSyncRunItem: 'SrmSyncRunItem',
   PoolBJob: 'PoolBJob',
-  PoolBBatch: 'PoolBBatch'
+  PoolBBatch: 'PoolBBatch',
+  ModifyLog: 'ModifyLog'
 };
 
 /**
