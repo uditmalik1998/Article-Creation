@@ -18,6 +18,7 @@ import Admin from './features/admin/pages/Admin'; // Admin Dashboard
 import SrmFailedExtractionsPage from './features/admin/pages/SrmFailedExtractionsPage'; // SRM Failed Extractions
 import KsmlUploaderPage from './features/admin/pages/KsmlUploaderPage'; // KSML class-characteristic uploader
 import PoolBUploaderPage from './features/admin/pages/PoolBUploaderPage'; // Pool B article-value uploader
+import ModificationLogsPage from './features/admin/pages/ModificationLogsPage';
 import ApproverDashboard from './features/approver/pages/ApproverDashboard'; // Approver Dashboard
 import ArticleDetailPage from './features/approver/pages/ArticleDetailPage'; // Article detail view
 import POPresentationPage from './features/po-presentation/pages/POPresentationPage'; // PO Presentation
@@ -306,6 +307,16 @@ const App: React.FC = () => {
                   <AdminRoute>
                     <MainLayout>
                       <PoolBUploaderPage />
+                    </MainLayout>
+                  </AdminRoute>
+                }
+              />
+              <Route
+                path="/admin/modify-logs"
+                element={
+                  <AdminRoute>
+                    <MainLayout>
+                      <ModificationLogsPage />
                     </MainLayout>
                   </AdminRoute>
                 }
