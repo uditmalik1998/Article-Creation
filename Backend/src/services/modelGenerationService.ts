@@ -28,7 +28,8 @@ function buildPrompt(
   specialInstructions?: string,
   colorName?: string,
   hasColorImage?: boolean,
-  attributesText?: string
+  attributesText?: string,
+  hasStyleReference?: boolean
 ): string {
   const genderLower = (gender || '').toLowerCase();
   let modelDesc: string;
@@ -39,12 +40,18 @@ function buildPrompt(
     default: modelDesc = 'a professional female fashion model';
   }
 
+  const isCloseup = viewDirection.toLowerCase() === 'closeup';
+
   let framingDesc: string;
-  switch (bodytype) {
-    case 'Full-Body': framingDesc = 'full body fashion photoshoot, head to toe'; break;
-    case 'Upper-Body': framingDesc = 'upper body fashion photoshoot, waist up, do NOT show below the waist'; break;
-    case 'Lower-Body': framingDesc = 'lower body fashion photoshoot, waist down to feet, do NOT show above the waist, crop tightly at the waist'; break;
-    default: framingDesc = 'fashion photoshoot; automatically choose the best framing for the garment shown in the SOURCE_IMAGE — full body (head to toe) for dresses, one-piece sets, or bottomwear worn full; upper body (waist up) for tops, shirts, and t-shirts; lower body (waist down) for standalone trousers/shorts/skirts';
+  if (isCloseup) {
+    framingDesc = 'extreme close-up macro fashion detail shot — NOT a full-body or upper-body shot';
+  } else {
+    switch (bodytype) {
+      case 'Full-Body': framingDesc = 'full body fashion photoshoot, head to toe'; break;
+      case 'Upper-Body': framingDesc = 'upper body fashion photoshoot, waist up, do NOT show below the waist'; break;
+      case 'Lower-Body': framingDesc = 'lower body fashion photoshoot, waist down to feet, do NOT show above the waist, crop tightly at the waist'; break;
+      default: framingDesc = 'fashion photoshoot; automatically choose the best framing for the garment shown in the SOURCE_IMAGE — full body (head to toe) for dresses, one-piece sets, or bottomwear worn full; upper body (waist up) for tops, shirts, and t-shirts; lower body (waist down) for standalone trousers/shorts/skirts';
+    }
   }
 
   const colorInstr = hasColorImage
@@ -59,16 +66,18 @@ function buildPrompt(
     left_side: 'Left side profile model pose showing the side fit of the garment.',
     side: 'Side profile model pose showing the side fit and full silhouette of the garment.',
     three_quarter: 'Three-quarter (45-degree) angle model pose showing the front and one side together.',
-    closeup: 'Close-up fashion shot highlighting fabric texture, stitching and details.',
+    closeup: 'Tightly cropped macro close-up on one representative section of the garment (e.g. collar, placket, chest, or sleeve cuff) — frame it like a product-detail shot: fabric weave, stitching, buttons, and print/stripe pattern fill most of the frame at high magnification.',
   };
 
-  const framingRule = bodytype === 'Lower-Body'
-    ? 'Show ONLY from waist down to feet. Upper body must NOT appear in the frame.'
-    : bodytype === 'Upper-Body'
-      ? 'Show ONLY from waist up. Lower body must NOT appear in the frame.'
-      : bodytype === 'Full-Body'
-        ? 'Full garment must be visible, head to toe, no cropping.'
-        : 'Frame the model so the ENTIRE garment is fully visible and well-composed; choose full/upper/lower framing to suit the garment type.';
+  const framingRule = isCloseup
+    ? 'Crop TIGHT on the fabric/collar/placket area — the model\'s full body, full garment, legs, and most of the face must NOT be in frame. This must look like a zoomed-in product-detail shot, clearly tighter and closer than the front/back/side views, not another full or upper-body shot.'
+    : bodytype === 'Lower-Body'
+      ? 'Show ONLY from waist down to feet. Upper body must NOT appear in the frame.'
+      : bodytype === 'Upper-Body'
+        ? 'Show ONLY from waist up. Lower body must NOT appear in the frame.'
+        : bodytype === 'Full-Body'
+          ? 'Full garment must be visible, head to toe, no cropping.'
+          : 'Frame the model so the ENTIRE garment is fully visible and well-composed; choose full/upper/lower framing to suit the garment type.';
 
   const attributesBlock = attributesText
     ? `\n\nGARMENT ATTRIBUTES (from catalog data — the generated garment MUST stay consistent with these):\n- ${attributesText}`
@@ -81,6 +90,9 @@ function buildPrompt(
   viewInstr += specialInstructions
     ? ` Additional instructions: ${specialInstructions}`
     : ' No additional special instructions.';
+  viewInstr += hasStyleReference
+    ? ` A VIEW_CONSISTENCY_REFERENCE image is attached — copy ONLY its color, pattern scale, and fabric texture from it. Its pose, body angle, and framing are IRRELEVANT and must be IGNORED. This output's pose/angle must follow the "${viewDirection}" instruction above and must look visibly different from the reference image's pose — do not reproduce the same body orientation, camera angle, or crop as the reference.`
+    : '';
 
   return `You are a world-class fashion photographer and AI fashion director.
 
@@ -145,7 +157,8 @@ export async function runSingleGeneration(
       ? `MANDATORY COLOR: Recolor ONLY the base garment color to ${colorName} — apply it as the new uniform base tone. This is a COLOR SWAP ONLY: do NOT flatten, smooth, or simplify the fabric — the weave/knit structure, stripe or print pattern, yarn grain, and surface texture from the source image MUST remain fully intact and pixel-faithful, just tinted to ${colorName} instead of the original color. The output must still look like a textured woven/knit fabric, never a flat solid-color block.`
       : `COLOR PRESERVE: Keep the garment color exactly as shown in the source image. Do not change, shift, or neutralize the color.`;
 
-  const promptText = buildPrompt(gender, bodytype, imageCount, viewDirection, broachPlacement, specialInstructions, colorName, hasColorImage, attributesText);
+  const hasStyleReference = !!(styleReferenceBuffer && styleReferenceMime);
+  const promptText = buildPrompt(gender, bodytype, imageCount, viewDirection, broachPlacement, specialInstructions, colorName, hasColorImage, attributesText, hasStyleReference);
 
   const parts: any[] = [
     { text: colorLockInstruction },
@@ -172,11 +185,12 @@ export async function runSingleGeneration(
 
   // A previously generated view of this SAME garment, provided so all views of one
   // garment agree with each other on color and pattern scale instead of each being
-  // an independent re-interpretation of the source photo.
-  const hasStyleReference = !!(styleReferenceBuffer && styleReferenceMime);
+  // an independent re-interpretation of the source photo. This must NEVER be read as
+  // a pose reference — only as a color/pattern/texture swatch.
   if (hasStyleReference) {
     parts.push({
-      text: 'VIEW_CONSISTENCY_REFERENCE follows — a fashion photo already generated for a DIFFERENT view of this EXACT same garment, from the same source image. It is the authoritative rendering: match its exact color, and its exact stripe/print pattern width, spacing, and density, and its fabric texture precisely. Do NOT redraw the pattern at a different scale or shift the color. Only the pose/camera angle should differ, per the View instruction below.',
+      text: `VIEW_CONSISTENCY_REFERENCE follows — a fashion photo already generated for a DIFFERENT view of this EXACT same garment. Use it for exactly ONE purpose: match its color, its stripe/print pattern width/spacing/density, and its fabric texture. Do NOT redraw the pattern at a different scale or shift the color.
+IGNORE EVERYTHING ELSE about this reference image: its pose, body angle, camera angle, crop, and framing are NOT to be copied. This output is the "${viewDirection}" view — its pose and framing MUST follow the View instruction below and MUST look visibly different from this reference photo's pose. Reproducing the same body orientation/angle as the reference is a FAILURE.`,
     });
     parts.push({ inlineData: { mimeType: styleReferenceMime as string, data: (styleReferenceBuffer as Buffer).toString('base64') } });
   }
