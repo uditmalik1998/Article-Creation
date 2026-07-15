@@ -65,6 +65,10 @@ export interface BulkTask {
   bodytype?: string;
   colorName?: string;
   attributesText?: string;
+  // true when this article's source photo is a sibling colour variant reused as
+  // a stand-in (the exact article+colour code had no extracted photo of its own)
+  // — colorName must then be actively enforced as a recolour instruction.
+  isColorFallback?: boolean;
 }
 
 // Fetch a source image over HTTP (the article flow stores an imageUrl, not a local
@@ -306,6 +310,7 @@ export function createArticleJob(args: {
         base.bodytype = article.bodytype;       // 'auto'
         base.colorName = article.colorName;
         base.attributesText = article.attributesText;
+        base.isColorFallback = article.isColorFallback;
       }
 
       tasks.push(base);
@@ -347,6 +352,14 @@ export function listRecentJobsForUser(userId: number | string | undefined, limit
 
 // Cancellation flag — the running worker checks this between tasks.
 const cancelFlags = new Set<string>();
+
+// Cross-view consistency cache: the first successfully generated view of a garment
+// is stashed here so the remaining views of the SAME garment (same job + fileName)
+// can be generated against it as a style reference instead of each independently
+// re-deriving color/texture from the flat source photo. This is what keeps front,
+// back, side, three_quarter, and closeup visually consistent with each other.
+// In-memory only (never persisted to job.json) — cleared once the job finishes.
+const groupReferenceCache = new Map<string, { buffer: Buffer; mime: string }>();
 export function cancelJob(id: string): boolean {
   const job = jobs.get(id);
   if (!job) return false;
@@ -418,13 +431,25 @@ async function runTaskWithRetry(job: BulkJob, task: BulkTask): Promise<void> {
         // use the shared job-level params.
         const gender = task.gender ?? job.params.gender;
         const bodytype = task.bodytype ?? job.params.bodytype;
-        // For the article flow the source image already IS the article's colour, so we
-        // preserve it (passing the abbreviated DB colour code like "NV_BL" as a recolor
-        // instruction risks misinterpretation). Other flows keep their explicit colour.
-        const colorName = task.kind === 'article' ? undefined : job.params.color_name;
+        // For an exact article match the source image already IS the article's colour,
+        // so we preserve it (passing the abbreviated DB colour code like "NV_BL" as a
+        // recolor instruction risks misinterpretation). But when the source photo was
+        // reused from a sibling colour variant (isColorFallback), the requested colour
+        // must be actively enforced so the AI actually recolours the garment. Other
+        // flows keep their explicit colour.
+        const colorName =
+          task.kind === 'article'
+            ? (task.isColorFallback ? task.colorName : undefined)
+            : job.params.color_name;
+
+        // If another view of this same garment has already been generated, use it as
+        // a style reference so this view's color/pattern/texture match it exactly
+        // instead of being re-derived independently from the source photo.
+        const refKey = `${job.id}:${task.fileName}`;
+        const styleReference = groupReferenceCache.get(refKey);
 
         await acquireGeminiSlot();
-        console.log(`[ModelGenBulk] Job ${job.id} task ${task.fileName}/${task.view} attempt ${task.attempts}`);
+        console.log(`[ModelGenBulk] Job ${job.id} task ${task.fileName}/${task.view} attempt ${task.attempts}${styleReference ? ' (with style reference)' : ''}`);
         generatedBuf = await runSingleGeneration(
           imgBuf,
           imgMime,
@@ -442,7 +467,14 @@ async function runTaskWithRetry(job: BulkJob, task: BulkTask): Promise<void> {
           colorImgBuf,
           colorImgMime,
           task.attributesText,
+          styleReference?.buffer,
+          styleReference?.mime,
         );
+
+        // The first view to finish for this garment becomes the reference the rest match.
+        if (!groupReferenceCache.has(refKey)) {
+          groupReferenceCache.set(refKey, { buffer: generatedBuf, mime: 'image/png' });
+        }
       }
 
       if (task.kind === 'r2key' || task.kind === 'article') {
@@ -563,28 +595,58 @@ export function startJob(jobId: string): void {
     persistJob(job);
     console.log(`[ModelGenBulk] Starting job ${job.id} — ${job.total} task(s), gap=${MIN_GAP_MS}ms`);
 
-    let nextIndex = 0;
+    // Group tasks by garment (fileName) — createJob/createArticleJob always push a
+    // garment's views contiguously, so a simple run-length grouping recovers the
+    // per-garment view lists without needing a separate key.
+    const groups: BulkTask[][] = [];
+    {
+      let current: BulkTask[] = [];
+      let currentKey: string | undefined;
+      for (const t of job.tasks) {
+        if (t.fileName !== currentKey) {
+          if (current.length) groups.push(current);
+          current = [];
+          currentKey = t.fileName;
+        }
+        current.push(t);
+      }
+      if (current.length) groups.push(current);
+    }
+
+    const runOneTask = async (task: BulkTask): Promise<void> => {
+      task.status = 'RUNNING';
+      persistJob(job);
+      await runTaskWithRetry(job, task);
+      const finalStatus = task.status as TaskStatus;
+      if (finalStatus === 'DONE') job.done++;
+      else if (finalStatus === 'FAILED') job.failed++;
+      persistJob(job);
+    };
+
+    let nextGroupIndex = 0;
     const runWorker = async (): Promise<void> => {
       while (true) {
         if (cancelFlags.has(job.id)) return;
-        const i = nextIndex++;
-        if (i >= job.tasks.length) return;
-        const task = job.tasks[i];
-        if (task.status !== 'PENDING') continue;
+        const gi = nextGroupIndex++;
+        if (gi >= groups.length) return;
+        const pending = groups[gi].filter((t) => t.status === 'PENDING');
+        if (pending.length === 0) continue;
 
-        task.status = 'RUNNING';
-        persistJob(job);
-
-        await runTaskWithRetry(job, task);
-
-        const finalStatus = task.status as TaskStatus;
-        if (finalStatus === 'DONE') job.done++;
-        else if (finalStatus === 'FAILED') job.failed++;
-        persistJob(job);
+        // Run the first view alone so it can populate the style-reference cache,
+        // then the remaining views of this garment run concurrently against it.
+        const [anchor, ...rest] = pending;
+        await runOneTask(anchor);
+        if (cancelFlags.has(job.id)) continue;
+        await Promise.all(rest.map((t) => runOneTask(t)));
       }
     };
 
     await Promise.all(Array.from({ length: CONCURRENCY }, () => runWorker()));
+
+    // Drop this job's cached reference images now that every garment is finished.
+    for (const key of Array.from(groupReferenceCache.keys())) {
+      if (key.startsWith(`${job.id}:`)) groupReferenceCache.delete(key);
+    }
 
     // Any tasks left PENDING because the job was cancelled → mark FAILED.
     if (cancelFlags.has(job.id)) {

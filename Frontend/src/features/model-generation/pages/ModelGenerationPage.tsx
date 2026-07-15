@@ -66,6 +66,25 @@ const resolveAssetUrl = (u?: string): string => {
 // synchronous /generate endpoint for snappy UX.
 const BULK_THRESHOLD = 5;
 
+// fetch() has no built-in timeout — a dropped connection (e.g. the backend dev
+// server restarting mid-request) otherwise hangs the calling await forever with
+// no error and no way to recover short of a full page reload. This aborts the
+// request after timeoutMs and turns that into a normal catchable Error.
+async function fetchWithTimeout(url: string, options: RequestInit = {}, timeoutMs = 30000): Promise<Response> {
+  const controller = new AbortController();
+  const timer = setTimeout(() => controller.abort(), timeoutMs);
+  try {
+    return await fetch(url, { ...options, signal: controller.signal });
+  } catch (err: any) {
+    if (err?.name === 'AbortError') {
+      throw new Error(`Request timed out after ${Math.round(timeoutMs / 1000)}s — the server may have restarted. Please try again.`);
+    }
+    throw err;
+  } finally {
+    clearTimeout(timer);
+  }
+}
+
 // localStorage key holding the most recent bulk jobId so we can resume polling
 // after a tab switch / page refresh. Cleared when the job finishes or is dropped.
 const ACTIVE_JOB_KEY = 'modelGen_activeJobId';
@@ -463,9 +482,9 @@ export default function ModelGenerationPage() {
     stopPolling();
     const tick = async () => {
       try {
-        const res = await fetch(`${API_BASE}/model-generation/bulk/job/${jobId}`, {
+        const res = await fetchWithTimeout(`${API_BASE}/model-generation/bulk/job/${jobId}`, {
           headers: { Authorization: `Bearer ${token}` },
-        });
+        }, 15000);
         const data = await res.json();
         if (!res.ok || !data.success) throw new Error(data.error || 'Failed to poll job');
         const j: JobSummary = data.job;
@@ -493,9 +512,9 @@ export default function ModelGenerationPage() {
   // Resume a job after a tab switch / page reload (called from useEffect on mount).
   const resumeJob = async (jobId: string, token: string | null) => {
     try {
-      const res = await fetch(`${API_BASE}/model-generation/bulk/job/${jobId}`, {
+      const res = await fetchWithTimeout(`${API_BASE}/model-generation/bulk/job/${jobId}`, {
         headers: { Authorization: `Bearer ${token}` },
-      });
+      }, 15000);
       const data = await res.json();
       if (!res.ok || !data.success) {
         if (localStorage.getItem(ACTIVE_JOB_KEY) === jobId) localStorage.removeItem(ACTIVE_JOB_KEY);
@@ -538,11 +557,11 @@ export default function ModelGenerationPage() {
       if (!isBulkMode) {
         // ── Synchronous path: existing /generate endpoint ───────────────────
         startFakeProgress();
-        const res = await fetch(`${API_BASE}/model-generation/generate`, {
+        const res = await fetchWithTimeout(`${API_BASE}/model-generation/generate`, {
           method: 'POST',
           headers: { Authorization: `Bearer ${token}` },
           body: buildFormData(values, false),
-        });
+        }, 180000);
         const data = await res.json();
         if (!res.ok || !data.success) throw new Error(data.error || 'Generation failed');
         setResults(data.results);
@@ -553,11 +572,13 @@ export default function ModelGenerationPage() {
       }
 
       // ── Bulk path: create job, then poll ────────────────────────────────
-      const res = await fetch(`${API_BASE}/model-generation/bulk/upload`, {
+      // Long timeout — this upload can carry many large images and the backend
+      // itself allows up to 20 minutes for it (see allocateJob in the bulk route).
+      const res = await fetchWithTimeout(`${API_BASE}/model-generation/bulk/upload`, {
         method: 'POST',
         headers: { Authorization: `Bearer ${token}` },
         body: buildFormData(values, true),
-      });
+      }, 20 * 60 * 1000);
       const data = await res.json();
       if (!res.ok || !data.success) throw new Error(data.error || 'Upload failed');
 
@@ -588,11 +609,14 @@ export default function ModelGenerationPage() {
       if (payload.file) form.append('list', payload.file);
       else form.append('codesText', payload.codesText);
 
-      const res = await fetch(`${API_BASE}/model-generation/bulk/from-articles`, {
+      // Job creation itself is fast (DB lookups only, no Gemini calls) — a generous
+      // but bounded timeout so a dropped connection surfaces as an error instead of
+      // hanging the "Starting…" button forever.
+      const res = await fetchWithTimeout(`${API_BASE}/model-generation/bulk/from-articles`, {
         method: 'POST',
         headers: { Authorization: `Bearer ${token}` },
         body: form,
-      });
+      }, 60000);
       const data = await res.json();
       if (!res.ok || !data.success) throw new Error(data.error || 'Failed to start job');
       if (!data.jobId) throw new Error('Server did not return a job id');
