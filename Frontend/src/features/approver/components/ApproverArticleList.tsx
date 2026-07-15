@@ -841,7 +841,7 @@ const ArticleCard = React.memo(
     // neither reach SAP nor change the local DB). The user cannot open these fields.
     const MODIFY_LOCKED_FIELDS = new Set<string>([
       'vendorCode', 'vendorName', 'mrp', 'rate', 'colour',
-      'designNumber', 'fabDiv', 'division', 'subDivision', 'majorCategory', 'segment',
+      'designNumber', 'division', 'subDivision', 'majorCategory', 'segment',
     ]);
     const isFieldLocked = (field: string) =>
       isLocked || (isModifyMode && MODIFY_LOCKED_FIELDS.has(field));
@@ -1634,9 +1634,7 @@ const ArticleCard = React.memo(
               {item.pptNumber && (
                 <Badge className="bg-amber-300 text-amber-950">PPT: {item.pptNumber}</Badge>
               )}
-              {/* Modify button permanently disabled — Created Articles are read-only.
-                  (Was: {isModifyMode && <Button onClick={handleModify}>Modify</Button>}) */}
-              {false && isModifyMode && (
+              {isModifyMode && (
                 <Button
                   size="sm"
                   onClick={handleModify}

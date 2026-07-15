@@ -1836,6 +1836,7 @@ export class ApproverController {
         try {
             const { id } = req.params;
             const changes = req.body?.changes;
+            const skipSap: boolean = req.body?.skipSap === true;
 
             if (!changes || typeof changes !== 'object' || Array.isArray(changes) || Object.keys(changes).length === 0) {
                 return res.status(400).json({ error: 'No changes provided' });
@@ -1850,7 +1851,6 @@ export class ApproverController {
                 'rate',          // cost / PURCH_PRICE
                 'colour',        // colour
                 'designNumber',  // design / DSG_NO
-                'fabDiv',        // M_FAB_DIV
                 'division',      // division (MENS/LADIES/…)
                 'subDivision',   // sub-division / SUB_DIV
                 'majorCategory', // major category
@@ -1934,29 +1934,24 @@ export class ApproverController {
                 if (segment) data.segment = segment;
             }
 
-            // ── Build the FULL Changes payload from the merged record. ──
-            // The user's edits (`data`) are merged over the current DB record, then
-            // buildModifyChangesPayload emits EVERY field applicable to this article
-            // (all identity/price/business fields + the garment characteristics valid
-            // for its major category), including empties. So changing one field still
-            // sends the complete attribute set to SAP.
-            const mergedItem = { ...(existingItem as any), ...data };
-            const sapChanges = await buildModifyChangesPayload(mergedItem);
+            let sapResult: { applied: number; message: string } = { applied: 0, message: 'Skipped (RFC proxy already applied)' };
 
-            // Modify flow only: these keys must NOT be sent to SAP on modification.
-            // Identity/price fields (VENDOR, MRP, DSG_NO, ...) are set at creation
-            // time and must not be altered via patch-bulk. ARTICLE_DES1 and M_FAB_DIV
-            // are likewise excluded from the modify payload.
-            for (const k of ['HSN_CODE', 'SUB_DIV', 'MC_CD', 'SEASON', 'PRICE_BAND_CATEGORY', 'PURCH_PRICE', 'NET_WEIGHT', 'VENDOR', 'MRP', 'DSG_NO', 'ARTICLE_DES1', 'M_FAB_DIV']) {
-                delete (sapChanges as any)[k];
-            }
+            if (!skipSap) {
+                // ── Build the FULL Changes payload from the merged record. ──
+                const mergedItem = { ...(existingItem as any), ...data };
+                const sapChanges = await buildModifyChangesPayload(mergedItem);
 
-            // ── Call SAP FIRST. Only persist locally on success. ──
-            const result = await patchArticleAttributes(matnr, sapChanges);
-            if (!result.ok) {
-                return res.status(502).json({ error: result.message || 'SAP modification failed', sap: result.raw });
+                for (const k of ['HSN_CODE', 'SUB_DIV', 'MC_CD', 'SEASON', 'PRICE_BAND_CATEGORY', 'PURCH_PRICE', 'NET_WEIGHT', 'VENDOR', 'MRP', 'DSG_NO', 'ARTICLE_DES1']) {
+                    delete (sapChanges as any)[k];
+                }
+
+                // ── Call SAP FIRST. Only persist locally on success. ──
+                const result = await patchArticleAttributes(matnr, sapChanges);
+                if (!result.ok) {
+                    return res.status(502).json({ error: result.message || 'SAP modification failed', sap: result.raw });
+                }
+                sapResult = { applied: result.applied, message: result.message };
             }
-            const sapResult: { applied: number; message: string } = { applied: result.applied, message: result.message };
 
             // Rebuild article description from the merged attribute values.
             const descriptionSource: any = {};
