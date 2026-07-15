@@ -1133,21 +1133,21 @@ model PoolBBatch {
 /// ModifyLog: One row per changed label per successful article modification
 model ModifyLog {
   id                  Int      @id @default(autoincrement())
-  modificationGroupId String   @map("modification_group_id")
-  articleNumber       String   @map("article_number")
-  labelName           String   @map("label_name")
+  modificationGroupId String   @db.Uuid @map("modification_group_id")
+  articleNumber       String   @db.VarChar(30) @map("article_number")
+  labelName           String   @db.VarChar(100) @map("label_name")
   oldValue            String?  @map("old_value")
   newValue            String?  @map("new_value")
-  modifiedByName      String   @default("") @map("modified_by_name")
-  modifiedByEmail     String   @default("") @map("modified_by_email")
+  modifiedByName      String   @default("") @db.VarChar(200) @map("modified_by_name") // denormalised: user name at time of change
+  modifiedByEmail     String   @default("") @db.VarChar(255) @map("modified_by_email") // denormalised: user email at time of change
   modifiedAt          DateTime @default(now()) @map("modified_at")
-  sapStatus           String   @default("SUCCESS") @map("sap_status")
+  sapStatus           String   @default("SUCCESS") @db.VarChar(20) @map("sap_status")
 
-  @@index([articleNumber])
+  @@index([articleNumber, modifiedAt(sort: Desc)])
   @@index([modificationGroupId])
   @@index([labelName])
   @@index([modifiedByEmail])
-  @@index([modifiedAt])
+  @@index([modifiedAt(sort: Desc)])
   @@map("modify_logs")
   @@schema("public")
 }
