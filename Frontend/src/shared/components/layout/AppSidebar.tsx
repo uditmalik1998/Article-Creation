@@ -16,6 +16,7 @@ import {
   User,
   AlertTriangle,
   Upload,
+  ClipboardList,
   Bell,
   ChevronRight,
   ChevronDown,
@@ -178,6 +179,7 @@ export const AppSidebar: React.FC<AppSidebarProps> = ({ collapsed, onCollapsedCh
         { key: '/admin/srm-failed', Icon: AlertTriangle, label: 'Failed Extractions' },
         { key: '/admin/ksml-uploader', Icon: Upload, label: 'KSML Uploader' },
         { key: '/admin/poolb-uploader', Icon: Upload, label: 'Pool B Uploader' },
+        { key: '/admin/modify-logs', Icon: ClipboardList, label: 'Modification Logs' },
       ],
     });
   }

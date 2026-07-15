@@ -399,6 +399,32 @@ model ExtractionResultFlat {
   @@schema("public")
 }
 
+/// Model Generation Results: one row per article per bulk job — records whether AI
+/// model images were created for the article and, if so, the per-view output URLs.
+model ModelGenerationResult {
+  id            String   @id @default(uuid())
+  jobId         String   @map("job_id") @db.VarChar(100)
+  articleNumber String   @map("article_number") @db.VarChar(100)
+  status        String   @db.VarChar(20) // DONE | PARTIAL | FAILED
+  viewsTotal    Int      @map("views_total")
+  viewsDone     Int      @map("views_done")
+  viewsFailed   Int      @map("views_failed")
+  imageUrls     Json?    @map("image_urls") // { front: url, back: url, ... }
+  error         String? // failure reason (first failed view)
+  gender        String?  @db.VarChar(30)
+  colour        String?  @db.VarChar(100)
+  userId        Int?     @map("user_id")
+  createdAt     DateTime @default(now()) @map("created_at")
+  updatedAt     DateTime @updatedAt @map("updated_at")
+
+  @@unique([jobId, articleNumber])
+  @@index([articleNumber])
+  @@index([jobId])
+  @@index([status])
+  @@map("model_generation_results")
+  @@schema("public")
+}
+
 /// MVGR Lookup: Reference table for Macro MVGR, Main MVGR, and M_FAB2 codes
 model MvgrLookup {
   id        Int      @id @default(autoincrement())
@@ -1040,5 +1066,88 @@ model SrmSyncRunItem {
   @@index([flatId])
   @@index([pptNumber])
   @@map("srm_sync_run_items")
+  @@schema("public")
+}
+
+// ── Pool B Bulk Jobs ──────────────────────────────────────────────────────────
+
+enum PoolBJobStatus {
+  QUEUED
+  PROCESSING
+  COMPLETED
+  PARTIAL
+  FAILED
+
+  @@schema("public")
+}
+
+enum PoolBBatchStatus {
+  QUEUED
+  PROCESSING
+  COMPLETED
+  FAILED
+
+  @@schema("public")
+}
+
+model PoolBJob {
+  id           String         @id @default(uuid()) @db.Uuid
+  status       PoolBJobStatus @default(QUEUED)
+  env          String
+  test         Boolean        @default(false)
+  totalRows    Int            @map("total_rows")
+  totalBatches Int            @map("total_batches")
+  batchSize    Int            @map("batch_size")
+  successRows  Int            @default(0) @map("success_rows")
+  failedRows   Int            @default(0) @map("failed_rows")
+  createdAt    DateTime       @default(now()) @map("created_at")
+  startedAt    DateTime?      @map("started_at")
+  completedAt  DateTime?      @map("completed_at")
+  batches      PoolBBatch[]
+
+  @@map("pool_b_jobs")
+  @@schema("public")
+}
+
+model PoolBBatch {
+  id           String           @id @default(uuid()) @db.Uuid
+  jobId        String           @map("job_id") @db.Uuid
+  batchIndex   Int              @map("batch_index")
+  status       PoolBBatchStatus @default(QUEUED)
+  startRow     Int              @map("start_row")
+  endRow       Int              @map("end_row")
+  rowCount     Int              @map("row_count")
+  successCount Int              @default(0) @map("success_count")
+  failedCount  Int              @default(0) @map("failed_count")
+  startedAt    DateTime?        @map("started_at")
+  completedAt  DateTime?        @map("completed_at")
+  results      Json?
+  errorMessage String?          @map("error_message")
+  job          PoolBJob         @relation(fields: [jobId], references: [id], onDelete: Cascade)
+
+  @@index([jobId])
+  @@map("pool_b_batches")
+  @@schema("public")
+}
+
+/// ModifyLog: One row per changed label per successful article modification
+model ModifyLog {
+  id                  Int      @id @default(autoincrement())
+  modificationGroupId String   @map("modification_group_id") @db.Uuid
+  articleNumber       String   @map("article_number") @db.VarChar(30)
+  labelName           String   @map("label_name") @db.VarChar(100)
+  oldValue            String?  @map("old_value")
+  newValue            String?  @map("new_value")
+  modifiedByName      String   @default("") @map("modified_by_name") @db.VarChar(200) // denormalised: user name at time of change
+  modifiedByEmail     String   @default("") @map("modified_by_email") @db.VarChar(255) // denormalised: user email at time of change
+  modifiedAt          DateTime @default(now()) @map("modified_at")
+  sapStatus           String   @default("SUCCESS") @map("sap_status") @db.VarChar(20)
+
+  @@index([articleNumber, modifiedAt(sort: Desc)])
+  @@index([modificationGroupId])
+  @@index([labelName])
+  @@index([modifiedByEmail])
+  @@index([modifiedAt(sort: Desc)])
+  @@map("modify_logs")
   @@schema("public")
 }

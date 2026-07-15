@@ -204,4 +204,11 @@ router.post('/size-master/delete', h(adminController.deleteSizeMasterSize));
 router.get('/hierarchy/excel-status', h(adminController.getHierarchyExcelStatus));
 router.post('/hierarchy/upload-excel', excelUpload.single('file'), mut, h(adminController.uploadHierarchyExcel));
 
+// ═══════════════════════════════════════════════════════
+// MODIFY LOGS (ADMIN)
+// ═══════════════════════════════════════════════════════
+// ORDER MATTERS: group/:groupId must come before plain :id would interfere
+router.get('/modify-logs/group/:groupId', h(adminController.getModifyLogsByGroup));
+router.get('/modify-logs',               h(adminController.getModifyLogs));
+
 export default router;
