@@ -8,7 +8,8 @@ import { getSegmentByCategoryAndMrp } from '../utils/segmentRangeMapper';
 import { syncApprovedItemsToSap } from '../services/sapSyncService';
 import { syncArticlesToSapViaRfc, buildModifyChangesPayload, previewRfcPayloads } from '../services/zmmArtCreationService';
 import { patchArticleAttributes } from '../services/sapModifyService';
-import { FLAT_TO_RFC } from '../data/flatToRfcMap';
+import { FLAT_TO_RFC, FLAT_TO_SAP_KEY } from '../data/flatToRfcMap';
+import { randomUUID } from 'crypto';
 import { syncVariantsToSapViaRfc } from '../services/zmmVarArtCreationService';
 import { storageService, type WatermarkLabel } from '../services/storageService';
 import { ARTICLE_DESCRIPTION_SOURCE_FIELDS, buildArticleDescription } from '../utils/articleDescriptionBuilder';
@@ -1962,6 +1963,42 @@ export class ApproverController {
             data.articleDescription = buildArticleDescription(descriptionSource, 40, {
                 excludeFields: await getExcludedDescriptionFields(majCatForDescCheck) as any,
             });
+
+            // ── Audit log: compute per-field diff and store in modify_logs ──
+            const modGroupId = randomUUID();
+            const auditEntries: {
+                modificationGroupId: string;
+                articleNumber: string;
+                labelName: string;
+                oldValue: string | null;
+                newValue: string | null;
+                modifiedByName: string;
+                modifiedByEmail: string;
+                sapStatus: string;
+            }[] = [];
+
+            for (const [field, newVal] of Object.entries(data)) {
+                // articleDescription is auto-rebuilt from other fields — not a user label change
+                if (field === 'articleDescription') continue;
+                const oldVal = (existingItem as any)[field];
+                const oldStr = oldVal == null ? null : String(oldVal);
+                const newStr = newVal == null ? null : String(newVal);
+                if (oldStr === newStr) continue;
+                auditEntries.push({
+                    modificationGroupId: modGroupId,
+                    articleNumber: matnr,
+                    labelName: FLAT_TO_SAP_KEY[field] ?? field,
+                    oldValue: oldStr,
+                    newValue: newStr,
+                    modifiedByName: req.user?.name ?? 'Unknown',
+                    modifiedByEmail: req.user?.email ?? 'unknown@unknown.com',
+                    sapStatus: 'SUCCESS',
+                });
+            }
+
+            if (auditEntries.length > 0) {
+                await prisma.modifyLog.createMany({ data: auditEntries });
+            }
 
             const updated = await prisma.extractionResultFlat.update({ where: { id }, data });
 
