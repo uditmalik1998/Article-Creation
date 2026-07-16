@@ -781,6 +781,15 @@ exports.Prisma.PoolBBatchScalarFieldEnum = {
   errorMessage: 'errorMessage'
 };
 
+exports.Prisma.NationalGridMasterScalarFieldEnum = {
+  id: 'id',
+  attributeName: 'attributeName',
+  code: 'code',
+  fullForm: 'fullForm',
+  isActive: 'isActive',
+  createdAt: 'createdAt'
+};
+
 exports.Prisma.ModifyLogScalarFieldEnum = {
   id: 'id',
   modificationGroupId: 'modificationGroupId',
@@ -1275,6 +1284,12 @@ exports.Prisma.PoolBBatchOrderByRelevanceFieldEnum = {
   errorMessage: 'errorMessage'
 };
 
+exports.Prisma.NationalGridMasterOrderByRelevanceFieldEnum = {
+  attributeName: 'attributeName',
+  code: 'code',
+  fullForm: 'fullForm'
+};
+
 exports.Prisma.ModifyLogOrderByRelevanceFieldEnum = {
   modificationGroupId: 'modificationGroupId',
   articleNumber: 'articleNumber',
@@ -1397,6 +1412,7 @@ exports.Prisma.ModelName = {
   SrmSyncRunItem: 'SrmSyncRunItem',
   PoolBJob: 'PoolBJob',
   PoolBBatch: 'PoolBBatch',
+  NationalGridMaster: 'NationalGridMaster',
   ModifyLog: 'ModifyLog'
 };
 

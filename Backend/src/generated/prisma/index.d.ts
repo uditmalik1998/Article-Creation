@@ -173,6 +173,11 @@ export type PoolBJob = $Result.DefaultSelection<Prisma.$PoolBJobPayload>
  */
 export type PoolBBatch = $Result.DefaultSelection<Prisma.$PoolBBatchPayload>
 /**
+ * Model NationalGridMaster
+ * NationalGridMaster: Valid attribute code/value pairs imported from the National Grid Excel
+ */
+export type NationalGridMaster = $Result.DefaultSelection<Prisma.$NationalGridMasterPayload>
+/**
  * Model ModifyLog
  * ModifyLog: One row per changed label per successful article modification
  */
@@ -769,6 +774,16 @@ export class PrismaClient<
   get poolBBatch(): Prisma.PoolBBatchDelegate<ExtArgs, ClientOptions>;
 
   /**
+   * `prisma.nationalGridMaster`: Exposes CRUD operations for the **NationalGridMaster** model.
+    * Example usage:
+    * ```ts
+    * // Fetch zero or more NationalGridMasters
+    * const nationalGridMasters = await prisma.nationalGridMaster.findMany()
+    * ```
+    */
+  get nationalGridMaster(): Prisma.NationalGridMasterDelegate<ExtArgs, ClientOptions>;
+
+  /**
    * `prisma.modifyLog`: Exposes CRUD operations for the **ModifyLog** model.
     * Example usage:
     * ```ts
@@ -1248,6 +1263,7 @@ export namespace Prisma {
     SrmSyncRunItem: 'SrmSyncRunItem',
     PoolBJob: 'PoolBJob',
     PoolBBatch: 'PoolBBatch',
+    NationalGridMaster: 'NationalGridMaster',
     ModifyLog: 'ModifyLog'
   };
 
@@ -1267,7 +1283,7 @@ export namespace Prisma {
       omit: GlobalOmitOptions
     }
     meta: {
-      modelProps: "department" | "subDepartment" | "category" | "masterAttribute" | "attributeAllowedValue" | "categoryAttribute" | "extractionJob" | "extractionResult" | "extractionResultFlat" | "modelGenerationResult" | "mvgrLookup" | "masterVendorDetail" | "user" | "auditLog" | "apiKey" | "changeHistory" | "costSummary" | "article360" | "articleFab" | "articleBody" | "articleVaAcc" | "articleVaPrcs" | "articleBom" | "sapFieldConfig" | "sapAttributeValue" | "article360Flat" | "rawArticle" | "srmSyncRun" | "srmSyncRunItem" | "poolBJob" | "poolBBatch" | "modifyLog"
+      modelProps: "department" | "subDepartment" | "category" | "masterAttribute" | "attributeAllowedValue" | "categoryAttribute" | "extractionJob" | "extractionResult" | "extractionResultFlat" | "modelGenerationResult" | "mvgrLookup" | "masterVendorDetail" | "user" | "auditLog" | "apiKey" | "changeHistory" | "costSummary" | "article360" | "articleFab" | "articleBody" | "articleVaAcc" | "articleVaPrcs" | "articleBom" | "sapFieldConfig" | "sapAttributeValue" | "article360Flat" | "rawArticle" | "srmSyncRun" | "srmSyncRunItem" | "poolBJob" | "poolBBatch" | "nationalGridMaster" | "modifyLog"
       txIsolationLevel: Prisma.TransactionIsolationLevel
     }
     model: {
@@ -3565,6 +3581,80 @@ export namespace Prisma {
           }
         }
       }
+      NationalGridMaster: {
+        payload: Prisma.$NationalGridMasterPayload<ExtArgs>
+        fields: Prisma.NationalGridMasterFieldRefs
+        operations: {
+          findUnique: {
+            args: Prisma.NationalGridMasterFindUniqueArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$NationalGridMasterPayload> | null
+          }
+          findUniqueOrThrow: {
+            args: Prisma.NationalGridMasterFindUniqueOrThrowArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$NationalGridMasterPayload>
+          }
+          findFirst: {
+            args: Prisma.NationalGridMasterFindFirstArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$NationalGridMasterPayload> | null
+          }
+          findFirstOrThrow: {
+            args: Prisma.NationalGridMasterFindFirstOrThrowArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$NationalGridMasterPayload>
+          }
+          findMany: {
+            args: Prisma.NationalGridMasterFindManyArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$NationalGridMasterPayload>[]
+          }
+          create: {
+            args: Prisma.NationalGridMasterCreateArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$NationalGridMasterPayload>
+          }
+          createMany: {
+            args: Prisma.NationalGridMasterCreateManyArgs<ExtArgs>
+            result: BatchPayload
+          }
+          createManyAndReturn: {
+            args: Prisma.NationalGridMasterCreateManyAndReturnArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$NationalGridMasterPayload>[]
+          }
+          delete: {
+            args: Prisma.NationalGridMasterDeleteArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$NationalGridMasterPayload>
+          }
+          update: {
+            args: Prisma.NationalGridMasterUpdateArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$NationalGridMasterPayload>
+          }
+          deleteMany: {
+            args: Prisma.NationalGridMasterDeleteManyArgs<ExtArgs>
+            result: BatchPayload
+          }
+          updateMany: {
+            args: Prisma.NationalGridMasterUpdateManyArgs<ExtArgs>
+            result: BatchPayload
+          }
+          updateManyAndReturn: {
+            args: Prisma.NationalGridMasterUpdateManyAndReturnArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$NationalGridMasterPayload>[]
+          }
+          upsert: {
+            args: Prisma.NationalGridMasterUpsertArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$NationalGridMasterPayload>
+          }
+          aggregate: {
+            args: Prisma.NationalGridMasterAggregateArgs<ExtArgs>
+            result: $Utils.Optional<AggregateNationalGridMaster>
+          }
+          groupBy: {
+            args: Prisma.NationalGridMasterGroupByArgs<ExtArgs>
+            result: $Utils.Optional<NationalGridMasterGroupByOutputType>[]
+          }
+          count: {
+            args: Prisma.NationalGridMasterCountArgs<ExtArgs>
+            result: $Utils.Optional<NationalGridMasterCountAggregateOutputType> | number
+          }
+        }
+      }
       ModifyLog: {
         payload: Prisma.$ModifyLogPayload<ExtArgs>
         fields: Prisma.ModifyLogFieldRefs
@@ -3762,6 +3852,7 @@ export namespace Prisma {
     srmSyncRunItem?: SrmSyncRunItemOmit
     poolBJob?: PoolBJobOmit
     poolBBatch?: PoolBBatchOmit
+    nationalGridMaster?: NationalGridMasterOmit
     modifyLog?: ModifyLogOmit
   }
 
@@ -43826,6 +43917,1048 @@ export namespace Prisma {
 
 
   /**
+   * Model NationalGridMaster
+   */
+
+  export type AggregateNationalGridMaster = {
+    _count: NationalGridMasterCountAggregateOutputType | null
+    _avg: NationalGridMasterAvgAggregateOutputType | null
+    _sum: NationalGridMasterSumAggregateOutputType | null
+    _min: NationalGridMasterMinAggregateOutputType | null
+    _max: NationalGridMasterMaxAggregateOutputType | null
+  }
+
+  export type NationalGridMasterAvgAggregateOutputType = {
+    id: number | null
+  }
+
+  export type NationalGridMasterSumAggregateOutputType = {
+    id: number | null
+  }
+
+  export type NationalGridMasterMinAggregateOutputType = {
+    id: number | null
+    attributeName: string | null
+    code: string | null
+    fullForm: string | null
+    isActive: boolean | null
+    createdAt: Date | null
+  }
+
+  export type NationalGridMasterMaxAggregateOutputType = {
+    id: number | null
+    attributeName: string | null
+    code: string | null
+    fullForm: string | null
+    isActive: boolean | null
+    createdAt: Date | null
+  }
+
+  export type NationalGridMasterCountAggregateOutputType = {
+    id: number
+    attributeName: number
+    code: number
+    fullForm: number
+    isActive: number
+    createdAt: number
+    _all: number
+  }
+
+
+  export type NationalGridMasterAvgAggregateInputType = {
+    id?: true
+  }
+
+  export type NationalGridMasterSumAggregateInputType = {
+    id?: true
+  }
+
+  export type NationalGridMasterMinAggregateInputType = {
+    id?: true
+    attributeName?: true
+    code?: true
+    fullForm?: true
+    isActive?: true
+    createdAt?: true
+  }
+
+  export type NationalGridMasterMaxAggregateInputType = {
+    id?: true
+    attributeName?: true
+    code?: true
+    fullForm?: true
+    isActive?: true
+    createdAt?: true
+  }
+
+  export type NationalGridMasterCountAggregateInputType = {
+    id?: true
+    attributeName?: true
+    code?: true
+    fullForm?: true
+    isActive?: true
+    createdAt?: true
+    _all?: true
+  }
+
+  export type NationalGridMasterAggregateArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Filter which NationalGridMaster to aggregate.
+     */
+    where?: NationalGridMasterWhereInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
+     * 
+     * Determine the order of NationalGridMasters to fetch.
+     */
+    orderBy?: NationalGridMasterOrderByWithRelationInput | NationalGridMasterOrderByWithRelationInput[]
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
+     * 
+     * Sets the start position
+     */
+    cursor?: NationalGridMasterWhereUniqueInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Take `±n` NationalGridMasters from the position of the cursor.
+     */
+    take?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Skip the first `n` NationalGridMasters.
+     */
+    skip?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     * 
+     * Count returned NationalGridMasters
+    **/
+    _count?: true | NationalGridMasterCountAggregateInputType
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     * 
+     * Select which fields to average
+    **/
+    _avg?: NationalGridMasterAvgAggregateInputType
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     * 
+     * Select which fields to sum
+    **/
+    _sum?: NationalGridMasterSumAggregateInputType
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     * 
+     * Select which fields to find the minimum value
+    **/
+    _min?: NationalGridMasterMinAggregateInputType
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     * 
+     * Select which fields to find the maximum value
+    **/
+    _max?: NationalGridMasterMaxAggregateInputType
+  }
+
+  export type GetNationalGridMasterAggregateType<T extends NationalGridMasterAggregateArgs> = {
+        [P in keyof T & keyof AggregateNationalGridMaster]: P extends '_count' | 'count'
+      ? T[P] extends true
+        ? number
+        : GetScalarType<T[P], AggregateNationalGridMaster[P]>
+      : GetScalarType<T[P], AggregateNationalGridMaster[P]>
+  }
+
+
+
+
+  export type NationalGridMasterGroupByArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    where?: NationalGridMasterWhereInput
+    orderBy?: NationalGridMasterOrderByWithAggregationInput | NationalGridMasterOrderByWithAggregationInput[]
+    by: NationalGridMasterScalarFieldEnum[] | NationalGridMasterScalarFieldEnum
+    having?: NationalGridMasterScalarWhereWithAggregatesInput
+    take?: number
+    skip?: number
+    _count?: NationalGridMasterCountAggregateInputType | true
+    _avg?: NationalGridMasterAvgAggregateInputType
+    _sum?: NationalGridMasterSumAggregateInputType
+    _min?: NationalGridMasterMinAggregateInputType
+    _max?: NationalGridMasterMaxAggregateInputType
+  }
+
+  export type NationalGridMasterGroupByOutputType = {
+    id: number
+    attributeName: string
+    code: string
+    fullForm: string | null
+    isActive: boolean
+    createdAt: Date
+    _count: NationalGridMasterCountAggregateOutputType | null
+    _avg: NationalGridMasterAvgAggregateOutputType | null
+    _sum: NationalGridMasterSumAggregateOutputType | null
+    _min: NationalGridMasterMinAggregateOutputType | null
+    _max: NationalGridMasterMaxAggregateOutputType | null
+  }
+
+  type GetNationalGridMasterGroupByPayload<T extends NationalGridMasterGroupByArgs> = Prisma.PrismaPromise<
+    Array<
+      PickEnumerable<NationalGridMasterGroupByOutputType, T['by']> &
+        {
+          [P in ((keyof T) & (keyof NationalGridMasterGroupByOutputType))]: P extends '_count'
+            ? T[P] extends boolean
+              ? number
+              : GetScalarType<T[P], NationalGridMasterGroupByOutputType[P]>
+            : GetScalarType<T[P], NationalGridMasterGroupByOutputType[P]>
+        }
+      >
+    >
+
+
+  export type NationalGridMasterSelect<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
+    id?: boolean
+    attributeName?: boolean
+    code?: boolean
+    fullForm?: boolean
+    isActive?: boolean
+    createdAt?: boolean
+  }, ExtArgs["result"]["nationalGridMaster"]>
+
+  export type NationalGridMasterSelectCreateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
+    id?: boolean
+    attributeName?: boolean
+    code?: boolean
+    fullForm?: boolean
+    isActive?: boolean
+    createdAt?: boolean
+  }, ExtArgs["result"]["nationalGridMaster"]>
+
+  export type NationalGridMasterSelectUpdateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
+    id?: boolean
+    attributeName?: boolean
+    code?: boolean
+    fullForm?: boolean
+    isActive?: boolean
+    createdAt?: boolean
+  }, ExtArgs["result"]["nationalGridMaster"]>
+
+  export type NationalGridMasterSelectScalar = {
+    id?: boolean
+    attributeName?: boolean
+    code?: boolean
+    fullForm?: boolean
+    isActive?: boolean
+    createdAt?: boolean
+  }
+
+  export type NationalGridMasterOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<"id" | "attributeName" | "code" | "fullForm" | "isActive" | "createdAt", ExtArgs["result"]["nationalGridMaster"]>
+
+  export type $NationalGridMasterPayload<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    name: "NationalGridMaster"
+    objects: {}
+    scalars: $Extensions.GetPayloadResult<{
+      id: number
+      attributeName: string
+      code: string
+      fullForm: string | null
+      isActive: boolean
+      createdAt: Date
+    }, ExtArgs["result"]["nationalGridMaster"]>
+    composites: {}
+  }
+
+  type NationalGridMasterGetPayload<S extends boolean | null | undefined | NationalGridMasterDefaultArgs> = $Result.GetResult<Prisma.$NationalGridMasterPayload, S>
+
+  type NationalGridMasterCountArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> =
+    Omit<NationalGridMasterFindManyArgs, 'select' | 'include' | 'distinct' | 'omit'> & {
+      select?: NationalGridMasterCountAggregateInputType | true
+    }
+
+  export interface NationalGridMasterDelegate<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs, GlobalOmitOptions = {}> {
+    [K: symbol]: { types: Prisma.TypeMap<ExtArgs>['model']['NationalGridMaster'], meta: { name: 'NationalGridMaster' } }
+    /**
+     * Find zero or one NationalGridMaster that matches the filter.
+     * @param {NationalGridMasterFindUniqueArgs} args - Arguments to find a NationalGridMaster
+     * @example
+     * // Get one NationalGridMaster
+     * const nationalGridMaster = await prisma.nationalGridMaster.findUnique({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     */
+    findUnique<T extends NationalGridMasterFindUniqueArgs>(args: SelectSubset<T, NationalGridMasterFindUniqueArgs<ExtArgs>>): Prisma__NationalGridMasterClient<$Result.GetResult<Prisma.$NationalGridMasterPayload<ExtArgs>, T, "findUnique", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Find one NationalGridMaster that matches the filter or throw an error with `error.code='P2025'`
+     * if no matches were found.
+     * @param {NationalGridMasterFindUniqueOrThrowArgs} args - Arguments to find a NationalGridMaster
+     * @example
+     * // Get one NationalGridMaster
+     * const nationalGridMaster = await prisma.nationalGridMaster.findUniqueOrThrow({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     */
+    findUniqueOrThrow<T extends NationalGridMasterFindUniqueOrThrowArgs>(args: SelectSubset<T, NationalGridMasterFindUniqueOrThrowArgs<ExtArgs>>): Prisma__NationalGridMasterClient<$Result.GetResult<Prisma.$NationalGridMasterPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Find the first NationalGridMaster that matches the filter.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {NationalGridMasterFindFirstArgs} args - Arguments to find a NationalGridMaster
+     * @example
+     * // Get one NationalGridMaster
+     * const nationalGridMaster = await prisma.nationalGridMaster.findFirst({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     */
+    findFirst<T extends NationalGridMasterFindFirstArgs>(args?: SelectSubset<T, NationalGridMasterFindFirstArgs<ExtArgs>>): Prisma__NationalGridMasterClient<$Result.GetResult<Prisma.$NationalGridMasterPayload<ExtArgs>, T, "findFirst", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Find the first NationalGridMaster that matches the filter or
+     * throw `PrismaKnownClientError` with `P2025` code if no matches were found.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {NationalGridMasterFindFirstOrThrowArgs} args - Arguments to find a NationalGridMaster
+     * @example
+     * // Get one NationalGridMaster
+     * const nationalGridMaster = await prisma.nationalGridMaster.findFirstOrThrow({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     */
+    findFirstOrThrow<T extends NationalGridMasterFindFirstOrThrowArgs>(args?: SelectSubset<T, NationalGridMasterFindFirstOrThrowArgs<ExtArgs>>): Prisma__NationalGridMasterClient<$Result.GetResult<Prisma.$NationalGridMasterPayload<ExtArgs>, T, "findFirstOrThrow", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Find zero or more NationalGridMasters that matches the filter.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {NationalGridMasterFindManyArgs} args - Arguments to filter and select certain fields only.
+     * @example
+     * // Get all NationalGridMasters
+     * const nationalGridMasters = await prisma.nationalGridMaster.findMany()
+     * 
+     * // Get first 10 NationalGridMasters
+     * const nationalGridMasters = await prisma.nationalGridMaster.findMany({ take: 10 })
+     * 
+     * // Only select the `id`
+     * const nationalGridMasterWithIdOnly = await prisma.nationalGridMaster.findMany({ select: { id: true } })
+     * 
+     */
+    findMany<T extends NationalGridMasterFindManyArgs>(args?: SelectSubset<T, NationalGridMasterFindManyArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$NationalGridMasterPayload<ExtArgs>, T, "findMany", GlobalOmitOptions>>
+
+    /**
+     * Create a NationalGridMaster.
+     * @param {NationalGridMasterCreateArgs} args - Arguments to create a NationalGridMaster.
+     * @example
+     * // Create one NationalGridMaster
+     * const NationalGridMaster = await prisma.nationalGridMaster.create({
+     *   data: {
+     *     // ... data to create a NationalGridMaster
+     *   }
+     * })
+     * 
+     */
+    create<T extends NationalGridMasterCreateArgs>(args: SelectSubset<T, NationalGridMasterCreateArgs<ExtArgs>>): Prisma__NationalGridMasterClient<$Result.GetResult<Prisma.$NationalGridMasterPayload<ExtArgs>, T, "create", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Create many NationalGridMasters.
+     * @param {NationalGridMasterCreateManyArgs} args - Arguments to create many NationalGridMasters.
+     * @example
+     * // Create many NationalGridMasters
+     * const nationalGridMaster = await prisma.nationalGridMaster.createMany({
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     *     
+     */
+    createMany<T extends NationalGridMasterCreateManyArgs>(args?: SelectSubset<T, NationalGridMasterCreateManyArgs<ExtArgs>>): Prisma.PrismaPromise<BatchPayload>
+
+    /**
+     * Create many NationalGridMasters and returns the data saved in the database.
+     * @param {NationalGridMasterCreateManyAndReturnArgs} args - Arguments to create many NationalGridMasters.
+     * @example
+     * // Create many NationalGridMasters
+     * const nationalGridMaster = await prisma.nationalGridMaster.createManyAndReturn({
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     * 
+     * // Create many NationalGridMasters and only return the `id`
+     * const nationalGridMasterWithIdOnly = await prisma.nationalGridMaster.createManyAndReturn({
+     *   select: { id: true },
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * 
+     */
+    createManyAndReturn<T extends NationalGridMasterCreateManyAndReturnArgs>(args?: SelectSubset<T, NationalGridMasterCreateManyAndReturnArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$NationalGridMasterPayload<ExtArgs>, T, "createManyAndReturn", GlobalOmitOptions>>
+
+    /**
+     * Delete a NationalGridMaster.
+     * @param {NationalGridMasterDeleteArgs} args - Arguments to delete one NationalGridMaster.
+     * @example
+     * // Delete one NationalGridMaster
+     * const NationalGridMaster = await prisma.nationalGridMaster.delete({
+     *   where: {
+     *     // ... filter to delete one NationalGridMaster
+     *   }
+     * })
+     * 
+     */
+    delete<T extends NationalGridMasterDeleteArgs>(args: SelectSubset<T, NationalGridMasterDeleteArgs<ExtArgs>>): Prisma__NationalGridMasterClient<$Result.GetResult<Prisma.$NationalGridMasterPayload<ExtArgs>, T, "delete", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Update one NationalGridMaster.
+     * @param {NationalGridMasterUpdateArgs} args - Arguments to update one NationalGridMaster.
+     * @example
+     * // Update one NationalGridMaster
+     * const nationalGridMaster = await prisma.nationalGridMaster.update({
+     *   where: {
+     *     // ... provide filter here
+     *   },
+     *   data: {
+     *     // ... provide data here
+     *   }
+     * })
+     * 
+     */
+    update<T extends NationalGridMasterUpdateArgs>(args: SelectSubset<T, NationalGridMasterUpdateArgs<ExtArgs>>): Prisma__NationalGridMasterClient<$Result.GetResult<Prisma.$NationalGridMasterPayload<ExtArgs>, T, "update", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Delete zero or more NationalGridMasters.
+     * @param {NationalGridMasterDeleteManyArgs} args - Arguments to filter NationalGridMasters to delete.
+     * @example
+     * // Delete a few NationalGridMasters
+     * const { count } = await prisma.nationalGridMaster.deleteMany({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     * 
+     */
+    deleteMany<T extends NationalGridMasterDeleteManyArgs>(args?: SelectSubset<T, NationalGridMasterDeleteManyArgs<ExtArgs>>): Prisma.PrismaPromise<BatchPayload>
+
+    /**
+     * Update zero or more NationalGridMasters.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {NationalGridMasterUpdateManyArgs} args - Arguments to update one or more rows.
+     * @example
+     * // Update many NationalGridMasters
+     * const nationalGridMaster = await prisma.nationalGridMaster.updateMany({
+     *   where: {
+     *     // ... provide filter here
+     *   },
+     *   data: {
+     *     // ... provide data here
+     *   }
+     * })
+     * 
+     */
+    updateMany<T extends NationalGridMasterUpdateManyArgs>(args: SelectSubset<T, NationalGridMasterUpdateManyArgs<ExtArgs>>): Prisma.PrismaPromise<BatchPayload>
+
+    /**
+     * Update zero or more NationalGridMasters and returns the data updated in the database.
+     * @param {NationalGridMasterUpdateManyAndReturnArgs} args - Arguments to update many NationalGridMasters.
+     * @example
+     * // Update many NationalGridMasters
+     * const nationalGridMaster = await prisma.nationalGridMaster.updateManyAndReturn({
+     *   where: {
+     *     // ... provide filter here
+     *   },
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     * 
+     * // Update zero or more NationalGridMasters and only return the `id`
+     * const nationalGridMasterWithIdOnly = await prisma.nationalGridMaster.updateManyAndReturn({
+     *   select: { id: true },
+     *   where: {
+     *     // ... provide filter here
+     *   },
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * 
+     */
+    updateManyAndReturn<T extends NationalGridMasterUpdateManyAndReturnArgs>(args: SelectSubset<T, NationalGridMasterUpdateManyAndReturnArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$NationalGridMasterPayload<ExtArgs>, T, "updateManyAndReturn", GlobalOmitOptions>>
+
+    /**
+     * Create or update one NationalGridMaster.
+     * @param {NationalGridMasterUpsertArgs} args - Arguments to update or create a NationalGridMaster.
+     * @example
+     * // Update or create a NationalGridMaster
+     * const nationalGridMaster = await prisma.nationalGridMaster.upsert({
+     *   create: {
+     *     // ... data to create a NationalGridMaster
+     *   },
+     *   update: {
+     *     // ... in case it already exists, update
+     *   },
+     *   where: {
+     *     // ... the filter for the NationalGridMaster we want to update
+     *   }
+     * })
+     */
+    upsert<T extends NationalGridMasterUpsertArgs>(args: SelectSubset<T, NationalGridMasterUpsertArgs<ExtArgs>>): Prisma__NationalGridMasterClient<$Result.GetResult<Prisma.$NationalGridMasterPayload<ExtArgs>, T, "upsert", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+
+    /**
+     * Count the number of NationalGridMasters.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {NationalGridMasterCountArgs} args - Arguments to filter NationalGridMasters to count.
+     * @example
+     * // Count the number of NationalGridMasters
+     * const count = await prisma.nationalGridMaster.count({
+     *   where: {
+     *     // ... the filter for the NationalGridMasters we want to count
+     *   }
+     * })
+    **/
+    count<T extends NationalGridMasterCountArgs>(
+      args?: Subset<T, NationalGridMasterCountArgs>,
+    ): Prisma.PrismaPromise<
+      T extends $Utils.Record<'select', any>
+        ? T['select'] extends true
+          ? number
+          : GetScalarType<T['select'], NationalGridMasterCountAggregateOutputType>
+        : number
+    >
+
+    /**
+     * Allows you to perform aggregations operations on a NationalGridMaster.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {NationalGridMasterAggregateArgs} args - Select which aggregations you would like to apply and on what fields.
+     * @example
+     * // Ordered by age ascending
+     * // Where email contains prisma.io
+     * // Limited to the 10 users
+     * const aggregations = await prisma.user.aggregate({
+     *   _avg: {
+     *     age: true,
+     *   },
+     *   where: {
+     *     email: {
+     *       contains: "prisma.io",
+     *     },
+     *   },
+     *   orderBy: {
+     *     age: "asc",
+     *   },
+     *   take: 10,
+     * })
+    **/
+    aggregate<T extends NationalGridMasterAggregateArgs>(args: Subset<T, NationalGridMasterAggregateArgs>): Prisma.PrismaPromise<GetNationalGridMasterAggregateType<T>>
+
+    /**
+     * Group by NationalGridMaster.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {NationalGridMasterGroupByArgs} args - Group by arguments.
+     * @example
+     * // Group by city, order by createdAt, get count
+     * const result = await prisma.user.groupBy({
+     *   by: ['city', 'createdAt'],
+     *   orderBy: {
+     *     createdAt: true
+     *   },
+     *   _count: {
+     *     _all: true
+     *   },
+     * })
+     * 
+    **/
+    groupBy<
+      T extends NationalGridMasterGroupByArgs,
+      HasSelectOrTake extends Or<
+        Extends<'skip', Keys<T>>,
+        Extends<'take', Keys<T>>
+      >,
+      OrderByArg extends True extends HasSelectOrTake
+        ? { orderBy: NationalGridMasterGroupByArgs['orderBy'] }
+        : { orderBy?: NationalGridMasterGroupByArgs['orderBy'] },
+      OrderFields extends ExcludeUnderscoreKeys<Keys<MaybeTupleToUnion<T['orderBy']>>>,
+      ByFields extends MaybeTupleToUnion<T['by']>,
+      ByValid extends Has<ByFields, OrderFields>,
+      HavingFields extends GetHavingFields<T['having']>,
+      HavingValid extends Has<ByFields, HavingFields>,
+      ByEmpty extends T['by'] extends never[] ? True : False,
+      InputErrors extends ByEmpty extends True
+      ? `Error: "by" must not be empty.`
+      : HavingValid extends False
+      ? {
+          [P in HavingFields]: P extends ByFields
+            ? never
+            : P extends string
+            ? `Error: Field "${P}" used in "having" needs to be provided in "by".`
+            : [
+                Error,
+                'Field ',
+                P,
+                ` in "having" needs to be provided in "by"`,
+              ]
+        }[HavingFields]
+      : 'take' extends Keys<T>
+      ? 'orderBy' extends Keys<T>
+        ? ByValid extends True
+          ? {}
+          : {
+              [P in OrderFields]: P extends ByFields
+                ? never
+                : `Error: Field "${P}" in "orderBy" needs to be provided in "by"`
+            }[OrderFields]
+        : 'Error: If you provide "take", you also need to provide "orderBy"'
+      : 'skip' extends Keys<T>
+      ? 'orderBy' extends Keys<T>
+        ? ByValid extends True
+          ? {}
+          : {
+              [P in OrderFields]: P extends ByFields
+                ? never
+                : `Error: Field "${P}" in "orderBy" needs to be provided in "by"`
+            }[OrderFields]
+        : 'Error: If you provide "skip", you also need to provide "orderBy"'
+      : ByValid extends True
+      ? {}
+      : {
+          [P in OrderFields]: P extends ByFields
+            ? never
+            : `Error: Field "${P}" in "orderBy" needs to be provided in "by"`
+        }[OrderFields]
+    >(args: SubsetIntersection<T, NationalGridMasterGroupByArgs, OrderByArg> & InputErrors): {} extends InputErrors ? GetNationalGridMasterGroupByPayload<T> : Prisma.PrismaPromise<InputErrors>
+  /**
+   * Fields of the NationalGridMaster model
+   */
+  readonly fields: NationalGridMasterFieldRefs;
+  }
+
+  /**
+   * The delegate class that acts as a "Promise-like" for NationalGridMaster.
+   * Why is this prefixed with `Prisma__`?
+   * Because we want to prevent naming conflicts as mentioned in
+   * https://github.com/prisma/prisma-client-js/issues/707
+   */
+  export interface Prisma__NationalGridMasterClient<T, Null = never, ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs, GlobalOmitOptions = {}> extends Prisma.PrismaPromise<T> {
+    readonly [Symbol.toStringTag]: "PrismaPromise"
+    /**
+     * Attaches callbacks for the resolution and/or rejection of the Promise.
+     * @param onfulfilled The callback to execute when the Promise is resolved.
+     * @param onrejected The callback to execute when the Promise is rejected.
+     * @returns A Promise for the completion of which ever callback is executed.
+     */
+    then<TResult1 = T, TResult2 = never>(onfulfilled?: ((value: T) => TResult1 | PromiseLike<TResult1>) | undefined | null, onrejected?: ((reason: any) => TResult2 | PromiseLike<TResult2>) | undefined | null): $Utils.JsPromise<TResult1 | TResult2>
+    /**
+     * Attaches a callback for only the rejection of the Promise.
+     * @param onrejected The callback to execute when the Promise is rejected.
+     * @returns A Promise for the completion of the callback.
+     */
+    catch<TResult = never>(onrejected?: ((reason: any) => TResult | PromiseLike<TResult>) | undefined | null): $Utils.JsPromise<T | TResult>
+    /**
+     * Attaches a callback that is invoked when the Promise is settled (fulfilled or rejected). The
+     * resolved value cannot be modified from the callback.
+     * @param onfinally The callback to execute when the Promise is settled (fulfilled or rejected).
+     * @returns A Promise for the completion of the callback.
+     */
+    finally(onfinally?: (() => void) | undefined | null): $Utils.JsPromise<T>
+  }
+
+
+
+
+  /**
+   * Fields of the NationalGridMaster model
+   */
+  interface NationalGridMasterFieldRefs {
+    readonly id: FieldRef<"NationalGridMaster", 'Int'>
+    readonly attributeName: FieldRef<"NationalGridMaster", 'String'>
+    readonly code: FieldRef<"NationalGridMaster", 'String'>
+    readonly fullForm: FieldRef<"NationalGridMaster", 'String'>
+    readonly isActive: FieldRef<"NationalGridMaster", 'Boolean'>
+    readonly createdAt: FieldRef<"NationalGridMaster", 'DateTime'>
+  }
+    
+
+  // Custom InputTypes
+  /**
+   * NationalGridMaster findUnique
+   */
+  export type NationalGridMasterFindUniqueArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the NationalGridMaster
+     */
+    select?: NationalGridMasterSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the NationalGridMaster
+     */
+    omit?: NationalGridMasterOmit<ExtArgs> | null
+    /**
+     * Filter, which NationalGridMaster to fetch.
+     */
+    where: NationalGridMasterWhereUniqueInput
+  }
+
+  /**
+   * NationalGridMaster findUniqueOrThrow
+   */
+  export type NationalGridMasterFindUniqueOrThrowArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the NationalGridMaster
+     */
+    select?: NationalGridMasterSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the NationalGridMaster
+     */
+    omit?: NationalGridMasterOmit<ExtArgs> | null
+    /**
+     * Filter, which NationalGridMaster to fetch.
+     */
+    where: NationalGridMasterWhereUniqueInput
+  }
+
+  /**
+   * NationalGridMaster findFirst
+   */
+  export type NationalGridMasterFindFirstArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the NationalGridMaster
+     */
+    select?: NationalGridMasterSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the NationalGridMaster
+     */
+    omit?: NationalGridMasterOmit<ExtArgs> | null
+    /**
+     * Filter, which NationalGridMaster to fetch.
+     */
+    where?: NationalGridMasterWhereInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
+     * 
+     * Determine the order of NationalGridMasters to fetch.
+     */
+    orderBy?: NationalGridMasterOrderByWithRelationInput | NationalGridMasterOrderByWithRelationInput[]
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
+     * 
+     * Sets the position for searching for NationalGridMasters.
+     */
+    cursor?: NationalGridMasterWhereUniqueInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Take `±n` NationalGridMasters from the position of the cursor.
+     */
+    take?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Skip the first `n` NationalGridMasters.
+     */
+    skip?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/distinct Distinct Docs}
+     * 
+     * Filter by unique combinations of NationalGridMasters.
+     */
+    distinct?: NationalGridMasterScalarFieldEnum | NationalGridMasterScalarFieldEnum[]
+  }
+
+  /**
+   * NationalGridMaster findFirstOrThrow
+   */
+  export type NationalGridMasterFindFirstOrThrowArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the NationalGridMaster
+     */
+    select?: NationalGridMasterSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the NationalGridMaster
+     */
+    omit?: NationalGridMasterOmit<ExtArgs> | null
+    /**
+     * Filter, which NationalGridMaster to fetch.
+     */
+    where?: NationalGridMasterWhereInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
+     * 
+     * Determine the order of NationalGridMasters to fetch.
+     */
+    orderBy?: NationalGridMasterOrderByWithRelationInput | NationalGridMasterOrderByWithRelationInput[]
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
+     * 
+     * Sets the position for searching for NationalGridMasters.
+     */
+    cursor?: NationalGridMasterWhereUniqueInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Take `±n` NationalGridMasters from the position of the cursor.
+     */
+    take?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Skip the first `n` NationalGridMasters.
+     */
+    skip?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/distinct Distinct Docs}
+     * 
+     * Filter by unique combinations of NationalGridMasters.
+     */
+    distinct?: NationalGridMasterScalarFieldEnum | NationalGridMasterScalarFieldEnum[]
+  }
+
+  /**
+   * NationalGridMaster findMany
+   */
+  export type NationalGridMasterFindManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the NationalGridMaster
+     */
+    select?: NationalGridMasterSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the NationalGridMaster
+     */
+    omit?: NationalGridMasterOmit<ExtArgs> | null
+    /**
+     * Filter, which NationalGridMasters to fetch.
+     */
+    where?: NationalGridMasterWhereInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
+     * 
+     * Determine the order of NationalGridMasters to fetch.
+     */
+    orderBy?: NationalGridMasterOrderByWithRelationInput | NationalGridMasterOrderByWithRelationInput[]
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
+     * 
+     * Sets the position for listing NationalGridMasters.
+     */
+    cursor?: NationalGridMasterWhereUniqueInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Take `±n` NationalGridMasters from the position of the cursor.
+     */
+    take?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Skip the first `n` NationalGridMasters.
+     */
+    skip?: number
+    distinct?: NationalGridMasterScalarFieldEnum | NationalGridMasterScalarFieldEnum[]
+  }
+
+  /**
+   * NationalGridMaster create
+   */
+  export type NationalGridMasterCreateArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the NationalGridMaster
+     */
+    select?: NationalGridMasterSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the NationalGridMaster
+     */
+    omit?: NationalGridMasterOmit<ExtArgs> | null
+    /**
+     * The data needed to create a NationalGridMaster.
+     */
+    data: XOR<NationalGridMasterCreateInput, NationalGridMasterUncheckedCreateInput>
+  }
+
+  /**
+   * NationalGridMaster createMany
+   */
+  export type NationalGridMasterCreateManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * The data used to create many NationalGridMasters.
+     */
+    data: NationalGridMasterCreateManyInput | NationalGridMasterCreateManyInput[]
+    skipDuplicates?: boolean
+  }
+
+  /**
+   * NationalGridMaster createManyAndReturn
+   */
+  export type NationalGridMasterCreateManyAndReturnArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the NationalGridMaster
+     */
+    select?: NationalGridMasterSelectCreateManyAndReturn<ExtArgs> | null
+    /**
+     * Omit specific fields from the NationalGridMaster
+     */
+    omit?: NationalGridMasterOmit<ExtArgs> | null
+    /**
+     * The data used to create many NationalGridMasters.
+     */
+    data: NationalGridMasterCreateManyInput | NationalGridMasterCreateManyInput[]
+    skipDuplicates?: boolean
+  }
+
+  /**
+   * NationalGridMaster update
+   */
+  export type NationalGridMasterUpdateArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the NationalGridMaster
+     */
+    select?: NationalGridMasterSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the NationalGridMaster
+     */
+    omit?: NationalGridMasterOmit<ExtArgs> | null
+    /**
+     * The data needed to update a NationalGridMaster.
+     */
+    data: XOR<NationalGridMasterUpdateInput, NationalGridMasterUncheckedUpdateInput>
+    /**
+     * Choose, which NationalGridMaster to update.
+     */
+    where: NationalGridMasterWhereUniqueInput
+  }
+
+  /**
+   * NationalGridMaster updateMany
+   */
+  export type NationalGridMasterUpdateManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * The data used to update NationalGridMasters.
+     */
+    data: XOR<NationalGridMasterUpdateManyMutationInput, NationalGridMasterUncheckedUpdateManyInput>
+    /**
+     * Filter which NationalGridMasters to update
+     */
+    where?: NationalGridMasterWhereInput
+    /**
+     * Limit how many NationalGridMasters to update.
+     */
+    limit?: number
+  }
+
+  /**
+   * NationalGridMaster updateManyAndReturn
+   */
+  export type NationalGridMasterUpdateManyAndReturnArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the NationalGridMaster
+     */
+    select?: NationalGridMasterSelectUpdateManyAndReturn<ExtArgs> | null
+    /**
+     * Omit specific fields from the NationalGridMaster
+     */
+    omit?: NationalGridMasterOmit<ExtArgs> | null
+    /**
+     * The data used to update NationalGridMasters.
+     */
+    data: XOR<NationalGridMasterUpdateManyMutationInput, NationalGridMasterUncheckedUpdateManyInput>
+    /**
+     * Filter which NationalGridMasters to update
+     */
+    where?: NationalGridMasterWhereInput
+    /**
+     * Limit how many NationalGridMasters to update.
+     */
+    limit?: number
+  }
+
+  /**
+   * NationalGridMaster upsert
+   */
+  export type NationalGridMasterUpsertArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the NationalGridMaster
+     */
+    select?: NationalGridMasterSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the NationalGridMaster
+     */
+    omit?: NationalGridMasterOmit<ExtArgs> | null
+    /**
+     * The filter to search for the NationalGridMaster to update in case it exists.
+     */
+    where: NationalGridMasterWhereUniqueInput
+    /**
+     * In case the NationalGridMaster found by the `where` argument doesn't exist, create a new NationalGridMaster with this data.
+     */
+    create: XOR<NationalGridMasterCreateInput, NationalGridMasterUncheckedCreateInput>
+    /**
+     * In case the NationalGridMaster was found with the provided `where` argument, update it with this data.
+     */
+    update: XOR<NationalGridMasterUpdateInput, NationalGridMasterUncheckedUpdateInput>
+  }
+
+  /**
+   * NationalGridMaster delete
+   */
+  export type NationalGridMasterDeleteArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the NationalGridMaster
+     */
+    select?: NationalGridMasterSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the NationalGridMaster
+     */
+    omit?: NationalGridMasterOmit<ExtArgs> | null
+    /**
+     * Filter which NationalGridMaster to delete.
+     */
+    where: NationalGridMasterWhereUniqueInput
+  }
+
+  /**
+   * NationalGridMaster deleteMany
+   */
+  export type NationalGridMasterDeleteManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Filter which NationalGridMasters to delete
+     */
+    where?: NationalGridMasterWhereInput
+    /**
+     * Limit how many NationalGridMasters to delete.
+     */
+    limit?: number
+  }
+
+  /**
+   * NationalGridMaster without action
+   */
+  export type NationalGridMasterDefaultArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the NationalGridMaster
+     */
+    select?: NationalGridMasterSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the NationalGridMaster
+     */
+    omit?: NationalGridMasterOmit<ExtArgs> | null
+  }
+
+
+  /**
    * Model ModifyLog
    */
 
@@ -45687,6 +46820,18 @@ export namespace Prisma {
   export type PoolBBatchScalarFieldEnum = (typeof PoolBBatchScalarFieldEnum)[keyof typeof PoolBBatchScalarFieldEnum]
 
 
+  export const NationalGridMasterScalarFieldEnum: {
+    id: 'id',
+    attributeName: 'attributeName',
+    code: 'code',
+    fullForm: 'fullForm',
+    isActive: 'isActive',
+    createdAt: 'createdAt'
+  };
+
+  export type NationalGridMasterScalarFieldEnum = (typeof NationalGridMasterScalarFieldEnum)[keyof typeof NationalGridMasterScalarFieldEnum]
+
+
   export const ModifyLogScalarFieldEnum: {
     id: 'id',
     modificationGroupId: 'modificationGroupId',
@@ -46293,6 +47438,15 @@ export namespace Prisma {
   };
 
   export type PoolBBatchOrderByRelevanceFieldEnum = (typeof PoolBBatchOrderByRelevanceFieldEnum)[keyof typeof PoolBBatchOrderByRelevanceFieldEnum]
+
+
+  export const NationalGridMasterOrderByRelevanceFieldEnum: {
+    attributeName: 'attributeName',
+    code: 'code',
+    fullForm: 'fullForm'
+  };
+
+  export type NationalGridMasterOrderByRelevanceFieldEnum = (typeof NationalGridMasterOrderByRelevanceFieldEnum)[keyof typeof NationalGridMasterOrderByRelevanceFieldEnum]
 
 
   export const ModifyLogOrderByRelevanceFieldEnum: {
@@ -50470,6 +51624,67 @@ export namespace Prisma {
     completedAt?: DateTimeNullableWithAggregatesFilter<"PoolBBatch"> | Date | string | null
     results?: JsonNullableWithAggregatesFilter<"PoolBBatch">
     errorMessage?: StringNullableWithAggregatesFilter<"PoolBBatch"> | string | null
+  }
+
+  export type NationalGridMasterWhereInput = {
+    AND?: NationalGridMasterWhereInput | NationalGridMasterWhereInput[]
+    OR?: NationalGridMasterWhereInput[]
+    NOT?: NationalGridMasterWhereInput | NationalGridMasterWhereInput[]
+    id?: IntFilter<"NationalGridMaster"> | number
+    attributeName?: StringFilter<"NationalGridMaster"> | string
+    code?: StringFilter<"NationalGridMaster"> | string
+    fullForm?: StringNullableFilter<"NationalGridMaster"> | string | null
+    isActive?: BoolFilter<"NationalGridMaster"> | boolean
+    createdAt?: DateTimeFilter<"NationalGridMaster"> | Date | string
+  }
+
+  export type NationalGridMasterOrderByWithRelationInput = {
+    id?: SortOrder
+    attributeName?: SortOrder
+    code?: SortOrder
+    fullForm?: SortOrderInput | SortOrder
+    isActive?: SortOrder
+    createdAt?: SortOrder
+    _relevance?: NationalGridMasterOrderByRelevanceInput
+  }
+
+  export type NationalGridMasterWhereUniqueInput = Prisma.AtLeast<{
+    id?: number
+    attributeName_code?: NationalGridMasterAttributeNameCodeCompoundUniqueInput
+    AND?: NationalGridMasterWhereInput | NationalGridMasterWhereInput[]
+    OR?: NationalGridMasterWhereInput[]
+    NOT?: NationalGridMasterWhereInput | NationalGridMasterWhereInput[]
+    attributeName?: StringFilter<"NationalGridMaster"> | string
+    code?: StringFilter<"NationalGridMaster"> | string
+    fullForm?: StringNullableFilter<"NationalGridMaster"> | string | null
+    isActive?: BoolFilter<"NationalGridMaster"> | boolean
+    createdAt?: DateTimeFilter<"NationalGridMaster"> | Date | string
+  }, "id" | "attributeName_code">
+
+  export type NationalGridMasterOrderByWithAggregationInput = {
+    id?: SortOrder
+    attributeName?: SortOrder
+    code?: SortOrder
+    fullForm?: SortOrderInput | SortOrder
+    isActive?: SortOrder
+    createdAt?: SortOrder
+    _count?: NationalGridMasterCountOrderByAggregateInput
+    _avg?: NationalGridMasterAvgOrderByAggregateInput
+    _max?: NationalGridMasterMaxOrderByAggregateInput
+    _min?: NationalGridMasterMinOrderByAggregateInput
+    _sum?: NationalGridMasterSumOrderByAggregateInput
+  }
+
+  export type NationalGridMasterScalarWhereWithAggregatesInput = {
+    AND?: NationalGridMasterScalarWhereWithAggregatesInput | NationalGridMasterScalarWhereWithAggregatesInput[]
+    OR?: NationalGridMasterScalarWhereWithAggregatesInput[]
+    NOT?: NationalGridMasterScalarWhereWithAggregatesInput | NationalGridMasterScalarWhereWithAggregatesInput[]
+    id?: IntWithAggregatesFilter<"NationalGridMaster"> | number
+    attributeName?: StringWithAggregatesFilter<"NationalGridMaster"> | string
+    code?: StringWithAggregatesFilter<"NationalGridMaster"> | string
+    fullForm?: StringNullableWithAggregatesFilter<"NationalGridMaster"> | string | null
+    isActive?: BoolWithAggregatesFilter<"NationalGridMaster"> | boolean
+    createdAt?: DateTimeWithAggregatesFilter<"NationalGridMaster"> | Date | string
   }
 
   export type ModifyLogWhereInput = {
@@ -55209,6 +56424,66 @@ export namespace Prisma {
     errorMessage?: NullableStringFieldUpdateOperationsInput | string | null
   }
 
+  export type NationalGridMasterCreateInput = {
+    attributeName: string
+    code: string
+    fullForm?: string | null
+    isActive?: boolean
+    createdAt?: Date | string
+  }
+
+  export type NationalGridMasterUncheckedCreateInput = {
+    id?: number
+    attributeName: string
+    code: string
+    fullForm?: string | null
+    isActive?: boolean
+    createdAt?: Date | string
+  }
+
+  export type NationalGridMasterUpdateInput = {
+    attributeName?: StringFieldUpdateOperationsInput | string
+    code?: StringFieldUpdateOperationsInput | string
+    fullForm?: NullableStringFieldUpdateOperationsInput | string | null
+    isActive?: BoolFieldUpdateOperationsInput | boolean
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+  }
+
+  export type NationalGridMasterUncheckedUpdateInput = {
+    id?: IntFieldUpdateOperationsInput | number
+    attributeName?: StringFieldUpdateOperationsInput | string
+    code?: StringFieldUpdateOperationsInput | string
+    fullForm?: NullableStringFieldUpdateOperationsInput | string | null
+    isActive?: BoolFieldUpdateOperationsInput | boolean
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+  }
+
+  export type NationalGridMasterCreateManyInput = {
+    id?: number
+    attributeName: string
+    code: string
+    fullForm?: string | null
+    isActive?: boolean
+    createdAt?: Date | string
+  }
+
+  export type NationalGridMasterUpdateManyMutationInput = {
+    attributeName?: StringFieldUpdateOperationsInput | string
+    code?: StringFieldUpdateOperationsInput | string
+    fullForm?: NullableStringFieldUpdateOperationsInput | string | null
+    isActive?: BoolFieldUpdateOperationsInput | boolean
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+  }
+
+  export type NationalGridMasterUncheckedUpdateManyInput = {
+    id?: IntFieldUpdateOperationsInput | number
+    attributeName?: StringFieldUpdateOperationsInput | string
+    code?: StringFieldUpdateOperationsInput | string
+    fullForm?: NullableStringFieldUpdateOperationsInput | string | null
+    isActive?: BoolFieldUpdateOperationsInput | boolean
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+  }
+
   export type ModifyLogCreateInput = {
     modificationGroupId: string
     articleNumber: string
@@ -58609,6 +59884,52 @@ export namespace Prisma {
     _count?: NestedIntFilter<$PrismaModel>
     _min?: NestedEnumPoolBBatchStatusFilter<$PrismaModel>
     _max?: NestedEnumPoolBBatchStatusFilter<$PrismaModel>
+  }
+
+  export type NationalGridMasterOrderByRelevanceInput = {
+    fields: NationalGridMasterOrderByRelevanceFieldEnum | NationalGridMasterOrderByRelevanceFieldEnum[]
+    sort: SortOrder
+    search: string
+  }
+
+  export type NationalGridMasterAttributeNameCodeCompoundUniqueInput = {
+    attributeName: string
+    code: string
+  }
+
+  export type NationalGridMasterCountOrderByAggregateInput = {
+    id?: SortOrder
+    attributeName?: SortOrder
+    code?: SortOrder
+    fullForm?: SortOrder
+    isActive?: SortOrder
+    createdAt?: SortOrder
+  }
+
+  export type NationalGridMasterAvgOrderByAggregateInput = {
+    id?: SortOrder
+  }
+
+  export type NationalGridMasterMaxOrderByAggregateInput = {
+    id?: SortOrder
+    attributeName?: SortOrder
+    code?: SortOrder
+    fullForm?: SortOrder
+    isActive?: SortOrder
+    createdAt?: SortOrder
+  }
+
+  export type NationalGridMasterMinOrderByAggregateInput = {
+    id?: SortOrder
+    attributeName?: SortOrder
+    code?: SortOrder
+    fullForm?: SortOrder
+    isActive?: SortOrder
+    createdAt?: SortOrder
+  }
+
+  export type NationalGridMasterSumOrderByAggregateInput = {
+    id?: SortOrder
   }
 
   export type ModifyLogOrderByRelevanceInput = {

@@ -610,4 +610,30 @@ export async function getModifyLogsByGroup(groupId: string): Promise<{ data: Mod
   return res.data;
 }
 
+// ═══════════════════════════════════════════════════════
+// NATIONAL GRID MASTER
+// ═══════════════════════════════════════════════════════
+
+export interface NationalGridRow {
+  id: number;
+  attributeName: string;
+  code: string;
+  fullForm: string | null;
+  isActive: boolean;
+  createdAt: string;
+}
+
+export interface NationalGridImportRow {
+  attributeName: string;
+  code: string;
+  fullForm?: string | null;
+}
+
+export async function importNationalGridRows(
+  rows: NationalGridImportRow[],
+): Promise<{ success: boolean; upserted: number }> {
+  const res = await adminApi.post<{ success: boolean; upserted: number }>('/national-grid/import', { rows });
+  return res.data;
+}
+
 export default adminApi;

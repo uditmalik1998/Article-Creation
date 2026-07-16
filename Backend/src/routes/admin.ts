@@ -211,4 +211,7 @@ router.post('/hierarchy/upload-excel', excelUpload.single('file'), mut, h(adminC
 router.get('/modify-logs/group/:groupId', h(adminController.getModifyLogsByGroup));
 router.get('/modify-logs',               h(adminController.getModifyLogs));
 
+router.get('/national-grid',             h(adminController.getNationalGrid));
+router.post('/national-grid/import',     h(adminController.importNationalGrid));
+
 export default router;

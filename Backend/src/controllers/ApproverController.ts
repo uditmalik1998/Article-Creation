@@ -10,6 +10,7 @@ import { syncArticlesToSapViaRfc, buildModifyChangesPayload, previewRfcPayloads 
 import { patchArticleAttributes } from '../services/sapModifyService';
 import { FLAT_TO_RFC, FLAT_TO_SAP_KEY } from '../data/flatToRfcMap';
 import { randomUUID } from 'crypto';
+import { validateAgainstNationalGrid } from '../services/nationalGridValidation';
 import { syncVariantsToSapViaRfc } from '../services/zmmVarArtCreationService';
 import { storageService, type WatermarkLabel } from '../services/storageService';
 import { ARTICLE_DESCRIPTION_SOURCE_FIELDS, buildArticleDescription } from '../utils/articleDescriptionBuilder';
@@ -1831,6 +1832,35 @@ export class ApproverController {
     //
     // Unlike updateItem, this is allowed on APPROVED articles (that is the whole
     // point — Created Articles are APPROVED + SAP-synced).
+    // Validate changes against National Grid without touching SAP or the DB.
+    // Returns 200 { valid: true } or 422 { error, details }.
+    static async validateModify(req: Request, res: Response) {
+        try {
+            const changes = req.body?.changes;
+            if (!changes || typeof changes !== 'object' || Array.isArray(changes)) {
+                return res.status(400).json({ error: 'changes object is required' });
+            }
+
+            // Build SAP key → value map (mirrors modifyItem logic)
+            const attrMap: Record<string, string | null | undefined> = {};
+            for (const [field, value] of Object.entries(changes)) {
+                const sapKey = FLAT_TO_SAP_KEY[field];
+                if (sapKey) attrMap[sapKey] = value == null ? null : String(value);
+            }
+
+            const gridResult = await validateAgainstNationalGrid(prisma, attrMap);
+            if (!gridResult.valid) {
+                return res.status(422).json({
+                    error: 'One or more attribute values are not allowed per the National Grid.',
+                    details: gridResult.errors,
+                });
+            }
+            return res.json({ valid: true });
+        } catch (err: any) {
+            return res.status(500).json({ error: err?.message ?? 'Validation error' });
+        }
+    }
+
     static async modifyItem(req: Request, res: Response) {
         ApproverController.itemsCache.clear();
         ApproverController.countCache.clear();
@@ -1933,6 +1963,23 @@ export class ApproverController {
             if (finalMajorCategory && finalMrp !== null && finalMrp !== undefined) {
                 const segment = getSegmentByCategoryAndMrp(finalMajorCategory, finalMrp);
                 if (segment) data.segment = segment;
+            }
+
+            // ── National Grid validation: reject if any submitted attribute value is not in grid ──
+            {
+                // Map camelCase data keys → SAP attribute names for grid lookup
+                const attrMap: Record<string, string | null | undefined> = {};
+                for (const [field, value] of Object.entries(data)) {
+                    const sapKey = FLAT_TO_SAP_KEY[field];
+                    if (sapKey) attrMap[sapKey] = value == null ? null : String(value);
+                }
+                const gridResult = await validateAgainstNationalGrid(prisma, attrMap);
+                if (!gridResult.valid) {
+                    return res.status(422).json({
+                        error: 'One or more attribute values are not allowed per the National Grid.',
+                        details: gridResult.errors,
+                    });
+                }
             }
 
             let sapResult: { applied: number; message: string } = { applied: 0, message: 'Skipped (RFC proxy already applied)' };

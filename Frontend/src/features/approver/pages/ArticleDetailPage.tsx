@@ -994,6 +994,26 @@ export default function ArticleDetailPage() {
               })
               .join('|');
             try {
+              // National Grid validation — must pass before SAP is touched.
+              const token = localStorage.getItem('authToken');
+              const valRes = await fetch(`${APP_CONFIG.api.baseURL}/approver/items/${row.id}/validate-modify`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` },
+                body: JSON.stringify({ changes }),
+              });
+              if (!valRes.ok) {
+                let errMsg = 'Validation failed';
+                try {
+                  const p = await valRes.json();
+                  if (p?.error) errMsg = p.error;
+                  if (p?.details?.length) {
+                    errMsg += ': ' + (p.details as any[]).map((d: any) => d.message).join('; ');
+                  }
+                } catch { /* skip */ }
+                message.error(errMsg);
+                throw new Error(errMsg);
+              }
+
               const r = await fetch('https://sap-api.v2retail.net/api/rfc/proxy?env=prod', {
                 method: 'POST',
                 headers: {
@@ -1025,7 +1045,6 @@ export default function ArticleDetailPage() {
                 throw new Error(errMsg);
               }
               // SAP succeeded via RFC proxy — now persist the changes to the DB only.
-              const token = localStorage.getItem('authToken');
               const dbRes = await fetch(`${APP_CONFIG.api.baseURL}/approver/items/${row.id}/modify`, {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` },
