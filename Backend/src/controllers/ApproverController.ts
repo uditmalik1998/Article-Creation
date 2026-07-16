@@ -10,6 +10,7 @@ import { syncArticlesToSapViaRfc, buildModifyChangesPayload, previewRfcPayloads 
 import { patchArticleAttributes } from '../services/sapModifyService';
 import { FLAT_TO_RFC, FLAT_TO_SAP_KEY } from '../data/flatToRfcMap';
 import { randomUUID } from 'crypto';
+import { validateAgainstNationalGrid } from '../services/nationalGridValidation';
 import { syncVariantsToSapViaRfc } from '../services/zmmVarArtCreationService';
 import { storageService, type WatermarkLabel } from '../services/storageService';
 import { ARTICLE_DESCRIPTION_SOURCE_FIELDS, buildArticleDescription } from '../utils/articleDescriptionBuilder';
@@ -1933,6 +1934,23 @@ export class ApproverController {
             if (finalMajorCategory && finalMrp !== null && finalMrp !== undefined) {
                 const segment = getSegmentByCategoryAndMrp(finalMajorCategory, finalMrp);
                 if (segment) data.segment = segment;
+            }
+
+            // ── National Grid validation: reject if any submitted attribute value is not in grid ──
+            {
+                // Map camelCase data keys → SAP attribute names for grid lookup
+                const attrMap: Record<string, string | null | undefined> = {};
+                for (const [field, value] of Object.entries(data)) {
+                    const sapKey = FLAT_TO_SAP_KEY[field];
+                    if (sapKey) attrMap[sapKey] = value == null ? null : String(value);
+                }
+                const gridResult = await validateAgainstNationalGrid(prisma, attrMap);
+                if (!gridResult.valid) {
+                    return res.status(422).json({
+                        error: 'One or more attribute values are not allowed per the National Grid.',
+                        details: gridResult.errors,
+                    });
+                }
             }
 
             let sapResult: { applied: number; message: string } = { applied: 0, message: 'Skipped (RFC proxy already applied)' };

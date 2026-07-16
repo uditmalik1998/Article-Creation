@@ -1130,6 +1130,21 @@ model PoolBBatch {
   @@schema("public")
 }
 
+/// NationalGridMaster: Valid attribute code/value pairs imported from the National Grid Excel
+model NationalGridMaster {
+  id            Int      @id @default(autoincrement())
+  attributeName String   @map("attribute_name") @db.VarChar(100)
+  code          String   @db.VarChar(100)
+  fullForm      String?  @map("full_form") @db.VarChar(500)
+  isActive      Boolean  @default(true) @map("is_active")
+  createdAt     DateTime @default(now()) @map("created_at")
+
+  @@unique([attributeName, code])
+  @@index([attributeName])
+  @@map("national_grid_master")
+  @@schema("public")
+}
+
 /// ModifyLog: One row per changed label per successful article modification
 model ModifyLog {
   id                  Int      @id @default(autoincrement())

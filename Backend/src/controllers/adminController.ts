@@ -4024,3 +4024,74 @@ export async function getModifyLogsByGroup(req: Request, res: Response) {
 
     return res.json({ data: logs });
 }
+
+// ─── National Grid Master ──────────────────────────────────────────────────
+
+export async function getNationalGrid(req: Request, res: Response) {
+    const { attributeName, page = '1', limit = '100' } = req.query as Record<string, string>;
+    const pageNum = Math.max(1, parseInt(page, 10) || 1);
+    const limitNum = Math.min(500, Math.max(1, parseInt(limit, 10) || 100));
+    const skip = (pageNum - 1) * limitNum;
+
+    const where: any = { isActive: true };
+    if (attributeName) where.attributeName = attributeName;
+
+    const [total, rows] = await withPrismaRetry(() =>
+        prisma.$transaction([
+            prisma.nationalGridMaster.count({ where }),
+            prisma.nationalGridMaster.findMany({
+                where,
+                orderBy: [{ attributeName: 'asc' }, { code: 'asc' }],
+                skip,
+                take: limitNum,
+            }),
+        ])
+    );
+
+    return res.json({ data: rows, total, page: pageNum, limit: limitNum, totalPages: Math.ceil(total / limitNum) });
+}
+
+export async function importNationalGrid(req: Request, res: Response) {
+    // Accepts a JSON body: { rows: [{ attributeName, code, fullForm? }] }
+    // Full replacement: deletes ALL existing rows then inserts the new set in a transaction.
+    const rows = req.body?.rows;
+    if (!Array.isArray(rows) || rows.length === 0) {
+        return res.status(400).json({ error: 'rows array is required' });
+    }
+
+    const valid = rows.filter(
+        (r: any) => typeof r.attributeName === 'string' && r.attributeName && typeof r.code === 'string' && r.code,
+    );
+    if (valid.length === 0) return res.status(400).json({ error: 'No valid rows (each needs attributeName + code)' });
+
+    // Deduplicate by (attributeName, code) before insert to avoid unique-constraint errors
+    const seen = new Set<string>();
+    const deduped = valid.filter((r: any) => {
+        const key = `${r.attributeName}||${r.code}`;
+        if (seen.has(key)) return false;
+        seen.add(key);
+        return true;
+    });
+
+    // Full replacement inside a transaction: delete all → insert new
+    await withPrismaRetry(() =>
+        prisma.$transaction(async (tx) => {
+            await tx.nationalGridMaster.deleteMany({});
+            const BATCH = 200;
+            for (let i = 0; i < deduped.length; i += BATCH) {
+                const batch = deduped.slice(i, i + BATCH);
+                await tx.nationalGridMaster.createMany({
+                    data: batch.map((row: any) => ({
+                        attributeName: row.attributeName,
+                        code: row.code,
+                        fullForm: row.fullForm ?? null,
+                    })),
+                    skipDuplicates: true,
+                });
+            }
+        }, { timeout: 60000 })
+    );
+
+    return res.json({ success: true, upserted: deduped.length });
+}
+

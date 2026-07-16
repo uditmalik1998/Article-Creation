@@ -180,6 +180,13 @@ export default function Admin() {
   const [colorMasterProgress, setColorMasterProgress] = useState<number>(0);
   const colorFileRef = useRef<HTMLInputElement | null>(null);
 
+  // National Grid Master
+  const [nationalGridTotal, setNationalGridTotal] = useState<number | null>(null);
+  const [nationalGridStatusLoading, setNationalGridStatusLoading] = useState(false);
+  const [nationalGridUploading, setNationalGridUploading] = useState(false);
+  const [nationalGridProgress, setNationalGridProgress] = useState<number>(0);
+  const nationalGridFileRef = useRef<HTMLInputElement | null>(null);
+
   // Hierarchy Excel Upload (two-step)
   const [hierarchyExcelStatus, setHierarchyExcelStatus] = useState<HierarchyExcelStatus | null>(null);
   const [hierarchyExcelStatusLoading, setHierarchyExcelStatusLoading] = useState(false);
@@ -572,6 +579,175 @@ export default function Admin() {
     }
   };
 
+  // ─────────────────────────────── National Grid Master ───────────────────────────────
+  const downloadNationalGridTemplate = async () => {
+    try {
+      const xlsx = await import('xlsx');
+
+      // Vertical format matching NATIONAL_GRID_VERTICAL_SEQUENCED.xlsx
+      // Row 1: title, Row 2: blank, Row 3: headers, Row 4: blank, Row 5+: data
+      const headers = ['F_GRD_SR', 'F_GRID_NM', 'CHILD_GRID_SR NO', 'M_GRID_NM', 'G_CHILD_SR NO', 'G_CHILD_GRID_VAL', 'FULL FORM', 'GRID_STATUS'];
+
+      const title  = ['', 'MDM NATIONAL GRID - VERTICAL SEQUENCED', '', '', '', '', '', ''];
+      const blank  = ['', '', '', '', '', '', '', ''];
+      const sample = [
+        ['1', 'FAB', '1.01', 'M_FAB_DIV', '1.01.01', 'K',   'KNIT',   'ACT'],
+        ['1', 'FAB', '1.01', 'M_FAB_DIV', '1.01.02', 'W',   'WOVEN',  'ACT'],
+        ['1', 'FAB', '1.01', 'M_FAB_DIV', '1.01.03', 'DNM', 'DENIM',  'ACT'],
+        ['2', 'FAB', '1.02', 'M_YARN',    '1.02.01', 'C',   'COTTON', 'ACT'],
+        ['2', 'FAB', '1.02', 'M_YARN',    '1.02.02', 'P',   'POLYESTER', 'ACT'],
+      ];
+      // 15 empty rows after samples
+      const emptyRows = Array.from({ length: 15 }, () => Array(8).fill(''));
+
+      const aoa = [title, blank, headers, blank, ...sample, ...emptyRows];
+      const ws = xlsx.utils.aoa_to_sheet(aoa);
+      ws['!cols'] = [{ wch: 10 }, { wch: 12 }, { wch: 16 }, { wch: 26 }, { wch: 14 }, { wch: 22 }, { wch: 32 }, { wch: 14 }];
+
+      const wb = xlsx.utils.book_new();
+      xlsx.utils.book_append_sheet(wb, ws, 'NATIONAL_GRID_SEQ');
+      xlsx.writeFile(wb, 'NATIONAL_GRID_TEMPLATE.xlsx');
+    } catch {
+      message.error('Failed to generate template');
+    }
+  };
+
+  const loadNationalGridStatus = useCallback(async () => {
+    setNationalGridStatusLoading(true);
+    try {
+      const token = localStorage.getItem('authToken');
+      const res = await fetch(`${APP_CONFIG.api.baseURL}/admin/national-grid?limit=1`, {
+        headers: token ? { Authorization: `Bearer ${token}` } : {},
+      });
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.error || 'Failed to load national grid status');
+      setNationalGridTotal(data.total ?? 0);
+    } catch (err: any) {
+      message.error(err?.message || 'Failed to load national grid status');
+    } finally {
+      setNationalGridStatusLoading(false);
+    }
+  }, []);
+
+  const handleNationalGridUpload = async (file: File) => {
+    if (!file.name.match(/\.(xlsx|xls)$/i)) {
+      message.error('Please select an Excel file (.xlsx or .xls)');
+      return;
+    }
+    setNationalGridUploading(true);
+    setNationalGridProgress(10);
+    try {
+      const xlsx = await import('xlsx');
+      const buf  = await file.arrayBuffer();
+      const wb   = xlsx.read(buf, { type: 'array' });
+      const ws   = wb.Sheets[wb.SheetNames[0]];
+
+      // Read as 2D array to detect format
+      const aoa = xlsx.utils.sheet_to_json<unknown[]>(ws, { header: 1, defval: '' }) as string[][];
+      setNationalGridProgress(30);
+
+      type GridRow = { attributeName: string; code: string; fullForm: string | null };
+      const rows: GridRow[] = [];
+      let skipped = 0;
+
+      // Detect VERTICAL format: Row 3 (index 2) contains M_GRID_NM and G_CHILD_GRID_VAL headers
+      const row3Headers = (aoa[2] || []).map((v) => String(v).trim().toUpperCase());
+      const isVertical = row3Headers.includes('M_GRID_NM') && row3Headers.includes('G_CHILD_GRID_VAL');
+
+      // Detect BASE_HORIZONTAL format: Row 4 (index 3) col 0 is a real SAP attribute key
+      const SKIP = new Set(['VALUE', 'FULL FORM', 'STATUS', 'DIV', 'OK', 'IMP ATBT', 'AGE GROUP', '']);
+      const row4 = (aoa[3] || []).map((v) => String(v).trim());
+      const isBaseHorizontal = !isVertical && row4.length > 0 && !!row4[0] && !SKIP.has(row4[0]) && !SKIP.has(row4[0].toUpperCase());
+
+      if (isVertical) {
+        // Vertical format: headers in Row 3 (index 2), data from Row 5 (index 4)
+        const attrIdx   = row3Headers.indexOf('M_GRID_NM');
+        const codeIdx   = row3Headers.indexOf('G_CHILD_GRID_VAL');
+        const formIdx   = row3Headers.indexOf('FULL FORM');
+        const statusIdx = row3Headers.indexOf('GRID_STATUS');
+
+        for (let r = 4; r < aoa.length; r++) {
+          const row = aoa[r];
+          const attributeName = String(row[attrIdx] ?? '').trim();
+          const code          = String(row[codeIdx] ?? '').trim();
+          const fullForm      = formIdx >= 0 ? String(row[formIdx] ?? '').trim() || null : null;
+          const status        = statusIdx >= 0 ? String(row[statusIdx] ?? '').trim().toUpperCase() : 'ACT';
+          if (!attributeName || !code) { skipped++; continue; }
+          if (status && status !== 'ACT') { skipped++; continue; } // skip inactive
+          rows.push({ attributeName, code, fullForm });
+        }
+      } else if (isBaseHorizontal) {
+        // BASE_HORIZONTAL: discover block starts from Row 4, data from Row 6+
+        const blocks: { colIdx: number; attributeName: string }[] = [];
+        const seen = new Set<string>();
+        for (let c = 0; c < row4.length; c++) {
+          const v = row4[c];
+          if (v && !SKIP.has(v) && !SKIP.has(v.toUpperCase()) && !seen.has(v)) {
+            blocks.push({ colIdx: c, attributeName: v });
+            seen.add(v);
+          }
+        }
+        for (let r = 5; r < aoa.length; r++) {
+          const row = aoa[r];
+          for (const { colIdx, attributeName } of blocks) {
+            const code     = String(row[colIdx + 1] ?? '').trim();
+            const fullForm = String(row[colIdx + 2] ?? '').trim() || null;
+            if (!code) continue;
+            rows.push({ attributeName, code, fullForm });
+          }
+        }
+      } else {
+        // Simple column format: attribute_name | code | full_form
+        const raw = xlsx.utils.sheet_to_json<Record<string, unknown>>(ws, { defval: '' });
+        if (raw.length === 0) { message.warning('No rows found in file.'); return; }
+
+        const hdrKeys  = Object.keys(raw[0]).map((h) => h.trim().toLowerCase().replace(/\s+/g, '_'));
+        const origKeys = Object.keys(raw[0]);
+        const findCol  = (aliases: string[]) => {
+          const idx = hdrKeys.findIndex((h) => aliases.includes(h));
+          return idx >= 0 ? origKeys[idx] : null;
+        };
+        const attrCol = findCol(['attribute_name', 'attributename', 'attribute', 'attr', 'sapkey', 'm_grid_nm']);
+        const codeCol = findCol(['code', 'value', 'val', 'g_child_grid_val']);
+        const formCol = findCol(['full_form', 'fullform', 'description', 'desc', 'full form']);
+
+        if (!attrCol || !codeCol) {
+          message.error('File must have "M_GRID_NM" and "G_CHILD_GRID_VAL" columns (or "attribute_name" and "code").');
+          return;
+        }
+        for (const row of raw) {
+          const attributeName = String(row[attrCol] ?? '').trim();
+          const code          = String(row[codeCol] ?? '').trim();
+          const fullForm      = formCol ? String(row[formCol] ?? '').trim() || null : null;
+          if (!attributeName || !code) { skipped++; continue; }
+          rows.push({ attributeName, code, fullForm });
+        }
+      }
+
+      if (rows.length === 0) { message.warning(`No valid rows found (${skipped} empty rows skipped).`); return; }
+      setNationalGridProgress(70);
+
+      // POST to backend
+      const token = localStorage.getItem('authToken');
+      const res = await fetch(`${APP_CONFIG.api.baseURL}/admin/national-grid/import`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json', ...(token ? { Authorization: `Bearer ${token}` } : {}) },
+        body: JSON.stringify({ rows }),
+      });
+      setNationalGridProgress(95);
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.error || 'Import failed');
+      message.success(`${data.upserted} rows upserted${skipped ? ` (${skipped} empty rows skipped)` : ''}.`);
+      await loadNationalGridStatus();
+    } catch (err: any) {
+      message.error(err?.message || 'Upload failed');
+    } finally {
+      setNationalGridUploading(false);
+      setTimeout(() => setNationalGridProgress(0), 1500);
+      if (nationalGridFileRef.current) nationalGridFileRef.current.value = '';
+    }
+  };
+
   // ─────────────────────────────── Hierarchy Excel ───────────────────────────────
   const loadHierarchyExcelStatus = useCallback(async () => {
     setHierarchyExcelStatusLoading(true);
@@ -664,10 +840,11 @@ export default function Admin() {
     loadMandatoryGridStatus();
     loadSizeMasterStatus();
     loadColorMasterStatus();
+    loadNationalGridStatus();
     loadHierarchyExcelStatus();
     loadPipelineStatus();
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [loadVendorStatus, loadMajCatGridStatus, loadMandatoryGridStatus, loadSizeMasterStatus, loadColorMasterStatus, loadHierarchyExcelStatus, loadPipelineStatus]);
+  }, [loadVendorStatus, loadMajCatGridStatus, loadMandatoryGridStatus, loadSizeMasterStatus, loadColorMasterStatus, loadNationalGridStatus, loadHierarchyExcelStatus, loadPipelineStatus]);
 
   const loadData = async () => {
     setLoading(true);
@@ -1513,6 +1690,96 @@ export default function Admin() {
                       <button
                         type="button"
                         onClick={() => mandatoryFileRef.current?.click()}
+                        className="flex w-full flex-col items-center justify-center rounded-md border-2 border-dashed border-border bg-muted/30 px-4 py-6 transition-colors hover:border-[#FF6F61] hover:bg-[#FF6F61]/5"
+                      >
+                        <Inbox className="mb-2 h-8 w-8 text-[#FF6F61]" />
+                        <p className="text-[13px]">
+                          Click to upload <strong>.xlsx</strong> file
+                        </p>
+                        <p className="text-[11px] text-muted-foreground">Only Excel files. Max 50 MB.</p>
+                      </button>
+                    )}
+                  </div>
+                </div>
+              </div>
+            </Spinner>
+          </CardContent>
+        </Card>
+
+        {/* National Grid Master Upload (attribute-code validation table) */}
+        <Card className="mb-6 glass rounded-2xl border border-white/60">
+          <CardHeader className="flex flex-row items-center justify-between">
+            <CardTitle className="flex items-center gap-2 text-base">
+              <TableIcon className="h-4 w-4" />
+              National Grid (Attribute Values)
+            </CardTitle>
+            <div className="flex gap-2">
+              <Button size="sm" variant="outline" onClick={downloadNationalGridTemplate}>
+                <Download />
+                Download Template
+              </Button>
+              <Button size="sm" variant="outline" onClick={loadNationalGridStatus} disabled={nationalGridStatusLoading}>
+                <RotateCw className={nationalGridStatusLoading ? 'animate-spin' : ''} />
+                Refresh Status
+              </Button>
+            </div>
+          </CardHeader>
+          <CardContent>
+            <Spinner spinning={nationalGridStatusLoading}>
+              <div className="grid grid-cols-1 gap-4 md:grid-cols-12">
+                {/* Status panel */}
+                <div className="md:col-span-7">
+                  {nationalGridTotal !== null && nationalGridTotal > 0 ? (
+                    <Descriptions bordered>
+                      <Descriptions.Item label="Total (attribute, code) pairs">
+                        <Badge variant="success">{nationalGridTotal.toLocaleString()}</Badge>
+                      </Descriptions.Item>
+                      <Descriptions.Item label="Usage">
+                        Validated on every article modify before SAP &amp; DB update.
+                      </Descriptions.Item>
+                    </Descriptions>
+                  ) : (
+                    <Alert
+                      type="warning"
+                      showIcon
+                      message="No national grid data loaded"
+                      description="Upload an Excel with columns attribute_name, code, full_form to populate the validation table. The template below shows the expected format."
+                    />
+                  )}
+                </div>
+
+                {/* Upload panel */}
+                <div className="md:col-span-5">
+                  <div className="rounded-md border border-border p-4">
+                    <div className="mb-1 font-semibold">Upload National Grid Excel</div>
+                    <div className="mb-3 text-xs text-muted-foreground">
+                      Accepts the vertical sequenced format — columns <strong>M_GRID_NM</strong>, <strong>G_CHILD_GRID_VAL</strong>, <strong>FULL FORM</strong>, <strong>GRID_STATUS</strong>.
+                      Only <code>ACT</code> rows are imported. <strong className="text-destructive">Uploading replaces the entire table.</strong>
+                    </div>
+
+                    <input
+                      ref={nationalGridFileRef}
+                      type="file"
+                      accept=".xlsx,.xls"
+                      className="hidden"
+                      onChange={(e) => {
+                        const file = e.target.files?.[0];
+                        if (file) handleNationalGridUpload(file);
+                      }}
+                    />
+
+                    {nationalGridUploading ? (
+                      <div>
+                        <div className="mb-2 text-[13px] text-[#FF6F61]">
+                          <RefreshCw className="mr-1.5 inline-block h-3.5 w-3.5 animate-spin" />
+                          Parsing &amp; importing rows...
+                        </div>
+                        <Progress value={nationalGridProgress} />
+                      </div>
+                    ) : (
+                      <button
+                        type="button"
+                        onClick={() => nationalGridFileRef.current?.click()}
                         className="flex w-full flex-col items-center justify-center rounded-md border-2 border-dashed border-border bg-muted/30 px-4 py-6 transition-colors hover:border-[#FF6F61] hover:bg-[#FF6F61]/5"
                       >
                         <Inbox className="mb-2 h-8 w-8 text-[#FF6F61]" />
