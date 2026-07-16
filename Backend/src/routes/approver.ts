@@ -44,6 +44,9 @@ router.all('/items/:id', h(async (req, res, next) => {
   return;
 }));
 
+// Validate changes against National Grid without touching SAP or the DB.
+router.post('/items/:id/validate-modify', h(ApproverController.validateModify));
+
 // Modify an already-created (SAP-synced) article: pushes attribute changes to
 // SAP via patch-bulk, then persists locally only on success.
 router.post('/items/:id/modify', requireApprovalRights, h(ApproverController.modifyItem));
