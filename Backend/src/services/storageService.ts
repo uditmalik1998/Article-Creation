@@ -660,6 +660,30 @@ export class StorageService {
             { expiresIn: 604800 }
         );
     }
+
+    /**
+     * Server-side copy of one object within the model-images bucket (e.g. promoting a
+     * generated view into the E-commerce/ folder). No download/re-upload — R2 copies
+     * the bytes internally. CopySource must be URL-encoded per path segment because
+     * article-number keys can contain spaces (e.g. "1110106859-DARK GREY/front.jpg").
+     */
+    async copyModelImage(sourceKey: string, destKey: string): Promise<string> {
+        const encodedSource = sourceKey.split('/').map(encodeURIComponent).join('/');
+        await this.modelImagesS3Client.send(new CopyObjectCommand({
+            Bucket: this.modelImagesBucket,
+            CopySource: `${this.modelImagesBucket}/${encodedSource}`,
+            Key: destKey,
+        }));
+        console.log(`✅ Copied model image: ${sourceKey} → ${destKey}`);
+        if (this.modelImagesPublicUrlBase) {
+            return this.buildPublicUrl(this.modelImagesPublicUrlBase, this.modelImagesBucket, destKey);
+        }
+        return getSignedUrl(
+            this.modelImagesS3Client,
+            new GetObjectCommand({ Bucket: this.modelImagesBucket, Key: destKey }),
+            { expiresIn: 604800 }
+        );
+    }
 }
 
 export const storageService = new StorageService();

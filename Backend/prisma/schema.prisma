@@ -425,6 +425,22 @@ model ModelGenerationResult {
   @@schema("public")
 }
 
+/// Model Image Approval: article-level record of promotion to the E-commerce/ folder.
+/// One row per article number (the color-specific code, e.g. "1110106859-DARK GREY").
+model ModelImageApproval {
+  id            String   @id @default(uuid())
+  articleNumber String   @unique @map("article_number") @db.VarChar(100)
+  approvedBy    Int?     @map("approved_by")             // users.id of the approver
+  approvedAt    DateTime @default(now()) @map("approved_at")
+  ecommerceUrls Json?    @map("ecommerce_urls")          // { "1": url, "2": url, ... }
+  createdAt     DateTime @default(now()) @map("created_at")
+  updatedAt     DateTime @updatedAt @map("updated_at")
+
+  @@index([approvedBy])
+  @@map("model_image_approvals")
+  @@schema("public")
+}
+
 /// MVGR Lookup: Reference table for Macro MVGR, Main MVGR, and M_FAB2 codes
 model MvgrLookup {
   id        Int      @id @default(autoincrement())

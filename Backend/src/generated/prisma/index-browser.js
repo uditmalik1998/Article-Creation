@@ -398,6 +398,16 @@ exports.Prisma.ModelGenerationResultScalarFieldEnum = {
   updatedAt: 'updatedAt'
 };
 
+exports.Prisma.ModelImageApprovalScalarFieldEnum = {
+  id: 'id',
+  articleNumber: 'articleNumber',
+  approvedBy: 'approvedBy',
+  approvedAt: 'approvedAt',
+  ecommerceUrls: 'ecommerceUrls',
+  createdAt: 'createdAt',
+  updatedAt: 'updatedAt'
+};
+
 exports.Prisma.MvgrLookupScalarFieldEnum = {
   id: 'id',
   type: 'type',
@@ -1013,6 +1023,11 @@ exports.Prisma.ModelGenerationResultOrderByRelevanceFieldEnum = {
   colour: 'colour'
 };
 
+exports.Prisma.ModelImageApprovalOrderByRelevanceFieldEnum = {
+  id: 'id',
+  articleNumber: 'articleNumber'
+};
+
 exports.Prisma.MvgrLookupOrderByRelevanceFieldEnum = {
   type: 'type',
   code: 'code',
@@ -1391,6 +1406,7 @@ exports.Prisma.ModelName = {
   ExtractionResult: 'ExtractionResult',
   ExtractionResultFlat: 'ExtractionResultFlat',
   ModelGenerationResult: 'ModelGenerationResult',
+  ModelImageApproval: 'ModelImageApproval',
   MvgrLookup: 'MvgrLookup',
   MasterVendorDetail: 'MasterVendorDetail',
   User: 'User',

@@ -114,9 +114,10 @@ IMAGE SIZE (STRICT):
 - Center the model/garment on the canvas
 
 BACKGROUND:
-- Simple solid color studio background
-- Neutral tone complementing the garment (white, off-white, light grey, beige)
-- Soft studio lighting, clean even illumination
+- Smooth, seamless studio backdrop with a SOFT RADIAL GRADIENT (not a flat solid fill): brightest directly behind and around the model (a gentle glow/halo centered on the upper body and head), gradually fading to a slightly deeper tone toward the edges and corners — a subtle, even vignette.
+- Use a soft, muted PASTEL tone that complements the garment's colour (e.g. pale lilac, soft seafoam/mint, buttery pale yellow, blush, powder blue, warm beige). Always keep the backdrop lighter, softer, and less saturated than the garment so the product stands out. Never bold, dark, or heavily saturated.
+- Matte and completely textureless — no seams, no floor line, no horizon, no props, no patterns, no gradients banding.
+- Soft, even studio lighting with only a faint, soft contact shadow near the feet — no hard or harsh shadows.
 
 GARMENT PRESERVATION RULES (ABSOLUTE):
 - Color: ${colorInstr}
@@ -211,6 +212,9 @@ IGNORE EVERYTHING ELSE about this reference image: its pose, body angle, camera 
       contents: [{ role: 'user', parts }],
       config: {
         responseModalities: [Modality.IMAGE],
+        // Enforce the 2:3 portrait ratio at the API level — the model ignores
+        // aspect-ratio wording in the text prompt, so it must be set here.
+        imageConfig: { aspectRatio: '2:3' },
         safetySettings: [
           { category: 'HARM_CATEGORY_SEXUALLY_EXPLICIT', threshold: 'BLOCK_NONE' },
         ],
