@@ -65,6 +65,12 @@ export type ExtractionResultFlat = $Result.DefaultSelection<Prisma.$ExtractionRe
  */
 export type ModelGenerationResult = $Result.DefaultSelection<Prisma.$ModelGenerationResultPayload>
 /**
+ * Model ModelImageApproval
+ * Model Image Approval: article-level record of promotion to the E-commerce/ folder.
+ * One row per article number (the color-specific code, e.g. "1110106859-DARK GREY").
+ */
+export type ModelImageApproval = $Result.DefaultSelection<Prisma.$ModelImageApprovalPayload>
+/**
  * Model MvgrLookup
  * MVGR Lookup: Reference table for Macro MVGR, Main MVGR, and M_FAB2 codes
  */
@@ -562,6 +568,16 @@ export class PrismaClient<
     * ```
     */
   get modelGenerationResult(): Prisma.ModelGenerationResultDelegate<ExtArgs, ClientOptions>;
+
+  /**
+   * `prisma.modelImageApproval`: Exposes CRUD operations for the **ModelImageApproval** model.
+    * Example usage:
+    * ```ts
+    * // Fetch zero or more ModelImageApprovals
+    * const modelImageApprovals = await prisma.modelImageApproval.findMany()
+    * ```
+    */
+  get modelImageApproval(): Prisma.ModelImageApprovalDelegate<ExtArgs, ClientOptions>;
 
   /**
    * `prisma.mvgrLookup`: Exposes CRUD operations for the **MvgrLookup** model.
@@ -1242,6 +1258,7 @@ export namespace Prisma {
     ExtractionResult: 'ExtractionResult',
     ExtractionResultFlat: 'ExtractionResultFlat',
     ModelGenerationResult: 'ModelGenerationResult',
+    ModelImageApproval: 'ModelImageApproval',
     MvgrLookup: 'MvgrLookup',
     MasterVendorDetail: 'MasterVendorDetail',
     User: 'User',
@@ -1283,7 +1300,7 @@ export namespace Prisma {
       omit: GlobalOmitOptions
     }
     meta: {
-      modelProps: "department" | "subDepartment" | "category" | "masterAttribute" | "attributeAllowedValue" | "categoryAttribute" | "extractionJob" | "extractionResult" | "extractionResultFlat" | "modelGenerationResult" | "mvgrLookup" | "masterVendorDetail" | "user" | "auditLog" | "apiKey" | "changeHistory" | "costSummary" | "article360" | "articleFab" | "articleBody" | "articleVaAcc" | "articleVaPrcs" | "articleBom" | "sapFieldConfig" | "sapAttributeValue" | "article360Flat" | "rawArticle" | "srmSyncRun" | "srmSyncRunItem" | "poolBJob" | "poolBBatch" | "nationalGridMaster" | "modifyLog"
+      modelProps: "department" | "subDepartment" | "category" | "masterAttribute" | "attributeAllowedValue" | "categoryAttribute" | "extractionJob" | "extractionResult" | "extractionResultFlat" | "modelGenerationResult" | "modelImageApproval" | "mvgrLookup" | "masterVendorDetail" | "user" | "auditLog" | "apiKey" | "changeHistory" | "costSummary" | "article360" | "articleFab" | "articleBody" | "articleVaAcc" | "articleVaPrcs" | "articleBom" | "sapFieldConfig" | "sapAttributeValue" | "article360Flat" | "rawArticle" | "srmSyncRun" | "srmSyncRunItem" | "poolBJob" | "poolBBatch" | "nationalGridMaster" | "modifyLog"
       txIsolationLevel: Prisma.TransactionIsolationLevel
     }
     model: {
@@ -2024,6 +2041,80 @@ export namespace Prisma {
           count: {
             args: Prisma.ModelGenerationResultCountArgs<ExtArgs>
             result: $Utils.Optional<ModelGenerationResultCountAggregateOutputType> | number
+          }
+        }
+      }
+      ModelImageApproval: {
+        payload: Prisma.$ModelImageApprovalPayload<ExtArgs>
+        fields: Prisma.ModelImageApprovalFieldRefs
+        operations: {
+          findUnique: {
+            args: Prisma.ModelImageApprovalFindUniqueArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$ModelImageApprovalPayload> | null
+          }
+          findUniqueOrThrow: {
+            args: Prisma.ModelImageApprovalFindUniqueOrThrowArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$ModelImageApprovalPayload>
+          }
+          findFirst: {
+            args: Prisma.ModelImageApprovalFindFirstArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$ModelImageApprovalPayload> | null
+          }
+          findFirstOrThrow: {
+            args: Prisma.ModelImageApprovalFindFirstOrThrowArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$ModelImageApprovalPayload>
+          }
+          findMany: {
+            args: Prisma.ModelImageApprovalFindManyArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$ModelImageApprovalPayload>[]
+          }
+          create: {
+            args: Prisma.ModelImageApprovalCreateArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$ModelImageApprovalPayload>
+          }
+          createMany: {
+            args: Prisma.ModelImageApprovalCreateManyArgs<ExtArgs>
+            result: BatchPayload
+          }
+          createManyAndReturn: {
+            args: Prisma.ModelImageApprovalCreateManyAndReturnArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$ModelImageApprovalPayload>[]
+          }
+          delete: {
+            args: Prisma.ModelImageApprovalDeleteArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$ModelImageApprovalPayload>
+          }
+          update: {
+            args: Prisma.ModelImageApprovalUpdateArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$ModelImageApprovalPayload>
+          }
+          deleteMany: {
+            args: Prisma.ModelImageApprovalDeleteManyArgs<ExtArgs>
+            result: BatchPayload
+          }
+          updateMany: {
+            args: Prisma.ModelImageApprovalUpdateManyArgs<ExtArgs>
+            result: BatchPayload
+          }
+          updateManyAndReturn: {
+            args: Prisma.ModelImageApprovalUpdateManyAndReturnArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$ModelImageApprovalPayload>[]
+          }
+          upsert: {
+            args: Prisma.ModelImageApprovalUpsertArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$ModelImageApprovalPayload>
+          }
+          aggregate: {
+            args: Prisma.ModelImageApprovalAggregateArgs<ExtArgs>
+            result: $Utils.Optional<AggregateModelImageApproval>
+          }
+          groupBy: {
+            args: Prisma.ModelImageApprovalGroupByArgs<ExtArgs>
+            result: $Utils.Optional<ModelImageApprovalGroupByOutputType>[]
+          }
+          count: {
+            args: Prisma.ModelImageApprovalCountArgs<ExtArgs>
+            result: $Utils.Optional<ModelImageApprovalCountAggregateOutputType> | number
           }
         }
       }
@@ -3831,6 +3922,7 @@ export namespace Prisma {
     extractionResult?: ExtractionResultOmit
     extractionResultFlat?: ExtractionResultFlatOmit
     modelGenerationResult?: ModelGenerationResultOmit
+    modelImageApproval?: ModelImageApprovalOmit
     mvgrLookup?: MvgrLookupOmit
     masterVendorDetail?: MasterVendorDetailOmit
     user?: UserOmit
@@ -18324,6 +18416,1057 @@ export namespace Prisma {
      * Omit specific fields from the ModelGenerationResult
      */
     omit?: ModelGenerationResultOmit<ExtArgs> | null
+  }
+
+
+  /**
+   * Model ModelImageApproval
+   */
+
+  export type AggregateModelImageApproval = {
+    _count: ModelImageApprovalCountAggregateOutputType | null
+    _avg: ModelImageApprovalAvgAggregateOutputType | null
+    _sum: ModelImageApprovalSumAggregateOutputType | null
+    _min: ModelImageApprovalMinAggregateOutputType | null
+    _max: ModelImageApprovalMaxAggregateOutputType | null
+  }
+
+  export type ModelImageApprovalAvgAggregateOutputType = {
+    approvedBy: number | null
+  }
+
+  export type ModelImageApprovalSumAggregateOutputType = {
+    approvedBy: number | null
+  }
+
+  export type ModelImageApprovalMinAggregateOutputType = {
+    id: string | null
+    articleNumber: string | null
+    approvedBy: number | null
+    approvedAt: Date | null
+    createdAt: Date | null
+    updatedAt: Date | null
+  }
+
+  export type ModelImageApprovalMaxAggregateOutputType = {
+    id: string | null
+    articleNumber: string | null
+    approvedBy: number | null
+    approvedAt: Date | null
+    createdAt: Date | null
+    updatedAt: Date | null
+  }
+
+  export type ModelImageApprovalCountAggregateOutputType = {
+    id: number
+    articleNumber: number
+    approvedBy: number
+    approvedAt: number
+    ecommerceUrls: number
+    createdAt: number
+    updatedAt: number
+    _all: number
+  }
+
+
+  export type ModelImageApprovalAvgAggregateInputType = {
+    approvedBy?: true
+  }
+
+  export type ModelImageApprovalSumAggregateInputType = {
+    approvedBy?: true
+  }
+
+  export type ModelImageApprovalMinAggregateInputType = {
+    id?: true
+    articleNumber?: true
+    approvedBy?: true
+    approvedAt?: true
+    createdAt?: true
+    updatedAt?: true
+  }
+
+  export type ModelImageApprovalMaxAggregateInputType = {
+    id?: true
+    articleNumber?: true
+    approvedBy?: true
+    approvedAt?: true
+    createdAt?: true
+    updatedAt?: true
+  }
+
+  export type ModelImageApprovalCountAggregateInputType = {
+    id?: true
+    articleNumber?: true
+    approvedBy?: true
+    approvedAt?: true
+    ecommerceUrls?: true
+    createdAt?: true
+    updatedAt?: true
+    _all?: true
+  }
+
+  export type ModelImageApprovalAggregateArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Filter which ModelImageApproval to aggregate.
+     */
+    where?: ModelImageApprovalWhereInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
+     * 
+     * Determine the order of ModelImageApprovals to fetch.
+     */
+    orderBy?: ModelImageApprovalOrderByWithRelationInput | ModelImageApprovalOrderByWithRelationInput[]
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
+     * 
+     * Sets the start position
+     */
+    cursor?: ModelImageApprovalWhereUniqueInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Take `±n` ModelImageApprovals from the position of the cursor.
+     */
+    take?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Skip the first `n` ModelImageApprovals.
+     */
+    skip?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     * 
+     * Count returned ModelImageApprovals
+    **/
+    _count?: true | ModelImageApprovalCountAggregateInputType
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     * 
+     * Select which fields to average
+    **/
+    _avg?: ModelImageApprovalAvgAggregateInputType
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     * 
+     * Select which fields to sum
+    **/
+    _sum?: ModelImageApprovalSumAggregateInputType
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     * 
+     * Select which fields to find the minimum value
+    **/
+    _min?: ModelImageApprovalMinAggregateInputType
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     * 
+     * Select which fields to find the maximum value
+    **/
+    _max?: ModelImageApprovalMaxAggregateInputType
+  }
+
+  export type GetModelImageApprovalAggregateType<T extends ModelImageApprovalAggregateArgs> = {
+        [P in keyof T & keyof AggregateModelImageApproval]: P extends '_count' | 'count'
+      ? T[P] extends true
+        ? number
+        : GetScalarType<T[P], AggregateModelImageApproval[P]>
+      : GetScalarType<T[P], AggregateModelImageApproval[P]>
+  }
+
+
+
+
+  export type ModelImageApprovalGroupByArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    where?: ModelImageApprovalWhereInput
+    orderBy?: ModelImageApprovalOrderByWithAggregationInput | ModelImageApprovalOrderByWithAggregationInput[]
+    by: ModelImageApprovalScalarFieldEnum[] | ModelImageApprovalScalarFieldEnum
+    having?: ModelImageApprovalScalarWhereWithAggregatesInput
+    take?: number
+    skip?: number
+    _count?: ModelImageApprovalCountAggregateInputType | true
+    _avg?: ModelImageApprovalAvgAggregateInputType
+    _sum?: ModelImageApprovalSumAggregateInputType
+    _min?: ModelImageApprovalMinAggregateInputType
+    _max?: ModelImageApprovalMaxAggregateInputType
+  }
+
+  export type ModelImageApprovalGroupByOutputType = {
+    id: string
+    articleNumber: string
+    approvedBy: number | null
+    approvedAt: Date
+    ecommerceUrls: JsonValue | null
+    createdAt: Date
+    updatedAt: Date
+    _count: ModelImageApprovalCountAggregateOutputType | null
+    _avg: ModelImageApprovalAvgAggregateOutputType | null
+    _sum: ModelImageApprovalSumAggregateOutputType | null
+    _min: ModelImageApprovalMinAggregateOutputType | null
+    _max: ModelImageApprovalMaxAggregateOutputType | null
+  }
+
+  type GetModelImageApprovalGroupByPayload<T extends ModelImageApprovalGroupByArgs> = Prisma.PrismaPromise<
+    Array<
+      PickEnumerable<ModelImageApprovalGroupByOutputType, T['by']> &
+        {
+          [P in ((keyof T) & (keyof ModelImageApprovalGroupByOutputType))]: P extends '_count'
+            ? T[P] extends boolean
+              ? number
+              : GetScalarType<T[P], ModelImageApprovalGroupByOutputType[P]>
+            : GetScalarType<T[P], ModelImageApprovalGroupByOutputType[P]>
+        }
+      >
+    >
+
+
+  export type ModelImageApprovalSelect<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
+    id?: boolean
+    articleNumber?: boolean
+    approvedBy?: boolean
+    approvedAt?: boolean
+    ecommerceUrls?: boolean
+    createdAt?: boolean
+    updatedAt?: boolean
+  }, ExtArgs["result"]["modelImageApproval"]>
+
+  export type ModelImageApprovalSelectCreateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
+    id?: boolean
+    articleNumber?: boolean
+    approvedBy?: boolean
+    approvedAt?: boolean
+    ecommerceUrls?: boolean
+    createdAt?: boolean
+    updatedAt?: boolean
+  }, ExtArgs["result"]["modelImageApproval"]>
+
+  export type ModelImageApprovalSelectUpdateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
+    id?: boolean
+    articleNumber?: boolean
+    approvedBy?: boolean
+    approvedAt?: boolean
+    ecommerceUrls?: boolean
+    createdAt?: boolean
+    updatedAt?: boolean
+  }, ExtArgs["result"]["modelImageApproval"]>
+
+  export type ModelImageApprovalSelectScalar = {
+    id?: boolean
+    articleNumber?: boolean
+    approvedBy?: boolean
+    approvedAt?: boolean
+    ecommerceUrls?: boolean
+    createdAt?: boolean
+    updatedAt?: boolean
+  }
+
+  export type ModelImageApprovalOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<"id" | "articleNumber" | "approvedBy" | "approvedAt" | "ecommerceUrls" | "createdAt" | "updatedAt", ExtArgs["result"]["modelImageApproval"]>
+
+  export type $ModelImageApprovalPayload<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    name: "ModelImageApproval"
+    objects: {}
+    scalars: $Extensions.GetPayloadResult<{
+      id: string
+      articleNumber: string
+      approvedBy: number | null
+      approvedAt: Date
+      ecommerceUrls: Prisma.JsonValue | null
+      createdAt: Date
+      updatedAt: Date
+    }, ExtArgs["result"]["modelImageApproval"]>
+    composites: {}
+  }
+
+  type ModelImageApprovalGetPayload<S extends boolean | null | undefined | ModelImageApprovalDefaultArgs> = $Result.GetResult<Prisma.$ModelImageApprovalPayload, S>
+
+  type ModelImageApprovalCountArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> =
+    Omit<ModelImageApprovalFindManyArgs, 'select' | 'include' | 'distinct' | 'omit'> & {
+      select?: ModelImageApprovalCountAggregateInputType | true
+    }
+
+  export interface ModelImageApprovalDelegate<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs, GlobalOmitOptions = {}> {
+    [K: symbol]: { types: Prisma.TypeMap<ExtArgs>['model']['ModelImageApproval'], meta: { name: 'ModelImageApproval' } }
+    /**
+     * Find zero or one ModelImageApproval that matches the filter.
+     * @param {ModelImageApprovalFindUniqueArgs} args - Arguments to find a ModelImageApproval
+     * @example
+     * // Get one ModelImageApproval
+     * const modelImageApproval = await prisma.modelImageApproval.findUnique({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     */
+    findUnique<T extends ModelImageApprovalFindUniqueArgs>(args: SelectSubset<T, ModelImageApprovalFindUniqueArgs<ExtArgs>>): Prisma__ModelImageApprovalClient<$Result.GetResult<Prisma.$ModelImageApprovalPayload<ExtArgs>, T, "findUnique", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Find one ModelImageApproval that matches the filter or throw an error with `error.code='P2025'`
+     * if no matches were found.
+     * @param {ModelImageApprovalFindUniqueOrThrowArgs} args - Arguments to find a ModelImageApproval
+     * @example
+     * // Get one ModelImageApproval
+     * const modelImageApproval = await prisma.modelImageApproval.findUniqueOrThrow({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     */
+    findUniqueOrThrow<T extends ModelImageApprovalFindUniqueOrThrowArgs>(args: SelectSubset<T, ModelImageApprovalFindUniqueOrThrowArgs<ExtArgs>>): Prisma__ModelImageApprovalClient<$Result.GetResult<Prisma.$ModelImageApprovalPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Find the first ModelImageApproval that matches the filter.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {ModelImageApprovalFindFirstArgs} args - Arguments to find a ModelImageApproval
+     * @example
+     * // Get one ModelImageApproval
+     * const modelImageApproval = await prisma.modelImageApproval.findFirst({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     */
+    findFirst<T extends ModelImageApprovalFindFirstArgs>(args?: SelectSubset<T, ModelImageApprovalFindFirstArgs<ExtArgs>>): Prisma__ModelImageApprovalClient<$Result.GetResult<Prisma.$ModelImageApprovalPayload<ExtArgs>, T, "findFirst", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Find the first ModelImageApproval that matches the filter or
+     * throw `PrismaKnownClientError` with `P2025` code if no matches were found.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {ModelImageApprovalFindFirstOrThrowArgs} args - Arguments to find a ModelImageApproval
+     * @example
+     * // Get one ModelImageApproval
+     * const modelImageApproval = await prisma.modelImageApproval.findFirstOrThrow({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     */
+    findFirstOrThrow<T extends ModelImageApprovalFindFirstOrThrowArgs>(args?: SelectSubset<T, ModelImageApprovalFindFirstOrThrowArgs<ExtArgs>>): Prisma__ModelImageApprovalClient<$Result.GetResult<Prisma.$ModelImageApprovalPayload<ExtArgs>, T, "findFirstOrThrow", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Find zero or more ModelImageApprovals that matches the filter.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {ModelImageApprovalFindManyArgs} args - Arguments to filter and select certain fields only.
+     * @example
+     * // Get all ModelImageApprovals
+     * const modelImageApprovals = await prisma.modelImageApproval.findMany()
+     * 
+     * // Get first 10 ModelImageApprovals
+     * const modelImageApprovals = await prisma.modelImageApproval.findMany({ take: 10 })
+     * 
+     * // Only select the `id`
+     * const modelImageApprovalWithIdOnly = await prisma.modelImageApproval.findMany({ select: { id: true } })
+     * 
+     */
+    findMany<T extends ModelImageApprovalFindManyArgs>(args?: SelectSubset<T, ModelImageApprovalFindManyArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$ModelImageApprovalPayload<ExtArgs>, T, "findMany", GlobalOmitOptions>>
+
+    /**
+     * Create a ModelImageApproval.
+     * @param {ModelImageApprovalCreateArgs} args - Arguments to create a ModelImageApproval.
+     * @example
+     * // Create one ModelImageApproval
+     * const ModelImageApproval = await prisma.modelImageApproval.create({
+     *   data: {
+     *     // ... data to create a ModelImageApproval
+     *   }
+     * })
+     * 
+     */
+    create<T extends ModelImageApprovalCreateArgs>(args: SelectSubset<T, ModelImageApprovalCreateArgs<ExtArgs>>): Prisma__ModelImageApprovalClient<$Result.GetResult<Prisma.$ModelImageApprovalPayload<ExtArgs>, T, "create", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Create many ModelImageApprovals.
+     * @param {ModelImageApprovalCreateManyArgs} args - Arguments to create many ModelImageApprovals.
+     * @example
+     * // Create many ModelImageApprovals
+     * const modelImageApproval = await prisma.modelImageApproval.createMany({
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     *     
+     */
+    createMany<T extends ModelImageApprovalCreateManyArgs>(args?: SelectSubset<T, ModelImageApprovalCreateManyArgs<ExtArgs>>): Prisma.PrismaPromise<BatchPayload>
+
+    /**
+     * Create many ModelImageApprovals and returns the data saved in the database.
+     * @param {ModelImageApprovalCreateManyAndReturnArgs} args - Arguments to create many ModelImageApprovals.
+     * @example
+     * // Create many ModelImageApprovals
+     * const modelImageApproval = await prisma.modelImageApproval.createManyAndReturn({
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     * 
+     * // Create many ModelImageApprovals and only return the `id`
+     * const modelImageApprovalWithIdOnly = await prisma.modelImageApproval.createManyAndReturn({
+     *   select: { id: true },
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * 
+     */
+    createManyAndReturn<T extends ModelImageApprovalCreateManyAndReturnArgs>(args?: SelectSubset<T, ModelImageApprovalCreateManyAndReturnArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$ModelImageApprovalPayload<ExtArgs>, T, "createManyAndReturn", GlobalOmitOptions>>
+
+    /**
+     * Delete a ModelImageApproval.
+     * @param {ModelImageApprovalDeleteArgs} args - Arguments to delete one ModelImageApproval.
+     * @example
+     * // Delete one ModelImageApproval
+     * const ModelImageApproval = await prisma.modelImageApproval.delete({
+     *   where: {
+     *     // ... filter to delete one ModelImageApproval
+     *   }
+     * })
+     * 
+     */
+    delete<T extends ModelImageApprovalDeleteArgs>(args: SelectSubset<T, ModelImageApprovalDeleteArgs<ExtArgs>>): Prisma__ModelImageApprovalClient<$Result.GetResult<Prisma.$ModelImageApprovalPayload<ExtArgs>, T, "delete", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Update one ModelImageApproval.
+     * @param {ModelImageApprovalUpdateArgs} args - Arguments to update one ModelImageApproval.
+     * @example
+     * // Update one ModelImageApproval
+     * const modelImageApproval = await prisma.modelImageApproval.update({
+     *   where: {
+     *     // ... provide filter here
+     *   },
+     *   data: {
+     *     // ... provide data here
+     *   }
+     * })
+     * 
+     */
+    update<T extends ModelImageApprovalUpdateArgs>(args: SelectSubset<T, ModelImageApprovalUpdateArgs<ExtArgs>>): Prisma__ModelImageApprovalClient<$Result.GetResult<Prisma.$ModelImageApprovalPayload<ExtArgs>, T, "update", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Delete zero or more ModelImageApprovals.
+     * @param {ModelImageApprovalDeleteManyArgs} args - Arguments to filter ModelImageApprovals to delete.
+     * @example
+     * // Delete a few ModelImageApprovals
+     * const { count } = await prisma.modelImageApproval.deleteMany({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     * 
+     */
+    deleteMany<T extends ModelImageApprovalDeleteManyArgs>(args?: SelectSubset<T, ModelImageApprovalDeleteManyArgs<ExtArgs>>): Prisma.PrismaPromise<BatchPayload>
+
+    /**
+     * Update zero or more ModelImageApprovals.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {ModelImageApprovalUpdateManyArgs} args - Arguments to update one or more rows.
+     * @example
+     * // Update many ModelImageApprovals
+     * const modelImageApproval = await prisma.modelImageApproval.updateMany({
+     *   where: {
+     *     // ... provide filter here
+     *   },
+     *   data: {
+     *     // ... provide data here
+     *   }
+     * })
+     * 
+     */
+    updateMany<T extends ModelImageApprovalUpdateManyArgs>(args: SelectSubset<T, ModelImageApprovalUpdateManyArgs<ExtArgs>>): Prisma.PrismaPromise<BatchPayload>
+
+    /**
+     * Update zero or more ModelImageApprovals and returns the data updated in the database.
+     * @param {ModelImageApprovalUpdateManyAndReturnArgs} args - Arguments to update many ModelImageApprovals.
+     * @example
+     * // Update many ModelImageApprovals
+     * const modelImageApproval = await prisma.modelImageApproval.updateManyAndReturn({
+     *   where: {
+     *     // ... provide filter here
+     *   },
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     * 
+     * // Update zero or more ModelImageApprovals and only return the `id`
+     * const modelImageApprovalWithIdOnly = await prisma.modelImageApproval.updateManyAndReturn({
+     *   select: { id: true },
+     *   where: {
+     *     // ... provide filter here
+     *   },
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * 
+     */
+    updateManyAndReturn<T extends ModelImageApprovalUpdateManyAndReturnArgs>(args: SelectSubset<T, ModelImageApprovalUpdateManyAndReturnArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$ModelImageApprovalPayload<ExtArgs>, T, "updateManyAndReturn", GlobalOmitOptions>>
+
+    /**
+     * Create or update one ModelImageApproval.
+     * @param {ModelImageApprovalUpsertArgs} args - Arguments to update or create a ModelImageApproval.
+     * @example
+     * // Update or create a ModelImageApproval
+     * const modelImageApproval = await prisma.modelImageApproval.upsert({
+     *   create: {
+     *     // ... data to create a ModelImageApproval
+     *   },
+     *   update: {
+     *     // ... in case it already exists, update
+     *   },
+     *   where: {
+     *     // ... the filter for the ModelImageApproval we want to update
+     *   }
+     * })
+     */
+    upsert<T extends ModelImageApprovalUpsertArgs>(args: SelectSubset<T, ModelImageApprovalUpsertArgs<ExtArgs>>): Prisma__ModelImageApprovalClient<$Result.GetResult<Prisma.$ModelImageApprovalPayload<ExtArgs>, T, "upsert", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+
+    /**
+     * Count the number of ModelImageApprovals.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {ModelImageApprovalCountArgs} args - Arguments to filter ModelImageApprovals to count.
+     * @example
+     * // Count the number of ModelImageApprovals
+     * const count = await prisma.modelImageApproval.count({
+     *   where: {
+     *     // ... the filter for the ModelImageApprovals we want to count
+     *   }
+     * })
+    **/
+    count<T extends ModelImageApprovalCountArgs>(
+      args?: Subset<T, ModelImageApprovalCountArgs>,
+    ): Prisma.PrismaPromise<
+      T extends $Utils.Record<'select', any>
+        ? T['select'] extends true
+          ? number
+          : GetScalarType<T['select'], ModelImageApprovalCountAggregateOutputType>
+        : number
+    >
+
+    /**
+     * Allows you to perform aggregations operations on a ModelImageApproval.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {ModelImageApprovalAggregateArgs} args - Select which aggregations you would like to apply and on what fields.
+     * @example
+     * // Ordered by age ascending
+     * // Where email contains prisma.io
+     * // Limited to the 10 users
+     * const aggregations = await prisma.user.aggregate({
+     *   _avg: {
+     *     age: true,
+     *   },
+     *   where: {
+     *     email: {
+     *       contains: "prisma.io",
+     *     },
+     *   },
+     *   orderBy: {
+     *     age: "asc",
+     *   },
+     *   take: 10,
+     * })
+    **/
+    aggregate<T extends ModelImageApprovalAggregateArgs>(args: Subset<T, ModelImageApprovalAggregateArgs>): Prisma.PrismaPromise<GetModelImageApprovalAggregateType<T>>
+
+    /**
+     * Group by ModelImageApproval.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {ModelImageApprovalGroupByArgs} args - Group by arguments.
+     * @example
+     * // Group by city, order by createdAt, get count
+     * const result = await prisma.user.groupBy({
+     *   by: ['city', 'createdAt'],
+     *   orderBy: {
+     *     createdAt: true
+     *   },
+     *   _count: {
+     *     _all: true
+     *   },
+     * })
+     * 
+    **/
+    groupBy<
+      T extends ModelImageApprovalGroupByArgs,
+      HasSelectOrTake extends Or<
+        Extends<'skip', Keys<T>>,
+        Extends<'take', Keys<T>>
+      >,
+      OrderByArg extends True extends HasSelectOrTake
+        ? { orderBy: ModelImageApprovalGroupByArgs['orderBy'] }
+        : { orderBy?: ModelImageApprovalGroupByArgs['orderBy'] },
+      OrderFields extends ExcludeUnderscoreKeys<Keys<MaybeTupleToUnion<T['orderBy']>>>,
+      ByFields extends MaybeTupleToUnion<T['by']>,
+      ByValid extends Has<ByFields, OrderFields>,
+      HavingFields extends GetHavingFields<T['having']>,
+      HavingValid extends Has<ByFields, HavingFields>,
+      ByEmpty extends T['by'] extends never[] ? True : False,
+      InputErrors extends ByEmpty extends True
+      ? `Error: "by" must not be empty.`
+      : HavingValid extends False
+      ? {
+          [P in HavingFields]: P extends ByFields
+            ? never
+            : P extends string
+            ? `Error: Field "${P}" used in "having" needs to be provided in "by".`
+            : [
+                Error,
+                'Field ',
+                P,
+                ` in "having" needs to be provided in "by"`,
+              ]
+        }[HavingFields]
+      : 'take' extends Keys<T>
+      ? 'orderBy' extends Keys<T>
+        ? ByValid extends True
+          ? {}
+          : {
+              [P in OrderFields]: P extends ByFields
+                ? never
+                : `Error: Field "${P}" in "orderBy" needs to be provided in "by"`
+            }[OrderFields]
+        : 'Error: If you provide "take", you also need to provide "orderBy"'
+      : 'skip' extends Keys<T>
+      ? 'orderBy' extends Keys<T>
+        ? ByValid extends True
+          ? {}
+          : {
+              [P in OrderFields]: P extends ByFields
+                ? never
+                : `Error: Field "${P}" in "orderBy" needs to be provided in "by"`
+            }[OrderFields]
+        : 'Error: If you provide "skip", you also need to provide "orderBy"'
+      : ByValid extends True
+      ? {}
+      : {
+          [P in OrderFields]: P extends ByFields
+            ? never
+            : `Error: Field "${P}" in "orderBy" needs to be provided in "by"`
+        }[OrderFields]
+    >(args: SubsetIntersection<T, ModelImageApprovalGroupByArgs, OrderByArg> & InputErrors): {} extends InputErrors ? GetModelImageApprovalGroupByPayload<T> : Prisma.PrismaPromise<InputErrors>
+  /**
+   * Fields of the ModelImageApproval model
+   */
+  readonly fields: ModelImageApprovalFieldRefs;
+  }
+
+  /**
+   * The delegate class that acts as a "Promise-like" for ModelImageApproval.
+   * Why is this prefixed with `Prisma__`?
+   * Because we want to prevent naming conflicts as mentioned in
+   * https://github.com/prisma/prisma-client-js/issues/707
+   */
+  export interface Prisma__ModelImageApprovalClient<T, Null = never, ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs, GlobalOmitOptions = {}> extends Prisma.PrismaPromise<T> {
+    readonly [Symbol.toStringTag]: "PrismaPromise"
+    /**
+     * Attaches callbacks for the resolution and/or rejection of the Promise.
+     * @param onfulfilled The callback to execute when the Promise is resolved.
+     * @param onrejected The callback to execute when the Promise is rejected.
+     * @returns A Promise for the completion of which ever callback is executed.
+     */
+    then<TResult1 = T, TResult2 = never>(onfulfilled?: ((value: T) => TResult1 | PromiseLike<TResult1>) | undefined | null, onrejected?: ((reason: any) => TResult2 | PromiseLike<TResult2>) | undefined | null): $Utils.JsPromise<TResult1 | TResult2>
+    /**
+     * Attaches a callback for only the rejection of the Promise.
+     * @param onrejected The callback to execute when the Promise is rejected.
+     * @returns A Promise for the completion of the callback.
+     */
+    catch<TResult = never>(onrejected?: ((reason: any) => TResult | PromiseLike<TResult>) | undefined | null): $Utils.JsPromise<T | TResult>
+    /**
+     * Attaches a callback that is invoked when the Promise is settled (fulfilled or rejected). The
+     * resolved value cannot be modified from the callback.
+     * @param onfinally The callback to execute when the Promise is settled (fulfilled or rejected).
+     * @returns A Promise for the completion of the callback.
+     */
+    finally(onfinally?: (() => void) | undefined | null): $Utils.JsPromise<T>
+  }
+
+
+
+
+  /**
+   * Fields of the ModelImageApproval model
+   */
+  interface ModelImageApprovalFieldRefs {
+    readonly id: FieldRef<"ModelImageApproval", 'String'>
+    readonly articleNumber: FieldRef<"ModelImageApproval", 'String'>
+    readonly approvedBy: FieldRef<"ModelImageApproval", 'Int'>
+    readonly approvedAt: FieldRef<"ModelImageApproval", 'DateTime'>
+    readonly ecommerceUrls: FieldRef<"ModelImageApproval", 'Json'>
+    readonly createdAt: FieldRef<"ModelImageApproval", 'DateTime'>
+    readonly updatedAt: FieldRef<"ModelImageApproval", 'DateTime'>
+  }
+    
+
+  // Custom InputTypes
+  /**
+   * ModelImageApproval findUnique
+   */
+  export type ModelImageApprovalFindUniqueArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the ModelImageApproval
+     */
+    select?: ModelImageApprovalSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the ModelImageApproval
+     */
+    omit?: ModelImageApprovalOmit<ExtArgs> | null
+    /**
+     * Filter, which ModelImageApproval to fetch.
+     */
+    where: ModelImageApprovalWhereUniqueInput
+  }
+
+  /**
+   * ModelImageApproval findUniqueOrThrow
+   */
+  export type ModelImageApprovalFindUniqueOrThrowArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the ModelImageApproval
+     */
+    select?: ModelImageApprovalSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the ModelImageApproval
+     */
+    omit?: ModelImageApprovalOmit<ExtArgs> | null
+    /**
+     * Filter, which ModelImageApproval to fetch.
+     */
+    where: ModelImageApprovalWhereUniqueInput
+  }
+
+  /**
+   * ModelImageApproval findFirst
+   */
+  export type ModelImageApprovalFindFirstArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the ModelImageApproval
+     */
+    select?: ModelImageApprovalSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the ModelImageApproval
+     */
+    omit?: ModelImageApprovalOmit<ExtArgs> | null
+    /**
+     * Filter, which ModelImageApproval to fetch.
+     */
+    where?: ModelImageApprovalWhereInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
+     * 
+     * Determine the order of ModelImageApprovals to fetch.
+     */
+    orderBy?: ModelImageApprovalOrderByWithRelationInput | ModelImageApprovalOrderByWithRelationInput[]
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
+     * 
+     * Sets the position for searching for ModelImageApprovals.
+     */
+    cursor?: ModelImageApprovalWhereUniqueInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Take `±n` ModelImageApprovals from the position of the cursor.
+     */
+    take?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Skip the first `n` ModelImageApprovals.
+     */
+    skip?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/distinct Distinct Docs}
+     * 
+     * Filter by unique combinations of ModelImageApprovals.
+     */
+    distinct?: ModelImageApprovalScalarFieldEnum | ModelImageApprovalScalarFieldEnum[]
+  }
+
+  /**
+   * ModelImageApproval findFirstOrThrow
+   */
+  export type ModelImageApprovalFindFirstOrThrowArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the ModelImageApproval
+     */
+    select?: ModelImageApprovalSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the ModelImageApproval
+     */
+    omit?: ModelImageApprovalOmit<ExtArgs> | null
+    /**
+     * Filter, which ModelImageApproval to fetch.
+     */
+    where?: ModelImageApprovalWhereInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
+     * 
+     * Determine the order of ModelImageApprovals to fetch.
+     */
+    orderBy?: ModelImageApprovalOrderByWithRelationInput | ModelImageApprovalOrderByWithRelationInput[]
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
+     * 
+     * Sets the position for searching for ModelImageApprovals.
+     */
+    cursor?: ModelImageApprovalWhereUniqueInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Take `±n` ModelImageApprovals from the position of the cursor.
+     */
+    take?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Skip the first `n` ModelImageApprovals.
+     */
+    skip?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/distinct Distinct Docs}
+     * 
+     * Filter by unique combinations of ModelImageApprovals.
+     */
+    distinct?: ModelImageApprovalScalarFieldEnum | ModelImageApprovalScalarFieldEnum[]
+  }
+
+  /**
+   * ModelImageApproval findMany
+   */
+  export type ModelImageApprovalFindManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the ModelImageApproval
+     */
+    select?: ModelImageApprovalSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the ModelImageApproval
+     */
+    omit?: ModelImageApprovalOmit<ExtArgs> | null
+    /**
+     * Filter, which ModelImageApprovals to fetch.
+     */
+    where?: ModelImageApprovalWhereInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
+     * 
+     * Determine the order of ModelImageApprovals to fetch.
+     */
+    orderBy?: ModelImageApprovalOrderByWithRelationInput | ModelImageApprovalOrderByWithRelationInput[]
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
+     * 
+     * Sets the position for listing ModelImageApprovals.
+     */
+    cursor?: ModelImageApprovalWhereUniqueInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Take `±n` ModelImageApprovals from the position of the cursor.
+     */
+    take?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Skip the first `n` ModelImageApprovals.
+     */
+    skip?: number
+    distinct?: ModelImageApprovalScalarFieldEnum | ModelImageApprovalScalarFieldEnum[]
+  }
+
+  /**
+   * ModelImageApproval create
+   */
+  export type ModelImageApprovalCreateArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the ModelImageApproval
+     */
+    select?: ModelImageApprovalSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the ModelImageApproval
+     */
+    omit?: ModelImageApprovalOmit<ExtArgs> | null
+    /**
+     * The data needed to create a ModelImageApproval.
+     */
+    data: XOR<ModelImageApprovalCreateInput, ModelImageApprovalUncheckedCreateInput>
+  }
+
+  /**
+   * ModelImageApproval createMany
+   */
+  export type ModelImageApprovalCreateManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * The data used to create many ModelImageApprovals.
+     */
+    data: ModelImageApprovalCreateManyInput | ModelImageApprovalCreateManyInput[]
+    skipDuplicates?: boolean
+  }
+
+  /**
+   * ModelImageApproval createManyAndReturn
+   */
+  export type ModelImageApprovalCreateManyAndReturnArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the ModelImageApproval
+     */
+    select?: ModelImageApprovalSelectCreateManyAndReturn<ExtArgs> | null
+    /**
+     * Omit specific fields from the ModelImageApproval
+     */
+    omit?: ModelImageApprovalOmit<ExtArgs> | null
+    /**
+     * The data used to create many ModelImageApprovals.
+     */
+    data: ModelImageApprovalCreateManyInput | ModelImageApprovalCreateManyInput[]
+    skipDuplicates?: boolean
+  }
+
+  /**
+   * ModelImageApproval update
+   */
+  export type ModelImageApprovalUpdateArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the ModelImageApproval
+     */
+    select?: ModelImageApprovalSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the ModelImageApproval
+     */
+    omit?: ModelImageApprovalOmit<ExtArgs> | null
+    /**
+     * The data needed to update a ModelImageApproval.
+     */
+    data: XOR<ModelImageApprovalUpdateInput, ModelImageApprovalUncheckedUpdateInput>
+    /**
+     * Choose, which ModelImageApproval to update.
+     */
+    where: ModelImageApprovalWhereUniqueInput
+  }
+
+  /**
+   * ModelImageApproval updateMany
+   */
+  export type ModelImageApprovalUpdateManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * The data used to update ModelImageApprovals.
+     */
+    data: XOR<ModelImageApprovalUpdateManyMutationInput, ModelImageApprovalUncheckedUpdateManyInput>
+    /**
+     * Filter which ModelImageApprovals to update
+     */
+    where?: ModelImageApprovalWhereInput
+    /**
+     * Limit how many ModelImageApprovals to update.
+     */
+    limit?: number
+  }
+
+  /**
+   * ModelImageApproval updateManyAndReturn
+   */
+  export type ModelImageApprovalUpdateManyAndReturnArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the ModelImageApproval
+     */
+    select?: ModelImageApprovalSelectUpdateManyAndReturn<ExtArgs> | null
+    /**
+     * Omit specific fields from the ModelImageApproval
+     */
+    omit?: ModelImageApprovalOmit<ExtArgs> | null
+    /**
+     * The data used to update ModelImageApprovals.
+     */
+    data: XOR<ModelImageApprovalUpdateManyMutationInput, ModelImageApprovalUncheckedUpdateManyInput>
+    /**
+     * Filter which ModelImageApprovals to update
+     */
+    where?: ModelImageApprovalWhereInput
+    /**
+     * Limit how many ModelImageApprovals to update.
+     */
+    limit?: number
+  }
+
+  /**
+   * ModelImageApproval upsert
+   */
+  export type ModelImageApprovalUpsertArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the ModelImageApproval
+     */
+    select?: ModelImageApprovalSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the ModelImageApproval
+     */
+    omit?: ModelImageApprovalOmit<ExtArgs> | null
+    /**
+     * The filter to search for the ModelImageApproval to update in case it exists.
+     */
+    where: ModelImageApprovalWhereUniqueInput
+    /**
+     * In case the ModelImageApproval found by the `where` argument doesn't exist, create a new ModelImageApproval with this data.
+     */
+    create: XOR<ModelImageApprovalCreateInput, ModelImageApprovalUncheckedCreateInput>
+    /**
+     * In case the ModelImageApproval was found with the provided `where` argument, update it with this data.
+     */
+    update: XOR<ModelImageApprovalUpdateInput, ModelImageApprovalUncheckedUpdateInput>
+  }
+
+  /**
+   * ModelImageApproval delete
+   */
+  export type ModelImageApprovalDeleteArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the ModelImageApproval
+     */
+    select?: ModelImageApprovalSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the ModelImageApproval
+     */
+    omit?: ModelImageApprovalOmit<ExtArgs> | null
+    /**
+     * Filter which ModelImageApproval to delete.
+     */
+    where: ModelImageApprovalWhereUniqueInput
+  }
+
+  /**
+   * ModelImageApproval deleteMany
+   */
+  export type ModelImageApprovalDeleteManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Filter which ModelImageApprovals to delete
+     */
+    where?: ModelImageApprovalWhereInput
+    /**
+     * Limit how many ModelImageApprovals to delete.
+     */
+    limit?: number
+  }
+
+  /**
+   * ModelImageApproval without action
+   */
+  export type ModelImageApprovalDefaultArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the ModelImageApproval
+     */
+    select?: ModelImageApprovalSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the ModelImageApproval
+     */
+    omit?: ModelImageApprovalOmit<ExtArgs> | null
   }
 
 
@@ -46374,6 +47517,19 @@ export namespace Prisma {
   export type ModelGenerationResultScalarFieldEnum = (typeof ModelGenerationResultScalarFieldEnum)[keyof typeof ModelGenerationResultScalarFieldEnum]
 
 
+  export const ModelImageApprovalScalarFieldEnum: {
+    id: 'id',
+    articleNumber: 'articleNumber',
+    approvedBy: 'approvedBy',
+    approvedAt: 'approvedAt',
+    ecommerceUrls: 'ecommerceUrls',
+    createdAt: 'createdAt',
+    updatedAt: 'updatedAt'
+  };
+
+  export type ModelImageApprovalScalarFieldEnum = (typeof ModelImageApprovalScalarFieldEnum)[keyof typeof ModelImageApprovalScalarFieldEnum]
+
+
   export const MvgrLookupScalarFieldEnum: {
     id: 'id',
     type: 'type',
@@ -47104,6 +48260,14 @@ export namespace Prisma {
   };
 
   export type ModelGenerationResultOrderByRelevanceFieldEnum = (typeof ModelGenerationResultOrderByRelevanceFieldEnum)[keyof typeof ModelGenerationResultOrderByRelevanceFieldEnum]
+
+
+  export const ModelImageApprovalOrderByRelevanceFieldEnum: {
+    id: 'id',
+    articleNumber: 'articleNumber'
+  };
+
+  export type ModelImageApprovalOrderByRelevanceFieldEnum = (typeof ModelImageApprovalOrderByRelevanceFieldEnum)[keyof typeof ModelImageApprovalOrderByRelevanceFieldEnum]
 
 
   export const MvgrLookupOrderByRelevanceFieldEnum: {
@@ -49330,6 +50494,71 @@ export namespace Prisma {
     userId?: IntNullableWithAggregatesFilter<"ModelGenerationResult"> | number | null
     createdAt?: DateTimeWithAggregatesFilter<"ModelGenerationResult"> | Date | string
     updatedAt?: DateTimeWithAggregatesFilter<"ModelGenerationResult"> | Date | string
+  }
+
+  export type ModelImageApprovalWhereInput = {
+    AND?: ModelImageApprovalWhereInput | ModelImageApprovalWhereInput[]
+    OR?: ModelImageApprovalWhereInput[]
+    NOT?: ModelImageApprovalWhereInput | ModelImageApprovalWhereInput[]
+    id?: StringFilter<"ModelImageApproval"> | string
+    articleNumber?: StringFilter<"ModelImageApproval"> | string
+    approvedBy?: IntNullableFilter<"ModelImageApproval"> | number | null
+    approvedAt?: DateTimeFilter<"ModelImageApproval"> | Date | string
+    ecommerceUrls?: JsonNullableFilter<"ModelImageApproval">
+    createdAt?: DateTimeFilter<"ModelImageApproval"> | Date | string
+    updatedAt?: DateTimeFilter<"ModelImageApproval"> | Date | string
+  }
+
+  export type ModelImageApprovalOrderByWithRelationInput = {
+    id?: SortOrder
+    articleNumber?: SortOrder
+    approvedBy?: SortOrderInput | SortOrder
+    approvedAt?: SortOrder
+    ecommerceUrls?: SortOrderInput | SortOrder
+    createdAt?: SortOrder
+    updatedAt?: SortOrder
+    _relevance?: ModelImageApprovalOrderByRelevanceInput
+  }
+
+  export type ModelImageApprovalWhereUniqueInput = Prisma.AtLeast<{
+    id?: string
+    articleNumber?: string
+    AND?: ModelImageApprovalWhereInput | ModelImageApprovalWhereInput[]
+    OR?: ModelImageApprovalWhereInput[]
+    NOT?: ModelImageApprovalWhereInput | ModelImageApprovalWhereInput[]
+    approvedBy?: IntNullableFilter<"ModelImageApproval"> | number | null
+    approvedAt?: DateTimeFilter<"ModelImageApproval"> | Date | string
+    ecommerceUrls?: JsonNullableFilter<"ModelImageApproval">
+    createdAt?: DateTimeFilter<"ModelImageApproval"> | Date | string
+    updatedAt?: DateTimeFilter<"ModelImageApproval"> | Date | string
+  }, "id" | "articleNumber">
+
+  export type ModelImageApprovalOrderByWithAggregationInput = {
+    id?: SortOrder
+    articleNumber?: SortOrder
+    approvedBy?: SortOrderInput | SortOrder
+    approvedAt?: SortOrder
+    ecommerceUrls?: SortOrderInput | SortOrder
+    createdAt?: SortOrder
+    updatedAt?: SortOrder
+    _count?: ModelImageApprovalCountOrderByAggregateInput
+    _avg?: ModelImageApprovalAvgOrderByAggregateInput
+    _max?: ModelImageApprovalMaxOrderByAggregateInput
+    _min?: ModelImageApprovalMinOrderByAggregateInput
+    _sum?: ModelImageApprovalSumOrderByAggregateInput
+  }
+
+  export type ModelImageApprovalScalarWhereWithAggregatesInput = {
+    AND?: ModelImageApprovalScalarWhereWithAggregatesInput | ModelImageApprovalScalarWhereWithAggregatesInput[]
+    OR?: ModelImageApprovalScalarWhereWithAggregatesInput[]
+    NOT?: ModelImageApprovalScalarWhereWithAggregatesInput | ModelImageApprovalScalarWhereWithAggregatesInput[]
+    id?: StringWithAggregatesFilter<"ModelImageApproval"> | string
+    articleNumber?: StringWithAggregatesFilter<"ModelImageApproval"> | string
+    approvedBy?: IntNullableWithAggregatesFilter<"ModelImageApproval"> | number | null
+    approvedAt?: DateTimeWithAggregatesFilter<"ModelImageApproval"> | Date | string
+    ecommerceUrls?: JsonNullableWithAggregatesFilter<"ModelImageApproval">
+    createdAt?: DateTimeWithAggregatesFilter<"ModelImageApproval"> | Date | string
+    updatedAt?: DateTimeWithAggregatesFilter<"ModelImageApproval"> | Date | string
   }
 
   export type MvgrLookupWhereInput = {
@@ -53722,6 +54951,76 @@ export namespace Prisma {
     gender?: NullableStringFieldUpdateOperationsInput | string | null
     colour?: NullableStringFieldUpdateOperationsInput | string | null
     userId?: NullableIntFieldUpdateOperationsInput | number | null
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+  }
+
+  export type ModelImageApprovalCreateInput = {
+    id?: string
+    articleNumber: string
+    approvedBy?: number | null
+    approvedAt?: Date | string
+    ecommerceUrls?: NullableJsonNullValueInput | InputJsonValue
+    createdAt?: Date | string
+    updatedAt?: Date | string
+  }
+
+  export type ModelImageApprovalUncheckedCreateInput = {
+    id?: string
+    articleNumber: string
+    approvedBy?: number | null
+    approvedAt?: Date | string
+    ecommerceUrls?: NullableJsonNullValueInput | InputJsonValue
+    createdAt?: Date | string
+    updatedAt?: Date | string
+  }
+
+  export type ModelImageApprovalUpdateInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    articleNumber?: StringFieldUpdateOperationsInput | string
+    approvedBy?: NullableIntFieldUpdateOperationsInput | number | null
+    approvedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    ecommerceUrls?: NullableJsonNullValueInput | InputJsonValue
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+  }
+
+  export type ModelImageApprovalUncheckedUpdateInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    articleNumber?: StringFieldUpdateOperationsInput | string
+    approvedBy?: NullableIntFieldUpdateOperationsInput | number | null
+    approvedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    ecommerceUrls?: NullableJsonNullValueInput | InputJsonValue
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+  }
+
+  export type ModelImageApprovalCreateManyInput = {
+    id?: string
+    articleNumber: string
+    approvedBy?: number | null
+    approvedAt?: Date | string
+    ecommerceUrls?: NullableJsonNullValueInput | InputJsonValue
+    createdAt?: Date | string
+    updatedAt?: Date | string
+  }
+
+  export type ModelImageApprovalUpdateManyMutationInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    articleNumber?: StringFieldUpdateOperationsInput | string
+    approvedBy?: NullableIntFieldUpdateOperationsInput | number | null
+    approvedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    ecommerceUrls?: NullableJsonNullValueInput | InputJsonValue
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+  }
+
+  export type ModelImageApprovalUncheckedUpdateManyInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    articleNumber?: StringFieldUpdateOperationsInput | string
+    approvedBy?: NullableIntFieldUpdateOperationsInput | number | null
+    approvedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    ecommerceUrls?: NullableJsonNullValueInput | InputJsonValue
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
   }
@@ -58156,6 +59455,48 @@ export namespace Prisma {
     viewsDone?: SortOrder
     viewsFailed?: SortOrder
     userId?: SortOrder
+  }
+
+  export type ModelImageApprovalOrderByRelevanceInput = {
+    fields: ModelImageApprovalOrderByRelevanceFieldEnum | ModelImageApprovalOrderByRelevanceFieldEnum[]
+    sort: SortOrder
+    search: string
+  }
+
+  export type ModelImageApprovalCountOrderByAggregateInput = {
+    id?: SortOrder
+    articleNumber?: SortOrder
+    approvedBy?: SortOrder
+    approvedAt?: SortOrder
+    ecommerceUrls?: SortOrder
+    createdAt?: SortOrder
+    updatedAt?: SortOrder
+  }
+
+  export type ModelImageApprovalAvgOrderByAggregateInput = {
+    approvedBy?: SortOrder
+  }
+
+  export type ModelImageApprovalMaxOrderByAggregateInput = {
+    id?: SortOrder
+    articleNumber?: SortOrder
+    approvedBy?: SortOrder
+    approvedAt?: SortOrder
+    createdAt?: SortOrder
+    updatedAt?: SortOrder
+  }
+
+  export type ModelImageApprovalMinOrderByAggregateInput = {
+    id?: SortOrder
+    articleNumber?: SortOrder
+    approvedBy?: SortOrder
+    approvedAt?: SortOrder
+    createdAt?: SortOrder
+    updatedAt?: SortOrder
+  }
+
+  export type ModelImageApprovalSumOrderByAggregateInput = {
+    approvedBy?: SortOrder
   }
 
   export type MvgrLookupOrderByRelevanceInput = {
