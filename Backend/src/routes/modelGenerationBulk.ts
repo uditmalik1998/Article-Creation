@@ -2,6 +2,7 @@ import { Router, Request, Response, NextFunction } from 'express';
 import multer from 'multer';
 import path from 'path';
 import fs from 'fs';
+import crypto from 'crypto';
 import AdmZip from 'adm-zip';
 import {
   newJobId,
@@ -19,6 +20,7 @@ import {
 import { parseArticleCodesFromXlsx, parseArticleCodesFromText } from '../services/articleListParser';
 import { resolveArticleForGeneration } from '../services/articleModelSourceService';
 import { storageService } from '../services/storageService';
+import { prismaClient as prisma, withPrismaRetry } from '../utils/prisma';
 
 const router = Router();
 
@@ -423,6 +425,149 @@ router.get('/model-images/download', async (req: Request, res: Response) => {
   } catch (err: any) {
     console.error('[ModelGenBulk] model-image download failed:', err?.message);
     res.status(500).json({ success: false, error: err?.message || 'Download failed' });
+  }
+});
+
+// ─── POST /model-images/approve-ecommerce — copy an article's views into E-commerce/
+// Promotes a generated article's model images into the E-commerce/ folder of the same
+// bucket, renamed sequentially (no gaps) in canonical view order:
+//   E-commerce/{articleNumber}/1.jpg (front), 2.jpg (back), 3.jpg (side), 4.jpg (3/4), 5.jpg (closeup)
+const ECOMMERCE_PREFIX = 'E-commerce';
+const APPROVE_VIEW_ORDER = ['front', 'back', 'side', 'three_quarter', 'left_side', 'closeup'];
+
+router.post('/model-images/approve-ecommerce', async (req: Request, res: Response) => {
+  const articleNumber = String(req.body?.articleNumber || '').trim();
+  if (!articleNumber || articleNumber.includes('..') || articleNumber.includes('/')) {
+    res.status(400).json({ success: false, error: 'A valid articleNumber is required' });
+    return;
+  }
+
+  try {
+    // Gather this article's view images (prefix "{articleNumber}/" — never matches the
+    // E-commerce/ copies, which live under a different top-level prefix).
+    const { objects } = await storageService.listModelImages({ prefix: `${articleNumber}/`, limit: 1000 });
+    const views = objects
+      .map((o) => {
+        const rest = o.key.slice(articleNumber.length + 1); // strip "{articleNumber}/"
+        const view = rest.replace(/\.[^.]+$/, '');
+        return { key: o.key, view };
+      })
+      .filter((v) => v.view && !v.view.includes('/')); // only direct "{article}/{view}.ext" objects
+
+    if (views.length === 0) {
+      res.status(404).json({ success: false, error: 'No model images found for this article' });
+      return;
+    }
+
+    // Sort by canonical view order; unknown views go last but keep a stable order.
+    views.sort((a, b) => {
+      const ia = APPROVE_VIEW_ORDER.indexOf(a.view);
+      const ib = APPROVE_VIEW_ORDER.indexOf(b.view);
+      return (ia < 0 ? 99 : ia) - (ib < 0 ? 99 : ib);
+    });
+
+    // Sanitize the destination folder name — replace whitespace with hyphens so the
+    // E-commerce/ path is URL-safe (e.g. "DARK GREY" → "DARK-GREY"). Source keys keep
+    // their original spaced names; only the copy destination is normalized.
+    const safeArticleFolder = articleNumber.replace(/\s+/g, '-');
+
+    // Number sequentially with NO gaps: 1.jpg, 2.jpg, 3.jpg, ...
+    const copied: Array<{ view: string; number: number; url: string }> = [];
+    const ecommerceUrls: Record<string, string> = {};
+    for (let i = 0; i < views.length; i++) {
+      const number = i + 1;
+      const destKey = `${ECOMMERCE_PREFIX}/${safeArticleFolder}/${number}.jpg`;
+      const url = await storageService.copyModelImage(views[i].key, destKey);
+      copied.push({ view: views[i].view, number, url });
+      ecommerceUrls[String(number)] = url;
+    }
+
+    // Record who approved (last-approver-wins). Best-effort: the copy already succeeded,
+    // so a DB hiccup here shouldn't fail the whole request.
+    const approver = (req as any).user as { id: number; name: string } | undefined;
+    let approvedAt = new Date();
+    try {
+      const row = await withPrismaRetry(() =>
+        prisma.modelImageApproval.upsert({
+          where: { articleNumber },
+          create: { id: crypto.randomUUID(), articleNumber, approvedBy: approver?.id ?? null, ecommerceUrls },
+          update: { approvedBy: approver?.id ?? null, approvedAt: new Date(), ecommerceUrls },
+        })
+      );
+      approvedAt = row.approvedAt;
+    } catch (dbErr: any) {
+      console.error('[ModelGenBulk] approval DB record failed (files copied OK):', dbErr?.message);
+    }
+
+    console.log(`[ModelGenBulk] Approved ${copied.length} image(s) to ${ECOMMERCE_PREFIX}/ for article ${articleNumber} by user ${approver?.id ?? '?'}`);
+    res.json({
+      success: true,
+      articleNumber,
+      count: copied.length,
+      copied,
+      approvedBy: approver ? { id: approver.id, name: approver.name } : null,
+      approvedAt,
+    });
+  } catch (err: any) {
+    console.error('[ModelGenBulk] approve-ecommerce failed for', articleNumber, err?.message);
+    res.status(500).json({ success: false, error: err?.message || 'Failed to approve for e-commerce' });
+  }
+});
+
+// ─── GET /model-images/meta — per-article generator + approval info for the gallery ──
+// Returns a map { articleNumber: { generatedBy, approved, approvedBy, approvedAt } } so
+// the browser can show "Generated by …" and an "Approved" tag. Data is small (tens of
+// articles) so we return everything in one call.
+router.get('/model-images/meta', async (_req: Request, res: Response) => {
+  try {
+    const [genRows, apprRows] = await Promise.all([
+      withPrismaRetry(() =>
+        prisma.modelGenerationResult.findMany({
+          orderBy: { createdAt: 'desc' },
+          select: { articleNumber: true, userId: true, createdAt: true },
+        })
+      ),
+      withPrismaRetry(() =>
+        prisma.modelImageApproval.findMany({
+          select: { articleNumber: true, approvedBy: true, approvedAt: true },
+        })
+      ),
+    ]);
+
+    // Collect all user ids we need names for, then fetch in one query.
+    const userIds = new Set<number>();
+    for (const g of genRows) if (g.userId != null) userIds.add(g.userId);
+    for (const a of apprRows) if (a.approvedBy != null) userIds.add(a.approvedBy);
+    const users = userIds.size
+      ? await withPrismaRetry(() =>
+          prisma.user.findMany({ where: { id: { in: Array.from(userIds) } }, select: { id: true, name: true } })
+        )
+      : [];
+    const nameById = new Map(users.map((u) => [u.id, u.name]));
+
+    const meta: Record<string, any> = {};
+    // genRows are newest-first — keep the first (latest) generator seen per article.
+    for (const g of genRows) {
+      if (!meta[g.articleNumber]) {
+        meta[g.articleNumber] = {
+          generatedBy: g.userId != null ? { id: g.userId, name: nameById.get(g.userId) || `User ${g.userId}` } : null,
+          approved: false,
+          approvedBy: null,
+          approvedAt: null,
+        };
+      }
+    }
+    for (const a of apprRows) {
+      const entry = meta[a.articleNumber] || (meta[a.articleNumber] = { generatedBy: null, approved: false, approvedBy: null, approvedAt: null });
+      entry.approved = true;
+      entry.approvedBy = a.approvedBy != null ? { id: a.approvedBy, name: nameById.get(a.approvedBy) || `User ${a.approvedBy}` } : null;
+      entry.approvedAt = a.approvedAt;
+    }
+
+    res.json({ success: true, meta });
+  } catch (err: any) {
+    console.error('[ModelGenBulk] model-images/meta failed:', err?.message);
+    res.status(500).json({ success: false, error: err?.message || 'Failed to load image meta' });
   }
 });
 
