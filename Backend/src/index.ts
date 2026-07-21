@@ -41,6 +41,7 @@ import ksmlRoutes from './routes/ksml';
 import poolBRoutes from './routes/poolB';
 import { syncVendorMaster } from './services/vendorMasterSyncService';
 import { runRawArticleExtraction, isExtractionRunning } from './services/rawArticleExtractionService';
+import { startEventLoopWatchdog } from './utils/eventLoopWatchdog';
 
 const app = express();
 const PORT = parseInt(process.env.PORT || '5000', 10);
@@ -52,6 +53,14 @@ process.on('unhandledRejection', (reason: any) => {
 process.on('uncaughtException', (err: Error) => {
   console.error('❌ Uncaught exception (process kept alive):', err.message, err.stack);
 });
+
+// Optional event-loop freeze diagnostic (the "everything hangs / stuck on Starting…"
+// bug). OFF by default — it attaches a debugger to grab a stack, which is noisy.
+// Turn it on only while investigating a freeze:  WATCHDOG=true npm run dev
+// When enabled, the exact JS stack at a freeze is written to logs/eventloop-block.log.
+if (process.env.WATCHDOG === 'true') {
+  startEventLoopWatchdog();
+}
 const isProduction = process.env.NODE_ENV === 'production';
 const RATE_LIMIT_WINDOW_MS = parseInt(process.env.RATE_LIMIT_WINDOW_MS || `${15 * 60 * 1000}`, 10);
 const RATE_LIMIT_MAX = parseInt(process.env.RATE_LIMIT_MAX || '1000', 10);
@@ -501,6 +510,15 @@ app.use(errorHandler);
         ? '\n🔄 SIGINT received, shutting down gracefully...'
         : '🔄 SIGTERM received, shutting down gracefully...');
 
+      // Safety net: never let shutdown hang. If cleanup or a lingering connection
+      // stalls, force-exit so the OS releases the port and the next start is clean.
+      // (This is the fix for "works on first run, gets stuck after a stop/start".)
+      const forceExit = setTimeout(() => {
+        console.error('⚠️  Graceful shutdown timed out — forcing exit.');
+        process.exit(1);
+      }, 8000);
+      forceExit.unref();
+
       try {
         await flushAuditLogsOnShutdown();
       } catch (error) {
@@ -521,8 +539,16 @@ app.use(errorHandler);
         }
 
         console.log('✅ Server closed');
+        clearTimeout(forceExit);
         process.exit(0);
       });
+
+      // server.close() waits for ALL open connections to finish before its
+      // callback runs. Browser keep-alive sockets and long-running background
+      // jobs never close on their own, so without this the callback (and the
+      // process.exit above) would never fire — the process hangs and keeps
+      // holding the port. Dropping the sockets lets close() complete now.
+      server.closeAllConnections();
     };
 
     process.once('SIGTERM', () => {
