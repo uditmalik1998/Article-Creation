@@ -19,7 +19,36 @@ function getAIClient(): GoogleGenAI {
 const MAX_RETRIES = 2;
 const MAX_WORKERS = 4;
 
-function buildPrompt(
+// Two fixed studio backdrops, chosen per ARTICLE (from its garment colour) so that all
+// of an article's views share the SAME backdrop. Rule: a DARK garment gets a LIGHT
+// backdrop; a LIGHT garment gets a slightly DEEPER backdrop — so the product always
+// stands out against the background. Both are overridable via env.
+export const LIGHT_BACKDROP = process.env.MODELGEN_BG_LIGHT || 'soft light powder blue (like #D8E6F2)';
+export const DEEPER_BACKDROP = process.env.MODELGEN_BG_DEEP || 'soft muted slate blue-grey (like #A9B8C9)';
+
+const DARK_COLOR_WORDS = ['black', 'navy', 'charcoal', 'maroon', 'burgundy', 'wine', 'brown', 'coffee', 'chocolate', 'espresso', 'olive', 'forest', 'bottle', 'indigo', 'midnight', 'ink', 'jet', 'dark', 'deep', 'teal', 'emerald', 'rust', 'plum', 'aubergine'];
+const LIGHT_COLOR_WORDS = ['white', 'offwhite', 'off white', 'cream', 'ivory', 'beige', 'ecru', 'natural', 'oatmeal', 'sand', 'stone', 'champagne', 'pearl', 'pale', 'light', 'pastel', 'powder', 'mint', 'lemon', 'sky', 'blush', 'peach', 'lavender', 'lilac', 'silver', 'chalk'];
+
+// Decide the backdrop for a whole article from its garment colour name. Deterministic,
+// so every view of the article resolves to the SAME backdrop. Dark words are checked
+// first (e.g. "light navy" is treated as dark → light backdrop). Unknown/blank colour
+// falls back to the light backdrop.
+export function backgroundForGarment(colorName?: string): string {
+  const c = (colorName || '').toLowerCase().trim();
+  if (c) {
+    if (DARK_COLOR_WORDS.some((w) => c.includes(w))) return LIGHT_BACKDROP;   // dark garment → light backdrop
+    if (LIGHT_COLOR_WORDS.some((w) => c.includes(w))) return DEEPER_BACKDROP; // light garment → deeper backdrop
+  }
+  return LIGHT_BACKDROP;
+}
+
+// Back-compat shim for existing call sites that pass a filename/seed we no longer use.
+// Prefer backgroundForGarment(colorName). Defaults to the light backdrop.
+export function pickBackgroundColor(_seed?: string): string {
+  return LIGHT_BACKDROP;
+}
+
+export function buildPrompt(
   gender: string,
   bodytype: string,
   imageCount: string,
@@ -29,7 +58,8 @@ function buildPrompt(
   colorName?: string,
   hasColorImage?: boolean,
   attributesText?: string,
-  hasStyleReference?: boolean
+  hasStyleReference?: boolean,
+  backgroundColor?: string
 ): string {
   const genderLower = (gender || '').toLowerCase();
   let modelDesc: string;
@@ -60,17 +90,24 @@ function buildPrompt(
       ? `The garment's base color MUST change to ${colorName} in every view (front, back, side, closeup). This is a COLOR SWAP ONLY: the fabric's weave/knit structure, stripe or print pattern, yarn grain, and surface texture from the SOURCE_IMAGE must stay pixel-faithful and fully intact — do not flatten, smooth, or simplify the fabric into a solid untextured block of color.`
       : `The garment color MUST be IDENTICAL to the SOURCE_IMAGE. Do not change or shift the color in any view.`;
 
+  // Bottomwear (trousers/shorts/skirts) needs its own close-up subject — collar/placket/
+  // sleeve don't exist on a bottom.
+  const isLower = bodytype === 'Lower-Body';
+  const closeupSubject = isLower
+    ? 'the waistband, belt loops, a pocket, the hem/cuff, or the fabric weave of the bottomwear (NOT a collar, neckline, or sleeve — this is a bottom garment)'
+    : 'the collar, placket, chest, neckline, or a sleeve cuff of the garment';
+
   const viewMap: Record<string, string> = {
     front: 'Front-facing model pose showing the front of the garment clearly.',
-    back: 'Back-facing model pose showing the back of the garment clearly.',
+    back: 'REAR VIEW: the model is turned to face directly AWAY from the camera (a full ~180° turn) so the back of the head/hair faces the camera and the ENTIRE BACK of the garment is shown (back yoke, back seams/pleats, back pockets where present). The model\'s face must NOT be visible. This must unmistakably be the BACK of the garment — never the front, and never a near-front or slightly-turned angle.',
     left_side: 'Left side profile model pose showing the side fit of the garment.',
     side: 'Side profile model pose showing the side fit and full silhouette of the garment.',
     three_quarter: 'Three-quarter (45-degree) angle model pose showing the front and one side together.',
-    closeup: 'Tightly cropped macro close-up on one representative section of the garment (e.g. collar, placket, chest, or sleeve cuff) — frame it like a product-detail shot: fabric weave, stitching, buttons, and print/stripe pattern fill most of the frame at high magnification.',
+    closeup: `Tightly cropped macro close-up on one representative section of ${closeupSubject} — frame it like a product-detail shot: fabric weave, stitching, and any print/stripe pattern fill most of the frame at high magnification.`,
   };
 
   const framingRule = isCloseup
-    ? 'Crop TIGHT on the fabric/collar/placket area — the model\'s full body, full garment, legs, and most of the face must NOT be in frame. This must look like a zoomed-in product-detail shot, clearly tighter and closer than the front/back/side views, not another full or upper-body shot.'
+    ? `Crop TIGHT on ${isLower ? 'the waistband / pocket / hem / fabric' : 'the fabric / collar / placket'} area — the model's full body, full garment, legs, and most of the face must NOT be in frame. This must look like a zoomed-in product-detail shot, clearly tighter and closer than the front/back/side views, not another full or upper-body shot.`
     : bodytype === 'Lower-Body'
       ? 'Show ONLY from waist down to feet. Upper body must NOT appear in the frame.'
       : bodytype === 'Upper-Body'
@@ -113,17 +150,20 @@ IMAGE SIZE (STRICT):
 - Final output: 2:3 aspect ratio
 - Center the model/garment on the canvas
 
-BACKGROUND:
-- Smooth, seamless studio backdrop with a SOFT RADIAL GRADIENT (not a flat solid fill): brightest directly behind and around the model (a gentle glow/halo centered on the upper body and head), gradually fading to a slightly deeper tone toward the edges and corners — a subtle, even vignette.
-- Use a soft, muted PASTEL tone that complements the garment's colour (e.g. pale lilac, soft seafoam/mint, buttery pale yellow, blush, powder blue, warm beige). Always keep the backdrop lighter, softer, and less saturated than the garment so the product stands out. Never bold, dark, or heavily saturated.
-- Matte and completely textureless — no seams, no floor line, no horizon, no props, no patterns, no gradients banding.
-- Soft, even studio lighting with only a faint, soft contact shadow near the feet — no hard or harsh shadows.
+BACKGROUND (READ CAREFULLY — CONSISTENCY IS CRITICAL):
+- The backdrop MUST be a COMPLETELY FLAT, UNIFORM, SOLID SINGLE COLOUR filling the entire frame edge-to-edge and corner-to-corner — like a solid paint fill / plain seamless studio wall. NO gradient, NO glow, NO halo, NO vignette, NO darkening toward the edges or corners, NO lighting falloff. Every pixel of the background is the SAME colour.
+- ${backgroundColor
+    ? `That solid colour MUST be EXACTLY ${backgroundColor}. This exact colour is FIXED for this product and MUST be pixel-identical in every view (front, back, side, three-quarter, closeup) — the entire product set is shot on the identical solid backdrop. Do NOT pick, invent, brighten, darken, warm, cool, or shift to any other colour. Keep it soft, muted and clean so the garment stands out clearly against it.`
+    : `Use ONE soft, PALE, low-saturation PASTEL solid colour that complements the garment (e.g. pale lilac, soft mint, pale buttery yellow, blush, powder blue, warm off-white) — light and airy, never bold, deep, golden, warm-dark, or saturated. Use the SAME solid colour for every view of this product.`}
+- Matte and completely textureless — no seams, no floor line, no horizon, no props, no patterns, no banding, no shadows cast on the backdrop.
+- Bright, soft, EVEN studio lighting on the model, with only a faint soft contact shadow near the feet — no hard shadows, no moody/dramatic/spotlight lighting. The backdrop itself stays a flat even colour regardless of the lighting on the model.
 
 GARMENT PRESERVATION RULES (ABSOLUTE):
 - Color: ${colorInstr}
 - Fabric texture, weave/knit structure, and surface grain MUST remain fully intact and unchanged from the SOURCE_IMAGE — this holds true even when the color above is being changed; a colour change must never flatten or smooth away the woven texture
 - Pattern MUST match the SOURCE_IMAGE exactly at the same scale: replicate the same stripe/print WIDTH, SPACING, and DENSITY relative to the garment's width — do not widen, thin, stretch, respace, or redraw the pattern at a different scale. Count and reproduce the same number of visible stripes/repeats as the source. Stripes must stay straight and run in their original direction (e.g. vertical), following the natural drape of the fabric — no unnatural warping, twisting, or curving around body contours.
 - NO redesign, NO styling alteration, NO added accessories
+- REMOVE all price tags, swing tags, hang tags, size tags, care/brand labels, stickers, barcodes, and any dangling tags or strings from the garment. Even if such tags ARE visible in the SOURCE_IMAGE, the generated garment must appear completely clean and tag-free, as if worn — never render a price tag or label on the product.
 
 QUALITY STANDARD:
 - Ultra-HD realism
@@ -149,7 +189,8 @@ export async function runSingleGeneration(
   colorImageMime?: string,
   attributesText?: string,
   styleReferenceBuffer?: Buffer,
-  styleReferenceMime?: string
+  styleReferenceMime?: string,
+  backgroundColor?: string
 ): Promise<Buffer> {
   const hasColorImage = !!(colorImageBuffer && colorImageMime);
   const colorLockInstruction = hasColorImage
@@ -159,7 +200,7 @@ export async function runSingleGeneration(
       : `COLOR PRESERVE: Keep the garment color exactly as shown in the source image. Do not change, shift, or neutralize the color.`;
 
   const hasStyleReference = !!(styleReferenceBuffer && styleReferenceMime);
-  const promptText = buildPrompt(gender, bodytype, imageCount, viewDirection, broachPlacement, specialInstructions, colorName, hasColorImage, attributesText, hasStyleReference);
+  const promptText = buildPrompt(gender, bodytype, imageCount, viewDirection, broachPlacement, specialInstructions, colorName, hasColorImage, attributesText, hasStyleReference, backgroundColor);
 
   const parts: any[] = [
     { text: colorLockInstruction },
@@ -190,8 +231,10 @@ export async function runSingleGeneration(
   // a pose reference — only as a color/pattern/texture swatch.
   if (hasStyleReference) {
     parts.push({
-      text: `VIEW_CONSISTENCY_REFERENCE follows — a fashion photo already generated for a DIFFERENT view of this EXACT same garment. Use it for exactly ONE purpose: match its color, its stripe/print pattern width/spacing/density, and its fabric texture. Do NOT redraw the pattern at a different scale or shift the color.
-IGNORE EVERYTHING ELSE about this reference image: its pose, body angle, camera angle, crop, and framing are NOT to be copied. This output is the "${viewDirection}" view — its pose and framing MUST follow the View instruction below and MUST look visibly different from this reference photo's pose. Reproducing the same body orientation/angle as the reference is a FAILURE.`,
+      text: `VIEW_CONSISTENCY_REFERENCE follows — a fashion photo already generated for a DIFFERENT view of this EXACT same garment. Match TWO things to it EXACTLY:
+1. THE GARMENT — its color, its stripe/print pattern width/spacing/density, and its fabric texture. Do NOT redraw the pattern at a different scale or shift the color.
+2. THE BACKDROP — the studio background COLOUR, its gradient and its brightness MUST be PIXEL-FOR-PIXEL IDENTICAL to this reference. Every view of this product is shot on the SAME backdrop. Do NOT invent, shift, or re-pick a different background colour (e.g. do not switch from blue to green). A different backdrop colour from the reference is a FAILURE.
+IGNORE ONLY the reference's pose, body angle, camera angle, crop, and framing — those are NOT to be copied. This output is the "${viewDirection}" view — its pose and framing MUST follow the View instruction below and MUST look visibly different from this reference photo's pose. Reproducing the same body orientation/angle as the reference is a FAILURE.`,
     });
     parts.push({ inlineData: { mimeType: styleReferenceMime as string, data: (styleReferenceBuffer as Buffer).toString('base64') } });
   }
@@ -202,7 +245,7 @@ IGNORE EVERYTHING ELSE about this reference image: its pose, body angle, camera 
   const imageSizeKB = Math.round(imageBuffer.length / 1024);
   const base64SizeKB = Math.round((imageBuffer.length * 4 / 3) / 1024);
   console.log(`[ModelGen] Calling Gemini model: ${GEMINI_IMAGE_MODEL}, view: ${viewDirection}, gender: ${gender}, bodytype: ${bodytype}`);
-  console.log(`[ModelGen] color mode: ${hasColorImage ? 'IMAGE' : colorName ? `NAME(${colorName})` : 'SOURCE'} | style reference: ${hasStyleReference}`);
+  console.log(`[ModelGen] color mode: ${hasColorImage ? 'IMAGE' : colorName ? `NAME(${colorName})` : 'SOURCE'} | style reference: ${hasStyleReference} | background: ${backgroundColor ?? 'auto-pastel'}`);
   console.log(`[ModelGen] Image size: ${imageSizeKB} KB | base64 payload: ~${base64SizeKB} KB | Parts count: ${parts.length}`);
 
   let response: any;
@@ -269,6 +312,9 @@ async function safeGenerate(
   colorName?: string,
   colorImageFile?: Express.Multer.File
 ): Promise<Buffer> {
+  // Pick the backdrop from the garment colour (dark → light backdrop, light → deeper),
+  // so every view of this garment shares the same background.
+  const backgroundColor = backgroundForGarment(colorName);
   let lastError: Error | null = null;
   for (let attempt = 0; attempt < MAX_RETRIES; attempt++) {
     console.log(`[ModelGen] safeGenerate attempt ${attempt + 1}/${MAX_RETRIES} — file: ${file.originalname}, view: ${view}`);
@@ -288,7 +334,11 @@ async function safeGenerate(
         specialInstructions,
         colorName,
         colorImageFile?.buffer,
-        colorImageFile?.mimetype
+        colorImageFile?.mimetype,
+        undefined, // attributesText — not used in the batch pipeline
+        undefined, // styleReferenceBuffer
+        undefined, // styleReferenceMime
+        backgroundColor
       );
       console.log(`[ModelGen] safeGenerate SUCCESS on attempt ${attempt + 1} — file: ${file.originalname}, view: ${view}`);
       return buf;

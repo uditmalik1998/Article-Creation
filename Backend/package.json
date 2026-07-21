@@ -4,6 +4,7 @@
   "description": "Backend API for AI Fashion Attribute Extractor",
   "main": "dist/index.js",
   "scripts": {
+    "predev": "node scripts/free-port.js",
     "dev": "nodemon src/index.ts",
     "build": "prisma generate && tsc --skipLibCheck && npm run postbuild",
     "postbuild": "node -e \"require('fs').cpSync('src/generated', 'dist/generated', {recursive: true}); require('fs').cpSync('src/data', 'dist/data', {recursive: true})\"",
@@ -77,6 +78,7 @@
     "multer": "^2.0.2",
     "pg": "^8.16.3",
     "prisma": "6.17.1",
+    "sharp": "^0.35.3",
     "typescript": "^5.9.3",
     "xlsx": "^0.18.5",
     "zod": "^4.1.12"
