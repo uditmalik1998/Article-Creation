@@ -43,6 +43,25 @@ function deriveGender(division?: string | null, subDivision?: string | null): st
   return 'female'; // safe default
 }
 
+// Clear bottomwear / full-length keywords used to drive framing. Only confident matches
+// change the framing; anything else stays 'auto' (let the AI choose) so we never crop a
+// top wrongly.
+const BOTTOM_WORDS = ['TROUSER', 'PANT', 'JEAN', 'DENIM', 'SHORT', 'SKIRT', 'LEGGING', 'JEGGING', 'CHINO', 'CARGO', 'CULOTTE', 'PALAZZO', 'JOGGER', 'TRACK PANT', 'TRACKPANT', 'PYJAMA', 'PAJAMA', 'CAPRI', 'DHOTI', 'LOWER', 'BOTTOM'];
+const FULL_WORDS = ['DRESS', 'GOWN', 'JUMPSUIT', 'DUNGAREE', 'ROMPER', 'OVERALL', 'SAREE', 'ABAYA', 'KAFTAN', 'KURTA', 'NIGHTSUIT'];
+
+/**
+ * Decide framing (body type) from the article's category text. Bottomwear must be shot
+ * waist-down and full-length one-pieces head-to-toe; everything else is left to the AI
+ * ('auto'). This is what makes the Bottom-Category views (and their close-ups) correct.
+ */
+export function deriveBodyFraming(majorCategory?: string | null, articleType?: string | null): string {
+  const hay = [majorCategory, articleType].map((x) => String(x || '').toUpperCase()).join(' ');
+  if (!hay.trim()) return 'auto';
+  if (BOTTOM_WORDS.some((w) => hay.includes(w))) return 'Lower-Body';
+  if (FULL_WORDS.some((w) => hay.includes(w))) return 'Full-Body';
+  return 'auto';
+}
+
 // Garment attributes worth reinforcing in the prompt, in [field, label] pairs.
 // Null/blank values are skipped when the string is built.
 const ATTR_FIELDS: Array<[string, string]> = [
@@ -83,6 +102,8 @@ const ARTICLE_SELECT = {
   approvalStatus: true,
   division: true,
   subDivision: true,
+  majorCategory: true,
+  articleType: true,
   colour: true,
   variantColor: true,
   neck: true,
@@ -148,7 +169,7 @@ export async function resolveArticleForGeneration(code: string): Promise<Resolve
       found: true,
       imageUrl: String(row.imageUrl).trim(),
       gender: deriveGender(row.division, row.subDivision),
-      bodytype: 'auto',
+      bodytype: deriveBodyFraming(row.majorCategory, row.articleType),
       colorName: colour || undefined,
       attributesText: buildAttributesText(row),
     };
@@ -190,7 +211,7 @@ export async function resolveArticleForGeneration(code: string): Promise<Resolve
     found: true,
     imageUrl: String(row.imageUrl).trim(),
     gender: deriveGender(row.division, row.subDivision),
-    bodytype: 'auto',
+    bodytype: deriveBodyFraming(row.majorCategory, row.articleType),
     colorName: requestedColor || undefined,
     attributesText: buildAttributesText(row),
     isColorFallback: true,

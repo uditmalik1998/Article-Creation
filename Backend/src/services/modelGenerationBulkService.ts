@@ -1,7 +1,7 @@
 import fs from 'fs';
 import path from 'path';
 import crypto from 'crypto';
-import { runSingleGeneration } from './modelGenerationService';
+import { runSingleGeneration, backgroundForGarment } from './modelGenerationService';
 import { storageService } from './storageService';
 import { outputKeyFor } from './articleListParser';
 import type { ResolvedArticle } from './articleModelSourceService';
@@ -153,8 +153,16 @@ function persistJob(job: BulkJob): void {
   }
 }
 
-// Load any persisted jobs at module init so /status survives a restart for finished jobs.
-// In-flight (RUNNING/QUEUED) jobs are marked FAILED — we cannot safely resume them.
+// Load any persisted jobs at module init so /status survives a restart.
+//
+// A job that was still QUEUED/RUNNING when the server stopped is NOT auto-resumed
+// by default: doing so re-fires Gemini image generation on every boot, which was
+// pegging the event loop at 100% CPU and wedging the whole backend ("restart →
+// stuck on Starting…"). Instead the interrupted job is marked done-with-failures so
+// its state is honest, and the user can simply run it again from the UI. Set
+// MODELGEN_AUTO_RESUME=true to explicitly opt back into resume-on-boot.
+const AUTO_RESUME_ON_BOOT = process.env.MODELGEN_AUTO_RESUME === 'true';
+
 function rehydrateJobsFromDisk(): void {
   const root = path.join(process.cwd(), 'uploads', 'model-generation', 'jobs');
   if (!fs.existsSync(root)) return;
@@ -165,16 +173,32 @@ function rehydrateJobsFromDisk(): void {
     try {
       const job: BulkJob = JSON.parse(fs.readFileSync(file, 'utf-8'));
       if (job.status === 'QUEUED' || job.status === 'RUNNING') {
-        // Reset in-flight tasks back to PENDING and re-queue the job so a restart resumes it.
-        for (const t of job.tasks) {
-          if (t.status === 'RUNNING') t.status = 'PENDING';
-        }
-        job.status = 'QUEUED';
-        persistJob(job);
-        jobs.set(job.id, job);
-        if (process.env.MODELGEN_AUTO_RESUME !== 'false') {
+        if (AUTO_RESUME_ON_BOOT) {
+          // Explicit opt-in only: reset in-flight tasks to PENDING and resume.
+          for (const t of job.tasks) {
+            if (t.status === 'RUNNING') t.status = 'PENDING';
+          }
+          job.status = 'QUEUED';
+          persistJob(job);
+          jobs.set(job.id, job);
           console.log(`[ModelGenBulk] Resuming job ${job.id} — ${job.tasks.filter(t => t.status === 'PENDING').length} pending task(s)`);
           startJob(job.id);
+        } else {
+          // Default: do NOT re-trigger generation on boot. Mark whatever was still
+          // in flight as failed-by-restart and close the job out.
+          for (const t of job.tasks) {
+            if (t.status === 'RUNNING' || t.status === 'PENDING') {
+              t.status = 'FAILED';
+              t.error = t.error || 'Interrupted by server restart';
+            }
+          }
+          job.done = job.tasks.filter(t => t.status === 'DONE').length;
+          job.failed = job.tasks.filter(t => t.status === 'FAILED').length;
+          job.status = job.done > 0 ? 'PARTIAL' : 'FAILED';
+          job.finishedAt = job.finishedAt ?? Date.now();
+          persistJob(job);
+          jobs.set(job.id, job);
+          console.log(`[ModelGenBulk] Job ${job.id} was interrupted by a restart — marked ${job.status}, NOT auto-resumed (set MODELGEN_AUTO_RESUME=true to resume on boot).`);
         }
         restored++;
         continue;
@@ -448,6 +472,11 @@ async function runTaskWithRetry(job: BulkJob, task: BulkTask): Promise<void> {
         const refKey = `${job.id}:${task.fileName}`;
         const styleReference = groupReferenceCache.get(refKey);
 
+        // Pick ONE backdrop for this whole article from its garment colour (dark garment
+        // → light backdrop, light garment → deeper backdrop). task.colorName is identical
+        // for every view of an article, so all views resolve to the SAME backdrop.
+        const backgroundColor = backgroundForGarment(task.colorName);
+
         await acquireGeminiSlot();
         console.log(`[ModelGenBulk] Job ${job.id} task ${task.fileName}/${task.view} attempt ${task.attempts}${styleReference ? ' (with style reference)' : ''}`);
         generatedBuf = await runSingleGeneration(
@@ -469,6 +498,7 @@ async function runTaskWithRetry(job: BulkJob, task: BulkTask): Promise<void> {
           task.attributesText,
           styleReference?.buffer,
           styleReference?.mime,
+          backgroundColor,
         );
 
         // The first view to finish for this garment becomes the reference the rest match.

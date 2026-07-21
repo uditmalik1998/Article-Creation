@@ -224,39 +224,59 @@ function getClientIp(req: Request): string {
 }
 
 /**
- * Sanitize request/response body
- * Remove sensitive fields
+ * Sanitize a request/response body into a plain, JSON-safe value before it is
+ * written to the auditLog Json column.
+ *
+ * This MUST NOT recurse blindly into arbitrary objects. Doing so froze the whole
+ * backend: a Buffer (walked as thousands of numeric byte keys), a Prisma Decimal
+ * (walked into decimal.js internals), or a circular reference turned this into an
+ * enormous/looping structure that then hung Prisma's own serializer (100% CPU,
+ * blocked event loop, every request stuck on "Starting…"). So we guard every
+ * dangerous shape explicitly and bound depth, breadth, and cycles.
  */
-function sanitizeBody(body: any): any {
-  if (!body) return null;
+const SANITIZE_MAX_DEPTH = 8;
+const SANITIZE_MAX_ARRAY = 100;
 
-  // Handle arrays
+function sanitizeBody(body: any, seen: WeakSet<object> = new WeakSet(), depth = 0): any {
+  if (body === null || body === undefined) return null;
+
+  const t = typeof body;
+  if (t === 'string') return body.length > 1000 ? `[TRUNCATED: ${body.length} chars]` : body;
+  if (t === 'number' || t === 'boolean') return body;
+  if (t === 'bigint') return body.toString();
+  if (t === 'function' || t === 'symbol') return undefined;
+  if (t !== 'object') return body;
+
+  // Binary / typed data — never walk byte-by-byte.
+  if (Buffer.isBuffer(body)) return `[Buffer: ${body.length} bytes]`;
+  if (ArrayBuffer.isView(body) || body instanceof ArrayBuffer) {
+    return `[${(body as any).constructor?.name || 'Binary'}: ${(body as any).byteLength ?? (body as any).length} bytes]`;
+  }
+  if (body instanceof Date) return body.toISOString();
+
+  if (depth >= SANITIZE_MAX_DEPTH) return '[max depth]';
+  if (seen.has(body)) return '[Circular]';
+  seen.add(body);
+
   if (Array.isArray(body)) {
-    return body.map(sanitizeBody);
+    const out = body.slice(0, SANITIZE_MAX_ARRAY).map((v) => sanitizeBody(v, seen, depth + 1));
+    if (body.length > SANITIZE_MAX_ARRAY) out.push(`[+${body.length - SANITIZE_MAX_ARRAY} more items]`);
+    return out;
   }
 
-  // Handle objects
-  if (typeof body === 'object') {
-    const sanitized: any = {};
-
-    for (const key in body) {
-      // Skip sensitive fields
-      if (isSensitiveField(key)) {
-        sanitized[key] = '[REDACTED]';
-      } else if (typeof body[key] === 'object') {
-        sanitized[key] = sanitizeBody(body[key]);
-      } else if (typeof body[key] === 'string' && body[key].length > 1000) {
-        // Truncate long strings (e.g., base64 images)
-        sanitized[key] = `[TRUNCATED: ${body[key].length} chars]`;
-      } else {
-        sanitized[key] = body[key];
-      }
-    }
-
-    return sanitized;
+  // Class instances (Prisma Decimal, streams, etc.) are not plain objects — do NOT
+  // walk their internals; represent them by their string form instead.
+  const proto = Object.getPrototypeOf(body);
+  if (proto !== Object.prototype && proto !== null) {
+    try { return String(body); } catch { return '[unserializable object]'; }
   }
 
-  return body;
+  const sanitized: any = {};
+  for (const key in body) {
+    if (!Object.prototype.hasOwnProperty.call(body, key)) continue;
+    sanitized[key] = isSensitiveField(key) ? '[REDACTED]' : sanitizeBody(body[key], seen, depth + 1);
+  }
+  return sanitized;
 }
 
 /**
