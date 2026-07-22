@@ -2344,6 +2344,26 @@ export const downloadMajCatGridTemplate = async (_req: Request, res: Response): 
 // Meta file only stores upload info (filename, date) — actual values live in Supabase
 const MAJ_CAT_META_FILE = path.join(process.cwd(), 'data', 'majCatGridMeta.json');
 
+// ── Async upload job store ─────────────────────────────────────────────────────
+type MajCatJobStatus = 'PENDING' | 'PARSING' | 'INSERTING' | 'DONE' | 'FAILED';
+interface MajCatJob {
+  status: MajCatJobStatus;
+  phase: string;
+  progress: number; // 0–100
+  totalRows: number;
+  insertedRows: number;
+  error?: string;
+  meta?: Record<string, unknown>;
+  createdAt: string;
+  completedAt?: string;
+}
+const majCatJobs = new Map<string, MajCatJob>();
+
+// Expire finished jobs after 30 minutes to avoid memory leak
+function expireMajCatJob(jobId: string) {
+  setTimeout(() => majCatJobs.delete(jobId), 30 * 60 * 1000);
+}
+
 /**
  * GET /api/admin/majcat-grid/status
  * Returns metadata about the last uploaded grid + live row counts from Supabase.
@@ -2427,113 +2447,161 @@ export const getMajCatGridValues = async (req: Request, res: Response): Promise<
 
 /**
  * POST /api/admin/majcat-grid/upload
- * Accepts a multipart Excel file, parses cols A (FG_MAJ_CAT), E (attr name), G (value),
- * truncates the maj_cat_grid_values table, then batch-inserts into Supabase.
+ * Accepts a multipart Excel file, responds immediately with 202 + jobId, then
+ * parses + truncates + batch-inserts in the background. Poll
+ * GET /majcat-grid/upload-status/:jobId for progress.
  */
 export const uploadMajCatGrid = async (req: Request, res: Response): Promise<void> => {
-  try {
-    if (!req.file) {
-      res.status(400).json({ success: false, error: 'No file uploaded. Send a .xlsx file as "file" field.' });
-      return;
-    }
-
-    // ── 1. Parse Excel ──────────────────────────────────────────────────────────
-    const ExcelJS = (await import('exceljs')).default;
-    const wb = new ExcelJS.Workbook();
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    await wb.xlsx.load(req.file.buffer as any);
-
-    const ws = wb.worksheets[0];
-    if (!ws) {
-      res.status(400).json({ success: false, error: 'No worksheets found in the uploaded Excel file.' });
-      return;
-    }
-
-    const COL_MAJ_CAT = 1; // A — FG_MAJ_CAT
-    const COL_ATTR    = 5; // E — FATHER COMP MAJ_CAT
-    const COL_VALUE   = 7; // G — MAIN MVGR
-    const COL_STATUS  = 9; // I — GRID STATUS  (only import "ACT" rows)
-
-    // Deduplicate with a Set keyed by "mc||at||v"
-    const seen = new Set<string>();
-    type GridRow = { major_category: string; attribute_name: string; value: string };
-    const flatRows: GridRow[] = [];
-    let skipped = 0;
-    let inactiveSkipped = 0;
-
-    for (let r = 5; r <= ws.rowCount; r++) {
-      const row    = ws.getRow(r);
-      const mc     = String(row.getCell(COL_MAJ_CAT).value ?? '').trim();
-      const at     = String(row.getCell(COL_ATTR).value    ?? '').trim();
-      const v      = String(row.getCell(COL_VALUE).value   ?? '').trim();
-      const status = String(row.getCell(COL_STATUS).value  ?? '').trim().toUpperCase();
-
-      if (!mc || !at || !v) { skipped++; continue; }
-
-      // Skip inactive rows — only import ACT (active) values
-      if (status && status !== 'ACT') { inactiveSkipped++; continue; }
-
-      const key = `${mc}||${at}||${v}`;
-      if (seen.has(key)) continue;
-      seen.add(key);
-      flatRows.push({ major_category: mc, attribute_name: at, value: v });
-    }
-
-    const totalRows       = flatRows.length;
-    const categoriesCount = new Set(flatRows.map(r => r.major_category)).size;
-    const attributesCount = new Set(flatRows.map(r => `${r.major_category}||${r.attribute_name}`)).size;
-
-    // ── 2. Replace all rows in Supabase ────────────────────────────────────────
-    // Use a larger batch size (5000) to cut DB round-trips from ~637 → ~64 for
-    // a 318k-row file. Wrapped in a single transaction so either all rows land
-    // or none do (no partial state on failure).
-    const BATCH = 5000;
-    console.log(`[MajCatGrid] Replacing table — ${totalRows} rows in batches of ${BATCH}...`);
-
-    await prisma.$transaction(async (tx) => {
-      await tx.$executeRaw`TRUNCATE TABLE maj_cat_grid_values RESTART IDENTITY`;
-
-      for (let i = 0; i < flatRows.length; i += BATCH) {
-        const batch = flatRows.slice(i, i + BATCH);
-        await tx.$executeRaw`
-          INSERT INTO maj_cat_grid_values (major_category, attribute_name, value, uploaded_at)
-          SELECT v.major_category, v.attribute_name, v.value, NOW()
-          FROM jsonb_to_recordset(${JSON.stringify(batch)}::jsonb)
-            AS v(major_category text, attribute_name text, value text)
-          ON CONFLICT (major_category, attribute_name, value) DO NOTHING
-        `;
-      }
-    }, { timeout: 14 * 60 * 1000 }); // 14-min DB transaction timeout (just under request timeout)
-
-    // ── 3. Save lightweight metadata file ──────────────────────────────────────
-    const meta = {
-      uploadedAt:       new Date().toISOString(),
-      fileName:         req.file.originalname,
-      totalRows,
-      skippedRows:      skipped,
-      inactiveSkipped,
-      categoriesCount,
-      attributesCount,
-    };
-    const metaDir = path.join(process.cwd(), 'data');
-    if (!fs.existsSync(metaDir)) fs.mkdirSync(metaDir, { recursive: true });
-    fs.writeFileSync(MAJ_CAT_META_FILE, JSON.stringify(meta, null, 2), 'utf-8');
-
-    // Flush the RFC service cache so next SAP sync uses the freshly uploaded grid
-    invalidateMajCatVisibleCache();
-    invalidateFieldVisibilityCache(); // also flush description-builder collar visibility cache
-
-    console.log(`[MajCatGrid] Done — ${totalRows} ACT rows inserted, ${inactiveSkipped} IN-ACT skipped, ${categoriesCount} major categories, ${attributesCount} attr slots`);
-
-    res.json({
-      success: true,
-      message: `Grid uploaded successfully. Inserted ${totalRows} rows across ${categoriesCount} major categories into Supabase.`,
-      data: meta,
-    });
-  } catch (error: any) {
-    console.error('[MajCatGrid] Upload error:', error);
-    res.status(500).json({ success: false, error: error.message });
+  if (!req.file) {
+    res.status(400).json({ success: false, error: 'No file uploaded. Send a .xlsx file as "file" field.' });
+    return;
   }
+
+  const jobId = `mcg-${Date.now()}-${Math.random().toString(36).slice(2, 8)}`;
+  const originalName = req.file.originalname;
+  const fileBuffer = req.file.buffer; // keep buffer in closure; multer memoryStorage
+
+  majCatJobs.set(jobId, {
+    status: 'PENDING',
+    phase: 'Queued',
+    progress: 0,
+    totalRows: 0,
+    insertedRows: 0,
+    createdAt: new Date().toISOString(),
+  });
+
+  // Respond immediately — client will poll for status
+  res.status(202).json({ success: true, jobId, message: 'Upload started. Poll /majcat-grid/upload-status/:jobId for progress.' });
+
+  // ── Background processing ────────────────────────────────────────────────────
+  (async () => {
+    const job = majCatJobs.get(jobId)!;
+    try {
+      // ── Phase 1: Parse Excel ─────────────────────────────────────────────────
+      job.status = 'PARSING';
+      job.phase  = 'Parsing Excel…';
+      job.progress = 5;
+
+      const ExcelJS = (await import('exceljs')).default;
+      const wb = new ExcelJS.Workbook();
+      await wb.xlsx.load(fileBuffer as any);
+
+      const ws = wb.worksheets[0];
+      if (!ws) throw new Error('No worksheets found in the uploaded Excel file.');
+
+      const COL_MAJ_CAT = 1; // A — FG_MAJ_CAT
+      const COL_ATTR    = 5; // E — FATHER COMP MAJ_CAT
+      const COL_VALUE   = 7; // G — MAIN MVGR
+      const COL_STATUS  = 9; // I — GRID STATUS
+
+      const seen = new Set<string>();
+      type GridRow = { major_category: string; attribute_name: string; value: string };
+      const flatRows: GridRow[] = [];
+      let skipped = 0;
+      let inactiveSkipped = 0;
+
+      for (let r = 5; r <= ws.rowCount; r++) {
+        const row    = ws.getRow(r);
+        const mc     = String(row.getCell(COL_MAJ_CAT).value ?? '').trim();
+        const at     = String(row.getCell(COL_ATTR).value    ?? '').trim();
+        const v      = String(row.getCell(COL_VALUE).value   ?? '').trim();
+        const status = String(row.getCell(COL_STATUS).value  ?? '').trim().toUpperCase();
+
+        if (!mc || !at || !v) { skipped++; continue; }
+        if (status && status !== 'ACT') { inactiveSkipped++; continue; }
+
+        const key = `${mc}||${at}||${v}`;
+        if (seen.has(key)) continue;
+        seen.add(key);
+        flatRows.push({ major_category: mc, attribute_name: at, value: v });
+      }
+
+      const totalRows       = flatRows.length;
+      const categoriesCount = new Set(flatRows.map(r => r.major_category)).size;
+      const attributesCount = new Set(flatRows.map(r => `${r.major_category}||${r.attribute_name}`)).size;
+
+      job.phase    = `Parsed ${totalRows.toLocaleString()} rows — inserting into database…`;
+      job.progress = 20;
+      job.totalRows = totalRows;
+
+      // ── Phase 2: DB replace ──────────────────────────────────────────────────
+      job.status = 'INSERTING';
+      const BATCH = 5000;
+      const totalBatches = Math.ceil(totalRows / BATCH);
+      console.log(`[MajCatGrid] Replacing table — ${totalRows} rows in ${totalBatches} batches…`);
+
+      await prisma.$transaction(async (tx) => {
+        await tx.$executeRaw`TRUNCATE TABLE maj_cat_grid_values RESTART IDENTITY`;
+
+        for (let i = 0; i < flatRows.length; i += BATCH) {
+          const batch = flatRows.slice(i, i + BATCH);
+          await tx.$executeRaw`
+            INSERT INTO maj_cat_grid_values (major_category, attribute_name, value, uploaded_at)
+            SELECT v.major_category, v.attribute_name, v.value, NOW()
+            FROM jsonb_to_recordset(${JSON.stringify(batch)}::jsonb)
+              AS v(major_category text, attribute_name text, value text)
+            ON CONFLICT (major_category, attribute_name, value) DO NOTHING
+          `;
+          const batchDone = Math.floor(i / BATCH) + 1;
+          job.insertedRows = Math.min(i + BATCH, flatRows.length);
+          // progress: 20–95 during insert phase
+          job.progress = 20 + Math.round((batchDone / totalBatches) * 75);
+          job.phase    = `Inserting batch ${batchDone}/${totalBatches}…`;
+        }
+      }, { timeout: 14 * 60 * 1000 });
+
+      // ── Phase 3: Finalize ────────────────────────────────────────────────────
+      const meta = {
+        uploadedAt:     new Date().toISOString(),
+        fileName:       originalName,
+        totalRows,
+        skippedRows:    skipped,
+        inactiveSkipped,
+        categoriesCount,
+        attributesCount,
+      };
+      const metaDir = path.join(process.cwd(), 'data');
+      if (!fs.existsSync(metaDir)) fs.mkdirSync(metaDir, { recursive: true });
+      fs.writeFileSync(MAJ_CAT_META_FILE, JSON.stringify(meta, null, 2), 'utf-8');
+
+      invalidateMajCatVisibleCache();
+      invalidateFieldVisibilityCache();
+
+      console.log(`[MajCatGrid] Done — ${totalRows} ACT rows, ${inactiveSkipped} IN-ACT skipped, ${categoriesCount} major categories`);
+
+      job.status      = 'DONE';
+      job.phase       = `Complete — ${totalRows.toLocaleString()} rows across ${categoriesCount} major categories`;
+      job.progress    = 100;
+      job.insertedRows = totalRows;
+      job.meta        = meta;
+      job.completedAt  = new Date().toISOString();
+    } catch (err: any) {
+      console.error('[MajCatGrid] Background upload error:', err);
+      const job = majCatJobs.get(jobId);
+      if (job) {
+        job.status      = 'FAILED';
+        job.phase       = 'Failed';
+        job.error       = err.message || 'Unknown error';
+        job.completedAt = new Date().toISOString();
+      }
+    } finally {
+      expireMajCatJob(jobId);
+    }
+  })();
+};
+
+/**
+ * GET /api/admin/majcat-grid/upload-status/:jobId
+ * Returns current status of a background upload job.
+ */
+export const getMajCatGridUploadStatus = async (req: Request, res: Response): Promise<void> => {
+  const { jobId } = req.params;
+  const job = majCatJobs.get(jobId);
+  if (!job) {
+    res.status(404).json({ success: false, error: 'Job not found or already expired.' });
+    return;
+  }
+  res.json({ success: true, jobId, ...job });
 };
 
 // ═══════════════════════════════════════════════════════════════════════════════

@@ -157,7 +157,9 @@ export default function Admin() {
   const [majCatGridStatusLoading, setMajCatGridStatusLoading] = useState(false);
   const [majCatGridUploading, setMajCatGridUploading] = useState(false);
   const [majCatGridProgress, setMajCatGridProgress] = useState<number>(0);
+  const [majCatJobPhase, setMajCatJobPhase] = useState<string>('');
   const majCatFileRef = useRef<HTMLInputElement | null>(null);
+  const majCatPollRef = useRef<ReturnType<typeof setInterval> | null>(null);
 
   // Mandatory Grid
   const [mandatoryGridMeta, setMandatoryGridMeta] = useState<MandatoryGridMeta | null>(null);
@@ -364,31 +366,67 @@ export default function Admin() {
   }, []);
 
   const handleMajCatGridUpload = async (file: File) => {
+    // Clear any previous poll
+    if (majCatPollRef.current) { clearInterval(majCatPollRef.current); majCatPollRef.current = null; }
+
     setMajCatGridUploading(true);
-    setMajCatGridProgress(0);
+    setMajCatGridProgress(2);
+    setMajCatJobPhase('Uploading file…');
+
     try {
       const token = localStorage.getItem('authToken');
       const formData = new FormData();
       formData.append('file', file);
-      const progressInterval = setInterval(() => {
-        setMajCatGridProgress((prev) => Math.min(prev + 3, 90));
-      }, 800);
+
       const res = await fetch(`${APP_CONFIG.api.baseURL}/admin/majcat-grid/upload`, {
         method: 'POST',
         headers: token ? { Authorization: `Bearer ${token}` } : {},
         body: formData,
       });
-      clearInterval(progressInterval);
-      setMajCatGridProgress(100);
       const data = await res.json();
       if (!res.ok) throw new Error(data.error || 'Upload failed');
-      message.success(data.message);
-      setMajCatGridMeta(data.data);
+
+      // Server accepted — now poll for job completion
+      const { jobId } = data;
+      setMajCatJobPhase('Queued — waiting for processing…');
+
+      const poll = async () => {
+        try {
+          const sr = await fetch(`${APP_CONFIG.api.baseURL}/admin/majcat-grid/upload-status/${jobId}`, {
+            headers: token ? { Authorization: `Bearer ${token}` } : {},
+          });
+          const sdata = await sr.json();
+          if (!sr.ok || !sdata.success) return;
+
+          setMajCatGridProgress(sdata.progress ?? 0);
+          setMajCatJobPhase(sdata.phase || '');
+
+          if (sdata.status === 'DONE') {
+            clearInterval(majCatPollRef.current!);
+            majCatPollRef.current = null;
+            message.success(`Grid uploaded — ${(sdata.meta?.totalRows ?? 0).toLocaleString()} rows across ${sdata.meta?.categoriesCount ?? 0} major categories`);
+            setMajCatGridMeta(sdata.meta as MajCatGridMeta);
+            setMajCatGridUploading(false);
+            setTimeout(() => { setMajCatGridProgress(0); setMajCatJobPhase(''); }, 1500);
+            if (majCatFileRef.current) majCatFileRef.current.value = '';
+          } else if (sdata.status === 'FAILED') {
+            clearInterval(majCatPollRef.current!);
+            majCatPollRef.current = null;
+            message.error(sdata.error || 'Upload failed during processing');
+            setMajCatGridUploading(false);
+            setTimeout(() => { setMajCatGridProgress(0); setMajCatJobPhase(''); }, 1500);
+            if (majCatFileRef.current) majCatFileRef.current.value = '';
+          }
+        } catch { /* network blip — keep polling */ }
+      };
+
+      poll(); // immediate first check
+      majCatPollRef.current = setInterval(poll, 2500);
     } catch (err: any) {
       message.error(err?.message || 'Upload failed');
-    } finally {
       setMajCatGridUploading(false);
-      setTimeout(() => setMajCatGridProgress(0), 1500);
+      setMajCatGridProgress(0);
+      setMajCatJobPhase('');
       if (majCatFileRef.current) majCatFileRef.current.value = '';
     }
   };
@@ -1349,9 +1387,10 @@ export default function Admin() {
                       <div>
                         <div className="mb-2 text-[13px] text-[#FF6F61]">
                           <RefreshCw className="mr-1.5 inline-block h-3.5 w-3.5 animate-spin" />
-                          Parsing Excel... this may take up to a minute
+                          {majCatJobPhase || 'Processing…'}
                         </div>
                         <Progress value={majCatGridProgress} />
+                        <div className="mt-1 text-[11px] text-muted-foreground">{majCatGridProgress}% complete</div>
                       </div>
                     ) : (
                       <button
