@@ -132,8 +132,8 @@ export const AppSidebar: React.FC<AppSidebarProps> = ({ collapsed, onCollapsedCh
     if ((!isApproverSide && !isPd) || role === 'APPROVER') {
       items.push({ key: '/extraction', Icon: FileSearch, label: 'Extraction' });
     }
-    // Model Generation — ADMIN only on this branch (PD_DESIGNER already has it via the items init above).
-    if (isAdmin) {
+    // Model Generation — ADMIN, CREATOR, APPROVER (PD_DESIGNER already has it via the items init above).
+    if (isAdmin || role === 'CREATOR' || role === 'APPROVER') {
       items.push({ key: '/model-generation', Icon: Camera, label: 'Model Generation' });
     }
   }

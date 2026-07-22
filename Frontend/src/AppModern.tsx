@@ -141,7 +141,7 @@ const ExtractionRoute: React.FC<{ children: React.ReactNode }> = ({ children }) 
   return <>{children}</>;
 };
 
-// PD_DESIGNER (and ADMIN) only — model-generation page
+// PD_DESIGNER, ADMIN, CREATOR, APPROVER — model-generation page
 const ModelGenerationRoute: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const token = localStorage.getItem('authToken');
   const user  = localStorage.getItem('user');
@@ -152,7 +152,8 @@ const ModelGenerationRoute: React.FC<{ children: React.ReactNode }> = ({ childre
 
   if (user) {
     const userData = JSON.parse(user);
-    if (userData.role !== 'PD_DESIGNER' && userData.role !== 'ADMIN') {
+    const allowed = ['PD_DESIGNER', 'ADMIN', 'CREATOR', 'APPROVER'];
+    if (!allowed.includes(userData.role)) {
       return <Navigate to="/dashboard" replace />;
     }
   }
