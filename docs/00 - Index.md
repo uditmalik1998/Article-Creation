@@ -24,6 +24,18 @@
 | [[11 - Frontend Architecture]] | Pages, components, data flow |
 | [[12 - Backend Architecture]] | Routes, controllers, services map |
 | [[13 - Pending Issues]] | Bugs, TODOs, deferred features |
+| [[14 - Changelog & Recent Development]] | Rolling log of what changed and when |
+
+### Deep-Dive / Handover Notes
+
+| Note | What it covers |
+|------|---------------|
+| [[ATTRIBUTE_WRITE_PATH]] | How attributes flow to SAP AUSP (write path) |
+| [[SPEC_MC_ATTRIBUTE_SOT]] | MC × attribute source-of-truth spec + Supabase↔SAP reconciliation |
+| [[UDIT_HANDOVER_ARTICLE_SOT]] | Article attributes SoT + SAP sync + article creation E2E |
+| [[UDIT_HANDOVER_KSML_CLASS_CHAR_2026-06-22]] | MDM KSML class/char assignment + V2 BAPI audit |
+| [[2026-07-08-model-generation-from-article-list-design]] | Spec: bulk model generation from article list |
+| [[2026-06-29-pd-to-pending-migration]] | Plan: PD → PENDING status migration |
 
 ---
 
