@@ -60,7 +60,7 @@ function ArticleCardComponent({ item, index, onClick, dateField = 'createdAt', s
     <>
       <div
         onClick={() => onClick(item, index)}
-        className={`group flex cursor-pointer flex-col gap-2 rounded-xl border bg-card p-3 shadow-sm transition-all hover:-translate-y-0.5 hover:border-primary/40 hover:shadow-md ${
+        className={`group flex cursor-pointer flex-col gap-2 rounded-xl border bg-card p-3 shadow-sm transition-[transform,box-shadow,border-color] duration-150 hover:-translate-y-0.5 hover:border-primary/40 hover:shadow-md ${
           selected ? 'border-primary ring-2 ring-primary/50' : 'border-border'
         }`}
       >
@@ -170,10 +170,10 @@ function ArticleCardComponent({ item, index, onClick, dateField = 'createdAt', s
         )}
       </div>
 
-      {/* Image preview modal */}
-      {item.imageUrl && (
+      {/* Image preview modal — only mounted when open to avoid 50 idle Dialog instances */}
+      {imgModalOpen && item.imageUrl && (
         <Dialog
-          open={imgModalOpen}
+          open
           onOpenChange={(o) => {
             setImgModalOpen(o);
             if (!o) resetImageView();

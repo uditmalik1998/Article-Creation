@@ -7,10 +7,34 @@
   "showOrphans": true,
   "collapse-color-groups": false,
   "colorGroups": [
-    { "query": "tag:#workflow", "color": { "a": 1, "rgb": 14702278 } },
-    { "query": "tag:#bugs", "color": { "a": 1, "rgb": 16711680 } },
-    { "query": "tag:#sap", "color": { "a": 1, "rgb": 16750848 } },
-    { "query": "tag:#ai", "color": { "a": 1, "rgb": 5614830 } }
+    {
+      "query": "tag:#workflow",
+      "color": {
+        "a": 1,
+        "rgb": 14702278
+      }
+    },
+    {
+      "query": "tag:#bugs",
+      "color": {
+        "a": 1,
+        "rgb": 16711680
+      }
+    },
+    {
+      "query": "tag:#sap",
+      "color": {
+        "a": 1,
+        "rgb": 16750848
+      }
+    },
+    {
+      "query": "tag:#ai",
+      "color": {
+        "a": 1,
+        "rgb": 5614830
+      }
+    }
   ],
   "collapse-display": false,
   "showArrow": true,
@@ -22,6 +46,6 @@
   "repelStrength": 10,
   "linkStrength": 1,
   "linkDistance": 250,
-  "scale": 1,
-  "close": false
+  "scale": 0.6897404035102583,
+  "close": true
 }

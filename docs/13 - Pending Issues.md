@@ -104,6 +104,8 @@ Multiple `query-engine-windows.exe.tmp*` files are tracked in git:
 
 ## ✅ Recently Fixed (reference)
 
+| Watcher cron jobs disabled | watcher/index.js | 2026-07-23 — both 12 PM & 8 PM scans commented out; re-enable `CRON_SCHEDULES.forEach` block to restore |
+
 | Issue | Fixed in | Commit |
 |-------|---------|--------|
 | impAtrbt2 not refreshing on approver card after save | develop | `a746fe8`, `db1639d` |

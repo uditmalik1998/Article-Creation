@@ -28,21 +28,21 @@ async function main() {
     return;
   }
 
-  // Schedule scans at 12pm, 8pm
-  CRON_SCHEDULES.forEach((schedule, i) => {
-    const labels = ['12:00 PM', '8:00 PM'];
-    cron.schedule(schedule, async () => {
-      log.info(`Scheduled scan triggered: ${labels[i]}`);
-      try {
-        await runScan();
-      } catch (err) {
-        log.error('Unexpected error during image scan:', err.message);
-      }
-    });
-    log.info(`Scheduled: ${labels[i]} (cron: ${schedule})`);
-  });
+  // Schedule scans at 12pm, 8pm — DISABLED
+  // CRON_SCHEDULES.forEach((schedule, i) => {
+  //   const labels = ['12:00 PM', '8:00 PM'];
+  //   cron.schedule(schedule, async () => {
+  //     log.info(`Scheduled scan triggered: ${labels[i]}`);
+  //     try {
+  //       await runScan();
+  //     } catch (err) {
+  //       log.error('Unexpected error during image scan:', err.message);
+  //     }
+  //   });
+  //   log.info(`Scheduled: ${labels[i]} (cron: ${schedule})`);
+  // });
 
-  log.info('Watcher is running. Waiting for scheduled times...');
+  log.info('Watcher cron jobs disabled. Exiting.');
 }
 
 main().catch(err => {
