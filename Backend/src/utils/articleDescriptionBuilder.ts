@@ -2,8 +2,9 @@
  * Article Description Builder
  *
  * Field order (user-confirmed sequence):
- *   fabDiv → yarn1 → fabricMainMvgr → weave → mFab2 → neckDetails →
- *   collarStyle → fatherBelt → fit → pattern
+ *   yarn1 → weave → mFab2 → fabricMainMvgr → collar → collarStyle →
+ *   neckDetails → neck → fatherBelt → childBelt → noOfPocket → pattern →
+ *   fit → wash
  * Joined with '-', sliced to 40 chars from the front.
  * BODY STYLE is mapped to the `pattern` column in ExtractionResultFlat.
  *
@@ -13,16 +14,20 @@
  */
 
 type ArticleDescriptionSource = {
-  fabDiv?: unknown;          // M_FAB_DIV
   yarn1?: unknown;           // M_YARN
-  fabricMainMvgr?: unknown;  // M_FAB_MAIN_MVGR_2
   weave?: unknown;           // M_WEAVE_01
   mFab2?: unknown;           // M_WEAVE_02
-  neckDetails?: unknown;     // M_NECK_STYLE
+  fabricMainMvgr?: unknown;  // M_FAB_MAIN_MVGR_2
+  collar?: unknown;          // M_COLLAR_TYPE
   collarStyle?: unknown;     // M_COLLAR_STYLE
+  neckDetails?: unknown;     // M_NECK_STYLE
+  neck?: unknown;            // M_NECK_TYPE
   fatherBelt?: unknown;      // M_BLT_TYPE
-  fit?: unknown;             // M_FIT
+  childBelt?: unknown;       // M_BLT_STYLE
+  noOfPocket?: unknown;      // M_NO_OF_POCKET
   pattern?: unknown;         // M_BODY_STYLE
+  fit?: unknown;             // M_FIT
+  wash?: unknown;            // M_WASH
 };
 
 export type ArticleDescriptionOptions = {
@@ -33,16 +38,20 @@ export type ArticleDescriptionOptions = {
 const ARTICLE_DESCRIPTION_MAX_LENGTH = 40;
 
 const ARTICLE_DESCRIPTION_FIELDS: Array<keyof ArticleDescriptionSource> = [
-  'fabDiv',         // M_FAB_DIV
   'yarn1',          // M_YARN
-  'fabricMainMvgr', // M_FAB_MAIN_MVGR_2
   'weave',          // M_WEAVE_01
   'mFab2',          // M_WEAVE_02
-  'neckDetails',    // M_NECK_STYLE
+  'fabricMainMvgr', // M_FAB_MAIN_MVGR_2
+  'collar',         // M_COLLAR_TYPE
   'collarStyle',    // M_COLLAR_STYLE
+  'neckDetails',    // M_NECK_STYLE
+  'neck',           // M_NECK_TYPE
   'fatherBelt',     // M_BLT_TYPE
-  'fit',            // M_FIT
+  'childBelt',      // M_BLT_STYLE
+  'noOfPocket',     // M_NO_OF_POCKET
   'pattern',        // M_BODY_STYLE
+  'fit',            // M_FIT
+  'wash',           // M_WASH
 ];
 
 const toShortToken = (value: unknown): string | null => {
