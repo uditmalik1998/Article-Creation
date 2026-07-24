@@ -64,6 +64,7 @@ export interface BulkTask {
   gender?: string;
   bodytype?: string;
   colorName?: string;
+  featuredGarment?: 'top' | 'bottom' | 'full' | 'unknown'; // which piece a colour swap targets
   attributesText?: string;
   // true when this article's source photo is a sibling colour variant reused as
   // a stand-in (the exact article+colour code had no extracted photo of its own)
@@ -333,6 +334,7 @@ export function createArticleJob(args: {
         base.gender = article.gender;
         base.bodytype = article.bodytype;       // 'auto'
         base.colorName = article.colorName;
+        base.featuredGarment = article.featuredGarment;
         base.attributesText = article.attributesText;
         base.isColorFallback = article.isColorFallback;
       }
@@ -499,6 +501,7 @@ async function runTaskWithRetry(job: BulkJob, task: BulkTask): Promise<void> {
           styleReference?.buffer,
           styleReference?.mime,
           backgroundColor,
+          task.featuredGarment,
         );
 
         // The first view to finish for this garment becomes the reference the rest match.

@@ -19,6 +19,7 @@ export interface ResolvedArticle {
   gender?: string;      // 'male' | 'female' | 'kid boy' | 'kid girl'
   bodytype?: string;    // always 'auto' — AI decides framing
   colorName?: string;   // undefined = preserve source colour
+  featuredGarment?: 'top' | 'bottom' | 'full' | 'unknown'; // which piece a colour swap targets
   attributesText?: string;
   reason?: string;      // populated when found === false
   // true when no row exists for the exact code (article+colour) but a sibling
@@ -48,6 +49,28 @@ function deriveGender(division?: string | null, subDivision?: string | null): st
 // top wrongly.
 const BOTTOM_WORDS = ['TROUSER', 'PANT', 'JEAN', 'DENIM', 'SHORT', 'SKIRT', 'LEGGING', 'JEGGING', 'CHINO', 'CARGO', 'CULOTTE', 'PALAZZO', 'JOGGER', 'TRACK PANT', 'TRACKPANT', 'PYJAMA', 'PAJAMA', 'CAPRI', 'DHOTI', 'LOWER', 'BOTTOM'];
 const FULL_WORDS = ['DRESS', 'GOWN', 'JUMPSUIT', 'DUNGAREE', 'ROMPER', 'OVERALL', 'SAREE', 'ABAYA', 'KAFTAN', 'KURTA', 'NIGHTSUIT'];
+// Clear upper-garment keywords — used to decide which piece a colour swap targets when
+// the source shows a two-piece set (recolour only the featured product, never both).
+const TOP_WORDS = ['SHIRT', 'T-SHIRT', 'TSHIRT', 'TEE', 'TOP', 'JACKET', 'SWEATSHIRT', 'HOODIE', 'SWEATER', 'PULLOVER', 'BLAZER', 'COAT', 'WAISTCOAT', 'CARDIGAN', 'POLO', 'BLOUSE', 'CROP TOP'];
+
+/**
+ * Decide WHICH garment a colour swap should target when the source photo contains two
+ * pieces (e.g. a jacket + trousers flat-lay). We recolour ONLY the featured product —
+ * the piece whose category the article actually is — and leave the complementary piece
+ * its original colour. 'full' = one-piece (recolour whole outfit); 'unknown' = leave the
+ * current whole-garment recolour behaviour (no reliable category signal).
+ */
+export function deriveFeaturedGarment(
+  majorCategory?: string | null,
+  articleType?: string | null,
+): 'top' | 'bottom' | 'full' | 'unknown' {
+  const hay = [majorCategory, articleType].map((x) => String(x || '').toUpperCase()).join(' ');
+  if (!hay.trim()) return 'unknown';
+  if (BOTTOM_WORDS.some((w) => hay.includes(w))) return 'bottom';
+  if (FULL_WORDS.some((w) => hay.includes(w))) return 'full';
+  if (TOP_WORDS.some((w) => hay.includes(w))) return 'top';
+  return 'unknown';
+}
 
 /**
  * Decide framing (body type) from the article's category text. Bottomwear must be shot
@@ -171,6 +194,7 @@ export async function resolveArticleForGeneration(code: string): Promise<Resolve
       gender: deriveGender(row.division, row.subDivision),
       bodytype: deriveBodyFraming(row.majorCategory, row.articleType),
       colorName: colour || undefined,
+      featuredGarment: deriveFeaturedGarment(row.majorCategory, row.articleType),
       attributesText: buildAttributesText(row),
     };
   }
@@ -213,6 +237,7 @@ export async function resolveArticleForGeneration(code: string): Promise<Resolve
     gender: deriveGender(row.division, row.subDivision),
     bodytype: deriveBodyFraming(row.majorCategory, row.articleType),
     colorName: requestedColor || undefined,
+    featuredGarment: deriveFeaturedGarment(row.majorCategory, row.articleType),
     attributesText: buildAttributesText(row),
     isColorFallback: true,
   };
