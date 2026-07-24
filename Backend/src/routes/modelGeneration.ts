@@ -2,13 +2,80 @@ import { Router, Request, Response, NextFunction } from 'express';
 import multer from 'multer';
 import path from 'path';
 import fs from 'fs';
+import { z } from 'zod';
 import { runBatchPipeline, ensureOutputFolder } from '../services/modelGenerationService';
+import { prismaClient as prisma, withPrismaRetry } from '../utils/prisma';
 import bulkRoutes from './modelGenerationBulk';
 
 const router = Router();
 
 // Mount bulk-upload sub-routes (POST /bulk/upload, GET /bulk/job/:id, POST /bulk/job/:id/cancel)
 router.use('/', bulkRoutes);
+
+// ───────────────────────────────────────────────────────────────────────────
+// MAJOR CATEGORY MASTER (major_cat_master)
+// Lookup of MAJ CAT → name / division / ideal-for / model-image FRAME.
+// The model-generation article flow resolves a MAJ CAT to its FRAME here.
+// ───────────────────────────────────────────────────────────────────────────
+const FRAME_VALUES = ['fw', 'upper', 'lower', 'set'] as const;
+
+const MajorCatSchema = z.object({
+  majCat: z.string().min(1).max(100).transform((s) => s.trim()),
+  name: z.string().max(200).optional().transform((s) => (s ? s.trim() : undefined)),
+  div: z.string().max(50).optional().transform((s) => (s ? s.trim() : undefined)),
+  idealFor: z.string().max(50).optional().transform((s) => (s ? s.trim() : undefined)),
+  frame: z.enum(FRAME_VALUES),
+});
+
+// GET /major-categories — list all (active) categories, newest-relevant first.
+router.get('/major-categories', async (_req: Request, res: Response): Promise<void> => {
+  try {
+    const rows = await withPrismaRetry(() =>
+      prisma.majorCatMaster.findMany({
+        where: { isActive: true },
+        orderBy: { majCat: 'asc' },
+        select: { id: true, majCat: true, name: true, div: true, idealFor: true, frame: true },
+      })
+    );
+    res.json({ success: true, data: rows });
+  } catch (error: any) {
+    res.status(500).json({ success: false, error: error.message });
+  }
+});
+
+// POST /major-categories — add a new MAJ CAT to the master (or update if it exists).
+router.post('/major-categories', async (req: Request, res: Response): Promise<void> => {
+  try {
+    const v = MajorCatSchema.parse(req.body);
+    const row = await withPrismaRetry(() =>
+      prisma.majorCatMaster.upsert({
+        where: { majCat: v.majCat },
+        create: {
+          majCat: v.majCat,
+          name: v.name ?? null,
+          div: v.div ?? null,
+          idealFor: v.idealFor ?? null,
+          frame: v.frame,
+          isActive: true,
+        },
+        update: {
+          name: v.name ?? null,
+          div: v.div ?? null,
+          idealFor: v.idealFor ?? null,
+          frame: v.frame,
+          isActive: true,
+        },
+      })
+    );
+    res.status(201).json({ success: true, data: row });
+  } catch (error: any) {
+    if (error instanceof z.ZodError) {
+      res.status(400).json({ success: false, error: error.issues });
+      return;
+    }
+    res.status(500).json({ success: false, error: error.message });
+  }
+});
 
 const upload = multer({
   storage: multer.memoryStorage(),

@@ -18,6 +18,7 @@ import {
 } from 'lucide-react';
 import { ArticleListPanel, type ArticleListSubmit } from '../components/ArticleListPanel';
 import { ModelImagesBrowser } from '../components/ModelImagesBrowser';
+import { MajorCategoryManager } from '../components/MajorCategoryManager';
 import { toast } from 'sonner';
 import {
   Alert,
@@ -751,6 +752,11 @@ export default function ModelGenerationPage() {
           <Images />
           model-images
         </Button>
+
+        {/* Manage the MAJ CAT master (add new categories + their model-image frame) */}
+        <div className="ml-auto">
+          <MajorCategoryManager />
+        </div>
       </div>
 
       {pageMode === 'model-images' && <ModelImagesBrowser />}

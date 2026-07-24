@@ -111,15 +111,19 @@ export function buildPrompt(
   }
 
   const isCloseup = viewDirection.toLowerCase() === 'closeup';
+  // Feet are only in frame when the shot reaches the feet. An Upper-Body (waist-up)
+  // shot must NOT show feet/footwear — mentioning sneakers there drags the crop down
+  // to a full body. So footwear is only instructed when the frame actually shows feet.
+  const framesFeet = bodytype !== 'Upper-Body';
 
   let framingDesc: string;
   if (isCloseup) {
     framingDesc = 'extreme close-up macro fashion detail shot — NOT a full-body or upper-body shot';
   } else {
     switch (bodytype) {
-      case 'Full-Body': framingDesc = 'full body fashion photoshoot, head to toe'; break;
-      case 'Upper-Body': framingDesc = 'upper body fashion photoshoot, waist up, do NOT show below the waist'; break;
-      case 'Lower-Body': framingDesc = 'lower body fashion photoshoot, waist down to feet, do NOT show above the waist, crop tightly at the waist'; break;
+      case 'Full-Body': framingDesc = 'full body fashion photoshoot, head to toe on a real human model (feet in clean sneakers, never barefoot)'; break;
+      case 'Upper-Body': framingDesc = 'upper body fashion photoshoot, waist up on a real human model (head, torso, arms visible), do NOT show below the waist'; break;
+      case 'Lower-Body': framingDesc = 'lower body fashion photoshoot, waist down to feet on a real human model (feet in clean sneakers, never barefoot), do NOT show above the waist, crop tightly at the waist'; break;
       default: framingDesc = 'DETECT the garment type from SOURCE_IMAGE, then use ONE consistent framing for EVERY view of this product: bottomwear (trousers/jeans/shorts/skirt) → HALF SHOT, waist down to the feet, cropped cleanly at the waist (upper body NOT shown); tops/shirts/t-shirts → upper-body shot, waist up; dresses/one-piece/full outfits → full body head to toe. Use the SAME framing across front, back, side, and three-quarter — NEVER mix full-body and half/waist-down across views.';
     }
   }
@@ -146,7 +150,7 @@ export function buildPrompt(
   const garmentTypeGuard = ' GARMENT-TYPE GUARD: Refer to Rule #1 — if the SOURCE_IMAGE shows ONLY bottomwear, pair it with a simple plain solid PLAIN WHITE crew-neck t-shirt (white ONLY — the identical white t-shirt in every view) as a neutral complement; do NOT add a jacket, hoodie, or printed top, and do NOT change the t-shirt colour between views. If the SOURCE_IMAGE shows ONLY a top, pair it with the same simple plain mid-blue denim jeans in every view. The SOURCE garment is always the hero.';
 
   const viewMap: Record<string, string> = {
-    front: `Front-facing model pose showing the full front of the garment clearly. The model faces the camera directly, standing naturally with feet in clean simple casual sneakers (NEVER barefoot). Follow the FRAMING & CAMERA framing rule for how much of the body to show (a real human body must always be visibly wearing the garment — never floating or empty fabric).${garmentTypeGuard}`,
+    front: `Front-facing model pose: the model faces the camera directly and the FULL FRONT of the garment is clearly visible. Follow the FRAMING & CAMERA rule for HOW MUCH of the body to show — do not add or remove body beyond what that rule specifies. A real human body must always be visibly wearing the garment (never floating or empty fabric)${framesFeet ? ', with the feet in clean simple casual sneakers (never barefoot)' : ''}.${garmentTypeGuard}`,
     back: `TRUE 180° REAR VIEW — THIS IS THE HARDEST CONSTRAINT, OBEY IT ABSOLUTELY: the model has turned a FULL 180° to face directly AWAY from the camera. The back of the head and hair face the camera; the face, chin, and any front-of-body detail are COMPLETELY out of view. You are looking at the model's spine/back and the REVERSE side of the garment.
 DO NOT simply repeat the front. Any feature that identifies the FRONT of the garment MUST be ABSENT from this image: no front drawstring / tie / bow, no front zip fly, no front slant hand-pockets, no chest print, no buttons/placket facing the camera. If the front had a drawstring bow, it is now hidden behind the body and must NOT appear.
 RECONSTRUCT the back plausibly from standard garment construction even though the SOURCE_IMAGE only shows the front: show the BACK of the garment — for a top: back yoke, centre-back seam, shoulder blades, back collar; for bottomwear: the seat/rear rise, centre-back seam, back waistband/belt loops, and back patch pockets where such a garment normally has them. Keep colour, fabric and pattern identical to the source, but the composition must unmistakably read as the BACK. A front-facing or near-front / slightly-turned result is a HARD FAILURE.${isLower ? ' Show the waistband from behind at the top of the frame. Pair with the SAME plain white crew-neck t-shirt (white only, identical in every view), seen from the back — no jacket.' : ''}${garmentTypeGuard}`,
@@ -167,12 +171,12 @@ RECONSTRUCT the back plausibly from standard garment construction even though th
     : bodytype === 'Lower-Body'
       // For back view of bottomwear, show waistband-to-hem; for all other views also waist-down only.
       ? isBackView
-        ? 'Show the complete bottomwear from waistband to hem. The waistband must be visible at the top of frame. Upper body (bare or clothed) must NOT appear above the waistband — crop at the waist.'
-        : 'Show ONLY from waist down to feet. Upper body must NOT appear in the frame.'
+        ? 'HALF SHOT (waist-down), REAR VIEW: show the bottomwear from the waistband to the hem on a REAL model seen from behind — waistband at the top of frame, then the seat, legs, and feet in clean sneakers. Crop cleanly at the waist; the upper body must NOT appear above the waistband. A real human lower body must be visibly wearing the garment — NEVER floating, empty, or laid-flat trousers, and never barefoot.'
+        : 'HALF SHOT (waist-down): show ONLY from the waist down to the feet, cropped cleanly at the waist — the upper body must NOT appear. A REAL human lower body (hips, thighs, legs, and feet in clean sneakers) MUST be clearly visible wearing the garment — NEVER floating, empty, or laid-flat trousers, and never barefoot. Use this identical waist-down framing for every view of the product.'
       : bodytype === 'Upper-Body'
-        ? 'Show ONLY from waist up. Lower body must NOT appear in the frame.'
+        ? 'WAIST-UP SHOT: show ONLY from the waist up — the lower body must NOT appear. The model\'s UPPER BODY (head, face, torso, arms) wearing the garment (plus the neutral complementary bottom where it enters frame) MUST be clearly visible — never floating or empty fabric, never a headless crop. Use this identical waist-up framing for every view of the product.'
         : bodytype === 'Full-Body'
-          ? 'Full garment must be visible, head to toe, no cropping.'
+          ? 'FULL-BODY SHOT, HEAD-TO-TOE: the COMPLETE model must be in frame from head to feet, fully clothed, with the upper body (head, torso, arms) AND the feet in clean sneakers all visible. Do NOT crop to waist-down-only or waist-up-only, NEVER show floating/empty fabric, and never barefoot. Use this identical full-body framing for every view of the product.'
           : 'DETECT the garment type from SOURCE_IMAGE and frame EVERY view of this product IDENTICALLY (this consistency is the top priority — never full-body in one view and waist-down in another):\n  • BOTTOMWEAR (trousers/jeans/shorts/skirt): HALF-BODY WAIST-DOWN shot — show from the waist down to the feet, cropped cleanly at the waist, in front/back/side/three-quarter alike. The upper body must NOT appear. A REAL human lower body (hips, thighs, legs, and feet in clean sneakers) MUST be clearly visible wearing the garment — NEVER floating, empty, or laid-flat trousers, and never barefoot.\n  • TOPWEAR (shirt/t-shirt/top): waist-UP upper-body shot in every view; do NOT show below the waist.\n  • DRESS / one-piece / full outfit: full body head-to-toe in every view.\nWhatever framing the garment type calls for, apply the EXACT SAME crop level to all four model views.';
 
   const attributesBlock = attributesText
@@ -205,9 +209,8 @@ Examine the SOURCE_IMAGE first to determine what garment is being featured.
 MODEL DETAILS (STRICT):
 - Description: ${modelDesc}
 - Expression: Neutral, confident
-- Pose: Professional fashion pose
-- Footwear: clean, simple, neutral casual sneakers appropriate to the outfit — the model is NEVER barefoot, and the SAME footwear is worn in every view.
-- Styling consistency: the paired/complementary garment (the neutral top or bottom from Rule #1), footwear, hairstyle, and skin tone MUST stay identical across all views of this product.
+- Pose: Professional fashion pose${framesFeet ? '\n- Footwear: clean, simple, neutral casual sneakers appropriate to the outfit — the model is NEVER barefoot, and the SAME footwear is worn in every view.' : ''}
+- Styling consistency: the paired/complementary garment (the neutral top or bottom from Rule #1), footwear (when in frame), hairstyle, and skin tone MUST stay identical across all views of this product.
 
 FRAMING & CAMERA:
 - Framing: ${framingDesc}
@@ -224,7 +227,7 @@ BACKGROUND (READ CAREFULLY — CONSISTENCY IS CRITICAL):
     ? `That solid colour MUST be EXACTLY ${backgroundColor}. This exact colour is FIXED for this product and MUST be pixel-identical in every view (front, back, side, three-quarter, closeup) — the entire product set is shot on the identical solid backdrop. Do NOT pick, invent, brighten, darken, warm, cool, or shift to any other colour. Keep it soft, muted and clean so the garment stands out clearly against it.`
     : `Use ONE soft, PALE, low-saturation PASTEL solid colour that complements the garment (e.g. pale lilac, soft mint, pale buttery yellow, blush, powder blue, warm off-white) — light and airy, never bold, deep, golden, warm-dark, or saturated. Use the SAME solid colour for every view of this product.`}
 - Matte and completely textureless — no seams, no floor line, no horizon, no props, no patterns, no banding, no shadows cast on the backdrop.
-- Bright, soft, EVEN studio lighting on the model, with only a faint soft contact shadow near the feet — no hard shadows, no moody/dramatic/spotlight lighting. The backdrop itself stays a flat even colour regardless of the lighting on the model.
+- Bright, soft, EVEN studio lighting on the model, with only a faint soft contact shadow${framesFeet ? ' near the feet' : ''} — no hard shadows, no moody/dramatic/spotlight lighting. The backdrop itself stays a flat even colour regardless of the lighting on the model.
 
 GARMENT PRESERVATION RULES (ABSOLUTE):
 - Color: ${colorInstr}
