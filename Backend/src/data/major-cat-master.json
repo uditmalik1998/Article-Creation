@@ -1,0 +1,2375 @@
+[
+  {
+    "majCat": "FW_W_SHOES",
+    "name": "CASUAL SHOES",
+    "div": "WOMEN",
+    "idealFor": "WOMEN",
+    "frame": "fw"
+  },
+  {
+    "majCat": "LW_JACKET_FS",
+    "name": "JACKETS",
+    "div": "WOMEN",
+    "idealFor": "WOMEN",
+    "frame": "upper"
+  },
+  {
+    "majCat": "LW_TOP",
+    "name": "TSHIRTS & TOPS",
+    "div": "WOMEN",
+    "idealFor": "WOMEN",
+    "frame": "upper"
+  },
+  {
+    "majCat": "LW_FLC_TOP",
+    "name": "SWEATSHIRTS",
+    "div": "WOMEN",
+    "idealFor": "WOMEN",
+    "frame": "upper"
+  },
+  {
+    "majCat": "LW_LEGGING",
+    "name": "LEGGINGS, SALWARS & CHURIDARS",
+    "div": "WOMEN",
+    "idealFor": "WOMEN",
+    "frame": "lower"
+  },
+  {
+    "majCat": "L_JEANS",
+    "name": "JEANS",
+    "div": "WOMEN",
+    "idealFor": "WOMEN",
+    "frame": "lower"
+  },
+  {
+    "majCat": "L_T_TOP_HS",
+    "name": "TSHIRTS & TOPS",
+    "div": "WOMEN",
+    "idealFor": "WOMEN",
+    "frame": "upper"
+  },
+  {
+    "majCat": "L_T_TOP_FS",
+    "name": "TSHIRTS & TOPS",
+    "div": "WOMEN",
+    "idealFor": "WOMEN",
+    "frame": "upper"
+  },
+  {
+    "majCat": "L_H_TOP_HS",
+    "name": "TSHIRTS & TOPS",
+    "div": "WOMEN",
+    "idealFor": "WOMEN",
+    "frame": "upper"
+  },
+  {
+    "majCat": "L_T_MID_FROCK_FS",
+    "name": "DRESSES",
+    "div": "WOMEN",
+    "idealFor": "WOMEN",
+    "frame": "upper"
+  },
+  {
+    "majCat": "L_SHIRTS",
+    "name": "CASUAL SHIRTS",
+    "div": "WOMEN",
+    "idealFor": "WOMEN",
+    "frame": "upper"
+  },
+  {
+    "majCat": "L_T_PYJAMA",
+    "name": "TRACK PANTS & PYJAMAS",
+    "div": "WOMEN",
+    "idealFor": "WOMEN",
+    "frame": "lower"
+  },
+  {
+    "majCat": "L_T_MID_FROCK_HS",
+    "name": "DRESSES",
+    "div": "WOMEN",
+    "idealFor": "WOMEN",
+    "frame": "upper"
+  },
+  {
+    "majCat": "L_SHRUG",
+    "name": "SHRUGS",
+    "div": "WOMEN",
+    "idealFor": "WOMEN",
+    "frame": "upper"
+  },
+  {
+    "majCat": "L_SKIRT",
+    "name": "SHORTS & SKIRTS",
+    "div": "WOMEN",
+    "idealFor": "WOMEN",
+    "frame": "lower"
+  },
+  {
+    "majCat": "L_H_TOP_FS",
+    "name": "TSHIRTS & TOPS",
+    "div": "WOMEN",
+    "idealFor": "WOMEN",
+    "frame": "upper"
+  },
+  {
+    "majCat": "L_H_PYJAMA",
+    "name": "TRACK PANTS & PYJAMAS",
+    "div": "WOMEN",
+    "idealFor": "WOMEN",
+    "frame": "lower"
+  },
+  {
+    "majCat": "L_BLAZER",
+    "name": "BLAZERS & COATS",
+    "div": "WOMEN",
+    "idealFor": "WOMEN",
+    "frame": "upper"
+  },
+  {
+    "majCat": "L_LEGGING",
+    "name": "LEGGINGS, SALWARS & CHURIDARS",
+    "div": "WOMEN",
+    "idealFor": "WOMEN",
+    "frame": "lower"
+  },
+  {
+    "majCat": "L_T_CAPRI",
+    "name": "TROUSERS & CAPRIS",
+    "div": "WOMEN",
+    "idealFor": "WOMEN",
+    "frame": "lower"
+  },
+  {
+    "majCat": "L_P_TIGHTS_UPPER",
+    "name": "TSHIRTS & TOPS",
+    "div": "WOMEN",
+    "idealFor": "WOMEN",
+    "frame": "upper"
+  },
+  {
+    "majCat": "L_P_TIGHTS_LOWER",
+    "name": "PYJAMAS",
+    "div": "WOMEN",
+    "idealFor": "WOMEN",
+    "frame": "lower"
+  },
+  {
+    "majCat": "L_HOT_PANT",
+    "name": "SHORTS",
+    "div": "WOMEN",
+    "idealFor": "WOMEN",
+    "frame": "lower"
+  },
+  {
+    "majCat": "L_SANDO",
+    "name": "SANDOS",
+    "div": "WOMEN",
+    "idealFor": "WOMEN",
+    "frame": "upper"
+  },
+  {
+    "majCat": "L_H_CAPRI",
+    "name": "TROUSERS & CAPRIS",
+    "div": "WOMEN",
+    "idealFor": "WOMEN",
+    "frame": "lower"
+  },
+  {
+    "majCat": "L_JEGGING",
+    "name": "LEGGINGS, SALWARS & CHURIDARS",
+    "div": "WOMEN",
+    "idealFor": "WOMEN",
+    "frame": "lower"
+  },
+  {
+    "majCat": "L_KURTI_SET",
+    "name": "KURTAS & SUITS",
+    "div": "WOMEN",
+    "idealFor": "WOMEN",
+    "frame": "set"
+  },
+  {
+    "majCat": "L_KURTI_HS",
+    "name": "KURTIS",
+    "div": "WOMEN",
+    "idealFor": "WOMEN",
+    "frame": "upper"
+  },
+  {
+    "majCat": "L_SLIPS",
+    "name": "SLEEPWEAR & LOUNGEWEAR",
+    "div": "WOMEN",
+    "idealFor": "WOMEN",
+    "frame": "upper"
+  },
+  {
+    "majCat": "L_KURTI_FS",
+    "name": "KURTIS",
+    "div": "WOMEN",
+    "idealFor": "WOMEN",
+    "frame": "upper"
+  },
+  {
+    "majCat": "L_PLAZO",
+    "name": "SKIRTS & PALAZZOS",
+    "div": "WOMEN",
+    "idealFor": "WOMEN",
+    "frame": "lower"
+  },
+  {
+    "majCat": "L_HAREMS",
+    "name": "TROUSERS & CAPRIS",
+    "div": "WOMEN",
+    "idealFor": "WOMEN",
+    "frame": "lower"
+  },
+  {
+    "majCat": "L_TROUSER",
+    "name": "CASUAL TROUSERS",
+    "div": "WOMEN",
+    "idealFor": "WOMEN",
+    "frame": "lower"
+  },
+  {
+    "majCat": "LW_SHRUG",
+    "name": "SHRUGS",
+    "div": "WOMEN",
+    "idealFor": "WOMEN",
+    "frame": "upper"
+  },
+  {
+    "majCat": "L_H_NIGHTY",
+    "name": "NIGHTY",
+    "div": "WOMEN",
+    "idealFor": "WOMEN",
+    "frame": "upper"
+  },
+  {
+    "majCat": "L_BRA",
+    "name": "BRA",
+    "div": "WOMEN",
+    "idealFor": "WOMEN",
+    "frame": "upper"
+  },
+  {
+    "majCat": "L_D_JOGGER",
+    "name": "TRACK PANTS & JOGGERS",
+    "div": "WOMEN",
+    "idealFor": "WOMEN",
+    "frame": "lower"
+  },
+  {
+    "majCat": "L_CARGO",
+    "name": "TRACK PANTS & JOGGERS",
+    "div": "WOMEN",
+    "idealFor": "WOMEN",
+    "frame": "lower"
+  },
+  {
+    "majCat": "L_CIG_PANT",
+    "name": "TROUSERS & CAPRIS",
+    "div": "WOMEN",
+    "idealFor": "WOMEN",
+    "frame": "lower"
+  },
+  {
+    "majCat": "L_T_HOT_PANT",
+    "name": "SHORTS",
+    "div": "WOMEN",
+    "idealFor": "WOMEN",
+    "frame": "lower"
+  },
+  {
+    "majCat": "L_H_HOT_PANT",
+    "name": "SHORTS",
+    "div": "WOMEN",
+    "idealFor": "WOMEN",
+    "frame": "lower"
+  },
+  {
+    "majCat": "L_CULOTTES",
+    "name": "DUNGAREES & JUMPSUITS",
+    "div": "WOMEN",
+    "idealFor": "WOMEN",
+    "frame": "set"
+  },
+  {
+    "majCat": "L_LNG_SKIRT",
+    "name": "SHORTS & SKIRTS",
+    "div": "WOMEN",
+    "idealFor": "WOMEN",
+    "frame": "lower"
+  },
+  {
+    "majCat": "LW_CAP",
+    "name": "CAPS & HATS",
+    "div": "WOMEN",
+    "idealFor": "WOMEN",
+    "frame": "upper"
+  },
+  {
+    "majCat": "LW_LTW_JKT_FS",
+    "name": "JACKETS",
+    "div": "WOMEN",
+    "idealFor": "WOMEN",
+    "frame": "upper"
+  },
+  {
+    "majCat": "LW_BLAZER_WLN",
+    "name": "BLAZERS & COATS",
+    "div": "WOMEN",
+    "idealFor": "WOMEN",
+    "frame": "upper"
+  },
+  {
+    "majCat": "LW_CO_ORD_SET",
+    "name": "CO-ORDS",
+    "div": "WOMEN",
+    "idealFor": "WOMEN",
+    "frame": "set"
+  },
+  {
+    "majCat": "LW_BLAZER",
+    "name": "BLAZERS & COATS",
+    "div": "WOMEN",
+    "idealFor": "WOMEN",
+    "frame": "upper"
+  },
+  {
+    "majCat": "LW_HW_JKT_FS",
+    "name": "JACKETS",
+    "div": "WOMEN",
+    "idealFor": "WOMEN",
+    "frame": "upper"
+  },
+  {
+    "majCat": "LW_PYJAMA",
+    "name": "TRACK PANTS & PYJAMAS",
+    "div": "WOMEN",
+    "idealFor": "WOMEN",
+    "frame": "lower"
+  },
+  {
+    "majCat": "LW_THRM_UPPER",
+    "name": "CAMISOLES & THERMALS",
+    "div": "WOMEN",
+    "idealFor": "WOMEN",
+    "frame": "upper"
+  },
+  {
+    "majCat": "LW_SWEATER_FS",
+    "name": "SWEATERS",
+    "div": "WOMEN",
+    "idealFor": "WOMEN",
+    "frame": "upper"
+  },
+  {
+    "majCat": "LW_SWEATER_SL",
+    "name": "SWEATERS",
+    "div": "WOMEN",
+    "idealFor": "WOMEN",
+    "frame": "upper"
+  },
+  {
+    "majCat": "LW_SHACKET",
+    "name": "SHACKET",
+    "div": "WOMEN",
+    "idealFor": "WOMEN",
+    "frame": "upper"
+  },
+  {
+    "majCat": "LW_THRM_LOWER",
+    "name": "CAMISOLES & THERMALS",
+    "div": "WOMEN",
+    "idealFor": "WOMEN",
+    "frame": "lower"
+  },
+  {
+    "majCat": "LW_SKEEVY",
+    "name": "SKEEVY",
+    "div": "WOMEN",
+    "idealFor": "WOMEN",
+    "frame": "upper"
+  },
+  {
+    "majCat": "LW_NIGHT_SUIT",
+    "name": "NIGHT SUIT",
+    "div": "WOMEN",
+    "idealFor": "WOMEN",
+    "frame": "upper"
+  },
+  {
+    "majCat": "LW_KURTI_ST",
+    "name": "KURTAS & SUITS",
+    "div": "WOMEN",
+    "idealFor": "WOMEN",
+    "frame": "set"
+  },
+  {
+    "majCat": "LW_WNDCHTR_JKT_FS",
+    "name": "JACKETS",
+    "div": "WOMEN",
+    "idealFor": "WOMEN",
+    "frame": "upper"
+  },
+  {
+    "majCat": "L_H_CROP_TOP_HS",
+    "name": "TSHIRTS & TOPS",
+    "div": "WOMEN",
+    "idealFor": "WOMEN",
+    "frame": "upper"
+  },
+  {
+    "majCat": "L_T_M_FRK_HS",
+    "name": "DRESSES",
+    "div": "WOMEN",
+    "idealFor": "WOMEN",
+    "frame": "upper"
+  },
+  {
+    "majCat": "L_H_CROP_TOP_FS",
+    "name": "TSHIRTS & TOPS",
+    "div": "WOMEN",
+    "idealFor": "WOMEN",
+    "frame": "upper"
+  },
+  {
+    "majCat": "L_KURTI_ST",
+    "name": "KURTAS & SUITS",
+    "div": "WOMEN",
+    "idealFor": "WOMEN",
+    "frame": "set"
+  },
+  {
+    "majCat": "L_SPRT_BRA",
+    "name": "BRA",
+    "div": "WOMEN",
+    "idealFor": "WOMEN",
+    "frame": "upper"
+  },
+  {
+    "majCat": "L_PANTY",
+    "name": "PANTY",
+    "div": "WOMEN",
+    "idealFor": "WOMEN",
+    "frame": "lower"
+  },
+  {
+    "majCat": "L_T_NIGHTY",
+    "name": "NIGHTY",
+    "div": "WOMEN",
+    "idealFor": "WOMEN",
+    "frame": "upper"
+  },
+  {
+    "majCat": "FW_M_CAS_SHOES",
+    "name": "CASUAL SHOES",
+    "div": "MEN",
+    "idealFor": "MEN",
+    "frame": "fw"
+  },
+  {
+    "majCat": "FW_M_SPRT_SHOES",
+    "name": "SPORTS SHOES",
+    "div": "MEN",
+    "idealFor": "MEN",
+    "frame": "fw"
+  },
+  {
+    "majCat": "FW_M_SPRT_SANDAL",
+    "name": "SANDALS",
+    "div": "MEN",
+    "idealFor": "MEN",
+    "frame": "fw"
+  },
+  {
+    "majCat": "FW_W_CHAPPAL",
+    "name": "SLIPPERS",
+    "div": "MEN",
+    "idealFor": "MEN",
+    "frame": "fw"
+  },
+  {
+    "majCat": "FW_M_FORMAL_SHOES",
+    "name": "FORMAL SHOES",
+    "div": "MEN",
+    "idealFor": "MEN",
+    "frame": "fw"
+  },
+  {
+    "majCat": "FW_M_FOR_SANDAL",
+    "name": "SANDALS",
+    "div": "MEN",
+    "idealFor": "MEN",
+    "frame": "fw"
+  },
+  {
+    "majCat": "FW_W_SLIPPER",
+    "name": "SLIPPERS",
+    "div": "MEN",
+    "idealFor": "MEN",
+    "frame": "fw"
+  },
+  {
+    "majCat": "M_SHRUG_FS",
+    "name": "SHRUGS",
+    "div": "MEN",
+    "idealFor": "MEN",
+    "frame": "upper"
+  },
+  {
+    "majCat": "M_T_SHIRT_PN_HS",
+    "name": "T-SHIRTS",
+    "div": "MEN",
+    "idealFor": "MEN",
+    "frame": "upper"
+  },
+  {
+    "majCat": "M_T_SHIRT_FS",
+    "name": "T-SHIRTS",
+    "div": "MEN",
+    "idealFor": "MEN",
+    "frame": "upper"
+  },
+  {
+    "majCat": "M_TEES_HS",
+    "name": "T-SHIRTS",
+    "div": "MEN",
+    "idealFor": "MEN",
+    "frame": "upper"
+  },
+  {
+    "majCat": "M_TIGHTS_SL",
+    "name": "T-SHIRTS",
+    "div": "MEN",
+    "idealFor": "MEN",
+    "frame": "upper"
+  },
+  {
+    "majCat": "M_TIGHTS_FS",
+    "name": "T-SHIRTS",
+    "div": "MEN",
+    "idealFor": "MEN",
+    "frame": "upper"
+  },
+  {
+    "majCat": "M_H_BERMUDA",
+    "name": "SHORTS",
+    "div": "MEN",
+    "idealFor": "MEN",
+    "frame": "lower"
+  },
+  {
+    "majCat": "M_H_PYJAMA",
+    "name": "TRACK PANTS & PYJAMAS",
+    "div": "MEN",
+    "idealFor": "MEN",
+    "frame": "lower"
+  },
+  {
+    "majCat": "M_TIGHTS_HS",
+    "name": "T-SHIRTS",
+    "div": "MEN",
+    "idealFor": "MEN",
+    "frame": "upper"
+  },
+  {
+    "majCat": "M_T_SHIRT_SL",
+    "name": "T-SHIRTS",
+    "div": "MEN",
+    "idealFor": "MEN",
+    "frame": "upper"
+  },
+  {
+    "majCat": "M_BLAZER",
+    "name": "BLAZERS & COATS",
+    "div": "MEN",
+    "idealFor": "MEN",
+    "frame": "upper"
+  },
+  {
+    "majCat": "M_JEANS",
+    "name": "JEANS",
+    "div": "MEN",
+    "idealFor": "MEN",
+    "frame": "lower"
+  },
+  {
+    "majCat": "MW_JACKET_FS",
+    "name": "JACKETS",
+    "div": "MEN",
+    "idealFor": "MEN",
+    "frame": "upper"
+  },
+  {
+    "majCat": "MW_SWEATER_FS",
+    "name": "SWEATERS",
+    "div": "MEN",
+    "idealFor": "MEN",
+    "frame": "upper"
+  },
+  {
+    "majCat": "MW_JACKET_SL",
+    "name": "JACKETS",
+    "div": "MEN",
+    "idealFor": "MEN",
+    "frame": "upper"
+  },
+  {
+    "majCat": "M_CASUAL_SHIRT_FS",
+    "name": "CASUAL SHIRTS",
+    "div": "MEN",
+    "idealFor": "MEN",
+    "frame": "upper"
+  },
+  {
+    "majCat": "M_FORMAL_SHIRT_FS",
+    "name": "FORMAL SHIRTS",
+    "div": "MEN",
+    "idealFor": "MEN",
+    "frame": "upper"
+  },
+  {
+    "majCat": "M_KURTA_FS",
+    "name": "KURTAS & KURTA SETS",
+    "div": "MEN",
+    "idealFor": "MEN",
+    "frame": "set"
+  },
+  {
+    "majCat": "M_CW_SHIRT_FS",
+    "name": "PARTYWEAR SHIRTS",
+    "div": "MEN",
+    "idealFor": "MEN",
+    "frame": "upper"
+  },
+  {
+    "majCat": "M_CASUAL_SHIRT_HS",
+    "name": "CASUAL SHIRTS",
+    "div": "MEN",
+    "idealFor": "MEN",
+    "frame": "upper"
+  },
+  {
+    "majCat": "M_S_FORMAL_SHIRT_FS",
+    "name": "FORMAL SHIRTS",
+    "div": "MEN",
+    "idealFor": "MEN",
+    "frame": "upper"
+  },
+  {
+    "majCat": "M_CASUAL_TROUSER",
+    "name": "CASUAL TROUSERS",
+    "div": "MEN",
+    "idealFor": "MEN",
+    "frame": "lower"
+  },
+  {
+    "majCat": "FW_M_SLIPPER",
+    "name": "SLIPPERS",
+    "div": "MEN",
+    "idealFor": "MEN",
+    "frame": "fw"
+  },
+  {
+    "majCat": "MW_T_SHIRT_FS",
+    "name": "T-SHIRTS",
+    "div": "MEN",
+    "idealFor": "MEN",
+    "frame": "upper"
+  },
+  {
+    "majCat": "M_FORMAL_TROUSER",
+    "name": "FORMAL TROUSERS",
+    "div": "MEN",
+    "idealFor": "MEN",
+    "frame": "lower"
+  },
+  {
+    "majCat": "M_T_BERMUDA",
+    "name": "SHORTS",
+    "div": "MEN",
+    "idealFor": "MEN",
+    "frame": "lower"
+  },
+  {
+    "majCat": "M_BOXER",
+    "name": "BOXERS",
+    "div": "MEN",
+    "idealFor": "MEN",
+    "frame": "lower"
+  },
+  {
+    "majCat": "M_H_JAMAICAN",
+    "name": "SHORTS",
+    "div": "MEN",
+    "idealFor": "MEN",
+    "frame": "lower"
+  },
+  {
+    "majCat": "M_W_SHIRT_HS",
+    "name": "CASUAL SHIRTS",
+    "div": "MEN",
+    "idealFor": "MEN",
+    "frame": "upper"
+  },
+  {
+    "majCat": "M_F_SHIRT_FS",
+    "name": "FORMAL SHIRTS",
+    "div": "MEN",
+    "idealFor": "MEN",
+    "frame": "upper"
+  },
+  {
+    "majCat": "M_W_SHIRT_FS",
+    "name": "CASUAL SHIRTS",
+    "div": "MEN",
+    "idealFor": "MEN",
+    "frame": "upper"
+  },
+  {
+    "majCat": "MW_LW_JKT_FS",
+    "name": "JACKETS",
+    "div": "MEN",
+    "idealFor": "MEN",
+    "frame": "upper"
+  },
+  {
+    "majCat": "M_K_SHIRT_HS",
+    "name": "CASUAL SHIRTS",
+    "div": "MEN",
+    "idealFor": "MEN",
+    "frame": "upper"
+  },
+  {
+    "majCat": "M_SF_SHIRT_FS",
+    "name": "SEMI FORMAL SHIRT",
+    "div": "MEN",
+    "idealFor": "MEN",
+    "frame": "upper"
+  },
+  {
+    "majCat": "M_KURTA_HS",
+    "name": "KURTAS & KURTA SETS",
+    "div": "MEN",
+    "idealFor": "MEN",
+    "frame": "set"
+  },
+  {
+    "majCat": "MW_PYJAMA",
+    "name": "TRACK PANTS & PYJAMAS",
+    "div": "MEN",
+    "idealFor": "MEN",
+    "frame": "lower"
+  },
+  {
+    "majCat": "MW_SWTR_FS",
+    "name": "SWEATERS",
+    "div": "MEN",
+    "idealFor": "MEN",
+    "frame": "upper"
+  },
+  {
+    "majCat": "MW_HRY_SWTR_FS",
+    "name": "SWEATERS",
+    "div": "MEN",
+    "idealFor": "MEN",
+    "frame": "upper"
+  },
+  {
+    "majCat": "MW_WNDCHTR_JKT_FS",
+    "name": "JACKETS",
+    "div": "MEN",
+    "idealFor": "MEN",
+    "frame": "upper"
+  },
+  {
+    "majCat": "MW_JKT_SL",
+    "name": "JACKETS",
+    "div": "MEN",
+    "idealFor": "MEN",
+    "frame": "upper"
+  },
+  {
+    "majCat": "M_K_TRSR",
+    "name": "CASUAL TROUSERS",
+    "div": "MEN",
+    "idealFor": "MEN",
+    "frame": "lower"
+  },
+  {
+    "majCat": "MW_TEES_HUD_FS",
+    "name": "T-SHIRTS",
+    "div": "MEN",
+    "idealFor": "MEN",
+    "frame": "upper"
+  },
+  {
+    "majCat": "MW_CAP",
+    "name": "CAPS & HATS",
+    "div": "MEN",
+    "idealFor": "MEN",
+    "frame": "upper"
+  },
+  {
+    "majCat": "MW_HW_JKT_FS",
+    "name": "JACKETS",
+    "div": "MEN",
+    "idealFor": "MEN",
+    "frame": "upper"
+  },
+  {
+    "majCat": "MW_TEES_FS",
+    "name": "T-SHIRTS",
+    "div": "MEN",
+    "idealFor": "MEN",
+    "frame": "upper"
+  },
+  {
+    "majCat": "MW_EAR_CAP",
+    "name": "CAPS & HATS",
+    "div": "MEN",
+    "idealFor": "MEN",
+    "frame": "upper"
+  },
+  {
+    "majCat": "MW_MODI_JKT",
+    "name": "MODI JACKET",
+    "div": "MEN",
+    "idealFor": "MEN",
+    "frame": "upper"
+  },
+  {
+    "majCat": "MW_BLAZER",
+    "name": "BLAZERS & COATS",
+    "div": "MEN",
+    "idealFor": "MEN",
+    "frame": "upper"
+  },
+  {
+    "majCat": "M_W_TRSR",
+    "name": "CASUAL TROUSERS",
+    "div": "MEN",
+    "idealFor": "MEN",
+    "frame": "lower"
+  },
+  {
+    "majCat": "M_W_PYJAMA",
+    "name": "TRACK PANTS & PYJAMAS",
+    "div": "MEN",
+    "idealFor": "MEN",
+    "frame": "lower"
+  },
+  {
+    "majCat": "M_F_TRSR",
+    "name": "FORMAL TROUSERS",
+    "div": "MEN",
+    "idealFor": "MEN",
+    "frame": "lower"
+  },
+  {
+    "majCat": "M_CARGO",
+    "name": "TRACK PANTS & JOGGERS",
+    "div": "MEN",
+    "idealFor": "MEN",
+    "frame": "lower"
+  },
+  {
+    "majCat": "M_VEST",
+    "name": "VESTS",
+    "div": "MEN",
+    "idealFor": "MEN",
+    "frame": "upper"
+  },
+  {
+    "majCat": "M_BRIEF",
+    "name": "BRIEFS & TRUNKS",
+    "div": "MEN",
+    "idealFor": "MEN",
+    "frame": "lower"
+  },
+  {
+    "majCat": "M_W_BERMUDA",
+    "name": "SHORTS",
+    "div": "MEN",
+    "idealFor": "MEN",
+    "frame": "lower"
+  },
+  {
+    "majCat": "M_SANDO",
+    "name": "SANDOS",
+    "div": "MEN",
+    "idealFor": "MEN",
+    "frame": "upper"
+  },
+  {
+    "majCat": "M_W_JAMAICAN",
+    "name": "SHORTS",
+    "div": "MEN",
+    "idealFor": "MEN",
+    "frame": "lower"
+  },
+  {
+    "majCat": "M_K_PYJAMA",
+    "name": "TRACK PANTS & PYJAMAS",
+    "div": "MEN",
+    "idealFor": "MEN",
+    "frame": "lower"
+  },
+  {
+    "majCat": "M_K_BERMUDA",
+    "name": "SHORTS",
+    "div": "MEN",
+    "idealFor": "MEN",
+    "frame": "lower"
+  },
+  {
+    "majCat": "M_TEES_PN_HS",
+    "name": "T-SHIRTS",
+    "div": "MEN",
+    "idealFor": "MEN",
+    "frame": "upper"
+  },
+  {
+    "majCat": "M_HOLI",
+    "name": "T-SHIRTS",
+    "div": "MEN",
+    "idealFor": "MEN",
+    "frame": "upper"
+  },
+  {
+    "majCat": "M_TEES_FS",
+    "name": "T-SHIRTS",
+    "div": "MEN",
+    "idealFor": "MEN",
+    "frame": "upper"
+  },
+  {
+    "majCat": "M_TEES_SL",
+    "name": "T-SHIRTS",
+    "div": "MEN",
+    "idealFor": "MEN",
+    "frame": "upper"
+  },
+  {
+    "majCat": "IB_T_SHIRT_HS",
+    "name": "TSHIRTS & TOPS",
+    "div": "KIDS",
+    "idealFor": "KIDS & INFANTS",
+    "frame": "upper"
+  },
+  {
+    "majCat": "KI_GIFT_ST_FS",
+    "name": "GIFT SET",
+    "div": "KIDS",
+    "idealFor": "KIDS & INFANTS",
+    "frame": "set"
+  },
+  {
+    "majCat": "KI_BABA_SUIT_SL",
+    "name": "BABA SUITS",
+    "div": "KIDS",
+    "idealFor": "KIDS & INFANTS",
+    "frame": "set"
+  },
+  {
+    "majCat": "YG_H_TOP_HS",
+    "name": "TSHIRTS & TOPS",
+    "div": "KIDS",
+    "idealFor": "KIDS GIRL",
+    "frame": "upper"
+  },
+  {
+    "majCat": "JG_HOT_PANT_SET",
+    "name": "CLOTHING SETS",
+    "div": "KIDS",
+    "idealFor": "KIDS GIRL",
+    "frame": "set"
+  },
+  {
+    "majCat": "JG_H_TOP_HS",
+    "name": "TSHIRTS & TOPS",
+    "div": "KIDS",
+    "idealFor": "KIDS GIRL",
+    "frame": "upper"
+  },
+  {
+    "majCat": "JG_T_TOP_HS",
+    "name": "TSHIRTS & TOPS",
+    "div": "KIDS",
+    "idealFor": "KIDS GIRL",
+    "frame": "upper"
+  },
+  {
+    "majCat": "YG_H_TOP_FS",
+    "name": "TSHIRTS & TOPS",
+    "div": "KIDS",
+    "idealFor": "KIDS GIRL",
+    "frame": "upper"
+  },
+  {
+    "majCat": "JB_T_SHIRT_HS",
+    "name": "T-SHIRTS",
+    "div": "KIDS",
+    "idealFor": "KIDS BOY",
+    "frame": "upper"
+  },
+  {
+    "majCat": "JB_T_SHIRT_FS",
+    "name": "T-SHIRTS",
+    "div": "KIDS",
+    "idealFor": "KIDS BOY",
+    "frame": "upper"
+  },
+  {
+    "majCat": "YB_T_SHIRT_HS",
+    "name": "T-SHIRTS",
+    "div": "KIDS",
+    "idealFor": "KIDS BOY",
+    "frame": "upper"
+  },
+  {
+    "majCat": "YB_BERMUDA",
+    "name": "SHORTS",
+    "div": "KIDS",
+    "idealFor": "KIDS BOY",
+    "frame": "lower"
+  },
+  {
+    "majCat": "JB_H_BABA_SUIT_FS",
+    "name": "BABA SUITS",
+    "div": "KIDS",
+    "idealFor": "KIDS BOY",
+    "frame": "set"
+  },
+  {
+    "majCat": "JB_BABA_SUIT_SL",
+    "name": "BABA SUITS",
+    "div": "KIDS",
+    "idealFor": "KIDS BOY",
+    "frame": "set"
+  },
+  {
+    "majCat": "IG_SET_FS",
+    "name": "CLOTHING SETS",
+    "div": "KIDS",
+    "idealFor": "KIDS & INFANTS",
+    "frame": "set"
+  },
+  {
+    "majCat": "KIW_JACKET_SL",
+    "name": "JACKETS",
+    "div": "KIDS",
+    "idealFor": "KIDS & INFANTS",
+    "frame": "upper"
+  },
+  {
+    "majCat": "YGW_LEGGING",
+    "name": "LEGGINGS, SALWARS & CHURIDARS",
+    "div": "KIDS",
+    "idealFor": "KIDS GIRL",
+    "frame": "lower"
+  },
+  {
+    "majCat": "YB_JAMAICAN",
+    "name": "SHORTS",
+    "div": "KIDS",
+    "idealFor": "KIDS BOY",
+    "frame": "lower"
+  },
+  {
+    "majCat": "JB_BERMUDA",
+    "name": "SHORTS",
+    "div": "KIDS",
+    "idealFor": "KIDS BOY",
+    "frame": "lower"
+  },
+  {
+    "majCat": "YG_HOT_PANT",
+    "name": "SHORTS",
+    "div": "KIDS",
+    "idealFor": "KIDS GIRL",
+    "frame": "lower"
+  },
+  {
+    "majCat": "IG_HOT_PANT_SET",
+    "name": "CLOTHING SETS",
+    "div": "KIDS",
+    "idealFor": "KIDS & INFANTS",
+    "frame": "set"
+  },
+  {
+    "majCat": "JG_HOT_PANT",
+    "name": "SHORTS",
+    "div": "KIDS",
+    "idealFor": "KIDS GIRL",
+    "frame": "lower"
+  },
+  {
+    "majCat": "JG_SET",
+    "name": "CLOTHING SETS",
+    "div": "KIDS",
+    "idealFor": "KIDS GIRL",
+    "frame": "set"
+  },
+  {
+    "majCat": "JG_SKIRT",
+    "name": "SHORTS & SKIRTS",
+    "div": "KIDS",
+    "idealFor": "KIDS GIRL",
+    "frame": "lower"
+  },
+  {
+    "majCat": "JB_T_BABA_SUIT_HS",
+    "name": "BABA SUITS",
+    "div": "KIDS",
+    "idealFor": "KIDS BOY",
+    "frame": "set"
+  },
+  {
+    "majCat": "YB_HALF_PANT",
+    "name": "SHORTS",
+    "div": "KIDS",
+    "idealFor": "KIDS BOY",
+    "frame": "lower"
+  },
+  {
+    "majCat": "YG_HAREMS",
+    "name": "TROUSERS & CAPRIS",
+    "div": "KIDS",
+    "idealFor": "KIDS GIRL",
+    "frame": "lower"
+  },
+  {
+    "majCat": "YB_T_SHIRT_SL",
+    "name": "T-SHIRTS",
+    "div": "KIDS",
+    "idealFor": "KIDS BOY",
+    "frame": "upper"
+  },
+  {
+    "majCat": "JB_T_SHIRT_SL",
+    "name": "T-SHIRTS",
+    "div": "KIDS",
+    "idealFor": "KIDS BOY",
+    "frame": "upper"
+  },
+  {
+    "majCat": "IG_HOT_PANT",
+    "name": "SHORTS",
+    "div": "KIDS",
+    "idealFor": "KIDS & INFANTS",
+    "frame": "lower"
+  },
+  {
+    "majCat": "JB_JAMAICAN",
+    "name": "SHORTS",
+    "div": "KIDS",
+    "idealFor": "KIDS BOY",
+    "frame": "lower"
+  },
+  {
+    "majCat": "KI_H_BABA_SUIT_HS",
+    "name": "BABA SUITS",
+    "div": "KIDS",
+    "idealFor": "KIDS & INFANTS",
+    "frame": "set"
+  },
+  {
+    "majCat": "KI_T_BABA_SUIT_HS",
+    "name": "BABA SUITS",
+    "div": "KIDS",
+    "idealFor": "KIDS & INFANTS",
+    "frame": "set"
+  },
+  {
+    "majCat": "JG_HAREMS",
+    "name": "TROUSERS & CAPRIS",
+    "div": "KIDS",
+    "idealFor": "KIDS GIRL",
+    "frame": "lower"
+  },
+  {
+    "majCat": "IB_DUNGAREE_SUIT",
+    "name": "DUNGAREES & JUMPSUITS",
+    "div": "KIDS",
+    "idealFor": "KIDS & INFANTS",
+    "frame": "set"
+  },
+  {
+    "majCat": "IG_FROCK",
+    "name": "DRESSES",
+    "div": "KIDS",
+    "idealFor": "KIDS & INFANTS",
+    "frame": "upper"
+  },
+  {
+    "majCat": "IG_TOP_HS",
+    "name": "TSHIRTS & TOPS",
+    "div": "KIDS",
+    "idealFor": "KIDS & INFANTS",
+    "frame": "upper"
+  },
+  {
+    "majCat": "KI_SKIRT_TOP_SET",
+    "name": "CLOTHING SETS",
+    "div": "KIDS",
+    "idealFor": "KIDS & INFANTS",
+    "frame": "set"
+  },
+  {
+    "majCat": "JG_CAPRI",
+    "name": "TROUSERS & CAPRIS",
+    "div": "KIDS",
+    "idealFor": "KIDS GIRL",
+    "frame": "lower"
+  },
+  {
+    "majCat": "YG_CAPRI",
+    "name": "TROUSERS & CAPRIS",
+    "div": "KIDS",
+    "idealFor": "KIDS GIRL",
+    "frame": "lower"
+  },
+  {
+    "majCat": "JB_H_BABA_SUIT_HS",
+    "name": "BABA SUITS",
+    "div": "KIDS",
+    "idealFor": "KIDS BOY",
+    "frame": "set"
+  },
+  {
+    "majCat": "YB_JEANS",
+    "name": "JEANS",
+    "div": "KIDS",
+    "idealFor": "KIDS BOY",
+    "frame": "lower"
+  },
+  {
+    "majCat": "JG_KURTI",
+    "name": "KURTIS",
+    "div": "KIDS",
+    "idealFor": "KIDS GIRL",
+    "frame": "upper"
+  },
+  {
+    "majCat": "YG_H_FROCK",
+    "name": "DRESSES",
+    "div": "KIDS",
+    "idealFor": "KIDS GIRL",
+    "frame": "upper"
+  },
+  {
+    "majCat": "JB_B_SUIT_SL",
+    "name": "BABA SUITS",
+    "div": "KIDS",
+    "idealFor": "KIDS BOY",
+    "frame": "set"
+  },
+  {
+    "majCat": "JB_H_B_SUIT_HS",
+    "name": "BABA SUITS",
+    "div": "KIDS",
+    "idealFor": "KIDS BOY",
+    "frame": "set"
+  },
+  {
+    "majCat": "YB_TEES_SL",
+    "name": "T-SHIRTS",
+    "div": "KIDS",
+    "idealFor": "KIDS BOY",
+    "frame": "upper"
+  },
+  {
+    "majCat": "YB_H_BERMUDA",
+    "name": "SHORTS",
+    "div": "KIDS",
+    "idealFor": "KIDS BOY",
+    "frame": "lower"
+  },
+  {
+    "majCat": "JB_H_BERMUDA",
+    "name": "SHORTS",
+    "div": "KIDS",
+    "idealFor": "KIDS BOY",
+    "frame": "lower"
+  },
+  {
+    "majCat": "JB_H_PYJAMA",
+    "name": "TRACK PANTS & PYJAMAS",
+    "div": "KIDS",
+    "idealFor": "KIDS BOY",
+    "frame": "lower"
+  },
+  {
+    "majCat": "JB_B_SUIT_ST_HS",
+    "name": "BABA SUITS",
+    "div": "KIDS",
+    "idealFor": "KIDS BOY",
+    "frame": "set"
+  },
+  {
+    "majCat": "JB_T_B_SUIT_HS",
+    "name": "BABA SUITS",
+    "div": "KIDS",
+    "idealFor": "KIDS BOY",
+    "frame": "set"
+  },
+  {
+    "majCat": "JB_BRIEF",
+    "name": "BRIEFS & TRUNKS",
+    "div": "KIDS",
+    "idealFor": "KIDS BOY",
+    "frame": "lower"
+  },
+  {
+    "majCat": "JB_TEES_SL",
+    "name": "T-SHIRTS",
+    "div": "KIDS",
+    "idealFor": "KIDS BOY",
+    "frame": "upper"
+  },
+  {
+    "majCat": "JB_TEES_HS",
+    "name": "T-SHIRTS",
+    "div": "KIDS",
+    "idealFor": "KIDS BOY",
+    "frame": "upper"
+  },
+  {
+    "majCat": "YB_TEES_HS",
+    "name": "T-SHIRTS",
+    "div": "KIDS",
+    "idealFor": "KIDS BOY",
+    "frame": "upper"
+  },
+  {
+    "majCat": "JB_SHIRT_HS",
+    "name": "CASUAL SHIRTS",
+    "div": "KIDS",
+    "idealFor": "KIDS BOY",
+    "frame": "upper"
+  },
+  {
+    "majCat": "YB_CRG",
+    "name": "TRACK PANTS & JOGGERS",
+    "div": "KIDS",
+    "idealFor": "KIDS BOY",
+    "frame": "lower"
+  },
+  {
+    "majCat": "YB_SHIRT_HS",
+    "name": "CASUAL SHIRTS",
+    "div": "KIDS",
+    "idealFor": "KIDS BOY",
+    "frame": "upper"
+  },
+  {
+    "majCat": "JB_CRG",
+    "name": "TRACK PANTS & JOGGERS",
+    "div": "KIDS",
+    "idealFor": "KIDS BOY",
+    "frame": "lower"
+  },
+  {
+    "majCat": "JG_CARGO",
+    "name": "CARGO",
+    "div": "KIDS",
+    "idealFor": "KIDS GIRL",
+    "frame": "lower"
+  },
+  {
+    "majCat": "JB_T_SHIRT_PN_HS",
+    "name": "T-SHIRTS",
+    "div": "KIDS",
+    "idealFor": "KIDS BOY",
+    "frame": "upper"
+  },
+  {
+    "majCat": "JB_H_B_SUIT_FS",
+    "name": "BABA SUITS",
+    "div": "KIDS",
+    "idealFor": "KIDS BOY",
+    "frame": "set"
+  },
+  {
+    "majCat": "JB_TEES_HD_FS",
+    "name": "T-SHIRTS",
+    "div": "KIDS",
+    "idealFor": "KIDS BOY",
+    "frame": "upper"
+  },
+  {
+    "majCat": "YB_TRSR",
+    "name": "CASUAL TROUSERS",
+    "div": "KIDS",
+    "idealFor": "KIDS BOY",
+    "frame": "lower"
+  },
+  {
+    "majCat": "JB_TRSR",
+    "name": "CASUAL TROUSERS",
+    "div": "KIDS",
+    "idealFor": "KIDS BOY",
+    "frame": "lower"
+  },
+  {
+    "majCat": "JB_T_BERMUDA",
+    "name": "SHORTS",
+    "div": "KIDS",
+    "idealFor": "KIDS BOY",
+    "frame": "lower"
+  },
+  {
+    "majCat": "JB_T_JAMAICAN",
+    "name": "SHORTS",
+    "div": "KIDS",
+    "idealFor": "KIDS BOY",
+    "frame": "lower"
+  },
+  {
+    "majCat": "YB_TEES_FS",
+    "name": "T-SHIRTS",
+    "div": "KIDS",
+    "idealFor": "KIDS BOY",
+    "frame": "upper"
+  },
+  {
+    "majCat": "YB_T_PYJAMA",
+    "name": "TRACK PANTS & PYJAMAS",
+    "div": "KIDS",
+    "idealFor": "KIDS BOY",
+    "frame": "lower"
+  },
+  {
+    "majCat": "YB_K_SHIRT_HS",
+    "name": "CASUAL SHIRTS",
+    "div": "KIDS",
+    "idealFor": "KIDS BOY",
+    "frame": "upper"
+  },
+  {
+    "majCat": "JB_K_SHIRT_HS",
+    "name": "CASUAL SHIRTS",
+    "div": "KIDS",
+    "idealFor": "KIDS BOY",
+    "frame": "upper"
+  },
+  {
+    "majCat": "YB_T_BERMUDA",
+    "name": "SHORTS",
+    "div": "KIDS",
+    "idealFor": "KIDS BOY",
+    "frame": "lower"
+  },
+  {
+    "majCat": "JBW_THRM_U",
+    "name": "INNERWEAR & THERMALS",
+    "div": "KIDS",
+    "idealFor": "KIDS BOY",
+    "frame": "upper"
+  },
+  {
+    "majCat": "IB_B_SUIT_FS",
+    "name": "BABA SUITS",
+    "div": "KIDS",
+    "idealFor": "KIDS & INFANTS",
+    "frame": "set"
+  },
+  {
+    "majCat": "KBW_CAP",
+    "name": "CAPS & HATS",
+    "div": "KIDS",
+    "idealFor": "KIDS & INFANTS",
+    "frame": "upper"
+  },
+  {
+    "majCat": "JBW_T_SHIRT_FS",
+    "name": "T-SHIRTS",
+    "div": "KIDS",
+    "idealFor": "KIDS BOY",
+    "frame": "upper"
+  },
+  {
+    "majCat": "YBW_T_SHIRT_FS",
+    "name": "T-SHIRTS",
+    "div": "KIDS",
+    "idealFor": "KIDS BOY",
+    "frame": "upper"
+  },
+  {
+    "majCat": "JBW_T_SHIRT_HD_FS",
+    "name": "T-SHIRTS",
+    "div": "KIDS",
+    "idealFor": "KIDS BOY",
+    "frame": "upper"
+  },
+  {
+    "majCat": "YBW_T_SHIRT_HD_FS",
+    "name": "T-SHIRTS",
+    "div": "KIDS",
+    "idealFor": "KIDS BOY",
+    "frame": "upper"
+  },
+  {
+    "majCat": "JBW_JKT_FS",
+    "name": "JACKETS",
+    "div": "KIDS",
+    "idealFor": "KIDS BOY",
+    "frame": "upper"
+  },
+  {
+    "majCat": "YBW_JKT_FS",
+    "name": "JACKETS",
+    "div": "KIDS",
+    "idealFor": "KIDS BOY",
+    "frame": "upper"
+  },
+  {
+    "majCat": "JBW_SWEATER_FS",
+    "name": "SWEATERS",
+    "div": "KIDS",
+    "idealFor": "KIDS BOY",
+    "frame": "upper"
+  },
+  {
+    "majCat": "JBW_PYJAMA",
+    "name": "TRACK PANTS & PYJAMAS",
+    "div": "KIDS",
+    "idealFor": "KIDS BOY",
+    "frame": "lower"
+  },
+  {
+    "majCat": "YBW_PYJAMA",
+    "name": "TRACK PANTS & PYJAMAS",
+    "div": "KIDS",
+    "idealFor": "KIDS BOY",
+    "frame": "lower"
+  },
+  {
+    "majCat": "YBW_SWEATER_FS",
+    "name": "SWEATERS",
+    "div": "KIDS",
+    "idealFor": "KIDS BOY",
+    "frame": "upper"
+  },
+  {
+    "majCat": "JBW_THRM_L",
+    "name": "INNERWEAR & THERMALS",
+    "div": "KIDS",
+    "idealFor": "KIDS BOY",
+    "frame": "lower"
+  },
+  {
+    "majCat": "JBW_T_SUIT",
+    "name": "TRACKSUITS",
+    "div": "KIDS",
+    "idealFor": "KIDS BOY",
+    "frame": "set"
+  },
+  {
+    "majCat": "JG_H_PYJAMA",
+    "name": "TRACK PANTS & PYJAMAS",
+    "div": "KIDS",
+    "idealFor": "KIDS GIRL",
+    "frame": "lower"
+  },
+  {
+    "majCat": "JG_PW_FROCK",
+    "name": "DRESSES",
+    "div": "KIDS",
+    "idealFor": "KIDS GIRL",
+    "frame": "upper"
+  },
+  {
+    "majCat": "JG_H_ST",
+    "name": "CLOTHING SETS",
+    "div": "KIDS",
+    "idealFor": "KIDS GIRL",
+    "frame": "set"
+  },
+  {
+    "majCat": "YG_T_PYJAMA",
+    "name": "TRACK PANTS & PYJAMAS",
+    "div": "KIDS",
+    "idealFor": "KIDS GIRL",
+    "frame": "lower"
+  },
+  {
+    "majCat": "YG_T_TOP_HS",
+    "name": "TSHIRTS & TOPS",
+    "div": "KIDS",
+    "idealFor": "KIDS GIRL",
+    "frame": "upper"
+  },
+  {
+    "majCat": "JG_D_HOT_PANT",
+    "name": "SHORTS",
+    "div": "KIDS",
+    "idealFor": "KIDS GIRL",
+    "frame": "lower"
+  },
+  {
+    "majCat": "JG_H_FROCK",
+    "name": "DRESSES",
+    "div": "KIDS",
+    "idealFor": "KIDS GIRL",
+    "frame": "upper"
+  },
+  {
+    "majCat": "YG_PW_FROCK",
+    "name": "DRESSES",
+    "div": "KIDS",
+    "idealFor": "KIDS GIRL",
+    "frame": "upper"
+  },
+  {
+    "majCat": "YG_D_HOT_PANT",
+    "name": "SHORTS",
+    "div": "KIDS",
+    "idealFor": "KIDS GIRL",
+    "frame": "lower"
+  },
+  {
+    "majCat": "YG_T_TOP_FS",
+    "name": "TSHIRTS & TOPS",
+    "div": "KIDS",
+    "idealFor": "KIDS GIRL",
+    "frame": "upper"
+  },
+  {
+    "majCat": "JG_T_TOP_FS",
+    "name": "TSHIRTS & TOPS",
+    "div": "KIDS",
+    "idealFor": "KIDS GIRL",
+    "frame": "upper"
+  },
+  {
+    "majCat": "YG_CARGO",
+    "name": "TRACK PANTS & JOGGERS",
+    "div": "KIDS",
+    "idealFor": "KIDS GIRL",
+    "frame": "lower"
+  },
+  {
+    "majCat": "JG_JEANS",
+    "name": "JEANS",
+    "div": "KIDS",
+    "idealFor": "KIDS GIRL",
+    "frame": "lower"
+  },
+  {
+    "majCat": "JG_H_TOP_FS",
+    "name": "TSHIRTS & TOPS",
+    "div": "KIDS",
+    "idealFor": "KIDS GIRL",
+    "frame": "upper"
+  },
+  {
+    "majCat": "YG_T_HOT_PANT",
+    "name": "SHORTS",
+    "div": "KIDS",
+    "idealFor": "KIDS GIRL",
+    "frame": "lower"
+  },
+  {
+    "majCat": "YG_JEANS",
+    "name": "JEANS",
+    "div": "KIDS",
+    "idealFor": "KIDS GIRL",
+    "frame": "lower"
+  },
+  {
+    "majCat": "YG_H_PYJAMA",
+    "name": "TRACK PANTS & PYJAMAS",
+    "div": "KIDS",
+    "idealFor": "KIDS GIRL",
+    "frame": "lower"
+  },
+  {
+    "majCat": "JG_H_HOT_PANT",
+    "name": "SHORTS & SKIRTS",
+    "div": "KIDS",
+    "idealFor": "KIDS GIRL",
+    "frame": "lower"
+  },
+  {
+    "majCat": "JG_SLIPS",
+    "name": "SLIPS",
+    "div": "KIDS",
+    "idealFor": "KIDS GIRL",
+    "frame": "upper"
+  },
+  {
+    "majCat": "JG_T_FROCK",
+    "name": "DRESSES",
+    "div": "KIDS",
+    "idealFor": "KIDS GIRL",
+    "frame": "upper"
+  },
+  {
+    "majCat": "JG_BLOOMER",
+    "name": "BLOOMER",
+    "div": "KIDS",
+    "idealFor": "KIDS GIRL",
+    "frame": "lower"
+  },
+  {
+    "majCat": "JG_PANTY",
+    "name": "PANTY",
+    "div": "KIDS",
+    "idealFor": "KIDS GIRL",
+    "frame": "lower"
+  },
+  {
+    "majCat": "KIW_TOP",
+    "name": "TSHIRTS & TOPS",
+    "div": "KIDS",
+    "idealFor": "KIDS & INFANTS",
+    "frame": "upper"
+  },
+  {
+    "majCat": "YGW_TOP",
+    "name": "TSHIRTS & TOPS",
+    "div": "KIDS",
+    "idealFor": "KIDS GIRL",
+    "frame": "upper"
+  },
+  {
+    "majCat": "JGW_TOP",
+    "name": "TSHIRTS & TOPS",
+    "div": "KIDS",
+    "idealFor": "KIDS GIRL",
+    "frame": "upper"
+  },
+  {
+    "majCat": "JGW_FLC_TOP",
+    "name": "TSHIRTS & TOPS",
+    "div": "KIDS",
+    "idealFor": "KIDS GIRL",
+    "frame": "upper"
+  },
+  {
+    "majCat": "YGW_FLC_TOP",
+    "name": "TSHIRTS & TOPS",
+    "div": "KIDS",
+    "idealFor": "KIDS GIRL",
+    "frame": "upper"
+  },
+  {
+    "majCat": "KGW_CAP",
+    "name": "CAPS & HATS",
+    "div": "KIDS",
+    "idealFor": "KIDS & INFANTS",
+    "frame": "upper"
+  },
+  {
+    "majCat": "JGW_ST",
+    "name": "CLOTHING SETS",
+    "div": "KIDS",
+    "idealFor": "KIDS GIRL",
+    "frame": "set"
+  },
+  {
+    "majCat": "JGW_LEGGING",
+    "name": "LEGGINGS, SALWARS & CHURIDARS",
+    "div": "KIDS",
+    "idealFor": "KIDS GIRL",
+    "frame": "lower"
+  },
+  {
+    "majCat": "IG_FROCK_HSR",
+    "name": "DRESSES",
+    "div": "KIDS",
+    "idealFor": "KIDS & INFANTS",
+    "frame": "upper"
+  },
+  {
+    "majCat": "KI_B_SUIT_ST_HS",
+    "name": "BABA SUITS",
+    "div": "KIDS",
+    "idealFor": "KIDS & INFANTS",
+    "frame": "set"
+  },
+  {
+    "majCat": "KI_BLOOMER",
+    "name": "BLOOMER",
+    "div": "KIDS",
+    "idealFor": "KIDS & INFANTS",
+    "frame": "lower"
+  },
+  {
+    "majCat": "IG_DNGR_SUIT",
+    "name": "DUNGAREES & JUMPSUITS",
+    "div": "KIDS",
+    "idealFor": "KIDS & INFANTS",
+    "frame": "set"
+  },
+  {
+    "majCat": "IB_TEES_FS",
+    "name": "T-SHIRTS",
+    "div": "KIDS",
+    "idealFor": "KIDS & INFANTS",
+    "frame": "upper"
+  },
+  {
+    "majCat": "IB_H_DNGR_SUIT",
+    "name": "DUNGAREES & JUMPSUITS",
+    "div": "KIDS",
+    "idealFor": "KIDS & INFANTS",
+    "frame": "set"
+  },
+  {
+    "majCat": "KI_B_SUIT_SL",
+    "name": "BABA SUITS",
+    "div": "KIDS",
+    "idealFor": "KIDS & INFANTS",
+    "frame": "set"
+  },
+  {
+    "majCat": "IB_BERMUDA",
+    "name": "SHORTS",
+    "div": "KIDS",
+    "idealFor": "KIDS & INFANTS",
+    "frame": "lower"
+  },
+  {
+    "majCat": "IB_PYJAMA",
+    "name": "TRACK PANTS & PYJAMAS",
+    "div": "KIDS",
+    "idealFor": "KIDS & INFANTS",
+    "frame": "lower"
+  },
+  {
+    "majCat": "IB_H_B_SUIT_HS",
+    "name": "BABA SUITS",
+    "div": "KIDS",
+    "idealFor": "KIDS & INFANTS",
+    "frame": "set"
+  },
+  {
+    "majCat": "KIW_GIFT_ST",
+    "name": "GIFT SET",
+    "div": "KIDS",
+    "idealFor": "KIDS & INFANTS",
+    "frame": "set"
+  },
+  {
+    "majCat": "KIW_ST",
+    "name": "CLOTHING SETS",
+    "div": "KIDS",
+    "idealFor": "KIDS & INFANTS",
+    "frame": "set"
+  },
+  {
+    "majCat": "IBW_PYJAMA",
+    "name": "TRACK PANTS & PYJAMAS",
+    "div": "KIDS",
+    "idealFor": "KIDS & INFANTS",
+    "frame": "lower"
+  },
+  {
+    "majCat": "KIW_CAP",
+    "name": "CAPS & HATS",
+    "div": "KIDS",
+    "idealFor": "KIDS & INFANTS",
+    "frame": "upper"
+  },
+  {
+    "majCat": "IBW_B_SUIT",
+    "name": "BABA SUITS",
+    "div": "KIDS",
+    "idealFor": "KIDS & INFANTS",
+    "frame": "set"
+  },
+  {
+    "majCat": "IBW_T_SHIRT",
+    "name": "T-SHIRTS",
+    "div": "KIDS",
+    "idealFor": "KIDS & INFANTS",
+    "frame": "upper"
+  },
+  {
+    "majCat": "KIW_JKT_SL",
+    "name": "JACKETS",
+    "div": "KIDS",
+    "idealFor": "KIDS & INFANTS",
+    "frame": "upper"
+  },
+  {
+    "majCat": "JB_T_PYJAMA",
+    "name": "TRACK PANTS & PYJAMAS",
+    "div": "KIDS",
+    "idealFor": "KIDS BOY",
+    "frame": "lower"
+  },
+  {
+    "majCat": "M_PW_SHIRT_FS",
+    "name": "CASUAL SHIRTS",
+    "div": "MEN",
+    "idealFor": "MEN",
+    "frame": "upper"
+  },
+  {
+    "majCat": "YB_H_PYJAMA",
+    "name": "TRACK PANTS & PYJAMAS",
+    "div": "KIDS",
+    "idealFor": "KIDS BOY",
+    "frame": "lower"
+  },
+  {
+    "majCat": "YB_SHIRT_FS",
+    "name": "CASUAL SHIRTS",
+    "div": "KIDS",
+    "idealFor": "KIDS BOY",
+    "frame": "upper"
+  },
+  {
+    "majCat": "JB_SHIRT_FS",
+    "name": "CASUAL SHIRTS",
+    "div": "KIDS",
+    "idealFor": "KIDS BOY",
+    "frame": "upper"
+  },
+  {
+    "majCat": "YB_T_JAMAICAN",
+    "name": "SHORTS",
+    "div": "KIDS",
+    "idealFor": "KIDS BOY",
+    "frame": "lower"
+  },
+  {
+    "majCat": "YB_T_SHIRT_PN_HS",
+    "name": "T-SHIRTS",
+    "div": "KIDS",
+    "idealFor": "KIDS BOY",
+    "frame": "upper"
+  },
+  {
+    "majCat": "JB_TEES_FS",
+    "name": "T-SHIRTS",
+    "div": "KIDS",
+    "idealFor": "KIDS BOY",
+    "frame": "upper"
+  },
+  {
+    "majCat": "JB_JEANS",
+    "name": "JEANS",
+    "div": "KIDS",
+    "idealFor": "KIDS BOY",
+    "frame": "lower"
+  },
+  {
+    "majCat": "JB_KURTA_ST",
+    "name": "KURTAS & KURTA SETS",
+    "div": "KIDS",
+    "idealFor": "KIDS BOY",
+    "frame": "set"
+  },
+  {
+    "majCat": "YB_H_B_SUIT_HS",
+    "name": "BABA SUITS",
+    "div": "KIDS",
+    "idealFor": "KIDS BOY",
+    "frame": "set"
+  },
+  {
+    "majCat": "JBW_JKT_SL",
+    "name": "JACKETS",
+    "div": "KIDS",
+    "idealFor": "KIDS BOY",
+    "frame": "upper"
+  },
+  {
+    "majCat": "YBW_THRM_L",
+    "name": "INNERWEAR & THERMALS",
+    "div": "KIDS",
+    "idealFor": "KIDS BOY",
+    "frame": "lower"
+  },
+  {
+    "majCat": "JBW_SHACKET",
+    "name": "SHACKET",
+    "div": "KIDS",
+    "idealFor": "KIDS BOY",
+    "frame": "upper"
+  },
+  {
+    "majCat": "JG_H_HOT_PANT_ST",
+    "name": "CLOTHING SETS",
+    "div": "KIDS",
+    "idealFor": "KIDS GIRL",
+    "frame": "set"
+  },
+  {
+    "majCat": "YG_H_HOT_PANT",
+    "name": "SHORTS",
+    "div": "KIDS",
+    "idealFor": "KIDS GIRL",
+    "frame": "lower"
+  },
+  {
+    "majCat": "JG_T_SKRT_TOP_ST",
+    "name": "SKIRTS & TOP SET",
+    "div": "KIDS",
+    "idealFor": "KIDS GIRL",
+    "frame": "set"
+  },
+  {
+    "majCat": "JG_T_ST",
+    "name": "CLOTHING SETS",
+    "div": "KIDS",
+    "idealFor": "KIDS GIRL",
+    "frame": "set"
+  },
+  {
+    "majCat": "JG_T_PYJAMA",
+    "name": "PYJAMAS",
+    "div": "KIDS",
+    "idealFor": "KIDS GIRL",
+    "frame": "lower"
+  },
+  {
+    "majCat": "YG_T_M_FROCK_HS",
+    "name": "DRESSES",
+    "div": "KIDS",
+    "idealFor": "KIDS GIRL",
+    "frame": "upper"
+  },
+  {
+    "majCat": "JGW_PYJAMA",
+    "name": "PYJAMAS",
+    "div": "KIDS",
+    "idealFor": "KIDS GIRL",
+    "frame": "lower"
+  },
+  {
+    "majCat": "YG_T_FROCK",
+    "name": "DRESSES",
+    "div": "KIDS",
+    "idealFor": "KIDS GIRL",
+    "frame": "upper"
+  },
+  {
+    "majCat": "JG_H_SKRT_TOP_ST",
+    "name": "SKIRTS & TOP SET",
+    "div": "KIDS",
+    "idealFor": "KIDS GIRL",
+    "frame": "set"
+  },
+  {
+    "majCat": "JG_T_SKRT",
+    "name": "SKIRTS & PALAZZOS",
+    "div": "KIDS",
+    "idealFor": "KIDS GIRL",
+    "frame": "lower"
+  },
+  {
+    "majCat": "YGW_PYJAMA",
+    "name": "PYJAMAS",
+    "div": "KIDS",
+    "idealFor": "KIDS GIRL",
+    "frame": "lower"
+  },
+  {
+    "majCat": "JGW_SKEEVY",
+    "name": "SKEEVY",
+    "div": "KIDS",
+    "idealFor": "KIDS GIRL",
+    "frame": "upper"
+  },
+  {
+    "majCat": "M_PRW_SHIRT_FS",
+    "name": "CASUAL SHIRTS",
+    "div": "MEN",
+    "idealFor": "MEN",
+    "frame": "upper"
+  },
+  {
+    "majCat": "MW_THRM_LOWER",
+    "name": "THERMALS",
+    "div": "MEN",
+    "idealFor": "MEN",
+    "frame": "lower"
+  },
+  {
+    "majCat": "MW_SWEATER_SL",
+    "name": "SWEATERS",
+    "div": "MEN",
+    "idealFor": "MEN",
+    "frame": "upper"
+  },
+  {
+    "majCat": "MW_THRM_UPPER",
+    "name": "CAMISOLES & THERMALS",
+    "div": "MEN",
+    "idealFor": "MEN",
+    "frame": "upper"
+  },
+  {
+    "majCat": "MW_TRACK_SUIT",
+    "name": "TRACKSUITS",
+    "div": "MEN",
+    "idealFor": "MEN",
+    "frame": "set"
+  },
+  {
+    "majCat": "JG_T_HOT_PANT",
+    "name": "SHORTS",
+    "div": "KIDS",
+    "idealFor": "KIDS GIRL",
+    "frame": "lower"
+  },
+  {
+    "majCat": "JG_T_HOT_PANT_ST",
+    "name": "CLOTHING SETS",
+    "div": "KIDS",
+    "idealFor": "KIDS GIRL",
+    "frame": "set"
+  },
+  {
+    "majCat": "YG_ST",
+    "name": "CLOTHING SETS",
+    "div": "KIDS",
+    "idealFor": "KIDS GIRL",
+    "frame": "set"
+  },
+  {
+    "majCat": "YGW_JKT_FS",
+    "name": "JACKETS",
+    "div": "KIDS",
+    "idealFor": "KIDS GIRL",
+    "frame": "upper"
+  },
+  {
+    "majCat": "JGW_THRM_L",
+    "name": "CAMISOLES & THERMALS",
+    "div": "KIDS",
+    "idealFor": "KIDS GIRL",
+    "frame": "lower"
+  },
+  {
+    "majCat": "YGW_THRM_L",
+    "name": "CAMISOLES & THERMALS",
+    "div": "KIDS",
+    "idealFor": "KIDS GIRL",
+    "frame": "lower"
+  },
+  {
+    "majCat": "JGW_THRM_U",
+    "name": "CAMISOLES & THERMALS",
+    "div": "KIDS",
+    "idealFor": "KIDS GIRL",
+    "frame": "upper"
+  },
+  {
+    "majCat": "YGW_THRM_U",
+    "name": "CAMISOLES & THERMALS",
+    "div": "KIDS",
+    "idealFor": "KIDS GIRL",
+    "frame": "upper"
+  },
+  {
+    "majCat": "JGW_JKT_FS",
+    "name": "JACKETS",
+    "div": "KIDS",
+    "idealFor": "KIDS GIRL",
+    "frame": "upper"
+  },
+  {
+    "majCat": "JB_VEST",
+    "name": "VESTS",
+    "div": "KIDS",
+    "idealFor": "KIDS BOY",
+    "frame": "upper"
+  },
+  {
+    "majCat": "IB_T_DNGR_SUIT",
+    "name": "DUNGAREES & JUMPSUITS",
+    "div": "KIDS",
+    "idealFor": "KIDS BOY",
+    "frame": "set"
+  },
+  {
+    "majCat": "IG_TOP_FS",
+    "name": "TSHIRTS & TOPS",
+    "div": "KIDS",
+    "idealFor": "KIDS GIRL",
+    "frame": "upper"
+  },
+  {
+    "majCat": "KI_SKRT_TOP_ST",
+    "name": "CLOTHING SETS",
+    "div": "KIDS",
+    "idealFor": "KIDS & INFANTS",
+    "frame": "set"
+  },
+  {
+    "majCat": "IB_TEES_HS",
+    "name": "TSHIRTS & TOPS",
+    "div": "KIDS",
+    "idealFor": "KIDS BOY",
+    "frame": "upper"
+  },
+  {
+    "majCat": "IB_DNGR_SUIT_FS",
+    "name": "DUNGAREES & JUMPSUITS",
+    "div": "KIDS",
+    "idealFor": "KIDS BOY",
+    "frame": "set"
+  },
+  {
+    "majCat": "IGW_JKT_FS",
+    "name": "JACKETS",
+    "div": "KIDS",
+    "idealFor": "KIDS GIRL",
+    "frame": "upper"
+  },
+  {
+    "majCat": "MW_SHACKET",
+    "name": "SHACKET",
+    "div": "MEN",
+    "idealFor": "MEN",
+    "frame": "upper"
+  },
+  {
+    "majCat": "MW_POLY_JKT_FS",
+    "name": "JACKETS",
+    "div": "MEN",
+    "idealFor": "MEN",
+    "frame": "upper"
+  },
+  {
+    "majCat": "MW_TXT_JKT_FS",
+    "name": "JACKETS",
+    "div": "MEN",
+    "idealFor": "MEN",
+    "frame": "upper"
+  },
+  {
+    "majCat": "MW_PU_JKT_FS",
+    "name": "JACKETS",
+    "div": "MEN",
+    "idealFor": "MEN",
+    "frame": "upper"
+  },
+  {
+    "majCat": "MW_TEES_SL",
+    "name": "T-SHIRTS",
+    "div": "MEN",
+    "idealFor": "MEN",
+    "frame": "upper"
+  },
+  {
+    "majCat": "M_MODI_JKT",
+    "name": "JACKETS",
+    "div": "MEN",
+    "idealFor": "MEN",
+    "frame": "upper"
+  },
+  {
+    "majCat": "L_JOGGER",
+    "name": "TRACK PANTS & JOGGERS",
+    "div": "WOMEN",
+    "idealFor": "WOMEN",
+    "frame": "lower"
+  },
+  {
+    "majCat": "LW_KURTI",
+    "name": "KURTIS",
+    "div": "WOMEN",
+    "idealFor": "WOMEN",
+    "frame": "upper"
+  },
+  {
+    "majCat": "LW_JKT_SL",
+    "name": "JACKETS",
+    "div": "WOMEN",
+    "idealFor": "WOMEN",
+    "frame": "upper"
+  },
+  {
+    "majCat": "LW_PLAZO",
+    "name": "SKIRTS & PALAZZOS",
+    "div": "WOMEN",
+    "idealFor": "WOMEN",
+    "frame": "lower"
+  },
+  {
+    "majCat": "L_D_JKT",
+    "name": "JACKETS",
+    "div": "WOMEN",
+    "idealFor": "WOMEN",
+    "frame": "upper"
+  },
+  {
+    "majCat": "JB_T_B_SUIT_FS",
+    "name": "BABA SUITS",
+    "div": "KIDS",
+    "idealFor": "KIDS BOY",
+    "frame": "set"
+  },
+  {
+    "majCat": "YB_TEES_HD_FS",
+    "name": "T-SHIRTS",
+    "div": "KIDS",
+    "idealFor": "KIDS BOY",
+    "frame": "upper"
+  },
+  {
+    "majCat": "YBW_SHACKET",
+    "name": "SHACKET",
+    "div": "KIDS",
+    "idealFor": "KIDS BOY",
+    "frame": "upper"
+  },
+  {
+    "majCat": "YBW_THRM_U",
+    "name": "CAMISOLES & THERMALS",
+    "div": "KIDS",
+    "idealFor": "KIDS BOY",
+    "frame": "upper"
+  },
+  {
+    "majCat": "YBW_T_SUIT",
+    "name": "TRACKSUITS",
+    "div": "KIDS",
+    "idealFor": "KIDS BOY",
+    "frame": "set"
+  },
+  {
+    "majCat": "YBW_JKT_SL",
+    "name": "JACKETS",
+    "div": "KIDS",
+    "idealFor": "KIDS BOY",
+    "frame": "upper"
+  },
+  {
+    "majCat": "JG_T_M_FROCK_HS",
+    "name": "DRESSES",
+    "div": "KIDS",
+    "idealFor": "KIDS BOY",
+    "frame": "upper"
+  },
+  {
+    "majCat": "YGW_SKEEVY",
+    "name": "SKEEVY",
+    "div": "KIDS",
+    "idealFor": "KIDS GIRL",
+    "frame": "upper"
+  },
+  {
+    "majCat": "IG_FROCK_FS",
+    "name": "DRESSES",
+    "div": "KIDS",
+    "idealFor": "KIDS GIRL",
+    "frame": "upper"
+  },
+  {
+    "majCat": "IG_ST_FS",
+    "name": "CLOTHING SETS",
+    "div": "KIDS",
+    "idealFor": "KIDS GIRL",
+    "frame": "set"
+  }
+]

@@ -800,6 +800,18 @@ exports.Prisma.NationalGridMasterScalarFieldEnum = {
   createdAt: 'createdAt'
 };
 
+exports.Prisma.MajorCatMasterScalarFieldEnum = {
+  id: 'id',
+  majCat: 'majCat',
+  name: 'name',
+  div: 'div',
+  idealFor: 'idealFor',
+  frame: 'frame',
+  isActive: 'isActive',
+  createdAt: 'createdAt',
+  updatedAt: 'updatedAt'
+};
+
 exports.Prisma.ModifyLogScalarFieldEnum = {
   id: 'id',
   modificationGroupId: 'modificationGroupId',
@@ -1305,6 +1317,14 @@ exports.Prisma.NationalGridMasterOrderByRelevanceFieldEnum = {
   fullForm: 'fullForm'
 };
 
+exports.Prisma.MajorCatMasterOrderByRelevanceFieldEnum = {
+  majCat: 'majCat',
+  name: 'name',
+  div: 'div',
+  idealFor: 'idealFor',
+  frame: 'frame'
+};
+
 exports.Prisma.ModifyLogOrderByRelevanceFieldEnum = {
   modificationGroupId: 'modificationGroupId',
   articleNumber: 'articleNumber',
@@ -1429,6 +1449,7 @@ exports.Prisma.ModelName = {
   PoolBJob: 'PoolBJob',
   PoolBBatch: 'PoolBBatch',
   NationalGridMaster: 'NationalGridMaster',
+  MajorCatMaster: 'MajorCatMaster',
   ModifyLog: 'ModifyLog'
 };
 

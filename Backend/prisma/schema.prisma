@@ -1161,6 +1161,27 @@ model NationalGridMaster {
   @@schema("public")
 }
 
+/// MajorCatMaster: MAJ CAT → name, division, ideal-for, and the model-image FRAME
+/// (fw | upper | lower | set) used to decide how the AI model photoshoot is framed.
+/// Seeded from "CATEGORY SHEET MJ WISE FINAL"; new entries added from the Model
+/// Generation page. Looked up by majCat when generating from article number + colour.
+model MajorCatMaster {
+  id        Int      @id @default(autoincrement())
+  majCat    String   @unique @map("maj_cat") @db.VarChar(100)
+  name      String?  @db.VarChar(200)
+  div       String?  @db.VarChar(50)
+  idealFor  String?  @map("ideal_for") @db.VarChar(50)
+  frame     String   @db.VarChar(20)   // 'fw' | 'upper' | 'lower' | 'set'
+  isActive  Boolean  @default(true) @map("is_active")
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
+
+  @@index([frame])
+  @@index([div])
+  @@map("major_cat_master")
+  @@schema("public")
+}
+
 /// ModifyLog: One row per changed label per successful article modification
 model ModifyLog {
   id                  Int      @id @default(autoincrement())

@@ -1,8 +1,31 @@
 import { GoogleGenAI, Modality } from '@google/genai';
 import fs from 'fs';
 import path from 'path';
+import sharp from 'sharp';
 
 const GEMINI_IMAGE_MODEL = process.env.GEMINI_IMAGE_MODEL || 'gemini-2.5-flash-image';
+
+// Every generated view is normalized to these EXACT pixel dimensions (2:3 portrait)
+// before it leaves runSingleGeneration, so all five views of an article are pixel-
+// identical in size — the model's aspectRatio config keeps the ratio at 2:3 but does
+// NOT guarantee identical pixel dimensions across views. Overridable via env.
+const OUTPUT_WIDTH = Number(process.env.MODELGEN_OUTPUT_WIDTH) || 1024;
+const OUTPUT_HEIGHT = Number(process.env.MODELGEN_OUTPUT_HEIGHT) || 1536;
+
+// Resize a generated view to the fixed OUTPUT_WIDTH×OUTPUT_HEIGHT. Gemini already
+// returns 2:3, so 'cover' is effectively a clean resize with no meaningful crop; it
+// also guards against any view that comes back at a slightly different aspect.
+async function normalizeOutput(buf: Buffer): Promise<Buffer> {
+  try {
+    return await sharp(buf)
+      .resize(OUTPUT_WIDTH, OUTPUT_HEIGHT, { fit: 'cover', position: 'centre' })
+      .png()
+      .toBuffer();
+  } catch (e: any) {
+    console.warn('[ModelGen] normalizeOutput failed, returning original buffer:', e?.message || e);
+    return buf;
+  }
+}
 
 // Lazily create the client so dotenv has run by the time we need the key.
 let _aiClient: GoogleGenAI | null = null;
@@ -48,6 +71,18 @@ export function pickBackgroundColor(_seed?: string): string {
   return LIGHT_BACKDROP;
 }
 
+// When the SOURCE_IMAGE shows a two-piece set (e.g. jacket + trousers), a colour swap
+// must recolour ONLY the featured product and leave the complementary piece its ORIGINAL
+// colour. This returns the scoping clause appended to the colour instructions. 'full' /
+// 'unknown' / undefined → no scoping (recolour the whole featured garment as before).
+function recolorScopeText(featuredGarment?: string): string {
+  if (featuredGarment === 'top')
+    return ' ⚠️ RECOLOUR ONLY THE UPPER GARMENT (the top/shirt/jacket — the featured product). The LOWER garment (trousers/pants/shorts/skirt) MUST keep its EXACT ORIGINAL colour from the SOURCE_IMAGE — do NOT recolour, tint, or shift the lower garment in any way. Only the upper garment changes colour.';
+  if (featuredGarment === 'bottom')
+    return ' ⚠️ RECOLOUR ONLY THE LOWER GARMENT (the trousers/pants/shorts/skirt — the featured product). The UPPER garment (top/shirt/jacket) MUST keep its EXACT ORIGINAL colour from the SOURCE_IMAGE — do NOT recolour, tint, or shift the upper garment in any way. Only the lower garment changes colour.';
+  return '';
+}
+
 export function buildPrompt(
   gender: string,
   bodytype: string,
@@ -59,7 +94,8 @@ export function buildPrompt(
   hasColorImage?: boolean,
   attributesText?: string,
   hasStyleReference?: boolean,
-  backgroundColor?: string
+  backgroundColor?: string,
+  featuredGarment?: string
 ): string {
   const genderLower = (gender || '').toLowerCase();
   // Use a light-skinned model for dark garments so the product is clearly visible
@@ -75,23 +111,28 @@ export function buildPrompt(
   }
 
   const isCloseup = viewDirection.toLowerCase() === 'closeup';
+  // Feet are only in frame when the shot reaches the feet. An Upper-Body (waist-up)
+  // shot must NOT show feet/footwear — mentioning sneakers there drags the crop down
+  // to a full body. So footwear is only instructed when the frame actually shows feet.
+  const framesFeet = bodytype !== 'Upper-Body';
 
   let framingDesc: string;
   if (isCloseup) {
     framingDesc = 'extreme close-up macro fashion detail shot — NOT a full-body or upper-body shot';
   } else {
     switch (bodytype) {
-      case 'Full-Body': framingDesc = 'full body fashion photoshoot, head to toe'; break;
-      case 'Upper-Body': framingDesc = 'upper body fashion photoshoot, waist up, do NOT show below the waist'; break;
-      case 'Lower-Body': framingDesc = 'lower body fashion photoshoot, waist down to feet, do NOT show above the waist, crop tightly at the waist'; break;
-      default: framingDesc = 'fashion photoshoot; automatically choose the best framing for the garment shown in the SOURCE_IMAGE — full body (head to toe) for dresses, one-piece sets, or bottomwear worn full; upper body (waist up) for tops, shirts, and t-shirts; lower body (waist down) for standalone trousers/shorts/skirts';
+      case 'Full-Body': framingDesc = 'full body fashion photoshoot, head to toe on a real human model (feet in clean sneakers, never barefoot)'; break;
+      case 'Upper-Body': framingDesc = 'upper body fashion photoshoot, waist up on a real human model (head, torso, arms visible), do NOT show below the waist'; break;
+      case 'Lower-Body': framingDesc = 'lower body fashion photoshoot, waist down to feet on a real human model (feet in clean sneakers, never barefoot), do NOT show above the waist, crop tightly at the waist'; break;
+      default: framingDesc = 'DETECT the garment type from SOURCE_IMAGE, then use ONE consistent framing for EVERY view of this product: bottomwear (trousers/jeans/shorts/skirt) → HALF SHOT, waist down to the feet, cropped cleanly at the waist (upper body NOT shown); tops/shirts/t-shirts → upper-body shot, waist up; dresses/one-piece/full outfits → full body head to toe. Use the SAME framing across front, back, side, and three-quarter — NEVER mix full-body and half/waist-down across views.';
     }
   }
 
+  const recolorScope = recolorScopeText(featuredGarment);
   const colorInstr = hasColorImage
-    ? `The garment MUST be recolored to match the dominant color of the COLOR_REFERENCE image included in this request. Sample the color from COLOR_REFERENCE and apply it uniformly to the entire garment in every view. Ignore the shape, pattern, texture, or content of COLOR_REFERENCE — use it ONLY as a color swatch. This overrides the source image color. This is a COLOR SWAP ONLY: the fabric's weave/knit structure, stripe or print pattern, yarn grain, and surface texture from the SOURCE_IMAGE must stay pixel-faithful and fully intact — do not flatten, smooth, or simplify the fabric into a solid untextured block of color.`
+    ? `The garment MUST be recolored to match the dominant color of the COLOR_REFERENCE image included in this request. Sample the color from COLOR_REFERENCE and apply it uniformly to the entire garment in every view. Ignore the shape, pattern, texture, or content of COLOR_REFERENCE — use it ONLY as a color swatch. This overrides the source image color. This is a COLOR SWAP ONLY: the fabric's weave/knit structure, stripe or print pattern, yarn grain, and surface texture from the SOURCE_IMAGE must stay pixel-faithful and fully intact — do not flatten, smooth, or simplify the fabric into a solid untextured block of color.${recolorScope}`
     : colorName
-      ? `The garment's base color MUST change to ${colorName} in every view (front, back, side, closeup). This is a COLOR SWAP ONLY: the fabric's weave/knit structure, stripe or print pattern, yarn grain, and surface texture from the SOURCE_IMAGE must stay pixel-faithful and fully intact — do not flatten, smooth, or simplify the fabric into a solid untextured block of color.`
+      ? `The garment's base color MUST change to ${colorName} in every view (front, back, side, closeup). This is a COLOR SWAP ONLY: the fabric's weave/knit structure, stripe or print pattern, yarn grain, and surface texture from the SOURCE_IMAGE must stay pixel-faithful and fully intact — do not flatten, smooth, or simplify the fabric into a solid untextured block of color.${recolorScope}`
       : `The garment color MUST be IDENTICAL to the SOURCE_IMAGE. Do not change or shift the color in any view.`;
 
   // Bottomwear (trousers/shorts/skirts) needs its own close-up subject — collar/placket/
@@ -106,15 +147,17 @@ export function buildPrompt(
 
   // Garment-type guard appended to back/side views — works for ALL bodytype values
   // including 'auto'. Reinforces Rule #1 at the view level.
-  const garmentTypeGuard = ' GARMENT-TYPE GUARD: Refer to Rule #1 — if the SOURCE_IMAGE shows ONLY bottomwear, pair it with a simple plain solid-color basic t-shirt (white, light grey, or black) as a neutral complement; do NOT add a jacket, hoodie, or printed top. If the SOURCE_IMAGE shows ONLY a top, pair it with simple plain neutral trousers. The SOURCE garment is always the hero.';
+  const garmentTypeGuard = ' GARMENT-TYPE GUARD: Refer to Rule #1 — if the SOURCE_IMAGE shows ONLY bottomwear, pair it with a simple plain solid PLAIN WHITE crew-neck t-shirt (white ONLY — the identical white t-shirt in every view) as a neutral complement; do NOT add a jacket, hoodie, or printed top, and do NOT change the t-shirt colour between views. If the SOURCE_IMAGE shows ONLY a top, pair it with the same simple plain mid-blue denim jeans in every view. The SOURCE garment is always the hero.';
 
   const viewMap: Record<string, string> = {
-    front: 'Front-facing model pose showing the full front of the garment clearly. The model faces the camera directly.',
-    back: `REAR VIEW: the model is turned to face directly AWAY from the camera (a full ~180° turn) so the back of the head/hair faces the camera and the ENTIRE BACK of the garment is shown (back yoke, back seams/pleats, back pockets where present). The model's face must NOT be visible. This must unmistakably be the BACK of the garment — never the front, and never a near-front or slightly-turned angle.${isLower ? ' The waistband must be visible at the top of the frame. Pair with a simple plain solid-color t-shirt (white, light grey, or black) tucked or untucked — no jacket.' : ''}${garmentTypeGuard}`,
+    front: `Front-facing model pose: the model faces the camera directly and the FULL FRONT of the garment is clearly visible. Follow the FRAMING & CAMERA rule for HOW MUCH of the body to show — do not add or remove body beyond what that rule specifies. A real human body must always be visibly wearing the garment (never floating or empty fabric)${framesFeet ? ', with the feet in clean simple casual sneakers (never barefoot)' : ''}.${garmentTypeGuard}`,
+    back: `TRUE 180° REAR VIEW — THIS IS THE HARDEST CONSTRAINT, OBEY IT ABSOLUTELY: the model has turned a FULL 180° to face directly AWAY from the camera. The back of the head and hair face the camera; the face, chin, and any front-of-body detail are COMPLETELY out of view. You are looking at the model's spine/back and the REVERSE side of the garment.
+DO NOT simply repeat the front. Any feature that identifies the FRONT of the garment MUST be ABSENT from this image: no front drawstring / tie / bow, no front zip fly, no front slant hand-pockets, no chest print, no buttons/placket facing the camera. If the front had a drawstring bow, it is now hidden behind the body and must NOT appear.
+RECONSTRUCT the back plausibly from standard garment construction even though the SOURCE_IMAGE only shows the front: show the BACK of the garment — for a top: back yoke, centre-back seam, shoulder blades, back collar; for bottomwear: the seat/rear rise, centre-back seam, back waistband/belt loops, and back patch pockets where such a garment normally has them. Keep colour, fabric and pattern identical to the source, but the composition must unmistakably read as the BACK. A front-facing or near-front / slightly-turned result is a HARD FAILURE.${isLower ? ' Show the waistband from behind at the top of the frame. Pair with the SAME plain white crew-neck t-shirt (white only, identical in every view), seen from the back — no jacket.' : ''}${garmentTypeGuard}`,
     left_side: `STRICT 90-DEGREE LEFT-SIDE PROFILE: Rotate the model exactly 90° so the left shoulder points directly toward the camera and the body spans left-to-right across the frame. The face must appear in true profile with only one eye visible and the nose pointing to the left edge of the frame. This must NOT be a near-front, slight-turn, or three-quarter angle — it must be a genuine 90° side view clearly showing the full side silhouette of the garment. The side view must look VISUALLY DISTINCT from the front view.${garmentTypeGuard}`,
     side: `STRICT 90-DEGREE SIDE PROFILE: Rotate the model exactly 90° so one shoulder points directly toward the camera. The face appears in true profile with only one eye visible. This is NOT a three-quarter or near-front angle — it must be a genuine 90° side view clearly showing the full side silhouette. The side view must look VISUALLY DISTINCT from the front view.${garmentTypeGuard}`,
     three_quarter: `Three-quarter (45-degree) angle model pose showing the front and one side together. The model is rotated approximately 45° from the camera.${garmentTypeGuard}`,
-    closeup: `Tightly cropped macro close-up on one representative section of ${closeupSubject} — frame it like a product-detail shot: fabric weave, stitching, and any print/stripe pattern fill most of the frame at high magnification.`,
+    closeup: `ON-MODEL HALF-BODY DETAIL SHOT — A REAL HUMAN MODEL MUST BE CLEARLY VISIBLE, THIS IS MANDATORY: frame a partial-body crop of the SAME model wearing the garment, zoomed on ${closeupSubject}. A recognisable human presence is REQUIRED — at minimum the model's hand(s) resting on/near that area AND a portion of the adjoining body (${isLower ? "the model's torso in the paired neutral t-shirt above the waistband, the hips, and upper thighs" : 'the shoulders, chest, and upper arms'}) must be in frame, so it unmistakably reads as a person wearing the garment. This is NOT a fabric-only macro, NOT floating fabric, and NOT a laid-flat product shot — if no human body is visible it is a HARD FAILURE. Keep it noticeably tighter/closer than the full-body views while still showing the model, and emphasise fabric weave, stitching, and any print/stripe pattern. Do NOT show the model's full face (crop above the chest or keep the head out of frame).${garmentTypeGuard}`,
   };
 
   const isBackView = viewDirection.toLowerCase() === 'back';
@@ -124,17 +167,17 @@ export function buildPrompt(
       ? 'the most relevant detail area (waistband/pocket/hem for bottomwear; collar/placket/chest for topwear — detect from SOURCE_IMAGE)'
       : 'the collar / placket / chest area';
   const framingRule = isCloseup
-    ? `Crop TIGHT on ${closeupAreaHint} — the model's full body, full garment, legs, and most of the face must NOT be in frame. This must look like a zoomed-in product-detail shot, clearly tighter and closer than the front/back/side views, not another full or upper-body shot.`
+    ? `Partial-body crop centred on ${closeupAreaHint}, clearly tighter and closer than the front/back/side views. A REAL HUMAN MODEL MUST be visible and unmistakable — include the model's hand(s) and a portion of the adjoining body/limbs wearing the garment. The full head-to-toe body and the full face must NOT be in frame, but the shot must obviously read as a person wearing the garment: NEVER a fabric-only macro, floating fabric, or a laid-flat product shot. If no human body is visible in the result, it is a HARD FAILURE — zoom out slightly rather than lose the model.`
     : bodytype === 'Lower-Body'
       // For back view of bottomwear, show waistband-to-hem; for all other views also waist-down only.
       ? isBackView
-        ? 'Show the complete bottomwear from waistband to hem. The waistband must be visible at the top of frame. Upper body (bare or clothed) must NOT appear above the waistband — crop at the waist.'
-        : 'Show ONLY from waist down to feet. Upper body must NOT appear in the frame.'
+        ? 'HALF SHOT (waist-down), REAR VIEW: show the bottomwear from the waistband to the hem on a REAL model seen from behind — waistband at the top of frame, then the seat, legs, and feet in clean sneakers. Crop cleanly at the waist; the upper body must NOT appear above the waistband. A real human lower body must be visibly wearing the garment — NEVER floating, empty, or laid-flat trousers, and never barefoot.'
+        : 'HALF SHOT (waist-down): show ONLY from the waist down to the feet, cropped cleanly at the waist — the upper body must NOT appear. A REAL human lower body (hips, thighs, legs, and feet in clean sneakers) MUST be clearly visible wearing the garment — NEVER floating, empty, or laid-flat trousers, and never barefoot. Use this identical waist-down framing for every view of the product.'
       : bodytype === 'Upper-Body'
-        ? 'Show ONLY from waist up. Lower body must NOT appear in the frame.'
+        ? 'WAIST-UP SHOT: show ONLY from the waist up — the lower body must NOT appear. The model\'s UPPER BODY (head, face, torso, arms) wearing the garment (plus the neutral complementary bottom where it enters frame) MUST be clearly visible — never floating or empty fabric, never a headless crop. Use this identical waist-up framing for every view of the product.'
         : bodytype === 'Full-Body'
-          ? 'Full garment must be visible, head to toe, no cropping.'
-          : 'Frame the model so the ENTIRE garment is fully visible and well-composed; choose full/upper/lower framing to suit the garment type. A REAL HUMAN MODEL must always be fully present — never generate floating fabric or a garment without a visible human body.';
+          ? 'FULL-BODY SHOT, HEAD-TO-TOE: the COMPLETE model must be in frame from head to feet, fully clothed, with the upper body (head, torso, arms) AND the feet in clean sneakers all visible. Do NOT crop to waist-down-only or waist-up-only, NEVER show floating/empty fabric, and never barefoot. Use this identical full-body framing for every view of the product.'
+          : 'DETECT the garment type from SOURCE_IMAGE and frame EVERY view of this product IDENTICALLY (this consistency is the top priority — never full-body in one view and waist-down in another):\n  • BOTTOMWEAR (trousers/jeans/shorts/skirt): HALF-BODY WAIST-DOWN shot — show from the waist down to the feet, cropped cleanly at the waist, in front/back/side/three-quarter alike. The upper body must NOT appear. A REAL human lower body (hips, thighs, legs, and feet in clean sneakers) MUST be clearly visible wearing the garment — NEVER floating, empty, or laid-flat trousers, and never barefoot.\n  • TOPWEAR (shirt/t-shirt/top): waist-UP upper-body shot in every view; do NOT show below the waist.\n  • DRESS / one-piece / full outfit: full body head-to-toe in every view.\nWhatever framing the garment type calls for, apply the EXACT SAME crop level to all four model views.';
 
   const attributesBlock = attributesText
     ? `\n\nGARMENT ATTRIBUTES (from catalog data — the generated garment MUST stay consistent with these):\n- ${attributesText}`
@@ -158,15 +201,16 @@ Generate a hyper-realistic fashion photoshoot image by strictly preserving the g
 
 ⚠️ RULE #1 — GARMENT STYLING (READ BEFORE ANYTHING ELSE):
 Examine the SOURCE_IMAGE first to determine what garment is being featured.
-- If the source shows ONLY bottomwear (trousers, jeans, shorts, skirt): the model must wear the SOURCE bottomwear as the FEATURED garment. Pair it with a simple, plain, solid-color basic t-shirt or fitted crew-neck top (white, light grey, or black — nothing printed, branded, or elaborate). The top is a neutral complement only; the bottomwear is the hero. Do NOT add a jacket, blazer, hoodie, or any bulky upper garment.
-- If the source shows ONLY a top/shirt: the model must wear the SOURCE top as the FEATURED garment. Pair it with simple plain dark or neutral trousers/jeans as a neutral complement. Do NOT add a jacket or any additional top layer.
+- If the source shows ONLY bottomwear (trousers, jeans, shorts, skirt): the model must wear the SOURCE bottomwear as the FEATURED garment. Pair it with a simple, plain, solid PLAIN WHITE basic crew-neck t-shirt (colour = white ONLY, nothing printed, branded, or elaborate). ⚠️ CONSISTENCY: this EXACT SAME plain white t-shirt MUST be worn IDENTICALLY in EVERY view (front, back, side, three-quarter, closeup) — do NOT change its colour, shade, or style between views (never switch it to grey, black, or any other colour). The top is a neutral complement only; the bottomwear is the hero. Do NOT add a jacket, blazer, hoodie, or any bulky upper garment.
+- If the source shows ONLY a top/shirt: the model must wear the SOURCE top as the FEATURED garment. Pair it with simple plain mid-blue denim jeans as a neutral complement. ⚠️ CONSISTENCY: this EXACT SAME pair of jeans MUST be worn IDENTICALLY in every view — do NOT change its colour or style between views. Do NOT add a jacket or any additional top layer.
 - If the source shows a full outfit: preserve both pieces exactly as shown.
 - The FEATURED garment from SOURCE_IMAGE must always be the visual focus — never let the complementary piece draw more attention than it.
 
 MODEL DETAILS (STRICT):
 - Description: ${modelDesc}
 - Expression: Neutral, confident
-- Pose: Professional fashion pose
+- Pose: Professional fashion pose${framesFeet ? '\n- Footwear: clean, simple, neutral casual sneakers appropriate to the outfit — the model is NEVER barefoot, and the SAME footwear is worn in every view.' : ''}
+- Styling consistency: the paired/complementary garment (the neutral top or bottom from Rule #1), footwear (when in frame), hairstyle, and skin tone MUST stay identical across all views of this product.
 
 FRAMING & CAMERA:
 - Framing: ${framingDesc}
@@ -183,7 +227,7 @@ BACKGROUND (READ CAREFULLY — CONSISTENCY IS CRITICAL):
     ? `That solid colour MUST be EXACTLY ${backgroundColor}. This exact colour is FIXED for this product and MUST be pixel-identical in every view (front, back, side, three-quarter, closeup) — the entire product set is shot on the identical solid backdrop. Do NOT pick, invent, brighten, darken, warm, cool, or shift to any other colour. Keep it soft, muted and clean so the garment stands out clearly against it.`
     : `Use ONE soft, PALE, low-saturation PASTEL solid colour that complements the garment (e.g. pale lilac, soft mint, pale buttery yellow, blush, powder blue, warm off-white) — light and airy, never bold, deep, golden, warm-dark, or saturated. Use the SAME solid colour for every view of this product.`}
 - Matte and completely textureless — no seams, no floor line, no horizon, no props, no patterns, no banding, no shadows cast on the backdrop.
-- Bright, soft, EVEN studio lighting on the model, with only a faint soft contact shadow near the feet — no hard shadows, no moody/dramatic/spotlight lighting. The backdrop itself stays a flat even colour regardless of the lighting on the model.
+- Bright, soft, EVEN studio lighting on the model, with only a faint soft contact shadow${framesFeet ? ' near the feet' : ''} — no hard shadows, no moody/dramatic/spotlight lighting. The backdrop itself stays a flat even colour regardless of the lighting on the model.
 
 GARMENT PRESERVATION RULES (ABSOLUTE):
 - Color: ${colorInstr}
@@ -218,17 +262,19 @@ export async function runSingleGeneration(
   attributesText?: string,
   styleReferenceBuffer?: Buffer,
   styleReferenceMime?: string,
-  backgroundColor?: string
+  backgroundColor?: string,
+  featuredGarment?: string
 ): Promise<Buffer> {
   const hasColorImage = !!(colorImageBuffer && colorImageMime);
+  const recolorScope = recolorScopeText(featuredGarment);
   const colorLockInstruction = hasColorImage
-    ? `MANDATORY COLOR (FROM IMAGE): The garment in the output MUST be recolored to match the dominant color of the COLOR_REFERENCE image that follows. Use COLOR_REFERENCE ONLY as a color swatch — ignore its shape, pattern, and content. This overrides the source image color and any text color name. This is a COLOR SWAP ONLY — the fabric's weave/knit texture, stripe or print pattern, yarn grain, and surface detail from the source image MUST be preserved pixel-faithfully; do not flatten or smooth the fabric into a solid untextured block of color.`
+    ? `MANDATORY COLOR (FROM IMAGE): The garment in the output MUST be recolored to match the dominant color of the COLOR_REFERENCE image that follows. Use COLOR_REFERENCE ONLY as a color swatch — ignore its shape, pattern, and content. This overrides the source image color and any text color name. This is a COLOR SWAP ONLY — the fabric's weave/knit texture, stripe or print pattern, yarn grain, and surface detail from the source image MUST be preserved pixel-faithfully; do not flatten or smooth the fabric into a solid untextured block of color.${recolorScope}`
     : colorName
-      ? `MANDATORY COLOR: Recolor ONLY the base garment color to ${colorName} — apply it as the new uniform base tone. This is a COLOR SWAP ONLY: do NOT flatten, smooth, or simplify the fabric — the weave/knit structure, stripe or print pattern, yarn grain, and surface texture from the source image MUST remain fully intact and pixel-faithful, just tinted to ${colorName} instead of the original color. The output must still look like a textured woven/knit fabric, never a flat solid-color block.`
+      ? `MANDATORY COLOR: Recolor ONLY the base garment color to ${colorName} — apply it as the new uniform base tone. This is a COLOR SWAP ONLY: do NOT flatten, smooth, or simplify the fabric — the weave/knit structure, stripe or print pattern, yarn grain, and surface texture from the source image MUST remain fully intact and pixel-faithful, just tinted to ${colorName} instead of the original color. The output must still look like a textured woven/knit fabric, never a flat solid-color block.${recolorScope}`
       : `COLOR PRESERVE: Keep the garment color exactly as shown in the source image. Do not change, shift, or neutralize the color.`;
 
   const hasStyleReference = !!(styleReferenceBuffer && styleReferenceMime);
-  const promptText = buildPrompt(gender, bodytype, imageCount, viewDirection, broachPlacement, specialInstructions, colorName, hasColorImage, attributesText, hasStyleReference, backgroundColor);
+  const promptText = buildPrompt(gender, bodytype, imageCount, viewDirection, broachPlacement, specialInstructions, colorName, hasColorImage, attributesText, hasStyleReference, backgroundColor, featuredGarment);
 
   const parts: any[] = [
     { text: colorLockInstruction },
@@ -259,10 +305,16 @@ export async function runSingleGeneration(
   // a pose reference — only as a color/pattern/texture swatch.
   if (hasStyleReference) {
     parts.push({
-      text: `VIEW_CONSISTENCY_REFERENCE follows — a fashion photo already generated for a DIFFERENT view of this EXACT same garment. Use it to lock TWO things ONLY:
+      text: `VIEW_CONSISTENCY_REFERENCE follows — a fashion photo already generated for a DIFFERENT view of this EXACT same garment. Use it to lock FOUR things ONLY:
 1. THE GARMENT — match its color, stripe/print pattern width/spacing/density, and fabric texture exactly. Do NOT redraw the pattern at a different scale or shift the color.
 2. THE BACKDROP — the solid studio background color must be identical to this reference. Do NOT switch to a different background color.
-⚠️ CRITICAL — POSE/ANGLE: The reference image's pose, body angle, camera angle, and crop are COMPLETELY IRRELEVANT and must NOT influence this output in any way. This output is the "${viewDirection}" view — its pose must match the "${viewDirection}" description precisely and must look CLEARLY AND OBVIOUSLY DIFFERENT from the reference image's body position. If the reference is a front view, this output must NOT look like a front view. Copying the reference pose or producing a near-identical body angle is a FAILURE.`,
+3. THE STYLING — the paired/complementary garment (e.g. the plain white t-shirt), the footwear, the hairstyle, and the model's skin tone MUST be IDENTICAL to the reference. If the reference model wears a plain white t-shirt and sneakers, this view must show the SAME plain white t-shirt and the SAME sneakers — do NOT change the top's colour/style or the shoes between views.
+4. THE FRAMING / CROP LEVEL — show the SAME AMOUNT of the body as the reference: if the reference is a waist-down HALF shot, this view MUST also be waist-down; if it is a waist-up shot, this view is also waist-up; if full-body, this view is also full-body. All views of this product must show the identical portion of the body — do NOT switch between full-body and half/waist-down across views.
+⚠️ CRITICAL — POSE/ANGLE (this is SEPARATE from crop level above): The reference image's POSE, BODY ANGLE, and CAMERA ANGLE are COMPLETELY IRRELEVANT and must NOT influence this output — but its CROP LEVEL (point 4) MUST be matched. This output is the "${viewDirection}" view — its pose/angle must match the "${viewDirection}" description precisely and must look CLEARLY AND OBVIOUSLY DIFFERENT in body position from the reference. If the reference is a front view, this output must NOT look like a front view. Copying the reference pose or producing a near-identical body angle is a FAILURE.${
+        viewDirection.toLowerCase() === 'back'
+          ? ` \n⚠️⚠️ THIS IS THE BACK VIEW: the VIEW_CONSISTENCY_REFERENCE almost certainly shows the FRONT of this garment. You must render the EXACT OPPOSITE — the model turned 180° with their back and the back of their head to the camera, and the front-identifying features seen in the reference (drawstring/tie, front fly, front slant pockets, chest print, buttons/placket, the face) MUST be absent. Take ONLY colour, pattern and fabric from the reference; take the POSE from the "back" description and show the reverse of the garment.`
+          : ''
+      }`,
     });
     parts.push({ inlineData: { mimeType: styleReferenceMime as string, data: (styleReferenceBuffer as Buffer).toString('base64') } });
   }
@@ -314,7 +366,8 @@ export async function runSingleGeneration(
       console.log(`[ModelGen] Candidate[${ci}] part[${pi}] keys:`, Object.keys(part || {}), '| has inlineData:', !!part?.inlineData, '| has text:', !!part?.text);
       if (part?.inlineData?.data) {
         console.log('[ModelGen] Found image data in candidate', ci, 'part', pi, '— size (bytes):', Buffer.from(part.inlineData.data, 'base64').length);
-        return Buffer.from(part.inlineData.data, 'base64');
+        // Normalize to fixed 2:3 pixel dimensions so every view of an article matches.
+        return await normalizeOutput(Buffer.from(part.inlineData.data, 'base64'));
       }
       if (part?.text) {
         console.log(`[ModelGen] Candidate[${ci}] part[${pi}] text snippet:`, part.text.slice(0, 200));
