@@ -2424,6 +2424,7 @@ export class ApproverController {
                             variantColor: true, colour: true, vendorCode: true,
                             rate: true, mrp: true, sapArticleId: true,
                             approvalStatus: true, sapSyncStatus: true,
+                            imageUrl: true, articleNumber: true,
                         }
                     });
 
@@ -2473,6 +2474,40 @@ export class ApproverController {
                         if (variantSyncUpdates.length > 0) {
                             await Promise.allSettled(variantSyncUpdates);
                         }
+
+                        // Upload each successfully synced variant's image to article-master
+                        // Key format: {baseArticleNumber}-{color}.jpg (no watermark)
+                        const variantById = new Map(allVariants.map((v) => [v.id, v]));
+                        await Promise.allSettled(
+                            variantSyncResults
+                                .filter((vr: any) => vr.success && vr.sapArticleNumber)
+                                .map(async (vr: any) => {
+                                    const variant = variantById.get(vr.id);
+                                    if (!variant?.imageUrl) {
+                                        console.warn(`⚠️ Variant image upload skipped for ${vr.id}: no imageUrl`);
+                                        return;
+                                    }
+                                    const colorCode = variant.variantColor || variant.colour || undefined;
+                                    const baseArticleNumber = variant.articleNumber
+                                        ? String(variant.articleNumber)
+                                        : String(vr.sapArticleNumber);
+                                    try {
+                                        const upload = await storageService.uploadApprovedImageFromSourceUrl(
+                                            String(variant.imageUrl),
+                                            baseArticleNumber,
+                                            undefined,
+                                            colorCode ?? undefined,
+                                        );
+                                        await prisma.extractionResultFlat.update({
+                                            where: { id: vr.id },
+                                            data: { imageUrl: upload.url },
+                                        });
+                                        console.log(`✅ Variant image saved to article-master: ${upload.key}`);
+                                    } catch (imgErr: any) {
+                                        console.error(`❌ Variant image upload failed for ${vr.id}:`, imgErr?.message);
+                                    }
+                                })
+                        );
                     }
                 } catch (varErr: any) {
                     console.error('[VARIANT_RFC] Variant sync failed (non-fatal):', varErr?.message);
