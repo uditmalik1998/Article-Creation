@@ -2347,10 +2347,19 @@ export class ApproverController {
                         mrp: approvedItem.mrp != null ? Number(approvedItem.mrp) : null,
                     };
 
+                    const isVariant = !approvedItem.isGeneric;
+                    const imageArticleNumber = isVariant
+                        ? String(approvedItem.articleNumber)
+                        : String(syncResult.sapArticleNumber);
+                    const imageColorCode = isVariant
+                        ? (approvedItem.variantColor || approvedItem.colour || undefined)
+                        : undefined;
+
                     const approvedImageUpload = await storageService.uploadApprovedImageFromSourceUrl(
                         String(approvedItem.imageUrl),
-                        String(syncResult.sapArticleNumber),
-                        labelData,
+                        imageArticleNumber,
+                        isVariant ? undefined : labelData,
+                        imageColorCode,
                     );
 
                     await prisma.extractionResultFlat.update({
