@@ -439,7 +439,18 @@ export class StorageService {
         return getSignedUrl(this.approvedS3Client, new GetObjectCommand({ Bucket: this.approvedBucket, Key: destKey }), { expiresIn: 604800 });
     }
 
-    async uploadApprovedImageFromSourceUrl(sourceImageUrl: string, articleNumber: string, labelData?: WatermarkLabel): Promise<UploadResult> {
+    private buildApprovedKey(safeArticleNumber: string, ext: string, safeColor?: string): string {
+        if (safeColor) {
+            return `${safeArticleNumber}-${safeColor}.${ext}`;
+        }
+        return `${safeArticleNumber}.${ext}`;
+    }
+
+    private sanitizeColor(color: string): string {
+        return color.trim().replace(/\s+/g, '').replace(/[^A-Za-z0-9_\-]/g, '').toUpperCase();
+    }
+
+    async uploadApprovedImageFromSourceUrl(sourceImageUrl: string, articleNumber: string, labelData?: WatermarkLabel, colorCode?: string): Promise<UploadResult> {
         if (!sourceImageUrl) {
             throw new Error('Source image URL is required');
         }
@@ -448,6 +459,7 @@ export class StorageService {
         }
 
         const safeArticleNumber = this.sanitizeArticleNumber(articleNumber);
+        const safeColor = colorCode ? this.sanitizeColor(colorCode) : undefined;
         const wantWatermark = !!labelData;
 
         // Preferred path: direct S3-to-S3 copy — no HTTP download, no network fetch needed.
@@ -456,7 +468,7 @@ export class StorageService {
         const sourceKey = this.extractKeyFromAnyUrl(sourceImageUrl);
         if (sourceKey && !wantWatermark) {
             const extension = this.extensionFromPath(sourceKey) || 'jpg';
-            const destKey = `${safeArticleNumber}.${extension}`;
+            const destKey = this.buildApprovedKey(safeArticleNumber, extension, safeColor);
             try {
                 console.log(`📦 Direct S3 copy: ${this.bucket}/${sourceKey} → ${this.approvedBucket}/${destKey}`);
                 await this.approvedS3Client.send(new CopyObjectCommand({
@@ -473,7 +485,7 @@ export class StorageService {
 
         if (sourceKey) {
             const fallbackExt = this.extensionFromPath(sourceKey) || 'jpg';
-            const fallbackDestKey = `${safeArticleNumber}.${fallbackExt}`;
+            const fallbackDestKey = this.buildApprovedKey(safeArticleNumber, fallbackExt, safeColor);
             // Second fallback (and watermark path): GetObject from source bucket → optionally watermark → PutObject.
             try {
                 const getResult = await this.s3Client.send(new GetObjectCommand({ Bucket: this.bucket, Key: sourceKey }));
@@ -488,7 +500,7 @@ export class StorageService {
                     const stamped = await this.applyWatermarkOrPassthrough(fileBuffer, labelData!, safeArticleNumber);
                     fileBuffer = Buffer.from(stamped.buffer);
                     mimeType = stamped.mimeType;
-                    destKey = `${safeArticleNumber}.${stamped.extension}`;
+                    destKey = this.buildApprovedKey(safeArticleNumber, stamped.extension, safeColor);
                 }
 
                 await this.putApprovedObject(this.approvedS3Client, this.approvedBucket, destKey, fileBuffer, mimeType, safeArticleNumber);
@@ -526,7 +538,7 @@ export class StorageService {
             extension = stamped.extension;
         }
 
-        const key = `${safeArticleNumber}.${extension}`;
+        const key = this.buildApprovedKey(safeArticleNumber, extension, safeColor);
 
         try {
             try {
