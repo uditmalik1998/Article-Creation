@@ -2304,7 +2304,27 @@ export class ApproverController {
                 });
             })).catch((err: any) => console.error('[mirror360] approval mirror failed:', err?.message));
 
+            // Fetch all variants for successfully synced generics before Phase 2,
+            // so we can upload their images immediately alongside the generic.
+            const earlySuccessIds = finalizedSyncResults
+                .filter((r: any) => r.success && r.sapArticleNumber)
+                .map((r: any) => r.id);
+            const variantsForUpload = earlySuccessIds.length > 0
+                ? await prisma.extractionResultFlat.findMany({
+                    where: { genericArticleId: { in: earlySuccessIds }, isGeneric: false },
+                    select: { id: true, genericArticleId: true, variantColor: true, colour: true, imageUrl: true },
+                })
+                : [];
+            // Group variants by their generic's DB id
+            const variantsByGenericId_img = new Map<string, typeof variantsForUpload>();
+            for (const v of variantsForUpload) {
+                const gId = v.genericArticleId!;
+                if (!variantsByGenericId_img.has(gId)) variantsByGenericId_img.set(gId, []);
+                variantsByGenericId_img.get(gId)!.push(v);
+            }
+
             // Phase 2: Upload approved image only after article creation is persisted.
+            // Also upload all variant images here using generic SAP number + variant color.
             await Promise.all(finalizedSyncResults.map(async (syncResult: any) => {
                 if (!syncResult.success || !syncResult.sapArticleNumber) {
                     console.log(`⏭ Skipping approved image upload for ${syncResult.id}: success=${syncResult.success}, articleNumber=${syncResult.sapArticleNumber || 'none'}`);
@@ -2323,12 +2343,12 @@ export class ApproverController {
                     return null;
                 }
 
+                const baseArticleNumber = String(syncResult.sapArticleNumber).replace(/^0+/, '');
+
+                // Upload generic image (with watermark)
                 try {
                     console.log(`📦 Copying approved image for article ${syncResult.sapArticleNumber} from source to article-master bucket...`);
 
-                    // Build the data we want stamped on the watermark. Every field is optional —
-                    // Python skips any line whose value is null/empty. Article number comes from
-                    // the freshly minted SAP RFC result, the rest from the DB row.
                     const labelData: WatermarkLabel = {
                         article_number: String(syncResult.sapArticleNumber),
                         presentation_no: approvedItem.pptNumber ?? null,
@@ -2347,29 +2367,17 @@ export class ApproverController {
                         mrp: approvedItem.mrp != null ? Number(approvedItem.mrp) : null,
                     };
 
-                    const isVariant = !approvedItem.isGeneric;
-                    const imageArticleNumber = isVariant
-                        ? String(approvedItem.articleNumber)
-                        : String(syncResult.sapArticleNumber);
-                    const imageColorCode = isVariant
-                        ? (approvedItem.variantColor || approvedItem.colour || undefined)
-                        : undefined;
-
                     const approvedImageUpload = await storageService.uploadApprovedImageFromSourceUrl(
                         String(approvedItem.imageUrl),
-                        imageArticleNumber,
-                        isVariant ? undefined : labelData,
-                        imageColorCode,
+                        String(syncResult.sapArticleNumber),
+                        labelData,
                     );
 
                     await prisma.extractionResultFlat.update({
                         where: { id: syncResult.id },
-                        data: {
-                            imageUrl: approvedImageUpload.url
-                        }
+                        data: { imageUrl: approvedImageUpload.url }
                     });
-                    console.log(`✅ Approved image saved to article-master: ${approvedImageUpload.url}`);
-                    return null;
+                    console.log(`✅ Generic image saved to article-master: ${approvedImageUpload.key}`);
                 } catch (error: any) {
                     console.error(`❌ Approved image upload failed for ${syncResult.id}:`, error?.message);
                     await prisma.extractionResultFlat.update({
@@ -2378,8 +2386,37 @@ export class ApproverController {
                             sapSyncMessage: `${syncResult.message} | Approved image upload failed: ${error?.message || 'unknown error'}`
                         }
                     });
-                    return null;
                 }
+
+                // Upload variant images using generic SAP number + variant color.
+                // This runs independently of variant RFC sync — we have everything needed:
+                // the generic's SAP number (base) and each variant's color code.
+                const variants = variantsByGenericId_img.get(syncResult.id) || [];
+                const variantsToUpload = variants.filter(
+                    v => v.imageUrl && !storageService.extractApprovedKeyFromUrl(v.imageUrl)
+                );
+                console.log(`[VARIANT_IMG] ${variantsToUpload.length}/${variants.length} variant(s) to upload for generic ${baseArticleNumber}`);
+                await Promise.allSettled(variantsToUpload.map(async (v) => {
+                    const colorCode = v.variantColor || v.colour || undefined;
+                    console.log(`[VARIANT_IMG] Uploading: variantId=${v.id} base=${baseArticleNumber} color=${colorCode} src=${v.imageUrl}`);
+                    try {
+                        const upload = await storageService.uploadApprovedImageFromSourceUrl(
+                            String(v.imageUrl),
+                            baseArticleNumber,
+                            undefined,
+                            colorCode ?? undefined,
+                        );
+                        await prisma.extractionResultFlat.update({
+                            where: { id: v.id },
+                            data: { imageUrl: upload.url },
+                        });
+                        console.log(`✅ [VARIANT_IMG] Saved to article-master: ${upload.key}`);
+                    } catch (imgErr: any) {
+                        console.error(`❌ [VARIANT_IMG] Upload failed for ${v.id}:`, imgErr?.message);
+                    }
+                }));
+
+                return null;
             }));
 
             const syncedCount = finalizedSyncResults.filter((r: any) => r.success).length;
@@ -2474,40 +2511,6 @@ export class ApproverController {
                         if (variantSyncUpdates.length > 0) {
                             await Promise.allSettled(variantSyncUpdates);
                         }
-
-                        // Upload each successfully synced variant's image to article-master
-                        // Key format: {baseArticleNumber}-{color}.jpg (no watermark)
-                        const variantById = new Map(allVariants.map((v) => [v.id, v]));
-                        await Promise.allSettled(
-                            variantSyncResults
-                                .filter((vr: any) => vr.success && vr.sapArticleNumber)
-                                .map(async (vr: any) => {
-                                    const variant = variantById.get(vr.id);
-                                    if (!variant?.imageUrl) {
-                                        console.warn(`⚠️ Variant image upload skipped for ${vr.id}: no imageUrl`);
-                                        return;
-                                    }
-                                    const colorCode = variant.variantColor || variant.colour || undefined;
-                                    const baseArticleNumber = variant.articleNumber
-                                        ? String(variant.articleNumber)
-                                        : String(vr.sapArticleNumber);
-                                    try {
-                                        const upload = await storageService.uploadApprovedImageFromSourceUrl(
-                                            String(variant.imageUrl),
-                                            baseArticleNumber,
-                                            undefined,
-                                            colorCode ?? undefined,
-                                        );
-                                        await prisma.extractionResultFlat.update({
-                                            where: { id: vr.id },
-                                            data: { imageUrl: upload.url },
-                                        });
-                                        console.log(`✅ Variant image saved to article-master: ${upload.key}`);
-                                    } catch (imgErr: any) {
-                                        console.error(`❌ Variant image upload failed for ${vr.id}:`, imgErr?.message);
-                                    }
-                                })
-                        );
                     }
                 } catch (varErr: any) {
                     console.error('[VARIANT_RFC] Variant sync failed (non-fatal):', varErr?.message);
@@ -2718,7 +2721,8 @@ export class ApproverController {
         }
     }
 
-    // Retry SAP sync for FAILED / NOT_SYNCED / PENDING variants of a generic article
+    // Retry SAP sync for FAILED / NOT_SYNCED / PENDING variants of a generic article.
+    // Also retroactively uploads images for SYNCED variants whose image is not yet in article-master.
     static async retryVariants(req: Request, res: Response) {
         try {
             const { id } = req.params;
@@ -2732,7 +2736,47 @@ export class ApproverController {
                 return res.status(400).json({ error: 'Generic article has no SAP article number. Approve the generic first.' });
             }
 
-            // 2. Find all variants that need (re)syncing
+            // Human-readable base number: strip leading zeros from generic SAP ID
+            // e.g. "0000001110143051" → "1110143051"
+            const genericBaseNum = String(generic.sapArticleId).replace(/^0+/, '');
+
+            // 2. Retroactive image upload — runs ALWAYS, even if no variants need SAP sync.
+            //    Fixes SYNCED variants whose imageUrl still points to the main bucket.
+            const allSyncedVariants = await prisma.extractionResultFlat.findMany({
+                where: {
+                    genericArticleId: id,
+                    isGeneric: false,
+                    sapSyncStatus: 'SYNCED',
+                    sapArticleId: { not: null },
+                },
+                select: { id: true, imageUrl: true, variantColor: true, colour: true }
+            });
+            const needsRetroUpload = allSyncedVariants.filter(
+                (v) => v.imageUrl && !storageService.extractApprovedKeyFromUrl(v.imageUrl)
+            );
+            if (needsRetroUpload.length > 0) {
+                console.log(`[RETRY_VARIANTS] Retroactive image upload for ${needsRetroUpload.length} SYNCED variant(s)`);
+                await Promise.allSettled(needsRetroUpload.map(async (v) => {
+                    const colorCode = v.variantColor || v.colour || undefined;
+                    try {
+                        const upload = await storageService.uploadApprovedImageFromSourceUrl(
+                            String(v.imageUrl),
+                            genericBaseNum,
+                            undefined,
+                            colorCode ?? undefined,
+                        );
+                        await prisma.extractionResultFlat.update({
+                            where: { id: v.id },
+                            data: { imageUrl: upload.url },
+                        });
+                        console.log(`✅ [RETRY_VARIANTS] Retroactive image upload: ${upload.key}`);
+                    } catch (imgErr: any) {
+                        console.error(`❌ [RETRY_VARIANTS] Retroactive upload failed for ${v.id}:`, imgErr?.message);
+                    }
+                }));
+            }
+
+            // 3. Find variants that need (re)syncing to SAP
             const variants = await prisma.extractionResultFlat.findMany({
                 where: {
                     genericArticleId: id,
@@ -2763,24 +2807,29 @@ export class ApproverController {
                 });
             }
 
-            // Merge both lists (dedup by id)
             const allToSync = [
                 ...variants,
                 ...pendingVariants.filter(p => !variants.find(v => v.id === p.id))
             ];
 
             if (allToSync.length === 0) {
-                return res.json({ message: 'No variants need SAP sync', synced: 0, failed: 0 });
+                return res.json({
+                    message: needsRetroUpload.length > 0
+                        ? `No SAP sync needed; uploaded ${needsRetroUpload.length} missing variant image(s) to article-master`
+                        : 'No variants need SAP sync',
+                    synced: 0,
+                    failed: 0
+                });
             }
 
-            // 3. Build maps for syncVariantsToSapViaRfc
+            // 4. Build maps for syncVariantsToSapViaRfc
             const variantsByGenericId = new Map([[id, allToSync]]);
             const genericSapArticleMap = new Map([[id, generic.sapArticleId]]);
 
-            // 4. Call the existing RFC function
+            // 5. Call the existing RFC function
             const results = await syncVariantsToSapViaRfc(variantsByGenericId, genericSapArticleMap);
 
-            // 5. Persist results back to DB
+            // 6. Persist results back to DB
             await Promise.allSettled(results.map(r => {
                 const data: Record<string, unknown> = {
                     sapSyncStatus: r.success ? SapSyncStatus.SYNCED : SapSyncStatus.FAILED,
@@ -2798,6 +2847,36 @@ export class ApproverController {
                 }
                 return prisma.extractionResultFlat.update({ where: { id: r.id }, data });
             }));
+
+            // 7. Upload images for newly synced variants
+            const variantById = new Map(allToSync.map((v: any) => [v.id, v]));
+            await Promise.allSettled(
+                results
+                    .filter((r: any) => r.success && r.sapArticleNumber)
+                    .map(async (r: any) => {
+                        const variant = variantById.get(r.id);
+                        if (!variant?.imageUrl) {
+                            console.warn(`⚠️ [RETRY_VARIANTS] Image upload skipped for ${r.id}: no imageUrl`);
+                            return;
+                        }
+                        const colorCode = variant.variantColor || variant.colour || undefined;
+                        try {
+                            const upload = await storageService.uploadApprovedImageFromSourceUrl(
+                                String(variant.imageUrl),
+                                genericBaseNum,
+                                undefined,
+                                colorCode ?? undefined,
+                            );
+                            await prisma.extractionResultFlat.update({
+                                where: { id: r.id },
+                                data: { imageUrl: upload.url },
+                            });
+                            console.log(`✅ [RETRY_VARIANTS] Variant image saved to article-master: ${upload.key}`);
+                        } catch (imgErr: any) {
+                            console.error(`❌ [RETRY_VARIANTS] Variant image upload failed for ${r.id}:`, imgErr?.message);
+                        }
+                    })
+            );
 
             const synced = results.filter(r => r.success).length;
             const failed = results.filter(r => !r.success).length;
