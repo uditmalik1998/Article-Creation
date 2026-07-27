@@ -1,11 +1,13 @@
 import { useCallback, useEffect, useMemo, useState } from 'react';
 import { Check, Download, RotateCw, Search, Store } from 'lucide-react';
+import dayjs, { type Dayjs } from 'dayjs';
 import {
   Button,
   Card,
   CardContent,
   CardHeader,
   CardTitle,
+  DatePicker,
   Dialog,
   DialogContent,
   Empty,
@@ -38,11 +40,14 @@ interface ArticleMeta {
   approvedAt?: string | null;
 }
 
-const VIEW_ORDER = ['front', 'back', 'side', 'three_quarter', 'left_side', 'closeup'];
+// 'three_quarter' was replaced by 'style_shoot'; it stays listed so images generated
+// before the switch keep their position and label in the gallery.
+const VIEW_ORDER = ['front', 'back', 'side', 'style_shoot', 'three_quarter', 'left_side', 'closeup'];
 const VIEW_LABELS: Record<string, string> = {
   front: 'Front',
   back: 'Back',
   side: 'Side',
+  style_shoot: 'Style Shoot',
   three_quarter: '3/4',
   left_side: 'Left Side',
   closeup: 'Closeup',
@@ -75,18 +80,28 @@ export function ModelImagesBrowser() {
   const [cursor, setCursor] = useState<string | undefined>();
   const [loading, setLoading] = useState(false);
   const [search, setSearch] = useState('');
+  // Defaults to today so the gallery opens on the images generated in this session.
+  // null = no date filter (browse the whole bucket).
+  const [date, setDate] = useState<Dayjs | null>(dayjs());
+  const [truncated, setTruncated] = useState(false);
   const [preview, setPreview] = useState<string | null>(null);
   const [loadedOnce, setLoadedOnce] = useState(false);
   const [approving, setApproving] = useState<Set<string>>(new Set());
   const [meta, setMeta] = useState<Record<string, ArticleMeta>>({});
 
-  const load = useCallback(async (reset: boolean, prefix: string, cur?: string) => {
+  const load = useCallback(async (reset: boolean, prefix: string, day: Dayjs | null, cur?: string) => {
     const token = localStorage.getItem('authToken');
     setLoading(true);
     try {
       const params = new URLSearchParams();
       if (prefix) params.set('prefix', prefix);
       if (cur) params.set('cursor', cur);
+      if (day) {
+        // Send the picked day's boundaries in the BROWSER's timezone, so the server
+        // filters on the user's calendar day rather than its own (UTC in prod).
+        params.set('from', day.startOf('day').toDate().toISOString());
+        params.set('to', day.add(1, 'day').startOf('day').toDate().toISOString());
+      }
       const res = await fetch(`${API_BASE}/model-generation/model-images?${params.toString()}`, {
         headers: { Authorization: `Bearer ${token}` },
       });
@@ -94,6 +109,7 @@ export function ModelImagesBrowser() {
       if (!res.ok || !data.success) throw new Error(data.error || 'Failed to load model images');
       setItems((prev) => (reset ? data.items : [...prev, ...data.items]));
       setCursor(data.nextCursor);
+      setTruncated(!!data.scanTruncated);
       setLoadedOnce(true);
     } catch (e: any) {
       message.error(e.message || 'Failed to load model images');
@@ -117,9 +133,19 @@ export function ModelImagesBrowser() {
   }, []);
 
   useEffect(() => {
-    void load(true, '');
+    void load(true, '', dayjs());
     void loadMeta();
+    // Intentionally runs once on mount — the initial view is always "today".
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [load, loadMeta]);
+
+  // Re-query whenever the picked day changes (including clearing it to "all dates").
+  const applyDate = (day: Dayjs | null) => {
+    setDate(day);
+    setItems([]);
+    setCursor(undefined);
+    void load(true, search.trim(), day);
+  };
 
   // Promote an article's views into the E-commerce/ folder (E-commerce/{article}/1.jpg…).
   const approveForEcommerce = async (article: string) => {
@@ -157,7 +183,15 @@ export function ModelImagesBrowser() {
   const runSearch = () => {
     setItems([]);
     setCursor(undefined);
-    void load(true, search.trim());
+    void load(true, search.trim(), date);
+  };
+
+  // Escape hatch for "I searched an article and got nothing because of the date".
+  const searchAllDates = () => {
+    setDate(null);
+    setItems([]);
+    setCursor(undefined);
+    void load(true, search.trim(), null);
   };
 
   const groups = useMemo(() => {
@@ -186,9 +220,30 @@ export function ModelImagesBrowser() {
             <span className="ml-2 text-xs font-normal text-muted-foreground">
               {groups.length} article{groups.length !== 1 ? 's' : ''} · {items.length} image{items.length !== 1 ? 's' : ''}
               {cursor ? '+' : ''}
+              {' · '}
+              {date
+                ? date.isSame(dayjs(), 'day')
+                  ? `today (${date.format('DD/MM/YYYY')})`
+                  : date.format('DD/MM/YYYY')
+                : 'all dates'}
             </span>
           </CardTitle>
-          <div className="flex items-center gap-2">
+          <div className="flex flex-wrap items-center gap-2">
+            <DatePicker
+              value={date}
+              onChange={applyDate}
+              placeholder="Generated on…"
+              className="h-9 w-40"
+            />
+            <Button
+              type="button"
+              size="sm"
+              variant={date ? 'outline' : 'secondary'}
+              onClick={() => applyDate(date ? null : dayjs())}
+              title={date ? 'Show images from every date' : 'Jump back to today'}
+            >
+              {date ? 'All dates' : 'Today'}
+            </Button>
             <div className="relative">
               <Search className="pointer-events-none absolute left-2 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
               <Input
@@ -207,13 +262,21 @@ export function ModelImagesBrowser() {
               size="icon"
               variant="ghost"
               className="h-9 w-9"
-              onClick={() => { setSearch(''); setItems([]); setCursor(undefined); void load(true, ''); }}
+              onClick={() => { setSearch(''); setItems([]); setCursor(undefined); void load(true, '', date); }}
               title="Reset & refresh"
             >
               <RotateCw className={loading ? 'animate-spin' : ''} />
             </Button>
           </div>
         </CardHeader>
+        {truncated && (
+          <CardContent className="pt-0">
+            <p className="text-xs text-amber-600">
+              The bucket is larger than one date scan — some images from this date may not be listed.
+              Narrow the search by article number.
+            </p>
+          </CardContent>
+        )}
       </Card>
 
       {loading && items.length === 0 && (
@@ -226,7 +289,22 @@ export function ModelImagesBrowser() {
       {loadedOnce && !loading && groups.length === 0 && (
         <Card className="flex min-h-[300px] items-center justify-center glass rounded-2xl border border-white/60">
           <CardContent className="pt-6">
-            <Empty description={<span className="text-muted-foreground">No model images found in the bucket.</span>} />
+            <Empty
+              description={
+                <div className="flex flex-col items-center gap-2">
+                  <span className="text-muted-foreground">
+                    {date
+                      ? `No model images generated on ${date.format('DD/MM/YYYY')}${search.trim() ? ` for "${search.trim()}"` : ''}.`
+                      : 'No model images found in the bucket.'}
+                  </span>
+                  {date && (
+                    <Button type="button" size="sm" variant="outline" onClick={searchAllDates}>
+                      Search all dates
+                    </Button>
+                  )}
+                </div>
+              }
+            />
           </CardContent>
         </Card>
       )}
@@ -330,7 +408,7 @@ export function ModelImagesBrowser() {
 
       {cursor && (
         <div className="flex justify-center py-2">
-          <Button type="button" variant="outline" disabled={loading} onClick={() => load(false, search.trim(), cursor)}>
+          <Button type="button" variant="outline" disabled={loading} onClick={() => load(false, search.trim(), date, cursor)}>
             {loading ? 'Loading…' : 'Load more'}
           </Button>
         </div>

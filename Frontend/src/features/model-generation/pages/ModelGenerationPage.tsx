@@ -109,8 +109,9 @@ interface BulkTaskResult {
 
 // Canonical view order — used to lay out cells left-to-right per garment row.
 // Covers both the legacy 4-view garment-upload set (front/back/left_side/closeup)
-// and the 5-view article-list set (front/back/side/three_quarter/closeup).
-const VIEW_ORDER = ['front', 'back', 'side', 'three_quarter', 'left_side', 'closeup'] as const;
+// and the 5-view article-list set (front/back/side/style_shoot/closeup).
+// 'three_quarter' is retained for jobs generated before style_shoot replaced it.
+const VIEW_ORDER = ['front', 'back', 'side', 'style_shoot', 'three_quarter', 'left_side', 'closeup'] as const;
 type ViewName = typeof VIEW_ORDER[number];
 
 interface GarmentRow {
@@ -170,6 +171,9 @@ const BROACH_PLACEMENT_OPTIONS = [
 const VIEW_LABELS: Record<string, string> = {
   front: 'Front',
   back: 'Back',
+  side: 'Side',
+  style_shoot: 'Style Shoot',
+  three_quarter: '3/4',
   left_side: 'Left Side',
   'left side': 'Left Side',
   closeup: 'Closeup',

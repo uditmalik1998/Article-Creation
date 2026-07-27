@@ -37,7 +37,9 @@ function sleep(ms: number): Promise<void> {
 }
 
 export function viewsForCount(imagesCount: string): string[] {
-  if (imagesCount === '5') return ['front', 'back', 'side', 'three_quarter', 'closeup'];
+  // 'style_shoot' replaced the old 'three_quarter' view — existing jobs/R2 keys still
+  // carry 'three_quarter', so the view name stays supported everywhere downstream.
+  if (imagesCount === '5') return ['front', 'back', 'side', 'style_shoot', 'closeup'];
   if (imagesCount === '1') return ['front'];
   return ['front', 'back', 'left_side', 'closeup'];
 }
@@ -383,7 +385,7 @@ const cancelFlags = new Set<string>();
 // is stashed here so the remaining views of the SAME garment (same job + fileName)
 // can be generated against it as a style reference instead of each independently
 // re-deriving color/texture from the flat source photo. This is what keeps front,
-// back, side, three_quarter, and closeup visually consistent with each other.
+// back, side, style_shoot, and closeup visually consistent with each other.
 // In-memory only (never persisted to job.json) — cleared once the job finishes.
 const groupReferenceCache = new Map<string, { buffer: Buffer; mime: string }>();
 export function cancelJob(id: string): boolean {
