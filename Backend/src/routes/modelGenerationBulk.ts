@@ -379,22 +379,39 @@ router.post('/bulk/from-articles', listUpload.single('list'), async (req: Reques
 // ─── GET /model-images — browse the model-images bucket (gallery) ────────────
 // Returns a page of image objects grouped client-side by article number
 // ("{articleNumber}/{view}.jpg"). Supports ?prefix= (article filter), ?cursor=, ?limit=.
+// ?from=&to= (ISO instants) filter by upload time. The client sends the boundaries of
+// the picked day in ITS OWN timezone, so "today" means the user's today regardless of
+// where the server runs. A date filter scans the whole bucket and ignores paging.
 router.get('/model-images', async (req: Request, res: Response) => {
   const prefix = String(req.query.prefix || '').trim();
   const cursor = String(req.query.cursor || '').trim() || undefined;
   const limit = Math.min(parseInt(String(req.query.limit ?? '300'), 10) || 300, 1000);
+  const from = String(req.query.from || '').trim() || undefined;
+  const to = String(req.query.to || '').trim() || undefined;
+
+  for (const [name, value] of [['from', from], ['to', to]] as const) {
+    if (value && !Number.isFinite(Date.parse(value))) {
+      res.status(400).json({ success: false, error: `Invalid ${name} timestamp — expected an ISO date` });
+      return;
+    }
+  }
 
   try {
-    const { objects, nextCursor } = await storageService.listModelImages({ prefix, cursor, limit });
+    const { objects, nextCursor, scanTruncated } = await storageService.listModelImages({ prefix, cursor, limit, from, to });
     // Attach parsed article number + view so the frontend can group without re-parsing.
-    const items = objects.map((o) => {
-      const slash = o.key.indexOf('/');
-      const articleNumber = slash > 0 ? o.key.slice(0, slash) : o.key;
-      const rest = slash > 0 ? o.key.slice(slash + 1) : o.key;
-      const view = rest.replace(/\.[^.]+$/, '');
-      return { ...o, articleNumber, view };
-    });
-    res.json({ success: true, items, nextCursor });
+    // The E-commerce/ copies live in the same bucket but are promoted duplicates, not
+    // generated articles — parsing them would produce a bogus "E-commerce" article row
+    // (very visible once a date filter sorts the newest uploads to the top).
+    const items = objects
+      .filter((o) => !o.key.startsWith(`${ECOMMERCE_PREFIX}/`))
+      .map((o) => {
+        const slash = o.key.indexOf('/');
+        const articleNumber = slash > 0 ? o.key.slice(0, slash) : o.key;
+        const rest = slash > 0 ? o.key.slice(slash + 1) : o.key;
+        const view = rest.replace(/\.[^.]+$/, '');
+        return { ...o, articleNumber, view };
+      });
+    res.json({ success: true, items, nextCursor, scanTruncated: scanTruncated || undefined });
   } catch (err: any) {
     console.error('[ModelGenBulk] listModelImages failed:', err?.message);
     res.status(500).json({ success: false, error: err?.message || 'Failed to list model images' });
@@ -433,7 +450,7 @@ router.get('/model-images/download', async (req: Request, res: Response) => {
 // bucket, renamed sequentially (no gaps) in canonical view order:
 //   E-commerce/{articleNumber}/1.jpg (front), 2.jpg (back), 3.jpg (side), 4.jpg (3/4), 5.jpg (closeup)
 const ECOMMERCE_PREFIX = 'E-commerce';
-const APPROVE_VIEW_ORDER = ['front', 'back', 'side', 'three_quarter', 'left_side', 'closeup'];
+const APPROVE_VIEW_ORDER = ['front', 'back', 'side', 'style_shoot', 'three_quarter', 'left_side', 'closeup'];
 
 router.post('/model-images/approve-ecommerce', async (req: Request, res: Response) => {
   const articleNumber = String(req.body?.articleNumber || '').trim();

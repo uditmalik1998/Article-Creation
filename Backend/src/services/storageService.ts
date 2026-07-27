@@ -1,5 +1,5 @@
 
-import { S3Client, PutObjectCommand, GetObjectCommand, CopyObjectCommand, ListObjectsV2Command } from '@aws-sdk/client-s3';
+import { S3Client, PutObjectCommand, GetObjectCommand, CopyObjectCommand, ListObjectsV2Command, type ListObjectsV2CommandOutput } from '@aws-sdk/client-s3';
 import { Upload } from '@aws-sdk/lib-storage';
 import { getSignedUrl } from '@aws-sdk/s3-request-presigner';
 import { randomUUID } from 'crypto';
@@ -607,30 +607,79 @@ export class StorageService {
      * List objects in the model-images bucket (for the gallery browser). Returns a
      * page of image objects with public URLs, plus a cursor for the next page.
      * `prefix` filters by key prefix (e.g. an article number).
+     *
+     * When `from`/`to` (ISO instants) are supplied, objects are filtered by their
+     * LastModified timestamp. S3/R2 has no server-side date filter and lists keys
+     * lexicographically, not chronologically — a given day's uploads are scattered
+     * across every page — so a date filter must scan the whole listing rather than
+     * one page. Scanning is capped by MAX_DATE_SCAN_PAGES; the caller is told via
+     * `scanTruncated` when the cap was hit so it can warn instead of silently
+     * under-reporting. Signed URLs are only minted for objects that survive the
+     * filter, so a wide scan does not cost a signature per skipped object.
      */
-    async listModelImages(opts: { prefix?: string; cursor?: string; limit?: number } = {}): Promise<{
+    async listModelImages(opts: { prefix?: string; cursor?: string; limit?: number; from?: string; to?: string } = {}): Promise<{
         objects: Array<{ key: string; url: string; size?: number; lastModified?: string }>;
         nextCursor?: string;
+        scanTruncated?: boolean;
     }> {
-        const res = await this.modelImagesS3Client.send(new ListObjectsV2Command({
-            Bucket: this.modelImagesBucket,
-            Prefix: opts.prefix ? opts.prefix : undefined,
-            MaxKeys: Math.min(Math.max(opts.limit ?? 200, 1), 1000),
-            ContinuationToken: opts.cursor || undefined,
-        }));
-
         const base = this.modelImagesPublicUrlBase?.replace(/\/$/, '');
-        const contents = (res.Contents || []).filter((o) => o.Key && /\.(png|jpe?g|webp)$/i.test(o.Key));
-
-        const objects = await Promise.all(contents.map(async (o) => {
+        const isImageKey = (k?: string) => !!k && /\.(png|jpe?g|webp)$/i.test(k);
+        const toUrl = async (o: { Key?: string; Size?: number; LastModified?: Date }) => {
             const key = o.Key!;
             const url = base
                 ? `${base}/${key}`
                 : await getSignedUrl(this.modelImagesS3Client, new GetObjectCommand({ Bucket: this.modelImagesBucket, Key: key }), { expiresIn: 3600 });
             return { key, url, size: o.Size, lastModified: o.LastModified?.toISOString() };
-        }));
+        };
 
-        return { objects, nextCursor: res.IsTruncated ? res.NextContinuationToken : undefined };
+        const fromMs = opts.from ? Date.parse(opts.from) : NaN;
+        const toMs = opts.to ? Date.parse(opts.to) : NaN;
+        const hasDateFilter = Number.isFinite(fromMs) || Number.isFinite(toMs);
+
+        if (!hasDateFilter) {
+            const res = await this.modelImagesS3Client.send(new ListObjectsV2Command({
+                Bucket: this.modelImagesBucket,
+                Prefix: opts.prefix ? opts.prefix : undefined,
+                MaxKeys: Math.min(Math.max(opts.limit ?? 200, 1), 1000),
+                ContinuationToken: opts.cursor || undefined,
+            }));
+            const contents = (res.Contents || []).filter((o) => isImageKey(o.Key));
+            const objects = await Promise.all(contents.map(toUrl));
+            return { objects, nextCursor: res.IsTruncated ? res.NextContinuationToken : undefined };
+        }
+
+        const MAX_DATE_SCAN_PAGES = 50; // 50 × 1000 keys — far above the current bucket size
+        const matches: Array<{ Key?: string; Size?: number; LastModified?: Date }> = [];
+        let token: string | undefined = opts.cursor || undefined;
+        let pages = 0;
+        let scanTruncated = false;
+
+        do {
+            const page: ListObjectsV2CommandOutput = await this.modelImagesS3Client.send(new ListObjectsV2Command({
+                Bucket: this.modelImagesBucket,
+                Prefix: opts.prefix ? opts.prefix : undefined,
+                MaxKeys: 1000,
+                ContinuationToken: token,
+            }));
+            pages++;
+            for (const o of page.Contents || []) {
+                if (!isImageKey(o.Key) || !o.LastModified) continue;
+                const t = o.LastModified.getTime();
+                if (Number.isFinite(fromMs) && t < fromMs) continue;
+                if (Number.isFinite(toMs) && t >= toMs) continue;
+                matches.push(o);
+            }
+            token = page.IsTruncated ? page.NextContinuationToken : undefined;
+            if (token && pages >= MAX_DATE_SCAN_PAGES) {
+                scanTruncated = true;
+                break;
+            }
+        } while (token);
+
+        // Newest first — within a date filter, recency is the useful ordering.
+        matches.sort((a, b) => (b.LastModified?.getTime() ?? 0) - (a.LastModified?.getTime() ?? 0));
+        const objects = await Promise.all(matches.map(toUrl));
+        return { objects, scanTruncated };
     }
 
     /** Download a model-image object by key (for the server-side download proxy). */
