@@ -452,78 +452,247 @@ router.get('/model-images/download', async (req: Request, res: Response) => {
 const ECOMMERCE_PREFIX = 'E-commerce';
 const APPROVE_VIEW_ORDER = ['front', 'back', 'side', 'style_shoot', 'three_quarter', 'left_side', 'closeup'];
 
+type ReviewAction = 'approve' | 'reject' | 'revert';
+type ReviewActor = { id: number; name: string } | undefined;
+
+const isValidArticleNumber = (a: string) => !!a && !a.includes('..') && !a.includes('/');
+
+// The E-commerce/ destination folder for an article. Whitespace becomes hyphens so the
+// path is URL-safe ("DARK GREY" → "DARK-GREY"); source keys keep their spaced names.
+const ecommerceFolderFor = (articleNumber: string) =>
+  `${ECOMMERCE_PREFIX}/${articleNumber.replace(/\s+/g, '-')}`;
+
+/** Copy an article's views into E-commerce/ as 1.jpg, 2.jpg … in canonical view order. */
+async function copyArticleToEcommerce(articleNumber: string) {
+  // Gather this article's view images (prefix "{articleNumber}/" — never matches the
+  // E-commerce/ copies, which live under a different top-level prefix).
+  const { objects } = await storageService.listModelImages({ prefix: `${articleNumber}/`, limit: 1000 });
+  const views = objects
+    .map((o) => {
+      const rest = o.key.slice(articleNumber.length + 1); // strip "{articleNumber}/"
+      const view = rest.replace(/\.[^.]+$/, '');
+      return { key: o.key, view };
+    })
+    .filter((v) => v.view && !v.view.includes('/')); // only direct "{article}/{view}.ext" objects
+
+  if (views.length === 0) return null;
+
+  // Sort by canonical view order; unknown views go last but keep a stable order.
+  views.sort((a, b) => {
+    const ia = APPROVE_VIEW_ORDER.indexOf(a.view);
+    const ib = APPROVE_VIEW_ORDER.indexOf(b.view);
+    return (ia < 0 ? 99 : ia) - (ib < 0 ? 99 : ib);
+  });
+
+  // Re-approving an article that previously had MORE views would otherwise leave the
+  // extra numbered files behind, so clear the folder before copying.
+  await storageService.deleteModelImagePrefix(`${ecommerceFolderFor(articleNumber)}/`);
+
+  // Number sequentially with NO gaps: 1.jpg, 2.jpg, 3.jpg, ...
+  const copied: Array<{ view: string; number: number; url: string }> = [];
+  const ecommerceUrls: Record<string, string> = {};
+  for (let i = 0; i < views.length; i++) {
+    const number = i + 1;
+    const destKey = `${ecommerceFolderFor(articleNumber)}/${number}.jpg`;
+    const url = await storageService.copyModelImage(views[i].key, destKey);
+    copied.push({ view: views[i].view, number, url });
+    ecommerceUrls[String(number)] = url;
+  }
+  return { copied, ecommerceUrls };
+}
+
+/**
+ * Apply one review action to one article.
+ *
+ * approve → copy the views into E-commerce/, status APPROVED.
+ * reject  → status REJECTED, and REMOVE any existing E-commerce/ copies. A rejected
+ *           article must not stay live on the storefront.
+ * revert  → status REVERTED, same removal. Same effect on storage as reject; the
+ *           difference is intent, which the status records.
+ */
+async function applyReview(articleNumber: string, action: ReviewAction, actor: ReviewActor) {
+  const now = new Date();
+
+  // REJECTED is terminal for the current set of images: the UI hides every action on a
+  // rejected article, and the API must agree or the rule is only cosmetic. Regenerating
+  // the article clears the rejection (persistJobResultsToDb drops the review row).
+  const existing = await withPrismaRetry(() =>
+    prisma.modelImageApproval.findUnique({ where: { articleNumber }, select: { status: true } })
+  ).catch(() => null);
+  if (existing?.status === 'REJECTED') {
+    return {
+      ok: false as const,
+      error: 'This article is rejected. Regenerate its images to make it reviewable again.',
+    };
+  }
+  if (action === 'revert' && existing?.status !== 'APPROVED') {
+    return { ok: false as const, error: 'Only an approved article can be reverted.' };
+  }
+
+  if (action === 'approve') {
+    const result = await copyArticleToEcommerce(articleNumber);
+    if (!result) return { ok: false as const, error: 'No model images found for this article' };
+
+    // The copy already succeeded, so report the files — but a failed DB write is NOT a
+    // success: without the row the article shows as approved in the UI while nothing is
+    // recorded, and revert/reject then fail with no explanation.
+    try {
+      await withPrismaRetry(() =>
+        prisma.modelImageApproval.upsert({
+          where: { articleNumber },
+          create: {
+            id: crypto.randomUUID(),
+            articleNumber,
+            status: 'APPROVED',
+            approvedBy: actor?.id ?? null,
+            approvedAt: now,
+            reviewedBy: actor?.id ?? null,
+            reviewedAt: now,
+            ecommerceUrls: result.ecommerceUrls,
+          },
+          update: {
+            status: 'APPROVED',
+            approvedBy: actor?.id ?? null,
+            approvedAt: now,
+            reviewedBy: actor?.id ?? null,
+            reviewedAt: now,
+            ecommerceUrls: result.ecommerceUrls,
+          },
+        })
+      );
+    } catch (dbErr: any) {
+      console.error('[ModelGenBulk] approval DB record failed (files copied OK):', dbErr?.message);
+      return {
+        ok: false as const,
+        error: `Images were copied to ${ECOMMERCE_PREFIX}/ but the approval could not be recorded: ${dbErr?.message || 'database error'}`,
+      };
+    }
+
+    console.log(`[ModelGenBulk] Approved ${result.copied.length} image(s) to ${ECOMMERCE_PREFIX}/ for ${articleNumber} by user ${actor?.id ?? '?'}`);
+    return { ok: true as const, status: 'APPROVED', count: result.copied.length, copied: result.copied, reviewedAt: now };
+  }
+
+  // reject / revert — withdraw from E-commerce/ and record the new status.
+  const status = action === 'reject' ? 'REJECTED' : 'REVERTED';
+  let removed = 0;
+  try {
+    removed = await storageService.deleteModelImagePrefix(`${ecommerceFolderFor(articleNumber)}/`);
+  } catch (storageErr: any) {
+    // Surface this — leaving live copies behind while the UI says "rejected" would lie.
+    console.error(`[ModelGenBulk] failed to remove E-commerce copies for ${articleNumber}:`, storageErr?.message);
+    return { ok: false as const, error: `Could not remove E-commerce copies: ${storageErr?.message || 'storage error'}` };
+  }
+
+  try {
+    await withPrismaRetry(() =>
+      prisma.modelImageApproval.upsert({
+        where: { articleNumber },
+        create: {
+          id: crypto.randomUUID(),
+          articleNumber,
+          status,
+          approvedBy: null,
+          approvedAt: now,
+          reviewedBy: actor?.id ?? null,
+          reviewedAt: now,
+          ecommerceUrls: undefined,
+        },
+        // approvedBy/approvedAt are intentionally left alone: they record who had
+        // approved it, which is exactly what you want to see next to a revert.
+        update: { status, reviewedBy: actor?.id ?? null, reviewedAt: now, ecommerceUrls: undefined },
+      })
+    );
+  } catch (dbErr: any) {
+    console.error(`[ModelGenBulk] ${status} DB record failed for ${articleNumber}:`, dbErr?.message);
+    return { ok: false as const, error: dbErr?.message || 'Failed to record status' };
+  }
+
+  console.log(`[ModelGenBulk] ${status} ${articleNumber} by user ${actor?.id ?? '?'} (removed ${removed} E-commerce copy/copies)`);
+  return { ok: true as const, status, count: removed, reviewedAt: now };
+}
+
+// ─── POST /model-images/review — approve / reject / revert one or many articles ──
+// Body: { articleNumbers: string[] (or articleNumber: string), action: 'approve'|'reject'|'revert' }
+// Articles are processed sequentially so a partial failure still reports per-article.
+router.post('/model-images/review', async (req: Request, res: Response) => {
+  const action = String(req.body?.action || '').trim() as ReviewAction;
+  if (!['approve', 'reject', 'revert'].includes(action)) {
+    res.status(400).json({ success: false, error: "action must be 'approve', 'reject' or 'revert'" });
+    return;
+  }
+
+  const raw = Array.isArray(req.body?.articleNumbers)
+    ? req.body.articleNumbers
+    : req.body?.articleNumber != null
+      ? [req.body.articleNumber]
+      : [];
+  const articleNumbers: string[] = Array.from(new Set(raw.map((a: unknown) => String(a || '').trim()))).filter(Boolean) as string[];
+
+  if (articleNumbers.length === 0) {
+    res.status(400).json({ success: false, error: 'articleNumbers must contain at least one article' });
+    return;
+  }
+  const invalid = articleNumbers.filter((a) => !isValidArticleNumber(a));
+  if (invalid.length) {
+    res.status(400).json({ success: false, error: `Invalid article number(s): ${invalid.join(', ')}` });
+    return;
+  }
+
+  const actor = (req as any).user as ReviewActor;
+  const results: Array<{ articleNumber: string; success: boolean; status?: string; count?: number; error?: string }> = [];
+
+  for (const articleNumber of articleNumbers) {
+    try {
+      const r = await applyReview(articleNumber, action, actor);
+      results.push(r.ok
+        ? { articleNumber, success: true, status: r.status, count: r.count }
+        : { articleNumber, success: false, error: r.error });
+    } catch (err: any) {
+      console.error(`[ModelGenBulk] review ${action} failed for ${articleNumber}:`, err?.message);
+      results.push({ articleNumber, success: false, error: err?.message || `Failed to ${action}` });
+    }
+  }
+
+  const succeeded = results.filter((r) => r.success);
+  res.status(succeeded.length === 0 ? 500 : 200).json({
+    success: succeeded.length > 0,
+    // Surface the first real reason at the top level — without it the client can only
+    // show a bare "<Action> failed" and the actual cause stays buried in the results.
+    error: succeeded.length === 0 ? results.find((r) => r.error)?.error : undefined,
+    action,
+    status: action === 'approve' ? 'APPROVED' : action === 'reject' ? 'REJECTED' : 'REVERTED',
+    succeeded: succeeded.length,
+    failed: results.length - succeeded.length,
+    reviewedBy: actor ? { id: actor.id, name: actor.name } : null,
+    reviewedAt: new Date(),
+    results,
+  });
+});
+
+// ─── POST /model-images/approve-ecommerce — single-article approve (legacy shape) ──
+// Kept so any existing caller keeps working; /model-images/review is the general form.
 router.post('/model-images/approve-ecommerce', async (req: Request, res: Response) => {
   const articleNumber = String(req.body?.articleNumber || '').trim();
-  if (!articleNumber || articleNumber.includes('..') || articleNumber.includes('/')) {
+  if (!isValidArticleNumber(articleNumber)) {
     res.status(400).json({ success: false, error: 'A valid articleNumber is required' });
     return;
   }
 
+  const actor = (req as any).user as ReviewActor;
   try {
-    // Gather this article's view images (prefix "{articleNumber}/" — never matches the
-    // E-commerce/ copies, which live under a different top-level prefix).
-    const { objects } = await storageService.listModelImages({ prefix: `${articleNumber}/`, limit: 1000 });
-    const views = objects
-      .map((o) => {
-        const rest = o.key.slice(articleNumber.length + 1); // strip "{articleNumber}/"
-        const view = rest.replace(/\.[^.]+$/, '');
-        return { key: o.key, view };
-      })
-      .filter((v) => v.view && !v.view.includes('/')); // only direct "{article}/{view}.ext" objects
-
-    if (views.length === 0) {
-      res.status(404).json({ success: false, error: 'No model images found for this article' });
+    const r = await applyReview(articleNumber, 'approve', actor);
+    if (!r.ok) {
+      res.status(404).json({ success: false, error: r.error });
       return;
     }
-
-    // Sort by canonical view order; unknown views go last but keep a stable order.
-    views.sort((a, b) => {
-      const ia = APPROVE_VIEW_ORDER.indexOf(a.view);
-      const ib = APPROVE_VIEW_ORDER.indexOf(b.view);
-      return (ia < 0 ? 99 : ia) - (ib < 0 ? 99 : ib);
-    });
-
-    // Sanitize the destination folder name — replace whitespace with hyphens so the
-    // E-commerce/ path is URL-safe (e.g. "DARK GREY" → "DARK-GREY"). Source keys keep
-    // their original spaced names; only the copy destination is normalized.
-    const safeArticleFolder = articleNumber.replace(/\s+/g, '-');
-
-    // Number sequentially with NO gaps: 1.jpg, 2.jpg, 3.jpg, ...
-    const copied: Array<{ view: string; number: number; url: string }> = [];
-    const ecommerceUrls: Record<string, string> = {};
-    for (let i = 0; i < views.length; i++) {
-      const number = i + 1;
-      const destKey = `${ECOMMERCE_PREFIX}/${safeArticleFolder}/${number}.jpg`;
-      const url = await storageService.copyModelImage(views[i].key, destKey);
-      copied.push({ view: views[i].view, number, url });
-      ecommerceUrls[String(number)] = url;
-    }
-
-    // Record who approved (last-approver-wins). Best-effort: the copy already succeeded,
-    // so a DB hiccup here shouldn't fail the whole request.
-    const approver = (req as any).user as { id: number; name: string } | undefined;
-    let approvedAt = new Date();
-    try {
-      const row = await withPrismaRetry(() =>
-        prisma.modelImageApproval.upsert({
-          where: { articleNumber },
-          create: { id: crypto.randomUUID(), articleNumber, approvedBy: approver?.id ?? null, ecommerceUrls },
-          update: { approvedBy: approver?.id ?? null, approvedAt: new Date(), ecommerceUrls },
-        })
-      );
-      approvedAt = row.approvedAt;
-    } catch (dbErr: any) {
-      console.error('[ModelGenBulk] approval DB record failed (files copied OK):', dbErr?.message);
-    }
-
-    console.log(`[ModelGenBulk] Approved ${copied.length} image(s) to ${ECOMMERCE_PREFIX}/ for article ${articleNumber} by user ${approver?.id ?? '?'}`);
     res.json({
       success: true,
       articleNumber,
-      count: copied.length,
-      copied,
-      approvedBy: approver ? { id: approver.id, name: approver.name } : null,
-      approvedAt,
+      count: r.count,
+      copied: r.copied,
+      status: r.status,
+      approvedBy: actor ? { id: actor.id, name: actor.name } : null,
+      approvedAt: r.reviewedAt,
     });
   } catch (err: any) {
     console.error('[ModelGenBulk] approve-ecommerce failed for', articleNumber, err?.message);
@@ -531,10 +700,11 @@ router.post('/model-images/approve-ecommerce', async (req: Request, res: Respons
   }
 });
 
-// ─── GET /model-images/meta — per-article generator + approval info for the gallery ──
-// Returns a map { articleNumber: { generatedBy, approved, approvedBy, approvedAt } } so
-// the browser can show "Generated by …" and an "Approved" tag. Data is small (tens of
-// articles) so we return everything in one call.
+// ─── GET /model-images/meta — per-article generator + review info for the gallery ──
+// Returns a map { articleNumber: { generatedBy, status, approved, approvedBy, approvedAt,
+// reviewedBy, reviewedAt } }. `status` is APPROVED | REJECTED | REVERTED | UNAPPROVED —
+// an article with no review row has never been actioned. Data is small (tens of articles)
+// so we return everything in one call.
 router.get('/model-images/meta', async (_req: Request, res: Response) => {
   try {
     const [genRows, apprRows] = await Promise.all([
@@ -546,7 +716,7 @@ router.get('/model-images/meta', async (_req: Request, res: Response) => {
       ),
       withPrismaRetry(() =>
         prisma.modelImageApproval.findMany({
-          select: { articleNumber: true, approvedBy: true, approvedAt: true },
+          select: { articleNumber: true, status: true, approvedBy: true, approvedAt: true, reviewedBy: true, reviewedAt: true },
         })
       ),
     ]);
@@ -554,31 +724,43 @@ router.get('/model-images/meta', async (_req: Request, res: Response) => {
     // Collect all user ids we need names for, then fetch in one query.
     const userIds = new Set<number>();
     for (const g of genRows) if (g.userId != null) userIds.add(g.userId);
-    for (const a of apprRows) if (a.approvedBy != null) userIds.add(a.approvedBy);
+    for (const a of apprRows) {
+      if (a.approvedBy != null) userIds.add(a.approvedBy);
+      if (a.reviewedBy != null) userIds.add(a.reviewedBy);
+    }
     const users = userIds.size
       ? await withPrismaRetry(() =>
           prisma.user.findMany({ where: { id: { in: Array.from(userIds) } }, select: { id: true, name: true } })
         )
       : [];
     const nameById = new Map(users.map((u) => [u.id, u.name]));
+    const userRef = (id: number | null) => (id != null ? { id, name: nameById.get(id) || `User ${id}` } : null);
+    const blank = () => ({
+      generatedBy: null,
+      status: 'UNAPPROVED',
+      approved: false,
+      approvedBy: null,
+      approvedAt: null,
+      reviewedBy: null,
+      reviewedAt: null,
+    });
 
     const meta: Record<string, any> = {};
     // genRows are newest-first — keep the first (latest) generator seen per article.
     for (const g of genRows) {
       if (!meta[g.articleNumber]) {
-        meta[g.articleNumber] = {
-          generatedBy: g.userId != null ? { id: g.userId, name: nameById.get(g.userId) || `User ${g.userId}` } : null,
-          approved: false,
-          approvedBy: null,
-          approvedAt: null,
-        };
+        meta[g.articleNumber] = { ...blank(), generatedBy: userRef(g.userId) };
       }
     }
     for (const a of apprRows) {
-      const entry = meta[a.articleNumber] || (meta[a.articleNumber] = { generatedBy: null, approved: false, approvedBy: null, approvedAt: null });
-      entry.approved = true;
-      entry.approvedBy = a.approvedBy != null ? { id: a.approvedBy, name: nameById.get(a.approvedBy) || `User ${a.approvedBy}` } : null;
+      const entry = meta[a.articleNumber] || (meta[a.articleNumber] = blank());
+      // Rows written before the status column existed were all approvals.
+      entry.status = a.status || 'APPROVED';
+      entry.approved = entry.status === 'APPROVED';
+      entry.approvedBy = userRef(a.approvedBy);
       entry.approvedAt = a.approvedAt;
+      entry.reviewedBy = userRef(a.reviewedBy ?? a.approvedBy);
+      entry.reviewedAt = a.reviewedAt ?? a.approvedAt;
     }
 
     res.json({ success: true, meta });

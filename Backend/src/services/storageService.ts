@@ -1,5 +1,5 @@
 
-import { S3Client, PutObjectCommand, GetObjectCommand, CopyObjectCommand, ListObjectsV2Command, type ListObjectsV2CommandOutput } from '@aws-sdk/client-s3';
+import { S3Client, PutObjectCommand, GetObjectCommand, CopyObjectCommand, ListObjectsV2Command, DeleteObjectsCommand, type ListObjectsV2CommandOutput } from '@aws-sdk/client-s3';
 import { Upload } from '@aws-sdk/lib-storage';
 import { getSignedUrl } from '@aws-sdk/s3-request-presigner';
 import { randomUUID } from 'crypto';
@@ -732,6 +732,39 @@ export class StorageService {
             new GetObjectCommand({ Bucket: this.modelImagesBucket, Key: destKey }),
             { expiresIn: 604800 }
         );
+    }
+
+    /**
+     * Delete every object under a prefix in the model-images bucket. Used to pull an
+     * article's promoted copies back out of E-commerce/ when an approval is reverted or
+     * the article is rejected — leaving them behind would keep a withdrawn article live
+     * on the storefront. Returns how many objects were removed.
+     */
+    async deleteModelImagePrefix(prefix: string): Promise<number> {
+        if (!prefix || prefix.includes('..')) throw new Error('A valid prefix is required');
+        let token: string | undefined;
+        let deleted = 0;
+
+        do {
+            const page: ListObjectsV2CommandOutput = await this.modelImagesS3Client.send(new ListObjectsV2Command({
+                Bucket: this.modelImagesBucket,
+                Prefix: prefix,
+                MaxKeys: 1000,
+                ContinuationToken: token,
+            }));
+            const keys = (page.Contents || []).map((o) => o.Key).filter((k): k is string => !!k);
+            if (keys.length) {
+                await this.modelImagesS3Client.send(new DeleteObjectsCommand({
+                    Bucket: this.modelImagesBucket,
+                    Delete: { Objects: keys.map((Key) => ({ Key })), Quiet: true },
+                }));
+                deleted += keys.length;
+            }
+            token = page.IsTruncated ? page.NextContinuationToken : undefined;
+        } while (token);
+
+        if (deleted) console.log(`🗑️  Deleted ${deleted} model image(s) under ${prefix}`);
+        return deleted;
     }
 }
 

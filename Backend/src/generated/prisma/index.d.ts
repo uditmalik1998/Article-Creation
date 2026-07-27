@@ -66,8 +66,13 @@ export type ExtractionResultFlat = $Result.DefaultSelection<Prisma.$ExtractionRe
 export type ModelGenerationResult = $Result.DefaultSelection<Prisma.$ModelGenerationResultPayload>
 /**
  * Model ModelImageApproval
- * Model Image Approval: article-level record of promotion to the E-commerce/ folder.
+ * Model Image Review: article-level review state for generated model images.
  * One row per article number (the color-specific code, e.g. "1110106859-DARK GREY").
+ * An article with NO row here has never been reviewed ("unapproved" in the UI).
+ * status: APPROVED (copies live in E-commerce/), REJECTED, or REVERTED (approval undone).
+ * approvedBy/approvedAt keep the LAST APPROVAL specifically, so a reverted article can
+ * still show who had approved it; reviewedBy/reviewedAt track the most recent action of
+ * any kind.
  */
 export type ModelImageApproval = $Result.DefaultSelection<Prisma.$ModelImageApprovalPayload>
 /**
@@ -18527,17 +18532,22 @@ export namespace Prisma {
 
   export type ModelImageApprovalAvgAggregateOutputType = {
     approvedBy: number | null
+    reviewedBy: number | null
   }
 
   export type ModelImageApprovalSumAggregateOutputType = {
     approvedBy: number | null
+    reviewedBy: number | null
   }
 
   export type ModelImageApprovalMinAggregateOutputType = {
     id: string | null
     articleNumber: string | null
+    status: string | null
     approvedBy: number | null
     approvedAt: Date | null
+    reviewedBy: number | null
+    reviewedAt: Date | null
     createdAt: Date | null
     updatedAt: Date | null
   }
@@ -18545,8 +18555,11 @@ export namespace Prisma {
   export type ModelImageApprovalMaxAggregateOutputType = {
     id: string | null
     articleNumber: string | null
+    status: string | null
     approvedBy: number | null
     approvedAt: Date | null
+    reviewedBy: number | null
+    reviewedAt: Date | null
     createdAt: Date | null
     updatedAt: Date | null
   }
@@ -18554,8 +18567,11 @@ export namespace Prisma {
   export type ModelImageApprovalCountAggregateOutputType = {
     id: number
     articleNumber: number
+    status: number
     approvedBy: number
     approvedAt: number
+    reviewedBy: number
+    reviewedAt: number
     ecommerceUrls: number
     createdAt: number
     updatedAt: number
@@ -18565,17 +18581,22 @@ export namespace Prisma {
 
   export type ModelImageApprovalAvgAggregateInputType = {
     approvedBy?: true
+    reviewedBy?: true
   }
 
   export type ModelImageApprovalSumAggregateInputType = {
     approvedBy?: true
+    reviewedBy?: true
   }
 
   export type ModelImageApprovalMinAggregateInputType = {
     id?: true
     articleNumber?: true
+    status?: true
     approvedBy?: true
     approvedAt?: true
+    reviewedBy?: true
+    reviewedAt?: true
     createdAt?: true
     updatedAt?: true
   }
@@ -18583,8 +18604,11 @@ export namespace Prisma {
   export type ModelImageApprovalMaxAggregateInputType = {
     id?: true
     articleNumber?: true
+    status?: true
     approvedBy?: true
     approvedAt?: true
+    reviewedBy?: true
+    reviewedAt?: true
     createdAt?: true
     updatedAt?: true
   }
@@ -18592,8 +18616,11 @@ export namespace Prisma {
   export type ModelImageApprovalCountAggregateInputType = {
     id?: true
     articleNumber?: true
+    status?: true
     approvedBy?: true
     approvedAt?: true
+    reviewedBy?: true
+    reviewedAt?: true
     ecommerceUrls?: true
     createdAt?: true
     updatedAt?: true
@@ -18689,8 +18716,11 @@ export namespace Prisma {
   export type ModelImageApprovalGroupByOutputType = {
     id: string
     articleNumber: string
+    status: string
     approvedBy: number | null
     approvedAt: Date
+    reviewedBy: number | null
+    reviewedAt: Date
     ecommerceUrls: JsonValue | null
     createdAt: Date
     updatedAt: Date
@@ -18718,8 +18748,11 @@ export namespace Prisma {
   export type ModelImageApprovalSelect<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
     id?: boolean
     articleNumber?: boolean
+    status?: boolean
     approvedBy?: boolean
     approvedAt?: boolean
+    reviewedBy?: boolean
+    reviewedAt?: boolean
     ecommerceUrls?: boolean
     createdAt?: boolean
     updatedAt?: boolean
@@ -18728,8 +18761,11 @@ export namespace Prisma {
   export type ModelImageApprovalSelectCreateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
     id?: boolean
     articleNumber?: boolean
+    status?: boolean
     approvedBy?: boolean
     approvedAt?: boolean
+    reviewedBy?: boolean
+    reviewedAt?: boolean
     ecommerceUrls?: boolean
     createdAt?: boolean
     updatedAt?: boolean
@@ -18738,8 +18774,11 @@ export namespace Prisma {
   export type ModelImageApprovalSelectUpdateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
     id?: boolean
     articleNumber?: boolean
+    status?: boolean
     approvedBy?: boolean
     approvedAt?: boolean
+    reviewedBy?: boolean
+    reviewedAt?: boolean
     ecommerceUrls?: boolean
     createdAt?: boolean
     updatedAt?: boolean
@@ -18748,14 +18787,17 @@ export namespace Prisma {
   export type ModelImageApprovalSelectScalar = {
     id?: boolean
     articleNumber?: boolean
+    status?: boolean
     approvedBy?: boolean
     approvedAt?: boolean
+    reviewedBy?: boolean
+    reviewedAt?: boolean
     ecommerceUrls?: boolean
     createdAt?: boolean
     updatedAt?: boolean
   }
 
-  export type ModelImageApprovalOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<"id" | "articleNumber" | "approvedBy" | "approvedAt" | "ecommerceUrls" | "createdAt" | "updatedAt", ExtArgs["result"]["modelImageApproval"]>
+  export type ModelImageApprovalOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<"id" | "articleNumber" | "status" | "approvedBy" | "approvedAt" | "reviewedBy" | "reviewedAt" | "ecommerceUrls" | "createdAt" | "updatedAt", ExtArgs["result"]["modelImageApproval"]>
 
   export type $ModelImageApprovalPayload<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
     name: "ModelImageApproval"
@@ -18763,8 +18805,11 @@ export namespace Prisma {
     scalars: $Extensions.GetPayloadResult<{
       id: string
       articleNumber: string
+      status: string
       approvedBy: number | null
       approvedAt: Date
+      reviewedBy: number | null
+      reviewedAt: Date
       ecommerceUrls: Prisma.JsonValue | null
       createdAt: Date
       updatedAt: Date
@@ -19193,8 +19238,11 @@ export namespace Prisma {
   interface ModelImageApprovalFieldRefs {
     readonly id: FieldRef<"ModelImageApproval", 'String'>
     readonly articleNumber: FieldRef<"ModelImageApproval", 'String'>
+    readonly status: FieldRef<"ModelImageApproval", 'String'>
     readonly approvedBy: FieldRef<"ModelImageApproval", 'Int'>
     readonly approvedAt: FieldRef<"ModelImageApproval", 'DateTime'>
+    readonly reviewedBy: FieldRef<"ModelImageApproval", 'Int'>
+    readonly reviewedAt: FieldRef<"ModelImageApproval", 'DateTime'>
     readonly ecommerceUrls: FieldRef<"ModelImageApproval", 'Json'>
     readonly createdAt: FieldRef<"ModelImageApproval", 'DateTime'>
     readonly updatedAt: FieldRef<"ModelImageApproval", 'DateTime'>
@@ -48695,8 +48743,11 @@ export namespace Prisma {
   export const ModelImageApprovalScalarFieldEnum: {
     id: 'id',
     articleNumber: 'articleNumber',
+    status: 'status',
     approvedBy: 'approvedBy',
     approvedAt: 'approvedAt',
+    reviewedBy: 'reviewedBy',
+    reviewedAt: 'reviewedAt',
     ecommerceUrls: 'ecommerceUrls',
     createdAt: 'createdAt',
     updatedAt: 'updatedAt'
@@ -49454,7 +49505,8 @@ export namespace Prisma {
 
   export const ModelImageApprovalOrderByRelevanceFieldEnum: {
     id: 'id',
-    articleNumber: 'articleNumber'
+    articleNumber: 'articleNumber',
+    status: 'status'
   };
 
   export type ModelImageApprovalOrderByRelevanceFieldEnum = (typeof ModelImageApprovalOrderByRelevanceFieldEnum)[keyof typeof ModelImageApprovalOrderByRelevanceFieldEnum]
@@ -51703,8 +51755,11 @@ export namespace Prisma {
     NOT?: ModelImageApprovalWhereInput | ModelImageApprovalWhereInput[]
     id?: StringFilter<"ModelImageApproval"> | string
     articleNumber?: StringFilter<"ModelImageApproval"> | string
+    status?: StringFilter<"ModelImageApproval"> | string
     approvedBy?: IntNullableFilter<"ModelImageApproval"> | number | null
     approvedAt?: DateTimeFilter<"ModelImageApproval"> | Date | string
+    reviewedBy?: IntNullableFilter<"ModelImageApproval"> | number | null
+    reviewedAt?: DateTimeFilter<"ModelImageApproval"> | Date | string
     ecommerceUrls?: JsonNullableFilter<"ModelImageApproval">
     createdAt?: DateTimeFilter<"ModelImageApproval"> | Date | string
     updatedAt?: DateTimeFilter<"ModelImageApproval"> | Date | string
@@ -51713,8 +51768,11 @@ export namespace Prisma {
   export type ModelImageApprovalOrderByWithRelationInput = {
     id?: SortOrder
     articleNumber?: SortOrder
+    status?: SortOrder
     approvedBy?: SortOrderInput | SortOrder
     approvedAt?: SortOrder
+    reviewedBy?: SortOrderInput | SortOrder
+    reviewedAt?: SortOrder
     ecommerceUrls?: SortOrderInput | SortOrder
     createdAt?: SortOrder
     updatedAt?: SortOrder
@@ -51727,8 +51785,11 @@ export namespace Prisma {
     AND?: ModelImageApprovalWhereInput | ModelImageApprovalWhereInput[]
     OR?: ModelImageApprovalWhereInput[]
     NOT?: ModelImageApprovalWhereInput | ModelImageApprovalWhereInput[]
+    status?: StringFilter<"ModelImageApproval"> | string
     approvedBy?: IntNullableFilter<"ModelImageApproval"> | number | null
     approvedAt?: DateTimeFilter<"ModelImageApproval"> | Date | string
+    reviewedBy?: IntNullableFilter<"ModelImageApproval"> | number | null
+    reviewedAt?: DateTimeFilter<"ModelImageApproval"> | Date | string
     ecommerceUrls?: JsonNullableFilter<"ModelImageApproval">
     createdAt?: DateTimeFilter<"ModelImageApproval"> | Date | string
     updatedAt?: DateTimeFilter<"ModelImageApproval"> | Date | string
@@ -51737,8 +51798,11 @@ export namespace Prisma {
   export type ModelImageApprovalOrderByWithAggregationInput = {
     id?: SortOrder
     articleNumber?: SortOrder
+    status?: SortOrder
     approvedBy?: SortOrderInput | SortOrder
     approvedAt?: SortOrder
+    reviewedBy?: SortOrderInput | SortOrder
+    reviewedAt?: SortOrder
     ecommerceUrls?: SortOrderInput | SortOrder
     createdAt?: SortOrder
     updatedAt?: SortOrder
@@ -51755,8 +51819,11 @@ export namespace Prisma {
     NOT?: ModelImageApprovalScalarWhereWithAggregatesInput | ModelImageApprovalScalarWhereWithAggregatesInput[]
     id?: StringWithAggregatesFilter<"ModelImageApproval"> | string
     articleNumber?: StringWithAggregatesFilter<"ModelImageApproval"> | string
+    status?: StringWithAggregatesFilter<"ModelImageApproval"> | string
     approvedBy?: IntNullableWithAggregatesFilter<"ModelImageApproval"> | number | null
     approvedAt?: DateTimeWithAggregatesFilter<"ModelImageApproval"> | Date | string
+    reviewedBy?: IntNullableWithAggregatesFilter<"ModelImageApproval"> | number | null
+    reviewedAt?: DateTimeWithAggregatesFilter<"ModelImageApproval"> | Date | string
     ecommerceUrls?: JsonNullableWithAggregatesFilter<"ModelImageApproval">
     createdAt?: DateTimeWithAggregatesFilter<"ModelImageApproval"> | Date | string
     updatedAt?: DateTimeWithAggregatesFilter<"ModelImageApproval"> | Date | string
@@ -56234,8 +56301,11 @@ export namespace Prisma {
   export type ModelImageApprovalCreateInput = {
     id?: string
     articleNumber: string
+    status?: string
     approvedBy?: number | null
     approvedAt?: Date | string
+    reviewedBy?: number | null
+    reviewedAt?: Date | string
     ecommerceUrls?: NullableJsonNullValueInput | InputJsonValue
     createdAt?: Date | string
     updatedAt?: Date | string
@@ -56244,8 +56314,11 @@ export namespace Prisma {
   export type ModelImageApprovalUncheckedCreateInput = {
     id?: string
     articleNumber: string
+    status?: string
     approvedBy?: number | null
     approvedAt?: Date | string
+    reviewedBy?: number | null
+    reviewedAt?: Date | string
     ecommerceUrls?: NullableJsonNullValueInput | InputJsonValue
     createdAt?: Date | string
     updatedAt?: Date | string
@@ -56254,8 +56327,11 @@ export namespace Prisma {
   export type ModelImageApprovalUpdateInput = {
     id?: StringFieldUpdateOperationsInput | string
     articleNumber?: StringFieldUpdateOperationsInput | string
+    status?: StringFieldUpdateOperationsInput | string
     approvedBy?: NullableIntFieldUpdateOperationsInput | number | null
     approvedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    reviewedBy?: NullableIntFieldUpdateOperationsInput | number | null
+    reviewedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     ecommerceUrls?: NullableJsonNullValueInput | InputJsonValue
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
@@ -56264,8 +56340,11 @@ export namespace Prisma {
   export type ModelImageApprovalUncheckedUpdateInput = {
     id?: StringFieldUpdateOperationsInput | string
     articleNumber?: StringFieldUpdateOperationsInput | string
+    status?: StringFieldUpdateOperationsInput | string
     approvedBy?: NullableIntFieldUpdateOperationsInput | number | null
     approvedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    reviewedBy?: NullableIntFieldUpdateOperationsInput | number | null
+    reviewedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     ecommerceUrls?: NullableJsonNullValueInput | InputJsonValue
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
@@ -56274,8 +56353,11 @@ export namespace Prisma {
   export type ModelImageApprovalCreateManyInput = {
     id?: string
     articleNumber: string
+    status?: string
     approvedBy?: number | null
     approvedAt?: Date | string
+    reviewedBy?: number | null
+    reviewedAt?: Date | string
     ecommerceUrls?: NullableJsonNullValueInput | InputJsonValue
     createdAt?: Date | string
     updatedAt?: Date | string
@@ -56284,8 +56366,11 @@ export namespace Prisma {
   export type ModelImageApprovalUpdateManyMutationInput = {
     id?: StringFieldUpdateOperationsInput | string
     articleNumber?: StringFieldUpdateOperationsInput | string
+    status?: StringFieldUpdateOperationsInput | string
     approvedBy?: NullableIntFieldUpdateOperationsInput | number | null
     approvedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    reviewedBy?: NullableIntFieldUpdateOperationsInput | number | null
+    reviewedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     ecommerceUrls?: NullableJsonNullValueInput | InputJsonValue
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
@@ -56294,8 +56379,11 @@ export namespace Prisma {
   export type ModelImageApprovalUncheckedUpdateManyInput = {
     id?: StringFieldUpdateOperationsInput | string
     articleNumber?: StringFieldUpdateOperationsInput | string
+    status?: StringFieldUpdateOperationsInput | string
     approvedBy?: NullableIntFieldUpdateOperationsInput | number | null
     approvedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    reviewedBy?: NullableIntFieldUpdateOperationsInput | number | null
+    reviewedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     ecommerceUrls?: NullableJsonNullValueInput | InputJsonValue
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
@@ -60823,8 +60911,11 @@ export namespace Prisma {
   export type ModelImageApprovalCountOrderByAggregateInput = {
     id?: SortOrder
     articleNumber?: SortOrder
+    status?: SortOrder
     approvedBy?: SortOrder
     approvedAt?: SortOrder
+    reviewedBy?: SortOrder
+    reviewedAt?: SortOrder
     ecommerceUrls?: SortOrder
     createdAt?: SortOrder
     updatedAt?: SortOrder
@@ -60832,13 +60923,17 @@ export namespace Prisma {
 
   export type ModelImageApprovalAvgOrderByAggregateInput = {
     approvedBy?: SortOrder
+    reviewedBy?: SortOrder
   }
 
   export type ModelImageApprovalMaxOrderByAggregateInput = {
     id?: SortOrder
     articleNumber?: SortOrder
+    status?: SortOrder
     approvedBy?: SortOrder
     approvedAt?: SortOrder
+    reviewedBy?: SortOrder
+    reviewedAt?: SortOrder
     createdAt?: SortOrder
     updatedAt?: SortOrder
   }
@@ -60846,14 +60941,18 @@ export namespace Prisma {
   export type ModelImageApprovalMinOrderByAggregateInput = {
     id?: SortOrder
     articleNumber?: SortOrder
+    status?: SortOrder
     approvedBy?: SortOrder
     approvedAt?: SortOrder
+    reviewedBy?: SortOrder
+    reviewedAt?: SortOrder
     createdAt?: SortOrder
     updatedAt?: SortOrder
   }
 
   export type ModelImageApprovalSumOrderByAggregateInput = {
     approvedBy?: SortOrder
+    reviewedBy?: SortOrder
   }
 
   export type MvgrLookupOrderByRelevanceInput = {
