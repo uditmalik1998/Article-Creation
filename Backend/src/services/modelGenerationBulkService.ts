@@ -614,6 +614,24 @@ async function persistJobResultsToDb(job: BulkJob): Promise<void> {
     } catch (err) {
       console.error('[ModelGenBulk] Failed to persist result for', articleNumber, (err as Error).message);
     }
+
+    // A review applies to the images that were reviewed. Once an article is regenerated
+    // those images are gone, so the old verdict is void: drop the review row and the
+    // article returns to "unapproved". This is also the ONLY way out of REJECTED, which
+    // is otherwise terminal — without it a rejected article could never be approved
+    // again, even after new images were generated for it.
+    if (done.length > 0) {
+      try {
+        const removed = await withPrismaRetry(() =>
+          prisma.modelImageApproval.deleteMany({ where: { articleNumber } })
+        );
+        if (removed.count > 0) {
+          console.log(`[ModelGenBulk] Cleared previous review status for regenerated article ${articleNumber}`);
+        }
+      } catch (err) {
+        console.error('[ModelGenBulk] Failed to clear review status for', articleNumber, (err as Error).message);
+      }
+    }
   }
   console.log(`[ModelGenBulk] Persisted ${byArticle.size} article result(s) to DB for job ${job.id}`);
 }

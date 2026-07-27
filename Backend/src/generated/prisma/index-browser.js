@@ -401,8 +401,11 @@ exports.Prisma.ModelGenerationResultScalarFieldEnum = {
 exports.Prisma.ModelImageApprovalScalarFieldEnum = {
   id: 'id',
   articleNumber: 'articleNumber',
+  status: 'status',
   approvedBy: 'approvedBy',
   approvedAt: 'approvedAt',
+  reviewedBy: 'reviewedBy',
+  reviewedAt: 'reviewedAt',
   ecommerceUrls: 'ecommerceUrls',
   createdAt: 'createdAt',
   updatedAt: 'updatedAt'
@@ -1037,7 +1040,8 @@ exports.Prisma.ModelGenerationResultOrderByRelevanceFieldEnum = {
 
 exports.Prisma.ModelImageApprovalOrderByRelevanceFieldEnum = {
   id: 'id',
-  articleNumber: 'articleNumber'
+  articleNumber: 'articleNumber',
+  status: 'status'
 };
 
 exports.Prisma.MvgrLookupOrderByRelevanceFieldEnum = {

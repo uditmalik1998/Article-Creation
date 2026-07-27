@@ -425,18 +425,27 @@ model ModelGenerationResult {
   @@schema("public")
 }
 
-/// Model Image Approval: article-level record of promotion to the E-commerce/ folder.
+/// Model Image Review: article-level review state for generated model images.
 /// One row per article number (the color-specific code, e.g. "1110106859-DARK GREY").
+/// An article with NO row here has never been reviewed ("unapproved" in the UI).
+/// status: APPROVED (copies live in E-commerce/), REJECTED, or REVERTED (approval undone).
+/// approvedBy/approvedAt keep the LAST APPROVAL specifically, so a reverted article can
+/// still show who had approved it; reviewedBy/reviewedAt track the most recent action of
+/// any kind.
 model ModelImageApproval {
   id            String   @id @default(uuid())
   articleNumber String   @unique @map("article_number") @db.VarChar(100)
+  status        String   @default("APPROVED") @db.VarChar(20)
   approvedBy    Int?     @map("approved_by")             // users.id of the approver
   approvedAt    DateTime @default(now()) @map("approved_at")
+  reviewedBy    Int?     @map("reviewed_by")             // users.id of whoever last acted
+  reviewedAt    DateTime @default(now()) @map("reviewed_at")
   ecommerceUrls Json?    @map("ecommerce_urls")          // { "1": url, "2": url, ... }
   createdAt     DateTime @default(now()) @map("created_at")
   updatedAt     DateTime @updatedAt @map("updated_at")
 
   @@index([approvedBy])
+  @@index([status])
   @@map("model_image_approvals")
   @@schema("public")
 }
