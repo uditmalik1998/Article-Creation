@@ -37,7 +37,9 @@ function sleep(ms: number): Promise<void> {
 }
 
 export function viewsForCount(imagesCount: string): string[] {
-  if (imagesCount === '5') return ['front', 'back', 'side', 'three_quarter', 'closeup'];
+  // 'style_shoot' replaced the old 'three_quarter' view — existing jobs/R2 keys still
+  // carry 'three_quarter', so the view name stays supported everywhere downstream.
+  if (imagesCount === '5') return ['front', 'back', 'side', 'style_shoot', 'closeup'];
   if (imagesCount === '1') return ['front'];
   return ['front', 'back', 'left_side', 'closeup'];
 }
@@ -64,6 +66,7 @@ export interface BulkTask {
   gender?: string;
   bodytype?: string;
   colorName?: string;
+  featuredGarment?: 'top' | 'bottom' | 'full' | 'unknown'; // which piece a colour swap targets
   attributesText?: string;
   // true when this article's source photo is a sibling colour variant reused as
   // a stand-in (the exact article+colour code had no extracted photo of its own)
@@ -333,6 +336,7 @@ export function createArticleJob(args: {
         base.gender = article.gender;
         base.bodytype = article.bodytype;       // 'auto'
         base.colorName = article.colorName;
+        base.featuredGarment = article.featuredGarment;
         base.attributesText = article.attributesText;
         base.isColorFallback = article.isColorFallback;
       }
@@ -381,7 +385,7 @@ const cancelFlags = new Set<string>();
 // is stashed here so the remaining views of the SAME garment (same job + fileName)
 // can be generated against it as a style reference instead of each independently
 // re-deriving color/texture from the flat source photo. This is what keeps front,
-// back, side, three_quarter, and closeup visually consistent with each other.
+// back, side, style_shoot, and closeup visually consistent with each other.
 // In-memory only (never persisted to job.json) — cleared once the job finishes.
 const groupReferenceCache = new Map<string, { buffer: Buffer; mime: string }>();
 export function cancelJob(id: string): boolean {
@@ -499,6 +503,7 @@ async function runTaskWithRetry(job: BulkJob, task: BulkTask): Promise<void> {
           styleReference?.buffer,
           styleReference?.mime,
           backgroundColor,
+          task.featuredGarment,
         );
 
         // The first view to finish for this garment becomes the reference the rest match.
@@ -608,6 +613,24 @@ async function persistJobResultsToDb(job: BulkJob): Promise<void> {
       );
     } catch (err) {
       console.error('[ModelGenBulk] Failed to persist result for', articleNumber, (err as Error).message);
+    }
+
+    // A review applies to the images that were reviewed. Once an article is regenerated
+    // those images are gone, so the old verdict is void: drop the review row and the
+    // article returns to "unapproved". This is also the ONLY way out of REJECTED, which
+    // is otherwise terminal — without it a rejected article could never be approved
+    // again, even after new images were generated for it.
+    if (done.length > 0) {
+      try {
+        const removed = await withPrismaRetry(() =>
+          prisma.modelImageApproval.deleteMany({ where: { articleNumber } })
+        );
+        if (removed.count > 0) {
+          console.log(`[ModelGenBulk] Cleared previous review status for regenerated article ${articleNumber}`);
+        }
+      } catch (err) {
+        console.error('[ModelGenBulk] Failed to clear review status for', articleNumber, (err as Error).message);
+      }
     }
   }
   console.log(`[ModelGenBulk] Persisted ${byArticle.size} article result(s) to DB for job ${job.id}`);

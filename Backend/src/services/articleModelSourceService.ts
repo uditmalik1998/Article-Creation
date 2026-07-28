@@ -19,6 +19,7 @@ export interface ResolvedArticle {
   gender?: string;      // 'male' | 'female' | 'kid boy' | 'kid girl'
   bodytype?: string;    // always 'auto' — AI decides framing
   colorName?: string;   // undefined = preserve source colour
+  featuredGarment?: 'top' | 'bottom' | 'full' | 'unknown'; // which piece a colour swap targets
   attributesText?: string;
   reason?: string;      // populated when found === false
   // true when no row exists for the exact code (article+colour) but a sibling
@@ -48,6 +49,110 @@ function deriveGender(division?: string | null, subDivision?: string | null): st
 // top wrongly.
 const BOTTOM_WORDS = ['TROUSER', 'PANT', 'JEAN', 'DENIM', 'SHORT', 'SKIRT', 'LEGGING', 'JEGGING', 'CHINO', 'CARGO', 'CULOTTE', 'PALAZZO', 'JOGGER', 'TRACK PANT', 'TRACKPANT', 'PYJAMA', 'PAJAMA', 'CAPRI', 'DHOTI', 'LOWER', 'BOTTOM'];
 const FULL_WORDS = ['DRESS', 'GOWN', 'JUMPSUIT', 'DUNGAREE', 'ROMPER', 'OVERALL', 'SAREE', 'ABAYA', 'KAFTAN', 'KURTA', 'NIGHTSUIT'];
+// Clear upper-garment keywords — used to decide which piece a colour swap targets when
+// the source shows a two-piece set (recolour only the featured product, never both).
+const TOP_WORDS = ['SHIRT', 'T-SHIRT', 'TSHIRT', 'TEE', 'TOP', 'JACKET', 'SWEATSHIRT', 'HOODIE', 'SWEATER', 'PULLOVER', 'BLAZER', 'COAT', 'WAISTCOAT', 'CARDIGAN', 'POLO', 'BLOUSE', 'CROP TOP'];
+
+/**
+ * Decide WHICH garment a colour swap should target when the source photo contains two
+ * pieces (e.g. a jacket + trousers flat-lay). We recolour ONLY the featured product —
+ * the piece whose category the article actually is — and leave the complementary piece
+ * its original colour. 'full' = one-piece (recolour whole outfit); 'unknown' = leave the
+ * current whole-garment recolour behaviour (no reliable category signal).
+ */
+export function deriveFeaturedGarment(
+  majorCategory?: string | null,
+  articleType?: string | null,
+): 'top' | 'bottom' | 'full' | 'unknown' {
+  const hay = [majorCategory, articleType].map((x) => String(x || '').toUpperCase()).join(' ');
+  if (!hay.trim()) return 'unknown';
+  if (BOTTOM_WORDS.some((w) => hay.includes(w))) return 'bottom';
+  if (FULL_WORDS.some((w) => hay.includes(w))) return 'full';
+  if (TOP_WORDS.some((w) => hay.includes(w))) return 'top';
+  return 'unknown';
+}
+
+// ── MAJOR_CAT_MASTER-driven framing/gender ──────────────────────────────────
+// When the article's majorCategory code matches a row in major_cat_master, that
+// row is the source of truth: its `frame` decides the model-image framing and its
+// `div`/`idealFor` decide the model gender. Falls back to the flat-row heuristics
+// (deriveBodyFraming / deriveGender / deriveFeaturedGarment) when there is no match.
+
+/** major_cat_master.frame → bodytype used by the generation prompt. */
+export function frameToBodytype(frame?: string | null): string | null {
+  switch (String(frame || '').toLowerCase().trim()) {
+    case 'upper': return 'Upper-Body';        // waist-up
+    case 'lower': return 'Lower-Body';        // waist-down (half)
+    case 'set':   return 'Full-Body';         // full outfit, head-to-toe
+    case 'fw':    return 'Lower-Body';         // footwear → legs + feet focus
+    default:      return null;
+  }
+}
+
+/** major_cat_master.frame → which piece a colour swap targets. */
+export function frameToFeatured(frame?: string | null): 'top' | 'bottom' | 'full' | 'unknown' | null {
+  switch (String(frame || '').toLowerCase().trim()) {
+    case 'upper': return 'top';
+    case 'lower': return 'bottom';
+    case 'set':   return 'full';
+    case 'fw':    return 'unknown';
+    default:      return null;
+  }
+}
+
+/** Model gender from major_cat_master.div + idealFor (idealFor is more specific). */
+export function genderFromDivIdeal(div?: string | null, idealFor?: string | null): string | null {
+  const i = String(idealFor || '').toUpperCase().trim();
+  const d = String(div || '').toUpperCase().trim();
+  // idealFor is the most specific signal
+  if (i.includes('GIRL')) return 'kid girl';
+  if (i.includes('BOY')) return 'kid boy';
+  if (i === 'MEN' || i === 'MENS') return 'male';
+  if (i === 'WOMEN' || i === 'WOMENS') return 'female';
+  if (i.includes('KID') || i.includes('INFANT')) return 'kid boy'; // kids & infants, unspecified
+  // fall back to division
+  if (d === 'MEN' || d === 'MENS') return 'male';
+  if (d === 'WOMEN' || d === 'WOMENS' || d === 'LADIES') return 'female';
+  if (d.includes('KID') || d.includes('INFANT')) return 'kid boy';
+  return null;
+}
+
+/**
+ * Resolve gender / bodytype / featuredGarment for an article row. Starts from the
+ * flat-row heuristics, then — if the row's majorCategory code exists in
+ * major_cat_master — overrides framing (from `frame`) and gender (from `div`/`idealFor`)
+ * with the master's authoritative values.
+ */
+async function resolveFramingAndGender(row: Record<string, any>): Promise<{
+  gender: string;
+  bodytype: string;
+  featuredGarment: 'top' | 'bottom' | 'full' | 'unknown';
+}> {
+  let gender = deriveGender(row.division, row.subDivision);
+  let bodytype = deriveBodyFraming(row.majorCategory, row.articleType);
+  let featuredGarment = deriveFeaturedGarment(row.majorCategory, row.articleType);
+
+  const code = String(row.majorCategory || '').trim();
+  if (code) {
+    try {
+      const master = await withPrismaRetry(() =>
+        prisma.majorCatMaster.findFirst({
+          where: { majCat: { equals: code, mode: 'insensitive' }, isActive: true },
+          select: { frame: true, div: true, idealFor: true },
+        })
+      );
+      if (master) {
+        bodytype = frameToBodytype(master.frame) ?? bodytype;
+        gender = genderFromDivIdeal(master.div, master.idealFor) ?? gender;
+        featuredGarment = frameToFeatured(master.frame) ?? featuredGarment;
+      }
+    } catch {
+      // Master lookup is best-effort — on any error keep the flat-row heuristics.
+    }
+  }
+
+  return { gender, bodytype, featuredGarment };
+}
 
 /**
  * Decide framing (body type) from the article's category text. Bottomwear must be shot
@@ -163,14 +268,16 @@ export async function resolveArticleForGeneration(code: string): Promise<Resolve
     // Prefer APPROVED, else the latest (rows already sorted newest-first).
     const row = withImage.find((r) => r.approvalStatus === 'APPROVED') || withImage[0];
     const colour = String(row.colour || row.variantColor || '').trim();
+    const { gender, bodytype, featuredGarment } = await resolveFramingAndGender(row);
 
     return {
       articleCode,
       found: true,
       imageUrl: String(row.imageUrl).trim(),
-      gender: deriveGender(row.division, row.subDivision),
-      bodytype: deriveBodyFraming(row.majorCategory, row.articleType),
+      gender,
+      bodytype,
       colorName: colour || undefined,
+      featuredGarment,
       attributesText: buildAttributesText(row),
     };
   }
@@ -205,14 +312,16 @@ export async function resolveArticleForGeneration(code: string): Promise<Resolve
 
   // Prefer APPROVED, else the latest — same rule as the exact-match path.
   const row = siblingRows.find((r) => r.approvalStatus === 'APPROVED') || siblingRows[0];
+  const { gender, bodytype, featuredGarment } = await resolveFramingAndGender(row);
 
   return {
     articleCode,
     found: true,
     imageUrl: String(row.imageUrl).trim(),
-    gender: deriveGender(row.division, row.subDivision),
-    bodytype: deriveBodyFraming(row.majorCategory, row.articleType),
+    gender,
+    bodytype,
     colorName: requestedColor || undefined,
+    featuredGarment,
     attributesText: buildAttributesText(row),
     isColorFallback: true,
   };

@@ -66,8 +66,13 @@ export type ExtractionResultFlat = $Result.DefaultSelection<Prisma.$ExtractionRe
 export type ModelGenerationResult = $Result.DefaultSelection<Prisma.$ModelGenerationResultPayload>
 /**
  * Model ModelImageApproval
- * Model Image Approval: article-level record of promotion to the E-commerce/ folder.
+ * Model Image Review: article-level review state for generated model images.
  * One row per article number (the color-specific code, e.g. "1110106859-DARK GREY").
+ * An article with NO row here has never been reviewed ("unapproved" in the UI).
+ * status: APPROVED (copies live in E-commerce/), REJECTED, or REVERTED (approval undone).
+ * approvedBy/approvedAt keep the LAST APPROVAL specifically, so a reverted article can
+ * still show who had approved it; reviewedBy/reviewedAt track the most recent action of
+ * any kind.
  */
 export type ModelImageApproval = $Result.DefaultSelection<Prisma.$ModelImageApprovalPayload>
 /**
@@ -183,6 +188,14 @@ export type PoolBBatch = $Result.DefaultSelection<Prisma.$PoolBBatchPayload>
  * NationalGridMaster: Valid attribute code/value pairs imported from the National Grid Excel
  */
 export type NationalGridMaster = $Result.DefaultSelection<Prisma.$NationalGridMasterPayload>
+/**
+ * Model MajorCatMaster
+ * MajorCatMaster: MAJ CAT → name, division, ideal-for, and the model-image FRAME
+ * (fw | upper | lower | set) used to decide how the AI model photoshoot is framed.
+ * Seeded from "CATEGORY SHEET MJ WISE FINAL"; new entries added from the Model
+ * Generation page. Looked up by majCat when generating from article number + colour.
+ */
+export type MajorCatMaster = $Result.DefaultSelection<Prisma.$MajorCatMasterPayload>
 /**
  * Model ModifyLog
  * ModifyLog: One row per changed label per successful article modification
@@ -800,6 +813,16 @@ export class PrismaClient<
   get nationalGridMaster(): Prisma.NationalGridMasterDelegate<ExtArgs, ClientOptions>;
 
   /**
+   * `prisma.majorCatMaster`: Exposes CRUD operations for the **MajorCatMaster** model.
+    * Example usage:
+    * ```ts
+    * // Fetch zero or more MajorCatMasters
+    * const majorCatMasters = await prisma.majorCatMaster.findMany()
+    * ```
+    */
+  get majorCatMaster(): Prisma.MajorCatMasterDelegate<ExtArgs, ClientOptions>;
+
+  /**
    * `prisma.modifyLog`: Exposes CRUD operations for the **ModifyLog** model.
     * Example usage:
     * ```ts
@@ -1281,6 +1304,7 @@ export namespace Prisma {
     PoolBJob: 'PoolBJob',
     PoolBBatch: 'PoolBBatch',
     NationalGridMaster: 'NationalGridMaster',
+    MajorCatMaster: 'MajorCatMaster',
     ModifyLog: 'ModifyLog'
   };
 
@@ -1300,7 +1324,7 @@ export namespace Prisma {
       omit: GlobalOmitOptions
     }
     meta: {
-      modelProps: "department" | "subDepartment" | "category" | "masterAttribute" | "attributeAllowedValue" | "categoryAttribute" | "extractionJob" | "extractionResult" | "extractionResultFlat" | "modelGenerationResult" | "modelImageApproval" | "mvgrLookup" | "masterVendorDetail" | "user" | "auditLog" | "apiKey" | "changeHistory" | "costSummary" | "article360" | "articleFab" | "articleBody" | "articleVaAcc" | "articleVaPrcs" | "articleBom" | "sapFieldConfig" | "sapAttributeValue" | "article360Flat" | "rawArticle" | "srmSyncRun" | "srmSyncRunItem" | "poolBJob" | "poolBBatch" | "nationalGridMaster" | "modifyLog"
+      modelProps: "department" | "subDepartment" | "category" | "masterAttribute" | "attributeAllowedValue" | "categoryAttribute" | "extractionJob" | "extractionResult" | "extractionResultFlat" | "modelGenerationResult" | "modelImageApproval" | "mvgrLookup" | "masterVendorDetail" | "user" | "auditLog" | "apiKey" | "changeHistory" | "costSummary" | "article360" | "articleFab" | "articleBody" | "articleVaAcc" | "articleVaPrcs" | "articleBom" | "sapFieldConfig" | "sapAttributeValue" | "article360Flat" | "rawArticle" | "srmSyncRun" | "srmSyncRunItem" | "poolBJob" | "poolBBatch" | "nationalGridMaster" | "majorCatMaster" | "modifyLog"
       txIsolationLevel: Prisma.TransactionIsolationLevel
     }
     model: {
@@ -3746,6 +3770,80 @@ export namespace Prisma {
           }
         }
       }
+      MajorCatMaster: {
+        payload: Prisma.$MajorCatMasterPayload<ExtArgs>
+        fields: Prisma.MajorCatMasterFieldRefs
+        operations: {
+          findUnique: {
+            args: Prisma.MajorCatMasterFindUniqueArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$MajorCatMasterPayload> | null
+          }
+          findUniqueOrThrow: {
+            args: Prisma.MajorCatMasterFindUniqueOrThrowArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$MajorCatMasterPayload>
+          }
+          findFirst: {
+            args: Prisma.MajorCatMasterFindFirstArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$MajorCatMasterPayload> | null
+          }
+          findFirstOrThrow: {
+            args: Prisma.MajorCatMasterFindFirstOrThrowArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$MajorCatMasterPayload>
+          }
+          findMany: {
+            args: Prisma.MajorCatMasterFindManyArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$MajorCatMasterPayload>[]
+          }
+          create: {
+            args: Prisma.MajorCatMasterCreateArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$MajorCatMasterPayload>
+          }
+          createMany: {
+            args: Prisma.MajorCatMasterCreateManyArgs<ExtArgs>
+            result: BatchPayload
+          }
+          createManyAndReturn: {
+            args: Prisma.MajorCatMasterCreateManyAndReturnArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$MajorCatMasterPayload>[]
+          }
+          delete: {
+            args: Prisma.MajorCatMasterDeleteArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$MajorCatMasterPayload>
+          }
+          update: {
+            args: Prisma.MajorCatMasterUpdateArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$MajorCatMasterPayload>
+          }
+          deleteMany: {
+            args: Prisma.MajorCatMasterDeleteManyArgs<ExtArgs>
+            result: BatchPayload
+          }
+          updateMany: {
+            args: Prisma.MajorCatMasterUpdateManyArgs<ExtArgs>
+            result: BatchPayload
+          }
+          updateManyAndReturn: {
+            args: Prisma.MajorCatMasterUpdateManyAndReturnArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$MajorCatMasterPayload>[]
+          }
+          upsert: {
+            args: Prisma.MajorCatMasterUpsertArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$MajorCatMasterPayload>
+          }
+          aggregate: {
+            args: Prisma.MajorCatMasterAggregateArgs<ExtArgs>
+            result: $Utils.Optional<AggregateMajorCatMaster>
+          }
+          groupBy: {
+            args: Prisma.MajorCatMasterGroupByArgs<ExtArgs>
+            result: $Utils.Optional<MajorCatMasterGroupByOutputType>[]
+          }
+          count: {
+            args: Prisma.MajorCatMasterCountArgs<ExtArgs>
+            result: $Utils.Optional<MajorCatMasterCountAggregateOutputType> | number
+          }
+        }
+      }
       ModifyLog: {
         payload: Prisma.$ModifyLogPayload<ExtArgs>
         fields: Prisma.ModifyLogFieldRefs
@@ -3945,6 +4043,7 @@ export namespace Prisma {
     poolBJob?: PoolBJobOmit
     poolBBatch?: PoolBBatchOmit
     nationalGridMaster?: NationalGridMasterOmit
+    majorCatMaster?: MajorCatMasterOmit
     modifyLog?: ModifyLogOmit
   }
 
@@ -18433,17 +18532,22 @@ export namespace Prisma {
 
   export type ModelImageApprovalAvgAggregateOutputType = {
     approvedBy: number | null
+    reviewedBy: number | null
   }
 
   export type ModelImageApprovalSumAggregateOutputType = {
     approvedBy: number | null
+    reviewedBy: number | null
   }
 
   export type ModelImageApprovalMinAggregateOutputType = {
     id: string | null
     articleNumber: string | null
+    status: string | null
     approvedBy: number | null
     approvedAt: Date | null
+    reviewedBy: number | null
+    reviewedAt: Date | null
     createdAt: Date | null
     updatedAt: Date | null
   }
@@ -18451,8 +18555,11 @@ export namespace Prisma {
   export type ModelImageApprovalMaxAggregateOutputType = {
     id: string | null
     articleNumber: string | null
+    status: string | null
     approvedBy: number | null
     approvedAt: Date | null
+    reviewedBy: number | null
+    reviewedAt: Date | null
     createdAt: Date | null
     updatedAt: Date | null
   }
@@ -18460,8 +18567,11 @@ export namespace Prisma {
   export type ModelImageApprovalCountAggregateOutputType = {
     id: number
     articleNumber: number
+    status: number
     approvedBy: number
     approvedAt: number
+    reviewedBy: number
+    reviewedAt: number
     ecommerceUrls: number
     createdAt: number
     updatedAt: number
@@ -18471,17 +18581,22 @@ export namespace Prisma {
 
   export type ModelImageApprovalAvgAggregateInputType = {
     approvedBy?: true
+    reviewedBy?: true
   }
 
   export type ModelImageApprovalSumAggregateInputType = {
     approvedBy?: true
+    reviewedBy?: true
   }
 
   export type ModelImageApprovalMinAggregateInputType = {
     id?: true
     articleNumber?: true
+    status?: true
     approvedBy?: true
     approvedAt?: true
+    reviewedBy?: true
+    reviewedAt?: true
     createdAt?: true
     updatedAt?: true
   }
@@ -18489,8 +18604,11 @@ export namespace Prisma {
   export type ModelImageApprovalMaxAggregateInputType = {
     id?: true
     articleNumber?: true
+    status?: true
     approvedBy?: true
     approvedAt?: true
+    reviewedBy?: true
+    reviewedAt?: true
     createdAt?: true
     updatedAt?: true
   }
@@ -18498,8 +18616,11 @@ export namespace Prisma {
   export type ModelImageApprovalCountAggregateInputType = {
     id?: true
     articleNumber?: true
+    status?: true
     approvedBy?: true
     approvedAt?: true
+    reviewedBy?: true
+    reviewedAt?: true
     ecommerceUrls?: true
     createdAt?: true
     updatedAt?: true
@@ -18595,8 +18716,11 @@ export namespace Prisma {
   export type ModelImageApprovalGroupByOutputType = {
     id: string
     articleNumber: string
+    status: string
     approvedBy: number | null
     approvedAt: Date
+    reviewedBy: number | null
+    reviewedAt: Date
     ecommerceUrls: JsonValue | null
     createdAt: Date
     updatedAt: Date
@@ -18624,8 +18748,11 @@ export namespace Prisma {
   export type ModelImageApprovalSelect<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
     id?: boolean
     articleNumber?: boolean
+    status?: boolean
     approvedBy?: boolean
     approvedAt?: boolean
+    reviewedBy?: boolean
+    reviewedAt?: boolean
     ecommerceUrls?: boolean
     createdAt?: boolean
     updatedAt?: boolean
@@ -18634,8 +18761,11 @@ export namespace Prisma {
   export type ModelImageApprovalSelectCreateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
     id?: boolean
     articleNumber?: boolean
+    status?: boolean
     approvedBy?: boolean
     approvedAt?: boolean
+    reviewedBy?: boolean
+    reviewedAt?: boolean
     ecommerceUrls?: boolean
     createdAt?: boolean
     updatedAt?: boolean
@@ -18644,8 +18774,11 @@ export namespace Prisma {
   export type ModelImageApprovalSelectUpdateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
     id?: boolean
     articleNumber?: boolean
+    status?: boolean
     approvedBy?: boolean
     approvedAt?: boolean
+    reviewedBy?: boolean
+    reviewedAt?: boolean
     ecommerceUrls?: boolean
     createdAt?: boolean
     updatedAt?: boolean
@@ -18654,14 +18787,17 @@ export namespace Prisma {
   export type ModelImageApprovalSelectScalar = {
     id?: boolean
     articleNumber?: boolean
+    status?: boolean
     approvedBy?: boolean
     approvedAt?: boolean
+    reviewedBy?: boolean
+    reviewedAt?: boolean
     ecommerceUrls?: boolean
     createdAt?: boolean
     updatedAt?: boolean
   }
 
-  export type ModelImageApprovalOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<"id" | "articleNumber" | "approvedBy" | "approvedAt" | "ecommerceUrls" | "createdAt" | "updatedAt", ExtArgs["result"]["modelImageApproval"]>
+  export type ModelImageApprovalOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<"id" | "articleNumber" | "status" | "approvedBy" | "approvedAt" | "reviewedBy" | "reviewedAt" | "ecommerceUrls" | "createdAt" | "updatedAt", ExtArgs["result"]["modelImageApproval"]>
 
   export type $ModelImageApprovalPayload<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
     name: "ModelImageApproval"
@@ -18669,8 +18805,11 @@ export namespace Prisma {
     scalars: $Extensions.GetPayloadResult<{
       id: string
       articleNumber: string
+      status: string
       approvedBy: number | null
       approvedAt: Date
+      reviewedBy: number | null
+      reviewedAt: Date
       ecommerceUrls: Prisma.JsonValue | null
       createdAt: Date
       updatedAt: Date
@@ -19099,8 +19238,11 @@ export namespace Prisma {
   interface ModelImageApprovalFieldRefs {
     readonly id: FieldRef<"ModelImageApproval", 'String'>
     readonly articleNumber: FieldRef<"ModelImageApproval", 'String'>
+    readonly status: FieldRef<"ModelImageApproval", 'String'>
     readonly approvedBy: FieldRef<"ModelImageApproval", 'Int'>
     readonly approvedAt: FieldRef<"ModelImageApproval", 'DateTime'>
+    readonly reviewedBy: FieldRef<"ModelImageApproval", 'Int'>
+    readonly reviewedAt: FieldRef<"ModelImageApproval", 'DateTime'>
     readonly ecommerceUrls: FieldRef<"ModelImageApproval", 'Json'>
     readonly createdAt: FieldRef<"ModelImageApproval", 'DateTime'>
     readonly updatedAt: FieldRef<"ModelImageApproval", 'DateTime'>
@@ -46102,6 +46244,1087 @@ export namespace Prisma {
 
 
   /**
+   * Model MajorCatMaster
+   */
+
+  export type AggregateMajorCatMaster = {
+    _count: MajorCatMasterCountAggregateOutputType | null
+    _avg: MajorCatMasterAvgAggregateOutputType | null
+    _sum: MajorCatMasterSumAggregateOutputType | null
+    _min: MajorCatMasterMinAggregateOutputType | null
+    _max: MajorCatMasterMaxAggregateOutputType | null
+  }
+
+  export type MajorCatMasterAvgAggregateOutputType = {
+    id: number | null
+  }
+
+  export type MajorCatMasterSumAggregateOutputType = {
+    id: number | null
+  }
+
+  export type MajorCatMasterMinAggregateOutputType = {
+    id: number | null
+    majCat: string | null
+    name: string | null
+    div: string | null
+    idealFor: string | null
+    frame: string | null
+    isActive: boolean | null
+    createdAt: Date | null
+    updatedAt: Date | null
+  }
+
+  export type MajorCatMasterMaxAggregateOutputType = {
+    id: number | null
+    majCat: string | null
+    name: string | null
+    div: string | null
+    idealFor: string | null
+    frame: string | null
+    isActive: boolean | null
+    createdAt: Date | null
+    updatedAt: Date | null
+  }
+
+  export type MajorCatMasterCountAggregateOutputType = {
+    id: number
+    majCat: number
+    name: number
+    div: number
+    idealFor: number
+    frame: number
+    isActive: number
+    createdAt: number
+    updatedAt: number
+    _all: number
+  }
+
+
+  export type MajorCatMasterAvgAggregateInputType = {
+    id?: true
+  }
+
+  export type MajorCatMasterSumAggregateInputType = {
+    id?: true
+  }
+
+  export type MajorCatMasterMinAggregateInputType = {
+    id?: true
+    majCat?: true
+    name?: true
+    div?: true
+    idealFor?: true
+    frame?: true
+    isActive?: true
+    createdAt?: true
+    updatedAt?: true
+  }
+
+  export type MajorCatMasterMaxAggregateInputType = {
+    id?: true
+    majCat?: true
+    name?: true
+    div?: true
+    idealFor?: true
+    frame?: true
+    isActive?: true
+    createdAt?: true
+    updatedAt?: true
+  }
+
+  export type MajorCatMasterCountAggregateInputType = {
+    id?: true
+    majCat?: true
+    name?: true
+    div?: true
+    idealFor?: true
+    frame?: true
+    isActive?: true
+    createdAt?: true
+    updatedAt?: true
+    _all?: true
+  }
+
+  export type MajorCatMasterAggregateArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Filter which MajorCatMaster to aggregate.
+     */
+    where?: MajorCatMasterWhereInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
+     * 
+     * Determine the order of MajorCatMasters to fetch.
+     */
+    orderBy?: MajorCatMasterOrderByWithRelationInput | MajorCatMasterOrderByWithRelationInput[]
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
+     * 
+     * Sets the start position
+     */
+    cursor?: MajorCatMasterWhereUniqueInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Take `±n` MajorCatMasters from the position of the cursor.
+     */
+    take?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Skip the first `n` MajorCatMasters.
+     */
+    skip?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     * 
+     * Count returned MajorCatMasters
+    **/
+    _count?: true | MajorCatMasterCountAggregateInputType
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     * 
+     * Select which fields to average
+    **/
+    _avg?: MajorCatMasterAvgAggregateInputType
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     * 
+     * Select which fields to sum
+    **/
+    _sum?: MajorCatMasterSumAggregateInputType
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     * 
+     * Select which fields to find the minimum value
+    **/
+    _min?: MajorCatMasterMinAggregateInputType
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     * 
+     * Select which fields to find the maximum value
+    **/
+    _max?: MajorCatMasterMaxAggregateInputType
+  }
+
+  export type GetMajorCatMasterAggregateType<T extends MajorCatMasterAggregateArgs> = {
+        [P in keyof T & keyof AggregateMajorCatMaster]: P extends '_count' | 'count'
+      ? T[P] extends true
+        ? number
+        : GetScalarType<T[P], AggregateMajorCatMaster[P]>
+      : GetScalarType<T[P], AggregateMajorCatMaster[P]>
+  }
+
+
+
+
+  export type MajorCatMasterGroupByArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    where?: MajorCatMasterWhereInput
+    orderBy?: MajorCatMasterOrderByWithAggregationInput | MajorCatMasterOrderByWithAggregationInput[]
+    by: MajorCatMasterScalarFieldEnum[] | MajorCatMasterScalarFieldEnum
+    having?: MajorCatMasterScalarWhereWithAggregatesInput
+    take?: number
+    skip?: number
+    _count?: MajorCatMasterCountAggregateInputType | true
+    _avg?: MajorCatMasterAvgAggregateInputType
+    _sum?: MajorCatMasterSumAggregateInputType
+    _min?: MajorCatMasterMinAggregateInputType
+    _max?: MajorCatMasterMaxAggregateInputType
+  }
+
+  export type MajorCatMasterGroupByOutputType = {
+    id: number
+    majCat: string
+    name: string | null
+    div: string | null
+    idealFor: string | null
+    frame: string
+    isActive: boolean
+    createdAt: Date
+    updatedAt: Date
+    _count: MajorCatMasterCountAggregateOutputType | null
+    _avg: MajorCatMasterAvgAggregateOutputType | null
+    _sum: MajorCatMasterSumAggregateOutputType | null
+    _min: MajorCatMasterMinAggregateOutputType | null
+    _max: MajorCatMasterMaxAggregateOutputType | null
+  }
+
+  type GetMajorCatMasterGroupByPayload<T extends MajorCatMasterGroupByArgs> = Prisma.PrismaPromise<
+    Array<
+      PickEnumerable<MajorCatMasterGroupByOutputType, T['by']> &
+        {
+          [P in ((keyof T) & (keyof MajorCatMasterGroupByOutputType))]: P extends '_count'
+            ? T[P] extends boolean
+              ? number
+              : GetScalarType<T[P], MajorCatMasterGroupByOutputType[P]>
+            : GetScalarType<T[P], MajorCatMasterGroupByOutputType[P]>
+        }
+      >
+    >
+
+
+  export type MajorCatMasterSelect<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
+    id?: boolean
+    majCat?: boolean
+    name?: boolean
+    div?: boolean
+    idealFor?: boolean
+    frame?: boolean
+    isActive?: boolean
+    createdAt?: boolean
+    updatedAt?: boolean
+  }, ExtArgs["result"]["majorCatMaster"]>
+
+  export type MajorCatMasterSelectCreateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
+    id?: boolean
+    majCat?: boolean
+    name?: boolean
+    div?: boolean
+    idealFor?: boolean
+    frame?: boolean
+    isActive?: boolean
+    createdAt?: boolean
+    updatedAt?: boolean
+  }, ExtArgs["result"]["majorCatMaster"]>
+
+  export type MajorCatMasterSelectUpdateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
+    id?: boolean
+    majCat?: boolean
+    name?: boolean
+    div?: boolean
+    idealFor?: boolean
+    frame?: boolean
+    isActive?: boolean
+    createdAt?: boolean
+    updatedAt?: boolean
+  }, ExtArgs["result"]["majorCatMaster"]>
+
+  export type MajorCatMasterSelectScalar = {
+    id?: boolean
+    majCat?: boolean
+    name?: boolean
+    div?: boolean
+    idealFor?: boolean
+    frame?: boolean
+    isActive?: boolean
+    createdAt?: boolean
+    updatedAt?: boolean
+  }
+
+  export type MajorCatMasterOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<"id" | "majCat" | "name" | "div" | "idealFor" | "frame" | "isActive" | "createdAt" | "updatedAt", ExtArgs["result"]["majorCatMaster"]>
+
+  export type $MajorCatMasterPayload<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    name: "MajorCatMaster"
+    objects: {}
+    scalars: $Extensions.GetPayloadResult<{
+      id: number
+      majCat: string
+      name: string | null
+      div: string | null
+      idealFor: string | null
+      frame: string
+      isActive: boolean
+      createdAt: Date
+      updatedAt: Date
+    }, ExtArgs["result"]["majorCatMaster"]>
+    composites: {}
+  }
+
+  type MajorCatMasterGetPayload<S extends boolean | null | undefined | MajorCatMasterDefaultArgs> = $Result.GetResult<Prisma.$MajorCatMasterPayload, S>
+
+  type MajorCatMasterCountArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> =
+    Omit<MajorCatMasterFindManyArgs, 'select' | 'include' | 'distinct' | 'omit'> & {
+      select?: MajorCatMasterCountAggregateInputType | true
+    }
+
+  export interface MajorCatMasterDelegate<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs, GlobalOmitOptions = {}> {
+    [K: symbol]: { types: Prisma.TypeMap<ExtArgs>['model']['MajorCatMaster'], meta: { name: 'MajorCatMaster' } }
+    /**
+     * Find zero or one MajorCatMaster that matches the filter.
+     * @param {MajorCatMasterFindUniqueArgs} args - Arguments to find a MajorCatMaster
+     * @example
+     * // Get one MajorCatMaster
+     * const majorCatMaster = await prisma.majorCatMaster.findUnique({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     */
+    findUnique<T extends MajorCatMasterFindUniqueArgs>(args: SelectSubset<T, MajorCatMasterFindUniqueArgs<ExtArgs>>): Prisma__MajorCatMasterClient<$Result.GetResult<Prisma.$MajorCatMasterPayload<ExtArgs>, T, "findUnique", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Find one MajorCatMaster that matches the filter or throw an error with `error.code='P2025'`
+     * if no matches were found.
+     * @param {MajorCatMasterFindUniqueOrThrowArgs} args - Arguments to find a MajorCatMaster
+     * @example
+     * // Get one MajorCatMaster
+     * const majorCatMaster = await prisma.majorCatMaster.findUniqueOrThrow({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     */
+    findUniqueOrThrow<T extends MajorCatMasterFindUniqueOrThrowArgs>(args: SelectSubset<T, MajorCatMasterFindUniqueOrThrowArgs<ExtArgs>>): Prisma__MajorCatMasterClient<$Result.GetResult<Prisma.$MajorCatMasterPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Find the first MajorCatMaster that matches the filter.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {MajorCatMasterFindFirstArgs} args - Arguments to find a MajorCatMaster
+     * @example
+     * // Get one MajorCatMaster
+     * const majorCatMaster = await prisma.majorCatMaster.findFirst({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     */
+    findFirst<T extends MajorCatMasterFindFirstArgs>(args?: SelectSubset<T, MajorCatMasterFindFirstArgs<ExtArgs>>): Prisma__MajorCatMasterClient<$Result.GetResult<Prisma.$MajorCatMasterPayload<ExtArgs>, T, "findFirst", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Find the first MajorCatMaster that matches the filter or
+     * throw `PrismaKnownClientError` with `P2025` code if no matches were found.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {MajorCatMasterFindFirstOrThrowArgs} args - Arguments to find a MajorCatMaster
+     * @example
+     * // Get one MajorCatMaster
+     * const majorCatMaster = await prisma.majorCatMaster.findFirstOrThrow({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     */
+    findFirstOrThrow<T extends MajorCatMasterFindFirstOrThrowArgs>(args?: SelectSubset<T, MajorCatMasterFindFirstOrThrowArgs<ExtArgs>>): Prisma__MajorCatMasterClient<$Result.GetResult<Prisma.$MajorCatMasterPayload<ExtArgs>, T, "findFirstOrThrow", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Find zero or more MajorCatMasters that matches the filter.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {MajorCatMasterFindManyArgs} args - Arguments to filter and select certain fields only.
+     * @example
+     * // Get all MajorCatMasters
+     * const majorCatMasters = await prisma.majorCatMaster.findMany()
+     * 
+     * // Get first 10 MajorCatMasters
+     * const majorCatMasters = await prisma.majorCatMaster.findMany({ take: 10 })
+     * 
+     * // Only select the `id`
+     * const majorCatMasterWithIdOnly = await prisma.majorCatMaster.findMany({ select: { id: true } })
+     * 
+     */
+    findMany<T extends MajorCatMasterFindManyArgs>(args?: SelectSubset<T, MajorCatMasterFindManyArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$MajorCatMasterPayload<ExtArgs>, T, "findMany", GlobalOmitOptions>>
+
+    /**
+     * Create a MajorCatMaster.
+     * @param {MajorCatMasterCreateArgs} args - Arguments to create a MajorCatMaster.
+     * @example
+     * // Create one MajorCatMaster
+     * const MajorCatMaster = await prisma.majorCatMaster.create({
+     *   data: {
+     *     // ... data to create a MajorCatMaster
+     *   }
+     * })
+     * 
+     */
+    create<T extends MajorCatMasterCreateArgs>(args: SelectSubset<T, MajorCatMasterCreateArgs<ExtArgs>>): Prisma__MajorCatMasterClient<$Result.GetResult<Prisma.$MajorCatMasterPayload<ExtArgs>, T, "create", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Create many MajorCatMasters.
+     * @param {MajorCatMasterCreateManyArgs} args - Arguments to create many MajorCatMasters.
+     * @example
+     * // Create many MajorCatMasters
+     * const majorCatMaster = await prisma.majorCatMaster.createMany({
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     *     
+     */
+    createMany<T extends MajorCatMasterCreateManyArgs>(args?: SelectSubset<T, MajorCatMasterCreateManyArgs<ExtArgs>>): Prisma.PrismaPromise<BatchPayload>
+
+    /**
+     * Create many MajorCatMasters and returns the data saved in the database.
+     * @param {MajorCatMasterCreateManyAndReturnArgs} args - Arguments to create many MajorCatMasters.
+     * @example
+     * // Create many MajorCatMasters
+     * const majorCatMaster = await prisma.majorCatMaster.createManyAndReturn({
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     * 
+     * // Create many MajorCatMasters and only return the `id`
+     * const majorCatMasterWithIdOnly = await prisma.majorCatMaster.createManyAndReturn({
+     *   select: { id: true },
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * 
+     */
+    createManyAndReturn<T extends MajorCatMasterCreateManyAndReturnArgs>(args?: SelectSubset<T, MajorCatMasterCreateManyAndReturnArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$MajorCatMasterPayload<ExtArgs>, T, "createManyAndReturn", GlobalOmitOptions>>
+
+    /**
+     * Delete a MajorCatMaster.
+     * @param {MajorCatMasterDeleteArgs} args - Arguments to delete one MajorCatMaster.
+     * @example
+     * // Delete one MajorCatMaster
+     * const MajorCatMaster = await prisma.majorCatMaster.delete({
+     *   where: {
+     *     // ... filter to delete one MajorCatMaster
+     *   }
+     * })
+     * 
+     */
+    delete<T extends MajorCatMasterDeleteArgs>(args: SelectSubset<T, MajorCatMasterDeleteArgs<ExtArgs>>): Prisma__MajorCatMasterClient<$Result.GetResult<Prisma.$MajorCatMasterPayload<ExtArgs>, T, "delete", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Update one MajorCatMaster.
+     * @param {MajorCatMasterUpdateArgs} args - Arguments to update one MajorCatMaster.
+     * @example
+     * // Update one MajorCatMaster
+     * const majorCatMaster = await prisma.majorCatMaster.update({
+     *   where: {
+     *     // ... provide filter here
+     *   },
+     *   data: {
+     *     // ... provide data here
+     *   }
+     * })
+     * 
+     */
+    update<T extends MajorCatMasterUpdateArgs>(args: SelectSubset<T, MajorCatMasterUpdateArgs<ExtArgs>>): Prisma__MajorCatMasterClient<$Result.GetResult<Prisma.$MajorCatMasterPayload<ExtArgs>, T, "update", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Delete zero or more MajorCatMasters.
+     * @param {MajorCatMasterDeleteManyArgs} args - Arguments to filter MajorCatMasters to delete.
+     * @example
+     * // Delete a few MajorCatMasters
+     * const { count } = await prisma.majorCatMaster.deleteMany({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     * 
+     */
+    deleteMany<T extends MajorCatMasterDeleteManyArgs>(args?: SelectSubset<T, MajorCatMasterDeleteManyArgs<ExtArgs>>): Prisma.PrismaPromise<BatchPayload>
+
+    /**
+     * Update zero or more MajorCatMasters.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {MajorCatMasterUpdateManyArgs} args - Arguments to update one or more rows.
+     * @example
+     * // Update many MajorCatMasters
+     * const majorCatMaster = await prisma.majorCatMaster.updateMany({
+     *   where: {
+     *     // ... provide filter here
+     *   },
+     *   data: {
+     *     // ... provide data here
+     *   }
+     * })
+     * 
+     */
+    updateMany<T extends MajorCatMasterUpdateManyArgs>(args: SelectSubset<T, MajorCatMasterUpdateManyArgs<ExtArgs>>): Prisma.PrismaPromise<BatchPayload>
+
+    /**
+     * Update zero or more MajorCatMasters and returns the data updated in the database.
+     * @param {MajorCatMasterUpdateManyAndReturnArgs} args - Arguments to update many MajorCatMasters.
+     * @example
+     * // Update many MajorCatMasters
+     * const majorCatMaster = await prisma.majorCatMaster.updateManyAndReturn({
+     *   where: {
+     *     // ... provide filter here
+     *   },
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     * 
+     * // Update zero or more MajorCatMasters and only return the `id`
+     * const majorCatMasterWithIdOnly = await prisma.majorCatMaster.updateManyAndReturn({
+     *   select: { id: true },
+     *   where: {
+     *     // ... provide filter here
+     *   },
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * 
+     */
+    updateManyAndReturn<T extends MajorCatMasterUpdateManyAndReturnArgs>(args: SelectSubset<T, MajorCatMasterUpdateManyAndReturnArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$MajorCatMasterPayload<ExtArgs>, T, "updateManyAndReturn", GlobalOmitOptions>>
+
+    /**
+     * Create or update one MajorCatMaster.
+     * @param {MajorCatMasterUpsertArgs} args - Arguments to update or create a MajorCatMaster.
+     * @example
+     * // Update or create a MajorCatMaster
+     * const majorCatMaster = await prisma.majorCatMaster.upsert({
+     *   create: {
+     *     // ... data to create a MajorCatMaster
+     *   },
+     *   update: {
+     *     // ... in case it already exists, update
+     *   },
+     *   where: {
+     *     // ... the filter for the MajorCatMaster we want to update
+     *   }
+     * })
+     */
+    upsert<T extends MajorCatMasterUpsertArgs>(args: SelectSubset<T, MajorCatMasterUpsertArgs<ExtArgs>>): Prisma__MajorCatMasterClient<$Result.GetResult<Prisma.$MajorCatMasterPayload<ExtArgs>, T, "upsert", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+
+    /**
+     * Count the number of MajorCatMasters.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {MajorCatMasterCountArgs} args - Arguments to filter MajorCatMasters to count.
+     * @example
+     * // Count the number of MajorCatMasters
+     * const count = await prisma.majorCatMaster.count({
+     *   where: {
+     *     // ... the filter for the MajorCatMasters we want to count
+     *   }
+     * })
+    **/
+    count<T extends MajorCatMasterCountArgs>(
+      args?: Subset<T, MajorCatMasterCountArgs>,
+    ): Prisma.PrismaPromise<
+      T extends $Utils.Record<'select', any>
+        ? T['select'] extends true
+          ? number
+          : GetScalarType<T['select'], MajorCatMasterCountAggregateOutputType>
+        : number
+    >
+
+    /**
+     * Allows you to perform aggregations operations on a MajorCatMaster.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {MajorCatMasterAggregateArgs} args - Select which aggregations you would like to apply and on what fields.
+     * @example
+     * // Ordered by age ascending
+     * // Where email contains prisma.io
+     * // Limited to the 10 users
+     * const aggregations = await prisma.user.aggregate({
+     *   _avg: {
+     *     age: true,
+     *   },
+     *   where: {
+     *     email: {
+     *       contains: "prisma.io",
+     *     },
+     *   },
+     *   orderBy: {
+     *     age: "asc",
+     *   },
+     *   take: 10,
+     * })
+    **/
+    aggregate<T extends MajorCatMasterAggregateArgs>(args: Subset<T, MajorCatMasterAggregateArgs>): Prisma.PrismaPromise<GetMajorCatMasterAggregateType<T>>
+
+    /**
+     * Group by MajorCatMaster.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {MajorCatMasterGroupByArgs} args - Group by arguments.
+     * @example
+     * // Group by city, order by createdAt, get count
+     * const result = await prisma.user.groupBy({
+     *   by: ['city', 'createdAt'],
+     *   orderBy: {
+     *     createdAt: true
+     *   },
+     *   _count: {
+     *     _all: true
+     *   },
+     * })
+     * 
+    **/
+    groupBy<
+      T extends MajorCatMasterGroupByArgs,
+      HasSelectOrTake extends Or<
+        Extends<'skip', Keys<T>>,
+        Extends<'take', Keys<T>>
+      >,
+      OrderByArg extends True extends HasSelectOrTake
+        ? { orderBy: MajorCatMasterGroupByArgs['orderBy'] }
+        : { orderBy?: MajorCatMasterGroupByArgs['orderBy'] },
+      OrderFields extends ExcludeUnderscoreKeys<Keys<MaybeTupleToUnion<T['orderBy']>>>,
+      ByFields extends MaybeTupleToUnion<T['by']>,
+      ByValid extends Has<ByFields, OrderFields>,
+      HavingFields extends GetHavingFields<T['having']>,
+      HavingValid extends Has<ByFields, HavingFields>,
+      ByEmpty extends T['by'] extends never[] ? True : False,
+      InputErrors extends ByEmpty extends True
+      ? `Error: "by" must not be empty.`
+      : HavingValid extends False
+      ? {
+          [P in HavingFields]: P extends ByFields
+            ? never
+            : P extends string
+            ? `Error: Field "${P}" used in "having" needs to be provided in "by".`
+            : [
+                Error,
+                'Field ',
+                P,
+                ` in "having" needs to be provided in "by"`,
+              ]
+        }[HavingFields]
+      : 'take' extends Keys<T>
+      ? 'orderBy' extends Keys<T>
+        ? ByValid extends True
+          ? {}
+          : {
+              [P in OrderFields]: P extends ByFields
+                ? never
+                : `Error: Field "${P}" in "orderBy" needs to be provided in "by"`
+            }[OrderFields]
+        : 'Error: If you provide "take", you also need to provide "orderBy"'
+      : 'skip' extends Keys<T>
+      ? 'orderBy' extends Keys<T>
+        ? ByValid extends True
+          ? {}
+          : {
+              [P in OrderFields]: P extends ByFields
+                ? never
+                : `Error: Field "${P}" in "orderBy" needs to be provided in "by"`
+            }[OrderFields]
+        : 'Error: If you provide "skip", you also need to provide "orderBy"'
+      : ByValid extends True
+      ? {}
+      : {
+          [P in OrderFields]: P extends ByFields
+            ? never
+            : `Error: Field "${P}" in "orderBy" needs to be provided in "by"`
+        }[OrderFields]
+    >(args: SubsetIntersection<T, MajorCatMasterGroupByArgs, OrderByArg> & InputErrors): {} extends InputErrors ? GetMajorCatMasterGroupByPayload<T> : Prisma.PrismaPromise<InputErrors>
+  /**
+   * Fields of the MajorCatMaster model
+   */
+  readonly fields: MajorCatMasterFieldRefs;
+  }
+
+  /**
+   * The delegate class that acts as a "Promise-like" for MajorCatMaster.
+   * Why is this prefixed with `Prisma__`?
+   * Because we want to prevent naming conflicts as mentioned in
+   * https://github.com/prisma/prisma-client-js/issues/707
+   */
+  export interface Prisma__MajorCatMasterClient<T, Null = never, ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs, GlobalOmitOptions = {}> extends Prisma.PrismaPromise<T> {
+    readonly [Symbol.toStringTag]: "PrismaPromise"
+    /**
+     * Attaches callbacks for the resolution and/or rejection of the Promise.
+     * @param onfulfilled The callback to execute when the Promise is resolved.
+     * @param onrejected The callback to execute when the Promise is rejected.
+     * @returns A Promise for the completion of which ever callback is executed.
+     */
+    then<TResult1 = T, TResult2 = never>(onfulfilled?: ((value: T) => TResult1 | PromiseLike<TResult1>) | undefined | null, onrejected?: ((reason: any) => TResult2 | PromiseLike<TResult2>) | undefined | null): $Utils.JsPromise<TResult1 | TResult2>
+    /**
+     * Attaches a callback for only the rejection of the Promise.
+     * @param onrejected The callback to execute when the Promise is rejected.
+     * @returns A Promise for the completion of the callback.
+     */
+    catch<TResult = never>(onrejected?: ((reason: any) => TResult | PromiseLike<TResult>) | undefined | null): $Utils.JsPromise<T | TResult>
+    /**
+     * Attaches a callback that is invoked when the Promise is settled (fulfilled or rejected). The
+     * resolved value cannot be modified from the callback.
+     * @param onfinally The callback to execute when the Promise is settled (fulfilled or rejected).
+     * @returns A Promise for the completion of the callback.
+     */
+    finally(onfinally?: (() => void) | undefined | null): $Utils.JsPromise<T>
+  }
+
+
+
+
+  /**
+   * Fields of the MajorCatMaster model
+   */
+  interface MajorCatMasterFieldRefs {
+    readonly id: FieldRef<"MajorCatMaster", 'Int'>
+    readonly majCat: FieldRef<"MajorCatMaster", 'String'>
+    readonly name: FieldRef<"MajorCatMaster", 'String'>
+    readonly div: FieldRef<"MajorCatMaster", 'String'>
+    readonly idealFor: FieldRef<"MajorCatMaster", 'String'>
+    readonly frame: FieldRef<"MajorCatMaster", 'String'>
+    readonly isActive: FieldRef<"MajorCatMaster", 'Boolean'>
+    readonly createdAt: FieldRef<"MajorCatMaster", 'DateTime'>
+    readonly updatedAt: FieldRef<"MajorCatMaster", 'DateTime'>
+  }
+    
+
+  // Custom InputTypes
+  /**
+   * MajorCatMaster findUnique
+   */
+  export type MajorCatMasterFindUniqueArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the MajorCatMaster
+     */
+    select?: MajorCatMasterSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the MajorCatMaster
+     */
+    omit?: MajorCatMasterOmit<ExtArgs> | null
+    /**
+     * Filter, which MajorCatMaster to fetch.
+     */
+    where: MajorCatMasterWhereUniqueInput
+  }
+
+  /**
+   * MajorCatMaster findUniqueOrThrow
+   */
+  export type MajorCatMasterFindUniqueOrThrowArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the MajorCatMaster
+     */
+    select?: MajorCatMasterSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the MajorCatMaster
+     */
+    omit?: MajorCatMasterOmit<ExtArgs> | null
+    /**
+     * Filter, which MajorCatMaster to fetch.
+     */
+    where: MajorCatMasterWhereUniqueInput
+  }
+
+  /**
+   * MajorCatMaster findFirst
+   */
+  export type MajorCatMasterFindFirstArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the MajorCatMaster
+     */
+    select?: MajorCatMasterSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the MajorCatMaster
+     */
+    omit?: MajorCatMasterOmit<ExtArgs> | null
+    /**
+     * Filter, which MajorCatMaster to fetch.
+     */
+    where?: MajorCatMasterWhereInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
+     * 
+     * Determine the order of MajorCatMasters to fetch.
+     */
+    orderBy?: MajorCatMasterOrderByWithRelationInput | MajorCatMasterOrderByWithRelationInput[]
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
+     * 
+     * Sets the position for searching for MajorCatMasters.
+     */
+    cursor?: MajorCatMasterWhereUniqueInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Take `±n` MajorCatMasters from the position of the cursor.
+     */
+    take?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Skip the first `n` MajorCatMasters.
+     */
+    skip?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/distinct Distinct Docs}
+     * 
+     * Filter by unique combinations of MajorCatMasters.
+     */
+    distinct?: MajorCatMasterScalarFieldEnum | MajorCatMasterScalarFieldEnum[]
+  }
+
+  /**
+   * MajorCatMaster findFirstOrThrow
+   */
+  export type MajorCatMasterFindFirstOrThrowArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the MajorCatMaster
+     */
+    select?: MajorCatMasterSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the MajorCatMaster
+     */
+    omit?: MajorCatMasterOmit<ExtArgs> | null
+    /**
+     * Filter, which MajorCatMaster to fetch.
+     */
+    where?: MajorCatMasterWhereInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
+     * 
+     * Determine the order of MajorCatMasters to fetch.
+     */
+    orderBy?: MajorCatMasterOrderByWithRelationInput | MajorCatMasterOrderByWithRelationInput[]
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
+     * 
+     * Sets the position for searching for MajorCatMasters.
+     */
+    cursor?: MajorCatMasterWhereUniqueInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Take `±n` MajorCatMasters from the position of the cursor.
+     */
+    take?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Skip the first `n` MajorCatMasters.
+     */
+    skip?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/distinct Distinct Docs}
+     * 
+     * Filter by unique combinations of MajorCatMasters.
+     */
+    distinct?: MajorCatMasterScalarFieldEnum | MajorCatMasterScalarFieldEnum[]
+  }
+
+  /**
+   * MajorCatMaster findMany
+   */
+  export type MajorCatMasterFindManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the MajorCatMaster
+     */
+    select?: MajorCatMasterSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the MajorCatMaster
+     */
+    omit?: MajorCatMasterOmit<ExtArgs> | null
+    /**
+     * Filter, which MajorCatMasters to fetch.
+     */
+    where?: MajorCatMasterWhereInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
+     * 
+     * Determine the order of MajorCatMasters to fetch.
+     */
+    orderBy?: MajorCatMasterOrderByWithRelationInput | MajorCatMasterOrderByWithRelationInput[]
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
+     * 
+     * Sets the position for listing MajorCatMasters.
+     */
+    cursor?: MajorCatMasterWhereUniqueInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Take `±n` MajorCatMasters from the position of the cursor.
+     */
+    take?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Skip the first `n` MajorCatMasters.
+     */
+    skip?: number
+    distinct?: MajorCatMasterScalarFieldEnum | MajorCatMasterScalarFieldEnum[]
+  }
+
+  /**
+   * MajorCatMaster create
+   */
+  export type MajorCatMasterCreateArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the MajorCatMaster
+     */
+    select?: MajorCatMasterSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the MajorCatMaster
+     */
+    omit?: MajorCatMasterOmit<ExtArgs> | null
+    /**
+     * The data needed to create a MajorCatMaster.
+     */
+    data: XOR<MajorCatMasterCreateInput, MajorCatMasterUncheckedCreateInput>
+  }
+
+  /**
+   * MajorCatMaster createMany
+   */
+  export type MajorCatMasterCreateManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * The data used to create many MajorCatMasters.
+     */
+    data: MajorCatMasterCreateManyInput | MajorCatMasterCreateManyInput[]
+    skipDuplicates?: boolean
+  }
+
+  /**
+   * MajorCatMaster createManyAndReturn
+   */
+  export type MajorCatMasterCreateManyAndReturnArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the MajorCatMaster
+     */
+    select?: MajorCatMasterSelectCreateManyAndReturn<ExtArgs> | null
+    /**
+     * Omit specific fields from the MajorCatMaster
+     */
+    omit?: MajorCatMasterOmit<ExtArgs> | null
+    /**
+     * The data used to create many MajorCatMasters.
+     */
+    data: MajorCatMasterCreateManyInput | MajorCatMasterCreateManyInput[]
+    skipDuplicates?: boolean
+  }
+
+  /**
+   * MajorCatMaster update
+   */
+  export type MajorCatMasterUpdateArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the MajorCatMaster
+     */
+    select?: MajorCatMasterSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the MajorCatMaster
+     */
+    omit?: MajorCatMasterOmit<ExtArgs> | null
+    /**
+     * The data needed to update a MajorCatMaster.
+     */
+    data: XOR<MajorCatMasterUpdateInput, MajorCatMasterUncheckedUpdateInput>
+    /**
+     * Choose, which MajorCatMaster to update.
+     */
+    where: MajorCatMasterWhereUniqueInput
+  }
+
+  /**
+   * MajorCatMaster updateMany
+   */
+  export type MajorCatMasterUpdateManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * The data used to update MajorCatMasters.
+     */
+    data: XOR<MajorCatMasterUpdateManyMutationInput, MajorCatMasterUncheckedUpdateManyInput>
+    /**
+     * Filter which MajorCatMasters to update
+     */
+    where?: MajorCatMasterWhereInput
+    /**
+     * Limit how many MajorCatMasters to update.
+     */
+    limit?: number
+  }
+
+  /**
+   * MajorCatMaster updateManyAndReturn
+   */
+  export type MajorCatMasterUpdateManyAndReturnArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the MajorCatMaster
+     */
+    select?: MajorCatMasterSelectUpdateManyAndReturn<ExtArgs> | null
+    /**
+     * Omit specific fields from the MajorCatMaster
+     */
+    omit?: MajorCatMasterOmit<ExtArgs> | null
+    /**
+     * The data used to update MajorCatMasters.
+     */
+    data: XOR<MajorCatMasterUpdateManyMutationInput, MajorCatMasterUncheckedUpdateManyInput>
+    /**
+     * Filter which MajorCatMasters to update
+     */
+    where?: MajorCatMasterWhereInput
+    /**
+     * Limit how many MajorCatMasters to update.
+     */
+    limit?: number
+  }
+
+  /**
+   * MajorCatMaster upsert
+   */
+  export type MajorCatMasterUpsertArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the MajorCatMaster
+     */
+    select?: MajorCatMasterSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the MajorCatMaster
+     */
+    omit?: MajorCatMasterOmit<ExtArgs> | null
+    /**
+     * The filter to search for the MajorCatMaster to update in case it exists.
+     */
+    where: MajorCatMasterWhereUniqueInput
+    /**
+     * In case the MajorCatMaster found by the `where` argument doesn't exist, create a new MajorCatMaster with this data.
+     */
+    create: XOR<MajorCatMasterCreateInput, MajorCatMasterUncheckedCreateInput>
+    /**
+     * In case the MajorCatMaster was found with the provided `where` argument, update it with this data.
+     */
+    update: XOR<MajorCatMasterUpdateInput, MajorCatMasterUncheckedUpdateInput>
+  }
+
+  /**
+   * MajorCatMaster delete
+   */
+  export type MajorCatMasterDeleteArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the MajorCatMaster
+     */
+    select?: MajorCatMasterSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the MajorCatMaster
+     */
+    omit?: MajorCatMasterOmit<ExtArgs> | null
+    /**
+     * Filter which MajorCatMaster to delete.
+     */
+    where: MajorCatMasterWhereUniqueInput
+  }
+
+  /**
+   * MajorCatMaster deleteMany
+   */
+  export type MajorCatMasterDeleteManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Filter which MajorCatMasters to delete
+     */
+    where?: MajorCatMasterWhereInput
+    /**
+     * Limit how many MajorCatMasters to delete.
+     */
+    limit?: number
+  }
+
+  /**
+   * MajorCatMaster without action
+   */
+  export type MajorCatMasterDefaultArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the MajorCatMaster
+     */
+    select?: MajorCatMasterSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the MajorCatMaster
+     */
+    omit?: MajorCatMasterOmit<ExtArgs> | null
+  }
+
+
+  /**
    * Model ModifyLog
    */
 
@@ -47520,8 +48743,11 @@ export namespace Prisma {
   export const ModelImageApprovalScalarFieldEnum: {
     id: 'id',
     articleNumber: 'articleNumber',
+    status: 'status',
     approvedBy: 'approvedBy',
     approvedAt: 'approvedAt',
+    reviewedBy: 'reviewedBy',
+    reviewedAt: 'reviewedAt',
     ecommerceUrls: 'ecommerceUrls',
     createdAt: 'createdAt',
     updatedAt: 'updatedAt'
@@ -47988,6 +49214,21 @@ export namespace Prisma {
   export type NationalGridMasterScalarFieldEnum = (typeof NationalGridMasterScalarFieldEnum)[keyof typeof NationalGridMasterScalarFieldEnum]
 
 
+  export const MajorCatMasterScalarFieldEnum: {
+    id: 'id',
+    majCat: 'majCat',
+    name: 'name',
+    div: 'div',
+    idealFor: 'idealFor',
+    frame: 'frame',
+    isActive: 'isActive',
+    createdAt: 'createdAt',
+    updatedAt: 'updatedAt'
+  };
+
+  export type MajorCatMasterScalarFieldEnum = (typeof MajorCatMasterScalarFieldEnum)[keyof typeof MajorCatMasterScalarFieldEnum]
+
+
   export const ModifyLogScalarFieldEnum: {
     id: 'id',
     modificationGroupId: 'modificationGroupId',
@@ -48264,7 +49505,8 @@ export namespace Prisma {
 
   export const ModelImageApprovalOrderByRelevanceFieldEnum: {
     id: 'id',
-    articleNumber: 'articleNumber'
+    articleNumber: 'articleNumber',
+    status: 'status'
   };
 
   export type ModelImageApprovalOrderByRelevanceFieldEnum = (typeof ModelImageApprovalOrderByRelevanceFieldEnum)[keyof typeof ModelImageApprovalOrderByRelevanceFieldEnum]
@@ -48611,6 +49853,17 @@ export namespace Prisma {
   };
 
   export type NationalGridMasterOrderByRelevanceFieldEnum = (typeof NationalGridMasterOrderByRelevanceFieldEnum)[keyof typeof NationalGridMasterOrderByRelevanceFieldEnum]
+
+
+  export const MajorCatMasterOrderByRelevanceFieldEnum: {
+    majCat: 'majCat',
+    name: 'name',
+    div: 'div',
+    idealFor: 'idealFor',
+    frame: 'frame'
+  };
+
+  export type MajorCatMasterOrderByRelevanceFieldEnum = (typeof MajorCatMasterOrderByRelevanceFieldEnum)[keyof typeof MajorCatMasterOrderByRelevanceFieldEnum]
 
 
   export const ModifyLogOrderByRelevanceFieldEnum: {
@@ -50502,8 +51755,11 @@ export namespace Prisma {
     NOT?: ModelImageApprovalWhereInput | ModelImageApprovalWhereInput[]
     id?: StringFilter<"ModelImageApproval"> | string
     articleNumber?: StringFilter<"ModelImageApproval"> | string
+    status?: StringFilter<"ModelImageApproval"> | string
     approvedBy?: IntNullableFilter<"ModelImageApproval"> | number | null
     approvedAt?: DateTimeFilter<"ModelImageApproval"> | Date | string
+    reviewedBy?: IntNullableFilter<"ModelImageApproval"> | number | null
+    reviewedAt?: DateTimeFilter<"ModelImageApproval"> | Date | string
     ecommerceUrls?: JsonNullableFilter<"ModelImageApproval">
     createdAt?: DateTimeFilter<"ModelImageApproval"> | Date | string
     updatedAt?: DateTimeFilter<"ModelImageApproval"> | Date | string
@@ -50512,8 +51768,11 @@ export namespace Prisma {
   export type ModelImageApprovalOrderByWithRelationInput = {
     id?: SortOrder
     articleNumber?: SortOrder
+    status?: SortOrder
     approvedBy?: SortOrderInput | SortOrder
     approvedAt?: SortOrder
+    reviewedBy?: SortOrderInput | SortOrder
+    reviewedAt?: SortOrder
     ecommerceUrls?: SortOrderInput | SortOrder
     createdAt?: SortOrder
     updatedAt?: SortOrder
@@ -50526,8 +51785,11 @@ export namespace Prisma {
     AND?: ModelImageApprovalWhereInput | ModelImageApprovalWhereInput[]
     OR?: ModelImageApprovalWhereInput[]
     NOT?: ModelImageApprovalWhereInput | ModelImageApprovalWhereInput[]
+    status?: StringFilter<"ModelImageApproval"> | string
     approvedBy?: IntNullableFilter<"ModelImageApproval"> | number | null
     approvedAt?: DateTimeFilter<"ModelImageApproval"> | Date | string
+    reviewedBy?: IntNullableFilter<"ModelImageApproval"> | number | null
+    reviewedAt?: DateTimeFilter<"ModelImageApproval"> | Date | string
     ecommerceUrls?: JsonNullableFilter<"ModelImageApproval">
     createdAt?: DateTimeFilter<"ModelImageApproval"> | Date | string
     updatedAt?: DateTimeFilter<"ModelImageApproval"> | Date | string
@@ -50536,8 +51798,11 @@ export namespace Prisma {
   export type ModelImageApprovalOrderByWithAggregationInput = {
     id?: SortOrder
     articleNumber?: SortOrder
+    status?: SortOrder
     approvedBy?: SortOrderInput | SortOrder
     approvedAt?: SortOrder
+    reviewedBy?: SortOrderInput | SortOrder
+    reviewedAt?: SortOrder
     ecommerceUrls?: SortOrderInput | SortOrder
     createdAt?: SortOrder
     updatedAt?: SortOrder
@@ -50554,8 +51819,11 @@ export namespace Prisma {
     NOT?: ModelImageApprovalScalarWhereWithAggregatesInput | ModelImageApprovalScalarWhereWithAggregatesInput[]
     id?: StringWithAggregatesFilter<"ModelImageApproval"> | string
     articleNumber?: StringWithAggregatesFilter<"ModelImageApproval"> | string
+    status?: StringWithAggregatesFilter<"ModelImageApproval"> | string
     approvedBy?: IntNullableWithAggregatesFilter<"ModelImageApproval"> | number | null
     approvedAt?: DateTimeWithAggregatesFilter<"ModelImageApproval"> | Date | string
+    reviewedBy?: IntNullableWithAggregatesFilter<"ModelImageApproval"> | number | null
+    reviewedAt?: DateTimeWithAggregatesFilter<"ModelImageApproval"> | Date | string
     ecommerceUrls?: JsonNullableWithAggregatesFilter<"ModelImageApproval">
     createdAt?: DateTimeWithAggregatesFilter<"ModelImageApproval"> | Date | string
     updatedAt?: DateTimeWithAggregatesFilter<"ModelImageApproval"> | Date | string
@@ -52916,6 +54184,81 @@ export namespace Prisma {
     createdAt?: DateTimeWithAggregatesFilter<"NationalGridMaster"> | Date | string
   }
 
+  export type MajorCatMasterWhereInput = {
+    AND?: MajorCatMasterWhereInput | MajorCatMasterWhereInput[]
+    OR?: MajorCatMasterWhereInput[]
+    NOT?: MajorCatMasterWhereInput | MajorCatMasterWhereInput[]
+    id?: IntFilter<"MajorCatMaster"> | number
+    majCat?: StringFilter<"MajorCatMaster"> | string
+    name?: StringNullableFilter<"MajorCatMaster"> | string | null
+    div?: StringNullableFilter<"MajorCatMaster"> | string | null
+    idealFor?: StringNullableFilter<"MajorCatMaster"> | string | null
+    frame?: StringFilter<"MajorCatMaster"> | string
+    isActive?: BoolFilter<"MajorCatMaster"> | boolean
+    createdAt?: DateTimeFilter<"MajorCatMaster"> | Date | string
+    updatedAt?: DateTimeFilter<"MajorCatMaster"> | Date | string
+  }
+
+  export type MajorCatMasterOrderByWithRelationInput = {
+    id?: SortOrder
+    majCat?: SortOrder
+    name?: SortOrderInput | SortOrder
+    div?: SortOrderInput | SortOrder
+    idealFor?: SortOrderInput | SortOrder
+    frame?: SortOrder
+    isActive?: SortOrder
+    createdAt?: SortOrder
+    updatedAt?: SortOrder
+    _relevance?: MajorCatMasterOrderByRelevanceInput
+  }
+
+  export type MajorCatMasterWhereUniqueInput = Prisma.AtLeast<{
+    id?: number
+    majCat?: string
+    AND?: MajorCatMasterWhereInput | MajorCatMasterWhereInput[]
+    OR?: MajorCatMasterWhereInput[]
+    NOT?: MajorCatMasterWhereInput | MajorCatMasterWhereInput[]
+    name?: StringNullableFilter<"MajorCatMaster"> | string | null
+    div?: StringNullableFilter<"MajorCatMaster"> | string | null
+    idealFor?: StringNullableFilter<"MajorCatMaster"> | string | null
+    frame?: StringFilter<"MajorCatMaster"> | string
+    isActive?: BoolFilter<"MajorCatMaster"> | boolean
+    createdAt?: DateTimeFilter<"MajorCatMaster"> | Date | string
+    updatedAt?: DateTimeFilter<"MajorCatMaster"> | Date | string
+  }, "id" | "majCat">
+
+  export type MajorCatMasterOrderByWithAggregationInput = {
+    id?: SortOrder
+    majCat?: SortOrder
+    name?: SortOrderInput | SortOrder
+    div?: SortOrderInput | SortOrder
+    idealFor?: SortOrderInput | SortOrder
+    frame?: SortOrder
+    isActive?: SortOrder
+    createdAt?: SortOrder
+    updatedAt?: SortOrder
+    _count?: MajorCatMasterCountOrderByAggregateInput
+    _avg?: MajorCatMasterAvgOrderByAggregateInput
+    _max?: MajorCatMasterMaxOrderByAggregateInput
+    _min?: MajorCatMasterMinOrderByAggregateInput
+    _sum?: MajorCatMasterSumOrderByAggregateInput
+  }
+
+  export type MajorCatMasterScalarWhereWithAggregatesInput = {
+    AND?: MajorCatMasterScalarWhereWithAggregatesInput | MajorCatMasterScalarWhereWithAggregatesInput[]
+    OR?: MajorCatMasterScalarWhereWithAggregatesInput[]
+    NOT?: MajorCatMasterScalarWhereWithAggregatesInput | MajorCatMasterScalarWhereWithAggregatesInput[]
+    id?: IntWithAggregatesFilter<"MajorCatMaster"> | number
+    majCat?: StringWithAggregatesFilter<"MajorCatMaster"> | string
+    name?: StringNullableWithAggregatesFilter<"MajorCatMaster"> | string | null
+    div?: StringNullableWithAggregatesFilter<"MajorCatMaster"> | string | null
+    idealFor?: StringNullableWithAggregatesFilter<"MajorCatMaster"> | string | null
+    frame?: StringWithAggregatesFilter<"MajorCatMaster"> | string
+    isActive?: BoolWithAggregatesFilter<"MajorCatMaster"> | boolean
+    createdAt?: DateTimeWithAggregatesFilter<"MajorCatMaster"> | Date | string
+    updatedAt?: DateTimeWithAggregatesFilter<"MajorCatMaster"> | Date | string
+  }
+
   export type ModifyLogWhereInput = {
     AND?: ModifyLogWhereInput | ModifyLogWhereInput[]
     OR?: ModifyLogWhereInput[]
@@ -54958,8 +56301,11 @@ export namespace Prisma {
   export type ModelImageApprovalCreateInput = {
     id?: string
     articleNumber: string
+    status?: string
     approvedBy?: number | null
     approvedAt?: Date | string
+    reviewedBy?: number | null
+    reviewedAt?: Date | string
     ecommerceUrls?: NullableJsonNullValueInput | InputJsonValue
     createdAt?: Date | string
     updatedAt?: Date | string
@@ -54968,8 +56314,11 @@ export namespace Prisma {
   export type ModelImageApprovalUncheckedCreateInput = {
     id?: string
     articleNumber: string
+    status?: string
     approvedBy?: number | null
     approvedAt?: Date | string
+    reviewedBy?: number | null
+    reviewedAt?: Date | string
     ecommerceUrls?: NullableJsonNullValueInput | InputJsonValue
     createdAt?: Date | string
     updatedAt?: Date | string
@@ -54978,8 +56327,11 @@ export namespace Prisma {
   export type ModelImageApprovalUpdateInput = {
     id?: StringFieldUpdateOperationsInput | string
     articleNumber?: StringFieldUpdateOperationsInput | string
+    status?: StringFieldUpdateOperationsInput | string
     approvedBy?: NullableIntFieldUpdateOperationsInput | number | null
     approvedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    reviewedBy?: NullableIntFieldUpdateOperationsInput | number | null
+    reviewedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     ecommerceUrls?: NullableJsonNullValueInput | InputJsonValue
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
@@ -54988,8 +56340,11 @@ export namespace Prisma {
   export type ModelImageApprovalUncheckedUpdateInput = {
     id?: StringFieldUpdateOperationsInput | string
     articleNumber?: StringFieldUpdateOperationsInput | string
+    status?: StringFieldUpdateOperationsInput | string
     approvedBy?: NullableIntFieldUpdateOperationsInput | number | null
     approvedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    reviewedBy?: NullableIntFieldUpdateOperationsInput | number | null
+    reviewedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     ecommerceUrls?: NullableJsonNullValueInput | InputJsonValue
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
@@ -54998,8 +56353,11 @@ export namespace Prisma {
   export type ModelImageApprovalCreateManyInput = {
     id?: string
     articleNumber: string
+    status?: string
     approvedBy?: number | null
     approvedAt?: Date | string
+    reviewedBy?: number | null
+    reviewedAt?: Date | string
     ecommerceUrls?: NullableJsonNullValueInput | InputJsonValue
     createdAt?: Date | string
     updatedAt?: Date | string
@@ -55008,8 +56366,11 @@ export namespace Prisma {
   export type ModelImageApprovalUpdateManyMutationInput = {
     id?: StringFieldUpdateOperationsInput | string
     articleNumber?: StringFieldUpdateOperationsInput | string
+    status?: StringFieldUpdateOperationsInput | string
     approvedBy?: NullableIntFieldUpdateOperationsInput | number | null
     approvedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    reviewedBy?: NullableIntFieldUpdateOperationsInput | number | null
+    reviewedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     ecommerceUrls?: NullableJsonNullValueInput | InputJsonValue
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
@@ -55018,8 +56379,11 @@ export namespace Prisma {
   export type ModelImageApprovalUncheckedUpdateManyInput = {
     id?: StringFieldUpdateOperationsInput | string
     articleNumber?: StringFieldUpdateOperationsInput | string
+    status?: StringFieldUpdateOperationsInput | string
     approvedBy?: NullableIntFieldUpdateOperationsInput | number | null
     approvedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    reviewedBy?: NullableIntFieldUpdateOperationsInput | number | null
+    reviewedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     ecommerceUrls?: NullableJsonNullValueInput | InputJsonValue
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
@@ -57783,6 +59147,87 @@ export namespace Prisma {
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
   }
 
+  export type MajorCatMasterCreateInput = {
+    majCat: string
+    name?: string | null
+    div?: string | null
+    idealFor?: string | null
+    frame: string
+    isActive?: boolean
+    createdAt?: Date | string
+    updatedAt?: Date | string
+  }
+
+  export type MajorCatMasterUncheckedCreateInput = {
+    id?: number
+    majCat: string
+    name?: string | null
+    div?: string | null
+    idealFor?: string | null
+    frame: string
+    isActive?: boolean
+    createdAt?: Date | string
+    updatedAt?: Date | string
+  }
+
+  export type MajorCatMasterUpdateInput = {
+    majCat?: StringFieldUpdateOperationsInput | string
+    name?: NullableStringFieldUpdateOperationsInput | string | null
+    div?: NullableStringFieldUpdateOperationsInput | string | null
+    idealFor?: NullableStringFieldUpdateOperationsInput | string | null
+    frame?: StringFieldUpdateOperationsInput | string
+    isActive?: BoolFieldUpdateOperationsInput | boolean
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+  }
+
+  export type MajorCatMasterUncheckedUpdateInput = {
+    id?: IntFieldUpdateOperationsInput | number
+    majCat?: StringFieldUpdateOperationsInput | string
+    name?: NullableStringFieldUpdateOperationsInput | string | null
+    div?: NullableStringFieldUpdateOperationsInput | string | null
+    idealFor?: NullableStringFieldUpdateOperationsInput | string | null
+    frame?: StringFieldUpdateOperationsInput | string
+    isActive?: BoolFieldUpdateOperationsInput | boolean
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+  }
+
+  export type MajorCatMasterCreateManyInput = {
+    id?: number
+    majCat: string
+    name?: string | null
+    div?: string | null
+    idealFor?: string | null
+    frame: string
+    isActive?: boolean
+    createdAt?: Date | string
+    updatedAt?: Date | string
+  }
+
+  export type MajorCatMasterUpdateManyMutationInput = {
+    majCat?: StringFieldUpdateOperationsInput | string
+    name?: NullableStringFieldUpdateOperationsInput | string | null
+    div?: NullableStringFieldUpdateOperationsInput | string | null
+    idealFor?: NullableStringFieldUpdateOperationsInput | string | null
+    frame?: StringFieldUpdateOperationsInput | string
+    isActive?: BoolFieldUpdateOperationsInput | boolean
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+  }
+
+  export type MajorCatMasterUncheckedUpdateManyInput = {
+    id?: IntFieldUpdateOperationsInput | number
+    majCat?: StringFieldUpdateOperationsInput | string
+    name?: NullableStringFieldUpdateOperationsInput | string | null
+    div?: NullableStringFieldUpdateOperationsInput | string | null
+    idealFor?: NullableStringFieldUpdateOperationsInput | string | null
+    frame?: StringFieldUpdateOperationsInput | string
+    isActive?: BoolFieldUpdateOperationsInput | boolean
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+  }
+
   export type ModifyLogCreateInput = {
     modificationGroupId: string
     articleNumber: string
@@ -59466,8 +60911,11 @@ export namespace Prisma {
   export type ModelImageApprovalCountOrderByAggregateInput = {
     id?: SortOrder
     articleNumber?: SortOrder
+    status?: SortOrder
     approvedBy?: SortOrder
     approvedAt?: SortOrder
+    reviewedBy?: SortOrder
+    reviewedAt?: SortOrder
     ecommerceUrls?: SortOrder
     createdAt?: SortOrder
     updatedAt?: SortOrder
@@ -59475,13 +60923,17 @@ export namespace Prisma {
 
   export type ModelImageApprovalAvgOrderByAggregateInput = {
     approvedBy?: SortOrder
+    reviewedBy?: SortOrder
   }
 
   export type ModelImageApprovalMaxOrderByAggregateInput = {
     id?: SortOrder
     articleNumber?: SortOrder
+    status?: SortOrder
     approvedBy?: SortOrder
     approvedAt?: SortOrder
+    reviewedBy?: SortOrder
+    reviewedAt?: SortOrder
     createdAt?: SortOrder
     updatedAt?: SortOrder
   }
@@ -59489,14 +60941,18 @@ export namespace Prisma {
   export type ModelImageApprovalMinOrderByAggregateInput = {
     id?: SortOrder
     articleNumber?: SortOrder
+    status?: SortOrder
     approvedBy?: SortOrder
     approvedAt?: SortOrder
+    reviewedBy?: SortOrder
+    reviewedAt?: SortOrder
     createdAt?: SortOrder
     updatedAt?: SortOrder
   }
 
   export type ModelImageApprovalSumOrderByAggregateInput = {
     approvedBy?: SortOrder
+    reviewedBy?: SortOrder
   }
 
   export type MvgrLookupOrderByRelevanceInput = {
@@ -61270,6 +62726,56 @@ export namespace Prisma {
   }
 
   export type NationalGridMasterSumOrderByAggregateInput = {
+    id?: SortOrder
+  }
+
+  export type MajorCatMasterOrderByRelevanceInput = {
+    fields: MajorCatMasterOrderByRelevanceFieldEnum | MajorCatMasterOrderByRelevanceFieldEnum[]
+    sort: SortOrder
+    search: string
+  }
+
+  export type MajorCatMasterCountOrderByAggregateInput = {
+    id?: SortOrder
+    majCat?: SortOrder
+    name?: SortOrder
+    div?: SortOrder
+    idealFor?: SortOrder
+    frame?: SortOrder
+    isActive?: SortOrder
+    createdAt?: SortOrder
+    updatedAt?: SortOrder
+  }
+
+  export type MajorCatMasterAvgOrderByAggregateInput = {
+    id?: SortOrder
+  }
+
+  export type MajorCatMasterMaxOrderByAggregateInput = {
+    id?: SortOrder
+    majCat?: SortOrder
+    name?: SortOrder
+    div?: SortOrder
+    idealFor?: SortOrder
+    frame?: SortOrder
+    isActive?: SortOrder
+    createdAt?: SortOrder
+    updatedAt?: SortOrder
+  }
+
+  export type MajorCatMasterMinOrderByAggregateInput = {
+    id?: SortOrder
+    majCat?: SortOrder
+    name?: SortOrder
+    div?: SortOrder
+    idealFor?: SortOrder
+    frame?: SortOrder
+    isActive?: SortOrder
+    createdAt?: SortOrder
+    updatedAt?: SortOrder
+  }
+
+  export type MajorCatMasterSumOrderByAggregateInput = {
     id?: SortOrder
   }
 

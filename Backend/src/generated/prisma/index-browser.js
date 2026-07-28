@@ -401,8 +401,11 @@ exports.Prisma.ModelGenerationResultScalarFieldEnum = {
 exports.Prisma.ModelImageApprovalScalarFieldEnum = {
   id: 'id',
   articleNumber: 'articleNumber',
+  status: 'status',
   approvedBy: 'approvedBy',
   approvedAt: 'approvedAt',
+  reviewedBy: 'reviewedBy',
+  reviewedAt: 'reviewedAt',
   ecommerceUrls: 'ecommerceUrls',
   createdAt: 'createdAt',
   updatedAt: 'updatedAt'
@@ -800,6 +803,18 @@ exports.Prisma.NationalGridMasterScalarFieldEnum = {
   createdAt: 'createdAt'
 };
 
+exports.Prisma.MajorCatMasterScalarFieldEnum = {
+  id: 'id',
+  majCat: 'majCat',
+  name: 'name',
+  div: 'div',
+  idealFor: 'idealFor',
+  frame: 'frame',
+  isActive: 'isActive',
+  createdAt: 'createdAt',
+  updatedAt: 'updatedAt'
+};
+
 exports.Prisma.ModifyLogScalarFieldEnum = {
   id: 'id',
   modificationGroupId: 'modificationGroupId',
@@ -1025,7 +1040,8 @@ exports.Prisma.ModelGenerationResultOrderByRelevanceFieldEnum = {
 
 exports.Prisma.ModelImageApprovalOrderByRelevanceFieldEnum = {
   id: 'id',
-  articleNumber: 'articleNumber'
+  articleNumber: 'articleNumber',
+  status: 'status'
 };
 
 exports.Prisma.MvgrLookupOrderByRelevanceFieldEnum = {
@@ -1305,6 +1321,14 @@ exports.Prisma.NationalGridMasterOrderByRelevanceFieldEnum = {
   fullForm: 'fullForm'
 };
 
+exports.Prisma.MajorCatMasterOrderByRelevanceFieldEnum = {
+  majCat: 'majCat',
+  name: 'name',
+  div: 'div',
+  idealFor: 'idealFor',
+  frame: 'frame'
+};
+
 exports.Prisma.ModifyLogOrderByRelevanceFieldEnum = {
   modificationGroupId: 'modificationGroupId',
   articleNumber: 'articleNumber',
@@ -1429,6 +1453,7 @@ exports.Prisma.ModelName = {
   PoolBJob: 'PoolBJob',
   PoolBBatch: 'PoolBBatch',
   NationalGridMaster: 'NationalGridMaster',
+  MajorCatMaster: 'MajorCatMaster',
   ModifyLog: 'ModifyLog'
 };
 
