@@ -364,10 +364,7 @@ const AddColorModal: React.FC<AddColorModalProps> = ({
   onClose,
   onAdded,
 }) => {
-  const [mode, setMode] = useState<'auto' | 'manual'>('auto');
   const [selectedColors, setSelectedColors] = useState<string[]>([]);
-  const [selectedSizes, setSelectedSizes] = useState<string[]>([]);
-  const [mcSizes, setMcSizes] = useState<string[]>([]);
   const [saving, setSaving] = useState(false);
   const [masterColors, setMasterColors] = useState<{ code: string; name: string }[]>([]);
   // Step 2: per-color image upload. step 1 = pick colors/sizes, step 2 = upload images.
@@ -376,7 +373,7 @@ const AddColorModal: React.FC<AddColorModalProps> = ({
   const [uploading, setUploading] = useState<Record<string, boolean>>({});
 
   useEffect(() => {
-    if (!open) { setSelectedColors([]); setSelectedSizes([]); setMode('auto'); setStep(1); setColorImages({}); setUploading({}); return; }
+    if (!open) { setSelectedColors([]); setStep(1); setColorImages({}); setUploading({}); return; }
     const token = localStorage.getItem('authToken');
     // Colors from the color_master table.
     fetch(`${APP_CONFIG.api.baseURL}/approver/colors`, {
@@ -385,17 +382,6 @@ const AddColorModal: React.FC<AddColorModalProps> = ({
       .then((r) => (r.ok ? r.json() : { colors: [] }))
       .then((d) => setMasterColors(Array.isArray(d?.colors) ? d.colors : []))
       .catch(() => setMasterColors([]));
-    // Active sizes for this Major Category (manual-mode dropdown).
-    if (majorCategory) {
-      fetch(`${APP_CONFIG.api.baseURL}/approver/sizes-for-majcat/${encodeURIComponent(majorCategory)}`, {
-        headers: token ? { Authorization: `Bearer ${token}` } : {},
-      })
-        .then((r) => (r.ok ? r.json() : { sizes: [] }))
-        .then((d) => setMcSizes(Array.isArray(d?.sizes) ? d.sizes : []))
-        .catch(() => setMcSizes([]));
-    } else {
-      setMcSizes([]);
-    }
   }, [open, majorCategory]);
 
   // color code → "Name - CODE" label for the image step.
@@ -430,18 +416,12 @@ const AddColorModal: React.FC<AddColorModalProps> = ({
 
   const handleNext = () => {
     if (selectedColors.length === 0) { message.warning('Please select at least one color'); return; }
-    if (mode === 'manual' && selectedSizes.length === 0) { message.warning('Please select at least one size'); return; }
-    if (mode === 'manual' && newPairs.length === 0) { message.warning('All selected size × color combinations already exist'); return; }
     setStep(2);
   };
 
   const handleOk = async () => {
     if (selectedColors.length === 0) {
       message.warning('Please select at least one color');
-      return;
-    }
-    if (mode === 'manual' && selectedSizes.length === 0) {
-      message.warning('Please select at least one size');
       return;
     }
     if (!allImagesReady) {
@@ -451,9 +431,7 @@ const AddColorModal: React.FC<AddColorModalProps> = ({
     setSaving(true);
     try {
       const token = localStorage.getItem('authToken');
-      const body = mode === 'manual'
-        ? { colors: selectedColors, sizes: selectedSizes, colorImages }
-        : { colors: selectedColors, colorImages };
+      const body = { colors: selectedColors, colorImages };
       const response = await fetch(`${APP_CONFIG.api.baseURL}/approver/items/${genericId}/add-color`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` },
@@ -482,24 +460,9 @@ const AddColorModal: React.FC<AddColorModalProps> = ({
       a.label.toUpperCase() === 'COLOUR',
   );
 
-  // Whether a color should be disabled in the picker.
-  //  • Auto mode  → a color spans ALL of the MC's sizes, so disable it if it
-  //    already exists for any size.
-  //  • Manual mode → the user targets specific size(s). Only disable a color
-  //    when EVERY selected size already has it (otherwise there's a new
-  //    size × color combination to create — e.g. adding size 34 for a color
-  //    that currently exists only on 28/30/32/36). With no size chosen yet we
-  //    keep colors enabled so the user can pick in any order.
   const isColorDisabled = (code: string, label?: string): boolean => {
     const codeU = code.toUpperCase();
     const labelU = label?.toUpperCase();
-    if (mode === 'manual') {
-      if (selectedSizes.length === 0) return false;
-      return selectedSizes.every((sz) => {
-        const s = sz.trim().toUpperCase();
-        return existingPairs.has(`${s}||${codeU}`) || (labelU ? existingPairs.has(`${s}||${labelU}`) : false);
-      });
-    }
     return existingColors.some((ec) => ec.toUpperCase() === codeU || (labelU ? ec.toUpperCase() === labelU : false));
   };
 
@@ -522,31 +485,12 @@ const AddColorModal: React.FC<AddColorModalProps> = ({
           disabled: isColorDisabled(code, label),
         }));
 
-  const sizeOptions = mcSizes.map((s) => ({ value: s, label: s }));
-
-  // Manual mode: a (size × color) combo that already exists is skipped by the
-  // backend, so the preview must count only the genuinely-new combinations.
-  const pairKey = (size: string, color: string) => `${size.trim().toUpperCase()}||${color.trim().toUpperCase()}`;
-  const plannedPairs =
-    mode === 'manual'
-      ? selectedColors.flatMap((c) => selectedSizes.map((s) => ({ size: s, color: c, key: pairKey(s, c) })))
-      : [];
-  const newPairs = plannedPairs.filter((p) => !existingPairs.has(p.key));
-  const skippedPairs = plannedPairs.filter((p) => existingPairs.has(p.key));
-
-  const effectiveSizeCount = mode === 'manual' ? selectedSizes.length : sizeCount;
   const variantPreview =
-    mode === 'manual'
-      ? selectedColors.length > 0 && selectedSizes.length > 0
-        ? `${newPairs.length} new variant${newPairs.length !== 1 ? 's' : ''}`
-        : null
-      : selectedColors.length > 0 && effectiveSizeCount > 0
-      ? `${selectedColors.length} color${selectedColors.length > 1 ? 's' : ''} × ${effectiveSizeCount} size${
-          effectiveSizeCount > 1 ? 's' : ''
-        } = ${selectedColors.length * effectiveSizeCount} variants`
+      selectedColors.length > 0 && sizeCount > 0
+      ? `${selectedColors.length} color${selectedColors.length > 1 ? 's' : ''} × ${sizeCount} size${
+          sizeCount > 1 ? 's' : ''
+        } = ${selectedColors.length * sizeCount} variants`
       : null;
-
-  const noSizesConfigured = !!majorCategory && mcSizes.length === 0;
 
   return (
     <Dialog open={open} onOpenChange={(o) => !o && onClose()}>
@@ -557,60 +501,9 @@ const AddColorModal: React.FC<AddColorModalProps> = ({
 
         {step === 1 && (
         <>
-        {/* Mode selector */}
-        <div className="mb-3 inline-flex rounded-md border border-border p-0.5">
-          <button
-            type="button"
-            onClick={() => setMode('auto')}
-            className={
-              'rounded px-3 py-1 text-[13px] font-medium transition-colors ' +
-              (mode === 'auto' ? 'bg-primary text-primary-foreground' : 'text-muted-foreground hover:bg-muted')
-            }
-          >
-            Auto-generate
-          </button>
-          <button
-            type="button"
-            onClick={() => setMode('manual')}
-            className={
-              'rounded px-3 py-1 text-[13px] font-medium transition-colors ' +
-              (mode === 'manual' ? 'bg-primary text-primary-foreground' : 'text-muted-foreground hover:bg-muted')
-            }
-          >
-            Manual
-          </button>
-        </div>
-
         <p className="mb-3 text-sm text-muted-foreground">
-          {mode === 'auto'
-            ? 'Select one or more colors. One variant will be created per size for each color.'
-            : 'Select specific size(s) and color(s). One variant is created for each size × color.'}
+          Select one or more colors. One variant will be created per size for each color.
         </p>
-
-        {/* Manual mode: size picker (MC-filtered) */}
-        {mode === 'manual' && (
-          <div className="mb-3">
-            <span className="mb-1 block text-[12px] font-medium text-muted-foreground">Sizes</span>
-            {noSizesConfigured ? (
-              <div className="rounded border border-amber-300 bg-amber-50 px-2.5 py-1.5 text-[13px] text-amber-700">
-                No sizes configured for this MC. Contact planning.
-              </div>
-            ) : (
-              <MultiSelect
-                options={sizeOptions}
-                value={selectedSizes}
-                onChange={setSelectedSizes}
-                placeholder="Select sizes…"
-                searchable
-                searchPlaceholder="Search sizes…"
-              />
-            )}
-          </div>
-        )}
-
-        {mode === 'manual' && (
-          <span className="mb-1 block text-[12px] font-medium text-muted-foreground">Colors</span>
-        )}
         <MultiSelect
           options={options}
           value={selectedColors}
@@ -625,17 +518,6 @@ const AddColorModal: React.FC<AddColorModalProps> = ({
             <span className="text-[13px] text-emerald-700">
               Will create: <strong>{variantPreview}</strong>
             </span>
-          </div>
-        )}
-
-        {mode === 'manual' && skippedPairs.length > 0 && (
-          <div className="mt-2 rounded border border-amber-300 bg-amber-50 px-2.5 py-1.5 text-[12px] text-amber-700">
-            Already exists — will be skipped:{' '}
-            {skippedPairs.map((p) => (
-              <Tag key={p.key} className="ml-1">
-                {p.size} × {p.color}
-              </Tag>
-            ))}
           </div>
         )}
 
@@ -713,11 +595,7 @@ const AddColorModal: React.FC<AddColorModalProps> = ({
               </Button>
               <Button
                 onClick={handleNext}
-                disabled={
-                  selectedColors.length === 0 ||
-                  (mode === 'manual' &&
-                    (selectedSizes.length === 0 || noSizesConfigured || newPairs.length === 0))
-                }
+                disabled={selectedColors.length === 0}
               >
                 Next
               </Button>
@@ -728,7 +606,7 @@ const AddColorModal: React.FC<AddColorModalProps> = ({
                 Back
               </Button>
               <Button onClick={handleOk} disabled={saving || anyUploading || !allImagesReady}>
-                {saving ? 'Adding…' : mode === 'manual' ? 'Add Variants' : 'Add Colors'}
+                {saving ? 'Adding…' : 'Add Colors'}
               </Button>
             </>
           )}
