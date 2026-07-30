@@ -1,0 +1,41 @@
+/* All `.ant-table-*` selectors are no-ops since antd is removed.
+ * Density rules live on the shadcn `tr` / `td` elements now. */
+
+.approver-compact-table tr > th,
+.approver-compact-table tr > td {
+  padding: 2px 5px !important;
+}
+.approver-compact-table thead > tr > th { font-size: 11px; }
+.approver-compact-table tbody > tr > td { font-size: 12px; }
+
+.approver-comfortable-table tr > th,
+.approver-comfortable-table tr > td {
+  padding: 6px 8px !important;
+}
+.approver-comfortable-table thead > tr > th { font-size: 12px; }
+.approver-comfortable-table tbody > tr > td { font-size: 13px; }
+
+.editable-cell-value_wrap {
+  display: flex;
+  align-items: center;
+  min-height: 20px;
+  padding: 2px 6px;
+  border: 1px solid rgba(0, 0, 0, 0.12);
+  border-radius: var(--radius-control, 8px);
+  background: #ffffff;
+  transition: border-color var(--duration-fast, 150ms) var(--ease-out-quart, ease-out),
+              box-shadow var(--duration-fast, 150ms) var(--ease-out-quart, ease-out);
+}
+
+.editable-cell-value_wrap:hover {
+  border-color: var(--color-primary, #FF6F61);
+  box-shadow: inset 0 0 0 1px rgba(255, 111, 97, 0.15);
+}
+
+/* Subtle row hover — coral tint replaces the old blue */
+tbody > tr {
+  transition: background-color var(--duration-fast, 150ms) var(--ease-out-quart, ease-out);
+}
+tbody > tr:hover > td {
+  background: rgba(255, 111, 97, 0.04);
+}

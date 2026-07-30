@@ -21,6 +21,8 @@ import PoolBUploaderPage from './features/admin/pages/PoolBUploaderPage'; // Poo
 import ModificationLogsPage from './features/admin/pages/ModificationLogsPage';
 import ApproverDashboard from './features/approver/pages/ApproverDashboard'; // Approver Dashboard
 import ArticleDetailPage from './features/approver/pages/ArticleDetailPage'; // Article detail view
+import FabricArticleDashboard from './features/fabric-article/pages/FabricArticleDashboard'; // Fabric Article Dashboard
+import FabricArticleDetailPage from './features/fabric-article/pages/FabricArticleDetailPage'; // Fabric Article detail view
 import POPresentationPage from './features/po-presentation/pages/POPresentationPage'; // PO Presentation
 import ModelGenerationPage from './features/model-generation/pages/ModelGenerationPage';
 
@@ -435,6 +437,98 @@ const App: React.FC = () => {
                 }
               />
 
+
+              {/* Fabric Article Routes - With MainLayout */}
+              <Route
+                path="/fabric-article"
+                element={
+                  <ApproverRoute>
+                    <MainLayout>
+                      <FabricArticleDashboard key="fabric-new-articles" pathType="new" />
+                    </MainLayout>
+                  </ApproverRoute>
+                }
+              />
+              <Route
+                path="/fabric-article/:id"
+                element={
+                  <ApproverRoute>
+                    <MainLayout>
+                      <FabricArticleDetailPage />
+                    </MainLayout>
+                  </ApproverRoute>
+                }
+              />
+              <Route
+                path="/fabric-article/old-articles"
+                element={
+                  <ApproverRoute>
+                    <MainLayout>
+                      <FabricArticleDashboard key="fabric-old-articles" pathType="old" />
+                    </MainLayout>
+                  </ApproverRoute>
+                }
+              />
+              <Route
+                path="/fabric-article/old-articles/:id"
+                element={
+                  <ApproverRoute>
+                    <MainLayout>
+                      <FabricArticleDetailPage />
+                    </MainLayout>
+                  </ApproverRoute>
+                }
+              />
+              <Route
+                path="/fabric-article/rejected"
+                element={
+                  <ApproverRoute>
+                    <MainLayout>
+                      <FabricArticleDashboard key="fabric-rejected-articles" pathType="rejected" />
+                    </MainLayout>
+                  </ApproverRoute>
+                }
+              />
+              <Route
+                path="/fabric-article/rejected/:id"
+                element={
+                  <ApproverRoute>
+                    <MainLayout>
+                      <FabricArticleDetailPage />
+                    </MainLayout>
+                  </ApproverRoute>
+                }
+              />
+              <Route
+                path="/fabric-article/created"
+                element={
+                  <ApproverRoute>
+                    <MainLayout>
+                      <FabricArticleDashboard key="fabric-created-articles" pathType="created" />
+                    </MainLayout>
+                  </ApproverRoute>
+                }
+              />
+              <Route
+                path="/fabric-article/created/:id"
+                element={
+                  <ApproverRoute>
+                    <MainLayout>
+                      <FabricArticleDetailPage />
+                    </MainLayout>
+                  </ApproverRoute>
+                }
+              />
+              <Route
+                path="/fabric-article/failed"
+                element={
+                  <ApproverRoute>
+                    <MainLayout>
+                      <FabricArticleDashboard key="fabric-failed-articles" pathType="failed" />
+                    </MainLayout>
+                  </ApproverRoute>
+                }
+              />
 
               {/* PO Presentation */}
               <Route
