@@ -98,7 +98,7 @@ export const MultiSelect: React.FC<MultiSelectProps> = ({
           <ChevronDown className="h-4 w-4 shrink-0 opacity-50" />
         </button>
       </PopoverTrigger>
-      <PopoverContent align="start" className="w-[--radix-popover-trigger-width] p-1">
+      <PopoverContent align="start" className="w-[--radix-popover-trigger-width] overflow-hidden p-1">
         {searchable && (
           <div className="mb-1 flex items-center gap-1.5 border-b px-2 py-1.5">
             <Search className="h-3.5 w-3.5 shrink-0 text-muted-foreground" />
@@ -122,7 +122,10 @@ export const MultiSelect: React.FC<MultiSelectProps> = ({
             )}
           </div>
         )}
-        <div className="max-h-64 overflow-auto">
+        <div
+          className="max-h-56 overflow-y-auto overscroll-contain"
+          onWheel={(e) => e.stopPropagation()}
+        >
           {filteredOptions.length === 0 && (
             <div className="px-2 py-1.5 text-sm text-muted-foreground">
               {options.length === 0 ? 'No options' : 'No matches'}
