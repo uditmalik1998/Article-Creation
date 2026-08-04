@@ -34,6 +34,7 @@ export class EnhancedExtractionController {
     folderName?: string;
     department?: string;
     subDepartment?: string;
+    presentationsType?: string;
     watcherFields?: {
       division?: string;
       vendorName?: string;
@@ -63,7 +64,7 @@ export class EnhancedExtractionController {
         return Array.from(tokens);
       };
 
-      const { image, schema, categoryName, resolvedCategoryCode, userId, result, originalFilename, folderName, department, subDepartment } = params;
+      const { image, schema, categoryName, resolvedCategoryCode, userId, result, originalFilename, folderName, department, subDepartment, presentationsType } = params;
 
       const extractVendorCodeFromMetadata = (metadata: any): string | null => {
         if (!metadata || typeof metadata !== 'object') return null;
@@ -401,6 +402,21 @@ export class EnhancedExtractionController {
               const match = String(v).replace(/,/g, '').match(/(\d+(?:\.\d+)?)/);
               if (match) directFill.weight = match[1];
             }
+          }
+
+          if (presentationsType) {
+            directFill.presentationsType = presentationsType;
+          }
+
+          if (image) {
+            void this.vlmService.extractAllFashionAttributes(image).then(rawAttrs => {
+              if (rawAttrs && flatId) {
+                prisma.extractionResultFlat.update({
+                  where: { id: flatId },
+                  data: { imageExtractionRawData: rawAttrs },
+                }).catch(e => console.warn('[ExtractAll] DB update failed:', e?.message));
+              }
+            });
           }
 
           if (Object.keys(directFill).length > 0) {
@@ -799,6 +815,7 @@ export class EnhancedExtractionController {
         folderName: effectiveFolderName,
         department: enforcedDepartment,
         subDepartment: enforcedSubDepartment,
+        presentationsType: source === 'WATCHER' ? undefined : 'FG Article',
         watcherFields: source === 'WATCHER' ? {
           division:      watcher_division      || undefined,
           vendorName:    watcher_vendor_name   || undefined,
@@ -852,7 +869,8 @@ export class EnhancedExtractionController {
         season,
         occasion,
         fileName, // Optional: original filename
-        folderName // Optional: vendor code source from uploaded folder
+        folderName, // Optional: vendor code source from uploaded folder
+        presentationsType, // Optional: e.g. 'FG Article', 'Fabric Article'
       }: ExtractionRequest & {
         department?: string;
         subDepartment?: string;
@@ -860,6 +878,7 @@ export class EnhancedExtractionController {
         occasion?: string;
         fileName?: string;
         folderName?: string;
+        presentationsType?: string;
       } = req.body;
 
       // RBAC: Enforce Division/SubDivision for Creators
@@ -988,7 +1007,7 @@ export class EnhancedExtractionController {
         : undefined)?.replace(/\.[^/.]+$/, '');
 
       const persistence = await this.persistExtractionJob({
-        image: imagePath, // Now stores R2 URL instead of filename
+        image: imagePath,
         schema,
         categoryName,
         userId: req.user?.id,
@@ -996,7 +1015,8 @@ export class EnhancedExtractionController {
         originalFilename: originalFilenameWithoutExt,
         folderName: folderName || parsedFolderFromFileName || undefined,
         department: enforcedDepartment,
-        subDepartment: enforcedSubDepartment
+        subDepartment: enforcedSubDepartment,
+        presentationsType: presentationsType || 'FG Article',
       });
 
       res.json({
@@ -1256,7 +1276,8 @@ export class EnhancedExtractionController {
             ? fileName.split(/[\\/]/)[0]
             : undefined),
         department: category.department.name,
-        subDepartment: category.subDepartment.code
+        subDepartment: category.subDepartment.code,
+        presentationsType: 'FG Article',
       });
 
       res.json({

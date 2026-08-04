@@ -1,5 +1,5 @@
 import { Request, Response } from 'express';
-import { ApprovalStatus, SapSyncStatus } from '../generated/prisma';
+import { ApprovalStatus, SapSyncStatus, Prisma } from '../generated/prisma';
 import fs from 'fs';
 import path from 'path';
 import { getHsnCodeByMcCode, getMcCodeByMajorCategory } from '../utils/mcCodeMapper';
@@ -614,7 +614,7 @@ export class ApproverController {
 
     static async getItems(req: Request, res: Response) {
         try {
-            const { status, division, subDivision, majorCategory, startDate, endDate, search, page = 1, limit = 50, pathType, source } = req.query;
+            const { status, division, subDivision, majorCategory, startDate, endDate, search, page = 1, limit = 50, pathType, source, presentationsType } = req.query;
 
             // ── Response cache (8 s TTL) ───────────────────────────────────────────
             // Key includes all query params + user scope so different users/filters
@@ -627,7 +627,7 @@ export class ApproverController {
                 userId: !isUnscoped ? req.user?.id : undefined,
                 userDiv: !isUnscoped ? req.user?.division : undefined,
                 userSubDiv: !isUnscoped ? req.user?.subDivision : undefined,
-                status, division, subDivision, majorCategory, startDate, endDate, search, page, limit, pathType, source,
+                status, division, subDivision, majorCategory, startDate, endDate, search, page, limit, pathType, source, presentationsType,
             });
             const cached = ApproverController.itemsCache.get(cacheKey);
             if (cached && cached.expiresAt > Date.now()) {
@@ -708,6 +708,11 @@ export class ApproverController {
                 if (role !== 'ADMIN' && role !== 'PD') {
                     where.approvedBy = (req.user as any)?.id ? Number((req.user as any).id) : -1;
                 }
+            }
+
+            // Presentations type filter — isolates FG Article vs Fabric Article tabs
+            if (presentationsType) {
+                where.presentationsType = String(presentationsType);
             }
 
             // Status Filtering (Multi-select support)
@@ -2947,6 +2952,7 @@ export class ApproverController {
                 articleNumber: _articleNumber,
                 fabricArticleNumber: _fabricArticleNumber,
                 fabricArticleDescription: _fabricArticleDescription,
+                imageExtractionRawData: _imageExtractionRawData,
                 ...rest
             } = source;
 
@@ -2973,6 +2979,7 @@ export class ApproverController {
                     // holds back source=SRM rows still in SRM_IMPORT) and isn't re-processed
                     // (and overwritten) by the SRM raw-extraction cron.
                     extractionStatus: 'COMPLETED',
+                    imageExtractionRawData: _imageExtractionRawData ?? Prisma.DbNull,
                 },
             });
 

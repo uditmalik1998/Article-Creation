@@ -71,6 +71,7 @@ export interface EnhancedExtractionResult extends ExtractionResult {
     retryable: boolean;
     discoveryStats?: string | Record<string, unknown> | number;
   };
+  rawGeminiResponse?: Record<string, any> | null;
 }
 
 export interface BulkExtractionOptions {

@@ -9,8 +9,8 @@ export const useBatchExtraction = (
   extractedRows: ExtractedRowEnhanced[],
   setExtractedRows: React.Dispatch<React.SetStateAction<ExtractedRowEnhanced[]>>,
   extractFunc: (
-    row: ExtractedRowEnhanced, 
-    schema: SchemaItem[], 
+    row: ExtractedRowEnhanced,
+    schema: SchemaItem[],
     cat?: string,
     categoryCode?: string,
     metadata?: {
@@ -20,7 +20,8 @@ export const useBatchExtraction = (
       costPrice?: number;
       sellingPrice?: number;
       notes?: string;
-    }
+    },
+    presentationsType?: string,
   ) => Promise<ExtractedRowEnhanced>,
   setProgress: (p: number) => void,
   setIsExtracting: (b: boolean) => void,
@@ -43,7 +44,8 @@ export const useBatchExtraction = (
       costPrice?: number;
       sellingPrice?: number;
       notes?: string;
-    }
+    },
+    presentationsType?: string,
   ): Promise<BatchOperationResult | void> => {
     const pending = extractedRows.filter(row =>
       row.status === 'Pending' || (row.status === 'Error' && (row.retryCount || 0) < 3)
@@ -90,7 +92,7 @@ export const useBatchExtraction = (
         r.id === row.id ? { ...r, status: 'Extracting', processingProgress: 10 } : r
       ));
 
-      const task = extractFunc(row, schema, categoryName, categoryCode, metadata)
+      const task = extractFunc(row, schema, categoryName, categoryCode, metadata, presentationsType)
         .then(updated => { 
           if (updated.status === 'Done') {
             successCount++;

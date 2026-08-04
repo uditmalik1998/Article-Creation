@@ -15,6 +15,7 @@ import path from 'path';
 // import * as XLSX from 'xlsx';
 import { randomUUID } from 'crypto';
 import { prismaClient as prisma } from '../utils/prisma';
+import { Prisma } from '../generated/prisma';
 import { storageService } from './storageService';
 import { upsert360ArticleFlatRow } from '../utils/mirror360Flat';
 
@@ -286,6 +287,7 @@ export async function duplicateForKidsDivision(flatId: string): Promise<void> {
           sapSyncStatus: _sapSyncStatus,
           sapArticleId: _sapArticleId,
           sapSyncMessage: _sapSyncMessage,
+          imageExtractionRawData: _imageExtractionRawData,
           ...rest
         } = original;
 
@@ -302,6 +304,7 @@ export async function duplicateForKidsDivision(flatId: string): Promise<void> {
           sapArticleId: null,
           sapSyncMessage: null,
           imageUncPath: null,
+          imageExtractionRawData: _imageExtractionRawData ?? Prisma.DbNull,
         };
 
         await prisma.extractionResultFlat.create({ data: kidsData });

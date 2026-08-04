@@ -130,7 +130,15 @@ export const AppSidebar: React.FC<AppSidebarProps> = ({ collapsed, onCollapsedCh
     // Extraction is available to creator-side roles and to APPROVER.
     // (CATEGORY_HEAD and PD remain approval-only and do not get it.)
     if ((!isApproverSide && !isPd) || role === 'APPROVER') {
-      items.push({ key: '/extraction', Icon: FileSearch, label: 'Extraction' });
+      items.push({
+        key: '/extraction-group',
+        Icon: FileSearch,
+        label: 'Extraction',
+        children: [
+          { key: '/extraction/fg-article', Icon: FileText, label: 'FG Article' },
+          { key: '/extraction/fabric-article', Icon: FileText, label: 'Fabric Article' },
+        ],
+      });
     }
     // Model Generation — ADMIN, CREATOR, APPROVER (PD_DESIGNER already has it via the items init above).
     if (isAdmin || role === 'CREATOR' || role === 'APPROVER') {
@@ -151,13 +159,37 @@ export const AppSidebar: React.FC<AppSidebarProps> = ({ collapsed, onCollapsedCh
     items.push({
       key: '/approver-group',
       Icon: CheckSquare,
-      label: 'Approver',
+      label: 'FG Articles',
       children: [
         { key: '/approver', Icon: FileText, label: 'New articles' },
         { key: '/approver/old-articles', Icon: History, label: 'Old articles' },
         { key: '/approver/rejected', Icon: XCircle, label: 'Rejected' },
         { key: '/approver/created', Icon: CheckCircle2, label: 'Created' },
         { key: '/approver/failed', Icon: AlertTriangle, label: 'Failed Creations' },
+      ],
+    });
+  }
+
+  if (
+    !isPdDesigner &&
+    (role === 'APPROVER' ||
+      role === 'CATEGORY_HEAD' ||
+      role === 'SUB_DIVISION_HEAD' ||
+      isAdmin ||
+      role === 'CREATOR' ||
+      role === 'PO_COMMITTEE' ||
+      isPd)
+  ) {
+    items.push({
+      key: '/fabric-article-group',
+      Icon: CheckSquare,
+      label: 'Fabric Article',
+      children: [
+        { key: '/fabric-article', Icon: FileText, label: 'New articles' },
+        { key: '/fabric-article/old-articles', Icon: History, label: 'Old articles' },
+        { key: '/fabric-article/rejected', Icon: XCircle, label: 'Rejected' },
+        { key: '/fabric-article/created', Icon: CheckCircle2, label: 'Created' },
+        { key: '/fabric-article/failed', Icon: AlertTriangle, label: 'Failed Creations' },
       ],
     });
   }

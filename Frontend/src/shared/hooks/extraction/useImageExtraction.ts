@@ -169,7 +169,8 @@ export const useImageExtraction = () => {
         costPrice?: number;
         sellingPrice?: number;
         notes?: string;
-      }
+      },
+      presentationsType?: string,
     ) => {
       const discoveryEnabled = discoverySettings.enabled;
       addNotification({
@@ -228,11 +229,12 @@ export const useImageExtraction = () => {
             image: base64Image,
             schema,
             categoryName: categoryName ?? "",
-            discoveryMode: discoveryEnabled === true, // Explicit boolean check
+            discoveryMode: discoveryEnabled === true,
             fileName: row.originalFileName,
             folderName,
             ...(legacyScope.division    ? { department:     legacyScope.division    } : {}),
             ...(legacyScope.subDivision ? { subDepartment:  legacyScope.subDivision } : {}),
+            ...(presentationsType       ? { presentationsType }                      : {}),
           });
         }
 

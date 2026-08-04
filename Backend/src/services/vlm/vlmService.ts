@@ -3,6 +3,7 @@ import { SchemaItem, AttributeData, EnhancedExtractionResult } from '../../types
 import { OpenAIVLMProvider } from './providers/openaiProvider';
 import { ClaudeVLMProvider } from './providers/claudeProvider';
 import { GoogleVisionProvider } from './providers/googleVisionProvider';
+// GoogleVisionProvider imported above for typed access to extractAllAttributes
 // Disabled providers (deprecated endpoints or unavailable):
 // import { HuggingFaceVLMProvider } from './providers/huggingfaceProvider';
 // import { OllamaVLMProvider } from './providers/ollamaProvider';
@@ -149,7 +150,8 @@ export class VLMService {
       modelUsed: 'fashion-clip+llava' as any,
       processingTime: Date.now() - startTime,
       discoveries: [],
-      discoveryStats: { totalFound: 0, highConfidence: 0, schemaPromotable: 0, uniqueKeys: 0 }
+      discoveryStats: { totalFound: 0, highConfidence: 0, schemaPromotable: 0, uniqueKeys: 0 },
+      rawGeminiResponse: detailResult.rawGeminiResponse ?? fashionResult.rawGeminiResponse ?? null,
     };
   }
 
@@ -292,6 +294,21 @@ export class VLMService {
 
     if (confidenceValues.length === 0) return 0;
     return Math.round(confidenceValues.reduce((sum, conf) => sum + conf, 0) / confidenceValues.length);
+  }
+
+  /**
+   * Dedicated call for image_extraction_raw_data column.
+   * Uses a free-form comprehensive prompt — separate from the structured 42-attribute flow.
+   */
+  async extractAllFashionAttributes(image: string): Promise<Record<string, any> | null> {
+    const provider = this.providers.get('google-gemini') as GoogleVisionProvider | undefined;
+    if (!provider) return null;
+    try {
+      return await provider.extractAllAttributes(image);
+    } catch (err: any) {
+      console.warn('[VLMService] extractAllFashionAttributes failed:', err?.message);
+      return null;
+    }
   }
 
   /**

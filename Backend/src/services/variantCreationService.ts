@@ -7,6 +7,7 @@
  */
 import { randomUUID } from 'crypto';
 import { prismaClient as prisma } from '../utils/prisma';
+import { Prisma } from '../generated/prisma';
 import { upsert360ArticleFlatRow, mirror360FlatUpdate } from '../utils/mirror360Flat';
 
 /**
@@ -73,6 +74,7 @@ export async function createVariantsForGeneric(genericId: string): Promise<void>
       approvalStatus: _as, approvedBy: _ab, approvedAt: _aat,
       sapSyncStatus: _sss, sapArticleId: _sai, sapSyncMessage: _ssm,
       isGeneric: _ig, genericArticleId: _gai, variantSize: _vs, variantColor: _vc,
+      imageExtractionRawData: _ied1,
       ...rest
     } = generic;
 
@@ -96,6 +98,7 @@ export async function createVariantsForGeneric(genericId: string): Promise<void>
           size: size,
           colour: generic.colour || null,
           variantColor: generic.colour || null,
+          imageExtractionRawData: _ied1 ?? Prisma.DbNull,
         };
         await prisma.extractionResultFlat.create({ data: variantData });
 
@@ -153,6 +156,7 @@ export async function addColorVariants(
     approvalStatus: _as, approvedBy: _ab, approvedAt: _aat,
     sapSyncStatus: _sss, sapArticleId: _sai, sapSyncMessage: _ssm,
     isGeneric: _ig, genericArticleId: _gai, variantSize: _vs, variantColor: _vc,
+    imageExtractionRawData: _ied2,
     ...rest
   } = generic;
 
@@ -182,6 +186,7 @@ export async function addColorVariants(
         size: size,
         variantColor: color,
         colour: color,
+        imageExtractionRawData: _ied2 ?? Prisma.DbNull,
       };
       await prisma.extractionResultFlat.create({ data: colorVariantData });
 
