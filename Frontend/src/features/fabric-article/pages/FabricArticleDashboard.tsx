@@ -25,7 +25,7 @@ import { SIMPLIFIED_HIERARCHY } from '../../extraction/components/SimplifiedCate
 import { getMcCodeByMajorCategory, MAJOR_CATEGORY_ALLOWED_VALUES } from '../../../data/majorCategoryMcCodeMap';
 import { exportToExcel } from '../../../shared/utils/export/extractionExport';
 import { formatDivisionLabel } from '../../../shared/utils/ui/formatters';
-import type { DetailFilters, DetailNavigationState } from './ArticleDetailPage';
+import type { DetailFilters, DetailNavigationState } from './FabricArticleDetailPage';
 
 const inferMcCode = (majorCategory?: string | null) => getMcCodeByMajorCategory(majorCategory);
 
@@ -195,7 +195,7 @@ export default function ApproverDashboard({ pathType }: ApproverDashboardProps =
   // hard refresh and shared links keep the filters), then from the detail page's
   // Back-button navigation state, then defaults.
   const seed = (key: keyof DetailFilters, fallback: string) =>
-    searchParams.get(key) ?? restoredFilters?.[key] ?? fallback;
+    searchParams.get(key as string) ?? restoredFilters?.[key] ?? fallback;
 
   const [statusFilter, setStatusFilter] = useState<string>('ALL');
   const [searchText, setSearchText] = useState(() => seed('search', ''));
