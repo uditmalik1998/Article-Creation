@@ -298,7 +298,7 @@ const GROUP_COLORS: Record<string, string> = {
   'VA PRCS': '#fff0f6',
   BUSINESS: '#f9f0ff',
 };
-const GROUP_ORDER = ['FAB', 'BODY', 'VA ACC.', 'VA PRCS', 'BUSINESS'];
+const GROUP_ORDER = ['FAB'];
 
 // Construction & Fabric (FAB): these attributes must appear first, in this
 // exact order, regardless of the order the backend returns them in. Everything
@@ -1667,7 +1667,7 @@ const ArticleCard = React.memo(
           </div>
 
           {/* ─── MAIN GRID — image+info | attribute groups ─── */}
-          <div className="grid items-start gap-3 p-3 lg:grid-cols-[minmax(320px,28%)_1fr] xl:grid-cols-[minmax(360px,26%)_1fr] 2xl:grid-cols-[minmax(400px,24%)_1fr]">
+          <div className="grid items-start gap-3 p-3 lg:grid-cols-[minmax(320px,40%)_1fr] xl:grid-cols-[minmax(360px,40%)_1fr] 2xl:grid-cols-[minmax(400px,40%)_1fr]">
             {/* ─── LEFT: Image + Article Info + Reference ───
              *
              * Sticky rail: image + identity stay anchored to the viewport
@@ -1684,7 +1684,7 @@ const ArticleCard = React.memo(
                   </span>
                   <Badge variant="success" className="text-[9px]">1 / 1</Badge>
                 </div>
-                <div className="group relative aspect-square w-full bg-gradient-to-br from-slate-50 to-slate-100">
+                <div className="group relative h-[420px] w-full bg-gradient-to-br from-slate-50 to-slate-100">
                   {imgUrl ? (
                     <>
                       <img
@@ -1837,7 +1837,7 @@ const ArticleCard = React.memo(
               </div>
 
               {visibleAttrs.length > 0 ? (
-                <div className="grid auto-rows-min grid-cols-1 gap-3 md:grid-cols-2 xl:grid-cols-3">
+                <div className="grid auto-rows-min grid-cols-1 gap-3">
                   {activeGroups.map((g) => {
                     const style = GROUP_HEADER_STYLE[g.group] ?? { bg: '#f3f4f6', fg: '#374151', border: '#e5e7eb' };
                     const collapsed = isGroupCollapsed(g.group);
@@ -2078,8 +2078,10 @@ const ArticleCard = React.memo(
                         { label: 'RATE / COST', field: 'rate', editable: true, mandatory: true, isDropdown: false, isColor: false, isMarkdown: false },
                         { label: 'MRP', field: 'mrp', editable: true, mandatory: true, isDropdown: false, isColor: false, isMarkdown: false },
                         { label: 'COLOUR', field: 'colour', editable: true, mandatory: true, isDropdown: true, isColor: true, isMarkdown: false },
-                        { label: 'MARKDOWN', field: '_markdown', editable: false, mandatory: false, isDropdown: false, isColor: false, isMarkdown: true, isAfterTax: false },
-                        { label: 'AFTER TAX', field: '_afterTax', editable: false, mandatory: false, isDropdown: false, isColor: false, isMarkdown: false, isAfterTax: true },
+                        { label: 'ARTICLE FASHION TYPE', field: 'articleFashionType', editable: true, mandatory: false, isDropdown: true, isColor: false, isMarkdown: false, boldLabel: true },
+                        { label: 'SEGMENT', field: 'segment', editable: true, mandatory: false, isDropdown: false, isColor: false, isMarkdown: false, boldLabel: true },
+                        { label: 'MARKDOWN', field: '_markdown', editable: false, mandatory: false, isDropdown: false, isColor: false, isMarkdown: true, isAfterTax: false, boldLabel: true },
+                        { label: 'AFTER TAX', field: '_afterTax', editable: false, mandatory: false, isDropdown: false, isColor: false, isMarkdown: false, isAfterTax: true, boldLabel: true },
                       ].map((bom) => {
                         const isEditingBom = editingField === `bom_${bom.field}`;
                         const bomLocked = isFieldLocked(bom.field);
@@ -2094,6 +2096,10 @@ const ArticleCard = React.memo(
                             ? getMajCatGridEntry(effectiveMajCat, 'IMP ATBT') ??
                               attributes.find((a) => a.key === 'imp_atrbt2')?.allowedValues.map((v) => v.shortForm) ??
                               getCachedValues(item.division ?? '', 'impAtrbt2') ??
+                              []
+                            : bom.field === 'articleFashionType'
+                            ? attributes.find((a) => a.key === 'article_fashion_type')?.allowedValues.map((v) => v.shortForm) ??
+                              getCachedValues(item.division ?? '', 'articleFashionType') ??
                               []
                             : getCachedValues(item.division ?? '', bom.field) ?? []
                           : [];
@@ -2117,7 +2123,7 @@ const ArticleCard = React.memo(
                               className="flex-1 truncate text-[11px]"
                               style={{
                                 color: bom.mandatory && isEmpty && !isLocked ? '#dc2626' : '#374151',
-                                fontWeight: bom.mandatory ? 600 : 400,
+                                fontWeight: bom.mandatory || (bom as any).boldLabel ? 600 : 400,
                               }}
                             >
                               {bom.mandatory && <span className="mr-0.5 text-red-500">*</span>}

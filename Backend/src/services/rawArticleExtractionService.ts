@@ -20,6 +20,7 @@
 import { prismaClient as prisma, isDbCircuitOpen, openDbCircuit } from '../utils/prisma';
 import { enrichSrmRowWithVlmAdmin, insertRawArticleAsFlat, type SrmRow } from './srmSyncService';
 
+
 // ── Cutoff: presentations on or before this date are already in extraction_results_flat
 //    via the old direct pipeline. Only stage rows AFTER this date to raw_articles.
 export const RAW_PIPELINE_CUTOFF = new Date('2026-05-26T23:59:59.999Z');
@@ -144,6 +145,7 @@ export async function runRawArticleExtraction(
               no_of_colors:               row.noOfColors    ?? 0,
               price:                      row.price != null ? Number(row.price) : 0,
               image_url:                  row.imageUrl,
+              presentations_type:         (row as any).presentationsType ?? null,
             };
             const created = await insertRawArticleAsFlat(srmRow, row.id);
             if (created) {
@@ -256,6 +258,7 @@ async function processOneRow(row: {
         no_of_colors:               row.noOfColors    ?? 0,
         price:                      row.price != null ? Number(row.price) : 0,
         image_url:                  row.imageUrl,
+        presentations_type:         (row as any).presentationsType ?? null,
       };
 
       // Pass row.id so srm_unique_id is set on the flat record from creation

@@ -11,6 +11,7 @@ export interface BackendExtractionRequest {
   discoveryMode?: boolean;
   fileName?: string; // Original filename for backend to use in saving
   folderName?: string; // Folder name for vendor code derivation
+  presentationsType?: string;
 }
 
 export interface BackendExtractionResponse {

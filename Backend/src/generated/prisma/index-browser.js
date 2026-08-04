@@ -363,6 +363,7 @@ exports.Prisma.ExtractionResultFlatScalarFieldEnum = {
   fashionGrid: 'fashionGrid',
   year: 'year',
   articleType: 'articleType',
+  presentationsType: 'presentationsType',
   approvalStatus: 'approvalStatus',
   pdStatus: 'pdStatus',
   approvedBy: 'approvedBy',
@@ -378,7 +379,8 @@ exports.Prisma.ExtractionResultFlatScalarFieldEnum = {
   sapArticleId: 'sapArticleId',
   sapSyncMessage: 'sapSyncMessage',
   srmOriginalDesignNumber: 'srmOriginalDesignNumber',
-  srmUniqueId: 'srmUniqueId'
+  srmUniqueId: 'srmUniqueId',
+  imageExtractionRawData: 'imageExtractionRawData'
 };
 
 exports.Prisma.ModelGenerationResultScalarFieldEnum = {
@@ -725,6 +727,7 @@ exports.Prisma.RawArticleScalarFieldEnum = {
   noOfColors: 'noOfColors',
   price: 'price',
   imageUrl: 'imageUrl',
+  presentationsType: 'presentationsType',
   uniqueKey: 'uniqueKey',
   source: 'source',
   status: 'status',
@@ -1017,6 +1020,7 @@ exports.Prisma.ExtractionResultFlatOrderByRelevanceFieldEnum = {
   fashionGrid: 'fashionGrid',
   year: 'year',
   articleType: 'articleType',
+  presentationsType: 'presentationsType',
   source: 'source',
   imageUncPath: 'imageUncPath',
   genericArticleId: 'genericArticleId',
@@ -1281,6 +1285,7 @@ exports.Prisma.RawArticleOrderByRelevanceFieldEnum = {
   designNumber: 'designNumber',
   fabric: 'fabric',
   imageUrl: 'imageUrl',
+  presentationsType: 'presentationsType',
   uniqueKey: 'uniqueKey',
   source: 'source',
   errorMessage: 'errorMessage',

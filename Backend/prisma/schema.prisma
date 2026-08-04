@@ -337,6 +337,7 @@ model ExtractionResultFlat {
   fashionGrid                 String?       @map("fashion_grid") @db.VarChar(100)
   year                        String?       @db.VarChar(20)
   articleType                 String?       @map("article_type") @db.VarChar(100)
+  presentationsType           String?       @map("Presentations_type") @db.VarChar(100)
 
   // Approval Workflow
   approvalStatus              ApprovalStatus @default(PENDING) @map("approval_status")
@@ -369,6 +370,9 @@ model ExtractionResultFlat {
   srmOriginalDesignNumber     String?        @map("srm_original_design_number") @db.VarChar(255)
   // FK to raw_articles.id — only set when extraction came from SRM/raw_articles flow
   srmUniqueId                 String?        @map("srm_unique_id") @db.VarChar(100)
+
+  // Raw Gemini response: full JSON output from VLM including all_extracted_attributes
+  imageExtractionRawData      Json?          @map("image_extraction_raw_data")
 
   job                         ExtractionJob? @relation(fields: [jobId], references: [id], onDelete: Cascade)
   srmSyncRunItems             SrmSyncRunItem[]
@@ -1019,6 +1023,7 @@ model RawArticle {
   noOfColors                 Int?              @map("no_of_colors")
   price                      Decimal?          @db.Decimal(10, 2)
   imageUrl                   String?           @map("image_url")
+  presentationsType          String?           @map("Presentations_type") @db.VarChar(200)
 
   // Dedup key: presentation_no::design_number::image_url (set on insert, never changed)
   uniqueKey                  String            @unique @map("unique_key")

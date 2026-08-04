@@ -95,7 +95,7 @@ export class GoogleVisionProvider implements VLMProvider {
         }
       }
 
-      const { attributes, extractedMetadata } = await this.parseResponse(response!.content, request.schema);
+      const { attributes, extractedMetadata, rawGeminiResponse } = await this.parseResponse(response!.content, request.schema);
 
       const confidence = this.calculateConfidence(attributes);
 
@@ -116,11 +116,57 @@ export class GoogleVisionProvider implements VLMProvider {
           schemaPromotable: 0,
           uniqueKeys: 0
         },
-        extractedMetadata: extractedMetadata || undefined
+        extractedMetadata: extractedMetadata || undefined,
+        rawGeminiResponse: rawGeminiResponse || null,
       };
     } catch (error) {
       console.error(`❌ [Google Vision] Extraction failed:`, error instanceof Error ? error.message : 'Unknown error');
       throw new Error(`Google Vision extraction failed: ${error instanceof Error ? error.message : 'Unknown error'}`);
+    }
+  }
+
+  /**
+   * Separate comprehensive extraction call for image_extraction_raw_data column.
+   * Uses a free-form prompt to extract every visually identifiable attribute
+   * as a flat key-value JSON — independent of the schema/dropdown constraint flow.
+   */
+  async extractAllAttributes(imageData: string): Promise<Record<string, any> | null> {
+    if (!this.client) return null;
+
+    const prompt = `You are a fashion AI analyst. Extract attributes comprehensively from this garment.
+
+Guidelines:
+- Extract all visible attributes with high confidence
+- Focus on clearly visible features
+- Be precise with colors, patterns, and materials
+- Note construction details
+- Identify styling elements
+
+Priority order:
+1. Color and pattern accuracy
+2. Fabric identification
+3. Construction details
+4. Fit and styling
+5. All other visible features
+
+Return a flat JSON object with every attribute as a key-value pair. Include as many attributes as you can identify. Examples of keys to include (but not limited to):
+color, pattern, fabric, fit, sleeve_length, neck_type, collar, placket, pocket_type, button_type, zipper, wash, length, hem_type, waistband, print_type, embroidery, embellishments, lining, stitching, hardware, silhouette, garment_type, brand_visible, care_label, size_label, weight_feel, texture, sheen, stretch, layering, closure_type, cuff_style, bottom_fold, drawcord, patches, season_feel, occasion_type
+
+Return JSON only, no markdown. Just the flat key-value JSON object.`;
+
+    try {
+      const resolvedImage = await this.resolveImageToBase64(imageData);
+      const response = await this.callGeminiVision(resolvedImage, prompt);
+      const clean = (response.content || '').replace(/```json\n?|\n?```/g, '').trim();
+      if (!clean) return null;
+      try {
+        return JSON.parse(clean);
+      } catch {
+        return repairAndParseJson(clean);
+      }
+    } catch (err: any) {
+      console.warn(`[Google Vision] extractAllAttributes failed: ${err?.message}`);
+      return null;
     }
   }
 
@@ -879,8 +925,13 @@ TOPWEAR EXAMPLE (SHIRT):
       "visualConfidence": 75,
       "reasoning": "what you saw + which database value matched"
     }
+  },
+  "all_extracted_attributes": {
+    "any_visually_identifiable_key": "value as a plain string"
   }
 }
+
+IMPORTANT: In "all_extracted_attributes", include EVERY fashion/product attribute you can identify from the image that is NOT already listed in the "attributes" section above. Use descriptive key names (snake_case). Values must be plain strings. Include anything you can visually observe: garment construction details, embellishments, hardware, fabric texture, silhouette, styling details, care symbols, brand elements, etc. Do NOT repeat keys that are already in "attributes". If nothing additional is found, return an empty object {}.
 
 {VALIDATION CHECKLIST:
 □ Garment type identified correctly (TOPWEAR/BOTTOMWEAR/etc.)
@@ -1006,7 +1057,7 @@ GOAL: Achieve 90%+ accuracy. Take your time. Be thorough. Be precise.`;
     };
   }
 
-  private async parseResponse(content: string, schema: any[]): Promise<{ attributes: AttributeData; extractedMetadata?: any }> {
+  private async parseResponse(content: string, schema: any[]): Promise<{ attributes: AttributeData; extractedMetadata?: any; rawGeminiResponse?: any }> {
     try {
       const cleanContent = (content || '').replace(/```json\n?|\n?```/g, '').trim();
       if (!cleanContent) {
@@ -1421,7 +1472,7 @@ GOAL: Achieve 90%+ accuracy. Take your time. Be thorough. Be precise.`;
         }
       }
 
-      return { attributes, extractedMetadata: mergedMetadata };
+      return { attributes, extractedMetadata: mergedMetadata, rawGeminiResponse: parsed };
     } catch (error) {
       console.error('❌ [Google Vision] Failed to parse response:', error);
       throw new Error(`Failed to parse Google Vision response: ${error instanceof Error ? error.message : 'Unknown error'}`);

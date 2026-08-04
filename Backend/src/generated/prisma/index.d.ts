@@ -14720,6 +14720,7 @@ export namespace Prisma {
     fashionGrid: string | null
     year: string | null
     articleType: string | null
+    presentationsType: string | null
     approvalStatus: $Enums.ApprovalStatus | null
     pdStatus: $Enums.PdStatus | null
     approvedBy: number | null
@@ -14850,6 +14851,7 @@ export namespace Prisma {
     fashionGrid: string | null
     year: string | null
     articleType: string | null
+    presentationsType: string | null
     approvalStatus: $Enums.ApprovalStatus | null
     pdStatus: $Enums.PdStatus | null
     approvedBy: number | null
@@ -14980,6 +14982,7 @@ export namespace Prisma {
     fashionGrid: number
     year: number
     articleType: number
+    presentationsType: number
     approvalStatus: number
     pdStatus: number
     approvedBy: number
@@ -14996,6 +14999,7 @@ export namespace Prisma {
     sapSyncMessage: number
     srmOriginalDesignNumber: number
     srmUniqueId: number
+    imageExtractionRawData: number
     _all: number
   }
 
@@ -15142,6 +15146,7 @@ export namespace Prisma {
     fashionGrid?: true
     year?: true
     articleType?: true
+    presentationsType?: true
     approvalStatus?: true
     pdStatus?: true
     approvedBy?: true
@@ -15272,6 +15277,7 @@ export namespace Prisma {
     fashionGrid?: true
     year?: true
     articleType?: true
+    presentationsType?: true
     approvalStatus?: true
     pdStatus?: true
     approvedBy?: true
@@ -15402,6 +15408,7 @@ export namespace Prisma {
     fashionGrid?: true
     year?: true
     articleType?: true
+    presentationsType?: true
     approvalStatus?: true
     pdStatus?: true
     approvedBy?: true
@@ -15418,6 +15425,7 @@ export namespace Prisma {
     sapSyncMessage?: true
     srmOriginalDesignNumber?: true
     srmUniqueId?: true
+    imageExtractionRawData?: true
     _all?: true
   }
 
@@ -15619,6 +15627,7 @@ export namespace Prisma {
     fashionGrid: string | null
     year: string | null
     articleType: string | null
+    presentationsType: string | null
     approvalStatus: $Enums.ApprovalStatus
     pdStatus: $Enums.PdStatus
     approvedBy: number | null
@@ -15635,6 +15644,7 @@ export namespace Prisma {
     sapSyncMessage: string | null
     srmOriginalDesignNumber: string | null
     srmUniqueId: string | null
+    imageExtractionRawData: JsonValue | null
     _count: ExtractionResultFlatCountAggregateOutputType | null
     _avg: ExtractionResultFlatAvgAggregateOutputType | null
     _sum: ExtractionResultFlatSumAggregateOutputType | null
@@ -15768,6 +15778,7 @@ export namespace Prisma {
     fashionGrid?: boolean
     year?: boolean
     articleType?: boolean
+    presentationsType?: boolean
     approvalStatus?: boolean
     pdStatus?: boolean
     approvedBy?: boolean
@@ -15784,6 +15795,7 @@ export namespace Prisma {
     sapSyncMessage?: boolean
     srmOriginalDesignNumber?: boolean
     srmUniqueId?: boolean
+    imageExtractionRawData?: boolean
     approver?: boolean | ExtractionResultFlat$approverArgs<ExtArgs>
     job?: boolean | ExtractionResultFlat$jobArgs<ExtArgs>
     srmSyncRunItems?: boolean | ExtractionResultFlat$srmSyncRunItemsArgs<ExtArgs>
@@ -15902,6 +15914,7 @@ export namespace Prisma {
     fashionGrid?: boolean
     year?: boolean
     articleType?: boolean
+    presentationsType?: boolean
     approvalStatus?: boolean
     pdStatus?: boolean
     approvedBy?: boolean
@@ -15918,6 +15931,7 @@ export namespace Prisma {
     sapSyncMessage?: boolean
     srmOriginalDesignNumber?: boolean
     srmUniqueId?: boolean
+    imageExtractionRawData?: boolean
     approver?: boolean | ExtractionResultFlat$approverArgs<ExtArgs>
     job?: boolean | ExtractionResultFlat$jobArgs<ExtArgs>
   }, ExtArgs["result"]["extractionResultFlat"]>
@@ -16034,6 +16048,7 @@ export namespace Prisma {
     fashionGrid?: boolean
     year?: boolean
     articleType?: boolean
+    presentationsType?: boolean
     approvalStatus?: boolean
     pdStatus?: boolean
     approvedBy?: boolean
@@ -16050,6 +16065,7 @@ export namespace Prisma {
     sapSyncMessage?: boolean
     srmOriginalDesignNumber?: boolean
     srmUniqueId?: boolean
+    imageExtractionRawData?: boolean
     approver?: boolean | ExtractionResultFlat$approverArgs<ExtArgs>
     job?: boolean | ExtractionResultFlat$jobArgs<ExtArgs>
   }, ExtArgs["result"]["extractionResultFlat"]>
@@ -16166,6 +16182,7 @@ export namespace Prisma {
     fashionGrid?: boolean
     year?: boolean
     articleType?: boolean
+    presentationsType?: boolean
     approvalStatus?: boolean
     pdStatus?: boolean
     approvedBy?: boolean
@@ -16182,9 +16199,10 @@ export namespace Prisma {
     sapSyncMessage?: boolean
     srmOriginalDesignNumber?: boolean
     srmUniqueId?: boolean
+    imageExtractionRawData?: boolean
   }
 
-  export type ExtractionResultFlatOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<"id" | "jobId" | "imageName" | "imageUrl" | "articleNumber" | "extractionStatus" | "aiModel" | "avgConfidence" | "processingTimeMs" | "totalAttributes" | "extractedCount" | "inputTokens" | "outputTokens" | "totalTokens" | "apiCost" | "userId" | "userName" | "extractionDate" | "createdAt" | "updatedAt" | "majorCategory" | "vendorName" | "designNumber" | "pptNumber" | "rate" | "size" | "yarn1" | "yarn2" | "fabricMainMvgr" | "weave" | "weaveFullForm" | "composition" | "finish" | "gsm" | "macroMvgr" | "macroMvgrFullForm" | "mainMvgr" | "mainMvgrFullForm" | "mFab2" | "mFab2FullForm" | "shade" | "weight" | "lycra" | "neck" | "neckDetails" | "collar" | "placket" | "sleeve" | "bottomFold" | "frontOpenStyle" | "pocketType" | "fit" | "pattern" | "length" | "colour" | "drawcord" | "button" | "zipper" | "zipColour" | "printType" | "printStyle" | "printPlacement" | "patches" | "patchesType" | "embroidery" | "embroideryType" | "wash" | "fatherBelt" | "childBelt" | "division" | "subDivision" | "referenceArticleNumber" | "referenceArticleDescription" | "collarStyle" | "sleeveFold" | "mSet" | "noOfPocket" | "extraPocket" | "dcShape" | "btnColour" | "fCount" | "fConstruction" | "fOunce" | "fWidth" | "fabDiv" | "fabVdr" | "htrfType" | "htrfStyle" | "embPlacement" | "ageGroup" | "mNoOfSize" | "mNoOfClr" | "articleFashionType" | "articleDimension" | "bodyArticle" | "bodyArticleDescription" | "fabricArticleNumber" | "fabricArticleDescription" | "attrArticleNums" | "mvgrBrandVendor" | "vendorCode" | "mrp" | "impAtrbt2" | "mcCode" | "segment" | "season" | "hsnTaxCode" | "articleDescription" | "fashionGrid" | "year" | "articleType" | "approvalStatus" | "pdStatus" | "approvedBy" | "approvedAt" | "source" | "imageUncPath" | "isOldArticle" | "isGeneric" | "genericArticleId" | "variantSize" | "variantColor" | "sapSyncStatus" | "sapArticleId" | "sapSyncMessage" | "srmOriginalDesignNumber" | "srmUniqueId", ExtArgs["result"]["extractionResultFlat"]>
+  export type ExtractionResultFlatOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<"id" | "jobId" | "imageName" | "imageUrl" | "articleNumber" | "extractionStatus" | "aiModel" | "avgConfidence" | "processingTimeMs" | "totalAttributes" | "extractedCount" | "inputTokens" | "outputTokens" | "totalTokens" | "apiCost" | "userId" | "userName" | "extractionDate" | "createdAt" | "updatedAt" | "majorCategory" | "vendorName" | "designNumber" | "pptNumber" | "rate" | "size" | "yarn1" | "yarn2" | "fabricMainMvgr" | "weave" | "weaveFullForm" | "composition" | "finish" | "gsm" | "macroMvgr" | "macroMvgrFullForm" | "mainMvgr" | "mainMvgrFullForm" | "mFab2" | "mFab2FullForm" | "shade" | "weight" | "lycra" | "neck" | "neckDetails" | "collar" | "placket" | "sleeve" | "bottomFold" | "frontOpenStyle" | "pocketType" | "fit" | "pattern" | "length" | "colour" | "drawcord" | "button" | "zipper" | "zipColour" | "printType" | "printStyle" | "printPlacement" | "patches" | "patchesType" | "embroidery" | "embroideryType" | "wash" | "fatherBelt" | "childBelt" | "division" | "subDivision" | "referenceArticleNumber" | "referenceArticleDescription" | "collarStyle" | "sleeveFold" | "mSet" | "noOfPocket" | "extraPocket" | "dcShape" | "btnColour" | "fCount" | "fConstruction" | "fOunce" | "fWidth" | "fabDiv" | "fabVdr" | "htrfType" | "htrfStyle" | "embPlacement" | "ageGroup" | "mNoOfSize" | "mNoOfClr" | "articleFashionType" | "articleDimension" | "bodyArticle" | "bodyArticleDescription" | "fabricArticleNumber" | "fabricArticleDescription" | "attrArticleNums" | "mvgrBrandVendor" | "vendorCode" | "mrp" | "impAtrbt2" | "mcCode" | "segment" | "season" | "hsnTaxCode" | "articleDescription" | "fashionGrid" | "year" | "articleType" | "presentationsType" | "approvalStatus" | "pdStatus" | "approvedBy" | "approvedAt" | "source" | "imageUncPath" | "isOldArticle" | "isGeneric" | "genericArticleId" | "variantSize" | "variantColor" | "sapSyncStatus" | "sapArticleId" | "sapSyncMessage" | "srmOriginalDesignNumber" | "srmUniqueId" | "imageExtractionRawData", ExtArgs["result"]["extractionResultFlat"]>
   export type ExtractionResultFlatInclude<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
     approver?: boolean | ExtractionResultFlat$approverArgs<ExtArgs>
     job?: boolean | ExtractionResultFlat$jobArgs<ExtArgs>
@@ -16319,6 +16337,7 @@ export namespace Prisma {
       fashionGrid: string | null
       year: string | null
       articleType: string | null
+      presentationsType: string | null
       approvalStatus: $Enums.ApprovalStatus
       pdStatus: $Enums.PdStatus
       approvedBy: number | null
@@ -16335,6 +16354,7 @@ export namespace Prisma {
       sapSyncMessage: string | null
       srmOriginalDesignNumber: string | null
       srmUniqueId: string | null
+      imageExtractionRawData: Prisma.JsonValue | null
     }, ExtArgs["result"]["extractionResultFlat"]>
     composites: {}
   }
@@ -16872,6 +16892,7 @@ export namespace Prisma {
     readonly fashionGrid: FieldRef<"ExtractionResultFlat", 'String'>
     readonly year: FieldRef<"ExtractionResultFlat", 'String'>
     readonly articleType: FieldRef<"ExtractionResultFlat", 'String'>
+    readonly presentationsType: FieldRef<"ExtractionResultFlat", 'String'>
     readonly approvalStatus: FieldRef<"ExtractionResultFlat", 'ApprovalStatus'>
     readonly pdStatus: FieldRef<"ExtractionResultFlat", 'PdStatus'>
     readonly approvedBy: FieldRef<"ExtractionResultFlat", 'Int'>
@@ -16888,6 +16909,7 @@ export namespace Prisma {
     readonly sapSyncMessage: FieldRef<"ExtractionResultFlat", 'String'>
     readonly srmOriginalDesignNumber: FieldRef<"ExtractionResultFlat", 'String'>
     readonly srmUniqueId: FieldRef<"ExtractionResultFlat", 'String'>
+    readonly imageExtractionRawData: FieldRef<"ExtractionResultFlat", 'Json'>
   }
     
 
@@ -39214,6 +39236,7 @@ export namespace Prisma {
     noOfColors: number | null
     price: Decimal | null
     imageUrl: string | null
+    presentationsType: string | null
     uniqueKey: string | null
     source: string | null
     status: $Enums.RawArticleStatus | null
@@ -39241,6 +39264,7 @@ export namespace Prisma {
     noOfColors: number | null
     price: Decimal | null
     imageUrl: string | null
+    presentationsType: string | null
     uniqueKey: string | null
     source: string | null
     status: $Enums.RawArticleStatus | null
@@ -39268,6 +39292,7 @@ export namespace Prisma {
     noOfColors: number
     price: number
     imageUrl: number
+    presentationsType: number
     uniqueKey: number
     source: number
     status: number
@@ -39310,6 +39335,7 @@ export namespace Prisma {
     noOfColors?: true
     price?: true
     imageUrl?: true
+    presentationsType?: true
     uniqueKey?: true
     source?: true
     status?: true
@@ -39337,6 +39363,7 @@ export namespace Prisma {
     noOfColors?: true
     price?: true
     imageUrl?: true
+    presentationsType?: true
     uniqueKey?: true
     source?: true
     status?: true
@@ -39364,6 +39391,7 @@ export namespace Prisma {
     noOfColors?: true
     price?: true
     imageUrl?: true
+    presentationsType?: true
     uniqueKey?: true
     source?: true
     status?: true
@@ -39479,6 +39507,7 @@ export namespace Prisma {
     noOfColors: number | null
     price: Decimal | null
     imageUrl: string | null
+    presentationsType: string | null
     uniqueKey: string
     source: string | null
     status: $Enums.RawArticleStatus
@@ -39526,6 +39555,7 @@ export namespace Prisma {
     noOfColors?: boolean
     price?: boolean
     imageUrl?: boolean
+    presentationsType?: boolean
     uniqueKey?: boolean
     source?: boolean
     status?: boolean
@@ -39554,6 +39584,7 @@ export namespace Prisma {
     noOfColors?: boolean
     price?: boolean
     imageUrl?: boolean
+    presentationsType?: boolean
     uniqueKey?: boolean
     source?: boolean
     status?: boolean
@@ -39582,6 +39613,7 @@ export namespace Prisma {
     noOfColors?: boolean
     price?: boolean
     imageUrl?: boolean
+    presentationsType?: boolean
     uniqueKey?: boolean
     source?: boolean
     status?: boolean
@@ -39610,6 +39642,7 @@ export namespace Prisma {
     noOfColors?: boolean
     price?: boolean
     imageUrl?: boolean
+    presentationsType?: boolean
     uniqueKey?: boolean
     source?: boolean
     status?: boolean
@@ -39624,7 +39657,7 @@ export namespace Prisma {
     updatedAt?: boolean
   }
 
-  export type RawArticleOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<"id" | "presentationNo" | "vendorCode" | "vendorName" | "division" | "subDivision" | "majorCategory" | "presentationReceivedDate" | "designNumber" | "fabric" | "noOfColors" | "price" | "imageUrl" | "uniqueKey" | "source" | "status" | "retryCount" | "errorMessage" | "extractedData" | "extractedAt" | "flatId" | "lockedUntil" | "articleNumber" | "createdAt" | "updatedAt", ExtArgs["result"]["rawArticle"]>
+  export type RawArticleOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<"id" | "presentationNo" | "vendorCode" | "vendorName" | "division" | "subDivision" | "majorCategory" | "presentationReceivedDate" | "designNumber" | "fabric" | "noOfColors" | "price" | "imageUrl" | "presentationsType" | "uniqueKey" | "source" | "status" | "retryCount" | "errorMessage" | "extractedData" | "extractedAt" | "flatId" | "lockedUntil" | "articleNumber" | "createdAt" | "updatedAt", ExtArgs["result"]["rawArticle"]>
 
   export type $RawArticlePayload<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
     name: "RawArticle"
@@ -39643,6 +39676,7 @@ export namespace Prisma {
       noOfColors: number | null
       price: Prisma.Decimal | null
       imageUrl: string | null
+      presentationsType: string | null
       uniqueKey: string
       source: string | null
       status: $Enums.RawArticleStatus
@@ -40091,6 +40125,7 @@ export namespace Prisma {
     readonly noOfColors: FieldRef<"RawArticle", 'Int'>
     readonly price: FieldRef<"RawArticle", 'Decimal'>
     readonly imageUrl: FieldRef<"RawArticle", 'String'>
+    readonly presentationsType: FieldRef<"RawArticle", 'String'>
     readonly uniqueKey: FieldRef<"RawArticle", 'String'>
     readonly source: FieldRef<"RawArticle", 'String'>
     readonly status: FieldRef<"RawArticle", 'RawArticleStatus'>
@@ -48699,6 +48734,7 @@ export namespace Prisma {
     fashionGrid: 'fashionGrid',
     year: 'year',
     articleType: 'articleType',
+    presentationsType: 'presentationsType',
     approvalStatus: 'approvalStatus',
     pdStatus: 'pdStatus',
     approvedBy: 'approvedBy',
@@ -48714,7 +48750,8 @@ export namespace Prisma {
     sapArticleId: 'sapArticleId',
     sapSyncMessage: 'sapSyncMessage',
     srmOriginalDesignNumber: 'srmOriginalDesignNumber',
-    srmUniqueId: 'srmUniqueId'
+    srmUniqueId: 'srmUniqueId',
+    imageExtractionRawData: 'imageExtractionRawData'
   };
 
   export type ExtractionResultFlatScalarFieldEnum = (typeof ExtractionResultFlatScalarFieldEnum)[keyof typeof ExtractionResultFlatScalarFieldEnum]
@@ -49118,6 +49155,7 @@ export namespace Prisma {
     noOfColors: 'noOfColors',
     price: 'price',
     imageUrl: 'imageUrl',
+    presentationsType: 'presentationsType',
     uniqueKey: 'uniqueKey',
     source: 'source',
     status: 'status',
@@ -49476,6 +49514,7 @@ export namespace Prisma {
     fashionGrid: 'fashionGrid',
     year: 'year',
     articleType: 'articleType',
+    presentationsType: 'presentationsType',
     source: 'source',
     imageUncPath: 'imageUncPath',
     genericArticleId: 'genericArticleId',
@@ -49797,6 +49836,7 @@ export namespace Prisma {
     designNumber: 'designNumber',
     fabric: 'fabric',
     imageUrl: 'imageUrl',
+    presentationsType: 'presentationsType',
     uniqueKey: 'uniqueKey',
     source: 'source',
     errorMessage: 'errorMessage',
@@ -51089,6 +51129,7 @@ export namespace Prisma {
     fashionGrid?: StringNullableFilter<"ExtractionResultFlat"> | string | null
     year?: StringNullableFilter<"ExtractionResultFlat"> | string | null
     articleType?: StringNullableFilter<"ExtractionResultFlat"> | string | null
+    presentationsType?: StringNullableFilter<"ExtractionResultFlat"> | string | null
     approvalStatus?: EnumApprovalStatusFilter<"ExtractionResultFlat"> | $Enums.ApprovalStatus
     pdStatus?: EnumPdStatusFilter<"ExtractionResultFlat"> | $Enums.PdStatus
     approvedBy?: IntNullableFilter<"ExtractionResultFlat"> | number | null
@@ -51105,6 +51146,7 @@ export namespace Prisma {
     sapSyncMessage?: StringNullableFilter<"ExtractionResultFlat"> | string | null
     srmOriginalDesignNumber?: StringNullableFilter<"ExtractionResultFlat"> | string | null
     srmUniqueId?: StringNullableFilter<"ExtractionResultFlat"> | string | null
+    imageExtractionRawData?: JsonNullableFilter<"ExtractionResultFlat">
     approver?: XOR<UserNullableScalarRelationFilter, UserWhereInput> | null
     job?: XOR<ExtractionJobNullableScalarRelationFilter, ExtractionJobWhereInput> | null
     srmSyncRunItems?: SrmSyncRunItemListRelationFilter
@@ -51222,6 +51264,7 @@ export namespace Prisma {
     fashionGrid?: SortOrderInput | SortOrder
     year?: SortOrderInput | SortOrder
     articleType?: SortOrderInput | SortOrder
+    presentationsType?: SortOrderInput | SortOrder
     approvalStatus?: SortOrder
     pdStatus?: SortOrder
     approvedBy?: SortOrderInput | SortOrder
@@ -51238,6 +51281,7 @@ export namespace Prisma {
     sapSyncMessage?: SortOrderInput | SortOrder
     srmOriginalDesignNumber?: SortOrderInput | SortOrder
     srmUniqueId?: SortOrderInput | SortOrder
+    imageExtractionRawData?: SortOrderInput | SortOrder
     approver?: UserOrderByWithRelationInput
     job?: ExtractionJobOrderByWithRelationInput
     srmSyncRunItems?: SrmSyncRunItemOrderByRelationAggregateInput
@@ -51360,6 +51404,7 @@ export namespace Prisma {
     fashionGrid?: StringNullableFilter<"ExtractionResultFlat"> | string | null
     year?: StringNullableFilter<"ExtractionResultFlat"> | string | null
     articleType?: StringNullableFilter<"ExtractionResultFlat"> | string | null
+    presentationsType?: StringNullableFilter<"ExtractionResultFlat"> | string | null
     approvalStatus?: EnumApprovalStatusFilter<"ExtractionResultFlat"> | $Enums.ApprovalStatus
     pdStatus?: EnumPdStatusFilter<"ExtractionResultFlat"> | $Enums.PdStatus
     approvedBy?: IntNullableFilter<"ExtractionResultFlat"> | number | null
@@ -51375,6 +51420,7 @@ export namespace Prisma {
     sapSyncMessage?: StringNullableFilter<"ExtractionResultFlat"> | string | null
     srmOriginalDesignNumber?: StringNullableFilter<"ExtractionResultFlat"> | string | null
     srmUniqueId?: StringNullableFilter<"ExtractionResultFlat"> | string | null
+    imageExtractionRawData?: JsonNullableFilter<"ExtractionResultFlat">
     approver?: XOR<UserNullableScalarRelationFilter, UserWhereInput> | null
     job?: XOR<ExtractionJobNullableScalarRelationFilter, ExtractionJobWhereInput> | null
     srmSyncRunItems?: SrmSyncRunItemListRelationFilter
@@ -51492,6 +51538,7 @@ export namespace Prisma {
     fashionGrid?: SortOrderInput | SortOrder
     year?: SortOrderInput | SortOrder
     articleType?: SortOrderInput | SortOrder
+    presentationsType?: SortOrderInput | SortOrder
     approvalStatus?: SortOrder
     pdStatus?: SortOrder
     approvedBy?: SortOrderInput | SortOrder
@@ -51508,6 +51555,7 @@ export namespace Prisma {
     sapSyncMessage?: SortOrderInput | SortOrder
     srmOriginalDesignNumber?: SortOrderInput | SortOrder
     srmUniqueId?: SortOrderInput | SortOrder
+    imageExtractionRawData?: SortOrderInput | SortOrder
     _count?: ExtractionResultFlatCountOrderByAggregateInput
     _avg?: ExtractionResultFlatAvgOrderByAggregateInput
     _max?: ExtractionResultFlatMaxOrderByAggregateInput
@@ -51630,6 +51678,7 @@ export namespace Prisma {
     fashionGrid?: StringNullableWithAggregatesFilter<"ExtractionResultFlat"> | string | null
     year?: StringNullableWithAggregatesFilter<"ExtractionResultFlat"> | string | null
     articleType?: StringNullableWithAggregatesFilter<"ExtractionResultFlat"> | string | null
+    presentationsType?: StringNullableWithAggregatesFilter<"ExtractionResultFlat"> | string | null
     approvalStatus?: EnumApprovalStatusWithAggregatesFilter<"ExtractionResultFlat"> | $Enums.ApprovalStatus
     pdStatus?: EnumPdStatusWithAggregatesFilter<"ExtractionResultFlat"> | $Enums.PdStatus
     approvedBy?: IntNullableWithAggregatesFilter<"ExtractionResultFlat"> | number | null
@@ -51646,6 +51695,7 @@ export namespace Prisma {
     sapSyncMessage?: StringNullableWithAggregatesFilter<"ExtractionResultFlat"> | string | null
     srmOriginalDesignNumber?: StringNullableWithAggregatesFilter<"ExtractionResultFlat"> | string | null
     srmUniqueId?: StringNullableWithAggregatesFilter<"ExtractionResultFlat"> | string | null
+    imageExtractionRawData?: JsonNullableWithAggregatesFilter<"ExtractionResultFlat">
   }
 
   export type ModelGenerationResultWhereInput = {
@@ -53637,6 +53687,7 @@ export namespace Prisma {
     noOfColors?: IntNullableFilter<"RawArticle"> | number | null
     price?: DecimalNullableFilter<"RawArticle"> | Decimal | DecimalJsLike | number | string | null
     imageUrl?: StringNullableFilter<"RawArticle"> | string | null
+    presentationsType?: StringNullableFilter<"RawArticle"> | string | null
     uniqueKey?: StringFilter<"RawArticle"> | string
     source?: StringNullableFilter<"RawArticle"> | string | null
     status?: EnumRawArticleStatusFilter<"RawArticle"> | $Enums.RawArticleStatus
@@ -53665,6 +53716,7 @@ export namespace Prisma {
     noOfColors?: SortOrderInput | SortOrder
     price?: SortOrderInput | SortOrder
     imageUrl?: SortOrderInput | SortOrder
+    presentationsType?: SortOrderInput | SortOrder
     uniqueKey?: SortOrder
     source?: SortOrderInput | SortOrder
     status?: SortOrder
@@ -53698,6 +53750,7 @@ export namespace Prisma {
     noOfColors?: IntNullableFilter<"RawArticle"> | number | null
     price?: DecimalNullableFilter<"RawArticle"> | Decimal | DecimalJsLike | number | string | null
     imageUrl?: StringNullableFilter<"RawArticle"> | string | null
+    presentationsType?: StringNullableFilter<"RawArticle"> | string | null
     source?: StringNullableFilter<"RawArticle"> | string | null
     status?: EnumRawArticleStatusFilter<"RawArticle"> | $Enums.RawArticleStatus
     retryCount?: IntFilter<"RawArticle"> | number
@@ -53725,6 +53778,7 @@ export namespace Prisma {
     noOfColors?: SortOrderInput | SortOrder
     price?: SortOrderInput | SortOrder
     imageUrl?: SortOrderInput | SortOrder
+    presentationsType?: SortOrderInput | SortOrder
     uniqueKey?: SortOrder
     source?: SortOrderInput | SortOrder
     status?: SortOrder
@@ -53761,6 +53815,7 @@ export namespace Prisma {
     noOfColors?: IntNullableWithAggregatesFilter<"RawArticle"> | number | null
     price?: DecimalNullableWithAggregatesFilter<"RawArticle"> | Decimal | DecimalJsLike | number | string | null
     imageUrl?: StringNullableWithAggregatesFilter<"RawArticle"> | string | null
+    presentationsType?: StringNullableWithAggregatesFilter<"RawArticle"> | string | null
     uniqueKey?: StringWithAggregatesFilter<"RawArticle"> | string
     source?: StringNullableWithAggregatesFilter<"RawArticle"> | string | null
     status?: EnumRawArticleStatusWithAggregatesFilter<"RawArticle"> | $Enums.RawArticleStatus
@@ -55378,6 +55433,7 @@ export namespace Prisma {
     fashionGrid?: string | null
     year?: string | null
     articleType?: string | null
+    presentationsType?: string | null
     approvalStatus?: $Enums.ApprovalStatus
     pdStatus?: $Enums.PdStatus
     approvedAt?: Date | string | null
@@ -55393,6 +55449,7 @@ export namespace Prisma {
     sapSyncMessage?: string | null
     srmOriginalDesignNumber?: string | null
     srmUniqueId?: string | null
+    imageExtractionRawData?: NullableJsonNullValueInput | InputJsonValue
     approver?: UserCreateNestedOneWithoutApprovedItemsInput
     job?: ExtractionJobCreateNestedOneWithoutFlatResultInput
     srmSyncRunItems?: SrmSyncRunItemCreateNestedManyWithoutFlatInput
@@ -55510,6 +55567,7 @@ export namespace Prisma {
     fashionGrid?: string | null
     year?: string | null
     articleType?: string | null
+    presentationsType?: string | null
     approvalStatus?: $Enums.ApprovalStatus
     pdStatus?: $Enums.PdStatus
     approvedBy?: number | null
@@ -55526,6 +55584,7 @@ export namespace Prisma {
     sapSyncMessage?: string | null
     srmOriginalDesignNumber?: string | null
     srmUniqueId?: string | null
+    imageExtractionRawData?: NullableJsonNullValueInput | InputJsonValue
     srmSyncRunItems?: SrmSyncRunItemUncheckedCreateNestedManyWithoutFlatInput
   }
 
@@ -55640,6 +55699,7 @@ export namespace Prisma {
     fashionGrid?: NullableStringFieldUpdateOperationsInput | string | null
     year?: NullableStringFieldUpdateOperationsInput | string | null
     articleType?: NullableStringFieldUpdateOperationsInput | string | null
+    presentationsType?: NullableStringFieldUpdateOperationsInput | string | null
     approvalStatus?: EnumApprovalStatusFieldUpdateOperationsInput | $Enums.ApprovalStatus
     pdStatus?: EnumPdStatusFieldUpdateOperationsInput | $Enums.PdStatus
     approvedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
@@ -55655,6 +55715,7 @@ export namespace Prisma {
     sapSyncMessage?: NullableStringFieldUpdateOperationsInput | string | null
     srmOriginalDesignNumber?: NullableStringFieldUpdateOperationsInput | string | null
     srmUniqueId?: NullableStringFieldUpdateOperationsInput | string | null
+    imageExtractionRawData?: NullableJsonNullValueInput | InputJsonValue
     approver?: UserUpdateOneWithoutApprovedItemsNestedInput
     job?: ExtractionJobUpdateOneWithoutFlatResultNestedInput
     srmSyncRunItems?: SrmSyncRunItemUpdateManyWithoutFlatNestedInput
@@ -55772,6 +55833,7 @@ export namespace Prisma {
     fashionGrid?: NullableStringFieldUpdateOperationsInput | string | null
     year?: NullableStringFieldUpdateOperationsInput | string | null
     articleType?: NullableStringFieldUpdateOperationsInput | string | null
+    presentationsType?: NullableStringFieldUpdateOperationsInput | string | null
     approvalStatus?: EnumApprovalStatusFieldUpdateOperationsInput | $Enums.ApprovalStatus
     pdStatus?: EnumPdStatusFieldUpdateOperationsInput | $Enums.PdStatus
     approvedBy?: NullableIntFieldUpdateOperationsInput | number | null
@@ -55788,6 +55850,7 @@ export namespace Prisma {
     sapSyncMessage?: NullableStringFieldUpdateOperationsInput | string | null
     srmOriginalDesignNumber?: NullableStringFieldUpdateOperationsInput | string | null
     srmUniqueId?: NullableStringFieldUpdateOperationsInput | string | null
+    imageExtractionRawData?: NullableJsonNullValueInput | InputJsonValue
     srmSyncRunItems?: SrmSyncRunItemUncheckedUpdateManyWithoutFlatNestedInput
   }
 
@@ -55903,6 +55966,7 @@ export namespace Prisma {
     fashionGrid?: string | null
     year?: string | null
     articleType?: string | null
+    presentationsType?: string | null
     approvalStatus?: $Enums.ApprovalStatus
     pdStatus?: $Enums.PdStatus
     approvedBy?: number | null
@@ -55919,6 +55983,7 @@ export namespace Prisma {
     sapSyncMessage?: string | null
     srmOriginalDesignNumber?: string | null
     srmUniqueId?: string | null
+    imageExtractionRawData?: NullableJsonNullValueInput | InputJsonValue
   }
 
   export type ExtractionResultFlatUpdateManyMutationInput = {
@@ -56032,6 +56097,7 @@ export namespace Prisma {
     fashionGrid?: NullableStringFieldUpdateOperationsInput | string | null
     year?: NullableStringFieldUpdateOperationsInput | string | null
     articleType?: NullableStringFieldUpdateOperationsInput | string | null
+    presentationsType?: NullableStringFieldUpdateOperationsInput | string | null
     approvalStatus?: EnumApprovalStatusFieldUpdateOperationsInput | $Enums.ApprovalStatus
     pdStatus?: EnumPdStatusFieldUpdateOperationsInput | $Enums.PdStatus
     approvedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
@@ -56047,6 +56113,7 @@ export namespace Prisma {
     sapSyncMessage?: NullableStringFieldUpdateOperationsInput | string | null
     srmOriginalDesignNumber?: NullableStringFieldUpdateOperationsInput | string | null
     srmUniqueId?: NullableStringFieldUpdateOperationsInput | string | null
+    imageExtractionRawData?: NullableJsonNullValueInput | InputJsonValue
   }
 
   export type ExtractionResultFlatUncheckedUpdateManyInput = {
@@ -56161,6 +56228,7 @@ export namespace Prisma {
     fashionGrid?: NullableStringFieldUpdateOperationsInput | string | null
     year?: NullableStringFieldUpdateOperationsInput | string | null
     articleType?: NullableStringFieldUpdateOperationsInput | string | null
+    presentationsType?: NullableStringFieldUpdateOperationsInput | string | null
     approvalStatus?: EnumApprovalStatusFieldUpdateOperationsInput | $Enums.ApprovalStatus
     pdStatus?: EnumPdStatusFieldUpdateOperationsInput | $Enums.PdStatus
     approvedBy?: NullableIntFieldUpdateOperationsInput | number | null
@@ -56177,6 +56245,7 @@ export namespace Prisma {
     sapSyncMessage?: NullableStringFieldUpdateOperationsInput | string | null
     srmOriginalDesignNumber?: NullableStringFieldUpdateOperationsInput | string | null
     srmUniqueId?: NullableStringFieldUpdateOperationsInput | string | null
+    imageExtractionRawData?: NullableJsonNullValueInput | InputJsonValue
   }
 
   export type ModelGenerationResultCreateInput = {
@@ -58515,6 +58584,7 @@ export namespace Prisma {
     noOfColors?: number | null
     price?: Decimal | DecimalJsLike | number | string | null
     imageUrl?: string | null
+    presentationsType?: string | null
     uniqueKey: string
     source?: string | null
     status?: $Enums.RawArticleStatus
@@ -58543,6 +58613,7 @@ export namespace Prisma {
     noOfColors?: number | null
     price?: Decimal | DecimalJsLike | number | string | null
     imageUrl?: string | null
+    presentationsType?: string | null
     uniqueKey: string
     source?: string | null
     status?: $Enums.RawArticleStatus
@@ -58571,6 +58642,7 @@ export namespace Prisma {
     noOfColors?: NullableIntFieldUpdateOperationsInput | number | null
     price?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
     imageUrl?: NullableStringFieldUpdateOperationsInput | string | null
+    presentationsType?: NullableStringFieldUpdateOperationsInput | string | null
     uniqueKey?: StringFieldUpdateOperationsInput | string
     source?: NullableStringFieldUpdateOperationsInput | string | null
     status?: EnumRawArticleStatusFieldUpdateOperationsInput | $Enums.RawArticleStatus
@@ -58599,6 +58671,7 @@ export namespace Prisma {
     noOfColors?: NullableIntFieldUpdateOperationsInput | number | null
     price?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
     imageUrl?: NullableStringFieldUpdateOperationsInput | string | null
+    presentationsType?: NullableStringFieldUpdateOperationsInput | string | null
     uniqueKey?: StringFieldUpdateOperationsInput | string
     source?: NullableStringFieldUpdateOperationsInput | string | null
     status?: EnumRawArticleStatusFieldUpdateOperationsInput | $Enums.RawArticleStatus
@@ -58627,6 +58700,7 @@ export namespace Prisma {
     noOfColors?: number | null
     price?: Decimal | DecimalJsLike | number | string | null
     imageUrl?: string | null
+    presentationsType?: string | null
     uniqueKey: string
     source?: string | null
     status?: $Enums.RawArticleStatus
@@ -58655,6 +58729,7 @@ export namespace Prisma {
     noOfColors?: NullableIntFieldUpdateOperationsInput | number | null
     price?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
     imageUrl?: NullableStringFieldUpdateOperationsInput | string | null
+    presentationsType?: NullableStringFieldUpdateOperationsInput | string | null
     uniqueKey?: StringFieldUpdateOperationsInput | string
     source?: NullableStringFieldUpdateOperationsInput | string | null
     status?: EnumRawArticleStatusFieldUpdateOperationsInput | $Enums.RawArticleStatus
@@ -58683,6 +58758,7 @@ export namespace Prisma {
     noOfColors?: NullableIntFieldUpdateOperationsInput | number | null
     price?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
     imageUrl?: NullableStringFieldUpdateOperationsInput | string | null
+    presentationsType?: NullableStringFieldUpdateOperationsInput | string | null
     uniqueKey?: StringFieldUpdateOperationsInput | string
     source?: NullableStringFieldUpdateOperationsInput | string | null
     status?: EnumRawArticleStatusFieldUpdateOperationsInput | $Enums.RawArticleStatus
@@ -60490,6 +60566,7 @@ export namespace Prisma {
     fashionGrid?: SortOrder
     year?: SortOrder
     articleType?: SortOrder
+    presentationsType?: SortOrder
     approvalStatus?: SortOrder
     pdStatus?: SortOrder
     approvedBy?: SortOrder
@@ -60506,6 +60583,7 @@ export namespace Prisma {
     sapSyncMessage?: SortOrder
     srmOriginalDesignNumber?: SortOrder
     srmUniqueId?: SortOrder
+    imageExtractionRawData?: SortOrder
   }
 
   export type ExtractionResultFlatAvgOrderByAggregateInput = {
@@ -60635,6 +60713,7 @@ export namespace Prisma {
     fashionGrid?: SortOrder
     year?: SortOrder
     articleType?: SortOrder
+    presentationsType?: SortOrder
     approvalStatus?: SortOrder
     pdStatus?: SortOrder
     approvedBy?: SortOrder
@@ -60765,6 +60844,7 @@ export namespace Prisma {
     fashionGrid?: SortOrder
     year?: SortOrder
     articleType?: SortOrder
+    presentationsType?: SortOrder
     approvalStatus?: SortOrder
     pdStatus?: SortOrder
     approvedBy?: SortOrder
@@ -62273,6 +62353,7 @@ export namespace Prisma {
     noOfColors?: SortOrder
     price?: SortOrder
     imageUrl?: SortOrder
+    presentationsType?: SortOrder
     uniqueKey?: SortOrder
     source?: SortOrder
     status?: SortOrder
@@ -62307,6 +62388,7 @@ export namespace Prisma {
     noOfColors?: SortOrder
     price?: SortOrder
     imageUrl?: SortOrder
+    presentationsType?: SortOrder
     uniqueKey?: SortOrder
     source?: SortOrder
     status?: SortOrder
@@ -62334,6 +62416,7 @@ export namespace Prisma {
     noOfColors?: SortOrder
     price?: SortOrder
     imageUrl?: SortOrder
+    presentationsType?: SortOrder
     uniqueKey?: SortOrder
     source?: SortOrder
     status?: SortOrder
@@ -65978,6 +66061,7 @@ export namespace Prisma {
     fashionGrid?: string | null
     year?: string | null
     articleType?: string | null
+    presentationsType?: string | null
     approvalStatus?: $Enums.ApprovalStatus
     pdStatus?: $Enums.PdStatus
     approvedAt?: Date | string | null
@@ -65993,6 +66077,7 @@ export namespace Prisma {
     sapSyncMessage?: string | null
     srmOriginalDesignNumber?: string | null
     srmUniqueId?: string | null
+    imageExtractionRawData?: NullableJsonNullValueInput | InputJsonValue
     approver?: UserCreateNestedOneWithoutApprovedItemsInput
     srmSyncRunItems?: SrmSyncRunItemCreateNestedManyWithoutFlatInput
   }
@@ -66108,6 +66193,7 @@ export namespace Prisma {
     fashionGrid?: string | null
     year?: string | null
     articleType?: string | null
+    presentationsType?: string | null
     approvalStatus?: $Enums.ApprovalStatus
     pdStatus?: $Enums.PdStatus
     approvedBy?: number | null
@@ -66124,6 +66210,7 @@ export namespace Prisma {
     sapSyncMessage?: string | null
     srmOriginalDesignNumber?: string | null
     srmUniqueId?: string | null
+    imageExtractionRawData?: NullableJsonNullValueInput | InputJsonValue
     srmSyncRunItems?: SrmSyncRunItemUncheckedCreateNestedManyWithoutFlatInput
   }
 
@@ -66362,6 +66449,7 @@ export namespace Prisma {
     fashionGrid?: NullableStringFieldUpdateOperationsInput | string | null
     year?: NullableStringFieldUpdateOperationsInput | string | null
     articleType?: NullableStringFieldUpdateOperationsInput | string | null
+    presentationsType?: NullableStringFieldUpdateOperationsInput | string | null
     approvalStatus?: EnumApprovalStatusFieldUpdateOperationsInput | $Enums.ApprovalStatus
     pdStatus?: EnumPdStatusFieldUpdateOperationsInput | $Enums.PdStatus
     approvedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
@@ -66377,6 +66465,7 @@ export namespace Prisma {
     sapSyncMessage?: NullableStringFieldUpdateOperationsInput | string | null
     srmOriginalDesignNumber?: NullableStringFieldUpdateOperationsInput | string | null
     srmUniqueId?: NullableStringFieldUpdateOperationsInput | string | null
+    imageExtractionRawData?: NullableJsonNullValueInput | InputJsonValue
     approver?: UserUpdateOneWithoutApprovedItemsNestedInput
     srmSyncRunItems?: SrmSyncRunItemUpdateManyWithoutFlatNestedInput
   }
@@ -66492,6 +66581,7 @@ export namespace Prisma {
     fashionGrid?: NullableStringFieldUpdateOperationsInput | string | null
     year?: NullableStringFieldUpdateOperationsInput | string | null
     articleType?: NullableStringFieldUpdateOperationsInput | string | null
+    presentationsType?: NullableStringFieldUpdateOperationsInput | string | null
     approvalStatus?: EnumApprovalStatusFieldUpdateOperationsInput | $Enums.ApprovalStatus
     pdStatus?: EnumPdStatusFieldUpdateOperationsInput | $Enums.PdStatus
     approvedBy?: NullableIntFieldUpdateOperationsInput | number | null
@@ -66508,6 +66598,7 @@ export namespace Prisma {
     sapSyncMessage?: NullableStringFieldUpdateOperationsInput | string | null
     srmOriginalDesignNumber?: NullableStringFieldUpdateOperationsInput | string | null
     srmUniqueId?: NullableStringFieldUpdateOperationsInput | string | null
+    imageExtractionRawData?: NullableJsonNullValueInput | InputJsonValue
     srmSyncRunItems?: SrmSyncRunItemUncheckedUpdateManyWithoutFlatNestedInput
   }
 
@@ -67460,6 +67551,7 @@ export namespace Prisma {
     fashionGrid?: string | null
     year?: string | null
     articleType?: string | null
+    presentationsType?: string | null
     approvalStatus?: $Enums.ApprovalStatus
     pdStatus?: $Enums.PdStatus
     approvedAt?: Date | string | null
@@ -67475,6 +67567,7 @@ export namespace Prisma {
     sapSyncMessage?: string | null
     srmOriginalDesignNumber?: string | null
     srmUniqueId?: string | null
+    imageExtractionRawData?: NullableJsonNullValueInput | InputJsonValue
     job?: ExtractionJobCreateNestedOneWithoutFlatResultInput
     srmSyncRunItems?: SrmSyncRunItemCreateNestedManyWithoutFlatInput
   }
@@ -67591,6 +67684,7 @@ export namespace Prisma {
     fashionGrid?: string | null
     year?: string | null
     articleType?: string | null
+    presentationsType?: string | null
     approvalStatus?: $Enums.ApprovalStatus
     pdStatus?: $Enums.PdStatus
     approvedAt?: Date | string | null
@@ -67606,6 +67700,7 @@ export namespace Prisma {
     sapSyncMessage?: string | null
     srmOriginalDesignNumber?: string | null
     srmUniqueId?: string | null
+    imageExtractionRawData?: NullableJsonNullValueInput | InputJsonValue
     srmSyncRunItems?: SrmSyncRunItemUncheckedCreateNestedManyWithoutFlatInput
   }
 
@@ -67851,6 +67946,7 @@ export namespace Prisma {
     fashionGrid?: StringNullableFilter<"ExtractionResultFlat"> | string | null
     year?: StringNullableFilter<"ExtractionResultFlat"> | string | null
     articleType?: StringNullableFilter<"ExtractionResultFlat"> | string | null
+    presentationsType?: StringNullableFilter<"ExtractionResultFlat"> | string | null
     approvalStatus?: EnumApprovalStatusFilter<"ExtractionResultFlat"> | $Enums.ApprovalStatus
     pdStatus?: EnumPdStatusFilter<"ExtractionResultFlat"> | $Enums.PdStatus
     approvedBy?: IntNullableFilter<"ExtractionResultFlat"> | number | null
@@ -67867,6 +67963,7 @@ export namespace Prisma {
     sapSyncMessage?: StringNullableFilter<"ExtractionResultFlat"> | string | null
     srmOriginalDesignNumber?: StringNullableFilter<"ExtractionResultFlat"> | string | null
     srmUniqueId?: StringNullableFilter<"ExtractionResultFlat"> | string | null
+    imageExtractionRawData?: JsonNullableFilter<"ExtractionResultFlat">
   }
 
   export type UserCreateWithoutApiKeysInput = {
@@ -69399,6 +69496,7 @@ export namespace Prisma {
     fashionGrid?: string | null
     year?: string | null
     articleType?: string | null
+    presentationsType?: string | null
     approvalStatus?: $Enums.ApprovalStatus
     pdStatus?: $Enums.PdStatus
     approvedAt?: Date | string | null
@@ -69414,6 +69512,7 @@ export namespace Prisma {
     sapSyncMessage?: string | null
     srmOriginalDesignNumber?: string | null
     srmUniqueId?: string | null
+    imageExtractionRawData?: NullableJsonNullValueInput | InputJsonValue
     approver?: UserCreateNestedOneWithoutApprovedItemsInput
     job?: ExtractionJobCreateNestedOneWithoutFlatResultInput
   }
@@ -69530,6 +69629,7 @@ export namespace Prisma {
     fashionGrid?: string | null
     year?: string | null
     articleType?: string | null
+    presentationsType?: string | null
     approvalStatus?: $Enums.ApprovalStatus
     pdStatus?: $Enums.PdStatus
     approvedBy?: number | null
@@ -69546,6 +69646,7 @@ export namespace Prisma {
     sapSyncMessage?: string | null
     srmOriginalDesignNumber?: string | null
     srmUniqueId?: string | null
+    imageExtractionRawData?: NullableJsonNullValueInput | InputJsonValue
   }
 
   export type ExtractionResultFlatCreateOrConnectWithoutSrmSyncRunItemsInput = {
@@ -69712,6 +69813,7 @@ export namespace Prisma {
     fashionGrid?: NullableStringFieldUpdateOperationsInput | string | null
     year?: NullableStringFieldUpdateOperationsInput | string | null
     articleType?: NullableStringFieldUpdateOperationsInput | string | null
+    presentationsType?: NullableStringFieldUpdateOperationsInput | string | null
     approvalStatus?: EnumApprovalStatusFieldUpdateOperationsInput | $Enums.ApprovalStatus
     pdStatus?: EnumPdStatusFieldUpdateOperationsInput | $Enums.PdStatus
     approvedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
@@ -69727,6 +69829,7 @@ export namespace Prisma {
     sapSyncMessage?: NullableStringFieldUpdateOperationsInput | string | null
     srmOriginalDesignNumber?: NullableStringFieldUpdateOperationsInput | string | null
     srmUniqueId?: NullableStringFieldUpdateOperationsInput | string | null
+    imageExtractionRawData?: NullableJsonNullValueInput | InputJsonValue
     approver?: UserUpdateOneWithoutApprovedItemsNestedInput
     job?: ExtractionJobUpdateOneWithoutFlatResultNestedInput
   }
@@ -69843,6 +69946,7 @@ export namespace Prisma {
     fashionGrid?: NullableStringFieldUpdateOperationsInput | string | null
     year?: NullableStringFieldUpdateOperationsInput | string | null
     articleType?: NullableStringFieldUpdateOperationsInput | string | null
+    presentationsType?: NullableStringFieldUpdateOperationsInput | string | null
     approvalStatus?: EnumApprovalStatusFieldUpdateOperationsInput | $Enums.ApprovalStatus
     pdStatus?: EnumPdStatusFieldUpdateOperationsInput | $Enums.PdStatus
     approvedBy?: NullableIntFieldUpdateOperationsInput | number | null
@@ -69859,6 +69963,7 @@ export namespace Prisma {
     sapSyncMessage?: NullableStringFieldUpdateOperationsInput | string | null
     srmOriginalDesignNumber?: NullableStringFieldUpdateOperationsInput | string | null
     srmUniqueId?: NullableStringFieldUpdateOperationsInput | string | null
+    imageExtractionRawData?: NullableJsonNullValueInput | InputJsonValue
   }
 
   export type PoolBBatchCreateWithoutJobInput = {
@@ -70748,6 +70853,7 @@ export namespace Prisma {
     fashionGrid?: string | null
     year?: string | null
     articleType?: string | null
+    presentationsType?: string | null
     approvalStatus?: $Enums.ApprovalStatus
     pdStatus?: $Enums.PdStatus
     approvedAt?: Date | string | null
@@ -70763,6 +70869,7 @@ export namespace Prisma {
     sapSyncMessage?: string | null
     srmOriginalDesignNumber?: string | null
     srmUniqueId?: string | null
+    imageExtractionRawData?: NullableJsonNullValueInput | InputJsonValue
   }
 
   export type ApiKeyUpdateWithoutUserInput = {
@@ -71038,6 +71145,7 @@ export namespace Prisma {
     fashionGrid?: NullableStringFieldUpdateOperationsInput | string | null
     year?: NullableStringFieldUpdateOperationsInput | string | null
     articleType?: NullableStringFieldUpdateOperationsInput | string | null
+    presentationsType?: NullableStringFieldUpdateOperationsInput | string | null
     approvalStatus?: EnumApprovalStatusFieldUpdateOperationsInput | $Enums.ApprovalStatus
     pdStatus?: EnumPdStatusFieldUpdateOperationsInput | $Enums.PdStatus
     approvedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
@@ -71053,6 +71161,7 @@ export namespace Prisma {
     sapSyncMessage?: NullableStringFieldUpdateOperationsInput | string | null
     srmOriginalDesignNumber?: NullableStringFieldUpdateOperationsInput | string | null
     srmUniqueId?: NullableStringFieldUpdateOperationsInput | string | null
+    imageExtractionRawData?: NullableJsonNullValueInput | InputJsonValue
     job?: ExtractionJobUpdateOneWithoutFlatResultNestedInput
     srmSyncRunItems?: SrmSyncRunItemUpdateManyWithoutFlatNestedInput
   }
@@ -71169,6 +71278,7 @@ export namespace Prisma {
     fashionGrid?: NullableStringFieldUpdateOperationsInput | string | null
     year?: NullableStringFieldUpdateOperationsInput | string | null
     articleType?: NullableStringFieldUpdateOperationsInput | string | null
+    presentationsType?: NullableStringFieldUpdateOperationsInput | string | null
     approvalStatus?: EnumApprovalStatusFieldUpdateOperationsInput | $Enums.ApprovalStatus
     pdStatus?: EnumPdStatusFieldUpdateOperationsInput | $Enums.PdStatus
     approvedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
@@ -71184,6 +71294,7 @@ export namespace Prisma {
     sapSyncMessage?: NullableStringFieldUpdateOperationsInput | string | null
     srmOriginalDesignNumber?: NullableStringFieldUpdateOperationsInput | string | null
     srmUniqueId?: NullableStringFieldUpdateOperationsInput | string | null
+    imageExtractionRawData?: NullableJsonNullValueInput | InputJsonValue
     srmSyncRunItems?: SrmSyncRunItemUncheckedUpdateManyWithoutFlatNestedInput
   }
 
@@ -71299,6 +71410,7 @@ export namespace Prisma {
     fashionGrid?: NullableStringFieldUpdateOperationsInput | string | null
     year?: NullableStringFieldUpdateOperationsInput | string | null
     articleType?: NullableStringFieldUpdateOperationsInput | string | null
+    presentationsType?: NullableStringFieldUpdateOperationsInput | string | null
     approvalStatus?: EnumApprovalStatusFieldUpdateOperationsInput | $Enums.ApprovalStatus
     pdStatus?: EnumPdStatusFieldUpdateOperationsInput | $Enums.PdStatus
     approvedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
@@ -71314,6 +71426,7 @@ export namespace Prisma {
     sapSyncMessage?: NullableStringFieldUpdateOperationsInput | string | null
     srmOriginalDesignNumber?: NullableStringFieldUpdateOperationsInput | string | null
     srmUniqueId?: NullableStringFieldUpdateOperationsInput | string | null
+    imageExtractionRawData?: NullableJsonNullValueInput | InputJsonValue
   }
 
   export type SapAttributeValueCreateManyFieldConfigInput = {

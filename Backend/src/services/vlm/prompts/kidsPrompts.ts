@@ -65,7 +65,7 @@ TIER 2: STANDARD ATTRIBUTES
 - SAFETY: No small buttons, child-safe materials
 
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-❌ SKIP THESE ATTRIBUTES (Not applicable to kids upper wear):
+❌ SKIP THESE ATTRIBUTES (Not applicable to kids upper wear): 
 WAIST_RISE, LEG_STYLE, FORMAL_STYLING, BOTTOM_TYPE
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 

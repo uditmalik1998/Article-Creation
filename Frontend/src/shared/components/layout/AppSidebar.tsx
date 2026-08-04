@@ -130,7 +130,15 @@ export const AppSidebar: React.FC<AppSidebarProps> = ({ collapsed, onCollapsedCh
     // Extraction is available to creator-side roles and to APPROVER.
     // (CATEGORY_HEAD and PD remain approval-only and do not get it.)
     if ((!isApproverSide && !isPd) || role === 'APPROVER') {
-      items.push({ key: '/extraction', Icon: FileSearch, label: 'Extraction' });
+      items.push({
+        key: '/extraction-group',
+        Icon: FileSearch,
+        label: 'Extraction',
+        children: [
+          { key: '/extraction/fg-article', Icon: FileText, label: 'FG Article' },
+          { key: '/extraction/fabric-article', Icon: FileText, label: 'Fabric Article' },
+        ],
+      });
     }
     // Model Generation — ADMIN, CREATOR, APPROVER (PD_DESIGNER already has it via the items init above).
     if (isAdmin || role === 'CREATOR' || role === 'APPROVER') {

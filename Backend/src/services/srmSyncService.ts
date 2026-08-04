@@ -53,6 +53,7 @@ interface SrmRow {
   no_of_colors: number;
   price: number;
   image_url?: string | null;
+  presentations_type?: string | null;
 }
 
 /** Normalise vendor code to last 6 digits (e.g. "0000200251" → "200251") */
@@ -595,6 +596,8 @@ async function enrichSrmRowWithVlm(
       if (result.inputTokens)  updates.inputTokens = result.inputTokens;
       if (result.outputTokens) updates.outputTokens = result.outputTokens;
       if (result.apiCost)      updates.apiCost = result.apiCost;
+      const rawAllAttrs = await vlmService.extractAllFashionAttributes(base64Image);
+      if (rawAllAttrs) updates.imageExtractionRawData = rawAllAttrs;
 
       if (Object.keys(updates).length <= 3) {
         // VLM returned 0 usable attributes — retry if attempts remain
@@ -726,12 +729,13 @@ async function insertRow(row: SrmRow, rawArticleId?: string): Promise<{ id: stri
       impAtrbt2:      impAtrbt2,
 
       // Derived fields
-      year:           String(now.getFullYear()),
+      year:              String(now.getFullYear()),
       season,
-      mcCode:         mcCode || null,
+      mcCode:            mcCode || null,
       hsnTaxCode,
       segment,
-      extractionDate: now,
+      extractionDate:    now,
+      presentationsType: row.presentations_type || null,
     },
   });
 

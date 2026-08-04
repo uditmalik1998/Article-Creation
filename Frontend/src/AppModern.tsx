@@ -12,6 +12,7 @@ import MainLayout from './shared/components/layout/MainLayout';
 import { LoginPage, RegisterPage } from './features/auth';
 
 import SimplifiedExtractionPage from './features/extraction/pages/SimplifiedExtractionPage'; // NEW: Simplified workflow
+import FabricExtractionPage from './features/extraction/pages/FabricExtractionPage';
 import { DashboardPage, ProfilePage, ProductsPage } from './features/dashboard';
 import { HierarchyManagement, UsersManagement, StatusDashboard } from './features/admin';
 import Admin from './features/admin/pages/Admin'; // Admin Dashboard
@@ -203,13 +204,7 @@ const App: React.FC = () => {
               />
               <Route
                 path="/extraction"
-                element={
-                  <ExtractionRoute>
-                    <MainLayout>
-                      <SimplifiedExtractionPage />
-                    </MainLayout>
-                  </ExtractionRoute>
-                }
+                element={<Navigate to="/extraction/fg-article" replace />}
               />
 
               <Route
@@ -218,6 +213,26 @@ const App: React.FC = () => {
                   <ExtractionRoute>
                     <MainLayout>
                       <SimplifiedExtractionPage />
+                    </MainLayout>
+                  </ExtractionRoute>
+                }
+              />
+              <Route
+                path="/extraction/fg-article"
+                element={
+                  <ExtractionRoute>
+                    <MainLayout>
+                      <SimplifiedExtractionPage />
+                    </MainLayout>
+                  </ExtractionRoute>
+                }
+              />
+              <Route
+                path="/extraction/fabric-article"
+                element={
+                  <ExtractionRoute>
+                    <MainLayout>
+                      <FabricExtractionPage />
                     </MainLayout>
                   </ExtractionRoute>
                 }

@@ -281,6 +281,7 @@ export default function ApproverDashboard({ pathType }: ApproverDashboardProps =
         if (dateRangeFilter?.[0]) params.set('startDate', dateRangeFilter[0].startOf('day').toISOString());
         if (dateRangeFilter?.[1]) params.set('endDate', dateRangeFilter[1].endOf('day').toISOString());
         if (pathType) params.set('pathType', pathType);
+        params.set('presentationsType', 'Fabric Article');
 
         const response = await fetch(`${APP_CONFIG.api.baseURL}/approver/items?${params}`, {
           headers: { Authorization: `Bearer ${token}` },
@@ -422,6 +423,7 @@ export default function ApproverDashboard({ pathType }: ApproverDashboardProps =
       if (dateRangeFilter?.[0]) params.set('startDate', dateRangeFilter[0].startOf('day').toISOString());
       if (dateRangeFilter?.[1]) params.set('endDate', dateRangeFilter[1].endOf('day').toISOString());
       if (pathType) params.set('pathType', pathType);
+      params.set('presentationsType', 'Fabric Article');
 
       const response = await fetch(`${APP_CONFIG.api.baseURL}/approver/items/export-all?${params}`, {
         headers: { Authorization: `Bearer ${token}` },
@@ -469,6 +471,7 @@ export default function ApproverDashboard({ pathType }: ApproverDashboardProps =
       if (dateRangeFilter?.[0]) params.set('startDate', dateRangeFilter[0].startOf('day').toISOString());
       if (dateRangeFilter?.[1]) params.set('endDate', dateRangeFilter[1].endOf('day').toISOString());
       params.set('pathType', 'created');
+      params.set('presentationsType', 'Fabric Article');
 
       const response = await fetch(`${APP_CONFIG.api.baseURL}/approver/items/export-all-with-variants?${params}`, {
         headers: { Authorization: `Bearer ${token}` },
@@ -533,6 +536,7 @@ export default function ApproverDashboard({ pathType }: ApproverDashboardProps =
         const token = localStorage.getItem('authToken');
         const params = new URLSearchParams();
         params.set('pathType', 'created');
+        params.set('presentationsType', 'Fabric Article');
         params.set('status', 'APPROVED');
         params.set('ids', rows.map((r) => r.id).join(','));
 

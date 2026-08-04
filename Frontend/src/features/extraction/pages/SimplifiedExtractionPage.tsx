@@ -332,6 +332,7 @@ const SimplifiedExtractionPage = () => {
         selectedCategory.displayName,
         `${selectedCategory.department}-${subDiv}`,
         {},
+        'FG Article',
       );
     }
   }, [selectedCategory, selectedSubDivision, extractAllPending, simplifiedSchema]);
