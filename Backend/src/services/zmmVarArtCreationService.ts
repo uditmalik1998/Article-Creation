@@ -125,7 +125,7 @@ function buildVariantPayload(
         VAR1VAL1:        toStr(variant.variantSize),            // actual size value e.g. "XL"
         VAR1VAL2:        toStr(variant.colour ?? variant.variantColor), // actual color e.g. "Blue"
         VENDOR:          toStr(variant.vendorCode),
-        NET_PRICE:       toStr(variant.mrp),
+        NET_PRICE:       toStr(variant.rate),
         MRP_TYPE:        toStr(variant.mrp),
         FROM_DATE:       fromDate,
         // ── Fixed SAP org values ──────────────────────────
