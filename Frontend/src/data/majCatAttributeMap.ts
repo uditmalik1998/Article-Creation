@@ -56,6 +56,7 @@ export const SCHEMA_KEY_TO_EXCEL_ATTR: Record<string, string> = {
   htrf_style:        'M_HTRF_STYLE',
   shade:             'SHADE',
   weight:            'WEIGHT',
+  fab_weight:        'M_FAB_WEIGHT',
   child_belt:        'M_BLT_STYLE',
   front_open_style:  'FO BTN STYLE',
   vendor_code:       'VENDOR CODE',
@@ -160,6 +161,7 @@ export const SAP_NAME_TO_SCHEMA_KEY: Record<string, string> = {
   // Wash / Age
   M_WASH:              'wash',
   M_AGE_GROUP:         'age_group',
+  M_FAB_WEIGHT:        'fab_weight',
   // Misc
   M_SHADE:             'shade',
   M_FO_BTN_STYLE:      'front_open_style',
@@ -228,6 +230,7 @@ export const SCHEMA_KEY_TO_DB_FIELD: Record<string, string> = {
   htrf_style:           'htrfStyle',
   shade:                'shade',
   weight:               'weight',
+  fab_weight:           'weight',
   child_belt:           'childBelt',
   front_open_style:     'frontOpenStyle',
   segment:              'segment',

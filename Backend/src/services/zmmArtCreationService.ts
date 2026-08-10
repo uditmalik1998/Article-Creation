@@ -245,7 +245,7 @@ const RFC_ALWAYS_SEND_IF_PRESENT = new Set([
     'M_IMP_ATBT',          // IMP_ATBT
     // freeText fields (always visible in card, no dropdown filtering)
     'M_SHADE',             // shade
-    'NET_WEIGHT',          // weight (renamed from G_WEIGHT in new API)
+    'M_FAB_WEIGHT',        // weight (Supabase: weight column, SAP key: M_FAB_WEIGHT)
     'PRICE_BAND_CATEGORY', // segment
 ]);
 
@@ -321,6 +321,7 @@ const RFC_TO_DB_FIELD: Record<string, string> = {
     M_FAB_DIV:            'fabDiv',
     M_IMP_ATBT:           'impAtrbt2',
     M_MAIN_MVGR:          'impAtrbt2',       // legacy alias
+    M_FAB_WEIGHT:         'weight',
 };
 
 /**

@@ -90,7 +90,7 @@ export const FLAT_TO_RFC: Array<{ rfc: string; flat: string }> = [
   { rfc: 'M_AGE_GROUP', flat: 'ageGroup' },
   { rfc: 'M_NO_OF_SIZE', flat: 'mNoOfSize' },
   { rfc: 'M_NO_OF_CLR', flat: 'mNoOfClr' },
-  { rfc: 'NET_WEIGHT', flat: 'weight' }, // renamed from G_WEIGHT in new API
+  { rfc: 'M_FAB_WEIGHT', flat: 'weight' }, // fabric weight — SAP key M_FAB_WEIGHT
 ];
 
 /**

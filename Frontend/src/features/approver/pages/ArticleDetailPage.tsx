@@ -204,6 +204,7 @@ const MODIFY_FIELDS: { field: string; sapName: string }[] = [
   // BUSINESS
   { field: 'ageGroup',          sapName: 'M_AGE_GROUP' },
   { field: 'impAtrbt2',         sapName: 'M_IMP_ATBT' },
+  { field: 'weight',            sapName: 'M_FAB_WEIGHT' },
 ];
 
 // ─── Types ────────────────────────────────────────────────────────────────────
