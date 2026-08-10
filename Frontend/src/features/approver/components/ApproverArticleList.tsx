@@ -148,7 +148,6 @@ const ATTRIBUTE_GROUPS: { group: string; color: string; fields: { field: string;
       { field: 'fWidth', schemaKey: 'f_width' },
       { field: 'lycra', schemaKey: 'lycra_non_lycra' },
       { field: 'shade', schemaKey: 'shade', freeText: true },
-      { field: 'weight', schemaKey: 'weight', freeText: true },
     ],
   },
   {
@@ -213,6 +212,7 @@ const ATTRIBUTE_GROUPS: { group: string; color: string; fields: { field: string;
       { field: 'mNoOfClr', schemaKey: 'no_of_clr' },
       { field: 'impAtrbt2', schemaKey: 'imp_atrbt2' },
       { field: 'segment', schemaKey: 'segment', freeText: true },
+      { field: 'weight', schemaKey: 'fab_weight', freeText: true },
     ],
   },
 ];
@@ -366,7 +366,25 @@ function buildCardGroups(entries: { key: string; type: string; group: string }[]
       fields,
     };
   });
-  return built.length > 0 ? built : ATTRIBUTE_GROUPS;
+
+  if (built.length > 0) {
+    // Merge static freeText fields from ATTRIBUTE_GROUPS that the dynamic
+    // attribute data doesn't carry (e.g. fab_weight alias for M_FAB_WEIGHT).
+    for (const staticGroup of ATTRIBUTE_GROUPS) {
+      const builtGroup = built.find((g) => g.group === staticGroup.group);
+      for (const sf of staticGroup.fields) {
+        if (!sf.freeText) continue;
+        if (builtGroup && builtGroup.fields.some((f) => f.field === sf.field && f.schemaKey === sf.schemaKey)) continue;
+        if (builtGroup) {
+          builtGroup.fields.push(sf);
+        } else {
+          built.push({ group: staticGroup.group, color: staticGroup.color, fields: [sf] });
+        }
+      }
+    }
+    return built;
+  }
+  return ATTRIBUTE_GROUPS;
 }
 
 export interface ApproverArticleListProps {
