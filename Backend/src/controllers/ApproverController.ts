@@ -1755,19 +1755,6 @@ export class ApproverController {
                 }
             }
 
-            // Recalculate segment whenever MRP or majorCategory changes.
-            // MRP is manually editable, so never hard-block the save — just set segment to null if out of range.
-            const mrpActuallyChanged = data.mrp !== undefined && toComparableNumber(data.mrp) !== toComparableNumber(existingItem.mrp);
-            const categoryActuallyChanged = data.majorCategory !== undefined && data.majorCategory !== existingItem.majorCategory;
-            if ((mrpActuallyChanged || categoryActuallyChanged) && finalMajorCategory && finalMrp !== null && finalMrp !== undefined) {
-                const segment = getSegmentByCategoryAndMrp(finalMajorCategory, finalMrp);
-                data.segment = segment ?? null;
-            } else if (finalMajorCategory && finalMrp !== null && finalMrp !== undefined) {
-                // Always try to set segment silently (no error if not found)
-                const segment = getSegmentByCategoryAndMrp(finalMajorCategory, finalMrp);
-                if (segment) data.segment = segment;
-            }
-
             // Do not force-overwrite user-edited season/year on every save.
             // Only auto-fill defaults when BOTH are absent in payload and missing in DB.
             if (data.year === undefined && data.season === undefined) {
@@ -1959,15 +1946,6 @@ export class ApproverController {
             const matnr = (existingItem as any).sapArticleId ? String((existingItem as any).sapArticleId).trim() : '';
             if (!matnr) {
                 return res.status(400).json({ error: 'This article has no SAP article number yet, so it cannot be modified in SAP.' });
-            }
-
-            // Recalculate segment when MRP or majorCategory changes (mirrors updateItem).
-            // Done BEFORE building the payload so the recalculated segment is sent to SAP.
-            const finalMajorCategory = (data.majorCategory !== undefined ? data.majorCategory : (existingItem as any).majorCategory) as string | null;
-            const finalMrp = data.mrp !== undefined ? data.mrp : (existingItem as any).mrp;
-            if (finalMajorCategory && finalMrp !== null && finalMrp !== undefined) {
-                const segment = getSegmentByCategoryAndMrp(finalMajorCategory, finalMrp);
-                if (segment) data.segment = segment;
             }
 
             // ── National Grid validation: reject if any submitted attribute value is not in grid ──

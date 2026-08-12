@@ -275,6 +275,7 @@ model ExtractionResultFlat {
   pattern                     String?   @db.VarChar(100)
   length                      String?   @db.VarChar(100)
   colour                      String?   @db.VarChar(100)
+  secondaryColour             String?   @map("secondary_colour") @db.VarChar(100)
   drawcord                    String?   @db.VarChar(100)
   button                      String?   @db.VarChar(100)
   zipper                      String?   @db.VarChar(100)

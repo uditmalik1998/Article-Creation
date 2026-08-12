@@ -4163,3 +4163,255 @@ export async function importNationalGrid(req: Request, res: Response) {
     return res.json({ success: true, upserted: deduped.length });
 }
 
+// ═══════════════════════════════════════════════════════
+// SEGMENT MASTER (maj_cat_segment)
+// ═══════════════════════════════════════════════════════
+
+export const getSegmentMasterStatus = async (_req: Request, res: Response): Promise<void> => {
+  try {
+    const rows = await prisma.$queryRaw<{ total: bigint; categories: bigint; last_updated: Date | null }[]>`
+      SELECT COUNT(*)::bigint AS total,
+             COUNT(DISTINCT major_category)::bigint AS categories,
+             MAX(updated_at) AS last_updated
+      FROM maj_cat_segment
+    `;
+    const r = rows[0] ?? { total: 0n, categories: 0n, last_updated: null };
+    res.json({
+      success: true,
+      data: {
+        total: Number(r.total),
+        categories: Number(r.categories),
+        lastUpdated: r.last_updated ? r.last_updated.toISOString() : null,
+      },
+    });
+  } catch (error: any) {
+    console.error('[SegmentMaster] Status error:', error);
+    res.status(500).json({ success: false, error: error.message });
+  }
+};
+
+export const downloadSegmentMasterTemplate = async (_req: Request, res: Response): Promise<void> => {
+  try {
+    const ExcelJS = require('exceljs');
+    const wb = new ExcelJS.Workbook();
+    const ws = wb.addWorksheet('SEGMENT');
+
+    // Header row
+    const headers = ['SUB-DIVISION', 'MAJOR-CATEGORY', 'SEGMENT_TYPE', 'MIN', 'MAX'];
+    const headerRow = ws.addRow(headers);
+    headerRow.eachCell((cell: any) => {
+      cell.font = { bold: true, color: { argb: 'FFFFFFFF' } };
+      cell.fill = { type: 'pattern', pattern: 'solid', fgColor: { argb: 'FF1565C0' } };
+      cell.alignment = { horizontal: 'center' };
+    });
+
+    // Sample data rows
+    ws.addRow(['LN&L', 'L_BRA', 'E', 0, 125]);
+    ws.addRow(['LN&L', 'L_BRA', 'V', 126, 175]);
+    ws.addRow(['LN&L', 'L_BRA', 'P', 176, 250]);
+    ws.addRow(['LN&L', 'L_BRA', 'SP', 251, 999999]);
+    ws.addRow([]);
+    ws.addRow(['LN&L', 'LW_THRM_UPPER', 'E', 0, 450]);
+    ws.addRow(['LN&L', 'LW_THRM_UPPER', 'V', 451, 'ABOVE']);
+    // Note: When MAX = ABOVE, that segment gets max=999999 and P, SP rows for this MC are dropped
+
+    ws.addRow([]);
+    const noteRow = ws.addRow(['⚠ NOTE: When MAX = "ABOVE", that row gets max=999999 and all further segments for that MAJOR-CATEGORY are skipped.']);
+    ws.mergeCells(`A${noteRow.number}:E${noteRow.number}`);
+    noteRow.getCell(1).font = { italic: true, size: 10 };
+    noteRow.getCell(1).fill = { type: 'pattern', pattern: 'solid', fgColor: { argb: 'FFFFF3CD' } };
+
+    ws.columns = [{ width: 18 }, { width: 22 }, { width: 16 }, { width: 12 }, { width: 14 }];
+
+    res.setHeader('Content-Type', 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');
+    res.setHeader('Content-Disposition', 'attachment; filename="SEGMENT_MASTER_TEMPLATE.xlsx"');
+    await wb.xlsx.write(res);
+    res.end();
+  } catch (error: any) {
+    console.error('[SegmentMaster] Template error:', error);
+    res.status(500).json({ success: false, error: error.message });
+  }
+};
+
+export const exportSegmentMaster = async (_req: Request, res: Response): Promise<void> => {
+  try {
+    const rows = await prisma.$queryRaw<{
+      sub_division: string;
+      major_category: string;
+      segment_type: string;
+      min: number;
+      max: number;
+    }[]>`
+      SELECT sub_division, major_category, segment_type, min, max
+      FROM maj_cat_segment
+      ORDER BY major_category, CASE segment_type WHEN 'E' THEN 1 WHEN 'V' THEN 2 WHEN 'P' THEN 3 WHEN 'SP' THEN 4 ELSE 5 END
+    `;
+
+    const ExcelJS = require('exceljs');
+    const wb = new ExcelJS.Workbook();
+    const ws = wb.addWorksheet('SEGMENT');
+
+    const headers = ['SUB-DIVISION', 'MAJOR-CATEGORY', 'SEGMENT_TYPE', 'MIN', 'MAX'];
+    const headerRow = ws.addRow(headers);
+    headerRow.eachCell((cell: any) => {
+      cell.font = { bold: true, color: { argb: 'FFFFFFFF' } };
+      cell.fill = { type: 'pattern', pattern: 'solid', fgColor: { argb: 'FF1565C0' } };
+      cell.alignment = { horizontal: 'center' };
+    });
+
+    for (const r of rows) {
+      ws.addRow([
+        r.sub_division,
+        r.major_category,
+        r.segment_type,
+        Number(r.min),
+        Number(r.max) === 999999 ? 'ABOVE' : Number(r.max),
+      ]);
+    }
+
+    ws.columns = [{ width: 18 }, { width: 22 }, { width: 16 }, { width: 12 }, { width: 14 }];
+
+    res.setHeader('Content-Type', 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');
+    res.setHeader('Content-Disposition', 'attachment; filename="SEGMENT_MASTER_EXPORT.xlsx"');
+    await wb.xlsx.write(res);
+    res.end();
+  } catch (error: any) {
+    console.error('[SegmentMaster] Export error:', error);
+    res.status(500).json({ success: false, error: error.message });
+  }
+};
+
+export const uploadSegmentMaster = async (req: Request, res: Response): Promise<void> => {
+  try {
+    if (!req.file) {
+      res.status(400).json({ success: false, error: 'No file uploaded. Send a .xlsx file as "file" field.' });
+      return;
+    }
+
+    const ExcelJS = (await import('exceljs')).default;
+    const wb = new ExcelJS.Workbook();
+    await wb.xlsx.load(req.file.buffer as any);
+
+    const ws = wb.getWorksheet('SEGMENT') ?? wb.worksheets[0];
+    if (!ws) {
+      res.status(400).json({ success: false, error: 'No worksheets found in the uploaded Excel file.' });
+      return;
+    }
+
+    const cellStr = (row: any, c: number): string => {
+      let v = row.getCell(c).value;
+      if (v && typeof v === 'object' && 'result' in v) v = (v as any).result;
+      if (v && typeof v === 'object' && 'text' in v) v = (v as any).text;
+      return v == null ? '' : String(v).trim();
+    };
+
+    // Auto-detect header row (first row with SUB or SEGMENT columns)
+    let headerRow = 1;
+    for (let r = 1; r <= Math.min(5, ws.rowCount); r++) {
+      const row = ws.getRow(r);
+      const line = [1, 2, 3, 4, 5].map((c) => cellStr(row, c).toUpperCase()).join(' ');
+      if (line.includes('SUB') && (line.includes('MAJOR') || line.includes('MC') || line.includes('SEGMENT'))) {
+        headerRow = r;
+        break;
+      }
+    }
+
+    // Detect column positions from header row
+    let cSub = 1, cMc = 2, cSeg = 3, cMin = 4, cMax = 5;
+    const hdr = ws.getRow(headerRow);
+    for (let c = 1; c <= 10; c++) {
+      const h = cellStr(hdr, c).toUpperCase().replace(/[-_ ]/g, '');
+      if (h.includes('SUB')) cSub = c;
+      else if (h.includes('MAJOR') || h === 'MC' || h.includes('MAJCAT')) cMc = c;
+      else if (h.includes('SEGMENT') && !h.includes('MIN') && !h.includes('MAX')) cSeg = c;
+      else if (h === 'MIN' || h === 'MINPRICE' || h === 'MINIMUM') cMin = c;
+      else if (h === 'MAX' || h === 'MAXPRICE' || h === 'MAXIMUM') cMax = c;
+    }
+
+    type SegRow = { sub_division: string; major_category: string; segment_type: string; min: number; max: number };
+    const allRows: SegRow[] = [];
+    let skipped = 0;
+
+    for (let r = headerRow + 1; r <= ws.rowCount; r++) {
+      const row = ws.getRow(r);
+      const sub = cellStr(row, cSub);
+      const mc  = cellStr(row, cMc);
+      const seg = cellStr(row, cSeg).toUpperCase();
+      const minRaw = cellStr(row, cMin);
+      const maxRaw = cellStr(row, cMax);
+
+      if (!mc || !seg) { skipped++; continue; }
+
+      const minVal = minRaw === '' ? 0 : Number(minRaw.replace(/[^0-9.-]/g, ''));
+      const isAbove = maxRaw.toUpperCase() === 'ABOVE' || maxRaw.toUpperCase() === 'INFINITY' || maxRaw === '∞';
+      const maxVal  = isAbove ? 999999 : Number(maxRaw.replace(/[^0-9.-]/g, ''));
+
+      if (isNaN(minVal) || isNaN(maxVal)) { skipped++; continue; }
+
+      allRows.push({ sub_division: sub, major_category: mc, segment_type: seg, min: minVal, max: maxVal });
+    }
+
+    // Apply ABOVE logic: group by major_category, stop adding rows after ABOVE hit
+    const grouped = new Map<string, SegRow[]>();
+    for (const r of allRows) {
+      const key = r.major_category.toUpperCase();
+      if (!grouped.has(key)) grouped.set(key, []);
+      grouped.get(key)!.push(r);
+    }
+
+    const finalRows: SegRow[] = [];
+    for (const rows of grouped.values()) {
+      let done = false;
+      for (const r of rows) {
+        if (done) { skipped++; continue; }
+        finalRows.push(r);
+        if (r.max === 999999) done = true;
+      }
+    }
+
+    if (finalRows.length === 0) {
+      res.status(400).json({ success: false, error: 'No valid rows found in the Excel file.' });
+      return;
+    }
+
+    // Replace table: truncate + batch insert
+    await prisma.$executeRaw`TRUNCATE TABLE maj_cat_segment RESTART IDENTITY`;
+
+    const now = new Date();
+    const BATCH = 500;
+    for (let i = 0; i < finalRows.length; i += BATCH) {
+      const batch = finalRows.slice(i, i + BATCH);
+      // Build VALUES string
+      const values = batch.map((r) =>
+        `(${[
+          `'${r.sub_division.replace(/'/g, "''")}'`,
+          `'${r.major_category.replace(/'/g, "''")}'`,
+          `'${r.segment_type.replace(/'/g, "''")}'`,
+          r.min,
+          r.max,
+          `'${now.toISOString()}'`,
+          `'${now.toISOString()}'`,
+        ].join(', ')})`
+      ).join(', ');
+      await prisma.$executeRawUnsafe(
+        `INSERT INTO maj_cat_segment (sub_division, major_category, segment_type, min, max, created_at, updated_at) VALUES ${values}`
+      );
+    }
+
+    console.log(`[SegmentMaster] Replaced table with ${finalRows.length} rows (${skipped} skipped)`);
+
+    res.json({
+      success: true,
+      message: `Segment master updated: ${finalRows.length} rows inserted${skipped > 0 ? `, ${skipped} rows skipped` : ''}.`,
+      data: {
+        total: finalRows.length,
+        categories: grouped.size,
+        skipped,
+        lastUpdated: now.toISOString(),
+      },
+    });
+  } catch (error: any) {
+    console.error('[SegmentMaster] Upload error:', error);
+    res.status(500).json({ success: false, error: error.message });
+  }
+};

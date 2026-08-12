@@ -1,5 +1,5 @@
 import { Router } from 'express';
-import { getFieldConfigs, getAttributeValues, getCategoryAttributeConfig } from '../controllers/articleConfigController';
+import { getFieldConfigs, getAttributeValues, getCategoryAttributeConfig, getSegmentRanges } from '../controllers/articleConfigController';
 import { getMajCatGridValues, getMandatoryGridValues } from '../controllers/adminController';
 
 const router = Router();
@@ -13,5 +13,6 @@ router.get('/category-attributes/:code', getCategoryAttributeConfig);
 // but served via the /api/article-config route which has no requireAdmin middleware.
 router.get('/majcat-grid', getMajCatGridValues);
 router.get('/mandatory-grid', getMandatoryGridValues);
+router.get('/segment-ranges', getSegmentRanges);
 
 export default router;

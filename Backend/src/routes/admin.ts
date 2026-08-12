@@ -176,6 +176,14 @@ router.get('/color-master/template', h(adminController.downloadColorMasterTempla
 router.post('/color-master/upload', excelUpload.single('file'), h(adminController.uploadColorMaster));
 
 // ═══════════════════════════════════════════════════════
+// SEGMENT MASTER (ADMIN) — maj_cat_segment
+// ═══════════════════════════════════════════════════════
+router.get('/segment-master/status', h(adminController.getSegmentMasterStatus));
+router.get('/segment-master/template', h(adminController.downloadSegmentMasterTemplate));
+router.get('/segment-master/export', h(adminController.exportSegmentMaster));
+router.post('/segment-master/upload', excelUpload.single('file'), h(adminController.uploadSegmentMaster));
+
+// ═══════════════════════════════════════════════════════
 // GRID VALUES EDITOR (ADMIN) — maj_cat_grid_values
 // Group → Attribute → Major Category browser + per-value add/delete.
 // POST used for mutations to avoid the Express 5 DELETE registration quirk.
