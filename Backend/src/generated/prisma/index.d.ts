@@ -14664,6 +14664,7 @@ export namespace Prisma {
     pattern: string | null
     length: string | null
     colour: string | null
+    secondaryColour: string | null
     drawcord: string | null
     button: string | null
     zipper: string | null
@@ -14795,6 +14796,7 @@ export namespace Prisma {
     pattern: string | null
     length: string | null
     colour: string | null
+    secondaryColour: string | null
     drawcord: string | null
     button: string | null
     zipper: string | null
@@ -14926,6 +14928,7 @@ export namespace Prisma {
     pattern: number
     length: number
     colour: number
+    secondaryColour: number
     drawcord: number
     button: number
     zipper: number
@@ -15090,6 +15093,7 @@ export namespace Prisma {
     pattern?: true
     length?: true
     colour?: true
+    secondaryColour?: true
     drawcord?: true
     button?: true
     zipper?: true
@@ -15221,6 +15225,7 @@ export namespace Prisma {
     pattern?: true
     length?: true
     colour?: true
+    secondaryColour?: true
     drawcord?: true
     button?: true
     zipper?: true
@@ -15352,6 +15357,7 @@ export namespace Prisma {
     pattern?: true
     length?: true
     colour?: true
+    secondaryColour?: true
     drawcord?: true
     button?: true
     zipper?: true
@@ -15571,6 +15577,7 @@ export namespace Prisma {
     pattern: string | null
     length: string | null
     colour: string | null
+    secondaryColour: string | null
     drawcord: string | null
     button: string | null
     zipper: string | null
@@ -15722,6 +15729,7 @@ export namespace Prisma {
     pattern?: boolean
     length?: boolean
     colour?: boolean
+    secondaryColour?: boolean
     drawcord?: boolean
     button?: boolean
     zipper?: boolean
@@ -15858,6 +15866,7 @@ export namespace Prisma {
     pattern?: boolean
     length?: boolean
     colour?: boolean
+    secondaryColour?: boolean
     drawcord?: boolean
     button?: boolean
     zipper?: boolean
@@ -15992,6 +16001,7 @@ export namespace Prisma {
     pattern?: boolean
     length?: boolean
     colour?: boolean
+    secondaryColour?: boolean
     drawcord?: boolean
     button?: boolean
     zipper?: boolean
@@ -16126,6 +16136,7 @@ export namespace Prisma {
     pattern?: boolean
     length?: boolean
     colour?: boolean
+    secondaryColour?: boolean
     drawcord?: boolean
     button?: boolean
     zipper?: boolean
@@ -16202,7 +16213,7 @@ export namespace Prisma {
     imageExtractionRawData?: boolean
   }
 
-  export type ExtractionResultFlatOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<"id" | "jobId" | "imageName" | "imageUrl" | "articleNumber" | "extractionStatus" | "aiModel" | "avgConfidence" | "processingTimeMs" | "totalAttributes" | "extractedCount" | "inputTokens" | "outputTokens" | "totalTokens" | "apiCost" | "userId" | "userName" | "extractionDate" | "createdAt" | "updatedAt" | "majorCategory" | "vendorName" | "designNumber" | "pptNumber" | "rate" | "size" | "yarn1" | "yarn2" | "fabricMainMvgr" | "weave" | "weaveFullForm" | "composition" | "finish" | "gsm" | "macroMvgr" | "macroMvgrFullForm" | "mainMvgr" | "mainMvgrFullForm" | "mFab2" | "mFab2FullForm" | "shade" | "weight" | "lycra" | "neck" | "neckDetails" | "collar" | "placket" | "sleeve" | "bottomFold" | "frontOpenStyle" | "pocketType" | "fit" | "pattern" | "length" | "colour" | "drawcord" | "button" | "zipper" | "zipColour" | "printType" | "printStyle" | "printPlacement" | "patches" | "patchesType" | "embroidery" | "embroideryType" | "wash" | "fatherBelt" | "childBelt" | "division" | "subDivision" | "referenceArticleNumber" | "referenceArticleDescription" | "collarStyle" | "sleeveFold" | "mSet" | "noOfPocket" | "extraPocket" | "dcShape" | "btnColour" | "fCount" | "fConstruction" | "fOunce" | "fWidth" | "fabDiv" | "fabVdr" | "htrfType" | "htrfStyle" | "embPlacement" | "ageGroup" | "mNoOfSize" | "mNoOfClr" | "articleFashionType" | "articleDimension" | "bodyArticle" | "bodyArticleDescription" | "fabricArticleNumber" | "fabricArticleDescription" | "attrArticleNums" | "mvgrBrandVendor" | "vendorCode" | "mrp" | "impAtrbt2" | "mcCode" | "segment" | "season" | "hsnTaxCode" | "articleDescription" | "fashionGrid" | "year" | "articleType" | "presentationsType" | "approvalStatus" | "pdStatus" | "approvedBy" | "approvedAt" | "source" | "imageUncPath" | "isOldArticle" | "isGeneric" | "genericArticleId" | "variantSize" | "variantColor" | "sapSyncStatus" | "sapArticleId" | "sapSyncMessage" | "srmOriginalDesignNumber" | "srmUniqueId" | "imageExtractionRawData", ExtArgs["result"]["extractionResultFlat"]>
+  export type ExtractionResultFlatOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<"id" | "jobId" | "imageName" | "imageUrl" | "articleNumber" | "extractionStatus" | "aiModel" | "avgConfidence" | "processingTimeMs" | "totalAttributes" | "extractedCount" | "inputTokens" | "outputTokens" | "totalTokens" | "apiCost" | "userId" | "userName" | "extractionDate" | "createdAt" | "updatedAt" | "majorCategory" | "vendorName" | "designNumber" | "pptNumber" | "rate" | "size" | "yarn1" | "yarn2" | "fabricMainMvgr" | "weave" | "weaveFullForm" | "composition" | "finish" | "gsm" | "macroMvgr" | "macroMvgrFullForm" | "mainMvgr" | "mainMvgrFullForm" | "mFab2" | "mFab2FullForm" | "shade" | "weight" | "lycra" | "neck" | "neckDetails" | "collar" | "placket" | "sleeve" | "bottomFold" | "frontOpenStyle" | "pocketType" | "fit" | "pattern" | "length" | "colour" | "secondaryColour" | "drawcord" | "button" | "zipper" | "zipColour" | "printType" | "printStyle" | "printPlacement" | "patches" | "patchesType" | "embroidery" | "embroideryType" | "wash" | "fatherBelt" | "childBelt" | "division" | "subDivision" | "referenceArticleNumber" | "referenceArticleDescription" | "collarStyle" | "sleeveFold" | "mSet" | "noOfPocket" | "extraPocket" | "dcShape" | "btnColour" | "fCount" | "fConstruction" | "fOunce" | "fWidth" | "fabDiv" | "fabVdr" | "htrfType" | "htrfStyle" | "embPlacement" | "ageGroup" | "mNoOfSize" | "mNoOfClr" | "articleFashionType" | "articleDimension" | "bodyArticle" | "bodyArticleDescription" | "fabricArticleNumber" | "fabricArticleDescription" | "attrArticleNums" | "mvgrBrandVendor" | "vendorCode" | "mrp" | "impAtrbt2" | "mcCode" | "segment" | "season" | "hsnTaxCode" | "articleDescription" | "fashionGrid" | "year" | "articleType" | "presentationsType" | "approvalStatus" | "pdStatus" | "approvedBy" | "approvedAt" | "source" | "imageUncPath" | "isOldArticle" | "isGeneric" | "genericArticleId" | "variantSize" | "variantColor" | "sapSyncStatus" | "sapArticleId" | "sapSyncMessage" | "srmOriginalDesignNumber" | "srmUniqueId" | "imageExtractionRawData", ExtArgs["result"]["extractionResultFlat"]>
   export type ExtractionResultFlatInclude<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
     approver?: boolean | ExtractionResultFlat$approverArgs<ExtArgs>
     job?: boolean | ExtractionResultFlat$jobArgs<ExtArgs>
@@ -16281,6 +16292,7 @@ export namespace Prisma {
       pattern: string | null
       length: string | null
       colour: string | null
+      secondaryColour: string | null
       drawcord: string | null
       button: string | null
       zipper: string | null
@@ -16836,6 +16848,7 @@ export namespace Prisma {
     readonly pattern: FieldRef<"ExtractionResultFlat", 'String'>
     readonly length: FieldRef<"ExtractionResultFlat", 'String'>
     readonly colour: FieldRef<"ExtractionResultFlat", 'String'>
+    readonly secondaryColour: FieldRef<"ExtractionResultFlat", 'String'>
     readonly drawcord: FieldRef<"ExtractionResultFlat", 'String'>
     readonly button: FieldRef<"ExtractionResultFlat", 'String'>
     readonly zipper: FieldRef<"ExtractionResultFlat", 'String'>
@@ -48678,6 +48691,7 @@ export namespace Prisma {
     pattern: 'pattern',
     length: 'length',
     colour: 'colour',
+    secondaryColour: 'secondaryColour',
     drawcord: 'drawcord',
     button: 'button',
     zipper: 'zipper',
@@ -49459,6 +49473,7 @@ export namespace Prisma {
     pattern: 'pattern',
     length: 'length',
     colour: 'colour',
+    secondaryColour: 'secondaryColour',
     drawcord: 'drawcord',
     button: 'button',
     zipper: 'zipper',
@@ -51073,6 +51088,7 @@ export namespace Prisma {
     pattern?: StringNullableFilter<"ExtractionResultFlat"> | string | null
     length?: StringNullableFilter<"ExtractionResultFlat"> | string | null
     colour?: StringNullableFilter<"ExtractionResultFlat"> | string | null
+    secondaryColour?: StringNullableFilter<"ExtractionResultFlat"> | string | null
     drawcord?: StringNullableFilter<"ExtractionResultFlat"> | string | null
     button?: StringNullableFilter<"ExtractionResultFlat"> | string | null
     zipper?: StringNullableFilter<"ExtractionResultFlat"> | string | null
@@ -51208,6 +51224,7 @@ export namespace Prisma {
     pattern?: SortOrderInput | SortOrder
     length?: SortOrderInput | SortOrder
     colour?: SortOrderInput | SortOrder
+    secondaryColour?: SortOrderInput | SortOrder
     drawcord?: SortOrderInput | SortOrder
     button?: SortOrderInput | SortOrder
     zipper?: SortOrderInput | SortOrder
@@ -51348,6 +51365,7 @@ export namespace Prisma {
     pattern?: StringNullableFilter<"ExtractionResultFlat"> | string | null
     length?: StringNullableFilter<"ExtractionResultFlat"> | string | null
     colour?: StringNullableFilter<"ExtractionResultFlat"> | string | null
+    secondaryColour?: StringNullableFilter<"ExtractionResultFlat"> | string | null
     drawcord?: StringNullableFilter<"ExtractionResultFlat"> | string | null
     button?: StringNullableFilter<"ExtractionResultFlat"> | string | null
     zipper?: StringNullableFilter<"ExtractionResultFlat"> | string | null
@@ -51482,6 +51500,7 @@ export namespace Prisma {
     pattern?: SortOrderInput | SortOrder
     length?: SortOrderInput | SortOrder
     colour?: SortOrderInput | SortOrder
+    secondaryColour?: SortOrderInput | SortOrder
     drawcord?: SortOrderInput | SortOrder
     button?: SortOrderInput | SortOrder
     zipper?: SortOrderInput | SortOrder
@@ -51622,6 +51641,7 @@ export namespace Prisma {
     pattern?: StringNullableWithAggregatesFilter<"ExtractionResultFlat"> | string | null
     length?: StringNullableWithAggregatesFilter<"ExtractionResultFlat"> | string | null
     colour?: StringNullableWithAggregatesFilter<"ExtractionResultFlat"> | string | null
+    secondaryColour?: StringNullableWithAggregatesFilter<"ExtractionResultFlat"> | string | null
     drawcord?: StringNullableWithAggregatesFilter<"ExtractionResultFlat"> | string | null
     button?: StringNullableWithAggregatesFilter<"ExtractionResultFlat"> | string | null
     zipper?: StringNullableWithAggregatesFilter<"ExtractionResultFlat"> | string | null
@@ -55377,6 +55397,7 @@ export namespace Prisma {
     pattern?: string | null
     length?: string | null
     colour?: string | null
+    secondaryColour?: string | null
     drawcord?: string | null
     button?: string | null
     zipper?: string | null
@@ -55511,6 +55532,7 @@ export namespace Prisma {
     pattern?: string | null
     length?: string | null
     colour?: string | null
+    secondaryColour?: string | null
     drawcord?: string | null
     button?: string | null
     zipper?: string | null
@@ -55643,6 +55665,7 @@ export namespace Prisma {
     pattern?: NullableStringFieldUpdateOperationsInput | string | null
     length?: NullableStringFieldUpdateOperationsInput | string | null
     colour?: NullableStringFieldUpdateOperationsInput | string | null
+    secondaryColour?: NullableStringFieldUpdateOperationsInput | string | null
     drawcord?: NullableStringFieldUpdateOperationsInput | string | null
     button?: NullableStringFieldUpdateOperationsInput | string | null
     zipper?: NullableStringFieldUpdateOperationsInput | string | null
@@ -55777,6 +55800,7 @@ export namespace Prisma {
     pattern?: NullableStringFieldUpdateOperationsInput | string | null
     length?: NullableStringFieldUpdateOperationsInput | string | null
     colour?: NullableStringFieldUpdateOperationsInput | string | null
+    secondaryColour?: NullableStringFieldUpdateOperationsInput | string | null
     drawcord?: NullableStringFieldUpdateOperationsInput | string | null
     button?: NullableStringFieldUpdateOperationsInput | string | null
     zipper?: NullableStringFieldUpdateOperationsInput | string | null
@@ -55910,6 +55934,7 @@ export namespace Prisma {
     pattern?: string | null
     length?: string | null
     colour?: string | null
+    secondaryColour?: string | null
     drawcord?: string | null
     button?: string | null
     zipper?: string | null
@@ -56041,6 +56066,7 @@ export namespace Prisma {
     pattern?: NullableStringFieldUpdateOperationsInput | string | null
     length?: NullableStringFieldUpdateOperationsInput | string | null
     colour?: NullableStringFieldUpdateOperationsInput | string | null
+    secondaryColour?: NullableStringFieldUpdateOperationsInput | string | null
     drawcord?: NullableStringFieldUpdateOperationsInput | string | null
     button?: NullableStringFieldUpdateOperationsInput | string | null
     zipper?: NullableStringFieldUpdateOperationsInput | string | null
@@ -56172,6 +56198,7 @@ export namespace Prisma {
     pattern?: NullableStringFieldUpdateOperationsInput | string | null
     length?: NullableStringFieldUpdateOperationsInput | string | null
     colour?: NullableStringFieldUpdateOperationsInput | string | null
+    secondaryColour?: NullableStringFieldUpdateOperationsInput | string | null
     drawcord?: NullableStringFieldUpdateOperationsInput | string | null
     button?: NullableStringFieldUpdateOperationsInput | string | null
     zipper?: NullableStringFieldUpdateOperationsInput | string | null
@@ -60510,6 +60537,7 @@ export namespace Prisma {
     pattern?: SortOrder
     length?: SortOrder
     colour?: SortOrder
+    secondaryColour?: SortOrder
     drawcord?: SortOrder
     button?: SortOrder
     zipper?: SortOrder
@@ -60657,6 +60685,7 @@ export namespace Prisma {
     pattern?: SortOrder
     length?: SortOrder
     colour?: SortOrder
+    secondaryColour?: SortOrder
     drawcord?: SortOrder
     button?: SortOrder
     zipper?: SortOrder
@@ -60788,6 +60817,7 @@ export namespace Prisma {
     pattern?: SortOrder
     length?: SortOrder
     colour?: SortOrder
+    secondaryColour?: SortOrder
     drawcord?: SortOrder
     button?: SortOrder
     zipper?: SortOrder
@@ -66005,6 +66035,7 @@ export namespace Prisma {
     pattern?: string | null
     length?: string | null
     colour?: string | null
+    secondaryColour?: string | null
     drawcord?: string | null
     button?: string | null
     zipper?: string | null
@@ -66137,6 +66168,7 @@ export namespace Prisma {
     pattern?: string | null
     length?: string | null
     colour?: string | null
+    secondaryColour?: string | null
     drawcord?: string | null
     button?: string | null
     zipper?: string | null
@@ -66393,6 +66425,7 @@ export namespace Prisma {
     pattern?: NullableStringFieldUpdateOperationsInput | string | null
     length?: NullableStringFieldUpdateOperationsInput | string | null
     colour?: NullableStringFieldUpdateOperationsInput | string | null
+    secondaryColour?: NullableStringFieldUpdateOperationsInput | string | null
     drawcord?: NullableStringFieldUpdateOperationsInput | string | null
     button?: NullableStringFieldUpdateOperationsInput | string | null
     zipper?: NullableStringFieldUpdateOperationsInput | string | null
@@ -66525,6 +66558,7 @@ export namespace Prisma {
     pattern?: NullableStringFieldUpdateOperationsInput | string | null
     length?: NullableStringFieldUpdateOperationsInput | string | null
     colour?: NullableStringFieldUpdateOperationsInput | string | null
+    secondaryColour?: NullableStringFieldUpdateOperationsInput | string | null
     drawcord?: NullableStringFieldUpdateOperationsInput | string | null
     button?: NullableStringFieldUpdateOperationsInput | string | null
     zipper?: NullableStringFieldUpdateOperationsInput | string | null
@@ -67495,6 +67529,7 @@ export namespace Prisma {
     pattern?: string | null
     length?: string | null
     colour?: string | null
+    secondaryColour?: string | null
     drawcord?: string | null
     button?: string | null
     zipper?: string | null
@@ -67628,6 +67663,7 @@ export namespace Prisma {
     pattern?: string | null
     length?: string | null
     colour?: string | null
+    secondaryColour?: string | null
     drawcord?: string | null
     button?: string | null
     zipper?: string | null
@@ -67890,6 +67926,7 @@ export namespace Prisma {
     pattern?: StringNullableFilter<"ExtractionResultFlat"> | string | null
     length?: StringNullableFilter<"ExtractionResultFlat"> | string | null
     colour?: StringNullableFilter<"ExtractionResultFlat"> | string | null
+    secondaryColour?: StringNullableFilter<"ExtractionResultFlat"> | string | null
     drawcord?: StringNullableFilter<"ExtractionResultFlat"> | string | null
     button?: StringNullableFilter<"ExtractionResultFlat"> | string | null
     zipper?: StringNullableFilter<"ExtractionResultFlat"> | string | null
@@ -69440,6 +69477,7 @@ export namespace Prisma {
     pattern?: string | null
     length?: string | null
     colour?: string | null
+    secondaryColour?: string | null
     drawcord?: string | null
     button?: string | null
     zipper?: string | null
@@ -69573,6 +69611,7 @@ export namespace Prisma {
     pattern?: string | null
     length?: string | null
     colour?: string | null
+    secondaryColour?: string | null
     drawcord?: string | null
     button?: string | null
     zipper?: string | null
@@ -69757,6 +69796,7 @@ export namespace Prisma {
     pattern?: NullableStringFieldUpdateOperationsInput | string | null
     length?: NullableStringFieldUpdateOperationsInput | string | null
     colour?: NullableStringFieldUpdateOperationsInput | string | null
+    secondaryColour?: NullableStringFieldUpdateOperationsInput | string | null
     drawcord?: NullableStringFieldUpdateOperationsInput | string | null
     button?: NullableStringFieldUpdateOperationsInput | string | null
     zipper?: NullableStringFieldUpdateOperationsInput | string | null
@@ -69890,6 +69930,7 @@ export namespace Prisma {
     pattern?: NullableStringFieldUpdateOperationsInput | string | null
     length?: NullableStringFieldUpdateOperationsInput | string | null
     colour?: NullableStringFieldUpdateOperationsInput | string | null
+    secondaryColour?: NullableStringFieldUpdateOperationsInput | string | null
     drawcord?: NullableStringFieldUpdateOperationsInput | string | null
     button?: NullableStringFieldUpdateOperationsInput | string | null
     zipper?: NullableStringFieldUpdateOperationsInput | string | null
@@ -70797,6 +70838,7 @@ export namespace Prisma {
     pattern?: string | null
     length?: string | null
     colour?: string | null
+    secondaryColour?: string | null
     drawcord?: string | null
     button?: string | null
     zipper?: string | null
@@ -71089,6 +71131,7 @@ export namespace Prisma {
     pattern?: NullableStringFieldUpdateOperationsInput | string | null
     length?: NullableStringFieldUpdateOperationsInput | string | null
     colour?: NullableStringFieldUpdateOperationsInput | string | null
+    secondaryColour?: NullableStringFieldUpdateOperationsInput | string | null
     drawcord?: NullableStringFieldUpdateOperationsInput | string | null
     button?: NullableStringFieldUpdateOperationsInput | string | null
     zipper?: NullableStringFieldUpdateOperationsInput | string | null
@@ -71222,6 +71265,7 @@ export namespace Prisma {
     pattern?: NullableStringFieldUpdateOperationsInput | string | null
     length?: NullableStringFieldUpdateOperationsInput | string | null
     colour?: NullableStringFieldUpdateOperationsInput | string | null
+    secondaryColour?: NullableStringFieldUpdateOperationsInput | string | null
     drawcord?: NullableStringFieldUpdateOperationsInput | string | null
     button?: NullableStringFieldUpdateOperationsInput | string | null
     zipper?: NullableStringFieldUpdateOperationsInput | string | null
@@ -71354,6 +71398,7 @@ export namespace Prisma {
     pattern?: NullableStringFieldUpdateOperationsInput | string | null
     length?: NullableStringFieldUpdateOperationsInput | string | null
     colour?: NullableStringFieldUpdateOperationsInput | string | null
+    secondaryColour?: NullableStringFieldUpdateOperationsInput | string | null
     drawcord?: NullableStringFieldUpdateOperationsInput | string | null
     button?: NullableStringFieldUpdateOperationsInput | string | null
     zipper?: NullableStringFieldUpdateOperationsInput | string | null

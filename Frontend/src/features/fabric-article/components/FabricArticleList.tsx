@@ -2159,7 +2159,8 @@ const ArticleCard = React.memo(
                       {[
                         { label: 'RATE / COST', field: 'rate', editable: true, mandatory: true, isDropdown: false, isColor: false, isMarkdown: false },
                         { label: 'MRP', field: 'mrp', editable: true, mandatory: true, isDropdown: false, isColor: false, isMarkdown: false },
-                        { label: 'COLOUR', field: 'colour', editable: true, mandatory: true, isDropdown: true, isColor: true, isMarkdown: false },
+                        { label: 'Base Color', field: 'colour', editable: true, mandatory: true, isDropdown: true, isColor: true, isMarkdown: false },
+                        { label: 'Secondary Color', field: 'secondaryColour', editable: true, mandatory: false, isDropdown: true, isColor: true, isMarkdown: false },
                         { label: 'ARTICLE FASHION TYPE', field: 'articleFashionType', editable: true, mandatory: false, isDropdown: true, isColor: false, isMarkdown: false, boldLabel: true },
                         { label: 'SEGMENT', field: 'segment', editable: true, mandatory: false, isDropdown: false, isColor: false, isMarkdown: false, boldLabel: true },
                         { label: 'MARKDOWN', field: '_markdown', editable: false, mandatory: false, isDropdown: false, isColor: false, isMarkdown: true, isAfterTax: false, boldLabel: true },
