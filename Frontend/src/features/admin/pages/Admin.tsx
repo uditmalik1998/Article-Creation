@@ -89,6 +89,13 @@ interface ColorMasterMeta {
   skipped?: number;
 }
 
+interface SegmentMasterMeta {
+  total?: number;
+  categories?: number;
+  skipped?: number;
+  lastUpdated?: string;
+}
+
 interface HierarchyExcelStatus {
   departments: number;
   subDepartments: number;
@@ -181,6 +188,13 @@ export default function Admin() {
   const [colorMasterUploading, setColorMasterUploading] = useState(false);
   const [colorMasterProgress, setColorMasterProgress] = useState<number>(0);
   const colorFileRef = useRef<HTMLInputElement | null>(null);
+
+  // Segment Master (maj_cat_segment)
+  const [segmentMasterMeta, setSegmentMasterMeta] = useState<SegmentMasterMeta | null>(null);
+  const [segmentMasterStatusLoading, setSegmentMasterStatusLoading] = useState(false);
+  const [segmentMasterUploading, setSegmentMasterUploading] = useState(false);
+  const [segmentMasterProgress, setSegmentMasterProgress] = useState<number>(0);
+  const segmentFileRef = useRef<HTMLInputElement | null>(null);
 
   // National Grid Master
   const [nationalGridTotal, setNationalGridTotal] = useState<number | null>(null);
@@ -617,6 +631,82 @@ export default function Admin() {
     }
   };
 
+  // ─────────────────────────────── Segment Master ─────────────────────────────
+  const loadSegmentMasterStatus = useCallback(async () => {
+    setSegmentMasterStatusLoading(true);
+    try {
+      const token = localStorage.getItem('authToken');
+      const res = await fetch(`${APP_CONFIG.api.baseURL}/admin/segment-master/status`, {
+        headers: token ? { Authorization: `Bearer ${token}` } : {},
+      });
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.error || 'Failed to load segment master status');
+      setSegmentMasterMeta(data.data);
+    } catch (err: any) {
+      message.error(err?.message || 'Failed to load segment master status');
+    } finally {
+      setSegmentMasterStatusLoading(false);
+    }
+  }, []);
+
+  const downloadSegmentMasterTemplate = () => {
+    const token = localStorage.getItem('authToken');
+    const url = `${APP_CONFIG.api.baseURL}/admin/segment-master/template`;
+    fetch(url, { headers: token ? { Authorization: `Bearer ${token}` } : {} })
+      .then((r) => r.blob())
+      .then((blob) => {
+        const a = document.createElement('a');
+        a.href = URL.createObjectURL(blob);
+        a.download = 'SEGMENT_MASTER_TEMPLATE.xlsx';
+        a.click();
+      })
+      .catch(() => message.error('Failed to download template'));
+  };
+
+  const exportSegmentMaster = () => {
+    const token = localStorage.getItem('authToken');
+    const url = `${APP_CONFIG.api.baseURL}/admin/segment-master/export`;
+    fetch(url, { headers: token ? { Authorization: `Bearer ${token}` } : {} })
+      .then((r) => r.blob())
+      .then((blob) => {
+        const a = document.createElement('a');
+        a.href = URL.createObjectURL(blob);
+        a.download = 'SEGMENT_MASTER_EXPORT.xlsx';
+        a.click();
+      })
+      .catch(() => message.error('Failed to export segment master'));
+  };
+
+  const handleSegmentMasterUpload = async (file: File) => {
+    setSegmentMasterUploading(true);
+    setSegmentMasterProgress(0);
+    try {
+      const token = localStorage.getItem('authToken');
+      const formData = new FormData();
+      formData.append('file', file);
+      const progressInterval = setInterval(() => {
+        setSegmentMasterProgress((prev) => Math.min(prev + 5, 90));
+      }, 500);
+      const res = await fetch(`${APP_CONFIG.api.baseURL}/admin/segment-master/upload`, {
+        method: 'POST',
+        headers: token ? { Authorization: `Bearer ${token}` } : {},
+        body: formData,
+      });
+      clearInterval(progressInterval);
+      setSegmentMasterProgress(100);
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.error || 'Upload failed');
+      message.success(data.message);
+      setSegmentMasterMeta(data.data);
+    } catch (err: any) {
+      message.error(err?.message || 'Upload failed');
+    } finally {
+      setSegmentMasterUploading(false);
+      setTimeout(() => setSegmentMasterProgress(0), 1500);
+      if (segmentFileRef.current) segmentFileRef.current.value = '';
+    }
+  };
+
   // ─────────────────────────────── National Grid Master ───────────────────────────────
   const downloadNationalGridTemplate = async () => {
     try {
@@ -878,11 +968,12 @@ export default function Admin() {
     loadMandatoryGridStatus();
     loadSizeMasterStatus();
     loadColorMasterStatus();
+    loadSegmentMasterStatus();
     loadNationalGridStatus();
     loadHierarchyExcelStatus();
     loadPipelineStatus();
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [loadVendorStatus, loadMajCatGridStatus, loadMandatoryGridStatus, loadSizeMasterStatus, loadColorMasterStatus, loadNationalGridStatus, loadHierarchyExcelStatus, loadPipelineStatus]);
+  }, [loadVendorStatus, loadMajCatGridStatus, loadMandatoryGridStatus, loadSizeMasterStatus, loadColorMasterStatus, loadSegmentMasterStatus, loadNationalGridStatus, loadHierarchyExcelStatus, loadPipelineStatus]);
 
   const loadData = async () => {
     setLoading(true);
@@ -1995,6 +2086,111 @@ export default function Admin() {
                           Click to upload <strong>.xlsx</strong> file
                         </p>
                         <p className="text-[11px] text-muted-foreground">Previews before importing. Only Excel files. Max 50 MB.</p>
+                      </button>
+                    )}
+                  </div>
+                </div>
+              </div>
+            </Spinner>
+          </CardContent>
+        </Card>
+
+        {/* Segment Master Upload (price segments per major category → maj_cat_segment) */}
+        <Card className="mb-6 glass rounded-2xl border border-white/60">
+          <CardHeader className="flex flex-row items-center justify-between">
+            <CardTitle className="flex items-center gap-2 text-base">
+              <TableIcon className="h-4 w-4" />
+              Segment Master (Price Segments per Major Category)
+            </CardTitle>
+            <div className="flex gap-2">
+              <Button size="sm" variant="outline" onClick={downloadSegmentMasterTemplate}>
+                <Download />
+                Download Template
+              </Button>
+              <Button size="sm" variant="outline" onClick={exportSegmentMaster}>
+                <Download />
+                Export Data
+              </Button>
+              <Button size="sm" variant="outline" onClick={loadSegmentMasterStatus} disabled={segmentMasterStatusLoading}>
+                <RotateCw className={segmentMasterStatusLoading ? 'animate-spin' : ''} />
+                Refresh Status
+              </Button>
+            </div>
+          </CardHeader>
+          <CardContent>
+            <Spinner spinning={segmentMasterStatusLoading}>
+              <div className="grid grid-cols-1 gap-4 md:grid-cols-12">
+                {/* Status panel */}
+                <div className="md:col-span-7">
+                  {segmentMasterMeta && (segmentMasterMeta.total ?? 0) > 0 ? (
+                    <Descriptions bordered>
+                      {segmentMasterMeta.lastUpdated && (
+                        <Descriptions.Item label="Last Updated">
+                          {new Date(segmentMasterMeta.lastUpdated).toLocaleString('en-IN', {
+                            timeZone: 'Asia/Kolkata', dateStyle: 'medium', timeStyle: 'short',
+                          }) + ' IST'}
+                        </Descriptions.Item>
+                      )}
+                      <Descriptions.Item label="Major Categories">
+                        <Badge variant="info">{(segmentMasterMeta.categories ?? 0).toLocaleString()}</Badge>
+                      </Descriptions.Item>
+                      <Descriptions.Item label="Total Rows">
+                        <Badge variant="success">{(segmentMasterMeta.total ?? 0).toLocaleString()}</Badge>
+                      </Descriptions.Item>
+                      {segmentMasterMeta.skipped != null && (segmentMasterMeta.skipped ?? 0) > 0 && (
+                        <Descriptions.Item label="Rows Skipped">
+                          <Badge variant="warning">{(segmentMasterMeta.skipped ?? 0).toLocaleString()}</Badge>
+                        </Descriptions.Item>
+                      )}
+                    </Descriptions>
+                  ) : (
+                    <Alert
+                      type="warning"
+                      showIcon
+                      message="No segment master data"
+                      description="Upload the Segment Master Excel (columns: SUB-DIVISION, MAJOR-CATEGORY, SEGMENT_TYPE, MIN, MAX). When MAX = ABOVE, that segment gets max=999999 and further segments for that MC are dropped."
+                    />
+                  )}
+                </div>
+
+                {/* Upload panel */}
+                <div className="md:col-span-5">
+                  <div className="rounded-md border border-border p-4">
+                    <div className="mb-1 font-semibold">Upload Segment Master Excel</div>
+                    <div className="mb-3 text-xs text-muted-foreground">
+                      Columns: <strong>SUB-DIVISION, MAJOR-CATEGORY, SEGMENT_TYPE, MIN, MAX</strong>. When MAX = <code>ABOVE</code>, max becomes 999999 and subsequent segments for that MC are dropped. <strong className="text-destructive">Replaces entire table.</strong>
+                    </div>
+
+                    <input
+                      ref={segmentFileRef}
+                      type="file"
+                      accept=".xlsx,.xls"
+                      className="hidden"
+                      onChange={(e) => {
+                        const file = e.target.files?.[0];
+                        if (file) handleSegmentMasterUpload(file);
+                      }}
+                    />
+
+                    {segmentMasterUploading ? (
+                      <div>
+                        <div className="mb-2 text-[13px] text-[#FF6F61]">
+                          <RefreshCw className="mr-1.5 inline-block h-3.5 w-3.5 animate-spin" />
+                          Parsing Excel &amp; replacing table...
+                        </div>
+                        <Progress value={segmentMasterProgress} />
+                      </div>
+                    ) : (
+                      <button
+                        type="button"
+                        onClick={() => segmentFileRef.current?.click()}
+                        className="flex w-full flex-col items-center justify-center rounded-md border-2 border-dashed border-border bg-muted/30 px-4 py-6 transition-colors hover:border-[#FF6F61] hover:bg-[#FF6F61]/5"
+                      >
+                        <Inbox className="mb-2 h-8 w-8 text-[#FF6F61]" />
+                        <p className="text-[13px]">
+                          Click to upload <strong>.xlsx</strong> file
+                        </p>
+                        <p className="text-[11px] text-muted-foreground">Only Excel files. Max 50 MB.</p>
                       </button>
                     )}
                   </div>

@@ -150,3 +150,23 @@ export async function getCategoryAttributeConfig(req: Request, res: Response) {
     res.status(500).json({ success: false, message: 'Failed to fetch category attribute config' });
   }
 }
+
+/** GET /api/article-config/segment-ranges?majorCategory=XXX */
+export async function getSegmentRanges(req: Request, res: Response) {
+  try {
+    const mc = ((req.query.majorCategory as string) || '').trim().toUpperCase();
+    if (!mc) {
+      res.json({ success: true, data: [] });
+      return;
+    }
+    const rows = await prisma.$queryRaw<{ segment_type: string; min: number; max: number }[]>`
+      SELECT segment_type, "min", "max"
+      FROM maj_cat_segment
+      WHERE UPPER(TRIM(major_category)) = ${mc}
+      ORDER BY "min"
+    `;
+    res.json({ success: true, data: rows.map(r => ({ segment_type: r.segment_type, min: Number(r.min), max: Number(r.max) })) });
+  } catch (err: any) {
+    res.status(500).json({ success: false, message: 'Failed to fetch segment ranges' });
+  }
+}

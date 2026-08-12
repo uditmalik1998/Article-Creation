@@ -86,6 +86,42 @@ const ChevronDownIcon = ChevronDown;
 // Module-level BOM cache (shared across card instances)
 const bomCache = new Map<string, Promise<Record<string, Record<string, string>>>>();
 
+// Module-level segment range cache (shared across card instances, keyed by UPPER major category)
+type SegmentRange = { segment_type: string; min: number; max: number };
+const segmentRangeCache = new Map<string, SegmentRange[]>();
+
+const fetchSegmentRangesFor = async (mc: string): Promise<SegmentRange[]> => {
+  const key = (mc || '').trim().toUpperCase();
+  if (!key) return [];
+  if (segmentRangeCache.has(key)) return segmentRangeCache.get(key)!;
+  try {
+    const token = localStorage.getItem('authToken');
+    const r = await fetch(
+      `${APP_CONFIG.api.baseURL}/article-config/segment-ranges?majorCategory=${encodeURIComponent(mc)}`,
+      { headers: token ? { Authorization: `Bearer ${token}` } : {} },
+    );
+    if (r.ok) {
+      const json = await r.json();
+      const data: SegmentRange[] = (json.data ?? []).map((row: any) => ({
+        segment_type: String(row.segment_type),
+        min: Number(row.min),
+        max: Number(row.max),
+      }));
+      segmentRangeCache.set(key, data);
+      return data;
+    }
+  } catch { /* ignore */ }
+  segmentRangeCache.set(key, []);
+  return [];
+};
+
+const computeSegmentFromMrp = (mrp: string | null | undefined, ranges: SegmentRange[]): string | null => {
+  const m = parseFloat(String(mrp ?? ''));
+  if (isNaN(m) || ranges.length === 0) return null;
+  const match = ranges.find((r) => m >= r.min && m <= r.max);
+  return match ? match.segment_type : null;
+};
+
 const fetchBomMap = (category: string): Promise<Record<string, Record<string, string>>> => {
   const existing = bomCache.get(category);
   if (existing) return existing;
@@ -518,6 +554,32 @@ const ArticleCard = React.memo(
       return normalizeMajorCategory(raw, item.division);
       // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [localValues['majorCategory'], item.majorCategory, item.division]);
+
+    // Segment ranges for the current major category — auto-filled when MRP or MC changes
+    const [segmentRanges, setSegmentRanges] = useState<SegmentRange[]>([]);
+    const segmentRangesRef = useRef<SegmentRange[]>([]);
+    segmentRangesRef.current = segmentRanges;
+
+    useEffect(() => {
+      if (!effectiveMajCat) return;
+      fetchSegmentRangesFor(effectiveMajCat).then((ranges) => setSegmentRanges(ranges));
+    }, [effectiveMajCat]);
+
+    // Auto-correct segment when ranges first load (fixes articles saved before this feature)
+    useEffect(() => {
+      if (segmentRanges.length === 0) return;
+      if (item.approvalStatus === 'APPROVED' || item.approvalStatus === 'REJECTED') return;
+      const mrpVal = String((localValues['mrp'] !== undefined ? localValues['mrp'] : item.mrp) ?? '');
+      const expected = computeSegmentFromMrp(mrpVal, segmentRanges);
+      if (!expected) return;
+      const current = String((localValues['segment'] !== undefined ? localValues['segment'] : item.segment) ?? '');
+      if (expected === current) return;
+      setLocalValues((prev) => ({ ...prev, segment: expected }));
+      if (!isModifyMode) {
+        onSave({ ...item, segment: expected } as ApproverItem, { segment: expected } as Record<string, unknown>, { silent: true });
+      }
+      // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, [segmentRanges]);
 
     const [cacheReady, setCacheReady] = useState(false);
     const [catConfigReady, setCatConfigReady] = useState(false);
@@ -969,9 +1031,29 @@ const ArticleCard = React.memo(
         const rate = parseFloat(String(value ?? ''));
         if (!isNaN(rate) && rate > 0) updates['mrp'] = String(calcMrpFromRate(rate));
       }
+      if (field === 'mrp') {
+        const seg = computeSegmentFromMrp(value, segmentRangesRef.current);
+        if (seg) updates['segment'] = seg;
+      }
+      if (field === 'rate') {
+        const newMrp = updates['mrp'];
+        if (newMrp) {
+          const seg = computeSegmentFromMrp(newMrp, segmentRangesRef.current);
+          if (seg) updates['segment'] = seg;
+        }
+      }
       if (field === 'majorCategory' && value) {
         const newMcCode = getMcCodeByMajorCategory(value);
         if (newMcCode) updates['mcCode'] = newMcCode;
+        const currentMrp = getValue('mrp');
+        fetchSegmentRangesFor(value).then((ranges) => {
+          setSegmentRanges(ranges);
+          const seg = computeSegmentFromMrp(currentMrp, ranges);
+          if (seg) {
+            setLocalValues((prev) => ({ ...prev, segment: seg }));
+            onSave({ ...item, segment: seg } as ApproverItem, { segment: seg } as Record<string, unknown>);
+          }
+        });
       }
       setLocalValues((prev) => ({ ...prev, ...updates }));
       setEditingField(null);
