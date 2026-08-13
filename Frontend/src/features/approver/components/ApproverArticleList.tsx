@@ -163,7 +163,7 @@ const HIDDEN_CARD_SCHEMA_KEYS = new Set([
   'weight',
 ]);
 
-const ATTRIBUTE_GROUPS: { group: string; color: string; fields: { field: string; schemaKey: string; freeText?: boolean }[] }[] = [
+const ATTRIBUTE_GROUPS: { group: string; color: string; fields: { field: string; schemaKey: string; freeText?: boolean; mandatory?: boolean }[] }[] = [
   {
     group: 'FAB',
     color: '#e6f4ff',
@@ -243,11 +243,11 @@ const ATTRIBUTE_GROUPS: { group: string; color: string; fields: { field: string;
     color: '#f9f0ff',
     fields: [
       { field: 'ageGroup', schemaKey: 'age_group' },
-      { field: 'articleFashionType', schemaKey: 'article_fashion_type' },
+      { field: 'articleFashionType', schemaKey: 'article_fashion_type', mandatory: true },
       { field: 'mNoOfSize', schemaKey: 'no_of_size' },
       { field: 'mNoOfClr', schemaKey: 'no_of_clr' },
       { field: 'impAtrbt2', schemaKey: 'imp_atrbt2' },
-      { field: 'segment', schemaKey: 'segment', freeText: true },
+      { field: 'segment', schemaKey: 'segment', freeText: true, mandatory: true },
       { field: 'weight', schemaKey: 'fab_weight', freeText: true },
     ],
   },
@@ -375,6 +375,11 @@ const GROUP_HEADER_STYLE: Record<string, { bg: string; fg: string; border: strin
 
 type CardGroup = typeof ATTRIBUTE_GROUPS[number];
 
+// Lookup map: schemaKey → mandatory flag from ATTRIBUTE_GROUPS static config
+const STATIC_MANDATORY_KEYS = new Map<string, boolean>(
+  ATTRIBUTE_GROUPS.flatMap((g) => g.fields.filter((f) => f.mandatory).map((f) => [f.schemaKey, true] as [string, boolean]))
+);
+
 function buildCardGroups(entries: { key: string; type: string; group: string }[]): CardGroup[] {
   const map = new Map<string, CardGroup['fields']>();
   for (const e of entries) {
@@ -383,7 +388,8 @@ function buildCardGroups(entries: { key: string; type: string; group: string }[]
     const dbField = SCHEMA_KEY_TO_DB_FIELD[e.key];
     if (!dbField) continue;
     if (!map.has(e.group)) map.set(e.group, []);
-    map.get(e.group)!.push({ field: dbField, schemaKey: e.key, freeText: e.type === 'TEXT' ? true : undefined });
+    const mandatory = STATIC_MANDATORY_KEYS.get(e.key) ? true : undefined;
+    map.get(e.group)!.push({ field: dbField, schemaKey: e.key, freeText: e.type === 'TEXT' ? true : undefined, mandatory });
   }
   const built = GROUP_ORDER.filter((g) => map.has(g)).map((g) => {
     let fields = map.get(g)!;
@@ -637,6 +643,7 @@ const ArticleCard = React.memo(
         values: AttrValue[];
         freeText: boolean;
         isMandatory: boolean;
+        mandatory?: boolean;
       }> = [];
       const mandatory = new Set<string>();
 
@@ -661,11 +668,12 @@ const ArticleCard = React.memo(
         // They CAN be mandatory if the mandatory grid marks them as active — check the grid.
         if (af.freeText) {
           const sapKeys = SCHEMA_KEY_TO_ALL_SAP_KEYS[af.schemaKey] ?? [];
-          const isMandatory =
+          const gridMandatory =
             gridsReady &&
             !!catHasAnyGridData &&
             mandatoryGridReady &&
             sapKeys.some((sk) => isMandatoryGridFieldActive(effectiveMajCat, sk) === true);
+          const isMandatory = af.mandatory === true || gridMandatory;
           if (isMandatory) mandatory.add(af.schemaKey);
           visible.push({
             field: af.field,
@@ -676,6 +684,7 @@ const ArticleCard = React.memo(
             values: [],
             freeText: true,
             isMandatory,
+            mandatory: af.mandatory,
           });
           continue;
         }
@@ -700,7 +709,8 @@ const ArticleCard = React.memo(
           const hasDropdownValues =
             gridReady && excelAttr ? (getMajCatGridEntry(effectiveMajCat, excelAttr)?.length ?? 0) > 0 : false;
 
-          if (isActiveMandatory) {
+          const forceMandatory = af.mandatory === true;
+          if (isActiveMandatory || forceMandatory) {
             // TIER 1: Mandatory — bold + * in card, required for approve
             mandatory.add(af.schemaKey);
             visible.push({
@@ -712,6 +722,7 @@ const ArticleCard = React.memo(
               values,
               freeText: false,
               isMandatory: true,
+              mandatory: af.mandatory,
             });
           } else if (hasDropdownValues) {
             // TIER 2: Optional — has dropdown values but not mandatory
@@ -724,6 +735,20 @@ const ArticleCard = React.memo(
               values,
               freeText: false,
               isMandatory: false,
+              mandatory: af.mandatory,
+            });
+          } else if (forceMandatory) {
+            // Force-show even with no dropdown values when mandatory override is set
+            visible.push({
+              field: af.field,
+              label: af.label,
+              schemaKey: af.schemaKey,
+              group: af.group,
+              groupColor: af.groupColor,
+              values,
+              freeText: false,
+              isMandatory: true,
+              mandatory: true,
             });
           }
           // TIER 3: Neither → skip (completely hidden for configured categories)
@@ -737,7 +762,8 @@ const ArticleCard = React.memo(
             groupColor: af.groupColor,
             values,
             freeText: false,
-            isMandatory: false,
+            isMandatory: af.mandatory === true,
+            mandatory: af.mandatory,
           });
         }
       }
@@ -1358,13 +1384,14 @@ const ArticleCard = React.memo(
       freeText: boolean;
       group: string;
       isMandatory?: boolean;
+      mandatory?: boolean;
     }) => {
       _attrCounter += 1;
       const num = _attrCounter;
       const currentValue = getValue(attr.field);
       const isEffectivelyEmpty = !currentValue || currentValue.trim() === '';
       const isEmpty = isEffectivelyEmpty;
-      const isMandatory = !attr.freeText && (attr.isMandatory ?? mandatoryKeys.has(attr.schemaKey));
+      const isMandatory = attr.mandatory === true || (!attr.freeText && (attr.isMandatory ?? mandatoryKeys.has(attr.schemaKey)));
       const isEditing = editingField === attr.field;
       const isUserEdited = !!localValues[attr.field];
       const attrLocked = isFieldLocked(attr.field);
