@@ -533,7 +533,7 @@ async function enrichSrmRowWithVlm(
       const fWidth  = get('f_width');          if (fWidth)  updates.fWidth          = fWidth;
 
       // Weight — extract numeric only
-      const weightAttr = attrs['weight'] ?? attrs['g_weight'] ?? attrs['G-Weight'];
+      const weightAttr = attrs['m_fab_weight'] ?? attrs['weight'] ?? attrs['g_weight'] ?? attrs['G-Weight'];
       if (weightAttr) {
         const v = weightAttr.schemaValue ?? weightAttr.rawValue;
         if (v != null) {

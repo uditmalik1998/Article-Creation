@@ -832,6 +832,39 @@ exports.Prisma.ModifyLogScalarFieldEnum = {
   sapStatus: 'sapStatus'
 };
 
+exports.Prisma.FabricArticleDataScalarFieldEnum = {
+  id: 'id',
+  mFabDiv: 'mFabDiv',
+  mYarn: 'mYarn',
+  mFabMainMvgr1: 'mFabMainMvgr1',
+  mFabMainMvgr2: 'mFabMainMvgr2',
+  mConstruction: 'mConstruction',
+  mOunz: 'mOunz',
+  mWidth: 'mWidth',
+  mWeave02: 'mWeave02',
+  mCount: 'mCount',
+  mWeave01: 'mWeave01',
+  mComposition: 'mComposition',
+  mFinish: 'mFinish',
+  mGsm: 'mGsm',
+  mLycra: 'mLycra',
+  fabricArticleNumber: 'fabricArticleNumber',
+  fabricArticleDescription: 'fabricArticleDescription',
+  division: 'division',
+  subDivision: 'subDivision',
+  majorCategory: 'majorCategory',
+  vendorName: 'vendorName',
+  vendorCode: 'vendorCode',
+  approvalStatus: 'approvalStatus',
+  approvedAt: 'approvedAt',
+  approvedBy: 'approvedBy',
+  sapSyncStatus: 'sapSyncStatus',
+  sapSyncMessage: 'sapSyncMessage',
+  userName: 'userName',
+  createdAt: 'createdAt',
+  updatedAt: 'updatedAt'
+};
+
 exports.Prisma.SortOrder = {
   asc: 'asc',
   desc: 'desc'
@@ -1346,6 +1379,35 @@ exports.Prisma.ModifyLogOrderByRelevanceFieldEnum = {
   modifiedByEmail: 'modifiedByEmail',
   sapStatus: 'sapStatus'
 };
+
+exports.Prisma.FabricArticleDataOrderByRelevanceFieldEnum = {
+  id: 'id',
+  mFabDiv: 'mFabDiv',
+  mYarn: 'mYarn',
+  mFabMainMvgr1: 'mFabMainMvgr1',
+  mFabMainMvgr2: 'mFabMainMvgr2',
+  mConstruction: 'mConstruction',
+  mOunz: 'mOunz',
+  mWidth: 'mWidth',
+  mWeave02: 'mWeave02',
+  mCount: 'mCount',
+  mWeave01: 'mWeave01',
+  mComposition: 'mComposition',
+  mFinish: 'mFinish',
+  mGsm: 'mGsm',
+  mLycra: 'mLycra',
+  fabricArticleNumber: 'fabricArticleNumber',
+  fabricArticleDescription: 'fabricArticleDescription',
+  division: 'division',
+  subDivision: 'subDivision',
+  majorCategory: 'majorCategory',
+  vendorName: 'vendorName',
+  vendorCode: 'vendorCode',
+  approvalStatus: 'approvalStatus',
+  sapSyncStatus: 'sapSyncStatus',
+  sapSyncMessage: 'sapSyncMessage',
+  userName: 'userName'
+};
 exports.GarmentType = exports.$Enums.GarmentType = {
   UPPER: 'UPPER',
   LOWER: 'LOWER',
@@ -1461,7 +1523,8 @@ exports.Prisma.ModelName = {
   PoolBBatch: 'PoolBBatch',
   NationalGridMaster: 'NationalGridMaster',
   MajorCatMaster: 'MajorCatMaster',
-  ModifyLog: 'ModifyLog'
+  ModifyLog: 'ModifyLog',
+  FabricArticleData: 'FabricArticleData'
 };
 
 /**

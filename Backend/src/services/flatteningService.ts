@@ -110,7 +110,8 @@ export class FlatteningService {
         const mappedMcCode = getMcCodeByMajorCategory(rawMajorCategory);
         const majorCategory = mappedMcCode ? rawMajorCategory : null;
         const normalizedWeight = this.extractNumericWeight(
-            resultsMap.get('weight')
+            resultsMap.get('m_fab_weight')
+            || resultsMap.get('weight')
             || resultsMap.get('g_weight')
             || resultsMap.get('g-weight')
             || resultsMap.get('gweight')
