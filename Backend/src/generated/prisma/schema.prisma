@@ -1218,3 +1218,56 @@ model ModifyLog {
   @@map("modify_logs")
   @@schema("public")
 }
+
+/// FabricArticleData: One row per fabric article created from the Construction & Fabric card
+model FabricArticleData {
+  id String @id @default(uuid())
+
+  // Construction & Fabric card fields (column names = SAP attribute names in lowercase)
+  mFabDiv       String? @map("m_fab_div") @db.VarChar(100)
+  mYarn         String? @map("m_yarn") @db.VarChar(100)
+  mFabMainMvgr1 String? @map("m_fab_main_mvgr_1") @db.VarChar(100)
+  mFabMainMvgr2 String? @map("m_fab_main_mvgr_2") @db.VarChar(100)
+  mConstruction String? @map("m_construction") @db.VarChar(100)
+  mOunz         String? @map("m_ounz") @db.VarChar(100)
+  mWidth        String? @map("m_width") @db.VarChar(100)
+  mWeave02      String? @map("m_weave_02") @db.VarChar(100)
+  mCount        String? @map("m_count") @db.VarChar(100)
+  mWeave01      String? @map("m_weave_01") @db.VarChar(100)
+  mComposition  String? @map("m_composition") @db.VarChar(200)
+  mFinish       String? @map("m_finish") @db.VarChar(100)
+  mGsm          String? @map("m_gsm") @db.VarChar(50)
+  mLycra        String? @map("m_lycra") @db.VarChar(50)
+
+  // Fabric article output fields
+  fabricArticleNumber      String? @map("fabric_article_number") @db.VarChar(100)
+  fabricArticleDescription String? @map("fabric_article_description") @db.VarChar(255)
+
+  // Article context
+  division      String? @map("division") @db.VarChar(100)
+  subDivision   String? @map("sub_division") @db.VarChar(100)
+  majorCategory String? @map("major_category") @db.VarChar(200)
+  vendorName    String? @map("vendor_name") @db.VarChar(200)
+  vendorCode    String? @map("vendor_code") @db.VarChar(100)
+
+  // Workflow
+  approvalStatus String    @default("PENDING") @map("approval_status") @db.VarChar(20)
+  approvedAt     DateTime? @map("approved_at")
+  approvedBy     Int?      @map("approved_by")
+  sapSyncStatus  String    @default("NOT_SYNCED") @map("sap_sync_status") @db.VarChar(20)
+  sapSyncMessage String?   @map("sap_sync_message")
+
+  // Audit
+  userName  String?  @map("user_name") @db.VarChar(200)
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
+
+  @@index([approvalStatus])
+  @@index([sapSyncStatus])
+  @@index([fabricArticleNumber])
+  @@index([majorCategory])
+  @@index([division])
+  @@index([createdAt(sort: Desc)])
+  @@map("fabric_article_data")
+  @@schema("public")
+}
