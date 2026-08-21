@@ -495,7 +495,7 @@ export default function ArticleDetailPage() {
     if (approveBlockedReasons.length > 0) { setInfoDialog({ kind: 'mandatoryMissing', errors: approveBlockedReasons }); return; }
 
     // Block submit while variants are being auto-created from a Base Color change
-    const stillCreating = pendingSelectedKeys.filter((id) => variantCreatingIds.has(id));
+    const stillCreating = pendingSelectedKeys.filter((id) => variantCreatingIds.has(String(id)));
     if (stillCreating.length > 0) {
       message.warning('Variants are still being created from the Base Color change. Please wait a moment and try again.');
       return;
