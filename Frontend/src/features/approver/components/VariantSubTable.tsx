@@ -663,7 +663,7 @@ const WeightCell: React.FC<{ variant: ApproverItem; onSaved: () => void }> = ({ 
     );
   }
 
-  const isEmpty = !value && value !== 0;
+  const isEmpty = !value && value !== '0';
   return (
     <span
       className={`cursor-pointer text-[12px] ${isEmpty ? 'font-medium text-rose-500' : 'text-foreground'}`}
