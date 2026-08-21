@@ -31,7 +31,7 @@ import {
   Tooltip,
 } from '@/shared/components/ui-tw';
 import { message } from '@/lib/message';
-import { FabricArticleList } from '../components/FabricArticleList';
+import { FabricArticleList, type ApproverArticleListProps } from '../components/FabricArticleList';
 import type { ApproverItem, MasterAttribute } from '../components/FabricArticleTable';
 import { APP_CONFIG } from '../../../constants/app/config';
 import { SIMPLIFIED_HIERARCHY } from '../../extraction/components/SimplifiedCategorySelector';
@@ -246,7 +246,11 @@ export interface DetailNavigationState {
 
 // ─── Component ────────────────────────────────────────────────────────────────
 
-export default function ArticleDetailPage() {
+export default function ArticleDetailPage({
+  ListComponent = FabricArticleList,
+}: {
+  ListComponent?: React.ComponentType<ApproverArticleListProps>;
+} = {}) {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
   const location = useLocation();
@@ -254,11 +258,11 @@ export default function ArticleDetailPage() {
   // Prefer the nav-state pathType; fall back to the URL so a hard refresh of a
   // detail page (esp. the PD page) keeps the correct flow (Save & Submit target).
   const pathFromUrl: DetailNavigationState['pathType'] =
-    location.pathname.startsWith('/fabric-article/old-articles') ? 'old'
-    : location.pathname.startsWith('/fabric-article/rejected') ? 'rejected'
-    : location.pathname.startsWith('/fabric-article/created') ? 'created'
-    : location.pathname.startsWith('/fabric-article/failed') ? 'failed'
-    : location.pathname.startsWith('/fabric-article') ? 'new'
+    (location.pathname.startsWith('/fabric-article/old-articles') || location.pathname.startsWith('/body-article/old-articles')) ? 'old'
+    : (location.pathname.startsWith('/fabric-article/rejected') || location.pathname.startsWith('/body-article/rejected')) ? 'rejected'
+    : (location.pathname.startsWith('/fabric-article/created') || location.pathname.startsWith('/body-article/created')) ? 'created'
+    : (location.pathname.startsWith('/fabric-article/failed') || location.pathname.startsWith('/body-article/failed')) ? 'failed'
+    : (location.pathname.startsWith('/fabric-article') || location.pathname.startsWith('/body-article')) ? 'new'
     : undefined;
   const pathType = navState?.pathType ?? pathFromUrl;
 
@@ -348,11 +352,12 @@ export default function ArticleDetailPage() {
   const isLastArticle = currentIndex >= items.length - 1;
 
   function getBasePath() {
-    if (pathType === 'old') return '/fabric-article/old-articles';
-    if (pathType === 'rejected') return '/fabric-article/rejected';
-    if (pathType === 'created') return '/fabric-article/created';
-    if (pathType === 'failed') return '/fabric-article/failed';
-    return '/fabric-article';
+    const prefix = location.pathname.startsWith('/body-article') ? '/body-article' : '/fabric-article';
+    if (pathType === 'old') return `${prefix}/old-articles`;
+    if (pathType === 'rejected') return `${prefix}/rejected`;
+    if (pathType === 'created') return `${prefix}/created`;
+    if (pathType === 'failed') return `${prefix}/failed`;
+    return prefix;
   }
 
   // Rebuild the list URL with the same filters that were active when the card was
@@ -962,7 +967,7 @@ export default function ArticleDetailPage() {
           <Loader2 className="h-8 w-8 animate-spin text-muted-foreground" />
         </div>
       ) : (
-        <FabricArticleList
+        <ListComponent
           items={currentItem ? [currentItem] : []}
           majorCategory={currentItem?.majorCategory || ''}
           loading={false}

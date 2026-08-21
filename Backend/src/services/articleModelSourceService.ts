@@ -243,10 +243,89 @@ async function findRowsByArticleNumber(articleNumber: string): Promise<any[]> {
   return rows.filter((r) => String(r.imageUrl || '').trim());
 }
 
+const SRM_SUPABASE_URL = 'https://pymdqnnwwxrgeolvgvgv.supabase.co';
+const SRM_SUPABASE_KEY = process.env.SRM_SUPABASE_ANON_KEY
+  || 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InB5bWRxbm53d3hyZ2VvbHZndmd2Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTMzMzU0NzYsImV4cCI6MjA2ODkxMTQ3Nn0.jUrb0jIg6qjj2Rlh9DxYesSnbstoD4uoDCswqOqAkUM';
+
+/**
+ * Fetch division / sub_division / maj_category for an article from the v2srm
+ * product_master table via the Supabase REST API.
+ */
+async function fetchProductMasterMeta(articleNumber: string): Promise<{
+  division?: string; subDivision?: string; majorCategory?: string;
+} | null> {
+  try {
+    const url = `${SRM_SUPABASE_URL}/rest/v1/product_master`
+      + `?article_number=eq.${encodeURIComponent(articleNumber)}`
+      + `&select=division,sub_division,maj_category&limit=1`;
+    const res = await fetch(url, {
+      headers: {
+        apikey: SRM_SUPABASE_KEY,
+        Authorization: `Bearer ${SRM_SUPABASE_KEY}`,
+      },
+    });
+    if (!res.ok) return null;
+    const rows = (await res.json()) as any[];
+    if (!rows.length) return null;
+    const r = rows[0];
+    return {
+      division:      r.division     || undefined,
+      subDivision:   r.sub_division || undefined,
+      majorCategory: r.maj_category || undefined,
+    };
+  } catch {
+    return null;
+  }
+}
+
+/**
+ * Last-resort fallback: article has no extraction record (or no imageUrl in it),
+ * so construct the source URL directly from the approved R2 bucket (article-master)
+ * and pull gender / category metadata from the v2srm product_master table.
+ */
+async function tryApprovedR2Fallback(
+  articleCode: string,
+  baseArticleNumber: string,
+  requestedColor?: string,
+): Promise<ResolvedArticle> {
+  const approvedUrlBase = (process.env.APPROVED_R2_PUBLIC_URL_BASE || '').replace(/\/$/, '');
+  if (!approvedUrlBase) {
+    return { articleCode, found: false, reason: 'not found in extraction data (no image)' };
+  }
+
+  const imageUrl = `${approvedUrlBase}/${baseArticleNumber}.jpg`;
+
+  // Pull metadata from v2srm product_master for gender / bodytype derivation.
+  const meta = await fetchProductMasterMeta(baseArticleNumber);
+  const metaRow: Record<string, any> = meta
+    ? { division: meta.division, subDivision: meta.subDivision, majorCategory: meta.majorCategory }
+    : {};
+
+  const { gender, bodytype, featuredGarment } = await resolveFramingAndGender(metaRow);
+
+  return {
+    articleCode,
+    found: true,
+    imageUrl,
+    gender,
+    bodytype,
+    colorName: requestedColor || undefined,
+    featuredGarment,
+    attributesText: undefined,
+    isColorFallback: !!requestedColor,
+  };
+}
+
 /**
  * Look up one article number. Prefers an APPROVED row, else the most recent row;
  * in all cases requires a usable imageUrl. Returns { found: false, reason } when
  * the article isn't in extraction_results_flat or has no image.
+ *
+ * Resolution order:
+ *  1. Exact match in extraction_results_flat (with imageUrl).
+ *  2. Sibling colour variant in extraction_results_flat (dash-split base number).
+ *  3. Approved R2 bucket directly (article-master) with metadata from v2srm
+ *     product_master — for articles that were never run through Gemini extraction.
  *
  * The input code is typically "BASEARTICLE-COLOUR" (e.g. "1110097922-BLACK"). If
  * no row exists for that exact code, but a sibling row for the same base article
@@ -282,47 +361,49 @@ export async function resolveArticleForGeneration(code: string): Promise<Resolve
     };
   }
 
-  // No exact match — try falling back to a sibling colour variant of the same
-  // base article number (split on the first "-").
+  // No exact extraction match — try falling back to a sibling colour variant of the
+  // same base article number (split on the first "-").
   const dashIdx = articleCode.indexOf('-');
-  if (dashIdx <= 0 || dashIdx === articleCode.length - 1) {
-    return { articleCode, found: false, reason: 'not found in extraction data (no image)' };
+  const hasDash = dashIdx > 0 && dashIdx < articleCode.length - 1;
+  const baseArticleNumber = hasDash ? articleCode.slice(0, dashIdx).trim() : articleCode;
+  const requestedColor = hasDash ? articleCode.slice(dashIdx + 1).trim() : undefined;
+
+  if (hasDash) {
+    let siblingRows: any[];
+    try {
+      siblingRows = await withPrismaRetry(() =>
+        prisma.extractionResultFlat.findMany({
+          where: { articleNumber: { startsWith: baseArticleNumber, mode: 'insensitive' } },
+          orderBy: { createdAt: 'desc' },
+          take: 10,
+          select: ARTICLE_SELECT,
+        })
+      );
+    } catch (err: any) {
+      return { articleCode, found: false, reason: `lookup failed: ${err?.message || 'db error'}` };
+    }
+    siblingRows = siblingRows.filter((r) => String(r.imageUrl || '').trim());
+
+    if (siblingRows.length > 0) {
+      // Prefer APPROVED, else the latest — same rule as the exact-match path.
+      const row = siblingRows.find((r) => r.approvalStatus === 'APPROVED') || siblingRows[0];
+      const { gender, bodytype, featuredGarment } = await resolveFramingAndGender(row);
+
+      return {
+        articleCode,
+        found: true,
+        imageUrl: String(row.imageUrl).trim(),
+        gender,
+        bodytype,
+        colorName: requestedColor || undefined,
+        featuredGarment,
+        attributesText: buildAttributesText(row),
+        isColorFallback: true,
+      };
+    }
   }
-  const baseArticleNumber = articleCode.slice(0, dashIdx).trim();
-  const requestedColor = articleCode.slice(dashIdx + 1).trim();
 
-  let siblingRows: any[];
-  try {
-    siblingRows = await withPrismaRetry(() =>
-      prisma.extractionResultFlat.findMany({
-        where: { articleNumber: { startsWith: baseArticleNumber, mode: 'insensitive' } },
-        orderBy: { createdAt: 'desc' },
-        take: 10,
-        select: ARTICLE_SELECT,
-      })
-    );
-  } catch (err: any) {
-    return { articleCode, found: false, reason: `lookup failed: ${err?.message || 'db error'}` };
-  }
-  siblingRows = siblingRows.filter((r) => String(r.imageUrl || '').trim());
-
-  if (siblingRows.length === 0) {
-    return { articleCode, found: false, reason: 'not found in extraction data (no image)' };
-  }
-
-  // Prefer APPROVED, else the latest — same rule as the exact-match path.
-  const row = siblingRows.find((r) => r.approvalStatus === 'APPROVED') || siblingRows[0];
-  const { gender, bodytype, featuredGarment } = await resolveFramingAndGender(row);
-
-  return {
-    articleCode,
-    found: true,
-    imageUrl: String(row.imageUrl).trim(),
-    gender,
-    bodytype,
-    colorName: requestedColor || undefined,
-    featuredGarment,
-    attributesText: buildAttributesText(row),
-    isColorFallback: true,
-  };
+  // No extraction record at all — fall back to the approved R2 bucket with metadata
+  // from the v2srm product_master table.
+  return tryApprovedR2Fallback(articleCode, baseArticleNumber, requestedColor);
 }

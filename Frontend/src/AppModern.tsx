@@ -24,6 +24,8 @@ import ApproverDashboard from './features/approver/pages/ApproverDashboard'; // 
 import ArticleDetailPage from './features/approver/pages/ArticleDetailPage'; // Article detail view
 import FabricArticleDashboard from './features/fabric-article/pages/FabricArticleDashboard'; // Fabric Article Dashboard
 import FabricArticleDetailPage from './features/fabric-article/pages/FabricArticleDetailPage'; // Fabric Article detail view
+import BodyArticleDashboard from './features/body-article/pages/BodyArticleDashboard'; // Body Article Dashboard
+import BodyArticleDetailPage from './features/body-article/pages/BodyArticleDetailPage'; // Body Article detail view
 import POPresentationPage from './features/po-presentation/pages/POPresentationPage'; // PO Presentation
 import ModelGenerationPage from './features/model-generation/pages/ModelGenerationPage';
 
@@ -540,6 +542,108 @@ const App: React.FC = () => {
                   <ApproverRoute>
                     <MainLayout>
                       <FabricArticleDashboard key="fabric-failed-articles" pathType="failed" />
+                    </MainLayout>
+                  </ApproverRoute>
+                }
+              />
+
+              {/* Body Article Routes */}
+              <Route
+                path="/body-article"
+                element={
+                  <ApproverRoute>
+                    <MainLayout>
+                      <BodyArticleDashboard key="body-new-articles" pathType="new" />
+                    </MainLayout>
+                  </ApproverRoute>
+                }
+              />
+              <Route
+                path="/body-article/:id"
+                element={
+                  <ApproverRoute>
+                    <MainLayout>
+                      <BodyArticleDetailPage />
+                    </MainLayout>
+                  </ApproverRoute>
+                }
+              />
+              <Route
+                path="/body-article/old-articles"
+                element={
+                  <ApproverRoute>
+                    <MainLayout>
+                      <BodyArticleDashboard key="body-old-articles" pathType="old" />
+                    </MainLayout>
+                  </ApproverRoute>
+                }
+              />
+              <Route
+                path="/body-article/old-articles/:id"
+                element={
+                  <ApproverRoute>
+                    <MainLayout>
+                      <BodyArticleDetailPage />
+                    </MainLayout>
+                  </ApproverRoute>
+                }
+              />
+              <Route
+                path="/body-article/rejected"
+                element={
+                  <ApproverRoute>
+                    <MainLayout>
+                      <BodyArticleDashboard key="body-rejected-articles" pathType="rejected" />
+                    </MainLayout>
+                  </ApproverRoute>
+                }
+              />
+              <Route
+                path="/body-article/rejected/:id"
+                element={
+                  <ApproverRoute>
+                    <MainLayout>
+                      <BodyArticleDetailPage />
+                    </MainLayout>
+                  </ApproverRoute>
+                }
+              />
+              <Route
+                path="/body-article/created"
+                element={
+                  <ApproverRoute>
+                    <MainLayout>
+                      <BodyArticleDashboard key="body-created-articles" pathType="created" />
+                    </MainLayout>
+                  </ApproverRoute>
+                }
+              />
+              <Route
+                path="/body-article/created/:id"
+                element={
+                  <ApproverRoute>
+                    <MainLayout>
+                      <BodyArticleDetailPage />
+                    </MainLayout>
+                  </ApproverRoute>
+                }
+              />
+              <Route
+                path="/body-article/failed"
+                element={
+                  <ApproverRoute>
+                    <MainLayout>
+                      <BodyArticleDashboard key="body-failed-articles" pathType="failed" />
+                    </MainLayout>
+                  </ApproverRoute>
+                }
+              />
+              <Route
+                path="/body-article/failed/:id"
+                element={
+                  <ApproverRoute>
+                    <MainLayout>
+                      <BodyArticleDetailPage />
                     </MainLayout>
                   </ApproverRoute>
                 }

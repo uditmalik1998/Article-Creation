@@ -427,6 +427,9 @@ export interface ApproverArticleListProps {
   attributes: MasterAttribute[];
   onRefresh: () => void;
   pathType?: 'old' | 'new' | 'rejected' | 'created' | 'failed';
+  hideGroups?: string[];
+  /** When true, always use the static ATTRIBUTE_GROUPS definition instead of the API-built card groups. */
+  forceStaticGroups?: boolean;
   serverPagination: {
     total: number;
     current: number;
@@ -459,6 +462,7 @@ const ArticleCard = React.memo(
     onRefresh,
     cardGroups,
     pathType,
+    hideGroups,
   }: {
     item: ApproverItem;
     isSelected: boolean;
@@ -473,6 +477,7 @@ const ArticleCard = React.memo(
     onRefresh: () => void;
     cardGroups: CardGroup[];
     pathType?: 'old' | 'new' | 'rejected' | 'created' | 'failed';
+    hideGroups?: string[];
   }) => {
     const [showVariants, setShowVariants] = useState(false);
     const [imgModalOpen, setImgModalOpen] = useState(false);
@@ -1090,7 +1095,7 @@ const ArticleCard = React.memo(
       if (!groupMap[attr.group]) groupMap[attr.group] = { color: attr.groupColor, attrs: [] };
       groupMap[attr.group].attrs.push(attr);
     }
-    const activeGroups = ATTRIBUTE_GROUPS.filter((g) => groupMap[g.group]);
+    const activeGroups = ATTRIBUTE_GROUPS.filter((g) => groupMap[g.group] && !hideGroups?.includes(g.group));
 
     const rateVal = String(getValue('rate') ?? '').trim();
     const mrpVal = String(getValue('mrp') ?? '').trim();
@@ -2471,14 +2476,18 @@ export const FabricArticleList: React.FC<ApproverArticleListProps> = ({
   attributes,
   onRefresh,
   pathType,
+  hideGroups,
+  forceStaticGroups,
   serverPagination,
 }) => {
   const [cardGroups, setCardGroups] = useState<CardGroup[]>(() => {
+    if (forceStaticGroups) return ATTRIBUTE_GROUPS;
     const cached = getCachedAttributeGroups();
     return cached && cached.length > 0 ? buildCardGroups(cached) : ATTRIBUTE_GROUPS;
   });
 
   useEffect(() => {
+    if (forceStaticGroups) return;
     preloadAttributeGroups()
       .then((entries) => {
         if (entries.length > 0) setCardGroups(buildCardGroups(entries));
@@ -2553,6 +2562,7 @@ export const FabricArticleList: React.FC<ApproverArticleListProps> = ({
           onRefresh={onRefresh}
           cardGroups={cardGroups}
           pathType={pathType}
+          hideGroups={hideGroups}
         />
       ))}
     </div>
