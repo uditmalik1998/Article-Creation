@@ -192,6 +192,18 @@ export const AppSidebar: React.FC<AppSidebarProps> = ({ collapsed, onCollapsedCh
         { key: '/fabric-article/failed', Icon: AlertTriangle, label: 'Failed Creations' },
       ],
     });
+    items.push({
+      key: '/body-article-group',
+      Icon: CheckSquare,
+      label: 'Body Article',
+      children: [
+        { key: '/body-article', Icon: FileText, label: 'New articles' },
+        { key: '/body-article/old-articles', Icon: History, label: 'Old articles' },
+        { key: '/body-article/rejected', Icon: XCircle, label: 'Rejected' },
+        { key: '/body-article/created', Icon: CheckCircle2, label: 'Created' },
+        { key: '/body-article/failed', Icon: AlertTriangle, label: 'Failed Creations' },
+      ],
+    });
   }
 
   if (!isPdDesigner && (role === 'APPROVER' || role === 'CATEGORY_HEAD' || role === 'SUB_DIVISION_HEAD' || isAdmin)) {

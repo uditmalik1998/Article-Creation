@@ -616,6 +616,64 @@ const AddColorModal: React.FC<AddColorModalProps> = ({
   );
 };
 
+// ── Inline weight input cell ──────────────────────────────────────────────────
+
+const WeightCell: React.FC<{ variant: ApproverItem; onSaved: () => void }> = ({ variant, onSaved }) => {
+  const [editing, setEditing] = useState(false);
+  const [value, setValue] = useState(variant.weight ?? '');
+  const [saving, setSaving] = useState(false);
+
+  useEffect(() => { setValue(variant.weight ?? ''); }, [variant.weight]);
+
+  const save = async () => {
+    const trimmed = String(value).trim();
+    setSaving(true);
+    try {
+      const token = localStorage.getItem('authToken');
+      const r = await fetch(`${APP_CONFIG.api.baseURL}/approver/items/${variant.id}`, {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` },
+        body: JSON.stringify({ weight: trimmed || null }),
+      });
+      if (!r.ok) throw new Error('Failed to save weight');
+      onSaved();
+    } catch {
+      message.error('Failed to save weight');
+    } finally {
+      setSaving(false);
+      setEditing(false);
+    }
+  };
+
+  if (editing) {
+    return (
+      <input
+        autoFocus
+        className="w-20 rounded border border-input bg-background px-1.5 py-0.5 text-xs focus:outline-none focus:ring-1 focus:ring-ring"
+        value={value}
+        onChange={(e) => setValue(e.target.value)}
+        onBlur={save}
+        onKeyDown={(e) => {
+          if (e.key === 'Enter') { e.preventDefault(); save(); }
+          if (e.key === 'Escape') setEditing(false);
+        }}
+        disabled={saving}
+        placeholder="e.g. 250"
+      />
+    );
+  }
+
+  const isEmpty = !value && value !== 0;
+  return (
+    <span
+      className={`cursor-pointer text-[12px] ${isEmpty ? 'font-medium text-rose-500' : 'text-foreground'}`}
+      onClick={() => setEditing(true)}
+    >
+      {isEmpty ? 'Required' : String(value)}
+    </span>
+  );
+};
+
 // ── Main VariantSubTable ──────────────────────────────────────────────────────
 
 const VariantSubTable: React.FC<VariantSubTableProps> = ({
@@ -810,6 +868,13 @@ const VariantSubTable: React.FC<VariantSubTableProps> = ({
       key: 'mrp',
       width: 80,
       render: (v) => (v != null ? String(v) : '—'),
+    },
+    {
+      title: 'Weight (g) *',
+      dataIndex: 'weight',
+      key: 'weight',
+      width: 100,
+      render: (_v, record) => <WeightCell variant={record} onSaved={() => fetchVariants(true)} />,
     },
     {
       title: 'SAP Article #',

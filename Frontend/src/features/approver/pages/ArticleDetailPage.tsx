@@ -489,9 +489,31 @@ export default function ArticleDetailPage() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [pendingSelectedKeys, items, gridVersion, pathType]);
 
-  const handleApproveClick = () => {
+  const handleApproveClick = async () => {
     if (pendingSelectedKeys.length === 0) return;
     if (approveBlockedReasons.length > 0) { setInfoDialog({ kind: 'mandatoryMissing', errors: approveBlockedReasons }); return; }
+
+    // Validate that all variants have weight filled in before allowing submission
+    const token = localStorage.getItem('authToken');
+    for (const id of pendingSelectedKeys) {
+      try {
+        const r = await fetch(`${APP_CONFIG.api.baseURL}/approver/items/${id}/variants`, {
+          headers: { Authorization: `Bearer ${token}` },
+        });
+        if (r.ok) {
+          const data = await r.json();
+          const variants: any[] = data.data || data;
+          const missingWeight = variants.filter((v) => v.weight === null || v.weight === undefined || String(v.weight).trim() === '');
+          if (missingWeight.length > 0) {
+            message.error(`${missingWeight.length} variant${missingWeight.length > 1 ? 's are' : ' is'} missing Weight (g). Fill in weight for all variants before submitting.`);
+            return;
+          }
+        }
+      } catch {
+        // non-blocking — if fetch fails just proceed
+      }
+    }
+
     setConfirmDialog({ kind: 'approve', count: pendingSelectedKeys.length });
   };
 
