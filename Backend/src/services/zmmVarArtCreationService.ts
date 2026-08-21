@@ -17,9 +17,6 @@ import { mapWithConcurrency } from '../utils/concurrency';
 
 // ─── Config ───────────────────────────────────────────────────────────────────
 
-const ZMM_VAR_RFC_URL =
-    process.env.ZMM_VAR_RFC_URL ||
-    'https://routemaster.v2retail.com:9010/api/ZMM_VAR_ART_CREATION_RFC';
 // Hard timeout per variant RFC call so a hung SAP endpoint can't stall the worker.
 const SAP_RFC_TIMEOUT_MS = parseInt(process.env.SAP_RFC_TIMEOUT_MS || '120000', 10);
 // Parallel SAP RFC calls ("lanes"). Shared setting with the generic RFC service.
@@ -33,13 +30,12 @@ const SAP_SITE       = process.env.SAP_SITE        || 'DH24';
 const SAP_PUR_GRP    = process.env.SAP_PUR_GRP     || '124';
 const SAP_SALES_ORG  = process.env.SAP_SALES_ORG   || '1100';
 const SAP_SALES_UNIT = process.env.SAP_SALES_UNIT  || 'EA';
-const SAP_TO_DATE    = process.env.SAP_TO_DATE      || '31129999';
 const SAP_TAX_CODE   = process.env.SAP_TAX_CODE    || 'J2';
 
-// SAP-side SoT validation (ZART_GRID_VALUES via Z_ART_VALIDATE_VARIANT_SIZE)
+// Proxy URL used for both variant RFC calls and SoT validation
 const SAP_RFC_PROXY_URL = process.env.SAP_RFC_PROXY_URL || 'https://sap-api.v2retail.net/api/rfc/proxy';
 const SAP_RFC_PROXY_KEY = process.env.SAP_RFC_PROXY_KEY || 'v2-rfc-proxy-2026';
-const SAP_RFC_PROXY_ENV = process.env.SAP_RFC_PROXY_ENV || '';
+const SAP_RFC_PROXY_ENV = process.env.SAP_RFC_PROXY_ENV || 'prod';
 const SAP_SIZE_VALIDATION_ENABLED =
     (process.env.SAP_SIZE_VALIDATION_ENABLED ?? 'true').toLowerCase() === 'true';
 
@@ -90,8 +86,10 @@ type FlatVariant = {
     variantColor?: string | null;
     colour?: string | null;
     vendorCode?: string | null;
-    rate?: unknown;       // NET_PRICE
-    mrp?: unknown;        // MRP_TYPE
+    rate?: unknown;          // NET_PRICE
+    mrp?: unknown;           // MRP_TYPE
+    weight?: unknown;        // WEIGHT_NET_G (kg)
+    variantWeight?: unknown; // variant-specific weight override
     [key: string]: unknown;
 };
 
@@ -107,38 +105,47 @@ const toStr = (v: unknown): string => {
     return String(v).trim();
 };
 
-/** Build the JSON payload for one variant RFC call */
+/** Build the IM_DATA row for one variant RFC call */
 function buildVariantPayload(
     genericSapArtNum: string,
     variant: FlatVariant
 ): Record<string, string> {
-    // FROM_DATE: today in DDMMYYYY format
+    // FROM_DATE: today in YYYYMMDD format
     const now = new Date();
     const dd   = String(now.getDate()).padStart(2, '0');
     const mm   = String(now.getMonth() + 1).padStart(2, '0');
     const yyyy = String(now.getFullYear());
-    const fromDate = `${dd}${mm}${yyyy}`;
+    const fromDate = `${yyyy}${mm}${dd}`;
+
+    // VENDOR: pad to 10 digits with leading zeros
+    const vendorRaw = toStr(variant.vendorCode).replace(/\D/g, '');
+    const vendor = vendorRaw ? vendorRaw.padStart(10, '0') : '';
 
     return {
         // ── Dynamic — from variant record ─────────────────
         GENERIC_ARTICLE: genericSapArtNum,
-        VAR1VAL1:        toStr(variant.variantSize),            // actual size value e.g. "XL"
-        VAR1VAL2:        toStr(variant.colour ?? variant.variantColor), // actual color e.g. "Blue"
-        VENDOR:          toStr(variant.vendorCode),
+        VAR1CHAR1:       'V2_COLOR',
+        VAR1VAL1:        toStr(variant.colour ?? variant.variantColor), // color value e.g. "A_MIX"
+        VAR1CHAR2:       'V2_SIZE',
+        VAR1VAL2:        toStr(variant.variantSize),                    // size value e.g. "XL"
+        VENDOR:          vendor,
         NET_PRICE:       toStr(variant.rate),
         MRP_TYPE:        toStr(variant.mrp),
         FROM_DATE:       fromDate,
         // ── Fixed SAP org values ──────────────────────────
         VARIANT_ARTICLE: '',
-        VAR1CHAR1:       'V2_SIZE',
-        VAR1CHAR2:       'V2_COLOR',
         SITE:            SAP_SITE,
         PUR_GRP:         SAP_PUR_GRP,
         SALES_ORG:       SAP_SALES_ORG,
         SALES_UNIT:      SAP_SALES_UNIT,
-        TO_DATE:         SAP_TO_DATE,
+        TO_DATE:         '99991231',
         OLD_MAT_NO:      '',
         TAX_CODE:        SAP_TAX_CODE,
+        WEIGHT_NET_G:    (() => {
+            const raw = toStr(variant.variantWeight);
+            const num = parseFloat(raw);
+            return isNaN(num) ? '0.000' : num.toFixed(3);
+        })(),
     };
 }
 
@@ -250,21 +257,32 @@ export async function syncVariantsToSapViaRfc(
             //     }
             // }
 
-            const payload = buildVariantPayload(genericSapArt, variant);
+            const imDataRow = buildVariantPayload(genericSapArt, variant);
+            const requestBody = {
+                bapiname: 'ZMM_VAR_ART_CREATION_RFC',
+                IM_DATA: [imDataRow],
+            };
+            const proxyUrl = SAP_RFC_PROXY_ENV
+                ? `${SAP_RFC_PROXY_URL}?env=${encodeURIComponent(SAP_RFC_PROXY_ENV)}`
+                : SAP_RFC_PROXY_URL;
 
             console.log(
                 `[ZMM_VAR_RFC] Creating variant → variantDbId=${variant.id}\n` +
-                `  Full payload: ${JSON.stringify(payload, null, 2)}\n` +
+                `  URL: ${proxyUrl}\n` +
+                `  Full payload: ${JSON.stringify(requestBody, null, 2)}\n` +
                 `  Variant DB fields: variantSize=${variant.variantSize} colour=${variant.colour} variantColor=${variant.variantColor} vendorCode=${variant.vendorCode} rate=${variant.rate} mrp=${variant.mrp}`
             );
 
             const ctrl = new AbortController();
             const timer = setTimeout(() => ctrl.abort(), SAP_RFC_TIMEOUT_MS);
             try {
-                const response = await fetch(ZMM_VAR_RFC_URL, {
+                const response = await fetch(proxyUrl, {
                     method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify(payload),
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'X-RFC-Key': SAP_RFC_PROXY_KEY,
+                    },
+                    body: JSON.stringify(requestBody),
                     signal: ctrl.signal,
                 });
 

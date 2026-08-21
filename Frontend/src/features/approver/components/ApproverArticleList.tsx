@@ -79,6 +79,7 @@ import { APP_CONFIG } from '../../../constants/app/config';
 import { formatDivisionLabel } from '../../../shared/utils/ui/formatters';
 import { SIMPLIFIED_HIERARCHY } from '../../extraction/components/SimplifiedCategorySelector';
 import VariantSubTable from './VariantSubTable';
+import { variantCreatingIds } from '../../fabric-article/variantCreationState';
 
 // Alias so the combobox trigger can use a distinct name from the plain icon
 const ChevronDownIcon = ChevronDown;
@@ -498,8 +499,10 @@ const ArticleCard = React.memo(
     cardGroups: CardGroup[];
     pathType?: 'old' | 'new' | 'rejected' | 'created' | 'failed';
   }) => {
-    const [showVariants, setShowVariants] = useState(false);
+    const [showVariants, setShowVariants] = useState(true);
     const [imgModalOpen, setImgModalOpen] = useState(false);
+    const [creatingVariants, setCreatingVariants] = useState(false);
+    const [variantRefreshKey, setVariantRefreshKey] = useState(0);
     const [localValues, setLocalValues] = useState<Record<string, string | null>>({});
     const [dupConfirmOpen, setDupConfirmOpen] = useState(false);
     const [duplicating, setDuplicating] = useState(false);
@@ -1109,6 +1112,40 @@ const ArticleCard = React.memo(
         return;
       }
       onSave({ ...item, ...updates } as ApproverItem, updates as Record<string, unknown>);
+
+      // When Base Color changes, auto-create variants for the new color (idempotent).
+      if (field === 'colour' && value && !isModifyMode) {
+        const colorCode = value.trim().toUpperCase();
+        setCreatingVariants(true);
+        variantCreatingIds.add(item.id);
+        const loadingToastId = message.loading(`Creating variants for color ${colorCode}…`);
+        const token = localStorage.getItem('authToken');
+        fetch(`${APP_CONFIG.api.baseURL}/approver/items/${item.id}/ensure-color-variants`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` },
+          body: JSON.stringify({ color: colorCode }),
+        })
+          .then(async (r) => {
+            const d = await r.json().catch(() => ({}));
+            if (!r.ok) throw new Error(d?.error || 'Failed to create variants');
+            message.dismiss(loadingToastId);
+            if ((d.count ?? 0) > 0) {
+              message.success(`${d.count} variants created for ${colorCode}`);
+              setVariantRefreshKey((k) => k + 1);
+            } else {
+              message.info(`Variants for ${colorCode} already exist`);
+            }
+            onRefresh();
+          })
+          .catch((err) => {
+            message.dismiss(loadingToastId);
+            message.error(err instanceof Error ? err.message : 'Failed to create variants');
+          })
+          .finally(() => {
+            setCreatingVariants(false);
+            variantCreatingIds.delete(item.id);
+          });
+      }
     };
 
     const handleModify = async () => {
@@ -2371,6 +2408,7 @@ const ArticleCard = React.memo(
                   attributes={attributes}
                   onRefresh={onRefresh}
                   pathType={pathType}
+                  refreshKey={variantRefreshKey}
                 />
               )}
             </div>

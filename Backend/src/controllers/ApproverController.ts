@@ -56,7 +56,7 @@ const ITEM_UPDATE_ALLOWED_FIELDS = [
     // Brand vendor MVGR
     'mvgrBrandVendor',
     // Variant-specific fields
-    'variantColor', 'variantSize',
+    'variantColor', 'variantSize', 'variantWeight',
 ];
 
 export class ApproverController {
@@ -2445,6 +2445,7 @@ export class ApproverController {
                             rate: true, mrp: true, sapArticleId: true,
                             approvalStatus: true, sapSyncStatus: true,
                             imageUrl: true, articleNumber: true,
+                            weight: true, variantWeight: true,
                         }
                     });
 
@@ -3029,6 +3030,23 @@ export class ApproverController {
                 totalCreated += await addColorVariants(id, c, sizesOverride, imageByColor[c]);
             }
             return res.json({ message: `Created ${totalCreated} color variants`, count: totalCreated });
+        } catch (err: any) {
+            return res.status(500).json({ error: err.message });
+        }
+    }
+
+    // Auto-create variants for a color without requiring an image upload.
+    // Falls back to the generic article's own image (same as the approve flow).
+    // Idempotent: returns count=0 if all size+color combos already exist.
+    static async ensureColorVariants(req: Request, res: Response) {
+        try {
+            const { id } = req.params;
+            const { color } = req.body;
+            const colorStr = typeof color === 'string' ? color.trim() : '';
+            if (!colorStr) return res.status(400).json({ error: 'color is required' });
+
+            const count = await addColorVariants(id, colorStr);
+            return res.json({ count, alreadyExists: count === 0 });
         } catch (err: any) {
             return res.status(500).json({ error: err.message });
         }

@@ -1,4 +1,4 @@
-import React, { useCallback, useEffect, useRef, useState } from 'react';
+import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { useForm } from 'react-hook-form';
 import { Pencil, Trash2, Plus, Info } from 'lucide-react';
 import {
@@ -41,6 +41,7 @@ interface VariantSubTableProps {
   onRefresh: () => void;
   attributes: MasterAttribute[];
   pathType?: 'old' | 'new' | 'rejected' | 'created' | 'failed';
+  refreshKey?: number;
 }
 
 // ── Edit variant modal ────────────────────────────────────────────────────────
@@ -618,12 +619,12 @@ const AddColorModal: React.FC<AddColorModalProps> = ({
 
 // ── Inline weight input cell ──────────────────────────────────────────────────
 
-const WeightCell: React.FC<{ variant: ApproverItem; onSaved: () => void }> = ({ variant, onSaved }) => {
+const WeightCell: React.FC<{ variant: ApproverItem; synced: boolean; onSaved: () => void }> = ({ variant, synced, onSaved }) => {
   const [editing, setEditing] = useState(false);
-  const [value, setValue] = useState(variant.weight ?? '');
+  const [value, setValue] = useState(variant.variantWeight ?? '');
   const [saving, setSaving] = useState(false);
 
-  useEffect(() => { setValue(variant.weight ?? ''); }, [variant.weight]);
+  useEffect(() => { setValue(variant.variantWeight ?? ''); }, [variant.variantWeight]);
 
   const save = async () => {
     const trimmed = String(value).trim();
@@ -633,7 +634,7 @@ const WeightCell: React.FC<{ variant: ApproverItem; onSaved: () => void }> = ({ 
       const r = await fetch(`${APP_CONFIG.api.baseURL}/approver/items/${variant.id}`, {
         method: 'PUT',
         headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` },
-        body: JSON.stringify({ weight: trimmed || null }),
+        body: JSON.stringify({ variantWeight: trimmed || null }),
       });
       if (!r.ok) throw new Error('Failed to save weight');
       onSaved();
@@ -644,6 +645,16 @@ const WeightCell: React.FC<{ variant: ApproverItem; onSaved: () => void }> = ({ 
       setEditing(false);
     }
   };
+
+  // Synced variants: show weight as plain read-only text
+  if (synced) {
+    const isEmpty = !value || value.trim() === '';
+    return (
+      <span className="text-[12px] text-muted-foreground">
+        {isEmpty ? '—' : String(value)}
+      </span>
+    );
+  }
 
   if (editing) {
     return (
@@ -658,12 +669,12 @@ const WeightCell: React.FC<{ variant: ApproverItem; onSaved: () => void }> = ({ 
           if (e.key === 'Escape') setEditing(false);
         }}
         disabled={saving}
-        placeholder="e.g. 250"
+        placeholder="e.g. 0.25"
       />
     );
   }
 
-  const isEmpty = !value && value !== '0';
+  const isEmpty = !value || value.trim() === '';
   return (
     <span
       className={`cursor-pointer text-[12px] ${isEmpty ? 'font-medium text-rose-500' : 'text-foreground'}`}
@@ -682,6 +693,7 @@ const VariantSubTable: React.FC<VariantSubTableProps> = ({
   attributes,
   onRefresh,
   pathType,
+  refreshKey,
 }) => {
   const [variants, setVariants] = useState<ApproverItem[]>([]);
   const [loading, setLoading] = useState(false);
@@ -689,6 +701,7 @@ const VariantSubTable: React.FC<VariantSubTableProps> = ({
   const [editingVariant, setEditingVariant] = useState<ApproverItem | null>(null);
   const [addColorOpen, setAddColorOpen] = useState(false);
   const [majCatSizeCount, setMajCatSizeCount] = useState<number | null>(null);
+  const [deletingColor, setDeletingColor] = useState<string | null>(null);
 
   const fetchVariants = useCallback(async (silent = false) => {
     if (!silent) setLoading(true);
@@ -712,7 +725,7 @@ const VariantSubTable: React.FC<VariantSubTableProps> = ({
   // variant rows refresh to show their updated status / SAP article numbers.
   useEffect(() => {
     fetchVariants();
-  }, [fetchVariants, genericRecord.approvalStatus, genericRecord.sapArticleId]);
+  }, [fetchVariants, genericRecord.approvalStatus, genericRecord.sapArticleId, refreshKey]);
 
   // Variants sync to SAP a bit AFTER the generic, so the first refetch above often
   // still shows them "Pending SAP". Quietly re-poll every 5s while the generic is
@@ -785,7 +798,68 @@ const VariantSubTable: React.FC<VariantSubTableProps> = ({
     [fetchVariants],
   );
 
+  const handleDeleteColorVariants = useCallback(
+    async (color: string) => {
+      const toDelete = variants.filter(
+        (v) => (v.variantColor || '').toUpperCase() === color.toUpperCase(),
+      );
+      setDeletingColor(color.toUpperCase());
+      try {
+        const token = localStorage.getItem('authToken');
+        await Promise.all(
+          toDelete.map((v) =>
+            fetch(`${APP_CONFIG.api.baseURL}/approver/items/${v.id}`, {
+              method: 'DELETE',
+              headers: { Authorization: `Bearer ${token}` },
+            }),
+          ),
+        );
+        message.success(`Deleted ${toDelete.length} variant${toDelete.length !== 1 ? 's' : ''} for color ${color}`);
+        fetchVariants();
+      } catch (err) {
+        message.error(err instanceof Error ? err.message : 'Failed to delete color variants');
+      } finally {
+        setDeletingColor(null);
+      }
+    },
+    [variants, fetchVariants],
+  );
+
+  // Colors where at least one variant has a SAP article number (synced) — hide delete button for these.
+  const syncedColors = useMemo(() => {
+    const s = new Set<string>();
+    for (const v of variants) {
+      if (v.fabricArticleNumber || v.sapArticleId) {
+        const c = (v.variantColor || '').toUpperCase();
+        if (c) s.add(c);
+      }
+    }
+    return s;
+  }, [variants]);
+
+  // First variant ID per color — we show the Delete Color button only on the first row of each group.
+  const firstIdByColor = useMemo(() => {
+    const m = new Map<string, string>();
+    for (const v of variants) {
+      const c = (v.variantColor || '').toUpperCase();
+      if (c && !m.has(c)) m.set(c, v.id);
+    }
+    return m;
+  }, [variants]);
+
   const handleRetryVariants = useCallback(async () => {
+    // Validate variant_weight for all un-synced variants before retrying
+    const unsynced = variants.filter((v) => !v.fabricArticleNumber && !v.sapArticleId);
+    const missingWeight = unsynced.filter(
+      (v) => !v.variantWeight || String(v.variantWeight).trim() === '',
+    );
+    if (missingWeight.length > 0) {
+      message.error(
+        `${missingWeight.length} variant${missingWeight.length > 1 ? 's are' : ' is'} missing Weight (kg). Fill in weight for all variants before retrying.`,
+      );
+      return;
+    }
+
     setRetrying(true);
     try {
       const token = localStorage.getItem('authToken');
@@ -803,7 +877,7 @@ const VariantSubTable: React.FC<VariantSubTableProps> = ({
     } finally {
       setRetrying(false);
     }
-  }, [genericId, fetchVariants, onRefresh]);
+  }, [genericId, variants, fetchVariants, onRefresh]);
 
   const columns: DataTableColumn<ApproverItem>[] = [
     {
@@ -870,11 +944,17 @@ const VariantSubTable: React.FC<VariantSubTableProps> = ({
       render: (v) => (v != null ? String(v) : '—'),
     },
     {
-      title: 'Weight (g) *',
+      title: 'Weight (kg) *',
       dataIndex: 'weight',
       key: 'weight',
       width: 100,
-      render: (_v, record) => <WeightCell variant={record} onSaved={() => fetchVariants(true)} />,
+      render: (_v, record) => (
+        <WeightCell
+          variant={record}
+          synced={!!(record.fabricArticleNumber || record.sapArticleId)}
+          onSaved={() => fetchVariants(true)}
+        />
+      ),
     },
     {
       title: 'SAP Article #',
@@ -900,29 +980,58 @@ const VariantSubTable: React.FC<VariantSubTableProps> = ({
     {
       title: '',
       key: 'actions',
-      width: 130,
-      render: (_v, record) => (
-        <div className="flex gap-1.5">
-          {!record.fabricArticleNumber && (
-            <Button size="sm" variant="outline" onClick={() => setEditingVariant(record)}>
-              <Pencil />
-              Edit
-            </Button>
-          )}
-          {(!record.approvalStatus || record.approvalStatus === 'PENDING') && (
-            <Popconfirm
-              title="Delete variant?"
-              description="This cannot be undone."
-              onConfirm={() => handleDeleteVariant(record.id)}
-              okText="Delete"
-            >
-              <Button size="sm" variant="destructive">
-                <Trash2 />
+      width: 200,
+      render: (_v, record) => {
+        const colorKey = (record.variantColor || '').toUpperCase();
+        const isFirstOfColor = colorKey && firstIdByColor.get(colorKey) === record.id;
+        const colorSynced = colorKey ? syncedColors.has(colorKey) : false;
+        return (
+          <div className="flex flex-wrap gap-1.5">
+            {!record.fabricArticleNumber && (
+              <Button size="sm" variant="outline" onClick={() => setEditingVariant(record)}>
+                <Pencil />
+                Edit
               </Button>
-            </Popconfirm>
-          )}
-        </div>
-      ),
+            )}
+            {(!record.approvalStatus || record.approvalStatus === 'PENDING') && (
+              <Popconfirm
+                title="Delete variant?"
+                description="This cannot be undone."
+                onConfirm={() => handleDeleteVariant(record.id)}
+                okText="Delete"
+              >
+                <Button size="sm" variant="destructive">
+                  <Trash2 />
+                </Button>
+              </Popconfirm>
+            )}
+            {isFirstOfColor && !colorSynced && colorKey && (
+              deletingColor === colorKey ? (
+                <Button size="sm" variant="destructive" className="gap-1 text-[11px]" disabled>
+                  <span className="flex items-center gap-0.5">
+                    <span className="animate-bounce [animation-delay:0ms]">.</span>
+                    <span className="animate-bounce [animation-delay:150ms]">.</span>
+                    <span className="animate-bounce [animation-delay:300ms]">.</span>
+                  </span>
+                  Deleting
+                </Button>
+              ) : (
+                <Popconfirm
+                  title={`Delete all "${record.variantColor}" variants?`}
+                  description={`This will delete all ${variants.filter((v) => (v.variantColor || '').toUpperCase() === colorKey).length} size variants for this color.`}
+                  onConfirm={() => handleDeleteColorVariants(record.variantColor || colorKey)}
+                  okText="Delete All"
+                >
+                  <Button size="sm" variant="destructive" className="gap-1 text-[11px]">
+                    <Trash2 className="h-3 w-3" />
+                    Delete Color
+                  </Button>
+                </Popconfirm>
+              )
+            )}
+          </div>
+        );
+      },
     },
   ];
 

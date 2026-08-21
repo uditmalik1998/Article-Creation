@@ -50,6 +50,7 @@ import {
   getMandatoryGridFieldLabel,
 } from '../../../services/articleConfigService';
 import { formatDivisionLabel } from '../../../shared/utils/ui/formatters';
+import { variantCreatingIds } from '../../fabric-article/variantCreationState';
 
 // ─── Helpers ─────────────────────────────────────────────────────────────────
 
@@ -493,6 +494,13 @@ export default function ArticleDetailPage() {
     if (pendingSelectedKeys.length === 0) return;
     if (approveBlockedReasons.length > 0) { setInfoDialog({ kind: 'mandatoryMissing', errors: approveBlockedReasons }); return; }
 
+    // Block submit while variants are being auto-created from a Base Color change
+    const stillCreating = pendingSelectedKeys.filter((id) => variantCreatingIds.has(id));
+    if (stillCreating.length > 0) {
+      message.warning('Variants are still being created from the Base Color change. Please wait a moment and try again.');
+      return;
+    }
+
     // Validate that all variants have weight filled in before allowing submission
     const token = localStorage.getItem('authToken');
     for (const id of pendingSelectedKeys) {
@@ -503,9 +511,9 @@ export default function ArticleDetailPage() {
         if (r.ok) {
           const data = await r.json();
           const variants: any[] = data.data || data;
-          const missingWeight = variants.filter((v) => v.weight === null || v.weight === undefined || String(v.weight).trim() === '');
+          const missingWeight = variants.filter((v) => v.variantWeight === null || v.variantWeight === undefined || String(v.variantWeight).trim() === '');
           if (missingWeight.length > 0) {
-            message.error(`${missingWeight.length} variant${missingWeight.length > 1 ? 's are' : ' is'} missing Weight (g). Fill in weight for all variants before submitting.`);
+            message.error(`${missingWeight.length} variant${missingWeight.length > 1 ? 's are' : ' is'} missing Weight (kg). Fill in weight for all variants before submitting.`);
             return;
           }
         }
