@@ -240,7 +240,14 @@ async function findRowsByArticleNumber(articleNumber: string): Promise<any[]> {
       select: ARTICLE_SELECT,
     })
   );
-  return rows.filter((r) => String(r.imageUrl || '').trim());
+  // Exclude raw Supabase srm-uploads URLs — that bucket is gone (404) so they are
+  // permanently broken. Articles with only these URLs fall through to the R2 fallback.
+  return rows.filter((r) => {
+    const url = String(r.imageUrl || '').trim();
+    if (!url) return false;
+    if (url.includes('supabase.co/storage') && url.includes('srm-uploads')) return false;
+    return true;
+  });
 }
 
 const SRM_SUPABASE_URL = 'https://pymdqnnwwxrgeolvgvgv.supabase.co';
@@ -382,7 +389,12 @@ export async function resolveArticleForGeneration(code: string): Promise<Resolve
     } catch (err: any) {
       return { articleCode, found: false, reason: `lookup failed: ${err?.message || 'db error'}` };
     }
-    siblingRows = siblingRows.filter((r) => String(r.imageUrl || '').trim());
+    siblingRows = siblingRows.filter((r) => {
+      const url = String(r.imageUrl || '').trim();
+      if (!url) return false;
+      if (url.includes('supabase.co/storage') && url.includes('srm-uploads')) return false;
+      return true;
+    });
 
     if (siblingRows.length > 0) {
       // Prefer APPROVED, else the latest — same rule as the exact-match path.

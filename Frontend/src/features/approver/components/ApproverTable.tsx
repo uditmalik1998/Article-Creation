@@ -97,6 +97,7 @@ export interface ApproverItem {
   finish: string | null;
   shade: string | null;
   weight: string | null;
+  variantWeight: string | null;
   lycra: string | null;
   neckDetails: string | null;
   collar: string | null;

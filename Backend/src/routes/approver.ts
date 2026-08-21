@@ -63,6 +63,7 @@ router.get('/image/:id', h(ApproverController.getImageUrl));
 // Variant routes
 router.get('/items/:id/variants', h(ApproverController.getVariants));
 router.post('/items/:id/add-color', h(ApproverController.addColor));
+router.post('/items/:id/ensure-color-variants', h(ApproverController.ensureColorVariants));
 // Upload a per-color variant image → returns { url }
 router.post('/upload-image', imageUpload.single('image'), h(ApproverController.uploadImage));
 router.post('/items/:id/duplicate', h(ApproverController.duplicateItem));

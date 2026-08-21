@@ -14824,6 +14824,7 @@ export namespace Prisma {
     genericArticleId: string | null
     variantSize: string | null
     variantColor: string | null
+    variantWeight: string | null
     sapSyncStatus: $Enums.SapSyncStatus | null
     sapArticleId: string | null
     sapSyncMessage: string | null
@@ -14956,6 +14957,7 @@ export namespace Prisma {
     genericArticleId: string | null
     variantSize: string | null
     variantColor: string | null
+    variantWeight: string | null
     sapSyncStatus: $Enums.SapSyncStatus | null
     sapArticleId: string | null
     sapSyncMessage: string | null
@@ -15088,6 +15090,7 @@ export namespace Prisma {
     genericArticleId: number
     variantSize: number
     variantColor: number
+    variantWeight: number
     sapSyncStatus: number
     sapArticleId: number
     sapSyncMessage: number
@@ -15253,6 +15256,7 @@ export namespace Prisma {
     genericArticleId?: true
     variantSize?: true
     variantColor?: true
+    variantWeight?: true
     sapSyncStatus?: true
     sapArticleId?: true
     sapSyncMessage?: true
@@ -15385,6 +15389,7 @@ export namespace Prisma {
     genericArticleId?: true
     variantSize?: true
     variantColor?: true
+    variantWeight?: true
     sapSyncStatus?: true
     sapArticleId?: true
     sapSyncMessage?: true
@@ -15517,6 +15522,7 @@ export namespace Prisma {
     genericArticleId?: true
     variantSize?: true
     variantColor?: true
+    variantWeight?: true
     sapSyncStatus?: true
     sapArticleId?: true
     sapSyncMessage?: true
@@ -15737,6 +15743,7 @@ export namespace Prisma {
     genericArticleId: string | null
     variantSize: string | null
     variantColor: string | null
+    variantWeight: string | null
     sapSyncStatus: $Enums.SapSyncStatus
     sapArticleId: string | null
     sapSyncMessage: string | null
@@ -15889,6 +15896,7 @@ export namespace Prisma {
     genericArticleId?: boolean
     variantSize?: boolean
     variantColor?: boolean
+    variantWeight?: boolean
     sapSyncStatus?: boolean
     sapArticleId?: boolean
     sapSyncMessage?: boolean
@@ -16026,6 +16034,7 @@ export namespace Prisma {
     genericArticleId?: boolean
     variantSize?: boolean
     variantColor?: boolean
+    variantWeight?: boolean
     sapSyncStatus?: boolean
     sapArticleId?: boolean
     sapSyncMessage?: boolean
@@ -16161,6 +16170,7 @@ export namespace Prisma {
     genericArticleId?: boolean
     variantSize?: boolean
     variantColor?: boolean
+    variantWeight?: boolean
     sapSyncStatus?: boolean
     sapArticleId?: boolean
     sapSyncMessage?: boolean
@@ -16296,6 +16306,7 @@ export namespace Prisma {
     genericArticleId?: boolean
     variantSize?: boolean
     variantColor?: boolean
+    variantWeight?: boolean
     sapSyncStatus?: boolean
     sapArticleId?: boolean
     sapSyncMessage?: boolean
@@ -16304,7 +16315,7 @@ export namespace Prisma {
     imageExtractionRawData?: boolean
   }
 
-  export type ExtractionResultFlatOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<"id" | "jobId" | "imageName" | "imageUrl" | "articleNumber" | "extractionStatus" | "aiModel" | "avgConfidence" | "processingTimeMs" | "totalAttributes" | "extractedCount" | "inputTokens" | "outputTokens" | "totalTokens" | "apiCost" | "userId" | "userName" | "extractionDate" | "createdAt" | "updatedAt" | "majorCategory" | "vendorName" | "designNumber" | "pptNumber" | "rate" | "size" | "yarn1" | "yarn2" | "fabricMainMvgr" | "weave" | "weaveFullForm" | "composition" | "finish" | "gsm" | "macroMvgr" | "macroMvgrFullForm" | "mainMvgr" | "mainMvgrFullForm" | "mFab2" | "mFab2FullForm" | "shade" | "weight" | "lycra" | "neck" | "neckDetails" | "collar" | "placket" | "sleeve" | "bottomFold" | "frontOpenStyle" | "pocketType" | "fit" | "pattern" | "length" | "colour" | "secondaryColour" | "drawcord" | "button" | "zipper" | "zipColour" | "printType" | "printStyle" | "printPlacement" | "patches" | "patchesType" | "embroidery" | "embroideryType" | "wash" | "fatherBelt" | "childBelt" | "division" | "subDivision" | "referenceArticleNumber" | "referenceArticleDescription" | "collarStyle" | "sleeveFold" | "mSet" | "noOfPocket" | "extraPocket" | "dcShape" | "btnColour" | "fCount" | "fConstruction" | "fOunce" | "fWidth" | "fabDiv" | "fabVdr" | "htrfType" | "htrfStyle" | "embPlacement" | "ageGroup" | "mNoOfSize" | "mNoOfClr" | "articleFashionType" | "articleDimension" | "bodyArticle" | "bodyArticleDescription" | "fabricArticleNumber" | "fabricArticleDescription" | "attrArticleNums" | "mvgrBrandVendor" | "vendorCode" | "mrp" | "impAtrbt2" | "mcCode" | "segment" | "season" | "hsnTaxCode" | "articleDescription" | "fashionGrid" | "year" | "articleType" | "presentationsType" | "approvalStatus" | "pdStatus" | "approvedBy" | "approvedAt" | "source" | "imageUncPath" | "isOldArticle" | "isGeneric" | "genericArticleId" | "variantSize" | "variantColor" | "sapSyncStatus" | "sapArticleId" | "sapSyncMessage" | "srmOriginalDesignNumber" | "srmUniqueId" | "imageExtractionRawData", ExtArgs["result"]["extractionResultFlat"]>
+  export type ExtractionResultFlatOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<"id" | "jobId" | "imageName" | "imageUrl" | "articleNumber" | "extractionStatus" | "aiModel" | "avgConfidence" | "processingTimeMs" | "totalAttributes" | "extractedCount" | "inputTokens" | "outputTokens" | "totalTokens" | "apiCost" | "userId" | "userName" | "extractionDate" | "createdAt" | "updatedAt" | "majorCategory" | "vendorName" | "designNumber" | "pptNumber" | "rate" | "size" | "yarn1" | "yarn2" | "fabricMainMvgr" | "weave" | "weaveFullForm" | "composition" | "finish" | "gsm" | "macroMvgr" | "macroMvgrFullForm" | "mainMvgr" | "mainMvgrFullForm" | "mFab2" | "mFab2FullForm" | "shade" | "weight" | "lycra" | "neck" | "neckDetails" | "collar" | "placket" | "sleeve" | "bottomFold" | "frontOpenStyle" | "pocketType" | "fit" | "pattern" | "length" | "colour" | "secondaryColour" | "drawcord" | "button" | "zipper" | "zipColour" | "printType" | "printStyle" | "printPlacement" | "patches" | "patchesType" | "embroidery" | "embroideryType" | "wash" | "fatherBelt" | "childBelt" | "division" | "subDivision" | "referenceArticleNumber" | "referenceArticleDescription" | "collarStyle" | "sleeveFold" | "mSet" | "noOfPocket" | "extraPocket" | "dcShape" | "btnColour" | "fCount" | "fConstruction" | "fOunce" | "fWidth" | "fabDiv" | "fabVdr" | "htrfType" | "htrfStyle" | "embPlacement" | "ageGroup" | "mNoOfSize" | "mNoOfClr" | "articleFashionType" | "articleDimension" | "bodyArticle" | "bodyArticleDescription" | "fabricArticleNumber" | "fabricArticleDescription" | "attrArticleNums" | "mvgrBrandVendor" | "vendorCode" | "mrp" | "impAtrbt2" | "mcCode" | "segment" | "season" | "hsnTaxCode" | "articleDescription" | "fashionGrid" | "year" | "articleType" | "presentationsType" | "approvalStatus" | "pdStatus" | "approvedBy" | "approvedAt" | "source" | "imageUncPath" | "isOldArticle" | "isGeneric" | "genericArticleId" | "variantSize" | "variantColor" | "variantWeight" | "sapSyncStatus" | "sapArticleId" | "sapSyncMessage" | "srmOriginalDesignNumber" | "srmUniqueId" | "imageExtractionRawData", ExtArgs["result"]["extractionResultFlat"]>
   export type ExtractionResultFlatInclude<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
     approver?: boolean | ExtractionResultFlat$approverArgs<ExtArgs>
     job?: boolean | ExtractionResultFlat$jobArgs<ExtArgs>
@@ -16452,6 +16463,7 @@ export namespace Prisma {
       genericArticleId: string | null
       variantSize: string | null
       variantColor: string | null
+      variantWeight: string | null
       sapSyncStatus: $Enums.SapSyncStatus
       sapArticleId: string | null
       sapSyncMessage: string | null
@@ -17008,6 +17020,7 @@ export namespace Prisma {
     readonly genericArticleId: FieldRef<"ExtractionResultFlat", 'String'>
     readonly variantSize: FieldRef<"ExtractionResultFlat", 'String'>
     readonly variantColor: FieldRef<"ExtractionResultFlat", 'String'>
+    readonly variantWeight: FieldRef<"ExtractionResultFlat", 'String'>
     readonly sapSyncStatus: FieldRef<"ExtractionResultFlat", 'SapSyncStatus'>
     readonly sapArticleId: FieldRef<"ExtractionResultFlat", 'String'>
     readonly sapSyncMessage: FieldRef<"ExtractionResultFlat", 'String'>
@@ -50205,6 +50218,7 @@ export namespace Prisma {
     genericArticleId: 'genericArticleId',
     variantSize: 'variantSize',
     variantColor: 'variantColor',
+    variantWeight: 'variantWeight',
     sapSyncStatus: 'sapSyncStatus',
     sapArticleId: 'sapArticleId',
     sapSyncMessage: 'sapSyncMessage',
@@ -51016,6 +51030,7 @@ export namespace Prisma {
     genericArticleId: 'genericArticleId',
     variantSize: 'variantSize',
     variantColor: 'variantColor',
+    variantWeight: 'variantWeight',
     sapArticleId: 'sapArticleId',
     sapSyncMessage: 'sapSyncMessage',
     srmOriginalDesignNumber: 'srmOriginalDesignNumber',
@@ -52670,6 +52685,7 @@ export namespace Prisma {
     genericArticleId?: StringNullableFilter<"ExtractionResultFlat"> | string | null
     variantSize?: StringNullableFilter<"ExtractionResultFlat"> | string | null
     variantColor?: StringNullableFilter<"ExtractionResultFlat"> | string | null
+    variantWeight?: StringNullableFilter<"ExtractionResultFlat"> | string | null
     sapSyncStatus?: EnumSapSyncStatusFilter<"ExtractionResultFlat"> | $Enums.SapSyncStatus
     sapArticleId?: StringNullableFilter<"ExtractionResultFlat"> | string | null
     sapSyncMessage?: StringNullableFilter<"ExtractionResultFlat"> | string | null
@@ -52806,6 +52822,7 @@ export namespace Prisma {
     genericArticleId?: SortOrderInput | SortOrder
     variantSize?: SortOrderInput | SortOrder
     variantColor?: SortOrderInput | SortOrder
+    variantWeight?: SortOrderInput | SortOrder
     sapSyncStatus?: SortOrder
     sapArticleId?: SortOrderInput | SortOrder
     sapSyncMessage?: SortOrderInput | SortOrder
@@ -52946,6 +52963,7 @@ export namespace Prisma {
     genericArticleId?: StringNullableFilter<"ExtractionResultFlat"> | string | null
     variantSize?: StringNullableFilter<"ExtractionResultFlat"> | string | null
     variantColor?: StringNullableFilter<"ExtractionResultFlat"> | string | null
+    variantWeight?: StringNullableFilter<"ExtractionResultFlat"> | string | null
     sapSyncStatus?: EnumSapSyncStatusFilter<"ExtractionResultFlat"> | $Enums.SapSyncStatus
     sapArticleId?: StringNullableFilter<"ExtractionResultFlat"> | string | null
     sapSyncMessage?: StringNullableFilter<"ExtractionResultFlat"> | string | null
@@ -53082,6 +53100,7 @@ export namespace Prisma {
     genericArticleId?: SortOrderInput | SortOrder
     variantSize?: SortOrderInput | SortOrder
     variantColor?: SortOrderInput | SortOrder
+    variantWeight?: SortOrderInput | SortOrder
     sapSyncStatus?: SortOrder
     sapArticleId?: SortOrderInput | SortOrder
     sapSyncMessage?: SortOrderInput | SortOrder
@@ -53223,6 +53242,7 @@ export namespace Prisma {
     genericArticleId?: StringNullableWithAggregatesFilter<"ExtractionResultFlat"> | string | null
     variantSize?: StringNullableWithAggregatesFilter<"ExtractionResultFlat"> | string | null
     variantColor?: StringNullableWithAggregatesFilter<"ExtractionResultFlat"> | string | null
+    variantWeight?: StringNullableWithAggregatesFilter<"ExtractionResultFlat"> | string | null
     sapSyncStatus?: EnumSapSyncStatusWithAggregatesFilter<"ExtractionResultFlat"> | $Enums.SapSyncStatus
     sapArticleId?: StringNullableWithAggregatesFilter<"ExtractionResultFlat"> | string | null
     sapSyncMessage?: StringNullableWithAggregatesFilter<"ExtractionResultFlat"> | string | null
@@ -57158,6 +57178,7 @@ export namespace Prisma {
     genericArticleId?: string | null
     variantSize?: string | null
     variantColor?: string | null
+    variantWeight?: string | null
     sapSyncStatus?: $Enums.SapSyncStatus
     sapArticleId?: string | null
     sapSyncMessage?: string | null
@@ -57294,6 +57315,7 @@ export namespace Prisma {
     genericArticleId?: string | null
     variantSize?: string | null
     variantColor?: string | null
+    variantWeight?: string | null
     sapSyncStatus?: $Enums.SapSyncStatus
     sapArticleId?: string | null
     sapSyncMessage?: string | null
@@ -57426,6 +57448,7 @@ export namespace Prisma {
     genericArticleId?: NullableStringFieldUpdateOperationsInput | string | null
     variantSize?: NullableStringFieldUpdateOperationsInput | string | null
     variantColor?: NullableStringFieldUpdateOperationsInput | string | null
+    variantWeight?: NullableStringFieldUpdateOperationsInput | string | null
     sapSyncStatus?: EnumSapSyncStatusFieldUpdateOperationsInput | $Enums.SapSyncStatus
     sapArticleId?: NullableStringFieldUpdateOperationsInput | string | null
     sapSyncMessage?: NullableStringFieldUpdateOperationsInput | string | null
@@ -57562,6 +57585,7 @@ export namespace Prisma {
     genericArticleId?: NullableStringFieldUpdateOperationsInput | string | null
     variantSize?: NullableStringFieldUpdateOperationsInput | string | null
     variantColor?: NullableStringFieldUpdateOperationsInput | string | null
+    variantWeight?: NullableStringFieldUpdateOperationsInput | string | null
     sapSyncStatus?: EnumSapSyncStatusFieldUpdateOperationsInput | $Enums.SapSyncStatus
     sapArticleId?: NullableStringFieldUpdateOperationsInput | string | null
     sapSyncMessage?: NullableStringFieldUpdateOperationsInput | string | null
@@ -57696,6 +57720,7 @@ export namespace Prisma {
     genericArticleId?: string | null
     variantSize?: string | null
     variantColor?: string | null
+    variantWeight?: string | null
     sapSyncStatus?: $Enums.SapSyncStatus
     sapArticleId?: string | null
     sapSyncMessage?: string | null
@@ -57827,6 +57852,7 @@ export namespace Prisma {
     genericArticleId?: NullableStringFieldUpdateOperationsInput | string | null
     variantSize?: NullableStringFieldUpdateOperationsInput | string | null
     variantColor?: NullableStringFieldUpdateOperationsInput | string | null
+    variantWeight?: NullableStringFieldUpdateOperationsInput | string | null
     sapSyncStatus?: EnumSapSyncStatusFieldUpdateOperationsInput | $Enums.SapSyncStatus
     sapArticleId?: NullableStringFieldUpdateOperationsInput | string | null
     sapSyncMessage?: NullableStringFieldUpdateOperationsInput | string | null
@@ -57960,6 +57986,7 @@ export namespace Prisma {
     genericArticleId?: NullableStringFieldUpdateOperationsInput | string | null
     variantSize?: NullableStringFieldUpdateOperationsInput | string | null
     variantColor?: NullableStringFieldUpdateOperationsInput | string | null
+    variantWeight?: NullableStringFieldUpdateOperationsInput | string | null
     sapSyncStatus?: EnumSapSyncStatusFieldUpdateOperationsInput | $Enums.SapSyncStatus
     sapArticleId?: NullableStringFieldUpdateOperationsInput | string | null
     sapSyncMessage?: NullableStringFieldUpdateOperationsInput | string | null
@@ -62530,6 +62557,7 @@ export namespace Prisma {
     genericArticleId?: SortOrder
     variantSize?: SortOrder
     variantColor?: SortOrder
+    variantWeight?: SortOrder
     sapSyncStatus?: SortOrder
     sapArticleId?: SortOrder
     sapSyncMessage?: SortOrder
@@ -62678,6 +62706,7 @@ export namespace Prisma {
     genericArticleId?: SortOrder
     variantSize?: SortOrder
     variantColor?: SortOrder
+    variantWeight?: SortOrder
     sapSyncStatus?: SortOrder
     sapArticleId?: SortOrder
     sapSyncMessage?: SortOrder
@@ -62810,6 +62839,7 @@ export namespace Prisma {
     genericArticleId?: SortOrder
     variantSize?: SortOrder
     variantColor?: SortOrder
+    variantWeight?: SortOrder
     sapSyncStatus?: SortOrder
     sapArticleId?: SortOrder
     sapSyncMessage?: SortOrder
@@ -68140,6 +68170,7 @@ export namespace Prisma {
     genericArticleId?: string | null
     variantSize?: string | null
     variantColor?: string | null
+    variantWeight?: string | null
     sapSyncStatus?: $Enums.SapSyncStatus
     sapArticleId?: string | null
     sapSyncMessage?: string | null
@@ -68274,6 +68305,7 @@ export namespace Prisma {
     genericArticleId?: string | null
     variantSize?: string | null
     variantColor?: string | null
+    variantWeight?: string | null
     sapSyncStatus?: $Enums.SapSyncStatus
     sapArticleId?: string | null
     sapSyncMessage?: string | null
@@ -68530,6 +68562,7 @@ export namespace Prisma {
     genericArticleId?: NullableStringFieldUpdateOperationsInput | string | null
     variantSize?: NullableStringFieldUpdateOperationsInput | string | null
     variantColor?: NullableStringFieldUpdateOperationsInput | string | null
+    variantWeight?: NullableStringFieldUpdateOperationsInput | string | null
     sapSyncStatus?: EnumSapSyncStatusFieldUpdateOperationsInput | $Enums.SapSyncStatus
     sapArticleId?: NullableStringFieldUpdateOperationsInput | string | null
     sapSyncMessage?: NullableStringFieldUpdateOperationsInput | string | null
@@ -68664,6 +68697,7 @@ export namespace Prisma {
     genericArticleId?: NullableStringFieldUpdateOperationsInput | string | null
     variantSize?: NullableStringFieldUpdateOperationsInput | string | null
     variantColor?: NullableStringFieldUpdateOperationsInput | string | null
+    variantWeight?: NullableStringFieldUpdateOperationsInput | string | null
     sapSyncStatus?: EnumSapSyncStatusFieldUpdateOperationsInput | $Enums.SapSyncStatus
     sapArticleId?: NullableStringFieldUpdateOperationsInput | string | null
     sapSyncMessage?: NullableStringFieldUpdateOperationsInput | string | null
@@ -69634,6 +69668,7 @@ export namespace Prisma {
     genericArticleId?: string | null
     variantSize?: string | null
     variantColor?: string | null
+    variantWeight?: string | null
     sapSyncStatus?: $Enums.SapSyncStatus
     sapArticleId?: string | null
     sapSyncMessage?: string | null
@@ -69768,6 +69803,7 @@ export namespace Prisma {
     genericArticleId?: string | null
     variantSize?: string | null
     variantColor?: string | null
+    variantWeight?: string | null
     sapSyncStatus?: $Enums.SapSyncStatus
     sapArticleId?: string | null
     sapSyncMessage?: string | null
@@ -70032,6 +70068,7 @@ export namespace Prisma {
     genericArticleId?: StringNullableFilter<"ExtractionResultFlat"> | string | null
     variantSize?: StringNullableFilter<"ExtractionResultFlat"> | string | null
     variantColor?: StringNullableFilter<"ExtractionResultFlat"> | string | null
+    variantWeight?: StringNullableFilter<"ExtractionResultFlat"> | string | null
     sapSyncStatus?: EnumSapSyncStatusFilter<"ExtractionResultFlat"> | $Enums.SapSyncStatus
     sapArticleId?: StringNullableFilter<"ExtractionResultFlat"> | string | null
     sapSyncMessage?: StringNullableFilter<"ExtractionResultFlat"> | string | null
@@ -71582,6 +71619,7 @@ export namespace Prisma {
     genericArticleId?: string | null
     variantSize?: string | null
     variantColor?: string | null
+    variantWeight?: string | null
     sapSyncStatus?: $Enums.SapSyncStatus
     sapArticleId?: string | null
     sapSyncMessage?: string | null
@@ -71717,6 +71755,7 @@ export namespace Prisma {
     genericArticleId?: string | null
     variantSize?: string | null
     variantColor?: string | null
+    variantWeight?: string | null
     sapSyncStatus?: $Enums.SapSyncStatus
     sapArticleId?: string | null
     sapSyncMessage?: string | null
@@ -71901,6 +71940,7 @@ export namespace Prisma {
     genericArticleId?: NullableStringFieldUpdateOperationsInput | string | null
     variantSize?: NullableStringFieldUpdateOperationsInput | string | null
     variantColor?: NullableStringFieldUpdateOperationsInput | string | null
+    variantWeight?: NullableStringFieldUpdateOperationsInput | string | null
     sapSyncStatus?: EnumSapSyncStatusFieldUpdateOperationsInput | $Enums.SapSyncStatus
     sapArticleId?: NullableStringFieldUpdateOperationsInput | string | null
     sapSyncMessage?: NullableStringFieldUpdateOperationsInput | string | null
@@ -72036,6 +72076,7 @@ export namespace Prisma {
     genericArticleId?: NullableStringFieldUpdateOperationsInput | string | null
     variantSize?: NullableStringFieldUpdateOperationsInput | string | null
     variantColor?: NullableStringFieldUpdateOperationsInput | string | null
+    variantWeight?: NullableStringFieldUpdateOperationsInput | string | null
     sapSyncStatus?: EnumSapSyncStatusFieldUpdateOperationsInput | $Enums.SapSyncStatus
     sapArticleId?: NullableStringFieldUpdateOperationsInput | string | null
     sapSyncMessage?: NullableStringFieldUpdateOperationsInput | string | null
@@ -72943,6 +72984,7 @@ export namespace Prisma {
     genericArticleId?: string | null
     variantSize?: string | null
     variantColor?: string | null
+    variantWeight?: string | null
     sapSyncStatus?: $Enums.SapSyncStatus
     sapArticleId?: string | null
     sapSyncMessage?: string | null
@@ -73236,6 +73278,7 @@ export namespace Prisma {
     genericArticleId?: NullableStringFieldUpdateOperationsInput | string | null
     variantSize?: NullableStringFieldUpdateOperationsInput | string | null
     variantColor?: NullableStringFieldUpdateOperationsInput | string | null
+    variantWeight?: NullableStringFieldUpdateOperationsInput | string | null
     sapSyncStatus?: EnumSapSyncStatusFieldUpdateOperationsInput | $Enums.SapSyncStatus
     sapArticleId?: NullableStringFieldUpdateOperationsInput | string | null
     sapSyncMessage?: NullableStringFieldUpdateOperationsInput | string | null
@@ -73370,6 +73413,7 @@ export namespace Prisma {
     genericArticleId?: NullableStringFieldUpdateOperationsInput | string | null
     variantSize?: NullableStringFieldUpdateOperationsInput | string | null
     variantColor?: NullableStringFieldUpdateOperationsInput | string | null
+    variantWeight?: NullableStringFieldUpdateOperationsInput | string | null
     sapSyncStatus?: EnumSapSyncStatusFieldUpdateOperationsInput | $Enums.SapSyncStatus
     sapArticleId?: NullableStringFieldUpdateOperationsInput | string | null
     sapSyncMessage?: NullableStringFieldUpdateOperationsInput | string | null
@@ -73503,6 +73547,7 @@ export namespace Prisma {
     genericArticleId?: NullableStringFieldUpdateOperationsInput | string | null
     variantSize?: NullableStringFieldUpdateOperationsInput | string | null
     variantColor?: NullableStringFieldUpdateOperationsInput | string | null
+    variantWeight?: NullableStringFieldUpdateOperationsInput | string | null
     sapSyncStatus?: EnumSapSyncStatusFieldUpdateOperationsInput | $Enums.SapSyncStatus
     sapArticleId?: NullableStringFieldUpdateOperationsInput | string | null
     sapSyncMessage?: NullableStringFieldUpdateOperationsInput | string | null

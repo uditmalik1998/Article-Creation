@@ -361,6 +361,7 @@ model ExtractionResultFlat {
   genericArticleId String? @map("generic_article_id")
   variantSize      String? @map("variant_size") @db.VarChar(50)
   variantColor     String? @map("variant_color") @db.VarChar(100)
+  variantWeight    String? @map("variant_weight") @db.VarChar(50)
 
   // SAP Sync (Placeholder)
   sapSyncStatus  SapSyncStatus @default(NOT_SYNCED) @map("sap_sync_status")

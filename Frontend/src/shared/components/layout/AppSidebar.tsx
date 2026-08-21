@@ -198,10 +198,6 @@ export const AppSidebar: React.FC<AppSidebarProps> = ({ collapsed, onCollapsedCh
       label: 'Body Article',
       children: [
         { key: '/body-article', Icon: FileText, label: 'New articles' },
-        { key: '/body-article/old-articles', Icon: History, label: 'Old articles' },
-        { key: '/body-article/rejected', Icon: XCircle, label: 'Rejected' },
-        { key: '/body-article/created', Icon: CheckCircle2, label: 'Created' },
-        { key: '/body-article/failed', Icon: AlertTriangle, label: 'Failed Creations' },
       ],
     });
   }
