@@ -149,7 +149,13 @@ function buildVariantPayload(
     };
 }
 
-/** Parse the RFC JSON response into a normalised outcome */
+/** Parse the RFC JSON response into a normalised outcome.
+ *
+ * New proxy response shape:
+ *   { "EX_RETURN": [{ "TYPE": "S"|"E", "FIELD": "<article_number>", "MESSAGE": "..." }] }
+ *
+ * Legacy shape (flat root keys) also handled for backwards compatibility.
+ */
 function parseVariantRfcResponse(
     statusCode: number,
     body: string
@@ -165,7 +171,31 @@ function parseVariantRfcResponse(
         };
     }
 
-    // SAP returns article number in FIELD (primary), fall back to legacy keys
+    // ── New format: EX_RETURN array from the RFC proxy ────────────────────────
+    const exReturn = Array.isArray(parsed?.EX_RETURN) ? parsed!.EX_RETURN as Record<string, unknown>[] : null;
+    if (exReturn && exReturn.length > 0) {
+        const first = exReturn[0];
+        const type    = toStr(first?.TYPE).toUpperCase();            // "S" or "E"
+        const sapArt  = toStr(first?.FIELD).trim();                  // variant article number
+        const msgText = toStr(first?.MESSAGE ?? first?.MSG ?? '').trim();
+
+        const isHttpOk  = statusCode >= 200 && statusCode < 300;
+        const isSuccess = isHttpOk && type === 'S';
+
+        const message = msgText || (isSuccess ? `Variant created: ${sapArt}` : `SAP error (TYPE=${type})`);
+
+        console.log(`[ZMM_VAR_RFC] EX_RETURN parsed: TYPE=${type} FIELD=${sapArt} MESSAGE=${msgText}`);
+
+        return {
+            ok: isSuccess,
+            sapArticleNumber:         isSuccess && sapArt ? sapArt : undefined,
+            fabricArticleNumber:      isSuccess && sapArt ? sapArt : undefined,
+            fabricArticleDescription: msgText || undefined,
+            message,
+        };
+    }
+
+    // ── Legacy flat response (fallback) ───────────────────────────────────────
     const sapArt = toStr(
         parsed?.FIELD ??
         parsed?.SAP_ART ??
@@ -175,14 +205,11 @@ function parseVariantRfcResponse(
         ''
     );
 
-    // sapMessage is the human-readable success/error text from SAP
     const sapMessageText = toStr(parsed?.sapMessage ?? parsed?.Message ?? parsed?.MESSAGE ?? parsed?.message ?? parsed?.MSG ?? '');
     const msgTyp  = toStr(parsed?.MSG_TYP ?? '').toUpperCase();
-    // sapType "S" = success, "E" = error (SAP standard)
     const sapType = toStr(parsed?.sapType ?? parsed?.SAPTYPE ?? '').toUpperCase();
     const statusFlag = parsed?.Status ?? parsed?.status;
 
-    // Build human-readable message — prefer sapMessage, fall back to MSG
     const message = sapMessageText ||
         (sapArt ? `Variant created: ${sapArt}` : `SAP response HTTP ${statusCode} — ${JSON.stringify(parsed)}`);
 
@@ -190,13 +217,12 @@ function parseVariantRfcResponse(
     const isStatusOk   = statusFlag !== false && statusFlag !== 'false' && statusFlag !== 0 && statusFlag !== '0';
     const isSapTypeOk  = !sapType || sapType === 'S' || sapType === 'SUCCESS';
     const isBusinessOk = isStatusOk && isSapTypeOk && msgTyp !== 'E' && msgTyp !== 'ERROR';
-    // If FIELD/article number is present treat as success regardless
     const ok = isHttpOk && (sapArt ? true : isBusinessOk);
 
     return {
         ok,
-        sapArticleNumber:       sapArt || undefined,
-        fabricArticleNumber:    sapArt || undefined,       // FIELD value = variant SAP article
+        sapArticleNumber:         sapArt || undefined,
+        fabricArticleNumber:      sapArt || undefined,
         fabricArticleDescription: sapMessageText || undefined,
         message,
     };
