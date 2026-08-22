@@ -501,26 +501,26 @@ export default function ArticleDetailPage() {
       return;
     }
 
-    // Validate that all variants have weight filled in before allowing submission
-    const token = localStorage.getItem('authToken');
-    for (const id of pendingSelectedKeys) {
-      try {
-        const r = await fetch(`${APP_CONFIG.api.baseURL}/approver/items/${id}/variants`, {
-          headers: { Authorization: `Bearer ${token}` },
-        });
-        if (r.ok) {
-          const data = await r.json();
-          const variants: any[] = data.data || data;
-          const missingWeight = variants.filter((v) => v.variantWeight === null || v.variantWeight === undefined || String(v.variantWeight).trim() === '');
-          if (missingWeight.length > 0) {
-            message.error(`${missingWeight.length} variant${missingWeight.length > 1 ? 's are' : ' is'} missing Weight (kg). Fill in weight for all variants before submitting.`);
-            return;
-          }
-        }
-      } catch {
-        // non-blocking — if fetch fails just proceed
-      }
-    }
+    // TODO: Re-enable on Tuesday — variant weight validation before submit
+    // const token = localStorage.getItem('authToken');
+    // for (const id of pendingSelectedKeys) {
+    //   try {
+    //     const r = await fetch(`${APP_CONFIG.api.baseURL}/approver/items/${id}/variants`, {
+    //       headers: { Authorization: `Bearer ${token}` },
+    //     });
+    //     if (r.ok) {
+    //       const data = await r.json();
+    //       const variants: any[] = data.data || data;
+    //       const missingWeight = variants.filter((v) => v.variantWeight === null || v.variantWeight === undefined || String(v.variantWeight).trim() === '');
+    //       if (missingWeight.length > 0) {
+    //         message.error(`${missingWeight.length} variant${missingWeight.length > 1 ? 's are' : ' is'} missing Weight (kg). Fill in weight for all variants before submitting.`);
+    //         return;
+    //       }
+    //     }
+    //   } catch {
+    //     // non-blocking — if fetch fails just proceed
+    //   }
+    // }
 
     setConfirmDialog({ kind: 'approve', count: pendingSelectedKeys.length });
   };
