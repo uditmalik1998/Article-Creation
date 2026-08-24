@@ -401,17 +401,27 @@ export class FlatExtractionController {
 
                 if (majorCategoryText) {
                     const mappedMcCode = getMcCodeByMajorCategory(majorCategoryText);
-                    if (!mappedMcCode) {
-                        res.status(400).json({
-                            success: false,
-                            error: `Invalid majorCategory '${majorCategoryText}'. Please use values from mc code list (mc des).`
+                    if (mappedMcCode) {
+                        data.majorCategory = majorCategoryText;
+                        data.mcCode = mappedMcCode;
+                        data.hsnTaxCode = getHsnCodeByMcCode(mappedMcCode) || null;
+                    } else {
+                        const fabMaster = await prisma.fabricArticleMaster.findFirst({
+                            where: { majCat: { equals: majorCategoryText, mode: 'insensitive' } },
+                            orderBy: { id: 'asc' },
+                            select: { mcCode: true, hsnCd: true },
                         });
-                        return;
+                        if (!fabMaster) {
+                            res.status(400).json({
+                                success: false,
+                                error: `Invalid majorCategory '${majorCategoryText}'. Please use values from mc code list (mc des).`
+                            });
+                            return;
+                        }
+                        data.majorCategory = majorCategoryText;
+                        data.mcCode = fabMaster.mcCode || null;
+                        data.hsnTaxCode = fabMaster.hsnCd || null;
                     }
-
-                    data.majorCategory = majorCategoryText;
-                    data.mcCode = mappedMcCode;
-                    data.hsnTaxCode = getHsnCodeByMcCode(mappedMcCode) || null;
                 } else {
                     data.majorCategory = null;
                     data.mcCode = null;

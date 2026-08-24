@@ -11,10 +11,6 @@ import {
   ChevronUp,
   ChevronDown,
   Shirt,
-  User as UserIcon,
-  Hash,
-  Wand2,
-  Briefcase,
   DollarSign,
   Plus,
   Minus,
@@ -86,6 +82,24 @@ const ChevronDownIcon = ChevronDown;
 // Module-level BOM cache (shared across card instances)
 const bomCache = new Map<string, Promise<Record<string, Record<string, string>>>>();
 
+// Module-level fabric grid values cache — fetched once for all cards
+// Shape: { [excelAttrName: string]: { code: string; fullForm: string }[] }
+// e.g. { M_FAB_DIV: [{code:'K', fullForm:'KNIT'}, ...], M_YARN: [...], ... }
+type FabGridValues = Record<string, { code: string; fullForm: string }[]>;
+let fabricGridPromise: Promise<FabGridValues> | null = null;
+const fetchFabricGridValues = (): Promise<FabGridValues> => {
+  if (!fabricGridPromise) {
+    const token = localStorage.getItem('authToken');
+    fabricGridPromise = fetch(`${APP_CONFIG.api.baseURL}/approver/fabric-grid-values`, {
+      headers: token ? { Authorization: `Bearer ${token}` } : {},
+    })
+      .then((r) => r.json())
+      .then((res) => (res?.data as FabGridValues) ?? {})
+      .catch(() => ({}));
+  }
+  return fabricGridPromise;
+};
+
 // Module-level segment range cache (shared across card instances, keyed by UPPER major category)
 type SegmentRange = { segment_type: string; min: number; max: number };
 const segmentRangeCache = new Map<string, SegmentRange[]>();
@@ -151,8 +165,6 @@ const SCHEMA_KEY_TO_ALL_SAP_KEYS: Record<string, string[]> = Object.entries(SAP_
 // even if they appear in the DB admin attribute list with a group assigned.
 const BOM_ONLY_SCHEMA_KEYS = new Set([
   'macro_mvgr', // IMP_ATBT-1 / macroMvgr  → BOM field
-  // imp_atrbt2 used to live here but main moved it to the BUSINESS group
-  // (4ec4bac "fields added"). Keeping it out so it renders in BUSINESS.
 ]);
 
 // Schema keys hidden from the article card entirely (display-only — the values
@@ -187,86 +199,9 @@ const ATTRIBUTE_GROUPS: { group: string; color: string; fields: { field: string;
       { field: 'weight', schemaKey: 'weight', freeText: true },
     ],
   },
-  {
-    group: 'BODY',
-    color: '#f6ffed',
-    fields: [
-      { field: 'collar', schemaKey: 'collar' },
-      { field: 'collarStyle', schemaKey: 'collar_style' },
-      { field: 'neckDetails', schemaKey: 'neck_details' },
-      { field: 'neck', schemaKey: 'neck' },
-      { field: 'placket', schemaKey: 'placket' },
-      { field: 'fatherBelt', schemaKey: 'father_belt' },
-      { field: 'childBelt', schemaKey: 'child_belt' },
-      { field: 'sleeve', schemaKey: 'sleeve' },
-      { field: 'sleeveFold', schemaKey: 'sleeve_fold' },
-      { field: 'mSet', schemaKey: 'set' },
-      { field: 'bottomFold', schemaKey: 'bottom_fold' },
-      { field: 'noOfPocket', schemaKey: 'no_of_pocket' },
-      { field: 'pocketType', schemaKey: 'pocket_type' },
-      { field: 'extraPocket', schemaKey: 'extra_pocket' },
-      { field: 'fit', schemaKey: 'fit' },
-      { field: 'pattern', schemaKey: 'body_style' },
-      { field: 'length', schemaKey: 'length' },
-    ],
-  },
-  {
-    group: 'VA ACC.',
-    color: '#fff7e6',
-    fields: [
-      { field: 'drawcord', schemaKey: 'drawcord' },
-      { field: 'dcShape', schemaKey: 'dc_shape' },
-      { field: 'button', schemaKey: 'button' },
-      { field: 'btnColour', schemaKey: 'btn_colour' },
-      { field: 'zipper', schemaKey: 'zipper' },
-      { field: 'zipColour', schemaKey: 'zip_colour' },
-      { field: 'patchesType', schemaKey: 'patches_type' },
-      { field: 'patches', schemaKey: 'patches' },
-      { field: 'htrfType', schemaKey: 'htrf_type' },
-      { field: 'htrfStyle', schemaKey: 'htrf_style' },
-    ],
-  },
-  {
-    group: 'VA PRCS',
-    color: '#fff0f6',
-    fields: [
-      { field: 'printType', schemaKey: 'print_type' },
-      { field: 'printStyle', schemaKey: 'print_style' },
-      { field: 'printPlacement', schemaKey: 'print_placement' },
-      { field: 'embroidery', schemaKey: 'embroidery' },
-      { field: 'embroideryType', schemaKey: 'embroidery_type' },
-      { field: 'embPlacement', schemaKey: 'emb_placement' },
-      { field: 'wash', schemaKey: 'wash' },
-    ],
-  },
-  {
-    group: 'BUSINESS',
-    color: '#f9f0ff',
-    fields: [
-      { field: 'ageGroup', schemaKey: 'age_group' },
-      { field: 'articleFashionType', schemaKey: 'article_fashion_type' },
-      { field: 'mNoOfSize', schemaKey: 'no_of_size' },
-      { field: 'mNoOfClr', schemaKey: 'no_of_clr' },
-      { field: 'impAtrbt2', schemaKey: 'imp_atrbt2' },
-      { field: 'segment', schemaKey: 'segment', freeText: true },
-    ],
-  },
 ];
 
 // REFERENCE ARTICLE DESC source fields, in the user-confirmed sequence.
-// These item keys span several cards (FAB / BODY / VA PRCS):
-//   M_FAB_MAIN_MVGR_2 → M_WEAVE_02 → M_BLT_TYPE → M_BLT_STYLE →
-//   M_FIT → M_BODY_STYLE → M_PRINT_PLACEMENT → M_WASH
-const REF_DESC_FIELDS = [
-  'fabricMainMvgr', // M_FAB_MAIN_MVGR_2
-  'mFab2',          // M_WEAVE_02
-  'fatherBelt',     // M_BLT_TYPE
-  'childBelt',      // M_BLT_STYLE
-  'fit',            // M_FIT
-  'pattern',        // M_BODY_STYLE
-  'printPlacement', // M_PRINT_PLACEMENT
-  'wash',           // M_WASH
-];
 // color_master options for the BOM Colour dropdown — fetched once, cached across cards.
 let _masterColorsCache: { code: string; name: string }[] | null = null;
 
@@ -329,10 +264,6 @@ const ColorSelect: React.FC<{
 
 const GROUP_COLORS: Record<string, string> = {
   FAB: '#e6f4ff',
-  BODY: '#f6ffed',
-  'VA ACC.': '#fff7e6',
-  'VA PRCS': '#fff0f6',
-  BUSINESS: '#f9f0ff',
 };
 const GROUP_ORDER = ['FAB'];
 
@@ -348,29 +279,17 @@ const FAB_PRIORITY_KEYS = ['fab_div', 'yarn_01', 'main_mvgr', 'fabric_main_mvgr'
 // ─── Redesign tokens — header/icon palette per group ──────────────────────────
 const GROUP_LABELS: Record<string, string> = {
   FAB: 'Construction & Fabric',
-  BODY: 'Body & Construction',
-  'VA ACC.': 'Trims & Accessories',
-  'VA PRCS': 'Finishing & Process',
-  BUSINESS: 'Business & Misc',
 };
 
 const GROUP_ICONS: Record<string, React.ReactNode> = {
   FAB: <Shirt className="h-3.5 w-3.5" />,
-  BODY: <UserIcon className="h-3.5 w-3.5" />,
-  'VA ACC.': <Hash className="h-3.5 w-3.5" />,
-  'VA PRCS': <Wand2 className="h-3.5 w-3.5" />,
-  BUSINESS: <Briefcase className="h-3.5 w-3.5" />,
 };
 
 // Group surfaces use saturated 400-tier border stops so the card edges
 // read confidently against the page. BUSINESS shifted from purple
 // (palette violation) to slate to fit the locked slate+coral palette.
 const GROUP_HEADER_STYLE: Record<string, { bg: string; fg: string; border: string }> = {
-  FAB: { bg: '#fff7ed', fg: '#9a3412', border: '#fb923c' },        // amber
-  BODY: { bg: '#ecfdf5', fg: '#065f46', border: '#34d399' },       // emerald
-  'VA ACC.': { bg: '#fef3c7', fg: '#854d0e', border: '#facc15' },  // yellow
-  'VA PRCS': { bg: '#fff1f2', fg: '#9f1239', border: '#fb7185' },  // rose
-  BUSINESS: { bg: '#f1f5f9', fg: '#1e293b', border: '#64748b' },   // slate (was purple)
+  FAB: { bg: '#fff7ed', fg: '#9a3412', border: '#fb923c' },
 };
 
 type CardGroup = typeof ATTRIBUTE_GROUPS[number];
@@ -402,7 +321,7 @@ function buildCardGroups(entries: { key: string; type: string; group: string }[]
       fields,
     };
   });
-  return built.length > 0 ? built : ATTRIBUTE_GROUPS;
+  return built.length > 0 ? built : ATTRIBUTE_GROUPS.filter((g) => GROUP_ORDER.includes(g.group));
 }
 
 export interface ApproverArticleListProps {
@@ -428,6 +347,12 @@ export interface ApproverArticleListProps {
   onRefresh: () => void;
   pathType?: 'old' | 'new' | 'rejected' | 'created' | 'failed';
   hideGroups?: string[];
+  fabHierarchy?: {
+    divisions: string[];
+    subDivsByDiv: Record<string, string[]>;
+    majCatsBySubDiv: Record<string, string[]>;
+    mcDesByMajCat: Record<string, string[]>;
+  };
   /** When true, always use the static ATTRIBUTE_GROUPS definition instead of the API-built card groups. */
   forceStaticGroups?: boolean;
   serverPagination: {
@@ -463,6 +388,7 @@ const ArticleCard = React.memo(
     cardGroups,
     pathType,
     hideGroups,
+    fabHierarchy,
   }: {
     item: ApproverItem;
     isSelected: boolean;
@@ -478,6 +404,11 @@ const ArticleCard = React.memo(
     cardGroups: CardGroup[];
     pathType?: 'old' | 'new' | 'rejected' | 'created' | 'failed';
     hideGroups?: string[];
+    fabHierarchy?: {
+      divisions: string[];
+      subDivsByDiv: Record<string, string[]>;
+      majCatsBySubDiv: Record<string, string[]>;
+    };
   }) => {
     const [showVariants, setShowVariants] = useState(false);
     const [imgModalOpen, setImgModalOpen] = useState(false);
@@ -490,6 +421,8 @@ const ArticleCard = React.memo(
     const [imgRotation, setImgRotation] = useState(0);
     const [catOpen, setCatOpen] = useState(false);
     const [catSearch, setCatSearch] = useState('');
+    const [mcDesOpen, setMcDesOpen] = useState(false);
+    const [mcDesSearch, setMcDesSearch] = useState('');
     // Search term for the attribute-value dropdown. A single shared term is
     // enough because only one attribute (editingField) is open at a time.
     const [attrSearch, setAttrSearch] = useState('');
@@ -527,32 +460,6 @@ const ArticleCard = React.memo(
       });
       // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [item]);
-
-    // Auto-persist MRP when null in DB but rate is present
-    React.useEffect(() => {
-      if (item.approvalStatus === 'APPROVED' || item.approvalStatus === 'REJECTED') return;
-      try {
-        const raw = localStorage.getItem('user');
-        if (raw) {
-          const u = JSON.parse(raw);
-          if (u.role !== 'ADMIN' && u.division && item.division && u.division !== item.division) return;
-        }
-      } catch {
-        /* ignore */
-      }
-      const storedMrp = parseFloat(String((item as any).mrp ?? ''));
-      const rate = parseFloat(String((item as any).rate ?? ''));
-      if (isNaN(rate) || rate <= 0) return;
-      const calculatedMrp = Math.ceil((rate * 1.47) / 50) * 50;
-      // Skip if MRP is already saved and matches what we'd calculate — no API call needed
-      if (!isNaN(storedMrp) && storedMrp > 0 && storedMrp === calculatedMrp) return;
-      // Skip if MRP is already saved as any valid positive number (user may have set it manually)
-      if (!isNaN(storedMrp) && storedMrp > 0) return;
-      const calculated = String(calculatedMrp);
-      setLocalValues((prev) => ({ ...prev, mrp: calculated }));
-      onSave({ ...item, mrp: calculated } as ApproverItem, { mrp: calculated }, { silent: true });
-      // eslint-disable-next-line react-hooks/exhaustive-deps
-    }, [item.id]);
 
     const effectiveMajCat = useMemo(() => {
       const raw = (localValues['majorCategory'] !== undefined ? localValues['majorCategory'] : item.majorCategory) || '';
@@ -592,6 +499,9 @@ const ArticleCard = React.memo(
     const [gridReady, setGridReady] = useState(() => isMajCatGridLoadedFor(effectiveMajCat));
     // Tracks when the mandatory grid (for THIS article's category) has loaded
     const [mandatoryGridReady, setMandatoryGridReady] = useState(() => isMandatoryGridLoadedFor(effectiveMajCat));
+    // Fabric attribute grid values from fabric_maj_cat_grid_values table
+    const [fabricGrid, setFabricGrid] = useState<FabGridValues>({});
+    const [fabricGridReady, setFabricGridReady] = useState(false);
 
     const attributeFields = useMemo(
       () =>
@@ -672,8 +582,15 @@ const ArticleCard = React.memo(
         // grid has no values for this category+attribute the dropdown stays empty
         // (and the field is hidden unless the mandatory grid forces it).
         const gridExcelAttr = SCHEMA_KEY_TO_EXCEL_ATTR[af.schemaKey];
-        const gridOnlyVals = gridExcelAttr ? getMajCatGridEntry(effectiveMajCat, gridExcelAttr) : null;
-        const values: AttrValue[] = (gridOnlyVals ?? []).map((v) => ({ shortForm: v, fullForm: v }));
+        // FAB group: values come from fabric_maj_cat_grid_values (universal, not per-major-category)
+        // Other groups: values come from the garment maj_cat_grid per major category
+        const fabGridVals = af.group === 'FAB' && gridExcelAttr && fabricGridReady
+          ? (fabricGrid[gridExcelAttr] ?? null)
+          : null;
+        const gridOnlyVals = fabGridVals ?? (gridExcelAttr ? getMajCatGridEntry(effectiveMajCat, gridExcelAttr) : null);
+        const values: AttrValue[] = fabGridVals
+          ? fabGridVals.map((v) => ({ shortForm: v.code, fullForm: v.fullForm }))
+          : (gridOnlyVals ?? []).map((v) => ({ shortForm: v as string, fullForm: v as string }));
 
         if (gridsReady && catHasAnyGridData) {
           // ── Grids loaded AND category is configured: apply 3-tier filtering ──
@@ -731,7 +648,7 @@ const ArticleCard = React.memo(
 
       return { visibleAttrs: visible, mandatoryKeys: mandatory };
       // eslint-disable-next-line react-hooks/exhaustive-deps
-    }, [effectiveMajCat, cacheReady, catConfigReady, gridReady, mandatoryGridReady, attributeFields, localValues]);
+    }, [effectiveMajCat, cacheReady, catConfigReady, gridReady, mandatoryGridReady, attributeFields, localValues, fabricGrid, fabricGridReady]);
 
     const [editingField, setEditingField] = useState<string | null>(null);
 
@@ -770,6 +687,14 @@ const ArticleCard = React.memo(
         .then(() => setCatConfigReady(true))
         .catch(() => setCatConfigReady(true));
     }, [effectiveMajCat]);
+
+    // Fetch fabric attribute grid values (M_FAB_DIV, M_YARN, etc.) from fabric_maj_cat_grid_values
+    useEffect(() => {
+      fetchFabricGridValues().then((grid) => {
+        setFabricGrid(grid);
+        setFabricGridReady(true);
+      });
+    }, []);
 
     // Preload the major-category grid (dropdown values) for THIS article's
     // category only — not the entire grid. Re-runs if the category changes.
@@ -858,11 +783,6 @@ const ArticleCard = React.memo(
         ),
       [cardGroups],
     );
-    const BODY_FIELDS = useMemo(
-      () => (cardGroups.find((g) => g.group === 'BODY')?.fields ?? []).filter((f) => !f.freeText),
-      [cardGroups],
-    );
-
     const getFieldVal = useCallback(
       (field: string) => {
         const v = localValues[field] !== undefined ? localValues[field] : (item as any)[field];
@@ -880,22 +800,12 @@ const ArticleCard = React.memo(
           return v ? String(v).trim() : null;
         };
         const fabParts = FAB_FIELDS.map((f) => getVal(f.field)).filter(Boolean) as string[];
-        const bodyParts = BODY_FIELDS.map((f) => getVal(f.field)).filter(Boolean) as string[];
         const newFabDesc = fabParts.length > 0 ? fabParts.join('-').slice(0, 40) : null;
-        const newBodyDesc = bodyParts.length > 0 ? bodyParts.join('-').slice(0, 40) : null;
-        // REFERENCE ARTICLE DESC — built like ARTICLE DESC but from a fixed,
-        // user-confirmed sequence spanning multiple cards:
-        //   M_FAB_MAIN_MVGR_2 → M_WEAVE_02 → M_BLT_TYPE → M_BLT_STYLE →
-        //   M_FIT → M_BODY_STYLE → M_PRINT_PLACEMENT → M_WASH
-        const refParts = REF_DESC_FIELDS.map((f) => getVal(f)).filter(Boolean) as string[];
-        const newRefDesc = refParts.length > 0 ? refParts.join('-').slice(0, 40) : null;
         const updates: Record<string, string | null> = {};
         if (newFabDesc !== null && newFabDesc !== prev['fabricArticleDescription']) updates['fabricArticleDescription'] = newFabDesc;
-        if (newBodyDesc !== null && newBodyDesc !== prev['bodyArticleDescription']) updates['bodyArticleDescription'] = newBodyDesc;
-        if (newRefDesc !== null && newRefDesc !== prev['referenceArticleDescription']) updates['referenceArticleDescription'] = newRefDesc;
         return Object.keys(updates).length > 0 ? { ...prev, ...updates } : prev;
       });
-    }, [item, FAB_FIELDS, BODY_FIELDS]);
+    }, [item, FAB_FIELDS]);
 
     // APPROVED/REJECTED articles are normally read-only. EXCEPTION: on the
     // Created page (modify mode) we keep them editable so the user can stage
@@ -959,18 +869,8 @@ const ArticleCard = React.memo(
       }
     }, [item.id]);
 
-    const calcMrpFromRate = (rate: number): number => Math.ceil((rate * 1.47) / 50) * 50;
-
     const getValue = (field: string): string | null => {
       if (field in localValues) return localValues[field];
-      if (field === 'mrp') {
-        const stored = (item as any).mrp;
-        const storedNum = parseFloat(String(stored ?? ''));
-        if (isNaN(storedNum) || storedNum <= 1) {
-          const rate = parseFloat(String((item as any).rate ?? ''));
-          if (!isNaN(rate) && rate > 0) return String(calcMrpFromRate(rate));
-        }
-      }
       return (item as any)[field] ?? null;
     };
 
@@ -1032,20 +932,9 @@ const ArticleCard = React.memo(
         return;
       }
       const updates: Record<string, string | null> = { [field]: value };
-      if (field === 'rate') {
-        const rate = parseFloat(String(value ?? ''));
-        if (!isNaN(rate) && rate > 0) updates['mrp'] = String(calcMrpFromRate(rate));
-      }
       if (field === 'mrp') {
         const seg = computeSegmentFromMrp(value, segmentRangesRef.current);
         if (seg) updates['segment'] = seg;
-      }
-      if (field === 'rate') {
-        const newMrp = updates['mrp'];
-        if (newMrp) {
-          const seg = computeSegmentFromMrp(newMrp, segmentRangesRef.current);
-          if (seg) updates['segment'] = seg;
-        }
       }
       if (field === 'majorCategory' && value) {
         const newMcCode = getMcCodeByMajorCategory(value);
@@ -1096,17 +985,6 @@ const ArticleCard = React.memo(
       groupMap[attr.group].attrs.push(attr);
     }
     const activeGroups = ATTRIBUTE_GROUPS.filter((g) => groupMap[g.group] && !hideGroups?.includes(g.group));
-
-    const rateVal = String(getValue('rate') ?? '').trim();
-    const mrpVal = String(getValue('mrp') ?? '').trim();
-    const rateNum = parseFloat(rateVal);
-    const mrpNum = parseFloat(mrpVal);
-    const markdown =
-      !isNaN(rateNum) && !isNaN(mrpNum) && mrpNum > 0 ? (((mrpNum - rateNum) / mrpNum) * 100).toFixed(1) + '%' : '—';
-    const afterTax =
-      !isNaN(rateNum) && !isNaN(mrpNum) && mrpNum > 0
-        ? (((mrpNum - rateNum * 1.05) / mrpNum) * 100).toFixed(1) + '%'
-        : '—';
 
     const renderFabBodyField = (
       field: string,
@@ -1167,6 +1045,7 @@ const ArticleCard = React.memo(
 
     const HEADER_FIELDS = [
       { label: 'MAJOR CATEGORY', field: 'majorCategory', editable: true, required: false, color: '#2f54eb' },
+      { label: 'MC DESCRIPTION', field: 'mcDescription', editable: true, required: false, color: '#7c3aed' },
       {
         label: 'ARTICLE NUMBER',
         field: 'articleNumber',
@@ -1246,31 +1125,84 @@ const ArticleCard = React.memo(
                       />
                     </div>
                     <div className="max-h-56 overflow-y-auto py-1">
-                      {getMajorCategoriesByDivision(item.division || '')
-                        .filter((cat) =>
-                          cat.toLowerCase().includes(catSearch.toLowerCase()),
-                        )
-                        .map((cat) => (
-                          <button
-                            key={cat}
-                            type="button"
-                            onClick={() => {
-                              handleSave(field, cat);
-                              setCatOpen(false);
-                              setCatSearch('');
-                            }}
-                            className="w-full px-3 py-1.5 text-left text-xs hover:bg-accent hover:text-accent-foreground"
-                          >
-                            {cat}
-                          </button>
-                        ))}
-                      {getMajorCategoriesByDivision(item.division || '').filter((cat) =>
-                        cat.toLowerCase().includes(catSearch.toLowerCase()),
-                      ).length === 0 && (
-                        <div className="px-3 py-2 text-xs text-muted-foreground">
-                          No categories found
-                        </div>
-                      )}
+                      {(() => {
+                        const effectiveSubDiv = (localValues['subDivision'] ?? item.subDivision) || '';
+                        const effectiveDiv   = (localValues['division']    ?? item.division)    || '';
+                        let cats: string[] = [];
+                        if (effectiveSubDiv && fabHierarchy?.majCatsBySubDiv[effectiveSubDiv]) {
+                          cats = fabHierarchy.majCatsBySubDiv[effectiveSubDiv];
+                        } else if (effectiveDiv && fabHierarchy?.subDivsByDiv[effectiveDiv]) {
+                          cats = fabHierarchy.subDivsByDiv[effectiveDiv]
+                            .flatMap(sd => fabHierarchy!.majCatsBySubDiv[sd] ?? []);
+                        } else {
+                          cats = Object.values(fabHierarchy?.majCatsBySubDiv ?? {}).flat();
+                        }
+                        const unique = Array.from(new Set(cats)).sort();
+                        const filtered = unique.filter(c => c.toLowerCase().includes(catSearch.toLowerCase()));
+                        return filtered.length === 0
+                          ? <div className="px-3 py-2 text-xs text-muted-foreground">No categories found</div>
+                          : filtered.map(cat => (
+                            <button
+                              key={cat}
+                              type="button"
+                              onClick={() => { handleSave(field, cat); setCatOpen(false); setCatSearch(''); }}
+                              className="w-full px-3 py-1.5 text-left text-xs hover:bg-accent hover:text-accent-foreground"
+                            >
+                              {cat}
+                            </button>
+                          ));
+                      })()}
+                    </div>
+                  </PopoverContent>
+                </Popover>
+              ) : isEditingThis && field === 'mcDescription' ? (
+                <Popover
+                  open={mcDesOpen}
+                  onOpenChange={(o) => {
+                    setMcDesOpen(o);
+                    if (!o) setMcDesSearch('');
+                  }}
+                >
+                  <PopoverTrigger asChild>
+                    <button
+                      type="button"
+                      className="flex h-7 w-full items-center justify-between rounded border border-input bg-background px-2 text-xs hover:border-ring focus:outline-none focus:ring-1 focus:ring-ring"
+                    >
+                      <span className="truncate text-left">{displayVal || 'Select...'}</span>
+                      <ChevronDownIcon className="ml-1 h-3 w-3 shrink-0 text-muted-foreground" />
+                    </button>
+                  </PopoverTrigger>
+                  <PopoverContent className="w-64 p-0" align="start">
+                    <div className="flex items-center border-b px-2 py-1.5">
+                      <Search className="mr-1.5 h-3.5 w-3.5 shrink-0 text-muted-foreground" />
+                      <input
+                        autoFocus
+                        value={mcDesSearch}
+                        onChange={(e) => setMcDesSearch(e.target.value)}
+                        placeholder="Search MC description..."
+                        className="flex-1 bg-transparent text-xs outline-none placeholder:text-muted-foreground"
+                      />
+                    </div>
+                    <div className="max-h-56 overflow-y-auto py-1">
+                      {(() => {
+                        const currentMajCat = (localValues['majorCategory'] ?? item.majorCategory) || '';
+                        const opts = (currentMajCat && fabHierarchy?.mcDesByMajCat[currentMajCat]) ?? [];
+                        const filtered = opts.filter(d => d.toLowerCase().includes(mcDesSearch.toLowerCase()));
+                        return filtered.length === 0
+                          ? <div className="px-3 py-2 text-xs text-muted-foreground">
+                              {currentMajCat ? 'No descriptions found' : 'Select a major category first'}
+                            </div>
+                          : filtered.map(d => (
+                            <button
+                              key={d}
+                              type="button"
+                              onClick={() => { handleSave(field, d); setMcDesOpen(false); setMcDesSearch(''); }}
+                              className="w-full px-3 py-1.5 text-left text-xs hover:bg-accent hover:text-accent-foreground"
+                            >
+                              {d}
+                            </button>
+                          ));
+                      })()}
                     </div>
                   </PopoverContent>
                 </Popover>
@@ -1615,9 +1547,9 @@ const ArticleCard = React.memo(
                       <SelectValue placeholder="Select division" />
                     </SelectTrigger>
                     <SelectContent>
-                      <SelectItem value="LADIES">LADIES</SelectItem>
-                      <SelectItem value="MENS">MENS</SelectItem>
-                      <SelectItem value="KIDS">KIDS</SelectItem>
+                      {(fabHierarchy?.divisions ?? []).map((d) => (
+                        <SelectItem key={d} value={d}>{d}</SelectItem>
+                      ))}
                     </SelectContent>
                   </Select>
                 ) : (
@@ -1648,14 +1580,11 @@ const ArticleCard = React.memo(
                     <SelectContent>
                       {(() => {
                         const effectiveDiv = (localValues['division'] ?? item.division) || '';
-                        let hierKey = '';
-                        if (effectiveDiv.match(/LADIES|WOMEN/i)) hierKey = 'Ladies';
-                        else if (effectiveDiv.match(/KIDS/i)) hierKey = 'Kids';
-                        else if (effectiveDiv.match(/MEN/i)) hierKey = 'MENS';
-                        return (SIMPLIFIED_HIERARCHY[hierKey] || []).map((sd: string) => (
-                          <SelectItem key={sd} value={sd}>
-                            {sd}
-                          </SelectItem>
+                        const opts = (effectiveDiv && fabHierarchy?.subDivsByDiv[effectiveDiv])
+                          ? fabHierarchy.subDivsByDiv[effectiveDiv]
+                          : Object.values(fabHierarchy?.subDivsByDiv ?? {}).flat();
+                        return opts.map((sd: string) => (
+                          <SelectItem key={sd} value={sd}>{sd}</SelectItem>
                         ));
                       })()}
                     </SelectContent>
@@ -1713,8 +1642,7 @@ const ArticleCard = React.memo(
                 </span>
                 {item.vendorName && <span className="text-white/40">·</span>}
                 {item.vendorName}
-                {item.rate != null && <>&nbsp;·&nbsp;₹{item.rate}</>}
-                {item.mrp != null && Number(item.mrp) > 1 && <> / ₹{item.mrp}</>}
+                {item.mrp != null && Number(item.mrp) > 1 && <> · ₹{item.mrp}</>}
               </span>
             </div>
             <div className="flex shrink-0 items-center gap-2">
@@ -2049,97 +1977,6 @@ const ArticleCard = React.memo(
                                 );
                               })()}
 
-                            {/* BODY: body article + description + button */}
-                            {g.group === 'BODY' &&
-                              (() => {
-                                const renderField = (
-                                  field: string,
-                                  label: string,
-                                  autoFillFn?: () => void,
-                                  maxLen?: number,
-                                ) => {
-                                  const displayVal =
-                                    localValues[field] !== undefined ? localValues[field] : (item as any)[field];
-                                  const isEditingThis = editingField === `bot_${field}`;
-                                  const saveVal = (raw: string | null) => {
-                                    const v = raw || null;
-                                    handleSave(field, maxLen && v ? v.slice(0, maxLen) : v);
-                                  };
-                                  return (
-                                    <div
-                                      key={field}
-                                      className="mt-1 border-t border-border bg-muted/30 px-2 py-1.5"
-                                      style={{ cursor: isLocked ? 'default' : 'pointer' }}
-                                      onClick={() => {
-                                        if (!isLocked && !isEditingThis) setEditingField(`bot_${field}`);
-                                      }}
-                                    >
-                                      <div className="mb-0.5 flex items-center justify-between gap-1">
-                                        <span className="text-[9px] font-semibold uppercase tracking-wider text-muted-foreground">
-                                          {label}
-                                        </span>
-                                        {autoFillFn && !isLocked && (
-                                          <button
-                                            type="button"
-                                            className="text-[9px] text-slate-700 underline hover:text-[#FF6F61]"
-                                            onClick={(e) => {
-                                              e.stopPropagation();
-                                              autoFillFn();
-                                            }}
-                                          >
-                                            Auto-fill
-                                          </button>
-                                        )}
-                                      </div>
-                                      {isEditingThis ? (
-                                        <Input
-                                          autoFocus
-                                          defaultValue={displayVal || ''}
-                                          maxLength={maxLen}
-                                          className="h-6 px-1 text-[11px]"
-                                          onKeyDown={(e) =>
-                                            e.key === 'Enter' && saveVal((e.target as HTMLInputElement).value)
-                                          }
-                                          onBlur={(e) => saveVal(e.target.value)}
-                                        />
-                                      ) : (
-                                        <div
-                                          className="truncate text-[11px]"
-                                          style={{ color: displayVal ? '#111827' : '#9ca3af' }}
-                                        >
-                                          {displayVal || (isLocked ? '—' : 'Click to fill')}
-                                        </div>
-                                      )}
-                                    </div>
-                                  );
-                                };
-                                const bodyAutoFill = () => {
-                                  const parts = BODY_FIELDS.filter((bf) => mandatoryKeys.has(bf.schemaKey))
-                                    .map((bf) => {
-                                      const v = localValues[bf.field] !== undefined ? localValues[bf.field] : (item as any)[bf.field];
-                                      return v ? String(v).trim() : null;
-                                    })
-                                    .filter(Boolean);
-                                  if (parts.length > 0)
-                                    handleSave('bodyArticleDescription', parts.join('-').slice(0, 40));
-                                };
-                                return (
-                                  <>
-                                    {renderField('bodyArticle', 'BODY ARTICLE NO.')}
-                                    {renderField('bodyArticleDescription', 'BODY ARTICLE DESC', bodyAutoFill, 40)}
-                                    <div className="border-t border-border px-2 py-1.5">
-                                      <Button
-                                        size="sm"
-                                        onClick={() => onCreateBodyArticle(item)}
-                                        className="h-7 w-full border border-purple-300 bg-purple-50 text-[11px] font-medium text-purple-700 hover:bg-purple-100"
-                                      >
-                                        <LayoutGrid />
-                                        Create Body Article
-                                      </Button>
-                                    </div>
-                                  </>
-                                );
-                              })()}
                           </div>
                         )}
                       </div>
@@ -2162,22 +1999,15 @@ const ArticleCard = React.memo(
                     </div>
                     <div className="space-y-0 p-1">
                       {[
-                        { label: 'RATE / COST', field: 'rate', editable: true, mandatory: true, isDropdown: false, isColor: false, isMarkdown: false },
                         { label: 'MRP', field: 'mrp', editable: true, mandatory: true, isDropdown: false, isColor: false, isMarkdown: false },
-                        { label: 'Base Color', field: 'colour', editable: true, mandatory: true, isDropdown: true, isColor: true, isMarkdown: false },
+                        { label: 'Base Color', field: 'colour', editable: true, mandatory: false, isDropdown: true, isColor: true, isMarkdown: false },
                         { label: 'Secondary Color', field: 'secondaryColour', editable: true, mandatory: false, isDropdown: true, isColor: true, isMarkdown: false },
                         { label: 'ARTICLE FASHION TYPE', field: 'articleFashionType', editable: true, mandatory: true, isDropdown: true, isColor: false, isMarkdown: false, boldLabel: true },
                         { label: 'SEGMENT', field: 'segment', editable: true, mandatory: true, isDropdown: false, isColor: false, isMarkdown: false, boldLabel: true },
-                        { label: 'MARKDOWN', field: '_markdown', editable: false, mandatory: false, isDropdown: false, isColor: false, isMarkdown: true, isAfterTax: false, boldLabel: true },
-                        { label: 'AFTER TAX', field: '_afterTax', editable: false, mandatory: false, isDropdown: false, isColor: false, isMarkdown: false, isAfterTax: true, boldLabel: true },
                       ].map((bom) => {
                         const isEditingBom = editingField === `bom_${bom.field}`;
                         const bomLocked = isFieldLocked(bom.field);
-                        const val = bom.isMarkdown
-                          ? markdown
-                          : bom.isAfterTax
-                          ? afterTax
-                          : String(getValue(bom.field) ?? '').trim() || '—';
+                        const val = String(getValue(bom.field) ?? '').trim() || '—';
                         const isEmpty = val === '—';
                         const dropdownOptions: string[] = bom.isDropdown
                           ? bom.field === 'impAtrbt2'
@@ -2256,14 +2086,11 @@ const ArticleCard = React.memo(
                                 <span
                                   className="block truncate text-[11px]"
                                   style={{
-                                    color: bom.isMarkdown
-                                      ? '#7c3aed'
-                                      : bom.mandatory && isEmpty && !isLocked
+                                    color: bom.mandatory && isEmpty && !isLocked
                                       ? '#ea580c'
                                       : isEmpty
                                       ? '#9ca3af'
                                       : '#111827',
-                                    fontWeight: bom.isMarkdown ? 700 : 400,
                                     fontStyle: bom.mandatory && isEmpty && !isLocked ? 'italic' : 'normal',
                                   }}
                                 >
@@ -2479,6 +2306,7 @@ export const FabricArticleList: React.FC<ApproverArticleListProps> = ({
   hideGroups,
   forceStaticGroups,
   serverPagination,
+  fabHierarchy,
 }) => {
   const [cardGroups, setCardGroups] = useState<CardGroup[]>(() => {
     if (forceStaticGroups) return ATTRIBUTE_GROUPS;
@@ -2563,6 +2391,7 @@ export const FabricArticleList: React.FC<ApproverArticleListProps> = ({
           cardGroups={cardGroups}
           pathType={pathType}
           hideGroups={hideGroups}
+          fabHierarchy={fabHierarchy}
         />
       ))}
     </div>

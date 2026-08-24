@@ -223,4 +223,18 @@ router.get('/modify-logs',               h(adminController.getModifyLogs));
 router.get('/national-grid',             h(adminController.getNationalGrid));
 router.post('/national-grid/import',     h(adminController.importNationalGrid));
 
+// ═══════════════════════════════════════════════════════
+// FABRIC ARTICLE DATA (ADMIN) — fabric_article_data
+// ═══════════════════════════════════════════════════════
+router.get('/fabric-article-data/status',   h(adminController.getFabricArticleDataStatus));
+router.get('/fabric-article-data/template', h(adminController.downloadFabricArticleDataTemplate));
+router.post('/fabric-article-data/upload',  excelUpload.single('file'), h(adminController.uploadFabricArticleData));
+
+// ═══════════════════════════════════════════════════════
+// FABRIC ARTICLE MASTER (ADMIN) — fabric_article_master
+// ═══════════════════════════════════════════════════════
+router.get('/fabric-article-master/status',   h(adminController.getFabricArticleMasterStatus));
+router.get('/fabric-article-master/template', h(adminController.downloadFabricArticleMasterTemplate));
+router.post('/fabric-article-master/upload',  excelUpload.single('file'), h(adminController.uploadFabricArticleMaster));
+
 export default router;

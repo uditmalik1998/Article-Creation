@@ -4415,3 +4415,406 @@ export const uploadSegmentMaster = async (req: Request, res: Response): Promise<
     res.status(500).json({ success: false, error: error.message });
   }
 };
+
+// ═══════════════════════════════════════════════════════
+// FABRIC ARTICLE DATA (fabric_article_data)
+// ═══════════════════════════════════════════════════════
+
+/**
+ * GET /api/admin/fabric-article-data/status
+ */
+export const getFabricArticleDataStatus = async (_req: Request, res: Response): Promise<void> => {
+  try {
+    const rows = await prisma.$queryRaw<{ total: bigint; synced: bigint; pending: bigint }[]>`
+      SELECT COUNT(*)::bigint                                                          AS total,
+             COUNT(*) FILTER (WHERE UPPER(TRIM(sap_sync_status)) = 'SYNCED')::bigint  AS synced,
+             COUNT(*) FILTER (WHERE UPPER(TRIM(approval_status)) = 'PENDING')::bigint AS pending
+      FROM fabric_article_data
+    `;
+    const r = rows[0] ?? { total: 0n, synced: 0n, pending: 0n };
+    res.json({
+      success: true,
+      data: { total: Number(r.total), synced: Number(r.synced), pending: Number(r.pending) },
+    });
+  } catch (error: any) {
+    console.error('[FabricArticleData] Status error:', error);
+    res.status(500).json({ success: false, error: error.message });
+  }
+};
+
+/**
+ * GET /api/admin/fabric-article-data/template
+ * Returns a blank .xlsx template with all uploadable columns.
+ */
+export const downloadFabricArticleDataTemplate = async (_req: Request, res: Response): Promise<void> => {
+  try {
+    const ExcelJS = require('exceljs');
+    const wb = new ExcelJS.Workbook();
+    const ws = wb.addWorksheet('FABRIC ARTICLE DATA');
+
+    ws.mergeCells('A1:X1');
+    const titleCell = ws.getCell('A1');
+    titleCell.value = 'FABRIC ARTICLE DATA UPLOAD';
+    titleCell.font = { bold: true, size: 13 };
+    titleCell.alignment = { horizontal: 'center' };
+    ws.getRow(1).height = 22;
+
+    ws.addRow([]);
+
+    const headers = [
+      'FABRIC_ARTICLE_NUMBER', 'FABRIC_ARTICLE_DESC',
+      'DIVISION', 'SUB_DIVISION', 'MAJOR_CATEGORY', 'VENDOR_NAME', 'VENDOR_CODE',
+      'M_FAB_DIV', 'M_YARN', 'M_FAB_MAIN_MVGR_1', 'M_FAB_MAIN_MVGR_2',
+      'M_CONSTRUCTION', 'M_OUNZ', 'M_WIDTH', 'M_WEAVE_01', 'M_WEAVE_02',
+      'M_COUNT', 'M_GSM', 'M_COMPOSITION', 'M_FINISH', 'M_LYCRA',
+      'APPROVAL_STATUS', 'SAP_SYNC_STATUS', 'USER_NAME',
+    ];
+    const headerRow = ws.addRow(headers);
+    headerRow.eachCell((cell: any) => {
+      cell.font = { bold: true, color: { argb: 'FFFFFFFF' } };
+      cell.fill = { type: 'pattern', pattern: 'solid', fgColor: { argb: 'FF1565C0' } };
+      cell.alignment = { horizontal: 'center' };
+    });
+
+    ws.addRow([]);
+
+    // Sample row
+    ws.addRow([
+      'FAB-001', 'KNIT FABRIC SLD',
+      'K', 'K_PC', 'K_PC_FLC', 'Sample Vendor', 'V001',
+      'KNT', 'CTO', 'FAB01', '', 'PLAIN', '180', '', 'P/W', '',
+      '30S', '180', '100% COTTON', 'NONE', 'N',
+      'PENDING', 'NOT_SYNCED', 'admin',
+    ]);
+
+    ws.columns = headers.map(() => ({ width: 22 }));
+
+    ws.addRow([]);
+    const noteRow = ws.addRow([
+      '⚠ NOTE: Headers in Row 3, data from Row 5. APPROVAL_STATUS: PENDING/APPROVED/REJECTED. SAP_SYNC_STATUS: NOT_SYNCED/SYNCED/FAILED. Each row is inserted as a new record.',
+    ]);
+    ws.mergeCells(`A${noteRow.number}:X${noteRow.number}`);
+    noteRow.getCell(1).font = { italic: true, size: 10 };
+    noteRow.getCell(1).fill = { type: 'pattern', pattern: 'solid', fgColor: { argb: 'FFFFF3CD' } };
+
+    res.setHeader('Content-Type', 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');
+    res.setHeader('Content-Disposition', 'attachment; filename="FABRIC_ARTICLE_DATA_TEMPLATE.xlsx"');
+    await wb.xlsx.write(res);
+    res.end();
+  } catch (error: any) {
+    console.error('[FabricArticleData] Template error:', error);
+    res.status(500).json({ success: false, error: error.message });
+  }
+};
+
+/**
+ * POST /api/admin/fabric-article-data/upload
+ * Parses rows from row 5 and bulk-inserts into fabric_article_data.
+ * Each row gets a fresh UUID. Upserts on fabric_article_number when provided.
+ */
+export const uploadFabricArticleData = async (req: Request, res: Response): Promise<void> => {
+  try {
+    if (!req.file) {
+      res.status(400).json({ success: false, error: 'No file uploaded. Send a .xlsx file as "file" field.' });
+      return;
+    }
+
+    const ExcelJS = (await import('exceljs')).default;
+    const wb = new ExcelJS.Workbook();
+    await wb.xlsx.load(req.file.buffer as any);
+
+    const ws = wb.getWorksheet('FABRIC ARTICLE DATA') ?? wb.worksheets[0];
+    if (!ws) {
+      res.status(400).json({ success: false, error: 'No worksheets found in the uploaded Excel file.' });
+      return;
+    }
+
+    const cell = (row: any, c: number): string => {
+      let v = row.getCell(c).value;
+      if (v && typeof v === 'object' && 'result' in v) v = (v as any).result;
+      if (v && typeof v === 'object' && 'text' in v) v = (v as any).text;
+      return v == null ? '' : String(v).trim();
+    };
+
+    // Column index map (1-based, matching template headers)
+    const C = {
+      fabNo: 1, fabDesc: 2,
+      div: 3, subDiv: 4, majCat: 5, vendorName: 6, vendorCode: 7,
+      fabDiv: 8, yarn: 9, mvgr1: 10, mvgr2: 11,
+      construction: 12, ounz: 13, width: 14, weave01: 15, weave02: 16,
+      count: 17, gsm: 18, composition: 19, finish: 20, lycra: 21,
+      approvalStatus: 22, sapSyncStatus: 23, userName: 24,
+    };
+
+    type DataRow = {
+      fabric_article_number: string | null; fabric_article_description: string | null;
+      division: string | null; sub_division: string | null; major_category: string | null;
+      vendor_name: string | null; vendor_code: string | null;
+      m_fab_div: string | null; m_yarn: string | null;
+      m_fab_main_mvgr_1: string | null; m_fab_main_mvgr_2: string | null;
+      m_construction: string | null; m_ounz: string | null; m_width: string | null;
+      m_weave_01: string | null; m_weave_02: string | null;
+      m_count: string | null; m_gsm: string | null;
+      m_composition: string | null; m_finish: string | null; m_lycra: string | null;
+      approval_status: string; sap_sync_status: string; user_name: string | null;
+    };
+
+    const rows: DataRow[] = [];
+    let skipped = 0;
+
+    for (let r = 5; r <= ws.rowCount; r++) {
+      const row = ws.getRow(r);
+      const fabNo = cell(row, C.fabNo);
+      const fabDesc = cell(row, C.fabDesc);
+      const div = cell(row, C.div);
+      const majCat = cell(row, C.majCat);
+
+      // Skip fully blank rows
+      if (!fabNo && !fabDesc && !div && !majCat) { skipped++; continue; }
+
+      const approvalStatus = cell(row, C.approvalStatus).toUpperCase() || 'PENDING';
+      const sapSyncStatus  = cell(row, C.sapSyncStatus).toUpperCase()  || 'NOT_SYNCED';
+
+      rows.push({
+        fabric_article_number:      fabNo      || null,
+        fabric_article_description: fabDesc    || null,
+        division:                   div        || null,
+        sub_division:               cell(row, C.subDiv)      || null,
+        major_category:             majCat     || null,
+        vendor_name:                cell(row, C.vendorName)  || null,
+        vendor_code:                cell(row, C.vendorCode)  || null,
+        m_fab_div:                  cell(row, C.fabDiv)      || null,
+        m_yarn:                     cell(row, C.yarn)        || null,
+        m_fab_main_mvgr_1:          cell(row, C.mvgr1)       || null,
+        m_fab_main_mvgr_2:          cell(row, C.mvgr2)       || null,
+        m_construction:             cell(row, C.construction)|| null,
+        m_ounz:                     cell(row, C.ounz)        || null,
+        m_width:                    cell(row, C.width)       || null,
+        m_weave_01:                 cell(row, C.weave01)     || null,
+        m_weave_02:                 cell(row, C.weave02)     || null,
+        m_count:                    cell(row, C.count)       || null,
+        m_gsm:                      cell(row, C.gsm)         || null,
+        m_composition:              cell(row, C.composition) || null,
+        m_finish:                   cell(row, C.finish)      || null,
+        m_lycra:                    cell(row, C.lycra)       || null,
+        approval_status:            approvalStatus,
+        sap_sync_status:            sapSyncStatus,
+        user_name:                  cell(row, C.userName)    || null,
+      });
+    }
+
+    const total = rows.length;
+    const BATCH = 1000;
+    console.log(`[FabricArticleData] Inserting ${total} rows in batches of ${BATCH}...`);
+
+    await prisma.$transaction(async (tx) => {
+      for (let i = 0; i < rows.length; i += BATCH) {
+        const batch = rows.slice(i, i + BATCH);
+        await tx.$executeRaw`
+          INSERT INTO fabric_article_data (
+            id, fabric_article_number, fabric_article_description,
+            division, sub_division, major_category, vendor_name, vendor_code,
+            m_fab_div, m_yarn, m_fab_main_mvgr_1, m_fab_main_mvgr_2,
+            m_construction, m_ounz, m_width, m_weave_01, m_weave_02,
+            m_count, m_gsm, m_composition, m_finish, m_lycra,
+            approval_status, sap_sync_status, user_name,
+            created_at, updated_at
+          )
+          SELECT
+            gen_random_uuid(), v.fabric_article_number, v.fabric_article_description,
+            v.division, v.sub_division, v.major_category, v.vendor_name, v.vendor_code,
+            v.m_fab_div, v.m_yarn, v.m_fab_main_mvgr_1, v.m_fab_main_mvgr_2,
+            v.m_construction, v.m_ounz, v.m_width, v.m_weave_01, v.m_weave_02,
+            v.m_count, v.m_gsm, v.m_composition, v.m_finish, v.m_lycra,
+            v.approval_status, v.sap_sync_status, v.user_name,
+            NOW(), NOW()
+          FROM jsonb_to_recordset(${JSON.stringify(batch)}::jsonb) AS v(
+            fabric_article_number text, fabric_article_description text,
+            division text, sub_division text, major_category text, vendor_name text, vendor_code text,
+            m_fab_div text, m_yarn text, m_fab_main_mvgr_1 text, m_fab_main_mvgr_2 text,
+            m_construction text, m_ounz text, m_width text, m_weave_01 text, m_weave_02 text,
+            m_count text, m_gsm text, m_composition text, m_finish text, m_lycra text,
+            approval_status text, sap_sync_status text, user_name text
+          )
+        `;
+      }
+    }, { timeout: 5 * 60 * 1000 });
+
+    console.log(`[FabricArticleData] Done — ${total} rows inserted, ${skipped} skipped.`);
+
+    res.json({
+      success: true,
+      message: `Fabric article data uploaded. Inserted ${total} rows.`,
+      data: { uploadedAt: new Date().toISOString(), fileName: req.file.originalname, total, skipped },
+    });
+  } catch (error: any) {
+    console.error('[FabricArticleData] Upload error:', error);
+    res.status(500).json({ success: false, error: error.message });
+  }
+};
+
+// ═══════════════════════════════════════════════════════
+// FABRIC ARTICLE MASTER (fabric_article_master)
+// ═══════════════════════════════════════════════════════
+
+/**
+ * GET /api/admin/fabric-article-master/status
+ */
+export const getFabricArticleMasterStatus = async (_req: Request, res: Response): Promise<void> => {
+  try {
+    const rows = await prisma.$queryRaw<{ total: bigint; categories: bigint; active: bigint }[]>`
+      SELECT COUNT(*)::bigint                                               AS total,
+             COUNT(DISTINCT maj_cat)::bigint                                AS categories,
+             COUNT(*) FILTER (WHERE UPPER(TRIM(status)) = 'ACT')::bigint   AS active
+      FROM fabric_article_master
+    `;
+    const r = rows[0] ?? { total: 0n, categories: 0n, active: 0n };
+    res.json({
+      success: true,
+      data: { total: Number(r.total), categories: Number(r.categories), active: Number(r.active) },
+    });
+  } catch (error: any) {
+    console.error('[FabricArticleMaster] Status error:', error);
+    res.status(500).json({ success: false, error: error.message });
+  }
+};
+
+/**
+ * GET /api/admin/fabric-article-master/template
+ */
+export const downloadFabricArticleMasterTemplate = async (_req: Request, res: Response): Promise<void> => {
+  try {
+    const ExcelJS = require('exceljs');
+    const wb = new ExcelJS.Workbook();
+    const ws = wb.addWorksheet('FAB UPLAODER FORMAT');
+
+    // Row 1 — title
+    ws.mergeCells('A1:E1');
+    const titleCell = ws.getCell('A1');
+    titleCell.value = 'FABRIC ARTICLE MASTER UPLOAD';
+    titleCell.font = { bold: true, size: 13 };
+    titleCell.alignment = { horizontal: 'center' };
+    ws.getRow(1).height = 22;
+
+    ws.addRow([]);
+
+    // Row 3 — headers (only the 5 columns we store)
+    const headers = ['DIV', 'SUB-DIV', 'MJ_CAT', 'MC_CD', 'MC_DESC'];
+    const headerRow = ws.addRow(headers);
+    headerRow.eachCell((cell: any) => {
+      cell.font = { bold: true, color: { argb: 'FFFFFFFF' } };
+      cell.fill = { type: 'pattern', pattern: 'solid', fgColor: { argb: 'FF1565C0' } };
+      cell.alignment = { horizontal: 'center' };
+    });
+
+    ws.addRow([]);
+
+    // Row 5 — sample rows
+    ws.addRow(['K', 'K_PC', 'K_PC_FLC', '910101001', 'K_PC_FLC_SLD']);
+    ws.addRow(['K', 'K_PC', 'K_PC_FLC', '910101002', 'K_PC_FLC_PRT']);
+
+    ws.columns = [{ width: 12 }, { width: 16 }, { width: 22 }, { width: 16 }, { width: 30 }];
+
+    ws.addRow([]);
+    const noteRow = ws.addRow(['⚠ NOTE: Headers in Row 3, data from Row 5. Only DIV, SUB-DIV, MJ_CAT, MC_CD, MC_DESC are required.']);
+    ws.mergeCells(`A${noteRow.number}:E${noteRow.number}`);
+    noteRow.getCell(1).font = { italic: true, size: 10 };
+    noteRow.getCell(1).fill = { type: 'pattern', pattern: 'solid', fgColor: { argb: 'FFFFF3CD' } };
+
+    res.setHeader('Content-Type', 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');
+    res.setHeader('Content-Disposition', 'attachment; filename="FABRIC_ARTICLE_MASTER_TEMPLATE.xlsx"');
+    await wb.xlsx.write(res);
+    res.end();
+  } catch (error: any) {
+    console.error('[FabricArticleMaster] Template error:', error);
+    res.status(500).json({ success: false, error: error.message });
+  }
+};
+
+/**
+ * POST /api/admin/fabric-article-master/upload
+ * Accepts Excel with sheet "FAB UPLAODER FORMAT" (or first sheet).
+ * Headers in row 3, data from row 5.
+ * Columns used: A=DIV, B=SUB-DIV, C=MJ_CAT, D=MC_CD, E=MC_DESC
+ * seg defaults to "FAB", status defaults to "ACT".
+ * Replaces the entire fabric_article_master table.
+ */
+export const uploadFabricArticleMaster = async (req: Request, res: Response): Promise<void> => {
+  try {
+    if (!req.file) {
+      res.status(400).json({ success: false, error: 'No file uploaded. Send a .xlsx file as "file" field.' });
+      return;
+    }
+
+    const ExcelJS = (await import('exceljs')).default;
+    const wb = new ExcelJS.Workbook();
+    await wb.xlsx.load(req.file.buffer as any);
+
+    const ws = wb.getWorksheet('FAB UPLAODER FORMAT') ?? wb.worksheets[0];
+    if (!ws) {
+      res.status(400).json({ success: false, error: 'No worksheets found in the uploaded Excel file.' });
+      return;
+    }
+
+    const C_DIV = 1, C_SUB = 2, C_MAJ = 3, C_MC = 4, C_DESC = 5;
+    const cell = (row: any, c: number): string => {
+      let v = row.getCell(c).value;
+      if (v && typeof v === 'object' && 'result' in v) v = (v as any).result;
+      if (v && typeof v === 'object' && 'text' in v) v = (v as any).text;
+      return v == null ? '' : String(v).trim();
+    };
+
+    type FabRow = { seg: string; div: string; sub_div: string; maj_cat: string; mc_code: string; mc_des: string; status: string; hsn_cd: string; art_type: string };
+    const rows: FabRow[] = [];
+    const seen = new Set<string>();
+    let skipped = 0;
+
+    for (let r = 5; r <= ws.rowCount; r++) {
+      const row = ws.getRow(r);
+      const div    = cell(row, C_DIV);
+      const sub    = cell(row, C_SUB);
+      const maj    = cell(row, C_MAJ);
+      const mc     = cell(row, C_MC);
+      const desc   = cell(row, C_DESC);
+
+      if (!div && !sub && !maj && !mc && !desc) { skipped++; continue; }
+      if (!mc || !desc) { skipped++; continue; }
+
+      const key = `${mc}||${desc}`;
+      if (seen.has(key)) continue;
+      seen.add(key);
+
+      rows.push({ seg: 'FAB', div, sub_div: sub, maj_cat: maj, mc_code: mc, mc_des: desc, status: 'ACT', hsn_cd: '', art_type: '' });
+    }
+
+    const total = rows.length;
+    const categories = new Set(rows.map(r => r.maj_cat)).size;
+    const BATCH = 5000;
+
+    console.log(`[FabricArticleMaster] Replacing fabric_article_master — ${total} rows in batches of ${BATCH}...`);
+
+    await prisma.$transaction(async (tx) => {
+      await tx.$executeRaw`TRUNCATE TABLE fabric_article_master RESTART IDENTITY`;
+      for (let i = 0; i < rows.length; i += BATCH) {
+        const batch = rows.slice(i, i + BATCH);
+        await tx.$executeRaw`
+          INSERT INTO fabric_article_master (seg, div, sub_div, maj_cat, mc_code, mc_des, status, hsn_cd, art_type, created_at, updated_at)
+          SELECT v.seg, v.div, v.sub_div, v.maj_cat, v.mc_code, v.mc_des, v.status, v.hsn_cd, v.art_type, NOW(), NOW()
+          FROM jsonb_to_recordset(${JSON.stringify(batch)}::jsonb)
+            AS v(seg text, div text, sub_div text, maj_cat text, mc_code text, mc_des text, status text, hsn_cd text, art_type text)
+        `;
+      }
+    }, { timeout: 5 * 60 * 1000 });
+
+    console.log(`[FabricArticleMaster] Done — ${total} rows across ${categories} major categories; ${skipped} rows skipped.`);
+
+    res.json({
+      success: true,
+      message: `Fabric article master uploaded. Inserted ${total} rows across ${categories} major categories.`,
+      data: { uploadedAt: new Date().toISOString(), fileName: req.file.originalname, total, categories, skipped },
+    });
+  } catch (error: any) {
+    console.error('[FabricArticleMaster] Upload error:', error);
+    res.status(500).json({ success: false, error: error.message });
+  }
+};

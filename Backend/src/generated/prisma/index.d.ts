@@ -197,6 +197,18 @@ export type NationalGridMaster = $Result.DefaultSelection<Prisma.$NationalGridMa
  */
 export type MajorCatMaster = $Result.DefaultSelection<Prisma.$MajorCatMasterPayload>
 /**
+ * Model FabricArticleMaster
+ * FabricArticleMaster: Fabric hierarchy reference data (from HIERARCHY MASTER sheet).
+ * One row per MC description (article type + major category combination).
+ */
+export type FabricArticleMaster = $Result.DefaultSelection<Prisma.$FabricArticleMasterPayload>
+/**
+ * Model FabricMajCatGridValue
+ * FabricMajCatGridValues: Valid codes + full-forms for each fabric characteristic (from MASTER sheet).
+ * One row per (characteristic, code) pair — e.g. characteristic="M_FAB_DIV", code="K", full_form="KNIT".
+ */
+export type FabricMajCatGridValue = $Result.DefaultSelection<Prisma.$FabricMajCatGridValuePayload>
+/**
  * Model ModifyLog
  * ModifyLog: One row per changed label per successful article modification
  */
@@ -206,6 +218,11 @@ export type ModifyLog = $Result.DefaultSelection<Prisma.$ModifyLogPayload>
  * FabricArticleData: One row per fabric article created from the Construction & Fabric card
  */
 export type FabricArticleData = $Result.DefaultSelection<Prisma.$FabricArticleDataPayload>
+/**
+ * Model BodyArticleData
+ * BodyArticleData: One row per body article created from the Body & Construction card
+ */
+export type BodyArticleData = $Result.DefaultSelection<Prisma.$BodyArticleDataPayload>
 
 /**
  * Enums
@@ -828,6 +845,26 @@ export class PrismaClient<
   get majorCatMaster(): Prisma.MajorCatMasterDelegate<ExtArgs, ClientOptions>;
 
   /**
+   * `prisma.fabricArticleMaster`: Exposes CRUD operations for the **FabricArticleMaster** model.
+    * Example usage:
+    * ```ts
+    * // Fetch zero or more FabricArticleMasters
+    * const fabricArticleMasters = await prisma.fabricArticleMaster.findMany()
+    * ```
+    */
+  get fabricArticleMaster(): Prisma.FabricArticleMasterDelegate<ExtArgs, ClientOptions>;
+
+  /**
+   * `prisma.fabricMajCatGridValue`: Exposes CRUD operations for the **FabricMajCatGridValue** model.
+    * Example usage:
+    * ```ts
+    * // Fetch zero or more FabricMajCatGridValues
+    * const fabricMajCatGridValues = await prisma.fabricMajCatGridValue.findMany()
+    * ```
+    */
+  get fabricMajCatGridValue(): Prisma.FabricMajCatGridValueDelegate<ExtArgs, ClientOptions>;
+
+  /**
    * `prisma.modifyLog`: Exposes CRUD operations for the **ModifyLog** model.
     * Example usage:
     * ```ts
@@ -846,6 +883,16 @@ export class PrismaClient<
     * ```
     */
   get fabricArticleData(): Prisma.FabricArticleDataDelegate<ExtArgs, ClientOptions>;
+
+  /**
+   * `prisma.bodyArticleData`: Exposes CRUD operations for the **BodyArticleData** model.
+    * Example usage:
+    * ```ts
+    * // Fetch zero or more BodyArticleData
+    * const bodyArticleData = await prisma.bodyArticleData.findMany()
+    * ```
+    */
+  get bodyArticleData(): Prisma.BodyArticleDataDelegate<ExtArgs, ClientOptions>;
 }
 
 export namespace Prisma {
@@ -1320,8 +1367,11 @@ export namespace Prisma {
     PoolBBatch: 'PoolBBatch',
     NationalGridMaster: 'NationalGridMaster',
     MajorCatMaster: 'MajorCatMaster',
+    FabricArticleMaster: 'FabricArticleMaster',
+    FabricMajCatGridValue: 'FabricMajCatGridValue',
     ModifyLog: 'ModifyLog',
-    FabricArticleData: 'FabricArticleData'
+    FabricArticleData: 'FabricArticleData',
+    BodyArticleData: 'BodyArticleData'
   };
 
   export type ModelName = (typeof ModelName)[keyof typeof ModelName]
@@ -1340,7 +1390,7 @@ export namespace Prisma {
       omit: GlobalOmitOptions
     }
     meta: {
-      modelProps: "department" | "subDepartment" | "category" | "masterAttribute" | "attributeAllowedValue" | "categoryAttribute" | "extractionJob" | "extractionResult" | "extractionResultFlat" | "modelGenerationResult" | "modelImageApproval" | "mvgrLookup" | "masterVendorDetail" | "user" | "auditLog" | "apiKey" | "changeHistory" | "costSummary" | "article360" | "articleFab" | "articleBody" | "articleVaAcc" | "articleVaPrcs" | "articleBom" | "sapFieldConfig" | "sapAttributeValue" | "article360Flat" | "rawArticle" | "srmSyncRun" | "srmSyncRunItem" | "poolBJob" | "poolBBatch" | "nationalGridMaster" | "majorCatMaster" | "modifyLog" | "fabricArticleData"
+      modelProps: "department" | "subDepartment" | "category" | "masterAttribute" | "attributeAllowedValue" | "categoryAttribute" | "extractionJob" | "extractionResult" | "extractionResultFlat" | "modelGenerationResult" | "modelImageApproval" | "mvgrLookup" | "masterVendorDetail" | "user" | "auditLog" | "apiKey" | "changeHistory" | "costSummary" | "article360" | "articleFab" | "articleBody" | "articleVaAcc" | "articleVaPrcs" | "articleBom" | "sapFieldConfig" | "sapAttributeValue" | "article360Flat" | "rawArticle" | "srmSyncRun" | "srmSyncRunItem" | "poolBJob" | "poolBBatch" | "nationalGridMaster" | "majorCatMaster" | "fabricArticleMaster" | "fabricMajCatGridValue" | "modifyLog" | "fabricArticleData" | "bodyArticleData"
       txIsolationLevel: Prisma.TransactionIsolationLevel
     }
     model: {
@@ -3860,6 +3910,154 @@ export namespace Prisma {
           }
         }
       }
+      FabricArticleMaster: {
+        payload: Prisma.$FabricArticleMasterPayload<ExtArgs>
+        fields: Prisma.FabricArticleMasterFieldRefs
+        operations: {
+          findUnique: {
+            args: Prisma.FabricArticleMasterFindUniqueArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$FabricArticleMasterPayload> | null
+          }
+          findUniqueOrThrow: {
+            args: Prisma.FabricArticleMasterFindUniqueOrThrowArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$FabricArticleMasterPayload>
+          }
+          findFirst: {
+            args: Prisma.FabricArticleMasterFindFirstArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$FabricArticleMasterPayload> | null
+          }
+          findFirstOrThrow: {
+            args: Prisma.FabricArticleMasterFindFirstOrThrowArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$FabricArticleMasterPayload>
+          }
+          findMany: {
+            args: Prisma.FabricArticleMasterFindManyArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$FabricArticleMasterPayload>[]
+          }
+          create: {
+            args: Prisma.FabricArticleMasterCreateArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$FabricArticleMasterPayload>
+          }
+          createMany: {
+            args: Prisma.FabricArticleMasterCreateManyArgs<ExtArgs>
+            result: BatchPayload
+          }
+          createManyAndReturn: {
+            args: Prisma.FabricArticleMasterCreateManyAndReturnArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$FabricArticleMasterPayload>[]
+          }
+          delete: {
+            args: Prisma.FabricArticleMasterDeleteArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$FabricArticleMasterPayload>
+          }
+          update: {
+            args: Prisma.FabricArticleMasterUpdateArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$FabricArticleMasterPayload>
+          }
+          deleteMany: {
+            args: Prisma.FabricArticleMasterDeleteManyArgs<ExtArgs>
+            result: BatchPayload
+          }
+          updateMany: {
+            args: Prisma.FabricArticleMasterUpdateManyArgs<ExtArgs>
+            result: BatchPayload
+          }
+          updateManyAndReturn: {
+            args: Prisma.FabricArticleMasterUpdateManyAndReturnArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$FabricArticleMasterPayload>[]
+          }
+          upsert: {
+            args: Prisma.FabricArticleMasterUpsertArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$FabricArticleMasterPayload>
+          }
+          aggregate: {
+            args: Prisma.FabricArticleMasterAggregateArgs<ExtArgs>
+            result: $Utils.Optional<AggregateFabricArticleMaster>
+          }
+          groupBy: {
+            args: Prisma.FabricArticleMasterGroupByArgs<ExtArgs>
+            result: $Utils.Optional<FabricArticleMasterGroupByOutputType>[]
+          }
+          count: {
+            args: Prisma.FabricArticleMasterCountArgs<ExtArgs>
+            result: $Utils.Optional<FabricArticleMasterCountAggregateOutputType> | number
+          }
+        }
+      }
+      FabricMajCatGridValue: {
+        payload: Prisma.$FabricMajCatGridValuePayload<ExtArgs>
+        fields: Prisma.FabricMajCatGridValueFieldRefs
+        operations: {
+          findUnique: {
+            args: Prisma.FabricMajCatGridValueFindUniqueArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$FabricMajCatGridValuePayload> | null
+          }
+          findUniqueOrThrow: {
+            args: Prisma.FabricMajCatGridValueFindUniqueOrThrowArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$FabricMajCatGridValuePayload>
+          }
+          findFirst: {
+            args: Prisma.FabricMajCatGridValueFindFirstArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$FabricMajCatGridValuePayload> | null
+          }
+          findFirstOrThrow: {
+            args: Prisma.FabricMajCatGridValueFindFirstOrThrowArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$FabricMajCatGridValuePayload>
+          }
+          findMany: {
+            args: Prisma.FabricMajCatGridValueFindManyArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$FabricMajCatGridValuePayload>[]
+          }
+          create: {
+            args: Prisma.FabricMajCatGridValueCreateArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$FabricMajCatGridValuePayload>
+          }
+          createMany: {
+            args: Prisma.FabricMajCatGridValueCreateManyArgs<ExtArgs>
+            result: BatchPayload
+          }
+          createManyAndReturn: {
+            args: Prisma.FabricMajCatGridValueCreateManyAndReturnArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$FabricMajCatGridValuePayload>[]
+          }
+          delete: {
+            args: Prisma.FabricMajCatGridValueDeleteArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$FabricMajCatGridValuePayload>
+          }
+          update: {
+            args: Prisma.FabricMajCatGridValueUpdateArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$FabricMajCatGridValuePayload>
+          }
+          deleteMany: {
+            args: Prisma.FabricMajCatGridValueDeleteManyArgs<ExtArgs>
+            result: BatchPayload
+          }
+          updateMany: {
+            args: Prisma.FabricMajCatGridValueUpdateManyArgs<ExtArgs>
+            result: BatchPayload
+          }
+          updateManyAndReturn: {
+            args: Prisma.FabricMajCatGridValueUpdateManyAndReturnArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$FabricMajCatGridValuePayload>[]
+          }
+          upsert: {
+            args: Prisma.FabricMajCatGridValueUpsertArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$FabricMajCatGridValuePayload>
+          }
+          aggregate: {
+            args: Prisma.FabricMajCatGridValueAggregateArgs<ExtArgs>
+            result: $Utils.Optional<AggregateFabricMajCatGridValue>
+          }
+          groupBy: {
+            args: Prisma.FabricMajCatGridValueGroupByArgs<ExtArgs>
+            result: $Utils.Optional<FabricMajCatGridValueGroupByOutputType>[]
+          }
+          count: {
+            args: Prisma.FabricMajCatGridValueCountArgs<ExtArgs>
+            result: $Utils.Optional<FabricMajCatGridValueCountAggregateOutputType> | number
+          }
+        }
+      }
       ModifyLog: {
         payload: Prisma.$ModifyLogPayload<ExtArgs>
         fields: Prisma.ModifyLogFieldRefs
@@ -4008,6 +4206,80 @@ export namespace Prisma {
           }
         }
       }
+      BodyArticleData: {
+        payload: Prisma.$BodyArticleDataPayload<ExtArgs>
+        fields: Prisma.BodyArticleDataFieldRefs
+        operations: {
+          findUnique: {
+            args: Prisma.BodyArticleDataFindUniqueArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$BodyArticleDataPayload> | null
+          }
+          findUniqueOrThrow: {
+            args: Prisma.BodyArticleDataFindUniqueOrThrowArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$BodyArticleDataPayload>
+          }
+          findFirst: {
+            args: Prisma.BodyArticleDataFindFirstArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$BodyArticleDataPayload> | null
+          }
+          findFirstOrThrow: {
+            args: Prisma.BodyArticleDataFindFirstOrThrowArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$BodyArticleDataPayload>
+          }
+          findMany: {
+            args: Prisma.BodyArticleDataFindManyArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$BodyArticleDataPayload>[]
+          }
+          create: {
+            args: Prisma.BodyArticleDataCreateArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$BodyArticleDataPayload>
+          }
+          createMany: {
+            args: Prisma.BodyArticleDataCreateManyArgs<ExtArgs>
+            result: BatchPayload
+          }
+          createManyAndReturn: {
+            args: Prisma.BodyArticleDataCreateManyAndReturnArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$BodyArticleDataPayload>[]
+          }
+          delete: {
+            args: Prisma.BodyArticleDataDeleteArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$BodyArticleDataPayload>
+          }
+          update: {
+            args: Prisma.BodyArticleDataUpdateArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$BodyArticleDataPayload>
+          }
+          deleteMany: {
+            args: Prisma.BodyArticleDataDeleteManyArgs<ExtArgs>
+            result: BatchPayload
+          }
+          updateMany: {
+            args: Prisma.BodyArticleDataUpdateManyArgs<ExtArgs>
+            result: BatchPayload
+          }
+          updateManyAndReturn: {
+            args: Prisma.BodyArticleDataUpdateManyAndReturnArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$BodyArticleDataPayload>[]
+          }
+          upsert: {
+            args: Prisma.BodyArticleDataUpsertArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$BodyArticleDataPayload>
+          }
+          aggregate: {
+            args: Prisma.BodyArticleDataAggregateArgs<ExtArgs>
+            result: $Utils.Optional<AggregateBodyArticleData>
+          }
+          groupBy: {
+            args: Prisma.BodyArticleDataGroupByArgs<ExtArgs>
+            result: $Utils.Optional<BodyArticleDataGroupByOutputType>[]
+          }
+          count: {
+            args: Prisma.BodyArticleDataCountArgs<ExtArgs>
+            result: $Utils.Optional<BodyArticleDataCountAggregateOutputType> | number
+          }
+        }
+      }
     }
   } & {
     other: {
@@ -4134,8 +4406,11 @@ export namespace Prisma {
     poolBBatch?: PoolBBatchOmit
     nationalGridMaster?: NationalGridMasterOmit
     majorCatMaster?: MajorCatMasterOmit
+    fabricArticleMaster?: FabricArticleMasterOmit
+    fabricMajCatGridValue?: FabricMajCatGridValueOmit
     modifyLog?: ModifyLogOmit
     fabricArticleData?: FabricArticleDataOmit
+    bodyArticleData?: BodyArticleDataOmit
   }
 
   /* Types for Logging */
@@ -14801,6 +15076,7 @@ export namespace Prisma {
     fabricArticleDescription: string | null
     attrArticleNums: string | null
     mvgrBrandVendor: string | null
+    mcDescription: string | null
     vendorCode: string | null
     mrp: Decimal | null
     impAtrbt2: string | null
@@ -14934,6 +15210,7 @@ export namespace Prisma {
     fabricArticleDescription: string | null
     attrArticleNums: string | null
     mvgrBrandVendor: string | null
+    mcDescription: string | null
     vendorCode: string | null
     mrp: Decimal | null
     impAtrbt2: string | null
@@ -15067,6 +15344,7 @@ export namespace Prisma {
     fabricArticleDescription: number
     attrArticleNums: number
     mvgrBrandVendor: number
+    mcDescription: number
     vendorCode: number
     mrp: number
     impAtrbt2: number
@@ -15233,6 +15511,7 @@ export namespace Prisma {
     fabricArticleDescription?: true
     attrArticleNums?: true
     mvgrBrandVendor?: true
+    mcDescription?: true
     vendorCode?: true
     mrp?: true
     impAtrbt2?: true
@@ -15366,6 +15645,7 @@ export namespace Prisma {
     fabricArticleDescription?: true
     attrArticleNums?: true
     mvgrBrandVendor?: true
+    mcDescription?: true
     vendorCode?: true
     mrp?: true
     impAtrbt2?: true
@@ -15499,6 +15779,7 @@ export namespace Prisma {
     fabricArticleDescription?: true
     attrArticleNums?: true
     mvgrBrandVendor?: true
+    mcDescription?: true
     vendorCode?: true
     mrp?: true
     impAtrbt2?: true
@@ -15720,6 +16001,7 @@ export namespace Prisma {
     fabricArticleDescription: string | null
     attrArticleNums: string | null
     mvgrBrandVendor: string | null
+    mcDescription: string | null
     vendorCode: string | null
     mrp: Decimal | null
     impAtrbt2: string | null
@@ -15873,6 +16155,7 @@ export namespace Prisma {
     fabricArticleDescription?: boolean
     attrArticleNums?: boolean
     mvgrBrandVendor?: boolean
+    mcDescription?: boolean
     vendorCode?: boolean
     mrp?: boolean
     impAtrbt2?: boolean
@@ -16011,6 +16294,7 @@ export namespace Prisma {
     fabricArticleDescription?: boolean
     attrArticleNums?: boolean
     mvgrBrandVendor?: boolean
+    mcDescription?: boolean
     vendorCode?: boolean
     mrp?: boolean
     impAtrbt2?: boolean
@@ -16147,6 +16431,7 @@ export namespace Prisma {
     fabricArticleDescription?: boolean
     attrArticleNums?: boolean
     mvgrBrandVendor?: boolean
+    mcDescription?: boolean
     vendorCode?: boolean
     mrp?: boolean
     impAtrbt2?: boolean
@@ -16283,6 +16568,7 @@ export namespace Prisma {
     fabricArticleDescription?: boolean
     attrArticleNums?: boolean
     mvgrBrandVendor?: boolean
+    mcDescription?: boolean
     vendorCode?: boolean
     mrp?: boolean
     impAtrbt2?: boolean
@@ -16315,7 +16601,7 @@ export namespace Prisma {
     imageExtractionRawData?: boolean
   }
 
-  export type ExtractionResultFlatOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<"id" | "jobId" | "imageName" | "imageUrl" | "articleNumber" | "extractionStatus" | "aiModel" | "avgConfidence" | "processingTimeMs" | "totalAttributes" | "extractedCount" | "inputTokens" | "outputTokens" | "totalTokens" | "apiCost" | "userId" | "userName" | "extractionDate" | "createdAt" | "updatedAt" | "majorCategory" | "vendorName" | "designNumber" | "pptNumber" | "rate" | "size" | "yarn1" | "yarn2" | "fabricMainMvgr" | "weave" | "weaveFullForm" | "composition" | "finish" | "gsm" | "macroMvgr" | "macroMvgrFullForm" | "mainMvgr" | "mainMvgrFullForm" | "mFab2" | "mFab2FullForm" | "shade" | "weight" | "lycra" | "neck" | "neckDetails" | "collar" | "placket" | "sleeve" | "bottomFold" | "frontOpenStyle" | "pocketType" | "fit" | "pattern" | "length" | "colour" | "secondaryColour" | "drawcord" | "button" | "zipper" | "zipColour" | "printType" | "printStyle" | "printPlacement" | "patches" | "patchesType" | "embroidery" | "embroideryType" | "wash" | "fatherBelt" | "childBelt" | "division" | "subDivision" | "referenceArticleNumber" | "referenceArticleDescription" | "collarStyle" | "sleeveFold" | "mSet" | "noOfPocket" | "extraPocket" | "dcShape" | "btnColour" | "fCount" | "fConstruction" | "fOunce" | "fWidth" | "fabDiv" | "fabVdr" | "htrfType" | "htrfStyle" | "embPlacement" | "ageGroup" | "mNoOfSize" | "mNoOfClr" | "articleFashionType" | "articleDimension" | "bodyArticle" | "bodyArticleDescription" | "fabricArticleNumber" | "fabricArticleDescription" | "attrArticleNums" | "mvgrBrandVendor" | "vendorCode" | "mrp" | "impAtrbt2" | "mcCode" | "segment" | "season" | "hsnTaxCode" | "articleDescription" | "fashionGrid" | "year" | "articleType" | "presentationsType" | "approvalStatus" | "pdStatus" | "approvedBy" | "approvedAt" | "source" | "imageUncPath" | "isOldArticle" | "isGeneric" | "genericArticleId" | "variantSize" | "variantColor" | "variantWeight" | "sapSyncStatus" | "sapArticleId" | "sapSyncMessage" | "srmOriginalDesignNumber" | "srmUniqueId" | "imageExtractionRawData", ExtArgs["result"]["extractionResultFlat"]>
+  export type ExtractionResultFlatOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<"id" | "jobId" | "imageName" | "imageUrl" | "articleNumber" | "extractionStatus" | "aiModel" | "avgConfidence" | "processingTimeMs" | "totalAttributes" | "extractedCount" | "inputTokens" | "outputTokens" | "totalTokens" | "apiCost" | "userId" | "userName" | "extractionDate" | "createdAt" | "updatedAt" | "majorCategory" | "vendorName" | "designNumber" | "pptNumber" | "rate" | "size" | "yarn1" | "yarn2" | "fabricMainMvgr" | "weave" | "weaveFullForm" | "composition" | "finish" | "gsm" | "macroMvgr" | "macroMvgrFullForm" | "mainMvgr" | "mainMvgrFullForm" | "mFab2" | "mFab2FullForm" | "shade" | "weight" | "lycra" | "neck" | "neckDetails" | "collar" | "placket" | "sleeve" | "bottomFold" | "frontOpenStyle" | "pocketType" | "fit" | "pattern" | "length" | "colour" | "secondaryColour" | "drawcord" | "button" | "zipper" | "zipColour" | "printType" | "printStyle" | "printPlacement" | "patches" | "patchesType" | "embroidery" | "embroideryType" | "wash" | "fatherBelt" | "childBelt" | "division" | "subDivision" | "referenceArticleNumber" | "referenceArticleDescription" | "collarStyle" | "sleeveFold" | "mSet" | "noOfPocket" | "extraPocket" | "dcShape" | "btnColour" | "fCount" | "fConstruction" | "fOunce" | "fWidth" | "fabDiv" | "fabVdr" | "htrfType" | "htrfStyle" | "embPlacement" | "ageGroup" | "mNoOfSize" | "mNoOfClr" | "articleFashionType" | "articleDimension" | "bodyArticle" | "bodyArticleDescription" | "fabricArticleNumber" | "fabricArticleDescription" | "attrArticleNums" | "mvgrBrandVendor" | "mcDescription" | "vendorCode" | "mrp" | "impAtrbt2" | "mcCode" | "segment" | "season" | "hsnTaxCode" | "articleDescription" | "fashionGrid" | "year" | "articleType" | "presentationsType" | "approvalStatus" | "pdStatus" | "approvedBy" | "approvedAt" | "source" | "imageUncPath" | "isOldArticle" | "isGeneric" | "genericArticleId" | "variantSize" | "variantColor" | "variantWeight" | "sapSyncStatus" | "sapArticleId" | "sapSyncMessage" | "srmOriginalDesignNumber" | "srmUniqueId" | "imageExtractionRawData", ExtArgs["result"]["extractionResultFlat"]>
   export type ExtractionResultFlatInclude<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
     approver?: boolean | ExtractionResultFlat$approverArgs<ExtArgs>
     job?: boolean | ExtractionResultFlat$jobArgs<ExtArgs>
@@ -16440,6 +16726,7 @@ export namespace Prisma {
       fabricArticleDescription: string | null
       attrArticleNums: string | null
       mvgrBrandVendor: string | null
+      mcDescription: string | null
       vendorCode: string | null
       mrp: Prisma.Decimal | null
       impAtrbt2: string | null
@@ -16997,6 +17284,7 @@ export namespace Prisma {
     readonly fabricArticleDescription: FieldRef<"ExtractionResultFlat", 'String'>
     readonly attrArticleNums: FieldRef<"ExtractionResultFlat", 'String'>
     readonly mvgrBrandVendor: FieldRef<"ExtractionResultFlat", 'String'>
+    readonly mcDescription: FieldRef<"ExtractionResultFlat", 'String'>
     readonly vendorCode: FieldRef<"ExtractionResultFlat", 'String'>
     readonly mrp: FieldRef<"ExtractionResultFlat", 'Decimal'>
     readonly impAtrbt2: FieldRef<"ExtractionResultFlat", 'String'>
@@ -47477,6 +47765,2168 @@ export namespace Prisma {
 
 
   /**
+   * Model FabricArticleMaster
+   */
+
+  export type AggregateFabricArticleMaster = {
+    _count: FabricArticleMasterCountAggregateOutputType | null
+    _avg: FabricArticleMasterAvgAggregateOutputType | null
+    _sum: FabricArticleMasterSumAggregateOutputType | null
+    _min: FabricArticleMasterMinAggregateOutputType | null
+    _max: FabricArticleMasterMaxAggregateOutputType | null
+  }
+
+  export type FabricArticleMasterAvgAggregateOutputType = {
+    id: number | null
+  }
+
+  export type FabricArticleMasterSumAggregateOutputType = {
+    id: number | null
+  }
+
+  export type FabricArticleMasterMinAggregateOutputType = {
+    id: number | null
+    seg: string | null
+    div: string | null
+    subDiv: string | null
+    majCat: string | null
+    mcCode: string | null
+    mcDes: string | null
+    status: string | null
+    hsnCd: string | null
+    artType: string | null
+    createdAt: Date | null
+    updatedAt: Date | null
+  }
+
+  export type FabricArticleMasterMaxAggregateOutputType = {
+    id: number | null
+    seg: string | null
+    div: string | null
+    subDiv: string | null
+    majCat: string | null
+    mcCode: string | null
+    mcDes: string | null
+    status: string | null
+    hsnCd: string | null
+    artType: string | null
+    createdAt: Date | null
+    updatedAt: Date | null
+  }
+
+  export type FabricArticleMasterCountAggregateOutputType = {
+    id: number
+    seg: number
+    div: number
+    subDiv: number
+    majCat: number
+    mcCode: number
+    mcDes: number
+    status: number
+    hsnCd: number
+    artType: number
+    createdAt: number
+    updatedAt: number
+    _all: number
+  }
+
+
+  export type FabricArticleMasterAvgAggregateInputType = {
+    id?: true
+  }
+
+  export type FabricArticleMasterSumAggregateInputType = {
+    id?: true
+  }
+
+  export type FabricArticleMasterMinAggregateInputType = {
+    id?: true
+    seg?: true
+    div?: true
+    subDiv?: true
+    majCat?: true
+    mcCode?: true
+    mcDes?: true
+    status?: true
+    hsnCd?: true
+    artType?: true
+    createdAt?: true
+    updatedAt?: true
+  }
+
+  export type FabricArticleMasterMaxAggregateInputType = {
+    id?: true
+    seg?: true
+    div?: true
+    subDiv?: true
+    majCat?: true
+    mcCode?: true
+    mcDes?: true
+    status?: true
+    hsnCd?: true
+    artType?: true
+    createdAt?: true
+    updatedAt?: true
+  }
+
+  export type FabricArticleMasterCountAggregateInputType = {
+    id?: true
+    seg?: true
+    div?: true
+    subDiv?: true
+    majCat?: true
+    mcCode?: true
+    mcDes?: true
+    status?: true
+    hsnCd?: true
+    artType?: true
+    createdAt?: true
+    updatedAt?: true
+    _all?: true
+  }
+
+  export type FabricArticleMasterAggregateArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Filter which FabricArticleMaster to aggregate.
+     */
+    where?: FabricArticleMasterWhereInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
+     * 
+     * Determine the order of FabricArticleMasters to fetch.
+     */
+    orderBy?: FabricArticleMasterOrderByWithRelationInput | FabricArticleMasterOrderByWithRelationInput[]
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
+     * 
+     * Sets the start position
+     */
+    cursor?: FabricArticleMasterWhereUniqueInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Take `±n` FabricArticleMasters from the position of the cursor.
+     */
+    take?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Skip the first `n` FabricArticleMasters.
+     */
+    skip?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     * 
+     * Count returned FabricArticleMasters
+    **/
+    _count?: true | FabricArticleMasterCountAggregateInputType
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     * 
+     * Select which fields to average
+    **/
+    _avg?: FabricArticleMasterAvgAggregateInputType
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     * 
+     * Select which fields to sum
+    **/
+    _sum?: FabricArticleMasterSumAggregateInputType
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     * 
+     * Select which fields to find the minimum value
+    **/
+    _min?: FabricArticleMasterMinAggregateInputType
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     * 
+     * Select which fields to find the maximum value
+    **/
+    _max?: FabricArticleMasterMaxAggregateInputType
+  }
+
+  export type GetFabricArticleMasterAggregateType<T extends FabricArticleMasterAggregateArgs> = {
+        [P in keyof T & keyof AggregateFabricArticleMaster]: P extends '_count' | 'count'
+      ? T[P] extends true
+        ? number
+        : GetScalarType<T[P], AggregateFabricArticleMaster[P]>
+      : GetScalarType<T[P], AggregateFabricArticleMaster[P]>
+  }
+
+
+
+
+  export type FabricArticleMasterGroupByArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    where?: FabricArticleMasterWhereInput
+    orderBy?: FabricArticleMasterOrderByWithAggregationInput | FabricArticleMasterOrderByWithAggregationInput[]
+    by: FabricArticleMasterScalarFieldEnum[] | FabricArticleMasterScalarFieldEnum
+    having?: FabricArticleMasterScalarWhereWithAggregatesInput
+    take?: number
+    skip?: number
+    _count?: FabricArticleMasterCountAggregateInputType | true
+    _avg?: FabricArticleMasterAvgAggregateInputType
+    _sum?: FabricArticleMasterSumAggregateInputType
+    _min?: FabricArticleMasterMinAggregateInputType
+    _max?: FabricArticleMasterMaxAggregateInputType
+  }
+
+  export type FabricArticleMasterGroupByOutputType = {
+    id: number
+    seg: string
+    div: string
+    subDiv: string
+    majCat: string
+    mcCode: string
+    mcDes: string
+    status: string
+    hsnCd: string
+    artType: string
+    createdAt: Date
+    updatedAt: Date
+    _count: FabricArticleMasterCountAggregateOutputType | null
+    _avg: FabricArticleMasterAvgAggregateOutputType | null
+    _sum: FabricArticleMasterSumAggregateOutputType | null
+    _min: FabricArticleMasterMinAggregateOutputType | null
+    _max: FabricArticleMasterMaxAggregateOutputType | null
+  }
+
+  type GetFabricArticleMasterGroupByPayload<T extends FabricArticleMasterGroupByArgs> = Prisma.PrismaPromise<
+    Array<
+      PickEnumerable<FabricArticleMasterGroupByOutputType, T['by']> &
+        {
+          [P in ((keyof T) & (keyof FabricArticleMasterGroupByOutputType))]: P extends '_count'
+            ? T[P] extends boolean
+              ? number
+              : GetScalarType<T[P], FabricArticleMasterGroupByOutputType[P]>
+            : GetScalarType<T[P], FabricArticleMasterGroupByOutputType[P]>
+        }
+      >
+    >
+
+
+  export type FabricArticleMasterSelect<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
+    id?: boolean
+    seg?: boolean
+    div?: boolean
+    subDiv?: boolean
+    majCat?: boolean
+    mcCode?: boolean
+    mcDes?: boolean
+    status?: boolean
+    hsnCd?: boolean
+    artType?: boolean
+    createdAt?: boolean
+    updatedAt?: boolean
+  }, ExtArgs["result"]["fabricArticleMaster"]>
+
+  export type FabricArticleMasterSelectCreateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
+    id?: boolean
+    seg?: boolean
+    div?: boolean
+    subDiv?: boolean
+    majCat?: boolean
+    mcCode?: boolean
+    mcDes?: boolean
+    status?: boolean
+    hsnCd?: boolean
+    artType?: boolean
+    createdAt?: boolean
+    updatedAt?: boolean
+  }, ExtArgs["result"]["fabricArticleMaster"]>
+
+  export type FabricArticleMasterSelectUpdateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
+    id?: boolean
+    seg?: boolean
+    div?: boolean
+    subDiv?: boolean
+    majCat?: boolean
+    mcCode?: boolean
+    mcDes?: boolean
+    status?: boolean
+    hsnCd?: boolean
+    artType?: boolean
+    createdAt?: boolean
+    updatedAt?: boolean
+  }, ExtArgs["result"]["fabricArticleMaster"]>
+
+  export type FabricArticleMasterSelectScalar = {
+    id?: boolean
+    seg?: boolean
+    div?: boolean
+    subDiv?: boolean
+    majCat?: boolean
+    mcCode?: boolean
+    mcDes?: boolean
+    status?: boolean
+    hsnCd?: boolean
+    artType?: boolean
+    createdAt?: boolean
+    updatedAt?: boolean
+  }
+
+  export type FabricArticleMasterOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<"id" | "seg" | "div" | "subDiv" | "majCat" | "mcCode" | "mcDes" | "status" | "hsnCd" | "artType" | "createdAt" | "updatedAt", ExtArgs["result"]["fabricArticleMaster"]>
+
+  export type $FabricArticleMasterPayload<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    name: "FabricArticleMaster"
+    objects: {}
+    scalars: $Extensions.GetPayloadResult<{
+      id: number
+      seg: string
+      div: string
+      subDiv: string
+      majCat: string
+      mcCode: string
+      mcDes: string
+      status: string
+      hsnCd: string
+      artType: string
+      createdAt: Date
+      updatedAt: Date
+    }, ExtArgs["result"]["fabricArticleMaster"]>
+    composites: {}
+  }
+
+  type FabricArticleMasterGetPayload<S extends boolean | null | undefined | FabricArticleMasterDefaultArgs> = $Result.GetResult<Prisma.$FabricArticleMasterPayload, S>
+
+  type FabricArticleMasterCountArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> =
+    Omit<FabricArticleMasterFindManyArgs, 'select' | 'include' | 'distinct' | 'omit'> & {
+      select?: FabricArticleMasterCountAggregateInputType | true
+    }
+
+  export interface FabricArticleMasterDelegate<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs, GlobalOmitOptions = {}> {
+    [K: symbol]: { types: Prisma.TypeMap<ExtArgs>['model']['FabricArticleMaster'], meta: { name: 'FabricArticleMaster' } }
+    /**
+     * Find zero or one FabricArticleMaster that matches the filter.
+     * @param {FabricArticleMasterFindUniqueArgs} args - Arguments to find a FabricArticleMaster
+     * @example
+     * // Get one FabricArticleMaster
+     * const fabricArticleMaster = await prisma.fabricArticleMaster.findUnique({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     */
+    findUnique<T extends FabricArticleMasterFindUniqueArgs>(args: SelectSubset<T, FabricArticleMasterFindUniqueArgs<ExtArgs>>): Prisma__FabricArticleMasterClient<$Result.GetResult<Prisma.$FabricArticleMasterPayload<ExtArgs>, T, "findUnique", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Find one FabricArticleMaster that matches the filter or throw an error with `error.code='P2025'`
+     * if no matches were found.
+     * @param {FabricArticleMasterFindUniqueOrThrowArgs} args - Arguments to find a FabricArticleMaster
+     * @example
+     * // Get one FabricArticleMaster
+     * const fabricArticleMaster = await prisma.fabricArticleMaster.findUniqueOrThrow({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     */
+    findUniqueOrThrow<T extends FabricArticleMasterFindUniqueOrThrowArgs>(args: SelectSubset<T, FabricArticleMasterFindUniqueOrThrowArgs<ExtArgs>>): Prisma__FabricArticleMasterClient<$Result.GetResult<Prisma.$FabricArticleMasterPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Find the first FabricArticleMaster that matches the filter.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {FabricArticleMasterFindFirstArgs} args - Arguments to find a FabricArticleMaster
+     * @example
+     * // Get one FabricArticleMaster
+     * const fabricArticleMaster = await prisma.fabricArticleMaster.findFirst({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     */
+    findFirst<T extends FabricArticleMasterFindFirstArgs>(args?: SelectSubset<T, FabricArticleMasterFindFirstArgs<ExtArgs>>): Prisma__FabricArticleMasterClient<$Result.GetResult<Prisma.$FabricArticleMasterPayload<ExtArgs>, T, "findFirst", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Find the first FabricArticleMaster that matches the filter or
+     * throw `PrismaKnownClientError` with `P2025` code if no matches were found.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {FabricArticleMasterFindFirstOrThrowArgs} args - Arguments to find a FabricArticleMaster
+     * @example
+     * // Get one FabricArticleMaster
+     * const fabricArticleMaster = await prisma.fabricArticleMaster.findFirstOrThrow({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     */
+    findFirstOrThrow<T extends FabricArticleMasterFindFirstOrThrowArgs>(args?: SelectSubset<T, FabricArticleMasterFindFirstOrThrowArgs<ExtArgs>>): Prisma__FabricArticleMasterClient<$Result.GetResult<Prisma.$FabricArticleMasterPayload<ExtArgs>, T, "findFirstOrThrow", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Find zero or more FabricArticleMasters that matches the filter.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {FabricArticleMasterFindManyArgs} args - Arguments to filter and select certain fields only.
+     * @example
+     * // Get all FabricArticleMasters
+     * const fabricArticleMasters = await prisma.fabricArticleMaster.findMany()
+     * 
+     * // Get first 10 FabricArticleMasters
+     * const fabricArticleMasters = await prisma.fabricArticleMaster.findMany({ take: 10 })
+     * 
+     * // Only select the `id`
+     * const fabricArticleMasterWithIdOnly = await prisma.fabricArticleMaster.findMany({ select: { id: true } })
+     * 
+     */
+    findMany<T extends FabricArticleMasterFindManyArgs>(args?: SelectSubset<T, FabricArticleMasterFindManyArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$FabricArticleMasterPayload<ExtArgs>, T, "findMany", GlobalOmitOptions>>
+
+    /**
+     * Create a FabricArticleMaster.
+     * @param {FabricArticleMasterCreateArgs} args - Arguments to create a FabricArticleMaster.
+     * @example
+     * // Create one FabricArticleMaster
+     * const FabricArticleMaster = await prisma.fabricArticleMaster.create({
+     *   data: {
+     *     // ... data to create a FabricArticleMaster
+     *   }
+     * })
+     * 
+     */
+    create<T extends FabricArticleMasterCreateArgs>(args: SelectSubset<T, FabricArticleMasterCreateArgs<ExtArgs>>): Prisma__FabricArticleMasterClient<$Result.GetResult<Prisma.$FabricArticleMasterPayload<ExtArgs>, T, "create", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Create many FabricArticleMasters.
+     * @param {FabricArticleMasterCreateManyArgs} args - Arguments to create many FabricArticleMasters.
+     * @example
+     * // Create many FabricArticleMasters
+     * const fabricArticleMaster = await prisma.fabricArticleMaster.createMany({
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     *     
+     */
+    createMany<T extends FabricArticleMasterCreateManyArgs>(args?: SelectSubset<T, FabricArticleMasterCreateManyArgs<ExtArgs>>): Prisma.PrismaPromise<BatchPayload>
+
+    /**
+     * Create many FabricArticleMasters and returns the data saved in the database.
+     * @param {FabricArticleMasterCreateManyAndReturnArgs} args - Arguments to create many FabricArticleMasters.
+     * @example
+     * // Create many FabricArticleMasters
+     * const fabricArticleMaster = await prisma.fabricArticleMaster.createManyAndReturn({
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     * 
+     * // Create many FabricArticleMasters and only return the `id`
+     * const fabricArticleMasterWithIdOnly = await prisma.fabricArticleMaster.createManyAndReturn({
+     *   select: { id: true },
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * 
+     */
+    createManyAndReturn<T extends FabricArticleMasterCreateManyAndReturnArgs>(args?: SelectSubset<T, FabricArticleMasterCreateManyAndReturnArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$FabricArticleMasterPayload<ExtArgs>, T, "createManyAndReturn", GlobalOmitOptions>>
+
+    /**
+     * Delete a FabricArticleMaster.
+     * @param {FabricArticleMasterDeleteArgs} args - Arguments to delete one FabricArticleMaster.
+     * @example
+     * // Delete one FabricArticleMaster
+     * const FabricArticleMaster = await prisma.fabricArticleMaster.delete({
+     *   where: {
+     *     // ... filter to delete one FabricArticleMaster
+     *   }
+     * })
+     * 
+     */
+    delete<T extends FabricArticleMasterDeleteArgs>(args: SelectSubset<T, FabricArticleMasterDeleteArgs<ExtArgs>>): Prisma__FabricArticleMasterClient<$Result.GetResult<Prisma.$FabricArticleMasterPayload<ExtArgs>, T, "delete", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Update one FabricArticleMaster.
+     * @param {FabricArticleMasterUpdateArgs} args - Arguments to update one FabricArticleMaster.
+     * @example
+     * // Update one FabricArticleMaster
+     * const fabricArticleMaster = await prisma.fabricArticleMaster.update({
+     *   where: {
+     *     // ... provide filter here
+     *   },
+     *   data: {
+     *     // ... provide data here
+     *   }
+     * })
+     * 
+     */
+    update<T extends FabricArticleMasterUpdateArgs>(args: SelectSubset<T, FabricArticleMasterUpdateArgs<ExtArgs>>): Prisma__FabricArticleMasterClient<$Result.GetResult<Prisma.$FabricArticleMasterPayload<ExtArgs>, T, "update", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Delete zero or more FabricArticleMasters.
+     * @param {FabricArticleMasterDeleteManyArgs} args - Arguments to filter FabricArticleMasters to delete.
+     * @example
+     * // Delete a few FabricArticleMasters
+     * const { count } = await prisma.fabricArticleMaster.deleteMany({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     * 
+     */
+    deleteMany<T extends FabricArticleMasterDeleteManyArgs>(args?: SelectSubset<T, FabricArticleMasterDeleteManyArgs<ExtArgs>>): Prisma.PrismaPromise<BatchPayload>
+
+    /**
+     * Update zero or more FabricArticleMasters.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {FabricArticleMasterUpdateManyArgs} args - Arguments to update one or more rows.
+     * @example
+     * // Update many FabricArticleMasters
+     * const fabricArticleMaster = await prisma.fabricArticleMaster.updateMany({
+     *   where: {
+     *     // ... provide filter here
+     *   },
+     *   data: {
+     *     // ... provide data here
+     *   }
+     * })
+     * 
+     */
+    updateMany<T extends FabricArticleMasterUpdateManyArgs>(args: SelectSubset<T, FabricArticleMasterUpdateManyArgs<ExtArgs>>): Prisma.PrismaPromise<BatchPayload>
+
+    /**
+     * Update zero or more FabricArticleMasters and returns the data updated in the database.
+     * @param {FabricArticleMasterUpdateManyAndReturnArgs} args - Arguments to update many FabricArticleMasters.
+     * @example
+     * // Update many FabricArticleMasters
+     * const fabricArticleMaster = await prisma.fabricArticleMaster.updateManyAndReturn({
+     *   where: {
+     *     // ... provide filter here
+     *   },
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     * 
+     * // Update zero or more FabricArticleMasters and only return the `id`
+     * const fabricArticleMasterWithIdOnly = await prisma.fabricArticleMaster.updateManyAndReturn({
+     *   select: { id: true },
+     *   where: {
+     *     // ... provide filter here
+     *   },
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * 
+     */
+    updateManyAndReturn<T extends FabricArticleMasterUpdateManyAndReturnArgs>(args: SelectSubset<T, FabricArticleMasterUpdateManyAndReturnArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$FabricArticleMasterPayload<ExtArgs>, T, "updateManyAndReturn", GlobalOmitOptions>>
+
+    /**
+     * Create or update one FabricArticleMaster.
+     * @param {FabricArticleMasterUpsertArgs} args - Arguments to update or create a FabricArticleMaster.
+     * @example
+     * // Update or create a FabricArticleMaster
+     * const fabricArticleMaster = await prisma.fabricArticleMaster.upsert({
+     *   create: {
+     *     // ... data to create a FabricArticleMaster
+     *   },
+     *   update: {
+     *     // ... in case it already exists, update
+     *   },
+     *   where: {
+     *     // ... the filter for the FabricArticleMaster we want to update
+     *   }
+     * })
+     */
+    upsert<T extends FabricArticleMasterUpsertArgs>(args: SelectSubset<T, FabricArticleMasterUpsertArgs<ExtArgs>>): Prisma__FabricArticleMasterClient<$Result.GetResult<Prisma.$FabricArticleMasterPayload<ExtArgs>, T, "upsert", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+
+    /**
+     * Count the number of FabricArticleMasters.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {FabricArticleMasterCountArgs} args - Arguments to filter FabricArticleMasters to count.
+     * @example
+     * // Count the number of FabricArticleMasters
+     * const count = await prisma.fabricArticleMaster.count({
+     *   where: {
+     *     // ... the filter for the FabricArticleMasters we want to count
+     *   }
+     * })
+    **/
+    count<T extends FabricArticleMasterCountArgs>(
+      args?: Subset<T, FabricArticleMasterCountArgs>,
+    ): Prisma.PrismaPromise<
+      T extends $Utils.Record<'select', any>
+        ? T['select'] extends true
+          ? number
+          : GetScalarType<T['select'], FabricArticleMasterCountAggregateOutputType>
+        : number
+    >
+
+    /**
+     * Allows you to perform aggregations operations on a FabricArticleMaster.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {FabricArticleMasterAggregateArgs} args - Select which aggregations you would like to apply and on what fields.
+     * @example
+     * // Ordered by age ascending
+     * // Where email contains prisma.io
+     * // Limited to the 10 users
+     * const aggregations = await prisma.user.aggregate({
+     *   _avg: {
+     *     age: true,
+     *   },
+     *   where: {
+     *     email: {
+     *       contains: "prisma.io",
+     *     },
+     *   },
+     *   orderBy: {
+     *     age: "asc",
+     *   },
+     *   take: 10,
+     * })
+    **/
+    aggregate<T extends FabricArticleMasterAggregateArgs>(args: Subset<T, FabricArticleMasterAggregateArgs>): Prisma.PrismaPromise<GetFabricArticleMasterAggregateType<T>>
+
+    /**
+     * Group by FabricArticleMaster.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {FabricArticleMasterGroupByArgs} args - Group by arguments.
+     * @example
+     * // Group by city, order by createdAt, get count
+     * const result = await prisma.user.groupBy({
+     *   by: ['city', 'createdAt'],
+     *   orderBy: {
+     *     createdAt: true
+     *   },
+     *   _count: {
+     *     _all: true
+     *   },
+     * })
+     * 
+    **/
+    groupBy<
+      T extends FabricArticleMasterGroupByArgs,
+      HasSelectOrTake extends Or<
+        Extends<'skip', Keys<T>>,
+        Extends<'take', Keys<T>>
+      >,
+      OrderByArg extends True extends HasSelectOrTake
+        ? { orderBy: FabricArticleMasterGroupByArgs['orderBy'] }
+        : { orderBy?: FabricArticleMasterGroupByArgs['orderBy'] },
+      OrderFields extends ExcludeUnderscoreKeys<Keys<MaybeTupleToUnion<T['orderBy']>>>,
+      ByFields extends MaybeTupleToUnion<T['by']>,
+      ByValid extends Has<ByFields, OrderFields>,
+      HavingFields extends GetHavingFields<T['having']>,
+      HavingValid extends Has<ByFields, HavingFields>,
+      ByEmpty extends T['by'] extends never[] ? True : False,
+      InputErrors extends ByEmpty extends True
+      ? `Error: "by" must not be empty.`
+      : HavingValid extends False
+      ? {
+          [P in HavingFields]: P extends ByFields
+            ? never
+            : P extends string
+            ? `Error: Field "${P}" used in "having" needs to be provided in "by".`
+            : [
+                Error,
+                'Field ',
+                P,
+                ` in "having" needs to be provided in "by"`,
+              ]
+        }[HavingFields]
+      : 'take' extends Keys<T>
+      ? 'orderBy' extends Keys<T>
+        ? ByValid extends True
+          ? {}
+          : {
+              [P in OrderFields]: P extends ByFields
+                ? never
+                : `Error: Field "${P}" in "orderBy" needs to be provided in "by"`
+            }[OrderFields]
+        : 'Error: If you provide "take", you also need to provide "orderBy"'
+      : 'skip' extends Keys<T>
+      ? 'orderBy' extends Keys<T>
+        ? ByValid extends True
+          ? {}
+          : {
+              [P in OrderFields]: P extends ByFields
+                ? never
+                : `Error: Field "${P}" in "orderBy" needs to be provided in "by"`
+            }[OrderFields]
+        : 'Error: If you provide "skip", you also need to provide "orderBy"'
+      : ByValid extends True
+      ? {}
+      : {
+          [P in OrderFields]: P extends ByFields
+            ? never
+            : `Error: Field "${P}" in "orderBy" needs to be provided in "by"`
+        }[OrderFields]
+    >(args: SubsetIntersection<T, FabricArticleMasterGroupByArgs, OrderByArg> & InputErrors): {} extends InputErrors ? GetFabricArticleMasterGroupByPayload<T> : Prisma.PrismaPromise<InputErrors>
+  /**
+   * Fields of the FabricArticleMaster model
+   */
+  readonly fields: FabricArticleMasterFieldRefs;
+  }
+
+  /**
+   * The delegate class that acts as a "Promise-like" for FabricArticleMaster.
+   * Why is this prefixed with `Prisma__`?
+   * Because we want to prevent naming conflicts as mentioned in
+   * https://github.com/prisma/prisma-client-js/issues/707
+   */
+  export interface Prisma__FabricArticleMasterClient<T, Null = never, ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs, GlobalOmitOptions = {}> extends Prisma.PrismaPromise<T> {
+    readonly [Symbol.toStringTag]: "PrismaPromise"
+    /**
+     * Attaches callbacks for the resolution and/or rejection of the Promise.
+     * @param onfulfilled The callback to execute when the Promise is resolved.
+     * @param onrejected The callback to execute when the Promise is rejected.
+     * @returns A Promise for the completion of which ever callback is executed.
+     */
+    then<TResult1 = T, TResult2 = never>(onfulfilled?: ((value: T) => TResult1 | PromiseLike<TResult1>) | undefined | null, onrejected?: ((reason: any) => TResult2 | PromiseLike<TResult2>) | undefined | null): $Utils.JsPromise<TResult1 | TResult2>
+    /**
+     * Attaches a callback for only the rejection of the Promise.
+     * @param onrejected The callback to execute when the Promise is rejected.
+     * @returns A Promise for the completion of the callback.
+     */
+    catch<TResult = never>(onrejected?: ((reason: any) => TResult | PromiseLike<TResult>) | undefined | null): $Utils.JsPromise<T | TResult>
+    /**
+     * Attaches a callback that is invoked when the Promise is settled (fulfilled or rejected). The
+     * resolved value cannot be modified from the callback.
+     * @param onfinally The callback to execute when the Promise is settled (fulfilled or rejected).
+     * @returns A Promise for the completion of the callback.
+     */
+    finally(onfinally?: (() => void) | undefined | null): $Utils.JsPromise<T>
+  }
+
+
+
+
+  /**
+   * Fields of the FabricArticleMaster model
+   */
+  interface FabricArticleMasterFieldRefs {
+    readonly id: FieldRef<"FabricArticleMaster", 'Int'>
+    readonly seg: FieldRef<"FabricArticleMaster", 'String'>
+    readonly div: FieldRef<"FabricArticleMaster", 'String'>
+    readonly subDiv: FieldRef<"FabricArticleMaster", 'String'>
+    readonly majCat: FieldRef<"FabricArticleMaster", 'String'>
+    readonly mcCode: FieldRef<"FabricArticleMaster", 'String'>
+    readonly mcDes: FieldRef<"FabricArticleMaster", 'String'>
+    readonly status: FieldRef<"FabricArticleMaster", 'String'>
+    readonly hsnCd: FieldRef<"FabricArticleMaster", 'String'>
+    readonly artType: FieldRef<"FabricArticleMaster", 'String'>
+    readonly createdAt: FieldRef<"FabricArticleMaster", 'DateTime'>
+    readonly updatedAt: FieldRef<"FabricArticleMaster", 'DateTime'>
+  }
+    
+
+  // Custom InputTypes
+  /**
+   * FabricArticleMaster findUnique
+   */
+  export type FabricArticleMasterFindUniqueArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the FabricArticleMaster
+     */
+    select?: FabricArticleMasterSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the FabricArticleMaster
+     */
+    omit?: FabricArticleMasterOmit<ExtArgs> | null
+    /**
+     * Filter, which FabricArticleMaster to fetch.
+     */
+    where: FabricArticleMasterWhereUniqueInput
+  }
+
+  /**
+   * FabricArticleMaster findUniqueOrThrow
+   */
+  export type FabricArticleMasterFindUniqueOrThrowArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the FabricArticleMaster
+     */
+    select?: FabricArticleMasterSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the FabricArticleMaster
+     */
+    omit?: FabricArticleMasterOmit<ExtArgs> | null
+    /**
+     * Filter, which FabricArticleMaster to fetch.
+     */
+    where: FabricArticleMasterWhereUniqueInput
+  }
+
+  /**
+   * FabricArticleMaster findFirst
+   */
+  export type FabricArticleMasterFindFirstArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the FabricArticleMaster
+     */
+    select?: FabricArticleMasterSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the FabricArticleMaster
+     */
+    omit?: FabricArticleMasterOmit<ExtArgs> | null
+    /**
+     * Filter, which FabricArticleMaster to fetch.
+     */
+    where?: FabricArticleMasterWhereInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
+     * 
+     * Determine the order of FabricArticleMasters to fetch.
+     */
+    orderBy?: FabricArticleMasterOrderByWithRelationInput | FabricArticleMasterOrderByWithRelationInput[]
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
+     * 
+     * Sets the position for searching for FabricArticleMasters.
+     */
+    cursor?: FabricArticleMasterWhereUniqueInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Take `±n` FabricArticleMasters from the position of the cursor.
+     */
+    take?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Skip the first `n` FabricArticleMasters.
+     */
+    skip?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/distinct Distinct Docs}
+     * 
+     * Filter by unique combinations of FabricArticleMasters.
+     */
+    distinct?: FabricArticleMasterScalarFieldEnum | FabricArticleMasterScalarFieldEnum[]
+  }
+
+  /**
+   * FabricArticleMaster findFirstOrThrow
+   */
+  export type FabricArticleMasterFindFirstOrThrowArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the FabricArticleMaster
+     */
+    select?: FabricArticleMasterSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the FabricArticleMaster
+     */
+    omit?: FabricArticleMasterOmit<ExtArgs> | null
+    /**
+     * Filter, which FabricArticleMaster to fetch.
+     */
+    where?: FabricArticleMasterWhereInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
+     * 
+     * Determine the order of FabricArticleMasters to fetch.
+     */
+    orderBy?: FabricArticleMasterOrderByWithRelationInput | FabricArticleMasterOrderByWithRelationInput[]
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
+     * 
+     * Sets the position for searching for FabricArticleMasters.
+     */
+    cursor?: FabricArticleMasterWhereUniqueInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Take `±n` FabricArticleMasters from the position of the cursor.
+     */
+    take?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Skip the first `n` FabricArticleMasters.
+     */
+    skip?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/distinct Distinct Docs}
+     * 
+     * Filter by unique combinations of FabricArticleMasters.
+     */
+    distinct?: FabricArticleMasterScalarFieldEnum | FabricArticleMasterScalarFieldEnum[]
+  }
+
+  /**
+   * FabricArticleMaster findMany
+   */
+  export type FabricArticleMasterFindManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the FabricArticleMaster
+     */
+    select?: FabricArticleMasterSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the FabricArticleMaster
+     */
+    omit?: FabricArticleMasterOmit<ExtArgs> | null
+    /**
+     * Filter, which FabricArticleMasters to fetch.
+     */
+    where?: FabricArticleMasterWhereInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
+     * 
+     * Determine the order of FabricArticleMasters to fetch.
+     */
+    orderBy?: FabricArticleMasterOrderByWithRelationInput | FabricArticleMasterOrderByWithRelationInput[]
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
+     * 
+     * Sets the position for listing FabricArticleMasters.
+     */
+    cursor?: FabricArticleMasterWhereUniqueInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Take `±n` FabricArticleMasters from the position of the cursor.
+     */
+    take?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Skip the first `n` FabricArticleMasters.
+     */
+    skip?: number
+    distinct?: FabricArticleMasterScalarFieldEnum | FabricArticleMasterScalarFieldEnum[]
+  }
+
+  /**
+   * FabricArticleMaster create
+   */
+  export type FabricArticleMasterCreateArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the FabricArticleMaster
+     */
+    select?: FabricArticleMasterSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the FabricArticleMaster
+     */
+    omit?: FabricArticleMasterOmit<ExtArgs> | null
+    /**
+     * The data needed to create a FabricArticleMaster.
+     */
+    data: XOR<FabricArticleMasterCreateInput, FabricArticleMasterUncheckedCreateInput>
+  }
+
+  /**
+   * FabricArticleMaster createMany
+   */
+  export type FabricArticleMasterCreateManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * The data used to create many FabricArticleMasters.
+     */
+    data: FabricArticleMasterCreateManyInput | FabricArticleMasterCreateManyInput[]
+    skipDuplicates?: boolean
+  }
+
+  /**
+   * FabricArticleMaster createManyAndReturn
+   */
+  export type FabricArticleMasterCreateManyAndReturnArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the FabricArticleMaster
+     */
+    select?: FabricArticleMasterSelectCreateManyAndReturn<ExtArgs> | null
+    /**
+     * Omit specific fields from the FabricArticleMaster
+     */
+    omit?: FabricArticleMasterOmit<ExtArgs> | null
+    /**
+     * The data used to create many FabricArticleMasters.
+     */
+    data: FabricArticleMasterCreateManyInput | FabricArticleMasterCreateManyInput[]
+    skipDuplicates?: boolean
+  }
+
+  /**
+   * FabricArticleMaster update
+   */
+  export type FabricArticleMasterUpdateArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the FabricArticleMaster
+     */
+    select?: FabricArticleMasterSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the FabricArticleMaster
+     */
+    omit?: FabricArticleMasterOmit<ExtArgs> | null
+    /**
+     * The data needed to update a FabricArticleMaster.
+     */
+    data: XOR<FabricArticleMasterUpdateInput, FabricArticleMasterUncheckedUpdateInput>
+    /**
+     * Choose, which FabricArticleMaster to update.
+     */
+    where: FabricArticleMasterWhereUniqueInput
+  }
+
+  /**
+   * FabricArticleMaster updateMany
+   */
+  export type FabricArticleMasterUpdateManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * The data used to update FabricArticleMasters.
+     */
+    data: XOR<FabricArticleMasterUpdateManyMutationInput, FabricArticleMasterUncheckedUpdateManyInput>
+    /**
+     * Filter which FabricArticleMasters to update
+     */
+    where?: FabricArticleMasterWhereInput
+    /**
+     * Limit how many FabricArticleMasters to update.
+     */
+    limit?: number
+  }
+
+  /**
+   * FabricArticleMaster updateManyAndReturn
+   */
+  export type FabricArticleMasterUpdateManyAndReturnArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the FabricArticleMaster
+     */
+    select?: FabricArticleMasterSelectUpdateManyAndReturn<ExtArgs> | null
+    /**
+     * Omit specific fields from the FabricArticleMaster
+     */
+    omit?: FabricArticleMasterOmit<ExtArgs> | null
+    /**
+     * The data used to update FabricArticleMasters.
+     */
+    data: XOR<FabricArticleMasterUpdateManyMutationInput, FabricArticleMasterUncheckedUpdateManyInput>
+    /**
+     * Filter which FabricArticleMasters to update
+     */
+    where?: FabricArticleMasterWhereInput
+    /**
+     * Limit how many FabricArticleMasters to update.
+     */
+    limit?: number
+  }
+
+  /**
+   * FabricArticleMaster upsert
+   */
+  export type FabricArticleMasterUpsertArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the FabricArticleMaster
+     */
+    select?: FabricArticleMasterSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the FabricArticleMaster
+     */
+    omit?: FabricArticleMasterOmit<ExtArgs> | null
+    /**
+     * The filter to search for the FabricArticleMaster to update in case it exists.
+     */
+    where: FabricArticleMasterWhereUniqueInput
+    /**
+     * In case the FabricArticleMaster found by the `where` argument doesn't exist, create a new FabricArticleMaster with this data.
+     */
+    create: XOR<FabricArticleMasterCreateInput, FabricArticleMasterUncheckedCreateInput>
+    /**
+     * In case the FabricArticleMaster was found with the provided `where` argument, update it with this data.
+     */
+    update: XOR<FabricArticleMasterUpdateInput, FabricArticleMasterUncheckedUpdateInput>
+  }
+
+  /**
+   * FabricArticleMaster delete
+   */
+  export type FabricArticleMasterDeleteArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the FabricArticleMaster
+     */
+    select?: FabricArticleMasterSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the FabricArticleMaster
+     */
+    omit?: FabricArticleMasterOmit<ExtArgs> | null
+    /**
+     * Filter which FabricArticleMaster to delete.
+     */
+    where: FabricArticleMasterWhereUniqueInput
+  }
+
+  /**
+   * FabricArticleMaster deleteMany
+   */
+  export type FabricArticleMasterDeleteManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Filter which FabricArticleMasters to delete
+     */
+    where?: FabricArticleMasterWhereInput
+    /**
+     * Limit how many FabricArticleMasters to delete.
+     */
+    limit?: number
+  }
+
+  /**
+   * FabricArticleMaster without action
+   */
+  export type FabricArticleMasterDefaultArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the FabricArticleMaster
+     */
+    select?: FabricArticleMasterSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the FabricArticleMaster
+     */
+    omit?: FabricArticleMasterOmit<ExtArgs> | null
+  }
+
+
+  /**
+   * Model FabricMajCatGridValue
+   */
+
+  export type AggregateFabricMajCatGridValue = {
+    _count: FabricMajCatGridValueCountAggregateOutputType | null
+    _avg: FabricMajCatGridValueAvgAggregateOutputType | null
+    _sum: FabricMajCatGridValueSumAggregateOutputType | null
+    _min: FabricMajCatGridValueMinAggregateOutputType | null
+    _max: FabricMajCatGridValueMaxAggregateOutputType | null
+  }
+
+  export type FabricMajCatGridValueAvgAggregateOutputType = {
+    id: number | null
+  }
+
+  export type FabricMajCatGridValueSumAggregateOutputType = {
+    id: number | null
+  }
+
+  export type FabricMajCatGridValueMinAggregateOutputType = {
+    id: number | null
+    characteristic: string | null
+    code: string | null
+    fullForm: string | null
+    createdAt: Date | null
+    updatedAt: Date | null
+  }
+
+  export type FabricMajCatGridValueMaxAggregateOutputType = {
+    id: number | null
+    characteristic: string | null
+    code: string | null
+    fullForm: string | null
+    createdAt: Date | null
+    updatedAt: Date | null
+  }
+
+  export type FabricMajCatGridValueCountAggregateOutputType = {
+    id: number
+    characteristic: number
+    code: number
+    fullForm: number
+    createdAt: number
+    updatedAt: number
+    _all: number
+  }
+
+
+  export type FabricMajCatGridValueAvgAggregateInputType = {
+    id?: true
+  }
+
+  export type FabricMajCatGridValueSumAggregateInputType = {
+    id?: true
+  }
+
+  export type FabricMajCatGridValueMinAggregateInputType = {
+    id?: true
+    characteristic?: true
+    code?: true
+    fullForm?: true
+    createdAt?: true
+    updatedAt?: true
+  }
+
+  export type FabricMajCatGridValueMaxAggregateInputType = {
+    id?: true
+    characteristic?: true
+    code?: true
+    fullForm?: true
+    createdAt?: true
+    updatedAt?: true
+  }
+
+  export type FabricMajCatGridValueCountAggregateInputType = {
+    id?: true
+    characteristic?: true
+    code?: true
+    fullForm?: true
+    createdAt?: true
+    updatedAt?: true
+    _all?: true
+  }
+
+  export type FabricMajCatGridValueAggregateArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Filter which FabricMajCatGridValue to aggregate.
+     */
+    where?: FabricMajCatGridValueWhereInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
+     * 
+     * Determine the order of FabricMajCatGridValues to fetch.
+     */
+    orderBy?: FabricMajCatGridValueOrderByWithRelationInput | FabricMajCatGridValueOrderByWithRelationInput[]
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
+     * 
+     * Sets the start position
+     */
+    cursor?: FabricMajCatGridValueWhereUniqueInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Take `±n` FabricMajCatGridValues from the position of the cursor.
+     */
+    take?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Skip the first `n` FabricMajCatGridValues.
+     */
+    skip?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     * 
+     * Count returned FabricMajCatGridValues
+    **/
+    _count?: true | FabricMajCatGridValueCountAggregateInputType
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     * 
+     * Select which fields to average
+    **/
+    _avg?: FabricMajCatGridValueAvgAggregateInputType
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     * 
+     * Select which fields to sum
+    **/
+    _sum?: FabricMajCatGridValueSumAggregateInputType
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     * 
+     * Select which fields to find the minimum value
+    **/
+    _min?: FabricMajCatGridValueMinAggregateInputType
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     * 
+     * Select which fields to find the maximum value
+    **/
+    _max?: FabricMajCatGridValueMaxAggregateInputType
+  }
+
+  export type GetFabricMajCatGridValueAggregateType<T extends FabricMajCatGridValueAggregateArgs> = {
+        [P in keyof T & keyof AggregateFabricMajCatGridValue]: P extends '_count' | 'count'
+      ? T[P] extends true
+        ? number
+        : GetScalarType<T[P], AggregateFabricMajCatGridValue[P]>
+      : GetScalarType<T[P], AggregateFabricMajCatGridValue[P]>
+  }
+
+
+
+
+  export type FabricMajCatGridValueGroupByArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    where?: FabricMajCatGridValueWhereInput
+    orderBy?: FabricMajCatGridValueOrderByWithAggregationInput | FabricMajCatGridValueOrderByWithAggregationInput[]
+    by: FabricMajCatGridValueScalarFieldEnum[] | FabricMajCatGridValueScalarFieldEnum
+    having?: FabricMajCatGridValueScalarWhereWithAggregatesInput
+    take?: number
+    skip?: number
+    _count?: FabricMajCatGridValueCountAggregateInputType | true
+    _avg?: FabricMajCatGridValueAvgAggregateInputType
+    _sum?: FabricMajCatGridValueSumAggregateInputType
+    _min?: FabricMajCatGridValueMinAggregateInputType
+    _max?: FabricMajCatGridValueMaxAggregateInputType
+  }
+
+  export type FabricMajCatGridValueGroupByOutputType = {
+    id: number
+    characteristic: string
+    code: string
+    fullForm: string
+    createdAt: Date
+    updatedAt: Date
+    _count: FabricMajCatGridValueCountAggregateOutputType | null
+    _avg: FabricMajCatGridValueAvgAggregateOutputType | null
+    _sum: FabricMajCatGridValueSumAggregateOutputType | null
+    _min: FabricMajCatGridValueMinAggregateOutputType | null
+    _max: FabricMajCatGridValueMaxAggregateOutputType | null
+  }
+
+  type GetFabricMajCatGridValueGroupByPayload<T extends FabricMajCatGridValueGroupByArgs> = Prisma.PrismaPromise<
+    Array<
+      PickEnumerable<FabricMajCatGridValueGroupByOutputType, T['by']> &
+        {
+          [P in ((keyof T) & (keyof FabricMajCatGridValueGroupByOutputType))]: P extends '_count'
+            ? T[P] extends boolean
+              ? number
+              : GetScalarType<T[P], FabricMajCatGridValueGroupByOutputType[P]>
+            : GetScalarType<T[P], FabricMajCatGridValueGroupByOutputType[P]>
+        }
+      >
+    >
+
+
+  export type FabricMajCatGridValueSelect<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
+    id?: boolean
+    characteristic?: boolean
+    code?: boolean
+    fullForm?: boolean
+    createdAt?: boolean
+    updatedAt?: boolean
+  }, ExtArgs["result"]["fabricMajCatGridValue"]>
+
+  export type FabricMajCatGridValueSelectCreateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
+    id?: boolean
+    characteristic?: boolean
+    code?: boolean
+    fullForm?: boolean
+    createdAt?: boolean
+    updatedAt?: boolean
+  }, ExtArgs["result"]["fabricMajCatGridValue"]>
+
+  export type FabricMajCatGridValueSelectUpdateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
+    id?: boolean
+    characteristic?: boolean
+    code?: boolean
+    fullForm?: boolean
+    createdAt?: boolean
+    updatedAt?: boolean
+  }, ExtArgs["result"]["fabricMajCatGridValue"]>
+
+  export type FabricMajCatGridValueSelectScalar = {
+    id?: boolean
+    characteristic?: boolean
+    code?: boolean
+    fullForm?: boolean
+    createdAt?: boolean
+    updatedAt?: boolean
+  }
+
+  export type FabricMajCatGridValueOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<"id" | "characteristic" | "code" | "fullForm" | "createdAt" | "updatedAt", ExtArgs["result"]["fabricMajCatGridValue"]>
+
+  export type $FabricMajCatGridValuePayload<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    name: "FabricMajCatGridValue"
+    objects: {}
+    scalars: $Extensions.GetPayloadResult<{
+      id: number
+      characteristic: string
+      code: string
+      fullForm: string
+      createdAt: Date
+      updatedAt: Date
+    }, ExtArgs["result"]["fabricMajCatGridValue"]>
+    composites: {}
+  }
+
+  type FabricMajCatGridValueGetPayload<S extends boolean | null | undefined | FabricMajCatGridValueDefaultArgs> = $Result.GetResult<Prisma.$FabricMajCatGridValuePayload, S>
+
+  type FabricMajCatGridValueCountArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> =
+    Omit<FabricMajCatGridValueFindManyArgs, 'select' | 'include' | 'distinct' | 'omit'> & {
+      select?: FabricMajCatGridValueCountAggregateInputType | true
+    }
+
+  export interface FabricMajCatGridValueDelegate<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs, GlobalOmitOptions = {}> {
+    [K: symbol]: { types: Prisma.TypeMap<ExtArgs>['model']['FabricMajCatGridValue'], meta: { name: 'FabricMajCatGridValue' } }
+    /**
+     * Find zero or one FabricMajCatGridValue that matches the filter.
+     * @param {FabricMajCatGridValueFindUniqueArgs} args - Arguments to find a FabricMajCatGridValue
+     * @example
+     * // Get one FabricMajCatGridValue
+     * const fabricMajCatGridValue = await prisma.fabricMajCatGridValue.findUnique({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     */
+    findUnique<T extends FabricMajCatGridValueFindUniqueArgs>(args: SelectSubset<T, FabricMajCatGridValueFindUniqueArgs<ExtArgs>>): Prisma__FabricMajCatGridValueClient<$Result.GetResult<Prisma.$FabricMajCatGridValuePayload<ExtArgs>, T, "findUnique", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Find one FabricMajCatGridValue that matches the filter or throw an error with `error.code='P2025'`
+     * if no matches were found.
+     * @param {FabricMajCatGridValueFindUniqueOrThrowArgs} args - Arguments to find a FabricMajCatGridValue
+     * @example
+     * // Get one FabricMajCatGridValue
+     * const fabricMajCatGridValue = await prisma.fabricMajCatGridValue.findUniqueOrThrow({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     */
+    findUniqueOrThrow<T extends FabricMajCatGridValueFindUniqueOrThrowArgs>(args: SelectSubset<T, FabricMajCatGridValueFindUniqueOrThrowArgs<ExtArgs>>): Prisma__FabricMajCatGridValueClient<$Result.GetResult<Prisma.$FabricMajCatGridValuePayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Find the first FabricMajCatGridValue that matches the filter.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {FabricMajCatGridValueFindFirstArgs} args - Arguments to find a FabricMajCatGridValue
+     * @example
+     * // Get one FabricMajCatGridValue
+     * const fabricMajCatGridValue = await prisma.fabricMajCatGridValue.findFirst({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     */
+    findFirst<T extends FabricMajCatGridValueFindFirstArgs>(args?: SelectSubset<T, FabricMajCatGridValueFindFirstArgs<ExtArgs>>): Prisma__FabricMajCatGridValueClient<$Result.GetResult<Prisma.$FabricMajCatGridValuePayload<ExtArgs>, T, "findFirst", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Find the first FabricMajCatGridValue that matches the filter or
+     * throw `PrismaKnownClientError` with `P2025` code if no matches were found.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {FabricMajCatGridValueFindFirstOrThrowArgs} args - Arguments to find a FabricMajCatGridValue
+     * @example
+     * // Get one FabricMajCatGridValue
+     * const fabricMajCatGridValue = await prisma.fabricMajCatGridValue.findFirstOrThrow({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     */
+    findFirstOrThrow<T extends FabricMajCatGridValueFindFirstOrThrowArgs>(args?: SelectSubset<T, FabricMajCatGridValueFindFirstOrThrowArgs<ExtArgs>>): Prisma__FabricMajCatGridValueClient<$Result.GetResult<Prisma.$FabricMajCatGridValuePayload<ExtArgs>, T, "findFirstOrThrow", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Find zero or more FabricMajCatGridValues that matches the filter.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {FabricMajCatGridValueFindManyArgs} args - Arguments to filter and select certain fields only.
+     * @example
+     * // Get all FabricMajCatGridValues
+     * const fabricMajCatGridValues = await prisma.fabricMajCatGridValue.findMany()
+     * 
+     * // Get first 10 FabricMajCatGridValues
+     * const fabricMajCatGridValues = await prisma.fabricMajCatGridValue.findMany({ take: 10 })
+     * 
+     * // Only select the `id`
+     * const fabricMajCatGridValueWithIdOnly = await prisma.fabricMajCatGridValue.findMany({ select: { id: true } })
+     * 
+     */
+    findMany<T extends FabricMajCatGridValueFindManyArgs>(args?: SelectSubset<T, FabricMajCatGridValueFindManyArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$FabricMajCatGridValuePayload<ExtArgs>, T, "findMany", GlobalOmitOptions>>
+
+    /**
+     * Create a FabricMajCatGridValue.
+     * @param {FabricMajCatGridValueCreateArgs} args - Arguments to create a FabricMajCatGridValue.
+     * @example
+     * // Create one FabricMajCatGridValue
+     * const FabricMajCatGridValue = await prisma.fabricMajCatGridValue.create({
+     *   data: {
+     *     // ... data to create a FabricMajCatGridValue
+     *   }
+     * })
+     * 
+     */
+    create<T extends FabricMajCatGridValueCreateArgs>(args: SelectSubset<T, FabricMajCatGridValueCreateArgs<ExtArgs>>): Prisma__FabricMajCatGridValueClient<$Result.GetResult<Prisma.$FabricMajCatGridValuePayload<ExtArgs>, T, "create", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Create many FabricMajCatGridValues.
+     * @param {FabricMajCatGridValueCreateManyArgs} args - Arguments to create many FabricMajCatGridValues.
+     * @example
+     * // Create many FabricMajCatGridValues
+     * const fabricMajCatGridValue = await prisma.fabricMajCatGridValue.createMany({
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     *     
+     */
+    createMany<T extends FabricMajCatGridValueCreateManyArgs>(args?: SelectSubset<T, FabricMajCatGridValueCreateManyArgs<ExtArgs>>): Prisma.PrismaPromise<BatchPayload>
+
+    /**
+     * Create many FabricMajCatGridValues and returns the data saved in the database.
+     * @param {FabricMajCatGridValueCreateManyAndReturnArgs} args - Arguments to create many FabricMajCatGridValues.
+     * @example
+     * // Create many FabricMajCatGridValues
+     * const fabricMajCatGridValue = await prisma.fabricMajCatGridValue.createManyAndReturn({
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     * 
+     * // Create many FabricMajCatGridValues and only return the `id`
+     * const fabricMajCatGridValueWithIdOnly = await prisma.fabricMajCatGridValue.createManyAndReturn({
+     *   select: { id: true },
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * 
+     */
+    createManyAndReturn<T extends FabricMajCatGridValueCreateManyAndReturnArgs>(args?: SelectSubset<T, FabricMajCatGridValueCreateManyAndReturnArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$FabricMajCatGridValuePayload<ExtArgs>, T, "createManyAndReturn", GlobalOmitOptions>>
+
+    /**
+     * Delete a FabricMajCatGridValue.
+     * @param {FabricMajCatGridValueDeleteArgs} args - Arguments to delete one FabricMajCatGridValue.
+     * @example
+     * // Delete one FabricMajCatGridValue
+     * const FabricMajCatGridValue = await prisma.fabricMajCatGridValue.delete({
+     *   where: {
+     *     // ... filter to delete one FabricMajCatGridValue
+     *   }
+     * })
+     * 
+     */
+    delete<T extends FabricMajCatGridValueDeleteArgs>(args: SelectSubset<T, FabricMajCatGridValueDeleteArgs<ExtArgs>>): Prisma__FabricMajCatGridValueClient<$Result.GetResult<Prisma.$FabricMajCatGridValuePayload<ExtArgs>, T, "delete", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Update one FabricMajCatGridValue.
+     * @param {FabricMajCatGridValueUpdateArgs} args - Arguments to update one FabricMajCatGridValue.
+     * @example
+     * // Update one FabricMajCatGridValue
+     * const fabricMajCatGridValue = await prisma.fabricMajCatGridValue.update({
+     *   where: {
+     *     // ... provide filter here
+     *   },
+     *   data: {
+     *     // ... provide data here
+     *   }
+     * })
+     * 
+     */
+    update<T extends FabricMajCatGridValueUpdateArgs>(args: SelectSubset<T, FabricMajCatGridValueUpdateArgs<ExtArgs>>): Prisma__FabricMajCatGridValueClient<$Result.GetResult<Prisma.$FabricMajCatGridValuePayload<ExtArgs>, T, "update", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Delete zero or more FabricMajCatGridValues.
+     * @param {FabricMajCatGridValueDeleteManyArgs} args - Arguments to filter FabricMajCatGridValues to delete.
+     * @example
+     * // Delete a few FabricMajCatGridValues
+     * const { count } = await prisma.fabricMajCatGridValue.deleteMany({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     * 
+     */
+    deleteMany<T extends FabricMajCatGridValueDeleteManyArgs>(args?: SelectSubset<T, FabricMajCatGridValueDeleteManyArgs<ExtArgs>>): Prisma.PrismaPromise<BatchPayload>
+
+    /**
+     * Update zero or more FabricMajCatGridValues.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {FabricMajCatGridValueUpdateManyArgs} args - Arguments to update one or more rows.
+     * @example
+     * // Update many FabricMajCatGridValues
+     * const fabricMajCatGridValue = await prisma.fabricMajCatGridValue.updateMany({
+     *   where: {
+     *     // ... provide filter here
+     *   },
+     *   data: {
+     *     // ... provide data here
+     *   }
+     * })
+     * 
+     */
+    updateMany<T extends FabricMajCatGridValueUpdateManyArgs>(args: SelectSubset<T, FabricMajCatGridValueUpdateManyArgs<ExtArgs>>): Prisma.PrismaPromise<BatchPayload>
+
+    /**
+     * Update zero or more FabricMajCatGridValues and returns the data updated in the database.
+     * @param {FabricMajCatGridValueUpdateManyAndReturnArgs} args - Arguments to update many FabricMajCatGridValues.
+     * @example
+     * // Update many FabricMajCatGridValues
+     * const fabricMajCatGridValue = await prisma.fabricMajCatGridValue.updateManyAndReturn({
+     *   where: {
+     *     // ... provide filter here
+     *   },
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     * 
+     * // Update zero or more FabricMajCatGridValues and only return the `id`
+     * const fabricMajCatGridValueWithIdOnly = await prisma.fabricMajCatGridValue.updateManyAndReturn({
+     *   select: { id: true },
+     *   where: {
+     *     // ... provide filter here
+     *   },
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * 
+     */
+    updateManyAndReturn<T extends FabricMajCatGridValueUpdateManyAndReturnArgs>(args: SelectSubset<T, FabricMajCatGridValueUpdateManyAndReturnArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$FabricMajCatGridValuePayload<ExtArgs>, T, "updateManyAndReturn", GlobalOmitOptions>>
+
+    /**
+     * Create or update one FabricMajCatGridValue.
+     * @param {FabricMajCatGridValueUpsertArgs} args - Arguments to update or create a FabricMajCatGridValue.
+     * @example
+     * // Update or create a FabricMajCatGridValue
+     * const fabricMajCatGridValue = await prisma.fabricMajCatGridValue.upsert({
+     *   create: {
+     *     // ... data to create a FabricMajCatGridValue
+     *   },
+     *   update: {
+     *     // ... in case it already exists, update
+     *   },
+     *   where: {
+     *     // ... the filter for the FabricMajCatGridValue we want to update
+     *   }
+     * })
+     */
+    upsert<T extends FabricMajCatGridValueUpsertArgs>(args: SelectSubset<T, FabricMajCatGridValueUpsertArgs<ExtArgs>>): Prisma__FabricMajCatGridValueClient<$Result.GetResult<Prisma.$FabricMajCatGridValuePayload<ExtArgs>, T, "upsert", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+
+    /**
+     * Count the number of FabricMajCatGridValues.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {FabricMajCatGridValueCountArgs} args - Arguments to filter FabricMajCatGridValues to count.
+     * @example
+     * // Count the number of FabricMajCatGridValues
+     * const count = await prisma.fabricMajCatGridValue.count({
+     *   where: {
+     *     // ... the filter for the FabricMajCatGridValues we want to count
+     *   }
+     * })
+    **/
+    count<T extends FabricMajCatGridValueCountArgs>(
+      args?: Subset<T, FabricMajCatGridValueCountArgs>,
+    ): Prisma.PrismaPromise<
+      T extends $Utils.Record<'select', any>
+        ? T['select'] extends true
+          ? number
+          : GetScalarType<T['select'], FabricMajCatGridValueCountAggregateOutputType>
+        : number
+    >
+
+    /**
+     * Allows you to perform aggregations operations on a FabricMajCatGridValue.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {FabricMajCatGridValueAggregateArgs} args - Select which aggregations you would like to apply and on what fields.
+     * @example
+     * // Ordered by age ascending
+     * // Where email contains prisma.io
+     * // Limited to the 10 users
+     * const aggregations = await prisma.user.aggregate({
+     *   _avg: {
+     *     age: true,
+     *   },
+     *   where: {
+     *     email: {
+     *       contains: "prisma.io",
+     *     },
+     *   },
+     *   orderBy: {
+     *     age: "asc",
+     *   },
+     *   take: 10,
+     * })
+    **/
+    aggregate<T extends FabricMajCatGridValueAggregateArgs>(args: Subset<T, FabricMajCatGridValueAggregateArgs>): Prisma.PrismaPromise<GetFabricMajCatGridValueAggregateType<T>>
+
+    /**
+     * Group by FabricMajCatGridValue.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {FabricMajCatGridValueGroupByArgs} args - Group by arguments.
+     * @example
+     * // Group by city, order by createdAt, get count
+     * const result = await prisma.user.groupBy({
+     *   by: ['city', 'createdAt'],
+     *   orderBy: {
+     *     createdAt: true
+     *   },
+     *   _count: {
+     *     _all: true
+     *   },
+     * })
+     * 
+    **/
+    groupBy<
+      T extends FabricMajCatGridValueGroupByArgs,
+      HasSelectOrTake extends Or<
+        Extends<'skip', Keys<T>>,
+        Extends<'take', Keys<T>>
+      >,
+      OrderByArg extends True extends HasSelectOrTake
+        ? { orderBy: FabricMajCatGridValueGroupByArgs['orderBy'] }
+        : { orderBy?: FabricMajCatGridValueGroupByArgs['orderBy'] },
+      OrderFields extends ExcludeUnderscoreKeys<Keys<MaybeTupleToUnion<T['orderBy']>>>,
+      ByFields extends MaybeTupleToUnion<T['by']>,
+      ByValid extends Has<ByFields, OrderFields>,
+      HavingFields extends GetHavingFields<T['having']>,
+      HavingValid extends Has<ByFields, HavingFields>,
+      ByEmpty extends T['by'] extends never[] ? True : False,
+      InputErrors extends ByEmpty extends True
+      ? `Error: "by" must not be empty.`
+      : HavingValid extends False
+      ? {
+          [P in HavingFields]: P extends ByFields
+            ? never
+            : P extends string
+            ? `Error: Field "${P}" used in "having" needs to be provided in "by".`
+            : [
+                Error,
+                'Field ',
+                P,
+                ` in "having" needs to be provided in "by"`,
+              ]
+        }[HavingFields]
+      : 'take' extends Keys<T>
+      ? 'orderBy' extends Keys<T>
+        ? ByValid extends True
+          ? {}
+          : {
+              [P in OrderFields]: P extends ByFields
+                ? never
+                : `Error: Field "${P}" in "orderBy" needs to be provided in "by"`
+            }[OrderFields]
+        : 'Error: If you provide "take", you also need to provide "orderBy"'
+      : 'skip' extends Keys<T>
+      ? 'orderBy' extends Keys<T>
+        ? ByValid extends True
+          ? {}
+          : {
+              [P in OrderFields]: P extends ByFields
+                ? never
+                : `Error: Field "${P}" in "orderBy" needs to be provided in "by"`
+            }[OrderFields]
+        : 'Error: If you provide "skip", you also need to provide "orderBy"'
+      : ByValid extends True
+      ? {}
+      : {
+          [P in OrderFields]: P extends ByFields
+            ? never
+            : `Error: Field "${P}" in "orderBy" needs to be provided in "by"`
+        }[OrderFields]
+    >(args: SubsetIntersection<T, FabricMajCatGridValueGroupByArgs, OrderByArg> & InputErrors): {} extends InputErrors ? GetFabricMajCatGridValueGroupByPayload<T> : Prisma.PrismaPromise<InputErrors>
+  /**
+   * Fields of the FabricMajCatGridValue model
+   */
+  readonly fields: FabricMajCatGridValueFieldRefs;
+  }
+
+  /**
+   * The delegate class that acts as a "Promise-like" for FabricMajCatGridValue.
+   * Why is this prefixed with `Prisma__`?
+   * Because we want to prevent naming conflicts as mentioned in
+   * https://github.com/prisma/prisma-client-js/issues/707
+   */
+  export interface Prisma__FabricMajCatGridValueClient<T, Null = never, ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs, GlobalOmitOptions = {}> extends Prisma.PrismaPromise<T> {
+    readonly [Symbol.toStringTag]: "PrismaPromise"
+    /**
+     * Attaches callbacks for the resolution and/or rejection of the Promise.
+     * @param onfulfilled The callback to execute when the Promise is resolved.
+     * @param onrejected The callback to execute when the Promise is rejected.
+     * @returns A Promise for the completion of which ever callback is executed.
+     */
+    then<TResult1 = T, TResult2 = never>(onfulfilled?: ((value: T) => TResult1 | PromiseLike<TResult1>) | undefined | null, onrejected?: ((reason: any) => TResult2 | PromiseLike<TResult2>) | undefined | null): $Utils.JsPromise<TResult1 | TResult2>
+    /**
+     * Attaches a callback for only the rejection of the Promise.
+     * @param onrejected The callback to execute when the Promise is rejected.
+     * @returns A Promise for the completion of the callback.
+     */
+    catch<TResult = never>(onrejected?: ((reason: any) => TResult | PromiseLike<TResult>) | undefined | null): $Utils.JsPromise<T | TResult>
+    /**
+     * Attaches a callback that is invoked when the Promise is settled (fulfilled or rejected). The
+     * resolved value cannot be modified from the callback.
+     * @param onfinally The callback to execute when the Promise is settled (fulfilled or rejected).
+     * @returns A Promise for the completion of the callback.
+     */
+    finally(onfinally?: (() => void) | undefined | null): $Utils.JsPromise<T>
+  }
+
+
+
+
+  /**
+   * Fields of the FabricMajCatGridValue model
+   */
+  interface FabricMajCatGridValueFieldRefs {
+    readonly id: FieldRef<"FabricMajCatGridValue", 'Int'>
+    readonly characteristic: FieldRef<"FabricMajCatGridValue", 'String'>
+    readonly code: FieldRef<"FabricMajCatGridValue", 'String'>
+    readonly fullForm: FieldRef<"FabricMajCatGridValue", 'String'>
+    readonly createdAt: FieldRef<"FabricMajCatGridValue", 'DateTime'>
+    readonly updatedAt: FieldRef<"FabricMajCatGridValue", 'DateTime'>
+  }
+    
+
+  // Custom InputTypes
+  /**
+   * FabricMajCatGridValue findUnique
+   */
+  export type FabricMajCatGridValueFindUniqueArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the FabricMajCatGridValue
+     */
+    select?: FabricMajCatGridValueSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the FabricMajCatGridValue
+     */
+    omit?: FabricMajCatGridValueOmit<ExtArgs> | null
+    /**
+     * Filter, which FabricMajCatGridValue to fetch.
+     */
+    where: FabricMajCatGridValueWhereUniqueInput
+  }
+
+  /**
+   * FabricMajCatGridValue findUniqueOrThrow
+   */
+  export type FabricMajCatGridValueFindUniqueOrThrowArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the FabricMajCatGridValue
+     */
+    select?: FabricMajCatGridValueSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the FabricMajCatGridValue
+     */
+    omit?: FabricMajCatGridValueOmit<ExtArgs> | null
+    /**
+     * Filter, which FabricMajCatGridValue to fetch.
+     */
+    where: FabricMajCatGridValueWhereUniqueInput
+  }
+
+  /**
+   * FabricMajCatGridValue findFirst
+   */
+  export type FabricMajCatGridValueFindFirstArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the FabricMajCatGridValue
+     */
+    select?: FabricMajCatGridValueSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the FabricMajCatGridValue
+     */
+    omit?: FabricMajCatGridValueOmit<ExtArgs> | null
+    /**
+     * Filter, which FabricMajCatGridValue to fetch.
+     */
+    where?: FabricMajCatGridValueWhereInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
+     * 
+     * Determine the order of FabricMajCatGridValues to fetch.
+     */
+    orderBy?: FabricMajCatGridValueOrderByWithRelationInput | FabricMajCatGridValueOrderByWithRelationInput[]
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
+     * 
+     * Sets the position for searching for FabricMajCatGridValues.
+     */
+    cursor?: FabricMajCatGridValueWhereUniqueInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Take `±n` FabricMajCatGridValues from the position of the cursor.
+     */
+    take?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Skip the first `n` FabricMajCatGridValues.
+     */
+    skip?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/distinct Distinct Docs}
+     * 
+     * Filter by unique combinations of FabricMajCatGridValues.
+     */
+    distinct?: FabricMajCatGridValueScalarFieldEnum | FabricMajCatGridValueScalarFieldEnum[]
+  }
+
+  /**
+   * FabricMajCatGridValue findFirstOrThrow
+   */
+  export type FabricMajCatGridValueFindFirstOrThrowArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the FabricMajCatGridValue
+     */
+    select?: FabricMajCatGridValueSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the FabricMajCatGridValue
+     */
+    omit?: FabricMajCatGridValueOmit<ExtArgs> | null
+    /**
+     * Filter, which FabricMajCatGridValue to fetch.
+     */
+    where?: FabricMajCatGridValueWhereInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
+     * 
+     * Determine the order of FabricMajCatGridValues to fetch.
+     */
+    orderBy?: FabricMajCatGridValueOrderByWithRelationInput | FabricMajCatGridValueOrderByWithRelationInput[]
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
+     * 
+     * Sets the position for searching for FabricMajCatGridValues.
+     */
+    cursor?: FabricMajCatGridValueWhereUniqueInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Take `±n` FabricMajCatGridValues from the position of the cursor.
+     */
+    take?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Skip the first `n` FabricMajCatGridValues.
+     */
+    skip?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/distinct Distinct Docs}
+     * 
+     * Filter by unique combinations of FabricMajCatGridValues.
+     */
+    distinct?: FabricMajCatGridValueScalarFieldEnum | FabricMajCatGridValueScalarFieldEnum[]
+  }
+
+  /**
+   * FabricMajCatGridValue findMany
+   */
+  export type FabricMajCatGridValueFindManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the FabricMajCatGridValue
+     */
+    select?: FabricMajCatGridValueSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the FabricMajCatGridValue
+     */
+    omit?: FabricMajCatGridValueOmit<ExtArgs> | null
+    /**
+     * Filter, which FabricMajCatGridValues to fetch.
+     */
+    where?: FabricMajCatGridValueWhereInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
+     * 
+     * Determine the order of FabricMajCatGridValues to fetch.
+     */
+    orderBy?: FabricMajCatGridValueOrderByWithRelationInput | FabricMajCatGridValueOrderByWithRelationInput[]
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
+     * 
+     * Sets the position for listing FabricMajCatGridValues.
+     */
+    cursor?: FabricMajCatGridValueWhereUniqueInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Take `±n` FabricMajCatGridValues from the position of the cursor.
+     */
+    take?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Skip the first `n` FabricMajCatGridValues.
+     */
+    skip?: number
+    distinct?: FabricMajCatGridValueScalarFieldEnum | FabricMajCatGridValueScalarFieldEnum[]
+  }
+
+  /**
+   * FabricMajCatGridValue create
+   */
+  export type FabricMajCatGridValueCreateArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the FabricMajCatGridValue
+     */
+    select?: FabricMajCatGridValueSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the FabricMajCatGridValue
+     */
+    omit?: FabricMajCatGridValueOmit<ExtArgs> | null
+    /**
+     * The data needed to create a FabricMajCatGridValue.
+     */
+    data: XOR<FabricMajCatGridValueCreateInput, FabricMajCatGridValueUncheckedCreateInput>
+  }
+
+  /**
+   * FabricMajCatGridValue createMany
+   */
+  export type FabricMajCatGridValueCreateManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * The data used to create many FabricMajCatGridValues.
+     */
+    data: FabricMajCatGridValueCreateManyInput | FabricMajCatGridValueCreateManyInput[]
+    skipDuplicates?: boolean
+  }
+
+  /**
+   * FabricMajCatGridValue createManyAndReturn
+   */
+  export type FabricMajCatGridValueCreateManyAndReturnArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the FabricMajCatGridValue
+     */
+    select?: FabricMajCatGridValueSelectCreateManyAndReturn<ExtArgs> | null
+    /**
+     * Omit specific fields from the FabricMajCatGridValue
+     */
+    omit?: FabricMajCatGridValueOmit<ExtArgs> | null
+    /**
+     * The data used to create many FabricMajCatGridValues.
+     */
+    data: FabricMajCatGridValueCreateManyInput | FabricMajCatGridValueCreateManyInput[]
+    skipDuplicates?: boolean
+  }
+
+  /**
+   * FabricMajCatGridValue update
+   */
+  export type FabricMajCatGridValueUpdateArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the FabricMajCatGridValue
+     */
+    select?: FabricMajCatGridValueSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the FabricMajCatGridValue
+     */
+    omit?: FabricMajCatGridValueOmit<ExtArgs> | null
+    /**
+     * The data needed to update a FabricMajCatGridValue.
+     */
+    data: XOR<FabricMajCatGridValueUpdateInput, FabricMajCatGridValueUncheckedUpdateInput>
+    /**
+     * Choose, which FabricMajCatGridValue to update.
+     */
+    where: FabricMajCatGridValueWhereUniqueInput
+  }
+
+  /**
+   * FabricMajCatGridValue updateMany
+   */
+  export type FabricMajCatGridValueUpdateManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * The data used to update FabricMajCatGridValues.
+     */
+    data: XOR<FabricMajCatGridValueUpdateManyMutationInput, FabricMajCatGridValueUncheckedUpdateManyInput>
+    /**
+     * Filter which FabricMajCatGridValues to update
+     */
+    where?: FabricMajCatGridValueWhereInput
+    /**
+     * Limit how many FabricMajCatGridValues to update.
+     */
+    limit?: number
+  }
+
+  /**
+   * FabricMajCatGridValue updateManyAndReturn
+   */
+  export type FabricMajCatGridValueUpdateManyAndReturnArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the FabricMajCatGridValue
+     */
+    select?: FabricMajCatGridValueSelectUpdateManyAndReturn<ExtArgs> | null
+    /**
+     * Omit specific fields from the FabricMajCatGridValue
+     */
+    omit?: FabricMajCatGridValueOmit<ExtArgs> | null
+    /**
+     * The data used to update FabricMajCatGridValues.
+     */
+    data: XOR<FabricMajCatGridValueUpdateManyMutationInput, FabricMajCatGridValueUncheckedUpdateManyInput>
+    /**
+     * Filter which FabricMajCatGridValues to update
+     */
+    where?: FabricMajCatGridValueWhereInput
+    /**
+     * Limit how many FabricMajCatGridValues to update.
+     */
+    limit?: number
+  }
+
+  /**
+   * FabricMajCatGridValue upsert
+   */
+  export type FabricMajCatGridValueUpsertArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the FabricMajCatGridValue
+     */
+    select?: FabricMajCatGridValueSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the FabricMajCatGridValue
+     */
+    omit?: FabricMajCatGridValueOmit<ExtArgs> | null
+    /**
+     * The filter to search for the FabricMajCatGridValue to update in case it exists.
+     */
+    where: FabricMajCatGridValueWhereUniqueInput
+    /**
+     * In case the FabricMajCatGridValue found by the `where` argument doesn't exist, create a new FabricMajCatGridValue with this data.
+     */
+    create: XOR<FabricMajCatGridValueCreateInput, FabricMajCatGridValueUncheckedCreateInput>
+    /**
+     * In case the FabricMajCatGridValue was found with the provided `where` argument, update it with this data.
+     */
+    update: XOR<FabricMajCatGridValueUpdateInput, FabricMajCatGridValueUncheckedUpdateInput>
+  }
+
+  /**
+   * FabricMajCatGridValue delete
+   */
+  export type FabricMajCatGridValueDeleteArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the FabricMajCatGridValue
+     */
+    select?: FabricMajCatGridValueSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the FabricMajCatGridValue
+     */
+    omit?: FabricMajCatGridValueOmit<ExtArgs> | null
+    /**
+     * Filter which FabricMajCatGridValue to delete.
+     */
+    where: FabricMajCatGridValueWhereUniqueInput
+  }
+
+  /**
+   * FabricMajCatGridValue deleteMany
+   */
+  export type FabricMajCatGridValueDeleteManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Filter which FabricMajCatGridValues to delete
+     */
+    where?: FabricMajCatGridValueWhereInput
+    /**
+     * Limit how many FabricMajCatGridValues to delete.
+     */
+    limit?: number
+  }
+
+  /**
+   * FabricMajCatGridValue without action
+   */
+  export type FabricMajCatGridValueDefaultArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the FabricMajCatGridValue
+     */
+    select?: FabricMajCatGridValueSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the FabricMajCatGridValue
+     */
+    omit?: FabricMajCatGridValueOmit<ExtArgs> | null
+  }
+
+
+  /**
    * Model ModifyLog
    */
 
@@ -49925,6 +52375,1477 @@ export namespace Prisma {
 
 
   /**
+   * Model BodyArticleData
+   */
+
+  export type AggregateBodyArticleData = {
+    _count: BodyArticleDataCountAggregateOutputType | null
+    _avg: BodyArticleDataAvgAggregateOutputType | null
+    _sum: BodyArticleDataSumAggregateOutputType | null
+    _min: BodyArticleDataMinAggregateOutputType | null
+    _max: BodyArticleDataMaxAggregateOutputType | null
+  }
+
+  export type BodyArticleDataAvgAggregateOutputType = {
+    approvedBy: number | null
+  }
+
+  export type BodyArticleDataSumAggregateOutputType = {
+    approvedBy: number | null
+  }
+
+  export type BodyArticleDataMinAggregateOutputType = {
+    id: string | null
+    mCollarType: string | null
+    mCollarStyle: string | null
+    mNeckType: string | null
+    mNeckStyle: string | null
+    mPlacket: string | null
+    mBltType: string | null
+    mBltStyle: string | null
+    mSleevesMainStyle: string | null
+    mSleeveFold: string | null
+    mBtmFold: string | null
+    mNoOfPocket: string | null
+    mPocket: string | null
+    mExtraPocket: string | null
+    mFit: string | null
+    mBodyStyle: string | null
+    mLength: string | null
+    mSet: string | null
+    bodyArticleNumber: string | null
+    bodyArticleDescription: string | null
+    flatId: string | null
+    articleNumber: string | null
+    division: string | null
+    subDivision: string | null
+    majorCategory: string | null
+    mcCode: string | null
+    vendorName: string | null
+    vendorCode: string | null
+    season: string | null
+    year: string | null
+    hsnTaxCode: string | null
+    approvalStatus: string | null
+    approvedAt: Date | null
+    approvedBy: number | null
+    sapSyncStatus: string | null
+    sapSyncMessage: string | null
+    userName: string | null
+    createdAt: Date | null
+    updatedAt: Date | null
+  }
+
+  export type BodyArticleDataMaxAggregateOutputType = {
+    id: string | null
+    mCollarType: string | null
+    mCollarStyle: string | null
+    mNeckType: string | null
+    mNeckStyle: string | null
+    mPlacket: string | null
+    mBltType: string | null
+    mBltStyle: string | null
+    mSleevesMainStyle: string | null
+    mSleeveFold: string | null
+    mBtmFold: string | null
+    mNoOfPocket: string | null
+    mPocket: string | null
+    mExtraPocket: string | null
+    mFit: string | null
+    mBodyStyle: string | null
+    mLength: string | null
+    mSet: string | null
+    bodyArticleNumber: string | null
+    bodyArticleDescription: string | null
+    flatId: string | null
+    articleNumber: string | null
+    division: string | null
+    subDivision: string | null
+    majorCategory: string | null
+    mcCode: string | null
+    vendorName: string | null
+    vendorCode: string | null
+    season: string | null
+    year: string | null
+    hsnTaxCode: string | null
+    approvalStatus: string | null
+    approvedAt: Date | null
+    approvedBy: number | null
+    sapSyncStatus: string | null
+    sapSyncMessage: string | null
+    userName: string | null
+    createdAt: Date | null
+    updatedAt: Date | null
+  }
+
+  export type BodyArticleDataCountAggregateOutputType = {
+    id: number
+    mCollarType: number
+    mCollarStyle: number
+    mNeckType: number
+    mNeckStyle: number
+    mPlacket: number
+    mBltType: number
+    mBltStyle: number
+    mSleevesMainStyle: number
+    mSleeveFold: number
+    mBtmFold: number
+    mNoOfPocket: number
+    mPocket: number
+    mExtraPocket: number
+    mFit: number
+    mBodyStyle: number
+    mLength: number
+    mSet: number
+    bodyArticleNumber: number
+    bodyArticleDescription: number
+    flatId: number
+    articleNumber: number
+    division: number
+    subDivision: number
+    majorCategory: number
+    mcCode: number
+    vendorName: number
+    vendorCode: number
+    season: number
+    year: number
+    hsnTaxCode: number
+    approvalStatus: number
+    approvedAt: number
+    approvedBy: number
+    sapSyncStatus: number
+    sapSyncMessage: number
+    userName: number
+    createdAt: number
+    updatedAt: number
+    _all: number
+  }
+
+
+  export type BodyArticleDataAvgAggregateInputType = {
+    approvedBy?: true
+  }
+
+  export type BodyArticleDataSumAggregateInputType = {
+    approvedBy?: true
+  }
+
+  export type BodyArticleDataMinAggregateInputType = {
+    id?: true
+    mCollarType?: true
+    mCollarStyle?: true
+    mNeckType?: true
+    mNeckStyle?: true
+    mPlacket?: true
+    mBltType?: true
+    mBltStyle?: true
+    mSleevesMainStyle?: true
+    mSleeveFold?: true
+    mBtmFold?: true
+    mNoOfPocket?: true
+    mPocket?: true
+    mExtraPocket?: true
+    mFit?: true
+    mBodyStyle?: true
+    mLength?: true
+    mSet?: true
+    bodyArticleNumber?: true
+    bodyArticleDescription?: true
+    flatId?: true
+    articleNumber?: true
+    division?: true
+    subDivision?: true
+    majorCategory?: true
+    mcCode?: true
+    vendorName?: true
+    vendorCode?: true
+    season?: true
+    year?: true
+    hsnTaxCode?: true
+    approvalStatus?: true
+    approvedAt?: true
+    approvedBy?: true
+    sapSyncStatus?: true
+    sapSyncMessage?: true
+    userName?: true
+    createdAt?: true
+    updatedAt?: true
+  }
+
+  export type BodyArticleDataMaxAggregateInputType = {
+    id?: true
+    mCollarType?: true
+    mCollarStyle?: true
+    mNeckType?: true
+    mNeckStyle?: true
+    mPlacket?: true
+    mBltType?: true
+    mBltStyle?: true
+    mSleevesMainStyle?: true
+    mSleeveFold?: true
+    mBtmFold?: true
+    mNoOfPocket?: true
+    mPocket?: true
+    mExtraPocket?: true
+    mFit?: true
+    mBodyStyle?: true
+    mLength?: true
+    mSet?: true
+    bodyArticleNumber?: true
+    bodyArticleDescription?: true
+    flatId?: true
+    articleNumber?: true
+    division?: true
+    subDivision?: true
+    majorCategory?: true
+    mcCode?: true
+    vendorName?: true
+    vendorCode?: true
+    season?: true
+    year?: true
+    hsnTaxCode?: true
+    approvalStatus?: true
+    approvedAt?: true
+    approvedBy?: true
+    sapSyncStatus?: true
+    sapSyncMessage?: true
+    userName?: true
+    createdAt?: true
+    updatedAt?: true
+  }
+
+  export type BodyArticleDataCountAggregateInputType = {
+    id?: true
+    mCollarType?: true
+    mCollarStyle?: true
+    mNeckType?: true
+    mNeckStyle?: true
+    mPlacket?: true
+    mBltType?: true
+    mBltStyle?: true
+    mSleevesMainStyle?: true
+    mSleeveFold?: true
+    mBtmFold?: true
+    mNoOfPocket?: true
+    mPocket?: true
+    mExtraPocket?: true
+    mFit?: true
+    mBodyStyle?: true
+    mLength?: true
+    mSet?: true
+    bodyArticleNumber?: true
+    bodyArticleDescription?: true
+    flatId?: true
+    articleNumber?: true
+    division?: true
+    subDivision?: true
+    majorCategory?: true
+    mcCode?: true
+    vendorName?: true
+    vendorCode?: true
+    season?: true
+    year?: true
+    hsnTaxCode?: true
+    approvalStatus?: true
+    approvedAt?: true
+    approvedBy?: true
+    sapSyncStatus?: true
+    sapSyncMessage?: true
+    userName?: true
+    createdAt?: true
+    updatedAt?: true
+    _all?: true
+  }
+
+  export type BodyArticleDataAggregateArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Filter which BodyArticleData to aggregate.
+     */
+    where?: BodyArticleDataWhereInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
+     * 
+     * Determine the order of BodyArticleData to fetch.
+     */
+    orderBy?: BodyArticleDataOrderByWithRelationInput | BodyArticleDataOrderByWithRelationInput[]
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
+     * 
+     * Sets the start position
+     */
+    cursor?: BodyArticleDataWhereUniqueInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Take `±n` BodyArticleData from the position of the cursor.
+     */
+    take?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Skip the first `n` BodyArticleData.
+     */
+    skip?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     * 
+     * Count returned BodyArticleData
+    **/
+    _count?: true | BodyArticleDataCountAggregateInputType
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     * 
+     * Select which fields to average
+    **/
+    _avg?: BodyArticleDataAvgAggregateInputType
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     * 
+     * Select which fields to sum
+    **/
+    _sum?: BodyArticleDataSumAggregateInputType
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     * 
+     * Select which fields to find the minimum value
+    **/
+    _min?: BodyArticleDataMinAggregateInputType
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     * 
+     * Select which fields to find the maximum value
+    **/
+    _max?: BodyArticleDataMaxAggregateInputType
+  }
+
+  export type GetBodyArticleDataAggregateType<T extends BodyArticleDataAggregateArgs> = {
+        [P in keyof T & keyof AggregateBodyArticleData]: P extends '_count' | 'count'
+      ? T[P] extends true
+        ? number
+        : GetScalarType<T[P], AggregateBodyArticleData[P]>
+      : GetScalarType<T[P], AggregateBodyArticleData[P]>
+  }
+
+
+
+
+  export type BodyArticleDataGroupByArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    where?: BodyArticleDataWhereInput
+    orderBy?: BodyArticleDataOrderByWithAggregationInput | BodyArticleDataOrderByWithAggregationInput[]
+    by: BodyArticleDataScalarFieldEnum[] | BodyArticleDataScalarFieldEnum
+    having?: BodyArticleDataScalarWhereWithAggregatesInput
+    take?: number
+    skip?: number
+    _count?: BodyArticleDataCountAggregateInputType | true
+    _avg?: BodyArticleDataAvgAggregateInputType
+    _sum?: BodyArticleDataSumAggregateInputType
+    _min?: BodyArticleDataMinAggregateInputType
+    _max?: BodyArticleDataMaxAggregateInputType
+  }
+
+  export type BodyArticleDataGroupByOutputType = {
+    id: string
+    mCollarType: string | null
+    mCollarStyle: string | null
+    mNeckType: string | null
+    mNeckStyle: string | null
+    mPlacket: string | null
+    mBltType: string | null
+    mBltStyle: string | null
+    mSleevesMainStyle: string | null
+    mSleeveFold: string | null
+    mBtmFold: string | null
+    mNoOfPocket: string | null
+    mPocket: string | null
+    mExtraPocket: string | null
+    mFit: string | null
+    mBodyStyle: string | null
+    mLength: string | null
+    mSet: string | null
+    bodyArticleNumber: string | null
+    bodyArticleDescription: string | null
+    flatId: string | null
+    articleNumber: string | null
+    division: string | null
+    subDivision: string | null
+    majorCategory: string | null
+    mcCode: string | null
+    vendorName: string | null
+    vendorCode: string | null
+    season: string | null
+    year: string | null
+    hsnTaxCode: string | null
+    approvalStatus: string
+    approvedAt: Date | null
+    approvedBy: number | null
+    sapSyncStatus: string
+    sapSyncMessage: string | null
+    userName: string | null
+    createdAt: Date
+    updatedAt: Date
+    _count: BodyArticleDataCountAggregateOutputType | null
+    _avg: BodyArticleDataAvgAggregateOutputType | null
+    _sum: BodyArticleDataSumAggregateOutputType | null
+    _min: BodyArticleDataMinAggregateOutputType | null
+    _max: BodyArticleDataMaxAggregateOutputType | null
+  }
+
+  type GetBodyArticleDataGroupByPayload<T extends BodyArticleDataGroupByArgs> = Prisma.PrismaPromise<
+    Array<
+      PickEnumerable<BodyArticleDataGroupByOutputType, T['by']> &
+        {
+          [P in ((keyof T) & (keyof BodyArticleDataGroupByOutputType))]: P extends '_count'
+            ? T[P] extends boolean
+              ? number
+              : GetScalarType<T[P], BodyArticleDataGroupByOutputType[P]>
+            : GetScalarType<T[P], BodyArticleDataGroupByOutputType[P]>
+        }
+      >
+    >
+
+
+  export type BodyArticleDataSelect<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
+    id?: boolean
+    mCollarType?: boolean
+    mCollarStyle?: boolean
+    mNeckType?: boolean
+    mNeckStyle?: boolean
+    mPlacket?: boolean
+    mBltType?: boolean
+    mBltStyle?: boolean
+    mSleevesMainStyle?: boolean
+    mSleeveFold?: boolean
+    mBtmFold?: boolean
+    mNoOfPocket?: boolean
+    mPocket?: boolean
+    mExtraPocket?: boolean
+    mFit?: boolean
+    mBodyStyle?: boolean
+    mLength?: boolean
+    mSet?: boolean
+    bodyArticleNumber?: boolean
+    bodyArticleDescription?: boolean
+    flatId?: boolean
+    articleNumber?: boolean
+    division?: boolean
+    subDivision?: boolean
+    majorCategory?: boolean
+    mcCode?: boolean
+    vendorName?: boolean
+    vendorCode?: boolean
+    season?: boolean
+    year?: boolean
+    hsnTaxCode?: boolean
+    approvalStatus?: boolean
+    approvedAt?: boolean
+    approvedBy?: boolean
+    sapSyncStatus?: boolean
+    sapSyncMessage?: boolean
+    userName?: boolean
+    createdAt?: boolean
+    updatedAt?: boolean
+  }, ExtArgs["result"]["bodyArticleData"]>
+
+  export type BodyArticleDataSelectCreateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
+    id?: boolean
+    mCollarType?: boolean
+    mCollarStyle?: boolean
+    mNeckType?: boolean
+    mNeckStyle?: boolean
+    mPlacket?: boolean
+    mBltType?: boolean
+    mBltStyle?: boolean
+    mSleevesMainStyle?: boolean
+    mSleeveFold?: boolean
+    mBtmFold?: boolean
+    mNoOfPocket?: boolean
+    mPocket?: boolean
+    mExtraPocket?: boolean
+    mFit?: boolean
+    mBodyStyle?: boolean
+    mLength?: boolean
+    mSet?: boolean
+    bodyArticleNumber?: boolean
+    bodyArticleDescription?: boolean
+    flatId?: boolean
+    articleNumber?: boolean
+    division?: boolean
+    subDivision?: boolean
+    majorCategory?: boolean
+    mcCode?: boolean
+    vendorName?: boolean
+    vendorCode?: boolean
+    season?: boolean
+    year?: boolean
+    hsnTaxCode?: boolean
+    approvalStatus?: boolean
+    approvedAt?: boolean
+    approvedBy?: boolean
+    sapSyncStatus?: boolean
+    sapSyncMessage?: boolean
+    userName?: boolean
+    createdAt?: boolean
+    updatedAt?: boolean
+  }, ExtArgs["result"]["bodyArticleData"]>
+
+  export type BodyArticleDataSelectUpdateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
+    id?: boolean
+    mCollarType?: boolean
+    mCollarStyle?: boolean
+    mNeckType?: boolean
+    mNeckStyle?: boolean
+    mPlacket?: boolean
+    mBltType?: boolean
+    mBltStyle?: boolean
+    mSleevesMainStyle?: boolean
+    mSleeveFold?: boolean
+    mBtmFold?: boolean
+    mNoOfPocket?: boolean
+    mPocket?: boolean
+    mExtraPocket?: boolean
+    mFit?: boolean
+    mBodyStyle?: boolean
+    mLength?: boolean
+    mSet?: boolean
+    bodyArticleNumber?: boolean
+    bodyArticleDescription?: boolean
+    flatId?: boolean
+    articleNumber?: boolean
+    division?: boolean
+    subDivision?: boolean
+    majorCategory?: boolean
+    mcCode?: boolean
+    vendorName?: boolean
+    vendorCode?: boolean
+    season?: boolean
+    year?: boolean
+    hsnTaxCode?: boolean
+    approvalStatus?: boolean
+    approvedAt?: boolean
+    approvedBy?: boolean
+    sapSyncStatus?: boolean
+    sapSyncMessage?: boolean
+    userName?: boolean
+    createdAt?: boolean
+    updatedAt?: boolean
+  }, ExtArgs["result"]["bodyArticleData"]>
+
+  export type BodyArticleDataSelectScalar = {
+    id?: boolean
+    mCollarType?: boolean
+    mCollarStyle?: boolean
+    mNeckType?: boolean
+    mNeckStyle?: boolean
+    mPlacket?: boolean
+    mBltType?: boolean
+    mBltStyle?: boolean
+    mSleevesMainStyle?: boolean
+    mSleeveFold?: boolean
+    mBtmFold?: boolean
+    mNoOfPocket?: boolean
+    mPocket?: boolean
+    mExtraPocket?: boolean
+    mFit?: boolean
+    mBodyStyle?: boolean
+    mLength?: boolean
+    mSet?: boolean
+    bodyArticleNumber?: boolean
+    bodyArticleDescription?: boolean
+    flatId?: boolean
+    articleNumber?: boolean
+    division?: boolean
+    subDivision?: boolean
+    majorCategory?: boolean
+    mcCode?: boolean
+    vendorName?: boolean
+    vendorCode?: boolean
+    season?: boolean
+    year?: boolean
+    hsnTaxCode?: boolean
+    approvalStatus?: boolean
+    approvedAt?: boolean
+    approvedBy?: boolean
+    sapSyncStatus?: boolean
+    sapSyncMessage?: boolean
+    userName?: boolean
+    createdAt?: boolean
+    updatedAt?: boolean
+  }
+
+  export type BodyArticleDataOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<"id" | "mCollarType" | "mCollarStyle" | "mNeckType" | "mNeckStyle" | "mPlacket" | "mBltType" | "mBltStyle" | "mSleevesMainStyle" | "mSleeveFold" | "mBtmFold" | "mNoOfPocket" | "mPocket" | "mExtraPocket" | "mFit" | "mBodyStyle" | "mLength" | "mSet" | "bodyArticleNumber" | "bodyArticleDescription" | "flatId" | "articleNumber" | "division" | "subDivision" | "majorCategory" | "mcCode" | "vendorName" | "vendorCode" | "season" | "year" | "hsnTaxCode" | "approvalStatus" | "approvedAt" | "approvedBy" | "sapSyncStatus" | "sapSyncMessage" | "userName" | "createdAt" | "updatedAt", ExtArgs["result"]["bodyArticleData"]>
+
+  export type $BodyArticleDataPayload<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    name: "BodyArticleData"
+    objects: {}
+    scalars: $Extensions.GetPayloadResult<{
+      id: string
+      mCollarType: string | null
+      mCollarStyle: string | null
+      mNeckType: string | null
+      mNeckStyle: string | null
+      mPlacket: string | null
+      mBltType: string | null
+      mBltStyle: string | null
+      mSleevesMainStyle: string | null
+      mSleeveFold: string | null
+      mBtmFold: string | null
+      mNoOfPocket: string | null
+      mPocket: string | null
+      mExtraPocket: string | null
+      mFit: string | null
+      mBodyStyle: string | null
+      mLength: string | null
+      mSet: string | null
+      bodyArticleNumber: string | null
+      bodyArticleDescription: string | null
+      flatId: string | null
+      articleNumber: string | null
+      division: string | null
+      subDivision: string | null
+      majorCategory: string | null
+      mcCode: string | null
+      vendorName: string | null
+      vendorCode: string | null
+      season: string | null
+      year: string | null
+      hsnTaxCode: string | null
+      approvalStatus: string
+      approvedAt: Date | null
+      approvedBy: number | null
+      sapSyncStatus: string
+      sapSyncMessage: string | null
+      userName: string | null
+      createdAt: Date
+      updatedAt: Date
+    }, ExtArgs["result"]["bodyArticleData"]>
+    composites: {}
+  }
+
+  type BodyArticleDataGetPayload<S extends boolean | null | undefined | BodyArticleDataDefaultArgs> = $Result.GetResult<Prisma.$BodyArticleDataPayload, S>
+
+  type BodyArticleDataCountArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> =
+    Omit<BodyArticleDataFindManyArgs, 'select' | 'include' | 'distinct' | 'omit'> & {
+      select?: BodyArticleDataCountAggregateInputType | true
+    }
+
+  export interface BodyArticleDataDelegate<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs, GlobalOmitOptions = {}> {
+    [K: symbol]: { types: Prisma.TypeMap<ExtArgs>['model']['BodyArticleData'], meta: { name: 'BodyArticleData' } }
+    /**
+     * Find zero or one BodyArticleData that matches the filter.
+     * @param {BodyArticleDataFindUniqueArgs} args - Arguments to find a BodyArticleData
+     * @example
+     * // Get one BodyArticleData
+     * const bodyArticleData = await prisma.bodyArticleData.findUnique({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     */
+    findUnique<T extends BodyArticleDataFindUniqueArgs>(args: SelectSubset<T, BodyArticleDataFindUniqueArgs<ExtArgs>>): Prisma__BodyArticleDataClient<$Result.GetResult<Prisma.$BodyArticleDataPayload<ExtArgs>, T, "findUnique", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Find one BodyArticleData that matches the filter or throw an error with `error.code='P2025'`
+     * if no matches were found.
+     * @param {BodyArticleDataFindUniqueOrThrowArgs} args - Arguments to find a BodyArticleData
+     * @example
+     * // Get one BodyArticleData
+     * const bodyArticleData = await prisma.bodyArticleData.findUniqueOrThrow({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     */
+    findUniqueOrThrow<T extends BodyArticleDataFindUniqueOrThrowArgs>(args: SelectSubset<T, BodyArticleDataFindUniqueOrThrowArgs<ExtArgs>>): Prisma__BodyArticleDataClient<$Result.GetResult<Prisma.$BodyArticleDataPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Find the first BodyArticleData that matches the filter.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {BodyArticleDataFindFirstArgs} args - Arguments to find a BodyArticleData
+     * @example
+     * // Get one BodyArticleData
+     * const bodyArticleData = await prisma.bodyArticleData.findFirst({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     */
+    findFirst<T extends BodyArticleDataFindFirstArgs>(args?: SelectSubset<T, BodyArticleDataFindFirstArgs<ExtArgs>>): Prisma__BodyArticleDataClient<$Result.GetResult<Prisma.$BodyArticleDataPayload<ExtArgs>, T, "findFirst", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Find the first BodyArticleData that matches the filter or
+     * throw `PrismaKnownClientError` with `P2025` code if no matches were found.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {BodyArticleDataFindFirstOrThrowArgs} args - Arguments to find a BodyArticleData
+     * @example
+     * // Get one BodyArticleData
+     * const bodyArticleData = await prisma.bodyArticleData.findFirstOrThrow({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     */
+    findFirstOrThrow<T extends BodyArticleDataFindFirstOrThrowArgs>(args?: SelectSubset<T, BodyArticleDataFindFirstOrThrowArgs<ExtArgs>>): Prisma__BodyArticleDataClient<$Result.GetResult<Prisma.$BodyArticleDataPayload<ExtArgs>, T, "findFirstOrThrow", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Find zero or more BodyArticleData that matches the filter.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {BodyArticleDataFindManyArgs} args - Arguments to filter and select certain fields only.
+     * @example
+     * // Get all BodyArticleData
+     * const bodyArticleData = await prisma.bodyArticleData.findMany()
+     * 
+     * // Get first 10 BodyArticleData
+     * const bodyArticleData = await prisma.bodyArticleData.findMany({ take: 10 })
+     * 
+     * // Only select the `id`
+     * const bodyArticleDataWithIdOnly = await prisma.bodyArticleData.findMany({ select: { id: true } })
+     * 
+     */
+    findMany<T extends BodyArticleDataFindManyArgs>(args?: SelectSubset<T, BodyArticleDataFindManyArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$BodyArticleDataPayload<ExtArgs>, T, "findMany", GlobalOmitOptions>>
+
+    /**
+     * Create a BodyArticleData.
+     * @param {BodyArticleDataCreateArgs} args - Arguments to create a BodyArticleData.
+     * @example
+     * // Create one BodyArticleData
+     * const BodyArticleData = await prisma.bodyArticleData.create({
+     *   data: {
+     *     // ... data to create a BodyArticleData
+     *   }
+     * })
+     * 
+     */
+    create<T extends BodyArticleDataCreateArgs>(args: SelectSubset<T, BodyArticleDataCreateArgs<ExtArgs>>): Prisma__BodyArticleDataClient<$Result.GetResult<Prisma.$BodyArticleDataPayload<ExtArgs>, T, "create", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Create many BodyArticleData.
+     * @param {BodyArticleDataCreateManyArgs} args - Arguments to create many BodyArticleData.
+     * @example
+     * // Create many BodyArticleData
+     * const bodyArticleData = await prisma.bodyArticleData.createMany({
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     *     
+     */
+    createMany<T extends BodyArticleDataCreateManyArgs>(args?: SelectSubset<T, BodyArticleDataCreateManyArgs<ExtArgs>>): Prisma.PrismaPromise<BatchPayload>
+
+    /**
+     * Create many BodyArticleData and returns the data saved in the database.
+     * @param {BodyArticleDataCreateManyAndReturnArgs} args - Arguments to create many BodyArticleData.
+     * @example
+     * // Create many BodyArticleData
+     * const bodyArticleData = await prisma.bodyArticleData.createManyAndReturn({
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     * 
+     * // Create many BodyArticleData and only return the `id`
+     * const bodyArticleDataWithIdOnly = await prisma.bodyArticleData.createManyAndReturn({
+     *   select: { id: true },
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * 
+     */
+    createManyAndReturn<T extends BodyArticleDataCreateManyAndReturnArgs>(args?: SelectSubset<T, BodyArticleDataCreateManyAndReturnArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$BodyArticleDataPayload<ExtArgs>, T, "createManyAndReturn", GlobalOmitOptions>>
+
+    /**
+     * Delete a BodyArticleData.
+     * @param {BodyArticleDataDeleteArgs} args - Arguments to delete one BodyArticleData.
+     * @example
+     * // Delete one BodyArticleData
+     * const BodyArticleData = await prisma.bodyArticleData.delete({
+     *   where: {
+     *     // ... filter to delete one BodyArticleData
+     *   }
+     * })
+     * 
+     */
+    delete<T extends BodyArticleDataDeleteArgs>(args: SelectSubset<T, BodyArticleDataDeleteArgs<ExtArgs>>): Prisma__BodyArticleDataClient<$Result.GetResult<Prisma.$BodyArticleDataPayload<ExtArgs>, T, "delete", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Update one BodyArticleData.
+     * @param {BodyArticleDataUpdateArgs} args - Arguments to update one BodyArticleData.
+     * @example
+     * // Update one BodyArticleData
+     * const bodyArticleData = await prisma.bodyArticleData.update({
+     *   where: {
+     *     // ... provide filter here
+     *   },
+     *   data: {
+     *     // ... provide data here
+     *   }
+     * })
+     * 
+     */
+    update<T extends BodyArticleDataUpdateArgs>(args: SelectSubset<T, BodyArticleDataUpdateArgs<ExtArgs>>): Prisma__BodyArticleDataClient<$Result.GetResult<Prisma.$BodyArticleDataPayload<ExtArgs>, T, "update", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Delete zero or more BodyArticleData.
+     * @param {BodyArticleDataDeleteManyArgs} args - Arguments to filter BodyArticleData to delete.
+     * @example
+     * // Delete a few BodyArticleData
+     * const { count } = await prisma.bodyArticleData.deleteMany({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     * 
+     */
+    deleteMany<T extends BodyArticleDataDeleteManyArgs>(args?: SelectSubset<T, BodyArticleDataDeleteManyArgs<ExtArgs>>): Prisma.PrismaPromise<BatchPayload>
+
+    /**
+     * Update zero or more BodyArticleData.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {BodyArticleDataUpdateManyArgs} args - Arguments to update one or more rows.
+     * @example
+     * // Update many BodyArticleData
+     * const bodyArticleData = await prisma.bodyArticleData.updateMany({
+     *   where: {
+     *     // ... provide filter here
+     *   },
+     *   data: {
+     *     // ... provide data here
+     *   }
+     * })
+     * 
+     */
+    updateMany<T extends BodyArticleDataUpdateManyArgs>(args: SelectSubset<T, BodyArticleDataUpdateManyArgs<ExtArgs>>): Prisma.PrismaPromise<BatchPayload>
+
+    /**
+     * Update zero or more BodyArticleData and returns the data updated in the database.
+     * @param {BodyArticleDataUpdateManyAndReturnArgs} args - Arguments to update many BodyArticleData.
+     * @example
+     * // Update many BodyArticleData
+     * const bodyArticleData = await prisma.bodyArticleData.updateManyAndReturn({
+     *   where: {
+     *     // ... provide filter here
+     *   },
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     * 
+     * // Update zero or more BodyArticleData and only return the `id`
+     * const bodyArticleDataWithIdOnly = await prisma.bodyArticleData.updateManyAndReturn({
+     *   select: { id: true },
+     *   where: {
+     *     // ... provide filter here
+     *   },
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * 
+     */
+    updateManyAndReturn<T extends BodyArticleDataUpdateManyAndReturnArgs>(args: SelectSubset<T, BodyArticleDataUpdateManyAndReturnArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$BodyArticleDataPayload<ExtArgs>, T, "updateManyAndReturn", GlobalOmitOptions>>
+
+    /**
+     * Create or update one BodyArticleData.
+     * @param {BodyArticleDataUpsertArgs} args - Arguments to update or create a BodyArticleData.
+     * @example
+     * // Update or create a BodyArticleData
+     * const bodyArticleData = await prisma.bodyArticleData.upsert({
+     *   create: {
+     *     // ... data to create a BodyArticleData
+     *   },
+     *   update: {
+     *     // ... in case it already exists, update
+     *   },
+     *   where: {
+     *     // ... the filter for the BodyArticleData we want to update
+     *   }
+     * })
+     */
+    upsert<T extends BodyArticleDataUpsertArgs>(args: SelectSubset<T, BodyArticleDataUpsertArgs<ExtArgs>>): Prisma__BodyArticleDataClient<$Result.GetResult<Prisma.$BodyArticleDataPayload<ExtArgs>, T, "upsert", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+
+    /**
+     * Count the number of BodyArticleData.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {BodyArticleDataCountArgs} args - Arguments to filter BodyArticleData to count.
+     * @example
+     * // Count the number of BodyArticleData
+     * const count = await prisma.bodyArticleData.count({
+     *   where: {
+     *     // ... the filter for the BodyArticleData we want to count
+     *   }
+     * })
+    **/
+    count<T extends BodyArticleDataCountArgs>(
+      args?: Subset<T, BodyArticleDataCountArgs>,
+    ): Prisma.PrismaPromise<
+      T extends $Utils.Record<'select', any>
+        ? T['select'] extends true
+          ? number
+          : GetScalarType<T['select'], BodyArticleDataCountAggregateOutputType>
+        : number
+    >
+
+    /**
+     * Allows you to perform aggregations operations on a BodyArticleData.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {BodyArticleDataAggregateArgs} args - Select which aggregations you would like to apply and on what fields.
+     * @example
+     * // Ordered by age ascending
+     * // Where email contains prisma.io
+     * // Limited to the 10 users
+     * const aggregations = await prisma.user.aggregate({
+     *   _avg: {
+     *     age: true,
+     *   },
+     *   where: {
+     *     email: {
+     *       contains: "prisma.io",
+     *     },
+     *   },
+     *   orderBy: {
+     *     age: "asc",
+     *   },
+     *   take: 10,
+     * })
+    **/
+    aggregate<T extends BodyArticleDataAggregateArgs>(args: Subset<T, BodyArticleDataAggregateArgs>): Prisma.PrismaPromise<GetBodyArticleDataAggregateType<T>>
+
+    /**
+     * Group by BodyArticleData.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {BodyArticleDataGroupByArgs} args - Group by arguments.
+     * @example
+     * // Group by city, order by createdAt, get count
+     * const result = await prisma.user.groupBy({
+     *   by: ['city', 'createdAt'],
+     *   orderBy: {
+     *     createdAt: true
+     *   },
+     *   _count: {
+     *     _all: true
+     *   },
+     * })
+     * 
+    **/
+    groupBy<
+      T extends BodyArticleDataGroupByArgs,
+      HasSelectOrTake extends Or<
+        Extends<'skip', Keys<T>>,
+        Extends<'take', Keys<T>>
+      >,
+      OrderByArg extends True extends HasSelectOrTake
+        ? { orderBy: BodyArticleDataGroupByArgs['orderBy'] }
+        : { orderBy?: BodyArticleDataGroupByArgs['orderBy'] },
+      OrderFields extends ExcludeUnderscoreKeys<Keys<MaybeTupleToUnion<T['orderBy']>>>,
+      ByFields extends MaybeTupleToUnion<T['by']>,
+      ByValid extends Has<ByFields, OrderFields>,
+      HavingFields extends GetHavingFields<T['having']>,
+      HavingValid extends Has<ByFields, HavingFields>,
+      ByEmpty extends T['by'] extends never[] ? True : False,
+      InputErrors extends ByEmpty extends True
+      ? `Error: "by" must not be empty.`
+      : HavingValid extends False
+      ? {
+          [P in HavingFields]: P extends ByFields
+            ? never
+            : P extends string
+            ? `Error: Field "${P}" used in "having" needs to be provided in "by".`
+            : [
+                Error,
+                'Field ',
+                P,
+                ` in "having" needs to be provided in "by"`,
+              ]
+        }[HavingFields]
+      : 'take' extends Keys<T>
+      ? 'orderBy' extends Keys<T>
+        ? ByValid extends True
+          ? {}
+          : {
+              [P in OrderFields]: P extends ByFields
+                ? never
+                : `Error: Field "${P}" in "orderBy" needs to be provided in "by"`
+            }[OrderFields]
+        : 'Error: If you provide "take", you also need to provide "orderBy"'
+      : 'skip' extends Keys<T>
+      ? 'orderBy' extends Keys<T>
+        ? ByValid extends True
+          ? {}
+          : {
+              [P in OrderFields]: P extends ByFields
+                ? never
+                : `Error: Field "${P}" in "orderBy" needs to be provided in "by"`
+            }[OrderFields]
+        : 'Error: If you provide "skip", you also need to provide "orderBy"'
+      : ByValid extends True
+      ? {}
+      : {
+          [P in OrderFields]: P extends ByFields
+            ? never
+            : `Error: Field "${P}" in "orderBy" needs to be provided in "by"`
+        }[OrderFields]
+    >(args: SubsetIntersection<T, BodyArticleDataGroupByArgs, OrderByArg> & InputErrors): {} extends InputErrors ? GetBodyArticleDataGroupByPayload<T> : Prisma.PrismaPromise<InputErrors>
+  /**
+   * Fields of the BodyArticleData model
+   */
+  readonly fields: BodyArticleDataFieldRefs;
+  }
+
+  /**
+   * The delegate class that acts as a "Promise-like" for BodyArticleData.
+   * Why is this prefixed with `Prisma__`?
+   * Because we want to prevent naming conflicts as mentioned in
+   * https://github.com/prisma/prisma-client-js/issues/707
+   */
+  export interface Prisma__BodyArticleDataClient<T, Null = never, ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs, GlobalOmitOptions = {}> extends Prisma.PrismaPromise<T> {
+    readonly [Symbol.toStringTag]: "PrismaPromise"
+    /**
+     * Attaches callbacks for the resolution and/or rejection of the Promise.
+     * @param onfulfilled The callback to execute when the Promise is resolved.
+     * @param onrejected The callback to execute when the Promise is rejected.
+     * @returns A Promise for the completion of which ever callback is executed.
+     */
+    then<TResult1 = T, TResult2 = never>(onfulfilled?: ((value: T) => TResult1 | PromiseLike<TResult1>) | undefined | null, onrejected?: ((reason: any) => TResult2 | PromiseLike<TResult2>) | undefined | null): $Utils.JsPromise<TResult1 | TResult2>
+    /**
+     * Attaches a callback for only the rejection of the Promise.
+     * @param onrejected The callback to execute when the Promise is rejected.
+     * @returns A Promise for the completion of the callback.
+     */
+    catch<TResult = never>(onrejected?: ((reason: any) => TResult | PromiseLike<TResult>) | undefined | null): $Utils.JsPromise<T | TResult>
+    /**
+     * Attaches a callback that is invoked when the Promise is settled (fulfilled or rejected). The
+     * resolved value cannot be modified from the callback.
+     * @param onfinally The callback to execute when the Promise is settled (fulfilled or rejected).
+     * @returns A Promise for the completion of the callback.
+     */
+    finally(onfinally?: (() => void) | undefined | null): $Utils.JsPromise<T>
+  }
+
+
+
+
+  /**
+   * Fields of the BodyArticleData model
+   */
+  interface BodyArticleDataFieldRefs {
+    readonly id: FieldRef<"BodyArticleData", 'String'>
+    readonly mCollarType: FieldRef<"BodyArticleData", 'String'>
+    readonly mCollarStyle: FieldRef<"BodyArticleData", 'String'>
+    readonly mNeckType: FieldRef<"BodyArticleData", 'String'>
+    readonly mNeckStyle: FieldRef<"BodyArticleData", 'String'>
+    readonly mPlacket: FieldRef<"BodyArticleData", 'String'>
+    readonly mBltType: FieldRef<"BodyArticleData", 'String'>
+    readonly mBltStyle: FieldRef<"BodyArticleData", 'String'>
+    readonly mSleevesMainStyle: FieldRef<"BodyArticleData", 'String'>
+    readonly mSleeveFold: FieldRef<"BodyArticleData", 'String'>
+    readonly mBtmFold: FieldRef<"BodyArticleData", 'String'>
+    readonly mNoOfPocket: FieldRef<"BodyArticleData", 'String'>
+    readonly mPocket: FieldRef<"BodyArticleData", 'String'>
+    readonly mExtraPocket: FieldRef<"BodyArticleData", 'String'>
+    readonly mFit: FieldRef<"BodyArticleData", 'String'>
+    readonly mBodyStyle: FieldRef<"BodyArticleData", 'String'>
+    readonly mLength: FieldRef<"BodyArticleData", 'String'>
+    readonly mSet: FieldRef<"BodyArticleData", 'String'>
+    readonly bodyArticleNumber: FieldRef<"BodyArticleData", 'String'>
+    readonly bodyArticleDescription: FieldRef<"BodyArticleData", 'String'>
+    readonly flatId: FieldRef<"BodyArticleData", 'String'>
+    readonly articleNumber: FieldRef<"BodyArticleData", 'String'>
+    readonly division: FieldRef<"BodyArticleData", 'String'>
+    readonly subDivision: FieldRef<"BodyArticleData", 'String'>
+    readonly majorCategory: FieldRef<"BodyArticleData", 'String'>
+    readonly mcCode: FieldRef<"BodyArticleData", 'String'>
+    readonly vendorName: FieldRef<"BodyArticleData", 'String'>
+    readonly vendorCode: FieldRef<"BodyArticleData", 'String'>
+    readonly season: FieldRef<"BodyArticleData", 'String'>
+    readonly year: FieldRef<"BodyArticleData", 'String'>
+    readonly hsnTaxCode: FieldRef<"BodyArticleData", 'String'>
+    readonly approvalStatus: FieldRef<"BodyArticleData", 'String'>
+    readonly approvedAt: FieldRef<"BodyArticleData", 'DateTime'>
+    readonly approvedBy: FieldRef<"BodyArticleData", 'Int'>
+    readonly sapSyncStatus: FieldRef<"BodyArticleData", 'String'>
+    readonly sapSyncMessage: FieldRef<"BodyArticleData", 'String'>
+    readonly userName: FieldRef<"BodyArticleData", 'String'>
+    readonly createdAt: FieldRef<"BodyArticleData", 'DateTime'>
+    readonly updatedAt: FieldRef<"BodyArticleData", 'DateTime'>
+  }
+    
+
+  // Custom InputTypes
+  /**
+   * BodyArticleData findUnique
+   */
+  export type BodyArticleDataFindUniqueArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the BodyArticleData
+     */
+    select?: BodyArticleDataSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the BodyArticleData
+     */
+    omit?: BodyArticleDataOmit<ExtArgs> | null
+    /**
+     * Filter, which BodyArticleData to fetch.
+     */
+    where: BodyArticleDataWhereUniqueInput
+  }
+
+  /**
+   * BodyArticleData findUniqueOrThrow
+   */
+  export type BodyArticleDataFindUniqueOrThrowArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the BodyArticleData
+     */
+    select?: BodyArticleDataSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the BodyArticleData
+     */
+    omit?: BodyArticleDataOmit<ExtArgs> | null
+    /**
+     * Filter, which BodyArticleData to fetch.
+     */
+    where: BodyArticleDataWhereUniqueInput
+  }
+
+  /**
+   * BodyArticleData findFirst
+   */
+  export type BodyArticleDataFindFirstArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the BodyArticleData
+     */
+    select?: BodyArticleDataSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the BodyArticleData
+     */
+    omit?: BodyArticleDataOmit<ExtArgs> | null
+    /**
+     * Filter, which BodyArticleData to fetch.
+     */
+    where?: BodyArticleDataWhereInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
+     * 
+     * Determine the order of BodyArticleData to fetch.
+     */
+    orderBy?: BodyArticleDataOrderByWithRelationInput | BodyArticleDataOrderByWithRelationInput[]
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
+     * 
+     * Sets the position for searching for BodyArticleData.
+     */
+    cursor?: BodyArticleDataWhereUniqueInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Take `±n` BodyArticleData from the position of the cursor.
+     */
+    take?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Skip the first `n` BodyArticleData.
+     */
+    skip?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/distinct Distinct Docs}
+     * 
+     * Filter by unique combinations of BodyArticleData.
+     */
+    distinct?: BodyArticleDataScalarFieldEnum | BodyArticleDataScalarFieldEnum[]
+  }
+
+  /**
+   * BodyArticleData findFirstOrThrow
+   */
+  export type BodyArticleDataFindFirstOrThrowArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the BodyArticleData
+     */
+    select?: BodyArticleDataSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the BodyArticleData
+     */
+    omit?: BodyArticleDataOmit<ExtArgs> | null
+    /**
+     * Filter, which BodyArticleData to fetch.
+     */
+    where?: BodyArticleDataWhereInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
+     * 
+     * Determine the order of BodyArticleData to fetch.
+     */
+    orderBy?: BodyArticleDataOrderByWithRelationInput | BodyArticleDataOrderByWithRelationInput[]
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
+     * 
+     * Sets the position for searching for BodyArticleData.
+     */
+    cursor?: BodyArticleDataWhereUniqueInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Take `±n` BodyArticleData from the position of the cursor.
+     */
+    take?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Skip the first `n` BodyArticleData.
+     */
+    skip?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/distinct Distinct Docs}
+     * 
+     * Filter by unique combinations of BodyArticleData.
+     */
+    distinct?: BodyArticleDataScalarFieldEnum | BodyArticleDataScalarFieldEnum[]
+  }
+
+  /**
+   * BodyArticleData findMany
+   */
+  export type BodyArticleDataFindManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the BodyArticleData
+     */
+    select?: BodyArticleDataSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the BodyArticleData
+     */
+    omit?: BodyArticleDataOmit<ExtArgs> | null
+    /**
+     * Filter, which BodyArticleData to fetch.
+     */
+    where?: BodyArticleDataWhereInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
+     * 
+     * Determine the order of BodyArticleData to fetch.
+     */
+    orderBy?: BodyArticleDataOrderByWithRelationInput | BodyArticleDataOrderByWithRelationInput[]
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
+     * 
+     * Sets the position for listing BodyArticleData.
+     */
+    cursor?: BodyArticleDataWhereUniqueInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Take `±n` BodyArticleData from the position of the cursor.
+     */
+    take?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Skip the first `n` BodyArticleData.
+     */
+    skip?: number
+    distinct?: BodyArticleDataScalarFieldEnum | BodyArticleDataScalarFieldEnum[]
+  }
+
+  /**
+   * BodyArticleData create
+   */
+  export type BodyArticleDataCreateArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the BodyArticleData
+     */
+    select?: BodyArticleDataSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the BodyArticleData
+     */
+    omit?: BodyArticleDataOmit<ExtArgs> | null
+    /**
+     * The data needed to create a BodyArticleData.
+     */
+    data: XOR<BodyArticleDataCreateInput, BodyArticleDataUncheckedCreateInput>
+  }
+
+  /**
+   * BodyArticleData createMany
+   */
+  export type BodyArticleDataCreateManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * The data used to create many BodyArticleData.
+     */
+    data: BodyArticleDataCreateManyInput | BodyArticleDataCreateManyInput[]
+    skipDuplicates?: boolean
+  }
+
+  /**
+   * BodyArticleData createManyAndReturn
+   */
+  export type BodyArticleDataCreateManyAndReturnArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the BodyArticleData
+     */
+    select?: BodyArticleDataSelectCreateManyAndReturn<ExtArgs> | null
+    /**
+     * Omit specific fields from the BodyArticleData
+     */
+    omit?: BodyArticleDataOmit<ExtArgs> | null
+    /**
+     * The data used to create many BodyArticleData.
+     */
+    data: BodyArticleDataCreateManyInput | BodyArticleDataCreateManyInput[]
+    skipDuplicates?: boolean
+  }
+
+  /**
+   * BodyArticleData update
+   */
+  export type BodyArticleDataUpdateArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the BodyArticleData
+     */
+    select?: BodyArticleDataSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the BodyArticleData
+     */
+    omit?: BodyArticleDataOmit<ExtArgs> | null
+    /**
+     * The data needed to update a BodyArticleData.
+     */
+    data: XOR<BodyArticleDataUpdateInput, BodyArticleDataUncheckedUpdateInput>
+    /**
+     * Choose, which BodyArticleData to update.
+     */
+    where: BodyArticleDataWhereUniqueInput
+  }
+
+  /**
+   * BodyArticleData updateMany
+   */
+  export type BodyArticleDataUpdateManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * The data used to update BodyArticleData.
+     */
+    data: XOR<BodyArticleDataUpdateManyMutationInput, BodyArticleDataUncheckedUpdateManyInput>
+    /**
+     * Filter which BodyArticleData to update
+     */
+    where?: BodyArticleDataWhereInput
+    /**
+     * Limit how many BodyArticleData to update.
+     */
+    limit?: number
+  }
+
+  /**
+   * BodyArticleData updateManyAndReturn
+   */
+  export type BodyArticleDataUpdateManyAndReturnArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the BodyArticleData
+     */
+    select?: BodyArticleDataSelectUpdateManyAndReturn<ExtArgs> | null
+    /**
+     * Omit specific fields from the BodyArticleData
+     */
+    omit?: BodyArticleDataOmit<ExtArgs> | null
+    /**
+     * The data used to update BodyArticleData.
+     */
+    data: XOR<BodyArticleDataUpdateManyMutationInput, BodyArticleDataUncheckedUpdateManyInput>
+    /**
+     * Filter which BodyArticleData to update
+     */
+    where?: BodyArticleDataWhereInput
+    /**
+     * Limit how many BodyArticleData to update.
+     */
+    limit?: number
+  }
+
+  /**
+   * BodyArticleData upsert
+   */
+  export type BodyArticleDataUpsertArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the BodyArticleData
+     */
+    select?: BodyArticleDataSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the BodyArticleData
+     */
+    omit?: BodyArticleDataOmit<ExtArgs> | null
+    /**
+     * The filter to search for the BodyArticleData to update in case it exists.
+     */
+    where: BodyArticleDataWhereUniqueInput
+    /**
+     * In case the BodyArticleData found by the `where` argument doesn't exist, create a new BodyArticleData with this data.
+     */
+    create: XOR<BodyArticleDataCreateInput, BodyArticleDataUncheckedCreateInput>
+    /**
+     * In case the BodyArticleData was found with the provided `where` argument, update it with this data.
+     */
+    update: XOR<BodyArticleDataUpdateInput, BodyArticleDataUncheckedUpdateInput>
+  }
+
+  /**
+   * BodyArticleData delete
+   */
+  export type BodyArticleDataDeleteArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the BodyArticleData
+     */
+    select?: BodyArticleDataSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the BodyArticleData
+     */
+    omit?: BodyArticleDataOmit<ExtArgs> | null
+    /**
+     * Filter which BodyArticleData to delete.
+     */
+    where: BodyArticleDataWhereUniqueInput
+  }
+
+  /**
+   * BodyArticleData deleteMany
+   */
+  export type BodyArticleDataDeleteManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Filter which BodyArticleData to delete
+     */
+    where?: BodyArticleDataWhereInput
+    /**
+     * Limit how many BodyArticleData to delete.
+     */
+    limit?: number
+  }
+
+  /**
+   * BodyArticleData without action
+   */
+  export type BodyArticleDataDefaultArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the BodyArticleData
+     */
+    select?: BodyArticleDataSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the BodyArticleData
+     */
+    omit?: BodyArticleDataOmit<ExtArgs> | null
+  }
+
+
+  /**
    * Enums
    */
 
@@ -50195,6 +54116,7 @@ export namespace Prisma {
     fabricArticleDescription: 'fabricArticleDescription',
     attrArticleNums: 'attrArticleNums',
     mvgrBrandVendor: 'mvgrBrandVendor',
+    mcDescription: 'mcDescription',
     vendorCode: 'vendorCode',
     mrp: 'mrp',
     impAtrbt2: 'impAtrbt2',
@@ -50740,6 +54662,36 @@ export namespace Prisma {
   export type MajorCatMasterScalarFieldEnum = (typeof MajorCatMasterScalarFieldEnum)[keyof typeof MajorCatMasterScalarFieldEnum]
 
 
+  export const FabricArticleMasterScalarFieldEnum: {
+    id: 'id',
+    seg: 'seg',
+    div: 'div',
+    subDiv: 'subDiv',
+    majCat: 'majCat',
+    mcCode: 'mcCode',
+    mcDes: 'mcDes',
+    status: 'status',
+    hsnCd: 'hsnCd',
+    artType: 'artType',
+    createdAt: 'createdAt',
+    updatedAt: 'updatedAt'
+  };
+
+  export type FabricArticleMasterScalarFieldEnum = (typeof FabricArticleMasterScalarFieldEnum)[keyof typeof FabricArticleMasterScalarFieldEnum]
+
+
+  export const FabricMajCatGridValueScalarFieldEnum: {
+    id: 'id',
+    characteristic: 'characteristic',
+    code: 'code',
+    fullForm: 'fullForm',
+    createdAt: 'createdAt',
+    updatedAt: 'updatedAt'
+  };
+
+  export type FabricMajCatGridValueScalarFieldEnum = (typeof FabricMajCatGridValueScalarFieldEnum)[keyof typeof FabricMajCatGridValueScalarFieldEnum]
+
+
   export const ModifyLogScalarFieldEnum: {
     id: 'id',
     modificationGroupId: 'modificationGroupId',
@@ -50790,6 +54742,51 @@ export namespace Prisma {
   };
 
   export type FabricArticleDataScalarFieldEnum = (typeof FabricArticleDataScalarFieldEnum)[keyof typeof FabricArticleDataScalarFieldEnum]
+
+
+  export const BodyArticleDataScalarFieldEnum: {
+    id: 'id',
+    mCollarType: 'mCollarType',
+    mCollarStyle: 'mCollarStyle',
+    mNeckType: 'mNeckType',
+    mNeckStyle: 'mNeckStyle',
+    mPlacket: 'mPlacket',
+    mBltType: 'mBltType',
+    mBltStyle: 'mBltStyle',
+    mSleevesMainStyle: 'mSleevesMainStyle',
+    mSleeveFold: 'mSleeveFold',
+    mBtmFold: 'mBtmFold',
+    mNoOfPocket: 'mNoOfPocket',
+    mPocket: 'mPocket',
+    mExtraPocket: 'mExtraPocket',
+    mFit: 'mFit',
+    mBodyStyle: 'mBodyStyle',
+    mLength: 'mLength',
+    mSet: 'mSet',
+    bodyArticleNumber: 'bodyArticleNumber',
+    bodyArticleDescription: 'bodyArticleDescription',
+    flatId: 'flatId',
+    articleNumber: 'articleNumber',
+    division: 'division',
+    subDivision: 'subDivision',
+    majorCategory: 'majorCategory',
+    mcCode: 'mcCode',
+    vendorName: 'vendorName',
+    vendorCode: 'vendorCode',
+    season: 'season',
+    year: 'year',
+    hsnTaxCode: 'hsnTaxCode',
+    approvalStatus: 'approvalStatus',
+    approvedAt: 'approvedAt',
+    approvedBy: 'approvedBy',
+    sapSyncStatus: 'sapSyncStatus',
+    sapSyncMessage: 'sapSyncMessage',
+    userName: 'userName',
+    createdAt: 'createdAt',
+    updatedAt: 'updatedAt'
+  };
+
+  export type BodyArticleDataScalarFieldEnum = (typeof BodyArticleDataScalarFieldEnum)[keyof typeof BodyArticleDataScalarFieldEnum]
 
 
   export const SortOrder: {
@@ -51014,6 +55011,7 @@ export namespace Prisma {
     fabricArticleDescription: 'fabricArticleDescription',
     attrArticleNums: 'attrArticleNums',
     mvgrBrandVendor: 'mvgrBrandVendor',
+    mcDescription: 'mcDescription',
     vendorCode: 'vendorCode',
     impAtrbt2: 'impAtrbt2',
     mcCode: 'mcCode',
@@ -51417,6 +55415,30 @@ export namespace Prisma {
   export type MajorCatMasterOrderByRelevanceFieldEnum = (typeof MajorCatMasterOrderByRelevanceFieldEnum)[keyof typeof MajorCatMasterOrderByRelevanceFieldEnum]
 
 
+  export const FabricArticleMasterOrderByRelevanceFieldEnum: {
+    seg: 'seg',
+    div: 'div',
+    subDiv: 'subDiv',
+    majCat: 'majCat',
+    mcCode: 'mcCode',
+    mcDes: 'mcDes',
+    status: 'status',
+    hsnCd: 'hsnCd',
+    artType: 'artType'
+  };
+
+  export type FabricArticleMasterOrderByRelevanceFieldEnum = (typeof FabricArticleMasterOrderByRelevanceFieldEnum)[keyof typeof FabricArticleMasterOrderByRelevanceFieldEnum]
+
+
+  export const FabricMajCatGridValueOrderByRelevanceFieldEnum: {
+    characteristic: 'characteristic',
+    code: 'code',
+    fullForm: 'fullForm'
+  };
+
+  export type FabricMajCatGridValueOrderByRelevanceFieldEnum = (typeof FabricMajCatGridValueOrderByRelevanceFieldEnum)[keyof typeof FabricMajCatGridValueOrderByRelevanceFieldEnum]
+
+
   export const ModifyLogOrderByRelevanceFieldEnum: {
     modificationGroupId: 'modificationGroupId',
     articleNumber: 'articleNumber',
@@ -51461,6 +55483,47 @@ export namespace Prisma {
   };
 
   export type FabricArticleDataOrderByRelevanceFieldEnum = (typeof FabricArticleDataOrderByRelevanceFieldEnum)[keyof typeof FabricArticleDataOrderByRelevanceFieldEnum]
+
+
+  export const BodyArticleDataOrderByRelevanceFieldEnum: {
+    id: 'id',
+    mCollarType: 'mCollarType',
+    mCollarStyle: 'mCollarStyle',
+    mNeckType: 'mNeckType',
+    mNeckStyle: 'mNeckStyle',
+    mPlacket: 'mPlacket',
+    mBltType: 'mBltType',
+    mBltStyle: 'mBltStyle',
+    mSleevesMainStyle: 'mSleevesMainStyle',
+    mSleeveFold: 'mSleeveFold',
+    mBtmFold: 'mBtmFold',
+    mNoOfPocket: 'mNoOfPocket',
+    mPocket: 'mPocket',
+    mExtraPocket: 'mExtraPocket',
+    mFit: 'mFit',
+    mBodyStyle: 'mBodyStyle',
+    mLength: 'mLength',
+    mSet: 'mSet',
+    bodyArticleNumber: 'bodyArticleNumber',
+    bodyArticleDescription: 'bodyArticleDescription',
+    flatId: 'flatId',
+    articleNumber: 'articleNumber',
+    division: 'division',
+    subDivision: 'subDivision',
+    majorCategory: 'majorCategory',
+    mcCode: 'mcCode',
+    vendorName: 'vendorName',
+    vendorCode: 'vendorCode',
+    season: 'season',
+    year: 'year',
+    hsnTaxCode: 'hsnTaxCode',
+    approvalStatus: 'approvalStatus',
+    sapSyncStatus: 'sapSyncStatus',
+    sapSyncMessage: 'sapSyncMessage',
+    userName: 'userName'
+  };
+
+  export type BodyArticleDataOrderByRelevanceFieldEnum = (typeof BodyArticleDataOrderByRelevanceFieldEnum)[keyof typeof BodyArticleDataOrderByRelevanceFieldEnum]
 
 
   /**
@@ -52662,6 +56725,7 @@ export namespace Prisma {
     fabricArticleDescription?: StringNullableFilter<"ExtractionResultFlat"> | string | null
     attrArticleNums?: StringNullableFilter<"ExtractionResultFlat"> | string | null
     mvgrBrandVendor?: StringNullableFilter<"ExtractionResultFlat"> | string | null
+    mcDescription?: StringNullableFilter<"ExtractionResultFlat"> | string | null
     vendorCode?: StringNullableFilter<"ExtractionResultFlat"> | string | null
     mrp?: DecimalNullableFilter<"ExtractionResultFlat"> | Decimal | DecimalJsLike | number | string | null
     impAtrbt2?: StringNullableFilter<"ExtractionResultFlat"> | string | null
@@ -52799,6 +56863,7 @@ export namespace Prisma {
     fabricArticleDescription?: SortOrderInput | SortOrder
     attrArticleNums?: SortOrderInput | SortOrder
     mvgrBrandVendor?: SortOrderInput | SortOrder
+    mcDescription?: SortOrderInput | SortOrder
     vendorCode?: SortOrderInput | SortOrder
     mrp?: SortOrderInput | SortOrder
     impAtrbt2?: SortOrderInput | SortOrder
@@ -52941,6 +57006,7 @@ export namespace Prisma {
     fabricArticleDescription?: StringNullableFilter<"ExtractionResultFlat"> | string | null
     attrArticleNums?: StringNullableFilter<"ExtractionResultFlat"> | string | null
     mvgrBrandVendor?: StringNullableFilter<"ExtractionResultFlat"> | string | null
+    mcDescription?: StringNullableFilter<"ExtractionResultFlat"> | string | null
     vendorCode?: StringNullableFilter<"ExtractionResultFlat"> | string | null
     mrp?: DecimalNullableFilter<"ExtractionResultFlat"> | Decimal | DecimalJsLike | number | string | null
     impAtrbt2?: StringNullableFilter<"ExtractionResultFlat"> | string | null
@@ -53077,6 +57143,7 @@ export namespace Prisma {
     fabricArticleDescription?: SortOrderInput | SortOrder
     attrArticleNums?: SortOrderInput | SortOrder
     mvgrBrandVendor?: SortOrderInput | SortOrder
+    mcDescription?: SortOrderInput | SortOrder
     vendorCode?: SortOrderInput | SortOrder
     mrp?: SortOrderInput | SortOrder
     impAtrbt2?: SortOrderInput | SortOrder
@@ -53219,6 +57286,7 @@ export namespace Prisma {
     fabricArticleDescription?: StringNullableWithAggregatesFilter<"ExtractionResultFlat"> | string | null
     attrArticleNums?: StringNullableWithAggregatesFilter<"ExtractionResultFlat"> | string | null
     mvgrBrandVendor?: StringNullableWithAggregatesFilter<"ExtractionResultFlat"> | string | null
+    mcDescription?: StringNullableWithAggregatesFilter<"ExtractionResultFlat"> | string | null
     vendorCode?: StringNullableWithAggregatesFilter<"ExtractionResultFlat"> | string | null
     mrp?: DecimalNullableWithAggregatesFilter<"ExtractionResultFlat"> | Decimal | DecimalJsLike | number | string | null
     impAtrbt2?: StringNullableWithAggregatesFilter<"ExtractionResultFlat"> | string | null
@@ -55867,6 +59935,158 @@ export namespace Prisma {
     updatedAt?: DateTimeWithAggregatesFilter<"MajorCatMaster"> | Date | string
   }
 
+  export type FabricArticleMasterWhereInput = {
+    AND?: FabricArticleMasterWhereInput | FabricArticleMasterWhereInput[]
+    OR?: FabricArticleMasterWhereInput[]
+    NOT?: FabricArticleMasterWhereInput | FabricArticleMasterWhereInput[]
+    id?: IntFilter<"FabricArticleMaster"> | number
+    seg?: StringFilter<"FabricArticleMaster"> | string
+    div?: StringFilter<"FabricArticleMaster"> | string
+    subDiv?: StringFilter<"FabricArticleMaster"> | string
+    majCat?: StringFilter<"FabricArticleMaster"> | string
+    mcCode?: StringFilter<"FabricArticleMaster"> | string
+    mcDes?: StringFilter<"FabricArticleMaster"> | string
+    status?: StringFilter<"FabricArticleMaster"> | string
+    hsnCd?: StringFilter<"FabricArticleMaster"> | string
+    artType?: StringFilter<"FabricArticleMaster"> | string
+    createdAt?: DateTimeFilter<"FabricArticleMaster"> | Date | string
+    updatedAt?: DateTimeFilter<"FabricArticleMaster"> | Date | string
+  }
+
+  export type FabricArticleMasterOrderByWithRelationInput = {
+    id?: SortOrder
+    seg?: SortOrder
+    div?: SortOrder
+    subDiv?: SortOrder
+    majCat?: SortOrder
+    mcCode?: SortOrder
+    mcDes?: SortOrder
+    status?: SortOrder
+    hsnCd?: SortOrder
+    artType?: SortOrder
+    createdAt?: SortOrder
+    updatedAt?: SortOrder
+    _relevance?: FabricArticleMasterOrderByRelevanceInput
+  }
+
+  export type FabricArticleMasterWhereUniqueInput = Prisma.AtLeast<{
+    id?: number
+    mcCode_mcDes?: FabricArticleMasterMcCodeMcDesCompoundUniqueInput
+    AND?: FabricArticleMasterWhereInput | FabricArticleMasterWhereInput[]
+    OR?: FabricArticleMasterWhereInput[]
+    NOT?: FabricArticleMasterWhereInput | FabricArticleMasterWhereInput[]
+    seg?: StringFilter<"FabricArticleMaster"> | string
+    div?: StringFilter<"FabricArticleMaster"> | string
+    subDiv?: StringFilter<"FabricArticleMaster"> | string
+    majCat?: StringFilter<"FabricArticleMaster"> | string
+    mcCode?: StringFilter<"FabricArticleMaster"> | string
+    mcDes?: StringFilter<"FabricArticleMaster"> | string
+    status?: StringFilter<"FabricArticleMaster"> | string
+    hsnCd?: StringFilter<"FabricArticleMaster"> | string
+    artType?: StringFilter<"FabricArticleMaster"> | string
+    createdAt?: DateTimeFilter<"FabricArticleMaster"> | Date | string
+    updatedAt?: DateTimeFilter<"FabricArticleMaster"> | Date | string
+  }, "id" | "mcCode_mcDes">
+
+  export type FabricArticleMasterOrderByWithAggregationInput = {
+    id?: SortOrder
+    seg?: SortOrder
+    div?: SortOrder
+    subDiv?: SortOrder
+    majCat?: SortOrder
+    mcCode?: SortOrder
+    mcDes?: SortOrder
+    status?: SortOrder
+    hsnCd?: SortOrder
+    artType?: SortOrder
+    createdAt?: SortOrder
+    updatedAt?: SortOrder
+    _count?: FabricArticleMasterCountOrderByAggregateInput
+    _avg?: FabricArticleMasterAvgOrderByAggregateInput
+    _max?: FabricArticleMasterMaxOrderByAggregateInput
+    _min?: FabricArticleMasterMinOrderByAggregateInput
+    _sum?: FabricArticleMasterSumOrderByAggregateInput
+  }
+
+  export type FabricArticleMasterScalarWhereWithAggregatesInput = {
+    AND?: FabricArticleMasterScalarWhereWithAggregatesInput | FabricArticleMasterScalarWhereWithAggregatesInput[]
+    OR?: FabricArticleMasterScalarWhereWithAggregatesInput[]
+    NOT?: FabricArticleMasterScalarWhereWithAggregatesInput | FabricArticleMasterScalarWhereWithAggregatesInput[]
+    id?: IntWithAggregatesFilter<"FabricArticleMaster"> | number
+    seg?: StringWithAggregatesFilter<"FabricArticleMaster"> | string
+    div?: StringWithAggregatesFilter<"FabricArticleMaster"> | string
+    subDiv?: StringWithAggregatesFilter<"FabricArticleMaster"> | string
+    majCat?: StringWithAggregatesFilter<"FabricArticleMaster"> | string
+    mcCode?: StringWithAggregatesFilter<"FabricArticleMaster"> | string
+    mcDes?: StringWithAggregatesFilter<"FabricArticleMaster"> | string
+    status?: StringWithAggregatesFilter<"FabricArticleMaster"> | string
+    hsnCd?: StringWithAggregatesFilter<"FabricArticleMaster"> | string
+    artType?: StringWithAggregatesFilter<"FabricArticleMaster"> | string
+    createdAt?: DateTimeWithAggregatesFilter<"FabricArticleMaster"> | Date | string
+    updatedAt?: DateTimeWithAggregatesFilter<"FabricArticleMaster"> | Date | string
+  }
+
+  export type FabricMajCatGridValueWhereInput = {
+    AND?: FabricMajCatGridValueWhereInput | FabricMajCatGridValueWhereInput[]
+    OR?: FabricMajCatGridValueWhereInput[]
+    NOT?: FabricMajCatGridValueWhereInput | FabricMajCatGridValueWhereInput[]
+    id?: IntFilter<"FabricMajCatGridValue"> | number
+    characteristic?: StringFilter<"FabricMajCatGridValue"> | string
+    code?: StringFilter<"FabricMajCatGridValue"> | string
+    fullForm?: StringFilter<"FabricMajCatGridValue"> | string
+    createdAt?: DateTimeFilter<"FabricMajCatGridValue"> | Date | string
+    updatedAt?: DateTimeFilter<"FabricMajCatGridValue"> | Date | string
+  }
+
+  export type FabricMajCatGridValueOrderByWithRelationInput = {
+    id?: SortOrder
+    characteristic?: SortOrder
+    code?: SortOrder
+    fullForm?: SortOrder
+    createdAt?: SortOrder
+    updatedAt?: SortOrder
+    _relevance?: FabricMajCatGridValueOrderByRelevanceInput
+  }
+
+  export type FabricMajCatGridValueWhereUniqueInput = Prisma.AtLeast<{
+    id?: number
+    characteristic_code?: FabricMajCatGridValueCharacteristicCodeCompoundUniqueInput
+    AND?: FabricMajCatGridValueWhereInput | FabricMajCatGridValueWhereInput[]
+    OR?: FabricMajCatGridValueWhereInput[]
+    NOT?: FabricMajCatGridValueWhereInput | FabricMajCatGridValueWhereInput[]
+    characteristic?: StringFilter<"FabricMajCatGridValue"> | string
+    code?: StringFilter<"FabricMajCatGridValue"> | string
+    fullForm?: StringFilter<"FabricMajCatGridValue"> | string
+    createdAt?: DateTimeFilter<"FabricMajCatGridValue"> | Date | string
+    updatedAt?: DateTimeFilter<"FabricMajCatGridValue"> | Date | string
+  }, "id" | "characteristic_code">
+
+  export type FabricMajCatGridValueOrderByWithAggregationInput = {
+    id?: SortOrder
+    characteristic?: SortOrder
+    code?: SortOrder
+    fullForm?: SortOrder
+    createdAt?: SortOrder
+    updatedAt?: SortOrder
+    _count?: FabricMajCatGridValueCountOrderByAggregateInput
+    _avg?: FabricMajCatGridValueAvgOrderByAggregateInput
+    _max?: FabricMajCatGridValueMaxOrderByAggregateInput
+    _min?: FabricMajCatGridValueMinOrderByAggregateInput
+    _sum?: FabricMajCatGridValueSumOrderByAggregateInput
+  }
+
+  export type FabricMajCatGridValueScalarWhereWithAggregatesInput = {
+    AND?: FabricMajCatGridValueScalarWhereWithAggregatesInput | FabricMajCatGridValueScalarWhereWithAggregatesInput[]
+    OR?: FabricMajCatGridValueScalarWhereWithAggregatesInput[]
+    NOT?: FabricMajCatGridValueScalarWhereWithAggregatesInput | FabricMajCatGridValueScalarWhereWithAggregatesInput[]
+    id?: IntWithAggregatesFilter<"FabricMajCatGridValue"> | number
+    characteristic?: StringWithAggregatesFilter<"FabricMajCatGridValue"> | string
+    code?: StringWithAggregatesFilter<"FabricMajCatGridValue"> | string
+    fullForm?: StringWithAggregatesFilter<"FabricMajCatGridValue"> | string
+    createdAt?: DateTimeWithAggregatesFilter<"FabricMajCatGridValue"> | Date | string
+    updatedAt?: DateTimeWithAggregatesFilter<"FabricMajCatGridValue"> | Date | string
+  }
+
   export type ModifyLogWhereInput = {
     AND?: ModifyLogWhereInput | ModifyLogWhereInput[]
     OR?: ModifyLogWhereInput[]
@@ -56125,6 +60345,231 @@ export namespace Prisma {
     userName?: StringNullableWithAggregatesFilter<"FabricArticleData"> | string | null
     createdAt?: DateTimeWithAggregatesFilter<"FabricArticleData"> | Date | string
     updatedAt?: DateTimeWithAggregatesFilter<"FabricArticleData"> | Date | string
+  }
+
+  export type BodyArticleDataWhereInput = {
+    AND?: BodyArticleDataWhereInput | BodyArticleDataWhereInput[]
+    OR?: BodyArticleDataWhereInput[]
+    NOT?: BodyArticleDataWhereInput | BodyArticleDataWhereInput[]
+    id?: StringFilter<"BodyArticleData"> | string
+    mCollarType?: StringNullableFilter<"BodyArticleData"> | string | null
+    mCollarStyle?: StringNullableFilter<"BodyArticleData"> | string | null
+    mNeckType?: StringNullableFilter<"BodyArticleData"> | string | null
+    mNeckStyle?: StringNullableFilter<"BodyArticleData"> | string | null
+    mPlacket?: StringNullableFilter<"BodyArticleData"> | string | null
+    mBltType?: StringNullableFilter<"BodyArticleData"> | string | null
+    mBltStyle?: StringNullableFilter<"BodyArticleData"> | string | null
+    mSleevesMainStyle?: StringNullableFilter<"BodyArticleData"> | string | null
+    mSleeveFold?: StringNullableFilter<"BodyArticleData"> | string | null
+    mBtmFold?: StringNullableFilter<"BodyArticleData"> | string | null
+    mNoOfPocket?: StringNullableFilter<"BodyArticleData"> | string | null
+    mPocket?: StringNullableFilter<"BodyArticleData"> | string | null
+    mExtraPocket?: StringNullableFilter<"BodyArticleData"> | string | null
+    mFit?: StringNullableFilter<"BodyArticleData"> | string | null
+    mBodyStyle?: StringNullableFilter<"BodyArticleData"> | string | null
+    mLength?: StringNullableFilter<"BodyArticleData"> | string | null
+    mSet?: StringNullableFilter<"BodyArticleData"> | string | null
+    bodyArticleNumber?: StringNullableFilter<"BodyArticleData"> | string | null
+    bodyArticleDescription?: StringNullableFilter<"BodyArticleData"> | string | null
+    flatId?: StringNullableFilter<"BodyArticleData"> | string | null
+    articleNumber?: StringNullableFilter<"BodyArticleData"> | string | null
+    division?: StringNullableFilter<"BodyArticleData"> | string | null
+    subDivision?: StringNullableFilter<"BodyArticleData"> | string | null
+    majorCategory?: StringNullableFilter<"BodyArticleData"> | string | null
+    mcCode?: StringNullableFilter<"BodyArticleData"> | string | null
+    vendorName?: StringNullableFilter<"BodyArticleData"> | string | null
+    vendorCode?: StringNullableFilter<"BodyArticleData"> | string | null
+    season?: StringNullableFilter<"BodyArticleData"> | string | null
+    year?: StringNullableFilter<"BodyArticleData"> | string | null
+    hsnTaxCode?: StringNullableFilter<"BodyArticleData"> | string | null
+    approvalStatus?: StringFilter<"BodyArticleData"> | string
+    approvedAt?: DateTimeNullableFilter<"BodyArticleData"> | Date | string | null
+    approvedBy?: IntNullableFilter<"BodyArticleData"> | number | null
+    sapSyncStatus?: StringFilter<"BodyArticleData"> | string
+    sapSyncMessage?: StringNullableFilter<"BodyArticleData"> | string | null
+    userName?: StringNullableFilter<"BodyArticleData"> | string | null
+    createdAt?: DateTimeFilter<"BodyArticleData"> | Date | string
+    updatedAt?: DateTimeFilter<"BodyArticleData"> | Date | string
+  }
+
+  export type BodyArticleDataOrderByWithRelationInput = {
+    id?: SortOrder
+    mCollarType?: SortOrderInput | SortOrder
+    mCollarStyle?: SortOrderInput | SortOrder
+    mNeckType?: SortOrderInput | SortOrder
+    mNeckStyle?: SortOrderInput | SortOrder
+    mPlacket?: SortOrderInput | SortOrder
+    mBltType?: SortOrderInput | SortOrder
+    mBltStyle?: SortOrderInput | SortOrder
+    mSleevesMainStyle?: SortOrderInput | SortOrder
+    mSleeveFold?: SortOrderInput | SortOrder
+    mBtmFold?: SortOrderInput | SortOrder
+    mNoOfPocket?: SortOrderInput | SortOrder
+    mPocket?: SortOrderInput | SortOrder
+    mExtraPocket?: SortOrderInput | SortOrder
+    mFit?: SortOrderInput | SortOrder
+    mBodyStyle?: SortOrderInput | SortOrder
+    mLength?: SortOrderInput | SortOrder
+    mSet?: SortOrderInput | SortOrder
+    bodyArticleNumber?: SortOrderInput | SortOrder
+    bodyArticleDescription?: SortOrderInput | SortOrder
+    flatId?: SortOrderInput | SortOrder
+    articleNumber?: SortOrderInput | SortOrder
+    division?: SortOrderInput | SortOrder
+    subDivision?: SortOrderInput | SortOrder
+    majorCategory?: SortOrderInput | SortOrder
+    mcCode?: SortOrderInput | SortOrder
+    vendorName?: SortOrderInput | SortOrder
+    vendorCode?: SortOrderInput | SortOrder
+    season?: SortOrderInput | SortOrder
+    year?: SortOrderInput | SortOrder
+    hsnTaxCode?: SortOrderInput | SortOrder
+    approvalStatus?: SortOrder
+    approvedAt?: SortOrderInput | SortOrder
+    approvedBy?: SortOrderInput | SortOrder
+    sapSyncStatus?: SortOrder
+    sapSyncMessage?: SortOrderInput | SortOrder
+    userName?: SortOrderInput | SortOrder
+    createdAt?: SortOrder
+    updatedAt?: SortOrder
+    _relevance?: BodyArticleDataOrderByRelevanceInput
+  }
+
+  export type BodyArticleDataWhereUniqueInput = Prisma.AtLeast<{
+    id?: string
+    AND?: BodyArticleDataWhereInput | BodyArticleDataWhereInput[]
+    OR?: BodyArticleDataWhereInput[]
+    NOT?: BodyArticleDataWhereInput | BodyArticleDataWhereInput[]
+    mCollarType?: StringNullableFilter<"BodyArticleData"> | string | null
+    mCollarStyle?: StringNullableFilter<"BodyArticleData"> | string | null
+    mNeckType?: StringNullableFilter<"BodyArticleData"> | string | null
+    mNeckStyle?: StringNullableFilter<"BodyArticleData"> | string | null
+    mPlacket?: StringNullableFilter<"BodyArticleData"> | string | null
+    mBltType?: StringNullableFilter<"BodyArticleData"> | string | null
+    mBltStyle?: StringNullableFilter<"BodyArticleData"> | string | null
+    mSleevesMainStyle?: StringNullableFilter<"BodyArticleData"> | string | null
+    mSleeveFold?: StringNullableFilter<"BodyArticleData"> | string | null
+    mBtmFold?: StringNullableFilter<"BodyArticleData"> | string | null
+    mNoOfPocket?: StringNullableFilter<"BodyArticleData"> | string | null
+    mPocket?: StringNullableFilter<"BodyArticleData"> | string | null
+    mExtraPocket?: StringNullableFilter<"BodyArticleData"> | string | null
+    mFit?: StringNullableFilter<"BodyArticleData"> | string | null
+    mBodyStyle?: StringNullableFilter<"BodyArticleData"> | string | null
+    mLength?: StringNullableFilter<"BodyArticleData"> | string | null
+    mSet?: StringNullableFilter<"BodyArticleData"> | string | null
+    bodyArticleNumber?: StringNullableFilter<"BodyArticleData"> | string | null
+    bodyArticleDescription?: StringNullableFilter<"BodyArticleData"> | string | null
+    flatId?: StringNullableFilter<"BodyArticleData"> | string | null
+    articleNumber?: StringNullableFilter<"BodyArticleData"> | string | null
+    division?: StringNullableFilter<"BodyArticleData"> | string | null
+    subDivision?: StringNullableFilter<"BodyArticleData"> | string | null
+    majorCategory?: StringNullableFilter<"BodyArticleData"> | string | null
+    mcCode?: StringNullableFilter<"BodyArticleData"> | string | null
+    vendorName?: StringNullableFilter<"BodyArticleData"> | string | null
+    vendorCode?: StringNullableFilter<"BodyArticleData"> | string | null
+    season?: StringNullableFilter<"BodyArticleData"> | string | null
+    year?: StringNullableFilter<"BodyArticleData"> | string | null
+    hsnTaxCode?: StringNullableFilter<"BodyArticleData"> | string | null
+    approvalStatus?: StringFilter<"BodyArticleData"> | string
+    approvedAt?: DateTimeNullableFilter<"BodyArticleData"> | Date | string | null
+    approvedBy?: IntNullableFilter<"BodyArticleData"> | number | null
+    sapSyncStatus?: StringFilter<"BodyArticleData"> | string
+    sapSyncMessage?: StringNullableFilter<"BodyArticleData"> | string | null
+    userName?: StringNullableFilter<"BodyArticleData"> | string | null
+    createdAt?: DateTimeFilter<"BodyArticleData"> | Date | string
+    updatedAt?: DateTimeFilter<"BodyArticleData"> | Date | string
+  }, "id">
+
+  export type BodyArticleDataOrderByWithAggregationInput = {
+    id?: SortOrder
+    mCollarType?: SortOrderInput | SortOrder
+    mCollarStyle?: SortOrderInput | SortOrder
+    mNeckType?: SortOrderInput | SortOrder
+    mNeckStyle?: SortOrderInput | SortOrder
+    mPlacket?: SortOrderInput | SortOrder
+    mBltType?: SortOrderInput | SortOrder
+    mBltStyle?: SortOrderInput | SortOrder
+    mSleevesMainStyle?: SortOrderInput | SortOrder
+    mSleeveFold?: SortOrderInput | SortOrder
+    mBtmFold?: SortOrderInput | SortOrder
+    mNoOfPocket?: SortOrderInput | SortOrder
+    mPocket?: SortOrderInput | SortOrder
+    mExtraPocket?: SortOrderInput | SortOrder
+    mFit?: SortOrderInput | SortOrder
+    mBodyStyle?: SortOrderInput | SortOrder
+    mLength?: SortOrderInput | SortOrder
+    mSet?: SortOrderInput | SortOrder
+    bodyArticleNumber?: SortOrderInput | SortOrder
+    bodyArticleDescription?: SortOrderInput | SortOrder
+    flatId?: SortOrderInput | SortOrder
+    articleNumber?: SortOrderInput | SortOrder
+    division?: SortOrderInput | SortOrder
+    subDivision?: SortOrderInput | SortOrder
+    majorCategory?: SortOrderInput | SortOrder
+    mcCode?: SortOrderInput | SortOrder
+    vendorName?: SortOrderInput | SortOrder
+    vendorCode?: SortOrderInput | SortOrder
+    season?: SortOrderInput | SortOrder
+    year?: SortOrderInput | SortOrder
+    hsnTaxCode?: SortOrderInput | SortOrder
+    approvalStatus?: SortOrder
+    approvedAt?: SortOrderInput | SortOrder
+    approvedBy?: SortOrderInput | SortOrder
+    sapSyncStatus?: SortOrder
+    sapSyncMessage?: SortOrderInput | SortOrder
+    userName?: SortOrderInput | SortOrder
+    createdAt?: SortOrder
+    updatedAt?: SortOrder
+    _count?: BodyArticleDataCountOrderByAggregateInput
+    _avg?: BodyArticleDataAvgOrderByAggregateInput
+    _max?: BodyArticleDataMaxOrderByAggregateInput
+    _min?: BodyArticleDataMinOrderByAggregateInput
+    _sum?: BodyArticleDataSumOrderByAggregateInput
+  }
+
+  export type BodyArticleDataScalarWhereWithAggregatesInput = {
+    AND?: BodyArticleDataScalarWhereWithAggregatesInput | BodyArticleDataScalarWhereWithAggregatesInput[]
+    OR?: BodyArticleDataScalarWhereWithAggregatesInput[]
+    NOT?: BodyArticleDataScalarWhereWithAggregatesInput | BodyArticleDataScalarWhereWithAggregatesInput[]
+    id?: StringWithAggregatesFilter<"BodyArticleData"> | string
+    mCollarType?: StringNullableWithAggregatesFilter<"BodyArticleData"> | string | null
+    mCollarStyle?: StringNullableWithAggregatesFilter<"BodyArticleData"> | string | null
+    mNeckType?: StringNullableWithAggregatesFilter<"BodyArticleData"> | string | null
+    mNeckStyle?: StringNullableWithAggregatesFilter<"BodyArticleData"> | string | null
+    mPlacket?: StringNullableWithAggregatesFilter<"BodyArticleData"> | string | null
+    mBltType?: StringNullableWithAggregatesFilter<"BodyArticleData"> | string | null
+    mBltStyle?: StringNullableWithAggregatesFilter<"BodyArticleData"> | string | null
+    mSleevesMainStyle?: StringNullableWithAggregatesFilter<"BodyArticleData"> | string | null
+    mSleeveFold?: StringNullableWithAggregatesFilter<"BodyArticleData"> | string | null
+    mBtmFold?: StringNullableWithAggregatesFilter<"BodyArticleData"> | string | null
+    mNoOfPocket?: StringNullableWithAggregatesFilter<"BodyArticleData"> | string | null
+    mPocket?: StringNullableWithAggregatesFilter<"BodyArticleData"> | string | null
+    mExtraPocket?: StringNullableWithAggregatesFilter<"BodyArticleData"> | string | null
+    mFit?: StringNullableWithAggregatesFilter<"BodyArticleData"> | string | null
+    mBodyStyle?: StringNullableWithAggregatesFilter<"BodyArticleData"> | string | null
+    mLength?: StringNullableWithAggregatesFilter<"BodyArticleData"> | string | null
+    mSet?: StringNullableWithAggregatesFilter<"BodyArticleData"> | string | null
+    bodyArticleNumber?: StringNullableWithAggregatesFilter<"BodyArticleData"> | string | null
+    bodyArticleDescription?: StringNullableWithAggregatesFilter<"BodyArticleData"> | string | null
+    flatId?: StringNullableWithAggregatesFilter<"BodyArticleData"> | string | null
+    articleNumber?: StringNullableWithAggregatesFilter<"BodyArticleData"> | string | null
+    division?: StringNullableWithAggregatesFilter<"BodyArticleData"> | string | null
+    subDivision?: StringNullableWithAggregatesFilter<"BodyArticleData"> | string | null
+    majorCategory?: StringNullableWithAggregatesFilter<"BodyArticleData"> | string | null
+    mcCode?: StringNullableWithAggregatesFilter<"BodyArticleData"> | string | null
+    vendorName?: StringNullableWithAggregatesFilter<"BodyArticleData"> | string | null
+    vendorCode?: StringNullableWithAggregatesFilter<"BodyArticleData"> | string | null
+    season?: StringNullableWithAggregatesFilter<"BodyArticleData"> | string | null
+    year?: StringNullableWithAggregatesFilter<"BodyArticleData"> | string | null
+    hsnTaxCode?: StringNullableWithAggregatesFilter<"BodyArticleData"> | string | null
+    approvalStatus?: StringWithAggregatesFilter<"BodyArticleData"> | string
+    approvedAt?: DateTimeNullableWithAggregatesFilter<"BodyArticleData"> | Date | string | null
+    approvedBy?: IntNullableWithAggregatesFilter<"BodyArticleData"> | number | null
+    sapSyncStatus?: StringWithAggregatesFilter<"BodyArticleData"> | string
+    sapSyncMessage?: StringNullableWithAggregatesFilter<"BodyArticleData"> | string | null
+    userName?: StringNullableWithAggregatesFilter<"BodyArticleData"> | string | null
+    createdAt?: DateTimeWithAggregatesFilter<"BodyArticleData"> | Date | string
+    updatedAt?: DateTimeWithAggregatesFilter<"BodyArticleData"> | Date | string
   }
 
   export type DepartmentCreateInput = {
@@ -57156,6 +61601,7 @@ export namespace Prisma {
     fabricArticleDescription?: string | null
     attrArticleNums?: string | null
     mvgrBrandVendor?: string | null
+    mcDescription?: string | null
     vendorCode?: string | null
     mrp?: Decimal | DecimalJsLike | number | string | null
     impAtrbt2?: string | null
@@ -57292,6 +61738,7 @@ export namespace Prisma {
     fabricArticleDescription?: string | null
     attrArticleNums?: string | null
     mvgrBrandVendor?: string | null
+    mcDescription?: string | null
     vendorCode?: string | null
     mrp?: Decimal | DecimalJsLike | number | string | null
     impAtrbt2?: string | null
@@ -57426,6 +61873,7 @@ export namespace Prisma {
     fabricArticleDescription?: NullableStringFieldUpdateOperationsInput | string | null
     attrArticleNums?: NullableStringFieldUpdateOperationsInput | string | null
     mvgrBrandVendor?: NullableStringFieldUpdateOperationsInput | string | null
+    mcDescription?: NullableStringFieldUpdateOperationsInput | string | null
     vendorCode?: NullableStringFieldUpdateOperationsInput | string | null
     mrp?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
     impAtrbt2?: NullableStringFieldUpdateOperationsInput | string | null
@@ -57562,6 +62010,7 @@ export namespace Prisma {
     fabricArticleDescription?: NullableStringFieldUpdateOperationsInput | string | null
     attrArticleNums?: NullableStringFieldUpdateOperationsInput | string | null
     mvgrBrandVendor?: NullableStringFieldUpdateOperationsInput | string | null
+    mcDescription?: NullableStringFieldUpdateOperationsInput | string | null
     vendorCode?: NullableStringFieldUpdateOperationsInput | string | null
     mrp?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
     impAtrbt2?: NullableStringFieldUpdateOperationsInput | string | null
@@ -57697,6 +62146,7 @@ export namespace Prisma {
     fabricArticleDescription?: string | null
     attrArticleNums?: string | null
     mvgrBrandVendor?: string | null
+    mcDescription?: string | null
     vendorCode?: string | null
     mrp?: Decimal | DecimalJsLike | number | string | null
     impAtrbt2?: string | null
@@ -57830,6 +62280,7 @@ export namespace Prisma {
     fabricArticleDescription?: NullableStringFieldUpdateOperationsInput | string | null
     attrArticleNums?: NullableStringFieldUpdateOperationsInput | string | null
     mvgrBrandVendor?: NullableStringFieldUpdateOperationsInput | string | null
+    mcDescription?: NullableStringFieldUpdateOperationsInput | string | null
     vendorCode?: NullableStringFieldUpdateOperationsInput | string | null
     mrp?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
     impAtrbt2?: NullableStringFieldUpdateOperationsInput | string | null
@@ -57963,6 +62414,7 @@ export namespace Prisma {
     fabricArticleDescription?: NullableStringFieldUpdateOperationsInput | string | null
     attrArticleNums?: NullableStringFieldUpdateOperationsInput | string | null
     mvgrBrandVendor?: NullableStringFieldUpdateOperationsInput | string | null
+    mcDescription?: NullableStringFieldUpdateOperationsInput | string | null
     vendorCode?: NullableStringFieldUpdateOperationsInput | string | null
     mrp?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
     impAtrbt2?: NullableStringFieldUpdateOperationsInput | string | null
@@ -61051,6 +65503,168 @@ export namespace Prisma {
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
   }
 
+  export type FabricArticleMasterCreateInput = {
+    seg: string
+    div: string
+    subDiv: string
+    majCat: string
+    mcCode: string
+    mcDes: string
+    status: string
+    hsnCd: string
+    artType: string
+    createdAt?: Date | string
+    updatedAt?: Date | string
+  }
+
+  export type FabricArticleMasterUncheckedCreateInput = {
+    id?: number
+    seg: string
+    div: string
+    subDiv: string
+    majCat: string
+    mcCode: string
+    mcDes: string
+    status: string
+    hsnCd: string
+    artType: string
+    createdAt?: Date | string
+    updatedAt?: Date | string
+  }
+
+  export type FabricArticleMasterUpdateInput = {
+    seg?: StringFieldUpdateOperationsInput | string
+    div?: StringFieldUpdateOperationsInput | string
+    subDiv?: StringFieldUpdateOperationsInput | string
+    majCat?: StringFieldUpdateOperationsInput | string
+    mcCode?: StringFieldUpdateOperationsInput | string
+    mcDes?: StringFieldUpdateOperationsInput | string
+    status?: StringFieldUpdateOperationsInput | string
+    hsnCd?: StringFieldUpdateOperationsInput | string
+    artType?: StringFieldUpdateOperationsInput | string
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+  }
+
+  export type FabricArticleMasterUncheckedUpdateInput = {
+    id?: IntFieldUpdateOperationsInput | number
+    seg?: StringFieldUpdateOperationsInput | string
+    div?: StringFieldUpdateOperationsInput | string
+    subDiv?: StringFieldUpdateOperationsInput | string
+    majCat?: StringFieldUpdateOperationsInput | string
+    mcCode?: StringFieldUpdateOperationsInput | string
+    mcDes?: StringFieldUpdateOperationsInput | string
+    status?: StringFieldUpdateOperationsInput | string
+    hsnCd?: StringFieldUpdateOperationsInput | string
+    artType?: StringFieldUpdateOperationsInput | string
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+  }
+
+  export type FabricArticleMasterCreateManyInput = {
+    id?: number
+    seg: string
+    div: string
+    subDiv: string
+    majCat: string
+    mcCode: string
+    mcDes: string
+    status: string
+    hsnCd: string
+    artType: string
+    createdAt?: Date | string
+    updatedAt?: Date | string
+  }
+
+  export type FabricArticleMasterUpdateManyMutationInput = {
+    seg?: StringFieldUpdateOperationsInput | string
+    div?: StringFieldUpdateOperationsInput | string
+    subDiv?: StringFieldUpdateOperationsInput | string
+    majCat?: StringFieldUpdateOperationsInput | string
+    mcCode?: StringFieldUpdateOperationsInput | string
+    mcDes?: StringFieldUpdateOperationsInput | string
+    status?: StringFieldUpdateOperationsInput | string
+    hsnCd?: StringFieldUpdateOperationsInput | string
+    artType?: StringFieldUpdateOperationsInput | string
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+  }
+
+  export type FabricArticleMasterUncheckedUpdateManyInput = {
+    id?: IntFieldUpdateOperationsInput | number
+    seg?: StringFieldUpdateOperationsInput | string
+    div?: StringFieldUpdateOperationsInput | string
+    subDiv?: StringFieldUpdateOperationsInput | string
+    majCat?: StringFieldUpdateOperationsInput | string
+    mcCode?: StringFieldUpdateOperationsInput | string
+    mcDes?: StringFieldUpdateOperationsInput | string
+    status?: StringFieldUpdateOperationsInput | string
+    hsnCd?: StringFieldUpdateOperationsInput | string
+    artType?: StringFieldUpdateOperationsInput | string
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+  }
+
+  export type FabricMajCatGridValueCreateInput = {
+    characteristic: string
+    code: string
+    fullForm: string
+    createdAt?: Date | string
+    updatedAt?: Date | string
+  }
+
+  export type FabricMajCatGridValueUncheckedCreateInput = {
+    id?: number
+    characteristic: string
+    code: string
+    fullForm: string
+    createdAt?: Date | string
+    updatedAt?: Date | string
+  }
+
+  export type FabricMajCatGridValueUpdateInput = {
+    characteristic?: StringFieldUpdateOperationsInput | string
+    code?: StringFieldUpdateOperationsInput | string
+    fullForm?: StringFieldUpdateOperationsInput | string
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+  }
+
+  export type FabricMajCatGridValueUncheckedUpdateInput = {
+    id?: IntFieldUpdateOperationsInput | number
+    characteristic?: StringFieldUpdateOperationsInput | string
+    code?: StringFieldUpdateOperationsInput | string
+    fullForm?: StringFieldUpdateOperationsInput | string
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+  }
+
+  export type FabricMajCatGridValueCreateManyInput = {
+    id?: number
+    characteristic: string
+    code: string
+    fullForm: string
+    createdAt?: Date | string
+    updatedAt?: Date | string
+  }
+
+  export type FabricMajCatGridValueUpdateManyMutationInput = {
+    characteristic?: StringFieldUpdateOperationsInput | string
+    code?: StringFieldUpdateOperationsInput | string
+    fullForm?: StringFieldUpdateOperationsInput | string
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+  }
+
+  export type FabricMajCatGridValueUncheckedUpdateManyInput = {
+    id?: IntFieldUpdateOperationsInput | number
+    characteristic?: StringFieldUpdateOperationsInput | string
+    code?: StringFieldUpdateOperationsInput | string
+    fullForm?: StringFieldUpdateOperationsInput | string
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+  }
+
   export type ModifyLogCreateInput = {
     modificationGroupId: string
     articleNumber: string
@@ -61360,6 +65974,300 @@ export namespace Prisma {
     majorCategory?: NullableStringFieldUpdateOperationsInput | string | null
     vendorName?: NullableStringFieldUpdateOperationsInput | string | null
     vendorCode?: NullableStringFieldUpdateOperationsInput | string | null
+    approvalStatus?: StringFieldUpdateOperationsInput | string
+    approvedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    approvedBy?: NullableIntFieldUpdateOperationsInput | number | null
+    sapSyncStatus?: StringFieldUpdateOperationsInput | string
+    sapSyncMessage?: NullableStringFieldUpdateOperationsInput | string | null
+    userName?: NullableStringFieldUpdateOperationsInput | string | null
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+  }
+
+  export type BodyArticleDataCreateInput = {
+    id?: string
+    mCollarType?: string | null
+    mCollarStyle?: string | null
+    mNeckType?: string | null
+    mNeckStyle?: string | null
+    mPlacket?: string | null
+    mBltType?: string | null
+    mBltStyle?: string | null
+    mSleevesMainStyle?: string | null
+    mSleeveFold?: string | null
+    mBtmFold?: string | null
+    mNoOfPocket?: string | null
+    mPocket?: string | null
+    mExtraPocket?: string | null
+    mFit?: string | null
+    mBodyStyle?: string | null
+    mLength?: string | null
+    mSet?: string | null
+    bodyArticleNumber?: string | null
+    bodyArticleDescription?: string | null
+    flatId?: string | null
+    articleNumber?: string | null
+    division?: string | null
+    subDivision?: string | null
+    majorCategory?: string | null
+    mcCode?: string | null
+    vendorName?: string | null
+    vendorCode?: string | null
+    season?: string | null
+    year?: string | null
+    hsnTaxCode?: string | null
+    approvalStatus?: string
+    approvedAt?: Date | string | null
+    approvedBy?: number | null
+    sapSyncStatus?: string
+    sapSyncMessage?: string | null
+    userName?: string | null
+    createdAt?: Date | string
+    updatedAt?: Date | string
+  }
+
+  export type BodyArticleDataUncheckedCreateInput = {
+    id?: string
+    mCollarType?: string | null
+    mCollarStyle?: string | null
+    mNeckType?: string | null
+    mNeckStyle?: string | null
+    mPlacket?: string | null
+    mBltType?: string | null
+    mBltStyle?: string | null
+    mSleevesMainStyle?: string | null
+    mSleeveFold?: string | null
+    mBtmFold?: string | null
+    mNoOfPocket?: string | null
+    mPocket?: string | null
+    mExtraPocket?: string | null
+    mFit?: string | null
+    mBodyStyle?: string | null
+    mLength?: string | null
+    mSet?: string | null
+    bodyArticleNumber?: string | null
+    bodyArticleDescription?: string | null
+    flatId?: string | null
+    articleNumber?: string | null
+    division?: string | null
+    subDivision?: string | null
+    majorCategory?: string | null
+    mcCode?: string | null
+    vendorName?: string | null
+    vendorCode?: string | null
+    season?: string | null
+    year?: string | null
+    hsnTaxCode?: string | null
+    approvalStatus?: string
+    approvedAt?: Date | string | null
+    approvedBy?: number | null
+    sapSyncStatus?: string
+    sapSyncMessage?: string | null
+    userName?: string | null
+    createdAt?: Date | string
+    updatedAt?: Date | string
+  }
+
+  export type BodyArticleDataUpdateInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    mCollarType?: NullableStringFieldUpdateOperationsInput | string | null
+    mCollarStyle?: NullableStringFieldUpdateOperationsInput | string | null
+    mNeckType?: NullableStringFieldUpdateOperationsInput | string | null
+    mNeckStyle?: NullableStringFieldUpdateOperationsInput | string | null
+    mPlacket?: NullableStringFieldUpdateOperationsInput | string | null
+    mBltType?: NullableStringFieldUpdateOperationsInput | string | null
+    mBltStyle?: NullableStringFieldUpdateOperationsInput | string | null
+    mSleevesMainStyle?: NullableStringFieldUpdateOperationsInput | string | null
+    mSleeveFold?: NullableStringFieldUpdateOperationsInput | string | null
+    mBtmFold?: NullableStringFieldUpdateOperationsInput | string | null
+    mNoOfPocket?: NullableStringFieldUpdateOperationsInput | string | null
+    mPocket?: NullableStringFieldUpdateOperationsInput | string | null
+    mExtraPocket?: NullableStringFieldUpdateOperationsInput | string | null
+    mFit?: NullableStringFieldUpdateOperationsInput | string | null
+    mBodyStyle?: NullableStringFieldUpdateOperationsInput | string | null
+    mLength?: NullableStringFieldUpdateOperationsInput | string | null
+    mSet?: NullableStringFieldUpdateOperationsInput | string | null
+    bodyArticleNumber?: NullableStringFieldUpdateOperationsInput | string | null
+    bodyArticleDescription?: NullableStringFieldUpdateOperationsInput | string | null
+    flatId?: NullableStringFieldUpdateOperationsInput | string | null
+    articleNumber?: NullableStringFieldUpdateOperationsInput | string | null
+    division?: NullableStringFieldUpdateOperationsInput | string | null
+    subDivision?: NullableStringFieldUpdateOperationsInput | string | null
+    majorCategory?: NullableStringFieldUpdateOperationsInput | string | null
+    mcCode?: NullableStringFieldUpdateOperationsInput | string | null
+    vendorName?: NullableStringFieldUpdateOperationsInput | string | null
+    vendorCode?: NullableStringFieldUpdateOperationsInput | string | null
+    season?: NullableStringFieldUpdateOperationsInput | string | null
+    year?: NullableStringFieldUpdateOperationsInput | string | null
+    hsnTaxCode?: NullableStringFieldUpdateOperationsInput | string | null
+    approvalStatus?: StringFieldUpdateOperationsInput | string
+    approvedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    approvedBy?: NullableIntFieldUpdateOperationsInput | number | null
+    sapSyncStatus?: StringFieldUpdateOperationsInput | string
+    sapSyncMessage?: NullableStringFieldUpdateOperationsInput | string | null
+    userName?: NullableStringFieldUpdateOperationsInput | string | null
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+  }
+
+  export type BodyArticleDataUncheckedUpdateInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    mCollarType?: NullableStringFieldUpdateOperationsInput | string | null
+    mCollarStyle?: NullableStringFieldUpdateOperationsInput | string | null
+    mNeckType?: NullableStringFieldUpdateOperationsInput | string | null
+    mNeckStyle?: NullableStringFieldUpdateOperationsInput | string | null
+    mPlacket?: NullableStringFieldUpdateOperationsInput | string | null
+    mBltType?: NullableStringFieldUpdateOperationsInput | string | null
+    mBltStyle?: NullableStringFieldUpdateOperationsInput | string | null
+    mSleevesMainStyle?: NullableStringFieldUpdateOperationsInput | string | null
+    mSleeveFold?: NullableStringFieldUpdateOperationsInput | string | null
+    mBtmFold?: NullableStringFieldUpdateOperationsInput | string | null
+    mNoOfPocket?: NullableStringFieldUpdateOperationsInput | string | null
+    mPocket?: NullableStringFieldUpdateOperationsInput | string | null
+    mExtraPocket?: NullableStringFieldUpdateOperationsInput | string | null
+    mFit?: NullableStringFieldUpdateOperationsInput | string | null
+    mBodyStyle?: NullableStringFieldUpdateOperationsInput | string | null
+    mLength?: NullableStringFieldUpdateOperationsInput | string | null
+    mSet?: NullableStringFieldUpdateOperationsInput | string | null
+    bodyArticleNumber?: NullableStringFieldUpdateOperationsInput | string | null
+    bodyArticleDescription?: NullableStringFieldUpdateOperationsInput | string | null
+    flatId?: NullableStringFieldUpdateOperationsInput | string | null
+    articleNumber?: NullableStringFieldUpdateOperationsInput | string | null
+    division?: NullableStringFieldUpdateOperationsInput | string | null
+    subDivision?: NullableStringFieldUpdateOperationsInput | string | null
+    majorCategory?: NullableStringFieldUpdateOperationsInput | string | null
+    mcCode?: NullableStringFieldUpdateOperationsInput | string | null
+    vendorName?: NullableStringFieldUpdateOperationsInput | string | null
+    vendorCode?: NullableStringFieldUpdateOperationsInput | string | null
+    season?: NullableStringFieldUpdateOperationsInput | string | null
+    year?: NullableStringFieldUpdateOperationsInput | string | null
+    hsnTaxCode?: NullableStringFieldUpdateOperationsInput | string | null
+    approvalStatus?: StringFieldUpdateOperationsInput | string
+    approvedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    approvedBy?: NullableIntFieldUpdateOperationsInput | number | null
+    sapSyncStatus?: StringFieldUpdateOperationsInput | string
+    sapSyncMessage?: NullableStringFieldUpdateOperationsInput | string | null
+    userName?: NullableStringFieldUpdateOperationsInput | string | null
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+  }
+
+  export type BodyArticleDataCreateManyInput = {
+    id?: string
+    mCollarType?: string | null
+    mCollarStyle?: string | null
+    mNeckType?: string | null
+    mNeckStyle?: string | null
+    mPlacket?: string | null
+    mBltType?: string | null
+    mBltStyle?: string | null
+    mSleevesMainStyle?: string | null
+    mSleeveFold?: string | null
+    mBtmFold?: string | null
+    mNoOfPocket?: string | null
+    mPocket?: string | null
+    mExtraPocket?: string | null
+    mFit?: string | null
+    mBodyStyle?: string | null
+    mLength?: string | null
+    mSet?: string | null
+    bodyArticleNumber?: string | null
+    bodyArticleDescription?: string | null
+    flatId?: string | null
+    articleNumber?: string | null
+    division?: string | null
+    subDivision?: string | null
+    majorCategory?: string | null
+    mcCode?: string | null
+    vendorName?: string | null
+    vendorCode?: string | null
+    season?: string | null
+    year?: string | null
+    hsnTaxCode?: string | null
+    approvalStatus?: string
+    approvedAt?: Date | string | null
+    approvedBy?: number | null
+    sapSyncStatus?: string
+    sapSyncMessage?: string | null
+    userName?: string | null
+    createdAt?: Date | string
+    updatedAt?: Date | string
+  }
+
+  export type BodyArticleDataUpdateManyMutationInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    mCollarType?: NullableStringFieldUpdateOperationsInput | string | null
+    mCollarStyle?: NullableStringFieldUpdateOperationsInput | string | null
+    mNeckType?: NullableStringFieldUpdateOperationsInput | string | null
+    mNeckStyle?: NullableStringFieldUpdateOperationsInput | string | null
+    mPlacket?: NullableStringFieldUpdateOperationsInput | string | null
+    mBltType?: NullableStringFieldUpdateOperationsInput | string | null
+    mBltStyle?: NullableStringFieldUpdateOperationsInput | string | null
+    mSleevesMainStyle?: NullableStringFieldUpdateOperationsInput | string | null
+    mSleeveFold?: NullableStringFieldUpdateOperationsInput | string | null
+    mBtmFold?: NullableStringFieldUpdateOperationsInput | string | null
+    mNoOfPocket?: NullableStringFieldUpdateOperationsInput | string | null
+    mPocket?: NullableStringFieldUpdateOperationsInput | string | null
+    mExtraPocket?: NullableStringFieldUpdateOperationsInput | string | null
+    mFit?: NullableStringFieldUpdateOperationsInput | string | null
+    mBodyStyle?: NullableStringFieldUpdateOperationsInput | string | null
+    mLength?: NullableStringFieldUpdateOperationsInput | string | null
+    mSet?: NullableStringFieldUpdateOperationsInput | string | null
+    bodyArticleNumber?: NullableStringFieldUpdateOperationsInput | string | null
+    bodyArticleDescription?: NullableStringFieldUpdateOperationsInput | string | null
+    flatId?: NullableStringFieldUpdateOperationsInput | string | null
+    articleNumber?: NullableStringFieldUpdateOperationsInput | string | null
+    division?: NullableStringFieldUpdateOperationsInput | string | null
+    subDivision?: NullableStringFieldUpdateOperationsInput | string | null
+    majorCategory?: NullableStringFieldUpdateOperationsInput | string | null
+    mcCode?: NullableStringFieldUpdateOperationsInput | string | null
+    vendorName?: NullableStringFieldUpdateOperationsInput | string | null
+    vendorCode?: NullableStringFieldUpdateOperationsInput | string | null
+    season?: NullableStringFieldUpdateOperationsInput | string | null
+    year?: NullableStringFieldUpdateOperationsInput | string | null
+    hsnTaxCode?: NullableStringFieldUpdateOperationsInput | string | null
+    approvalStatus?: StringFieldUpdateOperationsInput | string
+    approvedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    approvedBy?: NullableIntFieldUpdateOperationsInput | number | null
+    sapSyncStatus?: StringFieldUpdateOperationsInput | string
+    sapSyncMessage?: NullableStringFieldUpdateOperationsInput | string | null
+    userName?: NullableStringFieldUpdateOperationsInput | string | null
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+  }
+
+  export type BodyArticleDataUncheckedUpdateManyInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    mCollarType?: NullableStringFieldUpdateOperationsInput | string | null
+    mCollarStyle?: NullableStringFieldUpdateOperationsInput | string | null
+    mNeckType?: NullableStringFieldUpdateOperationsInput | string | null
+    mNeckStyle?: NullableStringFieldUpdateOperationsInput | string | null
+    mPlacket?: NullableStringFieldUpdateOperationsInput | string | null
+    mBltType?: NullableStringFieldUpdateOperationsInput | string | null
+    mBltStyle?: NullableStringFieldUpdateOperationsInput | string | null
+    mSleevesMainStyle?: NullableStringFieldUpdateOperationsInput | string | null
+    mSleeveFold?: NullableStringFieldUpdateOperationsInput | string | null
+    mBtmFold?: NullableStringFieldUpdateOperationsInput | string | null
+    mNoOfPocket?: NullableStringFieldUpdateOperationsInput | string | null
+    mPocket?: NullableStringFieldUpdateOperationsInput | string | null
+    mExtraPocket?: NullableStringFieldUpdateOperationsInput | string | null
+    mFit?: NullableStringFieldUpdateOperationsInput | string | null
+    mBodyStyle?: NullableStringFieldUpdateOperationsInput | string | null
+    mLength?: NullableStringFieldUpdateOperationsInput | string | null
+    mSet?: NullableStringFieldUpdateOperationsInput | string | null
+    bodyArticleNumber?: NullableStringFieldUpdateOperationsInput | string | null
+    bodyArticleDescription?: NullableStringFieldUpdateOperationsInput | string | null
+    flatId?: NullableStringFieldUpdateOperationsInput | string | null
+    articleNumber?: NullableStringFieldUpdateOperationsInput | string | null
+    division?: NullableStringFieldUpdateOperationsInput | string | null
+    subDivision?: NullableStringFieldUpdateOperationsInput | string | null
+    majorCategory?: NullableStringFieldUpdateOperationsInput | string | null
+    mcCode?: NullableStringFieldUpdateOperationsInput | string | null
+    vendorName?: NullableStringFieldUpdateOperationsInput | string | null
+    vendorCode?: NullableStringFieldUpdateOperationsInput | string | null
+    season?: NullableStringFieldUpdateOperationsInput | string | null
+    year?: NullableStringFieldUpdateOperationsInput | string | null
+    hsnTaxCode?: NullableStringFieldUpdateOperationsInput | string | null
     approvalStatus?: StringFieldUpdateOperationsInput | string
     approvedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     approvedBy?: NullableIntFieldUpdateOperationsInput | number | null
@@ -62534,6 +67442,7 @@ export namespace Prisma {
     fabricArticleDescription?: SortOrder
     attrArticleNums?: SortOrder
     mvgrBrandVendor?: SortOrder
+    mcDescription?: SortOrder
     vendorCode?: SortOrder
     mrp?: SortOrder
     impAtrbt2?: SortOrder
@@ -62683,6 +67592,7 @@ export namespace Prisma {
     fabricArticleDescription?: SortOrder
     attrArticleNums?: SortOrder
     mvgrBrandVendor?: SortOrder
+    mcDescription?: SortOrder
     vendorCode?: SortOrder
     mrp?: SortOrder
     impAtrbt2?: SortOrder
@@ -62816,6 +67726,7 @@ export namespace Prisma {
     fabricArticleDescription?: SortOrder
     attrArticleNums?: SortOrder
     mvgrBrandVendor?: SortOrder
+    mcDescription?: SortOrder
     vendorCode?: SortOrder
     mrp?: SortOrder
     impAtrbt2?: SortOrder
@@ -64846,6 +69757,116 @@ export namespace Prisma {
     id?: SortOrder
   }
 
+  export type FabricArticleMasterOrderByRelevanceInput = {
+    fields: FabricArticleMasterOrderByRelevanceFieldEnum | FabricArticleMasterOrderByRelevanceFieldEnum[]
+    sort: SortOrder
+    search: string
+  }
+
+  export type FabricArticleMasterMcCodeMcDesCompoundUniqueInput = {
+    mcCode: string
+    mcDes: string
+  }
+
+  export type FabricArticleMasterCountOrderByAggregateInput = {
+    id?: SortOrder
+    seg?: SortOrder
+    div?: SortOrder
+    subDiv?: SortOrder
+    majCat?: SortOrder
+    mcCode?: SortOrder
+    mcDes?: SortOrder
+    status?: SortOrder
+    hsnCd?: SortOrder
+    artType?: SortOrder
+    createdAt?: SortOrder
+    updatedAt?: SortOrder
+  }
+
+  export type FabricArticleMasterAvgOrderByAggregateInput = {
+    id?: SortOrder
+  }
+
+  export type FabricArticleMasterMaxOrderByAggregateInput = {
+    id?: SortOrder
+    seg?: SortOrder
+    div?: SortOrder
+    subDiv?: SortOrder
+    majCat?: SortOrder
+    mcCode?: SortOrder
+    mcDes?: SortOrder
+    status?: SortOrder
+    hsnCd?: SortOrder
+    artType?: SortOrder
+    createdAt?: SortOrder
+    updatedAt?: SortOrder
+  }
+
+  export type FabricArticleMasterMinOrderByAggregateInput = {
+    id?: SortOrder
+    seg?: SortOrder
+    div?: SortOrder
+    subDiv?: SortOrder
+    majCat?: SortOrder
+    mcCode?: SortOrder
+    mcDes?: SortOrder
+    status?: SortOrder
+    hsnCd?: SortOrder
+    artType?: SortOrder
+    createdAt?: SortOrder
+    updatedAt?: SortOrder
+  }
+
+  export type FabricArticleMasterSumOrderByAggregateInput = {
+    id?: SortOrder
+  }
+
+  export type FabricMajCatGridValueOrderByRelevanceInput = {
+    fields: FabricMajCatGridValueOrderByRelevanceFieldEnum | FabricMajCatGridValueOrderByRelevanceFieldEnum[]
+    sort: SortOrder
+    search: string
+  }
+
+  export type FabricMajCatGridValueCharacteristicCodeCompoundUniqueInput = {
+    characteristic: string
+    code: string
+  }
+
+  export type FabricMajCatGridValueCountOrderByAggregateInput = {
+    id?: SortOrder
+    characteristic?: SortOrder
+    code?: SortOrder
+    fullForm?: SortOrder
+    createdAt?: SortOrder
+    updatedAt?: SortOrder
+  }
+
+  export type FabricMajCatGridValueAvgOrderByAggregateInput = {
+    id?: SortOrder
+  }
+
+  export type FabricMajCatGridValueMaxOrderByAggregateInput = {
+    id?: SortOrder
+    characteristic?: SortOrder
+    code?: SortOrder
+    fullForm?: SortOrder
+    createdAt?: SortOrder
+    updatedAt?: SortOrder
+  }
+
+  export type FabricMajCatGridValueMinOrderByAggregateInput = {
+    id?: SortOrder
+    characteristic?: SortOrder
+    code?: SortOrder
+    fullForm?: SortOrder
+    createdAt?: SortOrder
+    updatedAt?: SortOrder
+  }
+
+  export type FabricMajCatGridValueSumOrderByAggregateInput = {
+    id?: SortOrder
+  }
+
   export type ModifyLogOrderByRelevanceInput = {
     fields: ModifyLogOrderByRelevanceFieldEnum | ModifyLogOrderByRelevanceFieldEnum[]
     sort: SortOrder
@@ -65009,6 +70030,146 @@ export namespace Prisma {
   }
 
   export type FabricArticleDataSumOrderByAggregateInput = {
+    approvedBy?: SortOrder
+  }
+
+  export type BodyArticleDataOrderByRelevanceInput = {
+    fields: BodyArticleDataOrderByRelevanceFieldEnum | BodyArticleDataOrderByRelevanceFieldEnum[]
+    sort: SortOrder
+    search: string
+  }
+
+  export type BodyArticleDataCountOrderByAggregateInput = {
+    id?: SortOrder
+    mCollarType?: SortOrder
+    mCollarStyle?: SortOrder
+    mNeckType?: SortOrder
+    mNeckStyle?: SortOrder
+    mPlacket?: SortOrder
+    mBltType?: SortOrder
+    mBltStyle?: SortOrder
+    mSleevesMainStyle?: SortOrder
+    mSleeveFold?: SortOrder
+    mBtmFold?: SortOrder
+    mNoOfPocket?: SortOrder
+    mPocket?: SortOrder
+    mExtraPocket?: SortOrder
+    mFit?: SortOrder
+    mBodyStyle?: SortOrder
+    mLength?: SortOrder
+    mSet?: SortOrder
+    bodyArticleNumber?: SortOrder
+    bodyArticleDescription?: SortOrder
+    flatId?: SortOrder
+    articleNumber?: SortOrder
+    division?: SortOrder
+    subDivision?: SortOrder
+    majorCategory?: SortOrder
+    mcCode?: SortOrder
+    vendorName?: SortOrder
+    vendorCode?: SortOrder
+    season?: SortOrder
+    year?: SortOrder
+    hsnTaxCode?: SortOrder
+    approvalStatus?: SortOrder
+    approvedAt?: SortOrder
+    approvedBy?: SortOrder
+    sapSyncStatus?: SortOrder
+    sapSyncMessage?: SortOrder
+    userName?: SortOrder
+    createdAt?: SortOrder
+    updatedAt?: SortOrder
+  }
+
+  export type BodyArticleDataAvgOrderByAggregateInput = {
+    approvedBy?: SortOrder
+  }
+
+  export type BodyArticleDataMaxOrderByAggregateInput = {
+    id?: SortOrder
+    mCollarType?: SortOrder
+    mCollarStyle?: SortOrder
+    mNeckType?: SortOrder
+    mNeckStyle?: SortOrder
+    mPlacket?: SortOrder
+    mBltType?: SortOrder
+    mBltStyle?: SortOrder
+    mSleevesMainStyle?: SortOrder
+    mSleeveFold?: SortOrder
+    mBtmFold?: SortOrder
+    mNoOfPocket?: SortOrder
+    mPocket?: SortOrder
+    mExtraPocket?: SortOrder
+    mFit?: SortOrder
+    mBodyStyle?: SortOrder
+    mLength?: SortOrder
+    mSet?: SortOrder
+    bodyArticleNumber?: SortOrder
+    bodyArticleDescription?: SortOrder
+    flatId?: SortOrder
+    articleNumber?: SortOrder
+    division?: SortOrder
+    subDivision?: SortOrder
+    majorCategory?: SortOrder
+    mcCode?: SortOrder
+    vendorName?: SortOrder
+    vendorCode?: SortOrder
+    season?: SortOrder
+    year?: SortOrder
+    hsnTaxCode?: SortOrder
+    approvalStatus?: SortOrder
+    approvedAt?: SortOrder
+    approvedBy?: SortOrder
+    sapSyncStatus?: SortOrder
+    sapSyncMessage?: SortOrder
+    userName?: SortOrder
+    createdAt?: SortOrder
+    updatedAt?: SortOrder
+  }
+
+  export type BodyArticleDataMinOrderByAggregateInput = {
+    id?: SortOrder
+    mCollarType?: SortOrder
+    mCollarStyle?: SortOrder
+    mNeckType?: SortOrder
+    mNeckStyle?: SortOrder
+    mPlacket?: SortOrder
+    mBltType?: SortOrder
+    mBltStyle?: SortOrder
+    mSleevesMainStyle?: SortOrder
+    mSleeveFold?: SortOrder
+    mBtmFold?: SortOrder
+    mNoOfPocket?: SortOrder
+    mPocket?: SortOrder
+    mExtraPocket?: SortOrder
+    mFit?: SortOrder
+    mBodyStyle?: SortOrder
+    mLength?: SortOrder
+    mSet?: SortOrder
+    bodyArticleNumber?: SortOrder
+    bodyArticleDescription?: SortOrder
+    flatId?: SortOrder
+    articleNumber?: SortOrder
+    division?: SortOrder
+    subDivision?: SortOrder
+    majorCategory?: SortOrder
+    mcCode?: SortOrder
+    vendorName?: SortOrder
+    vendorCode?: SortOrder
+    season?: SortOrder
+    year?: SortOrder
+    hsnTaxCode?: SortOrder
+    approvalStatus?: SortOrder
+    approvedAt?: SortOrder
+    approvedBy?: SortOrder
+    sapSyncStatus?: SortOrder
+    sapSyncMessage?: SortOrder
+    userName?: SortOrder
+    createdAt?: SortOrder
+    updatedAt?: SortOrder
+  }
+
+  export type BodyArticleDataSumOrderByAggregateInput = {
     approvedBy?: SortOrder
   }
 
@@ -68148,6 +73309,7 @@ export namespace Prisma {
     fabricArticleDescription?: string | null
     attrArticleNums?: string | null
     mvgrBrandVendor?: string | null
+    mcDescription?: string | null
     vendorCode?: string | null
     mrp?: Decimal | DecimalJsLike | number | string | null
     impAtrbt2?: string | null
@@ -68282,6 +73444,7 @@ export namespace Prisma {
     fabricArticleDescription?: string | null
     attrArticleNums?: string | null
     mvgrBrandVendor?: string | null
+    mcDescription?: string | null
     vendorCode?: string | null
     mrp?: Decimal | DecimalJsLike | number | string | null
     impAtrbt2?: string | null
@@ -68540,6 +73703,7 @@ export namespace Prisma {
     fabricArticleDescription?: NullableStringFieldUpdateOperationsInput | string | null
     attrArticleNums?: NullableStringFieldUpdateOperationsInput | string | null
     mvgrBrandVendor?: NullableStringFieldUpdateOperationsInput | string | null
+    mcDescription?: NullableStringFieldUpdateOperationsInput | string | null
     vendorCode?: NullableStringFieldUpdateOperationsInput | string | null
     mrp?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
     impAtrbt2?: NullableStringFieldUpdateOperationsInput | string | null
@@ -68674,6 +73838,7 @@ export namespace Prisma {
     fabricArticleDescription?: NullableStringFieldUpdateOperationsInput | string | null
     attrArticleNums?: NullableStringFieldUpdateOperationsInput | string | null
     mvgrBrandVendor?: NullableStringFieldUpdateOperationsInput | string | null
+    mcDescription?: NullableStringFieldUpdateOperationsInput | string | null
     vendorCode?: NullableStringFieldUpdateOperationsInput | string | null
     mrp?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
     impAtrbt2?: NullableStringFieldUpdateOperationsInput | string | null
@@ -69646,6 +74811,7 @@ export namespace Prisma {
     fabricArticleDescription?: string | null
     attrArticleNums?: string | null
     mvgrBrandVendor?: string | null
+    mcDescription?: string | null
     vendorCode?: string | null
     mrp?: Decimal | DecimalJsLike | number | string | null
     impAtrbt2?: string | null
@@ -69781,6 +74947,7 @@ export namespace Prisma {
     fabricArticleDescription?: string | null
     attrArticleNums?: string | null
     mvgrBrandVendor?: string | null
+    mcDescription?: string | null
     vendorCode?: string | null
     mrp?: Decimal | DecimalJsLike | number | string | null
     impAtrbt2?: string | null
@@ -70045,6 +75212,7 @@ export namespace Prisma {
     fabricArticleDescription?: StringNullableFilter<"ExtractionResultFlat"> | string | null
     attrArticleNums?: StringNullableFilter<"ExtractionResultFlat"> | string | null
     mvgrBrandVendor?: StringNullableFilter<"ExtractionResultFlat"> | string | null
+    mcDescription?: StringNullableFilter<"ExtractionResultFlat"> | string | null
     vendorCode?: StringNullableFilter<"ExtractionResultFlat"> | string | null
     mrp?: DecimalNullableFilter<"ExtractionResultFlat"> | Decimal | DecimalJsLike | number | string | null
     impAtrbt2?: StringNullableFilter<"ExtractionResultFlat"> | string | null
@@ -71597,6 +76765,7 @@ export namespace Prisma {
     fabricArticleDescription?: string | null
     attrArticleNums?: string | null
     mvgrBrandVendor?: string | null
+    mcDescription?: string | null
     vendorCode?: string | null
     mrp?: Decimal | DecimalJsLike | number | string | null
     impAtrbt2?: string | null
@@ -71732,6 +76901,7 @@ export namespace Prisma {
     fabricArticleDescription?: string | null
     attrArticleNums?: string | null
     mvgrBrandVendor?: string | null
+    mcDescription?: string | null
     vendorCode?: string | null
     mrp?: Decimal | DecimalJsLike | number | string | null
     impAtrbt2?: string | null
@@ -71918,6 +77088,7 @@ export namespace Prisma {
     fabricArticleDescription?: NullableStringFieldUpdateOperationsInput | string | null
     attrArticleNums?: NullableStringFieldUpdateOperationsInput | string | null
     mvgrBrandVendor?: NullableStringFieldUpdateOperationsInput | string | null
+    mcDescription?: NullableStringFieldUpdateOperationsInput | string | null
     vendorCode?: NullableStringFieldUpdateOperationsInput | string | null
     mrp?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
     impAtrbt2?: NullableStringFieldUpdateOperationsInput | string | null
@@ -72053,6 +77224,7 @@ export namespace Prisma {
     fabricArticleDescription?: NullableStringFieldUpdateOperationsInput | string | null
     attrArticleNums?: NullableStringFieldUpdateOperationsInput | string | null
     mvgrBrandVendor?: NullableStringFieldUpdateOperationsInput | string | null
+    mcDescription?: NullableStringFieldUpdateOperationsInput | string | null
     vendorCode?: NullableStringFieldUpdateOperationsInput | string | null
     mrp?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
     impAtrbt2?: NullableStringFieldUpdateOperationsInput | string | null
@@ -72962,6 +78134,7 @@ export namespace Prisma {
     fabricArticleDescription?: string | null
     attrArticleNums?: string | null
     mvgrBrandVendor?: string | null
+    mcDescription?: string | null
     vendorCode?: string | null
     mrp?: Decimal | DecimalJsLike | number | string | null
     impAtrbt2?: string | null
@@ -73256,6 +78429,7 @@ export namespace Prisma {
     fabricArticleDescription?: NullableStringFieldUpdateOperationsInput | string | null
     attrArticleNums?: NullableStringFieldUpdateOperationsInput | string | null
     mvgrBrandVendor?: NullableStringFieldUpdateOperationsInput | string | null
+    mcDescription?: NullableStringFieldUpdateOperationsInput | string | null
     vendorCode?: NullableStringFieldUpdateOperationsInput | string | null
     mrp?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
     impAtrbt2?: NullableStringFieldUpdateOperationsInput | string | null
@@ -73391,6 +78565,7 @@ export namespace Prisma {
     fabricArticleDescription?: NullableStringFieldUpdateOperationsInput | string | null
     attrArticleNums?: NullableStringFieldUpdateOperationsInput | string | null
     mvgrBrandVendor?: NullableStringFieldUpdateOperationsInput | string | null
+    mcDescription?: NullableStringFieldUpdateOperationsInput | string | null
     vendorCode?: NullableStringFieldUpdateOperationsInput | string | null
     mrp?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
     impAtrbt2?: NullableStringFieldUpdateOperationsInput | string | null
@@ -73525,6 +78700,7 @@ export namespace Prisma {
     fabricArticleDescription?: NullableStringFieldUpdateOperationsInput | string | null
     attrArticleNums?: NullableStringFieldUpdateOperationsInput | string | null
     mvgrBrandVendor?: NullableStringFieldUpdateOperationsInput | string | null
+    mcDescription?: NullableStringFieldUpdateOperationsInput | string | null
     vendorCode?: NullableStringFieldUpdateOperationsInput | string | null
     mrp?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
     impAtrbt2?: NullableStringFieldUpdateOperationsInput | string | null

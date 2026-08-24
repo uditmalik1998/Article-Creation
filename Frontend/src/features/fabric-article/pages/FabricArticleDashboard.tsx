@@ -238,9 +238,23 @@ export default function ApproverDashboard({ pathType }: ApproverDashboardProps =
   const showDivisionFilter = !isUnscoped && userAssignedDivisions.length > 1;
   const showSubDivisionFilter = !isUnscoped && userAssignedSubDivisions.length > 1;
 
+  const [fabHierarchy, setFabHierarchy] = useState<{
+    divisions: string[];
+    subDivsByDiv: Record<string, string[]>;
+    majCatsBySubDiv: Record<string, string[]>;
+    mcDesByMajCat: Record<string, string[]>;
+  }>({ divisions: [], subDivsByDiv: {}, majCatsBySubDiv: {}, mcDesByMajCat: {} });
+
   useEffect(() => {
     const str = localStorage.getItem('user');
     if (str) { try { setUser(JSON.parse(str)); } catch { /* skip */ } }
+  }, []);
+
+  useEffect(() => {
+    const token = localStorage.getItem('authToken');
+    fetch(`${APP_CONFIG.api.baseURL}/approver/fabric-article-master/hierarchy`, {
+      headers: { Authorization: `Bearer ${token}` },
+    }).then(r => r.json()).then(setFabHierarchy).catch(() => {});
   }, []);
 
   useEffect(() => {
@@ -705,19 +719,14 @@ export default function ApproverDashboard({ pathType }: ApproverDashboardProps =
                 </Select>
               )}
               {(showDivisionFilter || isUnscoped) && (
-                <Select value={divisionFilter} onValueChange={(v) => { setDivisionFilter(v); setSubDivisionFilter('ALL'); }}>
+                <Select value={divisionFilter} onValueChange={(v) => { setDivisionFilter(v); setSubDivisionFilter('ALL'); setMajorCategoryFilter(''); }}>
                   <SelectTrigger className="!h-7 w-[130px] text-[12px]"><SelectValue placeholder="Division" /></SelectTrigger>
                   <SelectContent>
                     <SelectItem value="ALL">All Divisions</SelectItem>
-                    {isUnscoped ? (
-                      <>
-                        <SelectItem value="MEN">MENS</SelectItem>
-                        <SelectItem value="LADIES">LADIES</SelectItem>
-                        <SelectItem value="KIDS">KIDS</SelectItem>
-                      </>
-                    ) : (
-                      userAssignedDivisions.map(d => <SelectItem key={d} value={d}>{formatDivisionLabel(d)}</SelectItem>)
-                    )}
+                    {isUnscoped
+                      ? fabHierarchy.divisions.map(d => <SelectItem key={d} value={d}>{d}</SelectItem>)
+                      : userAssignedDivisions.map(d => <SelectItem key={d} value={d}>{formatDivisionLabel(d)}</SelectItem>)
+                    }
                   </SelectContent>
                 </Select>
               )}
@@ -749,45 +758,30 @@ export default function ApproverDashboard({ pathType }: ApproverDashboardProps =
                       />
                     </div>
                     <div className="max-h-56 overflow-y-auto py-1">
-                      {(['ALL'] as string[])
-                        .concat(
-                          isUnscoped
-                            ? getSubDivisionOptions(divisionFilter === 'ALL' ? undefined : divisionFilter).length > 0
-                              ? getSubDivisionOptions(divisionFilter === 'ALL' ? undefined : divisionFilter)
-                              : [...SIMPLIFIED_HIERARCHY['MENS'], ...SIMPLIFIED_HIERARCHY['Ladies'], ...SIMPLIFIED_HIERARCHY['Kids']]
-                            : userAssignedSubDivisions,
-                        )
-                        .filter((sd) => sd === 'ALL' || sd.toLowerCase().includes(subDivSearch.toLowerCase()))
-                        .map((sd) => (
-                          <button
-                            key={sd}
-                            type="button"
-                            onClick={() => {
-                              setSubDivisionFilter(sd);
-                              setMajorCategoryFilter('');
-                              setSubDivOpen(false);
-                              setSubDivSearch('');
-                            }}
-                            className={cn(
-                              'w-full px-3 py-1.5 text-left text-xs hover:bg-accent hover:text-accent-foreground',
-                              subDivisionFilter === sd && 'bg-accent font-medium',
-                            )}
-                          >
-                            {sd === 'ALL' ? 'All Sub-Divs' : sd}
-                          </button>
-                        ))}
-                      {(['ALL'] as string[])
-                        .concat(
-                          isUnscoped
-                            ? getSubDivisionOptions(divisionFilter === 'ALL' ? undefined : divisionFilter).length > 0
-                              ? getSubDivisionOptions(divisionFilter === 'ALL' ? undefined : divisionFilter)
-                              : [...SIMPLIFIED_HIERARCHY['MENS'], ...SIMPLIFIED_HIERARCHY['Ladies'], ...SIMPLIFIED_HIERARCHY['Kids']]
-                            : userAssignedSubDivisions,
-                        )
-                        .filter((sd) => sd === 'ALL' || sd.toLowerCase().includes(subDivSearch.toLowerCase()))
-                        .length === 0 && (
-                        <div className="px-3 py-2 text-xs text-muted-foreground">No results</div>
-                      )}
+                      {(() => {
+                        const opts = isUnscoped
+                          ? (divisionFilter !== 'ALL' && fabHierarchy.subDivsByDiv[divisionFilter]
+                              ? fabHierarchy.subDivsByDiv[divisionFilter]
+                              : Object.values(fabHierarchy.subDivsByDiv).flat())
+                          : userAssignedSubDivisions;
+                        const filtered = (['ALL'] as string[]).concat(opts)
+                          .filter((sd) => sd === 'ALL' || sd.toLowerCase().includes(subDivSearch.toLowerCase()));
+                        return filtered.length === 0
+                          ? <div className="px-3 py-2 text-xs text-muted-foreground">No results</div>
+                          : filtered.map((sd) => (
+                            <button
+                              key={sd}
+                              type="button"
+                              onClick={() => { setSubDivisionFilter(sd); setMajorCategoryFilter(''); setSubDivOpen(false); setSubDivSearch(''); }}
+                              className={cn(
+                                'w-full px-3 py-1.5 text-left text-xs hover:bg-accent hover:text-accent-foreground',
+                                subDivisionFilter === sd && 'bg-accent font-medium',
+                              )}
+                            >
+                              {sd === 'ALL' ? 'All Sub-Divs' : sd}
+                            </button>
+                          ));
+                      })()}
                     </div>
                   </PopoverContent>
                 </Popover>
@@ -820,14 +814,18 @@ export default function ApproverDashboard({ pathType }: ApproverDashboardProps =
                   </div>
                   <div className="max-h-56 overflow-y-auto py-1">
                     {(() => {
-                      const div = divisionFilter === 'ALL' ? '' : divisionFilter;
-                      let prefixRegex: RegExp | null = null;
-                      if (div.match(/MEN/i)) prefixRegex = /^M|^MW/i;
-                      else if (div.match(/LADIES|WOMEN/i)) prefixRegex = /^L|^LW/i;
-                      else if (div.match(/KIDS/i)) prefixRegex = /^(K|I|J|Y|G)/i;
-                      const filtered = MAJOR_CATEGORY_ALLOWED_VALUES
-                        .filter((v) => !prefixRegex || v.shortForm.match(prefixRegex))
-                        .filter((v) => v.shortForm.toLowerCase().includes(majCatSearch.toLowerCase()));
+                      // Source maj_cats from fabric_article_master, cascading from sub-div → div → all
+                      let majCats: string[] = [];
+                      if (subDivisionFilter !== 'ALL' && fabHierarchy.majCatsBySubDiv[subDivisionFilter]) {
+                        majCats = fabHierarchy.majCatsBySubDiv[subDivisionFilter];
+                      } else if (divisionFilter !== 'ALL' && fabHierarchy.subDivsByDiv[divisionFilter]) {
+                        majCats = fabHierarchy.subDivsByDiv[divisionFilter]
+                          .flatMap(sd => fabHierarchy.majCatsBySubDiv[sd] ?? []);
+                      } else {
+                        majCats = Object.values(fabHierarchy.majCatsBySubDiv).flat();
+                      }
+                      const unique = Array.from(new Set(majCats)).sort();
+                      const filtered = unique.filter((v) => v.toLowerCase().includes(majCatSearch.toLowerCase()));
                       return (
                         <>
                           {!majCatSearch && (
@@ -844,15 +842,15 @@ export default function ApproverDashboard({ pathType }: ApproverDashboardProps =
                           )}
                           {filtered.map((v) => (
                             <button
-                              key={v.shortForm}
+                              key={v}
                               type="button"
-                              onClick={() => { setMajorCategoryFilter(v.shortForm); setMajCatOpen(false); setMajCatSearch(''); }}
+                              onClick={() => { setMajorCategoryFilter(v); setMajCatOpen(false); setMajCatSearch(''); }}
                               className={cn(
                                 'w-full px-3 py-1.5 text-left text-xs hover:bg-accent hover:text-accent-foreground',
-                                majorCategoryFilter === v.shortForm && 'bg-accent font-medium',
+                                majorCategoryFilter === v && 'bg-accent font-medium',
                               )}
                             >
-                              {v.shortForm}
+                              {v}
                             </button>
                           ))}
                           {filtered.length === 0 && (

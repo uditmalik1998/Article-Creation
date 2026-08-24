@@ -53,6 +53,8 @@ const ITEM_UPDATE_ALLOWED_FIELDS = [
     'fabricArticleNumber', 'fabricArticleDescription',
     'bodyArticle', 'bodyArticleDescription',
     'attrArticleNums',
+    // MC Description (from fabric_article_master mc_des, per major category)
+    'mcDescription',
     // Brand vendor MVGR
     'mvgrBrandVendor',
     // Variant-specific fields
@@ -919,6 +921,7 @@ export class ApproverController {
                     articleFashionType: true,
                     articleDimension: true,
                     mcCode: true,
+                    mcDescription: true,
                     impAtrbt2: true,
                     segment: true,
                     season: true,
@@ -1211,6 +1214,7 @@ export class ApproverController {
                     referenceArticleNumber: true,
                     referenceArticleDescription: true,
                     mcCode: true,
+                    mcDescription: true,
                     segment: true,
                     season: true,
                     hsnTaxCode: true,
@@ -1597,25 +1601,33 @@ export class ApproverController {
                 }
             }
 
-            // Enforce mc code list major categories only (mc des)
+            // Validate majorCategory — allow garment MC code list OR fabric_article_master (maj_cat).
             if (data.majorCategory !== undefined && data.majorCategory !== null) {
                 const majorCategoryText = String(data.majorCategory).trim();
                 if (majorCategoryText) {
-                    const mapped = getMcCodeByMajorCategory(majorCategoryText);
-                    if (!mapped) {
-                        return res.status(400).json({
-                            error: `Invalid majorCategory '${majorCategoryText}'. Please use values from mc code list (mc des).`
+                    const garmentMcCode = getMcCodeByMajorCategory(majorCategoryText);
+                    if (garmentMcCode) {
+                        data.mcCode = garmentMcCode;
+                        data.hsnTaxCode = getHsnCodeByMcCode(garmentMcCode) || null;
+                    } else {
+                        const fabMaster = await prisma.fabricArticleMaster.findFirst({
+                            where: { majCat: { equals: majorCategoryText, mode: 'insensitive' } },
+                            orderBy: { id: 'asc' },
+                            select: { mcCode: true, hsnCd: true },
                         });
+                        if (!fabMaster) {
+                            return res.status(400).json({
+                                error: `Invalid majorCategory '${majorCategoryText}'. Please use values from mc code list (mc des).`
+                            });
+                        }
+                        data.mcCode = fabMaster.mcCode || null;
+                        data.hsnTaxCode = fabMaster.hsnCd || null;
                     }
                 }
-            }
-
-            // Strict rule:
-            // mcCode should exist only when exact majorCategory mapping exists.
-            // Otherwise keep mcCode blank.
-            if (data.majorCategory !== undefined) {
-                data.mcCode = getMcCodeByMajorCategory(data.majorCategory) || null;
-                data.hsnTaxCode = getHsnCodeByMcCode(data.mcCode) || null;
+            } else if (data.majorCategory !== undefined) {
+                // majorCategory explicitly set to null/empty — clear derived fields
+                data.mcCode = null;
+                data.hsnTaxCode = null;
             } else if (data.mcCode !== undefined) {
                 data.hsnTaxCode = getHsnCodeByMcCode(data.mcCode) || null;
             }
@@ -3257,5 +3269,130 @@ export class ApproverController {
         });
 
         return res.json({ success: true, data: results });
+    }
+
+    /**
+     * Returns the cascading Division → Sub-Division → Major Category hierarchy
+     * built from the fabric_article_master table (active rows only).
+     * Used by the Fabric Article edit form and dashboard filters.
+     */
+    static async getFabricGridValues(_req: Request, res: Response) {
+        const rows = await prisma.fabricMajCatGridValue.findMany({
+            orderBy: [{ characteristic: 'asc' }, { id: 'asc' }],
+            select: { characteristic: true, code: true, fullForm: true },
+        });
+
+        // Map DB characteristic names → frontend Excel attr names (SCHEMA_KEY_TO_EXCEL_ATTR values)
+        const DB_TO_EXCEL: Record<string, string> = {
+            'FAB_MAIN_MVGR-1': 'M_FAB_MAIN_MVGR_1',
+            'FAB-MAIN-MVGR-2': 'M_FAB_MAIN_MVGR_2',
+            'WEAVE-01':        'M_WEAVE_01',
+            'WEAVE 02':        'M_WEAVE_02',
+        };
+
+        const grouped: Record<string, { code: string; fullForm: string }[]> = {};
+        for (const row of rows) {
+            const key = DB_TO_EXCEL[row.characteristic] ?? row.characteristic;
+            if (!grouped[key]) grouped[key] = [];
+            grouped[key].push({ code: row.code, fullForm: row.fullForm });
+        }
+
+        return res.json({ data: grouped });
+    }
+
+    static async getNationalGridValues(_req: Request, res: Response) {
+        const rows = await prisma.nationalGridMaster.findMany({
+            where: { isActive: true },
+            orderBy: [{ attributeName: 'asc' }, { id: 'asc' }],
+            select: { attributeName: true, code: true, fullForm: true },
+        });
+
+        // Map DB attribute_name → frontend Excel attr names where they differ
+        const DB_TO_EXCEL: Record<string, string> = {
+            'FAB_MAIN_MVGR-1': 'M_FAB_MAIN_MVGR_1',
+            'FAB-MAIN-MVGR-2': 'M_FAB_MAIN_MVGR_2',
+            'WEAVE-01':        'M_WEAVE_01',
+            'WEAVE 02':        'M_WEAVE_02',
+            'BODY STYLE':      'M_BODY_STYLE',
+            'M_NO_OF_POCKET':  'M_NO_OF_POCKET',
+        };
+
+        const grouped: Record<string, { code: string; fullForm: string }[]> = {};
+        for (const row of rows) {
+            const key = DB_TO_EXCEL[row.attributeName] ?? row.attributeName;
+            if (!grouped[key]) grouped[key] = [];
+            grouped[key].push({ code: row.code, fullForm: row.fullForm ?? row.code });
+        }
+
+        return res.json({ data: grouped });
+    }
+
+    static async getFabricArticleMasterHierarchy(_req: Request, res: Response) {
+        const rows = await prisma.fabricArticleMaster.findMany({
+            where: { status: 'ACT' },
+            select: { div: true, subDiv: true, majCat: true, mcDes: true },
+            orderBy: [{ div: 'asc' }, { subDiv: 'asc' }, { majCat: 'asc' }, { mcDes: 'asc' }],
+        });
+
+        const divSet = new Set<string>();
+        const subDivsByDiv: Record<string, string[]> = {};
+        const majCatsBySubDiv: Record<string, string[]> = {};
+        const mcDesByMajCat: Record<string, string[]> = {};
+
+        for (const row of rows) {
+            divSet.add(row.div);
+
+            if (!subDivsByDiv[row.div]) subDivsByDiv[row.div] = [];
+            if (!subDivsByDiv[row.div].includes(row.subDiv)) subDivsByDiv[row.div].push(row.subDiv);
+
+            if (!majCatsBySubDiv[row.subDiv]) majCatsBySubDiv[row.subDiv] = [];
+            if (!majCatsBySubDiv[row.subDiv].includes(row.majCat)) majCatsBySubDiv[row.subDiv].push(row.majCat);
+
+            if (!mcDesByMajCat[row.majCat]) mcDesByMajCat[row.majCat] = [];
+            if (!mcDesByMajCat[row.majCat].includes(row.mcDes)) mcDesByMajCat[row.majCat].push(row.mcDes);
+        }
+
+        return res.json({
+            divisions: Array.from(divSet),
+            subDivsByDiv,
+            majCatsBySubDiv,
+            mcDesByMajCat,
+        });
+    }
+
+    static async searchFabricArticleData(req: Request, res: Response) {
+        const q = String(req.query.q ?? '').trim();
+        if (!q) return res.json({ results: [] });
+        const results = await prisma.fabricArticleData.findMany({
+            where: {
+                OR: [
+                    { fabricArticleNumber: { contains: q, mode: 'insensitive' } },
+                    { fabricArticleDescription: { contains: q, mode: 'insensitive' } },
+                ],
+                NOT: { fabricArticleNumber: null },
+            },
+            select: {
+                fabricArticleNumber: true,
+                fabricArticleDescription: true,
+                mFabDiv: true,
+                mYarn: true,
+                mFabMainMvgr1: true,
+                mFabMainMvgr2: true,
+                mConstruction: true,
+                mOunz: true,
+                mWidth: true,
+                mWeave01: true,
+                mWeave02: true,
+                mCount: true,
+                mComposition: true,
+                mFinish: true,
+                mGsm: true,
+                mLycra: true,
+            },
+            distinct: ['fabricArticleNumber'],
+            take: 15,
+            orderBy: { fabricArticleNumber: 'asc' },
+        });
+        return res.json({ results });
     }
 }
