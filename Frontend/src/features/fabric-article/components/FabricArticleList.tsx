@@ -16,6 +16,7 @@ import {
   Minus,
   RotateCw,
   Search,
+  Wand2,
   X,
 } from 'lucide-react';
 import {
@@ -408,6 +409,7 @@ const ArticleCard = React.memo(
       divisions: string[];
       subDivsByDiv: Record<string, string[]>;
       majCatsBySubDiv: Record<string, string[]>;
+      mcDesByMajCat: Record<string, string[]>;
     };
   }) => {
     const [showVariants, setShowVariants] = useState(false);
