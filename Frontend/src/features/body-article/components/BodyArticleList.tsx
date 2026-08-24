@@ -1,10 +1,14 @@
 import React from 'react';
-import { FabricArticleList, type ApproverArticleListProps } from '../../fabric-article/components/FabricArticleList';
+import { ApproverArticleList } from '../../approver/components/ApproverArticleList';
+import type { ApproverArticleListProps } from '../../fabric-article/components/FabricArticleList';
 
-// Body Article shows only the "Body & Construction" attribute card.
-// forceStaticGroups skips the API-built cardGroups so the BODY group is never replaced by the FAB-only GROUP_ORDER.
-const BODY_HIDE_GROUPS = ['FAB', 'VA ACC.', 'VA PRCS', 'BUSINESS'];
+export type { ApproverArticleListProps };
 
-export const BodyArticleList: React.FC<ApproverArticleListProps> = (props) => (
-  <FabricArticleList {...props} hideGroups={BODY_HIDE_GROUPS} forceStaticGroups />
-);
+const BODY_ALLOW_GROUPS = ['BODY'];
+
+export const BodyArticleList: React.FC<ApproverArticleListProps> = ({
+  hideGroups: _hideGroups,
+  fabHierarchy: _fabHierarchy,
+  forceStaticGroups: _forceStaticGroups,
+  ...rest
+}) => <ApproverArticleList {...rest} allowGroups={BODY_ALLOW_GROUPS} />;

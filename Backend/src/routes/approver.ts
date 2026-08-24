@@ -75,6 +75,9 @@ router.post('/retry-sap-sync', requireApprovalRights, h(ApproverController.retry
 // Vendor name search — returns up to 15 matching vendors from master_vendor_details
 router.get('/vendor-search', h(ApproverController.vendorSearch));
 
+// Fabric article data search — returns up to 15 matching fabric_article_data rows by number or description
+router.get('/fabric-article-data/search', h(ApproverController.searchFabricArticleData));
+
 // Sizes for a given major category (from maj_cat_sizes table)
 router.get('/sizes-for-majcat/:majCat', h(ApproverController.getSizesForMajCat));
 
@@ -87,5 +90,14 @@ router.get('/bom-art-numbers/:majCat', h(ApproverController.getBomArtNumbers));
 // Admin: backfill article descriptions for a date range
 // POST /api/approver/backfill-descriptions?fromDate=2026-04-10&toDate=2026-04-16
 router.post('/backfill-descriptions', h(ApproverController.backfillDescriptions));
+
+// Cascading Division → Sub-Division → Major Category hierarchy from fabric_article_master
+router.get('/fabric-article-master/hierarchy', h(ApproverController.getFabricArticleMasterHierarchy));
+
+// Fabric attribute grid values from fabric_maj_cat_grid_values (M_FAB_DIV, M_YARN, etc.)
+router.get('/fabric-grid-values', h(ApproverController.getFabricGridValues));
+
+// Body attribute grid values from national_grid_master (M_COLLAR_TYPE, M_NO_OF_POCKET, etc.)
+router.get('/national-grid-values', h(ApproverController.getNationalGridValues));
 
 export default router;

@@ -81,6 +81,7 @@ export interface ApproverItem {
   vendorCode: string | null;
   mrp: number | string | null;
   mcCode: string | null;
+  mcDescription: string | null;
   segment: string | null;
   season: string | null;
   hsnTaxCode: string | null;

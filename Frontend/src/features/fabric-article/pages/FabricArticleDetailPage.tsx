@@ -85,7 +85,6 @@ const SCHEMA_KEY_TO_ALL_SAP_KEYS: Record<string, string[]> = Object.entries(SAP_
 function getMissingMandatoryFields(item: any): string[] {
   const missing: string[] = [];
   if (!item.vendorName) missing.push('VENDOR NAME');
-  if (!item.rate) missing.push('RATE / COST');
   if (!item.mrp) missing.push('MRP');
   const majorCat = item.majorCategory || '';
   if (!majorCat) return missing;
@@ -291,6 +290,15 @@ export default function ArticleDetailPage({
   const [modalMarkdown, setModalMarkdown] = useState<string | null>(null);
   const [editActiveTab, setEditActiveTab] = useState<'core' | 'attributes' | 'business'>('core');
   const modalDivision = editForm.watch('division');
+  const modalSubDivision = editForm.watch('subDivision');
+
+  // Fabric article master hierarchy (div → sub_div → maj_cat)
+  const [fabHierarchy, setFabHierarchy] = useState<{
+    divisions: string[];
+    subDivsByDiv: Record<string, string[]>;
+    majCatsBySubDiv: Record<string, string[]>;
+    mcDesByMajCat: Record<string, string[]>;
+  }>({ divisions: [], subDivsByDiv: {}, majCatsBySubDiv: {}, mcDesByMajCat: {} });
 
   const canApprove = user?.role === 'ADMIN' || user?.role === 'APPROVER' || user?.role === 'CATEGORY_HEAD' || user?.role === 'SUB_DIVISION_HEAD' || user?.role === 'PO_COMMITTEE' || user?.role === 'PD';
 
@@ -305,6 +313,13 @@ export default function ArticleDetailPage({
     const token = localStorage.getItem('authToken');
     fetch(`${APP_CONFIG.api.baseURL}/approver/attributes`, { headers: { Authorization: `Bearer ${token}` } })
       .then(r => r.json()).then(setAttributes).catch(() => {});
+  }, []);
+
+  useEffect(() => {
+    const token = localStorage.getItem('authToken');
+    fetch(`${APP_CONFIG.api.baseURL}/approver/fabric-article-master/hierarchy`, {
+      headers: { Authorization: `Bearer ${token}` },
+    }).then(r => r.json()).then(setFabHierarchy).catch(() => {});
   }, []);
 
   // Fetch by ID when opened directly (no navigation state)
@@ -664,13 +679,11 @@ export default function ArticleDetailPage({
     } catch (err) { message.error(err instanceof Error ? err.message : 'Failed to update item'); }
   };
 
-  const getSubDivisionOptions = (div?: string): string[] => {
-    if (!div) return [];
-    if (div.match(/LADIES|WOMEN/i)) return SIMPLIFIED_HIERARCHY['Ladies'];
-    if (div.match(/KIDS/i)) return SIMPLIFIED_HIERARCHY['Kids'];
-    if (div.match(/MEN/i)) return SIMPLIFIED_HIERARCHY['MENS'];
-    return [];
-  };
+  const getSubDivisionOptions = (div?: string): string[] =>
+    (div && fabHierarchy.subDivsByDiv[div]) ? fabHierarchy.subDivsByDiv[div] : [];
+
+  const getMajCatOptions = (subDiv?: string): string[] =>
+    (subDiv && fabHierarchy.majCatsBySubDiv[subDiv]) ? fabHierarchy.majCatsBySubDiv[subDiv] : [];
 
   const renderTextField = (name: string, label: string) => (
     <FormField control={editForm.control} name={name}
@@ -687,19 +700,22 @@ export default function ArticleDetailPage({
     <div className="grid grid-cols-2 gap-4">
       {renderTextField('articleNumber', 'Article Number')}
       {renderTextField('designNumber', 'Design Number')}
-      {renderTextField('majorCategory', 'Major Category')}
       <FormField control={editForm.control} name="division"
         render={({ field }) => (
           <FormItem>
             <FormLabel>Division</FormLabel>
             <FormControl>
-              <Select value={field.value || ''} onValueChange={(v) => { field.onChange(v); editForm.setValue('subDivision', ''); }}
+              <Select value={field.value || ''} onValueChange={(v) => {
+                field.onChange(v);
+                editForm.setValue('subDivision', '');
+                editForm.setValue('majorCategory', '');
+              }}
                 disabled={(user?.role === 'APPROVER' || user?.role === 'CATEGORY_HEAD') && !!user?.division}>
                 <SelectTrigger><SelectValue placeholder="Select division" /></SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="MEN">MENS</SelectItem>
-                  <SelectItem value="LADIES">LADIES</SelectItem>
-                  <SelectItem value="KIDS">KIDS</SelectItem>
+                  {fabHierarchy.divisions.map(d => (
+                    <SelectItem key={d} value={d}>{d}</SelectItem>
+                  ))}
                 </SelectContent>
               </Select>
             </FormControl>
@@ -711,12 +727,32 @@ export default function ArticleDetailPage({
           <FormItem>
             <FormLabel>Sub-Division</FormLabel>
             <FormControl>
-              <Select value={field.value || ''} onValueChange={field.onChange}
+              <Select value={field.value || ''} onValueChange={(v) => {
+                field.onChange(v);
+                editForm.setValue('majorCategory', '');
+              }}
                 disabled={user?.role === 'APPROVER' && !!user?.subDivision}>
                 <SelectTrigger><SelectValue placeholder="Select sub-division" /></SelectTrigger>
                 <SelectContent>
                   {getSubDivisionOptions(modalDivision).map(sd => (
                     <SelectItem key={sd} value={sd}>{sd}</SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </FormControl>
+          </FormItem>
+        )}
+      />
+      <FormField control={editForm.control} name="majorCategory"
+        render={({ field }) => (
+          <FormItem>
+            <FormLabel>Major Category</FormLabel>
+            <FormControl>
+              <Select value={field.value || ''} onValueChange={field.onChange}>
+                <SelectTrigger><SelectValue placeholder="Select major category" /></SelectTrigger>
+                <SelectContent>
+                  {getMajCatOptions(modalSubDivision).map(mc => (
+                    <SelectItem key={mc} value={mc}>{mc}</SelectItem>
                   ))}
                 </SelectContent>
               </Select>
@@ -1077,6 +1113,7 @@ export default function ArticleDetailPage({
           attributes={attributes}
           onRefresh={refetchCurrentItem}
           pathType={pathType}
+          fabHierarchy={fabHierarchy}
           serverPagination={{ total: totalCount, current: currentPage, pageSize: PAGE_SIZE, onChange: () => {} }}
           onSave={async (row, directUpdates, options) => {
             const prevItems = [...items];

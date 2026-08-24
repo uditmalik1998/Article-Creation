@@ -87,6 +87,22 @@ const ChevronDownIcon = ChevronDown;
 // Module-level BOM cache (shared across card instances)
 const bomCache = new Map<string, Promise<Record<string, Record<string, string>>>>();
 
+// Module-level national grid cache — body article dropdown values from national_grid_master
+type NationalGridValues = Record<string, { code: string; fullForm: string }[]>;
+let nationalGridPromise: Promise<NationalGridValues> | null = null;
+const fetchNationalGridValues = (): Promise<NationalGridValues> => {
+  if (!nationalGridPromise) {
+    const token = localStorage.getItem('authToken');
+    nationalGridPromise = fetch(`${APP_CONFIG.api.baseURL}/approver/national-grid-values`, {
+      headers: token ? { Authorization: `Bearer ${token}` } : {},
+    })
+      .then((r) => r.json())
+      .then((res) => res?.data ?? {})
+      .catch(() => ({}));
+  }
+  return nationalGridPromise;
+};
+
 // Module-level segment range cache (shared across card instances, keyed by UPPER major category)
 type SegmentRange = { segment_type: string; min: number; max: number };
 const segmentRangeCache = new Map<string, SegmentRange[]>();
@@ -452,6 +468,8 @@ export interface ApproverArticleListProps {
   attributes: MasterAttribute[];
   onRefresh: () => void;
   pathType?: 'old' | 'new' | 'rejected' | 'created' | 'failed';
+  /** When set, only these attribute group names are shown in article cards. */
+  allowGroups?: string[];
   serverPagination: {
     total: number;
     current: number;
@@ -484,6 +502,7 @@ const ArticleCard = React.memo(
     onRefresh,
     cardGroups,
     pathType,
+    allowGroups,
   }: {
     item: ApproverItem;
     isSelected: boolean;
@@ -498,6 +517,7 @@ const ArticleCard = React.memo(
     onRefresh: () => void;
     cardGroups: CardGroup[];
     pathType?: 'old' | 'new' | 'rejected' | 'created' | 'failed';
+    allowGroups?: string[];
   }) => {
     const [showVariants, setShowVariants] = useState(true);
     const [imgModalOpen, setImgModalOpen] = useState(false);
@@ -508,6 +528,17 @@ const ArticleCard = React.memo(
     const [duplicating, setDuplicating] = useState(false);
     const [allCollapsed, setAllCollapsed] = useState(false);
     const [collapsedGroups, setCollapsedGroups] = useState<Set<string>>(new Set());
+    const [fabNoQuery, setFabNoQuery] = useState('');
+    const [fabNoResults, setFabNoResults] = useState<{
+      fabricArticleNumber: string;
+      fabricArticleDescription: string | null;
+      mFabDiv: string | null; mYarn: string | null;
+      mFabMainMvgr1: string | null; mFabMainMvgr2: string | null;
+      mConstruction: string | null; mOunz: string | null; mWidth: string | null;
+      mWeave01: string | null; mWeave02: string | null; mCount: string | null;
+      mComposition: string | null; mFinish: string | null; mGsm: string | null; mLycra: string | null;
+    }[]>([]);
+    const [fabNoLoading, setFabNoLoading] = useState(false);
     const [imgZoom, setImgZoom] = useState(1);
     const [imgRotation, setImgRotation] = useState(0);
     const [catOpen, setCatOpen] = useState(false);
@@ -515,6 +546,17 @@ const ArticleCard = React.memo(
     // Search term for the attribute-value dropdown. A single shared term is
     // enough because only one attribute (editingField) is open at a time.
     const [attrSearch, setAttrSearch] = useState('');
+
+    // ── National grid values for Body Article dropdowns ─────────────────────
+    const [nationalGrid, setNationalGrid] = useState<NationalGridValues>({});
+    const [nationalGridReady, setNationalGridReady] = useState(false);
+    useEffect(() => {
+      if (!allowGroups) return;
+      fetchNationalGridValues().then((data) => {
+        setNationalGrid(data);
+        setNationalGridReady(true);
+      });
+    }, [allowGroups]);
 
     // ── Created-page "Modify" flow ──────────────────────────────────────────
     // On the Created page, articles are already APPROVED + SAP-synced. We keep
@@ -692,13 +734,19 @@ const ArticleCard = React.memo(
           continue;
         }
 
-        // Dropdown values come STRICTLY from the Maj-Cat Grid (maj_cat_grid_values).
-        // No global / division-level (attribute_allowed_values) fallback — if the
-        // grid has no values for this category+attribute the dropdown stays empty
-        // (and the field is hidden unless the mandatory grid forces it).
         const gridExcelAttr = SCHEMA_KEY_TO_EXCEL_ATTR[af.schemaKey];
+
+        // Body Article: source dropdown values from national_grid_master instead of maj_cat_grid_values
+        const nationalVals = allowGroups && nationalGridReady && gridExcelAttr
+          ? (nationalGrid[gridExcelAttr] ?? null)
+          : null;
+
+        // Garment grid fallback (used for FG articles and Body Article when national grid has no entry)
         const gridOnlyVals = gridExcelAttr ? getMajCatGridEntry(effectiveMajCat, gridExcelAttr) : null;
-        const values: AttrValue[] = (gridOnlyVals ?? []).map((v) => ({ shortForm: v, fullForm: v }));
+
+        const values: AttrValue[] = nationalVals
+          ? nationalVals.map((v) => ({ shortForm: v.code, fullForm: v.fullForm }))
+          : (gridOnlyVals ?? []).map((v) => ({ shortForm: v, fullForm: v }));
 
         if (gridsReady && catHasAnyGridData) {
           // ── Grids loaded AND category is configured: apply 3-tier filtering ──
@@ -709,6 +757,7 @@ const ArticleCard = React.memo(
             sapKeys.some((sk) => isMandatoryGridFieldActive(effectiveMajCat, sk) === true);
 
           const excelAttr = SCHEMA_KEY_TO_EXCEL_ATTR[af.schemaKey];
+          // Attribute visibility always driven by maj_cat_grid_values (same as FG articles)
           const hasDropdownValues =
             gridReady && excelAttr ? (getMajCatGridEntry(effectiveMajCat, excelAttr)?.length ?? 0) > 0 : false;
 
@@ -773,7 +822,7 @@ const ArticleCard = React.memo(
 
       return { visibleAttrs: visible, mandatoryKeys: mandatory };
       // eslint-disable-next-line react-hooks/exhaustive-deps
-    }, [effectiveMajCat, cacheReady, catConfigReady, gridReady, mandatoryGridReady, attributeFields, localValues]);
+    }, [effectiveMajCat, cacheReady, catConfigReady, gridReady, mandatoryGridReady, attributeFields, localValues, nationalGrid, nationalGridReady, allowGroups]);
 
     const [editingField, setEditingField] = useState<string | null>(null);
 
@@ -1173,7 +1222,9 @@ const ArticleCard = React.memo(
       if (!groupMap[attr.group]) groupMap[attr.group] = { color: attr.groupColor, attrs: [] };
       groupMap[attr.group].attrs.push(attr);
     }
-    const activeGroups = ATTRIBUTE_GROUPS.filter((g) => groupMap[g.group]);
+    const activeGroups = ATTRIBUTE_GROUPS.filter(
+      (g) => groupMap[g.group] && (!allowGroups || allowGroups.includes(g.group)),
+    );
 
     const rateVal = String(getValue('rate') ?? '').trim();
     const mrpVal = String(getValue('mrp') ?? '').trim();
@@ -1833,7 +1884,7 @@ const ArticleCard = React.memo(
           </div>
 
           {/* ─── MAIN GRID — image+info | attribute groups ─── */}
-          <div className="grid items-start gap-3 p-3 lg:grid-cols-[minmax(320px,28%)_1fr] xl:grid-cols-[minmax(360px,26%)_1fr] 2xl:grid-cols-[minmax(400px,24%)_1fr]">
+          <div className={`grid items-start gap-3 p-3 ${allowGroups ? 'lg:grid-cols-[minmax(320px,40%)_1fr] xl:grid-cols-[minmax(360px,40%)_1fr] 2xl:grid-cols-[minmax(400px,40%)_1fr]' : 'lg:grid-cols-[minmax(320px,28%)_1fr] xl:grid-cols-[minmax(360px,26%)_1fr] 2xl:grid-cols-[minmax(400px,24%)_1fr]'}`}>
             {/* ─── LEFT: Image + Article Info + Reference ───
              *
              * Sticky rail: image + identity stay anchored to the viewport
@@ -2003,7 +2054,7 @@ const ArticleCard = React.memo(
               </div>
 
               {visibleAttrs.length > 0 ? (
-                <div className="grid auto-rows-min grid-cols-1 gap-3 md:grid-cols-2 xl:grid-cols-3">
+                <div className={`grid auto-rows-min grid-cols-1 gap-3 ${allowGroups ? '' : 'md:grid-cols-2 xl:grid-cols-3'}`}>
                   {activeGroups.map((g) => {
                     const style = GROUP_HEADER_STYLE[g.group] ?? { bg: '#f3f4f6', fg: '#374151', border: '#e5e7eb' };
                     const collapsed = isGroupCollapsed(g.group);
@@ -2110,9 +2161,128 @@ const ArticleCard = React.memo(
                                   if (parts.length > 0)
                                     handleSave('fabricArticleDescription', parts.join('-').slice(0, 40));
                                 };
+                                const isFabNoEditing = editingField === 'bot_fabricArticleNumber';
+                                const fabNoDisplayVal =
+                                  localValues['fabricArticleNumber'] !== undefined
+                                    ? localValues['fabricArticleNumber']
+                                    : (item as any)['fabricArticleNumber'];
+
                                 return (
                                   <>
-                                    {renderField('fabricArticleNumber', 'FABRIC ARTICLE NO.')}
+                                    {/* FABRIC ARTICLE NO. — search dropdown from fabric_article_data */}
+                                    <div
+                                      key="fabricArticleNumber"
+                                      className="mt-1 border-t border-border bg-muted/30 px-2 py-1.5"
+                                      style={{ cursor: isLocked ? 'default' : 'pointer' }}
+                                      onClick={() => {
+                                        if (!isLocked && !isFabNoEditing) {
+                                          setEditingField('bot_fabricArticleNumber');
+                                          setFabNoQuery(fabNoDisplayVal || '');
+                                          setFabNoResults([]);
+                                        }
+                                      }}
+                                    >
+                                      <div className="mb-0.5 flex items-center justify-between gap-1">
+                                        <span className="text-[9px] font-semibold uppercase tracking-wider text-muted-foreground">
+                                          FABRIC ARTICLE NO.
+                                        </span>
+                                      </div>
+                                      {isFabNoEditing ? (
+                                        <div className="relative" onClick={(e) => e.stopPropagation()}>
+                                          <Input
+                                            autoFocus
+                                            value={fabNoQuery}
+                                            placeholder="Search fabric article no…"
+                                            className="h-6 px-1 text-[11px]"
+                                            onChange={(e) => {
+                                              const q = e.target.value;
+                                              setFabNoQuery(q);
+                                              if (!q.trim()) { setFabNoResults([]); return; }
+                                              setFabNoLoading(true);
+                                              const token = localStorage.getItem('authToken');
+                                              fetch(
+                                                `${APP_CONFIG.api.baseURL}/approver/fabric-article-data/search?q=${encodeURIComponent(q)}`,
+                                                { headers: { Authorization: `Bearer ${token}` } },
+                                              )
+                                                .then((r) => r.json())
+                                                .then((d) => setFabNoResults(d.results ?? []))
+                                                .catch(() => setFabNoResults([]))
+                                                .finally(() => setFabNoLoading(false));
+                                            }}
+                                            onBlur={() => {
+                                              setTimeout(() => {
+                                                setEditingField(null);
+                                                setFabNoResults([]);
+                                              }, 150);
+                                            }}
+                                            onKeyDown={(e) => {
+                                              if (e.key === 'Escape') {
+                                                setEditingField(null);
+                                                setFabNoResults([]);
+                                              }
+                                              if (e.key === 'Enter' && fabNoQuery.trim()) {
+                                                handleSave('fabricArticleNumber', fabNoQuery.trim() || null);
+                                                setEditingField(null);
+                                                setFabNoResults([]);
+                                              }
+                                            }}
+                                          />
+                                          {(fabNoResults.length > 0 || fabNoLoading) && (
+                                            <div className="absolute left-0 top-full z-50 mt-0.5 w-full rounded-md border border-border bg-white shadow-lg">
+                                              {fabNoLoading ? (
+                                                <div className="px-3 py-2 text-[11px] text-muted-foreground">Searching…</div>
+                                              ) : (
+                                                fabNoResults.map((r) => (
+                                                  <button
+                                                    key={r.fabricArticleNumber}
+                                                    type="button"
+                                                    className="flex w-full flex-col gap-0.5 px-3 py-1.5 text-left hover:bg-[#FF6F61]/10"
+                                                    onMouseDown={(e) => {
+                                                      e.preventDefault();
+                                                      // Map fabric_article_data fields → article item field names
+                                                      const gridUpdates: Record<string, string | null> = {
+                                                        fabricArticleNumber: r.fabricArticleNumber,
+                                                        ...(r.fabricArticleDescription != null && { fabricArticleDescription: r.fabricArticleDescription }),
+                                                        ...(r.mFabDiv       != null && { fabDiv:          r.mFabDiv }),
+                                                        ...(r.mYarn         != null && { yarn1:           r.mYarn }),
+                                                        ...(r.mFabMainMvgr1 != null && { mainMvgr:        r.mFabMainMvgr1 }),
+                                                        ...(r.mFabMainMvgr2 != null && { fabricMainMvgr:  r.mFabMainMvgr2 }),
+                                                        ...(r.mConstruction != null && { fConstruction:   r.mConstruction }),
+                                                        ...(r.mOunz         != null && { fOunce:          r.mOunz }),
+                                                        ...(r.mWidth        != null && { fWidth:          r.mWidth }),
+                                                        ...(r.mWeave01      != null && { weave:           r.mWeave01 }),
+                                                        ...(r.mWeave02      != null && { mFab2:           r.mWeave02 }),
+                                                        ...(r.mCount        != null && { fCount:          r.mCount }),
+                                                        ...(r.mComposition  != null && { composition:     r.mComposition }),
+                                                        ...(r.mFinish       != null && { finish:          r.mFinish }),
+                                                        ...(r.mGsm          != null && { gsm:             r.mGsm }),
+                                                        ...(r.mLycra        != null && { lycra:           r.mLycra }),
+                                                      };
+                                                      setLocalValues((prev) => ({ ...prev, ...gridUpdates }));
+                                                      setEditingField(null);
+                                                      setFabNoResults([]);
+                                                      onSave({ ...item, ...gridUpdates } as any, gridUpdates);
+                                                    }}
+                                                  >
+                                                    <span className="text-[11px] font-medium text-gray-900">{r.fabricArticleNumber}</span>
+                                                    {r.fabricArticleDescription && (
+                                                      <span className="truncate text-[10px] text-muted-foreground">{r.fabricArticleDescription}</span>
+                                                    )}
+                                                  </button>
+                                                ))
+                                              )}
+                                            </div>
+                                          )}
+                                        </div>
+                                      ) : (
+                                        <div
+                                          className="truncate text-[11px]"
+                                          style={{ color: fabNoDisplayVal ? '#111827' : '#9ca3af' }}
+                                        >
+                                          {fabNoDisplayVal || (isLocked ? '—' : 'Click to fill')}
+                                        </div>
+                                      )}
+                                    </div>
                                     {renderField('fabricArticleDescription', 'FABRIC ARTICLE DESC', fabAutoFill, 40)}
                                     <div className="border-t border-border px-2 py-1.5">
                                       <Button
@@ -2550,6 +2720,7 @@ export const ApproverArticleList: React.FC<ApproverArticleListProps> = ({
   attributes,
   onRefresh,
   pathType,
+  allowGroups,
   serverPagination,
 }) => {
   const [cardGroups, setCardGroups] = useState<CardGroup[]>(() => {
@@ -2566,6 +2737,10 @@ export const ApproverArticleList: React.FC<ApproverArticleListProps> = ({
         /* keep hardcoded fallback */
       });
   }, []);
+
+  const visibleCardGroups = allowGroups
+    ? cardGroups.filter((g) => allowGroups.includes(g.group))
+    : cardGroups;
 
   const handleToggleSelect = useCallback(
     (id: string) => {
@@ -2630,8 +2805,9 @@ export const ApproverArticleList: React.FC<ApproverArticleListProps> = ({
           onModify={onModify}
           attributes={attributes}
           onRefresh={onRefresh}
-          cardGroups={cardGroups}
+          cardGroups={visibleCardGroups}
           pathType={pathType}
+          allowGroups={allowGroups}
         />
       ))}
     </div>

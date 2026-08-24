@@ -89,6 +89,23 @@ interface ColorMasterMeta {
   skipped?: number;
 }
 
+interface FabricArticleDataMeta {
+  uploadedAt?: string;
+  fileName?: string;
+  total?: number;
+  synced?: number;
+  pending?: number;
+  skipped?: number;
+}
+
+interface FabricArticleMasterMeta {
+  uploadedAt?: string;
+  fileName?: string;
+  total?: number;
+  categories?: number;
+  skipped?: number;
+}
+
 interface SegmentMasterMeta {
   total?: number;
   categories?: number;
@@ -188,6 +205,20 @@ export default function Admin() {
   const [colorMasterUploading, setColorMasterUploading] = useState(false);
   const [colorMasterProgress, setColorMasterProgress] = useState<number>(0);
   const colorFileRef = useRef<HTMLInputElement | null>(null);
+
+  // Fabric Article Data (fabric_article_data)
+  const [fabricArticleDataMeta, setFabricArticleDataMeta] = useState<FabricArticleDataMeta | null>(null);
+  const [fabricArticleDataStatusLoading, setFabricArticleDataStatusLoading] = useState(false);
+  const [fabricArticleDataUploading, setFabricArticleDataUploading] = useState(false);
+  const [fabricArticleDataProgress, setFabricArticleDataProgress] = useState<number>(0);
+  const fabricArticleDataFileRef = useRef<HTMLInputElement | null>(null);
+
+  // Fabric Article Master (fabric_article_master)
+  const [fabricArticleMasterMeta, setFabricArticleMasterMeta] = useState<FabricArticleMasterMeta | null>(null);
+  const [fabricArticleMasterStatusLoading, setFabricArticleMasterStatusLoading] = useState(false);
+  const [fabricArticleMasterUploading, setFabricArticleMasterUploading] = useState(false);
+  const [fabricArticleMasterProgress, setFabricArticleMasterProgress] = useState<number>(0);
+  const fabricArticleFileRef = useRef<HTMLInputElement | null>(null);
 
   // Segment Master (maj_cat_segment)
   const [segmentMasterMeta, setSegmentMasterMeta] = useState<SegmentMasterMeta | null>(null);
@@ -631,6 +662,130 @@ export default function Admin() {
     }
   };
 
+  // ─────────────────────────────── Fabric Article Data ────────────────────────
+  const loadFabricArticleDataStatus = useCallback(async () => {
+    setFabricArticleDataStatusLoading(true);
+    try {
+      const token = localStorage.getItem('authToken');
+      const res = await fetch(`${APP_CONFIG.api.baseURL}/admin/fabric-article-data/status`, {
+        headers: token ? { Authorization: `Bearer ${token}` } : {},
+      });
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.error || 'Failed to load fabric article data status');
+      setFabricArticleDataMeta(data.data);
+    } catch (err: any) {
+      message.error(err?.message || 'Failed to load fabric article data status');
+    } finally {
+      setFabricArticleDataStatusLoading(false);
+    }
+  }, []);
+
+  const downloadFabricArticleDataTemplate = () => {
+    const token = localStorage.getItem('authToken');
+    const url = `${APP_CONFIG.api.baseURL}/admin/fabric-article-data/template`;
+    fetch(url, { headers: token ? { Authorization: `Bearer ${token}` } : {} })
+      .then((r) => r.blob())
+      .then((blob) => {
+        const a = document.createElement('a');
+        a.href = URL.createObjectURL(blob);
+        a.download = 'FABRIC_ARTICLE_DATA_TEMPLATE.xlsx';
+        a.click();
+      })
+      .catch(() => message.error('Failed to download template'));
+  };
+
+  const handleFabricArticleDataUpload = async (file: File) => {
+    setFabricArticleDataUploading(true);
+    setFabricArticleDataProgress(0);
+    try {
+      const token = localStorage.getItem('authToken');
+      const formData = new FormData();
+      formData.append('file', file);
+      const progressInterval = setInterval(() => {
+        setFabricArticleDataProgress((prev) => Math.min(prev + 5, 90));
+      }, 500);
+      const res = await fetch(`${APP_CONFIG.api.baseURL}/admin/fabric-article-data/upload`, {
+        method: 'POST',
+        headers: token ? { Authorization: `Bearer ${token}` } : {},
+        body: formData,
+      });
+      clearInterval(progressInterval);
+      setFabricArticleDataProgress(100);
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.error || 'Upload failed');
+      message.success(data.message);
+      setFabricArticleDataMeta(data.data);
+    } catch (err: any) {
+      message.error(err?.message || 'Upload failed');
+    } finally {
+      setFabricArticleDataUploading(false);
+      setTimeout(() => setFabricArticleDataProgress(0), 1500);
+      if (fabricArticleDataFileRef.current) fabricArticleDataFileRef.current.value = '';
+    }
+  };
+
+  // ─────────────────────────────── Fabric Article Master ──────────────────────
+  const loadFabricArticleMasterStatus = useCallback(async () => {
+    setFabricArticleMasterStatusLoading(true);
+    try {
+      const token = localStorage.getItem('authToken');
+      const res = await fetch(`${APP_CONFIG.api.baseURL}/admin/fabric-article-master/status`, {
+        headers: token ? { Authorization: `Bearer ${token}` } : {},
+      });
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.error || 'Failed to load fabric article master status');
+      setFabricArticleMasterMeta(data.data);
+    } catch (err: any) {
+      message.error(err?.message || 'Failed to load fabric article master status');
+    } finally {
+      setFabricArticleMasterStatusLoading(false);
+    }
+  }, []);
+
+  const downloadFabricArticleMasterTemplate = () => {
+    const token = localStorage.getItem('authToken');
+    const url = `${APP_CONFIG.api.baseURL}/admin/fabric-article-master/template`;
+    fetch(url, { headers: token ? { Authorization: `Bearer ${token}` } : {} })
+      .then((r) => r.blob())
+      .then((blob) => {
+        const a = document.createElement('a');
+        a.href = URL.createObjectURL(blob);
+        a.download = 'FABRIC_ARTICLE_MASTER_TEMPLATE.xlsx';
+        a.click();
+      })
+      .catch(() => message.error('Failed to download template'));
+  };
+
+  const handleFabricArticleMasterUpload = async (file: File) => {
+    setFabricArticleMasterUploading(true);
+    setFabricArticleMasterProgress(0);
+    try {
+      const token = localStorage.getItem('authToken');
+      const formData = new FormData();
+      formData.append('file', file);
+      const progressInterval = setInterval(() => {
+        setFabricArticleMasterProgress((prev) => Math.min(prev + 5, 90));
+      }, 500);
+      const res = await fetch(`${APP_CONFIG.api.baseURL}/admin/fabric-article-master/upload`, {
+        method: 'POST',
+        headers: token ? { Authorization: `Bearer ${token}` } : {},
+        body: formData,
+      });
+      clearInterval(progressInterval);
+      setFabricArticleMasterProgress(100);
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.error || 'Upload failed');
+      message.success(data.message);
+      setFabricArticleMasterMeta(data.data);
+    } catch (err: any) {
+      message.error(err?.message || 'Upload failed');
+    } finally {
+      setFabricArticleMasterUploading(false);
+      setTimeout(() => setFabricArticleMasterProgress(0), 1500);
+      if (fabricArticleFileRef.current) fabricArticleFileRef.current.value = '';
+    }
+  };
+
   // ─────────────────────────────── Segment Master ─────────────────────────────
   const loadSegmentMasterStatus = useCallback(async () => {
     setSegmentMasterStatusLoading(true);
@@ -968,12 +1123,14 @@ export default function Admin() {
     loadMandatoryGridStatus();
     loadSizeMasterStatus();
     loadColorMasterStatus();
+    loadFabricArticleDataStatus();
+    loadFabricArticleMasterStatus();
     loadSegmentMasterStatus();
     loadNationalGridStatus();
     loadHierarchyExcelStatus();
     loadPipelineStatus();
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [loadVendorStatus, loadMajCatGridStatus, loadMandatoryGridStatus, loadSizeMasterStatus, loadColorMasterStatus, loadSegmentMasterStatus, loadNationalGridStatus, loadHierarchyExcelStatus, loadPipelineStatus]);
+  }, [loadVendorStatus, loadMajCatGridStatus, loadMandatoryGridStatus, loadSizeMasterStatus, loadColorMasterStatus, loadFabricArticleDataStatus, loadFabricArticleMasterStatus, loadSegmentMasterStatus, loadNationalGridStatus, loadHierarchyExcelStatus, loadPipelineStatus]);
 
   const loadData = async () => {
     setLoading(true);
@@ -1709,6 +1866,227 @@ export default function Admin() {
                       <button
                         type="button"
                         onClick={() => colorFileRef.current?.click()}
+                        className="flex w-full flex-col items-center justify-center rounded-md border-2 border-dashed border-border bg-muted/30 px-4 py-6 transition-colors hover:border-[#FF6F61] hover:bg-[#FF6F61]/5"
+                      >
+                        <Inbox className="mb-2 h-8 w-8 text-[#FF6F61]" />
+                        <p className="text-[13px]">
+                          Click to upload <strong>.xlsx</strong> file
+                        </p>
+                        <p className="text-[11px] text-muted-foreground">Only Excel files. Max 50 MB.</p>
+                      </button>
+                    )}
+                  </div>
+                </div>
+              </div>
+            </Spinner>
+          </CardContent>
+        </Card>
+
+        {/* Fabric Article Data Upload (fabric article records → fabric_article_data) */}
+        <Card className="mb-6 glass rounded-2xl border border-white/60">
+          <CardHeader className="flex flex-row items-center justify-between">
+            <CardTitle className="flex items-center gap-2 text-base">
+              <TableIcon className="h-4 w-4" />
+              Fabric Article Data (Bulk Insert)
+            </CardTitle>
+            <div className="flex gap-2">
+              <Button size="sm" variant="outline" onClick={downloadFabricArticleDataTemplate}>
+                <Download />
+                Download Template
+              </Button>
+              <Button size="sm" variant="outline" onClick={loadFabricArticleDataStatus} disabled={fabricArticleDataStatusLoading}>
+                <RotateCw className={fabricArticleDataStatusLoading ? 'animate-spin' : ''} />
+                Refresh Status
+              </Button>
+            </div>
+          </CardHeader>
+          <CardContent>
+            <Spinner spinning={fabricArticleDataStatusLoading}>
+              <div className="grid grid-cols-1 gap-4 md:grid-cols-12">
+                {/* Status panel */}
+                <div className="md:col-span-7">
+                  {fabricArticleDataMeta && (fabricArticleDataMeta.total ?? 0) > 0 ? (
+                    <Descriptions bordered>
+                      {fabricArticleDataMeta.uploadedAt && (
+                        <Descriptions.Item label="Last Upload">
+                          {new Date(fabricArticleDataMeta.uploadedAt).toLocaleString('en-IN', {
+                            timeZone: 'Asia/Kolkata', dateStyle: 'medium', timeStyle: 'short',
+                          }) + ' IST'}
+                        </Descriptions.Item>
+                      )}
+                      {fabricArticleDataMeta.fileName && (
+                        <Descriptions.Item label="File">
+                          <span className="font-mono text-xs">{fabricArticleDataMeta.fileName}</span>
+                        </Descriptions.Item>
+                      )}
+                      <Descriptions.Item label="Total Rows">
+                        <Badge variant="secondary">{(fabricArticleDataMeta.total ?? 0).toLocaleString()}</Badge>
+                      </Descriptions.Item>
+                      <Descriptions.Item label="Synced">
+                        <Badge variant="success">{(fabricArticleDataMeta.synced ?? 0).toLocaleString()}</Badge>
+                      </Descriptions.Item>
+                      <Descriptions.Item label="Pending">
+                        <Badge variant="warning">{(fabricArticleDataMeta.pending ?? 0).toLocaleString()}</Badge>
+                      </Descriptions.Item>
+                      {fabricArticleDataMeta.skipped != null && (
+                        <Descriptions.Item label="Rows Skipped">
+                          <Badge variant={(fabricArticleDataMeta.skipped ?? 0) > 0 ? 'warning' : 'secondary'}>
+                            {(fabricArticleDataMeta.skipped ?? 0).toLocaleString()}
+                          </Badge>
+                        </Descriptions.Item>
+                      )}
+                    </Descriptions>
+                  ) : (
+                    <Alert
+                      type="warning"
+                      showIcon
+                      message="No fabric article data uploaded yet"
+                      description="Upload an Excel with columns: FABRIC_ARTICLE_NUMBER, FABRIC_ARTICLE_DESC, DIVISION, SUB_DIVISION, MAJOR_CATEGORY, VENDOR_NAME, VENDOR_CODE, plus fabric attribute columns. Each row is inserted as a new record."
+                    />
+                  )}
+                </div>
+
+                {/* Upload panel */}
+                <div className="md:col-span-5">
+                  <div className="rounded-md border border-border p-4">
+                    <div className="mb-1 font-semibold">Upload Fabric Article Data Excel</div>
+                    <div className="mb-3 text-xs text-muted-foreground">
+                      Sheet <strong>FABRIC ARTICLE DATA</strong> (or first sheet), headers in row 3, data from row 5.
+                      Each row is <strong>inserted as a new record</strong> with a fresh ID.
+                    </div>
+
+                    <input
+                      ref={fabricArticleDataFileRef}
+                      type="file"
+                      accept=".xlsx,.xls"
+                      className="hidden"
+                      onChange={(e) => {
+                        const file = e.target.files?.[0];
+                        if (file) handleFabricArticleDataUpload(file);
+                      }}
+                    />
+
+                    {fabricArticleDataUploading ? (
+                      <div>
+                        <div className="mb-2 text-[13px] text-[#FF6F61]">
+                          <RefreshCw className="mr-1.5 inline-block h-3.5 w-3.5 animate-spin" />
+                          Parsing Excel & inserting records...
+                        </div>
+                        <Progress value={fabricArticleDataProgress} />
+                      </div>
+                    ) : (
+                      <button
+                        type="button"
+                        onClick={() => fabricArticleDataFileRef.current?.click()}
+                        className="flex w-full flex-col items-center justify-center rounded-md border-2 border-dashed border-border bg-muted/30 px-4 py-6 transition-colors hover:border-[#FF6F61] hover:bg-[#FF6F61]/5"
+                      >
+                        <Inbox className="mb-2 h-8 w-8 text-[#FF6F61]" />
+                        <p className="text-[13px]">
+                          Click to upload <strong>.xlsx</strong> file
+                        </p>
+                        <p className="text-[11px] text-muted-foreground">Only Excel files. Max 50 MB.</p>
+                      </button>
+                    )}
+                  </div>
+                </div>
+              </div>
+            </Spinner>
+          </CardContent>
+        </Card>
+
+        {/* Fabric Article Master Upload (fabric hierarchy → fabric_article_master) */}
+        <Card className="mb-6 glass rounded-2xl border border-white/60">
+          <CardHeader className="flex flex-row items-center justify-between">
+            <CardTitle className="flex items-center gap-2 text-base">
+              <TableIcon className="h-4 w-4" />
+              Fabric Article Master (Fabric Hierarchy)
+            </CardTitle>
+            <div className="flex gap-2">
+              <Button size="sm" variant="outline" onClick={downloadFabricArticleMasterTemplate}>
+                <Download />
+                Download Template
+              </Button>
+              <Button size="sm" variant="outline" onClick={loadFabricArticleMasterStatus} disabled={fabricArticleMasterStatusLoading}>
+                <RotateCw className={fabricArticleMasterStatusLoading ? 'animate-spin' : ''} />
+                Refresh Status
+              </Button>
+            </div>
+          </CardHeader>
+          <CardContent>
+            <Spinner spinning={fabricArticleMasterStatusLoading}>
+              <div className="grid grid-cols-1 gap-4 md:grid-cols-12">
+                {/* Status panel */}
+                <div className="md:col-span-7">
+                  {fabricArticleMasterMeta && (fabricArticleMasterMeta.total ?? 0) > 0 ? (
+                    <Descriptions bordered>
+                      {fabricArticleMasterMeta.uploadedAt && (
+                        <Descriptions.Item label="Last Upload">
+                          {new Date(fabricArticleMasterMeta.uploadedAt).toLocaleString('en-IN', {
+                            timeZone: 'Asia/Kolkata', dateStyle: 'medium', timeStyle: 'short',
+                          }) + ' IST'}
+                        </Descriptions.Item>
+                      )}
+                      {fabricArticleMasterMeta.fileName && (
+                        <Descriptions.Item label="File">
+                          <span className="font-mono text-xs">{fabricArticleMasterMeta.fileName}</span>
+                        </Descriptions.Item>
+                      )}
+                      <Descriptions.Item label="Major Categories">
+                        <Badge variant="info">{(fabricArticleMasterMeta.categories ?? 0).toLocaleString()}</Badge>
+                      </Descriptions.Item>
+                      <Descriptions.Item label="Total Rows">
+                        <Badge variant="secondary">{(fabricArticleMasterMeta.total ?? 0).toLocaleString()}</Badge>
+                      </Descriptions.Item>
+                      {fabricArticleMasterMeta.skipped != null && (
+                        <Descriptions.Item label="Rows Skipped">
+                          <Badge variant={(fabricArticleMasterMeta.skipped ?? 0) > 0 ? 'warning' : 'secondary'}>
+                            {(fabricArticleMasterMeta.skipped ?? 0).toLocaleString()}
+                          </Badge>
+                        </Descriptions.Item>
+                      )}
+                    </Descriptions>
+                  ) : (
+                    <Alert
+                      type="warning"
+                      showIcon
+                      message="No fabric article master uploaded yet"
+                      description="Upload the Fabric Article Master Excel (columns: DIV, SUB-DIV, MJ_CAT, MC_CD, MC_DESC) to populate fabric hierarchy dropdowns."
+                    />
+                  )}
+                </div>
+
+                {/* Upload panel */}
+                <div className="md:col-span-5">
+                  <div className="rounded-md border border-border p-4">
+                    <div className="mb-1 font-semibold">Upload Fabric Article Master Excel</div>
+                    <div className="mb-3 text-xs text-muted-foreground">
+                      Sheet <strong>FAB UPLAODER FORMAT</strong> (or first sheet), headers in row 3, data from row 5 —
+                      columns A (DIV), B (SUB-DIV), C (MJ_CAT), D (MC_CD), E (MC_DESC). Replaces the entire table.
+                    </div>
+
+                    <input
+                      ref={fabricArticleFileRef}
+                      type="file"
+                      accept=".xlsx,.xls"
+                      className="hidden"
+                      onChange={(e) => {
+                        const file = e.target.files?.[0];
+                        if (file) handleFabricArticleMasterUpload(file);
+                      }}
+                    />
+
+                    {fabricArticleMasterUploading ? (
+                      <div>
+                        <div className="mb-2 text-[13px] text-[#FF6F61]">
+                          <RefreshCw className="mr-1.5 inline-block h-3.5 w-3.5 animate-spin" />
+                          Parsing Excel & replacing table...
+                        </div>
+                        <Progress value={fabricArticleMasterProgress} />
+                      </div>
+                    ) : (
+                      <button
+                        type="button"
+                        onClick={() => fabricArticleFileRef.current?.click()}
                         className="flex w-full flex-col items-center justify-center rounded-md border-2 border-dashed border-border bg-muted/30 px-4 py-6 transition-colors hover:border-[#FF6F61] hover:bg-[#FF6F61]/5"
                       >
                         <Inbox className="mb-2 h-8 w-8 text-[#FF6F61]" />

@@ -353,6 +353,7 @@ exports.Prisma.ExtractionResultFlatScalarFieldEnum = {
   fabricArticleDescription: 'fabricArticleDescription',
   attrArticleNums: 'attrArticleNums',
   mvgrBrandVendor: 'mvgrBrandVendor',
+  mcDescription: 'mcDescription',
   vendorCode: 'vendorCode',
   mrp: 'mrp',
   impAtrbt2: 'impAtrbt2',
@@ -820,6 +821,30 @@ exports.Prisma.MajorCatMasterScalarFieldEnum = {
   updatedAt: 'updatedAt'
 };
 
+exports.Prisma.FabricArticleMasterScalarFieldEnum = {
+  id: 'id',
+  seg: 'seg',
+  div: 'div',
+  subDiv: 'subDiv',
+  majCat: 'majCat',
+  mcCode: 'mcCode',
+  mcDes: 'mcDes',
+  status: 'status',
+  hsnCd: 'hsnCd',
+  artType: 'artType',
+  createdAt: 'createdAt',
+  updatedAt: 'updatedAt'
+};
+
+exports.Prisma.FabricMajCatGridValueScalarFieldEnum = {
+  id: 'id',
+  characteristic: 'characteristic',
+  code: 'code',
+  fullForm: 'fullForm',
+  createdAt: 'createdAt',
+  updatedAt: 'updatedAt'
+};
+
 exports.Prisma.ModifyLogScalarFieldEnum = {
   id: 'id',
   modificationGroupId: 'modificationGroupId',
@@ -856,6 +881,48 @@ exports.Prisma.FabricArticleDataScalarFieldEnum = {
   majorCategory: 'majorCategory',
   vendorName: 'vendorName',
   vendorCode: 'vendorCode',
+  approvalStatus: 'approvalStatus',
+  approvedAt: 'approvedAt',
+  approvedBy: 'approvedBy',
+  sapSyncStatus: 'sapSyncStatus',
+  sapSyncMessage: 'sapSyncMessage',
+  userName: 'userName',
+  createdAt: 'createdAt',
+  updatedAt: 'updatedAt'
+};
+
+exports.Prisma.BodyArticleDataScalarFieldEnum = {
+  id: 'id',
+  mCollarType: 'mCollarType',
+  mCollarStyle: 'mCollarStyle',
+  mNeckType: 'mNeckType',
+  mNeckStyle: 'mNeckStyle',
+  mPlacket: 'mPlacket',
+  mBltType: 'mBltType',
+  mBltStyle: 'mBltStyle',
+  mSleevesMainStyle: 'mSleevesMainStyle',
+  mSleeveFold: 'mSleeveFold',
+  mBtmFold: 'mBtmFold',
+  mNoOfPocket: 'mNoOfPocket',
+  mPocket: 'mPocket',
+  mExtraPocket: 'mExtraPocket',
+  mFit: 'mFit',
+  mBodyStyle: 'mBodyStyle',
+  mLength: 'mLength',
+  mSet: 'mSet',
+  bodyArticleNumber: 'bodyArticleNumber',
+  bodyArticleDescription: 'bodyArticleDescription',
+  flatId: 'flatId',
+  articleNumber: 'articleNumber',
+  division: 'division',
+  subDivision: 'subDivision',
+  majorCategory: 'majorCategory',
+  mcCode: 'mcCode',
+  vendorName: 'vendorName',
+  vendorCode: 'vendorCode',
+  season: 'season',
+  year: 'year',
+  hsnTaxCode: 'hsnTaxCode',
   approvalStatus: 'approvalStatus',
   approvedAt: 'approvedAt',
   approvedBy: 'approvedBy',
@@ -1046,6 +1113,7 @@ exports.Prisma.ExtractionResultFlatOrderByRelevanceFieldEnum = {
   fabricArticleDescription: 'fabricArticleDescription',
   attrArticleNums: 'attrArticleNums',
   mvgrBrandVendor: 'mvgrBrandVendor',
+  mcDescription: 'mcDescription',
   vendorCode: 'vendorCode',
   impAtrbt2: 'impAtrbt2',
   mcCode: 'mcCode',
@@ -1371,6 +1439,24 @@ exports.Prisma.MajorCatMasterOrderByRelevanceFieldEnum = {
   frame: 'frame'
 };
 
+exports.Prisma.FabricArticleMasterOrderByRelevanceFieldEnum = {
+  seg: 'seg',
+  div: 'div',
+  subDiv: 'subDiv',
+  majCat: 'majCat',
+  mcCode: 'mcCode',
+  mcDes: 'mcDes',
+  status: 'status',
+  hsnCd: 'hsnCd',
+  artType: 'artType'
+};
+
+exports.Prisma.FabricMajCatGridValueOrderByRelevanceFieldEnum = {
+  characteristic: 'characteristic',
+  code: 'code',
+  fullForm: 'fullForm'
+};
+
 exports.Prisma.ModifyLogOrderByRelevanceFieldEnum = {
   modificationGroupId: 'modificationGroupId',
   articleNumber: 'articleNumber',
@@ -1405,6 +1491,44 @@ exports.Prisma.FabricArticleDataOrderByRelevanceFieldEnum = {
   majorCategory: 'majorCategory',
   vendorName: 'vendorName',
   vendorCode: 'vendorCode',
+  approvalStatus: 'approvalStatus',
+  sapSyncStatus: 'sapSyncStatus',
+  sapSyncMessage: 'sapSyncMessage',
+  userName: 'userName'
+};
+
+exports.Prisma.BodyArticleDataOrderByRelevanceFieldEnum = {
+  id: 'id',
+  mCollarType: 'mCollarType',
+  mCollarStyle: 'mCollarStyle',
+  mNeckType: 'mNeckType',
+  mNeckStyle: 'mNeckStyle',
+  mPlacket: 'mPlacket',
+  mBltType: 'mBltType',
+  mBltStyle: 'mBltStyle',
+  mSleevesMainStyle: 'mSleevesMainStyle',
+  mSleeveFold: 'mSleeveFold',
+  mBtmFold: 'mBtmFold',
+  mNoOfPocket: 'mNoOfPocket',
+  mPocket: 'mPocket',
+  mExtraPocket: 'mExtraPocket',
+  mFit: 'mFit',
+  mBodyStyle: 'mBodyStyle',
+  mLength: 'mLength',
+  mSet: 'mSet',
+  bodyArticleNumber: 'bodyArticleNumber',
+  bodyArticleDescription: 'bodyArticleDescription',
+  flatId: 'flatId',
+  articleNumber: 'articleNumber',
+  division: 'division',
+  subDivision: 'subDivision',
+  majorCategory: 'majorCategory',
+  mcCode: 'mcCode',
+  vendorName: 'vendorName',
+  vendorCode: 'vendorCode',
+  season: 'season',
+  year: 'year',
+  hsnTaxCode: 'hsnTaxCode',
   approvalStatus: 'approvalStatus',
   sapSyncStatus: 'sapSyncStatus',
   sapSyncMessage: 'sapSyncMessage',
@@ -1525,8 +1649,11 @@ exports.Prisma.ModelName = {
   PoolBBatch: 'PoolBBatch',
   NationalGridMaster: 'NationalGridMaster',
   MajorCatMaster: 'MajorCatMaster',
+  FabricArticleMaster: 'FabricArticleMaster',
+  FabricMajCatGridValue: 'FabricMajCatGridValue',
   ModifyLog: 'ModifyLog',
-  FabricArticleData: 'FabricArticleData'
+  FabricArticleData: 'FabricArticleData',
+  BodyArticleData: 'BodyArticleData'
 };
 
 /**

@@ -327,6 +327,7 @@ model ExtractionResultFlat {
   mvgrBrandVendor          String? @map("mvgr_brand_vendor") @db.VarChar(100)
 
   // ===== NEW BUSINESS FIELDS =====
+  mcDescription      String?  @map("mc_description") @db.VarChar(200)
   vendorCode         String?  @map("vendor_code") @db.VarChar(100)
   mrp                Decimal? @db.Decimal(10, 2)
   impAtrbt2          String?  @map("imp_atrbt_2") @db.VarChar(200)
@@ -1198,6 +1199,47 @@ model MajorCatMaster {
   @@schema("public")
 }
 
+/// FabricArticleMaster: Fabric hierarchy reference data (from HIERARCHY MASTER sheet).
+/// One row per MC description (article type + major category combination).
+model FabricArticleMaster {
+  id        Int      @id @default(autoincrement())
+  seg       String   @db.VarChar(20) // Segment (e.g. FAB)
+  div       String   @db.VarChar(50) // Division (e.g. K)
+  subDiv    String   @map("sub_div") @db.VarChar(100) // Sub Division (e.g. K_PC)
+  majCat    String   @map("maj_cat") @db.VarChar(100) // Major Category (e.g. K_PC_FLC)
+  mcCode    String   @map("mc_code") @db.VarChar(20) // MC Code (e.g. 910101001)
+  mcDes     String   @map("mc_des") @db.VarChar(200) // MC Description (e.g. K_PC_FLC_SLD)
+  status    String   @db.VarChar(10) // ACT / INACT
+  hsnCd     String   @map("hsn_cd") @db.VarChar(20) // HSN Code
+  artType   String   @map("art_type") @db.VarChar(20) // Article Type code
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
+
+  @@unique([mcCode, mcDes])
+  @@index([majCat])
+  @@index([div])
+  @@index([subDiv])
+  @@index([status])
+  @@map("fabric_article_master")
+  @@schema("public")
+}
+
+/// FabricMajCatGridValues: Valid codes + full-forms for each fabric characteristic (from MASTER sheet).
+/// One row per (characteristic, code) pair — e.g. characteristic="M_FAB_DIV", code="K", full_form="KNIT".
+model FabricMajCatGridValue {
+  id             Int      @id @default(autoincrement())
+  characteristic String   @db.VarChar(50) // Column name from MASTER sheet (e.g. M_FAB_DIV)
+  code           String   @db.VarChar(100) // Short code value (e.g. K)
+  fullForm       String   @map("full_form") @db.VarChar(500) // Full description (e.g. KNIT)
+  createdAt      DateTime @default(now()) @map("created_at")
+  updatedAt      DateTime @updatedAt @map("updated_at")
+
+  @@unique([characteristic, code])
+  @@index([characteristic])
+  @@map("fabric_maj_cat_grid_values")
+  @@schema("public")
+}
+
 /// ModifyLog: One row per changed label per successful article modification
 model ModifyLog {
   id                  Int      @id @default(autoincrement())
@@ -1270,5 +1312,69 @@ model FabricArticleData {
   @@index([division])
   @@index([createdAt(sort: Desc)])
   @@map("fabric_article_data")
+  @@schema("public")
+}
+
+/// BodyArticleData: One row per body article created from the Body & Construction card
+model BodyArticleData {
+  id String @id @default(uuid())
+
+  // Body & Construction card attributes (column names = SAP attribute names in lowercase)
+  mCollarType       String? @map("m_collar_type") @db.VarChar(100)
+  mCollarStyle      String? @map("m_collar_style") @db.VarChar(100)
+  mNeckType         String? @map("m_neck_type") @db.VarChar(100)
+  mNeckStyle        String? @map("m_neck_style") @db.VarChar(100)
+  mPlacket          String? @map("m_placket") @db.VarChar(100)
+  mBltType          String? @map("m_blt_type") @db.VarChar(100)
+  mBltStyle         String? @map("m_blt_style") @db.VarChar(100)
+  mSleevesMainStyle String? @map("m_sleeves_main_style") @db.VarChar(100)
+  mSleeveFold       String? @map("m_sleeve_fold") @db.VarChar(100)
+  mBtmFold          String? @map("m_btm_fold") @db.VarChar(100)
+  mNoOfPocket       String? @map("m_no_of_pocket") @db.VarChar(100)
+  mPocket           String? @map("m_pocket") @db.VarChar(100)
+  mExtraPocket      String? @map("m_extra_pocket") @db.VarChar(100)
+  mFit              String? @map("m_fit") @db.VarChar(100)
+  mBodyStyle        String? @map("m_body_style") @db.VarChar(100)
+  mLength           String? @map("m_length") @db.VarChar(100)
+  mSet              String? @map("m_set") @db.VarChar(100)
+
+  // Body article output fields
+  bodyArticleNumber      String? @map("body_article_number") @db.VarChar(100)
+  bodyArticleDescription String? @map("body_article_description") @db.VarChar(255)
+
+  // Article context (mirrored from parent extraction_results_flat row)
+  flatId        String? @map("flat_id") @db.VarChar(100)
+  articleNumber String? @map("article_number") @db.VarChar(100)
+  division      String? @map("division") @db.VarChar(100)
+  subDivision   String? @map("sub_division") @db.VarChar(100)
+  majorCategory String? @map("major_category") @db.VarChar(200)
+  mcCode        String? @map("mc_code") @db.VarChar(50)
+  vendorName    String? @map("vendor_name") @db.VarChar(200)
+  vendorCode    String? @map("vendor_code") @db.VarChar(100)
+  season        String? @map("season") @db.VarChar(50)
+  year          String? @map("year") @db.VarChar(10)
+  hsnTaxCode    String? @map("hsn_tax_code") @db.VarChar(50)
+
+  // Workflow
+  approvalStatus String    @default("PENDING") @map("approval_status") @db.VarChar(20)
+  approvedAt     DateTime? @map("approved_at")
+  approvedBy     Int?      @map("approved_by")
+  sapSyncStatus  String    @default("NOT_SYNCED") @map("sap_sync_status") @db.VarChar(20)
+  sapSyncMessage String?   @map("sap_sync_message")
+
+  // Audit
+  userName  String?  @map("user_name") @db.VarChar(200)
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
+
+  @@index([approvalStatus])
+  @@index([sapSyncStatus])
+  @@index([bodyArticleNumber])
+  @@index([majorCategory])
+  @@index([division])
+  @@index([flatId])
+  @@index([articleNumber])
+  @@index([createdAt(sort: Desc)])
+  @@map("body_article_data")
   @@schema("public")
 }
