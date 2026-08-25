@@ -2240,23 +2240,24 @@ const ArticleCard = React.memo(
                                                     onMouseDown={(e) => {
                                                       e.preventDefault();
                                                       // Map fabric_article_data fields → article item field names
+                                                      // Always include all fields (even null) so existing values are cleared when fabric article has no value
                                                       const gridUpdates: Record<string, string | null> = {
-                                                        fabricArticleNumber: r.fabricArticleNumber,
-                                                        ...(r.fabricArticleDescription != null && { fabricArticleDescription: r.fabricArticleDescription }),
-                                                        ...(r.mFabDiv       != null && { fabDiv:          r.mFabDiv }),
-                                                        ...(r.mYarn         != null && { yarn1:           r.mYarn }),
-                                                        ...(r.mFabMainMvgr1 != null && { mainMvgr:        r.mFabMainMvgr1 }),
-                                                        ...(r.mFabMainMvgr2 != null && { fabricMainMvgr:  r.mFabMainMvgr2 }),
-                                                        ...(r.mConstruction != null && { fConstruction:   r.mConstruction }),
-                                                        ...(r.mOunz         != null && { fOunce:          r.mOunz }),
-                                                        ...(r.mWidth        != null && { fWidth:          r.mWidth }),
-                                                        ...(r.mWeave01      != null && { weave:           r.mWeave01 }),
-                                                        ...(r.mWeave02      != null && { mFab2:           r.mWeave02 }),
-                                                        ...(r.mCount        != null && { fCount:          r.mCount }),
-                                                        ...(r.mComposition  != null && { composition:     r.mComposition }),
-                                                        ...(r.mFinish       != null && { finish:          r.mFinish }),
-                                                        ...(r.mGsm          != null && { gsm:             r.mGsm }),
-                                                        ...(r.mLycra        != null && { lycra:           r.mLycra }),
+                                                        fabricArticleNumber:    r.fabricArticleNumber,
+                                                        fabricArticleDescription: r.fabricArticleDescription,
+                                                        fabDiv:                 r.mFabDiv,
+                                                        yarn1:                  r.mYarn,
+                                                        mainMvgr:               r.mFabMainMvgr1,
+                                                        fabricMainMvgr:         r.mFabMainMvgr2,
+                                                        fConstruction:          r.mConstruction,
+                                                        fOunce:                 r.mOunz,
+                                                        fWidth:                 r.mWidth,
+                                                        weave:                  r.mWeave01,
+                                                        mFab2:                  r.mWeave02,
+                                                        fCount:                 r.mCount,
+                                                        composition:            r.mComposition,
+                                                        finish:                 r.mFinish,
+                                                        gsm:                    r.mGsm,
+                                                        lycra:                  r.mLycra,
                                                       };
                                                       setLocalValues((prev) => ({ ...prev, ...gridUpdates }));
                                                       setEditingField(null);

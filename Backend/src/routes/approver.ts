@@ -1,7 +1,7 @@
 import { Router } from 'express';
 import multer from 'multer';
 import { ApproverController } from '../controllers/ApproverController';
-import { authenticate, requireApprover, requireApprovalRights } from '../middleware/auth';
+import { authenticate, requireApprover, requireApprovalRights, requireModifyRights } from '../middleware/auth';
 import { asyncHandler } from '../middleware/asyncHandler';
 
 const router = Router();
@@ -49,7 +49,7 @@ router.post('/items/:id/validate-modify', h(ApproverController.validateModify));
 
 // Modify an already-created (SAP-synced) article: pushes attribute changes to
 // SAP via patch-bulk, then persists locally only on success.
-router.post('/items/:id/modify', requireApprovalRights, h(ApproverController.modifyItem));
+router.post('/items/:id/modify', requireModifyRights, h(ApproverController.modifyItem));
 
 // FINAL submit — creates the article in SAP.
 router.post('/approve', requireApprovalRights, h(ApproverController.approveItems));

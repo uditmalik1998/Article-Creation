@@ -393,6 +393,33 @@ export const requireApprovalRights = (
 };
 
 /**
+ * Require approval rights OR CREATOR — allows modifying already-created article
+ * attributes without granting approve/reject permissions to creators.
+ * Must be used after authenticate middleware.
+ */
+export const requireModifyRights = (
+  req: Request,
+  res: Response,
+  next: NextFunction
+): void => {
+  if (!req.user) {
+    res.status(401).json({ success: false, error: 'Authentication required.', code: 'NOT_AUTHENTICATED' });
+    return;
+  }
+  const role = String(req.user.role || '');
+  if (role !== 'ADMIN' && role !== 'APPROVER' && role !== 'CATEGORY_HEAD' && role !== 'SUB_DIVISION_HEAD' && role !== 'PO_COMMITTEE' && role !== 'PD' && role !== 'CREATOR') {
+    res.status(403).json({
+      success: false,
+      error: 'You do not have permission to modify articles.',
+      code: 'INSUFFICIENT_PERMISSIONS',
+      userRole: role
+    });
+    return;
+  }
+  next();
+};
+
+/**
  * Require PD or ADMIN — the only roles allowed to do the FINAL submit that
  * creates the article in SAP. Approvers hand off to PD via /send-to-pd.
  * Must be used after authenticate middleware.
