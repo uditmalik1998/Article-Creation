@@ -2732,7 +2732,7 @@ export default function Admin() {
                       type="warning"
                       showIcon
                       message="No body article data uploaded yet"
-                      description="Upload the Body Article Data Excel (Body Article Number/Description, construction attributes, CMTP_COST, CMP_COST, FAB_CONS, WIDTH) to populate body article master data."
+                      description="Upload the Body Article Data Excel (Division/Sub Division/Major Category/MC Code, Body Article Number/Description, construction attributes, CMTP_COST, CMP_COST, FAB_CONS, WIDTH) to populate body article master data."
                     />
                   )}
                 </div>
@@ -2743,7 +2743,7 @@ export default function Admin() {
                     <div className="mb-1 font-semibold">Upload Body Article Data Excel</div>
                     <div className="mb-3 text-xs text-muted-foreground">
                       Sheet <strong>BODY UPLOADER FORMAT</strong> (or first sheet), headers in row 3, data from row 5 —
-                      Body Article Number, Description, construction attributes, CMTP_COST, CMP_COST, FAB_CONS, WIDTH.
+                      Division, Sub Division, Major Category, MC Code, Body Article Number, Description, construction attributes, CMTP_COST, CMP_COST, FAB_CONS, WIDTH.
                       Rows matching an existing Body Article Number are updated, others are inserted; approval/SAP-sync data is untouched.
                       Text values over 100 characters (255 for Description) are truncated to fit.
                     </div>

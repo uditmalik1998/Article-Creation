@@ -350,6 +350,8 @@ exports.Prisma.ExtractionResultFlatScalarFieldEnum = {
   cmtpCost: 'cmtpCost',
   cmpCost: 'cmpCost',
   fabCost: 'fabCost',
+  fabCons: 'fabCons',
+  width: 'width',
   bodyArticle: 'bodyArticle',
   bodyArticleDescription: 'bodyArticleDescription',
   fabricArticleNumber: 'fabricArticleNumber',

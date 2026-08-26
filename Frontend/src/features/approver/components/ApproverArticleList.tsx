@@ -551,6 +551,7 @@ const ArticleCard = React.memo(
       mNoOfPocket: string | null; mPocket: string | null; mExtraPocket: string | null;
       mFit: string | null; mBodyStyle: string | null; mLength: string | null; mSet: string | null;
       cmtpCost: string | number | null; cmpCost: string | number | null;
+      fabCons: string | number | null; width: string | number | null;
     }[]>([]);
     const [bodyNoLoading, setBodyNoLoading] = useState(false);
     const [imgZoom, setImgZoom] = useState(1);
@@ -2510,6 +2511,8 @@ const ArticleCard = React.memo(
                                                           length:        r.mLength,
                                                           cmtpCost:      r.cmtpCost,
                                                           cmpCost:       r.cmpCost,
+                                                          fabCons:       r.fabCons,
+                                                          width:         r.width,
                                                         };
                                                         const gridUpdates: Record<string, string> = { bodyArticle: r.bodyArticleNumber || '' };
                                                         Object.entries(sourceMap).forEach(([field, v]) => {
@@ -2544,6 +2547,10 @@ const ArticleCard = React.memo(
                                       )}
                                     </div>
                                     {renderField('bodyArticleDescription', 'BODY ARTICLE DESC', bodyAutoFill, 40)}
+                                    {renderField('cmtpCost', 'CMTP COST')}
+                                    {renderField('cmpCost', 'CMP COST')}
+                                    {renderField('fabCons', 'FAB CON')}
+                                    {renderField('width', 'WIDTH')}
                                     <div className="border-t border-border px-2 py-1.5">
                                       <Button
                                         size="sm"

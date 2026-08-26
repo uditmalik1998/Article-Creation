@@ -322,6 +322,8 @@ model ExtractionResultFlat {
   cmtpCost                    Decimal?      @map("cmtp_cost") @db.Decimal(10, 2)
   cmpCost                     Decimal?      @map("cmp_cost")  @db.Decimal(10, 2)
   fabCost                     Decimal?      @map("fab_cost")  @db.Decimal(10, 2)
+  fabCons                     Decimal?      @map("fab_cons")  @db.Decimal(10, 2)
+  width                       Decimal?      @map("width")     @db.Decimal(10, 2)
 
   // ===== ARTICLE REFERENCE FIELDS =====
   bodyArticle                 String?       @map("body_article") @db.VarChar(100)

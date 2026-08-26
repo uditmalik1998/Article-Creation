@@ -50,7 +50,7 @@ const ITEM_UPDATE_ALLOWED_FIELDS = [
     'vendorCode', 'mrp', 'mcCode', 'segment', 'season',
     'hsnTaxCode', 'articleDescription', 'fashionGrid', 'year', 'articleType',
     // Body article cost fields
-    'cmtpCost', 'cmpCost', 'fabCost',
+    'cmtpCost', 'cmpCost', 'fabCost', 'fabCons', 'width',
     // Card footer fields (fabric/body article builder)
     'fabricArticleNumber', 'fabricArticleDescription',
     'bodyArticle', 'bodyArticleDescription',
@@ -3415,7 +3415,7 @@ export class ApproverController {
             mSleevesMainStyle: true, mSleeveFold: true, mBtmFold: true,
             mNoOfPocket: true, mPocket: true, mExtraPocket: true,
             mFit: true, mBodyStyle: true, mLength: true, mSet: true,
-            cmtpCost: true, cmpCost: true,
+            cmtpCost: true, cmpCost: true, fabCons: true, width: true,
         } as const;
 
         const exact = await prisma.bodyArticleData.findFirst({

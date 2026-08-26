@@ -4824,6 +4824,10 @@ export const uploadFabricArticleMaster = async (req: Request, res: Response): Pr
 // ═══════════════════════════════════════════════════════
 
 const BODY_ARTICLE_DATA_COLUMNS = [
+  { key: 'division', column: 'division', header: 'DIVISION', type: 'text', maxLength: 100 },
+  { key: 'subDivision', column: 'sub_division', header: 'SUB_DIVISION', type: 'text', maxLength: 100 },
+  { key: 'majorCategory', column: 'major_category', header: 'MAJOR_CATEGORY', type: 'text', maxLength: 200 },
+  { key: 'mcCode', column: 'mc_code', header: 'MC_CODE', type: 'text', maxLength: 50 },
   { key: 'bodyArticleNumber', column: 'body_article_number', header: 'BODY_ARTICLE_NUMBER', type: 'text', maxLength: 100 },
   { key: 'bodyArticleDescription', column: 'body_article_description', header: 'BODY_ARTICLE_DESCRIPTION', type: 'text', maxLength: 255 },
   { key: 'mCollarType', column: 'm_collar_type', header: 'M_COLLAR_TYPE', type: 'text', maxLength: 100 },
@@ -4904,8 +4908,8 @@ export const downloadBodyArticleDataTemplate = async (_req: Request, res: Respon
     ws.addRow([]);
 
     // Row 5 — sample rows
-    ws.addRow(['BA0001', 'Round Neck Half Sleeve Body', 'ROUND', 'PLAIN', 'ROUND', 'PLAIN', 'NO PLACKET', 'NA', 'NA', 'HALF SLEEVE', 'PLAIN', 'STRAIGHT', '1', 'PATCH', 'NA', 'REGULAR', 'STRAIGHT', 'REGULAR', 'SET-1', 12.5, 8.25, 1.35, 58]);
-    ws.addRow(['BA0002', 'Collar Full Sleeve Body', 'SHIRT COLLAR', 'PLAIN', 'NA', 'NA', 'FULL PLACKET', 'BUTTON', 'PLAIN', 'FULL SLEEVE', 'NA', 'STRAIGHT', '2', 'PATCH', 'NA', 'REGULAR', 'STRAIGHT', 'LONG', 'SET-2', 15.75, 9.5, 1.6, 58]);
+    ws.addRow(['MENSWEAR', 'KNITS', 'T-SHIRTS', 'MC101', 'BA0001', 'Round Neck Half Sleeve Body', 'ROUND', 'PLAIN', 'ROUND', 'PLAIN', 'NO PLACKET', 'NA', 'NA', 'HALF SLEEVE', 'PLAIN', 'STRAIGHT', '1', 'PATCH', 'NA', 'REGULAR', 'STRAIGHT', 'REGULAR', 'SET-1', 12.5, 8.25, 1.35, 58]);
+    ws.addRow(['MENSWEAR', 'WOVENS', 'SHIRTS', 'MC205', 'BA0002', 'Collar Full Sleeve Body', 'SHIRT COLLAR', 'PLAIN', 'NA', 'NA', 'FULL PLACKET', 'BUTTON', 'PLAIN', 'FULL SLEEVE', 'NA', 'STRAIGHT', '2', 'PATCH', 'NA', 'REGULAR', 'STRAIGHT', 'LONG', 'SET-2', 15.75, 9.5, 1.6, 58]);
 
     ws.columns = BODY_ARTICLE_DATA_COLUMNS.map((c) => ({ width: c.type === 'number' ? 12 : 20 }));
 
@@ -4966,6 +4970,8 @@ export const uploadBodyArticleData = async (req: Request, res: Response): Promis
       return Number.isFinite(n) ? n : null;
     };
 
+    const bodyArticleNumberIdx = BODY_ARTICLE_DATA_COLUMNS.findIndex((c) => c.column === 'body_article_number');
+
     const rowsByKey = new Map<string, Record<string, any>>();
     let skipped = 0;
     let truncated = 0;
@@ -4984,7 +4990,7 @@ export const uploadBodyArticleData = async (req: Request, res: Response): Promis
         continue;
       }
 
-      if (!values[0]) { skipped++; continue; }
+      if (!values[bodyArticleNumberIdx]) { skipped++; continue; }
 
       const record: Record<string, any> = {};
       BODY_ARTICLE_DATA_COLUMNS.forEach((c, i) => {
@@ -5026,6 +5032,10 @@ export const uploadBodyArticleData = async (req: Request, res: Response): Promis
         const batch = toUpdate.slice(i, i + BATCH);
         const affected = await tx.$executeRaw`
           UPDATE body_article_data AS b SET
+            division                 = v.division,
+            sub_division             = v.sub_division,
+            major_category           = v.major_category,
+            mc_code                  = v.mc_code,
             body_article_description = v.body_article_description,
             m_collar_type            = v.m_collar_type,
             m_collar_style           = v.m_collar_style,
@@ -5051,6 +5061,7 @@ export const uploadBodyArticleData = async (req: Request, res: Response): Promis
             updated_at               = NOW()
           FROM jsonb_to_recordset(${JSON.stringify(batch)}::jsonb) AS v(
             body_article_number text, body_article_description text,
+            division text, sub_division text, major_category text, mc_code text,
             m_collar_type text, m_collar_style text, m_neck_type text, m_neck_style text,
             m_placket text, m_blt_type text, m_blt_style text, m_sleeves_main_style text,
             m_sleeve_fold text, m_btm_fold text, m_no_of_pocket text, m_pocket text,
@@ -5067,6 +5078,7 @@ export const uploadBodyArticleData = async (req: Request, res: Response): Promis
         const affected = await tx.$executeRaw`
           INSERT INTO body_article_data (
             id, body_article_number, body_article_description,
+            division, sub_division, major_category, mc_code,
             m_collar_type, m_collar_style, m_neck_type, m_neck_style,
             m_placket, m_blt_type, m_blt_style, m_sleeves_main_style,
             m_sleeve_fold, m_btm_fold, m_no_of_pocket, m_pocket,
@@ -5075,6 +5087,7 @@ export const uploadBodyArticleData = async (req: Request, res: Response): Promis
             approval_status, sap_sync_status, created_at, updated_at
           )
           SELECT gen_random_uuid()::text, v.body_article_number, v.body_article_description,
+            v.division, v.sub_division, v.major_category, v.mc_code,
             v.m_collar_type, v.m_collar_style, v.m_neck_type, v.m_neck_style,
             v.m_placket, v.m_blt_type, v.m_blt_style, v.m_sleeves_main_style,
             v.m_sleeve_fold, v.m_btm_fold, v.m_no_of_pocket, v.m_pocket,
@@ -5083,6 +5096,7 @@ export const uploadBodyArticleData = async (req: Request, res: Response): Promis
             'PENDING', 'NOT_SYNCED', NOW(), NOW()
           FROM jsonb_to_recordset(${JSON.stringify(batch)}::jsonb) AS v(
             body_article_number text, body_article_description text,
+            division text, sub_division text, major_category text, mc_code text,
             m_collar_type text, m_collar_style text, m_neck_type text, m_neck_style text,
             m_placket text, m_blt_type text, m_blt_style text, m_sleeves_main_style text,
             m_sleeve_fold text, m_btm_fold text, m_no_of_pocket text, m_pocket text,
