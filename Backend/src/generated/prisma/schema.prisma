@@ -318,6 +318,11 @@ model ExtractionResultFlat {
   articleFashionType String? @map("article_fashion_type") @db.VarChar(100)
   articleDimension   String? @map("article_dimension") @db.VarChar(100)
 
+  // ===== BODY ARTICLE COST FIELDS =====
+  cmtpCost Decimal? @map("cmtp_cost") @db.Decimal(10, 2)
+  cmpCost  Decimal? @map("cmp_cost") @db.Decimal(10, 2)
+  fabCost  Decimal? @map("fab_cost") @db.Decimal(10, 2)
+
   // ===== ARTICLE REFERENCE FIELDS =====
   bodyArticle              String? @map("body_article") @db.VarChar(100)
   bodyArticleDescription   String? @map("body_article_description")
@@ -1341,6 +1346,13 @@ model BodyArticleData {
   // Body article output fields
   bodyArticleNumber      String? @map("body_article_number") @db.VarChar(100)
   bodyArticleDescription String? @map("body_article_description") @db.VarChar(255)
+
+  // Cost fields
+  cmtpCost Decimal? @map("cmtp_cost") @db.Decimal(10, 2)
+  cmpCost  Decimal? @map("cmp_cost") @db.Decimal(10, 2)
+  fabCost  Decimal? @map("fab_cost") @db.Decimal(10, 2)
+  fabCons  Decimal? @map("fab_cons") @db.Decimal(10, 2)
+  width    Decimal? @map("width") @db.Decimal(10, 2)
 
   // Article context (mirrored from parent extraction_results_flat row)
   flatId        String? @map("flat_id") @db.VarChar(100)

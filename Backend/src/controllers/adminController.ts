@@ -4818,3 +4818,292 @@ export const uploadFabricArticleMaster = async (req: Request, res: Response): Pr
     res.status(500).json({ success: false, error: error.message });
   }
 };
+
+// ═══════════════════════════════════════════════════════
+// BODY ARTICLE DATA (body_article_data)
+// ═══════════════════════════════════════════════════════
+
+const BODY_ARTICLE_DATA_COLUMNS = [
+  { key: 'bodyArticleNumber', column: 'body_article_number', header: 'BODY_ARTICLE_NUMBER', type: 'text', maxLength: 100 },
+  { key: 'bodyArticleDescription', column: 'body_article_description', header: 'BODY_ARTICLE_DESCRIPTION', type: 'text', maxLength: 255 },
+  { key: 'mCollarType', column: 'm_collar_type', header: 'M_COLLAR_TYPE', type: 'text', maxLength: 100 },
+  { key: 'mCollarStyle', column: 'm_collar_style', header: 'M_COLLAR_STYLE', type: 'text', maxLength: 100 },
+  { key: 'mNeckType', column: 'm_neck_type', header: 'M_NECK_TYPE', type: 'text', maxLength: 100 },
+  { key: 'mNeckStyle', column: 'm_neck_style', header: 'M_NECK_STYLE', type: 'text', maxLength: 100 },
+  { key: 'mPlacket', column: 'm_placket', header: 'M_PLACKET', type: 'text', maxLength: 100 },
+  { key: 'mBltType', column: 'm_blt_type', header: 'M_BLT_TYPE', type: 'text', maxLength: 100 },
+  { key: 'mBltStyle', column: 'm_blt_style', header: 'M_BLT_STYLE', type: 'text', maxLength: 100 },
+  { key: 'mSleevesMainStyle', column: 'm_sleeves_main_style', header: 'M_SLEEVES_MAIN_STYLE', type: 'text', maxLength: 100 },
+  { key: 'mSleeveFold', column: 'm_sleeve_fold', header: 'M_SLEEVE_FOLD', type: 'text', maxLength: 100 },
+  { key: 'mBtmFold', column: 'm_btm_fold', header: 'M_BTM_FOLD', type: 'text', maxLength: 100 },
+  { key: 'mNoOfPocket', column: 'm_no_of_pocket', header: 'M_NO_OF_POCKET', type: 'text', maxLength: 100 },
+  { key: 'mPocket', column: 'm_pocket', header: 'M_POCKET', type: 'text', maxLength: 100 },
+  { key: 'mExtraPocket', column: 'm_extra_pocket', header: 'M_EXTRA_POCKET', type: 'text', maxLength: 100 },
+  { key: 'mFit', column: 'm_fit', header: 'M_FIT', type: 'text', maxLength: 100 },
+  { key: 'mBodyStyle', column: 'm_body_style', header: 'M_BODY_STYLE', type: 'text', maxLength: 100 },
+  { key: 'mLength', column: 'm_length', header: 'M_LENGTH', type: 'text', maxLength: 100 },
+  { key: 'mSet', column: 'm_set', header: 'M_SET', type: 'text', maxLength: 100 },
+  { key: 'cmtpCost', column: 'cmtp_cost', header: 'CMTP_COST', type: 'number' },
+  { key: 'cmpCost', column: 'cmp_cost', header: 'CMP_COST', type: 'number' },
+  { key: 'fabCons', column: 'fab_cons', header: 'FAB_CONS', type: 'number' },
+  { key: 'width', column: 'width', header: 'WIDTH', type: 'number' },
+] as const;
+
+/**
+ * GET /api/admin/body-article-data/status
+ */
+export const getBodyArticleDataStatus = async (_req: Request, res: Response): Promise<void> => {
+  try {
+    const rows = await prisma.$queryRaw<{ total: bigint; bodyArticles: bigint }[]>`
+      SELECT COUNT(*)::bigint                                  AS total,
+             COUNT(DISTINCT body_article_number)::bigint        AS "bodyArticles"
+      FROM body_article_data
+      WHERE body_article_number IS NOT NULL AND TRIM(body_article_number) <> ''
+    `;
+    const r = rows[0] ?? { total: 0n, bodyArticles: 0n };
+    res.json({
+      success: true,
+      data: { total: Number(r.total), bodyArticles: Number(r.bodyArticles) },
+    });
+  } catch (error: any) {
+    console.error('[BodyArticleData] Status error:', error);
+    res.status(500).json({ success: false, error: error.message });
+  }
+};
+
+/**
+ * GET /api/admin/body-article-data/template
+ */
+export const downloadBodyArticleDataTemplate = async (_req: Request, res: Response): Promise<void> => {
+  try {
+    const ExcelJS = require('exceljs');
+    const wb = new ExcelJS.Workbook();
+    const ws = wb.addWorksheet('BODY UPLOADER FORMAT');
+
+    const lastCol = String.fromCharCode('A'.charCodeAt(0) + BODY_ARTICLE_DATA_COLUMNS.length - 1);
+
+    // Row 1 — title
+    ws.mergeCells(`A1:${lastCol}1`);
+    const titleCell = ws.getCell('A1');
+    titleCell.value = 'BODY ARTICLE DATA UPLOAD';
+    titleCell.font = { bold: true, size: 13 };
+    titleCell.alignment = { horizontal: 'center' };
+    ws.getRow(1).height = 22;
+
+    ws.addRow([]);
+
+    // Row 3 — headers
+    const headers = BODY_ARTICLE_DATA_COLUMNS.map((c) => c.header);
+    const headerRow = ws.addRow(headers);
+    headerRow.eachCell((cell: any) => {
+      cell.font = { bold: true, color: { argb: 'FFFFFFFF' } };
+      cell.fill = { type: 'pattern', pattern: 'solid', fgColor: { argb: 'FF1565C0' } };
+      cell.alignment = { horizontal: 'center' };
+    });
+
+    ws.addRow([]);
+
+    // Row 5 — sample rows
+    ws.addRow(['BA0001', 'Round Neck Half Sleeve Body', 'ROUND', 'PLAIN', 'ROUND', 'PLAIN', 'NO PLACKET', 'NA', 'NA', 'HALF SLEEVE', 'PLAIN', 'STRAIGHT', '1', 'PATCH', 'NA', 'REGULAR', 'STRAIGHT', 'REGULAR', 'SET-1', 12.5, 8.25, 1.35, 58]);
+    ws.addRow(['BA0002', 'Collar Full Sleeve Body', 'SHIRT COLLAR', 'PLAIN', 'NA', 'NA', 'FULL PLACKET', 'BUTTON', 'PLAIN', 'FULL SLEEVE', 'NA', 'STRAIGHT', '2', 'PATCH', 'NA', 'REGULAR', 'STRAIGHT', 'LONG', 'SET-2', 15.75, 9.5, 1.6, 58]);
+
+    ws.columns = BODY_ARTICLE_DATA_COLUMNS.map((c) => ({ width: c.type === 'number' ? 12 : 20 }));
+
+    ws.addRow([]);
+    const noteRow = ws.addRow([
+      '⚠ NOTE: Headers in Row 3, data from Row 5. BODY_ARTICLE_NUMBER is required — rows matching an existing Body Article Number are updated, others are inserted. Approval/SAP-sync data is never modified by this upload.',
+    ]);
+    ws.mergeCells(`A${noteRow.number}:${lastCol}${noteRow.number}`);
+    noteRow.getCell(1).font = { italic: true, size: 10 };
+    noteRow.getCell(1).fill = { type: 'pattern', pattern: 'solid', fgColor: { argb: 'FFFFF3CD' } };
+
+    res.setHeader('Content-Type', 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');
+    res.setHeader('Content-Disposition', 'attachment; filename="BODY_ARTICLE_DATA_TEMPLATE.xlsx"');
+    await wb.xlsx.write(res);
+    res.end();
+  } catch (error: any) {
+    console.error('[BodyArticleData] Template error:', error);
+    res.status(500).json({ success: false, error: error.message });
+  }
+};
+
+/**
+ * POST /api/admin/body-article-data/upload
+ * Accepts Excel with sheet "BODY UPLOADER FORMAT" (or first sheet).
+ * Headers in row 3, data from row 5, columns per BODY_ARTICLE_DATA_COLUMNS (A..).
+ * Rows are matched to existing body_article_data rows by BODY_ARTICLE_NUMBER:
+ *   - a match updates only the master fields listed above (construction attributes +
+ *     CMTP_COST/CMP_COST/FAB_CONS/WIDTH), leaving approval/SAP-sync/workflow columns untouched.
+ *   - no match inserts a new master row.
+ * The rest of the table (rows created by the approver's Body & Construction flow) is left alone.
+ */
+export const uploadBodyArticleData = async (req: Request, res: Response): Promise<void> => {
+  try {
+    if (!req.file) {
+      res.status(400).json({ success: false, error: 'No file uploaded. Send a .xlsx file as "file" field.' });
+      return;
+    }
+
+    const ExcelJS = (await import('exceljs')).default;
+    const wb = new ExcelJS.Workbook();
+    await wb.xlsx.load(req.file.buffer as any);
+
+    const ws = wb.getWorksheet('BODY UPLOADER FORMAT') ?? wb.worksheets[0];
+    if (!ws) {
+      res.status(400).json({ success: false, error: 'No worksheets found in the uploaded Excel file.' });
+      return;
+    }
+
+    const cell = (row: any, c: number): string => {
+      let v = row.getCell(c).value;
+      if (v && typeof v === 'object' && 'result' in v) v = (v as any).result;
+      if (v && typeof v === 'object' && 'text' in v) v = (v as any).text;
+      return v == null ? '' : String(v).trim();
+    };
+    const num = (v: string): number | null => {
+      if (v === '') return null;
+      const n = Number(v);
+      return Number.isFinite(n) ? n : null;
+    };
+
+    const rowsByKey = new Map<string, Record<string, any>>();
+    let skipped = 0;
+    let truncated = 0;
+
+    for (let r = 5; r <= ws.rowCount; r++) {
+      const row = ws.getRow(r);
+      const values = BODY_ARTICLE_DATA_COLUMNS.map((_, i) => cell(row, i + 1));
+
+      if (values.every((v) => v === '')) { skipped++; continue; }
+
+      // The trailing "⚠ NOTE: ..." row is a merged cell spanning every column, so
+      // ExcelJS reports that same note text back in each column when re-read — skip it
+      // instead of treating it as a data row (its Body Article Number would be the note text).
+      if (values[0].startsWith('⚠') || (values[0] === values[values.length - 1] && values[0].toUpperCase().includes('NOTE:'))) {
+        skipped++;
+        continue;
+      }
+
+      if (!values[0]) { skipped++; continue; }
+
+      const record: Record<string, any> = {};
+      BODY_ARTICLE_DATA_COLUMNS.forEach((c, i) => {
+        if (c.type === 'number') {
+          record[c.column] = num(values[i]);
+          return;
+        }
+        let v: string | null = values[i] || null;
+        if (v && 'maxLength' in c && v.length > c.maxLength) {
+          v = v.slice(0, c.maxLength);
+          truncated++;
+        }
+        record[c.column] = v;
+      });
+
+      rowsByKey.set(record.body_article_number, record);
+    }
+
+    const rows = Array.from(rowsByKey.values());
+    const total = rows.length;
+    const BATCH = 2000;
+
+    console.log(`[BodyArticleData] Upserting ${total} body article master rows in batches of ${BATCH}...`);
+
+    let updated = 0;
+    let inserted = 0;
+
+    await prisma.$transaction(async (tx) => {
+      const existing = await tx.$queryRaw<{ body_article_number: string }[]>`
+        SELECT DISTINCT body_article_number FROM body_article_data
+        WHERE body_article_number = ANY(${rows.map((r) => r.body_article_number)})
+      `;
+      const existingKeys = new Set(existing.map((e) => e.body_article_number));
+
+      const toUpdate = rows.filter((r) => existingKeys.has(r.body_article_number));
+      const toInsert = rows.filter((r) => !existingKeys.has(r.body_article_number));
+
+      for (let i = 0; i < toUpdate.length; i += BATCH) {
+        const batch = toUpdate.slice(i, i + BATCH);
+        const affected = await tx.$executeRaw`
+          UPDATE body_article_data AS b SET
+            body_article_description = v.body_article_description,
+            m_collar_type            = v.m_collar_type,
+            m_collar_style           = v.m_collar_style,
+            m_neck_type              = v.m_neck_type,
+            m_neck_style             = v.m_neck_style,
+            m_placket                = v.m_placket,
+            m_blt_type               = v.m_blt_type,
+            m_blt_style              = v.m_blt_style,
+            m_sleeves_main_style     = v.m_sleeves_main_style,
+            m_sleeve_fold            = v.m_sleeve_fold,
+            m_btm_fold               = v.m_btm_fold,
+            m_no_of_pocket           = v.m_no_of_pocket,
+            m_pocket                 = v.m_pocket,
+            m_extra_pocket           = v.m_extra_pocket,
+            m_fit                    = v.m_fit,
+            m_body_style             = v.m_body_style,
+            m_length                 = v.m_length,
+            m_set                    = v.m_set,
+            cmtp_cost                = v.cmtp_cost,
+            cmp_cost                 = v.cmp_cost,
+            fab_cons                 = v.fab_cons,
+            width                    = v.width,
+            updated_at               = NOW()
+          FROM jsonb_to_recordset(${JSON.stringify(batch)}::jsonb) AS v(
+            body_article_number text, body_article_description text,
+            m_collar_type text, m_collar_style text, m_neck_type text, m_neck_style text,
+            m_placket text, m_blt_type text, m_blt_style text, m_sleeves_main_style text,
+            m_sleeve_fold text, m_btm_fold text, m_no_of_pocket text, m_pocket text,
+            m_extra_pocket text, m_fit text, m_body_style text, m_length text, m_set text,
+            cmtp_cost numeric, cmp_cost numeric, fab_cons numeric, width numeric
+          )
+          WHERE b.body_article_number = v.body_article_number
+        `;
+        updated += Number(affected);
+      }
+
+      for (let i = 0; i < toInsert.length; i += BATCH) {
+        const batch = toInsert.slice(i, i + BATCH);
+        const affected = await tx.$executeRaw`
+          INSERT INTO body_article_data (
+            id, body_article_number, body_article_description,
+            m_collar_type, m_collar_style, m_neck_type, m_neck_style,
+            m_placket, m_blt_type, m_blt_style, m_sleeves_main_style,
+            m_sleeve_fold, m_btm_fold, m_no_of_pocket, m_pocket,
+            m_extra_pocket, m_fit, m_body_style, m_length, m_set,
+            cmtp_cost, cmp_cost, fab_cons, width,
+            approval_status, sap_sync_status, created_at, updated_at
+          )
+          SELECT gen_random_uuid()::text, v.body_article_number, v.body_article_description,
+            v.m_collar_type, v.m_collar_style, v.m_neck_type, v.m_neck_style,
+            v.m_placket, v.m_blt_type, v.m_blt_style, v.m_sleeves_main_style,
+            v.m_sleeve_fold, v.m_btm_fold, v.m_no_of_pocket, v.m_pocket,
+            v.m_extra_pocket, v.m_fit, v.m_body_style, v.m_length, v.m_set,
+            v.cmtp_cost, v.cmp_cost, v.fab_cons, v.width,
+            'PENDING', 'NOT_SYNCED', NOW(), NOW()
+          FROM jsonb_to_recordset(${JSON.stringify(batch)}::jsonb) AS v(
+            body_article_number text, body_article_description text,
+            m_collar_type text, m_collar_style text, m_neck_type text, m_neck_style text,
+            m_placket text, m_blt_type text, m_blt_style text, m_sleeves_main_style text,
+            m_sleeve_fold text, m_btm_fold text, m_no_of_pocket text, m_pocket text,
+            m_extra_pocket text, m_fit text, m_body_style text, m_length text, m_set text,
+            cmtp_cost numeric, cmp_cost numeric, fab_cons numeric, width numeric
+          )
+        `;
+        inserted += Number(affected);
+      }
+    }, { timeout: 5 * 60 * 1000 });
+
+    console.log(`[BodyArticleData] Done — ${inserted} inserted, ${updated} updated, ${skipped} skipped, ${truncated} values truncated.`);
+
+    res.json({
+      success: true,
+      message: `Body article data uploaded. Inserted ${inserted}, updated ${updated} rows.`
+        + (truncated > 0 ? ` ${truncated} value(s) exceeded a column's length limit and were truncated.` : ''),
+      data: { uploadedAt: new Date().toISOString(), fileName: req.file.originalname, total, inserted, updated, skipped, truncated },
+    });
+  } catch (error: any) {
+    console.error('[BodyArticleData] Upload error:', error);
+    res.status(500).json({ success: false, error: error.message });
+  }
+};

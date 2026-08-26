@@ -2413,9 +2413,10 @@ const ArticleCard = React.memo(
                     <div className="space-y-0 p-1">
                       {(allowGroups?.includes('BODY')
                         ? [
-                            { label: 'CMPT Cost', field: 'cmptCost', editable: true, mandatory: true, isDropdown: false, isColor: false, isMarkdown: false },
+                            { label: 'CMTP Cost', field: 'cmtpCost', editable: true, mandatory: true, isDropdown: false, isColor: false, isMarkdown: false },
                             { label: 'CMP Cost',  field: 'cmpCost',  editable: true, mandatory: true, isDropdown: false, isColor: false, isMarkdown: false },
-                            { label: 'FAB Cost',  field: 'fabCost',  editable: true, mandatory: true, isDropdown: false, isColor: false, isMarkdown: false },
+                            { label: 'FAB Con',  field: 'fabCost',  editable: true, mandatory: true, isDropdown: false, isColor: false, isMarkdown: false },
+                            { label: 'Width',  field: 'width',  editable: true, mandatory: true, isDropdown: false, isColor: false, isMarkdown: false },
                           ]
                         : [
                             { label: 'RATE / COST', field: 'rate', editable: true, mandatory: true, isDropdown: false, isColor: false, isMarkdown: false },

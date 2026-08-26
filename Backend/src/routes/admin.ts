@@ -237,4 +237,11 @@ router.get('/fabric-article-master/status',   h(adminController.getFabricArticle
 router.get('/fabric-article-master/template', h(adminController.downloadFabricArticleMasterTemplate));
 router.post('/fabric-article-master/upload',  excelUpload.single('file'), h(adminController.uploadFabricArticleMaster));
 
+// ═══════════════════════════════════════════════════════
+// BODY ARTICLE DATA (ADMIN) — body_article_data
+// ═══════════════════════════════════════════════════════
+router.get('/body-article-data/status',   h(adminController.getBodyArticleDataStatus));
+router.get('/body-article-data/template', h(adminController.downloadBodyArticleDataTemplate));
+router.post('/body-article-data/upload',  excelUpload.single('file'), h(adminController.uploadBodyArticleData));
+
 export default router;

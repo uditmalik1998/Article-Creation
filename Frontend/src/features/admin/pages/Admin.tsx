@@ -106,6 +106,17 @@ interface FabricArticleMasterMeta {
   skipped?: number;
 }
 
+interface BodyArticleDataMeta {
+  uploadedAt?: string;
+  fileName?: string;
+  total?: number;
+  bodyArticles?: number;
+  inserted?: number;
+  updated?: number;
+  skipped?: number;
+  truncated?: number;
+}
+
 interface SegmentMasterMeta {
   total?: number;
   categories?: number;
@@ -219,6 +230,13 @@ export default function Admin() {
   const [fabricArticleMasterUploading, setFabricArticleMasterUploading] = useState(false);
   const [fabricArticleMasterProgress, setFabricArticleMasterProgress] = useState<number>(0);
   const fabricArticleFileRef = useRef<HTMLInputElement | null>(null);
+
+  // Body Article Data (body_article_data)
+  const [bodyArticleDataMeta, setBodyArticleDataMeta] = useState<BodyArticleDataMeta | null>(null);
+  const [bodyArticleDataStatusLoading, setBodyArticleDataStatusLoading] = useState(false);
+  const [bodyArticleDataUploading, setBodyArticleDataUploading] = useState(false);
+  const [bodyArticleDataProgress, setBodyArticleDataProgress] = useState<number>(0);
+  const bodyArticleDataFileRef = useRef<HTMLInputElement | null>(null);
 
   // Segment Master (maj_cat_segment)
   const [segmentMasterMeta, setSegmentMasterMeta] = useState<SegmentMasterMeta | null>(null);
@@ -786,6 +804,68 @@ export default function Admin() {
     }
   };
 
+  // ─────────────────────────────── Body Article Data ──────────────────────────
+  const loadBodyArticleDataStatus = useCallback(async () => {
+    setBodyArticleDataStatusLoading(true);
+    try {
+      const token = localStorage.getItem('authToken');
+      const res = await fetch(`${APP_CONFIG.api.baseURL}/admin/body-article-data/status`, {
+        headers: token ? { Authorization: `Bearer ${token}` } : {},
+      });
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.error || 'Failed to load body article data status');
+      setBodyArticleDataMeta(data.data);
+    } catch (err: any) {
+      message.error(err?.message || 'Failed to load body article data status');
+    } finally {
+      setBodyArticleDataStatusLoading(false);
+    }
+  }, []);
+
+  const downloadBodyArticleDataTemplate = () => {
+    const token = localStorage.getItem('authToken');
+    const url = `${APP_CONFIG.api.baseURL}/admin/body-article-data/template`;
+    fetch(url, { headers: token ? { Authorization: `Bearer ${token}` } : {} })
+      .then((r) => r.blob())
+      .then((blob) => {
+        const a = document.createElement('a');
+        a.href = URL.createObjectURL(blob);
+        a.download = 'BODY_ARTICLE_DATA_TEMPLATE.xlsx';
+        a.click();
+      })
+      .catch(() => message.error('Failed to download template'));
+  };
+
+  const handleBodyArticleDataUpload = async (file: File) => {
+    setBodyArticleDataUploading(true);
+    setBodyArticleDataProgress(0);
+    try {
+      const token = localStorage.getItem('authToken');
+      const formData = new FormData();
+      formData.append('file', file);
+      const progressInterval = setInterval(() => {
+        setBodyArticleDataProgress((prev) => Math.min(prev + 5, 90));
+      }, 500);
+      const res = await fetch(`${APP_CONFIG.api.baseURL}/admin/body-article-data/upload`, {
+        method: 'POST',
+        headers: token ? { Authorization: `Bearer ${token}` } : {},
+        body: formData,
+      });
+      clearInterval(progressInterval);
+      setBodyArticleDataProgress(100);
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.error || 'Upload failed');
+      message.success(data.message);
+      setBodyArticleDataMeta(data.data);
+    } catch (err: any) {
+      message.error(err?.message || 'Upload failed');
+    } finally {
+      setBodyArticleDataUploading(false);
+      setTimeout(() => setBodyArticleDataProgress(0), 1500);
+      if (bodyArticleDataFileRef.current) bodyArticleDataFileRef.current.value = '';
+    }
+  };
+
   // ─────────────────────────────── Segment Master ─────────────────────────────
   const loadSegmentMasterStatus = useCallback(async () => {
     setSegmentMasterStatusLoading(true);
@@ -1125,12 +1205,13 @@ export default function Admin() {
     loadColorMasterStatus();
     loadFabricArticleDataStatus();
     loadFabricArticleMasterStatus();
+    loadBodyArticleDataStatus();
     loadSegmentMasterStatus();
     loadNationalGridStatus();
     loadHierarchyExcelStatus();
     loadPipelineStatus();
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [loadVendorStatus, loadMajCatGridStatus, loadMandatoryGridStatus, loadSizeMasterStatus, loadColorMasterStatus, loadFabricArticleDataStatus, loadFabricArticleMasterStatus, loadSegmentMasterStatus, loadNationalGridStatus, loadHierarchyExcelStatus, loadPipelineStatus]);
+  }, [loadVendorStatus, loadMajCatGridStatus, loadMandatoryGridStatus, loadSizeMasterStatus, loadColorMasterStatus, loadFabricArticleDataStatus, loadFabricArticleMasterStatus, loadBodyArticleDataStatus, loadSegmentMasterStatus, loadNationalGridStatus, loadHierarchyExcelStatus, loadPipelineStatus]);
 
   const loadData = async () => {
     setLoading(true);
@@ -2562,6 +2643,134 @@ export default function Admin() {
                       <button
                         type="button"
                         onClick={() => segmentFileRef.current?.click()}
+                        className="flex w-full flex-col items-center justify-center rounded-md border-2 border-dashed border-border bg-muted/30 px-4 py-6 transition-colors hover:border-[#FF6F61] hover:bg-[#FF6F61]/5"
+                      >
+                        <Inbox className="mb-2 h-8 w-8 text-[#FF6F61]" />
+                        <p className="text-[13px]">
+                          Click to upload <strong>.xlsx</strong> file
+                        </p>
+                        <p className="text-[11px] text-muted-foreground">Only Excel files. Max 50 MB.</p>
+                      </button>
+                    )}
+                  </div>
+                </div>
+              </div>
+            </Spinner>
+          </CardContent>
+        </Card>
+
+        {/* Body Article Data Upload (construction attributes + costs → body_article_data) */}
+        <Card className="mb-6 glass rounded-2xl border border-white/60">
+          <CardHeader className="flex flex-row items-center justify-between">
+            <CardTitle className="flex items-center gap-2 text-base">
+              <TableIcon className="h-4 w-4" />
+              Body Article Data (Bulk Update)
+            </CardTitle>
+            <div className="flex gap-2">
+              <Button size="sm" variant="outline" onClick={downloadBodyArticleDataTemplate}>
+                <Download />
+                Download Template
+              </Button>
+              <Button size="sm" variant="outline" onClick={loadBodyArticleDataStatus} disabled={bodyArticleDataStatusLoading}>
+                <RotateCw className={bodyArticleDataStatusLoading ? 'animate-spin' : ''} />
+                Refresh Status
+              </Button>
+            </div>
+          </CardHeader>
+          <CardContent>
+            <Spinner spinning={bodyArticleDataStatusLoading}>
+              <div className="grid grid-cols-1 gap-4 md:grid-cols-12">
+                {/* Status panel */}
+                <div className="md:col-span-7">
+                  {bodyArticleDataMeta && (bodyArticleDataMeta.total ?? 0) > 0 ? (
+                    <Descriptions bordered>
+                      {bodyArticleDataMeta.uploadedAt && (
+                        <Descriptions.Item label="Last Upload">
+                          {new Date(bodyArticleDataMeta.uploadedAt).toLocaleString('en-IN', {
+                            timeZone: 'Asia/Kolkata', dateStyle: 'medium', timeStyle: 'short',
+                          }) + ' IST'}
+                        </Descriptions.Item>
+                      )}
+                      {bodyArticleDataMeta.fileName && (
+                        <Descriptions.Item label="File">
+                          <span className="font-mono text-xs">{bodyArticleDataMeta.fileName}</span>
+                        </Descriptions.Item>
+                      )}
+                      <Descriptions.Item label="Body Articles">
+                        <Badge variant="info">{(bodyArticleDataMeta.bodyArticles ?? 0).toLocaleString()}</Badge>
+                      </Descriptions.Item>
+                      <Descriptions.Item label="Total Rows">
+                        <Badge variant="secondary">{(bodyArticleDataMeta.total ?? 0).toLocaleString()}</Badge>
+                      </Descriptions.Item>
+                      {bodyArticleDataMeta.inserted != null && (
+                        <Descriptions.Item label="Rows Inserted">
+                          <Badge variant="secondary">{(bodyArticleDataMeta.inserted ?? 0).toLocaleString()}</Badge>
+                        </Descriptions.Item>
+                      )}
+                      {bodyArticleDataMeta.updated != null && (
+                        <Descriptions.Item label="Rows Updated">
+                          <Badge variant="secondary">{(bodyArticleDataMeta.updated ?? 0).toLocaleString()}</Badge>
+                        </Descriptions.Item>
+                      )}
+                      {bodyArticleDataMeta.skipped != null && (
+                        <Descriptions.Item label="Rows Skipped">
+                          <Badge variant={(bodyArticleDataMeta.skipped ?? 0) > 0 ? 'warning' : 'secondary'}>
+                            {(bodyArticleDataMeta.skipped ?? 0).toLocaleString()}
+                          </Badge>
+                        </Descriptions.Item>
+                      )}
+                      {bodyArticleDataMeta.truncated != null && (
+                        <Descriptions.Item label="Values Truncated">
+                          <Badge variant={(bodyArticleDataMeta.truncated ?? 0) > 0 ? 'warning' : 'secondary'}>
+                            {(bodyArticleDataMeta.truncated ?? 0).toLocaleString()}
+                          </Badge>
+                        </Descriptions.Item>
+                      )}
+                    </Descriptions>
+                  ) : (
+                    <Alert
+                      type="warning"
+                      showIcon
+                      message="No body article data uploaded yet"
+                      description="Upload the Body Article Data Excel (Body Article Number/Description, construction attributes, CMTP_COST, CMP_COST, FAB_CONS, WIDTH) to populate body article master data."
+                    />
+                  )}
+                </div>
+
+                {/* Upload panel */}
+                <div className="md:col-span-5">
+                  <div className="rounded-md border border-border p-4">
+                    <div className="mb-1 font-semibold">Upload Body Article Data Excel</div>
+                    <div className="mb-3 text-xs text-muted-foreground">
+                      Sheet <strong>BODY UPLOADER FORMAT</strong> (or first sheet), headers in row 3, data from row 5 —
+                      Body Article Number, Description, construction attributes, CMTP_COST, CMP_COST, FAB_CONS, WIDTH.
+                      Rows matching an existing Body Article Number are updated, others are inserted; approval/SAP-sync data is untouched.
+                      Text values over 100 characters (255 for Description) are truncated to fit.
+                    </div>
+
+                    <input
+                      ref={bodyArticleDataFileRef}
+                      type="file"
+                      accept=".xlsx,.xls"
+                      className="hidden"
+                      onChange={(e) => {
+                        const file = e.target.files?.[0];
+                        if (file) handleBodyArticleDataUpload(file);
+                      }}
+                    />
+
+                    {bodyArticleDataUploading ? (
+                      <div>
+                        <div className="mb-2 text-[13px] text-[#FF6F61]">
+                          <RefreshCw className="mr-1.5 inline-block h-3.5 w-3.5 animate-spin" />
+                          Parsing Excel & updating table...
+                        </div>
+                        <Progress value={bodyArticleDataProgress} />
+                      </div>
+                    ) : (
+                      <button
+                        type="button"
+                        onClick={() => bodyArticleDataFileRef.current?.click()}
                         className="flex w-full flex-col items-center justify-center rounded-md border-2 border-dashed border-border bg-muted/30 px-4 py-6 transition-colors hover:border-[#FF6F61] hover:bg-[#FF6F61]/5"
                       >
                         <Inbox className="mb-2 h-8 w-8 text-[#FF6F61]" />
