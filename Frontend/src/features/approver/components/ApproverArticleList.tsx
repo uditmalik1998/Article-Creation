@@ -968,6 +968,19 @@ const ArticleCard = React.memo(
       () => (cardGroups.find((g) => g.group === 'BODY')?.fields ?? []).filter((f) => !f.freeText),
       [cardGroups],
     );
+    // Canonical BODY ARTICLE DESC format: every filled Body & Construction field,
+    // in card order, joined with '-' and capped at 40 chars. Shared by the live
+    // rebuild effect below and by the search-select autofill, so the field always
+    // ends up in the same format regardless of how it was filled — which is also
+    // what makes searching by partial description meaningful (master rows are
+    // expected to follow this same convention).
+    const buildBodyDescription = useCallback(
+      (getVal: (field: string) => string | null) => {
+        const parts = BODY_FIELDS.map((f) => getVal(f.field)).filter(Boolean) as string[];
+        return parts.length > 0 ? parts.join('-').slice(0, 40) : null;
+      },
+      [BODY_FIELDS],
+    );
 
     const getFieldVal = useCallback(
       (field: string) => {
@@ -986,9 +999,8 @@ const ArticleCard = React.memo(
           return v ? String(v).trim() : null;
         };
         const fabParts = FAB_FIELDS.map((f) => getVal(f.field)).filter(Boolean) as string[];
-        const bodyParts = BODY_FIELDS.map((f) => getVal(f.field)).filter(Boolean) as string[];
         const newFabDesc = fabParts.length > 0 ? fabParts.join('-').slice(0, 40) : null;
-        const newBodyDesc = bodyParts.length > 0 ? bodyParts.join('-').slice(0, 40) : null;
+        const newBodyDesc = buildBodyDescription(getVal);
         // REFERENCE ARTICLE DESC — built like ARTICLE DESC but from a fixed,
         // user-confirmed sequence spanning multiple cards:
         //   M_FAB_MAIN_MVGR_2 → M_WEAVE_02 → M_BLT_TYPE → M_BLT_STYLE →
@@ -1001,7 +1013,7 @@ const ArticleCard = React.memo(
         if (newRefDesc !== null && newRefDesc !== prev['referenceArticleDescription']) updates['referenceArticleDescription'] = newRefDesc;
         return Object.keys(updates).length > 0 ? { ...prev, ...updates } : prev;
       });
-    }, [item, FAB_FIELDS, BODY_FIELDS]);
+    }, [item, FAB_FIELDS, buildBodyDescription]);
 
     // APPROVED/REJECTED articles are normally read-only. EXCEPTION: on the
     // Created page (modify mode) we keep them editable so the user can stage
@@ -2102,6 +2114,65 @@ const ArticleCard = React.memo(
                           <div className="space-y-0 p-1">
                             {groupMap[g.group].attrs.map((attr) => renderAttributeRow(attr))}
 
+                            {/* CMTP/CMP Cost, FAB Con, Width — numbered rows continuing straight on from
+                                M_LENGTH, alongside the rest of the counted BODY attributes. Skipped on the
+                                Body Article tab (allowGroups=['BODY']), whose BOM card already shows these
+                                same 4 values — FG Article tab's BOM card shows different fields, so these
+                                stay visible there. */}
+                            {g.group === 'BODY' && !allowGroups?.includes('BODY') &&
+                              [
+                                { field: 'cmtpCost', label: 'CMTP COST' },
+                                { field: 'cmpCost', label: 'CMP COST' },
+                                { field: 'fabCons', label: 'FAB CON' },
+                                { field: 'width', label: 'WIDTH' },
+                              ].map(({ field, label }) => {
+                                _attrCounter += 1;
+                                const num = _attrCounter;
+                                const displayVal = localValues[field] !== undefined ? localValues[field] : (item as any)[field];
+                                const isEffectivelyEmpty = !displayVal || String(displayVal).trim() === '';
+                                const isEditingThis = editingField === field;
+                                const fieldLocked = isFieldLocked(field);
+                                return (
+                                  <div
+                                    key={field}
+                                    className="group flex items-center gap-1.5 rounded px-1 py-0.5 transition-colors hover:bg-muted/40"
+                                    style={{ cursor: fieldLocked ? 'default' : 'pointer' }}
+                                    onClick={() => {
+                                      if (!fieldLocked && !isEditingThis) setEditingField(field);
+                                    }}
+                                  >
+                                    <span className="w-4 shrink-0 text-right text-[10px] font-bold tabular-nums text-muted-foreground">{num}.</span>
+                                    <span className="flex-1 truncate text-[10.5px] font-semibold leading-snug text-foreground/80">
+                                      {label}
+                                    </span>
+                                    <div className="w-[110px] shrink-0">
+                                      {isEditingThis ? (
+                                        <Input
+                                          autoFocus
+                                          defaultValue={isEffectivelyEmpty ? '' : String(displayVal)}
+                                          className="h-6 px-1 text-[11px]"
+                                          onKeyDown={(e) =>
+                                            e.key === 'Enter' && handleSave(field, (e.target as HTMLInputElement).value || null)
+                                          }
+                                          onBlur={(e) => handleSave(field, e.target.value || null)}
+                                        />
+                                      ) : (
+                                        <span
+                                          className="block truncate text-right text-[11px]"
+                                          style={{
+                                            color: isEffectivelyEmpty ? '#9ca3af' : '#111827',
+                                            fontStyle: isEffectivelyEmpty ? 'italic' : 'normal',
+                                            fontWeight: 600,
+                                          }}
+                                        >
+                                          {isEffectivelyEmpty ? (isLocked ? '—' : 'Click') : String(displayVal)}
+                                        </span>
+                                      )}
+                                    </div>
+                                  </div>
+                                );
+                              })}
+
                             {/* FAB: fabric article number + description + button */}
                             {g.group === 'FAB' &&
                               (() => {
@@ -2317,67 +2388,6 @@ const ArticleCard = React.memo(
                             {/* BODY: body article + description + button */}
                             {g.group === 'BODY' &&
                               (() => {
-                                const renderField = (
-                                  field: string,
-                                  label: string,
-                                  autoFillFn?: () => void,
-                                  maxLen?: number,
-                                ) => {
-                                  const displayVal =
-                                    localValues[field] !== undefined ? localValues[field] : (item as any)[field];
-                                  const isEditingThis = editingField === `bot_${field}`;
-                                  const saveVal = (raw: string | null) => {
-                                    const v = raw || null;
-                                    handleSave(field, maxLen && v ? v.slice(0, maxLen) : v);
-                                  };
-                                  return (
-                                    <div
-                                      key={field}
-                                      className="mt-1 border-t border-border bg-muted/30 px-2 py-1.5"
-                                      style={{ cursor: isLocked ? 'default' : 'pointer' }}
-                                      onClick={() => {
-                                        if (!isLocked && !isEditingThis) setEditingField(`bot_${field}`);
-                                      }}
-                                    >
-                                      <div className="mb-0.5 flex items-center justify-between gap-1">
-                                        <span className="text-[9px] font-semibold uppercase tracking-wider text-muted-foreground">
-                                          {label}
-                                        </span>
-                                        {autoFillFn && !isLocked && (
-                                          <button
-                                            type="button"
-                                            className="text-[9px] text-slate-700 underline hover:text-[#FF6F61]"
-                                            onClick={(e) => {
-                                              e.stopPropagation();
-                                              autoFillFn();
-                                            }}
-                                          >
-                                            Auto-fill
-                                          </button>
-                                        )}
-                                      </div>
-                                      {isEditingThis ? (
-                                        <Input
-                                          autoFocus
-                                          defaultValue={displayVal || ''}
-                                          maxLength={maxLen}
-                                          className="h-6 px-1 text-[11px]"
-                                          onKeyDown={(e) =>
-                                            e.key === 'Enter' && saveVal((e.target as HTMLInputElement).value)
-                                          }
-                                          onBlur={(e) => saveVal(e.target.value)}
-                                        />
-                                      ) : (
-                                        <div
-                                          className="truncate text-[11px]"
-                                          style={{ color: displayVal ? '#111827' : '#9ca3af' }}
-                                        >
-                                          {displayVal || (isLocked ? '—' : 'Click to fill')}
-                                        </div>
-                                      )}
-                                    </div>
-                                  );
-                                };
                                 const bodyAutoFill = () => {
                                   const parts = BODY_FIELDS.filter((bf) => mandatoryKeys.has(bf.schemaKey))
                                     .map((bf) => {
@@ -2391,6 +2401,80 @@ const ArticleCard = React.memo(
                                 const isBodyNoEditing = editingField === 'bot_bodyArticle';
                                 const bodyNoDisplayVal =
                                   localValues['bodyArticle'] !== undefined ? localValues['bodyArticle'] : (item as any)['bodyArticle'];
+                                const isBodyDescEditing = editingField === 'bot_bodyArticleDescription';
+                                const bodyDescDisplayVal =
+                                  localValues['bodyArticleDescription'] !== undefined
+                                    ? localValues['bodyArticleDescription']
+                                    : (item as any)['bodyArticleDescription'];
+                                // Fires the search for both boxes below — pulled out so opening the DESC
+                                // box can search immediately using whatever's already filled, instead of
+                                // waiting for the user to type another character.
+                                // Scoped to this article's own major category (shown as the last segment
+                                // of "Category" under Article Information) so results never include body
+                                // articles that belong to a different major category.
+                                const runBodySearch = (q: string) => {
+                                  if (!q.trim()) { setBodyNoResults([]); return; }
+                                  setBodyNoLoading(true);
+                                  const token = localStorage.getItem('authToken');
+                                  const params = new URLSearchParams({ q });
+                                  if (effectiveMajCat) params.set('majorCategory', effectiveMajCat);
+                                  fetch(
+                                    `${APP_CONFIG.api.baseURL}/approver/body-article-data/search?${params.toString()}`,
+                                    { headers: { Authorization: `Bearer ${token}` } },
+                                  )
+                                    .then((r) => r.json())
+                                    .then((d) => setBodyNoResults(d.results ?? []))
+                                    .catch(() => setBodyNoResults([]))
+                                    .finally(() => setBodyNoLoading(false));
+                                };
+                                // Selecting a search result (by number or by description) fills every
+                                // mapped field from that body_article_data row — shared by both search boxes below.
+                                // BODY ARTICLE DESC is recomputed via buildBodyDescription from the fields
+                                // this row just filled, rather than pasted verbatim from the row's own
+                                // description — so it always ends up in the same canonical format as when
+                                // each field is picked by hand (and stays a meaningful search key later).
+                                const applyBodyArticleRow = (r: (typeof bodyNoResults)[number]) => {
+                                  const sourceMap: Record<string, string | number | null | undefined> = {
+                                    collar:        r.mCollarType,
+                                    collarStyle:   r.mCollarStyle,
+                                    neckDetails:   r.mNeckStyle,
+                                    neck:          r.mNeckType,
+                                    placket:       r.mPlacket,
+                                    fatherBelt:    r.mBltType,
+                                    childBelt:     r.mBltStyle,
+                                    sleeve:        r.mSleevesMainStyle,
+                                    sleeveFold:    r.mSleeveFold,
+                                    mSet:          r.mSet,
+                                    bottomFold:    r.mBtmFold,
+                                    noOfPocket:    r.mNoOfPocket,
+                                    pocketType:    r.mPocket,
+                                    extraPocket:   r.mExtraPocket,
+                                    fit:           r.mFit,
+                                    pattern:       r.mBodyStyle,
+                                    length:        r.mLength,
+                                    cmtpCost:      r.cmtpCost,
+                                    cmpCost:       r.cmpCost,
+                                    fabCons:       r.fabCons,
+                                    width:         r.width,
+                                  };
+                                  const gridUpdates: Record<string, string> = { bodyArticle: r.bodyArticleNumber || '' };
+                                  Object.entries(sourceMap).forEach(([field, v]) => {
+                                    if (v !== null && v !== undefined && String(v).trim() !== '') {
+                                      gridUpdates[field] = String(v).trim();
+                                    }
+                                  });
+                                  const composedDesc = buildBodyDescription((field) => {
+                                    const v = gridUpdates[field] !== undefined
+                                      ? gridUpdates[field]
+                                      : (localValues[field] !== undefined ? localValues[field] : (item as any)[field]);
+                                    return v ? String(v).trim() : null;
+                                  });
+                                  gridUpdates.bodyArticleDescription = composedDesc || r.bodyArticleDescription || '';
+                                  setLocalValues((prev) => ({ ...prev, ...gridUpdates }));
+                                  setEditingField(null);
+                                  setBodyNoResults([]);
+                                  onSave({ ...item, ...gridUpdates } as any, gridUpdates);
+                                };
                                 return (
                                   <>
                                     {/* BODY ARTICLE NO. — search dropdown from body_article_data */}
@@ -2435,17 +2519,7 @@ const ArticleCard = React.memo(
                                               onChange={(e) => {
                                                 const q = e.target.value;
                                                 setBodyNoQuery(q);
-                                                if (!q.trim()) { setBodyNoResults([]); return; }
-                                                setBodyNoLoading(true);
-                                                const token = localStorage.getItem('authToken');
-                                                fetch(
-                                                  `${APP_CONFIG.api.baseURL}/approver/body-article-data/search?q=${encodeURIComponent(q)}`,
-                                                  { headers: { Authorization: `Bearer ${token}` } },
-                                                )
-                                                  .then((r) => r.json())
-                                                  .then((d) => setBodyNoResults(d.results ?? []))
-                                                  .catch(() => setBodyNoResults([]))
-                                                  .finally(() => setBodyNoLoading(false));
+                                                runBodySearch(q);
                                               }}
                                               onBlur={() => {
                                                 // Falls back to closing directly when no PopoverContent is mounted
@@ -2487,43 +2561,7 @@ const ArticleCard = React.memo(
                                                       className="flex w-full flex-col gap-0.5 px-3 py-1.5 text-left hover:bg-[#FF6F61]/10"
                                                       onMouseDown={(e) => {
                                                         e.preventDefault();
-                                                        // Map body_article_data fields → article item field names.
-                                                        // Only include fields that actually have a value in body_article_data —
-                                                        // fields absent there are skipped so existing values are left untouched.
-                                                        const sourceMap: Record<string, string | number | null | undefined> = {
-                                                          bodyArticleDescription: r.bodyArticleDescription,
-                                                          collar:        r.mCollarType,
-                                                          collarStyle:   r.mCollarStyle,
-                                                          neckDetails:   r.mNeckStyle,
-                                                          neck:          r.mNeckType,
-                                                          placket:       r.mPlacket,
-                                                          fatherBelt:    r.mBltType,
-                                                          childBelt:     r.mBltStyle,
-                                                          sleeve:        r.mSleevesMainStyle,
-                                                          sleeveFold:    r.mSleeveFold,
-                                                          mSet:          r.mSet,
-                                                          bottomFold:    r.mBtmFold,
-                                                          noOfPocket:    r.mNoOfPocket,
-                                                          pocketType:    r.mPocket,
-                                                          extraPocket:   r.mExtraPocket,
-                                                          fit:           r.mFit,
-                                                          pattern:       r.mBodyStyle,
-                                                          length:        r.mLength,
-                                                          cmtpCost:      r.cmtpCost,
-                                                          cmpCost:       r.cmpCost,
-                                                          fabCons:       r.fabCons,
-                                                          width:         r.width,
-                                                        };
-                                                        const gridUpdates: Record<string, string> = { bodyArticle: r.bodyArticleNumber || '' };
-                                                        Object.entries(sourceMap).forEach(([field, v]) => {
-                                                          if (v !== null && v !== undefined && String(v).trim() !== '') {
-                                                            gridUpdates[field] = String(v).trim();
-                                                          }
-                                                        });
-                                                        setLocalValues((prev) => ({ ...prev, ...gridUpdates }));
-                                                        setEditingField(null);
-                                                        setBodyNoResults([]);
-                                                        onSave({ ...item, ...gridUpdates } as any, gridUpdates);
+                                                        applyBodyArticleRow(r);
                                                       }}
                                                     >
                                                       <span className="text-[11px] font-medium text-gray-900">{r.bodyArticleNumber}</span>
@@ -2546,11 +2584,122 @@ const ArticleCard = React.memo(
                                         </div>
                                       )}
                                     </div>
-                                    {renderField('bodyArticleDescription', 'BODY ARTICLE DESC', bodyAutoFill, 40)}
-                                    {renderField('cmtpCost', 'CMTP COST')}
-                                    {renderField('cmpCost', 'CMP COST')}
-                                    {renderField('fabCons', 'FAB CON')}
-                                    {renderField('width', 'WIDTH')}
+                                    {/* BODY ARTICLE DESC — same search dropdown, keyed off description instead of number */}
+                                    <div
+                                      key="bodyArticleDescription"
+                                      className="mt-1 border-t border-border bg-muted/30 px-2 py-1.5"
+                                      style={{ cursor: isLocked ? 'default' : 'pointer' }}
+                                      onClick={() => {
+                                        if (!isLocked && !isBodyDescEditing) {
+                                          setEditingField('bot_bodyArticleDescription');
+                                          setBodyNoQuery(bodyDescDisplayVal || '');
+                                          // Whatever's already been composed from the fields filled so far
+                                          // (via the live rebuild above) becomes the starting search — no
+                                          // need to retype it before matches show up.
+                                          if (bodyDescDisplayVal) runBodySearch(bodyDescDisplayVal);
+                                          else setBodyNoResults([]);
+                                        }
+                                      }}
+                                    >
+                                      <div className="mb-0.5 flex items-center justify-between gap-1">
+                                        <span className="text-[9px] font-semibold uppercase tracking-wider text-muted-foreground">
+                                          BODY ARTICLE DESC
+                                        </span>
+                                        {!isBodyDescEditing && !isLocked && (
+                                          <button
+                                            type="button"
+                                            className="text-[9px] text-slate-700 underline hover:text-[#FF6F61]"
+                                            onClick={(e) => {
+                                              e.stopPropagation();
+                                              bodyAutoFill();
+                                            }}
+                                          >
+                                            Auto-fill
+                                          </button>
+                                        )}
+                                      </div>
+                                      {isBodyDescEditing ? (
+                                        <Popover
+                                          open
+                                          onOpenChange={(o) => {
+                                            if (!o) {
+                                              setEditingField(null);
+                                              setBodyNoResults([]);
+                                            }
+                                          }}
+                                        >
+                                          <PopoverAnchor asChild>
+                                            <Input
+                                              autoFocus
+                                              value={bodyNoQuery}
+                                              placeholder="Search body article desc…"
+                                              maxLength={40}
+                                              className="h-6 px-1 text-[11px]"
+                                              onClick={(e) => e.stopPropagation()}
+                                              onChange={(e) => {
+                                                const q = e.target.value;
+                                                setBodyNoQuery(q);
+                                                runBodySearch(q);
+                                              }}
+                                              onBlur={() => {
+                                                setEditingField(null);
+                                                setBodyNoResults([]);
+                                              }}
+                                              onKeyDown={(e) => {
+                                                if (e.key === 'Escape') {
+                                                  setEditingField(null);
+                                                  setBodyNoResults([]);
+                                                }
+                                                if (e.key === 'Enter' && bodyNoQuery.trim()) {
+                                                  handleSave('bodyArticleDescription', bodyNoQuery.trim().slice(0, 40) || null);
+                                                  setEditingField(null);
+                                                  setBodyNoResults([]);
+                                                }
+                                              }}
+                                            />
+                                          </PopoverAnchor>
+                                          {(bodyNoResults.length > 0 || bodyNoLoading) && (
+                                            <PopoverContent
+                                              align="start"
+                                              sideOffset={2}
+                                              className="w-[260px] p-0"
+                                              onOpenAutoFocus={(e) => e.preventDefault()}
+                                              onClick={(e) => e.stopPropagation()}
+                                            >
+                                              <div className="max-h-56 overflow-y-auto py-1">
+                                                {bodyNoLoading ? (
+                                                  <div className="px-3 py-2 text-[11px] text-muted-foreground">Searching…</div>
+                                                ) : (
+                                                  bodyNoResults.map((r) => (
+                                                    <button
+                                                      key={r.bodyArticleNumber}
+                                                      type="button"
+                                                      className="flex w-full flex-col gap-0.5 px-3 py-1.5 text-left hover:bg-[#FF6F61]/10"
+                                                      onMouseDown={(e) => {
+                                                        e.preventDefault();
+                                                        applyBodyArticleRow(r);
+                                                      }}
+                                                    >
+                                                      <span className="text-[11px] font-medium text-gray-900">{r.bodyArticleDescription || '—'}</span>
+                                                      {r.bodyArticleNumber && (
+                                                        <span className="truncate text-[10px] text-muted-foreground">{r.bodyArticleNumber}</span>
+                                                      )}
+                                                    </button>
+                                                  ))
+                                                )}
+                                              </div>
+                                            </PopoverContent>
+                                          )}
+                                        </Popover>
+                                      ) : (
+                                        <div
+                                          className="truncate text-[11px]"
+                                          style={{ color: bodyDescDisplayVal ? '#111827' : '#9ca3af' }}
+                                        >
+                                          {bodyDescDisplayVal || (isLocked ? '—' : 'Click to fill')}
+                                        </div>
+                                      )}
+                                    </div>
                                     <div className="border-t border-border px-2 py-1.5">
                                       <Button
                                         size="sm"
@@ -2589,7 +2738,7 @@ const ArticleCard = React.memo(
                         ? [
                             { label: 'CMTP Cost', field: 'cmtpCost', editable: true, mandatory: true, isDropdown: false, isColor: false, isMarkdown: false },
                             { label: 'CMP Cost',  field: 'cmpCost',  editable: true, mandatory: true, isDropdown: false, isColor: false, isMarkdown: false },
-                            { label: 'FAB Con',  field: 'fabCost',  editable: true, mandatory: true, isDropdown: false, isColor: false, isMarkdown: false },
+                            { label: 'FAB Con',  field: 'fabCons',  editable: true, mandatory: true, isDropdown: false, isColor: false, isMarkdown: false },
                             { label: 'Width',  field: 'width',  editable: true, mandatory: true, isDropdown: false, isColor: false, isMarkdown: false },
                           ]
                         : [

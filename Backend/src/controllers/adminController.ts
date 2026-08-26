@@ -4976,7 +4976,11 @@ export const uploadBodyArticleData = async (req: Request, res: Response): Promis
     let skipped = 0;
     let truncated = 0;
 
-    for (let r = 5; r <= ws.rowCount; r++) {
+    // Row 4 is a blank spacer in the pristine template (header is row 3, samples start row 5) —
+    // but nothing stops someone from typing a real row into it instead of leaving it empty, and a
+    // strict "start at row 5" scan would silently drop that row without even counting it as skipped.
+    // Scanning from row 4 costs nothing when it's actually blank (the empty-row check below skips it).
+    for (let r = 4; r <= ws.rowCount; r++) {
       const row = ws.getRow(r);
       const values = BODY_ARTICLE_DATA_COLUMNS.map((_, i) => cell(row, i + 1));
 

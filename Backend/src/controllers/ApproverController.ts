@@ -3402,9 +3402,16 @@ export class ApproverController {
     // the admin-managed master table (see Admin.tsx "Body Article Data" upload card).
     // Partial queries return up to 10 matches; an exact Body Article Number match (if any)
     // is always included, even if it would otherwise fall outside the top 10.
+    // Scoped to the current article's major category when ?majorCategory= is passed — the
+    // detail page already knows it (shown in "Category" under Article Information), so results
+    // never leak body articles belonging to a different major category.
     static async searchBodyArticleData(req: Request, res: Response) {
         const q = String(req.query.q ?? '').trim();
         if (!q) return res.json({ results: [] });
+        const majorCategory = String(req.query.majorCategory ?? '').trim();
+        const majorCategoryFilter = majorCategory
+            ? { majorCategory: { equals: majorCategory, mode: 'insensitive' as const } }
+            : {};
 
         const selectFields = {
             bodyArticleNumber: true,
@@ -3419,7 +3426,7 @@ export class ApproverController {
         } as const;
 
         const exact = await prisma.bodyArticleData.findFirst({
-            where: { bodyArticleNumber: { equals: q, mode: 'insensitive' } },
+            where: { bodyArticleNumber: { equals: q, mode: 'insensitive' }, ...majorCategoryFilter },
             select: selectFields,
         });
 
@@ -3430,6 +3437,7 @@ export class ApproverController {
                     { bodyArticleDescription: { contains: q, mode: 'insensitive' } },
                 ],
                 NOT: { bodyArticleNumber: null },
+                ...majorCategoryFilter,
             },
             select: selectFields,
             distinct: ['bodyArticleNumber'],

@@ -4,5 +4,5 @@ import ArticleDetailPage from '../../fabric-article/pages/FabricArticleDetailPag
 export type { DetailFilters, DetailNavigationState } from '../../fabric-article/pages/FabricArticleDetailPage';
 
 export default function BodyArticleDetailPage() {
-  return <ArticleDetailPage ListComponent={BodyArticleList} />;
+  return <ArticleDetailPage ListComponent={BodyArticleList} skipMandatoryFieldsCheck />;
 }

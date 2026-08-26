@@ -247,8 +247,15 @@ export interface DetailNavigationState {
 
 export default function ArticleDetailPage({
   ListComponent = FabricArticleList,
+  skipMandatoryFieldsCheck = false,
 }: {
   ListComponent?: React.ComponentType<ApproverArticleListProps>;
+  // The Body Article page only shows the Body & Construction + BOM cards, but
+  // getMissingMandatoryFields() checks the full attribute schema (FAB, VA ACC,
+  // VA PRCS, ...) — fields that page has no way to fill. Body Article Detail
+  // Page opts out of that gate entirely; the FG Article Detail Page (approver's
+  // own ArticleDetailPage.tsx) is a separate component and is unaffected.
+  skipMandatoryFieldsCheck?: boolean;
 } = {}) {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
@@ -494,6 +501,7 @@ export default function ArticleDetailPage({
   );
 
   const approveBlockedReasons = useMemo(() => {
+    if (skipMandatoryFieldsCheck) return [];
     const pendingItems = items.filter(i => pendingSelectedKeys.includes(i.id));
     return pendingItems.reduce<{ articleId: string; missing: string[] }[]>((acc, item) => {
       const missing: string[] = [];
@@ -506,7 +514,7 @@ export default function ArticleDetailPage({
       return acc;
     }, []);
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [pendingSelectedKeys, items, gridVersion, pathType]);
+  }, [pendingSelectedKeys, items, gridVersion, pathType, skipMandatoryFieldsCheck]);
 
   const handleApproveClick = () => {
     if (pendingSelectedKeys.length === 0) return;
