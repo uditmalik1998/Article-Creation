@@ -49,6 +49,8 @@ const ITEM_UPDATE_ALLOWED_FIELDS = [
     'macroMvgr', 'mainMvgr', 'mFab2',
     'vendorCode', 'mrp', 'mcCode', 'segment', 'season',
     'hsnTaxCode', 'articleDescription', 'fashionGrid', 'year', 'articleType',
+    // Body article cost fields
+    'cmptCost', 'cmpCost', 'fabCost',
     // Card footer fields (fabric/body article builder)
     'fabricArticleNumber', 'fabricArticleDescription',
     'bodyArticle', 'bodyArticleDescription',
