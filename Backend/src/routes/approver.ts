@@ -78,6 +78,10 @@ router.get('/vendor-search', h(ApproverController.vendorSearch));
 // Fabric article data search — returns up to 15 matching fabric_article_data rows by number or description
 router.get('/fabric-article-data/search', h(ApproverController.searchFabricArticleData));
 
+// Body article data search — returns up to 10 matching body_article_data rows by number or description
+// (an exact Body Article Number match is always included even if outside the top 10)
+router.get('/body-article-data/search', h(ApproverController.searchBodyArticleData));
+
 // Sizes for a given major category (from maj_cat_sizes table)
 router.get('/sizes-for-majcat/:majCat', h(ApproverController.getSizesForMajCat));
 

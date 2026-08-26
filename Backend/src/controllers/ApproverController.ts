@@ -50,7 +50,7 @@ const ITEM_UPDATE_ALLOWED_FIELDS = [
     'vendorCode', 'mrp', 'mcCode', 'segment', 'season',
     'hsnTaxCode', 'articleDescription', 'fashionGrid', 'year', 'articleType',
     // Body article cost fields
-    'cmptCost', 'cmpCost', 'fabCost',
+    'cmtpCost', 'cmpCost', 'fabCost', 'fabCons', 'width',
     // Card footer fields (fabric/body article builder)
     'fabricArticleNumber', 'fabricArticleDescription',
     'bodyArticle', 'bodyArticleDescription',
@@ -3395,6 +3395,58 @@ export class ApproverController {
             take: 15,
             orderBy: { fabricArticleNumber: 'asc' },
         });
+        return res.json({ results });
+    }
+
+    // Body Article No. search (Body & Construction card) — backed by body_article_data,
+    // the admin-managed master table (see Admin.tsx "Body Article Data" upload card).
+    // Partial queries return up to 10 matches; an exact Body Article Number match (if any)
+    // is always included, even if it would otherwise fall outside the top 10.
+    static async searchBodyArticleData(req: Request, res: Response) {
+        const q = String(req.query.q ?? '').trim();
+        if (!q) return res.json({ results: [] });
+
+        const selectFields = {
+            bodyArticleNumber: true,
+            bodyArticleDescription: true,
+            mCollarType: true, mCollarStyle: true,
+            mNeckType: true, mNeckStyle: true,
+            mPlacket: true, mBltType: true, mBltStyle: true,
+            mSleevesMainStyle: true, mSleeveFold: true, mBtmFold: true,
+            mNoOfPocket: true, mPocket: true, mExtraPocket: true,
+            mFit: true, mBodyStyle: true, mLength: true, mSet: true,
+            cmtpCost: true, cmpCost: true, fabCons: true, width: true,
+        } as const;
+
+        const exact = await prisma.bodyArticleData.findFirst({
+            where: { bodyArticleNumber: { equals: q, mode: 'insensitive' } },
+            select: selectFields,
+        });
+
+        const partial = await prisma.bodyArticleData.findMany({
+            where: {
+                OR: [
+                    { bodyArticleNumber: { contains: q, mode: 'insensitive' } },
+                    { bodyArticleDescription: { contains: q, mode: 'insensitive' } },
+                ],
+                NOT: { bodyArticleNumber: null },
+            },
+            select: selectFields,
+            distinct: ['bodyArticleNumber'],
+            take: 10,
+            orderBy: { bodyArticleNumber: 'asc' },
+        });
+
+        const seen = new Set<string>();
+        const results: typeof partial = [];
+        if (exact?.bodyArticleNumber) { results.push(exact); seen.add(exact.bodyArticleNumber); }
+        for (const r of partial) {
+            if (results.length >= 10) break;
+            if (r.bodyArticleNumber && seen.has(r.bodyArticleNumber)) continue;
+            results.push(r);
+            if (r.bodyArticleNumber) seen.add(r.bodyArticleNumber);
+        }
+
         return res.json({ results });
     }
 }
