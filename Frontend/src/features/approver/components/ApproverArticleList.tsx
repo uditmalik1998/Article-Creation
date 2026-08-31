@@ -1028,8 +1028,10 @@ const ArticleCard = React.memo(
       'vendorCode', 'vendorName', 'mrp', 'rate', 'colour',
       'designNumber', 'division', 'subDivision', 'majorCategory', 'segment',
     ]);
-    const isFieldLocked = (field: string) =>
-      isLocked || (isModifyMode && MODIFY_LOCKED_FIELDS.has(field));
+   const isFieldLocked = (field: string) =>
+    field === 'segment' ||
+    isLocked ||
+    (isModifyMode && MODIFY_LOCKED_FIELDS.has(field));
 
     // Division is non-editable for APPROVER/CATEGORY_HEAD users locked to a specific division
     const canEditDivision = useMemo(() => {
@@ -2743,7 +2745,7 @@ const ArticleCard = React.memo(
                           ]
                         : [
                             { label: 'RATE / COST', field: 'rate', editable: true, mandatory: true, isDropdown: false, isColor: false, isMarkdown: false },
-                            { label: 'MRP', field: 'mrp', editable: true, mandatory: true, isDropdown: false, isColor: false, isMarkdown: false },
+                            { label: 'MRP', field: 'mrp', editable: false, mandatory: true, isDropdown: false, isColor: false, isMarkdown: false },
                             { label: 'Base Color', field: 'colour', editable: true, mandatory: true, isDropdown: true, isColor: true, isMarkdown: false },
                             { label: 'Secondary Color', field: 'secondaryColour', editable: true, mandatory: false, isDropdown: true, isColor: true, isMarkdown: false },
                             { label: 'MARKDOWN', field: '_markdown', editable: false, mandatory: false, isDropdown: false, isColor: false, isMarkdown: true, isAfterTax: false },
