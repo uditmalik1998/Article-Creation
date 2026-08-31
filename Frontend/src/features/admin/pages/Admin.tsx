@@ -43,9 +43,18 @@ import { APP_CONFIG } from '../../../constants/app/config';
 
 const api = new BackendApiService();
 
+interface VendorSyncResult {
+  upserted: number;
+  pages: number;
+  durationMs: number;
+  startedAt: string;
+  error?: string;
+}
 interface VendorMasterStatus {
   count: number;
   lastSyncedAt: string | null;
+  inProgress?: boolean;
+  lastResult?: VendorSyncResult | null;
 }
 
 interface MajCatGridMeta {
@@ -290,11 +299,35 @@ export default function Admin() {
       });
       const data = await res.json();
       if (!res.ok) throw new Error(data.error || 'Vendor master sync failed');
-      message.success('Vendor master sync started in background. Records will update shortly.');
-      setTimeout(() => loadVendorStatus(), 5000);
+      message.info('Vendor master sync started — polling for completion…');
+
+      // Poll status every 4s until inProgress flips to false
+      const poll = async () => {
+        const token = localStorage.getItem('authToken');
+        const statusRes = await fetch(`${APP_CONFIG.api.baseURL}/admin/vendor-master/status`, {
+          headers: token ? { Authorization: `Bearer ${token}` } : {},
+        });
+        const statusData = await statusRes.json();
+        if (statusData.success) {
+          setVendorStatus(statusData.data);
+          if (statusData.data.inProgress) {
+            setTimeout(poll, 4000);
+          } else {
+            setVendorSyncing(false);
+            const result = statusData.data.lastResult;
+            if (result?.error) {
+              message.error(`Sync failed: ${result.error}`);
+            } else if (result) {
+              message.success(`Sync complete — ${result.upserted.toLocaleString()} records updated in ${result.pages} pages`);
+            }
+          }
+        } else {
+          setVendorSyncing(false);
+        }
+      };
+      setTimeout(poll, 4000);
     } catch (err: any) {
       message.error(err?.message || 'Vendor master sync failed');
-    } finally {
       setVendorSyncing(false);
     }
   };
@@ -1601,6 +1634,26 @@ export default function Admin() {
                         https://my-dab-app.azurewebsites.net/api/ET_Supplier_Master
                       </span>
                     </Descriptions.Item>
+                    {vendorStatus.inProgress && (
+                      <Descriptions.Item label="Status">
+                        <span className="flex items-center gap-1.5 text-blue-600">
+                          <RefreshCw className="h-3.5 w-3.5 animate-spin" /> Sync in progress…
+                        </span>
+                      </Descriptions.Item>
+                    )}
+                    {vendorStatus.lastResult && (
+                      <Descriptions.Item label="Last Run">
+                        {vendorStatus.lastResult.error ? (
+                          <span className="font-mono text-xs text-red-600">
+                            ❌ {vendorStatus.lastResult.error}
+                          </span>
+                        ) : (
+                          <span className="text-xs text-green-700">
+                            ✅ {vendorStatus.lastResult.upserted.toLocaleString()} records in {vendorStatus.lastResult.pages} pages ({(vendorStatus.lastResult.durationMs / 1000).toFixed(1)}s)
+                          </span>
+                        )}
+                      </Descriptions.Item>
+                    )}
                   </Descriptions>
 
                   <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">

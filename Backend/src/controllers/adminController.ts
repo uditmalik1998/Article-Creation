@@ -7,7 +7,7 @@ import { Request, Response } from 'express';
 import { z } from 'zod';
 import { prismaClient as prisma, withPrismaRetry } from '../utils/prisma';
 import bcrypt from 'bcryptjs';
-import { syncVendorMaster, getVendorMasterStatus } from '../services/vendorMasterSyncService';
+import { syncVendorMaster, getVendorMasterStatus, getLastVendorSyncResult, isVendorSyncInProgress } from '../services/vendorMasterSyncService';
 import { invalidateMandatoryGridCache, invalidateMajCatVisibleCache } from '../services/zmmArtCreationService';
 import { invalidateFieldVisibilityCache } from '../utils/categoryFieldVisibility';
 import path from 'path';
@@ -2190,7 +2190,14 @@ export const retrySrmFailedAll = async (req: Request, res: Response): Promise<vo
 export const getVendorMasterSyncStatus = async (req: Request, res: Response): Promise<void> => {
   try {
     const status = await getVendorMasterStatus();
-    res.json({ success: true, data: status });
+    res.json({
+      success: true,
+      data: {
+        ...status,
+        inProgress: isVendorSyncInProgress(),
+        lastResult: getLastVendorSyncResult(),
+      },
+    });
   } catch (error: any) {
     res.status(500).json({ success: false, error: error.message });
   }
@@ -2203,13 +2210,17 @@ export const getVendorMasterSyncStatus = async (req: Request, res: Response): Pr
  */
 export const triggerVendorMasterSync = async (req: Request, res: Response): Promise<void> => {
   try {
-    // Acknowledge immediately so the HTTP request doesn't time out mid-sync
+    if (isVendorSyncInProgress()) {
+      res.status(409).json({ success: false, error: 'Sync already in progress' });
+      return;
+    }
+
+    // Acknowledge immediately — the actual sync can take several minutes
     res.status(202).json({
       success: true,
-      message: 'Vendor master sync started in background. Check server logs for progress.',
+      message: 'Vendor master sync started in background. Poll /vendor-master/status for progress.',
     });
 
-    // Fire-and-forget
     syncVendorMaster()
       .then(r =>
         console.log(`[Admin] Vendor master sync complete — upserted:${r.upserted} pages:${r.pages} duration:${r.durationMs}ms`)
