@@ -1151,6 +1151,18 @@ const ArticleCard = React.memo(
         setEditingField(null);
         return;
       }
+      if (field === 'mrp' && value) {
+        const mrpNew = parseFloat(value);
+        const rateNow = parseFloat(String(getValue('rate') ?? ''));
+        if (!isNaN(mrpNew) && mrpNew > 0 && !isNaN(rateNow)) {
+          const markdownPct = ((mrpNew - rateNow) / mrpNew) * 100;
+          if (markdownPct < 20) {
+            message.error('MRP too low — markdown would fall below 20%');
+            setEditingField(null);
+            return;
+          }
+        }
+      }
       const updates: Record<string, string | null> = { [field]: value };
       if (field === 'rate') {
         const rate = parseFloat(String(value ?? ''));
