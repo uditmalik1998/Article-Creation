@@ -1067,6 +1067,63 @@ model RawArticle {
   @@schema("public")
 }
 
+/// Fabric Raw Data: staging table for fabric presentations (mirrors raw_articles + fabric-specific columns)
+model FabricRawData {
+  id String @id @default(uuid())
+
+  // SRM / presentation fields
+  presentationNo String @map("presentation_no") @db.VarChar(100)
+  uniqueKey      String @unique @map("unique_key")
+
+  // Vendor info
+  vendorCode String? @map("vendor_code") @db.VarChar(50)
+  vendorName String? @map("vendor_name") @db.VarChar(200)
+  vendorCity String? @map("vendor_city") @db.VarChar(100)
+
+  // Classification
+  division          String? @db.VarChar(100)
+  subDivision       String? @map("sub_division") @db.VarChar(100)
+  majorCategory     String? @map("major_category") @db.VarChar(200)
+  presentationsType String? @map("presentations_type")
+
+  // Article details
+  designNumber  String?  @map("design_number") @db.VarChar(255)
+  articleNumber String?  @map("article_number") @db.VarChar(100)
+  fabric        String?  @db.VarChar(100)
+  noOfColors    Int?     @map("no_of_colors")
+  price         Decimal? @db.Decimal(10, 2)
+  imageUrl      String?  @map("image_url")
+  source        String?  @db.VarChar(50)
+
+  // Fabric-specific extras
+  season        String?  @db.VarChar(50)
+  garmentWeight Decimal? @map("garment_weight") @db.Decimal(8, 2)
+  availableQty  Decimal? @map("available_qty") @db.Decimal(12, 2)
+  approvedBy    String?  @map("approved_by") @db.VarChar(200)
+  notes         String?
+
+  // Pipeline tracking
+  status        RawArticleStatus @default(PENDING)
+  retryCount    Int              @default(0) @map("retry_count")
+  errorMessage  String?          @map("error_message")
+  extractedData Json?            @map("extracted_data")
+  extractedAt   DateTime?        @map("extracted_at")
+  flatId        String?          @map("flat_id")
+  lockedUntil   DateTime?        @map("locked_until")
+
+  // Dates
+  presentationReceivedDate DateTime? @map("presentation_received_date")
+  createdAt                DateTime  @default(now()) @map("created_at")
+  updatedAt                DateTime  @updatedAt @map("updated_at")
+
+  @@index([presentationNo])
+  @@index([status])
+  @@index([vendorCode])
+  @@index([createdAt])
+  @@map("fabric_raw_data")
+  @@schema("public")
+}
+
 // ── SRM Sync Audit Logs ──────────────────────────────────────────────────────
 
 /// One row per cron/admin/webhook sync execution

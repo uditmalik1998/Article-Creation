@@ -29,8 +29,8 @@ export interface ResolvedArticle {
   isColorFallback?: boolean;
 }
 
-/** division (+ subDivision for kids) → model gender used by the prompt builder. */
-function deriveGender(division?: string | null, subDivision?: string | null): string {
+/** division (+ subDivision for kids) → model gender, or null if division is unrecognised. */
+function deriveGender(division?: string | null, subDivision?: string | null): string | null {
   const d = String(division || '').toUpperCase().trim();
   const s = String(subDivision || '').toUpperCase().trim();
 
@@ -41,7 +41,24 @@ function deriveGender(division?: string | null, subDivision?: string | null): st
     if (s.startsWith('KG') || s.startsWith('IG') || s.includes('GIRL')) return 'kid girl';
     return 'kid boy';
   }
-  return 'female'; // safe default
+  return null; // unknown division — caller applies article-number range fallback
+}
+
+/**
+ * Derive gender from the article number prefix ranges:
+ *   1110–1116 → MENS (male)
+ *   1120–1125 → LADIES (female)
+ *   1130–1135 → KIDS (kid boy — subDivision not available here)
+ * Returns null when the number doesn't fall in any known range.
+ */
+function deriveGenderFromArticleNumber(articleNumber?: string | null): string | null {
+  const digits = String(articleNumber || '').replace(/\D/g, '');
+  if (digits.length < 4) return null;
+  const prefix = parseInt(digits.slice(0, 4), 10);
+  if (prefix >= 1110 && prefix <= 1116) return 'male';
+  if (prefix >= 1120 && prefix <= 1125) return 'female';
+  if (prefix >= 1130 && prefix <= 1135) return 'kid boy';
+  return null;
 }
 
 // Clear bottomwear / full-length keywords used to drive framing. Only confident matches
@@ -128,11 +145,37 @@ async function resolveFramingAndGender(row: Record<string, any>): Promise<{
   bodytype: string;
   featuredGarment: 'top' | 'bottom' | 'full' | 'unknown';
 }> {
-  let gender = deriveGender(row.division, row.subDivision);
-  let bodytype = deriveBodyFraming(row.majorCategory, row.articleType);
-  let featuredGarment = deriveFeaturedGarment(row.majorCategory, row.articleType);
+  // When extraction_results_flat has no division, pull it from product_master so MENS
+  // articles aren't misclassified as female by the default fallback.
+  const artNum = String(row.articleNumber || '').trim();
+  const baseNum = artNum.split('-')[0].trim();
 
-  const code = String(row.majorCategory || '').trim();
+  let effectiveRow = row;
+  if (!row.division && artNum) {
+    const meta = await fetchProductMasterMeta(baseNum).catch(() => null);
+    console.log(`[GenderDebug] ${artNum}: flat division="${row.division}" → PM meta=${JSON.stringify(meta)}`);
+    if (meta?.division) {
+      effectiveRow = {
+        ...row,
+        division:      meta.division,
+        subDivision:   meta.subDivision   ?? row.subDivision,
+        majorCategory: meta.majorCategory ?? row.majorCategory,
+      };
+    }
+  } else {
+    console.log(`[GenderDebug] ${artNum}: flat division="${row.division}" (used as-is)`);
+  }
+
+  // Resolution chain: division → article-number range → 'male' (last resort)
+  let gender: string = deriveGender(effectiveRow.division, effectiveRow.subDivision)
+    ?? deriveGenderFromArticleNumber(baseNum || artNum)
+    ?? 'male';
+  console.log(`[GenderDebug] ${artNum}: deriveGender("${effectiveRow.division}") → "${gender}"`);
+
+  let bodytype = deriveBodyFraming(effectiveRow.majorCategory, effectiveRow.articleType);
+  let featuredGarment = deriveFeaturedGarment(effectiveRow.majorCategory, effectiveRow.articleType);
+
+  const code = String(effectiveRow.majorCategory || '').trim();
   if (code) {
     try {
       const master = await withPrismaRetry(() =>
@@ -142,15 +185,20 @@ async function resolveFramingAndGender(row: Record<string, any>): Promise<{
         })
       );
       if (master) {
+        const genderBefore = gender;
         bodytype = frameToBodytype(master.frame) ?? bodytype;
         gender = genderFromDivIdeal(master.div, master.idealFor) ?? gender;
         featuredGarment = frameToFeatured(master.frame) ?? featuredGarment;
+        console.log(`[GenderDebug] ${artNum}: majorCatMaster(${code}) div="${master.div}" idealFor="${master.idealFor}" → gender "${genderBefore}" → "${gender}"`);
+      } else {
+        console.log(`[GenderDebug] ${artNum}: no majorCatMaster entry for "${code}"`);
       }
     } catch {
       // Master lookup is best-effort — on any error keep the flat-row heuristics.
     }
   }
 
+  console.log(`[GenderDebug] ${artNum}: FINAL gender="${gender}"`);
   return { gender, bodytype, featuredGarment };
 }
 
@@ -251,7 +299,10 @@ async function findRowsByArticleNumber(articleNumber: string): Promise<any[]> {
 }
 
 const SRM_SUPABASE_URL = 'https://pymdqnnwwxrgeolvgvgv.supabase.co';
-const SRM_SUPABASE_KEY = process.env.SRM_SUPABASE_ANON_KEY
+// product_master has RLS — use the service_role key so server-side reads are not blocked.
+// Fall back to anon key if service key is not configured (will 401 if RLS is active).
+const SRM_SUPABASE_KEY = process.env.SRM_SUPABASE_SERVICE_KEY
+  || process.env.SRM_SUPABASE_ANON_KEY
   || 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InB5bWRxbm53d3hyZ2VvbHZndmd2Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTMzMzU0NzYsImV4cCI6MjA2ODkxMTQ3Nn0.jUrb0jIg6qjj2Rlh9DxYesSnbstoD4uoDCswqOqAkUM';
 
 /**
@@ -271,16 +322,24 @@ async function fetchProductMasterMeta(articleNumber: string): Promise<{
         Authorization: `Bearer ${SRM_SUPABASE_KEY}`,
       },
     });
-    if (!res.ok) return null;
+    if (!res.ok) {
+      console.warn(`[GenderDebug] fetchProductMasterMeta(${articleNumber}): HTTP ${res.status} ${res.statusText}`);
+      return null;
+    }
     const rows = (await res.json()) as any[];
-    if (!rows.length) return null;
+    if (!rows.length) {
+      console.warn(`[GenderDebug] fetchProductMasterMeta(${articleNumber}): no rows returned`);
+      return null;
+    }
     const r = rows[0];
+    console.log(`[GenderDebug] fetchProductMasterMeta(${articleNumber}): division="${r.division}" sub_division="${r.sub_division}" maj_category="${r.maj_category}"`);
     return {
       division:      r.division     || undefined,
       subDivision:   r.sub_division || undefined,
       majorCategory: r.maj_category || undefined,
     };
-  } catch {
+  } catch (err: any) {
+    console.warn(`[GenderDebug] fetchProductMasterMeta(${articleNumber}): fetch threw — ${err?.message}`);
     return null;
   }
 }
@@ -304,9 +363,10 @@ async function tryApprovedR2Fallback(
 
   // Pull metadata from v2srm product_master for gender / bodytype derivation.
   const meta = await fetchProductMasterMeta(baseArticleNumber);
-  const metaRow: Record<string, any> = meta
-    ? { division: meta.division, subDivision: meta.subDivision, majorCategory: meta.majorCategory }
-    : {};
+  const metaRow: Record<string, any> = {
+    articleNumber: baseArticleNumber,   // needed so resolveFramingAndGender can retry on failure
+    ...(meta ? { division: meta.division, subDivision: meta.subDivision, majorCategory: meta.majorCategory } : {}),
+  };
 
   const { gender, bodytype, featuredGarment } = await resolveFramingAndGender(metaRow);
 

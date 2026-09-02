@@ -750,6 +750,41 @@ exports.Prisma.RawArticleScalarFieldEnum = {
   updatedAt: 'updatedAt'
 };
 
+exports.Prisma.FabricRawDataScalarFieldEnum = {
+  id: 'id',
+  presentationNo: 'presentationNo',
+  uniqueKey: 'uniqueKey',
+  vendorCode: 'vendorCode',
+  vendorName: 'vendorName',
+  vendorCity: 'vendorCity',
+  division: 'division',
+  subDivision: 'subDivision',
+  majorCategory: 'majorCategory',
+  presentationsType: 'presentationsType',
+  designNumber: 'designNumber',
+  articleNumber: 'articleNumber',
+  fabric: 'fabric',
+  noOfColors: 'noOfColors',
+  price: 'price',
+  imageUrl: 'imageUrl',
+  source: 'source',
+  season: 'season',
+  garmentWeight: 'garmentWeight',
+  availableQty: 'availableQty',
+  approvedBy: 'approvedBy',
+  notes: 'notes',
+  status: 'status',
+  retryCount: 'retryCount',
+  errorMessage: 'errorMessage',
+  extractedData: 'extractedData',
+  extractedAt: 'extractedAt',
+  flatId: 'flatId',
+  lockedUntil: 'lockedUntil',
+  presentationReceivedDate: 'presentationReceivedDate',
+  createdAt: 'createdAt',
+  updatedAt: 'updatedAt'
+};
+
 exports.Prisma.SrmSyncRunScalarFieldEnum = {
   id: 'id',
   triggeredBy: 'triggeredBy',
@@ -1408,6 +1443,29 @@ exports.Prisma.RawArticleOrderByRelevanceFieldEnum = {
   articleNumber: 'articleNumber'
 };
 
+exports.Prisma.FabricRawDataOrderByRelevanceFieldEnum = {
+  id: 'id',
+  presentationNo: 'presentationNo',
+  uniqueKey: 'uniqueKey',
+  vendorCode: 'vendorCode',
+  vendorName: 'vendorName',
+  vendorCity: 'vendorCity',
+  division: 'division',
+  subDivision: 'subDivision',
+  majorCategory: 'majorCategory',
+  presentationsType: 'presentationsType',
+  designNumber: 'designNumber',
+  articleNumber: 'articleNumber',
+  fabric: 'fabric',
+  imageUrl: 'imageUrl',
+  source: 'source',
+  season: 'season',
+  approvedBy: 'approvedBy',
+  notes: 'notes',
+  errorMessage: 'errorMessage',
+  flatId: 'flatId'
+};
+
 exports.Prisma.SrmSyncRunOrderByRelevanceFieldEnum = {
   id: 'id',
   triggeredBy: 'triggeredBy',
@@ -1653,6 +1711,7 @@ exports.Prisma.ModelName = {
   SapAttributeValue: 'SapAttributeValue',
   Article360Flat: 'Article360Flat',
   RawArticle: 'RawArticle',
+  FabricRawData: 'FabricRawData',
   SrmSyncRun: 'SrmSyncRun',
   SrmSyncRunItem: 'SrmSyncRunItem',
   PoolBJob: 'PoolBJob',
