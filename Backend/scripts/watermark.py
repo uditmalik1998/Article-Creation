@@ -46,7 +46,7 @@ def _build_lines(row):
     # Article number (only present after SAP RFC succeeds)
     add("Article", row.get("article_number"))
 
-    add("Presentation", row.get("presentation_no"))
+    add("PPT No.", row.get("presentation_no"))
 
     vendor_code = row.get("vendor_code")
     vendor_name = row.get("vendor_name")
@@ -57,13 +57,14 @@ def _build_lines(row):
         lines.append(f"Vendor: {vendor}")
 
     add("Category", row.get("major_category"))
-    add("Design", row.get("design_number"))
-    add("Fabric", row.get("fabric"))
+    add("Design No.", row.get("design_number"))
     add("Colors", row.get("no_of_colors"))
-    add("Rate", row.get("rate"), formatter=lambda v: f"Rs {v}")
-    # Some callers send `price` (SRM), others `rate` (DB). Only add Price if rate wasn't already shown.
+    add("Cost", row.get("rate"), formatter=lambda v: f"Rs {v}")
+    # Some callers send `price` (SRM), others `rate` (DB). Only add Cost if rate wasn't already shown.
     if row.get("price") is not None and row.get("rate") is None:
-        add("Price", row.get("price"), formatter=lambda v: f"Rs {v}")
+        add("Cost", row.get("price"), formatter=lambda v: f"Rs {v}")
+
+    add("Approved By", row.get("approved_by"))
 
     # Date — prefer caller-supplied (e.g. 'date' or 'presentation_received_date'),
     # fall back to today's local date. Always YYYY-MM-DD, never includes time.

@@ -164,6 +164,11 @@ export type Article360Flat = $Result.DefaultSelection<Prisma.$Article360FlatPayl
  */
 export type RawArticle = $Result.DefaultSelection<Prisma.$RawArticlePayload>
 /**
+ * Model FabricRawData
+ * Fabric Raw Data: staging table for fabric presentations (mirrors raw_articles + fabric-specific columns)
+ */
+export type FabricRawData = $Result.DefaultSelection<Prisma.$FabricRawDataPayload>
+/**
  * Model SrmSyncRun
  * One row per cron/admin/webhook sync execution
  */
@@ -785,6 +790,16 @@ export class PrismaClient<
   get rawArticle(): Prisma.RawArticleDelegate<ExtArgs, ClientOptions>;
 
   /**
+   * `prisma.fabricRawData`: Exposes CRUD operations for the **FabricRawData** model.
+    * Example usage:
+    * ```ts
+    * // Fetch zero or more FabricRawData
+    * const fabricRawData = await prisma.fabricRawData.findMany()
+    * ```
+    */
+  get fabricRawData(): Prisma.FabricRawDataDelegate<ExtArgs, ClientOptions>;
+
+  /**
    * `prisma.srmSyncRun`: Exposes CRUD operations for the **SrmSyncRun** model.
     * Example usage:
     * ```ts
@@ -1361,6 +1376,7 @@ export namespace Prisma {
     SapAttributeValue: 'SapAttributeValue',
     Article360Flat: 'Article360Flat',
     RawArticle: 'RawArticle',
+    FabricRawData: 'FabricRawData',
     SrmSyncRun: 'SrmSyncRun',
     SrmSyncRunItem: 'SrmSyncRunItem',
     PoolBJob: 'PoolBJob',
@@ -1390,7 +1406,7 @@ export namespace Prisma {
       omit: GlobalOmitOptions
     }
     meta: {
-      modelProps: "department" | "subDepartment" | "category" | "masterAttribute" | "attributeAllowedValue" | "categoryAttribute" | "extractionJob" | "extractionResult" | "extractionResultFlat" | "modelGenerationResult" | "modelImageApproval" | "mvgrLookup" | "masterVendorDetail" | "user" | "auditLog" | "apiKey" | "changeHistory" | "costSummary" | "article360" | "articleFab" | "articleBody" | "articleVaAcc" | "articleVaPrcs" | "articleBom" | "sapFieldConfig" | "sapAttributeValue" | "article360Flat" | "rawArticle" | "srmSyncRun" | "srmSyncRunItem" | "poolBJob" | "poolBBatch" | "nationalGridMaster" | "majorCatMaster" | "fabricArticleMaster" | "fabricMajCatGridValue" | "modifyLog" | "fabricArticleData" | "bodyArticleData"
+      modelProps: "department" | "subDepartment" | "category" | "masterAttribute" | "attributeAllowedValue" | "categoryAttribute" | "extractionJob" | "extractionResult" | "extractionResultFlat" | "modelGenerationResult" | "modelImageApproval" | "mvgrLookup" | "masterVendorDetail" | "user" | "auditLog" | "apiKey" | "changeHistory" | "costSummary" | "article360" | "articleFab" | "articleBody" | "articleVaAcc" | "articleVaPrcs" | "articleBom" | "sapFieldConfig" | "sapAttributeValue" | "article360Flat" | "rawArticle" | "fabricRawData" | "srmSyncRun" | "srmSyncRunItem" | "poolBJob" | "poolBBatch" | "nationalGridMaster" | "majorCatMaster" | "fabricArticleMaster" | "fabricMajCatGridValue" | "modifyLog" | "fabricArticleData" | "bodyArticleData"
       txIsolationLevel: Prisma.TransactionIsolationLevel
     }
     model: {
@@ -3466,6 +3482,80 @@ export namespace Prisma {
           }
         }
       }
+      FabricRawData: {
+        payload: Prisma.$FabricRawDataPayload<ExtArgs>
+        fields: Prisma.FabricRawDataFieldRefs
+        operations: {
+          findUnique: {
+            args: Prisma.FabricRawDataFindUniqueArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$FabricRawDataPayload> | null
+          }
+          findUniqueOrThrow: {
+            args: Prisma.FabricRawDataFindUniqueOrThrowArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$FabricRawDataPayload>
+          }
+          findFirst: {
+            args: Prisma.FabricRawDataFindFirstArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$FabricRawDataPayload> | null
+          }
+          findFirstOrThrow: {
+            args: Prisma.FabricRawDataFindFirstOrThrowArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$FabricRawDataPayload>
+          }
+          findMany: {
+            args: Prisma.FabricRawDataFindManyArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$FabricRawDataPayload>[]
+          }
+          create: {
+            args: Prisma.FabricRawDataCreateArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$FabricRawDataPayload>
+          }
+          createMany: {
+            args: Prisma.FabricRawDataCreateManyArgs<ExtArgs>
+            result: BatchPayload
+          }
+          createManyAndReturn: {
+            args: Prisma.FabricRawDataCreateManyAndReturnArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$FabricRawDataPayload>[]
+          }
+          delete: {
+            args: Prisma.FabricRawDataDeleteArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$FabricRawDataPayload>
+          }
+          update: {
+            args: Prisma.FabricRawDataUpdateArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$FabricRawDataPayload>
+          }
+          deleteMany: {
+            args: Prisma.FabricRawDataDeleteManyArgs<ExtArgs>
+            result: BatchPayload
+          }
+          updateMany: {
+            args: Prisma.FabricRawDataUpdateManyArgs<ExtArgs>
+            result: BatchPayload
+          }
+          updateManyAndReturn: {
+            args: Prisma.FabricRawDataUpdateManyAndReturnArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$FabricRawDataPayload>[]
+          }
+          upsert: {
+            args: Prisma.FabricRawDataUpsertArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$FabricRawDataPayload>
+          }
+          aggregate: {
+            args: Prisma.FabricRawDataAggregateArgs<ExtArgs>
+            result: $Utils.Optional<AggregateFabricRawData>
+          }
+          groupBy: {
+            args: Prisma.FabricRawDataGroupByArgs<ExtArgs>
+            result: $Utils.Optional<FabricRawDataGroupByOutputType>[]
+          }
+          count: {
+            args: Prisma.FabricRawDataCountArgs<ExtArgs>
+            result: $Utils.Optional<FabricRawDataCountAggregateOutputType> | number
+          }
+        }
+      }
       SrmSyncRun: {
         payload: Prisma.$SrmSyncRunPayload<ExtArgs>
         fields: Prisma.SrmSyncRunFieldRefs
@@ -4400,6 +4490,7 @@ export namespace Prisma {
     sapAttributeValue?: SapAttributeValueOmit
     article360Flat?: Article360FlatOmit
     rawArticle?: RawArticleOmit
+    fabricRawData?: FabricRawDataOmit
     srmSyncRun?: SrmSyncRunOmit
     srmSyncRunItem?: SrmSyncRunItemOmit
     poolBJob?: PoolBJobOmit
@@ -40995,6 +41086,1398 @@ export namespace Prisma {
 
 
   /**
+   * Model FabricRawData
+   */
+
+  export type AggregateFabricRawData = {
+    _count: FabricRawDataCountAggregateOutputType | null
+    _avg: FabricRawDataAvgAggregateOutputType | null
+    _sum: FabricRawDataSumAggregateOutputType | null
+    _min: FabricRawDataMinAggregateOutputType | null
+    _max: FabricRawDataMaxAggregateOutputType | null
+  }
+
+  export type FabricRawDataAvgAggregateOutputType = {
+    noOfColors: number | null
+    price: Decimal | null
+    garmentWeight: Decimal | null
+    availableQty: Decimal | null
+    retryCount: number | null
+  }
+
+  export type FabricRawDataSumAggregateOutputType = {
+    noOfColors: number | null
+    price: Decimal | null
+    garmentWeight: Decimal | null
+    availableQty: Decimal | null
+    retryCount: number | null
+  }
+
+  export type FabricRawDataMinAggregateOutputType = {
+    id: string | null
+    presentationNo: string | null
+    uniqueKey: string | null
+    vendorCode: string | null
+    vendorName: string | null
+    vendorCity: string | null
+    division: string | null
+    subDivision: string | null
+    majorCategory: string | null
+    presentationsType: string | null
+    designNumber: string | null
+    articleNumber: string | null
+    fabric: string | null
+    noOfColors: number | null
+    price: Decimal | null
+    imageUrl: string | null
+    source: string | null
+    season: string | null
+    garmentWeight: Decimal | null
+    availableQty: Decimal | null
+    approvedBy: string | null
+    notes: string | null
+    status: $Enums.RawArticleStatus | null
+    retryCount: number | null
+    errorMessage: string | null
+    extractedAt: Date | null
+    flatId: string | null
+    lockedUntil: Date | null
+    presentationReceivedDate: Date | null
+    createdAt: Date | null
+    updatedAt: Date | null
+  }
+
+  export type FabricRawDataMaxAggregateOutputType = {
+    id: string | null
+    presentationNo: string | null
+    uniqueKey: string | null
+    vendorCode: string | null
+    vendorName: string | null
+    vendorCity: string | null
+    division: string | null
+    subDivision: string | null
+    majorCategory: string | null
+    presentationsType: string | null
+    designNumber: string | null
+    articleNumber: string | null
+    fabric: string | null
+    noOfColors: number | null
+    price: Decimal | null
+    imageUrl: string | null
+    source: string | null
+    season: string | null
+    garmentWeight: Decimal | null
+    availableQty: Decimal | null
+    approvedBy: string | null
+    notes: string | null
+    status: $Enums.RawArticleStatus | null
+    retryCount: number | null
+    errorMessage: string | null
+    extractedAt: Date | null
+    flatId: string | null
+    lockedUntil: Date | null
+    presentationReceivedDate: Date | null
+    createdAt: Date | null
+    updatedAt: Date | null
+  }
+
+  export type FabricRawDataCountAggregateOutputType = {
+    id: number
+    presentationNo: number
+    uniqueKey: number
+    vendorCode: number
+    vendorName: number
+    vendorCity: number
+    division: number
+    subDivision: number
+    majorCategory: number
+    presentationsType: number
+    designNumber: number
+    articleNumber: number
+    fabric: number
+    noOfColors: number
+    price: number
+    imageUrl: number
+    source: number
+    season: number
+    garmentWeight: number
+    availableQty: number
+    approvedBy: number
+    notes: number
+    status: number
+    retryCount: number
+    errorMessage: number
+    extractedData: number
+    extractedAt: number
+    flatId: number
+    lockedUntil: number
+    presentationReceivedDate: number
+    createdAt: number
+    updatedAt: number
+    _all: number
+  }
+
+
+  export type FabricRawDataAvgAggregateInputType = {
+    noOfColors?: true
+    price?: true
+    garmentWeight?: true
+    availableQty?: true
+    retryCount?: true
+  }
+
+  export type FabricRawDataSumAggregateInputType = {
+    noOfColors?: true
+    price?: true
+    garmentWeight?: true
+    availableQty?: true
+    retryCount?: true
+  }
+
+  export type FabricRawDataMinAggregateInputType = {
+    id?: true
+    presentationNo?: true
+    uniqueKey?: true
+    vendorCode?: true
+    vendorName?: true
+    vendorCity?: true
+    division?: true
+    subDivision?: true
+    majorCategory?: true
+    presentationsType?: true
+    designNumber?: true
+    articleNumber?: true
+    fabric?: true
+    noOfColors?: true
+    price?: true
+    imageUrl?: true
+    source?: true
+    season?: true
+    garmentWeight?: true
+    availableQty?: true
+    approvedBy?: true
+    notes?: true
+    status?: true
+    retryCount?: true
+    errorMessage?: true
+    extractedAt?: true
+    flatId?: true
+    lockedUntil?: true
+    presentationReceivedDate?: true
+    createdAt?: true
+    updatedAt?: true
+  }
+
+  export type FabricRawDataMaxAggregateInputType = {
+    id?: true
+    presentationNo?: true
+    uniqueKey?: true
+    vendorCode?: true
+    vendorName?: true
+    vendorCity?: true
+    division?: true
+    subDivision?: true
+    majorCategory?: true
+    presentationsType?: true
+    designNumber?: true
+    articleNumber?: true
+    fabric?: true
+    noOfColors?: true
+    price?: true
+    imageUrl?: true
+    source?: true
+    season?: true
+    garmentWeight?: true
+    availableQty?: true
+    approvedBy?: true
+    notes?: true
+    status?: true
+    retryCount?: true
+    errorMessage?: true
+    extractedAt?: true
+    flatId?: true
+    lockedUntil?: true
+    presentationReceivedDate?: true
+    createdAt?: true
+    updatedAt?: true
+  }
+
+  export type FabricRawDataCountAggregateInputType = {
+    id?: true
+    presentationNo?: true
+    uniqueKey?: true
+    vendorCode?: true
+    vendorName?: true
+    vendorCity?: true
+    division?: true
+    subDivision?: true
+    majorCategory?: true
+    presentationsType?: true
+    designNumber?: true
+    articleNumber?: true
+    fabric?: true
+    noOfColors?: true
+    price?: true
+    imageUrl?: true
+    source?: true
+    season?: true
+    garmentWeight?: true
+    availableQty?: true
+    approvedBy?: true
+    notes?: true
+    status?: true
+    retryCount?: true
+    errorMessage?: true
+    extractedData?: true
+    extractedAt?: true
+    flatId?: true
+    lockedUntil?: true
+    presentationReceivedDate?: true
+    createdAt?: true
+    updatedAt?: true
+    _all?: true
+  }
+
+  export type FabricRawDataAggregateArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Filter which FabricRawData to aggregate.
+     */
+    where?: FabricRawDataWhereInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
+     * 
+     * Determine the order of FabricRawData to fetch.
+     */
+    orderBy?: FabricRawDataOrderByWithRelationInput | FabricRawDataOrderByWithRelationInput[]
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
+     * 
+     * Sets the start position
+     */
+    cursor?: FabricRawDataWhereUniqueInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Take `±n` FabricRawData from the position of the cursor.
+     */
+    take?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Skip the first `n` FabricRawData.
+     */
+    skip?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     * 
+     * Count returned FabricRawData
+    **/
+    _count?: true | FabricRawDataCountAggregateInputType
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     * 
+     * Select which fields to average
+    **/
+    _avg?: FabricRawDataAvgAggregateInputType
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     * 
+     * Select which fields to sum
+    **/
+    _sum?: FabricRawDataSumAggregateInputType
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     * 
+     * Select which fields to find the minimum value
+    **/
+    _min?: FabricRawDataMinAggregateInputType
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     * 
+     * Select which fields to find the maximum value
+    **/
+    _max?: FabricRawDataMaxAggregateInputType
+  }
+
+  export type GetFabricRawDataAggregateType<T extends FabricRawDataAggregateArgs> = {
+        [P in keyof T & keyof AggregateFabricRawData]: P extends '_count' | 'count'
+      ? T[P] extends true
+        ? number
+        : GetScalarType<T[P], AggregateFabricRawData[P]>
+      : GetScalarType<T[P], AggregateFabricRawData[P]>
+  }
+
+
+
+
+  export type FabricRawDataGroupByArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    where?: FabricRawDataWhereInput
+    orderBy?: FabricRawDataOrderByWithAggregationInput | FabricRawDataOrderByWithAggregationInput[]
+    by: FabricRawDataScalarFieldEnum[] | FabricRawDataScalarFieldEnum
+    having?: FabricRawDataScalarWhereWithAggregatesInput
+    take?: number
+    skip?: number
+    _count?: FabricRawDataCountAggregateInputType | true
+    _avg?: FabricRawDataAvgAggregateInputType
+    _sum?: FabricRawDataSumAggregateInputType
+    _min?: FabricRawDataMinAggregateInputType
+    _max?: FabricRawDataMaxAggregateInputType
+  }
+
+  export type FabricRawDataGroupByOutputType = {
+    id: string
+    presentationNo: string
+    uniqueKey: string
+    vendorCode: string | null
+    vendorName: string | null
+    vendorCity: string | null
+    division: string | null
+    subDivision: string | null
+    majorCategory: string | null
+    presentationsType: string | null
+    designNumber: string | null
+    articleNumber: string | null
+    fabric: string | null
+    noOfColors: number | null
+    price: Decimal | null
+    imageUrl: string | null
+    source: string | null
+    season: string | null
+    garmentWeight: Decimal | null
+    availableQty: Decimal | null
+    approvedBy: string | null
+    notes: string | null
+    status: $Enums.RawArticleStatus
+    retryCount: number
+    errorMessage: string | null
+    extractedData: JsonValue | null
+    extractedAt: Date | null
+    flatId: string | null
+    lockedUntil: Date | null
+    presentationReceivedDate: Date | null
+    createdAt: Date
+    updatedAt: Date
+    _count: FabricRawDataCountAggregateOutputType | null
+    _avg: FabricRawDataAvgAggregateOutputType | null
+    _sum: FabricRawDataSumAggregateOutputType | null
+    _min: FabricRawDataMinAggregateOutputType | null
+    _max: FabricRawDataMaxAggregateOutputType | null
+  }
+
+  type GetFabricRawDataGroupByPayload<T extends FabricRawDataGroupByArgs> = Prisma.PrismaPromise<
+    Array<
+      PickEnumerable<FabricRawDataGroupByOutputType, T['by']> &
+        {
+          [P in ((keyof T) & (keyof FabricRawDataGroupByOutputType))]: P extends '_count'
+            ? T[P] extends boolean
+              ? number
+              : GetScalarType<T[P], FabricRawDataGroupByOutputType[P]>
+            : GetScalarType<T[P], FabricRawDataGroupByOutputType[P]>
+        }
+      >
+    >
+
+
+  export type FabricRawDataSelect<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
+    id?: boolean
+    presentationNo?: boolean
+    uniqueKey?: boolean
+    vendorCode?: boolean
+    vendorName?: boolean
+    vendorCity?: boolean
+    division?: boolean
+    subDivision?: boolean
+    majorCategory?: boolean
+    presentationsType?: boolean
+    designNumber?: boolean
+    articleNumber?: boolean
+    fabric?: boolean
+    noOfColors?: boolean
+    price?: boolean
+    imageUrl?: boolean
+    source?: boolean
+    season?: boolean
+    garmentWeight?: boolean
+    availableQty?: boolean
+    approvedBy?: boolean
+    notes?: boolean
+    status?: boolean
+    retryCount?: boolean
+    errorMessage?: boolean
+    extractedData?: boolean
+    extractedAt?: boolean
+    flatId?: boolean
+    lockedUntil?: boolean
+    presentationReceivedDate?: boolean
+    createdAt?: boolean
+    updatedAt?: boolean
+  }, ExtArgs["result"]["fabricRawData"]>
+
+  export type FabricRawDataSelectCreateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
+    id?: boolean
+    presentationNo?: boolean
+    uniqueKey?: boolean
+    vendorCode?: boolean
+    vendorName?: boolean
+    vendorCity?: boolean
+    division?: boolean
+    subDivision?: boolean
+    majorCategory?: boolean
+    presentationsType?: boolean
+    designNumber?: boolean
+    articleNumber?: boolean
+    fabric?: boolean
+    noOfColors?: boolean
+    price?: boolean
+    imageUrl?: boolean
+    source?: boolean
+    season?: boolean
+    garmentWeight?: boolean
+    availableQty?: boolean
+    approvedBy?: boolean
+    notes?: boolean
+    status?: boolean
+    retryCount?: boolean
+    errorMessage?: boolean
+    extractedData?: boolean
+    extractedAt?: boolean
+    flatId?: boolean
+    lockedUntil?: boolean
+    presentationReceivedDate?: boolean
+    createdAt?: boolean
+    updatedAt?: boolean
+  }, ExtArgs["result"]["fabricRawData"]>
+
+  export type FabricRawDataSelectUpdateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
+    id?: boolean
+    presentationNo?: boolean
+    uniqueKey?: boolean
+    vendorCode?: boolean
+    vendorName?: boolean
+    vendorCity?: boolean
+    division?: boolean
+    subDivision?: boolean
+    majorCategory?: boolean
+    presentationsType?: boolean
+    designNumber?: boolean
+    articleNumber?: boolean
+    fabric?: boolean
+    noOfColors?: boolean
+    price?: boolean
+    imageUrl?: boolean
+    source?: boolean
+    season?: boolean
+    garmentWeight?: boolean
+    availableQty?: boolean
+    approvedBy?: boolean
+    notes?: boolean
+    status?: boolean
+    retryCount?: boolean
+    errorMessage?: boolean
+    extractedData?: boolean
+    extractedAt?: boolean
+    flatId?: boolean
+    lockedUntil?: boolean
+    presentationReceivedDate?: boolean
+    createdAt?: boolean
+    updatedAt?: boolean
+  }, ExtArgs["result"]["fabricRawData"]>
+
+  export type FabricRawDataSelectScalar = {
+    id?: boolean
+    presentationNo?: boolean
+    uniqueKey?: boolean
+    vendorCode?: boolean
+    vendorName?: boolean
+    vendorCity?: boolean
+    division?: boolean
+    subDivision?: boolean
+    majorCategory?: boolean
+    presentationsType?: boolean
+    designNumber?: boolean
+    articleNumber?: boolean
+    fabric?: boolean
+    noOfColors?: boolean
+    price?: boolean
+    imageUrl?: boolean
+    source?: boolean
+    season?: boolean
+    garmentWeight?: boolean
+    availableQty?: boolean
+    approvedBy?: boolean
+    notes?: boolean
+    status?: boolean
+    retryCount?: boolean
+    errorMessage?: boolean
+    extractedData?: boolean
+    extractedAt?: boolean
+    flatId?: boolean
+    lockedUntil?: boolean
+    presentationReceivedDate?: boolean
+    createdAt?: boolean
+    updatedAt?: boolean
+  }
+
+  export type FabricRawDataOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<"id" | "presentationNo" | "uniqueKey" | "vendorCode" | "vendorName" | "vendorCity" | "division" | "subDivision" | "majorCategory" | "presentationsType" | "designNumber" | "articleNumber" | "fabric" | "noOfColors" | "price" | "imageUrl" | "source" | "season" | "garmentWeight" | "availableQty" | "approvedBy" | "notes" | "status" | "retryCount" | "errorMessage" | "extractedData" | "extractedAt" | "flatId" | "lockedUntil" | "presentationReceivedDate" | "createdAt" | "updatedAt", ExtArgs["result"]["fabricRawData"]>
+
+  export type $FabricRawDataPayload<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    name: "FabricRawData"
+    objects: {}
+    scalars: $Extensions.GetPayloadResult<{
+      id: string
+      presentationNo: string
+      uniqueKey: string
+      vendorCode: string | null
+      vendorName: string | null
+      vendorCity: string | null
+      division: string | null
+      subDivision: string | null
+      majorCategory: string | null
+      presentationsType: string | null
+      designNumber: string | null
+      articleNumber: string | null
+      fabric: string | null
+      noOfColors: number | null
+      price: Prisma.Decimal | null
+      imageUrl: string | null
+      source: string | null
+      season: string | null
+      garmentWeight: Prisma.Decimal | null
+      availableQty: Prisma.Decimal | null
+      approvedBy: string | null
+      notes: string | null
+      status: $Enums.RawArticleStatus
+      retryCount: number
+      errorMessage: string | null
+      extractedData: Prisma.JsonValue | null
+      extractedAt: Date | null
+      flatId: string | null
+      lockedUntil: Date | null
+      presentationReceivedDate: Date | null
+      createdAt: Date
+      updatedAt: Date
+    }, ExtArgs["result"]["fabricRawData"]>
+    composites: {}
+  }
+
+  type FabricRawDataGetPayload<S extends boolean | null | undefined | FabricRawDataDefaultArgs> = $Result.GetResult<Prisma.$FabricRawDataPayload, S>
+
+  type FabricRawDataCountArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> =
+    Omit<FabricRawDataFindManyArgs, 'select' | 'include' | 'distinct' | 'omit'> & {
+      select?: FabricRawDataCountAggregateInputType | true
+    }
+
+  export interface FabricRawDataDelegate<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs, GlobalOmitOptions = {}> {
+    [K: symbol]: { types: Prisma.TypeMap<ExtArgs>['model']['FabricRawData'], meta: { name: 'FabricRawData' } }
+    /**
+     * Find zero or one FabricRawData that matches the filter.
+     * @param {FabricRawDataFindUniqueArgs} args - Arguments to find a FabricRawData
+     * @example
+     * // Get one FabricRawData
+     * const fabricRawData = await prisma.fabricRawData.findUnique({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     */
+    findUnique<T extends FabricRawDataFindUniqueArgs>(args: SelectSubset<T, FabricRawDataFindUniqueArgs<ExtArgs>>): Prisma__FabricRawDataClient<$Result.GetResult<Prisma.$FabricRawDataPayload<ExtArgs>, T, "findUnique", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Find one FabricRawData that matches the filter or throw an error with `error.code='P2025'`
+     * if no matches were found.
+     * @param {FabricRawDataFindUniqueOrThrowArgs} args - Arguments to find a FabricRawData
+     * @example
+     * // Get one FabricRawData
+     * const fabricRawData = await prisma.fabricRawData.findUniqueOrThrow({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     */
+    findUniqueOrThrow<T extends FabricRawDataFindUniqueOrThrowArgs>(args: SelectSubset<T, FabricRawDataFindUniqueOrThrowArgs<ExtArgs>>): Prisma__FabricRawDataClient<$Result.GetResult<Prisma.$FabricRawDataPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Find the first FabricRawData that matches the filter.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {FabricRawDataFindFirstArgs} args - Arguments to find a FabricRawData
+     * @example
+     * // Get one FabricRawData
+     * const fabricRawData = await prisma.fabricRawData.findFirst({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     */
+    findFirst<T extends FabricRawDataFindFirstArgs>(args?: SelectSubset<T, FabricRawDataFindFirstArgs<ExtArgs>>): Prisma__FabricRawDataClient<$Result.GetResult<Prisma.$FabricRawDataPayload<ExtArgs>, T, "findFirst", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Find the first FabricRawData that matches the filter or
+     * throw `PrismaKnownClientError` with `P2025` code if no matches were found.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {FabricRawDataFindFirstOrThrowArgs} args - Arguments to find a FabricRawData
+     * @example
+     * // Get one FabricRawData
+     * const fabricRawData = await prisma.fabricRawData.findFirstOrThrow({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     */
+    findFirstOrThrow<T extends FabricRawDataFindFirstOrThrowArgs>(args?: SelectSubset<T, FabricRawDataFindFirstOrThrowArgs<ExtArgs>>): Prisma__FabricRawDataClient<$Result.GetResult<Prisma.$FabricRawDataPayload<ExtArgs>, T, "findFirstOrThrow", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Find zero or more FabricRawData that matches the filter.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {FabricRawDataFindManyArgs} args - Arguments to filter and select certain fields only.
+     * @example
+     * // Get all FabricRawData
+     * const fabricRawData = await prisma.fabricRawData.findMany()
+     * 
+     * // Get first 10 FabricRawData
+     * const fabricRawData = await prisma.fabricRawData.findMany({ take: 10 })
+     * 
+     * // Only select the `id`
+     * const fabricRawDataWithIdOnly = await prisma.fabricRawData.findMany({ select: { id: true } })
+     * 
+     */
+    findMany<T extends FabricRawDataFindManyArgs>(args?: SelectSubset<T, FabricRawDataFindManyArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$FabricRawDataPayload<ExtArgs>, T, "findMany", GlobalOmitOptions>>
+
+    /**
+     * Create a FabricRawData.
+     * @param {FabricRawDataCreateArgs} args - Arguments to create a FabricRawData.
+     * @example
+     * // Create one FabricRawData
+     * const FabricRawData = await prisma.fabricRawData.create({
+     *   data: {
+     *     // ... data to create a FabricRawData
+     *   }
+     * })
+     * 
+     */
+    create<T extends FabricRawDataCreateArgs>(args: SelectSubset<T, FabricRawDataCreateArgs<ExtArgs>>): Prisma__FabricRawDataClient<$Result.GetResult<Prisma.$FabricRawDataPayload<ExtArgs>, T, "create", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Create many FabricRawData.
+     * @param {FabricRawDataCreateManyArgs} args - Arguments to create many FabricRawData.
+     * @example
+     * // Create many FabricRawData
+     * const fabricRawData = await prisma.fabricRawData.createMany({
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     *     
+     */
+    createMany<T extends FabricRawDataCreateManyArgs>(args?: SelectSubset<T, FabricRawDataCreateManyArgs<ExtArgs>>): Prisma.PrismaPromise<BatchPayload>
+
+    /**
+     * Create many FabricRawData and returns the data saved in the database.
+     * @param {FabricRawDataCreateManyAndReturnArgs} args - Arguments to create many FabricRawData.
+     * @example
+     * // Create many FabricRawData
+     * const fabricRawData = await prisma.fabricRawData.createManyAndReturn({
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     * 
+     * // Create many FabricRawData and only return the `id`
+     * const fabricRawDataWithIdOnly = await prisma.fabricRawData.createManyAndReturn({
+     *   select: { id: true },
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * 
+     */
+    createManyAndReturn<T extends FabricRawDataCreateManyAndReturnArgs>(args?: SelectSubset<T, FabricRawDataCreateManyAndReturnArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$FabricRawDataPayload<ExtArgs>, T, "createManyAndReturn", GlobalOmitOptions>>
+
+    /**
+     * Delete a FabricRawData.
+     * @param {FabricRawDataDeleteArgs} args - Arguments to delete one FabricRawData.
+     * @example
+     * // Delete one FabricRawData
+     * const FabricRawData = await prisma.fabricRawData.delete({
+     *   where: {
+     *     // ... filter to delete one FabricRawData
+     *   }
+     * })
+     * 
+     */
+    delete<T extends FabricRawDataDeleteArgs>(args: SelectSubset<T, FabricRawDataDeleteArgs<ExtArgs>>): Prisma__FabricRawDataClient<$Result.GetResult<Prisma.$FabricRawDataPayload<ExtArgs>, T, "delete", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Update one FabricRawData.
+     * @param {FabricRawDataUpdateArgs} args - Arguments to update one FabricRawData.
+     * @example
+     * // Update one FabricRawData
+     * const fabricRawData = await prisma.fabricRawData.update({
+     *   where: {
+     *     // ... provide filter here
+     *   },
+     *   data: {
+     *     // ... provide data here
+     *   }
+     * })
+     * 
+     */
+    update<T extends FabricRawDataUpdateArgs>(args: SelectSubset<T, FabricRawDataUpdateArgs<ExtArgs>>): Prisma__FabricRawDataClient<$Result.GetResult<Prisma.$FabricRawDataPayload<ExtArgs>, T, "update", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Delete zero or more FabricRawData.
+     * @param {FabricRawDataDeleteManyArgs} args - Arguments to filter FabricRawData to delete.
+     * @example
+     * // Delete a few FabricRawData
+     * const { count } = await prisma.fabricRawData.deleteMany({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     * 
+     */
+    deleteMany<T extends FabricRawDataDeleteManyArgs>(args?: SelectSubset<T, FabricRawDataDeleteManyArgs<ExtArgs>>): Prisma.PrismaPromise<BatchPayload>
+
+    /**
+     * Update zero or more FabricRawData.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {FabricRawDataUpdateManyArgs} args - Arguments to update one or more rows.
+     * @example
+     * // Update many FabricRawData
+     * const fabricRawData = await prisma.fabricRawData.updateMany({
+     *   where: {
+     *     // ... provide filter here
+     *   },
+     *   data: {
+     *     // ... provide data here
+     *   }
+     * })
+     * 
+     */
+    updateMany<T extends FabricRawDataUpdateManyArgs>(args: SelectSubset<T, FabricRawDataUpdateManyArgs<ExtArgs>>): Prisma.PrismaPromise<BatchPayload>
+
+    /**
+     * Update zero or more FabricRawData and returns the data updated in the database.
+     * @param {FabricRawDataUpdateManyAndReturnArgs} args - Arguments to update many FabricRawData.
+     * @example
+     * // Update many FabricRawData
+     * const fabricRawData = await prisma.fabricRawData.updateManyAndReturn({
+     *   where: {
+     *     // ... provide filter here
+     *   },
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     * 
+     * // Update zero or more FabricRawData and only return the `id`
+     * const fabricRawDataWithIdOnly = await prisma.fabricRawData.updateManyAndReturn({
+     *   select: { id: true },
+     *   where: {
+     *     // ... provide filter here
+     *   },
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * 
+     */
+    updateManyAndReturn<T extends FabricRawDataUpdateManyAndReturnArgs>(args: SelectSubset<T, FabricRawDataUpdateManyAndReturnArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$FabricRawDataPayload<ExtArgs>, T, "updateManyAndReturn", GlobalOmitOptions>>
+
+    /**
+     * Create or update one FabricRawData.
+     * @param {FabricRawDataUpsertArgs} args - Arguments to update or create a FabricRawData.
+     * @example
+     * // Update or create a FabricRawData
+     * const fabricRawData = await prisma.fabricRawData.upsert({
+     *   create: {
+     *     // ... data to create a FabricRawData
+     *   },
+     *   update: {
+     *     // ... in case it already exists, update
+     *   },
+     *   where: {
+     *     // ... the filter for the FabricRawData we want to update
+     *   }
+     * })
+     */
+    upsert<T extends FabricRawDataUpsertArgs>(args: SelectSubset<T, FabricRawDataUpsertArgs<ExtArgs>>): Prisma__FabricRawDataClient<$Result.GetResult<Prisma.$FabricRawDataPayload<ExtArgs>, T, "upsert", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+
+    /**
+     * Count the number of FabricRawData.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {FabricRawDataCountArgs} args - Arguments to filter FabricRawData to count.
+     * @example
+     * // Count the number of FabricRawData
+     * const count = await prisma.fabricRawData.count({
+     *   where: {
+     *     // ... the filter for the FabricRawData we want to count
+     *   }
+     * })
+    **/
+    count<T extends FabricRawDataCountArgs>(
+      args?: Subset<T, FabricRawDataCountArgs>,
+    ): Prisma.PrismaPromise<
+      T extends $Utils.Record<'select', any>
+        ? T['select'] extends true
+          ? number
+          : GetScalarType<T['select'], FabricRawDataCountAggregateOutputType>
+        : number
+    >
+
+    /**
+     * Allows you to perform aggregations operations on a FabricRawData.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {FabricRawDataAggregateArgs} args - Select which aggregations you would like to apply and on what fields.
+     * @example
+     * // Ordered by age ascending
+     * // Where email contains prisma.io
+     * // Limited to the 10 users
+     * const aggregations = await prisma.user.aggregate({
+     *   _avg: {
+     *     age: true,
+     *   },
+     *   where: {
+     *     email: {
+     *       contains: "prisma.io",
+     *     },
+     *   },
+     *   orderBy: {
+     *     age: "asc",
+     *   },
+     *   take: 10,
+     * })
+    **/
+    aggregate<T extends FabricRawDataAggregateArgs>(args: Subset<T, FabricRawDataAggregateArgs>): Prisma.PrismaPromise<GetFabricRawDataAggregateType<T>>
+
+    /**
+     * Group by FabricRawData.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {FabricRawDataGroupByArgs} args - Group by arguments.
+     * @example
+     * // Group by city, order by createdAt, get count
+     * const result = await prisma.user.groupBy({
+     *   by: ['city', 'createdAt'],
+     *   orderBy: {
+     *     createdAt: true
+     *   },
+     *   _count: {
+     *     _all: true
+     *   },
+     * })
+     * 
+    **/
+    groupBy<
+      T extends FabricRawDataGroupByArgs,
+      HasSelectOrTake extends Or<
+        Extends<'skip', Keys<T>>,
+        Extends<'take', Keys<T>>
+      >,
+      OrderByArg extends True extends HasSelectOrTake
+        ? { orderBy: FabricRawDataGroupByArgs['orderBy'] }
+        : { orderBy?: FabricRawDataGroupByArgs['orderBy'] },
+      OrderFields extends ExcludeUnderscoreKeys<Keys<MaybeTupleToUnion<T['orderBy']>>>,
+      ByFields extends MaybeTupleToUnion<T['by']>,
+      ByValid extends Has<ByFields, OrderFields>,
+      HavingFields extends GetHavingFields<T['having']>,
+      HavingValid extends Has<ByFields, HavingFields>,
+      ByEmpty extends T['by'] extends never[] ? True : False,
+      InputErrors extends ByEmpty extends True
+      ? `Error: "by" must not be empty.`
+      : HavingValid extends False
+      ? {
+          [P in HavingFields]: P extends ByFields
+            ? never
+            : P extends string
+            ? `Error: Field "${P}" used in "having" needs to be provided in "by".`
+            : [
+                Error,
+                'Field ',
+                P,
+                ` in "having" needs to be provided in "by"`,
+              ]
+        }[HavingFields]
+      : 'take' extends Keys<T>
+      ? 'orderBy' extends Keys<T>
+        ? ByValid extends True
+          ? {}
+          : {
+              [P in OrderFields]: P extends ByFields
+                ? never
+                : `Error: Field "${P}" in "orderBy" needs to be provided in "by"`
+            }[OrderFields]
+        : 'Error: If you provide "take", you also need to provide "orderBy"'
+      : 'skip' extends Keys<T>
+      ? 'orderBy' extends Keys<T>
+        ? ByValid extends True
+          ? {}
+          : {
+              [P in OrderFields]: P extends ByFields
+                ? never
+                : `Error: Field "${P}" in "orderBy" needs to be provided in "by"`
+            }[OrderFields]
+        : 'Error: If you provide "skip", you also need to provide "orderBy"'
+      : ByValid extends True
+      ? {}
+      : {
+          [P in OrderFields]: P extends ByFields
+            ? never
+            : `Error: Field "${P}" in "orderBy" needs to be provided in "by"`
+        }[OrderFields]
+    >(args: SubsetIntersection<T, FabricRawDataGroupByArgs, OrderByArg> & InputErrors): {} extends InputErrors ? GetFabricRawDataGroupByPayload<T> : Prisma.PrismaPromise<InputErrors>
+  /**
+   * Fields of the FabricRawData model
+   */
+  readonly fields: FabricRawDataFieldRefs;
+  }
+
+  /**
+   * The delegate class that acts as a "Promise-like" for FabricRawData.
+   * Why is this prefixed with `Prisma__`?
+   * Because we want to prevent naming conflicts as mentioned in
+   * https://github.com/prisma/prisma-client-js/issues/707
+   */
+  export interface Prisma__FabricRawDataClient<T, Null = never, ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs, GlobalOmitOptions = {}> extends Prisma.PrismaPromise<T> {
+    readonly [Symbol.toStringTag]: "PrismaPromise"
+    /**
+     * Attaches callbacks for the resolution and/or rejection of the Promise.
+     * @param onfulfilled The callback to execute when the Promise is resolved.
+     * @param onrejected The callback to execute when the Promise is rejected.
+     * @returns A Promise for the completion of which ever callback is executed.
+     */
+    then<TResult1 = T, TResult2 = never>(onfulfilled?: ((value: T) => TResult1 | PromiseLike<TResult1>) | undefined | null, onrejected?: ((reason: any) => TResult2 | PromiseLike<TResult2>) | undefined | null): $Utils.JsPromise<TResult1 | TResult2>
+    /**
+     * Attaches a callback for only the rejection of the Promise.
+     * @param onrejected The callback to execute when the Promise is rejected.
+     * @returns A Promise for the completion of the callback.
+     */
+    catch<TResult = never>(onrejected?: ((reason: any) => TResult | PromiseLike<TResult>) | undefined | null): $Utils.JsPromise<T | TResult>
+    /**
+     * Attaches a callback that is invoked when the Promise is settled (fulfilled or rejected). The
+     * resolved value cannot be modified from the callback.
+     * @param onfinally The callback to execute when the Promise is settled (fulfilled or rejected).
+     * @returns A Promise for the completion of the callback.
+     */
+    finally(onfinally?: (() => void) | undefined | null): $Utils.JsPromise<T>
+  }
+
+
+
+
+  /**
+   * Fields of the FabricRawData model
+   */
+  interface FabricRawDataFieldRefs {
+    readonly id: FieldRef<"FabricRawData", 'String'>
+    readonly presentationNo: FieldRef<"FabricRawData", 'String'>
+    readonly uniqueKey: FieldRef<"FabricRawData", 'String'>
+    readonly vendorCode: FieldRef<"FabricRawData", 'String'>
+    readonly vendorName: FieldRef<"FabricRawData", 'String'>
+    readonly vendorCity: FieldRef<"FabricRawData", 'String'>
+    readonly division: FieldRef<"FabricRawData", 'String'>
+    readonly subDivision: FieldRef<"FabricRawData", 'String'>
+    readonly majorCategory: FieldRef<"FabricRawData", 'String'>
+    readonly presentationsType: FieldRef<"FabricRawData", 'String'>
+    readonly designNumber: FieldRef<"FabricRawData", 'String'>
+    readonly articleNumber: FieldRef<"FabricRawData", 'String'>
+    readonly fabric: FieldRef<"FabricRawData", 'String'>
+    readonly noOfColors: FieldRef<"FabricRawData", 'Int'>
+    readonly price: FieldRef<"FabricRawData", 'Decimal'>
+    readonly imageUrl: FieldRef<"FabricRawData", 'String'>
+    readonly source: FieldRef<"FabricRawData", 'String'>
+    readonly season: FieldRef<"FabricRawData", 'String'>
+    readonly garmentWeight: FieldRef<"FabricRawData", 'Decimal'>
+    readonly availableQty: FieldRef<"FabricRawData", 'Decimal'>
+    readonly approvedBy: FieldRef<"FabricRawData", 'String'>
+    readonly notes: FieldRef<"FabricRawData", 'String'>
+    readonly status: FieldRef<"FabricRawData", 'RawArticleStatus'>
+    readonly retryCount: FieldRef<"FabricRawData", 'Int'>
+    readonly errorMessage: FieldRef<"FabricRawData", 'String'>
+    readonly extractedData: FieldRef<"FabricRawData", 'Json'>
+    readonly extractedAt: FieldRef<"FabricRawData", 'DateTime'>
+    readonly flatId: FieldRef<"FabricRawData", 'String'>
+    readonly lockedUntil: FieldRef<"FabricRawData", 'DateTime'>
+    readonly presentationReceivedDate: FieldRef<"FabricRawData", 'DateTime'>
+    readonly createdAt: FieldRef<"FabricRawData", 'DateTime'>
+    readonly updatedAt: FieldRef<"FabricRawData", 'DateTime'>
+  }
+    
+
+  // Custom InputTypes
+  /**
+   * FabricRawData findUnique
+   */
+  export type FabricRawDataFindUniqueArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the FabricRawData
+     */
+    select?: FabricRawDataSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the FabricRawData
+     */
+    omit?: FabricRawDataOmit<ExtArgs> | null
+    /**
+     * Filter, which FabricRawData to fetch.
+     */
+    where: FabricRawDataWhereUniqueInput
+  }
+
+  /**
+   * FabricRawData findUniqueOrThrow
+   */
+  export type FabricRawDataFindUniqueOrThrowArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the FabricRawData
+     */
+    select?: FabricRawDataSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the FabricRawData
+     */
+    omit?: FabricRawDataOmit<ExtArgs> | null
+    /**
+     * Filter, which FabricRawData to fetch.
+     */
+    where: FabricRawDataWhereUniqueInput
+  }
+
+  /**
+   * FabricRawData findFirst
+   */
+  export type FabricRawDataFindFirstArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the FabricRawData
+     */
+    select?: FabricRawDataSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the FabricRawData
+     */
+    omit?: FabricRawDataOmit<ExtArgs> | null
+    /**
+     * Filter, which FabricRawData to fetch.
+     */
+    where?: FabricRawDataWhereInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
+     * 
+     * Determine the order of FabricRawData to fetch.
+     */
+    orderBy?: FabricRawDataOrderByWithRelationInput | FabricRawDataOrderByWithRelationInput[]
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
+     * 
+     * Sets the position for searching for FabricRawData.
+     */
+    cursor?: FabricRawDataWhereUniqueInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Take `±n` FabricRawData from the position of the cursor.
+     */
+    take?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Skip the first `n` FabricRawData.
+     */
+    skip?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/distinct Distinct Docs}
+     * 
+     * Filter by unique combinations of FabricRawData.
+     */
+    distinct?: FabricRawDataScalarFieldEnum | FabricRawDataScalarFieldEnum[]
+  }
+
+  /**
+   * FabricRawData findFirstOrThrow
+   */
+  export type FabricRawDataFindFirstOrThrowArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the FabricRawData
+     */
+    select?: FabricRawDataSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the FabricRawData
+     */
+    omit?: FabricRawDataOmit<ExtArgs> | null
+    /**
+     * Filter, which FabricRawData to fetch.
+     */
+    where?: FabricRawDataWhereInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
+     * 
+     * Determine the order of FabricRawData to fetch.
+     */
+    orderBy?: FabricRawDataOrderByWithRelationInput | FabricRawDataOrderByWithRelationInput[]
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
+     * 
+     * Sets the position for searching for FabricRawData.
+     */
+    cursor?: FabricRawDataWhereUniqueInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Take `±n` FabricRawData from the position of the cursor.
+     */
+    take?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Skip the first `n` FabricRawData.
+     */
+    skip?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/distinct Distinct Docs}
+     * 
+     * Filter by unique combinations of FabricRawData.
+     */
+    distinct?: FabricRawDataScalarFieldEnum | FabricRawDataScalarFieldEnum[]
+  }
+
+  /**
+   * FabricRawData findMany
+   */
+  export type FabricRawDataFindManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the FabricRawData
+     */
+    select?: FabricRawDataSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the FabricRawData
+     */
+    omit?: FabricRawDataOmit<ExtArgs> | null
+    /**
+     * Filter, which FabricRawData to fetch.
+     */
+    where?: FabricRawDataWhereInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
+     * 
+     * Determine the order of FabricRawData to fetch.
+     */
+    orderBy?: FabricRawDataOrderByWithRelationInput | FabricRawDataOrderByWithRelationInput[]
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
+     * 
+     * Sets the position for listing FabricRawData.
+     */
+    cursor?: FabricRawDataWhereUniqueInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Take `±n` FabricRawData from the position of the cursor.
+     */
+    take?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Skip the first `n` FabricRawData.
+     */
+    skip?: number
+    distinct?: FabricRawDataScalarFieldEnum | FabricRawDataScalarFieldEnum[]
+  }
+
+  /**
+   * FabricRawData create
+   */
+  export type FabricRawDataCreateArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the FabricRawData
+     */
+    select?: FabricRawDataSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the FabricRawData
+     */
+    omit?: FabricRawDataOmit<ExtArgs> | null
+    /**
+     * The data needed to create a FabricRawData.
+     */
+    data: XOR<FabricRawDataCreateInput, FabricRawDataUncheckedCreateInput>
+  }
+
+  /**
+   * FabricRawData createMany
+   */
+  export type FabricRawDataCreateManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * The data used to create many FabricRawData.
+     */
+    data: FabricRawDataCreateManyInput | FabricRawDataCreateManyInput[]
+    skipDuplicates?: boolean
+  }
+
+  /**
+   * FabricRawData createManyAndReturn
+   */
+  export type FabricRawDataCreateManyAndReturnArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the FabricRawData
+     */
+    select?: FabricRawDataSelectCreateManyAndReturn<ExtArgs> | null
+    /**
+     * Omit specific fields from the FabricRawData
+     */
+    omit?: FabricRawDataOmit<ExtArgs> | null
+    /**
+     * The data used to create many FabricRawData.
+     */
+    data: FabricRawDataCreateManyInput | FabricRawDataCreateManyInput[]
+    skipDuplicates?: boolean
+  }
+
+  /**
+   * FabricRawData update
+   */
+  export type FabricRawDataUpdateArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the FabricRawData
+     */
+    select?: FabricRawDataSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the FabricRawData
+     */
+    omit?: FabricRawDataOmit<ExtArgs> | null
+    /**
+     * The data needed to update a FabricRawData.
+     */
+    data: XOR<FabricRawDataUpdateInput, FabricRawDataUncheckedUpdateInput>
+    /**
+     * Choose, which FabricRawData to update.
+     */
+    where: FabricRawDataWhereUniqueInput
+  }
+
+  /**
+   * FabricRawData updateMany
+   */
+  export type FabricRawDataUpdateManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * The data used to update FabricRawData.
+     */
+    data: XOR<FabricRawDataUpdateManyMutationInput, FabricRawDataUncheckedUpdateManyInput>
+    /**
+     * Filter which FabricRawData to update
+     */
+    where?: FabricRawDataWhereInput
+    /**
+     * Limit how many FabricRawData to update.
+     */
+    limit?: number
+  }
+
+  /**
+   * FabricRawData updateManyAndReturn
+   */
+  export type FabricRawDataUpdateManyAndReturnArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the FabricRawData
+     */
+    select?: FabricRawDataSelectUpdateManyAndReturn<ExtArgs> | null
+    /**
+     * Omit specific fields from the FabricRawData
+     */
+    omit?: FabricRawDataOmit<ExtArgs> | null
+    /**
+     * The data used to update FabricRawData.
+     */
+    data: XOR<FabricRawDataUpdateManyMutationInput, FabricRawDataUncheckedUpdateManyInput>
+    /**
+     * Filter which FabricRawData to update
+     */
+    where?: FabricRawDataWhereInput
+    /**
+     * Limit how many FabricRawData to update.
+     */
+    limit?: number
+  }
+
+  /**
+   * FabricRawData upsert
+   */
+  export type FabricRawDataUpsertArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the FabricRawData
+     */
+    select?: FabricRawDataSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the FabricRawData
+     */
+    omit?: FabricRawDataOmit<ExtArgs> | null
+    /**
+     * The filter to search for the FabricRawData to update in case it exists.
+     */
+    where: FabricRawDataWhereUniqueInput
+    /**
+     * In case the FabricRawData found by the `where` argument doesn't exist, create a new FabricRawData with this data.
+     */
+    create: XOR<FabricRawDataCreateInput, FabricRawDataUncheckedCreateInput>
+    /**
+     * In case the FabricRawData was found with the provided `where` argument, update it with this data.
+     */
+    update: XOR<FabricRawDataUpdateInput, FabricRawDataUncheckedUpdateInput>
+  }
+
+  /**
+   * FabricRawData delete
+   */
+  export type FabricRawDataDeleteArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the FabricRawData
+     */
+    select?: FabricRawDataSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the FabricRawData
+     */
+    omit?: FabricRawDataOmit<ExtArgs> | null
+    /**
+     * Filter which FabricRawData to delete.
+     */
+    where: FabricRawDataWhereUniqueInput
+  }
+
+  /**
+   * FabricRawData deleteMany
+   */
+  export type FabricRawDataDeleteManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Filter which FabricRawData to delete
+     */
+    where?: FabricRawDataWhereInput
+    /**
+     * Limit how many FabricRawData to delete.
+     */
+    limit?: number
+  }
+
+  /**
+   * FabricRawData without action
+   */
+  export type FabricRawDataDefaultArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the FabricRawData
+     */
+    select?: FabricRawDataSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the FabricRawData
+     */
+    omit?: FabricRawDataOmit<ExtArgs> | null
+  }
+
+
+  /**
    * Model SrmSyncRun
    */
 
@@ -54743,6 +56226,44 @@ export namespace Prisma {
   export type RawArticleScalarFieldEnum = (typeof RawArticleScalarFieldEnum)[keyof typeof RawArticleScalarFieldEnum]
 
 
+  export const FabricRawDataScalarFieldEnum: {
+    id: 'id',
+    presentationNo: 'presentationNo',
+    uniqueKey: 'uniqueKey',
+    vendorCode: 'vendorCode',
+    vendorName: 'vendorName',
+    vendorCity: 'vendorCity',
+    division: 'division',
+    subDivision: 'subDivision',
+    majorCategory: 'majorCategory',
+    presentationsType: 'presentationsType',
+    designNumber: 'designNumber',
+    articleNumber: 'articleNumber',
+    fabric: 'fabric',
+    noOfColors: 'noOfColors',
+    price: 'price',
+    imageUrl: 'imageUrl',
+    source: 'source',
+    season: 'season',
+    garmentWeight: 'garmentWeight',
+    availableQty: 'availableQty',
+    approvedBy: 'approvedBy',
+    notes: 'notes',
+    status: 'status',
+    retryCount: 'retryCount',
+    errorMessage: 'errorMessage',
+    extractedData: 'extractedData',
+    extractedAt: 'extractedAt',
+    flatId: 'flatId',
+    lockedUntil: 'lockedUntil',
+    presentationReceivedDate: 'presentationReceivedDate',
+    createdAt: 'createdAt',
+    updatedAt: 'updatedAt'
+  };
+
+  export type FabricRawDataScalarFieldEnum = (typeof FabricRawDataScalarFieldEnum)[keyof typeof FabricRawDataScalarFieldEnum]
+
+
   export const SrmSyncRunScalarFieldEnum: {
     id: 'id',
     triggeredBy: 'triggeredBy',
@@ -55534,6 +57055,32 @@ export namespace Prisma {
   };
 
   export type RawArticleOrderByRelevanceFieldEnum = (typeof RawArticleOrderByRelevanceFieldEnum)[keyof typeof RawArticleOrderByRelevanceFieldEnum]
+
+
+  export const FabricRawDataOrderByRelevanceFieldEnum: {
+    id: 'id',
+    presentationNo: 'presentationNo',
+    uniqueKey: 'uniqueKey',
+    vendorCode: 'vendorCode',
+    vendorName: 'vendorName',
+    vendorCity: 'vendorCity',
+    division: 'division',
+    subDivision: 'subDivision',
+    majorCategory: 'majorCategory',
+    presentationsType: 'presentationsType',
+    designNumber: 'designNumber',
+    articleNumber: 'articleNumber',
+    fabric: 'fabric',
+    imageUrl: 'imageUrl',
+    source: 'source',
+    season: 'season',
+    approvedBy: 'approvedBy',
+    notes: 'notes',
+    errorMessage: 'errorMessage',
+    flatId: 'flatId'
+  };
+
+  export type FabricRawDataOrderByRelevanceFieldEnum = (typeof FabricRawDataOrderByRelevanceFieldEnum)[keyof typeof FabricRawDataOrderByRelevanceFieldEnum]
 
 
   export const SrmSyncRunOrderByRelevanceFieldEnum: {
@@ -59654,6 +61201,196 @@ export namespace Prisma {
     articleNumber?: StringNullableWithAggregatesFilter<"RawArticle"> | string | null
     createdAt?: DateTimeWithAggregatesFilter<"RawArticle"> | Date | string
     updatedAt?: DateTimeWithAggregatesFilter<"RawArticle"> | Date | string
+  }
+
+  export type FabricRawDataWhereInput = {
+    AND?: FabricRawDataWhereInput | FabricRawDataWhereInput[]
+    OR?: FabricRawDataWhereInput[]
+    NOT?: FabricRawDataWhereInput | FabricRawDataWhereInput[]
+    id?: StringFilter<"FabricRawData"> | string
+    presentationNo?: StringFilter<"FabricRawData"> | string
+    uniqueKey?: StringFilter<"FabricRawData"> | string
+    vendorCode?: StringNullableFilter<"FabricRawData"> | string | null
+    vendorName?: StringNullableFilter<"FabricRawData"> | string | null
+    vendorCity?: StringNullableFilter<"FabricRawData"> | string | null
+    division?: StringNullableFilter<"FabricRawData"> | string | null
+    subDivision?: StringNullableFilter<"FabricRawData"> | string | null
+    majorCategory?: StringNullableFilter<"FabricRawData"> | string | null
+    presentationsType?: StringNullableFilter<"FabricRawData"> | string | null
+    designNumber?: StringNullableFilter<"FabricRawData"> | string | null
+    articleNumber?: StringNullableFilter<"FabricRawData"> | string | null
+    fabric?: StringNullableFilter<"FabricRawData"> | string | null
+    noOfColors?: IntNullableFilter<"FabricRawData"> | number | null
+    price?: DecimalNullableFilter<"FabricRawData"> | Decimal | DecimalJsLike | number | string | null
+    imageUrl?: StringNullableFilter<"FabricRawData"> | string | null
+    source?: StringNullableFilter<"FabricRawData"> | string | null
+    season?: StringNullableFilter<"FabricRawData"> | string | null
+    garmentWeight?: DecimalNullableFilter<"FabricRawData"> | Decimal | DecimalJsLike | number | string | null
+    availableQty?: DecimalNullableFilter<"FabricRawData"> | Decimal | DecimalJsLike | number | string | null
+    approvedBy?: StringNullableFilter<"FabricRawData"> | string | null
+    notes?: StringNullableFilter<"FabricRawData"> | string | null
+    status?: EnumRawArticleStatusFilter<"FabricRawData"> | $Enums.RawArticleStatus
+    retryCount?: IntFilter<"FabricRawData"> | number
+    errorMessage?: StringNullableFilter<"FabricRawData"> | string | null
+    extractedData?: JsonNullableFilter<"FabricRawData">
+    extractedAt?: DateTimeNullableFilter<"FabricRawData"> | Date | string | null
+    flatId?: StringNullableFilter<"FabricRawData"> | string | null
+    lockedUntil?: DateTimeNullableFilter<"FabricRawData"> | Date | string | null
+    presentationReceivedDate?: DateTimeNullableFilter<"FabricRawData"> | Date | string | null
+    createdAt?: DateTimeFilter<"FabricRawData"> | Date | string
+    updatedAt?: DateTimeFilter<"FabricRawData"> | Date | string
+  }
+
+  export type FabricRawDataOrderByWithRelationInput = {
+    id?: SortOrder
+    presentationNo?: SortOrder
+    uniqueKey?: SortOrder
+    vendorCode?: SortOrderInput | SortOrder
+    vendorName?: SortOrderInput | SortOrder
+    vendorCity?: SortOrderInput | SortOrder
+    division?: SortOrderInput | SortOrder
+    subDivision?: SortOrderInput | SortOrder
+    majorCategory?: SortOrderInput | SortOrder
+    presentationsType?: SortOrderInput | SortOrder
+    designNumber?: SortOrderInput | SortOrder
+    articleNumber?: SortOrderInput | SortOrder
+    fabric?: SortOrderInput | SortOrder
+    noOfColors?: SortOrderInput | SortOrder
+    price?: SortOrderInput | SortOrder
+    imageUrl?: SortOrderInput | SortOrder
+    source?: SortOrderInput | SortOrder
+    season?: SortOrderInput | SortOrder
+    garmentWeight?: SortOrderInput | SortOrder
+    availableQty?: SortOrderInput | SortOrder
+    approvedBy?: SortOrderInput | SortOrder
+    notes?: SortOrderInput | SortOrder
+    status?: SortOrder
+    retryCount?: SortOrder
+    errorMessage?: SortOrderInput | SortOrder
+    extractedData?: SortOrderInput | SortOrder
+    extractedAt?: SortOrderInput | SortOrder
+    flatId?: SortOrderInput | SortOrder
+    lockedUntil?: SortOrderInput | SortOrder
+    presentationReceivedDate?: SortOrderInput | SortOrder
+    createdAt?: SortOrder
+    updatedAt?: SortOrder
+    _relevance?: FabricRawDataOrderByRelevanceInput
+  }
+
+  export type FabricRawDataWhereUniqueInput = Prisma.AtLeast<{
+    id?: string
+    uniqueKey?: string
+    AND?: FabricRawDataWhereInput | FabricRawDataWhereInput[]
+    OR?: FabricRawDataWhereInput[]
+    NOT?: FabricRawDataWhereInput | FabricRawDataWhereInput[]
+    presentationNo?: StringFilter<"FabricRawData"> | string
+    vendorCode?: StringNullableFilter<"FabricRawData"> | string | null
+    vendorName?: StringNullableFilter<"FabricRawData"> | string | null
+    vendorCity?: StringNullableFilter<"FabricRawData"> | string | null
+    division?: StringNullableFilter<"FabricRawData"> | string | null
+    subDivision?: StringNullableFilter<"FabricRawData"> | string | null
+    majorCategory?: StringNullableFilter<"FabricRawData"> | string | null
+    presentationsType?: StringNullableFilter<"FabricRawData"> | string | null
+    designNumber?: StringNullableFilter<"FabricRawData"> | string | null
+    articleNumber?: StringNullableFilter<"FabricRawData"> | string | null
+    fabric?: StringNullableFilter<"FabricRawData"> | string | null
+    noOfColors?: IntNullableFilter<"FabricRawData"> | number | null
+    price?: DecimalNullableFilter<"FabricRawData"> | Decimal | DecimalJsLike | number | string | null
+    imageUrl?: StringNullableFilter<"FabricRawData"> | string | null
+    source?: StringNullableFilter<"FabricRawData"> | string | null
+    season?: StringNullableFilter<"FabricRawData"> | string | null
+    garmentWeight?: DecimalNullableFilter<"FabricRawData"> | Decimal | DecimalJsLike | number | string | null
+    availableQty?: DecimalNullableFilter<"FabricRawData"> | Decimal | DecimalJsLike | number | string | null
+    approvedBy?: StringNullableFilter<"FabricRawData"> | string | null
+    notes?: StringNullableFilter<"FabricRawData"> | string | null
+    status?: EnumRawArticleStatusFilter<"FabricRawData"> | $Enums.RawArticleStatus
+    retryCount?: IntFilter<"FabricRawData"> | number
+    errorMessage?: StringNullableFilter<"FabricRawData"> | string | null
+    extractedData?: JsonNullableFilter<"FabricRawData">
+    extractedAt?: DateTimeNullableFilter<"FabricRawData"> | Date | string | null
+    flatId?: StringNullableFilter<"FabricRawData"> | string | null
+    lockedUntil?: DateTimeNullableFilter<"FabricRawData"> | Date | string | null
+    presentationReceivedDate?: DateTimeNullableFilter<"FabricRawData"> | Date | string | null
+    createdAt?: DateTimeFilter<"FabricRawData"> | Date | string
+    updatedAt?: DateTimeFilter<"FabricRawData"> | Date | string
+  }, "id" | "uniqueKey">
+
+  export type FabricRawDataOrderByWithAggregationInput = {
+    id?: SortOrder
+    presentationNo?: SortOrder
+    uniqueKey?: SortOrder
+    vendorCode?: SortOrderInput | SortOrder
+    vendorName?: SortOrderInput | SortOrder
+    vendorCity?: SortOrderInput | SortOrder
+    division?: SortOrderInput | SortOrder
+    subDivision?: SortOrderInput | SortOrder
+    majorCategory?: SortOrderInput | SortOrder
+    presentationsType?: SortOrderInput | SortOrder
+    designNumber?: SortOrderInput | SortOrder
+    articleNumber?: SortOrderInput | SortOrder
+    fabric?: SortOrderInput | SortOrder
+    noOfColors?: SortOrderInput | SortOrder
+    price?: SortOrderInput | SortOrder
+    imageUrl?: SortOrderInput | SortOrder
+    source?: SortOrderInput | SortOrder
+    season?: SortOrderInput | SortOrder
+    garmentWeight?: SortOrderInput | SortOrder
+    availableQty?: SortOrderInput | SortOrder
+    approvedBy?: SortOrderInput | SortOrder
+    notes?: SortOrderInput | SortOrder
+    status?: SortOrder
+    retryCount?: SortOrder
+    errorMessage?: SortOrderInput | SortOrder
+    extractedData?: SortOrderInput | SortOrder
+    extractedAt?: SortOrderInput | SortOrder
+    flatId?: SortOrderInput | SortOrder
+    lockedUntil?: SortOrderInput | SortOrder
+    presentationReceivedDate?: SortOrderInput | SortOrder
+    createdAt?: SortOrder
+    updatedAt?: SortOrder
+    _count?: FabricRawDataCountOrderByAggregateInput
+    _avg?: FabricRawDataAvgOrderByAggregateInput
+    _max?: FabricRawDataMaxOrderByAggregateInput
+    _min?: FabricRawDataMinOrderByAggregateInput
+    _sum?: FabricRawDataSumOrderByAggregateInput
+  }
+
+  export type FabricRawDataScalarWhereWithAggregatesInput = {
+    AND?: FabricRawDataScalarWhereWithAggregatesInput | FabricRawDataScalarWhereWithAggregatesInput[]
+    OR?: FabricRawDataScalarWhereWithAggregatesInput[]
+    NOT?: FabricRawDataScalarWhereWithAggregatesInput | FabricRawDataScalarWhereWithAggregatesInput[]
+    id?: StringWithAggregatesFilter<"FabricRawData"> | string
+    presentationNo?: StringWithAggregatesFilter<"FabricRawData"> | string
+    uniqueKey?: StringWithAggregatesFilter<"FabricRawData"> | string
+    vendorCode?: StringNullableWithAggregatesFilter<"FabricRawData"> | string | null
+    vendorName?: StringNullableWithAggregatesFilter<"FabricRawData"> | string | null
+    vendorCity?: StringNullableWithAggregatesFilter<"FabricRawData"> | string | null
+    division?: StringNullableWithAggregatesFilter<"FabricRawData"> | string | null
+    subDivision?: StringNullableWithAggregatesFilter<"FabricRawData"> | string | null
+    majorCategory?: StringNullableWithAggregatesFilter<"FabricRawData"> | string | null
+    presentationsType?: StringNullableWithAggregatesFilter<"FabricRawData"> | string | null
+    designNumber?: StringNullableWithAggregatesFilter<"FabricRawData"> | string | null
+    articleNumber?: StringNullableWithAggregatesFilter<"FabricRawData"> | string | null
+    fabric?: StringNullableWithAggregatesFilter<"FabricRawData"> | string | null
+    noOfColors?: IntNullableWithAggregatesFilter<"FabricRawData"> | number | null
+    price?: DecimalNullableWithAggregatesFilter<"FabricRawData"> | Decimal | DecimalJsLike | number | string | null
+    imageUrl?: StringNullableWithAggregatesFilter<"FabricRawData"> | string | null
+    source?: StringNullableWithAggregatesFilter<"FabricRawData"> | string | null
+    season?: StringNullableWithAggregatesFilter<"FabricRawData"> | string | null
+    garmentWeight?: DecimalNullableWithAggregatesFilter<"FabricRawData"> | Decimal | DecimalJsLike | number | string | null
+    availableQty?: DecimalNullableWithAggregatesFilter<"FabricRawData"> | Decimal | DecimalJsLike | number | string | null
+    approvedBy?: StringNullableWithAggregatesFilter<"FabricRawData"> | string | null
+    notes?: StringNullableWithAggregatesFilter<"FabricRawData"> | string | null
+    status?: EnumRawArticleStatusWithAggregatesFilter<"FabricRawData"> | $Enums.RawArticleStatus
+    retryCount?: IntWithAggregatesFilter<"FabricRawData"> | number
+    errorMessage?: StringNullableWithAggregatesFilter<"FabricRawData"> | string | null
+    extractedData?: JsonNullableWithAggregatesFilter<"FabricRawData">
+    extractedAt?: DateTimeNullableWithAggregatesFilter<"FabricRawData"> | Date | string | null
+    flatId?: StringNullableWithAggregatesFilter<"FabricRawData"> | string | null
+    lockedUntil?: DateTimeNullableWithAggregatesFilter<"FabricRawData"> | Date | string | null
+    presentationReceivedDate?: DateTimeNullableWithAggregatesFilter<"FabricRawData"> | Date | string | null
+    createdAt?: DateTimeWithAggregatesFilter<"FabricRawData"> | Date | string
+    updatedAt?: DateTimeWithAggregatesFilter<"FabricRawData"> | Date | string
   }
 
   export type SrmSyncRunWhereInput = {
@@ -65237,6 +66974,251 @@ export namespace Prisma {
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
   }
 
+  export type FabricRawDataCreateInput = {
+    id?: string
+    presentationNo: string
+    uniqueKey: string
+    vendorCode?: string | null
+    vendorName?: string | null
+    vendorCity?: string | null
+    division?: string | null
+    subDivision?: string | null
+    majorCategory?: string | null
+    presentationsType?: string | null
+    designNumber?: string | null
+    articleNumber?: string | null
+    fabric?: string | null
+    noOfColors?: number | null
+    price?: Decimal | DecimalJsLike | number | string | null
+    imageUrl?: string | null
+    source?: string | null
+    season?: string | null
+    garmentWeight?: Decimal | DecimalJsLike | number | string | null
+    availableQty?: Decimal | DecimalJsLike | number | string | null
+    approvedBy?: string | null
+    notes?: string | null
+    status?: $Enums.RawArticleStatus
+    retryCount?: number
+    errorMessage?: string | null
+    extractedData?: NullableJsonNullValueInput | InputJsonValue
+    extractedAt?: Date | string | null
+    flatId?: string | null
+    lockedUntil?: Date | string | null
+    presentationReceivedDate?: Date | string | null
+    createdAt?: Date | string
+    updatedAt?: Date | string
+  }
+
+  export type FabricRawDataUncheckedCreateInput = {
+    id?: string
+    presentationNo: string
+    uniqueKey: string
+    vendorCode?: string | null
+    vendorName?: string | null
+    vendorCity?: string | null
+    division?: string | null
+    subDivision?: string | null
+    majorCategory?: string | null
+    presentationsType?: string | null
+    designNumber?: string | null
+    articleNumber?: string | null
+    fabric?: string | null
+    noOfColors?: number | null
+    price?: Decimal | DecimalJsLike | number | string | null
+    imageUrl?: string | null
+    source?: string | null
+    season?: string | null
+    garmentWeight?: Decimal | DecimalJsLike | number | string | null
+    availableQty?: Decimal | DecimalJsLike | number | string | null
+    approvedBy?: string | null
+    notes?: string | null
+    status?: $Enums.RawArticleStatus
+    retryCount?: number
+    errorMessage?: string | null
+    extractedData?: NullableJsonNullValueInput | InputJsonValue
+    extractedAt?: Date | string | null
+    flatId?: string | null
+    lockedUntil?: Date | string | null
+    presentationReceivedDate?: Date | string | null
+    createdAt?: Date | string
+    updatedAt?: Date | string
+  }
+
+  export type FabricRawDataUpdateInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    presentationNo?: StringFieldUpdateOperationsInput | string
+    uniqueKey?: StringFieldUpdateOperationsInput | string
+    vendorCode?: NullableStringFieldUpdateOperationsInput | string | null
+    vendorName?: NullableStringFieldUpdateOperationsInput | string | null
+    vendorCity?: NullableStringFieldUpdateOperationsInput | string | null
+    division?: NullableStringFieldUpdateOperationsInput | string | null
+    subDivision?: NullableStringFieldUpdateOperationsInput | string | null
+    majorCategory?: NullableStringFieldUpdateOperationsInput | string | null
+    presentationsType?: NullableStringFieldUpdateOperationsInput | string | null
+    designNumber?: NullableStringFieldUpdateOperationsInput | string | null
+    articleNumber?: NullableStringFieldUpdateOperationsInput | string | null
+    fabric?: NullableStringFieldUpdateOperationsInput | string | null
+    noOfColors?: NullableIntFieldUpdateOperationsInput | number | null
+    price?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    imageUrl?: NullableStringFieldUpdateOperationsInput | string | null
+    source?: NullableStringFieldUpdateOperationsInput | string | null
+    season?: NullableStringFieldUpdateOperationsInput | string | null
+    garmentWeight?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    availableQty?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    approvedBy?: NullableStringFieldUpdateOperationsInput | string | null
+    notes?: NullableStringFieldUpdateOperationsInput | string | null
+    status?: EnumRawArticleStatusFieldUpdateOperationsInput | $Enums.RawArticleStatus
+    retryCount?: IntFieldUpdateOperationsInput | number
+    errorMessage?: NullableStringFieldUpdateOperationsInput | string | null
+    extractedData?: NullableJsonNullValueInput | InputJsonValue
+    extractedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    flatId?: NullableStringFieldUpdateOperationsInput | string | null
+    lockedUntil?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    presentationReceivedDate?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+  }
+
+  export type FabricRawDataUncheckedUpdateInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    presentationNo?: StringFieldUpdateOperationsInput | string
+    uniqueKey?: StringFieldUpdateOperationsInput | string
+    vendorCode?: NullableStringFieldUpdateOperationsInput | string | null
+    vendorName?: NullableStringFieldUpdateOperationsInput | string | null
+    vendorCity?: NullableStringFieldUpdateOperationsInput | string | null
+    division?: NullableStringFieldUpdateOperationsInput | string | null
+    subDivision?: NullableStringFieldUpdateOperationsInput | string | null
+    majorCategory?: NullableStringFieldUpdateOperationsInput | string | null
+    presentationsType?: NullableStringFieldUpdateOperationsInput | string | null
+    designNumber?: NullableStringFieldUpdateOperationsInput | string | null
+    articleNumber?: NullableStringFieldUpdateOperationsInput | string | null
+    fabric?: NullableStringFieldUpdateOperationsInput | string | null
+    noOfColors?: NullableIntFieldUpdateOperationsInput | number | null
+    price?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    imageUrl?: NullableStringFieldUpdateOperationsInput | string | null
+    source?: NullableStringFieldUpdateOperationsInput | string | null
+    season?: NullableStringFieldUpdateOperationsInput | string | null
+    garmentWeight?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    availableQty?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    approvedBy?: NullableStringFieldUpdateOperationsInput | string | null
+    notes?: NullableStringFieldUpdateOperationsInput | string | null
+    status?: EnumRawArticleStatusFieldUpdateOperationsInput | $Enums.RawArticleStatus
+    retryCount?: IntFieldUpdateOperationsInput | number
+    errorMessage?: NullableStringFieldUpdateOperationsInput | string | null
+    extractedData?: NullableJsonNullValueInput | InputJsonValue
+    extractedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    flatId?: NullableStringFieldUpdateOperationsInput | string | null
+    lockedUntil?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    presentationReceivedDate?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+  }
+
+  export type FabricRawDataCreateManyInput = {
+    id?: string
+    presentationNo: string
+    uniqueKey: string
+    vendorCode?: string | null
+    vendorName?: string | null
+    vendorCity?: string | null
+    division?: string | null
+    subDivision?: string | null
+    majorCategory?: string | null
+    presentationsType?: string | null
+    designNumber?: string | null
+    articleNumber?: string | null
+    fabric?: string | null
+    noOfColors?: number | null
+    price?: Decimal | DecimalJsLike | number | string | null
+    imageUrl?: string | null
+    source?: string | null
+    season?: string | null
+    garmentWeight?: Decimal | DecimalJsLike | number | string | null
+    availableQty?: Decimal | DecimalJsLike | number | string | null
+    approvedBy?: string | null
+    notes?: string | null
+    status?: $Enums.RawArticleStatus
+    retryCount?: number
+    errorMessage?: string | null
+    extractedData?: NullableJsonNullValueInput | InputJsonValue
+    extractedAt?: Date | string | null
+    flatId?: string | null
+    lockedUntil?: Date | string | null
+    presentationReceivedDate?: Date | string | null
+    createdAt?: Date | string
+    updatedAt?: Date | string
+  }
+
+  export type FabricRawDataUpdateManyMutationInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    presentationNo?: StringFieldUpdateOperationsInput | string
+    uniqueKey?: StringFieldUpdateOperationsInput | string
+    vendorCode?: NullableStringFieldUpdateOperationsInput | string | null
+    vendorName?: NullableStringFieldUpdateOperationsInput | string | null
+    vendorCity?: NullableStringFieldUpdateOperationsInput | string | null
+    division?: NullableStringFieldUpdateOperationsInput | string | null
+    subDivision?: NullableStringFieldUpdateOperationsInput | string | null
+    majorCategory?: NullableStringFieldUpdateOperationsInput | string | null
+    presentationsType?: NullableStringFieldUpdateOperationsInput | string | null
+    designNumber?: NullableStringFieldUpdateOperationsInput | string | null
+    articleNumber?: NullableStringFieldUpdateOperationsInput | string | null
+    fabric?: NullableStringFieldUpdateOperationsInput | string | null
+    noOfColors?: NullableIntFieldUpdateOperationsInput | number | null
+    price?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    imageUrl?: NullableStringFieldUpdateOperationsInput | string | null
+    source?: NullableStringFieldUpdateOperationsInput | string | null
+    season?: NullableStringFieldUpdateOperationsInput | string | null
+    garmentWeight?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    availableQty?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    approvedBy?: NullableStringFieldUpdateOperationsInput | string | null
+    notes?: NullableStringFieldUpdateOperationsInput | string | null
+    status?: EnumRawArticleStatusFieldUpdateOperationsInput | $Enums.RawArticleStatus
+    retryCount?: IntFieldUpdateOperationsInput | number
+    errorMessage?: NullableStringFieldUpdateOperationsInput | string | null
+    extractedData?: NullableJsonNullValueInput | InputJsonValue
+    extractedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    flatId?: NullableStringFieldUpdateOperationsInput | string | null
+    lockedUntil?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    presentationReceivedDate?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+  }
+
+  export type FabricRawDataUncheckedUpdateManyInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    presentationNo?: StringFieldUpdateOperationsInput | string
+    uniqueKey?: StringFieldUpdateOperationsInput | string
+    vendorCode?: NullableStringFieldUpdateOperationsInput | string | null
+    vendorName?: NullableStringFieldUpdateOperationsInput | string | null
+    vendorCity?: NullableStringFieldUpdateOperationsInput | string | null
+    division?: NullableStringFieldUpdateOperationsInput | string | null
+    subDivision?: NullableStringFieldUpdateOperationsInput | string | null
+    majorCategory?: NullableStringFieldUpdateOperationsInput | string | null
+    presentationsType?: NullableStringFieldUpdateOperationsInput | string | null
+    designNumber?: NullableStringFieldUpdateOperationsInput | string | null
+    articleNumber?: NullableStringFieldUpdateOperationsInput | string | null
+    fabric?: NullableStringFieldUpdateOperationsInput | string | null
+    noOfColors?: NullableIntFieldUpdateOperationsInput | number | null
+    price?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    imageUrl?: NullableStringFieldUpdateOperationsInput | string | null
+    source?: NullableStringFieldUpdateOperationsInput | string | null
+    season?: NullableStringFieldUpdateOperationsInput | string | null
+    garmentWeight?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    availableQty?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    approvedBy?: NullableStringFieldUpdateOperationsInput | string | null
+    notes?: NullableStringFieldUpdateOperationsInput | string | null
+    status?: EnumRawArticleStatusFieldUpdateOperationsInput | $Enums.RawArticleStatus
+    retryCount?: IntFieldUpdateOperationsInput | number
+    errorMessage?: NullableStringFieldUpdateOperationsInput | string | null
+    extractedData?: NullableJsonNullValueInput | InputJsonValue
+    extractedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    flatId?: NullableStringFieldUpdateOperationsInput | string | null
+    lockedUntil?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    presentationReceivedDate?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+  }
+
   export type SrmSyncRunCreateInput = {
     id?: string
     triggeredBy?: string
@@ -69664,6 +71646,131 @@ export namespace Prisma {
     _count?: NestedIntFilter<$PrismaModel>
     _min?: NestedEnumRawArticleStatusFilter<$PrismaModel>
     _max?: NestedEnumRawArticleStatusFilter<$PrismaModel>
+  }
+
+  export type FabricRawDataOrderByRelevanceInput = {
+    fields: FabricRawDataOrderByRelevanceFieldEnum | FabricRawDataOrderByRelevanceFieldEnum[]
+    sort: SortOrder
+    search: string
+  }
+
+  export type FabricRawDataCountOrderByAggregateInput = {
+    id?: SortOrder
+    presentationNo?: SortOrder
+    uniqueKey?: SortOrder
+    vendorCode?: SortOrder
+    vendorName?: SortOrder
+    vendorCity?: SortOrder
+    division?: SortOrder
+    subDivision?: SortOrder
+    majorCategory?: SortOrder
+    presentationsType?: SortOrder
+    designNumber?: SortOrder
+    articleNumber?: SortOrder
+    fabric?: SortOrder
+    noOfColors?: SortOrder
+    price?: SortOrder
+    imageUrl?: SortOrder
+    source?: SortOrder
+    season?: SortOrder
+    garmentWeight?: SortOrder
+    availableQty?: SortOrder
+    approvedBy?: SortOrder
+    notes?: SortOrder
+    status?: SortOrder
+    retryCount?: SortOrder
+    errorMessage?: SortOrder
+    extractedData?: SortOrder
+    extractedAt?: SortOrder
+    flatId?: SortOrder
+    lockedUntil?: SortOrder
+    presentationReceivedDate?: SortOrder
+    createdAt?: SortOrder
+    updatedAt?: SortOrder
+  }
+
+  export type FabricRawDataAvgOrderByAggregateInput = {
+    noOfColors?: SortOrder
+    price?: SortOrder
+    garmentWeight?: SortOrder
+    availableQty?: SortOrder
+    retryCount?: SortOrder
+  }
+
+  export type FabricRawDataMaxOrderByAggregateInput = {
+    id?: SortOrder
+    presentationNo?: SortOrder
+    uniqueKey?: SortOrder
+    vendorCode?: SortOrder
+    vendorName?: SortOrder
+    vendorCity?: SortOrder
+    division?: SortOrder
+    subDivision?: SortOrder
+    majorCategory?: SortOrder
+    presentationsType?: SortOrder
+    designNumber?: SortOrder
+    articleNumber?: SortOrder
+    fabric?: SortOrder
+    noOfColors?: SortOrder
+    price?: SortOrder
+    imageUrl?: SortOrder
+    source?: SortOrder
+    season?: SortOrder
+    garmentWeight?: SortOrder
+    availableQty?: SortOrder
+    approvedBy?: SortOrder
+    notes?: SortOrder
+    status?: SortOrder
+    retryCount?: SortOrder
+    errorMessage?: SortOrder
+    extractedAt?: SortOrder
+    flatId?: SortOrder
+    lockedUntil?: SortOrder
+    presentationReceivedDate?: SortOrder
+    createdAt?: SortOrder
+    updatedAt?: SortOrder
+  }
+
+  export type FabricRawDataMinOrderByAggregateInput = {
+    id?: SortOrder
+    presentationNo?: SortOrder
+    uniqueKey?: SortOrder
+    vendorCode?: SortOrder
+    vendorName?: SortOrder
+    vendorCity?: SortOrder
+    division?: SortOrder
+    subDivision?: SortOrder
+    majorCategory?: SortOrder
+    presentationsType?: SortOrder
+    designNumber?: SortOrder
+    articleNumber?: SortOrder
+    fabric?: SortOrder
+    noOfColors?: SortOrder
+    price?: SortOrder
+    imageUrl?: SortOrder
+    source?: SortOrder
+    season?: SortOrder
+    garmentWeight?: SortOrder
+    availableQty?: SortOrder
+    approvedBy?: SortOrder
+    notes?: SortOrder
+    status?: SortOrder
+    retryCount?: SortOrder
+    errorMessage?: SortOrder
+    extractedAt?: SortOrder
+    flatId?: SortOrder
+    lockedUntil?: SortOrder
+    presentationReceivedDate?: SortOrder
+    createdAt?: SortOrder
+    updatedAt?: SortOrder
+  }
+
+  export type FabricRawDataSumOrderByAggregateInput = {
+    noOfColors?: SortOrder
+    price?: SortOrder
+    garmentWeight?: SortOrder
+    availableQty?: SortOrder
+    retryCount?: SortOrder
   }
 
   export type SrmSyncRunOrderByRelevanceInput = {

@@ -2231,6 +2231,7 @@ export class ApproverController {
                     colour: true, variantSize: true, variantColor: true,
                     attrArticleNums: true, source: true, createdAt: true,
                     srmUniqueId: true,
+                    approver: { select: { name: true } },
                 }
             });
 
@@ -2362,6 +2363,7 @@ export class ApproverController {
                         year: approvedItem.year ?? null,
                         rate: approvedItem.rate != null ? Number(approvedItem.rate) : null,
                         mrp: approvedItem.mrp != null ? Number(approvedItem.mrp) : null,
+                        approved_by: (approvedItem as any).approver?.name ?? null,
                     };
 
                     const approvedImageUpload = await storageService.uploadApprovedImageFromSourceUrl(
