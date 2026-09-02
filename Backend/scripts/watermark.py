@@ -46,7 +46,8 @@ def _build_lines(row):
     # Article number (only present after SAP RFC succeeds)
     add("Article", row.get("article_number"))
 
-    add("PPT No.", row.get("presentation_no"))
+    ppt = row.get("presentation_no")
+    lines.append(f"PPT No.: {str(ppt).strip() if ppt and str(ppt).strip() else '-'}")
 
     vendor_code = row.get("vendor_code")
     vendor_name = row.get("vendor_name")
