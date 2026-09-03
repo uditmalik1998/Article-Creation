@@ -20,6 +20,8 @@ import SrmFailedExtractionsPage from './features/admin/pages/SrmFailedExtraction
 import KsmlUploaderPage from './features/admin/pages/KsmlUploaderPage'; // KSML class-characteristic uploader
 import PoolBUploaderPage from './features/admin/pages/PoolBUploaderPage'; // Pool B article-value uploader
 import ModificationLogsPage from './features/admin/pages/ModificationLogsPage';
+import ExpenseTableDetailPage from './features/admin/pages/ExpenseTableDetailPage';
+import ExpenseChangeRequestsPage from './features/admin/pages/ExpenseChangeRequestsPage';
 import ApproverDashboard from './features/approver/pages/ApproverDashboard'; // Approver Dashboard
 import ArticleDetailPage from './features/approver/pages/ArticleDetailPage'; // Article detail view
 import FabricArticleDashboard from './features/fabric-article/pages/FabricArticleDashboard'; // Fabric Article Dashboard
@@ -69,6 +71,31 @@ const AdminRoute: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   if (user) {
     const userData = JSON.parse(user);
     if (userData.role !== 'ADMIN') {
+      return <Navigate to="/dashboard" replace />;
+    }
+  }
+
+  return <>{children}</>;
+};
+
+const ExpenseRoute: React.FC<{ children: React.ReactNode }> = ({ children }) => {
+  const token = localStorage.getItem('authToken');
+  const user = localStorage.getItem('user');
+
+  if (!token) {
+    return <Navigate to="/login" replace />;
+  }
+
+  if (user) {
+    const userData = JSON.parse(user);
+    // Expense Data (view + change-request workflow): ADMIN, CREATOR, APPROVER, CATEGORY_HEAD, PD
+    if (
+      userData.role !== 'ADMIN' &&
+      userData.role !== 'CREATOR' &&
+      userData.role !== 'APPROVER' &&
+      userData.role !== 'CATEGORY_HEAD' &&
+      userData.role !== 'PD'
+    ) {
       return <Navigate to="/dashboard" replace />;
     }
   }
@@ -299,6 +326,26 @@ const App: React.FC = () => {
                       <Admin />
                     </MainLayout>
                   </AdminRoute>
+                }
+              />
+              <Route
+                path="/admin/expense/:tableKey"
+                element={
+                  <ExpenseRoute>
+                    <MainLayout>
+                      <ExpenseTableDetailPage />
+                    </MainLayout>
+                  </ExpenseRoute>
+                }
+              />
+              <Route
+                path="/admin/expense-change-requests"
+                element={
+                  <ExpenseRoute>
+                    <MainLayout>
+                      <ExpenseChangeRequestsPage />
+                    </MainLayout>
+                  </ExpenseRoute>
                 }
               />
               <Route

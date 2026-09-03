@@ -978,6 +978,34 @@ exports.Prisma.BodyArticleDataScalarFieldEnum = {
   updatedAt: 'updatedAt'
 };
 
+exports.Prisma.ExpenseChangeRequestScalarFieldEnum = {
+  id: 'id',
+  tableKey: 'tableKey',
+  rowId: 'rowId',
+  rowLabel: 'rowLabel',
+  changes: 'changes',
+  reason: 'reason',
+  status: 'status',
+  requestedById: 'requestedById',
+  requestedByName: 'requestedByName',
+  requestedByEmail: 'requestedByEmail',
+  requestedAt: 'requestedAt',
+  approverId: 'approverId',
+  approverName: 'approverName',
+  approverEmail: 'approverEmail',
+  approverAt: 'approverAt',
+  approverComment: 'approverComment',
+  approverAction: 'approverAction',
+  finalById: 'finalById',
+  finalByName: 'finalByName',
+  finalByEmail: 'finalByEmail',
+  finalAt: 'finalAt',
+  finalComment: 'finalComment',
+  finalAction: 'finalAction',
+  createdAt: 'createdAt',
+  updatedAt: 'updatedAt'
+};
+
 exports.Prisma.SortOrder = {
   asc: 'asc',
   desc: 'desc'
@@ -1602,6 +1630,24 @@ exports.Prisma.BodyArticleDataOrderByRelevanceFieldEnum = {
   sapSyncMessage: 'sapSyncMessage',
   userName: 'userName'
 };
+
+exports.Prisma.ExpenseChangeRequestOrderByRelevanceFieldEnum = {
+  id: 'id',
+  tableKey: 'tableKey',
+  rowId: 'rowId',
+  rowLabel: 'rowLabel',
+  reason: 'reason',
+  requestedByName: 'requestedByName',
+  requestedByEmail: 'requestedByEmail',
+  approverName: 'approverName',
+  approverEmail: 'approverEmail',
+  approverComment: 'approverComment',
+  approverAction: 'approverAction',
+  finalByName: 'finalByName',
+  finalByEmail: 'finalByEmail',
+  finalComment: 'finalComment',
+  finalAction: 'finalAction'
+};
 exports.GarmentType = exports.$Enums.GarmentType = {
   UPPER: 'UPPER',
   LOWER: 'LOWER',
@@ -1682,6 +1728,13 @@ exports.PoolBBatchStatus = exports.$Enums.PoolBBatchStatus = {
   FAILED: 'FAILED'
 };
 
+exports.ExpenseChangeStatus = exports.$Enums.ExpenseChangeStatus = {
+  PENDING_APPROVER: 'PENDING_APPROVER',
+  PENDING_FINAL: 'PENDING_FINAL',
+  APPROVED: 'APPROVED',
+  REJECTED: 'REJECTED'
+};
+
 exports.Prisma.ModelName = {
   Department: 'Department',
   SubDepartment: 'SubDepartment',
@@ -1722,7 +1775,8 @@ exports.Prisma.ModelName = {
   FabricMajCatGridValue: 'FabricMajCatGridValue',
   ModifyLog: 'ModifyLog',
   FabricArticleData: 'FabricArticleData',
-  BodyArticleData: 'BodyArticleData'
+  BodyArticleData: 'BodyArticleData',
+  ExpenseChangeRequest: 'ExpenseChangeRequest'
 };
 
 /**

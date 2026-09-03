@@ -6,6 +6,7 @@
 import { Request, Response } from 'express';
 import { z } from 'zod';
 import { prismaClient as prisma, withPrismaRetry } from '../utils/prisma';
+import { Prisma } from '../generated/prisma';
 import bcrypt from 'bcryptjs';
 import { syncVendorMaster, getVendorMasterStatus, getLastVendorSyncResult, isVendorSyncInProgress } from '../services/vendorMasterSyncService';
 import { invalidateMandatoryGridCache, invalidateMajCatVisibleCache } from '../services/zmmArtCreationService';
@@ -5136,3 +5137,491 @@ export const uploadBodyArticleData = async (req: Request, res: Response): Promis
     res.status(500).json({ success: false, error: error.message });
   }
 };
+
+// ═══════════════════════════════════════════════════════
+// EXPENSE TABLE DETAIL VIEWS (Phase 1 — generic read-only browse)
+//
+// Backs the "View Data" link on each Expense-page upload box: a plain
+// SELECT * (paginated / searchable / sortable) over the table that box
+// writes to. `tableKey` is always resolved against EXPENSE_TABLE_REGISTRY
+// below — it never reaches raw SQL directly, and `sortBy` is validated
+// against that entry's known column list before being used to build an
+// ORDER BY clause — so neither can be used to inject arbitrary SQL.
+// ═══════════════════════════════════════════════════════
+
+/** $queryRaw returns JS `bigint` for Postgres bigint/int8/serial8 columns, which JSON.stringify can't
+ * handle — convert any bigint to a number before sending the response. */
+export function serializeBigInts<T>(value: T): T {
+  return JSON.parse(JSON.stringify(value, (_k, v) => (typeof v === 'bigint' ? Number(v) : v)));
+}
+
+export type ExpenseTableColumn = { key: string; label: string; editable?: boolean };
+
+export interface RawExpenseTableConfig {
+  kind: 'raw';
+  tableName: string;
+  idColumn: string;
+  columns: ExpenseTableColumn[];
+  searchColumns: string[];
+  displayColumns: string[];
+  defaultSort: { column: string; dir: 'asc' | 'desc' };
+}
+
+export interface PrismaExpenseTableConfig {
+  kind: 'prisma';
+  delegateName: string;
+  idColumn: string;
+  /** true when the Prisma model's id field is an Int (autoincrement) rather than a uuid string. */
+  idIsNumeric?: boolean;
+  columns: ExpenseTableColumn[];
+  searchColumns: string[];
+  displayColumns: string[];
+  defaultSort: { field: string; dir: 'asc' | 'desc' };
+}
+
+export interface HierarchyExpenseTableConfig {
+  kind: 'hierarchy';
+  idColumn: string;
+  columns: ExpenseTableColumn[];
+  searchColumns: string[];
+  displayColumns: string[];
+  defaultSort: { column: string; dir: 'asc' | 'desc' };
+}
+
+export type ExpenseTableConfig = RawExpenseTableConfig | PrismaExpenseTableConfig | HierarchyExpenseTableConfig;
+
+export const EXPENSE_TABLE_REGISTRY: Record<string, ExpenseTableConfig> = {
+  'major-category-grid': {
+    kind: 'raw',
+    tableName: 'maj_cat_grid_values',
+    idColumn: 'id',
+    columns: [
+      { key: 'id', label: 'ID', editable: false },
+      { key: 'major_category', label: 'Major Category' },
+      { key: 'attribute_name', label: 'Attribute Name' },
+      { key: 'value', label: 'Value' },
+      { key: 'uploaded_at', label: 'Uploaded At', editable: false },
+    ],
+    searchColumns: ['major_category', 'attribute_name', 'value'],
+    displayColumns: ['major_category', 'attribute_name', 'value'],
+    defaultSort: { column: 'id', dir: 'desc' },
+  },
+  'size-master': {
+    kind: 'raw',
+    tableName: 'maj_cat_sizes',
+    idColumn: 'id',
+    columns: [
+      { key: 'id', label: 'ID', editable: false },
+      { key: 'division', label: 'Division' },
+      { key: 'sub_division', label: 'Sub Division' },
+      { key: 'mc_code', label: 'MC Code' },
+      { key: 'major_category', label: 'Major Category' },
+      { key: 'size', label: 'Size' },
+      { key: 'status', label: 'Status' },
+      { key: 'created_at', label: 'Created At', editable: false },
+    ],
+    searchColumns: ['division', 'sub_division', 'mc_code', 'major_category', 'size', 'status'],
+    displayColumns: ['major_category', 'size'],
+    defaultSort: { column: 'id', dir: 'desc' },
+  },
+  'color-master': {
+    kind: 'raw',
+    tableName: 'color_master',
+    idColumn: 'id',
+    columns: [
+      { key: 'id', label: 'ID', editable: false },
+      { key: 'father_color', label: 'Father Color' },
+      { key: 'child_color', label: 'Child Color' },
+      { key: 'sap_create_old', label: 'SAP Code' },
+    ],
+    searchColumns: ['father_color', 'child_color', 'sap_create_old'],
+    displayColumns: ['father_color', 'child_color'],
+    defaultSort: { column: 'id', dir: 'desc' },
+  },
+  'mandatory-grid': {
+    kind: 'raw',
+    tableName: 'maj_cat_mandatory_grid',
+    idColumn: 'id',
+    columns: [
+      { key: 'id', label: 'ID', editable: false },
+      { key: 'major_category', label: 'Major Category' },
+      { key: 'div', label: 'Division' },
+      { key: 'sub_div', label: 'Sub Division' },
+      { key: 'sap_key', label: 'SAP Key' },
+      { key: 'label', label: 'Label' },
+      { key: 'is_active', label: 'Active' },
+      { key: 'uploaded_at', label: 'Uploaded At', editable: false },
+    ],
+    searchColumns: ['major_category', 'div', 'sub_div', 'sap_key', 'label'],
+    displayColumns: ['major_category', 'sap_key'],
+    defaultSort: { column: 'id', dir: 'desc' },
+  },
+  'segment-master': {
+    kind: 'raw',
+    tableName: 'maj_cat_segment',
+    idColumn: 'id',
+    columns: [
+      { key: 'id', label: 'ID', editable: false },
+      { key: 'sub_division', label: 'Sub Division' },
+      { key: 'major_category', label: 'Major Category' },
+      { key: 'segment_type', label: 'Segment Type' },
+      { key: 'min', label: 'Min' },
+      { key: 'max', label: 'Max' },
+      { key: 'created_at', label: 'Created At', editable: false },
+      { key: 'updated_at', label: 'Updated At', editable: false },
+    ],
+    searchColumns: ['sub_division', 'major_category', 'segment_type'],
+    displayColumns: ['major_category', 'segment_type'],
+    defaultSort: { column: 'id', dir: 'desc' },
+  },
+  'fabric-article-data': {
+    kind: 'prisma',
+    delegateName: 'fabricArticleData',
+    idColumn: 'id',
+    columns: [
+      { key: 'fabricArticleNumber', label: 'Fabric Article No.' },
+      { key: 'fabricArticleDescription', label: 'Description' },
+      { key: 'division', label: 'Division' },
+      { key: 'subDivision', label: 'Sub Division' },
+      { key: 'majorCategory', label: 'Major Category' },
+      { key: 'vendorName', label: 'Vendor Name' },
+      { key: 'vendorCode', label: 'Vendor Code' },
+      { key: 'mFabDiv', label: 'Fab Div' },
+      { key: 'mYarn', label: 'Yarn' },
+      { key: 'mConstruction', label: 'Construction' },
+      { key: 'mGsm', label: 'GSM' },
+      { key: 'mComposition', label: 'Composition' },
+      { key: 'approvalStatus', label: 'Approval Status', editable: false },
+      { key: 'sapSyncStatus', label: 'SAP Sync Status', editable: false },
+      { key: 'userName', label: 'Uploaded By', editable: false },
+      { key: 'createdAt', label: 'Created At', editable: false },
+    ],
+    searchColumns: ['fabricArticleNumber', 'fabricArticleDescription', 'division', 'subDivision', 'majorCategory', 'vendorName', 'vendorCode', 'userName'],
+    displayColumns: ['fabricArticleNumber', 'fabricArticleDescription'],
+    defaultSort: { field: 'createdAt', dir: 'desc' },
+  },
+  'fabric-article-master': {
+    kind: 'prisma',
+    delegateName: 'fabricArticleMaster',
+    idColumn: 'id',
+    idIsNumeric: true,
+    columns: [
+      { key: 'seg', label: 'Segment' },
+      { key: 'div', label: 'Division' },
+      { key: 'subDiv', label: 'Sub Division' },
+      { key: 'majCat', label: 'Major Category' },
+      { key: 'mcCode', label: 'MC Code' },
+      { key: 'mcDes', label: 'MC Description' },
+      { key: 'status', label: 'Status' },
+      { key: 'hsnCd', label: 'HSN Code' },
+      { key: 'artType', label: 'Article Type' },
+      { key: 'createdAt', label: 'Created At', editable: false },
+    ],
+    searchColumns: ['seg', 'div', 'subDiv', 'majCat', 'mcCode', 'mcDes', 'status', 'hsnCd', 'artType'],
+    displayColumns: ['majCat', 'mcCode', 'mcDes'],
+    defaultSort: { field: 'createdAt', dir: 'desc' },
+  },
+  'national-grid': {
+    kind: 'prisma',
+    delegateName: 'nationalGridMaster',
+    idColumn: 'id',
+    idIsNumeric: true,
+    columns: [
+      { key: 'attributeName', label: 'Attribute Name' },
+      { key: 'code', label: 'Code' },
+      { key: 'fullForm', label: 'Full Form' },
+      { key: 'isActive', label: 'Active' },
+      { key: 'createdAt', label: 'Created At', editable: false },
+    ],
+    searchColumns: ['attributeName', 'code', 'fullForm'],
+    displayColumns: ['attributeName', 'code'],
+    defaultSort: { field: 'createdAt', dir: 'desc' },
+  },
+  'body-article-data': {
+    kind: 'prisma',
+    delegateName: 'bodyArticleData',
+    idColumn: 'id',
+    columns: [
+      { key: 'bodyArticleNumber', label: 'Body Article No.' },
+      { key: 'bodyArticleDescription', label: 'Description' },
+      { key: 'division', label: 'Division' },
+      { key: 'subDivision', label: 'Sub Division' },
+      { key: 'majorCategory', label: 'Major Category' },
+      { key: 'mcCode', label: 'MC Code' },
+      { key: 'articleNumber', label: 'Article Number' },
+      { key: 'vendorName', label: 'Vendor Name' },
+      { key: 'approvalStatus', label: 'Approval Status', editable: false },
+      { key: 'sapSyncStatus', label: 'SAP Sync Status', editable: false },
+      { key: 'userName', label: 'Uploaded By', editable: false },
+      { key: 'createdAt', label: 'Created At', editable: false },
+    ],
+    searchColumns: ['bodyArticleNumber', 'bodyArticleDescription', 'division', 'subDivision', 'majorCategory', 'mcCode', 'articleNumber', 'vendorName', 'userName'],
+    displayColumns: ['bodyArticleNumber', 'bodyArticleDescription'],
+    defaultSort: { field: 'createdAt', dir: 'desc' },
+  },
+  'raw-articles': {
+    kind: 'prisma',
+    delegateName: 'rawArticle',
+    idColumn: 'id',
+    columns: [
+      { key: 'presentationNo', label: 'Presentation No.', editable: false },
+      { key: 'vendorCode', label: 'Vendor Code', editable: false },
+      { key: 'vendorName', label: 'Vendor Name', editable: false },
+      { key: 'division', label: 'Division', editable: false },
+      { key: 'subDivision', label: 'Sub Division', editable: false },
+      { key: 'majorCategory', label: 'Major Category', editable: false },
+      { key: 'designNumber', label: 'Design Number', editable: false },
+      { key: 'articleNumber', label: 'Article Number', editable: false },
+      { key: 'status', label: 'Status', editable: false },
+      { key: 'source', label: 'Source', editable: false },
+      { key: 'createdAt', label: 'Created At', editable: false },
+    ],
+    searchColumns: ['presentationNo', 'vendorCode', 'vendorName', 'division', 'subDivision', 'majorCategory', 'designNumber', 'articleNumber', 'status'],
+    displayColumns: ['presentationNo'],
+    defaultSort: { field: 'createdAt', dir: 'desc' },
+  },
+  'vendor-master': {
+    kind: 'prisma',
+    delegateName: 'masterVendorDetail',
+    idColumn: 'id',
+    idIsNumeric: true,
+    columns: [
+      { key: 'vendorCode', label: 'Vendor Code', editable: false },
+      { key: 'vendorName', label: 'Vendor Name', editable: false },
+      { key: 'vendorCity', label: 'Vendor City', editable: false },
+      { key: 'vendorRegion', label: 'Vendor Region', editable: false },
+      { key: 'mergeVendorCode', label: 'Merge Vendor Code', editable: false },
+      { key: 'mergeVendorName', label: 'Merge Vendor Name', editable: false },
+      { key: 'syncedAt', label: 'Synced At', editable: false },
+    ],
+    searchColumns: ['vendorCode', 'vendorName', 'vendorCity', 'vendorRegion', 'mergeVendorCode', 'mergeVendorName'],
+    displayColumns: ['vendorCode', 'vendorName'],
+    defaultSort: { field: 'syncedAt', dir: 'desc' },
+  },
+  hierarchy: {
+    kind: 'hierarchy',
+    idColumn: 'major_category_code',
+    columns: [
+      { key: 'division_code', label: 'Division Code', editable: false },
+      { key: 'division', label: 'Division', editable: false },
+      { key: 'sub_division_code', label: 'Sub Division Code', editable: false },
+      { key: 'sub_division', label: 'Sub Division', editable: false },
+      { key: 'major_category_code', label: 'Major Category Code', editable: false },
+      { key: 'major_category', label: 'Major Category' },
+      { key: 'mc_code', label: 'MC Code' },
+      { key: 'mc_des', label: 'MC Description' },
+      { key: 'fabric_division', label: 'Fabric Division' },
+      { key: 'garment_type', label: 'Garment Type', editable: false },
+      { key: 'is_active', label: 'Active' },
+    ],
+    searchColumns: ['division', 'sub_division', 'major_category', 'mc_code'],
+    displayColumns: ['division', 'sub_division', 'major_category'],
+    defaultSort: { column: 'division', dir: 'asc' },
+  },
+};
+
+/** GET /admin/expense-table/:tableKey?page=&limit=&search=&sortBy=&sortDir= */
+export async function getExpenseTableData(req: Request, res: Response) {
+  const { tableKey } = req.params;
+  const config = EXPENSE_TABLE_REGISTRY[tableKey];
+  if (!config) {
+    return res.status(404).json({ success: false, error: `Unknown table key: ${tableKey}` });
+  }
+
+  const { page, limit, search, sortBy, sortDir } = req.query as Record<string, string | undefined>;
+  const pageNum = Math.max(1, parseInt(page ?? '1', 10) || 1);
+  const limitNum = Math.min(200, Math.max(1, parseInt(limit ?? '50', 10) || 50));
+  const skip = (pageNum - 1) * limitNum;
+  const dir: 'asc' | 'desc' = sortDir === 'asc' ? 'asc' : sortDir === 'desc' ? 'desc' : config.defaultSort.dir;
+  const searchTerm = search?.trim() || undefined;
+
+  try {
+    if (config.kind === 'prisma') {
+      const validFields = new Set(config.columns.map((c) => c.key));
+      const sortField = sortBy && validFields.has(sortBy) ? sortBy : config.defaultSort.field;
+      const delegate = (prisma as any)[config.delegateName];
+
+      const where = searchTerm
+        ? { OR: config.searchColumns.map((f) => ({ [f]: { contains: searchTerm, mode: 'insensitive' as const } })) }
+        : {};
+
+      const [total, rows] = await withPrismaRetry(() =>
+        prisma.$transaction([
+          delegate.count({ where }),
+          delegate.findMany({ where, orderBy: { [sortField]: dir }, skip, take: limitNum }),
+        ])
+      );
+
+      return res.json({ data: rows, total, page: pageNum, limit: limitNum, totalPages: Math.ceil(total / limitNum) });
+    }
+
+    if (config.kind === 'raw') {
+      const validColumns = new Set(config.columns.map((c) => c.key));
+      const sortColumn = sortBy && validColumns.has(sortBy) ? sortBy : config.defaultSort.column;
+
+      const whereSql = searchTerm
+        ? Prisma.sql`WHERE ${Prisma.join(
+            config.searchColumns.map(
+              (col) => Prisma.sql`${Prisma.raw(`"${col}"`)}::text ILIKE ${'%' + searchTerm + '%'}`
+            ),
+            ' OR '
+          )}`
+        : Prisma.empty;
+
+      const orderSql = Prisma.sql`ORDER BY ${Prisma.raw(`"${sortColumn}"`)} ${Prisma.raw(dir.toUpperCase())}`;
+      const tableSql = Prisma.raw(`"${config.tableName}"`);
+
+      const [countRows, rows] = await withPrismaRetry(() =>
+        Promise.all([
+          prisma.$queryRaw<{ total: bigint }[]>(Prisma.sql`SELECT COUNT(*)::bigint AS total FROM ${tableSql} ${whereSql}`),
+          prisma.$queryRaw<any[]>(Prisma.sql`SELECT * FROM ${tableSql} ${whereSql} ${orderSql} LIMIT ${limitNum} OFFSET ${skip}`),
+        ])
+      );
+
+      const total = Number(countRows[0]?.total ?? 0);
+      return res.json({ data: serializeBigInts(rows), total, page: pageNum, limit: limitNum, totalPages: Math.ceil(total / limitNum) });
+    }
+
+    // kind === 'hierarchy' — flattened departments ⋈ sub_departments ⋈ categories
+    const sortColumnMap: Record<string, string> = {
+      division: 'd.name',
+      sub_division: 'sd.name',
+      major_category: 'c.name',
+      mc_code: 'c.merchandise_code',
+    };
+    const sortColumn = (sortBy && sortColumnMap[sortBy]) || sortColumnMap[config.defaultSort.column];
+
+    const whereSql = searchTerm
+      ? Prisma.sql`WHERE d.name ILIKE ${'%' + searchTerm + '%'} OR sd.name ILIKE ${'%' + searchTerm + '%'} OR c.name ILIKE ${'%' + searchTerm + '%'} OR c.code ILIKE ${'%' + searchTerm + '%'} OR c.merchandise_code ILIKE ${'%' + searchTerm + '%'}`
+      : Prisma.empty;
+
+    const orderSql = Prisma.sql`ORDER BY ${Prisma.raw(sortColumn)} ${Prisma.raw(dir.toUpperCase())}`;
+
+    const baseFrom = Prisma.sql`FROM categories c
+      JOIN sub_departments sd ON sd.id = c.sub_department_id
+      JOIN departments d ON d.id = sd.department_id
+      ${whereSql}`;
+
+    const [countRows, rows] = await withPrismaRetry(() =>
+      Promise.all([
+        prisma.$queryRaw<{ total: bigint }[]>(Prisma.sql`SELECT COUNT(*)::bigint AS total ${baseFrom}`),
+        prisma.$queryRaw<any[]>(Prisma.sql`
+          SELECT
+            d.code AS division_code, d.name AS division,
+            sd.code AS sub_division_code, sd.name AS sub_division,
+            c.code AS major_category_code, c.name AS major_category,
+            c.merchandise_code AS mc_code, c.merchandise_desc AS mc_des,
+            c.fabric_division, c.garment_type, c.is_active
+          ${baseFrom}
+          ${orderSql}
+          LIMIT ${limitNum} OFFSET ${skip}
+        `),
+      ])
+    );
+
+    const total = Number(countRows[0]?.total ?? 0);
+    return res.json({ data: rows, total, page: pageNum, limit: limitNum, totalPages: Math.ceil(total / limitNum) });
+  } catch (error: any) {
+    console.error(`[ExpenseTableData] Error fetching "${tableKey}":`, error);
+    return res.status(500).json({ success: false, error: error.message });
+  }
+}
+
+function coercePrismaId(config: PrismaExpenseTableConfig, rowId: string): string | number {
+  return config.idIsNumeric ? Number(rowId) : rowId;
+}
+
+/** hierarchy's editable keys are the SELECT aliases used by getExpenseTableData,
+ * which don't all match `categories`' real column names — translate before UPDATE. */
+const HIERARCHY_COLUMN_TO_REAL: Record<string, string> = {
+  major_category: 'name',
+  mc_code: 'merchandise_code',
+  mc_des: 'merchandise_desc',
+  fabric_division: 'fabric_division',
+  is_active: 'is_active',
+};
+
+/** Fetches one row's current values for the expense change-request workflow —
+ * used both to snapshot "old" values when a request is created and to
+ * re-verify nothing drifted before applying an approved change. Returns null
+ * if the row no longer exists. `tableKey` is resolved against the same
+ * allowlisted registry as getExpenseTableData. */
+export async function fetchExpenseRowById(tableKey: string, rowId: string): Promise<Record<string, any> | null> {
+  const config = EXPENSE_TABLE_REGISTRY[tableKey];
+  if (!config) return null;
+
+  if (config.kind === 'prisma') {
+    const delegate = (prisma as any)[config.delegateName];
+    const id = coercePrismaId(config, rowId);
+    const row = await delegate.findUnique({ where: { [config.idColumn]: id } });
+    return row ? serializeBigInts(row) : null;
+  }
+
+  if (config.kind === 'raw') {
+    const tableSql = Prisma.raw(`"${config.tableName}"`);
+    const idColSql = Prisma.raw(`"${config.idColumn}"`);
+    const rows = await prisma.$queryRaw<any[]>(
+      Prisma.sql`SELECT * FROM ${tableSql} WHERE ${idColSql} = ${Number(rowId)} LIMIT 1`
+    );
+    return rows[0] ? serializeBigInts(rows[0]) : null;
+  }
+
+  // hierarchy — keyed by categories.code (exposed as major_category_code)
+  const rows = await prisma.$queryRaw<any[]>(Prisma.sql`
+    SELECT
+      d.code AS division_code, d.name AS division,
+      sd.code AS sub_division_code, sd.name AS sub_division,
+      c.code AS major_category_code, c.name AS major_category,
+      c.merchandise_code AS mc_code, c.merchandise_desc AS mc_des,
+      c.fabric_division, c.garment_type, c.is_active
+    FROM categories c
+    JOIN sub_departments sd ON sd.id = c.sub_department_id
+    JOIN departments d ON d.id = sd.department_id
+    WHERE c.code = ${rowId}
+    LIMIT 1
+  `);
+  return rows[0] ?? null;
+}
+
+/** Applies an already-approved change to the real row. Only ever called after
+ * final approval, with every key in `changes` already validated against the
+ * table's editable-column allowlist by the caller. */
+export async function applyExpenseRowUpdate(tableKey: string, rowId: string, changes: Record<string, any>): Promise<void> {
+  const config = EXPENSE_TABLE_REGISTRY[tableKey];
+  if (!config) throw new Error(`Unknown table key: ${tableKey}`);
+  const keys = Object.keys(changes);
+  if (keys.length === 0) return;
+
+  if (config.kind === 'prisma') {
+    const delegate = (prisma as any)[config.delegateName];
+    const id = coercePrismaId(config, rowId);
+    await delegate.update({ where: { [config.idColumn]: id }, data: changes });
+    return;
+  }
+
+  if (config.kind === 'raw') {
+    const tableSql = Prisma.raw(`"${config.tableName}"`);
+    const idColSql = Prisma.raw(`"${config.idColumn}"`);
+    const setSql = Prisma.join(
+      keys.map((k) => Prisma.sql`${Prisma.raw(`"${k}"`)} = ${changes[k]}`),
+      ', '
+    );
+    await prisma.$executeRaw(Prisma.sql`UPDATE ${tableSql} SET ${setSql} WHERE ${idColSql} = ${Number(rowId)}`);
+    return;
+  }
+
+  // hierarchy — only categories' own columns are editable, keyed by code
+  const setSql = Prisma.join(
+    keys.map((k) => Prisma.sql`${Prisma.raw(`"${HIERARCHY_COLUMN_TO_REAL[k] ?? k}"`)} = ${changes[k]}`),
+    ', '
+  );
+  await prisma.$executeRaw(Prisma.sql`UPDATE categories SET ${setSql} WHERE code = ${rowId}`);
+}
+
+/** Builds a short human-readable label for a row from its table's displayColumns. */
+export function buildExpenseRowLabel(tableKey: string, row: Record<string, any>): string | undefined {
+  const config = EXPENSE_TABLE_REGISTRY[tableKey];
+  if (!config) return undefined;
+  const parts = config.displayColumns.map((c) => row[c]).filter((v) => v !== null && v !== undefined && v !== '');
+  return parts.length > 0 ? parts.join(' / ') : undefined;
+}

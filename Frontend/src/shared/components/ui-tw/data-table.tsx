@@ -103,19 +103,39 @@ export function DataTable<T = any>({
   sticky,
   onRow,
 }: DataTableProps<T>) {
+  // Server-paginated mode: the caller passes `total` (the full row count from the
+  // backend) and `dataSource` is already just the current page — don't re-slice it,
+  // and compute page count from `total`, not from the length of that one page.
+  const isServerPaged = pagination !== false && typeof pagination?.total === 'number';
+
   const [internalPage, setInternalPage] = React.useState(pagination && typeof pagination === 'object' ? pagination.current ?? 1 : 1);
   const [internalPageSize, setInternalPageSize] = React.useState(
     pagination && typeof pagination === 'object' ? pagination.pageSize ?? 10 : 10,
   );
 
+  // Controlled `current`/`pageSize` can change from outside a Prev/Next click here
+  // (e.g. the parent resets to page 1 after a new search) — stay in sync with them.
+  const controlledCurrent = pagination && typeof pagination === 'object' ? pagination.current : undefined;
+  const controlledPageSize = pagination && typeof pagination === 'object' ? pagination.pageSize : undefined;
+  React.useEffect(() => {
+    if (controlledCurrent !== undefined) setInternalPage(controlledCurrent);
+  }, [controlledCurrent]);
+  React.useEffect(() => {
+    if (controlledPageSize !== undefined) setInternalPageSize(controlledPageSize);
+  }, [controlledPageSize]);
+
   const paged = React.useMemo(() => {
-    if (pagination === false) return dataSource;
+    if (pagination === false || isServerPaged) return dataSource;
     const start = (internalPage - 1) * internalPageSize;
     return dataSource.slice(start, start + internalPageSize);
-  }, [dataSource, pagination, internalPage, internalPageSize]);
+  }, [dataSource, pagination, isServerPaged, internalPage, internalPageSize]);
 
-  const totalPages = pagination === false ? 1 : Math.max(1, Math.ceil(dataSource.length / internalPageSize));
+  const totalPages =
+    pagination === false
+      ? 1
+      : Math.max(1, Math.ceil((isServerPaged ? pagination.total! : dataSource.length) / internalPageSize));
   const hasPager = pagination !== false;
+  const hasRows = isServerPaged ? (pagination as DataTablePagination).total! > 0 : dataSource.length > 0;
 
   return (
     <div className={cn('flex flex-col', className)}>
@@ -183,7 +203,7 @@ export function DataTable<T = any>({
         </Table>
       </div>
 
-      {hasPager && dataSource.length > 0 && (
+      {hasPager && hasRows && (
         <div className="mt-3 flex items-center justify-end gap-3">
           {pagination && pagination.showSizeChanger !== false && (
             <Select

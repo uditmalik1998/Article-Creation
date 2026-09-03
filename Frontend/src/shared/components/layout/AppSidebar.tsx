@@ -206,6 +206,12 @@ export const AppSidebar: React.FC<AppSidebarProps> = ({ collapsed, onCollapsedCh
     items.push({ key: '/po-presentation', Icon: FileText, label: 'PO Presentation' });
   }
 
+  // Expense Data change-request workflow: reachable by Creator/Approver/Category-Head/PD
+  // too (each still limited by their role server-side), not just Admin.
+  if (!isPdDesigner && !isAdmin && (role === 'CREATOR' || role === 'APPROVER' || role === 'CATEGORY_HEAD' || role === 'PD')) {
+    items.push({ key: '/admin/expense-change-requests', Icon: ClipboardList, label: 'Expense Change Requests' });
+  }
+
   if (!isPdDesigner && isAdmin) {
     items.push({
       key: '/admin',

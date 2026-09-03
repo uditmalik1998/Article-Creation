@@ -1449,3 +1449,56 @@ model BodyArticleData {
   @@map("body_article_data")
   @@schema("public")
 }
+
+/// Expense Data change-request workflow: Creator proposes a field edit with a
+/// reason -> Approver reviews -> Category Head/PD gives final sign-off, at
+/// which point (and only then) the real row's value is applied. One row here
+/// is the complete lifecycle + audit trail of a single edit.
+enum ExpenseChangeStatus {
+  PENDING_APPROVER
+  PENDING_FINAL
+  APPROVED
+  REJECTED
+
+  @@map("expense_change_status")
+  @@schema("public")
+}
+
+model ExpenseChangeRequest {
+  id       String  @id @default(uuid())
+  tableKey String  @map("table_key") @db.VarChar(50)
+  rowId    String  @map("row_id") @db.VarChar(100)
+  rowLabel String? @map("row_label") @db.VarChar(300)
+  changes  Json
+  reason   String
+
+  status ExpenseChangeStatus @default(PENDING_APPROVER)
+
+  requestedById    Int
+  requestedByName  String   @map("requested_by_name") @db.VarChar(200)
+  requestedByEmail String   @map("requested_by_email") @db.VarChar(255)
+  requestedAt      DateTime @default(now()) @map("requested_at")
+
+  approverId      Int?
+  approverName    String?   @map("approver_name") @db.VarChar(200)
+  approverEmail   String?   @map("approver_email") @db.VarChar(255)
+  approverAt      DateTime? @map("approver_at")
+  approverComment String?   @map("approver_comment")
+  approverAction  String?   @map("approver_action") @db.VarChar(20)
+
+  finalById      Int?
+  finalByName    String?   @map("final_by_name") @db.VarChar(200)
+  finalByEmail   String?   @map("final_by_email") @db.VarChar(255)
+  finalAt        DateTime? @map("final_at")
+  finalComment   String?   @map("final_comment")
+  finalAction    String?   @map("final_action") @db.VarChar(20)
+
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
+
+  @@index([tableKey, rowId])
+  @@index([status])
+  @@index([requestedById])
+  @@map("expense_change_requests")
+  @@schema("public")
+}
