@@ -72,6 +72,33 @@ const add = (gap: string, pass: boolean, detail: string) => results.push({ gap, 
   add('6 · back-view repositioning', /face away|faces the camera|180|turned to face directly AWAY|back of the head/i.test(p), 'explicit turn-away present');
 }
 
+// ── Flat/swatch mode: the materials-library path (no human anywhere) ────────
+// The whole point of renderMode='flat' is that a fabric swatch or a button comes
+// back as a product shot, not worn by somebody. These assert that contract on the
+// text we send, and that the on-model prompt is genuinely untouched by the branch.
+{
+  const flat = buildPrompt('', 'auto', '1', 'flat', undefined, undefined, 'Olive Green', false, '', false, undefined, undefined, 'flat');
+
+  add('F1 · flat mode forbids a human', /NO HUMAN, NO MANNEQUIN/.test(flat) && /HARD FAILURE/.test(flat),
+    'explicit no-person rule present');
+
+  const onModelLeaks = /fashion model|MODEL MUST ALWAYS BE PRESENT|professional female|professional male|hairstyle|sneakers/i.test(flat);
+  add('F2 · flat mode carries no on-model language', !onModelLeaks,
+    onModelLeaks ? 'LEAK — on-model wording reached the flat prompt' : 'no on-model wording present');
+
+  add('F3 · flat mode keeps the colour-lock verbatim', /COLOR SWAP ONLY/.test(flat) && /MUST change to Olive Green/.test(flat),
+    'shared colour clause reused, not reworded');
+
+  add('F4 · flat mode locks shape and construction', /SHAPE AND DIMENSIONS ARE LOCKED/.test(flat) && /selvedge/i.test(flat),
+    'shape + construction preservation present');
+
+  // The default must stay 'model': every existing caller omits the new argument.
+  const defaulted = buildPrompt('male', 'Upper-Body', '1', 'front', undefined, undefined, 'Navy Blue', false, '', false, undefined, undefined);
+  const explicit = buildPrompt('male', 'Upper-Body', '1', 'front', undefined, undefined, 'Navy Blue', false, '', false, undefined, undefined, 'model');
+  add('F5 · renderMode defaults to on-model', defaulted === explicit && /fashion model/i.test(defaulted),
+    'omitting renderMode is byte-identical to renderMode="model"');
+}
+
 // ── Report ──────────────────────────────────────────────────────────────────
 console.log('\n══════════ MODEL-GENERATION LOGIC TEST ══════════\n');
 let pass = 0;

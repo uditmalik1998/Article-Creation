@@ -81,10 +81,24 @@ const upload = multer({
   storage: multer.memoryStorage(),
   limits: { fileSize: 15 * 1024 * 1024 },
   fileFilter: (_req, file, cb) => {
-    const allowed = ['image/jpeg', 'image/jpg', 'image/png', 'image/webp'];
-    allowed.includes(file.mimetype) ? cb(null, true) : cb(new Error('Invalid file type. Allowed: JPEG, PNG, WebP'));
+    // AVIF/HEIC are what browsers and phones now export by default, so real source
+    // photos arrive in them. Gemini rejects AVIF, but runSingleGeneration transcodes
+    // any unsupported input with sharp before inlining it — so accepting them here
+    // is safe and stops a valid photo being turned away at the door.
+    const allowed = [
+      'image/jpeg', 'image/jpg', 'image/png', 'image/webp',
+      'image/avif', 'image/heic', 'image/heif',
+    ];
+    allowed.includes(file.mimetype)
+      ? cb(null, true)
+      : cb(new Error('Invalid file type. Allowed: JPEG, PNG, WebP, AVIF, HEIC/HEIF'));
   },
 });
+
+// 'model' = the on-model fashion photoshoot (default, unchanged behaviour).
+// 'flat'  = a straight-on swatch / component shot with no human — used by the
+// craftpack materials library, where the subject is a fabric swatch or a trim.
+const RenderModeSchema = z.enum(['model', 'flat']).default('model');
 
 const uploadFields = upload.fields([
   { name: 'designs', maxCount: 10 },
@@ -116,9 +130,15 @@ router.post('/generate', uploadFields, async (req: Request, res: Response, next:
     }
 
     const { gender, bodytype, imagesCount, broach_placement, special_instructions, color_name } = req.body;
-    console.log('[ModelGen] Body fields:', { gender, bodytype, imagesCount, broach_placement, special_instructions, color_name });
+    // This route's own body fields are already mixed-case (imagesCount vs color_name),
+    // so accept either spelling rather than make callers guess.
+    const renderMode = RenderModeSchema.parse(req.body.renderMode ?? req.body.render_mode ?? 'model');
+    console.log('[ModelGen] Body fields:', { gender, bodytype, imagesCount, broach_placement, special_instructions, color_name, renderMode });
 
-    if (!gender || !bodytype) {
+    // gender/bodytype describe a human. Flat mode has none, so requiring them would
+    // only force callers to send meaningless filler — which is exactly how a swatch
+    // ends up with a person in it.
+    if (renderMode !== 'flat' && (!gender || !bodytype)) {
       console.warn('[ModelGen] Rejected: missing gender or bodytype');
       res.status(400).json({ success: false, error: 'gender and bodytype are required.' });
       return;
@@ -128,22 +148,32 @@ router.post('/generate', uploadFields, async (req: Request, res: Response, next:
     const { todayStr, hitFolder, hitIndex } = ensureOutputFolder(uploadsBase);
     console.log('[ModelGen] Output folder:', hitFolder);
 
-    console.log('[ModelGen] Starting batch pipeline for', designs.length, 'file(s), imagesCount:', imagesCount || '1');
+    // Flat mode renders exactly one image per file — runBatchPipeline forces
+    // views=['flat'] regardless, and pinning imagesCount here keeps the log honest.
+    const effectiveImagesCount = renderMode === 'flat' ? '1' : (imagesCount || '1');
+    console.log('[ModelGen] Starting batch pipeline for', designs.length, 'file(s), imagesCount:', effectiveImagesCount, 'mode:', renderMode);
     const results = await runBatchPipeline(
       designs,
-      gender,
-      bodytype,
-      imagesCount || '1',
+      gender || '',
+      bodytype || 'auto',
+      effectiveImagesCount,
       patternFile,
       broachFile,
       broach_placement,
       special_instructions,
       color_name,
-      colorImageFile
+      colorImageFile,
+      renderMode
     );
     console.log('[ModelGen] Batch pipeline done, results count:', results.length);
 
-    const outputUrls: Array<{ file: string; view: string; url: string }> = [];
+    // Remote callers can ask for the bytes in the response body instead of following
+    // the URL. ensureOutputFolder deletes every non-today folder on each call, and a
+    // multi-instance App Service can serve the follow-up GET from a worker that never
+    // wrote the file — inline delivery makes the response self-contained.
+    const wantsInline = String(req.body.response_format || '') === 'base64';
+
+    const outputUrls: Array<{ file: string; view: string; url: string; data?: string }> = [];
     const errors: Array<{ file: string; view: string; error: string }> = [];
 
     for (const item of results) {
@@ -162,6 +192,7 @@ router.post('/generate', uploadFields, async (req: Request, res: Response, next:
         file: item.fileName,
         view: item.view,
         url: `/uploads/model-generation/${todayStr}/${hitIndex}/${filename}`,
+        ...(wantsInline ? { data: (item.output as Buffer).toString('base64') } : {}),
       });
     }
 

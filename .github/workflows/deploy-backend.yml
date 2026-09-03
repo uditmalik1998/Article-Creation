@@ -64,7 +64,8 @@ jobs:
             "R2_SECRET_ACCESS_KEY=${{ secrets.R2_SECRET_ACCESS_KEY }}" \
             "APPROVED_R2_ACCESS_KEY_ID=${{ secrets.APPROVED_R2_ACCESS_KEY_ID }}" \
             "APPROVED_R2_SECRET_ACCESS_KEY=${{ secrets.APPROVED_R2_SECRET_ACCESS_KEY }}" \
-            "SRM_SUPABASE_ANON_KEY=${{ secrets.SRM_SUPABASE_ANON_KEY }}"
+            "SRM_SUPABASE_ANON_KEY=${{ secrets.SRM_SUPABASE_ANON_KEY }}" \
+            "MODELGEN_SERVICE_API_KEY=${{ secrets.MODELGEN_SERVICE_API_KEY }}"
 
       - name: Wait for Kudu to stabilize after config changes
         run: |
