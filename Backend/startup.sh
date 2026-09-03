@@ -5,6 +5,6 @@
 PYLIB=/home/site/wwwroot/python_libs
 mkdir -p "$PYLIB"
 python3 -c "import sys; sys.path.insert(0,'$PYLIB'); import PIL" 2>/dev/null \
-  || pip3 install -q --disable-pip-version-check --target "$PYLIB" Pillow==11.3.0
+  || python3 -m pip install -q --disable-pip-version-check --target "$PYLIB" Pillow==11.3.0
 exec node --max-old-space-size=2048 dist/index.js
 
