@@ -31,7 +31,7 @@ jobs:
         run: |
           SUB="${{ secrets.AZURE_SUBSCRIPTION_ID }}"
           az webapp config set --name v2-article-backend --resource-group dab-rg --subscription "$SUB" \
-            --startup-file "/home/site/wwwroot/startup.sh" --linux-fx-version "NODE|22-lts"
+            --startup-file "sh /home/site/wwwroot/startup.sh" --linux-fx-version "NODE|22-lts"
           az webapp config appsettings set --name v2-article-backend --resource-group dab-rg --subscription "$SUB" --settings \
             NODE_ENV=production PORT=8080 \
             SCM_DO_BUILD_DURING_DEPLOYMENT=false WEBSITE_RUN_FROM_PACKAGE=0 \
@@ -51,6 +51,7 @@ jobs:
             APPROVED_R2_BUCKET_NAME=article-master \
             APPROVED_R2_ACCOUNT_ID=bab06c93e17ae71cae3c11b4cc40240b \
             PYTHON_BIN=python3 \
+            PYTHONPATH=/home/site/wwwroot/python_libs \
             "JWT_SECRET=${{ secrets.JWT_SECRET }}" \
             "DATABASE_URL=${{ secrets.DATABASE_URL }}" \
             "DIRECT_URL=${{ secrets.DIRECT_URL }}" \
