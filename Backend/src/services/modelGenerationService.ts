@@ -12,18 +12,66 @@ const GEMINI_IMAGE_MODEL = process.env.GEMINI_IMAGE_MODEL || 'gemini-2.5-flash-i
 const OUTPUT_WIDTH = Number(process.env.MODELGEN_OUTPUT_WIDTH) || 1024;
 const OUTPUT_HEIGHT = Number(process.env.MODELGEN_OUTPUT_HEIGHT) || 1536;
 
+// 'model' = the on-model fashion photoshoot (the original and only behaviour).
+// 'flat'  = a straight-on swatch / component product shot with NO human at all —
+// used by the materials library, where the subject is a fabric swatch or a trim
+// (button, zip, label) that has no body to hang on.
+export type RenderMode = 'model' | 'flat';
+
+// A swatch or a component is square; the 2:3 portrait canvas exists for a standing
+// human. Kept as separate knobs so the on-model path keeps its exact 1024×1536.
+const FLAT_OUTPUT_WIDTH = Number(process.env.MODELGEN_FLAT_OUTPUT_WIDTH) || 1024;
+const FLAT_OUTPUT_HEIGHT = Number(process.env.MODELGEN_FLAT_OUTPUT_HEIGHT) || 1024;
+
 // Resize a generated view to the fixed OUTPUT_WIDTH×OUTPUT_HEIGHT. Gemini already
 // returns 2:3, so 'cover' is effectively a clean resize with no meaningful crop; it
 // also guards against any view that comes back at a slightly different aspect.
-async function normalizeOutput(buf: Buffer): Promise<Buffer> {
+// Flat mode passes its own square dimensions — leaving these hardcoded while asking
+// Gemini for 1:1 would make 'cover' crop a third off each side.
+async function normalizeOutput(
+  buf: Buffer,
+  width: number = OUTPUT_WIDTH,
+  height: number = OUTPUT_HEIGHT,
+): Promise<Buffer> {
   try {
     return await sharp(buf)
-      .resize(OUTPUT_WIDTH, OUTPUT_HEIGHT, { fit: 'cover', position: 'centre' })
+      .resize(width, height, { fit: 'cover', position: 'centre' })
       .png()
       .toBuffer();
   } catch (e: any) {
     console.warn('[ModelGen] normalizeOutput failed, returning original buffer:', e?.message || e);
     return buf;
+  }
+}
+
+// What Gemini will actually accept as an inline image part. Notably absent: AVIF —
+// which browsers and phones now export by default, so real source photos arrive in
+// it (craftpack's fabric articles are stored as .avif). sharp decodes AVIF, so we
+// transcode the source instead of rejecting the request.
+const GEMINI_INPUT_MIMES = new Set([
+  'image/jpeg', 'image/jpg', 'image/png', 'image/webp', 'image/heic', 'image/heif',
+]);
+
+/**
+ * Guarantees an inline image part is in a format Gemini accepts, transcoding to
+ * PNG when it isn't. A no-op for jpeg/png/webp, so the existing paths are
+ * unaffected. This is the single choke point every caller goes through —
+ * the sync route, the bulk file pipeline and the bulk R2/article pipeline —
+ * which is why it lives here rather than at the upload boundary.
+ */
+async function normalizeInput(
+  buf: Buffer,
+  mime: string,
+): Promise<{ buffer: Buffer; mimeType: string }> {
+  if (GEMINI_INPUT_MIMES.has((mime || '').toLowerCase())) return { buffer: buf, mimeType: mime };
+  try {
+    const png = await sharp(buf).png().toBuffer();
+    console.log(`[ModelGen] normalizeInput transcoded ${mime || 'unknown'} → image/png (${Math.round(png.length / 1024)} KB)`);
+    return { buffer: png, mimeType: 'image/png' };
+  } catch (e: any) {
+    // Let it through unchanged — Gemini's own error is more informative than ours.
+    console.warn(`[ModelGen] normalizeInput could not transcode ${mime}:`, e?.message || e);
+    return { buffer: buf, mimeType: mime };
   }
 }
 
@@ -83,6 +131,113 @@ function recolorScopeText(featuredGarment?: string): string {
   return '';
 }
 
+// ─────────────────────────────────────────────────────────────────────────────
+// The two colour clauses live here rather than inline at their call sites so the
+// flat/swatch prompt reuses them by reference. They are the load-bearing part of
+// this whole service — the wording that stops Gemini flattening a woven texture
+// into a block of paint — so a second copy that drifts is the failure mode worth
+// designing against. Do not reword either one.
+// ─────────────────────────────────────────────────────────────────────────────
+
+/** The `Color:` clause inside the main prompt body. */
+export function colorInstructionText(
+  hasColorImage?: boolean,
+  colorName?: string,
+  featuredGarment?: string,
+): string {
+  const recolorScope = recolorScopeText(featuredGarment);
+  return hasColorImage
+    ? `The garment MUST be recolored to match the dominant color of the COLOR_REFERENCE image included in this request. Sample the color from COLOR_REFERENCE and apply it uniformly to the entire garment in every view. Ignore the shape, pattern, texture, or content of COLOR_REFERENCE — use it ONLY as a color swatch. This overrides the source image color. This is a COLOR SWAP ONLY: the fabric's weave/knit structure, stripe or print pattern, yarn grain, and surface texture from the SOURCE_IMAGE must stay pixel-faithful and fully intact — do not flatten, smooth, or simplify the fabric into a solid untextured block of color.${recolorScope}`
+    : colorName
+      ? `The garment's base color MUST change to ${colorName} in every view (front, back, side, closeup). This is a COLOR SWAP ONLY: the fabric's weave/knit structure, stripe or print pattern, yarn grain, and surface texture from the SOURCE_IMAGE must stay pixel-faithful and fully intact — do not flatten, smooth, or simplify the fabric into a solid untextured block of color.${recolorScope}`
+      : `The garment color MUST be IDENTICAL to the SOURCE_IMAGE. Do not change or shift the color in any view.`;
+}
+
+/** parts[0] — the colour lock that leads every request, in both render modes. */
+export function colorLockText(
+  hasColorImage?: boolean,
+  colorName?: string,
+  featuredGarment?: string,
+): string {
+  const recolorScope = recolorScopeText(featuredGarment);
+  return hasColorImage
+    ? `MANDATORY COLOR (FROM IMAGE): The garment in the output MUST be recolored to match the dominant color of the COLOR_REFERENCE image that follows. Use COLOR_REFERENCE ONLY as a color swatch — ignore its shape, pattern, and content. This overrides the source image color and any text color name. This is a COLOR SWAP ONLY — the fabric's weave/knit texture, stripe or print pattern, yarn grain, and surface detail from the source image MUST be preserved pixel-faithfully; do not flatten or smooth the fabric into a solid untextured block of color.${recolorScope}`
+    : colorName
+      ? `MANDATORY COLOR: Recolor ONLY the base garment color to ${colorName} — apply it as the new uniform base tone. This is a COLOR SWAP ONLY: do NOT flatten, smooth, or simplify the fabric — the weave/knit structure, stripe or print pattern, yarn grain, and surface texture from the source image MUST remain fully intact and pixel-faithful, just tinted to ${colorName} instead of the original color. The output must still look like a textured woven/knit fabric, never a flat solid-color block.${recolorScope}`
+      : `COLOR PRESERVE: Keep the garment color exactly as shown in the source image. Do not change, shift, or neutralize the color.`;
+}
+
+/**
+ * FLAT / SWATCH mode — a materials-library product shot with NO human in it.
+ *
+ * A fabric swatch or a trim (button, zip, label) has no body to hang on, and
+ * buildPrompt's Rule #1 plus its "MODEL MUST ALWAYS BE PRESENT" clause actively
+ * fight that. Rather than thread a dozen conditionals through a 250-line prompt
+ * and risk perturbing the on-model output, this is a separate document that
+ * shares only the colour clause — which is the part that must never drift.
+ */
+export function buildFlatPrompt(
+  colorName?: string,
+  hasColorImage?: boolean,
+  specialInstructions?: string,
+  attributesText?: string,
+  backgroundColor?: string,
+): string {
+  // featuredGarment scoping is meaningless here: a swatch is one item, not an outfit.
+  const colorInstr = colorInstructionText(hasColorImage, colorName, undefined);
+  const attributesBlock = attributesText
+    ? `\n\nMATERIAL ATTRIBUTES (from catalog data — the generated item MUST stay consistent with these):\n- ${attributesText}`
+    : '';
+  const extra = specialInstructions ? `\n- Additional instructions: ${specialInstructions}` : '';
+
+  return `You are a world-class product photographer shooting a MATERIAL SWATCH / COMPONENT for a technical materials library.
+
+PRIMARY OBJECTIVE:
+Reproduce the EXACT item shown in the SOURCE_IMAGE — same material, same construction, same shape, same dimensions — changing NOTHING except the colour instructed below.
+
+⚠️ RULE #1 — NO HUMAN, NO MANNEQUIN (READ THIS BEFORE ANYTHING ELSE):
+There is NO person in this image. No model, no face, no hands, no fingers, no arms, no skin, no mannequin, no dress form, no torso, no hanger, no body of any kind. Nobody is holding, wearing, draping or touching the item. An image containing any part of a human being or a mannequin is a HARD FAILURE.
+This is a flat product / swatch photograph, NOT a fashion photograph. Do NOT style it, do NOT stage it, do NOT add a scene.
+
+FRAMING & CAMERA (STRICT):
+- Camera directly overhead / straight-on, perpendicular to the item — a true flat lay or straight-on product shot. No perspective tilt, no three-quarter angle, no foreshortening.
+- The item lies FLAT on a plain surface. For fabric: laid flat and smooth, at most the natural relaxed fall of the cloth — no folds arranged into a shape, no rolled bolt, no swirl, no artistic draping, not hung.
+- The item is centred and fills roughly 80–90% of the frame, entirely inside the frame with a small even margin of background on all four sides. Nothing is cropped off.
+- ONE single item only. Do NOT multiply it into a grid, a stack, a fan of swatches, a colour card, or a before/after pair, and do NOT add a second copy in another colour.
+
+WHAT THE ITEM IS — DETECT IT FROM SOURCE_IMAGE:
+- FABRIC / textile: a flat rectangular swatch of the cloth filling the frame, weave clearly readable at close range.
+- ACCESSORY / trim / component (button, zip, label, hook, cord, buckle, lace, elastic, thread, rivet, eyelet, drawstring): the single component photographed straight-on against the plain ground, at its own natural proportions.
+Whatever it is, it is the ONLY subject in the picture.
+
+MATERIAL PRESERVATION RULES (ABSOLUTE):
+- Color: ${colorInstr}
+- Fabric texture, weave/knit structure, yarn twist, pile, nap and surface grain MUST remain fully intact and unchanged from the SOURCE_IMAGE — this holds true even when the color above is being changed; a colour change must never flatten, smooth or blur the woven texture into a solid untextured block.
+- Pattern MUST match the SOURCE_IMAGE exactly at the same scale: replicate the same stripe/print WIDTH, SPACING and DENSITY relative to the item's width — do not widen, thin, stretch, respace, or redraw the pattern at a different scale. Reproduce the same number of visible stripes/repeats. Stripes stay straight and run in their original direction.
+- EVERY CONSTRUCTION DETAIL from the SOURCE_IMAGE must survive unchanged: selvedge, cut/raw/pinked edges, hems, stitching and stitch density, topstitch lines, seams, ribbing, perforations, zip teeth and coils, tape, moulding lines, engraving, holes, shanks, prongs, knurling, embossing, and any hardware.
+- SHAPE AND DIMENSIONS ARE LOCKED: the item's silhouette, outline, proportions, aspect ratio and relative size must be IDENTICAL to the SOURCE_IMAGE. Do not restyle, redesign, straighten, round off, resize, stretch, or "improve" it. This is the same physical object, re-photographed in a different colour.
+- NO redesign, NO added decoration, NO props, NO scale ruler, NO colour chips, NO pins, NO scissors, NO packaging, NO shadows of objects outside the frame.
+- REMOVE all price tags, swing tags, hang tags, size tags, care/brand labels, stickers, barcodes and any dangling tags or strings — UNLESS the item itself IS a label/tag, in which case keep it and reproduce its printed content exactly.
+- NO text, watermark, logo, annotation or measurement callout anywhere in the image that is not physically printed or woven onto the item in the SOURCE_IMAGE.${extra}
+
+BACKGROUND (READ CAREFULLY):
+- A plain, neutral, COMPLETELY FLAT, UNIFORM, SOLID SINGLE-COLOUR ground filling the entire frame edge-to-edge and corner-to-corner — like a solid paint fill or a seamless studio sweep. NO gradient, NO glow, NO halo, NO vignette, NO darkening toward the edges or corners, NO lighting falloff. Every background pixel is the SAME colour.
+- ${backgroundColor
+      ? `That solid colour MUST be EXACTLY ${backgroundColor}. Do NOT pick, invent, brighten, darken, warm, cool, or shift to any other colour. Keep it soft, muted and clean so the item stands out clearly against it.`
+      : `Use one soft, neutral, low-saturation ground (light warm grey or off-white) that the item clearly stands out against.`}
+- Matte and completely textureless — no wood, no marble, no linen, no paper grain, no seams, no floor line, no horizon, no patterns, no banding, no shadows cast on the ground.
+- Bright, soft, EVEN, diffuse studio lighting straight onto the item, with at most a faint soft contact shadow directly beneath it. No hard shadows, no directional spotlight, no coloured light, no moody or dramatic lighting. The lighting must not tint the item's colour.
+
+IMAGE SIZE (STRICT):
+- Final output: 1:1 square
+- Centre the item on the canvas
+
+QUALITY STANDARD:
+- Ultra-HD realism, sharp focus edge to edge, macro-level fibre and surface detail
+- Material-library / component-catalogue quality
+- Clean, sharp, commercial-ready output${attributesBlock}`;
+}
+
 export function buildPrompt(
   gender: string,
   bodytype: string,
@@ -95,8 +250,15 @@ export function buildPrompt(
   attributesText?: string,
   hasStyleReference?: boolean,
   backgroundColor?: string,
-  featuredGarment?: string
+  featuredGarment?: string,
+  renderMode: RenderMode = 'model'
 ): string {
+  // Early return rather than conditionals threaded through the 250 lines below —
+  // that is what makes "the on-model prompt is untouched" provable rather than hoped for.
+  if (renderMode === 'flat') {
+    return buildFlatPrompt(colorName, hasColorImage, specialInstructions, attributesText, backgroundColor);
+  }
+
   const genderLower = (gender || '').toLowerCase();
   // Use a light-skinned model for dark garments so the product is clearly visible
   // against the model's skin (dark garment on dark skin = invisible product).
@@ -143,12 +305,7 @@ export function buildPrompt(
     }
   }
 
-  const recolorScope = recolorScopeText(featuredGarment);
-  const colorInstr = hasColorImage
-    ? `The garment MUST be recolored to match the dominant color of the COLOR_REFERENCE image included in this request. Sample the color from COLOR_REFERENCE and apply it uniformly to the entire garment in every view. Ignore the shape, pattern, texture, or content of COLOR_REFERENCE — use it ONLY as a color swatch. This overrides the source image color. This is a COLOR SWAP ONLY: the fabric's weave/knit structure, stripe or print pattern, yarn grain, and surface texture from the SOURCE_IMAGE must stay pixel-faithful and fully intact — do not flatten, smooth, or simplify the fabric into a solid untextured block of color.${recolorScope}`
-    : colorName
-      ? `The garment's base color MUST change to ${colorName} in every view (front, back, side, closeup). This is a COLOR SWAP ONLY: the fabric's weave/knit structure, stripe or print pattern, yarn grain, and surface texture from the SOURCE_IMAGE must stay pixel-faithful and fully intact — do not flatten, smooth, or simplify the fabric into a solid untextured block of color.${recolorScope}`
-      : `The garment color MUST be IDENTICAL to the SOURCE_IMAGE. Do not change or shift the color in any view.`;
+  const colorInstr = colorInstructionText(hasColorImage, colorName, featuredGarment);
 
   // Bottomwear (trousers/shorts/skirts) needs its own close-up subject — collar/placket/
   // sleeve don't exist on a bottom. For 'auto' bodytype (article-list jobs), we instruct
@@ -360,40 +517,53 @@ export async function runSingleGeneration(
   styleReferenceBuffer?: Buffer,
   styleReferenceMime?: string,
   backgroundColor?: string,
-  featuredGarment?: string
+  featuredGarment?: string,
+  renderMode: RenderMode = 'model'
 ): Promise<Buffer> {
+  const isFlat = renderMode === 'flat';
   const hasColorImage = !!(colorImageBuffer && colorImageMime);
-  const recolorScope = recolorScopeText(featuredGarment);
-  const colorLockInstruction = hasColorImage
-    ? `MANDATORY COLOR (FROM IMAGE): The garment in the output MUST be recolored to match the dominant color of the COLOR_REFERENCE image that follows. Use COLOR_REFERENCE ONLY as a color swatch — ignore its shape, pattern, and content. This overrides the source image color and any text color name. This is a COLOR SWAP ONLY — the fabric's weave/knit texture, stripe or print pattern, yarn grain, and surface detail from the source image MUST be preserved pixel-faithfully; do not flatten or smooth the fabric into a solid untextured block of color.${recolorScope}`
-    : colorName
-      ? `MANDATORY COLOR: Recolor ONLY the base garment color to ${colorName} — apply it as the new uniform base tone. This is a COLOR SWAP ONLY: do NOT flatten, smooth, or simplify the fabric — the weave/knit structure, stripe or print pattern, yarn grain, and surface texture from the source image MUST remain fully intact and pixel-faithful, just tinted to ${colorName} instead of the original color. The output must still look like a textured woven/knit fabric, never a flat solid-color block.${recolorScope}`
-      : `COLOR PRESERVE: Keep the garment color exactly as shown in the source image. Do not change, shift, or neutralize the color.`;
+  const colorLockInstruction = colorLockText(hasColorImage, colorName, featuredGarment);
 
   const hasStyleReference = !!(styleReferenceBuffer && styleReferenceMime);
-  const promptText = buildPrompt(gender, bodytype, imageCount, viewDirection, broachPlacement, specialInstructions, colorName, hasColorImage, attributesText, hasStyleReference, backgroundColor, featuredGarment);
+  const promptText = buildPrompt(gender, bodytype, imageCount, viewDirection, broachPlacement, specialInstructions, colorName, hasColorImage, attributesText, hasStyleReference, backgroundColor, featuredGarment, renderMode);
+
+  // Transcode any input Gemini won't accept (AVIF, chiefly) before it is inlined.
+  // No-op for jpeg/png/webp, so nothing about the existing paths changes.
+  const source = await normalizeInput(imageBuffer, mimeType);
+  const pattern = patternBuffer && patternMime ? await normalizeInput(patternBuffer, patternMime) : null;
+  const colorRef = hasColorImage
+    ? await normalizeInput(colorImageBuffer as Buffer, colorImageMime as string)
+    : null;
+  const accessory = accessoryBuffer && accessoryMime ? await normalizeInput(accessoryBuffer, accessoryMime) : null;
 
   const parts: any[] = [
     { text: colorLockInstruction },
-    { inlineData: { mimeType, data: imageBuffer.toString('base64') } },
+    { inlineData: { mimeType: source.mimeType, data: source.buffer.toString('base64') } },
   ];
 
-  if (patternBuffer && patternMime) {
-    parts.push({ inlineData: { mimeType: patternMime, data: patternBuffer.toString('base64') } });
+  if (pattern) {
+    parts.push({ inlineData: { mimeType: pattern.mimeType, data: pattern.buffer.toString('base64') } });
     parts.push({ text: 'Apply the pattern to the garment.' });
   } else {
-    parts.push({ text: 'Render the garment on a professional fashion model.' });
+    // This part sits right after the source-image bytes, where the model weights it
+    // heavily — branching only the main prompt text would leave "on a fashion model"
+    // here and flat mode would still produce people.
+    parts.push({
+      text: isFlat
+        ? 'Render the material itself as a flat, straight-on product/swatch photograph on a plain neutral ground. There is NO human model and NO mannequin in this image.'
+        : 'Render the garment on a professional fashion model.',
+    });
   }
 
   // Color reference image: provide right before the accessory so Gemini reads the
   // explicit "this is a color swatch, ignore content" instruction adjacent to the bytes.
-  if (hasColorImage) {
+  if (colorRef) {
     parts.push({ text: 'COLOR_REFERENCE follows. Use ONLY the dominant color from this image for the garment. Ignore its shape, pattern, and any objects depicted — treat it strictly as a color swatch.' });
-    parts.push({ inlineData: { mimeType: colorImageMime as string, data: (colorImageBuffer as Buffer).toString('base64') } });
+    parts.push({ inlineData: { mimeType: colorRef.mimeType, data: colorRef.buffer.toString('base64') } });
   }
 
-  if (accessoryBuffer && accessoryMime) {
-    parts.push({ inlineData: { mimeType: accessoryMime, data: accessoryBuffer.toString('base64') } });
+  if (accessory) {
+    parts.push({ inlineData: { mimeType: accessory.mimeType, data: accessory.buffer.toString('base64') } });
   }
 
   // A previously generated view of this SAME garment, provided so all views of one
@@ -425,7 +595,7 @@ export async function runSingleGeneration(
   const ai = getAIClient();
   const imageSizeKB = Math.round(imageBuffer.length / 1024);
   const base64SizeKB = Math.round((imageBuffer.length * 4 / 3) / 1024);
-  console.log(`[ModelGen] Calling Gemini model: ${GEMINI_IMAGE_MODEL}, view: ${viewDirection}, gender: ${gender}, bodytype: ${bodytype}`);
+  console.log(`[ModelGen] Calling Gemini model: ${GEMINI_IMAGE_MODEL}, mode: ${renderMode}, view: ${viewDirection}, gender: ${gender}, bodytype: ${bodytype}`);
   console.log(`[ModelGen] color mode: ${hasColorImage ? 'IMAGE' : colorName ? `NAME(${colorName})` : 'SOURCE'} | style reference: ${hasStyleReference} | background: ${backgroundColor ?? 'auto-pastel'}`);
   console.log(`[ModelGen] Image size: ${imageSizeKB} KB | base64 payload: ~${base64SizeKB} KB | Parts count: ${parts.length}`);
 
@@ -436,9 +606,10 @@ export async function runSingleGeneration(
       contents: [{ role: 'user', parts }],
       config: {
         responseModalities: [Modality.IMAGE],
-        // Enforce the 2:3 portrait ratio at the API level — the model ignores
-        // aspect-ratio wording in the text prompt, so it must be set here.
-        imageConfig: { aspectRatio: '2:3' },
+        // Enforce the aspect ratio at the API level — the model ignores aspect-ratio
+        // wording in the text prompt, so it must be set here. 2:3 portrait for a
+        // standing human; 1:1 square for a flat swatch or component.
+        imageConfig: { aspectRatio: isFlat ? '1:1' : '2:3' },
         safetySettings: [
           { category: 'HARM_CATEGORY_SEXUALLY_EXPLICIT', threshold: 'BLOCK_NONE' },
         ],
@@ -467,8 +638,12 @@ export async function runSingleGeneration(
       console.log(`[ModelGen] Candidate[${ci}] part[${pi}] keys:`, Object.keys(part || {}), '| has inlineData:', !!part?.inlineData, '| has text:', !!part?.text);
       if (part?.inlineData?.data) {
         console.log('[ModelGen] Found image data in candidate', ci, 'part', pi, '— size (bytes):', Buffer.from(part.inlineData.data, 'base64').length);
-        // Normalize to fixed 2:3 pixel dimensions so every view of an article matches.
-        return await normalizeOutput(Buffer.from(part.inlineData.data, 'base64'));
+        // Normalize to fixed pixel dimensions so every view of an article matches —
+        // 2:3 portrait on-model, square in flat mode (passing the portrait size while
+        // the model returned 1:1 would make 'cover' crop a third off each side).
+        return isFlat
+          ? await normalizeOutput(Buffer.from(part.inlineData.data, 'base64'), FLAT_OUTPUT_WIDTH, FLAT_OUTPUT_HEIGHT)
+          : await normalizeOutput(Buffer.from(part.inlineData.data, 'base64'));
       }
       if (part?.text) {
         console.log(`[ModelGen] Candidate[${ci}] part[${pi}] text snippet:`, part.text.slice(0, 200));
@@ -492,10 +667,12 @@ async function safeGenerate(
   broachPlacement?: string,
   specialInstructions?: string,
   colorName?: string,
-  colorImageFile?: Express.Multer.File
+  colorImageFile?: Express.Multer.File,
+  renderMode: RenderMode = 'model'
 ): Promise<Buffer> {
   // Pick the backdrop from the garment colour (dark → light backdrop, light → deeper),
-  // so every view of this garment shares the same background.
+  // so every view of this garment shares the same background. The same rule is right
+  // for a swatch: it is about product-vs-ground contrast, not about a human.
   const backgroundColor = backgroundForGarment(colorName);
   let lastError: Error | null = null;
   for (let attempt = 0; attempt < MAX_RETRIES; attempt++) {
@@ -520,7 +697,9 @@ async function safeGenerate(
         undefined, // attributesText — not used in the batch pipeline
         undefined, // styleReferenceBuffer
         undefined, // styleReferenceMime
-        backgroundColor
+        backgroundColor,
+        undefined, // featuredGarment — not used in the batch pipeline
+        renderMode
       );
       console.log(`[ModelGen] safeGenerate SUCCESS on attempt ${attempt + 1} — file: ${file.originalname}, view: ${view}`);
       return buf;
@@ -549,12 +728,19 @@ export async function runBatchPipeline(
   broachPlacement?: string,
   specialInstructions?: string,
   colorName?: string,
-  colorImageFile?: Express.Multer.File
+  colorImageFile?: Express.Multer.File,
+  renderMode: RenderMode = 'model'
 ): Promise<GenerationResult[]> {
+  // Flat mode is always exactly one image per file — there are no "views" of a
+  // swatch, so honouring imageCount here would bill four identical renders.
+  // 'flat' is deliberately not a viewMap key: buildPrompt early-returns before
+  // viewMap is read, and the label makes the output file <name>_flat.png.
   const views =
-    imageCount === '1'
-      ? ['front']
-      : ['front', 'back', 'left_side', 'closeup'];
+    renderMode === 'flat'
+      ? ['flat']
+      : imageCount === '1'
+        ? ['front']
+        : ['front', 'back', 'left_side', 'closeup'];
 
   const tasks: Array<{ file: Express.Multer.File; view: string }> = [];
   for (const f of files) {
@@ -570,7 +756,7 @@ export async function runBatchPipeline(
     const batch = tasks.slice(i, i + MAX_WORKERS);
     const settled = await Promise.allSettled(
       batch.map(({ file, view }) =>
-        safeGenerate(file, view, gender, bodytype, imageCount, patternFile, accessoryFile, broachPlacement, specialInstructions, colorName, colorImageFile)
+        safeGenerate(file, view, gender, bodytype, imageCount, patternFile, accessoryFile, broachPlacement, specialInstructions, colorName, colorImageFile, renderMode)
           .then(buf => ({ fileName: file.originalname, view, output: buf }))
       )
     );

@@ -26,6 +26,7 @@ import modelGenerationRoutes from './routes/modelGeneration';
 // Middleware
 import { errorHandler, notFound, requestTimeout } from './middleware/errorHandler';
 import { authenticate, requireAdmin, requireUser } from './middleware/auth';
+import { authenticateJwtOrServiceKey } from './middleware/serviceApiKeyAuth';
 import { authenticateWatcher } from './middleware/watcherAuth';
 import { auditLog, flushAuditLogsOnShutdown } from './middleware/auditLogger';
 
@@ -154,7 +155,7 @@ app.use(cors({
   },
   credentials: true,
   methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS', 'PATCH'],
-  allowedHeaders: ['Content-Type', 'Authorization', 'X-Requested-With', 'Accept'],
+  allowedHeaders: ['Content-Type', 'Authorization', 'X-Requested-With', 'Accept', 'x-api-key'],
   exposedHeaders: ['Content-Range', 'X-Content-Range'],
   maxAge: 3600
 }));
@@ -186,6 +187,12 @@ app.use('/api/watcher', requestTimeout(4 * 60 * 1000));
 // (background processing is unbounded and runs independently of the request)
 app.use('/api/srm-hook/trigger', requestTimeout(15 * 1000));
 app.use('/api/model-generation/bulk', requestTimeout(20 * 60 * 1000));
+// One synchronous Gemini image call is typically 10–25s, but safeGenerate retries
+// once (MAX_RETRIES=2 + 1s backoff), so a slow first attempt plus a retry lands at
+// 60–70s — inside the global 90s only by luck. 4 minutes bounds a hang without
+// making an overrun the normal case. Paired with the skip below; without both, the
+// 90s timer arms alongside this one and fires first.
+app.use('/api/model-generation/generate', requestTimeout(4 * 60 * 1000));
 app.use('/api/admin/majcat-grid/upload', requestTimeout(15 * 60 * 1000));
 // KSML commit pushes up to ~2000 pairs to SAP one-by-one (grouped) — can take 10-15 min.
 app.use('/api/ksml/commit', requestTimeout(20 * 60 * 1000));
@@ -193,6 +200,7 @@ app.use('/api/ksml/commit', requestTimeout(20 * 60 * 1000));
 app.use('/api/poolb/commit', requestTimeout(30 * 60 * 1000));
 app.use('/api/', (req, res, next) => {
   if (req.path.startsWith('/model-generation/bulk/')) return next();
+  if (req.path === '/model-generation/generate') return next();
   if (req.path.startsWith('/admin/majcat-grid/upload')) return next();
   if (req.path === '/ksml/commit') return next();
   if (req.path === '/poolb/commit') return next();
@@ -311,7 +319,9 @@ app.use('/api/approver', authenticate, approverLimiter, auditLog, approverRoutes
 // ═══════════════════════════════════════════════════════
 app.use('/api/watcher', authenticateWatcher, watcherRoutes); // TODO: Add requireApprover middleware
 app.use('/api/article-config', authenticate, articleConfigRoutes);
-app.use('/api/model-generation', authenticate, requireUser, modelGenerationRoutes);
+// Accepts a user JWT (the UI) or an x-api-key service key scoped to /generate
+// (craftpack's material recolour). Both paths converge on the same requireUser.
+app.use('/api/model-generation', authenticateJwtOrServiceKey, requireUser, modelGenerationRoutes);
 
 // Health check endpoint (public)
 app.get('/api/health', (req, res) => {
