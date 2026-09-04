@@ -67,7 +67,11 @@ export interface DataTableProps<T = any> {
   resizableColumns?: boolean;
 }
 
-const MIN_COLUMN_WIDTH = 60;
+// Columns without an explicit width never shrink below this when sharing space —
+// low enough to fit many columns, high enough that labels/short values stay readable
+// instead of wrapping into multi-line cells. Below this floor, extra columns push the
+// table wider and into horizontal scroll rather than continuing to shrink.
+const MIN_COLUMN_WIDTH = 130;
 const DEFAULT_COLUMN_WIDTH = 150;
 
 function getColumnKey(col: DataTableColumn<any>, index: number): string {
@@ -122,18 +126,56 @@ export function DataTable<T = any>({
   onRow,
   resizableColumns,
 }: DataTableProps<T>) {
-  // Excel-style column resize: widths start from each column's declared `width`
-  // (or a default) and are overridden per-column once the user drags a divider.
+  // Excel-style column resize: a column keeps its declared `width` (or a user-dragged
+  // override) once it has one; columns with neither share whatever space is actually
+  // left in the container — evenly, down to MIN_COLUMN_WIDTH — so a handful of columns
+  // fills the box edge-to-edge instead of leaving blank space, while enough columns to
+  // exceed that floor overflow into horizontal scroll instead of squeezing illegibly.
   const [columnWidths, setColumnWidths] = React.useState<Record<string, number>>({});
   const resizeState = React.useRef<{ key: string; startX: number; startWidth: number } | null>(null);
+
+  const containerRef = React.useRef<HTMLDivElement>(null);
+  const [containerWidth, setContainerWidth] = React.useState(0);
+  React.useEffect(() => {
+    if (!resizableColumns || !containerRef.current) return;
+    const el = containerRef.current;
+    const observer = new ResizeObserver((entries) => {
+      const width = entries[0]?.contentRect.width;
+      if (typeof width === 'number') setContainerWidth(width);
+    });
+    observer.observe(el);
+    return () => observer.disconnect();
+  }, [resizableColumns]);
+
+  const resolvedWidths = React.useMemo(() => {
+    if (!resizableColumns) return null;
+    const widths: Record<string, number> = {};
+    let explicitTotal = 0;
+    const freeKeys: string[] = [];
+    columns.forEach((col, i) => {
+      const key = getColumnKey(col, i);
+      const explicit = columnWidths[key] ?? (typeof col.width === 'number' ? col.width : undefined);
+      if (explicit !== undefined) {
+        widths[key] = explicit;
+        explicitTotal += explicit;
+      } else {
+        freeKeys.push(key);
+      }
+    });
+    if (freeKeys.length > 0) {
+      const available = Math.max(0, containerWidth - explicitTotal);
+      const share = Math.max(MIN_COLUMN_WIDTH, Math.floor(available / freeKeys.length));
+      freeKeys.forEach((k) => { widths[k] = share; });
+    }
+    return widths;
+  }, [resizableColumns, columns, columnWidths, containerWidth]);
 
   const getColumnWidth = React.useCallback(
     (col: DataTableColumn<any>, index: number): number | undefined => {
       if (!resizableColumns) return typeof col.width === 'number' ? col.width : undefined;
-      const key = getColumnKey(col, index);
-      return columnWidths[key] ?? (typeof col.width === 'number' ? col.width : DEFAULT_COLUMN_WIDTH);
+      return resolvedWidths?.[getColumnKey(col, index)];
     },
-    [resizableColumns, columnWidths],
+    [resizableColumns, resolvedWidths],
   );
 
   const onResizeMove = React.useCallback((e: MouseEvent) => {
@@ -208,26 +250,36 @@ export function DataTable<T = any>({
 
   return (
     <div className={cn('flex flex-col', className)}>
-      <div
-        className={cn(
+      {/* Single scroll region for both axes — a table nested inside its own separate
+          overflow-auto wrapper left the horizontal scrollbar (and what sticky top-0/
+          right-0 actually track) split across two containers, which is why the scrollbar
+          wasn't reliably showing up. `wrapperRef` also feeds the ResizeObserver above so
+          "fill remaining space evenly" measures the real visible width.
+          `Table` defaults to `w-full`, which under table-layout:fixed would proportionally
+          rescale every column to always fit the container — the opposite of Excel-style
+          resize, where widening a column grows the sheet and reveals horizontal scroll.
+          `w-auto` cancels that so the table's width is the sum of its column widths;
+          `min-w-full` keeps it filling the container when that sum is narrower.
+          `scroll.x` (previously accepted but never applied) sets a minimum width so a
+          wide table reliably triggers the scrollbar instead of squeezing every column to
+          fit, matching antd's `Table.scroll.x`. */}
+      <Table
+        wrapperRef={containerRef}
+        wrapperClassName={cn(
           'rounded-md border border-border',
           scroll?.y && 'overflow-auto',
           fillsAvailableHeight && 'flex-1 min-h-0',
         )}
-        style={{
+        wrapperStyle={{
           maxHeight: fillsAvailableHeight ? undefined : typeof scroll?.y === 'number' ? scroll.y : scroll?.y,
         }}
+        className={resizableColumns ? 'w-auto min-w-full' : undefined}
+        style={{
+          tableLayout: resizableColumns ? 'fixed' : undefined,
+          minWidth: typeof scroll?.x === 'number' ? scroll.x : scroll?.x,
+        }}
       >
-        {/* `Table` defaults to `w-full`, which under table-layout:fixed would proportionally
-            rescale every column to always fit the container — the opposite of Excel-style
-            resize, where widening a column grows the sheet and reveals horizontal scroll.
-            `w-auto` cancels that so the table's width is the sum of its column widths;
-            `min-w-full` keeps it filling the container when that sum is narrower. */}
-        <Table
-          className={resizableColumns ? 'w-auto min-w-full' : undefined}
-          style={resizableColumns ? { tableLayout: 'fixed' } : undefined}
-        >
-          <TableHeader className={sticky ? 'sticky top-0 z-10 bg-background' : undefined}>
+        <TableHeader className={sticky ? 'sticky top-0 z-10 bg-background' : undefined}>
             <TableRow>
               {columns.map((col, ci) => {
                 const width = getColumnWidth(col, ci);
@@ -291,7 +343,7 @@ export function DataTable<T = any>({
                           className={cn(
                             sizePadding[size],
                             'border-r border-border last:border-r-0',
-                            resizableColumns && 'overflow-hidden',
+                            resizableColumns && 'overflow-hidden whitespace-nowrap text-ellipsis',
                             getFixedClasses(col),
                             col.fixed && 'group-hover:bg-muted/40',
                             col.className,
@@ -307,7 +359,6 @@ export function DataTable<T = any>({
             )}
           </TableBody>
         </Table>
-      </div>
 
       {hasPager && hasRows && (
         <div className="mt-3 flex items-center justify-end gap-3">
