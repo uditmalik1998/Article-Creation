@@ -8,8 +8,6 @@ import {
   Button,
   Card,
   CardContent,
-  CardHeader,
-  CardTitle,
   DataTable,
   Input,
   Select,
@@ -114,8 +112,9 @@ export default function ExpenseTableDetailPage() {
     columns.push({
       title: '',
       key: 'action',
-      width: 60,
+      width: 52,
       align: 'center',
+      fixed: 'right',
       render: (_v, record) => (
         <Button
           size="sm"
@@ -131,7 +130,7 @@ export default function ExpenseTableDetailPage() {
   }
 
   return (
-    <div className="p-6 space-y-4">
+    <div className="flex h-full flex-col p-4 space-y-2">
       <div className="flex items-center justify-between">
         <Link to="/admin/expenses" className="inline-flex items-center gap-1 text-sm text-muted-foreground hover:text-foreground">
           <ArrowLeft className="h-4 w-4" /> Back to Expense Admin
@@ -145,15 +144,12 @@ export default function ExpenseTableDetailPage() {
       </div>
 
       <div>
-        <h1 className="text-2xl font-bold">{config.title}</h1>
-        <p className="text-sm text-muted-foreground mt-0.5">{config.description}</p>
+        <h1 className="text-xl font-bold leading-tight">{config.title}</h1>
+        <p className="text-xs text-muted-foreground">{config.description}</p>
       </div>
 
       <Card>
-        <CardHeader className="pb-3">
-          <CardTitle className="text-base">Search &amp; Sort</CardTitle>
-        </CardHeader>
-        <CardContent className="flex flex-col gap-3 md:flex-row md:items-end">
+        <CardContent className="flex flex-col gap-2 p-3 md:flex-row md:items-end">
           <div className="relative flex-1">
             <Search className="absolute left-2.5 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground pointer-events-none" />
             <Input
@@ -204,8 +200,8 @@ export default function ExpenseTableDetailPage() {
         </CardContent>
       </Card>
 
-      <Card>
-        <CardContent className="p-0">
+      <Card className="flex min-h-0 flex-1 flex-col">
+        <CardContent className="flex min-h-0 flex-1 flex-col p-0">
           {isError ? (
             <div className="py-10 text-center text-red-500 text-sm">Failed to load data. Please try again.</div>
           ) : (
@@ -215,7 +211,10 @@ export default function ExpenseTableDetailPage() {
               loading={isLoading}
               rowKey={config.rowKey}
               size="small"
-              scroll={{ x: 1100 }}
+              sticky
+              resizableColumns
+              scroll={{ x: 1100, y: '100%' }}
+              className="min-h-0 flex-1"
               pagination={{
                 current: page,
                 pageSize,
