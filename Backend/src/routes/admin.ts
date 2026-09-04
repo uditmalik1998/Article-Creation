@@ -223,6 +223,10 @@ router.get('/modify-logs',               h(adminController.getModifyLogs));
 router.get('/national-grid',             h(adminController.getNationalGrid));
 router.post('/national-grid/import',     h(adminController.importNationalGrid));
 
+// NOTE: Expense Data read/edit-workflow routes moved to routes/expense.ts,
+// mounted at /api/expense (not ADMIN-only), so Creator/Approver/Category-Head/PD
+// can reach them too.
+
 // ═══════════════════════════════════════════════════════
 // FABRIC ARTICLE DATA (ADMIN) — fabric_article_data
 // ═══════════════════════════════════════════════════════

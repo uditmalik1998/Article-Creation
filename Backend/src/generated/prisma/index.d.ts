@@ -228,6 +228,11 @@ export type FabricArticleData = $Result.DefaultSelection<Prisma.$FabricArticleDa
  * BodyArticleData: One row per body article created from the Body & Construction card
  */
 export type BodyArticleData = $Result.DefaultSelection<Prisma.$BodyArticleDataPayload>
+/**
+ * Model ExpenseChangeRequest
+ * 
+ */
+export type ExpenseChangeRequest = $Result.DefaultSelection<Prisma.$ExpenseChangeRequestPayload>
 
 /**
  * Enums
@@ -345,6 +350,16 @@ export const PoolBBatchStatus: {
 
 export type PoolBBatchStatus = (typeof PoolBBatchStatus)[keyof typeof PoolBBatchStatus]
 
+
+export const ExpenseChangeStatus: {
+  PENDING_APPROVER: 'PENDING_APPROVER',
+  PENDING_FINAL: 'PENDING_FINAL',
+  APPROVED: 'APPROVED',
+  REJECTED: 'REJECTED'
+};
+
+export type ExpenseChangeStatus = (typeof ExpenseChangeStatus)[keyof typeof ExpenseChangeStatus]
+
 }
 
 export type AttributeType = $Enums.AttributeType
@@ -390,6 +405,10 @@ export const PoolBJobStatus: typeof $Enums.PoolBJobStatus
 export type PoolBBatchStatus = $Enums.PoolBBatchStatus
 
 export const PoolBBatchStatus: typeof $Enums.PoolBBatchStatus
+
+export type ExpenseChangeStatus = $Enums.ExpenseChangeStatus
+
+export const ExpenseChangeStatus: typeof $Enums.ExpenseChangeStatus
 
 /**
  * ##  Prisma Client ʲˢ
@@ -908,6 +927,16 @@ export class PrismaClient<
     * ```
     */
   get bodyArticleData(): Prisma.BodyArticleDataDelegate<ExtArgs, ClientOptions>;
+
+  /**
+   * `prisma.expenseChangeRequest`: Exposes CRUD operations for the **ExpenseChangeRequest** model.
+    * Example usage:
+    * ```ts
+    * // Fetch zero or more ExpenseChangeRequests
+    * const expenseChangeRequests = await prisma.expenseChangeRequest.findMany()
+    * ```
+    */
+  get expenseChangeRequest(): Prisma.ExpenseChangeRequestDelegate<ExtArgs, ClientOptions>;
 }
 
 export namespace Prisma {
@@ -1387,7 +1416,8 @@ export namespace Prisma {
     FabricMajCatGridValue: 'FabricMajCatGridValue',
     ModifyLog: 'ModifyLog',
     FabricArticleData: 'FabricArticleData',
-    BodyArticleData: 'BodyArticleData'
+    BodyArticleData: 'BodyArticleData',
+    ExpenseChangeRequest: 'ExpenseChangeRequest'
   };
 
   export type ModelName = (typeof ModelName)[keyof typeof ModelName]
@@ -1406,7 +1436,7 @@ export namespace Prisma {
       omit: GlobalOmitOptions
     }
     meta: {
-      modelProps: "department" | "subDepartment" | "category" | "masterAttribute" | "attributeAllowedValue" | "categoryAttribute" | "extractionJob" | "extractionResult" | "extractionResultFlat" | "modelGenerationResult" | "modelImageApproval" | "mvgrLookup" | "masterVendorDetail" | "user" | "auditLog" | "apiKey" | "changeHistory" | "costSummary" | "article360" | "articleFab" | "articleBody" | "articleVaAcc" | "articleVaPrcs" | "articleBom" | "sapFieldConfig" | "sapAttributeValue" | "article360Flat" | "rawArticle" | "fabricRawData" | "srmSyncRun" | "srmSyncRunItem" | "poolBJob" | "poolBBatch" | "nationalGridMaster" | "majorCatMaster" | "fabricArticleMaster" | "fabricMajCatGridValue" | "modifyLog" | "fabricArticleData" | "bodyArticleData"
+      modelProps: "department" | "subDepartment" | "category" | "masterAttribute" | "attributeAllowedValue" | "categoryAttribute" | "extractionJob" | "extractionResult" | "extractionResultFlat" | "modelGenerationResult" | "modelImageApproval" | "mvgrLookup" | "masterVendorDetail" | "user" | "auditLog" | "apiKey" | "changeHistory" | "costSummary" | "article360" | "articleFab" | "articleBody" | "articleVaAcc" | "articleVaPrcs" | "articleBom" | "sapFieldConfig" | "sapAttributeValue" | "article360Flat" | "rawArticle" | "fabricRawData" | "srmSyncRun" | "srmSyncRunItem" | "poolBJob" | "poolBBatch" | "nationalGridMaster" | "majorCatMaster" | "fabricArticleMaster" | "fabricMajCatGridValue" | "modifyLog" | "fabricArticleData" | "bodyArticleData" | "expenseChangeRequest"
       txIsolationLevel: Prisma.TransactionIsolationLevel
     }
     model: {
@@ -4370,6 +4400,80 @@ export namespace Prisma {
           }
         }
       }
+      ExpenseChangeRequest: {
+        payload: Prisma.$ExpenseChangeRequestPayload<ExtArgs>
+        fields: Prisma.ExpenseChangeRequestFieldRefs
+        operations: {
+          findUnique: {
+            args: Prisma.ExpenseChangeRequestFindUniqueArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$ExpenseChangeRequestPayload> | null
+          }
+          findUniqueOrThrow: {
+            args: Prisma.ExpenseChangeRequestFindUniqueOrThrowArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$ExpenseChangeRequestPayload>
+          }
+          findFirst: {
+            args: Prisma.ExpenseChangeRequestFindFirstArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$ExpenseChangeRequestPayload> | null
+          }
+          findFirstOrThrow: {
+            args: Prisma.ExpenseChangeRequestFindFirstOrThrowArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$ExpenseChangeRequestPayload>
+          }
+          findMany: {
+            args: Prisma.ExpenseChangeRequestFindManyArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$ExpenseChangeRequestPayload>[]
+          }
+          create: {
+            args: Prisma.ExpenseChangeRequestCreateArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$ExpenseChangeRequestPayload>
+          }
+          createMany: {
+            args: Prisma.ExpenseChangeRequestCreateManyArgs<ExtArgs>
+            result: BatchPayload
+          }
+          createManyAndReturn: {
+            args: Prisma.ExpenseChangeRequestCreateManyAndReturnArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$ExpenseChangeRequestPayload>[]
+          }
+          delete: {
+            args: Prisma.ExpenseChangeRequestDeleteArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$ExpenseChangeRequestPayload>
+          }
+          update: {
+            args: Prisma.ExpenseChangeRequestUpdateArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$ExpenseChangeRequestPayload>
+          }
+          deleteMany: {
+            args: Prisma.ExpenseChangeRequestDeleteManyArgs<ExtArgs>
+            result: BatchPayload
+          }
+          updateMany: {
+            args: Prisma.ExpenseChangeRequestUpdateManyArgs<ExtArgs>
+            result: BatchPayload
+          }
+          updateManyAndReturn: {
+            args: Prisma.ExpenseChangeRequestUpdateManyAndReturnArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$ExpenseChangeRequestPayload>[]
+          }
+          upsert: {
+            args: Prisma.ExpenseChangeRequestUpsertArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$ExpenseChangeRequestPayload>
+          }
+          aggregate: {
+            args: Prisma.ExpenseChangeRequestAggregateArgs<ExtArgs>
+            result: $Utils.Optional<AggregateExpenseChangeRequest>
+          }
+          groupBy: {
+            args: Prisma.ExpenseChangeRequestGroupByArgs<ExtArgs>
+            result: $Utils.Optional<ExpenseChangeRequestGroupByOutputType>[]
+          }
+          count: {
+            args: Prisma.ExpenseChangeRequestCountArgs<ExtArgs>
+            result: $Utils.Optional<ExpenseChangeRequestCountAggregateOutputType> | number
+          }
+        }
+      }
     }
   } & {
     other: {
@@ -4502,6 +4606,7 @@ export namespace Prisma {
     modifyLog?: ModifyLogOmit
     fabricArticleData?: FabricArticleDataOmit
     bodyArticleData?: BodyArticleDataOmit
+    expenseChangeRequest?: ExpenseChangeRequestOmit
   }
 
   /* Types for Logging */
@@ -55499,6 +55604,1299 @@ export namespace Prisma {
 
 
   /**
+   * Model ExpenseChangeRequest
+   */
+
+  export type AggregateExpenseChangeRequest = {
+    _count: ExpenseChangeRequestCountAggregateOutputType | null
+    _avg: ExpenseChangeRequestAvgAggregateOutputType | null
+    _sum: ExpenseChangeRequestSumAggregateOutputType | null
+    _min: ExpenseChangeRequestMinAggregateOutputType | null
+    _max: ExpenseChangeRequestMaxAggregateOutputType | null
+  }
+
+  export type ExpenseChangeRequestAvgAggregateOutputType = {
+    requestedById: number | null
+    approverId: number | null
+    finalById: number | null
+  }
+
+  export type ExpenseChangeRequestSumAggregateOutputType = {
+    requestedById: number | null
+    approverId: number | null
+    finalById: number | null
+  }
+
+  export type ExpenseChangeRequestMinAggregateOutputType = {
+    id: string | null
+    tableKey: string | null
+    rowId: string | null
+    rowLabel: string | null
+    reason: string | null
+    status: $Enums.ExpenseChangeStatus | null
+    requestedById: number | null
+    requestedByName: string | null
+    requestedByEmail: string | null
+    requestedAt: Date | null
+    approverId: number | null
+    approverName: string | null
+    approverEmail: string | null
+    approverAt: Date | null
+    approverComment: string | null
+    approverAction: string | null
+    finalById: number | null
+    finalByName: string | null
+    finalByEmail: string | null
+    finalAt: Date | null
+    finalComment: string | null
+    finalAction: string | null
+    createdAt: Date | null
+    updatedAt: Date | null
+  }
+
+  export type ExpenseChangeRequestMaxAggregateOutputType = {
+    id: string | null
+    tableKey: string | null
+    rowId: string | null
+    rowLabel: string | null
+    reason: string | null
+    status: $Enums.ExpenseChangeStatus | null
+    requestedById: number | null
+    requestedByName: string | null
+    requestedByEmail: string | null
+    requestedAt: Date | null
+    approverId: number | null
+    approverName: string | null
+    approverEmail: string | null
+    approverAt: Date | null
+    approverComment: string | null
+    approverAction: string | null
+    finalById: number | null
+    finalByName: string | null
+    finalByEmail: string | null
+    finalAt: Date | null
+    finalComment: string | null
+    finalAction: string | null
+    createdAt: Date | null
+    updatedAt: Date | null
+  }
+
+  export type ExpenseChangeRequestCountAggregateOutputType = {
+    id: number
+    tableKey: number
+    rowId: number
+    rowLabel: number
+    changes: number
+    reason: number
+    status: number
+    requestedById: number
+    requestedByName: number
+    requestedByEmail: number
+    requestedAt: number
+    approverId: number
+    approverName: number
+    approverEmail: number
+    approverAt: number
+    approverComment: number
+    approverAction: number
+    finalById: number
+    finalByName: number
+    finalByEmail: number
+    finalAt: number
+    finalComment: number
+    finalAction: number
+    createdAt: number
+    updatedAt: number
+    _all: number
+  }
+
+
+  export type ExpenseChangeRequestAvgAggregateInputType = {
+    requestedById?: true
+    approverId?: true
+    finalById?: true
+  }
+
+  export type ExpenseChangeRequestSumAggregateInputType = {
+    requestedById?: true
+    approverId?: true
+    finalById?: true
+  }
+
+  export type ExpenseChangeRequestMinAggregateInputType = {
+    id?: true
+    tableKey?: true
+    rowId?: true
+    rowLabel?: true
+    reason?: true
+    status?: true
+    requestedById?: true
+    requestedByName?: true
+    requestedByEmail?: true
+    requestedAt?: true
+    approverId?: true
+    approverName?: true
+    approverEmail?: true
+    approverAt?: true
+    approverComment?: true
+    approverAction?: true
+    finalById?: true
+    finalByName?: true
+    finalByEmail?: true
+    finalAt?: true
+    finalComment?: true
+    finalAction?: true
+    createdAt?: true
+    updatedAt?: true
+  }
+
+  export type ExpenseChangeRequestMaxAggregateInputType = {
+    id?: true
+    tableKey?: true
+    rowId?: true
+    rowLabel?: true
+    reason?: true
+    status?: true
+    requestedById?: true
+    requestedByName?: true
+    requestedByEmail?: true
+    requestedAt?: true
+    approverId?: true
+    approverName?: true
+    approverEmail?: true
+    approverAt?: true
+    approverComment?: true
+    approverAction?: true
+    finalById?: true
+    finalByName?: true
+    finalByEmail?: true
+    finalAt?: true
+    finalComment?: true
+    finalAction?: true
+    createdAt?: true
+    updatedAt?: true
+  }
+
+  export type ExpenseChangeRequestCountAggregateInputType = {
+    id?: true
+    tableKey?: true
+    rowId?: true
+    rowLabel?: true
+    changes?: true
+    reason?: true
+    status?: true
+    requestedById?: true
+    requestedByName?: true
+    requestedByEmail?: true
+    requestedAt?: true
+    approverId?: true
+    approverName?: true
+    approverEmail?: true
+    approverAt?: true
+    approverComment?: true
+    approverAction?: true
+    finalById?: true
+    finalByName?: true
+    finalByEmail?: true
+    finalAt?: true
+    finalComment?: true
+    finalAction?: true
+    createdAt?: true
+    updatedAt?: true
+    _all?: true
+  }
+
+  export type ExpenseChangeRequestAggregateArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Filter which ExpenseChangeRequest to aggregate.
+     */
+    where?: ExpenseChangeRequestWhereInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
+     * 
+     * Determine the order of ExpenseChangeRequests to fetch.
+     */
+    orderBy?: ExpenseChangeRequestOrderByWithRelationInput | ExpenseChangeRequestOrderByWithRelationInput[]
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
+     * 
+     * Sets the start position
+     */
+    cursor?: ExpenseChangeRequestWhereUniqueInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Take `±n` ExpenseChangeRequests from the position of the cursor.
+     */
+    take?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Skip the first `n` ExpenseChangeRequests.
+     */
+    skip?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     * 
+     * Count returned ExpenseChangeRequests
+    **/
+    _count?: true | ExpenseChangeRequestCountAggregateInputType
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     * 
+     * Select which fields to average
+    **/
+    _avg?: ExpenseChangeRequestAvgAggregateInputType
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     * 
+     * Select which fields to sum
+    **/
+    _sum?: ExpenseChangeRequestSumAggregateInputType
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     * 
+     * Select which fields to find the minimum value
+    **/
+    _min?: ExpenseChangeRequestMinAggregateInputType
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     * 
+     * Select which fields to find the maximum value
+    **/
+    _max?: ExpenseChangeRequestMaxAggregateInputType
+  }
+
+  export type GetExpenseChangeRequestAggregateType<T extends ExpenseChangeRequestAggregateArgs> = {
+        [P in keyof T & keyof AggregateExpenseChangeRequest]: P extends '_count' | 'count'
+      ? T[P] extends true
+        ? number
+        : GetScalarType<T[P], AggregateExpenseChangeRequest[P]>
+      : GetScalarType<T[P], AggregateExpenseChangeRequest[P]>
+  }
+
+
+
+
+  export type ExpenseChangeRequestGroupByArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    where?: ExpenseChangeRequestWhereInput
+    orderBy?: ExpenseChangeRequestOrderByWithAggregationInput | ExpenseChangeRequestOrderByWithAggregationInput[]
+    by: ExpenseChangeRequestScalarFieldEnum[] | ExpenseChangeRequestScalarFieldEnum
+    having?: ExpenseChangeRequestScalarWhereWithAggregatesInput
+    take?: number
+    skip?: number
+    _count?: ExpenseChangeRequestCountAggregateInputType | true
+    _avg?: ExpenseChangeRequestAvgAggregateInputType
+    _sum?: ExpenseChangeRequestSumAggregateInputType
+    _min?: ExpenseChangeRequestMinAggregateInputType
+    _max?: ExpenseChangeRequestMaxAggregateInputType
+  }
+
+  export type ExpenseChangeRequestGroupByOutputType = {
+    id: string
+    tableKey: string
+    rowId: string
+    rowLabel: string | null
+    changes: JsonValue
+    reason: string
+    status: $Enums.ExpenseChangeStatus
+    requestedById: number
+    requestedByName: string
+    requestedByEmail: string
+    requestedAt: Date
+    approverId: number | null
+    approverName: string | null
+    approverEmail: string | null
+    approverAt: Date | null
+    approverComment: string | null
+    approverAction: string | null
+    finalById: number | null
+    finalByName: string | null
+    finalByEmail: string | null
+    finalAt: Date | null
+    finalComment: string | null
+    finalAction: string | null
+    createdAt: Date
+    updatedAt: Date
+    _count: ExpenseChangeRequestCountAggregateOutputType | null
+    _avg: ExpenseChangeRequestAvgAggregateOutputType | null
+    _sum: ExpenseChangeRequestSumAggregateOutputType | null
+    _min: ExpenseChangeRequestMinAggregateOutputType | null
+    _max: ExpenseChangeRequestMaxAggregateOutputType | null
+  }
+
+  type GetExpenseChangeRequestGroupByPayload<T extends ExpenseChangeRequestGroupByArgs> = Prisma.PrismaPromise<
+    Array<
+      PickEnumerable<ExpenseChangeRequestGroupByOutputType, T['by']> &
+        {
+          [P in ((keyof T) & (keyof ExpenseChangeRequestGroupByOutputType))]: P extends '_count'
+            ? T[P] extends boolean
+              ? number
+              : GetScalarType<T[P], ExpenseChangeRequestGroupByOutputType[P]>
+            : GetScalarType<T[P], ExpenseChangeRequestGroupByOutputType[P]>
+        }
+      >
+    >
+
+
+  export type ExpenseChangeRequestSelect<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
+    id?: boolean
+    tableKey?: boolean
+    rowId?: boolean
+    rowLabel?: boolean
+    changes?: boolean
+    reason?: boolean
+    status?: boolean
+    requestedById?: boolean
+    requestedByName?: boolean
+    requestedByEmail?: boolean
+    requestedAt?: boolean
+    approverId?: boolean
+    approverName?: boolean
+    approverEmail?: boolean
+    approverAt?: boolean
+    approverComment?: boolean
+    approverAction?: boolean
+    finalById?: boolean
+    finalByName?: boolean
+    finalByEmail?: boolean
+    finalAt?: boolean
+    finalComment?: boolean
+    finalAction?: boolean
+    createdAt?: boolean
+    updatedAt?: boolean
+  }, ExtArgs["result"]["expenseChangeRequest"]>
+
+  export type ExpenseChangeRequestSelectCreateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
+    id?: boolean
+    tableKey?: boolean
+    rowId?: boolean
+    rowLabel?: boolean
+    changes?: boolean
+    reason?: boolean
+    status?: boolean
+    requestedById?: boolean
+    requestedByName?: boolean
+    requestedByEmail?: boolean
+    requestedAt?: boolean
+    approverId?: boolean
+    approverName?: boolean
+    approverEmail?: boolean
+    approverAt?: boolean
+    approverComment?: boolean
+    approverAction?: boolean
+    finalById?: boolean
+    finalByName?: boolean
+    finalByEmail?: boolean
+    finalAt?: boolean
+    finalComment?: boolean
+    finalAction?: boolean
+    createdAt?: boolean
+    updatedAt?: boolean
+  }, ExtArgs["result"]["expenseChangeRequest"]>
+
+  export type ExpenseChangeRequestSelectUpdateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
+    id?: boolean
+    tableKey?: boolean
+    rowId?: boolean
+    rowLabel?: boolean
+    changes?: boolean
+    reason?: boolean
+    status?: boolean
+    requestedById?: boolean
+    requestedByName?: boolean
+    requestedByEmail?: boolean
+    requestedAt?: boolean
+    approverId?: boolean
+    approverName?: boolean
+    approverEmail?: boolean
+    approverAt?: boolean
+    approverComment?: boolean
+    approverAction?: boolean
+    finalById?: boolean
+    finalByName?: boolean
+    finalByEmail?: boolean
+    finalAt?: boolean
+    finalComment?: boolean
+    finalAction?: boolean
+    createdAt?: boolean
+    updatedAt?: boolean
+  }, ExtArgs["result"]["expenseChangeRequest"]>
+
+  export type ExpenseChangeRequestSelectScalar = {
+    id?: boolean
+    tableKey?: boolean
+    rowId?: boolean
+    rowLabel?: boolean
+    changes?: boolean
+    reason?: boolean
+    status?: boolean
+    requestedById?: boolean
+    requestedByName?: boolean
+    requestedByEmail?: boolean
+    requestedAt?: boolean
+    approverId?: boolean
+    approverName?: boolean
+    approverEmail?: boolean
+    approverAt?: boolean
+    approverComment?: boolean
+    approverAction?: boolean
+    finalById?: boolean
+    finalByName?: boolean
+    finalByEmail?: boolean
+    finalAt?: boolean
+    finalComment?: boolean
+    finalAction?: boolean
+    createdAt?: boolean
+    updatedAt?: boolean
+  }
+
+  export type ExpenseChangeRequestOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<"id" | "tableKey" | "rowId" | "rowLabel" | "changes" | "reason" | "status" | "requestedById" | "requestedByName" | "requestedByEmail" | "requestedAt" | "approverId" | "approverName" | "approverEmail" | "approverAt" | "approverComment" | "approverAction" | "finalById" | "finalByName" | "finalByEmail" | "finalAt" | "finalComment" | "finalAction" | "createdAt" | "updatedAt", ExtArgs["result"]["expenseChangeRequest"]>
+
+  export type $ExpenseChangeRequestPayload<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    name: "ExpenseChangeRequest"
+    objects: {}
+    scalars: $Extensions.GetPayloadResult<{
+      id: string
+      tableKey: string
+      rowId: string
+      rowLabel: string | null
+      changes: Prisma.JsonValue
+      reason: string
+      status: $Enums.ExpenseChangeStatus
+      requestedById: number
+      requestedByName: string
+      requestedByEmail: string
+      requestedAt: Date
+      approverId: number | null
+      approverName: string | null
+      approverEmail: string | null
+      approverAt: Date | null
+      approverComment: string | null
+      approverAction: string | null
+      finalById: number | null
+      finalByName: string | null
+      finalByEmail: string | null
+      finalAt: Date | null
+      finalComment: string | null
+      finalAction: string | null
+      createdAt: Date
+      updatedAt: Date
+    }, ExtArgs["result"]["expenseChangeRequest"]>
+    composites: {}
+  }
+
+  type ExpenseChangeRequestGetPayload<S extends boolean | null | undefined | ExpenseChangeRequestDefaultArgs> = $Result.GetResult<Prisma.$ExpenseChangeRequestPayload, S>
+
+  type ExpenseChangeRequestCountArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> =
+    Omit<ExpenseChangeRequestFindManyArgs, 'select' | 'include' | 'distinct' | 'omit'> & {
+      select?: ExpenseChangeRequestCountAggregateInputType | true
+    }
+
+  export interface ExpenseChangeRequestDelegate<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs, GlobalOmitOptions = {}> {
+    [K: symbol]: { types: Prisma.TypeMap<ExtArgs>['model']['ExpenseChangeRequest'], meta: { name: 'ExpenseChangeRequest' } }
+    /**
+     * Find zero or one ExpenseChangeRequest that matches the filter.
+     * @param {ExpenseChangeRequestFindUniqueArgs} args - Arguments to find a ExpenseChangeRequest
+     * @example
+     * // Get one ExpenseChangeRequest
+     * const expenseChangeRequest = await prisma.expenseChangeRequest.findUnique({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     */
+    findUnique<T extends ExpenseChangeRequestFindUniqueArgs>(args: SelectSubset<T, ExpenseChangeRequestFindUniqueArgs<ExtArgs>>): Prisma__ExpenseChangeRequestClient<$Result.GetResult<Prisma.$ExpenseChangeRequestPayload<ExtArgs>, T, "findUnique", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Find one ExpenseChangeRequest that matches the filter or throw an error with `error.code='P2025'`
+     * if no matches were found.
+     * @param {ExpenseChangeRequestFindUniqueOrThrowArgs} args - Arguments to find a ExpenseChangeRequest
+     * @example
+     * // Get one ExpenseChangeRequest
+     * const expenseChangeRequest = await prisma.expenseChangeRequest.findUniqueOrThrow({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     */
+    findUniqueOrThrow<T extends ExpenseChangeRequestFindUniqueOrThrowArgs>(args: SelectSubset<T, ExpenseChangeRequestFindUniqueOrThrowArgs<ExtArgs>>): Prisma__ExpenseChangeRequestClient<$Result.GetResult<Prisma.$ExpenseChangeRequestPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Find the first ExpenseChangeRequest that matches the filter.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {ExpenseChangeRequestFindFirstArgs} args - Arguments to find a ExpenseChangeRequest
+     * @example
+     * // Get one ExpenseChangeRequest
+     * const expenseChangeRequest = await prisma.expenseChangeRequest.findFirst({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     */
+    findFirst<T extends ExpenseChangeRequestFindFirstArgs>(args?: SelectSubset<T, ExpenseChangeRequestFindFirstArgs<ExtArgs>>): Prisma__ExpenseChangeRequestClient<$Result.GetResult<Prisma.$ExpenseChangeRequestPayload<ExtArgs>, T, "findFirst", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Find the first ExpenseChangeRequest that matches the filter or
+     * throw `PrismaKnownClientError` with `P2025` code if no matches were found.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {ExpenseChangeRequestFindFirstOrThrowArgs} args - Arguments to find a ExpenseChangeRequest
+     * @example
+     * // Get one ExpenseChangeRequest
+     * const expenseChangeRequest = await prisma.expenseChangeRequest.findFirstOrThrow({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     */
+    findFirstOrThrow<T extends ExpenseChangeRequestFindFirstOrThrowArgs>(args?: SelectSubset<T, ExpenseChangeRequestFindFirstOrThrowArgs<ExtArgs>>): Prisma__ExpenseChangeRequestClient<$Result.GetResult<Prisma.$ExpenseChangeRequestPayload<ExtArgs>, T, "findFirstOrThrow", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Find zero or more ExpenseChangeRequests that matches the filter.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {ExpenseChangeRequestFindManyArgs} args - Arguments to filter and select certain fields only.
+     * @example
+     * // Get all ExpenseChangeRequests
+     * const expenseChangeRequests = await prisma.expenseChangeRequest.findMany()
+     * 
+     * // Get first 10 ExpenseChangeRequests
+     * const expenseChangeRequests = await prisma.expenseChangeRequest.findMany({ take: 10 })
+     * 
+     * // Only select the `id`
+     * const expenseChangeRequestWithIdOnly = await prisma.expenseChangeRequest.findMany({ select: { id: true } })
+     * 
+     */
+    findMany<T extends ExpenseChangeRequestFindManyArgs>(args?: SelectSubset<T, ExpenseChangeRequestFindManyArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$ExpenseChangeRequestPayload<ExtArgs>, T, "findMany", GlobalOmitOptions>>
+
+    /**
+     * Create a ExpenseChangeRequest.
+     * @param {ExpenseChangeRequestCreateArgs} args - Arguments to create a ExpenseChangeRequest.
+     * @example
+     * // Create one ExpenseChangeRequest
+     * const ExpenseChangeRequest = await prisma.expenseChangeRequest.create({
+     *   data: {
+     *     // ... data to create a ExpenseChangeRequest
+     *   }
+     * })
+     * 
+     */
+    create<T extends ExpenseChangeRequestCreateArgs>(args: SelectSubset<T, ExpenseChangeRequestCreateArgs<ExtArgs>>): Prisma__ExpenseChangeRequestClient<$Result.GetResult<Prisma.$ExpenseChangeRequestPayload<ExtArgs>, T, "create", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Create many ExpenseChangeRequests.
+     * @param {ExpenseChangeRequestCreateManyArgs} args - Arguments to create many ExpenseChangeRequests.
+     * @example
+     * // Create many ExpenseChangeRequests
+     * const expenseChangeRequest = await prisma.expenseChangeRequest.createMany({
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     *     
+     */
+    createMany<T extends ExpenseChangeRequestCreateManyArgs>(args?: SelectSubset<T, ExpenseChangeRequestCreateManyArgs<ExtArgs>>): Prisma.PrismaPromise<BatchPayload>
+
+    /**
+     * Create many ExpenseChangeRequests and returns the data saved in the database.
+     * @param {ExpenseChangeRequestCreateManyAndReturnArgs} args - Arguments to create many ExpenseChangeRequests.
+     * @example
+     * // Create many ExpenseChangeRequests
+     * const expenseChangeRequest = await prisma.expenseChangeRequest.createManyAndReturn({
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     * 
+     * // Create many ExpenseChangeRequests and only return the `id`
+     * const expenseChangeRequestWithIdOnly = await prisma.expenseChangeRequest.createManyAndReturn({
+     *   select: { id: true },
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * 
+     */
+    createManyAndReturn<T extends ExpenseChangeRequestCreateManyAndReturnArgs>(args?: SelectSubset<T, ExpenseChangeRequestCreateManyAndReturnArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$ExpenseChangeRequestPayload<ExtArgs>, T, "createManyAndReturn", GlobalOmitOptions>>
+
+    /**
+     * Delete a ExpenseChangeRequest.
+     * @param {ExpenseChangeRequestDeleteArgs} args - Arguments to delete one ExpenseChangeRequest.
+     * @example
+     * // Delete one ExpenseChangeRequest
+     * const ExpenseChangeRequest = await prisma.expenseChangeRequest.delete({
+     *   where: {
+     *     // ... filter to delete one ExpenseChangeRequest
+     *   }
+     * })
+     * 
+     */
+    delete<T extends ExpenseChangeRequestDeleteArgs>(args: SelectSubset<T, ExpenseChangeRequestDeleteArgs<ExtArgs>>): Prisma__ExpenseChangeRequestClient<$Result.GetResult<Prisma.$ExpenseChangeRequestPayload<ExtArgs>, T, "delete", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Update one ExpenseChangeRequest.
+     * @param {ExpenseChangeRequestUpdateArgs} args - Arguments to update one ExpenseChangeRequest.
+     * @example
+     * // Update one ExpenseChangeRequest
+     * const expenseChangeRequest = await prisma.expenseChangeRequest.update({
+     *   where: {
+     *     // ... provide filter here
+     *   },
+     *   data: {
+     *     // ... provide data here
+     *   }
+     * })
+     * 
+     */
+    update<T extends ExpenseChangeRequestUpdateArgs>(args: SelectSubset<T, ExpenseChangeRequestUpdateArgs<ExtArgs>>): Prisma__ExpenseChangeRequestClient<$Result.GetResult<Prisma.$ExpenseChangeRequestPayload<ExtArgs>, T, "update", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Delete zero or more ExpenseChangeRequests.
+     * @param {ExpenseChangeRequestDeleteManyArgs} args - Arguments to filter ExpenseChangeRequests to delete.
+     * @example
+     * // Delete a few ExpenseChangeRequests
+     * const { count } = await prisma.expenseChangeRequest.deleteMany({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     * 
+     */
+    deleteMany<T extends ExpenseChangeRequestDeleteManyArgs>(args?: SelectSubset<T, ExpenseChangeRequestDeleteManyArgs<ExtArgs>>): Prisma.PrismaPromise<BatchPayload>
+
+    /**
+     * Update zero or more ExpenseChangeRequests.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {ExpenseChangeRequestUpdateManyArgs} args - Arguments to update one or more rows.
+     * @example
+     * // Update many ExpenseChangeRequests
+     * const expenseChangeRequest = await prisma.expenseChangeRequest.updateMany({
+     *   where: {
+     *     // ... provide filter here
+     *   },
+     *   data: {
+     *     // ... provide data here
+     *   }
+     * })
+     * 
+     */
+    updateMany<T extends ExpenseChangeRequestUpdateManyArgs>(args: SelectSubset<T, ExpenseChangeRequestUpdateManyArgs<ExtArgs>>): Prisma.PrismaPromise<BatchPayload>
+
+    /**
+     * Update zero or more ExpenseChangeRequests and returns the data updated in the database.
+     * @param {ExpenseChangeRequestUpdateManyAndReturnArgs} args - Arguments to update many ExpenseChangeRequests.
+     * @example
+     * // Update many ExpenseChangeRequests
+     * const expenseChangeRequest = await prisma.expenseChangeRequest.updateManyAndReturn({
+     *   where: {
+     *     // ... provide filter here
+     *   },
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     * 
+     * // Update zero or more ExpenseChangeRequests and only return the `id`
+     * const expenseChangeRequestWithIdOnly = await prisma.expenseChangeRequest.updateManyAndReturn({
+     *   select: { id: true },
+     *   where: {
+     *     // ... provide filter here
+     *   },
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * 
+     */
+    updateManyAndReturn<T extends ExpenseChangeRequestUpdateManyAndReturnArgs>(args: SelectSubset<T, ExpenseChangeRequestUpdateManyAndReturnArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$ExpenseChangeRequestPayload<ExtArgs>, T, "updateManyAndReturn", GlobalOmitOptions>>
+
+    /**
+     * Create or update one ExpenseChangeRequest.
+     * @param {ExpenseChangeRequestUpsertArgs} args - Arguments to update or create a ExpenseChangeRequest.
+     * @example
+     * // Update or create a ExpenseChangeRequest
+     * const expenseChangeRequest = await prisma.expenseChangeRequest.upsert({
+     *   create: {
+     *     // ... data to create a ExpenseChangeRequest
+     *   },
+     *   update: {
+     *     // ... in case it already exists, update
+     *   },
+     *   where: {
+     *     // ... the filter for the ExpenseChangeRequest we want to update
+     *   }
+     * })
+     */
+    upsert<T extends ExpenseChangeRequestUpsertArgs>(args: SelectSubset<T, ExpenseChangeRequestUpsertArgs<ExtArgs>>): Prisma__ExpenseChangeRequestClient<$Result.GetResult<Prisma.$ExpenseChangeRequestPayload<ExtArgs>, T, "upsert", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+
+    /**
+     * Count the number of ExpenseChangeRequests.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {ExpenseChangeRequestCountArgs} args - Arguments to filter ExpenseChangeRequests to count.
+     * @example
+     * // Count the number of ExpenseChangeRequests
+     * const count = await prisma.expenseChangeRequest.count({
+     *   where: {
+     *     // ... the filter for the ExpenseChangeRequests we want to count
+     *   }
+     * })
+    **/
+    count<T extends ExpenseChangeRequestCountArgs>(
+      args?: Subset<T, ExpenseChangeRequestCountArgs>,
+    ): Prisma.PrismaPromise<
+      T extends $Utils.Record<'select', any>
+        ? T['select'] extends true
+          ? number
+          : GetScalarType<T['select'], ExpenseChangeRequestCountAggregateOutputType>
+        : number
+    >
+
+    /**
+     * Allows you to perform aggregations operations on a ExpenseChangeRequest.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {ExpenseChangeRequestAggregateArgs} args - Select which aggregations you would like to apply and on what fields.
+     * @example
+     * // Ordered by age ascending
+     * // Where email contains prisma.io
+     * // Limited to the 10 users
+     * const aggregations = await prisma.user.aggregate({
+     *   _avg: {
+     *     age: true,
+     *   },
+     *   where: {
+     *     email: {
+     *       contains: "prisma.io",
+     *     },
+     *   },
+     *   orderBy: {
+     *     age: "asc",
+     *   },
+     *   take: 10,
+     * })
+    **/
+    aggregate<T extends ExpenseChangeRequestAggregateArgs>(args: Subset<T, ExpenseChangeRequestAggregateArgs>): Prisma.PrismaPromise<GetExpenseChangeRequestAggregateType<T>>
+
+    /**
+     * Group by ExpenseChangeRequest.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {ExpenseChangeRequestGroupByArgs} args - Group by arguments.
+     * @example
+     * // Group by city, order by createdAt, get count
+     * const result = await prisma.user.groupBy({
+     *   by: ['city', 'createdAt'],
+     *   orderBy: {
+     *     createdAt: true
+     *   },
+     *   _count: {
+     *     _all: true
+     *   },
+     * })
+     * 
+    **/
+    groupBy<
+      T extends ExpenseChangeRequestGroupByArgs,
+      HasSelectOrTake extends Or<
+        Extends<'skip', Keys<T>>,
+        Extends<'take', Keys<T>>
+      >,
+      OrderByArg extends True extends HasSelectOrTake
+        ? { orderBy: ExpenseChangeRequestGroupByArgs['orderBy'] }
+        : { orderBy?: ExpenseChangeRequestGroupByArgs['orderBy'] },
+      OrderFields extends ExcludeUnderscoreKeys<Keys<MaybeTupleToUnion<T['orderBy']>>>,
+      ByFields extends MaybeTupleToUnion<T['by']>,
+      ByValid extends Has<ByFields, OrderFields>,
+      HavingFields extends GetHavingFields<T['having']>,
+      HavingValid extends Has<ByFields, HavingFields>,
+      ByEmpty extends T['by'] extends never[] ? True : False,
+      InputErrors extends ByEmpty extends True
+      ? `Error: "by" must not be empty.`
+      : HavingValid extends False
+      ? {
+          [P in HavingFields]: P extends ByFields
+            ? never
+            : P extends string
+            ? `Error: Field "${P}" used in "having" needs to be provided in "by".`
+            : [
+                Error,
+                'Field ',
+                P,
+                ` in "having" needs to be provided in "by"`,
+              ]
+        }[HavingFields]
+      : 'take' extends Keys<T>
+      ? 'orderBy' extends Keys<T>
+        ? ByValid extends True
+          ? {}
+          : {
+              [P in OrderFields]: P extends ByFields
+                ? never
+                : `Error: Field "${P}" in "orderBy" needs to be provided in "by"`
+            }[OrderFields]
+        : 'Error: If you provide "take", you also need to provide "orderBy"'
+      : 'skip' extends Keys<T>
+      ? 'orderBy' extends Keys<T>
+        ? ByValid extends True
+          ? {}
+          : {
+              [P in OrderFields]: P extends ByFields
+                ? never
+                : `Error: Field "${P}" in "orderBy" needs to be provided in "by"`
+            }[OrderFields]
+        : 'Error: If you provide "skip", you also need to provide "orderBy"'
+      : ByValid extends True
+      ? {}
+      : {
+          [P in OrderFields]: P extends ByFields
+            ? never
+            : `Error: Field "${P}" in "orderBy" needs to be provided in "by"`
+        }[OrderFields]
+    >(args: SubsetIntersection<T, ExpenseChangeRequestGroupByArgs, OrderByArg> & InputErrors): {} extends InputErrors ? GetExpenseChangeRequestGroupByPayload<T> : Prisma.PrismaPromise<InputErrors>
+  /**
+   * Fields of the ExpenseChangeRequest model
+   */
+  readonly fields: ExpenseChangeRequestFieldRefs;
+  }
+
+  /**
+   * The delegate class that acts as a "Promise-like" for ExpenseChangeRequest.
+   * Why is this prefixed with `Prisma__`?
+   * Because we want to prevent naming conflicts as mentioned in
+   * https://github.com/prisma/prisma-client-js/issues/707
+   */
+  export interface Prisma__ExpenseChangeRequestClient<T, Null = never, ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs, GlobalOmitOptions = {}> extends Prisma.PrismaPromise<T> {
+    readonly [Symbol.toStringTag]: "PrismaPromise"
+    /**
+     * Attaches callbacks for the resolution and/or rejection of the Promise.
+     * @param onfulfilled The callback to execute when the Promise is resolved.
+     * @param onrejected The callback to execute when the Promise is rejected.
+     * @returns A Promise for the completion of which ever callback is executed.
+     */
+    then<TResult1 = T, TResult2 = never>(onfulfilled?: ((value: T) => TResult1 | PromiseLike<TResult1>) | undefined | null, onrejected?: ((reason: any) => TResult2 | PromiseLike<TResult2>) | undefined | null): $Utils.JsPromise<TResult1 | TResult2>
+    /**
+     * Attaches a callback for only the rejection of the Promise.
+     * @param onrejected The callback to execute when the Promise is rejected.
+     * @returns A Promise for the completion of the callback.
+     */
+    catch<TResult = never>(onrejected?: ((reason: any) => TResult | PromiseLike<TResult>) | undefined | null): $Utils.JsPromise<T | TResult>
+    /**
+     * Attaches a callback that is invoked when the Promise is settled (fulfilled or rejected). The
+     * resolved value cannot be modified from the callback.
+     * @param onfinally The callback to execute when the Promise is settled (fulfilled or rejected).
+     * @returns A Promise for the completion of the callback.
+     */
+    finally(onfinally?: (() => void) | undefined | null): $Utils.JsPromise<T>
+  }
+
+
+
+
+  /**
+   * Fields of the ExpenseChangeRequest model
+   */
+  interface ExpenseChangeRequestFieldRefs {
+    readonly id: FieldRef<"ExpenseChangeRequest", 'String'>
+    readonly tableKey: FieldRef<"ExpenseChangeRequest", 'String'>
+    readonly rowId: FieldRef<"ExpenseChangeRequest", 'String'>
+    readonly rowLabel: FieldRef<"ExpenseChangeRequest", 'String'>
+    readonly changes: FieldRef<"ExpenseChangeRequest", 'Json'>
+    readonly reason: FieldRef<"ExpenseChangeRequest", 'String'>
+    readonly status: FieldRef<"ExpenseChangeRequest", 'ExpenseChangeStatus'>
+    readonly requestedById: FieldRef<"ExpenseChangeRequest", 'Int'>
+    readonly requestedByName: FieldRef<"ExpenseChangeRequest", 'String'>
+    readonly requestedByEmail: FieldRef<"ExpenseChangeRequest", 'String'>
+    readonly requestedAt: FieldRef<"ExpenseChangeRequest", 'DateTime'>
+    readonly approverId: FieldRef<"ExpenseChangeRequest", 'Int'>
+    readonly approverName: FieldRef<"ExpenseChangeRequest", 'String'>
+    readonly approverEmail: FieldRef<"ExpenseChangeRequest", 'String'>
+    readonly approverAt: FieldRef<"ExpenseChangeRequest", 'DateTime'>
+    readonly approverComment: FieldRef<"ExpenseChangeRequest", 'String'>
+    readonly approverAction: FieldRef<"ExpenseChangeRequest", 'String'>
+    readonly finalById: FieldRef<"ExpenseChangeRequest", 'Int'>
+    readonly finalByName: FieldRef<"ExpenseChangeRequest", 'String'>
+    readonly finalByEmail: FieldRef<"ExpenseChangeRequest", 'String'>
+    readonly finalAt: FieldRef<"ExpenseChangeRequest", 'DateTime'>
+    readonly finalComment: FieldRef<"ExpenseChangeRequest", 'String'>
+    readonly finalAction: FieldRef<"ExpenseChangeRequest", 'String'>
+    readonly createdAt: FieldRef<"ExpenseChangeRequest", 'DateTime'>
+    readonly updatedAt: FieldRef<"ExpenseChangeRequest", 'DateTime'>
+  }
+    
+
+  // Custom InputTypes
+  /**
+   * ExpenseChangeRequest findUnique
+   */
+  export type ExpenseChangeRequestFindUniqueArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the ExpenseChangeRequest
+     */
+    select?: ExpenseChangeRequestSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the ExpenseChangeRequest
+     */
+    omit?: ExpenseChangeRequestOmit<ExtArgs> | null
+    /**
+     * Filter, which ExpenseChangeRequest to fetch.
+     */
+    where: ExpenseChangeRequestWhereUniqueInput
+  }
+
+  /**
+   * ExpenseChangeRequest findUniqueOrThrow
+   */
+  export type ExpenseChangeRequestFindUniqueOrThrowArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the ExpenseChangeRequest
+     */
+    select?: ExpenseChangeRequestSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the ExpenseChangeRequest
+     */
+    omit?: ExpenseChangeRequestOmit<ExtArgs> | null
+    /**
+     * Filter, which ExpenseChangeRequest to fetch.
+     */
+    where: ExpenseChangeRequestWhereUniqueInput
+  }
+
+  /**
+   * ExpenseChangeRequest findFirst
+   */
+  export type ExpenseChangeRequestFindFirstArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the ExpenseChangeRequest
+     */
+    select?: ExpenseChangeRequestSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the ExpenseChangeRequest
+     */
+    omit?: ExpenseChangeRequestOmit<ExtArgs> | null
+    /**
+     * Filter, which ExpenseChangeRequest to fetch.
+     */
+    where?: ExpenseChangeRequestWhereInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
+     * 
+     * Determine the order of ExpenseChangeRequests to fetch.
+     */
+    orderBy?: ExpenseChangeRequestOrderByWithRelationInput | ExpenseChangeRequestOrderByWithRelationInput[]
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
+     * 
+     * Sets the position for searching for ExpenseChangeRequests.
+     */
+    cursor?: ExpenseChangeRequestWhereUniqueInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Take `±n` ExpenseChangeRequests from the position of the cursor.
+     */
+    take?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Skip the first `n` ExpenseChangeRequests.
+     */
+    skip?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/distinct Distinct Docs}
+     * 
+     * Filter by unique combinations of ExpenseChangeRequests.
+     */
+    distinct?: ExpenseChangeRequestScalarFieldEnum | ExpenseChangeRequestScalarFieldEnum[]
+  }
+
+  /**
+   * ExpenseChangeRequest findFirstOrThrow
+   */
+  export type ExpenseChangeRequestFindFirstOrThrowArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the ExpenseChangeRequest
+     */
+    select?: ExpenseChangeRequestSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the ExpenseChangeRequest
+     */
+    omit?: ExpenseChangeRequestOmit<ExtArgs> | null
+    /**
+     * Filter, which ExpenseChangeRequest to fetch.
+     */
+    where?: ExpenseChangeRequestWhereInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
+     * 
+     * Determine the order of ExpenseChangeRequests to fetch.
+     */
+    orderBy?: ExpenseChangeRequestOrderByWithRelationInput | ExpenseChangeRequestOrderByWithRelationInput[]
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
+     * 
+     * Sets the position for searching for ExpenseChangeRequests.
+     */
+    cursor?: ExpenseChangeRequestWhereUniqueInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Take `±n` ExpenseChangeRequests from the position of the cursor.
+     */
+    take?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Skip the first `n` ExpenseChangeRequests.
+     */
+    skip?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/distinct Distinct Docs}
+     * 
+     * Filter by unique combinations of ExpenseChangeRequests.
+     */
+    distinct?: ExpenseChangeRequestScalarFieldEnum | ExpenseChangeRequestScalarFieldEnum[]
+  }
+
+  /**
+   * ExpenseChangeRequest findMany
+   */
+  export type ExpenseChangeRequestFindManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the ExpenseChangeRequest
+     */
+    select?: ExpenseChangeRequestSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the ExpenseChangeRequest
+     */
+    omit?: ExpenseChangeRequestOmit<ExtArgs> | null
+    /**
+     * Filter, which ExpenseChangeRequests to fetch.
+     */
+    where?: ExpenseChangeRequestWhereInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
+     * 
+     * Determine the order of ExpenseChangeRequests to fetch.
+     */
+    orderBy?: ExpenseChangeRequestOrderByWithRelationInput | ExpenseChangeRequestOrderByWithRelationInput[]
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
+     * 
+     * Sets the position for listing ExpenseChangeRequests.
+     */
+    cursor?: ExpenseChangeRequestWhereUniqueInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Take `±n` ExpenseChangeRequests from the position of the cursor.
+     */
+    take?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Skip the first `n` ExpenseChangeRequests.
+     */
+    skip?: number
+    distinct?: ExpenseChangeRequestScalarFieldEnum | ExpenseChangeRequestScalarFieldEnum[]
+  }
+
+  /**
+   * ExpenseChangeRequest create
+   */
+  export type ExpenseChangeRequestCreateArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the ExpenseChangeRequest
+     */
+    select?: ExpenseChangeRequestSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the ExpenseChangeRequest
+     */
+    omit?: ExpenseChangeRequestOmit<ExtArgs> | null
+    /**
+     * The data needed to create a ExpenseChangeRequest.
+     */
+    data: XOR<ExpenseChangeRequestCreateInput, ExpenseChangeRequestUncheckedCreateInput>
+  }
+
+  /**
+   * ExpenseChangeRequest createMany
+   */
+  export type ExpenseChangeRequestCreateManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * The data used to create many ExpenseChangeRequests.
+     */
+    data: ExpenseChangeRequestCreateManyInput | ExpenseChangeRequestCreateManyInput[]
+    skipDuplicates?: boolean
+  }
+
+  /**
+   * ExpenseChangeRequest createManyAndReturn
+   */
+  export type ExpenseChangeRequestCreateManyAndReturnArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the ExpenseChangeRequest
+     */
+    select?: ExpenseChangeRequestSelectCreateManyAndReturn<ExtArgs> | null
+    /**
+     * Omit specific fields from the ExpenseChangeRequest
+     */
+    omit?: ExpenseChangeRequestOmit<ExtArgs> | null
+    /**
+     * The data used to create many ExpenseChangeRequests.
+     */
+    data: ExpenseChangeRequestCreateManyInput | ExpenseChangeRequestCreateManyInput[]
+    skipDuplicates?: boolean
+  }
+
+  /**
+   * ExpenseChangeRequest update
+   */
+  export type ExpenseChangeRequestUpdateArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the ExpenseChangeRequest
+     */
+    select?: ExpenseChangeRequestSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the ExpenseChangeRequest
+     */
+    omit?: ExpenseChangeRequestOmit<ExtArgs> | null
+    /**
+     * The data needed to update a ExpenseChangeRequest.
+     */
+    data: XOR<ExpenseChangeRequestUpdateInput, ExpenseChangeRequestUncheckedUpdateInput>
+    /**
+     * Choose, which ExpenseChangeRequest to update.
+     */
+    where: ExpenseChangeRequestWhereUniqueInput
+  }
+
+  /**
+   * ExpenseChangeRequest updateMany
+   */
+  export type ExpenseChangeRequestUpdateManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * The data used to update ExpenseChangeRequests.
+     */
+    data: XOR<ExpenseChangeRequestUpdateManyMutationInput, ExpenseChangeRequestUncheckedUpdateManyInput>
+    /**
+     * Filter which ExpenseChangeRequests to update
+     */
+    where?: ExpenseChangeRequestWhereInput
+    /**
+     * Limit how many ExpenseChangeRequests to update.
+     */
+    limit?: number
+  }
+
+  /**
+   * ExpenseChangeRequest updateManyAndReturn
+   */
+  export type ExpenseChangeRequestUpdateManyAndReturnArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the ExpenseChangeRequest
+     */
+    select?: ExpenseChangeRequestSelectUpdateManyAndReturn<ExtArgs> | null
+    /**
+     * Omit specific fields from the ExpenseChangeRequest
+     */
+    omit?: ExpenseChangeRequestOmit<ExtArgs> | null
+    /**
+     * The data used to update ExpenseChangeRequests.
+     */
+    data: XOR<ExpenseChangeRequestUpdateManyMutationInput, ExpenseChangeRequestUncheckedUpdateManyInput>
+    /**
+     * Filter which ExpenseChangeRequests to update
+     */
+    where?: ExpenseChangeRequestWhereInput
+    /**
+     * Limit how many ExpenseChangeRequests to update.
+     */
+    limit?: number
+  }
+
+  /**
+   * ExpenseChangeRequest upsert
+   */
+  export type ExpenseChangeRequestUpsertArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the ExpenseChangeRequest
+     */
+    select?: ExpenseChangeRequestSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the ExpenseChangeRequest
+     */
+    omit?: ExpenseChangeRequestOmit<ExtArgs> | null
+    /**
+     * The filter to search for the ExpenseChangeRequest to update in case it exists.
+     */
+    where: ExpenseChangeRequestWhereUniqueInput
+    /**
+     * In case the ExpenseChangeRequest found by the `where` argument doesn't exist, create a new ExpenseChangeRequest with this data.
+     */
+    create: XOR<ExpenseChangeRequestCreateInput, ExpenseChangeRequestUncheckedCreateInput>
+    /**
+     * In case the ExpenseChangeRequest was found with the provided `where` argument, update it with this data.
+     */
+    update: XOR<ExpenseChangeRequestUpdateInput, ExpenseChangeRequestUncheckedUpdateInput>
+  }
+
+  /**
+   * ExpenseChangeRequest delete
+   */
+  export type ExpenseChangeRequestDeleteArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the ExpenseChangeRequest
+     */
+    select?: ExpenseChangeRequestSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the ExpenseChangeRequest
+     */
+    omit?: ExpenseChangeRequestOmit<ExtArgs> | null
+    /**
+     * Filter which ExpenseChangeRequest to delete.
+     */
+    where: ExpenseChangeRequestWhereUniqueInput
+  }
+
+  /**
+   * ExpenseChangeRequest deleteMany
+   */
+  export type ExpenseChangeRequestDeleteManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Filter which ExpenseChangeRequests to delete
+     */
+    where?: ExpenseChangeRequestWhereInput
+    /**
+     * Limit how many ExpenseChangeRequests to delete.
+     */
+    limit?: number
+  }
+
+  /**
+   * ExpenseChangeRequest without action
+   */
+  export type ExpenseChangeRequestDefaultArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the ExpenseChangeRequest
+     */
+    select?: ExpenseChangeRequestSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the ExpenseChangeRequest
+     */
+    omit?: ExpenseChangeRequestOmit<ExtArgs> | null
+  }
+
+
+  /**
    * Enums
    */
 
@@ -56490,6 +57888,37 @@ export namespace Prisma {
   export type BodyArticleDataScalarFieldEnum = (typeof BodyArticleDataScalarFieldEnum)[keyof typeof BodyArticleDataScalarFieldEnum]
 
 
+  export const ExpenseChangeRequestScalarFieldEnum: {
+    id: 'id',
+    tableKey: 'tableKey',
+    rowId: 'rowId',
+    rowLabel: 'rowLabel',
+    changes: 'changes',
+    reason: 'reason',
+    status: 'status',
+    requestedById: 'requestedById',
+    requestedByName: 'requestedByName',
+    requestedByEmail: 'requestedByEmail',
+    requestedAt: 'requestedAt',
+    approverId: 'approverId',
+    approverName: 'approverName',
+    approverEmail: 'approverEmail',
+    approverAt: 'approverAt',
+    approverComment: 'approverComment',
+    approverAction: 'approverAction',
+    finalById: 'finalById',
+    finalByName: 'finalByName',
+    finalByEmail: 'finalByEmail',
+    finalAt: 'finalAt',
+    finalComment: 'finalComment',
+    finalAction: 'finalAction',
+    createdAt: 'createdAt',
+    updatedAt: 'updatedAt'
+  };
+
+  export type ExpenseChangeRequestScalarFieldEnum = (typeof ExpenseChangeRequestScalarFieldEnum)[keyof typeof ExpenseChangeRequestScalarFieldEnum]
+
+
   export const SortOrder: {
     asc: 'asc',
     desc: 'desc'
@@ -57253,6 +58682,27 @@ export namespace Prisma {
   export type BodyArticleDataOrderByRelevanceFieldEnum = (typeof BodyArticleDataOrderByRelevanceFieldEnum)[keyof typeof BodyArticleDataOrderByRelevanceFieldEnum]
 
 
+  export const ExpenseChangeRequestOrderByRelevanceFieldEnum: {
+    id: 'id',
+    tableKey: 'tableKey',
+    rowId: 'rowId',
+    rowLabel: 'rowLabel',
+    reason: 'reason',
+    requestedByName: 'requestedByName',
+    requestedByEmail: 'requestedByEmail',
+    approverName: 'approverName',
+    approverEmail: 'approverEmail',
+    approverComment: 'approverComment',
+    approverAction: 'approverAction',
+    finalByName: 'finalByName',
+    finalByEmail: 'finalByEmail',
+    finalComment: 'finalComment',
+    finalAction: 'finalAction'
+  };
+
+  export type ExpenseChangeRequestOrderByRelevanceFieldEnum = (typeof ExpenseChangeRequestOrderByRelevanceFieldEnum)[keyof typeof ExpenseChangeRequestOrderByRelevanceFieldEnum]
+
+
   /**
    * Field references
    */
@@ -57486,6 +58936,20 @@ export namespace Prisma {
    * Reference to a field of type 'PoolBBatchStatus[]'
    */
   export type ListEnumPoolBBatchStatusFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'PoolBBatchStatus[]'>
+    
+
+
+  /**
+   * Reference to a field of type 'ExpenseChangeStatus'
+   */
+  export type EnumExpenseChangeStatusFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'ExpenseChangeStatus'>
+    
+
+
+  /**
+   * Reference to a field of type 'ExpenseChangeStatus[]'
+   */
+  export type ListEnumExpenseChangeStatusFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'ExpenseChangeStatus[]'>
     
 
 
@@ -62537,6 +64001,161 @@ export namespace Prisma {
     userName?: StringNullableWithAggregatesFilter<"BodyArticleData"> | string | null
     createdAt?: DateTimeWithAggregatesFilter<"BodyArticleData"> | Date | string
     updatedAt?: DateTimeWithAggregatesFilter<"BodyArticleData"> | Date | string
+  }
+
+  export type ExpenseChangeRequestWhereInput = {
+    AND?: ExpenseChangeRequestWhereInput | ExpenseChangeRequestWhereInput[]
+    OR?: ExpenseChangeRequestWhereInput[]
+    NOT?: ExpenseChangeRequestWhereInput | ExpenseChangeRequestWhereInput[]
+    id?: StringFilter<"ExpenseChangeRequest"> | string
+    tableKey?: StringFilter<"ExpenseChangeRequest"> | string
+    rowId?: StringFilter<"ExpenseChangeRequest"> | string
+    rowLabel?: StringNullableFilter<"ExpenseChangeRequest"> | string | null
+    changes?: JsonFilter<"ExpenseChangeRequest">
+    reason?: StringFilter<"ExpenseChangeRequest"> | string
+    status?: EnumExpenseChangeStatusFilter<"ExpenseChangeRequest"> | $Enums.ExpenseChangeStatus
+    requestedById?: IntFilter<"ExpenseChangeRequest"> | number
+    requestedByName?: StringFilter<"ExpenseChangeRequest"> | string
+    requestedByEmail?: StringFilter<"ExpenseChangeRequest"> | string
+    requestedAt?: DateTimeFilter<"ExpenseChangeRequest"> | Date | string
+    approverId?: IntNullableFilter<"ExpenseChangeRequest"> | number | null
+    approverName?: StringNullableFilter<"ExpenseChangeRequest"> | string | null
+    approverEmail?: StringNullableFilter<"ExpenseChangeRequest"> | string | null
+    approverAt?: DateTimeNullableFilter<"ExpenseChangeRequest"> | Date | string | null
+    approverComment?: StringNullableFilter<"ExpenseChangeRequest"> | string | null
+    approverAction?: StringNullableFilter<"ExpenseChangeRequest"> | string | null
+    finalById?: IntNullableFilter<"ExpenseChangeRequest"> | number | null
+    finalByName?: StringNullableFilter<"ExpenseChangeRequest"> | string | null
+    finalByEmail?: StringNullableFilter<"ExpenseChangeRequest"> | string | null
+    finalAt?: DateTimeNullableFilter<"ExpenseChangeRequest"> | Date | string | null
+    finalComment?: StringNullableFilter<"ExpenseChangeRequest"> | string | null
+    finalAction?: StringNullableFilter<"ExpenseChangeRequest"> | string | null
+    createdAt?: DateTimeFilter<"ExpenseChangeRequest"> | Date | string
+    updatedAt?: DateTimeFilter<"ExpenseChangeRequest"> | Date | string
+  }
+
+  export type ExpenseChangeRequestOrderByWithRelationInput = {
+    id?: SortOrder
+    tableKey?: SortOrder
+    rowId?: SortOrder
+    rowLabel?: SortOrderInput | SortOrder
+    changes?: SortOrder
+    reason?: SortOrder
+    status?: SortOrder
+    requestedById?: SortOrder
+    requestedByName?: SortOrder
+    requestedByEmail?: SortOrder
+    requestedAt?: SortOrder
+    approverId?: SortOrderInput | SortOrder
+    approverName?: SortOrderInput | SortOrder
+    approverEmail?: SortOrderInput | SortOrder
+    approverAt?: SortOrderInput | SortOrder
+    approverComment?: SortOrderInput | SortOrder
+    approverAction?: SortOrderInput | SortOrder
+    finalById?: SortOrderInput | SortOrder
+    finalByName?: SortOrderInput | SortOrder
+    finalByEmail?: SortOrderInput | SortOrder
+    finalAt?: SortOrderInput | SortOrder
+    finalComment?: SortOrderInput | SortOrder
+    finalAction?: SortOrderInput | SortOrder
+    createdAt?: SortOrder
+    updatedAt?: SortOrder
+    _relevance?: ExpenseChangeRequestOrderByRelevanceInput
+  }
+
+  export type ExpenseChangeRequestWhereUniqueInput = Prisma.AtLeast<{
+    id?: string
+    AND?: ExpenseChangeRequestWhereInput | ExpenseChangeRequestWhereInput[]
+    OR?: ExpenseChangeRequestWhereInput[]
+    NOT?: ExpenseChangeRequestWhereInput | ExpenseChangeRequestWhereInput[]
+    tableKey?: StringFilter<"ExpenseChangeRequest"> | string
+    rowId?: StringFilter<"ExpenseChangeRequest"> | string
+    rowLabel?: StringNullableFilter<"ExpenseChangeRequest"> | string | null
+    changes?: JsonFilter<"ExpenseChangeRequest">
+    reason?: StringFilter<"ExpenseChangeRequest"> | string
+    status?: EnumExpenseChangeStatusFilter<"ExpenseChangeRequest"> | $Enums.ExpenseChangeStatus
+    requestedById?: IntFilter<"ExpenseChangeRequest"> | number
+    requestedByName?: StringFilter<"ExpenseChangeRequest"> | string
+    requestedByEmail?: StringFilter<"ExpenseChangeRequest"> | string
+    requestedAt?: DateTimeFilter<"ExpenseChangeRequest"> | Date | string
+    approverId?: IntNullableFilter<"ExpenseChangeRequest"> | number | null
+    approverName?: StringNullableFilter<"ExpenseChangeRequest"> | string | null
+    approverEmail?: StringNullableFilter<"ExpenseChangeRequest"> | string | null
+    approverAt?: DateTimeNullableFilter<"ExpenseChangeRequest"> | Date | string | null
+    approverComment?: StringNullableFilter<"ExpenseChangeRequest"> | string | null
+    approverAction?: StringNullableFilter<"ExpenseChangeRequest"> | string | null
+    finalById?: IntNullableFilter<"ExpenseChangeRequest"> | number | null
+    finalByName?: StringNullableFilter<"ExpenseChangeRequest"> | string | null
+    finalByEmail?: StringNullableFilter<"ExpenseChangeRequest"> | string | null
+    finalAt?: DateTimeNullableFilter<"ExpenseChangeRequest"> | Date | string | null
+    finalComment?: StringNullableFilter<"ExpenseChangeRequest"> | string | null
+    finalAction?: StringNullableFilter<"ExpenseChangeRequest"> | string | null
+    createdAt?: DateTimeFilter<"ExpenseChangeRequest"> | Date | string
+    updatedAt?: DateTimeFilter<"ExpenseChangeRequest"> | Date | string
+  }, "id">
+
+  export type ExpenseChangeRequestOrderByWithAggregationInput = {
+    id?: SortOrder
+    tableKey?: SortOrder
+    rowId?: SortOrder
+    rowLabel?: SortOrderInput | SortOrder
+    changes?: SortOrder
+    reason?: SortOrder
+    status?: SortOrder
+    requestedById?: SortOrder
+    requestedByName?: SortOrder
+    requestedByEmail?: SortOrder
+    requestedAt?: SortOrder
+    approverId?: SortOrderInput | SortOrder
+    approverName?: SortOrderInput | SortOrder
+    approverEmail?: SortOrderInput | SortOrder
+    approverAt?: SortOrderInput | SortOrder
+    approverComment?: SortOrderInput | SortOrder
+    approverAction?: SortOrderInput | SortOrder
+    finalById?: SortOrderInput | SortOrder
+    finalByName?: SortOrderInput | SortOrder
+    finalByEmail?: SortOrderInput | SortOrder
+    finalAt?: SortOrderInput | SortOrder
+    finalComment?: SortOrderInput | SortOrder
+    finalAction?: SortOrderInput | SortOrder
+    createdAt?: SortOrder
+    updatedAt?: SortOrder
+    _count?: ExpenseChangeRequestCountOrderByAggregateInput
+    _avg?: ExpenseChangeRequestAvgOrderByAggregateInput
+    _max?: ExpenseChangeRequestMaxOrderByAggregateInput
+    _min?: ExpenseChangeRequestMinOrderByAggregateInput
+    _sum?: ExpenseChangeRequestSumOrderByAggregateInput
+  }
+
+  export type ExpenseChangeRequestScalarWhereWithAggregatesInput = {
+    AND?: ExpenseChangeRequestScalarWhereWithAggregatesInput | ExpenseChangeRequestScalarWhereWithAggregatesInput[]
+    OR?: ExpenseChangeRequestScalarWhereWithAggregatesInput[]
+    NOT?: ExpenseChangeRequestScalarWhereWithAggregatesInput | ExpenseChangeRequestScalarWhereWithAggregatesInput[]
+    id?: StringWithAggregatesFilter<"ExpenseChangeRequest"> | string
+    tableKey?: StringWithAggregatesFilter<"ExpenseChangeRequest"> | string
+    rowId?: StringWithAggregatesFilter<"ExpenseChangeRequest"> | string
+    rowLabel?: StringNullableWithAggregatesFilter<"ExpenseChangeRequest"> | string | null
+    changes?: JsonWithAggregatesFilter<"ExpenseChangeRequest">
+    reason?: StringWithAggregatesFilter<"ExpenseChangeRequest"> | string
+    status?: EnumExpenseChangeStatusWithAggregatesFilter<"ExpenseChangeRequest"> | $Enums.ExpenseChangeStatus
+    requestedById?: IntWithAggregatesFilter<"ExpenseChangeRequest"> | number
+    requestedByName?: StringWithAggregatesFilter<"ExpenseChangeRequest"> | string
+    requestedByEmail?: StringWithAggregatesFilter<"ExpenseChangeRequest"> | string
+    requestedAt?: DateTimeWithAggregatesFilter<"ExpenseChangeRequest"> | Date | string
+    approverId?: IntNullableWithAggregatesFilter<"ExpenseChangeRequest"> | number | null
+    approverName?: StringNullableWithAggregatesFilter<"ExpenseChangeRequest"> | string | null
+    approverEmail?: StringNullableWithAggregatesFilter<"ExpenseChangeRequest"> | string | null
+    approverAt?: DateTimeNullableWithAggregatesFilter<"ExpenseChangeRequest"> | Date | string | null
+    approverComment?: StringNullableWithAggregatesFilter<"ExpenseChangeRequest"> | string | null
+    approverAction?: StringNullableWithAggregatesFilter<"ExpenseChangeRequest"> | string | null
+    finalById?: IntNullableWithAggregatesFilter<"ExpenseChangeRequest"> | number | null
+    finalByName?: StringNullableWithAggregatesFilter<"ExpenseChangeRequest"> | string | null
+    finalByEmail?: StringNullableWithAggregatesFilter<"ExpenseChangeRequest"> | string | null
+    finalAt?: DateTimeNullableWithAggregatesFilter<"ExpenseChangeRequest"> | Date | string | null
+    finalComment?: StringNullableWithAggregatesFilter<"ExpenseChangeRequest"> | string | null
+    finalAction?: StringNullableWithAggregatesFilter<"ExpenseChangeRequest"> | string | null
+    createdAt?: DateTimeWithAggregatesFilter<"ExpenseChangeRequest"> | Date | string
+    updatedAt?: DateTimeWithAggregatesFilter<"ExpenseChangeRequest"> | Date | string
   }
 
   export type DepartmentCreateInput = {
@@ -68560,6 +70179,202 @@ export namespace Prisma {
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
   }
 
+  export type ExpenseChangeRequestCreateInput = {
+    id?: string
+    tableKey: string
+    rowId: string
+    rowLabel?: string | null
+    changes: JsonNullValueInput | InputJsonValue
+    reason: string
+    status?: $Enums.ExpenseChangeStatus
+    requestedById: number
+    requestedByName: string
+    requestedByEmail: string
+    requestedAt?: Date | string
+    approverId?: number | null
+    approverName?: string | null
+    approverEmail?: string | null
+    approverAt?: Date | string | null
+    approverComment?: string | null
+    approverAction?: string | null
+    finalById?: number | null
+    finalByName?: string | null
+    finalByEmail?: string | null
+    finalAt?: Date | string | null
+    finalComment?: string | null
+    finalAction?: string | null
+    createdAt?: Date | string
+    updatedAt?: Date | string
+  }
+
+  export type ExpenseChangeRequestUncheckedCreateInput = {
+    id?: string
+    tableKey: string
+    rowId: string
+    rowLabel?: string | null
+    changes: JsonNullValueInput | InputJsonValue
+    reason: string
+    status?: $Enums.ExpenseChangeStatus
+    requestedById: number
+    requestedByName: string
+    requestedByEmail: string
+    requestedAt?: Date | string
+    approverId?: number | null
+    approverName?: string | null
+    approverEmail?: string | null
+    approverAt?: Date | string | null
+    approverComment?: string | null
+    approverAction?: string | null
+    finalById?: number | null
+    finalByName?: string | null
+    finalByEmail?: string | null
+    finalAt?: Date | string | null
+    finalComment?: string | null
+    finalAction?: string | null
+    createdAt?: Date | string
+    updatedAt?: Date | string
+  }
+
+  export type ExpenseChangeRequestUpdateInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    tableKey?: StringFieldUpdateOperationsInput | string
+    rowId?: StringFieldUpdateOperationsInput | string
+    rowLabel?: NullableStringFieldUpdateOperationsInput | string | null
+    changes?: JsonNullValueInput | InputJsonValue
+    reason?: StringFieldUpdateOperationsInput | string
+    status?: EnumExpenseChangeStatusFieldUpdateOperationsInput | $Enums.ExpenseChangeStatus
+    requestedById?: IntFieldUpdateOperationsInput | number
+    requestedByName?: StringFieldUpdateOperationsInput | string
+    requestedByEmail?: StringFieldUpdateOperationsInput | string
+    requestedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    approverId?: NullableIntFieldUpdateOperationsInput | number | null
+    approverName?: NullableStringFieldUpdateOperationsInput | string | null
+    approverEmail?: NullableStringFieldUpdateOperationsInput | string | null
+    approverAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    approverComment?: NullableStringFieldUpdateOperationsInput | string | null
+    approverAction?: NullableStringFieldUpdateOperationsInput | string | null
+    finalById?: NullableIntFieldUpdateOperationsInput | number | null
+    finalByName?: NullableStringFieldUpdateOperationsInput | string | null
+    finalByEmail?: NullableStringFieldUpdateOperationsInput | string | null
+    finalAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    finalComment?: NullableStringFieldUpdateOperationsInput | string | null
+    finalAction?: NullableStringFieldUpdateOperationsInput | string | null
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+  }
+
+  export type ExpenseChangeRequestUncheckedUpdateInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    tableKey?: StringFieldUpdateOperationsInput | string
+    rowId?: StringFieldUpdateOperationsInput | string
+    rowLabel?: NullableStringFieldUpdateOperationsInput | string | null
+    changes?: JsonNullValueInput | InputJsonValue
+    reason?: StringFieldUpdateOperationsInput | string
+    status?: EnumExpenseChangeStatusFieldUpdateOperationsInput | $Enums.ExpenseChangeStatus
+    requestedById?: IntFieldUpdateOperationsInput | number
+    requestedByName?: StringFieldUpdateOperationsInput | string
+    requestedByEmail?: StringFieldUpdateOperationsInput | string
+    requestedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    approverId?: NullableIntFieldUpdateOperationsInput | number | null
+    approverName?: NullableStringFieldUpdateOperationsInput | string | null
+    approverEmail?: NullableStringFieldUpdateOperationsInput | string | null
+    approverAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    approverComment?: NullableStringFieldUpdateOperationsInput | string | null
+    approverAction?: NullableStringFieldUpdateOperationsInput | string | null
+    finalById?: NullableIntFieldUpdateOperationsInput | number | null
+    finalByName?: NullableStringFieldUpdateOperationsInput | string | null
+    finalByEmail?: NullableStringFieldUpdateOperationsInput | string | null
+    finalAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    finalComment?: NullableStringFieldUpdateOperationsInput | string | null
+    finalAction?: NullableStringFieldUpdateOperationsInput | string | null
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+  }
+
+  export type ExpenseChangeRequestCreateManyInput = {
+    id?: string
+    tableKey: string
+    rowId: string
+    rowLabel?: string | null
+    changes: JsonNullValueInput | InputJsonValue
+    reason: string
+    status?: $Enums.ExpenseChangeStatus
+    requestedById: number
+    requestedByName: string
+    requestedByEmail: string
+    requestedAt?: Date | string
+    approverId?: number | null
+    approverName?: string | null
+    approverEmail?: string | null
+    approverAt?: Date | string | null
+    approverComment?: string | null
+    approverAction?: string | null
+    finalById?: number | null
+    finalByName?: string | null
+    finalByEmail?: string | null
+    finalAt?: Date | string | null
+    finalComment?: string | null
+    finalAction?: string | null
+    createdAt?: Date | string
+    updatedAt?: Date | string
+  }
+
+  export type ExpenseChangeRequestUpdateManyMutationInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    tableKey?: StringFieldUpdateOperationsInput | string
+    rowId?: StringFieldUpdateOperationsInput | string
+    rowLabel?: NullableStringFieldUpdateOperationsInput | string | null
+    changes?: JsonNullValueInput | InputJsonValue
+    reason?: StringFieldUpdateOperationsInput | string
+    status?: EnumExpenseChangeStatusFieldUpdateOperationsInput | $Enums.ExpenseChangeStatus
+    requestedById?: IntFieldUpdateOperationsInput | number
+    requestedByName?: StringFieldUpdateOperationsInput | string
+    requestedByEmail?: StringFieldUpdateOperationsInput | string
+    requestedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    approverId?: NullableIntFieldUpdateOperationsInput | number | null
+    approverName?: NullableStringFieldUpdateOperationsInput | string | null
+    approverEmail?: NullableStringFieldUpdateOperationsInput | string | null
+    approverAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    approverComment?: NullableStringFieldUpdateOperationsInput | string | null
+    approverAction?: NullableStringFieldUpdateOperationsInput | string | null
+    finalById?: NullableIntFieldUpdateOperationsInput | number | null
+    finalByName?: NullableStringFieldUpdateOperationsInput | string | null
+    finalByEmail?: NullableStringFieldUpdateOperationsInput | string | null
+    finalAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    finalComment?: NullableStringFieldUpdateOperationsInput | string | null
+    finalAction?: NullableStringFieldUpdateOperationsInput | string | null
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+  }
+
+  export type ExpenseChangeRequestUncheckedUpdateManyInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    tableKey?: StringFieldUpdateOperationsInput | string
+    rowId?: StringFieldUpdateOperationsInput | string
+    rowLabel?: NullableStringFieldUpdateOperationsInput | string | null
+    changes?: JsonNullValueInput | InputJsonValue
+    reason?: StringFieldUpdateOperationsInput | string
+    status?: EnumExpenseChangeStatusFieldUpdateOperationsInput | $Enums.ExpenseChangeStatus
+    requestedById?: IntFieldUpdateOperationsInput | number
+    requestedByName?: StringFieldUpdateOperationsInput | string
+    requestedByEmail?: StringFieldUpdateOperationsInput | string
+    requestedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    approverId?: NullableIntFieldUpdateOperationsInput | number | null
+    approverName?: NullableStringFieldUpdateOperationsInput | string | null
+    approverEmail?: NullableStringFieldUpdateOperationsInput | string | null
+    approverAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    approverComment?: NullableStringFieldUpdateOperationsInput | string | null
+    approverAction?: NullableStringFieldUpdateOperationsInput | string | null
+    finalById?: NullableIntFieldUpdateOperationsInput | number | null
+    finalByName?: NullableStringFieldUpdateOperationsInput | string | null
+    finalByEmail?: NullableStringFieldUpdateOperationsInput | string | null
+    finalAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    finalComment?: NullableStringFieldUpdateOperationsInput | string | null
+    finalAction?: NullableStringFieldUpdateOperationsInput | string | null
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+  }
+
   export type IntFilter<$PrismaModel = never> = {
     equals?: number | IntFieldRefInput<$PrismaModel>
     in?: number[] | ListIntFieldRefInput<$PrismaModel>
@@ -72630,6 +74445,123 @@ export namespace Prisma {
     approvedBy?: SortOrder
   }
 
+  export type EnumExpenseChangeStatusFilter<$PrismaModel = never> = {
+    equals?: $Enums.ExpenseChangeStatus | EnumExpenseChangeStatusFieldRefInput<$PrismaModel>
+    in?: $Enums.ExpenseChangeStatus[] | ListEnumExpenseChangeStatusFieldRefInput<$PrismaModel>
+    notIn?: $Enums.ExpenseChangeStatus[] | ListEnumExpenseChangeStatusFieldRefInput<$PrismaModel>
+    not?: NestedEnumExpenseChangeStatusFilter<$PrismaModel> | $Enums.ExpenseChangeStatus
+  }
+
+  export type ExpenseChangeRequestOrderByRelevanceInput = {
+    fields: ExpenseChangeRequestOrderByRelevanceFieldEnum | ExpenseChangeRequestOrderByRelevanceFieldEnum[]
+    sort: SortOrder
+    search: string
+  }
+
+  export type ExpenseChangeRequestCountOrderByAggregateInput = {
+    id?: SortOrder
+    tableKey?: SortOrder
+    rowId?: SortOrder
+    rowLabel?: SortOrder
+    changes?: SortOrder
+    reason?: SortOrder
+    status?: SortOrder
+    requestedById?: SortOrder
+    requestedByName?: SortOrder
+    requestedByEmail?: SortOrder
+    requestedAt?: SortOrder
+    approverId?: SortOrder
+    approverName?: SortOrder
+    approverEmail?: SortOrder
+    approverAt?: SortOrder
+    approverComment?: SortOrder
+    approverAction?: SortOrder
+    finalById?: SortOrder
+    finalByName?: SortOrder
+    finalByEmail?: SortOrder
+    finalAt?: SortOrder
+    finalComment?: SortOrder
+    finalAction?: SortOrder
+    createdAt?: SortOrder
+    updatedAt?: SortOrder
+  }
+
+  export type ExpenseChangeRequestAvgOrderByAggregateInput = {
+    requestedById?: SortOrder
+    approverId?: SortOrder
+    finalById?: SortOrder
+  }
+
+  export type ExpenseChangeRequestMaxOrderByAggregateInput = {
+    id?: SortOrder
+    tableKey?: SortOrder
+    rowId?: SortOrder
+    rowLabel?: SortOrder
+    reason?: SortOrder
+    status?: SortOrder
+    requestedById?: SortOrder
+    requestedByName?: SortOrder
+    requestedByEmail?: SortOrder
+    requestedAt?: SortOrder
+    approverId?: SortOrder
+    approverName?: SortOrder
+    approverEmail?: SortOrder
+    approverAt?: SortOrder
+    approverComment?: SortOrder
+    approverAction?: SortOrder
+    finalById?: SortOrder
+    finalByName?: SortOrder
+    finalByEmail?: SortOrder
+    finalAt?: SortOrder
+    finalComment?: SortOrder
+    finalAction?: SortOrder
+    createdAt?: SortOrder
+    updatedAt?: SortOrder
+  }
+
+  export type ExpenseChangeRequestMinOrderByAggregateInput = {
+    id?: SortOrder
+    tableKey?: SortOrder
+    rowId?: SortOrder
+    rowLabel?: SortOrder
+    reason?: SortOrder
+    status?: SortOrder
+    requestedById?: SortOrder
+    requestedByName?: SortOrder
+    requestedByEmail?: SortOrder
+    requestedAt?: SortOrder
+    approverId?: SortOrder
+    approverName?: SortOrder
+    approverEmail?: SortOrder
+    approverAt?: SortOrder
+    approverComment?: SortOrder
+    approverAction?: SortOrder
+    finalById?: SortOrder
+    finalByName?: SortOrder
+    finalByEmail?: SortOrder
+    finalAt?: SortOrder
+    finalComment?: SortOrder
+    finalAction?: SortOrder
+    createdAt?: SortOrder
+    updatedAt?: SortOrder
+  }
+
+  export type ExpenseChangeRequestSumOrderByAggregateInput = {
+    requestedById?: SortOrder
+    approverId?: SortOrder
+    finalById?: SortOrder
+  }
+
+  export type EnumExpenseChangeStatusWithAggregatesFilter<$PrismaModel = never> = {
+    equals?: $Enums.ExpenseChangeStatus | EnumExpenseChangeStatusFieldRefInput<$PrismaModel>
+    in?: $Enums.ExpenseChangeStatus[] | ListEnumExpenseChangeStatusFieldRefInput<$PrismaModel>
+    notIn?: $Enums.ExpenseChangeStatus[] | ListEnumExpenseChangeStatusFieldRefInput<$PrismaModel>
+    not?: NestedEnumExpenseChangeStatusWithAggregatesFilter<$PrismaModel> | $Enums.ExpenseChangeStatus
+    _count?: NestedIntFilter<$PrismaModel>
+    _min?: NestedEnumExpenseChangeStatusFilter<$PrismaModel>
+    _max?: NestedEnumExpenseChangeStatusFilter<$PrismaModel>
+  }
+
   export type SubDepartmentCreateNestedManyWithoutDepartmentInput = {
     create?: XOR<SubDepartmentCreateWithoutDepartmentInput, SubDepartmentUncheckedCreateWithoutDepartmentInput> | SubDepartmentCreateWithoutDepartmentInput[] | SubDepartmentUncheckedCreateWithoutDepartmentInput[]
     connectOrCreate?: SubDepartmentCreateOrConnectWithoutDepartmentInput | SubDepartmentCreateOrConnectWithoutDepartmentInput[]
@@ -74023,6 +75955,10 @@ export namespace Prisma {
     update?: XOR<XOR<PoolBJobUpdateToOneWithWhereWithoutBatchesInput, PoolBJobUpdateWithoutBatchesInput>, PoolBJobUncheckedUpdateWithoutBatchesInput>
   }
 
+  export type EnumExpenseChangeStatusFieldUpdateOperationsInput = {
+    set?: $Enums.ExpenseChangeStatus
+  }
+
   export type NestedIntFilter<$PrismaModel = never> = {
     equals?: number | IntFieldRefInput<$PrismaModel>
     in?: number[] | ListIntFieldRefInput<$PrismaModel>
@@ -74540,6 +76476,23 @@ export namespace Prisma {
     _count?: NestedIntFilter<$PrismaModel>
     _min?: NestedEnumPoolBBatchStatusFilter<$PrismaModel>
     _max?: NestedEnumPoolBBatchStatusFilter<$PrismaModel>
+  }
+
+  export type NestedEnumExpenseChangeStatusFilter<$PrismaModel = never> = {
+    equals?: $Enums.ExpenseChangeStatus | EnumExpenseChangeStatusFieldRefInput<$PrismaModel>
+    in?: $Enums.ExpenseChangeStatus[] | ListEnumExpenseChangeStatusFieldRefInput<$PrismaModel>
+    notIn?: $Enums.ExpenseChangeStatus[] | ListEnumExpenseChangeStatusFieldRefInput<$PrismaModel>
+    not?: NestedEnumExpenseChangeStatusFilter<$PrismaModel> | $Enums.ExpenseChangeStatus
+  }
+
+  export type NestedEnumExpenseChangeStatusWithAggregatesFilter<$PrismaModel = never> = {
+    equals?: $Enums.ExpenseChangeStatus | EnumExpenseChangeStatusFieldRefInput<$PrismaModel>
+    in?: $Enums.ExpenseChangeStatus[] | ListEnumExpenseChangeStatusFieldRefInput<$PrismaModel>
+    notIn?: $Enums.ExpenseChangeStatus[] | ListEnumExpenseChangeStatusFieldRefInput<$PrismaModel>
+    not?: NestedEnumExpenseChangeStatusWithAggregatesFilter<$PrismaModel> | $Enums.ExpenseChangeStatus
+    _count?: NestedIntFilter<$PrismaModel>
+    _min?: NestedEnumExpenseChangeStatusFilter<$PrismaModel>
+    _max?: NestedEnumExpenseChangeStatusFilter<$PrismaModel>
   }
 
   export type SubDepartmentCreateWithoutDepartmentInput = {
