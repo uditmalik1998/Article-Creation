@@ -105,6 +105,7 @@ export default function ExpenseTableDetailPage() {
     key: col.dataIndex,
     dataIndex: col.dataIndex,
     width: col.width,
+    align: col.align,
     render: (value: any) => renderCell(value, col.type),
   }));
 
