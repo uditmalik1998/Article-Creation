@@ -10,7 +10,6 @@
 
 import { SapSyncItemResult } from './sapSyncService';
 import { mapWithConcurrency } from '../utils/concurrency';
-import { getMcCodeByMajorCategory, getHsnCodeByMcCode } from '../utils/mcCodeMapper';
 import { PrismaClient } from '../generated/prisma';
 import { FLAT_TO_RFC } from '../data/flatToRfcMap';
 
@@ -381,11 +380,11 @@ const toStr = (v: unknown): string => {
  *  Tier 2 (maj_cat_grid)       → has dropdown values for this major category → sent if non-empty
  *  Tier 3 (neither grid)       → NOT sent even if the DB has a value
  */
-function buildRfcPayload(
+async function buildRfcPayload(
     item: FlatItem,
     mandatoryGrid: MandatoryGridCache,
     majCatVisible: MajCatVisibleFields,
-): Record<string, string> {
+): Promise<Record<string, string>> {
     const majorCategory = toStr(item.majorCategory);
 
     // Tier 1: SAP keys that are active (mandatory) for this major category
@@ -414,15 +413,15 @@ function buildRfcPayload(
         // Tier 3: not in either grid → skip even if DB has a value
     }
 
-    // Always re-derive MC_CD and HSN_CODE from majorCategory using the JSON source of truth.
-    // Both DB fields (mcCode, hsnTaxCode) can be stale if set at extraction time with an old mapping.
-    const freshMcCode = getMcCodeByMajorCategory(item.majorCategory as string | null);
-    if (freshMcCode) {
-        payload['MC_CD'] = freshMcCode;
-        const freshHsn = getHsnCodeByMcCode(freshMcCode);
-        if (freshHsn) {
-            payload['HSN_CODE'] = freshHsn;
-        }
+    // Re-derive MC_CD and HSN_CODE from major_category_details table (source of truth).
+    const mcDes = (item.majorCategory as string | null | undefined)?.trim();
+    if (mcDes) {
+        const mcRow = await prisma.majorCategoryDetails.findFirst({
+            where: { mcDes: { equals: mcDes, mode: 'insensitive' }, mcStatus: 'ACT' },
+            select: { mcCode: true, hsnCode: true },
+        });
+        if (mcRow?.mcCode) payload['MC_CD'] = mcRow.mcCode;
+        if (mcRow?.hsnCode) payload['HSN_CODE'] = mcRow.hsnCode;
     }
 
     return payload;
@@ -460,12 +459,15 @@ export async function buildModifyChangesPayload(item: FlatItem): Promise<Record<
         if (include) payload[rfc] = toStr(item[flat]); // empties intentionally included
     }
 
-    // Re-derive MC_CD / HSN_CODE from the major category (DB values can be stale).
-    const freshMcCode = getMcCodeByMajorCategory(item.majorCategory as string | null);
-    if (freshMcCode) {
-        payload['MC_CD'] = freshMcCode;
-        const freshHsn = getHsnCodeByMcCode(freshMcCode);
-        if (freshHsn) payload['HSN_CODE'] = freshHsn;
+    // Re-derive MC_CD / HSN_CODE from major_category_details table (source of truth).
+    const mcDes = (item.majorCategory as string | null | undefined)?.trim();
+    if (mcDes) {
+        const mcRow = await prisma.majorCategoryDetails.findFirst({
+            where: { mcDes: { equals: mcDes, mode: 'insensitive' }, mcStatus: 'ACT' },
+            select: { mcCode: true, hsnCode: true },
+        });
+        if (mcRow?.mcCode) payload['MC_CD'] = mcRow.mcCode;
+        if (mcRow?.hsnCode) payload['HSN_CODE'] = mcRow.hsnCode;
     }
 
     return payload;
@@ -561,7 +563,7 @@ export async function previewRfcPayloads(items: FlatItem[]): Promise<void> {
         const mandatoryGrid = await loadMandatoryGridForRfc();
         const majCatVisible = await loadMajCatVisibleFieldsForRfc();
         for (const item of items) {
-            const payload = buildRfcPayload(item, mandatoryGrid, majCatVisible);
+            const payload = await buildRfcPayload(item, mandatoryGrid, majCatVisible);
             console.log(`\n========== [ZMM_RFC] PREVIEW PAYLOAD (dry-run, NO SAP call) for flat_id=${item.id} ==========`);
             console.log(`Would POST to : ${ZMM_RFC_URL}`);
             console.log(JSON.stringify({ IM_DATA: [payload] }, null, 2));

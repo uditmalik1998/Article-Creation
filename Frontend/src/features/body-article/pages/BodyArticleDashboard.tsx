@@ -213,24 +213,38 @@ export default function BodyArticleDashboard({ pathType }: BodyArticleDashboardP
         const params = new URLSearchParams();
         params.set('page', String(page));
         params.set('limit', String(PAGE_SIZE));
-        const effectiveStatus =
-          pathType === 'new' ? 'PENDING'
-          : pathType === 'rejected' ? 'REJECTED'
-          : pathType === 'created' ? 'APPROVED'
-          : statusFilter;
-        params.set('status', effectiveStatus);
-        if (divisionFilter !== 'ALL') params.set('division', divisionFilter);
-        if (subDivisionFilter !== 'ALL') params.set('subDivision', subDivisionFilter);
-        if (majorCategoryFilter) params.set('majorCategory', majorCategoryFilter);
-        if (sourceFilter !== 'ALL') params.set('source', sourceFilter);
-        if (sapSyncFilter !== 'ALL') params.set('sapSyncStatus', sapSyncFilter);
-        if (searchText) params.set('search', searchText);
-        if (dateRangeFilter?.[0]) params.set('startDate', dateRangeFilter[0].startOf('day').toISOString());
-        if (dateRangeFilter?.[1]) params.set('endDate', dateRangeFilter[1].endOf('day').toISOString());
-        if (pathType) params.set('pathType', pathType);
-        params.set('presentationsType', PRESENTATIONS_TYPE);
 
-        const response = await fetch(`${APP_CONFIG.api.baseURL}/approver/items?${params}`, {
+        let url: string;
+        if (pathType === 'new' || pathType === 'created') {
+          // Both New and Created tabs source from body_article_data via /approver/body-articles
+          const effectiveStatus = pathType === 'created' ? 'APPROVED' : 'PENDING';
+          params.set('status', effectiveStatus);
+          if (divisionFilter !== 'ALL') params.set('division', divisionFilter);
+          if (subDivisionFilter !== 'ALL') params.set('subDivision', subDivisionFilter);
+          if (majorCategoryFilter) params.set('majorCategory', majorCategoryFilter);
+          if (searchText) params.set('search', searchText);
+          if (dateRangeFilter?.[0]) params.set('startDate', dateRangeFilter[0].startOf('day').toISOString());
+          if (dateRangeFilter?.[1]) params.set('endDate', dateRangeFilter[1].endOf('day').toISOString());
+          url = `${APP_CONFIG.api.baseURL}/approver/body-articles?${params}`;
+        } else {
+          const effectiveStatus =
+            pathType === 'rejected' ? 'REJECTED'
+            : statusFilter;
+          params.set('status', effectiveStatus);
+          if (divisionFilter !== 'ALL') params.set('division', divisionFilter);
+          if (subDivisionFilter !== 'ALL') params.set('subDivision', subDivisionFilter);
+          if (majorCategoryFilter) params.set('majorCategory', majorCategoryFilter);
+          if (sourceFilter !== 'ALL') params.set('source', sourceFilter);
+          if (sapSyncFilter !== 'ALL') params.set('sapSyncStatus', sapSyncFilter);
+          if (searchText) params.set('search', searchText);
+          if (dateRangeFilter?.[0]) params.set('startDate', dateRangeFilter[0].startOf('day').toISOString());
+          if (dateRangeFilter?.[1]) params.set('endDate', dateRangeFilter[1].endOf('day').toISOString());
+          if (pathType) params.set('pathType', pathType);
+          params.set('presentationsType', PRESENTATIONS_TYPE);
+          url = `${APP_CONFIG.api.baseURL}/approver/items?${params}`;
+        }
+
+        const response = await fetch(url, {
           headers: { Authorization: `Bearer ${token}` },
         });
         if (!response.ok) throw new Error('Failed to fetch items');

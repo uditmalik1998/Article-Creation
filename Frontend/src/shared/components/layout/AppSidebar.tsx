@@ -198,6 +198,7 @@ export const AppSidebar: React.FC<AppSidebarProps> = ({ collapsed, onCollapsedCh
       label: 'Body Article',
       children: [
         { key: '/body-article', Icon: FileText, label: 'New articles' },
+        { key: '/body-article/created', Icon: CheckCircle2, label: 'Created' },
       ],
     });
   }

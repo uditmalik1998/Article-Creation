@@ -611,7 +611,11 @@ export default function ArticleDetailPage() {
         method: 'POST', headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` },
         body: JSON.stringify({ ids: [item.id] }),
       });
-      if (!r.ok) throw new Error('Request failed');
+      const data = await r.json();
+      if (!r.ok) {
+        message.error(data.error || 'Failed to create body article');
+        return;
+      }
       message.success('Body article creation initiated');
       await refetchCurrentItem();
     } catch { message.error('Failed to create body article'); }

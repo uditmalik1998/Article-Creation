@@ -50,7 +50,7 @@ const ITEM_UPDATE_ALLOWED_FIELDS = [
     'vendorCode', 'mrp', 'mcCode', 'segment', 'season',
     'hsnTaxCode', 'articleDescription', 'fashionGrid', 'year', 'articleType',
     // Body article cost fields
-    'cmtpCost', 'cmpCost', 'fabCost', 'fabCons', 'width',
+    'cmpCost', 'fabCost', 'fabCons', 'fWidth', 'width',
     // Card footer fields (fabric/body article builder)
     'fabricArticleNumber', 'fabricArticleDescription',
     'bodyArticle', 'bodyArticleDescription',
@@ -1603,27 +1603,21 @@ export class ApproverController {
                 }
             }
 
-            // Validate majorCategory — allow garment MC code list OR fabric_article_master (maj_cat).
+            // Validate majorCategory — use major_category_details table as source of truth.
             if (data.majorCategory !== undefined && data.majorCategory !== null) {
                 const majorCategoryText = String(data.majorCategory).trim();
                 if (majorCategoryText) {
-                    const garmentMcCode = getMcCodeByMajorCategory(majorCategoryText);
-                    if (garmentMcCode) {
-                        data.mcCode = garmentMcCode;
-                        data.hsnTaxCode = getHsnCodeByMcCode(garmentMcCode) || null;
+                    const mcDetails = await prisma.majorCategoryDetails.findFirst({
+                        where: { mcDes: { equals: majorCategoryText, mode: 'insensitive' }, mcStatus: 'ACT' },
+                        select: { mcCode: true, hsnCode: true },
+                    });
+                    if (mcDetails) {
+                        data.mcCode = mcDetails.mcCode || null;
+                        data.hsnTaxCode = mcDetails.hsnCode || null;
                     } else {
-                        const fabMaster = await prisma.fabricArticleMaster.findFirst({
-                            where: { majCat: { equals: majorCategoryText, mode: 'insensitive' } },
-                            orderBy: { id: 'asc' },
-                            select: { mcCode: true, hsnCd: true },
+                        return res.status(400).json({
+                            error: `Invalid majorCategory '${majorCategoryText}'. Please use values from mc code list (mc des).`
                         });
-                        if (!fabMaster) {
-                            return res.status(400).json({
-                                error: `Invalid majorCategory '${majorCategoryText}'. Please use values from mc code list (mc des).`
-                            });
-                        }
-                        data.mcCode = fabMaster.mcCode || null;
-                        data.hsnTaxCode = fabMaster.hsnCd || null;
                     }
                 }
             } else if (data.majorCategory !== undefined) {
@@ -2114,11 +2108,14 @@ export class ApproverController {
                 select: { id: true, majorCategory: true }
             });
             for (const row of rowsToFix) {
-                const mc = getMcCodeByMajorCategory(row.majorCategory);
-                if (mc) {
+                const mcRow = await prisma.majorCategoryDetails.findFirst({
+                    where: { mcDes: { equals: (row.majorCategory || '').trim(), mode: 'insensitive' }, mcStatus: 'ACT' },
+                    select: { mcCode: true, hsnCode: true },
+                });
+                if (mcRow?.mcCode) {
                     void prisma.extractionResultFlat.update({
                         where: { id: row.id },
-                        data: { mcCode: mc, hsnTaxCode: getHsnCodeByMcCode(mc) || null }
+                        data: { mcCode: mcRow.mcCode, hsnTaxCode: mcRow.hsnCode || null }
                     }).catch((err: any) => console.error('[pre-approval mcCode fix] update failed:', err?.message));
                 }
             }
@@ -3411,52 +3408,407 @@ export class ApproverController {
         const q = String(req.query.q ?? '').trim();
         if (!q) return res.json({ results: [] });
         const majorCategory = String(req.query.majorCategory ?? '').trim();
-        const majorCategoryFilter = majorCategory
-            ? { majorCategory: { equals: majorCategory, mode: 'insensitive' as const } }
-            : {};
 
-        const selectFields = {
-            bodyArticleNumber: true,
-            bodyArticleDescription: true,
-            mCollarType: true, mCollarStyle: true,
-            mNeckType: true, mNeckStyle: true,
-            mPlacket: true, mBltType: true, mBltStyle: true,
-            mSleevesMainStyle: true, mSleeveFold: true, mBtmFold: true,
-            mNoOfPocket: true, mPocket: true, mExtraPocket: true,
-            mFit: true, mBodyStyle: true, mLength: true, mSet: true,
-            cmtpCost: true, cmpCost: true, fabCons: true, width: true,
-        } as const;
+        type BodyRow = {
+            body_article_number: string | null;
+            body_article_description: string | null;
+            m_collar_type: string | null; m_collar_style: string | null;
+            m_neck_type: string | null; m_neck_style: string | null;
+            m_placket: string | null; m_blt_type: string | null; m_blt_style: string | null;
+            m_sleeves_main_style: string | null; m_sleeve_fold: string | null; m_btm_fold: string | null;
+            m_no_of_pocket: string | null; m_pocket: string | null; m_extra_pocket: string | null;
+            m_fit: string | null; m_body_style: string | null; m_length: string | null; m_set: string | null;
+            cmtp_cost: string | null; cmp_cost: string | null; fab_cons: string | null; width: string | null;
+        };
 
-        const exact = await prisma.bodyArticleData.findFirst({
-            where: { bodyArticleNumber: { equals: q, mode: 'insensitive' }, ...majorCategoryFilter },
-            select: selectFields,
-        });
+        const mcFilter = majorCategory
+            ? Prisma.sql`AND TRIM(LOWER(b.major_category)) = TRIM(LOWER(${majorCategory}))`
+            : Prisma.empty;
 
-        const partial = await prisma.bodyArticleData.findMany({
-            where: {
-                OR: [
-                    { bodyArticleNumber: { contains: q, mode: 'insensitive' } },
-                    { bodyArticleDescription: { contains: q, mode: 'insensitive' } },
-                ],
-                NOT: { bodyArticleNumber: null },
-                ...majorCategoryFilter,
-            },
-            select: selectFields,
-            distinct: ['bodyArticleNumber'],
-            take: 10,
-            orderBy: { bodyArticleNumber: 'asc' },
-        });
+        const rows = await prisma.$queryRaw<BodyRow[]>`
+            SELECT DISTINCT ON (b.body_article_number)
+                b.body_article_number,
+                b.body_article_description,
+                b.m_collar_type, b.m_collar_style,
+                b.m_neck_type, b.m_neck_style,
+                b.m_placket, b.m_blt_type, b.m_blt_style,
+                b.m_sleeves_main_style, b.m_sleeve_fold, b.m_btm_fold,
+                b.m_no_of_pocket, b.m_pocket, b.m_extra_pocket,
+                b.m_fit, b.m_body_style, b.m_length, b.m_set,
+                b.cmtp_cost::text, b.cmp_cost::text, b.fab_cons::text, b.width::text
+            FROM body_article_data b
+            WHERE b.body_article_number IS NOT NULL
+              AND TRIM(b.body_article_number) <> ''
+              AND (
+                LOWER(b.body_article_number) LIKE LOWER(${'%' + q + '%'})
+                OR LOWER(COALESCE(b.body_article_description, '')) LIKE LOWER(${'%' + q + '%'})
+              )
+              ${mcFilter}
+            ORDER BY b.body_article_number
+            LIMIT 10
+        `;
 
-        const seen = new Set<string>();
-        const results: typeof partial = [];
-        if (exact?.bodyArticleNumber) { results.push(exact); seen.add(exact.bodyArticleNumber); }
-        for (const r of partial) {
-            if (results.length >= 10) break;
-            if (r.bodyArticleNumber && seen.has(r.bodyArticleNumber)) continue;
-            results.push(r);
-            if (r.bodyArticleNumber) seen.add(r.bodyArticleNumber);
-        }
+        const results = rows.map((r) => ({
+            bodyArticleNumber:      r.body_article_number,
+            bodyArticleDescription: r.body_article_description,
+            mCollarType:  r.m_collar_type,  mCollarStyle: r.m_collar_style,
+            mNeckType:    r.m_neck_type,    mNeckStyle:   r.m_neck_style,
+            mPlacket:     r.m_placket,      mBltType:     r.m_blt_type,     mBltStyle: r.m_blt_style,
+            mSleevesMainStyle: r.m_sleeves_main_style, mSleeveFold: r.m_sleeve_fold, mBtmFold: r.m_btm_fold,
+            mNoOfPocket:  r.m_no_of_pocket, mPocket:      r.m_pocket,       mExtraPocket: r.m_extra_pocket,
+            mFit:         r.m_fit,          mBodyStyle:   r.m_body_style,   mLength: r.m_length, mSet: r.m_set,
+            cmtpCost:     r.cmtp_cost  != null ? Number(r.cmtp_cost)  : null,
+            cmpCost:      r.cmp_cost   != null ? Number(r.cmp_cost)   : null,
+            fabCons:      r.fab_cons   != null ? Number(r.fab_cons)   : null,
+            width:        r.width      != null ? Number(r.width)      : null,
+        }));
 
         return res.json({ results });
     }
+
+    static getBodyArticleItems = async (req: Request, res: Response) => {
+        const {
+            page = '1', limit = '50',
+            status, division, subDivision, majorCategory,
+            search, startDate, endDate,
+        } = req.query as Record<string, string>;
+
+        const skip = (parseInt(page, 10) - 1) * parseInt(limit, 10);
+        const take = parseInt(limit, 10);
+
+        const where: any = { bodyArticleType: 'FG' };
+
+        if (status && status !== 'ALL') where.approvalStatus = status;
+        if (division && division !== 'ALL') where.division = { contains: division, mode: 'insensitive' };
+        if (subDivision && subDivision !== 'ALL') where.subDivision = { equals: subDivision, mode: 'insensitive' };
+        if (majorCategory) where.majorCategory = { equals: majorCategory, mode: 'insensitive' };
+        if (startDate || endDate) {
+            where.createdAt = {};
+            if (startDate) where.createdAt.gte = new Date(startDate);
+            if (endDate)   where.createdAt.lte = new Date(endDate);
+        }
+        if (search) {
+            where.OR = [
+                { articleNumber: { contains: search, mode: 'insensitive' } },
+                { vendorName:    { contains: search, mode: 'insensitive' } },
+                { vendorCode:    { contains: search, mode: 'insensitive' } },
+            ];
+        }
+
+        const [rows, total] = await Promise.all([
+            prisma.bodyArticleData.findMany({
+                where, skip, take,
+                orderBy: { createdAt: 'desc' },
+                select: {
+                    id: true, articleNumber: true, division: true, subDivision: true,
+                    majorCategory: true, mcCode: true, vendorName: true, vendorCode: true,
+                    designNumber: true,
+                    season: true, year: true, hsnTaxCode: true, imageUrl: true,
+                    approvalStatus: true, approvedAt: true, approvedBy: true,
+                    sapSyncStatus: true, sapSyncMessage: true,
+                    userName: true, createdAt: true, updatedAt: true,
+                    bodyArticleType: true,
+                    mCollarType: true, mCollarStyle: true, mNeckType: true, mNeckStyle: true,
+                    mPlacket: true, mBltType: true, mBltStyle: true,
+                    mSleevesMainStyle: true, mSleeveFold: true, mBtmFold: true,
+                    mNoOfPocket: true, mPocket: true, mExtraPocket: true,
+                    mFit: true, mBodyStyle: true, mLength: true, mSet: true,
+                    bodyArticleNumber: true, bodyArticleDescription: true,
+                },
+            }),
+            prisma.bodyArticleData.count({ where }),
+        ]);
+
+        const data = rows.map((r) => ({
+            id:                       r.id,
+            imageName:                null,
+            imageUrl:                 r.imageUrl ?? null,
+            articleNumber:            r.articleNumber ?? null,
+            division:                 r.division ?? null,
+            subDivision:              r.subDivision ?? null,
+            majorCategory:            r.majorCategory ?? null,
+            mcCode:                   r.mcCode ?? null,
+            vendorName:               r.vendorName ?? null,
+            vendorCode:               r.vendorCode ?? null,
+            season:                   r.season ?? null,
+            year:                     r.year ?? null,
+            hsnTaxCode:               r.hsnTaxCode ?? null,
+            approvalStatus:           r.approvalStatus as 'PENDING' | 'APPROVED' | 'REJECTED',
+            approvedAt:               r.approvedAt?.toISOString() ?? null,
+            sapSyncStatus:            (r.sapSyncStatus ?? 'NOT_SYNCED') as any,
+            sapSyncMessage:           r.sapSyncMessage ?? null,
+            sapArticleId:             null,
+            userName:                 r.userName ?? null,
+            createdAt:                r.createdAt.toISOString(),
+            updatedAt:                r.updatedAt.toISOString(),
+            bodyArticleType:          r.bodyArticleType ?? null,
+            // Body & Construction fields
+            collar:                   r.mCollarType ?? null,
+            collarStyle:              r.mCollarStyle ?? null,
+            neck:                     r.mNeckType ?? null,
+            neckDetails:              r.mNeckStyle ?? null,
+            placket:                  r.mPlacket ?? null,
+            fatherBelt:               r.mBltType ?? null,
+            childBelt:                r.mBltStyle ?? null,
+            sleeve:                   r.mSleevesMainStyle ?? null,
+            sleeveFold:               r.mSleeveFold ?? null,
+            bottomFold:               r.mBtmFold ?? null,
+            noOfPocket:               r.mNoOfPocket ?? null,
+            pocketType:               r.mPocket ?? null,
+            extraPocket:              r.mExtraPocket ?? null,
+            fit:                      r.mFit ?? null,
+            pattern:                  r.mBodyStyle ?? null,
+            length:                   r.mLength ?? null,
+            mSet:                     r.mSet ?? null,
+            bodyArticle:              r.bodyArticleNumber ?? null,
+            bodyArticleDescription:   r.bodyArticleDescription ?? null,
+            designNumber: r.designNumber ?? null,
+            // Fields not in body_article_data — nulled out
+            pptNumber: null, source: null, rate: null, mrp: null,
+            size: null, colour: null, fabricMainMvgr: null, composition: null, gsm: null,
+            wash: null, referenceArticleNumber: null, referenceArticleDescription: null,
+            fabricArticleNumber: null, fabricArticleDescription: null, mcDescription: null,
+            segment: null, articleDescription: null, fashionGrid: null, articleType: null,
+            yarn1: null, yarn2: null, weave: null, macroMvgr: null, mainMvgr: null,
+            mFab2: null, finish: null, shade: null, weight: null, lycra: null,
+        }));
+
+        return res.json({ data, meta: { total, page: parseInt(page, 10), limit: take } });
+    };
+
+    // Map ApproverItem camelCase field names → body_article_data Prisma field names
+    private static readonly BODY_FIELD_MAP: Record<string, string> = {
+        collar:               'mCollarType',
+        collarStyle:          'mCollarStyle',
+        neck:                 'mNeckType',
+        neckDetails:          'mNeckStyle',
+        placket:              'mPlacket',
+        fatherBelt:           'mBltType',
+        childBelt:            'mBltStyle',
+        sleeve:               'mSleevesMainStyle',
+        sleeveFold:           'mSleeveFold',
+        mSet:                 'mSet',
+        bottomFold:           'mBtmFold',
+        noOfPocket:           'mNoOfPocket',
+        pocketType:           'mPocket',
+        extraPocket:          'mExtraPocket',
+        fit:                  'mFit',
+        pattern:              'mBodyStyle',
+        length:               'mLength',
+        bodyArticle:          'bodyArticleNumber',
+        bodyArticleDescription: 'bodyArticleDescription',
+        cmtpCost:             'cmtpCost',
+        cmpCost:              'cmpCost',
+        fabCons:              'fabCons',
+        fWidth:               'width',
+        width:                'width',
+        vendorCode:           'vendorCode',
+        vendorName:           'vendorName',
+        majorCategory:        'majorCategory',
+        mcCode:               'mcCode',
+        division:             'division',
+        subDivision:          'subDivision',
+        season:               'season',
+        year:                 'year',
+        hsnTaxCode:           'hsnTaxCode',
+        designNumber:         'designNumber',
+    };
+
+    private static bodyRowToApproverItem(r: any) {
+        return {
+            id: r.id,
+            imageName: null,
+            imageUrl: r.imageUrl ?? null,
+            articleNumber: r.articleNumber ?? null,
+            division: r.division ?? null,
+            subDivision: r.subDivision ?? null,
+            majorCategory: r.majorCategory ?? null,
+            mcCode: r.mcCode ?? null,
+            vendorName: r.vendorName ?? null,
+            vendorCode: r.vendorCode ?? null,
+            designNumber: r.designNumber ?? null,
+            season: r.season ?? null,
+            year: r.year ?? null,
+            hsnTaxCode: r.hsnTaxCode ?? null,
+            approvalStatus: r.approvalStatus,
+            approvedAt: r.approvedAt?.toISOString() ?? null,
+            sapSyncStatus: r.sapSyncStatus ?? 'NOT_SYNCED',
+            sapSyncMessage: r.sapSyncMessage ?? null,
+            sapArticleId: null,
+            userName: r.userName ?? null,
+            createdAt: r.createdAt?.toISOString?.() ?? r.createdAt,
+            updatedAt: r.updatedAt?.toISOString?.() ?? r.updatedAt,
+            bodyArticleType: r.bodyArticleType ?? null,
+            collar: r.mCollarType ?? null,
+            collarStyle: r.mCollarStyle ?? null,
+            neck: r.mNeckType ?? null,
+            neckDetails: r.mNeckStyle ?? null,
+            placket: r.mPlacket ?? null,
+            fatherBelt: r.mBltType ?? null,
+            childBelt: r.mBltStyle ?? null,
+            sleeve: r.mSleevesMainStyle ?? null,
+            sleeveFold: r.mSleeveFold ?? null,
+            bottomFold: r.mBtmFold ?? null,
+            noOfPocket: r.mNoOfPocket ?? null,
+            pocketType: r.mPocket ?? null,
+            extraPocket: r.mExtraPocket ?? null,
+            fit: r.mFit ?? null,
+            pattern: r.mBodyStyle ?? null,
+            length: r.mLength ?? null,
+            mSet: r.mSet ?? null,
+            bodyArticle: r.bodyArticleNumber ?? null,
+            bodyArticleDescription: r.bodyArticleDescription ?? null,
+            cmtpCost: r.cmtpCost ?? null,
+            cmpCost: r.cmpCost ?? null,
+            fabCons: r.fabCons ?? null,
+            fWidth: r.width ?? null,
+            width: r.width ?? null,
+            pptNumber: null, source: null, rate: null, mrp: null,
+            size: null, colour: null, fabricMainMvgr: null, composition: null, gsm: null,
+            wash: null, referenceArticleNumber: null, referenceArticleDescription: null,
+            fabricArticleNumber: null, fabricArticleDescription: null, mcDescription: null,
+            segment: null, articleDescription: null, fashionGrid: null, articleType: null,
+            yarn1: null, yarn2: null, weave: null, macroMvgr: null, mainMvgr: null,
+            mFab2: null, finish: null, shade: null, weight: null, lycra: null,
+        };
+    }
+
+    static getBodyArticleById = async (req: Request, res: Response) => {
+        const { id } = req.params;
+        const row = await prisma.bodyArticleData.findUnique({ where: { id } });
+        if (!row) return res.status(404).json({ error: 'Item not found' });
+        return res.json(ApproverController.bodyRowToApproverItem(row));
+    };
+
+    static updateBodyArticle = async (req: Request, res: Response) => {
+        const { id } = req.params;
+        const body = req.body as Record<string, unknown>;
+
+        const data: Record<string, unknown> = {};
+        for (const [clientKey, value] of Object.entries(body)) {
+            const dbKey = ApproverController.BODY_FIELD_MAP[clientKey];
+            if (dbKey) data[dbKey] = value === undefined ? null : value;
+        }
+        if (Object.keys(data).length === 0) {
+            const row = await prisma.bodyArticleData.findUnique({ where: { id } });
+            if (!row) return res.status(404).json({ error: 'Item not found' });
+            return res.json(ApproverController.bodyRowToApproverItem(row));
+        }
+        const row = await prisma.bodyArticleData.update({ where: { id }, data });
+        return res.json(ApproverController.bodyRowToApproverItem(row));
+    };
+
+    static submitBodyArticles = async (req: Request, res: Response) => {
+        const { ids } = req.body as { ids?: string[] };
+        if (!Array.isArray(ids) || ids.length === 0) {
+            return res.status(400).json({ error: 'ids array is required' });
+        }
+        const { submitBodyArticles } = await import('../services/zmmBodyArtCreationService');
+        const result = await submitBodyArticles(ids);
+        const allOk = result.results.every(r => r.success);
+        return res.status(allOk ? 200 : 207).json(result);
+    };
+
+    static createBodyArticleFromFG = async (req: Request, res: Response) => {
+        const { ids } = req.body as { ids?: string[] };
+        if (!Array.isArray(ids) || ids.length === 0) {
+            return res.status(400).json({ error: 'ids array is required' });
+        }
+
+        const items = await prisma.extractionResultFlat.findMany({
+            where: { id: { in: ids } },
+            select: {
+                id: true, articleNumber: true, designNumber: true, division: true, subDivision: true,
+                majorCategory: true, mcCode: true, vendorName: true, vendorCode: true,
+                season: true, year: true, hsnTaxCode: true, imageUrl: true, userName: true,
+                collar: true, collarStyle: true, neck: true, neckDetails: true,
+                placket: true, fatherBelt: true, childBelt: true,
+                sleeve: true, sleeveFold: true, mSet: true,
+                bottomFold: true, noOfPocket: true, pocketType: true, extraPocket: true,
+                fit: true, pattern: true, length: true,
+            },
+        });
+
+        if (items.length === 0) {
+            return res.status(404).json({ error: 'No items found for the given ids' });
+        }
+
+        // Check for existing body article data rows for these flat IDs
+        const existing = await prisma.bodyArticleData.findMany({
+            where: { flatId: { in: ids } },
+            select: { flatId: true, bodyArticleNumber: true },
+        });
+        if (existing.length > 0) {
+            const dupes = existing.map((e) => e.flatId).filter(Boolean).join(', ');
+            return res.status(409).json({
+                error: `Body Article go for Approval Already. Cannot Create Duplicate.`,
+                duplicateFlatIds: existing.map((e) => e.flatId),
+            });
+        }
+
+        const created = await Promise.all(items.map((item) =>
+            prisma.bodyArticleData.create({
+                data: {
+                    flatId:               item.id,
+                    articleNumber:        item.articleNumber,
+                    designNumber:         item.designNumber,
+                    division:             item.division,
+                    subDivision:          item.subDivision,
+                    majorCategory:        item.majorCategory,
+                    mcCode:               item.mcCode,
+                    vendorName:           item.vendorName,
+                    vendorCode:           item.vendorCode,
+                    season:               item.season,
+                    year:                 item.year,
+                    hsnTaxCode:           item.hsnTaxCode,
+                    imageUrl:             item.imageUrl,
+                    userName:             item.userName,
+                    bodyArticleType:      'FG',
+                    mCollarType:          item.collar,
+                    mCollarStyle:         item.collarStyle,
+                    mNeckType:            item.neck,
+                    mNeckStyle:           item.neckDetails,
+                    mPlacket:             item.placket,
+                    mBltType:             item.fatherBelt,
+                    mBltStyle:            item.childBelt,
+                    mSleevesMainStyle:    item.sleeve,
+                    mSleeveFold:          item.sleeveFold,
+                    mSet:                 item.mSet,
+                    mBtmFold:             item.bottomFold,
+                    mNoOfPocket:          item.noOfPocket,
+                    mPocket:              item.pocketType,
+                    mExtraPocket:         item.extraPocket,
+                    mFit:                 item.fit,
+                    mBodyStyle:           item.pattern,
+                    mLength:              item.length,
+                },
+            })
+        ));
+
+        return res.json({ success: true, created: created.length });
+    };
+
+    static getMajorCategoryDetails = async (req: Request, res: Response) => {
+        const { div, mcStatus, search } = req.query as Record<string, string>;
+
+        const where: any = {};
+        if (div && div !== 'ALL') where.div = { equals: div, mode: 'insensitive' };
+        if (mcStatus && mcStatus !== 'ALL') where.mcStatus = mcStatus;
+        if (search) {
+            where.OR = [
+                { majCat:  { contains: search, mode: 'insensitive' } },
+                { mcCode:  { contains: search, mode: 'insensitive' } },
+                { mcDes:   { contains: search, mode: 'insensitive' } },
+                { hsnCode: { contains: search, mode: 'insensitive' } },
+                { subDiv:  { contains: search, mode: 'insensitive' } },
+            ];
+        }
+
+        const rows = await prisma.majorCategoryDetails.findMany({
+            where,
+            orderBy: [{ div: 'asc' }, { subDiv: 'asc' }, { majCat: 'asc' }],
+        });
+
+        return res.json({ data: rows, total: rows.length });
+    };
 }

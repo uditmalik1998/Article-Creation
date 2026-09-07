@@ -952,6 +952,9 @@ exports.Prisma.BodyArticleDataScalarFieldEnum = {
   mSet: 'mSet',
   bodyArticleNumber: 'bodyArticleNumber',
   bodyArticleDescription: 'bodyArticleDescription',
+  imageUrl: 'imageUrl',
+  bodyArticleType: 'bodyArticleType',
+  designNumber: 'designNumber',
   cmtpCost: 'cmtpCost',
   cmpCost: 'cmpCost',
   fabCost: 'fabCost',
@@ -978,6 +981,19 @@ exports.Prisma.BodyArticleDataScalarFieldEnum = {
   updatedAt: 'updatedAt'
 };
 
+<<<<<<< HEAD
+exports.Prisma.MajorCategoryDetailsScalarFieldEnum = {
+  id: 'id',
+  seg: 'seg',
+  div: 'div',
+  subDiv: 'subDiv',
+  majCat: 'majCat',
+  mcCode: 'mcCode',
+  mcDes: 'mcDes',
+  hsnCode: 'hsnCode',
+  mcStatus: 'mcStatus',
+  createdAt: 'createdAt'
+=======
 exports.Prisma.ExpenseChangeRequestScalarFieldEnum = {
   id: 'id',
   tableKey: 'tableKey',
@@ -1004,6 +1020,7 @@ exports.Prisma.ExpenseChangeRequestScalarFieldEnum = {
   finalAction: 'finalAction',
   createdAt: 'createdAt',
   updatedAt: 'updatedAt'
+>>>>>>> 0d1159d12e0df55bfd3763cd59be6ab70e1b50b5
 };
 
 exports.Prisma.SortOrder = {
@@ -1614,6 +1631,9 @@ exports.Prisma.BodyArticleDataOrderByRelevanceFieldEnum = {
   mSet: 'mSet',
   bodyArticleNumber: 'bodyArticleNumber',
   bodyArticleDescription: 'bodyArticleDescription',
+  imageUrl: 'imageUrl',
+  bodyArticleType: 'bodyArticleType',
+  designNumber: 'designNumber',
   flatId: 'flatId',
   articleNumber: 'articleNumber',
   division: 'division',
@@ -1631,6 +1651,17 @@ exports.Prisma.BodyArticleDataOrderByRelevanceFieldEnum = {
   userName: 'userName'
 };
 
+<<<<<<< HEAD
+exports.Prisma.MajorCategoryDetailsOrderByRelevanceFieldEnum = {
+  seg: 'seg',
+  div: 'div',
+  subDiv: 'subDiv',
+  majCat: 'majCat',
+  mcCode: 'mcCode',
+  mcDes: 'mcDes',
+  hsnCode: 'hsnCode',
+  mcStatus: 'mcStatus'
+=======
 exports.Prisma.ExpenseChangeRequestOrderByRelevanceFieldEnum = {
   id: 'id',
   tableKey: 'tableKey',
@@ -1647,6 +1678,7 @@ exports.Prisma.ExpenseChangeRequestOrderByRelevanceFieldEnum = {
   finalByEmail: 'finalByEmail',
   finalComment: 'finalComment',
   finalAction: 'finalAction'
+>>>>>>> 0d1159d12e0df55bfd3763cd59be6ab70e1b50b5
 };
 exports.GarmentType = exports.$Enums.GarmentType = {
   UPPER: 'UPPER',
@@ -1776,7 +1808,11 @@ exports.Prisma.ModelName = {
   ModifyLog: 'ModifyLog',
   FabricArticleData: 'FabricArticleData',
   BodyArticleData: 'BodyArticleData',
+<<<<<<< HEAD
+  MajorCategoryDetails: 'MajorCategoryDetails'
+=======
   ExpenseChangeRequest: 'ExpenseChangeRequest'
+>>>>>>> 0d1159d12e0df55bfd3763cd59be6ab70e1b50b5
 };
 
 /**

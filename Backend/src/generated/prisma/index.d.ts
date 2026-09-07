@@ -229,10 +229,17 @@ export type FabricArticleData = $Result.DefaultSelection<Prisma.$FabricArticleDa
  */
 export type BodyArticleData = $Result.DefaultSelection<Prisma.$BodyArticleDataPayload>
 /**
+<<<<<<< HEAD
+ * Model MajorCategoryDetails
+ * MajorCategoryDetails: Master table for major category hierarchy, mc_code, and HSN codes
+ */
+export type MajorCategoryDetails = $Result.DefaultSelection<Prisma.$MajorCategoryDetailsPayload>
+=======
  * Model ExpenseChangeRequest
  * 
  */
 export type ExpenseChangeRequest = $Result.DefaultSelection<Prisma.$ExpenseChangeRequestPayload>
+>>>>>>> 0d1159d12e0df55bfd3763cd59be6ab70e1b50b5
 
 /**
  * Enums
@@ -929,6 +936,16 @@ export class PrismaClient<
   get bodyArticleData(): Prisma.BodyArticleDataDelegate<ExtArgs, ClientOptions>;
 
   /**
+<<<<<<< HEAD
+   * `prisma.majorCategoryDetails`: Exposes CRUD operations for the **MajorCategoryDetails** model.
+    * Example usage:
+    * ```ts
+    * // Fetch zero or more MajorCategoryDetails
+    * const majorCategoryDetails = await prisma.majorCategoryDetails.findMany()
+    * ```
+    */
+  get majorCategoryDetails(): Prisma.MajorCategoryDetailsDelegate<ExtArgs, ClientOptions>;
+=======
    * `prisma.expenseChangeRequest`: Exposes CRUD operations for the **ExpenseChangeRequest** model.
     * Example usage:
     * ```ts
@@ -937,6 +954,7 @@ export class PrismaClient<
     * ```
     */
   get expenseChangeRequest(): Prisma.ExpenseChangeRequestDelegate<ExtArgs, ClientOptions>;
+>>>>>>> 0d1159d12e0df55bfd3763cd59be6ab70e1b50b5
 }
 
 export namespace Prisma {
@@ -1417,7 +1435,11 @@ export namespace Prisma {
     ModifyLog: 'ModifyLog',
     FabricArticleData: 'FabricArticleData',
     BodyArticleData: 'BodyArticleData',
+<<<<<<< HEAD
+    MajorCategoryDetails: 'MajorCategoryDetails'
+=======
     ExpenseChangeRequest: 'ExpenseChangeRequest'
+>>>>>>> 0d1159d12e0df55bfd3763cd59be6ab70e1b50b5
   };
 
   export type ModelName = (typeof ModelName)[keyof typeof ModelName]
@@ -1436,7 +1458,11 @@ export namespace Prisma {
       omit: GlobalOmitOptions
     }
     meta: {
+<<<<<<< HEAD
+      modelProps: "department" | "subDepartment" | "category" | "masterAttribute" | "attributeAllowedValue" | "categoryAttribute" | "extractionJob" | "extractionResult" | "extractionResultFlat" | "modelGenerationResult" | "modelImageApproval" | "mvgrLookup" | "masterVendorDetail" | "user" | "auditLog" | "apiKey" | "changeHistory" | "costSummary" | "article360" | "articleFab" | "articleBody" | "articleVaAcc" | "articleVaPrcs" | "articleBom" | "sapFieldConfig" | "sapAttributeValue" | "article360Flat" | "rawArticle" | "fabricRawData" | "srmSyncRun" | "srmSyncRunItem" | "poolBJob" | "poolBBatch" | "nationalGridMaster" | "majorCatMaster" | "fabricArticleMaster" | "fabricMajCatGridValue" | "modifyLog" | "fabricArticleData" | "bodyArticleData" | "majorCategoryDetails"
+=======
       modelProps: "department" | "subDepartment" | "category" | "masterAttribute" | "attributeAllowedValue" | "categoryAttribute" | "extractionJob" | "extractionResult" | "extractionResultFlat" | "modelGenerationResult" | "modelImageApproval" | "mvgrLookup" | "masterVendorDetail" | "user" | "auditLog" | "apiKey" | "changeHistory" | "costSummary" | "article360" | "articleFab" | "articleBody" | "articleVaAcc" | "articleVaPrcs" | "articleBom" | "sapFieldConfig" | "sapAttributeValue" | "article360Flat" | "rawArticle" | "fabricRawData" | "srmSyncRun" | "srmSyncRunItem" | "poolBJob" | "poolBBatch" | "nationalGridMaster" | "majorCatMaster" | "fabricArticleMaster" | "fabricMajCatGridValue" | "modifyLog" | "fabricArticleData" | "bodyArticleData" | "expenseChangeRequest"
+>>>>>>> 0d1159d12e0df55bfd3763cd59be6ab70e1b50b5
       txIsolationLevel: Prisma.TransactionIsolationLevel
     }
     model: {
@@ -4400,6 +4426,79 @@ export namespace Prisma {
           }
         }
       }
+<<<<<<< HEAD
+      MajorCategoryDetails: {
+        payload: Prisma.$MajorCategoryDetailsPayload<ExtArgs>
+        fields: Prisma.MajorCategoryDetailsFieldRefs
+        operations: {
+          findUnique: {
+            args: Prisma.MajorCategoryDetailsFindUniqueArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$MajorCategoryDetailsPayload> | null
+          }
+          findUniqueOrThrow: {
+            args: Prisma.MajorCategoryDetailsFindUniqueOrThrowArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$MajorCategoryDetailsPayload>
+          }
+          findFirst: {
+            args: Prisma.MajorCategoryDetailsFindFirstArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$MajorCategoryDetailsPayload> | null
+          }
+          findFirstOrThrow: {
+            args: Prisma.MajorCategoryDetailsFindFirstOrThrowArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$MajorCategoryDetailsPayload>
+          }
+          findMany: {
+            args: Prisma.MajorCategoryDetailsFindManyArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$MajorCategoryDetailsPayload>[]
+          }
+          create: {
+            args: Prisma.MajorCategoryDetailsCreateArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$MajorCategoryDetailsPayload>
+          }
+          createMany: {
+            args: Prisma.MajorCategoryDetailsCreateManyArgs<ExtArgs>
+            result: BatchPayload
+          }
+          createManyAndReturn: {
+            args: Prisma.MajorCategoryDetailsCreateManyAndReturnArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$MajorCategoryDetailsPayload>[]
+          }
+          delete: {
+            args: Prisma.MajorCategoryDetailsDeleteArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$MajorCategoryDetailsPayload>
+          }
+          update: {
+            args: Prisma.MajorCategoryDetailsUpdateArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$MajorCategoryDetailsPayload>
+          }
+          deleteMany: {
+            args: Prisma.MajorCategoryDetailsDeleteManyArgs<ExtArgs>
+            result: BatchPayload
+          }
+          updateMany: {
+            args: Prisma.MajorCategoryDetailsUpdateManyArgs<ExtArgs>
+            result: BatchPayload
+          }
+          updateManyAndReturn: {
+            args: Prisma.MajorCategoryDetailsUpdateManyAndReturnArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$MajorCategoryDetailsPayload>[]
+          }
+          upsert: {
+            args: Prisma.MajorCategoryDetailsUpsertArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$MajorCategoryDetailsPayload>
+          }
+          aggregate: {
+            args: Prisma.MajorCategoryDetailsAggregateArgs<ExtArgs>
+            result: $Utils.Optional<AggregateMajorCategoryDetails>
+          }
+          groupBy: {
+            args: Prisma.MajorCategoryDetailsGroupByArgs<ExtArgs>
+            result: $Utils.Optional<MajorCategoryDetailsGroupByOutputType>[]
+          }
+          count: {
+            args: Prisma.MajorCategoryDetailsCountArgs<ExtArgs>
+            result: $Utils.Optional<MajorCategoryDetailsCountAggregateOutputType> | number
+=======
       ExpenseChangeRequest: {
         payload: Prisma.$ExpenseChangeRequestPayload<ExtArgs>
         fields: Prisma.ExpenseChangeRequestFieldRefs
@@ -4471,6 +4570,7 @@ export namespace Prisma {
           count: {
             args: Prisma.ExpenseChangeRequestCountArgs<ExtArgs>
             result: $Utils.Optional<ExpenseChangeRequestCountAggregateOutputType> | number
+>>>>>>> 0d1159d12e0df55bfd3763cd59be6ab70e1b50b5
           }
         }
       }
@@ -4606,7 +4706,11 @@ export namespace Prisma {
     modifyLog?: ModifyLogOmit
     fabricArticleData?: FabricArticleDataOmit
     bodyArticleData?: BodyArticleDataOmit
+<<<<<<< HEAD
+    majorCategoryDetails?: MajorCategoryDetailsOmit
+=======
     expenseChangeRequest?: ExpenseChangeRequestOmit
+>>>>>>> 0d1159d12e0df55bfd3763cd59be6ab70e1b50b5
   }
 
   /* Types for Logging */
@@ -54098,6 +54202,9 @@ export namespace Prisma {
     mSet: string | null
     bodyArticleNumber: string | null
     bodyArticleDescription: string | null
+    imageUrl: string | null
+    bodyArticleType: string | null
+    designNumber: string | null
     cmtpCost: Decimal | null
     cmpCost: Decimal | null
     fabCost: Decimal | null
@@ -54145,6 +54252,9 @@ export namespace Prisma {
     mSet: string | null
     bodyArticleNumber: string | null
     bodyArticleDescription: string | null
+    imageUrl: string | null
+    bodyArticleType: string | null
+    designNumber: string | null
     cmtpCost: Decimal | null
     cmpCost: Decimal | null
     fabCost: Decimal | null
@@ -54192,6 +54302,9 @@ export namespace Prisma {
     mSet: number
     bodyArticleNumber: number
     bodyArticleDescription: number
+    imageUrl: number
+    bodyArticleType: number
+    designNumber: number
     cmtpCost: number
     cmpCost: number
     fabCost: number
@@ -54259,6 +54372,9 @@ export namespace Prisma {
     mSet?: true
     bodyArticleNumber?: true
     bodyArticleDescription?: true
+    imageUrl?: true
+    bodyArticleType?: true
+    designNumber?: true
     cmtpCost?: true
     cmpCost?: true
     fabCost?: true
@@ -54306,6 +54422,9 @@ export namespace Prisma {
     mSet?: true
     bodyArticleNumber?: true
     bodyArticleDescription?: true
+    imageUrl?: true
+    bodyArticleType?: true
+    designNumber?: true
     cmtpCost?: true
     cmpCost?: true
     fabCost?: true
@@ -54353,6 +54472,9 @@ export namespace Prisma {
     mSet?: true
     bodyArticleNumber?: true
     bodyArticleDescription?: true
+    imageUrl?: true
+    bodyArticleType?: true
+    designNumber?: true
     cmtpCost?: true
     cmpCost?: true
     fabCost?: true
@@ -54487,6 +54609,9 @@ export namespace Prisma {
     mSet: string | null
     bodyArticleNumber: string | null
     bodyArticleDescription: string | null
+    imageUrl: string | null
+    bodyArticleType: string | null
+    designNumber: string | null
     cmtpCost: Decimal | null
     cmpCost: Decimal | null
     fabCost: Decimal | null
@@ -54553,6 +54678,9 @@ export namespace Prisma {
     mSet?: boolean
     bodyArticleNumber?: boolean
     bodyArticleDescription?: boolean
+    imageUrl?: boolean
+    bodyArticleType?: boolean
+    designNumber?: boolean
     cmtpCost?: boolean
     cmpCost?: boolean
     fabCost?: boolean
@@ -54600,6 +54728,9 @@ export namespace Prisma {
     mSet?: boolean
     bodyArticleNumber?: boolean
     bodyArticleDescription?: boolean
+    imageUrl?: boolean
+    bodyArticleType?: boolean
+    designNumber?: boolean
     cmtpCost?: boolean
     cmpCost?: boolean
     fabCost?: boolean
@@ -54647,6 +54778,9 @@ export namespace Prisma {
     mSet?: boolean
     bodyArticleNumber?: boolean
     bodyArticleDescription?: boolean
+    imageUrl?: boolean
+    bodyArticleType?: boolean
+    designNumber?: boolean
     cmtpCost?: boolean
     cmpCost?: boolean
     fabCost?: boolean
@@ -54694,6 +54828,9 @@ export namespace Prisma {
     mSet?: boolean
     bodyArticleNumber?: boolean
     bodyArticleDescription?: boolean
+    imageUrl?: boolean
+    bodyArticleType?: boolean
+    designNumber?: boolean
     cmtpCost?: boolean
     cmpCost?: boolean
     fabCost?: boolean
@@ -54720,7 +54857,7 @@ export namespace Prisma {
     updatedAt?: boolean
   }
 
-  export type BodyArticleDataOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<"id" | "mCollarType" | "mCollarStyle" | "mNeckType" | "mNeckStyle" | "mPlacket" | "mBltType" | "mBltStyle" | "mSleevesMainStyle" | "mSleeveFold" | "mBtmFold" | "mNoOfPocket" | "mPocket" | "mExtraPocket" | "mFit" | "mBodyStyle" | "mLength" | "mSet" | "bodyArticleNumber" | "bodyArticleDescription" | "cmtpCost" | "cmpCost" | "fabCost" | "fabCons" | "width" | "flatId" | "articleNumber" | "division" | "subDivision" | "majorCategory" | "mcCode" | "vendorName" | "vendorCode" | "season" | "year" | "hsnTaxCode" | "approvalStatus" | "approvedAt" | "approvedBy" | "sapSyncStatus" | "sapSyncMessage" | "userName" | "createdAt" | "updatedAt", ExtArgs["result"]["bodyArticleData"]>
+  export type BodyArticleDataOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<"id" | "mCollarType" | "mCollarStyle" | "mNeckType" | "mNeckStyle" | "mPlacket" | "mBltType" | "mBltStyle" | "mSleevesMainStyle" | "mSleeveFold" | "mBtmFold" | "mNoOfPocket" | "mPocket" | "mExtraPocket" | "mFit" | "mBodyStyle" | "mLength" | "mSet" | "bodyArticleNumber" | "bodyArticleDescription" | "imageUrl" | "bodyArticleType" | "designNumber" | "cmtpCost" | "cmpCost" | "fabCost" | "fabCons" | "width" | "flatId" | "articleNumber" | "division" | "subDivision" | "majorCategory" | "mcCode" | "vendorName" | "vendorCode" | "season" | "year" | "hsnTaxCode" | "approvalStatus" | "approvedAt" | "approvedBy" | "sapSyncStatus" | "sapSyncMessage" | "userName" | "createdAt" | "updatedAt", ExtArgs["result"]["bodyArticleData"]>
 
   export type $BodyArticleDataPayload<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
     name: "BodyArticleData"
@@ -54746,6 +54883,9 @@ export namespace Prisma {
       mSet: string | null
       bodyArticleNumber: string | null
       bodyArticleDescription: string | null
+      imageUrl: string | null
+      bodyArticleType: string | null
+      designNumber: string | null
       cmtpCost: Prisma.Decimal | null
       cmpCost: Prisma.Decimal | null
       fabCost: Prisma.Decimal | null
@@ -55213,6 +55353,9 @@ export namespace Prisma {
     readonly mSet: FieldRef<"BodyArticleData", 'String'>
     readonly bodyArticleNumber: FieldRef<"BodyArticleData", 'String'>
     readonly bodyArticleDescription: FieldRef<"BodyArticleData", 'String'>
+    readonly imageUrl: FieldRef<"BodyArticleData", 'String'>
+    readonly bodyArticleType: FieldRef<"BodyArticleData", 'String'>
+    readonly designNumber: FieldRef<"BodyArticleData", 'String'>
     readonly cmtpCost: FieldRef<"BodyArticleData", 'Decimal'>
     readonly cmpCost: FieldRef<"BodyArticleData", 'Decimal'>
     readonly fabCost: FieldRef<"BodyArticleData", 'Decimal'>
@@ -55604,6 +55747,64 @@ export namespace Prisma {
 
 
   /**
+<<<<<<< HEAD
+   * Model MajorCategoryDetails
+   */
+
+  export type AggregateMajorCategoryDetails = {
+    _count: MajorCategoryDetailsCountAggregateOutputType | null
+    _avg: MajorCategoryDetailsAvgAggregateOutputType | null
+    _sum: MajorCategoryDetailsSumAggregateOutputType | null
+    _min: MajorCategoryDetailsMinAggregateOutputType | null
+    _max: MajorCategoryDetailsMaxAggregateOutputType | null
+  }
+
+  export type MajorCategoryDetailsAvgAggregateOutputType = {
+    id: number | null
+  }
+
+  export type MajorCategoryDetailsSumAggregateOutputType = {
+    id: number | null
+  }
+
+  export type MajorCategoryDetailsMinAggregateOutputType = {
+    id: number | null
+    seg: string | null
+    div: string | null
+    subDiv: string | null
+    majCat: string | null
+    mcCode: string | null
+    mcDes: string | null
+    hsnCode: string | null
+    mcStatus: string | null
+    createdAt: Date | null
+  }
+
+  export type MajorCategoryDetailsMaxAggregateOutputType = {
+    id: number | null
+    seg: string | null
+    div: string | null
+    subDiv: string | null
+    majCat: string | null
+    mcCode: string | null
+    mcDes: string | null
+    hsnCode: string | null
+    mcStatus: string | null
+    createdAt: Date | null
+  }
+
+  export type MajorCategoryDetailsCountAggregateOutputType = {
+    id: number
+    seg: number
+    div: number
+    subDiv: number
+    majCat: number
+    mcCode: number
+    mcDes: number
+    hsnCode: number
+    mcStatus: number
+    createdAt: number
+=======
    * Model ExpenseChangeRequest
    */
 
@@ -55707,10 +55908,72 @@ export namespace Prisma {
     finalAction: number
     createdAt: number
     updatedAt: number
+>>>>>>> 0d1159d12e0df55bfd3763cd59be6ab70e1b50b5
     _all: number
   }
 
 
+<<<<<<< HEAD
+  export type MajorCategoryDetailsAvgAggregateInputType = {
+    id?: true
+  }
+
+  export type MajorCategoryDetailsSumAggregateInputType = {
+    id?: true
+  }
+
+  export type MajorCategoryDetailsMinAggregateInputType = {
+    id?: true
+    seg?: true
+    div?: true
+    subDiv?: true
+    majCat?: true
+    mcCode?: true
+    mcDes?: true
+    hsnCode?: true
+    mcStatus?: true
+    createdAt?: true
+  }
+
+  export type MajorCategoryDetailsMaxAggregateInputType = {
+    id?: true
+    seg?: true
+    div?: true
+    subDiv?: true
+    majCat?: true
+    mcCode?: true
+    mcDes?: true
+    hsnCode?: true
+    mcStatus?: true
+    createdAt?: true
+  }
+
+  export type MajorCategoryDetailsCountAggregateInputType = {
+    id?: true
+    seg?: true
+    div?: true
+    subDiv?: true
+    majCat?: true
+    mcCode?: true
+    mcDes?: true
+    hsnCode?: true
+    mcStatus?: true
+    createdAt?: true
+    _all?: true
+  }
+
+  export type MajorCategoryDetailsAggregateArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Filter which MajorCategoryDetails to aggregate.
+     */
+    where?: MajorCategoryDetailsWhereInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
+     * 
+     * Determine the order of MajorCategoryDetails to fetch.
+     */
+    orderBy?: MajorCategoryDetailsOrderByWithRelationInput | MajorCategoryDetailsOrderByWithRelationInput[]
+=======
   export type ExpenseChangeRequestAvgAggregateInputType = {
     requestedById?: true
     approverId?: true
@@ -55817,53 +56080,95 @@ export namespace Prisma {
      * Determine the order of ExpenseChangeRequests to fetch.
      */
     orderBy?: ExpenseChangeRequestOrderByWithRelationInput | ExpenseChangeRequestOrderByWithRelationInput[]
+>>>>>>> 0d1159d12e0df55bfd3763cd59be6ab70e1b50b5
     /**
      * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
      * 
      * Sets the start position
      */
+<<<<<<< HEAD
+    cursor?: MajorCategoryDetailsWhereUniqueInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Take `±n` MajorCategoryDetails from the position of the cursor.
+=======
     cursor?: ExpenseChangeRequestWhereUniqueInput
     /**
      * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
      * 
      * Take `±n` ExpenseChangeRequests from the position of the cursor.
+>>>>>>> 0d1159d12e0df55bfd3763cd59be6ab70e1b50b5
      */
     take?: number
     /**
      * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
      * 
+<<<<<<< HEAD
+     * Skip the first `n` MajorCategoryDetails.
+=======
      * Skip the first `n` ExpenseChangeRequests.
+>>>>>>> 0d1159d12e0df55bfd3763cd59be6ab70e1b50b5
      */
     skip?: number
     /**
      * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
      * 
+<<<<<<< HEAD
+     * Count returned MajorCategoryDetails
+    **/
+    _count?: true | MajorCategoryDetailsCountAggregateInputType
+=======
      * Count returned ExpenseChangeRequests
     **/
     _count?: true | ExpenseChangeRequestCountAggregateInputType
+>>>>>>> 0d1159d12e0df55bfd3763cd59be6ab70e1b50b5
     /**
      * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
      * 
      * Select which fields to average
     **/
+<<<<<<< HEAD
+    _avg?: MajorCategoryDetailsAvgAggregateInputType
+=======
     _avg?: ExpenseChangeRequestAvgAggregateInputType
+>>>>>>> 0d1159d12e0df55bfd3763cd59be6ab70e1b50b5
     /**
      * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
      * 
      * Select which fields to sum
     **/
+<<<<<<< HEAD
+    _sum?: MajorCategoryDetailsSumAggregateInputType
+=======
     _sum?: ExpenseChangeRequestSumAggregateInputType
+>>>>>>> 0d1159d12e0df55bfd3763cd59be6ab70e1b50b5
     /**
      * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
      * 
      * Select which fields to find the minimum value
     **/
+<<<<<<< HEAD
+    _min?: MajorCategoryDetailsMinAggregateInputType
+=======
     _min?: ExpenseChangeRequestMinAggregateInputType
+>>>>>>> 0d1159d12e0df55bfd3763cd59be6ab70e1b50b5
     /**
      * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
      * 
      * Select which fields to find the maximum value
     **/
+<<<<<<< HEAD
+    _max?: MajorCategoryDetailsMaxAggregateInputType
+  }
+
+  export type GetMajorCategoryDetailsAggregateType<T extends MajorCategoryDetailsAggregateArgs> = {
+        [P in keyof T & keyof AggregateMajorCategoryDetails]: P extends '_count' | 'count'
+      ? T[P] extends true
+        ? number
+        : GetScalarType<T[P], AggregateMajorCategoryDetails[P]>
+      : GetScalarType<T[P], AggregateMajorCategoryDetails[P]>
+=======
     _max?: ExpenseChangeRequestMaxAggregateInputType
   }
 
@@ -55873,11 +56178,55 @@ export namespace Prisma {
         ? number
         : GetScalarType<T[P], AggregateExpenseChangeRequest[P]>
       : GetScalarType<T[P], AggregateExpenseChangeRequest[P]>
+>>>>>>> 0d1159d12e0df55bfd3763cd59be6ab70e1b50b5
   }
 
 
 
 
+<<<<<<< HEAD
+  export type MajorCategoryDetailsGroupByArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    where?: MajorCategoryDetailsWhereInput
+    orderBy?: MajorCategoryDetailsOrderByWithAggregationInput | MajorCategoryDetailsOrderByWithAggregationInput[]
+    by: MajorCategoryDetailsScalarFieldEnum[] | MajorCategoryDetailsScalarFieldEnum
+    having?: MajorCategoryDetailsScalarWhereWithAggregatesInput
+    take?: number
+    skip?: number
+    _count?: MajorCategoryDetailsCountAggregateInputType | true
+    _avg?: MajorCategoryDetailsAvgAggregateInputType
+    _sum?: MajorCategoryDetailsSumAggregateInputType
+    _min?: MajorCategoryDetailsMinAggregateInputType
+    _max?: MajorCategoryDetailsMaxAggregateInputType
+  }
+
+  export type MajorCategoryDetailsGroupByOutputType = {
+    id: number
+    seg: string | null
+    div: string | null
+    subDiv: string | null
+    majCat: string | null
+    mcCode: string | null
+    mcDes: string | null
+    hsnCode: string | null
+    mcStatus: string | null
+    createdAt: Date
+    _count: MajorCategoryDetailsCountAggregateOutputType | null
+    _avg: MajorCategoryDetailsAvgAggregateOutputType | null
+    _sum: MajorCategoryDetailsSumAggregateOutputType | null
+    _min: MajorCategoryDetailsMinAggregateOutputType | null
+    _max: MajorCategoryDetailsMaxAggregateOutputType | null
+  }
+
+  type GetMajorCategoryDetailsGroupByPayload<T extends MajorCategoryDetailsGroupByArgs> = Prisma.PrismaPromise<
+    Array<
+      PickEnumerable<MajorCategoryDetailsGroupByOutputType, T['by']> &
+        {
+          [P in ((keyof T) & (keyof MajorCategoryDetailsGroupByOutputType))]: P extends '_count'
+            ? T[P] extends boolean
+              ? number
+              : GetScalarType<T[P], MajorCategoryDetailsGroupByOutputType[P]>
+            : GetScalarType<T[P], MajorCategoryDetailsGroupByOutputType[P]>
+=======
   export type ExpenseChangeRequestGroupByArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
     where?: ExpenseChangeRequestWhereInput
     orderBy?: ExpenseChangeRequestOrderByWithAggregationInput | ExpenseChangeRequestOrderByWithAggregationInput[]
@@ -55934,11 +56283,101 @@ export namespace Prisma {
               ? number
               : GetScalarType<T[P], ExpenseChangeRequestGroupByOutputType[P]>
             : GetScalarType<T[P], ExpenseChangeRequestGroupByOutputType[P]>
+>>>>>>> 0d1159d12e0df55bfd3763cd59be6ab70e1b50b5
         }
       >
     >
 
 
+<<<<<<< HEAD
+  export type MajorCategoryDetailsSelect<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
+    id?: boolean
+    seg?: boolean
+    div?: boolean
+    subDiv?: boolean
+    majCat?: boolean
+    mcCode?: boolean
+    mcDes?: boolean
+    hsnCode?: boolean
+    mcStatus?: boolean
+    createdAt?: boolean
+  }, ExtArgs["result"]["majorCategoryDetails"]>
+
+  export type MajorCategoryDetailsSelectCreateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
+    id?: boolean
+    seg?: boolean
+    div?: boolean
+    subDiv?: boolean
+    majCat?: boolean
+    mcCode?: boolean
+    mcDes?: boolean
+    hsnCode?: boolean
+    mcStatus?: boolean
+    createdAt?: boolean
+  }, ExtArgs["result"]["majorCategoryDetails"]>
+
+  export type MajorCategoryDetailsSelectUpdateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
+    id?: boolean
+    seg?: boolean
+    div?: boolean
+    subDiv?: boolean
+    majCat?: boolean
+    mcCode?: boolean
+    mcDes?: boolean
+    hsnCode?: boolean
+    mcStatus?: boolean
+    createdAt?: boolean
+  }, ExtArgs["result"]["majorCategoryDetails"]>
+
+  export type MajorCategoryDetailsSelectScalar = {
+    id?: boolean
+    seg?: boolean
+    div?: boolean
+    subDiv?: boolean
+    majCat?: boolean
+    mcCode?: boolean
+    mcDes?: boolean
+    hsnCode?: boolean
+    mcStatus?: boolean
+    createdAt?: boolean
+  }
+
+  export type MajorCategoryDetailsOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<"id" | "seg" | "div" | "subDiv" | "majCat" | "mcCode" | "mcDes" | "hsnCode" | "mcStatus" | "createdAt", ExtArgs["result"]["majorCategoryDetails"]>
+
+  export type $MajorCategoryDetailsPayload<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    name: "MajorCategoryDetails"
+    objects: {}
+    scalars: $Extensions.GetPayloadResult<{
+      id: number
+      seg: string | null
+      div: string | null
+      subDiv: string | null
+      majCat: string | null
+      mcCode: string | null
+      mcDes: string | null
+      hsnCode: string | null
+      mcStatus: string | null
+      createdAt: Date
+    }, ExtArgs["result"]["majorCategoryDetails"]>
+    composites: {}
+  }
+
+  type MajorCategoryDetailsGetPayload<S extends boolean | null | undefined | MajorCategoryDetailsDefaultArgs> = $Result.GetResult<Prisma.$MajorCategoryDetailsPayload, S>
+
+  type MajorCategoryDetailsCountArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> =
+    Omit<MajorCategoryDetailsFindManyArgs, 'select' | 'include' | 'distinct' | 'omit'> & {
+      select?: MajorCategoryDetailsCountAggregateInputType | true
+    }
+
+  export interface MajorCategoryDetailsDelegate<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs, GlobalOmitOptions = {}> {
+    [K: symbol]: { types: Prisma.TypeMap<ExtArgs>['model']['MajorCategoryDetails'], meta: { name: 'MajorCategoryDetails' } }
+    /**
+     * Find zero or one MajorCategoryDetails that matches the filter.
+     * @param {MajorCategoryDetailsFindUniqueArgs} args - Arguments to find a MajorCategoryDetails
+     * @example
+     * // Get one MajorCategoryDetails
+     * const majorCategoryDetails = await prisma.majorCategoryDetails.findUnique({
+=======
   export type ExpenseChangeRequestSelect<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
     id?: boolean
     tableKey?: boolean
@@ -56101,11 +56540,23 @@ export namespace Prisma {
      * @example
      * // Get one ExpenseChangeRequest
      * const expenseChangeRequest = await prisma.expenseChangeRequest.findUnique({
+>>>>>>> 0d1159d12e0df55bfd3763cd59be6ab70e1b50b5
      *   where: {
      *     // ... provide filter here
      *   }
      * })
      */
+<<<<<<< HEAD
+    findUnique<T extends MajorCategoryDetailsFindUniqueArgs>(args: SelectSubset<T, MajorCategoryDetailsFindUniqueArgs<ExtArgs>>): Prisma__MajorCategoryDetailsClient<$Result.GetResult<Prisma.$MajorCategoryDetailsPayload<ExtArgs>, T, "findUnique", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Find one MajorCategoryDetails that matches the filter or throw an error with `error.code='P2025'`
+     * if no matches were found.
+     * @param {MajorCategoryDetailsFindUniqueOrThrowArgs} args - Arguments to find a MajorCategoryDetails
+     * @example
+     * // Get one MajorCategoryDetails
+     * const majorCategoryDetails = await prisma.majorCategoryDetails.findUniqueOrThrow({
+=======
     findUnique<T extends ExpenseChangeRequestFindUniqueArgs>(args: SelectSubset<T, ExpenseChangeRequestFindUniqueArgs<ExtArgs>>): Prisma__ExpenseChangeRequestClient<$Result.GetResult<Prisma.$ExpenseChangeRequestPayload<ExtArgs>, T, "findUnique", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
 
     /**
@@ -56115,11 +56566,24 @@ export namespace Prisma {
      * @example
      * // Get one ExpenseChangeRequest
      * const expenseChangeRequest = await prisma.expenseChangeRequest.findUniqueOrThrow({
+>>>>>>> 0d1159d12e0df55bfd3763cd59be6ab70e1b50b5
      *   where: {
      *     // ... provide filter here
      *   }
      * })
      */
+<<<<<<< HEAD
+    findUniqueOrThrow<T extends MajorCategoryDetailsFindUniqueOrThrowArgs>(args: SelectSubset<T, MajorCategoryDetailsFindUniqueOrThrowArgs<ExtArgs>>): Prisma__MajorCategoryDetailsClient<$Result.GetResult<Prisma.$MajorCategoryDetailsPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Find the first MajorCategoryDetails that matches the filter.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {MajorCategoryDetailsFindFirstArgs} args - Arguments to find a MajorCategoryDetails
+     * @example
+     * // Get one MajorCategoryDetails
+     * const majorCategoryDetails = await prisma.majorCategoryDetails.findFirst({
+=======
     findUniqueOrThrow<T extends ExpenseChangeRequestFindUniqueOrThrowArgs>(args: SelectSubset<T, ExpenseChangeRequestFindUniqueOrThrowArgs<ExtArgs>>): Prisma__ExpenseChangeRequestClient<$Result.GetResult<Prisma.$ExpenseChangeRequestPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
 
     /**
@@ -56130,11 +56594,25 @@ export namespace Prisma {
      * @example
      * // Get one ExpenseChangeRequest
      * const expenseChangeRequest = await prisma.expenseChangeRequest.findFirst({
+>>>>>>> 0d1159d12e0df55bfd3763cd59be6ab70e1b50b5
      *   where: {
      *     // ... provide filter here
      *   }
      * })
      */
+<<<<<<< HEAD
+    findFirst<T extends MajorCategoryDetailsFindFirstArgs>(args?: SelectSubset<T, MajorCategoryDetailsFindFirstArgs<ExtArgs>>): Prisma__MajorCategoryDetailsClient<$Result.GetResult<Prisma.$MajorCategoryDetailsPayload<ExtArgs>, T, "findFirst", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Find the first MajorCategoryDetails that matches the filter or
+     * throw `PrismaKnownClientError` with `P2025` code if no matches were found.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {MajorCategoryDetailsFindFirstOrThrowArgs} args - Arguments to find a MajorCategoryDetails
+     * @example
+     * // Get one MajorCategoryDetails
+     * const majorCategoryDetails = await prisma.majorCategoryDetails.findFirstOrThrow({
+=======
     findFirst<T extends ExpenseChangeRequestFindFirstArgs>(args?: SelectSubset<T, ExpenseChangeRequestFindFirstArgs<ExtArgs>>): Prisma__ExpenseChangeRequestClient<$Result.GetResult<Prisma.$ExpenseChangeRequestPayload<ExtArgs>, T, "findFirst", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
 
     /**
@@ -56146,11 +56624,42 @@ export namespace Prisma {
      * @example
      * // Get one ExpenseChangeRequest
      * const expenseChangeRequest = await prisma.expenseChangeRequest.findFirstOrThrow({
+>>>>>>> 0d1159d12e0df55bfd3763cd59be6ab70e1b50b5
      *   where: {
      *     // ... provide filter here
      *   }
      * })
      */
+<<<<<<< HEAD
+    findFirstOrThrow<T extends MajorCategoryDetailsFindFirstOrThrowArgs>(args?: SelectSubset<T, MajorCategoryDetailsFindFirstOrThrowArgs<ExtArgs>>): Prisma__MajorCategoryDetailsClient<$Result.GetResult<Prisma.$MajorCategoryDetailsPayload<ExtArgs>, T, "findFirstOrThrow", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Find zero or more MajorCategoryDetails that matches the filter.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {MajorCategoryDetailsFindManyArgs} args - Arguments to filter and select certain fields only.
+     * @example
+     * // Get all MajorCategoryDetails
+     * const majorCategoryDetails = await prisma.majorCategoryDetails.findMany()
+     * 
+     * // Get first 10 MajorCategoryDetails
+     * const majorCategoryDetails = await prisma.majorCategoryDetails.findMany({ take: 10 })
+     * 
+     * // Only select the `id`
+     * const majorCategoryDetailsWithIdOnly = await prisma.majorCategoryDetails.findMany({ select: { id: true } })
+     * 
+     */
+    findMany<T extends MajorCategoryDetailsFindManyArgs>(args?: SelectSubset<T, MajorCategoryDetailsFindManyArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$MajorCategoryDetailsPayload<ExtArgs>, T, "findMany", GlobalOmitOptions>>
+
+    /**
+     * Create a MajorCategoryDetails.
+     * @param {MajorCategoryDetailsCreateArgs} args - Arguments to create a MajorCategoryDetails.
+     * @example
+     * // Create one MajorCategoryDetails
+     * const MajorCategoryDetails = await prisma.majorCategoryDetails.create({
+     *   data: {
+     *     // ... data to create a MajorCategoryDetails
+=======
     findFirstOrThrow<T extends ExpenseChangeRequestFindFirstOrThrowArgs>(args?: SelectSubset<T, ExpenseChangeRequestFindFirstOrThrowArgs<ExtArgs>>): Prisma__ExpenseChangeRequestClient<$Result.GetResult<Prisma.$ExpenseChangeRequestPayload<ExtArgs>, T, "findFirstOrThrow", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
 
     /**
@@ -56179,10 +56688,21 @@ export namespace Prisma {
      * const ExpenseChangeRequest = await prisma.expenseChangeRequest.create({
      *   data: {
      *     // ... data to create a ExpenseChangeRequest
+>>>>>>> 0d1159d12e0df55bfd3763cd59be6ab70e1b50b5
      *   }
      * })
      * 
      */
+<<<<<<< HEAD
+    create<T extends MajorCategoryDetailsCreateArgs>(args: SelectSubset<T, MajorCategoryDetailsCreateArgs<ExtArgs>>): Prisma__MajorCategoryDetailsClient<$Result.GetResult<Prisma.$MajorCategoryDetailsPayload<ExtArgs>, T, "create", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Create many MajorCategoryDetails.
+     * @param {MajorCategoryDetailsCreateManyArgs} args - Arguments to create many MajorCategoryDetails.
+     * @example
+     * // Create many MajorCategoryDetails
+     * const majorCategoryDetails = await prisma.majorCategoryDetails.createMany({
+=======
     create<T extends ExpenseChangeRequestCreateArgs>(args: SelectSubset<T, ExpenseChangeRequestCreateArgs<ExtArgs>>): Prisma__ExpenseChangeRequestClient<$Result.GetResult<Prisma.$ExpenseChangeRequestPayload<ExtArgs>, T, "create", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
 
     /**
@@ -56191,12 +56711,23 @@ export namespace Prisma {
      * @example
      * // Create many ExpenseChangeRequests
      * const expenseChangeRequest = await prisma.expenseChangeRequest.createMany({
+>>>>>>> 0d1159d12e0df55bfd3763cd59be6ab70e1b50b5
      *   data: [
      *     // ... provide data here
      *   ]
      * })
      *     
      */
+<<<<<<< HEAD
+    createMany<T extends MajorCategoryDetailsCreateManyArgs>(args?: SelectSubset<T, MajorCategoryDetailsCreateManyArgs<ExtArgs>>): Prisma.PrismaPromise<BatchPayload>
+
+    /**
+     * Create many MajorCategoryDetails and returns the data saved in the database.
+     * @param {MajorCategoryDetailsCreateManyAndReturnArgs} args - Arguments to create many MajorCategoryDetails.
+     * @example
+     * // Create many MajorCategoryDetails
+     * const majorCategoryDetails = await prisma.majorCategoryDetails.createManyAndReturn({
+=======
     createMany<T extends ExpenseChangeRequestCreateManyArgs>(args?: SelectSubset<T, ExpenseChangeRequestCreateManyArgs<ExtArgs>>): Prisma.PrismaPromise<BatchPayload>
 
     /**
@@ -56205,13 +56736,19 @@ export namespace Prisma {
      * @example
      * // Create many ExpenseChangeRequests
      * const expenseChangeRequest = await prisma.expenseChangeRequest.createManyAndReturn({
+>>>>>>> 0d1159d12e0df55bfd3763cd59be6ab70e1b50b5
      *   data: [
      *     // ... provide data here
      *   ]
      * })
      * 
+<<<<<<< HEAD
+     * // Create many MajorCategoryDetails and only return the `id`
+     * const majorCategoryDetailsWithIdOnly = await prisma.majorCategoryDetails.createManyAndReturn({
+=======
      * // Create many ExpenseChangeRequests and only return the `id`
      * const expenseChangeRequestWithIdOnly = await prisma.expenseChangeRequest.createManyAndReturn({
+>>>>>>> 0d1159d12e0df55bfd3763cd59be6ab70e1b50b5
      *   select: { id: true },
      *   data: [
      *     // ... provide data here
@@ -56221,6 +56758,18 @@ export namespace Prisma {
      * Read more here: https://pris.ly/d/null-undefined
      * 
      */
+<<<<<<< HEAD
+    createManyAndReturn<T extends MajorCategoryDetailsCreateManyAndReturnArgs>(args?: SelectSubset<T, MajorCategoryDetailsCreateManyAndReturnArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$MajorCategoryDetailsPayload<ExtArgs>, T, "createManyAndReturn", GlobalOmitOptions>>
+
+    /**
+     * Delete a MajorCategoryDetails.
+     * @param {MajorCategoryDetailsDeleteArgs} args - Arguments to delete one MajorCategoryDetails.
+     * @example
+     * // Delete one MajorCategoryDetails
+     * const MajorCategoryDetails = await prisma.majorCategoryDetails.delete({
+     *   where: {
+     *     // ... filter to delete one MajorCategoryDetails
+=======
     createManyAndReturn<T extends ExpenseChangeRequestCreateManyAndReturnArgs>(args?: SelectSubset<T, ExpenseChangeRequestCreateManyAndReturnArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$ExpenseChangeRequestPayload<ExtArgs>, T, "createManyAndReturn", GlobalOmitOptions>>
 
     /**
@@ -56231,10 +56780,21 @@ export namespace Prisma {
      * const ExpenseChangeRequest = await prisma.expenseChangeRequest.delete({
      *   where: {
      *     // ... filter to delete one ExpenseChangeRequest
+>>>>>>> 0d1159d12e0df55bfd3763cd59be6ab70e1b50b5
      *   }
      * })
      * 
      */
+<<<<<<< HEAD
+    delete<T extends MajorCategoryDetailsDeleteArgs>(args: SelectSubset<T, MajorCategoryDetailsDeleteArgs<ExtArgs>>): Prisma__MajorCategoryDetailsClient<$Result.GetResult<Prisma.$MajorCategoryDetailsPayload<ExtArgs>, T, "delete", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Update one MajorCategoryDetails.
+     * @param {MajorCategoryDetailsUpdateArgs} args - Arguments to update one MajorCategoryDetails.
+     * @example
+     * // Update one MajorCategoryDetails
+     * const majorCategoryDetails = await prisma.majorCategoryDetails.update({
+=======
     delete<T extends ExpenseChangeRequestDeleteArgs>(args: SelectSubset<T, ExpenseChangeRequestDeleteArgs<ExtArgs>>): Prisma__ExpenseChangeRequestClient<$Result.GetResult<Prisma.$ExpenseChangeRequestPayload<ExtArgs>, T, "delete", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
 
     /**
@@ -56243,6 +56803,7 @@ export namespace Prisma {
      * @example
      * // Update one ExpenseChangeRequest
      * const expenseChangeRequest = await prisma.expenseChangeRequest.update({
+>>>>>>> 0d1159d12e0df55bfd3763cd59be6ab70e1b50b5
      *   where: {
      *     // ... provide filter here
      *   },
@@ -56252,6 +56813,16 @@ export namespace Prisma {
      * })
      * 
      */
+<<<<<<< HEAD
+    update<T extends MajorCategoryDetailsUpdateArgs>(args: SelectSubset<T, MajorCategoryDetailsUpdateArgs<ExtArgs>>): Prisma__MajorCategoryDetailsClient<$Result.GetResult<Prisma.$MajorCategoryDetailsPayload<ExtArgs>, T, "update", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Delete zero or more MajorCategoryDetails.
+     * @param {MajorCategoryDetailsDeleteManyArgs} args - Arguments to filter MajorCategoryDetails to delete.
+     * @example
+     * // Delete a few MajorCategoryDetails
+     * const { count } = await prisma.majorCategoryDetails.deleteMany({
+=======
     update<T extends ExpenseChangeRequestUpdateArgs>(args: SelectSubset<T, ExpenseChangeRequestUpdateArgs<ExtArgs>>): Prisma__ExpenseChangeRequestClient<$Result.GetResult<Prisma.$ExpenseChangeRequestPayload<ExtArgs>, T, "update", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
 
     /**
@@ -56260,12 +56831,25 @@ export namespace Prisma {
      * @example
      * // Delete a few ExpenseChangeRequests
      * const { count } = await prisma.expenseChangeRequest.deleteMany({
+>>>>>>> 0d1159d12e0df55bfd3763cd59be6ab70e1b50b5
      *   where: {
      *     // ... provide filter here
      *   }
      * })
      * 
      */
+<<<<<<< HEAD
+    deleteMany<T extends MajorCategoryDetailsDeleteManyArgs>(args?: SelectSubset<T, MajorCategoryDetailsDeleteManyArgs<ExtArgs>>): Prisma.PrismaPromise<BatchPayload>
+
+    /**
+     * Update zero or more MajorCategoryDetails.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {MajorCategoryDetailsUpdateManyArgs} args - Arguments to update one or more rows.
+     * @example
+     * // Update many MajorCategoryDetails
+     * const majorCategoryDetails = await prisma.majorCategoryDetails.updateMany({
+=======
     deleteMany<T extends ExpenseChangeRequestDeleteManyArgs>(args?: SelectSubset<T, ExpenseChangeRequestDeleteManyArgs<ExtArgs>>): Prisma.PrismaPromise<BatchPayload>
 
     /**
@@ -56276,6 +56860,7 @@ export namespace Prisma {
      * @example
      * // Update many ExpenseChangeRequests
      * const expenseChangeRequest = await prisma.expenseChangeRequest.updateMany({
+>>>>>>> 0d1159d12e0df55bfd3763cd59be6ab70e1b50b5
      *   where: {
      *     // ... provide filter here
      *   },
@@ -56285,6 +56870,16 @@ export namespace Prisma {
      * })
      * 
      */
+<<<<<<< HEAD
+    updateMany<T extends MajorCategoryDetailsUpdateManyArgs>(args: SelectSubset<T, MajorCategoryDetailsUpdateManyArgs<ExtArgs>>): Prisma.PrismaPromise<BatchPayload>
+
+    /**
+     * Update zero or more MajorCategoryDetails and returns the data updated in the database.
+     * @param {MajorCategoryDetailsUpdateManyAndReturnArgs} args - Arguments to update many MajorCategoryDetails.
+     * @example
+     * // Update many MajorCategoryDetails
+     * const majorCategoryDetails = await prisma.majorCategoryDetails.updateManyAndReturn({
+=======
     updateMany<T extends ExpenseChangeRequestUpdateManyArgs>(args: SelectSubset<T, ExpenseChangeRequestUpdateManyArgs<ExtArgs>>): Prisma.PrismaPromise<BatchPayload>
 
     /**
@@ -56293,6 +56888,7 @@ export namespace Prisma {
      * @example
      * // Update many ExpenseChangeRequests
      * const expenseChangeRequest = await prisma.expenseChangeRequest.updateManyAndReturn({
+>>>>>>> 0d1159d12e0df55bfd3763cd59be6ab70e1b50b5
      *   where: {
      *     // ... provide filter here
      *   },
@@ -56301,8 +56897,13 @@ export namespace Prisma {
      *   ]
      * })
      * 
+<<<<<<< HEAD
+     * // Update zero or more MajorCategoryDetails and only return the `id`
+     * const majorCategoryDetailsWithIdOnly = await prisma.majorCategoryDetails.updateManyAndReturn({
+=======
      * // Update zero or more ExpenseChangeRequests and only return the `id`
      * const expenseChangeRequestWithIdOnly = await prisma.expenseChangeRequest.updateManyAndReturn({
+>>>>>>> 0d1159d12e0df55bfd3763cd59be6ab70e1b50b5
      *   select: { id: true },
      *   where: {
      *     // ... provide filter here
@@ -56315,6 +56916,18 @@ export namespace Prisma {
      * Read more here: https://pris.ly/d/null-undefined
      * 
      */
+<<<<<<< HEAD
+    updateManyAndReturn<T extends MajorCategoryDetailsUpdateManyAndReturnArgs>(args: SelectSubset<T, MajorCategoryDetailsUpdateManyAndReturnArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$MajorCategoryDetailsPayload<ExtArgs>, T, "updateManyAndReturn", GlobalOmitOptions>>
+
+    /**
+     * Create or update one MajorCategoryDetails.
+     * @param {MajorCategoryDetailsUpsertArgs} args - Arguments to update or create a MajorCategoryDetails.
+     * @example
+     * // Update or create a MajorCategoryDetails
+     * const majorCategoryDetails = await prisma.majorCategoryDetails.upsert({
+     *   create: {
+     *     // ... data to create a MajorCategoryDetails
+=======
     updateManyAndReturn<T extends ExpenseChangeRequestUpdateManyAndReturnArgs>(args: SelectSubset<T, ExpenseChangeRequestUpdateManyAndReturnArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$ExpenseChangeRequestPayload<ExtArgs>, T, "updateManyAndReturn", GlobalOmitOptions>>
 
     /**
@@ -56325,11 +56938,36 @@ export namespace Prisma {
      * const expenseChangeRequest = await prisma.expenseChangeRequest.upsert({
      *   create: {
      *     // ... data to create a ExpenseChangeRequest
+>>>>>>> 0d1159d12e0df55bfd3763cd59be6ab70e1b50b5
      *   },
      *   update: {
      *     // ... in case it already exists, update
      *   },
      *   where: {
+<<<<<<< HEAD
+     *     // ... the filter for the MajorCategoryDetails we want to update
+     *   }
+     * })
+     */
+    upsert<T extends MajorCategoryDetailsUpsertArgs>(args: SelectSubset<T, MajorCategoryDetailsUpsertArgs<ExtArgs>>): Prisma__MajorCategoryDetailsClient<$Result.GetResult<Prisma.$MajorCategoryDetailsPayload<ExtArgs>, T, "upsert", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+
+    /**
+     * Count the number of MajorCategoryDetails.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {MajorCategoryDetailsCountArgs} args - Arguments to filter MajorCategoryDetails to count.
+     * @example
+     * // Count the number of MajorCategoryDetails
+     * const count = await prisma.majorCategoryDetails.count({
+     *   where: {
+     *     // ... the filter for the MajorCategoryDetails we want to count
+     *   }
+     * })
+    **/
+    count<T extends MajorCategoryDetailsCountArgs>(
+      args?: Subset<T, MajorCategoryDetailsCountArgs>,
+=======
      *     // ... the filter for the ExpenseChangeRequest we want to update
      *   }
      * })
@@ -56352,19 +56990,31 @@ export namespace Prisma {
     **/
     count<T extends ExpenseChangeRequestCountArgs>(
       args?: Subset<T, ExpenseChangeRequestCountArgs>,
+>>>>>>> 0d1159d12e0df55bfd3763cd59be6ab70e1b50b5
     ): Prisma.PrismaPromise<
       T extends $Utils.Record<'select', any>
         ? T['select'] extends true
           ? number
+<<<<<<< HEAD
+          : GetScalarType<T['select'], MajorCategoryDetailsCountAggregateOutputType>
+=======
           : GetScalarType<T['select'], ExpenseChangeRequestCountAggregateOutputType>
+>>>>>>> 0d1159d12e0df55bfd3763cd59be6ab70e1b50b5
         : number
     >
 
     /**
+<<<<<<< HEAD
+     * Allows you to perform aggregations operations on a MajorCategoryDetails.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {MajorCategoryDetailsAggregateArgs} args - Select which aggregations you would like to apply and on what fields.
+=======
      * Allows you to perform aggregations operations on a ExpenseChangeRequest.
      * Note, that providing `undefined` is treated as the value not being there.
      * Read more here: https://pris.ly/d/null-undefined
      * @param {ExpenseChangeRequestAggregateArgs} args - Select which aggregations you would like to apply and on what fields.
+>>>>>>> 0d1159d12e0df55bfd3763cd59be6ab70e1b50b5
      * @example
      * // Ordered by age ascending
      * // Where email contains prisma.io
@@ -56384,6 +57034,15 @@ export namespace Prisma {
      *   take: 10,
      * })
     **/
+<<<<<<< HEAD
+    aggregate<T extends MajorCategoryDetailsAggregateArgs>(args: Subset<T, MajorCategoryDetailsAggregateArgs>): Prisma.PrismaPromise<GetMajorCategoryDetailsAggregateType<T>>
+
+    /**
+     * Group by MajorCategoryDetails.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {MajorCategoryDetailsGroupByArgs} args - Group by arguments.
+=======
     aggregate<T extends ExpenseChangeRequestAggregateArgs>(args: Subset<T, ExpenseChangeRequestAggregateArgs>): Prisma.PrismaPromise<GetExpenseChangeRequestAggregateType<T>>
 
     /**
@@ -56391,6 +57050,7 @@ export namespace Prisma {
      * Note, that providing `undefined` is treated as the value not being there.
      * Read more here: https://pris.ly/d/null-undefined
      * @param {ExpenseChangeRequestGroupByArgs} args - Group by arguments.
+>>>>>>> 0d1159d12e0df55bfd3763cd59be6ab70e1b50b5
      * @example
      * // Group by city, order by createdAt, get count
      * const result = await prisma.user.groupBy({
@@ -56405,14 +57065,23 @@ export namespace Prisma {
      * 
     **/
     groupBy<
+<<<<<<< HEAD
+      T extends MajorCategoryDetailsGroupByArgs,
+=======
       T extends ExpenseChangeRequestGroupByArgs,
+>>>>>>> 0d1159d12e0df55bfd3763cd59be6ab70e1b50b5
       HasSelectOrTake extends Or<
         Extends<'skip', Keys<T>>,
         Extends<'take', Keys<T>>
       >,
       OrderByArg extends True extends HasSelectOrTake
+<<<<<<< HEAD
+        ? { orderBy: MajorCategoryDetailsGroupByArgs['orderBy'] }
+        : { orderBy?: MajorCategoryDetailsGroupByArgs['orderBy'] },
+=======
         ? { orderBy: ExpenseChangeRequestGroupByArgs['orderBy'] }
         : { orderBy?: ExpenseChangeRequestGroupByArgs['orderBy'] },
+>>>>>>> 0d1159d12e0df55bfd3763cd59be6ab70e1b50b5
       OrderFields extends ExcludeUnderscoreKeys<Keys<MaybeTupleToUnion<T['orderBy']>>>,
       ByFields extends MaybeTupleToUnion<T['by']>,
       ByValid extends Has<ByFields, OrderFields>,
@@ -56461,6 +57130,17 @@ export namespace Prisma {
             ? never
             : `Error: Field "${P}" in "orderBy" needs to be provided in "by"`
         }[OrderFields]
+<<<<<<< HEAD
+    >(args: SubsetIntersection<T, MajorCategoryDetailsGroupByArgs, OrderByArg> & InputErrors): {} extends InputErrors ? GetMajorCategoryDetailsGroupByPayload<T> : Prisma.PrismaPromise<InputErrors>
+  /**
+   * Fields of the MajorCategoryDetails model
+   */
+  readonly fields: MajorCategoryDetailsFieldRefs;
+  }
+
+  /**
+   * The delegate class that acts as a "Promise-like" for MajorCategoryDetails.
+=======
     >(args: SubsetIntersection<T, ExpenseChangeRequestGroupByArgs, OrderByArg> & InputErrors): {} extends InputErrors ? GetExpenseChangeRequestGroupByPayload<T> : Prisma.PrismaPromise<InputErrors>
   /**
    * Fields of the ExpenseChangeRequest model
@@ -56470,11 +57150,16 @@ export namespace Prisma {
 
   /**
    * The delegate class that acts as a "Promise-like" for ExpenseChangeRequest.
+>>>>>>> 0d1159d12e0df55bfd3763cd59be6ab70e1b50b5
    * Why is this prefixed with `Prisma__`?
    * Because we want to prevent naming conflicts as mentioned in
    * https://github.com/prisma/prisma-client-js/issues/707
    */
+<<<<<<< HEAD
+  export interface Prisma__MajorCategoryDetailsClient<T, Null = never, ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs, GlobalOmitOptions = {}> extends Prisma.PrismaPromise<T> {
+=======
   export interface Prisma__ExpenseChangeRequestClient<T, Null = never, ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs, GlobalOmitOptions = {}> extends Prisma.PrismaPromise<T> {
+>>>>>>> 0d1159d12e0df55bfd3763cd59be6ab70e1b50b5
     readonly [Symbol.toStringTag]: "PrismaPromise"
     /**
      * Attaches callbacks for the resolution and/or rejection of the Promise.
@@ -56502,6 +57187,21 @@ export namespace Prisma {
 
 
   /**
+<<<<<<< HEAD
+   * Fields of the MajorCategoryDetails model
+   */
+  interface MajorCategoryDetailsFieldRefs {
+    readonly id: FieldRef<"MajorCategoryDetails", 'Int'>
+    readonly seg: FieldRef<"MajorCategoryDetails", 'String'>
+    readonly div: FieldRef<"MajorCategoryDetails", 'String'>
+    readonly subDiv: FieldRef<"MajorCategoryDetails", 'String'>
+    readonly majCat: FieldRef<"MajorCategoryDetails", 'String'>
+    readonly mcCode: FieldRef<"MajorCategoryDetails", 'String'>
+    readonly mcDes: FieldRef<"MajorCategoryDetails", 'String'>
+    readonly hsnCode: FieldRef<"MajorCategoryDetails", 'String'>
+    readonly mcStatus: FieldRef<"MajorCategoryDetails", 'String'>
+    readonly createdAt: FieldRef<"MajorCategoryDetails", 'DateTime'>
+=======
    * Fields of the ExpenseChangeRequest model
    */
   interface ExpenseChangeRequestFieldRefs {
@@ -56530,11 +57230,81 @@ export namespace Prisma {
     readonly finalAction: FieldRef<"ExpenseChangeRequest", 'String'>
     readonly createdAt: FieldRef<"ExpenseChangeRequest", 'DateTime'>
     readonly updatedAt: FieldRef<"ExpenseChangeRequest", 'DateTime'>
+>>>>>>> 0d1159d12e0df55bfd3763cd59be6ab70e1b50b5
   }
     
 
   // Custom InputTypes
   /**
+<<<<<<< HEAD
+   * MajorCategoryDetails findUnique
+   */
+  export type MajorCategoryDetailsFindUniqueArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the MajorCategoryDetails
+     */
+    select?: MajorCategoryDetailsSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the MajorCategoryDetails
+     */
+    omit?: MajorCategoryDetailsOmit<ExtArgs> | null
+    /**
+     * Filter, which MajorCategoryDetails to fetch.
+     */
+    where: MajorCategoryDetailsWhereUniqueInput
+  }
+
+  /**
+   * MajorCategoryDetails findUniqueOrThrow
+   */
+  export type MajorCategoryDetailsFindUniqueOrThrowArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the MajorCategoryDetails
+     */
+    select?: MajorCategoryDetailsSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the MajorCategoryDetails
+     */
+    omit?: MajorCategoryDetailsOmit<ExtArgs> | null
+    /**
+     * Filter, which MajorCategoryDetails to fetch.
+     */
+    where: MajorCategoryDetailsWhereUniqueInput
+  }
+
+  /**
+   * MajorCategoryDetails findFirst
+   */
+  export type MajorCategoryDetailsFindFirstArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the MajorCategoryDetails
+     */
+    select?: MajorCategoryDetailsSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the MajorCategoryDetails
+     */
+    omit?: MajorCategoryDetailsOmit<ExtArgs> | null
+    /**
+     * Filter, which MajorCategoryDetails to fetch.
+     */
+    where?: MajorCategoryDetailsWhereInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
+     * 
+     * Determine the order of MajorCategoryDetails to fetch.
+     */
+    orderBy?: MajorCategoryDetailsOrderByWithRelationInput | MajorCategoryDetailsOrderByWithRelationInput[]
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
+     * 
+     * Sets the position for searching for MajorCategoryDetails.
+     */
+    cursor?: MajorCategoryDetailsWhereUniqueInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Take `±n` MajorCategoryDetails from the position of the cursor.
+=======
    * ExpenseChangeRequest findUnique
    */
   export type ExpenseChangeRequestFindUniqueArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
@@ -56602,17 +57372,61 @@ export namespace Prisma {
      * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
      * 
      * Take `±n` ExpenseChangeRequests from the position of the cursor.
+>>>>>>> 0d1159d12e0df55bfd3763cd59be6ab70e1b50b5
      */
     take?: number
     /**
      * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
      * 
+<<<<<<< HEAD
+     * Skip the first `n` MajorCategoryDetails.
+=======
      * Skip the first `n` ExpenseChangeRequests.
+>>>>>>> 0d1159d12e0df55bfd3763cd59be6ab70e1b50b5
      */
     skip?: number
     /**
      * {@link https://www.prisma.io/docs/concepts/components/prisma-client/distinct Distinct Docs}
      * 
+<<<<<<< HEAD
+     * Filter by unique combinations of MajorCategoryDetails.
+     */
+    distinct?: MajorCategoryDetailsScalarFieldEnum | MajorCategoryDetailsScalarFieldEnum[]
+  }
+
+  /**
+   * MajorCategoryDetails findFirstOrThrow
+   */
+  export type MajorCategoryDetailsFindFirstOrThrowArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the MajorCategoryDetails
+     */
+    select?: MajorCategoryDetailsSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the MajorCategoryDetails
+     */
+    omit?: MajorCategoryDetailsOmit<ExtArgs> | null
+    /**
+     * Filter, which MajorCategoryDetails to fetch.
+     */
+    where?: MajorCategoryDetailsWhereInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
+     * 
+     * Determine the order of MajorCategoryDetails to fetch.
+     */
+    orderBy?: MajorCategoryDetailsOrderByWithRelationInput | MajorCategoryDetailsOrderByWithRelationInput[]
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
+     * 
+     * Sets the position for searching for MajorCategoryDetails.
+     */
+    cursor?: MajorCategoryDetailsWhereUniqueInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Take `±n` MajorCategoryDetails from the position of the cursor.
+=======
      * Filter by unique combinations of ExpenseChangeRequests.
      */
     distinct?: ExpenseChangeRequestScalarFieldEnum | ExpenseChangeRequestScalarFieldEnum[]
@@ -56650,17 +57464,61 @@ export namespace Prisma {
      * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
      * 
      * Take `±n` ExpenseChangeRequests from the position of the cursor.
+>>>>>>> 0d1159d12e0df55bfd3763cd59be6ab70e1b50b5
      */
     take?: number
     /**
      * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
      * 
+<<<<<<< HEAD
+     * Skip the first `n` MajorCategoryDetails.
+=======
      * Skip the first `n` ExpenseChangeRequests.
+>>>>>>> 0d1159d12e0df55bfd3763cd59be6ab70e1b50b5
      */
     skip?: number
     /**
      * {@link https://www.prisma.io/docs/concepts/components/prisma-client/distinct Distinct Docs}
      * 
+<<<<<<< HEAD
+     * Filter by unique combinations of MajorCategoryDetails.
+     */
+    distinct?: MajorCategoryDetailsScalarFieldEnum | MajorCategoryDetailsScalarFieldEnum[]
+  }
+
+  /**
+   * MajorCategoryDetails findMany
+   */
+  export type MajorCategoryDetailsFindManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the MajorCategoryDetails
+     */
+    select?: MajorCategoryDetailsSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the MajorCategoryDetails
+     */
+    omit?: MajorCategoryDetailsOmit<ExtArgs> | null
+    /**
+     * Filter, which MajorCategoryDetails to fetch.
+     */
+    where?: MajorCategoryDetailsWhereInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
+     * 
+     * Determine the order of MajorCategoryDetails to fetch.
+     */
+    orderBy?: MajorCategoryDetailsOrderByWithRelationInput | MajorCategoryDetailsOrderByWithRelationInput[]
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
+     * 
+     * Sets the position for listing MajorCategoryDetails.
+     */
+    cursor?: MajorCategoryDetailsWhereUniqueInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Take `±n` MajorCategoryDetails from the position of the cursor.
+=======
      * Filter by unique combinations of ExpenseChangeRequests.
      */
     distinct?: ExpenseChangeRequestScalarFieldEnum | ExpenseChangeRequestScalarFieldEnum[]
@@ -56698,11 +57556,46 @@ export namespace Prisma {
      * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
      * 
      * Take `±n` ExpenseChangeRequests from the position of the cursor.
+>>>>>>> 0d1159d12e0df55bfd3763cd59be6ab70e1b50b5
      */
     take?: number
     /**
      * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
      * 
+<<<<<<< HEAD
+     * Skip the first `n` MajorCategoryDetails.
+     */
+    skip?: number
+    distinct?: MajorCategoryDetailsScalarFieldEnum | MajorCategoryDetailsScalarFieldEnum[]
+  }
+
+  /**
+   * MajorCategoryDetails create
+   */
+  export type MajorCategoryDetailsCreateArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the MajorCategoryDetails
+     */
+    select?: MajorCategoryDetailsSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the MajorCategoryDetails
+     */
+    omit?: MajorCategoryDetailsOmit<ExtArgs> | null
+    /**
+     * The data needed to create a MajorCategoryDetails.
+     */
+    data?: XOR<MajorCategoryDetailsCreateInput, MajorCategoryDetailsUncheckedCreateInput>
+  }
+
+  /**
+   * MajorCategoryDetails createMany
+   */
+  export type MajorCategoryDetailsCreateManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * The data used to create many MajorCategoryDetails.
+     */
+    data: MajorCategoryDetailsCreateManyInput | MajorCategoryDetailsCreateManyInput[]
+=======
      * Skip the first `n` ExpenseChangeRequests.
      */
     skip?: number
@@ -56735,10 +57628,28 @@ export namespace Prisma {
      * The data used to create many ExpenseChangeRequests.
      */
     data: ExpenseChangeRequestCreateManyInput | ExpenseChangeRequestCreateManyInput[]
+>>>>>>> 0d1159d12e0df55bfd3763cd59be6ab70e1b50b5
     skipDuplicates?: boolean
   }
 
   /**
+<<<<<<< HEAD
+   * MajorCategoryDetails createManyAndReturn
+   */
+  export type MajorCategoryDetailsCreateManyAndReturnArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the MajorCategoryDetails
+     */
+    select?: MajorCategoryDetailsSelectCreateManyAndReturn<ExtArgs> | null
+    /**
+     * Omit specific fields from the MajorCategoryDetails
+     */
+    omit?: MajorCategoryDetailsOmit<ExtArgs> | null
+    /**
+     * The data used to create many MajorCategoryDetails.
+     */
+    data: MajorCategoryDetailsCreateManyInput | MajorCategoryDetailsCreateManyInput[]
+=======
    * ExpenseChangeRequest createManyAndReturn
    */
   export type ExpenseChangeRequestCreateManyAndReturnArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
@@ -56754,10 +57665,48 @@ export namespace Prisma {
      * The data used to create many ExpenseChangeRequests.
      */
     data: ExpenseChangeRequestCreateManyInput | ExpenseChangeRequestCreateManyInput[]
+>>>>>>> 0d1159d12e0df55bfd3763cd59be6ab70e1b50b5
     skipDuplicates?: boolean
   }
 
   /**
+<<<<<<< HEAD
+   * MajorCategoryDetails update
+   */
+  export type MajorCategoryDetailsUpdateArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the MajorCategoryDetails
+     */
+    select?: MajorCategoryDetailsSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the MajorCategoryDetails
+     */
+    omit?: MajorCategoryDetailsOmit<ExtArgs> | null
+    /**
+     * The data needed to update a MajorCategoryDetails.
+     */
+    data: XOR<MajorCategoryDetailsUpdateInput, MajorCategoryDetailsUncheckedUpdateInput>
+    /**
+     * Choose, which MajorCategoryDetails to update.
+     */
+    where: MajorCategoryDetailsWhereUniqueInput
+  }
+
+  /**
+   * MajorCategoryDetails updateMany
+   */
+  export type MajorCategoryDetailsUpdateManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * The data used to update MajorCategoryDetails.
+     */
+    data: XOR<MajorCategoryDetailsUpdateManyMutationInput, MajorCategoryDetailsUncheckedUpdateManyInput>
+    /**
+     * Filter which MajorCategoryDetails to update
+     */
+    where?: MajorCategoryDetailsWhereInput
+    /**
+     * Limit how many MajorCategoryDetails to update.
+=======
    * ExpenseChangeRequest update
    */
   export type ExpenseChangeRequestUpdateArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
@@ -56793,11 +57742,35 @@ export namespace Prisma {
     where?: ExpenseChangeRequestWhereInput
     /**
      * Limit how many ExpenseChangeRequests to update.
+>>>>>>> 0d1159d12e0df55bfd3763cd59be6ab70e1b50b5
      */
     limit?: number
   }
 
   /**
+<<<<<<< HEAD
+   * MajorCategoryDetails updateManyAndReturn
+   */
+  export type MajorCategoryDetailsUpdateManyAndReturnArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the MajorCategoryDetails
+     */
+    select?: MajorCategoryDetailsSelectUpdateManyAndReturn<ExtArgs> | null
+    /**
+     * Omit specific fields from the MajorCategoryDetails
+     */
+    omit?: MajorCategoryDetailsOmit<ExtArgs> | null
+    /**
+     * The data used to update MajorCategoryDetails.
+     */
+    data: XOR<MajorCategoryDetailsUpdateManyMutationInput, MajorCategoryDetailsUncheckedUpdateManyInput>
+    /**
+     * Filter which MajorCategoryDetails to update
+     */
+    where?: MajorCategoryDetailsWhereInput
+    /**
+     * Limit how many MajorCategoryDetails to update.
+=======
    * ExpenseChangeRequest updateManyAndReturn
    */
   export type ExpenseChangeRequestUpdateManyAndReturnArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
@@ -56819,11 +57792,67 @@ export namespace Prisma {
     where?: ExpenseChangeRequestWhereInput
     /**
      * Limit how many ExpenseChangeRequests to update.
+>>>>>>> 0d1159d12e0df55bfd3763cd59be6ab70e1b50b5
      */
     limit?: number
   }
 
   /**
+<<<<<<< HEAD
+   * MajorCategoryDetails upsert
+   */
+  export type MajorCategoryDetailsUpsertArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the MajorCategoryDetails
+     */
+    select?: MajorCategoryDetailsSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the MajorCategoryDetails
+     */
+    omit?: MajorCategoryDetailsOmit<ExtArgs> | null
+    /**
+     * The filter to search for the MajorCategoryDetails to update in case it exists.
+     */
+    where: MajorCategoryDetailsWhereUniqueInput
+    /**
+     * In case the MajorCategoryDetails found by the `where` argument doesn't exist, create a new MajorCategoryDetails with this data.
+     */
+    create: XOR<MajorCategoryDetailsCreateInput, MajorCategoryDetailsUncheckedCreateInput>
+    /**
+     * In case the MajorCategoryDetails was found with the provided `where` argument, update it with this data.
+     */
+    update: XOR<MajorCategoryDetailsUpdateInput, MajorCategoryDetailsUncheckedUpdateInput>
+  }
+
+  /**
+   * MajorCategoryDetails delete
+   */
+  export type MajorCategoryDetailsDeleteArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the MajorCategoryDetails
+     */
+    select?: MajorCategoryDetailsSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the MajorCategoryDetails
+     */
+    omit?: MajorCategoryDetailsOmit<ExtArgs> | null
+    /**
+     * Filter which MajorCategoryDetails to delete.
+     */
+    where: MajorCategoryDetailsWhereUniqueInput
+  }
+
+  /**
+   * MajorCategoryDetails deleteMany
+   */
+  export type MajorCategoryDetailsDeleteManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Filter which MajorCategoryDetails to delete
+     */
+    where?: MajorCategoryDetailsWhereInput
+    /**
+     * Limit how many MajorCategoryDetails to delete.
+=======
    * ExpenseChangeRequest upsert
    */
   export type ExpenseChangeRequestUpsertArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
@@ -56877,11 +57906,25 @@ export namespace Prisma {
     where?: ExpenseChangeRequestWhereInput
     /**
      * Limit how many ExpenseChangeRequests to delete.
+>>>>>>> 0d1159d12e0df55bfd3763cd59be6ab70e1b50b5
      */
     limit?: number
   }
 
   /**
+<<<<<<< HEAD
+   * MajorCategoryDetails without action
+   */
+  export type MajorCategoryDetailsDefaultArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the MajorCategoryDetails
+     */
+    select?: MajorCategoryDetailsSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the MajorCategoryDetails
+     */
+    omit?: MajorCategoryDetailsOmit<ExtArgs> | null
+=======
    * ExpenseChangeRequest without action
    */
   export type ExpenseChangeRequestDefaultArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
@@ -56893,6 +57936,7 @@ export namespace Prisma {
      * Omit specific fields from the ExpenseChangeRequest
      */
     omit?: ExpenseChangeRequestOmit<ExtArgs> | null
+>>>>>>> 0d1159d12e0df55bfd3763cd59be6ab70e1b50b5
   }
 
 
@@ -57859,6 +58903,9 @@ export namespace Prisma {
     mSet: 'mSet',
     bodyArticleNumber: 'bodyArticleNumber',
     bodyArticleDescription: 'bodyArticleDescription',
+    imageUrl: 'imageUrl',
+    bodyArticleType: 'bodyArticleType',
+    designNumber: 'designNumber',
     cmtpCost: 'cmtpCost',
     cmpCost: 'cmpCost',
     fabCost: 'fabCost',
@@ -57888,6 +58935,22 @@ export namespace Prisma {
   export type BodyArticleDataScalarFieldEnum = (typeof BodyArticleDataScalarFieldEnum)[keyof typeof BodyArticleDataScalarFieldEnum]
 
 
+<<<<<<< HEAD
+  export const MajorCategoryDetailsScalarFieldEnum: {
+    id: 'id',
+    seg: 'seg',
+    div: 'div',
+    subDiv: 'subDiv',
+    majCat: 'majCat',
+    mcCode: 'mcCode',
+    mcDes: 'mcDes',
+    hsnCode: 'hsnCode',
+    mcStatus: 'mcStatus',
+    createdAt: 'createdAt'
+  };
+
+  export type MajorCategoryDetailsScalarFieldEnum = (typeof MajorCategoryDetailsScalarFieldEnum)[keyof typeof MajorCategoryDetailsScalarFieldEnum]
+=======
   export const ExpenseChangeRequestScalarFieldEnum: {
     id: 'id',
     tableKey: 'tableKey',
@@ -57917,6 +58980,7 @@ export namespace Prisma {
   };
 
   export type ExpenseChangeRequestScalarFieldEnum = (typeof ExpenseChangeRequestScalarFieldEnum)[keyof typeof ExpenseChangeRequestScalarFieldEnum]
+>>>>>>> 0d1159d12e0df55bfd3763cd59be6ab70e1b50b5
 
 
   export const SortOrder: {
@@ -58662,6 +59726,9 @@ export namespace Prisma {
     mSet: 'mSet',
     bodyArticleNumber: 'bodyArticleNumber',
     bodyArticleDescription: 'bodyArticleDescription',
+    imageUrl: 'imageUrl',
+    bodyArticleType: 'bodyArticleType',
+    designNumber: 'designNumber',
     flatId: 'flatId',
     articleNumber: 'articleNumber',
     division: 'division',
@@ -58682,6 +59749,20 @@ export namespace Prisma {
   export type BodyArticleDataOrderByRelevanceFieldEnum = (typeof BodyArticleDataOrderByRelevanceFieldEnum)[keyof typeof BodyArticleDataOrderByRelevanceFieldEnum]
 
 
+<<<<<<< HEAD
+  export const MajorCategoryDetailsOrderByRelevanceFieldEnum: {
+    seg: 'seg',
+    div: 'div',
+    subDiv: 'subDiv',
+    majCat: 'majCat',
+    mcCode: 'mcCode',
+    mcDes: 'mcDes',
+    hsnCode: 'hsnCode',
+    mcStatus: 'mcStatus'
+  };
+
+  export type MajorCategoryDetailsOrderByRelevanceFieldEnum = (typeof MajorCategoryDetailsOrderByRelevanceFieldEnum)[keyof typeof MajorCategoryDetailsOrderByRelevanceFieldEnum]
+=======
   export const ExpenseChangeRequestOrderByRelevanceFieldEnum: {
     id: 'id',
     tableKey: 'tableKey',
@@ -58701,6 +59782,7 @@ export namespace Prisma {
   };
 
   export type ExpenseChangeRequestOrderByRelevanceFieldEnum = (typeof ExpenseChangeRequestOrderByRelevanceFieldEnum)[keyof typeof ExpenseChangeRequestOrderByRelevanceFieldEnum]
+>>>>>>> 0d1159d12e0df55bfd3763cd59be6ab70e1b50b5
 
 
   /**
@@ -63777,6 +64859,9 @@ export namespace Prisma {
     mSet?: StringNullableFilter<"BodyArticleData"> | string | null
     bodyArticleNumber?: StringNullableFilter<"BodyArticleData"> | string | null
     bodyArticleDescription?: StringNullableFilter<"BodyArticleData"> | string | null
+    imageUrl?: StringNullableFilter<"BodyArticleData"> | string | null
+    bodyArticleType?: StringNullableFilter<"BodyArticleData"> | string | null
+    designNumber?: StringNullableFilter<"BodyArticleData"> | string | null
     cmtpCost?: DecimalNullableFilter<"BodyArticleData"> | Decimal | DecimalJsLike | number | string | null
     cmpCost?: DecimalNullableFilter<"BodyArticleData"> | Decimal | DecimalJsLike | number | string | null
     fabCost?: DecimalNullableFilter<"BodyArticleData"> | Decimal | DecimalJsLike | number | string | null
@@ -63824,6 +64909,9 @@ export namespace Prisma {
     mSet?: SortOrderInput | SortOrder
     bodyArticleNumber?: SortOrderInput | SortOrder
     bodyArticleDescription?: SortOrderInput | SortOrder
+    imageUrl?: SortOrderInput | SortOrder
+    bodyArticleType?: SortOrderInput | SortOrder
+    designNumber?: SortOrderInput | SortOrder
     cmtpCost?: SortOrderInput | SortOrder
     cmpCost?: SortOrderInput | SortOrder
     fabCost?: SortOrderInput | SortOrder
@@ -63875,6 +64963,9 @@ export namespace Prisma {
     mSet?: StringNullableFilter<"BodyArticleData"> | string | null
     bodyArticleNumber?: StringNullableFilter<"BodyArticleData"> | string | null
     bodyArticleDescription?: StringNullableFilter<"BodyArticleData"> | string | null
+    imageUrl?: StringNullableFilter<"BodyArticleData"> | string | null
+    bodyArticleType?: StringNullableFilter<"BodyArticleData"> | string | null
+    designNumber?: StringNullableFilter<"BodyArticleData"> | string | null
     cmtpCost?: DecimalNullableFilter<"BodyArticleData"> | Decimal | DecimalJsLike | number | string | null
     cmpCost?: DecimalNullableFilter<"BodyArticleData"> | Decimal | DecimalJsLike | number | string | null
     fabCost?: DecimalNullableFilter<"BodyArticleData"> | Decimal | DecimalJsLike | number | string | null
@@ -63922,6 +65013,9 @@ export namespace Prisma {
     mSet?: SortOrderInput | SortOrder
     bodyArticleNumber?: SortOrderInput | SortOrder
     bodyArticleDescription?: SortOrderInput | SortOrder
+    imageUrl?: SortOrderInput | SortOrder
+    bodyArticleType?: SortOrderInput | SortOrder
+    designNumber?: SortOrderInput | SortOrder
     cmtpCost?: SortOrderInput | SortOrder
     cmpCost?: SortOrderInput | SortOrder
     fabCost?: SortOrderInput | SortOrder
@@ -63977,6 +65071,9 @@ export namespace Prisma {
     mSet?: StringNullableWithAggregatesFilter<"BodyArticleData"> | string | null
     bodyArticleNumber?: StringNullableWithAggregatesFilter<"BodyArticleData"> | string | null
     bodyArticleDescription?: StringNullableWithAggregatesFilter<"BodyArticleData"> | string | null
+    imageUrl?: StringNullableWithAggregatesFilter<"BodyArticleData"> | string | null
+    bodyArticleType?: StringNullableWithAggregatesFilter<"BodyArticleData"> | string | null
+    designNumber?: StringNullableWithAggregatesFilter<"BodyArticleData"> | string | null
     cmtpCost?: DecimalNullableWithAggregatesFilter<"BodyArticleData"> | Decimal | DecimalJsLike | number | string | null
     cmpCost?: DecimalNullableWithAggregatesFilter<"BodyArticleData"> | Decimal | DecimalJsLike | number | string | null
     fabCost?: DecimalNullableWithAggregatesFilter<"BodyArticleData"> | Decimal | DecimalJsLike | number | string | null
@@ -64003,6 +65100,86 @@ export namespace Prisma {
     updatedAt?: DateTimeWithAggregatesFilter<"BodyArticleData"> | Date | string
   }
 
+<<<<<<< HEAD
+  export type MajorCategoryDetailsWhereInput = {
+    AND?: MajorCategoryDetailsWhereInput | MajorCategoryDetailsWhereInput[]
+    OR?: MajorCategoryDetailsWhereInput[]
+    NOT?: MajorCategoryDetailsWhereInput | MajorCategoryDetailsWhereInput[]
+    id?: IntFilter<"MajorCategoryDetails"> | number
+    seg?: StringNullableFilter<"MajorCategoryDetails"> | string | null
+    div?: StringNullableFilter<"MajorCategoryDetails"> | string | null
+    subDiv?: StringNullableFilter<"MajorCategoryDetails"> | string | null
+    majCat?: StringNullableFilter<"MajorCategoryDetails"> | string | null
+    mcCode?: StringNullableFilter<"MajorCategoryDetails"> | string | null
+    mcDes?: StringNullableFilter<"MajorCategoryDetails"> | string | null
+    hsnCode?: StringNullableFilter<"MajorCategoryDetails"> | string | null
+    mcStatus?: StringNullableFilter<"MajorCategoryDetails"> | string | null
+    createdAt?: DateTimeFilter<"MajorCategoryDetails"> | Date | string
+  }
+
+  export type MajorCategoryDetailsOrderByWithRelationInput = {
+    id?: SortOrder
+    seg?: SortOrderInput | SortOrder
+    div?: SortOrderInput | SortOrder
+    subDiv?: SortOrderInput | SortOrder
+    majCat?: SortOrderInput | SortOrder
+    mcCode?: SortOrderInput | SortOrder
+    mcDes?: SortOrderInput | SortOrder
+    hsnCode?: SortOrderInput | SortOrder
+    mcStatus?: SortOrderInput | SortOrder
+    createdAt?: SortOrder
+    _relevance?: MajorCategoryDetailsOrderByRelevanceInput
+  }
+
+  export type MajorCategoryDetailsWhereUniqueInput = Prisma.AtLeast<{
+    id?: number
+    AND?: MajorCategoryDetailsWhereInput | MajorCategoryDetailsWhereInput[]
+    OR?: MajorCategoryDetailsWhereInput[]
+    NOT?: MajorCategoryDetailsWhereInput | MajorCategoryDetailsWhereInput[]
+    seg?: StringNullableFilter<"MajorCategoryDetails"> | string | null
+    div?: StringNullableFilter<"MajorCategoryDetails"> | string | null
+    subDiv?: StringNullableFilter<"MajorCategoryDetails"> | string | null
+    majCat?: StringNullableFilter<"MajorCategoryDetails"> | string | null
+    mcCode?: StringNullableFilter<"MajorCategoryDetails"> | string | null
+    mcDes?: StringNullableFilter<"MajorCategoryDetails"> | string | null
+    hsnCode?: StringNullableFilter<"MajorCategoryDetails"> | string | null
+    mcStatus?: StringNullableFilter<"MajorCategoryDetails"> | string | null
+    createdAt?: DateTimeFilter<"MajorCategoryDetails"> | Date | string
+  }, "id">
+
+  export type MajorCategoryDetailsOrderByWithAggregationInput = {
+    id?: SortOrder
+    seg?: SortOrderInput | SortOrder
+    div?: SortOrderInput | SortOrder
+    subDiv?: SortOrderInput | SortOrder
+    majCat?: SortOrderInput | SortOrder
+    mcCode?: SortOrderInput | SortOrder
+    mcDes?: SortOrderInput | SortOrder
+    hsnCode?: SortOrderInput | SortOrder
+    mcStatus?: SortOrderInput | SortOrder
+    createdAt?: SortOrder
+    _count?: MajorCategoryDetailsCountOrderByAggregateInput
+    _avg?: MajorCategoryDetailsAvgOrderByAggregateInput
+    _max?: MajorCategoryDetailsMaxOrderByAggregateInput
+    _min?: MajorCategoryDetailsMinOrderByAggregateInput
+    _sum?: MajorCategoryDetailsSumOrderByAggregateInput
+  }
+
+  export type MajorCategoryDetailsScalarWhereWithAggregatesInput = {
+    AND?: MajorCategoryDetailsScalarWhereWithAggregatesInput | MajorCategoryDetailsScalarWhereWithAggregatesInput[]
+    OR?: MajorCategoryDetailsScalarWhereWithAggregatesInput[]
+    NOT?: MajorCategoryDetailsScalarWhereWithAggregatesInput | MajorCategoryDetailsScalarWhereWithAggregatesInput[]
+    id?: IntWithAggregatesFilter<"MajorCategoryDetails"> | number
+    seg?: StringNullableWithAggregatesFilter<"MajorCategoryDetails"> | string | null
+    div?: StringNullableWithAggregatesFilter<"MajorCategoryDetails"> | string | null
+    subDiv?: StringNullableWithAggregatesFilter<"MajorCategoryDetails"> | string | null
+    majCat?: StringNullableWithAggregatesFilter<"MajorCategoryDetails"> | string | null
+    mcCode?: StringNullableWithAggregatesFilter<"MajorCategoryDetails"> | string | null
+    mcDes?: StringNullableWithAggregatesFilter<"MajorCategoryDetails"> | string | null
+    hsnCode?: StringNullableWithAggregatesFilter<"MajorCategoryDetails"> | string | null
+    mcStatus?: StringNullableWithAggregatesFilter<"MajorCategoryDetails"> | string | null
+    createdAt?: DateTimeWithAggregatesFilter<"MajorCategoryDetails"> | Date | string
+=======
   export type ExpenseChangeRequestWhereInput = {
     AND?: ExpenseChangeRequestWhereInput | ExpenseChangeRequestWhereInput[]
     OR?: ExpenseChangeRequestWhereInput[]
@@ -64156,6 +65333,7 @@ export namespace Prisma {
     finalAction?: StringNullableWithAggregatesFilter<"ExpenseChangeRequest"> | string | null
     createdAt?: DateTimeWithAggregatesFilter<"ExpenseChangeRequest"> | Date | string
     updatedAt?: DateTimeWithAggregatesFilter<"ExpenseChangeRequest"> | Date | string
+>>>>>>> 0d1159d12e0df55bfd3763cd59be6ab70e1b50b5
   }
 
   export type DepartmentCreateInput = {
@@ -69871,6 +71049,9 @@ export namespace Prisma {
     mSet?: string | null
     bodyArticleNumber?: string | null
     bodyArticleDescription?: string | null
+    imageUrl?: string | null
+    bodyArticleType?: string | null
+    designNumber?: string | null
     cmtpCost?: Decimal | DecimalJsLike | number | string | null
     cmpCost?: Decimal | DecimalJsLike | number | string | null
     fabCost?: Decimal | DecimalJsLike | number | string | null
@@ -69918,6 +71099,9 @@ export namespace Prisma {
     mSet?: string | null
     bodyArticleNumber?: string | null
     bodyArticleDescription?: string | null
+    imageUrl?: string | null
+    bodyArticleType?: string | null
+    designNumber?: string | null
     cmtpCost?: Decimal | DecimalJsLike | number | string | null
     cmpCost?: Decimal | DecimalJsLike | number | string | null
     fabCost?: Decimal | DecimalJsLike | number | string | null
@@ -69965,6 +71149,9 @@ export namespace Prisma {
     mSet?: NullableStringFieldUpdateOperationsInput | string | null
     bodyArticleNumber?: NullableStringFieldUpdateOperationsInput | string | null
     bodyArticleDescription?: NullableStringFieldUpdateOperationsInput | string | null
+    imageUrl?: NullableStringFieldUpdateOperationsInput | string | null
+    bodyArticleType?: NullableStringFieldUpdateOperationsInput | string | null
+    designNumber?: NullableStringFieldUpdateOperationsInput | string | null
     cmtpCost?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
     cmpCost?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
     fabCost?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
@@ -70012,6 +71199,9 @@ export namespace Prisma {
     mSet?: NullableStringFieldUpdateOperationsInput | string | null
     bodyArticleNumber?: NullableStringFieldUpdateOperationsInput | string | null
     bodyArticleDescription?: NullableStringFieldUpdateOperationsInput | string | null
+    imageUrl?: NullableStringFieldUpdateOperationsInput | string | null
+    bodyArticleType?: NullableStringFieldUpdateOperationsInput | string | null
+    designNumber?: NullableStringFieldUpdateOperationsInput | string | null
     cmtpCost?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
     cmpCost?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
     fabCost?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
@@ -70059,6 +71249,9 @@ export namespace Prisma {
     mSet?: string | null
     bodyArticleNumber?: string | null
     bodyArticleDescription?: string | null
+    imageUrl?: string | null
+    bodyArticleType?: string | null
+    designNumber?: string | null
     cmtpCost?: Decimal | DecimalJsLike | number | string | null
     cmpCost?: Decimal | DecimalJsLike | number | string | null
     fabCost?: Decimal | DecimalJsLike | number | string | null
@@ -70106,6 +71299,9 @@ export namespace Prisma {
     mSet?: NullableStringFieldUpdateOperationsInput | string | null
     bodyArticleNumber?: NullableStringFieldUpdateOperationsInput | string | null
     bodyArticleDescription?: NullableStringFieldUpdateOperationsInput | string | null
+    imageUrl?: NullableStringFieldUpdateOperationsInput | string | null
+    bodyArticleType?: NullableStringFieldUpdateOperationsInput | string | null
+    designNumber?: NullableStringFieldUpdateOperationsInput | string | null
     cmtpCost?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
     cmpCost?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
     fabCost?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
@@ -70153,6 +71349,9 @@ export namespace Prisma {
     mSet?: NullableStringFieldUpdateOperationsInput | string | null
     bodyArticleNumber?: NullableStringFieldUpdateOperationsInput | string | null
     bodyArticleDescription?: NullableStringFieldUpdateOperationsInput | string | null
+    imageUrl?: NullableStringFieldUpdateOperationsInput | string | null
+    bodyArticleType?: NullableStringFieldUpdateOperationsInput | string | null
+    designNumber?: NullableStringFieldUpdateOperationsInput | string | null
     cmtpCost?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
     cmpCost?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
     fabCost?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
@@ -70179,6 +71378,94 @@ export namespace Prisma {
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
   }
 
+<<<<<<< HEAD
+  export type MajorCategoryDetailsCreateInput = {
+    seg?: string | null
+    div?: string | null
+    subDiv?: string | null
+    majCat?: string | null
+    mcCode?: string | null
+    mcDes?: string | null
+    hsnCode?: string | null
+    mcStatus?: string | null
+    createdAt?: Date | string
+  }
+
+  export type MajorCategoryDetailsUncheckedCreateInput = {
+    id?: number
+    seg?: string | null
+    div?: string | null
+    subDiv?: string | null
+    majCat?: string | null
+    mcCode?: string | null
+    mcDes?: string | null
+    hsnCode?: string | null
+    mcStatus?: string | null
+    createdAt?: Date | string
+  }
+
+  export type MajorCategoryDetailsUpdateInput = {
+    seg?: NullableStringFieldUpdateOperationsInput | string | null
+    div?: NullableStringFieldUpdateOperationsInput | string | null
+    subDiv?: NullableStringFieldUpdateOperationsInput | string | null
+    majCat?: NullableStringFieldUpdateOperationsInput | string | null
+    mcCode?: NullableStringFieldUpdateOperationsInput | string | null
+    mcDes?: NullableStringFieldUpdateOperationsInput | string | null
+    hsnCode?: NullableStringFieldUpdateOperationsInput | string | null
+    mcStatus?: NullableStringFieldUpdateOperationsInput | string | null
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+  }
+
+  export type MajorCategoryDetailsUncheckedUpdateInput = {
+    id?: IntFieldUpdateOperationsInput | number
+    seg?: NullableStringFieldUpdateOperationsInput | string | null
+    div?: NullableStringFieldUpdateOperationsInput | string | null
+    subDiv?: NullableStringFieldUpdateOperationsInput | string | null
+    majCat?: NullableStringFieldUpdateOperationsInput | string | null
+    mcCode?: NullableStringFieldUpdateOperationsInput | string | null
+    mcDes?: NullableStringFieldUpdateOperationsInput | string | null
+    hsnCode?: NullableStringFieldUpdateOperationsInput | string | null
+    mcStatus?: NullableStringFieldUpdateOperationsInput | string | null
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+  }
+
+  export type MajorCategoryDetailsCreateManyInput = {
+    id?: number
+    seg?: string | null
+    div?: string | null
+    subDiv?: string | null
+    majCat?: string | null
+    mcCode?: string | null
+    mcDes?: string | null
+    hsnCode?: string | null
+    mcStatus?: string | null
+    createdAt?: Date | string
+  }
+
+  export type MajorCategoryDetailsUpdateManyMutationInput = {
+    seg?: NullableStringFieldUpdateOperationsInput | string | null
+    div?: NullableStringFieldUpdateOperationsInput | string | null
+    subDiv?: NullableStringFieldUpdateOperationsInput | string | null
+    majCat?: NullableStringFieldUpdateOperationsInput | string | null
+    mcCode?: NullableStringFieldUpdateOperationsInput | string | null
+    mcDes?: NullableStringFieldUpdateOperationsInput | string | null
+    hsnCode?: NullableStringFieldUpdateOperationsInput | string | null
+    mcStatus?: NullableStringFieldUpdateOperationsInput | string | null
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+  }
+
+  export type MajorCategoryDetailsUncheckedUpdateManyInput = {
+    id?: IntFieldUpdateOperationsInput | number
+    seg?: NullableStringFieldUpdateOperationsInput | string | null
+    div?: NullableStringFieldUpdateOperationsInput | string | null
+    subDiv?: NullableStringFieldUpdateOperationsInput | string | null
+    majCat?: NullableStringFieldUpdateOperationsInput | string | null
+    mcCode?: NullableStringFieldUpdateOperationsInput | string | null
+    mcDes?: NullableStringFieldUpdateOperationsInput | string | null
+    hsnCode?: NullableStringFieldUpdateOperationsInput | string | null
+    mcStatus?: NullableStringFieldUpdateOperationsInput | string | null
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+=======
   export type ExpenseChangeRequestCreateInput = {
     id?: string
     tableKey: string
@@ -70373,6 +71660,7 @@ export namespace Prisma {
     finalAction?: NullableStringFieldUpdateOperationsInput | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+>>>>>>> 0d1159d12e0df55bfd3763cd59be6ab70e1b50b5
   }
 
   export type IntFilter<$PrismaModel = never> = {
@@ -74307,6 +75595,9 @@ export namespace Prisma {
     mSet?: SortOrder
     bodyArticleNumber?: SortOrder
     bodyArticleDescription?: SortOrder
+    imageUrl?: SortOrder
+    bodyArticleType?: SortOrder
+    designNumber?: SortOrder
     cmtpCost?: SortOrder
     cmpCost?: SortOrder
     fabCost?: SortOrder
@@ -74363,6 +75654,9 @@ export namespace Prisma {
     mSet?: SortOrder
     bodyArticleNumber?: SortOrder
     bodyArticleDescription?: SortOrder
+    imageUrl?: SortOrder
+    bodyArticleType?: SortOrder
+    designNumber?: SortOrder
     cmtpCost?: SortOrder
     cmpCost?: SortOrder
     fabCost?: SortOrder
@@ -74410,6 +75704,9 @@ export namespace Prisma {
     mSet?: SortOrder
     bodyArticleNumber?: SortOrder
     bodyArticleDescription?: SortOrder
+    imageUrl?: SortOrder
+    bodyArticleType?: SortOrder
+    designNumber?: SortOrder
     cmtpCost?: SortOrder
     cmpCost?: SortOrder
     fabCost?: SortOrder
@@ -74445,6 +75742,10 @@ export namespace Prisma {
     approvedBy?: SortOrder
   }
 
+<<<<<<< HEAD
+  export type MajorCategoryDetailsOrderByRelevanceInput = {
+    fields: MajorCategoryDetailsOrderByRelevanceFieldEnum | MajorCategoryDetailsOrderByRelevanceFieldEnum[]
+=======
   export type EnumExpenseChangeStatusFilter<$PrismaModel = never> = {
     equals?: $Enums.ExpenseChangeStatus | EnumExpenseChangeStatusFieldRefInput<$PrismaModel>
     in?: $Enums.ExpenseChangeStatus[] | ListEnumExpenseChangeStatusFieldRefInput<$PrismaModel>
@@ -74454,10 +75755,58 @@ export namespace Prisma {
 
   export type ExpenseChangeRequestOrderByRelevanceInput = {
     fields: ExpenseChangeRequestOrderByRelevanceFieldEnum | ExpenseChangeRequestOrderByRelevanceFieldEnum[]
+>>>>>>> 0d1159d12e0df55bfd3763cd59be6ab70e1b50b5
     sort: SortOrder
     search: string
   }
 
+<<<<<<< HEAD
+  export type MajorCategoryDetailsCountOrderByAggregateInput = {
+    id?: SortOrder
+    seg?: SortOrder
+    div?: SortOrder
+    subDiv?: SortOrder
+    majCat?: SortOrder
+    mcCode?: SortOrder
+    mcDes?: SortOrder
+    hsnCode?: SortOrder
+    mcStatus?: SortOrder
+    createdAt?: SortOrder
+  }
+
+  export type MajorCategoryDetailsAvgOrderByAggregateInput = {
+    id?: SortOrder
+  }
+
+  export type MajorCategoryDetailsMaxOrderByAggregateInput = {
+    id?: SortOrder
+    seg?: SortOrder
+    div?: SortOrder
+    subDiv?: SortOrder
+    majCat?: SortOrder
+    mcCode?: SortOrder
+    mcDes?: SortOrder
+    hsnCode?: SortOrder
+    mcStatus?: SortOrder
+    createdAt?: SortOrder
+  }
+
+  export type MajorCategoryDetailsMinOrderByAggregateInput = {
+    id?: SortOrder
+    seg?: SortOrder
+    div?: SortOrder
+    subDiv?: SortOrder
+    majCat?: SortOrder
+    mcCode?: SortOrder
+    mcDes?: SortOrder
+    hsnCode?: SortOrder
+    mcStatus?: SortOrder
+    createdAt?: SortOrder
+  }
+
+  export type MajorCategoryDetailsSumOrderByAggregateInput = {
+    id?: SortOrder
+=======
   export type ExpenseChangeRequestCountOrderByAggregateInput = {
     id?: SortOrder
     tableKey?: SortOrder
@@ -74560,6 +75909,7 @@ export namespace Prisma {
     _count?: NestedIntFilter<$PrismaModel>
     _min?: NestedEnumExpenseChangeStatusFilter<$PrismaModel>
     _max?: NestedEnumExpenseChangeStatusFilter<$PrismaModel>
+>>>>>>> 0d1159d12e0df55bfd3763cd59be6ab70e1b50b5
   }
 
   export type SubDepartmentCreateNestedManyWithoutDepartmentInput = {

@@ -82,6 +82,19 @@ router.get('/fabric-article-data/search', h(ApproverController.searchFabricArtic
 // (an exact Body Article Number match is always included even if outside the top 10)
 router.get('/body-article-data/search', h(ApproverController.searchBodyArticleData));
 
+// Create body article from FG article — copies Body & Construction fields into body_article_data
+router.post('/create-body-article', h(ApproverController.createBodyArticleFromFG));
+
+// Body Article list (type=FG) — paginated list from body_article_data for the Body Article New Articles page
+router.get('/body-articles', h(ApproverController.getBodyArticleItems));
+
+// Submit body articles to SAP via ZMM_BODY_ART_CRT_V3
+router.post('/body-articles/submit', h(ApproverController.submitBodyArticles));
+
+// Get / Update a single body_article_data record (used by Body Article detail page)
+router.get('/body-articles/:id',  h(ApproverController.getBodyArticleById));
+router.put('/body-articles/:id',  h(ApproverController.updateBodyArticle));
+
 // Sizes for a given major category (from maj_cat_sizes table)
 router.get('/sizes-for-majcat/:majCat', h(ApproverController.getSizesForMajCat));
 
@@ -103,5 +116,9 @@ router.get('/fabric-grid-values', h(ApproverController.getFabricGridValues));
 
 // Body attribute grid values from national_grid_master (M_COLLAR_TYPE, M_NO_OF_POCKET, etc.)
 router.get('/national-grid-values', h(ApproverController.getNationalGridValues));
+
+// Major category details — full table (seg, div, sub_div, maj_cat, mc_code, mc_des, hsn_code, mc_status)
+// Supports ?div=MENS&mcStatus=ACT&search=SHIRT for optional filtering
+router.get('/major-category-details', h(ApproverController.getMajorCategoryDetails));
 
 export default router;
