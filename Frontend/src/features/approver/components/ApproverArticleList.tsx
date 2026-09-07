@@ -494,6 +494,8 @@ export interface ApproverArticleListProps {
   pathType?: 'old' | 'new' | 'rejected' | 'created' | 'failed';
   /** When set, only these attribute group names are shown in article cards. */
   allowGroups?: string[];
+  /** When true, hides the "Create Body Article" button (used by BodyArticleList). */
+  hideCreateBody?: boolean;
   serverPagination: {
     total: number;
     current: number;
