@@ -356,6 +356,8 @@ export interface ApproverArticleListProps {
   };
   /** When true, always use the static ATTRIBUTE_GROUPS definition instead of the API-built card groups. */
   forceStaticGroups?: boolean;
+  /** When true, hides the "Create Body Article" button (e.g. on the Body Article detail page) */
+  hideCreateBody?: boolean;
   serverPagination: {
     total: number;
     current: number;

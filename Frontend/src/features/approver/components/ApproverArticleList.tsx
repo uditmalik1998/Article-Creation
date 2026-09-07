@@ -56,7 +56,7 @@ import {
   SAP_NAME_TO_SCHEMA_KEY,
   normalizeMajorCategory,
 } from '../../../data/majCatAttributeMap';
-import { getMajorCategoriesByDivision, getMcCodeByMajorCategory } from '../../../data/majorCategoryMcCodeMap';
+import { getMcCodeByMajorCategory } from '../../../data/majorCategoryMcCodeMap';
 import {
   preloadAttributeValues,
   getCachedValues,
@@ -91,6 +91,29 @@ const bomCache = new Map<string, Promise<Record<string, Record<string, string>>>
 // Module-level national grid cache — body article dropdown values from national_grid_master
 type NationalGridValues = Record<string, { code: string; fullForm: string }[]>;
 let nationalGridPromise: Promise<NationalGridValues> | null = null;
+
+// Module-level major category cache keyed by normalised division (e.g. "MENS")
+const majorCatByDivision = new Map<string, string[]>();
+const majorCatPromises = new Map<string, Promise<string[]>>();
+const fetchMajorCategoriesByDivision = (division: string): Promise<string[]> => {
+  const div = (division || '').trim().toUpperCase() === 'MEN' ? 'MENS' : (division || '').trim().toUpperCase();
+  if (majorCatByDivision.has(div)) return Promise.resolve(majorCatByDivision.get(div)!);
+  if (majorCatPromises.has(div)) return majorCatPromises.get(div)!;
+  const token = localStorage.getItem('authToken');
+  const url = div
+    ? `${APP_CONFIG.api.baseURL}/admin/major-categories?division=${encodeURIComponent(div)}`
+    : `${APP_CONFIG.api.baseURL}/admin/major-categories`;
+  const promise = fetch(url, { headers: token ? { Authorization: `Bearer ${token}` } : {} })
+    .then((r) => r.json())
+    .then((res: any) => {
+      const list: string[] = Array.isArray(res?.data) ? res.data : [];
+      majorCatByDivision.set(div, list);
+      return list;
+    })
+    .catch(() => []);
+  majorCatPromises.set(div, promise);
+  return promise;
+};
 const fetchNationalGridValues = (): Promise<NationalGridValues> => {
   if (!nationalGridPromise) {
     const token = localStorage.getItem('authToken');
@@ -504,6 +527,7 @@ const ArticleCard = React.memo(
     cardGroups,
     pathType,
     allowGroups,
+    hideCreateBody,
   }: {
     item: ApproverItem;
     isSelected: boolean;
@@ -519,6 +543,7 @@ const ArticleCard = React.memo(
     cardGroups: CardGroup[];
     pathType?: 'old' | 'new' | 'rejected' | 'created' | 'failed';
     allowGroups?: string[];
+    hideCreateBody?: boolean;
   }) => {
     const [showVariants, setShowVariants] = useState(true);
     const [imgModalOpen, setImgModalOpen] = useState(false);
@@ -562,6 +587,12 @@ const ArticleCard = React.memo(
     // enough because only one attribute (editingField) is open at a time.
     const [attrSearch, setAttrSearch] = useState('');
 
+    // ── Major categories from DB (major_category_details table) ─────────────
+    const [dbMajorCategories, setDbMajorCategories] = useState<string[]>([]);
+    useEffect(() => {
+      fetchMajorCategoriesByDivision(item.division || '').then(setDbMajorCategories);
+    }, [item.division]);
+
     // ── National grid values for Body Article dropdowns ─────────────────────
     const [nationalGrid, setNationalGrid] = useState<NationalGridValues>({});
     const [nationalGridReady, setNationalGridReady] = useState(false);
@@ -573,11 +604,13 @@ const ArticleCard = React.memo(
       });
     }, [allowGroups]);
 
+    const isBodyArticle = allowGroups?.includes('BODY') ?? false;
+
     // ── Created-page "Modify" flow ──────────────────────────────────────────
     // On the Created page, articles are already APPROVED + SAP-synced. We keep
     // them editable, but stage edits as `pendingChanges` instead of auto-saving;
     // the user then clicks "Modify" to push the diff to SAP (and only then the DB).
-    const isModifyMode = pathType === 'created' && !!onModify;
+    const isModifyMode = pathType === 'created' && !!onModify && !isBodyArticle;
     const [pendingChanges, setPendingChanges] = useState<Record<string, string | null>>({});
     const [modifying, setModifying] = useState(false);
 
@@ -1182,6 +1215,17 @@ const ArticleCard = React.memo(
           }
         });
       }
+      // When a Body & Construction attribute changes, recompute bodyArticleDescription
+      // and bundle it into the same save so the DB value stays in sync with the UI.
+      const bodyFieldKeys = new Set(BODY_FIELDS.map((bf) => bf.field));
+      if (bodyFieldKeys.has(field)) {
+        const getVal = (f: string) => {
+          const v = updates[f] !== undefined ? updates[f] : (localValues[f] !== undefined ? localValues[f] : (item as any)[f]);
+          return v ? String(v).trim() : null;
+        };
+        const newDesc = buildBodyDescription(getVal);
+        if (newDesc) updates['bodyArticleDescription'] = newDesc;
+      }
       setLocalValues((prev) => ({ ...prev, ...updates }));
       setEditingField(null);
       if (isModifyMode) {
@@ -1325,19 +1369,17 @@ const ArticleCard = React.memo(
 
     const HEADER_FIELDS = [
       { label: 'MAJOR CATEGORY', field: 'majorCategory', editable: true, required: false, color: '#2f54eb' },
-      {
-        label: 'ARTICLE NUMBER',
-        field: 'articleNumber',
-        editable: !item.sapArticleId,
-        required: false,
-        color: item.sapArticleId ? '#15803d' : '#FF6F61',
-      },
+      isBodyArticle
+        ? { label: 'BODY ARTICLE NUMBER', field: 'bodyArticle', editable: false, required: false, color: '#15803d' }
+        : { label: 'ARTICLE NUMBER', field: 'articleNumber', editable: !item.sapArticleId, required: false, color: item.sapArticleId ? '#15803d' : '#FF6F61' },
       { label: 'VENDOR CODE', field: 'vendorCode', editable: true, required: true, color: '#1f2937' },
       { label: 'VENDOR NAME', field: 'vendorName', editable: true, required: true, color: '#1f2937' },
-      { label: 'ARTICLE DESC', field: 'articleDescription', editable: true, required: false, color: '#4b5563' },
-      { label: 'REFERENCE ARTICLE', field: 'referenceArticleNumber', editable: true, required: false, color: '#1f2937' },
-      { label: 'REFERENCE ARTICLE DESC', field: 'referenceArticleDescription', editable: true, required: false, color: '#1f2937' },
-    ] as const;
+      ...(!isBodyArticle ? [
+        { label: 'ARTICLE DESC', field: 'articleDescription', editable: true, required: false, color: '#4b5563' },
+        { label: 'REFERENCE ARTICLE', field: 'referenceArticleNumber', editable: true, required: false, color: '#1f2937' },
+        { label: 'REFERENCE ARTICLE DESC', field: 'referenceArticleDescription', editable: true, required: false, color: '#1f2937' },
+      ] : []),
+    ];
 
     const renderHeaderField = ({
       label,
@@ -1349,6 +1391,8 @@ const ArticleCard = React.memo(
       const baseValue =
         field === 'articleNumber'
           ? item.sapArticleId || (item as any)[field]
+          : field === 'bodyArticle'
+          ? (item as any)['bodyArticle']
           : field === 'majorCategory'
           ? effectiveMajCat || (item as any)[field]
           : (item as any)[field];
@@ -1404,7 +1448,7 @@ const ArticleCard = React.memo(
                       />
                     </div>
                     <div className="max-h-56 overflow-y-auto py-1">
-                      {getMajorCategoriesByDivision(item.division || '')
+                      {dbMajorCategories
                         .filter((cat) =>
                           cat.toLowerCase().includes(catSearch.toLowerCase()),
                         )
@@ -1422,7 +1466,7 @@ const ArticleCard = React.memo(
                             {cat}
                           </button>
                         ))}
-                      {getMajorCategoriesByDivision(item.division || '').filter((cat) =>
+                      {dbMajorCategories.filter((cat) =>
                         cat.toLowerCase().includes(catSearch.toLowerCase()),
                       ).length === 0 && (
                         <div className="px-3 py-2 text-xs text-muted-foreground">
@@ -2644,6 +2688,8 @@ const ArticleCard = React.memo(
                                                 runBodySearch(q);
                                               }}
                                               onBlur={() => {
+                                                const trimmed = bodyNoQuery.trim().slice(0, 40);
+                                                if (trimmed) handleSave('bodyArticleDescription', trimmed);
                                                 setEditingField(null);
                                                 setBodyNoResults([]);
                                               }}
@@ -2702,6 +2748,7 @@ const ArticleCard = React.memo(
                                         </div>
                                       )}
                                     </div>
+                                    {!hideCreateBody && (
                                     <div className="border-t border-border px-2 py-1.5">
                                       <Button
                                         size="sm"
@@ -2712,6 +2759,7 @@ const ArticleCard = React.memo(
                                         Create Body Article
                                       </Button>
                                     </div>
+                                    )}
                                   </>
                                 );
                               })()}
@@ -2860,8 +2908,8 @@ const ArticleCard = React.memo(
                 </div>
               )}
 
-              {/* Proceed for FG Article Creation — hidden on New Articles and Failed Creations */}
-              {!item.articleNumber && pathType !== 'new' && pathType !== 'failed' &&
+              {/* Proceed for FG Article Creation — hidden on Body Article pages, New Articles, and Failed Creations */}
+              {!isBodyArticle && !item.articleNumber && pathType !== 'new' && pathType !== 'failed' &&
                 (() => {
                   const effectiveVendorCode =
                     localValues['vendorCode'] !== undefined ? localValues['vendorCode'] : item.vendorCode;
@@ -3055,6 +3103,7 @@ export const ApproverArticleList: React.FC<ApproverArticleListProps> = ({
   onRefresh,
   pathType,
   allowGroups,
+  hideCreateBody,
   serverPagination,
 }) => {
   const [cardGroups, setCardGroups] = useState<CardGroup[]>(() => {
@@ -3142,6 +3191,7 @@ export const ApproverArticleList: React.FC<ApproverArticleListProps> = ({
           cardGroups={visibleCardGroups}
           pathType={pathType}
           allowGroups={allowGroups}
+          hideCreateBody={hideCreateBody}
         />
       ))}
     </div>

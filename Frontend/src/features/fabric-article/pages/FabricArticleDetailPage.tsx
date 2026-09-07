@@ -248,14 +248,15 @@ export interface DetailNavigationState {
 export default function ArticleDetailPage({
   ListComponent = FabricArticleList,
   skipMandatoryFieldsCheck = false,
+  approveEndpoint = '/fabric-article/approve',
+  itemsBaseEndpoint = '/approver/items',
 }: {
   ListComponent?: React.ComponentType<ApproverArticleListProps>;
-  // The Body Article page only shows the Body & Construction + BOM cards, but
-  // getMissingMandatoryFields() checks the full attribute schema (FAB, VA ACC,
-  // VA PRCS, ...) — fields that page has no way to fill. Body Article Detail
-  // Page opts out of that gate entirely; the FG Article Detail Page (approver's
-  // own ArticleDetailPage.tsx) is a separate component and is unaffected.
   skipMandatoryFieldsCheck?: boolean;
+  /** Override the approve POST endpoint. Defaults to /fabric-article/approve. */
+  approveEndpoint?: string;
+  /** Override the base path for GET/PUT item calls. Defaults to /approver/items. */
+  itemsBaseEndpoint?: string;
 } = {}) {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
@@ -335,7 +336,7 @@ export default function ArticleDetailPage({
     if (!id) return;
     setLoadingItem(true);
     const token = localStorage.getItem('authToken');
-    fetch(`${APP_CONFIG.api.baseURL}/approver/items/${id}`, { headers: { Authorization: `Bearer ${token}` } })
+    fetch(`${APP_CONFIG.api.baseURL}${itemsBaseEndpoint}/${id}`, { headers: { Authorization: `Bearer ${token}` } })
       .then(r => r.json())
       .then(item => {
         const withMc = { ...item, mcCode: item.mcCode || inferMcCode(item.majorCategory) };
@@ -433,7 +434,7 @@ export default function ArticleDetailPage({
     if (!currentItem) return;
     const token = localStorage.getItem('authToken');
     try {
-      const r = await fetch(`${APP_CONFIG.api.baseURL}/approver/items/${currentItem.id}`, { headers: { Authorization: `Bearer ${token}` } });
+      const r = await fetch(`${APP_CONFIG.api.baseURL}${itemsBaseEndpoint}/${currentItem.id}`, { headers: { Authorization: `Bearer ${token}` } });
       if (r.ok) { const saved = await r.json(); updateItemInList(saved); }
     } catch { message.error('Failed to refresh'); }
   };
@@ -452,7 +453,7 @@ export default function ArticleDetailPage({
       elapsed += 4;
       const token = localStorage.getItem('authToken');
       try {
-        const r = await fetch(`${APP_CONFIG.api.baseURL}/approver/items/${id}`, { headers: { Authorization: `Bearer ${token}` } });
+        const r = await fetch(`${APP_CONFIG.api.baseURL}${itemsBaseEndpoint}/${id}`, { headers: { Authorization: `Bearer ${token}` } });
         if (r.ok) {
           const saved = await r.json();
           updateItemInList(saved);
@@ -523,7 +524,7 @@ export default function ArticleDetailPage({
   };
 
   const doApprove = async () => {
-    const endpoint = '/fabric-article/approve';
+    const endpoint = approveEndpoint;
     setApproving(true);
     try {
       const token = localStorage.getItem('authToken');
@@ -538,6 +539,22 @@ export default function ArticleDetailPage({
       }
       const payload = await r.json();
       setConfirmDialog(null);
+
+      // Body article submit returns { results: [{ success, message }] } — check for failures
+      if (Array.isArray(payload?.results)) {
+        const failed = payload.results.filter((res: any) => !res.success);
+        const succeeded = payload.results.filter((res: any) => res.success);
+        if (failed.length > 0) {
+          failed.forEach((res: any) => message.error(res.message || 'Submission failed'));
+        }
+        if (succeeded.length > 0) {
+          message.success(`${succeeded.length} article(s) submitted to SAP successfully`);
+        }
+        setSelectedRowKeys([]);
+        await refetchCurrentItem();
+        return;
+      }
+
       // Async approval: /approve returns 202 immediately and the SAP create runs in
       // the background worker. Inform the user, free the UI, and poll for completion
       // so the SAP article number fills in (or a failure popup shows) without blocking.
@@ -671,7 +688,7 @@ export default function ArticleDetailPage({
       if (values.majorCategory && (values.majorCategory !== editingItem?.majorCategory || !values.mcCode)) {
         values.mcCode = inferMcCode(values.majorCategory) || values.mcCode;
       }
-      const r = await fetch(`${APP_CONFIG.api.baseURL}/approver/items/${editingItem?.id}`, {
+      const r = await fetch(`${APP_CONFIG.api.baseURL}${itemsBaseEndpoint}/${editingItem?.id}`, {
         method: 'PUT', headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` },
         body: JSON.stringify(values),
       });
@@ -1147,7 +1164,7 @@ export default function ArticleDetailPage({
             if (Object.keys(updatePayload).length === 0) return;
             try {
               const token = localStorage.getItem('authToken');
-              const r = await fetch(`${APP_CONFIG.api.baseURL}/approver/items/${row.id}`, {
+              const r = await fetch(`${APP_CONFIG.api.baseURL}${itemsBaseEndpoint}/${row.id}`, {
                 method: 'PUT',
                 headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` },
                 body: JSON.stringify(updatePayload),

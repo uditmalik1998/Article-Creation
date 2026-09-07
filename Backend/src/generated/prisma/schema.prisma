@@ -1405,6 +1405,9 @@ model BodyArticleData {
   // Body article output fields
   bodyArticleNumber      String? @map("body_article_number") @db.VarChar(100)
   bodyArticleDescription String? @map("body_article_description") @db.VarChar(255)
+  imageUrl               String? @map("image_url") @db.Text
+  bodyArticleType        String? @map("body_article_type") @db.VarChar(100)
+  designNumber           String? @map("design_number") @db.VarChar(100)
 
   // Cost fields
   cmtpCost Decimal? @map("cmtp_cost") @db.Decimal(10, 2)
@@ -1447,5 +1450,26 @@ model BodyArticleData {
   @@index([articleNumber])
   @@index([createdAt(sort: Desc)])
   @@map("body_article_data")
+  @@schema("public")
+}
+
+/// MajorCategoryDetails: Master table for major category hierarchy, mc_code, and HSN codes
+model MajorCategoryDetails {
+  id        Int      @id @default(autoincrement())
+  seg       String?  @map("seg") @db.VarChar(50)
+  div       String?  @map("div") @db.VarChar(100)
+  subDiv    String?  @map("sub_div") @db.VarChar(100)
+  majCat    String?  @map("maj_cat") @db.VarChar(200)
+  mcCode    String?  @map("mc_code") @db.VarChar(50)
+  mcDes     String?  @map("mc_des") @db.VarChar(200)
+  hsnCode   String?  @map("hsn_code") @db.VarChar(20)
+  mcStatus  String?  @map("mc_status") @db.VarChar(20)
+  createdAt DateTime @default(now()) @map("created_at")
+
+  @@index([mcCode])
+  @@index([majCat])
+  @@index([div])
+  @@index([hsnCode])
+  @@map("major_category_details")
   @@schema("public")
 }

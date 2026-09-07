@@ -5136,3 +5136,18 @@ export const uploadBodyArticleData = async (req: Request, res: Response): Promis
     res.status(500).json({ success: false, error: error.message });
   }
 };
+
+export const getMajorCategories = async (req: Request, res: Response) => {
+  const { division } = req.query;
+  const where: any = { mcStatus: 'ACT' };
+  if (division && typeof division === 'string' && division.trim()) {
+    where.div = { equals: division.trim().toUpperCase() === 'MEN' ? 'MENS' : division.trim().toUpperCase(), mode: 'insensitive' };
+  }
+  const rows = await prisma.majorCategoryDetails.findMany({
+    where,
+    select: { mcDes: true },
+    orderBy: { mcDes: 'asc' },
+  });
+  const data = rows.map((r) => r.mcDes).filter(Boolean) as string[];
+  res.json({ success: true, data });
+};

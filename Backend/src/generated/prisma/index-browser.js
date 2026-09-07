@@ -952,6 +952,9 @@ exports.Prisma.BodyArticleDataScalarFieldEnum = {
   mSet: 'mSet',
   bodyArticleNumber: 'bodyArticleNumber',
   bodyArticleDescription: 'bodyArticleDescription',
+  imageUrl: 'imageUrl',
+  bodyArticleType: 'bodyArticleType',
+  designNumber: 'designNumber',
   cmtpCost: 'cmtpCost',
   cmpCost: 'cmpCost',
   fabCost: 'fabCost',
@@ -976,6 +979,19 @@ exports.Prisma.BodyArticleDataScalarFieldEnum = {
   userName: 'userName',
   createdAt: 'createdAt',
   updatedAt: 'updatedAt'
+};
+
+exports.Prisma.MajorCategoryDetailsScalarFieldEnum = {
+  id: 'id',
+  seg: 'seg',
+  div: 'div',
+  subDiv: 'subDiv',
+  majCat: 'majCat',
+  mcCode: 'mcCode',
+  mcDes: 'mcDes',
+  hsnCode: 'hsnCode',
+  mcStatus: 'mcStatus',
+  createdAt: 'createdAt'
 };
 
 exports.Prisma.SortOrder = {
@@ -1586,6 +1602,9 @@ exports.Prisma.BodyArticleDataOrderByRelevanceFieldEnum = {
   mSet: 'mSet',
   bodyArticleNumber: 'bodyArticleNumber',
   bodyArticleDescription: 'bodyArticleDescription',
+  imageUrl: 'imageUrl',
+  bodyArticleType: 'bodyArticleType',
+  designNumber: 'designNumber',
   flatId: 'flatId',
   articleNumber: 'articleNumber',
   division: 'division',
@@ -1601,6 +1620,17 @@ exports.Prisma.BodyArticleDataOrderByRelevanceFieldEnum = {
   sapSyncStatus: 'sapSyncStatus',
   sapSyncMessage: 'sapSyncMessage',
   userName: 'userName'
+};
+
+exports.Prisma.MajorCategoryDetailsOrderByRelevanceFieldEnum = {
+  seg: 'seg',
+  div: 'div',
+  subDiv: 'subDiv',
+  majCat: 'majCat',
+  mcCode: 'mcCode',
+  mcDes: 'mcDes',
+  hsnCode: 'hsnCode',
+  mcStatus: 'mcStatus'
 };
 exports.GarmentType = exports.$Enums.GarmentType = {
   UPPER: 'UPPER',
@@ -1722,7 +1752,8 @@ exports.Prisma.ModelName = {
   FabricMajCatGridValue: 'FabricMajCatGridValue',
   ModifyLog: 'ModifyLog',
   FabricArticleData: 'FabricArticleData',
-  BodyArticleData: 'BodyArticleData'
+  BodyArticleData: 'BodyArticleData',
+  MajorCategoryDetails: 'MajorCategoryDetails'
 };
 
 /**
