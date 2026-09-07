@@ -1,4 +1,5 @@
 import { useEffect, useState, useCallback, useRef } from 'react';
+import { useNavigate } from 'react-router-dom';
 import dayjs, { type Dayjs } from 'dayjs';
 import {
   User,
@@ -174,6 +175,7 @@ interface TestApiResult {
 const RAW_ARTICLES_MIN_DATE = dayjs('2026-05-27');
 
 export default function Admin() {
+  const navigate = useNavigate();
   const [stats, setStats] = useState({ totalUploads: 0, completed: 0, failed: 0, pending: 0 });
   const [expenseData, setExpenseData] = useState<any>(null);
   const [imageData, setImageData] = useState<any>(null);
@@ -1410,10 +1412,16 @@ export default function Admin() {
               <Search className="h-4 w-4" />
               raw_articles Pipeline
             </CardTitle>
-            <Button size="sm" variant="outline" onClick={loadPipelineStatus} disabled={pipelineStatusLoading}>
-              <RotateCw className={pipelineStatusLoading ? 'animate-spin' : ''} />
-              Refresh Status
-            </Button>
+            <div className="flex gap-2">
+              <Button size="sm" variant="outline" onClick={() => navigate('/admin/expense/raw-articles')}>
+                <Eye />
+                View Data
+              </Button>
+              <Button size="sm" variant="outline" onClick={loadPipelineStatus} disabled={pipelineStatusLoading}>
+                <RotateCw className={pipelineStatusLoading ? 'animate-spin' : ''} />
+                Refresh Status
+              </Button>
+            </div>
           </CardHeader>
           <CardContent>
             {/* Pipeline status row */}
@@ -1606,10 +1614,16 @@ export default function Admin() {
               <RefreshCw className="h-4 w-4" />
               Vendor Master Sync
             </CardTitle>
-            <Button size="sm" variant="outline" onClick={loadVendorStatus} disabled={vendorStatusLoading}>
-              <RotateCw className={vendorStatusLoading ? 'animate-spin' : ''} />
-              Refresh Status
-            </Button>
+            <div className="flex gap-2">
+              <Button size="sm" variant="outline" onClick={() => navigate('/admin/expense/vendor-master')}>
+                <Eye />
+                View Data
+              </Button>
+              <Button size="sm" variant="outline" onClick={loadVendorStatus} disabled={vendorStatusLoading}>
+                <RotateCw className={vendorStatusLoading ? 'animate-spin' : ''} />
+                Refresh Status
+              </Button>
+            </div>
           </CardHeader>
           <CardContent>
             <Spinner spinning={vendorStatusLoading}>
@@ -1692,6 +1706,10 @@ export default function Admin() {
               Major Category Grid (Dropdown Values)
             </CardTitle>
             <div className="flex gap-2">
+              <Button size="sm" variant="outline" onClick={() => navigate('/admin/expense/major-category-grid')}>
+                <Eye />
+                View Data
+              </Button>
               <Button size="sm" variant="outline" onClick={downloadMajCatTemplate}>
                 <Download />
                 Download Template
@@ -1802,6 +1820,10 @@ export default function Admin() {
               Size Master (Sizes per Major Category)
             </CardTitle>
             <div className="flex gap-2">
+              <Button size="sm" variant="outline" onClick={() => navigate('/admin/expense/size-master')}>
+                <Eye />
+                View Data
+              </Button>
               <Button size="sm" variant="outline" onClick={downloadSizeMasterTemplate}>
                 <Download />
                 Download Template
@@ -1914,6 +1936,10 @@ export default function Admin() {
               Color Master (Father / Child Colours)
             </CardTitle>
             <div className="flex gap-2">
+              <Button size="sm" variant="outline" onClick={() => navigate('/admin/expense/color-master')}>
+                <Eye />
+                View Data
+              </Button>
               <Button size="sm" variant="outline" onClick={downloadColorMasterTemplate}>
                 <Download />
                 Download Template
@@ -2024,6 +2050,10 @@ export default function Admin() {
               Fabric Article Data (Bulk Insert)
             </CardTitle>
             <div className="flex gap-2">
+              <Button size="sm" variant="outline" onClick={() => navigate('/admin/expense/fabric-article-data')}>
+                <Eye />
+                View Data
+              </Button>
               <Button size="sm" variant="outline" onClick={downloadFabricArticleDataTemplate}>
                 <Download />
                 Download Template
@@ -2136,6 +2166,10 @@ export default function Admin() {
               Fabric Article Master (Fabric Hierarchy)
             </CardTitle>
             <div className="flex gap-2">
+              <Button size="sm" variant="outline" onClick={() => navigate('/admin/expense/fabric-article-master')}>
+                <Eye />
+                View Data
+              </Button>
               <Button size="sm" variant="outline" onClick={downloadFabricArticleMasterTemplate}>
                 <Download />
                 Download Template
@@ -2245,6 +2279,10 @@ export default function Admin() {
               Mandatory Grid (Field Visibility per Major Category)
             </CardTitle>
             <div className="flex gap-2">
+              <Button size="sm" variant="outline" onClick={() => navigate('/admin/expense/mandatory-grid')}>
+                <Eye />
+                View Data
+              </Button>
               <Button size="sm" variant="outline" onClick={downloadMandatoryTemplate}>
                 <Download />
                 Download Template
@@ -2356,6 +2394,10 @@ export default function Admin() {
               National Grid (Attribute Values)
             </CardTitle>
             <div className="flex gap-2">
+              <Button size="sm" variant="outline" onClick={() => navigate('/admin/expense/national-grid')}>
+                <Eye />
+                View Data
+              </Button>
               <Button size="sm" variant="outline" onClick={downloadNationalGridTemplate}>
                 <Download />
                 Download Template
@@ -2445,10 +2487,16 @@ export default function Admin() {
               <TableIcon className="h-4 w-4" />
               Hierarchy Excel Upload (Division / Sub-Division / Major Category)
             </CardTitle>
-            <Button size="sm" variant="outline" onClick={loadHierarchyExcelStatus} disabled={hierarchyExcelStatusLoading}>
-              <RotateCw className={hierarchyExcelStatusLoading ? 'animate-spin' : ''} />
-              Refresh Status
-            </Button>
+            <div className="flex gap-2">
+              <Button size="sm" variant="outline" onClick={() => navigate('/admin/expense/hierarchy')}>
+                <Eye />
+                View Data
+              </Button>
+              <Button size="sm" variant="outline" onClick={loadHierarchyExcelStatus} disabled={hierarchyExcelStatusLoading}>
+                <RotateCw className={hierarchyExcelStatusLoading ? 'animate-spin' : ''} />
+                Refresh Status
+              </Button>
+            </div>
           </CardHeader>
           <CardContent>
             <Spinner spinning={hierarchyExcelStatusLoading}>
@@ -2615,6 +2663,10 @@ export default function Admin() {
               Segment Master (Price Segments per Major Category)
             </CardTitle>
             <div className="flex gap-2">
+              <Button size="sm" variant="outline" onClick={() => navigate('/admin/expense/segment-master')}>
+                <Eye />
+                View Data
+              </Button>
               <Button size="sm" variant="outline" onClick={downloadSegmentMasterTemplate}>
                 <Download />
                 Download Template
@@ -2720,6 +2772,10 @@ export default function Admin() {
               Body Article Data (Bulk Update)
             </CardTitle>
             <div className="flex gap-2">
+              <Button size="sm" variant="outline" onClick={() => navigate('/admin/expense/body-article-data')}>
+                <Eye />
+                View Data
+              </Button>
               <Button size="sm" variant="outline" onClick={downloadBodyArticleDataTemplate}>
                 <Download />
                 Download Template

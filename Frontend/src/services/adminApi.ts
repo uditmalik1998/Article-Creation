@@ -8,48 +8,50 @@ import { clearAuthSession, redirectToLoginOnce } from '../shared/utils/auth/navi
 
 const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || (import.meta.env.DEV ? 'http://localhost:5001/api' : '/api');
 
-const adminApi = axios.create({
-  baseURL: `${API_BASE_URL}/admin`,
-  headers: {
-    'Content-Type': 'application/json',
-  },
-});
+/** Builds an axios instance under `${API_BASE_URL}${basePath}` with the same
+ * auth-token injection and 401/403 handling every backend API client here needs. */
+function createApiClient(basePath: string) {
+  const client = axios.create({
+    baseURL: `${API_BASE_URL}${basePath}`,
+    headers: {
+      'Content-Type': 'application/json',
+    },
+  });
 
-// ═══════════════════════════════════════════════════════
-// REQUEST INTERCEPTOR - Add Auth Token
-// ═══════════════════════════════════════════════════════
-adminApi.interceptors.request.use(
-  (config) => {
-    const token = localStorage.getItem('authToken');
-    if (token) {
-      config.headers.Authorization = `Bearer ${token}`;
-    }
-    return config;
-  },
-  (error) => {
-    return Promise.reject(error);
-  }
-);
+  client.interceptors.request.use(
+    (config) => {
+      const token = localStorage.getItem('authToken');
+      if (token) {
+        config.headers.Authorization = `Bearer ${token}`;
+      }
+      return config;
+    },
+    (error) => Promise.reject(error)
+  );
 
-// ═══════════════════════════════════════════════════════
-// RESPONSE INTERCEPTOR - Handle Auth Errors
-// ═══════════════════════════════════════════════════════
-adminApi.interceptors.response.use(
-  (response) => response,
-  (error) => {
-    if (error.response?.status === 401) {
-      // Token expired or invalid - clear and redirect to login
-      console.warn('🔐 Authentication failed - redirecting to login');
-      clearAuthSession();
-      redirectToLoginOnce();
-    } else if (error.response?.status === 403) {
-      // Forbidden - insufficient permissions
-      console.error('🚫 Access denied - insufficient permissions');
-      // You can show a toast/notification here
+  client.interceptors.response.use(
+    (response) => response,
+    (error) => {
+      if (error.response?.status === 401) {
+        console.warn('🔐 Authentication failed - redirecting to login');
+        clearAuthSession();
+        redirectToLoginOnce();
+      } else if (error.response?.status === 403) {
+        console.error('🚫 Access denied - insufficient permissions');
+      }
+      return Promise.reject(error);
     }
-    return Promise.reject(error);
-  }
-);
+  );
+
+  return client;
+}
+
+const adminApi = createApiClient('/admin');
+
+// Expense Data change-request workflow lives outside the ADMIN-only /admin mount
+// so Creator/Approver/Category-Head/PD can reach it too (each route still checks
+// the caller's specific role server-side).
+const expenseApi = createApiClient('/expense');
 
 // ═══════════════════════════════════════════════════════
 // TYPES
@@ -608,6 +610,156 @@ export async function getModifyLogs(params: ModifyLogsParams = {}): Promise<Modi
 export async function getModifyLogsByGroup(groupId: string): Promise<{ data: ModifyLog[] }> {
   const res = await adminApi.get<{ data: ModifyLog[] }>(`/modify-logs/group/${encodeURIComponent(groupId)}`);
   return res.data;
+}
+
+// ═══════════════════════════════════════════════════════
+// EXPENSE TABLE DETAIL VIEWS (Phase 1 — generic read-only browse)
+// ═══════════════════════════════════════════════════════
+
+export interface ExpenseTableParams {
+  page?: number;
+  limit?: number;
+  search?: string;
+  sortBy?: string;
+  sortDir?: 'asc' | 'desc';
+}
+
+export interface ExpenseTableResponse<T = Record<string, any>> {
+  data: T[];
+  total: number;
+  page: number;
+  limit: number;
+  totalPages: number;
+}
+
+export async function getExpenseTableData(
+  tableKey: string,
+  params: ExpenseTableParams = {},
+): Promise<ExpenseTableResponse> {
+  const query = new URLSearchParams();
+  Object.entries(params).forEach(([k, v]) => {
+    if (v !== undefined && v !== null && v !== '') query.set(k, String(v));
+  });
+  const res = await expenseApi.get<ExpenseTableResponse>(
+    `/table/${encodeURIComponent(tableKey)}?${query.toString()}`,
+  );
+  return res.data;
+}
+
+// ═══════════════════════════════════════════════════════
+// EXPENSE CHANGE REQUESTS (3-stage approval workflow)
+// ═══════════════════════════════════════════════════════
+
+export type ExpenseChangeStatus = 'PENDING_APPROVER' | 'PENDING_FINAL' | 'APPROVED' | 'REJECTED';
+
+export interface ExpenseChangeFieldDiff {
+  old: any;
+  new: any;
+}
+
+export interface ExpenseChangeRequest {
+  id: string;
+  tableKey: string;
+  rowId: string;
+  rowLabel: string | null;
+  changes: Record<string, ExpenseChangeFieldDiff>;
+  reason: string;
+  status: ExpenseChangeStatus;
+
+  requestedById: number;
+  requestedByName: string;
+  requestedByEmail: string;
+  requestedAt: string;
+
+  approverId: number | null;
+  approverName: string | null;
+  approverEmail: string | null;
+  approverAt: string | null;
+  approverComment: string | null;
+  approverAction: string | null;
+
+  finalById: number | null;
+  finalByName: string | null;
+  finalByEmail: string | null;
+  finalAt: string | null;
+  finalComment: string | null;
+  finalAction: string | null;
+
+  createdAt: string;
+  updatedAt: string;
+}
+
+export interface ExpenseChangeRequestsParams {
+  page?: number;
+  limit?: number;
+  search?: string;
+  sortBy?: string;
+  sortDir?: 'asc' | 'desc';
+  tableKey?: string;
+  status?: ExpenseChangeStatus;
+  mine?: boolean;
+}
+
+export interface ExpenseChangeRequestsResponse {
+  data: ExpenseChangeRequest[];
+  total: number;
+  page: number;
+  limit: number;
+  totalPages: number;
+}
+
+export async function createExpenseChangeRequest(
+  tableKey: string,
+  rowId: string,
+  payload: { changes: Record<string, any>; reason: string },
+): Promise<ExpenseChangeRequest> {
+  const res = await expenseApi.post<{ success: boolean; data: ExpenseChangeRequest }>(
+    `/table/${encodeURIComponent(tableKey)}/${encodeURIComponent(rowId)}/change-requests`,
+    payload,
+  );
+  return res.data.data;
+}
+
+export async function getExpenseChangeRequests(
+  params: ExpenseChangeRequestsParams = {},
+): Promise<ExpenseChangeRequestsResponse> {
+  const query = new URLSearchParams();
+  Object.entries(params).forEach(([k, v]) => {
+    if (v !== undefined && v !== null && v !== '') query.set(k, String(v));
+  });
+  const res = await expenseApi.get<ExpenseChangeRequestsResponse>(`/change-requests?${query.toString()}`);
+  return res.data;
+}
+
+export async function getExpenseChangeRequestById(id: string): Promise<ExpenseChangeRequest> {
+  const res = await expenseApi.get<{ success: boolean; data: ExpenseChangeRequest }>(
+    `/change-requests/${encodeURIComponent(id)}`,
+  );
+  return res.data.data;
+}
+
+export async function reviewExpenseChangeRequest(
+  id: string,
+  action: 'APPROVE' | 'REJECT',
+  comment?: string,
+): Promise<ExpenseChangeRequest> {
+  const res = await expenseApi.post<{ success: boolean; data: ExpenseChangeRequest }>(
+    `/change-requests/${encodeURIComponent(id)}/review`,
+    { action, comment },
+  );
+  return res.data.data;
+}
+
+export async function finalizeExpenseChangeRequest(
+  id: string,
+  action: 'APPROVE' | 'REJECT',
+  comment?: string,
+): Promise<ExpenseChangeRequest> {
+  const res = await expenseApi.post<{ success: boolean; data: ExpenseChangeRequest }>(
+    `/change-requests/${encodeURIComponent(id)}/finalize`,
+    { action, comment },
+  );
+  return res.data.data;
 }
 
 // ═══════════════════════════════════════════════════════

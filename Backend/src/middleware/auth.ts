@@ -447,6 +447,31 @@ export const requirePd = (
 };
 
 /**
+ * Require one of a specific set of roles (ADMIN is NOT auto-included — pass it
+ * explicitly if it should be allowed). Must be used after authenticate middleware.
+ */
+export const requireRole = (...roles: string[]) => {
+  return (req: Request, res: Response, next: NextFunction): void => {
+    if (!req.user) {
+      res.status(401).json({ success: false, error: 'Authentication required.', code: 'NOT_AUTHENTICATED' });
+      return;
+    }
+    const role = String(req.user.role || '');
+    if (!roles.includes(role)) {
+      res.status(403).json({
+        success: false,
+        error: 'You do not have permission to access this resource.',
+        code: 'INSUFFICIENT_PERMISSIONS',
+        requiredRoles: roles,
+        userRole: role,
+      });
+      return;
+    }
+    next();
+  };
+};
+
+/**
  * Optional authentication - attach user if token present, but don't fail
  * Useful for endpoints that have different behavior for authenticated users
  */

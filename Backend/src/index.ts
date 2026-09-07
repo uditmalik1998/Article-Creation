@@ -13,6 +13,7 @@ import compression from 'compression';
 import extractionRoutes from './routes/extraction';
 import vlmExtractionRoutes from './routes/vlmExtraction';
 import adminRoutes from './routes/admin';
+import expenseRoutes from './routes/expense';
 import authRoutes from './routes/auth';
 import userExtractionRoutes from './routes/userExtraction';
 import simplifiedExtractionRoutes from './routes/simplifiedExtraction'; // NEW: Simplified workflow
@@ -27,6 +28,7 @@ import modelGenerationRoutes from './routes/modelGeneration';
 import { errorHandler, notFound, requestTimeout } from './middleware/errorHandler';
 import { authenticate, requireAdmin, requireUser } from './middleware/auth';
 import { authenticateWatcher } from './middleware/watcherAuth';
+import { authenticateModelGeneration } from './middleware/modelGenerationAuth';
 import { auditLog, flushAuditLogsOnShutdown } from './middleware/auditLogger';
 
 // Services
@@ -253,6 +255,11 @@ app.use('/api/srm-hook', srmHookRoutes);
 app.use('/api/admin', authenticate, requireAdmin, auditLog, adminRoutes);
 
 // ═══════════════════════════════════════════════════════
+// EXPENSE DATA ROUTES (Creator/Approver/Category-Head/PD/Admin — per-route role checks)
+// ═══════════════════════════════════════════════════════
+app.use('/api/expense', authenticate, auditLog, expenseRoutes);
+
+// ═══════════════════════════════════════════════════════
 // TEST API ROUTES (Admin role required)
 // Raw-articles pipeline staging endpoints.
 // ═══════════════════════════════════════════════════════
@@ -311,7 +318,7 @@ app.use('/api/approver', authenticate, approverLimiter, auditLog, approverRoutes
 // ═══════════════════════════════════════════════════════
 app.use('/api/watcher', authenticateWatcher, watcherRoutes); // TODO: Add requireApprover middleware
 app.use('/api/article-config', authenticate, articleConfigRoutes);
-app.use('/api/model-generation', authenticate, requireUser, modelGenerationRoutes);
+app.use('/api/model-generation', authenticateModelGeneration, modelGenerationRoutes);
 
 // Health check endpoint (public)
 app.get('/api/health', (req, res) => {

@@ -981,6 +981,7 @@ exports.Prisma.BodyArticleDataScalarFieldEnum = {
   updatedAt: 'updatedAt'
 };
 
+<<<<<<< HEAD
 exports.Prisma.MajorCategoryDetailsScalarFieldEnum = {
   id: 'id',
   seg: 'seg',
@@ -992,6 +993,34 @@ exports.Prisma.MajorCategoryDetailsScalarFieldEnum = {
   hsnCode: 'hsnCode',
   mcStatus: 'mcStatus',
   createdAt: 'createdAt'
+=======
+exports.Prisma.ExpenseChangeRequestScalarFieldEnum = {
+  id: 'id',
+  tableKey: 'tableKey',
+  rowId: 'rowId',
+  rowLabel: 'rowLabel',
+  changes: 'changes',
+  reason: 'reason',
+  status: 'status',
+  requestedById: 'requestedById',
+  requestedByName: 'requestedByName',
+  requestedByEmail: 'requestedByEmail',
+  requestedAt: 'requestedAt',
+  approverId: 'approverId',
+  approverName: 'approverName',
+  approverEmail: 'approverEmail',
+  approverAt: 'approverAt',
+  approverComment: 'approverComment',
+  approverAction: 'approverAction',
+  finalById: 'finalById',
+  finalByName: 'finalByName',
+  finalByEmail: 'finalByEmail',
+  finalAt: 'finalAt',
+  finalComment: 'finalComment',
+  finalAction: 'finalAction',
+  createdAt: 'createdAt',
+  updatedAt: 'updatedAt'
+>>>>>>> 0d1159d12e0df55bfd3763cd59be6ab70e1b50b5
 };
 
 exports.Prisma.SortOrder = {
@@ -1622,6 +1651,7 @@ exports.Prisma.BodyArticleDataOrderByRelevanceFieldEnum = {
   userName: 'userName'
 };
 
+<<<<<<< HEAD
 exports.Prisma.MajorCategoryDetailsOrderByRelevanceFieldEnum = {
   seg: 'seg',
   div: 'div',
@@ -1631,6 +1661,24 @@ exports.Prisma.MajorCategoryDetailsOrderByRelevanceFieldEnum = {
   mcDes: 'mcDes',
   hsnCode: 'hsnCode',
   mcStatus: 'mcStatus'
+=======
+exports.Prisma.ExpenseChangeRequestOrderByRelevanceFieldEnum = {
+  id: 'id',
+  tableKey: 'tableKey',
+  rowId: 'rowId',
+  rowLabel: 'rowLabel',
+  reason: 'reason',
+  requestedByName: 'requestedByName',
+  requestedByEmail: 'requestedByEmail',
+  approverName: 'approverName',
+  approverEmail: 'approverEmail',
+  approverComment: 'approverComment',
+  approverAction: 'approverAction',
+  finalByName: 'finalByName',
+  finalByEmail: 'finalByEmail',
+  finalComment: 'finalComment',
+  finalAction: 'finalAction'
+>>>>>>> 0d1159d12e0df55bfd3763cd59be6ab70e1b50b5
 };
 exports.GarmentType = exports.$Enums.GarmentType = {
   UPPER: 'UPPER',
@@ -1712,6 +1760,13 @@ exports.PoolBBatchStatus = exports.$Enums.PoolBBatchStatus = {
   FAILED: 'FAILED'
 };
 
+exports.ExpenseChangeStatus = exports.$Enums.ExpenseChangeStatus = {
+  PENDING_APPROVER: 'PENDING_APPROVER',
+  PENDING_FINAL: 'PENDING_FINAL',
+  APPROVED: 'APPROVED',
+  REJECTED: 'REJECTED'
+};
+
 exports.Prisma.ModelName = {
   Department: 'Department',
   SubDepartment: 'SubDepartment',
@@ -1753,7 +1808,11 @@ exports.Prisma.ModelName = {
   ModifyLog: 'ModifyLog',
   FabricArticleData: 'FabricArticleData',
   BodyArticleData: 'BodyArticleData',
+<<<<<<< HEAD
   MajorCategoryDetails: 'MajorCategoryDetails'
+=======
+  ExpenseChangeRequest: 'ExpenseChangeRequest'
+>>>>>>> 0d1159d12e0df55bfd3763cd59be6ab70e1b50b5
 };
 
 /**
