@@ -166,6 +166,7 @@ router.post('/mandatory-grid/upload', excelUpload.single('file'), h(adminControl
 // ═══════════════════════════════════════════════════════
 router.get('/size-master/status', h(adminController.getSizeMasterStatus));
 router.get('/size-master/template', h(adminController.downloadSizeMasterTemplate));
+router.get('/size-master/download', h(adminController.downloadSizeMasterData));
 router.post('/size-master/upload', excelUpload.single('file'), h(adminController.uploadSizeMaster));
 
 // ═══════════════════════════════════════════════════════
@@ -173,6 +174,7 @@ router.post('/size-master/upload', excelUpload.single('file'), h(adminController
 // ═══════════════════════════════════════════════════════
 router.get('/color-master/status', h(adminController.getColorMasterStatus));
 router.get('/color-master/template', h(adminController.downloadColorMasterTemplate));
+router.get('/color-master/download', h(adminController.downloadColorMasterData));
 router.post('/color-master/upload', excelUpload.single('file'), h(adminController.uploadColorMaster));
 
 // ═══════════════════════════════════════════════════════
