@@ -647,43 +647,63 @@ export async function getExpenseTableData(
 }
 
 // ═══════════════════════════════════════════════════════
-// EXPENSE CHANGE REQUESTS (3-stage approval workflow)
+// EXPENSE CHANGE REQUESTS (N-stage approval chain — see EXPENSE ACCESS
+// CONTROL below for the chain definition itself)
 // ═══════════════════════════════════════════════════════
 
-export type ExpenseChangeStatus = 'PENDING_APPROVER' | 'PENDING_FINAL' | 'APPROVED' | 'REJECTED';
+/** PENDING covers every mid-chain state — which stage exactly is
+ * `currentStageKey`, since the chain's length is admin-configurable. */
+export type ExpenseChangeStatus = 'PENDING' | 'APPROVED' | 'REJECTED';
 
 export interface ExpenseChangeFieldDiff {
   old: any;
   new: any;
 }
 
+export type ExpenseChangeOperation = 'UPDATE' | 'CREATE' | 'DELETE';
+
+/** One entry of a request's `approvalTrail` — one per stage action taken.
+ * `stageKey` is `"SYSTEM"` for the one case a human didn't act: an
+ * automatic rejection when the row drifted between submission and the
+ * chain's last approval. */
+export interface ExpenseApprovalTrailEntry {
+  stageKey: string;
+  stageLabel: string;
+  action: 'APPROVE' | 'REJECT';
+  byId: number;
+  byName: string;
+  byEmail: string;
+  at: string;
+  comment: string | null;
+  /** Field(s) this stage's approver adjusted before passing the request on —
+   * present only when they actually changed something. */
+  editedFields?: string[];
+}
+
 export interface ExpenseChangeRequest {
   id: string;
   tableKey: string;
-  rowId: string;
+  operation: ExpenseChangeOperation;
+  /** Null on CREATE requests — there is no row until the chain finishes. */
+  rowId: string | null;
+  /** The id the insert was given, once an approved CREATE has been applied. */
+  appliedRowId: string | null;
   rowLabel: string | null;
   changes: Record<string, ExpenseChangeFieldDiff>;
   reason: string;
+  /** The date the requester needs this done by. */
+  dueDate: string | null;
   status: ExpenseChangeStatus;
+  /** The approval-stage key this request is currently waiting on; null once
+   * status is APPROVED or REJECTED. */
+  currentStageKey: string | null;
+  /** Every stage action taken so far, in order. */
+  approvalTrail: ExpenseApprovalTrailEntry[];
 
   requestedById: number;
   requestedByName: string;
   requestedByEmail: string;
   requestedAt: string;
-
-  approverId: number | null;
-  approverName: string | null;
-  approverEmail: string | null;
-  approverAt: string | null;
-  approverComment: string | null;
-  approverAction: string | null;
-
-  finalById: number | null;
-  finalByName: string | null;
-  finalByEmail: string | null;
-  finalAt: string | null;
-  finalComment: string | null;
-  finalAction: string | null;
 
   createdAt: string;
   updatedAt: string;
@@ -697,7 +717,15 @@ export interface ExpenseChangeRequestsParams {
   sortDir?: 'asc' | 'desc';
   tableKey?: string;
   status?: ExpenseChangeStatus;
+  operation?: ExpenseChangeOperation;
+  /** Only requests currently waiting on this exact stage key. */
+  stageKey?: string;
   mine?: boolean;
+  /** Requests currently sitting at any stage the caller may act on — the
+   * dynamic replacement for a fixed "pending my review" filter per stage. */
+  mineToApprove?: boolean;
+  /** Only still-open requests whose "needed by" date has already passed. */
+  overdue?: boolean;
 }
 
 export interface ExpenseChangeRequestsResponse {
@@ -708,13 +736,46 @@ export interface ExpenseChangeRequestsResponse {
   totalPages: number;
 }
 
+/** Every request carries the reason AND the date the requester needs it done by. */
+export interface ExpenseRequestMeta {
+  reason: string;
+  /** YYYY-MM-DD. */
+  dueDate: string;
+}
+
+/** Propose edits to an existing row. */
 export async function createExpenseChangeRequest(
   tableKey: string,
   rowId: string,
-  payload: { changes: Record<string, any>; reason: string },
+  payload: ExpenseRequestMeta & { changes: Record<string, any> },
 ): Promise<ExpenseChangeRequest> {
   const res = await expenseApi.post<{ success: boolean; data: ExpenseChangeRequest }>(
     `/table/${encodeURIComponent(tableKey)}/${encodeURIComponent(rowId)}/change-requests`,
+    payload,
+  );
+  return res.data.data;
+}
+
+/** Propose a brand-new row. */
+export async function createExpenseAddRequest(
+  tableKey: string,
+  payload: ExpenseRequestMeta & { values: Record<string, any> },
+): Promise<ExpenseChangeRequest> {
+  const res = await expenseApi.post<{ success: boolean; data: ExpenseChangeRequest }>(
+    `/table/${encodeURIComponent(tableKey)}/add-requests`,
+    payload,
+  );
+  return res.data.data;
+}
+
+/** Propose deleting an existing row. */
+export async function createExpenseDeleteRequest(
+  tableKey: string,
+  rowId: string,
+  payload: ExpenseRequestMeta,
+): Promise<ExpenseChangeRequest> {
+  const res = await expenseApi.post<{ success: boolean; data: ExpenseChangeRequest }>(
+    `/table/${encodeURIComponent(tableKey)}/${encodeURIComponent(rowId)}/delete-requests`,
     payload,
   );
   return res.data.data;
@@ -738,26 +799,262 @@ export async function getExpenseChangeRequestById(id: string): Promise<ExpenseCh
   return res.data.data;
 }
 
-export async function reviewExpenseChangeRequest(
+/** Acts at whichever stage the request currently sits at (`currentStageKey`).
+ * One endpoint for the whole chain — with an admin-editable number of
+ * stages there's no fixed "stage 2 is final" to hang a separate call off;
+ * the server resolves what stage this is and whether it's the last one.
+ *
+ * `changes` lets the approver adjust the proposed values before passing the
+ * request on — field -> new value, a subset of the request's own proposed
+ * fields. Only meaningful with action APPROVE on an UPDATE/CREATE request;
+ * ignored on REJECT, and rejected by the server on a DELETE request (there
+ * is nothing to edit — only a row to remove). */
+export async function actOnExpenseChangeRequest(
   id: string,
   action: 'APPROVE' | 'REJECT',
   comment?: string,
+  changes?: Record<string, any>,
 ): Promise<ExpenseChangeRequest> {
   const res = await expenseApi.post<{ success: boolean; data: ExpenseChangeRequest }>(
-    `/change-requests/${encodeURIComponent(id)}/review`,
-    { action, comment },
+    `/change-requests/${encodeURIComponent(id)}/act`,
+    { action, comment, changes },
   );
   return res.data.data;
 }
 
-export async function finalizeExpenseChangeRequest(
-  id: string,
-  action: 'APPROVE' | 'REJECT',
-  comment?: string,
-): Promise<ExpenseChangeRequest> {
-  const res = await expenseApi.post<{ success: boolean; data: ExpenseChangeRequest }>(
-    `/change-requests/${encodeURIComponent(id)}/finalize`,
-    { action, comment },
+// ═══════════════════════════════════════════════════════
+// EXPENSE ACCESS CONTROL (per-email grants, ADMIN-managed) + the approval
+// CHAIN those grants reference
+// ═══════════════════════════════════════════════════════
+
+/** The fixed requester role — not an approval stage. Every other `level`
+ * value is an ExpenseApprovalStage.key, so the number of possible levels
+ * grows as admins add stages; there is no fixed union to enumerate. */
+export const REQUESTER_LEVEL = 'SUB_DIVISION';
+
+/** Sentinel tableKey meaning "every expense table". */
+export const ALL_EXPENSE_TABLES = '*';
+
+/** One rung of the Expense Data approval chain, e.g. "Category Head" then
+ * "MDM" — admin-managed on /admin/expense-access. Adding a row here (via
+ * createExpenseApprovalStage) lengthens the chain for every table; no code
+ * change needed. `sortOrder` is the walk order; a request starts at the
+ * lowest-sortOrder active stage and approving the highest-sortOrder active
+ * one applies the change. */
+export interface ExpenseApprovalStage {
+  id: number;
+  key: string;
+  label: string;
+  description: string | null;
+  sortOrder: number;
+  /** A retired stage can no longer be granted or reached by a new request,
+   * but is kept (not deleted) so past requests' trails still resolve its
+   * label. */
+  isActive: boolean;
+  createdById: number | null;
+  createdByName: string | null;
+  createdAt: string;
+  updatedAt: string;
+}
+
+export interface ExpenseApprovalStageInput {
+  key?: string;
+  label: string;
+  description?: string | null;
+  /** Insert immediately after the active stage with this key; omit/null to
+   * insert at the very start of the chain. Only read on create. */
+  afterKey?: string | null;
+  isActive?: boolean;
+}
+
+export interface ExpenseAccessGrant {
+  id: number;
+  email: string;
+  /** REQUESTER_LEVEL, or an ExpenseApprovalStage.key. */
+  level: string;
+  /** One EXPENSE_TABLE_CONFIGS key, or '*' for every table. */
+  tableKey: string;
+  subDivision: string | null;
+  canCreate: boolean;
+  canUpdate: boolean;
+  canDelete: boolean;
+  isActive: boolean;
+  note: string | null;
+  grantedById: number | null;
+  grantedByName: string | null;
+  createdAt: string;
+  updatedAt: string;
+}
+
+export interface ExpenseAccessGrantInput {
+  email: string;
+  level: string;
+  tableKey?: string;
+  subDivision?: string | null;
+  canCreate?: boolean;
+  canUpdate?: boolean;
+  canDelete?: boolean;
+  isActive?: boolean;
+  note?: string | null;
+}
+
+/** What the CALLER may do — drives which buttons the Expense pages render.
+ * The server re-checks every action, so this is presentation only. */
+export interface MyExpenseAccess {
+  isAdmin: boolean;
+  canView: boolean;
+  canCreate: boolean;
+  canUpdate: boolean;
+  canDelete: boolean;
+  /** Stage keys the caller may approve, for the table asked about. */
+  approvableStageKeys: string[];
+  levels: string[];
+  subDivisions: string[];
+}
+
+export async function getMyExpenseAccess(tableKey?: string): Promise<MyExpenseAccess> {
+  const query = tableKey ? `?tableKey=${encodeURIComponent(tableKey)}` : '';
+  const res = await expenseApi.get<{ success: boolean; data: MyExpenseAccess }>(`/my-access${query}`);
+  return res.data.data;
+}
+
+export async function getExpenseAccessGrants(params: {
+  email?: string;
+  level?: string;
+  tableKey?: string;
+  includeInactive?: boolean;
+} = {}): Promise<ExpenseAccessGrant[]> {
+  const query = new URLSearchParams();
+  Object.entries(params).forEach(([k, v]) => {
+    if (v !== undefined && v !== null && v !== '') query.set(k, String(v));
+  });
+  const res = await adminApi.get<{ success: boolean; data: ExpenseAccessGrant[] }>(
+    `/expense-access?${query.toString()}`,
+  );
+  return res.data.data;
+}
+
+export async function createExpenseAccessGrant(payload: ExpenseAccessGrantInput): Promise<ExpenseAccessGrant> {
+  const res = await adminApi.post<{ success: boolean; data: ExpenseAccessGrant }>('/expense-access', payload);
+  return res.data.data;
+}
+
+export async function updateExpenseAccessGrant(
+  id: number,
+  payload: Partial<ExpenseAccessGrantInput>,
+): Promise<ExpenseAccessGrant> {
+  const res = await adminApi.put<{ success: boolean; data: ExpenseAccessGrant }>(`/expense-access/${id}`, payload);
+  return res.data.data;
+}
+
+export async function deleteExpenseAccessGrant(id: number): Promise<void> {
+  await adminApi.delete(`/expense-access/${id}`);
+}
+
+/** The full chain, active and retired, in walk order. */
+export async function getExpenseApprovalStages(): Promise<ExpenseApprovalStage[]> {
+  const res = await adminApi.get<{ success: boolean; data: ExpenseApprovalStage[] }>('/expense-approval-stages');
+  return res.data.data;
+}
+
+/** Adds a new stage to the chain — the extensibility point: e.g. inserting
+ * "Regional Head" between "Category Head" and "MDM" lengthens every table's
+ * chain from 2 stages to 3 with no further setup. */
+export async function createExpenseApprovalStage(
+  payload: ExpenseApprovalStageInput,
+): Promise<ExpenseApprovalStage> {
+  const res = await adminApi.post<{ success: boolean; data: ExpenseApprovalStage }>(
+    '/expense-approval-stages',
+    payload,
+  );
+  return res.data.data;
+}
+
+export async function updateExpenseApprovalStage(
+  id: number,
+  payload: { label?: string; description?: string | null; isActive?: boolean },
+): Promise<ExpenseApprovalStage> {
+  const res = await adminApi.put<{ success: boolean; data: ExpenseApprovalStage }>(
+    `/expense-approval-stages/${id}`,
+    payload,
+  );
+  return res.data.data;
+}
+
+/** Reorders the active chain to match `orderedIds` (every active stage's id,
+ * each exactly once). */
+export async function reorderExpenseApprovalStages(orderedIds: number[]): Promise<ExpenseApprovalStage[]> {
+  const res = await adminApi.post<{ success: boolean; data: ExpenseApprovalStage[] }>(
+    '/expense-approval-stages/reorder',
+    { orderedIds },
+  );
+  return res.data.data;
+}
+
+export async function deleteExpenseApprovalStage(id: number): Promise<void> {
+  await adminApi.delete(`/expense-approval-stages/${id}`);
+}
+
+// ═══════════════════════════════════════════════════════
+// EXPENSE AUDIT LOG (admin-only) — the durable record of every step: raised,
+// each stage's action, and every real write to a master table (or failed
+// attempt). See Backend/src/services/expenseAuditLogService.ts.
+// ═══════════════════════════════════════════════════════
+
+export type ExpenseAuditEventType = 'REQUESTED' | 'STAGE_APPROVED' | 'STAGE_REJECTED' | 'APPLIED' | 'APPLY_FAILED' | 'AUTO_REJECTED';
+
+export interface ExpenseAuditLogEntry {
+  id: number;
+  requestId: string;
+  tableKey: string;
+  rowId: string | null;
+  operation: ExpenseChangeOperation;
+  eventType: ExpenseAuditEventType;
+  stageKey: string | null;
+  stageLabel: string | null;
+  actorId: number | null;
+  actorName: string | null;
+  actorEmail: string | null;
+  comment: string | null;
+  details: Record<string, any> | null;
+  occurredAt: string;
+}
+
+export interface ExpenseAuditLogParams {
+  requestId?: string;
+  tableKey?: string;
+  rowId?: string;
+  eventType?: ExpenseAuditEventType;
+  operation?: ExpenseChangeOperation;
+  actorEmail?: string;
+  dateFrom?: string;
+  dateTo?: string;
+  search?: string;
+  page?: number;
+  limit?: number;
+}
+
+export interface ExpenseAuditLogResponse {
+  data: ExpenseAuditLogEntry[];
+  total: number;
+  page: number;
+  limit: number;
+  totalPages: number;
+}
+
+export async function getExpenseAuditLog(params: ExpenseAuditLogParams = {}): Promise<ExpenseAuditLogResponse> {
+  const query = new URLSearchParams();
+  Object.entries(params).forEach(([k, v]) => {
+    if (v !== undefined && v !== null && v !== '') query.set(k, String(v));
+  });
+  const res = await adminApi.get<ExpenseAuditLogResponse>(`/expense-audit-log?${query.toString()}`);
+  return res.data;
+}
+
+/** Every audit-log entry for one request, oldest first. */
+export async function getExpenseAuditLogForRequest(requestId: string): Promise<ExpenseAuditLogEntry[]> {
+  const res = await adminApi.get<{ success: boolean; data: ExpenseAuditLogEntry[] }>(
+    `/expense-audit-log/${encodeURIComponent(requestId)}`,
   );
   return res.data.data;
 }
