@@ -19,6 +19,7 @@ type CachedAuthUser = {
   role: UserRole;
   division: string | null;
   subDivision: string | null;
+  businessDivision: string | null;
   isActive: boolean;
   lastLogin: Date | null;
 };
@@ -62,6 +63,7 @@ async function fetchAuthUserById(userId: number): Promise<CachedAuthUser | null>
         role: true,
         division: true,
         subDivision: true,
+        businessDivision: true,
         isActive: true,
         lastLogin: true,
       },
@@ -125,6 +127,7 @@ declare global {
         name: string;
         division?: string | null;
         subDivision?: string | null;
+        businessDivision?: string | null;
       };
     }
   }
@@ -227,6 +230,7 @@ export const authenticate = async (
       role: user.role,
       division: user.division,
       subDivision: user.subDivision,
+      businessDivision: user.businessDivision,
     };
 
     next();
@@ -507,6 +511,7 @@ export const optionalAuth = async (
           role: user.role,
           division: user.division,
           subDivision: user.subDivision,
+          businessDivision: user.businessDivision,
         };
       }
     } catch (jwtError) {

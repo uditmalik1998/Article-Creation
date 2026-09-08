@@ -35,6 +35,7 @@ import {
   getExpenseApprovalStages,
   getExpenseChangeRequests,
   getMyExpenseAccess,
+  type AdminUserBusinessDivision,
   type ExpenseApprovalStage,
   type ExpenseChangeOperation,
   type ExpenseChangeRequest,
@@ -82,6 +83,18 @@ function OperationBadge({ operation }: { operation: ExpenseChangeOperation }) {
   return <Badge className={meta.className}>{meta.label}</Badge>;
 }
 
+const BUSINESS_DIVISION_LABELS: Record<AdminUserBusinessDivision, string> = {
+  MENS: 'Mens', KIDS: 'Kids', LADIES: 'Ladies', PO: 'PO', MDM: 'MDM',
+};
+
+/** Which Category Head this request is routed to — the whole point of the
+ * business-division segregation. Absent for requesters with no division set
+ * (their request has no automatic Category Head match, see the backend). */
+function BusinessDivisionBadge({ division }: { division: AdminUserBusinessDivision | null }) {
+  if (!division) return <span className="text-muted-foreground italic text-xs">No division</span>;
+  return <Badge className="bg-indigo-100 text-indigo-700 border-indigo-200">{BUSINESS_DIVISION_LABELS[division]}</Badge>;
+}
+
 /** The requester's deadline, flagged red once it has passed on a still-open request. */
 function DueDate({ request, className }: { request: ExpenseChangeRequest; className?: string }) {
   if (!request.dueDate) return <span className="text-muted-foreground italic text-xs">—</span>;
@@ -122,11 +135,18 @@ function DetailDialog({ request, stages, onClose, onActed }: DetailDialogProps) 
   const config = request ? EXPENSE_TABLE_CONFIGS[request.tableKey] : undefined;
   const columnMeta = (field: string) => config?.columns.find((c) => c.dataIndex === field);
 
+  // `approvableStageKeys` is coarse (a Category Head shows 'CATEGORY_HEAD'
+  // regardless of division) — for that stage specifically, also require this
+  // user's own Business Division to match the REQUESTER's, mirroring the
+  // server's real gate (canActOnExpenseRequestStage). The server enforces
+  // this regardless; this just keeps the button from being shown when it
+  // would just 403.
   const canAct =
     !!request &&
     request.status === 'PENDING' &&
     !!request.currentStageKey &&
-    !!access?.approvableStageKeys.includes(request.currentStageKey);
+    !!access?.approvableStageKeys.includes(request.currentStageKey) &&
+    (request.currentStageKey !== 'CATEGORY_HEAD' || access?.businessDivision === request.requesterBusinessDivision);
   // A deletion has nothing to edit — only a row to remove.
   const canEditValues = canAct && request?.operation !== 'DELETE';
 
@@ -197,6 +217,7 @@ function DetailDialog({ request, stages, onClose, onActed }: DetailDialogProps) 
           <div className="flex flex-wrap items-center gap-2">
             <OperationBadge operation={request.operation} />
             <StatusBadge request={request} stages={stages} />
+            <BusinessDivisionBadge division={request.requesterBusinessDivision} />
             {request.dueDate && (
               <span className="text-xs text-muted-foreground">
                 Needed by <DueDate request={request} />
@@ -331,20 +352,34 @@ export default function ExpenseChangeRequestsPage() {
     staleTime: 60_000,
   });
 
-  // Someone who only ever raises requests (no approval-stage grant on any
-  // table, and not ADMIN) never sees anyone else's — the server enforces
-  // this independently, this just keeps a tab literally labelled "All
-  // Requests" from being shown to someone it wouldn't actually show all of.
-  const canSeeEveryonesRequests = !!access?.isAdmin || (access?.approvableStageKeys.length ?? 0) > 0;
+  // Three visibility tiers, matching the server exactly (getExpenseChangeRequests):
+  //   1. ADMIN, or anyone tagged Business Division MDM — sees everything,
+  //      unrestricted (MDM is the division-agnostic convergence point).
+  //   2. A Category Head with a division set — sees only THEIR OWN
+  //      division's requests, never another's ("segregated to their
+  //      Category Head"). Same 'all' tab, just automatically narrower — the
+  //      server does the actual filtering, this only adjusts the tab label
+  //      and keeps it from being hidden.
+  //   3. Everyone else — sees only requests they themselves raised, so
+  //      there is no "all" tab at all for them.
+  const canSeeEveryonesRequests = !!access?.isAdmin || access?.businessDivision === 'MDM';
+  const canSeeOwnDivisionRequests =
+    !canSeeEveryonesRequests && !!access?.businessDivision && access.approvableStageKeys.includes('CATEGORY_HEAD');
+  const canSeeBroaderThanOwnRequests = canSeeEveryonesRequests || canSeeOwnDivisionRequests;
 
   const availableTabs = useMemo(() => {
     const tabs: { key: TabKey; label: string }[] = [];
     if ((access?.approvableStageKeys.length ?? 0) > 0) tabs.push({ key: 'pending-mine', label: 'Pending My Action' });
     if (access?.canCreate || access?.canUpdate || access?.canDelete) tabs.push({ key: 'mine', label: 'My Requests' });
     tabs.push({ key: 'overdue', label: 'Overdue' });
-    if (canSeeEveryonesRequests) tabs.push({ key: 'all', label: 'All Requests' });
+    if (canSeeBroaderThanOwnRequests) {
+      tabs.push({
+        key: 'all',
+        label: canSeeEveryonesRequests ? 'All Requests' : `${BUSINESS_DIVISION_LABELS[access!.businessDivision!]} Requests`,
+      });
+    }
     return tabs;
-  }, [access, canSeeEveryonesRequests]);
+  }, [access, canSeeEveryonesRequests, canSeeBroaderThanOwnRequests]);
 
   const [activeTab, setActiveTab] = useState<TabKey>('all');
   const [page, setPage] = useState(1);
@@ -352,6 +387,7 @@ export default function ExpenseChangeRequestsPage() {
   const [appliedSearch, setAppliedSearch] = useState('');
   const [tableFilter, setTableFilter] = useState<string>('__ALL__');
   const [operationFilter, setOperationFilter] = useState<string>('__ALL__');
+  const [divisionFilter, setDivisionFilter] = useState<string>('__ALL__');
   const [selected, setSelected] = useState<ExpenseChangeRequest | null>(null);
 
   const tabParams: Record<TabKey, { status?: ExpenseChangeStatus; mine?: boolean; mineToApprove?: boolean; overdue?: boolean }> = {
@@ -372,7 +408,7 @@ export default function ExpenseChangeRequestsPage() {
   }
 
   const { data, isLoading, isError } = useQuery({
-    queryKey: ['expense-change-requests', activeTab, page, appliedSearch, tableFilter, operationFilter],
+    queryKey: ['expense-change-requests', activeTab, page, appliedSearch, tableFilter, operationFilter, divisionFilter],
     queryFn: () =>
       getExpenseChangeRequests({
         page,
@@ -380,6 +416,7 @@ export default function ExpenseChangeRequestsPage() {
         search: appliedSearch || undefined,
         tableKey: tableFilter === '__ALL__' ? undefined : tableFilter,
         operation: operationFilter === '__ALL__' ? undefined : (operationFilter as ExpenseChangeOperation),
+        requesterBusinessDivision: divisionFilter === '__ALL__' ? undefined : (divisionFilter as AdminUserBusinessDivision),
         ...tabParams[activeTab],
       }),
     placeholderData: keepPreviousData,
@@ -412,6 +449,12 @@ export default function ExpenseChangeRequestsPage() {
       render: (_v, r) => r.rowLabel || <span className="text-muted-foreground italic">—</span>,
     },
     { title: 'Requested By', key: 'requestedByName', width: 150 },
+    {
+      title: 'Division',
+      key: 'requesterBusinessDivision',
+      width: 110,
+      render: (_v, r) => <BusinessDivisionBadge division={r.requesterBusinessDivision} />,
+    },
     {
       title: 'Reason',
       key: 'reason',
@@ -458,7 +501,9 @@ export default function ExpenseChangeRequestsPage() {
         <h1 className="text-2xl font-bold">Expense Change Requests</h1>
         <p className="text-sm text-muted-foreground mt-0.5">
           {canSeeEveryonesRequests
-            ? 'Every add, edit and deletion requested across the Expense Data tables, walked through the approval chain (Admin → Expense Access Control) before it reaches the master.'
+            ? 'Every add, edit and deletion requested across the Expense Data tables — routed by Business Division to that division’s Category Head, then to whoever is tagged MDM for final approval (Admin → Expense Access Control).'
+            : canSeeOwnDivisionRequests
+            ? `Every add, edit and deletion requested by ${BUSINESS_DIVISION_LABELS[access!.businessDivision!]} division, and where each one stands before it reaches the master.`
             : 'Every add, edit and deletion you have requested, and where each one stands in the approval chain before it reaches the master.'}
         </p>
       </div>
@@ -519,6 +564,23 @@ export default function ExpenseChangeRequestsPage() {
                   </SelectContent>
                 </Select>
               </div>
+              {canSeeEveryonesRequests && (
+                <div className="w-full md:w-44">
+                  <Select value={divisionFilter} onValueChange={(v) => { setDivisionFilter(v); setPage(1); }}>
+                    <SelectTrigger>
+                      <SelectValue placeholder="All divisions" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="__ALL__">All divisions</SelectItem>
+                      {(Object.keys(BUSINESS_DIVISION_LABELS) as AdminUserBusinessDivision[]).map((d) => (
+                        <SelectItem key={d} value={d}>
+                          {BUSINESS_DIVISION_LABELS[d]}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                </div>
+              )}
               <Button onClick={handleApplySearch}>Apply</Button>
             </CardContent>
           </Card>

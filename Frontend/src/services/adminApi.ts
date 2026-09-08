@@ -712,6 +712,10 @@ export interface ExpenseChangeRequest {
   requestedByName: string;
   requestedByEmail: string;
   requestedAt: string;
+  /** The requester's own Business Division at the moment they raised this,
+   * captured once and never changed afterward — what routes the
+   * CATEGORY_HEAD stage to the matching Category Head. */
+  requesterBusinessDivision: AdminUserBusinessDivision | null;
 
   createdAt: string;
   updatedAt: string;
@@ -728,6 +732,11 @@ export interface ExpenseChangeRequestsParams {
   operation?: ExpenseChangeOperation;
   /** Only requests currently waiting on this exact stage key. */
   stageKey?: string;
+  /** Only requests raised by someone tagged this Business Division — an
+   * admin's (or MDM's) "show me just this division" filter. Purely
+   * additive: it can only narrow whichever visibility tier already applies,
+   * never widen it. */
+  requesterBusinessDivision?: AdminUserBusinessDivision;
   mine?: boolean;
   /** Requests currently sitting at any stage the caller may act on — the
    * dynamic replacement for a fixed "pending my review" filter per stage. */
@@ -914,10 +923,16 @@ export interface MyExpenseAccess {
   canCreate: boolean;
   canUpdate: boolean;
   canDelete: boolean;
-  /** Stage keys the caller may approve, for the table asked about. */
+  /** Stage keys the caller holds AT ALL, for the table asked about — coarse,
+   * not request-specific. A Category Head shows 'CATEGORY_HEAD' here
+   * regardless of division; whether they can act on one particular request
+   * also depends on `businessDivision` matching that request's
+   * `requesterBusinessDivision` — the server is the real gate either way. */
   approvableStageKeys: string[];
   levels: string[];
   subDivisions: string[];
+  /** This user's own Business Division (MENS/KIDS/LADIES/PO/MDM), or null. */
+  businessDivision: AdminUserBusinessDivision | null;
 }
 
 export async function getMyExpenseAccess(tableKey?: string): Promise<MyExpenseAccess> {

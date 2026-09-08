@@ -60078,6 +60078,7 @@ export namespace Prisma {
     requestedByName: string | null
     requestedByEmail: string | null
     requestedAt: Date | null
+    requesterBusinessDivision: string | null
     createdAt: Date | null
     updatedAt: Date | null
   }
@@ -60097,6 +60098,7 @@ export namespace Prisma {
     requestedByName: string | null
     requestedByEmail: string | null
     requestedAt: Date | null
+    requesterBusinessDivision: string | null
     createdAt: Date | null
     updatedAt: Date | null
   }
@@ -60118,6 +60120,7 @@ export namespace Prisma {
     requestedByName: number
     requestedByEmail: number
     requestedAt: number
+    requesterBusinessDivision: number
     createdAt: number
     updatedAt: number
     _all: number
@@ -60147,6 +60150,7 @@ export namespace Prisma {
     requestedByName?: true
     requestedByEmail?: true
     requestedAt?: true
+    requesterBusinessDivision?: true
     createdAt?: true
     updatedAt?: true
   }
@@ -60166,6 +60170,7 @@ export namespace Prisma {
     requestedByName?: true
     requestedByEmail?: true
     requestedAt?: true
+    requesterBusinessDivision?: true
     createdAt?: true
     updatedAt?: true
   }
@@ -60187,6 +60192,7 @@ export namespace Prisma {
     requestedByName?: true
     requestedByEmail?: true
     requestedAt?: true
+    requesterBusinessDivision?: true
     createdAt?: true
     updatedAt?: true
     _all?: true
@@ -60295,6 +60301,7 @@ export namespace Prisma {
     requestedByName: string
     requestedByEmail: string
     requestedAt: Date
+    requesterBusinessDivision: string | null
     createdAt: Date
     updatedAt: Date
     _count: ExpenseChangeRequestCountAggregateOutputType | null
@@ -60335,6 +60342,7 @@ export namespace Prisma {
     requestedByName?: boolean
     requestedByEmail?: boolean
     requestedAt?: boolean
+    requesterBusinessDivision?: boolean
     createdAt?: boolean
     updatedAt?: boolean
   }, ExtArgs["result"]["expenseChangeRequest"]>
@@ -60356,6 +60364,7 @@ export namespace Prisma {
     requestedByName?: boolean
     requestedByEmail?: boolean
     requestedAt?: boolean
+    requesterBusinessDivision?: boolean
     createdAt?: boolean
     updatedAt?: boolean
   }, ExtArgs["result"]["expenseChangeRequest"]>
@@ -60377,6 +60386,7 @@ export namespace Prisma {
     requestedByName?: boolean
     requestedByEmail?: boolean
     requestedAt?: boolean
+    requesterBusinessDivision?: boolean
     createdAt?: boolean
     updatedAt?: boolean
   }, ExtArgs["result"]["expenseChangeRequest"]>
@@ -60398,11 +60408,12 @@ export namespace Prisma {
     requestedByName?: boolean
     requestedByEmail?: boolean
     requestedAt?: boolean
+    requesterBusinessDivision?: boolean
     createdAt?: boolean
     updatedAt?: boolean
   }
 
-  export type ExpenseChangeRequestOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<"id" | "tableKey" | "operation" | "rowId" | "appliedRowId" | "rowLabel" | "changes" | "reason" | "dueDate" | "status" | "currentStageKey" | "approvalTrail" | "requestedById" | "requestedByName" | "requestedByEmail" | "requestedAt" | "createdAt" | "updatedAt", ExtArgs["result"]["expenseChangeRequest"]>
+  export type ExpenseChangeRequestOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<"id" | "tableKey" | "operation" | "rowId" | "appliedRowId" | "rowLabel" | "changes" | "reason" | "dueDate" | "status" | "currentStageKey" | "approvalTrail" | "requestedById" | "requestedByName" | "requestedByEmail" | "requestedAt" | "requesterBusinessDivision" | "createdAt" | "updatedAt", ExtArgs["result"]["expenseChangeRequest"]>
 
   export type $ExpenseChangeRequestPayload<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
     name: "ExpenseChangeRequest"
@@ -60448,6 +60459,16 @@ export namespace Prisma {
       requestedByName: string
       requestedByEmail: string
       requestedAt: Date
+      /**
+       * The requester's OWN User.businessDivision at the moment they raised
+       * this request — captured once, immutable afterward (a later change to
+       * their profile must never re-route a request already in flight). This
+       * is what routes the CATEGORY_HEAD stage to the Category Head whose own
+       * businessDivision matches, instead of any Category Head being able to
+       * act on any request — see canActOnExpenseRequestStage in
+       * expenseAccessService.ts.
+       */
+      requesterBusinessDivision: string | null
       createdAt: Date
       updatedAt: Date
     }, ExtArgs["result"]["expenseChangeRequest"]>
@@ -60889,6 +60910,7 @@ export namespace Prisma {
     readonly requestedByName: FieldRef<"ExpenseChangeRequest", 'String'>
     readonly requestedByEmail: FieldRef<"ExpenseChangeRequest", 'String'>
     readonly requestedAt: FieldRef<"ExpenseChangeRequest", 'DateTime'>
+    readonly requesterBusinessDivision: FieldRef<"ExpenseChangeRequest", 'String'>
     readonly createdAt: FieldRef<"ExpenseChangeRequest", 'DateTime'>
     readonly updatedAt: FieldRef<"ExpenseChangeRequest", 'DateTime'>
   }
@@ -64673,6 +64695,7 @@ export namespace Prisma {
     requestedByName: 'requestedByName',
     requestedByEmail: 'requestedByEmail',
     requestedAt: 'requestedAt',
+    requesterBusinessDivision: 'requesterBusinessDivision',
     createdAt: 'createdAt',
     updatedAt: 'updatedAt'
   };
@@ -65549,7 +65572,8 @@ export namespace Prisma {
     reason: 'reason',
     currentStageKey: 'currentStageKey',
     requestedByName: 'requestedByName',
-    requestedByEmail: 'requestedByEmail'
+    requestedByEmail: 'requestedByEmail',
+    requesterBusinessDivision: 'requesterBusinessDivision'
   };
 
   export type ExpenseChangeRequestOrderByRelevanceFieldEnum = (typeof ExpenseChangeRequestOrderByRelevanceFieldEnum)[keyof typeof ExpenseChangeRequestOrderByRelevanceFieldEnum]
@@ -71369,6 +71393,7 @@ export namespace Prisma {
     requestedByName?: StringFilter<"ExpenseChangeRequest"> | string
     requestedByEmail?: StringFilter<"ExpenseChangeRequest"> | string
     requestedAt?: DateTimeFilter<"ExpenseChangeRequest"> | Date | string
+    requesterBusinessDivision?: StringNullableFilter<"ExpenseChangeRequest"> | string | null
     createdAt?: DateTimeFilter<"ExpenseChangeRequest"> | Date | string
     updatedAt?: DateTimeFilter<"ExpenseChangeRequest"> | Date | string
   }
@@ -71390,6 +71415,7 @@ export namespace Prisma {
     requestedByName?: SortOrder
     requestedByEmail?: SortOrder
     requestedAt?: SortOrder
+    requesterBusinessDivision?: SortOrderInput | SortOrder
     createdAt?: SortOrder
     updatedAt?: SortOrder
     _relevance?: ExpenseChangeRequestOrderByRelevanceInput
@@ -71415,6 +71441,7 @@ export namespace Prisma {
     requestedByName?: StringFilter<"ExpenseChangeRequest"> | string
     requestedByEmail?: StringFilter<"ExpenseChangeRequest"> | string
     requestedAt?: DateTimeFilter<"ExpenseChangeRequest"> | Date | string
+    requesterBusinessDivision?: StringNullableFilter<"ExpenseChangeRequest"> | string | null
     createdAt?: DateTimeFilter<"ExpenseChangeRequest"> | Date | string
     updatedAt?: DateTimeFilter<"ExpenseChangeRequest"> | Date | string
   }, "id">
@@ -71436,6 +71463,7 @@ export namespace Prisma {
     requestedByName?: SortOrder
     requestedByEmail?: SortOrder
     requestedAt?: SortOrder
+    requesterBusinessDivision?: SortOrderInput | SortOrder
     createdAt?: SortOrder
     updatedAt?: SortOrder
     _count?: ExpenseChangeRequestCountOrderByAggregateInput
@@ -71465,6 +71493,7 @@ export namespace Prisma {
     requestedByName?: StringWithAggregatesFilter<"ExpenseChangeRequest"> | string
     requestedByEmail?: StringWithAggregatesFilter<"ExpenseChangeRequest"> | string
     requestedAt?: DateTimeWithAggregatesFilter<"ExpenseChangeRequest"> | Date | string
+    requesterBusinessDivision?: StringNullableWithAggregatesFilter<"ExpenseChangeRequest"> | string | null
     createdAt?: DateTimeWithAggregatesFilter<"ExpenseChangeRequest"> | Date | string
     updatedAt?: DateTimeWithAggregatesFilter<"ExpenseChangeRequest"> | Date | string
   }
@@ -78252,6 +78281,7 @@ export namespace Prisma {
     requestedByName: string
     requestedByEmail: string
     requestedAt?: Date | string
+    requesterBusinessDivision?: string | null
     createdAt?: Date | string
     updatedAt?: Date | string
   }
@@ -78273,6 +78303,7 @@ export namespace Prisma {
     requestedByName: string
     requestedByEmail: string
     requestedAt?: Date | string
+    requesterBusinessDivision?: string | null
     createdAt?: Date | string
     updatedAt?: Date | string
   }
@@ -78294,6 +78325,7 @@ export namespace Prisma {
     requestedByName?: StringFieldUpdateOperationsInput | string
     requestedByEmail?: StringFieldUpdateOperationsInput | string
     requestedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    requesterBusinessDivision?: NullableStringFieldUpdateOperationsInput | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
   }
@@ -78315,6 +78347,7 @@ export namespace Prisma {
     requestedByName?: StringFieldUpdateOperationsInput | string
     requestedByEmail?: StringFieldUpdateOperationsInput | string
     requestedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    requesterBusinessDivision?: NullableStringFieldUpdateOperationsInput | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
   }
@@ -78336,6 +78369,7 @@ export namespace Prisma {
     requestedByName: string
     requestedByEmail: string
     requestedAt?: Date | string
+    requesterBusinessDivision?: string | null
     createdAt?: Date | string
     updatedAt?: Date | string
   }
@@ -78357,6 +78391,7 @@ export namespace Prisma {
     requestedByName?: StringFieldUpdateOperationsInput | string
     requestedByEmail?: StringFieldUpdateOperationsInput | string
     requestedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    requesterBusinessDivision?: NullableStringFieldUpdateOperationsInput | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
   }
@@ -78378,6 +78413,7 @@ export namespace Prisma {
     requestedByName?: StringFieldUpdateOperationsInput | string
     requestedByEmail?: StringFieldUpdateOperationsInput | string
     requestedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    requesterBusinessDivision?: NullableStringFieldUpdateOperationsInput | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
   }
@@ -83042,6 +83078,7 @@ export namespace Prisma {
     requestedByName?: SortOrder
     requestedByEmail?: SortOrder
     requestedAt?: SortOrder
+    requesterBusinessDivision?: SortOrder
     createdAt?: SortOrder
     updatedAt?: SortOrder
   }
@@ -83065,6 +83102,7 @@ export namespace Prisma {
     requestedByName?: SortOrder
     requestedByEmail?: SortOrder
     requestedAt?: SortOrder
+    requesterBusinessDivision?: SortOrder
     createdAt?: SortOrder
     updatedAt?: SortOrder
   }
@@ -83084,6 +83122,7 @@ export namespace Prisma {
     requestedByName?: SortOrder
     requestedByEmail?: SortOrder
     requestedAt?: SortOrder
+    requesterBusinessDivision?: SortOrder
     createdAt?: SortOrder
     updatedAt?: SortOrder
   }

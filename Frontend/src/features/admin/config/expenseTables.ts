@@ -100,6 +100,9 @@ export const EXPENSE_TABLE_CONFIGS: Record<string, ExpenseTableConfig> = {
     rowKey: 'id',
     defaultSortBy: 'id',
     defaultSortDir: 'desc',
+    allowCreate: true,
+    allowDelete: true,
+    requiredOnCreate: ['sub_division', 'major_category', 'segment_type'],
     columns: [
       { dataIndex: 'id', title: 'ID', width: 80, editable: false },
       { dataIndex: 'sub_division', title: 'Sub Division' },

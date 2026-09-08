@@ -1662,10 +1662,18 @@ model ExpenseChangeRequest {
   /// approver/final column pair so the trail scales to any chain length.
   approvalTrail   Json                @default("[]") @map("approval_trail")
 
-  requestedById    Int
-  requestedByName  String   @map("requested_by_name") @db.VarChar(200)
-  requestedByEmail String   @map("requested_by_email") @db.VarChar(255)
-  requestedAt      DateTime @default(now()) @map("requested_at")
+  requestedById             Int
+  requestedByName           String   @map("requested_by_name") @db.VarChar(200)
+  requestedByEmail          String   @map("requested_by_email") @db.VarChar(255)
+  requestedAt               DateTime @default(now()) @map("requested_at")
+  /// The requester's OWN User.businessDivision at the moment they raised
+  /// this request — captured once, immutable afterward (a later change to
+  /// their profile must never re-route a request already in flight). This
+  /// is what routes the CATEGORY_HEAD stage to the Category Head whose own
+  /// businessDivision matches, instead of any Category Head being able to
+  /// act on any request — see canActOnExpenseRequestStage in
+  /// expenseAccessService.ts.
+  requesterBusinessDivision String?  @map("requester_business_division") @db.VarChar(20)
 
   createdAt DateTime @default(now()) @map("created_at")
   updatedAt DateTime @updatedAt @map("updated_at")
@@ -1675,6 +1683,7 @@ model ExpenseChangeRequest {
   @@index([currentStageKey])
   @@index([requestedById])
   @@index([dueDate])
+  @@index([requesterBusinessDivision])
   @@map("expense_change_requests")
   @@schema("public")
 }

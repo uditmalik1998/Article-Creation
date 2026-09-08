@@ -742,11 +742,13 @@ export default function ExpenseAccessControlPage() {
         <p className="text-sm text-muted-foreground mt-0.5 max-w-3xl">
           Raising an add / edit / delete request needs no setup here: anyone with the <strong>Creator</strong>,{' '}
           <strong>Approver</strong> or <strong>Category Head</strong> role already can, on every table. Sign-off is
-          role-based too where a role fits — <strong>Category Head</strong> approves the Category Head stage, and{' '}
-          <strong>Admin</strong> approves every stage (MDM included, since there is no separate MDM role). What this
-          page manages is the <strong>approval chain</strong> itself — its stages and their order — plus the rare
-          case of handing a right to someone by email instead of by role. Admins hold every right implicitly and
-          need no grant here.
+          routed by <strong>Business Division</strong> (set per person on the Users page) rather than by email grant
+          or by Admin bypass: a request only reaches the Category Head whose own division matches the requester's —
+          a Mens request goes only to the Mens Category Head — and final approval belongs only to whoever is tagged
+          division <strong>MDM</strong>, not to Admin in general. What this page manages is the{' '}
+          <strong>approval chain</strong> itself — its stages and their order — plus the rare case of handing a
+          right to someone by email instead of by division. Admins can always see and manage everything here, but no
+          longer automatically approve a request themselves unless also tagged the matching division.
         </p>
       </div>
 

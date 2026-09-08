@@ -5733,6 +5733,13 @@ export const EXPENSE_TABLE_REGISTRY: Record<string, ExpenseTableConfig> = {
     kind: 'raw',
     tableName: 'maj_cat_segment',
     idColumn: 'id',
+    // Whole-row add/delete is open here, same as national-grid: price
+    // segments are maintained row-by-row as major categories are added or
+    // re-banded, so an admin shouldn't need a full Excel re-upload just to
+    // add or retire one segment.
+    allowCreate: true,
+    allowDelete: true,
+    requiredOnCreate: ['sub_division', 'major_category', 'segment_type'],
     columns: [
       { key: 'id', label: 'ID', editable: false },
       { key: 'sub_division', label: 'Sub Division' },

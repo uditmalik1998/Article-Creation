@@ -1074,6 +1074,7 @@ exports.Prisma.ExpenseChangeRequestScalarFieldEnum = {
   requestedByName: 'requestedByName',
   requestedByEmail: 'requestedByEmail',
   requestedAt: 'requestedAt',
+  requesterBusinessDivision: 'requesterBusinessDivision',
   createdAt: 'createdAt',
   updatedAt: 'updatedAt'
 };
@@ -1794,7 +1795,8 @@ exports.Prisma.ExpenseChangeRequestOrderByRelevanceFieldEnum = {
   reason: 'reason',
   currentStageKey: 'currentStageKey',
   requestedByName: 'requestedByName',
-  requestedByEmail: 'requestedByEmail'
+  requestedByEmail: 'requestedByEmail',
+  requesterBusinessDivision: 'requesterBusinessDivision'
 };
 
 exports.Prisma.ExpenseAccessGrantOrderByRelevanceFieldEnum = {

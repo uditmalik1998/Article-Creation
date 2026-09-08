@@ -18,10 +18,14 @@
  * to the chain afterwards, so a mid-flight stage insertion or retirement
  * never corrupts history.
  *
- * Who may raise and who may sign off is resolved per-request from the
- * caller's role (Creator/Approver/Category Head raise; Category Head/Admin
- * sign off) plus, for anything a role doesn't cover, a per-email grant — see
- * services/expenseAccessService.ts. ADMIN bypasses every check.
+ * Who may raise is role-based (Creator/Approver/Category Head). Who may sign
+ * off is routed by BUSINESS DIVISION, captured onto the request once at
+ * creation as `requesterBusinessDivision`: the CATEGORY_HEAD stage goes only
+ * to the Category Head whose own business division matches the requester's
+ * (a Mens request only reaches the Mens Category Head), and the MDM stage
+ * goes only to whoever is tagged business division MDM — not to ADMIN in
+ * general. See services/expenseAccessService.ts (canActOnExpenseRequestStage)
+ * for the precise rule and why ADMIN has no automatic approval bypass here.
  */
 
 import { Request, Response } from 'express';
@@ -29,11 +33,11 @@ import { ExpenseChangeOperation } from '../generated/prisma';
 import { prismaClient as prisma, withPrismaRetry } from '../utils/prisma';
 import {
   ALL_TABLES,
-  getExpenseAccess,
   getFirstApprovalStage,
   getNextApprovalStage,
   getAllApprovalStages,
   getGrantsForEmail,
+  canActOnExpenseRequestStage,
 } from '../services/expenseAccessService';
 import { logExpenseAuditEvent, logExpenseAuditEventBestEffort } from '../services/expenseAuditLogService';
 import {
@@ -192,6 +196,7 @@ export async function createExpenseChangeRequest(req: Request, res: Response) {
             requestedById: user.id,
             requestedByName: user.name,
             requestedByEmail: user.email,
+            requesterBusinessDivision: user.businessDivision ?? null,
           },
         });
         await logExpenseAuditEvent(
@@ -303,6 +308,7 @@ export async function createExpenseAddRequest(req: Request, res: Response) {
             requestedById: user.id,
             requestedByName: user.name,
             requestedByEmail: user.email,
+            requesterBusinessDivision: user.businessDivision ?? null,
           },
         });
         await logExpenseAuditEvent(
@@ -396,6 +402,7 @@ export async function createExpenseDeleteRequest(req: Request, res: Response) {
             requestedById: user.id,
             requestedByName: user.name,
             requestedByEmail: user.email,
+            requesterBusinessDivision: user.businessDivision ?? null,
           },
         });
         await logExpenseAuditEvent(
@@ -437,8 +444,21 @@ export async function createExpenseDeleteRequest(req: Request, res: Response) {
  * review" tab per stage. ADMIN sees every PENDING request under it.
  */
 export async function getExpenseChangeRequests(req: Request, res: Response) {
-  const { tableKey, status, operation, stageKey, mine, mineToApprove, overdue, page, limit, search, sortBy, sortDir } =
-    req.query as Record<string, string | undefined>;
+  const {
+    tableKey,
+    status,
+    operation,
+    stageKey,
+    requesterBusinessDivision,
+    mine,
+    mineToApprove,
+    overdue,
+    page,
+    limit,
+    search,
+    sortBy,
+    sortDir,
+  } = req.query as Record<string, string | undefined>;
   const pageNum = Math.max(1, parseInt(page ?? '1', 10) || 1);
   const limitNum = Math.min(200, Math.max(1, parseInt(limit ?? '50', 10) || 50));
   const skip = (pageNum - 1) * limitNum;
@@ -451,19 +471,36 @@ export async function getExpenseChangeRequests(req: Request, res: Response) {
   if (status) andConditions.push({ status });
   if (operation) andConditions.push({ operation });
   if (stageKey) andConditions.push({ currentStageKey: stageKey });
+  // Admin's (or any full-visibility user's) explicit "show me just this
+  // division" filter — purely additive, so it can only narrow whichever
+  // visibility tier below already applies, never widen it.
+  if (requesterBusinessDivision) andConditions.push({ requesterBusinessDivision });
 
-  // A user with no approval-stage grant on ANY table (and who isn't ADMIN)
-  // never gets to see anyone else's requests, regardless of what `mine`/
-  // `mineToApprove` say — someone who only ever raises requests has no
-  // business browsing the audit trail of everyone else's. This is enforced
-  // here, not just by hiding the "All Requests" tab client-side.
-  const globalAccess = req.user ? await getExpenseAccess(req.user) : null;
-  const canSeeEveryonesRequests = String(req.user?.role) === 'ADMIN' || (globalAccess?.approvableStageKeys.length ?? 0) > 0;
+  // Three visibility tiers, in order of how much a caller can see:
+  //   1. ADMIN, or someone tagged businessDivision MDM (the final stage is
+  //      division-agnostic on purpose — every division converges there) —
+  //      sees every request, unrestricted.
+  //   2. A CATEGORY_HEAD with a business division set — sees only THEIR OWN
+  //      division's requests (every operation/requester in it, not just the
+  //      ones currently pending at their stage), never another division's.
+  //      This is the "segregated to their Category Head" behaviour.
+  //   3. Everyone else (a pure requester, or a Category Head with no
+  //      division tagged yet) — sees only requests they themselves raised.
+  // `mine=true` always means literally "I raised these", regardless of tier,
+  // so it's checked first.
+  const isAdmin = String(req.user?.role) === 'ADMIN';
+  const isMdmTagged = req.user?.businessDivision === 'MDM';
+  const isDivisionScopedCategoryHead = String(req.user?.role) === 'CATEGORY_HEAD' && !!req.user?.businessDivision;
+  const canSeeEveryonesRequests = isAdmin || isMdmTagged;
 
-  if (!canSeeEveryonesRequests && req.user) {
+  if (mine === 'true' && req.user) {
     andConditions.push({ requestedById: req.user.id });
-  } else if (mine === 'true' && req.user) {
-    andConditions.push({ requestedById: req.user.id });
+  } else if (!canSeeEveryonesRequests && req.user) {
+    if (isDivisionScopedCategoryHead) {
+      andConditions.push({ requesterBusinessDivision: req.user.businessDivision });
+    } else {
+      andConditions.push({ requestedById: req.user.id });
+    }
   }
   // Still open and already past the date the requester asked for.
   if (overdue === 'true') {
@@ -471,29 +508,35 @@ export async function getExpenseChangeRequests(req: Request, res: Response) {
   }
 
   if (mineToApprove === 'true' && req.user) {
-    if (String(req.user.role) === 'ADMIN') {
-      andConditions.push({ status: 'PENDING' });
-    } else {
-      const all = await getGrantsForEmail(req.user.email);
-      const approverGrants = all.filter((g) => g.level !== 'SUB_DIVISION');
+    const or: object[] = [];
 
-      const globalStageKeys = [...new Set(approverGrants.filter((g) => g.tableKey === ALL_TABLES).map((g) => g.level))];
-      const perTable = new Map<string, Set<string>>();
-      for (const g of approverGrants) {
-        if (g.tableKey === ALL_TABLES) continue;
-        if (!perTable.has(g.tableKey)) perTable.set(g.tableKey, new Set());
-        perTable.get(g.tableKey)!.add(g.level);
-      }
-
-      const or: object[] = [];
-      if (globalStageKeys.length > 0) or.push({ currentStageKey: { in: globalStageKeys } });
-      for (const [t, keys] of perTable) or.push({ tableKey: t, currentStageKey: { in: [...keys] } });
-
-      // No approval grants at all -> a condition that matches nothing, rather
-      // than accidentally falling through to "no filter" (which would leak
-      // every pending request to a requester-only user).
-      andConditions.push({ status: 'PENDING' }, or.length > 0 ? { OR: or } : { id: '__none__' });
+    // CATEGORY_HEAD stage: only this approver's own division's requests.
+    if (String(req.user.role) === 'CATEGORY_HEAD' && req.user.businessDivision) {
+      or.push({ currentStageKey: 'CATEGORY_HEAD', requesterBusinessDivision: req.user.businessDivision });
     }
+    // MDM stage: gated purely by the approver's own tag, not by which
+    // division the request came from.
+    if (req.user.businessDivision === 'MDM') {
+      or.push({ currentStageKey: 'MDM' });
+    }
+
+    // Explicit per-email grants remain an additional path, for any stage.
+    const all = await getGrantsForEmail(req.user.email);
+    const approverGrants = all.filter((g) => g.level !== 'SUB_DIVISION');
+    const globalStageKeys = [...new Set(approverGrants.filter((g) => g.tableKey === ALL_TABLES).map((g) => g.level))];
+    if (globalStageKeys.length > 0) or.push({ currentStageKey: { in: globalStageKeys } });
+    const perTable = new Map<string, Set<string>>();
+    for (const g of approverGrants) {
+      if (g.tableKey === ALL_TABLES) continue;
+      if (!perTable.has(g.tableKey)) perTable.set(g.tableKey, new Set());
+      perTable.get(g.tableKey)!.add(g.level);
+    }
+    for (const [t, keys] of perTable) or.push({ tableKey: t, currentStageKey: { in: [...keys] } });
+
+    // Nothing matched -> a condition that matches nothing, rather than
+    // accidentally falling through to "no filter" (which would leak every
+    // pending request to a requester-only user).
+    andConditions.push({ status: 'PENDING' }, or.length > 0 ? { OR: or } : { id: '__none__' });
   }
 
   if (search) {
@@ -587,13 +630,22 @@ export async function actOnExpenseChangeRequest(req: Request, res: Response) {
       });
     }
 
-    const access = await getExpenseAccess(req.user!, existingRequest.tableKey);
-    if (!access.approvableStageKeys.includes(existingRequest.currentStageKey)) {
+    // The real gate — division-matched for CATEGORY_HEAD, MDM-tagged for
+    // MDM, grant-based otherwise. Deliberately NOT `getExpenseAccess`'s
+    // `approvableStageKeys`, which is a coarse "holds this stage for SOME
+    // division" signal — a Category Head from a different division must
+    // still be refused here. See canActOnExpenseRequestStage's doc comment.
+    const canAct = await canActOnExpenseRequestStage(req.user!, {
+      tableKey: existingRequest.tableKey,
+      currentStageKey: existingRequest.currentStageKey,
+      requesterBusinessDivision: existingRequest.requesterBusinessDivision,
+    });
+    if (!canAct) {
       const allStages = await getAllApprovalStages();
       const deniedStageLabel = allStages.find((s) => s.key === existingRequest.currentStageKey)?.label ?? existingRequest.currentStageKey;
       return res.status(403).json({
         success: false,
-        error: `Only users granted "${deniedStageLabel}" access to this table can act on this request right now.`,
+        error: `Only the "${deniedStageLabel}" approver for this request's business division can act on it right now.`,
         code: 'NO_EXPENSE_ACCESS',
       });
     }

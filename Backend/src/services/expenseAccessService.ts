@@ -4,33 +4,46 @@
  *
  * The chain a change walks through is:
  *
- *   requester (CREATOR/APPROVER)  ->  stage 1  ->  stage 2  ->  ...  ->  applied
- *   (raises add/edit/                 (e.g.        (e.g.                to the
- *    delete + reason                    Category     MDM)                master
- *    + wanted-by date)                  Head)                            row, and
- *                                                                         so SAP)
+ *   requester            ->  CATEGORY_HEAD stage  ->  MDM stage  ->  applied
+ *   (CREATOR/APPROVER/       (the Category Head        (whoever's    to the
+ *    CATEGORY_HEAD role,      whose OWN Business         own          master
+ *    raises add/edit/         Division matches           Business     row, and
+ *    delete + reason          the REQUESTER's)            Division    so SAP)
+ *    + wanted-by date)                                    is MDM)
  *
- * The REQUESTER layer (first layer) rides on the existing `UserRole` —
- * anyone with role CREATOR, APPROVER or CATEGORY_HEAD can raise a request on
- * any table, no setup needed (`ROLE_BASED_REQUESTERS` below). That is a
- * deliberate choice over per-email grants: this layer maps naturally onto
- * roles the app already has, so there is no separate list to keep in sync
- * as people join, leave, or change teams.
+ * Routing is by BUSINESS DIVISION (User.businessDivision — MENS/KIDS/LADIES/
+ * PO/MDM, see UsersManagement), captured onto the request once at creation
+ * (`requesterBusinessDivision`) and never changed afterward:
  *
- * The APPROVAL layer (second layer onward — Category Head, MDM, and whatever
- * an admin adds beyond them) is role-based wherever a role lines up
- * naturally (`ROLE_BASED_APPROVAL_STAGES` below):
- *   - CATEGORY_HEAD role  <->  the "CATEGORY_HEAD" stage
- *   - ADMIN role          <->  every stage, MDM included — ADMIN bypasses the
- *                              chain entirely (see the isAdmin branch below),
- *                              so "MDM approves" and "an admin approves" are
- *                              the same thing; there is no separate MDM role.
- * A stage an admin adds beyond those two has no role to bind to, so it falls
- * back to `expense_access_grants` (see /admin/expense-access) — a list of
- * specific email addresses ADMIN maintains, for sign-off authority that
- * doesn't line up with any existing role. Grants also still work for
- * CATEGORY_HEAD and REQUESTER_LEVEL, e.g. to loop in one person on one table
- * without changing their role — they simply aren't the primary mechanism.
+ *   - The REQUESTER layer (first layer) rides on `UserRole` — anyone with
+ *     role CREATOR, APPROVER or CATEGORY_HEAD can raise a request on any
+ *     table, no grant needed (`ROLE_BASED_REQUESTERS` below).
+ *   - The CATEGORY_HEAD stage is scoped to ONE Category Head per division —
+ *     role CATEGORY_HEAD *and* that person's own businessDivision must equal
+ *     the request's `requesterBusinessDivision`. A Mens-division Creator's
+ *     request can only be acted on by the Mens-division Category Head, never
+ *     a Kids- or Ladies-division one. This division match can only be
+ *     evaluated against a SPECIFIC request, so it lives in
+ *     `canActOnExpenseRequestStage` below, not in `getExpenseAccess`
+ *     (`approvableStageKeys` there is deliberately the coarser, request-
+ *     agnostic "holds this stage at all, for some division" signal, used for
+ *     UI affordances like tab visibility).
+ *   - The MDM (final) stage is scoped to whoever's own businessDivision is
+ *     'MDM' — every division's requests converge here, but on EXACTLY those
+ *     specific people, not "any ADMIN". Being ADMIN-role no longer implies
+ *     final-approval rights by itself; an ADMIN who also happens to be
+ *     tagged businessDivision MDM can act on it — because they're MDM, not
+ *     because they're ADMIN. ADMIN still bypasses `canView` and the
+ *     requester rights (canCreate/Update/Delete) unconditionally, and still
+ *     manages grants/stages/the audit log (those routes require the ADMIN
+ *     role directly, unrelated to this file) — only the "approve a specific
+ *     request" action lost its automatic ADMIN bypass.
+ *   - A stage with no role/division to bind to (a 3rd stage an admin adds
+ *     beyond Category Head/MDM) falls back entirely to
+ *     `expense_access_grants` (see /admin/expense-access) — specific email
+ *     addresses ADMIN maintains. Grants also still work as an ADDITIONAL
+ *     override on top of the Category-Head/MDM rules above (e.g. temporary
+ *     cover for someone on leave), they just aren't the primary mechanism.
  *
  * The STAGES themselves — how many there are, their order, their labels — are
  * admin-managed, in `expense_approval_stages` (see
@@ -38,7 +51,9 @@
  * MDM); an admin can insert a third stage between or after them at any time
  * with no code change — everything here and in
  * expenseChangeRequestController resolves the chain from this table rather
- * than hardcoding stage count or names.
+ * than hardcoding stage count or names. (A third stage's business-division
+ * routing, if it needs one, is not yet automatic — see
+ * BUSINESS_DIVISION_BASED_APPROVAL_STAGES below.)
  */
 
 import { prismaClient as prisma, withPrismaRetry } from '../utils/prisma';
@@ -66,13 +81,21 @@ const VIEW_ROLES = new Set(['ADMIN', 'CREATOR', 'APPROVER', 'CATEGORY_HEAD', 'PD
 const ROLE_BASED_REQUESTERS = new Set(['CREATOR', 'APPROVER', 'CATEGORY_HEAD']);
 
 /** Approval-stage key -> the UserRole that automatically holds it, no grant
- * needed — the second layer onward. ADMIN is deliberately not listed here:
- * it bypasses the whole chain unconditionally (see the isAdmin branch in
- * getExpenseAccess), which already makes ADMIN equivalent to holding every
- * stage, MDM included. A stage key not listed here has no role to bind to
- * and relies entirely on `expense_access_grants`. */
+ * needed. Coarse/request-agnostic: it says "this role holds the stage for
+ * SOME division", not which one — the actual per-request division match is
+ * `canActOnExpenseRequestStage`'s job. A stage key not listed here has no
+ * role to bind to and relies on businessDivision (below) or
+ * `expense_access_grants`. */
 const ROLE_BASED_APPROVAL_STAGES: Record<string, string> = {
   CATEGORY_HEAD: 'CATEGORY_HEAD',
+};
+
+/** Approval-stage key -> the User.businessDivision value that automatically
+ * holds it, no grant needed and independent of role — the MDM stage isn't
+ * "ADMIN approves", it's "whoever is tagged businessDivision MDM approves",
+ * see the module doc comment. */
+const BUSINESS_DIVISION_BASED_APPROVAL_STAGES: Record<string, string> = {
+  MDM: 'MDM',
 };
 
 export type ExpenseApprovalStage = {
@@ -103,19 +126,26 @@ export type ExpenseAccess = {
   canCreate: boolean;
   canUpdate: boolean;
   canDelete: boolean;
-  /** Stage keys this user may approve, for the table asked about. Empty for a
-   * pure requester or for a plain view-role user with no grant. ADMIN gets
-   * every currently-active stage key (it bypasses the chain either way, but
-   * the UI reads this list to decide what to show). */
+  /** Stage keys this user holds AT ALL, for the table asked about — coarse
+   * and request-agnostic (a Category Head from any division shows
+   * 'CATEGORY_HEAD' here). Used for UI affordances (which tabs to show,
+   * whether "sees everyone's requests" applies); NOT the real per-request
+   * gate — that's `canActOnExpenseRequestStage`, which also checks the
+   * requester's business division against this user's own. */
   approvableStageKeys: string[];
   /** Levels held for the table asked about — REQUESTER_LEVEL and/or stage
    * keys. Empty for a pure ADMIN bypass. */
   levels: string[];
   /** Sub-divisions this person is registered as editing for, if any. */
   subDivisions: string[];
+  /** This user's own User.businessDivision (MENS/KIDS/LADIES/PO/MDM), or
+   * null if unset. Exposed so the caller (e.g. the frontend, before it ever
+   * reaches the server-enforced check) can tell whether a CATEGORY_HEAD
+   * stage request is actually theirs to act on. */
+  businessDivision: string | null;
 };
 
-type AuthLikeUser = { email: string; role: string };
+type AuthLikeUser = { email: string; role: string; businessDivision?: string | null };
 
 const grantCache = new Map<string, { grants: ExpenseAccessGrantRow[]; expiresAt: number }>();
 let stageCache: { stages: ExpenseApprovalStage[]; expiresAt: number } | null = null;
@@ -212,23 +242,15 @@ export async function isFinalApprovalStage(stageKey: string): Promise<boolean> {
 
 /**
  * Resolves what `user` may do on `tableKey` (omit it to ask "on any table",
- * which is what the change-request list page needs).
+ * which is what the change-request list page needs). ADMIN bypasses
+ * canView/canCreate/canUpdate/canDelete unconditionally, but its
+ * `approvableStageKeys` are computed the same role/businessDivision way as
+ * everyone else's — being ADMIN no longer implies final-approval rights by
+ * itself, see the module doc comment.
  */
 export async function getExpenseAccess(user: AuthLikeUser, tableKey?: string): Promise<ExpenseAccess> {
   const isAdmin = String(user.role) === 'ADMIN';
-  if (isAdmin) {
-    const stages = await getActiveApprovalStages();
-    return {
-      isAdmin: true,
-      canView: true,
-      canCreate: true,
-      canUpdate: true,
-      canDelete: true,
-      approvableStageKeys: stages.map((s) => s.key),
-      levels: [],
-      subDivisions: [],
-    };
-  }
+  const businessDivision = user.businessDivision ? String(user.businessDivision) : null;
 
   const all = await getGrantsForEmail(user.email);
   const relevant = tableKey
@@ -238,12 +260,19 @@ export async function getExpenseAccess(user: AuthLikeUser, tableKey?: string): P
   const editor = relevant.filter((g) => g.level === REQUESTER_LEVEL);
   const approverLevels = new Set(relevant.filter((g) => g.level !== REQUESTER_LEVEL).map((g) => g.level));
 
-  // Second layer onward: fold in whichever stages this role is bound to
-  // (e.g. CATEGORY_HEAD role -> the "CATEGORY_HEAD" stage), regardless of
-  // `tableKey` — role-based rights are deliberately global, same as the
+  // Second layer onward: fold in whichever stages this role or business
+  // division is bound to (e.g. CATEGORY_HEAD role -> the "CATEGORY_HEAD"
+  // stage, businessDivision MDM -> the "MDM" stage), regardless of
+  // `tableKey` — these rights are deliberately global, same as the
   // requester layer, so there is nothing per-table to configure for them.
+  // Coarse on purpose: this says a Category Head holds the stage for SOME
+  // division, not which one — actually acting on one specific request also
+  // requires `canActOnExpenseRequestStage`'s division match.
   for (const [stageKey, requiredRole] of Object.entries(ROLE_BASED_APPROVAL_STAGES)) {
     if (String(user.role) === requiredRole) approverLevels.add(stageKey);
+  }
+  for (const [stageKey, requiredDivision] of Object.entries(BUSINESS_DIVISION_BASED_APPROVAL_STAGES)) {
+    if (businessDivision === requiredDivision) approverLevels.add(stageKey);
   }
 
   // First layer: CREATOR/APPROVER/CATEGORY_HEAD get requester rights on every
@@ -254,20 +283,67 @@ export async function getExpenseAccess(user: AuthLikeUser, tableKey?: string): P
   const roleIsRequester = ROLE_BASED_REQUESTERS.has(String(user.role));
 
   return {
-    isAdmin: false,
-    canView: VIEW_ROLES.has(String(user.role)) || relevant.length > 0,
-    canCreate: roleIsRequester || editor.some((g) => g.canCreate),
-    canUpdate: roleIsRequester || editor.some((g) => g.canUpdate),
-    canDelete: roleIsRequester || editor.some((g) => g.canDelete),
+    isAdmin,
+    canView: isAdmin || VIEW_ROLES.has(String(user.role)) || relevant.length > 0,
+    canCreate: isAdmin || roleIsRequester || editor.some((g) => g.canCreate),
+    canUpdate: isAdmin || roleIsRequester || editor.some((g) => g.canUpdate),
+    canDelete: isAdmin || roleIsRequester || editor.some((g) => g.canDelete),
     approvableStageKeys: [...approverLevels],
     levels: [...new Set([...(roleIsRequester ? [REQUESTER_LEVEL] : []), ...relevant.map((g) => g.level), ...approverLevels])],
     subDivisions: [...new Set(editor.map((g) => g.subDivision).filter((s): s is string => !!s))],
+    businessDivision,
   };
 }
 
-/** Whether `user` may act at `stageKey` on `tableKey` — ADMIN always can. */
-export async function canApproveStage(user: AuthLikeUser, tableKey: string, stageKey: string): Promise<boolean> {
-  if (String(user.role) === 'ADMIN') return true;
-  const access = await getExpenseAccess(user, tableKey);
-  return access.approvableStageKeys.includes(stageKey);
+export type ExpenseRequestStageContext = {
+  tableKey: string;
+  currentStageKey: string;
+  /** The REQUESTER's own businessDivision, captured onto the request at
+   * creation — see ExpenseChangeRequest.requesterBusinessDivision. */
+  requesterBusinessDivision: string | null;
+};
+
+/**
+ * The PRECISE per-request gate — used by actOnExpenseChangeRequest, the
+ * actual security check. Unlike `ExpenseAccess.approvableStageKeys` (a
+ * coarse "holds this stage at all, for some request" signal used only for
+ * UI affordances), this honours the business-division routing:
+ *
+ *   - CATEGORY_HEAD stage: role CATEGORY_HEAD AND `user`'s own
+ *     businessDivision equals `request.requesterBusinessDivision` — a
+ *     Category Head only acts on their own division's requests.
+ *   - MDM stage: `user`'s own businessDivision is 'MDM'. Division-agnostic
+ *     on the request side (every division converges here), but exclusive to
+ *     specifically-tagged people — NOT a blanket ADMIN-role bypass.
+ *   - Anything else: an explicit `expense_access_grants` row for this exact
+ *     stage + table (or '*') — the manual-override mechanism, which also
+ *     still works as an ADDITION on top of the two rules above (e.g.
+ *     temporary cover for someone on leave).
+ *
+ * ADMIN holds no automatic bypass here — see the module doc comment.
+ */
+export async function canActOnExpenseRequestStage(
+  user: AuthLikeUser,
+  request: ExpenseRequestStageContext
+): Promise<boolean> {
+  const role = String(user.role);
+  const businessDivision = user.businessDivision ? String(user.businessDivision) : null;
+
+  if (
+    request.currentStageKey === 'CATEGORY_HEAD' &&
+    role === 'CATEGORY_HEAD' &&
+    businessDivision &&
+    businessDivision === request.requesterBusinessDivision
+  ) {
+    return true;
+  }
+
+  if (request.currentStageKey === 'MDM' && businessDivision === 'MDM') {
+    return true;
+  }
+
+  const grants = await getGrantsForEmail(user.email);
+  return grants.some(
+    (g) => g.level === request.currentStageKey && (g.tableKey === ALL_TABLES || g.tableKey === request.tableKey)
+  );
 }
