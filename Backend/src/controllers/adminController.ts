@@ -5074,6 +5074,7 @@ export const uploadBodyArticleData = async (req: Request, res: Response): Promis
             cmp_cost                 = v.cmp_cost,
             fab_cons                 = v.fab_cons,
             width                    = v.width,
+            body_article_type        = 'uploader',
             updated_at               = NOW()
           FROM jsonb_to_recordset(${JSON.stringify(batch)}::jsonb) AS v(
             body_article_number text, body_article_description text,
@@ -5100,7 +5101,7 @@ export const uploadBodyArticleData = async (req: Request, res: Response): Promis
             m_sleeve_fold, m_btm_fold, m_no_of_pocket, m_pocket,
             m_extra_pocket, m_fit, m_body_style, m_length, m_set,
             cmtp_cost, cmp_cost, fab_cons, width,
-            approval_status, sap_sync_status, created_at, updated_at
+            approval_status, sap_sync_status, body_article_type, created_at, updated_at
           )
           SELECT gen_random_uuid()::text, v.body_article_number, v.body_article_description,
             v.division, v.sub_division, v.major_category, v.mc_code,
@@ -5109,7 +5110,7 @@ export const uploadBodyArticleData = async (req: Request, res: Response): Promis
             v.m_sleeve_fold, v.m_btm_fold, v.m_no_of_pocket, v.m_pocket,
             v.m_extra_pocket, v.m_fit, v.m_body_style, v.m_length, v.m_set,
             v.cmtp_cost, v.cmp_cost, v.fab_cons, v.width,
-            'PENDING', 'NOT_SYNCED', NOW(), NOW()
+            'PENDING', 'NOT_SYNCED', 'uploader', NOW(), NOW()
           FROM jsonb_to_recordset(${JSON.stringify(batch)}::jsonb) AS v(
             body_article_number text, body_article_description text,
             division text, sub_division text, major_category text, mc_code text,
