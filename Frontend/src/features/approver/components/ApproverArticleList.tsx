@@ -101,8 +101,8 @@ const fetchMajorCategoriesByDivision = (division: string): Promise<string[]> => 
   if (majorCatPromises.has(div)) return majorCatPromises.get(div)!;
   const token = localStorage.getItem('authToken');
   const url = div
-    ? `${APP_CONFIG.api.baseURL}/admin/major-categories?division=${encodeURIComponent(div)}`
-    : `${APP_CONFIG.api.baseURL}/admin/major-categories`;
+    ? `${APP_CONFIG.api.baseURL}/approver/major-categories?division=${encodeURIComponent(div)}`
+    : `${APP_CONFIG.api.baseURL}/approver/major-categories`;
   const promise = fetch(url, { headers: token ? { Authorization: `Bearer ${token}` } : {} })
     .then((r) => r.json())
     .then((res: any) => {

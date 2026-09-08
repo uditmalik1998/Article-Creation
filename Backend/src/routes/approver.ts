@@ -1,6 +1,7 @@
 import { Router } from 'express';
 import multer from 'multer';
 import { ApproverController } from '../controllers/ApproverController';
+import { getMajorCategories } from '../controllers/adminController';
 import { authenticate, requireApprover, requireApprovalRights, requireModifyRights } from '../middleware/auth';
 import { asyncHandler } from '../middleware/asyncHandler';
 
@@ -120,5 +121,8 @@ router.get('/national-grid-values', h(ApproverController.getNationalGridValues))
 // Major category details — full table (seg, div, sub_div, maj_cat, mc_code, mc_des, hsn_code, mc_status)
 // Supports ?div=MENS&mcStatus=ACT&search=SHIRT for optional filtering
 router.get('/major-category-details', h(ApproverController.getMajorCategoryDetails));
+
+// Major categories list — accessible to all authenticated roles (Creator, Approver, Admin, etc.)
+router.get('/major-categories', h(getMajorCategories));
 
 export default router;
