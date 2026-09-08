@@ -2,7 +2,7 @@ import { Router } from 'express';
 import multer from 'multer';
 import { ApproverController } from '../controllers/ApproverController';
 import { getMajorCategories } from '../controllers/adminController';
-import { authenticate, requireApprover, requireApprovalRights, requireModifyRights } from '../middleware/auth';
+import { authenticate, requireApprover, requireApprovalRights, requireModifyRights, requireBodyApprovalRights } from '../middleware/auth';
 import { asyncHandler } from '../middleware/asyncHandler';
 
 const router = Router();
@@ -89,8 +89,8 @@ router.post('/create-body-article', h(ApproverController.createBodyArticleFromFG
 // Body Article list (type=FG) — paginated list from body_article_data for the Body Article New Articles page
 router.get('/body-articles', h(ApproverController.getBodyArticleItems));
 
-// Submit body articles to SAP via ZMM_BODY_ART_CRT_V3
-router.post('/body-articles/submit', h(ApproverController.submitBodyArticles));
+// Submit body articles to SAP via ZMM_BODY_ART_CRT_V3 — BODY_APPROVER and ADMIN only
+router.post('/body-articles/submit', requireBodyApprovalRights, h(ApproverController.submitBodyArticles));
 
 // Get / Update a single body_article_data record (used by Body Article detail page)
 router.get('/body-articles/:id',  h(ApproverController.getBodyArticleById));

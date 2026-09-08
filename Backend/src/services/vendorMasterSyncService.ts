@@ -1,16 +1,16 @@
 /**
  * vendorMasterSyncService.ts
  *
- * Fetches all vendor records from the DAB API (ET_Supplier_Master) and
+ * Fetches all vendor records from the DAB API (DY_SUPPLIER_MST) and
  * upserts them into the master_vendor_details table.
  *
- * Pagination: API returns 100 records per page; follow `nextLink` until absent.
+ * Pagination: $first=1000 per page; follow `nextLink` cursor until absent.
  * Upsert key: vendor_code — safe to re-run at any time.
  */
 
 import { prismaClient as prisma } from '../utils/prisma';
 
-const DAB_API_BASE = 'https://my-dab-app.azurewebsites.net/api/ET_Supplier_Master';
+const DAB_API_BASE = 'https://my-dab-app.azurewebsites.net/api/DY_SUPPLIER_MST?$first=1000&$orderby=ID%20desc';
 
 interface DabVendorRow {
   ID: number;
@@ -60,9 +60,11 @@ function toStr(val: number | string | null | undefined): string | null {
 
 /** Fetch one page from the API */
 async function fetchPage(url: string): Promise<DabApiResponse> {
-  const res = await fetch(url, {
-    headers: { Accept: 'application/json' },
-    signal: AbortSignal.timeout(30_000), // 30s per page
+  // nextLink may return http:// — force https
+  const safeUrl = url.replace(/^http:\/\//i, 'https://');
+  const res = await fetch(safeUrl, {
+    headers: { 'Content-Type': 'application/json', Accept: 'application/json' },
+    signal: AbortSignal.timeout(60_000), // 60s per page (1000 rows)
   });
   if (!res.ok) {
     throw new Error(`DAB API HTTP ${res.status} — ${res.statusText}`);
@@ -125,7 +127,7 @@ export async function syncVendorMaster(): Promise<VendorSyncResult> {
       );
 
       upserted += rows.length;
-      console.log(`[VendorSync] Page ${pages} — upserted ${rows.length} rows (total: ${upserted})`);
+      console.log(`[VendorSync] Page ${pages} — fetched ${rows.length} rows (total so far: ${upserted})`);
 
       // Support both OData @odata.nextLink and plain nextLink
       nextUrl = (data['@odata.nextLink'] ?? data.nextLink) ?? null;

@@ -245,11 +245,14 @@ export interface DetailNavigationState {
 
 // ─── Component ────────────────────────────────────────────────────────────────
 
+const DEFAULT_APPROVE_ROLES = ['ADMIN', 'APPROVER', 'CATEGORY_HEAD', 'SUB_DIVISION_HEAD', 'PO_COMMITTEE', 'PD'];
+
 export default function ArticleDetailPage({
   ListComponent = FabricArticleList,
   skipMandatoryFieldsCheck = false,
   approveEndpoint = '/fabric-article/approve',
   itemsBaseEndpoint = '/approver/items',
+  approveRoles = DEFAULT_APPROVE_ROLES,
 }: {
   ListComponent?: React.ComponentType<ApproverArticleListProps>;
   skipMandatoryFieldsCheck?: boolean;
@@ -257,6 +260,8 @@ export default function ArticleDetailPage({
   approveEndpoint?: string;
   /** Override the base path for GET/PUT item calls. Defaults to /approver/items. */
   itemsBaseEndpoint?: string;
+  /** Roles that can use the Save & Submit (approve) button. Defaults to standard approver roles. */
+  approveRoles?: string[];
 } = {}) {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
@@ -308,7 +313,7 @@ export default function ArticleDetailPage({
     mcDesByMajCat: Record<string, string[]>;
   }>({ divisions: [], subDivsByDiv: {}, majCatsBySubDiv: {}, mcDesByMajCat: {} });
 
-  const canApprove = user?.role === 'ADMIN' || user?.role === 'APPROVER' || user?.role === 'CATEGORY_HEAD' || user?.role === 'SUB_DIVISION_HEAD' || user?.role === 'PO_COMMITTEE' || user?.role === 'PD';
+  const canApprove = user?.role != null && approveRoles.includes(user.role);
 
   // ─── Init ───────────────────────────────────────────────────────────────────
 
