@@ -55,13 +55,26 @@ const parseSubDivisionList = (value: unknown): string[] => {
   return [];
 };
 
+/** Mens / Kids / Ladies / PO / MDM — a coarse business-unit tag independent
+ * of Division/Sub-Division above (those follow the Department hierarchy for
+ * extraction routing). Every user is meant to end up with one of these. */
+const BUSINESS_DIVISIONS = ['MENS', 'KIDS', 'LADIES', 'PO', 'MDM'] as const;
+const BUSINESS_DIVISION_LABELS: Record<(typeof BUSINESS_DIVISIONS)[number], string> = {
+  MENS: 'Mens Division',
+  KIDS: 'Kids Division',
+  LADIES: 'Ladies Division',
+  PO: 'PO Division',
+  MDM: 'MDM',
+};
+
 const userSchema = z.object({
   name: z.string().min(1, 'Please enter name'),
   email: z.string().email('Enter a valid email').min(1, 'Please enter email'),
   password: z.string().optional(),
-  role: z.enum(['CREATOR', 'PO_COMMITTEE', 'APPROVER', 'CATEGORY_HEAD', 'SUB_DIVISION_HEAD', 'ADMIN', 'PD_DESIGNER', 'PD']),
+  role: z.enum(['CREATOR', 'PO_COMMITTEE', 'APPROVER', 'CATEGORY_HEAD', 'SUB_DIVISION_HEAD', 'ADMIN', 'PD_DESIGNER', 'PD', 'BODY_APPROVER']),
   divisionIds: z.array(z.string()).optional(),
   subDivision: z.array(z.string()).optional(),
+  businessDivision: z.enum(BUSINESS_DIVISIONS).optional().nullable(),
 });
 type UserValues = z.infer<typeof userSchema>;
 
@@ -77,7 +90,7 @@ export default function UsersManagement() {
 
   const form = useForm<UserValues>({
     resolver: zodResolver(userSchema),
-    defaultValues: { name: '', email: '', password: '', role: 'CREATOR', divisionIds: [], subDivision: [] },
+    defaultValues: { name: '', email: '', password: '', role: 'CREATOR', divisionIds: [], subDivision: [], businessDivision: null },
   });
   const selectedRole = form.watch('role');
   const selectedDivisionIds = form.watch('divisionIds') ?? [];
@@ -134,7 +147,7 @@ export default function UsersManagement() {
   const closeModal = () => {
     setIsModalOpen(false);
     setSelectedUser(null);
-    form.reset({ name: '', email: '', password: '', role: 'CREATOR', divisionIds: [], subDivision: [] });
+    form.reset({ name: '', email: '', password: '', role: 'CREATOR', divisionIds: [], subDivision: [], businessDivision: null });
     pendingDivisionChangeRef.current = null;
     setPendingRemoveDivision(null);
     setPendingOrphans([]);
@@ -189,6 +202,7 @@ export default function UsersManagement() {
       role: values.role,
       division: values.divisionIds?.length ? values.divisionIds : undefined,
       subDivision: values.subDivision,
+      businessDivision: values.businessDivision ?? null,
     };
     if (values.password) payload.password = values.password;
 
@@ -207,6 +221,7 @@ export default function UsersManagement() {
       role: u.role as UserValues['role'],
       divisionIds,
       subDivision: parseSubDivisionList(u.subDivision),
+      businessDivision: u.businessDivision ?? null,
       password: '',
     });
     setIsModalOpen(true);
@@ -270,39 +285,44 @@ export default function UsersManagement() {
       const listSheet = workbook.addWorksheet('Lists');
       listSheet.state = 'hidden';
 
-      const headers = ['name', 'email', 'password', 'role', 'division', 'subDivision'];
+      const headers = ['name', 'email', 'password', 'role', 'division', 'subDivision', 'businessDivision'];
       usersSheet.columns = headers.map((h) => ({ header: h, key: h, width: 24 }));
       usersSheet.getRow(1).font = { bold: true };
       usersSheet.getRow(1).alignment = { vertical: 'middle', horizontal: 'center' };
 
-      usersSheet.addRow(['John Creator', 'john.creator@company.com', 'Temp@123', 'CREATOR', 'MENS', 'ML']);
-      usersSheet.addRow(['Rita CategoryHead', 'rita.head@company.com', 'Temp@123', 'CATEGORY_HEAD', 'LADIES', '']);
+      usersSheet.addRow(['John Creator', 'john.creator@company.com', 'Temp@123', 'CREATOR', 'MENS', 'ML', 'MENS']);
+      usersSheet.addRow(['Rita CategoryHead', 'rita.head@company.com', 'Temp@123', 'CATEGORY_HEAD', 'LADIES', '', 'LADIES']);
 
-      const roleOptions = ['CREATOR', 'PO_COMMITTEE', 'APPROVER', 'CATEGORY_HEAD', 'SUB_DIVISION_HEAD', 'ADMIN', 'PD_DESIGNER', 'PD'];
+      const roleOptions = ['CREATOR', 'PO_COMMITTEE', 'APPROVER', 'CATEGORY_HEAD', 'SUB_DIVISION_HEAD', 'ADMIN', 'PD_DESIGNER', 'PD', 'BODY_APPROVER'];
       const divisionOptions = divisionNames;
       const subDivisionOptions = Array.from(
         new Set(departments.flatMap((d) => (d.subDepartments || []).map((s) => s.code).filter(Boolean))),
       );
+      const businessDivisionOptions = [...BUSINESS_DIVISIONS];
 
       listSheet.getColumn(1).values = [undefined, ...roleOptions];
       listSheet.getColumn(2).values = [undefined, ...divisionOptions];
       listSheet.getColumn(3).values = [undefined, ...subDivisionOptions];
+      listSheet.getColumn(4).values = [undefined, ...businessDivisionOptions];
 
       const roleRange = `Lists!$A$2:$A$${Math.max(roleOptions.length + 1, 2)}`;
       const divisionRange = `Lists!$B$2:$B$${Math.max(divisionOptions.length + 1, 2)}`;
       const subDivisionRange = `Lists!$C$2:$C$${Math.max(subDivisionOptions.length + 1, 2)}`;
+      const businessDivisionRange = `Lists!$D$2:$D$${Math.max(businessDivisionOptions.length + 1, 2)}`;
 
       for (let row = 2; row <= 500; row += 1) {
         usersSheet.getCell(`D${row}`).dataValidation = { type: 'list', allowBlank: true, formulae: [roleRange], showErrorMessage: true, errorStyle: 'warning' };
         usersSheet.getCell(`E${row}`).dataValidation = { type: 'list', allowBlank: true, formulae: [divisionRange], showErrorMessage: true, errorStyle: 'warning' };
         usersSheet.getCell(`F${row}`).dataValidation = { type: 'list', allowBlank: true, formulae: [subDivisionRange], showErrorMessage: true, errorStyle: 'warning' };
+        usersSheet.getCell(`G${row}`).dataValidation = { type: 'list', allowBlank: true, formulae: [businessDivisionRange], showErrorMessage: true, errorStyle: 'warning' };
       }
 
-      usersSheet.getCell('H1').value = 'Notes';
-      usersSheet.getCell('H2').value = 'CREATOR/APPROVER: division + subDivision required';
-      usersSheet.getCell('H3').value = 'CATEGORY_HEAD: division required, subDivision optional';
-      usersSheet.getCell('H4').value = 'ADMIN: division/subDivision optional';
-      usersSheet.getCell('H5').value = 'PO_COMMITTEE: division/subDivision not required (free selection at extraction)';
+      usersSheet.getCell('I1').value = 'Notes';
+      usersSheet.getCell('I2').value = 'CREATOR/APPROVER: division + subDivision required';
+      usersSheet.getCell('I3').value = 'CATEGORY_HEAD: division required, subDivision optional';
+      usersSheet.getCell('I4').value = 'ADMIN: division/subDivision optional';
+      usersSheet.getCell('I5').value = 'PO_COMMITTEE: division/subDivision not required (free selection at extraction)';
+      usersSheet.getCell('I6').value = 'businessDivision (MENS/KIDS/LADIES/PO/MDM) is optional and independent of division/subDivision — leave blank to set later from the Users page.';
 
       const buffer = await workbook.xlsx.writeBuffer();
       const blob = new Blob([buffer], { type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' });
@@ -339,7 +359,7 @@ export default function UsersManagement() {
 
       const toRole = (roleRaw: string): AdminUser['role'] | null => {
         const role = roleRaw.toUpperCase();
-        if (['CREATOR', 'PO_COMMITTEE', 'APPROVER', 'CATEGORY_HEAD', 'SUB_DIVISION_HEAD', 'ADMIN', 'PD_DESIGNER', 'PD'].includes(role))
+        if (['CREATOR', 'PO_COMMITTEE', 'APPROVER', 'CATEGORY_HEAD', 'SUB_DIVISION_HEAD', 'ADMIN', 'PD_DESIGNER', 'PD', 'BODY_APPROVER'].includes(role))
           return role as AdminUser['role'];
         return null;
       };
@@ -365,6 +385,15 @@ export default function UsersManagement() {
         const division = parseCell(row.division) || undefined;
         const subDivisionValues = parseSubDivisionList(parseCell(row.subDivision));
         const subDivision = subDivisionValues.length ? subDivisionValues : undefined;
+        const businessDivisionRaw = parseCell(row.businessDivision).toUpperCase();
+        const businessDivision = (BUSINESS_DIVISIONS as readonly string[]).includes(businessDivisionRaw)
+          ? (businessDivisionRaw as (typeof BUSINESS_DIVISIONS)[number])
+          : undefined;
+        if (businessDivisionRaw && !businessDivision) {
+          failed += 1;
+          errors.push(`Row ${line}: businessDivision "${businessDivisionRaw}" must be one of ${BUSINESS_DIVISIONS.join(', ')}`);
+          continue;
+        }
 
         if (!name || !email || !password || !role) {
           failed += 1;
@@ -402,6 +431,7 @@ export default function UsersManagement() {
               role === 'CATEGORY_HEAD' || role === 'PO_COMMITTEE' || role === 'ADMIN' || role === 'PD'
                 ? undefined
                 : subDivision,
+            businessDivision,
           });
           success += 1;
         } catch (error: any) {
@@ -452,6 +482,16 @@ export default function UsersManagement() {
           </div>
         );
       },
+    },
+    {
+      title: 'Business Division',
+      key: 'businessDivision',
+      render: (_v, record) =>
+        record.businessDivision ? (
+          <Badge variant="secondary">{BUSINESS_DIVISION_LABELS[record.businessDivision]}</Badge>
+        ) : (
+          <span className="text-muted-foreground italic text-xs">Not set</span>
+        ),
     },
     {
       title: 'Status',
@@ -624,9 +664,37 @@ export default function UsersManagement() {
                           <SelectValue />
                         </SelectTrigger>
                         <SelectContent>
-                          {['CREATOR', 'PO_COMMITTEE', 'APPROVER', 'CATEGORY_HEAD', 'SUB_DIVISION_HEAD', 'ADMIN', 'PD_DESIGNER', 'PD'].map((r) => (
+                          {['CREATOR', 'PO_COMMITTEE', 'APPROVER', 'CATEGORY_HEAD', 'SUB_DIVISION_HEAD', 'ADMIN', 'PD_DESIGNER', 'PD', 'BODY_APPROVER'].map((r) => (
                             <SelectItem key={r} value={r}>
                               {r}
+                            </SelectItem>
+                          ))}
+                        </SelectContent>
+                      </Select>
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+              <FormField
+                control={form.control}
+                name="businessDivision"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Business Division</FormLabel>
+                    <FormControl>
+                      <Select
+                        onValueChange={(v) => field.onChange(v === '__NONE__' ? null : v)}
+                        value={field.value ?? '__NONE__'}
+                      >
+                        <SelectTrigger>
+                          <SelectValue />
+                        </SelectTrigger>
+                        <SelectContent>
+                          <SelectItem value="__NONE__">Not set</SelectItem>
+                          {BUSINESS_DIVISIONS.map((d) => (
+                            <SelectItem key={d} value={d}>
+                              {BUSINESS_DIVISION_LABELS[d]}
                             </SelectItem>
                           ))}
                         </SelectContent>

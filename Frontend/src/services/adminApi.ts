@@ -141,13 +141,20 @@ export interface DashboardStats {
   allowedValues: number;
 }
 
+/** Mens / Kids / Ladies / PO — a coarse business-unit tag independent of
+ * `division`/`subDivision` below (those follow the Department/SubDepartment
+ * hierarchy for extraction routing; `division` can hold several values at
+ * once). Shown in the Users page as "Business Division". */
+export type AdminUserBusinessDivision = 'MENS' | 'KIDS' | 'LADIES' | 'PO' | 'MDM';
+
 export interface AdminUser {
   id: number;
   email: string;
   name: string;
-  role: 'ADMIN' | 'CREATOR' | 'PO_COMMITTEE' | 'APPROVER' | 'CATEGORY_HEAD' | 'SUB_DIVISION_HEAD' | 'PD_DESIGNER' | 'PD';
+  role: 'ADMIN' | 'CREATOR' | 'PO_COMMITTEE' | 'APPROVER' | 'CATEGORY_HEAD' | 'SUB_DIVISION_HEAD' | 'PD_DESIGNER' | 'PD' | 'BODY_APPROVER';
   division?: string | null;
   subDivision?: string | null;
+  businessDivision?: AdminUserBusinessDivision | null;
   isActive: boolean;
   createdAt: string;
   lastLogin?: string | null;
@@ -538,9 +545,10 @@ export const createUser = async (payload: {
   email: string;
   password: string;
   name: string;
-  role?: 'ADMIN' | 'CREATOR' | 'PO_COMMITTEE' | 'APPROVER' | 'CATEGORY_HEAD' | 'SUB_DIVISION_HEAD' | 'PD_DESIGNER' | 'PD';
+  role?: 'ADMIN' | 'CREATOR' | 'PO_COMMITTEE' | 'APPROVER' | 'CATEGORY_HEAD' | 'SUB_DIVISION_HEAD' | 'PD_DESIGNER' | 'PD' | 'BODY_APPROVER';
   division?: string;
   subDivision?: string | string[];
+  businessDivision?: AdminUserBusinessDivision | null;
 }): Promise<AdminUser> => {
   const { data } = await adminApi.post<ApiResponse<AdminUser>>('/users', payload);
   return data.data;

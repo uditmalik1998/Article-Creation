@@ -450,6 +450,7 @@ exports.Prisma.UserScalarFieldEnum = {
   role: 'role',
   division: 'division',
   subDivision: 'subDivision',
+  businessDivision: 'businessDivision',
   isActive: 'isActive',
   lastLogin: 'lastLogin',
   createdAt: 'createdAt',
@@ -1353,7 +1354,8 @@ exports.Prisma.UserOrderByRelevanceFieldEnum = {
   password: 'password',
   name: 'name',
   division: 'division',
-  subDivision: 'subDivision'
+  subDivision: 'subDivision',
+  businessDivision: 'businessDivision'
 };
 
 exports.Prisma.AuditLogOrderByRelevanceFieldEnum = {
@@ -1862,7 +1864,8 @@ exports.UserRole = exports.$Enums.UserRole = {
   CATEGORY_HEAD: 'CATEGORY_HEAD',
   SUB_DIVISION_HEAD: 'SUB_DIVISION_HEAD',
   PD_DESIGNER: 'PD_DESIGNER',
-  PD: 'PD'
+  PD: 'PD',
+  BODY_APPROVER: 'BODY_APPROVER'
 };
 
 exports.ChangeAction = exports.$Enums.ChangeAction = {

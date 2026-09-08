@@ -66,13 +66,26 @@ const AdminCreateUserSchema = z.object({
   email: z.string().email().max(255),
   password: z.string().min(6).max(128),
   name: z.string().min(1).max(100),
-  role: z.enum(['ADMIN', 'USER', 'CREATOR', 'PO_COMMITTEE', 'APPROVER', 'CATEGORY_HEAD', 'SUB_DIVISION_HEAD', 'PD_DESIGNER', 'PD']).optional().default('USER'),
+  role: z.enum(['ADMIN', 'USER', 'CREATOR', 'PO_COMMITTEE', 'APPROVER', 'CATEGORY_HEAD', 'SUB_DIVISION_HEAD', 'PD_DESIGNER', 'PD', 'BODY_APPROVER']).optional().default('USER'),
   division: z.union([z.string(), z.array(z.string())]).optional().nullable(),
   subDivision: z.union([z.string(), z.array(z.string())]).optional().nullable(),
+  // Coarse business-unit tag — independent of division/subDivision above,
+  // see the doc comment on User.businessDivision in schema.prisma.
+  businessDivision: z.enum(['MENS', 'KIDS', 'LADIES', 'PO', 'MDM']).optional().nullable(),
 });
 
 const AdminUpdateUserSchema = AdminCreateUserSchema.partial().extend({
   password: z.string().min(6).max(128).optional(),
+  // `.partial()` only widens types to `| undefined` — it does NOT strip a
+  // `.default()` already baked into a field, so without this override an
+  // update that simply omits `role` (any PATCH-style caller that only sends
+  // the fields it's actually changing) would resolve to the base schema's
+  // `.default('USER')` instead of undefined, and `updateUser` below would
+  // then silently overwrite that user's real role with 'USER'. Redeclared
+  // here with no default so an omitted role truly stays undefined, and
+  // `updateUser`'s `validated.role ?? existingUser.role` correctly keeps
+  // whatever role the user already had.
+  role: z.enum(['ADMIN', 'USER', 'CREATOR', 'PO_COMMITTEE', 'APPROVER', 'CATEGORY_HEAD', 'SUB_DIVISION_HEAD', 'PD_DESIGNER', 'PD', 'BODY_APPROVER']).optional(),
 });
 
 const normalizeSubDivisionInput = (value: unknown): string | null => {
@@ -1145,6 +1158,7 @@ export const getAllUsers = async (req: Request, res: Response): Promise<void> =>
         role: true,
         division: true,
         subDivision: true,
+        businessDivision: true,
         isActive: true,
         createdAt: true,
         lastLogin: true,
@@ -1195,6 +1209,7 @@ export const createUser = async (req: Request, res: Response): Promise<void> => 
           role: validated.role as any,
           division: validated.role === 'PO_COMMITTEE' ? null : normalizedDivision,
           subDivision: (validated.role === 'CATEGORY_HEAD' || validated.role === 'PO_COMMITTEE' || validated.role === 'ADMIN') ? null : normalizedSubDivision,
+          businessDivision: validated.businessDivision ?? null,
           isActive: true,
         },
         select: {
@@ -1204,6 +1219,7 @@ export const createUser = async (req: Request, res: Response): Promise<void> => 
           role: true,
           division: true,
           subDivision: true,
+          businessDivision: true,
           isActive: true,
           createdAt: true,
         }
@@ -1221,6 +1237,7 @@ export const createUser = async (req: Request, res: Response): Promise<void> => 
         role: validated.role as any,
         division: validated.role === 'PO_COMMITTEE' ? null : normalizedDivision,
         subDivision: (validated.role === 'CATEGORY_HEAD' || validated.role === 'PO_COMMITTEE' || validated.role === 'ADMIN') ? null : normalizedSubDivision,
+        businessDivision: validated.businessDivision ?? null,
         isActive: true,
       },
       select: {
@@ -1230,6 +1247,7 @@ export const createUser = async (req: Request, res: Response): Promise<void> => 
         role: true,
         division: true,
         subDivision: true,
+        businessDivision: true,
         isActive: true,
         createdAt: true,
       }
@@ -1285,6 +1303,9 @@ export const updateUser = async (req: Request, res: Response): Promise<void> => 
       role: validated.role as any,
       division: finalRole === 'PO_COMMITTEE' ? null : (validated.division !== undefined ? finalDivision : undefined),
       subDivision: (finalRole === 'CATEGORY_HEAD' || finalRole === 'PO_COMMITTEE' || finalRole === 'ADMIN') ? null : (validated.subDivision !== undefined ? normalizeSubDivisionInput(validated.subDivision) : undefined),
+      // Unlike division/subDivision, businessDivision has no role-based
+      // clearing rule — every role can be tagged Mens/Kids/Ladies/PO.
+      businessDivision: validated.businessDivision !== undefined ? validated.businessDivision : undefined,
       email: validated.email ? validated.email.toLowerCase() : undefined,
     };
 
@@ -1306,6 +1327,7 @@ export const updateUser = async (req: Request, res: Response): Promise<void> => 
         role: true,
         division: true,
         subDivision: true,
+        businessDivision: true,
         isActive: true,
         createdAt: true,
       }

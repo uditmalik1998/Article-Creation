@@ -498,22 +498,30 @@ model MasterVendorDetail {
 
 /// User: Admin and regular users
 model User {
-  id             Int                    @id @default(autoincrement())
-  email          String                 @unique @db.VarChar(255)
-  password       String                 @db.VarChar(255)
-  name           String                 @db.VarChar(100)
-  role           UserRole               @default(CREATOR)
-  division       String?                @db.VarChar(200) // Linked to Department.name
-  subDivision    String?                @map("sub_division") @db.VarChar(500) // Linked to SubDepartment.code
-  isActive       Boolean                @default(true) @map("is_active")
-  lastLogin      DateTime?              @map("last_login")
-  createdAt      DateTime               @default(now()) @map("created_at")
-  updatedAt      DateTime               @updatedAt @map("updated_at")
-  apiKeys        ApiKey[]
-  costSummary    CostSummary?
-  extractionJobs ExtractionJob[]
-  verifications  ExtractionResult[]     @relation("UserVerifications")
-  approvedItems  ExtractionResultFlat[] @relation("ApproverRelation")
+  id               Int                    @id @default(autoincrement())
+  email            String                 @unique @db.VarChar(255)
+  password         String                 @db.VarChar(255)
+  name             String                 @db.VarChar(100)
+  role             UserRole               @default(CREATOR)
+  division         String?                @db.VarChar(200) // Linked to Department.name
+  subDivision      String?                @map("sub_division") @db.VarChar(500) // Linked to SubDepartment.code
+  /// Coarse business-unit tag, independent of `division`/`subDivision` above
+  /// (those are tied to the Department/SubDepartment hierarchy for
+  /// extraction routing, and `division` can hold several comma-separated
+  /// values). This is always exactly one of MENS / KIDS / LADIES / PO,
+  /// admin-editable from the Users page, and every user is meant to end up
+  /// with one — shown in the UI as "Business Division" to avoid being
+  /// confused with the existing Sub Division field.
+  businessDivision String?                @map("business_division") @db.VarChar(20)
+  isActive         Boolean                @default(true) @map("is_active")
+  lastLogin        DateTime?              @map("last_login")
+  createdAt        DateTime               @default(now()) @map("created_at")
+  updatedAt        DateTime               @updatedAt @map("updated_at")
+  apiKeys          ApiKey[]
+  costSummary      CostSummary?
+  extractionJobs   ExtractionJob[]
+  verifications    ExtractionResult[]     @relation("UserVerifications")
+  approvedItems    ExtractionResultFlat[] @relation("ApproverRelation")
 
   @@index([email])
   @@index([role])
@@ -647,6 +655,13 @@ enum UserRole {
   SUB_DIVISION_HEAD
   PD_DESIGNER
   PD
+  /// Added directly on the database's `user_role` enum (3 users already carry
+  /// it) without ever being added here — every `prisma.user.findMany()` (the
+  /// Admin Users page included) threw on any result set containing one of
+  /// those rows, since Prisma can't deserialize an enum value it doesn't
+  /// know about. Declared here purely to stop that crash; no access rules
+  /// exist for this role anywhere in the app yet.
+  BODY_APPROVER
 
   @@map("user_role")
   @@schema("public")
