@@ -50,10 +50,14 @@ const ProtectedRoute: React.FC<{ children: React.ReactNode }> = ({ children }) =
   }
 
   // PD_DESIGNER only has access to model-generation
+  // BODY_APPROVER only has access to body-article
   if (user) {
     const userData = JSON.parse(user);
     if (userData.role === 'PD_DESIGNER') {
       return <Navigate to="/model-generation" replace />;
+    }
+    if (userData.role === 'BODY_APPROVER') {
+      return <Navigate to="/body-article" replace />;
     }
   }
 
@@ -113,8 +117,8 @@ const ApproverRoute: React.FC<{ children: React.ReactNode }> = ({ children }) =>
 
   if (user) {
     const userData = JSON.parse(user);
-    // Allow ADMIN, APPROVER, CATEGORY_HEAD, SUB_DIVISION_HEAD, CREATOR, PO_COMMITTEE or PD
-    if (userData.role !== 'APPROVER' && userData.role !== 'CATEGORY_HEAD' && userData.role !== 'SUB_DIVISION_HEAD' && userData.role !== 'ADMIN' && userData.role !== 'CREATOR' && userData.role !== 'PO_COMMITTEE' && userData.role !== 'PD') {
+    // Allow ADMIN, APPROVER, CATEGORY_HEAD, SUB_DIVISION_HEAD, CREATOR, PO_COMMITTEE, PD, BODY_APPROVER
+    if (userData.role !== 'APPROVER' && userData.role !== 'CATEGORY_HEAD' && userData.role !== 'SUB_DIVISION_HEAD' && userData.role !== 'ADMIN' && userData.role !== 'CREATOR' && userData.role !== 'PO_COMMITTEE' && userData.role !== 'PD' && userData.role !== 'BODY_APPROVER') {
       return <Navigate to="/dashboard" replace />;
     }
   }

@@ -647,6 +647,7 @@ enum UserRole {
   SUB_DIVISION_HEAD
   PD_DESIGNER
   PD
+  BODY_APPROVER
 
   @@map("user_role")
   @@schema("public")

@@ -282,7 +282,8 @@ export const UserRole: {
   CATEGORY_HEAD: 'CATEGORY_HEAD',
   SUB_DIVISION_HEAD: 'SUB_DIVISION_HEAD',
   PD_DESIGNER: 'PD_DESIGNER',
-  PD: 'PD'
+  PD: 'PD',
+  BODY_APPROVER: 'BODY_APPROVER'
 };
 
 export type UserRole = (typeof UserRole)[keyof typeof UserRole]
