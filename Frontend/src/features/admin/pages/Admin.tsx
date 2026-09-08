@@ -623,6 +623,24 @@ export default function Admin() {
       .catch(() => message.error('Failed to download template'));
   };
 
+  const downloadSizeMasterData = () => {
+    const token = localStorage.getItem('authToken');
+    const url = `${APP_CONFIG.api.baseURL}/admin/size-master/download`;
+    fetch(url, { headers: token ? { Authorization: `Bearer ${token}` } : {} })
+      .then((r) => {
+        if (!r.ok) throw new Error('Download failed');
+        return r.blob();
+      })
+      .then((blob) => {
+        const today = new Date().toISOString().slice(0, 10);
+        const a = document.createElement('a');
+        a.href = URL.createObjectURL(blob);
+        a.download = `SIZE_MASTER_${today}.xlsx`;
+        a.click();
+      })
+      .catch(() => message.error('Failed to download size master data'));
+  };
+
   const handleSizeMasterUpload = async (file: File) => {
     setSizeMasterUploading(true);
     setSizeMasterProgress(0);
@@ -683,6 +701,24 @@ export default function Admin() {
         a.click();
       })
       .catch(() => message.error('Failed to download template'));
+  };
+
+  const downloadColorMasterData = () => {
+    const token = localStorage.getItem('authToken');
+    const url = `${APP_CONFIG.api.baseURL}/admin/color-master/download`;
+    fetch(url, { headers: token ? { Authorization: `Bearer ${token}` } : {} })
+      .then((r) => {
+        if (!r.ok) throw new Error('Download failed');
+        return r.blob();
+      })
+      .then((blob) => {
+        const today = new Date().toISOString().slice(0, 10);
+        const a = document.createElement('a');
+        a.href = URL.createObjectURL(blob);
+        a.download = `COLOR_MASTER_${today}.xlsx`;
+        a.click();
+      })
+      .catch(() => message.error('Failed to download color master data'));
   };
 
   const handleColorMasterUpload = async (file: File) => {
@@ -1824,6 +1860,10 @@ export default function Admin() {
                 <Eye />
                 View Data
               </Button>
+              <Button size="sm" variant="outline" onClick={downloadSizeMasterData}>
+                <Download />
+                Download Data
+              </Button>
               <Button size="sm" variant="outline" onClick={downloadSizeMasterTemplate}>
                 <Download />
                 Download Template
@@ -1939,6 +1979,10 @@ export default function Admin() {
               <Button size="sm" variant="outline" onClick={() => navigate('/admin/expense/color-master')}>
                 <Eye />
                 View Data
+              </Button>
+              <Button size="sm" variant="outline" onClick={downloadColorMasterData}>
+                <Download />
+                Download Data
               </Button>
               <Button size="sm" variant="outline" onClick={downloadColorMasterTemplate}>
                 <Download />
@@ -2673,7 +2717,7 @@ export default function Admin() {
               </Button>
               <Button size="sm" variant="outline" onClick={exportSegmentMaster}>
                 <Download />
-                Export Data
+                Download Data
               </Button>
               <Button size="sm" variant="outline" onClick={loadSegmentMasterStatus} disabled={segmentMasterStatusLoading}>
                 <RotateCw className={segmentMasterStatusLoading ? 'animate-spin' : ''} />
