@@ -2541,7 +2541,7 @@ const ArticleCard = React.memo(
                                     length:        r.mLength,
                                   };
                                   // BOM cost fields: only overwrite when the body article has a value.
-                                  const bomMap: Record<string, number | null | undefined> = {
+                                  const bomMap: Record<string, string | number | null | undefined> = {
                                     cmtpCost: r.cmtpCost,
                                     cmpCost:  r.cmpCost,
                                     fabCons:  r.fabCons,
