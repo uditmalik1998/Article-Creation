@@ -618,7 +618,7 @@ export async function syncArticlesToSapViaRfc(
         }
 
         // ── 2. Build payload (filtered by card visibility: mandatory + optional grids) ──
-        const payload = buildRfcPayload(item, mandatoryGrid, majCatVisible);
+        const payload = await buildRfcPayload(item, mandatoryGrid, majCatVisible);
 
         console.log(`\n========== [ZMM_RFC] FULL PAYLOAD for flat_id=${item.id} ==========`);
         console.log(`API URL : ${ZMM_RFC_URL}`);
