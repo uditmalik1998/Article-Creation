@@ -21,7 +21,10 @@ import KsmlUploaderPage from './features/admin/pages/KsmlUploaderPage'; // KSML 
 import PoolBUploaderPage from './features/admin/pages/PoolBUploaderPage'; // Pool B article-value uploader
 import ModificationLogsPage from './features/admin/pages/ModificationLogsPage';
 import ExpenseTableDetailPage from './features/admin/pages/ExpenseTableDetailPage';
+import ExpenseMastersPage from './features/admin/pages/ExpenseMastersPage';
 import ExpenseChangeRequestsPage from './features/admin/pages/ExpenseChangeRequestsPage';
+import ExpenseAccessControlPage from './features/admin/pages/ExpenseAccessControlPage';
+import ExpenseAuditLogPage from './features/admin/pages/ExpenseAuditLogPage';
 import ApproverDashboard from './features/approver/pages/ApproverDashboard'; // Approver Dashboard
 import ArticleDetailPage from './features/approver/pages/ArticleDetailPage'; // Article detail view
 import FabricArticleDashboard from './features/fabric-article/pages/FabricArticleDashboard'; // Fabric Article Dashboard
@@ -78,6 +81,12 @@ const AdminRoute: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   return <>{children}</>;
 };
 
+// Expense Data (view + change-request workflow). Access is per-email, not
+// per-role — a sub-division editor, Category Head or MDM user can hold any
+// role — so this guard only keeps out PD_DESIGNER (who has their own app) and
+// leaves the rest to the server: /api/expense checks every read and every
+// action against expense_access_grants, and the pages render a clear
+// "no access" card when it says no.
 const ExpenseRoute: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const token = localStorage.getItem('authToken');
   const user = localStorage.getItem('user');
@@ -88,15 +97,8 @@ const ExpenseRoute: React.FC<{ children: React.ReactNode }> = ({ children }) => 
 
   if (user) {
     const userData = JSON.parse(user);
-    // Expense Data (view + change-request workflow): ADMIN, CREATOR, APPROVER, CATEGORY_HEAD, PD
-    if (
-      userData.role !== 'ADMIN' &&
-      userData.role !== 'CREATOR' &&
-      userData.role !== 'APPROVER' &&
-      userData.role !== 'CATEGORY_HEAD' &&
-      userData.role !== 'PD'
-    ) {
-      return <Navigate to="/dashboard" replace />;
+    if (userData.role === 'PD_DESIGNER') {
+      return <Navigate to="/model-generation" replace />;
     }
   }
 
@@ -339,6 +341,16 @@ const App: React.FC = () => {
                 }
               />
               <Route
+                path="/admin/expense-masters"
+                element={
+                  <ExpenseRoute>
+                    <MainLayout>
+                      <ExpenseMastersPage />
+                    </MainLayout>
+                  </ExpenseRoute>
+                }
+              />
+              <Route
                 path="/admin/expense-change-requests"
                 element={
                   <ExpenseRoute>
@@ -346,6 +358,26 @@ const App: React.FC = () => {
                       <ExpenseChangeRequestsPage />
                     </MainLayout>
                   </ExpenseRoute>
+                }
+              />
+              <Route
+                path="/admin/expense-access"
+                element={
+                  <AdminRoute>
+                    <MainLayout>
+                      <ExpenseAccessControlPage />
+                    </MainLayout>
+                  </AdminRoute>
+                }
+              />
+              <Route
+                path="/admin/expense-audit-log"
+                element={
+                  <AdminRoute>
+                    <MainLayout>
+                      <ExpenseAuditLogPage />
+                    </MainLayout>
+                  </AdminRoute>
                 }
               />
               <Route

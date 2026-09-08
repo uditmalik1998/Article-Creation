@@ -849,6 +849,55 @@ exports.Prisma.NationalGridMasterScalarFieldEnum = {
   createdAt: 'createdAt'
 };
 
+exports.Prisma.BroaderMenuScalarFieldEnum = {
+  id: 'id',
+  sn: 'sn',
+  mcCd: 'mcCd',
+  seg: 'seg',
+  div: 'div',
+  subDiv: 'subDiv',
+  majCatCd: 'majCatCd',
+  majCatNm: 'majCatNm',
+  subCatCd: 'subCatCd',
+  subCatDesc: 'subCatDesc',
+  mcDesc: 'mcDesc',
+  ssn: 'ssn',
+  mcStat: 'mcStat',
+  subCatStat: 'subCatStat',
+  majCatStat: 'majCatStat',
+  sizeApplicable: 'sizeApplicable',
+  divStat: 'divStat',
+  mcPkSz: 'mcPkSz',
+  subCatPkSz: 'subCatPkSz',
+  noOfOptions: 'noOfOptions',
+  avgDensity: 'avgDensity',
+  accDensity: 'accDensity',
+  wgDensity: 'wgDensity',
+  fg46FtDensity: 'fg46FtDensity',
+  fg5FtDensity: 'fg5FtDensity',
+  fg4ADensity: 'fg4ADensity',
+  fg8ADensity: 'fg8ADensity',
+  acp: 'acp',
+  oldDensity: 'oldDensity',
+  seq: 'seq',
+  mjCatTyp: 'mjCatTyp',
+  fixtr: 'fixtr',
+  newMcCd: 'newMcCd',
+  newMcDesc: 'newMcDesc',
+  oldMcDesc: 'oldMcDesc',
+  oldSubCatCd: 'oldSubCatCd',
+  oldSubCatDesc: 'oldSubCatDesc',
+  legacyMcDesc: 'legacyMcDesc',
+  effectiveDate: 'effectiveDate',
+  remarks: 'remarks',
+  gmStatus: 'gmStatus',
+  currentMcStatus: 'currentMcStatus',
+  fullMcName: 'fullMcName',
+  winterStatus: 'winterStatus',
+  uploadedAt: 'uploadedAt',
+  updatedAt: 'updatedAt'
+};
+
 exports.Prisma.MajorCatMasterScalarFieldEnum = {
   id: 'id',
   majCat: 'majCat',
@@ -994,32 +1043,72 @@ exports.Prisma.MajorCategoryDetailsScalarFieldEnum = {
   createdAt: 'createdAt'
 };
 
+exports.Prisma.ExpenseApprovalStageScalarFieldEnum = {
+  id: 'id',
+  key: 'key',
+  label: 'label',
+  description: 'description',
+  sortOrder: 'sortOrder',
+  isActive: 'isActive',
+  createdById: 'createdById',
+  createdByName: 'createdByName',
+  createdAt: 'createdAt',
+  updatedAt: 'updatedAt'
+};
+
 exports.Prisma.ExpenseChangeRequestScalarFieldEnum = {
   id: 'id',
   tableKey: 'tableKey',
+  operation: 'operation',
   rowId: 'rowId',
+  appliedRowId: 'appliedRowId',
   rowLabel: 'rowLabel',
   changes: 'changes',
   reason: 'reason',
+  dueDate: 'dueDate',
   status: 'status',
+  currentStageKey: 'currentStageKey',
+  approvalTrail: 'approvalTrail',
   requestedById: 'requestedById',
   requestedByName: 'requestedByName',
   requestedByEmail: 'requestedByEmail',
   requestedAt: 'requestedAt',
-  approverId: 'approverId',
-  approverName: 'approverName',
-  approverEmail: 'approverEmail',
-  approverAt: 'approverAt',
-  approverComment: 'approverComment',
-  approverAction: 'approverAction',
-  finalById: 'finalById',
-  finalByName: 'finalByName',
-  finalByEmail: 'finalByEmail',
-  finalAt: 'finalAt',
-  finalComment: 'finalComment',
-  finalAction: 'finalAction',
   createdAt: 'createdAt',
   updatedAt: 'updatedAt'
+};
+
+exports.Prisma.ExpenseAccessGrantScalarFieldEnum = {
+  id: 'id',
+  email: 'email',
+  level: 'level',
+  tableKey: 'tableKey',
+  subDivision: 'subDivision',
+  canCreate: 'canCreate',
+  canUpdate: 'canUpdate',
+  canDelete: 'canDelete',
+  isActive: 'isActive',
+  note: 'note',
+  grantedById: 'grantedById',
+  grantedByName: 'grantedByName',
+  createdAt: 'createdAt',
+  updatedAt: 'updatedAt'
+};
+
+exports.Prisma.ExpenseAuditLogScalarFieldEnum = {
+  id: 'id',
+  requestId: 'requestId',
+  tableKey: 'tableKey',
+  rowId: 'rowId',
+  operation: 'operation',
+  eventType: 'eventType',
+  stageKey: 'stageKey',
+  stageLabel: 'stageLabel',
+  actorId: 'actorId',
+  actorName: 'actorName',
+  actorEmail: 'actorEmail',
+  comment: 'comment',
+  details: 'details',
+  occurredAt: 'occurredAt'
 };
 
 exports.Prisma.SortOrder = {
@@ -1543,6 +1632,32 @@ exports.Prisma.NationalGridMasterOrderByRelevanceFieldEnum = {
   fullForm: 'fullForm'
 };
 
+exports.Prisma.BroaderMenuOrderByRelevanceFieldEnum = {
+  seg: 'seg',
+  div: 'div',
+  subDiv: 'subDiv',
+  majCatNm: 'majCatNm',
+  subCatDesc: 'subCatDesc',
+  mcDesc: 'mcDesc',
+  ssn: 'ssn',
+  mcStat: 'mcStat',
+  subCatStat: 'subCatStat',
+  majCatStat: 'majCatStat',
+  sizeApplicable: 'sizeApplicable',
+  divStat: 'divStat',
+  mjCatTyp: 'mjCatTyp',
+  fixtr: 'fixtr',
+  newMcDesc: 'newMcDesc',
+  oldMcDesc: 'oldMcDesc',
+  oldSubCatDesc: 'oldSubCatDesc',
+  legacyMcDesc: 'legacyMcDesc',
+  remarks: 'remarks',
+  gmStatus: 'gmStatus',
+  currentMcStatus: 'currentMcStatus',
+  fullMcName: 'fullMcName',
+  winterStatus: 'winterStatus'
+};
+
 exports.Prisma.MajorCatMasterOrderByRelevanceFieldEnum = {
   majCat: 'majCat',
   name: 'name',
@@ -1661,22 +1776,43 @@ exports.Prisma.MajorCategoryDetailsOrderByRelevanceFieldEnum = {
   mcStatus: 'mcStatus'
 };
 
+exports.Prisma.ExpenseApprovalStageOrderByRelevanceFieldEnum = {
+  key: 'key',
+  label: 'label',
+  description: 'description',
+  createdByName: 'createdByName'
+};
+
 exports.Prisma.ExpenseChangeRequestOrderByRelevanceFieldEnum = {
   id: 'id',
   tableKey: 'tableKey',
   rowId: 'rowId',
+  appliedRowId: 'appliedRowId',
   rowLabel: 'rowLabel',
   reason: 'reason',
+  currentStageKey: 'currentStageKey',
   requestedByName: 'requestedByName',
-  requestedByEmail: 'requestedByEmail',
-  approverName: 'approverName',
-  approverEmail: 'approverEmail',
-  approverComment: 'approverComment',
-  approverAction: 'approverAction',
-  finalByName: 'finalByName',
-  finalByEmail: 'finalByEmail',
-  finalComment: 'finalComment',
-  finalAction: 'finalAction'
+  requestedByEmail: 'requestedByEmail'
+};
+
+exports.Prisma.ExpenseAccessGrantOrderByRelevanceFieldEnum = {
+  email: 'email',
+  level: 'level',
+  tableKey: 'tableKey',
+  subDivision: 'subDivision',
+  note: 'note',
+  grantedByName: 'grantedByName'
+};
+
+exports.Prisma.ExpenseAuditLogOrderByRelevanceFieldEnum = {
+  requestId: 'requestId',
+  tableKey: 'tableKey',
+  rowId: 'rowId',
+  stageKey: 'stageKey',
+  stageLabel: 'stageLabel',
+  actorName: 'actorName',
+  actorEmail: 'actorEmail',
+  comment: 'comment'
 };
 exports.GarmentType = exports.$Enums.GarmentType = {
   UPPER: 'UPPER',
@@ -1758,11 +1894,25 @@ exports.PoolBBatchStatus = exports.$Enums.PoolBBatchStatus = {
   FAILED: 'FAILED'
 };
 
+exports.ExpenseChangeOperation = exports.$Enums.ExpenseChangeOperation = {
+  UPDATE: 'UPDATE',
+  CREATE: 'CREATE',
+  DELETE: 'DELETE'
+};
+
 exports.ExpenseChangeStatus = exports.$Enums.ExpenseChangeStatus = {
-  PENDING_APPROVER: 'PENDING_APPROVER',
-  PENDING_FINAL: 'PENDING_FINAL',
+  PENDING: 'PENDING',
   APPROVED: 'APPROVED',
   REJECTED: 'REJECTED'
+};
+
+exports.ExpenseAuditEventType = exports.$Enums.ExpenseAuditEventType = {
+  REQUESTED: 'REQUESTED',
+  STAGE_APPROVED: 'STAGE_APPROVED',
+  STAGE_REJECTED: 'STAGE_REJECTED',
+  APPLIED: 'APPLIED',
+  APPLY_FAILED: 'APPLY_FAILED',
+  AUTO_REJECTED: 'AUTO_REJECTED'
 };
 
 exports.Prisma.ModelName = {
@@ -1800,6 +1950,7 @@ exports.Prisma.ModelName = {
   PoolBJob: 'PoolBJob',
   PoolBBatch: 'PoolBBatch',
   NationalGridMaster: 'NationalGridMaster',
+  BroaderMenu: 'BroaderMenu',
   MajorCatMaster: 'MajorCatMaster',
   FabricArticleMaster: 'FabricArticleMaster',
   FabricMajCatGridValue: 'FabricMajCatGridValue',
@@ -1807,7 +1958,10 @@ exports.Prisma.ModelName = {
   FabricArticleData: 'FabricArticleData',
   BodyArticleData: 'BodyArticleData',
   MajorCategoryDetails: 'MajorCategoryDetails',
-  ExpenseChangeRequest: 'ExpenseChangeRequest'
+  ExpenseApprovalStage: 'ExpenseApprovalStage',
+  ExpenseChangeRequest: 'ExpenseChangeRequest',
+  ExpenseAccessGrant: 'ExpenseAccessGrant',
+  ExpenseAuditLog: 'ExpenseAuditLog'
 };
 
 /**
