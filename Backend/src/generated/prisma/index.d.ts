@@ -194,6 +194,20 @@ export type PoolBBatch = $Result.DefaultSelection<Prisma.$PoolBBatchPayload>
  */
 export type NationalGridMaster = $Result.DefaultSelection<Prisma.$NationalGridMasterPayload>
 /**
+ * Model BroaderMenu
+ * BroaderMenu: the "BROADER MENU" merchandising master — one row per MC CD,
+ * carrying the full SEG → DIV → SUB_DIV → MAJ_CAT → SUB_CAT → MC hierarchy
+ * together with its status flags, pack sizes, fixture densities and the
+ * rename/remarks trail. Loaded from the BM-H sheet of the Broader Menu
+ * workbook via the Expense page's bulk uploader.
+ * 
+ * The workbook also carries an 84-column per-store density block (store code
+ * in the second header row). Those cells are all zero in the source file, so
+ * they are not mirrored here — the uploader counts any non-zero value it
+ * finds and reports it rather than dropping it silently.
+ */
+export type BroaderMenu = $Result.DefaultSelection<Prisma.$BroaderMenuPayload>
+/**
  * Model MajorCatMaster
  * MajorCatMaster: MAJ CAT → name, division, ideal-for, and the model-image FRAME
  * (fw | upper | lower | set) used to decide how the AI model photoshoot is framed.
@@ -234,10 +248,50 @@ export type BodyArticleData = $Result.DefaultSelection<Prisma.$BodyArticleDataPa
  */
 export type MajorCategoryDetails = $Result.DefaultSelection<Prisma.$MajorCategoryDetailsPayload>
 /**
+ * Model ExpenseApprovalStage
+ * One rung of the Expense Data approval chain — e.g. "Category Head" then
+ * "MDM", or a longer chain with a regional sign-off inserted between them.
+ * Admin-managed on /admin/expense-access ("Approval Stages"); this table
+ * *is* the extensibility point: adding a row here adds a stage everywhere,
+ * with no code change and no enum migration.
+ * 
+ * `key` is the stable identifier `ExpenseAccessGrant.level` and
+ * `ExpenseChangeRequest.currentStageKey`/`approvalTrail` reference — set
+ * once at creation and never reused after a stage is retired, so old
+ * requests' trails keep reading correctly. `sortOrder` defines the chain:
+ * a request starts at the lowest-sortOrder active stage and, on each
+ * approval, moves to the next-lowest active stage above its current one;
+ * approving the highest-sortOrder active stage applies the change for real.
+ */
+export type ExpenseApprovalStage = $Result.DefaultSelection<Prisma.$ExpenseApprovalStagePayload>
+/**
  * Model ExpenseChangeRequest
  * 
  */
 export type ExpenseChangeRequest = $Result.DefaultSelection<Prisma.$ExpenseChangeRequestPayload>
+/**
+ * Model ExpenseAccessGrant
+ * Per-email access control for the Expense Data workflow, maintained by ADMIN
+ * on /admin/expense-access. ADMIN always has every right implicitly and needs
+ * no grant; every other user needs a matching active grant here, so approval
+ * rights land on specific people rather than on a whole `UserRole`.
+ * 
+ * `tableKey` is "*" for "every expense table", otherwise one
+ * EXPENSE_TABLE_REGISTRY key. A user may hold several grants (e.g. an MDM
+ * grant on every table plus a requester grant on one); rights are the union
+ * of all of them.
+ */
+export type ExpenseAccessGrant = $Result.DefaultSelection<Prisma.$ExpenseAccessGrantPayload>
+/**
+ * Model ExpenseAuditLog
+ * The durable, queryable audit trail of the Expense Data workflow — every
+ * event in `ExpenseAuditEventType` above, one row each, independent of the
+ * parent `ExpenseChangeRequest` row (which also keeps its own
+ * `approvalTrail`; this table exists so the whole history can be queried
+ * by table/row/actor/date without expanding that JSON, and so an APPLIED
+ * row is durable proof the master data actually changed, and when).
+ */
+export type ExpenseAuditLog = $Result.DefaultSelection<Prisma.$ExpenseAuditLogPayload>
 
 /**
  * Enums
@@ -356,14 +410,34 @@ export const PoolBBatchStatus: {
 export type PoolBBatchStatus = (typeof PoolBBatchStatus)[keyof typeof PoolBBatchStatus]
 
 
+export const ExpenseChangeOperation: {
+  UPDATE: 'UPDATE',
+  CREATE: 'CREATE',
+  DELETE: 'DELETE'
+};
+
+export type ExpenseChangeOperation = (typeof ExpenseChangeOperation)[keyof typeof ExpenseChangeOperation]
+
+
 export const ExpenseChangeStatus: {
-  PENDING_APPROVER: 'PENDING_APPROVER',
-  PENDING_FINAL: 'PENDING_FINAL',
+  PENDING: 'PENDING',
   APPROVED: 'APPROVED',
   REJECTED: 'REJECTED'
 };
 
 export type ExpenseChangeStatus = (typeof ExpenseChangeStatus)[keyof typeof ExpenseChangeStatus]
+
+
+export const ExpenseAuditEventType: {
+  REQUESTED: 'REQUESTED',
+  STAGE_APPROVED: 'STAGE_APPROVED',
+  STAGE_REJECTED: 'STAGE_REJECTED',
+  APPLIED: 'APPLIED',
+  APPLY_FAILED: 'APPLY_FAILED',
+  AUTO_REJECTED: 'AUTO_REJECTED'
+};
+
+export type ExpenseAuditEventType = (typeof ExpenseAuditEventType)[keyof typeof ExpenseAuditEventType]
 
 }
 
@@ -411,9 +485,17 @@ export type PoolBBatchStatus = $Enums.PoolBBatchStatus
 
 export const PoolBBatchStatus: typeof $Enums.PoolBBatchStatus
 
+export type ExpenseChangeOperation = $Enums.ExpenseChangeOperation
+
+export const ExpenseChangeOperation: typeof $Enums.ExpenseChangeOperation
+
 export type ExpenseChangeStatus = $Enums.ExpenseChangeStatus
 
 export const ExpenseChangeStatus: typeof $Enums.ExpenseChangeStatus
+
+export type ExpenseAuditEventType = $Enums.ExpenseAuditEventType
+
+export const ExpenseAuditEventType: typeof $Enums.ExpenseAuditEventType
 
 /**
  * ##  Prisma Client ʲˢ
@@ -874,6 +956,16 @@ export class PrismaClient<
   get nationalGridMaster(): Prisma.NationalGridMasterDelegate<ExtArgs, ClientOptions>;
 
   /**
+   * `prisma.broaderMenu`: Exposes CRUD operations for the **BroaderMenu** model.
+    * Example usage:
+    * ```ts
+    * // Fetch zero or more BroaderMenus
+    * const broaderMenus = await prisma.broaderMenu.findMany()
+    * ```
+    */
+  get broaderMenu(): Prisma.BroaderMenuDelegate<ExtArgs, ClientOptions>;
+
+  /**
    * `prisma.majorCatMaster`: Exposes CRUD operations for the **MajorCatMaster** model.
     * Example usage:
     * ```ts
@@ -944,6 +1036,16 @@ export class PrismaClient<
   get majorCategoryDetails(): Prisma.MajorCategoryDetailsDelegate<ExtArgs, ClientOptions>;
 
   /**
+   * `prisma.expenseApprovalStage`: Exposes CRUD operations for the **ExpenseApprovalStage** model.
+    * Example usage:
+    * ```ts
+    * // Fetch zero or more ExpenseApprovalStages
+    * const expenseApprovalStages = await prisma.expenseApprovalStage.findMany()
+    * ```
+    */
+  get expenseApprovalStage(): Prisma.ExpenseApprovalStageDelegate<ExtArgs, ClientOptions>;
+
+  /**
    * `prisma.expenseChangeRequest`: Exposes CRUD operations for the **ExpenseChangeRequest** model.
     * Example usage:
     * ```ts
@@ -952,6 +1054,26 @@ export class PrismaClient<
     * ```
     */
   get expenseChangeRequest(): Prisma.ExpenseChangeRequestDelegate<ExtArgs, ClientOptions>;
+
+  /**
+   * `prisma.expenseAccessGrant`: Exposes CRUD operations for the **ExpenseAccessGrant** model.
+    * Example usage:
+    * ```ts
+    * // Fetch zero or more ExpenseAccessGrants
+    * const expenseAccessGrants = await prisma.expenseAccessGrant.findMany()
+    * ```
+    */
+  get expenseAccessGrant(): Prisma.ExpenseAccessGrantDelegate<ExtArgs, ClientOptions>;
+
+  /**
+   * `prisma.expenseAuditLog`: Exposes CRUD operations for the **ExpenseAuditLog** model.
+    * Example usage:
+    * ```ts
+    * // Fetch zero or more ExpenseAuditLogs
+    * const expenseAuditLogs = await prisma.expenseAuditLog.findMany()
+    * ```
+    */
+  get expenseAuditLog(): Prisma.ExpenseAuditLogDelegate<ExtArgs, ClientOptions>;
 }
 
 export namespace Prisma {
@@ -1426,6 +1548,7 @@ export namespace Prisma {
     PoolBJob: 'PoolBJob',
     PoolBBatch: 'PoolBBatch',
     NationalGridMaster: 'NationalGridMaster',
+    BroaderMenu: 'BroaderMenu',
     MajorCatMaster: 'MajorCatMaster',
     FabricArticleMaster: 'FabricArticleMaster',
     FabricMajCatGridValue: 'FabricMajCatGridValue',
@@ -1433,7 +1556,10 @@ export namespace Prisma {
     FabricArticleData: 'FabricArticleData',
     BodyArticleData: 'BodyArticleData',
     MajorCategoryDetails: 'MajorCategoryDetails',
-    ExpenseChangeRequest: 'ExpenseChangeRequest'
+    ExpenseApprovalStage: 'ExpenseApprovalStage',
+    ExpenseChangeRequest: 'ExpenseChangeRequest',
+    ExpenseAccessGrant: 'ExpenseAccessGrant',
+    ExpenseAuditLog: 'ExpenseAuditLog'
   };
 
   export type ModelName = (typeof ModelName)[keyof typeof ModelName]
@@ -1452,7 +1578,7 @@ export namespace Prisma {
       omit: GlobalOmitOptions
     }
     meta: {
-      modelProps: "department" | "subDepartment" | "category" | "masterAttribute" | "attributeAllowedValue" | "categoryAttribute" | "extractionJob" | "extractionResult" | "extractionResultFlat" | "modelGenerationResult" | "modelImageApproval" | "mvgrLookup" | "masterVendorDetail" | "user" | "auditLog" | "apiKey" | "changeHistory" | "costSummary" | "article360" | "articleFab" | "articleBody" | "articleVaAcc" | "articleVaPrcs" | "articleBom" | "sapFieldConfig" | "sapAttributeValue" | "article360Flat" | "rawArticle" | "fabricRawData" | "srmSyncRun" | "srmSyncRunItem" | "poolBJob" | "poolBBatch" | "nationalGridMaster" | "majorCatMaster" | "fabricArticleMaster" | "fabricMajCatGridValue" | "modifyLog" | "fabricArticleData" | "bodyArticleData" | "majorCategoryDetails" | "expenseChangeRequest"
+      modelProps: "department" | "subDepartment" | "category" | "masterAttribute" | "attributeAllowedValue" | "categoryAttribute" | "extractionJob" | "extractionResult" | "extractionResultFlat" | "modelGenerationResult" | "modelImageApproval" | "mvgrLookup" | "masterVendorDetail" | "user" | "auditLog" | "apiKey" | "changeHistory" | "costSummary" | "article360" | "articleFab" | "articleBody" | "articleVaAcc" | "articleVaPrcs" | "articleBom" | "sapFieldConfig" | "sapAttributeValue" | "article360Flat" | "rawArticle" | "fabricRawData" | "srmSyncRun" | "srmSyncRunItem" | "poolBJob" | "poolBBatch" | "nationalGridMaster" | "broaderMenu" | "majorCatMaster" | "fabricArticleMaster" | "fabricMajCatGridValue" | "modifyLog" | "fabricArticleData" | "bodyArticleData" | "majorCategoryDetails" | "expenseApprovalStage" | "expenseChangeRequest" | "expenseAccessGrant" | "expenseAuditLog"
       txIsolationLevel: Prisma.TransactionIsolationLevel
     }
     model: {
@@ -3972,6 +4098,80 @@ export namespace Prisma {
           }
         }
       }
+      BroaderMenu: {
+        payload: Prisma.$BroaderMenuPayload<ExtArgs>
+        fields: Prisma.BroaderMenuFieldRefs
+        operations: {
+          findUnique: {
+            args: Prisma.BroaderMenuFindUniqueArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$BroaderMenuPayload> | null
+          }
+          findUniqueOrThrow: {
+            args: Prisma.BroaderMenuFindUniqueOrThrowArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$BroaderMenuPayload>
+          }
+          findFirst: {
+            args: Prisma.BroaderMenuFindFirstArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$BroaderMenuPayload> | null
+          }
+          findFirstOrThrow: {
+            args: Prisma.BroaderMenuFindFirstOrThrowArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$BroaderMenuPayload>
+          }
+          findMany: {
+            args: Prisma.BroaderMenuFindManyArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$BroaderMenuPayload>[]
+          }
+          create: {
+            args: Prisma.BroaderMenuCreateArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$BroaderMenuPayload>
+          }
+          createMany: {
+            args: Prisma.BroaderMenuCreateManyArgs<ExtArgs>
+            result: BatchPayload
+          }
+          createManyAndReturn: {
+            args: Prisma.BroaderMenuCreateManyAndReturnArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$BroaderMenuPayload>[]
+          }
+          delete: {
+            args: Prisma.BroaderMenuDeleteArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$BroaderMenuPayload>
+          }
+          update: {
+            args: Prisma.BroaderMenuUpdateArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$BroaderMenuPayload>
+          }
+          deleteMany: {
+            args: Prisma.BroaderMenuDeleteManyArgs<ExtArgs>
+            result: BatchPayload
+          }
+          updateMany: {
+            args: Prisma.BroaderMenuUpdateManyArgs<ExtArgs>
+            result: BatchPayload
+          }
+          updateManyAndReturn: {
+            args: Prisma.BroaderMenuUpdateManyAndReturnArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$BroaderMenuPayload>[]
+          }
+          upsert: {
+            args: Prisma.BroaderMenuUpsertArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$BroaderMenuPayload>
+          }
+          aggregate: {
+            args: Prisma.BroaderMenuAggregateArgs<ExtArgs>
+            result: $Utils.Optional<AggregateBroaderMenu>
+          }
+          groupBy: {
+            args: Prisma.BroaderMenuGroupByArgs<ExtArgs>
+            result: $Utils.Optional<BroaderMenuGroupByOutputType>[]
+          }
+          count: {
+            args: Prisma.BroaderMenuCountArgs<ExtArgs>
+            result: $Utils.Optional<BroaderMenuCountAggregateOutputType> | number
+          }
+        }
+      }
       MajorCatMaster: {
         payload: Prisma.$MajorCatMasterPayload<ExtArgs>
         fields: Prisma.MajorCatMasterFieldRefs
@@ -4490,6 +4690,80 @@ export namespace Prisma {
           }
         }
       }
+      ExpenseApprovalStage: {
+        payload: Prisma.$ExpenseApprovalStagePayload<ExtArgs>
+        fields: Prisma.ExpenseApprovalStageFieldRefs
+        operations: {
+          findUnique: {
+            args: Prisma.ExpenseApprovalStageFindUniqueArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$ExpenseApprovalStagePayload> | null
+          }
+          findUniqueOrThrow: {
+            args: Prisma.ExpenseApprovalStageFindUniqueOrThrowArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$ExpenseApprovalStagePayload>
+          }
+          findFirst: {
+            args: Prisma.ExpenseApprovalStageFindFirstArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$ExpenseApprovalStagePayload> | null
+          }
+          findFirstOrThrow: {
+            args: Prisma.ExpenseApprovalStageFindFirstOrThrowArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$ExpenseApprovalStagePayload>
+          }
+          findMany: {
+            args: Prisma.ExpenseApprovalStageFindManyArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$ExpenseApprovalStagePayload>[]
+          }
+          create: {
+            args: Prisma.ExpenseApprovalStageCreateArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$ExpenseApprovalStagePayload>
+          }
+          createMany: {
+            args: Prisma.ExpenseApprovalStageCreateManyArgs<ExtArgs>
+            result: BatchPayload
+          }
+          createManyAndReturn: {
+            args: Prisma.ExpenseApprovalStageCreateManyAndReturnArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$ExpenseApprovalStagePayload>[]
+          }
+          delete: {
+            args: Prisma.ExpenseApprovalStageDeleteArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$ExpenseApprovalStagePayload>
+          }
+          update: {
+            args: Prisma.ExpenseApprovalStageUpdateArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$ExpenseApprovalStagePayload>
+          }
+          deleteMany: {
+            args: Prisma.ExpenseApprovalStageDeleteManyArgs<ExtArgs>
+            result: BatchPayload
+          }
+          updateMany: {
+            args: Prisma.ExpenseApprovalStageUpdateManyArgs<ExtArgs>
+            result: BatchPayload
+          }
+          updateManyAndReturn: {
+            args: Prisma.ExpenseApprovalStageUpdateManyAndReturnArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$ExpenseApprovalStagePayload>[]
+          }
+          upsert: {
+            args: Prisma.ExpenseApprovalStageUpsertArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$ExpenseApprovalStagePayload>
+          }
+          aggregate: {
+            args: Prisma.ExpenseApprovalStageAggregateArgs<ExtArgs>
+            result: $Utils.Optional<AggregateExpenseApprovalStage>
+          }
+          groupBy: {
+            args: Prisma.ExpenseApprovalStageGroupByArgs<ExtArgs>
+            result: $Utils.Optional<ExpenseApprovalStageGroupByOutputType>[]
+          }
+          count: {
+            args: Prisma.ExpenseApprovalStageCountArgs<ExtArgs>
+            result: $Utils.Optional<ExpenseApprovalStageCountAggregateOutputType> | number
+          }
+        }
+      }
       ExpenseChangeRequest: {
         payload: Prisma.$ExpenseChangeRequestPayload<ExtArgs>
         fields: Prisma.ExpenseChangeRequestFieldRefs
@@ -4561,6 +4835,154 @@ export namespace Prisma {
           count: {
             args: Prisma.ExpenseChangeRequestCountArgs<ExtArgs>
             result: $Utils.Optional<ExpenseChangeRequestCountAggregateOutputType> | number
+          }
+        }
+      }
+      ExpenseAccessGrant: {
+        payload: Prisma.$ExpenseAccessGrantPayload<ExtArgs>
+        fields: Prisma.ExpenseAccessGrantFieldRefs
+        operations: {
+          findUnique: {
+            args: Prisma.ExpenseAccessGrantFindUniqueArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$ExpenseAccessGrantPayload> | null
+          }
+          findUniqueOrThrow: {
+            args: Prisma.ExpenseAccessGrantFindUniqueOrThrowArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$ExpenseAccessGrantPayload>
+          }
+          findFirst: {
+            args: Prisma.ExpenseAccessGrantFindFirstArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$ExpenseAccessGrantPayload> | null
+          }
+          findFirstOrThrow: {
+            args: Prisma.ExpenseAccessGrantFindFirstOrThrowArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$ExpenseAccessGrantPayload>
+          }
+          findMany: {
+            args: Prisma.ExpenseAccessGrantFindManyArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$ExpenseAccessGrantPayload>[]
+          }
+          create: {
+            args: Prisma.ExpenseAccessGrantCreateArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$ExpenseAccessGrantPayload>
+          }
+          createMany: {
+            args: Prisma.ExpenseAccessGrantCreateManyArgs<ExtArgs>
+            result: BatchPayload
+          }
+          createManyAndReturn: {
+            args: Prisma.ExpenseAccessGrantCreateManyAndReturnArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$ExpenseAccessGrantPayload>[]
+          }
+          delete: {
+            args: Prisma.ExpenseAccessGrantDeleteArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$ExpenseAccessGrantPayload>
+          }
+          update: {
+            args: Prisma.ExpenseAccessGrantUpdateArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$ExpenseAccessGrantPayload>
+          }
+          deleteMany: {
+            args: Prisma.ExpenseAccessGrantDeleteManyArgs<ExtArgs>
+            result: BatchPayload
+          }
+          updateMany: {
+            args: Prisma.ExpenseAccessGrantUpdateManyArgs<ExtArgs>
+            result: BatchPayload
+          }
+          updateManyAndReturn: {
+            args: Prisma.ExpenseAccessGrantUpdateManyAndReturnArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$ExpenseAccessGrantPayload>[]
+          }
+          upsert: {
+            args: Prisma.ExpenseAccessGrantUpsertArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$ExpenseAccessGrantPayload>
+          }
+          aggregate: {
+            args: Prisma.ExpenseAccessGrantAggregateArgs<ExtArgs>
+            result: $Utils.Optional<AggregateExpenseAccessGrant>
+          }
+          groupBy: {
+            args: Prisma.ExpenseAccessGrantGroupByArgs<ExtArgs>
+            result: $Utils.Optional<ExpenseAccessGrantGroupByOutputType>[]
+          }
+          count: {
+            args: Prisma.ExpenseAccessGrantCountArgs<ExtArgs>
+            result: $Utils.Optional<ExpenseAccessGrantCountAggregateOutputType> | number
+          }
+        }
+      }
+      ExpenseAuditLog: {
+        payload: Prisma.$ExpenseAuditLogPayload<ExtArgs>
+        fields: Prisma.ExpenseAuditLogFieldRefs
+        operations: {
+          findUnique: {
+            args: Prisma.ExpenseAuditLogFindUniqueArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$ExpenseAuditLogPayload> | null
+          }
+          findUniqueOrThrow: {
+            args: Prisma.ExpenseAuditLogFindUniqueOrThrowArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$ExpenseAuditLogPayload>
+          }
+          findFirst: {
+            args: Prisma.ExpenseAuditLogFindFirstArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$ExpenseAuditLogPayload> | null
+          }
+          findFirstOrThrow: {
+            args: Prisma.ExpenseAuditLogFindFirstOrThrowArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$ExpenseAuditLogPayload>
+          }
+          findMany: {
+            args: Prisma.ExpenseAuditLogFindManyArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$ExpenseAuditLogPayload>[]
+          }
+          create: {
+            args: Prisma.ExpenseAuditLogCreateArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$ExpenseAuditLogPayload>
+          }
+          createMany: {
+            args: Prisma.ExpenseAuditLogCreateManyArgs<ExtArgs>
+            result: BatchPayload
+          }
+          createManyAndReturn: {
+            args: Prisma.ExpenseAuditLogCreateManyAndReturnArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$ExpenseAuditLogPayload>[]
+          }
+          delete: {
+            args: Prisma.ExpenseAuditLogDeleteArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$ExpenseAuditLogPayload>
+          }
+          update: {
+            args: Prisma.ExpenseAuditLogUpdateArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$ExpenseAuditLogPayload>
+          }
+          deleteMany: {
+            args: Prisma.ExpenseAuditLogDeleteManyArgs<ExtArgs>
+            result: BatchPayload
+          }
+          updateMany: {
+            args: Prisma.ExpenseAuditLogUpdateManyArgs<ExtArgs>
+            result: BatchPayload
+          }
+          updateManyAndReturn: {
+            args: Prisma.ExpenseAuditLogUpdateManyAndReturnArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$ExpenseAuditLogPayload>[]
+          }
+          upsert: {
+            args: Prisma.ExpenseAuditLogUpsertArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$ExpenseAuditLogPayload>
+          }
+          aggregate: {
+            args: Prisma.ExpenseAuditLogAggregateArgs<ExtArgs>
+            result: $Utils.Optional<AggregateExpenseAuditLog>
+          }
+          groupBy: {
+            args: Prisma.ExpenseAuditLogGroupByArgs<ExtArgs>
+            result: $Utils.Optional<ExpenseAuditLogGroupByOutputType>[]
+          }
+          count: {
+            args: Prisma.ExpenseAuditLogCountArgs<ExtArgs>
+            result: $Utils.Optional<ExpenseAuditLogCountAggregateOutputType> | number
           }
         }
       }
@@ -4690,6 +5112,7 @@ export namespace Prisma {
     poolBJob?: PoolBJobOmit
     poolBBatch?: PoolBBatchOmit
     nationalGridMaster?: NationalGridMasterOmit
+    broaderMenu?: BroaderMenuOmit
     majorCatMaster?: MajorCatMasterOmit
     fabricArticleMaster?: FabricArticleMasterOmit
     fabricMajCatGridValue?: FabricMajCatGridValueOmit
@@ -4697,7 +5120,10 @@ export namespace Prisma {
     fabricArticleData?: FabricArticleDataOmit
     bodyArticleData?: BodyArticleDataOmit
     majorCategoryDetails?: MajorCategoryDetailsOmit
+    expenseApprovalStage?: ExpenseApprovalStageOmit
     expenseChangeRequest?: ExpenseChangeRequestOmit
+    expenseAccessGrant?: ExpenseAccessGrantOmit
+    expenseAuditLog?: ExpenseAuditLogOmit
   }
 
   /* Types for Logging */
@@ -48448,6 +48874,1666 @@ export namespace Prisma {
 
 
   /**
+   * Model BroaderMenu
+   */
+
+  export type AggregateBroaderMenu = {
+    _count: BroaderMenuCountAggregateOutputType | null
+    _avg: BroaderMenuAvgAggregateOutputType | null
+    _sum: BroaderMenuSumAggregateOutputType | null
+    _min: BroaderMenuMinAggregateOutputType | null
+    _max: BroaderMenuMaxAggregateOutputType | null
+  }
+
+  export type BroaderMenuAvgAggregateOutputType = {
+    id: number | null
+    sn: number | null
+    mcCd: number | null
+    majCatCd: number | null
+    subCatCd: number | null
+    mcPkSz: number | null
+    subCatPkSz: number | null
+    noOfOptions: number | null
+    avgDensity: Decimal | null
+    accDensity: Decimal | null
+    wgDensity: Decimal | null
+    fg46FtDensity: Decimal | null
+    fg5FtDensity: Decimal | null
+    fg4ADensity: Decimal | null
+    fg8ADensity: Decimal | null
+    acp: Decimal | null
+    oldDensity: Decimal | null
+    seq: number | null
+    newMcCd: number | null
+    oldSubCatCd: number | null
+  }
+
+  export type BroaderMenuSumAggregateOutputType = {
+    id: number | null
+    sn: number | null
+    mcCd: number | null
+    majCatCd: number | null
+    subCatCd: number | null
+    mcPkSz: number | null
+    subCatPkSz: number | null
+    noOfOptions: number | null
+    avgDensity: Decimal | null
+    accDensity: Decimal | null
+    wgDensity: Decimal | null
+    fg46FtDensity: Decimal | null
+    fg5FtDensity: Decimal | null
+    fg4ADensity: Decimal | null
+    fg8ADensity: Decimal | null
+    acp: Decimal | null
+    oldDensity: Decimal | null
+    seq: number | null
+    newMcCd: number | null
+    oldSubCatCd: number | null
+  }
+
+  export type BroaderMenuMinAggregateOutputType = {
+    id: number | null
+    sn: number | null
+    mcCd: number | null
+    seg: string | null
+    div: string | null
+    subDiv: string | null
+    majCatCd: number | null
+    majCatNm: string | null
+    subCatCd: number | null
+    subCatDesc: string | null
+    mcDesc: string | null
+    ssn: string | null
+    mcStat: string | null
+    subCatStat: string | null
+    majCatStat: string | null
+    sizeApplicable: string | null
+    divStat: string | null
+    mcPkSz: number | null
+    subCatPkSz: number | null
+    noOfOptions: number | null
+    avgDensity: Decimal | null
+    accDensity: Decimal | null
+    wgDensity: Decimal | null
+    fg46FtDensity: Decimal | null
+    fg5FtDensity: Decimal | null
+    fg4ADensity: Decimal | null
+    fg8ADensity: Decimal | null
+    acp: Decimal | null
+    oldDensity: Decimal | null
+    seq: number | null
+    mjCatTyp: string | null
+    fixtr: string | null
+    newMcCd: number | null
+    newMcDesc: string | null
+    oldMcDesc: string | null
+    oldSubCatCd: number | null
+    oldSubCatDesc: string | null
+    legacyMcDesc: string | null
+    effectiveDate: Date | null
+    remarks: string | null
+    gmStatus: string | null
+    currentMcStatus: string | null
+    fullMcName: string | null
+    winterStatus: string | null
+    uploadedAt: Date | null
+    updatedAt: Date | null
+  }
+
+  export type BroaderMenuMaxAggregateOutputType = {
+    id: number | null
+    sn: number | null
+    mcCd: number | null
+    seg: string | null
+    div: string | null
+    subDiv: string | null
+    majCatCd: number | null
+    majCatNm: string | null
+    subCatCd: number | null
+    subCatDesc: string | null
+    mcDesc: string | null
+    ssn: string | null
+    mcStat: string | null
+    subCatStat: string | null
+    majCatStat: string | null
+    sizeApplicable: string | null
+    divStat: string | null
+    mcPkSz: number | null
+    subCatPkSz: number | null
+    noOfOptions: number | null
+    avgDensity: Decimal | null
+    accDensity: Decimal | null
+    wgDensity: Decimal | null
+    fg46FtDensity: Decimal | null
+    fg5FtDensity: Decimal | null
+    fg4ADensity: Decimal | null
+    fg8ADensity: Decimal | null
+    acp: Decimal | null
+    oldDensity: Decimal | null
+    seq: number | null
+    mjCatTyp: string | null
+    fixtr: string | null
+    newMcCd: number | null
+    newMcDesc: string | null
+    oldMcDesc: string | null
+    oldSubCatCd: number | null
+    oldSubCatDesc: string | null
+    legacyMcDesc: string | null
+    effectiveDate: Date | null
+    remarks: string | null
+    gmStatus: string | null
+    currentMcStatus: string | null
+    fullMcName: string | null
+    winterStatus: string | null
+    uploadedAt: Date | null
+    updatedAt: Date | null
+  }
+
+  export type BroaderMenuCountAggregateOutputType = {
+    id: number
+    sn: number
+    mcCd: number
+    seg: number
+    div: number
+    subDiv: number
+    majCatCd: number
+    majCatNm: number
+    subCatCd: number
+    subCatDesc: number
+    mcDesc: number
+    ssn: number
+    mcStat: number
+    subCatStat: number
+    majCatStat: number
+    sizeApplicable: number
+    divStat: number
+    mcPkSz: number
+    subCatPkSz: number
+    noOfOptions: number
+    avgDensity: number
+    accDensity: number
+    wgDensity: number
+    fg46FtDensity: number
+    fg5FtDensity: number
+    fg4ADensity: number
+    fg8ADensity: number
+    acp: number
+    oldDensity: number
+    seq: number
+    mjCatTyp: number
+    fixtr: number
+    newMcCd: number
+    newMcDesc: number
+    oldMcDesc: number
+    oldSubCatCd: number
+    oldSubCatDesc: number
+    legacyMcDesc: number
+    effectiveDate: number
+    remarks: number
+    gmStatus: number
+    currentMcStatus: number
+    fullMcName: number
+    winterStatus: number
+    uploadedAt: number
+    updatedAt: number
+    _all: number
+  }
+
+
+  export type BroaderMenuAvgAggregateInputType = {
+    id?: true
+    sn?: true
+    mcCd?: true
+    majCatCd?: true
+    subCatCd?: true
+    mcPkSz?: true
+    subCatPkSz?: true
+    noOfOptions?: true
+    avgDensity?: true
+    accDensity?: true
+    wgDensity?: true
+    fg46FtDensity?: true
+    fg5FtDensity?: true
+    fg4ADensity?: true
+    fg8ADensity?: true
+    acp?: true
+    oldDensity?: true
+    seq?: true
+    newMcCd?: true
+    oldSubCatCd?: true
+  }
+
+  export type BroaderMenuSumAggregateInputType = {
+    id?: true
+    sn?: true
+    mcCd?: true
+    majCatCd?: true
+    subCatCd?: true
+    mcPkSz?: true
+    subCatPkSz?: true
+    noOfOptions?: true
+    avgDensity?: true
+    accDensity?: true
+    wgDensity?: true
+    fg46FtDensity?: true
+    fg5FtDensity?: true
+    fg4ADensity?: true
+    fg8ADensity?: true
+    acp?: true
+    oldDensity?: true
+    seq?: true
+    newMcCd?: true
+    oldSubCatCd?: true
+  }
+
+  export type BroaderMenuMinAggregateInputType = {
+    id?: true
+    sn?: true
+    mcCd?: true
+    seg?: true
+    div?: true
+    subDiv?: true
+    majCatCd?: true
+    majCatNm?: true
+    subCatCd?: true
+    subCatDesc?: true
+    mcDesc?: true
+    ssn?: true
+    mcStat?: true
+    subCatStat?: true
+    majCatStat?: true
+    sizeApplicable?: true
+    divStat?: true
+    mcPkSz?: true
+    subCatPkSz?: true
+    noOfOptions?: true
+    avgDensity?: true
+    accDensity?: true
+    wgDensity?: true
+    fg46FtDensity?: true
+    fg5FtDensity?: true
+    fg4ADensity?: true
+    fg8ADensity?: true
+    acp?: true
+    oldDensity?: true
+    seq?: true
+    mjCatTyp?: true
+    fixtr?: true
+    newMcCd?: true
+    newMcDesc?: true
+    oldMcDesc?: true
+    oldSubCatCd?: true
+    oldSubCatDesc?: true
+    legacyMcDesc?: true
+    effectiveDate?: true
+    remarks?: true
+    gmStatus?: true
+    currentMcStatus?: true
+    fullMcName?: true
+    winterStatus?: true
+    uploadedAt?: true
+    updatedAt?: true
+  }
+
+  export type BroaderMenuMaxAggregateInputType = {
+    id?: true
+    sn?: true
+    mcCd?: true
+    seg?: true
+    div?: true
+    subDiv?: true
+    majCatCd?: true
+    majCatNm?: true
+    subCatCd?: true
+    subCatDesc?: true
+    mcDesc?: true
+    ssn?: true
+    mcStat?: true
+    subCatStat?: true
+    majCatStat?: true
+    sizeApplicable?: true
+    divStat?: true
+    mcPkSz?: true
+    subCatPkSz?: true
+    noOfOptions?: true
+    avgDensity?: true
+    accDensity?: true
+    wgDensity?: true
+    fg46FtDensity?: true
+    fg5FtDensity?: true
+    fg4ADensity?: true
+    fg8ADensity?: true
+    acp?: true
+    oldDensity?: true
+    seq?: true
+    mjCatTyp?: true
+    fixtr?: true
+    newMcCd?: true
+    newMcDesc?: true
+    oldMcDesc?: true
+    oldSubCatCd?: true
+    oldSubCatDesc?: true
+    legacyMcDesc?: true
+    effectiveDate?: true
+    remarks?: true
+    gmStatus?: true
+    currentMcStatus?: true
+    fullMcName?: true
+    winterStatus?: true
+    uploadedAt?: true
+    updatedAt?: true
+  }
+
+  export type BroaderMenuCountAggregateInputType = {
+    id?: true
+    sn?: true
+    mcCd?: true
+    seg?: true
+    div?: true
+    subDiv?: true
+    majCatCd?: true
+    majCatNm?: true
+    subCatCd?: true
+    subCatDesc?: true
+    mcDesc?: true
+    ssn?: true
+    mcStat?: true
+    subCatStat?: true
+    majCatStat?: true
+    sizeApplicable?: true
+    divStat?: true
+    mcPkSz?: true
+    subCatPkSz?: true
+    noOfOptions?: true
+    avgDensity?: true
+    accDensity?: true
+    wgDensity?: true
+    fg46FtDensity?: true
+    fg5FtDensity?: true
+    fg4ADensity?: true
+    fg8ADensity?: true
+    acp?: true
+    oldDensity?: true
+    seq?: true
+    mjCatTyp?: true
+    fixtr?: true
+    newMcCd?: true
+    newMcDesc?: true
+    oldMcDesc?: true
+    oldSubCatCd?: true
+    oldSubCatDesc?: true
+    legacyMcDesc?: true
+    effectiveDate?: true
+    remarks?: true
+    gmStatus?: true
+    currentMcStatus?: true
+    fullMcName?: true
+    winterStatus?: true
+    uploadedAt?: true
+    updatedAt?: true
+    _all?: true
+  }
+
+  export type BroaderMenuAggregateArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Filter which BroaderMenu to aggregate.
+     */
+    where?: BroaderMenuWhereInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
+     * 
+     * Determine the order of BroaderMenus to fetch.
+     */
+    orderBy?: BroaderMenuOrderByWithRelationInput | BroaderMenuOrderByWithRelationInput[]
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
+     * 
+     * Sets the start position
+     */
+    cursor?: BroaderMenuWhereUniqueInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Take `±n` BroaderMenus from the position of the cursor.
+     */
+    take?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Skip the first `n` BroaderMenus.
+     */
+    skip?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     * 
+     * Count returned BroaderMenus
+    **/
+    _count?: true | BroaderMenuCountAggregateInputType
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     * 
+     * Select which fields to average
+    **/
+    _avg?: BroaderMenuAvgAggregateInputType
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     * 
+     * Select which fields to sum
+    **/
+    _sum?: BroaderMenuSumAggregateInputType
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     * 
+     * Select which fields to find the minimum value
+    **/
+    _min?: BroaderMenuMinAggregateInputType
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     * 
+     * Select which fields to find the maximum value
+    **/
+    _max?: BroaderMenuMaxAggregateInputType
+  }
+
+  export type GetBroaderMenuAggregateType<T extends BroaderMenuAggregateArgs> = {
+        [P in keyof T & keyof AggregateBroaderMenu]: P extends '_count' | 'count'
+      ? T[P] extends true
+        ? number
+        : GetScalarType<T[P], AggregateBroaderMenu[P]>
+      : GetScalarType<T[P], AggregateBroaderMenu[P]>
+  }
+
+
+
+
+  export type BroaderMenuGroupByArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    where?: BroaderMenuWhereInput
+    orderBy?: BroaderMenuOrderByWithAggregationInput | BroaderMenuOrderByWithAggregationInput[]
+    by: BroaderMenuScalarFieldEnum[] | BroaderMenuScalarFieldEnum
+    having?: BroaderMenuScalarWhereWithAggregatesInput
+    take?: number
+    skip?: number
+    _count?: BroaderMenuCountAggregateInputType | true
+    _avg?: BroaderMenuAvgAggregateInputType
+    _sum?: BroaderMenuSumAggregateInputType
+    _min?: BroaderMenuMinAggregateInputType
+    _max?: BroaderMenuMaxAggregateInputType
+  }
+
+  export type BroaderMenuGroupByOutputType = {
+    id: number
+    sn: number | null
+    mcCd: number
+    seg: string | null
+    div: string | null
+    subDiv: string | null
+    majCatCd: number | null
+    majCatNm: string | null
+    subCatCd: number | null
+    subCatDesc: string | null
+    mcDesc: string | null
+    ssn: string | null
+    mcStat: string | null
+    subCatStat: string | null
+    majCatStat: string | null
+    sizeApplicable: string | null
+    divStat: string | null
+    mcPkSz: number | null
+    subCatPkSz: number | null
+    noOfOptions: number | null
+    avgDensity: Decimal | null
+    accDensity: Decimal | null
+    wgDensity: Decimal | null
+    fg46FtDensity: Decimal | null
+    fg5FtDensity: Decimal | null
+    fg4ADensity: Decimal | null
+    fg8ADensity: Decimal | null
+    acp: Decimal | null
+    oldDensity: Decimal | null
+    seq: number | null
+    mjCatTyp: string | null
+    fixtr: string | null
+    newMcCd: number | null
+    newMcDesc: string | null
+    oldMcDesc: string | null
+    oldSubCatCd: number | null
+    oldSubCatDesc: string | null
+    legacyMcDesc: string | null
+    effectiveDate: Date | null
+    remarks: string | null
+    gmStatus: string | null
+    currentMcStatus: string | null
+    fullMcName: string | null
+    winterStatus: string | null
+    uploadedAt: Date
+    updatedAt: Date
+    _count: BroaderMenuCountAggregateOutputType | null
+    _avg: BroaderMenuAvgAggregateOutputType | null
+    _sum: BroaderMenuSumAggregateOutputType | null
+    _min: BroaderMenuMinAggregateOutputType | null
+    _max: BroaderMenuMaxAggregateOutputType | null
+  }
+
+  type GetBroaderMenuGroupByPayload<T extends BroaderMenuGroupByArgs> = Prisma.PrismaPromise<
+    Array<
+      PickEnumerable<BroaderMenuGroupByOutputType, T['by']> &
+        {
+          [P in ((keyof T) & (keyof BroaderMenuGroupByOutputType))]: P extends '_count'
+            ? T[P] extends boolean
+              ? number
+              : GetScalarType<T[P], BroaderMenuGroupByOutputType[P]>
+            : GetScalarType<T[P], BroaderMenuGroupByOutputType[P]>
+        }
+      >
+    >
+
+
+  export type BroaderMenuSelect<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
+    id?: boolean
+    sn?: boolean
+    mcCd?: boolean
+    seg?: boolean
+    div?: boolean
+    subDiv?: boolean
+    majCatCd?: boolean
+    majCatNm?: boolean
+    subCatCd?: boolean
+    subCatDesc?: boolean
+    mcDesc?: boolean
+    ssn?: boolean
+    mcStat?: boolean
+    subCatStat?: boolean
+    majCatStat?: boolean
+    sizeApplicable?: boolean
+    divStat?: boolean
+    mcPkSz?: boolean
+    subCatPkSz?: boolean
+    noOfOptions?: boolean
+    avgDensity?: boolean
+    accDensity?: boolean
+    wgDensity?: boolean
+    fg46FtDensity?: boolean
+    fg5FtDensity?: boolean
+    fg4ADensity?: boolean
+    fg8ADensity?: boolean
+    acp?: boolean
+    oldDensity?: boolean
+    seq?: boolean
+    mjCatTyp?: boolean
+    fixtr?: boolean
+    newMcCd?: boolean
+    newMcDesc?: boolean
+    oldMcDesc?: boolean
+    oldSubCatCd?: boolean
+    oldSubCatDesc?: boolean
+    legacyMcDesc?: boolean
+    effectiveDate?: boolean
+    remarks?: boolean
+    gmStatus?: boolean
+    currentMcStatus?: boolean
+    fullMcName?: boolean
+    winterStatus?: boolean
+    uploadedAt?: boolean
+    updatedAt?: boolean
+  }, ExtArgs["result"]["broaderMenu"]>
+
+  export type BroaderMenuSelectCreateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
+    id?: boolean
+    sn?: boolean
+    mcCd?: boolean
+    seg?: boolean
+    div?: boolean
+    subDiv?: boolean
+    majCatCd?: boolean
+    majCatNm?: boolean
+    subCatCd?: boolean
+    subCatDesc?: boolean
+    mcDesc?: boolean
+    ssn?: boolean
+    mcStat?: boolean
+    subCatStat?: boolean
+    majCatStat?: boolean
+    sizeApplicable?: boolean
+    divStat?: boolean
+    mcPkSz?: boolean
+    subCatPkSz?: boolean
+    noOfOptions?: boolean
+    avgDensity?: boolean
+    accDensity?: boolean
+    wgDensity?: boolean
+    fg46FtDensity?: boolean
+    fg5FtDensity?: boolean
+    fg4ADensity?: boolean
+    fg8ADensity?: boolean
+    acp?: boolean
+    oldDensity?: boolean
+    seq?: boolean
+    mjCatTyp?: boolean
+    fixtr?: boolean
+    newMcCd?: boolean
+    newMcDesc?: boolean
+    oldMcDesc?: boolean
+    oldSubCatCd?: boolean
+    oldSubCatDesc?: boolean
+    legacyMcDesc?: boolean
+    effectiveDate?: boolean
+    remarks?: boolean
+    gmStatus?: boolean
+    currentMcStatus?: boolean
+    fullMcName?: boolean
+    winterStatus?: boolean
+    uploadedAt?: boolean
+    updatedAt?: boolean
+  }, ExtArgs["result"]["broaderMenu"]>
+
+  export type BroaderMenuSelectUpdateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
+    id?: boolean
+    sn?: boolean
+    mcCd?: boolean
+    seg?: boolean
+    div?: boolean
+    subDiv?: boolean
+    majCatCd?: boolean
+    majCatNm?: boolean
+    subCatCd?: boolean
+    subCatDesc?: boolean
+    mcDesc?: boolean
+    ssn?: boolean
+    mcStat?: boolean
+    subCatStat?: boolean
+    majCatStat?: boolean
+    sizeApplicable?: boolean
+    divStat?: boolean
+    mcPkSz?: boolean
+    subCatPkSz?: boolean
+    noOfOptions?: boolean
+    avgDensity?: boolean
+    accDensity?: boolean
+    wgDensity?: boolean
+    fg46FtDensity?: boolean
+    fg5FtDensity?: boolean
+    fg4ADensity?: boolean
+    fg8ADensity?: boolean
+    acp?: boolean
+    oldDensity?: boolean
+    seq?: boolean
+    mjCatTyp?: boolean
+    fixtr?: boolean
+    newMcCd?: boolean
+    newMcDesc?: boolean
+    oldMcDesc?: boolean
+    oldSubCatCd?: boolean
+    oldSubCatDesc?: boolean
+    legacyMcDesc?: boolean
+    effectiveDate?: boolean
+    remarks?: boolean
+    gmStatus?: boolean
+    currentMcStatus?: boolean
+    fullMcName?: boolean
+    winterStatus?: boolean
+    uploadedAt?: boolean
+    updatedAt?: boolean
+  }, ExtArgs["result"]["broaderMenu"]>
+
+  export type BroaderMenuSelectScalar = {
+    id?: boolean
+    sn?: boolean
+    mcCd?: boolean
+    seg?: boolean
+    div?: boolean
+    subDiv?: boolean
+    majCatCd?: boolean
+    majCatNm?: boolean
+    subCatCd?: boolean
+    subCatDesc?: boolean
+    mcDesc?: boolean
+    ssn?: boolean
+    mcStat?: boolean
+    subCatStat?: boolean
+    majCatStat?: boolean
+    sizeApplicable?: boolean
+    divStat?: boolean
+    mcPkSz?: boolean
+    subCatPkSz?: boolean
+    noOfOptions?: boolean
+    avgDensity?: boolean
+    accDensity?: boolean
+    wgDensity?: boolean
+    fg46FtDensity?: boolean
+    fg5FtDensity?: boolean
+    fg4ADensity?: boolean
+    fg8ADensity?: boolean
+    acp?: boolean
+    oldDensity?: boolean
+    seq?: boolean
+    mjCatTyp?: boolean
+    fixtr?: boolean
+    newMcCd?: boolean
+    newMcDesc?: boolean
+    oldMcDesc?: boolean
+    oldSubCatCd?: boolean
+    oldSubCatDesc?: boolean
+    legacyMcDesc?: boolean
+    effectiveDate?: boolean
+    remarks?: boolean
+    gmStatus?: boolean
+    currentMcStatus?: boolean
+    fullMcName?: boolean
+    winterStatus?: boolean
+    uploadedAt?: boolean
+    updatedAt?: boolean
+  }
+
+  export type BroaderMenuOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<"id" | "sn" | "mcCd" | "seg" | "div" | "subDiv" | "majCatCd" | "majCatNm" | "subCatCd" | "subCatDesc" | "mcDesc" | "ssn" | "mcStat" | "subCatStat" | "majCatStat" | "sizeApplicable" | "divStat" | "mcPkSz" | "subCatPkSz" | "noOfOptions" | "avgDensity" | "accDensity" | "wgDensity" | "fg46FtDensity" | "fg5FtDensity" | "fg4ADensity" | "fg8ADensity" | "acp" | "oldDensity" | "seq" | "mjCatTyp" | "fixtr" | "newMcCd" | "newMcDesc" | "oldMcDesc" | "oldSubCatCd" | "oldSubCatDesc" | "legacyMcDesc" | "effectiveDate" | "remarks" | "gmStatus" | "currentMcStatus" | "fullMcName" | "winterStatus" | "uploadedAt" | "updatedAt", ExtArgs["result"]["broaderMenu"]>
+
+  export type $BroaderMenuPayload<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    name: "BroaderMenu"
+    objects: {}
+    scalars: $Extensions.GetPayloadResult<{
+      id: number
+      /**
+       * Row number as it appeared in the sheet — informational only.
+       */
+      sn: number | null
+      /**
+       * Merchandise Category code. The natural key: one row per MC CD.
+       */
+      mcCd: number
+      seg: string | null
+      div: string | null
+      subDiv: string | null
+      majCatCd: number | null
+      majCatNm: string | null
+      subCatCd: number | null
+      subCatDesc: string | null
+      mcDesc: string | null
+      /**
+       * Season: A / S / PW / HW / OC / MW / SSNL
+       */
+      ssn: string | null
+      /**
+       * Status flags at each level of the hierarchy: ACT / IN / T-ACT
+       */
+      mcStat: string | null
+      subCatStat: string | null
+      majCatStat: string | null
+      sizeApplicable: string | null
+      divStat: string | null
+      mcPkSz: number | null
+      subCatPkSz: number | null
+      noOfOptions: number | null
+      /**
+       * Fixture densities. avgDensity/acp carry fractions, the rest are whole numbers
+       * in practice — all Decimal so a future file with fractions doesn't get rounded.
+       */
+      avgDensity: Prisma.Decimal | null
+      accDensity: Prisma.Decimal | null
+      wgDensity: Prisma.Decimal | null
+      fg46FtDensity: Prisma.Decimal | null
+      fg5FtDensity: Prisma.Decimal | null
+      fg4ADensity: Prisma.Decimal | null
+      fg8ADensity: Prisma.Decimal | null
+      acp: Prisma.Decimal | null
+      oldDensity: Prisma.Decimal | null
+      seq: number | null
+      mjCatTyp: string | null
+      fixtr: string | null
+      /**
+       * Rename trail — the codes/descriptions this MC is moving to or came from.
+       */
+      newMcCd: number | null
+      newMcDesc: string | null
+      oldMcDesc: string | null
+      oldSubCatCd: number | null
+      oldSubCatDesc: string | null
+      legacyMcDesc: string | null
+      /**
+       * The sheet's DATE column — when this row's change took effect.
+       */
+      effectiveDate: Date | null
+      remarks: string | null
+      gmStatus: string | null
+      currentMcStatus: string | null
+      fullMcName: string | null
+      winterStatus: string | null
+      uploadedAt: Date
+      updatedAt: Date
+    }, ExtArgs["result"]["broaderMenu"]>
+    composites: {}
+  }
+
+  type BroaderMenuGetPayload<S extends boolean | null | undefined | BroaderMenuDefaultArgs> = $Result.GetResult<Prisma.$BroaderMenuPayload, S>
+
+  type BroaderMenuCountArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> =
+    Omit<BroaderMenuFindManyArgs, 'select' | 'include' | 'distinct' | 'omit'> & {
+      select?: BroaderMenuCountAggregateInputType | true
+    }
+
+  export interface BroaderMenuDelegate<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs, GlobalOmitOptions = {}> {
+    [K: symbol]: { types: Prisma.TypeMap<ExtArgs>['model']['BroaderMenu'], meta: { name: 'BroaderMenu' } }
+    /**
+     * Find zero or one BroaderMenu that matches the filter.
+     * @param {BroaderMenuFindUniqueArgs} args - Arguments to find a BroaderMenu
+     * @example
+     * // Get one BroaderMenu
+     * const broaderMenu = await prisma.broaderMenu.findUnique({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     */
+    findUnique<T extends BroaderMenuFindUniqueArgs>(args: SelectSubset<T, BroaderMenuFindUniqueArgs<ExtArgs>>): Prisma__BroaderMenuClient<$Result.GetResult<Prisma.$BroaderMenuPayload<ExtArgs>, T, "findUnique", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Find one BroaderMenu that matches the filter or throw an error with `error.code='P2025'`
+     * if no matches were found.
+     * @param {BroaderMenuFindUniqueOrThrowArgs} args - Arguments to find a BroaderMenu
+     * @example
+     * // Get one BroaderMenu
+     * const broaderMenu = await prisma.broaderMenu.findUniqueOrThrow({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     */
+    findUniqueOrThrow<T extends BroaderMenuFindUniqueOrThrowArgs>(args: SelectSubset<T, BroaderMenuFindUniqueOrThrowArgs<ExtArgs>>): Prisma__BroaderMenuClient<$Result.GetResult<Prisma.$BroaderMenuPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Find the first BroaderMenu that matches the filter.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {BroaderMenuFindFirstArgs} args - Arguments to find a BroaderMenu
+     * @example
+     * // Get one BroaderMenu
+     * const broaderMenu = await prisma.broaderMenu.findFirst({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     */
+    findFirst<T extends BroaderMenuFindFirstArgs>(args?: SelectSubset<T, BroaderMenuFindFirstArgs<ExtArgs>>): Prisma__BroaderMenuClient<$Result.GetResult<Prisma.$BroaderMenuPayload<ExtArgs>, T, "findFirst", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Find the first BroaderMenu that matches the filter or
+     * throw `PrismaKnownClientError` with `P2025` code if no matches were found.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {BroaderMenuFindFirstOrThrowArgs} args - Arguments to find a BroaderMenu
+     * @example
+     * // Get one BroaderMenu
+     * const broaderMenu = await prisma.broaderMenu.findFirstOrThrow({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     */
+    findFirstOrThrow<T extends BroaderMenuFindFirstOrThrowArgs>(args?: SelectSubset<T, BroaderMenuFindFirstOrThrowArgs<ExtArgs>>): Prisma__BroaderMenuClient<$Result.GetResult<Prisma.$BroaderMenuPayload<ExtArgs>, T, "findFirstOrThrow", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Find zero or more BroaderMenus that matches the filter.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {BroaderMenuFindManyArgs} args - Arguments to filter and select certain fields only.
+     * @example
+     * // Get all BroaderMenus
+     * const broaderMenus = await prisma.broaderMenu.findMany()
+     * 
+     * // Get first 10 BroaderMenus
+     * const broaderMenus = await prisma.broaderMenu.findMany({ take: 10 })
+     * 
+     * // Only select the `id`
+     * const broaderMenuWithIdOnly = await prisma.broaderMenu.findMany({ select: { id: true } })
+     * 
+     */
+    findMany<T extends BroaderMenuFindManyArgs>(args?: SelectSubset<T, BroaderMenuFindManyArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$BroaderMenuPayload<ExtArgs>, T, "findMany", GlobalOmitOptions>>
+
+    /**
+     * Create a BroaderMenu.
+     * @param {BroaderMenuCreateArgs} args - Arguments to create a BroaderMenu.
+     * @example
+     * // Create one BroaderMenu
+     * const BroaderMenu = await prisma.broaderMenu.create({
+     *   data: {
+     *     // ... data to create a BroaderMenu
+     *   }
+     * })
+     * 
+     */
+    create<T extends BroaderMenuCreateArgs>(args: SelectSubset<T, BroaderMenuCreateArgs<ExtArgs>>): Prisma__BroaderMenuClient<$Result.GetResult<Prisma.$BroaderMenuPayload<ExtArgs>, T, "create", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Create many BroaderMenus.
+     * @param {BroaderMenuCreateManyArgs} args - Arguments to create many BroaderMenus.
+     * @example
+     * // Create many BroaderMenus
+     * const broaderMenu = await prisma.broaderMenu.createMany({
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     *     
+     */
+    createMany<T extends BroaderMenuCreateManyArgs>(args?: SelectSubset<T, BroaderMenuCreateManyArgs<ExtArgs>>): Prisma.PrismaPromise<BatchPayload>
+
+    /**
+     * Create many BroaderMenus and returns the data saved in the database.
+     * @param {BroaderMenuCreateManyAndReturnArgs} args - Arguments to create many BroaderMenus.
+     * @example
+     * // Create many BroaderMenus
+     * const broaderMenu = await prisma.broaderMenu.createManyAndReturn({
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     * 
+     * // Create many BroaderMenus and only return the `id`
+     * const broaderMenuWithIdOnly = await prisma.broaderMenu.createManyAndReturn({
+     *   select: { id: true },
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * 
+     */
+    createManyAndReturn<T extends BroaderMenuCreateManyAndReturnArgs>(args?: SelectSubset<T, BroaderMenuCreateManyAndReturnArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$BroaderMenuPayload<ExtArgs>, T, "createManyAndReturn", GlobalOmitOptions>>
+
+    /**
+     * Delete a BroaderMenu.
+     * @param {BroaderMenuDeleteArgs} args - Arguments to delete one BroaderMenu.
+     * @example
+     * // Delete one BroaderMenu
+     * const BroaderMenu = await prisma.broaderMenu.delete({
+     *   where: {
+     *     // ... filter to delete one BroaderMenu
+     *   }
+     * })
+     * 
+     */
+    delete<T extends BroaderMenuDeleteArgs>(args: SelectSubset<T, BroaderMenuDeleteArgs<ExtArgs>>): Prisma__BroaderMenuClient<$Result.GetResult<Prisma.$BroaderMenuPayload<ExtArgs>, T, "delete", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Update one BroaderMenu.
+     * @param {BroaderMenuUpdateArgs} args - Arguments to update one BroaderMenu.
+     * @example
+     * // Update one BroaderMenu
+     * const broaderMenu = await prisma.broaderMenu.update({
+     *   where: {
+     *     // ... provide filter here
+     *   },
+     *   data: {
+     *     // ... provide data here
+     *   }
+     * })
+     * 
+     */
+    update<T extends BroaderMenuUpdateArgs>(args: SelectSubset<T, BroaderMenuUpdateArgs<ExtArgs>>): Prisma__BroaderMenuClient<$Result.GetResult<Prisma.$BroaderMenuPayload<ExtArgs>, T, "update", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Delete zero or more BroaderMenus.
+     * @param {BroaderMenuDeleteManyArgs} args - Arguments to filter BroaderMenus to delete.
+     * @example
+     * // Delete a few BroaderMenus
+     * const { count } = await prisma.broaderMenu.deleteMany({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     * 
+     */
+    deleteMany<T extends BroaderMenuDeleteManyArgs>(args?: SelectSubset<T, BroaderMenuDeleteManyArgs<ExtArgs>>): Prisma.PrismaPromise<BatchPayload>
+
+    /**
+     * Update zero or more BroaderMenus.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {BroaderMenuUpdateManyArgs} args - Arguments to update one or more rows.
+     * @example
+     * // Update many BroaderMenus
+     * const broaderMenu = await prisma.broaderMenu.updateMany({
+     *   where: {
+     *     // ... provide filter here
+     *   },
+     *   data: {
+     *     // ... provide data here
+     *   }
+     * })
+     * 
+     */
+    updateMany<T extends BroaderMenuUpdateManyArgs>(args: SelectSubset<T, BroaderMenuUpdateManyArgs<ExtArgs>>): Prisma.PrismaPromise<BatchPayload>
+
+    /**
+     * Update zero or more BroaderMenus and returns the data updated in the database.
+     * @param {BroaderMenuUpdateManyAndReturnArgs} args - Arguments to update many BroaderMenus.
+     * @example
+     * // Update many BroaderMenus
+     * const broaderMenu = await prisma.broaderMenu.updateManyAndReturn({
+     *   where: {
+     *     // ... provide filter here
+     *   },
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     * 
+     * // Update zero or more BroaderMenus and only return the `id`
+     * const broaderMenuWithIdOnly = await prisma.broaderMenu.updateManyAndReturn({
+     *   select: { id: true },
+     *   where: {
+     *     // ... provide filter here
+     *   },
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * 
+     */
+    updateManyAndReturn<T extends BroaderMenuUpdateManyAndReturnArgs>(args: SelectSubset<T, BroaderMenuUpdateManyAndReturnArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$BroaderMenuPayload<ExtArgs>, T, "updateManyAndReturn", GlobalOmitOptions>>
+
+    /**
+     * Create or update one BroaderMenu.
+     * @param {BroaderMenuUpsertArgs} args - Arguments to update or create a BroaderMenu.
+     * @example
+     * // Update or create a BroaderMenu
+     * const broaderMenu = await prisma.broaderMenu.upsert({
+     *   create: {
+     *     // ... data to create a BroaderMenu
+     *   },
+     *   update: {
+     *     // ... in case it already exists, update
+     *   },
+     *   where: {
+     *     // ... the filter for the BroaderMenu we want to update
+     *   }
+     * })
+     */
+    upsert<T extends BroaderMenuUpsertArgs>(args: SelectSubset<T, BroaderMenuUpsertArgs<ExtArgs>>): Prisma__BroaderMenuClient<$Result.GetResult<Prisma.$BroaderMenuPayload<ExtArgs>, T, "upsert", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+
+    /**
+     * Count the number of BroaderMenus.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {BroaderMenuCountArgs} args - Arguments to filter BroaderMenus to count.
+     * @example
+     * // Count the number of BroaderMenus
+     * const count = await prisma.broaderMenu.count({
+     *   where: {
+     *     // ... the filter for the BroaderMenus we want to count
+     *   }
+     * })
+    **/
+    count<T extends BroaderMenuCountArgs>(
+      args?: Subset<T, BroaderMenuCountArgs>,
+    ): Prisma.PrismaPromise<
+      T extends $Utils.Record<'select', any>
+        ? T['select'] extends true
+          ? number
+          : GetScalarType<T['select'], BroaderMenuCountAggregateOutputType>
+        : number
+    >
+
+    /**
+     * Allows you to perform aggregations operations on a BroaderMenu.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {BroaderMenuAggregateArgs} args - Select which aggregations you would like to apply and on what fields.
+     * @example
+     * // Ordered by age ascending
+     * // Where email contains prisma.io
+     * // Limited to the 10 users
+     * const aggregations = await prisma.user.aggregate({
+     *   _avg: {
+     *     age: true,
+     *   },
+     *   where: {
+     *     email: {
+     *       contains: "prisma.io",
+     *     },
+     *   },
+     *   orderBy: {
+     *     age: "asc",
+     *   },
+     *   take: 10,
+     * })
+    **/
+    aggregate<T extends BroaderMenuAggregateArgs>(args: Subset<T, BroaderMenuAggregateArgs>): Prisma.PrismaPromise<GetBroaderMenuAggregateType<T>>
+
+    /**
+     * Group by BroaderMenu.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {BroaderMenuGroupByArgs} args - Group by arguments.
+     * @example
+     * // Group by city, order by createdAt, get count
+     * const result = await prisma.user.groupBy({
+     *   by: ['city', 'createdAt'],
+     *   orderBy: {
+     *     createdAt: true
+     *   },
+     *   _count: {
+     *     _all: true
+     *   },
+     * })
+     * 
+    **/
+    groupBy<
+      T extends BroaderMenuGroupByArgs,
+      HasSelectOrTake extends Or<
+        Extends<'skip', Keys<T>>,
+        Extends<'take', Keys<T>>
+      >,
+      OrderByArg extends True extends HasSelectOrTake
+        ? { orderBy: BroaderMenuGroupByArgs['orderBy'] }
+        : { orderBy?: BroaderMenuGroupByArgs['orderBy'] },
+      OrderFields extends ExcludeUnderscoreKeys<Keys<MaybeTupleToUnion<T['orderBy']>>>,
+      ByFields extends MaybeTupleToUnion<T['by']>,
+      ByValid extends Has<ByFields, OrderFields>,
+      HavingFields extends GetHavingFields<T['having']>,
+      HavingValid extends Has<ByFields, HavingFields>,
+      ByEmpty extends T['by'] extends never[] ? True : False,
+      InputErrors extends ByEmpty extends True
+      ? `Error: "by" must not be empty.`
+      : HavingValid extends False
+      ? {
+          [P in HavingFields]: P extends ByFields
+            ? never
+            : P extends string
+            ? `Error: Field "${P}" used in "having" needs to be provided in "by".`
+            : [
+                Error,
+                'Field ',
+                P,
+                ` in "having" needs to be provided in "by"`,
+              ]
+        }[HavingFields]
+      : 'take' extends Keys<T>
+      ? 'orderBy' extends Keys<T>
+        ? ByValid extends True
+          ? {}
+          : {
+              [P in OrderFields]: P extends ByFields
+                ? never
+                : `Error: Field "${P}" in "orderBy" needs to be provided in "by"`
+            }[OrderFields]
+        : 'Error: If you provide "take", you also need to provide "orderBy"'
+      : 'skip' extends Keys<T>
+      ? 'orderBy' extends Keys<T>
+        ? ByValid extends True
+          ? {}
+          : {
+              [P in OrderFields]: P extends ByFields
+                ? never
+                : `Error: Field "${P}" in "orderBy" needs to be provided in "by"`
+            }[OrderFields]
+        : 'Error: If you provide "skip", you also need to provide "orderBy"'
+      : ByValid extends True
+      ? {}
+      : {
+          [P in OrderFields]: P extends ByFields
+            ? never
+            : `Error: Field "${P}" in "orderBy" needs to be provided in "by"`
+        }[OrderFields]
+    >(args: SubsetIntersection<T, BroaderMenuGroupByArgs, OrderByArg> & InputErrors): {} extends InputErrors ? GetBroaderMenuGroupByPayload<T> : Prisma.PrismaPromise<InputErrors>
+  /**
+   * Fields of the BroaderMenu model
+   */
+  readonly fields: BroaderMenuFieldRefs;
+  }
+
+  /**
+   * The delegate class that acts as a "Promise-like" for BroaderMenu.
+   * Why is this prefixed with `Prisma__`?
+   * Because we want to prevent naming conflicts as mentioned in
+   * https://github.com/prisma/prisma-client-js/issues/707
+   */
+  export interface Prisma__BroaderMenuClient<T, Null = never, ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs, GlobalOmitOptions = {}> extends Prisma.PrismaPromise<T> {
+    readonly [Symbol.toStringTag]: "PrismaPromise"
+    /**
+     * Attaches callbacks for the resolution and/or rejection of the Promise.
+     * @param onfulfilled The callback to execute when the Promise is resolved.
+     * @param onrejected The callback to execute when the Promise is rejected.
+     * @returns A Promise for the completion of which ever callback is executed.
+     */
+    then<TResult1 = T, TResult2 = never>(onfulfilled?: ((value: T) => TResult1 | PromiseLike<TResult1>) | undefined | null, onrejected?: ((reason: any) => TResult2 | PromiseLike<TResult2>) | undefined | null): $Utils.JsPromise<TResult1 | TResult2>
+    /**
+     * Attaches a callback for only the rejection of the Promise.
+     * @param onrejected The callback to execute when the Promise is rejected.
+     * @returns A Promise for the completion of the callback.
+     */
+    catch<TResult = never>(onrejected?: ((reason: any) => TResult | PromiseLike<TResult>) | undefined | null): $Utils.JsPromise<T | TResult>
+    /**
+     * Attaches a callback that is invoked when the Promise is settled (fulfilled or rejected). The
+     * resolved value cannot be modified from the callback.
+     * @param onfinally The callback to execute when the Promise is settled (fulfilled or rejected).
+     * @returns A Promise for the completion of the callback.
+     */
+    finally(onfinally?: (() => void) | undefined | null): $Utils.JsPromise<T>
+  }
+
+
+
+
+  /**
+   * Fields of the BroaderMenu model
+   */
+  interface BroaderMenuFieldRefs {
+    readonly id: FieldRef<"BroaderMenu", 'Int'>
+    readonly sn: FieldRef<"BroaderMenu", 'Int'>
+    readonly mcCd: FieldRef<"BroaderMenu", 'Int'>
+    readonly seg: FieldRef<"BroaderMenu", 'String'>
+    readonly div: FieldRef<"BroaderMenu", 'String'>
+    readonly subDiv: FieldRef<"BroaderMenu", 'String'>
+    readonly majCatCd: FieldRef<"BroaderMenu", 'Int'>
+    readonly majCatNm: FieldRef<"BroaderMenu", 'String'>
+    readonly subCatCd: FieldRef<"BroaderMenu", 'Int'>
+    readonly subCatDesc: FieldRef<"BroaderMenu", 'String'>
+    readonly mcDesc: FieldRef<"BroaderMenu", 'String'>
+    readonly ssn: FieldRef<"BroaderMenu", 'String'>
+    readonly mcStat: FieldRef<"BroaderMenu", 'String'>
+    readonly subCatStat: FieldRef<"BroaderMenu", 'String'>
+    readonly majCatStat: FieldRef<"BroaderMenu", 'String'>
+    readonly sizeApplicable: FieldRef<"BroaderMenu", 'String'>
+    readonly divStat: FieldRef<"BroaderMenu", 'String'>
+    readonly mcPkSz: FieldRef<"BroaderMenu", 'Int'>
+    readonly subCatPkSz: FieldRef<"BroaderMenu", 'Int'>
+    readonly noOfOptions: FieldRef<"BroaderMenu", 'Int'>
+    readonly avgDensity: FieldRef<"BroaderMenu", 'Decimal'>
+    readonly accDensity: FieldRef<"BroaderMenu", 'Decimal'>
+    readonly wgDensity: FieldRef<"BroaderMenu", 'Decimal'>
+    readonly fg46FtDensity: FieldRef<"BroaderMenu", 'Decimal'>
+    readonly fg5FtDensity: FieldRef<"BroaderMenu", 'Decimal'>
+    readonly fg4ADensity: FieldRef<"BroaderMenu", 'Decimal'>
+    readonly fg8ADensity: FieldRef<"BroaderMenu", 'Decimal'>
+    readonly acp: FieldRef<"BroaderMenu", 'Decimal'>
+    readonly oldDensity: FieldRef<"BroaderMenu", 'Decimal'>
+    readonly seq: FieldRef<"BroaderMenu", 'Int'>
+    readonly mjCatTyp: FieldRef<"BroaderMenu", 'String'>
+    readonly fixtr: FieldRef<"BroaderMenu", 'String'>
+    readonly newMcCd: FieldRef<"BroaderMenu", 'Int'>
+    readonly newMcDesc: FieldRef<"BroaderMenu", 'String'>
+    readonly oldMcDesc: FieldRef<"BroaderMenu", 'String'>
+    readonly oldSubCatCd: FieldRef<"BroaderMenu", 'Int'>
+    readonly oldSubCatDesc: FieldRef<"BroaderMenu", 'String'>
+    readonly legacyMcDesc: FieldRef<"BroaderMenu", 'String'>
+    readonly effectiveDate: FieldRef<"BroaderMenu", 'DateTime'>
+    readonly remarks: FieldRef<"BroaderMenu", 'String'>
+    readonly gmStatus: FieldRef<"BroaderMenu", 'String'>
+    readonly currentMcStatus: FieldRef<"BroaderMenu", 'String'>
+    readonly fullMcName: FieldRef<"BroaderMenu", 'String'>
+    readonly winterStatus: FieldRef<"BroaderMenu", 'String'>
+    readonly uploadedAt: FieldRef<"BroaderMenu", 'DateTime'>
+    readonly updatedAt: FieldRef<"BroaderMenu", 'DateTime'>
+  }
+    
+
+  // Custom InputTypes
+  /**
+   * BroaderMenu findUnique
+   */
+  export type BroaderMenuFindUniqueArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the BroaderMenu
+     */
+    select?: BroaderMenuSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the BroaderMenu
+     */
+    omit?: BroaderMenuOmit<ExtArgs> | null
+    /**
+     * Filter, which BroaderMenu to fetch.
+     */
+    where: BroaderMenuWhereUniqueInput
+  }
+
+  /**
+   * BroaderMenu findUniqueOrThrow
+   */
+  export type BroaderMenuFindUniqueOrThrowArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the BroaderMenu
+     */
+    select?: BroaderMenuSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the BroaderMenu
+     */
+    omit?: BroaderMenuOmit<ExtArgs> | null
+    /**
+     * Filter, which BroaderMenu to fetch.
+     */
+    where: BroaderMenuWhereUniqueInput
+  }
+
+  /**
+   * BroaderMenu findFirst
+   */
+  export type BroaderMenuFindFirstArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the BroaderMenu
+     */
+    select?: BroaderMenuSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the BroaderMenu
+     */
+    omit?: BroaderMenuOmit<ExtArgs> | null
+    /**
+     * Filter, which BroaderMenu to fetch.
+     */
+    where?: BroaderMenuWhereInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
+     * 
+     * Determine the order of BroaderMenus to fetch.
+     */
+    orderBy?: BroaderMenuOrderByWithRelationInput | BroaderMenuOrderByWithRelationInput[]
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
+     * 
+     * Sets the position for searching for BroaderMenus.
+     */
+    cursor?: BroaderMenuWhereUniqueInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Take `±n` BroaderMenus from the position of the cursor.
+     */
+    take?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Skip the first `n` BroaderMenus.
+     */
+    skip?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/distinct Distinct Docs}
+     * 
+     * Filter by unique combinations of BroaderMenus.
+     */
+    distinct?: BroaderMenuScalarFieldEnum | BroaderMenuScalarFieldEnum[]
+  }
+
+  /**
+   * BroaderMenu findFirstOrThrow
+   */
+  export type BroaderMenuFindFirstOrThrowArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the BroaderMenu
+     */
+    select?: BroaderMenuSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the BroaderMenu
+     */
+    omit?: BroaderMenuOmit<ExtArgs> | null
+    /**
+     * Filter, which BroaderMenu to fetch.
+     */
+    where?: BroaderMenuWhereInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
+     * 
+     * Determine the order of BroaderMenus to fetch.
+     */
+    orderBy?: BroaderMenuOrderByWithRelationInput | BroaderMenuOrderByWithRelationInput[]
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
+     * 
+     * Sets the position for searching for BroaderMenus.
+     */
+    cursor?: BroaderMenuWhereUniqueInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Take `±n` BroaderMenus from the position of the cursor.
+     */
+    take?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Skip the first `n` BroaderMenus.
+     */
+    skip?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/distinct Distinct Docs}
+     * 
+     * Filter by unique combinations of BroaderMenus.
+     */
+    distinct?: BroaderMenuScalarFieldEnum | BroaderMenuScalarFieldEnum[]
+  }
+
+  /**
+   * BroaderMenu findMany
+   */
+  export type BroaderMenuFindManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the BroaderMenu
+     */
+    select?: BroaderMenuSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the BroaderMenu
+     */
+    omit?: BroaderMenuOmit<ExtArgs> | null
+    /**
+     * Filter, which BroaderMenus to fetch.
+     */
+    where?: BroaderMenuWhereInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
+     * 
+     * Determine the order of BroaderMenus to fetch.
+     */
+    orderBy?: BroaderMenuOrderByWithRelationInput | BroaderMenuOrderByWithRelationInput[]
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
+     * 
+     * Sets the position for listing BroaderMenus.
+     */
+    cursor?: BroaderMenuWhereUniqueInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Take `±n` BroaderMenus from the position of the cursor.
+     */
+    take?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Skip the first `n` BroaderMenus.
+     */
+    skip?: number
+    distinct?: BroaderMenuScalarFieldEnum | BroaderMenuScalarFieldEnum[]
+  }
+
+  /**
+   * BroaderMenu create
+   */
+  export type BroaderMenuCreateArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the BroaderMenu
+     */
+    select?: BroaderMenuSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the BroaderMenu
+     */
+    omit?: BroaderMenuOmit<ExtArgs> | null
+    /**
+     * The data needed to create a BroaderMenu.
+     */
+    data: XOR<BroaderMenuCreateInput, BroaderMenuUncheckedCreateInput>
+  }
+
+  /**
+   * BroaderMenu createMany
+   */
+  export type BroaderMenuCreateManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * The data used to create many BroaderMenus.
+     */
+    data: BroaderMenuCreateManyInput | BroaderMenuCreateManyInput[]
+    skipDuplicates?: boolean
+  }
+
+  /**
+   * BroaderMenu createManyAndReturn
+   */
+  export type BroaderMenuCreateManyAndReturnArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the BroaderMenu
+     */
+    select?: BroaderMenuSelectCreateManyAndReturn<ExtArgs> | null
+    /**
+     * Omit specific fields from the BroaderMenu
+     */
+    omit?: BroaderMenuOmit<ExtArgs> | null
+    /**
+     * The data used to create many BroaderMenus.
+     */
+    data: BroaderMenuCreateManyInput | BroaderMenuCreateManyInput[]
+    skipDuplicates?: boolean
+  }
+
+  /**
+   * BroaderMenu update
+   */
+  export type BroaderMenuUpdateArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the BroaderMenu
+     */
+    select?: BroaderMenuSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the BroaderMenu
+     */
+    omit?: BroaderMenuOmit<ExtArgs> | null
+    /**
+     * The data needed to update a BroaderMenu.
+     */
+    data: XOR<BroaderMenuUpdateInput, BroaderMenuUncheckedUpdateInput>
+    /**
+     * Choose, which BroaderMenu to update.
+     */
+    where: BroaderMenuWhereUniqueInput
+  }
+
+  /**
+   * BroaderMenu updateMany
+   */
+  export type BroaderMenuUpdateManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * The data used to update BroaderMenus.
+     */
+    data: XOR<BroaderMenuUpdateManyMutationInput, BroaderMenuUncheckedUpdateManyInput>
+    /**
+     * Filter which BroaderMenus to update
+     */
+    where?: BroaderMenuWhereInput
+    /**
+     * Limit how many BroaderMenus to update.
+     */
+    limit?: number
+  }
+
+  /**
+   * BroaderMenu updateManyAndReturn
+   */
+  export type BroaderMenuUpdateManyAndReturnArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the BroaderMenu
+     */
+    select?: BroaderMenuSelectUpdateManyAndReturn<ExtArgs> | null
+    /**
+     * Omit specific fields from the BroaderMenu
+     */
+    omit?: BroaderMenuOmit<ExtArgs> | null
+    /**
+     * The data used to update BroaderMenus.
+     */
+    data: XOR<BroaderMenuUpdateManyMutationInput, BroaderMenuUncheckedUpdateManyInput>
+    /**
+     * Filter which BroaderMenus to update
+     */
+    where?: BroaderMenuWhereInput
+    /**
+     * Limit how many BroaderMenus to update.
+     */
+    limit?: number
+  }
+
+  /**
+   * BroaderMenu upsert
+   */
+  export type BroaderMenuUpsertArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the BroaderMenu
+     */
+    select?: BroaderMenuSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the BroaderMenu
+     */
+    omit?: BroaderMenuOmit<ExtArgs> | null
+    /**
+     * The filter to search for the BroaderMenu to update in case it exists.
+     */
+    where: BroaderMenuWhereUniqueInput
+    /**
+     * In case the BroaderMenu found by the `where` argument doesn't exist, create a new BroaderMenu with this data.
+     */
+    create: XOR<BroaderMenuCreateInput, BroaderMenuUncheckedCreateInput>
+    /**
+     * In case the BroaderMenu was found with the provided `where` argument, update it with this data.
+     */
+    update: XOR<BroaderMenuUpdateInput, BroaderMenuUncheckedUpdateInput>
+  }
+
+  /**
+   * BroaderMenu delete
+   */
+  export type BroaderMenuDeleteArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the BroaderMenu
+     */
+    select?: BroaderMenuSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the BroaderMenu
+     */
+    omit?: BroaderMenuOmit<ExtArgs> | null
+    /**
+     * Filter which BroaderMenu to delete.
+     */
+    where: BroaderMenuWhereUniqueInput
+  }
+
+  /**
+   * BroaderMenu deleteMany
+   */
+  export type BroaderMenuDeleteManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Filter which BroaderMenus to delete
+     */
+    where?: BroaderMenuWhereInput
+    /**
+     * Limit how many BroaderMenus to delete.
+     */
+    limit?: number
+  }
+
+  /**
+   * BroaderMenu without action
+   */
+  export type BroaderMenuDefaultArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the BroaderMenu
+     */
+    select?: BroaderMenuSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the BroaderMenu
+     */
+    omit?: BroaderMenuOmit<ExtArgs> | null
+  }
+
+
+  /**
    * Model MajorCatMaster
    */
 
@@ -56828,6 +58914,1113 @@ export namespace Prisma {
 
 
   /**
+   * Model ExpenseApprovalStage
+   */
+
+  export type AggregateExpenseApprovalStage = {
+    _count: ExpenseApprovalStageCountAggregateOutputType | null
+    _avg: ExpenseApprovalStageAvgAggregateOutputType | null
+    _sum: ExpenseApprovalStageSumAggregateOutputType | null
+    _min: ExpenseApprovalStageMinAggregateOutputType | null
+    _max: ExpenseApprovalStageMaxAggregateOutputType | null
+  }
+
+  export type ExpenseApprovalStageAvgAggregateOutputType = {
+    id: number | null
+    sortOrder: number | null
+    createdById: number | null
+  }
+
+  export type ExpenseApprovalStageSumAggregateOutputType = {
+    id: number | null
+    sortOrder: number | null
+    createdById: number | null
+  }
+
+  export type ExpenseApprovalStageMinAggregateOutputType = {
+    id: number | null
+    key: string | null
+    label: string | null
+    description: string | null
+    sortOrder: number | null
+    isActive: boolean | null
+    createdById: number | null
+    createdByName: string | null
+    createdAt: Date | null
+    updatedAt: Date | null
+  }
+
+  export type ExpenseApprovalStageMaxAggregateOutputType = {
+    id: number | null
+    key: string | null
+    label: string | null
+    description: string | null
+    sortOrder: number | null
+    isActive: boolean | null
+    createdById: number | null
+    createdByName: string | null
+    createdAt: Date | null
+    updatedAt: Date | null
+  }
+
+  export type ExpenseApprovalStageCountAggregateOutputType = {
+    id: number
+    key: number
+    label: number
+    description: number
+    sortOrder: number
+    isActive: number
+    createdById: number
+    createdByName: number
+    createdAt: number
+    updatedAt: number
+    _all: number
+  }
+
+
+  export type ExpenseApprovalStageAvgAggregateInputType = {
+    id?: true
+    sortOrder?: true
+    createdById?: true
+  }
+
+  export type ExpenseApprovalStageSumAggregateInputType = {
+    id?: true
+    sortOrder?: true
+    createdById?: true
+  }
+
+  export type ExpenseApprovalStageMinAggregateInputType = {
+    id?: true
+    key?: true
+    label?: true
+    description?: true
+    sortOrder?: true
+    isActive?: true
+    createdById?: true
+    createdByName?: true
+    createdAt?: true
+    updatedAt?: true
+  }
+
+  export type ExpenseApprovalStageMaxAggregateInputType = {
+    id?: true
+    key?: true
+    label?: true
+    description?: true
+    sortOrder?: true
+    isActive?: true
+    createdById?: true
+    createdByName?: true
+    createdAt?: true
+    updatedAt?: true
+  }
+
+  export type ExpenseApprovalStageCountAggregateInputType = {
+    id?: true
+    key?: true
+    label?: true
+    description?: true
+    sortOrder?: true
+    isActive?: true
+    createdById?: true
+    createdByName?: true
+    createdAt?: true
+    updatedAt?: true
+    _all?: true
+  }
+
+  export type ExpenseApprovalStageAggregateArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Filter which ExpenseApprovalStage to aggregate.
+     */
+    where?: ExpenseApprovalStageWhereInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
+     * 
+     * Determine the order of ExpenseApprovalStages to fetch.
+     */
+    orderBy?: ExpenseApprovalStageOrderByWithRelationInput | ExpenseApprovalStageOrderByWithRelationInput[]
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
+     * 
+     * Sets the start position
+     */
+    cursor?: ExpenseApprovalStageWhereUniqueInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Take `±n` ExpenseApprovalStages from the position of the cursor.
+     */
+    take?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Skip the first `n` ExpenseApprovalStages.
+     */
+    skip?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     * 
+     * Count returned ExpenseApprovalStages
+    **/
+    _count?: true | ExpenseApprovalStageCountAggregateInputType
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     * 
+     * Select which fields to average
+    **/
+    _avg?: ExpenseApprovalStageAvgAggregateInputType
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     * 
+     * Select which fields to sum
+    **/
+    _sum?: ExpenseApprovalStageSumAggregateInputType
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     * 
+     * Select which fields to find the minimum value
+    **/
+    _min?: ExpenseApprovalStageMinAggregateInputType
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     * 
+     * Select which fields to find the maximum value
+    **/
+    _max?: ExpenseApprovalStageMaxAggregateInputType
+  }
+
+  export type GetExpenseApprovalStageAggregateType<T extends ExpenseApprovalStageAggregateArgs> = {
+        [P in keyof T & keyof AggregateExpenseApprovalStage]: P extends '_count' | 'count'
+      ? T[P] extends true
+        ? number
+        : GetScalarType<T[P], AggregateExpenseApprovalStage[P]>
+      : GetScalarType<T[P], AggregateExpenseApprovalStage[P]>
+  }
+
+
+
+
+  export type ExpenseApprovalStageGroupByArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    where?: ExpenseApprovalStageWhereInput
+    orderBy?: ExpenseApprovalStageOrderByWithAggregationInput | ExpenseApprovalStageOrderByWithAggregationInput[]
+    by: ExpenseApprovalStageScalarFieldEnum[] | ExpenseApprovalStageScalarFieldEnum
+    having?: ExpenseApprovalStageScalarWhereWithAggregatesInput
+    take?: number
+    skip?: number
+    _count?: ExpenseApprovalStageCountAggregateInputType | true
+    _avg?: ExpenseApprovalStageAvgAggregateInputType
+    _sum?: ExpenseApprovalStageSumAggregateInputType
+    _min?: ExpenseApprovalStageMinAggregateInputType
+    _max?: ExpenseApprovalStageMaxAggregateInputType
+  }
+
+  export type ExpenseApprovalStageGroupByOutputType = {
+    id: number
+    key: string
+    label: string
+    description: string | null
+    sortOrder: number
+    isActive: boolean
+    createdById: number | null
+    createdByName: string | null
+    createdAt: Date
+    updatedAt: Date
+    _count: ExpenseApprovalStageCountAggregateOutputType | null
+    _avg: ExpenseApprovalStageAvgAggregateOutputType | null
+    _sum: ExpenseApprovalStageSumAggregateOutputType | null
+    _min: ExpenseApprovalStageMinAggregateOutputType | null
+    _max: ExpenseApprovalStageMaxAggregateOutputType | null
+  }
+
+  type GetExpenseApprovalStageGroupByPayload<T extends ExpenseApprovalStageGroupByArgs> = Prisma.PrismaPromise<
+    Array<
+      PickEnumerable<ExpenseApprovalStageGroupByOutputType, T['by']> &
+        {
+          [P in ((keyof T) & (keyof ExpenseApprovalStageGroupByOutputType))]: P extends '_count'
+            ? T[P] extends boolean
+              ? number
+              : GetScalarType<T[P], ExpenseApprovalStageGroupByOutputType[P]>
+            : GetScalarType<T[P], ExpenseApprovalStageGroupByOutputType[P]>
+        }
+      >
+    >
+
+
+  export type ExpenseApprovalStageSelect<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
+    id?: boolean
+    key?: boolean
+    label?: boolean
+    description?: boolean
+    sortOrder?: boolean
+    isActive?: boolean
+    createdById?: boolean
+    createdByName?: boolean
+    createdAt?: boolean
+    updatedAt?: boolean
+  }, ExtArgs["result"]["expenseApprovalStage"]>
+
+  export type ExpenseApprovalStageSelectCreateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
+    id?: boolean
+    key?: boolean
+    label?: boolean
+    description?: boolean
+    sortOrder?: boolean
+    isActive?: boolean
+    createdById?: boolean
+    createdByName?: boolean
+    createdAt?: boolean
+    updatedAt?: boolean
+  }, ExtArgs["result"]["expenseApprovalStage"]>
+
+  export type ExpenseApprovalStageSelectUpdateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
+    id?: boolean
+    key?: boolean
+    label?: boolean
+    description?: boolean
+    sortOrder?: boolean
+    isActive?: boolean
+    createdById?: boolean
+    createdByName?: boolean
+    createdAt?: boolean
+    updatedAt?: boolean
+  }, ExtArgs["result"]["expenseApprovalStage"]>
+
+  export type ExpenseApprovalStageSelectScalar = {
+    id?: boolean
+    key?: boolean
+    label?: boolean
+    description?: boolean
+    sortOrder?: boolean
+    isActive?: boolean
+    createdById?: boolean
+    createdByName?: boolean
+    createdAt?: boolean
+    updatedAt?: boolean
+  }
+
+  export type ExpenseApprovalStageOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<"id" | "key" | "label" | "description" | "sortOrder" | "isActive" | "createdById" | "createdByName" | "createdAt" | "updatedAt", ExtArgs["result"]["expenseApprovalStage"]>
+
+  export type $ExpenseApprovalStagePayload<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    name: "ExpenseApprovalStage"
+    objects: {}
+    scalars: $Extensions.GetPayloadResult<{
+      id: number
+      key: string
+      label: string
+      description: string | null
+      sortOrder: number
+      /**
+       * A retired stage is skipped when building new chains and can no longer
+       * be granted, but is kept (not deleted) so past requests' trails still
+       * resolve its label — see `key`.
+       */
+      isActive: boolean
+      createdById: number | null
+      createdByName: string | null
+      createdAt: Date
+      updatedAt: Date
+    }, ExtArgs["result"]["expenseApprovalStage"]>
+    composites: {}
+  }
+
+  type ExpenseApprovalStageGetPayload<S extends boolean | null | undefined | ExpenseApprovalStageDefaultArgs> = $Result.GetResult<Prisma.$ExpenseApprovalStagePayload, S>
+
+  type ExpenseApprovalStageCountArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> =
+    Omit<ExpenseApprovalStageFindManyArgs, 'select' | 'include' | 'distinct' | 'omit'> & {
+      select?: ExpenseApprovalStageCountAggregateInputType | true
+    }
+
+  export interface ExpenseApprovalStageDelegate<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs, GlobalOmitOptions = {}> {
+    [K: symbol]: { types: Prisma.TypeMap<ExtArgs>['model']['ExpenseApprovalStage'], meta: { name: 'ExpenseApprovalStage' } }
+    /**
+     * Find zero or one ExpenseApprovalStage that matches the filter.
+     * @param {ExpenseApprovalStageFindUniqueArgs} args - Arguments to find a ExpenseApprovalStage
+     * @example
+     * // Get one ExpenseApprovalStage
+     * const expenseApprovalStage = await prisma.expenseApprovalStage.findUnique({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     */
+    findUnique<T extends ExpenseApprovalStageFindUniqueArgs>(args: SelectSubset<T, ExpenseApprovalStageFindUniqueArgs<ExtArgs>>): Prisma__ExpenseApprovalStageClient<$Result.GetResult<Prisma.$ExpenseApprovalStagePayload<ExtArgs>, T, "findUnique", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Find one ExpenseApprovalStage that matches the filter or throw an error with `error.code='P2025'`
+     * if no matches were found.
+     * @param {ExpenseApprovalStageFindUniqueOrThrowArgs} args - Arguments to find a ExpenseApprovalStage
+     * @example
+     * // Get one ExpenseApprovalStage
+     * const expenseApprovalStage = await prisma.expenseApprovalStage.findUniqueOrThrow({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     */
+    findUniqueOrThrow<T extends ExpenseApprovalStageFindUniqueOrThrowArgs>(args: SelectSubset<T, ExpenseApprovalStageFindUniqueOrThrowArgs<ExtArgs>>): Prisma__ExpenseApprovalStageClient<$Result.GetResult<Prisma.$ExpenseApprovalStagePayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Find the first ExpenseApprovalStage that matches the filter.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {ExpenseApprovalStageFindFirstArgs} args - Arguments to find a ExpenseApprovalStage
+     * @example
+     * // Get one ExpenseApprovalStage
+     * const expenseApprovalStage = await prisma.expenseApprovalStage.findFirst({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     */
+    findFirst<T extends ExpenseApprovalStageFindFirstArgs>(args?: SelectSubset<T, ExpenseApprovalStageFindFirstArgs<ExtArgs>>): Prisma__ExpenseApprovalStageClient<$Result.GetResult<Prisma.$ExpenseApprovalStagePayload<ExtArgs>, T, "findFirst", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Find the first ExpenseApprovalStage that matches the filter or
+     * throw `PrismaKnownClientError` with `P2025` code if no matches were found.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {ExpenseApprovalStageFindFirstOrThrowArgs} args - Arguments to find a ExpenseApprovalStage
+     * @example
+     * // Get one ExpenseApprovalStage
+     * const expenseApprovalStage = await prisma.expenseApprovalStage.findFirstOrThrow({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     */
+    findFirstOrThrow<T extends ExpenseApprovalStageFindFirstOrThrowArgs>(args?: SelectSubset<T, ExpenseApprovalStageFindFirstOrThrowArgs<ExtArgs>>): Prisma__ExpenseApprovalStageClient<$Result.GetResult<Prisma.$ExpenseApprovalStagePayload<ExtArgs>, T, "findFirstOrThrow", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Find zero or more ExpenseApprovalStages that matches the filter.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {ExpenseApprovalStageFindManyArgs} args - Arguments to filter and select certain fields only.
+     * @example
+     * // Get all ExpenseApprovalStages
+     * const expenseApprovalStages = await prisma.expenseApprovalStage.findMany()
+     * 
+     * // Get first 10 ExpenseApprovalStages
+     * const expenseApprovalStages = await prisma.expenseApprovalStage.findMany({ take: 10 })
+     * 
+     * // Only select the `id`
+     * const expenseApprovalStageWithIdOnly = await prisma.expenseApprovalStage.findMany({ select: { id: true } })
+     * 
+     */
+    findMany<T extends ExpenseApprovalStageFindManyArgs>(args?: SelectSubset<T, ExpenseApprovalStageFindManyArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$ExpenseApprovalStagePayload<ExtArgs>, T, "findMany", GlobalOmitOptions>>
+
+    /**
+     * Create a ExpenseApprovalStage.
+     * @param {ExpenseApprovalStageCreateArgs} args - Arguments to create a ExpenseApprovalStage.
+     * @example
+     * // Create one ExpenseApprovalStage
+     * const ExpenseApprovalStage = await prisma.expenseApprovalStage.create({
+     *   data: {
+     *     // ... data to create a ExpenseApprovalStage
+     *   }
+     * })
+     * 
+     */
+    create<T extends ExpenseApprovalStageCreateArgs>(args: SelectSubset<T, ExpenseApprovalStageCreateArgs<ExtArgs>>): Prisma__ExpenseApprovalStageClient<$Result.GetResult<Prisma.$ExpenseApprovalStagePayload<ExtArgs>, T, "create", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Create many ExpenseApprovalStages.
+     * @param {ExpenseApprovalStageCreateManyArgs} args - Arguments to create many ExpenseApprovalStages.
+     * @example
+     * // Create many ExpenseApprovalStages
+     * const expenseApprovalStage = await prisma.expenseApprovalStage.createMany({
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     *     
+     */
+    createMany<T extends ExpenseApprovalStageCreateManyArgs>(args?: SelectSubset<T, ExpenseApprovalStageCreateManyArgs<ExtArgs>>): Prisma.PrismaPromise<BatchPayload>
+
+    /**
+     * Create many ExpenseApprovalStages and returns the data saved in the database.
+     * @param {ExpenseApprovalStageCreateManyAndReturnArgs} args - Arguments to create many ExpenseApprovalStages.
+     * @example
+     * // Create many ExpenseApprovalStages
+     * const expenseApprovalStage = await prisma.expenseApprovalStage.createManyAndReturn({
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     * 
+     * // Create many ExpenseApprovalStages and only return the `id`
+     * const expenseApprovalStageWithIdOnly = await prisma.expenseApprovalStage.createManyAndReturn({
+     *   select: { id: true },
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * 
+     */
+    createManyAndReturn<T extends ExpenseApprovalStageCreateManyAndReturnArgs>(args?: SelectSubset<T, ExpenseApprovalStageCreateManyAndReturnArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$ExpenseApprovalStagePayload<ExtArgs>, T, "createManyAndReturn", GlobalOmitOptions>>
+
+    /**
+     * Delete a ExpenseApprovalStage.
+     * @param {ExpenseApprovalStageDeleteArgs} args - Arguments to delete one ExpenseApprovalStage.
+     * @example
+     * // Delete one ExpenseApprovalStage
+     * const ExpenseApprovalStage = await prisma.expenseApprovalStage.delete({
+     *   where: {
+     *     // ... filter to delete one ExpenseApprovalStage
+     *   }
+     * })
+     * 
+     */
+    delete<T extends ExpenseApprovalStageDeleteArgs>(args: SelectSubset<T, ExpenseApprovalStageDeleteArgs<ExtArgs>>): Prisma__ExpenseApprovalStageClient<$Result.GetResult<Prisma.$ExpenseApprovalStagePayload<ExtArgs>, T, "delete", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Update one ExpenseApprovalStage.
+     * @param {ExpenseApprovalStageUpdateArgs} args - Arguments to update one ExpenseApprovalStage.
+     * @example
+     * // Update one ExpenseApprovalStage
+     * const expenseApprovalStage = await prisma.expenseApprovalStage.update({
+     *   where: {
+     *     // ... provide filter here
+     *   },
+     *   data: {
+     *     // ... provide data here
+     *   }
+     * })
+     * 
+     */
+    update<T extends ExpenseApprovalStageUpdateArgs>(args: SelectSubset<T, ExpenseApprovalStageUpdateArgs<ExtArgs>>): Prisma__ExpenseApprovalStageClient<$Result.GetResult<Prisma.$ExpenseApprovalStagePayload<ExtArgs>, T, "update", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Delete zero or more ExpenseApprovalStages.
+     * @param {ExpenseApprovalStageDeleteManyArgs} args - Arguments to filter ExpenseApprovalStages to delete.
+     * @example
+     * // Delete a few ExpenseApprovalStages
+     * const { count } = await prisma.expenseApprovalStage.deleteMany({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     * 
+     */
+    deleteMany<T extends ExpenseApprovalStageDeleteManyArgs>(args?: SelectSubset<T, ExpenseApprovalStageDeleteManyArgs<ExtArgs>>): Prisma.PrismaPromise<BatchPayload>
+
+    /**
+     * Update zero or more ExpenseApprovalStages.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {ExpenseApprovalStageUpdateManyArgs} args - Arguments to update one or more rows.
+     * @example
+     * // Update many ExpenseApprovalStages
+     * const expenseApprovalStage = await prisma.expenseApprovalStage.updateMany({
+     *   where: {
+     *     // ... provide filter here
+     *   },
+     *   data: {
+     *     // ... provide data here
+     *   }
+     * })
+     * 
+     */
+    updateMany<T extends ExpenseApprovalStageUpdateManyArgs>(args: SelectSubset<T, ExpenseApprovalStageUpdateManyArgs<ExtArgs>>): Prisma.PrismaPromise<BatchPayload>
+
+    /**
+     * Update zero or more ExpenseApprovalStages and returns the data updated in the database.
+     * @param {ExpenseApprovalStageUpdateManyAndReturnArgs} args - Arguments to update many ExpenseApprovalStages.
+     * @example
+     * // Update many ExpenseApprovalStages
+     * const expenseApprovalStage = await prisma.expenseApprovalStage.updateManyAndReturn({
+     *   where: {
+     *     // ... provide filter here
+     *   },
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     * 
+     * // Update zero or more ExpenseApprovalStages and only return the `id`
+     * const expenseApprovalStageWithIdOnly = await prisma.expenseApprovalStage.updateManyAndReturn({
+     *   select: { id: true },
+     *   where: {
+     *     // ... provide filter here
+     *   },
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * 
+     */
+    updateManyAndReturn<T extends ExpenseApprovalStageUpdateManyAndReturnArgs>(args: SelectSubset<T, ExpenseApprovalStageUpdateManyAndReturnArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$ExpenseApprovalStagePayload<ExtArgs>, T, "updateManyAndReturn", GlobalOmitOptions>>
+
+    /**
+     * Create or update one ExpenseApprovalStage.
+     * @param {ExpenseApprovalStageUpsertArgs} args - Arguments to update or create a ExpenseApprovalStage.
+     * @example
+     * // Update or create a ExpenseApprovalStage
+     * const expenseApprovalStage = await prisma.expenseApprovalStage.upsert({
+     *   create: {
+     *     // ... data to create a ExpenseApprovalStage
+     *   },
+     *   update: {
+     *     // ... in case it already exists, update
+     *   },
+     *   where: {
+     *     // ... the filter for the ExpenseApprovalStage we want to update
+     *   }
+     * })
+     */
+    upsert<T extends ExpenseApprovalStageUpsertArgs>(args: SelectSubset<T, ExpenseApprovalStageUpsertArgs<ExtArgs>>): Prisma__ExpenseApprovalStageClient<$Result.GetResult<Prisma.$ExpenseApprovalStagePayload<ExtArgs>, T, "upsert", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+
+    /**
+     * Count the number of ExpenseApprovalStages.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {ExpenseApprovalStageCountArgs} args - Arguments to filter ExpenseApprovalStages to count.
+     * @example
+     * // Count the number of ExpenseApprovalStages
+     * const count = await prisma.expenseApprovalStage.count({
+     *   where: {
+     *     // ... the filter for the ExpenseApprovalStages we want to count
+     *   }
+     * })
+    **/
+    count<T extends ExpenseApprovalStageCountArgs>(
+      args?: Subset<T, ExpenseApprovalStageCountArgs>,
+    ): Prisma.PrismaPromise<
+      T extends $Utils.Record<'select', any>
+        ? T['select'] extends true
+          ? number
+          : GetScalarType<T['select'], ExpenseApprovalStageCountAggregateOutputType>
+        : number
+    >
+
+    /**
+     * Allows you to perform aggregations operations on a ExpenseApprovalStage.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {ExpenseApprovalStageAggregateArgs} args - Select which aggregations you would like to apply and on what fields.
+     * @example
+     * // Ordered by age ascending
+     * // Where email contains prisma.io
+     * // Limited to the 10 users
+     * const aggregations = await prisma.user.aggregate({
+     *   _avg: {
+     *     age: true,
+     *   },
+     *   where: {
+     *     email: {
+     *       contains: "prisma.io",
+     *     },
+     *   },
+     *   orderBy: {
+     *     age: "asc",
+     *   },
+     *   take: 10,
+     * })
+    **/
+    aggregate<T extends ExpenseApprovalStageAggregateArgs>(args: Subset<T, ExpenseApprovalStageAggregateArgs>): Prisma.PrismaPromise<GetExpenseApprovalStageAggregateType<T>>
+
+    /**
+     * Group by ExpenseApprovalStage.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {ExpenseApprovalStageGroupByArgs} args - Group by arguments.
+     * @example
+     * // Group by city, order by createdAt, get count
+     * const result = await prisma.user.groupBy({
+     *   by: ['city', 'createdAt'],
+     *   orderBy: {
+     *     createdAt: true
+     *   },
+     *   _count: {
+     *     _all: true
+     *   },
+     * })
+     * 
+    **/
+    groupBy<
+      T extends ExpenseApprovalStageGroupByArgs,
+      HasSelectOrTake extends Or<
+        Extends<'skip', Keys<T>>,
+        Extends<'take', Keys<T>>
+      >,
+      OrderByArg extends True extends HasSelectOrTake
+        ? { orderBy: ExpenseApprovalStageGroupByArgs['orderBy'] }
+        : { orderBy?: ExpenseApprovalStageGroupByArgs['orderBy'] },
+      OrderFields extends ExcludeUnderscoreKeys<Keys<MaybeTupleToUnion<T['orderBy']>>>,
+      ByFields extends MaybeTupleToUnion<T['by']>,
+      ByValid extends Has<ByFields, OrderFields>,
+      HavingFields extends GetHavingFields<T['having']>,
+      HavingValid extends Has<ByFields, HavingFields>,
+      ByEmpty extends T['by'] extends never[] ? True : False,
+      InputErrors extends ByEmpty extends True
+      ? `Error: "by" must not be empty.`
+      : HavingValid extends False
+      ? {
+          [P in HavingFields]: P extends ByFields
+            ? never
+            : P extends string
+            ? `Error: Field "${P}" used in "having" needs to be provided in "by".`
+            : [
+                Error,
+                'Field ',
+                P,
+                ` in "having" needs to be provided in "by"`,
+              ]
+        }[HavingFields]
+      : 'take' extends Keys<T>
+      ? 'orderBy' extends Keys<T>
+        ? ByValid extends True
+          ? {}
+          : {
+              [P in OrderFields]: P extends ByFields
+                ? never
+                : `Error: Field "${P}" in "orderBy" needs to be provided in "by"`
+            }[OrderFields]
+        : 'Error: If you provide "take", you also need to provide "orderBy"'
+      : 'skip' extends Keys<T>
+      ? 'orderBy' extends Keys<T>
+        ? ByValid extends True
+          ? {}
+          : {
+              [P in OrderFields]: P extends ByFields
+                ? never
+                : `Error: Field "${P}" in "orderBy" needs to be provided in "by"`
+            }[OrderFields]
+        : 'Error: If you provide "skip", you also need to provide "orderBy"'
+      : ByValid extends True
+      ? {}
+      : {
+          [P in OrderFields]: P extends ByFields
+            ? never
+            : `Error: Field "${P}" in "orderBy" needs to be provided in "by"`
+        }[OrderFields]
+    >(args: SubsetIntersection<T, ExpenseApprovalStageGroupByArgs, OrderByArg> & InputErrors): {} extends InputErrors ? GetExpenseApprovalStageGroupByPayload<T> : Prisma.PrismaPromise<InputErrors>
+  /**
+   * Fields of the ExpenseApprovalStage model
+   */
+  readonly fields: ExpenseApprovalStageFieldRefs;
+  }
+
+  /**
+   * The delegate class that acts as a "Promise-like" for ExpenseApprovalStage.
+   * Why is this prefixed with `Prisma__`?
+   * Because we want to prevent naming conflicts as mentioned in
+   * https://github.com/prisma/prisma-client-js/issues/707
+   */
+  export interface Prisma__ExpenseApprovalStageClient<T, Null = never, ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs, GlobalOmitOptions = {}> extends Prisma.PrismaPromise<T> {
+    readonly [Symbol.toStringTag]: "PrismaPromise"
+    /**
+     * Attaches callbacks for the resolution and/or rejection of the Promise.
+     * @param onfulfilled The callback to execute when the Promise is resolved.
+     * @param onrejected The callback to execute when the Promise is rejected.
+     * @returns A Promise for the completion of which ever callback is executed.
+     */
+    then<TResult1 = T, TResult2 = never>(onfulfilled?: ((value: T) => TResult1 | PromiseLike<TResult1>) | undefined | null, onrejected?: ((reason: any) => TResult2 | PromiseLike<TResult2>) | undefined | null): $Utils.JsPromise<TResult1 | TResult2>
+    /**
+     * Attaches a callback for only the rejection of the Promise.
+     * @param onrejected The callback to execute when the Promise is rejected.
+     * @returns A Promise for the completion of the callback.
+     */
+    catch<TResult = never>(onrejected?: ((reason: any) => TResult | PromiseLike<TResult>) | undefined | null): $Utils.JsPromise<T | TResult>
+    /**
+     * Attaches a callback that is invoked when the Promise is settled (fulfilled or rejected). The
+     * resolved value cannot be modified from the callback.
+     * @param onfinally The callback to execute when the Promise is settled (fulfilled or rejected).
+     * @returns A Promise for the completion of the callback.
+     */
+    finally(onfinally?: (() => void) | undefined | null): $Utils.JsPromise<T>
+  }
+
+
+
+
+  /**
+   * Fields of the ExpenseApprovalStage model
+   */
+  interface ExpenseApprovalStageFieldRefs {
+    readonly id: FieldRef<"ExpenseApprovalStage", 'Int'>
+    readonly key: FieldRef<"ExpenseApprovalStage", 'String'>
+    readonly label: FieldRef<"ExpenseApprovalStage", 'String'>
+    readonly description: FieldRef<"ExpenseApprovalStage", 'String'>
+    readonly sortOrder: FieldRef<"ExpenseApprovalStage", 'Int'>
+    readonly isActive: FieldRef<"ExpenseApprovalStage", 'Boolean'>
+    readonly createdById: FieldRef<"ExpenseApprovalStage", 'Int'>
+    readonly createdByName: FieldRef<"ExpenseApprovalStage", 'String'>
+    readonly createdAt: FieldRef<"ExpenseApprovalStage", 'DateTime'>
+    readonly updatedAt: FieldRef<"ExpenseApprovalStage", 'DateTime'>
+  }
+    
+
+  // Custom InputTypes
+  /**
+   * ExpenseApprovalStage findUnique
+   */
+  export type ExpenseApprovalStageFindUniqueArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the ExpenseApprovalStage
+     */
+    select?: ExpenseApprovalStageSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the ExpenseApprovalStage
+     */
+    omit?: ExpenseApprovalStageOmit<ExtArgs> | null
+    /**
+     * Filter, which ExpenseApprovalStage to fetch.
+     */
+    where: ExpenseApprovalStageWhereUniqueInput
+  }
+
+  /**
+   * ExpenseApprovalStage findUniqueOrThrow
+   */
+  export type ExpenseApprovalStageFindUniqueOrThrowArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the ExpenseApprovalStage
+     */
+    select?: ExpenseApprovalStageSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the ExpenseApprovalStage
+     */
+    omit?: ExpenseApprovalStageOmit<ExtArgs> | null
+    /**
+     * Filter, which ExpenseApprovalStage to fetch.
+     */
+    where: ExpenseApprovalStageWhereUniqueInput
+  }
+
+  /**
+   * ExpenseApprovalStage findFirst
+   */
+  export type ExpenseApprovalStageFindFirstArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the ExpenseApprovalStage
+     */
+    select?: ExpenseApprovalStageSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the ExpenseApprovalStage
+     */
+    omit?: ExpenseApprovalStageOmit<ExtArgs> | null
+    /**
+     * Filter, which ExpenseApprovalStage to fetch.
+     */
+    where?: ExpenseApprovalStageWhereInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
+     * 
+     * Determine the order of ExpenseApprovalStages to fetch.
+     */
+    orderBy?: ExpenseApprovalStageOrderByWithRelationInput | ExpenseApprovalStageOrderByWithRelationInput[]
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
+     * 
+     * Sets the position for searching for ExpenseApprovalStages.
+     */
+    cursor?: ExpenseApprovalStageWhereUniqueInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Take `±n` ExpenseApprovalStages from the position of the cursor.
+     */
+    take?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Skip the first `n` ExpenseApprovalStages.
+     */
+    skip?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/distinct Distinct Docs}
+     * 
+     * Filter by unique combinations of ExpenseApprovalStages.
+     */
+    distinct?: ExpenseApprovalStageScalarFieldEnum | ExpenseApprovalStageScalarFieldEnum[]
+  }
+
+  /**
+   * ExpenseApprovalStage findFirstOrThrow
+   */
+  export type ExpenseApprovalStageFindFirstOrThrowArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the ExpenseApprovalStage
+     */
+    select?: ExpenseApprovalStageSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the ExpenseApprovalStage
+     */
+    omit?: ExpenseApprovalStageOmit<ExtArgs> | null
+    /**
+     * Filter, which ExpenseApprovalStage to fetch.
+     */
+    where?: ExpenseApprovalStageWhereInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
+     * 
+     * Determine the order of ExpenseApprovalStages to fetch.
+     */
+    orderBy?: ExpenseApprovalStageOrderByWithRelationInput | ExpenseApprovalStageOrderByWithRelationInput[]
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
+     * 
+     * Sets the position for searching for ExpenseApprovalStages.
+     */
+    cursor?: ExpenseApprovalStageWhereUniqueInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Take `±n` ExpenseApprovalStages from the position of the cursor.
+     */
+    take?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Skip the first `n` ExpenseApprovalStages.
+     */
+    skip?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/distinct Distinct Docs}
+     * 
+     * Filter by unique combinations of ExpenseApprovalStages.
+     */
+    distinct?: ExpenseApprovalStageScalarFieldEnum | ExpenseApprovalStageScalarFieldEnum[]
+  }
+
+  /**
+   * ExpenseApprovalStage findMany
+   */
+  export type ExpenseApprovalStageFindManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the ExpenseApprovalStage
+     */
+    select?: ExpenseApprovalStageSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the ExpenseApprovalStage
+     */
+    omit?: ExpenseApprovalStageOmit<ExtArgs> | null
+    /**
+     * Filter, which ExpenseApprovalStages to fetch.
+     */
+    where?: ExpenseApprovalStageWhereInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
+     * 
+     * Determine the order of ExpenseApprovalStages to fetch.
+     */
+    orderBy?: ExpenseApprovalStageOrderByWithRelationInput | ExpenseApprovalStageOrderByWithRelationInput[]
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
+     * 
+     * Sets the position for listing ExpenseApprovalStages.
+     */
+    cursor?: ExpenseApprovalStageWhereUniqueInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Take `±n` ExpenseApprovalStages from the position of the cursor.
+     */
+    take?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Skip the first `n` ExpenseApprovalStages.
+     */
+    skip?: number
+    distinct?: ExpenseApprovalStageScalarFieldEnum | ExpenseApprovalStageScalarFieldEnum[]
+  }
+
+  /**
+   * ExpenseApprovalStage create
+   */
+  export type ExpenseApprovalStageCreateArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the ExpenseApprovalStage
+     */
+    select?: ExpenseApprovalStageSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the ExpenseApprovalStage
+     */
+    omit?: ExpenseApprovalStageOmit<ExtArgs> | null
+    /**
+     * The data needed to create a ExpenseApprovalStage.
+     */
+    data: XOR<ExpenseApprovalStageCreateInput, ExpenseApprovalStageUncheckedCreateInput>
+  }
+
+  /**
+   * ExpenseApprovalStage createMany
+   */
+  export type ExpenseApprovalStageCreateManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * The data used to create many ExpenseApprovalStages.
+     */
+    data: ExpenseApprovalStageCreateManyInput | ExpenseApprovalStageCreateManyInput[]
+    skipDuplicates?: boolean
+  }
+
+  /**
+   * ExpenseApprovalStage createManyAndReturn
+   */
+  export type ExpenseApprovalStageCreateManyAndReturnArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the ExpenseApprovalStage
+     */
+    select?: ExpenseApprovalStageSelectCreateManyAndReturn<ExtArgs> | null
+    /**
+     * Omit specific fields from the ExpenseApprovalStage
+     */
+    omit?: ExpenseApprovalStageOmit<ExtArgs> | null
+    /**
+     * The data used to create many ExpenseApprovalStages.
+     */
+    data: ExpenseApprovalStageCreateManyInput | ExpenseApprovalStageCreateManyInput[]
+    skipDuplicates?: boolean
+  }
+
+  /**
+   * ExpenseApprovalStage update
+   */
+  export type ExpenseApprovalStageUpdateArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the ExpenseApprovalStage
+     */
+    select?: ExpenseApprovalStageSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the ExpenseApprovalStage
+     */
+    omit?: ExpenseApprovalStageOmit<ExtArgs> | null
+    /**
+     * The data needed to update a ExpenseApprovalStage.
+     */
+    data: XOR<ExpenseApprovalStageUpdateInput, ExpenseApprovalStageUncheckedUpdateInput>
+    /**
+     * Choose, which ExpenseApprovalStage to update.
+     */
+    where: ExpenseApprovalStageWhereUniqueInput
+  }
+
+  /**
+   * ExpenseApprovalStage updateMany
+   */
+  export type ExpenseApprovalStageUpdateManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * The data used to update ExpenseApprovalStages.
+     */
+    data: XOR<ExpenseApprovalStageUpdateManyMutationInput, ExpenseApprovalStageUncheckedUpdateManyInput>
+    /**
+     * Filter which ExpenseApprovalStages to update
+     */
+    where?: ExpenseApprovalStageWhereInput
+    /**
+     * Limit how many ExpenseApprovalStages to update.
+     */
+    limit?: number
+  }
+
+  /**
+   * ExpenseApprovalStage updateManyAndReturn
+   */
+  export type ExpenseApprovalStageUpdateManyAndReturnArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the ExpenseApprovalStage
+     */
+    select?: ExpenseApprovalStageSelectUpdateManyAndReturn<ExtArgs> | null
+    /**
+     * Omit specific fields from the ExpenseApprovalStage
+     */
+    omit?: ExpenseApprovalStageOmit<ExtArgs> | null
+    /**
+     * The data used to update ExpenseApprovalStages.
+     */
+    data: XOR<ExpenseApprovalStageUpdateManyMutationInput, ExpenseApprovalStageUncheckedUpdateManyInput>
+    /**
+     * Filter which ExpenseApprovalStages to update
+     */
+    where?: ExpenseApprovalStageWhereInput
+    /**
+     * Limit how many ExpenseApprovalStages to update.
+     */
+    limit?: number
+  }
+
+  /**
+   * ExpenseApprovalStage upsert
+   */
+  export type ExpenseApprovalStageUpsertArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the ExpenseApprovalStage
+     */
+    select?: ExpenseApprovalStageSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the ExpenseApprovalStage
+     */
+    omit?: ExpenseApprovalStageOmit<ExtArgs> | null
+    /**
+     * The filter to search for the ExpenseApprovalStage to update in case it exists.
+     */
+    where: ExpenseApprovalStageWhereUniqueInput
+    /**
+     * In case the ExpenseApprovalStage found by the `where` argument doesn't exist, create a new ExpenseApprovalStage with this data.
+     */
+    create: XOR<ExpenseApprovalStageCreateInput, ExpenseApprovalStageUncheckedCreateInput>
+    /**
+     * In case the ExpenseApprovalStage was found with the provided `where` argument, update it with this data.
+     */
+    update: XOR<ExpenseApprovalStageUpdateInput, ExpenseApprovalStageUncheckedUpdateInput>
+  }
+
+  /**
+   * ExpenseApprovalStage delete
+   */
+  export type ExpenseApprovalStageDeleteArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the ExpenseApprovalStage
+     */
+    select?: ExpenseApprovalStageSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the ExpenseApprovalStage
+     */
+    omit?: ExpenseApprovalStageOmit<ExtArgs> | null
+    /**
+     * Filter which ExpenseApprovalStage to delete.
+     */
+    where: ExpenseApprovalStageWhereUniqueInput
+  }
+
+  /**
+   * ExpenseApprovalStage deleteMany
+   */
+  export type ExpenseApprovalStageDeleteManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Filter which ExpenseApprovalStages to delete
+     */
+    where?: ExpenseApprovalStageWhereInput
+    /**
+     * Limit how many ExpenseApprovalStages to delete.
+     */
+    limit?: number
+  }
+
+  /**
+   * ExpenseApprovalStage without action
+   */
+  export type ExpenseApprovalStageDefaultArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the ExpenseApprovalStage
+     */
+    select?: ExpenseApprovalStageSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the ExpenseApprovalStage
+     */
+    omit?: ExpenseApprovalStageOmit<ExtArgs> | null
+  }
+
+
+  /**
    * Model ExpenseChangeRequest
    */
 
@@ -56841,39 +60034,27 @@ export namespace Prisma {
 
   export type ExpenseChangeRequestAvgAggregateOutputType = {
     requestedById: number | null
-    approverId: number | null
-    finalById: number | null
   }
 
   export type ExpenseChangeRequestSumAggregateOutputType = {
     requestedById: number | null
-    approverId: number | null
-    finalById: number | null
   }
 
   export type ExpenseChangeRequestMinAggregateOutputType = {
     id: string | null
     tableKey: string | null
+    operation: $Enums.ExpenseChangeOperation | null
     rowId: string | null
+    appliedRowId: string | null
     rowLabel: string | null
     reason: string | null
+    dueDate: Date | null
     status: $Enums.ExpenseChangeStatus | null
+    currentStageKey: string | null
     requestedById: number | null
     requestedByName: string | null
     requestedByEmail: string | null
     requestedAt: Date | null
-    approverId: number | null
-    approverName: string | null
-    approverEmail: string | null
-    approverAt: Date | null
-    approverComment: string | null
-    approverAction: string | null
-    finalById: number | null
-    finalByName: string | null
-    finalByEmail: string | null
-    finalAt: Date | null
-    finalComment: string | null
-    finalAction: string | null
     createdAt: Date | null
     updatedAt: Date | null
   }
@@ -56881,26 +60062,18 @@ export namespace Prisma {
   export type ExpenseChangeRequestMaxAggregateOutputType = {
     id: string | null
     tableKey: string | null
+    operation: $Enums.ExpenseChangeOperation | null
     rowId: string | null
+    appliedRowId: string | null
     rowLabel: string | null
     reason: string | null
+    dueDate: Date | null
     status: $Enums.ExpenseChangeStatus | null
+    currentStageKey: string | null
     requestedById: number | null
     requestedByName: string | null
     requestedByEmail: string | null
     requestedAt: Date | null
-    approverId: number | null
-    approverName: string | null
-    approverEmail: string | null
-    approverAt: Date | null
-    approverComment: string | null
-    approverAction: string | null
-    finalById: number | null
-    finalByName: string | null
-    finalByEmail: string | null
-    finalAt: Date | null
-    finalComment: string | null
-    finalAction: string | null
     createdAt: Date | null
     updatedAt: Date | null
   }
@@ -56908,27 +60081,20 @@ export namespace Prisma {
   export type ExpenseChangeRequestCountAggregateOutputType = {
     id: number
     tableKey: number
+    operation: number
     rowId: number
+    appliedRowId: number
     rowLabel: number
     changes: number
     reason: number
+    dueDate: number
     status: number
+    currentStageKey: number
+    approvalTrail: number
     requestedById: number
     requestedByName: number
     requestedByEmail: number
     requestedAt: number
-    approverId: number
-    approverName: number
-    approverEmail: number
-    approverAt: number
-    approverComment: number
-    approverAction: number
-    finalById: number
-    finalByName: number
-    finalByEmail: number
-    finalAt: number
-    finalComment: number
-    finalAction: number
     createdAt: number
     updatedAt: number
     _all: number
@@ -56937,39 +60103,27 @@ export namespace Prisma {
 
   export type ExpenseChangeRequestAvgAggregateInputType = {
     requestedById?: true
-    approverId?: true
-    finalById?: true
   }
 
   export type ExpenseChangeRequestSumAggregateInputType = {
     requestedById?: true
-    approverId?: true
-    finalById?: true
   }
 
   export type ExpenseChangeRequestMinAggregateInputType = {
     id?: true
     tableKey?: true
+    operation?: true
     rowId?: true
+    appliedRowId?: true
     rowLabel?: true
     reason?: true
+    dueDate?: true
     status?: true
+    currentStageKey?: true
     requestedById?: true
     requestedByName?: true
     requestedByEmail?: true
     requestedAt?: true
-    approverId?: true
-    approverName?: true
-    approverEmail?: true
-    approverAt?: true
-    approverComment?: true
-    approverAction?: true
-    finalById?: true
-    finalByName?: true
-    finalByEmail?: true
-    finalAt?: true
-    finalComment?: true
-    finalAction?: true
     createdAt?: true
     updatedAt?: true
   }
@@ -56977,26 +60131,18 @@ export namespace Prisma {
   export type ExpenseChangeRequestMaxAggregateInputType = {
     id?: true
     tableKey?: true
+    operation?: true
     rowId?: true
+    appliedRowId?: true
     rowLabel?: true
     reason?: true
+    dueDate?: true
     status?: true
+    currentStageKey?: true
     requestedById?: true
     requestedByName?: true
     requestedByEmail?: true
     requestedAt?: true
-    approverId?: true
-    approverName?: true
-    approverEmail?: true
-    approverAt?: true
-    approverComment?: true
-    approverAction?: true
-    finalById?: true
-    finalByName?: true
-    finalByEmail?: true
-    finalAt?: true
-    finalComment?: true
-    finalAction?: true
     createdAt?: true
     updatedAt?: true
   }
@@ -57004,27 +60150,20 @@ export namespace Prisma {
   export type ExpenseChangeRequestCountAggregateInputType = {
     id?: true
     tableKey?: true
+    operation?: true
     rowId?: true
+    appliedRowId?: true
     rowLabel?: true
     changes?: true
     reason?: true
+    dueDate?: true
     status?: true
+    currentStageKey?: true
+    approvalTrail?: true
     requestedById?: true
     requestedByName?: true
     requestedByEmail?: true
     requestedAt?: true
-    approverId?: true
-    approverName?: true
-    approverEmail?: true
-    approverAt?: true
-    approverComment?: true
-    approverAction?: true
-    finalById?: true
-    finalByName?: true
-    finalByEmail?: true
-    finalAt?: true
-    finalComment?: true
-    finalAction?: true
     createdAt?: true
     updatedAt?: true
     _all?: true
@@ -57119,27 +60258,20 @@ export namespace Prisma {
   export type ExpenseChangeRequestGroupByOutputType = {
     id: string
     tableKey: string
-    rowId: string
+    operation: $Enums.ExpenseChangeOperation
+    rowId: string | null
+    appliedRowId: string | null
     rowLabel: string | null
     changes: JsonValue
     reason: string
+    dueDate: Date | null
     status: $Enums.ExpenseChangeStatus
+    currentStageKey: string | null
+    approvalTrail: JsonValue
     requestedById: number
     requestedByName: string
     requestedByEmail: string
     requestedAt: Date
-    approverId: number | null
-    approverName: string | null
-    approverEmail: string | null
-    approverAt: Date | null
-    approverComment: string | null
-    approverAction: string | null
-    finalById: number | null
-    finalByName: string | null
-    finalByEmail: string | null
-    finalAt: Date | null
-    finalComment: string | null
-    finalAction: string | null
     createdAt: Date
     updatedAt: Date
     _count: ExpenseChangeRequestCountAggregateOutputType | null
@@ -57166,27 +60298,20 @@ export namespace Prisma {
   export type ExpenseChangeRequestSelect<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
     id?: boolean
     tableKey?: boolean
+    operation?: boolean
     rowId?: boolean
+    appliedRowId?: boolean
     rowLabel?: boolean
     changes?: boolean
     reason?: boolean
+    dueDate?: boolean
     status?: boolean
+    currentStageKey?: boolean
+    approvalTrail?: boolean
     requestedById?: boolean
     requestedByName?: boolean
     requestedByEmail?: boolean
     requestedAt?: boolean
-    approverId?: boolean
-    approverName?: boolean
-    approverEmail?: boolean
-    approverAt?: boolean
-    approverComment?: boolean
-    approverAction?: boolean
-    finalById?: boolean
-    finalByName?: boolean
-    finalByEmail?: boolean
-    finalAt?: boolean
-    finalComment?: boolean
-    finalAction?: boolean
     createdAt?: boolean
     updatedAt?: boolean
   }, ExtArgs["result"]["expenseChangeRequest"]>
@@ -57194,27 +60319,20 @@ export namespace Prisma {
   export type ExpenseChangeRequestSelectCreateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
     id?: boolean
     tableKey?: boolean
+    operation?: boolean
     rowId?: boolean
+    appliedRowId?: boolean
     rowLabel?: boolean
     changes?: boolean
     reason?: boolean
+    dueDate?: boolean
     status?: boolean
+    currentStageKey?: boolean
+    approvalTrail?: boolean
     requestedById?: boolean
     requestedByName?: boolean
     requestedByEmail?: boolean
     requestedAt?: boolean
-    approverId?: boolean
-    approverName?: boolean
-    approverEmail?: boolean
-    approverAt?: boolean
-    approverComment?: boolean
-    approverAction?: boolean
-    finalById?: boolean
-    finalByName?: boolean
-    finalByEmail?: boolean
-    finalAt?: boolean
-    finalComment?: boolean
-    finalAction?: boolean
     createdAt?: boolean
     updatedAt?: boolean
   }, ExtArgs["result"]["expenseChangeRequest"]>
@@ -57222,27 +60340,20 @@ export namespace Prisma {
   export type ExpenseChangeRequestSelectUpdateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
     id?: boolean
     tableKey?: boolean
+    operation?: boolean
     rowId?: boolean
+    appliedRowId?: boolean
     rowLabel?: boolean
     changes?: boolean
     reason?: boolean
+    dueDate?: boolean
     status?: boolean
+    currentStageKey?: boolean
+    approvalTrail?: boolean
     requestedById?: boolean
     requestedByName?: boolean
     requestedByEmail?: boolean
     requestedAt?: boolean
-    approverId?: boolean
-    approverName?: boolean
-    approverEmail?: boolean
-    approverAt?: boolean
-    approverComment?: boolean
-    approverAction?: boolean
-    finalById?: boolean
-    finalByName?: boolean
-    finalByEmail?: boolean
-    finalAt?: boolean
-    finalComment?: boolean
-    finalAction?: boolean
     createdAt?: boolean
     updatedAt?: boolean
   }, ExtArgs["result"]["expenseChangeRequest"]>
@@ -57250,32 +60361,25 @@ export namespace Prisma {
   export type ExpenseChangeRequestSelectScalar = {
     id?: boolean
     tableKey?: boolean
+    operation?: boolean
     rowId?: boolean
+    appliedRowId?: boolean
     rowLabel?: boolean
     changes?: boolean
     reason?: boolean
+    dueDate?: boolean
     status?: boolean
+    currentStageKey?: boolean
+    approvalTrail?: boolean
     requestedById?: boolean
     requestedByName?: boolean
     requestedByEmail?: boolean
     requestedAt?: boolean
-    approverId?: boolean
-    approverName?: boolean
-    approverEmail?: boolean
-    approverAt?: boolean
-    approverComment?: boolean
-    approverAction?: boolean
-    finalById?: boolean
-    finalByName?: boolean
-    finalByEmail?: boolean
-    finalAt?: boolean
-    finalComment?: boolean
-    finalAction?: boolean
     createdAt?: boolean
     updatedAt?: boolean
   }
 
-  export type ExpenseChangeRequestOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<"id" | "tableKey" | "rowId" | "rowLabel" | "changes" | "reason" | "status" | "requestedById" | "requestedByName" | "requestedByEmail" | "requestedAt" | "approverId" | "approverName" | "approverEmail" | "approverAt" | "approverComment" | "approverAction" | "finalById" | "finalByName" | "finalByEmail" | "finalAt" | "finalComment" | "finalAction" | "createdAt" | "updatedAt", ExtArgs["result"]["expenseChangeRequest"]>
+  export type ExpenseChangeRequestOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<"id" | "tableKey" | "operation" | "rowId" | "appliedRowId" | "rowLabel" | "changes" | "reason" | "dueDate" | "status" | "currentStageKey" | "approvalTrail" | "requestedById" | "requestedByName" | "requestedByEmail" | "requestedAt" | "createdAt" | "updatedAt", ExtArgs["result"]["expenseChangeRequest"]>
 
   export type $ExpenseChangeRequestPayload<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
     name: "ExpenseChangeRequest"
@@ -57283,27 +60387,44 @@ export namespace Prisma {
     scalars: $Extensions.GetPayloadResult<{
       id: string
       tableKey: string
-      rowId: string
+      operation: $Enums.ExpenseChangeOperation
+      /**
+       * Null only for CREATE requests, which have no row yet — `appliedRowId`
+       * records the id the insert actually got once the chain finishes.
+       */
+      rowId: string | null
+      appliedRowId: string | null
       rowLabel: string | null
+      /**
+       * UPDATE: { field: { old, new } }. CREATE: { field: { old: null, new } }.
+       * DELETE: { field: { old, new: null } } — a full snapshot of the row that
+       * is being removed, so the audit trail survives the row itself.
+       */
       changes: Prisma.JsonValue
       reason: string
+      /**
+       * The date the requester needs this done by — advisory, shown at every
+       * stage so approvers can see what is running late.
+       */
+      dueDate: Date | null
       status: $Enums.ExpenseChangeStatus
+      /**
+       * The ExpenseApprovalStage.key this request is waiting on. Set to the
+       * chain's first active stage on creation, advanced on each approval, and
+       * null once status is APPROVED or REJECTED.
+       */
+      currentStageKey: string | null
+      /**
+       * Ordered log of every action taken on this request's chain — one entry
+       * per approval/rejection: { stageKey, stageLabel, action: 'APPROVE'|
+       * 'REJECT', byId, byName, byEmail, at, comment }. Replaces a fixed
+       * approver/final column pair so the trail scales to any chain length.
+       */
+      approvalTrail: Prisma.JsonValue
       requestedById: number
       requestedByName: string
       requestedByEmail: string
       requestedAt: Date
-      approverId: number | null
-      approverName: string | null
-      approverEmail: string | null
-      approverAt: Date | null
-      approverComment: string | null
-      approverAction: string | null
-      finalById: number | null
-      finalByName: string | null
-      finalByEmail: string | null
-      finalAt: Date | null
-      finalComment: string | null
-      finalAction: string | null
       createdAt: Date
       updatedAt: Date
     }, ExtArgs["result"]["expenseChangeRequest"]>
@@ -57731,27 +60852,20 @@ export namespace Prisma {
   interface ExpenseChangeRequestFieldRefs {
     readonly id: FieldRef<"ExpenseChangeRequest", 'String'>
     readonly tableKey: FieldRef<"ExpenseChangeRequest", 'String'>
+    readonly operation: FieldRef<"ExpenseChangeRequest", 'ExpenseChangeOperation'>
     readonly rowId: FieldRef<"ExpenseChangeRequest", 'String'>
+    readonly appliedRowId: FieldRef<"ExpenseChangeRequest", 'String'>
     readonly rowLabel: FieldRef<"ExpenseChangeRequest", 'String'>
     readonly changes: FieldRef<"ExpenseChangeRequest", 'Json'>
     readonly reason: FieldRef<"ExpenseChangeRequest", 'String'>
+    readonly dueDate: FieldRef<"ExpenseChangeRequest", 'DateTime'>
     readonly status: FieldRef<"ExpenseChangeRequest", 'ExpenseChangeStatus'>
+    readonly currentStageKey: FieldRef<"ExpenseChangeRequest", 'String'>
+    readonly approvalTrail: FieldRef<"ExpenseChangeRequest", 'Json'>
     readonly requestedById: FieldRef<"ExpenseChangeRequest", 'Int'>
     readonly requestedByName: FieldRef<"ExpenseChangeRequest", 'String'>
     readonly requestedByEmail: FieldRef<"ExpenseChangeRequest", 'String'>
     readonly requestedAt: FieldRef<"ExpenseChangeRequest", 'DateTime'>
-    readonly approverId: FieldRef<"ExpenseChangeRequest", 'Int'>
-    readonly approverName: FieldRef<"ExpenseChangeRequest", 'String'>
-    readonly approverEmail: FieldRef<"ExpenseChangeRequest", 'String'>
-    readonly approverAt: FieldRef<"ExpenseChangeRequest", 'DateTime'>
-    readonly approverComment: FieldRef<"ExpenseChangeRequest", 'String'>
-    readonly approverAction: FieldRef<"ExpenseChangeRequest", 'String'>
-    readonly finalById: FieldRef<"ExpenseChangeRequest", 'Int'>
-    readonly finalByName: FieldRef<"ExpenseChangeRequest", 'String'>
-    readonly finalByEmail: FieldRef<"ExpenseChangeRequest", 'String'>
-    readonly finalAt: FieldRef<"ExpenseChangeRequest", 'DateTime'>
-    readonly finalComment: FieldRef<"ExpenseChangeRequest", 'String'>
-    readonly finalAction: FieldRef<"ExpenseChangeRequest", 'String'>
     readonly createdAt: FieldRef<"ExpenseChangeRequest", 'DateTime'>
     readonly updatedAt: FieldRef<"ExpenseChangeRequest", 'DateTime'>
   }
@@ -58117,6 +61231,2325 @@ export namespace Prisma {
      * Omit specific fields from the ExpenseChangeRequest
      */
     omit?: ExpenseChangeRequestOmit<ExtArgs> | null
+  }
+
+
+  /**
+   * Model ExpenseAccessGrant
+   */
+
+  export type AggregateExpenseAccessGrant = {
+    _count: ExpenseAccessGrantCountAggregateOutputType | null
+    _avg: ExpenseAccessGrantAvgAggregateOutputType | null
+    _sum: ExpenseAccessGrantSumAggregateOutputType | null
+    _min: ExpenseAccessGrantMinAggregateOutputType | null
+    _max: ExpenseAccessGrantMaxAggregateOutputType | null
+  }
+
+  export type ExpenseAccessGrantAvgAggregateOutputType = {
+    id: number | null
+    grantedById: number | null
+  }
+
+  export type ExpenseAccessGrantSumAggregateOutputType = {
+    id: number | null
+    grantedById: number | null
+  }
+
+  export type ExpenseAccessGrantMinAggregateOutputType = {
+    id: number | null
+    email: string | null
+    level: string | null
+    tableKey: string | null
+    subDivision: string | null
+    canCreate: boolean | null
+    canUpdate: boolean | null
+    canDelete: boolean | null
+    isActive: boolean | null
+    note: string | null
+    grantedById: number | null
+    grantedByName: string | null
+    createdAt: Date | null
+    updatedAt: Date | null
+  }
+
+  export type ExpenseAccessGrantMaxAggregateOutputType = {
+    id: number | null
+    email: string | null
+    level: string | null
+    tableKey: string | null
+    subDivision: string | null
+    canCreate: boolean | null
+    canUpdate: boolean | null
+    canDelete: boolean | null
+    isActive: boolean | null
+    note: string | null
+    grantedById: number | null
+    grantedByName: string | null
+    createdAt: Date | null
+    updatedAt: Date | null
+  }
+
+  export type ExpenseAccessGrantCountAggregateOutputType = {
+    id: number
+    email: number
+    level: number
+    tableKey: number
+    subDivision: number
+    canCreate: number
+    canUpdate: number
+    canDelete: number
+    isActive: number
+    note: number
+    grantedById: number
+    grantedByName: number
+    createdAt: number
+    updatedAt: number
+    _all: number
+  }
+
+
+  export type ExpenseAccessGrantAvgAggregateInputType = {
+    id?: true
+    grantedById?: true
+  }
+
+  export type ExpenseAccessGrantSumAggregateInputType = {
+    id?: true
+    grantedById?: true
+  }
+
+  export type ExpenseAccessGrantMinAggregateInputType = {
+    id?: true
+    email?: true
+    level?: true
+    tableKey?: true
+    subDivision?: true
+    canCreate?: true
+    canUpdate?: true
+    canDelete?: true
+    isActive?: true
+    note?: true
+    grantedById?: true
+    grantedByName?: true
+    createdAt?: true
+    updatedAt?: true
+  }
+
+  export type ExpenseAccessGrantMaxAggregateInputType = {
+    id?: true
+    email?: true
+    level?: true
+    tableKey?: true
+    subDivision?: true
+    canCreate?: true
+    canUpdate?: true
+    canDelete?: true
+    isActive?: true
+    note?: true
+    grantedById?: true
+    grantedByName?: true
+    createdAt?: true
+    updatedAt?: true
+  }
+
+  export type ExpenseAccessGrantCountAggregateInputType = {
+    id?: true
+    email?: true
+    level?: true
+    tableKey?: true
+    subDivision?: true
+    canCreate?: true
+    canUpdate?: true
+    canDelete?: true
+    isActive?: true
+    note?: true
+    grantedById?: true
+    grantedByName?: true
+    createdAt?: true
+    updatedAt?: true
+    _all?: true
+  }
+
+  export type ExpenseAccessGrantAggregateArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Filter which ExpenseAccessGrant to aggregate.
+     */
+    where?: ExpenseAccessGrantWhereInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
+     * 
+     * Determine the order of ExpenseAccessGrants to fetch.
+     */
+    orderBy?: ExpenseAccessGrantOrderByWithRelationInput | ExpenseAccessGrantOrderByWithRelationInput[]
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
+     * 
+     * Sets the start position
+     */
+    cursor?: ExpenseAccessGrantWhereUniqueInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Take `±n` ExpenseAccessGrants from the position of the cursor.
+     */
+    take?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Skip the first `n` ExpenseAccessGrants.
+     */
+    skip?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     * 
+     * Count returned ExpenseAccessGrants
+    **/
+    _count?: true | ExpenseAccessGrantCountAggregateInputType
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     * 
+     * Select which fields to average
+    **/
+    _avg?: ExpenseAccessGrantAvgAggregateInputType
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     * 
+     * Select which fields to sum
+    **/
+    _sum?: ExpenseAccessGrantSumAggregateInputType
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     * 
+     * Select which fields to find the minimum value
+    **/
+    _min?: ExpenseAccessGrantMinAggregateInputType
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     * 
+     * Select which fields to find the maximum value
+    **/
+    _max?: ExpenseAccessGrantMaxAggregateInputType
+  }
+
+  export type GetExpenseAccessGrantAggregateType<T extends ExpenseAccessGrantAggregateArgs> = {
+        [P in keyof T & keyof AggregateExpenseAccessGrant]: P extends '_count' | 'count'
+      ? T[P] extends true
+        ? number
+        : GetScalarType<T[P], AggregateExpenseAccessGrant[P]>
+      : GetScalarType<T[P], AggregateExpenseAccessGrant[P]>
+  }
+
+
+
+
+  export type ExpenseAccessGrantGroupByArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    where?: ExpenseAccessGrantWhereInput
+    orderBy?: ExpenseAccessGrantOrderByWithAggregationInput | ExpenseAccessGrantOrderByWithAggregationInput[]
+    by: ExpenseAccessGrantScalarFieldEnum[] | ExpenseAccessGrantScalarFieldEnum
+    having?: ExpenseAccessGrantScalarWhereWithAggregatesInput
+    take?: number
+    skip?: number
+    _count?: ExpenseAccessGrantCountAggregateInputType | true
+    _avg?: ExpenseAccessGrantAvgAggregateInputType
+    _sum?: ExpenseAccessGrantSumAggregateInputType
+    _min?: ExpenseAccessGrantMinAggregateInputType
+    _max?: ExpenseAccessGrantMaxAggregateInputType
+  }
+
+  export type ExpenseAccessGrantGroupByOutputType = {
+    id: number
+    email: string
+    level: string
+    tableKey: string
+    subDivision: string | null
+    canCreate: boolean
+    canUpdate: boolean
+    canDelete: boolean
+    isActive: boolean
+    note: string | null
+    grantedById: number | null
+    grantedByName: string | null
+    createdAt: Date
+    updatedAt: Date
+    _count: ExpenseAccessGrantCountAggregateOutputType | null
+    _avg: ExpenseAccessGrantAvgAggregateOutputType | null
+    _sum: ExpenseAccessGrantSumAggregateOutputType | null
+    _min: ExpenseAccessGrantMinAggregateOutputType | null
+    _max: ExpenseAccessGrantMaxAggregateOutputType | null
+  }
+
+  type GetExpenseAccessGrantGroupByPayload<T extends ExpenseAccessGrantGroupByArgs> = Prisma.PrismaPromise<
+    Array<
+      PickEnumerable<ExpenseAccessGrantGroupByOutputType, T['by']> &
+        {
+          [P in ((keyof T) & (keyof ExpenseAccessGrantGroupByOutputType))]: P extends '_count'
+            ? T[P] extends boolean
+              ? number
+              : GetScalarType<T[P], ExpenseAccessGrantGroupByOutputType[P]>
+            : GetScalarType<T[P], ExpenseAccessGrantGroupByOutputType[P]>
+        }
+      >
+    >
+
+
+  export type ExpenseAccessGrantSelect<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
+    id?: boolean
+    email?: boolean
+    level?: boolean
+    tableKey?: boolean
+    subDivision?: boolean
+    canCreate?: boolean
+    canUpdate?: boolean
+    canDelete?: boolean
+    isActive?: boolean
+    note?: boolean
+    grantedById?: boolean
+    grantedByName?: boolean
+    createdAt?: boolean
+    updatedAt?: boolean
+  }, ExtArgs["result"]["expenseAccessGrant"]>
+
+  export type ExpenseAccessGrantSelectCreateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
+    id?: boolean
+    email?: boolean
+    level?: boolean
+    tableKey?: boolean
+    subDivision?: boolean
+    canCreate?: boolean
+    canUpdate?: boolean
+    canDelete?: boolean
+    isActive?: boolean
+    note?: boolean
+    grantedById?: boolean
+    grantedByName?: boolean
+    createdAt?: boolean
+    updatedAt?: boolean
+  }, ExtArgs["result"]["expenseAccessGrant"]>
+
+  export type ExpenseAccessGrantSelectUpdateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
+    id?: boolean
+    email?: boolean
+    level?: boolean
+    tableKey?: boolean
+    subDivision?: boolean
+    canCreate?: boolean
+    canUpdate?: boolean
+    canDelete?: boolean
+    isActive?: boolean
+    note?: boolean
+    grantedById?: boolean
+    grantedByName?: boolean
+    createdAt?: boolean
+    updatedAt?: boolean
+  }, ExtArgs["result"]["expenseAccessGrant"]>
+
+  export type ExpenseAccessGrantSelectScalar = {
+    id?: boolean
+    email?: boolean
+    level?: boolean
+    tableKey?: boolean
+    subDivision?: boolean
+    canCreate?: boolean
+    canUpdate?: boolean
+    canDelete?: boolean
+    isActive?: boolean
+    note?: boolean
+    grantedById?: boolean
+    grantedByName?: boolean
+    createdAt?: boolean
+    updatedAt?: boolean
+  }
+
+  export type ExpenseAccessGrantOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<"id" | "email" | "level" | "tableKey" | "subDivision" | "canCreate" | "canUpdate" | "canDelete" | "isActive" | "note" | "grantedById" | "grantedByName" | "createdAt" | "updatedAt", ExtArgs["result"]["expenseAccessGrant"]>
+
+  export type $ExpenseAccessGrantPayload<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    name: "ExpenseAccessGrant"
+    objects: {}
+    scalars: $Extensions.GetPayloadResult<{
+      id: number
+      email: string
+      /**
+       * Either the constant "SUB_DIVISION" (the fixed requester role — raises
+       * add/edit/delete requests) or an ExpenseApprovalStage.key (an approval
+       * right for that rung of the chain). Not a DB enum on purpose: new stages
+       * must be grantable the moment an admin creates them, with no migration.
+       */
+      level: string
+      tableKey: string
+      /**
+       * Informational label for SUB_DIVISION grants (which sub-division this
+       * person edits for) — shown in the admin list and on their requests.
+       */
+      subDivision: string | null
+      /**
+       * Only meaningful for SUB_DIVISION grants — which operations this person
+       * may raise. Approval-stage grants ignore these.
+       */
+      canCreate: boolean
+      canUpdate: boolean
+      canDelete: boolean
+      isActive: boolean
+      note: string | null
+      grantedById: number | null
+      grantedByName: string | null
+      createdAt: Date
+      updatedAt: Date
+    }, ExtArgs["result"]["expenseAccessGrant"]>
+    composites: {}
+  }
+
+  type ExpenseAccessGrantGetPayload<S extends boolean | null | undefined | ExpenseAccessGrantDefaultArgs> = $Result.GetResult<Prisma.$ExpenseAccessGrantPayload, S>
+
+  type ExpenseAccessGrantCountArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> =
+    Omit<ExpenseAccessGrantFindManyArgs, 'select' | 'include' | 'distinct' | 'omit'> & {
+      select?: ExpenseAccessGrantCountAggregateInputType | true
+    }
+
+  export interface ExpenseAccessGrantDelegate<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs, GlobalOmitOptions = {}> {
+    [K: symbol]: { types: Prisma.TypeMap<ExtArgs>['model']['ExpenseAccessGrant'], meta: { name: 'ExpenseAccessGrant' } }
+    /**
+     * Find zero or one ExpenseAccessGrant that matches the filter.
+     * @param {ExpenseAccessGrantFindUniqueArgs} args - Arguments to find a ExpenseAccessGrant
+     * @example
+     * // Get one ExpenseAccessGrant
+     * const expenseAccessGrant = await prisma.expenseAccessGrant.findUnique({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     */
+    findUnique<T extends ExpenseAccessGrantFindUniqueArgs>(args: SelectSubset<T, ExpenseAccessGrantFindUniqueArgs<ExtArgs>>): Prisma__ExpenseAccessGrantClient<$Result.GetResult<Prisma.$ExpenseAccessGrantPayload<ExtArgs>, T, "findUnique", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Find one ExpenseAccessGrant that matches the filter or throw an error with `error.code='P2025'`
+     * if no matches were found.
+     * @param {ExpenseAccessGrantFindUniqueOrThrowArgs} args - Arguments to find a ExpenseAccessGrant
+     * @example
+     * // Get one ExpenseAccessGrant
+     * const expenseAccessGrant = await prisma.expenseAccessGrant.findUniqueOrThrow({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     */
+    findUniqueOrThrow<T extends ExpenseAccessGrantFindUniqueOrThrowArgs>(args: SelectSubset<T, ExpenseAccessGrantFindUniqueOrThrowArgs<ExtArgs>>): Prisma__ExpenseAccessGrantClient<$Result.GetResult<Prisma.$ExpenseAccessGrantPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Find the first ExpenseAccessGrant that matches the filter.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {ExpenseAccessGrantFindFirstArgs} args - Arguments to find a ExpenseAccessGrant
+     * @example
+     * // Get one ExpenseAccessGrant
+     * const expenseAccessGrant = await prisma.expenseAccessGrant.findFirst({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     */
+    findFirst<T extends ExpenseAccessGrantFindFirstArgs>(args?: SelectSubset<T, ExpenseAccessGrantFindFirstArgs<ExtArgs>>): Prisma__ExpenseAccessGrantClient<$Result.GetResult<Prisma.$ExpenseAccessGrantPayload<ExtArgs>, T, "findFirst", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Find the first ExpenseAccessGrant that matches the filter or
+     * throw `PrismaKnownClientError` with `P2025` code if no matches were found.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {ExpenseAccessGrantFindFirstOrThrowArgs} args - Arguments to find a ExpenseAccessGrant
+     * @example
+     * // Get one ExpenseAccessGrant
+     * const expenseAccessGrant = await prisma.expenseAccessGrant.findFirstOrThrow({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     */
+    findFirstOrThrow<T extends ExpenseAccessGrantFindFirstOrThrowArgs>(args?: SelectSubset<T, ExpenseAccessGrantFindFirstOrThrowArgs<ExtArgs>>): Prisma__ExpenseAccessGrantClient<$Result.GetResult<Prisma.$ExpenseAccessGrantPayload<ExtArgs>, T, "findFirstOrThrow", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Find zero or more ExpenseAccessGrants that matches the filter.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {ExpenseAccessGrantFindManyArgs} args - Arguments to filter and select certain fields only.
+     * @example
+     * // Get all ExpenseAccessGrants
+     * const expenseAccessGrants = await prisma.expenseAccessGrant.findMany()
+     * 
+     * // Get first 10 ExpenseAccessGrants
+     * const expenseAccessGrants = await prisma.expenseAccessGrant.findMany({ take: 10 })
+     * 
+     * // Only select the `id`
+     * const expenseAccessGrantWithIdOnly = await prisma.expenseAccessGrant.findMany({ select: { id: true } })
+     * 
+     */
+    findMany<T extends ExpenseAccessGrantFindManyArgs>(args?: SelectSubset<T, ExpenseAccessGrantFindManyArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$ExpenseAccessGrantPayload<ExtArgs>, T, "findMany", GlobalOmitOptions>>
+
+    /**
+     * Create a ExpenseAccessGrant.
+     * @param {ExpenseAccessGrantCreateArgs} args - Arguments to create a ExpenseAccessGrant.
+     * @example
+     * // Create one ExpenseAccessGrant
+     * const ExpenseAccessGrant = await prisma.expenseAccessGrant.create({
+     *   data: {
+     *     // ... data to create a ExpenseAccessGrant
+     *   }
+     * })
+     * 
+     */
+    create<T extends ExpenseAccessGrantCreateArgs>(args: SelectSubset<T, ExpenseAccessGrantCreateArgs<ExtArgs>>): Prisma__ExpenseAccessGrantClient<$Result.GetResult<Prisma.$ExpenseAccessGrantPayload<ExtArgs>, T, "create", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Create many ExpenseAccessGrants.
+     * @param {ExpenseAccessGrantCreateManyArgs} args - Arguments to create many ExpenseAccessGrants.
+     * @example
+     * // Create many ExpenseAccessGrants
+     * const expenseAccessGrant = await prisma.expenseAccessGrant.createMany({
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     *     
+     */
+    createMany<T extends ExpenseAccessGrantCreateManyArgs>(args?: SelectSubset<T, ExpenseAccessGrantCreateManyArgs<ExtArgs>>): Prisma.PrismaPromise<BatchPayload>
+
+    /**
+     * Create many ExpenseAccessGrants and returns the data saved in the database.
+     * @param {ExpenseAccessGrantCreateManyAndReturnArgs} args - Arguments to create many ExpenseAccessGrants.
+     * @example
+     * // Create many ExpenseAccessGrants
+     * const expenseAccessGrant = await prisma.expenseAccessGrant.createManyAndReturn({
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     * 
+     * // Create many ExpenseAccessGrants and only return the `id`
+     * const expenseAccessGrantWithIdOnly = await prisma.expenseAccessGrant.createManyAndReturn({
+     *   select: { id: true },
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * 
+     */
+    createManyAndReturn<T extends ExpenseAccessGrantCreateManyAndReturnArgs>(args?: SelectSubset<T, ExpenseAccessGrantCreateManyAndReturnArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$ExpenseAccessGrantPayload<ExtArgs>, T, "createManyAndReturn", GlobalOmitOptions>>
+
+    /**
+     * Delete a ExpenseAccessGrant.
+     * @param {ExpenseAccessGrantDeleteArgs} args - Arguments to delete one ExpenseAccessGrant.
+     * @example
+     * // Delete one ExpenseAccessGrant
+     * const ExpenseAccessGrant = await prisma.expenseAccessGrant.delete({
+     *   where: {
+     *     // ... filter to delete one ExpenseAccessGrant
+     *   }
+     * })
+     * 
+     */
+    delete<T extends ExpenseAccessGrantDeleteArgs>(args: SelectSubset<T, ExpenseAccessGrantDeleteArgs<ExtArgs>>): Prisma__ExpenseAccessGrantClient<$Result.GetResult<Prisma.$ExpenseAccessGrantPayload<ExtArgs>, T, "delete", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Update one ExpenseAccessGrant.
+     * @param {ExpenseAccessGrantUpdateArgs} args - Arguments to update one ExpenseAccessGrant.
+     * @example
+     * // Update one ExpenseAccessGrant
+     * const expenseAccessGrant = await prisma.expenseAccessGrant.update({
+     *   where: {
+     *     // ... provide filter here
+     *   },
+     *   data: {
+     *     // ... provide data here
+     *   }
+     * })
+     * 
+     */
+    update<T extends ExpenseAccessGrantUpdateArgs>(args: SelectSubset<T, ExpenseAccessGrantUpdateArgs<ExtArgs>>): Prisma__ExpenseAccessGrantClient<$Result.GetResult<Prisma.$ExpenseAccessGrantPayload<ExtArgs>, T, "update", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Delete zero or more ExpenseAccessGrants.
+     * @param {ExpenseAccessGrantDeleteManyArgs} args - Arguments to filter ExpenseAccessGrants to delete.
+     * @example
+     * // Delete a few ExpenseAccessGrants
+     * const { count } = await prisma.expenseAccessGrant.deleteMany({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     * 
+     */
+    deleteMany<T extends ExpenseAccessGrantDeleteManyArgs>(args?: SelectSubset<T, ExpenseAccessGrantDeleteManyArgs<ExtArgs>>): Prisma.PrismaPromise<BatchPayload>
+
+    /**
+     * Update zero or more ExpenseAccessGrants.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {ExpenseAccessGrantUpdateManyArgs} args - Arguments to update one or more rows.
+     * @example
+     * // Update many ExpenseAccessGrants
+     * const expenseAccessGrant = await prisma.expenseAccessGrant.updateMany({
+     *   where: {
+     *     // ... provide filter here
+     *   },
+     *   data: {
+     *     // ... provide data here
+     *   }
+     * })
+     * 
+     */
+    updateMany<T extends ExpenseAccessGrantUpdateManyArgs>(args: SelectSubset<T, ExpenseAccessGrantUpdateManyArgs<ExtArgs>>): Prisma.PrismaPromise<BatchPayload>
+
+    /**
+     * Update zero or more ExpenseAccessGrants and returns the data updated in the database.
+     * @param {ExpenseAccessGrantUpdateManyAndReturnArgs} args - Arguments to update many ExpenseAccessGrants.
+     * @example
+     * // Update many ExpenseAccessGrants
+     * const expenseAccessGrant = await prisma.expenseAccessGrant.updateManyAndReturn({
+     *   where: {
+     *     // ... provide filter here
+     *   },
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     * 
+     * // Update zero or more ExpenseAccessGrants and only return the `id`
+     * const expenseAccessGrantWithIdOnly = await prisma.expenseAccessGrant.updateManyAndReturn({
+     *   select: { id: true },
+     *   where: {
+     *     // ... provide filter here
+     *   },
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * 
+     */
+    updateManyAndReturn<T extends ExpenseAccessGrantUpdateManyAndReturnArgs>(args: SelectSubset<T, ExpenseAccessGrantUpdateManyAndReturnArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$ExpenseAccessGrantPayload<ExtArgs>, T, "updateManyAndReturn", GlobalOmitOptions>>
+
+    /**
+     * Create or update one ExpenseAccessGrant.
+     * @param {ExpenseAccessGrantUpsertArgs} args - Arguments to update or create a ExpenseAccessGrant.
+     * @example
+     * // Update or create a ExpenseAccessGrant
+     * const expenseAccessGrant = await prisma.expenseAccessGrant.upsert({
+     *   create: {
+     *     // ... data to create a ExpenseAccessGrant
+     *   },
+     *   update: {
+     *     // ... in case it already exists, update
+     *   },
+     *   where: {
+     *     // ... the filter for the ExpenseAccessGrant we want to update
+     *   }
+     * })
+     */
+    upsert<T extends ExpenseAccessGrantUpsertArgs>(args: SelectSubset<T, ExpenseAccessGrantUpsertArgs<ExtArgs>>): Prisma__ExpenseAccessGrantClient<$Result.GetResult<Prisma.$ExpenseAccessGrantPayload<ExtArgs>, T, "upsert", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+
+    /**
+     * Count the number of ExpenseAccessGrants.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {ExpenseAccessGrantCountArgs} args - Arguments to filter ExpenseAccessGrants to count.
+     * @example
+     * // Count the number of ExpenseAccessGrants
+     * const count = await prisma.expenseAccessGrant.count({
+     *   where: {
+     *     // ... the filter for the ExpenseAccessGrants we want to count
+     *   }
+     * })
+    **/
+    count<T extends ExpenseAccessGrantCountArgs>(
+      args?: Subset<T, ExpenseAccessGrantCountArgs>,
+    ): Prisma.PrismaPromise<
+      T extends $Utils.Record<'select', any>
+        ? T['select'] extends true
+          ? number
+          : GetScalarType<T['select'], ExpenseAccessGrantCountAggregateOutputType>
+        : number
+    >
+
+    /**
+     * Allows you to perform aggregations operations on a ExpenseAccessGrant.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {ExpenseAccessGrantAggregateArgs} args - Select which aggregations you would like to apply and on what fields.
+     * @example
+     * // Ordered by age ascending
+     * // Where email contains prisma.io
+     * // Limited to the 10 users
+     * const aggregations = await prisma.user.aggregate({
+     *   _avg: {
+     *     age: true,
+     *   },
+     *   where: {
+     *     email: {
+     *       contains: "prisma.io",
+     *     },
+     *   },
+     *   orderBy: {
+     *     age: "asc",
+     *   },
+     *   take: 10,
+     * })
+    **/
+    aggregate<T extends ExpenseAccessGrantAggregateArgs>(args: Subset<T, ExpenseAccessGrantAggregateArgs>): Prisma.PrismaPromise<GetExpenseAccessGrantAggregateType<T>>
+
+    /**
+     * Group by ExpenseAccessGrant.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {ExpenseAccessGrantGroupByArgs} args - Group by arguments.
+     * @example
+     * // Group by city, order by createdAt, get count
+     * const result = await prisma.user.groupBy({
+     *   by: ['city', 'createdAt'],
+     *   orderBy: {
+     *     createdAt: true
+     *   },
+     *   _count: {
+     *     _all: true
+     *   },
+     * })
+     * 
+    **/
+    groupBy<
+      T extends ExpenseAccessGrantGroupByArgs,
+      HasSelectOrTake extends Or<
+        Extends<'skip', Keys<T>>,
+        Extends<'take', Keys<T>>
+      >,
+      OrderByArg extends True extends HasSelectOrTake
+        ? { orderBy: ExpenseAccessGrantGroupByArgs['orderBy'] }
+        : { orderBy?: ExpenseAccessGrantGroupByArgs['orderBy'] },
+      OrderFields extends ExcludeUnderscoreKeys<Keys<MaybeTupleToUnion<T['orderBy']>>>,
+      ByFields extends MaybeTupleToUnion<T['by']>,
+      ByValid extends Has<ByFields, OrderFields>,
+      HavingFields extends GetHavingFields<T['having']>,
+      HavingValid extends Has<ByFields, HavingFields>,
+      ByEmpty extends T['by'] extends never[] ? True : False,
+      InputErrors extends ByEmpty extends True
+      ? `Error: "by" must not be empty.`
+      : HavingValid extends False
+      ? {
+          [P in HavingFields]: P extends ByFields
+            ? never
+            : P extends string
+            ? `Error: Field "${P}" used in "having" needs to be provided in "by".`
+            : [
+                Error,
+                'Field ',
+                P,
+                ` in "having" needs to be provided in "by"`,
+              ]
+        }[HavingFields]
+      : 'take' extends Keys<T>
+      ? 'orderBy' extends Keys<T>
+        ? ByValid extends True
+          ? {}
+          : {
+              [P in OrderFields]: P extends ByFields
+                ? never
+                : `Error: Field "${P}" in "orderBy" needs to be provided in "by"`
+            }[OrderFields]
+        : 'Error: If you provide "take", you also need to provide "orderBy"'
+      : 'skip' extends Keys<T>
+      ? 'orderBy' extends Keys<T>
+        ? ByValid extends True
+          ? {}
+          : {
+              [P in OrderFields]: P extends ByFields
+                ? never
+                : `Error: Field "${P}" in "orderBy" needs to be provided in "by"`
+            }[OrderFields]
+        : 'Error: If you provide "skip", you also need to provide "orderBy"'
+      : ByValid extends True
+      ? {}
+      : {
+          [P in OrderFields]: P extends ByFields
+            ? never
+            : `Error: Field "${P}" in "orderBy" needs to be provided in "by"`
+        }[OrderFields]
+    >(args: SubsetIntersection<T, ExpenseAccessGrantGroupByArgs, OrderByArg> & InputErrors): {} extends InputErrors ? GetExpenseAccessGrantGroupByPayload<T> : Prisma.PrismaPromise<InputErrors>
+  /**
+   * Fields of the ExpenseAccessGrant model
+   */
+  readonly fields: ExpenseAccessGrantFieldRefs;
+  }
+
+  /**
+   * The delegate class that acts as a "Promise-like" for ExpenseAccessGrant.
+   * Why is this prefixed with `Prisma__`?
+   * Because we want to prevent naming conflicts as mentioned in
+   * https://github.com/prisma/prisma-client-js/issues/707
+   */
+  export interface Prisma__ExpenseAccessGrantClient<T, Null = never, ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs, GlobalOmitOptions = {}> extends Prisma.PrismaPromise<T> {
+    readonly [Symbol.toStringTag]: "PrismaPromise"
+    /**
+     * Attaches callbacks for the resolution and/or rejection of the Promise.
+     * @param onfulfilled The callback to execute when the Promise is resolved.
+     * @param onrejected The callback to execute when the Promise is rejected.
+     * @returns A Promise for the completion of which ever callback is executed.
+     */
+    then<TResult1 = T, TResult2 = never>(onfulfilled?: ((value: T) => TResult1 | PromiseLike<TResult1>) | undefined | null, onrejected?: ((reason: any) => TResult2 | PromiseLike<TResult2>) | undefined | null): $Utils.JsPromise<TResult1 | TResult2>
+    /**
+     * Attaches a callback for only the rejection of the Promise.
+     * @param onrejected The callback to execute when the Promise is rejected.
+     * @returns A Promise for the completion of the callback.
+     */
+    catch<TResult = never>(onrejected?: ((reason: any) => TResult | PromiseLike<TResult>) | undefined | null): $Utils.JsPromise<T | TResult>
+    /**
+     * Attaches a callback that is invoked when the Promise is settled (fulfilled or rejected). The
+     * resolved value cannot be modified from the callback.
+     * @param onfinally The callback to execute when the Promise is settled (fulfilled or rejected).
+     * @returns A Promise for the completion of the callback.
+     */
+    finally(onfinally?: (() => void) | undefined | null): $Utils.JsPromise<T>
+  }
+
+
+
+
+  /**
+   * Fields of the ExpenseAccessGrant model
+   */
+  interface ExpenseAccessGrantFieldRefs {
+    readonly id: FieldRef<"ExpenseAccessGrant", 'Int'>
+    readonly email: FieldRef<"ExpenseAccessGrant", 'String'>
+    readonly level: FieldRef<"ExpenseAccessGrant", 'String'>
+    readonly tableKey: FieldRef<"ExpenseAccessGrant", 'String'>
+    readonly subDivision: FieldRef<"ExpenseAccessGrant", 'String'>
+    readonly canCreate: FieldRef<"ExpenseAccessGrant", 'Boolean'>
+    readonly canUpdate: FieldRef<"ExpenseAccessGrant", 'Boolean'>
+    readonly canDelete: FieldRef<"ExpenseAccessGrant", 'Boolean'>
+    readonly isActive: FieldRef<"ExpenseAccessGrant", 'Boolean'>
+    readonly note: FieldRef<"ExpenseAccessGrant", 'String'>
+    readonly grantedById: FieldRef<"ExpenseAccessGrant", 'Int'>
+    readonly grantedByName: FieldRef<"ExpenseAccessGrant", 'String'>
+    readonly createdAt: FieldRef<"ExpenseAccessGrant", 'DateTime'>
+    readonly updatedAt: FieldRef<"ExpenseAccessGrant", 'DateTime'>
+  }
+    
+
+  // Custom InputTypes
+  /**
+   * ExpenseAccessGrant findUnique
+   */
+  export type ExpenseAccessGrantFindUniqueArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the ExpenseAccessGrant
+     */
+    select?: ExpenseAccessGrantSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the ExpenseAccessGrant
+     */
+    omit?: ExpenseAccessGrantOmit<ExtArgs> | null
+    /**
+     * Filter, which ExpenseAccessGrant to fetch.
+     */
+    where: ExpenseAccessGrantWhereUniqueInput
+  }
+
+  /**
+   * ExpenseAccessGrant findUniqueOrThrow
+   */
+  export type ExpenseAccessGrantFindUniqueOrThrowArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the ExpenseAccessGrant
+     */
+    select?: ExpenseAccessGrantSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the ExpenseAccessGrant
+     */
+    omit?: ExpenseAccessGrantOmit<ExtArgs> | null
+    /**
+     * Filter, which ExpenseAccessGrant to fetch.
+     */
+    where: ExpenseAccessGrantWhereUniqueInput
+  }
+
+  /**
+   * ExpenseAccessGrant findFirst
+   */
+  export type ExpenseAccessGrantFindFirstArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the ExpenseAccessGrant
+     */
+    select?: ExpenseAccessGrantSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the ExpenseAccessGrant
+     */
+    omit?: ExpenseAccessGrantOmit<ExtArgs> | null
+    /**
+     * Filter, which ExpenseAccessGrant to fetch.
+     */
+    where?: ExpenseAccessGrantWhereInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
+     * 
+     * Determine the order of ExpenseAccessGrants to fetch.
+     */
+    orderBy?: ExpenseAccessGrantOrderByWithRelationInput | ExpenseAccessGrantOrderByWithRelationInput[]
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
+     * 
+     * Sets the position for searching for ExpenseAccessGrants.
+     */
+    cursor?: ExpenseAccessGrantWhereUniqueInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Take `±n` ExpenseAccessGrants from the position of the cursor.
+     */
+    take?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Skip the first `n` ExpenseAccessGrants.
+     */
+    skip?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/distinct Distinct Docs}
+     * 
+     * Filter by unique combinations of ExpenseAccessGrants.
+     */
+    distinct?: ExpenseAccessGrantScalarFieldEnum | ExpenseAccessGrantScalarFieldEnum[]
+  }
+
+  /**
+   * ExpenseAccessGrant findFirstOrThrow
+   */
+  export type ExpenseAccessGrantFindFirstOrThrowArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the ExpenseAccessGrant
+     */
+    select?: ExpenseAccessGrantSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the ExpenseAccessGrant
+     */
+    omit?: ExpenseAccessGrantOmit<ExtArgs> | null
+    /**
+     * Filter, which ExpenseAccessGrant to fetch.
+     */
+    where?: ExpenseAccessGrantWhereInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
+     * 
+     * Determine the order of ExpenseAccessGrants to fetch.
+     */
+    orderBy?: ExpenseAccessGrantOrderByWithRelationInput | ExpenseAccessGrantOrderByWithRelationInput[]
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
+     * 
+     * Sets the position for searching for ExpenseAccessGrants.
+     */
+    cursor?: ExpenseAccessGrantWhereUniqueInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Take `±n` ExpenseAccessGrants from the position of the cursor.
+     */
+    take?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Skip the first `n` ExpenseAccessGrants.
+     */
+    skip?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/distinct Distinct Docs}
+     * 
+     * Filter by unique combinations of ExpenseAccessGrants.
+     */
+    distinct?: ExpenseAccessGrantScalarFieldEnum | ExpenseAccessGrantScalarFieldEnum[]
+  }
+
+  /**
+   * ExpenseAccessGrant findMany
+   */
+  export type ExpenseAccessGrantFindManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the ExpenseAccessGrant
+     */
+    select?: ExpenseAccessGrantSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the ExpenseAccessGrant
+     */
+    omit?: ExpenseAccessGrantOmit<ExtArgs> | null
+    /**
+     * Filter, which ExpenseAccessGrants to fetch.
+     */
+    where?: ExpenseAccessGrantWhereInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
+     * 
+     * Determine the order of ExpenseAccessGrants to fetch.
+     */
+    orderBy?: ExpenseAccessGrantOrderByWithRelationInput | ExpenseAccessGrantOrderByWithRelationInput[]
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
+     * 
+     * Sets the position for listing ExpenseAccessGrants.
+     */
+    cursor?: ExpenseAccessGrantWhereUniqueInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Take `±n` ExpenseAccessGrants from the position of the cursor.
+     */
+    take?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Skip the first `n` ExpenseAccessGrants.
+     */
+    skip?: number
+    distinct?: ExpenseAccessGrantScalarFieldEnum | ExpenseAccessGrantScalarFieldEnum[]
+  }
+
+  /**
+   * ExpenseAccessGrant create
+   */
+  export type ExpenseAccessGrantCreateArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the ExpenseAccessGrant
+     */
+    select?: ExpenseAccessGrantSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the ExpenseAccessGrant
+     */
+    omit?: ExpenseAccessGrantOmit<ExtArgs> | null
+    /**
+     * The data needed to create a ExpenseAccessGrant.
+     */
+    data: XOR<ExpenseAccessGrantCreateInput, ExpenseAccessGrantUncheckedCreateInput>
+  }
+
+  /**
+   * ExpenseAccessGrant createMany
+   */
+  export type ExpenseAccessGrantCreateManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * The data used to create many ExpenseAccessGrants.
+     */
+    data: ExpenseAccessGrantCreateManyInput | ExpenseAccessGrantCreateManyInput[]
+    skipDuplicates?: boolean
+  }
+
+  /**
+   * ExpenseAccessGrant createManyAndReturn
+   */
+  export type ExpenseAccessGrantCreateManyAndReturnArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the ExpenseAccessGrant
+     */
+    select?: ExpenseAccessGrantSelectCreateManyAndReturn<ExtArgs> | null
+    /**
+     * Omit specific fields from the ExpenseAccessGrant
+     */
+    omit?: ExpenseAccessGrantOmit<ExtArgs> | null
+    /**
+     * The data used to create many ExpenseAccessGrants.
+     */
+    data: ExpenseAccessGrantCreateManyInput | ExpenseAccessGrantCreateManyInput[]
+    skipDuplicates?: boolean
+  }
+
+  /**
+   * ExpenseAccessGrant update
+   */
+  export type ExpenseAccessGrantUpdateArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the ExpenseAccessGrant
+     */
+    select?: ExpenseAccessGrantSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the ExpenseAccessGrant
+     */
+    omit?: ExpenseAccessGrantOmit<ExtArgs> | null
+    /**
+     * The data needed to update a ExpenseAccessGrant.
+     */
+    data: XOR<ExpenseAccessGrantUpdateInput, ExpenseAccessGrantUncheckedUpdateInput>
+    /**
+     * Choose, which ExpenseAccessGrant to update.
+     */
+    where: ExpenseAccessGrantWhereUniqueInput
+  }
+
+  /**
+   * ExpenseAccessGrant updateMany
+   */
+  export type ExpenseAccessGrantUpdateManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * The data used to update ExpenseAccessGrants.
+     */
+    data: XOR<ExpenseAccessGrantUpdateManyMutationInput, ExpenseAccessGrantUncheckedUpdateManyInput>
+    /**
+     * Filter which ExpenseAccessGrants to update
+     */
+    where?: ExpenseAccessGrantWhereInput
+    /**
+     * Limit how many ExpenseAccessGrants to update.
+     */
+    limit?: number
+  }
+
+  /**
+   * ExpenseAccessGrant updateManyAndReturn
+   */
+  export type ExpenseAccessGrantUpdateManyAndReturnArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the ExpenseAccessGrant
+     */
+    select?: ExpenseAccessGrantSelectUpdateManyAndReturn<ExtArgs> | null
+    /**
+     * Omit specific fields from the ExpenseAccessGrant
+     */
+    omit?: ExpenseAccessGrantOmit<ExtArgs> | null
+    /**
+     * The data used to update ExpenseAccessGrants.
+     */
+    data: XOR<ExpenseAccessGrantUpdateManyMutationInput, ExpenseAccessGrantUncheckedUpdateManyInput>
+    /**
+     * Filter which ExpenseAccessGrants to update
+     */
+    where?: ExpenseAccessGrantWhereInput
+    /**
+     * Limit how many ExpenseAccessGrants to update.
+     */
+    limit?: number
+  }
+
+  /**
+   * ExpenseAccessGrant upsert
+   */
+  export type ExpenseAccessGrantUpsertArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the ExpenseAccessGrant
+     */
+    select?: ExpenseAccessGrantSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the ExpenseAccessGrant
+     */
+    omit?: ExpenseAccessGrantOmit<ExtArgs> | null
+    /**
+     * The filter to search for the ExpenseAccessGrant to update in case it exists.
+     */
+    where: ExpenseAccessGrantWhereUniqueInput
+    /**
+     * In case the ExpenseAccessGrant found by the `where` argument doesn't exist, create a new ExpenseAccessGrant with this data.
+     */
+    create: XOR<ExpenseAccessGrantCreateInput, ExpenseAccessGrantUncheckedCreateInput>
+    /**
+     * In case the ExpenseAccessGrant was found with the provided `where` argument, update it with this data.
+     */
+    update: XOR<ExpenseAccessGrantUpdateInput, ExpenseAccessGrantUncheckedUpdateInput>
+  }
+
+  /**
+   * ExpenseAccessGrant delete
+   */
+  export type ExpenseAccessGrantDeleteArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the ExpenseAccessGrant
+     */
+    select?: ExpenseAccessGrantSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the ExpenseAccessGrant
+     */
+    omit?: ExpenseAccessGrantOmit<ExtArgs> | null
+    /**
+     * Filter which ExpenseAccessGrant to delete.
+     */
+    where: ExpenseAccessGrantWhereUniqueInput
+  }
+
+  /**
+   * ExpenseAccessGrant deleteMany
+   */
+  export type ExpenseAccessGrantDeleteManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Filter which ExpenseAccessGrants to delete
+     */
+    where?: ExpenseAccessGrantWhereInput
+    /**
+     * Limit how many ExpenseAccessGrants to delete.
+     */
+    limit?: number
+  }
+
+  /**
+   * ExpenseAccessGrant without action
+   */
+  export type ExpenseAccessGrantDefaultArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the ExpenseAccessGrant
+     */
+    select?: ExpenseAccessGrantSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the ExpenseAccessGrant
+     */
+    omit?: ExpenseAccessGrantOmit<ExtArgs> | null
+  }
+
+
+  /**
+   * Model ExpenseAuditLog
+   */
+
+  export type AggregateExpenseAuditLog = {
+    _count: ExpenseAuditLogCountAggregateOutputType | null
+    _avg: ExpenseAuditLogAvgAggregateOutputType | null
+    _sum: ExpenseAuditLogSumAggregateOutputType | null
+    _min: ExpenseAuditLogMinAggregateOutputType | null
+    _max: ExpenseAuditLogMaxAggregateOutputType | null
+  }
+
+  export type ExpenseAuditLogAvgAggregateOutputType = {
+    id: number | null
+    actorId: number | null
+  }
+
+  export type ExpenseAuditLogSumAggregateOutputType = {
+    id: number | null
+    actorId: number | null
+  }
+
+  export type ExpenseAuditLogMinAggregateOutputType = {
+    id: number | null
+    requestId: string | null
+    tableKey: string | null
+    rowId: string | null
+    operation: $Enums.ExpenseChangeOperation | null
+    eventType: $Enums.ExpenseAuditEventType | null
+    stageKey: string | null
+    stageLabel: string | null
+    actorId: number | null
+    actorName: string | null
+    actorEmail: string | null
+    comment: string | null
+    occurredAt: Date | null
+  }
+
+  export type ExpenseAuditLogMaxAggregateOutputType = {
+    id: number | null
+    requestId: string | null
+    tableKey: string | null
+    rowId: string | null
+    operation: $Enums.ExpenseChangeOperation | null
+    eventType: $Enums.ExpenseAuditEventType | null
+    stageKey: string | null
+    stageLabel: string | null
+    actorId: number | null
+    actorName: string | null
+    actorEmail: string | null
+    comment: string | null
+    occurredAt: Date | null
+  }
+
+  export type ExpenseAuditLogCountAggregateOutputType = {
+    id: number
+    requestId: number
+    tableKey: number
+    rowId: number
+    operation: number
+    eventType: number
+    stageKey: number
+    stageLabel: number
+    actorId: number
+    actorName: number
+    actorEmail: number
+    comment: number
+    details: number
+    occurredAt: number
+    _all: number
+  }
+
+
+  export type ExpenseAuditLogAvgAggregateInputType = {
+    id?: true
+    actorId?: true
+  }
+
+  export type ExpenseAuditLogSumAggregateInputType = {
+    id?: true
+    actorId?: true
+  }
+
+  export type ExpenseAuditLogMinAggregateInputType = {
+    id?: true
+    requestId?: true
+    tableKey?: true
+    rowId?: true
+    operation?: true
+    eventType?: true
+    stageKey?: true
+    stageLabel?: true
+    actorId?: true
+    actorName?: true
+    actorEmail?: true
+    comment?: true
+    occurredAt?: true
+  }
+
+  export type ExpenseAuditLogMaxAggregateInputType = {
+    id?: true
+    requestId?: true
+    tableKey?: true
+    rowId?: true
+    operation?: true
+    eventType?: true
+    stageKey?: true
+    stageLabel?: true
+    actorId?: true
+    actorName?: true
+    actorEmail?: true
+    comment?: true
+    occurredAt?: true
+  }
+
+  export type ExpenseAuditLogCountAggregateInputType = {
+    id?: true
+    requestId?: true
+    tableKey?: true
+    rowId?: true
+    operation?: true
+    eventType?: true
+    stageKey?: true
+    stageLabel?: true
+    actorId?: true
+    actorName?: true
+    actorEmail?: true
+    comment?: true
+    details?: true
+    occurredAt?: true
+    _all?: true
+  }
+
+  export type ExpenseAuditLogAggregateArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Filter which ExpenseAuditLog to aggregate.
+     */
+    where?: ExpenseAuditLogWhereInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
+     * 
+     * Determine the order of ExpenseAuditLogs to fetch.
+     */
+    orderBy?: ExpenseAuditLogOrderByWithRelationInput | ExpenseAuditLogOrderByWithRelationInput[]
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
+     * 
+     * Sets the start position
+     */
+    cursor?: ExpenseAuditLogWhereUniqueInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Take `±n` ExpenseAuditLogs from the position of the cursor.
+     */
+    take?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Skip the first `n` ExpenseAuditLogs.
+     */
+    skip?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     * 
+     * Count returned ExpenseAuditLogs
+    **/
+    _count?: true | ExpenseAuditLogCountAggregateInputType
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     * 
+     * Select which fields to average
+    **/
+    _avg?: ExpenseAuditLogAvgAggregateInputType
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     * 
+     * Select which fields to sum
+    **/
+    _sum?: ExpenseAuditLogSumAggregateInputType
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     * 
+     * Select which fields to find the minimum value
+    **/
+    _min?: ExpenseAuditLogMinAggregateInputType
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     * 
+     * Select which fields to find the maximum value
+    **/
+    _max?: ExpenseAuditLogMaxAggregateInputType
+  }
+
+  export type GetExpenseAuditLogAggregateType<T extends ExpenseAuditLogAggregateArgs> = {
+        [P in keyof T & keyof AggregateExpenseAuditLog]: P extends '_count' | 'count'
+      ? T[P] extends true
+        ? number
+        : GetScalarType<T[P], AggregateExpenseAuditLog[P]>
+      : GetScalarType<T[P], AggregateExpenseAuditLog[P]>
+  }
+
+
+
+
+  export type ExpenseAuditLogGroupByArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    where?: ExpenseAuditLogWhereInput
+    orderBy?: ExpenseAuditLogOrderByWithAggregationInput | ExpenseAuditLogOrderByWithAggregationInput[]
+    by: ExpenseAuditLogScalarFieldEnum[] | ExpenseAuditLogScalarFieldEnum
+    having?: ExpenseAuditLogScalarWhereWithAggregatesInput
+    take?: number
+    skip?: number
+    _count?: ExpenseAuditLogCountAggregateInputType | true
+    _avg?: ExpenseAuditLogAvgAggregateInputType
+    _sum?: ExpenseAuditLogSumAggregateInputType
+    _min?: ExpenseAuditLogMinAggregateInputType
+    _max?: ExpenseAuditLogMaxAggregateInputType
+  }
+
+  export type ExpenseAuditLogGroupByOutputType = {
+    id: number
+    requestId: string
+    tableKey: string
+    rowId: string | null
+    operation: $Enums.ExpenseChangeOperation
+    eventType: $Enums.ExpenseAuditEventType
+    stageKey: string | null
+    stageLabel: string | null
+    actorId: number | null
+    actorName: string | null
+    actorEmail: string | null
+    comment: string | null
+    details: JsonValue | null
+    occurredAt: Date
+    _count: ExpenseAuditLogCountAggregateOutputType | null
+    _avg: ExpenseAuditLogAvgAggregateOutputType | null
+    _sum: ExpenseAuditLogSumAggregateOutputType | null
+    _min: ExpenseAuditLogMinAggregateOutputType | null
+    _max: ExpenseAuditLogMaxAggregateOutputType | null
+  }
+
+  type GetExpenseAuditLogGroupByPayload<T extends ExpenseAuditLogGroupByArgs> = Prisma.PrismaPromise<
+    Array<
+      PickEnumerable<ExpenseAuditLogGroupByOutputType, T['by']> &
+        {
+          [P in ((keyof T) & (keyof ExpenseAuditLogGroupByOutputType))]: P extends '_count'
+            ? T[P] extends boolean
+              ? number
+              : GetScalarType<T[P], ExpenseAuditLogGroupByOutputType[P]>
+            : GetScalarType<T[P], ExpenseAuditLogGroupByOutputType[P]>
+        }
+      >
+    >
+
+
+  export type ExpenseAuditLogSelect<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
+    id?: boolean
+    requestId?: boolean
+    tableKey?: boolean
+    rowId?: boolean
+    operation?: boolean
+    eventType?: boolean
+    stageKey?: boolean
+    stageLabel?: boolean
+    actorId?: boolean
+    actorName?: boolean
+    actorEmail?: boolean
+    comment?: boolean
+    details?: boolean
+    occurredAt?: boolean
+  }, ExtArgs["result"]["expenseAuditLog"]>
+
+  export type ExpenseAuditLogSelectCreateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
+    id?: boolean
+    requestId?: boolean
+    tableKey?: boolean
+    rowId?: boolean
+    operation?: boolean
+    eventType?: boolean
+    stageKey?: boolean
+    stageLabel?: boolean
+    actorId?: boolean
+    actorName?: boolean
+    actorEmail?: boolean
+    comment?: boolean
+    details?: boolean
+    occurredAt?: boolean
+  }, ExtArgs["result"]["expenseAuditLog"]>
+
+  export type ExpenseAuditLogSelectUpdateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
+    id?: boolean
+    requestId?: boolean
+    tableKey?: boolean
+    rowId?: boolean
+    operation?: boolean
+    eventType?: boolean
+    stageKey?: boolean
+    stageLabel?: boolean
+    actorId?: boolean
+    actorName?: boolean
+    actorEmail?: boolean
+    comment?: boolean
+    details?: boolean
+    occurredAt?: boolean
+  }, ExtArgs["result"]["expenseAuditLog"]>
+
+  export type ExpenseAuditLogSelectScalar = {
+    id?: boolean
+    requestId?: boolean
+    tableKey?: boolean
+    rowId?: boolean
+    operation?: boolean
+    eventType?: boolean
+    stageKey?: boolean
+    stageLabel?: boolean
+    actorId?: boolean
+    actorName?: boolean
+    actorEmail?: boolean
+    comment?: boolean
+    details?: boolean
+    occurredAt?: boolean
+  }
+
+  export type ExpenseAuditLogOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<"id" | "requestId" | "tableKey" | "rowId" | "operation" | "eventType" | "stageKey" | "stageLabel" | "actorId" | "actorName" | "actorEmail" | "comment" | "details" | "occurredAt", ExtArgs["result"]["expenseAuditLog"]>
+
+  export type $ExpenseAuditLogPayload<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    name: "ExpenseAuditLog"
+    objects: {}
+    scalars: $Extensions.GetPayloadResult<{
+      id: number
+      requestId: string
+      tableKey: string
+      /**
+       * The affected master row's id. Null only for a REQUESTED/STAGE_* event on
+       * a not-yet-applied CREATE, which has no row yet.
+       */
+      rowId: string | null
+      operation: $Enums.ExpenseChangeOperation
+      eventType: $Enums.ExpenseAuditEventType
+      stageKey: string | null
+      stageLabel: string | null
+      actorId: number | null
+      actorName: string | null
+      actorEmail: string | null
+      comment: string | null
+      /**
+       * Event-shaped detail, e.g. { changes: {field:{old,new}} } for REQUESTED/
+       * APPLIED, { editedFields } for a STAGE_APPROVED that edited values, or
+       * { error } for APPLY_FAILED/AUTO_REJECTED.
+       */
+      details: Prisma.JsonValue | null
+      occurredAt: Date
+    }, ExtArgs["result"]["expenseAuditLog"]>
+    composites: {}
+  }
+
+  type ExpenseAuditLogGetPayload<S extends boolean | null | undefined | ExpenseAuditLogDefaultArgs> = $Result.GetResult<Prisma.$ExpenseAuditLogPayload, S>
+
+  type ExpenseAuditLogCountArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> =
+    Omit<ExpenseAuditLogFindManyArgs, 'select' | 'include' | 'distinct' | 'omit'> & {
+      select?: ExpenseAuditLogCountAggregateInputType | true
+    }
+
+  export interface ExpenseAuditLogDelegate<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs, GlobalOmitOptions = {}> {
+    [K: symbol]: { types: Prisma.TypeMap<ExtArgs>['model']['ExpenseAuditLog'], meta: { name: 'ExpenseAuditLog' } }
+    /**
+     * Find zero or one ExpenseAuditLog that matches the filter.
+     * @param {ExpenseAuditLogFindUniqueArgs} args - Arguments to find a ExpenseAuditLog
+     * @example
+     * // Get one ExpenseAuditLog
+     * const expenseAuditLog = await prisma.expenseAuditLog.findUnique({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     */
+    findUnique<T extends ExpenseAuditLogFindUniqueArgs>(args: SelectSubset<T, ExpenseAuditLogFindUniqueArgs<ExtArgs>>): Prisma__ExpenseAuditLogClient<$Result.GetResult<Prisma.$ExpenseAuditLogPayload<ExtArgs>, T, "findUnique", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Find one ExpenseAuditLog that matches the filter or throw an error with `error.code='P2025'`
+     * if no matches were found.
+     * @param {ExpenseAuditLogFindUniqueOrThrowArgs} args - Arguments to find a ExpenseAuditLog
+     * @example
+     * // Get one ExpenseAuditLog
+     * const expenseAuditLog = await prisma.expenseAuditLog.findUniqueOrThrow({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     */
+    findUniqueOrThrow<T extends ExpenseAuditLogFindUniqueOrThrowArgs>(args: SelectSubset<T, ExpenseAuditLogFindUniqueOrThrowArgs<ExtArgs>>): Prisma__ExpenseAuditLogClient<$Result.GetResult<Prisma.$ExpenseAuditLogPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Find the first ExpenseAuditLog that matches the filter.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {ExpenseAuditLogFindFirstArgs} args - Arguments to find a ExpenseAuditLog
+     * @example
+     * // Get one ExpenseAuditLog
+     * const expenseAuditLog = await prisma.expenseAuditLog.findFirst({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     */
+    findFirst<T extends ExpenseAuditLogFindFirstArgs>(args?: SelectSubset<T, ExpenseAuditLogFindFirstArgs<ExtArgs>>): Prisma__ExpenseAuditLogClient<$Result.GetResult<Prisma.$ExpenseAuditLogPayload<ExtArgs>, T, "findFirst", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Find the first ExpenseAuditLog that matches the filter or
+     * throw `PrismaKnownClientError` with `P2025` code if no matches were found.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {ExpenseAuditLogFindFirstOrThrowArgs} args - Arguments to find a ExpenseAuditLog
+     * @example
+     * // Get one ExpenseAuditLog
+     * const expenseAuditLog = await prisma.expenseAuditLog.findFirstOrThrow({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     */
+    findFirstOrThrow<T extends ExpenseAuditLogFindFirstOrThrowArgs>(args?: SelectSubset<T, ExpenseAuditLogFindFirstOrThrowArgs<ExtArgs>>): Prisma__ExpenseAuditLogClient<$Result.GetResult<Prisma.$ExpenseAuditLogPayload<ExtArgs>, T, "findFirstOrThrow", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Find zero or more ExpenseAuditLogs that matches the filter.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {ExpenseAuditLogFindManyArgs} args - Arguments to filter and select certain fields only.
+     * @example
+     * // Get all ExpenseAuditLogs
+     * const expenseAuditLogs = await prisma.expenseAuditLog.findMany()
+     * 
+     * // Get first 10 ExpenseAuditLogs
+     * const expenseAuditLogs = await prisma.expenseAuditLog.findMany({ take: 10 })
+     * 
+     * // Only select the `id`
+     * const expenseAuditLogWithIdOnly = await prisma.expenseAuditLog.findMany({ select: { id: true } })
+     * 
+     */
+    findMany<T extends ExpenseAuditLogFindManyArgs>(args?: SelectSubset<T, ExpenseAuditLogFindManyArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$ExpenseAuditLogPayload<ExtArgs>, T, "findMany", GlobalOmitOptions>>
+
+    /**
+     * Create a ExpenseAuditLog.
+     * @param {ExpenseAuditLogCreateArgs} args - Arguments to create a ExpenseAuditLog.
+     * @example
+     * // Create one ExpenseAuditLog
+     * const ExpenseAuditLog = await prisma.expenseAuditLog.create({
+     *   data: {
+     *     // ... data to create a ExpenseAuditLog
+     *   }
+     * })
+     * 
+     */
+    create<T extends ExpenseAuditLogCreateArgs>(args: SelectSubset<T, ExpenseAuditLogCreateArgs<ExtArgs>>): Prisma__ExpenseAuditLogClient<$Result.GetResult<Prisma.$ExpenseAuditLogPayload<ExtArgs>, T, "create", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Create many ExpenseAuditLogs.
+     * @param {ExpenseAuditLogCreateManyArgs} args - Arguments to create many ExpenseAuditLogs.
+     * @example
+     * // Create many ExpenseAuditLogs
+     * const expenseAuditLog = await prisma.expenseAuditLog.createMany({
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     *     
+     */
+    createMany<T extends ExpenseAuditLogCreateManyArgs>(args?: SelectSubset<T, ExpenseAuditLogCreateManyArgs<ExtArgs>>): Prisma.PrismaPromise<BatchPayload>
+
+    /**
+     * Create many ExpenseAuditLogs and returns the data saved in the database.
+     * @param {ExpenseAuditLogCreateManyAndReturnArgs} args - Arguments to create many ExpenseAuditLogs.
+     * @example
+     * // Create many ExpenseAuditLogs
+     * const expenseAuditLog = await prisma.expenseAuditLog.createManyAndReturn({
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     * 
+     * // Create many ExpenseAuditLogs and only return the `id`
+     * const expenseAuditLogWithIdOnly = await prisma.expenseAuditLog.createManyAndReturn({
+     *   select: { id: true },
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * 
+     */
+    createManyAndReturn<T extends ExpenseAuditLogCreateManyAndReturnArgs>(args?: SelectSubset<T, ExpenseAuditLogCreateManyAndReturnArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$ExpenseAuditLogPayload<ExtArgs>, T, "createManyAndReturn", GlobalOmitOptions>>
+
+    /**
+     * Delete a ExpenseAuditLog.
+     * @param {ExpenseAuditLogDeleteArgs} args - Arguments to delete one ExpenseAuditLog.
+     * @example
+     * // Delete one ExpenseAuditLog
+     * const ExpenseAuditLog = await prisma.expenseAuditLog.delete({
+     *   where: {
+     *     // ... filter to delete one ExpenseAuditLog
+     *   }
+     * })
+     * 
+     */
+    delete<T extends ExpenseAuditLogDeleteArgs>(args: SelectSubset<T, ExpenseAuditLogDeleteArgs<ExtArgs>>): Prisma__ExpenseAuditLogClient<$Result.GetResult<Prisma.$ExpenseAuditLogPayload<ExtArgs>, T, "delete", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Update one ExpenseAuditLog.
+     * @param {ExpenseAuditLogUpdateArgs} args - Arguments to update one ExpenseAuditLog.
+     * @example
+     * // Update one ExpenseAuditLog
+     * const expenseAuditLog = await prisma.expenseAuditLog.update({
+     *   where: {
+     *     // ... provide filter here
+     *   },
+     *   data: {
+     *     // ... provide data here
+     *   }
+     * })
+     * 
+     */
+    update<T extends ExpenseAuditLogUpdateArgs>(args: SelectSubset<T, ExpenseAuditLogUpdateArgs<ExtArgs>>): Prisma__ExpenseAuditLogClient<$Result.GetResult<Prisma.$ExpenseAuditLogPayload<ExtArgs>, T, "update", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Delete zero or more ExpenseAuditLogs.
+     * @param {ExpenseAuditLogDeleteManyArgs} args - Arguments to filter ExpenseAuditLogs to delete.
+     * @example
+     * // Delete a few ExpenseAuditLogs
+     * const { count } = await prisma.expenseAuditLog.deleteMany({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     * 
+     */
+    deleteMany<T extends ExpenseAuditLogDeleteManyArgs>(args?: SelectSubset<T, ExpenseAuditLogDeleteManyArgs<ExtArgs>>): Prisma.PrismaPromise<BatchPayload>
+
+    /**
+     * Update zero or more ExpenseAuditLogs.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {ExpenseAuditLogUpdateManyArgs} args - Arguments to update one or more rows.
+     * @example
+     * // Update many ExpenseAuditLogs
+     * const expenseAuditLog = await prisma.expenseAuditLog.updateMany({
+     *   where: {
+     *     // ... provide filter here
+     *   },
+     *   data: {
+     *     // ... provide data here
+     *   }
+     * })
+     * 
+     */
+    updateMany<T extends ExpenseAuditLogUpdateManyArgs>(args: SelectSubset<T, ExpenseAuditLogUpdateManyArgs<ExtArgs>>): Prisma.PrismaPromise<BatchPayload>
+
+    /**
+     * Update zero or more ExpenseAuditLogs and returns the data updated in the database.
+     * @param {ExpenseAuditLogUpdateManyAndReturnArgs} args - Arguments to update many ExpenseAuditLogs.
+     * @example
+     * // Update many ExpenseAuditLogs
+     * const expenseAuditLog = await prisma.expenseAuditLog.updateManyAndReturn({
+     *   where: {
+     *     // ... provide filter here
+     *   },
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     * 
+     * // Update zero or more ExpenseAuditLogs and only return the `id`
+     * const expenseAuditLogWithIdOnly = await prisma.expenseAuditLog.updateManyAndReturn({
+     *   select: { id: true },
+     *   where: {
+     *     // ... provide filter here
+     *   },
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * 
+     */
+    updateManyAndReturn<T extends ExpenseAuditLogUpdateManyAndReturnArgs>(args: SelectSubset<T, ExpenseAuditLogUpdateManyAndReturnArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$ExpenseAuditLogPayload<ExtArgs>, T, "updateManyAndReturn", GlobalOmitOptions>>
+
+    /**
+     * Create or update one ExpenseAuditLog.
+     * @param {ExpenseAuditLogUpsertArgs} args - Arguments to update or create a ExpenseAuditLog.
+     * @example
+     * // Update or create a ExpenseAuditLog
+     * const expenseAuditLog = await prisma.expenseAuditLog.upsert({
+     *   create: {
+     *     // ... data to create a ExpenseAuditLog
+     *   },
+     *   update: {
+     *     // ... in case it already exists, update
+     *   },
+     *   where: {
+     *     // ... the filter for the ExpenseAuditLog we want to update
+     *   }
+     * })
+     */
+    upsert<T extends ExpenseAuditLogUpsertArgs>(args: SelectSubset<T, ExpenseAuditLogUpsertArgs<ExtArgs>>): Prisma__ExpenseAuditLogClient<$Result.GetResult<Prisma.$ExpenseAuditLogPayload<ExtArgs>, T, "upsert", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+
+    /**
+     * Count the number of ExpenseAuditLogs.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {ExpenseAuditLogCountArgs} args - Arguments to filter ExpenseAuditLogs to count.
+     * @example
+     * // Count the number of ExpenseAuditLogs
+     * const count = await prisma.expenseAuditLog.count({
+     *   where: {
+     *     // ... the filter for the ExpenseAuditLogs we want to count
+     *   }
+     * })
+    **/
+    count<T extends ExpenseAuditLogCountArgs>(
+      args?: Subset<T, ExpenseAuditLogCountArgs>,
+    ): Prisma.PrismaPromise<
+      T extends $Utils.Record<'select', any>
+        ? T['select'] extends true
+          ? number
+          : GetScalarType<T['select'], ExpenseAuditLogCountAggregateOutputType>
+        : number
+    >
+
+    /**
+     * Allows you to perform aggregations operations on a ExpenseAuditLog.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {ExpenseAuditLogAggregateArgs} args - Select which aggregations you would like to apply and on what fields.
+     * @example
+     * // Ordered by age ascending
+     * // Where email contains prisma.io
+     * // Limited to the 10 users
+     * const aggregations = await prisma.user.aggregate({
+     *   _avg: {
+     *     age: true,
+     *   },
+     *   where: {
+     *     email: {
+     *       contains: "prisma.io",
+     *     },
+     *   },
+     *   orderBy: {
+     *     age: "asc",
+     *   },
+     *   take: 10,
+     * })
+    **/
+    aggregate<T extends ExpenseAuditLogAggregateArgs>(args: Subset<T, ExpenseAuditLogAggregateArgs>): Prisma.PrismaPromise<GetExpenseAuditLogAggregateType<T>>
+
+    /**
+     * Group by ExpenseAuditLog.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {ExpenseAuditLogGroupByArgs} args - Group by arguments.
+     * @example
+     * // Group by city, order by createdAt, get count
+     * const result = await prisma.user.groupBy({
+     *   by: ['city', 'createdAt'],
+     *   orderBy: {
+     *     createdAt: true
+     *   },
+     *   _count: {
+     *     _all: true
+     *   },
+     * })
+     * 
+    **/
+    groupBy<
+      T extends ExpenseAuditLogGroupByArgs,
+      HasSelectOrTake extends Or<
+        Extends<'skip', Keys<T>>,
+        Extends<'take', Keys<T>>
+      >,
+      OrderByArg extends True extends HasSelectOrTake
+        ? { orderBy: ExpenseAuditLogGroupByArgs['orderBy'] }
+        : { orderBy?: ExpenseAuditLogGroupByArgs['orderBy'] },
+      OrderFields extends ExcludeUnderscoreKeys<Keys<MaybeTupleToUnion<T['orderBy']>>>,
+      ByFields extends MaybeTupleToUnion<T['by']>,
+      ByValid extends Has<ByFields, OrderFields>,
+      HavingFields extends GetHavingFields<T['having']>,
+      HavingValid extends Has<ByFields, HavingFields>,
+      ByEmpty extends T['by'] extends never[] ? True : False,
+      InputErrors extends ByEmpty extends True
+      ? `Error: "by" must not be empty.`
+      : HavingValid extends False
+      ? {
+          [P in HavingFields]: P extends ByFields
+            ? never
+            : P extends string
+            ? `Error: Field "${P}" used in "having" needs to be provided in "by".`
+            : [
+                Error,
+                'Field ',
+                P,
+                ` in "having" needs to be provided in "by"`,
+              ]
+        }[HavingFields]
+      : 'take' extends Keys<T>
+      ? 'orderBy' extends Keys<T>
+        ? ByValid extends True
+          ? {}
+          : {
+              [P in OrderFields]: P extends ByFields
+                ? never
+                : `Error: Field "${P}" in "orderBy" needs to be provided in "by"`
+            }[OrderFields]
+        : 'Error: If you provide "take", you also need to provide "orderBy"'
+      : 'skip' extends Keys<T>
+      ? 'orderBy' extends Keys<T>
+        ? ByValid extends True
+          ? {}
+          : {
+              [P in OrderFields]: P extends ByFields
+                ? never
+                : `Error: Field "${P}" in "orderBy" needs to be provided in "by"`
+            }[OrderFields]
+        : 'Error: If you provide "skip", you also need to provide "orderBy"'
+      : ByValid extends True
+      ? {}
+      : {
+          [P in OrderFields]: P extends ByFields
+            ? never
+            : `Error: Field "${P}" in "orderBy" needs to be provided in "by"`
+        }[OrderFields]
+    >(args: SubsetIntersection<T, ExpenseAuditLogGroupByArgs, OrderByArg> & InputErrors): {} extends InputErrors ? GetExpenseAuditLogGroupByPayload<T> : Prisma.PrismaPromise<InputErrors>
+  /**
+   * Fields of the ExpenseAuditLog model
+   */
+  readonly fields: ExpenseAuditLogFieldRefs;
+  }
+
+  /**
+   * The delegate class that acts as a "Promise-like" for ExpenseAuditLog.
+   * Why is this prefixed with `Prisma__`?
+   * Because we want to prevent naming conflicts as mentioned in
+   * https://github.com/prisma/prisma-client-js/issues/707
+   */
+  export interface Prisma__ExpenseAuditLogClient<T, Null = never, ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs, GlobalOmitOptions = {}> extends Prisma.PrismaPromise<T> {
+    readonly [Symbol.toStringTag]: "PrismaPromise"
+    /**
+     * Attaches callbacks for the resolution and/or rejection of the Promise.
+     * @param onfulfilled The callback to execute when the Promise is resolved.
+     * @param onrejected The callback to execute when the Promise is rejected.
+     * @returns A Promise for the completion of which ever callback is executed.
+     */
+    then<TResult1 = T, TResult2 = never>(onfulfilled?: ((value: T) => TResult1 | PromiseLike<TResult1>) | undefined | null, onrejected?: ((reason: any) => TResult2 | PromiseLike<TResult2>) | undefined | null): $Utils.JsPromise<TResult1 | TResult2>
+    /**
+     * Attaches a callback for only the rejection of the Promise.
+     * @param onrejected The callback to execute when the Promise is rejected.
+     * @returns A Promise for the completion of the callback.
+     */
+    catch<TResult = never>(onrejected?: ((reason: any) => TResult | PromiseLike<TResult>) | undefined | null): $Utils.JsPromise<T | TResult>
+    /**
+     * Attaches a callback that is invoked when the Promise is settled (fulfilled or rejected). The
+     * resolved value cannot be modified from the callback.
+     * @param onfinally The callback to execute when the Promise is settled (fulfilled or rejected).
+     * @returns A Promise for the completion of the callback.
+     */
+    finally(onfinally?: (() => void) | undefined | null): $Utils.JsPromise<T>
+  }
+
+
+
+
+  /**
+   * Fields of the ExpenseAuditLog model
+   */
+  interface ExpenseAuditLogFieldRefs {
+    readonly id: FieldRef<"ExpenseAuditLog", 'Int'>
+    readonly requestId: FieldRef<"ExpenseAuditLog", 'String'>
+    readonly tableKey: FieldRef<"ExpenseAuditLog", 'String'>
+    readonly rowId: FieldRef<"ExpenseAuditLog", 'String'>
+    readonly operation: FieldRef<"ExpenseAuditLog", 'ExpenseChangeOperation'>
+    readonly eventType: FieldRef<"ExpenseAuditLog", 'ExpenseAuditEventType'>
+    readonly stageKey: FieldRef<"ExpenseAuditLog", 'String'>
+    readonly stageLabel: FieldRef<"ExpenseAuditLog", 'String'>
+    readonly actorId: FieldRef<"ExpenseAuditLog", 'Int'>
+    readonly actorName: FieldRef<"ExpenseAuditLog", 'String'>
+    readonly actorEmail: FieldRef<"ExpenseAuditLog", 'String'>
+    readonly comment: FieldRef<"ExpenseAuditLog", 'String'>
+    readonly details: FieldRef<"ExpenseAuditLog", 'Json'>
+    readonly occurredAt: FieldRef<"ExpenseAuditLog", 'DateTime'>
+  }
+    
+
+  // Custom InputTypes
+  /**
+   * ExpenseAuditLog findUnique
+   */
+  export type ExpenseAuditLogFindUniqueArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the ExpenseAuditLog
+     */
+    select?: ExpenseAuditLogSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the ExpenseAuditLog
+     */
+    omit?: ExpenseAuditLogOmit<ExtArgs> | null
+    /**
+     * Filter, which ExpenseAuditLog to fetch.
+     */
+    where: ExpenseAuditLogWhereUniqueInput
+  }
+
+  /**
+   * ExpenseAuditLog findUniqueOrThrow
+   */
+  export type ExpenseAuditLogFindUniqueOrThrowArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the ExpenseAuditLog
+     */
+    select?: ExpenseAuditLogSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the ExpenseAuditLog
+     */
+    omit?: ExpenseAuditLogOmit<ExtArgs> | null
+    /**
+     * Filter, which ExpenseAuditLog to fetch.
+     */
+    where: ExpenseAuditLogWhereUniqueInput
+  }
+
+  /**
+   * ExpenseAuditLog findFirst
+   */
+  export type ExpenseAuditLogFindFirstArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the ExpenseAuditLog
+     */
+    select?: ExpenseAuditLogSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the ExpenseAuditLog
+     */
+    omit?: ExpenseAuditLogOmit<ExtArgs> | null
+    /**
+     * Filter, which ExpenseAuditLog to fetch.
+     */
+    where?: ExpenseAuditLogWhereInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
+     * 
+     * Determine the order of ExpenseAuditLogs to fetch.
+     */
+    orderBy?: ExpenseAuditLogOrderByWithRelationInput | ExpenseAuditLogOrderByWithRelationInput[]
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
+     * 
+     * Sets the position for searching for ExpenseAuditLogs.
+     */
+    cursor?: ExpenseAuditLogWhereUniqueInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Take `±n` ExpenseAuditLogs from the position of the cursor.
+     */
+    take?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Skip the first `n` ExpenseAuditLogs.
+     */
+    skip?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/distinct Distinct Docs}
+     * 
+     * Filter by unique combinations of ExpenseAuditLogs.
+     */
+    distinct?: ExpenseAuditLogScalarFieldEnum | ExpenseAuditLogScalarFieldEnum[]
+  }
+
+  /**
+   * ExpenseAuditLog findFirstOrThrow
+   */
+  export type ExpenseAuditLogFindFirstOrThrowArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the ExpenseAuditLog
+     */
+    select?: ExpenseAuditLogSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the ExpenseAuditLog
+     */
+    omit?: ExpenseAuditLogOmit<ExtArgs> | null
+    /**
+     * Filter, which ExpenseAuditLog to fetch.
+     */
+    where?: ExpenseAuditLogWhereInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
+     * 
+     * Determine the order of ExpenseAuditLogs to fetch.
+     */
+    orderBy?: ExpenseAuditLogOrderByWithRelationInput | ExpenseAuditLogOrderByWithRelationInput[]
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
+     * 
+     * Sets the position for searching for ExpenseAuditLogs.
+     */
+    cursor?: ExpenseAuditLogWhereUniqueInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Take `±n` ExpenseAuditLogs from the position of the cursor.
+     */
+    take?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Skip the first `n` ExpenseAuditLogs.
+     */
+    skip?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/distinct Distinct Docs}
+     * 
+     * Filter by unique combinations of ExpenseAuditLogs.
+     */
+    distinct?: ExpenseAuditLogScalarFieldEnum | ExpenseAuditLogScalarFieldEnum[]
+  }
+
+  /**
+   * ExpenseAuditLog findMany
+   */
+  export type ExpenseAuditLogFindManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the ExpenseAuditLog
+     */
+    select?: ExpenseAuditLogSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the ExpenseAuditLog
+     */
+    omit?: ExpenseAuditLogOmit<ExtArgs> | null
+    /**
+     * Filter, which ExpenseAuditLogs to fetch.
+     */
+    where?: ExpenseAuditLogWhereInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
+     * 
+     * Determine the order of ExpenseAuditLogs to fetch.
+     */
+    orderBy?: ExpenseAuditLogOrderByWithRelationInput | ExpenseAuditLogOrderByWithRelationInput[]
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
+     * 
+     * Sets the position for listing ExpenseAuditLogs.
+     */
+    cursor?: ExpenseAuditLogWhereUniqueInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Take `±n` ExpenseAuditLogs from the position of the cursor.
+     */
+    take?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Skip the first `n` ExpenseAuditLogs.
+     */
+    skip?: number
+    distinct?: ExpenseAuditLogScalarFieldEnum | ExpenseAuditLogScalarFieldEnum[]
+  }
+
+  /**
+   * ExpenseAuditLog create
+   */
+  export type ExpenseAuditLogCreateArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the ExpenseAuditLog
+     */
+    select?: ExpenseAuditLogSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the ExpenseAuditLog
+     */
+    omit?: ExpenseAuditLogOmit<ExtArgs> | null
+    /**
+     * The data needed to create a ExpenseAuditLog.
+     */
+    data: XOR<ExpenseAuditLogCreateInput, ExpenseAuditLogUncheckedCreateInput>
+  }
+
+  /**
+   * ExpenseAuditLog createMany
+   */
+  export type ExpenseAuditLogCreateManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * The data used to create many ExpenseAuditLogs.
+     */
+    data: ExpenseAuditLogCreateManyInput | ExpenseAuditLogCreateManyInput[]
+    skipDuplicates?: boolean
+  }
+
+  /**
+   * ExpenseAuditLog createManyAndReturn
+   */
+  export type ExpenseAuditLogCreateManyAndReturnArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the ExpenseAuditLog
+     */
+    select?: ExpenseAuditLogSelectCreateManyAndReturn<ExtArgs> | null
+    /**
+     * Omit specific fields from the ExpenseAuditLog
+     */
+    omit?: ExpenseAuditLogOmit<ExtArgs> | null
+    /**
+     * The data used to create many ExpenseAuditLogs.
+     */
+    data: ExpenseAuditLogCreateManyInput | ExpenseAuditLogCreateManyInput[]
+    skipDuplicates?: boolean
+  }
+
+  /**
+   * ExpenseAuditLog update
+   */
+  export type ExpenseAuditLogUpdateArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the ExpenseAuditLog
+     */
+    select?: ExpenseAuditLogSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the ExpenseAuditLog
+     */
+    omit?: ExpenseAuditLogOmit<ExtArgs> | null
+    /**
+     * The data needed to update a ExpenseAuditLog.
+     */
+    data: XOR<ExpenseAuditLogUpdateInput, ExpenseAuditLogUncheckedUpdateInput>
+    /**
+     * Choose, which ExpenseAuditLog to update.
+     */
+    where: ExpenseAuditLogWhereUniqueInput
+  }
+
+  /**
+   * ExpenseAuditLog updateMany
+   */
+  export type ExpenseAuditLogUpdateManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * The data used to update ExpenseAuditLogs.
+     */
+    data: XOR<ExpenseAuditLogUpdateManyMutationInput, ExpenseAuditLogUncheckedUpdateManyInput>
+    /**
+     * Filter which ExpenseAuditLogs to update
+     */
+    where?: ExpenseAuditLogWhereInput
+    /**
+     * Limit how many ExpenseAuditLogs to update.
+     */
+    limit?: number
+  }
+
+  /**
+   * ExpenseAuditLog updateManyAndReturn
+   */
+  export type ExpenseAuditLogUpdateManyAndReturnArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the ExpenseAuditLog
+     */
+    select?: ExpenseAuditLogSelectUpdateManyAndReturn<ExtArgs> | null
+    /**
+     * Omit specific fields from the ExpenseAuditLog
+     */
+    omit?: ExpenseAuditLogOmit<ExtArgs> | null
+    /**
+     * The data used to update ExpenseAuditLogs.
+     */
+    data: XOR<ExpenseAuditLogUpdateManyMutationInput, ExpenseAuditLogUncheckedUpdateManyInput>
+    /**
+     * Filter which ExpenseAuditLogs to update
+     */
+    where?: ExpenseAuditLogWhereInput
+    /**
+     * Limit how many ExpenseAuditLogs to update.
+     */
+    limit?: number
+  }
+
+  /**
+   * ExpenseAuditLog upsert
+   */
+  export type ExpenseAuditLogUpsertArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the ExpenseAuditLog
+     */
+    select?: ExpenseAuditLogSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the ExpenseAuditLog
+     */
+    omit?: ExpenseAuditLogOmit<ExtArgs> | null
+    /**
+     * The filter to search for the ExpenseAuditLog to update in case it exists.
+     */
+    where: ExpenseAuditLogWhereUniqueInput
+    /**
+     * In case the ExpenseAuditLog found by the `where` argument doesn't exist, create a new ExpenseAuditLog with this data.
+     */
+    create: XOR<ExpenseAuditLogCreateInput, ExpenseAuditLogUncheckedCreateInput>
+    /**
+     * In case the ExpenseAuditLog was found with the provided `where` argument, update it with this data.
+     */
+    update: XOR<ExpenseAuditLogUpdateInput, ExpenseAuditLogUncheckedUpdateInput>
+  }
+
+  /**
+   * ExpenseAuditLog delete
+   */
+  export type ExpenseAuditLogDeleteArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the ExpenseAuditLog
+     */
+    select?: ExpenseAuditLogSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the ExpenseAuditLog
+     */
+    omit?: ExpenseAuditLogOmit<ExtArgs> | null
+    /**
+     * Filter which ExpenseAuditLog to delete.
+     */
+    where: ExpenseAuditLogWhereUniqueInput
+  }
+
+  /**
+   * ExpenseAuditLog deleteMany
+   */
+  export type ExpenseAuditLogDeleteManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Filter which ExpenseAuditLogs to delete
+     */
+    where?: ExpenseAuditLogWhereInput
+    /**
+     * Limit how many ExpenseAuditLogs to delete.
+     */
+    limit?: number
+  }
+
+  /**
+   * ExpenseAuditLog without action
+   */
+  export type ExpenseAuditLogDefaultArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the ExpenseAuditLog
+     */
+    select?: ExpenseAuditLogSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the ExpenseAuditLog
+     */
+    omit?: ExpenseAuditLogOmit<ExtArgs> | null
   }
 
 
@@ -58965,6 +64398,58 @@ export namespace Prisma {
   export type NationalGridMasterScalarFieldEnum = (typeof NationalGridMasterScalarFieldEnum)[keyof typeof NationalGridMasterScalarFieldEnum]
 
 
+  export const BroaderMenuScalarFieldEnum: {
+    id: 'id',
+    sn: 'sn',
+    mcCd: 'mcCd',
+    seg: 'seg',
+    div: 'div',
+    subDiv: 'subDiv',
+    majCatCd: 'majCatCd',
+    majCatNm: 'majCatNm',
+    subCatCd: 'subCatCd',
+    subCatDesc: 'subCatDesc',
+    mcDesc: 'mcDesc',
+    ssn: 'ssn',
+    mcStat: 'mcStat',
+    subCatStat: 'subCatStat',
+    majCatStat: 'majCatStat',
+    sizeApplicable: 'sizeApplicable',
+    divStat: 'divStat',
+    mcPkSz: 'mcPkSz',
+    subCatPkSz: 'subCatPkSz',
+    noOfOptions: 'noOfOptions',
+    avgDensity: 'avgDensity',
+    accDensity: 'accDensity',
+    wgDensity: 'wgDensity',
+    fg46FtDensity: 'fg46FtDensity',
+    fg5FtDensity: 'fg5FtDensity',
+    fg4ADensity: 'fg4ADensity',
+    fg8ADensity: 'fg8ADensity',
+    acp: 'acp',
+    oldDensity: 'oldDensity',
+    seq: 'seq',
+    mjCatTyp: 'mjCatTyp',
+    fixtr: 'fixtr',
+    newMcCd: 'newMcCd',
+    newMcDesc: 'newMcDesc',
+    oldMcDesc: 'oldMcDesc',
+    oldSubCatCd: 'oldSubCatCd',
+    oldSubCatDesc: 'oldSubCatDesc',
+    legacyMcDesc: 'legacyMcDesc',
+    effectiveDate: 'effectiveDate',
+    remarks: 'remarks',
+    gmStatus: 'gmStatus',
+    currentMcStatus: 'currentMcStatus',
+    fullMcName: 'fullMcName',
+    winterStatus: 'winterStatus',
+    uploadedAt: 'uploadedAt',
+    updatedAt: 'updatedAt'
+  };
+
+  export type BroaderMenuScalarFieldEnum = (typeof BroaderMenuScalarFieldEnum)[keyof typeof BroaderMenuScalarFieldEnum]
+
+
   export const MajorCatMasterScalarFieldEnum: {
     id: 'id',
     majCat: 'majCat',
@@ -59131,35 +64616,84 @@ export namespace Prisma {
   export type MajorCategoryDetailsScalarFieldEnum = (typeof MajorCategoryDetailsScalarFieldEnum)[keyof typeof MajorCategoryDetailsScalarFieldEnum]
 
 
+  export const ExpenseApprovalStageScalarFieldEnum: {
+    id: 'id',
+    key: 'key',
+    label: 'label',
+    description: 'description',
+    sortOrder: 'sortOrder',
+    isActive: 'isActive',
+    createdById: 'createdById',
+    createdByName: 'createdByName',
+    createdAt: 'createdAt',
+    updatedAt: 'updatedAt'
+  };
+
+  export type ExpenseApprovalStageScalarFieldEnum = (typeof ExpenseApprovalStageScalarFieldEnum)[keyof typeof ExpenseApprovalStageScalarFieldEnum]
+
+
   export const ExpenseChangeRequestScalarFieldEnum: {
     id: 'id',
     tableKey: 'tableKey',
+    operation: 'operation',
     rowId: 'rowId',
+    appliedRowId: 'appliedRowId',
     rowLabel: 'rowLabel',
     changes: 'changes',
     reason: 'reason',
+    dueDate: 'dueDate',
     status: 'status',
+    currentStageKey: 'currentStageKey',
+    approvalTrail: 'approvalTrail',
     requestedById: 'requestedById',
     requestedByName: 'requestedByName',
     requestedByEmail: 'requestedByEmail',
     requestedAt: 'requestedAt',
-    approverId: 'approverId',
-    approverName: 'approverName',
-    approverEmail: 'approverEmail',
-    approverAt: 'approverAt',
-    approverComment: 'approverComment',
-    approverAction: 'approverAction',
-    finalById: 'finalById',
-    finalByName: 'finalByName',
-    finalByEmail: 'finalByEmail',
-    finalAt: 'finalAt',
-    finalComment: 'finalComment',
-    finalAction: 'finalAction',
     createdAt: 'createdAt',
     updatedAt: 'updatedAt'
   };
 
   export type ExpenseChangeRequestScalarFieldEnum = (typeof ExpenseChangeRequestScalarFieldEnum)[keyof typeof ExpenseChangeRequestScalarFieldEnum]
+
+
+  export const ExpenseAccessGrantScalarFieldEnum: {
+    id: 'id',
+    email: 'email',
+    level: 'level',
+    tableKey: 'tableKey',
+    subDivision: 'subDivision',
+    canCreate: 'canCreate',
+    canUpdate: 'canUpdate',
+    canDelete: 'canDelete',
+    isActive: 'isActive',
+    note: 'note',
+    grantedById: 'grantedById',
+    grantedByName: 'grantedByName',
+    createdAt: 'createdAt',
+    updatedAt: 'updatedAt'
+  };
+
+  export type ExpenseAccessGrantScalarFieldEnum = (typeof ExpenseAccessGrantScalarFieldEnum)[keyof typeof ExpenseAccessGrantScalarFieldEnum]
+
+
+  export const ExpenseAuditLogScalarFieldEnum: {
+    id: 'id',
+    requestId: 'requestId',
+    tableKey: 'tableKey',
+    rowId: 'rowId',
+    operation: 'operation',
+    eventType: 'eventType',
+    stageKey: 'stageKey',
+    stageLabel: 'stageLabel',
+    actorId: 'actorId',
+    actorName: 'actorName',
+    actorEmail: 'actorEmail',
+    comment: 'comment',
+    details: 'details',
+    occurredAt: 'occurredAt'
+  };
+
+  export type ExpenseAuditLogScalarFieldEnum = (typeof ExpenseAuditLogScalarFieldEnum)[keyof typeof ExpenseAuditLogScalarFieldEnum]
 
 
   export const SortOrder: {
@@ -59803,6 +65337,35 @@ export namespace Prisma {
   export type NationalGridMasterOrderByRelevanceFieldEnum = (typeof NationalGridMasterOrderByRelevanceFieldEnum)[keyof typeof NationalGridMasterOrderByRelevanceFieldEnum]
 
 
+  export const BroaderMenuOrderByRelevanceFieldEnum: {
+    seg: 'seg',
+    div: 'div',
+    subDiv: 'subDiv',
+    majCatNm: 'majCatNm',
+    subCatDesc: 'subCatDesc',
+    mcDesc: 'mcDesc',
+    ssn: 'ssn',
+    mcStat: 'mcStat',
+    subCatStat: 'subCatStat',
+    majCatStat: 'majCatStat',
+    sizeApplicable: 'sizeApplicable',
+    divStat: 'divStat',
+    mjCatTyp: 'mjCatTyp',
+    fixtr: 'fixtr',
+    newMcDesc: 'newMcDesc',
+    oldMcDesc: 'oldMcDesc',
+    oldSubCatDesc: 'oldSubCatDesc',
+    legacyMcDesc: 'legacyMcDesc',
+    remarks: 'remarks',
+    gmStatus: 'gmStatus',
+    currentMcStatus: 'currentMcStatus',
+    fullMcName: 'fullMcName',
+    winterStatus: 'winterStatus'
+  };
+
+  export type BroaderMenuOrderByRelevanceFieldEnum = (typeof BroaderMenuOrderByRelevanceFieldEnum)[keyof typeof BroaderMenuOrderByRelevanceFieldEnum]
+
+
   export const MajorCatMasterOrderByRelevanceFieldEnum: {
     majCat: 'majCat',
     name: 'name',
@@ -59942,25 +65505,55 @@ export namespace Prisma {
   export type MajorCategoryDetailsOrderByRelevanceFieldEnum = (typeof MajorCategoryDetailsOrderByRelevanceFieldEnum)[keyof typeof MajorCategoryDetailsOrderByRelevanceFieldEnum]
 
 
+  export const ExpenseApprovalStageOrderByRelevanceFieldEnum: {
+    key: 'key',
+    label: 'label',
+    description: 'description',
+    createdByName: 'createdByName'
+  };
+
+  export type ExpenseApprovalStageOrderByRelevanceFieldEnum = (typeof ExpenseApprovalStageOrderByRelevanceFieldEnum)[keyof typeof ExpenseApprovalStageOrderByRelevanceFieldEnum]
+
+
   export const ExpenseChangeRequestOrderByRelevanceFieldEnum: {
     id: 'id',
     tableKey: 'tableKey',
     rowId: 'rowId',
+    appliedRowId: 'appliedRowId',
     rowLabel: 'rowLabel',
     reason: 'reason',
+    currentStageKey: 'currentStageKey',
     requestedByName: 'requestedByName',
-    requestedByEmail: 'requestedByEmail',
-    approverName: 'approverName',
-    approverEmail: 'approverEmail',
-    approverComment: 'approverComment',
-    approverAction: 'approverAction',
-    finalByName: 'finalByName',
-    finalByEmail: 'finalByEmail',
-    finalComment: 'finalComment',
-    finalAction: 'finalAction'
+    requestedByEmail: 'requestedByEmail'
   };
 
   export type ExpenseChangeRequestOrderByRelevanceFieldEnum = (typeof ExpenseChangeRequestOrderByRelevanceFieldEnum)[keyof typeof ExpenseChangeRequestOrderByRelevanceFieldEnum]
+
+
+  export const ExpenseAccessGrantOrderByRelevanceFieldEnum: {
+    email: 'email',
+    level: 'level',
+    tableKey: 'tableKey',
+    subDivision: 'subDivision',
+    note: 'note',
+    grantedByName: 'grantedByName'
+  };
+
+  export type ExpenseAccessGrantOrderByRelevanceFieldEnum = (typeof ExpenseAccessGrantOrderByRelevanceFieldEnum)[keyof typeof ExpenseAccessGrantOrderByRelevanceFieldEnum]
+
+
+  export const ExpenseAuditLogOrderByRelevanceFieldEnum: {
+    requestId: 'requestId',
+    tableKey: 'tableKey',
+    rowId: 'rowId',
+    stageKey: 'stageKey',
+    stageLabel: 'stageLabel',
+    actorName: 'actorName',
+    actorEmail: 'actorEmail',
+    comment: 'comment'
+  };
+
+  export type ExpenseAuditLogOrderByRelevanceFieldEnum = (typeof ExpenseAuditLogOrderByRelevanceFieldEnum)[keyof typeof ExpenseAuditLogOrderByRelevanceFieldEnum]
 
 
   /**
@@ -60200,6 +65793,20 @@ export namespace Prisma {
 
 
   /**
+   * Reference to a field of type 'ExpenseChangeOperation'
+   */
+  export type EnumExpenseChangeOperationFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'ExpenseChangeOperation'>
+    
+
+
+  /**
+   * Reference to a field of type 'ExpenseChangeOperation[]'
+   */
+  export type ListEnumExpenseChangeOperationFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'ExpenseChangeOperation[]'>
+    
+
+
+  /**
    * Reference to a field of type 'ExpenseChangeStatus'
    */
   export type EnumExpenseChangeStatusFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'ExpenseChangeStatus'>
@@ -60210,6 +65817,20 @@ export namespace Prisma {
    * Reference to a field of type 'ExpenseChangeStatus[]'
    */
   export type ListEnumExpenseChangeStatusFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'ExpenseChangeStatus[]'>
+    
+
+
+  /**
+   * Reference to a field of type 'ExpenseAuditEventType'
+   */
+  export type EnumExpenseAuditEventTypeFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'ExpenseAuditEventType'>
+    
+
+
+  /**
+   * Reference to a field of type 'ExpenseAuditEventType[]'
+   */
+  export type ListEnumExpenseAuditEventTypeFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'ExpenseAuditEventType[]'>
     
 
 
@@ -64526,6 +70147,266 @@ export namespace Prisma {
     createdAt?: DateTimeWithAggregatesFilter<"NationalGridMaster"> | Date | string
   }
 
+  export type BroaderMenuWhereInput = {
+    AND?: BroaderMenuWhereInput | BroaderMenuWhereInput[]
+    OR?: BroaderMenuWhereInput[]
+    NOT?: BroaderMenuWhereInput | BroaderMenuWhereInput[]
+    id?: IntFilter<"BroaderMenu"> | number
+    sn?: IntNullableFilter<"BroaderMenu"> | number | null
+    mcCd?: IntFilter<"BroaderMenu"> | number
+    seg?: StringNullableFilter<"BroaderMenu"> | string | null
+    div?: StringNullableFilter<"BroaderMenu"> | string | null
+    subDiv?: StringNullableFilter<"BroaderMenu"> | string | null
+    majCatCd?: IntNullableFilter<"BroaderMenu"> | number | null
+    majCatNm?: StringNullableFilter<"BroaderMenu"> | string | null
+    subCatCd?: IntNullableFilter<"BroaderMenu"> | number | null
+    subCatDesc?: StringNullableFilter<"BroaderMenu"> | string | null
+    mcDesc?: StringNullableFilter<"BroaderMenu"> | string | null
+    ssn?: StringNullableFilter<"BroaderMenu"> | string | null
+    mcStat?: StringNullableFilter<"BroaderMenu"> | string | null
+    subCatStat?: StringNullableFilter<"BroaderMenu"> | string | null
+    majCatStat?: StringNullableFilter<"BroaderMenu"> | string | null
+    sizeApplicable?: StringNullableFilter<"BroaderMenu"> | string | null
+    divStat?: StringNullableFilter<"BroaderMenu"> | string | null
+    mcPkSz?: IntNullableFilter<"BroaderMenu"> | number | null
+    subCatPkSz?: IntNullableFilter<"BroaderMenu"> | number | null
+    noOfOptions?: IntNullableFilter<"BroaderMenu"> | number | null
+    avgDensity?: DecimalNullableFilter<"BroaderMenu"> | Decimal | DecimalJsLike | number | string | null
+    accDensity?: DecimalNullableFilter<"BroaderMenu"> | Decimal | DecimalJsLike | number | string | null
+    wgDensity?: DecimalNullableFilter<"BroaderMenu"> | Decimal | DecimalJsLike | number | string | null
+    fg46FtDensity?: DecimalNullableFilter<"BroaderMenu"> | Decimal | DecimalJsLike | number | string | null
+    fg5FtDensity?: DecimalNullableFilter<"BroaderMenu"> | Decimal | DecimalJsLike | number | string | null
+    fg4ADensity?: DecimalNullableFilter<"BroaderMenu"> | Decimal | DecimalJsLike | number | string | null
+    fg8ADensity?: DecimalNullableFilter<"BroaderMenu"> | Decimal | DecimalJsLike | number | string | null
+    acp?: DecimalNullableFilter<"BroaderMenu"> | Decimal | DecimalJsLike | number | string | null
+    oldDensity?: DecimalNullableFilter<"BroaderMenu"> | Decimal | DecimalJsLike | number | string | null
+    seq?: IntNullableFilter<"BroaderMenu"> | number | null
+    mjCatTyp?: StringNullableFilter<"BroaderMenu"> | string | null
+    fixtr?: StringNullableFilter<"BroaderMenu"> | string | null
+    newMcCd?: IntNullableFilter<"BroaderMenu"> | number | null
+    newMcDesc?: StringNullableFilter<"BroaderMenu"> | string | null
+    oldMcDesc?: StringNullableFilter<"BroaderMenu"> | string | null
+    oldSubCatCd?: IntNullableFilter<"BroaderMenu"> | number | null
+    oldSubCatDesc?: StringNullableFilter<"BroaderMenu"> | string | null
+    legacyMcDesc?: StringNullableFilter<"BroaderMenu"> | string | null
+    effectiveDate?: DateTimeNullableFilter<"BroaderMenu"> | Date | string | null
+    remarks?: StringNullableFilter<"BroaderMenu"> | string | null
+    gmStatus?: StringNullableFilter<"BroaderMenu"> | string | null
+    currentMcStatus?: StringNullableFilter<"BroaderMenu"> | string | null
+    fullMcName?: StringNullableFilter<"BroaderMenu"> | string | null
+    winterStatus?: StringNullableFilter<"BroaderMenu"> | string | null
+    uploadedAt?: DateTimeFilter<"BroaderMenu"> | Date | string
+    updatedAt?: DateTimeFilter<"BroaderMenu"> | Date | string
+  }
+
+  export type BroaderMenuOrderByWithRelationInput = {
+    id?: SortOrder
+    sn?: SortOrderInput | SortOrder
+    mcCd?: SortOrder
+    seg?: SortOrderInput | SortOrder
+    div?: SortOrderInput | SortOrder
+    subDiv?: SortOrderInput | SortOrder
+    majCatCd?: SortOrderInput | SortOrder
+    majCatNm?: SortOrderInput | SortOrder
+    subCatCd?: SortOrderInput | SortOrder
+    subCatDesc?: SortOrderInput | SortOrder
+    mcDesc?: SortOrderInput | SortOrder
+    ssn?: SortOrderInput | SortOrder
+    mcStat?: SortOrderInput | SortOrder
+    subCatStat?: SortOrderInput | SortOrder
+    majCatStat?: SortOrderInput | SortOrder
+    sizeApplicable?: SortOrderInput | SortOrder
+    divStat?: SortOrderInput | SortOrder
+    mcPkSz?: SortOrderInput | SortOrder
+    subCatPkSz?: SortOrderInput | SortOrder
+    noOfOptions?: SortOrderInput | SortOrder
+    avgDensity?: SortOrderInput | SortOrder
+    accDensity?: SortOrderInput | SortOrder
+    wgDensity?: SortOrderInput | SortOrder
+    fg46FtDensity?: SortOrderInput | SortOrder
+    fg5FtDensity?: SortOrderInput | SortOrder
+    fg4ADensity?: SortOrderInput | SortOrder
+    fg8ADensity?: SortOrderInput | SortOrder
+    acp?: SortOrderInput | SortOrder
+    oldDensity?: SortOrderInput | SortOrder
+    seq?: SortOrderInput | SortOrder
+    mjCatTyp?: SortOrderInput | SortOrder
+    fixtr?: SortOrderInput | SortOrder
+    newMcCd?: SortOrderInput | SortOrder
+    newMcDesc?: SortOrderInput | SortOrder
+    oldMcDesc?: SortOrderInput | SortOrder
+    oldSubCatCd?: SortOrderInput | SortOrder
+    oldSubCatDesc?: SortOrderInput | SortOrder
+    legacyMcDesc?: SortOrderInput | SortOrder
+    effectiveDate?: SortOrderInput | SortOrder
+    remarks?: SortOrderInput | SortOrder
+    gmStatus?: SortOrderInput | SortOrder
+    currentMcStatus?: SortOrderInput | SortOrder
+    fullMcName?: SortOrderInput | SortOrder
+    winterStatus?: SortOrderInput | SortOrder
+    uploadedAt?: SortOrder
+    updatedAt?: SortOrder
+    _relevance?: BroaderMenuOrderByRelevanceInput
+  }
+
+  export type BroaderMenuWhereUniqueInput = Prisma.AtLeast<{
+    id?: number
+    mcCd?: number
+    AND?: BroaderMenuWhereInput | BroaderMenuWhereInput[]
+    OR?: BroaderMenuWhereInput[]
+    NOT?: BroaderMenuWhereInput | BroaderMenuWhereInput[]
+    sn?: IntNullableFilter<"BroaderMenu"> | number | null
+    seg?: StringNullableFilter<"BroaderMenu"> | string | null
+    div?: StringNullableFilter<"BroaderMenu"> | string | null
+    subDiv?: StringNullableFilter<"BroaderMenu"> | string | null
+    majCatCd?: IntNullableFilter<"BroaderMenu"> | number | null
+    majCatNm?: StringNullableFilter<"BroaderMenu"> | string | null
+    subCatCd?: IntNullableFilter<"BroaderMenu"> | number | null
+    subCatDesc?: StringNullableFilter<"BroaderMenu"> | string | null
+    mcDesc?: StringNullableFilter<"BroaderMenu"> | string | null
+    ssn?: StringNullableFilter<"BroaderMenu"> | string | null
+    mcStat?: StringNullableFilter<"BroaderMenu"> | string | null
+    subCatStat?: StringNullableFilter<"BroaderMenu"> | string | null
+    majCatStat?: StringNullableFilter<"BroaderMenu"> | string | null
+    sizeApplicable?: StringNullableFilter<"BroaderMenu"> | string | null
+    divStat?: StringNullableFilter<"BroaderMenu"> | string | null
+    mcPkSz?: IntNullableFilter<"BroaderMenu"> | number | null
+    subCatPkSz?: IntNullableFilter<"BroaderMenu"> | number | null
+    noOfOptions?: IntNullableFilter<"BroaderMenu"> | number | null
+    avgDensity?: DecimalNullableFilter<"BroaderMenu"> | Decimal | DecimalJsLike | number | string | null
+    accDensity?: DecimalNullableFilter<"BroaderMenu"> | Decimal | DecimalJsLike | number | string | null
+    wgDensity?: DecimalNullableFilter<"BroaderMenu"> | Decimal | DecimalJsLike | number | string | null
+    fg46FtDensity?: DecimalNullableFilter<"BroaderMenu"> | Decimal | DecimalJsLike | number | string | null
+    fg5FtDensity?: DecimalNullableFilter<"BroaderMenu"> | Decimal | DecimalJsLike | number | string | null
+    fg4ADensity?: DecimalNullableFilter<"BroaderMenu"> | Decimal | DecimalJsLike | number | string | null
+    fg8ADensity?: DecimalNullableFilter<"BroaderMenu"> | Decimal | DecimalJsLike | number | string | null
+    acp?: DecimalNullableFilter<"BroaderMenu"> | Decimal | DecimalJsLike | number | string | null
+    oldDensity?: DecimalNullableFilter<"BroaderMenu"> | Decimal | DecimalJsLike | number | string | null
+    seq?: IntNullableFilter<"BroaderMenu"> | number | null
+    mjCatTyp?: StringNullableFilter<"BroaderMenu"> | string | null
+    fixtr?: StringNullableFilter<"BroaderMenu"> | string | null
+    newMcCd?: IntNullableFilter<"BroaderMenu"> | number | null
+    newMcDesc?: StringNullableFilter<"BroaderMenu"> | string | null
+    oldMcDesc?: StringNullableFilter<"BroaderMenu"> | string | null
+    oldSubCatCd?: IntNullableFilter<"BroaderMenu"> | number | null
+    oldSubCatDesc?: StringNullableFilter<"BroaderMenu"> | string | null
+    legacyMcDesc?: StringNullableFilter<"BroaderMenu"> | string | null
+    effectiveDate?: DateTimeNullableFilter<"BroaderMenu"> | Date | string | null
+    remarks?: StringNullableFilter<"BroaderMenu"> | string | null
+    gmStatus?: StringNullableFilter<"BroaderMenu"> | string | null
+    currentMcStatus?: StringNullableFilter<"BroaderMenu"> | string | null
+    fullMcName?: StringNullableFilter<"BroaderMenu"> | string | null
+    winterStatus?: StringNullableFilter<"BroaderMenu"> | string | null
+    uploadedAt?: DateTimeFilter<"BroaderMenu"> | Date | string
+    updatedAt?: DateTimeFilter<"BroaderMenu"> | Date | string
+  }, "id" | "mcCd">
+
+  export type BroaderMenuOrderByWithAggregationInput = {
+    id?: SortOrder
+    sn?: SortOrderInput | SortOrder
+    mcCd?: SortOrder
+    seg?: SortOrderInput | SortOrder
+    div?: SortOrderInput | SortOrder
+    subDiv?: SortOrderInput | SortOrder
+    majCatCd?: SortOrderInput | SortOrder
+    majCatNm?: SortOrderInput | SortOrder
+    subCatCd?: SortOrderInput | SortOrder
+    subCatDesc?: SortOrderInput | SortOrder
+    mcDesc?: SortOrderInput | SortOrder
+    ssn?: SortOrderInput | SortOrder
+    mcStat?: SortOrderInput | SortOrder
+    subCatStat?: SortOrderInput | SortOrder
+    majCatStat?: SortOrderInput | SortOrder
+    sizeApplicable?: SortOrderInput | SortOrder
+    divStat?: SortOrderInput | SortOrder
+    mcPkSz?: SortOrderInput | SortOrder
+    subCatPkSz?: SortOrderInput | SortOrder
+    noOfOptions?: SortOrderInput | SortOrder
+    avgDensity?: SortOrderInput | SortOrder
+    accDensity?: SortOrderInput | SortOrder
+    wgDensity?: SortOrderInput | SortOrder
+    fg46FtDensity?: SortOrderInput | SortOrder
+    fg5FtDensity?: SortOrderInput | SortOrder
+    fg4ADensity?: SortOrderInput | SortOrder
+    fg8ADensity?: SortOrderInput | SortOrder
+    acp?: SortOrderInput | SortOrder
+    oldDensity?: SortOrderInput | SortOrder
+    seq?: SortOrderInput | SortOrder
+    mjCatTyp?: SortOrderInput | SortOrder
+    fixtr?: SortOrderInput | SortOrder
+    newMcCd?: SortOrderInput | SortOrder
+    newMcDesc?: SortOrderInput | SortOrder
+    oldMcDesc?: SortOrderInput | SortOrder
+    oldSubCatCd?: SortOrderInput | SortOrder
+    oldSubCatDesc?: SortOrderInput | SortOrder
+    legacyMcDesc?: SortOrderInput | SortOrder
+    effectiveDate?: SortOrderInput | SortOrder
+    remarks?: SortOrderInput | SortOrder
+    gmStatus?: SortOrderInput | SortOrder
+    currentMcStatus?: SortOrderInput | SortOrder
+    fullMcName?: SortOrderInput | SortOrder
+    winterStatus?: SortOrderInput | SortOrder
+    uploadedAt?: SortOrder
+    updatedAt?: SortOrder
+    _count?: BroaderMenuCountOrderByAggregateInput
+    _avg?: BroaderMenuAvgOrderByAggregateInput
+    _max?: BroaderMenuMaxOrderByAggregateInput
+    _min?: BroaderMenuMinOrderByAggregateInput
+    _sum?: BroaderMenuSumOrderByAggregateInput
+  }
+
+  export type BroaderMenuScalarWhereWithAggregatesInput = {
+    AND?: BroaderMenuScalarWhereWithAggregatesInput | BroaderMenuScalarWhereWithAggregatesInput[]
+    OR?: BroaderMenuScalarWhereWithAggregatesInput[]
+    NOT?: BroaderMenuScalarWhereWithAggregatesInput | BroaderMenuScalarWhereWithAggregatesInput[]
+    id?: IntWithAggregatesFilter<"BroaderMenu"> | number
+    sn?: IntNullableWithAggregatesFilter<"BroaderMenu"> | number | null
+    mcCd?: IntWithAggregatesFilter<"BroaderMenu"> | number
+    seg?: StringNullableWithAggregatesFilter<"BroaderMenu"> | string | null
+    div?: StringNullableWithAggregatesFilter<"BroaderMenu"> | string | null
+    subDiv?: StringNullableWithAggregatesFilter<"BroaderMenu"> | string | null
+    majCatCd?: IntNullableWithAggregatesFilter<"BroaderMenu"> | number | null
+    majCatNm?: StringNullableWithAggregatesFilter<"BroaderMenu"> | string | null
+    subCatCd?: IntNullableWithAggregatesFilter<"BroaderMenu"> | number | null
+    subCatDesc?: StringNullableWithAggregatesFilter<"BroaderMenu"> | string | null
+    mcDesc?: StringNullableWithAggregatesFilter<"BroaderMenu"> | string | null
+    ssn?: StringNullableWithAggregatesFilter<"BroaderMenu"> | string | null
+    mcStat?: StringNullableWithAggregatesFilter<"BroaderMenu"> | string | null
+    subCatStat?: StringNullableWithAggregatesFilter<"BroaderMenu"> | string | null
+    majCatStat?: StringNullableWithAggregatesFilter<"BroaderMenu"> | string | null
+    sizeApplicable?: StringNullableWithAggregatesFilter<"BroaderMenu"> | string | null
+    divStat?: StringNullableWithAggregatesFilter<"BroaderMenu"> | string | null
+    mcPkSz?: IntNullableWithAggregatesFilter<"BroaderMenu"> | number | null
+    subCatPkSz?: IntNullableWithAggregatesFilter<"BroaderMenu"> | number | null
+    noOfOptions?: IntNullableWithAggregatesFilter<"BroaderMenu"> | number | null
+    avgDensity?: DecimalNullableWithAggregatesFilter<"BroaderMenu"> | Decimal | DecimalJsLike | number | string | null
+    accDensity?: DecimalNullableWithAggregatesFilter<"BroaderMenu"> | Decimal | DecimalJsLike | number | string | null
+    wgDensity?: DecimalNullableWithAggregatesFilter<"BroaderMenu"> | Decimal | DecimalJsLike | number | string | null
+    fg46FtDensity?: DecimalNullableWithAggregatesFilter<"BroaderMenu"> | Decimal | DecimalJsLike | number | string | null
+    fg5FtDensity?: DecimalNullableWithAggregatesFilter<"BroaderMenu"> | Decimal | DecimalJsLike | number | string | null
+    fg4ADensity?: DecimalNullableWithAggregatesFilter<"BroaderMenu"> | Decimal | DecimalJsLike | number | string | null
+    fg8ADensity?: DecimalNullableWithAggregatesFilter<"BroaderMenu"> | Decimal | DecimalJsLike | number | string | null
+    acp?: DecimalNullableWithAggregatesFilter<"BroaderMenu"> | Decimal | DecimalJsLike | number | string | null
+    oldDensity?: DecimalNullableWithAggregatesFilter<"BroaderMenu"> | Decimal | DecimalJsLike | number | string | null
+    seq?: IntNullableWithAggregatesFilter<"BroaderMenu"> | number | null
+    mjCatTyp?: StringNullableWithAggregatesFilter<"BroaderMenu"> | string | null
+    fixtr?: StringNullableWithAggregatesFilter<"BroaderMenu"> | string | null
+    newMcCd?: IntNullableWithAggregatesFilter<"BroaderMenu"> | number | null
+    newMcDesc?: StringNullableWithAggregatesFilter<"BroaderMenu"> | string | null
+    oldMcDesc?: StringNullableWithAggregatesFilter<"BroaderMenu"> | string | null
+    oldSubCatCd?: IntNullableWithAggregatesFilter<"BroaderMenu"> | number | null
+    oldSubCatDesc?: StringNullableWithAggregatesFilter<"BroaderMenu"> | string | null
+    legacyMcDesc?: StringNullableWithAggregatesFilter<"BroaderMenu"> | string | null
+    effectiveDate?: DateTimeNullableWithAggregatesFilter<"BroaderMenu"> | Date | string | null
+    remarks?: StringNullableWithAggregatesFilter<"BroaderMenu"> | string | null
+    gmStatus?: StringNullableWithAggregatesFilter<"BroaderMenu"> | string | null
+    currentMcStatus?: StringNullableWithAggregatesFilter<"BroaderMenu"> | string | null
+    fullMcName?: StringNullableWithAggregatesFilter<"BroaderMenu"> | string | null
+    winterStatus?: StringNullableWithAggregatesFilter<"BroaderMenu"> | string | null
+    uploadedAt?: DateTimeWithAggregatesFilter<"BroaderMenu"> | Date | string
+    updatedAt?: DateTimeWithAggregatesFilter<"BroaderMenu"> | Date | string
+  }
+
   export type MajorCatMasterWhereInput = {
     AND?: MajorCatMasterWhereInput | MajorCatMasterWhereInput[]
     OR?: MajorCatMasterWhereInput[]
@@ -65358,33 +71239,106 @@ export namespace Prisma {
     createdAt?: DateTimeWithAggregatesFilter<"MajorCategoryDetails"> | Date | string
   }
 
+  export type ExpenseApprovalStageWhereInput = {
+    AND?: ExpenseApprovalStageWhereInput | ExpenseApprovalStageWhereInput[]
+    OR?: ExpenseApprovalStageWhereInput[]
+    NOT?: ExpenseApprovalStageWhereInput | ExpenseApprovalStageWhereInput[]
+    id?: IntFilter<"ExpenseApprovalStage"> | number
+    key?: StringFilter<"ExpenseApprovalStage"> | string
+    label?: StringFilter<"ExpenseApprovalStage"> | string
+    description?: StringNullableFilter<"ExpenseApprovalStage"> | string | null
+    sortOrder?: IntFilter<"ExpenseApprovalStage"> | number
+    isActive?: BoolFilter<"ExpenseApprovalStage"> | boolean
+    createdById?: IntNullableFilter<"ExpenseApprovalStage"> | number | null
+    createdByName?: StringNullableFilter<"ExpenseApprovalStage"> | string | null
+    createdAt?: DateTimeFilter<"ExpenseApprovalStage"> | Date | string
+    updatedAt?: DateTimeFilter<"ExpenseApprovalStage"> | Date | string
+  }
+
+  export type ExpenseApprovalStageOrderByWithRelationInput = {
+    id?: SortOrder
+    key?: SortOrder
+    label?: SortOrder
+    description?: SortOrderInput | SortOrder
+    sortOrder?: SortOrder
+    isActive?: SortOrder
+    createdById?: SortOrderInput | SortOrder
+    createdByName?: SortOrderInput | SortOrder
+    createdAt?: SortOrder
+    updatedAt?: SortOrder
+    _relevance?: ExpenseApprovalStageOrderByRelevanceInput
+  }
+
+  export type ExpenseApprovalStageWhereUniqueInput = Prisma.AtLeast<{
+    id?: number
+    key?: string
+    AND?: ExpenseApprovalStageWhereInput | ExpenseApprovalStageWhereInput[]
+    OR?: ExpenseApprovalStageWhereInput[]
+    NOT?: ExpenseApprovalStageWhereInput | ExpenseApprovalStageWhereInput[]
+    label?: StringFilter<"ExpenseApprovalStage"> | string
+    description?: StringNullableFilter<"ExpenseApprovalStage"> | string | null
+    sortOrder?: IntFilter<"ExpenseApprovalStage"> | number
+    isActive?: BoolFilter<"ExpenseApprovalStage"> | boolean
+    createdById?: IntNullableFilter<"ExpenseApprovalStage"> | number | null
+    createdByName?: StringNullableFilter<"ExpenseApprovalStage"> | string | null
+    createdAt?: DateTimeFilter<"ExpenseApprovalStage"> | Date | string
+    updatedAt?: DateTimeFilter<"ExpenseApprovalStage"> | Date | string
+  }, "id" | "key">
+
+  export type ExpenseApprovalStageOrderByWithAggregationInput = {
+    id?: SortOrder
+    key?: SortOrder
+    label?: SortOrder
+    description?: SortOrderInput | SortOrder
+    sortOrder?: SortOrder
+    isActive?: SortOrder
+    createdById?: SortOrderInput | SortOrder
+    createdByName?: SortOrderInput | SortOrder
+    createdAt?: SortOrder
+    updatedAt?: SortOrder
+    _count?: ExpenseApprovalStageCountOrderByAggregateInput
+    _avg?: ExpenseApprovalStageAvgOrderByAggregateInput
+    _max?: ExpenseApprovalStageMaxOrderByAggregateInput
+    _min?: ExpenseApprovalStageMinOrderByAggregateInput
+    _sum?: ExpenseApprovalStageSumOrderByAggregateInput
+  }
+
+  export type ExpenseApprovalStageScalarWhereWithAggregatesInput = {
+    AND?: ExpenseApprovalStageScalarWhereWithAggregatesInput | ExpenseApprovalStageScalarWhereWithAggregatesInput[]
+    OR?: ExpenseApprovalStageScalarWhereWithAggregatesInput[]
+    NOT?: ExpenseApprovalStageScalarWhereWithAggregatesInput | ExpenseApprovalStageScalarWhereWithAggregatesInput[]
+    id?: IntWithAggregatesFilter<"ExpenseApprovalStage"> | number
+    key?: StringWithAggregatesFilter<"ExpenseApprovalStage"> | string
+    label?: StringWithAggregatesFilter<"ExpenseApprovalStage"> | string
+    description?: StringNullableWithAggregatesFilter<"ExpenseApprovalStage"> | string | null
+    sortOrder?: IntWithAggregatesFilter<"ExpenseApprovalStage"> | number
+    isActive?: BoolWithAggregatesFilter<"ExpenseApprovalStage"> | boolean
+    createdById?: IntNullableWithAggregatesFilter<"ExpenseApprovalStage"> | number | null
+    createdByName?: StringNullableWithAggregatesFilter<"ExpenseApprovalStage"> | string | null
+    createdAt?: DateTimeWithAggregatesFilter<"ExpenseApprovalStage"> | Date | string
+    updatedAt?: DateTimeWithAggregatesFilter<"ExpenseApprovalStage"> | Date | string
+  }
+
   export type ExpenseChangeRequestWhereInput = {
     AND?: ExpenseChangeRequestWhereInput | ExpenseChangeRequestWhereInput[]
     OR?: ExpenseChangeRequestWhereInput[]
     NOT?: ExpenseChangeRequestWhereInput | ExpenseChangeRequestWhereInput[]
     id?: StringFilter<"ExpenseChangeRequest"> | string
     tableKey?: StringFilter<"ExpenseChangeRequest"> | string
-    rowId?: StringFilter<"ExpenseChangeRequest"> | string
+    operation?: EnumExpenseChangeOperationFilter<"ExpenseChangeRequest"> | $Enums.ExpenseChangeOperation
+    rowId?: StringNullableFilter<"ExpenseChangeRequest"> | string | null
+    appliedRowId?: StringNullableFilter<"ExpenseChangeRequest"> | string | null
     rowLabel?: StringNullableFilter<"ExpenseChangeRequest"> | string | null
     changes?: JsonFilter<"ExpenseChangeRequest">
     reason?: StringFilter<"ExpenseChangeRequest"> | string
+    dueDate?: DateTimeNullableFilter<"ExpenseChangeRequest"> | Date | string | null
     status?: EnumExpenseChangeStatusFilter<"ExpenseChangeRequest"> | $Enums.ExpenseChangeStatus
+    currentStageKey?: StringNullableFilter<"ExpenseChangeRequest"> | string | null
+    approvalTrail?: JsonFilter<"ExpenseChangeRequest">
     requestedById?: IntFilter<"ExpenseChangeRequest"> | number
     requestedByName?: StringFilter<"ExpenseChangeRequest"> | string
     requestedByEmail?: StringFilter<"ExpenseChangeRequest"> | string
     requestedAt?: DateTimeFilter<"ExpenseChangeRequest"> | Date | string
-    approverId?: IntNullableFilter<"ExpenseChangeRequest"> | number | null
-    approverName?: StringNullableFilter<"ExpenseChangeRequest"> | string | null
-    approverEmail?: StringNullableFilter<"ExpenseChangeRequest"> | string | null
-    approverAt?: DateTimeNullableFilter<"ExpenseChangeRequest"> | Date | string | null
-    approverComment?: StringNullableFilter<"ExpenseChangeRequest"> | string | null
-    approverAction?: StringNullableFilter<"ExpenseChangeRequest"> | string | null
-    finalById?: IntNullableFilter<"ExpenseChangeRequest"> | number | null
-    finalByName?: StringNullableFilter<"ExpenseChangeRequest"> | string | null
-    finalByEmail?: StringNullableFilter<"ExpenseChangeRequest"> | string | null
-    finalAt?: DateTimeNullableFilter<"ExpenseChangeRequest"> | Date | string | null
-    finalComment?: StringNullableFilter<"ExpenseChangeRequest"> | string | null
-    finalAction?: StringNullableFilter<"ExpenseChangeRequest"> | string | null
     createdAt?: DateTimeFilter<"ExpenseChangeRequest"> | Date | string
     updatedAt?: DateTimeFilter<"ExpenseChangeRequest"> | Date | string
   }
@@ -65392,27 +71346,20 @@ export namespace Prisma {
   export type ExpenseChangeRequestOrderByWithRelationInput = {
     id?: SortOrder
     tableKey?: SortOrder
-    rowId?: SortOrder
+    operation?: SortOrder
+    rowId?: SortOrderInput | SortOrder
+    appliedRowId?: SortOrderInput | SortOrder
     rowLabel?: SortOrderInput | SortOrder
     changes?: SortOrder
     reason?: SortOrder
+    dueDate?: SortOrderInput | SortOrder
     status?: SortOrder
+    currentStageKey?: SortOrderInput | SortOrder
+    approvalTrail?: SortOrder
     requestedById?: SortOrder
     requestedByName?: SortOrder
     requestedByEmail?: SortOrder
     requestedAt?: SortOrder
-    approverId?: SortOrderInput | SortOrder
-    approverName?: SortOrderInput | SortOrder
-    approverEmail?: SortOrderInput | SortOrder
-    approverAt?: SortOrderInput | SortOrder
-    approverComment?: SortOrderInput | SortOrder
-    approverAction?: SortOrderInput | SortOrder
-    finalById?: SortOrderInput | SortOrder
-    finalByName?: SortOrderInput | SortOrder
-    finalByEmail?: SortOrderInput | SortOrder
-    finalAt?: SortOrderInput | SortOrder
-    finalComment?: SortOrderInput | SortOrder
-    finalAction?: SortOrderInput | SortOrder
     createdAt?: SortOrder
     updatedAt?: SortOrder
     _relevance?: ExpenseChangeRequestOrderByRelevanceInput
@@ -65424,27 +71371,20 @@ export namespace Prisma {
     OR?: ExpenseChangeRequestWhereInput[]
     NOT?: ExpenseChangeRequestWhereInput | ExpenseChangeRequestWhereInput[]
     tableKey?: StringFilter<"ExpenseChangeRequest"> | string
-    rowId?: StringFilter<"ExpenseChangeRequest"> | string
+    operation?: EnumExpenseChangeOperationFilter<"ExpenseChangeRequest"> | $Enums.ExpenseChangeOperation
+    rowId?: StringNullableFilter<"ExpenseChangeRequest"> | string | null
+    appliedRowId?: StringNullableFilter<"ExpenseChangeRequest"> | string | null
     rowLabel?: StringNullableFilter<"ExpenseChangeRequest"> | string | null
     changes?: JsonFilter<"ExpenseChangeRequest">
     reason?: StringFilter<"ExpenseChangeRequest"> | string
+    dueDate?: DateTimeNullableFilter<"ExpenseChangeRequest"> | Date | string | null
     status?: EnumExpenseChangeStatusFilter<"ExpenseChangeRequest"> | $Enums.ExpenseChangeStatus
+    currentStageKey?: StringNullableFilter<"ExpenseChangeRequest"> | string | null
+    approvalTrail?: JsonFilter<"ExpenseChangeRequest">
     requestedById?: IntFilter<"ExpenseChangeRequest"> | number
     requestedByName?: StringFilter<"ExpenseChangeRequest"> | string
     requestedByEmail?: StringFilter<"ExpenseChangeRequest"> | string
     requestedAt?: DateTimeFilter<"ExpenseChangeRequest"> | Date | string
-    approverId?: IntNullableFilter<"ExpenseChangeRequest"> | number | null
-    approverName?: StringNullableFilter<"ExpenseChangeRequest"> | string | null
-    approverEmail?: StringNullableFilter<"ExpenseChangeRequest"> | string | null
-    approverAt?: DateTimeNullableFilter<"ExpenseChangeRequest"> | Date | string | null
-    approverComment?: StringNullableFilter<"ExpenseChangeRequest"> | string | null
-    approverAction?: StringNullableFilter<"ExpenseChangeRequest"> | string | null
-    finalById?: IntNullableFilter<"ExpenseChangeRequest"> | number | null
-    finalByName?: StringNullableFilter<"ExpenseChangeRequest"> | string | null
-    finalByEmail?: StringNullableFilter<"ExpenseChangeRequest"> | string | null
-    finalAt?: DateTimeNullableFilter<"ExpenseChangeRequest"> | Date | string | null
-    finalComment?: StringNullableFilter<"ExpenseChangeRequest"> | string | null
-    finalAction?: StringNullableFilter<"ExpenseChangeRequest"> | string | null
     createdAt?: DateTimeFilter<"ExpenseChangeRequest"> | Date | string
     updatedAt?: DateTimeFilter<"ExpenseChangeRequest"> | Date | string
   }, "id">
@@ -65452,27 +71392,20 @@ export namespace Prisma {
   export type ExpenseChangeRequestOrderByWithAggregationInput = {
     id?: SortOrder
     tableKey?: SortOrder
-    rowId?: SortOrder
+    operation?: SortOrder
+    rowId?: SortOrderInput | SortOrder
+    appliedRowId?: SortOrderInput | SortOrder
     rowLabel?: SortOrderInput | SortOrder
     changes?: SortOrder
     reason?: SortOrder
+    dueDate?: SortOrderInput | SortOrder
     status?: SortOrder
+    currentStageKey?: SortOrderInput | SortOrder
+    approvalTrail?: SortOrder
     requestedById?: SortOrder
     requestedByName?: SortOrder
     requestedByEmail?: SortOrder
     requestedAt?: SortOrder
-    approverId?: SortOrderInput | SortOrder
-    approverName?: SortOrderInput | SortOrder
-    approverEmail?: SortOrderInput | SortOrder
-    approverAt?: SortOrderInput | SortOrder
-    approverComment?: SortOrderInput | SortOrder
-    approverAction?: SortOrderInput | SortOrder
-    finalById?: SortOrderInput | SortOrder
-    finalByName?: SortOrderInput | SortOrder
-    finalByEmail?: SortOrderInput | SortOrder
-    finalAt?: SortOrderInput | SortOrder
-    finalComment?: SortOrderInput | SortOrder
-    finalAction?: SortOrderInput | SortOrder
     createdAt?: SortOrder
     updatedAt?: SortOrder
     _count?: ExpenseChangeRequestCountOrderByAggregateInput
@@ -65488,29 +71421,223 @@ export namespace Prisma {
     NOT?: ExpenseChangeRequestScalarWhereWithAggregatesInput | ExpenseChangeRequestScalarWhereWithAggregatesInput[]
     id?: StringWithAggregatesFilter<"ExpenseChangeRequest"> | string
     tableKey?: StringWithAggregatesFilter<"ExpenseChangeRequest"> | string
-    rowId?: StringWithAggregatesFilter<"ExpenseChangeRequest"> | string
+    operation?: EnumExpenseChangeOperationWithAggregatesFilter<"ExpenseChangeRequest"> | $Enums.ExpenseChangeOperation
+    rowId?: StringNullableWithAggregatesFilter<"ExpenseChangeRequest"> | string | null
+    appliedRowId?: StringNullableWithAggregatesFilter<"ExpenseChangeRequest"> | string | null
     rowLabel?: StringNullableWithAggregatesFilter<"ExpenseChangeRequest"> | string | null
     changes?: JsonWithAggregatesFilter<"ExpenseChangeRequest">
     reason?: StringWithAggregatesFilter<"ExpenseChangeRequest"> | string
+    dueDate?: DateTimeNullableWithAggregatesFilter<"ExpenseChangeRequest"> | Date | string | null
     status?: EnumExpenseChangeStatusWithAggregatesFilter<"ExpenseChangeRequest"> | $Enums.ExpenseChangeStatus
+    currentStageKey?: StringNullableWithAggregatesFilter<"ExpenseChangeRequest"> | string | null
+    approvalTrail?: JsonWithAggregatesFilter<"ExpenseChangeRequest">
     requestedById?: IntWithAggregatesFilter<"ExpenseChangeRequest"> | number
     requestedByName?: StringWithAggregatesFilter<"ExpenseChangeRequest"> | string
     requestedByEmail?: StringWithAggregatesFilter<"ExpenseChangeRequest"> | string
     requestedAt?: DateTimeWithAggregatesFilter<"ExpenseChangeRequest"> | Date | string
-    approverId?: IntNullableWithAggregatesFilter<"ExpenseChangeRequest"> | number | null
-    approverName?: StringNullableWithAggregatesFilter<"ExpenseChangeRequest"> | string | null
-    approverEmail?: StringNullableWithAggregatesFilter<"ExpenseChangeRequest"> | string | null
-    approverAt?: DateTimeNullableWithAggregatesFilter<"ExpenseChangeRequest"> | Date | string | null
-    approverComment?: StringNullableWithAggregatesFilter<"ExpenseChangeRequest"> | string | null
-    approverAction?: StringNullableWithAggregatesFilter<"ExpenseChangeRequest"> | string | null
-    finalById?: IntNullableWithAggregatesFilter<"ExpenseChangeRequest"> | number | null
-    finalByName?: StringNullableWithAggregatesFilter<"ExpenseChangeRequest"> | string | null
-    finalByEmail?: StringNullableWithAggregatesFilter<"ExpenseChangeRequest"> | string | null
-    finalAt?: DateTimeNullableWithAggregatesFilter<"ExpenseChangeRequest"> | Date | string | null
-    finalComment?: StringNullableWithAggregatesFilter<"ExpenseChangeRequest"> | string | null
-    finalAction?: StringNullableWithAggregatesFilter<"ExpenseChangeRequest"> | string | null
     createdAt?: DateTimeWithAggregatesFilter<"ExpenseChangeRequest"> | Date | string
     updatedAt?: DateTimeWithAggregatesFilter<"ExpenseChangeRequest"> | Date | string
+  }
+
+  export type ExpenseAccessGrantWhereInput = {
+    AND?: ExpenseAccessGrantWhereInput | ExpenseAccessGrantWhereInput[]
+    OR?: ExpenseAccessGrantWhereInput[]
+    NOT?: ExpenseAccessGrantWhereInput | ExpenseAccessGrantWhereInput[]
+    id?: IntFilter<"ExpenseAccessGrant"> | number
+    email?: StringFilter<"ExpenseAccessGrant"> | string
+    level?: StringFilter<"ExpenseAccessGrant"> | string
+    tableKey?: StringFilter<"ExpenseAccessGrant"> | string
+    subDivision?: StringNullableFilter<"ExpenseAccessGrant"> | string | null
+    canCreate?: BoolFilter<"ExpenseAccessGrant"> | boolean
+    canUpdate?: BoolFilter<"ExpenseAccessGrant"> | boolean
+    canDelete?: BoolFilter<"ExpenseAccessGrant"> | boolean
+    isActive?: BoolFilter<"ExpenseAccessGrant"> | boolean
+    note?: StringNullableFilter<"ExpenseAccessGrant"> | string | null
+    grantedById?: IntNullableFilter<"ExpenseAccessGrant"> | number | null
+    grantedByName?: StringNullableFilter<"ExpenseAccessGrant"> | string | null
+    createdAt?: DateTimeFilter<"ExpenseAccessGrant"> | Date | string
+    updatedAt?: DateTimeFilter<"ExpenseAccessGrant"> | Date | string
+  }
+
+  export type ExpenseAccessGrantOrderByWithRelationInput = {
+    id?: SortOrder
+    email?: SortOrder
+    level?: SortOrder
+    tableKey?: SortOrder
+    subDivision?: SortOrderInput | SortOrder
+    canCreate?: SortOrder
+    canUpdate?: SortOrder
+    canDelete?: SortOrder
+    isActive?: SortOrder
+    note?: SortOrderInput | SortOrder
+    grantedById?: SortOrderInput | SortOrder
+    grantedByName?: SortOrderInput | SortOrder
+    createdAt?: SortOrder
+    updatedAt?: SortOrder
+    _relevance?: ExpenseAccessGrantOrderByRelevanceInput
+  }
+
+  export type ExpenseAccessGrantWhereUniqueInput = Prisma.AtLeast<{
+    id?: number
+    email_level_tableKey?: ExpenseAccessGrantEmailLevelTableKeyCompoundUniqueInput
+    AND?: ExpenseAccessGrantWhereInput | ExpenseAccessGrantWhereInput[]
+    OR?: ExpenseAccessGrantWhereInput[]
+    NOT?: ExpenseAccessGrantWhereInput | ExpenseAccessGrantWhereInput[]
+    email?: StringFilter<"ExpenseAccessGrant"> | string
+    level?: StringFilter<"ExpenseAccessGrant"> | string
+    tableKey?: StringFilter<"ExpenseAccessGrant"> | string
+    subDivision?: StringNullableFilter<"ExpenseAccessGrant"> | string | null
+    canCreate?: BoolFilter<"ExpenseAccessGrant"> | boolean
+    canUpdate?: BoolFilter<"ExpenseAccessGrant"> | boolean
+    canDelete?: BoolFilter<"ExpenseAccessGrant"> | boolean
+    isActive?: BoolFilter<"ExpenseAccessGrant"> | boolean
+    note?: StringNullableFilter<"ExpenseAccessGrant"> | string | null
+    grantedById?: IntNullableFilter<"ExpenseAccessGrant"> | number | null
+    grantedByName?: StringNullableFilter<"ExpenseAccessGrant"> | string | null
+    createdAt?: DateTimeFilter<"ExpenseAccessGrant"> | Date | string
+    updatedAt?: DateTimeFilter<"ExpenseAccessGrant"> | Date | string
+  }, "id" | "email_level_tableKey">
+
+  export type ExpenseAccessGrantOrderByWithAggregationInput = {
+    id?: SortOrder
+    email?: SortOrder
+    level?: SortOrder
+    tableKey?: SortOrder
+    subDivision?: SortOrderInput | SortOrder
+    canCreate?: SortOrder
+    canUpdate?: SortOrder
+    canDelete?: SortOrder
+    isActive?: SortOrder
+    note?: SortOrderInput | SortOrder
+    grantedById?: SortOrderInput | SortOrder
+    grantedByName?: SortOrderInput | SortOrder
+    createdAt?: SortOrder
+    updatedAt?: SortOrder
+    _count?: ExpenseAccessGrantCountOrderByAggregateInput
+    _avg?: ExpenseAccessGrantAvgOrderByAggregateInput
+    _max?: ExpenseAccessGrantMaxOrderByAggregateInput
+    _min?: ExpenseAccessGrantMinOrderByAggregateInput
+    _sum?: ExpenseAccessGrantSumOrderByAggregateInput
+  }
+
+  export type ExpenseAccessGrantScalarWhereWithAggregatesInput = {
+    AND?: ExpenseAccessGrantScalarWhereWithAggregatesInput | ExpenseAccessGrantScalarWhereWithAggregatesInput[]
+    OR?: ExpenseAccessGrantScalarWhereWithAggregatesInput[]
+    NOT?: ExpenseAccessGrantScalarWhereWithAggregatesInput | ExpenseAccessGrantScalarWhereWithAggregatesInput[]
+    id?: IntWithAggregatesFilter<"ExpenseAccessGrant"> | number
+    email?: StringWithAggregatesFilter<"ExpenseAccessGrant"> | string
+    level?: StringWithAggregatesFilter<"ExpenseAccessGrant"> | string
+    tableKey?: StringWithAggregatesFilter<"ExpenseAccessGrant"> | string
+    subDivision?: StringNullableWithAggregatesFilter<"ExpenseAccessGrant"> | string | null
+    canCreate?: BoolWithAggregatesFilter<"ExpenseAccessGrant"> | boolean
+    canUpdate?: BoolWithAggregatesFilter<"ExpenseAccessGrant"> | boolean
+    canDelete?: BoolWithAggregatesFilter<"ExpenseAccessGrant"> | boolean
+    isActive?: BoolWithAggregatesFilter<"ExpenseAccessGrant"> | boolean
+    note?: StringNullableWithAggregatesFilter<"ExpenseAccessGrant"> | string | null
+    grantedById?: IntNullableWithAggregatesFilter<"ExpenseAccessGrant"> | number | null
+    grantedByName?: StringNullableWithAggregatesFilter<"ExpenseAccessGrant"> | string | null
+    createdAt?: DateTimeWithAggregatesFilter<"ExpenseAccessGrant"> | Date | string
+    updatedAt?: DateTimeWithAggregatesFilter<"ExpenseAccessGrant"> | Date | string
+  }
+
+  export type ExpenseAuditLogWhereInput = {
+    AND?: ExpenseAuditLogWhereInput | ExpenseAuditLogWhereInput[]
+    OR?: ExpenseAuditLogWhereInput[]
+    NOT?: ExpenseAuditLogWhereInput | ExpenseAuditLogWhereInput[]
+    id?: IntFilter<"ExpenseAuditLog"> | number
+    requestId?: StringFilter<"ExpenseAuditLog"> | string
+    tableKey?: StringFilter<"ExpenseAuditLog"> | string
+    rowId?: StringNullableFilter<"ExpenseAuditLog"> | string | null
+    operation?: EnumExpenseChangeOperationFilter<"ExpenseAuditLog"> | $Enums.ExpenseChangeOperation
+    eventType?: EnumExpenseAuditEventTypeFilter<"ExpenseAuditLog"> | $Enums.ExpenseAuditEventType
+    stageKey?: StringNullableFilter<"ExpenseAuditLog"> | string | null
+    stageLabel?: StringNullableFilter<"ExpenseAuditLog"> | string | null
+    actorId?: IntNullableFilter<"ExpenseAuditLog"> | number | null
+    actorName?: StringNullableFilter<"ExpenseAuditLog"> | string | null
+    actorEmail?: StringNullableFilter<"ExpenseAuditLog"> | string | null
+    comment?: StringNullableFilter<"ExpenseAuditLog"> | string | null
+    details?: JsonNullableFilter<"ExpenseAuditLog">
+    occurredAt?: DateTimeFilter<"ExpenseAuditLog"> | Date | string
+  }
+
+  export type ExpenseAuditLogOrderByWithRelationInput = {
+    id?: SortOrder
+    requestId?: SortOrder
+    tableKey?: SortOrder
+    rowId?: SortOrderInput | SortOrder
+    operation?: SortOrder
+    eventType?: SortOrder
+    stageKey?: SortOrderInput | SortOrder
+    stageLabel?: SortOrderInput | SortOrder
+    actorId?: SortOrderInput | SortOrder
+    actorName?: SortOrderInput | SortOrder
+    actorEmail?: SortOrderInput | SortOrder
+    comment?: SortOrderInput | SortOrder
+    details?: SortOrderInput | SortOrder
+    occurredAt?: SortOrder
+    _relevance?: ExpenseAuditLogOrderByRelevanceInput
+  }
+
+  export type ExpenseAuditLogWhereUniqueInput = Prisma.AtLeast<{
+    id?: number
+    AND?: ExpenseAuditLogWhereInput | ExpenseAuditLogWhereInput[]
+    OR?: ExpenseAuditLogWhereInput[]
+    NOT?: ExpenseAuditLogWhereInput | ExpenseAuditLogWhereInput[]
+    requestId?: StringFilter<"ExpenseAuditLog"> | string
+    tableKey?: StringFilter<"ExpenseAuditLog"> | string
+    rowId?: StringNullableFilter<"ExpenseAuditLog"> | string | null
+    operation?: EnumExpenseChangeOperationFilter<"ExpenseAuditLog"> | $Enums.ExpenseChangeOperation
+    eventType?: EnumExpenseAuditEventTypeFilter<"ExpenseAuditLog"> | $Enums.ExpenseAuditEventType
+    stageKey?: StringNullableFilter<"ExpenseAuditLog"> | string | null
+    stageLabel?: StringNullableFilter<"ExpenseAuditLog"> | string | null
+    actorId?: IntNullableFilter<"ExpenseAuditLog"> | number | null
+    actorName?: StringNullableFilter<"ExpenseAuditLog"> | string | null
+    actorEmail?: StringNullableFilter<"ExpenseAuditLog"> | string | null
+    comment?: StringNullableFilter<"ExpenseAuditLog"> | string | null
+    details?: JsonNullableFilter<"ExpenseAuditLog">
+    occurredAt?: DateTimeFilter<"ExpenseAuditLog"> | Date | string
+  }, "id">
+
+  export type ExpenseAuditLogOrderByWithAggregationInput = {
+    id?: SortOrder
+    requestId?: SortOrder
+    tableKey?: SortOrder
+    rowId?: SortOrderInput | SortOrder
+    operation?: SortOrder
+    eventType?: SortOrder
+    stageKey?: SortOrderInput | SortOrder
+    stageLabel?: SortOrderInput | SortOrder
+    actorId?: SortOrderInput | SortOrder
+    actorName?: SortOrderInput | SortOrder
+    actorEmail?: SortOrderInput | SortOrder
+    comment?: SortOrderInput | SortOrder
+    details?: SortOrderInput | SortOrder
+    occurredAt?: SortOrder
+    _count?: ExpenseAuditLogCountOrderByAggregateInput
+    _avg?: ExpenseAuditLogAvgOrderByAggregateInput
+    _max?: ExpenseAuditLogMaxOrderByAggregateInput
+    _min?: ExpenseAuditLogMinOrderByAggregateInput
+    _sum?: ExpenseAuditLogSumOrderByAggregateInput
+  }
+
+  export type ExpenseAuditLogScalarWhereWithAggregatesInput = {
+    AND?: ExpenseAuditLogScalarWhereWithAggregatesInput | ExpenseAuditLogScalarWhereWithAggregatesInput[]
+    OR?: ExpenseAuditLogScalarWhereWithAggregatesInput[]
+    NOT?: ExpenseAuditLogScalarWhereWithAggregatesInput | ExpenseAuditLogScalarWhereWithAggregatesInput[]
+    id?: IntWithAggregatesFilter<"ExpenseAuditLog"> | number
+    requestId?: StringWithAggregatesFilter<"ExpenseAuditLog"> | string
+    tableKey?: StringWithAggregatesFilter<"ExpenseAuditLog"> | string
+    rowId?: StringNullableWithAggregatesFilter<"ExpenseAuditLog"> | string | null
+    operation?: EnumExpenseChangeOperationWithAggregatesFilter<"ExpenseAuditLog"> | $Enums.ExpenseChangeOperation
+    eventType?: EnumExpenseAuditEventTypeWithAggregatesFilter<"ExpenseAuditLog"> | $Enums.ExpenseAuditEventType
+    stageKey?: StringNullableWithAggregatesFilter<"ExpenseAuditLog"> | string | null
+    stageLabel?: StringNullableWithAggregatesFilter<"ExpenseAuditLog"> | string | null
+    actorId?: IntNullableWithAggregatesFilter<"ExpenseAuditLog"> | number | null
+    actorName?: StringNullableWithAggregatesFilter<"ExpenseAuditLog"> | string | null
+    actorEmail?: StringNullableWithAggregatesFilter<"ExpenseAuditLog"> | string | null
+    comment?: StringNullableWithAggregatesFilter<"ExpenseAuditLog"> | string | null
+    details?: JsonNullableWithAggregatesFilter<"ExpenseAuditLog">
+    occurredAt?: DateTimeWithAggregatesFilter<"ExpenseAuditLog"> | Date | string
   }
 
   export type DepartmentCreateInput = {
@@ -70643,6 +76770,346 @@ export namespace Prisma {
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
   }
 
+  export type BroaderMenuCreateInput = {
+    sn?: number | null
+    mcCd: number
+    seg?: string | null
+    div?: string | null
+    subDiv?: string | null
+    majCatCd?: number | null
+    majCatNm?: string | null
+    subCatCd?: number | null
+    subCatDesc?: string | null
+    mcDesc?: string | null
+    ssn?: string | null
+    mcStat?: string | null
+    subCatStat?: string | null
+    majCatStat?: string | null
+    sizeApplicable?: string | null
+    divStat?: string | null
+    mcPkSz?: number | null
+    subCatPkSz?: number | null
+    noOfOptions?: number | null
+    avgDensity?: Decimal | DecimalJsLike | number | string | null
+    accDensity?: Decimal | DecimalJsLike | number | string | null
+    wgDensity?: Decimal | DecimalJsLike | number | string | null
+    fg46FtDensity?: Decimal | DecimalJsLike | number | string | null
+    fg5FtDensity?: Decimal | DecimalJsLike | number | string | null
+    fg4ADensity?: Decimal | DecimalJsLike | number | string | null
+    fg8ADensity?: Decimal | DecimalJsLike | number | string | null
+    acp?: Decimal | DecimalJsLike | number | string | null
+    oldDensity?: Decimal | DecimalJsLike | number | string | null
+    seq?: number | null
+    mjCatTyp?: string | null
+    fixtr?: string | null
+    newMcCd?: number | null
+    newMcDesc?: string | null
+    oldMcDesc?: string | null
+    oldSubCatCd?: number | null
+    oldSubCatDesc?: string | null
+    legacyMcDesc?: string | null
+    effectiveDate?: Date | string | null
+    remarks?: string | null
+    gmStatus?: string | null
+    currentMcStatus?: string | null
+    fullMcName?: string | null
+    winterStatus?: string | null
+    uploadedAt?: Date | string
+    updatedAt?: Date | string
+  }
+
+  export type BroaderMenuUncheckedCreateInput = {
+    id?: number
+    sn?: number | null
+    mcCd: number
+    seg?: string | null
+    div?: string | null
+    subDiv?: string | null
+    majCatCd?: number | null
+    majCatNm?: string | null
+    subCatCd?: number | null
+    subCatDesc?: string | null
+    mcDesc?: string | null
+    ssn?: string | null
+    mcStat?: string | null
+    subCatStat?: string | null
+    majCatStat?: string | null
+    sizeApplicable?: string | null
+    divStat?: string | null
+    mcPkSz?: number | null
+    subCatPkSz?: number | null
+    noOfOptions?: number | null
+    avgDensity?: Decimal | DecimalJsLike | number | string | null
+    accDensity?: Decimal | DecimalJsLike | number | string | null
+    wgDensity?: Decimal | DecimalJsLike | number | string | null
+    fg46FtDensity?: Decimal | DecimalJsLike | number | string | null
+    fg5FtDensity?: Decimal | DecimalJsLike | number | string | null
+    fg4ADensity?: Decimal | DecimalJsLike | number | string | null
+    fg8ADensity?: Decimal | DecimalJsLike | number | string | null
+    acp?: Decimal | DecimalJsLike | number | string | null
+    oldDensity?: Decimal | DecimalJsLike | number | string | null
+    seq?: number | null
+    mjCatTyp?: string | null
+    fixtr?: string | null
+    newMcCd?: number | null
+    newMcDesc?: string | null
+    oldMcDesc?: string | null
+    oldSubCatCd?: number | null
+    oldSubCatDesc?: string | null
+    legacyMcDesc?: string | null
+    effectiveDate?: Date | string | null
+    remarks?: string | null
+    gmStatus?: string | null
+    currentMcStatus?: string | null
+    fullMcName?: string | null
+    winterStatus?: string | null
+    uploadedAt?: Date | string
+    updatedAt?: Date | string
+  }
+
+  export type BroaderMenuUpdateInput = {
+    sn?: NullableIntFieldUpdateOperationsInput | number | null
+    mcCd?: IntFieldUpdateOperationsInput | number
+    seg?: NullableStringFieldUpdateOperationsInput | string | null
+    div?: NullableStringFieldUpdateOperationsInput | string | null
+    subDiv?: NullableStringFieldUpdateOperationsInput | string | null
+    majCatCd?: NullableIntFieldUpdateOperationsInput | number | null
+    majCatNm?: NullableStringFieldUpdateOperationsInput | string | null
+    subCatCd?: NullableIntFieldUpdateOperationsInput | number | null
+    subCatDesc?: NullableStringFieldUpdateOperationsInput | string | null
+    mcDesc?: NullableStringFieldUpdateOperationsInput | string | null
+    ssn?: NullableStringFieldUpdateOperationsInput | string | null
+    mcStat?: NullableStringFieldUpdateOperationsInput | string | null
+    subCatStat?: NullableStringFieldUpdateOperationsInput | string | null
+    majCatStat?: NullableStringFieldUpdateOperationsInput | string | null
+    sizeApplicable?: NullableStringFieldUpdateOperationsInput | string | null
+    divStat?: NullableStringFieldUpdateOperationsInput | string | null
+    mcPkSz?: NullableIntFieldUpdateOperationsInput | number | null
+    subCatPkSz?: NullableIntFieldUpdateOperationsInput | number | null
+    noOfOptions?: NullableIntFieldUpdateOperationsInput | number | null
+    avgDensity?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    accDensity?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    wgDensity?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    fg46FtDensity?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    fg5FtDensity?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    fg4ADensity?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    fg8ADensity?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    acp?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    oldDensity?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    seq?: NullableIntFieldUpdateOperationsInput | number | null
+    mjCatTyp?: NullableStringFieldUpdateOperationsInput | string | null
+    fixtr?: NullableStringFieldUpdateOperationsInput | string | null
+    newMcCd?: NullableIntFieldUpdateOperationsInput | number | null
+    newMcDesc?: NullableStringFieldUpdateOperationsInput | string | null
+    oldMcDesc?: NullableStringFieldUpdateOperationsInput | string | null
+    oldSubCatCd?: NullableIntFieldUpdateOperationsInput | number | null
+    oldSubCatDesc?: NullableStringFieldUpdateOperationsInput | string | null
+    legacyMcDesc?: NullableStringFieldUpdateOperationsInput | string | null
+    effectiveDate?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    remarks?: NullableStringFieldUpdateOperationsInput | string | null
+    gmStatus?: NullableStringFieldUpdateOperationsInput | string | null
+    currentMcStatus?: NullableStringFieldUpdateOperationsInput | string | null
+    fullMcName?: NullableStringFieldUpdateOperationsInput | string | null
+    winterStatus?: NullableStringFieldUpdateOperationsInput | string | null
+    uploadedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+  }
+
+  export type BroaderMenuUncheckedUpdateInput = {
+    id?: IntFieldUpdateOperationsInput | number
+    sn?: NullableIntFieldUpdateOperationsInput | number | null
+    mcCd?: IntFieldUpdateOperationsInput | number
+    seg?: NullableStringFieldUpdateOperationsInput | string | null
+    div?: NullableStringFieldUpdateOperationsInput | string | null
+    subDiv?: NullableStringFieldUpdateOperationsInput | string | null
+    majCatCd?: NullableIntFieldUpdateOperationsInput | number | null
+    majCatNm?: NullableStringFieldUpdateOperationsInput | string | null
+    subCatCd?: NullableIntFieldUpdateOperationsInput | number | null
+    subCatDesc?: NullableStringFieldUpdateOperationsInput | string | null
+    mcDesc?: NullableStringFieldUpdateOperationsInput | string | null
+    ssn?: NullableStringFieldUpdateOperationsInput | string | null
+    mcStat?: NullableStringFieldUpdateOperationsInput | string | null
+    subCatStat?: NullableStringFieldUpdateOperationsInput | string | null
+    majCatStat?: NullableStringFieldUpdateOperationsInput | string | null
+    sizeApplicable?: NullableStringFieldUpdateOperationsInput | string | null
+    divStat?: NullableStringFieldUpdateOperationsInput | string | null
+    mcPkSz?: NullableIntFieldUpdateOperationsInput | number | null
+    subCatPkSz?: NullableIntFieldUpdateOperationsInput | number | null
+    noOfOptions?: NullableIntFieldUpdateOperationsInput | number | null
+    avgDensity?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    accDensity?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    wgDensity?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    fg46FtDensity?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    fg5FtDensity?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    fg4ADensity?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    fg8ADensity?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    acp?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    oldDensity?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    seq?: NullableIntFieldUpdateOperationsInput | number | null
+    mjCatTyp?: NullableStringFieldUpdateOperationsInput | string | null
+    fixtr?: NullableStringFieldUpdateOperationsInput | string | null
+    newMcCd?: NullableIntFieldUpdateOperationsInput | number | null
+    newMcDesc?: NullableStringFieldUpdateOperationsInput | string | null
+    oldMcDesc?: NullableStringFieldUpdateOperationsInput | string | null
+    oldSubCatCd?: NullableIntFieldUpdateOperationsInput | number | null
+    oldSubCatDesc?: NullableStringFieldUpdateOperationsInput | string | null
+    legacyMcDesc?: NullableStringFieldUpdateOperationsInput | string | null
+    effectiveDate?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    remarks?: NullableStringFieldUpdateOperationsInput | string | null
+    gmStatus?: NullableStringFieldUpdateOperationsInput | string | null
+    currentMcStatus?: NullableStringFieldUpdateOperationsInput | string | null
+    fullMcName?: NullableStringFieldUpdateOperationsInput | string | null
+    winterStatus?: NullableStringFieldUpdateOperationsInput | string | null
+    uploadedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+  }
+
+  export type BroaderMenuCreateManyInput = {
+    id?: number
+    sn?: number | null
+    mcCd: number
+    seg?: string | null
+    div?: string | null
+    subDiv?: string | null
+    majCatCd?: number | null
+    majCatNm?: string | null
+    subCatCd?: number | null
+    subCatDesc?: string | null
+    mcDesc?: string | null
+    ssn?: string | null
+    mcStat?: string | null
+    subCatStat?: string | null
+    majCatStat?: string | null
+    sizeApplicable?: string | null
+    divStat?: string | null
+    mcPkSz?: number | null
+    subCatPkSz?: number | null
+    noOfOptions?: number | null
+    avgDensity?: Decimal | DecimalJsLike | number | string | null
+    accDensity?: Decimal | DecimalJsLike | number | string | null
+    wgDensity?: Decimal | DecimalJsLike | number | string | null
+    fg46FtDensity?: Decimal | DecimalJsLike | number | string | null
+    fg5FtDensity?: Decimal | DecimalJsLike | number | string | null
+    fg4ADensity?: Decimal | DecimalJsLike | number | string | null
+    fg8ADensity?: Decimal | DecimalJsLike | number | string | null
+    acp?: Decimal | DecimalJsLike | number | string | null
+    oldDensity?: Decimal | DecimalJsLike | number | string | null
+    seq?: number | null
+    mjCatTyp?: string | null
+    fixtr?: string | null
+    newMcCd?: number | null
+    newMcDesc?: string | null
+    oldMcDesc?: string | null
+    oldSubCatCd?: number | null
+    oldSubCatDesc?: string | null
+    legacyMcDesc?: string | null
+    effectiveDate?: Date | string | null
+    remarks?: string | null
+    gmStatus?: string | null
+    currentMcStatus?: string | null
+    fullMcName?: string | null
+    winterStatus?: string | null
+    uploadedAt?: Date | string
+    updatedAt?: Date | string
+  }
+
+  export type BroaderMenuUpdateManyMutationInput = {
+    sn?: NullableIntFieldUpdateOperationsInput | number | null
+    mcCd?: IntFieldUpdateOperationsInput | number
+    seg?: NullableStringFieldUpdateOperationsInput | string | null
+    div?: NullableStringFieldUpdateOperationsInput | string | null
+    subDiv?: NullableStringFieldUpdateOperationsInput | string | null
+    majCatCd?: NullableIntFieldUpdateOperationsInput | number | null
+    majCatNm?: NullableStringFieldUpdateOperationsInput | string | null
+    subCatCd?: NullableIntFieldUpdateOperationsInput | number | null
+    subCatDesc?: NullableStringFieldUpdateOperationsInput | string | null
+    mcDesc?: NullableStringFieldUpdateOperationsInput | string | null
+    ssn?: NullableStringFieldUpdateOperationsInput | string | null
+    mcStat?: NullableStringFieldUpdateOperationsInput | string | null
+    subCatStat?: NullableStringFieldUpdateOperationsInput | string | null
+    majCatStat?: NullableStringFieldUpdateOperationsInput | string | null
+    sizeApplicable?: NullableStringFieldUpdateOperationsInput | string | null
+    divStat?: NullableStringFieldUpdateOperationsInput | string | null
+    mcPkSz?: NullableIntFieldUpdateOperationsInput | number | null
+    subCatPkSz?: NullableIntFieldUpdateOperationsInput | number | null
+    noOfOptions?: NullableIntFieldUpdateOperationsInput | number | null
+    avgDensity?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    accDensity?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    wgDensity?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    fg46FtDensity?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    fg5FtDensity?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    fg4ADensity?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    fg8ADensity?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    acp?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    oldDensity?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    seq?: NullableIntFieldUpdateOperationsInput | number | null
+    mjCatTyp?: NullableStringFieldUpdateOperationsInput | string | null
+    fixtr?: NullableStringFieldUpdateOperationsInput | string | null
+    newMcCd?: NullableIntFieldUpdateOperationsInput | number | null
+    newMcDesc?: NullableStringFieldUpdateOperationsInput | string | null
+    oldMcDesc?: NullableStringFieldUpdateOperationsInput | string | null
+    oldSubCatCd?: NullableIntFieldUpdateOperationsInput | number | null
+    oldSubCatDesc?: NullableStringFieldUpdateOperationsInput | string | null
+    legacyMcDesc?: NullableStringFieldUpdateOperationsInput | string | null
+    effectiveDate?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    remarks?: NullableStringFieldUpdateOperationsInput | string | null
+    gmStatus?: NullableStringFieldUpdateOperationsInput | string | null
+    currentMcStatus?: NullableStringFieldUpdateOperationsInput | string | null
+    fullMcName?: NullableStringFieldUpdateOperationsInput | string | null
+    winterStatus?: NullableStringFieldUpdateOperationsInput | string | null
+    uploadedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+  }
+
+  export type BroaderMenuUncheckedUpdateManyInput = {
+    id?: IntFieldUpdateOperationsInput | number
+    sn?: NullableIntFieldUpdateOperationsInput | number | null
+    mcCd?: IntFieldUpdateOperationsInput | number
+    seg?: NullableStringFieldUpdateOperationsInput | string | null
+    div?: NullableStringFieldUpdateOperationsInput | string | null
+    subDiv?: NullableStringFieldUpdateOperationsInput | string | null
+    majCatCd?: NullableIntFieldUpdateOperationsInput | number | null
+    majCatNm?: NullableStringFieldUpdateOperationsInput | string | null
+    subCatCd?: NullableIntFieldUpdateOperationsInput | number | null
+    subCatDesc?: NullableStringFieldUpdateOperationsInput | string | null
+    mcDesc?: NullableStringFieldUpdateOperationsInput | string | null
+    ssn?: NullableStringFieldUpdateOperationsInput | string | null
+    mcStat?: NullableStringFieldUpdateOperationsInput | string | null
+    subCatStat?: NullableStringFieldUpdateOperationsInput | string | null
+    majCatStat?: NullableStringFieldUpdateOperationsInput | string | null
+    sizeApplicable?: NullableStringFieldUpdateOperationsInput | string | null
+    divStat?: NullableStringFieldUpdateOperationsInput | string | null
+    mcPkSz?: NullableIntFieldUpdateOperationsInput | number | null
+    subCatPkSz?: NullableIntFieldUpdateOperationsInput | number | null
+    noOfOptions?: NullableIntFieldUpdateOperationsInput | number | null
+    avgDensity?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    accDensity?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    wgDensity?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    fg46FtDensity?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    fg5FtDensity?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    fg4ADensity?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    fg8ADensity?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    acp?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    oldDensity?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    seq?: NullableIntFieldUpdateOperationsInput | number | null
+    mjCatTyp?: NullableStringFieldUpdateOperationsInput | string | null
+    fixtr?: NullableStringFieldUpdateOperationsInput | string | null
+    newMcCd?: NullableIntFieldUpdateOperationsInput | number | null
+    newMcDesc?: NullableStringFieldUpdateOperationsInput | string | null
+    oldMcDesc?: NullableStringFieldUpdateOperationsInput | string | null
+    oldSubCatCd?: NullableIntFieldUpdateOperationsInput | number | null
+    oldSubCatDesc?: NullableStringFieldUpdateOperationsInput | string | null
+    legacyMcDesc?: NullableStringFieldUpdateOperationsInput | string | null
+    effectiveDate?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    remarks?: NullableStringFieldUpdateOperationsInput | string | null
+    gmStatus?: NullableStringFieldUpdateOperationsInput | string | null
+    currentMcStatus?: NullableStringFieldUpdateOperationsInput | string | null
+    fullMcName?: NullableStringFieldUpdateOperationsInput | string | null
+    winterStatus?: NullableStringFieldUpdateOperationsInput | string | null
+    uploadedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+  }
+
   export type MajorCatMasterCreateInput = {
     majCat: string
     name?: string | null
@@ -71643,30 +78110,111 @@ export namespace Prisma {
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
   }
 
+  export type ExpenseApprovalStageCreateInput = {
+    key: string
+    label: string
+    description?: string | null
+    sortOrder: number
+    isActive?: boolean
+    createdById?: number | null
+    createdByName?: string | null
+    createdAt?: Date | string
+    updatedAt?: Date | string
+  }
+
+  export type ExpenseApprovalStageUncheckedCreateInput = {
+    id?: number
+    key: string
+    label: string
+    description?: string | null
+    sortOrder: number
+    isActive?: boolean
+    createdById?: number | null
+    createdByName?: string | null
+    createdAt?: Date | string
+    updatedAt?: Date | string
+  }
+
+  export type ExpenseApprovalStageUpdateInput = {
+    key?: StringFieldUpdateOperationsInput | string
+    label?: StringFieldUpdateOperationsInput | string
+    description?: NullableStringFieldUpdateOperationsInput | string | null
+    sortOrder?: IntFieldUpdateOperationsInput | number
+    isActive?: BoolFieldUpdateOperationsInput | boolean
+    createdById?: NullableIntFieldUpdateOperationsInput | number | null
+    createdByName?: NullableStringFieldUpdateOperationsInput | string | null
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+  }
+
+  export type ExpenseApprovalStageUncheckedUpdateInput = {
+    id?: IntFieldUpdateOperationsInput | number
+    key?: StringFieldUpdateOperationsInput | string
+    label?: StringFieldUpdateOperationsInput | string
+    description?: NullableStringFieldUpdateOperationsInput | string | null
+    sortOrder?: IntFieldUpdateOperationsInput | number
+    isActive?: BoolFieldUpdateOperationsInput | boolean
+    createdById?: NullableIntFieldUpdateOperationsInput | number | null
+    createdByName?: NullableStringFieldUpdateOperationsInput | string | null
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+  }
+
+  export type ExpenseApprovalStageCreateManyInput = {
+    id?: number
+    key: string
+    label: string
+    description?: string | null
+    sortOrder: number
+    isActive?: boolean
+    createdById?: number | null
+    createdByName?: string | null
+    createdAt?: Date | string
+    updatedAt?: Date | string
+  }
+
+  export type ExpenseApprovalStageUpdateManyMutationInput = {
+    key?: StringFieldUpdateOperationsInput | string
+    label?: StringFieldUpdateOperationsInput | string
+    description?: NullableStringFieldUpdateOperationsInput | string | null
+    sortOrder?: IntFieldUpdateOperationsInput | number
+    isActive?: BoolFieldUpdateOperationsInput | boolean
+    createdById?: NullableIntFieldUpdateOperationsInput | number | null
+    createdByName?: NullableStringFieldUpdateOperationsInput | string | null
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+  }
+
+  export type ExpenseApprovalStageUncheckedUpdateManyInput = {
+    id?: IntFieldUpdateOperationsInput | number
+    key?: StringFieldUpdateOperationsInput | string
+    label?: StringFieldUpdateOperationsInput | string
+    description?: NullableStringFieldUpdateOperationsInput | string | null
+    sortOrder?: IntFieldUpdateOperationsInput | number
+    isActive?: BoolFieldUpdateOperationsInput | boolean
+    createdById?: NullableIntFieldUpdateOperationsInput | number | null
+    createdByName?: NullableStringFieldUpdateOperationsInput | string | null
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+  }
+
   export type ExpenseChangeRequestCreateInput = {
     id?: string
     tableKey: string
-    rowId: string
+    operation?: $Enums.ExpenseChangeOperation
+    rowId?: string | null
+    appliedRowId?: string | null
     rowLabel?: string | null
     changes: JsonNullValueInput | InputJsonValue
     reason: string
+    dueDate?: Date | string | null
     status?: $Enums.ExpenseChangeStatus
+    currentStageKey?: string | null
+    approvalTrail?: JsonNullValueInput | InputJsonValue
     requestedById: number
     requestedByName: string
     requestedByEmail: string
     requestedAt?: Date | string
-    approverId?: number | null
-    approverName?: string | null
-    approverEmail?: string | null
-    approverAt?: Date | string | null
-    approverComment?: string | null
-    approverAction?: string | null
-    finalById?: number | null
-    finalByName?: string | null
-    finalByEmail?: string | null
-    finalAt?: Date | string | null
-    finalComment?: string | null
-    finalAction?: string | null
     createdAt?: Date | string
     updatedAt?: Date | string
   }
@@ -71674,27 +78222,20 @@ export namespace Prisma {
   export type ExpenseChangeRequestUncheckedCreateInput = {
     id?: string
     tableKey: string
-    rowId: string
+    operation?: $Enums.ExpenseChangeOperation
+    rowId?: string | null
+    appliedRowId?: string | null
     rowLabel?: string | null
     changes: JsonNullValueInput | InputJsonValue
     reason: string
+    dueDate?: Date | string | null
     status?: $Enums.ExpenseChangeStatus
+    currentStageKey?: string | null
+    approvalTrail?: JsonNullValueInput | InputJsonValue
     requestedById: number
     requestedByName: string
     requestedByEmail: string
     requestedAt?: Date | string
-    approverId?: number | null
-    approverName?: string | null
-    approverEmail?: string | null
-    approverAt?: Date | string | null
-    approverComment?: string | null
-    approverAction?: string | null
-    finalById?: number | null
-    finalByName?: string | null
-    finalByEmail?: string | null
-    finalAt?: Date | string | null
-    finalComment?: string | null
-    finalAction?: string | null
     createdAt?: Date | string
     updatedAt?: Date | string
   }
@@ -71702,27 +78243,20 @@ export namespace Prisma {
   export type ExpenseChangeRequestUpdateInput = {
     id?: StringFieldUpdateOperationsInput | string
     tableKey?: StringFieldUpdateOperationsInput | string
-    rowId?: StringFieldUpdateOperationsInput | string
+    operation?: EnumExpenseChangeOperationFieldUpdateOperationsInput | $Enums.ExpenseChangeOperation
+    rowId?: NullableStringFieldUpdateOperationsInput | string | null
+    appliedRowId?: NullableStringFieldUpdateOperationsInput | string | null
     rowLabel?: NullableStringFieldUpdateOperationsInput | string | null
     changes?: JsonNullValueInput | InputJsonValue
     reason?: StringFieldUpdateOperationsInput | string
+    dueDate?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     status?: EnumExpenseChangeStatusFieldUpdateOperationsInput | $Enums.ExpenseChangeStatus
+    currentStageKey?: NullableStringFieldUpdateOperationsInput | string | null
+    approvalTrail?: JsonNullValueInput | InputJsonValue
     requestedById?: IntFieldUpdateOperationsInput | number
     requestedByName?: StringFieldUpdateOperationsInput | string
     requestedByEmail?: StringFieldUpdateOperationsInput | string
     requestedAt?: DateTimeFieldUpdateOperationsInput | Date | string
-    approverId?: NullableIntFieldUpdateOperationsInput | number | null
-    approverName?: NullableStringFieldUpdateOperationsInput | string | null
-    approverEmail?: NullableStringFieldUpdateOperationsInput | string | null
-    approverAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
-    approverComment?: NullableStringFieldUpdateOperationsInput | string | null
-    approverAction?: NullableStringFieldUpdateOperationsInput | string | null
-    finalById?: NullableIntFieldUpdateOperationsInput | number | null
-    finalByName?: NullableStringFieldUpdateOperationsInput | string | null
-    finalByEmail?: NullableStringFieldUpdateOperationsInput | string | null
-    finalAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
-    finalComment?: NullableStringFieldUpdateOperationsInput | string | null
-    finalAction?: NullableStringFieldUpdateOperationsInput | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
   }
@@ -71730,27 +78264,20 @@ export namespace Prisma {
   export type ExpenseChangeRequestUncheckedUpdateInput = {
     id?: StringFieldUpdateOperationsInput | string
     tableKey?: StringFieldUpdateOperationsInput | string
-    rowId?: StringFieldUpdateOperationsInput | string
+    operation?: EnumExpenseChangeOperationFieldUpdateOperationsInput | $Enums.ExpenseChangeOperation
+    rowId?: NullableStringFieldUpdateOperationsInput | string | null
+    appliedRowId?: NullableStringFieldUpdateOperationsInput | string | null
     rowLabel?: NullableStringFieldUpdateOperationsInput | string | null
     changes?: JsonNullValueInput | InputJsonValue
     reason?: StringFieldUpdateOperationsInput | string
+    dueDate?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     status?: EnumExpenseChangeStatusFieldUpdateOperationsInput | $Enums.ExpenseChangeStatus
+    currentStageKey?: NullableStringFieldUpdateOperationsInput | string | null
+    approvalTrail?: JsonNullValueInput | InputJsonValue
     requestedById?: IntFieldUpdateOperationsInput | number
     requestedByName?: StringFieldUpdateOperationsInput | string
     requestedByEmail?: StringFieldUpdateOperationsInput | string
     requestedAt?: DateTimeFieldUpdateOperationsInput | Date | string
-    approverId?: NullableIntFieldUpdateOperationsInput | number | null
-    approverName?: NullableStringFieldUpdateOperationsInput | string | null
-    approverEmail?: NullableStringFieldUpdateOperationsInput | string | null
-    approverAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
-    approverComment?: NullableStringFieldUpdateOperationsInput | string | null
-    approverAction?: NullableStringFieldUpdateOperationsInput | string | null
-    finalById?: NullableIntFieldUpdateOperationsInput | number | null
-    finalByName?: NullableStringFieldUpdateOperationsInput | string | null
-    finalByEmail?: NullableStringFieldUpdateOperationsInput | string | null
-    finalAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
-    finalComment?: NullableStringFieldUpdateOperationsInput | string | null
-    finalAction?: NullableStringFieldUpdateOperationsInput | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
   }
@@ -71758,27 +78285,20 @@ export namespace Prisma {
   export type ExpenseChangeRequestCreateManyInput = {
     id?: string
     tableKey: string
-    rowId: string
+    operation?: $Enums.ExpenseChangeOperation
+    rowId?: string | null
+    appliedRowId?: string | null
     rowLabel?: string | null
     changes: JsonNullValueInput | InputJsonValue
     reason: string
+    dueDate?: Date | string | null
     status?: $Enums.ExpenseChangeStatus
+    currentStageKey?: string | null
+    approvalTrail?: JsonNullValueInput | InputJsonValue
     requestedById: number
     requestedByName: string
     requestedByEmail: string
     requestedAt?: Date | string
-    approverId?: number | null
-    approverName?: string | null
-    approverEmail?: string | null
-    approverAt?: Date | string | null
-    approverComment?: string | null
-    approverAction?: string | null
-    finalById?: number | null
-    finalByName?: string | null
-    finalByEmail?: string | null
-    finalAt?: Date | string | null
-    finalComment?: string | null
-    finalAction?: string | null
     createdAt?: Date | string
     updatedAt?: Date | string
   }
@@ -71786,27 +78306,20 @@ export namespace Prisma {
   export type ExpenseChangeRequestUpdateManyMutationInput = {
     id?: StringFieldUpdateOperationsInput | string
     tableKey?: StringFieldUpdateOperationsInput | string
-    rowId?: StringFieldUpdateOperationsInput | string
+    operation?: EnumExpenseChangeOperationFieldUpdateOperationsInput | $Enums.ExpenseChangeOperation
+    rowId?: NullableStringFieldUpdateOperationsInput | string | null
+    appliedRowId?: NullableStringFieldUpdateOperationsInput | string | null
     rowLabel?: NullableStringFieldUpdateOperationsInput | string | null
     changes?: JsonNullValueInput | InputJsonValue
     reason?: StringFieldUpdateOperationsInput | string
+    dueDate?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     status?: EnumExpenseChangeStatusFieldUpdateOperationsInput | $Enums.ExpenseChangeStatus
+    currentStageKey?: NullableStringFieldUpdateOperationsInput | string | null
+    approvalTrail?: JsonNullValueInput | InputJsonValue
     requestedById?: IntFieldUpdateOperationsInput | number
     requestedByName?: StringFieldUpdateOperationsInput | string
     requestedByEmail?: StringFieldUpdateOperationsInput | string
     requestedAt?: DateTimeFieldUpdateOperationsInput | Date | string
-    approverId?: NullableIntFieldUpdateOperationsInput | number | null
-    approverName?: NullableStringFieldUpdateOperationsInput | string | null
-    approverEmail?: NullableStringFieldUpdateOperationsInput | string | null
-    approverAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
-    approverComment?: NullableStringFieldUpdateOperationsInput | string | null
-    approverAction?: NullableStringFieldUpdateOperationsInput | string | null
-    finalById?: NullableIntFieldUpdateOperationsInput | number | null
-    finalByName?: NullableStringFieldUpdateOperationsInput | string | null
-    finalByEmail?: NullableStringFieldUpdateOperationsInput | string | null
-    finalAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
-    finalComment?: NullableStringFieldUpdateOperationsInput | string | null
-    finalAction?: NullableStringFieldUpdateOperationsInput | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
   }
@@ -71814,29 +78327,254 @@ export namespace Prisma {
   export type ExpenseChangeRequestUncheckedUpdateManyInput = {
     id?: StringFieldUpdateOperationsInput | string
     tableKey?: StringFieldUpdateOperationsInput | string
-    rowId?: StringFieldUpdateOperationsInput | string
+    operation?: EnumExpenseChangeOperationFieldUpdateOperationsInput | $Enums.ExpenseChangeOperation
+    rowId?: NullableStringFieldUpdateOperationsInput | string | null
+    appliedRowId?: NullableStringFieldUpdateOperationsInput | string | null
     rowLabel?: NullableStringFieldUpdateOperationsInput | string | null
     changes?: JsonNullValueInput | InputJsonValue
     reason?: StringFieldUpdateOperationsInput | string
+    dueDate?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     status?: EnumExpenseChangeStatusFieldUpdateOperationsInput | $Enums.ExpenseChangeStatus
+    currentStageKey?: NullableStringFieldUpdateOperationsInput | string | null
+    approvalTrail?: JsonNullValueInput | InputJsonValue
     requestedById?: IntFieldUpdateOperationsInput | number
     requestedByName?: StringFieldUpdateOperationsInput | string
     requestedByEmail?: StringFieldUpdateOperationsInput | string
     requestedAt?: DateTimeFieldUpdateOperationsInput | Date | string
-    approverId?: NullableIntFieldUpdateOperationsInput | number | null
-    approverName?: NullableStringFieldUpdateOperationsInput | string | null
-    approverEmail?: NullableStringFieldUpdateOperationsInput | string | null
-    approverAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
-    approverComment?: NullableStringFieldUpdateOperationsInput | string | null
-    approverAction?: NullableStringFieldUpdateOperationsInput | string | null
-    finalById?: NullableIntFieldUpdateOperationsInput | number | null
-    finalByName?: NullableStringFieldUpdateOperationsInput | string | null
-    finalByEmail?: NullableStringFieldUpdateOperationsInput | string | null
-    finalAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
-    finalComment?: NullableStringFieldUpdateOperationsInput | string | null
-    finalAction?: NullableStringFieldUpdateOperationsInput | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+  }
+
+  export type ExpenseAccessGrantCreateInput = {
+    email: string
+    level: string
+    tableKey?: string
+    subDivision?: string | null
+    canCreate?: boolean
+    canUpdate?: boolean
+    canDelete?: boolean
+    isActive?: boolean
+    note?: string | null
+    grantedById?: number | null
+    grantedByName?: string | null
+    createdAt?: Date | string
+    updatedAt?: Date | string
+  }
+
+  export type ExpenseAccessGrantUncheckedCreateInput = {
+    id?: number
+    email: string
+    level: string
+    tableKey?: string
+    subDivision?: string | null
+    canCreate?: boolean
+    canUpdate?: boolean
+    canDelete?: boolean
+    isActive?: boolean
+    note?: string | null
+    grantedById?: number | null
+    grantedByName?: string | null
+    createdAt?: Date | string
+    updatedAt?: Date | string
+  }
+
+  export type ExpenseAccessGrantUpdateInput = {
+    email?: StringFieldUpdateOperationsInput | string
+    level?: StringFieldUpdateOperationsInput | string
+    tableKey?: StringFieldUpdateOperationsInput | string
+    subDivision?: NullableStringFieldUpdateOperationsInput | string | null
+    canCreate?: BoolFieldUpdateOperationsInput | boolean
+    canUpdate?: BoolFieldUpdateOperationsInput | boolean
+    canDelete?: BoolFieldUpdateOperationsInput | boolean
+    isActive?: BoolFieldUpdateOperationsInput | boolean
+    note?: NullableStringFieldUpdateOperationsInput | string | null
+    grantedById?: NullableIntFieldUpdateOperationsInput | number | null
+    grantedByName?: NullableStringFieldUpdateOperationsInput | string | null
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+  }
+
+  export type ExpenseAccessGrantUncheckedUpdateInput = {
+    id?: IntFieldUpdateOperationsInput | number
+    email?: StringFieldUpdateOperationsInput | string
+    level?: StringFieldUpdateOperationsInput | string
+    tableKey?: StringFieldUpdateOperationsInput | string
+    subDivision?: NullableStringFieldUpdateOperationsInput | string | null
+    canCreate?: BoolFieldUpdateOperationsInput | boolean
+    canUpdate?: BoolFieldUpdateOperationsInput | boolean
+    canDelete?: BoolFieldUpdateOperationsInput | boolean
+    isActive?: BoolFieldUpdateOperationsInput | boolean
+    note?: NullableStringFieldUpdateOperationsInput | string | null
+    grantedById?: NullableIntFieldUpdateOperationsInput | number | null
+    grantedByName?: NullableStringFieldUpdateOperationsInput | string | null
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+  }
+
+  export type ExpenseAccessGrantCreateManyInput = {
+    id?: number
+    email: string
+    level: string
+    tableKey?: string
+    subDivision?: string | null
+    canCreate?: boolean
+    canUpdate?: boolean
+    canDelete?: boolean
+    isActive?: boolean
+    note?: string | null
+    grantedById?: number | null
+    grantedByName?: string | null
+    createdAt?: Date | string
+    updatedAt?: Date | string
+  }
+
+  export type ExpenseAccessGrantUpdateManyMutationInput = {
+    email?: StringFieldUpdateOperationsInput | string
+    level?: StringFieldUpdateOperationsInput | string
+    tableKey?: StringFieldUpdateOperationsInput | string
+    subDivision?: NullableStringFieldUpdateOperationsInput | string | null
+    canCreate?: BoolFieldUpdateOperationsInput | boolean
+    canUpdate?: BoolFieldUpdateOperationsInput | boolean
+    canDelete?: BoolFieldUpdateOperationsInput | boolean
+    isActive?: BoolFieldUpdateOperationsInput | boolean
+    note?: NullableStringFieldUpdateOperationsInput | string | null
+    grantedById?: NullableIntFieldUpdateOperationsInput | number | null
+    grantedByName?: NullableStringFieldUpdateOperationsInput | string | null
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+  }
+
+  export type ExpenseAccessGrantUncheckedUpdateManyInput = {
+    id?: IntFieldUpdateOperationsInput | number
+    email?: StringFieldUpdateOperationsInput | string
+    level?: StringFieldUpdateOperationsInput | string
+    tableKey?: StringFieldUpdateOperationsInput | string
+    subDivision?: NullableStringFieldUpdateOperationsInput | string | null
+    canCreate?: BoolFieldUpdateOperationsInput | boolean
+    canUpdate?: BoolFieldUpdateOperationsInput | boolean
+    canDelete?: BoolFieldUpdateOperationsInput | boolean
+    isActive?: BoolFieldUpdateOperationsInput | boolean
+    note?: NullableStringFieldUpdateOperationsInput | string | null
+    grantedById?: NullableIntFieldUpdateOperationsInput | number | null
+    grantedByName?: NullableStringFieldUpdateOperationsInput | string | null
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+  }
+
+  export type ExpenseAuditLogCreateInput = {
+    requestId: string
+    tableKey: string
+    rowId?: string | null
+    operation: $Enums.ExpenseChangeOperation
+    eventType: $Enums.ExpenseAuditEventType
+    stageKey?: string | null
+    stageLabel?: string | null
+    actorId?: number | null
+    actorName?: string | null
+    actorEmail?: string | null
+    comment?: string | null
+    details?: NullableJsonNullValueInput | InputJsonValue
+    occurredAt?: Date | string
+  }
+
+  export type ExpenseAuditLogUncheckedCreateInput = {
+    id?: number
+    requestId: string
+    tableKey: string
+    rowId?: string | null
+    operation: $Enums.ExpenseChangeOperation
+    eventType: $Enums.ExpenseAuditEventType
+    stageKey?: string | null
+    stageLabel?: string | null
+    actorId?: number | null
+    actorName?: string | null
+    actorEmail?: string | null
+    comment?: string | null
+    details?: NullableJsonNullValueInput | InputJsonValue
+    occurredAt?: Date | string
+  }
+
+  export type ExpenseAuditLogUpdateInput = {
+    requestId?: StringFieldUpdateOperationsInput | string
+    tableKey?: StringFieldUpdateOperationsInput | string
+    rowId?: NullableStringFieldUpdateOperationsInput | string | null
+    operation?: EnumExpenseChangeOperationFieldUpdateOperationsInput | $Enums.ExpenseChangeOperation
+    eventType?: EnumExpenseAuditEventTypeFieldUpdateOperationsInput | $Enums.ExpenseAuditEventType
+    stageKey?: NullableStringFieldUpdateOperationsInput | string | null
+    stageLabel?: NullableStringFieldUpdateOperationsInput | string | null
+    actorId?: NullableIntFieldUpdateOperationsInput | number | null
+    actorName?: NullableStringFieldUpdateOperationsInput | string | null
+    actorEmail?: NullableStringFieldUpdateOperationsInput | string | null
+    comment?: NullableStringFieldUpdateOperationsInput | string | null
+    details?: NullableJsonNullValueInput | InputJsonValue
+    occurredAt?: DateTimeFieldUpdateOperationsInput | Date | string
+  }
+
+  export type ExpenseAuditLogUncheckedUpdateInput = {
+    id?: IntFieldUpdateOperationsInput | number
+    requestId?: StringFieldUpdateOperationsInput | string
+    tableKey?: StringFieldUpdateOperationsInput | string
+    rowId?: NullableStringFieldUpdateOperationsInput | string | null
+    operation?: EnumExpenseChangeOperationFieldUpdateOperationsInput | $Enums.ExpenseChangeOperation
+    eventType?: EnumExpenseAuditEventTypeFieldUpdateOperationsInput | $Enums.ExpenseAuditEventType
+    stageKey?: NullableStringFieldUpdateOperationsInput | string | null
+    stageLabel?: NullableStringFieldUpdateOperationsInput | string | null
+    actorId?: NullableIntFieldUpdateOperationsInput | number | null
+    actorName?: NullableStringFieldUpdateOperationsInput | string | null
+    actorEmail?: NullableStringFieldUpdateOperationsInput | string | null
+    comment?: NullableStringFieldUpdateOperationsInput | string | null
+    details?: NullableJsonNullValueInput | InputJsonValue
+    occurredAt?: DateTimeFieldUpdateOperationsInput | Date | string
+  }
+
+  export type ExpenseAuditLogCreateManyInput = {
+    id?: number
+    requestId: string
+    tableKey: string
+    rowId?: string | null
+    operation: $Enums.ExpenseChangeOperation
+    eventType: $Enums.ExpenseAuditEventType
+    stageKey?: string | null
+    stageLabel?: string | null
+    actorId?: number | null
+    actorName?: string | null
+    actorEmail?: string | null
+    comment?: string | null
+    details?: NullableJsonNullValueInput | InputJsonValue
+    occurredAt?: Date | string
+  }
+
+  export type ExpenseAuditLogUpdateManyMutationInput = {
+    requestId?: StringFieldUpdateOperationsInput | string
+    tableKey?: StringFieldUpdateOperationsInput | string
+    rowId?: NullableStringFieldUpdateOperationsInput | string | null
+    operation?: EnumExpenseChangeOperationFieldUpdateOperationsInput | $Enums.ExpenseChangeOperation
+    eventType?: EnumExpenseAuditEventTypeFieldUpdateOperationsInput | $Enums.ExpenseAuditEventType
+    stageKey?: NullableStringFieldUpdateOperationsInput | string | null
+    stageLabel?: NullableStringFieldUpdateOperationsInput | string | null
+    actorId?: NullableIntFieldUpdateOperationsInput | number | null
+    actorName?: NullableStringFieldUpdateOperationsInput | string | null
+    actorEmail?: NullableStringFieldUpdateOperationsInput | string | null
+    comment?: NullableStringFieldUpdateOperationsInput | string | null
+    details?: NullableJsonNullValueInput | InputJsonValue
+    occurredAt?: DateTimeFieldUpdateOperationsInput | Date | string
+  }
+
+  export type ExpenseAuditLogUncheckedUpdateManyInput = {
+    id?: IntFieldUpdateOperationsInput | number
+    requestId?: StringFieldUpdateOperationsInput | string
+    tableKey?: StringFieldUpdateOperationsInput | string
+    rowId?: NullableStringFieldUpdateOperationsInput | string | null
+    operation?: EnumExpenseChangeOperationFieldUpdateOperationsInput | $Enums.ExpenseChangeOperation
+    eventType?: EnumExpenseAuditEventTypeFieldUpdateOperationsInput | $Enums.ExpenseAuditEventType
+    stageKey?: NullableStringFieldUpdateOperationsInput | string | null
+    stageLabel?: NullableStringFieldUpdateOperationsInput | string | null
+    actorId?: NullableIntFieldUpdateOperationsInput | number | null
+    actorName?: NullableStringFieldUpdateOperationsInput | string | null
+    actorEmail?: NullableStringFieldUpdateOperationsInput | string | null
+    comment?: NullableStringFieldUpdateOperationsInput | string | null
+    details?: NullableJsonNullValueInput | InputJsonValue
+    occurredAt?: DateTimeFieldUpdateOperationsInput | Date | string
   }
 
   export type IntFilter<$PrismaModel = never> = {
@@ -75418,6 +82156,205 @@ export namespace Prisma {
     id?: SortOrder
   }
 
+  export type BroaderMenuOrderByRelevanceInput = {
+    fields: BroaderMenuOrderByRelevanceFieldEnum | BroaderMenuOrderByRelevanceFieldEnum[]
+    sort: SortOrder
+    search: string
+  }
+
+  export type BroaderMenuCountOrderByAggregateInput = {
+    id?: SortOrder
+    sn?: SortOrder
+    mcCd?: SortOrder
+    seg?: SortOrder
+    div?: SortOrder
+    subDiv?: SortOrder
+    majCatCd?: SortOrder
+    majCatNm?: SortOrder
+    subCatCd?: SortOrder
+    subCatDesc?: SortOrder
+    mcDesc?: SortOrder
+    ssn?: SortOrder
+    mcStat?: SortOrder
+    subCatStat?: SortOrder
+    majCatStat?: SortOrder
+    sizeApplicable?: SortOrder
+    divStat?: SortOrder
+    mcPkSz?: SortOrder
+    subCatPkSz?: SortOrder
+    noOfOptions?: SortOrder
+    avgDensity?: SortOrder
+    accDensity?: SortOrder
+    wgDensity?: SortOrder
+    fg46FtDensity?: SortOrder
+    fg5FtDensity?: SortOrder
+    fg4ADensity?: SortOrder
+    fg8ADensity?: SortOrder
+    acp?: SortOrder
+    oldDensity?: SortOrder
+    seq?: SortOrder
+    mjCatTyp?: SortOrder
+    fixtr?: SortOrder
+    newMcCd?: SortOrder
+    newMcDesc?: SortOrder
+    oldMcDesc?: SortOrder
+    oldSubCatCd?: SortOrder
+    oldSubCatDesc?: SortOrder
+    legacyMcDesc?: SortOrder
+    effectiveDate?: SortOrder
+    remarks?: SortOrder
+    gmStatus?: SortOrder
+    currentMcStatus?: SortOrder
+    fullMcName?: SortOrder
+    winterStatus?: SortOrder
+    uploadedAt?: SortOrder
+    updatedAt?: SortOrder
+  }
+
+  export type BroaderMenuAvgOrderByAggregateInput = {
+    id?: SortOrder
+    sn?: SortOrder
+    mcCd?: SortOrder
+    majCatCd?: SortOrder
+    subCatCd?: SortOrder
+    mcPkSz?: SortOrder
+    subCatPkSz?: SortOrder
+    noOfOptions?: SortOrder
+    avgDensity?: SortOrder
+    accDensity?: SortOrder
+    wgDensity?: SortOrder
+    fg46FtDensity?: SortOrder
+    fg5FtDensity?: SortOrder
+    fg4ADensity?: SortOrder
+    fg8ADensity?: SortOrder
+    acp?: SortOrder
+    oldDensity?: SortOrder
+    seq?: SortOrder
+    newMcCd?: SortOrder
+    oldSubCatCd?: SortOrder
+  }
+
+  export type BroaderMenuMaxOrderByAggregateInput = {
+    id?: SortOrder
+    sn?: SortOrder
+    mcCd?: SortOrder
+    seg?: SortOrder
+    div?: SortOrder
+    subDiv?: SortOrder
+    majCatCd?: SortOrder
+    majCatNm?: SortOrder
+    subCatCd?: SortOrder
+    subCatDesc?: SortOrder
+    mcDesc?: SortOrder
+    ssn?: SortOrder
+    mcStat?: SortOrder
+    subCatStat?: SortOrder
+    majCatStat?: SortOrder
+    sizeApplicable?: SortOrder
+    divStat?: SortOrder
+    mcPkSz?: SortOrder
+    subCatPkSz?: SortOrder
+    noOfOptions?: SortOrder
+    avgDensity?: SortOrder
+    accDensity?: SortOrder
+    wgDensity?: SortOrder
+    fg46FtDensity?: SortOrder
+    fg5FtDensity?: SortOrder
+    fg4ADensity?: SortOrder
+    fg8ADensity?: SortOrder
+    acp?: SortOrder
+    oldDensity?: SortOrder
+    seq?: SortOrder
+    mjCatTyp?: SortOrder
+    fixtr?: SortOrder
+    newMcCd?: SortOrder
+    newMcDesc?: SortOrder
+    oldMcDesc?: SortOrder
+    oldSubCatCd?: SortOrder
+    oldSubCatDesc?: SortOrder
+    legacyMcDesc?: SortOrder
+    effectiveDate?: SortOrder
+    remarks?: SortOrder
+    gmStatus?: SortOrder
+    currentMcStatus?: SortOrder
+    fullMcName?: SortOrder
+    winterStatus?: SortOrder
+    uploadedAt?: SortOrder
+    updatedAt?: SortOrder
+  }
+
+  export type BroaderMenuMinOrderByAggregateInput = {
+    id?: SortOrder
+    sn?: SortOrder
+    mcCd?: SortOrder
+    seg?: SortOrder
+    div?: SortOrder
+    subDiv?: SortOrder
+    majCatCd?: SortOrder
+    majCatNm?: SortOrder
+    subCatCd?: SortOrder
+    subCatDesc?: SortOrder
+    mcDesc?: SortOrder
+    ssn?: SortOrder
+    mcStat?: SortOrder
+    subCatStat?: SortOrder
+    majCatStat?: SortOrder
+    sizeApplicable?: SortOrder
+    divStat?: SortOrder
+    mcPkSz?: SortOrder
+    subCatPkSz?: SortOrder
+    noOfOptions?: SortOrder
+    avgDensity?: SortOrder
+    accDensity?: SortOrder
+    wgDensity?: SortOrder
+    fg46FtDensity?: SortOrder
+    fg5FtDensity?: SortOrder
+    fg4ADensity?: SortOrder
+    fg8ADensity?: SortOrder
+    acp?: SortOrder
+    oldDensity?: SortOrder
+    seq?: SortOrder
+    mjCatTyp?: SortOrder
+    fixtr?: SortOrder
+    newMcCd?: SortOrder
+    newMcDesc?: SortOrder
+    oldMcDesc?: SortOrder
+    oldSubCatCd?: SortOrder
+    oldSubCatDesc?: SortOrder
+    legacyMcDesc?: SortOrder
+    effectiveDate?: SortOrder
+    remarks?: SortOrder
+    gmStatus?: SortOrder
+    currentMcStatus?: SortOrder
+    fullMcName?: SortOrder
+    winterStatus?: SortOrder
+    uploadedAt?: SortOrder
+    updatedAt?: SortOrder
+  }
+
+  export type BroaderMenuSumOrderByAggregateInput = {
+    id?: SortOrder
+    sn?: SortOrder
+    mcCd?: SortOrder
+    majCatCd?: SortOrder
+    subCatCd?: SortOrder
+    mcPkSz?: SortOrder
+    subCatPkSz?: SortOrder
+    noOfOptions?: SortOrder
+    avgDensity?: SortOrder
+    accDensity?: SortOrder
+    wgDensity?: SortOrder
+    fg46FtDensity?: SortOrder
+    fg5FtDensity?: SortOrder
+    fg4ADensity?: SortOrder
+    fg8ADensity?: SortOrder
+    acp?: SortOrder
+    oldDensity?: SortOrder
+    seq?: SortOrder
+    newMcCd?: SortOrder
+    oldSubCatCd?: SortOrder
+  }
+
   export type MajorCatMasterOrderByRelevanceInput = {
     fields: MajorCatMasterOrderByRelevanceFieldEnum | MajorCatMasterOrderByRelevanceFieldEnum[]
     sort: SortOrder
@@ -75971,6 +82908,70 @@ export namespace Prisma {
     id?: SortOrder
   }
 
+  export type ExpenseApprovalStageOrderByRelevanceInput = {
+    fields: ExpenseApprovalStageOrderByRelevanceFieldEnum | ExpenseApprovalStageOrderByRelevanceFieldEnum[]
+    sort: SortOrder
+    search: string
+  }
+
+  export type ExpenseApprovalStageCountOrderByAggregateInput = {
+    id?: SortOrder
+    key?: SortOrder
+    label?: SortOrder
+    description?: SortOrder
+    sortOrder?: SortOrder
+    isActive?: SortOrder
+    createdById?: SortOrder
+    createdByName?: SortOrder
+    createdAt?: SortOrder
+    updatedAt?: SortOrder
+  }
+
+  export type ExpenseApprovalStageAvgOrderByAggregateInput = {
+    id?: SortOrder
+    sortOrder?: SortOrder
+    createdById?: SortOrder
+  }
+
+  export type ExpenseApprovalStageMaxOrderByAggregateInput = {
+    id?: SortOrder
+    key?: SortOrder
+    label?: SortOrder
+    description?: SortOrder
+    sortOrder?: SortOrder
+    isActive?: SortOrder
+    createdById?: SortOrder
+    createdByName?: SortOrder
+    createdAt?: SortOrder
+    updatedAt?: SortOrder
+  }
+
+  export type ExpenseApprovalStageMinOrderByAggregateInput = {
+    id?: SortOrder
+    key?: SortOrder
+    label?: SortOrder
+    description?: SortOrder
+    sortOrder?: SortOrder
+    isActive?: SortOrder
+    createdById?: SortOrder
+    createdByName?: SortOrder
+    createdAt?: SortOrder
+    updatedAt?: SortOrder
+  }
+
+  export type ExpenseApprovalStageSumOrderByAggregateInput = {
+    id?: SortOrder
+    sortOrder?: SortOrder
+    createdById?: SortOrder
+  }
+
+  export type EnumExpenseChangeOperationFilter<$PrismaModel = never> = {
+    equals?: $Enums.ExpenseChangeOperation | EnumExpenseChangeOperationFieldRefInput<$PrismaModel>
+    in?: $Enums.ExpenseChangeOperation[] | ListEnumExpenseChangeOperationFieldRefInput<$PrismaModel>
+    notIn?: $Enums.ExpenseChangeOperation[] | ListEnumExpenseChangeOperationFieldRefInput<$PrismaModel>
+    not?: NestedEnumExpenseChangeOperationFilter<$PrismaModel> | $Enums.ExpenseChangeOperation
+  }
+
   export type EnumExpenseChangeStatusFilter<$PrismaModel = never> = {
     equals?: $Enums.ExpenseChangeStatus | EnumExpenseChangeStatusFieldRefInput<$PrismaModel>
     in?: $Enums.ExpenseChangeStatus[] | ListEnumExpenseChangeStatusFieldRefInput<$PrismaModel>
@@ -75987,60 +82988,43 @@ export namespace Prisma {
   export type ExpenseChangeRequestCountOrderByAggregateInput = {
     id?: SortOrder
     tableKey?: SortOrder
+    operation?: SortOrder
     rowId?: SortOrder
+    appliedRowId?: SortOrder
     rowLabel?: SortOrder
     changes?: SortOrder
     reason?: SortOrder
+    dueDate?: SortOrder
     status?: SortOrder
+    currentStageKey?: SortOrder
+    approvalTrail?: SortOrder
     requestedById?: SortOrder
     requestedByName?: SortOrder
     requestedByEmail?: SortOrder
     requestedAt?: SortOrder
-    approverId?: SortOrder
-    approverName?: SortOrder
-    approverEmail?: SortOrder
-    approverAt?: SortOrder
-    approverComment?: SortOrder
-    approverAction?: SortOrder
-    finalById?: SortOrder
-    finalByName?: SortOrder
-    finalByEmail?: SortOrder
-    finalAt?: SortOrder
-    finalComment?: SortOrder
-    finalAction?: SortOrder
     createdAt?: SortOrder
     updatedAt?: SortOrder
   }
 
   export type ExpenseChangeRequestAvgOrderByAggregateInput = {
     requestedById?: SortOrder
-    approverId?: SortOrder
-    finalById?: SortOrder
   }
 
   export type ExpenseChangeRequestMaxOrderByAggregateInput = {
     id?: SortOrder
     tableKey?: SortOrder
+    operation?: SortOrder
     rowId?: SortOrder
+    appliedRowId?: SortOrder
     rowLabel?: SortOrder
     reason?: SortOrder
+    dueDate?: SortOrder
     status?: SortOrder
+    currentStageKey?: SortOrder
     requestedById?: SortOrder
     requestedByName?: SortOrder
     requestedByEmail?: SortOrder
     requestedAt?: SortOrder
-    approverId?: SortOrder
-    approverName?: SortOrder
-    approverEmail?: SortOrder
-    approverAt?: SortOrder
-    approverComment?: SortOrder
-    approverAction?: SortOrder
-    finalById?: SortOrder
-    finalByName?: SortOrder
-    finalByEmail?: SortOrder
-    finalAt?: SortOrder
-    finalComment?: SortOrder
-    finalAction?: SortOrder
     createdAt?: SortOrder
     updatedAt?: SortOrder
   }
@@ -76048,34 +83032,34 @@ export namespace Prisma {
   export type ExpenseChangeRequestMinOrderByAggregateInput = {
     id?: SortOrder
     tableKey?: SortOrder
+    operation?: SortOrder
     rowId?: SortOrder
+    appliedRowId?: SortOrder
     rowLabel?: SortOrder
     reason?: SortOrder
+    dueDate?: SortOrder
     status?: SortOrder
+    currentStageKey?: SortOrder
     requestedById?: SortOrder
     requestedByName?: SortOrder
     requestedByEmail?: SortOrder
     requestedAt?: SortOrder
-    approverId?: SortOrder
-    approverName?: SortOrder
-    approverEmail?: SortOrder
-    approverAt?: SortOrder
-    approverComment?: SortOrder
-    approverAction?: SortOrder
-    finalById?: SortOrder
-    finalByName?: SortOrder
-    finalByEmail?: SortOrder
-    finalAt?: SortOrder
-    finalComment?: SortOrder
-    finalAction?: SortOrder
     createdAt?: SortOrder
     updatedAt?: SortOrder
   }
 
   export type ExpenseChangeRequestSumOrderByAggregateInput = {
     requestedById?: SortOrder
-    approverId?: SortOrder
-    finalById?: SortOrder
+  }
+
+  export type EnumExpenseChangeOperationWithAggregatesFilter<$PrismaModel = never> = {
+    equals?: $Enums.ExpenseChangeOperation | EnumExpenseChangeOperationFieldRefInput<$PrismaModel>
+    in?: $Enums.ExpenseChangeOperation[] | ListEnumExpenseChangeOperationFieldRefInput<$PrismaModel>
+    notIn?: $Enums.ExpenseChangeOperation[] | ListEnumExpenseChangeOperationFieldRefInput<$PrismaModel>
+    not?: NestedEnumExpenseChangeOperationWithAggregatesFilter<$PrismaModel> | $Enums.ExpenseChangeOperation
+    _count?: NestedIntFilter<$PrismaModel>
+    _min?: NestedEnumExpenseChangeOperationFilter<$PrismaModel>
+    _max?: NestedEnumExpenseChangeOperationFilter<$PrismaModel>
   }
 
   export type EnumExpenseChangeStatusWithAggregatesFilter<$PrismaModel = never> = {
@@ -76086,6 +83070,161 @@ export namespace Prisma {
     _count?: NestedIntFilter<$PrismaModel>
     _min?: NestedEnumExpenseChangeStatusFilter<$PrismaModel>
     _max?: NestedEnumExpenseChangeStatusFilter<$PrismaModel>
+  }
+
+  export type ExpenseAccessGrantOrderByRelevanceInput = {
+    fields: ExpenseAccessGrantOrderByRelevanceFieldEnum | ExpenseAccessGrantOrderByRelevanceFieldEnum[]
+    sort: SortOrder
+    search: string
+  }
+
+  export type ExpenseAccessGrantEmailLevelTableKeyCompoundUniqueInput = {
+    email: string
+    level: string
+    tableKey: string
+  }
+
+  export type ExpenseAccessGrantCountOrderByAggregateInput = {
+    id?: SortOrder
+    email?: SortOrder
+    level?: SortOrder
+    tableKey?: SortOrder
+    subDivision?: SortOrder
+    canCreate?: SortOrder
+    canUpdate?: SortOrder
+    canDelete?: SortOrder
+    isActive?: SortOrder
+    note?: SortOrder
+    grantedById?: SortOrder
+    grantedByName?: SortOrder
+    createdAt?: SortOrder
+    updatedAt?: SortOrder
+  }
+
+  export type ExpenseAccessGrantAvgOrderByAggregateInput = {
+    id?: SortOrder
+    grantedById?: SortOrder
+  }
+
+  export type ExpenseAccessGrantMaxOrderByAggregateInput = {
+    id?: SortOrder
+    email?: SortOrder
+    level?: SortOrder
+    tableKey?: SortOrder
+    subDivision?: SortOrder
+    canCreate?: SortOrder
+    canUpdate?: SortOrder
+    canDelete?: SortOrder
+    isActive?: SortOrder
+    note?: SortOrder
+    grantedById?: SortOrder
+    grantedByName?: SortOrder
+    createdAt?: SortOrder
+    updatedAt?: SortOrder
+  }
+
+  export type ExpenseAccessGrantMinOrderByAggregateInput = {
+    id?: SortOrder
+    email?: SortOrder
+    level?: SortOrder
+    tableKey?: SortOrder
+    subDivision?: SortOrder
+    canCreate?: SortOrder
+    canUpdate?: SortOrder
+    canDelete?: SortOrder
+    isActive?: SortOrder
+    note?: SortOrder
+    grantedById?: SortOrder
+    grantedByName?: SortOrder
+    createdAt?: SortOrder
+    updatedAt?: SortOrder
+  }
+
+  export type ExpenseAccessGrantSumOrderByAggregateInput = {
+    id?: SortOrder
+    grantedById?: SortOrder
+  }
+
+  export type EnumExpenseAuditEventTypeFilter<$PrismaModel = never> = {
+    equals?: $Enums.ExpenseAuditEventType | EnumExpenseAuditEventTypeFieldRefInput<$PrismaModel>
+    in?: $Enums.ExpenseAuditEventType[] | ListEnumExpenseAuditEventTypeFieldRefInput<$PrismaModel>
+    notIn?: $Enums.ExpenseAuditEventType[] | ListEnumExpenseAuditEventTypeFieldRefInput<$PrismaModel>
+    not?: NestedEnumExpenseAuditEventTypeFilter<$PrismaModel> | $Enums.ExpenseAuditEventType
+  }
+
+  export type ExpenseAuditLogOrderByRelevanceInput = {
+    fields: ExpenseAuditLogOrderByRelevanceFieldEnum | ExpenseAuditLogOrderByRelevanceFieldEnum[]
+    sort: SortOrder
+    search: string
+  }
+
+  export type ExpenseAuditLogCountOrderByAggregateInput = {
+    id?: SortOrder
+    requestId?: SortOrder
+    tableKey?: SortOrder
+    rowId?: SortOrder
+    operation?: SortOrder
+    eventType?: SortOrder
+    stageKey?: SortOrder
+    stageLabel?: SortOrder
+    actorId?: SortOrder
+    actorName?: SortOrder
+    actorEmail?: SortOrder
+    comment?: SortOrder
+    details?: SortOrder
+    occurredAt?: SortOrder
+  }
+
+  export type ExpenseAuditLogAvgOrderByAggregateInput = {
+    id?: SortOrder
+    actorId?: SortOrder
+  }
+
+  export type ExpenseAuditLogMaxOrderByAggregateInput = {
+    id?: SortOrder
+    requestId?: SortOrder
+    tableKey?: SortOrder
+    rowId?: SortOrder
+    operation?: SortOrder
+    eventType?: SortOrder
+    stageKey?: SortOrder
+    stageLabel?: SortOrder
+    actorId?: SortOrder
+    actorName?: SortOrder
+    actorEmail?: SortOrder
+    comment?: SortOrder
+    occurredAt?: SortOrder
+  }
+
+  export type ExpenseAuditLogMinOrderByAggregateInput = {
+    id?: SortOrder
+    requestId?: SortOrder
+    tableKey?: SortOrder
+    rowId?: SortOrder
+    operation?: SortOrder
+    eventType?: SortOrder
+    stageKey?: SortOrder
+    stageLabel?: SortOrder
+    actorId?: SortOrder
+    actorName?: SortOrder
+    actorEmail?: SortOrder
+    comment?: SortOrder
+    occurredAt?: SortOrder
+  }
+
+  export type ExpenseAuditLogSumOrderByAggregateInput = {
+    id?: SortOrder
+    actorId?: SortOrder
+  }
+
+  export type EnumExpenseAuditEventTypeWithAggregatesFilter<$PrismaModel = never> = {
+    equals?: $Enums.ExpenseAuditEventType | EnumExpenseAuditEventTypeFieldRefInput<$PrismaModel>
+    in?: $Enums.ExpenseAuditEventType[] | ListEnumExpenseAuditEventTypeFieldRefInput<$PrismaModel>
+    notIn?: $Enums.ExpenseAuditEventType[] | ListEnumExpenseAuditEventTypeFieldRefInput<$PrismaModel>
+    not?: NestedEnumExpenseAuditEventTypeWithAggregatesFilter<$PrismaModel> | $Enums.ExpenseAuditEventType
+    _count?: NestedIntFilter<$PrismaModel>
+    _min?: NestedEnumExpenseAuditEventTypeFilter<$PrismaModel>
+    _max?: NestedEnumExpenseAuditEventTypeFilter<$PrismaModel>
   }
 
   export type SubDepartmentCreateNestedManyWithoutDepartmentInput = {
@@ -77481,8 +84620,16 @@ export namespace Prisma {
     update?: XOR<XOR<PoolBJobUpdateToOneWithWhereWithoutBatchesInput, PoolBJobUpdateWithoutBatchesInput>, PoolBJobUncheckedUpdateWithoutBatchesInput>
   }
 
+  export type EnumExpenseChangeOperationFieldUpdateOperationsInput = {
+    set?: $Enums.ExpenseChangeOperation
+  }
+
   export type EnumExpenseChangeStatusFieldUpdateOperationsInput = {
     set?: $Enums.ExpenseChangeStatus
+  }
+
+  export type EnumExpenseAuditEventTypeFieldUpdateOperationsInput = {
+    set?: $Enums.ExpenseAuditEventType
   }
 
   export type NestedIntFilter<$PrismaModel = never> = {
@@ -78004,11 +85151,28 @@ export namespace Prisma {
     _max?: NestedEnumPoolBBatchStatusFilter<$PrismaModel>
   }
 
+  export type NestedEnumExpenseChangeOperationFilter<$PrismaModel = never> = {
+    equals?: $Enums.ExpenseChangeOperation | EnumExpenseChangeOperationFieldRefInput<$PrismaModel>
+    in?: $Enums.ExpenseChangeOperation[] | ListEnumExpenseChangeOperationFieldRefInput<$PrismaModel>
+    notIn?: $Enums.ExpenseChangeOperation[] | ListEnumExpenseChangeOperationFieldRefInput<$PrismaModel>
+    not?: NestedEnumExpenseChangeOperationFilter<$PrismaModel> | $Enums.ExpenseChangeOperation
+  }
+
   export type NestedEnumExpenseChangeStatusFilter<$PrismaModel = never> = {
     equals?: $Enums.ExpenseChangeStatus | EnumExpenseChangeStatusFieldRefInput<$PrismaModel>
     in?: $Enums.ExpenseChangeStatus[] | ListEnumExpenseChangeStatusFieldRefInput<$PrismaModel>
     notIn?: $Enums.ExpenseChangeStatus[] | ListEnumExpenseChangeStatusFieldRefInput<$PrismaModel>
     not?: NestedEnumExpenseChangeStatusFilter<$PrismaModel> | $Enums.ExpenseChangeStatus
+  }
+
+  export type NestedEnumExpenseChangeOperationWithAggregatesFilter<$PrismaModel = never> = {
+    equals?: $Enums.ExpenseChangeOperation | EnumExpenseChangeOperationFieldRefInput<$PrismaModel>
+    in?: $Enums.ExpenseChangeOperation[] | ListEnumExpenseChangeOperationFieldRefInput<$PrismaModel>
+    notIn?: $Enums.ExpenseChangeOperation[] | ListEnumExpenseChangeOperationFieldRefInput<$PrismaModel>
+    not?: NestedEnumExpenseChangeOperationWithAggregatesFilter<$PrismaModel> | $Enums.ExpenseChangeOperation
+    _count?: NestedIntFilter<$PrismaModel>
+    _min?: NestedEnumExpenseChangeOperationFilter<$PrismaModel>
+    _max?: NestedEnumExpenseChangeOperationFilter<$PrismaModel>
   }
 
   export type NestedEnumExpenseChangeStatusWithAggregatesFilter<$PrismaModel = never> = {
@@ -78019,6 +85183,23 @@ export namespace Prisma {
     _count?: NestedIntFilter<$PrismaModel>
     _min?: NestedEnumExpenseChangeStatusFilter<$PrismaModel>
     _max?: NestedEnumExpenseChangeStatusFilter<$PrismaModel>
+  }
+
+  export type NestedEnumExpenseAuditEventTypeFilter<$PrismaModel = never> = {
+    equals?: $Enums.ExpenseAuditEventType | EnumExpenseAuditEventTypeFieldRefInput<$PrismaModel>
+    in?: $Enums.ExpenseAuditEventType[] | ListEnumExpenseAuditEventTypeFieldRefInput<$PrismaModel>
+    notIn?: $Enums.ExpenseAuditEventType[] | ListEnumExpenseAuditEventTypeFieldRefInput<$PrismaModel>
+    not?: NestedEnumExpenseAuditEventTypeFilter<$PrismaModel> | $Enums.ExpenseAuditEventType
+  }
+
+  export type NestedEnumExpenseAuditEventTypeWithAggregatesFilter<$PrismaModel = never> = {
+    equals?: $Enums.ExpenseAuditEventType | EnumExpenseAuditEventTypeFieldRefInput<$PrismaModel>
+    in?: $Enums.ExpenseAuditEventType[] | ListEnumExpenseAuditEventTypeFieldRefInput<$PrismaModel>
+    notIn?: $Enums.ExpenseAuditEventType[] | ListEnumExpenseAuditEventTypeFieldRefInput<$PrismaModel>
+    not?: NestedEnumExpenseAuditEventTypeWithAggregatesFilter<$PrismaModel> | $Enums.ExpenseAuditEventType
+    _count?: NestedIntFilter<$PrismaModel>
+    _min?: NestedEnumExpenseAuditEventTypeFilter<$PrismaModel>
+    _max?: NestedEnumExpenseAuditEventTypeFilter<$PrismaModel>
   }
 
   export type SubDepartmentCreateWithoutDepartmentInput = {
