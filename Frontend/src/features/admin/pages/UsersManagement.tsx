@@ -426,9 +426,9 @@ export default function UsersManagement() {
             email,
             password,
             role,
-            division: role === 'PO_COMMITTEE' || role === 'PD' ? undefined : division,
+            division: role === 'PO_COMMITTEE' || role === 'PD' || role === 'BODY_APPROVER' ? undefined : division,
             subDivision:
-              role === 'CATEGORY_HEAD' || role === 'PO_COMMITTEE' || role === 'ADMIN' || role === 'PD'
+              role === 'CATEGORY_HEAD' || role === 'PO_COMMITTEE' || role === 'ADMIN' || role === 'PD' || role === 'BODY_APPROVER'
                 ? undefined
                 : subDivision,
             businessDivision,

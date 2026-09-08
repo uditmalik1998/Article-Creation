@@ -101,8 +101,8 @@ const fetchMajorCategoriesByDivision = (division: string): Promise<string[]> => 
   if (majorCatPromises.has(div)) return majorCatPromises.get(div)!;
   const token = localStorage.getItem('authToken');
   const url = div
-    ? `${APP_CONFIG.api.baseURL}/admin/major-categories?division=${encodeURIComponent(div)}`
-    : `${APP_CONFIG.api.baseURL}/admin/major-categories`;
+    ? `${APP_CONFIG.api.baseURL}/approver/major-categories?division=${encodeURIComponent(div)}`
+    : `${APP_CONFIG.api.baseURL}/approver/major-categories`;
   const promise = fetch(url, { headers: token ? { Authorization: `Bearer ${token}` } : {} })
     .then((r) => r.json())
     .then((res: any) => {
@@ -1011,8 +1011,10 @@ const ArticleCard = React.memo(
     // expected to follow this same convention).
     const buildBodyDescription = useCallback(
       (getVal: (field: string) => string | null) => {
-        const parts = BODY_FIELDS.map((f) => getVal(f.field)).filter(Boolean) as string[];
-        return parts.length > 0 ? parts.join('-').slice(0, 40) : null;
+        const parts = BODY_FIELDS
+          .map((f) => getVal(f.field))
+          .filter((v): v is string => !!v && !/^-+$/.test(v.trim()));
+        return parts.length > 0 ? parts.join('-') : null;
       },
       [BODY_FIELDS],
     );
@@ -1026,6 +1028,8 @@ const ArticleCard = React.memo(
     );
 
     // Reactively rebuild fabric/body descriptions whenever visible fields or item changes.
+    // Also persists bodyArticleDescription to DB when it's missing (null in DB but computable
+    // from the current body attribute values).
     React.useEffect(() => {
       if (item.approvalStatus !== 'PENDING') return;
       setLocalValues((prev) => {
@@ -1046,6 +1050,13 @@ const ArticleCard = React.memo(
         if (newFabDesc !== null && newFabDesc !== prev['fabricArticleDescription']) updates['fabricArticleDescription'] = newFabDesc;
         if (newBodyDesc !== null && newBodyDesc !== prev['bodyArticleDescription']) updates['bodyArticleDescription'] = newBodyDesc;
         if (newRefDesc !== null && newRefDesc !== prev['referenceArticleDescription']) updates['referenceArticleDescription'] = newRefDesc;
+        // Persist bodyArticleDescription to DB when it was missing (null) but is now computable.
+        // This backfills records that were created before the description was auto-saved.
+        if (newBodyDesc && !item.bodyArticleDescription) {
+          setTimeout(() => {
+            onSave({ ...item } as any, { bodyArticleDescription: newBodyDesc }, { silent: true });
+          }, 0);
+        }
         return Object.keys(updates).length > 0 ? { ...prev, ...updates } : prev;
       });
     }, [item, FAB_FIELDS, buildBodyDescription]);
@@ -1063,8 +1074,18 @@ const ArticleCard = React.memo(
       'vendorCode', 'vendorName', 'mrp', 'rate', 'colour',
       'designNumber', 'division', 'subDivision', 'majorCategory', 'segment',
     ]);
+    // Body & Construction fields are read-only in FG article context — values
+    // must come exclusively from the Body Article NO search dropdown.
+    // In the Body Article page (isBodyArticle=true) they remain fully editable.
+    const BODY_LOCKED_FIELDS = new Set<string>([
+      'collar', 'collarStyle', 'neckDetails', 'neck', 'placket',
+      'fatherBelt', 'childBelt', 'sleeve', 'sleeveFold', 'mSet',
+      'bottomFold', 'noOfPocket', 'pocketType', 'extraPocket',
+      'fit', 'pattern', 'length',
+    ]);
    const isFieldLocked = (field: string) =>
     field === 'segment' ||
+    (!isBodyArticle && BODY_LOCKED_FIELDS.has(field)) ||
     isLocked ||
     (isModifyMode && MODIFY_LOCKED_FIELDS.has(field));
 
@@ -1228,6 +1249,10 @@ const ArticleCard = React.memo(
             onSave({ ...item, segment: seg } as ApproverItem, { segment: seg } as Record<string, unknown>);
           }
         });
+        // Clear body article and all body attributes — they are category-scoped
+        updates['bodyArticle'] = '';
+        updates['bodyArticleDescription'] = '';
+        for (const bf of BODY_FIELDS) updates[bf.field] = '';
       }
       // When a Body & Construction attribute changes, recompute bodyArticleDescription
       // and bundle it into the same save so the DB value stays in sync with the UI.
@@ -2456,7 +2481,7 @@ const ArticleCard = React.memo(
                                     })
                                     .filter(Boolean);
                                   if (parts.length > 0)
-                                    handleSave('bodyArticleDescription', parts.join('-').slice(0, 40));
+                                    handleSave('bodyArticleDescription', parts.join('-'));
                                 };
                                 const isBodyNoEditing = editingField === 'bot_bodyArticle';
                                 const bodyNoDisplayVal =
@@ -2494,7 +2519,9 @@ const ArticleCard = React.memo(
                                 // description — so it always ends up in the same canonical format as when
                                 // each field is picked by hand (and stays a meaningful search key later).
                                 const applyBodyArticleRow = (r: (typeof bodyNoResults)[number]) => {
-                                  const sourceMap: Record<string, string | number | null | undefined> = {
+                                  // Body attribute fields: always overwrite (even with null/empty) so that
+                                  // fields absent in body_article_data don't inherit stale FG article values.
+                                  const bodyAttrMap: Record<string, string | null | undefined> = {
                                     collar:        r.mCollarType,
                                     collarStyle:   r.mCollarStyle,
                                     neckDetails:   r.mNeckStyle,
@@ -2512,13 +2539,22 @@ const ArticleCard = React.memo(
                                     fit:           r.mFit,
                                     pattern:       r.mBodyStyle,
                                     length:        r.mLength,
-                                    cmtpCost:      r.cmtpCost,
-                                    cmpCost:       r.cmpCost,
-                                    fabCons:       r.fabCons,
-                                    width:         r.width,
+                                  };
+                                  // BOM cost fields: only overwrite when the body article has a value.
+                                  const bomMap: Record<string, string | number | null | undefined> = {
+                                    cmtpCost: r.cmtpCost,
+                                    cmpCost:  r.cmpCost,
+                                    fabCons:  r.fabCons,
+                                    width:    r.width,
                                   };
                                   const gridUpdates: Record<string, string> = { bodyArticle: r.bodyArticleNumber || '' };
-                                  Object.entries(sourceMap).forEach(([field, v]) => {
+                                  // Always write body attributes — clear old values when body_article_data has null
+                                  Object.entries(bodyAttrMap).forEach(([field, v]) => {
+                                    const str = (v !== null && v !== undefined) ? String(v).trim() : '';
+                                    gridUpdates[field] = str;
+                                  });
+                                  // BOM: only overwrite if non-empty
+                                  Object.entries(bomMap).forEach(([field, v]) => {
                                     if (v !== null && v !== undefined && String(v).trim() !== '') {
                                       gridUpdates[field] = String(v).trim();
                                     }
@@ -2702,7 +2738,7 @@ const ArticleCard = React.memo(
                                                 runBodySearch(q);
                                               }}
                                               onBlur={() => {
-                                                const trimmed = bodyNoQuery.trim().slice(0, 40);
+                                                const trimmed = bodyNoQuery.trim();
                                                 if (trimmed) handleSave('bodyArticleDescription', trimmed);
                                                 setEditingField(null);
                                                 setBodyNoResults([]);
@@ -2713,7 +2749,7 @@ const ArticleCard = React.memo(
                                                   setBodyNoResults([]);
                                                 }
                                                 if (e.key === 'Enter' && bodyNoQuery.trim()) {
-                                                  handleSave('bodyArticleDescription', bodyNoQuery.trim().slice(0, 40) || null);
+                                                  handleSave('bodyArticleDescription', bodyNoQuery.trim() || null);
                                                   setEditingField(null);
                                                   setBodyNoResults([]);
                                                 }
@@ -2800,10 +2836,10 @@ const ArticleCard = React.memo(
                     <div className="space-y-0 p-1">
                       {(allowGroups?.includes('BODY')
                         ? [
-                            { label: 'CMTP Cost', field: 'cmtpCost', editable: true, mandatory: true, isDropdown: false, isColor: false, isMarkdown: false },
-                            { label: 'CMP Cost',  field: 'cmpCost',  editable: true, mandatory: true, isDropdown: false, isColor: false, isMarkdown: false },
-                            { label: 'FAB Con',  field: 'fabCons',  editable: true, mandatory: true, isDropdown: false, isColor: false, isMarkdown: false },
-                            { label: 'Width',  field: 'width',  editable: true, mandatory: true, isDropdown: false, isColor: false, isMarkdown: false },
+                            { label: 'CMTP Cost', field: 'cmtpCost', editable: true, mandatory: false, isDropdown: false, isColor: false, isMarkdown: false },
+                            { label: 'CMP Cost',  field: 'cmpCost',  editable: true, mandatory: false, isDropdown: false, isColor: false, isMarkdown: false },
+                            { label: 'FAB Con',  field: 'fabCons',  editable: true, mandatory: false, isDropdown: false, isColor: false, isMarkdown: false },
+                            { label: 'Width',  field: 'width',  editable: true, mandatory: false, isDropdown: false, isColor: false, isMarkdown: false },
                           ]
                         : [
                             { label: 'RATE / COST', field: 'rate', editable: true, mandatory: true, isDropdown: false, isColor: false, isMarkdown: false },

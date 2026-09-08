@@ -206,6 +206,20 @@ export const AppSidebar: React.FC<AppSidebarProps> = ({ collapsed, onCollapsedCh
         { key: '/fabric-article/failed', Icon: AlertTriangle, label: 'Failed Creations' },
       ],
     });
+  }
+
+  // Body Article — visible to standard approver roles AND the dedicated BODY_APPROVER role
+  if (
+    !isPdDesigner &&
+    (role === 'APPROVER' ||
+      role === 'CATEGORY_HEAD' ||
+      role === 'SUB_DIVISION_HEAD' ||
+      role === 'BODY_APPROVER' ||
+      isAdmin ||
+      role === 'CREATOR' ||
+      role === 'PO_COMMITTEE' ||
+      isPd)
+  ) {
     items.push({
       key: '/body-article-group',
       Icon: CheckSquare,

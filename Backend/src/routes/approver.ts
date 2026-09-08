@@ -1,7 +1,8 @@
 import { Router } from 'express';
 import multer from 'multer';
 import { ApproverController } from '../controllers/ApproverController';
-import { authenticate, requireApprover, requireApprovalRights, requireModifyRights } from '../middleware/auth';
+import { getMajorCategories } from '../controllers/adminController';
+import { authenticate, requireApprover, requireApprovalRights, requireModifyRights, requireBodyApprovalRights } from '../middleware/auth';
 import { asyncHandler } from '../middleware/asyncHandler';
 
 const router = Router();
@@ -88,8 +89,8 @@ router.post('/create-body-article', h(ApproverController.createBodyArticleFromFG
 // Body Article list (type=FG) — paginated list from body_article_data for the Body Article New Articles page
 router.get('/body-articles', h(ApproverController.getBodyArticleItems));
 
-// Submit body articles to SAP via ZMM_BODY_ART_CRT_V3
-router.post('/body-articles/submit', h(ApproverController.submitBodyArticles));
+// Submit body articles to SAP via ZMM_BODY_ART_CRT_V3 — BODY_APPROVER and ADMIN only
+router.post('/body-articles/submit', requireBodyApprovalRights, h(ApproverController.submitBodyArticles));
 
 // Get / Update a single body_article_data record (used by Body Article detail page)
 router.get('/body-articles/:id',  h(ApproverController.getBodyArticleById));
@@ -120,5 +121,8 @@ router.get('/national-grid-values', h(ApproverController.getNationalGridValues))
 // Major category details — full table (seg, div, sub_div, maj_cat, mc_code, mc_des, hsn_code, mc_status)
 // Supports ?div=MENS&mcStatus=ACT&search=SHIRT for optional filtering
 router.get('/major-category-details', h(ApproverController.getMajorCategoryDetails));
+
+// Major categories list — accessible to all authenticated roles (Creator, Approver, Admin, etc.)
+router.get('/major-categories', h(getMajorCategories));
 
 export default router;

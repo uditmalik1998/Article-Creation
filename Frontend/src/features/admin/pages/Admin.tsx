@@ -1765,7 +1765,7 @@ export default function Admin() {
                     <Descriptions.Item label="Schedule">Daily at 2:00 AM IST</Descriptions.Item>
                     <Descriptions.Item label="Source API">
                       <span className="font-mono text-xs text-muted-foreground">
-                        https://my-dab-app.azurewebsites.net/api/ET_Supplier_Master
+                        https://my-dab-app.azurewebsites.net/api/DY_SUPPLIER_MST
                       </span>
                     </Descriptions.Item>
                     {vendorStatus.inProgress && (

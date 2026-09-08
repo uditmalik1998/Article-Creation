@@ -8,7 +8,7 @@ import { prismaClient as prisma } from '../utils/prisma';
 
 const SAP_RFC_PROXY_URL = (process.env.SAP_RFC_PROXY_URL || 'https://sap-api.v2retail.net').replace(/\/$/, '');
 const SAP_RFC_KEY       = process.env.SAP_RFC_KEY || 'v2-rfc-proxy-2026';
-const SAP_RFC_ENV       = process.env.SAP_RFC_PROXY_ENV || 'qa';
+const SAP_RFC_ENV       = process.env.SAP_RFC_PROXY_ENV || 'prod';
 
 function str(v: unknown): string {
     if (v === null || v === undefined) return '';
