@@ -385,6 +385,14 @@ const GROUP_ORDER = ['FAB', 'BODY', 'VA ACC.', 'VA PRCS', 'BUSINESS'];
 //   main_mvgr        → M_FAB_MAIN_MVGR_1
 //   fabric_main_mvgr → M_FAB_MAIN_MVGR_2
 const FAB_PRIORITY_KEYS = ['fab_div', 'yarn_01', 'main_mvgr', 'fabric_main_mvgr'];
+// Canonical BODY & CONSTRUCTION field order — enforced in buildCardGroups so
+// every user session sees fields in the same sequence regardless of DB displayOrder.
+const BODY_PRIORITY_KEYS = [
+  'collar', 'collar_style', 'neck_details', 'neck', 'placket',
+  'father_belt', 'child_belt', 'sleeve', 'sleeve_fold', 'set',
+  'bottom_fold', 'no_of_pocket', 'pocket_type', 'extra_pocket',
+  'fit', 'body_style', 'length',
+];
 
 // ─── Redesign tokens — header/icon palette per group ──────────────────────────
 const GROUP_LABELS: Record<string, string> = {
@@ -440,6 +448,15 @@ function buildCardGroups(entries: { key: string; type: string; group: string }[]
       const rank = (k: string) => {
         const i = FAB_PRIORITY_KEYS.indexOf(k);
         return i === -1 ? FAB_PRIORITY_KEYS.length : i;
+      };
+      fields = [...fields].sort((a, b) => rank(a.schemaKey) - rank(b.schemaKey));
+    }
+    if (g === 'BODY') {
+      // Enforce canonical BODY field order so every user sees the same sequence
+      // regardless of DB displayOrder (which can be non-deterministic when tied).
+      const rank = (k: string) => {
+        const i = BODY_PRIORITY_KEYS.indexOf(k);
+        return i === -1 ? BODY_PRIORITY_KEYS.length : i;
       };
       fields = [...fields].sort((a, b) => rank(a.schemaKey) - rank(b.schemaKey));
     }
@@ -1051,7 +1068,6 @@ const ArticleCard = React.memo(
         if (newBodyDesc !== null && newBodyDesc !== prev['bodyArticleDescription']) updates['bodyArticleDescription'] = newBodyDesc;
         if (newRefDesc !== null && newRefDesc !== prev['referenceArticleDescription']) updates['referenceArticleDescription'] = newRefDesc;
         // Persist bodyArticleDescription to DB when it was missing (null) but is now computable.
-        // This backfills records that were created before the description was auto-saved.
         if (newBodyDesc && !item.bodyArticleDescription) {
           setTimeout(() => {
             onSave({ ...item } as any, { bodyArticleDescription: newBodyDesc }, { silent: true });
@@ -1075,17 +1091,8 @@ const ArticleCard = React.memo(
       'designNumber', 'division', 'subDivision', 'majorCategory', 'segment',
     ]);
     // Body & Construction fields are read-only in FG article context — values
-    // must come exclusively from the Body Article NO search dropdown.
-    // In the Body Article page (isBodyArticle=true) they remain fully editable.
-    const BODY_LOCKED_FIELDS = new Set<string>([
-      'collar', 'collarStyle', 'neckDetails', 'neck', 'placket',
-      'fatherBelt', 'childBelt', 'sleeve', 'sleeveFold', 'mSet',
-      'bottomFold', 'noOfPocket', 'pocketType', 'extraPocket',
-      'fit', 'pattern', 'length',
-    ]);
    const isFieldLocked = (field: string) =>
     field === 'segment' ||
-    (!isBodyArticle && BODY_LOCKED_FIELDS.has(field)) ||
     isLocked ||
     (isModifyMode && MODIFY_LOCKED_FIELDS.has(field));
 
