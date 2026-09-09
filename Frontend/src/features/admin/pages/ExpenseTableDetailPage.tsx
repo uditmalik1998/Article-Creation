@@ -1,8 +1,8 @@
 import { useState } from 'react';
 import { useParams, Link } from 'react-router-dom';
-import { useQuery, keepPreviousData } from '@tanstack/react-query';
+import { useQuery, useQueryClient, keepPreviousData } from '@tanstack/react-query';
 import dayjs from 'dayjs';
-import { ArrowLeft, Search, ArrowUpDown, Pencil, ClipboardList } from 'lucide-react';
+import { ArrowLeft, Search, ArrowUpDown, Pencil, Trash2, Plus, ClipboardList } from 'lucide-react';
 import {
   Badge,
   Button,
@@ -17,14 +17,9 @@ import {
   SelectValue,
   type DataTableColumn,
 } from '@/shared/components/ui-tw';
-import { getExpenseTableData } from '../../../services/adminApi';
+import { getExpenseTableData, getMyExpenseAccess } from '../../../services/adminApi';
 import { EXPENSE_TABLE_CONFIGS, type ExpenseTableColumnConfig } from '../config/expenseTables';
-import { EditRowDialog } from '../components/EditRowDialog';
-
-function getCurrentUser(): { id: number; role: string } | null {
-  const raw = localStorage.getItem('user');
-  return raw ? JSON.parse(raw) : null;
-}
+import { RowChangeRequestDialog, type RowChangeMode } from '../components/RowChangeRequestDialog';
 
 const PAGE_SIZE = 50;
 
@@ -50,6 +45,7 @@ function renderCell(value: any, type?: ExpenseTableColumnConfig['type']) {
 export default function ExpenseTableDetailPage() {
   const { tableKey } = useParams<{ tableKey: string }>();
   const config = tableKey ? EXPENSE_TABLE_CONFIGS[tableKey] : undefined;
+  const queryClient = useQueryClient();
 
   const [page, setPage] = useState(1);
   const [pageSize, setPageSize] = useState(PAGE_SIZE);
@@ -57,11 +53,28 @@ export default function ExpenseTableDetailPage() {
   const [appliedSearch, setAppliedSearch] = useState('');
   const [sortBy, setSortBy] = useState<string>(config?.defaultSortBy ?? '');
   const [sortDir, setSortDir] = useState<'asc' | 'desc'>(config?.defaultSortDir ?? 'desc');
-  const [editingRow, setEditingRow] = useState<Record<string, any> | null>(null);
+  const [dialog, setDialog] = useState<{ mode: RowChangeMode; row: Record<string, any> | null } | null>(null);
 
-  const currentUser = getCurrentUser();
-  const canEdit = currentUser?.role === 'CREATOR' || currentUser?.role === 'ADMIN';
+  // Which buttons to show. The server re-checks every action, so a stale or
+  // over-generous answer here can't actually grant anything.
+  const { data: access, isLoading: accessLoading } = useQuery({
+    queryKey: ['my-expense-access', tableKey],
+    queryFn: () => getMyExpenseAccess(tableKey!),
+    enabled: !!tableKey && !!config,
+    staleTime: 60_000,
+  });
+
+  // Admin has its own full Expenses dashboard; everyone else (Creator,
+  // Approver, Category Head, ...) enters through the simplified masters
+  // cards page — the back arrow must return to whichever one they came from,
+  // not unconditionally to the admin-only route (which just bounces a
+  // non-admin straight back out to the app's home page).
+  const backHref = access?.isAdmin ? '/admin/expenses' : '/admin/expense-masters';
+
   const hasEditableColumns = !!config?.columns.some((c) => c.editable !== false);
+  const canAdd = !!config?.allowCreate && !!access?.canCreate;
+  const canEdit = hasEditableColumns && !!access?.canUpdate;
+  const canDelete = !!config?.allowDelete && !!access?.canDelete;
 
   const { data, isLoading, isError } = useQuery({
     queryKey: ['expense-table', tableKey, page, pageSize, appliedSearch, sortBy, sortDir],
@@ -73,19 +86,36 @@ export default function ExpenseTableDetailPage() {
         sortBy: sortBy || undefined,
         sortDir,
       }),
-    enabled: !!tableKey && !!config,
+    // Don't fire the table read until access is known — a user with none
+    // would just get a 403 back.
+    enabled: !!tableKey && !!config && access?.canView === true,
     placeholderData: keepPreviousData,
   });
 
   if (!tableKey || !config) {
     return (
       <div className="p-6 space-y-4">
-        <Link to="/admin/expenses" className="inline-flex items-center gap-1 text-sm text-muted-foreground hover:text-foreground">
-          <ArrowLeft className="h-4 w-4" /> Back to Expense Admin
+        <Link to="/admin/expense-masters" className="inline-flex items-center gap-1 text-sm text-muted-foreground hover:text-foreground">
+          <ArrowLeft className="h-4 w-4" /> Back to Expense Data
         </Link>
         <Card>
           <CardContent className="py-10 text-center text-sm text-muted-foreground">
             Unknown table: <span className="font-mono">{tableKey}</span>
+          </CardContent>
+        </Card>
+      </div>
+    );
+  }
+
+  if (!accessLoading && access && !access.canView) {
+    return (
+      <div className="p-6 space-y-4">
+        <Link to="/dashboard" className="inline-flex items-center gap-1 text-sm text-muted-foreground hover:text-foreground">
+          <ArrowLeft className="h-4 w-4" /> Back to Dashboard
+        </Link>
+        <Card>
+          <CardContent className="py-10 text-center text-sm text-muted-foreground">
+            You don't have access to Expense Data. Ask an admin to set your Business Division on the Users page.
           </CardContent>
         </Card>
       </div>
@@ -109,23 +139,38 @@ export default function ExpenseTableDetailPage() {
     render: (value: any) => renderCell(value, col.type),
   }));
 
-  if (canEdit && hasEditableColumns) {
+  if (canEdit || canDelete) {
     columns.push({
       title: '',
       key: 'action',
-      width: 52,
+      width: canEdit && canDelete ? 92 : 52,
       align: 'center',
       fixed: 'right',
       render: (_v, record) => (
-        <Button
-          size="sm"
-          variant="ghost"
-          className="h-7 w-7 p-0"
-          onClick={() => setEditingRow(record)}
-          title="Propose an edit"
-        >
-          <Pencil className="h-4 w-4" />
-        </Button>
+        <div className="flex items-center justify-center gap-0.5">
+          {canEdit && (
+            <Button
+              size="sm"
+              variant="ghost"
+              className="h-7 w-7 p-0"
+              onClick={() => setDialog({ mode: 'update', row: record })}
+              title="Propose an edit"
+            >
+              <Pencil className="h-4 w-4" />
+            </Button>
+          )}
+          {canDelete && (
+            <Button
+              size="sm"
+              variant="ghost"
+              className="h-7 w-7 p-0 text-red-600 hover:text-red-700 hover:bg-red-50"
+              onClick={() => setDialog({ mode: 'delete', row: record })}
+              title="Propose a deletion"
+            >
+              <Trash2 className="h-4 w-4" />
+            </Button>
+          )}
+        </div>
       ),
     });
   }
@@ -133,8 +178,8 @@ export default function ExpenseTableDetailPage() {
   return (
     <div className="flex h-full flex-col p-4 space-y-2">
       <div className="flex items-center justify-between">
-        <Link to="/admin/expenses" className="inline-flex items-center gap-1 text-sm text-muted-foreground hover:text-foreground">
-          <ArrowLeft className="h-4 w-4" /> Back to Expense Admin
+        <Link to={backHref} className="inline-flex items-center gap-1 text-sm text-muted-foreground hover:text-foreground">
+          <ArrowLeft className="h-4 w-4" /> Back to Expense Data
         </Link>
         <Link
           to="/admin/expense-change-requests"
@@ -144,10 +189,25 @@ export default function ExpenseTableDetailPage() {
         </Link>
       </div>
 
-      <div>
-        <h1 className="text-xl font-bold leading-tight">{config.title}</h1>
-        <p className="text-xs text-muted-foreground">{config.description}</p>
+      <div className="flex items-start justify-between gap-4">
+        <div>
+          <h1 className="text-xl font-bold leading-tight">{config.title}</h1>
+          <p className="text-xs text-muted-foreground">{config.description}</p>
+        </div>
+        {canAdd && (
+          <Button size="sm" onClick={() => setDialog({ mode: 'create', row: null })}>
+            <Plus className="h-4 w-4" />
+            Add Row
+          </Button>
+        )}
       </div>
+
+      {(canAdd || canEdit || canDelete) && (
+        <p className="text-xs text-muted-foreground">
+          Adds, edits and deletions are requests, not direct changes: each one needs a reason and a “needed by” date,
+          then Category Head review followed by MDM approval before it touches the master.
+        </p>
+      )}
 
       <Card>
         <CardContent className="flex flex-col gap-2 p-3 md:flex-row md:items-end">
@@ -238,14 +298,20 @@ export default function ExpenseTableDetailPage() {
         </p>
       )}
 
-      <EditRowDialog
-        open={!!editingRow}
-        onOpenChange={(open) => { if (!open) setEditingRow(null); }}
-        tableKey={tableKey}
-        config={config}
-        row={editingRow}
-        onSubmitted={() => setEditingRow(null)}
-      />
+      {dialog && (
+        <RowChangeRequestDialog
+          open
+          onOpenChange={(open) => { if (!open) setDialog(null); }}
+          tableKey={tableKey}
+          config={config}
+          mode={dialog.mode}
+          row={dialog.row}
+          onSubmitted={() => {
+            setDialog(null);
+            queryClient.invalidateQueries({ queryKey: ['expense-change-requests'] });
+          }}
+        />
+      )}
     </div>
   );
 }

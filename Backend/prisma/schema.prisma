@@ -505,6 +505,14 @@ model User {
   role           UserRole           @default(CREATOR)
   division       String?            @db.VarChar(200)  // Linked to Department.name
   subDivision    String?            @map("sub_division") @db.VarChar(500) // Linked to SubDepartment.code
+  /// Coarse business-unit tag, independent of `division`/`subDivision` above
+  /// (those are tied to the Department/SubDepartment hierarchy for
+  /// extraction routing, and `division` can hold several comma-separated
+  /// values). This is always exactly one of MENS / KIDS / LADIES / PO,
+  /// admin-editable from the Users page, and every user is meant to end up
+  /// with one — shown in the UI as "Business Division" to avoid being
+  /// confused with the existing Sub Division field.
+  businessDivision String?          @map("business_division") @db.VarChar(20)
   isActive       Boolean            @default(true) @map("is_active")
   lastLogin      DateTime?          @map("last_login")
   createdAt      DateTime           @default(now()) @map("created_at")
@@ -647,6 +655,12 @@ enum UserRole {
   SUB_DIVISION_HEAD
   PD_DESIGNER
   PD
+  /// Added directly on the database's `user_role` enum (3 users already carry
+  /// it) without ever being added here — every `prisma.user.findMany()` (the
+  /// Admin Users page included) threw on any result set containing one of
+  /// those rows, since Prisma can't deserialize an enum value it doesn't
+  /// know about. Declared here purely to stop that crash; no access rules
+  /// exist for this role anywhere in the app yet.
   BODY_APPROVER
 
   @@map("user_role")
@@ -1243,6 +1257,90 @@ model NationalGridMaster {
   @@schema("public")
 }
 
+/// BroaderMenu: the "BROADER MENU" merchandising master — one row per MC CD,
+/// carrying the full SEG → DIV → SUB_DIV → MAJ_CAT → SUB_CAT → MC hierarchy
+/// together with its status flags, pack sizes, fixture densities and the
+/// rename/remarks trail. Loaded from the BM-H sheet of the Broader Menu
+/// workbook via the Expense page's bulk uploader.
+///
+/// The workbook also carries an 84-column per-store density block (store code
+/// in the second header row). Those cells are all zero in the source file, so
+/// they are not mirrored here — the uploader counts any non-zero value it
+/// finds and reports it rather than dropping it silently.
+model BroaderMenu {
+  id Int @id @default(autoincrement())
+
+  /// Row number as it appeared in the sheet — informational only.
+  sn   Int? @map("sn")
+  /// Merchandise Category code. The natural key: one row per MC CD.
+  mcCd Int  @unique @map("mc_cd")
+
+  seg         String? @db.VarChar(50)
+  div         String? @db.VarChar(50)
+  subDiv      String? @map("sub_div") @db.VarChar(50)
+  majCatCd    Int?    @map("maj_cat_cd")
+  majCatNm    String? @map("maj_cat_nm") @db.VarChar(200)
+  subCatCd    Int?    @map("sub_cat_cd")
+  subCatDesc  String? @map("sub_cat_desc") @db.VarChar(200)
+  mcDesc      String? @map("mc_desc") @db.VarChar(300)
+
+  /// Season: A / S / PW / HW / OC / MW / SSNL
+  ssn String? @db.VarChar(20)
+
+  /// Status flags at each level of the hierarchy: ACT / IN / T-ACT
+  mcStat         String? @map("mc_stat") @db.VarChar(20)
+  subCatStat     String? @map("sub_cat_stat") @db.VarChar(20)
+  majCatStat     String? @map("maj_cat_stat") @db.VarChar(20)
+  sizeApplicable String? @map("size_applicable") @db.VarChar(10)
+  divStat        String? @map("div_stat") @db.VarChar(20)
+
+  mcPkSz       Int? @map("mc_pk_sz")
+  subCatPkSz   Int? @map("sub_cat_pk_sz")
+  noOfOptions  Int? @map("no_of_options")
+
+  /// Fixture densities. avgDensity/acp carry fractions, the rest are whole numbers
+  /// in practice — all Decimal so a future file with fractions doesn't get rounded.
+  avgDensity    Decimal? @map("avg_density") @db.Decimal(14, 4)
+  accDensity    Decimal? @map("acc_density") @db.Decimal(14, 4)
+  wgDensity     Decimal? @map("wg_density") @db.Decimal(14, 4)
+  fg46FtDensity Decimal? @map("fg_46ft_density") @db.Decimal(14, 4)
+  fg5FtDensity  Decimal? @map("fg_5ft_density") @db.Decimal(14, 4)
+  fg4ADensity   Decimal? @map("fg_4a_density") @db.Decimal(14, 4)
+  fg8ADensity   Decimal? @map("fg_8a_density") @db.Decimal(14, 4)
+  acp           Decimal? @db.Decimal(14, 4)
+  oldDensity    Decimal? @map("old_density") @db.Decimal(14, 4)
+
+  seq      Int?    @map("seq")
+  mjCatTyp String? @map("mj_cat_typ") @db.VarChar(20)
+  fixtr    String? @db.VarChar(100)
+
+  /// Rename trail — the codes/descriptions this MC is moving to or came from.
+  newMcCd       Int?    @map("new_mc_cd")
+  newMcDesc     String? @map("new_mc_desc") @db.VarChar(300)
+  oldMcDesc     String? @map("old_mc_desc") @db.VarChar(300)
+  oldSubCatCd   Int?    @map("old_sub_cat_cd")
+  oldSubCatDesc String? @map("old_sub_cat_desc") @db.VarChar(200)
+  legacyMcDesc  String? @map("legacy_mc_desc") @db.VarChar(300)
+
+  /// The sheet's DATE column — when this row's change took effect.
+  effectiveDate   DateTime? @map("effective_date") @db.Date
+  remarks         String?   @db.VarChar(300)
+  gmStatus        String?   @map("gm_status") @db.VarChar(50)
+  currentMcStatus String?   @map("current_mc_status") @db.VarChar(50)
+  fullMcName      String?   @map("full_mc_name") @db.VarChar(300)
+  winterStatus    String?   @map("winter_status") @db.VarChar(20)
+
+  uploadedAt DateTime @default(now()) @map("uploaded_at")
+  updatedAt  DateTime @updatedAt @map("updated_at")
+
+  @@index([seg, div, subDiv])
+  @@index([majCatCd])
+  @@index([subCatCd])
+  @@index([mcStat])
+  @@map("broader_menu")
+  @@schema("public")
+}
+
 /// MajorCatMaster: MAJ CAT → name, division, ideal-for, and the model-image FRAME
 /// (fw | upper | lower | set) used to decide how the AI model photoshoot is framed.
 /// Seeded from "CATEGORY SHEET MJ WISE FINAL"; new entries added from the Model
@@ -1475,13 +1573,24 @@ model MajorCategoryDetails {
   @@schema("public")
 }
 
-/// Expense Data change-request workflow: Creator proposes a field edit with a
-/// reason -> Approver reviews -> Category Head/PD gives final sign-off, at
-/// which point (and only then) the real row's value is applied. One row here
-/// is the complete lifecycle + audit trail of a single edit.
+/// Which kind of change a request asks for. UPDATE edits an existing row,
+/// CREATE inserts a brand-new one (`rowId` is null until it is applied),
+/// DELETE removes an existing row.
+enum ExpenseChangeOperation {
+  UPDATE
+  CREATE
+  DELETE
+
+  @@map("expense_change_operation")
+  @@schema("public")
+}
+
+/// A request's lifecycle: PENDING while it's walking the approval chain,
+/// then APPROVED (applied to the master) or REJECTED. Which stage it's
+/// pending at lives on the request itself (`currentStageKey`), not here —
+/// that's what makes the chain's length editable without touching this enum.
 enum ExpenseChangeStatus {
-  PENDING_APPROVER
-  PENDING_FINAL
+  PENDING
   APPROVED
   REJECTED
 
@@ -1489,41 +1598,206 @@ enum ExpenseChangeStatus {
   @@schema("public")
 }
 
-model ExpenseChangeRequest {
-  id       String  @id @default(uuid())
-  tableKey String  @map("table_key") @db.VarChar(50)
-  rowId    String  @map("row_id") @db.VarChar(100)
-  rowLabel String? @map("row_label") @db.VarChar(300)
-  changes  Json
-  reason   String
+/// One rung of the Expense Data approval chain — e.g. "Category Head" then
+/// "MDM", or a longer chain with a regional sign-off inserted between them.
+/// Admin-managed on /admin/expense-access ("Approval Stages"); this table
+/// *is* the extensibility point: adding a row here adds a stage everywhere,
+/// with no code change and no enum migration.
+///
+/// `key` is the stable identifier `ExpenseAccessGrant.level` and
+/// `ExpenseChangeRequest.currentStageKey`/`approvalTrail` reference — set
+/// once at creation and never reused after a stage is retired, so old
+/// requests' trails keep reading correctly. `sortOrder` defines the chain:
+/// a request starts at the lowest-sortOrder active stage and, on each
+/// approval, moves to the next-lowest active stage above its current one;
+/// approving the highest-sortOrder active stage applies the change for real.
+model ExpenseApprovalStage {
+  id          Int     @id @default(autoincrement())
+  key         String  @unique @db.VarChar(50)
+  label       String  @db.VarChar(100)
+  description String?
+  sortOrder   Int     @map("sort_order")
+  /// A retired stage is skipped when building new chains and can no longer
+  /// be granted, but is kept (not deleted) so past requests' trails still
+  /// resolve its label — see `key`.
+  isActive Boolean @default(true) @map("is_active")
 
-  status ExpenseChangeStatus @default(PENDING_APPROVER)
+  createdById   Int?    @map("created_by_id")
+  createdByName String? @map("created_by_name") @db.VarChar(200)
+
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
+
+  @@index([isActive, sortOrder])
+  @@map("expense_approval_stages")
+  @@schema("public")
+}
+
+model ExpenseChangeRequest {
+  id        String                 @id @default(uuid())
+  tableKey  String                 @map("table_key") @db.VarChar(50)
+  operation ExpenseChangeOperation @default(UPDATE)
+  /// Null only for CREATE requests, which have no row yet — `appliedRowId`
+  /// records the id the insert actually got once the chain finishes.
+  rowId        String? @map("row_id") @db.VarChar(100)
+  appliedRowId String? @map("applied_row_id") @db.VarChar(100)
+  rowLabel     String? @map("row_label") @db.VarChar(300)
+  /// UPDATE: { field: { old, new } }. CREATE: { field: { old: null, new } }.
+  /// DELETE: { field: { old, new: null } } — a full snapshot of the row that
+  /// is being removed, so the audit trail survives the row itself.
+  changes Json
+  reason  String
+  /// The date the requester needs this done by — advisory, shown at every
+  /// stage so approvers can see what is running late.
+  dueDate DateTime? @map("due_date")
+
+  status ExpenseChangeStatus @default(PENDING)
+  /// The ExpenseApprovalStage.key this request is waiting on. Set to the
+  /// chain's first active stage on creation, advanced on each approval, and
+  /// null once status is APPROVED or REJECTED.
+  currentStageKey String? @map("current_stage_key") @db.VarChar(50)
+  /// Ordered log of every action taken on this request's chain — one entry
+  /// per approval/rejection: { stageKey, stageLabel, action: 'APPROVE'|
+  /// 'REJECT', byId, byName, byEmail, at, comment }. Replaces a fixed
+  /// approver/final column pair so the trail scales to any chain length.
+  approvalTrail Json @default("[]") @map("approval_trail")
 
   requestedById    Int
   requestedByName  String   @map("requested_by_name") @db.VarChar(200)
   requestedByEmail String   @map("requested_by_email") @db.VarChar(255)
   requestedAt      DateTime @default(now()) @map("requested_at")
-
-  approverId      Int?
-  approverName    String?   @map("approver_name") @db.VarChar(200)
-  approverEmail   String?   @map("approver_email") @db.VarChar(255)
-  approverAt      DateTime? @map("approver_at")
-  approverComment String?   @map("approver_comment")
-  approverAction  String?   @map("approver_action") @db.VarChar(20)
-
-  finalById      Int?
-  finalByName    String?   @map("final_by_name") @db.VarChar(200)
-  finalByEmail   String?   @map("final_by_email") @db.VarChar(255)
-  finalAt        DateTime? @map("final_at")
-  finalComment   String?   @map("final_comment")
-  finalAction    String?   @map("final_action") @db.VarChar(20)
+  /// The requester's OWN User.businessDivision at the moment they raised
+  /// this request — captured once, immutable afterward (a later change to
+  /// their profile must never re-route a request already in flight). This
+  /// is what routes the CATEGORY_HEAD stage to the Category Head whose own
+  /// businessDivision matches, instead of any Category Head being able to
+  /// act on any request — see canActOnExpenseRequestStage in
+  /// expenseAccessService.ts.
+  requesterBusinessDivision String? @map("requester_business_division") @db.VarChar(20)
 
   createdAt DateTime @default(now()) @map("created_at")
   updatedAt DateTime @updatedAt @map("updated_at")
 
   @@index([tableKey, rowId])
   @@index([status])
+  @@index([currentStageKey])
   @@index([requestedById])
+  @@index([dueDate])
+  @@index([requesterBusinessDivision])
   @@map("expense_change_requests")
+  @@schema("public")
+}
+
+/// Per-email access control for the Expense Data workflow, maintained by ADMIN
+/// on /admin/expense-access. ADMIN always has every right implicitly and needs
+/// no grant; every other user needs a matching active grant here, so approval
+/// rights land on specific people rather than on a whole `UserRole`.
+///
+/// `tableKey` is "*" for "every expense table", otherwise one
+/// EXPENSE_TABLE_REGISTRY key. A user may hold several grants (e.g. an MDM
+/// grant on every table plus a requester grant on one); rights are the union
+/// of all of them.
+model ExpenseAccessGrant {
+  id    Int    @id @default(autoincrement())
+  email String @db.VarChar(255)
+  /// Either the constant "SUB_DIVISION" (the fixed requester role — raises
+  /// add/edit/delete requests) or an ExpenseApprovalStage.key (an approval
+  /// right for that rung of the chain). Not a DB enum on purpose: new stages
+  /// must be grantable the moment an admin creates them, with no migration.
+  level    String @db.VarChar(50)
+  tableKey String @default("*") @map("table_key") @db.VarChar(50)
+  /// Informational label for SUB_DIVISION grants (which sub-division this
+  /// person edits for) — shown in the admin list and on their requests.
+  subDivision String? @map("sub_division") @db.VarChar(100)
+
+  /// Only meaningful for SUB_DIVISION grants — which operations this person
+  /// may raise. Approval-stage grants ignore these.
+  canCreate Boolean @default(true) @map("can_create")
+  canUpdate Boolean @default(true) @map("can_update")
+  canDelete Boolean @default(true) @map("can_delete")
+
+  isActive Boolean @default(true) @map("is_active")
+  note     String?
+
+  grantedById   Int?    @map("granted_by_id")
+  grantedByName String? @map("granted_by_name") @db.VarChar(200)
+
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
+
+  @@unique([email, level, tableKey])
+  @@index([email])
+  @@index([isActive])
+  @@map("expense_access_grants")
+  @@schema("public")
+}
+
+/// What kind of event a row in `expense_audit_log` records. Every step of a
+/// change request's life gets one — not just the final apply — so "log all
+/// of these" covers the whole lifecycle, not only the moment data changes.
+enum ExpenseAuditEventType {
+  /// A request was raised (add / edit / delete).
+  REQUESTED
+  /// A stage approved and passed the request on (or, if it was the last
+  /// stage, is about to trigger APPLIED as part of the same transaction).
+  STAGE_APPROVED
+  /// A stage rejected the request outright.
+  STAGE_REJECTED
+  /// The chain's last stage approved AND the write to the real master row
+  /// succeeded — this is the one event type where Supabase data actually
+  /// changed. Always in the same transaction as that write (see
+  /// applyExpenseRow{Update,Insert,Delete}'s `client` param) — this row
+  /// exists if and only if the master row was actually mutated.
+  APPLIED
+  /// The last stage approved but writing to the master row THREW (a unique
+  /// clash, a FK, the DB being down, ...). No master-table mutation
+  /// happened; the request is left PENDING at that stage for a retry.
+  APPLY_FAILED
+  /// The system rejected a request automatically at the last stage — the
+  /// target row had drifted from the snapshot taken at submission, or
+  /// (for a DELETE) had already been removed. No master-table mutation.
+  AUTO_REJECTED
+
+  @@map("expense_audit_event_type")
+  @@schema("public")
+}
+
+/// The durable, queryable audit trail of the Expense Data workflow — every
+/// event in `ExpenseAuditEventType` above, one row each, independent of the
+/// parent `ExpenseChangeRequest` row (which also keeps its own
+/// `approvalTrail`; this table exists so the whole history can be queried
+/// by table/row/actor/date without expanding that JSON, and so an APPLIED
+/// row is durable proof the master data actually changed, and when).
+model ExpenseAuditLog {
+  id        Int                    @id @default(autoincrement())
+  requestId String                 @map("request_id") @db.VarChar(36)
+  tableKey  String                 @map("table_key") @db.VarChar(50)
+  /// The affected master row's id. Null only for a REQUESTED/STAGE_* event on
+  /// a not-yet-applied CREATE, which has no row yet.
+  rowId     String?                @map("row_id") @db.VarChar(100)
+  operation ExpenseChangeOperation
+  eventType ExpenseAuditEventType  @map("event_type")
+
+  stageKey   String? @map("stage_key") @db.VarChar(50)
+  stageLabel String? @map("stage_label") @db.VarChar(100)
+
+  actorId    Int?    @map("actor_id")
+  actorName  String? @map("actor_name") @db.VarChar(200)
+  actorEmail String? @map("actor_email") @db.VarChar(255)
+  comment    String?
+
+  /// Event-shaped detail, e.g. { changes: {field:{old,new}} } for REQUESTED/
+  /// APPLIED, { editedFields } for a STAGE_APPROVED that edited values, or
+  /// { error } for APPLY_FAILED/AUTO_REJECTED.
+  details Json?
+
+  occurredAt DateTime @default(now()) @map("occurred_at")
+
+  @@index([requestId])
+  @@index([tableKey, rowId])
+  @@index([eventType])
+  @@index([occurredAt(sort: Desc)])
+  @@index([actorEmail])
+  @@map("expense_audit_log")
   @@schema("public")
 }

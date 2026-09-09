@@ -4,6 +4,8 @@
 
 import { Router, Request, Response, NextFunction } from 'express';
 import * as adminController from '../controllers/adminController';
+import * as expenseAccessController from '../controllers/expenseAccessController';
+import * as expenseAuditLogController from '../controllers/expenseAuditLogController';
 import { hierarchyService } from '../services/hierarchyService';
 import { asyncHandler } from '../middleware/asyncHandler';
 import multer from 'multer';
@@ -229,8 +231,41 @@ router.get('/national-grid',             h(adminController.getNationalGrid));
 router.post('/national-grid/import',     h(adminController.importNationalGrid));
 
 // NOTE: Expense Data read/edit-workflow routes moved to routes/expense.ts,
-// mounted at /api/expense (not ADMIN-only), so Creator/Approver/Category-Head/PD
-// can reach them too.
+// mounted at /api/expense (not ADMIN-only), so the sub-division editors and
+// approval-chain users in that workflow can reach them too.
+
+// ═══════════════════════════════════════════════════════
+// EXPENSE ACCESS CONTROL (ADMIN) — expense_access_grants
+// Which email addresses may raise / sign off Expense Data changes.
+// ORDER MATTERS: /options must come before a bare :id would swallow it.
+// ═══════════════════════════════════════════════════════
+router.get('/expense-access/options', h(expenseAccessController.getExpenseAccessOptions));
+router.get('/expense-access',         h(expenseAccessController.getExpenseAccessGrants));
+router.post('/expense-access',        h(expenseAccessController.createExpenseAccessGrant));
+router.put('/expense-access/:id',     h(expenseAccessController.updateExpenseAccessGrant));
+router.delete('/expense-access/:id',  h(expenseAccessController.deleteExpenseAccessGrant));
+
+// ═══════════════════════════════════════════════════════
+// EXPENSE APPROVAL STAGES (ADMIN) — expense_approval_stages
+// The editable approval CHAIN itself (today: Category Head, then MDM).
+// Add a stage here to lengthen the chain for every table — no code change.
+// ORDER MATTERS: /reorder must come before a bare :id would swallow it.
+// ═══════════════════════════════════════════════════════
+router.get('/expense-approval-stages',           h(expenseAccessController.getExpenseApprovalStages));
+router.post('/expense-approval-stages',          h(expenseAccessController.createExpenseApprovalStage));
+router.post('/expense-approval-stages/reorder',  h(expenseAccessController.reorderExpenseApprovalStages));
+router.put('/expense-approval-stages/:id',       h(expenseAccessController.updateExpenseApprovalStage));
+router.delete('/expense-approval-stages/:id',    h(expenseAccessController.deleteExpenseApprovalStage));
+
+// ═══════════════════════════════════════════════════════
+// EXPENSE AUDIT LOG (ADMIN) — expense_audit_log
+// The durable record of every step: raised, each stage's action, and every
+// real write to a master table (or failed attempt) — see
+// services/expenseAuditLogService.ts.
+// ORDER MATTERS: the bare list must come before /:requestId would swallow it.
+// ═══════════════════════════════════════════════════════
+router.get('/expense-audit-log',              h(expenseAuditLogController.getExpenseAuditLog));
+router.get('/expense-audit-log/:requestId',   h(expenseAuditLogController.getExpenseAuditLogForRequest));
 
 // ═══════════════════════════════════════════════════════
 // FABRIC ARTICLE DATA (ADMIN) — fabric_article_data
@@ -252,5 +287,12 @@ router.post('/fabric-article-master/upload',  excelUpload.single('file'), h(admi
 router.get('/body-article-data/status',   h(adminController.getBodyArticleDataStatus));
 router.get('/body-article-data/template', h(adminController.downloadBodyArticleDataTemplate));
 router.post('/body-article-data/upload',  excelUpload.single('file'), h(adminController.uploadBodyArticleData));
+
+// ═════════════════════════════════════════════════════
+// BROADER MENU (ADMIN) — broader_menu
+// ═════════════════════════════════════════════════════
+router.get('/broader-menu/status',   h(adminController.getBroaderMenuStatus));
+router.get('/broader-menu/template', h(adminController.downloadBroaderMenuTemplate));
+router.post('/broader-menu/upload',  excelUpload.single('file'), h(adminController.uploadBroaderMenu));
 
 export default router;

@@ -1,0 +1,11 @@
+-- BODY_APPROVER was added directly to the live `user_role` enum at some
+-- point without ever being added to schema.prisma — every prisma query that
+-- returned a row with that role (prisma.user.findMany() included) threw,
+-- since Prisma can't deserialize an enum value it doesn't know about. This
+-- is what actually broke the Admin Users page ("no users showing").
+--
+-- This statement is what makes the value exist on a FRESH database; on this
+-- project's live database it's already there (added out-of-band), so this
+-- is a no-op here — the real fix was adding BODY_APPROVER to
+-- schema.prisma's UserRole enum and regenerating the Prisma client.
+ALTER TYPE "user_role" ADD VALUE IF NOT EXISTS 'BODY_APPROVER';

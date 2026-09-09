@@ -14,6 +14,12 @@ export interface ExpenseTableColumnConfig {
   /** Defaults to true. Set false for ids/timestamps and fields owned by another
    * workflow (e.g. fabric/body article data's own approval/SAP-sync fields). */
   editable?: boolean;
+  /** Render the add/edit form field as a dropdown of this column's distinct
+   * existing values (fetched from the server) instead of free text — for a
+   * column whose values are really a fixed taxonomy (e.g. Attribute Name,
+   * Sub Division, Major Category, Segment Type), so a new row can't drift
+   * from it with a typo or a near-duplicate spelling. */
+  pickFromExisting?: boolean;
 }
 
 export interface ExpenseTableConfig {
@@ -23,6 +29,13 @@ export interface ExpenseTableConfig {
   defaultSortBy: string;
   defaultSortDir: 'asc' | 'desc';
   columns: ExpenseTableColumnConfig[];
+  /** Show the "Add Row" button. Must match the registry entry's `allowCreate`,
+   * which is what the server actually enforces. */
+  allowCreate?: boolean;
+  /** Show the per-row delete button. Must match the registry's `allowDelete`. */
+  allowDelete?: boolean;
+  /** Editable column dataIndexes that must be filled in on the Add Row form. */
+  requiredOnCreate?: string[];
 }
 
 export const EXPENSE_TABLE_CONFIGS: Record<string, ExpenseTableConfig> = {
@@ -93,11 +106,14 @@ export const EXPENSE_TABLE_CONFIGS: Record<string, ExpenseTableConfig> = {
     rowKey: 'id',
     defaultSortBy: 'id',
     defaultSortDir: 'desc',
+    allowCreate: true,
+    allowDelete: true,
+    requiredOnCreate: ['sub_division', 'major_category', 'segment_type'],
     columns: [
       { dataIndex: 'id', title: 'ID', width: 80, editable: false },
-      { dataIndex: 'sub_division', title: 'Sub Division' },
-      { dataIndex: 'major_category', title: 'Major Category' },
-      { dataIndex: 'segment_type', title: 'Segment Type' },
+      { dataIndex: 'sub_division', title: 'Sub Division', pickFromExisting: true },
+      { dataIndex: 'major_category', title: 'Major Category', pickFromExisting: true },
+      { dataIndex: 'segment_type', title: 'Segment Type', pickFromExisting: true },
       { dataIndex: 'min', title: 'Min' },
       { dataIndex: 'max', title: 'Max' },
       { dataIndex: 'created_at', title: 'Created At', type: 'date', editable: false },
@@ -170,9 +186,12 @@ export const EXPENSE_TABLE_CONFIGS: Record<string, ExpenseTableConfig> = {
     rowKey: 'id',
     defaultSortBy: 'createdAt',
     defaultSortDir: 'desc',
+    allowCreate: true,
+    allowDelete: true,
+    requiredOnCreate: ['attributeName', 'code'],
     columns: [
       { dataIndex: 'id', title: 'ID', editable: false },
-      { dataIndex: 'attributeName', title: 'Attribute Name' },
+      { dataIndex: 'attributeName', title: 'Attribute Name', pickFromExisting: true },
       { dataIndex: 'code', title: 'Code' },
       { dataIndex: 'fullForm', title: 'Full Form' },
       { dataIndex: 'isActive', title: 'Active', type: 'boolean' },
@@ -202,6 +221,65 @@ export const EXPENSE_TABLE_CONFIGS: Record<string, ExpenseTableConfig> = {
       { dataIndex: 'is_active', title: 'Active', type: 'boolean' },
       { dataIndex: 'created_at', title: 'Created At', type: 'date', editable: false },
       { dataIndex: 'updated_at', title: 'Updated At', type: 'date', editable: false },
+    ],
+  },
+  'broader-menu': {
+    title: 'Broader Menu (Merchandising Master)',
+    description:
+      'All rows currently stored in broader_menu — one per MC CD, from the BM-H sheet of the Broader Menu workbook.',
+    rowKey: 'id',
+    defaultSortBy: 'mcCd',
+    defaultSortDir: 'asc',
+    allowCreate: true,
+    allowDelete: true,
+    requiredOnCreate: ['mcCd', 'mcDesc'],
+    columns: [
+      { dataIndex: 'id', title: 'ID', width: 70, editable: false },
+      { dataIndex: 'sn', title: 'SN', width: 70, align: 'right' },
+      { dataIndex: 'mcCd', title: 'MC CD', width: 110, align: 'right' },
+      { dataIndex: 'seg', title: 'Segment', width: 90 },
+      { dataIndex: 'div', title: 'Division', width: 100 },
+      { dataIndex: 'subDiv', title: 'Sub Division', width: 110 },
+      { dataIndex: 'majCatCd', title: 'Maj Cat Code', width: 110, align: 'right' },
+      { dataIndex: 'majCatNm', title: 'Major Category', width: 180 },
+      { dataIndex: 'subCatCd', title: 'Sub Cat Code', width: 110, align: 'right' },
+      { dataIndex: 'subCatDesc', title: 'Sub Category', width: 180 },
+      { dataIndex: 'mcDesc', title: 'MC Description', width: 200 },
+      { dataIndex: 'ssn', title: 'Season', width: 80 },
+      { dataIndex: 'mcStat', title: 'MC Status', width: 100 },
+      { dataIndex: 'subCatStat', title: 'Sub Cat Status', width: 120 },
+      { dataIndex: 'majCatStat', title: 'Maj Cat Status', width: 120 },
+      { dataIndex: 'sizeApplicable', title: 'Size Applicable', width: 120 },
+      { dataIndex: 'divStat', title: 'Division Status', width: 120 },
+      { dataIndex: 'mcPkSz', title: 'MC Pack Size', width: 110, align: 'right' },
+      { dataIndex: 'subCatPkSz', title: 'Sub Cat Pack Size', width: 130, align: 'right' },
+      { dataIndex: 'noOfOptions', title: 'No. of Options', width: 120, align: 'right' },
+      { dataIndex: 'avgDensity', title: 'Avg Density', width: 110, align: 'right' },
+      { dataIndex: 'accDensity', title: 'Acc Density', width: 110, align: 'right' },
+      { dataIndex: 'wgDensity', title: 'WG/7FT Density', width: 130, align: 'right' },
+      { dataIndex: 'fg46FtDensity', title: 'FG-4.6FT Density', width: 140, align: 'right' },
+      { dataIndex: 'fg5FtDensity', title: 'FG-5FT Density', width: 130, align: 'right' },
+      { dataIndex: 'fg4ADensity', title: 'FG-4A Density', width: 130, align: 'right' },
+      { dataIndex: 'fg8ADensity', title: 'FG-8A Density', width: 130, align: 'right' },
+      { dataIndex: 'acp', title: 'ACP', width: 90, align: 'right' },
+      { dataIndex: 'oldDensity', title: 'Old Density', width: 110, align: 'right' },
+      { dataIndex: 'seq', title: 'Seq', width: 80, align: 'right' },
+      { dataIndex: 'mjCatTyp', title: 'Maj Cat Type', width: 110 },
+      { dataIndex: 'fixtr', title: 'Fixture', width: 100 },
+      { dataIndex: 'newMcCd', title: 'New MC CD', width: 110, align: 'right' },
+      { dataIndex: 'newMcDesc', title: 'New MC Description', width: 180 },
+      { dataIndex: 'oldMcDesc', title: 'Old MC Description', width: 180 },
+      { dataIndex: 'oldSubCatCd', title: 'Old Sub Cat Code', width: 130, align: 'right' },
+      { dataIndex: 'oldSubCatDesc', title: 'Old Sub Category', width: 170 },
+      { dataIndex: 'legacyMcDesc', title: 'Legacy MC Description', width: 190 },
+      { dataIndex: 'effectiveDate', title: 'Effective Date', width: 130, type: 'date' },
+      { dataIndex: 'remarks', title: 'Remarks', width: 180 },
+      { dataIndex: 'gmStatus', title: 'GM Status', width: 110 },
+      { dataIndex: 'currentMcStatus', title: 'Current MC Status', width: 150 },
+      { dataIndex: 'fullMcName', title: 'Full MC Name', width: 190 },
+      { dataIndex: 'winterStatus', title: 'Winter Status', width: 120 },
+      { dataIndex: 'uploadedAt', title: 'Uploaded At', width: 160, type: 'date', editable: false },
+      { dataIndex: 'updatedAt', title: 'Updated At', width: 160, type: 'date', editable: false },
     ],
   },
   'body-article-data': {
