@@ -2458,7 +2458,6 @@ export class ApproverController {
                             rate: true, mrp: true, sapArticleId: true,
                             approvalStatus: true, sapSyncStatus: true,
                             imageUrl: true, articleNumber: true,
-                            weight: true, variantWeight: true,
                         }
                     });
 
@@ -3478,7 +3477,10 @@ export class ApproverController {
 
         const where: any = { bodyArticleType: 'FG' };
 
-        if (status && status !== 'ALL') where.approvalStatus = status;
+        if (status && status !== 'ALL') {
+            const statuses = status.split(',').map((s: string) => s.trim()).filter(Boolean);
+            where.approvalStatus = statuses.length === 1 ? statuses[0] : { in: statuses };
+        }
         if (division && division !== 'ALL') where.division = { contains: division, mode: 'insensitive' };
         if (subDivision && subDivision !== 'ALL') where.subDivision = { equals: subDivision, mode: 'insensitive' };
         if (majorCategory) where.majorCategory = { equals: majorCategory, mode: 'insensitive' };

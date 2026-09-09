@@ -1864,7 +1864,7 @@ const ArticleCard = React.memo(
             <div className="flex min-w-0 flex-1 items-center gap-3">
               <Checkbox
                 checked={isSelected}
-                disabled={item.approvalStatus === 'REJECTED'}
+                disabled={item.approvalStatus === 'REJECTED' && !hideCreateBody}
                 onCheckedChange={() => onToggleSelect(item.id)}
                 className="border-white/60 bg-white/10 data-[state=checked]:bg-white data-[state=checked]:text-[#FF6F61]"
               />

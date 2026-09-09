@@ -502,8 +502,11 @@ export default function ArticleDetailPage({
   }, [currentItem?.id]);
 
   const pendingSelectedKeys = useMemo(
-    () => selectedRowKeys.filter(key => items.find(i => i.id === key)?.approvalStatus === 'PENDING'),
-    [selectedRowKeys, items],
+    () => selectedRowKeys.filter(key => {
+      const status = items.find(i => i.id === key)?.approvalStatus;
+      return status === 'PENDING' || (skipMandatoryFieldsCheck && status === 'REJECTED');
+    }),
+    [selectedRowKeys, items, skipMandatoryFieldsCheck],
   );
 
   const approveBlockedReasons = useMemo(() => {
