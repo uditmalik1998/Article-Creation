@@ -84,7 +84,7 @@ function OperationBadge({ operation }: { operation: ExpenseChangeOperation }) {
 }
 
 const BUSINESS_DIVISION_LABELS: Record<AdminUserBusinessDivision, string> = {
-  MENS: 'Mens', KIDS: 'Kids', LADIES: 'Ladies', PO: 'PO', MDM: 'MDM',
+  MENS: 'Mens', KIDS: 'Kids', LADIES: 'Ladies', PD: 'PD', MDM: 'MDM',
 };
 
 /** Which Category Head this request is routed to — the whole point of the

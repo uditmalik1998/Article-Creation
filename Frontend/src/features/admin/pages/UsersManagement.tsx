@@ -55,15 +55,15 @@ const parseSubDivisionList = (value: unknown): string[] => {
   return [];
 };
 
-/** Mens / Kids / Ladies / PO / MDM — a coarse business-unit tag independent
+/** Mens / Kids / Ladies / PD / MDM — a coarse business-unit tag independent
  * of Division/Sub-Division above (those follow the Department hierarchy for
  * extraction routing). Every user is meant to end up with one of these. */
-const BUSINESS_DIVISIONS = ['MENS', 'KIDS', 'LADIES', 'PO', 'MDM'] as const;
+const BUSINESS_DIVISIONS = ['MENS', 'KIDS', 'LADIES', 'PD', 'MDM'] as const;
 const BUSINESS_DIVISION_LABELS: Record<(typeof BUSINESS_DIVISIONS)[number], string> = {
   MENS: 'Mens Division',
   KIDS: 'Kids Division',
   LADIES: 'Ladies Division',
-  PO: 'PO Division',
+  PD: 'PD Division',
   MDM: 'MDM',
 };
 
