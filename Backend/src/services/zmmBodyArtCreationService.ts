@@ -64,7 +64,7 @@ function buildImData(row: any, mcDetails: { mcCode: string | null; hsnCode: stri
         M_POCKET:             str(row.mPocket),
         POCKET_PLACEMENT:     '',
         M_FIT:                str(row.mFit),
-        M_PATTERN:            str(row.mBodyStyle),
+        M_PATTERN:            '',
         M_LENGTH:             str(row.mLength),
         M_DC_SUB_STYLE:       '',
         M_BTN_MAIN_MVGR:      '',
@@ -199,7 +199,7 @@ export async function submitBodyArticles(ids: string[]): Promise<{
             await prisma.bodyArticleData.update({
                 where: { id: row.id },
                 data: {
-                    approvalStatus:    success ? 'APPROVED' : 'REJECTED',
+                    approvalStatus:    success ? 'APPROVED' : 'PENDING',
                     sapSyncStatus:     success ? 'SYNCED' : 'FAILED',
                     sapSyncMessage:    msg,
                     bodyArticleNumber: success ? sapNumber : row.bodyArticleNumber,
