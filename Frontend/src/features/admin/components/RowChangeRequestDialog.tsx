@@ -20,6 +20,7 @@ import {
   createExpenseAddRequest,
   createExpenseChangeRequest,
   createExpenseDeleteRequest,
+  getExpenseColumnMapping,
   getExpenseColumnOptions,
 } from '../../../services/adminApi';
 import type { ExpenseTableConfig } from '../config/expenseTables';
@@ -115,7 +116,7 @@ function ExistingValuePicker({
           onChange(e.target.value);
           setOpen(true);
         }}
-        onFocus={() => setOpen(true)}
+        onClick={() => setOpen(true)}
       />
       {open && (
         <div className="absolute z-50 mt-1 max-h-48 w-full overflow-y-auto rounded-md border border-border bg-popover p-1 text-popover-foreground shadow-md">
@@ -176,6 +177,24 @@ export function RowChangeRequestDialog({
     return map;
   }, [pickColumns, optionQueries]);
 
+  // One query per auto-fill column, fetching its {sourceValue: value} map —
+  // e.g. Size Master's Sub Division, keyed by Major Category.
+  const autoFillColumns = useMemo(() => editableColumns.filter((c) => c.autoFillFrom), [editableColumns]);
+  const autoFillQueries = useQueries({
+    queries: autoFillColumns.map((col) => ({
+      queryKey: ['expense-column-mapping', tableKey, col.autoFillFrom, col.dataIndex],
+      queryFn: () => getExpenseColumnMapping(tableKey, col.autoFillFrom!, col.dataIndex),
+      staleTime: 5 * 60_000,
+    })),
+  });
+  const autoFillMapByColumn = useMemo(() => {
+    const map: Record<string, Record<string, string>> = {};
+    autoFillColumns.forEach((col, i) => {
+      map[col.dataIndex] = autoFillQueries[i]?.data ?? {};
+    });
+    return map;
+  }, [autoFillColumns, autoFillQueries]);
+
   // Seeded once, on mount: callers render this dialog only while it is open
   // (`{dialog && <RowChangeRequestDialog …/>}`), so closing it unmounts the
   // component and the next open starts from a clean form.
@@ -189,6 +208,22 @@ export function RowChangeRequestDialog({
   const [reason, setReason] = useState('');
   const [dueDate, setDueDate] = useState<Dayjs | null>(null);
   const [submitting, setSubmitting] = useState(false);
+
+  // Every field's onChange goes through this — besides setting its own
+  // value, it fills in any OTHER column whose autoFillFrom names this one,
+  // if the mapping has an entry for the value just picked. Still a plain
+  // editable field afterward, not locked to the auto-filled value.
+  const updateValue = (key: string, value: any) => {
+    setValues((prev) => {
+      const next = { ...prev, [key]: value };
+      for (const col of autoFillColumns) {
+        if (col.autoFillFrom !== key) continue;
+        const mapped = autoFillMapByColumn[col.dataIndex]?.[value];
+        if (mapped !== undefined) next[col.dataIndex] = mapped;
+      }
+      return next;
+    });
+  };
 
   if (mode !== 'create' && !row) return null;
 
@@ -298,7 +333,7 @@ export function RowChangeRequestDialog({
                   <div className="flex items-center gap-2">
                     <Switch
                       checked={values[col.dataIndex] === true || values[col.dataIndex] === 'true'}
-                      onCheckedChange={(checked) => setValues((v) => ({ ...v, [col.dataIndex]: checked }))}
+                      onCheckedChange={(checked) => updateValue(col.dataIndex, checked)}
                     />
                     <span className="text-sm text-muted-foreground">
                       {values[col.dataIndex] === true || values[col.dataIndex] === 'true' ? 'Yes' : 'No'}
@@ -307,7 +342,7 @@ export function RowChangeRequestDialog({
                 ) : col.pickFromExisting ? (
                   <ExistingValuePicker
                     value={values[col.dataIndex] ?? ''}
-                    onChange={(v) => setValues((prev) => ({ ...prev, [col.dataIndex]: v }))}
+                    onChange={(v) => updateValue(col.dataIndex, v)}
                     options={optionsByColumn[col.dataIndex] ?? []}
                     loading={(optionsByColumn[col.dataIndex] ?? []).length === 0}
                     placeholder={`Search or type a ${col.title.toLowerCase()}…`}
@@ -315,7 +350,7 @@ export function RowChangeRequestDialog({
                 ) : (
                   <Input
                     value={values[col.dataIndex] ?? ''}
-                    onChange={(e) => setValues((v) => ({ ...v, [col.dataIndex]: e.target.value }))}
+                    onChange={(e) => updateValue(col.dataIndex, e.target.value)}
                   />
                 )}
               </div>

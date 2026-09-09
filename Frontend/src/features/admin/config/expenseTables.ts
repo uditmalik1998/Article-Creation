@@ -20,6 +20,12 @@ export interface ExpenseTableColumnConfig {
    * Sub Division, Major Category, Segment Type), so a new row can't drift
    * from it with a typo or a near-duplicate spelling. */
   pickFromExisting?: boolean;
+  /** On the add/edit form, auto-fill this field from another column's value
+   * once a 1:1 mapping between them is fetched from the server (e.g. Size
+   * Master: picking a Major Category fills in its Sub Division) — a
+   * convenience default, not a lock; the field stays editable afterward.
+   * Names the OTHER column's `dataIndex` to watch. */
+  autoFillFrom?: string;
 }
 
 export interface ExpenseTableConfig {
@@ -68,9 +74,11 @@ export const EXPENSE_TABLE_CONFIGS: Record<string, ExpenseTableConfig> = {
     columns: [
       { dataIndex: 'id', title: 'ID', width: 80, editable: false },
       { dataIndex: 'division', title: 'Division', pickFromExisting: true },
-      { dataIndex: 'sub_division', title: 'Sub Division', pickFromExisting: true },
-      { dataIndex: 'mc_code', title: 'MC Code' },
       { dataIndex: 'major_category', title: 'Major Category', pickFromExisting: true },
+      // Picking a Major Category fills this in automatically (see
+      // autoFillFrom) — it's still a normal editable field afterward.
+      { dataIndex: 'sub_division', title: 'Sub Division', pickFromExisting: true, autoFillFrom: 'major_category' },
+      { dataIndex: 'mc_code', title: 'MC Code' },
       { dataIndex: 'size', title: 'Size' },
       { dataIndex: 'status', title: 'Status' },
       { dataIndex: 'created_at', title: 'Created At', type: 'date', editable: false },

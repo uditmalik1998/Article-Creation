@@ -665,6 +665,20 @@ export async function getExpenseColumnOptions(tableKey: string, column: string):
   return res.data.data;
 }
 
+/** A fromColumn -> toColumn value lookup, for auto-filling one field from
+ * another on the add/edit form (e.g. Size Master: pick a Major Category,
+ * Sub Division fills itself in). */
+export async function getExpenseColumnMapping(
+  tableKey: string,
+  fromColumn: string,
+  toColumn: string,
+): Promise<Record<string, string>> {
+  const res = await expenseApi.get<{ success: boolean; data: Record<string, string> }>(
+    `/table/${encodeURIComponent(tableKey)}/column/${encodeURIComponent(fromColumn)}/mapped-to/${encodeURIComponent(toColumn)}`,
+  );
+  return res.data.data;
+}
+
 // ═══════════════════════════════════════════════════════
 // EXPENSE CHANGE REQUESTS (N-stage approval chain — see EXPENSE ACCESS
 // CONTROL below for the chain definition itself)

@@ -6337,6 +6337,69 @@ export async function getExpenseColumnOptions(req: Request, res: Response) {
   }
 }
 
+/** GET /admin/expense-table/:tableKey/column/:fromColumn/mapped-to/:toColumn
+ * — a lookup table of `fromColumn` value -> `toColumn` value, built from
+ * every existing row, for auto-filling one field from another on the
+ * add/edit form (e.g. Size Master: pick a Major Category, Sub Division
+ * fills itself in) instead of asking for the same fact twice. Only
+ * meaningful where the relationship is really 1:1 in the data — if a
+ * `fromColumn` value appears with more than one `toColumn` value, this just
+ * returns whichever happens to sort last; the caller treats the result as a
+ * convenience default, not a constraint, so that's an acceptable fallback,
+ * not a correctness bug. Both columns are checked against this table's own
+ * configured columns first — they're route params, so that's what stops
+ * this being used to probe arbitrary columns. */
+export async function getExpenseColumnMapping(req: Request, res: Response) {
+  const { tableKey, fromColumn, toColumn } = req.params;
+  const config = EXPENSE_TABLE_REGISTRY[tableKey];
+  if (!config) {
+    return res.status(404).json({ success: false, error: `Unknown table key: ${tableKey}` });
+  }
+  if (!config.columns.some((c) => c.key === fromColumn) || !config.columns.some((c) => c.key === toColumn)) {
+    return res.status(400).json({ success: false, error: 'Unknown column.' });
+  }
+
+  try {
+    let pairs: { from: any; to: any }[];
+
+    if (config.kind === 'prisma') {
+      const delegate = (prisma as any)[config.delegateName];
+      const rows = (await withPrismaRetry(() =>
+        delegate.findMany({
+          distinct: [fromColumn],
+          select: { [fromColumn]: true, [toColumn]: true },
+          orderBy: { [fromColumn]: 'asc' },
+          take: 5000,
+        })
+      )) as any[];
+      pairs = rows.map((r) => ({ from: r[fromColumn], to: r[toColumn] }));
+    } else if (config.kind === 'raw') {
+      const fromSql = Prisma.raw(`"${fromColumn}"`);
+      const toSql = Prisma.raw(`"${toColumn}"`);
+      const tableSql = Prisma.raw(`"${config.tableName}"`);
+      const rows = await withPrismaRetry(() =>
+        prisma.$queryRaw<{ from: any; to: any }[]>(
+          Prisma.sql`SELECT DISTINCT ON (${fromSql}) ${fromSql} AS from, ${toSql} AS to FROM ${tableSql} WHERE ${fromSql} IS NOT NULL ORDER BY ${fromSql} ASC, ${toSql} DESC LIMIT 5000`
+        )
+      );
+      pairs = rows;
+    } else {
+      return res.status(400).json({ success: false, error: 'Column mapping is not supported for this table.' });
+    }
+
+    const map: Record<string, string> = {};
+    for (const { from, to } of pairs) {
+      if (from === null || from === undefined || String(from).trim() === '') continue;
+      if (to === null || to === undefined || String(to).trim() === '') continue;
+      map[String(from)] = String(to);
+    }
+    return res.json({ success: true, data: map });
+  } catch (error: any) {
+    console.error(`[Expense] column-mapping error for "${tableKey}" "${fromColumn}"->"${toColumn}":`, error);
+    return res.status(500).json({ success: false, error: error.message });
+  }
+}
+
 function coercePrismaId(config: PrismaExpenseTableConfig, rowId: string): string | number {
   return config.idIsNumeric ? Number(rowId) : rowId;
 }
