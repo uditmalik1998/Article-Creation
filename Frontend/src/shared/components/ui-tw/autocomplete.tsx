@@ -64,7 +64,7 @@ export const Autocomplete: React.FC<AutocompleteProps> = ({
       </PopoverAnchor>
       <PopoverContent
         align="start"
-        className="w-[--radix-popover-trigger-width] p-1"
+        className="w-[--radix-popover-trigger-width] max-h-56 overflow-y-auto p-1"
         onOpenAutoFocus={(e) => e.preventDefault()}
       >
         {options.length === 0

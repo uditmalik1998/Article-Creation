@@ -1,9 +1,8 @@
-import { useMemo, useState } from 'react';
+import { useEffect, useMemo, useRef, useState } from 'react';
 import { useQueries } from '@tanstack/react-query';
 import dayjs, { type Dayjs } from 'dayjs';
 import { AlertTriangle } from 'lucide-react';
 import {
-  Autocomplete,
   Button,
   DatePicker,
   Dialog,
@@ -63,6 +62,87 @@ function displayValue(value: any): string {
   if (value === null || value === undefined || value === '') return '—';
   if (typeof value === 'boolean') return value ? 'Yes' : 'No';
   return String(value);
+}
+
+/**
+ * A small, self-contained "type or pick from existing values" field.
+ * Deliberately NOT built on the shared Popover-based Autocomplete: that one
+ * portals its panel to document.body and positions it via viewport math,
+ * which inside this dialog (itself scrollable and centered) sometimes
+ * resolved to the wrong place entirely and to an unbounded height. This
+ * renders its options list as a normal in-flow child directly under the
+ * input (`absolute` against a `relative` wrapper, no portal), so it can
+ * never drift from the field, and stays capped to a handful of rows with
+ * its own scrollbar.
+ */
+function ExistingValuePicker({
+  value,
+  onChange,
+  options,
+  loading,
+  placeholder,
+}: {
+  value: string;
+  onChange: (value: string) => void;
+  options: string[];
+  loading: boolean;
+  placeholder: string;
+}) {
+  const [open, setOpen] = useState(false);
+  const containerRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    if (!open) return;
+    const onDocMouseDown = (e: MouseEvent) => {
+      if (containerRef.current && !containerRef.current.contains(e.target as Node)) setOpen(false);
+    };
+    document.addEventListener('mousedown', onDocMouseDown);
+    return () => document.removeEventListener('mousedown', onDocMouseDown);
+  }, [open]);
+
+  const query = value.trim().toLowerCase();
+  const filtered = useMemo(
+    () => (query ? options.filter((o) => o.toLowerCase().includes(query)) : options).slice(0, 50),
+    [options, query]
+  );
+
+  return (
+    <div ref={containerRef} className="relative">
+      <Input
+        value={value}
+        placeholder={placeholder}
+        onChange={(e) => {
+          onChange(e.target.value);
+          setOpen(true);
+        }}
+        onFocus={() => setOpen(true)}
+      />
+      {open && (
+        <div className="absolute z-50 mt-1 max-h-48 w-full overflow-y-auto rounded-md border border-border bg-popover p-1 text-popover-foreground shadow-md">
+          {filtered.length === 0 ? (
+            <div className="px-2 py-1.5 text-sm text-muted-foreground">
+              {loading ? 'Loading…' : 'No match — you can still type a new value.'}
+            </div>
+          ) : (
+            filtered.map((opt) => (
+              <button
+                key={opt}
+                type="button"
+                onMouseDown={(e) => {
+                  e.preventDefault();
+                  onChange(opt);
+                  setOpen(false);
+                }}
+                className="w-full rounded px-2 py-1.5 text-left text-sm hover:bg-accent"
+              >
+                {opt}
+              </button>
+            ))
+          )}
+        </div>
+      )}
+    </div>
+  );
 }
 
 export function RowChangeRequestDialog({
@@ -225,22 +305,13 @@ export function RowChangeRequestDialog({
                     </span>
                   </div>
                 ) : col.pickFromExisting ? (
-                  (() => {
-                    const allOptions = optionsByColumn[col.dataIndex] ?? [];
-                    const query = String(values[col.dataIndex] ?? '').trim().toLowerCase();
-                    const filtered = query ? allOptions.filter((o) => o.toLowerCase().includes(query)) : allOptions;
-                    return (
-                      <Autocomplete
-                        value={values[col.dataIndex] ?? ''}
-                        onChange={(v) => setValues((prev) => ({ ...prev, [col.dataIndex]: v }))}
-                        options={filtered.slice(0, 50).map((o) => ({ value: o }))}
-                        placeholder={`Search or type a ${col.title.toLowerCase()}…`}
-                        notFoundContent={
-                          allOptions.length === 0 ? 'Loading…' : 'No match — you can still type a new value.'
-                        }
-                      />
-                    );
-                  })()
+                  <ExistingValuePicker
+                    value={values[col.dataIndex] ?? ''}
+                    onChange={(v) => setValues((prev) => ({ ...prev, [col.dataIndex]: v }))}
+                    options={optionsByColumn[col.dataIndex] ?? []}
+                    loading={(optionsByColumn[col.dataIndex] ?? []).length === 0}
+                    placeholder={`Search or type a ${col.title.toLowerCase()}…`}
+                  />
                 ) : (
                   <Input
                     value={values[col.dataIndex] ?? ''}
