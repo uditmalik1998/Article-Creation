@@ -71,7 +71,7 @@ const AdminCreateUserSchema = z.object({
   subDivision: z.union([z.string(), z.array(z.string())]).optional().nullable(),
   // Coarse business-unit tag — independent of division/subDivision above,
   // see the doc comment on User.businessDivision in schema.prisma.
-  businessDivision: z.enum(['MENS', 'KIDS', 'LADIES', 'PO', 'MDM']).optional().nullable(),
+  businessDivision: z.enum(['MENS', 'KIDS', 'LADIES', 'PD', 'MDM']).optional().nullable(),
 });
 
 const AdminUpdateUserSchema = AdminCreateUserSchema.partial().extend({
@@ -5792,6 +5792,13 @@ export const EXPENSE_TABLE_REGISTRY: Record<string, ExpenseTableConfig> = {
     kind: 'raw',
     tableName: 'maj_cat_grid_values',
     idColumn: 'id',
+    // Same reasoning as national-grid: this is a catalogue (which attribute
+    // values are valid for which major category), so new entries have to be
+    // addable one at a time, and stale ones removable, not just replaceable
+    // via a full re-upload.
+    allowCreate: true,
+    allowDelete: true,
+    requiredOnCreate: ['major_category', 'attribute_name', 'value'],
     columns: [
       { key: 'id', label: 'ID', editable: false },
       { key: 'major_category', label: 'Major Category' },

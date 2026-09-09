@@ -145,7 +145,7 @@ export interface DashboardStats {
  * `division`/`subDivision` below (those follow the Department/SubDepartment
  * hierarchy for extraction routing; `division` can hold several values at
  * once). Shown in the Users page as "Business Division". */
-export type AdminUserBusinessDivision = 'MENS' | 'KIDS' | 'LADIES' | 'PO' | 'MDM';
+export type AdminUserBusinessDivision = 'MENS' | 'KIDS' | 'LADIES' | 'PD' | 'MDM';
 
 export interface AdminUser {
   id: number;

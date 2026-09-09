@@ -12,7 +12,7 @@
  *    + wanted-by date)                                    is MDM)
  *
  * Routing is by BUSINESS DIVISION (User.businessDivision — MENS/KIDS/LADIES/
- * PO/MDM, see UsersManagement), captured onto the request once at creation
+ * PD/MDM, see UsersManagement), captured onto the request once at creation
  * (`requesterBusinessDivision`) and never changed afterward:
  *
  *   - The REQUESTER layer (first layer) rides on `UserRole` — anyone with
@@ -138,7 +138,7 @@ export type ExpenseAccess = {
   levels: string[];
   /** Sub-divisions this person is registered as editing for, if any. */
   subDivisions: string[];
-  /** This user's own User.businessDivision (MENS/KIDS/LADIES/PO/MDM), or
+  /** This user's own User.businessDivision (MENS/KIDS/LADIES/PD/MDM), or
    * null if unset. Exposed so the caller (e.g. the frontend, before it ever
    * reaches the server-enforced check) can tell whether a CATEGORY_HEAD
    * stage request is actually theirs to act on. */

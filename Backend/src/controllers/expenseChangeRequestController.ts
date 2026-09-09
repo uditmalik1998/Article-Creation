@@ -110,8 +110,7 @@ async function requireFirstStage(): Promise<{ key: string; label: string } | { e
   const stage = await getFirstApprovalStage();
   if (!stage) {
     return {
-      error:
-        'No approval stages are configured for Expense Data changes yet. Ask an admin to add one on Admin → Expense Access Control.',
+      error: 'No approval stages are configured for Expense Data changes yet.',
     };
   }
   return { key: stage.key, label: stage.label };
@@ -339,6 +338,42 @@ export async function createExpenseAddRequest(req: Request, res: Response) {
   }
 }
 
+/**
+ * Where a DELETE request raised by `user` themselves should start — unlike
+ * an add or edit, a deletion the requester could immediately approve
+ * themselves has nothing meaningful to gain from waiting on them a second
+ * time:
+ *
+ *   - Plain CREATOR/APPROVER: the normal chain, starting at its first stage
+ *     (Category Head today).
+ *   - CATEGORY_HEAD deleting a row from their OWN division (which is the
+ *     only kind they can raise — `requesterBusinessDivision` is always
+ *     their own): skips straight past the Category Head stage — approving
+ *     your own request is meaningless — to whatever comes after it. If
+ *     nothing does (that stage's been made the last one), same as MDM
+ *     below: apply immediately.
+ *   - Whoever is tagged business division MDM: applies at once, no chain at
+ *     all — they already hold the final say over every division.
+ *
+ * Returns `{ immediate: true }` when there's nothing left to wait on, or the
+ * stage to start at otherwise; `{ error }` only in the default branch, when
+ * no chain is configured at all yet.
+ */
+async function resolveDeleteRequestStart(
+  user: { role: string; businessDivision?: string | null }
+): Promise<{ immediate: true; stageKey: string } | { immediate: false; stageKey: string; stageLabel: string } | { error: string }> {
+  if (user.businessDivision === 'MDM') {
+    return { immediate: true, stageKey: 'MDM' };
+  }
+  if (String(user.role) === 'CATEGORY_HEAD') {
+    const next = await getNextApprovalStage('CATEGORY_HEAD');
+    return next ? { immediate: false, stageKey: next.key, stageLabel: next.label } : { immediate: true, stageKey: 'CATEGORY_HEAD' };
+  }
+  const first = await getFirstApprovalStage();
+  if (!first) return { error: 'No approval stages are configured for Expense Data changes yet.' };
+  return { immediate: false, stageKey: first.key, stageLabel: first.label };
+}
+
 /** POST /expense/table/:tableKey/:rowId/delete-requests — propose a row DELETION */
 export async function createExpenseDeleteRequest(req: Request, res: Response) {
   const { tableKey, rowId } = req.params;
@@ -361,9 +396,10 @@ export async function createExpenseDeleteRequest(req: Request, res: Response) {
     return res.status(400).json({ success: false, error: due.error });
   }
 
-  const firstStage = await requireFirstStage();
-  if ('error' in firstStage) {
-    return res.status(400).json({ success: false, error: firstStage.error });
+  const user = req.user!;
+  const start = await resolveDeleteRequestStart(user);
+  if ('error' in start) {
+    return res.status(400).json({ success: false, error: start.error });
   }
 
   try {
@@ -386,7 +422,105 @@ export async function createExpenseDeleteRequest(req: Request, res: Response) {
     const diff: Record<string, { old: any; new: any }> = {};
     for (const col of config.columns) diff[col.key] = { old: currentRow[col.key] ?? null, new: null };
 
-    const user = req.user!;
+    if (start.immediate) {
+      // The requester already holds every remaining stage themselves (MDM
+      // tag, or a Category Head with nobody configured after them) — write
+      // it straight to the master, in one transaction, exactly like the
+      // final stage of a normal chain would.
+      const allStages = await getAllApprovalStages();
+      const stageLabel = allStages.find((s) => s.key === start.stageKey)?.label ?? start.stageKey;
+      const selfApprovedTrail: ApprovalTrailEntry = {
+        stageKey: start.stageKey,
+        stageLabel,
+        action: 'APPROVE',
+        byId: user.id,
+        byName: user.name,
+        byEmail: user.email,
+        at: new Date().toISOString(),
+        comment: 'Self-applied — the requester already holds final approval for this business division.',
+      };
+
+      const created = await withPrismaRetry(() =>
+        prisma.$transaction(async (tx) => {
+          const row = await tx.expenseChangeRequest.create({
+            data: {
+              tableKey,
+              operation: 'DELETE',
+              rowId,
+              rowLabel: buildExpenseRowLabel(tableKey, currentRow) ?? null,
+              changes: diff,
+              reason: trimmedReason,
+              dueDate: due.dueDate,
+              status: 'APPROVED',
+              currentStageKey: null,
+              approvalTrail: [selfApprovedTrail],
+              requestedById: user.id,
+              requestedByName: user.name,
+              requestedByEmail: user.email,
+              requesterBusinessDivision: user.businessDivision ?? null,
+            },
+          });
+          await logExpenseAuditEvent(
+            {
+              requestId: row.id,
+              tableKey,
+              rowId,
+              operation: 'DELETE',
+              eventType: 'REQUESTED',
+              stageKey: start.stageKey,
+              stageLabel,
+              actorId: user.id,
+              actorName: user.name,
+              actorEmail: user.email,
+              comment: trimmedReason,
+              details: null,
+            },
+            tx
+          );
+          await applyExpenseRowDelete(tableKey, rowId, tx);
+          await logExpenseAuditEvent(
+            {
+              requestId: row.id,
+              tableKey,
+              rowId,
+              operation: 'DELETE',
+              eventType: 'APPLIED',
+              stageKey: start.stageKey,
+              stageLabel,
+              actorId: user.id,
+              actorName: user.name,
+              actorEmail: user.email,
+              comment: trimmedReason,
+              details: { deletedSnapshot: diff },
+            },
+            tx
+          );
+          return row;
+        })
+      );
+
+      return res.status(201).json({ success: true, data: created });
+    }
+
+    // Normal path — starts at `start.stageKey` (the chain's first stage, or
+    // the stage after Category Head when the requester holds that one
+    // themselves).
+    const skippedCategoryHead = String(user.role) === 'CATEGORY_HEAD';
+    const approvalTrail: ApprovalTrailEntry[] = skippedCategoryHead
+      ? [
+          {
+            stageKey: 'CATEGORY_HEAD',
+            stageLabel: 'Category Head',
+            action: 'APPROVE',
+            byId: user.id,
+            byName: user.name,
+            byEmail: user.email,
+            at: new Date().toISOString(),
+            comment: 'Automatically skipped — the requester is the Category Head for this division.',
+          },
+        ]
+      : [];
+
     const created = await withPrismaRetry(() =>
       prisma.$transaction(async (tx) => {
         const row = await tx.expenseChangeRequest.create({
@@ -398,7 +532,8 @@ export async function createExpenseDeleteRequest(req: Request, res: Response) {
             changes: diff,
             reason: trimmedReason,
             dueDate: due.dueDate,
-            currentStageKey: firstStage.key,
+            currentStageKey: start.stageKey,
+            approvalTrail,
             requestedById: user.id,
             requestedByName: user.name,
             requestedByEmail: user.email,
@@ -412,8 +547,8 @@ export async function createExpenseDeleteRequest(req: Request, res: Response) {
             rowId,
             operation: 'DELETE',
             eventType: 'REQUESTED',
-            stageKey: firstStage.key,
-            stageLabel: firstStage.label,
+            stageKey: start.stageKey,
+            stageLabel: start.stageLabel,
             actorId: user.id,
             actorName: user.name,
             actorEmail: user.email,
@@ -422,7 +557,7 @@ export async function createExpenseDeleteRequest(req: Request, res: Response) {
             // column snapshot (already on the request row itself) — keeps
             // this log entry small; the request row is the source of truth
             // for "what exactly was on the row" until it's actually removed.
-            details: null,
+            details: skippedCategoryHead ? { skippedStage: 'CATEGORY_HEAD' } : null,
           },
           tx
         );
