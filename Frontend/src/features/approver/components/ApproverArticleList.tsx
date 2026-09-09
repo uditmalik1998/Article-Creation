@@ -49,6 +49,7 @@ import {
 } from '@/shared/components/ui-tw';
 import { message } from '@/lib/message';
 import { cn } from '@/lib/utils';
+import { useDragToPan } from '@/shared/hooks/ui/useDragToPan';
 import type { ApproverItem, MasterAttribute } from './ApproverTable';
 import {
   SCHEMA_KEY_TO_EXCEL_ATTR,
@@ -600,6 +601,12 @@ const ArticleCard = React.memo(
     const [bodyNoLoading, setBodyNoLoading] = useState(false);
     const [imgZoom, setImgZoom] = useState(1);
     const [imgRotation, setImgRotation] = useState(0);
+    // The image's real (natural) pixel size, captured on load. `transform: scale()`
+    // alone is purely visual — it never grows the parent's scrollable area, which is
+    // why zooming in previously left no real room to scroll/drag to the far edges.
+    // Sizing the <img> with actual width/height (computed from this) instead makes
+    // the browser's own overflow/scroll math account for the true zoomed size.
+    const [naturalSize, setNaturalSize] = useState<{ w: number; h: number } | null>(null);
     const [catOpen, setCatOpen] = useState(false);
     const [catSearch, setCatSearch] = useState('');
     // Search term for the attribute-value dropdown. A single shared term is
@@ -637,6 +644,18 @@ const ArticleCard = React.memo(
       setImgZoom(1);
       setImgRotation(0);
     }, []);
+
+    // Click-and-drag panning once zoomed in — an alternative to relying on the
+    // mouse wheel/scrollbars to see different parts of a zoomed-in image.
+    const { containerRef: panRef, onMouseDown: onPanMouseDown, isDragging: isImgPanning } = useDragToPan<HTMLDivElement>(imgZoom > 1);
+
+    const [imgViewportSize, setImgViewportSize] = useState({ w: window.innerWidth, h: window.innerHeight });
+    useEffect(() => {
+      if (!imgModalOpen) return;
+      const onResize = () => setImgViewportSize({ w: window.innerWidth, h: window.innerHeight });
+      window.addEventListener('resize', onResize);
+      return () => window.removeEventListener('resize', onResize);
+    }, [imgModalOpen]);
 
     const prevItemRef = React.useRef<ApproverItem>(item);
     React.useEffect(() => {
@@ -1804,6 +1823,31 @@ const ArticleCard = React.memo(
     const attrMatchLevel = attrMatchRatio >= 0.7 ? 'High' : attrMatchRatio >= 0.4 ? 'Medium' : 'Low';
     const qualityColor = (level: string) =>
       level === 'High' ? 'text-emerald-600' : level === 'Medium' ? 'text-amber-600' : 'text-rose-600';
+
+    // Base (100%-zoom) display size, fit to the same 85vw/75vh box the old
+    // maxWidth/maxHeight CSS used — then scaled up by the zoom factor. Rotation at
+    // 90/270° swaps which axis is width vs height so the post-rotation footprint
+    // (what the scroll container needs to accommodate) is what actually gets laid out.
+    const isImgSideways = imgRotation === 90 || imgRotation === 270;
+    // `imgFrame*` is the viewing window: the image's footprint at 100% zoom. It stays put
+    // as you zoom so the dialog doesn't grow with every step — only `imgBox*` (the image
+    // itself) scales, overflowing the frame and becoming scrollable/draggable.
+    const IMG_VIEWER_PADDING = 16; // matches the `p-4` on the preview container
+    let imgFrameWidth: number | undefined;
+    let imgFrameHeight: number | undefined;
+    let imgBoxWidth: number | undefined;
+    let imgBoxHeight: number | undefined;
+    if (naturalSize) {
+      const maxW = imgViewportSize.w * 0.85 - IMG_VIEWER_PADDING * 2;
+      const maxH = imgViewportSize.h * 0.75 - IMG_VIEWER_PADDING * 2;
+      const fitScale = Math.min(1, maxW / naturalSize.w, maxH / naturalSize.h);
+      const baseW = naturalSize.w * fitScale;
+      const baseH = naturalSize.h * fitScale;
+      imgFrameWidth = isImgSideways ? baseH : baseW;
+      imgFrameHeight = isImgSideways ? baseW : baseH;
+      imgBoxWidth = imgFrameWidth * imgZoom;
+      imgBoxHeight = imgFrameHeight * imgZoom;
+    }
 
     return (
       <>
@@ -3090,18 +3134,62 @@ const ArticleCard = React.memo(
                 </Button>
               </div>
             </DialogHeader>
-            <div className="flex items-center justify-center overflow-auto p-4" style={{ maxHeight: '80vh' }}>
+            <div
+              ref={panRef}
+              onMouseDown={onPanMouseDown}
+              className={`flex overflow-auto p-4 ${
+                imgZoom > 1 ? (isImgPanning ? 'cursor-grabbing' : 'cursor-grab') : ''
+              }`}
+              // Fixed to the image's 100%-zoom footprint (plus padding, via border-box)
+              // so the dialog stays the same size at every zoom level — zooming scrolls
+              // within this frame instead of growing it.
+              //
+              // "safe center" degrades to plain "center" in browsers that don't support
+              // it — but plain centering of overflowing flex content can make the start
+              // edge unreachable by scroll, which is the other half of the "can't reach
+              // the top" bug. "safe" keeps it centered until it overflows, then falls
+              // back to start-aligned so every edge stays reachable.
+              style={{
+                width: imgFrameWidth ? imgFrameWidth + IMG_VIEWER_PADDING * 2 : undefined,
+                height: imgFrameHeight ? imgFrameHeight + IMG_VIEWER_PADDING * 2 : undefined,
+                maxWidth: '85vw',
+                maxHeight: '80vh',
+                alignItems: 'safe center',
+                justifyContent: 'safe center',
+              } as React.CSSProperties}
+            >
               <img
                 src={imgUrl || ''}
                 alt={item.imageName || 'preview'}
-                className="block transition-transform duration-200 will-change-transform"
-                style={{
-                  maxWidth: '85vw',
-                  maxHeight: '75vh',
-                  objectFit: 'contain',
-                  transform: `scale(${imgZoom}) rotate(${imgRotation}deg)`,
-                  transformOrigin: 'center',
+                draggable={false}
+                onLoad={(e) => {
+                  const t = e.currentTarget;
+                  setNaturalSize({ w: t.naturalWidth, h: t.naturalHeight });
                 }}
+                className="block shrink-0 transition-[width,height,transform] duration-200 will-change-transform"
+                style={
+                  imgBoxWidth && imgBoxHeight
+                    ? {
+                        width: imgBoxWidth,
+                        height: imgBoxHeight,
+                        // Tailwind Preflight sets `img { max-width: 100% }`, which would
+                        // cap the zoomed width at the dialog's width while the height grew
+                        // freely — distorting the box so `object-fit: contain` letterboxed
+                        // the image with empty bands instead of actually zooming it.
+                        maxWidth: 'none',
+                        maxHeight: 'none',
+                        objectFit: 'contain',
+                        transform: `rotate(${imgRotation}deg)`,
+                        transformOrigin: 'center',
+                      }
+                    : {
+                        maxWidth: '85vw',
+                        maxHeight: '75vh',
+                        objectFit: 'contain',
+                        transform: `scale(${imgZoom}) rotate(${imgRotation}deg)`,
+                        transformOrigin: 'center',
+                      }
+                }
               />
             </div>
           </DialogContent>

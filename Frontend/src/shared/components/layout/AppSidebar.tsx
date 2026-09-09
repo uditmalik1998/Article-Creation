@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
+import { useQuery } from '@tanstack/react-query';
 import {
   Home,
   ShoppingBag,
@@ -58,6 +59,7 @@ import {
   type NotificationItem,
 } from '../../services/notifications/notificationStore';
 import { resetExtractionSession } from '../../hooks/extraction/useImageExtraction';
+import { getMyExpenseAccess } from '../../../services/adminApi';
 
 const COLLAPSED_KEY = 'appSidebarCollapsed';
 
@@ -116,6 +118,17 @@ export const AppSidebar: React.FC<AppSidebarProps> = ({ collapsed, onCollapsedCh
 
   // PD_DESIGNER is a single-purpose role — only Model Generation, no other nav.
   const isPdDesigner = role === 'PD_DESIGNER';
+
+  // Expense Data access is per-email, not per-role, so the only way to know
+  // whether to show its nav entry is to ask. Admins already reach it through
+  // the Admin Panel, so they are skipped.
+  const { data: expenseAccess } = useQuery({
+    queryKey: ['my-expense-access', undefined],
+    queryFn: () => getMyExpenseAccess(),
+    enabled: !isPdDesigner && !isAdmin && !!userData?.id,
+    staleTime: 5 * 60_000,
+    retry: false,
+  });
   // PD is an approval-only role: article queues + PD Approval, no extraction/admin.
   const isPd = role === 'PD';
 
@@ -221,9 +234,12 @@ export const AppSidebar: React.FC<AppSidebarProps> = ({ collapsed, onCollapsedCh
     items.push({ key: '/po-presentation', Icon: FileText, label: 'PO Presentation' });
   }
 
-  // Expense Data change-request workflow: reachable by Creator/Approver/Category-Head/PD
-  // too (each still limited by their role server-side), not just Admin.
-  if (!isPdDesigner && !isAdmin && (role === 'CREATOR' || role === 'APPROVER' || role === 'CATEGORY_HEAD' || role === 'PD')) {
+  // Expense Data: CREATOR/APPROVER get requester rights by role, everyone
+  // else in `canView` (a historic view role, or a grant) gets read access —
+  // `canView` from /expense/my-access folds both in. Admin reaches the same
+  // tables via the full Admin → Expenses page instead.
+  if (!isPdDesigner && !isAdmin && expenseAccess?.canView) {
+    items.push({ key: '/admin/expense-masters', Icon: ShoppingBag, label: 'Expense Data' });
     items.push({ key: '/admin/expense-change-requests', Icon: ClipboardList, label: 'Expense Change Requests' });
   }
 
@@ -237,6 +253,7 @@ export const AppSidebar: React.FC<AppSidebarProps> = ({ collapsed, onCollapsedCh
         { key: '/admin/hierarchy', Icon: Globe, label: 'Hierarchy' },
         { key: '/admin/users', Icon: User, label: 'Users' },
         { key: '/admin/expenses', Icon: ShoppingBag, label: 'Expenses' },
+        { key: '/admin/expense-audit-log', Icon: History, label: 'Expense Audit Log' },
         { key: '/admin/srm-failed', Icon: AlertTriangle, label: 'Failed Extractions' },
         { key: '/admin/ksml-uploader', Icon: Upload, label: 'KSML Uploader' },
         { key: '/admin/poolb-uploader', Icon: Upload, label: 'Pool B Uploader' },
