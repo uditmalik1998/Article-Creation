@@ -56319,6 +56319,7 @@ export namespace Prisma {
     year: string | null
     hsnTaxCode: string | null
     approvalStatus: string | null
+    fgCreatorApproved: string | null
     approvedAt: Date | null
     approvedBy: number | null
     sapSyncStatus: string | null
@@ -56369,6 +56370,7 @@ export namespace Prisma {
     year: string | null
     hsnTaxCode: string | null
     approvalStatus: string | null
+    fgCreatorApproved: string | null
     approvedAt: Date | null
     approvedBy: number | null
     sapSyncStatus: string | null
@@ -56419,6 +56421,7 @@ export namespace Prisma {
     year: number
     hsnTaxCode: number
     approvalStatus: number
+    fgCreatorApproved: number
     approvedAt: number
     approvedBy: number
     sapSyncStatus: number
@@ -56489,6 +56492,7 @@ export namespace Prisma {
     year?: true
     hsnTaxCode?: true
     approvalStatus?: true
+    fgCreatorApproved?: true
     approvedAt?: true
     approvedBy?: true
     sapSyncStatus?: true
@@ -56539,6 +56543,7 @@ export namespace Prisma {
     year?: true
     hsnTaxCode?: true
     approvalStatus?: true
+    fgCreatorApproved?: true
     approvedAt?: true
     approvedBy?: true
     sapSyncStatus?: true
@@ -56589,6 +56594,7 @@ export namespace Prisma {
     year?: true
     hsnTaxCode?: true
     approvalStatus?: true
+    fgCreatorApproved?: true
     approvedAt?: true
     approvedBy?: true
     sapSyncStatus?: true
@@ -56726,6 +56732,7 @@ export namespace Prisma {
     year: string | null
     hsnTaxCode: string | null
     approvalStatus: string
+    fgCreatorApproved: string
     approvedAt: Date | null
     approvedBy: number | null
     sapSyncStatus: string
@@ -56795,6 +56802,7 @@ export namespace Prisma {
     year?: boolean
     hsnTaxCode?: boolean
     approvalStatus?: boolean
+    fgCreatorApproved?: boolean
     approvedAt?: boolean
     approvedBy?: boolean
     sapSyncStatus?: boolean
@@ -56845,6 +56853,7 @@ export namespace Prisma {
     year?: boolean
     hsnTaxCode?: boolean
     approvalStatus?: boolean
+    fgCreatorApproved?: boolean
     approvedAt?: boolean
     approvedBy?: boolean
     sapSyncStatus?: boolean
@@ -56895,6 +56904,7 @@ export namespace Prisma {
     year?: boolean
     hsnTaxCode?: boolean
     approvalStatus?: boolean
+    fgCreatorApproved?: boolean
     approvedAt?: boolean
     approvedBy?: boolean
     sapSyncStatus?: boolean
@@ -56945,6 +56955,7 @@ export namespace Prisma {
     year?: boolean
     hsnTaxCode?: boolean
     approvalStatus?: boolean
+    fgCreatorApproved?: boolean
     approvedAt?: boolean
     approvedBy?: boolean
     sapSyncStatus?: boolean
@@ -56954,7 +56965,7 @@ export namespace Prisma {
     updatedAt?: boolean
   }
 
-  export type BodyArticleDataOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<"id" | "mCollarType" | "mCollarStyle" | "mNeckType" | "mNeckStyle" | "mPlacket" | "mBltType" | "mBltStyle" | "mSleevesMainStyle" | "mSleeveFold" | "mBtmFold" | "mNoOfPocket" | "mPocket" | "mExtraPocket" | "mFit" | "mBodyStyle" | "mLength" | "mSet" | "bodyArticleNumber" | "bodyArticleDescription" | "imageUrl" | "bodyArticleType" | "designNumber" | "cmtpCost" | "cmpCost" | "fabCost" | "fabCons" | "width" | "flatId" | "articleNumber" | "division" | "subDivision" | "majorCategory" | "mcCode" | "vendorName" | "vendorCode" | "season" | "year" | "hsnTaxCode" | "approvalStatus" | "approvedAt" | "approvedBy" | "sapSyncStatus" | "sapSyncMessage" | "userName" | "createdAt" | "updatedAt", ExtArgs["result"]["bodyArticleData"]>
+  export type BodyArticleDataOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<"id" | "mCollarType" | "mCollarStyle" | "mNeckType" | "mNeckStyle" | "mPlacket" | "mBltType" | "mBltStyle" | "mSleevesMainStyle" | "mSleeveFold" | "mBtmFold" | "mNoOfPocket" | "mPocket" | "mExtraPocket" | "mFit" | "mBodyStyle" | "mLength" | "mSet" | "bodyArticleNumber" | "bodyArticleDescription" | "imageUrl" | "bodyArticleType" | "designNumber" | "cmtpCost" | "cmpCost" | "fabCost" | "fabCons" | "width" | "flatId" | "articleNumber" | "division" | "subDivision" | "majorCategory" | "mcCode" | "vendorName" | "vendorCode" | "season" | "year" | "hsnTaxCode" | "approvalStatus" | "fgCreatorApproved" | "approvedAt" | "approvedBy" | "sapSyncStatus" | "sapSyncMessage" | "userName" | "createdAt" | "updatedAt", ExtArgs["result"]["bodyArticleData"]>
 
   export type $BodyArticleDataPayload<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
     name: "BodyArticleData"
@@ -57000,6 +57011,7 @@ export namespace Prisma {
       year: string | null
       hsnTaxCode: string | null
       approvalStatus: string
+      fgCreatorApproved: string
       approvedAt: Date | null
       approvedBy: number | null
       sapSyncStatus: string
@@ -57470,6 +57482,7 @@ export namespace Prisma {
     readonly year: FieldRef<"BodyArticleData", 'String'>
     readonly hsnTaxCode: FieldRef<"BodyArticleData", 'String'>
     readonly approvalStatus: FieldRef<"BodyArticleData", 'String'>
+    readonly fgCreatorApproved: FieldRef<"BodyArticleData", 'String'>
     readonly approvedAt: FieldRef<"BodyArticleData", 'DateTime'>
     readonly approvedBy: FieldRef<"BodyArticleData", 'Int'>
     readonly sapSyncStatus: FieldRef<"BodyArticleData", 'String'>
@@ -64658,6 +64671,7 @@ export namespace Prisma {
     year: 'year',
     hsnTaxCode: 'hsnTaxCode',
     approvalStatus: 'approvalStatus',
+    fgCreatorApproved: 'fgCreatorApproved',
     approvedAt: 'approvedAt',
     approvedBy: 'approvedBy',
     sapSyncStatus: 'sapSyncStatus',
@@ -65556,6 +65570,7 @@ export namespace Prisma {
     year: 'year',
     hsnTaxCode: 'hsnTaxCode',
     approvalStatus: 'approvalStatus',
+    fgCreatorApproved: 'fgCreatorApproved',
     sapSyncStatus: 'sapSyncStatus',
     sapSyncMessage: 'sapSyncMessage',
     userName: 'userName'
@@ -71018,6 +71033,7 @@ export namespace Prisma {
     year?: StringNullableFilter<"BodyArticleData"> | string | null
     hsnTaxCode?: StringNullableFilter<"BodyArticleData"> | string | null
     approvalStatus?: StringFilter<"BodyArticleData"> | string
+    fgCreatorApproved?: StringFilter<"BodyArticleData"> | string
     approvedAt?: DateTimeNullableFilter<"BodyArticleData"> | Date | string | null
     approvedBy?: IntNullableFilter<"BodyArticleData"> | number | null
     sapSyncStatus?: StringFilter<"BodyArticleData"> | string
@@ -71068,6 +71084,7 @@ export namespace Prisma {
     year?: SortOrderInput | SortOrder
     hsnTaxCode?: SortOrderInput | SortOrder
     approvalStatus?: SortOrder
+    fgCreatorApproved?: SortOrder
     approvedAt?: SortOrderInput | SortOrder
     approvedBy?: SortOrderInput | SortOrder
     sapSyncStatus?: SortOrder
@@ -71122,6 +71139,7 @@ export namespace Prisma {
     year?: StringNullableFilter<"BodyArticleData"> | string | null
     hsnTaxCode?: StringNullableFilter<"BodyArticleData"> | string | null
     approvalStatus?: StringFilter<"BodyArticleData"> | string
+    fgCreatorApproved?: StringFilter<"BodyArticleData"> | string
     approvedAt?: DateTimeNullableFilter<"BodyArticleData"> | Date | string | null
     approvedBy?: IntNullableFilter<"BodyArticleData"> | number | null
     sapSyncStatus?: StringFilter<"BodyArticleData"> | string
@@ -71172,6 +71190,7 @@ export namespace Prisma {
     year?: SortOrderInput | SortOrder
     hsnTaxCode?: SortOrderInput | SortOrder
     approvalStatus?: SortOrder
+    fgCreatorApproved?: SortOrder
     approvedAt?: SortOrderInput | SortOrder
     approvedBy?: SortOrderInput | SortOrder
     sapSyncStatus?: SortOrder
@@ -71230,6 +71249,7 @@ export namespace Prisma {
     year?: StringNullableWithAggregatesFilter<"BodyArticleData"> | string | null
     hsnTaxCode?: StringNullableWithAggregatesFilter<"BodyArticleData"> | string | null
     approvalStatus?: StringWithAggregatesFilter<"BodyArticleData"> | string
+    fgCreatorApproved?: StringWithAggregatesFilter<"BodyArticleData"> | string
     approvedAt?: DateTimeNullableWithAggregatesFilter<"BodyArticleData"> | Date | string | null
     approvedBy?: IntNullableWithAggregatesFilter<"BodyArticleData"> | number | null
     sapSyncStatus?: StringWithAggregatesFilter<"BodyArticleData"> | string
@@ -77811,6 +77831,7 @@ export namespace Prisma {
     year?: string | null
     hsnTaxCode?: string | null
     approvalStatus?: string
+    fgCreatorApproved?: string
     approvedAt?: Date | string | null
     approvedBy?: number | null
     sapSyncStatus?: string
@@ -77861,6 +77882,7 @@ export namespace Prisma {
     year?: string | null
     hsnTaxCode?: string | null
     approvalStatus?: string
+    fgCreatorApproved?: string
     approvedAt?: Date | string | null
     approvedBy?: number | null
     sapSyncStatus?: string
@@ -77911,6 +77933,7 @@ export namespace Prisma {
     year?: NullableStringFieldUpdateOperationsInput | string | null
     hsnTaxCode?: NullableStringFieldUpdateOperationsInput | string | null
     approvalStatus?: StringFieldUpdateOperationsInput | string
+    fgCreatorApproved?: StringFieldUpdateOperationsInput | string
     approvedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     approvedBy?: NullableIntFieldUpdateOperationsInput | number | null
     sapSyncStatus?: StringFieldUpdateOperationsInput | string
@@ -77961,6 +77984,7 @@ export namespace Prisma {
     year?: NullableStringFieldUpdateOperationsInput | string | null
     hsnTaxCode?: NullableStringFieldUpdateOperationsInput | string | null
     approvalStatus?: StringFieldUpdateOperationsInput | string
+    fgCreatorApproved?: StringFieldUpdateOperationsInput | string
     approvedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     approvedBy?: NullableIntFieldUpdateOperationsInput | number | null
     sapSyncStatus?: StringFieldUpdateOperationsInput | string
@@ -78011,6 +78035,7 @@ export namespace Prisma {
     year?: string | null
     hsnTaxCode?: string | null
     approvalStatus?: string
+    fgCreatorApproved?: string
     approvedAt?: Date | string | null
     approvedBy?: number | null
     sapSyncStatus?: string
@@ -78061,6 +78086,7 @@ export namespace Prisma {
     year?: NullableStringFieldUpdateOperationsInput | string | null
     hsnTaxCode?: NullableStringFieldUpdateOperationsInput | string | null
     approvalStatus?: StringFieldUpdateOperationsInput | string
+    fgCreatorApproved?: StringFieldUpdateOperationsInput | string
     approvedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     approvedBy?: NullableIntFieldUpdateOperationsInput | number | null
     sapSyncStatus?: StringFieldUpdateOperationsInput | string
@@ -78111,6 +78137,7 @@ export namespace Prisma {
     year?: NullableStringFieldUpdateOperationsInput | string | null
     hsnTaxCode?: NullableStringFieldUpdateOperationsInput | string | null
     approvalStatus?: StringFieldUpdateOperationsInput | string
+    fgCreatorApproved?: StringFieldUpdateOperationsInput | string
     approvedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     approvedBy?: NullableIntFieldUpdateOperationsInput | number | null
     sapSyncStatus?: StringFieldUpdateOperationsInput | string
@@ -82843,6 +82870,7 @@ export namespace Prisma {
     year?: SortOrder
     hsnTaxCode?: SortOrder
     approvalStatus?: SortOrder
+    fgCreatorApproved?: SortOrder
     approvedAt?: SortOrder
     approvedBy?: SortOrder
     sapSyncStatus?: SortOrder
@@ -82902,6 +82930,7 @@ export namespace Prisma {
     year?: SortOrder
     hsnTaxCode?: SortOrder
     approvalStatus?: SortOrder
+    fgCreatorApproved?: SortOrder
     approvedAt?: SortOrder
     approvedBy?: SortOrder
     sapSyncStatus?: SortOrder
@@ -82952,6 +82981,7 @@ export namespace Prisma {
     year?: SortOrder
     hsnTaxCode?: SortOrder
     approvalStatus?: SortOrder
+    fgCreatorApproved?: SortOrder
     approvedAt?: SortOrder
     approvedBy?: SortOrder
     sapSyncStatus?: SortOrder

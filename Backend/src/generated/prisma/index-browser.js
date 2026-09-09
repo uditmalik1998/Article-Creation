@@ -1022,6 +1022,7 @@ exports.Prisma.BodyArticleDataScalarFieldEnum = {
   year: 'year',
   hsnTaxCode: 'hsnTaxCode',
   approvalStatus: 'approvalStatus',
+  fgCreatorApproved: 'fgCreatorApproved',
   approvedAt: 'approvedAt',
   approvedBy: 'approvedBy',
   sapSyncStatus: 'sapSyncStatus',
@@ -1764,6 +1765,7 @@ exports.Prisma.BodyArticleDataOrderByRelevanceFieldEnum = {
   year: 'year',
   hsnTaxCode: 'hsnTaxCode',
   approvalStatus: 'approvalStatus',
+  fgCreatorApproved: 'fgCreatorApproved',
   sapSyncStatus: 'sapSyncStatus',
   sapSyncMessage: 'sapSyncMessage',
   userName: 'userName'

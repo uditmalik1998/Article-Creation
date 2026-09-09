@@ -64,7 +64,7 @@ function buildImData(row: any, mcDetails: { mcCode: string | null; hsnCode: stri
         M_POCKET:             str(row.mPocket),
         POCKET_PLACEMENT:     '',
         M_FIT:                str(row.mFit),
-        M_PATTERN:            str(row.mBodyStyle),
+        M_PATTERN:            '',
         M_LENGTH:             str(row.mLength),
         M_DC_SUB_STYLE:       '',
         M_BTN_MAIN_MVGR:      '',
@@ -91,7 +91,7 @@ function buildImData(row: any, mcDetails: { mcCode: string | null; hsnCode: stri
         M_AGE_GROUP:          '',
         M_EXTRA_POCKET:       str(row.mExtraPocket),
         MVGR_BRAND_VENDOR:    '',
-        NET_WEIGHT:           '',
+        NET_WEIGHT:           '0',
         M_FAB_MAIN_MVGR_1:    '',
         M_FAB_MAIN_MVGR_2:    '',
         M_WEAVE_01:           '',
@@ -177,13 +177,18 @@ export async function submitBodyArticles(ids: string[]): Promise<{
             // ZMM_BODY_ART_CRT_V3 returns EX_DATA array — article number in SAP_ART, errors in MSG_TYP=E rows
             const exDataArray: any[] = Array.isArray(ev?.EX_DATA) ? ev.EX_DATA : [];
             const exDataRow = exDataArray[0] ?? {};
-            const sapNumber =
-                exDataRow?.SAP_ART ||
-                ev?.ARTICLE_NUMBER || ev?.article_number || ev?.MATNR || null;
-            const success = res.ok && !!sapNumber;
+
+            // Only treat SAP_ART as the article number if the row is NOT an error.
+            // When SAP fails, it echoes the failing characteristic name into SAP_ART (e.g. "M_SLEEVE_FOLD").
+            const exDataError = exDataArray.find((r: any) => r.MSG_TYP === 'E' || r.MSG_TYP === 'A');
+            const exDataRowIsError = exDataRow.MSG_TYP === 'E' || exDataRow.MSG_TYP === 'A';
+            const sapNumber = (!exDataRowIsError && exDataRow?.SAP_ART)
+                ? exDataRow.SAP_ART
+                : (ev?.ARTICLE_NUMBER || ev?.article_number || ev?.MATNR || null);
+
+            const success = res.ok && !!sapNumber && !exDataError;
 
             // Error priority: EX_DATA error row → RETURN table → top-level fields → raw HTTP
-            const exDataError = exDataArray.find((r: any) => r.MSG_TYP === 'E' || r.MSG_TYP === 'A');
             const returnEntry = Array.isArray(ev?.RETURN) ? ev.RETURN.find((r: any) => r.TYPE === 'E' || r.TYPE === 'A') : null;
             const msg = exDataError?.MESSAGE
                 || returnEntry?.MESSAGE
@@ -194,10 +199,10 @@ export async function submitBodyArticles(ids: string[]): Promise<{
             await prisma.bodyArticleData.update({
                 where: { id: row.id },
                 data: {
-                    approvalStatus:    success ? 'APPROVED' : 'REJECTED',
+                    approvalStatus:    success ? 'APPROVED' : 'PENDING',
                     sapSyncStatus:     success ? 'SYNCED' : 'FAILED',
                     sapSyncMessage:    msg,
-                    bodyArticleNumber: sapNumber ?? row.bodyArticleNumber,
+                    bodyArticleNumber: success ? sapNumber : row.bodyArticleNumber,
                     approvedAt:        success ? new Date() : undefined,
                 },
             });

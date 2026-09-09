@@ -2458,7 +2458,6 @@ export class ApproverController {
                             rate: true, mrp: true, sapArticleId: true,
                             approvalStatus: true, sapSyncStatus: true,
                             imageUrl: true, articleNumber: true,
-                            weight: true, variantWeight: true,
                         }
                     });
 
@@ -3478,7 +3477,16 @@ export class ApproverController {
 
         const where: any = { bodyArticleType: 'FG' };
 
-        if (status && status !== 'ALL') where.approvalStatus = status;
+        // BODY_APPROVER only sees articles the creator has confirmed (fg_creator_approved = 'APPROVED')
+        const requestingUserRole = (req as any).user?.role as string | undefined;
+        if (requestingUserRole === 'BODY_APPROVER') {
+            where.fgCreatorApproved = 'APPROVED';
+        }
+
+        if (status && status !== 'ALL') {
+            const statuses = status.split(',').map((s: string) => s.trim()).filter(Boolean);
+            where.approvalStatus = statuses.length === 1 ? statuses[0] : { in: statuses };
+        }
         if (division && division !== 'ALL') where.division = { contains: division, mode: 'insensitive' };
         if (subDivision && subDivision !== 'ALL') where.subDivision = { equals: subDivision, mode: 'insensitive' };
         if (majorCategory) where.majorCategory = { equals: majorCategory, mode: 'insensitive' };
@@ -3504,7 +3512,7 @@ export class ApproverController {
                     majorCategory: true, mcCode: true, vendorName: true, vendorCode: true,
                     designNumber: true,
                     season: true, year: true, hsnTaxCode: true, imageUrl: true,
-                    approvalStatus: true, approvedAt: true, approvedBy: true,
+                    approvalStatus: true, fgCreatorApproved: true, approvedAt: true, approvedBy: true,
                     sapSyncStatus: true, sapSyncMessage: true,
                     userName: true, createdAt: true, updatedAt: true,
                     bodyArticleType: true,
@@ -3534,6 +3542,7 @@ export class ApproverController {
             year:                     r.year ?? null,
             hsnTaxCode:               r.hsnTaxCode ?? null,
             approvalStatus:           r.approvalStatus as 'PENDING' | 'APPROVED' | 'REJECTED',
+            fgCreatorApproved:        r.fgCreatorApproved ?? 'PENDING',
             approvedAt:               r.approvedAt?.toISOString() ?? null,
             sapSyncStatus:            (r.sapSyncStatus ?? 'NOT_SYNCED') as any,
             sapSyncMessage:           r.sapSyncMessage ?? null,
@@ -3631,6 +3640,7 @@ export class ApproverController {
             year: r.year ?? null,
             hsnTaxCode: r.hsnTaxCode ?? null,
             approvalStatus: r.approvalStatus,
+            fgCreatorApproved: r.fgCreatorApproved ?? 'PENDING',
             approvedAt: r.approvedAt?.toISOString() ?? null,
             sapSyncStatus: r.sapSyncStatus ?? 'NOT_SYNCED',
             sapSyncMessage: r.sapSyncMessage ?? null,
@@ -3696,6 +3706,20 @@ export class ApproverController {
         }
         const row = await prisma.bodyArticleData.update({ where: { id }, data });
         return res.json(ApproverController.bodyRowToApproverItem(row));
+    };
+
+    static creatorConfirmBodyArticle = async (req: Request, res: Response) => {
+        const { id } = req.params;
+        const row = await prisma.bodyArticleData.findUnique({ where: { id } });
+        if (!row) return res.status(404).json({ error: 'Item not found' });
+        if (row.fgCreatorApproved === 'APPROVED') {
+            return res.json(ApproverController.bodyRowToApproverItem(row));
+        }
+        const updated = await prisma.bodyArticleData.update({
+            where: { id },
+            data: { fgCreatorApproved: 'APPROVED' },
+        });
+        return res.json(ApproverController.bodyRowToApproverItem(updated));
     };
 
     static submitBodyArticles = async (req: Request, res: Response) => {
