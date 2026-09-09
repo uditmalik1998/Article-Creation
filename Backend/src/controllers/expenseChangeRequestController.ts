@@ -35,9 +35,12 @@ import {
   ALL_TABLES,
   getFirstApprovalStage,
   getNextApprovalStage,
+  getActiveApprovalStages,
   getAllApprovalStages,
   getGrantsForEmail,
   canActOnExpenseRequestStage,
+  roleBoundApprovalStageKey,
+  roleTableRestriction,
 } from '../services/expenseAccessService';
 import { logExpenseAuditEvent, logExpenseAuditEventBestEffort } from '../services/expenseAuditLogService';
 import {
@@ -104,10 +107,11 @@ async function findOpenRequestForRow(tableKey: string, rowId: string) {
   );
 }
 
-/** The stage every new request starts at. Creation is refused (400, not a
- * crash) if an admin hasn't configured any active stage yet. */
-async function requireFirstStage(): Promise<{ key: string; label: string } | { error: string }> {
-  const stage = await getFirstApprovalStage();
+/** The stage every new request on `tableKey` starts at. Creation is refused
+ * (400, not a crash) if no active stage is configured for it at all (its
+ * own chain, or the '*' default it would otherwise fall back to). */
+async function requireFirstStage(tableKey: string): Promise<{ key: string; label: string } | { error: string }> {
+  const stage = await getFirstApprovalStage(tableKey);
   if (!stage) {
     return {
       error: 'No approval stages are configured for Expense Data changes yet.',
@@ -148,7 +152,7 @@ export async function createExpenseChangeRequest(req: Request, res: Response) {
     return res.status(400).json({ success: false, error: `These fields are not editable: ${invalidKeys.join(', ')}` });
   }
 
-  const firstStage = await requireFirstStage();
+  const firstStage = await requireFirstStage(tableKey);
   if ('error' in firstStage) {
     return res.status(400).json({ success: false, error: firstStage.error });
   }
@@ -281,7 +285,7 @@ export async function createExpenseAddRequest(req: Request, res: Response) {
     return res.status(400).json({ success: false, error: 'No values were submitted for the new row.' });
   }
 
-  const firstStage = await requireFirstStage();
+  const firstStage = await requireFirstStage(tableKey);
   if ('error' in firstStage) {
     return res.status(400).json({ success: false, error: firstStage.error });
   }
@@ -339,39 +343,62 @@ export async function createExpenseAddRequest(req: Request, res: Response) {
 }
 
 /**
- * Where a DELETE request raised by `user` themselves should start — unlike
- * an add or edit, a deletion the requester could immediately approve
- * themselves has nothing meaningful to gain from waiting on them a second
- * time:
+ * Where a DELETE request raised by `user` themselves should start, on
+ * `tableKey`'s own chain — unlike an add or edit, a deletion the requester
+ * could immediately approve themselves has nothing meaningful to gain from
+ * waiting on them a second time.
  *
- *   - Plain CREATOR/APPROVER: the normal chain, starting at its first stage
- *     (Category Head today).
- *   - CATEGORY_HEAD deleting a row from their OWN division (which is the
- *     only kind they can raise — `requesterBusinessDivision` is always
- *     their own): skips straight past the Category Head stage — approving
- *     your own request is meaningless — to whatever comes after it. If
- *     nothing does (that stage's been made the last one), same as MDM
- *     below: apply immediately.
- *   - Whoever is tagged business division MDM: applies at once, no chain at
- *     all — they already hold the final say over every division.
+ * Walks the chain from its first stage, skipping every LEADING stage
+ * `user`'s own role is bound to (Category Head, Planning) — not just their
+ * own, but everything junior beneath it too, since e.g. a Planning approver
+ * doesn't need a Category Head's sign-off either — until it reaches one
+ * that isn't theirs (that's where the request starts), or runs out (they
+ * hold the whole remaining chain: apply immediately, and THAT stage becomes
+ * a real self-applied action rather than another skip). Whoever is tagged
+ * business division MDM short-circuits this entirely, applying at once
+ * regardless of position — they hold the final say over every division.
  *
- * Returns `{ immediate: true }` when there's nothing left to wait on, or the
- * stage to start at otherwise; `{ error }` only in the default branch, when
- * no chain is configured at all yet.
+ * Returns the stages bypassed this way (for a transparent audit trail)
+ * alongside either the stage to start at or `immediate: true`; `{ error }`
+ * only when no chain is configured for this table at all.
  */
 async function resolveDeleteRequestStart(
-  user: { role: string; businessDivision?: string | null }
-): Promise<{ immediate: true; stageKey: string } | { immediate: false; stageKey: string; stageLabel: string } | { error: string }> {
+  user: { role: string; businessDivision?: string | null },
+  tableKey: string
+): Promise<
+  | { immediate: true; stageKey: string; stageLabel: string; skippedStages: { key: string; label: string }[] }
+  | { immediate: false; stageKey: string; stageLabel: string; skippedStages: { key: string; label: string }[] }
+  | { error: string }
+> {
+  const stages = await getActiveApprovalStages(tableKey);
+  if (stages.length === 0) {
+    return { error: 'No approval stages are configured for Expense Data changes yet.' };
+  }
+  const asRef = (s: { key: string; label: string }) => ({ key: s.key, label: s.label });
+
   if (user.businessDivision === 'MDM') {
-    return { immediate: true, stageKey: 'MDM' };
+    const idx = stages.findIndex((s) => s.key === 'MDM');
+    return idx === -1
+      ? { immediate: true, stageKey: 'MDM', stageLabel: 'MDM', skippedStages: stages.map(asRef) }
+      : { immediate: true, stageKey: 'MDM', stageLabel: stages[idx].label, skippedStages: stages.slice(0, idx).map(asRef) };
   }
-  if (String(user.role) === 'CATEGORY_HEAD') {
-    const next = await getNextApprovalStage('CATEGORY_HEAD');
-    return next ? { immediate: false, stageKey: next.key, stageLabel: next.label } : { immediate: true, stageKey: 'CATEGORY_HEAD' };
+
+  const myStageKey = roleBoundApprovalStageKey(String(user.role));
+  const myIndex = myStageKey ? stages.findIndex((s) => s.key === myStageKey) : -1;
+
+  if (myIndex === -1) {
+    return { immediate: false, stageKey: stages[0].key, stageLabel: stages[0].label, skippedStages: [] };
   }
-  const first = await getFirstApprovalStage();
-  if (!first) return { error: 'No approval stages are configured for Expense Data changes yet.' };
-  return { immediate: false, stageKey: first.key, stageLabel: first.label };
+
+  const next = stages[myIndex + 1];
+  if (next) {
+    // Bypassed entirely — my own stage included, since nobody ever really
+    // approves it, it's just skipped on the way to `next`.
+    return { immediate: false, stageKey: next.key, stageLabel: next.label, skippedStages: stages.slice(0, myIndex + 1).map(asRef) };
+  }
+  // I hold the LAST stage — that one becomes a real self-applied action;
+  // only the stages strictly before it were bypassed.
+  return { immediate: true, stageKey: myStageKey!, stageLabel: stages[myIndex].label, skippedStages: stages.slice(0, myIndex).map(asRef) };
 }
 
 /** POST /expense/table/:tableKey/:rowId/delete-requests — propose a row DELETION */
@@ -397,10 +424,21 @@ export async function createExpenseDeleteRequest(req: Request, res: Response) {
   }
 
   const user = req.user!;
-  const start = await resolveDeleteRequestStart(user);
+  const start = await resolveDeleteRequestStart(user, tableKey);
   if ('error' in start) {
     return res.status(400).json({ success: false, error: start.error });
   }
+  const skippedTrail = (at: string): ApprovalTrailEntry[] =>
+    start.skippedStages.map((s) => ({
+      stageKey: s.key,
+      stageLabel: s.label,
+      action: 'APPROVE',
+      byId: user.id,
+      byName: user.name,
+      byEmail: user.email,
+      at,
+      comment: `Automatically skipped — the requester's own approval position already covers "${s.label}".`,
+    }));
 
   try {
     const openExisting = await findOpenRequestForRow(tableKey, rowId);
@@ -424,19 +462,20 @@ export async function createExpenseDeleteRequest(req: Request, res: Response) {
 
     if (start.immediate) {
       // The requester already holds every remaining stage themselves (MDM
-      // tag, or a Category Head with nobody configured after them) — write
-      // it straight to the master, in one transaction, exactly like the
-      // final stage of a normal chain would.
-      const allStages = await getAllApprovalStages();
-      const stageLabel = allStages.find((s) => s.key === start.stageKey)?.label ?? start.stageKey;
+      // tag, or a senior role with nobody configured after it) — write it
+      // straight to the master, in one transaction, exactly like the final
+      // stage of a normal chain would. Every stage before it (if any) is
+      // recorded as auto-skipped; the stage they actually hold gets one
+      // real self-applied APPROVE entry.
+      const now = new Date().toISOString();
       const selfApprovedTrail: ApprovalTrailEntry = {
         stageKey: start.stageKey,
-        stageLabel,
+        stageLabel: start.stageLabel,
         action: 'APPROVE',
         byId: user.id,
         byName: user.name,
         byEmail: user.email,
-        at: new Date().toISOString(),
+        at: now,
         comment: 'Self-applied — the requester already holds final approval for this business division.',
       };
 
@@ -453,7 +492,7 @@ export async function createExpenseDeleteRequest(req: Request, res: Response) {
               dueDate: due.dueDate,
               status: 'APPROVED',
               currentStageKey: null,
-              approvalTrail: [selfApprovedTrail],
+              approvalTrail: [...skippedTrail(now), selfApprovedTrail],
               requestedById: user.id,
               requestedByName: user.name,
               requestedByEmail: user.email,
@@ -468,7 +507,7 @@ export async function createExpenseDeleteRequest(req: Request, res: Response) {
               operation: 'DELETE',
               eventType: 'REQUESTED',
               stageKey: start.stageKey,
-              stageLabel,
+              stageLabel: start.stageLabel,
               actorId: user.id,
               actorName: user.name,
               actorEmail: user.email,
@@ -486,7 +525,7 @@ export async function createExpenseDeleteRequest(req: Request, res: Response) {
               operation: 'DELETE',
               eventType: 'APPLIED',
               stageKey: start.stageKey,
-              stageLabel,
+              stageLabel: start.stageLabel,
               actorId: user.id,
               actorName: user.name,
               actorEmail: user.email,
@@ -503,23 +542,10 @@ export async function createExpenseDeleteRequest(req: Request, res: Response) {
     }
 
     // Normal path — starts at `start.stageKey` (the chain's first stage, or
-    // the stage after Category Head when the requester holds that one
-    // themselves).
-    const skippedCategoryHead = String(user.role) === 'CATEGORY_HEAD';
-    const approvalTrail: ApprovalTrailEntry[] = skippedCategoryHead
-      ? [
-          {
-            stageKey: 'CATEGORY_HEAD',
-            stageLabel: 'Category Head',
-            action: 'APPROVE',
-            byId: user.id,
-            byName: user.name,
-            byEmail: user.email,
-            at: new Date().toISOString(),
-            comment: 'Automatically skipped — the requester is the Category Head for this division.',
-          },
-        ]
-      : [];
+    // whatever comes after every stage the requester already holds
+    // themselves, each recorded below as auto-skipped).
+    const nowIso = new Date().toISOString();
+    const approvalTrail = skippedTrail(nowIso);
 
     const created = await withPrismaRetry(() =>
       prisma.$transaction(async (tx) => {
@@ -557,7 +583,7 @@ export async function createExpenseDeleteRequest(req: Request, res: Response) {
             // column snapshot (already on the request row itself) — keeps
             // this log entry small; the request row is the source of truth
             // for "what exactly was on the row" until it's actually removed.
-            details: skippedCategoryHead ? { skippedStage: 'CATEGORY_HEAD' } : null,
+            details: start.skippedStages.length > 0 ? { skippedStages: start.skippedStages.map((s) => s.key) } : null,
           },
           tx
         );
@@ -611,27 +637,34 @@ export async function getExpenseChangeRequests(req: Request, res: Response) {
   // visibility tier below already applies, never widen it.
   if (requesterBusinessDivision) andConditions.push({ requesterBusinessDivision });
 
-  // Three visibility tiers, in order of how much a caller can see:
+  // Four visibility tiers, in order of how much a caller can see:
   //   1. ADMIN, or someone tagged businessDivision MDM (the final stage is
-  //      division-agnostic on purpose — every division converges there) —
+  //      division-agnostic on purpose — every division converges here) —
   //      sees every request, unrestricted.
-  //   2. A CATEGORY_HEAD with a business division set — sees only THEIR OWN
+  //   2. A role confined to a fixed subset of tables (PLANNING: Segment
+  //      Master / Size Master only, see ROLE_TABLE_RESTRICTIONS) — sees
+  //      every request, but ONLY for those tables. Company-wide within
+  //      them (not scoped to one division), same reasoning as MDM.
+  //   3. A CATEGORY_HEAD with a business division set — sees only THEIR OWN
   //      division's requests (every operation/requester in it, not just the
   //      ones currently pending at their stage), never another division's.
   //      This is the "segregated to their Category Head" behaviour.
-  //   3. Everyone else (a pure requester, or a Category Head with no
+  //   4. Everyone else (a pure requester, or a Category Head with no
   //      division tagged yet) — sees only requests they themselves raised.
   // `mine=true` always means literally "I raised these", regardless of tier,
   // so it's checked first.
   const isAdmin = String(req.user?.role) === 'ADMIN';
   const isMdmTagged = req.user?.businessDivision === 'MDM';
+  const restrictedToTables = req.user ? roleTableRestriction(String(req.user.role)) : null;
   const isDivisionScopedCategoryHead = String(req.user?.role) === 'CATEGORY_HEAD' && !!req.user?.businessDivision;
   const canSeeEveryonesRequests = isAdmin || isMdmTagged;
 
   if (mine === 'true' && req.user) {
     andConditions.push({ requestedById: req.user.id });
   } else if (!canSeeEveryonesRequests && req.user) {
-    if (isDivisionScopedCategoryHead) {
+    if (restrictedToTables) {
+      andConditions.push({ tableKey: { in: restrictedToTables } });
+    } else if (isDivisionScopedCategoryHead) {
       andConditions.push({ requesterBusinessDivision: req.user.businessDivision });
     } else {
       andConditions.push({ requestedById: req.user.id });
@@ -648,6 +681,11 @@ export async function getExpenseChangeRequests(req: Request, res: Response) {
     // CATEGORY_HEAD stage: only this approver's own division's requests.
     if (String(req.user.role) === 'CATEGORY_HEAD' && req.user.businessDivision) {
       or.push({ currentStageKey: 'CATEGORY_HEAD', requesterBusinessDivision: req.user.businessDivision });
+    }
+    // PLANNING stage (Segment Master / Size Master only): role alone,
+    // company-wide — no division match required.
+    if (String(req.user.role) === 'PLANNING') {
+      or.push({ currentStageKey: 'PLANNING' });
     }
     // MDM stage: gated purely by the approver's own tag, not by which
     // division the request came from.
@@ -883,7 +921,7 @@ export async function actOnExpenseChangeRequest(req: Request, res: Response) {
     }
 
     // APPROVE — advance to the next active stage, or apply if this was the last one.
-    const nextStage = await getNextApprovalStage(existingRequest.currentStageKey);
+    const nextStage = await getNextApprovalStage(existingRequest.currentStageKey, existingRequest.tableKey);
 
     if (nextStage) {
       const updated = await withPrismaRetry(() =>

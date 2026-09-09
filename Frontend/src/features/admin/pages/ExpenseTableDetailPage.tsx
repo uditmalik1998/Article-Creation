@@ -205,7 +205,7 @@ export default function ExpenseTableDetailPage() {
       {(canAdd || canEdit || canDelete) && (
         <p className="text-xs text-muted-foreground">
           Adds, edits and deletions are requests, not direct changes: each one needs a reason and a “needed by” date,
-          then Category Head review followed by MDM approval before it touches the master.
+          then goes through the approval chain before it touches the master.
         </p>
       )}
 

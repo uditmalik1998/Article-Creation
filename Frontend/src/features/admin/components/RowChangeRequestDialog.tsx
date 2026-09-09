@@ -252,7 +252,7 @@ export function RowChangeRequestDialog({
       } else {
         await createExpenseDeleteRequest(tableKey, String(row![config.rowKey]), meta);
       }
-      message.success('Request submitted — pending Category Head review, then MDM approval.');
+      message.success('Request submitted — now pending approval.');
       onOpenChange(false);
       onSubmitted();
     } catch (err: any) {
@@ -336,14 +336,14 @@ export function RowChangeRequestDialog({
             <Label className="text-xs">Needed by (required)</Label>
             <DatePicker value={dueDate} onChange={setDueDate} />
             <p className="text-xs text-muted-foreground">
-              The date you need this done by. Both the Category Head and MDM see it, so they can tell what is running
+              The date you need this done by. Every approver in the chain sees it, so they can tell what is running
               late.
             </p>
           </div>
 
           <p className="text-xs text-muted-foreground">
-            This won't take effect immediately — it goes to the Category Head for review, then to MDM for final
-            approval, and only then is it applied to the master (and so visible to SAP).
+            This won't take effect immediately — it goes through the approval chain, and is applied to the master
+            (and so visible to SAP) only once every stage has signed off.
           </p>
         </div>
 

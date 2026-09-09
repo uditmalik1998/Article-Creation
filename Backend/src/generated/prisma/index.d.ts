@@ -337,7 +337,8 @@ export const UserRole: {
   SUB_DIVISION_HEAD: 'SUB_DIVISION_HEAD',
   PD_DESIGNER: 'PD_DESIGNER',
   PD: 'PD',
-  BODY_APPROVER: 'BODY_APPROVER'
+  BODY_APPROVER: 'BODY_APPROVER',
+  PLANNING: 'PLANNING'
 };
 
 export type UserRole = (typeof UserRole)[keyof typeof UserRole]
@@ -23301,7 +23302,7 @@ export namespace Prisma {
        * Coarse business-unit tag, independent of `division`/`subDivision` above
        * (those are tied to the Department/SubDepartment hierarchy for
        * extraction routing, and `division` can hold several comma-separated
-       * values). This is always exactly one of MENS / KIDS / LADIES / PO,
+       * values). This is always exactly one of MENS / KIDS / LADIES / PD / MDM,
        * admin-editable from the Users page, and every user is meant to end up
        * with one — shown in the UI as "Business Division" to avoid being
        * confused with the existing Sub Division field.
@@ -58962,6 +58963,7 @@ export namespace Prisma {
 
   export type ExpenseApprovalStageMinAggregateOutputType = {
     id: number | null
+    tableKey: string | null
     key: string | null
     label: string | null
     description: string | null
@@ -58975,6 +58977,7 @@ export namespace Prisma {
 
   export type ExpenseApprovalStageMaxAggregateOutputType = {
     id: number | null
+    tableKey: string | null
     key: string | null
     label: string | null
     description: string | null
@@ -58988,6 +58991,7 @@ export namespace Prisma {
 
   export type ExpenseApprovalStageCountAggregateOutputType = {
     id: number
+    tableKey: number
     key: number
     label: number
     description: number
@@ -59015,6 +59019,7 @@ export namespace Prisma {
 
   export type ExpenseApprovalStageMinAggregateInputType = {
     id?: true
+    tableKey?: true
     key?: true
     label?: true
     description?: true
@@ -59028,6 +59033,7 @@ export namespace Prisma {
 
   export type ExpenseApprovalStageMaxAggregateInputType = {
     id?: true
+    tableKey?: true
     key?: true
     label?: true
     description?: true
@@ -59041,6 +59047,7 @@ export namespace Prisma {
 
   export type ExpenseApprovalStageCountAggregateInputType = {
     id?: true
+    tableKey?: true
     key?: true
     label?: true
     description?: true
@@ -59141,6 +59148,7 @@ export namespace Prisma {
 
   export type ExpenseApprovalStageGroupByOutputType = {
     id: number
+    tableKey: string
     key: string
     label: string
     description: string | null
@@ -59173,6 +59181,7 @@ export namespace Prisma {
 
   export type ExpenseApprovalStageSelect<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
     id?: boolean
+    tableKey?: boolean
     key?: boolean
     label?: boolean
     description?: boolean
@@ -59186,6 +59195,7 @@ export namespace Prisma {
 
   export type ExpenseApprovalStageSelectCreateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
     id?: boolean
+    tableKey?: boolean
     key?: boolean
     label?: boolean
     description?: boolean
@@ -59199,6 +59209,7 @@ export namespace Prisma {
 
   export type ExpenseApprovalStageSelectUpdateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
     id?: boolean
+    tableKey?: boolean
     key?: boolean
     label?: boolean
     description?: boolean
@@ -59212,6 +59223,7 @@ export namespace Prisma {
 
   export type ExpenseApprovalStageSelectScalar = {
     id?: boolean
+    tableKey?: boolean
     key?: boolean
     label?: boolean
     description?: boolean
@@ -59223,13 +59235,24 @@ export namespace Prisma {
     updatedAt?: boolean
   }
 
-  export type ExpenseApprovalStageOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<"id" | "key" | "label" | "description" | "sortOrder" | "isActive" | "createdById" | "createdByName" | "createdAt" | "updatedAt", ExtArgs["result"]["expenseApprovalStage"]>
+  export type ExpenseApprovalStageOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<"id" | "tableKey" | "key" | "label" | "description" | "sortOrder" | "isActive" | "createdById" | "createdByName" | "createdAt" | "updatedAt", ExtArgs["result"]["expenseApprovalStage"]>
 
   export type $ExpenseApprovalStagePayload<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
     name: "ExpenseApprovalStage"
     objects: {}
     scalars: $Extensions.GetPayloadResult<{
       id: number
+      /**
+       * Which table's chain this stage belongs to, or the sentinel '*' (see
+       * ALL_TABLES in expenseAccessService.ts) for the SHARED DEFAULT chain
+       * every table walks unless it has rows of its own here. A table with
+       * any row of its own uses ONLY those (its complete chain), never a mix
+       * of its own rows and the default's — e.g. Segment Master and Size
+       * Master each get their own 3-stage Category Head -> Planning -> MDM
+       * chain, while National Grid and Major Category Grid still fall
+       * through to the '*' default (Category Head -> MDM).
+       */
+      tableKey: string
       key: string
       label: string
       description: string | null
@@ -59668,6 +59691,7 @@ export namespace Prisma {
    */
   interface ExpenseApprovalStageFieldRefs {
     readonly id: FieldRef<"ExpenseApprovalStage", 'Int'>
+    readonly tableKey: FieldRef<"ExpenseApprovalStage", 'String'>
     readonly key: FieldRef<"ExpenseApprovalStage", 'String'>
     readonly label: FieldRef<"ExpenseApprovalStage", 'String'>
     readonly description: FieldRef<"ExpenseApprovalStage", 'String'>
@@ -64664,6 +64688,7 @@ export namespace Prisma {
 
   export const ExpenseApprovalStageScalarFieldEnum: {
     id: 'id',
+    tableKey: 'tableKey',
     key: 'key',
     label: 'label',
     description: 'description',
@@ -65554,6 +65579,7 @@ export namespace Prisma {
 
 
   export const ExpenseApprovalStageOrderByRelevanceFieldEnum: {
+    tableKey: 'tableKey',
     key: 'key',
     label: 'label',
     description: 'description',
@@ -71298,6 +71324,7 @@ export namespace Prisma {
     OR?: ExpenseApprovalStageWhereInput[]
     NOT?: ExpenseApprovalStageWhereInput | ExpenseApprovalStageWhereInput[]
     id?: IntFilter<"ExpenseApprovalStage"> | number
+    tableKey?: StringFilter<"ExpenseApprovalStage"> | string
     key?: StringFilter<"ExpenseApprovalStage"> | string
     label?: StringFilter<"ExpenseApprovalStage"> | string
     description?: StringNullableFilter<"ExpenseApprovalStage"> | string | null
@@ -71311,6 +71338,7 @@ export namespace Prisma {
 
   export type ExpenseApprovalStageOrderByWithRelationInput = {
     id?: SortOrder
+    tableKey?: SortOrder
     key?: SortOrder
     label?: SortOrder
     description?: SortOrderInput | SortOrder
@@ -71325,10 +71353,12 @@ export namespace Prisma {
 
   export type ExpenseApprovalStageWhereUniqueInput = Prisma.AtLeast<{
     id?: number
-    key?: string
+    tableKey_key?: ExpenseApprovalStageTableKeyKeyCompoundUniqueInput
     AND?: ExpenseApprovalStageWhereInput | ExpenseApprovalStageWhereInput[]
     OR?: ExpenseApprovalStageWhereInput[]
     NOT?: ExpenseApprovalStageWhereInput | ExpenseApprovalStageWhereInput[]
+    tableKey?: StringFilter<"ExpenseApprovalStage"> | string
+    key?: StringFilter<"ExpenseApprovalStage"> | string
     label?: StringFilter<"ExpenseApprovalStage"> | string
     description?: StringNullableFilter<"ExpenseApprovalStage"> | string | null
     sortOrder?: IntFilter<"ExpenseApprovalStage"> | number
@@ -71337,10 +71367,11 @@ export namespace Prisma {
     createdByName?: StringNullableFilter<"ExpenseApprovalStage"> | string | null
     createdAt?: DateTimeFilter<"ExpenseApprovalStage"> | Date | string
     updatedAt?: DateTimeFilter<"ExpenseApprovalStage"> | Date | string
-  }, "id" | "key">
+  }, "id" | "tableKey_key">
 
   export type ExpenseApprovalStageOrderByWithAggregationInput = {
     id?: SortOrder
+    tableKey?: SortOrder
     key?: SortOrder
     label?: SortOrder
     description?: SortOrderInput | SortOrder
@@ -71362,6 +71393,7 @@ export namespace Prisma {
     OR?: ExpenseApprovalStageScalarWhereWithAggregatesInput[]
     NOT?: ExpenseApprovalStageScalarWhereWithAggregatesInput | ExpenseApprovalStageScalarWhereWithAggregatesInput[]
     id?: IntWithAggregatesFilter<"ExpenseApprovalStage"> | number
+    tableKey?: StringWithAggregatesFilter<"ExpenseApprovalStage"> | string
     key?: StringWithAggregatesFilter<"ExpenseApprovalStage"> | string
     label?: StringWithAggregatesFilter<"ExpenseApprovalStage"> | string
     description?: StringNullableWithAggregatesFilter<"ExpenseApprovalStage"> | string | null
@@ -78177,6 +78209,7 @@ export namespace Prisma {
   }
 
   export type ExpenseApprovalStageCreateInput = {
+    tableKey?: string
     key: string
     label: string
     description?: string | null
@@ -78190,6 +78223,7 @@ export namespace Prisma {
 
   export type ExpenseApprovalStageUncheckedCreateInput = {
     id?: number
+    tableKey?: string
     key: string
     label: string
     description?: string | null
@@ -78202,6 +78236,7 @@ export namespace Prisma {
   }
 
   export type ExpenseApprovalStageUpdateInput = {
+    tableKey?: StringFieldUpdateOperationsInput | string
     key?: StringFieldUpdateOperationsInput | string
     label?: StringFieldUpdateOperationsInput | string
     description?: NullableStringFieldUpdateOperationsInput | string | null
@@ -78215,6 +78250,7 @@ export namespace Prisma {
 
   export type ExpenseApprovalStageUncheckedUpdateInput = {
     id?: IntFieldUpdateOperationsInput | number
+    tableKey?: StringFieldUpdateOperationsInput | string
     key?: StringFieldUpdateOperationsInput | string
     label?: StringFieldUpdateOperationsInput | string
     description?: NullableStringFieldUpdateOperationsInput | string | null
@@ -78228,6 +78264,7 @@ export namespace Prisma {
 
   export type ExpenseApprovalStageCreateManyInput = {
     id?: number
+    tableKey?: string
     key: string
     label: string
     description?: string | null
@@ -78240,6 +78277,7 @@ export namespace Prisma {
   }
 
   export type ExpenseApprovalStageUpdateManyMutationInput = {
+    tableKey?: StringFieldUpdateOperationsInput | string
     key?: StringFieldUpdateOperationsInput | string
     label?: StringFieldUpdateOperationsInput | string
     description?: NullableStringFieldUpdateOperationsInput | string | null
@@ -78253,6 +78291,7 @@ export namespace Prisma {
 
   export type ExpenseApprovalStageUncheckedUpdateManyInput = {
     id?: IntFieldUpdateOperationsInput | number
+    tableKey?: StringFieldUpdateOperationsInput | string
     key?: StringFieldUpdateOperationsInput | string
     label?: StringFieldUpdateOperationsInput | string
     description?: NullableStringFieldUpdateOperationsInput | string | null
@@ -82990,8 +83029,14 @@ export namespace Prisma {
     search: string
   }
 
+  export type ExpenseApprovalStageTableKeyKeyCompoundUniqueInput = {
+    tableKey: string
+    key: string
+  }
+
   export type ExpenseApprovalStageCountOrderByAggregateInput = {
     id?: SortOrder
+    tableKey?: SortOrder
     key?: SortOrder
     label?: SortOrder
     description?: SortOrder
@@ -83011,6 +83056,7 @@ export namespace Prisma {
 
   export type ExpenseApprovalStageMaxOrderByAggregateInput = {
     id?: SortOrder
+    tableKey?: SortOrder
     key?: SortOrder
     label?: SortOrder
     description?: SortOrder
@@ -83024,6 +83070,7 @@ export namespace Prisma {
 
   export type ExpenseApprovalStageMinOrderByAggregateInput = {
     id?: SortOrder
+    tableKey?: SortOrder
     key?: SortOrder
     label?: SortOrder
     description?: SortOrder

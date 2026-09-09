@@ -1046,6 +1046,7 @@ exports.Prisma.MajorCategoryDetailsScalarFieldEnum = {
 
 exports.Prisma.ExpenseApprovalStageScalarFieldEnum = {
   id: 'id',
+  tableKey: 'tableKey',
   key: 'key',
   label: 'label',
   description: 'description',
@@ -1780,6 +1781,7 @@ exports.Prisma.MajorCategoryDetailsOrderByRelevanceFieldEnum = {
 };
 
 exports.Prisma.ExpenseApprovalStageOrderByRelevanceFieldEnum = {
+  tableKey: 'tableKey',
   key: 'key',
   label: 'label',
   description: 'description',
@@ -1867,7 +1869,8 @@ exports.UserRole = exports.$Enums.UserRole = {
   SUB_DIVISION_HEAD: 'SUB_DIVISION_HEAD',
   PD_DESIGNER: 'PD_DESIGNER',
   PD: 'PD',
-  BODY_APPROVER: 'BODY_APPROVER'
+  BODY_APPROVER: 'BODY_APPROVER',
+  PLANNING: 'PLANNING'
 };
 
 exports.ChangeAction = exports.$Enums.ChangeAction = {
