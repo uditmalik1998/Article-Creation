@@ -483,6 +483,15 @@ export default function ArticleDetailPage() {
       // Color is mandatory on New Articles — on Save & Submit the approver's
       // direct approval auto-generates variants from this BOM color.
       if (pathType === 'new' && !item.colour) missing.push('COLOUR');
+      // Body Article NO and DESC are mandatory for FG articles.
+      // Body Article NO must be exactly 10 digits.
+      const bodyNo = (item.bodyArticle || '').trim();
+      if (!bodyNo) {
+        missing.push('BODY ARTICLE NO.');
+      } else if (!/^\d{10}$/.test(bodyNo)) {
+        missing.push('BODY ARTICLE NO. (must be exactly 10 digits)');
+      }
+      if (!(item.bodyArticleDescription || '').trim()) missing.push('BODY ARTICLE DESC.');
       missing.push(...getMissingMandatoryFields(item));
       if (missing.length > 0) acc.push({ articleId: item.sapArticleId || item.articleNumber || item.imageName || item.id, missing });
       return acc;

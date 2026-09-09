@@ -2728,6 +2728,72 @@ export const downloadSizeMasterTemplate = async (_req: Request, res: Response): 
 };
 
 /**
+ * GET /api/admin/size-master/download
+ * Exports the full maj_cat_sizes table as an .xlsx file in the same format as the upload template.
+ */
+export const downloadSizeMasterData = async (_req: Request, res: Response): Promise<void> => {
+  try {
+    const ExcelJS = require('exceljs');
+    const rows: any[] = await prisma.$queryRaw`
+      SELECT division, sub_division, mc_code, major_category, size, status
+      FROM maj_cat_sizes
+      ORDER BY division, sub_division, major_category, size
+    `;
+
+    const wb = new ExcelJS.Workbook();
+    const ws = wb.addWorksheet('COMPILE');
+
+    // Row 1 — title (merged A1:F1)
+    ws.mergeCells('A1:F1');
+    const titleCell = ws.getCell('A1');
+    titleCell.value = 'CENTRAL ACT/IN-ACT SIZE STATUS';
+    titleCell.font = { bold: true, size: 13 };
+    titleCell.alignment = { horizontal: 'center' };
+    ws.getRow(1).height = 22;
+
+    // Row 2 — empty
+    ws.addRow([]);
+
+    // Row 3 — headers
+    const headers = ['DIV', 'SUB-DIV', 'MC_CD', 'MC_DESC', 'SIZE', 'SIZE ST'];
+    const headerRow = ws.addRow(headers);
+    headerRow.eachCell((cell: any) => {
+      cell.font = { bold: true, color: { argb: 'FFFFFFFF' } };
+      cell.fill = { type: 'pattern', pattern: 'solid', fgColor: { argb: 'FF1565C0' } };
+      cell.alignment = { horizontal: 'center' };
+    });
+
+    // Row 4 — empty
+    ws.addRow([]);
+
+    // Row 5+ — data
+    for (const row of rows) {
+      ws.addRow([
+        row.division ?? '',
+        row.sub_division ?? '',
+        row.mc_code ?? '',
+        row.major_category ?? '',
+        row.size ?? '',
+        row.status ?? '',
+      ]);
+    }
+
+    ws.columns = [
+      { width: 12 }, { width: 12 }, { width: 16 }, { width: 22 }, { width: 12 }, { width: 12 },
+    ];
+
+    const filename = `SIZE_MASTER_${new Date().toISOString().slice(0, 10)}.xlsx`;
+    res.setHeader('Content-Type', 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');
+    res.setHeader('Content-Disposition', `attachment; filename="${filename}"`);
+    await wb.xlsx.write(res);
+    res.end();
+  } catch (error: any) {
+    console.error('[SizeMaster] Download error:', error);
+    res.status(500).json({ success: false, error: error.message });
+  }
+};
+
+/**
  * POST /api/admin/size-master/upload
  * Accepts a multipart Excel (sheet "COMPILE", headers in row 3, data from row 5):
  *   A=DIV  B=SUB-DIV  C=MC_CD  D=MC_DESC  E=SIZE  F=SIZE ST
@@ -2907,6 +2973,63 @@ export const downloadColorMasterTemplate = async (_req: Request, res: Response):
     res.end();
   } catch (error: any) {
     console.error('[ColorMaster] Template error:', error);
+    res.status(500).json({ success: false, error: error.message });
+  }
+};
+
+/**
+ * GET /api/admin/color-master/download
+ * Exports the full color_master table as an .xlsx in the same format as the upload template.
+ */
+export const downloadColorMasterData = async (_req: Request, res: Response): Promise<void> => {
+  try {
+    const ExcelJS = require('exceljs');
+    const rows: any[] = await prisma.$queryRaw`
+      SELECT father_color, child_color, sap_create_old
+      FROM color_master
+      ORDER BY father_color, child_color
+    `;
+
+    const wb = new ExcelJS.Workbook();
+    const ws = wb.addWorksheet('COLOR CHART MASTER');
+
+    // Row 1 — title
+    ws.mergeCells('A1:I1');
+    const titleCell = ws.getCell('A1');
+    titleCell.value = 'NATIONAL COLOR CHART';
+    titleCell.font = { bold: true, size: 13 };
+    titleCell.alignment = { horizontal: 'center' };
+    ws.getRow(1).height = 22;
+
+    // Row 2 — empty
+    ws.addRow([]);
+
+    // Row 3 — headers
+    const headers = ['S. NO', 'FATHER COLOR', 'FATHER_COLOR__SHORT_FORM', 'CHILD COLOR', 'SAP CREATE OLD', 'SUGGESTED TCX', 'MATCH TYPE', 'HEX CODE', 'CORRECT VISUAL SHADE'];
+    const headerRow = ws.addRow(headers);
+    headerRow.eachCell((cell: any) => {
+      cell.font = { bold: true, color: { argb: 'FFFFFFFF' } };
+      cell.fill = { type: 'pattern', pattern: 'solid', fgColor: { argb: 'FF1565C0' } };
+      cell.alignment = { horizontal: 'center' };
+    });
+
+    // Row 4+ — data (only the 3 stored columns; rest blank)
+    rows.forEach((row, i) => {
+      ws.addRow([i + 1, row.father_color ?? '', '', row.child_color ?? '', row.sap_create_old ?? '', '', '', '', '']);
+    });
+
+    ws.columns = [
+      { width: 8 }, { width: 16 }, { width: 22 }, { width: 20 }, { width: 16 },
+      { width: 14 }, { width: 12 }, { width: 12 }, { width: 18 },
+    ];
+
+    const filename = `COLOR_MASTER_${new Date().toISOString().slice(0, 10)}.xlsx`;
+    res.setHeader('Content-Type', 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');
+    res.setHeader('Content-Disposition', `attachment; filename="${filename}"`);
+    await wb.xlsx.write(res);
+    res.end();
+  } catch (error: any) {
+    console.error('[ColorMaster] Download error:', error);
     res.status(500).json({ success: false, error: error.message });
   }
 };
