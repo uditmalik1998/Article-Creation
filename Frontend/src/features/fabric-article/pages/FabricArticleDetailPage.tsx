@@ -291,6 +291,7 @@ export default function ArticleDetailPage({
   const [confirmDialog, setConfirmDialog] = useState<ConfirmDialog>(null);
   const [infoDialog, setInfoDialog] = useState<InfoDialog>(null);
   const [approving, setApproving] = useState(false);
+  const [confirmingCreator, setConfirmingCreator] = useState(false);
   // Bumped once the per-category mandatory grid finishes loading, so the
   // Save & Submit gate recomputes against real grid data (fixes the hard-refresh
   // race where the gate ran before the grid cache was populated).
@@ -314,6 +315,11 @@ export default function ArticleDetailPage({
   }>({ divisions: [], subDivsByDiv: {}, majCatsBySubDiv: {}, mcDesByMajCat: {} });
 
   const canApprove = user?.role != null && approveRoles.includes(user.role);
+  const isBodyArticlePage = skipMandatoryFieldsCheck;
+  // Confirm button: visible to everyone on body article page EXCEPT BODY_APPROVER
+  const canCreatorConfirm = isBodyArticlePage && user?.role !== 'BODY_APPROVER';
+  // Save & Submit on body article page: only BODY_APPROVER and ADMIN can submit to SAP
+  const canSubmitBodyArticle = !isBodyArticlePage || user?.role === 'BODY_APPROVER' || user?.role === 'ADMIN';
 
   // ─── Init ───────────────────────────────────────────────────────────────────
 
@@ -416,7 +422,7 @@ export default function ArticleDetailPage({
 
   // Auto-select current item
   useEffect(() => {
-    if (currentItem && currentItem.approvalStatus !== 'REJECTED') {
+    if (currentItem && (currentItem.approvalStatus !== 'REJECTED' || isBodyArticlePage)) {
       setSelectedRowKeys([currentItem.id]);
     } else {
       setSelectedRowKeys([]);
@@ -595,6 +601,26 @@ export default function ArticleDetailPage({
       pollUntilSynced(currentItem.id);
     } catch (e) {
       message.error(e instanceof Error ? e.message : 'Failed to re-queue');
+    }
+  };
+
+  const doCreatorConfirm = async () => {
+    if (!currentItem) return;
+    setConfirmingCreator(true);
+    try {
+      const token = localStorage.getItem('authToken');
+      const res = await fetch(`${APP_CONFIG.api.baseURL}/approver/body-articles/${currentItem.id}/confirm`, {
+        method: 'POST',
+        headers: { Authorization: `Bearer ${token}` },
+      });
+      if (!res.ok) throw new Error('Failed to confirm');
+      const updated = await res.json();
+      setItems(prev => prev.map(i => i.id === updated.id ? { ...i, fgCreatorApproved: updated.fgCreatorApproved } : i));
+      message.success('Article confirmed — now visible to Body Approver');
+    } catch {
+      message.error('Failed to confirm article');
+    } finally {
+      setConfirmingCreator(false);
     }
   };
 
@@ -978,6 +1004,20 @@ export default function ArticleDetailPage({
                   )}
                 </>
               )}
+              {canCreatorConfirm && currentItem?.fgCreatorApproved !== 'APPROVED' && (
+                <Button size="sm" variant="outline"
+                  onClick={doCreatorConfirm}
+                  disabled={confirmingCreator}
+                  className="h-7 px-2.5 text-[12px] border-green-500 text-green-700 hover:bg-green-50">
+                  <CheckCircle2 className="h-3.5 w-3.5" />
+                  {confirmingCreator ? 'Confirming…' : 'Confirm'}
+                </Button>
+              )}
+              {canCreatorConfirm && currentItem?.fgCreatorApproved === 'APPROVED' && (
+                <span className="flex h-7 items-center gap-1 rounded-md bg-green-100 px-2.5 text-[12px] font-medium text-green-700">
+                  <CheckCircle2 className="h-3.5 w-3.5" /> Confirmed
+                </span>
+              )}
               <Tooltip title={!canApprove ? 'Only Approver, Sub-Division Head, Category Head or Admin can reject articles' : undefined}>
                 {/* span wrapper: disabled <button> swallows pointer events; span keeps hover alive */}
                 <span className="inline-block">
@@ -1018,7 +1058,7 @@ export default function ArticleDetailPage({
                 {/* span wrapper: disabled <button> swallows pointer events; span keeps hover alive */}
                 <span className="inline-block">
                   <Button size="sm" onClick={handleApproveClick}
-                    disabled={!canApprove || pendingSelectedKeys.length === 0 || approveBlockedReasons.length > 0}
+                    disabled={!canApprove || !canSubmitBodyArticle || pendingSelectedKeys.length === 0 || approveBlockedReasons.length > 0}
                     className="h-7 border-none bg-[#FF6F61] px-3 text-[12px] font-semibold text-white shadow-sm hover:bg-[#ff5b4d] disabled:bg-white/20 disabled:text-white/50">
                     <CheckCircle2 /> Save &amp; Submit
                     {approveBlockedReasons.length > 0 && <span className="ml-1 text-[10px] text-amber-200">⚠ {approveBlockedReasons.length}</span>}

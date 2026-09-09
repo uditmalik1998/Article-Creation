@@ -93,8 +93,10 @@ router.get('/body-articles', h(ApproverController.getBodyArticleItems));
 router.post('/body-articles/submit', requireBodyApprovalRights, h(ApproverController.submitBodyArticles));
 
 // Get / Update a single body_article_data record (used by Body Article detail page)
-router.get('/body-articles/:id',  h(ApproverController.getBodyArticleById));
-router.put('/body-articles/:id',  h(ApproverController.updateBodyArticle));
+router.get('/body-articles/:id',         h(ApproverController.getBodyArticleById));
+router.put('/body-articles/:id',         h(ApproverController.updateBodyArticle));
+// Creator confirms body article — makes it visible to BODY_APPROVER
+router.post('/body-articles/:id/confirm', h(ApproverController.creatorConfirmBodyArticle));
 
 // Sizes for a given major category (from maj_cat_sizes table)
 router.get('/sizes-for-majcat/:majCat', h(ApproverController.getSizesForMajCat));
