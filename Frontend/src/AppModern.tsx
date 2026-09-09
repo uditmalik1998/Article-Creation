@@ -23,7 +23,6 @@ import ModificationLogsPage from './features/admin/pages/ModificationLogsPage';
 import ExpenseTableDetailPage from './features/admin/pages/ExpenseTableDetailPage';
 import ExpenseMastersPage from './features/admin/pages/ExpenseMastersPage';
 import ExpenseChangeRequestsPage from './features/admin/pages/ExpenseChangeRequestsPage';
-import ExpenseAccessControlPage from './features/admin/pages/ExpenseAccessControlPage';
 import ExpenseAuditLogPage from './features/admin/pages/ExpenseAuditLogPage';
 import ApproverDashboard from './features/approver/pages/ApproverDashboard'; // Approver Dashboard
 import ArticleDetailPage from './features/approver/pages/ArticleDetailPage'; // Article detail view
@@ -362,16 +361,6 @@ const App: React.FC = () => {
                       <ExpenseChangeRequestsPage />
                     </MainLayout>
                   </ExpenseRoute>
-                }
-              />
-              <Route
-                path="/admin/expense-access"
-                element={
-                  <AdminRoute>
-                    <MainLayout>
-                      <ExpenseAccessControlPage />
-                    </MainLayout>
-                  </AdminRoute>
                 }
               />
               <Route

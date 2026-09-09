@@ -2,7 +2,7 @@ import { useState } from 'react';
 import { Link } from 'react-router-dom';
 import { useQuery } from '@tanstack/react-query';
 import dayjs from 'dayjs';
-import { ArrowLeft, ClipboardList, Search, ShieldCheck } from 'lucide-react';
+import { ArrowLeft, ClipboardList, Search } from 'lucide-react';
 import {
   Badge,
   Button,
@@ -184,9 +184,6 @@ export default function ExpenseAuditLogPage() {
           <ArrowLeft className="h-4 w-4" /> Back to Expense Admin
         </Link>
         <div className="flex items-center gap-4">
-          <Link to="/admin/expense-access" className="inline-flex items-center gap-1 text-sm text-muted-foreground hover:text-foreground">
-            <ShieldCheck className="h-4 w-4" /> Access Control
-          </Link>
           <Link to="/admin/expense-change-requests" className="inline-flex items-center gap-1 text-sm text-muted-foreground hover:text-foreground">
             <ClipboardList className="h-4 w-4" /> Change Requests
           </Link>

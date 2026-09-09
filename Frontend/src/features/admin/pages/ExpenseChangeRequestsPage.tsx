@@ -2,7 +2,7 @@ import { useMemo, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { useQuery, useQueryClient, keepPreviousData } from '@tanstack/react-query';
 import dayjs from 'dayjs';
-import { ArrowLeft, Search, ChevronRight, ShieldCheck } from 'lucide-react';
+import { ArrowLeft, Search, ChevronRight } from 'lucide-react';
 import {
   Badge,
   Button,
@@ -487,21 +487,13 @@ export default function ExpenseChangeRequestsPage() {
         <Link to="/admin/expenses" className="inline-flex items-center gap-1 text-sm text-muted-foreground hover:text-foreground">
           <ArrowLeft className="h-4 w-4" /> Back to Expense Admin
         </Link>
-        {user?.role === 'ADMIN' && (
-          <Link
-            to="/admin/expense-access"
-            className="inline-flex items-center gap-1 text-sm text-muted-foreground hover:text-foreground"
-          >
-            <ShieldCheck className="h-4 w-4" /> Access Control
-          </Link>
-        )}
       </div>
 
       <div>
         <h1 className="text-2xl font-bold">Expense Change Requests</h1>
         <p className="text-sm text-muted-foreground mt-0.5">
           {canSeeEveryonesRequests
-            ? 'Every add, edit and deletion requested across the Expense Data tables — routed by Business Division to that division’s Category Head, then to whoever is tagged MDM for final approval (Admin → Expense Access Control).'
+            ? 'Every add, edit and deletion requested across the Expense Data tables — routed by Business Division to that division’s Category Head, then to whoever is tagged MDM for final approval.'
             : canSeeOwnDivisionRequests
             ? `Every add, edit and deletion requested by ${BUSINESS_DIVISION_LABELS[access!.businessDivision!]} division, and where each one stands before it reaches the master.`
             : 'Every add, edit and deletion you have requested, and where each one stands in the approval chain before it reaches the master.'}

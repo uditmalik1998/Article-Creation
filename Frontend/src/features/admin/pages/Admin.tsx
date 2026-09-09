@@ -17,7 +17,6 @@ import {
   Table as TableIcon,
   Inbox,
   Download,
-  ShieldCheck,
   ClipboardList,
   History,
 } from 'lucide-react';
@@ -1483,15 +1482,6 @@ export default function Admin() {
           <p className="m-0 mt-0.5 text-xs text-white/60">System health, sync status &amp; analytics</p>
         </div>
         <div className="flex gap-2">
-          <Button
-            onClick={() => navigate('/admin/expense-access')}
-            variant="outline"
-            className="border-white/30 bg-white/10 text-white hover:bg-white/20 hover:text-white"
-            title="Who may raise and approve Expense Data changes"
-          >
-            <ShieldCheck />
-            Expense Access
-          </Button>
           <Button
             onClick={() => navigate('/admin/expense-change-requests')}
             variant="outline"
