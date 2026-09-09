@@ -133,6 +133,29 @@ export async function submitBodyArticles(ids: string[]): Promise<{
               })
             : null;
 
+        // Block if same major_category + body_article_description already has a valid SAP article number
+        const desc = str(row.bodyArticleDescription);
+        if (majCat && desc) {
+            const duplicate = await prisma.bodyArticleData.findFirst({
+                where: {
+                    id: { not: row.id },
+                    majorCategory: { equals: majCat, mode: 'insensitive' },
+                    bodyArticleDescription: { equals: desc, mode: 'insensitive' },
+                    bodyArticleNumber: { not: null },
+                },
+                select: { id: true, bodyArticleNumber: true },
+            });
+            if (duplicate) {
+                const msg = `Body Article already created for the given Grid (existing: ${duplicate.bodyArticleNumber}).`;
+                console.warn(`[ZMM_BODY_RFC] Duplicate blocked id=${row.id} — ${msg}`);
+                await prisma.bodyArticleData.update({
+                    where: { id: row.id },
+                    data: { sapSyncStatus: 'FAILED', sapSyncMessage: msg },
+                });
+                return { id: row.id, success: false, message: msg };
+            }
+        }
+
         // Block submission if major category is not found or is inactive
         if (!mcDetails) {
             const msg = `Major category "${majCat}" not found in major_category_details. Cannot submit to SAP.`;
