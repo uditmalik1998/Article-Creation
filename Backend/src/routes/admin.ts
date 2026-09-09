@@ -273,6 +273,7 @@ router.get('/expense-audit-log/:requestId',   h(expenseAuditLogController.getExp
 router.get('/fabric-article-data/status',   h(adminController.getFabricArticleDataStatus));
 router.get('/fabric-article-data/template', h(adminController.downloadFabricArticleDataTemplate));
 router.post('/fabric-article-data/upload',  excelUpload.single('file'), h(adminController.uploadFabricArticleData));
+router.get('/fabric-article-data/export',   h(adminController.downloadFabricArticleDataMaster));
 
 // ═══════════════════════════════════════════════════════
 // FABRIC ARTICLE MASTER (ADMIN) — fabric_article_master

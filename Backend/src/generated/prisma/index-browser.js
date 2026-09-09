@@ -971,6 +971,7 @@ exports.Prisma.FabricArticleDataScalarFieldEnum = {
   majorCategory: 'majorCategory',
   vendorName: 'vendorName',
   vendorCode: 'vendorCode',
+  fabricRate: 'fabricRate',
   approvalStatus: 'approvalStatus',
   approvedAt: 'approvedAt',
   approvedBy: 'approvedBy',

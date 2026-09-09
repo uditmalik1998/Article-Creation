@@ -2,7 +2,7 @@ import { useState } from 'react';
 import { useParams, Link } from 'react-router-dom';
 import { useQuery, useQueryClient, keepPreviousData } from '@tanstack/react-query';
 import dayjs from 'dayjs';
-import { ArrowLeft, Search, ArrowUpDown, Pencil, Trash2, Plus, ClipboardList } from 'lucide-react';
+import { ArrowLeft, Search, ArrowUpDown, Pencil, Trash2, Plus, ClipboardList, Download } from 'lucide-react';
 import {
   Badge,
   Button,
@@ -17,9 +17,18 @@ import {
   SelectValue,
   type DataTableColumn,
 } from '@/shared/components/ui-tw';
+import { message } from '@/lib/message';
+import { APP_CONFIG } from '../../../constants/app/config';
 import { getExpenseTableData, getMyExpenseAccess } from '../../../services/adminApi';
 import { EXPENSE_TABLE_CONFIGS, type ExpenseTableColumnConfig } from '../config/expenseTables';
 import { RowChangeRequestDialog, type RowChangeMode } from '../components/RowChangeRequestDialog';
+
+/** Tables with a full "download master" export — admin-only, wired up ad hoc
+ * per table on the backend (e.g. GET /admin/fabric-article-data/export)
+ * rather than through the generic paginated read used for the on-page table. */
+const DOWNLOAD_MASTER_TABLE_KEYS: Record<string, { endpoint: string; filenamePrefix: string }> = {
+  'fabric-article-data': { endpoint: '/admin/fabric-article-data/export', filenamePrefix: 'FABRIC_ARTICLE_DATA_MASTER' },
+};
 
 const PAGE_SIZE = 50;
 
@@ -75,6 +84,31 @@ export default function ExpenseTableDetailPage() {
   const canAdd = !!config?.allowCreate && !!access?.canCreate;
   const canEdit = hasEditableColumns && !!access?.canUpdate;
   const canDelete = !!config?.allowDelete && !!access?.canDelete;
+
+  const downloadMaster = tableKey ? DOWNLOAD_MASTER_TABLE_KEYS[tableKey] : undefined;
+  const canDownloadMaster = !!downloadMaster && !!access?.isAdmin;
+  const [downloadingMaster, setDownloadingMaster] = useState(false);
+
+  const handleDownloadMaster = async () => {
+    if (!downloadMaster) return;
+    setDownloadingMaster(true);
+    try {
+      const token = localStorage.getItem('authToken');
+      const res = await fetch(`${APP_CONFIG.api.baseURL}${downloadMaster.endpoint}`, {
+        headers: token ? { Authorization: `Bearer ${token}` } : {},
+      });
+      if (!res.ok) throw new Error('Failed to download master file');
+      const blob = await res.blob();
+      const a = document.createElement('a');
+      a.href = URL.createObjectURL(blob);
+      a.download = `${downloadMaster.filenamePrefix}_${dayjs().format('YYYY-MM-DD')}.xlsx`;
+      a.click();
+    } catch (err: any) {
+      message.error(err?.message || 'Failed to download master file');
+    } finally {
+      setDownloadingMaster(false);
+    }
+  };
 
   const { data, isLoading, isError } = useQuery({
     queryKey: ['expense-table', tableKey, page, pageSize, appliedSearch, sortBy, sortDir],
@@ -194,12 +228,20 @@ export default function ExpenseTableDetailPage() {
           <h1 className="text-xl font-bold leading-tight">{config.title}</h1>
           <p className="text-xs text-muted-foreground">{config.description}</p>
         </div>
-        {canAdd && (
-          <Button size="sm" onClick={() => setDialog({ mode: 'create', row: null })}>
-            <Plus className="h-4 w-4" />
-            Add Row
-          </Button>
-        )}
+        <div className="flex items-center gap-2">
+          {canDownloadMaster && (
+            <Button size="sm" variant="outline" onClick={handleDownloadMaster} disabled={downloadingMaster}>
+              <Download className="h-4 w-4" />
+              {downloadingMaster ? 'Downloading…' : 'Download Master'}
+            </Button>
+          )}
+          {canAdd && (
+            <Button size="sm" onClick={() => setDialog({ mode: 'create', row: null })}>
+              <Plus className="h-4 w-4" />
+              Add Row
+            </Button>
+          )}
+        </div>
       </div>
 
       {(canAdd || canEdit || canDelete) && (
