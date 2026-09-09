@@ -217,7 +217,7 @@ export default function BodyArticleDashboard({ pathType }: BodyArticleDashboardP
         let url: string;
         if (pathType === 'new' || pathType === 'created') {
           // Both New and Created tabs source from body_article_data via /approver/body-articles
-          const effectiveStatus = pathType === 'created' ? 'APPROVED' : 'PENDING';
+          const effectiveStatus = pathType === 'created' ? 'APPROVED' : 'PENDING,REJECTED';
           params.set('status', effectiveStatus);
           if (divisionFilter !== 'ALL') params.set('division', divisionFilter);
           if (subDivisionFilter !== 'ALL') params.set('subDivision', subDivisionFilter);
@@ -360,7 +360,7 @@ export default function BodyArticleDashboard({ pathType }: BodyArticleDashboardP
       const token = localStorage.getItem('authToken');
       const params = new URLSearchParams();
       const effectiveStatus =
-        pathType === 'new' ? 'PENDING' : pathType === 'rejected' ? 'REJECTED'
+        pathType === 'new' ? 'PENDING,REJECTED' : pathType === 'rejected' ? 'REJECTED'
         : pathType === 'created' ? 'APPROVED' : statusFilter;
       params.set('status', effectiveStatus);
       if (divisionFilter !== 'ALL') params.set('division', divisionFilter);
@@ -505,7 +505,7 @@ export default function BodyArticleDashboard({ pathType }: BodyArticleDashboardP
   const handleCardClick = useCallback((item: ApproverItem, index: number) => {
     const d = cardClickDataRef.current;
     const effectiveStatus =
-      d.pathType === 'new' ? 'PENDING' : d.pathType === 'rejected' ? 'REJECTED'
+      d.pathType === 'new' ? 'PENDING,REJECTED' : d.pathType === 'rejected' ? 'REJECTED'
       : d.pathType === 'created' ? 'APPROVED' : d.statusFilter;
     const filters: DetailFilters = {
       status: effectiveStatus,
