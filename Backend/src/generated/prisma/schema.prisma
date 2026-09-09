@@ -508,7 +508,7 @@ model User {
   /// Coarse business-unit tag, independent of `division`/`subDivision` above
   /// (those are tied to the Department/SubDepartment hierarchy for
   /// extraction routing, and `division` can hold several comma-separated
-  /// values). This is always exactly one of MENS / KIDS / LADIES / PO,
+  /// values). This is always exactly one of MENS / KIDS / LADIES / PD / MDM,
   /// admin-editable from the Users page, and every user is meant to end up
   /// with one — shown in the UI as "Business Division" to avoid being
   /// confused with the existing Sub Division field.
@@ -1529,11 +1529,12 @@ model BodyArticleData {
   hsnTaxCode    String? @map("hsn_tax_code") @db.VarChar(50)
 
   // Workflow
-  approvalStatus String    @default("PENDING") @map("approval_status") @db.VarChar(20)
-  approvedAt     DateTime? @map("approved_at")
-  approvedBy     Int?      @map("approved_by")
-  sapSyncStatus  String    @default("NOT_SYNCED") @map("sap_sync_status") @db.VarChar(20)
-  sapSyncMessage String?   @map("sap_sync_message")
+  approvalStatus    String    @default("PENDING") @map("approval_status") @db.VarChar(20)
+  fgCreatorApproved String    @default("PENDING") @map("fg_creator_approved") @db.VarChar(20)
+  approvedAt        DateTime? @map("approved_at")
+  approvedBy        Int?      @map("approved_by")
+  sapSyncStatus     String    @default("NOT_SYNCED") @map("sap_sync_status") @db.VarChar(20)
+  sapSyncMessage    String?   @map("sap_sync_message")
 
   // Audit
   userName  String?  @map("user_name") @db.VarChar(200)
