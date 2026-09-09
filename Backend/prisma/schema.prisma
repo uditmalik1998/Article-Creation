@@ -662,6 +662,11 @@ enum UserRole {
   /// know about. Declared here purely to stop that crash; no access rules
   /// exist for this role anywhere in the app yet.
   BODY_APPROVER
+  /// New approval-chain stage, between Category Head and MDM, for tables
+  /// whose chain needs it (Segment Master, Size Master) — see
+  /// ExpenseApprovalStage.tableKey. Not yet assigned to any real user; added
+  /// so the routing logic below can be wired up ahead of that.
+  PLANNING
 
   @@map("user_role")
   @@schema("public")
@@ -1613,8 +1618,17 @@ enum ExpenseChangeStatus {
 /// approval, moves to the next-lowest active stage above its current one;
 /// approving the highest-sortOrder active stage applies the change for real.
 model ExpenseApprovalStage {
-  id          Int     @id @default(autoincrement())
-  key         String  @unique @db.VarChar(50)
+  id Int @id @default(autoincrement())
+  /// Which table's chain this stage belongs to, or the sentinel '*' (see
+  /// ALL_TABLES in expenseAccessService.ts) for the SHARED DEFAULT chain
+  /// every table walks unless it has rows of its own here. A table with
+  /// any row of its own uses ONLY those (its complete chain), never a mix
+  /// of its own rows and the default's — e.g. Segment Master and Size
+  /// Master each get their own 3-stage Category Head -> Planning -> MDM
+  /// chain, while National Grid and Major Category Grid still fall
+  /// through to the '*' default (Category Head -> MDM).
+  tableKey    String  @default("*") @map("table_key") @db.VarChar(50)
+  key         String  @db.VarChar(50)
   label       String  @db.VarChar(100)
   description String?
   sortOrder   Int     @map("sort_order")
@@ -1629,7 +1643,8 @@ model ExpenseApprovalStage {
   createdAt DateTime @default(now()) @map("created_at")
   updatedAt DateTime @updatedAt @map("updated_at")
 
-  @@index([isActive, sortOrder])
+  @@unique([tableKey, key])
+  @@index([tableKey, isActive, sortOrder])
   @@map("expense_approval_stages")
   @@schema("public")
 }

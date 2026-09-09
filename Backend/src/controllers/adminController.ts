@@ -66,7 +66,7 @@ const AdminCreateUserSchema = z.object({
   email: z.string().email().max(255),
   password: z.string().min(6).max(128),
   name: z.string().min(1).max(100),
-  role: z.enum(['ADMIN', 'USER', 'CREATOR', 'PO_COMMITTEE', 'APPROVER', 'CATEGORY_HEAD', 'SUB_DIVISION_HEAD', 'PD_DESIGNER', 'PD', 'BODY_APPROVER']).optional().default('USER'),
+  role: z.enum(['ADMIN', 'USER', 'CREATOR', 'PO_COMMITTEE', 'APPROVER', 'CATEGORY_HEAD', 'SUB_DIVISION_HEAD', 'PD_DESIGNER', 'PD', 'BODY_APPROVER', 'PLANNING']).optional().default('USER'),
   division: z.union([z.string(), z.array(z.string())]).optional().nullable(),
   subDivision: z.union([z.string(), z.array(z.string())]).optional().nullable(),
   // Coarse business-unit tag — independent of division/subDivision above,
@@ -85,7 +85,7 @@ const AdminUpdateUserSchema = AdminCreateUserSchema.partial().extend({
   // here with no default so an omitted role truly stays undefined, and
   // `updateUser`'s `validated.role ?? existingUser.role` correctly keeps
   // whatever role the user already had.
-  role: z.enum(['ADMIN', 'USER', 'CREATOR', 'PO_COMMITTEE', 'APPROVER', 'CATEGORY_HEAD', 'SUB_DIVISION_HEAD', 'PD_DESIGNER', 'PD', 'BODY_APPROVER']).optional(),
+  role: z.enum(['ADMIN', 'USER', 'CREATOR', 'PO_COMMITTEE', 'APPROVER', 'CATEGORY_HEAD', 'SUB_DIVISION_HEAD', 'PD_DESIGNER', 'PD', 'BODY_APPROVER', 'PLANNING']).optional(),
 });
 
 const normalizeSubDivisionInput = (value: unknown): string | null => {
@@ -5814,6 +5814,9 @@ export const EXPENSE_TABLE_REGISTRY: Record<string, ExpenseTableConfig> = {
     kind: 'raw',
     tableName: 'maj_cat_sizes',
     idColumn: 'id',
+    allowCreate: true,
+    allowDelete: true,
+    requiredOnCreate: ['division', 'sub_division', 'major_category', 'size'],
     columns: [
       { key: 'id', label: 'ID', editable: false },
       { key: 'division', label: 'Division' },
@@ -6330,6 +6333,69 @@ export async function getExpenseColumnOptions(req: Request, res: Response) {
     return res.json({ success: true, data: cleaned });
   } catch (error: any) {
     console.error(`[Expense] column-options error for "${tableKey}"."${column}":`, error);
+    return res.status(500).json({ success: false, error: error.message });
+  }
+}
+
+/** GET /admin/expense-table/:tableKey/column/:fromColumn/mapped-to/:toColumn
+ * — a lookup table of `fromColumn` value -> `toColumn` value, built from
+ * every existing row, for auto-filling one field from another on the
+ * add/edit form (e.g. Size Master: pick a Major Category, Sub Division
+ * fills itself in) instead of asking for the same fact twice. Only
+ * meaningful where the relationship is really 1:1 in the data — if a
+ * `fromColumn` value appears with more than one `toColumn` value, this just
+ * returns whichever happens to sort last; the caller treats the result as a
+ * convenience default, not a constraint, so that's an acceptable fallback,
+ * not a correctness bug. Both columns are checked against this table's own
+ * configured columns first — they're route params, so that's what stops
+ * this being used to probe arbitrary columns. */
+export async function getExpenseColumnMapping(req: Request, res: Response) {
+  const { tableKey, fromColumn, toColumn } = req.params;
+  const config = EXPENSE_TABLE_REGISTRY[tableKey];
+  if (!config) {
+    return res.status(404).json({ success: false, error: `Unknown table key: ${tableKey}` });
+  }
+  if (!config.columns.some((c) => c.key === fromColumn) || !config.columns.some((c) => c.key === toColumn)) {
+    return res.status(400).json({ success: false, error: 'Unknown column.' });
+  }
+
+  try {
+    let pairs: { from: any; to: any }[];
+
+    if (config.kind === 'prisma') {
+      const delegate = (prisma as any)[config.delegateName];
+      const rows = (await withPrismaRetry(() =>
+        delegate.findMany({
+          distinct: [fromColumn],
+          select: { [fromColumn]: true, [toColumn]: true },
+          orderBy: { [fromColumn]: 'asc' },
+          take: 5000,
+        })
+      )) as any[];
+      pairs = rows.map((r) => ({ from: r[fromColumn], to: r[toColumn] }));
+    } else if (config.kind === 'raw') {
+      const fromSql = Prisma.raw(`"${fromColumn}"`);
+      const toSql = Prisma.raw(`"${toColumn}"`);
+      const tableSql = Prisma.raw(`"${config.tableName}"`);
+      const rows = await withPrismaRetry(() =>
+        prisma.$queryRaw<{ from: any; to: any }[]>(
+          Prisma.sql`SELECT DISTINCT ON (${fromSql}) ${fromSql} AS from, ${toSql} AS to FROM ${tableSql} WHERE ${fromSql} IS NOT NULL ORDER BY ${fromSql} ASC, ${toSql} DESC LIMIT 5000`
+        )
+      );
+      pairs = rows;
+    } else {
+      return res.status(400).json({ success: false, error: 'Column mapping is not supported for this table.' });
+    }
+
+    const map: Record<string, string> = {};
+    for (const { from, to } of pairs) {
+      if (from === null || from === undefined || String(from).trim() === '') continue;
+      if (to === null || to === undefined || String(to).trim() === '') continue;
+      map[String(from)] = String(to);
+    }
+    return res.json({ success: true, data: map });
+  } catch (error: any) {
+    console.error(`[Expense] column-mapping error for "${tableKey}" "${fromColumn}"->"${toColumn}":`, error);
     return res.status(500).json({ success: false, error: error.message });
   }
 }

@@ -141,7 +141,7 @@ export interface DashboardStats {
   allowedValues: number;
 }
 
-/** Mens / Kids / Ladies / PO — a coarse business-unit tag independent of
+/** Mens / Kids / Ladies / PD — a coarse business-unit tag independent of
  * `division`/`subDivision` below (those follow the Department/SubDepartment
  * hierarchy for extraction routing; `division` can hold several values at
  * once). Shown in the Users page as "Business Division". */
@@ -151,7 +151,7 @@ export interface AdminUser {
   id: number;
   email: string;
   name: string;
-  role: 'ADMIN' | 'CREATOR' | 'PO_COMMITTEE' | 'APPROVER' | 'CATEGORY_HEAD' | 'SUB_DIVISION_HEAD' | 'PD_DESIGNER' | 'PD' | 'BODY_APPROVER';
+  role: 'ADMIN' | 'CREATOR' | 'PO_COMMITTEE' | 'APPROVER' | 'CATEGORY_HEAD' | 'SUB_DIVISION_HEAD' | 'PD_DESIGNER' | 'PD' | 'BODY_APPROVER' | 'PLANNING';
   division?: string | null;
   subDivision?: string | null;
   businessDivision?: AdminUserBusinessDivision | null;
@@ -545,7 +545,7 @@ export const createUser = async (payload: {
   email: string;
   password: string;
   name: string;
-  role?: 'ADMIN' | 'CREATOR' | 'PO_COMMITTEE' | 'APPROVER' | 'CATEGORY_HEAD' | 'SUB_DIVISION_HEAD' | 'PD_DESIGNER' | 'PD' | 'BODY_APPROVER';
+  role?: 'ADMIN' | 'CREATOR' | 'PO_COMMITTEE' | 'APPROVER' | 'CATEGORY_HEAD' | 'SUB_DIVISION_HEAD' | 'PD_DESIGNER' | 'PD' | 'BODY_APPROVER' | 'PLANNING';
   division?: string;
   subDivision?: string | string[];
   businessDivision?: AdminUserBusinessDivision | null;
@@ -661,6 +661,20 @@ export async function getExpenseTableData(
 export async function getExpenseColumnOptions(tableKey: string, column: string): Promise<string[]> {
   const res = await expenseApi.get<{ success: boolean; data: string[] }>(
     `/table/${encodeURIComponent(tableKey)}/column/${encodeURIComponent(column)}/options`,
+  );
+  return res.data.data;
+}
+
+/** A fromColumn -> toColumn value lookup, for auto-filling one field from
+ * another on the add/edit form (e.g. Size Master: pick a Major Category,
+ * Sub Division fills itself in). */
+export async function getExpenseColumnMapping(
+  tableKey: string,
+  fromColumn: string,
+  toColumn: string,
+): Promise<Record<string, string>> {
+  const res = await expenseApi.get<{ success: boolean; data: Record<string, string> }>(
+    `/table/${encodeURIComponent(tableKey)}/column/${encodeURIComponent(fromColumn)}/mapped-to/${encodeURIComponent(toColumn)}`,
   );
   return res.data.data;
 }
@@ -863,6 +877,12 @@ export async function actOnExpenseChangeRequest(
  * label a request's current stage in the Change Requests / Audit Log views. */
 export interface ExpenseApprovalStage {
   id: number;
+  /** Which table's chain this stage belongs to, or '*' for the shared
+   * default chain every table walks unless it has rows of its own — see
+   * ExpenseApprovalStage.tableKey in schema.prisma. A same-named key (e.g.
+   * 'CATEGORY_HEAD') can appear once per chain, so this — not `key` alone —
+   * is what disambiguates which chain a stage row belongs to. */
+  tableKey: string;
   key: string;
   label: string;
   description: string | null;
@@ -892,8 +912,13 @@ export interface MyExpenseAccess {
   approvableStageKeys: string[];
   levels: string[];
   subDivisions: string[];
-  /** This user's own Business Division (MENS/KIDS/LADIES/PO/MDM), or null. */
+  /** This user's own Business Division (MENS/KIDS/LADIES/PD/MDM), or null. */
   businessDivision: AdminUserBusinessDivision | null;
+  /** Which expense tables this role may even browse, or null for no
+   * restriction. PLANNING is confined to `['segment-master', 'size-master']`
+   * — used to filter the masters list and the Change Requests view down to
+   * just those; the server enforces the same thing per-table regardless. */
+  allowedTableKeys: string[] | null;
 }
 
 export async function getMyExpenseAccess(tableKey?: string): Promise<MyExpenseAccess> {
