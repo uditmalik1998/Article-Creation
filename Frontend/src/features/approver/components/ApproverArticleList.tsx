@@ -599,6 +599,7 @@ const ArticleCard = React.memo(
       fabCons: string | number | null; width: string | number | null;
     }[]>([]);
     const [bodyNoLoading, setBodyNoLoading] = useState(false);
+    const [bodyNoSearched, setBodyNoSearched] = useState(false);
     const [imgZoom, setImgZoom] = useState(1);
     const [imgRotation, setImgRotation] = useState(0);
     // The image's real (natural) pixel size, captured on load. `transform: scale()`
@@ -2549,8 +2550,9 @@ const ArticleCard = React.memo(
                                 // of "Category" under Article Information) so results never include body
                                 // articles that belong to a different major category.
                                 const runBodySearch = (q: string) => {
-                                  if (!q.trim()) { setBodyNoResults([]); return; }
+                                  if (!q.trim()) { setBodyNoResults([]); setBodyNoSearched(false); return; }
                                   setBodyNoLoading(true);
+                                  setBodyNoSearched(false);
                                   const token = localStorage.getItem('authToken');
                                   const params = new URLSearchParams({ q });
                                   if (effectiveMajCat) params.set('majorCategory', effectiveMajCat);
@@ -2559,8 +2561,8 @@ const ArticleCard = React.memo(
                                     { headers: { Authorization: `Bearer ${token}` } },
                                   )
                                     .then((r) => r.json())
-                                    .then((d) => setBodyNoResults(d.results ?? []))
-                                    .catch(() => setBodyNoResults([]))
+                                    .then((d) => { setBodyNoResults(d.results ?? []); setBodyNoSearched(true); })
+                                    .catch(() => { setBodyNoResults([]); setBodyNoSearched(true); })
                                     .finally(() => setBodyNoLoading(false));
                                 };
                                 // Selecting a search result (by number or by description) fills every
@@ -2620,6 +2622,7 @@ const ArticleCard = React.memo(
                                   setLocalValues((prev) => ({ ...prev, ...gridUpdates }));
                                   setEditingField(null);
                                   setBodyNoResults([]);
+                                  setBodyNoSearched(false);
                                   onSave({ ...item, ...gridUpdates } as any, gridUpdates);
                                 };
                                 return (
@@ -2634,6 +2637,7 @@ const ArticleCard = React.memo(
                                           setEditingField('bot_bodyArticle');
                                           setBodyNoQuery(bodyNoDisplayVal || '');
                                           setBodyNoResults([]);
+                                          setBodyNoSearched(false);
                                         }
                                       }}
                                     >
@@ -2653,6 +2657,7 @@ const ArticleCard = React.memo(
                                             if (!o) {
                                               setEditingField(null);
                                               setBodyNoResults([]);
+                                              setBodyNoSearched(false);
                                             }
                                           }}
                                         >
@@ -2669,10 +2674,10 @@ const ArticleCard = React.memo(
                                                 runBodySearch(q);
                                               }}
                                               onBlur={() => {
-                                                // Falls back to closing directly when no PopoverContent is mounted
-                                                // (e.g. before any results have loaded) so Radix has no dismissable
-                                                // layer to catch the outside click itself. Clicking a result is safe —
-                                                // its onMouseDown calls preventDefault(), so this blur never fires for it.
+                                                // Don't close while a "No Body Article found" message or loading
+                                                // indicator is showing — the PopoverContent mounting can steal focus
+                                                // momentarily, firing this blur before the user has seen the result.
+                                                if (bodyNoLoading || bodyNoSearched) return;
                                                 setEditingField(null);
                                                 setBodyNoResults([]);
                                               }}
@@ -2689,7 +2694,7 @@ const ArticleCard = React.memo(
                                               }}
                                             />
                                           </PopoverAnchor>
-                                          {(bodyNoResults.length > 0 || bodyNoLoading) && (
+                                          {(bodyNoResults.length > 0 || bodyNoLoading || bodyNoSearched) && (
                                             <PopoverContent
                                               align="start"
                                               sideOffset={2}
@@ -2700,6 +2705,8 @@ const ArticleCard = React.memo(
                                               <div className="max-h-56 overflow-y-auto py-1">
                                                 {bodyNoLoading ? (
                                                   <div className="px-3 py-2 text-[11px] text-muted-foreground">Searching…</div>
+                                                ) : bodyNoResults.length === 0 ? (
+                                                  <div className="px-3 py-2 text-[11px] text-muted-foreground">No Body Article found</div>
                                                 ) : (
                                                   bodyNoResults.map((r) => (
                                                     <button
@@ -2740,6 +2747,7 @@ const ArticleCard = React.memo(
                                         if (!isLocked && !isBodyDescEditing) {
                                           setEditingField('bot_bodyArticleDescription');
                                           setBodyNoQuery(bodyDescDisplayVal || '');
+                                          setBodyNoSearched(false);
                                           // Whatever's already been composed from the fields filled so far
                                           // (via the live rebuild above) becomes the starting search — no
                                           // need to retype it before matches show up.
@@ -2772,6 +2780,7 @@ const ArticleCard = React.memo(
                                             if (!o) {
                                               setEditingField(null);
                                               setBodyNoResults([]);
+                                              setBodyNoSearched(false);
                                             }
                                           }}
                                         >
@@ -2789,6 +2798,8 @@ const ArticleCard = React.memo(
                                                 runBodySearch(q);
                                               }}
                                               onBlur={() => {
+                                                // Don't close while "No Body Article found" is showing
+                                                if (bodyNoLoading || bodyNoSearched) return;
                                                 const trimmed = bodyNoQuery.trim();
                                                 if (trimmed) handleSave('bodyArticleDescription', trimmed);
                                                 setEditingField(null);
@@ -2807,7 +2818,7 @@ const ArticleCard = React.memo(
                                               }}
                                             />
                                           </PopoverAnchor>
-                                          {(bodyNoResults.length > 0 || bodyNoLoading) && (
+                                          {(bodyNoResults.length > 0 || bodyNoLoading || bodyNoSearched) && (
                                             <PopoverContent
                                               align="start"
                                               sideOffset={2}
@@ -2818,6 +2829,8 @@ const ArticleCard = React.memo(
                                               <div className="max-h-56 overflow-y-auto py-1">
                                                 {bodyNoLoading ? (
                                                   <div className="px-3 py-2 text-[11px] text-muted-foreground">Searching…</div>
+                                                ) : bodyNoResults.length === 0 ? (
+                                                  <div className="px-3 py-2 text-[11px] text-muted-foreground">No Body Article found</div>
                                                 ) : (
                                                   bodyNoResults.map((r) => (
                                                     <button
