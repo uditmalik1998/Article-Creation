@@ -654,6 +654,17 @@ export async function getExpenseTableData(
   return res.data;
 }
 
+/** Distinct existing values for one column — powers a dropdown on the
+ * add/edit form (e.g. Attribute Name, Sub Division / Major Category /
+ * Segment Type) instead of free-typing something that has to match an
+ * existing taxonomy exactly. */
+export async function getExpenseColumnOptions(tableKey: string, column: string): Promise<string[]> {
+  const res = await expenseApi.get<{ success: boolean; data: string[] }>(
+    `/table/${encodeURIComponent(tableKey)}/column/${encodeURIComponent(column)}/options`,
+  );
+  return res.data.data;
+}
+
 // ═══════════════════════════════════════════════════════
 // EXPENSE CHANGE REQUESTS (N-stage approval chain — see EXPENSE ACCESS
 // CONTROL below for the chain definition itself)

@@ -14,6 +14,12 @@ export interface ExpenseTableColumnConfig {
   /** Defaults to true. Set false for ids/timestamps and fields owned by another
    * workflow (e.g. fabric/body article data's own approval/SAP-sync fields). */
   editable?: boolean;
+  /** Render the add/edit form field as a dropdown of this column's distinct
+   * existing values (fetched from the server) instead of free text — for a
+   * column whose values are really a fixed taxonomy (e.g. Attribute Name,
+   * Sub Division, Major Category, Segment Type), so a new row can't drift
+   * from it with a typo or a near-duplicate spelling. */
+  pickFromExisting?: boolean;
 }
 
 export interface ExpenseTableConfig {
@@ -105,9 +111,9 @@ export const EXPENSE_TABLE_CONFIGS: Record<string, ExpenseTableConfig> = {
     requiredOnCreate: ['sub_division', 'major_category', 'segment_type'],
     columns: [
       { dataIndex: 'id', title: 'ID', width: 80, editable: false },
-      { dataIndex: 'sub_division', title: 'Sub Division' },
-      { dataIndex: 'major_category', title: 'Major Category' },
-      { dataIndex: 'segment_type', title: 'Segment Type' },
+      { dataIndex: 'sub_division', title: 'Sub Division', pickFromExisting: true },
+      { dataIndex: 'major_category', title: 'Major Category', pickFromExisting: true },
+      { dataIndex: 'segment_type', title: 'Segment Type', pickFromExisting: true },
       { dataIndex: 'min', title: 'Min' },
       { dataIndex: 'max', title: 'Max' },
       { dataIndex: 'created_at', title: 'Created At', type: 'date', editable: false },
@@ -185,7 +191,7 @@ export const EXPENSE_TABLE_CONFIGS: Record<string, ExpenseTableConfig> = {
     requiredOnCreate: ['attributeName', 'code'],
     columns: [
       { dataIndex: 'id', title: 'ID', editable: false },
-      { dataIndex: 'attributeName', title: 'Attribute Name' },
+      { dataIndex: 'attributeName', title: 'Attribute Name', pickFromExisting: true },
       { dataIndex: 'code', title: 'Code' },
       { dataIndex: 'fullForm', title: 'Full Form' },
       { dataIndex: 'isActive', title: 'Active', type: 'boolean' },

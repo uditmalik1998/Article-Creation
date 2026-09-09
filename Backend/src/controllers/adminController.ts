@@ -6272,6 +6272,61 @@ export async function getExpenseTableData(req: Request, res: Response) {
   }
 }
 
+/** GET /admin/expense-table/:tableKey/column/:column/options — distinct
+ * existing values for one column, sorted, for populating a dropdown on the
+ * add/edit form (e.g. Attribute Name on National Grid, or Sub Division /
+ * Major Category / Segment Type on Segment Master) instead of free-typing
+ * something that has to match an existing taxonomy exactly. `column` is
+ * checked against this table's own configured columns first — it's a route
+ * param, so this is what stops it being used to probe arbitrary columns. */
+export async function getExpenseColumnOptions(req: Request, res: Response) {
+  const { tableKey, column } = req.params;
+  const config = EXPENSE_TABLE_REGISTRY[tableKey];
+  if (!config) {
+    return res.status(404).json({ success: false, error: `Unknown table key: ${tableKey}` });
+  }
+  if (!config.columns.some((c) => c.key === column)) {
+    return res.status(400).json({ success: false, error: `Unknown column: ${column}` });
+  }
+
+  try {
+    let values: any[];
+
+    if (config.kind === 'prisma') {
+      // No `where: { not: null }` here — some of these columns are
+      // non-nullable, and Prisma rejects that filter on a required field;
+      // nulls/blanks are dropped below instead, uniformly for both branches.
+      const delegate = (prisma as any)[config.delegateName];
+      const rows = (await withPrismaRetry(() =>
+        delegate.findMany({
+          distinct: [column],
+          select: { [column]: true },
+          orderBy: { [column]: 'asc' },
+          take: 1000,
+        })
+      )) as any[];
+      values = rows.map((r) => r[column]);
+    } else if (config.kind === 'raw') {
+      const colSql = Prisma.raw(`"${column}"`);
+      const tableSql = Prisma.raw(`"${config.tableName}"`);
+      const rows = await withPrismaRetry(() =>
+        prisma.$queryRaw<Record<string, any>[]>(
+          Prisma.sql`SELECT DISTINCT ${colSql} AS value FROM ${tableSql} WHERE ${colSql} IS NOT NULL ORDER BY ${colSql} ASC LIMIT 1000`
+        )
+      );
+      values = rows.map((r) => r.value);
+    } else {
+      return res.status(400).json({ success: false, error: 'Column options are not supported for this table.' });
+    }
+
+    const cleaned = [...new Set(values.filter((v) => v !== null && v !== undefined && String(v).trim() !== ''))];
+    return res.json({ success: true, data: cleaned });
+  } catch (error: any) {
+    console.error(`[Expense] column-options error for "${tableKey}"."${column}":`, error);
+    return res.status(500).json({ success: false, error: error.message });
+  }
+}
+
 function coercePrismaId(config: PrismaExpenseTableConfig, rowId: string): string | number {
   return config.idIsNumeric ? Number(rowId) : rowId;
 }

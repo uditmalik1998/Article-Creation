@@ -64,6 +64,13 @@ export default function ExpenseTableDetailPage() {
     staleTime: 60_000,
   });
 
+  // Admin has its own full Expenses dashboard; everyone else (Creator,
+  // Approver, Category Head, ...) enters through the simplified masters
+  // cards page — the back arrow must return to whichever one they came from,
+  // not unconditionally to the admin-only route (which just bounces a
+  // non-admin straight back out to the app's home page).
+  const backHref = access?.isAdmin ? '/admin/expenses' : '/admin/expense-masters';
+
   const hasEditableColumns = !!config?.columns.some((c) => c.editable !== false);
   const canAdd = !!config?.allowCreate && !!access?.canCreate;
   const canEdit = hasEditableColumns && !!access?.canUpdate;
@@ -88,8 +95,8 @@ export default function ExpenseTableDetailPage() {
   if (!tableKey || !config) {
     return (
       <div className="p-6 space-y-4">
-        <Link to="/admin/expenses" className="inline-flex items-center gap-1 text-sm text-muted-foreground hover:text-foreground">
-          <ArrowLeft className="h-4 w-4" /> Back to Expense Admin
+        <Link to="/admin/expense-masters" className="inline-flex items-center gap-1 text-sm text-muted-foreground hover:text-foreground">
+          <ArrowLeft className="h-4 w-4" /> Back to Expense Data
         </Link>
         <Card>
           <CardContent className="py-10 text-center text-sm text-muted-foreground">
@@ -108,8 +115,7 @@ export default function ExpenseTableDetailPage() {
         </Link>
         <Card>
           <CardContent className="py-10 text-center text-sm text-muted-foreground">
-            You don't have access to Expense Data. Ask an admin to grant your email address access on
-            Admin → Expense Access Control.
+            You don't have access to Expense Data. Ask an admin to set your Business Division on the Users page.
           </CardContent>
         </Card>
       </div>
@@ -172,8 +178,8 @@ export default function ExpenseTableDetailPage() {
   return (
     <div className="flex h-full flex-col p-4 space-y-2">
       <div className="flex items-center justify-between">
-        <Link to="/admin/expenses" className="inline-flex items-center gap-1 text-sm text-muted-foreground hover:text-foreground">
-          <ArrowLeft className="h-4 w-4" /> Back to Expense Admin
+        <Link to={backHref} className="inline-flex items-center gap-1 text-sm text-muted-foreground hover:text-foreground">
+          <ArrowLeft className="h-4 w-4" /> Back to Expense Data
         </Link>
         <Link
           to="/admin/expense-change-requests"

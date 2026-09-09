@@ -25,6 +25,16 @@ router.get('/my-access', h(expenseAccessController.getMyExpenseAccess));
 
 router.get('/table/:tableKey', h(requireExpenseView), h(adminController.getExpenseTableData));
 
+// Distinct existing values for one column — powers the add/edit form's
+// dropdowns (e.g. Attribute Name, Sub Division / Major Category / Segment
+// Type) instead of free-typing something that has to match an existing
+// taxonomy exactly.
+router.get(
+  '/table/:tableKey/column/:column/options',
+  h(requireExpenseView),
+  h(adminController.getExpenseColumnOptions)
+);
+
 // ORDER MATTERS: /table/:tableKey/add-requests must be registered before
 // /table/:tableKey/:rowId/... so "add-requests" isn't read as a rowId.
 router.post(

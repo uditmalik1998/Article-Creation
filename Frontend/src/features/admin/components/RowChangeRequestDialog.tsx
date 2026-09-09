@@ -1,7 +1,9 @@
 import { useMemo, useState } from 'react';
+import { useQueries } from '@tanstack/react-query';
 import dayjs, { type Dayjs } from 'dayjs';
 import { AlertTriangle } from 'lucide-react';
 import {
+  Autocomplete,
   Button,
   DatePicker,
   Dialog,
@@ -19,6 +21,7 @@ import {
   createExpenseAddRequest,
   createExpenseChangeRequest,
   createExpenseDeleteRequest,
+  getExpenseColumnOptions,
 } from '../../../services/adminApi';
 import type { ExpenseTableConfig } from '../config/expenseTables';
 
@@ -73,6 +76,25 @@ export function RowChangeRequestDialog({
 }: RowChangeRequestDialogProps) {
   const editableColumns = useMemo(() => config.columns.filter((c) => c.editable !== false), [config]);
   const requiredKeys = useMemo(() => new Set(config.requiredOnCreate ?? []), [config]);
+  const pickColumns = useMemo(() => editableColumns.filter((c) => c.pickFromExisting), [editableColumns]);
+
+  // One query per dropdown column, fetching its distinct existing values —
+  // a suggestion list, not a hard constraint, so a genuinely new value can
+  // still be typed.
+  const optionQueries = useQueries({
+    queries: pickColumns.map((col) => ({
+      queryKey: ['expense-column-options', tableKey, col.dataIndex],
+      queryFn: () => getExpenseColumnOptions(tableKey, col.dataIndex),
+      staleTime: 5 * 60_000,
+    })),
+  });
+  const optionsByColumn = useMemo(() => {
+    const map: Record<string, string[]> = {};
+    pickColumns.forEach((col, i) => {
+      map[col.dataIndex] = optionQueries[i]?.data ?? [];
+    });
+    return map;
+  }, [pickColumns, optionQueries]);
 
   // Seeded once, on mount: callers render this dialog only while it is open
   // (`{dialog && <RowChangeRequestDialog …/>}`), so closing it unmounts the
@@ -202,6 +224,23 @@ export function RowChangeRequestDialog({
                       {values[col.dataIndex] === true || values[col.dataIndex] === 'true' ? 'Yes' : 'No'}
                     </span>
                   </div>
+                ) : col.pickFromExisting ? (
+                  (() => {
+                    const allOptions = optionsByColumn[col.dataIndex] ?? [];
+                    const query = String(values[col.dataIndex] ?? '').trim().toLowerCase();
+                    const filtered = query ? allOptions.filter((o) => o.toLowerCase().includes(query)) : allOptions;
+                    return (
+                      <Autocomplete
+                        value={values[col.dataIndex] ?? ''}
+                        onChange={(v) => setValues((prev) => ({ ...prev, [col.dataIndex]: v }))}
+                        options={filtered.slice(0, 50).map((o) => ({ value: o }))}
+                        placeholder={`Search or type a ${col.title.toLowerCase()}…`}
+                        notFoundContent={
+                          allOptions.length === 0 ? 'Loading…' : 'No match — you can still type a new value.'
+                        }
+                      />
+                    );
+                  })()
                 ) : (
                   <Input
                     value={values[col.dataIndex] ?? ''}

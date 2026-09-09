@@ -27,8 +27,7 @@ export default function ExpenseMastersPage() {
         </Link>
         <Card>
           <CardContent className="py-10 text-center text-sm text-muted-foreground">
-            You don't have access to Expense Data. Ask an admin to grant your email address access on
-            Admin → Expense Access Control.
+            You don't have access to Expense Data. Ask an admin to set your Business Division on the Users page.
           </CardContent>
         </Card>
       </div>
