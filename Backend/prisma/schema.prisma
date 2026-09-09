@@ -508,7 +508,7 @@ model User {
   /// Coarse business-unit tag, independent of `division`/`subDivision` above
   /// (those are tied to the Department/SubDepartment hierarchy for
   /// extraction routing, and `division` can hold several comma-separated
-  /// values). This is always exactly one of MENS / KIDS / LADIES / PO,
+  /// values). This is always exactly one of MENS / KIDS / LADIES / PD / MDM,
   /// admin-editable from the Users page, and every user is meant to end up
   /// with one — shown in the UI as "Business Division" to avoid being
   /// confused with the existing Sub Division field.
