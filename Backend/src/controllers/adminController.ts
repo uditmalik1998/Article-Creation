@@ -6209,6 +6209,37 @@ export async function fetchExpenseRowById(tableKey: string, rowId: string): Prom
  * callback's client — see the `client` param on each apply function below. */
 type PrismaOrTx = typeof prisma | Prisma.TransactionClient;
 
+/**
+ * Looks up the actual Postgres type of each column in `keys` on `tableName`,
+ * so a raw INSERT/UPDATE can cast its (always-string, since they arrive as
+ * JSON) bound values to match. Needed because node-postgres/Prisma send a JS
+ * string parameter with an explicit `text` OID — Postgres allows an
+ * *implicit* text->varchar assignment (which is why this went unnoticed for
+ * every varchar-only raw table so far), but text->numeric/boolean/date/... is
+ * NOT an implicit assignment cast, so writing e.g. a price segment's `min`/
+ * `max` (numeric) without an explicit `::numeric` throws
+ * "column is of type X but expression is of type text". Cast EVERY column
+ * (not just numeric ones) for robustness across whatever raw table this runs
+ * against next.
+ */
+async function getRawColumnTypes(
+  client: PrismaOrTx,
+  tableName: string,
+  keys: string[]
+): Promise<Map<string, string>> {
+  if (keys.length === 0) return new Map();
+  const rows = await client.$queryRaw<{ column_name: string; data_type: string }[]>(
+    Prisma.sql`SELECT column_name, data_type FROM information_schema.columns WHERE table_name = ${tableName} AND column_name = ANY(${keys})`
+  );
+  return new Map(rows.map((r) => [r.column_name, r.data_type]));
+}
+
+/** `value::<pg type>`, or just `value` if the type is unknown (falls back to
+ * Postgres' default text handling — still correct for varchar/text columns). */
+function castRawValue(value: any, pgType: string | undefined) {
+  return pgType ? Prisma.sql`${value}::${Prisma.raw(pgType)}` : Prisma.sql`${value}`;
+}
+
 /** Applies an already-approved change to the real row. Only ever called after
  * final approval, with every key in `changes` already validated against the
  * table's editable-column allowlist by the caller.
@@ -6236,10 +6267,11 @@ export async function applyExpenseRowUpdate(
   }
 
   if (config.kind === 'raw') {
+    const colTypes = await getRawColumnTypes(client, config.tableName, keys);
     const tableSql = Prisma.raw(`"${config.tableName}"`);
     const idColSql = Prisma.raw(`"${config.idColumn}"`);
     const setSql = Prisma.join(
-      keys.map((k) => Prisma.sql`${Prisma.raw(`"${k}"`)} = ${changes[k]}`),
+      keys.map((k) => Prisma.sql`${Prisma.raw(`"${k}"`)} = ${castRawValue(changes[k], colTypes.get(k))}`),
       ', '
     );
     await client.$executeRaw(Prisma.sql`UPDATE ${tableSql} SET ${setSql} WHERE ${idColSql} = ${Number(rowId)}`);
@@ -6247,8 +6279,13 @@ export async function applyExpenseRowUpdate(
   }
 
   // hierarchy — only categories' own columns are editable, keyed by code
+  const realKeys = keys.map((k) => HIERARCHY_COLUMN_TO_REAL[k] ?? k);
+  const hierarchyColTypes = await getRawColumnTypes(client, 'categories', realKeys);
   const setSql = Prisma.join(
-    keys.map((k) => Prisma.sql`${Prisma.raw(`"${HIERARCHY_COLUMN_TO_REAL[k] ?? k}"`)} = ${changes[k]}`),
+    keys.map((k) => {
+      const realKey = HIERARCHY_COLUMN_TO_REAL[k] ?? k;
+      return Prisma.sql`${Prisma.raw(`"${realKey}"`)} = ${castRawValue(changes[k], hierarchyColTypes.get(realKey))}`;
+    }),
     ', '
   );
   await client.$executeRaw(Prisma.sql`UPDATE categories SET ${setSql} WHERE code = ${rowId}`);
@@ -6279,10 +6316,11 @@ export async function applyExpenseRowInsert(
   }
 
   if (config.kind === 'raw') {
+    const colTypes = await getRawColumnTypes(client, config.tableName, keys);
     const tableSql = Prisma.raw(`"${config.tableName}"`);
     const idColSql = Prisma.raw(`"${config.idColumn}"`);
     const colsSql = Prisma.join(keys.map((k) => Prisma.raw(`"${k}"`)), ', ');
-    const valsSql = Prisma.join(keys.map((k) => Prisma.sql`${values[k]}`), ', ');
+    const valsSql = Prisma.join(keys.map((k) => castRawValue(values[k], colTypes.get(k))), ', ');
     const rows = await client.$queryRaw<any[]>(
       Prisma.sql`INSERT INTO ${tableSql} (${colsSql}) VALUES (${valsSql}) RETURNING ${idColSql}`
     );
