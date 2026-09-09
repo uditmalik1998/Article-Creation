@@ -2458,7 +2458,6 @@ export class ApproverController {
                             rate: true, mrp: true, sapArticleId: true,
                             approvalStatus: true, sapSyncStatus: true,
                             imageUrl: true, articleNumber: true,
-                            weight: true, variantWeight: true,
                         }
                     });
 
