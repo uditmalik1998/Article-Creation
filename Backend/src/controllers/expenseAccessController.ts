@@ -31,6 +31,22 @@ function normalizeEmail(raw: unknown): string {
   return String(raw ?? '').trim().toLowerCase();
 }
 
+/**
+ * Which real EXPENSE_TABLE_REGISTRY keys currently fall through to the '*'
+ * default chain — every table EXCEPT the ones with a dedicated chain of
+ * their own (Segment Master, Size Master today). Used so a pending/history
+ * check against the DEFAULT chain's stages doesn't also match requests
+ * sitting on a same-named stage (e.g. 'CATEGORY_HEAD') that actually
+ * belongs to one of those tables' own, separate chain.
+ */
+async function tableKeysUsingDefaultChain(): Promise<string[]> {
+  const dedicated = await withPrismaRetry(() =>
+    prisma.expenseApprovalStage.findMany({ where: { tableKey: { not: ALL_TABLES } }, distinct: ['tableKey'], select: { tableKey: true } })
+  );
+  const dedicatedKeys = new Set(dedicated.map((d) => d.tableKey));
+  return Object.keys(EXPENSE_TABLE_REGISTRY).filter((k) => !dedicatedKeys.has(k));
+}
+
 // Deliberately permissive — the point is to reject typos like a missing "@",
 // not to adjudicate RFC 5322.
 const EMAIL_SHAPE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
@@ -335,7 +351,12 @@ export async function createExpenseApprovalStage(req: Request, res: Response) {
   }
 
   try {
-    const existingByKey = await withPrismaRetry(() => prisma.expenseApprovalStage.findUnique({ where: { key } }));
+    // This endpoint manages only the shared '*' default chain — Segment
+    // Master and Size Master's own dedicated chains aren't reachable here
+    // (there's no UI for them either; they were seeded directly).
+    const existingByKey = await withPrismaRetry(() =>
+      prisma.expenseApprovalStage.findUnique({ where: { tableKey_key: { tableKey: ALL_TABLES, key } } })
+    );
     if (existingByKey) {
       return res.status(409).json({ success: false, error: `A stage with key "${key}" already exists.` });
     }
@@ -345,7 +366,7 @@ export async function createExpenseApprovalStage(req: Request, res: Response) {
     // Uses the midpoint between neighbours' sortOrders, renumbering only if
     // two active stages have adjacent integers with no room between them.
     const active = await withPrismaRetry(() =>
-      prisma.expenseApprovalStage.findMany({ where: { isActive: true }, orderBy: { sortOrder: 'asc' } })
+      prisma.expenseApprovalStage.findMany({ where: { tableKey: ALL_TABLES, isActive: true }, orderBy: { sortOrder: 'asc' } })
     );
 
     const afterKey = body.afterKey?.trim() || null;
@@ -383,6 +404,7 @@ export async function createExpenseApprovalStage(req: Request, res: Response) {
     const created = await withPrismaRetry(() =>
       prisma.expenseApprovalStage.create({
         data: {
+          tableKey: ALL_TABLES,
           key,
           label,
           description: body.description?.trim() || null,
@@ -418,8 +440,15 @@ export async function updateExpenseApprovalStage(req: Request, res: Response) {
     if (!existing) return res.status(404).json({ success: false, error: 'Approval stage not found.' });
 
     if (body.isActive === false && existing.isActive) {
+      // Only requests that actually resolve to THIS stage: if it's part of
+      // a table's own dedicated chain, just that table; if it's part of the
+      // '*' default, every table that falls through to the default rather
+      // than having a dedicated chain of its own (a same-named stage on a
+      // dedicated chain is a different stage entirely).
+      const tableFilter =
+        existing.tableKey === ALL_TABLES ? { tableKey: { in: await tableKeysUsingDefaultChain() } } : { tableKey: existing.tableKey };
       const stillPending = await withPrismaRetry(() =>
-        prisma.expenseChangeRequest.count({ where: { currentStageKey: existing.key, status: 'PENDING' } })
+        prisma.expenseChangeRequest.count({ where: { currentStageKey: existing.key, status: 'PENDING', ...tableFilter } })
       );
       if (stillPending > 0) {
         return res.status(409).json({
@@ -452,7 +481,9 @@ export async function updateExpenseApprovalStage(req: Request, res: Response) {
 }
 
 /** POST /admin/expense-approval-stages/reorder — body: { orderedIds: number[] }
- * Renumbers every ACTIVE stage's sortOrder to match the given id order.
+ * Renumbers every ACTIVE stage's sortOrder to match the given id order,
+ * within the '*' default chain only (Segment Master / Size Master's own
+ * chains aren't reachable through this endpoint — see createExpenseApprovalStage).
  * Retired stages are left where they are (their position no longer matters). */
 export async function reorderExpenseApprovalStages(req: Request, res: Response) {
   const { orderedIds } = req.body as { orderedIds?: number[] };
@@ -461,7 +492,7 @@ export async function reorderExpenseApprovalStages(req: Request, res: Response) 
   }
 
   try {
-    const active = await withPrismaRetry(() => prisma.expenseApprovalStage.findMany({ where: { isActive: true } }));
+    const active = await withPrismaRetry(() => prisma.expenseApprovalStage.findMany({ where: { tableKey: ALL_TABLES, isActive: true } }));
     const activeIds = new Set(active.map((s) => s.id));
 
     const missing = active.filter((s) => !orderedIds.includes(s.id));
@@ -502,10 +533,15 @@ export async function deleteExpenseApprovalStage(req: Request, res: Response) {
     const existing = await withPrismaRetry(() => prisma.expenseApprovalStage.findUnique({ where: { id } }));
     if (!existing) return res.status(404).json({ success: false, error: 'Approval stage not found.' });
 
+    // Same "which real tables actually resolve to this stage" scoping as
+    // the retire check above — a same-named stage on a table's own
+    // dedicated chain is a different stage entirely.
+    const tableFilter =
+      existing.tableKey === ALL_TABLES ? { tableKey: { in: await tableKeysUsingDefaultChain() } } : { tableKey: existing.tableKey };
     const [grantCount, pendingCount, trailCount] = await withPrismaRetry(() =>
       Promise.all([
         prisma.expenseAccessGrant.count({ where: { level: existing.key } }),
-        prisma.expenseChangeRequest.count({ where: { currentStageKey: existing.key } }),
+        prisma.expenseChangeRequest.count({ where: { currentStageKey: existing.key, ...tableFilter } }),
         prisma.$queryRaw<{ n: bigint }[]>`
           SELECT COUNT(*)::bigint AS n FROM expense_change_requests
           WHERE approval_trail @> ${JSON.stringify([{ stageKey: existing.key }])}::jsonb

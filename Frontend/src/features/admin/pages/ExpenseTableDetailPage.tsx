@@ -1,8 +1,8 @@
 import { useState } from 'react';
 import { useParams, Link } from 'react-router-dom';
-import { useQuery, useQueryClient, keepPreviousData } from '@tanstack/react-query';
+import { useQueries, useQuery, useQueryClient, keepPreviousData } from '@tanstack/react-query';
 import dayjs from 'dayjs';
-import { ArrowLeft, Search, ArrowUpDown, Pencil, Trash2, Plus, ClipboardList } from 'lucide-react';
+import { ArrowLeft, Search, ArrowUpDown, Pencil, Trash2, Plus, ClipboardList, Download } from 'lucide-react';
 import {
   Badge,
   Button,
@@ -17,9 +17,20 @@ import {
   SelectValue,
   type DataTableColumn,
 } from '@/shared/components/ui-tw';
-import { getExpenseTableData, getMyExpenseAccess } from '../../../services/adminApi';
+import { message } from '@/lib/message';
+import { APP_CONFIG } from '../../../constants/app/config';
+import { getExpenseColumnOptions, getExpenseTableData, getMyExpenseAccess } from '../../../services/adminApi';
 import { EXPENSE_TABLE_CONFIGS, type ExpenseTableColumnConfig } from '../config/expenseTables';
 import { RowChangeRequestDialog, type RowChangeMode } from '../components/RowChangeRequestDialog';
+import { ColumnCheckboxFilter } from '../components/ColumnCheckboxFilter';
+
+/** Tables with a full "download master" export — admin-only, wired up ad hoc
+ * per table on the backend (e.g. GET /admin/fabric-article-data/export)
+ * rather than through the generic paginated read used for the on-page table. */
+const DOWNLOAD_MASTER_TABLE_KEYS: Record<string, { endpoint: string; filenamePrefix: string }> = {
+  'fabric-article-data': { endpoint: '/admin/fabric-article-data/export', filenamePrefix: 'FABRIC_ARTICLE_DATA_MASTER' },
+  'body-article-data': { endpoint: '/admin/body-article-data/export', filenamePrefix: 'BODY_ARTICLE_DATA_MASTER' },
+};
 
 const PAGE_SIZE = 50;
 
@@ -54,6 +65,9 @@ export default function ExpenseTableDetailPage() {
   const [sortBy, setSortBy] = useState<string>(config?.defaultSortBy ?? '');
   const [sortDir, setSortDir] = useState<'asc' | 'desc'>(config?.defaultSortDir ?? 'desc');
   const [dialog, setDialog] = useState<{ mode: RowChangeMode; row: Record<string, any> | null } | null>(null);
+  // Excel-style column filters (checkbox multi-select), additive to the
+  // search box above — separate state so one never clobbers the other.
+  const [columnFilters, setColumnFilters] = useState<Record<string, string[]>>({});
 
   // Which buttons to show. The server re-checks every action, so a stale or
   // over-generous answer here can't actually grant anything.
@@ -76,8 +90,33 @@ export default function ExpenseTableDetailPage() {
   const canEdit = hasEditableColumns && !!access?.canUpdate;
   const canDelete = !!config?.allowDelete && !!access?.canDelete;
 
+  const downloadMaster = tableKey ? DOWNLOAD_MASTER_TABLE_KEYS[tableKey] : undefined;
+  const canDownloadMaster = !!downloadMaster && !!access?.isAdmin;
+  const [downloadingMaster, setDownloadingMaster] = useState(false);
+
+  const handleDownloadMaster = async () => {
+    if (!downloadMaster) return;
+    setDownloadingMaster(true);
+    try {
+      const token = localStorage.getItem('authToken');
+      const res = await fetch(`${APP_CONFIG.api.baseURL}${downloadMaster.endpoint}`, {
+        headers: token ? { Authorization: `Bearer ${token}` } : {},
+      });
+      if (!res.ok) throw new Error('Failed to download master file');
+      const blob = await res.blob();
+      const a = document.createElement('a');
+      a.href = URL.createObjectURL(blob);
+      a.download = `${downloadMaster.filenamePrefix}_${dayjs().format('YYYY-MM-DD')}.xlsx`;
+      a.click();
+    } catch (err: any) {
+      message.error(err?.message || 'Failed to download master file');
+    } finally {
+      setDownloadingMaster(false);
+    }
+  };
+
   const { data, isLoading, isError } = useQuery({
-    queryKey: ['expense-table', tableKey, page, pageSize, appliedSearch, sortBy, sortDir],
+    queryKey: ['expense-table', tableKey, page, pageSize, appliedSearch, sortBy, sortDir, columnFilters],
     queryFn: () =>
       getExpenseTableData(tableKey!, {
         page,
@@ -85,11 +124,32 @@ export default function ExpenseTableDetailPage() {
         search: appliedSearch || undefined,
         sortBy: sortBy || undefined,
         sortDir,
+        filters: columnFilters,
       }),
     // Don't fire the table read until access is known — a user with none
     // would just get a 403 back.
     enabled: !!tableKey && !!config && access?.canView === true,
     placeholderData: keepPreviousData,
+  });
+
+  // One options query per filterable column, feeding its header checkbox
+  // dropdown — cheap and cached, same pattern as the add/edit form's
+  // pick-from-existing dropdowns.
+  const filterableColumns = (config?.columns ?? []).filter((c) => c.filterable);
+  const filterOptionQueries = useQueries({
+    queries: filterableColumns.map((col) => ({
+      queryKey: ['expense-column-options', tableKey, col.dataIndex],
+      queryFn: () => getExpenseColumnOptions(tableKey!, col.dataIndex),
+      enabled: !!tableKey && !!config,
+      staleTime: 5 * 60_000,
+    })),
+  });
+  const filterOptionsByColumn: Record<string, { options: string[]; loading: boolean }> = {};
+  filterableColumns.forEach((col, i) => {
+    filterOptionsByColumn[col.dataIndex] = {
+      options: filterOptionQueries[i]?.data ?? [],
+      loading: filterOptionQueries[i]?.isLoading ?? false,
+    };
   });
 
   if (!tableKey || !config) {
@@ -130,14 +190,40 @@ export default function ExpenseTableDetailPage() {
     setAppliedSearch(draftSearch);
   };
 
-  const columns: DataTableColumn<Record<string, any>>[] = config.columns.map((col) => ({
-    title: col.title,
-    key: col.dataIndex,
-    dataIndex: col.dataIndex,
-    width: col.width,
-    align: col.align,
-    render: (value: any) => renderCell(value, col.type),
-  }));
+  // The surrogate primary key (Supabase's own row id) isn't meaningful to a
+  // viewer — every table names it 'id' — so it's dropped here, in the table
+  // view only; it's still on the underlying row data for actions/rowKey.
+  const columns: DataTableColumn<Record<string, any>>[] = config.columns
+    .filter((col) => col.dataIndex !== 'id')
+    .map((col) => ({
+      title: col.filterable ? (
+        <span className="flex min-w-0 items-center justify-between gap-1">
+          <span className="truncate">{col.title}</span>
+          <ColumnCheckboxFilter
+            label={col.title}
+            options={filterOptionsByColumn[col.dataIndex]?.options ?? []}
+            loading={filterOptionsByColumn[col.dataIndex]?.loading ?? false}
+            selected={columnFilters[col.dataIndex] ?? []}
+            onApply={(values) => {
+              setPage(1);
+              setColumnFilters((prev) => {
+                const next = { ...prev };
+                if (values.length > 0) next[col.dataIndex] = values;
+                else delete next[col.dataIndex];
+                return next;
+              });
+            }}
+          />
+        </span>
+      ) : (
+        col.title
+      ),
+      key: col.dataIndex,
+      dataIndex: col.dataIndex,
+      width: col.width,
+      align: col.align,
+      render: (value: any) => renderCell(value, col.type),
+    }));
 
   if (canEdit || canDelete) {
     columns.push({
@@ -194,18 +280,26 @@ export default function ExpenseTableDetailPage() {
           <h1 className="text-xl font-bold leading-tight">{config.title}</h1>
           <p className="text-xs text-muted-foreground">{config.description}</p>
         </div>
-        {canAdd && (
-          <Button size="sm" onClick={() => setDialog({ mode: 'create', row: null })}>
-            <Plus className="h-4 w-4" />
-            Add Row
-          </Button>
-        )}
+        <div className="flex items-center gap-2">
+          {canDownloadMaster && (
+            <Button size="sm" variant="outline" onClick={handleDownloadMaster} disabled={downloadingMaster}>
+              <Download className="h-4 w-4" />
+              {downloadingMaster ? 'Downloading…' : 'Download Master'}
+            </Button>
+          )}
+          {canAdd && (
+            <Button size="sm" onClick={() => setDialog({ mode: 'create', row: null })}>
+              <Plus className="h-4 w-4" />
+              Add Row
+            </Button>
+          )}
+        </div>
       </div>
 
       {(canAdd || canEdit || canDelete) && (
         <p className="text-xs text-muted-foreground">
           Adds, edits and deletions are requests, not direct changes: each one needs a reason and a “needed by” date,
-          then Category Head review followed by MDM approval before it touches the master.
+          then goes through the approval chain before it touches the master.
         </p>
       )}
 

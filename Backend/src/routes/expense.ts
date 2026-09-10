@@ -35,6 +35,15 @@ router.get(
   h(adminController.getExpenseColumnOptions)
 );
 
+// A fromColumn -> toColumn value lookup, for auto-filling one field from
+// another on the add/edit form (e.g. Size Master: Major Category -> Sub
+// Division) where the relationship is really 1:1 in the data.
+router.get(
+  '/table/:tableKey/column/:fromColumn/mapped-to/:toColumn',
+  h(requireExpenseView),
+  h(adminController.getExpenseColumnMapping)
+);
+
 // ORDER MATTERS: /table/:tableKey/add-requests must be registered before
 // /table/:tableKey/:rowId/... so "add-requests" isn't read as a rowId.
 router.post(

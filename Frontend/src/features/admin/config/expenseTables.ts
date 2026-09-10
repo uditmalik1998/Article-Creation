@@ -20,6 +20,16 @@ export interface ExpenseTableColumnConfig {
    * Sub Division, Major Category, Segment Type), so a new row can't drift
    * from it with a typo or a near-duplicate spelling. */
   pickFromExisting?: boolean;
+  /** On the add/edit form, auto-fill this field from another column's value
+   * once a 1:1 mapping between them is fetched from the server (e.g. Size
+   * Master: picking a Major Category fills in its Sub Division) — a
+   * convenience default, not a lock; the field stays editable afterward.
+   * Names the OTHER column's `dataIndex` to watch. */
+  autoFillFrom?: string;
+  /** Adds an Excel-style checkbox filter to this column's header — search +
+   * multi-select over its distinct existing values, additive to the page's
+   * own search box. Being rolled out one column/table at a time. */
+  filterable?: boolean;
 }
 
 export interface ExpenseTableConfig {
@@ -50,9 +60,9 @@ export const EXPENSE_TABLE_CONFIGS: Record<string, ExpenseTableConfig> = {
     requiredOnCreate: ['major_category', 'attribute_name', 'value'],
     columns: [
       { dataIndex: 'id', title: 'ID', width: 80, editable: false },
-      { dataIndex: 'major_category', title: 'Major Category', pickFromExisting: true },
-      { dataIndex: 'attribute_name', title: 'Attribute Name', pickFromExisting: true },
-      { dataIndex: 'value', title: 'Value' },
+      { dataIndex: 'major_category', title: 'Major Category', pickFromExisting: true, filterable: true },
+      { dataIndex: 'attribute_name', title: 'Attribute Name', pickFromExisting: true, filterable: true },
+      { dataIndex: 'value', title: 'Value', filterable: true },
       { dataIndex: 'uploaded_at', title: 'Uploaded At', type: 'date', editable: false },
     ],
   },
@@ -62,13 +72,18 @@ export const EXPENSE_TABLE_CONFIGS: Record<string, ExpenseTableConfig> = {
     rowKey: 'id',
     defaultSortBy: 'id',
     defaultSortDir: 'desc',
+    allowCreate: true,
+    allowDelete: true,
+    requiredOnCreate: ['division', 'sub_division', 'major_category', 'size'],
     columns: [
       { dataIndex: 'id', title: 'ID', width: 80, editable: false },
-      { dataIndex: 'division', title: 'Division' },
-      { dataIndex: 'sub_division', title: 'Sub Division' },
+      { dataIndex: 'division', title: 'Division', pickFromExisting: true, filterable: true },
+      { dataIndex: 'major_category', title: 'Major Category', pickFromExisting: true, filterable: true },
+      // Picking a Major Category fills this in automatically (see
+      // autoFillFrom) — it's still a normal editable field afterward.
+      { dataIndex: 'sub_division', title: 'Sub Division', pickFromExisting: true, autoFillFrom: 'major_category', filterable: true },
       { dataIndex: 'mc_code', title: 'MC Code' },
-      { dataIndex: 'major_category', title: 'Major Category' },
-      { dataIndex: 'size', title: 'Size' },
+      { dataIndex: 'size', title: 'Size', filterable: true },
       { dataIndex: 'status', title: 'Status' },
       { dataIndex: 'created_at', title: 'Created At', type: 'date', editable: false },
     ],
@@ -114,9 +129,9 @@ export const EXPENSE_TABLE_CONFIGS: Record<string, ExpenseTableConfig> = {
     requiredOnCreate: ['sub_division', 'major_category', 'segment_type'],
     columns: [
       { dataIndex: 'id', title: 'ID', width: 80, editable: false },
-      { dataIndex: 'sub_division', title: 'Sub Division', pickFromExisting: true },
-      { dataIndex: 'major_category', title: 'Major Category', pickFromExisting: true },
-      { dataIndex: 'segment_type', title: 'Segment Type', pickFromExisting: true },
+      { dataIndex: 'sub_division', title: 'Sub Division', pickFromExisting: true, filterable: true },
+      { dataIndex: 'major_category', title: 'Major Category', pickFromExisting: true, filterable: true },
+      { dataIndex: 'segment_type', title: 'Segment Type', pickFromExisting: true, filterable: true },
       { dataIndex: 'min', title: 'Min' },
       { dataIndex: 'max', title: 'Max' },
       { dataIndex: 'created_at', title: 'Created At', type: 'date', editable: false },
@@ -138,6 +153,7 @@ export const EXPENSE_TABLE_CONFIGS: Record<string, ExpenseTableConfig> = {
       { dataIndex: 'majorCategory', title: 'Major Category' },
       { dataIndex: 'vendorName', title: 'Vendor Name' },
       { dataIndex: 'vendorCode', title: 'Vendor Code' },
+      { dataIndex: 'fabricRate', title: 'Fabric Rate' },
       { dataIndex: 'mFabDiv', title: 'Fab Div' },
       { dataIndex: 'mYarn', title: 'Yarn' },
       { dataIndex: 'mFabMainMvgr1', title: 'Fab Main MVGR 1' },
@@ -194,7 +210,7 @@ export const EXPENSE_TABLE_CONFIGS: Record<string, ExpenseTableConfig> = {
     requiredOnCreate: ['attributeName', 'code'],
     columns: [
       { dataIndex: 'id', title: 'ID', editable: false },
-      { dataIndex: 'attributeName', title: 'Attribute Name', pickFromExisting: true },
+      { dataIndex: 'attributeName', title: 'Attribute Name', pickFromExisting: true, filterable: true },
       { dataIndex: 'code', title: 'Code' },
       { dataIndex: 'fullForm', title: 'Full Form' },
       { dataIndex: 'isActive', title: 'Active', type: 'boolean' },

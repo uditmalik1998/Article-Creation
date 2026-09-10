@@ -66,7 +66,7 @@ const AdminCreateUserSchema = z.object({
   email: z.string().email().max(255),
   password: z.string().min(6).max(128),
   name: z.string().min(1).max(100),
-  role: z.enum(['ADMIN', 'USER', 'CREATOR', 'PO_COMMITTEE', 'APPROVER', 'CATEGORY_HEAD', 'SUB_DIVISION_HEAD', 'PD_DESIGNER', 'PD', 'BODY_APPROVER']).optional().default('USER'),
+  role: z.enum(['ADMIN', 'USER', 'CREATOR', 'PO_COMMITTEE', 'APPROVER', 'CATEGORY_HEAD', 'SUB_DIVISION_HEAD', 'PD_DESIGNER', 'PD', 'BODY_APPROVER', 'PLANNING']).optional().default('USER'),
   division: z.union([z.string(), z.array(z.string())]).optional().nullable(),
   subDivision: z.union([z.string(), z.array(z.string())]).optional().nullable(),
   // Coarse business-unit tag — independent of division/subDivision above,
@@ -85,7 +85,7 @@ const AdminUpdateUserSchema = AdminCreateUserSchema.partial().extend({
   // here with no default so an omitted role truly stays undefined, and
   // `updateUser`'s `validated.role ?? existingUser.role` correctly keeps
   // whatever role the user already had.
-  role: z.enum(['ADMIN', 'USER', 'CREATOR', 'PO_COMMITTEE', 'APPROVER', 'CATEGORY_HEAD', 'SUB_DIVISION_HEAD', 'PD_DESIGNER', 'PD', 'BODY_APPROVER']).optional(),
+  role: z.enum(['ADMIN', 'USER', 'CREATOR', 'PO_COMMITTEE', 'APPROVER', 'CATEGORY_HEAD', 'SUB_DIVISION_HEAD', 'PD_DESIGNER', 'PD', 'BODY_APPROVER', 'PLANNING']).optional(),
 });
 
 const normalizeSubDivisionInput = (value: unknown): string | null => {
@@ -4609,7 +4609,7 @@ export const downloadFabricArticleDataTemplate = async (_req: Request, res: Resp
     const wb = new ExcelJS.Workbook();
     const ws = wb.addWorksheet('FABRIC ARTICLE DATA');
 
-    ws.mergeCells('A1:X1');
+    ws.mergeCells('A1:Y1');
     const titleCell = ws.getCell('A1');
     titleCell.value = 'FABRIC ARTICLE DATA UPLOAD';
     titleCell.font = { bold: true, size: 13 };
@@ -4620,7 +4620,7 @@ export const downloadFabricArticleDataTemplate = async (_req: Request, res: Resp
 
     const headers = [
       'FABRIC_ARTICLE_NUMBER', 'FABRIC_ARTICLE_DESC',
-      'DIVISION', 'SUB_DIVISION', 'MAJOR_CATEGORY', 'VENDOR_NAME', 'VENDOR_CODE',
+      'DIVISION', 'SUB_DIVISION', 'MAJOR_CATEGORY', 'VENDOR_NAME', 'VENDOR_CODE', 'FABRIC_RATE',
       'M_FAB_DIV', 'M_YARN', 'M_FAB_MAIN_MVGR_1', 'M_FAB_MAIN_MVGR_2',
       'M_CONSTRUCTION', 'M_OUNZ', 'M_WIDTH', 'M_WEAVE_01', 'M_WEAVE_02',
       'M_COUNT', 'M_GSM', 'M_COMPOSITION', 'M_FINISH', 'M_LYCRA',
@@ -4638,7 +4638,7 @@ export const downloadFabricArticleDataTemplate = async (_req: Request, res: Resp
     // Sample row
     ws.addRow([
       'FAB-001', 'KNIT FABRIC SLD',
-      'K', 'K_PC', 'K_PC_FLC', 'Sample Vendor', 'V001',
+      'K', 'K_PC', 'K_PC_FLC', 'Sample Vendor', 'V001', '250.50',
       'KNT', 'CTO', 'FAB01', '', 'PLAIN', '180', '', 'P/W', '',
       '30S', '180', '100% COTTON', 'NONE', 'N',
       'PENDING', 'NOT_SYNCED', 'admin',
@@ -4650,7 +4650,7 @@ export const downloadFabricArticleDataTemplate = async (_req: Request, res: Resp
     const noteRow = ws.addRow([
       '⚠ NOTE: Headers in Row 3, data from Row 5. APPROVAL_STATUS: PENDING/APPROVED/REJECTED. SAP_SYNC_STATUS: NOT_SYNCED/SYNCED/FAILED. Each row is inserted as a new record.',
     ]);
-    ws.mergeCells(`A${noteRow.number}:X${noteRow.number}`);
+    ws.mergeCells(`A${noteRow.number}:Y${noteRow.number}`);
     noteRow.getCell(1).font = { italic: true, size: 10 };
     noteRow.getCell(1).fill = { type: 'pattern', pattern: 'solid', fgColor: { argb: 'FFFFF3CD' } };
 
@@ -4696,17 +4696,17 @@ export const uploadFabricArticleData = async (req: Request, res: Response): Prom
     // Column index map (1-based, matching template headers)
     const C = {
       fabNo: 1, fabDesc: 2,
-      div: 3, subDiv: 4, majCat: 5, vendorName: 6, vendorCode: 7,
-      fabDiv: 8, yarn: 9, mvgr1: 10, mvgr2: 11,
-      construction: 12, ounz: 13, width: 14, weave01: 15, weave02: 16,
-      count: 17, gsm: 18, composition: 19, finish: 20, lycra: 21,
-      approvalStatus: 22, sapSyncStatus: 23, userName: 24,
+      div: 3, subDiv: 4, majCat: 5, vendorName: 6, vendorCode: 7, fabricRate: 8,
+      fabDiv: 9, yarn: 10, mvgr1: 11, mvgr2: 12,
+      construction: 13, ounz: 14, width: 15, weave01: 16, weave02: 17,
+      count: 18, gsm: 19, composition: 20, finish: 21, lycra: 22,
+      approvalStatus: 23, sapSyncStatus: 24, userName: 25,
     };
 
     type DataRow = {
       fabric_article_number: string | null; fabric_article_description: string | null;
       division: string | null; sub_division: string | null; major_category: string | null;
-      vendor_name: string | null; vendor_code: string | null;
+      vendor_name: string | null; vendor_code: string | null; fabric_rate: number | null;
       m_fab_div: string | null; m_yarn: string | null;
       m_fab_main_mvgr_1: string | null; m_fab_main_mvgr_2: string | null;
       m_construction: string | null; m_ounz: string | null; m_width: string | null;
@@ -4731,6 +4731,8 @@ export const uploadFabricArticleData = async (req: Request, res: Response): Prom
 
       const approvalStatus = cell(row, C.approvalStatus).toUpperCase() || 'PENDING';
       const sapSyncStatus  = cell(row, C.sapSyncStatus).toUpperCase()  || 'NOT_SYNCED';
+      const fabricRateRaw  = cell(row, C.fabricRate);
+      const fabricRate     = fabricRateRaw ? Number(fabricRateRaw) : NaN;
 
       rows.push({
         fabric_article_number:      fabNo      || null,
@@ -4740,6 +4742,7 @@ export const uploadFabricArticleData = async (req: Request, res: Response): Prom
         major_category:             majCat     || null,
         vendor_name:                cell(row, C.vendorName)  || null,
         vendor_code:                cell(row, C.vendorCode)  || null,
+        fabric_rate:                Number.isFinite(fabricRate) ? fabricRate : null,
         m_fab_div:                  cell(row, C.fabDiv)      || null,
         m_yarn:                     cell(row, C.yarn)        || null,
         m_fab_main_mvgr_1:          cell(row, C.mvgr1)       || null,
@@ -4770,7 +4773,7 @@ export const uploadFabricArticleData = async (req: Request, res: Response): Prom
         await tx.$executeRaw`
           INSERT INTO fabric_article_data (
             id, fabric_article_number, fabric_article_description,
-            division, sub_division, major_category, vendor_name, vendor_code,
+            division, sub_division, major_category, vendor_name, vendor_code, fabric_rate,
             m_fab_div, m_yarn, m_fab_main_mvgr_1, m_fab_main_mvgr_2,
             m_construction, m_ounz, m_width, m_weave_01, m_weave_02,
             m_count, m_gsm, m_composition, m_finish, m_lycra,
@@ -4779,7 +4782,7 @@ export const uploadFabricArticleData = async (req: Request, res: Response): Prom
           )
           SELECT
             gen_random_uuid(), v.fabric_article_number, v.fabric_article_description,
-            v.division, v.sub_division, v.major_category, v.vendor_name, v.vendor_code,
+            v.division, v.sub_division, v.major_category, v.vendor_name, v.vendor_code, v.fabric_rate,
             v.m_fab_div, v.m_yarn, v.m_fab_main_mvgr_1, v.m_fab_main_mvgr_2,
             v.m_construction, v.m_ounz, v.m_width, v.m_weave_01, v.m_weave_02,
             v.m_count, v.m_gsm, v.m_composition, v.m_finish, v.m_lycra,
@@ -4787,7 +4790,7 @@ export const uploadFabricArticleData = async (req: Request, res: Response): Prom
             NOW(), NOW()
           FROM jsonb_to_recordset(${JSON.stringify(batch)}::jsonb) AS v(
             fabric_article_number text, fabric_article_description text,
-            division text, sub_division text, major_category text, vendor_name text, vendor_code text,
+            division text, sub_division text, major_category text, vendor_name text, vendor_code text, fabric_rate numeric,
             m_fab_div text, m_yarn text, m_fab_main_mvgr_1 text, m_fab_main_mvgr_2 text,
             m_construction text, m_ounz text, m_width text, m_weave_01 text, m_weave_02 text,
             m_count text, m_gsm text, m_composition text, m_finish text, m_lycra text,
@@ -4806,6 +4809,69 @@ export const uploadFabricArticleData = async (req: Request, res: Response): Prom
     });
   } catch (error: any) {
     console.error('[FabricArticleData] Upload error:', error);
+    res.status(500).json({ success: false, error: error.message });
+  }
+};
+
+/**
+ * GET /api/admin/fabric-article-data/export
+ * Admin-only (this whole router is mounted behind `requireAdmin`). Dumps
+ * every column and every row of fabric_article_data as-is — a raw `SELECT *`
+ * so the export can never silently drop a column the Prisma model hasn't
+ * caught up with yet.
+ */
+export const downloadFabricArticleDataMaster = async (_req: Request, res: Response): Promise<void> => {
+  try {
+    const rows: Record<string, any>[] = await prisma.$queryRaw`
+      SELECT * FROM fabric_article_data ORDER BY created_at ASC, id ASC
+    `;
+
+    const ExcelJS = require('exceljs');
+    const wb = new ExcelJS.Workbook();
+    const ws = wb.addWorksheet('FABRIC ARTICLE DATA');
+
+    // 'id' is Supabase's own surrogate primary key — not meaningful to
+    // whoever opens this file, so it's dropped here same as everywhere else
+    // in the Expense Data views; every other column ships as-is.
+    const headers = (rows.length > 0
+      ? Object.keys(rows[0])
+      : [
+          'id', 'fabric_article_number', 'fabric_article_description',
+          'division', 'sub_division', 'major_category', 'vendor_name', 'vendor_code', 'fabric_rate',
+          'm_fab_div', 'm_yarn', 'm_fab_main_mvgr_1', 'm_fab_main_mvgr_2',
+          'm_construction', 'm_ounz', 'm_width', 'm_weave_01', 'm_weave_02',
+          'm_count', 'm_gsm', 'm_composition', 'm_finish', 'm_lycra',
+          'approval_status', 'approved_at', 'approved_by', 'sap_sync_status', 'sap_sync_message',
+          'user_name', 'created_at', 'updated_at',
+        ]
+    ).filter((h) => h !== 'id');
+
+    const headerRow = ws.addRow(headers.map((h) => h.toUpperCase()));
+    headerRow.eachCell((cell: any) => {
+      cell.font = { bold: true, color: { argb: 'FFFFFFFF' } };
+      cell.fill = { type: 'pattern', pattern: 'solid', fgColor: { argb: 'FF1565C0' } };
+      cell.alignment = { horizontal: 'center' };
+    });
+    ws.views = [{ state: 'frozen', ySplit: 1 }];
+
+    for (const row of rows) {
+      ws.addRow(headers.map((h) => {
+        const v = row[h];
+        if (v == null) return '';
+        if (v instanceof Date) return v.toISOString();
+        return typeof v === 'object' ? String(v) : v;
+      }));
+    }
+
+    ws.columns = headers.map(() => ({ width: 20 }));
+
+    const filename = `FABRIC_ARTICLE_DATA_MASTER_${new Date().toISOString().slice(0, 10)}.xlsx`;
+    res.setHeader('Content-Type', 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');
+    res.setHeader('Content-Disposition', `attachment; filename="${filename}"`);
+    await wb.xlsx.write(res);
+    res.end();
+  } catch (error: any) {
+    console.error('[FabricArticleData] Master export error:', error);
     res.status(500).json({ success: false, error: error.message });
   }
 };
@@ -5280,6 +5346,72 @@ export const uploadBodyArticleData = async (req: Request, res: Response): Promis
     });
   } catch (error: any) {
     console.error('[BodyArticleData] Upload error:', error);
+    res.status(500).json({ success: false, error: error.message });
+  }
+};
+
+/**
+ * GET /api/admin/body-article-data/export
+ * Admin-only (this whole router is mounted behind `requireAdmin`). Same
+ * shape as the Fabric Article Data master export: a raw `SELECT *` so a
+ * newly added column (see FABRIC_RATE there) is always included with no
+ * further code change, minus the surrogate `id` primary key.
+ */
+export const downloadBodyArticleDataMaster = async (_req: Request, res: Response): Promise<void> => {
+  try {
+    const rows: Record<string, any>[] = await prisma.$queryRaw`
+      SELECT * FROM body_article_data ORDER BY created_at ASC, id ASC
+    `;
+
+    const ExcelJS = require('exceljs');
+    const wb = new ExcelJS.Workbook();
+    const ws = wb.addWorksheet('BODY ARTICLE DATA');
+
+    // 'id' is Supabase's own surrogate primary key — not meaningful to
+    // whoever opens this file, so it's dropped here same as the Fabric
+    // Article Data master export; every other column ships as-is.
+    const headers = (rows.length > 0
+      ? Object.keys(rows[0])
+      : [
+          'body_article_number', 'body_article_description', 'flat_id', 'article_number',
+          'division', 'sub_division', 'major_category', 'mc_code', 'vendor_name', 'vendor_code',
+          'season', 'year', 'hsn_tax_code',
+          'm_collar_type', 'm_collar_style', 'm_neck_type', 'm_neck_style', 'm_placket',
+          'm_blt_type', 'm_blt_style', 'm_sleeves_main_style', 'm_sleeve_fold', 'm_btm_fold',
+          'm_no_of_pocket', 'm_pocket', 'm_extra_pocket', 'm_fit', 'm_body_style', 'm_length', 'm_set',
+          'cmtp_cost', 'cmp_cost', 'fab_cost', 'fab_cons', 'width',
+          'approval_status', 'approved_at', 'approved_by', 'sap_sync_status', 'sap_sync_message',
+          'user_name', 'created_at', 'updated_at', 'image_url', 'body_article_type',
+          'design_number', 'fg_creator_approved',
+        ]
+    ).filter((h) => h !== 'id');
+
+    const headerRow = ws.addRow(headers.map((h) => h.toUpperCase()));
+    headerRow.eachCell((cell: any) => {
+      cell.font = { bold: true, color: { argb: 'FFFFFFFF' } };
+      cell.fill = { type: 'pattern', pattern: 'solid', fgColor: { argb: 'FF1565C0' } };
+      cell.alignment = { horizontal: 'center' };
+    });
+    ws.views = [{ state: 'frozen', ySplit: 1 }];
+
+    for (const row of rows) {
+      ws.addRow(headers.map((h) => {
+        const v = row[h];
+        if (v == null) return '';
+        if (v instanceof Date) return v.toISOString();
+        return typeof v === 'object' ? String(v) : v;
+      }));
+    }
+
+    ws.columns = headers.map(() => ({ width: 20 }));
+
+    const filename = `BODY_ARTICLE_DATA_MASTER_${new Date().toISOString().slice(0, 10)}.xlsx`;
+    res.setHeader('Content-Type', 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');
+    res.setHeader('Content-Disposition', `attachment; filename="${filename}"`);
+    await wb.xlsx.write(res);
+    res.end();
+  } catch (error: any) {
+    console.error('[BodyArticleData] Master export error:', error);
     res.status(500).json({ success: false, error: error.message });
   }
 };
@@ -5814,6 +5946,9 @@ export const EXPENSE_TABLE_REGISTRY: Record<string, ExpenseTableConfig> = {
     kind: 'raw',
     tableName: 'maj_cat_sizes',
     idColumn: 'id',
+    allowCreate: true,
+    allowDelete: true,
+    requiredOnCreate: ['division', 'sub_division', 'major_category', 'size'],
     columns: [
       { key: 'id', label: 'ID', editable: false },
       { key: 'division', label: 'Division' },
@@ -5898,6 +6033,7 @@ export const EXPENSE_TABLE_REGISTRY: Record<string, ExpenseTableConfig> = {
       { key: 'majorCategory', label: 'Major Category' },
       { key: 'vendorName', label: 'Vendor Name' },
       { key: 'vendorCode', label: 'Vendor Code' },
+      { key: 'fabricRate', label: 'Fabric Rate' },
       { key: 'mFabDiv', label: 'Fab Div' },
       { key: 'mYarn', label: 'Yarn' },
       { key: 'mFabMainMvgr1', label: 'Fab Main MVGR 1' },
@@ -6171,6 +6307,31 @@ export const EXPENSE_TABLE_REGISTRY: Record<string, ExpenseTableConfig> = {
 };
 
 /** GET /admin/expense-table/:tableKey?page=&limit=&search=&sortBy=&sortDir= */
+/** Parses the `filters` query param — a JSON object of column key -> array of
+ * exact values to match (checkbox-style column filters, additive to the
+ * free-text `search` box, not a replacement for it). Whitelisted against
+ * this table's own configured columns (it's client-supplied), and anything
+ * malformed is dropped rather than erroring — a bad filter should just not
+ * filter, not break the page. */
+function parseExpenseColumnFilters(raw: string | undefined, validKeys: Set<string>): Record<string, string[]> {
+  if (!raw) return {};
+  let parsed: unknown;
+  try {
+    parsed = JSON.parse(raw);
+  } catch {
+    return {};
+  }
+  if (!parsed || typeof parsed !== 'object' || Array.isArray(parsed)) return {};
+
+  const result: Record<string, string[]> = {};
+  for (const [key, value] of Object.entries(parsed as Record<string, unknown>)) {
+    if (!validKeys.has(key) || !Array.isArray(value) || value.length === 0) continue;
+    const values = value.filter((v): v is string | number | boolean => v !== null && v !== undefined).map((v) => String(v));
+    if (values.length > 0) result[key] = values;
+  }
+  return result;
+}
+
 export async function getExpenseTableData(req: Request, res: Response) {
   const { tableKey } = req.params;
   const config = EXPENSE_TABLE_REGISTRY[tableKey];
@@ -6178,7 +6339,7 @@ export async function getExpenseTableData(req: Request, res: Response) {
     return res.status(404).json({ success: false, error: `Unknown table key: ${tableKey}` });
   }
 
-  const { page, limit, search, sortBy, sortDir } = req.query as Record<string, string | undefined>;
+  const { page, limit, search, sortBy, sortDir, filters } = req.query as Record<string, string | undefined>;
   const pageNum = Math.max(1, parseInt(page ?? '1', 10) || 1);
   const limitNum = Math.min(200, Math.max(1, parseInt(limit ?? '50', 10) || 50));
   const skip = (pageNum - 1) * limitNum;
@@ -6190,10 +6351,16 @@ export async function getExpenseTableData(req: Request, res: Response) {
       const validFields = new Set(config.columns.map((c) => c.key));
       const sortField = sortBy && validFields.has(sortBy) ? sortBy : config.defaultSort.field;
       const delegate = (prisma as any)[config.delegateName];
+      const columnFilters = parseExpenseColumnFilters(filters, validFields);
 
-      const where = searchTerm
-        ? { OR: config.searchColumns.map((f) => ({ [f]: { contains: searchTerm, mode: 'insensitive' as const } })) }
-        : {};
+      const andConditions: any[] = [];
+      if (searchTerm) {
+        andConditions.push({ OR: config.searchColumns.map((f) => ({ [f]: { contains: searchTerm, mode: 'insensitive' as const } })) });
+      }
+      for (const [col, values] of Object.entries(columnFilters)) {
+        andConditions.push({ [col]: { in: values } });
+      }
+      const where = andConditions.length > 0 ? { AND: andConditions } : {};
 
       const [total, rows] = await withPrismaRetry(() =>
         prisma.$transaction([
@@ -6208,15 +6375,23 @@ export async function getExpenseTableData(req: Request, res: Response) {
     if (config.kind === 'raw') {
       const validColumns = new Set(config.columns.map((c) => c.key));
       const sortColumn = sortBy && validColumns.has(sortBy) ? sortBy : config.defaultSort.column;
+      const columnFilters = parseExpenseColumnFilters(filters, validColumns);
 
-      const whereSql = searchTerm
-        ? Prisma.sql`WHERE ${Prisma.join(
+      const clauses: ReturnType<typeof Prisma.sql>[] = [];
+      if (searchTerm) {
+        clauses.push(
+          Prisma.sql`(${Prisma.join(
             config.searchColumns.map(
               (col) => Prisma.sql`${Prisma.raw(`"${col}"`)}::text ILIKE ${'%' + searchTerm + '%'}`
             ),
             ' OR '
-          )}`
-        : Prisma.empty;
+          )})`
+        );
+      }
+      for (const [col, values] of Object.entries(columnFilters)) {
+        clauses.push(Prisma.sql`${Prisma.raw(`"${col}"`)}::text = ANY(${values})`);
+      }
+      const whereSql = clauses.length > 0 ? Prisma.sql`WHERE ${Prisma.join(clauses, ' AND ')}` : Prisma.empty;
 
       const orderSql = Prisma.sql`ORDER BY ${Prisma.raw(`"${sortColumn}"`)} ${Prisma.raw(dir.toUpperCase())}`;
       const tableSql = Prisma.raw(`"${config.tableName}"`);
@@ -6330,6 +6505,69 @@ export async function getExpenseColumnOptions(req: Request, res: Response) {
     return res.json({ success: true, data: cleaned });
   } catch (error: any) {
     console.error(`[Expense] column-options error for "${tableKey}"."${column}":`, error);
+    return res.status(500).json({ success: false, error: error.message });
+  }
+}
+
+/** GET /admin/expense-table/:tableKey/column/:fromColumn/mapped-to/:toColumn
+ * — a lookup table of `fromColumn` value -> `toColumn` value, built from
+ * every existing row, for auto-filling one field from another on the
+ * add/edit form (e.g. Size Master: pick a Major Category, Sub Division
+ * fills itself in) instead of asking for the same fact twice. Only
+ * meaningful where the relationship is really 1:1 in the data — if a
+ * `fromColumn` value appears with more than one `toColumn` value, this just
+ * returns whichever happens to sort last; the caller treats the result as a
+ * convenience default, not a constraint, so that's an acceptable fallback,
+ * not a correctness bug. Both columns are checked against this table's own
+ * configured columns first — they're route params, so that's what stops
+ * this being used to probe arbitrary columns. */
+export async function getExpenseColumnMapping(req: Request, res: Response) {
+  const { tableKey, fromColumn, toColumn } = req.params;
+  const config = EXPENSE_TABLE_REGISTRY[tableKey];
+  if (!config) {
+    return res.status(404).json({ success: false, error: `Unknown table key: ${tableKey}` });
+  }
+  if (!config.columns.some((c) => c.key === fromColumn) || !config.columns.some((c) => c.key === toColumn)) {
+    return res.status(400).json({ success: false, error: 'Unknown column.' });
+  }
+
+  try {
+    let pairs: { from: any; to: any }[];
+
+    if (config.kind === 'prisma') {
+      const delegate = (prisma as any)[config.delegateName];
+      const rows = (await withPrismaRetry(() =>
+        delegate.findMany({
+          distinct: [fromColumn],
+          select: { [fromColumn]: true, [toColumn]: true },
+          orderBy: { [fromColumn]: 'asc' },
+          take: 5000,
+        })
+      )) as any[];
+      pairs = rows.map((r) => ({ from: r[fromColumn], to: r[toColumn] }));
+    } else if (config.kind === 'raw') {
+      const fromSql = Prisma.raw(`"${fromColumn}"`);
+      const toSql = Prisma.raw(`"${toColumn}"`);
+      const tableSql = Prisma.raw(`"${config.tableName}"`);
+      const rows = await withPrismaRetry(() =>
+        prisma.$queryRaw<{ from: any; to: any }[]>(
+          Prisma.sql`SELECT DISTINCT ON (${fromSql}) ${fromSql} AS from, ${toSql} AS to FROM ${tableSql} WHERE ${fromSql} IS NOT NULL ORDER BY ${fromSql} ASC, ${toSql} DESC LIMIT 5000`
+        )
+      );
+      pairs = rows;
+    } else {
+      return res.status(400).json({ success: false, error: 'Column mapping is not supported for this table.' });
+    }
+
+    const map: Record<string, string> = {};
+    for (const { from, to } of pairs) {
+      if (from === null || from === undefined || String(from).trim() === '') continue;
+      if (to === null || to === undefined || String(to).trim() === '') continue;
+      map[String(from)] = String(to);
+    }
+    return res.json({ success: true, data: map });
+  } catch (error: any) {
+    console.error(`[Expense] column-mapping error for "${tableKey}" "${fromColumn}"->"${toColumn}":`, error);
     return res.status(500).json({ success: false, error: error.message });
   }
 }

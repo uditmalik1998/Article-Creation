@@ -34,6 +34,12 @@ interface ModelImageItem {
   lastModified?: string;
 }
 
+interface ModelImagesPage {
+  items: ModelImageItem[];
+  nextCursor?: string;
+  scanTruncated?: boolean;
+}
+
 interface UserRef {
   id: number;
   name: string;
@@ -106,6 +112,47 @@ function splitArticleColour(folder: string): { article: string; colour: string }
   return m ? { article: m[1], colour: m[2].trim() } : { article: folder.trim(), colour: '' };
 }
 
+// The gallery renders at most this many images at a time. A day can hold 400+ images
+// and mounting them all at once stalls the tab (hundreds of parallel image requests),
+// so the loaded set is paged client-side instead.
+const PAGE_IMAGE_LIMIT = 50;
+
+// Compact pager: first, last, and a window around the current page, with gaps elided.
+function pageWindow(page: number, total: number): Array<number | '…'> {
+  if (total <= 7) return Array.from({ length: total }, (_, i) => i + 1);
+  const out: Array<number | '…'> = [1];
+  const from = Math.max(2, page - 1);
+  const to = Math.min(total - 1, page + 1);
+  if (from > 2) out.push('…');
+  for (let n = from; n <= to; n++) out.push(n);
+  if (to < total - 1) out.push('…');
+  out.push(total);
+  return out;
+}
+
+// A CSV export walks the listing page by page; this caps the walk so a runaway bucket
+// can't spin forever (200 x 300 keys is far above the current bucket size).
+const MAX_EXPORT_PAGES = 200;
+
+// Group a flat list of objects into [articleFolder, images[]] with the views in
+// display order. Used both for the gallery and for the export's full-bucket fetch.
+function groupByArticle(list: ModelImageItem[]): Array<[string, ModelImageItem[]]> {
+  const m = new Map<string, ModelImageItem[]>();
+  for (const it of list) {
+    const arr = m.get(it.articleNumber) || [];
+    arr.push(it);
+    m.set(it.articleNumber, arr);
+  }
+  for (const arr of m.values()) {
+    arr.sort((a, b) => {
+      const ia = VIEW_ORDER.indexOf(a.view);
+      const ib = VIEW_ORDER.indexOf(b.view);
+      return (ia < 0 ? 99 : ia) - (ib < 0 ? 99 : ib);
+    });
+  }
+  return Array.from(m.entries());
+}
+
 // Download via the backend proxy (R2 public URLs don't allow cross-origin fetch,
 // so downloading them client-side would just open the image). The proxy streams
 // the bytes with a Content-Disposition attachment header.
@@ -144,25 +191,51 @@ export function ModelImagesBrowser() {
   const [loadedOnce, setLoadedOnce] = useState(false);
   const [approving, setApproving] = useState<Set<string>>(new Set());
   const [meta, setMeta] = useState<Record<string, ArticleMeta>>({});
+  const [exporting, setExporting] = useState(false);
+  const [page, setPage] = useState(1);
+
+  // One page of the bucket listing. Shared by the gallery loader and by the CSV export,
+  // which walks every page rather than exporting only what's on screen.
+  const fetchPage = useCallback(async (prefix: string, day: Dayjs | null, cur?: string): Promise<ModelImagesPage> => {
+    const token = localStorage.getItem('authToken');
+    const params = new URLSearchParams();
+    if (prefix) params.set('prefix', prefix);
+    if (cur) params.set('cursor', cur);
+    if (day) {
+      // Send the picked day's boundaries in the BROWSER's timezone, so the server
+      // filters on the user's calendar day rather than its own (UTC in prod).
+      params.set('from', day.startOf('day').toDate().toISOString());
+      params.set('to', day.add(1, 'day').startOf('day').toDate().toISOString());
+    }
+    const res = await fetch(`${API_BASE}/model-generation/model-images?${params.toString()}`, {
+      headers: { Authorization: `Bearer ${token}` },
+    });
+    const data = await res.json();
+    if (!res.ok || !data.success) throw new Error(data.error || 'Failed to load model images');
+    return data as ModelImagesPage;
+  }, []);
+
+  // Every page for the current filters. With no date picked the server pages the bucket,
+  // so the gallery holds one page while the export needs the lot — first upload to last.
+  const fetchAll = useCallback(async (prefix: string, day: Dayjs | null) => {
+    const all: ModelImageItem[] = [];
+    let cur: string | undefined;
+    let pages = 0;
+    let scanTruncated = false;
+    do {
+      const page = await fetchPage(prefix, day, cur);
+      all.push(...(page.items || []));
+      scanTruncated = scanTruncated || !!page.scanTruncated;
+      cur = page.nextCursor;
+      pages += 1;
+    } while (cur && pages < MAX_EXPORT_PAGES);
+    return { items: all, incomplete: !!cur || scanTruncated };
+  }, [fetchPage]);
 
   const load = useCallback(async (reset: boolean, prefix: string, day: Dayjs | null, cur?: string) => {
-    const token = localStorage.getItem('authToken');
     setLoading(true);
     try {
-      const params = new URLSearchParams();
-      if (prefix) params.set('prefix', prefix);
-      if (cur) params.set('cursor', cur);
-      if (day) {
-        // Send the picked day's boundaries in the BROWSER's timezone, so the server
-        // filters on the user's calendar day rather than its own (UTC in prod).
-        params.set('from', day.startOf('day').toDate().toISOString());
-        params.set('to', day.add(1, 'day').startOf('day').toDate().toISOString());
-      }
-      const res = await fetch(`${API_BASE}/model-generation/model-images?${params.toString()}`, {
-        headers: { Authorization: `Bearer ${token}` },
-      });
-      const data = await res.json();
-      if (!res.ok || !data.success) throw new Error(data.error || 'Failed to load model images');
+      const data = await fetchPage(prefix, day, cur);
       setItems((prev) => (reset ? data.items : [...prev, ...data.items]));
       setCursor(data.nextCursor);
       setTruncated(!!data.scanTruncated);
@@ -172,7 +245,7 @@ export function ModelImagesBrowser() {
     } finally {
       setLoading(false);
     }
-  }, []);
+  }, [fetchPage]);
 
   // Per-article generator + approval info (who generated, who approved, approved flag).
   const loadMeta = useCallback(async () => {
@@ -200,6 +273,7 @@ export function ModelImagesBrowser() {
     setDate(day);
     setItems([]);
     setCursor(undefined);
+    setPage(1);
     void load(true, search.trim(), day);
   };
 
@@ -282,59 +356,87 @@ export function ModelImagesBrowser() {
   const runSearch = () => {
     setItems([]);
     setCursor(undefined);
+    setPage(1);
     void load(true, search.trim(), date);
   };
 
-  // Export exactly what the gallery is currently showing (same date / status / search
-  // filters) as a CSV: one row per article, with the colour split out of the folder name
-  // so the list can be pasted straight into a sheet or matched against a PO.
-  const downloadList = () => {
-    if (groups.length === 0) {
-      message.warning('Nothing to export for the current filters');
-      return;
+  // Export the CSV for the current date / status / search filters: one row per article,
+  // with the colour split out of the folder name so the list can be pasted straight into
+  // a sheet or matched against a PO.
+  //
+  // The gallery is paged, so it may be holding only the first page — with no date picked
+  // that is a slice of the bucket, not "all dates". So when more pages exist, the export
+  // walks the listing to the end first and writes EVERY article, first date to last,
+  // regardless of how much the gallery has scrolled in.
+  const downloadList = async () => {
+    if (exporting) return;
+    setExporting(true);
+    try {
+      let rows = groups;
+      let partial = false;
+      if (cursor) {
+        const all = await fetchAll(search.trim(), date);
+        rows = applyStatus(groupByArticle(all.items));
+        partial = all.incomplete;
+      } else {
+        partial = truncated;
+      }
+      if (rows.length === 0) {
+        message.warning('Nothing to export for the current filters');
+        return;
+      }
+      const esc = (v: string) => `"${String(v ?? '').replace(/"/g, '""')}"`;
+      const header = [
+        'article_number',
+        'colour',
+        'full_code',
+        'status',
+        'images',
+        'views',
+        'generated_by',
+        'approved_by',
+        'approved_at',
+        'last_reviewed_at',
+      ];
+      const lines = rows.map(([folder, imgs]) => {
+        const { article, colour } = splitArticleColour(folder);
+        const m = meta[folder];
+        const s = statusOf(folder);
+        return [
+          esc(article),
+          esc(colour),
+          esc(folder),
+          s,
+          String(imgs.length),
+          esc(imgs.map((i) => VIEW_LABELS[i.view] || i.view).join(' | ')),
+          esc(m?.generatedBy?.name || ''),
+          esc(s === 'APPROVED' ? m?.approvedBy?.name || '' : ''),
+          esc(s === 'APPROVED' && m?.approvedAt ? new Date(m.approvedAt).toLocaleString() : ''),
+          esc(m?.reviewedAt ? new Date(m.reviewedAt).toLocaleString() : ''),
+        ].join(',');
+      });
+      const csv = [header.join(','), ...lines].join('\r\n');
+      // BOM so Excel reads the UTF-8 colour names correctly.
+      const blob = new Blob(['\ufeff' + csv], { type: 'text/csv;charset=utf-8;' });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      const scope = status === 'ALL' ? 'all' : status.toLowerCase();
+      const when = date ? date.format('YYYY-MM-DD') : 'all-dates';
+      a.href = url;
+      a.download = `model-images_${scope}_${when}.csv`;
+      a.click();
+      URL.revokeObjectURL(url);
+      message.success(
+        `Exported ${rows.length} article${rows.length !== 1 ? 's' : ''}${date ? '' : ' across all dates'}`
+      );
+      if (partial) {
+        message.warning('The bucket is larger than one export scan — some older articles may be missing');
+      }
+    } catch (e: any) {
+      message.error(e?.message || 'Export failed');
+    } finally {
+      setExporting(false);
     }
-    const esc = (v: string) => `"${String(v ?? '').replace(/"/g, '""')}"`;
-    const header = [
-      'article_number',
-      'colour',
-      'full_code',
-      'status',
-      'images',
-      'views',
-      'generated_by',
-      'approved_by',
-      'approved_at',
-      'last_reviewed_at',
-    ];
-    const lines = groups.map(([folder, imgs]) => {
-      const { article, colour } = splitArticleColour(folder);
-      const m = meta[folder];
-      const s = statusOf(folder);
-      return [
-        esc(article),
-        esc(colour),
-        esc(folder),
-        s,
-        String(imgs.length),
-        esc(imgs.map((i) => VIEW_LABELS[i.view] || i.view).join(' | ')),
-        esc(m?.generatedBy?.name || ''),
-        esc(s === 'APPROVED' ? m?.approvedBy?.name || '' : ''),
-        esc(s === 'APPROVED' && m?.approvedAt ? new Date(m.approvedAt).toLocaleString() : ''),
-        esc(m?.reviewedAt ? new Date(m.reviewedAt).toLocaleString() : ''),
-      ].join(',');
-    });
-    const csv = [header.join(','), ...lines].join('\r\n');
-    // BOM so Excel reads the UTF-8 colour names correctly.
-    const blob = new Blob(['\ufeff' + csv], { type: 'text/csv;charset=utf-8;' });
-    const url = URL.createObjectURL(blob);
-    const a = document.createElement('a');
-    const scope = status === 'ALL' ? 'all' : status.toLowerCase();
-    const when = date ? date.format('YYYY-MM-DD') : 'all-dates';
-    a.href = url;
-    a.download = `model-images_${scope}_${when}.csv`;
-    a.click();
-    URL.revokeObjectURL(url);
-    message.success(`Exported ${groups.length} article${groups.length !== 1 ? 's' : ''}`);
   };
 
   // Escape hatch for "I searched an article and got nothing because of the date".
@@ -342,6 +444,7 @@ export function ModelImagesBrowser() {
     setDate(null);
     setItems([]);
     setCursor(undefined);
+    setPage(1);
     void load(true, search.trim(), null);
   };
 
@@ -350,35 +453,64 @@ export function ModelImagesBrowser() {
     [meta],
   );
 
-  const groups = useMemo(() => {
-    const m = new Map<string, ModelImageItem[]>();
-    for (const it of items) {
-      const arr = m.get(it.articleNumber) || [];
-      arr.push(it);
-      m.set(it.articleNumber, arr);
-    }
-    for (const arr of m.values()) {
-      arr.sort((a, b) => {
-        const ia = VIEW_ORDER.indexOf(a.view);
-        const ib = VIEW_ORDER.indexOf(b.view);
-        return (ia < 0 ? 99 : ia) - (ib < 0 ? 99 : ib);
-      });
-    }
-    // Status lives in the meta map (already loaded in full), so this filter is applied
-    // client-side over whatever pages are loaded — with the default date filter that is
-    // the complete set for the day.
-    const entries = Array.from(m.entries());
-    return status === 'ALL' ? entries : entries.filter(([article]) => statusOf(article) === status);
-  }, [items, status, statusOf]);
+  // Status lives in the meta map (already loaded in full), so this filter is applied
+  // client-side over whatever pages are loaded — with the default date filter that is
+  // the complete set for the day.
+  const applyStatus = useCallback(
+    (entries: Array<[string, ModelImageItem[]]>) =>
+      status === 'ALL' ? entries : entries.filter(([article]) => statusOf(article) === status),
+    [status, statusOf],
+  );
 
-  const visibleArticles = useMemo(() => groups.map(([a]) => a), [groups]);
-  // Count what's actually on screen — with a status filter active, items.length is the
-  // unfiltered total and would report far more images than the page shows.
+  const groups = useMemo(() => applyStatus(groupByArticle(items)), [items, applyStatus]);
+
+  // Split the matched articles into pages of at most PAGE_IMAGE_LIMIT images. An article
+  // is never split across pages, so a page can run slightly under the limit.
+  const pages = useMemo(() => {
+    const out: Array<Array<[string, ModelImageItem[]]>> = [];
+    let current: Array<[string, ModelImageItem[]]> = [];
+    let count = 0;
+    for (const group of groups) {
+      const n = group[1].length;
+      if (current.length > 0 && count + n > PAGE_IMAGE_LIMIT) {
+        out.push(current);
+        current = [];
+        count = 0;
+      }
+      current.push(group);
+      count += n;
+    }
+    if (current.length > 0) out.push(current);
+    return out;
+  }, [groups]);
+
+  const pageCount = pages.length;
+  const pageGroups = pages[page - 1] || [];
+
+  // A narrowed filter can leave the current page out of range (e.g. sitting on page 6 of
+  // 9 and then picking a status that only matches two pages' worth).
+  useEffect(() => {
+    setPage((p) => Math.min(Math.max(p, 1), Math.max(pageCount, 1)));
+  }, [pageCount]);
+
+  const goToPage = (n: number) => {
+    setPage(Math.min(Math.max(n, 1), Math.max(pageCount, 1)));
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  };
+
+  // Articles on THIS page — what the select-all checkbox covers.
+  const pageArticles = useMemo(() => pageGroups.map(([a]) => a), [pageGroups]);
+  // Every article matching the filters, across all pages. Selection survives paging, so
+  // a bulk approve still covers what was ticked on an earlier page.
+  const matchedArticles = useMemo(() => groups.map(([a]) => a), [groups]);
+  // Count what's actually matched — with a status filter active, items.length is the
+  // unfiltered total and would report far more images than the gallery shows.
   const shownImageCount = useMemo(() => groups.reduce((n, [, imgs]) => n + imgs.length, 0), [groups]);
-  const allVisibleSelected = visibleArticles.length > 0 && visibleArticles.every((a) => selected.has(a));
+  const pageImageCount = useMemo(() => pageGroups.reduce((n, [, imgs]) => n + imgs.length, 0), [pageGroups]);
+  const allVisibleSelected = pageArticles.length > 0 && pageArticles.every((a) => selected.has(a));
   const selectedList = useMemo(
-    () => visibleArticles.filter((a) => selected.has(a)),
-    [visibleArticles, selected],
+    () => matchedArticles.filter((a) => selected.has(a)),
+    [matchedArticles, selected],
   );
   // A bulk action applies only to the selected articles its status rule allows — the
   // same rule the per-article buttons use, so selecting a rejected article can never
@@ -399,14 +531,46 @@ export function ModelImagesBrowser() {
 
   const toggleSelectAll = () => {
     setSelected((prev) => {
-      if (visibleArticles.every((a) => prev.has(a))) {
+      if (pageArticles.every((a) => prev.has(a))) {
         const next = new Set(prev);
-        visibleArticles.forEach((a) => next.delete(a));
+        pageArticles.forEach((a) => next.delete(a));
         return next;
       }
-      return new Set([...prev, ...visibleArticles]);
+      return new Set([...prev, ...pageArticles]);
     });
   };
+
+  const pager = pageCount > 1 && (
+    <div className="flex flex-wrap items-center justify-center gap-1 py-2">
+      <Button type="button" size="sm" variant="outline" disabled={page <= 1} onClick={() => goToPage(page - 1)}>
+        Prev
+      </Button>
+      {pageWindow(page, pageCount).map((n, i) =>
+        n === '…' ? (
+          <span key={`gap-${i}`} className="px-1 text-sm text-muted-foreground">
+            …
+          </span>
+        ) : (
+          <Button
+            key={n}
+            type="button"
+            size="sm"
+            variant={n === page ? 'secondary' : 'ghost'}
+            className="h-8 min-w-8 px-2"
+            onClick={() => goToPage(n)}
+          >
+            {n}
+          </Button>
+        )
+      )}
+      <Button type="button" size="sm" variant="outline" disabled={page >= pageCount} onClick={() => goToPage(page + 1)}>
+        Next
+      </Button>
+      <span className="ml-2 text-xs text-muted-foreground">
+        Page {page} of {pageCount} · showing {pageImageCount} of {shownImageCount} images
+      </span>
+    </div>
+  );
 
   return (
     <div className="flex flex-col gap-4">
@@ -418,6 +582,7 @@ export function ModelImagesBrowser() {
               {groups.length} article{groups.length !== 1 ? 's' : ''} · {shownImageCount} image
               {shownImageCount !== 1 ? 's' : ''}
               {cursor ? '+' : ''}
+              {pageCount > 1 && ` · page ${page}/${pageCount}`}
               {status !== 'ALL' && ` of ${items.length}`}
               {' · '}
               {date
@@ -443,7 +608,7 @@ export function ModelImagesBrowser() {
             >
               {date ? 'All dates' : 'Today'}
             </Button>
-            <Select value={status} onValueChange={(v) => setStatus(v as 'ALL' | ReviewStatus)}>
+            <Select value={status} onValueChange={(v) => { setStatus(v as 'ALL' | ReviewStatus); setPage(1); }}>
               <SelectTrigger className="h-9 w-40">
                 <SelectValue placeholder="Status" />
               </SelectTrigger>
@@ -472,19 +637,23 @@ export function ModelImagesBrowser() {
               type="button"
               size="sm"
               variant="outline"
-              onClick={downloadList}
-              disabled={groups.length === 0}
-              title="Export the articles currently listed (article number + colour) as CSV"
+              onClick={() => void downloadList()}
+              disabled={exporting || (groups.length === 0 && !cursor)}
+              title={
+                date
+                  ? 'Export the articles listed for this date (article number + colour) as CSV'
+                  : 'Export every article in the bucket, all dates, as CSV'
+              }
             >
-              <FileDown />
-              Download list
+              {exporting ? <Spinner className="h-4 w-4" /> : <FileDown />}
+              {exporting ? 'Preparing…' : 'Download list'}
             </Button>
             <Button
               type="button"
               size="icon"
               variant="ghost"
               className="h-9 w-9"
-              onClick={() => { setSearch(''); setItems([]); setCursor(undefined); void load(true, '', date); }}
+              onClick={() => { setSearch(''); setItems([]); setCursor(undefined); setPage(1); void load(true, '', date); }}
               title="Reset & refresh"
             >
               <RotateCw className={loading ? 'animate-spin' : ''} />
@@ -503,7 +672,7 @@ export function ModelImagesBrowser() {
           <CardContent className="flex flex-wrap items-center gap-3 border-t border-white/60 pt-3">
             <label className="flex cursor-pointer select-none items-center gap-2 text-sm">
               <Checkbox checked={allVisibleSelected} onCheckedChange={toggleSelectAll} />
-              Select all {visibleArticles.length}
+              Select all {pageArticles.length} on this page
             </label>
             {selectedList.length > 0 && (
               <>
@@ -592,7 +761,9 @@ export function ModelImagesBrowser() {
         </Card>
       )}
 
-      {groups.map(([article, imgs]) => {
+      {pager}
+
+      {pageGroups.map(([article, imgs]) => {
         const m = meta[article];
         const articleStatus = statusOf(article);
         const isApproved = articleStatus === 'APPROVED';
@@ -725,6 +896,8 @@ export function ModelImagesBrowser() {
         </Card>
         );
       })}
+
+      {pager}
 
       {cursor && (
         <div className="flex justify-center py-2">

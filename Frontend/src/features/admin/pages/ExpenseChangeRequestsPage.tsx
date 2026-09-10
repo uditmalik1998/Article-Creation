@@ -67,6 +67,17 @@ const OPERATION_META: Record<ExpenseChangeOperation, { label: string; className:
   DELETE: { label: 'Delete Row', className: 'bg-red-100 text-red-700 border-red-200' },
 };
 
+/** The full stage catalog spans every table's chain at once — a same-named
+ * key (e.g. 'CATEGORY_HEAD') appears once per chain. This narrows it down
+ * to just the one `tableKey` actually walks: its own dedicated rows if it
+ * has any, else the shared '*' default every other table falls back to —
+ * mirrors the backend's getActiveApprovalStages fallback (see
+ * expenseAccessService.ts). */
+function chainForTable(stages: ExpenseApprovalStage[], tableKey: string): ExpenseApprovalStage[] {
+  const own = stages.filter((s) => s.tableKey === tableKey);
+  return own.length > 0 ? own : stages.filter((s) => s.tableKey === '*');
+}
+
 /** PENDING has no fixed label — it shows the CURRENT stage's own name, which
  * only exists once the stage catalog has loaded. */
 function StatusBadge({ request, stages }: { request: ExpenseChangeRequest; stages: ExpenseApprovalStage[] }) {
@@ -162,9 +173,10 @@ function DetailDialog({ request, stages, onClose, onActed }: DetailDialogProps) 
   if (!request) return null;
 
   const tableTitle = EXPENSE_TABLE_CONFIGS[request.tableKey]?.title ?? request.tableKey;
-  const currentStage = stages.find((s) => s.key === request.currentStageKey);
+  const tableStages = chainForTable(stages, request.tableKey);
+  const currentStage = tableStages.find((s) => s.key === request.currentStageKey);
   const isLastStage =
-    !!currentStage && stages.filter((s) => s.isActive).every((s) => s.sortOrder <= currentStage.sortOrder);
+    !!currentStage && tableStages.filter((s) => s.isActive).every((s) => s.sortOrder <= currentStage.sortOrder);
 
   const act = async (action: 'APPROVE' | 'REJECT') => {
     if (action === 'REJECT' && !comment.trim()) {
@@ -352,20 +364,31 @@ export default function ExpenseChangeRequestsPage() {
     staleTime: 60_000,
   });
 
-  // Three visibility tiers, matching the server exactly (getExpenseChangeRequests):
+  // Four visibility tiers, matching the server exactly (getExpenseChangeRequests):
   //   1. ADMIN, or anyone tagged Business Division MDM — sees everything,
   //      unrestricted (MDM is the division-agnostic convergence point).
-  //   2. A Category Head with a division set — sees only THEIR OWN
+  //   2. A role confined to a fixed subset of tables (PLANNING: Segment
+  //      Master / Size Master only) — sees every request, but only for
+  //      those tables.
+  //   3. A Category Head with a division set — sees only THEIR OWN
   //      division's requests, never another's ("segregated to their
   //      Category Head"). Same 'all' tab, just automatically narrower — the
   //      server does the actual filtering, this only adjusts the tab label
   //      and keeps it from being hidden.
-  //   3. Everyone else — sees only requests they themselves raised, so
+  //   4. Everyone else — sees only requests they themselves raised, so
   //      there is no "all" tab at all for them.
   const canSeeEveryonesRequests = !!access?.isAdmin || access?.businessDivision === 'MDM';
+  const restrictedTableLabels = useMemo(
+    () => access?.allowedTableKeys?.map((k) => EXPENSE_TABLE_CONFIGS[k]?.title.split(' (')[0] ?? k).join(' & ') ?? '',
+    [access?.allowedTableKeys]
+  );
+  const isTableRestrictedApprover = !canSeeEveryonesRequests && !!access?.allowedTableKeys;
   const canSeeOwnDivisionRequests =
-    !canSeeEveryonesRequests && !!access?.businessDivision && access.approvableStageKeys.includes('CATEGORY_HEAD');
-  const canSeeBroaderThanOwnRequests = canSeeEveryonesRequests || canSeeOwnDivisionRequests;
+    !canSeeEveryonesRequests &&
+    !isTableRestrictedApprover &&
+    !!access?.businessDivision &&
+    access.approvableStageKeys.includes('CATEGORY_HEAD');
+  const canSeeBroaderThanOwnRequests = canSeeEveryonesRequests || isTableRestrictedApprover || canSeeOwnDivisionRequests;
 
   const availableTabs = useMemo(() => {
     const tabs: { key: TabKey; label: string }[] = [];
@@ -375,11 +398,15 @@ export default function ExpenseChangeRequestsPage() {
     if (canSeeBroaderThanOwnRequests) {
       tabs.push({
         key: 'all',
-        label: canSeeEveryonesRequests ? 'All Requests' : `${BUSINESS_DIVISION_LABELS[access!.businessDivision!]} Requests`,
+        label: canSeeEveryonesRequests
+          ? 'All Requests'
+          : isTableRestrictedApprover
+          ? `${restrictedTableLabels} Requests`
+          : `${BUSINESS_DIVISION_LABELS[access!.businessDivision!]} Requests`,
       });
     }
     return tabs;
-  }, [access, canSeeEveryonesRequests, canSeeBroaderThanOwnRequests]);
+  }, [access, canSeeEveryonesRequests, isTableRestrictedApprover, restrictedTableLabels, canSeeBroaderThanOwnRequests]);
 
   const [activeTab, setActiveTab] = useState<TabKey>('all');
   const [page, setPage] = useState(1);
@@ -493,7 +520,9 @@ export default function ExpenseChangeRequestsPage() {
         <h1 className="text-2xl font-bold">Expense Change Requests</h1>
         <p className="text-sm text-muted-foreground mt-0.5">
           {canSeeEveryonesRequests
-            ? 'Every add, edit and deletion requested across the Expense Data tables — routed by Business Division to that division’s Category Head, then to whoever is tagged MDM for final approval.'
+            ? 'Every add, edit and deletion requested across the Expense Data tables — routed by Business Division to that division’s Category Head (then, for Segment Master and Size Master, to Planning) before final approval from whoever is tagged MDM.'
+            : isTableRestrictedApprover
+            ? `Every add, edit and deletion requested on ${restrictedTableLabels}, and where each one stands before it reaches the master.`
             : canSeeOwnDivisionRequests
             ? `Every add, edit and deletion requested by ${BUSINESS_DIVISION_LABELS[access!.businessDivision!]} division, and where each one stands before it reaches the master.`
             : 'Every add, edit and deletion you have requested, and where each one stands in the approval chain before it reaches the master.'}
@@ -535,11 +564,13 @@ export default function ExpenseChangeRequestsPage() {
                   </SelectTrigger>
                   <SelectContent>
                     <SelectItem value="__ALL__">All tables</SelectItem>
-                    {Object.entries(EXPENSE_TABLE_CONFIGS).map(([key, cfg]) => (
-                      <SelectItem key={key} value={key}>
-                        {cfg.title.split(' (')[0]}
-                      </SelectItem>
-                    ))}
+                    {Object.entries(EXPENSE_TABLE_CONFIGS)
+                      .filter(([key]) => !access?.allowedTableKeys || access.allowedTableKeys.includes(key))
+                      .map(([key, cfg]) => (
+                        <SelectItem key={key} value={key}>
+                          {cfg.title.split(' (')[0]}
+                        </SelectItem>
+                      ))}
                   </SelectContent>
                 </Select>
               </div>

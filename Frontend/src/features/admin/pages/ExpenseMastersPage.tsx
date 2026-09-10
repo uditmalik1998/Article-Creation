@@ -57,7 +57,9 @@ export default function ExpenseMastersPage() {
       </div>
 
       <div className="grid grid-cols-1 gap-3 md:grid-cols-2 xl:grid-cols-3">
-        {Object.entries(EXPENSE_TABLE_CONFIGS).map(([key, cfg]) => (
+        {Object.entries(EXPENSE_TABLE_CONFIGS)
+          .filter(([key]) => !access?.allowedTableKeys || access.allowedTableKeys.includes(key))
+          .map(([key, cfg]) => (
           <Card key={key} className="flex flex-col">
             <CardContent className="flex flex-1 flex-col gap-2 pt-4">
               <div className="flex items-start gap-2">

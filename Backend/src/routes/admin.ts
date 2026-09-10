@@ -273,6 +273,7 @@ router.get('/expense-audit-log/:requestId',   h(expenseAuditLogController.getExp
 router.get('/fabric-article-data/status',   h(adminController.getFabricArticleDataStatus));
 router.get('/fabric-article-data/template', h(adminController.downloadFabricArticleDataTemplate));
 router.post('/fabric-article-data/upload',  excelUpload.single('file'), h(adminController.uploadFabricArticleData));
+router.get('/fabric-article-data/export',   h(adminController.downloadFabricArticleDataMaster));
 
 // ═══════════════════════════════════════════════════════
 // FABRIC ARTICLE MASTER (ADMIN) — fabric_article_master
@@ -287,6 +288,7 @@ router.post('/fabric-article-master/upload',  excelUpload.single('file'), h(admi
 router.get('/body-article-data/status',   h(adminController.getBodyArticleDataStatus));
 router.get('/body-article-data/template', h(adminController.downloadBodyArticleDataTemplate));
 router.post('/body-article-data/upload',  excelUpload.single('file'), h(adminController.uploadBodyArticleData));
+router.get('/body-article-data/export',   h(adminController.downloadBodyArticleDataMaster));
 
 // ═════════════════════════════════════════════════════
 // BROADER MENU (ADMIN) — broader_menu
