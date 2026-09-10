@@ -5350,6 +5350,72 @@ export const uploadBodyArticleData = async (req: Request, res: Response): Promis
   }
 };
 
+/**
+ * GET /api/admin/body-article-data/export
+ * Admin-only (this whole router is mounted behind `requireAdmin`). Same
+ * shape as the Fabric Article Data master export: a raw `SELECT *` so a
+ * newly added column (see FABRIC_RATE there) is always included with no
+ * further code change, minus the surrogate `id` primary key.
+ */
+export const downloadBodyArticleDataMaster = async (_req: Request, res: Response): Promise<void> => {
+  try {
+    const rows: Record<string, any>[] = await prisma.$queryRaw`
+      SELECT * FROM body_article_data ORDER BY created_at ASC, id ASC
+    `;
+
+    const ExcelJS = require('exceljs');
+    const wb = new ExcelJS.Workbook();
+    const ws = wb.addWorksheet('BODY ARTICLE DATA');
+
+    // 'id' is Supabase's own surrogate primary key — not meaningful to
+    // whoever opens this file, so it's dropped here same as the Fabric
+    // Article Data master export; every other column ships as-is.
+    const headers = (rows.length > 0
+      ? Object.keys(rows[0])
+      : [
+          'body_article_number', 'body_article_description', 'flat_id', 'article_number',
+          'division', 'sub_division', 'major_category', 'mc_code', 'vendor_name', 'vendor_code',
+          'season', 'year', 'hsn_tax_code',
+          'm_collar_type', 'm_collar_style', 'm_neck_type', 'm_neck_style', 'm_placket',
+          'm_blt_type', 'm_blt_style', 'm_sleeves_main_style', 'm_sleeve_fold', 'm_btm_fold',
+          'm_no_of_pocket', 'm_pocket', 'm_extra_pocket', 'm_fit', 'm_body_style', 'm_length', 'm_set',
+          'cmtp_cost', 'cmp_cost', 'fab_cost', 'fab_cons', 'width',
+          'approval_status', 'approved_at', 'approved_by', 'sap_sync_status', 'sap_sync_message',
+          'user_name', 'created_at', 'updated_at', 'image_url', 'body_article_type',
+          'design_number', 'fg_creator_approved',
+        ]
+    ).filter((h) => h !== 'id');
+
+    const headerRow = ws.addRow(headers.map((h) => h.toUpperCase()));
+    headerRow.eachCell((cell: any) => {
+      cell.font = { bold: true, color: { argb: 'FFFFFFFF' } };
+      cell.fill = { type: 'pattern', pattern: 'solid', fgColor: { argb: 'FF1565C0' } };
+      cell.alignment = { horizontal: 'center' };
+    });
+    ws.views = [{ state: 'frozen', ySplit: 1 }];
+
+    for (const row of rows) {
+      ws.addRow(headers.map((h) => {
+        const v = row[h];
+        if (v == null) return '';
+        if (v instanceof Date) return v.toISOString();
+        return typeof v === 'object' ? String(v) : v;
+      }));
+    }
+
+    ws.columns = headers.map(() => ({ width: 20 }));
+
+    const filename = `BODY_ARTICLE_DATA_MASTER_${new Date().toISOString().slice(0, 10)}.xlsx`;
+    res.setHeader('Content-Type', 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');
+    res.setHeader('Content-Disposition', `attachment; filename="${filename}"`);
+    await wb.xlsx.write(res);
+    res.end();
+  } catch (error: any) {
+    console.error('[BodyArticleData] Master export error:', error);
+    res.status(500).json({ success: false, error: error.message });
+  }
+};
+
 export const getMajorCategories = async (req: Request, res: Response) => {
   const { division } = req.query;
   const where: any = { mcStatus: 'ACT' };

@@ -29,6 +29,7 @@ import { ColumnCheckboxFilter } from '../components/ColumnCheckboxFilter';
  * rather than through the generic paginated read used for the on-page table. */
 const DOWNLOAD_MASTER_TABLE_KEYS: Record<string, { endpoint: string; filenamePrefix: string }> = {
   'fabric-article-data': { endpoint: '/admin/fabric-article-data/export', filenamePrefix: 'FABRIC_ARTICLE_DATA_MASTER' },
+  'body-article-data': { endpoint: '/admin/body-article-data/export', filenamePrefix: 'BODY_ARTICLE_DATA_MASTER' },
 };
 
 const PAGE_SIZE = 50;

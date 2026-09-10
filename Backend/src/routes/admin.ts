@@ -288,6 +288,7 @@ router.post('/fabric-article-master/upload',  excelUpload.single('file'), h(admi
 router.get('/body-article-data/status',   h(adminController.getBodyArticleDataStatus));
 router.get('/body-article-data/template', h(adminController.downloadBodyArticleDataTemplate));
 router.post('/body-article-data/upload',  excelUpload.single('file'), h(adminController.uploadBodyArticleData));
+router.get('/body-article-data/export',   h(adminController.downloadBodyArticleDataMaster));
 
 // ═════════════════════════════════════════════════════
 // BROADER MENU (ADMIN) — broader_menu
