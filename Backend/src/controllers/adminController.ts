@@ -4830,7 +4830,10 @@ export const downloadFabricArticleDataMaster = async (_req: Request, res: Respon
     const wb = new ExcelJS.Workbook();
     const ws = wb.addWorksheet('FABRIC ARTICLE DATA');
 
-    const headers = rows.length > 0
+    // 'id' is Supabase's own surrogate primary key — not meaningful to
+    // whoever opens this file, so it's dropped here same as everywhere else
+    // in the Expense Data views; every other column ships as-is.
+    const headers = (rows.length > 0
       ? Object.keys(rows[0])
       : [
           'id', 'fabric_article_number', 'fabric_article_description',
@@ -4840,7 +4843,8 @@ export const downloadFabricArticleDataMaster = async (_req: Request, res: Respon
           'm_count', 'm_gsm', 'm_composition', 'm_finish', 'm_lycra',
           'approval_status', 'approved_at', 'approved_by', 'sap_sync_status', 'sap_sync_message',
           'user_name', 'created_at', 'updated_at',
-        ];
+        ]
+    ).filter((h) => h !== 'id');
 
     const headerRow = ws.addRow(headers.map((h) => h.toUpperCase()));
     headerRow.eachCell((cell: any) => {
