@@ -28,6 +28,8 @@ import ApproverDashboard from './features/approver/pages/ApproverDashboard'; // 
 import ArticleDetailPage from './features/approver/pages/ArticleDetailPage'; // Article detail view
 import FabricArticleDashboard from './features/fabric-article/pages/FabricArticleDashboard'; // Fabric Article Dashboard
 import FabricArticleDetailPage from './features/fabric-article/pages/FabricArticleDetailPage'; // Fabric Article detail view
+import FGNewArticleDashboard from './features/fabric-article/pages/FGNewArticleDashboard'; // FG New Article Dashboard
+import FGNewArticleDetailPage from './features/fabric-article/pages/FGNewArticleDetailPage'; // FG New Article detail view
 import BodyArticleDashboard from './features/body-article/pages/BodyArticleDashboard'; // Body Article Dashboard
 import BodyArticleDetailPage from './features/body-article/pages/BodyArticleDetailPage'; // Body Article detail view
 import POPresentationPage from './features/po-presentation/pages/POPresentationPage'; // PO Presentation
@@ -549,26 +551,6 @@ const App: React.FC = () => {
                 }
               />
               <Route
-                path="/fabric-article/old-articles"
-                element={
-                  <ApproverRoute>
-                    <MainLayout>
-                      <FabricArticleDashboard key="fabric-old-articles" pathType="old" />
-                    </MainLayout>
-                  </ApproverRoute>
-                }
-              />
-              <Route
-                path="/fabric-article/old-articles/:id"
-                element={
-                  <ApproverRoute>
-                    <MainLayout>
-                      <FabricArticleDetailPage />
-                    </MainLayout>
-                  </ApproverRoute>
-                }
-              />
-              <Route
                 path="/fabric-article/rejected"
                 element={
                   <ApproverRoute>
@@ -614,6 +596,48 @@ const App: React.FC = () => {
                   <ApproverRoute>
                     <MainLayout>
                       <FabricArticleDashboard key="fabric-failed-articles" pathType="failed" />
+                    </MainLayout>
+                  </ApproverRoute>
+                }
+              />
+
+              {/* FG Article routes inside Fabric Article tab */}
+              <Route
+                path="/fabric-article/fg-new"
+                element={
+                  <ApproverRoute>
+                    <MainLayout>
+                      <FGNewArticleDashboard key="fg-new-articles" pathType="new" />
+                    </MainLayout>
+                  </ApproverRoute>
+                }
+              />
+              <Route
+                path="/fabric-article/fg-new/:id"
+                element={
+                  <ApproverRoute>
+                    <MainLayout>
+                      <FGNewArticleDetailPage />
+                    </MainLayout>
+                  </ApproverRoute>
+                }
+              />
+              <Route
+                path="/fabric-article/fg-created"
+                element={
+                  <ApproverRoute>
+                    <MainLayout>
+                      <FGNewArticleDashboard key="fg-created-articles" pathType="created" />
+                    </MainLayout>
+                  </ApproverRoute>
+                }
+              />
+              <Route
+                path="/fabric-article/fg-created/:id"
+                element={
+                  <ApproverRoute>
+                    <MainLayout>
+                      <FGNewArticleDetailPage />
                     </MainLayout>
                   </ApproverRoute>
                 }

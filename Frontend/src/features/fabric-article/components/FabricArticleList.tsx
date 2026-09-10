@@ -358,6 +358,8 @@ export interface ApproverArticleListProps {
   forceStaticGroups?: boolean;
   /** When true, hides the "Create Body Article" button (e.g. on the Body Article detail page) */
   hideCreateBody?: boolean;
+  /** When true, hides reference/article-desc fields and renames Article Number to Fabric Article Number. */
+  isFGMode?: boolean;
   serverPagination: {
     total: number;
     current: number;
@@ -391,6 +393,7 @@ const ArticleCard = React.memo(
     cardGroups,
     pathType,
     hideGroups,
+    isFGMode,
     fabHierarchy,
   }: {
     item: ApproverItem;
@@ -407,6 +410,7 @@ const ArticleCard = React.memo(
     cardGroups: CardGroup[];
     pathType?: 'old' | 'new' | 'rejected' | 'created' | 'failed';
     hideGroups?: string[];
+    isFGMode?: boolean;
     fabHierarchy?: {
       divisions: string[];
       subDivsByDiv: Record<string, string[]>;
@@ -418,6 +422,7 @@ const ArticleCard = React.memo(
     const [imgModalOpen, setImgModalOpen] = useState(false);
     const [localValues, setLocalValues] = useState<Record<string, string | null>>({});
     const [dupConfirmOpen, setDupConfirmOpen] = useState(false);
+    const autoSavedFabDescRef = useRef<string | null>(null);
     const [duplicating, setDuplicating] = useState(false);
     const [allCollapsed, setAllCollapsed] = useState(false);
     const [collapsedGroups, setCollapsedGroups] = useState<Set<string>>(new Set());
@@ -804,12 +809,29 @@ const ArticleCard = React.memo(
           return v ? String(v).trim() : null;
         };
         const fabParts = FAB_FIELDS.map((f) => getVal(f.field)).filter(Boolean) as string[];
-        const newFabDesc = fabParts.length > 0 ? fabParts.join('-').slice(0, 40) : null;
+        const fabJoined = fabParts.length > 0 ? fabParts.join('-') : null;
+        const newFabDesc = fabJoined !== null ? (isFGMode ? fabJoined : fabJoined.slice(0, 40)) : null;
         const updates: Record<string, string | null> = {};
         if (newFabDesc !== null && newFabDesc !== prev['fabricArticleDescription']) updates['fabricArticleDescription'] = newFabDesc;
         return Object.keys(updates).length > 0 ? { ...prev, ...updates } : prev;
       });
     }, [item, FAB_FIELDS]);
+
+    // In FG mode: auto-save the computed fabric description to DB when DB value is empty.
+    React.useEffect(() => {
+      if (!isFGMode || item.approvalStatus !== 'PENDING') return;
+      if (item.fabricArticleDescription) return; // already has a value in DB
+      const fabParts = FAB_FIELDS.map((f) => {
+        const v = (item as any)[f.field];
+        return v ? String(v).trim() : null;
+      }).filter(Boolean) as string[];
+      if (fabParts.length === 0) return;
+      const computed = fabParts.join('-');
+      if (autoSavedFabDescRef.current === computed) return; // already auto-saved this value
+      autoSavedFabDescRef.current = computed;
+      onSave({ ...item, fabricArticleDescription: computed } as ApproverItem, { fabricArticleDescription: computed }, { silent: true });
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, [item.id, item.fabricArticleDescription, FAB_FIELDS, isFGMode]);
 
     // APPROVED/REJECTED articles are normally read-only. EXCEPTION: on the
     // Created page (modify mode) we keep them editable so the user can stage
@@ -1051,7 +1073,7 @@ const ArticleCard = React.memo(
       { label: 'MAJOR CATEGORY', field: 'majorCategory', editable: true, required: false, color: '#2f54eb' },
       { label: 'MC DESCRIPTION', field: 'mcDescription', editable: true, required: false, color: '#7c3aed' },
       {
-        label: 'ARTICLE NUMBER',
+        label: isFGMode ? 'FABRIC ARTICLE NUMBER' : 'ARTICLE NUMBER',
         field: 'articleNumber',
         editable: !item.sapArticleId,
         required: false,
@@ -1059,10 +1081,12 @@ const ArticleCard = React.memo(
       },
       { label: 'VENDOR CODE', field: 'vendorCode', editable: true, required: true, color: '#1f2937' },
       { label: 'VENDOR NAME', field: 'vendorName', editable: true, required: true, color: '#1f2937' },
-      { label: 'ARTICLE DESC', field: 'articleDescription', editable: true, required: false, color: '#4b5563' },
-      { label: 'REFERENCE ARTICLE', field: 'referenceArticleNumber', editable: true, required: false, color: '#1f2937' },
-      { label: 'REFERENCE ARTICLE DESC', field: 'referenceArticleDescription', editable: true, required: false, color: '#1f2937' },
-    ] as const;
+      ...(!isFGMode ? [
+        { label: 'ARTICLE DESC', field: 'articleDescription', editable: true, required: false, color: '#4b5563' },
+        { label: 'REFERENCE ARTICLE', field: 'referenceArticleNumber', editable: true, required: false, color: '#1f2937' },
+        { label: 'REFERENCE ARTICLE DESC', field: 'referenceArticleDescription', editable: true, required: false, color: '#1f2937' },
+      ] : []),
+    ];
 
     const renderHeaderField = ({
       label,
@@ -1961,22 +1985,24 @@ const ArticleCard = React.memo(
                                     })
                                     .filter(Boolean);
                                   if (parts.length > 0)
-                                    handleSave('fabricArticleDescription', parts.join('-').slice(0, 40));
+                                    handleSave('fabricArticleDescription', isFGMode ? parts.join('-') : parts.join('-').slice(0, 40));
                                 };
                                 return (
                                   <>
                                     {renderField('fabricArticleNumber', 'FABRIC ARTICLE NO.')}
-                                    {renderField('fabricArticleDescription', 'FABRIC ARTICLE DESC', fabAutoFill, 40)}
-                                    <div className="border-t border-border px-2 py-1.5">
-                                      <Button
-                                        size="sm"
-                                        onClick={() => onCreateFabricArticle(item)}
-                                        className="h-7 w-full border border-slate-300 bg-slate-50 text-[11px] font-medium text-slate-700 hover:bg-[#FF6F61]/10 hover:border-[#FF6F61]/40 hover:text-[#FF6F61]"
-                                      >
-                                        <FileText />
-                                        Create Fabric Article
-                                      </Button>
-                                    </div>
+                                    {renderField('fabricArticleDescription', 'FABRIC ARTICLE DESC', fabAutoFill, isFGMode ? undefined : 40)}
+                                    {!isFGMode && (
+                                      <div className="border-t border-border px-2 py-1.5">
+                                        <Button
+                                          size="sm"
+                                          onClick={() => onCreateFabricArticle(item)}
+                                          className="h-7 w-full border border-slate-300 bg-slate-50 text-[11px] font-medium text-slate-700 hover:bg-[#FF6F61]/10 hover:border-[#FF6F61]/40 hover:text-[#FF6F61]"
+                                        >
+                                          <FileText />
+                                          Create Fabric Article
+                                        </Button>
+                                      </div>
+                                    )}
                                   </>
                                 );
                               })()}
@@ -2003,11 +2029,19 @@ const ArticleCard = React.memo(
                     </div>
                     <div className="space-y-0 p-1">
                       {[
-                        { label: 'MRP', field: 'mrp', editable: true, mandatory: true, isDropdown: false, isColor: false, isMarkdown: false },
-                        { label: 'Base Color', field: 'colour', editable: true, mandatory: false, isDropdown: true, isColor: true, isMarkdown: false },
-                        { label: 'Secondary Color', field: 'secondaryColour', editable: true, mandatory: false, isDropdown: true, isColor: true, isMarkdown: false },
+                        ...(!isFGMode ? [
+                          { label: 'MRP', field: 'mrp', editable: true, mandatory: true, isDropdown: false, isColor: false, isMarkdown: false },
+                          { label: 'Base Color', field: 'colour', editable: true, mandatory: false, isDropdown: true, isColor: true, isMarkdown: false },
+                          { label: 'Secondary Color', field: 'secondaryColour', editable: true, mandatory: false, isDropdown: true, isColor: true, isMarkdown: false },
+                        ] : []),
                         { label: 'ARTICLE FASHION TYPE', field: 'articleFashionType', editable: true, mandatory: true, isDropdown: true, isColor: false, isMarkdown: false, boldLabel: true },
-                        { label: 'SEGMENT', field: 'segment', editable: true, mandatory: true, isDropdown: false, isColor: false, isMarkdown: false, boldLabel: true },
+                        ...(!isFGMode ? [
+                          { label: 'SEGMENT', field: 'segment', editable: true, mandatory: true, isDropdown: false, isColor: false, isMarkdown: false, boldLabel: true },
+                        ] : []),
+                        ...(isFGMode ? [
+                          { label: 'VENDOR FABRIC RATE', field: 'fabricRate', editable: true, mandatory: false, isDropdown: false, isColor: false, isMarkdown: false },
+                          { label: 'V2 FABRIC RATE', field: 'v2FabricRate', editable: true, mandatory: false, isDropdown: false, isColor: false, isMarkdown: false },
+                        ] : []),
                       ].map((bom) => {
                         const isEditingBom = editingField === `bom_${bom.field}`;
                         const bomLocked = isFieldLocked(bom.field);
@@ -2308,6 +2342,7 @@ export const FabricArticleList: React.FC<ApproverArticleListProps> = ({
   onRefresh,
   pathType,
   hideGroups,
+  isFGMode,
   forceStaticGroups,
   serverPagination,
   fabHierarchy,
@@ -2395,6 +2430,7 @@ export const FabricArticleList: React.FC<ApproverArticleListProps> = ({
           cardGroups={cardGroups}
           pathType={pathType}
           hideGroups={hideGroups}
+          isFGMode={isFGMode}
           fabHierarchy={fabHierarchy}
         />
       ))}

@@ -1449,12 +1449,20 @@ model FabricArticleData {
   fabricArticleNumber      String?   @map("fabric_article_number")      @db.VarChar(100)
   fabricArticleDescription String?   @map("fabric_article_description") @db.VarChar(255)
 
-  // Article context
+  // Source FG article reference (extraction_results_flat.id) — used for deduplication
+  flatId                   String?   @map("flat_id") @db.VarChar(100)
+
+  // Article context (vendor only; division/sub_division/major_category intentionally omitted for fabric)
   division                 String?   @map("division")      @db.VarChar(100)
   subDivision              String?   @map("sub_division")  @db.VarChar(100)
-  majorCategory            String?   @map("major_category") @db.VarChar(200)
-  vendorName               String?   @map("vendor_name")   @db.VarChar(200)
+  majorCategory            String?   @map("major_category")    @db.VarChar(200)
+  mcDescription            String?   @map("mc_description")    @db.VarChar(200)
+  vendorName               String?   @map("vendor_name")       @db.VarChar(200)
   vendorCode               String?   @map("vendor_code")   @db.VarChar(100)
+  designNumber             String?   @map("design_number") @db.VarChar(100)
+  fabricRate               Decimal?  @map("fabric_rate")         @db.Decimal(10, 2)
+  v2FabricRate             Decimal?  @map("v2_fabric_rate")      @db.Decimal(10, 2)
+  articleFashionType       String?   @map("article_fashion_type") @db.VarChar(100)
 
   // Workflow
   approvalStatus           String    @default("PENDING")    @map("approval_status")    @db.VarChar(20)
@@ -1462,6 +1470,11 @@ model FabricArticleData {
   approvedBy               Int?      @map("approved_by")
   sapSyncStatus            String    @default("NOT_SYNCED") @map("sap_sync_status")    @db.VarChar(20)
   sapSyncMessage           String?   @map("sap_sync_message")
+  fgCreatorApproved        String    @default("PENDING")    @map("fg_creator_approved") @db.VarChar(20)
+
+  // Media & classification
+  imageUrl                 String?   @map("image_url")            @db.Text
+  fabricArticleType        String?   @map("fabric_article_type")  @db.VarChar(100)
 
   // Audit
   userName                 String?   @map("user_name")  @db.VarChar(200)

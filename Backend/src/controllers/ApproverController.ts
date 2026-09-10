@@ -3733,6 +3733,207 @@ export class ApproverController {
         return res.status(allOk ? 200 : 207).json(result);
     };
 
+    static submitFabricArticleData = async (req: Request, res: Response) => {
+        const { ids } = req.body as { ids?: string[] };
+        if (!Array.isArray(ids) || ids.length === 0) {
+            return res.status(400).json({ error: 'ids array is required' });
+        }
+        const { submitFabricArticles } = await import('../services/zmmFabArtCreationService');
+        const result = await submitFabricArticles(ids);
+        const allOk = result.results.every(r => r.success);
+        return res.status(allOk ? 200 : 207).json(result);
+    };
+
+    // ─── Fabric Article Data list (type=FG) ──────────────────────────────────────
+    // pathType=new  → fg_creator_approved=PENDING (pending creator confirmation)
+    // pathType=created → approval_status=APPROVED (SAP-created articles)
+
+    static getFabricArticleDataItems = async (req: Request, res: Response) => {
+        const {
+            page = '1', limit = '50',
+            pathType = 'new',
+            status, division, subDivision, majorCategory,
+            search, startDate, endDate,
+        } = req.query as Record<string, string>;
+
+        const skip = (parseInt(page, 10) - 1) * parseInt(limit, 10);
+        const take = parseInt(limit, 10);
+
+        const where: any = { fabricArticleType: 'FG' };
+
+        if (pathType === 'created') {
+            where.approvalStatus = 'APPROVED';
+        } else {
+            // 'new' tab: show articles awaiting creator confirmation
+            where.fgCreatorApproved = 'PENDING';
+            if (status && status !== 'ALL') {
+                const statuses = status.split(',').map((s: string) => s.trim()).filter(Boolean);
+                where.approvalStatus = statuses.length === 1 ? statuses[0] : { in: statuses };
+            }
+        }
+        if (division && division !== 'ALL') where.division = { contains: division, mode: 'insensitive' };
+        if (subDivision && subDivision !== 'ALL') where.subDivision = { equals: subDivision, mode: 'insensitive' };
+        if (majorCategory) where.majorCategory = { equals: majorCategory, mode: 'insensitive' };
+        if (startDate || endDate) {
+            where.createdAt = {};
+            if (startDate) where.createdAt.gte = new Date(startDate);
+            if (endDate)   where.createdAt.lte = new Date(endDate);
+        }
+        if (search) {
+            where.OR = [
+                { fabricArticleNumber:      { contains: search, mode: 'insensitive' } },
+                { fabricArticleDescription: { contains: search, mode: 'insensitive' } },
+                { vendorName:              { contains: search, mode: 'insensitive' } },
+                { vendorCode:              { contains: search, mode: 'insensitive' } },
+                { majorCategory:           { contains: search, mode: 'insensitive' } },
+            ];
+        }
+
+        const [rows, total] = await Promise.all([
+            prisma.fabricArticleData.findMany({
+                where, skip, take,
+                orderBy: { createdAt: 'desc' },
+                select: {
+                    id: true,
+                    fabricArticleNumber: true, fabricArticleDescription: true,
+                    fabricArticleType: true, fgCreatorApproved: true,
+                    division: true, subDivision: true, majorCategory: true,
+                    vendorName: true, vendorCode: true,
+                    approvalStatus: true, approvedAt: true,
+                    sapSyncStatus: true, sapSyncMessage: true,
+                    imageUrl: true, userName: true,
+                    createdAt: true, updatedAt: true,
+                    mFabDiv: true, mYarn: true, mFabMainMvgr1: true, mFabMainMvgr2: true,
+                    mConstruction: true, mOunz: true, mWidth: true, mWeave02: true,
+                    mCount: true, mWeave01: true, mComposition: true, mFinish: true,
+                    mGsm: true, mLycra: true, fabricRate: true, v2FabricRate: true, articleFashionType: true,
+                    designNumber: true, mcDescription: true,
+                },
+            }),
+            prisma.fabricArticleData.count({ where }),
+        ]);
+
+        const data = rows.map((r) => ApproverController.fabricArticleDataRowToItem(r));
+        return res.json({ data, meta: { total, page: parseInt(page, 10), limit: take } });
+    };
+
+    static getFabricArticleDataById = async (req: Request, res: Response) => {
+        const { id } = req.params;
+        const row = await prisma.fabricArticleData.findUnique({ where: { id } });
+        if (!row) return res.status(404).json({ error: 'Item not found' });
+        return res.json(ApproverController.fabricArticleDataRowToItem(row));
+    };
+
+    // Client field → DB column mapping for fabric_article_data
+    private static FABRIC_ARTICLE_DATA_FIELD_MAP: Record<string, string> = {
+        division:                 'division',
+        subDivision:              'subDivision',
+        majorCategory:            'majorCategory',
+        mcDescription:            'mcDescription',
+        vendorName:               'vendorName',
+        vendorCode:               'vendorCode',
+        designNumber:             'designNumber',
+        fabricArticleNumber:      'fabricArticleNumber',
+        fabricArticleDescription: 'fabricArticleDescription',
+        fabricRate:               'fabricRate',
+        v2FabricRate:             'v2FabricRate',
+        articleFashionType:       'articleFashionType',
+        // Fabric construction fields
+        fabDiv:        'mFabDiv',
+        yarn1:         'mYarn',
+        mainMvgr:      'mFabMainMvgr1',
+        fabricMainMvgr:'mFabMainMvgr2',
+        fConstruction: 'mConstruction',
+        fOunce:        'mOunz',
+        fWidth:        'mWidth',
+        mFab2:         'mWeave02',
+        fCount:        'mCount',
+        weave:         'mWeave01',
+        composition:   'mComposition',
+        finish:        'mFinish',
+        gsm:           'mGsm',
+        lycra:         'mLycra',
+    };
+
+    static updateFabricArticleData = async (req: Request, res: Response) => {
+        const { id } = req.params;
+        const body = req.body as Record<string, unknown>;
+
+        const data: Record<string, unknown> = {};
+        for (const [clientKey, value] of Object.entries(body)) {
+            const dbKey = ApproverController.FABRIC_ARTICLE_DATA_FIELD_MAP[clientKey];
+            if (dbKey) data[dbKey] = value === undefined ? null : value;
+        }
+        if (Object.keys(data).length === 0) {
+            const row = await prisma.fabricArticleData.findUnique({ where: { id } });
+            if (!row) return res.status(404).json({ error: 'Item not found' });
+            return res.json(ApproverController.fabricArticleDataRowToItem(row));
+        }
+        const row = await prisma.fabricArticleData.update({ where: { id }, data });
+        return res.json(ApproverController.fabricArticleDataRowToItem(row));
+    };
+
+    private static fabricArticleDataRowToItem(r: any) {
+        return {
+            id:                       r.id,
+            imageName:                null,
+            imageUrl:                 r.imageUrl ?? null,
+            articleNumber:            r.fabricArticleNumber ?? null,
+            fabricArticleNumber:      r.fabricArticleNumber ?? null,
+            fabricArticleDescription: r.fabricArticleDescription ?? null,
+            fabricArticleType:        r.fabricArticleType ?? null,
+            fgCreatorApproved:        r.fgCreatorApproved ?? 'PENDING',
+            division:                 r.division ?? null,
+            subDivision:              r.subDivision ?? null,
+            majorCategory:            r.majorCategory ?? null,
+            mcCode:                   null,
+            mcDescription:            r.mcDescription ?? null,
+            vendorName:               r.vendorName ?? null,
+            vendorCode:               r.vendorCode ?? null,
+            approvalStatus:           (r.approvalStatus ?? 'PENDING') as 'PENDING' | 'APPROVED' | 'REJECTED',
+            approvedAt:               r.approvedAt?.toISOString() ?? null,
+            sapSyncStatus:            (r.sapSyncStatus ?? 'NOT_SYNCED') as any,
+            sapSyncMessage:           r.sapSyncMessage ?? null,
+            userName:                 r.userName ?? null,
+            createdAt:                r.createdAt.toISOString(),
+            updatedAt:                r.updatedAt.toISOString(),
+            // Fabric construction fields
+            fabDiv:      r.mFabDiv ?? null,
+            yarn1:       r.mYarn ?? null,
+            mainMvgr:    r.mFabMainMvgr1 ?? null,
+            fabricMainMvgr: r.mFabMainMvgr2 ?? null,
+            fConstruction: r.mConstruction ?? null,
+            fOunce:      r.mOunz ?? null,
+            fWidth:      r.mWidth ?? null,
+            mFab2:       r.mWeave02 ?? null,
+            fCount:      r.mCount ?? null,
+            weave:       r.mWeave01 ?? null,
+            composition: r.mComposition ?? null,
+            finish:      r.mFinish ?? null,
+            gsm:         r.mGsm ?? null,
+            lycra:       r.mLycra ?? null,
+            designNumber:       r.designNumber ?? null,
+            fabricRate:         r.fabricRate != null ? Number(r.fabricRate) : null,
+            v2FabricRate:       r.v2FabricRate != null ? Number(r.v2FabricRate) : null,
+            articleFashionType: r.articleFashionType ?? null,
+            // Fields not present in fabric_article_data — nulled out
+            pptNumber: null, source: null, rate: null, mrp: null,
+            size: null, colour: null, wash: null, shade: null, weight: null,
+            referenceArticleNumber: null, referenceArticleDescription: null,
+            segment: null, articleDescription: null,
+            fashionGrid: null, articleType: null,
+            ageGroup: null, impAtrbt2: null,
+            season: null, year: null, hsnTaxCode: null,
+            collar: null, collarStyle: null, neck: null, neckDetails: null,
+            placket: null, fatherBelt: null, childBelt: null,
+            sleeve: null, sleeveFold: null, bottomFold: null,
+            noOfPocket: null, pocketType: null, extraPocket: null,
+            fit: null, pattern: null, length: null,
+            bodyArticle: null, bodyArticleDescription: null,
+            sapArticleId: null, approver: null,
+        };
+    }
+
     static createBodyArticleFromFG = async (req: Request, res: Response) => {
         const { ids } = req.body as { ids?: string[] };
         if (!Array.isArray(ids) || ids.length === 0) {
@@ -3745,6 +3946,7 @@ export class ApproverController {
                 id: true, articleNumber: true, designNumber: true, division: true, subDivision: true,
                 majorCategory: true, mcCode: true, vendorName: true, vendorCode: true,
                 season: true, year: true, hsnTaxCode: true, imageUrl: true, userName: true,
+                bodyArticleDescription: true,
                 collar: true, collarStyle: true, neck: true, neckDetails: true,
                 placket: true, fatherBelt: true, childBelt: true,
                 sleeve: true, sleeveFold: true, mSet: true,
@@ -3757,13 +3959,30 @@ export class ApproverController {
             return res.status(404).json({ error: 'No items found for the given ids' });
         }
 
-        // Check for existing body article data rows for these flat IDs
+        // Check 1: body_article_data already has a row for the same majorCategory + bodyArticleDescription
+        for (const item of items) {
+            if (item.majorCategory && item.bodyArticleDescription) {
+                const descMatch = await prisma.bodyArticleData.findFirst({
+                    where: {
+                        majorCategory: item.majorCategory,
+                        bodyArticleDescription: item.bodyArticleDescription,
+                    },
+                    select: { bodyArticleNumber: true },
+                });
+                if (descMatch) {
+                    return res.status(409).json({
+                        error: `For this ${item.majorCategory} Major Category, Body Article is already Present: ${descMatch.bodyArticleNumber || 'N/A'}`,
+                    });
+                }
+            }
+        }
+
+        // Check 2: this flat article has already been sent to Body Article
         const existing = await prisma.bodyArticleData.findMany({
             where: { flatId: { in: ids } },
             select: { flatId: true, bodyArticleNumber: true },
         });
         if (existing.length > 0) {
-            const dupes = existing.map((e) => e.flatId).filter(Boolean).join(', ');
             return res.status(409).json({
                 error: `Body Article go for Approval Already. Cannot Create Duplicate.`,
                 duplicateFlatIds: existing.map((e) => e.flatId),
@@ -3805,6 +4024,98 @@ export class ApproverController {
                     mFit:                 item.fit,
                     mBodyStyle:           item.pattern,
                     mLength:              item.length,
+                },
+            })
+        ));
+
+        return res.json({ success: true, created: created.length });
+    };
+
+    static createFabricArticleFromFG = async (req: Request, res: Response) => {
+        const { ids } = req.body as { ids?: string[] };
+        if (!Array.isArray(ids) || ids.length === 0) {
+            return res.status(400).json({ error: 'ids array is required' });
+        }
+
+        // Fetch Construction & Fabric fields from the source FG article rows
+        const items = await prisma.extractionResultFlat.findMany({
+            where: { id: { in: ids } },
+            select: {
+                id: true, articleNumber: true, designNumber: true,
+                majorCategory: true,
+                vendorName: true, vendorCode: true,
+                imageUrl: true, userName: true,
+                fabricArticleDescription: true,
+                // Construction & Fabric attributes
+                fabDiv: true, yarn1: true,
+                mainMvgr: true, fabricMainMvgr: true,
+                fConstruction: true, fOunce: true, fWidth: true,
+                mFab2: true, fCount: true, weave: true,
+                composition: true, finish: true, gsm: true, lycra: true,
+            },
+        });
+
+        if (items.length === 0) {
+            return res.status(404).json({ error: 'No items found for the given ids' });
+        }
+
+        // Check 1: fabric_article_data already has a row for the same majorCategory + fabricArticleDescription
+        for (const item of items) {
+            if (item.majorCategory && item.fabricArticleDescription) {
+                const descMatch = await prisma.fabricArticleData.findFirst({
+                    where: {
+                        majorCategory: item.majorCategory,
+                        fabricArticleDescription: item.fabricArticleDescription,
+                    },
+                    select: { fabricArticleNumber: true },
+                });
+                if (descMatch) {
+                    return res.status(409).json({
+                        error: `For this ${item.majorCategory} Major Category, Fabric Article is already Present: ${descMatch.fabricArticleNumber || 'N/A'}`,
+                    });
+                }
+            }
+        }
+
+        // Check 2: this flat article has already been sent to Fabric Article
+        const existing = await prisma.fabricArticleData.findMany({
+            where: { flatId: { in: ids } },
+            select: { flatId: true },
+        });
+        if (existing.length > 0) {
+            return res.status(409).json({
+                error: 'Fabric Article went for Approval Already. Cannot Create Duplicate.',
+                duplicateFlatIds: existing.map((e) => e.flatId),
+            });
+        }
+
+        const created = await Promise.all(items.map((item) =>
+            prisma.fabricArticleData.create({
+                data: {
+                    flatId:          item.id,
+                    fabricArticleType: 'FG',
+                    vendorName:      item.vendorName,
+                    vendorCode:      item.vendorCode,
+                    designNumber:    item.designNumber,
+                    imageUrl:        item.imageUrl,
+                    userName:        item.userName,
+                    // Construction & Fabric card attributes
+                    mFabDiv:         item.fabDiv,
+                    mYarn:           item.yarn1,
+                    mFabMainMvgr1:   item.mainMvgr,
+                    mFabMainMvgr2:   item.fabricMainMvgr,
+                    mConstruction:   item.fConstruction,
+                    mOunz:           item.fOunce,
+                    mWidth:          item.fWidth,
+                    mWeave02:        item.mFab2,
+                    mCount:          item.fCount,
+                    mWeave01:        item.weave,
+                    mComposition:    item.composition,
+                    mFinish:         item.finish,
+                    mGsm:            item.gsm,
+                    mLycra:          item.lycra,
+                    // division / subDivision / majorCategory intentionally omitted —
+                    // fabric articles have their own separate category hierarchy
                 },
             })
         ));

@@ -600,6 +600,19 @@ const ArticleCard = React.memo(
     }[]>([]);
     const [bodyNoLoading, setBodyNoLoading] = useState(false);
     const [bodyNoSearched, setBodyNoSearched] = useState(false);
+    const [fabDescQuery, setFabDescQuery] = useState('');
+    const [fabDescResults, setFabDescResults] = useState<{
+      fabricArticleNumber: string;
+      fabricArticleDescription: string | null;
+      mFabDiv: string | null; mYarn: string | null;
+      mFabMainMvgr1: string | null; mFabMainMvgr2: string | null;
+      mConstruction: string | null; mOunz: string | null; mWidth: string | null;
+      mWeave01: string | null; mWeave02: string | null; mCount: string | null;
+      mComposition: string | null; mFinish: string | null; mGsm: string | null; mLycra: string | null;
+    }[]>([]);
+    const [fabDescLoading, setFabDescLoading] = useState(false);
+    const [fabDescSearched, setFabDescSearched] = useState(false);
+    const autoSavedFabDescRef = React.useRef<string | null>(null);
     const [imgZoom, setImgZoom] = useState(1);
     const [imgRotation, setImgRotation] = useState(0);
     // The image's real (natural) pixel size, captured on load. `transform: scale()`
@@ -1075,7 +1088,7 @@ const ArticleCard = React.memo(
           return v ? String(v).trim() : null;
         };
         const fabParts = FAB_FIELDS.map((f) => getVal(f.field)).filter(Boolean) as string[];
-        const newFabDesc = fabParts.length > 0 ? fabParts.join('-').slice(0, 40) : null;
+        const newFabDesc = fabParts.length > 0 ? fabParts.join('-') : null;
         const newBodyDesc = buildBodyDescription(getVal);
         // REFERENCE ARTICLE DESC — built like ARTICLE DESC but from a fixed,
         // user-confirmed sequence spanning multiple cards:
@@ -1091,6 +1104,14 @@ const ArticleCard = React.memo(
         if (newBodyDesc && !item.bodyArticleDescription) {
           setTimeout(() => {
             onSave({ ...item } as any, { bodyArticleDescription: newBodyDesc }, { silent: true });
+          }, 0);
+        }
+        // Persist fabricArticleDescription to DB whenever the computed value differs from what's
+        // stored — guards against stale Gemini-extracted strings that don't match the joined fields.
+        if (newFabDesc && newFabDesc !== item.fabricArticleDescription && autoSavedFabDescRef.current !== newFabDesc) {
+          autoSavedFabDescRef.current = newFabDesc;
+          setTimeout(() => {
+            onSave({ ...item } as any, { fabricArticleDescription: newFabDesc }, { silent: true });
           }, 0);
         }
         return Object.keys(updates).length > 0 ? { ...prev, ...updates } : prev;
@@ -1276,10 +1297,11 @@ const ArticleCard = React.memo(
             onSave({ ...item, segment: seg } as ApproverItem, { segment: seg } as Record<string, unknown>);
           }
         });
-        // Clear body article and all body attributes — they are category-scoped
+        // Clear body/fabric article number and description only — attributes remain unchanged
         updates['bodyArticle'] = '';
         updates['bodyArticleDescription'] = '';
-        for (const bf of BODY_FIELDS) updates[bf.field] = '';
+        updates['fabricArticleNumber'] = '';
+        updates['fabricArticleDescription'] = '';
       }
       // When a Body & Construction attribute changes, recompute bodyArticleDescription
       // and bundle it into the same save so the DB value stays in sync with the UI.
@@ -2382,7 +2404,7 @@ const ArticleCard = React.memo(
                                     })
                                     .filter(Boolean);
                                   if (parts.length > 0)
-                                    handleSave('fabricArticleDescription', parts.join('-').slice(0, 40));
+                                    handleSave('fabricArticleDescription', parts.join('-'));
                                 };
                                 const isFabNoEditing = editingField === 'bot_fabricArticleNumber';
                                 const fabNoDisplayVal =
@@ -2507,7 +2529,170 @@ const ArticleCard = React.memo(
                                         </div>
                                       )}
                                     </div>
-                                    {renderField('fabricArticleDescription', 'FABRIC ARTICLE DESC', fabAutoFill, 40)}
+                                    {/* FABRIC ARTICLE DESC — search dropdown from fabric_article_data (no category filter) */}
+                                    {(() => {
+                                      const isFabDescEditing = editingField === 'bot_fabricArticleDescription';
+                                      const fabDescDisplayVal =
+                                        localValues['fabricArticleDescription'] !== undefined
+                                          ? localValues['fabricArticleDescription']
+                                          : (item as any)['fabricArticleDescription'];
+                                      const runFabDescSearch = (q: string) => {
+                                        if (!q.trim()) { setFabDescResults([]); setFabDescSearched(false); return; }
+                                        setFabDescLoading(true);
+                                        setFabDescSearched(false);
+                                        const token = localStorage.getItem('authToken');
+                                        fetch(
+                                          `${APP_CONFIG.api.baseURL}/approver/fabric-article-data/search?q=${encodeURIComponent(q)}`,
+                                          { headers: { Authorization: `Bearer ${token}` } },
+                                        )
+                                          .then((r) => r.json())
+                                          .then((d) => { setFabDescResults(d.results ?? []); setFabDescSearched(true); })
+                                          .catch(() => { setFabDescResults([]); setFabDescSearched(true); })
+                                          .finally(() => setFabDescLoading(false));
+                                      };
+                                      return (
+                                        <div
+                                          key="fabricArticleDescription"
+                                          className="mt-1 border-t border-border bg-muted/30 px-2 py-1.5"
+                                          style={{ cursor: isLocked ? 'default' : 'pointer' }}
+                                          onClick={() => {
+                                            if (!isLocked && !isFabDescEditing) {
+                                              setEditingField('bot_fabricArticleDescription');
+                                              setFabDescQuery(fabDescDisplayVal || '');
+                                              setFabDescSearched(false);
+                                              if (fabDescDisplayVal) runFabDescSearch(fabDescDisplayVal);
+                                              else setFabDescResults([]);
+                                            }
+                                          }}
+                                        >
+                                          <div className="mb-0.5 flex items-center justify-between gap-1">
+                                            <span className="text-[9px] font-semibold uppercase tracking-wider text-muted-foreground">
+                                              FABRIC ARTICLE DESC
+                                            </span>
+                                            {!isFabDescEditing && !isLocked && (
+                                              <button
+                                                type="button"
+                                                className="text-[9px] text-slate-700 underline hover:text-[#FF6F61]"
+                                                onClick={(e) => {
+                                                  e.stopPropagation();
+                                                  fabAutoFill();
+                                                }}
+                                              >
+                                                Auto-fill
+                                              </button>
+                                            )}
+                                          </div>
+                                          {isFabDescEditing ? (
+                                            <Popover
+                                              open
+                                              onOpenChange={(o) => {
+                                                if (!o) {
+                                                  setEditingField(null);
+                                                  setFabDescResults([]);
+                                                  setFabDescSearched(false);
+                                                }
+                                              }}
+                                            >
+                                              <PopoverAnchor asChild>
+                                                <Input
+                                                  autoFocus
+                                                  value={fabDescQuery}
+                                                  placeholder="Search fabric article desc…"
+                                                  className="h-6 px-1 text-[11px]"
+                                                  onClick={(e) => e.stopPropagation()}
+                                                  onChange={(e) => {
+                                                    const q = e.target.value;
+                                                    setFabDescQuery(q);
+                                                    runFabDescSearch(q);
+                                                  }}
+                                                  onBlur={() => {
+                                                    if (fabDescLoading || fabDescSearched) return;
+                                                    const trimmed = fabDescQuery.trim();
+                                                    if (trimmed) handleSave('fabricArticleDescription', trimmed);
+                                                    setEditingField(null);
+                                                    setFabDescResults([]);
+                                                  }}
+                                                  onKeyDown={(e) => {
+                                                    if (e.key === 'Escape') {
+                                                      setEditingField(null);
+                                                      setFabDescResults([]);
+                                                    }
+                                                    if (e.key === 'Enter' && fabDescQuery.trim()) {
+                                                      handleSave('fabricArticleDescription', fabDescQuery.trim() || null);
+                                                      setEditingField(null);
+                                                      setFabDescResults([]);
+                                                    }
+                                                  }}
+                                                />
+                                              </PopoverAnchor>
+                                              {(fabDescResults.length > 0 || fabDescLoading || fabDescSearched) && (
+                                                <PopoverContent
+                                                  align="start"
+                                                  sideOffset={2}
+                                                  className="w-[260px] p-0"
+                                                  onOpenAutoFocus={(e) => e.preventDefault()}
+                                                  onClick={(e) => e.stopPropagation()}
+                                                >
+                                                  <div className="max-h-56 overflow-y-auto py-1">
+                                                    {fabDescLoading ? (
+                                                      <div className="px-3 py-2 text-[11px] text-muted-foreground">Searching…</div>
+                                                    ) : fabDescResults.length === 0 ? (
+                                                      <div className="px-3 py-2 text-[11px] text-muted-foreground">No Fabric Article found</div>
+                                                    ) : (
+                                                      fabDescResults.map((r, i) => (
+                                                        <button
+                                                          key={r.fabricArticleNumber + i}
+                                                          type="button"
+                                                          className="flex w-full flex-col gap-0.5 px-3 py-1.5 text-left hover:bg-[#FF6F61]/10"
+                                                          onMouseDown={(e) => {
+                                                            e.preventDefault();
+                                                            const gridUpdates: Record<string, string | null> = {
+                                                              fabricArticleNumber:      r.fabricArticleNumber,
+                                                              fabricArticleDescription: r.fabricArticleDescription,
+                                                              fabDiv:                   r.mFabDiv,
+                                                              yarn1:                    r.mYarn,
+                                                              mainMvgr:                 r.mFabMainMvgr1,
+                                                              fabricMainMvgr:           r.mFabMainMvgr2,
+                                                              fConstruction:            r.mConstruction,
+                                                              fOunce:                   r.mOunz,
+                                                              fWidth:                   r.mWidth,
+                                                              weave:                    r.mWeave01,
+                                                              mFab2:                    r.mWeave02,
+                                                              fCount:                   r.mCount,
+                                                              composition:              r.mComposition,
+                                                              finish:                   r.mFinish,
+                                                              gsm:                      r.mGsm,
+                                                              lycra:                    r.mLycra,
+                                                            };
+                                                            setLocalValues((prev) => ({ ...prev, ...gridUpdates }));
+                                                            setEditingField(null);
+                                                            setFabDescResults([]);
+                                                            setFabDescSearched(false);
+                                                            onSave({ ...item, ...gridUpdates } as any, gridUpdates);
+                                                          }}
+                                                        >
+                                                          <span className="text-[11px] font-medium text-gray-900">{r.fabricArticleDescription || '—'}</span>
+                                                          {r.fabricArticleNumber && (
+                                                            <span className="truncate text-[10px] text-muted-foreground">{r.fabricArticleNumber}</span>
+                                                          )}
+                                                        </button>
+                                                      ))
+                                                    )}
+                                                  </div>
+                                                </PopoverContent>
+                                              )}
+                                            </Popover>
+                                          ) : (
+                                            <div
+                                              className="truncate text-[11px]"
+                                              style={{ color: fabDescDisplayVal ? '#111827' : '#9ca3af' }}
+                                            >
+                                              {fabDescDisplayVal || (isLocked ? '—' : 'Click to fill')}
+                                            </div>
+                                          )}
+                                        </div>
+                                      );
+                                    })()}
                                     <div className="border-t border-border px-2 py-1.5">
                                       <Button
                                         size="sm"

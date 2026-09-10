@@ -86,8 +86,21 @@ router.get('/body-article-data/search', h(ApproverController.searchBodyArticleDa
 // Create body article from FG article — copies Body & Construction fields into body_article_data
 router.post('/create-body-article', h(ApproverController.createBodyArticleFromFG));
 
+// Create fabric article from FG article — copies Construction & Fabric fields into fabric_article_data
+router.post('/create-fabric-article', h(ApproverController.createFabricArticleFromFG));
+
 // Body Article list (type=FG) — paginated list from body_article_data for the Body Article New Articles page
 router.get('/body-articles', h(ApproverController.getBodyArticleItems));
+
+// Fabric Article data list (fabric_article_type=FG, fg_creator_approved=PENDING) — for FG New Articles page in Fabric Article tab
+router.get('/fabric-article-data', h(ApproverController.getFabricArticleDataItems));
+
+// Submit FG New Articles to SAP via ZMM_FAB_ART_CREATION_RFC
+router.post('/fabric-article-data/submit', h(ApproverController.submitFabricArticleData));
+
+// Get / Update a single fabric_article_data record (used by FG New Articles detail page)
+router.get('/fabric-article-data/:id', h(ApproverController.getFabricArticleDataById));
+router.put('/fabric-article-data/:id', h(ApproverController.updateFabricArticleData));
 
 // Submit body articles to SAP via ZMM_BODY_ART_CRT_V3 — BODY_APPROVER and ADMIN only
 router.post('/body-articles/submit', requireBodyApprovalRights, h(ApproverController.submitBodyArticles));

@@ -54906,10 +54906,14 @@ export namespace Prisma {
   }
 
   export type FabricArticleDataAvgAggregateOutputType = {
+    fabricRate: Decimal | null
+    v2FabricRate: Decimal | null
     approvedBy: number | null
   }
 
   export type FabricArticleDataSumAggregateOutputType = {
+    fabricRate: Decimal | null
+    v2FabricRate: Decimal | null
     approvedBy: number | null
   }
 
@@ -54931,16 +54935,25 @@ export namespace Prisma {
     mLycra: string | null
     fabricArticleNumber: string | null
     fabricArticleDescription: string | null
+    flatId: string | null
     division: string | null
     subDivision: string | null
     majorCategory: string | null
+    mcDescription: string | null
     vendorName: string | null
     vendorCode: string | null
+    designNumber: string | null
+    fabricRate: Decimal | null
+    v2FabricRate: Decimal | null
+    articleFashionType: string | null
     approvalStatus: string | null
     approvedAt: Date | null
     approvedBy: number | null
     sapSyncStatus: string | null
     sapSyncMessage: string | null
+    fgCreatorApproved: string | null
+    imageUrl: string | null
+    fabricArticleType: string | null
     userName: string | null
     createdAt: Date | null
     updatedAt: Date | null
@@ -54964,16 +54977,25 @@ export namespace Prisma {
     mLycra: string | null
     fabricArticleNumber: string | null
     fabricArticleDescription: string | null
+    flatId: string | null
     division: string | null
     subDivision: string | null
     majorCategory: string | null
+    mcDescription: string | null
     vendorName: string | null
     vendorCode: string | null
+    designNumber: string | null
+    fabricRate: Decimal | null
+    v2FabricRate: Decimal | null
+    articleFashionType: string | null
     approvalStatus: string | null
     approvedAt: Date | null
     approvedBy: number | null
     sapSyncStatus: string | null
     sapSyncMessage: string | null
+    fgCreatorApproved: string | null
+    imageUrl: string | null
+    fabricArticleType: string | null
     userName: string | null
     createdAt: Date | null
     updatedAt: Date | null
@@ -54997,16 +55019,25 @@ export namespace Prisma {
     mLycra: number
     fabricArticleNumber: number
     fabricArticleDescription: number
+    flatId: number
     division: number
     subDivision: number
     majorCategory: number
+    mcDescription: number
     vendorName: number
     vendorCode: number
+    designNumber: number
+    fabricRate: number
+    v2FabricRate: number
+    articleFashionType: number
     approvalStatus: number
     approvedAt: number
     approvedBy: number
     sapSyncStatus: number
     sapSyncMessage: number
+    fgCreatorApproved: number
+    imageUrl: number
+    fabricArticleType: number
     userName: number
     createdAt: number
     updatedAt: number
@@ -55015,10 +55046,14 @@ export namespace Prisma {
 
 
   export type FabricArticleDataAvgAggregateInputType = {
+    fabricRate?: true
+    v2FabricRate?: true
     approvedBy?: true
   }
 
   export type FabricArticleDataSumAggregateInputType = {
+    fabricRate?: true
+    v2FabricRate?: true
     approvedBy?: true
   }
 
@@ -55040,16 +55075,25 @@ export namespace Prisma {
     mLycra?: true
     fabricArticleNumber?: true
     fabricArticleDescription?: true
+    flatId?: true
     division?: true
     subDivision?: true
     majorCategory?: true
+    mcDescription?: true
     vendorName?: true
     vendorCode?: true
+    designNumber?: true
+    fabricRate?: true
+    v2FabricRate?: true
+    articleFashionType?: true
     approvalStatus?: true
     approvedAt?: true
     approvedBy?: true
     sapSyncStatus?: true
     sapSyncMessage?: true
+    fgCreatorApproved?: true
+    imageUrl?: true
+    fabricArticleType?: true
     userName?: true
     createdAt?: true
     updatedAt?: true
@@ -55073,16 +55117,25 @@ export namespace Prisma {
     mLycra?: true
     fabricArticleNumber?: true
     fabricArticleDescription?: true
+    flatId?: true
     division?: true
     subDivision?: true
     majorCategory?: true
+    mcDescription?: true
     vendorName?: true
     vendorCode?: true
+    designNumber?: true
+    fabricRate?: true
+    v2FabricRate?: true
+    articleFashionType?: true
     approvalStatus?: true
     approvedAt?: true
     approvedBy?: true
     sapSyncStatus?: true
     sapSyncMessage?: true
+    fgCreatorApproved?: true
+    imageUrl?: true
+    fabricArticleType?: true
     userName?: true
     createdAt?: true
     updatedAt?: true
@@ -55106,16 +55159,25 @@ export namespace Prisma {
     mLycra?: true
     fabricArticleNumber?: true
     fabricArticleDescription?: true
+    flatId?: true
     division?: true
     subDivision?: true
     majorCategory?: true
+    mcDescription?: true
     vendorName?: true
     vendorCode?: true
+    designNumber?: true
+    fabricRate?: true
+    v2FabricRate?: true
+    articleFashionType?: true
     approvalStatus?: true
     approvedAt?: true
     approvedBy?: true
     sapSyncStatus?: true
     sapSyncMessage?: true
+    fgCreatorApproved?: true
+    imageUrl?: true
+    fabricArticleType?: true
     userName?: true
     createdAt?: true
     updatedAt?: true
@@ -55226,16 +55288,25 @@ export namespace Prisma {
     mLycra: string | null
     fabricArticleNumber: string | null
     fabricArticleDescription: string | null
+    flatId: string | null
     division: string | null
     subDivision: string | null
     majorCategory: string | null
+    mcDescription: string | null
     vendorName: string | null
     vendorCode: string | null
+    designNumber: string | null
+    fabricRate: Decimal | null
+    v2FabricRate: Decimal | null
+    articleFashionType: string | null
     approvalStatus: string
     approvedAt: Date | null
     approvedBy: number | null
     sapSyncStatus: string
     sapSyncMessage: string | null
+    fgCreatorApproved: string
+    imageUrl: string | null
+    fabricArticleType: string | null
     userName: string | null
     createdAt: Date
     updatedAt: Date
@@ -55278,16 +55349,25 @@ export namespace Prisma {
     mLycra?: boolean
     fabricArticleNumber?: boolean
     fabricArticleDescription?: boolean
+    flatId?: boolean
     division?: boolean
     subDivision?: boolean
     majorCategory?: boolean
+    mcDescription?: boolean
     vendorName?: boolean
     vendorCode?: boolean
+    designNumber?: boolean
+    fabricRate?: boolean
+    v2FabricRate?: boolean
+    articleFashionType?: boolean
     approvalStatus?: boolean
     approvedAt?: boolean
     approvedBy?: boolean
     sapSyncStatus?: boolean
     sapSyncMessage?: boolean
+    fgCreatorApproved?: boolean
+    imageUrl?: boolean
+    fabricArticleType?: boolean
     userName?: boolean
     createdAt?: boolean
     updatedAt?: boolean
@@ -55311,16 +55391,25 @@ export namespace Prisma {
     mLycra?: boolean
     fabricArticleNumber?: boolean
     fabricArticleDescription?: boolean
+    flatId?: boolean
     division?: boolean
     subDivision?: boolean
     majorCategory?: boolean
+    mcDescription?: boolean
     vendorName?: boolean
     vendorCode?: boolean
+    designNumber?: boolean
+    fabricRate?: boolean
+    v2FabricRate?: boolean
+    articleFashionType?: boolean
     approvalStatus?: boolean
     approvedAt?: boolean
     approvedBy?: boolean
     sapSyncStatus?: boolean
     sapSyncMessage?: boolean
+    fgCreatorApproved?: boolean
+    imageUrl?: boolean
+    fabricArticleType?: boolean
     userName?: boolean
     createdAt?: boolean
     updatedAt?: boolean
@@ -55344,16 +55433,25 @@ export namespace Prisma {
     mLycra?: boolean
     fabricArticleNumber?: boolean
     fabricArticleDescription?: boolean
+    flatId?: boolean
     division?: boolean
     subDivision?: boolean
     majorCategory?: boolean
+    mcDescription?: boolean
     vendorName?: boolean
     vendorCode?: boolean
+    designNumber?: boolean
+    fabricRate?: boolean
+    v2FabricRate?: boolean
+    articleFashionType?: boolean
     approvalStatus?: boolean
     approvedAt?: boolean
     approvedBy?: boolean
     sapSyncStatus?: boolean
     sapSyncMessage?: boolean
+    fgCreatorApproved?: boolean
+    imageUrl?: boolean
+    fabricArticleType?: boolean
     userName?: boolean
     createdAt?: boolean
     updatedAt?: boolean
@@ -55377,22 +55475,31 @@ export namespace Prisma {
     mLycra?: boolean
     fabricArticleNumber?: boolean
     fabricArticleDescription?: boolean
+    flatId?: boolean
     division?: boolean
     subDivision?: boolean
     majorCategory?: boolean
+    mcDescription?: boolean
     vendorName?: boolean
     vendorCode?: boolean
+    designNumber?: boolean
+    fabricRate?: boolean
+    v2FabricRate?: boolean
+    articleFashionType?: boolean
     approvalStatus?: boolean
     approvedAt?: boolean
     approvedBy?: boolean
     sapSyncStatus?: boolean
     sapSyncMessage?: boolean
+    fgCreatorApproved?: boolean
+    imageUrl?: boolean
+    fabricArticleType?: boolean
     userName?: boolean
     createdAt?: boolean
     updatedAt?: boolean
   }
 
-  export type FabricArticleDataOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<"id" | "mFabDiv" | "mYarn" | "mFabMainMvgr1" | "mFabMainMvgr2" | "mConstruction" | "mOunz" | "mWidth" | "mWeave02" | "mCount" | "mWeave01" | "mComposition" | "mFinish" | "mGsm" | "mLycra" | "fabricArticleNumber" | "fabricArticleDescription" | "division" | "subDivision" | "majorCategory" | "vendorName" | "vendorCode" | "approvalStatus" | "approvedAt" | "approvedBy" | "sapSyncStatus" | "sapSyncMessage" | "userName" | "createdAt" | "updatedAt", ExtArgs["result"]["fabricArticleData"]>
+  export type FabricArticleDataOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<"id" | "mFabDiv" | "mYarn" | "mFabMainMvgr1" | "mFabMainMvgr2" | "mConstruction" | "mOunz" | "mWidth" | "mWeave02" | "mCount" | "mWeave01" | "mComposition" | "mFinish" | "mGsm" | "mLycra" | "fabricArticleNumber" | "fabricArticleDescription" | "flatId" | "division" | "subDivision" | "majorCategory" | "mcDescription" | "vendorName" | "vendorCode" | "designNumber" | "fabricRate" | "v2FabricRate" | "articleFashionType" | "approvalStatus" | "approvedAt" | "approvedBy" | "sapSyncStatus" | "sapSyncMessage" | "fgCreatorApproved" | "imageUrl" | "fabricArticleType" | "userName" | "createdAt" | "updatedAt", ExtArgs["result"]["fabricArticleData"]>
 
   export type $FabricArticleDataPayload<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
     name: "FabricArticleData"
@@ -55415,16 +55522,25 @@ export namespace Prisma {
       mLycra: string | null
       fabricArticleNumber: string | null
       fabricArticleDescription: string | null
+      flatId: string | null
       division: string | null
       subDivision: string | null
       majorCategory: string | null
+      mcDescription: string | null
       vendorName: string | null
       vendorCode: string | null
+      designNumber: string | null
+      fabricRate: Prisma.Decimal | null
+      v2FabricRate: Prisma.Decimal | null
+      articleFashionType: string | null
       approvalStatus: string
       approvedAt: Date | null
       approvedBy: number | null
       sapSyncStatus: string
       sapSyncMessage: string | null
+      fgCreatorApproved: string
+      imageUrl: string | null
+      fabricArticleType: string | null
       userName: string | null
       createdAt: Date
       updatedAt: Date
@@ -55868,16 +55984,25 @@ export namespace Prisma {
     readonly mLycra: FieldRef<"FabricArticleData", 'String'>
     readonly fabricArticleNumber: FieldRef<"FabricArticleData", 'String'>
     readonly fabricArticleDescription: FieldRef<"FabricArticleData", 'String'>
+    readonly flatId: FieldRef<"FabricArticleData", 'String'>
     readonly division: FieldRef<"FabricArticleData", 'String'>
     readonly subDivision: FieldRef<"FabricArticleData", 'String'>
     readonly majorCategory: FieldRef<"FabricArticleData", 'String'>
+    readonly mcDescription: FieldRef<"FabricArticleData", 'String'>
     readonly vendorName: FieldRef<"FabricArticleData", 'String'>
     readonly vendorCode: FieldRef<"FabricArticleData", 'String'>
+    readonly designNumber: FieldRef<"FabricArticleData", 'String'>
+    readonly fabricRate: FieldRef<"FabricArticleData", 'Decimal'>
+    readonly v2FabricRate: FieldRef<"FabricArticleData", 'Decimal'>
+    readonly articleFashionType: FieldRef<"FabricArticleData", 'String'>
     readonly approvalStatus: FieldRef<"FabricArticleData", 'String'>
     readonly approvedAt: FieldRef<"FabricArticleData", 'DateTime'>
     readonly approvedBy: FieldRef<"FabricArticleData", 'Int'>
     readonly sapSyncStatus: FieldRef<"FabricArticleData", 'String'>
     readonly sapSyncMessage: FieldRef<"FabricArticleData", 'String'>
+    readonly fgCreatorApproved: FieldRef<"FabricArticleData", 'String'>
+    readonly imageUrl: FieldRef<"FabricArticleData", 'String'>
+    readonly fabricArticleType: FieldRef<"FabricArticleData", 'String'>
     readonly userName: FieldRef<"FabricArticleData", 'String'>
     readonly createdAt: FieldRef<"FabricArticleData", 'DateTime'>
     readonly updatedAt: FieldRef<"FabricArticleData", 'DateTime'>
@@ -64588,16 +64713,25 @@ export namespace Prisma {
     mLycra: 'mLycra',
     fabricArticleNumber: 'fabricArticleNumber',
     fabricArticleDescription: 'fabricArticleDescription',
+    flatId: 'flatId',
     division: 'division',
     subDivision: 'subDivision',
     majorCategory: 'majorCategory',
+    mcDescription: 'mcDescription',
     vendorName: 'vendorName',
     vendorCode: 'vendorCode',
+    designNumber: 'designNumber',
+    fabricRate: 'fabricRate',
+    v2FabricRate: 'v2FabricRate',
+    articleFashionType: 'articleFashionType',
     approvalStatus: 'approvalStatus',
     approvedAt: 'approvedAt',
     approvedBy: 'approvedBy',
     sapSyncStatus: 'sapSyncStatus',
     sapSyncMessage: 'sapSyncMessage',
+    fgCreatorApproved: 'fgCreatorApproved',
+    imageUrl: 'imageUrl',
+    fabricArticleType: 'fabricArticleType',
     userName: 'userName',
     createdAt: 'createdAt',
     updatedAt: 'updatedAt'
@@ -65495,14 +65629,21 @@ export namespace Prisma {
     mLycra: 'mLycra',
     fabricArticleNumber: 'fabricArticleNumber',
     fabricArticleDescription: 'fabricArticleDescription',
+    flatId: 'flatId',
     division: 'division',
     subDivision: 'subDivision',
     majorCategory: 'majorCategory',
+    mcDescription: 'mcDescription',
     vendorName: 'vendorName',
     vendorCode: 'vendorCode',
+    designNumber: 'designNumber',
+    articleFashionType: 'articleFashionType',
     approvalStatus: 'approvalStatus',
     sapSyncStatus: 'sapSyncStatus',
     sapSyncMessage: 'sapSyncMessage',
+    fgCreatorApproved: 'fgCreatorApproved',
+    imageUrl: 'imageUrl',
+    fabricArticleType: 'fabricArticleType',
     userName: 'userName'
   };
 
@@ -70804,16 +70945,25 @@ export namespace Prisma {
     mLycra?: StringNullableFilter<"FabricArticleData"> | string | null
     fabricArticleNumber?: StringNullableFilter<"FabricArticleData"> | string | null
     fabricArticleDescription?: StringNullableFilter<"FabricArticleData"> | string | null
+    flatId?: StringNullableFilter<"FabricArticleData"> | string | null
     division?: StringNullableFilter<"FabricArticleData"> | string | null
     subDivision?: StringNullableFilter<"FabricArticleData"> | string | null
     majorCategory?: StringNullableFilter<"FabricArticleData"> | string | null
+    mcDescription?: StringNullableFilter<"FabricArticleData"> | string | null
     vendorName?: StringNullableFilter<"FabricArticleData"> | string | null
     vendorCode?: StringNullableFilter<"FabricArticleData"> | string | null
+    designNumber?: StringNullableFilter<"FabricArticleData"> | string | null
+    fabricRate?: DecimalNullableFilter<"FabricArticleData"> | Decimal | DecimalJsLike | number | string | null
+    v2FabricRate?: DecimalNullableFilter<"FabricArticleData"> | Decimal | DecimalJsLike | number | string | null
+    articleFashionType?: StringNullableFilter<"FabricArticleData"> | string | null
     approvalStatus?: StringFilter<"FabricArticleData"> | string
     approvedAt?: DateTimeNullableFilter<"FabricArticleData"> | Date | string | null
     approvedBy?: IntNullableFilter<"FabricArticleData"> | number | null
     sapSyncStatus?: StringFilter<"FabricArticleData"> | string
     sapSyncMessage?: StringNullableFilter<"FabricArticleData"> | string | null
+    fgCreatorApproved?: StringFilter<"FabricArticleData"> | string
+    imageUrl?: StringNullableFilter<"FabricArticleData"> | string | null
+    fabricArticleType?: StringNullableFilter<"FabricArticleData"> | string | null
     userName?: StringNullableFilter<"FabricArticleData"> | string | null
     createdAt?: DateTimeFilter<"FabricArticleData"> | Date | string
     updatedAt?: DateTimeFilter<"FabricArticleData"> | Date | string
@@ -70837,16 +70987,25 @@ export namespace Prisma {
     mLycra?: SortOrderInput | SortOrder
     fabricArticleNumber?: SortOrderInput | SortOrder
     fabricArticleDescription?: SortOrderInput | SortOrder
+    flatId?: SortOrderInput | SortOrder
     division?: SortOrderInput | SortOrder
     subDivision?: SortOrderInput | SortOrder
     majorCategory?: SortOrderInput | SortOrder
+    mcDescription?: SortOrderInput | SortOrder
     vendorName?: SortOrderInput | SortOrder
     vendorCode?: SortOrderInput | SortOrder
+    designNumber?: SortOrderInput | SortOrder
+    fabricRate?: SortOrderInput | SortOrder
+    v2FabricRate?: SortOrderInput | SortOrder
+    articleFashionType?: SortOrderInput | SortOrder
     approvalStatus?: SortOrder
     approvedAt?: SortOrderInput | SortOrder
     approvedBy?: SortOrderInput | SortOrder
     sapSyncStatus?: SortOrder
     sapSyncMessage?: SortOrderInput | SortOrder
+    fgCreatorApproved?: SortOrder
+    imageUrl?: SortOrderInput | SortOrder
+    fabricArticleType?: SortOrderInput | SortOrder
     userName?: SortOrderInput | SortOrder
     createdAt?: SortOrder
     updatedAt?: SortOrder
@@ -70874,16 +71033,25 @@ export namespace Prisma {
     mLycra?: StringNullableFilter<"FabricArticleData"> | string | null
     fabricArticleNumber?: StringNullableFilter<"FabricArticleData"> | string | null
     fabricArticleDescription?: StringNullableFilter<"FabricArticleData"> | string | null
+    flatId?: StringNullableFilter<"FabricArticleData"> | string | null
     division?: StringNullableFilter<"FabricArticleData"> | string | null
     subDivision?: StringNullableFilter<"FabricArticleData"> | string | null
     majorCategory?: StringNullableFilter<"FabricArticleData"> | string | null
+    mcDescription?: StringNullableFilter<"FabricArticleData"> | string | null
     vendorName?: StringNullableFilter<"FabricArticleData"> | string | null
     vendorCode?: StringNullableFilter<"FabricArticleData"> | string | null
+    designNumber?: StringNullableFilter<"FabricArticleData"> | string | null
+    fabricRate?: DecimalNullableFilter<"FabricArticleData"> | Decimal | DecimalJsLike | number | string | null
+    v2FabricRate?: DecimalNullableFilter<"FabricArticleData"> | Decimal | DecimalJsLike | number | string | null
+    articleFashionType?: StringNullableFilter<"FabricArticleData"> | string | null
     approvalStatus?: StringFilter<"FabricArticleData"> | string
     approvedAt?: DateTimeNullableFilter<"FabricArticleData"> | Date | string | null
     approvedBy?: IntNullableFilter<"FabricArticleData"> | number | null
     sapSyncStatus?: StringFilter<"FabricArticleData"> | string
     sapSyncMessage?: StringNullableFilter<"FabricArticleData"> | string | null
+    fgCreatorApproved?: StringFilter<"FabricArticleData"> | string
+    imageUrl?: StringNullableFilter<"FabricArticleData"> | string | null
+    fabricArticleType?: StringNullableFilter<"FabricArticleData"> | string | null
     userName?: StringNullableFilter<"FabricArticleData"> | string | null
     createdAt?: DateTimeFilter<"FabricArticleData"> | Date | string
     updatedAt?: DateTimeFilter<"FabricArticleData"> | Date | string
@@ -70907,16 +71075,25 @@ export namespace Prisma {
     mLycra?: SortOrderInput | SortOrder
     fabricArticleNumber?: SortOrderInput | SortOrder
     fabricArticleDescription?: SortOrderInput | SortOrder
+    flatId?: SortOrderInput | SortOrder
     division?: SortOrderInput | SortOrder
     subDivision?: SortOrderInput | SortOrder
     majorCategory?: SortOrderInput | SortOrder
+    mcDescription?: SortOrderInput | SortOrder
     vendorName?: SortOrderInput | SortOrder
     vendorCode?: SortOrderInput | SortOrder
+    designNumber?: SortOrderInput | SortOrder
+    fabricRate?: SortOrderInput | SortOrder
+    v2FabricRate?: SortOrderInput | SortOrder
+    articleFashionType?: SortOrderInput | SortOrder
     approvalStatus?: SortOrder
     approvedAt?: SortOrderInput | SortOrder
     approvedBy?: SortOrderInput | SortOrder
     sapSyncStatus?: SortOrder
     sapSyncMessage?: SortOrderInput | SortOrder
+    fgCreatorApproved?: SortOrder
+    imageUrl?: SortOrderInput | SortOrder
+    fabricArticleType?: SortOrderInput | SortOrder
     userName?: SortOrderInput | SortOrder
     createdAt?: SortOrder
     updatedAt?: SortOrder
@@ -70948,16 +71125,25 @@ export namespace Prisma {
     mLycra?: StringNullableWithAggregatesFilter<"FabricArticleData"> | string | null
     fabricArticleNumber?: StringNullableWithAggregatesFilter<"FabricArticleData"> | string | null
     fabricArticleDescription?: StringNullableWithAggregatesFilter<"FabricArticleData"> | string | null
+    flatId?: StringNullableWithAggregatesFilter<"FabricArticleData"> | string | null
     division?: StringNullableWithAggregatesFilter<"FabricArticleData"> | string | null
     subDivision?: StringNullableWithAggregatesFilter<"FabricArticleData"> | string | null
     majorCategory?: StringNullableWithAggregatesFilter<"FabricArticleData"> | string | null
+    mcDescription?: StringNullableWithAggregatesFilter<"FabricArticleData"> | string | null
     vendorName?: StringNullableWithAggregatesFilter<"FabricArticleData"> | string | null
     vendorCode?: StringNullableWithAggregatesFilter<"FabricArticleData"> | string | null
+    designNumber?: StringNullableWithAggregatesFilter<"FabricArticleData"> | string | null
+    fabricRate?: DecimalNullableWithAggregatesFilter<"FabricArticleData"> | Decimal | DecimalJsLike | number | string | null
+    v2FabricRate?: DecimalNullableWithAggregatesFilter<"FabricArticleData"> | Decimal | DecimalJsLike | number | string | null
+    articleFashionType?: StringNullableWithAggregatesFilter<"FabricArticleData"> | string | null
     approvalStatus?: StringWithAggregatesFilter<"FabricArticleData"> | string
     approvedAt?: DateTimeNullableWithAggregatesFilter<"FabricArticleData"> | Date | string | null
     approvedBy?: IntNullableWithAggregatesFilter<"FabricArticleData"> | number | null
     sapSyncStatus?: StringWithAggregatesFilter<"FabricArticleData"> | string
     sapSyncMessage?: StringNullableWithAggregatesFilter<"FabricArticleData"> | string | null
+    fgCreatorApproved?: StringWithAggregatesFilter<"FabricArticleData"> | string
+    imageUrl?: StringNullableWithAggregatesFilter<"FabricArticleData"> | string | null
+    fabricArticleType?: StringNullableWithAggregatesFilter<"FabricArticleData"> | string | null
     userName?: StringNullableWithAggregatesFilter<"FabricArticleData"> | string | null
     createdAt?: DateTimeWithAggregatesFilter<"FabricArticleData"> | Date | string
     updatedAt?: DateTimeWithAggregatesFilter<"FabricArticleData"> | Date | string
@@ -77545,16 +77731,25 @@ export namespace Prisma {
     mLycra?: string | null
     fabricArticleNumber?: string | null
     fabricArticleDescription?: string | null
+    flatId?: string | null
     division?: string | null
     subDivision?: string | null
     majorCategory?: string | null
+    mcDescription?: string | null
     vendorName?: string | null
     vendorCode?: string | null
+    designNumber?: string | null
+    fabricRate?: Decimal | DecimalJsLike | number | string | null
+    v2FabricRate?: Decimal | DecimalJsLike | number | string | null
+    articleFashionType?: string | null
     approvalStatus?: string
     approvedAt?: Date | string | null
     approvedBy?: number | null
     sapSyncStatus?: string
     sapSyncMessage?: string | null
+    fgCreatorApproved?: string
+    imageUrl?: string | null
+    fabricArticleType?: string | null
     userName?: string | null
     createdAt?: Date | string
     updatedAt?: Date | string
@@ -77578,16 +77773,25 @@ export namespace Prisma {
     mLycra?: string | null
     fabricArticleNumber?: string | null
     fabricArticleDescription?: string | null
+    flatId?: string | null
     division?: string | null
     subDivision?: string | null
     majorCategory?: string | null
+    mcDescription?: string | null
     vendorName?: string | null
     vendorCode?: string | null
+    designNumber?: string | null
+    fabricRate?: Decimal | DecimalJsLike | number | string | null
+    v2FabricRate?: Decimal | DecimalJsLike | number | string | null
+    articleFashionType?: string | null
     approvalStatus?: string
     approvedAt?: Date | string | null
     approvedBy?: number | null
     sapSyncStatus?: string
     sapSyncMessage?: string | null
+    fgCreatorApproved?: string
+    imageUrl?: string | null
+    fabricArticleType?: string | null
     userName?: string | null
     createdAt?: Date | string
     updatedAt?: Date | string
@@ -77611,16 +77815,25 @@ export namespace Prisma {
     mLycra?: NullableStringFieldUpdateOperationsInput | string | null
     fabricArticleNumber?: NullableStringFieldUpdateOperationsInput | string | null
     fabricArticleDescription?: NullableStringFieldUpdateOperationsInput | string | null
+    flatId?: NullableStringFieldUpdateOperationsInput | string | null
     division?: NullableStringFieldUpdateOperationsInput | string | null
     subDivision?: NullableStringFieldUpdateOperationsInput | string | null
     majorCategory?: NullableStringFieldUpdateOperationsInput | string | null
+    mcDescription?: NullableStringFieldUpdateOperationsInput | string | null
     vendorName?: NullableStringFieldUpdateOperationsInput | string | null
     vendorCode?: NullableStringFieldUpdateOperationsInput | string | null
+    designNumber?: NullableStringFieldUpdateOperationsInput | string | null
+    fabricRate?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    v2FabricRate?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    articleFashionType?: NullableStringFieldUpdateOperationsInput | string | null
     approvalStatus?: StringFieldUpdateOperationsInput | string
     approvedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     approvedBy?: NullableIntFieldUpdateOperationsInput | number | null
     sapSyncStatus?: StringFieldUpdateOperationsInput | string
     sapSyncMessage?: NullableStringFieldUpdateOperationsInput | string | null
+    fgCreatorApproved?: StringFieldUpdateOperationsInput | string
+    imageUrl?: NullableStringFieldUpdateOperationsInput | string | null
+    fabricArticleType?: NullableStringFieldUpdateOperationsInput | string | null
     userName?: NullableStringFieldUpdateOperationsInput | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
@@ -77644,16 +77857,25 @@ export namespace Prisma {
     mLycra?: NullableStringFieldUpdateOperationsInput | string | null
     fabricArticleNumber?: NullableStringFieldUpdateOperationsInput | string | null
     fabricArticleDescription?: NullableStringFieldUpdateOperationsInput | string | null
+    flatId?: NullableStringFieldUpdateOperationsInput | string | null
     division?: NullableStringFieldUpdateOperationsInput | string | null
     subDivision?: NullableStringFieldUpdateOperationsInput | string | null
     majorCategory?: NullableStringFieldUpdateOperationsInput | string | null
+    mcDescription?: NullableStringFieldUpdateOperationsInput | string | null
     vendorName?: NullableStringFieldUpdateOperationsInput | string | null
     vendorCode?: NullableStringFieldUpdateOperationsInput | string | null
+    designNumber?: NullableStringFieldUpdateOperationsInput | string | null
+    fabricRate?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    v2FabricRate?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    articleFashionType?: NullableStringFieldUpdateOperationsInput | string | null
     approvalStatus?: StringFieldUpdateOperationsInput | string
     approvedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     approvedBy?: NullableIntFieldUpdateOperationsInput | number | null
     sapSyncStatus?: StringFieldUpdateOperationsInput | string
     sapSyncMessage?: NullableStringFieldUpdateOperationsInput | string | null
+    fgCreatorApproved?: StringFieldUpdateOperationsInput | string
+    imageUrl?: NullableStringFieldUpdateOperationsInput | string | null
+    fabricArticleType?: NullableStringFieldUpdateOperationsInput | string | null
     userName?: NullableStringFieldUpdateOperationsInput | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
@@ -77677,16 +77899,25 @@ export namespace Prisma {
     mLycra?: string | null
     fabricArticleNumber?: string | null
     fabricArticleDescription?: string | null
+    flatId?: string | null
     division?: string | null
     subDivision?: string | null
     majorCategory?: string | null
+    mcDescription?: string | null
     vendorName?: string | null
     vendorCode?: string | null
+    designNumber?: string | null
+    fabricRate?: Decimal | DecimalJsLike | number | string | null
+    v2FabricRate?: Decimal | DecimalJsLike | number | string | null
+    articleFashionType?: string | null
     approvalStatus?: string
     approvedAt?: Date | string | null
     approvedBy?: number | null
     sapSyncStatus?: string
     sapSyncMessage?: string | null
+    fgCreatorApproved?: string
+    imageUrl?: string | null
+    fabricArticleType?: string | null
     userName?: string | null
     createdAt?: Date | string
     updatedAt?: Date | string
@@ -77710,16 +77941,25 @@ export namespace Prisma {
     mLycra?: NullableStringFieldUpdateOperationsInput | string | null
     fabricArticleNumber?: NullableStringFieldUpdateOperationsInput | string | null
     fabricArticleDescription?: NullableStringFieldUpdateOperationsInput | string | null
+    flatId?: NullableStringFieldUpdateOperationsInput | string | null
     division?: NullableStringFieldUpdateOperationsInput | string | null
     subDivision?: NullableStringFieldUpdateOperationsInput | string | null
     majorCategory?: NullableStringFieldUpdateOperationsInput | string | null
+    mcDescription?: NullableStringFieldUpdateOperationsInput | string | null
     vendorName?: NullableStringFieldUpdateOperationsInput | string | null
     vendorCode?: NullableStringFieldUpdateOperationsInput | string | null
+    designNumber?: NullableStringFieldUpdateOperationsInput | string | null
+    fabricRate?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    v2FabricRate?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    articleFashionType?: NullableStringFieldUpdateOperationsInput | string | null
     approvalStatus?: StringFieldUpdateOperationsInput | string
     approvedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     approvedBy?: NullableIntFieldUpdateOperationsInput | number | null
     sapSyncStatus?: StringFieldUpdateOperationsInput | string
     sapSyncMessage?: NullableStringFieldUpdateOperationsInput | string | null
+    fgCreatorApproved?: StringFieldUpdateOperationsInput | string
+    imageUrl?: NullableStringFieldUpdateOperationsInput | string | null
+    fabricArticleType?: NullableStringFieldUpdateOperationsInput | string | null
     userName?: NullableStringFieldUpdateOperationsInput | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
@@ -77743,16 +77983,25 @@ export namespace Prisma {
     mLycra?: NullableStringFieldUpdateOperationsInput | string | null
     fabricArticleNumber?: NullableStringFieldUpdateOperationsInput | string | null
     fabricArticleDescription?: NullableStringFieldUpdateOperationsInput | string | null
+    flatId?: NullableStringFieldUpdateOperationsInput | string | null
     division?: NullableStringFieldUpdateOperationsInput | string | null
     subDivision?: NullableStringFieldUpdateOperationsInput | string | null
     majorCategory?: NullableStringFieldUpdateOperationsInput | string | null
+    mcDescription?: NullableStringFieldUpdateOperationsInput | string | null
     vendorName?: NullableStringFieldUpdateOperationsInput | string | null
     vendorCode?: NullableStringFieldUpdateOperationsInput | string | null
+    designNumber?: NullableStringFieldUpdateOperationsInput | string | null
+    fabricRate?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    v2FabricRate?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    articleFashionType?: NullableStringFieldUpdateOperationsInput | string | null
     approvalStatus?: StringFieldUpdateOperationsInput | string
     approvedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     approvedBy?: NullableIntFieldUpdateOperationsInput | number | null
     sapSyncStatus?: StringFieldUpdateOperationsInput | string
     sapSyncMessage?: NullableStringFieldUpdateOperationsInput | string | null
+    fgCreatorApproved?: StringFieldUpdateOperationsInput | string
+    imageUrl?: NullableStringFieldUpdateOperationsInput | string | null
+    fabricArticleType?: NullableStringFieldUpdateOperationsInput | string | null
     userName?: NullableStringFieldUpdateOperationsInput | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
@@ -82695,22 +82944,33 @@ export namespace Prisma {
     mLycra?: SortOrder
     fabricArticleNumber?: SortOrder
     fabricArticleDescription?: SortOrder
+    flatId?: SortOrder
     division?: SortOrder
     subDivision?: SortOrder
     majorCategory?: SortOrder
+    mcDescription?: SortOrder
     vendorName?: SortOrder
     vendorCode?: SortOrder
+    designNumber?: SortOrder
+    fabricRate?: SortOrder
+    v2FabricRate?: SortOrder
+    articleFashionType?: SortOrder
     approvalStatus?: SortOrder
     approvedAt?: SortOrder
     approvedBy?: SortOrder
     sapSyncStatus?: SortOrder
     sapSyncMessage?: SortOrder
+    fgCreatorApproved?: SortOrder
+    imageUrl?: SortOrder
+    fabricArticleType?: SortOrder
     userName?: SortOrder
     createdAt?: SortOrder
     updatedAt?: SortOrder
   }
 
   export type FabricArticleDataAvgOrderByAggregateInput = {
+    fabricRate?: SortOrder
+    v2FabricRate?: SortOrder
     approvedBy?: SortOrder
   }
 
@@ -82732,16 +82992,25 @@ export namespace Prisma {
     mLycra?: SortOrder
     fabricArticleNumber?: SortOrder
     fabricArticleDescription?: SortOrder
+    flatId?: SortOrder
     division?: SortOrder
     subDivision?: SortOrder
     majorCategory?: SortOrder
+    mcDescription?: SortOrder
     vendorName?: SortOrder
     vendorCode?: SortOrder
+    designNumber?: SortOrder
+    fabricRate?: SortOrder
+    v2FabricRate?: SortOrder
+    articleFashionType?: SortOrder
     approvalStatus?: SortOrder
     approvedAt?: SortOrder
     approvedBy?: SortOrder
     sapSyncStatus?: SortOrder
     sapSyncMessage?: SortOrder
+    fgCreatorApproved?: SortOrder
+    imageUrl?: SortOrder
+    fabricArticleType?: SortOrder
     userName?: SortOrder
     createdAt?: SortOrder
     updatedAt?: SortOrder
@@ -82765,22 +83034,33 @@ export namespace Prisma {
     mLycra?: SortOrder
     fabricArticleNumber?: SortOrder
     fabricArticleDescription?: SortOrder
+    flatId?: SortOrder
     division?: SortOrder
     subDivision?: SortOrder
     majorCategory?: SortOrder
+    mcDescription?: SortOrder
     vendorName?: SortOrder
     vendorCode?: SortOrder
+    designNumber?: SortOrder
+    fabricRate?: SortOrder
+    v2FabricRate?: SortOrder
+    articleFashionType?: SortOrder
     approvalStatus?: SortOrder
     approvedAt?: SortOrder
     approvedBy?: SortOrder
     sapSyncStatus?: SortOrder
     sapSyncMessage?: SortOrder
+    fgCreatorApproved?: SortOrder
+    imageUrl?: SortOrder
+    fabricArticleType?: SortOrder
     userName?: SortOrder
     createdAt?: SortOrder
     updatedAt?: SortOrder
   }
 
   export type FabricArticleDataSumOrderByAggregateInput = {
+    fabricRate?: SortOrder
+    v2FabricRate?: SortOrder
     approvedBy?: SortOrder
   }
 
