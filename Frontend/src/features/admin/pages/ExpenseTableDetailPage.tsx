@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { useParams, Link } from 'react-router-dom';
-import { useQuery, useQueryClient, keepPreviousData } from '@tanstack/react-query';
+import { useQueries, useQuery, useQueryClient, keepPreviousData } from '@tanstack/react-query';
 import dayjs from 'dayjs';
 import { ArrowLeft, Search, ArrowUpDown, Pencil, Trash2, Plus, ClipboardList, Download } from 'lucide-react';
 import {
@@ -19,9 +19,10 @@ import {
 } from '@/shared/components/ui-tw';
 import { message } from '@/lib/message';
 import { APP_CONFIG } from '../../../constants/app/config';
-import { getExpenseTableData, getMyExpenseAccess } from '../../../services/adminApi';
+import { getExpenseColumnOptions, getExpenseTableData, getMyExpenseAccess } from '../../../services/adminApi';
 import { EXPENSE_TABLE_CONFIGS, type ExpenseTableColumnConfig } from '../config/expenseTables';
 import { RowChangeRequestDialog, type RowChangeMode } from '../components/RowChangeRequestDialog';
+import { ColumnCheckboxFilter } from '../components/ColumnCheckboxFilter';
 
 /** Tables with a full "download master" export — admin-only, wired up ad hoc
  * per table on the backend (e.g. GET /admin/fabric-article-data/export)
@@ -63,6 +64,9 @@ export default function ExpenseTableDetailPage() {
   const [sortBy, setSortBy] = useState<string>(config?.defaultSortBy ?? '');
   const [sortDir, setSortDir] = useState<'asc' | 'desc'>(config?.defaultSortDir ?? 'desc');
   const [dialog, setDialog] = useState<{ mode: RowChangeMode; row: Record<string, any> | null } | null>(null);
+  // Excel-style column filters (checkbox multi-select), additive to the
+  // search box above — separate state so one never clobbers the other.
+  const [columnFilters, setColumnFilters] = useState<Record<string, string[]>>({});
 
   // Which buttons to show. The server re-checks every action, so a stale or
   // over-generous answer here can't actually grant anything.
@@ -111,7 +115,7 @@ export default function ExpenseTableDetailPage() {
   };
 
   const { data, isLoading, isError } = useQuery({
-    queryKey: ['expense-table', tableKey, page, pageSize, appliedSearch, sortBy, sortDir],
+    queryKey: ['expense-table', tableKey, page, pageSize, appliedSearch, sortBy, sortDir, columnFilters],
     queryFn: () =>
       getExpenseTableData(tableKey!, {
         page,
@@ -119,11 +123,32 @@ export default function ExpenseTableDetailPage() {
         search: appliedSearch || undefined,
         sortBy: sortBy || undefined,
         sortDir,
+        filters: columnFilters,
       }),
     // Don't fire the table read until access is known — a user with none
     // would just get a 403 back.
     enabled: !!tableKey && !!config && access?.canView === true,
     placeholderData: keepPreviousData,
+  });
+
+  // One options query per filterable column, feeding its header checkbox
+  // dropdown — cheap and cached, same pattern as the add/edit form's
+  // pick-from-existing dropdowns.
+  const filterableColumns = (config?.columns ?? []).filter((c) => c.filterable);
+  const filterOptionQueries = useQueries({
+    queries: filterableColumns.map((col) => ({
+      queryKey: ['expense-column-options', tableKey, col.dataIndex],
+      queryFn: () => getExpenseColumnOptions(tableKey!, col.dataIndex),
+      enabled: !!tableKey && !!config,
+      staleTime: 5 * 60_000,
+    })),
+  });
+  const filterOptionsByColumn: Record<string, { options: string[]; loading: boolean }> = {};
+  filterableColumns.forEach((col, i) => {
+    filterOptionsByColumn[col.dataIndex] = {
+      options: filterOptionQueries[i]?.data ?? [],
+      loading: filterOptionQueries[i]?.isLoading ?? false,
+    };
   });
 
   if (!tableKey || !config) {
@@ -170,7 +195,28 @@ export default function ExpenseTableDetailPage() {
   const columns: DataTableColumn<Record<string, any>>[] = config.columns
     .filter((col) => col.dataIndex !== 'id')
     .map((col) => ({
-      title: col.title,
+      title: col.filterable ? (
+        <span className="flex min-w-0 items-center justify-between gap-1">
+          <span className="truncate">{col.title}</span>
+          <ColumnCheckboxFilter
+            label={col.title}
+            options={filterOptionsByColumn[col.dataIndex]?.options ?? []}
+            loading={filterOptionsByColumn[col.dataIndex]?.loading ?? false}
+            selected={columnFilters[col.dataIndex] ?? []}
+            onApply={(values) => {
+              setPage(1);
+              setColumnFilters((prev) => {
+                const next = { ...prev };
+                if (values.length > 0) next[col.dataIndex] = values;
+                else delete next[col.dataIndex];
+                return next;
+              });
+            }}
+          />
+        </span>
+      ) : (
+        col.title
+      ),
       key: col.dataIndex,
       dataIndex: col.dataIndex,
       width: col.width,

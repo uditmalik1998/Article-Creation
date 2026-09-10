@@ -26,6 +26,10 @@ export interface ExpenseTableColumnConfig {
    * convenience default, not a lock; the field stays editable afterward.
    * Names the OTHER column's `dataIndex` to watch. */
   autoFillFrom?: string;
+  /** Adds an Excel-style checkbox filter to this column's header — search +
+   * multi-select over its distinct existing values, additive to the page's
+   * own search box. Being rolled out one column/table at a time. */
+  filterable?: boolean;
 }
 
 export interface ExpenseTableConfig {
@@ -206,7 +210,7 @@ export const EXPENSE_TABLE_CONFIGS: Record<string, ExpenseTableConfig> = {
     requiredOnCreate: ['attributeName', 'code'],
     columns: [
       { dataIndex: 'id', title: 'ID', editable: false },
-      { dataIndex: 'attributeName', title: 'Attribute Name', pickFromExisting: true },
+      { dataIndex: 'attributeName', title: 'Attribute Name', pickFromExisting: true, filterable: true },
       { dataIndex: 'code', title: 'Code' },
       { dataIndex: 'fullForm', title: 'Full Form' },
       { dataIndex: 'isActive', title: 'Active', type: 'boolean' },
