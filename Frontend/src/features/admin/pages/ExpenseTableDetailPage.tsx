@@ -164,14 +164,19 @@ export default function ExpenseTableDetailPage() {
     setAppliedSearch(draftSearch);
   };
 
-  const columns: DataTableColumn<Record<string, any>>[] = config.columns.map((col) => ({
-    title: col.title,
-    key: col.dataIndex,
-    dataIndex: col.dataIndex,
-    width: col.width,
-    align: col.align,
-    render: (value: any) => renderCell(value, col.type),
-  }));
+  // The surrogate primary key (Supabase's own row id) isn't meaningful to a
+  // viewer — every table names it 'id' — so it's dropped here, in the table
+  // view only; it's still on the underlying row data for actions/rowKey.
+  const columns: DataTableColumn<Record<string, any>>[] = config.columns
+    .filter((col) => col.dataIndex !== 'id')
+    .map((col) => ({
+      title: col.title,
+      key: col.dataIndex,
+      dataIndex: col.dataIndex,
+      width: col.width,
+      align: col.align,
+      render: (value: any) => renderCell(value, col.type),
+    }));
 
   if (canEdit || canDelete) {
     columns.push({
