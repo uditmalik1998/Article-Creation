@@ -630,6 +630,10 @@ export interface ExpenseTableParams {
   search?: string;
   sortBy?: string;
   sortDir?: 'asc' | 'desc';
+  /** Excel-style column filters: column key -> the exact values to include.
+   * Additive to `search` (both apply, ANDed), and independent per column. An
+   * absent or empty-array column is simply not filtered. */
+  filters?: Record<string, string[]>;
 }
 
 export interface ExpenseTableResponse<T = Record<string, any>> {
@@ -644,10 +648,13 @@ export async function getExpenseTableData(
   tableKey: string,
   params: ExpenseTableParams = {},
 ): Promise<ExpenseTableResponse> {
+  const { filters, ...rest } = params;
   const query = new URLSearchParams();
-  Object.entries(params).forEach(([k, v]) => {
+  Object.entries(rest).forEach(([k, v]) => {
     if (v !== undefined && v !== null && v !== '') query.set(k, String(v));
   });
+  const activeFilters = filters ? Object.fromEntries(Object.entries(filters).filter(([, v]) => v.length > 0)) : {};
+  if (Object.keys(activeFilters).length > 0) query.set('filters', JSON.stringify(activeFilters));
   const res = await expenseApi.get<ExpenseTableResponse>(
     `/table/${encodeURIComponent(tableKey)}?${query.toString()}`,
   );

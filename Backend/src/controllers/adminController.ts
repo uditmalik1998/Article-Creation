@@ -4830,7 +4830,10 @@ export const downloadFabricArticleDataMaster = async (_req: Request, res: Respon
     const wb = new ExcelJS.Workbook();
     const ws = wb.addWorksheet('FABRIC ARTICLE DATA');
 
-    const headers = rows.length > 0
+    // 'id' is Supabase's own surrogate primary key — not meaningful to
+    // whoever opens this file, so it's dropped here same as everywhere else
+    // in the Expense Data views; every other column ships as-is.
+    const headers = (rows.length > 0
       ? Object.keys(rows[0])
       : [
           'id', 'fabric_article_number', 'fabric_article_description',
@@ -4840,7 +4843,8 @@ export const downloadFabricArticleDataMaster = async (_req: Request, res: Respon
           'm_count', 'm_gsm', 'm_composition', 'm_finish', 'm_lycra',
           'approval_status', 'approved_at', 'approved_by', 'sap_sync_status', 'sap_sync_message',
           'user_name', 'created_at', 'updated_at',
-        ];
+        ]
+    ).filter((h) => h !== 'id');
 
     const headerRow = ws.addRow(headers.map((h) => h.toUpperCase()));
     headerRow.eachCell((cell: any) => {
@@ -6237,6 +6241,31 @@ export const EXPENSE_TABLE_REGISTRY: Record<string, ExpenseTableConfig> = {
 };
 
 /** GET /admin/expense-table/:tableKey?page=&limit=&search=&sortBy=&sortDir= */
+/** Parses the `filters` query param — a JSON object of column key -> array of
+ * exact values to match (checkbox-style column filters, additive to the
+ * free-text `search` box, not a replacement for it). Whitelisted against
+ * this table's own configured columns (it's client-supplied), and anything
+ * malformed is dropped rather than erroring — a bad filter should just not
+ * filter, not break the page. */
+function parseExpenseColumnFilters(raw: string | undefined, validKeys: Set<string>): Record<string, string[]> {
+  if (!raw) return {};
+  let parsed: unknown;
+  try {
+    parsed = JSON.parse(raw);
+  } catch {
+    return {};
+  }
+  if (!parsed || typeof parsed !== 'object' || Array.isArray(parsed)) return {};
+
+  const result: Record<string, string[]> = {};
+  for (const [key, value] of Object.entries(parsed as Record<string, unknown>)) {
+    if (!validKeys.has(key) || !Array.isArray(value) || value.length === 0) continue;
+    const values = value.filter((v): v is string | number | boolean => v !== null && v !== undefined).map((v) => String(v));
+    if (values.length > 0) result[key] = values;
+  }
+  return result;
+}
+
 export async function getExpenseTableData(req: Request, res: Response) {
   const { tableKey } = req.params;
   const config = EXPENSE_TABLE_REGISTRY[tableKey];
@@ -6244,7 +6273,7 @@ export async function getExpenseTableData(req: Request, res: Response) {
     return res.status(404).json({ success: false, error: `Unknown table key: ${tableKey}` });
   }
 
-  const { page, limit, search, sortBy, sortDir } = req.query as Record<string, string | undefined>;
+  const { page, limit, search, sortBy, sortDir, filters } = req.query as Record<string, string | undefined>;
   const pageNum = Math.max(1, parseInt(page ?? '1', 10) || 1);
   const limitNum = Math.min(200, Math.max(1, parseInt(limit ?? '50', 10) || 50));
   const skip = (pageNum - 1) * limitNum;
@@ -6256,10 +6285,16 @@ export async function getExpenseTableData(req: Request, res: Response) {
       const validFields = new Set(config.columns.map((c) => c.key));
       const sortField = sortBy && validFields.has(sortBy) ? sortBy : config.defaultSort.field;
       const delegate = (prisma as any)[config.delegateName];
+      const columnFilters = parseExpenseColumnFilters(filters, validFields);
 
-      const where = searchTerm
-        ? { OR: config.searchColumns.map((f) => ({ [f]: { contains: searchTerm, mode: 'insensitive' as const } })) }
-        : {};
+      const andConditions: any[] = [];
+      if (searchTerm) {
+        andConditions.push({ OR: config.searchColumns.map((f) => ({ [f]: { contains: searchTerm, mode: 'insensitive' as const } })) });
+      }
+      for (const [col, values] of Object.entries(columnFilters)) {
+        andConditions.push({ [col]: { in: values } });
+      }
+      const where = andConditions.length > 0 ? { AND: andConditions } : {};
 
       const [total, rows] = await withPrismaRetry(() =>
         prisma.$transaction([
@@ -6274,15 +6309,23 @@ export async function getExpenseTableData(req: Request, res: Response) {
     if (config.kind === 'raw') {
       const validColumns = new Set(config.columns.map((c) => c.key));
       const sortColumn = sortBy && validColumns.has(sortBy) ? sortBy : config.defaultSort.column;
+      const columnFilters = parseExpenseColumnFilters(filters, validColumns);
 
-      const whereSql = searchTerm
-        ? Prisma.sql`WHERE ${Prisma.join(
+      const clauses: ReturnType<typeof Prisma.sql>[] = [];
+      if (searchTerm) {
+        clauses.push(
+          Prisma.sql`(${Prisma.join(
             config.searchColumns.map(
               (col) => Prisma.sql`${Prisma.raw(`"${col}"`)}::text ILIKE ${'%' + searchTerm + '%'}`
             ),
             ' OR '
-          )}`
-        : Prisma.empty;
+          )})`
+        );
+      }
+      for (const [col, values] of Object.entries(columnFilters)) {
+        clauses.push(Prisma.sql`${Prisma.raw(`"${col}"`)}::text = ANY(${values})`);
+      }
+      const whereSql = clauses.length > 0 ? Prisma.sql`WHERE ${Prisma.join(clauses, ' AND ')}` : Prisma.empty;
 
       const orderSql = Prisma.sql`ORDER BY ${Prisma.raw(`"${sortColumn}"`)} ${Prisma.raw(dir.toUpperCase())}`;
       const tableSql = Prisma.raw(`"${config.tableName}"`);
