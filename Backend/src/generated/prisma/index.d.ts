@@ -54907,10 +54907,12 @@ export namespace Prisma {
   }
 
   export type FabricArticleDataAvgAggregateOutputType = {
+    fabricRate: Decimal | null
     approvedBy: number | null
   }
 
   export type FabricArticleDataSumAggregateOutputType = {
+    fabricRate: Decimal | null
     approvedBy: number | null
   }
 
@@ -54937,6 +54939,7 @@ export namespace Prisma {
     majorCategory: string | null
     vendorName: string | null
     vendorCode: string | null
+    fabricRate: Decimal | null
     approvalStatus: string | null
     approvedAt: Date | null
     approvedBy: number | null
@@ -54970,6 +54973,7 @@ export namespace Prisma {
     majorCategory: string | null
     vendorName: string | null
     vendorCode: string | null
+    fabricRate: Decimal | null
     approvalStatus: string | null
     approvedAt: Date | null
     approvedBy: number | null
@@ -55003,6 +55007,7 @@ export namespace Prisma {
     majorCategory: number
     vendorName: number
     vendorCode: number
+    fabricRate: number
     approvalStatus: number
     approvedAt: number
     approvedBy: number
@@ -55016,10 +55021,12 @@ export namespace Prisma {
 
 
   export type FabricArticleDataAvgAggregateInputType = {
+    fabricRate?: true
     approvedBy?: true
   }
 
   export type FabricArticleDataSumAggregateInputType = {
+    fabricRate?: true
     approvedBy?: true
   }
 
@@ -55046,6 +55053,7 @@ export namespace Prisma {
     majorCategory?: true
     vendorName?: true
     vendorCode?: true
+    fabricRate?: true
     approvalStatus?: true
     approvedAt?: true
     approvedBy?: true
@@ -55079,6 +55087,7 @@ export namespace Prisma {
     majorCategory?: true
     vendorName?: true
     vendorCode?: true
+    fabricRate?: true
     approvalStatus?: true
     approvedAt?: true
     approvedBy?: true
@@ -55112,6 +55121,7 @@ export namespace Prisma {
     majorCategory?: true
     vendorName?: true
     vendorCode?: true
+    fabricRate?: true
     approvalStatus?: true
     approvedAt?: true
     approvedBy?: true
@@ -55232,6 +55242,7 @@ export namespace Prisma {
     majorCategory: string | null
     vendorName: string | null
     vendorCode: string | null
+    fabricRate: Decimal | null
     approvalStatus: string
     approvedAt: Date | null
     approvedBy: number | null
@@ -55284,6 +55295,7 @@ export namespace Prisma {
     majorCategory?: boolean
     vendorName?: boolean
     vendorCode?: boolean
+    fabricRate?: boolean
     approvalStatus?: boolean
     approvedAt?: boolean
     approvedBy?: boolean
@@ -55317,6 +55329,7 @@ export namespace Prisma {
     majorCategory?: boolean
     vendorName?: boolean
     vendorCode?: boolean
+    fabricRate?: boolean
     approvalStatus?: boolean
     approvedAt?: boolean
     approvedBy?: boolean
@@ -55350,6 +55363,7 @@ export namespace Prisma {
     majorCategory?: boolean
     vendorName?: boolean
     vendorCode?: boolean
+    fabricRate?: boolean
     approvalStatus?: boolean
     approvedAt?: boolean
     approvedBy?: boolean
@@ -55383,6 +55397,7 @@ export namespace Prisma {
     majorCategory?: boolean
     vendorName?: boolean
     vendorCode?: boolean
+    fabricRate?: boolean
     approvalStatus?: boolean
     approvedAt?: boolean
     approvedBy?: boolean
@@ -55393,7 +55408,7 @@ export namespace Prisma {
     updatedAt?: boolean
   }
 
-  export type FabricArticleDataOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<"id" | "mFabDiv" | "mYarn" | "mFabMainMvgr1" | "mFabMainMvgr2" | "mConstruction" | "mOunz" | "mWidth" | "mWeave02" | "mCount" | "mWeave01" | "mComposition" | "mFinish" | "mGsm" | "mLycra" | "fabricArticleNumber" | "fabricArticleDescription" | "division" | "subDivision" | "majorCategory" | "vendorName" | "vendorCode" | "approvalStatus" | "approvedAt" | "approvedBy" | "sapSyncStatus" | "sapSyncMessage" | "userName" | "createdAt" | "updatedAt", ExtArgs["result"]["fabricArticleData"]>
+  export type FabricArticleDataOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<"id" | "mFabDiv" | "mYarn" | "mFabMainMvgr1" | "mFabMainMvgr2" | "mConstruction" | "mOunz" | "mWidth" | "mWeave02" | "mCount" | "mWeave01" | "mComposition" | "mFinish" | "mGsm" | "mLycra" | "fabricArticleNumber" | "fabricArticleDescription" | "division" | "subDivision" | "majorCategory" | "vendorName" | "vendorCode" | "fabricRate" | "approvalStatus" | "approvedAt" | "approvedBy" | "sapSyncStatus" | "sapSyncMessage" | "userName" | "createdAt" | "updatedAt", ExtArgs["result"]["fabricArticleData"]>
 
   export type $FabricArticleDataPayload<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
     name: "FabricArticleData"
@@ -55421,6 +55436,7 @@ export namespace Prisma {
       majorCategory: string | null
       vendorName: string | null
       vendorCode: string | null
+      fabricRate: Prisma.Decimal | null
       approvalStatus: string
       approvedAt: Date | null
       approvedBy: number | null
@@ -55874,6 +55890,7 @@ export namespace Prisma {
     readonly majorCategory: FieldRef<"FabricArticleData", 'String'>
     readonly vendorName: FieldRef<"FabricArticleData", 'String'>
     readonly vendorCode: FieldRef<"FabricArticleData", 'String'>
+    readonly fabricRate: FieldRef<"FabricArticleData", 'Decimal'>
     readonly approvalStatus: FieldRef<"FabricArticleData", 'String'>
     readonly approvedAt: FieldRef<"FabricArticleData", 'DateTime'>
     readonly approvedBy: FieldRef<"FabricArticleData", 'Int'>
@@ -64617,6 +64634,7 @@ export namespace Prisma {
     majorCategory: 'majorCategory',
     vendorName: 'vendorName',
     vendorCode: 'vendorCode',
+    fabricRate: 'fabricRate',
     approvalStatus: 'approvalStatus',
     approvedAt: 'approvedAt',
     approvedBy: 'approvedBy',
@@ -70835,6 +70853,7 @@ export namespace Prisma {
     majorCategory?: StringNullableFilter<"FabricArticleData"> | string | null
     vendorName?: StringNullableFilter<"FabricArticleData"> | string | null
     vendorCode?: StringNullableFilter<"FabricArticleData"> | string | null
+    fabricRate?: DecimalNullableFilter<"FabricArticleData"> | Decimal | DecimalJsLike | number | string | null
     approvalStatus?: StringFilter<"FabricArticleData"> | string
     approvedAt?: DateTimeNullableFilter<"FabricArticleData"> | Date | string | null
     approvedBy?: IntNullableFilter<"FabricArticleData"> | number | null
@@ -70868,6 +70887,7 @@ export namespace Prisma {
     majorCategory?: SortOrderInput | SortOrder
     vendorName?: SortOrderInput | SortOrder
     vendorCode?: SortOrderInput | SortOrder
+    fabricRate?: SortOrderInput | SortOrder
     approvalStatus?: SortOrder
     approvedAt?: SortOrderInput | SortOrder
     approvedBy?: SortOrderInput | SortOrder
@@ -70905,6 +70925,7 @@ export namespace Prisma {
     majorCategory?: StringNullableFilter<"FabricArticleData"> | string | null
     vendorName?: StringNullableFilter<"FabricArticleData"> | string | null
     vendorCode?: StringNullableFilter<"FabricArticleData"> | string | null
+    fabricRate?: DecimalNullableFilter<"FabricArticleData"> | Decimal | DecimalJsLike | number | string | null
     approvalStatus?: StringFilter<"FabricArticleData"> | string
     approvedAt?: DateTimeNullableFilter<"FabricArticleData"> | Date | string | null
     approvedBy?: IntNullableFilter<"FabricArticleData"> | number | null
@@ -70938,6 +70959,7 @@ export namespace Prisma {
     majorCategory?: SortOrderInput | SortOrder
     vendorName?: SortOrderInput | SortOrder
     vendorCode?: SortOrderInput | SortOrder
+    fabricRate?: SortOrderInput | SortOrder
     approvalStatus?: SortOrder
     approvedAt?: SortOrderInput | SortOrder
     approvedBy?: SortOrderInput | SortOrder
@@ -70979,6 +71001,7 @@ export namespace Prisma {
     majorCategory?: StringNullableWithAggregatesFilter<"FabricArticleData"> | string | null
     vendorName?: StringNullableWithAggregatesFilter<"FabricArticleData"> | string | null
     vendorCode?: StringNullableWithAggregatesFilter<"FabricArticleData"> | string | null
+    fabricRate?: DecimalNullableWithAggregatesFilter<"FabricArticleData"> | Decimal | DecimalJsLike | number | string | null
     approvalStatus?: StringWithAggregatesFilter<"FabricArticleData"> | string
     approvedAt?: DateTimeNullableWithAggregatesFilter<"FabricArticleData"> | Date | string | null
     approvedBy?: IntNullableWithAggregatesFilter<"FabricArticleData"> | number | null
@@ -77582,6 +77605,7 @@ export namespace Prisma {
     majorCategory?: string | null
     vendorName?: string | null
     vendorCode?: string | null
+    fabricRate?: Decimal | DecimalJsLike | number | string | null
     approvalStatus?: string
     approvedAt?: Date | string | null
     approvedBy?: number | null
@@ -77615,6 +77639,7 @@ export namespace Prisma {
     majorCategory?: string | null
     vendorName?: string | null
     vendorCode?: string | null
+    fabricRate?: Decimal | DecimalJsLike | number | string | null
     approvalStatus?: string
     approvedAt?: Date | string | null
     approvedBy?: number | null
@@ -77648,6 +77673,7 @@ export namespace Prisma {
     majorCategory?: NullableStringFieldUpdateOperationsInput | string | null
     vendorName?: NullableStringFieldUpdateOperationsInput | string | null
     vendorCode?: NullableStringFieldUpdateOperationsInput | string | null
+    fabricRate?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
     approvalStatus?: StringFieldUpdateOperationsInput | string
     approvedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     approvedBy?: NullableIntFieldUpdateOperationsInput | number | null
@@ -77681,6 +77707,7 @@ export namespace Prisma {
     majorCategory?: NullableStringFieldUpdateOperationsInput | string | null
     vendorName?: NullableStringFieldUpdateOperationsInput | string | null
     vendorCode?: NullableStringFieldUpdateOperationsInput | string | null
+    fabricRate?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
     approvalStatus?: StringFieldUpdateOperationsInput | string
     approvedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     approvedBy?: NullableIntFieldUpdateOperationsInput | number | null
@@ -77714,6 +77741,7 @@ export namespace Prisma {
     majorCategory?: string | null
     vendorName?: string | null
     vendorCode?: string | null
+    fabricRate?: Decimal | DecimalJsLike | number | string | null
     approvalStatus?: string
     approvedAt?: Date | string | null
     approvedBy?: number | null
@@ -77747,6 +77775,7 @@ export namespace Prisma {
     majorCategory?: NullableStringFieldUpdateOperationsInput | string | null
     vendorName?: NullableStringFieldUpdateOperationsInput | string | null
     vendorCode?: NullableStringFieldUpdateOperationsInput | string | null
+    fabricRate?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
     approvalStatus?: StringFieldUpdateOperationsInput | string
     approvedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     approvedBy?: NullableIntFieldUpdateOperationsInput | number | null
@@ -77780,6 +77809,7 @@ export namespace Prisma {
     majorCategory?: NullableStringFieldUpdateOperationsInput | string | null
     vendorName?: NullableStringFieldUpdateOperationsInput | string | null
     vendorCode?: NullableStringFieldUpdateOperationsInput | string | null
+    fabricRate?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
     approvalStatus?: StringFieldUpdateOperationsInput | string
     approvedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     approvedBy?: NullableIntFieldUpdateOperationsInput | number | null
@@ -82739,6 +82769,7 @@ export namespace Prisma {
     majorCategory?: SortOrder
     vendorName?: SortOrder
     vendorCode?: SortOrder
+    fabricRate?: SortOrder
     approvalStatus?: SortOrder
     approvedAt?: SortOrder
     approvedBy?: SortOrder
@@ -82750,6 +82781,7 @@ export namespace Prisma {
   }
 
   export type FabricArticleDataAvgOrderByAggregateInput = {
+    fabricRate?: SortOrder
     approvedBy?: SortOrder
   }
 
@@ -82776,6 +82808,7 @@ export namespace Prisma {
     majorCategory?: SortOrder
     vendorName?: SortOrder
     vendorCode?: SortOrder
+    fabricRate?: SortOrder
     approvalStatus?: SortOrder
     approvedAt?: SortOrder
     approvedBy?: SortOrder
@@ -82809,6 +82842,7 @@ export namespace Prisma {
     majorCategory?: SortOrder
     vendorName?: SortOrder
     vendorCode?: SortOrder
+    fabricRate?: SortOrder
     approvalStatus?: SortOrder
     approvedAt?: SortOrder
     approvedBy?: SortOrder
@@ -82820,6 +82854,7 @@ export namespace Prisma {
   }
 
   export type FabricArticleDataSumOrderByAggregateInput = {
+    fabricRate?: SortOrder
     approvedBy?: SortOrder
   }
 

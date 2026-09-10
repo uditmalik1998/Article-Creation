@@ -149,6 +149,7 @@ export const EXPENSE_TABLE_CONFIGS: Record<string, ExpenseTableConfig> = {
       { dataIndex: 'majorCategory', title: 'Major Category' },
       { dataIndex: 'vendorName', title: 'Vendor Name' },
       { dataIndex: 'vendorCode', title: 'Vendor Code' },
+      { dataIndex: 'fabricRate', title: 'Fabric Rate' },
       { dataIndex: 'mFabDiv', title: 'Fab Div' },
       { dataIndex: 'mYarn', title: 'Yarn' },
       { dataIndex: 'mFabMainMvgr1', title: 'Fab Main MVGR 1' },

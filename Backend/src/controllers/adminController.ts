@@ -4609,7 +4609,7 @@ export const downloadFabricArticleDataTemplate = async (_req: Request, res: Resp
     const wb = new ExcelJS.Workbook();
     const ws = wb.addWorksheet('FABRIC ARTICLE DATA');
 
-    ws.mergeCells('A1:X1');
+    ws.mergeCells('A1:Y1');
     const titleCell = ws.getCell('A1');
     titleCell.value = 'FABRIC ARTICLE DATA UPLOAD';
     titleCell.font = { bold: true, size: 13 };
@@ -4620,7 +4620,7 @@ export const downloadFabricArticleDataTemplate = async (_req: Request, res: Resp
 
     const headers = [
       'FABRIC_ARTICLE_NUMBER', 'FABRIC_ARTICLE_DESC',
-      'DIVISION', 'SUB_DIVISION', 'MAJOR_CATEGORY', 'VENDOR_NAME', 'VENDOR_CODE',
+      'DIVISION', 'SUB_DIVISION', 'MAJOR_CATEGORY', 'VENDOR_NAME', 'VENDOR_CODE', 'FABRIC_RATE',
       'M_FAB_DIV', 'M_YARN', 'M_FAB_MAIN_MVGR_1', 'M_FAB_MAIN_MVGR_2',
       'M_CONSTRUCTION', 'M_OUNZ', 'M_WIDTH', 'M_WEAVE_01', 'M_WEAVE_02',
       'M_COUNT', 'M_GSM', 'M_COMPOSITION', 'M_FINISH', 'M_LYCRA',
@@ -4638,7 +4638,7 @@ export const downloadFabricArticleDataTemplate = async (_req: Request, res: Resp
     // Sample row
     ws.addRow([
       'FAB-001', 'KNIT FABRIC SLD',
-      'K', 'K_PC', 'K_PC_FLC', 'Sample Vendor', 'V001',
+      'K', 'K_PC', 'K_PC_FLC', 'Sample Vendor', 'V001', '250.50',
       'KNT', 'CTO', 'FAB01', '', 'PLAIN', '180', '', 'P/W', '',
       '30S', '180', '100% COTTON', 'NONE', 'N',
       'PENDING', 'NOT_SYNCED', 'admin',
@@ -4650,7 +4650,7 @@ export const downloadFabricArticleDataTemplate = async (_req: Request, res: Resp
     const noteRow = ws.addRow([
       '⚠ NOTE: Headers in Row 3, data from Row 5. APPROVAL_STATUS: PENDING/APPROVED/REJECTED. SAP_SYNC_STATUS: NOT_SYNCED/SYNCED/FAILED. Each row is inserted as a new record.',
     ]);
-    ws.mergeCells(`A${noteRow.number}:X${noteRow.number}`);
+    ws.mergeCells(`A${noteRow.number}:Y${noteRow.number}`);
     noteRow.getCell(1).font = { italic: true, size: 10 };
     noteRow.getCell(1).fill = { type: 'pattern', pattern: 'solid', fgColor: { argb: 'FFFFF3CD' } };
 
@@ -4696,17 +4696,17 @@ export const uploadFabricArticleData = async (req: Request, res: Response): Prom
     // Column index map (1-based, matching template headers)
     const C = {
       fabNo: 1, fabDesc: 2,
-      div: 3, subDiv: 4, majCat: 5, vendorName: 6, vendorCode: 7,
-      fabDiv: 8, yarn: 9, mvgr1: 10, mvgr2: 11,
-      construction: 12, ounz: 13, width: 14, weave01: 15, weave02: 16,
-      count: 17, gsm: 18, composition: 19, finish: 20, lycra: 21,
-      approvalStatus: 22, sapSyncStatus: 23, userName: 24,
+      div: 3, subDiv: 4, majCat: 5, vendorName: 6, vendorCode: 7, fabricRate: 8,
+      fabDiv: 9, yarn: 10, mvgr1: 11, mvgr2: 12,
+      construction: 13, ounz: 14, width: 15, weave01: 16, weave02: 17,
+      count: 18, gsm: 19, composition: 20, finish: 21, lycra: 22,
+      approvalStatus: 23, sapSyncStatus: 24, userName: 25,
     };
 
     type DataRow = {
       fabric_article_number: string | null; fabric_article_description: string | null;
       division: string | null; sub_division: string | null; major_category: string | null;
-      vendor_name: string | null; vendor_code: string | null;
+      vendor_name: string | null; vendor_code: string | null; fabric_rate: number | null;
       m_fab_div: string | null; m_yarn: string | null;
       m_fab_main_mvgr_1: string | null; m_fab_main_mvgr_2: string | null;
       m_construction: string | null; m_ounz: string | null; m_width: string | null;
@@ -4731,6 +4731,8 @@ export const uploadFabricArticleData = async (req: Request, res: Response): Prom
 
       const approvalStatus = cell(row, C.approvalStatus).toUpperCase() || 'PENDING';
       const sapSyncStatus  = cell(row, C.sapSyncStatus).toUpperCase()  || 'NOT_SYNCED';
+      const fabricRateRaw  = cell(row, C.fabricRate);
+      const fabricRate     = fabricRateRaw ? Number(fabricRateRaw) : NaN;
 
       rows.push({
         fabric_article_number:      fabNo      || null,
@@ -4740,6 +4742,7 @@ export const uploadFabricArticleData = async (req: Request, res: Response): Prom
         major_category:             majCat     || null,
         vendor_name:                cell(row, C.vendorName)  || null,
         vendor_code:                cell(row, C.vendorCode)  || null,
+        fabric_rate:                Number.isFinite(fabricRate) ? fabricRate : null,
         m_fab_div:                  cell(row, C.fabDiv)      || null,
         m_yarn:                     cell(row, C.yarn)        || null,
         m_fab_main_mvgr_1:          cell(row, C.mvgr1)       || null,
@@ -4770,7 +4773,7 @@ export const uploadFabricArticleData = async (req: Request, res: Response): Prom
         await tx.$executeRaw`
           INSERT INTO fabric_article_data (
             id, fabric_article_number, fabric_article_description,
-            division, sub_division, major_category, vendor_name, vendor_code,
+            division, sub_division, major_category, vendor_name, vendor_code, fabric_rate,
             m_fab_div, m_yarn, m_fab_main_mvgr_1, m_fab_main_mvgr_2,
             m_construction, m_ounz, m_width, m_weave_01, m_weave_02,
             m_count, m_gsm, m_composition, m_finish, m_lycra,
@@ -4779,7 +4782,7 @@ export const uploadFabricArticleData = async (req: Request, res: Response): Prom
           )
           SELECT
             gen_random_uuid(), v.fabric_article_number, v.fabric_article_description,
-            v.division, v.sub_division, v.major_category, v.vendor_name, v.vendor_code,
+            v.division, v.sub_division, v.major_category, v.vendor_name, v.vendor_code, v.fabric_rate,
             v.m_fab_div, v.m_yarn, v.m_fab_main_mvgr_1, v.m_fab_main_mvgr_2,
             v.m_construction, v.m_ounz, v.m_width, v.m_weave_01, v.m_weave_02,
             v.m_count, v.m_gsm, v.m_composition, v.m_finish, v.m_lycra,
@@ -4787,7 +4790,7 @@ export const uploadFabricArticleData = async (req: Request, res: Response): Prom
             NOW(), NOW()
           FROM jsonb_to_recordset(${JSON.stringify(batch)}::jsonb) AS v(
             fabric_article_number text, fabric_article_description text,
-            division text, sub_division text, major_category text, vendor_name text, vendor_code text,
+            division text, sub_division text, major_category text, vendor_name text, vendor_code text, fabric_rate numeric,
             m_fab_div text, m_yarn text, m_fab_main_mvgr_1 text, m_fab_main_mvgr_2 text,
             m_construction text, m_ounz text, m_width text, m_weave_01 text, m_weave_02 text,
             m_count text, m_gsm text, m_composition text, m_finish text, m_lycra text,
@@ -4806,6 +4809,65 @@ export const uploadFabricArticleData = async (req: Request, res: Response): Prom
     });
   } catch (error: any) {
     console.error('[FabricArticleData] Upload error:', error);
+    res.status(500).json({ success: false, error: error.message });
+  }
+};
+
+/**
+ * GET /api/admin/fabric-article-data/export
+ * Admin-only (this whole router is mounted behind `requireAdmin`). Dumps
+ * every column and every row of fabric_article_data as-is — a raw `SELECT *`
+ * so the export can never silently drop a column the Prisma model hasn't
+ * caught up with yet.
+ */
+export const downloadFabricArticleDataMaster = async (_req: Request, res: Response): Promise<void> => {
+  try {
+    const rows: Record<string, any>[] = await prisma.$queryRaw`
+      SELECT * FROM fabric_article_data ORDER BY created_at ASC, id ASC
+    `;
+
+    const ExcelJS = require('exceljs');
+    const wb = new ExcelJS.Workbook();
+    const ws = wb.addWorksheet('FABRIC ARTICLE DATA');
+
+    const headers = rows.length > 0
+      ? Object.keys(rows[0])
+      : [
+          'id', 'fabric_article_number', 'fabric_article_description',
+          'division', 'sub_division', 'major_category', 'vendor_name', 'vendor_code', 'fabric_rate',
+          'm_fab_div', 'm_yarn', 'm_fab_main_mvgr_1', 'm_fab_main_mvgr_2',
+          'm_construction', 'm_ounz', 'm_width', 'm_weave_01', 'm_weave_02',
+          'm_count', 'm_gsm', 'm_composition', 'm_finish', 'm_lycra',
+          'approval_status', 'approved_at', 'approved_by', 'sap_sync_status', 'sap_sync_message',
+          'user_name', 'created_at', 'updated_at',
+        ];
+
+    const headerRow = ws.addRow(headers.map((h) => h.toUpperCase()));
+    headerRow.eachCell((cell: any) => {
+      cell.font = { bold: true, color: { argb: 'FFFFFFFF' } };
+      cell.fill = { type: 'pattern', pattern: 'solid', fgColor: { argb: 'FF1565C0' } };
+      cell.alignment = { horizontal: 'center' };
+    });
+    ws.views = [{ state: 'frozen', ySplit: 1 }];
+
+    for (const row of rows) {
+      ws.addRow(headers.map((h) => {
+        const v = row[h];
+        if (v == null) return '';
+        if (v instanceof Date) return v.toISOString();
+        return typeof v === 'object' ? String(v) : v;
+      }));
+    }
+
+    ws.columns = headers.map(() => ({ width: 20 }));
+
+    const filename = `FABRIC_ARTICLE_DATA_MASTER_${new Date().toISOString().slice(0, 10)}.xlsx`;
+    res.setHeader('Content-Type', 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');
+    res.setHeader('Content-Disposition', `attachment; filename="${filename}"`);
+    await wb.xlsx.write(res);
+    res.end();
+  } catch (error: any) {
+    console.error('[FabricArticleData] Master export error:', error);
     res.status(500).json({ success: false, error: error.message });
   }
 };
@@ -5901,6 +5963,7 @@ export const EXPENSE_TABLE_REGISTRY: Record<string, ExpenseTableConfig> = {
       { key: 'majorCategory', label: 'Major Category' },
       { key: 'vendorName', label: 'Vendor Name' },
       { key: 'vendorCode', label: 'Vendor Code' },
+      { key: 'fabricRate', label: 'Fabric Rate' },
       { key: 'mFabDiv', label: 'Fab Div' },
       { key: 'mYarn', label: 'Yarn' },
       { key: 'mFabMainMvgr1', label: 'Fab Main MVGR 1' },
