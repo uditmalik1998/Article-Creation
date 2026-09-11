@@ -188,6 +188,7 @@ export const AppSidebar: React.FC<AppSidebarProps> = ({ collapsed, onCollapsedCh
     (role === 'APPROVER' ||
       role === 'CATEGORY_HEAD' ||
       role === 'SUB_DIVISION_HEAD' ||
+      role === 'FABRIC_APPROVER' ||
       isAdmin ||
       role === 'CREATOR' ||
       role === 'PO_COMMITTEE' ||
@@ -199,10 +200,11 @@ export const AppSidebar: React.FC<AppSidebarProps> = ({ collapsed, onCollapsedCh
       label: 'Fabric Article',
       children: [
         { key: '/fabric-article', Icon: FileText, label: 'New articles' },
-        { key: '/fabric-article/old-articles', Icon: History, label: 'Old articles' },
         { key: '/fabric-article/rejected', Icon: XCircle, label: 'Rejected' },
         { key: '/fabric-article/created', Icon: CheckCircle2, label: 'Created' },
         { key: '/fabric-article/failed', Icon: AlertTriangle, label: 'Failed Creations' },
+        { key: '/fabric-article/fg-new', Icon: FileText, label: 'FG New Articles' },
+        { key: '/fabric-article/fg-created', Icon: CheckCircle2, label: 'FG Created' },
       ],
     });
   }

@@ -28,6 +28,8 @@ import ApproverDashboard from './features/approver/pages/ApproverDashboard'; // 
 import ArticleDetailPage from './features/approver/pages/ArticleDetailPage'; // Article detail view
 import FabricArticleDashboard from './features/fabric-article/pages/FabricArticleDashboard'; // Fabric Article Dashboard
 import FabricArticleDetailPage from './features/fabric-article/pages/FabricArticleDetailPage'; // Fabric Article detail view
+import FGNewArticleDashboard from './features/fabric-article/pages/FGNewArticleDashboard'; // FG New Article Dashboard
+import FGNewArticleDetailPage from './features/fabric-article/pages/FGNewArticleDetailPage'; // FG New Article detail view
 import BodyArticleDashboard from './features/body-article/pages/BodyArticleDashboard'; // Body Article Dashboard
 import BodyArticleDetailPage from './features/body-article/pages/BodyArticleDetailPage'; // Body Article detail view
 import POPresentationPage from './features/po-presentation/pages/POPresentationPage'; // PO Presentation
@@ -53,6 +55,7 @@ const ProtectedRoute: React.FC<{ children: React.ReactNode }> = ({ children }) =
 
   // PD_DESIGNER only has access to model-generation
   // BODY_APPROVER only has access to body-article
+  // FABRIC_APPROVER only has access to fabric-article FG new articles
   if (user) {
     const userData = JSON.parse(user);
     if (userData.role === 'PD_DESIGNER') {
@@ -60,6 +63,9 @@ const ProtectedRoute: React.FC<{ children: React.ReactNode }> = ({ children }) =
     }
     if (userData.role === 'BODY_APPROVER') {
       return <Navigate to="/body-article" replace />;
+    }
+    if (userData.role === 'FABRIC_APPROVER') {
+      return <Navigate to="/fabric-article/fg-new" replace />;
     }
   }
 
@@ -118,8 +124,8 @@ const ApproverRoute: React.FC<{ children: React.ReactNode }> = ({ children }) =>
 
   if (user) {
     const userData = JSON.parse(user);
-    // Allow ADMIN, APPROVER, CATEGORY_HEAD, SUB_DIVISION_HEAD, CREATOR, PO_COMMITTEE, PD, BODY_APPROVER
-    if (userData.role !== 'APPROVER' && userData.role !== 'CATEGORY_HEAD' && userData.role !== 'SUB_DIVISION_HEAD' && userData.role !== 'ADMIN' && userData.role !== 'CREATOR' && userData.role !== 'PO_COMMITTEE' && userData.role !== 'PD' && userData.role !== 'BODY_APPROVER') {
+    // Allow ADMIN, APPROVER, CATEGORY_HEAD, SUB_DIVISION_HEAD, CREATOR, PO_COMMITTEE, PD, BODY_APPROVER, FABRIC_APPROVER
+    if (userData.role !== 'APPROVER' && userData.role !== 'CATEGORY_HEAD' && userData.role !== 'SUB_DIVISION_HEAD' && userData.role !== 'ADMIN' && userData.role !== 'CREATOR' && userData.role !== 'PO_COMMITTEE' && userData.role !== 'PD' && userData.role !== 'BODY_APPROVER' && userData.role !== 'FABRIC_APPROVER') {
       return <Navigate to="/dashboard" replace />;
     }
   }
@@ -549,26 +555,6 @@ const App: React.FC = () => {
                 }
               />
               <Route
-                path="/fabric-article/old-articles"
-                element={
-                  <ApproverRoute>
-                    <MainLayout>
-                      <FabricArticleDashboard key="fabric-old-articles" pathType="old" />
-                    </MainLayout>
-                  </ApproverRoute>
-                }
-              />
-              <Route
-                path="/fabric-article/old-articles/:id"
-                element={
-                  <ApproverRoute>
-                    <MainLayout>
-                      <FabricArticleDetailPage />
-                    </MainLayout>
-                  </ApproverRoute>
-                }
-              />
-              <Route
                 path="/fabric-article/rejected"
                 element={
                   <ApproverRoute>
@@ -614,6 +600,48 @@ const App: React.FC = () => {
                   <ApproverRoute>
                     <MainLayout>
                       <FabricArticleDashboard key="fabric-failed-articles" pathType="failed" />
+                    </MainLayout>
+                  </ApproverRoute>
+                }
+              />
+
+              {/* FG Article routes inside Fabric Article tab */}
+              <Route
+                path="/fabric-article/fg-new"
+                element={
+                  <ApproverRoute>
+                    <MainLayout>
+                      <FGNewArticleDashboard key="fg-new-articles" pathType="new" />
+                    </MainLayout>
+                  </ApproverRoute>
+                }
+              />
+              <Route
+                path="/fabric-article/fg-new/:id"
+                element={
+                  <ApproverRoute>
+                    <MainLayout>
+                      <FGNewArticleDetailPage />
+                    </MainLayout>
+                  </ApproverRoute>
+                }
+              />
+              <Route
+                path="/fabric-article/fg-created"
+                element={
+                  <ApproverRoute>
+                    <MainLayout>
+                      <FGNewArticleDashboard key="fg-created-articles" pathType="created" />
+                    </MainLayout>
+                  </ApproverRoute>
+                }
+              />
+              <Route
+                path="/fabric-article/fg-created/:id"
+                element={
+                  <ApproverRoute>
+                    <MainLayout>
+                      <FGNewArticleDetailPage />
                     </MainLayout>
                   </ApproverRoute>
                 }

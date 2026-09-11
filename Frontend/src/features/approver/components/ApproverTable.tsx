@@ -140,6 +140,9 @@ export interface ApproverItem {
   articleFashionType: string | null;
   mvgrBrandVendor: string | null;
   impAtrbt2: string | null;
+  vendorFabricRate: number | string | null;
+  valueAddCost: number | string | null;
+  basicTrimCost: number | string | null;
   isGeneric: boolean;
   genericArticleId: string | null;
   variantSize: string | null;

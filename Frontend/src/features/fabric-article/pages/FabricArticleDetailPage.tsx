@@ -82,10 +82,11 @@ const SCHEMA_KEY_TO_ALL_SAP_KEYS: Record<string, string[]> = Object.entries(SAP_
   {} as Record<string, string[]>,
 );
 
-function getMissingMandatoryFields(item: any): string[] {
+function getMissingMandatoryFields(item: any, isFGMode = false): string[] {
   const missing: string[] = [];
   if (!item.vendorName) missing.push('VENDOR NAME');
-  if (!item.mrp) missing.push('MRP');
+  if (!isFGMode && !item.mrp) missing.push('MRP');
+  if (isFGMode && !item.articleFashionType) missing.push('ARTICLE FASHION TYPE');
   const majorCat = item.majorCategory || '';
   if (!majorCat) return missing;
   for (const [schemaKey, dbField] of Object.entries(SCHEMA_KEY_TO_DB_FIELD)) {
@@ -253,6 +254,7 @@ export default function ArticleDetailPage({
   approveEndpoint = '/fabric-article/approve',
   itemsBaseEndpoint = '/approver/items',
   approveRoles = DEFAULT_APPROVE_ROLES,
+  isFGMode = false,
 }: {
   ListComponent?: React.ComponentType<ApproverArticleListProps>;
   skipMandatoryFieldsCheck?: boolean;
@@ -262,6 +264,8 @@ export default function ArticleDetailPage({
   itemsBaseEndpoint?: string;
   /** Roles that can use the Save & Submit (approve) button. Defaults to standard approver roles. */
   approveRoles?: string[];
+  /** When true, hides reference/article-desc fields and renames Article Number to Fabric Article Number. */
+  isFGMode?: boolean;
 } = {}) {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
@@ -320,6 +324,8 @@ export default function ArticleDetailPage({
   const canCreatorConfirm = isBodyArticlePage && user?.role !== 'BODY_APPROVER';
   // Save & Submit on body article page: only BODY_APPROVER and ADMIN can submit to SAP
   const canSubmitBodyArticle = !isBodyArticlePage || user?.role === 'BODY_APPROVER' || user?.role === 'ADMIN';
+  // Save & Submit on FG New Articles page: only FABRIC_APPROVER and ADMIN can submit fabric articles to SAP
+  const canSubmitFabricArticle = !isFGMode || user?.role === 'FABRIC_APPROVER' || user?.role === 'ADMIN';
 
   // ─── Init ───────────────────────────────────────────────────────────────────
 
@@ -521,15 +527,19 @@ export default function ArticleDetailPage({
     return pendingItems.reduce<{ articleId: string; missing: string[] }[]>((acc, item) => {
       const missing: string[] = [];
       if (!item.vendorCode) missing.push('VENDOR CODE');
-      // Color is mandatory on New Articles — on Save & Submit the approver's
-      // direct approval auto-generates variants from this BOM color.
-      if (pathType === 'new' && !item.colour) missing.push('COLOUR');
-      missing.push(...getMissingMandatoryFields(item));
+      // Color is mandatory on New Articles — skipped in FG mode (no colour field).
+      if (pathType === 'new' && !isFGMode && !item.colour) missing.push('COLOUR');
+      // Fabric Article Desc and MC Description are mandatory in FG mode.
+      if (isFGMode) {
+        if (!(item.fabricArticleDescription || '').trim()) missing.push('FABRIC ARTICLE DESC.');
+        if (!(item.mcDescription || '').trim()) missing.push('MC DESCRIPTION');
+      }
+      missing.push(...getMissingMandatoryFields(item, isFGMode));
       if (missing.length > 0) acc.push({ articleId: item.sapArticleId || item.articleNumber || item.imageName || item.id, missing });
       return acc;
     }, []);
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [pendingSelectedKeys, items, gridVersion, pathType, skipMandatoryFieldsCheck]);
+  }, [pendingSelectedKeys, items, gridVersion, pathType, skipMandatoryFieldsCheck, isFGMode]);
 
   const handleApproveClick = () => {
     if (pendingSelectedKeys.length === 0) return;
@@ -646,7 +656,11 @@ export default function ArticleDetailPage({
         method: 'POST', headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` },
         body: JSON.stringify({ ids: [item.id] }),
       });
-      if (!r.ok) throw new Error('Request failed');
+      const data = await r.json();
+      if (!r.ok) {
+        message.error(data.error || 'Failed to create fabric article');
+        return;
+      }
       message.success('Fabric article creation initiated');
       await refetchCurrentItem();
     } catch { message.error('Failed to create fabric article'); }
@@ -1058,7 +1072,7 @@ export default function ArticleDetailPage({
                 {/* span wrapper: disabled <button> swallows pointer events; span keeps hover alive */}
                 <span className="inline-block">
                   <Button size="sm" onClick={handleApproveClick}
-                    disabled={!canApprove || !canSubmitBodyArticle || pendingSelectedKeys.length === 0 || approveBlockedReasons.length > 0}
+                    disabled={!canApprove || !canSubmitBodyArticle || !canSubmitFabricArticle || pendingSelectedKeys.length === 0 || approveBlockedReasons.length > 0}
                     className="h-7 border-none bg-[#FF6F61] px-3 text-[12px] font-semibold text-white shadow-sm hover:bg-[#ff5b4d] disabled:bg-white/20 disabled:text-white/50">
                     <CheckCircle2 /> Save &amp; Submit
                     {approveBlockedReasons.length > 0 && <span className="ml-1 text-[10px] text-amber-200">⚠ {approveBlockedReasons.length}</span>}
@@ -1092,7 +1106,7 @@ export default function ArticleDetailPage({
 
             // Run the same mandatory-field validation as Save & Submit.
             const mergedItem = { ...row, ...(changes as any) };
-            const missing = getMissingMandatoryFields(mergedItem);
+            const missing = getMissingMandatoryFields(mergedItem, isFGMode);
             if (!mergedItem.vendorCode) missing.unshift('VENDOR CODE');
             if (missing.length > 0) {
               const articleId = mergedItem.sapArticleId || mergedItem.articleNumber || mergedItem.id;
@@ -1187,6 +1201,7 @@ export default function ArticleDetailPage({
           onRefresh={refetchCurrentItem}
           pathType={pathType}
           fabHierarchy={fabHierarchy}
+          isFGMode={isFGMode}
           serverPagination={{ total: totalCount, current: currentPage, pageSize: PAGE_SIZE, onChange: () => {} }}
           onSave={async (row, directUpdates, options) => {
             const prevItems = [...items];
