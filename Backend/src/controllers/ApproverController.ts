@@ -3503,9 +3503,13 @@ export class ApproverController {
         }
         if (search) {
             where.OR = [
-                { articleNumber: { contains: search, mode: 'insensitive' } },
-                { vendorName:    { contains: search, mode: 'insensitive' } },
-                { vendorCode:    { contains: search, mode: 'insensitive' } },
+                { articleNumber:          { contains: search, mode: 'insensitive' } },
+                { designNumber:           { contains: search, mode: 'insensitive' } },
+                { bodyArticleNumber:      { contains: search, mode: 'insensitive' } },
+                { bodyArticleDescription: { contains: search, mode: 'insensitive' } },
+                { vendorName:             { contains: search, mode: 'insensitive' } },
+                { vendorCode:             { contains: search, mode: 'insensitive' } },
+                { majorCategory:          { contains: search, mode: 'insensitive' } },
             ];
         }
 
@@ -3712,8 +3716,31 @@ export class ApproverController {
             if (!row) return res.status(404).json({ error: 'Item not found' });
             return res.json(ApproverController.bodyRowToApproverItem(row));
         }
-        const row = await prisma.bodyArticleData.update({ where: { id }, data });
-        return res.json(ApproverController.bodyRowToApproverItem(row));
+
+        // If bodyArticleNumber is being set, check it isn't already owned by a different row
+        if (data.bodyArticleNumber) {
+            const conflict = await prisma.bodyArticleData.findFirst({
+                where: { bodyArticleNumber: data.bodyArticleNumber as string, NOT: { id } },
+                select: { id: true, bodyArticleDescription: true },
+            });
+            if (conflict) {
+                return res.status(409).json({
+                    error: `Body Article Number ${data.bodyArticleNumber} is already assigned to another record.`,
+                });
+            }
+        }
+
+        try {
+            const row = await prisma.bodyArticleData.update({ where: { id }, data });
+            return res.json(ApproverController.bodyRowToApproverItem(row));
+        } catch (err: any) {
+            if (err?.code === 'P2002' && err?.meta?.target?.includes('body_article_number')) {
+                return res.status(409).json({
+                    error: `Body Article Number ${data.bodyArticleNumber} is already assigned to another record.`,
+                });
+            }
+            throw err;
+        }
     };
 
     static creatorConfirmBodyArticle = async (req: Request, res: Response) => {
@@ -3728,6 +3755,15 @@ export class ApproverController {
             data: { fgCreatorApproved: 'APPROVED' },
         });
         return res.json(ApproverController.bodyRowToApproverItem(updated));
+    };
+
+    static deleteBodyArticles = async (req: Request, res: Response) => {
+        const { ids } = req.body as { ids?: string[] };
+        if (!Array.isArray(ids) || ids.length === 0) {
+            return res.status(400).json({ error: 'ids array is required' });
+        }
+        const { count } = await prisma.bodyArticleData.deleteMany({ where: { id: { in: ids } } });
+        return res.json({ deleted: count });
     };
 
     static submitBodyArticles = async (req: Request, res: Response) => {
@@ -3990,29 +4026,33 @@ export class ApproverController {
         // Check 2: this flat article has already been sent to Body Article
         const existing = await prisma.bodyArticleData.findMany({
             where: { flatId: { in: ids } },
-            select: { id: true, flatId: true, bodyArticleNumber: true, majorCategory: true, sapSyncStatus: true },
+            select: { id: true, flatId: true, bodyArticleNumber: true, majorCategory: true, sapSyncStatus: true, bodyArticleDescription: true },
         });
         if (existing.length > 0) {
             const itemMap = new Map(items.map((i) => [i.id, i]));
-            const sameCategory: string[] = [];
-            const staleToDelete: string[] = [];
+            const sameExact: string[] = [];  // same category + same description → true duplicate, block
+            const staleToDelete: string[] = []; // safe to replace (NOT_SYNCED, desc or category changed)
 
             for (const ex of existing) {
                 const item = itemMap.get(ex.flatId ?? '');
                 if (!item) continue;
-                if (ex.majorCategory === item.majorCategory) {
-                    sameCategory.push(ex.flatId ?? '');
+                const sameCat  = ex.majorCategory === item.majorCategory;
+                const sameDesc = (ex.bodyArticleDescription ?? '') === (item.bodyArticleDescription ?? '');
+
+                if (sameCat && sameDesc) {
+                    // Exact duplicate — same category + same description, block it
+                    sameExact.push(ex.flatId ?? '');
                 } else if (!ex.bodyArticleNumber && ex.sapSyncStatus === 'NOT_SYNCED') {
-                    // Major category changed, not yet SAP-synced — replace stale record
+                    // Description or category changed and not yet in SAP — safe to replace
                     staleToDelete.push(ex.id);
                 }
-                // Different major category + already in SAP → leave old row, create new PENDING row
+                // Already in SAP but desc/category changed → leave old row, create new PENDING row
             }
 
-            if (sameCategory.length > 0) {
+            if (sameExact.length > 0) {
                 return res.status(409).json({
                     error: `Body Article go for Approval Already. Cannot Create Duplicate.`,
-                    duplicateFlatIds: sameCategory,
+                    duplicateFlatIds: sameExact,
                 });
             }
             if (staleToDelete.length > 0) {

@@ -103,6 +103,9 @@ router.post('/fabric-article-data/submit', requireFabricApprovalRights, h(Approv
 router.get('/fabric-article-data/:id', h(ApproverController.getFabricArticleDataById));
 router.put('/fabric-article-data/:id', h(ApproverController.updateFabricArticleData));
 
+// Delete body articles (used on reject in Body Article New Articles page)
+router.post('/body-articles/bulk-delete', requireBodyApprovalRights, h(ApproverController.deleteBodyArticles));
+
 // Submit body articles to SAP via ZMM_BODY_ART_CRT_V3 — BODY_APPROVER and ADMIN only
 router.post('/body-articles/submit', requireBodyApprovalRights, h(ApproverController.submitBodyArticles));
 

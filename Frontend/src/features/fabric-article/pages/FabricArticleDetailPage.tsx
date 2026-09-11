@@ -253,6 +253,7 @@ export default function ArticleDetailPage({
   skipMandatoryFieldsCheck = false,
   approveEndpoint = '/fabric-article/approve',
   itemsBaseEndpoint = '/approver/items',
+  rejectEndpoint = '/approver/reject',
   approveRoles = DEFAULT_APPROVE_ROLES,
   isFGMode = false,
 }: {
@@ -262,6 +263,8 @@ export default function ArticleDetailPage({
   approveEndpoint?: string;
   /** Override the base path for GET/PUT item calls. Defaults to /approver/items. */
   itemsBaseEndpoint?: string;
+  /** Override the reject POST endpoint. Defaults to /approver/reject. */
+  rejectEndpoint?: string;
   /** Roles that can use the Save & Submit (approve) button. Defaults to standard approver roles. */
   approveRoles?: string[];
   /** When true, hides reference/article-desc fields and renames Article Number to Fabric Article Number. */
@@ -637,7 +640,7 @@ export default function ArticleDetailPage({
   const doReject = async () => {
     try {
       const token = localStorage.getItem('authToken');
-      const r = await fetch(`${APP_CONFIG.api.baseURL}/approver/reject`, {
+      const r = await fetch(`${APP_CONFIG.api.baseURL}${rejectEndpoint}`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` },
         body: JSON.stringify({ ids: pendingSelectedKeys }),

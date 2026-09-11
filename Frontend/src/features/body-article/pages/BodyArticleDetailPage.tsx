@@ -10,6 +10,7 @@ export default function BodyArticleDetailPage() {
       skipMandatoryFieldsCheck
       approveEndpoint="/approver/body-articles/submit"
       itemsBaseEndpoint="/approver/body-articles"
+      rejectEndpoint="/approver/body-articles/bulk-delete"
       approveRoles={['ADMIN', 'BODY_APPROVER']}
     />
   );
