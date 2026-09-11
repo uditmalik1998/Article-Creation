@@ -454,6 +454,24 @@ export default function Admin() {
   };
 
   // ─────────────────────────────── Maj-Cat Grid ───────────────────────────────
+  const downloadMajCatGridData = () => {
+    const token = localStorage.getItem('authToken');
+    const url = `${APP_CONFIG.api.baseURL}/admin/majcat-grid/download`;
+    fetch(url, { headers: token ? { Authorization: `Bearer ${token}` } : {} })
+      .then((r) => {
+        if (!r.ok) throw new Error('Download failed');
+        return r.blob();
+      })
+      .then((blob) => {
+        const today = new Date().toISOString().slice(0, 10);
+        const a = document.createElement('a');
+        a.href = URL.createObjectURL(blob);
+        a.download = `MAJ_CAT_GRID_${today}.xlsx`;
+        a.click();
+      })
+      .catch(() => message.error('Failed to download major category grid data'));
+  };
+
   const downloadMajCatTemplate = () => {
     const token = localStorage.getItem('authToken');
     const url = `${APP_CONFIG.api.baseURL}/admin/majcat-grid/template`;
@@ -1873,6 +1891,10 @@ export default function Admin() {
               <Button size="sm" variant="outline" onClick={() => navigate('/admin/expense/major-category-grid')}>
                 <Eye />
                 View Data
+              </Button>
+              <Button size="sm" variant="outline" onClick={downloadMajCatGridData}>
+                <Download />
+                Download Data
               </Button>
               <Button size="sm" variant="outline" onClick={downloadMajCatTemplate}>
                 <Download />

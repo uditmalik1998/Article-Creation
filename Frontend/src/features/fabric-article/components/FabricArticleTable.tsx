@@ -150,6 +150,8 @@ export interface ApproverItem {
   approvedAt?: string | null;
   approver?: { name: string | null; email: string | null } | null;
   valueAddCost: number | string | null;
+  vendorFabricRate: number | string | null;
+  basicTrimCost: number | string | null;
 }
 
 interface EditableCellProps {

@@ -2793,6 +2793,90 @@ export const downloadSizeMasterData = async (_req: Request, res: Response): Prom
   }
 };
 
+export const downloadMajCatGridData = async (_req: Request, res: Response): Promise<void> => {
+  try {
+    const ExcelJS = require('exceljs');
+    const rows: any[] = await prisma.$queryRaw`
+      SELECT major_category, attribute_name, value
+      FROM maj_cat_grid_values
+      ORDER BY major_category, attribute_name, value
+    `;
+
+    const wb = new ExcelJS.Workbook();
+    // Sheet name must match template so upload works from either file
+    const ws = wb.addWorksheet('MAJ_CAT_GRID');
+
+    // Uploader reads: A(1)=FG_MAJ_CAT, E(5)=FATHER COMP MAJ_CAT, G(7)=MAIN MVGR, I(9)=GRID STATUS
+    // Must match 10-column template layout exactly so this file can be re-uploaded directly.
+
+    // Row 1 — title (merged A1:J1)
+    ws.mergeCells('A1:J1');
+    const titleCell = ws.getCell('A1');
+    titleCell.value = '300 MAJOR CATEGORY WISE ACTIVE GRID MASTER';
+    titleCell.font = { bold: true, size: 13, color: { argb: 'FF1D3557' } };
+    titleCell.alignment = { horizontal: 'center', vertical: 'middle' };
+    titleCell.fill = { type: 'pattern', pattern: 'solid', fgColor: { argb: 'FFD6E4F0' } };
+    ws.getRow(1).height = 28;
+
+    // Row 2 — empty
+    ws.addRow([]);
+
+    // Row 3 — headers (10 columns, green for required A/E/G, blue for optional)
+    const HEADERS = [
+      'FG_MAJ_CAT', 'F.GRD SR NO', 'FATHER COMP DIV', 'CHILD GRID SR NO',
+      'FATHER COMP MAJ_CAT', 'MVGR GRID SR NO', 'MAIN MVGR',
+      'FULL FORM', 'GRID STATUS', 'RECEIVED/AUTO',
+    ];
+    const REQUIRED_COLS = [0, 4, 6]; // A, E, G
+    const headerRow = ws.addRow(HEADERS);
+    headerRow.eachCell((cell: any, colNum: number) => {
+      const isRequired = REQUIRED_COLS.includes(colNum - 1);
+      cell.font = { bold: true, color: { argb: 'FFFFFFFF' } };
+      cell.fill = { type: 'pattern', pattern: 'solid', fgColor: { argb: isRequired ? 'FF1D6F42' : 'FF2F5496' } };
+      cell.alignment = { horizontal: 'center', vertical: 'middle', wrapText: true };
+      cell.border = {
+        top: { style: 'thin' }, left: { style: 'thin' },
+        bottom: { style: 'thin' }, right: { style: 'thin' },
+      };
+    });
+    ws.getRow(3).height = 32;
+
+    // Row 4 — empty
+    ws.addRow([]);
+
+    // Row 5+ — data: A=major_category, E=attribute_name, G=value, I=ACT (cols B/C/D/F/H/J left blank)
+    for (const row of rows) {
+      ws.addRow([
+        row.major_category ?? '', // A — FG_MAJ_CAT (col 1)
+        '',                        // B — F.GRD SR NO
+        '',                        // C — FATHER COMP DIV
+        '',                        // D — CHILD GRID SR NO
+        row.attribute_name ?? '', // E — FATHER COMP MAJ_CAT (col 5)
+        '',                        // F — MVGR GRID SR NO
+        row.value ?? '',           // G — MAIN MVGR (col 7)
+        '',                        // H — FULL FORM
+        'ACT',                     // I — GRID STATUS (col 9)
+        '',                        // J — RECEIVED/AUTO
+      ]);
+    }
+
+    ws.columns = [
+      { width: 22 }, { width: 12 }, { width: 16 }, { width: 14 },
+      { width: 22 }, { width: 14 }, { width: 22 },
+      { width: 22 }, { width: 12 }, { width: 14 },
+    ];
+
+    const filename = `MAJ_CAT_GRID_${new Date().toISOString().slice(0, 10)}.xlsx`;
+    res.setHeader('Content-Type', 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');
+    res.setHeader('Content-Disposition', `attachment; filename="${filename}"`);
+    await wb.xlsx.write(res);
+    res.end();
+  } catch (error: any) {
+    console.error('[MajCatGrid] Download error:', error);
+    res.status(500).json({ success: false, error: error.message });
+  }
+};
+
 /**
  * POST /api/admin/size-master/upload
  * Accepts a multipart Excel (sheet "COMPILE", headers in row 3, data from row 5):
