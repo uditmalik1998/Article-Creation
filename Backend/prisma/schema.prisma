@@ -324,6 +324,8 @@ model ExtractionResultFlat {
   fabCost                     Decimal?      @map("fab_cost")  @db.Decimal(10, 2)
   fabCons                     Decimal?      @map("fab_cons")  @db.Decimal(10, 2)
   width                       Decimal?      @map("width")     @db.Decimal(10, 2)
+  vendorFabricRate            Decimal?      @map("vendor_fabric_rate") @db.Decimal(10, 2)
+  valueAddCost                Decimal?      @map("value_add_cost")     @db.Decimal(10, 2)
 
   // ===== ARTICLE REFERENCE FIELDS =====
   bodyArticle                 String?       @map("body_article") @db.VarChar(100)
@@ -662,6 +664,7 @@ enum UserRole {
   /// know about. Declared here purely to stop that crash; no access rules
   /// exist for this role anywhere in the app yet.
   BODY_APPROVER
+  FABRIC_APPROVER
   /// New approval-chain stage, between Category Head and MDM, for tables
   /// whose chain needs it (Segment Master, Size Master) — see
   /// ExpenseApprovalStage.tableKey. Not yet assigned to any real user; added
@@ -1467,6 +1470,7 @@ model FabricArticleData {
   designNumber             String?   @map("design_number") @db.VarChar(100)
   fabricRate               Decimal?  @map("fabric_rate")         @db.Decimal(10, 2)
   v2FabricRate             Decimal?  @map("v2_fabric_rate")      @db.Decimal(10, 2)
+  valueAddCost             Decimal?  @map("value_add_cost")      @db.Decimal(10, 2)
   articleFashionType       String?   @map("article_fashion_type") @db.VarChar(100)
 
   // Workflow
@@ -1475,7 +1479,6 @@ model FabricArticleData {
   approvedBy               Int?      @map("approved_by")
   sapSyncStatus            String    @default("NOT_SYNCED") @map("sap_sync_status")    @db.VarChar(20)
   sapSyncMessage           String?   @map("sap_sync_message")
-  fgCreatorApproved        String    @default("PENDING")    @map("fg_creator_approved") @db.VarChar(20)
 
   // Media & classification
   imageUrl                 String?   @map("image_url")            @db.Text
@@ -1527,11 +1530,12 @@ model BodyArticleData {
   designNumber             String?   @map("design_number")            @db.VarChar(100)
 
   // Cost fields
-  cmtpCost                 Decimal?  @map("cmtp_cost") @db.Decimal(10, 2)
-  cmpCost                  Decimal?  @map("cmp_cost")  @db.Decimal(10, 2)
-  fabCost                  Decimal?  @map("fab_cost")  @db.Decimal(10, 2)
-  fabCons                  Decimal?  @map("fab_cons")  @db.Decimal(10, 2)
-  width                    Decimal?  @map("width")     @db.Decimal(10, 2)
+  cmtpCost                 Decimal?  @map("cmtp_cost")       @db.Decimal(10, 2)
+  cmpCost                  Decimal?  @map("cmp_cost")        @db.Decimal(10, 2)
+  fabCost                  Decimal?  @map("fab_cost")        @db.Decimal(10, 2)
+  fabCons                  Decimal?  @map("fab_cons")        @db.Decimal(10, 2)
+  width                    Decimal?  @map("width")           @db.Decimal(10, 2)
+  basicTrimCost            Decimal?  @map("basic_trim_cost") @db.Decimal(10, 2)
 
   // Article context (mirrored from parent extraction_results_flat row)
   flatId                   String?   @map("flat_id")                @db.VarChar(100)

@@ -352,6 +352,8 @@ exports.Prisma.ExtractionResultFlatScalarFieldEnum = {
   fabCost: 'fabCost',
   fabCons: 'fabCons',
   width: 'width',
+  vendorFabricRate: 'vendorFabricRate',
+  valueAddCost: 'valueAddCost',
   bodyArticle: 'bodyArticle',
   bodyArticleDescription: 'bodyArticleDescription',
   fabricArticleNumber: 'fabricArticleNumber',
@@ -976,13 +978,13 @@ exports.Prisma.FabricArticleDataScalarFieldEnum = {
   designNumber: 'designNumber',
   fabricRate: 'fabricRate',
   v2FabricRate: 'v2FabricRate',
+  valueAddCost: 'valueAddCost',
   articleFashionType: 'articleFashionType',
   approvalStatus: 'approvalStatus',
   approvedAt: 'approvedAt',
   approvedBy: 'approvedBy',
   sapSyncStatus: 'sapSyncStatus',
   sapSyncMessage: 'sapSyncMessage',
-  fgCreatorApproved: 'fgCreatorApproved',
   imageUrl: 'imageUrl',
   fabricArticleType: 'fabricArticleType',
   userName: 'userName',
@@ -1019,6 +1021,7 @@ exports.Prisma.BodyArticleDataScalarFieldEnum = {
   fabCost: 'fabCost',
   fabCons: 'fabCons',
   width: 'width',
+  basicTrimCost: 'basicTrimCost',
   flatId: 'flatId',
   articleNumber: 'articleNumber',
   division: 'division',
@@ -1739,7 +1742,6 @@ exports.Prisma.FabricArticleDataOrderByRelevanceFieldEnum = {
   approvalStatus: 'approvalStatus',
   sapSyncStatus: 'sapSyncStatus',
   sapSyncMessage: 'sapSyncMessage',
-  fgCreatorApproved: 'fgCreatorApproved',
   imageUrl: 'imageUrl',
   fabricArticleType: 'fabricArticleType',
   userName: 'userName'
@@ -1888,6 +1890,7 @@ exports.UserRole = exports.$Enums.UserRole = {
   PD_DESIGNER: 'PD_DESIGNER',
   PD: 'PD',
   BODY_APPROVER: 'BODY_APPROVER',
+  FABRIC_APPROVER: 'FABRIC_APPROVER',
   PLANNING: 'PLANNING'
 };
 

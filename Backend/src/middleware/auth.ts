@@ -354,9 +354,9 @@ export const requireApprover = (
     return;
   }
 
-  // APPROVER, CATEGORY_HEAD, SUB_DIVISION_HEAD, ADMIN, CREATOR, PO_COMMITTEE, BODY_APPROVER (read-only) roles are allowed
+  // APPROVER, CATEGORY_HEAD, SUB_DIVISION_HEAD, ADMIN, CREATOR, PO_COMMITTEE, BODY_APPROVER, FABRIC_APPROVER (read-only) roles are allowed
   const role = String(req.user.role || '');
-  if (role !== 'APPROVER' && role !== 'CATEGORY_HEAD' && role !== 'SUB_DIVISION_HEAD' && role !== 'ADMIN' && role !== 'CREATOR' && role !== 'PO_COMMITTEE' && role !== 'PD' && role !== 'BODY_APPROVER') {
+  if (role !== 'APPROVER' && role !== 'CATEGORY_HEAD' && role !== 'SUB_DIVISION_HEAD' && role !== 'ADMIN' && role !== 'CREATOR' && role !== 'PO_COMMITTEE' && role !== 'PD' && role !== 'BODY_APPROVER' && role !== 'FABRIC_APPROVER') {
     res.status(403).json({
       success: false,
       error: 'Approver access required. You do not have permission to access this resource.',
@@ -414,6 +414,32 @@ export const requireBodyApprovalRights = (
     res.status(403).json({
       success: false,
       error: 'Only Body Approver or Admin can approve body articles.',
+      code: 'INSUFFICIENT_PERMISSIONS',
+      userRole: role
+    });
+    return;
+  }
+  next();
+};
+
+/**
+ * Require ADMIN or FABRIC_APPROVER role to submit fabric articles to SAP.
+ * Must be used after authenticate middleware.
+ */
+export const requireFabricApprovalRights = (
+  req: Request,
+  res: Response,
+  next: NextFunction
+): void => {
+  if (!req.user) {
+    res.status(401).json({ success: false, error: 'Authentication required.', code: 'NOT_AUTHENTICATED' });
+    return;
+  }
+  const role = String(req.user.role || '');
+  if (role !== 'ADMIN' && role !== 'FABRIC_APPROVER') {
+    res.status(403).json({
+      success: false,
+      error: 'Only Fabric Approver or Admin can submit fabric articles.',
       code: 'INSUFFICIENT_PERMISSIONS',
       userRole: role
     });

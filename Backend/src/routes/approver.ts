@@ -2,7 +2,7 @@ import { Router } from 'express';
 import multer from 'multer';
 import { ApproverController } from '../controllers/ApproverController';
 import { getMajorCategories } from '../controllers/adminController';
-import { authenticate, requireApprover, requireApprovalRights, requireModifyRights, requireBodyApprovalRights } from '../middleware/auth';
+import { authenticate, requireApprover, requireApprovalRights, requireModifyRights, requireBodyApprovalRights, requireFabricApprovalRights } from '../middleware/auth';
 import { asyncHandler } from '../middleware/asyncHandler';
 
 const router = Router();
@@ -92,11 +92,12 @@ router.post('/create-fabric-article', h(ApproverController.createFabricArticleFr
 // Body Article list (type=FG) — paginated list from body_article_data for the Body Article New Articles page
 router.get('/body-articles', h(ApproverController.getBodyArticleItems));
 
-// Fabric Article data list (fabric_article_type=FG, fg_creator_approved=PENDING) — for FG New Articles page in Fabric Article tab
+// Fabric Article data list (fabric_article_type=FG) — for FG New Articles page in Fabric Article tab
 router.get('/fabric-article-data', h(ApproverController.getFabricArticleDataItems));
 
 // Submit FG New Articles to SAP via ZMM_FAB_ART_CREATION_RFC
-router.post('/fabric-article-data/submit', h(ApproverController.submitFabricArticleData));
+// Submit fabric articles to SAP via ZMM_FAB_ART_CREATION_RFC — FABRIC_APPROVER and ADMIN only
+router.post('/fabric-article-data/submit', requireFabricApprovalRights, h(ApproverController.submitFabricArticleData));
 
 // Get / Update a single fabric_article_data record (used by FG New Articles detail page)
 router.get('/fabric-article-data/:id', h(ApproverController.getFabricArticleDataById));

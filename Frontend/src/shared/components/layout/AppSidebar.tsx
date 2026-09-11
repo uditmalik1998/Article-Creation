@@ -188,6 +188,7 @@ export const AppSidebar: React.FC<AppSidebarProps> = ({ collapsed, onCollapsedCh
     (role === 'APPROVER' ||
       role === 'CATEGORY_HEAD' ||
       role === 'SUB_DIVISION_HEAD' ||
+      role === 'FABRIC_APPROVER' ||
       isAdmin ||
       role === 'CREATOR' ||
       role === 'PO_COMMITTEE' ||

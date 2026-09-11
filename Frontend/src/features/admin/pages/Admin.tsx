@@ -856,6 +856,24 @@ export default function Admin() {
     }
   }, []);
 
+  const downloadFabricArticleMasterData = () => {
+    const token = localStorage.getItem('authToken');
+    const url = `${APP_CONFIG.api.baseURL}/admin/fabric-article-master/download`;
+    fetch(url, { headers: token ? { Authorization: `Bearer ${token}` } : {} })
+      .then((r) => {
+        if (!r.ok) throw new Error('Download failed');
+        return r.blob();
+      })
+      .then((blob) => {
+        const today = new Date().toISOString().slice(0, 10);
+        const a = document.createElement('a');
+        a.href = URL.createObjectURL(blob);
+        a.download = `FABRIC_ARTICLE_MASTER_${today}.xlsx`;
+        a.click();
+      })
+      .catch(() => message.error('Failed to download fabric article master data'));
+  };
+
   const downloadFabricArticleMasterTemplate = () => {
     const token = localStorage.getItem('authToken');
     const url = `${APP_CONFIG.api.baseURL}/admin/fabric-article-master/template`;
@@ -2328,6 +2346,10 @@ export default function Admin() {
                 <Download />
                 Download Template
               </Button>
+              <Button size="sm" variant="outline" onClick={downloadFabricArticleMasterData}>
+                <Download />
+                Download Data
+              </Button>
               <Button size="sm" variant="outline" onClick={loadFabricArticleMasterStatus} disabled={fabricArticleMasterStatusLoading}>
                 <RotateCw className={fabricArticleMasterStatusLoading ? 'animate-spin' : ''} />
                 Refresh Status
@@ -2372,7 +2394,7 @@ export default function Admin() {
                       type="warning"
                       showIcon
                       message="No fabric article master uploaded yet"
-                      description="Upload the Fabric Article Master Excel (columns: DIV, SUB-DIV, MJ_CAT, MC_CD, MC_DESC) to populate fabric hierarchy dropdowns."
+                      description="Upload the Fabric Article Master Excel (columns: SEG, DIV, SUB DIV, MAJ CAT, MC CODE, MC DES, STATUS, HSN CD, ART_TYPE) to populate fabric hierarchy dropdowns."
                     />
                   )}
                 </div>
@@ -2382,8 +2404,8 @@ export default function Admin() {
                   <div className="rounded-md border border-border p-4">
                     <div className="mb-1 font-semibold">Upload Fabric Article Master Excel</div>
                     <div className="mb-3 text-xs text-muted-foreground">
-                      Sheet <strong>FAB UPLAODER FORMAT</strong> (or first sheet), headers in row 3, data from row 5 —
-                      columns A (DIV), B (SUB-DIV), C (MJ_CAT), D (MC_CD), E (MC_DESC). Replaces the entire table.
+                      Sheet <strong>HIERARCHY MASTER</strong> (or first sheet), headers in row 3, data from row 5 —
+                      columns: SEG, DIV, SUB DIV, MAJ CAT, MC CODE, MC DES, STATUS, HSN CD, ART_TYPE. Replaces the entire table.
                     </div>
 
                     <input

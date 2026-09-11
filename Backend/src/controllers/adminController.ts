@@ -66,7 +66,7 @@ const AdminCreateUserSchema = z.object({
   email: z.string().email().max(255),
   password: z.string().min(6).max(128),
   name: z.string().min(1).max(100),
-  role: z.enum(['ADMIN', 'USER', 'CREATOR', 'PO_COMMITTEE', 'APPROVER', 'CATEGORY_HEAD', 'SUB_DIVISION_HEAD', 'PD_DESIGNER', 'PD', 'BODY_APPROVER', 'PLANNING']).optional().default('USER'),
+  role: z.enum(['ADMIN', 'USER', 'CREATOR', 'PO_COMMITTEE', 'APPROVER', 'CATEGORY_HEAD', 'SUB_DIVISION_HEAD', 'PD_DESIGNER', 'PD', 'BODY_APPROVER', 'FABRIC_APPROVER', 'PLANNING']).optional().default('USER'),
   division: z.union([z.string(), z.array(z.string())]).optional().nullable(),
   subDivision: z.union([z.string(), z.array(z.string())]).optional().nullable(),
   // Coarse business-unit tag — independent of division/subDivision above,
@@ -85,7 +85,7 @@ const AdminUpdateUserSchema = AdminCreateUserSchema.partial().extend({
   // here with no default so an omitted role truly stays undefined, and
   // `updateUser`'s `validated.role ?? existingUser.role` correctly keeps
   // whatever role the user already had.
-  role: z.enum(['ADMIN', 'USER', 'CREATOR', 'PO_COMMITTEE', 'APPROVER', 'CATEGORY_HEAD', 'SUB_DIVISION_HEAD', 'PD_DESIGNER', 'PD', 'BODY_APPROVER', 'PLANNING']).optional(),
+  role: z.enum(['ADMIN', 'USER', 'CREATOR', 'PO_COMMITTEE', 'APPROVER', 'CATEGORY_HEAD', 'SUB_DIVISION_HEAD', 'PD_DESIGNER', 'PD', 'BODY_APPROVER', 'FABRIC_APPROVER', 'PLANNING']).optional(),
 });
 
 const normalizeSubDivisionInput = (value: unknown): string | null => {
@@ -4909,10 +4909,10 @@ export const downloadFabricArticleMasterTemplate = async (_req: Request, res: Re
   try {
     const ExcelJS = require('exceljs');
     const wb = new ExcelJS.Workbook();
-    const ws = wb.addWorksheet('FAB UPLAODER FORMAT');
+    const ws = wb.addWorksheet('HIERARCHY MASTER');
 
     // Row 1 — title
-    ws.mergeCells('A1:E1');
+    ws.mergeCells('A1:I1');
     const titleCell = ws.getCell('A1');
     titleCell.value = 'FABRIC ARTICLE MASTER UPLOAD';
     titleCell.font = { bold: true, size: 13 };
@@ -4921,8 +4921,8 @@ export const downloadFabricArticleMasterTemplate = async (_req: Request, res: Re
 
     ws.addRow([]);
 
-    // Row 3 — headers (only the 5 columns we store)
-    const headers = ['DIV', 'SUB-DIV', 'MJ_CAT', 'MC_CD', 'MC_DESC'];
+    // Row 3 — headers (9 columns matching actual file format)
+    const headers = ['SEG', 'DIV', 'SUB DIV', 'MAJ CAT', 'MC CODE', 'MC DES', 'STATUS', 'HSN CD', 'ART_TYPE'];
     const headerRow = ws.addRow(headers);
     headerRow.eachCell((cell: any) => {
       cell.font = { bold: true, color: { argb: 'FFFFFFFF' } };
@@ -4933,14 +4933,17 @@ export const downloadFabricArticleMasterTemplate = async (_req: Request, res: Re
     ws.addRow([]);
 
     // Row 5 — sample rows
-    ws.addRow(['K', 'K_PC', 'K_PC_FLC', '910101001', 'K_PC_FLC_SLD']);
-    ws.addRow(['K', 'K_PC', 'K_PC_FLC', '910101002', 'K_PC_FLC_PRT']);
+    ws.addRow(['FAB', 'D', 'D_C', 'D_C_DBY', '930201011', 'D_C_DBY', 'ACT', '52114200', '2111']);
+    ws.addRow(['FAB', 'D', 'D_C', 'D_C_PLN', '930202011', 'D_C_PLN', 'ACT', '52114200', '2111']);
 
-    ws.columns = [{ width: 12 }, { width: 16 }, { width: 22 }, { width: 16 }, { width: 30 }];
+    ws.columns = [
+      { width: 8 }, { width: 10 }, { width: 14 }, { width: 18 },
+      { width: 14 }, { width: 26 }, { width: 10 }, { width: 12 }, { width: 10 },
+    ];
 
     ws.addRow([]);
-    const noteRow = ws.addRow(['⚠ NOTE: Headers in Row 3, data from Row 5. Only DIV, SUB-DIV, MJ_CAT, MC_CD, MC_DESC are required.']);
-    ws.mergeCells(`A${noteRow.number}:E${noteRow.number}`);
+    const noteRow = ws.addRow(['⚠ NOTE: Headers in Row 3, data from Row 5. Columns: SEG, DIV, SUB DIV, MAJ CAT, MC CODE, MC DES, STATUS, HSN CD, ART_TYPE.']);
+    ws.mergeCells(`A${noteRow.number}:I${noteRow.number}`);
     noteRow.getCell(1).font = { italic: true, size: 10 };
     noteRow.getCell(1).fill = { type: 'pattern', pattern: 'solid', fgColor: { argb: 'FFFFF3CD' } };
 
@@ -4950,6 +4953,53 @@ export const downloadFabricArticleMasterTemplate = async (_req: Request, res: Re
     res.end();
   } catch (error: any) {
     console.error('[FabricArticleMaster] Template error:', error);
+    res.status(500).json({ success: false, error: error.message });
+  }
+};
+
+/**
+ * GET /api/admin/fabric-article-master/download
+ * Exports all fabric_article_master rows as .xlsx.
+ */
+export const downloadFabricArticleMasterData = async (_req: Request, res: Response): Promise<void> => {
+  try {
+    const ExcelJS = require('exceljs');
+    const rows: any[] = await prisma.$queryRaw`
+      SELECT seg, div, sub_div, maj_cat, mc_code, mc_des, status, hsn_cd, art_type
+      FROM fabric_article_master
+      ORDER BY seg, div, sub_div, maj_cat
+    `;
+
+    const wb = new ExcelJS.Workbook();
+    const ws = wb.addWorksheet('FABRIC ARTICLE MASTER');
+
+    const headers = ['SEG', 'DIV', 'SUB DIV', 'MAJ CAT', 'MC CODE', 'MC DES', 'STATUS', 'HSN CD', 'ART_TYPE'];
+    const headerRow = ws.addRow(headers);
+    headerRow.eachCell((cell: any) => {
+      cell.font = { bold: true, color: { argb: 'FFFFFFFF' } };
+      cell.fill = { type: 'pattern', pattern: 'solid', fgColor: { argb: 'FF1565C0' } };
+      cell.alignment = { horizontal: 'center' };
+    });
+
+    rows.forEach((row) => {
+      ws.addRow([
+        row.seg ?? '', row.div ?? '', row.sub_div ?? '', row.maj_cat ?? '',
+        row.mc_code ?? '', row.mc_des ?? '', row.status ?? '', row.hsn_cd ?? '', row.art_type ?? '',
+      ]);
+    });
+
+    ws.columns = [
+      { width: 10 }, { width: 12 }, { width: 16 }, { width: 22 },
+      { width: 14 }, { width: 30 }, { width: 10 }, { width: 12 }, { width: 12 },
+    ];
+
+    const filename = `FABRIC_ARTICLE_MASTER_${new Date().toISOString().slice(0, 10)}.xlsx`;
+    res.setHeader('Content-Type', 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');
+    res.setHeader('Content-Disposition', `attachment; filename="${filename}"`);
+    await wb.xlsx.write(res);
+    res.end();
+  } catch (error: any) {
+    console.error('[FabricArticleMaster] Download error:', error);
     res.status(500).json({ success: false, error: error.message });
   }
 };
@@ -4973,13 +5023,15 @@ export const uploadFabricArticleMaster = async (req: Request, res: Response): Pr
     const wb = new ExcelJS.Workbook();
     await wb.xlsx.load(req.file.buffer as any);
 
-    const ws = wb.getWorksheet('FAB UPLAODER FORMAT') ?? wb.worksheets[0];
+    // Accept 'HIERARCHY MASTER' sheet (actual file) or 'FAB UPLAODER FORMAT' (old template) or first sheet
+    const ws = wb.getWorksheet('HIERARCHY MASTER') ?? wb.getWorksheet('FAB UPLAODER FORMAT') ?? wb.worksheets[0];
     if (!ws) {
       res.status(400).json({ success: false, error: 'No worksheets found in the uploaded Excel file.' });
       return;
     }
 
-    const C_DIV = 1, C_SUB = 2, C_MAJ = 3, C_MC = 4, C_DESC = 5;
+    // Columns: A=SEG, B=DIV, C=SUB DIV, D=MAJ CAT, E=MC CODE, F=MC DES, G=STATUS, H=HSN CD, I=ART_TYPE
+    const C_SEG = 1, C_DIV = 2, C_SUB = 3, C_MAJ = 4, C_MC = 5, C_DESC = 6, C_STATUS = 7, C_HSN = 8, C_ARTTYPE = 9;
     const cell = (row: any, c: number): string => {
       let v = row.getCell(c).value;
       if (v && typeof v === 'object' && 'result' in v) v = (v as any).result;
@@ -4994,11 +5046,15 @@ export const uploadFabricArticleMaster = async (req: Request, res: Response): Pr
 
     for (let r = 5; r <= ws.rowCount; r++) {
       const row = ws.getRow(r);
+      const seg    = cell(row, C_SEG) || 'FAB';
       const div    = cell(row, C_DIV);
       const sub    = cell(row, C_SUB);
       const maj    = cell(row, C_MAJ);
       const mc     = cell(row, C_MC);
       const desc   = cell(row, C_DESC);
+      const status = cell(row, C_STATUS) || 'ACT';
+      const hsn    = cell(row, C_HSN);
+      const artType = cell(row, C_ARTTYPE);
 
       if (!div && !sub && !maj && !mc && !desc) { skipped++; continue; }
       if (!mc || !desc) { skipped++; continue; }
@@ -5007,7 +5063,7 @@ export const uploadFabricArticleMaster = async (req: Request, res: Response): Pr
       if (seen.has(key)) continue;
       seen.add(key);
 
-      rows.push({ seg: 'FAB', div, sub_div: sub, maj_cat: maj, mc_code: mc, mc_des: desc, status: 'ACT', hsn_cd: '', art_type: '' });
+      rows.push({ seg, div, sub_div: sub, maj_cat: maj, mc_code: mc, mc_des: desc, status, hsn_cd: hsn, art_type: artType });
     }
 
     const total = rows.length;
@@ -5382,7 +5438,7 @@ export const downloadBodyArticleDataMaster = async (_req: Request, res: Response
           'cmtp_cost', 'cmp_cost', 'fab_cost', 'fab_cons', 'width',
           'approval_status', 'approved_at', 'approved_by', 'sap_sync_status', 'sap_sync_message',
           'user_name', 'created_at', 'updated_at', 'image_url', 'body_article_type',
-          'design_number', 'fg_creator_approved',
+          'design_number',
         ]
     ).filter((h) => h !== 'id');
 

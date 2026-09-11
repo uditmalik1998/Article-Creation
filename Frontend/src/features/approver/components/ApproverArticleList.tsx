@@ -226,6 +226,7 @@ const ATTRIBUTE_GROUPS: { group: string; color: string; fields: { field: string;
       { field: 'fWidth', schemaKey: 'f_width' },
       { field: 'lycra', schemaKey: 'lycra_non_lycra' },
       { field: 'shade', schemaKey: 'shade', freeText: true },
+      { field: 'vendorFabricRate', schemaKey: 'vendor_fabric_rate', freeText: true },
     ],
   },
   {
@@ -265,6 +266,7 @@ const ATTRIBUTE_GROUPS: { group: string; color: string; fields: { field: string;
       { field: 'patches', schemaKey: 'patches' },
       { field: 'htrfType', schemaKey: 'htrf_type' },
       { field: 'htrfStyle', schemaKey: 'htrf_style' },
+      { field: 'valueAddCost', schemaKey: 'value_add_cost', freeText: true },
     ],
   },
   {
@@ -1313,6 +1315,18 @@ const ArticleCard = React.memo(
         };
         const newDesc = buildBodyDescription(getVal);
         if (newDesc) updates['bodyArticleDescription'] = newDesc;
+      }
+      // When a Construction & Fabric attribute changes, recompute fabricArticleDescription
+      // and bundle it into the same save so the DB value stays in sync with the UI.
+      const fabFieldKeys = new Set(FAB_FIELDS.map((ff) => ff.field));
+      if (fabFieldKeys.has(field)) {
+        const getVal = (f: string) => {
+          const v = updates[f] !== undefined ? updates[f] : (localValues[f] !== undefined ? localValues[f] : (item as any)[f]);
+          return v ? String(v).trim() : null;
+        };
+        const fabParts = FAB_FIELDS.map((f) => getVal(f.field)).filter(Boolean) as string[];
+        const newFabDesc = fabParts.length > 0 ? fabParts.join('-') : null;
+        if (newFabDesc) updates['fabricArticleDescription'] = newFabDesc;
       }
       setLocalValues((prev) => ({ ...prev, ...updates }));
       setEditingField(null);
@@ -3089,6 +3103,7 @@ const ArticleCard = React.memo(
                             { label: 'CMP Cost',  field: 'cmpCost',  editable: true, mandatory: false, isDropdown: false, isColor: false, isMarkdown: false },
                             { label: 'FAB Con',  field: 'fabCons',  editable: true, mandatory: false, isDropdown: false, isColor: false, isMarkdown: false },
                             { label: 'Width',  field: 'width',  editable: true, mandatory: false, isDropdown: false, isColor: false, isMarkdown: false },
+                            { label: 'Basic Trim Cost', field: 'basicTrimCost', editable: true, mandatory: false, isDropdown: false, isColor: false, isMarkdown: false },
                           ]
                         : [
                             { label: 'RATE / COST', field: 'rate', editable: true, mandatory: true, isDropdown: false, isColor: false, isMarkdown: false },

@@ -51,6 +51,7 @@ const ITEM_UPDATE_ALLOWED_FIELDS = [
     'hsnTaxCode', 'articleDescription', 'fashionGrid', 'year', 'articleType',
     // Body article cost fields
     'cmpCost', 'fabCost', 'fabCons', 'fWidth', 'width',
+    'vendorFabricRate', 'valueAddCost',
     // Card footer fields (fabric/body article builder)
     'fabricArticleNumber', 'fabricArticleDescription',
     'bodyArticle', 'bodyArticleDescription',
@@ -932,6 +933,8 @@ export class ApproverController {
                     fashionGrid: true,
                     year: true,
                     articleType: true,
+                    vendorFabricRate: true,
+                    valueAddCost: true,
                     // Article reference fields
                     bodyArticle: true,
                     bodyArticleDescription: true,
@@ -1237,6 +1240,8 @@ export class ApproverController {
                     fOunce: true,
                     fWidth: true,
                     fabDiv: true,
+                    vendorFabricRate: true,
+                    valueAddCost: true,
                     // BODY extras
                     collarStyle: true,
                     sleeveFold: true, mSet: true,
@@ -2221,6 +2226,7 @@ export class ApproverController {
                     wash: true, fit: true, pattern: true, segment: true, ageGroup: true, mNoOfSize: true, mNoOfClr: true,
                     articleFashionType: true, mvgrBrandVendor: true, fCount: true,
                     fConstruction: true, fOunce: true, fWidth: true, fabDiv: true, fabVdr: true, impAtrbt2: true,
+                    vendorFabricRate: true, valueAddCost: true,
                     mcCode: true, hsnTaxCode: true, articleDescription: true, fashionGrid: true,
                     season: true, year: true, articleType: true, referenceArticleNumber: true,
                     referenceArticleDescription: true, imageUrl: true, imageName: true,
@@ -3611,6 +3617,7 @@ export class ApproverController {
         fabCons:              'fabCons',
         fWidth:               'width',
         width:                'width',
+        basicTrimCost:        'basicTrimCost',
         vendorCode:           'vendorCode',
         vendorName:           'vendorName',
         majorCategory:        'majorCategory',
@@ -3673,6 +3680,7 @@ export class ApproverController {
             fabCons: r.fabCons ?? null,
             fWidth: r.width ?? null,
             width: r.width ?? null,
+            basicTrimCost: r.basicTrimCost ?? null,
             pptNumber: null, source: null, rate: null, mrp: null,
             size: null, colour: null, fabricMainMvgr: null, composition: null, gsm: null,
             wash: null, referenceArticleNumber: null, referenceArticleDescription: null,
@@ -3745,7 +3753,7 @@ export class ApproverController {
     };
 
     // ─── Fabric Article Data list (type=FG) ──────────────────────────────────────
-    // pathType=new  → fg_creator_approved=PENDING (pending creator confirmation)
+    // pathType=new  → all non-APPROVED articles
     // pathType=created → approval_status=APPROVED (SAP-created articles)
 
     static getFabricArticleDataItems = async (req: Request, res: Response) => {
@@ -3764,11 +3772,12 @@ export class ApproverController {
         if (pathType === 'created') {
             where.approvalStatus = 'APPROVED';
         } else {
-            // 'new' tab: show articles awaiting creator confirmation
-            where.fgCreatorApproved = 'PENDING';
+            // 'new' tab: exclude already-approved articles (those belong in FG Created)
             if (status && status !== 'ALL') {
-                const statuses = status.split(',').map((s: string) => s.trim()).filter(Boolean);
+                const statuses = status.split(',').map((s: string) => s.trim()).filter(Boolean).filter(s => s !== 'APPROVED');
                 where.approvalStatus = statuses.length === 1 ? statuses[0] : { in: statuses };
+            } else {
+                where.approvalStatus = { not: 'APPROVED' };
             }
         }
         if (division && division !== 'ALL') where.division = { contains: division, mode: 'insensitive' };
@@ -3796,7 +3805,7 @@ export class ApproverController {
                 select: {
                     id: true,
                     fabricArticleNumber: true, fabricArticleDescription: true,
-                    fabricArticleType: true, fgCreatorApproved: true,
+                    fabricArticleType: true,
                     division: true, subDivision: true, majorCategory: true,
                     vendorName: true, vendorCode: true,
                     approvalStatus: true, approvedAt: true,
@@ -3806,7 +3815,7 @@ export class ApproverController {
                     mFabDiv: true, mYarn: true, mFabMainMvgr1: true, mFabMainMvgr2: true,
                     mConstruction: true, mOunz: true, mWidth: true, mWeave02: true,
                     mCount: true, mWeave01: true, mComposition: true, mFinish: true,
-                    mGsm: true, mLycra: true, fabricRate: true, v2FabricRate: true, articleFashionType: true,
+                    mGsm: true, mLycra: true, fabricRate: true, v2FabricRate: true, valueAddCost: true, articleFashionType: true,
                     designNumber: true, mcDescription: true,
                 },
             }),
@@ -3837,6 +3846,7 @@ export class ApproverController {
         fabricArticleDescription: 'fabricArticleDescription',
         fabricRate:               'fabricRate',
         v2FabricRate:             'v2FabricRate',
+        valueAddCost:             'valueAddCost',
         articleFashionType:       'articleFashionType',
         // Fabric construction fields
         fabDiv:        'mFabDiv',
@@ -3882,7 +3892,6 @@ export class ApproverController {
             fabricArticleNumber:      r.fabricArticleNumber ?? null,
             fabricArticleDescription: r.fabricArticleDescription ?? null,
             fabricArticleType:        r.fabricArticleType ?? null,
-            fgCreatorApproved:        r.fgCreatorApproved ?? 'PENDING',
             division:                 r.division ?? null,
             subDivision:              r.subDivision ?? null,
             majorCategory:            r.majorCategory ?? null,
@@ -3915,6 +3924,7 @@ export class ApproverController {
             designNumber:       r.designNumber ?? null,
             fabricRate:         r.fabricRate != null ? Number(r.fabricRate) : null,
             v2FabricRate:       r.v2FabricRate != null ? Number(r.v2FabricRate) : null,
+            valueAddCost:       r.valueAddCost != null ? Number(r.valueAddCost) : null,
             articleFashionType: r.articleFashionType ?? null,
             // Fields not present in fabric_article_data — nulled out
             pptNumber: null, source: null, rate: null, mrp: null,
@@ -3980,13 +3990,34 @@ export class ApproverController {
         // Check 2: this flat article has already been sent to Body Article
         const existing = await prisma.bodyArticleData.findMany({
             where: { flatId: { in: ids } },
-            select: { flatId: true, bodyArticleNumber: true },
+            select: { id: true, flatId: true, bodyArticleNumber: true, majorCategory: true, sapSyncStatus: true },
         });
         if (existing.length > 0) {
-            return res.status(409).json({
-                error: `Body Article go for Approval Already. Cannot Create Duplicate.`,
-                duplicateFlatIds: existing.map((e) => e.flatId),
-            });
+            const itemMap = new Map(items.map((i) => [i.id, i]));
+            const sameCategory: string[] = [];
+            const staleToDelete: string[] = [];
+
+            for (const ex of existing) {
+                const item = itemMap.get(ex.flatId ?? '');
+                if (!item) continue;
+                if (ex.majorCategory === item.majorCategory) {
+                    sameCategory.push(ex.flatId ?? '');
+                } else if (!ex.bodyArticleNumber && ex.sapSyncStatus === 'NOT_SYNCED') {
+                    // Major category changed, not yet SAP-synced — replace stale record
+                    staleToDelete.push(ex.id);
+                }
+                // Different major category + already in SAP → leave old row, create new PENDING row
+            }
+
+            if (sameCategory.length > 0) {
+                return res.status(409).json({
+                    error: `Body Article go for Approval Already. Cannot Create Duplicate.`,
+                    duplicateFlatIds: sameCategory,
+                });
+            }
+            if (staleToDelete.length > 0) {
+                await prisma.bodyArticleData.deleteMany({ where: { id: { in: staleToDelete } } });
+            }
         }
 
         const created = await Promise.all(items.map((item) =>
@@ -4046,6 +4077,7 @@ export class ApproverController {
                 vendorName: true, vendorCode: true,
                 imageUrl: true, userName: true,
                 fabricArticleDescription: true,
+                vendorFabricRate: true,
                 // Construction & Fabric attributes
                 fabDiv: true, yarn1: true,
                 mainMvgr: true, fabricMainMvgr: true,
@@ -4114,6 +4146,7 @@ export class ApproverController {
                     mFinish:         item.finish,
                     mGsm:            item.gsm,
                     mLycra:          item.lycra,
+                    fabricRate:      item.vendorFabricRate ?? null,
                     // division / subDivision / majorCategory intentionally omitted —
                     // fabric articles have their own separate category hierarchy
                 },

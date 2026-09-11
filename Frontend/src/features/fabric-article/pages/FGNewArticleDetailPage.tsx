@@ -7,6 +7,7 @@ export default function FGNewArticleDetailPage() {
     <FabricArticleDetailPage
       itemsBaseEndpoint="/approver/fabric-article-data"
       approveEndpoint="/approver/fabric-article-data/submit"
+      approveRoles={['ADMIN', 'FABRIC_APPROVER']}
       isFGMode
     />
   );

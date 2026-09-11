@@ -185,17 +185,17 @@ const ATTRIBUTE_GROUPS: { group: string; color: string; fields: { field: string;
       { field: 'yarn1', schemaKey: 'yarn_01' },
       { field: 'mainMvgr', schemaKey: 'main_mvgr' },
       { field: 'fabricMainMvgr', schemaKey: 'fabric_main_mvgr' },
-      { field: 'fabVdr', schemaKey: 'fab_vdr' },
-      { field: 'weave', schemaKey: 'weave' },
+      { field: 'fConstruction', schemaKey: 'f_construction' },
+      { field: 'fWidth', schemaKey: 'f_width' },
       { field: 'mFab2', schemaKey: 'm_fab2' },
       { field: 'fCount', schemaKey: 'f_count' },
-      { field: 'gsm', schemaKey: 'gsm' },
-      { field: 'fOunce', schemaKey: 'f_ounce' },
-      { field: 'fConstruction', schemaKey: 'f_construction' },
+      { field: 'weave', schemaKey: 'weave' },
       { field: 'composition', schemaKey: 'composition' },
       { field: 'finish', schemaKey: 'finish' },
-      { field: 'fWidth', schemaKey: 'f_width' },
+      { field: 'gsm', schemaKey: 'gsm' },
       { field: 'lycra', schemaKey: 'lycra_non_lycra' },
+      { field: 'fabVdr', schemaKey: 'fab_vdr' },
+      { field: 'fOunce', schemaKey: 'f_ounce' },
       { field: 'shade', schemaKey: 'shade', freeText: true },
       { field: 'weight', schemaKey: 'weight', freeText: true },
     ],
@@ -268,14 +268,23 @@ const GROUP_COLORS: Record<string, string> = {
 };
 const GROUP_ORDER = ['FAB'];
 
-// Construction & Fabric (FAB): these attributes must appear first, in this
-// exact order, regardless of the order the backend returns them in. Everything
-// else in the group keeps its existing relative order below them.
-//   fab_div          → M_FAB_DIV
-//   yarn_01          → M_YARN
-//   main_mvgr        → M_FAB_MAIN_MVGR_1
-//   fabric_main_mvgr → M_FAB_MAIN_MVGR_2
-const FAB_PRIORITY_KEYS = ['fab_div', 'yarn_01', 'main_mvgr', 'fabric_main_mvgr'];
+// Construction & Fabric (FAB): full canonical field order — matches FG Articles
+// New Articles page so every user sees the same sequence regardless of backend order.
+const FAB_PRIORITY_KEYS = [
+  'fab_div',          // M_FAB_DIV
+  'yarn_01',          // M_YARN
+  'main_mvgr',        // M_FAB_MAIN_MVGR_1
+  'fabric_main_mvgr', // M_FAB_MAIN_MVGR_2
+  'f_construction',   // M_CONSTRUCTION
+  'f_width',          // M_WIDTH
+  'm_fab2',           // M_WEAVE_02
+  'f_count',          // M_COUNT
+  'weave',            // M_WEAVE_01
+  'composition',      // M_COMPOSITION
+  'finish',           // M_FINISH
+  'gsm',              // M_GSM
+  'lycra_non_lycra',  // M_LYCRA
+];
 
 // ─── Redesign tokens — header/icon palette per group ──────────────────────────
 const GROUP_LABELS: Record<string, string> = {
@@ -974,6 +983,18 @@ const ArticleCard = React.memo(
             onSave({ ...item, segment: seg } as ApproverItem, { segment: seg } as Record<string, unknown>);
           }
         });
+      }
+      // When a Construction & Fabric attribute changes, recompute fabricArticleDescription
+      // and bundle it into the same save so the DB value stays in sync with the UI.
+      const fabFieldKeys = new Set(FAB_FIELDS.map((ff) => ff.field));
+      if (fabFieldKeys.has(field)) {
+        const getVal = (f: string) => {
+          const v = updates[f] !== undefined ? updates[f] : (localValues[f] !== undefined ? localValues[f] : (item as any)[f]);
+          return v ? String(v).trim() : null;
+        };
+        const fabParts = FAB_FIELDS.map((f) => getVal(f.field)).filter(Boolean) as string[];
+        const newFabDesc = fabParts.length > 0 ? fabParts.join('-') : null;
+        if (newFabDesc) updates['fabricArticleDescription'] = newFabDesc;
       }
       setLocalValues((prev) => ({ ...prev, ...updates }));
       setEditingField(null);
@@ -2041,6 +2062,7 @@ const ArticleCard = React.memo(
                         ...(isFGMode ? [
                           { label: 'VENDOR FABRIC RATE', field: 'fabricRate', editable: true, mandatory: false, isDropdown: false, isColor: false, isMarkdown: false },
                           { label: 'V2 FABRIC RATE', field: 'v2FabricRate', editable: true, mandatory: false, isDropdown: false, isColor: false, isMarkdown: false },
+                          { label: 'VALUE ADD COST', field: 'valueAddCost', editable: true, mandatory: false, isDropdown: false, isColor: false, isMarkdown: false },
                         ] : []),
                       ].map((bom) => {
                         const isEditingBom = editingField === `bom_${bom.field}`;

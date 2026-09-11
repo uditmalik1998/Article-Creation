@@ -280,6 +280,7 @@ router.get('/fabric-article-data/export',   h(adminController.downloadFabricArti
 // ═══════════════════════════════════════════════════════
 router.get('/fabric-article-master/status',   h(adminController.getFabricArticleMasterStatus));
 router.get('/fabric-article-master/template', h(adminController.downloadFabricArticleMasterTemplate));
+router.get('/fabric-article-master/download', h(adminController.downloadFabricArticleMasterData));
 router.post('/fabric-article-master/upload',  excelUpload.single('file'), h(adminController.uploadFabricArticleMaster));
 
 // ═══════════════════════════════════════════════════════

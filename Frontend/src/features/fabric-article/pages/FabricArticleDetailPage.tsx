@@ -324,6 +324,8 @@ export default function ArticleDetailPage({
   const canCreatorConfirm = isBodyArticlePage && user?.role !== 'BODY_APPROVER';
   // Save & Submit on body article page: only BODY_APPROVER and ADMIN can submit to SAP
   const canSubmitBodyArticle = !isBodyArticlePage || user?.role === 'BODY_APPROVER' || user?.role === 'ADMIN';
+  // Save & Submit on FG New Articles page: only FABRIC_APPROVER and ADMIN can submit fabric articles to SAP
+  const canSubmitFabricArticle = !isFGMode || user?.role === 'FABRIC_APPROVER' || user?.role === 'ADMIN';
 
   // ─── Init ───────────────────────────────────────────────────────────────────
 
@@ -1070,7 +1072,7 @@ export default function ArticleDetailPage({
                 {/* span wrapper: disabled <button> swallows pointer events; span keeps hover alive */}
                 <span className="inline-block">
                   <Button size="sm" onClick={handleApproveClick}
-                    disabled={!canApprove || !canSubmitBodyArticle || pendingSelectedKeys.length === 0 || approveBlockedReasons.length > 0}
+                    disabled={!canApprove || !canSubmitBodyArticle || !canSubmitFabricArticle || pendingSelectedKeys.length === 0 || approveBlockedReasons.length > 0}
                     className="h-7 border-none bg-[#FF6F61] px-3 text-[12px] font-semibold text-white shadow-sm hover:bg-[#ff5b4d] disabled:bg-white/20 disabled:text-white/50">
                     <CheckCircle2 /> Save &amp; Submit
                     {approveBlockedReasons.length > 0 && <span className="ml-1 text-[10px] text-amber-200">⚠ {approveBlockedReasons.length}</span>}
