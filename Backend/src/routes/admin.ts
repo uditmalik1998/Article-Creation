@@ -152,6 +152,7 @@ router.post('/vendor-master/sync', h(adminController.triggerVendorMasterSync));
 router.get('/majcat-grid/status', h(adminController.getMajCatGridStatus));
 router.get('/majcat-grid/values', h(adminController.getMajCatGridValues));
 router.get('/majcat-grid/template', h(adminController.downloadMajCatGridTemplate));
+router.get('/majcat-grid/download', h(adminController.downloadMajCatGridData));
 router.post('/majcat-grid/upload', excelUpload.single('file'), h(adminController.uploadMajCatGrid));
 router.get('/majcat-grid/upload-status/:jobId', h(adminController.getMajCatGridUploadStatus));
 
