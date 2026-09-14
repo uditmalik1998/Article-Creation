@@ -212,6 +212,7 @@ export default function ApproverDashboard({ pathType }: ApproverDashboardProps =
   });
   const [exportingAll, setExportingAll] = useState(false);
   const [exportingWithVariants, setExportingWithVariants] = useState(false);
+  const [exportingRoughCosting, setExportingRoughCosting] = useState(false);
   // IDs of cards checked for selective export. Scoped to the current page only:
   // cleared on every fetch (pagination / filter change) so it never holds ids
   // that aren't currently rendered.
@@ -500,6 +501,43 @@ export default function ApproverDashboard({ pathType }: ApproverDashboardProps =
     }
   }, [divisionFilter, subDivisionFilter, majorCategoryFilter, sourceFilter, searchText, dateRangeFilter, exportHeaders]);
 
+  const handleRoughCostingExport = useCallback(async () => {
+    setExportingRoughCosting(true);
+    const loadingId = message.loading('Generating Rough Costing report…');
+    try {
+      const token = localStorage.getItem('authToken');
+      const params = new URLSearchParams();
+      params.set('pathType', 'created');
+      if (divisionFilter !== 'ALL') params.set('division', divisionFilter);
+      if (subDivisionFilter !== 'ALL') params.set('subDivision', subDivisionFilter);
+      if (majorCategoryFilter) params.set('majorCategory', majorCategoryFilter);
+      if (searchText) params.set('search', searchText);
+      if (dateRangeFilter?.[0]) params.set('startDate', dateRangeFilter[0].startOf('day').toISOString());
+      if (dateRangeFilter?.[1]) params.set('endDate', dateRangeFilter[1].endOf('day').toISOString());
+
+      const response = await fetch(`${APP_CONFIG.api.baseURL}/approver/items/rough-costing-export?${params}`, {
+        headers: { Authorization: `Bearer ${token}` },
+      });
+      if (!response.ok) throw new Error('Export failed');
+      const blob = await response.blob();
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = `Rough_Costing_${new Date().toISOString().slice(0, 10)}.xlsx`;
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
+      URL.revokeObjectURL(url);
+      message.dismiss(loadingId);
+      message.success('Rough Costing report downloaded');
+    } catch {
+      message.dismiss(loadingId);
+      message.error('Failed to generate Rough Costing report. Please try again.');
+    } finally {
+      setExportingRoughCosting(false);
+    }
+  }, [divisionFilter, subDivisionFilter, majorCategoryFilter, searchText, dateRangeFilter]);
+
   // ─── Selective export ─────────────────────────────────────────────────────────
 
   // Stable (empty deps, functional update) so memoized ArticleCards don't
@@ -673,6 +711,12 @@ export default function ApproverDashboard({ pathType }: ApproverDashboardProps =
                 <Button size="sm" variant="outline" onClick={handleExportWithVariants} disabled={exportingWithVariants}
                   className="h-7 border-white/30 bg-white/10 px-2.5 text-[12px] text-white hover:bg-white/20 hover:text-white disabled:opacity-50">
                   <Download /> Export Variants
+                </Button>
+              )}
+              {pathType === 'created' && (
+                <Button size="sm" variant="outline" onClick={handleRoughCostingExport} disabled={exportingRoughCosting}
+                  className="h-7 border-white/30 bg-white/10 px-2.5 text-[12px] text-white hover:bg-white/20 hover:text-white disabled:opacity-50">
+                  <Download /> Rough Costing
                 </Button>
               )}
               <Button size="sm" variant="outline" onClick={handleExportAll} disabled={exportingAll}

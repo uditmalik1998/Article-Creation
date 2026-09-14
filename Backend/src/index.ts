@@ -43,6 +43,7 @@ import ksmlRoutes from './routes/ksml';
 import poolBRoutes from './routes/poolB';
 import { syncVendorMaster } from './services/vendorMasterSyncService';
 import { runRawArticleExtraction, isExtractionRunning } from './services/rawArticleExtractionService';
+import { runFabricRawDataProcessing, isFabricRawRunning } from './services/fabricRawDataService';
 import { startEventLoopWatchdog } from './utils/eventLoopWatchdog';
 
 const app = express();
@@ -484,6 +485,33 @@ app.use(errorHandler);
       setInterval(rawExtractTick, 5 * 60_000);
     } else {
       console.log('[RawExtract Cron] Disabled — ENABLE_CRON is not "true" and NODE_ENV is not "production". Skipping the 5-min raw-extraction cron.');
+    }
+
+    // fabric_raw_data → fabric_article_data processing cron.
+    // Picks up PENDING rows (flat_id IS NULL) every 5 minutes.
+    // Uploads image to R2 (articlecreation bucket); falls back to original URL on failure.
+    // No retries — FAILED rows stay FAILED (run once only).
+    const fabricRawTick = () => {
+      if (isFabricRawRunning()) {
+        console.log('[FabricRaw Cron] Skipped — previous run still in progress');
+        return;
+      }
+      runFabricRawDataProcessing('CRON')
+        .then(r => {
+          if (r.claimed > 0) {
+            console.log(`[FabricRaw Cron] ✅ claimed:${r.claimed} completed:${r.completed} failed:${r.failed}`);
+          } else {
+            console.log('[FabricRaw Cron] ✔ No PENDING rows — nothing to process');
+          }
+        })
+        .catch(err => console.error('[FabricRaw Cron] ❌ Unhandled error:', err?.message));
+    };
+
+    if (cronEnabled) {
+      setTimeout(fabricRawTick, 8000); // 8s delay — after raw_articles tick fires at 5s
+      setInterval(fabricRawTick, 5 * 60_000);
+    } else {
+      console.log('[FabricRaw Cron] Disabled — ENABLE_CRON is not "true" and NODE_ENV is not "production".');
     }
 
     // Approval → SAP sync worker. After Save & Submit, the article is approved +

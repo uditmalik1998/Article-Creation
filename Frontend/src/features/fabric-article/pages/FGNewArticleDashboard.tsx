@@ -94,6 +94,7 @@ export default function FGNewArticleDashboard({ pathType = 'new' }: FGNewArticle
     return start || end ? [start ? dayjs(start) : null, end ? dayjs(end) : null] : null;
   });
   const [exportingAll, setExportingAll] = useState(false);
+  const [exportingRoughCosting, setExportingRoughCosting] = useState(false);
   const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set());
 
   const [subDivOpen, setSubDivOpen] = useState(false);
@@ -299,6 +300,43 @@ export default function FGNewArticleDashboard({ pathType = 'new' }: FGNewArticle
     }
   }, [statusFilter, divisionFilter, subDivisionFilter, majorCategoryFilter, sourceFilter, searchText, dateRangeFilter, pathType, buildExportData, exportHeaders]);
 
+  const handleRoughCostingExport = useCallback(async () => {
+    setExportingRoughCosting(true);
+    const loadingId = message.loading('Generating Rough Costing report…');
+    try {
+      const token = localStorage.getItem('authToken');
+      const params = new URLSearchParams();
+      params.set('pathType', 'created');
+      if (divisionFilter !== 'ALL') params.set('division', divisionFilter);
+      if (subDivisionFilter !== 'ALL') params.set('subDivision', subDivisionFilter);
+      if (majorCategoryFilter) params.set('majorCategory', majorCategoryFilter);
+      if (searchText) params.set('search', searchText);
+      if (dateRangeFilter?.[0]) params.set('startDate', dateRangeFilter[0].startOf('day').toISOString());
+      if (dateRangeFilter?.[1]) params.set('endDate', dateRangeFilter[1].endOf('day').toISOString());
+
+      const response = await fetch(`${APP_CONFIG.api.baseURL}/approver/items/rough-costing-export?${params}`, {
+        headers: { Authorization: `Bearer ${token}` },
+      });
+      if (!response.ok) throw new Error('Export failed');
+      const blob = await response.blob();
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = `Rough_Costing_${new Date().toISOString().slice(0, 10)}.xlsx`;
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
+      URL.revokeObjectURL(url);
+      message.dismiss(loadingId);
+      message.success('Rough Costing report downloaded');
+    } catch {
+      message.dismiss(loadingId);
+      message.error('Failed to generate Rough Costing report. Please try again.');
+    } finally {
+      setExportingRoughCosting(false);
+    }
+  }, [divisionFilter, subDivisionFilter, majorCategoryFilter, searchText, dateRangeFilter]);
+
   const toggleSelect = useCallback((item: ApproverItem) => {
     setSelectedIds((prev) => {
       const next = new Set(prev);
@@ -419,6 +457,12 @@ export default function FGNewArticleDashboard({ pathType = 'new' }: FGNewArticle
                 className="h-7 border-white/30 bg-white/10 px-2.5 text-[12px] text-white hover:bg-white/20 hover:text-white">
                 <RotateCw /> Refresh
               </Button>
+              {pathType === 'created' && (
+                <Button size="sm" variant="outline" onClick={handleRoughCostingExport} disabled={exportingRoughCosting}
+                  className="h-7 border-white/30 bg-white/10 px-2.5 text-[12px] text-white hover:bg-white/20 hover:text-white disabled:opacity-50">
+                  <Download /> Rough Costing
+                </Button>
+              )}
               <Button size="sm" variant="outline" onClick={handleExportAll} disabled={exportingAll}
                 className="h-7 border-white/30 bg-white/10 px-2.5 text-[12px] text-white hover:bg-white/20 hover:text-white disabled:opacity-50">
                 <Download /> Export ({totalCount})

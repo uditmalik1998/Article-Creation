@@ -58,7 +58,7 @@ function buildImData(row: any, mcDetails: { mcCode: string | null; hsnCode: stri
         M_SUB_STYLE_BLT:      str(row.mBltStyle),
         M_SLEEVES_MAIN_STYLE: str(row.mSleevesMainStyle),
         M_BTM_FOLD:           str(row.mBtmFold),
-        M_NECK_BAND:          str(row.mNeckType),
+        M_NECK_BAND:          '',
         M_FO_BTN_STYLE:       '',
         NO_OF_POCKET:         str(row.mNoOfPocket),
         M_POCKET:             str(row.mPocket),

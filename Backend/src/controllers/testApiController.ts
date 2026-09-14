@@ -17,6 +17,11 @@ import {
   getRawArticlePipelineStatus,
   isExtractionRunning,
 } from '../services/rawArticleExtractionService';
+import {
+  runFabricRawDataProcessing,
+  getFabricRawPipelineStatus,
+  isFabricRawRunning,
+} from '../services/fabricRawDataService';
 
 // ── SRM Paginated API (same as srmSyncService) ────────────────────────────────
 const SRM_API_BASE   = 'https://pymdqnnwwxrgeolvgvgv.supabase.co/functions/v1/srm-presentation-images-api';
@@ -411,4 +416,39 @@ export const runExtraction = async (req: Request, res: Response): Promise<void> 
 export const getPipelineStatus = async (_req: Request, res: Response): Promise<void> => {
   const status = await getRawArticlePipelineStatus();
   res.json({ success: true, data: status });
+};
+
+// ─────────────────────────────────────────────────────────────────────────────
+
+/**
+ * GET /api/test-api/fabric-raw-pipeline-status
+ * Returns fabric_raw_data counts grouped by status.
+ */
+export const getFabricRawStatus = async (_req: Request, res: Response): Promise<void> => {
+  const status = await getFabricRawPipelineStatus();
+  res.json({ success: true, data: status });
+};
+
+/**
+ * POST /api/test-api/run-fabric-raw-processing
+ * Triggers the fabric_raw_data → fabric_article_data processing worker.
+ * Returns immediately if a run is already in progress.
+ */
+export const runFabricRawProcessing = async (_req: Request, res: Response): Promise<void> => {
+  if (isFabricRawRunning()) {
+    res.status(409).json({
+      success: false,
+      error: 'Fabric raw processing worker is already running. Try again once it completes.',
+    });
+    return;
+  }
+
+  runFabricRawDataProcessing('ADMIN_MANUAL').catch(err => {
+    console.error('[TestAPI] Fabric raw processing error:', err.message);
+  });
+
+  res.json({
+    success: true,
+    message: 'Fabric raw processing started in background. Check pipeline status in a few seconds.',
+  });
 };

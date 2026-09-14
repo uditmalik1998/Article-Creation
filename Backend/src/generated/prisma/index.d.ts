@@ -55083,6 +55083,7 @@ export namespace Prisma {
     sapSyncMessage: string | null
     imageUrl: string | null
     fabricArticleType: string | null
+    source: string | null
     userName: string | null
     createdAt: Date | null
     updatedAt: Date | null
@@ -55125,6 +55126,7 @@ export namespace Prisma {
     sapSyncMessage: string | null
     imageUrl: string | null
     fabricArticleType: string | null
+    source: string | null
     userName: string | null
     createdAt: Date | null
     updatedAt: Date | null
@@ -55167,6 +55169,7 @@ export namespace Prisma {
     sapSyncMessage: number
     imageUrl: number
     fabricArticleType: number
+    source: number
     userName: number
     createdAt: number
     updatedAt: number
@@ -55225,6 +55228,7 @@ export namespace Prisma {
     sapSyncMessage?: true
     imageUrl?: true
     fabricArticleType?: true
+    source?: true
     userName?: true
     createdAt?: true
     updatedAt?: true
@@ -55267,6 +55271,7 @@ export namespace Prisma {
     sapSyncMessage?: true
     imageUrl?: true
     fabricArticleType?: true
+    source?: true
     userName?: true
     createdAt?: true
     updatedAt?: true
@@ -55309,6 +55314,7 @@ export namespace Prisma {
     sapSyncMessage?: true
     imageUrl?: true
     fabricArticleType?: true
+    source?: true
     userName?: true
     createdAt?: true
     updatedAt?: true
@@ -55438,6 +55444,7 @@ export namespace Prisma {
     sapSyncMessage: string | null
     imageUrl: string | null
     fabricArticleType: string | null
+    source: string | null
     userName: string | null
     createdAt: Date
     updatedAt: Date
@@ -55499,6 +55506,7 @@ export namespace Prisma {
     sapSyncMessage?: boolean
     imageUrl?: boolean
     fabricArticleType?: boolean
+    source?: boolean
     userName?: boolean
     createdAt?: boolean
     updatedAt?: boolean
@@ -55541,6 +55549,7 @@ export namespace Prisma {
     sapSyncMessage?: boolean
     imageUrl?: boolean
     fabricArticleType?: boolean
+    source?: boolean
     userName?: boolean
     createdAt?: boolean
     updatedAt?: boolean
@@ -55583,6 +55592,7 @@ export namespace Prisma {
     sapSyncMessage?: boolean
     imageUrl?: boolean
     fabricArticleType?: boolean
+    source?: boolean
     userName?: boolean
     createdAt?: boolean
     updatedAt?: boolean
@@ -55625,12 +55635,13 @@ export namespace Prisma {
     sapSyncMessage?: boolean
     imageUrl?: boolean
     fabricArticleType?: boolean
+    source?: boolean
     userName?: boolean
     createdAt?: boolean
     updatedAt?: boolean
   }
 
-  export type FabricArticleDataOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<"id" | "mFabDiv" | "mYarn" | "mFabMainMvgr1" | "mFabMainMvgr2" | "mConstruction" | "mOunz" | "mWidth" | "mWeave02" | "mCount" | "mWeave01" | "mComposition" | "mFinish" | "mGsm" | "mLycra" | "fabricArticleNumber" | "fabricArticleDescription" | "flatId" | "division" | "subDivision" | "majorCategory" | "mcDescription" | "vendorName" | "vendorCode" | "designNumber" | "fabricRate" | "v2FabricRate" | "valueAddCost" | "articleFashionType" | "approvalStatus" | "approvedAt" | "approvedBy" | "sapSyncStatus" | "sapSyncMessage" | "imageUrl" | "fabricArticleType" | "userName" | "createdAt" | "updatedAt", ExtArgs["result"]["fabricArticleData"]>
+  export type FabricArticleDataOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<"id" | "mFabDiv" | "mYarn" | "mFabMainMvgr1" | "mFabMainMvgr2" | "mConstruction" | "mOunz" | "mWidth" | "mWeave02" | "mCount" | "mWeave01" | "mComposition" | "mFinish" | "mGsm" | "mLycra" | "fabricArticleNumber" | "fabricArticleDescription" | "flatId" | "division" | "subDivision" | "majorCategory" | "mcDescription" | "vendorName" | "vendorCode" | "designNumber" | "fabricRate" | "v2FabricRate" | "valueAddCost" | "articleFashionType" | "approvalStatus" | "approvedAt" | "approvedBy" | "sapSyncStatus" | "sapSyncMessage" | "imageUrl" | "fabricArticleType" | "source" | "userName" | "createdAt" | "updatedAt", ExtArgs["result"]["fabricArticleData"]>
 
   export type $FabricArticleDataPayload<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
     name: "FabricArticleData"
@@ -55672,6 +55683,7 @@ export namespace Prisma {
       sapSyncMessage: string | null
       imageUrl: string | null
       fabricArticleType: string | null
+      source: string | null
       userName: string | null
       createdAt: Date
       updatedAt: Date
@@ -56134,6 +56146,7 @@ export namespace Prisma {
     readonly sapSyncMessage: FieldRef<"FabricArticleData", 'String'>
     readonly imageUrl: FieldRef<"FabricArticleData", 'String'>
     readonly fabricArticleType: FieldRef<"FabricArticleData", 'String'>
+    readonly source: FieldRef<"FabricArticleData", 'String'>
     readonly userName: FieldRef<"FabricArticleData", 'String'>
     readonly createdAt: FieldRef<"FabricArticleData", 'DateTime'>
     readonly updatedAt: FieldRef<"FabricArticleData", 'DateTime'>
@@ -65981,6 +65994,7 @@ export namespace Prisma {
     sapSyncMessage: 'sapSyncMessage',
     imageUrl: 'imageUrl',
     fabricArticleType: 'fabricArticleType',
+    source: 'source',
     userName: 'userName',
     createdAt: 'createdAt',
     updatedAt: 'updatedAt'
@@ -66908,6 +66922,7 @@ export namespace Prisma {
     sapSyncMessage: 'sapSyncMessage',
     imageUrl: 'imageUrl',
     fabricArticleType: 'fabricArticleType',
+    source: 'source',
     userName: 'userName'
   };
 
@@ -72248,6 +72263,7 @@ export namespace Prisma {
     sapSyncMessage?: StringNullableFilter<"FabricArticleData"> | string | null
     imageUrl?: StringNullableFilter<"FabricArticleData"> | string | null
     fabricArticleType?: StringNullableFilter<"FabricArticleData"> | string | null
+    source?: StringNullableFilter<"FabricArticleData"> | string | null
     userName?: StringNullableFilter<"FabricArticleData"> | string | null
     createdAt?: DateTimeFilter<"FabricArticleData"> | Date | string
     updatedAt?: DateTimeFilter<"FabricArticleData"> | Date | string
@@ -72290,6 +72306,7 @@ export namespace Prisma {
     sapSyncMessage?: SortOrderInput | SortOrder
     imageUrl?: SortOrderInput | SortOrder
     fabricArticleType?: SortOrderInput | SortOrder
+    source?: SortOrderInput | SortOrder
     userName?: SortOrderInput | SortOrder
     createdAt?: SortOrder
     updatedAt?: SortOrder
@@ -72336,6 +72353,7 @@ export namespace Prisma {
     sapSyncMessage?: StringNullableFilter<"FabricArticleData"> | string | null
     imageUrl?: StringNullableFilter<"FabricArticleData"> | string | null
     fabricArticleType?: StringNullableFilter<"FabricArticleData"> | string | null
+    source?: StringNullableFilter<"FabricArticleData"> | string | null
     userName?: StringNullableFilter<"FabricArticleData"> | string | null
     createdAt?: DateTimeFilter<"FabricArticleData"> | Date | string
     updatedAt?: DateTimeFilter<"FabricArticleData"> | Date | string
@@ -72378,6 +72396,7 @@ export namespace Prisma {
     sapSyncMessage?: SortOrderInput | SortOrder
     imageUrl?: SortOrderInput | SortOrder
     fabricArticleType?: SortOrderInput | SortOrder
+    source?: SortOrderInput | SortOrder
     userName?: SortOrderInput | SortOrder
     createdAt?: SortOrder
     updatedAt?: SortOrder
@@ -72428,6 +72447,7 @@ export namespace Prisma {
     sapSyncMessage?: StringNullableWithAggregatesFilter<"FabricArticleData"> | string | null
     imageUrl?: StringNullableWithAggregatesFilter<"FabricArticleData"> | string | null
     fabricArticleType?: StringNullableWithAggregatesFilter<"FabricArticleData"> | string | null
+    source?: StringNullableWithAggregatesFilter<"FabricArticleData"> | string | null
     userName?: StringNullableWithAggregatesFilter<"FabricArticleData"> | string | null
     createdAt?: DateTimeWithAggregatesFilter<"FabricArticleData"> | Date | string
     updatedAt?: DateTimeWithAggregatesFilter<"FabricArticleData"> | Date | string
@@ -79130,6 +79150,7 @@ export namespace Prisma {
     sapSyncMessage?: string | null
     imageUrl?: string | null
     fabricArticleType?: string | null
+    source?: string | null
     userName?: string | null
     createdAt?: Date | string
     updatedAt?: Date | string
@@ -79172,6 +79193,7 @@ export namespace Prisma {
     sapSyncMessage?: string | null
     imageUrl?: string | null
     fabricArticleType?: string | null
+    source?: string | null
     userName?: string | null
     createdAt?: Date | string
     updatedAt?: Date | string
@@ -79214,6 +79236,7 @@ export namespace Prisma {
     sapSyncMessage?: NullableStringFieldUpdateOperationsInput | string | null
     imageUrl?: NullableStringFieldUpdateOperationsInput | string | null
     fabricArticleType?: NullableStringFieldUpdateOperationsInput | string | null
+    source?: NullableStringFieldUpdateOperationsInput | string | null
     userName?: NullableStringFieldUpdateOperationsInput | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
@@ -79256,6 +79279,7 @@ export namespace Prisma {
     sapSyncMessage?: NullableStringFieldUpdateOperationsInput | string | null
     imageUrl?: NullableStringFieldUpdateOperationsInput | string | null
     fabricArticleType?: NullableStringFieldUpdateOperationsInput | string | null
+    source?: NullableStringFieldUpdateOperationsInput | string | null
     userName?: NullableStringFieldUpdateOperationsInput | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
@@ -79298,6 +79322,7 @@ export namespace Prisma {
     sapSyncMessage?: string | null
     imageUrl?: string | null
     fabricArticleType?: string | null
+    source?: string | null
     userName?: string | null
     createdAt?: Date | string
     updatedAt?: Date | string
@@ -79340,6 +79365,7 @@ export namespace Prisma {
     sapSyncMessage?: NullableStringFieldUpdateOperationsInput | string | null
     imageUrl?: NullableStringFieldUpdateOperationsInput | string | null
     fabricArticleType?: NullableStringFieldUpdateOperationsInput | string | null
+    source?: NullableStringFieldUpdateOperationsInput | string | null
     userName?: NullableStringFieldUpdateOperationsInput | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
@@ -79382,6 +79408,7 @@ export namespace Prisma {
     sapSyncMessage?: NullableStringFieldUpdateOperationsInput | string | null
     imageUrl?: NullableStringFieldUpdateOperationsInput | string | null
     fabricArticleType?: NullableStringFieldUpdateOperationsInput | string | null
+    source?: NullableStringFieldUpdateOperationsInput | string | null
     userName?: NullableStringFieldUpdateOperationsInput | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
@@ -84441,6 +84468,7 @@ export namespace Prisma {
     sapSyncMessage?: SortOrder
     imageUrl?: SortOrder
     fabricArticleType?: SortOrder
+    source?: SortOrder
     userName?: SortOrder
     createdAt?: SortOrder
     updatedAt?: SortOrder
@@ -84490,6 +84518,7 @@ export namespace Prisma {
     sapSyncMessage?: SortOrder
     imageUrl?: SortOrder
     fabricArticleType?: SortOrder
+    source?: SortOrder
     userName?: SortOrder
     createdAt?: SortOrder
     updatedAt?: SortOrder
@@ -84532,6 +84561,7 @@ export namespace Prisma {
     sapSyncMessage?: SortOrder
     imageUrl?: SortOrder
     fabricArticleType?: SortOrder
+    source?: SortOrder
     userName?: SortOrder
     createdAt?: SortOrder
     updatedAt?: SortOrder

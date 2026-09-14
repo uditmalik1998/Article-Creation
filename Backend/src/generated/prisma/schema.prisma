@@ -1483,6 +1483,7 @@ model FabricArticleData {
   // Media & classification
   imageUrl          String? @map("image_url") @db.Text
   fabricArticleType String? @map("fabric_article_type") @db.VarChar(100)
+  source            String? @map("source") @db.VarChar(50)
 
   // Audit
   userName  String?  @map("user_name") @db.VarChar(200)
