@@ -1447,6 +1447,216 @@ export class ApproverController {
         }
     }
 
+    // Rough Costing Excel export — for FG Created articles.
+    // Produces 5 rows per article: 1 summary row + 4 component rows (Fab_art, Body Article, Basic Trim Cost, Val add cos).
+    // Joins body_article_data (by bodyArticleNumber) and fabric_article_data (by fabricArticleNumber) for cost data.
+    static async roughCostingExport(req: Request, res: Response) {
+        try {
+            const where = ApproverController.buildExportWhere(req);
+
+            const fgArticles = await prisma.extractionResultFlat.findMany({
+                where,
+                orderBy: { approvedAt: { sort: 'desc', nulls: 'last' } },
+                select: {
+                    id: true,
+                    sapArticleId: true,
+                    articleNumber: true,
+                    articleDescription: true,
+                    division: true,
+                    subDivision: true,
+                    majorCategory: true,
+                    mrp: true,
+                    segment: true,
+                    vendorCode: true,
+                    vendorName: true,
+                    fabricArticleNumber: true,
+                    fabricArticleDescription: true,
+                    bodyArticle: true,
+                    bodyArticleDescription: true,
+                    vendorFabricRate: true,
+                    valueAddCost: true,
+                    approvedAt: true,
+                    approver: { select: { name: true } },
+                },
+            });
+
+            // Batch-load body_article_data by body article number
+            const bodyNums = [...new Set(fgArticles.map(a => a.bodyArticle).filter(Boolean) as string[])];
+            const bodyRows = bodyNums.length > 0
+                ? await prisma.bodyArticleData.findMany({
+                    where: { bodyArticleNumber: { in: bodyNums } },
+                    select: { bodyArticleNumber: true, fabCons: true, basicTrimCost: true, cmpCost: true },
+                })
+                : [];
+            const bodyMap = new Map(bodyRows.map(r => [r.bodyArticleNumber!, r]));
+
+            // Batch-load fabric_article_data by fabric article number
+            const fabricNums = [...new Set(fgArticles.map(a => a.fabricArticleNumber).filter(Boolean) as string[])];
+            const fabricRows = fabricNums.length > 0
+                ? await prisma.fabricArticleData.findMany({
+                    where: { fabricArticleNumber: { in: fabricNums } },
+                    select: { fabricArticleNumber: true, v2FabricRate: true, valueAddCost: true },
+                })
+                : [];
+            const fabricMap = new Map(fabricRows.map(r => [r.fabricArticleNumber!, r]));
+
+            const ExcelJS = (await import('exceljs')).default;
+            const wb = new ExcelJS.Workbook();
+            const ws = wb.addWorksheet('Rough Costing');
+
+            // Column widths
+            const colWidths = [14, 10, 14, 16, 16, 32, 8, 10, 12, 24, 16, 18, 28, 8, 10, 10, 8, 10, 10, 8, 20];
+            colWidths.forEach((w, i) => { ws.getColumn(i + 1).width = w; });
+
+            // Row 1: title
+            ws.addRow(['Rough Costing Report']);
+            ws.getCell('A1').font = { bold: true, size: 13 };
+
+            // Row 2: group headers above Vdr/V2 columns
+            const grpRow = ws.addRow([null, null, null, null, null, null, null, null, null, null, null, null, null, 'Vendor', 'Vendor', 'Vendor', 'v2', 'v2', 'v2']);
+            [14, 15, 16].forEach(c => {
+                const cell = grpRow.getCell(c);
+                cell.alignment = { horizontal: 'center' };
+                cell.fill = { type: 'pattern', pattern: 'solid', fgColor: { argb: 'FFDCE6F1' } };
+            });
+            [17, 18, 19].forEach(c => {
+                const cell = grpRow.getCell(c);
+                cell.font = { bold: true };
+                cell.alignment = { horizontal: 'center' };
+                cell.fill = { type: 'pattern', pattern: 'solid', fgColor: { argb: 'FFE2EFDA' } };
+            });
+
+            // Row 3: column headers
+            const headers = [
+                'FG Article Date', 'Division', 'Sub Division', 'Major Category',
+                'Fg Article No.', 'Fg Article Description', 'MRP', 'Segment',
+                'Vendor Code', 'Vendor Name',
+                'Comp Description', 'Comp Article Number', 'Comp Article Description',
+                'Cons', 'Vdr Rate', 'Cost',
+                'Cons', 'V2 Rate', 'Cost',
+                'Diff', 'FG Approved By',
+            ];
+            const hdrRow = ws.addRow(headers);
+            hdrRow.eachCell(cell => {
+                cell.font = { bold: true };
+                cell.fill = { type: 'pattern', pattern: 'solid', fgColor: { argb: 'FF4F81BD' } };
+                cell.font = { bold: true, color: { argb: 'FFFFFFFF' } };
+                cell.border = { bottom: { style: 'thin' } };
+            });
+
+            const toNum = (v: any) => v == null ? null : Number(v);
+            const fmtDate = (d: Date | null | undefined) => d ? new Date(d).toLocaleDateString('en-GB') : '';
+
+            let dataRow = 4; // next row index (1-based) after 3 header rows
+
+            for (const a of fgArticles) {
+                const bodyData = a.bodyArticle ? bodyMap.get(a.bodyArticle) : null;
+                const fabricData = a.fabricArticleNumber ? fabricMap.get(a.fabricArticleNumber) : null;
+
+                const fgNum = a.sapArticleId || a.articleNumber || '';
+                const fabCons = toNum(bodyData?.fabCons);
+                const vdrRate = toNum(a.vendorFabricRate);
+                const v2Rate = toNum(fabricData?.v2FabricRate);
+                const basicTrim = toNum(bodyData?.basicTrimCost);
+                const cmpCost = toNum(bodyData?.cmpCost);
+                const fgValAdd = toNum(a.valueAddCost);
+                const fabValAdd = toNum(fabricData?.valueAddCost);
+
+                const summaryRowNum = dataRow;
+                const compStart = dataRow + 1;
+                const compEnd = dataRow + 4;
+
+                // Common FG columns A–J for all 5 rows
+                const fgCols = [
+                    fmtDate(a.approvedAt),
+                    a.division || '', a.subDivision || '', a.majorCategory || '',
+                    fgNum, a.articleDescription || '',
+                    toNum(a.mrp), a.segment || '',
+                    a.vendorCode || '', a.vendorName || '',
+                ];
+
+                // Summary row
+                const sumRow = ws.addRow([
+                    ...fgCols,
+                    null, null, null, null, null,
+                    { formula: `SUM(P${compStart}:P${compEnd})` },
+                    null, null,
+                    { formula: `SUM(S${compStart}:S${compEnd})` },
+                    { formula: `P${summaryRowNum}-S${summaryRowNum}` },
+                    a.approver?.name || '',
+                ]);
+                sumRow.getCell(16).numFmt = '#,##0.00';
+                sumRow.getCell(19).numFmt = '#,##0.00';
+                sumRow.getCell(20).numFmt = '#,##0.00';
+                sumRow.font = { bold: true };
+                sumRow.fill = { type: 'pattern', pattern: 'solid', fgColor: { argb: 'FFFFFACD' } };
+                dataRow++;
+
+                // Fabric Article row
+                const fabRow = ws.addRow([
+                    ...fgCols,
+                    'Fabric Article', a.fabricArticleNumber || '', a.fabricArticleNumber ? (a.fabricArticleDescription || '') : '',
+                    fabCons, vdrRate,
+                    fabCons != null && vdrRate != null ? { formula: `N${dataRow}*O${dataRow}` } : null,
+                    fabCons, v2Rate,
+                    fabCons != null && v2Rate != null ? { formula: `Q${dataRow}*R${dataRow}` } : null,
+                    null, null,
+                ]);
+                [14, 15, 16, 17, 18, 19].forEach(c => { fabRow.getCell(c).numFmt = '#,##0.00'; });
+                dataRow++;
+
+                // Body Article row
+                const bodyRow = ws.addRow([
+                    ...fgCols,
+                    'Body Article', a.bodyArticle || '', a.bodyArticle ? (a.bodyArticleDescription || '') : '',
+                    fabCons, null, cmpCost,
+                    fabCons, null, cmpCost,
+                    null, null,
+                ]);
+                [14, 16, 17, 19].forEach(c => { bodyRow.getCell(c).numFmt = '#,##0.00'; });
+                dataRow++;
+
+                // Basic Trim Cost row
+                const trimRow = ws.addRow([
+                    ...fgCols,
+                    'Basic Trim Cost', null, null,
+                    null, null, basicTrim,
+                    null, null, basicTrim,
+                    null, null,
+                ]);
+                [16, 19].forEach(c => { trimRow.getCell(c).numFmt = '#,##0.00'; });
+                dataRow++;
+
+                // Value Addition Cost row
+                const valRow = ws.addRow([
+                    ...fgCols,
+                    'Value Addition Cost', null, null,
+                    null, null, fgValAdd,
+                    null, null, fabValAdd,
+                    null, null,
+                ]);
+                [16, 19].forEach(c => { valRow.getCell(c).numFmt = '#,##0.00'; });
+
+                // Light grey separator between articles
+                [summaryRowNum, summaryRowNum + 1, summaryRowNum + 2, summaryRowNum + 3, summaryRowNum + 4].forEach(rn => {
+                    ws.getRow(rn).getCell(1).border = { left: { style: 'medium', color: { argb: 'FFAAAAAA' } } };
+                });
+
+                dataRow++;
+            }
+
+            const buf = await wb.xlsx.writeBuffer();
+            const fileName = `Rough_Costing_${new Date().toISOString().slice(0, 10)}.xlsx`;
+            res.setHeader('Content-Type', 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');
+            res.setHeader('Content-Disposition', `attachment; filename="${fileName}"`);
+            return res.send(Buffer.from(buf));
+        } catch (error) {
+            console.error('Error in roughCostingExport:', error);
+            if (res.headersSent) return;
+            return res.status(500).json({ error: 'Failed to generate rough costing report' });
+        }
+    }
+
     // Get master attributes for dropdowns
     static async getAttributes(req: Request, res: Response) {
         try {

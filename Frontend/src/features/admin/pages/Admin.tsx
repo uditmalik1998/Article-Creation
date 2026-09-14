@@ -218,6 +218,11 @@ export default function Admin() {
   const [extractionRunning, setExtractionRunning] = useState(false);
   const [extractionMessage, setExtractionMessage] = useState<string | null>(null);
 
+  const [fabricRawStatus, setFabricRawStatus] = useState<{ PENDING: number; PROCESSING: number; COMPLETED: number; FAILED: number; total: number } | null>(null);
+  const [fabricRawStatusLoading, setFabricRawStatusLoading] = useState(false);
+  const [fabricRawRunning, setFabricRawRunning] = useState(false);
+  const [fabricRawMessage, setFabricRawMessage] = useState<string | null>(null);
+
   // Maj-Cat Grid
   const [majCatGridMeta, setMajCatGridMeta] = useState<MajCatGridMeta | null>(null);
   const [majCatGridStatusLoading, setMajCatGridStatusLoading] = useState(false);
@@ -376,6 +381,49 @@ export default function Admin() {
       setPipelineStatusLoading(false);
     }
   }, []);
+
+  const loadFabricRawStatus = useCallback(async () => {
+    setFabricRawStatusLoading(true);
+    try {
+      const token = localStorage.getItem('authToken');
+      const res = await fetch(`${APP_CONFIG.api.baseURL}/test-api/fabric-raw-pipeline-status`, {
+        headers: token ? { Authorization: `Bearer ${token}` } : {},
+      });
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.error || 'Failed to load fabric raw pipeline status');
+      setFabricRawStatus(data.data);
+    } catch (err: any) {
+      message.error(err?.message || 'Failed to load fabric raw pipeline status');
+    } finally {
+      setFabricRawStatusLoading(false);
+    }
+  }, []);
+
+  const triggerFabricRawProcessing = async () => {
+    setFabricRawRunning(true);
+    setFabricRawMessage(null);
+    try {
+      const token = localStorage.getItem('authToken');
+      const res = await fetch(`${APP_CONFIG.api.baseURL}/test-api/run-fabric-raw-processing`, {
+        method: 'POST',
+        headers: token ? { Authorization: `Bearer ${token}` } : {},
+      });
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.error || 'Failed to start processing');
+      setFabricRawMessage(data.message);
+      message.success(data.message);
+      let polls = 0;
+      const pollInterval = setInterval(async () => {
+        polls++;
+        await loadFabricRawStatus();
+        if (polls >= 12) clearInterval(pollInterval);
+      }, 5000);
+    } catch (err: any) {
+      message.error(err?.message || 'Failed to start processing');
+    } finally {
+      setFabricRawRunning(false);
+    }
+  };
 
   const runTestApiFetch = async () => {
     if (testFetchMode === 'date') {
@@ -1408,8 +1456,9 @@ export default function Admin() {
     loadNationalGridStatus();
     loadHierarchyExcelStatus();
     loadPipelineStatus();
+    loadFabricRawStatus();
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [loadVendorStatus, loadMajCatGridStatus, loadMandatoryGridStatus, loadSizeMasterStatus, loadColorMasterStatus, loadFabricArticleDataStatus, loadFabricArticleMasterStatus, loadBodyArticleDataStatus, loadBroaderMenuStatus, loadSegmentMasterStatus, loadNationalGridStatus, loadHierarchyExcelStatus, loadPipelineStatus]);
+  }, [loadVendorStatus, loadMajCatGridStatus, loadMandatoryGridStatus, loadSizeMasterStatus, loadColorMasterStatus, loadFabricArticleDataStatus, loadFabricArticleMasterStatus, loadBodyArticleDataStatus, loadBroaderMenuStatus, loadSegmentMasterStatus, loadNationalGridStatus, loadHierarchyExcelStatus, loadPipelineStatus, loadFabricRawStatus]);
 
   const loadData = async () => {
     setLoading(true);
@@ -1786,6 +1835,71 @@ export default function Admin() {
                 }
               />
             )}
+          </CardContent>
+        </Card>
+
+        {/* fabric_raw_data Pipeline */}
+        <Card className="mb-6 glass rounded-2xl border border-sky-300/60">
+          <CardHeader className="flex flex-row items-center justify-between bg-sky-50/60">
+            <CardTitle className="flex items-center gap-2 text-base">
+              <Search className="h-4 w-4" />
+              fabric_raw_data Pipeline
+            </CardTitle>
+            <div className="flex gap-2">
+              <Button size="sm" variant="outline" onClick={() => navigate('/admin/expense/fabric-article-data')}>
+                <Eye />
+                View Data
+              </Button>
+              <Button size="sm" variant="outline" onClick={loadFabricRawStatus} disabled={fabricRawStatusLoading}>
+                <RotateCw className={fabricRawStatusLoading ? 'animate-spin' : ''} />
+                Refresh Status
+              </Button>
+            </div>
+          </CardHeader>
+          <CardContent className="pt-4">
+            <div className="mb-2.5 text-[13px] font-semibold">Pipeline Status</div>
+            {fabricRawStatus ? (
+              <div className="flex flex-wrap items-center gap-2.5">
+                <Tag className="px-2.5 py-0.5 text-[13px]" bgColor="#fef3c7" color="#92400e" borderColor="#fde68a">
+                  PENDING: <strong className="ml-1">{fabricRawStatus.PENDING}</strong>
+                </Tag>
+                <Tag className="px-2.5 py-0.5 text-[13px]" bgColor="#dbeafe" color="#1e40af" borderColor="#bfdbfe">
+                  PROCESSING: <strong className="ml-1">{fabricRawStatus.PROCESSING}</strong>
+                </Tag>
+                <Tag className="px-2.5 py-0.5 text-[13px]" bgColor="#d1fae5" color="#065f46" borderColor="#a7f3d0">
+                  COMPLETED: <strong className="ml-1">{fabricRawStatus.COMPLETED}</strong>
+                </Tag>
+                <Tag className="px-2.5 py-0.5 text-[13px]" bgColor="#fee2e2" color="#991b1b" borderColor="#fecaca">
+                  FAILED: <strong className="ml-1">{fabricRawStatus.FAILED}</strong>
+                </Tag>
+                <Tag className="px-2.5 py-0.5 text-[13px]">
+                  TOTAL: <strong className="ml-1">{fabricRawStatus.total}</strong>
+                </Tag>
+                <Popconfirm
+                  title="Run Fabric Raw Processing?"
+                  description="This will process up to 20 PENDING rows: upload images to R2 and save records to fabric_article_data. Runs in background."
+                  onConfirm={triggerFabricRawProcessing}
+                  okText="Yes, run now"
+                  cancelText="Cancel"
+                  disabled={fabricRawStatus.PENDING === 0}
+                >
+                  <Button
+                    disabled={fabricRawRunning || fabricRawStatus.PENDING === 0}
+                    className="bg-sky-600 hover:bg-sky-700"
+                  >
+                    <RefreshCw className={fabricRawRunning ? 'animate-spin' : ''} />
+                    {fabricRawRunning
+                      ? 'Starting...'
+                      : `Run Processing (${fabricRawStatus.PENDING} queued)`}
+                  </Button>
+                </Popconfirm>
+              </div>
+            ) : (
+              <Spinner spinning={fabricRawStatusLoading}>
+                <span className="text-[13px] text-muted-foreground">Loading pipeline status...</span>
+              </Spinner>
+            )}
+            {fabricRawMessage && <Alert type="info" showIcon className="mt-2.5" message={fabricRawMessage} />}
           </CardContent>
         </Card>
 

@@ -32,6 +32,9 @@ router.get('/items', h(ApproverController.getItems));
 // Export ALL items matching current filters (capped at 10k rows)
 router.get('/items/export-all', h(ApproverController.exportAll));
 
+// Rough Costing Excel report — for FG Created articles
+router.get('/items/rough-costing-export', h(ApproverController.roughCostingExport));
+
 // Export ALL items with SAP-created variants interleaved (generic row then its variant rows)
 router.get('/items/export-all-with-variants', h(ApproverController.exportAllWithVariants));
 

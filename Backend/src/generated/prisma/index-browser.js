@@ -987,6 +987,7 @@ exports.Prisma.FabricArticleDataScalarFieldEnum = {
   sapSyncMessage: 'sapSyncMessage',
   imageUrl: 'imageUrl',
   fabricArticleType: 'fabricArticleType',
+  source: 'source',
   userName: 'userName',
   createdAt: 'createdAt',
   updatedAt: 'updatedAt'
@@ -1755,6 +1756,7 @@ exports.Prisma.FabricArticleDataOrderByRelevanceFieldEnum = {
   sapSyncMessage: 'sapSyncMessage',
   imageUrl: 'imageUrl',
   fabricArticleType: 'fabricArticleType',
+  source: 'source',
   userName: 'userName'
 };
 

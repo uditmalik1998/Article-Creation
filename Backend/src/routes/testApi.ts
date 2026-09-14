@@ -13,6 +13,8 @@ import {
   runExtraction,
   getPipelineStatus,
   getRawArticles,
+  getFabricRawStatus,
+  runFabricRawProcessing,
 } from '../controllers/testApiController';
 
 const router = Router();
@@ -48,5 +50,17 @@ router.get('/pipeline-status', asyncHandler(getPipelineStatus));
  * Lists raw_articles rows (optionally filtered by ppt_no).
  */
 router.get('/raw-articles', asyncHandler(getRawArticles));
+
+/**
+ * GET /api/test-api/fabric-raw-pipeline-status
+ * Returns fabric_raw_data counts grouped by status.
+ */
+router.get('/fabric-raw-pipeline-status', asyncHandler(getFabricRawStatus));
+
+/**
+ * POST /api/test-api/run-fabric-raw-processing
+ * Triggers the fabric_raw_data → fabric_article_data processing worker.
+ */
+router.post('/run-fabric-raw-processing', asyncHandler(runFabricRawProcessing));
 
 export default router;
