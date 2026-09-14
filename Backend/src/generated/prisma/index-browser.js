@@ -1022,6 +1022,7 @@ exports.Prisma.BodyArticleDataScalarFieldEnum = {
   fabCons: 'fabCons',
   width: 'width',
   basicTrimCost: 'basicTrimCost',
+  roughCmpCost: 'roughCmpCost',
   flatId: 'flatId',
   articleNumber: 'articleNumber',
   division: 'division',
@@ -1040,6 +1041,16 @@ exports.Prisma.BodyArticleDataScalarFieldEnum = {
   sapSyncStatus: 'sapSyncStatus',
   sapSyncMessage: 'sapSyncMessage',
   userName: 'userName',
+  createdAt: 'createdAt',
+  updatedAt: 'updatedAt'
+};
+
+exports.Prisma.RoughCmpCostMasterScalarFieldEnum = {
+  id: 'id',
+  div: 'div',
+  subDiv: 'subDiv',
+  majCat: 'majCat',
+  cmpCost: 'cmpCost',
   createdAt: 'createdAt',
   updatedAt: 'updatedAt'
 };
@@ -1789,6 +1800,12 @@ exports.Prisma.BodyArticleDataOrderByRelevanceFieldEnum = {
   userName: 'userName'
 };
 
+exports.Prisma.RoughCmpCostMasterOrderByRelevanceFieldEnum = {
+  div: 'div',
+  subDiv: 'subDiv',
+  majCat: 'majCat'
+};
+
 exports.Prisma.MajorCategoryDetailsOrderByRelevanceFieldEnum = {
   seg: 'seg',
   div: 'div',
@@ -1986,6 +2003,7 @@ exports.Prisma.ModelName = {
   ModifyLog: 'ModifyLog',
   FabricArticleData: 'FabricArticleData',
   BodyArticleData: 'BodyArticleData',
+  RoughCmpCostMaster: 'RoughCmpCostMaster',
   MajorCategoryDetails: 'MajorCategoryDetails',
   ExpenseApprovalStage: 'ExpenseApprovalStage',
   ExpenseChangeRequest: 'ExpenseChangeRequest',

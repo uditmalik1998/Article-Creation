@@ -344,6 +344,7 @@ export const EXPENSE_TABLE_CONFIGS: Record<string, ExpenseTableConfig> = {
       { dataIndex: 'fabCost', title: 'Fab Cost', align: 'right' },
       { dataIndex: 'fabCons', title: 'Fab Cons', align: 'right' },
       { dataIndex: 'width', title: 'Width', align: 'right' },
+      { dataIndex: 'roughCmpCost', title: 'Rough CMP Cost', align: 'right' },
       { dataIndex: 'approvalStatus', title: 'Approval Status', editable: false },
       { dataIndex: 'approvedAt', title: 'Approved At', type: 'date', editable: false },
       { dataIndex: 'approvedBy', title: 'Approved By (User ID)', editable: false },

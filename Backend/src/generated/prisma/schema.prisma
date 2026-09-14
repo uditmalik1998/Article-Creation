@@ -1536,6 +1536,7 @@ model BodyArticleData {
   fabCons       Decimal? @map("fab_cons") @db.Decimal(10, 2)
   width         Decimal? @map("width") @db.Decimal(10, 2)
   basicTrimCost Decimal? @map("basic_trim_cost") @db.Decimal(10, 2)
+  roughCmpCost  Decimal? @map("rough_cmp_cost") @db.Decimal(10, 2)
 
   // Article context (mirrored from parent extraction_results_flat row)
   flatId        String? @map("flat_id") @db.VarChar(100)
@@ -1572,6 +1573,22 @@ model BodyArticleData {
   @@index([articleNumber])
   @@index([createdAt(sort: Desc)])
   @@map("body_article_data")
+  @@schema("public")
+}
+
+/// RoughCmpCostMaster: Master table for rough CMP cost by division, sub-division, and major category
+model RoughCmpCostMaster {
+  id        Int      @id @default(autoincrement())
+  div       String?  @map("div") @db.VarChar(50)
+  subDiv    String?  @map("sub_div") @db.VarChar(50)
+  majCat    String   @map("maj_cat") @db.VarChar(100)
+  cmpCost   Decimal? @map("cmp_cost") @db.Decimal(10, 4)
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
+
+  @@unique([div, subDiv, majCat])
+  @@index([majCat])
+  @@map("rough_cmp_cost_master")
   @@schema("public")
 }
 

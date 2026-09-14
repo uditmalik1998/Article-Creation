@@ -3104,6 +3104,7 @@ const ArticleCard = React.memo(
                             { label: 'FAB Con',  field: 'fabCons',  editable: true, mandatory: false, isDropdown: false, isColor: false, isMarkdown: false },
                             { label: 'Width',  field: 'width',  editable: true, mandatory: false, isDropdown: false, isColor: false, isMarkdown: false },
                             { label: 'Basic Trim Cost', field: 'basicTrimCost', editable: true, mandatory: false, isDropdown: false, isColor: false, isMarkdown: false },
+                            { label: 'Rough CMP Cost', field: 'roughCmpCost',  editable: true, mandatory: false, isDropdown: false, isColor: false, isMarkdown: false },
                           ]
                         : [
                             { label: 'RATE / COST', field: 'rate', editable: true, mandatory: true, isDropdown: false, isColor: false, isMarkdown: false },

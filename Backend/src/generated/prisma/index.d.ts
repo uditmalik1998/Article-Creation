@@ -243,6 +243,11 @@ export type FabricArticleData = $Result.DefaultSelection<Prisma.$FabricArticleDa
  */
 export type BodyArticleData = $Result.DefaultSelection<Prisma.$BodyArticleDataPayload>
 /**
+ * Model RoughCmpCostMaster
+ * RoughCmpCostMaster: Master table for rough CMP cost by division, sub-division, and major category
+ */
+export type RoughCmpCostMaster = $Result.DefaultSelection<Prisma.$RoughCmpCostMasterPayload>
+/**
  * Model MajorCategoryDetails
  * MajorCategoryDetails: Master table for major category hierarchy, mc_code, and HSN codes
  */
@@ -1029,6 +1034,16 @@ export class PrismaClient<
   get bodyArticleData(): Prisma.BodyArticleDataDelegate<ExtArgs, ClientOptions>;
 
   /**
+   * `prisma.roughCmpCostMaster`: Exposes CRUD operations for the **RoughCmpCostMaster** model.
+    * Example usage:
+    * ```ts
+    * // Fetch zero or more RoughCmpCostMasters
+    * const roughCmpCostMasters = await prisma.roughCmpCostMaster.findMany()
+    * ```
+    */
+  get roughCmpCostMaster(): Prisma.RoughCmpCostMasterDelegate<ExtArgs, ClientOptions>;
+
+  /**
    * `prisma.majorCategoryDetails`: Exposes CRUD operations for the **MajorCategoryDetails** model.
     * Example usage:
     * ```ts
@@ -1558,6 +1573,7 @@ export namespace Prisma {
     ModifyLog: 'ModifyLog',
     FabricArticleData: 'FabricArticleData',
     BodyArticleData: 'BodyArticleData',
+    RoughCmpCostMaster: 'RoughCmpCostMaster',
     MajorCategoryDetails: 'MajorCategoryDetails',
     ExpenseApprovalStage: 'ExpenseApprovalStage',
     ExpenseChangeRequest: 'ExpenseChangeRequest',
@@ -1581,7 +1597,7 @@ export namespace Prisma {
       omit: GlobalOmitOptions
     }
     meta: {
-      modelProps: "department" | "subDepartment" | "category" | "masterAttribute" | "attributeAllowedValue" | "categoryAttribute" | "extractionJob" | "extractionResult" | "extractionResultFlat" | "modelGenerationResult" | "modelImageApproval" | "mvgrLookup" | "masterVendorDetail" | "user" | "auditLog" | "apiKey" | "changeHistory" | "costSummary" | "article360" | "articleFab" | "articleBody" | "articleVaAcc" | "articleVaPrcs" | "articleBom" | "sapFieldConfig" | "sapAttributeValue" | "article360Flat" | "rawArticle" | "fabricRawData" | "srmSyncRun" | "srmSyncRunItem" | "poolBJob" | "poolBBatch" | "nationalGridMaster" | "broaderMenu" | "majorCatMaster" | "fabricArticleMaster" | "fabricMajCatGridValue" | "modifyLog" | "fabricArticleData" | "bodyArticleData" | "majorCategoryDetails" | "expenseApprovalStage" | "expenseChangeRequest" | "expenseAccessGrant" | "expenseAuditLog"
+      modelProps: "department" | "subDepartment" | "category" | "masterAttribute" | "attributeAllowedValue" | "categoryAttribute" | "extractionJob" | "extractionResult" | "extractionResultFlat" | "modelGenerationResult" | "modelImageApproval" | "mvgrLookup" | "masterVendorDetail" | "user" | "auditLog" | "apiKey" | "changeHistory" | "costSummary" | "article360" | "articleFab" | "articleBody" | "articleVaAcc" | "articleVaPrcs" | "articleBom" | "sapFieldConfig" | "sapAttributeValue" | "article360Flat" | "rawArticle" | "fabricRawData" | "srmSyncRun" | "srmSyncRunItem" | "poolBJob" | "poolBBatch" | "nationalGridMaster" | "broaderMenu" | "majorCatMaster" | "fabricArticleMaster" | "fabricMajCatGridValue" | "modifyLog" | "fabricArticleData" | "bodyArticleData" | "roughCmpCostMaster" | "majorCategoryDetails" | "expenseApprovalStage" | "expenseChangeRequest" | "expenseAccessGrant" | "expenseAuditLog"
       txIsolationLevel: Prisma.TransactionIsolationLevel
     }
     model: {
@@ -4619,6 +4635,80 @@ export namespace Prisma {
           }
         }
       }
+      RoughCmpCostMaster: {
+        payload: Prisma.$RoughCmpCostMasterPayload<ExtArgs>
+        fields: Prisma.RoughCmpCostMasterFieldRefs
+        operations: {
+          findUnique: {
+            args: Prisma.RoughCmpCostMasterFindUniqueArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$RoughCmpCostMasterPayload> | null
+          }
+          findUniqueOrThrow: {
+            args: Prisma.RoughCmpCostMasterFindUniqueOrThrowArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$RoughCmpCostMasterPayload>
+          }
+          findFirst: {
+            args: Prisma.RoughCmpCostMasterFindFirstArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$RoughCmpCostMasterPayload> | null
+          }
+          findFirstOrThrow: {
+            args: Prisma.RoughCmpCostMasterFindFirstOrThrowArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$RoughCmpCostMasterPayload>
+          }
+          findMany: {
+            args: Prisma.RoughCmpCostMasterFindManyArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$RoughCmpCostMasterPayload>[]
+          }
+          create: {
+            args: Prisma.RoughCmpCostMasterCreateArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$RoughCmpCostMasterPayload>
+          }
+          createMany: {
+            args: Prisma.RoughCmpCostMasterCreateManyArgs<ExtArgs>
+            result: BatchPayload
+          }
+          createManyAndReturn: {
+            args: Prisma.RoughCmpCostMasterCreateManyAndReturnArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$RoughCmpCostMasterPayload>[]
+          }
+          delete: {
+            args: Prisma.RoughCmpCostMasterDeleteArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$RoughCmpCostMasterPayload>
+          }
+          update: {
+            args: Prisma.RoughCmpCostMasterUpdateArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$RoughCmpCostMasterPayload>
+          }
+          deleteMany: {
+            args: Prisma.RoughCmpCostMasterDeleteManyArgs<ExtArgs>
+            result: BatchPayload
+          }
+          updateMany: {
+            args: Prisma.RoughCmpCostMasterUpdateManyArgs<ExtArgs>
+            result: BatchPayload
+          }
+          updateManyAndReturn: {
+            args: Prisma.RoughCmpCostMasterUpdateManyAndReturnArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$RoughCmpCostMasterPayload>[]
+          }
+          upsert: {
+            args: Prisma.RoughCmpCostMasterUpsertArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$RoughCmpCostMasterPayload>
+          }
+          aggregate: {
+            args: Prisma.RoughCmpCostMasterAggregateArgs<ExtArgs>
+            result: $Utils.Optional<AggregateRoughCmpCostMaster>
+          }
+          groupBy: {
+            args: Prisma.RoughCmpCostMasterGroupByArgs<ExtArgs>
+            result: $Utils.Optional<RoughCmpCostMasterGroupByOutputType>[]
+          }
+          count: {
+            args: Prisma.RoughCmpCostMasterCountArgs<ExtArgs>
+            result: $Utils.Optional<RoughCmpCostMasterCountAggregateOutputType> | number
+          }
+        }
+      }
       MajorCategoryDetails: {
         payload: Prisma.$MajorCategoryDetailsPayload<ExtArgs>
         fields: Prisma.MajorCategoryDetailsFieldRefs
@@ -5122,6 +5212,7 @@ export namespace Prisma {
     modifyLog?: ModifyLogOmit
     fabricArticleData?: FabricArticleDataOmit
     bodyArticleData?: BodyArticleDataOmit
+    roughCmpCostMaster?: RoughCmpCostMasterOmit
     majorCategoryDetails?: MajorCategoryDetailsOmit
     expenseApprovalStage?: ExpenseApprovalStageOmit
     expenseChangeRequest?: ExpenseChangeRequestOmit
@@ -56431,6 +56522,7 @@ export namespace Prisma {
     fabCons: Decimal | null
     width: Decimal | null
     basicTrimCost: Decimal | null
+    roughCmpCost: Decimal | null
     approvedBy: number | null
   }
 
@@ -56441,6 +56533,7 @@ export namespace Prisma {
     fabCons: Decimal | null
     width: Decimal | null
     basicTrimCost: Decimal | null
+    roughCmpCost: Decimal | null
     approvedBy: number | null
   }
 
@@ -56474,6 +56567,7 @@ export namespace Prisma {
     fabCons: Decimal | null
     width: Decimal | null
     basicTrimCost: Decimal | null
+    roughCmpCost: Decimal | null
     flatId: string | null
     articleNumber: string | null
     division: string | null
@@ -56526,6 +56620,7 @@ export namespace Prisma {
     fabCons: Decimal | null
     width: Decimal | null
     basicTrimCost: Decimal | null
+    roughCmpCost: Decimal | null
     flatId: string | null
     articleNumber: string | null
     division: string | null
@@ -56578,6 +56673,7 @@ export namespace Prisma {
     fabCons: number
     width: number
     basicTrimCost: number
+    roughCmpCost: number
     flatId: number
     articleNumber: number
     division: number
@@ -56609,6 +56705,7 @@ export namespace Prisma {
     fabCons?: true
     width?: true
     basicTrimCost?: true
+    roughCmpCost?: true
     approvedBy?: true
   }
 
@@ -56619,6 +56716,7 @@ export namespace Prisma {
     fabCons?: true
     width?: true
     basicTrimCost?: true
+    roughCmpCost?: true
     approvedBy?: true
   }
 
@@ -56652,6 +56750,7 @@ export namespace Prisma {
     fabCons?: true
     width?: true
     basicTrimCost?: true
+    roughCmpCost?: true
     flatId?: true
     articleNumber?: true
     division?: true
@@ -56704,6 +56803,7 @@ export namespace Prisma {
     fabCons?: true
     width?: true
     basicTrimCost?: true
+    roughCmpCost?: true
     flatId?: true
     articleNumber?: true
     division?: true
@@ -56756,6 +56856,7 @@ export namespace Prisma {
     fabCons?: true
     width?: true
     basicTrimCost?: true
+    roughCmpCost?: true
     flatId?: true
     articleNumber?: true
     division?: true
@@ -56895,6 +56996,7 @@ export namespace Prisma {
     fabCons: Decimal | null
     width: Decimal | null
     basicTrimCost: Decimal | null
+    roughCmpCost: Decimal | null
     flatId: string | null
     articleNumber: string | null
     division: string | null
@@ -56966,6 +57068,7 @@ export namespace Prisma {
     fabCons?: boolean
     width?: boolean
     basicTrimCost?: boolean
+    roughCmpCost?: boolean
     flatId?: boolean
     articleNumber?: boolean
     division?: boolean
@@ -57018,6 +57121,7 @@ export namespace Prisma {
     fabCons?: boolean
     width?: boolean
     basicTrimCost?: boolean
+    roughCmpCost?: boolean
     flatId?: boolean
     articleNumber?: boolean
     division?: boolean
@@ -57070,6 +57174,7 @@ export namespace Prisma {
     fabCons?: boolean
     width?: boolean
     basicTrimCost?: boolean
+    roughCmpCost?: boolean
     flatId?: boolean
     articleNumber?: boolean
     division?: boolean
@@ -57122,6 +57227,7 @@ export namespace Prisma {
     fabCons?: boolean
     width?: boolean
     basicTrimCost?: boolean
+    roughCmpCost?: boolean
     flatId?: boolean
     articleNumber?: boolean
     division?: boolean
@@ -57144,7 +57250,7 @@ export namespace Prisma {
     updatedAt?: boolean
   }
 
-  export type BodyArticleDataOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<"id" | "mCollarType" | "mCollarStyle" | "mNeckType" | "mNeckStyle" | "mPlacket" | "mBltType" | "mBltStyle" | "mSleevesMainStyle" | "mSleeveFold" | "mBtmFold" | "mNoOfPocket" | "mPocket" | "mExtraPocket" | "mFit" | "mBodyStyle" | "mLength" | "mSet" | "bodyArticleNumber" | "bodyArticleDescription" | "imageUrl" | "bodyArticleType" | "designNumber" | "cmtpCost" | "cmpCost" | "fabCost" | "fabCons" | "width" | "basicTrimCost" | "flatId" | "articleNumber" | "division" | "subDivision" | "majorCategory" | "mcCode" | "vendorName" | "vendorCode" | "season" | "year" | "hsnTaxCode" | "approvalStatus" | "fgCreatorApproved" | "approvedAt" | "approvedBy" | "sapSyncStatus" | "sapSyncMessage" | "userName" | "createdAt" | "updatedAt", ExtArgs["result"]["bodyArticleData"]>
+  export type BodyArticleDataOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<"id" | "mCollarType" | "mCollarStyle" | "mNeckType" | "mNeckStyle" | "mPlacket" | "mBltType" | "mBltStyle" | "mSleevesMainStyle" | "mSleeveFold" | "mBtmFold" | "mNoOfPocket" | "mPocket" | "mExtraPocket" | "mFit" | "mBodyStyle" | "mLength" | "mSet" | "bodyArticleNumber" | "bodyArticleDescription" | "imageUrl" | "bodyArticleType" | "designNumber" | "cmtpCost" | "cmpCost" | "fabCost" | "fabCons" | "width" | "basicTrimCost" | "roughCmpCost" | "flatId" | "articleNumber" | "division" | "subDivision" | "majorCategory" | "mcCode" | "vendorName" | "vendorCode" | "season" | "year" | "hsnTaxCode" | "approvalStatus" | "fgCreatorApproved" | "approvedAt" | "approvedBy" | "sapSyncStatus" | "sapSyncMessage" | "userName" | "createdAt" | "updatedAt", ExtArgs["result"]["bodyArticleData"]>
 
   export type $BodyArticleDataPayload<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
     name: "BodyArticleData"
@@ -57179,6 +57285,7 @@ export namespace Prisma {
       fabCons: Prisma.Decimal | null
       width: Prisma.Decimal | null
       basicTrimCost: Prisma.Decimal | null
+      roughCmpCost: Prisma.Decimal | null
       flatId: string | null
       articleNumber: string | null
       division: string | null
@@ -57651,6 +57758,7 @@ export namespace Prisma {
     readonly fabCons: FieldRef<"BodyArticleData", 'Decimal'>
     readonly width: FieldRef<"BodyArticleData", 'Decimal'>
     readonly basicTrimCost: FieldRef<"BodyArticleData", 'Decimal'>
+    readonly roughCmpCost: FieldRef<"BodyArticleData", 'Decimal'>
     readonly flatId: FieldRef<"BodyArticleData", 'String'>
     readonly articleNumber: FieldRef<"BodyArticleData", 'String'>
     readonly division: FieldRef<"BodyArticleData", 'String'>
@@ -58034,6 +58142,1065 @@ export namespace Prisma {
      * Omit specific fields from the BodyArticleData
      */
     omit?: BodyArticleDataOmit<ExtArgs> | null
+  }
+
+
+  /**
+   * Model RoughCmpCostMaster
+   */
+
+  export type AggregateRoughCmpCostMaster = {
+    _count: RoughCmpCostMasterCountAggregateOutputType | null
+    _avg: RoughCmpCostMasterAvgAggregateOutputType | null
+    _sum: RoughCmpCostMasterSumAggregateOutputType | null
+    _min: RoughCmpCostMasterMinAggregateOutputType | null
+    _max: RoughCmpCostMasterMaxAggregateOutputType | null
+  }
+
+  export type RoughCmpCostMasterAvgAggregateOutputType = {
+    id: number | null
+    cmpCost: Decimal | null
+  }
+
+  export type RoughCmpCostMasterSumAggregateOutputType = {
+    id: number | null
+    cmpCost: Decimal | null
+  }
+
+  export type RoughCmpCostMasterMinAggregateOutputType = {
+    id: number | null
+    div: string | null
+    subDiv: string | null
+    majCat: string | null
+    cmpCost: Decimal | null
+    createdAt: Date | null
+    updatedAt: Date | null
+  }
+
+  export type RoughCmpCostMasterMaxAggregateOutputType = {
+    id: number | null
+    div: string | null
+    subDiv: string | null
+    majCat: string | null
+    cmpCost: Decimal | null
+    createdAt: Date | null
+    updatedAt: Date | null
+  }
+
+  export type RoughCmpCostMasterCountAggregateOutputType = {
+    id: number
+    div: number
+    subDiv: number
+    majCat: number
+    cmpCost: number
+    createdAt: number
+    updatedAt: number
+    _all: number
+  }
+
+
+  export type RoughCmpCostMasterAvgAggregateInputType = {
+    id?: true
+    cmpCost?: true
+  }
+
+  export type RoughCmpCostMasterSumAggregateInputType = {
+    id?: true
+    cmpCost?: true
+  }
+
+  export type RoughCmpCostMasterMinAggregateInputType = {
+    id?: true
+    div?: true
+    subDiv?: true
+    majCat?: true
+    cmpCost?: true
+    createdAt?: true
+    updatedAt?: true
+  }
+
+  export type RoughCmpCostMasterMaxAggregateInputType = {
+    id?: true
+    div?: true
+    subDiv?: true
+    majCat?: true
+    cmpCost?: true
+    createdAt?: true
+    updatedAt?: true
+  }
+
+  export type RoughCmpCostMasterCountAggregateInputType = {
+    id?: true
+    div?: true
+    subDiv?: true
+    majCat?: true
+    cmpCost?: true
+    createdAt?: true
+    updatedAt?: true
+    _all?: true
+  }
+
+  export type RoughCmpCostMasterAggregateArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Filter which RoughCmpCostMaster to aggregate.
+     */
+    where?: RoughCmpCostMasterWhereInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
+     * 
+     * Determine the order of RoughCmpCostMasters to fetch.
+     */
+    orderBy?: RoughCmpCostMasterOrderByWithRelationInput | RoughCmpCostMasterOrderByWithRelationInput[]
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
+     * 
+     * Sets the start position
+     */
+    cursor?: RoughCmpCostMasterWhereUniqueInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Take `±n` RoughCmpCostMasters from the position of the cursor.
+     */
+    take?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Skip the first `n` RoughCmpCostMasters.
+     */
+    skip?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     * 
+     * Count returned RoughCmpCostMasters
+    **/
+    _count?: true | RoughCmpCostMasterCountAggregateInputType
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     * 
+     * Select which fields to average
+    **/
+    _avg?: RoughCmpCostMasterAvgAggregateInputType
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     * 
+     * Select which fields to sum
+    **/
+    _sum?: RoughCmpCostMasterSumAggregateInputType
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     * 
+     * Select which fields to find the minimum value
+    **/
+    _min?: RoughCmpCostMasterMinAggregateInputType
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     * 
+     * Select which fields to find the maximum value
+    **/
+    _max?: RoughCmpCostMasterMaxAggregateInputType
+  }
+
+  export type GetRoughCmpCostMasterAggregateType<T extends RoughCmpCostMasterAggregateArgs> = {
+        [P in keyof T & keyof AggregateRoughCmpCostMaster]: P extends '_count' | 'count'
+      ? T[P] extends true
+        ? number
+        : GetScalarType<T[P], AggregateRoughCmpCostMaster[P]>
+      : GetScalarType<T[P], AggregateRoughCmpCostMaster[P]>
+  }
+
+
+
+
+  export type RoughCmpCostMasterGroupByArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    where?: RoughCmpCostMasterWhereInput
+    orderBy?: RoughCmpCostMasterOrderByWithAggregationInput | RoughCmpCostMasterOrderByWithAggregationInput[]
+    by: RoughCmpCostMasterScalarFieldEnum[] | RoughCmpCostMasterScalarFieldEnum
+    having?: RoughCmpCostMasterScalarWhereWithAggregatesInput
+    take?: number
+    skip?: number
+    _count?: RoughCmpCostMasterCountAggregateInputType | true
+    _avg?: RoughCmpCostMasterAvgAggregateInputType
+    _sum?: RoughCmpCostMasterSumAggregateInputType
+    _min?: RoughCmpCostMasterMinAggregateInputType
+    _max?: RoughCmpCostMasterMaxAggregateInputType
+  }
+
+  export type RoughCmpCostMasterGroupByOutputType = {
+    id: number
+    div: string | null
+    subDiv: string | null
+    majCat: string
+    cmpCost: Decimal | null
+    createdAt: Date
+    updatedAt: Date
+    _count: RoughCmpCostMasterCountAggregateOutputType | null
+    _avg: RoughCmpCostMasterAvgAggregateOutputType | null
+    _sum: RoughCmpCostMasterSumAggregateOutputType | null
+    _min: RoughCmpCostMasterMinAggregateOutputType | null
+    _max: RoughCmpCostMasterMaxAggregateOutputType | null
+  }
+
+  type GetRoughCmpCostMasterGroupByPayload<T extends RoughCmpCostMasterGroupByArgs> = Prisma.PrismaPromise<
+    Array<
+      PickEnumerable<RoughCmpCostMasterGroupByOutputType, T['by']> &
+        {
+          [P in ((keyof T) & (keyof RoughCmpCostMasterGroupByOutputType))]: P extends '_count'
+            ? T[P] extends boolean
+              ? number
+              : GetScalarType<T[P], RoughCmpCostMasterGroupByOutputType[P]>
+            : GetScalarType<T[P], RoughCmpCostMasterGroupByOutputType[P]>
+        }
+      >
+    >
+
+
+  export type RoughCmpCostMasterSelect<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
+    id?: boolean
+    div?: boolean
+    subDiv?: boolean
+    majCat?: boolean
+    cmpCost?: boolean
+    createdAt?: boolean
+    updatedAt?: boolean
+  }, ExtArgs["result"]["roughCmpCostMaster"]>
+
+  export type RoughCmpCostMasterSelectCreateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
+    id?: boolean
+    div?: boolean
+    subDiv?: boolean
+    majCat?: boolean
+    cmpCost?: boolean
+    createdAt?: boolean
+    updatedAt?: boolean
+  }, ExtArgs["result"]["roughCmpCostMaster"]>
+
+  export type RoughCmpCostMasterSelectUpdateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
+    id?: boolean
+    div?: boolean
+    subDiv?: boolean
+    majCat?: boolean
+    cmpCost?: boolean
+    createdAt?: boolean
+    updatedAt?: boolean
+  }, ExtArgs["result"]["roughCmpCostMaster"]>
+
+  export type RoughCmpCostMasterSelectScalar = {
+    id?: boolean
+    div?: boolean
+    subDiv?: boolean
+    majCat?: boolean
+    cmpCost?: boolean
+    createdAt?: boolean
+    updatedAt?: boolean
+  }
+
+  export type RoughCmpCostMasterOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<"id" | "div" | "subDiv" | "majCat" | "cmpCost" | "createdAt" | "updatedAt", ExtArgs["result"]["roughCmpCostMaster"]>
+
+  export type $RoughCmpCostMasterPayload<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    name: "RoughCmpCostMaster"
+    objects: {}
+    scalars: $Extensions.GetPayloadResult<{
+      id: number
+      div: string | null
+      subDiv: string | null
+      majCat: string
+      cmpCost: Prisma.Decimal | null
+      createdAt: Date
+      updatedAt: Date
+    }, ExtArgs["result"]["roughCmpCostMaster"]>
+    composites: {}
+  }
+
+  type RoughCmpCostMasterGetPayload<S extends boolean | null | undefined | RoughCmpCostMasterDefaultArgs> = $Result.GetResult<Prisma.$RoughCmpCostMasterPayload, S>
+
+  type RoughCmpCostMasterCountArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> =
+    Omit<RoughCmpCostMasterFindManyArgs, 'select' | 'include' | 'distinct' | 'omit'> & {
+      select?: RoughCmpCostMasterCountAggregateInputType | true
+    }
+
+  export interface RoughCmpCostMasterDelegate<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs, GlobalOmitOptions = {}> {
+    [K: symbol]: { types: Prisma.TypeMap<ExtArgs>['model']['RoughCmpCostMaster'], meta: { name: 'RoughCmpCostMaster' } }
+    /**
+     * Find zero or one RoughCmpCostMaster that matches the filter.
+     * @param {RoughCmpCostMasterFindUniqueArgs} args - Arguments to find a RoughCmpCostMaster
+     * @example
+     * // Get one RoughCmpCostMaster
+     * const roughCmpCostMaster = await prisma.roughCmpCostMaster.findUnique({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     */
+    findUnique<T extends RoughCmpCostMasterFindUniqueArgs>(args: SelectSubset<T, RoughCmpCostMasterFindUniqueArgs<ExtArgs>>): Prisma__RoughCmpCostMasterClient<$Result.GetResult<Prisma.$RoughCmpCostMasterPayload<ExtArgs>, T, "findUnique", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Find one RoughCmpCostMaster that matches the filter or throw an error with `error.code='P2025'`
+     * if no matches were found.
+     * @param {RoughCmpCostMasterFindUniqueOrThrowArgs} args - Arguments to find a RoughCmpCostMaster
+     * @example
+     * // Get one RoughCmpCostMaster
+     * const roughCmpCostMaster = await prisma.roughCmpCostMaster.findUniqueOrThrow({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     */
+    findUniqueOrThrow<T extends RoughCmpCostMasterFindUniqueOrThrowArgs>(args: SelectSubset<T, RoughCmpCostMasterFindUniqueOrThrowArgs<ExtArgs>>): Prisma__RoughCmpCostMasterClient<$Result.GetResult<Prisma.$RoughCmpCostMasterPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Find the first RoughCmpCostMaster that matches the filter.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {RoughCmpCostMasterFindFirstArgs} args - Arguments to find a RoughCmpCostMaster
+     * @example
+     * // Get one RoughCmpCostMaster
+     * const roughCmpCostMaster = await prisma.roughCmpCostMaster.findFirst({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     */
+    findFirst<T extends RoughCmpCostMasterFindFirstArgs>(args?: SelectSubset<T, RoughCmpCostMasterFindFirstArgs<ExtArgs>>): Prisma__RoughCmpCostMasterClient<$Result.GetResult<Prisma.$RoughCmpCostMasterPayload<ExtArgs>, T, "findFirst", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Find the first RoughCmpCostMaster that matches the filter or
+     * throw `PrismaKnownClientError` with `P2025` code if no matches were found.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {RoughCmpCostMasterFindFirstOrThrowArgs} args - Arguments to find a RoughCmpCostMaster
+     * @example
+     * // Get one RoughCmpCostMaster
+     * const roughCmpCostMaster = await prisma.roughCmpCostMaster.findFirstOrThrow({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     */
+    findFirstOrThrow<T extends RoughCmpCostMasterFindFirstOrThrowArgs>(args?: SelectSubset<T, RoughCmpCostMasterFindFirstOrThrowArgs<ExtArgs>>): Prisma__RoughCmpCostMasterClient<$Result.GetResult<Prisma.$RoughCmpCostMasterPayload<ExtArgs>, T, "findFirstOrThrow", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Find zero or more RoughCmpCostMasters that matches the filter.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {RoughCmpCostMasterFindManyArgs} args - Arguments to filter and select certain fields only.
+     * @example
+     * // Get all RoughCmpCostMasters
+     * const roughCmpCostMasters = await prisma.roughCmpCostMaster.findMany()
+     * 
+     * // Get first 10 RoughCmpCostMasters
+     * const roughCmpCostMasters = await prisma.roughCmpCostMaster.findMany({ take: 10 })
+     * 
+     * // Only select the `id`
+     * const roughCmpCostMasterWithIdOnly = await prisma.roughCmpCostMaster.findMany({ select: { id: true } })
+     * 
+     */
+    findMany<T extends RoughCmpCostMasterFindManyArgs>(args?: SelectSubset<T, RoughCmpCostMasterFindManyArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$RoughCmpCostMasterPayload<ExtArgs>, T, "findMany", GlobalOmitOptions>>
+
+    /**
+     * Create a RoughCmpCostMaster.
+     * @param {RoughCmpCostMasterCreateArgs} args - Arguments to create a RoughCmpCostMaster.
+     * @example
+     * // Create one RoughCmpCostMaster
+     * const RoughCmpCostMaster = await prisma.roughCmpCostMaster.create({
+     *   data: {
+     *     // ... data to create a RoughCmpCostMaster
+     *   }
+     * })
+     * 
+     */
+    create<T extends RoughCmpCostMasterCreateArgs>(args: SelectSubset<T, RoughCmpCostMasterCreateArgs<ExtArgs>>): Prisma__RoughCmpCostMasterClient<$Result.GetResult<Prisma.$RoughCmpCostMasterPayload<ExtArgs>, T, "create", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Create many RoughCmpCostMasters.
+     * @param {RoughCmpCostMasterCreateManyArgs} args - Arguments to create many RoughCmpCostMasters.
+     * @example
+     * // Create many RoughCmpCostMasters
+     * const roughCmpCostMaster = await prisma.roughCmpCostMaster.createMany({
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     *     
+     */
+    createMany<T extends RoughCmpCostMasterCreateManyArgs>(args?: SelectSubset<T, RoughCmpCostMasterCreateManyArgs<ExtArgs>>): Prisma.PrismaPromise<BatchPayload>
+
+    /**
+     * Create many RoughCmpCostMasters and returns the data saved in the database.
+     * @param {RoughCmpCostMasterCreateManyAndReturnArgs} args - Arguments to create many RoughCmpCostMasters.
+     * @example
+     * // Create many RoughCmpCostMasters
+     * const roughCmpCostMaster = await prisma.roughCmpCostMaster.createManyAndReturn({
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     * 
+     * // Create many RoughCmpCostMasters and only return the `id`
+     * const roughCmpCostMasterWithIdOnly = await prisma.roughCmpCostMaster.createManyAndReturn({
+     *   select: { id: true },
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * 
+     */
+    createManyAndReturn<T extends RoughCmpCostMasterCreateManyAndReturnArgs>(args?: SelectSubset<T, RoughCmpCostMasterCreateManyAndReturnArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$RoughCmpCostMasterPayload<ExtArgs>, T, "createManyAndReturn", GlobalOmitOptions>>
+
+    /**
+     * Delete a RoughCmpCostMaster.
+     * @param {RoughCmpCostMasterDeleteArgs} args - Arguments to delete one RoughCmpCostMaster.
+     * @example
+     * // Delete one RoughCmpCostMaster
+     * const RoughCmpCostMaster = await prisma.roughCmpCostMaster.delete({
+     *   where: {
+     *     // ... filter to delete one RoughCmpCostMaster
+     *   }
+     * })
+     * 
+     */
+    delete<T extends RoughCmpCostMasterDeleteArgs>(args: SelectSubset<T, RoughCmpCostMasterDeleteArgs<ExtArgs>>): Prisma__RoughCmpCostMasterClient<$Result.GetResult<Prisma.$RoughCmpCostMasterPayload<ExtArgs>, T, "delete", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Update one RoughCmpCostMaster.
+     * @param {RoughCmpCostMasterUpdateArgs} args - Arguments to update one RoughCmpCostMaster.
+     * @example
+     * // Update one RoughCmpCostMaster
+     * const roughCmpCostMaster = await prisma.roughCmpCostMaster.update({
+     *   where: {
+     *     // ... provide filter here
+     *   },
+     *   data: {
+     *     // ... provide data here
+     *   }
+     * })
+     * 
+     */
+    update<T extends RoughCmpCostMasterUpdateArgs>(args: SelectSubset<T, RoughCmpCostMasterUpdateArgs<ExtArgs>>): Prisma__RoughCmpCostMasterClient<$Result.GetResult<Prisma.$RoughCmpCostMasterPayload<ExtArgs>, T, "update", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Delete zero or more RoughCmpCostMasters.
+     * @param {RoughCmpCostMasterDeleteManyArgs} args - Arguments to filter RoughCmpCostMasters to delete.
+     * @example
+     * // Delete a few RoughCmpCostMasters
+     * const { count } = await prisma.roughCmpCostMaster.deleteMany({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     * 
+     */
+    deleteMany<T extends RoughCmpCostMasterDeleteManyArgs>(args?: SelectSubset<T, RoughCmpCostMasterDeleteManyArgs<ExtArgs>>): Prisma.PrismaPromise<BatchPayload>
+
+    /**
+     * Update zero or more RoughCmpCostMasters.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {RoughCmpCostMasterUpdateManyArgs} args - Arguments to update one or more rows.
+     * @example
+     * // Update many RoughCmpCostMasters
+     * const roughCmpCostMaster = await prisma.roughCmpCostMaster.updateMany({
+     *   where: {
+     *     // ... provide filter here
+     *   },
+     *   data: {
+     *     // ... provide data here
+     *   }
+     * })
+     * 
+     */
+    updateMany<T extends RoughCmpCostMasterUpdateManyArgs>(args: SelectSubset<T, RoughCmpCostMasterUpdateManyArgs<ExtArgs>>): Prisma.PrismaPromise<BatchPayload>
+
+    /**
+     * Update zero or more RoughCmpCostMasters and returns the data updated in the database.
+     * @param {RoughCmpCostMasterUpdateManyAndReturnArgs} args - Arguments to update many RoughCmpCostMasters.
+     * @example
+     * // Update many RoughCmpCostMasters
+     * const roughCmpCostMaster = await prisma.roughCmpCostMaster.updateManyAndReturn({
+     *   where: {
+     *     // ... provide filter here
+     *   },
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     * 
+     * // Update zero or more RoughCmpCostMasters and only return the `id`
+     * const roughCmpCostMasterWithIdOnly = await prisma.roughCmpCostMaster.updateManyAndReturn({
+     *   select: { id: true },
+     *   where: {
+     *     // ... provide filter here
+     *   },
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * 
+     */
+    updateManyAndReturn<T extends RoughCmpCostMasterUpdateManyAndReturnArgs>(args: SelectSubset<T, RoughCmpCostMasterUpdateManyAndReturnArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$RoughCmpCostMasterPayload<ExtArgs>, T, "updateManyAndReturn", GlobalOmitOptions>>
+
+    /**
+     * Create or update one RoughCmpCostMaster.
+     * @param {RoughCmpCostMasterUpsertArgs} args - Arguments to update or create a RoughCmpCostMaster.
+     * @example
+     * // Update or create a RoughCmpCostMaster
+     * const roughCmpCostMaster = await prisma.roughCmpCostMaster.upsert({
+     *   create: {
+     *     // ... data to create a RoughCmpCostMaster
+     *   },
+     *   update: {
+     *     // ... in case it already exists, update
+     *   },
+     *   where: {
+     *     // ... the filter for the RoughCmpCostMaster we want to update
+     *   }
+     * })
+     */
+    upsert<T extends RoughCmpCostMasterUpsertArgs>(args: SelectSubset<T, RoughCmpCostMasterUpsertArgs<ExtArgs>>): Prisma__RoughCmpCostMasterClient<$Result.GetResult<Prisma.$RoughCmpCostMasterPayload<ExtArgs>, T, "upsert", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+
+    /**
+     * Count the number of RoughCmpCostMasters.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {RoughCmpCostMasterCountArgs} args - Arguments to filter RoughCmpCostMasters to count.
+     * @example
+     * // Count the number of RoughCmpCostMasters
+     * const count = await prisma.roughCmpCostMaster.count({
+     *   where: {
+     *     // ... the filter for the RoughCmpCostMasters we want to count
+     *   }
+     * })
+    **/
+    count<T extends RoughCmpCostMasterCountArgs>(
+      args?: Subset<T, RoughCmpCostMasterCountArgs>,
+    ): Prisma.PrismaPromise<
+      T extends $Utils.Record<'select', any>
+        ? T['select'] extends true
+          ? number
+          : GetScalarType<T['select'], RoughCmpCostMasterCountAggregateOutputType>
+        : number
+    >
+
+    /**
+     * Allows you to perform aggregations operations on a RoughCmpCostMaster.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {RoughCmpCostMasterAggregateArgs} args - Select which aggregations you would like to apply and on what fields.
+     * @example
+     * // Ordered by age ascending
+     * // Where email contains prisma.io
+     * // Limited to the 10 users
+     * const aggregations = await prisma.user.aggregate({
+     *   _avg: {
+     *     age: true,
+     *   },
+     *   where: {
+     *     email: {
+     *       contains: "prisma.io",
+     *     },
+     *   },
+     *   orderBy: {
+     *     age: "asc",
+     *   },
+     *   take: 10,
+     * })
+    **/
+    aggregate<T extends RoughCmpCostMasterAggregateArgs>(args: Subset<T, RoughCmpCostMasterAggregateArgs>): Prisma.PrismaPromise<GetRoughCmpCostMasterAggregateType<T>>
+
+    /**
+     * Group by RoughCmpCostMaster.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {RoughCmpCostMasterGroupByArgs} args - Group by arguments.
+     * @example
+     * // Group by city, order by createdAt, get count
+     * const result = await prisma.user.groupBy({
+     *   by: ['city', 'createdAt'],
+     *   orderBy: {
+     *     createdAt: true
+     *   },
+     *   _count: {
+     *     _all: true
+     *   },
+     * })
+     * 
+    **/
+    groupBy<
+      T extends RoughCmpCostMasterGroupByArgs,
+      HasSelectOrTake extends Or<
+        Extends<'skip', Keys<T>>,
+        Extends<'take', Keys<T>>
+      >,
+      OrderByArg extends True extends HasSelectOrTake
+        ? { orderBy: RoughCmpCostMasterGroupByArgs['orderBy'] }
+        : { orderBy?: RoughCmpCostMasterGroupByArgs['orderBy'] },
+      OrderFields extends ExcludeUnderscoreKeys<Keys<MaybeTupleToUnion<T['orderBy']>>>,
+      ByFields extends MaybeTupleToUnion<T['by']>,
+      ByValid extends Has<ByFields, OrderFields>,
+      HavingFields extends GetHavingFields<T['having']>,
+      HavingValid extends Has<ByFields, HavingFields>,
+      ByEmpty extends T['by'] extends never[] ? True : False,
+      InputErrors extends ByEmpty extends True
+      ? `Error: "by" must not be empty.`
+      : HavingValid extends False
+      ? {
+          [P in HavingFields]: P extends ByFields
+            ? never
+            : P extends string
+            ? `Error: Field "${P}" used in "having" needs to be provided in "by".`
+            : [
+                Error,
+                'Field ',
+                P,
+                ` in "having" needs to be provided in "by"`,
+              ]
+        }[HavingFields]
+      : 'take' extends Keys<T>
+      ? 'orderBy' extends Keys<T>
+        ? ByValid extends True
+          ? {}
+          : {
+              [P in OrderFields]: P extends ByFields
+                ? never
+                : `Error: Field "${P}" in "orderBy" needs to be provided in "by"`
+            }[OrderFields]
+        : 'Error: If you provide "take", you also need to provide "orderBy"'
+      : 'skip' extends Keys<T>
+      ? 'orderBy' extends Keys<T>
+        ? ByValid extends True
+          ? {}
+          : {
+              [P in OrderFields]: P extends ByFields
+                ? never
+                : `Error: Field "${P}" in "orderBy" needs to be provided in "by"`
+            }[OrderFields]
+        : 'Error: If you provide "skip", you also need to provide "orderBy"'
+      : ByValid extends True
+      ? {}
+      : {
+          [P in OrderFields]: P extends ByFields
+            ? never
+            : `Error: Field "${P}" in "orderBy" needs to be provided in "by"`
+        }[OrderFields]
+    >(args: SubsetIntersection<T, RoughCmpCostMasterGroupByArgs, OrderByArg> & InputErrors): {} extends InputErrors ? GetRoughCmpCostMasterGroupByPayload<T> : Prisma.PrismaPromise<InputErrors>
+  /**
+   * Fields of the RoughCmpCostMaster model
+   */
+  readonly fields: RoughCmpCostMasterFieldRefs;
+  }
+
+  /**
+   * The delegate class that acts as a "Promise-like" for RoughCmpCostMaster.
+   * Why is this prefixed with `Prisma__`?
+   * Because we want to prevent naming conflicts as mentioned in
+   * https://github.com/prisma/prisma-client-js/issues/707
+   */
+  export interface Prisma__RoughCmpCostMasterClient<T, Null = never, ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs, GlobalOmitOptions = {}> extends Prisma.PrismaPromise<T> {
+    readonly [Symbol.toStringTag]: "PrismaPromise"
+    /**
+     * Attaches callbacks for the resolution and/or rejection of the Promise.
+     * @param onfulfilled The callback to execute when the Promise is resolved.
+     * @param onrejected The callback to execute when the Promise is rejected.
+     * @returns A Promise for the completion of which ever callback is executed.
+     */
+    then<TResult1 = T, TResult2 = never>(onfulfilled?: ((value: T) => TResult1 | PromiseLike<TResult1>) | undefined | null, onrejected?: ((reason: any) => TResult2 | PromiseLike<TResult2>) | undefined | null): $Utils.JsPromise<TResult1 | TResult2>
+    /**
+     * Attaches a callback for only the rejection of the Promise.
+     * @param onrejected The callback to execute when the Promise is rejected.
+     * @returns A Promise for the completion of the callback.
+     */
+    catch<TResult = never>(onrejected?: ((reason: any) => TResult | PromiseLike<TResult>) | undefined | null): $Utils.JsPromise<T | TResult>
+    /**
+     * Attaches a callback that is invoked when the Promise is settled (fulfilled or rejected). The
+     * resolved value cannot be modified from the callback.
+     * @param onfinally The callback to execute when the Promise is settled (fulfilled or rejected).
+     * @returns A Promise for the completion of the callback.
+     */
+    finally(onfinally?: (() => void) | undefined | null): $Utils.JsPromise<T>
+  }
+
+
+
+
+  /**
+   * Fields of the RoughCmpCostMaster model
+   */
+  interface RoughCmpCostMasterFieldRefs {
+    readonly id: FieldRef<"RoughCmpCostMaster", 'Int'>
+    readonly div: FieldRef<"RoughCmpCostMaster", 'String'>
+    readonly subDiv: FieldRef<"RoughCmpCostMaster", 'String'>
+    readonly majCat: FieldRef<"RoughCmpCostMaster", 'String'>
+    readonly cmpCost: FieldRef<"RoughCmpCostMaster", 'Decimal'>
+    readonly createdAt: FieldRef<"RoughCmpCostMaster", 'DateTime'>
+    readonly updatedAt: FieldRef<"RoughCmpCostMaster", 'DateTime'>
+  }
+    
+
+  // Custom InputTypes
+  /**
+   * RoughCmpCostMaster findUnique
+   */
+  export type RoughCmpCostMasterFindUniqueArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the RoughCmpCostMaster
+     */
+    select?: RoughCmpCostMasterSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the RoughCmpCostMaster
+     */
+    omit?: RoughCmpCostMasterOmit<ExtArgs> | null
+    /**
+     * Filter, which RoughCmpCostMaster to fetch.
+     */
+    where: RoughCmpCostMasterWhereUniqueInput
+  }
+
+  /**
+   * RoughCmpCostMaster findUniqueOrThrow
+   */
+  export type RoughCmpCostMasterFindUniqueOrThrowArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the RoughCmpCostMaster
+     */
+    select?: RoughCmpCostMasterSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the RoughCmpCostMaster
+     */
+    omit?: RoughCmpCostMasterOmit<ExtArgs> | null
+    /**
+     * Filter, which RoughCmpCostMaster to fetch.
+     */
+    where: RoughCmpCostMasterWhereUniqueInput
+  }
+
+  /**
+   * RoughCmpCostMaster findFirst
+   */
+  export type RoughCmpCostMasterFindFirstArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the RoughCmpCostMaster
+     */
+    select?: RoughCmpCostMasterSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the RoughCmpCostMaster
+     */
+    omit?: RoughCmpCostMasterOmit<ExtArgs> | null
+    /**
+     * Filter, which RoughCmpCostMaster to fetch.
+     */
+    where?: RoughCmpCostMasterWhereInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
+     * 
+     * Determine the order of RoughCmpCostMasters to fetch.
+     */
+    orderBy?: RoughCmpCostMasterOrderByWithRelationInput | RoughCmpCostMasterOrderByWithRelationInput[]
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
+     * 
+     * Sets the position for searching for RoughCmpCostMasters.
+     */
+    cursor?: RoughCmpCostMasterWhereUniqueInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Take `±n` RoughCmpCostMasters from the position of the cursor.
+     */
+    take?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Skip the first `n` RoughCmpCostMasters.
+     */
+    skip?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/distinct Distinct Docs}
+     * 
+     * Filter by unique combinations of RoughCmpCostMasters.
+     */
+    distinct?: RoughCmpCostMasterScalarFieldEnum | RoughCmpCostMasterScalarFieldEnum[]
+  }
+
+  /**
+   * RoughCmpCostMaster findFirstOrThrow
+   */
+  export type RoughCmpCostMasterFindFirstOrThrowArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the RoughCmpCostMaster
+     */
+    select?: RoughCmpCostMasterSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the RoughCmpCostMaster
+     */
+    omit?: RoughCmpCostMasterOmit<ExtArgs> | null
+    /**
+     * Filter, which RoughCmpCostMaster to fetch.
+     */
+    where?: RoughCmpCostMasterWhereInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
+     * 
+     * Determine the order of RoughCmpCostMasters to fetch.
+     */
+    orderBy?: RoughCmpCostMasterOrderByWithRelationInput | RoughCmpCostMasterOrderByWithRelationInput[]
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
+     * 
+     * Sets the position for searching for RoughCmpCostMasters.
+     */
+    cursor?: RoughCmpCostMasterWhereUniqueInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Take `±n` RoughCmpCostMasters from the position of the cursor.
+     */
+    take?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Skip the first `n` RoughCmpCostMasters.
+     */
+    skip?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/distinct Distinct Docs}
+     * 
+     * Filter by unique combinations of RoughCmpCostMasters.
+     */
+    distinct?: RoughCmpCostMasterScalarFieldEnum | RoughCmpCostMasterScalarFieldEnum[]
+  }
+
+  /**
+   * RoughCmpCostMaster findMany
+   */
+  export type RoughCmpCostMasterFindManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the RoughCmpCostMaster
+     */
+    select?: RoughCmpCostMasterSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the RoughCmpCostMaster
+     */
+    omit?: RoughCmpCostMasterOmit<ExtArgs> | null
+    /**
+     * Filter, which RoughCmpCostMasters to fetch.
+     */
+    where?: RoughCmpCostMasterWhereInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
+     * 
+     * Determine the order of RoughCmpCostMasters to fetch.
+     */
+    orderBy?: RoughCmpCostMasterOrderByWithRelationInput | RoughCmpCostMasterOrderByWithRelationInput[]
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
+     * 
+     * Sets the position for listing RoughCmpCostMasters.
+     */
+    cursor?: RoughCmpCostMasterWhereUniqueInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Take `±n` RoughCmpCostMasters from the position of the cursor.
+     */
+    take?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Skip the first `n` RoughCmpCostMasters.
+     */
+    skip?: number
+    distinct?: RoughCmpCostMasterScalarFieldEnum | RoughCmpCostMasterScalarFieldEnum[]
+  }
+
+  /**
+   * RoughCmpCostMaster create
+   */
+  export type RoughCmpCostMasterCreateArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the RoughCmpCostMaster
+     */
+    select?: RoughCmpCostMasterSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the RoughCmpCostMaster
+     */
+    omit?: RoughCmpCostMasterOmit<ExtArgs> | null
+    /**
+     * The data needed to create a RoughCmpCostMaster.
+     */
+    data: XOR<RoughCmpCostMasterCreateInput, RoughCmpCostMasterUncheckedCreateInput>
+  }
+
+  /**
+   * RoughCmpCostMaster createMany
+   */
+  export type RoughCmpCostMasterCreateManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * The data used to create many RoughCmpCostMasters.
+     */
+    data: RoughCmpCostMasterCreateManyInput | RoughCmpCostMasterCreateManyInput[]
+    skipDuplicates?: boolean
+  }
+
+  /**
+   * RoughCmpCostMaster createManyAndReturn
+   */
+  export type RoughCmpCostMasterCreateManyAndReturnArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the RoughCmpCostMaster
+     */
+    select?: RoughCmpCostMasterSelectCreateManyAndReturn<ExtArgs> | null
+    /**
+     * Omit specific fields from the RoughCmpCostMaster
+     */
+    omit?: RoughCmpCostMasterOmit<ExtArgs> | null
+    /**
+     * The data used to create many RoughCmpCostMasters.
+     */
+    data: RoughCmpCostMasterCreateManyInput | RoughCmpCostMasterCreateManyInput[]
+    skipDuplicates?: boolean
+  }
+
+  /**
+   * RoughCmpCostMaster update
+   */
+  export type RoughCmpCostMasterUpdateArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the RoughCmpCostMaster
+     */
+    select?: RoughCmpCostMasterSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the RoughCmpCostMaster
+     */
+    omit?: RoughCmpCostMasterOmit<ExtArgs> | null
+    /**
+     * The data needed to update a RoughCmpCostMaster.
+     */
+    data: XOR<RoughCmpCostMasterUpdateInput, RoughCmpCostMasterUncheckedUpdateInput>
+    /**
+     * Choose, which RoughCmpCostMaster to update.
+     */
+    where: RoughCmpCostMasterWhereUniqueInput
+  }
+
+  /**
+   * RoughCmpCostMaster updateMany
+   */
+  export type RoughCmpCostMasterUpdateManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * The data used to update RoughCmpCostMasters.
+     */
+    data: XOR<RoughCmpCostMasterUpdateManyMutationInput, RoughCmpCostMasterUncheckedUpdateManyInput>
+    /**
+     * Filter which RoughCmpCostMasters to update
+     */
+    where?: RoughCmpCostMasterWhereInput
+    /**
+     * Limit how many RoughCmpCostMasters to update.
+     */
+    limit?: number
+  }
+
+  /**
+   * RoughCmpCostMaster updateManyAndReturn
+   */
+  export type RoughCmpCostMasterUpdateManyAndReturnArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the RoughCmpCostMaster
+     */
+    select?: RoughCmpCostMasterSelectUpdateManyAndReturn<ExtArgs> | null
+    /**
+     * Omit specific fields from the RoughCmpCostMaster
+     */
+    omit?: RoughCmpCostMasterOmit<ExtArgs> | null
+    /**
+     * The data used to update RoughCmpCostMasters.
+     */
+    data: XOR<RoughCmpCostMasterUpdateManyMutationInput, RoughCmpCostMasterUncheckedUpdateManyInput>
+    /**
+     * Filter which RoughCmpCostMasters to update
+     */
+    where?: RoughCmpCostMasterWhereInput
+    /**
+     * Limit how many RoughCmpCostMasters to update.
+     */
+    limit?: number
+  }
+
+  /**
+   * RoughCmpCostMaster upsert
+   */
+  export type RoughCmpCostMasterUpsertArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the RoughCmpCostMaster
+     */
+    select?: RoughCmpCostMasterSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the RoughCmpCostMaster
+     */
+    omit?: RoughCmpCostMasterOmit<ExtArgs> | null
+    /**
+     * The filter to search for the RoughCmpCostMaster to update in case it exists.
+     */
+    where: RoughCmpCostMasterWhereUniqueInput
+    /**
+     * In case the RoughCmpCostMaster found by the `where` argument doesn't exist, create a new RoughCmpCostMaster with this data.
+     */
+    create: XOR<RoughCmpCostMasterCreateInput, RoughCmpCostMasterUncheckedCreateInput>
+    /**
+     * In case the RoughCmpCostMaster was found with the provided `where` argument, update it with this data.
+     */
+    update: XOR<RoughCmpCostMasterUpdateInput, RoughCmpCostMasterUncheckedUpdateInput>
+  }
+
+  /**
+   * RoughCmpCostMaster delete
+   */
+  export type RoughCmpCostMasterDeleteArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the RoughCmpCostMaster
+     */
+    select?: RoughCmpCostMasterSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the RoughCmpCostMaster
+     */
+    omit?: RoughCmpCostMasterOmit<ExtArgs> | null
+    /**
+     * Filter which RoughCmpCostMaster to delete.
+     */
+    where: RoughCmpCostMasterWhereUniqueInput
+  }
+
+  /**
+   * RoughCmpCostMaster deleteMany
+   */
+  export type RoughCmpCostMasterDeleteManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Filter which RoughCmpCostMasters to delete
+     */
+    where?: RoughCmpCostMasterWhereInput
+    /**
+     * Limit how many RoughCmpCostMasters to delete.
+     */
+    limit?: number
+  }
+
+  /**
+   * RoughCmpCostMaster without action
+   */
+  export type RoughCmpCostMasterDefaultArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the RoughCmpCostMaster
+     */
+    select?: RoughCmpCostMasterSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the RoughCmpCostMaster
+     */
+    omit?: RoughCmpCostMasterOmit<ExtArgs> | null
   }
 
 
@@ -64852,6 +66019,7 @@ export namespace Prisma {
     fabCons: 'fabCons',
     width: 'width',
     basicTrimCost: 'basicTrimCost',
+    roughCmpCost: 'roughCmpCost',
     flatId: 'flatId',
     articleNumber: 'articleNumber',
     division: 'division',
@@ -64875,6 +66043,19 @@ export namespace Prisma {
   };
 
   export type BodyArticleDataScalarFieldEnum = (typeof BodyArticleDataScalarFieldEnum)[keyof typeof BodyArticleDataScalarFieldEnum]
+
+
+  export const RoughCmpCostMasterScalarFieldEnum: {
+    id: 'id',
+    div: 'div',
+    subDiv: 'subDiv',
+    majCat: 'majCat',
+    cmpCost: 'cmpCost',
+    createdAt: 'createdAt',
+    updatedAt: 'updatedAt'
+  };
+
+  export type RoughCmpCostMasterScalarFieldEnum = (typeof RoughCmpCostMasterScalarFieldEnum)[keyof typeof RoughCmpCostMasterScalarFieldEnum]
 
 
   export const MajorCategoryDetailsScalarFieldEnum: {
@@ -65776,6 +66957,15 @@ export namespace Prisma {
   };
 
   export type BodyArticleDataOrderByRelevanceFieldEnum = (typeof BodyArticleDataOrderByRelevanceFieldEnum)[keyof typeof BodyArticleDataOrderByRelevanceFieldEnum]
+
+
+  export const RoughCmpCostMasterOrderByRelevanceFieldEnum: {
+    div: 'div',
+    subDiv: 'subDiv',
+    majCat: 'majCat'
+  };
+
+  export type RoughCmpCostMasterOrderByRelevanceFieldEnum = (typeof RoughCmpCostMasterOrderByRelevanceFieldEnum)[keyof typeof RoughCmpCostMasterOrderByRelevanceFieldEnum]
 
 
   export const MajorCategoryDetailsOrderByRelevanceFieldEnum: {
@@ -71276,6 +72466,7 @@ export namespace Prisma {
     fabCons?: DecimalNullableFilter<"BodyArticleData"> | Decimal | DecimalJsLike | number | string | null
     width?: DecimalNullableFilter<"BodyArticleData"> | Decimal | DecimalJsLike | number | string | null
     basicTrimCost?: DecimalNullableFilter<"BodyArticleData"> | Decimal | DecimalJsLike | number | string | null
+    roughCmpCost?: DecimalNullableFilter<"BodyArticleData"> | Decimal | DecimalJsLike | number | string | null
     flatId?: StringNullableFilter<"BodyArticleData"> | string | null
     articleNumber?: StringNullableFilter<"BodyArticleData"> | string | null
     division?: StringNullableFilter<"BodyArticleData"> | string | null
@@ -71328,6 +72519,7 @@ export namespace Prisma {
     fabCons?: SortOrderInput | SortOrder
     width?: SortOrderInput | SortOrder
     basicTrimCost?: SortOrderInput | SortOrder
+    roughCmpCost?: SortOrderInput | SortOrder
     flatId?: SortOrderInput | SortOrder
     articleNumber?: SortOrderInput | SortOrder
     division?: SortOrderInput | SortOrder
@@ -71384,6 +72576,7 @@ export namespace Prisma {
     fabCons?: DecimalNullableFilter<"BodyArticleData"> | Decimal | DecimalJsLike | number | string | null
     width?: DecimalNullableFilter<"BodyArticleData"> | Decimal | DecimalJsLike | number | string | null
     basicTrimCost?: DecimalNullableFilter<"BodyArticleData"> | Decimal | DecimalJsLike | number | string | null
+    roughCmpCost?: DecimalNullableFilter<"BodyArticleData"> | Decimal | DecimalJsLike | number | string | null
     flatId?: StringNullableFilter<"BodyArticleData"> | string | null
     articleNumber?: StringNullableFilter<"BodyArticleData"> | string | null
     division?: StringNullableFilter<"BodyArticleData"> | string | null
@@ -71436,6 +72629,7 @@ export namespace Prisma {
     fabCons?: SortOrderInput | SortOrder
     width?: SortOrderInput | SortOrder
     basicTrimCost?: SortOrderInput | SortOrder
+    roughCmpCost?: SortOrderInput | SortOrder
     flatId?: SortOrderInput | SortOrder
     articleNumber?: SortOrderInput | SortOrder
     division?: SortOrderInput | SortOrder
@@ -71496,6 +72690,7 @@ export namespace Prisma {
     fabCons?: DecimalNullableWithAggregatesFilter<"BodyArticleData"> | Decimal | DecimalJsLike | number | string | null
     width?: DecimalNullableWithAggregatesFilter<"BodyArticleData"> | Decimal | DecimalJsLike | number | string | null
     basicTrimCost?: DecimalNullableWithAggregatesFilter<"BodyArticleData"> | Decimal | DecimalJsLike | number | string | null
+    roughCmpCost?: DecimalNullableWithAggregatesFilter<"BodyArticleData"> | Decimal | DecimalJsLike | number | string | null
     flatId?: StringNullableWithAggregatesFilter<"BodyArticleData"> | string | null
     articleNumber?: StringNullableWithAggregatesFilter<"BodyArticleData"> | string | null
     division?: StringNullableWithAggregatesFilter<"BodyArticleData"> | string | null
@@ -71516,6 +72711,72 @@ export namespace Prisma {
     userName?: StringNullableWithAggregatesFilter<"BodyArticleData"> | string | null
     createdAt?: DateTimeWithAggregatesFilter<"BodyArticleData"> | Date | string
     updatedAt?: DateTimeWithAggregatesFilter<"BodyArticleData"> | Date | string
+  }
+
+  export type RoughCmpCostMasterWhereInput = {
+    AND?: RoughCmpCostMasterWhereInput | RoughCmpCostMasterWhereInput[]
+    OR?: RoughCmpCostMasterWhereInput[]
+    NOT?: RoughCmpCostMasterWhereInput | RoughCmpCostMasterWhereInput[]
+    id?: IntFilter<"RoughCmpCostMaster"> | number
+    div?: StringNullableFilter<"RoughCmpCostMaster"> | string | null
+    subDiv?: StringNullableFilter<"RoughCmpCostMaster"> | string | null
+    majCat?: StringFilter<"RoughCmpCostMaster"> | string
+    cmpCost?: DecimalNullableFilter<"RoughCmpCostMaster"> | Decimal | DecimalJsLike | number | string | null
+    createdAt?: DateTimeFilter<"RoughCmpCostMaster"> | Date | string
+    updatedAt?: DateTimeFilter<"RoughCmpCostMaster"> | Date | string
+  }
+
+  export type RoughCmpCostMasterOrderByWithRelationInput = {
+    id?: SortOrder
+    div?: SortOrderInput | SortOrder
+    subDiv?: SortOrderInput | SortOrder
+    majCat?: SortOrder
+    cmpCost?: SortOrderInput | SortOrder
+    createdAt?: SortOrder
+    updatedAt?: SortOrder
+    _relevance?: RoughCmpCostMasterOrderByRelevanceInput
+  }
+
+  export type RoughCmpCostMasterWhereUniqueInput = Prisma.AtLeast<{
+    id?: number
+    div_subDiv_majCat?: RoughCmpCostMasterDivSubDivMajCatCompoundUniqueInput
+    AND?: RoughCmpCostMasterWhereInput | RoughCmpCostMasterWhereInput[]
+    OR?: RoughCmpCostMasterWhereInput[]
+    NOT?: RoughCmpCostMasterWhereInput | RoughCmpCostMasterWhereInput[]
+    div?: StringNullableFilter<"RoughCmpCostMaster"> | string | null
+    subDiv?: StringNullableFilter<"RoughCmpCostMaster"> | string | null
+    majCat?: StringFilter<"RoughCmpCostMaster"> | string
+    cmpCost?: DecimalNullableFilter<"RoughCmpCostMaster"> | Decimal | DecimalJsLike | number | string | null
+    createdAt?: DateTimeFilter<"RoughCmpCostMaster"> | Date | string
+    updatedAt?: DateTimeFilter<"RoughCmpCostMaster"> | Date | string
+  }, "id" | "div_subDiv_majCat">
+
+  export type RoughCmpCostMasterOrderByWithAggregationInput = {
+    id?: SortOrder
+    div?: SortOrderInput | SortOrder
+    subDiv?: SortOrderInput | SortOrder
+    majCat?: SortOrder
+    cmpCost?: SortOrderInput | SortOrder
+    createdAt?: SortOrder
+    updatedAt?: SortOrder
+    _count?: RoughCmpCostMasterCountOrderByAggregateInput
+    _avg?: RoughCmpCostMasterAvgOrderByAggregateInput
+    _max?: RoughCmpCostMasterMaxOrderByAggregateInput
+    _min?: RoughCmpCostMasterMinOrderByAggregateInput
+    _sum?: RoughCmpCostMasterSumOrderByAggregateInput
+  }
+
+  export type RoughCmpCostMasterScalarWhereWithAggregatesInput = {
+    AND?: RoughCmpCostMasterScalarWhereWithAggregatesInput | RoughCmpCostMasterScalarWhereWithAggregatesInput[]
+    OR?: RoughCmpCostMasterScalarWhereWithAggregatesInput[]
+    NOT?: RoughCmpCostMasterScalarWhereWithAggregatesInput | RoughCmpCostMasterScalarWhereWithAggregatesInput[]
+    id?: IntWithAggregatesFilter<"RoughCmpCostMaster"> | number
+    div?: StringNullableWithAggregatesFilter<"RoughCmpCostMaster"> | string | null
+    subDiv?: StringNullableWithAggregatesFilter<"RoughCmpCostMaster"> | string | null
+    majCat?: StringWithAggregatesFilter<"RoughCmpCostMaster"> | string
+    cmpCost?: DecimalNullableWithAggregatesFilter<"RoughCmpCostMaster"> | Decimal | DecimalJsLike | number | string | null
+    createdAt?: DateTimeWithAggregatesFilter<"RoughCmpCostMaster"> | Date | string
+    updatedAt?: DateTimeWithAggregatesFilter<"RoughCmpCostMaster"> | Date | string
   }
 
   export type MajorCategoryDetailsWhereInput = {
@@ -78156,6 +79417,7 @@ export namespace Prisma {
     fabCons?: Decimal | DecimalJsLike | number | string | null
     width?: Decimal | DecimalJsLike | number | string | null
     basicTrimCost?: Decimal | DecimalJsLike | number | string | null
+    roughCmpCost?: Decimal | DecimalJsLike | number | string | null
     flatId?: string | null
     articleNumber?: string | null
     division?: string | null
@@ -78208,6 +79470,7 @@ export namespace Prisma {
     fabCons?: Decimal | DecimalJsLike | number | string | null
     width?: Decimal | DecimalJsLike | number | string | null
     basicTrimCost?: Decimal | DecimalJsLike | number | string | null
+    roughCmpCost?: Decimal | DecimalJsLike | number | string | null
     flatId?: string | null
     articleNumber?: string | null
     division?: string | null
@@ -78260,6 +79523,7 @@ export namespace Prisma {
     fabCons?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
     width?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
     basicTrimCost?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    roughCmpCost?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
     flatId?: NullableStringFieldUpdateOperationsInput | string | null
     articleNumber?: NullableStringFieldUpdateOperationsInput | string | null
     division?: NullableStringFieldUpdateOperationsInput | string | null
@@ -78312,6 +79576,7 @@ export namespace Prisma {
     fabCons?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
     width?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
     basicTrimCost?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    roughCmpCost?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
     flatId?: NullableStringFieldUpdateOperationsInput | string | null
     articleNumber?: NullableStringFieldUpdateOperationsInput | string | null
     division?: NullableStringFieldUpdateOperationsInput | string | null
@@ -78364,6 +79629,7 @@ export namespace Prisma {
     fabCons?: Decimal | DecimalJsLike | number | string | null
     width?: Decimal | DecimalJsLike | number | string | null
     basicTrimCost?: Decimal | DecimalJsLike | number | string | null
+    roughCmpCost?: Decimal | DecimalJsLike | number | string | null
     flatId?: string | null
     articleNumber?: string | null
     division?: string | null
@@ -78416,6 +79682,7 @@ export namespace Prisma {
     fabCons?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
     width?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
     basicTrimCost?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    roughCmpCost?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
     flatId?: NullableStringFieldUpdateOperationsInput | string | null
     articleNumber?: NullableStringFieldUpdateOperationsInput | string | null
     division?: NullableStringFieldUpdateOperationsInput | string | null
@@ -78468,6 +79735,7 @@ export namespace Prisma {
     fabCons?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
     width?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
     basicTrimCost?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    roughCmpCost?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
     flatId?: NullableStringFieldUpdateOperationsInput | string | null
     articleNumber?: NullableStringFieldUpdateOperationsInput | string | null
     division?: NullableStringFieldUpdateOperationsInput | string | null
@@ -78486,6 +79754,73 @@ export namespace Prisma {
     sapSyncStatus?: StringFieldUpdateOperationsInput | string
     sapSyncMessage?: NullableStringFieldUpdateOperationsInput | string | null
     userName?: NullableStringFieldUpdateOperationsInput | string | null
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+  }
+
+  export type RoughCmpCostMasterCreateInput = {
+    div?: string | null
+    subDiv?: string | null
+    majCat: string
+    cmpCost?: Decimal | DecimalJsLike | number | string | null
+    createdAt?: Date | string
+    updatedAt?: Date | string
+  }
+
+  export type RoughCmpCostMasterUncheckedCreateInput = {
+    id?: number
+    div?: string | null
+    subDiv?: string | null
+    majCat: string
+    cmpCost?: Decimal | DecimalJsLike | number | string | null
+    createdAt?: Date | string
+    updatedAt?: Date | string
+  }
+
+  export type RoughCmpCostMasterUpdateInput = {
+    div?: NullableStringFieldUpdateOperationsInput | string | null
+    subDiv?: NullableStringFieldUpdateOperationsInput | string | null
+    majCat?: StringFieldUpdateOperationsInput | string
+    cmpCost?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+  }
+
+  export type RoughCmpCostMasterUncheckedUpdateInput = {
+    id?: IntFieldUpdateOperationsInput | number
+    div?: NullableStringFieldUpdateOperationsInput | string | null
+    subDiv?: NullableStringFieldUpdateOperationsInput | string | null
+    majCat?: StringFieldUpdateOperationsInput | string
+    cmpCost?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+  }
+
+  export type RoughCmpCostMasterCreateManyInput = {
+    id?: number
+    div?: string | null
+    subDiv?: string | null
+    majCat: string
+    cmpCost?: Decimal | DecimalJsLike | number | string | null
+    createdAt?: Date | string
+    updatedAt?: Date | string
+  }
+
+  export type RoughCmpCostMasterUpdateManyMutationInput = {
+    div?: NullableStringFieldUpdateOperationsInput | string | null
+    subDiv?: NullableStringFieldUpdateOperationsInput | string | null
+    majCat?: StringFieldUpdateOperationsInput | string
+    cmpCost?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+  }
+
+  export type RoughCmpCostMasterUncheckedUpdateManyInput = {
+    id?: IntFieldUpdateOperationsInput | number
+    div?: NullableStringFieldUpdateOperationsInput | string | null
+    subDiv?: NullableStringFieldUpdateOperationsInput | string | null
+    majCat?: StringFieldUpdateOperationsInput | string
+    cmpCost?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
   }
@@ -83245,6 +84580,7 @@ export namespace Prisma {
     fabCons?: SortOrder
     width?: SortOrder
     basicTrimCost?: SortOrder
+    roughCmpCost?: SortOrder
     flatId?: SortOrder
     articleNumber?: SortOrder
     division?: SortOrder
@@ -83274,6 +84610,7 @@ export namespace Prisma {
     fabCons?: SortOrder
     width?: SortOrder
     basicTrimCost?: SortOrder
+    roughCmpCost?: SortOrder
     approvedBy?: SortOrder
   }
 
@@ -83307,6 +84644,7 @@ export namespace Prisma {
     fabCons?: SortOrder
     width?: SortOrder
     basicTrimCost?: SortOrder
+    roughCmpCost?: SortOrder
     flatId?: SortOrder
     articleNumber?: SortOrder
     division?: SortOrder
@@ -83359,6 +84697,7 @@ export namespace Prisma {
     fabCons?: SortOrder
     width?: SortOrder
     basicTrimCost?: SortOrder
+    roughCmpCost?: SortOrder
     flatId?: SortOrder
     articleNumber?: SortOrder
     division?: SortOrder
@@ -83388,7 +84727,60 @@ export namespace Prisma {
     fabCons?: SortOrder
     width?: SortOrder
     basicTrimCost?: SortOrder
+    roughCmpCost?: SortOrder
     approvedBy?: SortOrder
+  }
+
+  export type RoughCmpCostMasterOrderByRelevanceInput = {
+    fields: RoughCmpCostMasterOrderByRelevanceFieldEnum | RoughCmpCostMasterOrderByRelevanceFieldEnum[]
+    sort: SortOrder
+    search: string
+  }
+
+  export type RoughCmpCostMasterDivSubDivMajCatCompoundUniqueInput = {
+    div: string
+    subDiv: string
+    majCat: string
+  }
+
+  export type RoughCmpCostMasterCountOrderByAggregateInput = {
+    id?: SortOrder
+    div?: SortOrder
+    subDiv?: SortOrder
+    majCat?: SortOrder
+    cmpCost?: SortOrder
+    createdAt?: SortOrder
+    updatedAt?: SortOrder
+  }
+
+  export type RoughCmpCostMasterAvgOrderByAggregateInput = {
+    id?: SortOrder
+    cmpCost?: SortOrder
+  }
+
+  export type RoughCmpCostMasterMaxOrderByAggregateInput = {
+    id?: SortOrder
+    div?: SortOrder
+    subDiv?: SortOrder
+    majCat?: SortOrder
+    cmpCost?: SortOrder
+    createdAt?: SortOrder
+    updatedAt?: SortOrder
+  }
+
+  export type RoughCmpCostMasterMinOrderByAggregateInput = {
+    id?: SortOrder
+    div?: SortOrder
+    subDiv?: SortOrder
+    majCat?: SortOrder
+    cmpCost?: SortOrder
+    createdAt?: SortOrder
+    updatedAt?: SortOrder
+  }
+
+  export type RoughCmpCostMasterSumOrderByAggregateInput = {
+    id?: SortOrder
+    cmpCost?: SortOrder
   }
 
   export type MajorCategoryDetailsOrderByRelevanceInput = {

@@ -152,6 +152,7 @@ export interface ApproverItem {
   valueAddCost: number | string | null;
   vendorFabricRate: number | string | null;
   basicTrimCost: number | string | null;
+  roughCmpCost: number | string | null;
 }
 
 interface EditableCellProps {

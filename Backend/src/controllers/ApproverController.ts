@@ -3622,6 +3622,7 @@ export class ApproverController {
         fWidth:               'width',
         width:                'width',
         basicTrimCost:        'basicTrimCost',
+        roughCmpCost:         'roughCmpCost',
         vendorCode:           'vendorCode',
         vendorName:           'vendorName',
         majorCategory:        'majorCategory',
@@ -3685,6 +3686,7 @@ export class ApproverController {
             fWidth: r.width ?? null,
             width: r.width ?? null,
             basicTrimCost: r.basicTrimCost ?? null,
+            roughCmpCost:  r.roughCmpCost ?? null,
             pptNumber: null, source: null, rate: null, mrp: null,
             size: null, colour: null, fabricMainMvgr: null, composition: null, gsm: null,
             wash: null, referenceArticleNumber: null, referenceArticleDescription: null,
@@ -3695,11 +3697,23 @@ export class ApproverController {
         };
     }
 
+    private static async resolveRoughCmpCost(row: { roughCmpCost?: any; majorCategory?: string | null }): Promise<number | null> {
+        if (row.roughCmpCost != null) return Number(row.roughCmpCost);
+        if (!row.majorCategory) return null;
+        const master = await prisma.roughCmpCostMaster.findFirst({
+            where: { majCat: { equals: row.majorCategory, mode: 'insensitive' } },
+            select: { cmpCost: true },
+        });
+        return master?.cmpCost != null ? Number(master.cmpCost) : null;
+    }
+
     static getBodyArticleById = async (req: Request, res: Response) => {
         const { id } = req.params;
         const row = await prisma.bodyArticleData.findUnique({ where: { id } });
         if (!row) return res.status(404).json({ error: 'Item not found' });
-        return res.json(ApproverController.bodyRowToApproverItem(row));
+        const item = ApproverController.bodyRowToApproverItem(row);
+        item.roughCmpCost = await ApproverController.resolveRoughCmpCost(row);
+        return res.json(item);
     };
 
     static updateBodyArticle = async (req: Request, res: Response) => {
@@ -3714,7 +3728,9 @@ export class ApproverController {
         if (Object.keys(data).length === 0) {
             const row = await prisma.bodyArticleData.findUnique({ where: { id } });
             if (!row) return res.status(404).json({ error: 'Item not found' });
-            return res.json(ApproverController.bodyRowToApproverItem(row));
+            const item = ApproverController.bodyRowToApproverItem(row);
+            item.roughCmpCost = await ApproverController.resolveRoughCmpCost(row);
+            return res.json(item);
         }
 
         // If bodyArticleNumber is being set, check it isn't already owned by a different row
@@ -3732,7 +3748,9 @@ export class ApproverController {
 
         try {
             const row = await prisma.bodyArticleData.update({ where: { id }, data });
-            return res.json(ApproverController.bodyRowToApproverItem(row));
+            const item = ApproverController.bodyRowToApproverItem(row);
+            item.roughCmpCost = await ApproverController.resolveRoughCmpCost(row);
+            return res.json(item);
         } catch (err: any) {
             if (err?.code === 'P2002' && err?.meta?.target?.includes('body_article_number')) {
                 return res.status(409).json({
