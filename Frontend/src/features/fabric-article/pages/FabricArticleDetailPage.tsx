@@ -82,10 +82,11 @@ const SCHEMA_KEY_TO_ALL_SAP_KEYS: Record<string, string[]> = Object.entries(SAP_
   {} as Record<string, string[]>,
 );
 
-function getMissingMandatoryFields(item: any): string[] {
+function getMissingMandatoryFields(item: any, isFGMode = false): string[] {
   const missing: string[] = [];
   if (!item.vendorName) missing.push('VENDOR NAME');
-  if (!item.mrp) missing.push('MRP');
+  if (!isFGMode && !item.mrp) missing.push('MRP');
+  if (isFGMode && !item.articleFashionType) missing.push('ARTICLE FASHION TYPE');
   const majorCat = item.majorCategory || '';
   if (!majorCat) return missing;
   for (const [schemaKey, dbField] of Object.entries(SCHEMA_KEY_TO_DB_FIELD)) {
@@ -245,17 +246,29 @@ export interface DetailNavigationState {
 
 // ─── Component ────────────────────────────────────────────────────────────────
 
+const DEFAULT_APPROVE_ROLES = ['ADMIN', 'APPROVER', 'CATEGORY_HEAD', 'SUB_DIVISION_HEAD', 'PO_COMMITTEE', 'PD'];
+
 export default function ArticleDetailPage({
   ListComponent = FabricArticleList,
   skipMandatoryFieldsCheck = false,
+  approveEndpoint = '/fabric-article/approve',
+  itemsBaseEndpoint = '/approver/items',
+  rejectEndpoint = '/approver/reject',
+  approveRoles = DEFAULT_APPROVE_ROLES,
+  isFGMode = false,
 }: {
   ListComponent?: React.ComponentType<ApproverArticleListProps>;
-  // The Body Article page only shows the Body & Construction + BOM cards, but
-  // getMissingMandatoryFields() checks the full attribute schema (FAB, VA ACC,
-  // VA PRCS, ...) — fields that page has no way to fill. Body Article Detail
-  // Page opts out of that gate entirely; the FG Article Detail Page (approver's
-  // own ArticleDetailPage.tsx) is a separate component and is unaffected.
   skipMandatoryFieldsCheck?: boolean;
+  /** Override the approve POST endpoint. Defaults to /fabric-article/approve. */
+  approveEndpoint?: string;
+  /** Override the base path for GET/PUT item calls. Defaults to /approver/items. */
+  itemsBaseEndpoint?: string;
+  /** Override the reject POST endpoint. Defaults to /approver/reject. */
+  rejectEndpoint?: string;
+  /** Roles that can use the Save & Submit (approve) button. Defaults to standard approver roles. */
+  approveRoles?: string[];
+  /** When true, hides reference/article-desc fields and renames Article Number to Fabric Article Number. */
+  isFGMode?: boolean;
 } = {}) {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
@@ -285,6 +298,7 @@ export default function ArticleDetailPage({
   const [confirmDialog, setConfirmDialog] = useState<ConfirmDialog>(null);
   const [infoDialog, setInfoDialog] = useState<InfoDialog>(null);
   const [approving, setApproving] = useState(false);
+  const [confirmingCreator, setConfirmingCreator] = useState(false);
   // Bumped once the per-category mandatory grid finishes loading, so the
   // Save & Submit gate recomputes against real grid data (fixes the hard-refresh
   // race where the gate ran before the grid cache was populated).
@@ -307,7 +321,14 @@ export default function ArticleDetailPage({
     mcDesByMajCat: Record<string, string[]>;
   }>({ divisions: [], subDivsByDiv: {}, majCatsBySubDiv: {}, mcDesByMajCat: {} });
 
-  const canApprove = user?.role === 'ADMIN' || user?.role === 'APPROVER' || user?.role === 'CATEGORY_HEAD' || user?.role === 'SUB_DIVISION_HEAD' || user?.role === 'PO_COMMITTEE' || user?.role === 'PD';
+  const canApprove = user?.role != null && approveRoles.includes(user.role);
+  const isBodyArticlePage = skipMandatoryFieldsCheck;
+  // Confirm button: visible to everyone on body article page EXCEPT BODY_APPROVER
+  const canCreatorConfirm = isBodyArticlePage && user?.role !== 'BODY_APPROVER';
+  // Save & Submit on body article page: only BODY_APPROVER and ADMIN can submit to SAP
+  const canSubmitBodyArticle = !isBodyArticlePage || user?.role === 'BODY_APPROVER' || user?.role === 'ADMIN';
+  // Save & Submit on FG New Articles page: only FABRIC_APPROVER and ADMIN can submit fabric articles to SAP
+  const canSubmitFabricArticle = !isFGMode || user?.role === 'FABRIC_APPROVER' || user?.role === 'ADMIN';
 
   // ─── Init ───────────────────────────────────────────────────────────────────
 
@@ -335,7 +356,7 @@ export default function ArticleDetailPage({
     if (!id) return;
     setLoadingItem(true);
     const token = localStorage.getItem('authToken');
-    fetch(`${APP_CONFIG.api.baseURL}/approver/items/${id}`, { headers: { Authorization: `Bearer ${token}` } })
+    fetch(`${APP_CONFIG.api.baseURL}${itemsBaseEndpoint}/${id}`, { headers: { Authorization: `Bearer ${token}` } })
       .then(r => r.json())
       .then(item => {
         const withMc = { ...item, mcCode: item.mcCode || inferMcCode(item.majorCategory) };
@@ -410,7 +431,7 @@ export default function ArticleDetailPage({
 
   // Auto-select current item
   useEffect(() => {
-    if (currentItem && currentItem.approvalStatus !== 'REJECTED') {
+    if (currentItem && (currentItem.approvalStatus !== 'REJECTED' || isBodyArticlePage)) {
       setSelectedRowKeys([currentItem.id]);
     } else {
       setSelectedRowKeys([]);
@@ -433,7 +454,7 @@ export default function ArticleDetailPage({
     if (!currentItem) return;
     const token = localStorage.getItem('authToken');
     try {
-      const r = await fetch(`${APP_CONFIG.api.baseURL}/approver/items/${currentItem.id}`, { headers: { Authorization: `Bearer ${token}` } });
+      const r = await fetch(`${APP_CONFIG.api.baseURL}${itemsBaseEndpoint}/${currentItem.id}`, { headers: { Authorization: `Bearer ${token}` } });
       if (r.ok) { const saved = await r.json(); updateItemInList(saved); }
     } catch { message.error('Failed to refresh'); }
   };
@@ -452,7 +473,7 @@ export default function ArticleDetailPage({
       elapsed += 4;
       const token = localStorage.getItem('authToken');
       try {
-        const r = await fetch(`${APP_CONFIG.api.baseURL}/approver/items/${id}`, { headers: { Authorization: `Bearer ${token}` } });
+        const r = await fetch(`${APP_CONFIG.api.baseURL}${itemsBaseEndpoint}/${id}`, { headers: { Authorization: `Bearer ${token}` } });
         if (r.ok) {
           const saved = await r.json();
           updateItemInList(saved);
@@ -496,8 +517,11 @@ export default function ArticleDetailPage({
   }, [currentItem?.id]);
 
   const pendingSelectedKeys = useMemo(
-    () => selectedRowKeys.filter(key => items.find(i => i.id === key)?.approvalStatus === 'PENDING'),
-    [selectedRowKeys, items],
+    () => selectedRowKeys.filter(key => {
+      const status = items.find(i => i.id === key)?.approvalStatus;
+      return status === 'PENDING' || (skipMandatoryFieldsCheck && status === 'REJECTED');
+    }),
+    [selectedRowKeys, items, skipMandatoryFieldsCheck],
   );
 
   const approveBlockedReasons = useMemo(() => {
@@ -506,15 +530,19 @@ export default function ArticleDetailPage({
     return pendingItems.reduce<{ articleId: string; missing: string[] }[]>((acc, item) => {
       const missing: string[] = [];
       if (!item.vendorCode) missing.push('VENDOR CODE');
-      // Color is mandatory on New Articles — on Save & Submit the approver's
-      // direct approval auto-generates variants from this BOM color.
-      if (pathType === 'new' && !item.colour) missing.push('COLOUR');
-      missing.push(...getMissingMandatoryFields(item));
+      // Color is mandatory on New Articles — skipped in FG mode (no colour field).
+      if (pathType === 'new' && !isFGMode && !item.colour) missing.push('COLOUR');
+      // Fabric Article Desc and MC Description are mandatory in FG mode.
+      if (isFGMode) {
+        if (!(item.fabricArticleDescription || '').trim()) missing.push('FABRIC ARTICLE DESC.');
+        if (!(item.mcDescription || '').trim()) missing.push('MC DESCRIPTION');
+      }
+      missing.push(...getMissingMandatoryFields(item, isFGMode));
       if (missing.length > 0) acc.push({ articleId: item.sapArticleId || item.articleNumber || item.imageName || item.id, missing });
       return acc;
     }, []);
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [pendingSelectedKeys, items, gridVersion, pathType, skipMandatoryFieldsCheck]);
+  }, [pendingSelectedKeys, items, gridVersion, pathType, skipMandatoryFieldsCheck, isFGMode]);
 
   const handleApproveClick = () => {
     if (pendingSelectedKeys.length === 0) return;
@@ -523,7 +551,7 @@ export default function ArticleDetailPage({
   };
 
   const doApprove = async () => {
-    const endpoint = '/fabric-article/approve';
+    const endpoint = approveEndpoint;
     setApproving(true);
     try {
       const token = localStorage.getItem('authToken');
@@ -538,6 +566,22 @@ export default function ArticleDetailPage({
       }
       const payload = await r.json();
       setConfirmDialog(null);
+
+      // Body article submit returns { results: [{ success, message }] } — check for failures
+      if (Array.isArray(payload?.results)) {
+        const failed = payload.results.filter((res: any) => !res.success);
+        const succeeded = payload.results.filter((res: any) => res.success);
+        if (failed.length > 0) {
+          failed.forEach((res: any) => message.error(res.message || 'Submission failed'));
+        }
+        if (succeeded.length > 0) {
+          message.success(`${succeeded.length} article(s) submitted to SAP successfully`);
+        }
+        setSelectedRowKeys([]);
+        await refetchCurrentItem();
+        return;
+      }
+
       // Async approval: /approve returns 202 immediately and the SAP create runs in
       // the background worker. Inform the user, free the UI, and poll for completion
       // so the SAP article number fills in (or a failure popup shows) without blocking.
@@ -573,10 +617,30 @@ export default function ArticleDetailPage({
     }
   };
 
+  const doCreatorConfirm = async () => {
+    if (!currentItem) return;
+    setConfirmingCreator(true);
+    try {
+      const token = localStorage.getItem('authToken');
+      const res = await fetch(`${APP_CONFIG.api.baseURL}/approver/body-articles/${currentItem.id}/confirm`, {
+        method: 'POST',
+        headers: { Authorization: `Bearer ${token}` },
+      });
+      if (!res.ok) throw new Error('Failed to confirm');
+      const updated = await res.json();
+      setItems(prev => prev.map(i => i.id === updated.id ? { ...i, fgCreatorApproved: updated.fgCreatorApproved } : i));
+      message.success('Article confirmed — now visible to Body Approver');
+    } catch {
+      message.error('Failed to confirm article');
+    } finally {
+      setConfirmingCreator(false);
+    }
+  };
+
   const doReject = async () => {
     try {
       const token = localStorage.getItem('authToken');
-      const r = await fetch(`${APP_CONFIG.api.baseURL}/approver/reject`, {
+      const r = await fetch(`${APP_CONFIG.api.baseURL}${rejectEndpoint}`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` },
         body: JSON.stringify({ ids: pendingSelectedKeys }),
@@ -595,7 +659,11 @@ export default function ArticleDetailPage({
         method: 'POST', headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` },
         body: JSON.stringify({ ids: [item.id] }),
       });
-      if (!r.ok) throw new Error('Request failed');
+      const data = await r.json();
+      if (!r.ok) {
+        message.error(data.error || 'Failed to create fabric article');
+        return;
+      }
       message.success('Fabric article creation initiated');
       await refetchCurrentItem();
     } catch { message.error('Failed to create fabric article'); }
@@ -671,7 +739,7 @@ export default function ArticleDetailPage({
       if (values.majorCategory && (values.majorCategory !== editingItem?.majorCategory || !values.mcCode)) {
         values.mcCode = inferMcCode(values.majorCategory) || values.mcCode;
       }
-      const r = await fetch(`${APP_CONFIG.api.baseURL}/approver/items/${editingItem?.id}`, {
+      const r = await fetch(`${APP_CONFIG.api.baseURL}${itemsBaseEndpoint}/${editingItem?.id}`, {
         method: 'PUT', headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` },
         body: JSON.stringify(values),
       });
@@ -953,6 +1021,20 @@ export default function ArticleDetailPage({
                   )}
                 </>
               )}
+              {canCreatorConfirm && currentItem?.fgCreatorApproved !== 'APPROVED' && (
+                <Button size="sm" variant="outline"
+                  onClick={doCreatorConfirm}
+                  disabled={confirmingCreator}
+                  className="h-7 px-2.5 text-[12px] border-green-500 text-green-700 hover:bg-green-50">
+                  <CheckCircle2 className="h-3.5 w-3.5" />
+                  {confirmingCreator ? 'Confirming…' : 'Confirm'}
+                </Button>
+              )}
+              {canCreatorConfirm && currentItem?.fgCreatorApproved === 'APPROVED' && (
+                <span className="flex h-7 items-center gap-1 rounded-md bg-green-100 px-2.5 text-[12px] font-medium text-green-700">
+                  <CheckCircle2 className="h-3.5 w-3.5" /> Confirmed
+                </span>
+              )}
               <Tooltip title={!canApprove ? 'Only Approver, Sub-Division Head, Category Head or Admin can reject articles' : undefined}>
                 {/* span wrapper: disabled <button> swallows pointer events; span keeps hover alive */}
                 <span className="inline-block">
@@ -993,7 +1075,7 @@ export default function ArticleDetailPage({
                 {/* span wrapper: disabled <button> swallows pointer events; span keeps hover alive */}
                 <span className="inline-block">
                   <Button size="sm" onClick={handleApproveClick}
-                    disabled={!canApprove || pendingSelectedKeys.length === 0 || approveBlockedReasons.length > 0}
+                    disabled={!canApprove || !canSubmitBodyArticle || !canSubmitFabricArticle || pendingSelectedKeys.length === 0 || approveBlockedReasons.length > 0}
                     className="h-7 border-none bg-[#FF6F61] px-3 text-[12px] font-semibold text-white shadow-sm hover:bg-[#ff5b4d] disabled:bg-white/20 disabled:text-white/50">
                     <CheckCircle2 /> Save &amp; Submit
                     {approveBlockedReasons.length > 0 && <span className="ml-1 text-[10px] text-amber-200">⚠ {approveBlockedReasons.length}</span>}
@@ -1027,7 +1109,7 @@ export default function ArticleDetailPage({
 
             // Run the same mandatory-field validation as Save & Submit.
             const mergedItem = { ...row, ...(changes as any) };
-            const missing = getMissingMandatoryFields(mergedItem);
+            const missing = getMissingMandatoryFields(mergedItem, isFGMode);
             if (!mergedItem.vendorCode) missing.unshift('VENDOR CODE');
             if (missing.length > 0) {
               const articleId = mergedItem.sapArticleId || mergedItem.articleNumber || mergedItem.id;
@@ -1122,6 +1204,7 @@ export default function ArticleDetailPage({
           onRefresh={refetchCurrentItem}
           pathType={pathType}
           fabHierarchy={fabHierarchy}
+          isFGMode={isFGMode}
           serverPagination={{ total: totalCount, current: currentPage, pageSize: PAGE_SIZE, onChange: () => {} }}
           onSave={async (row, directUpdates, options) => {
             const prevItems = [...items];
@@ -1147,7 +1230,7 @@ export default function ArticleDetailPage({
             if (Object.keys(updatePayload).length === 0) return;
             try {
               const token = localStorage.getItem('authToken');
-              const r = await fetch(`${APP_CONFIG.api.baseURL}/approver/items/${row.id}`, {
+              const r = await fetch(`${APP_CONFIG.api.baseURL}${itemsBaseEndpoint}/${row.id}`, {
                 method: 'PUT',
                 headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` },
                 body: JSON.stringify(updatePayload),

@@ -1,16 +1,16 @@
 /**
  * vendorMasterSyncService.ts
  *
- * Fetches all vendor records from the DAB API (ET_Supplier_Master) and
+ * Fetches all vendor records from the DAB API (DY_SUPPLIER_MST) and
  * upserts them into the master_vendor_details table.
  *
- * Pagination: API returns 100 records per page; follow `nextLink` until absent.
+ * Pagination: $first=1000 per page; follow `nextLink` cursor until absent.
  * Upsert key: vendor_code — safe to re-run at any time.
  */
 
 import { prismaClient as prisma } from '../utils/prisma';
 
-const DAB_API_BASE = 'https://my-dab-app.azurewebsites.net/api/ET_Supplier_Master';
+const DAB_API_BASE = 'https://my-dab-app.azurewebsites.net/api/DY_SUPPLIER_MST?$first=1000&$orderby=ID%20desc';
 
 interface DabVendorRow {
   ID: number;
@@ -26,14 +26,29 @@ interface DabVendorRow {
 
 interface DabApiResponse {
   value: DabVendorRow[];
+  // OData APIs may use either key
   nextLink?: string | null;
+  '@odata.nextLink'?: string | null;
 }
 
 export interface VendorSyncResult {
   upserted: number;
   pages: number;
   durationMs: number;
+  startedAt: string;
   error?: string;
+}
+
+// In-memory record of the most recent sync attempt
+let lastSyncResult: VendorSyncResult | null = null;
+let syncInProgress = false;
+
+export function getLastVendorSyncResult(): VendorSyncResult | null {
+  return lastSyncResult;
+}
+
+export function isVendorSyncInProgress(): boolean {
+  return syncInProgress;
 }
 
 /** Normalise a raw vendor code value to a plain string */
@@ -45,9 +60,11 @@ function toStr(val: number | string | null | undefined): string | null {
 
 /** Fetch one page from the API */
 async function fetchPage(url: string): Promise<DabApiResponse> {
-  const res = await fetch(url, {
-    headers: { Accept: 'application/json' },
-    signal: AbortSignal.timeout(30_000), // 30s per page
+  // nextLink may return http:// — force https
+  const safeUrl = url.replace(/^http:\/\//i, 'https://');
+  const res = await fetch(safeUrl, {
+    headers: { 'Content-Type': 'application/json', Accept: 'application/json' },
+    signal: AbortSignal.timeout(60_000), // 60s per page (1000 rows)
   });
   if (!res.ok) {
     throw new Error(`DAB API HTTP ${res.status} — ${res.statusText}`);
@@ -60,59 +77,75 @@ async function fetchPage(url: string): Promise<DabApiResponse> {
  * Returns a result summary.
  */
 export async function syncVendorMaster(): Promise<VendorSyncResult> {
+  if (syncInProgress) {
+    throw new Error('Sync already in progress');
+  }
+
   const start = Date.now();
+  const startedAt = new Date().toISOString();
   let upserted = 0;
   let pages = 0;
   let nextUrl: string | null = DAB_API_BASE;
 
+  syncInProgress = true;
   console.log('[VendorSync] Starting vendor master sync from DAB API…');
 
-  while (nextUrl) {
-    const data = await fetchPage(nextUrl);
-    pages++;
+  try {
+    while (nextUrl) {
+      const data = await fetchPage(nextUrl);
+      pages++;
 
-    const rows = data.value ?? [];
-    if (rows.length === 0) break;
+      const rows = data.value ?? [];
+      if (rows.length === 0) break;
 
-    // Upsert in batches — Prisma doesn't support bulk upsert natively,
-    // so we use a transaction with individual upserts (fast enough for ~100/page)
-    await prisma.$transaction(
-      rows.map((row) =>
-        prisma.masterVendorDetail.upsert({
-          where: { vendorCode: String(row.VENDOR_CODE) },
-          update: {
-            vendorName:        toStr(row.VENDOR_NAME),
-            vendorCity:        toStr(row.VENDOR_CITY),
-            vendorRegion:      toStr(row.VENDOR_REGION),
-            mergeVendorCode:   toStr(row.MERGE_VENDOR_CODE),
-            mergeVendorName:   toStr(row.MERGE_VENDOR_NAME),
-            mergeVendorCity:   toStr(row.MERGE_VENDOR_CITY),
-            mergeVendorRegion: toStr(row.MERGE_VENDOR_REGION),
-            syncedAt:          new Date(),
-          },
-          create: {
-            vendorCode:        String(row.VENDOR_CODE),
-            vendorName:        toStr(row.VENDOR_NAME),
-            vendorCity:        toStr(row.VENDOR_CITY),
-            vendorRegion:      toStr(row.VENDOR_REGION),
-            mergeVendorCode:   toStr(row.MERGE_VENDOR_CODE),
-            mergeVendorName:   toStr(row.MERGE_VENDOR_NAME),
-            mergeVendorCity:   toStr(row.MERGE_VENDOR_CITY),
-            mergeVendorRegion: toStr(row.MERGE_VENDOR_REGION),
-          },
-        })
-      )
-    );
+      await prisma.$transaction(
+        rows.map((row) =>
+          prisma.masterVendorDetail.upsert({
+            where: { vendorCode: String(row.VENDOR_CODE) },
+            update: {
+              vendorName:        toStr(row.VENDOR_NAME),
+              vendorCity:        toStr(row.VENDOR_CITY),
+              vendorRegion:      toStr(row.VENDOR_REGION),
+              mergeVendorCode:   toStr(row.MERGE_VENDOR_CODE),
+              mergeVendorName:   toStr(row.MERGE_VENDOR_NAME),
+              mergeVendorCity:   toStr(row.MERGE_VENDOR_CITY),
+              mergeVendorRegion: toStr(row.MERGE_VENDOR_REGION),
+              syncedAt:          new Date(),
+            },
+            create: {
+              vendorCode:        String(row.VENDOR_CODE),
+              vendorName:        toStr(row.VENDOR_NAME),
+              vendorCity:        toStr(row.VENDOR_CITY),
+              vendorRegion:      toStr(row.VENDOR_REGION),
+              mergeVendorCode:   toStr(row.MERGE_VENDOR_CODE),
+              mergeVendorName:   toStr(row.MERGE_VENDOR_NAME),
+              mergeVendorCity:   toStr(row.MERGE_VENDOR_CITY),
+              mergeVendorRegion: toStr(row.MERGE_VENDOR_REGION),
+            },
+          })
+        )
+      );
 
-    upserted += rows.length;
-    console.log(`[VendorSync] Page ${pages} — upserted ${rows.length} rows (total: ${upserted})`);
+      upserted += rows.length;
+      console.log(`[VendorSync] Page ${pages} — fetched ${rows.length} rows (total so far: ${upserted})`);
 
-    nextUrl = data.nextLink ?? null;
+      // Support both OData @odata.nextLink and plain nextLink
+      nextUrl = (data['@odata.nextLink'] ?? data.nextLink) ?? null;
+    }
+
+    const durationMs = Date.now() - start;
+    console.log(`[VendorSync] Done — ${upserted} records in ${pages} pages (${durationMs}ms)`);
+    lastSyncResult = { upserted, pages, durationMs, startedAt };
+    return lastSyncResult;
+  } catch (err: any) {
+    const durationMs = Date.now() - start;
+    const error = err?.message ?? 'Unknown error';
+    console.error(`[VendorSync] Failed after ${pages} pages: ${error}`);
+    lastSyncResult = { upserted, pages, durationMs, startedAt, error };
+    throw err;
+  } finally {
+    syncInProgress = false;
   }
-
-  const durationMs = Date.now() - start;
-  console.log(`[VendorSync] Done — ${upserted} records in ${pages} pages (${durationMs}ms)`);
-  return { upserted, pages, durationMs };
 }
 
 /**

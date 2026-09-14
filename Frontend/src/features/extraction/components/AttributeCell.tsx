@@ -1,5 +1,5 @@
 import React, { useState, useCallback, useEffect, useRef } from 'react';
-import { Check, X, Info, Bot } from 'lucide-react';
+import { Check, X, Info, Bot, ChevronDown, Search } from 'lucide-react';
 import {
   Badge,
   Button,
@@ -7,11 +7,6 @@ import {
   Popover,
   PopoverContent,
   PopoverTrigger,
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
   Tag,
 } from '@/shared/components/ui-tw';
 import { cn } from '@/lib/utils';
@@ -61,6 +56,8 @@ export const AttributeCell: React.FC<AttributeCellProps> = ({
 }) => {
   const [isEditing, setIsEditing] = useState(false);
   const [editValue, setEditValue] = useState<string | number | null>(null);
+  const [selectOpen, setSelectOpen] = useState(false);
+  const [selectSearch, setSelectSearch] = useState('');
   const inputRef = useRef<HTMLInputElement>(null);
 
   const normalizeSelectValue = useCallback(
@@ -166,6 +163,8 @@ export const AttributeCell: React.FC<AttributeCellProps> = ({
   const handleCancelEdit = useCallback(() => {
     setEditValue(attribute?.schemaValue ?? attribute?.rawValue ?? null);
     setIsEditing(false);
+    setSelectOpen(false);
+    setSelectSearch('');
   }, [attribute?.schemaValue, attribute?.rawValue]);
 
   const confidencePillColor = (c: number) =>
@@ -195,27 +194,71 @@ export const AttributeCell: React.FC<AttributeCellProps> = ({
         placeholder="Type value"
       />
     ) : (
-      <Select
-        value={normalizeText(editValue) || undefined}
-        onValueChange={(val) => {
-          setEditValue(val);
-          handleSaveEdit(true, val);
+      <Popover
+        open={selectOpen}
+        onOpenChange={(open) => {
+          setSelectOpen(open);
+          if (!open) setSelectSearch('');
         }}
       >
-        <SelectTrigger className="h-8 w-full min-w-[120px] text-xs">
-          <SelectValue placeholder="Select value" />
-        </SelectTrigger>
-        <SelectContent>
-          {schemaItem.allowedValues?.map((valObj) => {
-            const value = valObj.shortForm || valObj.fullForm || '';
-            return (
-              <SelectItem key={value} value={value}>
-                {value}
-              </SelectItem>
-            );
-          })}
-        </SelectContent>
-      </Select>
+        <PopoverTrigger asChild>
+          <Button
+            type="button"
+            variant="outline"
+            className="h-8 w-full min-w-[120px] justify-between px-2 text-xs font-normal"
+          >
+            <span className="truncate">{normalizeText(editValue) || 'Select value'}</span>
+            <ChevronDown className="h-3.5 w-3.5 shrink-0 text-muted-foreground" />
+          </Button>
+        </PopoverTrigger>
+        <PopoverContent className="w-[--radix-popover-trigger-width] p-0" align="start">
+          <div className="flex items-center gap-1.5 border-b px-2 py-1.5">
+            <Search className="h-3.5 w-3.5 shrink-0 text-muted-foreground" />
+            <input
+              autoFocus
+              value={selectSearch}
+              onChange={(e) => setSelectSearch(e.target.value)}
+              placeholder="Search..."
+              className="flex-1 bg-transparent text-xs outline-none placeholder:text-muted-foreground"
+            />
+          </div>
+          <div className="max-h-56 overflow-y-auto py-1">
+            {(schemaItem.allowedValues || [])
+              .filter((valObj) =>
+                (valObj.shortForm || valObj.fullForm || '')
+                  .toLowerCase()
+                  .includes(selectSearch.toLowerCase()),
+              )
+              .map((valObj) => {
+                const value = valObj.shortForm || valObj.fullForm || '';
+                const isSelected = normalizeText(editValue) === value;
+                return (
+                  <button
+                    key={value}
+                    type="button"
+                    onClick={() => {
+                      setEditValue(value);
+                      setSelectOpen(false);
+                      setSelectSearch('');
+                      handleSaveEdit(true, value);
+                    }}
+                    className={cn(
+                      'flex w-full items-center px-3 py-1.5 text-left text-xs hover:bg-accent hover:text-accent-foreground',
+                      isSelected && 'bg-primary/8 font-medium',
+                    )}
+                  >
+                    {value}
+                  </button>
+                );
+              })}
+            {(schemaItem.allowedValues || []).filter((valObj) =>
+              (valObj.shortForm || valObj.fullForm || '').toLowerCase().includes(selectSearch.toLowerCase()),
+            ).length === 0 && (
+              <div className="px-3 py-2 text-xs text-muted-foreground">No options found</div>
+            )}
+          </div>
+        </PopoverContent>
+      </Popover>
     );
 
   const reasoningContent = (

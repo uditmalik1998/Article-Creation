@@ -52,6 +52,7 @@ export interface ApproverItem {
   vendorName: string | null;
   designNumber: string | null;
   approvalStatus: 'PENDING' | 'APPROVED' | 'REJECTED';
+  fgCreatorApproved?: 'PENDING' | 'APPROVED';
   sapSyncStatus: 'NOT_SYNCED' | 'PENDING' | 'SYNCED' | 'FAILED';
   sapSyncMessage: string | null;
   sapArticleId: string | null;
@@ -148,6 +149,9 @@ export interface ApproverItem {
   approvedBy?: number | null;
   approvedAt?: string | null;
   approver?: { name: string | null; email: string | null } | null;
+  valueAddCost: number | string | null;
+  vendorFabricRate: number | string | null;
+  basicTrimCost: number | string | null;
 }
 
 interface EditableCellProps {

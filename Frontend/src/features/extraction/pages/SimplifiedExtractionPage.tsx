@@ -34,7 +34,7 @@ import { AttributeTable } from '../components/AttributeTable';
 import ExportManager from '../components/ExportManager';
 import { useImageExtraction } from '../../../shared/hooks/extraction/useImageExtraction';
 import type { SchemaItem } from '../../../shared/types/extraction/ExtractionTypes';
-import { MAJOR_CATEGORY_ALLOWED_VALUES } from '../../../data/majorCategoryMcCodeMap';
+import { MAJOR_CATEGORY_ALLOWED_VALUES, getMajorCategoriesBySubDivision } from '../../../data/majorCategoryMcCodeMap';
 import { getMajCatAllowedValues, getMajCatMandatoryKeys } from '../../../data/majCatAttributeMap';
 import { preloadAttributeValues } from '../../../services/articleConfigService';
 
@@ -276,7 +276,21 @@ const SimplifiedExtractionPage = () => {
     const division = selectedCategory?.department || '';
     preloadAttributeValues(division).catch(() => {});
     const mandatoryKeys = getMajCatMandatoryKeys(majorCat);
+    // `majorCat` here is actually the selected Sub-Division (e.g. MW, MS-U) —
+    // narrow the Major Category options to that division + sub-division so
+    // e.g. MS-U never shows MW-only categories like MW_THRM_LOWER.
+    const subDivisionCategories = normalizeAllowedValues(
+      'major_category',
+      getMajorCategoriesBySubDivision(division, majorCat).map((name) => ({ shortForm: name, fullForm: name })),
+    );
     const filtered = baseSchema.map((item) => {
+      if (item.key === 'major_category') {
+        return {
+          ...item,
+          allowedValues: subDivisionCategories.length > 0 ? subDivisionCategories : item.allowedValues,
+          required: mandatoryKeys.has(item.key),
+        };
+      }
       const majCatValues = getMajCatAllowedValues(division, item.key);
       const isRequired = mandatoryKeys.has(item.key);
       return { ...item, ...(majCatValues ? { allowedValues: majCatValues } : {}), required: isRequired };

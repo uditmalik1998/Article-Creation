@@ -352,6 +352,8 @@ exports.Prisma.ExtractionResultFlatScalarFieldEnum = {
   fabCost: 'fabCost',
   fabCons: 'fabCons',
   width: 'width',
+  vendorFabricRate: 'vendorFabricRate',
+  valueAddCost: 'valueAddCost',
   bodyArticle: 'bodyArticle',
   bodyArticleDescription: 'bodyArticleDescription',
   fabricArticleNumber: 'fabricArticleNumber',
@@ -450,6 +452,7 @@ exports.Prisma.UserScalarFieldEnum = {
   role: 'role',
   division: 'division',
   subDivision: 'subDivision',
+  businessDivision: 'businessDivision',
   isActive: 'isActive',
   lastLogin: 'lastLogin',
   createdAt: 'createdAt',
@@ -750,6 +753,41 @@ exports.Prisma.RawArticleScalarFieldEnum = {
   updatedAt: 'updatedAt'
 };
 
+exports.Prisma.FabricRawDataScalarFieldEnum = {
+  id: 'id',
+  presentationNo: 'presentationNo',
+  uniqueKey: 'uniqueKey',
+  vendorCode: 'vendorCode',
+  vendorName: 'vendorName',
+  vendorCity: 'vendorCity',
+  division: 'division',
+  subDivision: 'subDivision',
+  majorCategory: 'majorCategory',
+  presentationsType: 'presentationsType',
+  designNumber: 'designNumber',
+  articleNumber: 'articleNumber',
+  fabric: 'fabric',
+  noOfColors: 'noOfColors',
+  price: 'price',
+  imageUrl: 'imageUrl',
+  source: 'source',
+  season: 'season',
+  garmentWeight: 'garmentWeight',
+  availableQty: 'availableQty',
+  approvedBy: 'approvedBy',
+  notes: 'notes',
+  status: 'status',
+  retryCount: 'retryCount',
+  errorMessage: 'errorMessage',
+  extractedData: 'extractedData',
+  extractedAt: 'extractedAt',
+  flatId: 'flatId',
+  lockedUntil: 'lockedUntil',
+  presentationReceivedDate: 'presentationReceivedDate',
+  createdAt: 'createdAt',
+  updatedAt: 'updatedAt'
+};
+
 exports.Prisma.SrmSyncRunScalarFieldEnum = {
   id: 'id',
   triggeredBy: 'triggeredBy',
@@ -812,6 +850,55 @@ exports.Prisma.NationalGridMasterScalarFieldEnum = {
   fullForm: 'fullForm',
   isActive: 'isActive',
   createdAt: 'createdAt'
+};
+
+exports.Prisma.BroaderMenuScalarFieldEnum = {
+  id: 'id',
+  sn: 'sn',
+  mcCd: 'mcCd',
+  seg: 'seg',
+  div: 'div',
+  subDiv: 'subDiv',
+  majCatCd: 'majCatCd',
+  majCatNm: 'majCatNm',
+  subCatCd: 'subCatCd',
+  subCatDesc: 'subCatDesc',
+  mcDesc: 'mcDesc',
+  ssn: 'ssn',
+  mcStat: 'mcStat',
+  subCatStat: 'subCatStat',
+  majCatStat: 'majCatStat',
+  sizeApplicable: 'sizeApplicable',
+  divStat: 'divStat',
+  mcPkSz: 'mcPkSz',
+  subCatPkSz: 'subCatPkSz',
+  noOfOptions: 'noOfOptions',
+  avgDensity: 'avgDensity',
+  accDensity: 'accDensity',
+  wgDensity: 'wgDensity',
+  fg46FtDensity: 'fg46FtDensity',
+  fg5FtDensity: 'fg5FtDensity',
+  fg4ADensity: 'fg4ADensity',
+  fg8ADensity: 'fg8ADensity',
+  acp: 'acp',
+  oldDensity: 'oldDensity',
+  seq: 'seq',
+  mjCatTyp: 'mjCatTyp',
+  fixtr: 'fixtr',
+  newMcCd: 'newMcCd',
+  newMcDesc: 'newMcDesc',
+  oldMcDesc: 'oldMcDesc',
+  oldSubCatCd: 'oldSubCatCd',
+  oldSubCatDesc: 'oldSubCatDesc',
+  legacyMcDesc: 'legacyMcDesc',
+  effectiveDate: 'effectiveDate',
+  remarks: 'remarks',
+  gmStatus: 'gmStatus',
+  currentMcStatus: 'currentMcStatus',
+  fullMcName: 'fullMcName',
+  winterStatus: 'winterStatus',
+  uploadedAt: 'uploadedAt',
+  updatedAt: 'updatedAt'
 };
 
 exports.Prisma.MajorCatMasterScalarFieldEnum = {
@@ -881,16 +968,25 @@ exports.Prisma.FabricArticleDataScalarFieldEnum = {
   mLycra: 'mLycra',
   fabricArticleNumber: 'fabricArticleNumber',
   fabricArticleDescription: 'fabricArticleDescription',
+  flatId: 'flatId',
   division: 'division',
   subDivision: 'subDivision',
   majorCategory: 'majorCategory',
+  mcDescription: 'mcDescription',
   vendorName: 'vendorName',
   vendorCode: 'vendorCode',
+  designNumber: 'designNumber',
+  fabricRate: 'fabricRate',
+  v2FabricRate: 'v2FabricRate',
+  valueAddCost: 'valueAddCost',
+  articleFashionType: 'articleFashionType',
   approvalStatus: 'approvalStatus',
   approvedAt: 'approvedAt',
   approvedBy: 'approvedBy',
   sapSyncStatus: 'sapSyncStatus',
   sapSyncMessage: 'sapSyncMessage',
+  imageUrl: 'imageUrl',
+  fabricArticleType: 'fabricArticleType',
   userName: 'userName',
   createdAt: 'createdAt',
   updatedAt: 'updatedAt'
@@ -917,11 +1013,15 @@ exports.Prisma.BodyArticleDataScalarFieldEnum = {
   mSet: 'mSet',
   bodyArticleNumber: 'bodyArticleNumber',
   bodyArticleDescription: 'bodyArticleDescription',
+  imageUrl: 'imageUrl',
+  bodyArticleType: 'bodyArticleType',
+  designNumber: 'designNumber',
   cmtpCost: 'cmtpCost',
   cmpCost: 'cmpCost',
   fabCost: 'fabCost',
   fabCons: 'fabCons',
   width: 'width',
+  basicTrimCost: 'basicTrimCost',
   flatId: 'flatId',
   articleNumber: 'articleNumber',
   division: 'division',
@@ -934,6 +1034,7 @@ exports.Prisma.BodyArticleDataScalarFieldEnum = {
   year: 'year',
   hsnTaxCode: 'hsnTaxCode',
   approvalStatus: 'approvalStatus',
+  fgCreatorApproved: 'fgCreatorApproved',
   approvedAt: 'approvedAt',
   approvedBy: 'approvedBy',
   sapSyncStatus: 'sapSyncStatus',
@@ -941,6 +1042,89 @@ exports.Prisma.BodyArticleDataScalarFieldEnum = {
   userName: 'userName',
   createdAt: 'createdAt',
   updatedAt: 'updatedAt'
+};
+
+exports.Prisma.MajorCategoryDetailsScalarFieldEnum = {
+  id: 'id',
+  seg: 'seg',
+  div: 'div',
+  subDiv: 'subDiv',
+  majCat: 'majCat',
+  mcCode: 'mcCode',
+  mcDes: 'mcDes',
+  hsnCode: 'hsnCode',
+  mcStatus: 'mcStatus',
+  createdAt: 'createdAt'
+};
+
+exports.Prisma.ExpenseApprovalStageScalarFieldEnum = {
+  id: 'id',
+  tableKey: 'tableKey',
+  key: 'key',
+  label: 'label',
+  description: 'description',
+  sortOrder: 'sortOrder',
+  isActive: 'isActive',
+  createdById: 'createdById',
+  createdByName: 'createdByName',
+  createdAt: 'createdAt',
+  updatedAt: 'updatedAt'
+};
+
+exports.Prisma.ExpenseChangeRequestScalarFieldEnum = {
+  id: 'id',
+  tableKey: 'tableKey',
+  operation: 'operation',
+  rowId: 'rowId',
+  appliedRowId: 'appliedRowId',
+  rowLabel: 'rowLabel',
+  changes: 'changes',
+  reason: 'reason',
+  dueDate: 'dueDate',
+  status: 'status',
+  currentStageKey: 'currentStageKey',
+  approvalTrail: 'approvalTrail',
+  requestedById: 'requestedById',
+  requestedByName: 'requestedByName',
+  requestedByEmail: 'requestedByEmail',
+  requestedAt: 'requestedAt',
+  requesterBusinessDivision: 'requesterBusinessDivision',
+  createdAt: 'createdAt',
+  updatedAt: 'updatedAt'
+};
+
+exports.Prisma.ExpenseAccessGrantScalarFieldEnum = {
+  id: 'id',
+  email: 'email',
+  level: 'level',
+  tableKey: 'tableKey',
+  subDivision: 'subDivision',
+  canCreate: 'canCreate',
+  canUpdate: 'canUpdate',
+  canDelete: 'canDelete',
+  isActive: 'isActive',
+  note: 'note',
+  grantedById: 'grantedById',
+  grantedByName: 'grantedByName',
+  createdAt: 'createdAt',
+  updatedAt: 'updatedAt'
+};
+
+exports.Prisma.ExpenseAuditLogScalarFieldEnum = {
+  id: 'id',
+  requestId: 'requestId',
+  tableKey: 'tableKey',
+  rowId: 'rowId',
+  operation: 'operation',
+  eventType: 'eventType',
+  stageKey: 'stageKey',
+  stageLabel: 'stageLabel',
+  actorId: 'actorId',
+  actorName: 'actorName',
+  actorEmail: 'actorEmail',
+  comment: 'comment',
+  details: 'details',
+  occurredAt: 'occurredAt'
 };
 
 exports.Prisma.SortOrder = {
@@ -1185,7 +1369,8 @@ exports.Prisma.UserOrderByRelevanceFieldEnum = {
   password: 'password',
   name: 'name',
   division: 'division',
-  subDivision: 'subDivision'
+  subDivision: 'subDivision',
+  businessDivision: 'businessDivision'
 };
 
 exports.Prisma.AuditLogOrderByRelevanceFieldEnum = {
@@ -1408,6 +1593,29 @@ exports.Prisma.RawArticleOrderByRelevanceFieldEnum = {
   articleNumber: 'articleNumber'
 };
 
+exports.Prisma.FabricRawDataOrderByRelevanceFieldEnum = {
+  id: 'id',
+  presentationNo: 'presentationNo',
+  uniqueKey: 'uniqueKey',
+  vendorCode: 'vendorCode',
+  vendorName: 'vendorName',
+  vendorCity: 'vendorCity',
+  division: 'division',
+  subDivision: 'subDivision',
+  majorCategory: 'majorCategory',
+  presentationsType: 'presentationsType',
+  designNumber: 'designNumber',
+  articleNumber: 'articleNumber',
+  fabric: 'fabric',
+  imageUrl: 'imageUrl',
+  source: 'source',
+  season: 'season',
+  approvedBy: 'approvedBy',
+  notes: 'notes',
+  errorMessage: 'errorMessage',
+  flatId: 'flatId'
+};
+
 exports.Prisma.SrmSyncRunOrderByRelevanceFieldEnum = {
   id: 'id',
   triggeredBy: 'triggeredBy',
@@ -1439,6 +1647,32 @@ exports.Prisma.NationalGridMasterOrderByRelevanceFieldEnum = {
   attributeName: 'attributeName',
   code: 'code',
   fullForm: 'fullForm'
+};
+
+exports.Prisma.BroaderMenuOrderByRelevanceFieldEnum = {
+  seg: 'seg',
+  div: 'div',
+  subDiv: 'subDiv',
+  majCatNm: 'majCatNm',
+  subCatDesc: 'subCatDesc',
+  mcDesc: 'mcDesc',
+  ssn: 'ssn',
+  mcStat: 'mcStat',
+  subCatStat: 'subCatStat',
+  majCatStat: 'majCatStat',
+  sizeApplicable: 'sizeApplicable',
+  divStat: 'divStat',
+  mjCatTyp: 'mjCatTyp',
+  fixtr: 'fixtr',
+  newMcDesc: 'newMcDesc',
+  oldMcDesc: 'oldMcDesc',
+  oldSubCatDesc: 'oldSubCatDesc',
+  legacyMcDesc: 'legacyMcDesc',
+  remarks: 'remarks',
+  gmStatus: 'gmStatus',
+  currentMcStatus: 'currentMcStatus',
+  fullMcName: 'fullMcName',
+  winterStatus: 'winterStatus'
 };
 
 exports.Prisma.MajorCatMasterOrderByRelevanceFieldEnum = {
@@ -1496,14 +1730,20 @@ exports.Prisma.FabricArticleDataOrderByRelevanceFieldEnum = {
   mLycra: 'mLycra',
   fabricArticleNumber: 'fabricArticleNumber',
   fabricArticleDescription: 'fabricArticleDescription',
+  flatId: 'flatId',
   division: 'division',
   subDivision: 'subDivision',
   majorCategory: 'majorCategory',
+  mcDescription: 'mcDescription',
   vendorName: 'vendorName',
   vendorCode: 'vendorCode',
+  designNumber: 'designNumber',
+  articleFashionType: 'articleFashionType',
   approvalStatus: 'approvalStatus',
   sapSyncStatus: 'sapSyncStatus',
   sapSyncMessage: 'sapSyncMessage',
+  imageUrl: 'imageUrl',
+  fabricArticleType: 'fabricArticleType',
   userName: 'userName'
 };
 
@@ -1528,6 +1768,9 @@ exports.Prisma.BodyArticleDataOrderByRelevanceFieldEnum = {
   mSet: 'mSet',
   bodyArticleNumber: 'bodyArticleNumber',
   bodyArticleDescription: 'bodyArticleDescription',
+  imageUrl: 'imageUrl',
+  bodyArticleType: 'bodyArticleType',
+  designNumber: 'designNumber',
   flatId: 'flatId',
   articleNumber: 'articleNumber',
   division: 'division',
@@ -1540,9 +1783,62 @@ exports.Prisma.BodyArticleDataOrderByRelevanceFieldEnum = {
   year: 'year',
   hsnTaxCode: 'hsnTaxCode',
   approvalStatus: 'approvalStatus',
+  fgCreatorApproved: 'fgCreatorApproved',
   sapSyncStatus: 'sapSyncStatus',
   sapSyncMessage: 'sapSyncMessage',
   userName: 'userName'
+};
+
+exports.Prisma.MajorCategoryDetailsOrderByRelevanceFieldEnum = {
+  seg: 'seg',
+  div: 'div',
+  subDiv: 'subDiv',
+  majCat: 'majCat',
+  mcCode: 'mcCode',
+  mcDes: 'mcDes',
+  hsnCode: 'hsnCode',
+  mcStatus: 'mcStatus'
+};
+
+exports.Prisma.ExpenseApprovalStageOrderByRelevanceFieldEnum = {
+  tableKey: 'tableKey',
+  key: 'key',
+  label: 'label',
+  description: 'description',
+  createdByName: 'createdByName'
+};
+
+exports.Prisma.ExpenseChangeRequestOrderByRelevanceFieldEnum = {
+  id: 'id',
+  tableKey: 'tableKey',
+  rowId: 'rowId',
+  appliedRowId: 'appliedRowId',
+  rowLabel: 'rowLabel',
+  reason: 'reason',
+  currentStageKey: 'currentStageKey',
+  requestedByName: 'requestedByName',
+  requestedByEmail: 'requestedByEmail',
+  requesterBusinessDivision: 'requesterBusinessDivision'
+};
+
+exports.Prisma.ExpenseAccessGrantOrderByRelevanceFieldEnum = {
+  email: 'email',
+  level: 'level',
+  tableKey: 'tableKey',
+  subDivision: 'subDivision',
+  note: 'note',
+  grantedByName: 'grantedByName'
+};
+
+exports.Prisma.ExpenseAuditLogOrderByRelevanceFieldEnum = {
+  requestId: 'requestId',
+  tableKey: 'tableKey',
+  rowId: 'rowId',
+  stageKey: 'stageKey',
+  stageLabel: 'stageLabel',
+  actorName: 'actorName',
+  actorEmail: 'actorEmail',
+  comment: 'comment'
 };
 exports.GarmentType = exports.$Enums.GarmentType = {
   UPPER: 'UPPER',
@@ -1592,7 +1888,10 @@ exports.UserRole = exports.$Enums.UserRole = {
   CATEGORY_HEAD: 'CATEGORY_HEAD',
   SUB_DIVISION_HEAD: 'SUB_DIVISION_HEAD',
   PD_DESIGNER: 'PD_DESIGNER',
-  PD: 'PD'
+  PD: 'PD',
+  BODY_APPROVER: 'BODY_APPROVER',
+  FABRIC_APPROVER: 'FABRIC_APPROVER',
+  PLANNING: 'PLANNING'
 };
 
 exports.ChangeAction = exports.$Enums.ChangeAction = {
@@ -1624,6 +1923,27 @@ exports.PoolBBatchStatus = exports.$Enums.PoolBBatchStatus = {
   FAILED: 'FAILED'
 };
 
+exports.ExpenseChangeOperation = exports.$Enums.ExpenseChangeOperation = {
+  UPDATE: 'UPDATE',
+  CREATE: 'CREATE',
+  DELETE: 'DELETE'
+};
+
+exports.ExpenseChangeStatus = exports.$Enums.ExpenseChangeStatus = {
+  PENDING: 'PENDING',
+  APPROVED: 'APPROVED',
+  REJECTED: 'REJECTED'
+};
+
+exports.ExpenseAuditEventType = exports.$Enums.ExpenseAuditEventType = {
+  REQUESTED: 'REQUESTED',
+  STAGE_APPROVED: 'STAGE_APPROVED',
+  STAGE_REJECTED: 'STAGE_REJECTED',
+  APPLIED: 'APPLIED',
+  APPLY_FAILED: 'APPLY_FAILED',
+  AUTO_REJECTED: 'AUTO_REJECTED'
+};
+
 exports.Prisma.ModelName = {
   Department: 'Department',
   SubDepartment: 'SubDepartment',
@@ -1653,17 +1973,24 @@ exports.Prisma.ModelName = {
   SapAttributeValue: 'SapAttributeValue',
   Article360Flat: 'Article360Flat',
   RawArticle: 'RawArticle',
+  FabricRawData: 'FabricRawData',
   SrmSyncRun: 'SrmSyncRun',
   SrmSyncRunItem: 'SrmSyncRunItem',
   PoolBJob: 'PoolBJob',
   PoolBBatch: 'PoolBBatch',
   NationalGridMaster: 'NationalGridMaster',
+  BroaderMenu: 'BroaderMenu',
   MajorCatMaster: 'MajorCatMaster',
   FabricArticleMaster: 'FabricArticleMaster',
   FabricMajCatGridValue: 'FabricMajCatGridValue',
   ModifyLog: 'ModifyLog',
   FabricArticleData: 'FabricArticleData',
-  BodyArticleData: 'BodyArticleData'
+  BodyArticleData: 'BodyArticleData',
+  MajorCategoryDetails: 'MajorCategoryDetails',
+  ExpenseApprovalStage: 'ExpenseApprovalStage',
+  ExpenseChangeRequest: 'ExpenseChangeRequest',
+  ExpenseAccessGrant: 'ExpenseAccessGrant',
+  ExpenseAuditLog: 'ExpenseAuditLog'
 };
 
 /**

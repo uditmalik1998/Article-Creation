@@ -4,6 +4,8 @@
 
 import { Router, Request, Response, NextFunction } from 'express';
 import * as adminController from '../controllers/adminController';
+import * as expenseAccessController from '../controllers/expenseAccessController';
+import * as expenseAuditLogController from '../controllers/expenseAuditLogController';
 import { hierarchyService } from '../services/hierarchyService';
 import { asyncHandler } from '../middleware/asyncHandler';
 import multer from 'multer';
@@ -150,6 +152,7 @@ router.post('/vendor-master/sync', h(adminController.triggerVendorMasterSync));
 router.get('/majcat-grid/status', h(adminController.getMajCatGridStatus));
 router.get('/majcat-grid/values', h(adminController.getMajCatGridValues));
 router.get('/majcat-grid/template', h(adminController.downloadMajCatGridTemplate));
+router.get('/majcat-grid/download', h(adminController.downloadMajCatGridData));
 router.post('/majcat-grid/upload', excelUpload.single('file'), h(adminController.uploadMajCatGrid));
 router.get('/majcat-grid/upload-status/:jobId', h(adminController.getMajCatGridUploadStatus));
 
@@ -166,6 +169,7 @@ router.post('/mandatory-grid/upload', excelUpload.single('file'), h(adminControl
 // ═══════════════════════════════════════════════════════
 router.get('/size-master/status', h(adminController.getSizeMasterStatus));
 router.get('/size-master/template', h(adminController.downloadSizeMasterTemplate));
+router.get('/size-master/download', h(adminController.downloadSizeMasterData));
 router.post('/size-master/upload', excelUpload.single('file'), h(adminController.uploadSizeMaster));
 
 // ═══════════════════════════════════════════════════════
@@ -173,6 +177,7 @@ router.post('/size-master/upload', excelUpload.single('file'), h(adminController
 // ═══════════════════════════════════════════════════════
 router.get('/color-master/status', h(adminController.getColorMasterStatus));
 router.get('/color-master/template', h(adminController.downloadColorMasterTemplate));
+router.get('/color-master/download', h(adminController.downloadColorMasterData));
 router.post('/color-master/upload', excelUpload.single('file'), h(adminController.uploadColorMaster));
 
 // ═══════════════════════════════════════════════════════
@@ -197,6 +202,9 @@ router.post('/grid-values/delete', h(adminController.deleteGridValue));
 
 // Status dashboard — generic-article counts by status, grouped division → sub-division
 router.get('/status-dashboard', h(adminController.getStatusDashboard));
+
+// Major categories from major_category_details table (ACT only, optionally filtered by division)
+router.get('/major-categories', h(adminController.getMajorCategories));
 
 // Size Master editor (maj_cat_sizes) — browse per major category, add/remove with audit
 router.get('/size-master/categories', h(adminController.getSizeMasterCategories));
@@ -223,18 +231,57 @@ router.get('/modify-logs',               h(adminController.getModifyLogs));
 router.get('/national-grid',             h(adminController.getNationalGrid));
 router.post('/national-grid/import',     h(adminController.importNationalGrid));
 
+// NOTE: Expense Data read/edit-workflow routes moved to routes/expense.ts,
+// mounted at /api/expense (not ADMIN-only), so the sub-division editors and
+// approval-chain users in that workflow can reach them too.
+
+// ═══════════════════════════════════════════════════════
+// EXPENSE ACCESS CONTROL (ADMIN) — expense_access_grants
+// Which email addresses may raise / sign off Expense Data changes.
+// ORDER MATTERS: /options must come before a bare :id would swallow it.
+// ═══════════════════════════════════════════════════════
+router.get('/expense-access/options', h(expenseAccessController.getExpenseAccessOptions));
+router.get('/expense-access',         h(expenseAccessController.getExpenseAccessGrants));
+router.post('/expense-access',        h(expenseAccessController.createExpenseAccessGrant));
+router.put('/expense-access/:id',     h(expenseAccessController.updateExpenseAccessGrant));
+router.delete('/expense-access/:id',  h(expenseAccessController.deleteExpenseAccessGrant));
+
+// ═══════════════════════════════════════════════════════
+// EXPENSE APPROVAL STAGES (ADMIN) — expense_approval_stages
+// The editable approval CHAIN itself (today: Category Head, then MDM).
+// Add a stage here to lengthen the chain for every table — no code change.
+// ORDER MATTERS: /reorder must come before a bare :id would swallow it.
+// ═══════════════════════════════════════════════════════
+router.get('/expense-approval-stages',           h(expenseAccessController.getExpenseApprovalStages));
+router.post('/expense-approval-stages',          h(expenseAccessController.createExpenseApprovalStage));
+router.post('/expense-approval-stages/reorder',  h(expenseAccessController.reorderExpenseApprovalStages));
+router.put('/expense-approval-stages/:id',       h(expenseAccessController.updateExpenseApprovalStage));
+router.delete('/expense-approval-stages/:id',    h(expenseAccessController.deleteExpenseApprovalStage));
+
+// ═══════════════════════════════════════════════════════
+// EXPENSE AUDIT LOG (ADMIN) — expense_audit_log
+// The durable record of every step: raised, each stage's action, and every
+// real write to a master table (or failed attempt) — see
+// services/expenseAuditLogService.ts.
+// ORDER MATTERS: the bare list must come before /:requestId would swallow it.
+// ═══════════════════════════════════════════════════════
+router.get('/expense-audit-log',              h(expenseAuditLogController.getExpenseAuditLog));
+router.get('/expense-audit-log/:requestId',   h(expenseAuditLogController.getExpenseAuditLogForRequest));
+
 // ═══════════════════════════════════════════════════════
 // FABRIC ARTICLE DATA (ADMIN) — fabric_article_data
 // ═══════════════════════════════════════════════════════
 router.get('/fabric-article-data/status',   h(adminController.getFabricArticleDataStatus));
 router.get('/fabric-article-data/template', h(adminController.downloadFabricArticleDataTemplate));
 router.post('/fabric-article-data/upload',  excelUpload.single('file'), h(adminController.uploadFabricArticleData));
+router.get('/fabric-article-data/export',   h(adminController.downloadFabricArticleDataMaster));
 
 // ═══════════════════════════════════════════════════════
 // FABRIC ARTICLE MASTER (ADMIN) — fabric_article_master
 // ═══════════════════════════════════════════════════════
 router.get('/fabric-article-master/status',   h(adminController.getFabricArticleMasterStatus));
 router.get('/fabric-article-master/template', h(adminController.downloadFabricArticleMasterTemplate));
+router.get('/fabric-article-master/download', h(adminController.downloadFabricArticleMasterData));
 router.post('/fabric-article-master/upload',  excelUpload.single('file'), h(adminController.uploadFabricArticleMaster));
 
 // ═══════════════════════════════════════════════════════
@@ -243,5 +290,13 @@ router.post('/fabric-article-master/upload',  excelUpload.single('file'), h(admi
 router.get('/body-article-data/status',   h(adminController.getBodyArticleDataStatus));
 router.get('/body-article-data/template', h(adminController.downloadBodyArticleDataTemplate));
 router.post('/body-article-data/upload',  excelUpload.single('file'), h(adminController.uploadBodyArticleData));
+router.get('/body-article-data/export',   h(adminController.downloadBodyArticleDataMaster));
+
+// ═════════════════════════════════════════════════════
+// BROADER MENU (ADMIN) — broader_menu
+// ═════════════════════════════════════════════════════
+router.get('/broader-menu/status',   h(adminController.getBroaderMenuStatus));
+router.get('/broader-menu/template', h(adminController.downloadBroaderMenuTemplate));
+router.post('/broader-menu/upload',  excelUpload.single('file'), h(adminController.uploadBroaderMenu));
 
 export default router;

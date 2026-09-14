@@ -6,8 +6,9 @@
 import { Request, Response } from 'express';
 import { z } from 'zod';
 import { prismaClient as prisma, withPrismaRetry } from '../utils/prisma';
+import { Prisma } from '../generated/prisma';
 import bcrypt from 'bcryptjs';
-import { syncVendorMaster, getVendorMasterStatus } from '../services/vendorMasterSyncService';
+import { syncVendorMaster, getVendorMasterStatus, getLastVendorSyncResult, isVendorSyncInProgress } from '../services/vendorMasterSyncService';
 import { invalidateMandatoryGridCache, invalidateMajCatVisibleCache } from '../services/zmmArtCreationService';
 import { invalidateFieldVisibilityCache } from '../utils/categoryFieldVisibility';
 import path from 'path';
@@ -65,13 +66,26 @@ const AdminCreateUserSchema = z.object({
   email: z.string().email().max(255),
   password: z.string().min(6).max(128),
   name: z.string().min(1).max(100),
-  role: z.enum(['ADMIN', 'USER', 'CREATOR', 'PO_COMMITTEE', 'APPROVER', 'CATEGORY_HEAD', 'SUB_DIVISION_HEAD', 'PD_DESIGNER', 'PD']).optional().default('USER'),
+  role: z.enum(['ADMIN', 'USER', 'CREATOR', 'PO_COMMITTEE', 'APPROVER', 'CATEGORY_HEAD', 'SUB_DIVISION_HEAD', 'PD_DESIGNER', 'PD', 'BODY_APPROVER', 'FABRIC_APPROVER', 'PLANNING']).optional().default('USER'),
   division: z.union([z.string(), z.array(z.string())]).optional().nullable(),
   subDivision: z.union([z.string(), z.array(z.string())]).optional().nullable(),
+  // Coarse business-unit tag — independent of division/subDivision above,
+  // see the doc comment on User.businessDivision in schema.prisma.
+  businessDivision: z.enum(['MENS', 'KIDS', 'LADIES', 'PD', 'MDM']).optional().nullable(),
 });
 
 const AdminUpdateUserSchema = AdminCreateUserSchema.partial().extend({
   password: z.string().min(6).max(128).optional(),
+  // `.partial()` only widens types to `| undefined` — it does NOT strip a
+  // `.default()` already baked into a field, so without this override an
+  // update that simply omits `role` (any PATCH-style caller that only sends
+  // the fields it's actually changing) would resolve to the base schema's
+  // `.default('USER')` instead of undefined, and `updateUser` below would
+  // then silently overwrite that user's real role with 'USER'. Redeclared
+  // here with no default so an omitted role truly stays undefined, and
+  // `updateUser`'s `validated.role ?? existingUser.role` correctly keeps
+  // whatever role the user already had.
+  role: z.enum(['ADMIN', 'USER', 'CREATOR', 'PO_COMMITTEE', 'APPROVER', 'CATEGORY_HEAD', 'SUB_DIVISION_HEAD', 'PD_DESIGNER', 'PD', 'BODY_APPROVER', 'FABRIC_APPROVER', 'PLANNING']).optional(),
 });
 
 const normalizeSubDivisionInput = (value: unknown): string | null => {
@@ -1144,6 +1158,7 @@ export const getAllUsers = async (req: Request, res: Response): Promise<void> =>
         role: true,
         division: true,
         subDivision: true,
+        businessDivision: true,
         isActive: true,
         createdAt: true,
         lastLogin: true,
@@ -1194,6 +1209,7 @@ export const createUser = async (req: Request, res: Response): Promise<void> => 
           role: validated.role as any,
           division: validated.role === 'PO_COMMITTEE' ? null : normalizedDivision,
           subDivision: (validated.role === 'CATEGORY_HEAD' || validated.role === 'PO_COMMITTEE' || validated.role === 'ADMIN') ? null : normalizedSubDivision,
+          businessDivision: validated.businessDivision ?? null,
           isActive: true,
         },
         select: {
@@ -1203,6 +1219,7 @@ export const createUser = async (req: Request, res: Response): Promise<void> => 
           role: true,
           division: true,
           subDivision: true,
+          businessDivision: true,
           isActive: true,
           createdAt: true,
         }
@@ -1220,6 +1237,7 @@ export const createUser = async (req: Request, res: Response): Promise<void> => 
         role: validated.role as any,
         division: validated.role === 'PO_COMMITTEE' ? null : normalizedDivision,
         subDivision: (validated.role === 'CATEGORY_HEAD' || validated.role === 'PO_COMMITTEE' || validated.role === 'ADMIN') ? null : normalizedSubDivision,
+        businessDivision: validated.businessDivision ?? null,
         isActive: true,
       },
       select: {
@@ -1229,6 +1247,7 @@ export const createUser = async (req: Request, res: Response): Promise<void> => 
         role: true,
         division: true,
         subDivision: true,
+        businessDivision: true,
         isActive: true,
         createdAt: true,
       }
@@ -1284,6 +1303,9 @@ export const updateUser = async (req: Request, res: Response): Promise<void> => 
       role: validated.role as any,
       division: finalRole === 'PO_COMMITTEE' ? null : (validated.division !== undefined ? finalDivision : undefined),
       subDivision: (finalRole === 'CATEGORY_HEAD' || finalRole === 'PO_COMMITTEE' || finalRole === 'ADMIN') ? null : (validated.subDivision !== undefined ? normalizeSubDivisionInput(validated.subDivision) : undefined),
+      // Unlike division/subDivision, businessDivision has no role-based
+      // clearing rule — every role can be tagged Mens/Kids/Ladies/PO.
+      businessDivision: validated.businessDivision !== undefined ? validated.businessDivision : undefined,
       email: validated.email ? validated.email.toLowerCase() : undefined,
     };
 
@@ -1305,6 +1327,7 @@ export const updateUser = async (req: Request, res: Response): Promise<void> => 
         role: true,
         division: true,
         subDivision: true,
+        businessDivision: true,
         isActive: true,
         createdAt: true,
       }
@@ -2190,7 +2213,14 @@ export const retrySrmFailedAll = async (req: Request, res: Response): Promise<vo
 export const getVendorMasterSyncStatus = async (req: Request, res: Response): Promise<void> => {
   try {
     const status = await getVendorMasterStatus();
-    res.json({ success: true, data: status });
+    res.json({
+      success: true,
+      data: {
+        ...status,
+        inProgress: isVendorSyncInProgress(),
+        lastResult: getLastVendorSyncResult(),
+      },
+    });
   } catch (error: any) {
     res.status(500).json({ success: false, error: error.message });
   }
@@ -2203,13 +2233,17 @@ export const getVendorMasterSyncStatus = async (req: Request, res: Response): Pr
  */
 export const triggerVendorMasterSync = async (req: Request, res: Response): Promise<void> => {
   try {
-    // Acknowledge immediately so the HTTP request doesn't time out mid-sync
+    if (isVendorSyncInProgress()) {
+      res.status(409).json({ success: false, error: 'Sync already in progress' });
+      return;
+    }
+
+    // Acknowledge immediately — the actual sync can take several minutes
     res.status(202).json({
       success: true,
-      message: 'Vendor master sync started in background. Check server logs for progress.',
+      message: 'Vendor master sync started in background. Poll /vendor-master/status for progress.',
     });
 
-    // Fire-and-forget
     syncVendorMaster()
       .then(r =>
         console.log(`[Admin] Vendor master sync complete — upserted:${r.upserted} pages:${r.pages} duration:${r.durationMs}ms`)
@@ -2694,6 +2728,156 @@ export const downloadSizeMasterTemplate = async (_req: Request, res: Response): 
 };
 
 /**
+ * GET /api/admin/size-master/download
+ * Exports the full maj_cat_sizes table as an .xlsx file in the same format as the upload template.
+ */
+export const downloadSizeMasterData = async (_req: Request, res: Response): Promise<void> => {
+  try {
+    const ExcelJS = require('exceljs');
+    const rows: any[] = await prisma.$queryRaw`
+      SELECT division, sub_division, mc_code, major_category, size, status
+      FROM maj_cat_sizes
+      ORDER BY division, sub_division, major_category, size
+    `;
+
+    const wb = new ExcelJS.Workbook();
+    const ws = wb.addWorksheet('COMPILE');
+
+    // Row 1 — title (merged A1:F1)
+    ws.mergeCells('A1:F1');
+    const titleCell = ws.getCell('A1');
+    titleCell.value = 'CENTRAL ACT/IN-ACT SIZE STATUS';
+    titleCell.font = { bold: true, size: 13 };
+    titleCell.alignment = { horizontal: 'center' };
+    ws.getRow(1).height = 22;
+
+    // Row 2 — empty
+    ws.addRow([]);
+
+    // Row 3 — headers
+    const headers = ['DIV', 'SUB-DIV', 'MC_CD', 'MC_DESC', 'SIZE', 'SIZE ST'];
+    const headerRow = ws.addRow(headers);
+    headerRow.eachCell((cell: any) => {
+      cell.font = { bold: true, color: { argb: 'FFFFFFFF' } };
+      cell.fill = { type: 'pattern', pattern: 'solid', fgColor: { argb: 'FF1565C0' } };
+      cell.alignment = { horizontal: 'center' };
+    });
+
+    // Row 4 — empty
+    ws.addRow([]);
+
+    // Row 5+ — data
+    for (const row of rows) {
+      ws.addRow([
+        row.division ?? '',
+        row.sub_division ?? '',
+        row.mc_code ?? '',
+        row.major_category ?? '',
+        row.size ?? '',
+        row.status ?? '',
+      ]);
+    }
+
+    ws.columns = [
+      { width: 12 }, { width: 12 }, { width: 16 }, { width: 22 }, { width: 12 }, { width: 12 },
+    ];
+
+    const filename = `SIZE_MASTER_${new Date().toISOString().slice(0, 10)}.xlsx`;
+    res.setHeader('Content-Type', 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');
+    res.setHeader('Content-Disposition', `attachment; filename="${filename}"`);
+    await wb.xlsx.write(res);
+    res.end();
+  } catch (error: any) {
+    console.error('[SizeMaster] Download error:', error);
+    res.status(500).json({ success: false, error: error.message });
+  }
+};
+
+export const downloadMajCatGridData = async (_req: Request, res: Response): Promise<void> => {
+  try {
+    const ExcelJS = require('exceljs');
+    const rows: any[] = await prisma.$queryRaw`
+      SELECT major_category, attribute_name, value
+      FROM maj_cat_grid_values
+      ORDER BY major_category, attribute_name, value
+    `;
+
+    const wb = new ExcelJS.Workbook();
+    // Sheet name must match template so upload works from either file
+    const ws = wb.addWorksheet('MAJ_CAT_GRID');
+
+    // Uploader reads: A(1)=FG_MAJ_CAT, E(5)=FATHER COMP MAJ_CAT, G(7)=MAIN MVGR, I(9)=GRID STATUS
+    // Must match 10-column template layout exactly so this file can be re-uploaded directly.
+
+    // Row 1 — title (merged A1:J1)
+    ws.mergeCells('A1:J1');
+    const titleCell = ws.getCell('A1');
+    titleCell.value = '300 MAJOR CATEGORY WISE ACTIVE GRID MASTER';
+    titleCell.font = { bold: true, size: 13, color: { argb: 'FF1D3557' } };
+    titleCell.alignment = { horizontal: 'center', vertical: 'middle' };
+    titleCell.fill = { type: 'pattern', pattern: 'solid', fgColor: { argb: 'FFD6E4F0' } };
+    ws.getRow(1).height = 28;
+
+    // Row 2 — empty
+    ws.addRow([]);
+
+    // Row 3 — headers (10 columns, green for required A/E/G, blue for optional)
+    const HEADERS = [
+      'FG_MAJ_CAT', 'F.GRD SR NO', 'FATHER COMP DIV', 'CHILD GRID SR NO',
+      'FATHER COMP MAJ_CAT', 'MVGR GRID SR NO', 'MAIN MVGR',
+      'FULL FORM', 'GRID STATUS', 'RECEIVED/AUTO',
+    ];
+    const REQUIRED_COLS = [0, 4, 6]; // A, E, G
+    const headerRow = ws.addRow(HEADERS);
+    headerRow.eachCell((cell: any, colNum: number) => {
+      const isRequired = REQUIRED_COLS.includes(colNum - 1);
+      cell.font = { bold: true, color: { argb: 'FFFFFFFF' } };
+      cell.fill = { type: 'pattern', pattern: 'solid', fgColor: { argb: isRequired ? 'FF1D6F42' : 'FF2F5496' } };
+      cell.alignment = { horizontal: 'center', vertical: 'middle', wrapText: true };
+      cell.border = {
+        top: { style: 'thin' }, left: { style: 'thin' },
+        bottom: { style: 'thin' }, right: { style: 'thin' },
+      };
+    });
+    ws.getRow(3).height = 32;
+
+    // Row 4 — empty
+    ws.addRow([]);
+
+    // Row 5+ — data: A=major_category, E=attribute_name, G=value, I=ACT (cols B/C/D/F/H/J left blank)
+    for (const row of rows) {
+      ws.addRow([
+        row.major_category ?? '', // A — FG_MAJ_CAT (col 1)
+        '',                        // B — F.GRD SR NO
+        '',                        // C — FATHER COMP DIV
+        '',                        // D — CHILD GRID SR NO
+        row.attribute_name ?? '', // E — FATHER COMP MAJ_CAT (col 5)
+        '',                        // F — MVGR GRID SR NO
+        row.value ?? '',           // G — MAIN MVGR (col 7)
+        '',                        // H — FULL FORM
+        'ACT',                     // I — GRID STATUS (col 9)
+        '',                        // J — RECEIVED/AUTO
+      ]);
+    }
+
+    ws.columns = [
+      { width: 22 }, { width: 12 }, { width: 16 }, { width: 14 },
+      { width: 22 }, { width: 14 }, { width: 22 },
+      { width: 22 }, { width: 12 }, { width: 14 },
+    ];
+
+    const filename = `MAJ_CAT_GRID_${new Date().toISOString().slice(0, 10)}.xlsx`;
+    res.setHeader('Content-Type', 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');
+    res.setHeader('Content-Disposition', `attachment; filename="${filename}"`);
+    await wb.xlsx.write(res);
+    res.end();
+  } catch (error: any) {
+    console.error('[MajCatGrid] Download error:', error);
+    res.status(500).json({ success: false, error: error.message });
+  }
+};
+
+/**
  * POST /api/admin/size-master/upload
  * Accepts a multipart Excel (sheet "COMPILE", headers in row 3, data from row 5):
  *   A=DIV  B=SUB-DIV  C=MC_CD  D=MC_DESC  E=SIZE  F=SIZE ST
@@ -2873,6 +3057,63 @@ export const downloadColorMasterTemplate = async (_req: Request, res: Response):
     res.end();
   } catch (error: any) {
     console.error('[ColorMaster] Template error:', error);
+    res.status(500).json({ success: false, error: error.message });
+  }
+};
+
+/**
+ * GET /api/admin/color-master/download
+ * Exports the full color_master table as an .xlsx in the same format as the upload template.
+ */
+export const downloadColorMasterData = async (_req: Request, res: Response): Promise<void> => {
+  try {
+    const ExcelJS = require('exceljs');
+    const rows: any[] = await prisma.$queryRaw`
+      SELECT father_color, child_color, sap_create_old
+      FROM color_master
+      ORDER BY father_color, child_color
+    `;
+
+    const wb = new ExcelJS.Workbook();
+    const ws = wb.addWorksheet('COLOR CHART MASTER');
+
+    // Row 1 — title
+    ws.mergeCells('A1:I1');
+    const titleCell = ws.getCell('A1');
+    titleCell.value = 'NATIONAL COLOR CHART';
+    titleCell.font = { bold: true, size: 13 };
+    titleCell.alignment = { horizontal: 'center' };
+    ws.getRow(1).height = 22;
+
+    // Row 2 — empty
+    ws.addRow([]);
+
+    // Row 3 — headers
+    const headers = ['S. NO', 'FATHER COLOR', 'FATHER_COLOR__SHORT_FORM', 'CHILD COLOR', 'SAP CREATE OLD', 'SUGGESTED TCX', 'MATCH TYPE', 'HEX CODE', 'CORRECT VISUAL SHADE'];
+    const headerRow = ws.addRow(headers);
+    headerRow.eachCell((cell: any) => {
+      cell.font = { bold: true, color: { argb: 'FFFFFFFF' } };
+      cell.fill = { type: 'pattern', pattern: 'solid', fgColor: { argb: 'FF1565C0' } };
+      cell.alignment = { horizontal: 'center' };
+    });
+
+    // Row 4+ — data (only the 3 stored columns; rest blank)
+    rows.forEach((row, i) => {
+      ws.addRow([i + 1, row.father_color ?? '', '', row.child_color ?? '', row.sap_create_old ?? '', '', '', '', '']);
+    });
+
+    ws.columns = [
+      { width: 8 }, { width: 16 }, { width: 22 }, { width: 20 }, { width: 16 },
+      { width: 14 }, { width: 12 }, { width: 12 }, { width: 18 },
+    ];
+
+    const filename = `COLOR_MASTER_${new Date().toISOString().slice(0, 10)}.xlsx`;
+    res.setHeader('Content-Type', 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');
+    res.setHeader('Content-Disposition', `attachment; filename="${filename}"`);
+    await wb.xlsx.write(res);
+    res.end();
+  } catch (error: any) {
+    console.error('[ColorMaster] Download error:', error);
     res.status(500).json({ success: false, error: error.message });
   }
 };
@@ -4452,7 +4693,7 @@ export const downloadFabricArticleDataTemplate = async (_req: Request, res: Resp
     const wb = new ExcelJS.Workbook();
     const ws = wb.addWorksheet('FABRIC ARTICLE DATA');
 
-    ws.mergeCells('A1:X1');
+    ws.mergeCells('A1:Y1');
     const titleCell = ws.getCell('A1');
     titleCell.value = 'FABRIC ARTICLE DATA UPLOAD';
     titleCell.font = { bold: true, size: 13 };
@@ -4463,7 +4704,7 @@ export const downloadFabricArticleDataTemplate = async (_req: Request, res: Resp
 
     const headers = [
       'FABRIC_ARTICLE_NUMBER', 'FABRIC_ARTICLE_DESC',
-      'DIVISION', 'SUB_DIVISION', 'MAJOR_CATEGORY', 'VENDOR_NAME', 'VENDOR_CODE',
+      'DIVISION', 'SUB_DIVISION', 'MAJOR_CATEGORY', 'VENDOR_NAME', 'VENDOR_CODE', 'FABRIC_RATE',
       'M_FAB_DIV', 'M_YARN', 'M_FAB_MAIN_MVGR_1', 'M_FAB_MAIN_MVGR_2',
       'M_CONSTRUCTION', 'M_OUNZ', 'M_WIDTH', 'M_WEAVE_01', 'M_WEAVE_02',
       'M_COUNT', 'M_GSM', 'M_COMPOSITION', 'M_FINISH', 'M_LYCRA',
@@ -4481,7 +4722,7 @@ export const downloadFabricArticleDataTemplate = async (_req: Request, res: Resp
     // Sample row
     ws.addRow([
       'FAB-001', 'KNIT FABRIC SLD',
-      'K', 'K_PC', 'K_PC_FLC', 'Sample Vendor', 'V001',
+      'K', 'K_PC', 'K_PC_FLC', 'Sample Vendor', 'V001', '250.50',
       'KNT', 'CTO', 'FAB01', '', 'PLAIN', '180', '', 'P/W', '',
       '30S', '180', '100% COTTON', 'NONE', 'N',
       'PENDING', 'NOT_SYNCED', 'admin',
@@ -4493,7 +4734,7 @@ export const downloadFabricArticleDataTemplate = async (_req: Request, res: Resp
     const noteRow = ws.addRow([
       '⚠ NOTE: Headers in Row 3, data from Row 5. APPROVAL_STATUS: PENDING/APPROVED/REJECTED. SAP_SYNC_STATUS: NOT_SYNCED/SYNCED/FAILED. Each row is inserted as a new record.',
     ]);
-    ws.mergeCells(`A${noteRow.number}:X${noteRow.number}`);
+    ws.mergeCells(`A${noteRow.number}:Y${noteRow.number}`);
     noteRow.getCell(1).font = { italic: true, size: 10 };
     noteRow.getCell(1).fill = { type: 'pattern', pattern: 'solid', fgColor: { argb: 'FFFFF3CD' } };
 
@@ -4539,17 +4780,17 @@ export const uploadFabricArticleData = async (req: Request, res: Response): Prom
     // Column index map (1-based, matching template headers)
     const C = {
       fabNo: 1, fabDesc: 2,
-      div: 3, subDiv: 4, majCat: 5, vendorName: 6, vendorCode: 7,
-      fabDiv: 8, yarn: 9, mvgr1: 10, mvgr2: 11,
-      construction: 12, ounz: 13, width: 14, weave01: 15, weave02: 16,
-      count: 17, gsm: 18, composition: 19, finish: 20, lycra: 21,
-      approvalStatus: 22, sapSyncStatus: 23, userName: 24,
+      div: 3, subDiv: 4, majCat: 5, vendorName: 6, vendorCode: 7, fabricRate: 8,
+      fabDiv: 9, yarn: 10, mvgr1: 11, mvgr2: 12,
+      construction: 13, ounz: 14, width: 15, weave01: 16, weave02: 17,
+      count: 18, gsm: 19, composition: 20, finish: 21, lycra: 22,
+      approvalStatus: 23, sapSyncStatus: 24, userName: 25,
     };
 
     type DataRow = {
       fabric_article_number: string | null; fabric_article_description: string | null;
       division: string | null; sub_division: string | null; major_category: string | null;
-      vendor_name: string | null; vendor_code: string | null;
+      vendor_name: string | null; vendor_code: string | null; fabric_rate: number | null;
       m_fab_div: string | null; m_yarn: string | null;
       m_fab_main_mvgr_1: string | null; m_fab_main_mvgr_2: string | null;
       m_construction: string | null; m_ounz: string | null; m_width: string | null;
@@ -4574,6 +4815,8 @@ export const uploadFabricArticleData = async (req: Request, res: Response): Prom
 
       const approvalStatus = cell(row, C.approvalStatus).toUpperCase() || 'PENDING';
       const sapSyncStatus  = cell(row, C.sapSyncStatus).toUpperCase()  || 'NOT_SYNCED';
+      const fabricRateRaw  = cell(row, C.fabricRate);
+      const fabricRate     = fabricRateRaw ? Number(fabricRateRaw) : NaN;
 
       rows.push({
         fabric_article_number:      fabNo      || null,
@@ -4583,6 +4826,7 @@ export const uploadFabricArticleData = async (req: Request, res: Response): Prom
         major_category:             majCat     || null,
         vendor_name:                cell(row, C.vendorName)  || null,
         vendor_code:                cell(row, C.vendorCode)  || null,
+        fabric_rate:                Number.isFinite(fabricRate) ? fabricRate : null,
         m_fab_div:                  cell(row, C.fabDiv)      || null,
         m_yarn:                     cell(row, C.yarn)        || null,
         m_fab_main_mvgr_1:          cell(row, C.mvgr1)       || null,
@@ -4613,7 +4857,7 @@ export const uploadFabricArticleData = async (req: Request, res: Response): Prom
         await tx.$executeRaw`
           INSERT INTO fabric_article_data (
             id, fabric_article_number, fabric_article_description,
-            division, sub_division, major_category, vendor_name, vendor_code,
+            division, sub_division, major_category, vendor_name, vendor_code, fabric_rate,
             m_fab_div, m_yarn, m_fab_main_mvgr_1, m_fab_main_mvgr_2,
             m_construction, m_ounz, m_width, m_weave_01, m_weave_02,
             m_count, m_gsm, m_composition, m_finish, m_lycra,
@@ -4622,7 +4866,7 @@ export const uploadFabricArticleData = async (req: Request, res: Response): Prom
           )
           SELECT
             gen_random_uuid(), v.fabric_article_number, v.fabric_article_description,
-            v.division, v.sub_division, v.major_category, v.vendor_name, v.vendor_code,
+            v.division, v.sub_division, v.major_category, v.vendor_name, v.vendor_code, v.fabric_rate,
             v.m_fab_div, v.m_yarn, v.m_fab_main_mvgr_1, v.m_fab_main_mvgr_2,
             v.m_construction, v.m_ounz, v.m_width, v.m_weave_01, v.m_weave_02,
             v.m_count, v.m_gsm, v.m_composition, v.m_finish, v.m_lycra,
@@ -4630,7 +4874,7 @@ export const uploadFabricArticleData = async (req: Request, res: Response): Prom
             NOW(), NOW()
           FROM jsonb_to_recordset(${JSON.stringify(batch)}::jsonb) AS v(
             fabric_article_number text, fabric_article_description text,
-            division text, sub_division text, major_category text, vendor_name text, vendor_code text,
+            division text, sub_division text, major_category text, vendor_name text, vendor_code text, fabric_rate numeric,
             m_fab_div text, m_yarn text, m_fab_main_mvgr_1 text, m_fab_main_mvgr_2 text,
             m_construction text, m_ounz text, m_width text, m_weave_01 text, m_weave_02 text,
             m_count text, m_gsm text, m_composition text, m_finish text, m_lycra text,
@@ -4649,6 +4893,69 @@ export const uploadFabricArticleData = async (req: Request, res: Response): Prom
     });
   } catch (error: any) {
     console.error('[FabricArticleData] Upload error:', error);
+    res.status(500).json({ success: false, error: error.message });
+  }
+};
+
+/**
+ * GET /api/admin/fabric-article-data/export
+ * Admin-only (this whole router is mounted behind `requireAdmin`). Dumps
+ * every column and every row of fabric_article_data as-is — a raw `SELECT *`
+ * so the export can never silently drop a column the Prisma model hasn't
+ * caught up with yet.
+ */
+export const downloadFabricArticleDataMaster = async (_req: Request, res: Response): Promise<void> => {
+  try {
+    const rows: Record<string, any>[] = await prisma.$queryRaw`
+      SELECT * FROM fabric_article_data ORDER BY created_at ASC, id ASC
+    `;
+
+    const ExcelJS = require('exceljs');
+    const wb = new ExcelJS.Workbook();
+    const ws = wb.addWorksheet('FABRIC ARTICLE DATA');
+
+    // 'id' is Supabase's own surrogate primary key — not meaningful to
+    // whoever opens this file, so it's dropped here same as everywhere else
+    // in the Expense Data views; every other column ships as-is.
+    const headers = (rows.length > 0
+      ? Object.keys(rows[0])
+      : [
+          'id', 'fabric_article_number', 'fabric_article_description',
+          'division', 'sub_division', 'major_category', 'vendor_name', 'vendor_code', 'fabric_rate',
+          'm_fab_div', 'm_yarn', 'm_fab_main_mvgr_1', 'm_fab_main_mvgr_2',
+          'm_construction', 'm_ounz', 'm_width', 'm_weave_01', 'm_weave_02',
+          'm_count', 'm_gsm', 'm_composition', 'm_finish', 'm_lycra',
+          'approval_status', 'approved_at', 'approved_by', 'sap_sync_status', 'sap_sync_message',
+          'user_name', 'created_at', 'updated_at',
+        ]
+    ).filter((h) => h !== 'id');
+
+    const headerRow = ws.addRow(headers.map((h) => h.toUpperCase()));
+    headerRow.eachCell((cell: any) => {
+      cell.font = { bold: true, color: { argb: 'FFFFFFFF' } };
+      cell.fill = { type: 'pattern', pattern: 'solid', fgColor: { argb: 'FF1565C0' } };
+      cell.alignment = { horizontal: 'center' };
+    });
+    ws.views = [{ state: 'frozen', ySplit: 1 }];
+
+    for (const row of rows) {
+      ws.addRow(headers.map((h) => {
+        const v = row[h];
+        if (v == null) return '';
+        if (v instanceof Date) return v.toISOString();
+        return typeof v === 'object' ? String(v) : v;
+      }));
+    }
+
+    ws.columns = headers.map(() => ({ width: 20 }));
+
+    const filename = `FABRIC_ARTICLE_DATA_MASTER_${new Date().toISOString().slice(0, 10)}.xlsx`;
+    res.setHeader('Content-Type', 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');
+    res.setHeader('Content-Disposition', `attachment; filename="${filename}"`);
+    await wb.xlsx.write(res);
+    res.end();
+  } catch (error: any) {
+    console.error('[FabricArticleData] Master export error:', error);
     res.status(500).json({ success: false, error: error.message });
   }
 };
@@ -4686,10 +4993,10 @@ export const downloadFabricArticleMasterTemplate = async (_req: Request, res: Re
   try {
     const ExcelJS = require('exceljs');
     const wb = new ExcelJS.Workbook();
-    const ws = wb.addWorksheet('FAB UPLAODER FORMAT');
+    const ws = wb.addWorksheet('HIERARCHY MASTER');
 
     // Row 1 — title
-    ws.mergeCells('A1:E1');
+    ws.mergeCells('A1:I1');
     const titleCell = ws.getCell('A1');
     titleCell.value = 'FABRIC ARTICLE MASTER UPLOAD';
     titleCell.font = { bold: true, size: 13 };
@@ -4698,8 +5005,8 @@ export const downloadFabricArticleMasterTemplate = async (_req: Request, res: Re
 
     ws.addRow([]);
 
-    // Row 3 — headers (only the 5 columns we store)
-    const headers = ['DIV', 'SUB-DIV', 'MJ_CAT', 'MC_CD', 'MC_DESC'];
+    // Row 3 — headers (9 columns matching actual file format)
+    const headers = ['SEG', 'DIV', 'SUB DIV', 'MAJ CAT', 'MC CODE', 'MC DES', 'STATUS', 'HSN CD', 'ART_TYPE'];
     const headerRow = ws.addRow(headers);
     headerRow.eachCell((cell: any) => {
       cell.font = { bold: true, color: { argb: 'FFFFFFFF' } };
@@ -4710,14 +5017,17 @@ export const downloadFabricArticleMasterTemplate = async (_req: Request, res: Re
     ws.addRow([]);
 
     // Row 5 — sample rows
-    ws.addRow(['K', 'K_PC', 'K_PC_FLC', '910101001', 'K_PC_FLC_SLD']);
-    ws.addRow(['K', 'K_PC', 'K_PC_FLC', '910101002', 'K_PC_FLC_PRT']);
+    ws.addRow(['FAB', 'D', 'D_C', 'D_C_DBY', '930201011', 'D_C_DBY', 'ACT', '52114200', '2111']);
+    ws.addRow(['FAB', 'D', 'D_C', 'D_C_PLN', '930202011', 'D_C_PLN', 'ACT', '52114200', '2111']);
 
-    ws.columns = [{ width: 12 }, { width: 16 }, { width: 22 }, { width: 16 }, { width: 30 }];
+    ws.columns = [
+      { width: 8 }, { width: 10 }, { width: 14 }, { width: 18 },
+      { width: 14 }, { width: 26 }, { width: 10 }, { width: 12 }, { width: 10 },
+    ];
 
     ws.addRow([]);
-    const noteRow = ws.addRow(['⚠ NOTE: Headers in Row 3, data from Row 5. Only DIV, SUB-DIV, MJ_CAT, MC_CD, MC_DESC are required.']);
-    ws.mergeCells(`A${noteRow.number}:E${noteRow.number}`);
+    const noteRow = ws.addRow(['⚠ NOTE: Headers in Row 3, data from Row 5. Columns: SEG, DIV, SUB DIV, MAJ CAT, MC CODE, MC DES, STATUS, HSN CD, ART_TYPE.']);
+    ws.mergeCells(`A${noteRow.number}:I${noteRow.number}`);
     noteRow.getCell(1).font = { italic: true, size: 10 };
     noteRow.getCell(1).fill = { type: 'pattern', pattern: 'solid', fgColor: { argb: 'FFFFF3CD' } };
 
@@ -4727,6 +5037,53 @@ export const downloadFabricArticleMasterTemplate = async (_req: Request, res: Re
     res.end();
   } catch (error: any) {
     console.error('[FabricArticleMaster] Template error:', error);
+    res.status(500).json({ success: false, error: error.message });
+  }
+};
+
+/**
+ * GET /api/admin/fabric-article-master/download
+ * Exports all fabric_article_master rows as .xlsx.
+ */
+export const downloadFabricArticleMasterData = async (_req: Request, res: Response): Promise<void> => {
+  try {
+    const ExcelJS = require('exceljs');
+    const rows: any[] = await prisma.$queryRaw`
+      SELECT seg, div, sub_div, maj_cat, mc_code, mc_des, status, hsn_cd, art_type
+      FROM fabric_article_master
+      ORDER BY seg, div, sub_div, maj_cat
+    `;
+
+    const wb = new ExcelJS.Workbook();
+    const ws = wb.addWorksheet('FABRIC ARTICLE MASTER');
+
+    const headers = ['SEG', 'DIV', 'SUB DIV', 'MAJ CAT', 'MC CODE', 'MC DES', 'STATUS', 'HSN CD', 'ART_TYPE'];
+    const headerRow = ws.addRow(headers);
+    headerRow.eachCell((cell: any) => {
+      cell.font = { bold: true, color: { argb: 'FFFFFFFF' } };
+      cell.fill = { type: 'pattern', pattern: 'solid', fgColor: { argb: 'FF1565C0' } };
+      cell.alignment = { horizontal: 'center' };
+    });
+
+    rows.forEach((row) => {
+      ws.addRow([
+        row.seg ?? '', row.div ?? '', row.sub_div ?? '', row.maj_cat ?? '',
+        row.mc_code ?? '', row.mc_des ?? '', row.status ?? '', row.hsn_cd ?? '', row.art_type ?? '',
+      ]);
+    });
+
+    ws.columns = [
+      { width: 10 }, { width: 12 }, { width: 16 }, { width: 22 },
+      { width: 14 }, { width: 30 }, { width: 10 }, { width: 12 }, { width: 12 },
+    ];
+
+    const filename = `FABRIC_ARTICLE_MASTER_${new Date().toISOString().slice(0, 10)}.xlsx`;
+    res.setHeader('Content-Type', 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');
+    res.setHeader('Content-Disposition', `attachment; filename="${filename}"`);
+    await wb.xlsx.write(res);
+    res.end();
+  } catch (error: any) {
+    console.error('[FabricArticleMaster] Download error:', error);
     res.status(500).json({ success: false, error: error.message });
   }
 };
@@ -4750,13 +5107,15 @@ export const uploadFabricArticleMaster = async (req: Request, res: Response): Pr
     const wb = new ExcelJS.Workbook();
     await wb.xlsx.load(req.file.buffer as any);
 
-    const ws = wb.getWorksheet('FAB UPLAODER FORMAT') ?? wb.worksheets[0];
+    // Accept 'HIERARCHY MASTER' sheet (actual file) or 'FAB UPLAODER FORMAT' (old template) or first sheet
+    const ws = wb.getWorksheet('HIERARCHY MASTER') ?? wb.getWorksheet('FAB UPLAODER FORMAT') ?? wb.worksheets[0];
     if (!ws) {
       res.status(400).json({ success: false, error: 'No worksheets found in the uploaded Excel file.' });
       return;
     }
 
-    const C_DIV = 1, C_SUB = 2, C_MAJ = 3, C_MC = 4, C_DESC = 5;
+    // Columns: A=SEG, B=DIV, C=SUB DIV, D=MAJ CAT, E=MC CODE, F=MC DES, G=STATUS, H=HSN CD, I=ART_TYPE
+    const C_SEG = 1, C_DIV = 2, C_SUB = 3, C_MAJ = 4, C_MC = 5, C_DESC = 6, C_STATUS = 7, C_HSN = 8, C_ARTTYPE = 9;
     const cell = (row: any, c: number): string => {
       let v = row.getCell(c).value;
       if (v && typeof v === 'object' && 'result' in v) v = (v as any).result;
@@ -4771,11 +5130,15 @@ export const uploadFabricArticleMaster = async (req: Request, res: Response): Pr
 
     for (let r = 5; r <= ws.rowCount; r++) {
       const row = ws.getRow(r);
+      const seg    = cell(row, C_SEG) || 'FAB';
       const div    = cell(row, C_DIV);
       const sub    = cell(row, C_SUB);
       const maj    = cell(row, C_MAJ);
       const mc     = cell(row, C_MC);
       const desc   = cell(row, C_DESC);
+      const status = cell(row, C_STATUS) || 'ACT';
+      const hsn    = cell(row, C_HSN);
+      const artType = cell(row, C_ARTTYPE);
 
       if (!div && !sub && !maj && !mc && !desc) { skipped++; continue; }
       if (!mc || !desc) { skipped++; continue; }
@@ -4784,7 +5147,7 @@ export const uploadFabricArticleMaster = async (req: Request, res: Response): Pr
       if (seen.has(key)) continue;
       seen.add(key);
 
-      rows.push({ seg: 'FAB', div, sub_div: sub, maj_cat: maj, mc_code: mc, mc_des: desc, status: 'ACT', hsn_cd: '', art_type: '' });
+      rows.push({ seg, div, sub_div: sub, maj_cat: maj, mc_code: mc, mc_des: desc, status, hsn_cd: hsn, art_type: artType });
     }
 
     const total = rows.length;
@@ -5062,6 +5425,7 @@ export const uploadBodyArticleData = async (req: Request, res: Response): Promis
             cmp_cost                 = v.cmp_cost,
             fab_cons                 = v.fab_cons,
             width                    = v.width,
+            body_article_type        = 'uploader',
             updated_at               = NOW()
           FROM jsonb_to_recordset(${JSON.stringify(batch)}::jsonb) AS v(
             body_article_number text, body_article_description text,
@@ -5088,7 +5452,7 @@ export const uploadBodyArticleData = async (req: Request, res: Response): Promis
             m_sleeve_fold, m_btm_fold, m_no_of_pocket, m_pocket,
             m_extra_pocket, m_fit, m_body_style, m_length, m_set,
             cmtp_cost, cmp_cost, fab_cons, width,
-            approval_status, sap_sync_status, created_at, updated_at
+            approval_status, sap_sync_status, body_article_type, created_at, updated_at
           )
           SELECT gen_random_uuid()::text, v.body_article_number, v.body_article_description,
             v.division, v.sub_division, v.major_category, v.mc_code,
@@ -5097,7 +5461,7 @@ export const uploadBodyArticleData = async (req: Request, res: Response): Promis
             v.m_sleeve_fold, v.m_btm_fold, v.m_no_of_pocket, v.m_pocket,
             v.m_extra_pocket, v.m_fit, v.m_body_style, v.m_length, v.m_set,
             v.cmtp_cost, v.cmp_cost, v.fab_cons, v.width,
-            'PENDING', 'NOT_SYNCED', NOW(), NOW()
+            'PENDING', 'NOT_SYNCED', 'uploader', NOW(), NOW()
           FROM jsonb_to_recordset(${JSON.stringify(batch)}::jsonb) AS v(
             body_article_number text, body_article_description text,
             division text, sub_division text, major_category text, mc_code text,
@@ -5125,3 +5489,1449 @@ export const uploadBodyArticleData = async (req: Request, res: Response): Promis
     res.status(500).json({ success: false, error: error.message });
   }
 };
+
+/**
+ * GET /api/admin/body-article-data/export
+ * Admin-only (this whole router is mounted behind `requireAdmin`). Same
+ * shape as the Fabric Article Data master export: a raw `SELECT *` so a
+ * newly added column (see FABRIC_RATE there) is always included with no
+ * further code change, minus the surrogate `id` primary key.
+ */
+export const downloadBodyArticleDataMaster = async (_req: Request, res: Response): Promise<void> => {
+  try {
+    const rows: Record<string, any>[] = await prisma.$queryRaw`
+      SELECT * FROM body_article_data ORDER BY created_at ASC, id ASC
+    `;
+
+    const ExcelJS = require('exceljs');
+    const wb = new ExcelJS.Workbook();
+    const ws = wb.addWorksheet('BODY ARTICLE DATA');
+
+    // 'id' is Supabase's own surrogate primary key — not meaningful to
+    // whoever opens this file, so it's dropped here same as the Fabric
+    // Article Data master export; every other column ships as-is.
+    const headers = (rows.length > 0
+      ? Object.keys(rows[0])
+      : [
+          'body_article_number', 'body_article_description', 'flat_id', 'article_number',
+          'division', 'sub_division', 'major_category', 'mc_code', 'vendor_name', 'vendor_code',
+          'season', 'year', 'hsn_tax_code',
+          'm_collar_type', 'm_collar_style', 'm_neck_type', 'm_neck_style', 'm_placket',
+          'm_blt_type', 'm_blt_style', 'm_sleeves_main_style', 'm_sleeve_fold', 'm_btm_fold',
+          'm_no_of_pocket', 'm_pocket', 'm_extra_pocket', 'm_fit', 'm_body_style', 'm_length', 'm_set',
+          'cmtp_cost', 'cmp_cost', 'fab_cost', 'fab_cons', 'width',
+          'approval_status', 'approved_at', 'approved_by', 'sap_sync_status', 'sap_sync_message',
+          'user_name', 'created_at', 'updated_at', 'image_url', 'body_article_type',
+          'design_number',
+        ]
+    ).filter((h) => h !== 'id');
+
+    const headerRow = ws.addRow(headers.map((h) => h.toUpperCase()));
+    headerRow.eachCell((cell: any) => {
+      cell.font = { bold: true, color: { argb: 'FFFFFFFF' } };
+      cell.fill = { type: 'pattern', pattern: 'solid', fgColor: { argb: 'FF1565C0' } };
+      cell.alignment = { horizontal: 'center' };
+    });
+    ws.views = [{ state: 'frozen', ySplit: 1 }];
+
+    for (const row of rows) {
+      ws.addRow(headers.map((h) => {
+        const v = row[h];
+        if (v == null) return '';
+        if (v instanceof Date) return v.toISOString();
+        return typeof v === 'object' ? String(v) : v;
+      }));
+    }
+
+    ws.columns = headers.map(() => ({ width: 20 }));
+
+    const filename = `BODY_ARTICLE_DATA_MASTER_${new Date().toISOString().slice(0, 10)}.xlsx`;
+    res.setHeader('Content-Type', 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');
+    res.setHeader('Content-Disposition', `attachment; filename="${filename}"`);
+    await wb.xlsx.write(res);
+    res.end();
+  } catch (error: any) {
+    console.error('[BodyArticleData] Master export error:', error);
+    res.status(500).json({ success: false, error: error.message });
+  }
+};
+
+export const getMajorCategories = async (req: Request, res: Response) => {
+  const { division } = req.query;
+  const where: any = { mcStatus: 'ACT' };
+  if (division && typeof division === 'string' && division.trim()) {
+    where.div = { equals: division.trim().toUpperCase() === 'MEN' ? 'MENS' : division.trim().toUpperCase(), mode: 'insensitive' };
+  }
+  const rows = await prisma.majorCategoryDetails.findMany({
+    where,
+    select: { mcDes: true },
+    orderBy: { mcDes: 'asc' },
+  });
+  const data = rows.map((r) => r.mcDes).filter(Boolean) as string[];
+  res.json({ success: true, data });
+};
+// ═══════════════════════════════════════════════════════
+// BROADER MENU (broader_menu) — BM-H sheet of the Broader Menu workbook
+// ═══════════════════════════════════════════════════════
+
+type BroaderMenuColumn = {
+  /** DB column name. */
+  column: string;
+  /** Header text as it appears in the source workbook's header row, matched
+   * after `normalizeHeader` (case/whitespace/punctuation-insensitive). */
+  header: string;
+  type: 'text' | 'int' | 'decimal' | 'date';
+  maxLength?: number;
+  /** Column width used when generating the template. */
+  width?: number;
+};
+
+/**
+ * The BM-H columns mirrored into `broader_menu`, in template order.
+ *
+ * Rows are matched to the sheet BY HEADER NAME, not by position, so this works
+ * both on the 138-column source workbook (whose middle 84 columns are a
+ * per-store density block we don't store) and on the clean template this
+ * module generates. Any non-zero value found in an unmapped column is counted
+ * and reported back rather than silently dropped.
+ */
+const BROADER_MENU_COLUMNS: BroaderMenuColumn[] = [
+  { column: 'sn',                header: 'SN',                              type: 'int',     width: 8 },
+  { column: 'mc_cd',             header: 'MC CD',                           type: 'int',     width: 14 },
+  { column: 'seg',               header: 'SEG',                             type: 'text', maxLength: 50,  width: 10 },
+  { column: 'div',               header: 'DIV',                             type: 'text', maxLength: 50,  width: 12 },
+  { column: 'sub_div',           header: 'SUB_DIV',                         type: 'text', maxLength: 50,  width: 14 },
+  { column: 'maj_cat_cd',        header: 'MAJ_CAT_CD',                      type: 'int',     width: 12 },
+  { column: 'maj_cat_nm',        header: 'MAJ_CAT_NM',                      type: 'text', maxLength: 200, width: 26 },
+  { column: 'sub_cat_cd',        header: 'SUB_CAT CD',                      type: 'int',     width: 12 },
+  { column: 'sub_cat_desc',      header: 'SUB_CAT DESC',                    type: 'text', maxLength: 200, width: 26 },
+  { column: 'mc_desc',           header: 'MC_DESC',                         type: 'text', maxLength: 300, width: 28 },
+  { column: 'ssn',               header: 'SSN',                             type: 'text', maxLength: 20,  width: 8 },
+  { column: 'mc_stat',           header: 'MC STAT',                         type: 'text', maxLength: 20,  width: 10 },
+  { column: 'sub_cat_stat',      header: 'SUB CAT STAT',                    type: 'text', maxLength: 20,  width: 12 },
+  { column: 'maj_cat_stat',      header: 'MAJ_CAT_ST',                      type: 'text', maxLength: 20,  width: 12 },
+  { column: 'size_applicable',   header: 'SIZE APPLICABLE',                 type: 'text', maxLength: 10,  width: 12 },
+  { column: 'div_stat',          header: 'DIV STAT',                        type: 'text', maxLength: 20,  width: 10 },
+  { column: 'mc_pk_sz',          header: 'MC PK_SZ',                        type: 'int',     width: 10 },
+  { column: 'sub_cat_pk_sz',     header: 'SUB _CAT PK_SZ',                  type: 'int',     width: 12 },
+  { column: 'no_of_options',     header: 'NO. OF OPTIONS (SUB CAT)',        type: 'int',     width: 14 },
+  { column: 'avg_density',       header: 'AVG DENSITY',                     type: 'decimal', width: 12 },
+  { column: 'acc_density',       header: 'ACC DENSITY ( DISP-Q-PER OPTION', type: 'decimal', width: 14 },
+  { column: 'wg_density',        header: 'WG/7FT DENSITY',                  type: 'decimal', width: 12 },
+  { column: 'fg_46ft_density',   header: 'FG-4.6FT DENSITY',                type: 'decimal', width: 12 },
+  { column: 'fg_5ft_density',    header: 'FG-5FT DENSITY',                  type: 'decimal', width: 12 },
+  { column: 'fg_4a_density',     header: 'FG-4A DENSITY',                   type: 'decimal', width: 12 },
+  { column: 'fg_8a_density',     header: 'FG-8A DENSITY',                   type: 'decimal', width: 12 },
+  { column: 'acp',               header: 'ACP',                             type: 'decimal', width: 10 },
+  { column: 'old_density',       header: 'OLD DENSITY',                     type: 'decimal', width: 12 },
+  { column: 'seq',               header: 'SEQ',                             type: 'int',     width: 8 },
+  { column: 'mj_cat_typ',        header: 'MJ-CAT TYP',                      type: 'text', maxLength: 20,  width: 12 },
+  { column: 'fixtr',             header: 'FIXTR',                           type: 'text', maxLength: 100, width: 12 },
+  { column: 'new_mc_cd',         header: 'NEW MC CD',                       type: 'int',     width: 12 },
+  { column: 'new_mc_desc',       header: 'NEW MC DES',                      type: 'text', maxLength: 300, width: 26 },
+  { column: 'old_mc_desc',       header: 'OLD MC DESC',                     type: 'text', maxLength: 300, width: 26 },
+  { column: 'old_sub_cat_cd',    header: 'OLD SUB_CAT CD',                  type: 'int',     width: 12 },
+  { column: 'old_sub_cat_desc',  header: 'OLD SUB CAT DESC',                type: 'text', maxLength: 200, width: 26 },
+  { column: 'legacy_mc_desc',    header: 'OLD MC DES',                      type: 'text', maxLength: 300, width: 26 },
+  { column: 'effective_date',    header: 'DATE',                            type: 'date',    width: 14 },
+  { column: 'remarks',           header: 'REMARKS',                         type: 'text', maxLength: 300, width: 24 },
+  { column: 'gm_status',         header: 'GM-13MAR',                        type: 'text', maxLength: 50,  width: 12 },
+  { column: 'current_mc_status', header: 'CURRENT MC STATUS',               type: 'text', maxLength: 50,  width: 16 },
+  { column: 'full_mc_name',      header: 'FULL MC NAME',                    type: 'text', maxLength: 300, width: 26 },
+  { column: 'winter_status',     header: 'WINTER STATUS',                   type: 'text', maxLength: 20,  width: 12 },
+];
+
+/** Header text -> comparable key. The workbook's headers carry embedded
+ * newlines and inconsistent spacing ("SUB _CAT\nPK_SZ"), so everything that
+ * isn't a letter or a digit is dropped before comparing. */
+function normalizeHeader(raw: unknown): string {
+  return String(raw ?? '').toUpperCase().replace(/[^A-Z0-9]/g, '');
+}
+
+/** "-" is the sheet's placeholder for "no value", so it reads as null. */
+function isBlankCell(v: string): boolean {
+  return v === '' || v === '-';
+}
+
+function toBroaderMenuInt(v: string): number | null {
+  if (isBlankCell(v)) return null;
+  const n = Number(v);
+  return Number.isFinite(n) ? Math.trunc(n) : null;
+}
+
+function toBroaderMenuDecimal(v: string): number | null {
+  if (isBlankCell(v)) return null;
+  const n = Number(v);
+  return Number.isFinite(n) ? n : null;
+}
+
+/**
+ * The DATE column is a mix of Excel serial numbers and hand-typed
+ * DD.MM.YYYY / DD-MM-YYYY / DD/MM/YYYY strings. Returns an ISO date string
+ * (YYYY-MM-DD) or null.
+ */
+function toBroaderMenuDate(v: string): string | null {
+  if (isBlankCell(v)) return null;
+
+  // Excel serial (days since 1899-12-30), bounded to a sane range so a stray
+  // numeric code can't be mistaken for a date.
+  const serial = Number(v);
+  if (Number.isFinite(serial) && serial > 20000 && serial < 80000) {
+    return new Date(Date.UTC(1899, 11, 30) + serial * 86400000).toISOString().slice(0, 10);
+  }
+
+  const dmy = v.match(/^(\d{1,2})[./-](\d{1,2})[./-](\d{4})$/);
+  if (dmy) {
+    const dt = new Date(Date.UTC(Number(dmy[3]), Number(dmy[2]) - 1, Number(dmy[1])));
+    return Number.isNaN(dt.getTime()) ? null : dt.toISOString().slice(0, 10);
+  }
+
+  const parsed = new Date(v);
+  return Number.isNaN(parsed.getTime()) ? null : parsed.toISOString().slice(0, 10);
+}
+
+/** Postgres type per column kind, used to build the jsonb_to_recordset list. */
+const BROADER_MENU_PG_TYPE: Record<BroaderMenuColumn['type'], string> = {
+  text: 'text',
+  int: 'integer',
+  decimal: 'numeric',
+  date: 'date',
+};
+
+/**
+ * GET /api/admin/broader-menu/status
+ */
+export const getBroaderMenuStatus = async (_req: Request, res: Response): Promise<void> => {
+  try {
+    const rows = await prisma.$queryRaw<
+      { total: bigint; majCats: bigint; subCats: bigint; active: bigint; lastUpload: Date | null }[]
+    >`
+      SELECT COUNT(*)::bigint                                 AS total,
+             COUNT(DISTINCT maj_cat_cd)::bigint               AS "majCats",
+             COUNT(DISTINCT sub_cat_cd)::bigint               AS "subCats",
+             COUNT(*) FILTER (WHERE mc_stat = 'ACT')::bigint  AS active,
+             MAX(uploaded_at)                                 AS "lastUpload"
+      FROM broader_menu
+    `;
+    const r = rows[0];
+    res.json({
+      success: true,
+      data: {
+        total: Number(r?.total ?? 0),
+        majCats: Number(r?.majCats ?? 0),
+        subCats: Number(r?.subCats ?? 0),
+        active: Number(r?.active ?? 0),
+        lastUpload: r?.lastUpload ?? null,
+      },
+    });
+  } catch (error: any) {
+    console.error('[BroaderMenu] Status error:', error);
+    res.status(500).json({ success: false, error: error.message });
+  }
+};
+
+/**
+ * GET /api/admin/broader-menu/template
+ */
+export const downloadBroaderMenuTemplate = async (_req: Request, res: Response): Promise<void> => {
+  try {
+    const ExcelJS = (await import('exceljs')).default;
+    const wb = new ExcelJS.Workbook();
+    const ws = wb.addWorksheet('BM-H');
+
+    const lastCol = ws.getColumn(BROADER_MENU_COLUMNS.length).letter;
+
+    ws.mergeCells(`A1:${lastCol}1`);
+    const titleCell = ws.getCell('A1');
+    titleCell.value = 'BROADER MENU UPLOAD (BM-H)';
+    titleCell.font = { bold: true, size: 13 };
+    titleCell.alignment = { horizontal: 'center' };
+    ws.getRow(1).height = 22;
+
+    ws.addRow([]);
+
+    // Row 3 — headers, the same row the source workbook uses.
+    const headerRow = ws.addRow(BROADER_MENU_COLUMNS.map((c) => c.header));
+    headerRow.eachCell((cell: any) => {
+      cell.font = { bold: true, color: { argb: 'FFFFFFFF' } };
+      cell.fill = { type: 'pattern', pattern: 'solid', fgColor: { argb: 'FF1565C0' } };
+      cell.alignment = { horizontal: 'center', wrapText: true };
+    });
+
+    ws.addRow([]);
+
+    // Row 5 — sample rows.
+    ws.addRow([1, 111030101, 'APP', 'MENS', 'MU', 11103, 'M_PW_SHIRT_FS', 1110301, 'M_PW_SHIRT_FS', 'M_PW_SHIRT_FS',
+      'A', 'ACT', 'ACT', 'ACT', 'Y', 'ACT', 0, 0, 0, 80, 16, 80, 80, 64, 0, 0, 0, null, null, 'NOR', null,
+      null, null, null, null, null, null, '2025-01-22', 'NEW MC', 'ACT', null, null, null, 'MILD']);
+    ws.addRow([2, 111060101, 'APP', 'MENS', 'MU', 11106, 'M_KURTA_FS', 1110601, 'M_KURTA_FS', 'M_KURTA_FS',
+      'A', 'ACT', 'ACT', 'ACT', 'Y', 'ACT', 9, 3, 2, 80, 20, 96, 40, 40, 96, 128, 361, null, null, 'NOR', null,
+      null, null, null, null, null, null, '2025-01-22', 'RENAMED', null, null, null, null, null]);
+
+    ws.columns = BROADER_MENU_COLUMNS.map((c) => ({ width: c.width ?? 16 }));
+
+    ws.addRow([]);
+    const noteRow = ws.addRow([
+      'NOTE: Headers in Row 3, data from Row 5. Columns are matched BY HEADER NAME, so extra columns '
+      + '(such as the per-store density block in the original workbook) can be left in place — they are ignored. '
+      + 'MC CD is required and is the key: a row whose MC CD already exists is updated, otherwise it is inserted. '
+      + 'Use "-" or leave a cell blank for no value.',
+    ]);
+    ws.mergeCells(`A${noteRow.number}:${lastCol}${noteRow.number}`);
+    noteRow.getCell(1).font = { italic: true, size: 10 };
+    noteRow.getCell(1).fill = { type: 'pattern', pattern: 'solid', fgColor: { argb: 'FFFFF3CD' } };
+
+    res.setHeader('Content-Type', 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');
+    res.setHeader('Content-Disposition', 'attachment; filename="BROADER_MENU_TEMPLATE.xlsx"');
+    await wb.xlsx.write(res);
+    res.end();
+  } catch (error: any) {
+    console.error('[BroaderMenu] Template error:', error);
+    res.status(500).json({ success: false, error: error.message });
+  }
+};
+
+/**
+ * POST /api/admin/broader-menu/upload
+ * Accepts the Broader Menu workbook (sheet "BM-H", or the first sheet).
+ * Columns are located by header name, so the original 138-column file works
+ * as-is. Rows are keyed on MC CD — an existing code is updated, a new one is
+ * inserted, and an upload never deletes anything.
+ */
+export const uploadBroaderMenu = async (req: Request, res: Response): Promise<void> => {
+  try {
+    if (!req.file) {
+      res.status(400).json({ success: false, error: 'No file uploaded. Send a .xlsx file as "file" field.' });
+      return;
+    }
+
+    const ExcelJS = (await import('exceljs')).default;
+    const wb = new ExcelJS.Workbook();
+    await wb.xlsx.load(req.file.buffer as any);
+
+    const ws = wb.getWorksheet('BM-H') ?? wb.worksheets[0];
+    if (!ws) {
+      res.status(400).json({ success: false, error: 'No worksheets found in the uploaded Excel file.' });
+      return;
+    }
+
+    const cell = (row: any, c: number): string => {
+      let v = row.getCell(c).value;
+      if (v && typeof v === 'object' && 'result' in v) v = (v as any).result;
+      if (v && typeof v === 'object' && 'text' in v) v = (v as any).text;
+      if (v instanceof Date) return v.toISOString().slice(0, 10);
+      return v == null ? '' : String(v).trim();
+    };
+
+    // Locate the header row rather than trusting a fixed row number: the source
+    // workbook has two decorative rows above it and a store-code row below it.
+    const mcCdKey = normalizeHeader('MC CD');
+    const mcDescKey = normalizeHeader('MC_DESC');
+    let headerRowNum = -1;
+    for (let r = 1; r <= Math.min(15, ws.rowCount); r++) {
+      const keys = new Set<string>();
+      for (let c = 1; c <= ws.columnCount; c++) keys.add(normalizeHeader(cell(ws.getRow(r), c)));
+      if (keys.has(mcCdKey) && keys.has(mcDescKey)) { headerRowNum = r; break; }
+    }
+    if (headerRowNum === -1) {
+      res.status(400).json({
+        success: false,
+        error: 'Could not find the header row — expected a row containing both "MC CD" and "MC_DESC".',
+      });
+      return;
+    }
+
+    // Header name -> sheet column. First occurrence wins, so the populated
+    // "REMARKS" is used rather than the empty duplicate further right.
+    const headerToCol = new Map<string, number>();
+    for (let c = 1; c <= ws.columnCount; c++) {
+      const key = normalizeHeader(cell(ws.getRow(headerRowNum), c));
+      if (key && !headerToCol.has(key)) headerToCol.set(key, c);
+    }
+
+    const colIndex = BROADER_MENU_COLUMNS.map((c) => headerToCol.get(normalizeHeader(c.header)) ?? -1);
+    const missing = BROADER_MENU_COLUMNS.filter((_, i) => colIndex[i] === -1).map((c) => c.header);
+
+    const mcCdCol = colIndex[BROADER_MENU_COLUMNS.findIndex((c) => c.column === 'mc_cd')];
+    if (mcCdCol === -1) {
+      res.status(400).json({ success: false, error: 'The "MC CD" column is required but was not found.' });
+      return;
+    }
+
+    // Columns we don't mirror (the per-store density block, mostly). Any
+    // non-zero number in them is counted so a file that starts carrying real
+    // store densities doesn't lose them without anyone noticing.
+    const mappedCols = new Set(colIndex.filter((c) => c > 0));
+
+    const rowsByKey = new Map<number, Record<string, any>>();
+    let skipped = 0;
+    let truncated = 0;
+    let duplicates = 0;
+    let unmappedValues = 0;
+
+    for (let r = headerRowNum + 1; r <= ws.rowCount; r++) {
+      const row = ws.getRow(r);
+
+      const mcCd = toBroaderMenuInt(cell(row, mcCdCol));
+      // Skips the store-code sub-header, blank spacers and the trailing note.
+      if (mcCd === null) { skipped++; continue; }
+
+      const record: Record<string, any> = {};
+      BROADER_MENU_COLUMNS.forEach((c, i) => {
+        if (colIndex[i] === -1) { record[c.column] = null; return; }
+        const raw = cell(row, colIndex[i]);
+
+        if (c.type === 'int') { record[c.column] = toBroaderMenuInt(raw); return; }
+        if (c.type === 'decimal') { record[c.column] = toBroaderMenuDecimal(raw); return; }
+        if (c.type === 'date') { record[c.column] = toBroaderMenuDate(raw); return; }
+
+        let v: string | null = isBlankCell(raw) ? null : raw;
+        if (v && c.maxLength && v.length > c.maxLength) {
+          v = v.slice(0, c.maxLength);
+          truncated++;
+        }
+        record[c.column] = v;
+      });
+
+      for (let c = 1; c <= ws.columnCount; c++) {
+        if (mappedCols.has(c)) continue;
+        const n = Number(cell(row, c));
+        if (Number.isFinite(n) && n !== 0) unmappedValues++;
+      }
+
+      if (rowsByKey.has(mcCd)) duplicates++;
+      rowsByKey.set(mcCd, record); // last row for an MC CD wins
+    }
+
+    const rows = Array.from(rowsByKey.values());
+    const total = rows.length;
+    if (total === 0) {
+      res.status(400).json({ success: false, error: 'No data rows with a numeric MC CD were found in the sheet.' });
+      return;
+    }
+
+    // The SET / INSERT / recordset lists are generated from BROADER_MENU_COLUMNS
+    // so 40-odd columns can't drift out of sync across the three of them.
+    const dataColumns = BROADER_MENU_COLUMNS.filter((c) => c.column !== 'mc_cd');
+    const recordsetSql = Prisma.raw(
+      BROADER_MENU_COLUMNS.map((c) => `"${c.column}" ${BROADER_MENU_PG_TYPE[c.type]}`).join(', ')
+    );
+    const setSql = Prisma.raw(dataColumns.map((c) => `"${c.column}" = v."${c.column}"`).join(', '));
+    const insertColsSql = Prisma.raw(BROADER_MENU_COLUMNS.map((c) => `"${c.column}"`).join(', '));
+    const insertValsSql = Prisma.raw(BROADER_MENU_COLUMNS.map((c) => `v."${c.column}"`).join(', '));
+
+    const BATCH = 1000;
+    let updated = 0;
+    let inserted = 0;
+
+    console.log(`[BroaderMenu] Upserting ${total} rows in batches of ${BATCH}...`);
+
+    await prisma.$transaction(async (tx) => {
+      const mcCds = rows.map((r) => r.mc_cd as number);
+      const existing = await tx.$queryRaw<{ mc_cd: number }[]>`
+        SELECT mc_cd FROM broader_menu WHERE mc_cd = ANY(${mcCds}::int[])
+      `;
+      const existingKeys = new Set(existing.map((e) => e.mc_cd));
+
+      const toUpdate = rows.filter((r) => existingKeys.has(r.mc_cd));
+      const toInsert = rows.filter((r) => !existingKeys.has(r.mc_cd));
+
+      for (let i = 0; i < toUpdate.length; i += BATCH) {
+        const batch = JSON.stringify(toUpdate.slice(i, i + BATCH));
+        const affected = await tx.$executeRaw`
+          UPDATE broader_menu AS b
+          SET ${setSql}, updated_at = NOW()
+          FROM jsonb_to_recordset(${batch}::jsonb) AS v(${recordsetSql})
+          WHERE b.mc_cd = v."mc_cd"
+        `;
+        updated += Number(affected);
+      }
+
+      for (let i = 0; i < toInsert.length; i += BATCH) {
+        const batch = JSON.stringify(toInsert.slice(i, i + BATCH));
+        const affected = await tx.$executeRaw`
+          INSERT INTO broader_menu (${insertColsSql}, uploaded_at, updated_at)
+          SELECT ${insertValsSql}, NOW(), NOW()
+          FROM jsonb_to_recordset(${batch}::jsonb) AS v(${recordsetSql})
+        `;
+        inserted += Number(affected);
+      }
+    }, { timeout: 5 * 60 * 1000 });
+
+    const warnings: string[] = [];
+    if (missing.length > 0) warnings.push(`${missing.length} column(s) were not found in the sheet and were left empty: ${missing.join(', ')}.`);
+    if (truncated > 0) warnings.push(`${truncated} value(s) exceeded a column's length limit and were truncated.`);
+    if (duplicates > 0) warnings.push(`${duplicates} duplicate MC CD row(s) were found — the last one for each code was used.`);
+    if (unmappedValues > 0) warnings.push(`${unmappedValues} non-zero value(s) sat in columns this table does not mirror (such as the per-store density block) and were not imported.`);
+
+    console.log(`[BroaderMenu] Done — ${inserted} inserted, ${updated} updated, ${skipped} skipped.`);
+
+    res.json({
+      success: true,
+      message: `Broader Menu uploaded. Inserted ${inserted}, updated ${updated} rows.`
+        + (warnings.length > 0 ? ` ${warnings.join(' ')}` : ''),
+      data: {
+        uploadedAt: new Date().toISOString(),
+        fileName: req.file.originalname,
+        sheet: ws.name,
+        headerRow: headerRowNum,
+        total, inserted, updated, skipped, truncated, duplicates, unmappedValues,
+        missingColumns: missing,
+      },
+    });
+  } catch (error: any) {
+    console.error('[BroaderMenu] Upload error:', error);
+    res.status(500).json({ success: false, error: error.message });
+  }
+};
+
+// ═══════════════════════════════════════════════════════
+// EXPENSE TABLE DETAIL VIEWS (Phase 1 — generic read-only browse)
+//
+// Backs the "View Data" link on each Expense-page upload box: a plain
+// SELECT * (paginated / searchable / sortable) over the table that box
+// writes to. `tableKey` is always resolved against EXPENSE_TABLE_REGISTRY
+// below — it never reaches raw SQL directly, and `sortBy` is validated
+// against that entry's known column list before being used to build an
+// ORDER BY clause — so neither can be used to inject arbitrary SQL.
+// ═══════════════════════════════════════════════════════
+
+/** $queryRaw returns JS `bigint` for Postgres bigint/int8/serial8 columns, which JSON.stringify can't
+ * handle — convert any bigint to a number before sending the response. */
+export function serializeBigInts<T>(value: T): T {
+  return JSON.parse(JSON.stringify(value, (_k, v) => (typeof v === 'bigint' ? Number(v) : v)));
+}
+
+export type ExpenseTableColumn = {
+  key: string;
+  label: string;
+  editable?: boolean;
+  /** Display hints only — mirrored in Frontend/src/features/admin/config/expenseTables.ts
+   * for rendering; unused by this file's search/sort/editable-allowlist logic. */
+  type?: 'date' | 'boolean';
+  align?: 'left' | 'right' | 'center';
+};
+
+/** Which change-request operations a table accepts, beyond editing a field.
+ * Off by default: a table is only opened up to whole-row add/delete once its
+ * insert has no required context the grid can't supply (hierarchy rows, for
+ * instance, need a parent sub-department, and staging tables are overwritten
+ * by their own sync). Mirrored in Frontend/src/features/admin/config/expenseTables.ts. */
+export interface ExpenseTableCapabilities {
+  /** Allow "Add Row" change requests. */
+  allowCreate?: boolean;
+  /** Allow "Delete Row" change requests. */
+  allowDelete?: boolean;
+  /** Editable column keys that must be non-empty on a CREATE. */
+  requiredOnCreate?: string[];
+}
+
+export interface RawExpenseTableConfig extends ExpenseTableCapabilities {
+  kind: 'raw';
+  tableName: string;
+  idColumn: string;
+  columns: ExpenseTableColumn[];
+  searchColumns: string[];
+  displayColumns: string[];
+  defaultSort: { column: string; dir: 'asc' | 'desc' };
+}
+
+export interface PrismaExpenseTableConfig extends ExpenseTableCapabilities {
+  kind: 'prisma';
+  delegateName: string;
+  idColumn: string;
+  /** true when the Prisma model's id field is an Int (autoincrement) rather than a uuid string. */
+  idIsNumeric?: boolean;
+  columns: ExpenseTableColumn[];
+  searchColumns: string[];
+  displayColumns: string[];
+  defaultSort: { field: string; dir: 'asc' | 'desc' };
+}
+
+export interface HierarchyExpenseTableConfig extends ExpenseTableCapabilities {
+  kind: 'hierarchy';
+  idColumn: string;
+  columns: ExpenseTableColumn[];
+  searchColumns: string[];
+  displayColumns: string[];
+  defaultSort: { column: string; dir: 'asc' | 'desc' };
+}
+
+export type ExpenseTableConfig = RawExpenseTableConfig | PrismaExpenseTableConfig | HierarchyExpenseTableConfig;
+
+export const EXPENSE_TABLE_REGISTRY: Record<string, ExpenseTableConfig> = {
+  'major-category-grid': {
+    kind: 'raw',
+    tableName: 'maj_cat_grid_values',
+    idColumn: 'id',
+    // Same reasoning as national-grid: this is a catalogue (which attribute
+    // values are valid for which major category), so new entries have to be
+    // addable one at a time, and stale ones removable, not just replaceable
+    // via a full re-upload.
+    allowCreate: true,
+    allowDelete: true,
+    requiredOnCreate: ['major_category', 'attribute_name', 'value'],
+    columns: [
+      { key: 'id', label: 'ID', editable: false },
+      { key: 'major_category', label: 'Major Category' },
+      { key: 'attribute_name', label: 'Attribute Name' },
+      { key: 'value', label: 'Value' },
+      { key: 'uploaded_at', label: 'Uploaded At', editable: false },
+    ],
+    searchColumns: ['major_category', 'attribute_name', 'value'],
+    displayColumns: ['major_category', 'attribute_name', 'value'],
+    defaultSort: { column: 'id', dir: 'desc' },
+  },
+  'size-master': {
+    kind: 'raw',
+    tableName: 'maj_cat_sizes',
+    idColumn: 'id',
+    allowCreate: true,
+    allowDelete: true,
+    requiredOnCreate: ['division', 'sub_division', 'major_category', 'size'],
+    columns: [
+      { key: 'id', label: 'ID', editable: false },
+      { key: 'division', label: 'Division' },
+      { key: 'sub_division', label: 'Sub Division' },
+      { key: 'mc_code', label: 'MC Code' },
+      { key: 'major_category', label: 'Major Category' },
+      { key: 'size', label: 'Size' },
+      { key: 'status', label: 'Status' },
+      { key: 'created_at', label: 'Created At', editable: false },
+    ],
+    searchColumns: ['division', 'sub_division', 'mc_code', 'major_category', 'size', 'status'],
+    displayColumns: ['major_category', 'size'],
+    defaultSort: { column: 'id', dir: 'desc' },
+  },
+  'color-master': {
+    kind: 'raw',
+    tableName: 'color_master',
+    idColumn: 'id',
+    columns: [
+      { key: 'id', label: 'ID', editable: false },
+      { key: 'father_color', label: 'Father Color' },
+      { key: 'child_color', label: 'Child Color' },
+      { key: 'sap_create_old', label: 'SAP Code' },
+    ],
+    searchColumns: ['father_color', 'child_color', 'sap_create_old'],
+    displayColumns: ['father_color', 'child_color'],
+    defaultSort: { column: 'id', dir: 'desc' },
+  },
+  'mandatory-grid': {
+    kind: 'raw',
+    tableName: 'maj_cat_mandatory_grid',
+    idColumn: 'id',
+    columns: [
+      { key: 'id', label: 'ID', editable: false },
+      { key: 'major_category', label: 'Major Category' },
+      { key: 'div', label: 'Division' },
+      { key: 'sub_div', label: 'Sub Division' },
+      { key: 'sap_key', label: 'SAP Key' },
+      { key: 'label', label: 'Label' },
+      { key: 'is_active', label: 'Active' },
+      { key: 'uploaded_at', label: 'Uploaded At', editable: false },
+    ],
+    searchColumns: ['major_category', 'div', 'sub_div', 'sap_key', 'label'],
+    displayColumns: ['major_category', 'sap_key'],
+    defaultSort: { column: 'id', dir: 'desc' },
+  },
+  'segment-master': {
+    kind: 'raw',
+    tableName: 'maj_cat_segment',
+    idColumn: 'id',
+    // Whole-row add/delete is open here, same as national-grid: price
+    // segments are maintained row-by-row as major categories are added or
+    // re-banded, so an admin shouldn't need a full Excel re-upload just to
+    // add or retire one segment.
+    allowCreate: true,
+    allowDelete: true,
+    requiredOnCreate: ['sub_division', 'major_category', 'segment_type'],
+    columns: [
+      { key: 'id', label: 'ID', editable: false },
+      { key: 'sub_division', label: 'Sub Division' },
+      { key: 'major_category', label: 'Major Category' },
+      { key: 'segment_type', label: 'Segment Type' },
+      { key: 'min', label: 'Min' },
+      { key: 'max', label: 'Max' },
+      { key: 'created_at', label: 'Created At', editable: false },
+      { key: 'updated_at', label: 'Updated At', editable: false },
+    ],
+    searchColumns: ['sub_division', 'major_category', 'segment_type'],
+    displayColumns: ['major_category', 'segment_type'],
+    defaultSort: { column: 'id', dir: 'desc' },
+  },
+  'fabric-article-data': {
+    kind: 'prisma',
+    delegateName: 'fabricArticleData',
+    idColumn: 'id',
+    columns: [
+      { key: 'id', label: 'ID', editable: false },
+      { key: 'fabricArticleNumber', label: 'Fabric Article No.' },
+      { key: 'fabricArticleDescription', label: 'Description' },
+      { key: 'division', label: 'Division' },
+      { key: 'subDivision', label: 'Sub Division' },
+      { key: 'majorCategory', label: 'Major Category' },
+      { key: 'vendorName', label: 'Vendor Name' },
+      { key: 'vendorCode', label: 'Vendor Code' },
+      { key: 'fabricRate', label: 'Fabric Rate' },
+      { key: 'mFabDiv', label: 'Fab Div' },
+      { key: 'mYarn', label: 'Yarn' },
+      { key: 'mFabMainMvgr1', label: 'Fab Main MVGR 1' },
+      { key: 'mFabMainMvgr2', label: 'Fab Main MVGR 2' },
+      { key: 'mConstruction', label: 'Construction' },
+      { key: 'mOunz', label: 'Ounz' },
+      { key: 'mWidth', label: 'Width' },
+      { key: 'mWeave01', label: 'Weave 1' },
+      { key: 'mWeave02', label: 'Weave 2' },
+      { key: 'mCount', label: 'Count' },
+      { key: 'mComposition', label: 'Composition' },
+      { key: 'mFinish', label: 'Finish' },
+      { key: 'mGsm', label: 'GSM' },
+      { key: 'mLycra', label: 'Lycra' },
+      { key: 'approvalStatus', label: 'Approval Status', editable: false },
+      { key: 'approvedAt', label: 'Approved At', type: 'date', editable: false },
+      { key: 'approvedBy', label: 'Approved By (User ID)', editable: false },
+      { key: 'sapSyncStatus', label: 'SAP Sync Status', editable: false },
+      { key: 'sapSyncMessage', label: 'SAP Sync Message', editable: false },
+      { key: 'userName', label: 'Uploaded By', editable: false },
+      { key: 'createdAt', label: 'Created At', type: 'date', editable: false },
+      { key: 'updatedAt', label: 'Updated At', type: 'date', editable: false },
+    ],
+    searchColumns: ['fabricArticleNumber', 'fabricArticleDescription', 'division', 'subDivision', 'majorCategory', 'vendorName', 'vendorCode', 'userName'],
+    displayColumns: ['fabricArticleNumber', 'fabricArticleDescription'],
+    defaultSort: { field: 'createdAt', dir: 'desc' },
+  },
+  'fabric-article-master': {
+    kind: 'prisma',
+    delegateName: 'fabricArticleMaster',
+    idColumn: 'id',
+    idIsNumeric: true,
+    columns: [
+      { key: 'id', label: 'ID', editable: false },
+      { key: 'seg', label: 'Segment' },
+      { key: 'div', label: 'Division' },
+      { key: 'subDiv', label: 'Sub Division' },
+      { key: 'majCat', label: 'Major Category' },
+      { key: 'mcCode', label: 'MC Code' },
+      { key: 'mcDes', label: 'MC Description' },
+      { key: 'status', label: 'Status' },
+      { key: 'hsnCd', label: 'HSN Code' },
+      { key: 'artType', label: 'Article Type' },
+      { key: 'createdAt', label: 'Created At', type: 'date', editable: false },
+      { key: 'updatedAt', label: 'Updated At', type: 'date', editable: false },
+    ],
+    searchColumns: ['seg', 'div', 'subDiv', 'majCat', 'mcCode', 'mcDes', 'status', 'hsnCd', 'artType'],
+    displayColumns: ['majCat', 'mcCode', 'mcDes'],
+    defaultSort: { field: 'createdAt', dir: 'desc' },
+  },
+  'national-grid': {
+    kind: 'prisma',
+    delegateName: 'nationalGridMaster',
+    idColumn: 'id',
+    idIsNumeric: true,
+    // Whole-row add/delete is open here: national_grid_master is the catalogue
+    // of legal attribute codes, so new codes have to be addable one at a time
+    // (not just via a full Excel re-upload) and retired ones removable.
+    allowCreate: true,
+    allowDelete: true,
+    requiredOnCreate: ['attributeName', 'code'],
+    columns: [
+      { key: 'id', label: 'ID', editable: false },
+      { key: 'attributeName', label: 'Attribute Name' },
+      { key: 'code', label: 'Code' },
+      { key: 'fullForm', label: 'Full Form' },
+      { key: 'isActive', label: 'Active' },
+      { key: 'createdAt', label: 'Created At', type: 'date', editable: false },
+    ],
+    searchColumns: ['attributeName', 'code', 'fullForm'],
+    displayColumns: ['attributeName', 'code'],
+    defaultSort: { field: 'createdAt', dir: 'desc' },
+  },
+  'broader-menu': {
+    kind: 'prisma',
+    delegateName: 'broaderMenu',
+    idColumn: 'id',
+    idIsNumeric: true,
+    // The Broader Menu is maintained row-by-row as MCs are opened, renamed and
+    // retired, so whole-row add/delete is open here alongside field edits.
+    allowCreate: true,
+    allowDelete: true,
+    requiredOnCreate: ['mcCd', 'mcDesc'],
+    columns: [
+      { key: 'id', label: 'ID', editable: false },
+      { key: 'sn', label: 'SN', align: 'right' },
+      { key: 'mcCd', label: 'MC CD', align: 'right' },
+      { key: 'seg', label: 'Segment' },
+      { key: 'div', label: 'Division' },
+      { key: 'subDiv', label: 'Sub Division' },
+      { key: 'majCatCd', label: 'Maj Cat Code', align: 'right' },
+      { key: 'majCatNm', label: 'Major Category' },
+      { key: 'subCatCd', label: 'Sub Cat Code', align: 'right' },
+      { key: 'subCatDesc', label: 'Sub Category' },
+      { key: 'mcDesc', label: 'MC Description' },
+      { key: 'ssn', label: 'Season' },
+      { key: 'mcStat', label: 'MC Status' },
+      { key: 'subCatStat', label: 'Sub Cat Status' },
+      { key: 'majCatStat', label: 'Maj Cat Status' },
+      { key: 'sizeApplicable', label: 'Size Applicable' },
+      { key: 'divStat', label: 'Division Status' },
+      { key: 'mcPkSz', label: 'MC Pack Size', align: 'right' },
+      { key: 'subCatPkSz', label: 'Sub Cat Pack Size', align: 'right' },
+      { key: 'noOfOptions', label: 'No. of Options', align: 'right' },
+      { key: 'avgDensity', label: 'Avg Density', align: 'right' },
+      { key: 'accDensity', label: 'Acc Density', align: 'right' },
+      { key: 'wgDensity', label: 'WG/7FT Density', align: 'right' },
+      { key: 'fg46FtDensity', label: 'FG-4.6FT Density', align: 'right' },
+      { key: 'fg5FtDensity', label: 'FG-5FT Density', align: 'right' },
+      { key: 'fg4ADensity', label: 'FG-4A Density', align: 'right' },
+      { key: 'fg8ADensity', label: 'FG-8A Density', align: 'right' },
+      { key: 'acp', label: 'ACP', align: 'right' },
+      { key: 'oldDensity', label: 'Old Density', align: 'right' },
+      { key: 'seq', label: 'Seq', align: 'right' },
+      { key: 'mjCatTyp', label: 'Maj Cat Type' },
+      { key: 'fixtr', label: 'Fixture' },
+      { key: 'newMcCd', label: 'New MC CD', align: 'right' },
+      { key: 'newMcDesc', label: 'New MC Description' },
+      { key: 'oldMcDesc', label: 'Old MC Description' },
+      { key: 'oldSubCatCd', label: 'Old Sub Cat Code', align: 'right' },
+      { key: 'oldSubCatDesc', label: 'Old Sub Category' },
+      { key: 'legacyMcDesc', label: 'Legacy MC Description' },
+      { key: 'effectiveDate', label: 'Effective Date', type: 'date' },
+      { key: 'remarks', label: 'Remarks' },
+      { key: 'gmStatus', label: 'GM Status' },
+      { key: 'currentMcStatus', label: 'Current MC Status' },
+      { key: 'fullMcName', label: 'Full MC Name' },
+      { key: 'winterStatus', label: 'Winter Status' },
+      { key: 'uploadedAt', label: 'Uploaded At', type: 'date', editable: false },
+      { key: 'updatedAt', label: 'Updated At', type: 'date', editable: false },
+    ],
+    searchColumns: ['seg', 'div', 'subDiv', 'majCatNm', 'subCatDesc', 'mcDesc', 'remarks'],
+    displayColumns: ['mcCd', 'mcDesc'],
+    defaultSort: { field: 'mcCd', dir: 'asc' },
+  },
+  'body-article-data': {
+    kind: 'prisma',
+    delegateName: 'bodyArticleData',
+    idColumn: 'id',
+    columns: [
+      { key: 'id', label: 'ID', editable: false },
+      { key: 'bodyArticleNumber', label: 'Body Article No.' },
+      { key: 'bodyArticleDescription', label: 'Description' },
+      { key: 'division', label: 'Division' },
+      { key: 'subDivision', label: 'Sub Division' },
+      { key: 'majorCategory', label: 'Major Category' },
+      { key: 'mcCode', label: 'MC Code' },
+      { key: 'articleNumber', label: 'Article Number' },
+      { key: 'flatId', label: 'Flat ID', editable: false },
+      { key: 'vendorName', label: 'Vendor Name' },
+      { key: 'vendorCode', label: 'Vendor Code' },
+      { key: 'season', label: 'Season' },
+      { key: 'year', label: 'Year' },
+      { key: 'hsnTaxCode', label: 'HSN Tax Code' },
+      { key: 'mCollarType', label: 'Collar Type' },
+      { key: 'mCollarStyle', label: 'Collar Style' },
+      { key: 'mNeckType', label: 'Neck Type' },
+      { key: 'mNeckStyle', label: 'Neck Style' },
+      { key: 'mPlacket', label: 'Placket' },
+      { key: 'mBltType', label: 'Belt Type' },
+      { key: 'mBltStyle', label: 'Belt Style' },
+      { key: 'mSleevesMainStyle', label: 'Sleeves Main Style' },
+      { key: 'mSleeveFold', label: 'Sleeve Fold' },
+      { key: 'mBtmFold', label: 'Bottom Fold' },
+      { key: 'mNoOfPocket', label: 'No. of Pockets' },
+      { key: 'mPocket', label: 'Pocket' },
+      { key: 'mExtraPocket', label: 'Extra Pocket' },
+      { key: 'mFit', label: 'Fit' },
+      { key: 'mBodyStyle', label: 'Body Style' },
+      { key: 'mLength', label: 'Length' },
+      { key: 'mSet', label: 'Set' },
+      { key: 'cmtpCost', label: 'CMTP Cost', align: 'right' },
+      { key: 'cmpCost', label: 'CMP Cost', align: 'right' },
+      { key: 'fabCost', label: 'Fab Cost', align: 'right' },
+      { key: 'fabCons', label: 'Fab Cons', align: 'right' },
+      { key: 'width', label: 'Width', align: 'right' },
+      { key: 'approvalStatus', label: 'Approval Status', editable: false },
+      { key: 'approvedAt', label: 'Approved At', type: 'date', editable: false },
+      { key: 'approvedBy', label: 'Approved By (User ID)', editable: false },
+      { key: 'sapSyncStatus', label: 'SAP Sync Status', editable: false },
+      { key: 'sapSyncMessage', label: 'SAP Sync Message', editable: false },
+      { key: 'userName', label: 'Uploaded By', editable: false },
+      { key: 'createdAt', label: 'Created At', type: 'date', editable: false },
+      { key: 'updatedAt', label: 'Updated At', type: 'date', editable: false },
+    ],
+    searchColumns: ['bodyArticleNumber', 'bodyArticleDescription', 'division', 'subDivision', 'majorCategory', 'mcCode', 'articleNumber', 'vendorName', 'userName'],
+    displayColumns: ['bodyArticleNumber', 'bodyArticleDescription'],
+    defaultSort: { field: 'createdAt', dir: 'desc' },
+  },
+  'raw-articles': {
+    kind: 'prisma',
+    delegateName: 'rawArticle',
+    idColumn: 'id',
+    columns: [
+      { key: 'id', label: 'ID', editable: false },
+      { key: 'presentationNo', label: 'Presentation No.', editable: false },
+      { key: 'vendorCode', label: 'Vendor Code', editable: false },
+      { key: 'vendorName', label: 'Vendor Name', editable: false },
+      { key: 'division', label: 'Division', editable: false },
+      { key: 'subDivision', label: 'Sub Division', editable: false },
+      { key: 'majorCategory', label: 'Major Category', editable: false },
+      { key: 'presentationReceivedDate', label: 'Presentation Received', type: 'date', editable: false },
+      { key: 'designNumber', label: 'Design Number', editable: false },
+      { key: 'fabric', label: 'Fabric', editable: false },
+      { key: 'noOfColors', label: 'No. of Colors', editable: false },
+      { key: 'price', label: 'Price', align: 'right', editable: false },
+      { key: 'imageUrl', label: 'Image URL', editable: false },
+      { key: 'presentationsType', label: 'Presentation Type', editable: false },
+      { key: 'uniqueKey', label: 'Unique Key', editable: false },
+      { key: 'source', label: 'Source', editable: false },
+      { key: 'status', label: 'Status', editable: false },
+      { key: 'retryCount', label: 'Retry Count', editable: false },
+      { key: 'errorMessage', label: 'Error Message', editable: false },
+      { key: 'extractedAt', label: 'Extracted At', type: 'date', editable: false },
+      { key: 'flatId', label: 'Flat ID', editable: false },
+      { key: 'lockedUntil', label: 'Locked Until', type: 'date', editable: false },
+      { key: 'articleNumber', label: 'Article Number', editable: false },
+      { key: 'createdAt', label: 'Created At', type: 'date', editable: false },
+      { key: 'updatedAt', label: 'Updated At', type: 'date', editable: false },
+    ],
+    searchColumns: ['presentationNo', 'vendorCode', 'vendorName', 'division', 'subDivision', 'majorCategory', 'designNumber', 'articleNumber', 'status'],
+    displayColumns: ['presentationNo'],
+    defaultSort: { field: 'createdAt', dir: 'desc' },
+  },
+  'vendor-master': {
+    kind: 'prisma',
+    delegateName: 'masterVendorDetail',
+    idColumn: 'id',
+    idIsNumeric: true,
+    columns: [
+      { key: 'id', label: 'ID', editable: false },
+      { key: 'vendorCode', label: 'Vendor Code', editable: false },
+      { key: 'vendorName', label: 'Vendor Name', editable: false },
+      { key: 'vendorCity', label: 'Vendor City', editable: false },
+      { key: 'vendorRegion', label: 'Vendor Region', editable: false },
+      { key: 'mergeVendorCode', label: 'Merge Vendor Code', editable: false },
+      { key: 'mergeVendorName', label: 'Merge Vendor Name', editable: false },
+      { key: 'mergeVendorCity', label: 'Merge Vendor City', editable: false },
+      { key: 'mergeVendorRegion', label: 'Merge Vendor Region', editable: false },
+      { key: 'syncedAt', label: 'Synced At', type: 'date', editable: false },
+    ],
+    searchColumns: ['vendorCode', 'vendorName', 'vendorCity', 'vendorRegion', 'mergeVendorCode', 'mergeVendorName'],
+    displayColumns: ['vendorCode', 'vendorName'],
+    defaultSort: { field: 'syncedAt', dir: 'desc' },
+  },
+  hierarchy: {
+    kind: 'hierarchy',
+    idColumn: 'major_category_code',
+    columns: [
+      { key: 'division_code', label: 'Division Code', editable: false },
+      { key: 'division', label: 'Division', editable: false },
+      { key: 'sub_division_code', label: 'Sub Division Code', editable: false },
+      { key: 'sub_division', label: 'Sub Division', editable: false },
+      { key: 'major_category_code', label: 'Major Category Code', editable: false },
+      { key: 'major_category', label: 'Major Category' },
+      { key: 'full_form', label: 'Full Form' },
+      { key: 'description', label: 'Description' },
+      { key: 'mc_code', label: 'MC Code' },
+      { key: 'mc_des', label: 'MC Description' },
+      { key: 'fabric_division', label: 'Fabric Division' },
+      { key: 'garment_type', label: 'Garment Type', editable: false },
+      { key: 'display_order', label: 'Display Order' },
+      { key: 'is_active', label: 'Active' },
+      { key: 'created_at', label: 'Created At', type: 'date', editable: false },
+      { key: 'updated_at', label: 'Updated At', type: 'date', editable: false },
+    ],
+    searchColumns: ['division', 'sub_division', 'major_category', 'mc_code'],
+    displayColumns: ['division', 'sub_division', 'major_category'],
+    defaultSort: { column: 'division', dir: 'asc' },
+  },
+};
+
+/** GET /admin/expense-table/:tableKey?page=&limit=&search=&sortBy=&sortDir= */
+/** Parses the `filters` query param — a JSON object of column key -> array of
+ * exact values to match (checkbox-style column filters, additive to the
+ * free-text `search` box, not a replacement for it). Whitelisted against
+ * this table's own configured columns (it's client-supplied), and anything
+ * malformed is dropped rather than erroring — a bad filter should just not
+ * filter, not break the page. */
+function parseExpenseColumnFilters(raw: string | undefined, validKeys: Set<string>): Record<string, string[]> {
+  if (!raw) return {};
+  let parsed: unknown;
+  try {
+    parsed = JSON.parse(raw);
+  } catch {
+    return {};
+  }
+  if (!parsed || typeof parsed !== 'object' || Array.isArray(parsed)) return {};
+
+  const result: Record<string, string[]> = {};
+  for (const [key, value] of Object.entries(parsed as Record<string, unknown>)) {
+    if (!validKeys.has(key) || !Array.isArray(value) || value.length === 0) continue;
+    const values = value.filter((v): v is string | number | boolean => v !== null && v !== undefined).map((v) => String(v));
+    if (values.length > 0) result[key] = values;
+  }
+  return result;
+}
+
+export async function getExpenseTableData(req: Request, res: Response) {
+  const { tableKey } = req.params;
+  const config = EXPENSE_TABLE_REGISTRY[tableKey];
+  if (!config) {
+    return res.status(404).json({ success: false, error: `Unknown table key: ${tableKey}` });
+  }
+
+  const { page, limit, search, sortBy, sortDir, filters } = req.query as Record<string, string | undefined>;
+  const pageNum = Math.max(1, parseInt(page ?? '1', 10) || 1);
+  const limitNum = Math.min(200, Math.max(1, parseInt(limit ?? '50', 10) || 50));
+  const skip = (pageNum - 1) * limitNum;
+  const dir: 'asc' | 'desc' = sortDir === 'asc' ? 'asc' : sortDir === 'desc' ? 'desc' : config.defaultSort.dir;
+  const searchTerm = search?.trim() || undefined;
+
+  try {
+    if (config.kind === 'prisma') {
+      const validFields = new Set(config.columns.map((c) => c.key));
+      const sortField = sortBy && validFields.has(sortBy) ? sortBy : config.defaultSort.field;
+      const delegate = (prisma as any)[config.delegateName];
+      const columnFilters = parseExpenseColumnFilters(filters, validFields);
+
+      const andConditions: any[] = [];
+      if (searchTerm) {
+        andConditions.push({ OR: config.searchColumns.map((f) => ({ [f]: { contains: searchTerm, mode: 'insensitive' as const } })) });
+      }
+      for (const [col, values] of Object.entries(columnFilters)) {
+        andConditions.push({ [col]: { in: values } });
+      }
+      const where = andConditions.length > 0 ? { AND: andConditions } : {};
+
+      const [total, rows] = await withPrismaRetry(() =>
+        prisma.$transaction([
+          delegate.count({ where }),
+          delegate.findMany({ where, orderBy: { [sortField]: dir }, skip, take: limitNum }),
+        ])
+      );
+
+      return res.json({ data: rows, total, page: pageNum, limit: limitNum, totalPages: Math.ceil(total / limitNum) });
+    }
+
+    if (config.kind === 'raw') {
+      const validColumns = new Set(config.columns.map((c) => c.key));
+      const sortColumn = sortBy && validColumns.has(sortBy) ? sortBy : config.defaultSort.column;
+      const columnFilters = parseExpenseColumnFilters(filters, validColumns);
+
+      const clauses: ReturnType<typeof Prisma.sql>[] = [];
+      if (searchTerm) {
+        clauses.push(
+          Prisma.sql`(${Prisma.join(
+            config.searchColumns.map(
+              (col) => Prisma.sql`${Prisma.raw(`"${col}"`)}::text ILIKE ${'%' + searchTerm + '%'}`
+            ),
+            ' OR '
+          )})`
+        );
+      }
+      for (const [col, values] of Object.entries(columnFilters)) {
+        clauses.push(Prisma.sql`${Prisma.raw(`"${col}"`)}::text = ANY(${values})`);
+      }
+      const whereSql = clauses.length > 0 ? Prisma.sql`WHERE ${Prisma.join(clauses, ' AND ')}` : Prisma.empty;
+
+      const orderSql = Prisma.sql`ORDER BY ${Prisma.raw(`"${sortColumn}"`)} ${Prisma.raw(dir.toUpperCase())}`;
+      const tableSql = Prisma.raw(`"${config.tableName}"`);
+
+      const [countRows, rows] = await withPrismaRetry(() =>
+        Promise.all([
+          prisma.$queryRaw<{ total: bigint }[]>(Prisma.sql`SELECT COUNT(*)::bigint AS total FROM ${tableSql} ${whereSql}`),
+          prisma.$queryRaw<any[]>(Prisma.sql`SELECT * FROM ${tableSql} ${whereSql} ${orderSql} LIMIT ${limitNum} OFFSET ${skip}`),
+        ])
+      );
+
+      const total = Number(countRows[0]?.total ?? 0);
+      return res.json({ data: serializeBigInts(rows), total, page: pageNum, limit: limitNum, totalPages: Math.ceil(total / limitNum) });
+    }
+
+    // kind === 'hierarchy' — flattened departments ⋈ sub_departments ⋈ categories
+    const sortColumnMap: Record<string, string> = {
+      division: 'd.name',
+      sub_division: 'sd.name',
+      major_category: 'c.name',
+      mc_code: 'c.merchandise_code',
+    };
+    const sortColumn = (sortBy && sortColumnMap[sortBy]) || sortColumnMap[config.defaultSort.column];
+
+    const whereSql = searchTerm
+      ? Prisma.sql`WHERE d.name ILIKE ${'%' + searchTerm + '%'} OR sd.name ILIKE ${'%' + searchTerm + '%'} OR c.name ILIKE ${'%' + searchTerm + '%'} OR c.code ILIKE ${'%' + searchTerm + '%'} OR c.merchandise_code ILIKE ${'%' + searchTerm + '%'}`
+      : Prisma.empty;
+
+    const orderSql = Prisma.sql`ORDER BY ${Prisma.raw(sortColumn)} ${Prisma.raw(dir.toUpperCase())}`;
+
+    const baseFrom = Prisma.sql`FROM categories c
+      JOIN sub_departments sd ON sd.id = c.sub_department_id
+      JOIN departments d ON d.id = sd.department_id
+      ${whereSql}`;
+
+    const [countRows, rows] = await withPrismaRetry(() =>
+      Promise.all([
+        prisma.$queryRaw<{ total: bigint }[]>(Prisma.sql`SELECT COUNT(*)::bigint AS total ${baseFrom}`),
+        prisma.$queryRaw<any[]>(Prisma.sql`
+          SELECT
+            d.code AS division_code, d.name AS division,
+            sd.code AS sub_division_code, sd.name AS sub_division,
+            c.code AS major_category_code, c.name AS major_category,
+            c.full_form, c.description,
+            c.merchandise_code AS mc_code, c.merchandise_desc AS mc_des,
+            c.fabric_division, c.garment_type, c.display_order, c.is_active,
+            c.created_at, c.updated_at
+          ${baseFrom}
+          ${orderSql}
+          LIMIT ${limitNum} OFFSET ${skip}
+        `),
+      ])
+    );
+
+    const total = Number(countRows[0]?.total ?? 0);
+    return res.json({ data: rows, total, page: pageNum, limit: limitNum, totalPages: Math.ceil(total / limitNum) });
+  } catch (error: any) {
+    console.error(`[ExpenseTableData] Error fetching "${tableKey}":`, error);
+    return res.status(500).json({ success: false, error: error.message });
+  }
+}
+
+/** GET /admin/expense-table/:tableKey/column/:column/options — distinct
+ * existing values for one column, sorted, for populating a dropdown on the
+ * add/edit form (e.g. Attribute Name on National Grid, or Sub Division /
+ * Major Category / Segment Type on Segment Master) instead of free-typing
+ * something that has to match an existing taxonomy exactly. `column` is
+ * checked against this table's own configured columns first — it's a route
+ * param, so this is what stops it being used to probe arbitrary columns. */
+export async function getExpenseColumnOptions(req: Request, res: Response) {
+  const { tableKey, column } = req.params;
+  const config = EXPENSE_TABLE_REGISTRY[tableKey];
+  if (!config) {
+    return res.status(404).json({ success: false, error: `Unknown table key: ${tableKey}` });
+  }
+  if (!config.columns.some((c) => c.key === column)) {
+    return res.status(400).json({ success: false, error: `Unknown column: ${column}` });
+  }
+
+  try {
+    let values: any[];
+
+    if (config.kind === 'prisma') {
+      // No `where: { not: null }` here — some of these columns are
+      // non-nullable, and Prisma rejects that filter on a required field;
+      // nulls/blanks are dropped below instead, uniformly for both branches.
+      const delegate = (prisma as any)[config.delegateName];
+      const rows = (await withPrismaRetry(() =>
+        delegate.findMany({
+          distinct: [column],
+          select: { [column]: true },
+          orderBy: { [column]: 'asc' },
+          take: 1000,
+        })
+      )) as any[];
+      values = rows.map((r) => r[column]);
+    } else if (config.kind === 'raw') {
+      const colSql = Prisma.raw(`"${column}"`);
+      const tableSql = Prisma.raw(`"${config.tableName}"`);
+      const rows = await withPrismaRetry(() =>
+        prisma.$queryRaw<Record<string, any>[]>(
+          Prisma.sql`SELECT DISTINCT ${colSql} AS value FROM ${tableSql} WHERE ${colSql} IS NOT NULL ORDER BY ${colSql} ASC LIMIT 1000`
+        )
+      );
+      values = rows.map((r) => r.value);
+    } else {
+      return res.status(400).json({ success: false, error: 'Column options are not supported for this table.' });
+    }
+
+    const cleaned = [...new Set(values.filter((v) => v !== null && v !== undefined && String(v).trim() !== ''))];
+    return res.json({ success: true, data: cleaned });
+  } catch (error: any) {
+    console.error(`[Expense] column-options error for "${tableKey}"."${column}":`, error);
+    return res.status(500).json({ success: false, error: error.message });
+  }
+}
+
+/** GET /admin/expense-table/:tableKey/column/:fromColumn/mapped-to/:toColumn
+ * — a lookup table of `fromColumn` value -> `toColumn` value, built from
+ * every existing row, for auto-filling one field from another on the
+ * add/edit form (e.g. Size Master: pick a Major Category, Sub Division
+ * fills itself in) instead of asking for the same fact twice. Only
+ * meaningful where the relationship is really 1:1 in the data — if a
+ * `fromColumn` value appears with more than one `toColumn` value, this just
+ * returns whichever happens to sort last; the caller treats the result as a
+ * convenience default, not a constraint, so that's an acceptable fallback,
+ * not a correctness bug. Both columns are checked against this table's own
+ * configured columns first — they're route params, so that's what stops
+ * this being used to probe arbitrary columns. */
+export async function getExpenseColumnMapping(req: Request, res: Response) {
+  const { tableKey, fromColumn, toColumn } = req.params;
+  const config = EXPENSE_TABLE_REGISTRY[tableKey];
+  if (!config) {
+    return res.status(404).json({ success: false, error: `Unknown table key: ${tableKey}` });
+  }
+  if (!config.columns.some((c) => c.key === fromColumn) || !config.columns.some((c) => c.key === toColumn)) {
+    return res.status(400).json({ success: false, error: 'Unknown column.' });
+  }
+
+  try {
+    let pairs: { from: any; to: any }[];
+
+    if (config.kind === 'prisma') {
+      const delegate = (prisma as any)[config.delegateName];
+      const rows = (await withPrismaRetry(() =>
+        delegate.findMany({
+          distinct: [fromColumn],
+          select: { [fromColumn]: true, [toColumn]: true },
+          orderBy: { [fromColumn]: 'asc' },
+          take: 5000,
+        })
+      )) as any[];
+      pairs = rows.map((r) => ({ from: r[fromColumn], to: r[toColumn] }));
+    } else if (config.kind === 'raw') {
+      const fromSql = Prisma.raw(`"${fromColumn}"`);
+      const toSql = Prisma.raw(`"${toColumn}"`);
+      const tableSql = Prisma.raw(`"${config.tableName}"`);
+      const rows = await withPrismaRetry(() =>
+        prisma.$queryRaw<{ from: any; to: any }[]>(
+          Prisma.sql`SELECT DISTINCT ON (${fromSql}) ${fromSql} AS from, ${toSql} AS to FROM ${tableSql} WHERE ${fromSql} IS NOT NULL ORDER BY ${fromSql} ASC, ${toSql} DESC LIMIT 5000`
+        )
+      );
+      pairs = rows;
+    } else {
+      return res.status(400).json({ success: false, error: 'Column mapping is not supported for this table.' });
+    }
+
+    const map: Record<string, string> = {};
+    for (const { from, to } of pairs) {
+      if (from === null || from === undefined || String(from).trim() === '') continue;
+      if (to === null || to === undefined || String(to).trim() === '') continue;
+      map[String(from)] = String(to);
+    }
+    return res.json({ success: true, data: map });
+  } catch (error: any) {
+    console.error(`[Expense] column-mapping error for "${tableKey}" "${fromColumn}"->"${toColumn}":`, error);
+    return res.status(500).json({ success: false, error: error.message });
+  }
+}
+
+function coercePrismaId(config: PrismaExpenseTableConfig, rowId: string): string | number {
+  return config.idIsNumeric ? Number(rowId) : rowId;
+}
+
+/** hierarchy's editable keys are the SELECT aliases used by getExpenseTableData,
+ * which don't all match `categories`' real column names — translate before UPDATE. */
+const HIERARCHY_COLUMN_TO_REAL: Record<string, string> = {
+  major_category: 'name',
+  mc_code: 'merchandise_code',
+  mc_des: 'merchandise_desc',
+  fabric_division: 'fabric_division',
+  is_active: 'is_active',
+};
+
+/** Fetches one row's current values for the expense change-request workflow —
+ * used both to snapshot "old" values when a request is created and to
+ * re-verify nothing drifted before applying an approved change. Returns null
+ * if the row no longer exists. `tableKey` is resolved against the same
+ * allowlisted registry as getExpenseTableData. */
+export async function fetchExpenseRowById(tableKey: string, rowId: string): Promise<Record<string, any> | null> {
+  const config = EXPENSE_TABLE_REGISTRY[tableKey];
+  if (!config) return null;
+
+  if (config.kind === 'prisma') {
+    const delegate = (prisma as any)[config.delegateName];
+    const id = coercePrismaId(config, rowId);
+    const row = await delegate.findUnique({ where: { [config.idColumn]: id } });
+    return row ? serializeBigInts(row) : null;
+  }
+
+  if (config.kind === 'raw') {
+    const tableSql = Prisma.raw(`"${config.tableName}"`);
+    const idColSql = Prisma.raw(`"${config.idColumn}"`);
+    const rows = await prisma.$queryRaw<any[]>(
+      Prisma.sql`SELECT * FROM ${tableSql} WHERE ${idColSql} = ${Number(rowId)} LIMIT 1`
+    );
+    return rows[0] ? serializeBigInts(rows[0]) : null;
+  }
+
+  // hierarchy — keyed by categories.code (exposed as major_category_code)
+  const rows = await prisma.$queryRaw<any[]>(Prisma.sql`
+    SELECT
+      d.code AS division_code, d.name AS division,
+      sd.code AS sub_division_code, sd.name AS sub_division,
+      c.code AS major_category_code, c.name AS major_category,
+      c.merchandise_code AS mc_code, c.merchandise_desc AS mc_des,
+      c.fabric_division, c.garment_type, c.is_active
+    FROM categories c
+    JOIN sub_departments sd ON sd.id = c.sub_department_id
+    JOIN departments d ON d.id = sd.department_id
+    WHERE c.code = ${rowId}
+    LIMIT 1
+  `);
+  return rows[0] ?? null;
+}
+
+/** Either the top-level client or an in-flight `prisma.$transaction`
+ * callback's client — see the `client` param on each apply function below. */
+type PrismaOrTx = typeof prisma | Prisma.TransactionClient;
+
+/**
+ * Looks up the actual Postgres type of each column in `keys` on `tableName`,
+ * so a raw INSERT/UPDATE can cast its (always-string, since they arrive as
+ * JSON) bound values to match. Needed because node-postgres/Prisma send a JS
+ * string parameter with an explicit `text` OID — Postgres allows an
+ * *implicit* text->varchar assignment (which is why this went unnoticed for
+ * every varchar-only raw table so far), but text->numeric/boolean/date/... is
+ * NOT an implicit assignment cast, so writing e.g. a price segment's `min`/
+ * `max` (numeric) without an explicit `::numeric` throws
+ * "column is of type X but expression is of type text". Cast EVERY column
+ * (not just numeric ones) for robustness across whatever raw table this runs
+ * against next.
+ */
+async function getRawColumnTypes(
+  client: PrismaOrTx,
+  tableName: string,
+  keys: string[]
+): Promise<Map<string, string>> {
+  if (keys.length === 0) return new Map();
+  const rows = await client.$queryRaw<{ column_name: string; data_type: string }[]>(
+    Prisma.sql`SELECT column_name, data_type FROM information_schema.columns WHERE table_name = ${tableName} AND column_name = ANY(${keys})`
+  );
+  return new Map(rows.map((r) => [r.column_name, r.data_type]));
+}
+
+/** `value::<pg type>`, or just `value` if the type is unknown (falls back to
+ * Postgres' default text handling — still correct for varchar/text columns). */
+function castRawValue(value: any, pgType: string | undefined) {
+  return pgType ? Prisma.sql`${value}::${Prisma.raw(pgType)}` : Prisma.sql`${value}`;
+}
+
+/** Applies an already-approved change to the real row. Only ever called after
+ * final approval, with every key in `changes` already validated against the
+ * table's editable-column allowlist by the caller.
+ *
+ * `client` defaults to the top-level connection but should be passed the
+ * transaction client from an enclosing `prisma.$transaction(...)` whenever
+ * this write must be atomic with something else (e.g. the request's own
+ * status update and its audit-log entry) — see actOnExpenseChangeRequest. */
+export async function applyExpenseRowUpdate(
+  tableKey: string,
+  rowId: string,
+  changes: Record<string, any>,
+  client: PrismaOrTx = prisma
+): Promise<void> {
+  const config = EXPENSE_TABLE_REGISTRY[tableKey];
+  if (!config) throw new Error(`Unknown table key: ${tableKey}`);
+  const keys = Object.keys(changes);
+  if (keys.length === 0) return;
+
+  if (config.kind === 'prisma') {
+    const delegate = (client as any)[config.delegateName];
+    const id = coercePrismaId(config, rowId);
+    await delegate.update({ where: { [config.idColumn]: id }, data: changes });
+    return;
+  }
+
+  if (config.kind === 'raw') {
+    const colTypes = await getRawColumnTypes(client, config.tableName, keys);
+    const tableSql = Prisma.raw(`"${config.tableName}"`);
+    const idColSql = Prisma.raw(`"${config.idColumn}"`);
+    const setSql = Prisma.join(
+      keys.map((k) => Prisma.sql`${Prisma.raw(`"${k}"`)} = ${castRawValue(changes[k], colTypes.get(k))}`),
+      ', '
+    );
+    await client.$executeRaw(Prisma.sql`UPDATE ${tableSql} SET ${setSql} WHERE ${idColSql} = ${Number(rowId)}`);
+    return;
+  }
+
+  // hierarchy — only categories' own columns are editable, keyed by code
+  const realKeys = keys.map((k) => HIERARCHY_COLUMN_TO_REAL[k] ?? k);
+  const hierarchyColTypes = await getRawColumnTypes(client, 'categories', realKeys);
+  const setSql = Prisma.join(
+    keys.map((k) => {
+      const realKey = HIERARCHY_COLUMN_TO_REAL[k] ?? k;
+      return Prisma.sql`${Prisma.raw(`"${realKey}"`)} = ${castRawValue(changes[k], hierarchyColTypes.get(realKey))}`;
+    }),
+    ', '
+  );
+  await client.$executeRaw(Prisma.sql`UPDATE categories SET ${setSql} WHERE code = ${rowId}`);
+}
+
+/** Inserts a brand-new row for an approved CREATE change request and returns
+ * the id it was given, so the request can record what it actually created.
+ * Only ever called after final (MDM) approval, with every key in `values`
+ * already validated against the table's editable-column allowlist.
+ *
+ * `client` — see applyExpenseRowUpdate's doc comment above. */
+export async function applyExpenseRowInsert(
+  tableKey: string,
+  values: Record<string, any>,
+  client: PrismaOrTx = prisma
+): Promise<string> {
+  const config = EXPENSE_TABLE_REGISTRY[tableKey];
+  if (!config) throw new Error(`Unknown table key: ${tableKey}`);
+  if (!config.allowCreate) throw new Error(`Adding rows is not supported for "${tableKey}".`);
+
+  const keys = Object.keys(values);
+  if (keys.length === 0) throw new Error('No values were supplied for the new row.');
+
+  if (config.kind === 'prisma') {
+    const delegate = (client as any)[config.delegateName];
+    const created = await delegate.create({ data: values });
+    return String(created[config.idColumn]);
+  }
+
+  if (config.kind === 'raw') {
+    const colTypes = await getRawColumnTypes(client, config.tableName, keys);
+    const tableSql = Prisma.raw(`"${config.tableName}"`);
+    const idColSql = Prisma.raw(`"${config.idColumn}"`);
+    const colsSql = Prisma.join(keys.map((k) => Prisma.raw(`"${k}"`)), ', ');
+    const valsSql = Prisma.join(keys.map((k) => castRawValue(values[k], colTypes.get(k))), ', ');
+    const rows = await client.$queryRaw<any[]>(
+      Prisma.sql`INSERT INTO ${tableSql} (${colsSql}) VALUES (${valsSql}) RETURNING ${idColSql}`
+    );
+    const inserted = serializeBigInts(rows[0] ?? {});
+    return String(inserted[config.idColumn]);
+  }
+
+  // hierarchy — a category needs a parent sub-department the flat grid doesn't
+  // model, so new rows are created through Hierarchy Management instead.
+  throw new Error('Adding rows is not supported for the hierarchy view.');
+}
+
+/** Deletes a row for an approved DELETE change request. Only ever called after
+ * final (MDM) approval; the request keeps a full snapshot of the row in its
+ * `changes` blob so the audit trail outlives the row.
+ *
+ * `client` — see applyExpenseRowUpdate's doc comment above. */
+export async function applyExpenseRowDelete(
+  tableKey: string,
+  rowId: string,
+  client: PrismaOrTx = prisma
+): Promise<void> {
+  const config = EXPENSE_TABLE_REGISTRY[tableKey];
+  if (!config) throw new Error(`Unknown table key: ${tableKey}`);
+  if (!config.allowDelete) throw new Error(`Deleting rows is not supported for "${tableKey}".`);
+
+  if (config.kind === 'prisma') {
+    const delegate = (client as any)[config.delegateName];
+    await delegate.delete({ where: { [config.idColumn]: coercePrismaId(config, rowId) } });
+    return;
+  }
+
+  if (config.kind === 'raw') {
+    const tableSql = Prisma.raw(`"${config.tableName}"`);
+    const idColSql = Prisma.raw(`"${config.idColumn}"`);
+    await client.$executeRaw(Prisma.sql`DELETE FROM ${tableSql} WHERE ${idColSql} = ${Number(rowId)}`);
+    return;
+  }
+
+  // hierarchy — deleting a category cascades into articles/attributes, so it
+  // stays in Hierarchy Management where those consequences are shown.
+  throw new Error('Deleting rows is not supported for the hierarchy view.');
+}
+
+/** Builds a short human-readable label for a row from its table's displayColumns. */
+export function buildExpenseRowLabel(tableKey: string, row: Record<string, any>): string | undefined {
+  const config = EXPENSE_TABLE_REGISTRY[tableKey];
+  if (!config) return undefined;
+  const parts = config.displayColumns.map((c) => row[c]).filter((v) => v !== null && v !== undefined && v !== '');
+  return parts.length > 0 ? parts.join(' / ') : undefined;
+}

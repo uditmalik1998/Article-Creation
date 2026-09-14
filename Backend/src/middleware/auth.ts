@@ -19,6 +19,7 @@ type CachedAuthUser = {
   role: UserRole;
   division: string | null;
   subDivision: string | null;
+  businessDivision: string | null;
   isActive: boolean;
   lastLogin: Date | null;
 };
@@ -62,6 +63,7 @@ async function fetchAuthUserById(userId: number): Promise<CachedAuthUser | null>
         role: true,
         division: true,
         subDivision: true,
+        businessDivision: true,
         isActive: true,
         lastLogin: true,
       },
@@ -125,6 +127,7 @@ declare global {
         name: string;
         division?: string | null;
         subDivision?: string | null;
+        businessDivision?: string | null;
       };
     }
   }
@@ -227,6 +230,7 @@ export const authenticate = async (
       role: user.role,
       division: user.division,
       subDivision: user.subDivision,
+      businessDivision: user.businessDivision,
     };
 
     next();
@@ -350,9 +354,9 @@ export const requireApprover = (
     return;
   }
 
-  // APPROVER, CATEGORY_HEAD, SUB_DIVISION_HEAD, ADMIN, CREATOR and PO_COMMITTEE (read-only) roles are allowed
+  // APPROVER, CATEGORY_HEAD, SUB_DIVISION_HEAD, ADMIN, CREATOR, PO_COMMITTEE, BODY_APPROVER, FABRIC_APPROVER (read-only) roles are allowed
   const role = String(req.user.role || '');
-  if (role !== 'APPROVER' && role !== 'CATEGORY_HEAD' && role !== 'SUB_DIVISION_HEAD' && role !== 'ADMIN' && role !== 'CREATOR' && role !== 'PO_COMMITTEE' && role !== 'PD') {
+  if (role !== 'APPROVER' && role !== 'CATEGORY_HEAD' && role !== 'SUB_DIVISION_HEAD' && role !== 'ADMIN' && role !== 'CREATOR' && role !== 'PO_COMMITTEE' && role !== 'PD' && role !== 'BODY_APPROVER' && role !== 'FABRIC_APPROVER') {
     res.status(403).json({
       success: false,
       error: 'Approver access required. You do not have permission to access this resource.',
@@ -384,6 +388,58 @@ export const requireApprovalRights = (
     res.status(403).json({
       success: false,
       error: 'You do not have permission to approve or reject articles.',
+      code: 'INSUFFICIENT_PERMISSIONS',
+      userRole: role
+    });
+    return;
+  }
+  next();
+};
+
+/**
+ * Require ADMIN or BODY_APPROVER role to submit (approve) body articles.
+ * Must be used after authenticate middleware.
+ */
+export const requireBodyApprovalRights = (
+  req: Request,
+  res: Response,
+  next: NextFunction
+): void => {
+  if (!req.user) {
+    res.status(401).json({ success: false, error: 'Authentication required.', code: 'NOT_AUTHENTICATED' });
+    return;
+  }
+  const role = String(req.user.role || '');
+  if (role !== 'ADMIN' && role !== 'BODY_APPROVER') {
+    res.status(403).json({
+      success: false,
+      error: 'Only Body Approver or Admin can approve body articles.',
+      code: 'INSUFFICIENT_PERMISSIONS',
+      userRole: role
+    });
+    return;
+  }
+  next();
+};
+
+/**
+ * Require ADMIN or FABRIC_APPROVER role to submit fabric articles to SAP.
+ * Must be used after authenticate middleware.
+ */
+export const requireFabricApprovalRights = (
+  req: Request,
+  res: Response,
+  next: NextFunction
+): void => {
+  if (!req.user) {
+    res.status(401).json({ success: false, error: 'Authentication required.', code: 'NOT_AUTHENTICATED' });
+    return;
+  }
+  const role = String(req.user.role || '');
+  if (role !== 'ADMIN' && role !== 'FABRIC_APPROVER') {
+    res.status(403).json({
+      success: false,
+      error: 'Only Fabric Approver or Admin can submit fabric articles.',
       code: 'INSUFFICIENT_PERMISSIONS',
       userRole: role
     });
@@ -447,6 +503,31 @@ export const requirePd = (
 };
 
 /**
+ * Require one of a specific set of roles (ADMIN is NOT auto-included — pass it
+ * explicitly if it should be allowed). Must be used after authenticate middleware.
+ */
+export const requireRole = (...roles: string[]) => {
+  return (req: Request, res: Response, next: NextFunction): void => {
+    if (!req.user) {
+      res.status(401).json({ success: false, error: 'Authentication required.', code: 'NOT_AUTHENTICATED' });
+      return;
+    }
+    const role = String(req.user.role || '');
+    if (!roles.includes(role)) {
+      res.status(403).json({
+        success: false,
+        error: 'You do not have permission to access this resource.',
+        code: 'INSUFFICIENT_PERMISSIONS',
+        requiredRoles: roles,
+        userRole: role,
+      });
+      return;
+    }
+    next();
+  };
+};
+
+/**
  * Optional authentication - attach user if token present, but don't fail
  * Useful for endpoints that have different behavior for authenticated users
  */
@@ -482,6 +563,7 @@ export const optionalAuth = async (
           role: user.role,
           division: user.division,
           subDivision: user.subDivision,
+          businessDivision: user.businessDivision,
         };
       }
     } catch (jwtError) {

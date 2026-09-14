@@ -13,6 +13,7 @@ import compression from 'compression';
 import extractionRoutes from './routes/extraction';
 import vlmExtractionRoutes from './routes/vlmExtraction';
 import adminRoutes from './routes/admin';
+import expenseRoutes from './routes/expense';
 import authRoutes from './routes/auth';
 import userExtractionRoutes from './routes/userExtraction';
 import simplifiedExtractionRoutes from './routes/simplifiedExtraction'; // NEW: Simplified workflow
@@ -259,6 +260,11 @@ app.use('/api/srm-hook', srmHookRoutes);
 // ADMIN ROUTES (Admin role required + Audit logging)
 // ═══════════════════════════════════════════════════════
 app.use('/api/admin', authenticate, requireAdmin, auditLog, adminRoutes);
+
+// ═══════════════════════════════════════════════════════
+// EXPENSE DATA ROUTES (Creator/Approver/Category-Head/PD/Admin — per-route role checks)
+// ═══════════════════════════════════════════════════════
+app.use('/api/expense', authenticate, auditLog, expenseRoutes);
 
 // ═══════════════════════════════════════════════════════
 // TEST API ROUTES (Admin role required)

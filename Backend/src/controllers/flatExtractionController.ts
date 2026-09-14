@@ -1,6 +1,5 @@
 import { Request, Response, NextFunction } from 'express';
 import { prismaClient as prisma } from '../utils/prisma';
-import { getHsnCodeByMcCode, getMcCodeByMajorCategory } from '../utils/mcCodeMapper';
 import { parseNumericValue } from '../utils/mrpCalculator';
 import { hasVendorCode, isValidVendorCode, normalizeVendorCode } from '../utils/vendorCode';
 import { mirror360FlatUpdate } from '../utils/mirror360Flat';
@@ -400,27 +399,20 @@ export class FlatExtractionController {
                 const majorCategoryText = toNullableString(value);
 
                 if (majorCategoryText) {
-                    const mappedMcCode = getMcCodeByMajorCategory(majorCategoryText);
-                    if (mappedMcCode) {
+                    const mcDetails = await prisma.majorCategoryDetails.findFirst({
+                        where: { mcDes: { equals: majorCategoryText, mode: 'insensitive' }, mcStatus: 'ACT' },
+                        select: { mcCode: true, hsnCode: true },
+                    });
+                    if (mcDetails) {
                         data.majorCategory = majorCategoryText;
-                        data.mcCode = mappedMcCode;
-                        data.hsnTaxCode = getHsnCodeByMcCode(mappedMcCode) || null;
+                        data.mcCode = mcDetails.mcCode || null;
+                        data.hsnTaxCode = mcDetails.hsnCode || null;
                     } else {
-                        const fabMaster = await prisma.fabricArticleMaster.findFirst({
-                            where: { majCat: { equals: majorCategoryText, mode: 'insensitive' } },
-                            orderBy: { id: 'asc' },
-                            select: { mcCode: true, hsnCd: true },
+                        res.status(400).json({
+                            success: false,
+                            error: `Invalid majorCategory '${majorCategoryText}'. Please use values from mc code list (mc des).`
                         });
-                        if (!fabMaster) {
-                            res.status(400).json({
-                                success: false,
-                                error: `Invalid majorCategory '${majorCategoryText}'. Please use values from mc code list (mc des).`
-                            });
-                            return;
-                        }
-                        data.majorCategory = majorCategoryText;
-                        data.mcCode = fabMaster.mcCode || null;
-                        data.hsnTaxCode = fabMaster.hsnCd || null;
+                        return;
                     }
                 } else {
                     data.majorCategory = null;

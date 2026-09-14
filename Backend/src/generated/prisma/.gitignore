@@ -1,6 +1,0 @@
-# Exclude platform-specific query engine binaries and temp files
-*.exe
-*.so
-*.dylib
-*.node
-*.tmp

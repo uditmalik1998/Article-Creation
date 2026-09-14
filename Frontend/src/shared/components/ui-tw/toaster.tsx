@@ -16,7 +16,7 @@ export const Toaster = () => {
   return (
     <SonnerToaster
       theme={theme}
-      position="top-right"
+      position="top-center"
       richColors={false}
       closeButton
       visibleToasts={4}

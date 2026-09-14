@@ -20,10 +20,16 @@ import SrmFailedExtractionsPage from './features/admin/pages/SrmFailedExtraction
 import KsmlUploaderPage from './features/admin/pages/KsmlUploaderPage'; // KSML class-characteristic uploader
 import PoolBUploaderPage from './features/admin/pages/PoolBUploaderPage'; // Pool B article-value uploader
 import ModificationLogsPage from './features/admin/pages/ModificationLogsPage';
+import ExpenseTableDetailPage from './features/admin/pages/ExpenseTableDetailPage';
+import ExpenseMastersPage from './features/admin/pages/ExpenseMastersPage';
+import ExpenseChangeRequestsPage from './features/admin/pages/ExpenseChangeRequestsPage';
+import ExpenseAuditLogPage from './features/admin/pages/ExpenseAuditLogPage';
 import ApproverDashboard from './features/approver/pages/ApproverDashboard'; // Approver Dashboard
 import ArticleDetailPage from './features/approver/pages/ArticleDetailPage'; // Article detail view
 import FabricArticleDashboard from './features/fabric-article/pages/FabricArticleDashboard'; // Fabric Article Dashboard
 import FabricArticleDetailPage from './features/fabric-article/pages/FabricArticleDetailPage'; // Fabric Article detail view
+import FGNewArticleDashboard from './features/fabric-article/pages/FGNewArticleDashboard'; // FG New Article Dashboard
+import FGNewArticleDetailPage from './features/fabric-article/pages/FGNewArticleDetailPage'; // FG New Article detail view
 import BodyArticleDashboard from './features/body-article/pages/BodyArticleDashboard'; // Body Article Dashboard
 import BodyArticleDetailPage from './features/body-article/pages/BodyArticleDetailPage'; // Body Article detail view
 import POPresentationPage from './features/po-presentation/pages/POPresentationPage'; // PO Presentation
@@ -48,10 +54,18 @@ const ProtectedRoute: React.FC<{ children: React.ReactNode }> = ({ children }) =
   }
 
   // PD_DESIGNER only has access to model-generation
+  // BODY_APPROVER only has access to body-article
+  // FABRIC_APPROVER only has access to fabric-article FG new articles
   if (user) {
     const userData = JSON.parse(user);
     if (userData.role === 'PD_DESIGNER') {
       return <Navigate to="/model-generation" replace />;
+    }
+    if (userData.role === 'BODY_APPROVER') {
+      return <Navigate to="/body-article" replace />;
+    }
+    if (userData.role === 'FABRIC_APPROVER') {
+      return <Navigate to="/fabric-article/fg-new" replace />;
     }
   }
 
@@ -76,6 +90,30 @@ const AdminRoute: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   return <>{children}</>;
 };
 
+// Expense Data (view + change-request workflow). Access is per-email, not
+// per-role — a sub-division editor, Category Head or MDM user can hold any
+// role — so this guard only keeps out PD_DESIGNER (who has their own app) and
+// leaves the rest to the server: /api/expense checks every read and every
+// action against expense_access_grants, and the pages render a clear
+// "no access" card when it says no.
+const ExpenseRoute: React.FC<{ children: React.ReactNode }> = ({ children }) => {
+  const token = localStorage.getItem('authToken');
+  const user = localStorage.getItem('user');
+
+  if (!token) {
+    return <Navigate to="/login" replace />;
+  }
+
+  if (user) {
+    const userData = JSON.parse(user);
+    if (userData.role === 'PD_DESIGNER') {
+      return <Navigate to="/model-generation" replace />;
+    }
+  }
+
+  return <>{children}</>;
+};
+
 const ApproverRoute: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const token = localStorage.getItem('authToken');
   const user = localStorage.getItem('user');
@@ -86,8 +124,8 @@ const ApproverRoute: React.FC<{ children: React.ReactNode }> = ({ children }) =>
 
   if (user) {
     const userData = JSON.parse(user);
-    // Allow ADMIN, APPROVER, CATEGORY_HEAD, SUB_DIVISION_HEAD, CREATOR, PO_COMMITTEE or PD
-    if (userData.role !== 'APPROVER' && userData.role !== 'CATEGORY_HEAD' && userData.role !== 'SUB_DIVISION_HEAD' && userData.role !== 'ADMIN' && userData.role !== 'CREATOR' && userData.role !== 'PO_COMMITTEE' && userData.role !== 'PD') {
+    // Allow ADMIN, APPROVER, CATEGORY_HEAD, SUB_DIVISION_HEAD, CREATOR, PO_COMMITTEE, PD, BODY_APPROVER, FABRIC_APPROVER
+    if (userData.role !== 'APPROVER' && userData.role !== 'CATEGORY_HEAD' && userData.role !== 'SUB_DIVISION_HEAD' && userData.role !== 'ADMIN' && userData.role !== 'CREATOR' && userData.role !== 'PO_COMMITTEE' && userData.role !== 'PD' && userData.role !== 'BODY_APPROVER' && userData.role !== 'FABRIC_APPROVER') {
       return <Navigate to="/dashboard" replace />;
     }
   }
@@ -302,6 +340,46 @@ const App: React.FC = () => {
                 }
               />
               <Route
+                path="/admin/expense/:tableKey"
+                element={
+                  <ExpenseRoute>
+                    <MainLayout>
+                      <ExpenseTableDetailPage />
+                    </MainLayout>
+                  </ExpenseRoute>
+                }
+              />
+              <Route
+                path="/admin/expense-masters"
+                element={
+                  <ExpenseRoute>
+                    <MainLayout>
+                      <ExpenseMastersPage />
+                    </MainLayout>
+                  </ExpenseRoute>
+                }
+              />
+              <Route
+                path="/admin/expense-change-requests"
+                element={
+                  <ExpenseRoute>
+                    <MainLayout>
+                      <ExpenseChangeRequestsPage />
+                    </MainLayout>
+                  </ExpenseRoute>
+                }
+              />
+              <Route
+                path="/admin/expense-audit-log"
+                element={
+                  <AdminRoute>
+                    <MainLayout>
+                      <ExpenseAuditLogPage />
+                    </MainLayout>
+                  </AdminRoute>
+                }
+              />
+              <Route
                 path="/admin/srm-failed"
                 element={
                   <AdminRoute>
@@ -477,26 +555,6 @@ const App: React.FC = () => {
                 }
               />
               <Route
-                path="/fabric-article/old-articles"
-                element={
-                  <ApproverRoute>
-                    <MainLayout>
-                      <FabricArticleDashboard key="fabric-old-articles" pathType="old" />
-                    </MainLayout>
-                  </ApproverRoute>
-                }
-              />
-              <Route
-                path="/fabric-article/old-articles/:id"
-                element={
-                  <ApproverRoute>
-                    <MainLayout>
-                      <FabricArticleDetailPage />
-                    </MainLayout>
-                  </ApproverRoute>
-                }
-              />
-              <Route
                 path="/fabric-article/rejected"
                 element={
                   <ApproverRoute>
@@ -542,6 +600,48 @@ const App: React.FC = () => {
                   <ApproverRoute>
                     <MainLayout>
                       <FabricArticleDashboard key="fabric-failed-articles" pathType="failed" />
+                    </MainLayout>
+                  </ApproverRoute>
+                }
+              />
+
+              {/* FG Article routes inside Fabric Article tab */}
+              <Route
+                path="/fabric-article/fg-new"
+                element={
+                  <ApproverRoute>
+                    <MainLayout>
+                      <FGNewArticleDashboard key="fg-new-articles" pathType="new" />
+                    </MainLayout>
+                  </ApproverRoute>
+                }
+              />
+              <Route
+                path="/fabric-article/fg-new/:id"
+                element={
+                  <ApproverRoute>
+                    <MainLayout>
+                      <FGNewArticleDetailPage />
+                    </MainLayout>
+                  </ApproverRoute>
+                }
+              />
+              <Route
+                path="/fabric-article/fg-created"
+                element={
+                  <ApproverRoute>
+                    <MainLayout>
+                      <FGNewArticleDashboard key="fg-created-articles" pathType="created" />
+                    </MainLayout>
+                  </ApproverRoute>
+                }
+              />
+              <Route
+                path="/fabric-article/fg-created/:id"
+                element={
+                  <ApproverRoute>
+                    <MainLayout>
+                      <FGNewArticleDetailPage />
                     </MainLayout>
                   </ApproverRoute>
                 }

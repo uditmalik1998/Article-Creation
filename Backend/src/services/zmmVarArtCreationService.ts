@@ -2,7 +2,7 @@
  * zmmVarArtCreationService.ts
  *
  * SAP RFC integration for Variant Article Creation.
- * Calls ZMM_VAR_ART_CREATION_RFC with a JSON body after a generic article
+ * Calls ZMM_VAR_ART_CRT_V8 with a JSON body after a generic article
  * is successfully created via ZMM_ART_CREATION_RFC.
  *
  * Each variant gets its own RFC call with:
@@ -88,8 +88,6 @@ type FlatVariant = {
     vendorCode?: string | null;
     rate?: unknown;          // NET_PRICE
     mrp?: unknown;           // MRP_TYPE
-    weight?: unknown;        // WEIGHT_NET_G (kg)
-    variantWeight?: unknown; // variant-specific weight override
     [key: string]: unknown;
 };
 
@@ -117,9 +115,7 @@ function buildVariantPayload(
     const yyyy = String(now.getFullYear());
     const fromDate = `${yyyy}${mm}${dd}`;
 
-    // VENDOR: pad to 10 digits with leading zeros
-    const vendorRaw = toStr(variant.vendorCode).replace(/\D/g, '');
-    const vendor = vendorRaw ? vendorRaw.padStart(10, '0') : '';
+    const vendor = toStr(variant.vendorCode).replace(/\D/g, '');
 
     return {
         // ── Dynamic — from variant record ─────────────────
@@ -141,11 +137,6 @@ function buildVariantPayload(
         TO_DATE:         '99991231',
         OLD_MAT_NO:      '',
         TAX_CODE:        SAP_TAX_CODE,
-        WEIGHT_NET_G:    (() => {
-            const raw = toStr(variant.variantWeight);
-            const num = parseFloat(raw);
-            return isNaN(num) ? '0.000' : num.toFixed(3);
-        })(),
     };
 }
 
@@ -231,7 +222,7 @@ function parseVariantRfcResponse(
 // ─── Main export ──────────────────────────────────────────────────────────────
 
 /**
- * Calls ZMM_VAR_ART_CREATION_RFC for every variant in the map.
+ * Calls ZMM_VAR_ART_CRT_V8 for every variant in the map.
  *
  * @param variantsByGenericId  Map<genericDbId, FlatVariant[]>
  * @param genericSapArticleMap Map<genericDbId, sapArticleNumber>  (from generic creation results)
@@ -245,7 +236,7 @@ export async function syncVariantsToSapViaRfc(
         const results: SapSyncItemResult[] = [];
         for (const variants of variantsByGenericId.values()) {
             for (const v of variants) {
-                results.push({ id: v.id, success: false, message: 'ZMM_VAR_ART_CREATION_RFC sync is disabled' });
+                results.push({ id: v.id, success: false, message: 'ZMM_VAR_ART_CRT_V8 sync is disabled' });
             }
         }
         return results;
@@ -285,7 +276,7 @@ export async function syncVariantsToSapViaRfc(
 
             const imDataRow = buildVariantPayload(genericSapArt, variant);
             const requestBody = {
-                bapiname: 'ZMM_VAR_ART_CREATION_RFC',
+                bapiname: 'ZMM_VAR_ART_CRT_V8',
                 IM_DATA: [imDataRow],
             };
             const proxyUrl = SAP_RFC_PROXY_ENV
@@ -352,8 +343,8 @@ export async function syncVariantsToSapViaRfc(
                     id: variant.id,
                     success: false,
                     message: isTimeout
-                        ? `ZMM_VAR_ART_CREATION_RFC timed out after ${Math.round(SAP_RFC_TIMEOUT_MS / 1000)}s`
-                        : `ZMM_VAR_ART_CREATION_RFC network error: ${msg}`,
+                        ? `ZMM_VAR_ART_CRT_V8 timed out after ${Math.round(SAP_RFC_TIMEOUT_MS / 1000)}s`
+                        : `ZMM_VAR_ART_CRT_V8 network error: ${msg}`,
                 });
             } finally {
                 clearTimeout(timer);

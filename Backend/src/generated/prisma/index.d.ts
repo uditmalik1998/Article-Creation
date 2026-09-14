@@ -164,6 +164,11 @@ export type Article360Flat = $Result.DefaultSelection<Prisma.$Article360FlatPayl
  */
 export type RawArticle = $Result.DefaultSelection<Prisma.$RawArticlePayload>
 /**
+ * Model FabricRawData
+ * Fabric Raw Data: staging table for fabric presentations (mirrors raw_articles + fabric-specific columns)
+ */
+export type FabricRawData = $Result.DefaultSelection<Prisma.$FabricRawDataPayload>
+/**
  * Model SrmSyncRun
  * One row per cron/admin/webhook sync execution
  */
@@ -188,6 +193,20 @@ export type PoolBBatch = $Result.DefaultSelection<Prisma.$PoolBBatchPayload>
  * NationalGridMaster: Valid attribute code/value pairs imported from the National Grid Excel
  */
 export type NationalGridMaster = $Result.DefaultSelection<Prisma.$NationalGridMasterPayload>
+/**
+ * Model BroaderMenu
+ * BroaderMenu: the "BROADER MENU" merchandising master — one row per MC CD,
+ * carrying the full SEG → DIV → SUB_DIV → MAJ_CAT → SUB_CAT → MC hierarchy
+ * together with its status flags, pack sizes, fixture densities and the
+ * rename/remarks trail. Loaded from the BM-H sheet of the Broader Menu
+ * workbook via the Expense page's bulk uploader.
+ * 
+ * The workbook also carries an 84-column per-store density block (store code
+ * in the second header row). Those cells are all zero in the source file, so
+ * they are not mirrored here — the uploader counts any non-zero value it
+ * finds and reports it rather than dropping it silently.
+ */
+export type BroaderMenu = $Result.DefaultSelection<Prisma.$BroaderMenuPayload>
 /**
  * Model MajorCatMaster
  * MajorCatMaster: MAJ CAT → name, division, ideal-for, and the model-image FRAME
@@ -223,6 +242,56 @@ export type FabricArticleData = $Result.DefaultSelection<Prisma.$FabricArticleDa
  * BodyArticleData: One row per body article created from the Body & Construction card
  */
 export type BodyArticleData = $Result.DefaultSelection<Prisma.$BodyArticleDataPayload>
+/**
+ * Model MajorCategoryDetails
+ * MajorCategoryDetails: Master table for major category hierarchy, mc_code, and HSN codes
+ */
+export type MajorCategoryDetails = $Result.DefaultSelection<Prisma.$MajorCategoryDetailsPayload>
+/**
+ * Model ExpenseApprovalStage
+ * One rung of the Expense Data approval chain — e.g. "Category Head" then
+ * "MDM", or a longer chain with a regional sign-off inserted between them.
+ * Admin-managed on /admin/expense-access ("Approval Stages"); this table
+ * *is* the extensibility point: adding a row here adds a stage everywhere,
+ * with no code change and no enum migration.
+ * 
+ * `key` is the stable identifier `ExpenseAccessGrant.level` and
+ * `ExpenseChangeRequest.currentStageKey`/`approvalTrail` reference — set
+ * once at creation and never reused after a stage is retired, so old
+ * requests' trails keep reading correctly. `sortOrder` defines the chain:
+ * a request starts at the lowest-sortOrder active stage and, on each
+ * approval, moves to the next-lowest active stage above its current one;
+ * approving the highest-sortOrder active stage applies the change for real.
+ */
+export type ExpenseApprovalStage = $Result.DefaultSelection<Prisma.$ExpenseApprovalStagePayload>
+/**
+ * Model ExpenseChangeRequest
+ * 
+ */
+export type ExpenseChangeRequest = $Result.DefaultSelection<Prisma.$ExpenseChangeRequestPayload>
+/**
+ * Model ExpenseAccessGrant
+ * Per-email access control for the Expense Data workflow, maintained by ADMIN
+ * on /admin/expense-access. ADMIN always has every right implicitly and needs
+ * no grant; every other user needs a matching active grant here, so approval
+ * rights land on specific people rather than on a whole `UserRole`.
+ * 
+ * `tableKey` is "*" for "every expense table", otherwise one
+ * EXPENSE_TABLE_REGISTRY key. A user may hold several grants (e.g. an MDM
+ * grant on every table plus a requester grant on one); rights are the union
+ * of all of them.
+ */
+export type ExpenseAccessGrant = $Result.DefaultSelection<Prisma.$ExpenseAccessGrantPayload>
+/**
+ * Model ExpenseAuditLog
+ * The durable, queryable audit trail of the Expense Data workflow — every
+ * event in `ExpenseAuditEventType` above, one row each, independent of the
+ * parent `ExpenseChangeRequest` row (which also keeps its own
+ * `approvalTrail`; this table exists so the whole history can be queried
+ * by table/row/actor/date without expanding that JSON, and so an APPLIED
+ * row is durable proof the master data actually changed, and when).
+ */
+export type ExpenseAuditLog = $Result.DefaultSelection<Prisma.$ExpenseAuditLogPayload>
 
 /**
  * Enums
@@ -267,7 +336,10 @@ export const UserRole: {
   CATEGORY_HEAD: 'CATEGORY_HEAD',
   SUB_DIVISION_HEAD: 'SUB_DIVISION_HEAD',
   PD_DESIGNER: 'PD_DESIGNER',
-  PD: 'PD'
+  PD: 'PD',
+  BODY_APPROVER: 'BODY_APPROVER',
+  FABRIC_APPROVER: 'FABRIC_APPROVER',
+  PLANNING: 'PLANNING'
 };
 
 export type UserRole = (typeof UserRole)[keyof typeof UserRole]
@@ -340,6 +412,36 @@ export const PoolBBatchStatus: {
 
 export type PoolBBatchStatus = (typeof PoolBBatchStatus)[keyof typeof PoolBBatchStatus]
 
+
+export const ExpenseChangeOperation: {
+  UPDATE: 'UPDATE',
+  CREATE: 'CREATE',
+  DELETE: 'DELETE'
+};
+
+export type ExpenseChangeOperation = (typeof ExpenseChangeOperation)[keyof typeof ExpenseChangeOperation]
+
+
+export const ExpenseChangeStatus: {
+  PENDING: 'PENDING',
+  APPROVED: 'APPROVED',
+  REJECTED: 'REJECTED'
+};
+
+export type ExpenseChangeStatus = (typeof ExpenseChangeStatus)[keyof typeof ExpenseChangeStatus]
+
+
+export const ExpenseAuditEventType: {
+  REQUESTED: 'REQUESTED',
+  STAGE_APPROVED: 'STAGE_APPROVED',
+  STAGE_REJECTED: 'STAGE_REJECTED',
+  APPLIED: 'APPLIED',
+  APPLY_FAILED: 'APPLY_FAILED',
+  AUTO_REJECTED: 'AUTO_REJECTED'
+};
+
+export type ExpenseAuditEventType = (typeof ExpenseAuditEventType)[keyof typeof ExpenseAuditEventType]
+
 }
 
 export type AttributeType = $Enums.AttributeType
@@ -385,6 +487,18 @@ export const PoolBJobStatus: typeof $Enums.PoolBJobStatus
 export type PoolBBatchStatus = $Enums.PoolBBatchStatus
 
 export const PoolBBatchStatus: typeof $Enums.PoolBBatchStatus
+
+export type ExpenseChangeOperation = $Enums.ExpenseChangeOperation
+
+export const ExpenseChangeOperation: typeof $Enums.ExpenseChangeOperation
+
+export type ExpenseChangeStatus = $Enums.ExpenseChangeStatus
+
+export const ExpenseChangeStatus: typeof $Enums.ExpenseChangeStatus
+
+export type ExpenseAuditEventType = $Enums.ExpenseAuditEventType
+
+export const ExpenseAuditEventType: typeof $Enums.ExpenseAuditEventType
 
 /**
  * ##  Prisma Client ʲˢ
@@ -785,6 +899,16 @@ export class PrismaClient<
   get rawArticle(): Prisma.RawArticleDelegate<ExtArgs, ClientOptions>;
 
   /**
+   * `prisma.fabricRawData`: Exposes CRUD operations for the **FabricRawData** model.
+    * Example usage:
+    * ```ts
+    * // Fetch zero or more FabricRawData
+    * const fabricRawData = await prisma.fabricRawData.findMany()
+    * ```
+    */
+  get fabricRawData(): Prisma.FabricRawDataDelegate<ExtArgs, ClientOptions>;
+
+  /**
    * `prisma.srmSyncRun`: Exposes CRUD operations for the **SrmSyncRun** model.
     * Example usage:
     * ```ts
@@ -833,6 +957,16 @@ export class PrismaClient<
     * ```
     */
   get nationalGridMaster(): Prisma.NationalGridMasterDelegate<ExtArgs, ClientOptions>;
+
+  /**
+   * `prisma.broaderMenu`: Exposes CRUD operations for the **BroaderMenu** model.
+    * Example usage:
+    * ```ts
+    * // Fetch zero or more BroaderMenus
+    * const broaderMenus = await prisma.broaderMenu.findMany()
+    * ```
+    */
+  get broaderMenu(): Prisma.BroaderMenuDelegate<ExtArgs, ClientOptions>;
 
   /**
    * `prisma.majorCatMaster`: Exposes CRUD operations for the **MajorCatMaster** model.
@@ -893,6 +1027,56 @@ export class PrismaClient<
     * ```
     */
   get bodyArticleData(): Prisma.BodyArticleDataDelegate<ExtArgs, ClientOptions>;
+
+  /**
+   * `prisma.majorCategoryDetails`: Exposes CRUD operations for the **MajorCategoryDetails** model.
+    * Example usage:
+    * ```ts
+    * // Fetch zero or more MajorCategoryDetails
+    * const majorCategoryDetails = await prisma.majorCategoryDetails.findMany()
+    * ```
+    */
+  get majorCategoryDetails(): Prisma.MajorCategoryDetailsDelegate<ExtArgs, ClientOptions>;
+
+  /**
+   * `prisma.expenseApprovalStage`: Exposes CRUD operations for the **ExpenseApprovalStage** model.
+    * Example usage:
+    * ```ts
+    * // Fetch zero or more ExpenseApprovalStages
+    * const expenseApprovalStages = await prisma.expenseApprovalStage.findMany()
+    * ```
+    */
+  get expenseApprovalStage(): Prisma.ExpenseApprovalStageDelegate<ExtArgs, ClientOptions>;
+
+  /**
+   * `prisma.expenseChangeRequest`: Exposes CRUD operations for the **ExpenseChangeRequest** model.
+    * Example usage:
+    * ```ts
+    * // Fetch zero or more ExpenseChangeRequests
+    * const expenseChangeRequests = await prisma.expenseChangeRequest.findMany()
+    * ```
+    */
+  get expenseChangeRequest(): Prisma.ExpenseChangeRequestDelegate<ExtArgs, ClientOptions>;
+
+  /**
+   * `prisma.expenseAccessGrant`: Exposes CRUD operations for the **ExpenseAccessGrant** model.
+    * Example usage:
+    * ```ts
+    * // Fetch zero or more ExpenseAccessGrants
+    * const expenseAccessGrants = await prisma.expenseAccessGrant.findMany()
+    * ```
+    */
+  get expenseAccessGrant(): Prisma.ExpenseAccessGrantDelegate<ExtArgs, ClientOptions>;
+
+  /**
+   * `prisma.expenseAuditLog`: Exposes CRUD operations for the **ExpenseAuditLog** model.
+    * Example usage:
+    * ```ts
+    * // Fetch zero or more ExpenseAuditLogs
+    * const expenseAuditLogs = await prisma.expenseAuditLog.findMany()
+    * ```
+    */
+  get expenseAuditLog(): Prisma.ExpenseAuditLogDelegate<ExtArgs, ClientOptions>;
 }
 
 export namespace Prisma {
@@ -1361,17 +1545,24 @@ export namespace Prisma {
     SapAttributeValue: 'SapAttributeValue',
     Article360Flat: 'Article360Flat',
     RawArticle: 'RawArticle',
+    FabricRawData: 'FabricRawData',
     SrmSyncRun: 'SrmSyncRun',
     SrmSyncRunItem: 'SrmSyncRunItem',
     PoolBJob: 'PoolBJob',
     PoolBBatch: 'PoolBBatch',
     NationalGridMaster: 'NationalGridMaster',
+    BroaderMenu: 'BroaderMenu',
     MajorCatMaster: 'MajorCatMaster',
     FabricArticleMaster: 'FabricArticleMaster',
     FabricMajCatGridValue: 'FabricMajCatGridValue',
     ModifyLog: 'ModifyLog',
     FabricArticleData: 'FabricArticleData',
-    BodyArticleData: 'BodyArticleData'
+    BodyArticleData: 'BodyArticleData',
+    MajorCategoryDetails: 'MajorCategoryDetails',
+    ExpenseApprovalStage: 'ExpenseApprovalStage',
+    ExpenseChangeRequest: 'ExpenseChangeRequest',
+    ExpenseAccessGrant: 'ExpenseAccessGrant',
+    ExpenseAuditLog: 'ExpenseAuditLog'
   };
 
   export type ModelName = (typeof ModelName)[keyof typeof ModelName]
@@ -1390,7 +1581,7 @@ export namespace Prisma {
       omit: GlobalOmitOptions
     }
     meta: {
-      modelProps: "department" | "subDepartment" | "category" | "masterAttribute" | "attributeAllowedValue" | "categoryAttribute" | "extractionJob" | "extractionResult" | "extractionResultFlat" | "modelGenerationResult" | "modelImageApproval" | "mvgrLookup" | "masterVendorDetail" | "user" | "auditLog" | "apiKey" | "changeHistory" | "costSummary" | "article360" | "articleFab" | "articleBody" | "articleVaAcc" | "articleVaPrcs" | "articleBom" | "sapFieldConfig" | "sapAttributeValue" | "article360Flat" | "rawArticle" | "srmSyncRun" | "srmSyncRunItem" | "poolBJob" | "poolBBatch" | "nationalGridMaster" | "majorCatMaster" | "fabricArticleMaster" | "fabricMajCatGridValue" | "modifyLog" | "fabricArticleData" | "bodyArticleData"
+      modelProps: "department" | "subDepartment" | "category" | "masterAttribute" | "attributeAllowedValue" | "categoryAttribute" | "extractionJob" | "extractionResult" | "extractionResultFlat" | "modelGenerationResult" | "modelImageApproval" | "mvgrLookup" | "masterVendorDetail" | "user" | "auditLog" | "apiKey" | "changeHistory" | "costSummary" | "article360" | "articleFab" | "articleBody" | "articleVaAcc" | "articleVaPrcs" | "articleBom" | "sapFieldConfig" | "sapAttributeValue" | "article360Flat" | "rawArticle" | "fabricRawData" | "srmSyncRun" | "srmSyncRunItem" | "poolBJob" | "poolBBatch" | "nationalGridMaster" | "broaderMenu" | "majorCatMaster" | "fabricArticleMaster" | "fabricMajCatGridValue" | "modifyLog" | "fabricArticleData" | "bodyArticleData" | "majorCategoryDetails" | "expenseApprovalStage" | "expenseChangeRequest" | "expenseAccessGrant" | "expenseAuditLog"
       txIsolationLevel: Prisma.TransactionIsolationLevel
     }
     model: {
@@ -3466,6 +3657,80 @@ export namespace Prisma {
           }
         }
       }
+      FabricRawData: {
+        payload: Prisma.$FabricRawDataPayload<ExtArgs>
+        fields: Prisma.FabricRawDataFieldRefs
+        operations: {
+          findUnique: {
+            args: Prisma.FabricRawDataFindUniqueArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$FabricRawDataPayload> | null
+          }
+          findUniqueOrThrow: {
+            args: Prisma.FabricRawDataFindUniqueOrThrowArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$FabricRawDataPayload>
+          }
+          findFirst: {
+            args: Prisma.FabricRawDataFindFirstArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$FabricRawDataPayload> | null
+          }
+          findFirstOrThrow: {
+            args: Prisma.FabricRawDataFindFirstOrThrowArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$FabricRawDataPayload>
+          }
+          findMany: {
+            args: Prisma.FabricRawDataFindManyArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$FabricRawDataPayload>[]
+          }
+          create: {
+            args: Prisma.FabricRawDataCreateArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$FabricRawDataPayload>
+          }
+          createMany: {
+            args: Prisma.FabricRawDataCreateManyArgs<ExtArgs>
+            result: BatchPayload
+          }
+          createManyAndReturn: {
+            args: Prisma.FabricRawDataCreateManyAndReturnArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$FabricRawDataPayload>[]
+          }
+          delete: {
+            args: Prisma.FabricRawDataDeleteArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$FabricRawDataPayload>
+          }
+          update: {
+            args: Prisma.FabricRawDataUpdateArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$FabricRawDataPayload>
+          }
+          deleteMany: {
+            args: Prisma.FabricRawDataDeleteManyArgs<ExtArgs>
+            result: BatchPayload
+          }
+          updateMany: {
+            args: Prisma.FabricRawDataUpdateManyArgs<ExtArgs>
+            result: BatchPayload
+          }
+          updateManyAndReturn: {
+            args: Prisma.FabricRawDataUpdateManyAndReturnArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$FabricRawDataPayload>[]
+          }
+          upsert: {
+            args: Prisma.FabricRawDataUpsertArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$FabricRawDataPayload>
+          }
+          aggregate: {
+            args: Prisma.FabricRawDataAggregateArgs<ExtArgs>
+            result: $Utils.Optional<AggregateFabricRawData>
+          }
+          groupBy: {
+            args: Prisma.FabricRawDataGroupByArgs<ExtArgs>
+            result: $Utils.Optional<FabricRawDataGroupByOutputType>[]
+          }
+          count: {
+            args: Prisma.FabricRawDataCountArgs<ExtArgs>
+            result: $Utils.Optional<FabricRawDataCountAggregateOutputType> | number
+          }
+        }
+      }
       SrmSyncRun: {
         payload: Prisma.$SrmSyncRunPayload<ExtArgs>
         fields: Prisma.SrmSyncRunFieldRefs
@@ -3833,6 +4098,80 @@ export namespace Prisma {
           count: {
             args: Prisma.NationalGridMasterCountArgs<ExtArgs>
             result: $Utils.Optional<NationalGridMasterCountAggregateOutputType> | number
+          }
+        }
+      }
+      BroaderMenu: {
+        payload: Prisma.$BroaderMenuPayload<ExtArgs>
+        fields: Prisma.BroaderMenuFieldRefs
+        operations: {
+          findUnique: {
+            args: Prisma.BroaderMenuFindUniqueArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$BroaderMenuPayload> | null
+          }
+          findUniqueOrThrow: {
+            args: Prisma.BroaderMenuFindUniqueOrThrowArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$BroaderMenuPayload>
+          }
+          findFirst: {
+            args: Prisma.BroaderMenuFindFirstArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$BroaderMenuPayload> | null
+          }
+          findFirstOrThrow: {
+            args: Prisma.BroaderMenuFindFirstOrThrowArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$BroaderMenuPayload>
+          }
+          findMany: {
+            args: Prisma.BroaderMenuFindManyArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$BroaderMenuPayload>[]
+          }
+          create: {
+            args: Prisma.BroaderMenuCreateArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$BroaderMenuPayload>
+          }
+          createMany: {
+            args: Prisma.BroaderMenuCreateManyArgs<ExtArgs>
+            result: BatchPayload
+          }
+          createManyAndReturn: {
+            args: Prisma.BroaderMenuCreateManyAndReturnArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$BroaderMenuPayload>[]
+          }
+          delete: {
+            args: Prisma.BroaderMenuDeleteArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$BroaderMenuPayload>
+          }
+          update: {
+            args: Prisma.BroaderMenuUpdateArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$BroaderMenuPayload>
+          }
+          deleteMany: {
+            args: Prisma.BroaderMenuDeleteManyArgs<ExtArgs>
+            result: BatchPayload
+          }
+          updateMany: {
+            args: Prisma.BroaderMenuUpdateManyArgs<ExtArgs>
+            result: BatchPayload
+          }
+          updateManyAndReturn: {
+            args: Prisma.BroaderMenuUpdateManyAndReturnArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$BroaderMenuPayload>[]
+          }
+          upsert: {
+            args: Prisma.BroaderMenuUpsertArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$BroaderMenuPayload>
+          }
+          aggregate: {
+            args: Prisma.BroaderMenuAggregateArgs<ExtArgs>
+            result: $Utils.Optional<AggregateBroaderMenu>
+          }
+          groupBy: {
+            args: Prisma.BroaderMenuGroupByArgs<ExtArgs>
+            result: $Utils.Optional<BroaderMenuGroupByOutputType>[]
+          }
+          count: {
+            args: Prisma.BroaderMenuCountArgs<ExtArgs>
+            result: $Utils.Optional<BroaderMenuCountAggregateOutputType> | number
           }
         }
       }
@@ -4280,6 +4619,376 @@ export namespace Prisma {
           }
         }
       }
+      MajorCategoryDetails: {
+        payload: Prisma.$MajorCategoryDetailsPayload<ExtArgs>
+        fields: Prisma.MajorCategoryDetailsFieldRefs
+        operations: {
+          findUnique: {
+            args: Prisma.MajorCategoryDetailsFindUniqueArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$MajorCategoryDetailsPayload> | null
+          }
+          findUniqueOrThrow: {
+            args: Prisma.MajorCategoryDetailsFindUniqueOrThrowArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$MajorCategoryDetailsPayload>
+          }
+          findFirst: {
+            args: Prisma.MajorCategoryDetailsFindFirstArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$MajorCategoryDetailsPayload> | null
+          }
+          findFirstOrThrow: {
+            args: Prisma.MajorCategoryDetailsFindFirstOrThrowArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$MajorCategoryDetailsPayload>
+          }
+          findMany: {
+            args: Prisma.MajorCategoryDetailsFindManyArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$MajorCategoryDetailsPayload>[]
+          }
+          create: {
+            args: Prisma.MajorCategoryDetailsCreateArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$MajorCategoryDetailsPayload>
+          }
+          createMany: {
+            args: Prisma.MajorCategoryDetailsCreateManyArgs<ExtArgs>
+            result: BatchPayload
+          }
+          createManyAndReturn: {
+            args: Prisma.MajorCategoryDetailsCreateManyAndReturnArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$MajorCategoryDetailsPayload>[]
+          }
+          delete: {
+            args: Prisma.MajorCategoryDetailsDeleteArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$MajorCategoryDetailsPayload>
+          }
+          update: {
+            args: Prisma.MajorCategoryDetailsUpdateArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$MajorCategoryDetailsPayload>
+          }
+          deleteMany: {
+            args: Prisma.MajorCategoryDetailsDeleteManyArgs<ExtArgs>
+            result: BatchPayload
+          }
+          updateMany: {
+            args: Prisma.MajorCategoryDetailsUpdateManyArgs<ExtArgs>
+            result: BatchPayload
+          }
+          updateManyAndReturn: {
+            args: Prisma.MajorCategoryDetailsUpdateManyAndReturnArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$MajorCategoryDetailsPayload>[]
+          }
+          upsert: {
+            args: Prisma.MajorCategoryDetailsUpsertArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$MajorCategoryDetailsPayload>
+          }
+          aggregate: {
+            args: Prisma.MajorCategoryDetailsAggregateArgs<ExtArgs>
+            result: $Utils.Optional<AggregateMajorCategoryDetails>
+          }
+          groupBy: {
+            args: Prisma.MajorCategoryDetailsGroupByArgs<ExtArgs>
+            result: $Utils.Optional<MajorCategoryDetailsGroupByOutputType>[]
+          }
+          count: {
+            args: Prisma.MajorCategoryDetailsCountArgs<ExtArgs>
+            result: $Utils.Optional<MajorCategoryDetailsCountAggregateOutputType> | number
+          }
+        }
+      }
+      ExpenseApprovalStage: {
+        payload: Prisma.$ExpenseApprovalStagePayload<ExtArgs>
+        fields: Prisma.ExpenseApprovalStageFieldRefs
+        operations: {
+          findUnique: {
+            args: Prisma.ExpenseApprovalStageFindUniqueArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$ExpenseApprovalStagePayload> | null
+          }
+          findUniqueOrThrow: {
+            args: Prisma.ExpenseApprovalStageFindUniqueOrThrowArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$ExpenseApprovalStagePayload>
+          }
+          findFirst: {
+            args: Prisma.ExpenseApprovalStageFindFirstArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$ExpenseApprovalStagePayload> | null
+          }
+          findFirstOrThrow: {
+            args: Prisma.ExpenseApprovalStageFindFirstOrThrowArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$ExpenseApprovalStagePayload>
+          }
+          findMany: {
+            args: Prisma.ExpenseApprovalStageFindManyArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$ExpenseApprovalStagePayload>[]
+          }
+          create: {
+            args: Prisma.ExpenseApprovalStageCreateArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$ExpenseApprovalStagePayload>
+          }
+          createMany: {
+            args: Prisma.ExpenseApprovalStageCreateManyArgs<ExtArgs>
+            result: BatchPayload
+          }
+          createManyAndReturn: {
+            args: Prisma.ExpenseApprovalStageCreateManyAndReturnArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$ExpenseApprovalStagePayload>[]
+          }
+          delete: {
+            args: Prisma.ExpenseApprovalStageDeleteArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$ExpenseApprovalStagePayload>
+          }
+          update: {
+            args: Prisma.ExpenseApprovalStageUpdateArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$ExpenseApprovalStagePayload>
+          }
+          deleteMany: {
+            args: Prisma.ExpenseApprovalStageDeleteManyArgs<ExtArgs>
+            result: BatchPayload
+          }
+          updateMany: {
+            args: Prisma.ExpenseApprovalStageUpdateManyArgs<ExtArgs>
+            result: BatchPayload
+          }
+          updateManyAndReturn: {
+            args: Prisma.ExpenseApprovalStageUpdateManyAndReturnArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$ExpenseApprovalStagePayload>[]
+          }
+          upsert: {
+            args: Prisma.ExpenseApprovalStageUpsertArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$ExpenseApprovalStagePayload>
+          }
+          aggregate: {
+            args: Prisma.ExpenseApprovalStageAggregateArgs<ExtArgs>
+            result: $Utils.Optional<AggregateExpenseApprovalStage>
+          }
+          groupBy: {
+            args: Prisma.ExpenseApprovalStageGroupByArgs<ExtArgs>
+            result: $Utils.Optional<ExpenseApprovalStageGroupByOutputType>[]
+          }
+          count: {
+            args: Prisma.ExpenseApprovalStageCountArgs<ExtArgs>
+            result: $Utils.Optional<ExpenseApprovalStageCountAggregateOutputType> | number
+          }
+        }
+      }
+      ExpenseChangeRequest: {
+        payload: Prisma.$ExpenseChangeRequestPayload<ExtArgs>
+        fields: Prisma.ExpenseChangeRequestFieldRefs
+        operations: {
+          findUnique: {
+            args: Prisma.ExpenseChangeRequestFindUniqueArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$ExpenseChangeRequestPayload> | null
+          }
+          findUniqueOrThrow: {
+            args: Prisma.ExpenseChangeRequestFindUniqueOrThrowArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$ExpenseChangeRequestPayload>
+          }
+          findFirst: {
+            args: Prisma.ExpenseChangeRequestFindFirstArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$ExpenseChangeRequestPayload> | null
+          }
+          findFirstOrThrow: {
+            args: Prisma.ExpenseChangeRequestFindFirstOrThrowArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$ExpenseChangeRequestPayload>
+          }
+          findMany: {
+            args: Prisma.ExpenseChangeRequestFindManyArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$ExpenseChangeRequestPayload>[]
+          }
+          create: {
+            args: Prisma.ExpenseChangeRequestCreateArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$ExpenseChangeRequestPayload>
+          }
+          createMany: {
+            args: Prisma.ExpenseChangeRequestCreateManyArgs<ExtArgs>
+            result: BatchPayload
+          }
+          createManyAndReturn: {
+            args: Prisma.ExpenseChangeRequestCreateManyAndReturnArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$ExpenseChangeRequestPayload>[]
+          }
+          delete: {
+            args: Prisma.ExpenseChangeRequestDeleteArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$ExpenseChangeRequestPayload>
+          }
+          update: {
+            args: Prisma.ExpenseChangeRequestUpdateArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$ExpenseChangeRequestPayload>
+          }
+          deleteMany: {
+            args: Prisma.ExpenseChangeRequestDeleteManyArgs<ExtArgs>
+            result: BatchPayload
+          }
+          updateMany: {
+            args: Prisma.ExpenseChangeRequestUpdateManyArgs<ExtArgs>
+            result: BatchPayload
+          }
+          updateManyAndReturn: {
+            args: Prisma.ExpenseChangeRequestUpdateManyAndReturnArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$ExpenseChangeRequestPayload>[]
+          }
+          upsert: {
+            args: Prisma.ExpenseChangeRequestUpsertArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$ExpenseChangeRequestPayload>
+          }
+          aggregate: {
+            args: Prisma.ExpenseChangeRequestAggregateArgs<ExtArgs>
+            result: $Utils.Optional<AggregateExpenseChangeRequest>
+          }
+          groupBy: {
+            args: Prisma.ExpenseChangeRequestGroupByArgs<ExtArgs>
+            result: $Utils.Optional<ExpenseChangeRequestGroupByOutputType>[]
+          }
+          count: {
+            args: Prisma.ExpenseChangeRequestCountArgs<ExtArgs>
+            result: $Utils.Optional<ExpenseChangeRequestCountAggregateOutputType> | number
+          }
+        }
+      }
+      ExpenseAccessGrant: {
+        payload: Prisma.$ExpenseAccessGrantPayload<ExtArgs>
+        fields: Prisma.ExpenseAccessGrantFieldRefs
+        operations: {
+          findUnique: {
+            args: Prisma.ExpenseAccessGrantFindUniqueArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$ExpenseAccessGrantPayload> | null
+          }
+          findUniqueOrThrow: {
+            args: Prisma.ExpenseAccessGrantFindUniqueOrThrowArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$ExpenseAccessGrantPayload>
+          }
+          findFirst: {
+            args: Prisma.ExpenseAccessGrantFindFirstArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$ExpenseAccessGrantPayload> | null
+          }
+          findFirstOrThrow: {
+            args: Prisma.ExpenseAccessGrantFindFirstOrThrowArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$ExpenseAccessGrantPayload>
+          }
+          findMany: {
+            args: Prisma.ExpenseAccessGrantFindManyArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$ExpenseAccessGrantPayload>[]
+          }
+          create: {
+            args: Prisma.ExpenseAccessGrantCreateArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$ExpenseAccessGrantPayload>
+          }
+          createMany: {
+            args: Prisma.ExpenseAccessGrantCreateManyArgs<ExtArgs>
+            result: BatchPayload
+          }
+          createManyAndReturn: {
+            args: Prisma.ExpenseAccessGrantCreateManyAndReturnArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$ExpenseAccessGrantPayload>[]
+          }
+          delete: {
+            args: Prisma.ExpenseAccessGrantDeleteArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$ExpenseAccessGrantPayload>
+          }
+          update: {
+            args: Prisma.ExpenseAccessGrantUpdateArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$ExpenseAccessGrantPayload>
+          }
+          deleteMany: {
+            args: Prisma.ExpenseAccessGrantDeleteManyArgs<ExtArgs>
+            result: BatchPayload
+          }
+          updateMany: {
+            args: Prisma.ExpenseAccessGrantUpdateManyArgs<ExtArgs>
+            result: BatchPayload
+          }
+          updateManyAndReturn: {
+            args: Prisma.ExpenseAccessGrantUpdateManyAndReturnArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$ExpenseAccessGrantPayload>[]
+          }
+          upsert: {
+            args: Prisma.ExpenseAccessGrantUpsertArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$ExpenseAccessGrantPayload>
+          }
+          aggregate: {
+            args: Prisma.ExpenseAccessGrantAggregateArgs<ExtArgs>
+            result: $Utils.Optional<AggregateExpenseAccessGrant>
+          }
+          groupBy: {
+            args: Prisma.ExpenseAccessGrantGroupByArgs<ExtArgs>
+            result: $Utils.Optional<ExpenseAccessGrantGroupByOutputType>[]
+          }
+          count: {
+            args: Prisma.ExpenseAccessGrantCountArgs<ExtArgs>
+            result: $Utils.Optional<ExpenseAccessGrantCountAggregateOutputType> | number
+          }
+        }
+      }
+      ExpenseAuditLog: {
+        payload: Prisma.$ExpenseAuditLogPayload<ExtArgs>
+        fields: Prisma.ExpenseAuditLogFieldRefs
+        operations: {
+          findUnique: {
+            args: Prisma.ExpenseAuditLogFindUniqueArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$ExpenseAuditLogPayload> | null
+          }
+          findUniqueOrThrow: {
+            args: Prisma.ExpenseAuditLogFindUniqueOrThrowArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$ExpenseAuditLogPayload>
+          }
+          findFirst: {
+            args: Prisma.ExpenseAuditLogFindFirstArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$ExpenseAuditLogPayload> | null
+          }
+          findFirstOrThrow: {
+            args: Prisma.ExpenseAuditLogFindFirstOrThrowArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$ExpenseAuditLogPayload>
+          }
+          findMany: {
+            args: Prisma.ExpenseAuditLogFindManyArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$ExpenseAuditLogPayload>[]
+          }
+          create: {
+            args: Prisma.ExpenseAuditLogCreateArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$ExpenseAuditLogPayload>
+          }
+          createMany: {
+            args: Prisma.ExpenseAuditLogCreateManyArgs<ExtArgs>
+            result: BatchPayload
+          }
+          createManyAndReturn: {
+            args: Prisma.ExpenseAuditLogCreateManyAndReturnArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$ExpenseAuditLogPayload>[]
+          }
+          delete: {
+            args: Prisma.ExpenseAuditLogDeleteArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$ExpenseAuditLogPayload>
+          }
+          update: {
+            args: Prisma.ExpenseAuditLogUpdateArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$ExpenseAuditLogPayload>
+          }
+          deleteMany: {
+            args: Prisma.ExpenseAuditLogDeleteManyArgs<ExtArgs>
+            result: BatchPayload
+          }
+          updateMany: {
+            args: Prisma.ExpenseAuditLogUpdateManyArgs<ExtArgs>
+            result: BatchPayload
+          }
+          updateManyAndReturn: {
+            args: Prisma.ExpenseAuditLogUpdateManyAndReturnArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$ExpenseAuditLogPayload>[]
+          }
+          upsert: {
+            args: Prisma.ExpenseAuditLogUpsertArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$ExpenseAuditLogPayload>
+          }
+          aggregate: {
+            args: Prisma.ExpenseAuditLogAggregateArgs<ExtArgs>
+            result: $Utils.Optional<AggregateExpenseAuditLog>
+          }
+          groupBy: {
+            args: Prisma.ExpenseAuditLogGroupByArgs<ExtArgs>
+            result: $Utils.Optional<ExpenseAuditLogGroupByOutputType>[]
+          }
+          count: {
+            args: Prisma.ExpenseAuditLogCountArgs<ExtArgs>
+            result: $Utils.Optional<ExpenseAuditLogCountAggregateOutputType> | number
+          }
+        }
+      }
     }
   } & {
     other: {
@@ -4400,17 +5109,24 @@ export namespace Prisma {
     sapAttributeValue?: SapAttributeValueOmit
     article360Flat?: Article360FlatOmit
     rawArticle?: RawArticleOmit
+    fabricRawData?: FabricRawDataOmit
     srmSyncRun?: SrmSyncRunOmit
     srmSyncRunItem?: SrmSyncRunItemOmit
     poolBJob?: PoolBJobOmit
     poolBBatch?: PoolBBatchOmit
     nationalGridMaster?: NationalGridMasterOmit
+    broaderMenu?: BroaderMenuOmit
     majorCatMaster?: MajorCatMasterOmit
     fabricArticleMaster?: FabricArticleMasterOmit
     fabricMajCatGridValue?: FabricMajCatGridValueOmit
     modifyLog?: ModifyLogOmit
     fabricArticleData?: FabricArticleDataOmit
     bodyArticleData?: BodyArticleDataOmit
+    majorCategoryDetails?: MajorCategoryDetailsOmit
+    expenseApprovalStage?: ExpenseApprovalStageOmit
+    expenseChangeRequest?: ExpenseChangeRequestOmit
+    expenseAccessGrant?: ExpenseAccessGrantOmit
+    expenseAuditLog?: ExpenseAuditLogOmit
   }
 
   /* Types for Logging */
@@ -14960,6 +15676,8 @@ export namespace Prisma {
     fabCost: Decimal | null
     fabCons: Decimal | null
     width: Decimal | null
+    vendorFabricRate: Decimal | null
+    valueAddCost: Decimal | null
     mrp: Decimal | null
     approvedBy: number | null
   }
@@ -14980,6 +15698,8 @@ export namespace Prisma {
     fabCost: Decimal | null
     fabCons: Decimal | null
     width: Decimal | null
+    vendorFabricRate: Decimal | null
+    valueAddCost: Decimal | null
     mrp: Decimal | null
     approvedBy: number | null
   }
@@ -15085,6 +15805,8 @@ export namespace Prisma {
     fabCost: Decimal | null
     fabCons: Decimal | null
     width: Decimal | null
+    vendorFabricRate: Decimal | null
+    valueAddCost: Decimal | null
     bodyArticle: string | null
     bodyArticleDescription: string | null
     fabricArticleNumber: string | null
@@ -15224,6 +15946,8 @@ export namespace Prisma {
     fabCost: Decimal | null
     fabCons: Decimal | null
     width: Decimal | null
+    vendorFabricRate: Decimal | null
+    valueAddCost: Decimal | null
     bodyArticle: string | null
     bodyArticleDescription: string | null
     fabricArticleNumber: string | null
@@ -15363,6 +16087,8 @@ export namespace Prisma {
     fabCost: number
     fabCons: number
     width: number
+    vendorFabricRate: number
+    valueAddCost: number
     bodyArticle: number
     bodyArticleDescription: number
     fabricArticleNumber: number
@@ -15420,6 +16146,8 @@ export namespace Prisma {
     fabCost?: true
     fabCons?: true
     width?: true
+    vendorFabricRate?: true
+    valueAddCost?: true
     mrp?: true
     approvedBy?: true
   }
@@ -15440,6 +16168,8 @@ export namespace Prisma {
     fabCost?: true
     fabCons?: true
     width?: true
+    vendorFabricRate?: true
+    valueAddCost?: true
     mrp?: true
     approvedBy?: true
   }
@@ -15545,6 +16275,8 @@ export namespace Prisma {
     fabCost?: true
     fabCons?: true
     width?: true
+    vendorFabricRate?: true
+    valueAddCost?: true
     bodyArticle?: true
     bodyArticleDescription?: true
     fabricArticleNumber?: true
@@ -15684,6 +16416,8 @@ export namespace Prisma {
     fabCost?: true
     fabCons?: true
     width?: true
+    vendorFabricRate?: true
+    valueAddCost?: true
     bodyArticle?: true
     bodyArticleDescription?: true
     fabricArticleNumber?: true
@@ -15823,6 +16557,8 @@ export namespace Prisma {
     fabCost?: true
     fabCons?: true
     width?: true
+    vendorFabricRate?: true
+    valueAddCost?: true
     bodyArticle?: true
     bodyArticleDescription?: true
     fabricArticleNumber?: true
@@ -16050,6 +16786,8 @@ export namespace Prisma {
     fabCost: Decimal | null
     fabCons: Decimal | null
     width: Decimal | null
+    vendorFabricRate: Decimal | null
+    valueAddCost: Decimal | null
     bodyArticle: string | null
     bodyArticleDescription: string | null
     fabricArticleNumber: string | null
@@ -16209,6 +16947,8 @@ export namespace Prisma {
     fabCost?: boolean
     fabCons?: boolean
     width?: boolean
+    vendorFabricRate?: boolean
+    valueAddCost?: boolean
     bodyArticle?: boolean
     bodyArticleDescription?: boolean
     fabricArticleNumber?: boolean
@@ -16353,6 +17093,8 @@ export namespace Prisma {
     fabCost?: boolean
     fabCons?: boolean
     width?: boolean
+    vendorFabricRate?: boolean
+    valueAddCost?: boolean
     bodyArticle?: boolean
     bodyArticleDescription?: boolean
     fabricArticleNumber?: boolean
@@ -16495,6 +17237,8 @@ export namespace Prisma {
     fabCost?: boolean
     fabCons?: boolean
     width?: boolean
+    vendorFabricRate?: boolean
+    valueAddCost?: boolean
     bodyArticle?: boolean
     bodyArticleDescription?: boolean
     fabricArticleNumber?: boolean
@@ -16637,6 +17381,8 @@ export namespace Prisma {
     fabCost?: boolean
     fabCons?: boolean
     width?: boolean
+    vendorFabricRate?: boolean
+    valueAddCost?: boolean
     bodyArticle?: boolean
     bodyArticleDescription?: boolean
     fabricArticleNumber?: boolean
@@ -16676,7 +17422,7 @@ export namespace Prisma {
     imageExtractionRawData?: boolean
   }
 
-  export type ExtractionResultFlatOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<"id" | "jobId" | "imageName" | "imageUrl" | "articleNumber" | "extractionStatus" | "aiModel" | "avgConfidence" | "processingTimeMs" | "totalAttributes" | "extractedCount" | "inputTokens" | "outputTokens" | "totalTokens" | "apiCost" | "userId" | "userName" | "extractionDate" | "createdAt" | "updatedAt" | "majorCategory" | "vendorName" | "designNumber" | "pptNumber" | "rate" | "size" | "yarn1" | "yarn2" | "fabricMainMvgr" | "weave" | "weaveFullForm" | "composition" | "finish" | "gsm" | "macroMvgr" | "macroMvgrFullForm" | "mainMvgr" | "mainMvgrFullForm" | "mFab2" | "mFab2FullForm" | "shade" | "weight" | "lycra" | "neck" | "neckDetails" | "collar" | "placket" | "sleeve" | "bottomFold" | "frontOpenStyle" | "pocketType" | "fit" | "pattern" | "length" | "colour" | "secondaryColour" | "drawcord" | "button" | "zipper" | "zipColour" | "printType" | "printStyle" | "printPlacement" | "patches" | "patchesType" | "embroidery" | "embroideryType" | "wash" | "fatherBelt" | "childBelt" | "division" | "subDivision" | "referenceArticleNumber" | "referenceArticleDescription" | "collarStyle" | "sleeveFold" | "mSet" | "noOfPocket" | "extraPocket" | "dcShape" | "btnColour" | "fCount" | "fConstruction" | "fOunce" | "fWidth" | "fabDiv" | "fabVdr" | "htrfType" | "htrfStyle" | "embPlacement" | "ageGroup" | "mNoOfSize" | "mNoOfClr" | "articleFashionType" | "articleDimension" | "cmtpCost" | "cmpCost" | "fabCost" | "fabCons" | "width" | "bodyArticle" | "bodyArticleDescription" | "fabricArticleNumber" | "fabricArticleDescription" | "attrArticleNums" | "mvgrBrandVendor" | "mcDescription" | "vendorCode" | "mrp" | "impAtrbt2" | "mcCode" | "segment" | "season" | "hsnTaxCode" | "articleDescription" | "fashionGrid" | "year" | "articleType" | "presentationsType" | "approvalStatus" | "pdStatus" | "approvedBy" | "approvedAt" | "source" | "imageUncPath" | "isOldArticle" | "isGeneric" | "genericArticleId" | "variantSize" | "variantColor" | "variantWeight" | "sapSyncStatus" | "sapArticleId" | "sapSyncMessage" | "srmOriginalDesignNumber" | "srmUniqueId" | "imageExtractionRawData", ExtArgs["result"]["extractionResultFlat"]>
+  export type ExtractionResultFlatOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<"id" | "jobId" | "imageName" | "imageUrl" | "articleNumber" | "extractionStatus" | "aiModel" | "avgConfidence" | "processingTimeMs" | "totalAttributes" | "extractedCount" | "inputTokens" | "outputTokens" | "totalTokens" | "apiCost" | "userId" | "userName" | "extractionDate" | "createdAt" | "updatedAt" | "majorCategory" | "vendorName" | "designNumber" | "pptNumber" | "rate" | "size" | "yarn1" | "yarn2" | "fabricMainMvgr" | "weave" | "weaveFullForm" | "composition" | "finish" | "gsm" | "macroMvgr" | "macroMvgrFullForm" | "mainMvgr" | "mainMvgrFullForm" | "mFab2" | "mFab2FullForm" | "shade" | "weight" | "lycra" | "neck" | "neckDetails" | "collar" | "placket" | "sleeve" | "bottomFold" | "frontOpenStyle" | "pocketType" | "fit" | "pattern" | "length" | "colour" | "secondaryColour" | "drawcord" | "button" | "zipper" | "zipColour" | "printType" | "printStyle" | "printPlacement" | "patches" | "patchesType" | "embroidery" | "embroideryType" | "wash" | "fatherBelt" | "childBelt" | "division" | "subDivision" | "referenceArticleNumber" | "referenceArticleDescription" | "collarStyle" | "sleeveFold" | "mSet" | "noOfPocket" | "extraPocket" | "dcShape" | "btnColour" | "fCount" | "fConstruction" | "fOunce" | "fWidth" | "fabDiv" | "fabVdr" | "htrfType" | "htrfStyle" | "embPlacement" | "ageGroup" | "mNoOfSize" | "mNoOfClr" | "articleFashionType" | "articleDimension" | "cmtpCost" | "cmpCost" | "fabCost" | "fabCons" | "width" | "vendorFabricRate" | "valueAddCost" | "bodyArticle" | "bodyArticleDescription" | "fabricArticleNumber" | "fabricArticleDescription" | "attrArticleNums" | "mvgrBrandVendor" | "mcDescription" | "vendorCode" | "mrp" | "impAtrbt2" | "mcCode" | "segment" | "season" | "hsnTaxCode" | "articleDescription" | "fashionGrid" | "year" | "articleType" | "presentationsType" | "approvalStatus" | "pdStatus" | "approvedBy" | "approvedAt" | "source" | "imageUncPath" | "isOldArticle" | "isGeneric" | "genericArticleId" | "variantSize" | "variantColor" | "variantWeight" | "sapSyncStatus" | "sapArticleId" | "sapSyncMessage" | "srmOriginalDesignNumber" | "srmUniqueId" | "imageExtractionRawData", ExtArgs["result"]["extractionResultFlat"]>
   export type ExtractionResultFlatInclude<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
     approver?: boolean | ExtractionResultFlat$approverArgs<ExtArgs>
     job?: boolean | ExtractionResultFlat$jobArgs<ExtArgs>
@@ -16800,6 +17546,8 @@ export namespace Prisma {
       fabCost: Prisma.Decimal | null
       fabCons: Prisma.Decimal | null
       width: Prisma.Decimal | null
+      vendorFabricRate: Prisma.Decimal | null
+      valueAddCost: Prisma.Decimal | null
       bodyArticle: string | null
       bodyArticleDescription: string | null
       fabricArticleNumber: string | null
@@ -17363,6 +18111,8 @@ export namespace Prisma {
     readonly fabCost: FieldRef<"ExtractionResultFlat", 'Decimal'>
     readonly fabCons: FieldRef<"ExtractionResultFlat", 'Decimal'>
     readonly width: FieldRef<"ExtractionResultFlat", 'Decimal'>
+    readonly vendorFabricRate: FieldRef<"ExtractionResultFlat", 'Decimal'>
+    readonly valueAddCost: FieldRef<"ExtractionResultFlat", 'Decimal'>
     readonly bodyArticle: FieldRef<"ExtractionResultFlat", 'String'>
     readonly bodyArticleDescription: FieldRef<"ExtractionResultFlat", 'String'>
     readonly fabricArticleNumber: FieldRef<"ExtractionResultFlat", 'String'>
@@ -22275,6 +23025,7 @@ export namespace Prisma {
     role: $Enums.UserRole | null
     division: string | null
     subDivision: string | null
+    businessDivision: string | null
     isActive: boolean | null
     lastLogin: Date | null
     createdAt: Date | null
@@ -22289,6 +23040,7 @@ export namespace Prisma {
     role: $Enums.UserRole | null
     division: string | null
     subDivision: string | null
+    businessDivision: string | null
     isActive: boolean | null
     lastLogin: Date | null
     createdAt: Date | null
@@ -22303,6 +23055,7 @@ export namespace Prisma {
     role: number
     division: number
     subDivision: number
+    businessDivision: number
     isActive: number
     lastLogin: number
     createdAt: number
@@ -22327,6 +23080,7 @@ export namespace Prisma {
     role?: true
     division?: true
     subDivision?: true
+    businessDivision?: true
     isActive?: true
     lastLogin?: true
     createdAt?: true
@@ -22341,6 +23095,7 @@ export namespace Prisma {
     role?: true
     division?: true
     subDivision?: true
+    businessDivision?: true
     isActive?: true
     lastLogin?: true
     createdAt?: true
@@ -22355,6 +23110,7 @@ export namespace Prisma {
     role?: true
     division?: true
     subDivision?: true
+    businessDivision?: true
     isActive?: true
     lastLogin?: true
     createdAt?: true
@@ -22456,6 +23212,7 @@ export namespace Prisma {
     role: $Enums.UserRole
     division: string | null
     subDivision: string | null
+    businessDivision: string | null
     isActive: boolean
     lastLogin: Date | null
     createdAt: Date
@@ -22489,6 +23246,7 @@ export namespace Prisma {
     role?: boolean
     division?: boolean
     subDivision?: boolean
+    businessDivision?: boolean
     isActive?: boolean
     lastLogin?: boolean
     createdAt?: boolean
@@ -22509,6 +23267,7 @@ export namespace Prisma {
     role?: boolean
     division?: boolean
     subDivision?: boolean
+    businessDivision?: boolean
     isActive?: boolean
     lastLogin?: boolean
     createdAt?: boolean
@@ -22523,6 +23282,7 @@ export namespace Prisma {
     role?: boolean
     division?: boolean
     subDivision?: boolean
+    businessDivision?: boolean
     isActive?: boolean
     lastLogin?: boolean
     createdAt?: boolean
@@ -22537,13 +23297,14 @@ export namespace Prisma {
     role?: boolean
     division?: boolean
     subDivision?: boolean
+    businessDivision?: boolean
     isActive?: boolean
     lastLogin?: boolean
     createdAt?: boolean
     updatedAt?: boolean
   }
 
-  export type UserOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<"id" | "email" | "password" | "name" | "role" | "division" | "subDivision" | "isActive" | "lastLogin" | "createdAt" | "updatedAt", ExtArgs["result"]["user"]>
+  export type UserOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<"id" | "email" | "password" | "name" | "role" | "division" | "subDivision" | "businessDivision" | "isActive" | "lastLogin" | "createdAt" | "updatedAt", ExtArgs["result"]["user"]>
   export type UserInclude<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
     apiKeys?: boolean | User$apiKeysArgs<ExtArgs>
     costSummary?: boolean | User$costSummaryArgs<ExtArgs>
@@ -22572,6 +23333,16 @@ export namespace Prisma {
       role: $Enums.UserRole
       division: string | null
       subDivision: string | null
+      /**
+       * Coarse business-unit tag, independent of `division`/`subDivision` above
+       * (those are tied to the Department/SubDepartment hierarchy for
+       * extraction routing, and `division` can hold several comma-separated
+       * values). This is always exactly one of MENS / KIDS / LADIES / PD / MDM,
+       * admin-editable from the Users page, and every user is meant to end up
+       * with one — shown in the UI as "Business Division" to avoid being
+       * confused with the existing Sub Division field.
+       */
+      businessDivision: string | null
       isActive: boolean
       lastLogin: Date | null
       createdAt: Date
@@ -23011,6 +23782,7 @@ export namespace Prisma {
     readonly role: FieldRef<"User", 'UserRole'>
     readonly division: FieldRef<"User", 'String'>
     readonly subDivision: FieldRef<"User", 'String'>
+    readonly businessDivision: FieldRef<"User", 'String'>
     readonly isActive: FieldRef<"User", 'Boolean'>
     readonly lastLogin: FieldRef<"User", 'DateTime'>
     readonly createdAt: FieldRef<"User", 'DateTime'>
@@ -40995,6 +41767,1398 @@ export namespace Prisma {
 
 
   /**
+   * Model FabricRawData
+   */
+
+  export type AggregateFabricRawData = {
+    _count: FabricRawDataCountAggregateOutputType | null
+    _avg: FabricRawDataAvgAggregateOutputType | null
+    _sum: FabricRawDataSumAggregateOutputType | null
+    _min: FabricRawDataMinAggregateOutputType | null
+    _max: FabricRawDataMaxAggregateOutputType | null
+  }
+
+  export type FabricRawDataAvgAggregateOutputType = {
+    noOfColors: number | null
+    price: Decimal | null
+    garmentWeight: Decimal | null
+    availableQty: Decimal | null
+    retryCount: number | null
+  }
+
+  export type FabricRawDataSumAggregateOutputType = {
+    noOfColors: number | null
+    price: Decimal | null
+    garmentWeight: Decimal | null
+    availableQty: Decimal | null
+    retryCount: number | null
+  }
+
+  export type FabricRawDataMinAggregateOutputType = {
+    id: string | null
+    presentationNo: string | null
+    uniqueKey: string | null
+    vendorCode: string | null
+    vendorName: string | null
+    vendorCity: string | null
+    division: string | null
+    subDivision: string | null
+    majorCategory: string | null
+    presentationsType: string | null
+    designNumber: string | null
+    articleNumber: string | null
+    fabric: string | null
+    noOfColors: number | null
+    price: Decimal | null
+    imageUrl: string | null
+    source: string | null
+    season: string | null
+    garmentWeight: Decimal | null
+    availableQty: Decimal | null
+    approvedBy: string | null
+    notes: string | null
+    status: $Enums.RawArticleStatus | null
+    retryCount: number | null
+    errorMessage: string | null
+    extractedAt: Date | null
+    flatId: string | null
+    lockedUntil: Date | null
+    presentationReceivedDate: Date | null
+    createdAt: Date | null
+    updatedAt: Date | null
+  }
+
+  export type FabricRawDataMaxAggregateOutputType = {
+    id: string | null
+    presentationNo: string | null
+    uniqueKey: string | null
+    vendorCode: string | null
+    vendorName: string | null
+    vendorCity: string | null
+    division: string | null
+    subDivision: string | null
+    majorCategory: string | null
+    presentationsType: string | null
+    designNumber: string | null
+    articleNumber: string | null
+    fabric: string | null
+    noOfColors: number | null
+    price: Decimal | null
+    imageUrl: string | null
+    source: string | null
+    season: string | null
+    garmentWeight: Decimal | null
+    availableQty: Decimal | null
+    approvedBy: string | null
+    notes: string | null
+    status: $Enums.RawArticleStatus | null
+    retryCount: number | null
+    errorMessage: string | null
+    extractedAt: Date | null
+    flatId: string | null
+    lockedUntil: Date | null
+    presentationReceivedDate: Date | null
+    createdAt: Date | null
+    updatedAt: Date | null
+  }
+
+  export type FabricRawDataCountAggregateOutputType = {
+    id: number
+    presentationNo: number
+    uniqueKey: number
+    vendorCode: number
+    vendorName: number
+    vendorCity: number
+    division: number
+    subDivision: number
+    majorCategory: number
+    presentationsType: number
+    designNumber: number
+    articleNumber: number
+    fabric: number
+    noOfColors: number
+    price: number
+    imageUrl: number
+    source: number
+    season: number
+    garmentWeight: number
+    availableQty: number
+    approvedBy: number
+    notes: number
+    status: number
+    retryCount: number
+    errorMessage: number
+    extractedData: number
+    extractedAt: number
+    flatId: number
+    lockedUntil: number
+    presentationReceivedDate: number
+    createdAt: number
+    updatedAt: number
+    _all: number
+  }
+
+
+  export type FabricRawDataAvgAggregateInputType = {
+    noOfColors?: true
+    price?: true
+    garmentWeight?: true
+    availableQty?: true
+    retryCount?: true
+  }
+
+  export type FabricRawDataSumAggregateInputType = {
+    noOfColors?: true
+    price?: true
+    garmentWeight?: true
+    availableQty?: true
+    retryCount?: true
+  }
+
+  export type FabricRawDataMinAggregateInputType = {
+    id?: true
+    presentationNo?: true
+    uniqueKey?: true
+    vendorCode?: true
+    vendorName?: true
+    vendorCity?: true
+    division?: true
+    subDivision?: true
+    majorCategory?: true
+    presentationsType?: true
+    designNumber?: true
+    articleNumber?: true
+    fabric?: true
+    noOfColors?: true
+    price?: true
+    imageUrl?: true
+    source?: true
+    season?: true
+    garmentWeight?: true
+    availableQty?: true
+    approvedBy?: true
+    notes?: true
+    status?: true
+    retryCount?: true
+    errorMessage?: true
+    extractedAt?: true
+    flatId?: true
+    lockedUntil?: true
+    presentationReceivedDate?: true
+    createdAt?: true
+    updatedAt?: true
+  }
+
+  export type FabricRawDataMaxAggregateInputType = {
+    id?: true
+    presentationNo?: true
+    uniqueKey?: true
+    vendorCode?: true
+    vendorName?: true
+    vendorCity?: true
+    division?: true
+    subDivision?: true
+    majorCategory?: true
+    presentationsType?: true
+    designNumber?: true
+    articleNumber?: true
+    fabric?: true
+    noOfColors?: true
+    price?: true
+    imageUrl?: true
+    source?: true
+    season?: true
+    garmentWeight?: true
+    availableQty?: true
+    approvedBy?: true
+    notes?: true
+    status?: true
+    retryCount?: true
+    errorMessage?: true
+    extractedAt?: true
+    flatId?: true
+    lockedUntil?: true
+    presentationReceivedDate?: true
+    createdAt?: true
+    updatedAt?: true
+  }
+
+  export type FabricRawDataCountAggregateInputType = {
+    id?: true
+    presentationNo?: true
+    uniqueKey?: true
+    vendorCode?: true
+    vendorName?: true
+    vendorCity?: true
+    division?: true
+    subDivision?: true
+    majorCategory?: true
+    presentationsType?: true
+    designNumber?: true
+    articleNumber?: true
+    fabric?: true
+    noOfColors?: true
+    price?: true
+    imageUrl?: true
+    source?: true
+    season?: true
+    garmentWeight?: true
+    availableQty?: true
+    approvedBy?: true
+    notes?: true
+    status?: true
+    retryCount?: true
+    errorMessage?: true
+    extractedData?: true
+    extractedAt?: true
+    flatId?: true
+    lockedUntil?: true
+    presentationReceivedDate?: true
+    createdAt?: true
+    updatedAt?: true
+    _all?: true
+  }
+
+  export type FabricRawDataAggregateArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Filter which FabricRawData to aggregate.
+     */
+    where?: FabricRawDataWhereInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
+     * 
+     * Determine the order of FabricRawData to fetch.
+     */
+    orderBy?: FabricRawDataOrderByWithRelationInput | FabricRawDataOrderByWithRelationInput[]
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
+     * 
+     * Sets the start position
+     */
+    cursor?: FabricRawDataWhereUniqueInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Take `±n` FabricRawData from the position of the cursor.
+     */
+    take?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Skip the first `n` FabricRawData.
+     */
+    skip?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     * 
+     * Count returned FabricRawData
+    **/
+    _count?: true | FabricRawDataCountAggregateInputType
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     * 
+     * Select which fields to average
+    **/
+    _avg?: FabricRawDataAvgAggregateInputType
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     * 
+     * Select which fields to sum
+    **/
+    _sum?: FabricRawDataSumAggregateInputType
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     * 
+     * Select which fields to find the minimum value
+    **/
+    _min?: FabricRawDataMinAggregateInputType
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     * 
+     * Select which fields to find the maximum value
+    **/
+    _max?: FabricRawDataMaxAggregateInputType
+  }
+
+  export type GetFabricRawDataAggregateType<T extends FabricRawDataAggregateArgs> = {
+        [P in keyof T & keyof AggregateFabricRawData]: P extends '_count' | 'count'
+      ? T[P] extends true
+        ? number
+        : GetScalarType<T[P], AggregateFabricRawData[P]>
+      : GetScalarType<T[P], AggregateFabricRawData[P]>
+  }
+
+
+
+
+  export type FabricRawDataGroupByArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    where?: FabricRawDataWhereInput
+    orderBy?: FabricRawDataOrderByWithAggregationInput | FabricRawDataOrderByWithAggregationInput[]
+    by: FabricRawDataScalarFieldEnum[] | FabricRawDataScalarFieldEnum
+    having?: FabricRawDataScalarWhereWithAggregatesInput
+    take?: number
+    skip?: number
+    _count?: FabricRawDataCountAggregateInputType | true
+    _avg?: FabricRawDataAvgAggregateInputType
+    _sum?: FabricRawDataSumAggregateInputType
+    _min?: FabricRawDataMinAggregateInputType
+    _max?: FabricRawDataMaxAggregateInputType
+  }
+
+  export type FabricRawDataGroupByOutputType = {
+    id: string
+    presentationNo: string
+    uniqueKey: string
+    vendorCode: string | null
+    vendorName: string | null
+    vendorCity: string | null
+    division: string | null
+    subDivision: string | null
+    majorCategory: string | null
+    presentationsType: string | null
+    designNumber: string | null
+    articleNumber: string | null
+    fabric: string | null
+    noOfColors: number | null
+    price: Decimal | null
+    imageUrl: string | null
+    source: string | null
+    season: string | null
+    garmentWeight: Decimal | null
+    availableQty: Decimal | null
+    approvedBy: string | null
+    notes: string | null
+    status: $Enums.RawArticleStatus
+    retryCount: number
+    errorMessage: string | null
+    extractedData: JsonValue | null
+    extractedAt: Date | null
+    flatId: string | null
+    lockedUntil: Date | null
+    presentationReceivedDate: Date | null
+    createdAt: Date
+    updatedAt: Date
+    _count: FabricRawDataCountAggregateOutputType | null
+    _avg: FabricRawDataAvgAggregateOutputType | null
+    _sum: FabricRawDataSumAggregateOutputType | null
+    _min: FabricRawDataMinAggregateOutputType | null
+    _max: FabricRawDataMaxAggregateOutputType | null
+  }
+
+  type GetFabricRawDataGroupByPayload<T extends FabricRawDataGroupByArgs> = Prisma.PrismaPromise<
+    Array<
+      PickEnumerable<FabricRawDataGroupByOutputType, T['by']> &
+        {
+          [P in ((keyof T) & (keyof FabricRawDataGroupByOutputType))]: P extends '_count'
+            ? T[P] extends boolean
+              ? number
+              : GetScalarType<T[P], FabricRawDataGroupByOutputType[P]>
+            : GetScalarType<T[P], FabricRawDataGroupByOutputType[P]>
+        }
+      >
+    >
+
+
+  export type FabricRawDataSelect<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
+    id?: boolean
+    presentationNo?: boolean
+    uniqueKey?: boolean
+    vendorCode?: boolean
+    vendorName?: boolean
+    vendorCity?: boolean
+    division?: boolean
+    subDivision?: boolean
+    majorCategory?: boolean
+    presentationsType?: boolean
+    designNumber?: boolean
+    articleNumber?: boolean
+    fabric?: boolean
+    noOfColors?: boolean
+    price?: boolean
+    imageUrl?: boolean
+    source?: boolean
+    season?: boolean
+    garmentWeight?: boolean
+    availableQty?: boolean
+    approvedBy?: boolean
+    notes?: boolean
+    status?: boolean
+    retryCount?: boolean
+    errorMessage?: boolean
+    extractedData?: boolean
+    extractedAt?: boolean
+    flatId?: boolean
+    lockedUntil?: boolean
+    presentationReceivedDate?: boolean
+    createdAt?: boolean
+    updatedAt?: boolean
+  }, ExtArgs["result"]["fabricRawData"]>
+
+  export type FabricRawDataSelectCreateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
+    id?: boolean
+    presentationNo?: boolean
+    uniqueKey?: boolean
+    vendorCode?: boolean
+    vendorName?: boolean
+    vendorCity?: boolean
+    division?: boolean
+    subDivision?: boolean
+    majorCategory?: boolean
+    presentationsType?: boolean
+    designNumber?: boolean
+    articleNumber?: boolean
+    fabric?: boolean
+    noOfColors?: boolean
+    price?: boolean
+    imageUrl?: boolean
+    source?: boolean
+    season?: boolean
+    garmentWeight?: boolean
+    availableQty?: boolean
+    approvedBy?: boolean
+    notes?: boolean
+    status?: boolean
+    retryCount?: boolean
+    errorMessage?: boolean
+    extractedData?: boolean
+    extractedAt?: boolean
+    flatId?: boolean
+    lockedUntil?: boolean
+    presentationReceivedDate?: boolean
+    createdAt?: boolean
+    updatedAt?: boolean
+  }, ExtArgs["result"]["fabricRawData"]>
+
+  export type FabricRawDataSelectUpdateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
+    id?: boolean
+    presentationNo?: boolean
+    uniqueKey?: boolean
+    vendorCode?: boolean
+    vendorName?: boolean
+    vendorCity?: boolean
+    division?: boolean
+    subDivision?: boolean
+    majorCategory?: boolean
+    presentationsType?: boolean
+    designNumber?: boolean
+    articleNumber?: boolean
+    fabric?: boolean
+    noOfColors?: boolean
+    price?: boolean
+    imageUrl?: boolean
+    source?: boolean
+    season?: boolean
+    garmentWeight?: boolean
+    availableQty?: boolean
+    approvedBy?: boolean
+    notes?: boolean
+    status?: boolean
+    retryCount?: boolean
+    errorMessage?: boolean
+    extractedData?: boolean
+    extractedAt?: boolean
+    flatId?: boolean
+    lockedUntil?: boolean
+    presentationReceivedDate?: boolean
+    createdAt?: boolean
+    updatedAt?: boolean
+  }, ExtArgs["result"]["fabricRawData"]>
+
+  export type FabricRawDataSelectScalar = {
+    id?: boolean
+    presentationNo?: boolean
+    uniqueKey?: boolean
+    vendorCode?: boolean
+    vendorName?: boolean
+    vendorCity?: boolean
+    division?: boolean
+    subDivision?: boolean
+    majorCategory?: boolean
+    presentationsType?: boolean
+    designNumber?: boolean
+    articleNumber?: boolean
+    fabric?: boolean
+    noOfColors?: boolean
+    price?: boolean
+    imageUrl?: boolean
+    source?: boolean
+    season?: boolean
+    garmentWeight?: boolean
+    availableQty?: boolean
+    approvedBy?: boolean
+    notes?: boolean
+    status?: boolean
+    retryCount?: boolean
+    errorMessage?: boolean
+    extractedData?: boolean
+    extractedAt?: boolean
+    flatId?: boolean
+    lockedUntil?: boolean
+    presentationReceivedDate?: boolean
+    createdAt?: boolean
+    updatedAt?: boolean
+  }
+
+  export type FabricRawDataOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<"id" | "presentationNo" | "uniqueKey" | "vendorCode" | "vendorName" | "vendorCity" | "division" | "subDivision" | "majorCategory" | "presentationsType" | "designNumber" | "articleNumber" | "fabric" | "noOfColors" | "price" | "imageUrl" | "source" | "season" | "garmentWeight" | "availableQty" | "approvedBy" | "notes" | "status" | "retryCount" | "errorMessage" | "extractedData" | "extractedAt" | "flatId" | "lockedUntil" | "presentationReceivedDate" | "createdAt" | "updatedAt", ExtArgs["result"]["fabricRawData"]>
+
+  export type $FabricRawDataPayload<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    name: "FabricRawData"
+    objects: {}
+    scalars: $Extensions.GetPayloadResult<{
+      id: string
+      presentationNo: string
+      uniqueKey: string
+      vendorCode: string | null
+      vendorName: string | null
+      vendorCity: string | null
+      division: string | null
+      subDivision: string | null
+      majorCategory: string | null
+      presentationsType: string | null
+      designNumber: string | null
+      articleNumber: string | null
+      fabric: string | null
+      noOfColors: number | null
+      price: Prisma.Decimal | null
+      imageUrl: string | null
+      source: string | null
+      season: string | null
+      garmentWeight: Prisma.Decimal | null
+      availableQty: Prisma.Decimal | null
+      approvedBy: string | null
+      notes: string | null
+      status: $Enums.RawArticleStatus
+      retryCount: number
+      errorMessage: string | null
+      extractedData: Prisma.JsonValue | null
+      extractedAt: Date | null
+      flatId: string | null
+      lockedUntil: Date | null
+      presentationReceivedDate: Date | null
+      createdAt: Date
+      updatedAt: Date
+    }, ExtArgs["result"]["fabricRawData"]>
+    composites: {}
+  }
+
+  type FabricRawDataGetPayload<S extends boolean | null | undefined | FabricRawDataDefaultArgs> = $Result.GetResult<Prisma.$FabricRawDataPayload, S>
+
+  type FabricRawDataCountArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> =
+    Omit<FabricRawDataFindManyArgs, 'select' | 'include' | 'distinct' | 'omit'> & {
+      select?: FabricRawDataCountAggregateInputType | true
+    }
+
+  export interface FabricRawDataDelegate<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs, GlobalOmitOptions = {}> {
+    [K: symbol]: { types: Prisma.TypeMap<ExtArgs>['model']['FabricRawData'], meta: { name: 'FabricRawData' } }
+    /**
+     * Find zero or one FabricRawData that matches the filter.
+     * @param {FabricRawDataFindUniqueArgs} args - Arguments to find a FabricRawData
+     * @example
+     * // Get one FabricRawData
+     * const fabricRawData = await prisma.fabricRawData.findUnique({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     */
+    findUnique<T extends FabricRawDataFindUniqueArgs>(args: SelectSubset<T, FabricRawDataFindUniqueArgs<ExtArgs>>): Prisma__FabricRawDataClient<$Result.GetResult<Prisma.$FabricRawDataPayload<ExtArgs>, T, "findUnique", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Find one FabricRawData that matches the filter or throw an error with `error.code='P2025'`
+     * if no matches were found.
+     * @param {FabricRawDataFindUniqueOrThrowArgs} args - Arguments to find a FabricRawData
+     * @example
+     * // Get one FabricRawData
+     * const fabricRawData = await prisma.fabricRawData.findUniqueOrThrow({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     */
+    findUniqueOrThrow<T extends FabricRawDataFindUniqueOrThrowArgs>(args: SelectSubset<T, FabricRawDataFindUniqueOrThrowArgs<ExtArgs>>): Prisma__FabricRawDataClient<$Result.GetResult<Prisma.$FabricRawDataPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Find the first FabricRawData that matches the filter.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {FabricRawDataFindFirstArgs} args - Arguments to find a FabricRawData
+     * @example
+     * // Get one FabricRawData
+     * const fabricRawData = await prisma.fabricRawData.findFirst({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     */
+    findFirst<T extends FabricRawDataFindFirstArgs>(args?: SelectSubset<T, FabricRawDataFindFirstArgs<ExtArgs>>): Prisma__FabricRawDataClient<$Result.GetResult<Prisma.$FabricRawDataPayload<ExtArgs>, T, "findFirst", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Find the first FabricRawData that matches the filter or
+     * throw `PrismaKnownClientError` with `P2025` code if no matches were found.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {FabricRawDataFindFirstOrThrowArgs} args - Arguments to find a FabricRawData
+     * @example
+     * // Get one FabricRawData
+     * const fabricRawData = await prisma.fabricRawData.findFirstOrThrow({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     */
+    findFirstOrThrow<T extends FabricRawDataFindFirstOrThrowArgs>(args?: SelectSubset<T, FabricRawDataFindFirstOrThrowArgs<ExtArgs>>): Prisma__FabricRawDataClient<$Result.GetResult<Prisma.$FabricRawDataPayload<ExtArgs>, T, "findFirstOrThrow", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Find zero or more FabricRawData that matches the filter.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {FabricRawDataFindManyArgs} args - Arguments to filter and select certain fields only.
+     * @example
+     * // Get all FabricRawData
+     * const fabricRawData = await prisma.fabricRawData.findMany()
+     * 
+     * // Get first 10 FabricRawData
+     * const fabricRawData = await prisma.fabricRawData.findMany({ take: 10 })
+     * 
+     * // Only select the `id`
+     * const fabricRawDataWithIdOnly = await prisma.fabricRawData.findMany({ select: { id: true } })
+     * 
+     */
+    findMany<T extends FabricRawDataFindManyArgs>(args?: SelectSubset<T, FabricRawDataFindManyArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$FabricRawDataPayload<ExtArgs>, T, "findMany", GlobalOmitOptions>>
+
+    /**
+     * Create a FabricRawData.
+     * @param {FabricRawDataCreateArgs} args - Arguments to create a FabricRawData.
+     * @example
+     * // Create one FabricRawData
+     * const FabricRawData = await prisma.fabricRawData.create({
+     *   data: {
+     *     // ... data to create a FabricRawData
+     *   }
+     * })
+     * 
+     */
+    create<T extends FabricRawDataCreateArgs>(args: SelectSubset<T, FabricRawDataCreateArgs<ExtArgs>>): Prisma__FabricRawDataClient<$Result.GetResult<Prisma.$FabricRawDataPayload<ExtArgs>, T, "create", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Create many FabricRawData.
+     * @param {FabricRawDataCreateManyArgs} args - Arguments to create many FabricRawData.
+     * @example
+     * // Create many FabricRawData
+     * const fabricRawData = await prisma.fabricRawData.createMany({
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     *     
+     */
+    createMany<T extends FabricRawDataCreateManyArgs>(args?: SelectSubset<T, FabricRawDataCreateManyArgs<ExtArgs>>): Prisma.PrismaPromise<BatchPayload>
+
+    /**
+     * Create many FabricRawData and returns the data saved in the database.
+     * @param {FabricRawDataCreateManyAndReturnArgs} args - Arguments to create many FabricRawData.
+     * @example
+     * // Create many FabricRawData
+     * const fabricRawData = await prisma.fabricRawData.createManyAndReturn({
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     * 
+     * // Create many FabricRawData and only return the `id`
+     * const fabricRawDataWithIdOnly = await prisma.fabricRawData.createManyAndReturn({
+     *   select: { id: true },
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * 
+     */
+    createManyAndReturn<T extends FabricRawDataCreateManyAndReturnArgs>(args?: SelectSubset<T, FabricRawDataCreateManyAndReturnArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$FabricRawDataPayload<ExtArgs>, T, "createManyAndReturn", GlobalOmitOptions>>
+
+    /**
+     * Delete a FabricRawData.
+     * @param {FabricRawDataDeleteArgs} args - Arguments to delete one FabricRawData.
+     * @example
+     * // Delete one FabricRawData
+     * const FabricRawData = await prisma.fabricRawData.delete({
+     *   where: {
+     *     // ... filter to delete one FabricRawData
+     *   }
+     * })
+     * 
+     */
+    delete<T extends FabricRawDataDeleteArgs>(args: SelectSubset<T, FabricRawDataDeleteArgs<ExtArgs>>): Prisma__FabricRawDataClient<$Result.GetResult<Prisma.$FabricRawDataPayload<ExtArgs>, T, "delete", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Update one FabricRawData.
+     * @param {FabricRawDataUpdateArgs} args - Arguments to update one FabricRawData.
+     * @example
+     * // Update one FabricRawData
+     * const fabricRawData = await prisma.fabricRawData.update({
+     *   where: {
+     *     // ... provide filter here
+     *   },
+     *   data: {
+     *     // ... provide data here
+     *   }
+     * })
+     * 
+     */
+    update<T extends FabricRawDataUpdateArgs>(args: SelectSubset<T, FabricRawDataUpdateArgs<ExtArgs>>): Prisma__FabricRawDataClient<$Result.GetResult<Prisma.$FabricRawDataPayload<ExtArgs>, T, "update", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Delete zero or more FabricRawData.
+     * @param {FabricRawDataDeleteManyArgs} args - Arguments to filter FabricRawData to delete.
+     * @example
+     * // Delete a few FabricRawData
+     * const { count } = await prisma.fabricRawData.deleteMany({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     * 
+     */
+    deleteMany<T extends FabricRawDataDeleteManyArgs>(args?: SelectSubset<T, FabricRawDataDeleteManyArgs<ExtArgs>>): Prisma.PrismaPromise<BatchPayload>
+
+    /**
+     * Update zero or more FabricRawData.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {FabricRawDataUpdateManyArgs} args - Arguments to update one or more rows.
+     * @example
+     * // Update many FabricRawData
+     * const fabricRawData = await prisma.fabricRawData.updateMany({
+     *   where: {
+     *     // ... provide filter here
+     *   },
+     *   data: {
+     *     // ... provide data here
+     *   }
+     * })
+     * 
+     */
+    updateMany<T extends FabricRawDataUpdateManyArgs>(args: SelectSubset<T, FabricRawDataUpdateManyArgs<ExtArgs>>): Prisma.PrismaPromise<BatchPayload>
+
+    /**
+     * Update zero or more FabricRawData and returns the data updated in the database.
+     * @param {FabricRawDataUpdateManyAndReturnArgs} args - Arguments to update many FabricRawData.
+     * @example
+     * // Update many FabricRawData
+     * const fabricRawData = await prisma.fabricRawData.updateManyAndReturn({
+     *   where: {
+     *     // ... provide filter here
+     *   },
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     * 
+     * // Update zero or more FabricRawData and only return the `id`
+     * const fabricRawDataWithIdOnly = await prisma.fabricRawData.updateManyAndReturn({
+     *   select: { id: true },
+     *   where: {
+     *     // ... provide filter here
+     *   },
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * 
+     */
+    updateManyAndReturn<T extends FabricRawDataUpdateManyAndReturnArgs>(args: SelectSubset<T, FabricRawDataUpdateManyAndReturnArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$FabricRawDataPayload<ExtArgs>, T, "updateManyAndReturn", GlobalOmitOptions>>
+
+    /**
+     * Create or update one FabricRawData.
+     * @param {FabricRawDataUpsertArgs} args - Arguments to update or create a FabricRawData.
+     * @example
+     * // Update or create a FabricRawData
+     * const fabricRawData = await prisma.fabricRawData.upsert({
+     *   create: {
+     *     // ... data to create a FabricRawData
+     *   },
+     *   update: {
+     *     // ... in case it already exists, update
+     *   },
+     *   where: {
+     *     // ... the filter for the FabricRawData we want to update
+     *   }
+     * })
+     */
+    upsert<T extends FabricRawDataUpsertArgs>(args: SelectSubset<T, FabricRawDataUpsertArgs<ExtArgs>>): Prisma__FabricRawDataClient<$Result.GetResult<Prisma.$FabricRawDataPayload<ExtArgs>, T, "upsert", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+
+    /**
+     * Count the number of FabricRawData.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {FabricRawDataCountArgs} args - Arguments to filter FabricRawData to count.
+     * @example
+     * // Count the number of FabricRawData
+     * const count = await prisma.fabricRawData.count({
+     *   where: {
+     *     // ... the filter for the FabricRawData we want to count
+     *   }
+     * })
+    **/
+    count<T extends FabricRawDataCountArgs>(
+      args?: Subset<T, FabricRawDataCountArgs>,
+    ): Prisma.PrismaPromise<
+      T extends $Utils.Record<'select', any>
+        ? T['select'] extends true
+          ? number
+          : GetScalarType<T['select'], FabricRawDataCountAggregateOutputType>
+        : number
+    >
+
+    /**
+     * Allows you to perform aggregations operations on a FabricRawData.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {FabricRawDataAggregateArgs} args - Select which aggregations you would like to apply and on what fields.
+     * @example
+     * // Ordered by age ascending
+     * // Where email contains prisma.io
+     * // Limited to the 10 users
+     * const aggregations = await prisma.user.aggregate({
+     *   _avg: {
+     *     age: true,
+     *   },
+     *   where: {
+     *     email: {
+     *       contains: "prisma.io",
+     *     },
+     *   },
+     *   orderBy: {
+     *     age: "asc",
+     *   },
+     *   take: 10,
+     * })
+    **/
+    aggregate<T extends FabricRawDataAggregateArgs>(args: Subset<T, FabricRawDataAggregateArgs>): Prisma.PrismaPromise<GetFabricRawDataAggregateType<T>>
+
+    /**
+     * Group by FabricRawData.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {FabricRawDataGroupByArgs} args - Group by arguments.
+     * @example
+     * // Group by city, order by createdAt, get count
+     * const result = await prisma.user.groupBy({
+     *   by: ['city', 'createdAt'],
+     *   orderBy: {
+     *     createdAt: true
+     *   },
+     *   _count: {
+     *     _all: true
+     *   },
+     * })
+     * 
+    **/
+    groupBy<
+      T extends FabricRawDataGroupByArgs,
+      HasSelectOrTake extends Or<
+        Extends<'skip', Keys<T>>,
+        Extends<'take', Keys<T>>
+      >,
+      OrderByArg extends True extends HasSelectOrTake
+        ? { orderBy: FabricRawDataGroupByArgs['orderBy'] }
+        : { orderBy?: FabricRawDataGroupByArgs['orderBy'] },
+      OrderFields extends ExcludeUnderscoreKeys<Keys<MaybeTupleToUnion<T['orderBy']>>>,
+      ByFields extends MaybeTupleToUnion<T['by']>,
+      ByValid extends Has<ByFields, OrderFields>,
+      HavingFields extends GetHavingFields<T['having']>,
+      HavingValid extends Has<ByFields, HavingFields>,
+      ByEmpty extends T['by'] extends never[] ? True : False,
+      InputErrors extends ByEmpty extends True
+      ? `Error: "by" must not be empty.`
+      : HavingValid extends False
+      ? {
+          [P in HavingFields]: P extends ByFields
+            ? never
+            : P extends string
+            ? `Error: Field "${P}" used in "having" needs to be provided in "by".`
+            : [
+                Error,
+                'Field ',
+                P,
+                ` in "having" needs to be provided in "by"`,
+              ]
+        }[HavingFields]
+      : 'take' extends Keys<T>
+      ? 'orderBy' extends Keys<T>
+        ? ByValid extends True
+          ? {}
+          : {
+              [P in OrderFields]: P extends ByFields
+                ? never
+                : `Error: Field "${P}" in "orderBy" needs to be provided in "by"`
+            }[OrderFields]
+        : 'Error: If you provide "take", you also need to provide "orderBy"'
+      : 'skip' extends Keys<T>
+      ? 'orderBy' extends Keys<T>
+        ? ByValid extends True
+          ? {}
+          : {
+              [P in OrderFields]: P extends ByFields
+                ? never
+                : `Error: Field "${P}" in "orderBy" needs to be provided in "by"`
+            }[OrderFields]
+        : 'Error: If you provide "skip", you also need to provide "orderBy"'
+      : ByValid extends True
+      ? {}
+      : {
+          [P in OrderFields]: P extends ByFields
+            ? never
+            : `Error: Field "${P}" in "orderBy" needs to be provided in "by"`
+        }[OrderFields]
+    >(args: SubsetIntersection<T, FabricRawDataGroupByArgs, OrderByArg> & InputErrors): {} extends InputErrors ? GetFabricRawDataGroupByPayload<T> : Prisma.PrismaPromise<InputErrors>
+  /**
+   * Fields of the FabricRawData model
+   */
+  readonly fields: FabricRawDataFieldRefs;
+  }
+
+  /**
+   * The delegate class that acts as a "Promise-like" for FabricRawData.
+   * Why is this prefixed with `Prisma__`?
+   * Because we want to prevent naming conflicts as mentioned in
+   * https://github.com/prisma/prisma-client-js/issues/707
+   */
+  export interface Prisma__FabricRawDataClient<T, Null = never, ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs, GlobalOmitOptions = {}> extends Prisma.PrismaPromise<T> {
+    readonly [Symbol.toStringTag]: "PrismaPromise"
+    /**
+     * Attaches callbacks for the resolution and/or rejection of the Promise.
+     * @param onfulfilled The callback to execute when the Promise is resolved.
+     * @param onrejected The callback to execute when the Promise is rejected.
+     * @returns A Promise for the completion of which ever callback is executed.
+     */
+    then<TResult1 = T, TResult2 = never>(onfulfilled?: ((value: T) => TResult1 | PromiseLike<TResult1>) | undefined | null, onrejected?: ((reason: any) => TResult2 | PromiseLike<TResult2>) | undefined | null): $Utils.JsPromise<TResult1 | TResult2>
+    /**
+     * Attaches a callback for only the rejection of the Promise.
+     * @param onrejected The callback to execute when the Promise is rejected.
+     * @returns A Promise for the completion of the callback.
+     */
+    catch<TResult = never>(onrejected?: ((reason: any) => TResult | PromiseLike<TResult>) | undefined | null): $Utils.JsPromise<T | TResult>
+    /**
+     * Attaches a callback that is invoked when the Promise is settled (fulfilled or rejected). The
+     * resolved value cannot be modified from the callback.
+     * @param onfinally The callback to execute when the Promise is settled (fulfilled or rejected).
+     * @returns A Promise for the completion of the callback.
+     */
+    finally(onfinally?: (() => void) | undefined | null): $Utils.JsPromise<T>
+  }
+
+
+
+
+  /**
+   * Fields of the FabricRawData model
+   */
+  interface FabricRawDataFieldRefs {
+    readonly id: FieldRef<"FabricRawData", 'String'>
+    readonly presentationNo: FieldRef<"FabricRawData", 'String'>
+    readonly uniqueKey: FieldRef<"FabricRawData", 'String'>
+    readonly vendorCode: FieldRef<"FabricRawData", 'String'>
+    readonly vendorName: FieldRef<"FabricRawData", 'String'>
+    readonly vendorCity: FieldRef<"FabricRawData", 'String'>
+    readonly division: FieldRef<"FabricRawData", 'String'>
+    readonly subDivision: FieldRef<"FabricRawData", 'String'>
+    readonly majorCategory: FieldRef<"FabricRawData", 'String'>
+    readonly presentationsType: FieldRef<"FabricRawData", 'String'>
+    readonly designNumber: FieldRef<"FabricRawData", 'String'>
+    readonly articleNumber: FieldRef<"FabricRawData", 'String'>
+    readonly fabric: FieldRef<"FabricRawData", 'String'>
+    readonly noOfColors: FieldRef<"FabricRawData", 'Int'>
+    readonly price: FieldRef<"FabricRawData", 'Decimal'>
+    readonly imageUrl: FieldRef<"FabricRawData", 'String'>
+    readonly source: FieldRef<"FabricRawData", 'String'>
+    readonly season: FieldRef<"FabricRawData", 'String'>
+    readonly garmentWeight: FieldRef<"FabricRawData", 'Decimal'>
+    readonly availableQty: FieldRef<"FabricRawData", 'Decimal'>
+    readonly approvedBy: FieldRef<"FabricRawData", 'String'>
+    readonly notes: FieldRef<"FabricRawData", 'String'>
+    readonly status: FieldRef<"FabricRawData", 'RawArticleStatus'>
+    readonly retryCount: FieldRef<"FabricRawData", 'Int'>
+    readonly errorMessage: FieldRef<"FabricRawData", 'String'>
+    readonly extractedData: FieldRef<"FabricRawData", 'Json'>
+    readonly extractedAt: FieldRef<"FabricRawData", 'DateTime'>
+    readonly flatId: FieldRef<"FabricRawData", 'String'>
+    readonly lockedUntil: FieldRef<"FabricRawData", 'DateTime'>
+    readonly presentationReceivedDate: FieldRef<"FabricRawData", 'DateTime'>
+    readonly createdAt: FieldRef<"FabricRawData", 'DateTime'>
+    readonly updatedAt: FieldRef<"FabricRawData", 'DateTime'>
+  }
+    
+
+  // Custom InputTypes
+  /**
+   * FabricRawData findUnique
+   */
+  export type FabricRawDataFindUniqueArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the FabricRawData
+     */
+    select?: FabricRawDataSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the FabricRawData
+     */
+    omit?: FabricRawDataOmit<ExtArgs> | null
+    /**
+     * Filter, which FabricRawData to fetch.
+     */
+    where: FabricRawDataWhereUniqueInput
+  }
+
+  /**
+   * FabricRawData findUniqueOrThrow
+   */
+  export type FabricRawDataFindUniqueOrThrowArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the FabricRawData
+     */
+    select?: FabricRawDataSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the FabricRawData
+     */
+    omit?: FabricRawDataOmit<ExtArgs> | null
+    /**
+     * Filter, which FabricRawData to fetch.
+     */
+    where: FabricRawDataWhereUniqueInput
+  }
+
+  /**
+   * FabricRawData findFirst
+   */
+  export type FabricRawDataFindFirstArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the FabricRawData
+     */
+    select?: FabricRawDataSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the FabricRawData
+     */
+    omit?: FabricRawDataOmit<ExtArgs> | null
+    /**
+     * Filter, which FabricRawData to fetch.
+     */
+    where?: FabricRawDataWhereInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
+     * 
+     * Determine the order of FabricRawData to fetch.
+     */
+    orderBy?: FabricRawDataOrderByWithRelationInput | FabricRawDataOrderByWithRelationInput[]
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
+     * 
+     * Sets the position for searching for FabricRawData.
+     */
+    cursor?: FabricRawDataWhereUniqueInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Take `±n` FabricRawData from the position of the cursor.
+     */
+    take?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Skip the first `n` FabricRawData.
+     */
+    skip?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/distinct Distinct Docs}
+     * 
+     * Filter by unique combinations of FabricRawData.
+     */
+    distinct?: FabricRawDataScalarFieldEnum | FabricRawDataScalarFieldEnum[]
+  }
+
+  /**
+   * FabricRawData findFirstOrThrow
+   */
+  export type FabricRawDataFindFirstOrThrowArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the FabricRawData
+     */
+    select?: FabricRawDataSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the FabricRawData
+     */
+    omit?: FabricRawDataOmit<ExtArgs> | null
+    /**
+     * Filter, which FabricRawData to fetch.
+     */
+    where?: FabricRawDataWhereInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
+     * 
+     * Determine the order of FabricRawData to fetch.
+     */
+    orderBy?: FabricRawDataOrderByWithRelationInput | FabricRawDataOrderByWithRelationInput[]
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
+     * 
+     * Sets the position for searching for FabricRawData.
+     */
+    cursor?: FabricRawDataWhereUniqueInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Take `±n` FabricRawData from the position of the cursor.
+     */
+    take?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Skip the first `n` FabricRawData.
+     */
+    skip?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/distinct Distinct Docs}
+     * 
+     * Filter by unique combinations of FabricRawData.
+     */
+    distinct?: FabricRawDataScalarFieldEnum | FabricRawDataScalarFieldEnum[]
+  }
+
+  /**
+   * FabricRawData findMany
+   */
+  export type FabricRawDataFindManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the FabricRawData
+     */
+    select?: FabricRawDataSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the FabricRawData
+     */
+    omit?: FabricRawDataOmit<ExtArgs> | null
+    /**
+     * Filter, which FabricRawData to fetch.
+     */
+    where?: FabricRawDataWhereInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
+     * 
+     * Determine the order of FabricRawData to fetch.
+     */
+    orderBy?: FabricRawDataOrderByWithRelationInput | FabricRawDataOrderByWithRelationInput[]
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
+     * 
+     * Sets the position for listing FabricRawData.
+     */
+    cursor?: FabricRawDataWhereUniqueInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Take `±n` FabricRawData from the position of the cursor.
+     */
+    take?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Skip the first `n` FabricRawData.
+     */
+    skip?: number
+    distinct?: FabricRawDataScalarFieldEnum | FabricRawDataScalarFieldEnum[]
+  }
+
+  /**
+   * FabricRawData create
+   */
+  export type FabricRawDataCreateArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the FabricRawData
+     */
+    select?: FabricRawDataSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the FabricRawData
+     */
+    omit?: FabricRawDataOmit<ExtArgs> | null
+    /**
+     * The data needed to create a FabricRawData.
+     */
+    data: XOR<FabricRawDataCreateInput, FabricRawDataUncheckedCreateInput>
+  }
+
+  /**
+   * FabricRawData createMany
+   */
+  export type FabricRawDataCreateManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * The data used to create many FabricRawData.
+     */
+    data: FabricRawDataCreateManyInput | FabricRawDataCreateManyInput[]
+    skipDuplicates?: boolean
+  }
+
+  /**
+   * FabricRawData createManyAndReturn
+   */
+  export type FabricRawDataCreateManyAndReturnArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the FabricRawData
+     */
+    select?: FabricRawDataSelectCreateManyAndReturn<ExtArgs> | null
+    /**
+     * Omit specific fields from the FabricRawData
+     */
+    omit?: FabricRawDataOmit<ExtArgs> | null
+    /**
+     * The data used to create many FabricRawData.
+     */
+    data: FabricRawDataCreateManyInput | FabricRawDataCreateManyInput[]
+    skipDuplicates?: boolean
+  }
+
+  /**
+   * FabricRawData update
+   */
+  export type FabricRawDataUpdateArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the FabricRawData
+     */
+    select?: FabricRawDataSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the FabricRawData
+     */
+    omit?: FabricRawDataOmit<ExtArgs> | null
+    /**
+     * The data needed to update a FabricRawData.
+     */
+    data: XOR<FabricRawDataUpdateInput, FabricRawDataUncheckedUpdateInput>
+    /**
+     * Choose, which FabricRawData to update.
+     */
+    where: FabricRawDataWhereUniqueInput
+  }
+
+  /**
+   * FabricRawData updateMany
+   */
+  export type FabricRawDataUpdateManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * The data used to update FabricRawData.
+     */
+    data: XOR<FabricRawDataUpdateManyMutationInput, FabricRawDataUncheckedUpdateManyInput>
+    /**
+     * Filter which FabricRawData to update
+     */
+    where?: FabricRawDataWhereInput
+    /**
+     * Limit how many FabricRawData to update.
+     */
+    limit?: number
+  }
+
+  /**
+   * FabricRawData updateManyAndReturn
+   */
+  export type FabricRawDataUpdateManyAndReturnArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the FabricRawData
+     */
+    select?: FabricRawDataSelectUpdateManyAndReturn<ExtArgs> | null
+    /**
+     * Omit specific fields from the FabricRawData
+     */
+    omit?: FabricRawDataOmit<ExtArgs> | null
+    /**
+     * The data used to update FabricRawData.
+     */
+    data: XOR<FabricRawDataUpdateManyMutationInput, FabricRawDataUncheckedUpdateManyInput>
+    /**
+     * Filter which FabricRawData to update
+     */
+    where?: FabricRawDataWhereInput
+    /**
+     * Limit how many FabricRawData to update.
+     */
+    limit?: number
+  }
+
+  /**
+   * FabricRawData upsert
+   */
+  export type FabricRawDataUpsertArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the FabricRawData
+     */
+    select?: FabricRawDataSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the FabricRawData
+     */
+    omit?: FabricRawDataOmit<ExtArgs> | null
+    /**
+     * The filter to search for the FabricRawData to update in case it exists.
+     */
+    where: FabricRawDataWhereUniqueInput
+    /**
+     * In case the FabricRawData found by the `where` argument doesn't exist, create a new FabricRawData with this data.
+     */
+    create: XOR<FabricRawDataCreateInput, FabricRawDataUncheckedCreateInput>
+    /**
+     * In case the FabricRawData was found with the provided `where` argument, update it with this data.
+     */
+    update: XOR<FabricRawDataUpdateInput, FabricRawDataUncheckedUpdateInput>
+  }
+
+  /**
+   * FabricRawData delete
+   */
+  export type FabricRawDataDeleteArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the FabricRawData
+     */
+    select?: FabricRawDataSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the FabricRawData
+     */
+    omit?: FabricRawDataOmit<ExtArgs> | null
+    /**
+     * Filter which FabricRawData to delete.
+     */
+    where: FabricRawDataWhereUniqueInput
+  }
+
+  /**
+   * FabricRawData deleteMany
+   */
+  export type FabricRawDataDeleteManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Filter which FabricRawData to delete
+     */
+    where?: FabricRawDataWhereInput
+    /**
+     * Limit how many FabricRawData to delete.
+     */
+    limit?: number
+  }
+
+  /**
+   * FabricRawData without action
+   */
+  export type FabricRawDataDefaultArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the FabricRawData
+     */
+    select?: FabricRawDataSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the FabricRawData
+     */
+    omit?: FabricRawDataOmit<ExtArgs> | null
+  }
+
+
+  /**
    * Model SrmSyncRun
    */
 
@@ -46769,6 +48933,1666 @@ export namespace Prisma {
 
 
   /**
+   * Model BroaderMenu
+   */
+
+  export type AggregateBroaderMenu = {
+    _count: BroaderMenuCountAggregateOutputType | null
+    _avg: BroaderMenuAvgAggregateOutputType | null
+    _sum: BroaderMenuSumAggregateOutputType | null
+    _min: BroaderMenuMinAggregateOutputType | null
+    _max: BroaderMenuMaxAggregateOutputType | null
+  }
+
+  export type BroaderMenuAvgAggregateOutputType = {
+    id: number | null
+    sn: number | null
+    mcCd: number | null
+    majCatCd: number | null
+    subCatCd: number | null
+    mcPkSz: number | null
+    subCatPkSz: number | null
+    noOfOptions: number | null
+    avgDensity: Decimal | null
+    accDensity: Decimal | null
+    wgDensity: Decimal | null
+    fg46FtDensity: Decimal | null
+    fg5FtDensity: Decimal | null
+    fg4ADensity: Decimal | null
+    fg8ADensity: Decimal | null
+    acp: Decimal | null
+    oldDensity: Decimal | null
+    seq: number | null
+    newMcCd: number | null
+    oldSubCatCd: number | null
+  }
+
+  export type BroaderMenuSumAggregateOutputType = {
+    id: number | null
+    sn: number | null
+    mcCd: number | null
+    majCatCd: number | null
+    subCatCd: number | null
+    mcPkSz: number | null
+    subCatPkSz: number | null
+    noOfOptions: number | null
+    avgDensity: Decimal | null
+    accDensity: Decimal | null
+    wgDensity: Decimal | null
+    fg46FtDensity: Decimal | null
+    fg5FtDensity: Decimal | null
+    fg4ADensity: Decimal | null
+    fg8ADensity: Decimal | null
+    acp: Decimal | null
+    oldDensity: Decimal | null
+    seq: number | null
+    newMcCd: number | null
+    oldSubCatCd: number | null
+  }
+
+  export type BroaderMenuMinAggregateOutputType = {
+    id: number | null
+    sn: number | null
+    mcCd: number | null
+    seg: string | null
+    div: string | null
+    subDiv: string | null
+    majCatCd: number | null
+    majCatNm: string | null
+    subCatCd: number | null
+    subCatDesc: string | null
+    mcDesc: string | null
+    ssn: string | null
+    mcStat: string | null
+    subCatStat: string | null
+    majCatStat: string | null
+    sizeApplicable: string | null
+    divStat: string | null
+    mcPkSz: number | null
+    subCatPkSz: number | null
+    noOfOptions: number | null
+    avgDensity: Decimal | null
+    accDensity: Decimal | null
+    wgDensity: Decimal | null
+    fg46FtDensity: Decimal | null
+    fg5FtDensity: Decimal | null
+    fg4ADensity: Decimal | null
+    fg8ADensity: Decimal | null
+    acp: Decimal | null
+    oldDensity: Decimal | null
+    seq: number | null
+    mjCatTyp: string | null
+    fixtr: string | null
+    newMcCd: number | null
+    newMcDesc: string | null
+    oldMcDesc: string | null
+    oldSubCatCd: number | null
+    oldSubCatDesc: string | null
+    legacyMcDesc: string | null
+    effectiveDate: Date | null
+    remarks: string | null
+    gmStatus: string | null
+    currentMcStatus: string | null
+    fullMcName: string | null
+    winterStatus: string | null
+    uploadedAt: Date | null
+    updatedAt: Date | null
+  }
+
+  export type BroaderMenuMaxAggregateOutputType = {
+    id: number | null
+    sn: number | null
+    mcCd: number | null
+    seg: string | null
+    div: string | null
+    subDiv: string | null
+    majCatCd: number | null
+    majCatNm: string | null
+    subCatCd: number | null
+    subCatDesc: string | null
+    mcDesc: string | null
+    ssn: string | null
+    mcStat: string | null
+    subCatStat: string | null
+    majCatStat: string | null
+    sizeApplicable: string | null
+    divStat: string | null
+    mcPkSz: number | null
+    subCatPkSz: number | null
+    noOfOptions: number | null
+    avgDensity: Decimal | null
+    accDensity: Decimal | null
+    wgDensity: Decimal | null
+    fg46FtDensity: Decimal | null
+    fg5FtDensity: Decimal | null
+    fg4ADensity: Decimal | null
+    fg8ADensity: Decimal | null
+    acp: Decimal | null
+    oldDensity: Decimal | null
+    seq: number | null
+    mjCatTyp: string | null
+    fixtr: string | null
+    newMcCd: number | null
+    newMcDesc: string | null
+    oldMcDesc: string | null
+    oldSubCatCd: number | null
+    oldSubCatDesc: string | null
+    legacyMcDesc: string | null
+    effectiveDate: Date | null
+    remarks: string | null
+    gmStatus: string | null
+    currentMcStatus: string | null
+    fullMcName: string | null
+    winterStatus: string | null
+    uploadedAt: Date | null
+    updatedAt: Date | null
+  }
+
+  export type BroaderMenuCountAggregateOutputType = {
+    id: number
+    sn: number
+    mcCd: number
+    seg: number
+    div: number
+    subDiv: number
+    majCatCd: number
+    majCatNm: number
+    subCatCd: number
+    subCatDesc: number
+    mcDesc: number
+    ssn: number
+    mcStat: number
+    subCatStat: number
+    majCatStat: number
+    sizeApplicable: number
+    divStat: number
+    mcPkSz: number
+    subCatPkSz: number
+    noOfOptions: number
+    avgDensity: number
+    accDensity: number
+    wgDensity: number
+    fg46FtDensity: number
+    fg5FtDensity: number
+    fg4ADensity: number
+    fg8ADensity: number
+    acp: number
+    oldDensity: number
+    seq: number
+    mjCatTyp: number
+    fixtr: number
+    newMcCd: number
+    newMcDesc: number
+    oldMcDesc: number
+    oldSubCatCd: number
+    oldSubCatDesc: number
+    legacyMcDesc: number
+    effectiveDate: number
+    remarks: number
+    gmStatus: number
+    currentMcStatus: number
+    fullMcName: number
+    winterStatus: number
+    uploadedAt: number
+    updatedAt: number
+    _all: number
+  }
+
+
+  export type BroaderMenuAvgAggregateInputType = {
+    id?: true
+    sn?: true
+    mcCd?: true
+    majCatCd?: true
+    subCatCd?: true
+    mcPkSz?: true
+    subCatPkSz?: true
+    noOfOptions?: true
+    avgDensity?: true
+    accDensity?: true
+    wgDensity?: true
+    fg46FtDensity?: true
+    fg5FtDensity?: true
+    fg4ADensity?: true
+    fg8ADensity?: true
+    acp?: true
+    oldDensity?: true
+    seq?: true
+    newMcCd?: true
+    oldSubCatCd?: true
+  }
+
+  export type BroaderMenuSumAggregateInputType = {
+    id?: true
+    sn?: true
+    mcCd?: true
+    majCatCd?: true
+    subCatCd?: true
+    mcPkSz?: true
+    subCatPkSz?: true
+    noOfOptions?: true
+    avgDensity?: true
+    accDensity?: true
+    wgDensity?: true
+    fg46FtDensity?: true
+    fg5FtDensity?: true
+    fg4ADensity?: true
+    fg8ADensity?: true
+    acp?: true
+    oldDensity?: true
+    seq?: true
+    newMcCd?: true
+    oldSubCatCd?: true
+  }
+
+  export type BroaderMenuMinAggregateInputType = {
+    id?: true
+    sn?: true
+    mcCd?: true
+    seg?: true
+    div?: true
+    subDiv?: true
+    majCatCd?: true
+    majCatNm?: true
+    subCatCd?: true
+    subCatDesc?: true
+    mcDesc?: true
+    ssn?: true
+    mcStat?: true
+    subCatStat?: true
+    majCatStat?: true
+    sizeApplicable?: true
+    divStat?: true
+    mcPkSz?: true
+    subCatPkSz?: true
+    noOfOptions?: true
+    avgDensity?: true
+    accDensity?: true
+    wgDensity?: true
+    fg46FtDensity?: true
+    fg5FtDensity?: true
+    fg4ADensity?: true
+    fg8ADensity?: true
+    acp?: true
+    oldDensity?: true
+    seq?: true
+    mjCatTyp?: true
+    fixtr?: true
+    newMcCd?: true
+    newMcDesc?: true
+    oldMcDesc?: true
+    oldSubCatCd?: true
+    oldSubCatDesc?: true
+    legacyMcDesc?: true
+    effectiveDate?: true
+    remarks?: true
+    gmStatus?: true
+    currentMcStatus?: true
+    fullMcName?: true
+    winterStatus?: true
+    uploadedAt?: true
+    updatedAt?: true
+  }
+
+  export type BroaderMenuMaxAggregateInputType = {
+    id?: true
+    sn?: true
+    mcCd?: true
+    seg?: true
+    div?: true
+    subDiv?: true
+    majCatCd?: true
+    majCatNm?: true
+    subCatCd?: true
+    subCatDesc?: true
+    mcDesc?: true
+    ssn?: true
+    mcStat?: true
+    subCatStat?: true
+    majCatStat?: true
+    sizeApplicable?: true
+    divStat?: true
+    mcPkSz?: true
+    subCatPkSz?: true
+    noOfOptions?: true
+    avgDensity?: true
+    accDensity?: true
+    wgDensity?: true
+    fg46FtDensity?: true
+    fg5FtDensity?: true
+    fg4ADensity?: true
+    fg8ADensity?: true
+    acp?: true
+    oldDensity?: true
+    seq?: true
+    mjCatTyp?: true
+    fixtr?: true
+    newMcCd?: true
+    newMcDesc?: true
+    oldMcDesc?: true
+    oldSubCatCd?: true
+    oldSubCatDesc?: true
+    legacyMcDesc?: true
+    effectiveDate?: true
+    remarks?: true
+    gmStatus?: true
+    currentMcStatus?: true
+    fullMcName?: true
+    winterStatus?: true
+    uploadedAt?: true
+    updatedAt?: true
+  }
+
+  export type BroaderMenuCountAggregateInputType = {
+    id?: true
+    sn?: true
+    mcCd?: true
+    seg?: true
+    div?: true
+    subDiv?: true
+    majCatCd?: true
+    majCatNm?: true
+    subCatCd?: true
+    subCatDesc?: true
+    mcDesc?: true
+    ssn?: true
+    mcStat?: true
+    subCatStat?: true
+    majCatStat?: true
+    sizeApplicable?: true
+    divStat?: true
+    mcPkSz?: true
+    subCatPkSz?: true
+    noOfOptions?: true
+    avgDensity?: true
+    accDensity?: true
+    wgDensity?: true
+    fg46FtDensity?: true
+    fg5FtDensity?: true
+    fg4ADensity?: true
+    fg8ADensity?: true
+    acp?: true
+    oldDensity?: true
+    seq?: true
+    mjCatTyp?: true
+    fixtr?: true
+    newMcCd?: true
+    newMcDesc?: true
+    oldMcDesc?: true
+    oldSubCatCd?: true
+    oldSubCatDesc?: true
+    legacyMcDesc?: true
+    effectiveDate?: true
+    remarks?: true
+    gmStatus?: true
+    currentMcStatus?: true
+    fullMcName?: true
+    winterStatus?: true
+    uploadedAt?: true
+    updatedAt?: true
+    _all?: true
+  }
+
+  export type BroaderMenuAggregateArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Filter which BroaderMenu to aggregate.
+     */
+    where?: BroaderMenuWhereInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
+     * 
+     * Determine the order of BroaderMenus to fetch.
+     */
+    orderBy?: BroaderMenuOrderByWithRelationInput | BroaderMenuOrderByWithRelationInput[]
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
+     * 
+     * Sets the start position
+     */
+    cursor?: BroaderMenuWhereUniqueInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Take `±n` BroaderMenus from the position of the cursor.
+     */
+    take?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Skip the first `n` BroaderMenus.
+     */
+    skip?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     * 
+     * Count returned BroaderMenus
+    **/
+    _count?: true | BroaderMenuCountAggregateInputType
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     * 
+     * Select which fields to average
+    **/
+    _avg?: BroaderMenuAvgAggregateInputType
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     * 
+     * Select which fields to sum
+    **/
+    _sum?: BroaderMenuSumAggregateInputType
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     * 
+     * Select which fields to find the minimum value
+    **/
+    _min?: BroaderMenuMinAggregateInputType
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     * 
+     * Select which fields to find the maximum value
+    **/
+    _max?: BroaderMenuMaxAggregateInputType
+  }
+
+  export type GetBroaderMenuAggregateType<T extends BroaderMenuAggregateArgs> = {
+        [P in keyof T & keyof AggregateBroaderMenu]: P extends '_count' | 'count'
+      ? T[P] extends true
+        ? number
+        : GetScalarType<T[P], AggregateBroaderMenu[P]>
+      : GetScalarType<T[P], AggregateBroaderMenu[P]>
+  }
+
+
+
+
+  export type BroaderMenuGroupByArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    where?: BroaderMenuWhereInput
+    orderBy?: BroaderMenuOrderByWithAggregationInput | BroaderMenuOrderByWithAggregationInput[]
+    by: BroaderMenuScalarFieldEnum[] | BroaderMenuScalarFieldEnum
+    having?: BroaderMenuScalarWhereWithAggregatesInput
+    take?: number
+    skip?: number
+    _count?: BroaderMenuCountAggregateInputType | true
+    _avg?: BroaderMenuAvgAggregateInputType
+    _sum?: BroaderMenuSumAggregateInputType
+    _min?: BroaderMenuMinAggregateInputType
+    _max?: BroaderMenuMaxAggregateInputType
+  }
+
+  export type BroaderMenuGroupByOutputType = {
+    id: number
+    sn: number | null
+    mcCd: number
+    seg: string | null
+    div: string | null
+    subDiv: string | null
+    majCatCd: number | null
+    majCatNm: string | null
+    subCatCd: number | null
+    subCatDesc: string | null
+    mcDesc: string | null
+    ssn: string | null
+    mcStat: string | null
+    subCatStat: string | null
+    majCatStat: string | null
+    sizeApplicable: string | null
+    divStat: string | null
+    mcPkSz: number | null
+    subCatPkSz: number | null
+    noOfOptions: number | null
+    avgDensity: Decimal | null
+    accDensity: Decimal | null
+    wgDensity: Decimal | null
+    fg46FtDensity: Decimal | null
+    fg5FtDensity: Decimal | null
+    fg4ADensity: Decimal | null
+    fg8ADensity: Decimal | null
+    acp: Decimal | null
+    oldDensity: Decimal | null
+    seq: number | null
+    mjCatTyp: string | null
+    fixtr: string | null
+    newMcCd: number | null
+    newMcDesc: string | null
+    oldMcDesc: string | null
+    oldSubCatCd: number | null
+    oldSubCatDesc: string | null
+    legacyMcDesc: string | null
+    effectiveDate: Date | null
+    remarks: string | null
+    gmStatus: string | null
+    currentMcStatus: string | null
+    fullMcName: string | null
+    winterStatus: string | null
+    uploadedAt: Date
+    updatedAt: Date
+    _count: BroaderMenuCountAggregateOutputType | null
+    _avg: BroaderMenuAvgAggregateOutputType | null
+    _sum: BroaderMenuSumAggregateOutputType | null
+    _min: BroaderMenuMinAggregateOutputType | null
+    _max: BroaderMenuMaxAggregateOutputType | null
+  }
+
+  type GetBroaderMenuGroupByPayload<T extends BroaderMenuGroupByArgs> = Prisma.PrismaPromise<
+    Array<
+      PickEnumerable<BroaderMenuGroupByOutputType, T['by']> &
+        {
+          [P in ((keyof T) & (keyof BroaderMenuGroupByOutputType))]: P extends '_count'
+            ? T[P] extends boolean
+              ? number
+              : GetScalarType<T[P], BroaderMenuGroupByOutputType[P]>
+            : GetScalarType<T[P], BroaderMenuGroupByOutputType[P]>
+        }
+      >
+    >
+
+
+  export type BroaderMenuSelect<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
+    id?: boolean
+    sn?: boolean
+    mcCd?: boolean
+    seg?: boolean
+    div?: boolean
+    subDiv?: boolean
+    majCatCd?: boolean
+    majCatNm?: boolean
+    subCatCd?: boolean
+    subCatDesc?: boolean
+    mcDesc?: boolean
+    ssn?: boolean
+    mcStat?: boolean
+    subCatStat?: boolean
+    majCatStat?: boolean
+    sizeApplicable?: boolean
+    divStat?: boolean
+    mcPkSz?: boolean
+    subCatPkSz?: boolean
+    noOfOptions?: boolean
+    avgDensity?: boolean
+    accDensity?: boolean
+    wgDensity?: boolean
+    fg46FtDensity?: boolean
+    fg5FtDensity?: boolean
+    fg4ADensity?: boolean
+    fg8ADensity?: boolean
+    acp?: boolean
+    oldDensity?: boolean
+    seq?: boolean
+    mjCatTyp?: boolean
+    fixtr?: boolean
+    newMcCd?: boolean
+    newMcDesc?: boolean
+    oldMcDesc?: boolean
+    oldSubCatCd?: boolean
+    oldSubCatDesc?: boolean
+    legacyMcDesc?: boolean
+    effectiveDate?: boolean
+    remarks?: boolean
+    gmStatus?: boolean
+    currentMcStatus?: boolean
+    fullMcName?: boolean
+    winterStatus?: boolean
+    uploadedAt?: boolean
+    updatedAt?: boolean
+  }, ExtArgs["result"]["broaderMenu"]>
+
+  export type BroaderMenuSelectCreateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
+    id?: boolean
+    sn?: boolean
+    mcCd?: boolean
+    seg?: boolean
+    div?: boolean
+    subDiv?: boolean
+    majCatCd?: boolean
+    majCatNm?: boolean
+    subCatCd?: boolean
+    subCatDesc?: boolean
+    mcDesc?: boolean
+    ssn?: boolean
+    mcStat?: boolean
+    subCatStat?: boolean
+    majCatStat?: boolean
+    sizeApplicable?: boolean
+    divStat?: boolean
+    mcPkSz?: boolean
+    subCatPkSz?: boolean
+    noOfOptions?: boolean
+    avgDensity?: boolean
+    accDensity?: boolean
+    wgDensity?: boolean
+    fg46FtDensity?: boolean
+    fg5FtDensity?: boolean
+    fg4ADensity?: boolean
+    fg8ADensity?: boolean
+    acp?: boolean
+    oldDensity?: boolean
+    seq?: boolean
+    mjCatTyp?: boolean
+    fixtr?: boolean
+    newMcCd?: boolean
+    newMcDesc?: boolean
+    oldMcDesc?: boolean
+    oldSubCatCd?: boolean
+    oldSubCatDesc?: boolean
+    legacyMcDesc?: boolean
+    effectiveDate?: boolean
+    remarks?: boolean
+    gmStatus?: boolean
+    currentMcStatus?: boolean
+    fullMcName?: boolean
+    winterStatus?: boolean
+    uploadedAt?: boolean
+    updatedAt?: boolean
+  }, ExtArgs["result"]["broaderMenu"]>
+
+  export type BroaderMenuSelectUpdateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
+    id?: boolean
+    sn?: boolean
+    mcCd?: boolean
+    seg?: boolean
+    div?: boolean
+    subDiv?: boolean
+    majCatCd?: boolean
+    majCatNm?: boolean
+    subCatCd?: boolean
+    subCatDesc?: boolean
+    mcDesc?: boolean
+    ssn?: boolean
+    mcStat?: boolean
+    subCatStat?: boolean
+    majCatStat?: boolean
+    sizeApplicable?: boolean
+    divStat?: boolean
+    mcPkSz?: boolean
+    subCatPkSz?: boolean
+    noOfOptions?: boolean
+    avgDensity?: boolean
+    accDensity?: boolean
+    wgDensity?: boolean
+    fg46FtDensity?: boolean
+    fg5FtDensity?: boolean
+    fg4ADensity?: boolean
+    fg8ADensity?: boolean
+    acp?: boolean
+    oldDensity?: boolean
+    seq?: boolean
+    mjCatTyp?: boolean
+    fixtr?: boolean
+    newMcCd?: boolean
+    newMcDesc?: boolean
+    oldMcDesc?: boolean
+    oldSubCatCd?: boolean
+    oldSubCatDesc?: boolean
+    legacyMcDesc?: boolean
+    effectiveDate?: boolean
+    remarks?: boolean
+    gmStatus?: boolean
+    currentMcStatus?: boolean
+    fullMcName?: boolean
+    winterStatus?: boolean
+    uploadedAt?: boolean
+    updatedAt?: boolean
+  }, ExtArgs["result"]["broaderMenu"]>
+
+  export type BroaderMenuSelectScalar = {
+    id?: boolean
+    sn?: boolean
+    mcCd?: boolean
+    seg?: boolean
+    div?: boolean
+    subDiv?: boolean
+    majCatCd?: boolean
+    majCatNm?: boolean
+    subCatCd?: boolean
+    subCatDesc?: boolean
+    mcDesc?: boolean
+    ssn?: boolean
+    mcStat?: boolean
+    subCatStat?: boolean
+    majCatStat?: boolean
+    sizeApplicable?: boolean
+    divStat?: boolean
+    mcPkSz?: boolean
+    subCatPkSz?: boolean
+    noOfOptions?: boolean
+    avgDensity?: boolean
+    accDensity?: boolean
+    wgDensity?: boolean
+    fg46FtDensity?: boolean
+    fg5FtDensity?: boolean
+    fg4ADensity?: boolean
+    fg8ADensity?: boolean
+    acp?: boolean
+    oldDensity?: boolean
+    seq?: boolean
+    mjCatTyp?: boolean
+    fixtr?: boolean
+    newMcCd?: boolean
+    newMcDesc?: boolean
+    oldMcDesc?: boolean
+    oldSubCatCd?: boolean
+    oldSubCatDesc?: boolean
+    legacyMcDesc?: boolean
+    effectiveDate?: boolean
+    remarks?: boolean
+    gmStatus?: boolean
+    currentMcStatus?: boolean
+    fullMcName?: boolean
+    winterStatus?: boolean
+    uploadedAt?: boolean
+    updatedAt?: boolean
+  }
+
+  export type BroaderMenuOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<"id" | "sn" | "mcCd" | "seg" | "div" | "subDiv" | "majCatCd" | "majCatNm" | "subCatCd" | "subCatDesc" | "mcDesc" | "ssn" | "mcStat" | "subCatStat" | "majCatStat" | "sizeApplicable" | "divStat" | "mcPkSz" | "subCatPkSz" | "noOfOptions" | "avgDensity" | "accDensity" | "wgDensity" | "fg46FtDensity" | "fg5FtDensity" | "fg4ADensity" | "fg8ADensity" | "acp" | "oldDensity" | "seq" | "mjCatTyp" | "fixtr" | "newMcCd" | "newMcDesc" | "oldMcDesc" | "oldSubCatCd" | "oldSubCatDesc" | "legacyMcDesc" | "effectiveDate" | "remarks" | "gmStatus" | "currentMcStatus" | "fullMcName" | "winterStatus" | "uploadedAt" | "updatedAt", ExtArgs["result"]["broaderMenu"]>
+
+  export type $BroaderMenuPayload<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    name: "BroaderMenu"
+    objects: {}
+    scalars: $Extensions.GetPayloadResult<{
+      id: number
+      /**
+       * Row number as it appeared in the sheet — informational only.
+       */
+      sn: number | null
+      /**
+       * Merchandise Category code. The natural key: one row per MC CD.
+       */
+      mcCd: number
+      seg: string | null
+      div: string | null
+      subDiv: string | null
+      majCatCd: number | null
+      majCatNm: string | null
+      subCatCd: number | null
+      subCatDesc: string | null
+      mcDesc: string | null
+      /**
+       * Season: A / S / PW / HW / OC / MW / SSNL
+       */
+      ssn: string | null
+      /**
+       * Status flags at each level of the hierarchy: ACT / IN / T-ACT
+       */
+      mcStat: string | null
+      subCatStat: string | null
+      majCatStat: string | null
+      sizeApplicable: string | null
+      divStat: string | null
+      mcPkSz: number | null
+      subCatPkSz: number | null
+      noOfOptions: number | null
+      /**
+       * Fixture densities. avgDensity/acp carry fractions, the rest are whole numbers
+       * in practice — all Decimal so a future file with fractions doesn't get rounded.
+       */
+      avgDensity: Prisma.Decimal | null
+      accDensity: Prisma.Decimal | null
+      wgDensity: Prisma.Decimal | null
+      fg46FtDensity: Prisma.Decimal | null
+      fg5FtDensity: Prisma.Decimal | null
+      fg4ADensity: Prisma.Decimal | null
+      fg8ADensity: Prisma.Decimal | null
+      acp: Prisma.Decimal | null
+      oldDensity: Prisma.Decimal | null
+      seq: number | null
+      mjCatTyp: string | null
+      fixtr: string | null
+      /**
+       * Rename trail — the codes/descriptions this MC is moving to or came from.
+       */
+      newMcCd: number | null
+      newMcDesc: string | null
+      oldMcDesc: string | null
+      oldSubCatCd: number | null
+      oldSubCatDesc: string | null
+      legacyMcDesc: string | null
+      /**
+       * The sheet's DATE column — when this row's change took effect.
+       */
+      effectiveDate: Date | null
+      remarks: string | null
+      gmStatus: string | null
+      currentMcStatus: string | null
+      fullMcName: string | null
+      winterStatus: string | null
+      uploadedAt: Date
+      updatedAt: Date
+    }, ExtArgs["result"]["broaderMenu"]>
+    composites: {}
+  }
+
+  type BroaderMenuGetPayload<S extends boolean | null | undefined | BroaderMenuDefaultArgs> = $Result.GetResult<Prisma.$BroaderMenuPayload, S>
+
+  type BroaderMenuCountArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> =
+    Omit<BroaderMenuFindManyArgs, 'select' | 'include' | 'distinct' | 'omit'> & {
+      select?: BroaderMenuCountAggregateInputType | true
+    }
+
+  export interface BroaderMenuDelegate<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs, GlobalOmitOptions = {}> {
+    [K: symbol]: { types: Prisma.TypeMap<ExtArgs>['model']['BroaderMenu'], meta: { name: 'BroaderMenu' } }
+    /**
+     * Find zero or one BroaderMenu that matches the filter.
+     * @param {BroaderMenuFindUniqueArgs} args - Arguments to find a BroaderMenu
+     * @example
+     * // Get one BroaderMenu
+     * const broaderMenu = await prisma.broaderMenu.findUnique({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     */
+    findUnique<T extends BroaderMenuFindUniqueArgs>(args: SelectSubset<T, BroaderMenuFindUniqueArgs<ExtArgs>>): Prisma__BroaderMenuClient<$Result.GetResult<Prisma.$BroaderMenuPayload<ExtArgs>, T, "findUnique", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Find one BroaderMenu that matches the filter or throw an error with `error.code='P2025'`
+     * if no matches were found.
+     * @param {BroaderMenuFindUniqueOrThrowArgs} args - Arguments to find a BroaderMenu
+     * @example
+     * // Get one BroaderMenu
+     * const broaderMenu = await prisma.broaderMenu.findUniqueOrThrow({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     */
+    findUniqueOrThrow<T extends BroaderMenuFindUniqueOrThrowArgs>(args: SelectSubset<T, BroaderMenuFindUniqueOrThrowArgs<ExtArgs>>): Prisma__BroaderMenuClient<$Result.GetResult<Prisma.$BroaderMenuPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Find the first BroaderMenu that matches the filter.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {BroaderMenuFindFirstArgs} args - Arguments to find a BroaderMenu
+     * @example
+     * // Get one BroaderMenu
+     * const broaderMenu = await prisma.broaderMenu.findFirst({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     */
+    findFirst<T extends BroaderMenuFindFirstArgs>(args?: SelectSubset<T, BroaderMenuFindFirstArgs<ExtArgs>>): Prisma__BroaderMenuClient<$Result.GetResult<Prisma.$BroaderMenuPayload<ExtArgs>, T, "findFirst", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Find the first BroaderMenu that matches the filter or
+     * throw `PrismaKnownClientError` with `P2025` code if no matches were found.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {BroaderMenuFindFirstOrThrowArgs} args - Arguments to find a BroaderMenu
+     * @example
+     * // Get one BroaderMenu
+     * const broaderMenu = await prisma.broaderMenu.findFirstOrThrow({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     */
+    findFirstOrThrow<T extends BroaderMenuFindFirstOrThrowArgs>(args?: SelectSubset<T, BroaderMenuFindFirstOrThrowArgs<ExtArgs>>): Prisma__BroaderMenuClient<$Result.GetResult<Prisma.$BroaderMenuPayload<ExtArgs>, T, "findFirstOrThrow", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Find zero or more BroaderMenus that matches the filter.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {BroaderMenuFindManyArgs} args - Arguments to filter and select certain fields only.
+     * @example
+     * // Get all BroaderMenus
+     * const broaderMenus = await prisma.broaderMenu.findMany()
+     * 
+     * // Get first 10 BroaderMenus
+     * const broaderMenus = await prisma.broaderMenu.findMany({ take: 10 })
+     * 
+     * // Only select the `id`
+     * const broaderMenuWithIdOnly = await prisma.broaderMenu.findMany({ select: { id: true } })
+     * 
+     */
+    findMany<T extends BroaderMenuFindManyArgs>(args?: SelectSubset<T, BroaderMenuFindManyArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$BroaderMenuPayload<ExtArgs>, T, "findMany", GlobalOmitOptions>>
+
+    /**
+     * Create a BroaderMenu.
+     * @param {BroaderMenuCreateArgs} args - Arguments to create a BroaderMenu.
+     * @example
+     * // Create one BroaderMenu
+     * const BroaderMenu = await prisma.broaderMenu.create({
+     *   data: {
+     *     // ... data to create a BroaderMenu
+     *   }
+     * })
+     * 
+     */
+    create<T extends BroaderMenuCreateArgs>(args: SelectSubset<T, BroaderMenuCreateArgs<ExtArgs>>): Prisma__BroaderMenuClient<$Result.GetResult<Prisma.$BroaderMenuPayload<ExtArgs>, T, "create", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Create many BroaderMenus.
+     * @param {BroaderMenuCreateManyArgs} args - Arguments to create many BroaderMenus.
+     * @example
+     * // Create many BroaderMenus
+     * const broaderMenu = await prisma.broaderMenu.createMany({
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     *     
+     */
+    createMany<T extends BroaderMenuCreateManyArgs>(args?: SelectSubset<T, BroaderMenuCreateManyArgs<ExtArgs>>): Prisma.PrismaPromise<BatchPayload>
+
+    /**
+     * Create many BroaderMenus and returns the data saved in the database.
+     * @param {BroaderMenuCreateManyAndReturnArgs} args - Arguments to create many BroaderMenus.
+     * @example
+     * // Create many BroaderMenus
+     * const broaderMenu = await prisma.broaderMenu.createManyAndReturn({
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     * 
+     * // Create many BroaderMenus and only return the `id`
+     * const broaderMenuWithIdOnly = await prisma.broaderMenu.createManyAndReturn({
+     *   select: { id: true },
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * 
+     */
+    createManyAndReturn<T extends BroaderMenuCreateManyAndReturnArgs>(args?: SelectSubset<T, BroaderMenuCreateManyAndReturnArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$BroaderMenuPayload<ExtArgs>, T, "createManyAndReturn", GlobalOmitOptions>>
+
+    /**
+     * Delete a BroaderMenu.
+     * @param {BroaderMenuDeleteArgs} args - Arguments to delete one BroaderMenu.
+     * @example
+     * // Delete one BroaderMenu
+     * const BroaderMenu = await prisma.broaderMenu.delete({
+     *   where: {
+     *     // ... filter to delete one BroaderMenu
+     *   }
+     * })
+     * 
+     */
+    delete<T extends BroaderMenuDeleteArgs>(args: SelectSubset<T, BroaderMenuDeleteArgs<ExtArgs>>): Prisma__BroaderMenuClient<$Result.GetResult<Prisma.$BroaderMenuPayload<ExtArgs>, T, "delete", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Update one BroaderMenu.
+     * @param {BroaderMenuUpdateArgs} args - Arguments to update one BroaderMenu.
+     * @example
+     * // Update one BroaderMenu
+     * const broaderMenu = await prisma.broaderMenu.update({
+     *   where: {
+     *     // ... provide filter here
+     *   },
+     *   data: {
+     *     // ... provide data here
+     *   }
+     * })
+     * 
+     */
+    update<T extends BroaderMenuUpdateArgs>(args: SelectSubset<T, BroaderMenuUpdateArgs<ExtArgs>>): Prisma__BroaderMenuClient<$Result.GetResult<Prisma.$BroaderMenuPayload<ExtArgs>, T, "update", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Delete zero or more BroaderMenus.
+     * @param {BroaderMenuDeleteManyArgs} args - Arguments to filter BroaderMenus to delete.
+     * @example
+     * // Delete a few BroaderMenus
+     * const { count } = await prisma.broaderMenu.deleteMany({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     * 
+     */
+    deleteMany<T extends BroaderMenuDeleteManyArgs>(args?: SelectSubset<T, BroaderMenuDeleteManyArgs<ExtArgs>>): Prisma.PrismaPromise<BatchPayload>
+
+    /**
+     * Update zero or more BroaderMenus.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {BroaderMenuUpdateManyArgs} args - Arguments to update one or more rows.
+     * @example
+     * // Update many BroaderMenus
+     * const broaderMenu = await prisma.broaderMenu.updateMany({
+     *   where: {
+     *     // ... provide filter here
+     *   },
+     *   data: {
+     *     // ... provide data here
+     *   }
+     * })
+     * 
+     */
+    updateMany<T extends BroaderMenuUpdateManyArgs>(args: SelectSubset<T, BroaderMenuUpdateManyArgs<ExtArgs>>): Prisma.PrismaPromise<BatchPayload>
+
+    /**
+     * Update zero or more BroaderMenus and returns the data updated in the database.
+     * @param {BroaderMenuUpdateManyAndReturnArgs} args - Arguments to update many BroaderMenus.
+     * @example
+     * // Update many BroaderMenus
+     * const broaderMenu = await prisma.broaderMenu.updateManyAndReturn({
+     *   where: {
+     *     // ... provide filter here
+     *   },
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     * 
+     * // Update zero or more BroaderMenus and only return the `id`
+     * const broaderMenuWithIdOnly = await prisma.broaderMenu.updateManyAndReturn({
+     *   select: { id: true },
+     *   where: {
+     *     // ... provide filter here
+     *   },
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * 
+     */
+    updateManyAndReturn<T extends BroaderMenuUpdateManyAndReturnArgs>(args: SelectSubset<T, BroaderMenuUpdateManyAndReturnArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$BroaderMenuPayload<ExtArgs>, T, "updateManyAndReturn", GlobalOmitOptions>>
+
+    /**
+     * Create or update one BroaderMenu.
+     * @param {BroaderMenuUpsertArgs} args - Arguments to update or create a BroaderMenu.
+     * @example
+     * // Update or create a BroaderMenu
+     * const broaderMenu = await prisma.broaderMenu.upsert({
+     *   create: {
+     *     // ... data to create a BroaderMenu
+     *   },
+     *   update: {
+     *     // ... in case it already exists, update
+     *   },
+     *   where: {
+     *     // ... the filter for the BroaderMenu we want to update
+     *   }
+     * })
+     */
+    upsert<T extends BroaderMenuUpsertArgs>(args: SelectSubset<T, BroaderMenuUpsertArgs<ExtArgs>>): Prisma__BroaderMenuClient<$Result.GetResult<Prisma.$BroaderMenuPayload<ExtArgs>, T, "upsert", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+
+    /**
+     * Count the number of BroaderMenus.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {BroaderMenuCountArgs} args - Arguments to filter BroaderMenus to count.
+     * @example
+     * // Count the number of BroaderMenus
+     * const count = await prisma.broaderMenu.count({
+     *   where: {
+     *     // ... the filter for the BroaderMenus we want to count
+     *   }
+     * })
+    **/
+    count<T extends BroaderMenuCountArgs>(
+      args?: Subset<T, BroaderMenuCountArgs>,
+    ): Prisma.PrismaPromise<
+      T extends $Utils.Record<'select', any>
+        ? T['select'] extends true
+          ? number
+          : GetScalarType<T['select'], BroaderMenuCountAggregateOutputType>
+        : number
+    >
+
+    /**
+     * Allows you to perform aggregations operations on a BroaderMenu.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {BroaderMenuAggregateArgs} args - Select which aggregations you would like to apply and on what fields.
+     * @example
+     * // Ordered by age ascending
+     * // Where email contains prisma.io
+     * // Limited to the 10 users
+     * const aggregations = await prisma.user.aggregate({
+     *   _avg: {
+     *     age: true,
+     *   },
+     *   where: {
+     *     email: {
+     *       contains: "prisma.io",
+     *     },
+     *   },
+     *   orderBy: {
+     *     age: "asc",
+     *   },
+     *   take: 10,
+     * })
+    **/
+    aggregate<T extends BroaderMenuAggregateArgs>(args: Subset<T, BroaderMenuAggregateArgs>): Prisma.PrismaPromise<GetBroaderMenuAggregateType<T>>
+
+    /**
+     * Group by BroaderMenu.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {BroaderMenuGroupByArgs} args - Group by arguments.
+     * @example
+     * // Group by city, order by createdAt, get count
+     * const result = await prisma.user.groupBy({
+     *   by: ['city', 'createdAt'],
+     *   orderBy: {
+     *     createdAt: true
+     *   },
+     *   _count: {
+     *     _all: true
+     *   },
+     * })
+     * 
+    **/
+    groupBy<
+      T extends BroaderMenuGroupByArgs,
+      HasSelectOrTake extends Or<
+        Extends<'skip', Keys<T>>,
+        Extends<'take', Keys<T>>
+      >,
+      OrderByArg extends True extends HasSelectOrTake
+        ? { orderBy: BroaderMenuGroupByArgs['orderBy'] }
+        : { orderBy?: BroaderMenuGroupByArgs['orderBy'] },
+      OrderFields extends ExcludeUnderscoreKeys<Keys<MaybeTupleToUnion<T['orderBy']>>>,
+      ByFields extends MaybeTupleToUnion<T['by']>,
+      ByValid extends Has<ByFields, OrderFields>,
+      HavingFields extends GetHavingFields<T['having']>,
+      HavingValid extends Has<ByFields, HavingFields>,
+      ByEmpty extends T['by'] extends never[] ? True : False,
+      InputErrors extends ByEmpty extends True
+      ? `Error: "by" must not be empty.`
+      : HavingValid extends False
+      ? {
+          [P in HavingFields]: P extends ByFields
+            ? never
+            : P extends string
+            ? `Error: Field "${P}" used in "having" needs to be provided in "by".`
+            : [
+                Error,
+                'Field ',
+                P,
+                ` in "having" needs to be provided in "by"`,
+              ]
+        }[HavingFields]
+      : 'take' extends Keys<T>
+      ? 'orderBy' extends Keys<T>
+        ? ByValid extends True
+          ? {}
+          : {
+              [P in OrderFields]: P extends ByFields
+                ? never
+                : `Error: Field "${P}" in "orderBy" needs to be provided in "by"`
+            }[OrderFields]
+        : 'Error: If you provide "take", you also need to provide "orderBy"'
+      : 'skip' extends Keys<T>
+      ? 'orderBy' extends Keys<T>
+        ? ByValid extends True
+          ? {}
+          : {
+              [P in OrderFields]: P extends ByFields
+                ? never
+                : `Error: Field "${P}" in "orderBy" needs to be provided in "by"`
+            }[OrderFields]
+        : 'Error: If you provide "skip", you also need to provide "orderBy"'
+      : ByValid extends True
+      ? {}
+      : {
+          [P in OrderFields]: P extends ByFields
+            ? never
+            : `Error: Field "${P}" in "orderBy" needs to be provided in "by"`
+        }[OrderFields]
+    >(args: SubsetIntersection<T, BroaderMenuGroupByArgs, OrderByArg> & InputErrors): {} extends InputErrors ? GetBroaderMenuGroupByPayload<T> : Prisma.PrismaPromise<InputErrors>
+  /**
+   * Fields of the BroaderMenu model
+   */
+  readonly fields: BroaderMenuFieldRefs;
+  }
+
+  /**
+   * The delegate class that acts as a "Promise-like" for BroaderMenu.
+   * Why is this prefixed with `Prisma__`?
+   * Because we want to prevent naming conflicts as mentioned in
+   * https://github.com/prisma/prisma-client-js/issues/707
+   */
+  export interface Prisma__BroaderMenuClient<T, Null = never, ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs, GlobalOmitOptions = {}> extends Prisma.PrismaPromise<T> {
+    readonly [Symbol.toStringTag]: "PrismaPromise"
+    /**
+     * Attaches callbacks for the resolution and/or rejection of the Promise.
+     * @param onfulfilled The callback to execute when the Promise is resolved.
+     * @param onrejected The callback to execute when the Promise is rejected.
+     * @returns A Promise for the completion of which ever callback is executed.
+     */
+    then<TResult1 = T, TResult2 = never>(onfulfilled?: ((value: T) => TResult1 | PromiseLike<TResult1>) | undefined | null, onrejected?: ((reason: any) => TResult2 | PromiseLike<TResult2>) | undefined | null): $Utils.JsPromise<TResult1 | TResult2>
+    /**
+     * Attaches a callback for only the rejection of the Promise.
+     * @param onrejected The callback to execute when the Promise is rejected.
+     * @returns A Promise for the completion of the callback.
+     */
+    catch<TResult = never>(onrejected?: ((reason: any) => TResult | PromiseLike<TResult>) | undefined | null): $Utils.JsPromise<T | TResult>
+    /**
+     * Attaches a callback that is invoked when the Promise is settled (fulfilled or rejected). The
+     * resolved value cannot be modified from the callback.
+     * @param onfinally The callback to execute when the Promise is settled (fulfilled or rejected).
+     * @returns A Promise for the completion of the callback.
+     */
+    finally(onfinally?: (() => void) | undefined | null): $Utils.JsPromise<T>
+  }
+
+
+
+
+  /**
+   * Fields of the BroaderMenu model
+   */
+  interface BroaderMenuFieldRefs {
+    readonly id: FieldRef<"BroaderMenu", 'Int'>
+    readonly sn: FieldRef<"BroaderMenu", 'Int'>
+    readonly mcCd: FieldRef<"BroaderMenu", 'Int'>
+    readonly seg: FieldRef<"BroaderMenu", 'String'>
+    readonly div: FieldRef<"BroaderMenu", 'String'>
+    readonly subDiv: FieldRef<"BroaderMenu", 'String'>
+    readonly majCatCd: FieldRef<"BroaderMenu", 'Int'>
+    readonly majCatNm: FieldRef<"BroaderMenu", 'String'>
+    readonly subCatCd: FieldRef<"BroaderMenu", 'Int'>
+    readonly subCatDesc: FieldRef<"BroaderMenu", 'String'>
+    readonly mcDesc: FieldRef<"BroaderMenu", 'String'>
+    readonly ssn: FieldRef<"BroaderMenu", 'String'>
+    readonly mcStat: FieldRef<"BroaderMenu", 'String'>
+    readonly subCatStat: FieldRef<"BroaderMenu", 'String'>
+    readonly majCatStat: FieldRef<"BroaderMenu", 'String'>
+    readonly sizeApplicable: FieldRef<"BroaderMenu", 'String'>
+    readonly divStat: FieldRef<"BroaderMenu", 'String'>
+    readonly mcPkSz: FieldRef<"BroaderMenu", 'Int'>
+    readonly subCatPkSz: FieldRef<"BroaderMenu", 'Int'>
+    readonly noOfOptions: FieldRef<"BroaderMenu", 'Int'>
+    readonly avgDensity: FieldRef<"BroaderMenu", 'Decimal'>
+    readonly accDensity: FieldRef<"BroaderMenu", 'Decimal'>
+    readonly wgDensity: FieldRef<"BroaderMenu", 'Decimal'>
+    readonly fg46FtDensity: FieldRef<"BroaderMenu", 'Decimal'>
+    readonly fg5FtDensity: FieldRef<"BroaderMenu", 'Decimal'>
+    readonly fg4ADensity: FieldRef<"BroaderMenu", 'Decimal'>
+    readonly fg8ADensity: FieldRef<"BroaderMenu", 'Decimal'>
+    readonly acp: FieldRef<"BroaderMenu", 'Decimal'>
+    readonly oldDensity: FieldRef<"BroaderMenu", 'Decimal'>
+    readonly seq: FieldRef<"BroaderMenu", 'Int'>
+    readonly mjCatTyp: FieldRef<"BroaderMenu", 'String'>
+    readonly fixtr: FieldRef<"BroaderMenu", 'String'>
+    readonly newMcCd: FieldRef<"BroaderMenu", 'Int'>
+    readonly newMcDesc: FieldRef<"BroaderMenu", 'String'>
+    readonly oldMcDesc: FieldRef<"BroaderMenu", 'String'>
+    readonly oldSubCatCd: FieldRef<"BroaderMenu", 'Int'>
+    readonly oldSubCatDesc: FieldRef<"BroaderMenu", 'String'>
+    readonly legacyMcDesc: FieldRef<"BroaderMenu", 'String'>
+    readonly effectiveDate: FieldRef<"BroaderMenu", 'DateTime'>
+    readonly remarks: FieldRef<"BroaderMenu", 'String'>
+    readonly gmStatus: FieldRef<"BroaderMenu", 'String'>
+    readonly currentMcStatus: FieldRef<"BroaderMenu", 'String'>
+    readonly fullMcName: FieldRef<"BroaderMenu", 'String'>
+    readonly winterStatus: FieldRef<"BroaderMenu", 'String'>
+    readonly uploadedAt: FieldRef<"BroaderMenu", 'DateTime'>
+    readonly updatedAt: FieldRef<"BroaderMenu", 'DateTime'>
+  }
+    
+
+  // Custom InputTypes
+  /**
+   * BroaderMenu findUnique
+   */
+  export type BroaderMenuFindUniqueArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the BroaderMenu
+     */
+    select?: BroaderMenuSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the BroaderMenu
+     */
+    omit?: BroaderMenuOmit<ExtArgs> | null
+    /**
+     * Filter, which BroaderMenu to fetch.
+     */
+    where: BroaderMenuWhereUniqueInput
+  }
+
+  /**
+   * BroaderMenu findUniqueOrThrow
+   */
+  export type BroaderMenuFindUniqueOrThrowArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the BroaderMenu
+     */
+    select?: BroaderMenuSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the BroaderMenu
+     */
+    omit?: BroaderMenuOmit<ExtArgs> | null
+    /**
+     * Filter, which BroaderMenu to fetch.
+     */
+    where: BroaderMenuWhereUniqueInput
+  }
+
+  /**
+   * BroaderMenu findFirst
+   */
+  export type BroaderMenuFindFirstArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the BroaderMenu
+     */
+    select?: BroaderMenuSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the BroaderMenu
+     */
+    omit?: BroaderMenuOmit<ExtArgs> | null
+    /**
+     * Filter, which BroaderMenu to fetch.
+     */
+    where?: BroaderMenuWhereInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
+     * 
+     * Determine the order of BroaderMenus to fetch.
+     */
+    orderBy?: BroaderMenuOrderByWithRelationInput | BroaderMenuOrderByWithRelationInput[]
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
+     * 
+     * Sets the position for searching for BroaderMenus.
+     */
+    cursor?: BroaderMenuWhereUniqueInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Take `±n` BroaderMenus from the position of the cursor.
+     */
+    take?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Skip the first `n` BroaderMenus.
+     */
+    skip?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/distinct Distinct Docs}
+     * 
+     * Filter by unique combinations of BroaderMenus.
+     */
+    distinct?: BroaderMenuScalarFieldEnum | BroaderMenuScalarFieldEnum[]
+  }
+
+  /**
+   * BroaderMenu findFirstOrThrow
+   */
+  export type BroaderMenuFindFirstOrThrowArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the BroaderMenu
+     */
+    select?: BroaderMenuSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the BroaderMenu
+     */
+    omit?: BroaderMenuOmit<ExtArgs> | null
+    /**
+     * Filter, which BroaderMenu to fetch.
+     */
+    where?: BroaderMenuWhereInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
+     * 
+     * Determine the order of BroaderMenus to fetch.
+     */
+    orderBy?: BroaderMenuOrderByWithRelationInput | BroaderMenuOrderByWithRelationInput[]
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
+     * 
+     * Sets the position for searching for BroaderMenus.
+     */
+    cursor?: BroaderMenuWhereUniqueInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Take `±n` BroaderMenus from the position of the cursor.
+     */
+    take?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Skip the first `n` BroaderMenus.
+     */
+    skip?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/distinct Distinct Docs}
+     * 
+     * Filter by unique combinations of BroaderMenus.
+     */
+    distinct?: BroaderMenuScalarFieldEnum | BroaderMenuScalarFieldEnum[]
+  }
+
+  /**
+   * BroaderMenu findMany
+   */
+  export type BroaderMenuFindManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the BroaderMenu
+     */
+    select?: BroaderMenuSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the BroaderMenu
+     */
+    omit?: BroaderMenuOmit<ExtArgs> | null
+    /**
+     * Filter, which BroaderMenus to fetch.
+     */
+    where?: BroaderMenuWhereInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
+     * 
+     * Determine the order of BroaderMenus to fetch.
+     */
+    orderBy?: BroaderMenuOrderByWithRelationInput | BroaderMenuOrderByWithRelationInput[]
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
+     * 
+     * Sets the position for listing BroaderMenus.
+     */
+    cursor?: BroaderMenuWhereUniqueInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Take `±n` BroaderMenus from the position of the cursor.
+     */
+    take?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Skip the first `n` BroaderMenus.
+     */
+    skip?: number
+    distinct?: BroaderMenuScalarFieldEnum | BroaderMenuScalarFieldEnum[]
+  }
+
+  /**
+   * BroaderMenu create
+   */
+  export type BroaderMenuCreateArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the BroaderMenu
+     */
+    select?: BroaderMenuSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the BroaderMenu
+     */
+    omit?: BroaderMenuOmit<ExtArgs> | null
+    /**
+     * The data needed to create a BroaderMenu.
+     */
+    data: XOR<BroaderMenuCreateInput, BroaderMenuUncheckedCreateInput>
+  }
+
+  /**
+   * BroaderMenu createMany
+   */
+  export type BroaderMenuCreateManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * The data used to create many BroaderMenus.
+     */
+    data: BroaderMenuCreateManyInput | BroaderMenuCreateManyInput[]
+    skipDuplicates?: boolean
+  }
+
+  /**
+   * BroaderMenu createManyAndReturn
+   */
+  export type BroaderMenuCreateManyAndReturnArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the BroaderMenu
+     */
+    select?: BroaderMenuSelectCreateManyAndReturn<ExtArgs> | null
+    /**
+     * Omit specific fields from the BroaderMenu
+     */
+    omit?: BroaderMenuOmit<ExtArgs> | null
+    /**
+     * The data used to create many BroaderMenus.
+     */
+    data: BroaderMenuCreateManyInput | BroaderMenuCreateManyInput[]
+    skipDuplicates?: boolean
+  }
+
+  /**
+   * BroaderMenu update
+   */
+  export type BroaderMenuUpdateArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the BroaderMenu
+     */
+    select?: BroaderMenuSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the BroaderMenu
+     */
+    omit?: BroaderMenuOmit<ExtArgs> | null
+    /**
+     * The data needed to update a BroaderMenu.
+     */
+    data: XOR<BroaderMenuUpdateInput, BroaderMenuUncheckedUpdateInput>
+    /**
+     * Choose, which BroaderMenu to update.
+     */
+    where: BroaderMenuWhereUniqueInput
+  }
+
+  /**
+   * BroaderMenu updateMany
+   */
+  export type BroaderMenuUpdateManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * The data used to update BroaderMenus.
+     */
+    data: XOR<BroaderMenuUpdateManyMutationInput, BroaderMenuUncheckedUpdateManyInput>
+    /**
+     * Filter which BroaderMenus to update
+     */
+    where?: BroaderMenuWhereInput
+    /**
+     * Limit how many BroaderMenus to update.
+     */
+    limit?: number
+  }
+
+  /**
+   * BroaderMenu updateManyAndReturn
+   */
+  export type BroaderMenuUpdateManyAndReturnArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the BroaderMenu
+     */
+    select?: BroaderMenuSelectUpdateManyAndReturn<ExtArgs> | null
+    /**
+     * Omit specific fields from the BroaderMenu
+     */
+    omit?: BroaderMenuOmit<ExtArgs> | null
+    /**
+     * The data used to update BroaderMenus.
+     */
+    data: XOR<BroaderMenuUpdateManyMutationInput, BroaderMenuUncheckedUpdateManyInput>
+    /**
+     * Filter which BroaderMenus to update
+     */
+    where?: BroaderMenuWhereInput
+    /**
+     * Limit how many BroaderMenus to update.
+     */
+    limit?: number
+  }
+
+  /**
+   * BroaderMenu upsert
+   */
+  export type BroaderMenuUpsertArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the BroaderMenu
+     */
+    select?: BroaderMenuSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the BroaderMenu
+     */
+    omit?: BroaderMenuOmit<ExtArgs> | null
+    /**
+     * The filter to search for the BroaderMenu to update in case it exists.
+     */
+    where: BroaderMenuWhereUniqueInput
+    /**
+     * In case the BroaderMenu found by the `where` argument doesn't exist, create a new BroaderMenu with this data.
+     */
+    create: XOR<BroaderMenuCreateInput, BroaderMenuUncheckedCreateInput>
+    /**
+     * In case the BroaderMenu was found with the provided `where` argument, update it with this data.
+     */
+    update: XOR<BroaderMenuUpdateInput, BroaderMenuUncheckedUpdateInput>
+  }
+
+  /**
+   * BroaderMenu delete
+   */
+  export type BroaderMenuDeleteArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the BroaderMenu
+     */
+    select?: BroaderMenuSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the BroaderMenu
+     */
+    omit?: BroaderMenuOmit<ExtArgs> | null
+    /**
+     * Filter which BroaderMenu to delete.
+     */
+    where: BroaderMenuWhereUniqueInput
+  }
+
+  /**
+   * BroaderMenu deleteMany
+   */
+  export type BroaderMenuDeleteManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Filter which BroaderMenus to delete
+     */
+    where?: BroaderMenuWhereInput
+    /**
+     * Limit how many BroaderMenus to delete.
+     */
+    limit?: number
+  }
+
+  /**
+   * BroaderMenu without action
+   */
+  export type BroaderMenuDefaultArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the BroaderMenu
+     */
+    select?: BroaderMenuSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the BroaderMenu
+     */
+    omit?: BroaderMenuOmit<ExtArgs> | null
+  }
+
+
+  /**
    * Model MajorCatMaster
    */
 
@@ -51118,10 +54942,16 @@ export namespace Prisma {
   }
 
   export type FabricArticleDataAvgAggregateOutputType = {
+    fabricRate: Decimal | null
+    v2FabricRate: Decimal | null
+    valueAddCost: Decimal | null
     approvedBy: number | null
   }
 
   export type FabricArticleDataSumAggregateOutputType = {
+    fabricRate: Decimal | null
+    v2FabricRate: Decimal | null
+    valueAddCost: Decimal | null
     approvedBy: number | null
   }
 
@@ -51143,16 +54973,25 @@ export namespace Prisma {
     mLycra: string | null
     fabricArticleNumber: string | null
     fabricArticleDescription: string | null
+    flatId: string | null
     division: string | null
     subDivision: string | null
     majorCategory: string | null
+    mcDescription: string | null
     vendorName: string | null
     vendorCode: string | null
+    designNumber: string | null
+    fabricRate: Decimal | null
+    v2FabricRate: Decimal | null
+    valueAddCost: Decimal | null
+    articleFashionType: string | null
     approvalStatus: string | null
     approvedAt: Date | null
     approvedBy: number | null
     sapSyncStatus: string | null
     sapSyncMessage: string | null
+    imageUrl: string | null
+    fabricArticleType: string | null
     userName: string | null
     createdAt: Date | null
     updatedAt: Date | null
@@ -51176,16 +55015,25 @@ export namespace Prisma {
     mLycra: string | null
     fabricArticleNumber: string | null
     fabricArticleDescription: string | null
+    flatId: string | null
     division: string | null
     subDivision: string | null
     majorCategory: string | null
+    mcDescription: string | null
     vendorName: string | null
     vendorCode: string | null
+    designNumber: string | null
+    fabricRate: Decimal | null
+    v2FabricRate: Decimal | null
+    valueAddCost: Decimal | null
+    articleFashionType: string | null
     approvalStatus: string | null
     approvedAt: Date | null
     approvedBy: number | null
     sapSyncStatus: string | null
     sapSyncMessage: string | null
+    imageUrl: string | null
+    fabricArticleType: string | null
     userName: string | null
     createdAt: Date | null
     updatedAt: Date | null
@@ -51209,16 +55057,25 @@ export namespace Prisma {
     mLycra: number
     fabricArticleNumber: number
     fabricArticleDescription: number
+    flatId: number
     division: number
     subDivision: number
     majorCategory: number
+    mcDescription: number
     vendorName: number
     vendorCode: number
+    designNumber: number
+    fabricRate: number
+    v2FabricRate: number
+    valueAddCost: number
+    articleFashionType: number
     approvalStatus: number
     approvedAt: number
     approvedBy: number
     sapSyncStatus: number
     sapSyncMessage: number
+    imageUrl: number
+    fabricArticleType: number
     userName: number
     createdAt: number
     updatedAt: number
@@ -51227,10 +55084,16 @@ export namespace Prisma {
 
 
   export type FabricArticleDataAvgAggregateInputType = {
+    fabricRate?: true
+    v2FabricRate?: true
+    valueAddCost?: true
     approvedBy?: true
   }
 
   export type FabricArticleDataSumAggregateInputType = {
+    fabricRate?: true
+    v2FabricRate?: true
+    valueAddCost?: true
     approvedBy?: true
   }
 
@@ -51252,16 +55115,25 @@ export namespace Prisma {
     mLycra?: true
     fabricArticleNumber?: true
     fabricArticleDescription?: true
+    flatId?: true
     division?: true
     subDivision?: true
     majorCategory?: true
+    mcDescription?: true
     vendorName?: true
     vendorCode?: true
+    designNumber?: true
+    fabricRate?: true
+    v2FabricRate?: true
+    valueAddCost?: true
+    articleFashionType?: true
     approvalStatus?: true
     approvedAt?: true
     approvedBy?: true
     sapSyncStatus?: true
     sapSyncMessage?: true
+    imageUrl?: true
+    fabricArticleType?: true
     userName?: true
     createdAt?: true
     updatedAt?: true
@@ -51285,16 +55157,25 @@ export namespace Prisma {
     mLycra?: true
     fabricArticleNumber?: true
     fabricArticleDescription?: true
+    flatId?: true
     division?: true
     subDivision?: true
     majorCategory?: true
+    mcDescription?: true
     vendorName?: true
     vendorCode?: true
+    designNumber?: true
+    fabricRate?: true
+    v2FabricRate?: true
+    valueAddCost?: true
+    articleFashionType?: true
     approvalStatus?: true
     approvedAt?: true
     approvedBy?: true
     sapSyncStatus?: true
     sapSyncMessage?: true
+    imageUrl?: true
+    fabricArticleType?: true
     userName?: true
     createdAt?: true
     updatedAt?: true
@@ -51318,16 +55199,25 @@ export namespace Prisma {
     mLycra?: true
     fabricArticleNumber?: true
     fabricArticleDescription?: true
+    flatId?: true
     division?: true
     subDivision?: true
     majorCategory?: true
+    mcDescription?: true
     vendorName?: true
     vendorCode?: true
+    designNumber?: true
+    fabricRate?: true
+    v2FabricRate?: true
+    valueAddCost?: true
+    articleFashionType?: true
     approvalStatus?: true
     approvedAt?: true
     approvedBy?: true
     sapSyncStatus?: true
     sapSyncMessage?: true
+    imageUrl?: true
+    fabricArticleType?: true
     userName?: true
     createdAt?: true
     updatedAt?: true
@@ -51438,16 +55328,25 @@ export namespace Prisma {
     mLycra: string | null
     fabricArticleNumber: string | null
     fabricArticleDescription: string | null
+    flatId: string | null
     division: string | null
     subDivision: string | null
     majorCategory: string | null
+    mcDescription: string | null
     vendorName: string | null
     vendorCode: string | null
+    designNumber: string | null
+    fabricRate: Decimal | null
+    v2FabricRate: Decimal | null
+    valueAddCost: Decimal | null
+    articleFashionType: string | null
     approvalStatus: string
     approvedAt: Date | null
     approvedBy: number | null
     sapSyncStatus: string
     sapSyncMessage: string | null
+    imageUrl: string | null
+    fabricArticleType: string | null
     userName: string | null
     createdAt: Date
     updatedAt: Date
@@ -51490,16 +55389,25 @@ export namespace Prisma {
     mLycra?: boolean
     fabricArticleNumber?: boolean
     fabricArticleDescription?: boolean
+    flatId?: boolean
     division?: boolean
     subDivision?: boolean
     majorCategory?: boolean
+    mcDescription?: boolean
     vendorName?: boolean
     vendorCode?: boolean
+    designNumber?: boolean
+    fabricRate?: boolean
+    v2FabricRate?: boolean
+    valueAddCost?: boolean
+    articleFashionType?: boolean
     approvalStatus?: boolean
     approvedAt?: boolean
     approvedBy?: boolean
     sapSyncStatus?: boolean
     sapSyncMessage?: boolean
+    imageUrl?: boolean
+    fabricArticleType?: boolean
     userName?: boolean
     createdAt?: boolean
     updatedAt?: boolean
@@ -51523,16 +55431,25 @@ export namespace Prisma {
     mLycra?: boolean
     fabricArticleNumber?: boolean
     fabricArticleDescription?: boolean
+    flatId?: boolean
     division?: boolean
     subDivision?: boolean
     majorCategory?: boolean
+    mcDescription?: boolean
     vendorName?: boolean
     vendorCode?: boolean
+    designNumber?: boolean
+    fabricRate?: boolean
+    v2FabricRate?: boolean
+    valueAddCost?: boolean
+    articleFashionType?: boolean
     approvalStatus?: boolean
     approvedAt?: boolean
     approvedBy?: boolean
     sapSyncStatus?: boolean
     sapSyncMessage?: boolean
+    imageUrl?: boolean
+    fabricArticleType?: boolean
     userName?: boolean
     createdAt?: boolean
     updatedAt?: boolean
@@ -51556,16 +55473,25 @@ export namespace Prisma {
     mLycra?: boolean
     fabricArticleNumber?: boolean
     fabricArticleDescription?: boolean
+    flatId?: boolean
     division?: boolean
     subDivision?: boolean
     majorCategory?: boolean
+    mcDescription?: boolean
     vendorName?: boolean
     vendorCode?: boolean
+    designNumber?: boolean
+    fabricRate?: boolean
+    v2FabricRate?: boolean
+    valueAddCost?: boolean
+    articleFashionType?: boolean
     approvalStatus?: boolean
     approvedAt?: boolean
     approvedBy?: boolean
     sapSyncStatus?: boolean
     sapSyncMessage?: boolean
+    imageUrl?: boolean
+    fabricArticleType?: boolean
     userName?: boolean
     createdAt?: boolean
     updatedAt?: boolean
@@ -51589,22 +55515,31 @@ export namespace Prisma {
     mLycra?: boolean
     fabricArticleNumber?: boolean
     fabricArticleDescription?: boolean
+    flatId?: boolean
     division?: boolean
     subDivision?: boolean
     majorCategory?: boolean
+    mcDescription?: boolean
     vendorName?: boolean
     vendorCode?: boolean
+    designNumber?: boolean
+    fabricRate?: boolean
+    v2FabricRate?: boolean
+    valueAddCost?: boolean
+    articleFashionType?: boolean
     approvalStatus?: boolean
     approvedAt?: boolean
     approvedBy?: boolean
     sapSyncStatus?: boolean
     sapSyncMessage?: boolean
+    imageUrl?: boolean
+    fabricArticleType?: boolean
     userName?: boolean
     createdAt?: boolean
     updatedAt?: boolean
   }
 
-  export type FabricArticleDataOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<"id" | "mFabDiv" | "mYarn" | "mFabMainMvgr1" | "mFabMainMvgr2" | "mConstruction" | "mOunz" | "mWidth" | "mWeave02" | "mCount" | "mWeave01" | "mComposition" | "mFinish" | "mGsm" | "mLycra" | "fabricArticleNumber" | "fabricArticleDescription" | "division" | "subDivision" | "majorCategory" | "vendorName" | "vendorCode" | "approvalStatus" | "approvedAt" | "approvedBy" | "sapSyncStatus" | "sapSyncMessage" | "userName" | "createdAt" | "updatedAt", ExtArgs["result"]["fabricArticleData"]>
+  export type FabricArticleDataOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<"id" | "mFabDiv" | "mYarn" | "mFabMainMvgr1" | "mFabMainMvgr2" | "mConstruction" | "mOunz" | "mWidth" | "mWeave02" | "mCount" | "mWeave01" | "mComposition" | "mFinish" | "mGsm" | "mLycra" | "fabricArticleNumber" | "fabricArticleDescription" | "flatId" | "division" | "subDivision" | "majorCategory" | "mcDescription" | "vendorName" | "vendorCode" | "designNumber" | "fabricRate" | "v2FabricRate" | "valueAddCost" | "articleFashionType" | "approvalStatus" | "approvedAt" | "approvedBy" | "sapSyncStatus" | "sapSyncMessage" | "imageUrl" | "fabricArticleType" | "userName" | "createdAt" | "updatedAt", ExtArgs["result"]["fabricArticleData"]>
 
   export type $FabricArticleDataPayload<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
     name: "FabricArticleData"
@@ -51627,16 +55562,25 @@ export namespace Prisma {
       mLycra: string | null
       fabricArticleNumber: string | null
       fabricArticleDescription: string | null
+      flatId: string | null
       division: string | null
       subDivision: string | null
       majorCategory: string | null
+      mcDescription: string | null
       vendorName: string | null
       vendorCode: string | null
+      designNumber: string | null
+      fabricRate: Prisma.Decimal | null
+      v2FabricRate: Prisma.Decimal | null
+      valueAddCost: Prisma.Decimal | null
+      articleFashionType: string | null
       approvalStatus: string
       approvedAt: Date | null
       approvedBy: number | null
       sapSyncStatus: string
       sapSyncMessage: string | null
+      imageUrl: string | null
+      fabricArticleType: string | null
       userName: string | null
       createdAt: Date
       updatedAt: Date
@@ -52080,16 +56024,25 @@ export namespace Prisma {
     readonly mLycra: FieldRef<"FabricArticleData", 'String'>
     readonly fabricArticleNumber: FieldRef<"FabricArticleData", 'String'>
     readonly fabricArticleDescription: FieldRef<"FabricArticleData", 'String'>
+    readonly flatId: FieldRef<"FabricArticleData", 'String'>
     readonly division: FieldRef<"FabricArticleData", 'String'>
     readonly subDivision: FieldRef<"FabricArticleData", 'String'>
     readonly majorCategory: FieldRef<"FabricArticleData", 'String'>
+    readonly mcDescription: FieldRef<"FabricArticleData", 'String'>
     readonly vendorName: FieldRef<"FabricArticleData", 'String'>
     readonly vendorCode: FieldRef<"FabricArticleData", 'String'>
+    readonly designNumber: FieldRef<"FabricArticleData", 'String'>
+    readonly fabricRate: FieldRef<"FabricArticleData", 'Decimal'>
+    readonly v2FabricRate: FieldRef<"FabricArticleData", 'Decimal'>
+    readonly valueAddCost: FieldRef<"FabricArticleData", 'Decimal'>
+    readonly articleFashionType: FieldRef<"FabricArticleData", 'String'>
     readonly approvalStatus: FieldRef<"FabricArticleData", 'String'>
     readonly approvedAt: FieldRef<"FabricArticleData", 'DateTime'>
     readonly approvedBy: FieldRef<"FabricArticleData", 'Int'>
     readonly sapSyncStatus: FieldRef<"FabricArticleData", 'String'>
     readonly sapSyncMessage: FieldRef<"FabricArticleData", 'String'>
+    readonly imageUrl: FieldRef<"FabricArticleData", 'String'>
+    readonly fabricArticleType: FieldRef<"FabricArticleData", 'String'>
     readonly userName: FieldRef<"FabricArticleData", 'String'>
     readonly createdAt: FieldRef<"FabricArticleData", 'DateTime'>
     readonly updatedAt: FieldRef<"FabricArticleData", 'DateTime'>
@@ -52477,6 +56430,7 @@ export namespace Prisma {
     fabCost: Decimal | null
     fabCons: Decimal | null
     width: Decimal | null
+    basicTrimCost: Decimal | null
     approvedBy: number | null
   }
 
@@ -52486,6 +56440,7 @@ export namespace Prisma {
     fabCost: Decimal | null
     fabCons: Decimal | null
     width: Decimal | null
+    basicTrimCost: Decimal | null
     approvedBy: number | null
   }
 
@@ -52510,11 +56465,15 @@ export namespace Prisma {
     mSet: string | null
     bodyArticleNumber: string | null
     bodyArticleDescription: string | null
+    imageUrl: string | null
+    bodyArticleType: string | null
+    designNumber: string | null
     cmtpCost: Decimal | null
     cmpCost: Decimal | null
     fabCost: Decimal | null
     fabCons: Decimal | null
     width: Decimal | null
+    basicTrimCost: Decimal | null
     flatId: string | null
     articleNumber: string | null
     division: string | null
@@ -52527,6 +56486,7 @@ export namespace Prisma {
     year: string | null
     hsnTaxCode: string | null
     approvalStatus: string | null
+    fgCreatorApproved: string | null
     approvedAt: Date | null
     approvedBy: number | null
     sapSyncStatus: string | null
@@ -52557,11 +56517,15 @@ export namespace Prisma {
     mSet: string | null
     bodyArticleNumber: string | null
     bodyArticleDescription: string | null
+    imageUrl: string | null
+    bodyArticleType: string | null
+    designNumber: string | null
     cmtpCost: Decimal | null
     cmpCost: Decimal | null
     fabCost: Decimal | null
     fabCons: Decimal | null
     width: Decimal | null
+    basicTrimCost: Decimal | null
     flatId: string | null
     articleNumber: string | null
     division: string | null
@@ -52574,6 +56538,7 @@ export namespace Prisma {
     year: string | null
     hsnTaxCode: string | null
     approvalStatus: string | null
+    fgCreatorApproved: string | null
     approvedAt: Date | null
     approvedBy: number | null
     sapSyncStatus: string | null
@@ -52604,11 +56569,15 @@ export namespace Prisma {
     mSet: number
     bodyArticleNumber: number
     bodyArticleDescription: number
+    imageUrl: number
+    bodyArticleType: number
+    designNumber: number
     cmtpCost: number
     cmpCost: number
     fabCost: number
     fabCons: number
     width: number
+    basicTrimCost: number
     flatId: number
     articleNumber: number
     division: number
@@ -52621,6 +56590,7 @@ export namespace Prisma {
     year: number
     hsnTaxCode: number
     approvalStatus: number
+    fgCreatorApproved: number
     approvedAt: number
     approvedBy: number
     sapSyncStatus: number
@@ -52638,6 +56608,7 @@ export namespace Prisma {
     fabCost?: true
     fabCons?: true
     width?: true
+    basicTrimCost?: true
     approvedBy?: true
   }
 
@@ -52647,6 +56618,7 @@ export namespace Prisma {
     fabCost?: true
     fabCons?: true
     width?: true
+    basicTrimCost?: true
     approvedBy?: true
   }
 
@@ -52671,11 +56643,15 @@ export namespace Prisma {
     mSet?: true
     bodyArticleNumber?: true
     bodyArticleDescription?: true
+    imageUrl?: true
+    bodyArticleType?: true
+    designNumber?: true
     cmtpCost?: true
     cmpCost?: true
     fabCost?: true
     fabCons?: true
     width?: true
+    basicTrimCost?: true
     flatId?: true
     articleNumber?: true
     division?: true
@@ -52688,6 +56664,7 @@ export namespace Prisma {
     year?: true
     hsnTaxCode?: true
     approvalStatus?: true
+    fgCreatorApproved?: true
     approvedAt?: true
     approvedBy?: true
     sapSyncStatus?: true
@@ -52718,11 +56695,15 @@ export namespace Prisma {
     mSet?: true
     bodyArticleNumber?: true
     bodyArticleDescription?: true
+    imageUrl?: true
+    bodyArticleType?: true
+    designNumber?: true
     cmtpCost?: true
     cmpCost?: true
     fabCost?: true
     fabCons?: true
     width?: true
+    basicTrimCost?: true
     flatId?: true
     articleNumber?: true
     division?: true
@@ -52735,6 +56716,7 @@ export namespace Prisma {
     year?: true
     hsnTaxCode?: true
     approvalStatus?: true
+    fgCreatorApproved?: true
     approvedAt?: true
     approvedBy?: true
     sapSyncStatus?: true
@@ -52765,11 +56747,15 @@ export namespace Prisma {
     mSet?: true
     bodyArticleNumber?: true
     bodyArticleDescription?: true
+    imageUrl?: true
+    bodyArticleType?: true
+    designNumber?: true
     cmtpCost?: true
     cmpCost?: true
     fabCost?: true
     fabCons?: true
     width?: true
+    basicTrimCost?: true
     flatId?: true
     articleNumber?: true
     division?: true
@@ -52782,6 +56768,7 @@ export namespace Prisma {
     year?: true
     hsnTaxCode?: true
     approvalStatus?: true
+    fgCreatorApproved?: true
     approvedAt?: true
     approvedBy?: true
     sapSyncStatus?: true
@@ -52899,11 +56886,15 @@ export namespace Prisma {
     mSet: string | null
     bodyArticleNumber: string | null
     bodyArticleDescription: string | null
+    imageUrl: string | null
+    bodyArticleType: string | null
+    designNumber: string | null
     cmtpCost: Decimal | null
     cmpCost: Decimal | null
     fabCost: Decimal | null
     fabCons: Decimal | null
     width: Decimal | null
+    basicTrimCost: Decimal | null
     flatId: string | null
     articleNumber: string | null
     division: string | null
@@ -52916,6 +56907,7 @@ export namespace Prisma {
     year: string | null
     hsnTaxCode: string | null
     approvalStatus: string
+    fgCreatorApproved: string
     approvedAt: Date | null
     approvedBy: number | null
     sapSyncStatus: string
@@ -52965,11 +56957,15 @@ export namespace Prisma {
     mSet?: boolean
     bodyArticleNumber?: boolean
     bodyArticleDescription?: boolean
+    imageUrl?: boolean
+    bodyArticleType?: boolean
+    designNumber?: boolean
     cmtpCost?: boolean
     cmpCost?: boolean
     fabCost?: boolean
     fabCons?: boolean
     width?: boolean
+    basicTrimCost?: boolean
     flatId?: boolean
     articleNumber?: boolean
     division?: boolean
@@ -52982,6 +56978,7 @@ export namespace Prisma {
     year?: boolean
     hsnTaxCode?: boolean
     approvalStatus?: boolean
+    fgCreatorApproved?: boolean
     approvedAt?: boolean
     approvedBy?: boolean
     sapSyncStatus?: boolean
@@ -53012,11 +57009,15 @@ export namespace Prisma {
     mSet?: boolean
     bodyArticleNumber?: boolean
     bodyArticleDescription?: boolean
+    imageUrl?: boolean
+    bodyArticleType?: boolean
+    designNumber?: boolean
     cmtpCost?: boolean
     cmpCost?: boolean
     fabCost?: boolean
     fabCons?: boolean
     width?: boolean
+    basicTrimCost?: boolean
     flatId?: boolean
     articleNumber?: boolean
     division?: boolean
@@ -53029,6 +57030,7 @@ export namespace Prisma {
     year?: boolean
     hsnTaxCode?: boolean
     approvalStatus?: boolean
+    fgCreatorApproved?: boolean
     approvedAt?: boolean
     approvedBy?: boolean
     sapSyncStatus?: boolean
@@ -53059,11 +57061,15 @@ export namespace Prisma {
     mSet?: boolean
     bodyArticleNumber?: boolean
     bodyArticleDescription?: boolean
+    imageUrl?: boolean
+    bodyArticleType?: boolean
+    designNumber?: boolean
     cmtpCost?: boolean
     cmpCost?: boolean
     fabCost?: boolean
     fabCons?: boolean
     width?: boolean
+    basicTrimCost?: boolean
     flatId?: boolean
     articleNumber?: boolean
     division?: boolean
@@ -53076,6 +57082,7 @@ export namespace Prisma {
     year?: boolean
     hsnTaxCode?: boolean
     approvalStatus?: boolean
+    fgCreatorApproved?: boolean
     approvedAt?: boolean
     approvedBy?: boolean
     sapSyncStatus?: boolean
@@ -53106,11 +57113,15 @@ export namespace Prisma {
     mSet?: boolean
     bodyArticleNumber?: boolean
     bodyArticleDescription?: boolean
+    imageUrl?: boolean
+    bodyArticleType?: boolean
+    designNumber?: boolean
     cmtpCost?: boolean
     cmpCost?: boolean
     fabCost?: boolean
     fabCons?: boolean
     width?: boolean
+    basicTrimCost?: boolean
     flatId?: boolean
     articleNumber?: boolean
     division?: boolean
@@ -53123,6 +57134,7 @@ export namespace Prisma {
     year?: boolean
     hsnTaxCode?: boolean
     approvalStatus?: boolean
+    fgCreatorApproved?: boolean
     approvedAt?: boolean
     approvedBy?: boolean
     sapSyncStatus?: boolean
@@ -53132,7 +57144,7 @@ export namespace Prisma {
     updatedAt?: boolean
   }
 
-  export type BodyArticleDataOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<"id" | "mCollarType" | "mCollarStyle" | "mNeckType" | "mNeckStyle" | "mPlacket" | "mBltType" | "mBltStyle" | "mSleevesMainStyle" | "mSleeveFold" | "mBtmFold" | "mNoOfPocket" | "mPocket" | "mExtraPocket" | "mFit" | "mBodyStyle" | "mLength" | "mSet" | "bodyArticleNumber" | "bodyArticleDescription" | "cmtpCost" | "cmpCost" | "fabCost" | "fabCons" | "width" | "flatId" | "articleNumber" | "division" | "subDivision" | "majorCategory" | "mcCode" | "vendorName" | "vendorCode" | "season" | "year" | "hsnTaxCode" | "approvalStatus" | "approvedAt" | "approvedBy" | "sapSyncStatus" | "sapSyncMessage" | "userName" | "createdAt" | "updatedAt", ExtArgs["result"]["bodyArticleData"]>
+  export type BodyArticleDataOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<"id" | "mCollarType" | "mCollarStyle" | "mNeckType" | "mNeckStyle" | "mPlacket" | "mBltType" | "mBltStyle" | "mSleevesMainStyle" | "mSleeveFold" | "mBtmFold" | "mNoOfPocket" | "mPocket" | "mExtraPocket" | "mFit" | "mBodyStyle" | "mLength" | "mSet" | "bodyArticleNumber" | "bodyArticleDescription" | "imageUrl" | "bodyArticleType" | "designNumber" | "cmtpCost" | "cmpCost" | "fabCost" | "fabCons" | "width" | "basicTrimCost" | "flatId" | "articleNumber" | "division" | "subDivision" | "majorCategory" | "mcCode" | "vendorName" | "vendorCode" | "season" | "year" | "hsnTaxCode" | "approvalStatus" | "fgCreatorApproved" | "approvedAt" | "approvedBy" | "sapSyncStatus" | "sapSyncMessage" | "userName" | "createdAt" | "updatedAt", ExtArgs["result"]["bodyArticleData"]>
 
   export type $BodyArticleDataPayload<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
     name: "BodyArticleData"
@@ -53158,11 +57170,15 @@ export namespace Prisma {
       mSet: string | null
       bodyArticleNumber: string | null
       bodyArticleDescription: string | null
+      imageUrl: string | null
+      bodyArticleType: string | null
+      designNumber: string | null
       cmtpCost: Prisma.Decimal | null
       cmpCost: Prisma.Decimal | null
       fabCost: Prisma.Decimal | null
       fabCons: Prisma.Decimal | null
       width: Prisma.Decimal | null
+      basicTrimCost: Prisma.Decimal | null
       flatId: string | null
       articleNumber: string | null
       division: string | null
@@ -53175,6 +57191,7 @@ export namespace Prisma {
       year: string | null
       hsnTaxCode: string | null
       approvalStatus: string
+      fgCreatorApproved: string
       approvedAt: Date | null
       approvedBy: number | null
       sapSyncStatus: string
@@ -53625,11 +57642,15 @@ export namespace Prisma {
     readonly mSet: FieldRef<"BodyArticleData", 'String'>
     readonly bodyArticleNumber: FieldRef<"BodyArticleData", 'String'>
     readonly bodyArticleDescription: FieldRef<"BodyArticleData", 'String'>
+    readonly imageUrl: FieldRef<"BodyArticleData", 'String'>
+    readonly bodyArticleType: FieldRef<"BodyArticleData", 'String'>
+    readonly designNumber: FieldRef<"BodyArticleData", 'String'>
     readonly cmtpCost: FieldRef<"BodyArticleData", 'Decimal'>
     readonly cmpCost: FieldRef<"BodyArticleData", 'Decimal'>
     readonly fabCost: FieldRef<"BodyArticleData", 'Decimal'>
     readonly fabCons: FieldRef<"BodyArticleData", 'Decimal'>
     readonly width: FieldRef<"BodyArticleData", 'Decimal'>
+    readonly basicTrimCost: FieldRef<"BodyArticleData", 'Decimal'>
     readonly flatId: FieldRef<"BodyArticleData", 'String'>
     readonly articleNumber: FieldRef<"BodyArticleData", 'String'>
     readonly division: FieldRef<"BodyArticleData", 'String'>
@@ -53642,6 +57663,7 @@ export namespace Prisma {
     readonly year: FieldRef<"BodyArticleData", 'String'>
     readonly hsnTaxCode: FieldRef<"BodyArticleData", 'String'>
     readonly approvalStatus: FieldRef<"BodyArticleData", 'String'>
+    readonly fgCreatorApproved: FieldRef<"BodyArticleData", 'String'>
     readonly approvedAt: FieldRef<"BodyArticleData", 'DateTime'>
     readonly approvedBy: FieldRef<"BodyArticleData", 'Int'>
     readonly sapSyncStatus: FieldRef<"BodyArticleData", 'String'>
@@ -54016,6 +58038,5785 @@ export namespace Prisma {
 
 
   /**
+   * Model MajorCategoryDetails
+   */
+
+  export type AggregateMajorCategoryDetails = {
+    _count: MajorCategoryDetailsCountAggregateOutputType | null
+    _avg: MajorCategoryDetailsAvgAggregateOutputType | null
+    _sum: MajorCategoryDetailsSumAggregateOutputType | null
+    _min: MajorCategoryDetailsMinAggregateOutputType | null
+    _max: MajorCategoryDetailsMaxAggregateOutputType | null
+  }
+
+  export type MajorCategoryDetailsAvgAggregateOutputType = {
+    id: number | null
+  }
+
+  export type MajorCategoryDetailsSumAggregateOutputType = {
+    id: number | null
+  }
+
+  export type MajorCategoryDetailsMinAggregateOutputType = {
+    id: number | null
+    seg: string | null
+    div: string | null
+    subDiv: string | null
+    majCat: string | null
+    mcCode: string | null
+    mcDes: string | null
+    hsnCode: string | null
+    mcStatus: string | null
+    createdAt: Date | null
+  }
+
+  export type MajorCategoryDetailsMaxAggregateOutputType = {
+    id: number | null
+    seg: string | null
+    div: string | null
+    subDiv: string | null
+    majCat: string | null
+    mcCode: string | null
+    mcDes: string | null
+    hsnCode: string | null
+    mcStatus: string | null
+    createdAt: Date | null
+  }
+
+  export type MajorCategoryDetailsCountAggregateOutputType = {
+    id: number
+    seg: number
+    div: number
+    subDiv: number
+    majCat: number
+    mcCode: number
+    mcDes: number
+    hsnCode: number
+    mcStatus: number
+    createdAt: number
+    _all: number
+  }
+
+
+  export type MajorCategoryDetailsAvgAggregateInputType = {
+    id?: true
+  }
+
+  export type MajorCategoryDetailsSumAggregateInputType = {
+    id?: true
+  }
+
+  export type MajorCategoryDetailsMinAggregateInputType = {
+    id?: true
+    seg?: true
+    div?: true
+    subDiv?: true
+    majCat?: true
+    mcCode?: true
+    mcDes?: true
+    hsnCode?: true
+    mcStatus?: true
+    createdAt?: true
+  }
+
+  export type MajorCategoryDetailsMaxAggregateInputType = {
+    id?: true
+    seg?: true
+    div?: true
+    subDiv?: true
+    majCat?: true
+    mcCode?: true
+    mcDes?: true
+    hsnCode?: true
+    mcStatus?: true
+    createdAt?: true
+  }
+
+  export type MajorCategoryDetailsCountAggregateInputType = {
+    id?: true
+    seg?: true
+    div?: true
+    subDiv?: true
+    majCat?: true
+    mcCode?: true
+    mcDes?: true
+    hsnCode?: true
+    mcStatus?: true
+    createdAt?: true
+    _all?: true
+  }
+
+  export type MajorCategoryDetailsAggregateArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Filter which MajorCategoryDetails to aggregate.
+     */
+    where?: MajorCategoryDetailsWhereInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
+     * 
+     * Determine the order of MajorCategoryDetails to fetch.
+     */
+    orderBy?: MajorCategoryDetailsOrderByWithRelationInput | MajorCategoryDetailsOrderByWithRelationInput[]
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
+     * 
+     * Sets the start position
+     */
+    cursor?: MajorCategoryDetailsWhereUniqueInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Take `±n` MajorCategoryDetails from the position of the cursor.
+     */
+    take?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Skip the first `n` MajorCategoryDetails.
+     */
+    skip?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     * 
+     * Count returned MajorCategoryDetails
+    **/
+    _count?: true | MajorCategoryDetailsCountAggregateInputType
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     * 
+     * Select which fields to average
+    **/
+    _avg?: MajorCategoryDetailsAvgAggregateInputType
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     * 
+     * Select which fields to sum
+    **/
+    _sum?: MajorCategoryDetailsSumAggregateInputType
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     * 
+     * Select which fields to find the minimum value
+    **/
+    _min?: MajorCategoryDetailsMinAggregateInputType
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     * 
+     * Select which fields to find the maximum value
+    **/
+    _max?: MajorCategoryDetailsMaxAggregateInputType
+  }
+
+  export type GetMajorCategoryDetailsAggregateType<T extends MajorCategoryDetailsAggregateArgs> = {
+        [P in keyof T & keyof AggregateMajorCategoryDetails]: P extends '_count' | 'count'
+      ? T[P] extends true
+        ? number
+        : GetScalarType<T[P], AggregateMajorCategoryDetails[P]>
+      : GetScalarType<T[P], AggregateMajorCategoryDetails[P]>
+  }
+
+
+
+
+  export type MajorCategoryDetailsGroupByArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    where?: MajorCategoryDetailsWhereInput
+    orderBy?: MajorCategoryDetailsOrderByWithAggregationInput | MajorCategoryDetailsOrderByWithAggregationInput[]
+    by: MajorCategoryDetailsScalarFieldEnum[] | MajorCategoryDetailsScalarFieldEnum
+    having?: MajorCategoryDetailsScalarWhereWithAggregatesInput
+    take?: number
+    skip?: number
+    _count?: MajorCategoryDetailsCountAggregateInputType | true
+    _avg?: MajorCategoryDetailsAvgAggregateInputType
+    _sum?: MajorCategoryDetailsSumAggregateInputType
+    _min?: MajorCategoryDetailsMinAggregateInputType
+    _max?: MajorCategoryDetailsMaxAggregateInputType
+  }
+
+  export type MajorCategoryDetailsGroupByOutputType = {
+    id: number
+    seg: string | null
+    div: string | null
+    subDiv: string | null
+    majCat: string | null
+    mcCode: string | null
+    mcDes: string | null
+    hsnCode: string | null
+    mcStatus: string | null
+    createdAt: Date
+    _count: MajorCategoryDetailsCountAggregateOutputType | null
+    _avg: MajorCategoryDetailsAvgAggregateOutputType | null
+    _sum: MajorCategoryDetailsSumAggregateOutputType | null
+    _min: MajorCategoryDetailsMinAggregateOutputType | null
+    _max: MajorCategoryDetailsMaxAggregateOutputType | null
+  }
+
+  type GetMajorCategoryDetailsGroupByPayload<T extends MajorCategoryDetailsGroupByArgs> = Prisma.PrismaPromise<
+    Array<
+      PickEnumerable<MajorCategoryDetailsGroupByOutputType, T['by']> &
+        {
+          [P in ((keyof T) & (keyof MajorCategoryDetailsGroupByOutputType))]: P extends '_count'
+            ? T[P] extends boolean
+              ? number
+              : GetScalarType<T[P], MajorCategoryDetailsGroupByOutputType[P]>
+            : GetScalarType<T[P], MajorCategoryDetailsGroupByOutputType[P]>
+        }
+      >
+    >
+
+
+  export type MajorCategoryDetailsSelect<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
+    id?: boolean
+    seg?: boolean
+    div?: boolean
+    subDiv?: boolean
+    majCat?: boolean
+    mcCode?: boolean
+    mcDes?: boolean
+    hsnCode?: boolean
+    mcStatus?: boolean
+    createdAt?: boolean
+  }, ExtArgs["result"]["majorCategoryDetails"]>
+
+  export type MajorCategoryDetailsSelectCreateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
+    id?: boolean
+    seg?: boolean
+    div?: boolean
+    subDiv?: boolean
+    majCat?: boolean
+    mcCode?: boolean
+    mcDes?: boolean
+    hsnCode?: boolean
+    mcStatus?: boolean
+    createdAt?: boolean
+  }, ExtArgs["result"]["majorCategoryDetails"]>
+
+  export type MajorCategoryDetailsSelectUpdateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
+    id?: boolean
+    seg?: boolean
+    div?: boolean
+    subDiv?: boolean
+    majCat?: boolean
+    mcCode?: boolean
+    mcDes?: boolean
+    hsnCode?: boolean
+    mcStatus?: boolean
+    createdAt?: boolean
+  }, ExtArgs["result"]["majorCategoryDetails"]>
+
+  export type MajorCategoryDetailsSelectScalar = {
+    id?: boolean
+    seg?: boolean
+    div?: boolean
+    subDiv?: boolean
+    majCat?: boolean
+    mcCode?: boolean
+    mcDes?: boolean
+    hsnCode?: boolean
+    mcStatus?: boolean
+    createdAt?: boolean
+  }
+
+  export type MajorCategoryDetailsOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<"id" | "seg" | "div" | "subDiv" | "majCat" | "mcCode" | "mcDes" | "hsnCode" | "mcStatus" | "createdAt", ExtArgs["result"]["majorCategoryDetails"]>
+
+  export type $MajorCategoryDetailsPayload<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    name: "MajorCategoryDetails"
+    objects: {}
+    scalars: $Extensions.GetPayloadResult<{
+      id: number
+      seg: string | null
+      div: string | null
+      subDiv: string | null
+      majCat: string | null
+      mcCode: string | null
+      mcDes: string | null
+      hsnCode: string | null
+      mcStatus: string | null
+      createdAt: Date
+    }, ExtArgs["result"]["majorCategoryDetails"]>
+    composites: {}
+  }
+
+  type MajorCategoryDetailsGetPayload<S extends boolean | null | undefined | MajorCategoryDetailsDefaultArgs> = $Result.GetResult<Prisma.$MajorCategoryDetailsPayload, S>
+
+  type MajorCategoryDetailsCountArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> =
+    Omit<MajorCategoryDetailsFindManyArgs, 'select' | 'include' | 'distinct' | 'omit'> & {
+      select?: MajorCategoryDetailsCountAggregateInputType | true
+    }
+
+  export interface MajorCategoryDetailsDelegate<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs, GlobalOmitOptions = {}> {
+    [K: symbol]: { types: Prisma.TypeMap<ExtArgs>['model']['MajorCategoryDetails'], meta: { name: 'MajorCategoryDetails' } }
+    /**
+     * Find zero or one MajorCategoryDetails that matches the filter.
+     * @param {MajorCategoryDetailsFindUniqueArgs} args - Arguments to find a MajorCategoryDetails
+     * @example
+     * // Get one MajorCategoryDetails
+     * const majorCategoryDetails = await prisma.majorCategoryDetails.findUnique({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     */
+    findUnique<T extends MajorCategoryDetailsFindUniqueArgs>(args: SelectSubset<T, MajorCategoryDetailsFindUniqueArgs<ExtArgs>>): Prisma__MajorCategoryDetailsClient<$Result.GetResult<Prisma.$MajorCategoryDetailsPayload<ExtArgs>, T, "findUnique", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Find one MajorCategoryDetails that matches the filter or throw an error with `error.code='P2025'`
+     * if no matches were found.
+     * @param {MajorCategoryDetailsFindUniqueOrThrowArgs} args - Arguments to find a MajorCategoryDetails
+     * @example
+     * // Get one MajorCategoryDetails
+     * const majorCategoryDetails = await prisma.majorCategoryDetails.findUniqueOrThrow({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     */
+    findUniqueOrThrow<T extends MajorCategoryDetailsFindUniqueOrThrowArgs>(args: SelectSubset<T, MajorCategoryDetailsFindUniqueOrThrowArgs<ExtArgs>>): Prisma__MajorCategoryDetailsClient<$Result.GetResult<Prisma.$MajorCategoryDetailsPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Find the first MajorCategoryDetails that matches the filter.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {MajorCategoryDetailsFindFirstArgs} args - Arguments to find a MajorCategoryDetails
+     * @example
+     * // Get one MajorCategoryDetails
+     * const majorCategoryDetails = await prisma.majorCategoryDetails.findFirst({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     */
+    findFirst<T extends MajorCategoryDetailsFindFirstArgs>(args?: SelectSubset<T, MajorCategoryDetailsFindFirstArgs<ExtArgs>>): Prisma__MajorCategoryDetailsClient<$Result.GetResult<Prisma.$MajorCategoryDetailsPayload<ExtArgs>, T, "findFirst", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Find the first MajorCategoryDetails that matches the filter or
+     * throw `PrismaKnownClientError` with `P2025` code if no matches were found.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {MajorCategoryDetailsFindFirstOrThrowArgs} args - Arguments to find a MajorCategoryDetails
+     * @example
+     * // Get one MajorCategoryDetails
+     * const majorCategoryDetails = await prisma.majorCategoryDetails.findFirstOrThrow({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     */
+    findFirstOrThrow<T extends MajorCategoryDetailsFindFirstOrThrowArgs>(args?: SelectSubset<T, MajorCategoryDetailsFindFirstOrThrowArgs<ExtArgs>>): Prisma__MajorCategoryDetailsClient<$Result.GetResult<Prisma.$MajorCategoryDetailsPayload<ExtArgs>, T, "findFirstOrThrow", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Find zero or more MajorCategoryDetails that matches the filter.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {MajorCategoryDetailsFindManyArgs} args - Arguments to filter and select certain fields only.
+     * @example
+     * // Get all MajorCategoryDetails
+     * const majorCategoryDetails = await prisma.majorCategoryDetails.findMany()
+     * 
+     * // Get first 10 MajorCategoryDetails
+     * const majorCategoryDetails = await prisma.majorCategoryDetails.findMany({ take: 10 })
+     * 
+     * // Only select the `id`
+     * const majorCategoryDetailsWithIdOnly = await prisma.majorCategoryDetails.findMany({ select: { id: true } })
+     * 
+     */
+    findMany<T extends MajorCategoryDetailsFindManyArgs>(args?: SelectSubset<T, MajorCategoryDetailsFindManyArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$MajorCategoryDetailsPayload<ExtArgs>, T, "findMany", GlobalOmitOptions>>
+
+    /**
+     * Create a MajorCategoryDetails.
+     * @param {MajorCategoryDetailsCreateArgs} args - Arguments to create a MajorCategoryDetails.
+     * @example
+     * // Create one MajorCategoryDetails
+     * const MajorCategoryDetails = await prisma.majorCategoryDetails.create({
+     *   data: {
+     *     // ... data to create a MajorCategoryDetails
+     *   }
+     * })
+     * 
+     */
+    create<T extends MajorCategoryDetailsCreateArgs>(args: SelectSubset<T, MajorCategoryDetailsCreateArgs<ExtArgs>>): Prisma__MajorCategoryDetailsClient<$Result.GetResult<Prisma.$MajorCategoryDetailsPayload<ExtArgs>, T, "create", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Create many MajorCategoryDetails.
+     * @param {MajorCategoryDetailsCreateManyArgs} args - Arguments to create many MajorCategoryDetails.
+     * @example
+     * // Create many MajorCategoryDetails
+     * const majorCategoryDetails = await prisma.majorCategoryDetails.createMany({
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     *     
+     */
+    createMany<T extends MajorCategoryDetailsCreateManyArgs>(args?: SelectSubset<T, MajorCategoryDetailsCreateManyArgs<ExtArgs>>): Prisma.PrismaPromise<BatchPayload>
+
+    /**
+     * Create many MajorCategoryDetails and returns the data saved in the database.
+     * @param {MajorCategoryDetailsCreateManyAndReturnArgs} args - Arguments to create many MajorCategoryDetails.
+     * @example
+     * // Create many MajorCategoryDetails
+     * const majorCategoryDetails = await prisma.majorCategoryDetails.createManyAndReturn({
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     * 
+     * // Create many MajorCategoryDetails and only return the `id`
+     * const majorCategoryDetailsWithIdOnly = await prisma.majorCategoryDetails.createManyAndReturn({
+     *   select: { id: true },
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * 
+     */
+    createManyAndReturn<T extends MajorCategoryDetailsCreateManyAndReturnArgs>(args?: SelectSubset<T, MajorCategoryDetailsCreateManyAndReturnArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$MajorCategoryDetailsPayload<ExtArgs>, T, "createManyAndReturn", GlobalOmitOptions>>
+
+    /**
+     * Delete a MajorCategoryDetails.
+     * @param {MajorCategoryDetailsDeleteArgs} args - Arguments to delete one MajorCategoryDetails.
+     * @example
+     * // Delete one MajorCategoryDetails
+     * const MajorCategoryDetails = await prisma.majorCategoryDetails.delete({
+     *   where: {
+     *     // ... filter to delete one MajorCategoryDetails
+     *   }
+     * })
+     * 
+     */
+    delete<T extends MajorCategoryDetailsDeleteArgs>(args: SelectSubset<T, MajorCategoryDetailsDeleteArgs<ExtArgs>>): Prisma__MajorCategoryDetailsClient<$Result.GetResult<Prisma.$MajorCategoryDetailsPayload<ExtArgs>, T, "delete", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Update one MajorCategoryDetails.
+     * @param {MajorCategoryDetailsUpdateArgs} args - Arguments to update one MajorCategoryDetails.
+     * @example
+     * // Update one MajorCategoryDetails
+     * const majorCategoryDetails = await prisma.majorCategoryDetails.update({
+     *   where: {
+     *     // ... provide filter here
+     *   },
+     *   data: {
+     *     // ... provide data here
+     *   }
+     * })
+     * 
+     */
+    update<T extends MajorCategoryDetailsUpdateArgs>(args: SelectSubset<T, MajorCategoryDetailsUpdateArgs<ExtArgs>>): Prisma__MajorCategoryDetailsClient<$Result.GetResult<Prisma.$MajorCategoryDetailsPayload<ExtArgs>, T, "update", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Delete zero or more MajorCategoryDetails.
+     * @param {MajorCategoryDetailsDeleteManyArgs} args - Arguments to filter MajorCategoryDetails to delete.
+     * @example
+     * // Delete a few MajorCategoryDetails
+     * const { count } = await prisma.majorCategoryDetails.deleteMany({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     * 
+     */
+    deleteMany<T extends MajorCategoryDetailsDeleteManyArgs>(args?: SelectSubset<T, MajorCategoryDetailsDeleteManyArgs<ExtArgs>>): Prisma.PrismaPromise<BatchPayload>
+
+    /**
+     * Update zero or more MajorCategoryDetails.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {MajorCategoryDetailsUpdateManyArgs} args - Arguments to update one or more rows.
+     * @example
+     * // Update many MajorCategoryDetails
+     * const majorCategoryDetails = await prisma.majorCategoryDetails.updateMany({
+     *   where: {
+     *     // ... provide filter here
+     *   },
+     *   data: {
+     *     // ... provide data here
+     *   }
+     * })
+     * 
+     */
+    updateMany<T extends MajorCategoryDetailsUpdateManyArgs>(args: SelectSubset<T, MajorCategoryDetailsUpdateManyArgs<ExtArgs>>): Prisma.PrismaPromise<BatchPayload>
+
+    /**
+     * Update zero or more MajorCategoryDetails and returns the data updated in the database.
+     * @param {MajorCategoryDetailsUpdateManyAndReturnArgs} args - Arguments to update many MajorCategoryDetails.
+     * @example
+     * // Update many MajorCategoryDetails
+     * const majorCategoryDetails = await prisma.majorCategoryDetails.updateManyAndReturn({
+     *   where: {
+     *     // ... provide filter here
+     *   },
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     * 
+     * // Update zero or more MajorCategoryDetails and only return the `id`
+     * const majorCategoryDetailsWithIdOnly = await prisma.majorCategoryDetails.updateManyAndReturn({
+     *   select: { id: true },
+     *   where: {
+     *     // ... provide filter here
+     *   },
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * 
+     */
+    updateManyAndReturn<T extends MajorCategoryDetailsUpdateManyAndReturnArgs>(args: SelectSubset<T, MajorCategoryDetailsUpdateManyAndReturnArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$MajorCategoryDetailsPayload<ExtArgs>, T, "updateManyAndReturn", GlobalOmitOptions>>
+
+    /**
+     * Create or update one MajorCategoryDetails.
+     * @param {MajorCategoryDetailsUpsertArgs} args - Arguments to update or create a MajorCategoryDetails.
+     * @example
+     * // Update or create a MajorCategoryDetails
+     * const majorCategoryDetails = await prisma.majorCategoryDetails.upsert({
+     *   create: {
+     *     // ... data to create a MajorCategoryDetails
+     *   },
+     *   update: {
+     *     // ... in case it already exists, update
+     *   },
+     *   where: {
+     *     // ... the filter for the MajorCategoryDetails we want to update
+     *   }
+     * })
+     */
+    upsert<T extends MajorCategoryDetailsUpsertArgs>(args: SelectSubset<T, MajorCategoryDetailsUpsertArgs<ExtArgs>>): Prisma__MajorCategoryDetailsClient<$Result.GetResult<Prisma.$MajorCategoryDetailsPayload<ExtArgs>, T, "upsert", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+
+    /**
+     * Count the number of MajorCategoryDetails.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {MajorCategoryDetailsCountArgs} args - Arguments to filter MajorCategoryDetails to count.
+     * @example
+     * // Count the number of MajorCategoryDetails
+     * const count = await prisma.majorCategoryDetails.count({
+     *   where: {
+     *     // ... the filter for the MajorCategoryDetails we want to count
+     *   }
+     * })
+    **/
+    count<T extends MajorCategoryDetailsCountArgs>(
+      args?: Subset<T, MajorCategoryDetailsCountArgs>,
+    ): Prisma.PrismaPromise<
+      T extends $Utils.Record<'select', any>
+        ? T['select'] extends true
+          ? number
+          : GetScalarType<T['select'], MajorCategoryDetailsCountAggregateOutputType>
+        : number
+    >
+
+    /**
+     * Allows you to perform aggregations operations on a MajorCategoryDetails.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {MajorCategoryDetailsAggregateArgs} args - Select which aggregations you would like to apply and on what fields.
+     * @example
+     * // Ordered by age ascending
+     * // Where email contains prisma.io
+     * // Limited to the 10 users
+     * const aggregations = await prisma.user.aggregate({
+     *   _avg: {
+     *     age: true,
+     *   },
+     *   where: {
+     *     email: {
+     *       contains: "prisma.io",
+     *     },
+     *   },
+     *   orderBy: {
+     *     age: "asc",
+     *   },
+     *   take: 10,
+     * })
+    **/
+    aggregate<T extends MajorCategoryDetailsAggregateArgs>(args: Subset<T, MajorCategoryDetailsAggregateArgs>): Prisma.PrismaPromise<GetMajorCategoryDetailsAggregateType<T>>
+
+    /**
+     * Group by MajorCategoryDetails.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {MajorCategoryDetailsGroupByArgs} args - Group by arguments.
+     * @example
+     * // Group by city, order by createdAt, get count
+     * const result = await prisma.user.groupBy({
+     *   by: ['city', 'createdAt'],
+     *   orderBy: {
+     *     createdAt: true
+     *   },
+     *   _count: {
+     *     _all: true
+     *   },
+     * })
+     * 
+    **/
+    groupBy<
+      T extends MajorCategoryDetailsGroupByArgs,
+      HasSelectOrTake extends Or<
+        Extends<'skip', Keys<T>>,
+        Extends<'take', Keys<T>>
+      >,
+      OrderByArg extends True extends HasSelectOrTake
+        ? { orderBy: MajorCategoryDetailsGroupByArgs['orderBy'] }
+        : { orderBy?: MajorCategoryDetailsGroupByArgs['orderBy'] },
+      OrderFields extends ExcludeUnderscoreKeys<Keys<MaybeTupleToUnion<T['orderBy']>>>,
+      ByFields extends MaybeTupleToUnion<T['by']>,
+      ByValid extends Has<ByFields, OrderFields>,
+      HavingFields extends GetHavingFields<T['having']>,
+      HavingValid extends Has<ByFields, HavingFields>,
+      ByEmpty extends T['by'] extends never[] ? True : False,
+      InputErrors extends ByEmpty extends True
+      ? `Error: "by" must not be empty.`
+      : HavingValid extends False
+      ? {
+          [P in HavingFields]: P extends ByFields
+            ? never
+            : P extends string
+            ? `Error: Field "${P}" used in "having" needs to be provided in "by".`
+            : [
+                Error,
+                'Field ',
+                P,
+                ` in "having" needs to be provided in "by"`,
+              ]
+        }[HavingFields]
+      : 'take' extends Keys<T>
+      ? 'orderBy' extends Keys<T>
+        ? ByValid extends True
+          ? {}
+          : {
+              [P in OrderFields]: P extends ByFields
+                ? never
+                : `Error: Field "${P}" in "orderBy" needs to be provided in "by"`
+            }[OrderFields]
+        : 'Error: If you provide "take", you also need to provide "orderBy"'
+      : 'skip' extends Keys<T>
+      ? 'orderBy' extends Keys<T>
+        ? ByValid extends True
+          ? {}
+          : {
+              [P in OrderFields]: P extends ByFields
+                ? never
+                : `Error: Field "${P}" in "orderBy" needs to be provided in "by"`
+            }[OrderFields]
+        : 'Error: If you provide "skip", you also need to provide "orderBy"'
+      : ByValid extends True
+      ? {}
+      : {
+          [P in OrderFields]: P extends ByFields
+            ? never
+            : `Error: Field "${P}" in "orderBy" needs to be provided in "by"`
+        }[OrderFields]
+    >(args: SubsetIntersection<T, MajorCategoryDetailsGroupByArgs, OrderByArg> & InputErrors): {} extends InputErrors ? GetMajorCategoryDetailsGroupByPayload<T> : Prisma.PrismaPromise<InputErrors>
+  /**
+   * Fields of the MajorCategoryDetails model
+   */
+  readonly fields: MajorCategoryDetailsFieldRefs;
+  }
+
+  /**
+   * The delegate class that acts as a "Promise-like" for MajorCategoryDetails.
+   * Why is this prefixed with `Prisma__`?
+   * Because we want to prevent naming conflicts as mentioned in
+   * https://github.com/prisma/prisma-client-js/issues/707
+   */
+  export interface Prisma__MajorCategoryDetailsClient<T, Null = never, ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs, GlobalOmitOptions = {}> extends Prisma.PrismaPromise<T> {
+    readonly [Symbol.toStringTag]: "PrismaPromise"
+    /**
+     * Attaches callbacks for the resolution and/or rejection of the Promise.
+     * @param onfulfilled The callback to execute when the Promise is resolved.
+     * @param onrejected The callback to execute when the Promise is rejected.
+     * @returns A Promise for the completion of which ever callback is executed.
+     */
+    then<TResult1 = T, TResult2 = never>(onfulfilled?: ((value: T) => TResult1 | PromiseLike<TResult1>) | undefined | null, onrejected?: ((reason: any) => TResult2 | PromiseLike<TResult2>) | undefined | null): $Utils.JsPromise<TResult1 | TResult2>
+    /**
+     * Attaches a callback for only the rejection of the Promise.
+     * @param onrejected The callback to execute when the Promise is rejected.
+     * @returns A Promise for the completion of the callback.
+     */
+    catch<TResult = never>(onrejected?: ((reason: any) => TResult | PromiseLike<TResult>) | undefined | null): $Utils.JsPromise<T | TResult>
+    /**
+     * Attaches a callback that is invoked when the Promise is settled (fulfilled or rejected). The
+     * resolved value cannot be modified from the callback.
+     * @param onfinally The callback to execute when the Promise is settled (fulfilled or rejected).
+     * @returns A Promise for the completion of the callback.
+     */
+    finally(onfinally?: (() => void) | undefined | null): $Utils.JsPromise<T>
+  }
+
+
+
+
+  /**
+   * Fields of the MajorCategoryDetails model
+   */
+  interface MajorCategoryDetailsFieldRefs {
+    readonly id: FieldRef<"MajorCategoryDetails", 'Int'>
+    readonly seg: FieldRef<"MajorCategoryDetails", 'String'>
+    readonly div: FieldRef<"MajorCategoryDetails", 'String'>
+    readonly subDiv: FieldRef<"MajorCategoryDetails", 'String'>
+    readonly majCat: FieldRef<"MajorCategoryDetails", 'String'>
+    readonly mcCode: FieldRef<"MajorCategoryDetails", 'String'>
+    readonly mcDes: FieldRef<"MajorCategoryDetails", 'String'>
+    readonly hsnCode: FieldRef<"MajorCategoryDetails", 'String'>
+    readonly mcStatus: FieldRef<"MajorCategoryDetails", 'String'>
+    readonly createdAt: FieldRef<"MajorCategoryDetails", 'DateTime'>
+  }
+    
+
+  // Custom InputTypes
+  /**
+   * MajorCategoryDetails findUnique
+   */
+  export type MajorCategoryDetailsFindUniqueArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the MajorCategoryDetails
+     */
+    select?: MajorCategoryDetailsSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the MajorCategoryDetails
+     */
+    omit?: MajorCategoryDetailsOmit<ExtArgs> | null
+    /**
+     * Filter, which MajorCategoryDetails to fetch.
+     */
+    where: MajorCategoryDetailsWhereUniqueInput
+  }
+
+  /**
+   * MajorCategoryDetails findUniqueOrThrow
+   */
+  export type MajorCategoryDetailsFindUniqueOrThrowArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the MajorCategoryDetails
+     */
+    select?: MajorCategoryDetailsSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the MajorCategoryDetails
+     */
+    omit?: MajorCategoryDetailsOmit<ExtArgs> | null
+    /**
+     * Filter, which MajorCategoryDetails to fetch.
+     */
+    where: MajorCategoryDetailsWhereUniqueInput
+  }
+
+  /**
+   * MajorCategoryDetails findFirst
+   */
+  export type MajorCategoryDetailsFindFirstArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the MajorCategoryDetails
+     */
+    select?: MajorCategoryDetailsSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the MajorCategoryDetails
+     */
+    omit?: MajorCategoryDetailsOmit<ExtArgs> | null
+    /**
+     * Filter, which MajorCategoryDetails to fetch.
+     */
+    where?: MajorCategoryDetailsWhereInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
+     * 
+     * Determine the order of MajorCategoryDetails to fetch.
+     */
+    orderBy?: MajorCategoryDetailsOrderByWithRelationInput | MajorCategoryDetailsOrderByWithRelationInput[]
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
+     * 
+     * Sets the position for searching for MajorCategoryDetails.
+     */
+    cursor?: MajorCategoryDetailsWhereUniqueInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Take `±n` MajorCategoryDetails from the position of the cursor.
+     */
+    take?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Skip the first `n` MajorCategoryDetails.
+     */
+    skip?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/distinct Distinct Docs}
+     * 
+     * Filter by unique combinations of MajorCategoryDetails.
+     */
+    distinct?: MajorCategoryDetailsScalarFieldEnum | MajorCategoryDetailsScalarFieldEnum[]
+  }
+
+  /**
+   * MajorCategoryDetails findFirstOrThrow
+   */
+  export type MajorCategoryDetailsFindFirstOrThrowArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the MajorCategoryDetails
+     */
+    select?: MajorCategoryDetailsSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the MajorCategoryDetails
+     */
+    omit?: MajorCategoryDetailsOmit<ExtArgs> | null
+    /**
+     * Filter, which MajorCategoryDetails to fetch.
+     */
+    where?: MajorCategoryDetailsWhereInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
+     * 
+     * Determine the order of MajorCategoryDetails to fetch.
+     */
+    orderBy?: MajorCategoryDetailsOrderByWithRelationInput | MajorCategoryDetailsOrderByWithRelationInput[]
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
+     * 
+     * Sets the position for searching for MajorCategoryDetails.
+     */
+    cursor?: MajorCategoryDetailsWhereUniqueInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Take `±n` MajorCategoryDetails from the position of the cursor.
+     */
+    take?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Skip the first `n` MajorCategoryDetails.
+     */
+    skip?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/distinct Distinct Docs}
+     * 
+     * Filter by unique combinations of MajorCategoryDetails.
+     */
+    distinct?: MajorCategoryDetailsScalarFieldEnum | MajorCategoryDetailsScalarFieldEnum[]
+  }
+
+  /**
+   * MajorCategoryDetails findMany
+   */
+  export type MajorCategoryDetailsFindManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the MajorCategoryDetails
+     */
+    select?: MajorCategoryDetailsSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the MajorCategoryDetails
+     */
+    omit?: MajorCategoryDetailsOmit<ExtArgs> | null
+    /**
+     * Filter, which MajorCategoryDetails to fetch.
+     */
+    where?: MajorCategoryDetailsWhereInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
+     * 
+     * Determine the order of MajorCategoryDetails to fetch.
+     */
+    orderBy?: MajorCategoryDetailsOrderByWithRelationInput | MajorCategoryDetailsOrderByWithRelationInput[]
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
+     * 
+     * Sets the position for listing MajorCategoryDetails.
+     */
+    cursor?: MajorCategoryDetailsWhereUniqueInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Take `±n` MajorCategoryDetails from the position of the cursor.
+     */
+    take?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Skip the first `n` MajorCategoryDetails.
+     */
+    skip?: number
+    distinct?: MajorCategoryDetailsScalarFieldEnum | MajorCategoryDetailsScalarFieldEnum[]
+  }
+
+  /**
+   * MajorCategoryDetails create
+   */
+  export type MajorCategoryDetailsCreateArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the MajorCategoryDetails
+     */
+    select?: MajorCategoryDetailsSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the MajorCategoryDetails
+     */
+    omit?: MajorCategoryDetailsOmit<ExtArgs> | null
+    /**
+     * The data needed to create a MajorCategoryDetails.
+     */
+    data?: XOR<MajorCategoryDetailsCreateInput, MajorCategoryDetailsUncheckedCreateInput>
+  }
+
+  /**
+   * MajorCategoryDetails createMany
+   */
+  export type MajorCategoryDetailsCreateManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * The data used to create many MajorCategoryDetails.
+     */
+    data: MajorCategoryDetailsCreateManyInput | MajorCategoryDetailsCreateManyInput[]
+    skipDuplicates?: boolean
+  }
+
+  /**
+   * MajorCategoryDetails createManyAndReturn
+   */
+  export type MajorCategoryDetailsCreateManyAndReturnArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the MajorCategoryDetails
+     */
+    select?: MajorCategoryDetailsSelectCreateManyAndReturn<ExtArgs> | null
+    /**
+     * Omit specific fields from the MajorCategoryDetails
+     */
+    omit?: MajorCategoryDetailsOmit<ExtArgs> | null
+    /**
+     * The data used to create many MajorCategoryDetails.
+     */
+    data: MajorCategoryDetailsCreateManyInput | MajorCategoryDetailsCreateManyInput[]
+    skipDuplicates?: boolean
+  }
+
+  /**
+   * MajorCategoryDetails update
+   */
+  export type MajorCategoryDetailsUpdateArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the MajorCategoryDetails
+     */
+    select?: MajorCategoryDetailsSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the MajorCategoryDetails
+     */
+    omit?: MajorCategoryDetailsOmit<ExtArgs> | null
+    /**
+     * The data needed to update a MajorCategoryDetails.
+     */
+    data: XOR<MajorCategoryDetailsUpdateInput, MajorCategoryDetailsUncheckedUpdateInput>
+    /**
+     * Choose, which MajorCategoryDetails to update.
+     */
+    where: MajorCategoryDetailsWhereUniqueInput
+  }
+
+  /**
+   * MajorCategoryDetails updateMany
+   */
+  export type MajorCategoryDetailsUpdateManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * The data used to update MajorCategoryDetails.
+     */
+    data: XOR<MajorCategoryDetailsUpdateManyMutationInput, MajorCategoryDetailsUncheckedUpdateManyInput>
+    /**
+     * Filter which MajorCategoryDetails to update
+     */
+    where?: MajorCategoryDetailsWhereInput
+    /**
+     * Limit how many MajorCategoryDetails to update.
+     */
+    limit?: number
+  }
+
+  /**
+   * MajorCategoryDetails updateManyAndReturn
+   */
+  export type MajorCategoryDetailsUpdateManyAndReturnArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the MajorCategoryDetails
+     */
+    select?: MajorCategoryDetailsSelectUpdateManyAndReturn<ExtArgs> | null
+    /**
+     * Omit specific fields from the MajorCategoryDetails
+     */
+    omit?: MajorCategoryDetailsOmit<ExtArgs> | null
+    /**
+     * The data used to update MajorCategoryDetails.
+     */
+    data: XOR<MajorCategoryDetailsUpdateManyMutationInput, MajorCategoryDetailsUncheckedUpdateManyInput>
+    /**
+     * Filter which MajorCategoryDetails to update
+     */
+    where?: MajorCategoryDetailsWhereInput
+    /**
+     * Limit how many MajorCategoryDetails to update.
+     */
+    limit?: number
+  }
+
+  /**
+   * MajorCategoryDetails upsert
+   */
+  export type MajorCategoryDetailsUpsertArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the MajorCategoryDetails
+     */
+    select?: MajorCategoryDetailsSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the MajorCategoryDetails
+     */
+    omit?: MajorCategoryDetailsOmit<ExtArgs> | null
+    /**
+     * The filter to search for the MajorCategoryDetails to update in case it exists.
+     */
+    where: MajorCategoryDetailsWhereUniqueInput
+    /**
+     * In case the MajorCategoryDetails found by the `where` argument doesn't exist, create a new MajorCategoryDetails with this data.
+     */
+    create: XOR<MajorCategoryDetailsCreateInput, MajorCategoryDetailsUncheckedCreateInput>
+    /**
+     * In case the MajorCategoryDetails was found with the provided `where` argument, update it with this data.
+     */
+    update: XOR<MajorCategoryDetailsUpdateInput, MajorCategoryDetailsUncheckedUpdateInput>
+  }
+
+  /**
+   * MajorCategoryDetails delete
+   */
+  export type MajorCategoryDetailsDeleteArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the MajorCategoryDetails
+     */
+    select?: MajorCategoryDetailsSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the MajorCategoryDetails
+     */
+    omit?: MajorCategoryDetailsOmit<ExtArgs> | null
+    /**
+     * Filter which MajorCategoryDetails to delete.
+     */
+    where: MajorCategoryDetailsWhereUniqueInput
+  }
+
+  /**
+   * MajorCategoryDetails deleteMany
+   */
+  export type MajorCategoryDetailsDeleteManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Filter which MajorCategoryDetails to delete
+     */
+    where?: MajorCategoryDetailsWhereInput
+    /**
+     * Limit how many MajorCategoryDetails to delete.
+     */
+    limit?: number
+  }
+
+  /**
+   * MajorCategoryDetails without action
+   */
+  export type MajorCategoryDetailsDefaultArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the MajorCategoryDetails
+     */
+    select?: MajorCategoryDetailsSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the MajorCategoryDetails
+     */
+    omit?: MajorCategoryDetailsOmit<ExtArgs> | null
+  }
+
+
+  /**
+   * Model ExpenseApprovalStage
+   */
+
+  export type AggregateExpenseApprovalStage = {
+    _count: ExpenseApprovalStageCountAggregateOutputType | null
+    _avg: ExpenseApprovalStageAvgAggregateOutputType | null
+    _sum: ExpenseApprovalStageSumAggregateOutputType | null
+    _min: ExpenseApprovalStageMinAggregateOutputType | null
+    _max: ExpenseApprovalStageMaxAggregateOutputType | null
+  }
+
+  export type ExpenseApprovalStageAvgAggregateOutputType = {
+    id: number | null
+    sortOrder: number | null
+    createdById: number | null
+  }
+
+  export type ExpenseApprovalStageSumAggregateOutputType = {
+    id: number | null
+    sortOrder: number | null
+    createdById: number | null
+  }
+
+  export type ExpenseApprovalStageMinAggregateOutputType = {
+    id: number | null
+    tableKey: string | null
+    key: string | null
+    label: string | null
+    description: string | null
+    sortOrder: number | null
+    isActive: boolean | null
+    createdById: number | null
+    createdByName: string | null
+    createdAt: Date | null
+    updatedAt: Date | null
+  }
+
+  export type ExpenseApprovalStageMaxAggregateOutputType = {
+    id: number | null
+    tableKey: string | null
+    key: string | null
+    label: string | null
+    description: string | null
+    sortOrder: number | null
+    isActive: boolean | null
+    createdById: number | null
+    createdByName: string | null
+    createdAt: Date | null
+    updatedAt: Date | null
+  }
+
+  export type ExpenseApprovalStageCountAggregateOutputType = {
+    id: number
+    tableKey: number
+    key: number
+    label: number
+    description: number
+    sortOrder: number
+    isActive: number
+    createdById: number
+    createdByName: number
+    createdAt: number
+    updatedAt: number
+    _all: number
+  }
+
+
+  export type ExpenseApprovalStageAvgAggregateInputType = {
+    id?: true
+    sortOrder?: true
+    createdById?: true
+  }
+
+  export type ExpenseApprovalStageSumAggregateInputType = {
+    id?: true
+    sortOrder?: true
+    createdById?: true
+  }
+
+  export type ExpenseApprovalStageMinAggregateInputType = {
+    id?: true
+    tableKey?: true
+    key?: true
+    label?: true
+    description?: true
+    sortOrder?: true
+    isActive?: true
+    createdById?: true
+    createdByName?: true
+    createdAt?: true
+    updatedAt?: true
+  }
+
+  export type ExpenseApprovalStageMaxAggregateInputType = {
+    id?: true
+    tableKey?: true
+    key?: true
+    label?: true
+    description?: true
+    sortOrder?: true
+    isActive?: true
+    createdById?: true
+    createdByName?: true
+    createdAt?: true
+    updatedAt?: true
+  }
+
+  export type ExpenseApprovalStageCountAggregateInputType = {
+    id?: true
+    tableKey?: true
+    key?: true
+    label?: true
+    description?: true
+    sortOrder?: true
+    isActive?: true
+    createdById?: true
+    createdByName?: true
+    createdAt?: true
+    updatedAt?: true
+    _all?: true
+  }
+
+  export type ExpenseApprovalStageAggregateArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Filter which ExpenseApprovalStage to aggregate.
+     */
+    where?: ExpenseApprovalStageWhereInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
+     * 
+     * Determine the order of ExpenseApprovalStages to fetch.
+     */
+    orderBy?: ExpenseApprovalStageOrderByWithRelationInput | ExpenseApprovalStageOrderByWithRelationInput[]
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
+     * 
+     * Sets the start position
+     */
+    cursor?: ExpenseApprovalStageWhereUniqueInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Take `±n` ExpenseApprovalStages from the position of the cursor.
+     */
+    take?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Skip the first `n` ExpenseApprovalStages.
+     */
+    skip?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     * 
+     * Count returned ExpenseApprovalStages
+    **/
+    _count?: true | ExpenseApprovalStageCountAggregateInputType
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     * 
+     * Select which fields to average
+    **/
+    _avg?: ExpenseApprovalStageAvgAggregateInputType
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     * 
+     * Select which fields to sum
+    **/
+    _sum?: ExpenseApprovalStageSumAggregateInputType
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     * 
+     * Select which fields to find the minimum value
+    **/
+    _min?: ExpenseApprovalStageMinAggregateInputType
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     * 
+     * Select which fields to find the maximum value
+    **/
+    _max?: ExpenseApprovalStageMaxAggregateInputType
+  }
+
+  export type GetExpenseApprovalStageAggregateType<T extends ExpenseApprovalStageAggregateArgs> = {
+        [P in keyof T & keyof AggregateExpenseApprovalStage]: P extends '_count' | 'count'
+      ? T[P] extends true
+        ? number
+        : GetScalarType<T[P], AggregateExpenseApprovalStage[P]>
+      : GetScalarType<T[P], AggregateExpenseApprovalStage[P]>
+  }
+
+
+
+
+  export type ExpenseApprovalStageGroupByArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    where?: ExpenseApprovalStageWhereInput
+    orderBy?: ExpenseApprovalStageOrderByWithAggregationInput | ExpenseApprovalStageOrderByWithAggregationInput[]
+    by: ExpenseApprovalStageScalarFieldEnum[] | ExpenseApprovalStageScalarFieldEnum
+    having?: ExpenseApprovalStageScalarWhereWithAggregatesInput
+    take?: number
+    skip?: number
+    _count?: ExpenseApprovalStageCountAggregateInputType | true
+    _avg?: ExpenseApprovalStageAvgAggregateInputType
+    _sum?: ExpenseApprovalStageSumAggregateInputType
+    _min?: ExpenseApprovalStageMinAggregateInputType
+    _max?: ExpenseApprovalStageMaxAggregateInputType
+  }
+
+  export type ExpenseApprovalStageGroupByOutputType = {
+    id: number
+    tableKey: string
+    key: string
+    label: string
+    description: string | null
+    sortOrder: number
+    isActive: boolean
+    createdById: number | null
+    createdByName: string | null
+    createdAt: Date
+    updatedAt: Date
+    _count: ExpenseApprovalStageCountAggregateOutputType | null
+    _avg: ExpenseApprovalStageAvgAggregateOutputType | null
+    _sum: ExpenseApprovalStageSumAggregateOutputType | null
+    _min: ExpenseApprovalStageMinAggregateOutputType | null
+    _max: ExpenseApprovalStageMaxAggregateOutputType | null
+  }
+
+  type GetExpenseApprovalStageGroupByPayload<T extends ExpenseApprovalStageGroupByArgs> = Prisma.PrismaPromise<
+    Array<
+      PickEnumerable<ExpenseApprovalStageGroupByOutputType, T['by']> &
+        {
+          [P in ((keyof T) & (keyof ExpenseApprovalStageGroupByOutputType))]: P extends '_count'
+            ? T[P] extends boolean
+              ? number
+              : GetScalarType<T[P], ExpenseApprovalStageGroupByOutputType[P]>
+            : GetScalarType<T[P], ExpenseApprovalStageGroupByOutputType[P]>
+        }
+      >
+    >
+
+
+  export type ExpenseApprovalStageSelect<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
+    id?: boolean
+    tableKey?: boolean
+    key?: boolean
+    label?: boolean
+    description?: boolean
+    sortOrder?: boolean
+    isActive?: boolean
+    createdById?: boolean
+    createdByName?: boolean
+    createdAt?: boolean
+    updatedAt?: boolean
+  }, ExtArgs["result"]["expenseApprovalStage"]>
+
+  export type ExpenseApprovalStageSelectCreateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
+    id?: boolean
+    tableKey?: boolean
+    key?: boolean
+    label?: boolean
+    description?: boolean
+    sortOrder?: boolean
+    isActive?: boolean
+    createdById?: boolean
+    createdByName?: boolean
+    createdAt?: boolean
+    updatedAt?: boolean
+  }, ExtArgs["result"]["expenseApprovalStage"]>
+
+  export type ExpenseApprovalStageSelectUpdateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
+    id?: boolean
+    tableKey?: boolean
+    key?: boolean
+    label?: boolean
+    description?: boolean
+    sortOrder?: boolean
+    isActive?: boolean
+    createdById?: boolean
+    createdByName?: boolean
+    createdAt?: boolean
+    updatedAt?: boolean
+  }, ExtArgs["result"]["expenseApprovalStage"]>
+
+  export type ExpenseApprovalStageSelectScalar = {
+    id?: boolean
+    tableKey?: boolean
+    key?: boolean
+    label?: boolean
+    description?: boolean
+    sortOrder?: boolean
+    isActive?: boolean
+    createdById?: boolean
+    createdByName?: boolean
+    createdAt?: boolean
+    updatedAt?: boolean
+  }
+
+  export type ExpenseApprovalStageOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<"id" | "tableKey" | "key" | "label" | "description" | "sortOrder" | "isActive" | "createdById" | "createdByName" | "createdAt" | "updatedAt", ExtArgs["result"]["expenseApprovalStage"]>
+
+  export type $ExpenseApprovalStagePayload<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    name: "ExpenseApprovalStage"
+    objects: {}
+    scalars: $Extensions.GetPayloadResult<{
+      id: number
+      /**
+       * Which table's chain this stage belongs to, or the sentinel '*' (see
+       * ALL_TABLES in expenseAccessService.ts) for the SHARED DEFAULT chain
+       * every table walks unless it has rows of its own here. A table with
+       * any row of its own uses ONLY those (its complete chain), never a mix
+       * of its own rows and the default's — e.g. Segment Master and Size
+       * Master each get their own 3-stage Category Head -> Planning -> MDM
+       * chain, while National Grid and Major Category Grid still fall
+       * through to the '*' default (Category Head -> MDM).
+       */
+      tableKey: string
+      key: string
+      label: string
+      description: string | null
+      sortOrder: number
+      /**
+       * A retired stage is skipped when building new chains and can no longer
+       * be granted, but is kept (not deleted) so past requests' trails still
+       * resolve its label — see `key`.
+       */
+      isActive: boolean
+      createdById: number | null
+      createdByName: string | null
+      createdAt: Date
+      updatedAt: Date
+    }, ExtArgs["result"]["expenseApprovalStage"]>
+    composites: {}
+  }
+
+  type ExpenseApprovalStageGetPayload<S extends boolean | null | undefined | ExpenseApprovalStageDefaultArgs> = $Result.GetResult<Prisma.$ExpenseApprovalStagePayload, S>
+
+  type ExpenseApprovalStageCountArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> =
+    Omit<ExpenseApprovalStageFindManyArgs, 'select' | 'include' | 'distinct' | 'omit'> & {
+      select?: ExpenseApprovalStageCountAggregateInputType | true
+    }
+
+  export interface ExpenseApprovalStageDelegate<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs, GlobalOmitOptions = {}> {
+    [K: symbol]: { types: Prisma.TypeMap<ExtArgs>['model']['ExpenseApprovalStage'], meta: { name: 'ExpenseApprovalStage' } }
+    /**
+     * Find zero or one ExpenseApprovalStage that matches the filter.
+     * @param {ExpenseApprovalStageFindUniqueArgs} args - Arguments to find a ExpenseApprovalStage
+     * @example
+     * // Get one ExpenseApprovalStage
+     * const expenseApprovalStage = await prisma.expenseApprovalStage.findUnique({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     */
+    findUnique<T extends ExpenseApprovalStageFindUniqueArgs>(args: SelectSubset<T, ExpenseApprovalStageFindUniqueArgs<ExtArgs>>): Prisma__ExpenseApprovalStageClient<$Result.GetResult<Prisma.$ExpenseApprovalStagePayload<ExtArgs>, T, "findUnique", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Find one ExpenseApprovalStage that matches the filter or throw an error with `error.code='P2025'`
+     * if no matches were found.
+     * @param {ExpenseApprovalStageFindUniqueOrThrowArgs} args - Arguments to find a ExpenseApprovalStage
+     * @example
+     * // Get one ExpenseApprovalStage
+     * const expenseApprovalStage = await prisma.expenseApprovalStage.findUniqueOrThrow({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     */
+    findUniqueOrThrow<T extends ExpenseApprovalStageFindUniqueOrThrowArgs>(args: SelectSubset<T, ExpenseApprovalStageFindUniqueOrThrowArgs<ExtArgs>>): Prisma__ExpenseApprovalStageClient<$Result.GetResult<Prisma.$ExpenseApprovalStagePayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Find the first ExpenseApprovalStage that matches the filter.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {ExpenseApprovalStageFindFirstArgs} args - Arguments to find a ExpenseApprovalStage
+     * @example
+     * // Get one ExpenseApprovalStage
+     * const expenseApprovalStage = await prisma.expenseApprovalStage.findFirst({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     */
+    findFirst<T extends ExpenseApprovalStageFindFirstArgs>(args?: SelectSubset<T, ExpenseApprovalStageFindFirstArgs<ExtArgs>>): Prisma__ExpenseApprovalStageClient<$Result.GetResult<Prisma.$ExpenseApprovalStagePayload<ExtArgs>, T, "findFirst", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Find the first ExpenseApprovalStage that matches the filter or
+     * throw `PrismaKnownClientError` with `P2025` code if no matches were found.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {ExpenseApprovalStageFindFirstOrThrowArgs} args - Arguments to find a ExpenseApprovalStage
+     * @example
+     * // Get one ExpenseApprovalStage
+     * const expenseApprovalStage = await prisma.expenseApprovalStage.findFirstOrThrow({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     */
+    findFirstOrThrow<T extends ExpenseApprovalStageFindFirstOrThrowArgs>(args?: SelectSubset<T, ExpenseApprovalStageFindFirstOrThrowArgs<ExtArgs>>): Prisma__ExpenseApprovalStageClient<$Result.GetResult<Prisma.$ExpenseApprovalStagePayload<ExtArgs>, T, "findFirstOrThrow", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Find zero or more ExpenseApprovalStages that matches the filter.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {ExpenseApprovalStageFindManyArgs} args - Arguments to filter and select certain fields only.
+     * @example
+     * // Get all ExpenseApprovalStages
+     * const expenseApprovalStages = await prisma.expenseApprovalStage.findMany()
+     * 
+     * // Get first 10 ExpenseApprovalStages
+     * const expenseApprovalStages = await prisma.expenseApprovalStage.findMany({ take: 10 })
+     * 
+     * // Only select the `id`
+     * const expenseApprovalStageWithIdOnly = await prisma.expenseApprovalStage.findMany({ select: { id: true } })
+     * 
+     */
+    findMany<T extends ExpenseApprovalStageFindManyArgs>(args?: SelectSubset<T, ExpenseApprovalStageFindManyArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$ExpenseApprovalStagePayload<ExtArgs>, T, "findMany", GlobalOmitOptions>>
+
+    /**
+     * Create a ExpenseApprovalStage.
+     * @param {ExpenseApprovalStageCreateArgs} args - Arguments to create a ExpenseApprovalStage.
+     * @example
+     * // Create one ExpenseApprovalStage
+     * const ExpenseApprovalStage = await prisma.expenseApprovalStage.create({
+     *   data: {
+     *     // ... data to create a ExpenseApprovalStage
+     *   }
+     * })
+     * 
+     */
+    create<T extends ExpenseApprovalStageCreateArgs>(args: SelectSubset<T, ExpenseApprovalStageCreateArgs<ExtArgs>>): Prisma__ExpenseApprovalStageClient<$Result.GetResult<Prisma.$ExpenseApprovalStagePayload<ExtArgs>, T, "create", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Create many ExpenseApprovalStages.
+     * @param {ExpenseApprovalStageCreateManyArgs} args - Arguments to create many ExpenseApprovalStages.
+     * @example
+     * // Create many ExpenseApprovalStages
+     * const expenseApprovalStage = await prisma.expenseApprovalStage.createMany({
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     *     
+     */
+    createMany<T extends ExpenseApprovalStageCreateManyArgs>(args?: SelectSubset<T, ExpenseApprovalStageCreateManyArgs<ExtArgs>>): Prisma.PrismaPromise<BatchPayload>
+
+    /**
+     * Create many ExpenseApprovalStages and returns the data saved in the database.
+     * @param {ExpenseApprovalStageCreateManyAndReturnArgs} args - Arguments to create many ExpenseApprovalStages.
+     * @example
+     * // Create many ExpenseApprovalStages
+     * const expenseApprovalStage = await prisma.expenseApprovalStage.createManyAndReturn({
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     * 
+     * // Create many ExpenseApprovalStages and only return the `id`
+     * const expenseApprovalStageWithIdOnly = await prisma.expenseApprovalStage.createManyAndReturn({
+     *   select: { id: true },
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * 
+     */
+    createManyAndReturn<T extends ExpenseApprovalStageCreateManyAndReturnArgs>(args?: SelectSubset<T, ExpenseApprovalStageCreateManyAndReturnArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$ExpenseApprovalStagePayload<ExtArgs>, T, "createManyAndReturn", GlobalOmitOptions>>
+
+    /**
+     * Delete a ExpenseApprovalStage.
+     * @param {ExpenseApprovalStageDeleteArgs} args - Arguments to delete one ExpenseApprovalStage.
+     * @example
+     * // Delete one ExpenseApprovalStage
+     * const ExpenseApprovalStage = await prisma.expenseApprovalStage.delete({
+     *   where: {
+     *     // ... filter to delete one ExpenseApprovalStage
+     *   }
+     * })
+     * 
+     */
+    delete<T extends ExpenseApprovalStageDeleteArgs>(args: SelectSubset<T, ExpenseApprovalStageDeleteArgs<ExtArgs>>): Prisma__ExpenseApprovalStageClient<$Result.GetResult<Prisma.$ExpenseApprovalStagePayload<ExtArgs>, T, "delete", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Update one ExpenseApprovalStage.
+     * @param {ExpenseApprovalStageUpdateArgs} args - Arguments to update one ExpenseApprovalStage.
+     * @example
+     * // Update one ExpenseApprovalStage
+     * const expenseApprovalStage = await prisma.expenseApprovalStage.update({
+     *   where: {
+     *     // ... provide filter here
+     *   },
+     *   data: {
+     *     // ... provide data here
+     *   }
+     * })
+     * 
+     */
+    update<T extends ExpenseApprovalStageUpdateArgs>(args: SelectSubset<T, ExpenseApprovalStageUpdateArgs<ExtArgs>>): Prisma__ExpenseApprovalStageClient<$Result.GetResult<Prisma.$ExpenseApprovalStagePayload<ExtArgs>, T, "update", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Delete zero or more ExpenseApprovalStages.
+     * @param {ExpenseApprovalStageDeleteManyArgs} args - Arguments to filter ExpenseApprovalStages to delete.
+     * @example
+     * // Delete a few ExpenseApprovalStages
+     * const { count } = await prisma.expenseApprovalStage.deleteMany({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     * 
+     */
+    deleteMany<T extends ExpenseApprovalStageDeleteManyArgs>(args?: SelectSubset<T, ExpenseApprovalStageDeleteManyArgs<ExtArgs>>): Prisma.PrismaPromise<BatchPayload>
+
+    /**
+     * Update zero or more ExpenseApprovalStages.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {ExpenseApprovalStageUpdateManyArgs} args - Arguments to update one or more rows.
+     * @example
+     * // Update many ExpenseApprovalStages
+     * const expenseApprovalStage = await prisma.expenseApprovalStage.updateMany({
+     *   where: {
+     *     // ... provide filter here
+     *   },
+     *   data: {
+     *     // ... provide data here
+     *   }
+     * })
+     * 
+     */
+    updateMany<T extends ExpenseApprovalStageUpdateManyArgs>(args: SelectSubset<T, ExpenseApprovalStageUpdateManyArgs<ExtArgs>>): Prisma.PrismaPromise<BatchPayload>
+
+    /**
+     * Update zero or more ExpenseApprovalStages and returns the data updated in the database.
+     * @param {ExpenseApprovalStageUpdateManyAndReturnArgs} args - Arguments to update many ExpenseApprovalStages.
+     * @example
+     * // Update many ExpenseApprovalStages
+     * const expenseApprovalStage = await prisma.expenseApprovalStage.updateManyAndReturn({
+     *   where: {
+     *     // ... provide filter here
+     *   },
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     * 
+     * // Update zero or more ExpenseApprovalStages and only return the `id`
+     * const expenseApprovalStageWithIdOnly = await prisma.expenseApprovalStage.updateManyAndReturn({
+     *   select: { id: true },
+     *   where: {
+     *     // ... provide filter here
+     *   },
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * 
+     */
+    updateManyAndReturn<T extends ExpenseApprovalStageUpdateManyAndReturnArgs>(args: SelectSubset<T, ExpenseApprovalStageUpdateManyAndReturnArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$ExpenseApprovalStagePayload<ExtArgs>, T, "updateManyAndReturn", GlobalOmitOptions>>
+
+    /**
+     * Create or update one ExpenseApprovalStage.
+     * @param {ExpenseApprovalStageUpsertArgs} args - Arguments to update or create a ExpenseApprovalStage.
+     * @example
+     * // Update or create a ExpenseApprovalStage
+     * const expenseApprovalStage = await prisma.expenseApprovalStage.upsert({
+     *   create: {
+     *     // ... data to create a ExpenseApprovalStage
+     *   },
+     *   update: {
+     *     // ... in case it already exists, update
+     *   },
+     *   where: {
+     *     // ... the filter for the ExpenseApprovalStage we want to update
+     *   }
+     * })
+     */
+    upsert<T extends ExpenseApprovalStageUpsertArgs>(args: SelectSubset<T, ExpenseApprovalStageUpsertArgs<ExtArgs>>): Prisma__ExpenseApprovalStageClient<$Result.GetResult<Prisma.$ExpenseApprovalStagePayload<ExtArgs>, T, "upsert", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+
+    /**
+     * Count the number of ExpenseApprovalStages.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {ExpenseApprovalStageCountArgs} args - Arguments to filter ExpenseApprovalStages to count.
+     * @example
+     * // Count the number of ExpenseApprovalStages
+     * const count = await prisma.expenseApprovalStage.count({
+     *   where: {
+     *     // ... the filter for the ExpenseApprovalStages we want to count
+     *   }
+     * })
+    **/
+    count<T extends ExpenseApprovalStageCountArgs>(
+      args?: Subset<T, ExpenseApprovalStageCountArgs>,
+    ): Prisma.PrismaPromise<
+      T extends $Utils.Record<'select', any>
+        ? T['select'] extends true
+          ? number
+          : GetScalarType<T['select'], ExpenseApprovalStageCountAggregateOutputType>
+        : number
+    >
+
+    /**
+     * Allows you to perform aggregations operations on a ExpenseApprovalStage.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {ExpenseApprovalStageAggregateArgs} args - Select which aggregations you would like to apply and on what fields.
+     * @example
+     * // Ordered by age ascending
+     * // Where email contains prisma.io
+     * // Limited to the 10 users
+     * const aggregations = await prisma.user.aggregate({
+     *   _avg: {
+     *     age: true,
+     *   },
+     *   where: {
+     *     email: {
+     *       contains: "prisma.io",
+     *     },
+     *   },
+     *   orderBy: {
+     *     age: "asc",
+     *   },
+     *   take: 10,
+     * })
+    **/
+    aggregate<T extends ExpenseApprovalStageAggregateArgs>(args: Subset<T, ExpenseApprovalStageAggregateArgs>): Prisma.PrismaPromise<GetExpenseApprovalStageAggregateType<T>>
+
+    /**
+     * Group by ExpenseApprovalStage.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {ExpenseApprovalStageGroupByArgs} args - Group by arguments.
+     * @example
+     * // Group by city, order by createdAt, get count
+     * const result = await prisma.user.groupBy({
+     *   by: ['city', 'createdAt'],
+     *   orderBy: {
+     *     createdAt: true
+     *   },
+     *   _count: {
+     *     _all: true
+     *   },
+     * })
+     * 
+    **/
+    groupBy<
+      T extends ExpenseApprovalStageGroupByArgs,
+      HasSelectOrTake extends Or<
+        Extends<'skip', Keys<T>>,
+        Extends<'take', Keys<T>>
+      >,
+      OrderByArg extends True extends HasSelectOrTake
+        ? { orderBy: ExpenseApprovalStageGroupByArgs['orderBy'] }
+        : { orderBy?: ExpenseApprovalStageGroupByArgs['orderBy'] },
+      OrderFields extends ExcludeUnderscoreKeys<Keys<MaybeTupleToUnion<T['orderBy']>>>,
+      ByFields extends MaybeTupleToUnion<T['by']>,
+      ByValid extends Has<ByFields, OrderFields>,
+      HavingFields extends GetHavingFields<T['having']>,
+      HavingValid extends Has<ByFields, HavingFields>,
+      ByEmpty extends T['by'] extends never[] ? True : False,
+      InputErrors extends ByEmpty extends True
+      ? `Error: "by" must not be empty.`
+      : HavingValid extends False
+      ? {
+          [P in HavingFields]: P extends ByFields
+            ? never
+            : P extends string
+            ? `Error: Field "${P}" used in "having" needs to be provided in "by".`
+            : [
+                Error,
+                'Field ',
+                P,
+                ` in "having" needs to be provided in "by"`,
+              ]
+        }[HavingFields]
+      : 'take' extends Keys<T>
+      ? 'orderBy' extends Keys<T>
+        ? ByValid extends True
+          ? {}
+          : {
+              [P in OrderFields]: P extends ByFields
+                ? never
+                : `Error: Field "${P}" in "orderBy" needs to be provided in "by"`
+            }[OrderFields]
+        : 'Error: If you provide "take", you also need to provide "orderBy"'
+      : 'skip' extends Keys<T>
+      ? 'orderBy' extends Keys<T>
+        ? ByValid extends True
+          ? {}
+          : {
+              [P in OrderFields]: P extends ByFields
+                ? never
+                : `Error: Field "${P}" in "orderBy" needs to be provided in "by"`
+            }[OrderFields]
+        : 'Error: If you provide "skip", you also need to provide "orderBy"'
+      : ByValid extends True
+      ? {}
+      : {
+          [P in OrderFields]: P extends ByFields
+            ? never
+            : `Error: Field "${P}" in "orderBy" needs to be provided in "by"`
+        }[OrderFields]
+    >(args: SubsetIntersection<T, ExpenseApprovalStageGroupByArgs, OrderByArg> & InputErrors): {} extends InputErrors ? GetExpenseApprovalStageGroupByPayload<T> : Prisma.PrismaPromise<InputErrors>
+  /**
+   * Fields of the ExpenseApprovalStage model
+   */
+  readonly fields: ExpenseApprovalStageFieldRefs;
+  }
+
+  /**
+   * The delegate class that acts as a "Promise-like" for ExpenseApprovalStage.
+   * Why is this prefixed with `Prisma__`?
+   * Because we want to prevent naming conflicts as mentioned in
+   * https://github.com/prisma/prisma-client-js/issues/707
+   */
+  export interface Prisma__ExpenseApprovalStageClient<T, Null = never, ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs, GlobalOmitOptions = {}> extends Prisma.PrismaPromise<T> {
+    readonly [Symbol.toStringTag]: "PrismaPromise"
+    /**
+     * Attaches callbacks for the resolution and/or rejection of the Promise.
+     * @param onfulfilled The callback to execute when the Promise is resolved.
+     * @param onrejected The callback to execute when the Promise is rejected.
+     * @returns A Promise for the completion of which ever callback is executed.
+     */
+    then<TResult1 = T, TResult2 = never>(onfulfilled?: ((value: T) => TResult1 | PromiseLike<TResult1>) | undefined | null, onrejected?: ((reason: any) => TResult2 | PromiseLike<TResult2>) | undefined | null): $Utils.JsPromise<TResult1 | TResult2>
+    /**
+     * Attaches a callback for only the rejection of the Promise.
+     * @param onrejected The callback to execute when the Promise is rejected.
+     * @returns A Promise for the completion of the callback.
+     */
+    catch<TResult = never>(onrejected?: ((reason: any) => TResult | PromiseLike<TResult>) | undefined | null): $Utils.JsPromise<T | TResult>
+    /**
+     * Attaches a callback that is invoked when the Promise is settled (fulfilled or rejected). The
+     * resolved value cannot be modified from the callback.
+     * @param onfinally The callback to execute when the Promise is settled (fulfilled or rejected).
+     * @returns A Promise for the completion of the callback.
+     */
+    finally(onfinally?: (() => void) | undefined | null): $Utils.JsPromise<T>
+  }
+
+
+
+
+  /**
+   * Fields of the ExpenseApprovalStage model
+   */
+  interface ExpenseApprovalStageFieldRefs {
+    readonly id: FieldRef<"ExpenseApprovalStage", 'Int'>
+    readonly tableKey: FieldRef<"ExpenseApprovalStage", 'String'>
+    readonly key: FieldRef<"ExpenseApprovalStage", 'String'>
+    readonly label: FieldRef<"ExpenseApprovalStage", 'String'>
+    readonly description: FieldRef<"ExpenseApprovalStage", 'String'>
+    readonly sortOrder: FieldRef<"ExpenseApprovalStage", 'Int'>
+    readonly isActive: FieldRef<"ExpenseApprovalStage", 'Boolean'>
+    readonly createdById: FieldRef<"ExpenseApprovalStage", 'Int'>
+    readonly createdByName: FieldRef<"ExpenseApprovalStage", 'String'>
+    readonly createdAt: FieldRef<"ExpenseApprovalStage", 'DateTime'>
+    readonly updatedAt: FieldRef<"ExpenseApprovalStage", 'DateTime'>
+  }
+    
+
+  // Custom InputTypes
+  /**
+   * ExpenseApprovalStage findUnique
+   */
+  export type ExpenseApprovalStageFindUniqueArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the ExpenseApprovalStage
+     */
+    select?: ExpenseApprovalStageSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the ExpenseApprovalStage
+     */
+    omit?: ExpenseApprovalStageOmit<ExtArgs> | null
+    /**
+     * Filter, which ExpenseApprovalStage to fetch.
+     */
+    where: ExpenseApprovalStageWhereUniqueInput
+  }
+
+  /**
+   * ExpenseApprovalStage findUniqueOrThrow
+   */
+  export type ExpenseApprovalStageFindUniqueOrThrowArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the ExpenseApprovalStage
+     */
+    select?: ExpenseApprovalStageSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the ExpenseApprovalStage
+     */
+    omit?: ExpenseApprovalStageOmit<ExtArgs> | null
+    /**
+     * Filter, which ExpenseApprovalStage to fetch.
+     */
+    where: ExpenseApprovalStageWhereUniqueInput
+  }
+
+  /**
+   * ExpenseApprovalStage findFirst
+   */
+  export type ExpenseApprovalStageFindFirstArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the ExpenseApprovalStage
+     */
+    select?: ExpenseApprovalStageSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the ExpenseApprovalStage
+     */
+    omit?: ExpenseApprovalStageOmit<ExtArgs> | null
+    /**
+     * Filter, which ExpenseApprovalStage to fetch.
+     */
+    where?: ExpenseApprovalStageWhereInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
+     * 
+     * Determine the order of ExpenseApprovalStages to fetch.
+     */
+    orderBy?: ExpenseApprovalStageOrderByWithRelationInput | ExpenseApprovalStageOrderByWithRelationInput[]
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
+     * 
+     * Sets the position for searching for ExpenseApprovalStages.
+     */
+    cursor?: ExpenseApprovalStageWhereUniqueInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Take `±n` ExpenseApprovalStages from the position of the cursor.
+     */
+    take?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Skip the first `n` ExpenseApprovalStages.
+     */
+    skip?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/distinct Distinct Docs}
+     * 
+     * Filter by unique combinations of ExpenseApprovalStages.
+     */
+    distinct?: ExpenseApprovalStageScalarFieldEnum | ExpenseApprovalStageScalarFieldEnum[]
+  }
+
+  /**
+   * ExpenseApprovalStage findFirstOrThrow
+   */
+  export type ExpenseApprovalStageFindFirstOrThrowArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the ExpenseApprovalStage
+     */
+    select?: ExpenseApprovalStageSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the ExpenseApprovalStage
+     */
+    omit?: ExpenseApprovalStageOmit<ExtArgs> | null
+    /**
+     * Filter, which ExpenseApprovalStage to fetch.
+     */
+    where?: ExpenseApprovalStageWhereInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
+     * 
+     * Determine the order of ExpenseApprovalStages to fetch.
+     */
+    orderBy?: ExpenseApprovalStageOrderByWithRelationInput | ExpenseApprovalStageOrderByWithRelationInput[]
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
+     * 
+     * Sets the position for searching for ExpenseApprovalStages.
+     */
+    cursor?: ExpenseApprovalStageWhereUniqueInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Take `±n` ExpenseApprovalStages from the position of the cursor.
+     */
+    take?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Skip the first `n` ExpenseApprovalStages.
+     */
+    skip?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/distinct Distinct Docs}
+     * 
+     * Filter by unique combinations of ExpenseApprovalStages.
+     */
+    distinct?: ExpenseApprovalStageScalarFieldEnum | ExpenseApprovalStageScalarFieldEnum[]
+  }
+
+  /**
+   * ExpenseApprovalStage findMany
+   */
+  export type ExpenseApprovalStageFindManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the ExpenseApprovalStage
+     */
+    select?: ExpenseApprovalStageSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the ExpenseApprovalStage
+     */
+    omit?: ExpenseApprovalStageOmit<ExtArgs> | null
+    /**
+     * Filter, which ExpenseApprovalStages to fetch.
+     */
+    where?: ExpenseApprovalStageWhereInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
+     * 
+     * Determine the order of ExpenseApprovalStages to fetch.
+     */
+    orderBy?: ExpenseApprovalStageOrderByWithRelationInput | ExpenseApprovalStageOrderByWithRelationInput[]
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
+     * 
+     * Sets the position for listing ExpenseApprovalStages.
+     */
+    cursor?: ExpenseApprovalStageWhereUniqueInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Take `±n` ExpenseApprovalStages from the position of the cursor.
+     */
+    take?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Skip the first `n` ExpenseApprovalStages.
+     */
+    skip?: number
+    distinct?: ExpenseApprovalStageScalarFieldEnum | ExpenseApprovalStageScalarFieldEnum[]
+  }
+
+  /**
+   * ExpenseApprovalStage create
+   */
+  export type ExpenseApprovalStageCreateArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the ExpenseApprovalStage
+     */
+    select?: ExpenseApprovalStageSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the ExpenseApprovalStage
+     */
+    omit?: ExpenseApprovalStageOmit<ExtArgs> | null
+    /**
+     * The data needed to create a ExpenseApprovalStage.
+     */
+    data: XOR<ExpenseApprovalStageCreateInput, ExpenseApprovalStageUncheckedCreateInput>
+  }
+
+  /**
+   * ExpenseApprovalStage createMany
+   */
+  export type ExpenseApprovalStageCreateManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * The data used to create many ExpenseApprovalStages.
+     */
+    data: ExpenseApprovalStageCreateManyInput | ExpenseApprovalStageCreateManyInput[]
+    skipDuplicates?: boolean
+  }
+
+  /**
+   * ExpenseApprovalStage createManyAndReturn
+   */
+  export type ExpenseApprovalStageCreateManyAndReturnArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the ExpenseApprovalStage
+     */
+    select?: ExpenseApprovalStageSelectCreateManyAndReturn<ExtArgs> | null
+    /**
+     * Omit specific fields from the ExpenseApprovalStage
+     */
+    omit?: ExpenseApprovalStageOmit<ExtArgs> | null
+    /**
+     * The data used to create many ExpenseApprovalStages.
+     */
+    data: ExpenseApprovalStageCreateManyInput | ExpenseApprovalStageCreateManyInput[]
+    skipDuplicates?: boolean
+  }
+
+  /**
+   * ExpenseApprovalStage update
+   */
+  export type ExpenseApprovalStageUpdateArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the ExpenseApprovalStage
+     */
+    select?: ExpenseApprovalStageSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the ExpenseApprovalStage
+     */
+    omit?: ExpenseApprovalStageOmit<ExtArgs> | null
+    /**
+     * The data needed to update a ExpenseApprovalStage.
+     */
+    data: XOR<ExpenseApprovalStageUpdateInput, ExpenseApprovalStageUncheckedUpdateInput>
+    /**
+     * Choose, which ExpenseApprovalStage to update.
+     */
+    where: ExpenseApprovalStageWhereUniqueInput
+  }
+
+  /**
+   * ExpenseApprovalStage updateMany
+   */
+  export type ExpenseApprovalStageUpdateManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * The data used to update ExpenseApprovalStages.
+     */
+    data: XOR<ExpenseApprovalStageUpdateManyMutationInput, ExpenseApprovalStageUncheckedUpdateManyInput>
+    /**
+     * Filter which ExpenseApprovalStages to update
+     */
+    where?: ExpenseApprovalStageWhereInput
+    /**
+     * Limit how many ExpenseApprovalStages to update.
+     */
+    limit?: number
+  }
+
+  /**
+   * ExpenseApprovalStage updateManyAndReturn
+   */
+  export type ExpenseApprovalStageUpdateManyAndReturnArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the ExpenseApprovalStage
+     */
+    select?: ExpenseApprovalStageSelectUpdateManyAndReturn<ExtArgs> | null
+    /**
+     * Omit specific fields from the ExpenseApprovalStage
+     */
+    omit?: ExpenseApprovalStageOmit<ExtArgs> | null
+    /**
+     * The data used to update ExpenseApprovalStages.
+     */
+    data: XOR<ExpenseApprovalStageUpdateManyMutationInput, ExpenseApprovalStageUncheckedUpdateManyInput>
+    /**
+     * Filter which ExpenseApprovalStages to update
+     */
+    where?: ExpenseApprovalStageWhereInput
+    /**
+     * Limit how many ExpenseApprovalStages to update.
+     */
+    limit?: number
+  }
+
+  /**
+   * ExpenseApprovalStage upsert
+   */
+  export type ExpenseApprovalStageUpsertArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the ExpenseApprovalStage
+     */
+    select?: ExpenseApprovalStageSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the ExpenseApprovalStage
+     */
+    omit?: ExpenseApprovalStageOmit<ExtArgs> | null
+    /**
+     * The filter to search for the ExpenseApprovalStage to update in case it exists.
+     */
+    where: ExpenseApprovalStageWhereUniqueInput
+    /**
+     * In case the ExpenseApprovalStage found by the `where` argument doesn't exist, create a new ExpenseApprovalStage with this data.
+     */
+    create: XOR<ExpenseApprovalStageCreateInput, ExpenseApprovalStageUncheckedCreateInput>
+    /**
+     * In case the ExpenseApprovalStage was found with the provided `where` argument, update it with this data.
+     */
+    update: XOR<ExpenseApprovalStageUpdateInput, ExpenseApprovalStageUncheckedUpdateInput>
+  }
+
+  /**
+   * ExpenseApprovalStage delete
+   */
+  export type ExpenseApprovalStageDeleteArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the ExpenseApprovalStage
+     */
+    select?: ExpenseApprovalStageSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the ExpenseApprovalStage
+     */
+    omit?: ExpenseApprovalStageOmit<ExtArgs> | null
+    /**
+     * Filter which ExpenseApprovalStage to delete.
+     */
+    where: ExpenseApprovalStageWhereUniqueInput
+  }
+
+  /**
+   * ExpenseApprovalStage deleteMany
+   */
+  export type ExpenseApprovalStageDeleteManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Filter which ExpenseApprovalStages to delete
+     */
+    where?: ExpenseApprovalStageWhereInput
+    /**
+     * Limit how many ExpenseApprovalStages to delete.
+     */
+    limit?: number
+  }
+
+  /**
+   * ExpenseApprovalStage without action
+   */
+  export type ExpenseApprovalStageDefaultArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the ExpenseApprovalStage
+     */
+    select?: ExpenseApprovalStageSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the ExpenseApprovalStage
+     */
+    omit?: ExpenseApprovalStageOmit<ExtArgs> | null
+  }
+
+
+  /**
+   * Model ExpenseChangeRequest
+   */
+
+  export type AggregateExpenseChangeRequest = {
+    _count: ExpenseChangeRequestCountAggregateOutputType | null
+    _avg: ExpenseChangeRequestAvgAggregateOutputType | null
+    _sum: ExpenseChangeRequestSumAggregateOutputType | null
+    _min: ExpenseChangeRequestMinAggregateOutputType | null
+    _max: ExpenseChangeRequestMaxAggregateOutputType | null
+  }
+
+  export type ExpenseChangeRequestAvgAggregateOutputType = {
+    requestedById: number | null
+  }
+
+  export type ExpenseChangeRequestSumAggregateOutputType = {
+    requestedById: number | null
+  }
+
+  export type ExpenseChangeRequestMinAggregateOutputType = {
+    id: string | null
+    tableKey: string | null
+    operation: $Enums.ExpenseChangeOperation | null
+    rowId: string | null
+    appliedRowId: string | null
+    rowLabel: string | null
+    reason: string | null
+    dueDate: Date | null
+    status: $Enums.ExpenseChangeStatus | null
+    currentStageKey: string | null
+    requestedById: number | null
+    requestedByName: string | null
+    requestedByEmail: string | null
+    requestedAt: Date | null
+    requesterBusinessDivision: string | null
+    createdAt: Date | null
+    updatedAt: Date | null
+  }
+
+  export type ExpenseChangeRequestMaxAggregateOutputType = {
+    id: string | null
+    tableKey: string | null
+    operation: $Enums.ExpenseChangeOperation | null
+    rowId: string | null
+    appliedRowId: string | null
+    rowLabel: string | null
+    reason: string | null
+    dueDate: Date | null
+    status: $Enums.ExpenseChangeStatus | null
+    currentStageKey: string | null
+    requestedById: number | null
+    requestedByName: string | null
+    requestedByEmail: string | null
+    requestedAt: Date | null
+    requesterBusinessDivision: string | null
+    createdAt: Date | null
+    updatedAt: Date | null
+  }
+
+  export type ExpenseChangeRequestCountAggregateOutputType = {
+    id: number
+    tableKey: number
+    operation: number
+    rowId: number
+    appliedRowId: number
+    rowLabel: number
+    changes: number
+    reason: number
+    dueDate: number
+    status: number
+    currentStageKey: number
+    approvalTrail: number
+    requestedById: number
+    requestedByName: number
+    requestedByEmail: number
+    requestedAt: number
+    requesterBusinessDivision: number
+    createdAt: number
+    updatedAt: number
+    _all: number
+  }
+
+
+  export type ExpenseChangeRequestAvgAggregateInputType = {
+    requestedById?: true
+  }
+
+  export type ExpenseChangeRequestSumAggregateInputType = {
+    requestedById?: true
+  }
+
+  export type ExpenseChangeRequestMinAggregateInputType = {
+    id?: true
+    tableKey?: true
+    operation?: true
+    rowId?: true
+    appliedRowId?: true
+    rowLabel?: true
+    reason?: true
+    dueDate?: true
+    status?: true
+    currentStageKey?: true
+    requestedById?: true
+    requestedByName?: true
+    requestedByEmail?: true
+    requestedAt?: true
+    requesterBusinessDivision?: true
+    createdAt?: true
+    updatedAt?: true
+  }
+
+  export type ExpenseChangeRequestMaxAggregateInputType = {
+    id?: true
+    tableKey?: true
+    operation?: true
+    rowId?: true
+    appliedRowId?: true
+    rowLabel?: true
+    reason?: true
+    dueDate?: true
+    status?: true
+    currentStageKey?: true
+    requestedById?: true
+    requestedByName?: true
+    requestedByEmail?: true
+    requestedAt?: true
+    requesterBusinessDivision?: true
+    createdAt?: true
+    updatedAt?: true
+  }
+
+  export type ExpenseChangeRequestCountAggregateInputType = {
+    id?: true
+    tableKey?: true
+    operation?: true
+    rowId?: true
+    appliedRowId?: true
+    rowLabel?: true
+    changes?: true
+    reason?: true
+    dueDate?: true
+    status?: true
+    currentStageKey?: true
+    approvalTrail?: true
+    requestedById?: true
+    requestedByName?: true
+    requestedByEmail?: true
+    requestedAt?: true
+    requesterBusinessDivision?: true
+    createdAt?: true
+    updatedAt?: true
+    _all?: true
+  }
+
+  export type ExpenseChangeRequestAggregateArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Filter which ExpenseChangeRequest to aggregate.
+     */
+    where?: ExpenseChangeRequestWhereInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
+     * 
+     * Determine the order of ExpenseChangeRequests to fetch.
+     */
+    orderBy?: ExpenseChangeRequestOrderByWithRelationInput | ExpenseChangeRequestOrderByWithRelationInput[]
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
+     * 
+     * Sets the start position
+     */
+    cursor?: ExpenseChangeRequestWhereUniqueInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Take `±n` ExpenseChangeRequests from the position of the cursor.
+     */
+    take?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Skip the first `n` ExpenseChangeRequests.
+     */
+    skip?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     * 
+     * Count returned ExpenseChangeRequests
+    **/
+    _count?: true | ExpenseChangeRequestCountAggregateInputType
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     * 
+     * Select which fields to average
+    **/
+    _avg?: ExpenseChangeRequestAvgAggregateInputType
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     * 
+     * Select which fields to sum
+    **/
+    _sum?: ExpenseChangeRequestSumAggregateInputType
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     * 
+     * Select which fields to find the minimum value
+    **/
+    _min?: ExpenseChangeRequestMinAggregateInputType
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     * 
+     * Select which fields to find the maximum value
+    **/
+    _max?: ExpenseChangeRequestMaxAggregateInputType
+  }
+
+  export type GetExpenseChangeRequestAggregateType<T extends ExpenseChangeRequestAggregateArgs> = {
+        [P in keyof T & keyof AggregateExpenseChangeRequest]: P extends '_count' | 'count'
+      ? T[P] extends true
+        ? number
+        : GetScalarType<T[P], AggregateExpenseChangeRequest[P]>
+      : GetScalarType<T[P], AggregateExpenseChangeRequest[P]>
+  }
+
+
+
+
+  export type ExpenseChangeRequestGroupByArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    where?: ExpenseChangeRequestWhereInput
+    orderBy?: ExpenseChangeRequestOrderByWithAggregationInput | ExpenseChangeRequestOrderByWithAggregationInput[]
+    by: ExpenseChangeRequestScalarFieldEnum[] | ExpenseChangeRequestScalarFieldEnum
+    having?: ExpenseChangeRequestScalarWhereWithAggregatesInput
+    take?: number
+    skip?: number
+    _count?: ExpenseChangeRequestCountAggregateInputType | true
+    _avg?: ExpenseChangeRequestAvgAggregateInputType
+    _sum?: ExpenseChangeRequestSumAggregateInputType
+    _min?: ExpenseChangeRequestMinAggregateInputType
+    _max?: ExpenseChangeRequestMaxAggregateInputType
+  }
+
+  export type ExpenseChangeRequestGroupByOutputType = {
+    id: string
+    tableKey: string
+    operation: $Enums.ExpenseChangeOperation
+    rowId: string | null
+    appliedRowId: string | null
+    rowLabel: string | null
+    changes: JsonValue
+    reason: string
+    dueDate: Date | null
+    status: $Enums.ExpenseChangeStatus
+    currentStageKey: string | null
+    approvalTrail: JsonValue
+    requestedById: number
+    requestedByName: string
+    requestedByEmail: string
+    requestedAt: Date
+    requesterBusinessDivision: string | null
+    createdAt: Date
+    updatedAt: Date
+    _count: ExpenseChangeRequestCountAggregateOutputType | null
+    _avg: ExpenseChangeRequestAvgAggregateOutputType | null
+    _sum: ExpenseChangeRequestSumAggregateOutputType | null
+    _min: ExpenseChangeRequestMinAggregateOutputType | null
+    _max: ExpenseChangeRequestMaxAggregateOutputType | null
+  }
+
+  type GetExpenseChangeRequestGroupByPayload<T extends ExpenseChangeRequestGroupByArgs> = Prisma.PrismaPromise<
+    Array<
+      PickEnumerable<ExpenseChangeRequestGroupByOutputType, T['by']> &
+        {
+          [P in ((keyof T) & (keyof ExpenseChangeRequestGroupByOutputType))]: P extends '_count'
+            ? T[P] extends boolean
+              ? number
+              : GetScalarType<T[P], ExpenseChangeRequestGroupByOutputType[P]>
+            : GetScalarType<T[P], ExpenseChangeRequestGroupByOutputType[P]>
+        }
+      >
+    >
+
+
+  export type ExpenseChangeRequestSelect<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
+    id?: boolean
+    tableKey?: boolean
+    operation?: boolean
+    rowId?: boolean
+    appliedRowId?: boolean
+    rowLabel?: boolean
+    changes?: boolean
+    reason?: boolean
+    dueDate?: boolean
+    status?: boolean
+    currentStageKey?: boolean
+    approvalTrail?: boolean
+    requestedById?: boolean
+    requestedByName?: boolean
+    requestedByEmail?: boolean
+    requestedAt?: boolean
+    requesterBusinessDivision?: boolean
+    createdAt?: boolean
+    updatedAt?: boolean
+  }, ExtArgs["result"]["expenseChangeRequest"]>
+
+  export type ExpenseChangeRequestSelectCreateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
+    id?: boolean
+    tableKey?: boolean
+    operation?: boolean
+    rowId?: boolean
+    appliedRowId?: boolean
+    rowLabel?: boolean
+    changes?: boolean
+    reason?: boolean
+    dueDate?: boolean
+    status?: boolean
+    currentStageKey?: boolean
+    approvalTrail?: boolean
+    requestedById?: boolean
+    requestedByName?: boolean
+    requestedByEmail?: boolean
+    requestedAt?: boolean
+    requesterBusinessDivision?: boolean
+    createdAt?: boolean
+    updatedAt?: boolean
+  }, ExtArgs["result"]["expenseChangeRequest"]>
+
+  export type ExpenseChangeRequestSelectUpdateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
+    id?: boolean
+    tableKey?: boolean
+    operation?: boolean
+    rowId?: boolean
+    appliedRowId?: boolean
+    rowLabel?: boolean
+    changes?: boolean
+    reason?: boolean
+    dueDate?: boolean
+    status?: boolean
+    currentStageKey?: boolean
+    approvalTrail?: boolean
+    requestedById?: boolean
+    requestedByName?: boolean
+    requestedByEmail?: boolean
+    requestedAt?: boolean
+    requesterBusinessDivision?: boolean
+    createdAt?: boolean
+    updatedAt?: boolean
+  }, ExtArgs["result"]["expenseChangeRequest"]>
+
+  export type ExpenseChangeRequestSelectScalar = {
+    id?: boolean
+    tableKey?: boolean
+    operation?: boolean
+    rowId?: boolean
+    appliedRowId?: boolean
+    rowLabel?: boolean
+    changes?: boolean
+    reason?: boolean
+    dueDate?: boolean
+    status?: boolean
+    currentStageKey?: boolean
+    approvalTrail?: boolean
+    requestedById?: boolean
+    requestedByName?: boolean
+    requestedByEmail?: boolean
+    requestedAt?: boolean
+    requesterBusinessDivision?: boolean
+    createdAt?: boolean
+    updatedAt?: boolean
+  }
+
+  export type ExpenseChangeRequestOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<"id" | "tableKey" | "operation" | "rowId" | "appliedRowId" | "rowLabel" | "changes" | "reason" | "dueDate" | "status" | "currentStageKey" | "approvalTrail" | "requestedById" | "requestedByName" | "requestedByEmail" | "requestedAt" | "requesterBusinessDivision" | "createdAt" | "updatedAt", ExtArgs["result"]["expenseChangeRequest"]>
+
+  export type $ExpenseChangeRequestPayload<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    name: "ExpenseChangeRequest"
+    objects: {}
+    scalars: $Extensions.GetPayloadResult<{
+      id: string
+      tableKey: string
+      operation: $Enums.ExpenseChangeOperation
+      /**
+       * Null only for CREATE requests, which have no row yet — `appliedRowId`
+       * records the id the insert actually got once the chain finishes.
+       */
+      rowId: string | null
+      appliedRowId: string | null
+      rowLabel: string | null
+      /**
+       * UPDATE: { field: { old, new } }. CREATE: { field: { old: null, new } }.
+       * DELETE: { field: { old, new: null } } — a full snapshot of the row that
+       * is being removed, so the audit trail survives the row itself.
+       */
+      changes: Prisma.JsonValue
+      reason: string
+      /**
+       * The date the requester needs this done by — advisory, shown at every
+       * stage so approvers can see what is running late.
+       */
+      dueDate: Date | null
+      status: $Enums.ExpenseChangeStatus
+      /**
+       * The ExpenseApprovalStage.key this request is waiting on. Set to the
+       * chain's first active stage on creation, advanced on each approval, and
+       * null once status is APPROVED or REJECTED.
+       */
+      currentStageKey: string | null
+      /**
+       * Ordered log of every action taken on this request's chain — one entry
+       * per approval/rejection: { stageKey, stageLabel, action: 'APPROVE'|
+       * 'REJECT', byId, byName, byEmail, at, comment }. Replaces a fixed
+       * approver/final column pair so the trail scales to any chain length.
+       */
+      approvalTrail: Prisma.JsonValue
+      requestedById: number
+      requestedByName: string
+      requestedByEmail: string
+      requestedAt: Date
+      /**
+       * The requester's OWN User.businessDivision at the moment they raised
+       * this request — captured once, immutable afterward (a later change to
+       * their profile must never re-route a request already in flight). This
+       * is what routes the CATEGORY_HEAD stage to the Category Head whose own
+       * businessDivision matches, instead of any Category Head being able to
+       * act on any request — see canActOnExpenseRequestStage in
+       * expenseAccessService.ts.
+       */
+      requesterBusinessDivision: string | null
+      createdAt: Date
+      updatedAt: Date
+    }, ExtArgs["result"]["expenseChangeRequest"]>
+    composites: {}
+  }
+
+  type ExpenseChangeRequestGetPayload<S extends boolean | null | undefined | ExpenseChangeRequestDefaultArgs> = $Result.GetResult<Prisma.$ExpenseChangeRequestPayload, S>
+
+  type ExpenseChangeRequestCountArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> =
+    Omit<ExpenseChangeRequestFindManyArgs, 'select' | 'include' | 'distinct' | 'omit'> & {
+      select?: ExpenseChangeRequestCountAggregateInputType | true
+    }
+
+  export interface ExpenseChangeRequestDelegate<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs, GlobalOmitOptions = {}> {
+    [K: symbol]: { types: Prisma.TypeMap<ExtArgs>['model']['ExpenseChangeRequest'], meta: { name: 'ExpenseChangeRequest' } }
+    /**
+     * Find zero or one ExpenseChangeRequest that matches the filter.
+     * @param {ExpenseChangeRequestFindUniqueArgs} args - Arguments to find a ExpenseChangeRequest
+     * @example
+     * // Get one ExpenseChangeRequest
+     * const expenseChangeRequest = await prisma.expenseChangeRequest.findUnique({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     */
+    findUnique<T extends ExpenseChangeRequestFindUniqueArgs>(args: SelectSubset<T, ExpenseChangeRequestFindUniqueArgs<ExtArgs>>): Prisma__ExpenseChangeRequestClient<$Result.GetResult<Prisma.$ExpenseChangeRequestPayload<ExtArgs>, T, "findUnique", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Find one ExpenseChangeRequest that matches the filter or throw an error with `error.code='P2025'`
+     * if no matches were found.
+     * @param {ExpenseChangeRequestFindUniqueOrThrowArgs} args - Arguments to find a ExpenseChangeRequest
+     * @example
+     * // Get one ExpenseChangeRequest
+     * const expenseChangeRequest = await prisma.expenseChangeRequest.findUniqueOrThrow({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     */
+    findUniqueOrThrow<T extends ExpenseChangeRequestFindUniqueOrThrowArgs>(args: SelectSubset<T, ExpenseChangeRequestFindUniqueOrThrowArgs<ExtArgs>>): Prisma__ExpenseChangeRequestClient<$Result.GetResult<Prisma.$ExpenseChangeRequestPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Find the first ExpenseChangeRequest that matches the filter.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {ExpenseChangeRequestFindFirstArgs} args - Arguments to find a ExpenseChangeRequest
+     * @example
+     * // Get one ExpenseChangeRequest
+     * const expenseChangeRequest = await prisma.expenseChangeRequest.findFirst({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     */
+    findFirst<T extends ExpenseChangeRequestFindFirstArgs>(args?: SelectSubset<T, ExpenseChangeRequestFindFirstArgs<ExtArgs>>): Prisma__ExpenseChangeRequestClient<$Result.GetResult<Prisma.$ExpenseChangeRequestPayload<ExtArgs>, T, "findFirst", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Find the first ExpenseChangeRequest that matches the filter or
+     * throw `PrismaKnownClientError` with `P2025` code if no matches were found.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {ExpenseChangeRequestFindFirstOrThrowArgs} args - Arguments to find a ExpenseChangeRequest
+     * @example
+     * // Get one ExpenseChangeRequest
+     * const expenseChangeRequest = await prisma.expenseChangeRequest.findFirstOrThrow({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     */
+    findFirstOrThrow<T extends ExpenseChangeRequestFindFirstOrThrowArgs>(args?: SelectSubset<T, ExpenseChangeRequestFindFirstOrThrowArgs<ExtArgs>>): Prisma__ExpenseChangeRequestClient<$Result.GetResult<Prisma.$ExpenseChangeRequestPayload<ExtArgs>, T, "findFirstOrThrow", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Find zero or more ExpenseChangeRequests that matches the filter.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {ExpenseChangeRequestFindManyArgs} args - Arguments to filter and select certain fields only.
+     * @example
+     * // Get all ExpenseChangeRequests
+     * const expenseChangeRequests = await prisma.expenseChangeRequest.findMany()
+     * 
+     * // Get first 10 ExpenseChangeRequests
+     * const expenseChangeRequests = await prisma.expenseChangeRequest.findMany({ take: 10 })
+     * 
+     * // Only select the `id`
+     * const expenseChangeRequestWithIdOnly = await prisma.expenseChangeRequest.findMany({ select: { id: true } })
+     * 
+     */
+    findMany<T extends ExpenseChangeRequestFindManyArgs>(args?: SelectSubset<T, ExpenseChangeRequestFindManyArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$ExpenseChangeRequestPayload<ExtArgs>, T, "findMany", GlobalOmitOptions>>
+
+    /**
+     * Create a ExpenseChangeRequest.
+     * @param {ExpenseChangeRequestCreateArgs} args - Arguments to create a ExpenseChangeRequest.
+     * @example
+     * // Create one ExpenseChangeRequest
+     * const ExpenseChangeRequest = await prisma.expenseChangeRequest.create({
+     *   data: {
+     *     // ... data to create a ExpenseChangeRequest
+     *   }
+     * })
+     * 
+     */
+    create<T extends ExpenseChangeRequestCreateArgs>(args: SelectSubset<T, ExpenseChangeRequestCreateArgs<ExtArgs>>): Prisma__ExpenseChangeRequestClient<$Result.GetResult<Prisma.$ExpenseChangeRequestPayload<ExtArgs>, T, "create", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Create many ExpenseChangeRequests.
+     * @param {ExpenseChangeRequestCreateManyArgs} args - Arguments to create many ExpenseChangeRequests.
+     * @example
+     * // Create many ExpenseChangeRequests
+     * const expenseChangeRequest = await prisma.expenseChangeRequest.createMany({
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     *     
+     */
+    createMany<T extends ExpenseChangeRequestCreateManyArgs>(args?: SelectSubset<T, ExpenseChangeRequestCreateManyArgs<ExtArgs>>): Prisma.PrismaPromise<BatchPayload>
+
+    /**
+     * Create many ExpenseChangeRequests and returns the data saved in the database.
+     * @param {ExpenseChangeRequestCreateManyAndReturnArgs} args - Arguments to create many ExpenseChangeRequests.
+     * @example
+     * // Create many ExpenseChangeRequests
+     * const expenseChangeRequest = await prisma.expenseChangeRequest.createManyAndReturn({
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     * 
+     * // Create many ExpenseChangeRequests and only return the `id`
+     * const expenseChangeRequestWithIdOnly = await prisma.expenseChangeRequest.createManyAndReturn({
+     *   select: { id: true },
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * 
+     */
+    createManyAndReturn<T extends ExpenseChangeRequestCreateManyAndReturnArgs>(args?: SelectSubset<T, ExpenseChangeRequestCreateManyAndReturnArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$ExpenseChangeRequestPayload<ExtArgs>, T, "createManyAndReturn", GlobalOmitOptions>>
+
+    /**
+     * Delete a ExpenseChangeRequest.
+     * @param {ExpenseChangeRequestDeleteArgs} args - Arguments to delete one ExpenseChangeRequest.
+     * @example
+     * // Delete one ExpenseChangeRequest
+     * const ExpenseChangeRequest = await prisma.expenseChangeRequest.delete({
+     *   where: {
+     *     // ... filter to delete one ExpenseChangeRequest
+     *   }
+     * })
+     * 
+     */
+    delete<T extends ExpenseChangeRequestDeleteArgs>(args: SelectSubset<T, ExpenseChangeRequestDeleteArgs<ExtArgs>>): Prisma__ExpenseChangeRequestClient<$Result.GetResult<Prisma.$ExpenseChangeRequestPayload<ExtArgs>, T, "delete", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Update one ExpenseChangeRequest.
+     * @param {ExpenseChangeRequestUpdateArgs} args - Arguments to update one ExpenseChangeRequest.
+     * @example
+     * // Update one ExpenseChangeRequest
+     * const expenseChangeRequest = await prisma.expenseChangeRequest.update({
+     *   where: {
+     *     // ... provide filter here
+     *   },
+     *   data: {
+     *     // ... provide data here
+     *   }
+     * })
+     * 
+     */
+    update<T extends ExpenseChangeRequestUpdateArgs>(args: SelectSubset<T, ExpenseChangeRequestUpdateArgs<ExtArgs>>): Prisma__ExpenseChangeRequestClient<$Result.GetResult<Prisma.$ExpenseChangeRequestPayload<ExtArgs>, T, "update", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Delete zero or more ExpenseChangeRequests.
+     * @param {ExpenseChangeRequestDeleteManyArgs} args - Arguments to filter ExpenseChangeRequests to delete.
+     * @example
+     * // Delete a few ExpenseChangeRequests
+     * const { count } = await prisma.expenseChangeRequest.deleteMany({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     * 
+     */
+    deleteMany<T extends ExpenseChangeRequestDeleteManyArgs>(args?: SelectSubset<T, ExpenseChangeRequestDeleteManyArgs<ExtArgs>>): Prisma.PrismaPromise<BatchPayload>
+
+    /**
+     * Update zero or more ExpenseChangeRequests.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {ExpenseChangeRequestUpdateManyArgs} args - Arguments to update one or more rows.
+     * @example
+     * // Update many ExpenseChangeRequests
+     * const expenseChangeRequest = await prisma.expenseChangeRequest.updateMany({
+     *   where: {
+     *     // ... provide filter here
+     *   },
+     *   data: {
+     *     // ... provide data here
+     *   }
+     * })
+     * 
+     */
+    updateMany<T extends ExpenseChangeRequestUpdateManyArgs>(args: SelectSubset<T, ExpenseChangeRequestUpdateManyArgs<ExtArgs>>): Prisma.PrismaPromise<BatchPayload>
+
+    /**
+     * Update zero or more ExpenseChangeRequests and returns the data updated in the database.
+     * @param {ExpenseChangeRequestUpdateManyAndReturnArgs} args - Arguments to update many ExpenseChangeRequests.
+     * @example
+     * // Update many ExpenseChangeRequests
+     * const expenseChangeRequest = await prisma.expenseChangeRequest.updateManyAndReturn({
+     *   where: {
+     *     // ... provide filter here
+     *   },
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     * 
+     * // Update zero or more ExpenseChangeRequests and only return the `id`
+     * const expenseChangeRequestWithIdOnly = await prisma.expenseChangeRequest.updateManyAndReturn({
+     *   select: { id: true },
+     *   where: {
+     *     // ... provide filter here
+     *   },
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * 
+     */
+    updateManyAndReturn<T extends ExpenseChangeRequestUpdateManyAndReturnArgs>(args: SelectSubset<T, ExpenseChangeRequestUpdateManyAndReturnArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$ExpenseChangeRequestPayload<ExtArgs>, T, "updateManyAndReturn", GlobalOmitOptions>>
+
+    /**
+     * Create or update one ExpenseChangeRequest.
+     * @param {ExpenseChangeRequestUpsertArgs} args - Arguments to update or create a ExpenseChangeRequest.
+     * @example
+     * // Update or create a ExpenseChangeRequest
+     * const expenseChangeRequest = await prisma.expenseChangeRequest.upsert({
+     *   create: {
+     *     // ... data to create a ExpenseChangeRequest
+     *   },
+     *   update: {
+     *     // ... in case it already exists, update
+     *   },
+     *   where: {
+     *     // ... the filter for the ExpenseChangeRequest we want to update
+     *   }
+     * })
+     */
+    upsert<T extends ExpenseChangeRequestUpsertArgs>(args: SelectSubset<T, ExpenseChangeRequestUpsertArgs<ExtArgs>>): Prisma__ExpenseChangeRequestClient<$Result.GetResult<Prisma.$ExpenseChangeRequestPayload<ExtArgs>, T, "upsert", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+
+    /**
+     * Count the number of ExpenseChangeRequests.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {ExpenseChangeRequestCountArgs} args - Arguments to filter ExpenseChangeRequests to count.
+     * @example
+     * // Count the number of ExpenseChangeRequests
+     * const count = await prisma.expenseChangeRequest.count({
+     *   where: {
+     *     // ... the filter for the ExpenseChangeRequests we want to count
+     *   }
+     * })
+    **/
+    count<T extends ExpenseChangeRequestCountArgs>(
+      args?: Subset<T, ExpenseChangeRequestCountArgs>,
+    ): Prisma.PrismaPromise<
+      T extends $Utils.Record<'select', any>
+        ? T['select'] extends true
+          ? number
+          : GetScalarType<T['select'], ExpenseChangeRequestCountAggregateOutputType>
+        : number
+    >
+
+    /**
+     * Allows you to perform aggregations operations on a ExpenseChangeRequest.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {ExpenseChangeRequestAggregateArgs} args - Select which aggregations you would like to apply and on what fields.
+     * @example
+     * // Ordered by age ascending
+     * // Where email contains prisma.io
+     * // Limited to the 10 users
+     * const aggregations = await prisma.user.aggregate({
+     *   _avg: {
+     *     age: true,
+     *   },
+     *   where: {
+     *     email: {
+     *       contains: "prisma.io",
+     *     },
+     *   },
+     *   orderBy: {
+     *     age: "asc",
+     *   },
+     *   take: 10,
+     * })
+    **/
+    aggregate<T extends ExpenseChangeRequestAggregateArgs>(args: Subset<T, ExpenseChangeRequestAggregateArgs>): Prisma.PrismaPromise<GetExpenseChangeRequestAggregateType<T>>
+
+    /**
+     * Group by ExpenseChangeRequest.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {ExpenseChangeRequestGroupByArgs} args - Group by arguments.
+     * @example
+     * // Group by city, order by createdAt, get count
+     * const result = await prisma.user.groupBy({
+     *   by: ['city', 'createdAt'],
+     *   orderBy: {
+     *     createdAt: true
+     *   },
+     *   _count: {
+     *     _all: true
+     *   },
+     * })
+     * 
+    **/
+    groupBy<
+      T extends ExpenseChangeRequestGroupByArgs,
+      HasSelectOrTake extends Or<
+        Extends<'skip', Keys<T>>,
+        Extends<'take', Keys<T>>
+      >,
+      OrderByArg extends True extends HasSelectOrTake
+        ? { orderBy: ExpenseChangeRequestGroupByArgs['orderBy'] }
+        : { orderBy?: ExpenseChangeRequestGroupByArgs['orderBy'] },
+      OrderFields extends ExcludeUnderscoreKeys<Keys<MaybeTupleToUnion<T['orderBy']>>>,
+      ByFields extends MaybeTupleToUnion<T['by']>,
+      ByValid extends Has<ByFields, OrderFields>,
+      HavingFields extends GetHavingFields<T['having']>,
+      HavingValid extends Has<ByFields, HavingFields>,
+      ByEmpty extends T['by'] extends never[] ? True : False,
+      InputErrors extends ByEmpty extends True
+      ? `Error: "by" must not be empty.`
+      : HavingValid extends False
+      ? {
+          [P in HavingFields]: P extends ByFields
+            ? never
+            : P extends string
+            ? `Error: Field "${P}" used in "having" needs to be provided in "by".`
+            : [
+                Error,
+                'Field ',
+                P,
+                ` in "having" needs to be provided in "by"`,
+              ]
+        }[HavingFields]
+      : 'take' extends Keys<T>
+      ? 'orderBy' extends Keys<T>
+        ? ByValid extends True
+          ? {}
+          : {
+              [P in OrderFields]: P extends ByFields
+                ? never
+                : `Error: Field "${P}" in "orderBy" needs to be provided in "by"`
+            }[OrderFields]
+        : 'Error: If you provide "take", you also need to provide "orderBy"'
+      : 'skip' extends Keys<T>
+      ? 'orderBy' extends Keys<T>
+        ? ByValid extends True
+          ? {}
+          : {
+              [P in OrderFields]: P extends ByFields
+                ? never
+                : `Error: Field "${P}" in "orderBy" needs to be provided in "by"`
+            }[OrderFields]
+        : 'Error: If you provide "skip", you also need to provide "orderBy"'
+      : ByValid extends True
+      ? {}
+      : {
+          [P in OrderFields]: P extends ByFields
+            ? never
+            : `Error: Field "${P}" in "orderBy" needs to be provided in "by"`
+        }[OrderFields]
+    >(args: SubsetIntersection<T, ExpenseChangeRequestGroupByArgs, OrderByArg> & InputErrors): {} extends InputErrors ? GetExpenseChangeRequestGroupByPayload<T> : Prisma.PrismaPromise<InputErrors>
+  /**
+   * Fields of the ExpenseChangeRequest model
+   */
+  readonly fields: ExpenseChangeRequestFieldRefs;
+  }
+
+  /**
+   * The delegate class that acts as a "Promise-like" for ExpenseChangeRequest.
+   * Why is this prefixed with `Prisma__`?
+   * Because we want to prevent naming conflicts as mentioned in
+   * https://github.com/prisma/prisma-client-js/issues/707
+   */
+  export interface Prisma__ExpenseChangeRequestClient<T, Null = never, ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs, GlobalOmitOptions = {}> extends Prisma.PrismaPromise<T> {
+    readonly [Symbol.toStringTag]: "PrismaPromise"
+    /**
+     * Attaches callbacks for the resolution and/or rejection of the Promise.
+     * @param onfulfilled The callback to execute when the Promise is resolved.
+     * @param onrejected The callback to execute when the Promise is rejected.
+     * @returns A Promise for the completion of which ever callback is executed.
+     */
+    then<TResult1 = T, TResult2 = never>(onfulfilled?: ((value: T) => TResult1 | PromiseLike<TResult1>) | undefined | null, onrejected?: ((reason: any) => TResult2 | PromiseLike<TResult2>) | undefined | null): $Utils.JsPromise<TResult1 | TResult2>
+    /**
+     * Attaches a callback for only the rejection of the Promise.
+     * @param onrejected The callback to execute when the Promise is rejected.
+     * @returns A Promise for the completion of the callback.
+     */
+    catch<TResult = never>(onrejected?: ((reason: any) => TResult | PromiseLike<TResult>) | undefined | null): $Utils.JsPromise<T | TResult>
+    /**
+     * Attaches a callback that is invoked when the Promise is settled (fulfilled or rejected). The
+     * resolved value cannot be modified from the callback.
+     * @param onfinally The callback to execute when the Promise is settled (fulfilled or rejected).
+     * @returns A Promise for the completion of the callback.
+     */
+    finally(onfinally?: (() => void) | undefined | null): $Utils.JsPromise<T>
+  }
+
+
+
+
+  /**
+   * Fields of the ExpenseChangeRequest model
+   */
+  interface ExpenseChangeRequestFieldRefs {
+    readonly id: FieldRef<"ExpenseChangeRequest", 'String'>
+    readonly tableKey: FieldRef<"ExpenseChangeRequest", 'String'>
+    readonly operation: FieldRef<"ExpenseChangeRequest", 'ExpenseChangeOperation'>
+    readonly rowId: FieldRef<"ExpenseChangeRequest", 'String'>
+    readonly appliedRowId: FieldRef<"ExpenseChangeRequest", 'String'>
+    readonly rowLabel: FieldRef<"ExpenseChangeRequest", 'String'>
+    readonly changes: FieldRef<"ExpenseChangeRequest", 'Json'>
+    readonly reason: FieldRef<"ExpenseChangeRequest", 'String'>
+    readonly dueDate: FieldRef<"ExpenseChangeRequest", 'DateTime'>
+    readonly status: FieldRef<"ExpenseChangeRequest", 'ExpenseChangeStatus'>
+    readonly currentStageKey: FieldRef<"ExpenseChangeRequest", 'String'>
+    readonly approvalTrail: FieldRef<"ExpenseChangeRequest", 'Json'>
+    readonly requestedById: FieldRef<"ExpenseChangeRequest", 'Int'>
+    readonly requestedByName: FieldRef<"ExpenseChangeRequest", 'String'>
+    readonly requestedByEmail: FieldRef<"ExpenseChangeRequest", 'String'>
+    readonly requestedAt: FieldRef<"ExpenseChangeRequest", 'DateTime'>
+    readonly requesterBusinessDivision: FieldRef<"ExpenseChangeRequest", 'String'>
+    readonly createdAt: FieldRef<"ExpenseChangeRequest", 'DateTime'>
+    readonly updatedAt: FieldRef<"ExpenseChangeRequest", 'DateTime'>
+  }
+    
+
+  // Custom InputTypes
+  /**
+   * ExpenseChangeRequest findUnique
+   */
+  export type ExpenseChangeRequestFindUniqueArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the ExpenseChangeRequest
+     */
+    select?: ExpenseChangeRequestSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the ExpenseChangeRequest
+     */
+    omit?: ExpenseChangeRequestOmit<ExtArgs> | null
+    /**
+     * Filter, which ExpenseChangeRequest to fetch.
+     */
+    where: ExpenseChangeRequestWhereUniqueInput
+  }
+
+  /**
+   * ExpenseChangeRequest findUniqueOrThrow
+   */
+  export type ExpenseChangeRequestFindUniqueOrThrowArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the ExpenseChangeRequest
+     */
+    select?: ExpenseChangeRequestSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the ExpenseChangeRequest
+     */
+    omit?: ExpenseChangeRequestOmit<ExtArgs> | null
+    /**
+     * Filter, which ExpenseChangeRequest to fetch.
+     */
+    where: ExpenseChangeRequestWhereUniqueInput
+  }
+
+  /**
+   * ExpenseChangeRequest findFirst
+   */
+  export type ExpenseChangeRequestFindFirstArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the ExpenseChangeRequest
+     */
+    select?: ExpenseChangeRequestSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the ExpenseChangeRequest
+     */
+    omit?: ExpenseChangeRequestOmit<ExtArgs> | null
+    /**
+     * Filter, which ExpenseChangeRequest to fetch.
+     */
+    where?: ExpenseChangeRequestWhereInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
+     * 
+     * Determine the order of ExpenseChangeRequests to fetch.
+     */
+    orderBy?: ExpenseChangeRequestOrderByWithRelationInput | ExpenseChangeRequestOrderByWithRelationInput[]
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
+     * 
+     * Sets the position for searching for ExpenseChangeRequests.
+     */
+    cursor?: ExpenseChangeRequestWhereUniqueInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Take `±n` ExpenseChangeRequests from the position of the cursor.
+     */
+    take?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Skip the first `n` ExpenseChangeRequests.
+     */
+    skip?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/distinct Distinct Docs}
+     * 
+     * Filter by unique combinations of ExpenseChangeRequests.
+     */
+    distinct?: ExpenseChangeRequestScalarFieldEnum | ExpenseChangeRequestScalarFieldEnum[]
+  }
+
+  /**
+   * ExpenseChangeRequest findFirstOrThrow
+   */
+  export type ExpenseChangeRequestFindFirstOrThrowArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the ExpenseChangeRequest
+     */
+    select?: ExpenseChangeRequestSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the ExpenseChangeRequest
+     */
+    omit?: ExpenseChangeRequestOmit<ExtArgs> | null
+    /**
+     * Filter, which ExpenseChangeRequest to fetch.
+     */
+    where?: ExpenseChangeRequestWhereInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
+     * 
+     * Determine the order of ExpenseChangeRequests to fetch.
+     */
+    orderBy?: ExpenseChangeRequestOrderByWithRelationInput | ExpenseChangeRequestOrderByWithRelationInput[]
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
+     * 
+     * Sets the position for searching for ExpenseChangeRequests.
+     */
+    cursor?: ExpenseChangeRequestWhereUniqueInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Take `±n` ExpenseChangeRequests from the position of the cursor.
+     */
+    take?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Skip the first `n` ExpenseChangeRequests.
+     */
+    skip?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/distinct Distinct Docs}
+     * 
+     * Filter by unique combinations of ExpenseChangeRequests.
+     */
+    distinct?: ExpenseChangeRequestScalarFieldEnum | ExpenseChangeRequestScalarFieldEnum[]
+  }
+
+  /**
+   * ExpenseChangeRequest findMany
+   */
+  export type ExpenseChangeRequestFindManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the ExpenseChangeRequest
+     */
+    select?: ExpenseChangeRequestSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the ExpenseChangeRequest
+     */
+    omit?: ExpenseChangeRequestOmit<ExtArgs> | null
+    /**
+     * Filter, which ExpenseChangeRequests to fetch.
+     */
+    where?: ExpenseChangeRequestWhereInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
+     * 
+     * Determine the order of ExpenseChangeRequests to fetch.
+     */
+    orderBy?: ExpenseChangeRequestOrderByWithRelationInput | ExpenseChangeRequestOrderByWithRelationInput[]
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
+     * 
+     * Sets the position for listing ExpenseChangeRequests.
+     */
+    cursor?: ExpenseChangeRequestWhereUniqueInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Take `±n` ExpenseChangeRequests from the position of the cursor.
+     */
+    take?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Skip the first `n` ExpenseChangeRequests.
+     */
+    skip?: number
+    distinct?: ExpenseChangeRequestScalarFieldEnum | ExpenseChangeRequestScalarFieldEnum[]
+  }
+
+  /**
+   * ExpenseChangeRequest create
+   */
+  export type ExpenseChangeRequestCreateArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the ExpenseChangeRequest
+     */
+    select?: ExpenseChangeRequestSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the ExpenseChangeRequest
+     */
+    omit?: ExpenseChangeRequestOmit<ExtArgs> | null
+    /**
+     * The data needed to create a ExpenseChangeRequest.
+     */
+    data: XOR<ExpenseChangeRequestCreateInput, ExpenseChangeRequestUncheckedCreateInput>
+  }
+
+  /**
+   * ExpenseChangeRequest createMany
+   */
+  export type ExpenseChangeRequestCreateManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * The data used to create many ExpenseChangeRequests.
+     */
+    data: ExpenseChangeRequestCreateManyInput | ExpenseChangeRequestCreateManyInput[]
+    skipDuplicates?: boolean
+  }
+
+  /**
+   * ExpenseChangeRequest createManyAndReturn
+   */
+  export type ExpenseChangeRequestCreateManyAndReturnArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the ExpenseChangeRequest
+     */
+    select?: ExpenseChangeRequestSelectCreateManyAndReturn<ExtArgs> | null
+    /**
+     * Omit specific fields from the ExpenseChangeRequest
+     */
+    omit?: ExpenseChangeRequestOmit<ExtArgs> | null
+    /**
+     * The data used to create many ExpenseChangeRequests.
+     */
+    data: ExpenseChangeRequestCreateManyInput | ExpenseChangeRequestCreateManyInput[]
+    skipDuplicates?: boolean
+  }
+
+  /**
+   * ExpenseChangeRequest update
+   */
+  export type ExpenseChangeRequestUpdateArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the ExpenseChangeRequest
+     */
+    select?: ExpenseChangeRequestSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the ExpenseChangeRequest
+     */
+    omit?: ExpenseChangeRequestOmit<ExtArgs> | null
+    /**
+     * The data needed to update a ExpenseChangeRequest.
+     */
+    data: XOR<ExpenseChangeRequestUpdateInput, ExpenseChangeRequestUncheckedUpdateInput>
+    /**
+     * Choose, which ExpenseChangeRequest to update.
+     */
+    where: ExpenseChangeRequestWhereUniqueInput
+  }
+
+  /**
+   * ExpenseChangeRequest updateMany
+   */
+  export type ExpenseChangeRequestUpdateManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * The data used to update ExpenseChangeRequests.
+     */
+    data: XOR<ExpenseChangeRequestUpdateManyMutationInput, ExpenseChangeRequestUncheckedUpdateManyInput>
+    /**
+     * Filter which ExpenseChangeRequests to update
+     */
+    where?: ExpenseChangeRequestWhereInput
+    /**
+     * Limit how many ExpenseChangeRequests to update.
+     */
+    limit?: number
+  }
+
+  /**
+   * ExpenseChangeRequest updateManyAndReturn
+   */
+  export type ExpenseChangeRequestUpdateManyAndReturnArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the ExpenseChangeRequest
+     */
+    select?: ExpenseChangeRequestSelectUpdateManyAndReturn<ExtArgs> | null
+    /**
+     * Omit specific fields from the ExpenseChangeRequest
+     */
+    omit?: ExpenseChangeRequestOmit<ExtArgs> | null
+    /**
+     * The data used to update ExpenseChangeRequests.
+     */
+    data: XOR<ExpenseChangeRequestUpdateManyMutationInput, ExpenseChangeRequestUncheckedUpdateManyInput>
+    /**
+     * Filter which ExpenseChangeRequests to update
+     */
+    where?: ExpenseChangeRequestWhereInput
+    /**
+     * Limit how many ExpenseChangeRequests to update.
+     */
+    limit?: number
+  }
+
+  /**
+   * ExpenseChangeRequest upsert
+   */
+  export type ExpenseChangeRequestUpsertArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the ExpenseChangeRequest
+     */
+    select?: ExpenseChangeRequestSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the ExpenseChangeRequest
+     */
+    omit?: ExpenseChangeRequestOmit<ExtArgs> | null
+    /**
+     * The filter to search for the ExpenseChangeRequest to update in case it exists.
+     */
+    where: ExpenseChangeRequestWhereUniqueInput
+    /**
+     * In case the ExpenseChangeRequest found by the `where` argument doesn't exist, create a new ExpenseChangeRequest with this data.
+     */
+    create: XOR<ExpenseChangeRequestCreateInput, ExpenseChangeRequestUncheckedCreateInput>
+    /**
+     * In case the ExpenseChangeRequest was found with the provided `where` argument, update it with this data.
+     */
+    update: XOR<ExpenseChangeRequestUpdateInput, ExpenseChangeRequestUncheckedUpdateInput>
+  }
+
+  /**
+   * ExpenseChangeRequest delete
+   */
+  export type ExpenseChangeRequestDeleteArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the ExpenseChangeRequest
+     */
+    select?: ExpenseChangeRequestSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the ExpenseChangeRequest
+     */
+    omit?: ExpenseChangeRequestOmit<ExtArgs> | null
+    /**
+     * Filter which ExpenseChangeRequest to delete.
+     */
+    where: ExpenseChangeRequestWhereUniqueInput
+  }
+
+  /**
+   * ExpenseChangeRequest deleteMany
+   */
+  export type ExpenseChangeRequestDeleteManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Filter which ExpenseChangeRequests to delete
+     */
+    where?: ExpenseChangeRequestWhereInput
+    /**
+     * Limit how many ExpenseChangeRequests to delete.
+     */
+    limit?: number
+  }
+
+  /**
+   * ExpenseChangeRequest without action
+   */
+  export type ExpenseChangeRequestDefaultArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the ExpenseChangeRequest
+     */
+    select?: ExpenseChangeRequestSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the ExpenseChangeRequest
+     */
+    omit?: ExpenseChangeRequestOmit<ExtArgs> | null
+  }
+
+
+  /**
+   * Model ExpenseAccessGrant
+   */
+
+  export type AggregateExpenseAccessGrant = {
+    _count: ExpenseAccessGrantCountAggregateOutputType | null
+    _avg: ExpenseAccessGrantAvgAggregateOutputType | null
+    _sum: ExpenseAccessGrantSumAggregateOutputType | null
+    _min: ExpenseAccessGrantMinAggregateOutputType | null
+    _max: ExpenseAccessGrantMaxAggregateOutputType | null
+  }
+
+  export type ExpenseAccessGrantAvgAggregateOutputType = {
+    id: number | null
+    grantedById: number | null
+  }
+
+  export type ExpenseAccessGrantSumAggregateOutputType = {
+    id: number | null
+    grantedById: number | null
+  }
+
+  export type ExpenseAccessGrantMinAggregateOutputType = {
+    id: number | null
+    email: string | null
+    level: string | null
+    tableKey: string | null
+    subDivision: string | null
+    canCreate: boolean | null
+    canUpdate: boolean | null
+    canDelete: boolean | null
+    isActive: boolean | null
+    note: string | null
+    grantedById: number | null
+    grantedByName: string | null
+    createdAt: Date | null
+    updatedAt: Date | null
+  }
+
+  export type ExpenseAccessGrantMaxAggregateOutputType = {
+    id: number | null
+    email: string | null
+    level: string | null
+    tableKey: string | null
+    subDivision: string | null
+    canCreate: boolean | null
+    canUpdate: boolean | null
+    canDelete: boolean | null
+    isActive: boolean | null
+    note: string | null
+    grantedById: number | null
+    grantedByName: string | null
+    createdAt: Date | null
+    updatedAt: Date | null
+  }
+
+  export type ExpenseAccessGrantCountAggregateOutputType = {
+    id: number
+    email: number
+    level: number
+    tableKey: number
+    subDivision: number
+    canCreate: number
+    canUpdate: number
+    canDelete: number
+    isActive: number
+    note: number
+    grantedById: number
+    grantedByName: number
+    createdAt: number
+    updatedAt: number
+    _all: number
+  }
+
+
+  export type ExpenseAccessGrantAvgAggregateInputType = {
+    id?: true
+    grantedById?: true
+  }
+
+  export type ExpenseAccessGrantSumAggregateInputType = {
+    id?: true
+    grantedById?: true
+  }
+
+  export type ExpenseAccessGrantMinAggregateInputType = {
+    id?: true
+    email?: true
+    level?: true
+    tableKey?: true
+    subDivision?: true
+    canCreate?: true
+    canUpdate?: true
+    canDelete?: true
+    isActive?: true
+    note?: true
+    grantedById?: true
+    grantedByName?: true
+    createdAt?: true
+    updatedAt?: true
+  }
+
+  export type ExpenseAccessGrantMaxAggregateInputType = {
+    id?: true
+    email?: true
+    level?: true
+    tableKey?: true
+    subDivision?: true
+    canCreate?: true
+    canUpdate?: true
+    canDelete?: true
+    isActive?: true
+    note?: true
+    grantedById?: true
+    grantedByName?: true
+    createdAt?: true
+    updatedAt?: true
+  }
+
+  export type ExpenseAccessGrantCountAggregateInputType = {
+    id?: true
+    email?: true
+    level?: true
+    tableKey?: true
+    subDivision?: true
+    canCreate?: true
+    canUpdate?: true
+    canDelete?: true
+    isActive?: true
+    note?: true
+    grantedById?: true
+    grantedByName?: true
+    createdAt?: true
+    updatedAt?: true
+    _all?: true
+  }
+
+  export type ExpenseAccessGrantAggregateArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Filter which ExpenseAccessGrant to aggregate.
+     */
+    where?: ExpenseAccessGrantWhereInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
+     * 
+     * Determine the order of ExpenseAccessGrants to fetch.
+     */
+    orderBy?: ExpenseAccessGrantOrderByWithRelationInput | ExpenseAccessGrantOrderByWithRelationInput[]
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
+     * 
+     * Sets the start position
+     */
+    cursor?: ExpenseAccessGrantWhereUniqueInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Take `±n` ExpenseAccessGrants from the position of the cursor.
+     */
+    take?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Skip the first `n` ExpenseAccessGrants.
+     */
+    skip?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     * 
+     * Count returned ExpenseAccessGrants
+    **/
+    _count?: true | ExpenseAccessGrantCountAggregateInputType
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     * 
+     * Select which fields to average
+    **/
+    _avg?: ExpenseAccessGrantAvgAggregateInputType
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     * 
+     * Select which fields to sum
+    **/
+    _sum?: ExpenseAccessGrantSumAggregateInputType
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     * 
+     * Select which fields to find the minimum value
+    **/
+    _min?: ExpenseAccessGrantMinAggregateInputType
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     * 
+     * Select which fields to find the maximum value
+    **/
+    _max?: ExpenseAccessGrantMaxAggregateInputType
+  }
+
+  export type GetExpenseAccessGrantAggregateType<T extends ExpenseAccessGrantAggregateArgs> = {
+        [P in keyof T & keyof AggregateExpenseAccessGrant]: P extends '_count' | 'count'
+      ? T[P] extends true
+        ? number
+        : GetScalarType<T[P], AggregateExpenseAccessGrant[P]>
+      : GetScalarType<T[P], AggregateExpenseAccessGrant[P]>
+  }
+
+
+
+
+  export type ExpenseAccessGrantGroupByArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    where?: ExpenseAccessGrantWhereInput
+    orderBy?: ExpenseAccessGrantOrderByWithAggregationInput | ExpenseAccessGrantOrderByWithAggregationInput[]
+    by: ExpenseAccessGrantScalarFieldEnum[] | ExpenseAccessGrantScalarFieldEnum
+    having?: ExpenseAccessGrantScalarWhereWithAggregatesInput
+    take?: number
+    skip?: number
+    _count?: ExpenseAccessGrantCountAggregateInputType | true
+    _avg?: ExpenseAccessGrantAvgAggregateInputType
+    _sum?: ExpenseAccessGrantSumAggregateInputType
+    _min?: ExpenseAccessGrantMinAggregateInputType
+    _max?: ExpenseAccessGrantMaxAggregateInputType
+  }
+
+  export type ExpenseAccessGrantGroupByOutputType = {
+    id: number
+    email: string
+    level: string
+    tableKey: string
+    subDivision: string | null
+    canCreate: boolean
+    canUpdate: boolean
+    canDelete: boolean
+    isActive: boolean
+    note: string | null
+    grantedById: number | null
+    grantedByName: string | null
+    createdAt: Date
+    updatedAt: Date
+    _count: ExpenseAccessGrantCountAggregateOutputType | null
+    _avg: ExpenseAccessGrantAvgAggregateOutputType | null
+    _sum: ExpenseAccessGrantSumAggregateOutputType | null
+    _min: ExpenseAccessGrantMinAggregateOutputType | null
+    _max: ExpenseAccessGrantMaxAggregateOutputType | null
+  }
+
+  type GetExpenseAccessGrantGroupByPayload<T extends ExpenseAccessGrantGroupByArgs> = Prisma.PrismaPromise<
+    Array<
+      PickEnumerable<ExpenseAccessGrantGroupByOutputType, T['by']> &
+        {
+          [P in ((keyof T) & (keyof ExpenseAccessGrantGroupByOutputType))]: P extends '_count'
+            ? T[P] extends boolean
+              ? number
+              : GetScalarType<T[P], ExpenseAccessGrantGroupByOutputType[P]>
+            : GetScalarType<T[P], ExpenseAccessGrantGroupByOutputType[P]>
+        }
+      >
+    >
+
+
+  export type ExpenseAccessGrantSelect<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
+    id?: boolean
+    email?: boolean
+    level?: boolean
+    tableKey?: boolean
+    subDivision?: boolean
+    canCreate?: boolean
+    canUpdate?: boolean
+    canDelete?: boolean
+    isActive?: boolean
+    note?: boolean
+    grantedById?: boolean
+    grantedByName?: boolean
+    createdAt?: boolean
+    updatedAt?: boolean
+  }, ExtArgs["result"]["expenseAccessGrant"]>
+
+  export type ExpenseAccessGrantSelectCreateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
+    id?: boolean
+    email?: boolean
+    level?: boolean
+    tableKey?: boolean
+    subDivision?: boolean
+    canCreate?: boolean
+    canUpdate?: boolean
+    canDelete?: boolean
+    isActive?: boolean
+    note?: boolean
+    grantedById?: boolean
+    grantedByName?: boolean
+    createdAt?: boolean
+    updatedAt?: boolean
+  }, ExtArgs["result"]["expenseAccessGrant"]>
+
+  export type ExpenseAccessGrantSelectUpdateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
+    id?: boolean
+    email?: boolean
+    level?: boolean
+    tableKey?: boolean
+    subDivision?: boolean
+    canCreate?: boolean
+    canUpdate?: boolean
+    canDelete?: boolean
+    isActive?: boolean
+    note?: boolean
+    grantedById?: boolean
+    grantedByName?: boolean
+    createdAt?: boolean
+    updatedAt?: boolean
+  }, ExtArgs["result"]["expenseAccessGrant"]>
+
+  export type ExpenseAccessGrantSelectScalar = {
+    id?: boolean
+    email?: boolean
+    level?: boolean
+    tableKey?: boolean
+    subDivision?: boolean
+    canCreate?: boolean
+    canUpdate?: boolean
+    canDelete?: boolean
+    isActive?: boolean
+    note?: boolean
+    grantedById?: boolean
+    grantedByName?: boolean
+    createdAt?: boolean
+    updatedAt?: boolean
+  }
+
+  export type ExpenseAccessGrantOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<"id" | "email" | "level" | "tableKey" | "subDivision" | "canCreate" | "canUpdate" | "canDelete" | "isActive" | "note" | "grantedById" | "grantedByName" | "createdAt" | "updatedAt", ExtArgs["result"]["expenseAccessGrant"]>
+
+  export type $ExpenseAccessGrantPayload<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    name: "ExpenseAccessGrant"
+    objects: {}
+    scalars: $Extensions.GetPayloadResult<{
+      id: number
+      email: string
+      /**
+       * Either the constant "SUB_DIVISION" (the fixed requester role — raises
+       * add/edit/delete requests) or an ExpenseApprovalStage.key (an approval
+       * right for that rung of the chain). Not a DB enum on purpose: new stages
+       * must be grantable the moment an admin creates them, with no migration.
+       */
+      level: string
+      tableKey: string
+      /**
+       * Informational label for SUB_DIVISION grants (which sub-division this
+       * person edits for) — shown in the admin list and on their requests.
+       */
+      subDivision: string | null
+      /**
+       * Only meaningful for SUB_DIVISION grants — which operations this person
+       * may raise. Approval-stage grants ignore these.
+       */
+      canCreate: boolean
+      canUpdate: boolean
+      canDelete: boolean
+      isActive: boolean
+      note: string | null
+      grantedById: number | null
+      grantedByName: string | null
+      createdAt: Date
+      updatedAt: Date
+    }, ExtArgs["result"]["expenseAccessGrant"]>
+    composites: {}
+  }
+
+  type ExpenseAccessGrantGetPayload<S extends boolean | null | undefined | ExpenseAccessGrantDefaultArgs> = $Result.GetResult<Prisma.$ExpenseAccessGrantPayload, S>
+
+  type ExpenseAccessGrantCountArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> =
+    Omit<ExpenseAccessGrantFindManyArgs, 'select' | 'include' | 'distinct' | 'omit'> & {
+      select?: ExpenseAccessGrantCountAggregateInputType | true
+    }
+
+  export interface ExpenseAccessGrantDelegate<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs, GlobalOmitOptions = {}> {
+    [K: symbol]: { types: Prisma.TypeMap<ExtArgs>['model']['ExpenseAccessGrant'], meta: { name: 'ExpenseAccessGrant' } }
+    /**
+     * Find zero or one ExpenseAccessGrant that matches the filter.
+     * @param {ExpenseAccessGrantFindUniqueArgs} args - Arguments to find a ExpenseAccessGrant
+     * @example
+     * // Get one ExpenseAccessGrant
+     * const expenseAccessGrant = await prisma.expenseAccessGrant.findUnique({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     */
+    findUnique<T extends ExpenseAccessGrantFindUniqueArgs>(args: SelectSubset<T, ExpenseAccessGrantFindUniqueArgs<ExtArgs>>): Prisma__ExpenseAccessGrantClient<$Result.GetResult<Prisma.$ExpenseAccessGrantPayload<ExtArgs>, T, "findUnique", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Find one ExpenseAccessGrant that matches the filter or throw an error with `error.code='P2025'`
+     * if no matches were found.
+     * @param {ExpenseAccessGrantFindUniqueOrThrowArgs} args - Arguments to find a ExpenseAccessGrant
+     * @example
+     * // Get one ExpenseAccessGrant
+     * const expenseAccessGrant = await prisma.expenseAccessGrant.findUniqueOrThrow({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     */
+    findUniqueOrThrow<T extends ExpenseAccessGrantFindUniqueOrThrowArgs>(args: SelectSubset<T, ExpenseAccessGrantFindUniqueOrThrowArgs<ExtArgs>>): Prisma__ExpenseAccessGrantClient<$Result.GetResult<Prisma.$ExpenseAccessGrantPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Find the first ExpenseAccessGrant that matches the filter.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {ExpenseAccessGrantFindFirstArgs} args - Arguments to find a ExpenseAccessGrant
+     * @example
+     * // Get one ExpenseAccessGrant
+     * const expenseAccessGrant = await prisma.expenseAccessGrant.findFirst({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     */
+    findFirst<T extends ExpenseAccessGrantFindFirstArgs>(args?: SelectSubset<T, ExpenseAccessGrantFindFirstArgs<ExtArgs>>): Prisma__ExpenseAccessGrantClient<$Result.GetResult<Prisma.$ExpenseAccessGrantPayload<ExtArgs>, T, "findFirst", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Find the first ExpenseAccessGrant that matches the filter or
+     * throw `PrismaKnownClientError` with `P2025` code if no matches were found.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {ExpenseAccessGrantFindFirstOrThrowArgs} args - Arguments to find a ExpenseAccessGrant
+     * @example
+     * // Get one ExpenseAccessGrant
+     * const expenseAccessGrant = await prisma.expenseAccessGrant.findFirstOrThrow({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     */
+    findFirstOrThrow<T extends ExpenseAccessGrantFindFirstOrThrowArgs>(args?: SelectSubset<T, ExpenseAccessGrantFindFirstOrThrowArgs<ExtArgs>>): Prisma__ExpenseAccessGrantClient<$Result.GetResult<Prisma.$ExpenseAccessGrantPayload<ExtArgs>, T, "findFirstOrThrow", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Find zero or more ExpenseAccessGrants that matches the filter.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {ExpenseAccessGrantFindManyArgs} args - Arguments to filter and select certain fields only.
+     * @example
+     * // Get all ExpenseAccessGrants
+     * const expenseAccessGrants = await prisma.expenseAccessGrant.findMany()
+     * 
+     * // Get first 10 ExpenseAccessGrants
+     * const expenseAccessGrants = await prisma.expenseAccessGrant.findMany({ take: 10 })
+     * 
+     * // Only select the `id`
+     * const expenseAccessGrantWithIdOnly = await prisma.expenseAccessGrant.findMany({ select: { id: true } })
+     * 
+     */
+    findMany<T extends ExpenseAccessGrantFindManyArgs>(args?: SelectSubset<T, ExpenseAccessGrantFindManyArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$ExpenseAccessGrantPayload<ExtArgs>, T, "findMany", GlobalOmitOptions>>
+
+    /**
+     * Create a ExpenseAccessGrant.
+     * @param {ExpenseAccessGrantCreateArgs} args - Arguments to create a ExpenseAccessGrant.
+     * @example
+     * // Create one ExpenseAccessGrant
+     * const ExpenseAccessGrant = await prisma.expenseAccessGrant.create({
+     *   data: {
+     *     // ... data to create a ExpenseAccessGrant
+     *   }
+     * })
+     * 
+     */
+    create<T extends ExpenseAccessGrantCreateArgs>(args: SelectSubset<T, ExpenseAccessGrantCreateArgs<ExtArgs>>): Prisma__ExpenseAccessGrantClient<$Result.GetResult<Prisma.$ExpenseAccessGrantPayload<ExtArgs>, T, "create", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Create many ExpenseAccessGrants.
+     * @param {ExpenseAccessGrantCreateManyArgs} args - Arguments to create many ExpenseAccessGrants.
+     * @example
+     * // Create many ExpenseAccessGrants
+     * const expenseAccessGrant = await prisma.expenseAccessGrant.createMany({
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     *     
+     */
+    createMany<T extends ExpenseAccessGrantCreateManyArgs>(args?: SelectSubset<T, ExpenseAccessGrantCreateManyArgs<ExtArgs>>): Prisma.PrismaPromise<BatchPayload>
+
+    /**
+     * Create many ExpenseAccessGrants and returns the data saved in the database.
+     * @param {ExpenseAccessGrantCreateManyAndReturnArgs} args - Arguments to create many ExpenseAccessGrants.
+     * @example
+     * // Create many ExpenseAccessGrants
+     * const expenseAccessGrant = await prisma.expenseAccessGrant.createManyAndReturn({
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     * 
+     * // Create many ExpenseAccessGrants and only return the `id`
+     * const expenseAccessGrantWithIdOnly = await prisma.expenseAccessGrant.createManyAndReturn({
+     *   select: { id: true },
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * 
+     */
+    createManyAndReturn<T extends ExpenseAccessGrantCreateManyAndReturnArgs>(args?: SelectSubset<T, ExpenseAccessGrantCreateManyAndReturnArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$ExpenseAccessGrantPayload<ExtArgs>, T, "createManyAndReturn", GlobalOmitOptions>>
+
+    /**
+     * Delete a ExpenseAccessGrant.
+     * @param {ExpenseAccessGrantDeleteArgs} args - Arguments to delete one ExpenseAccessGrant.
+     * @example
+     * // Delete one ExpenseAccessGrant
+     * const ExpenseAccessGrant = await prisma.expenseAccessGrant.delete({
+     *   where: {
+     *     // ... filter to delete one ExpenseAccessGrant
+     *   }
+     * })
+     * 
+     */
+    delete<T extends ExpenseAccessGrantDeleteArgs>(args: SelectSubset<T, ExpenseAccessGrantDeleteArgs<ExtArgs>>): Prisma__ExpenseAccessGrantClient<$Result.GetResult<Prisma.$ExpenseAccessGrantPayload<ExtArgs>, T, "delete", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Update one ExpenseAccessGrant.
+     * @param {ExpenseAccessGrantUpdateArgs} args - Arguments to update one ExpenseAccessGrant.
+     * @example
+     * // Update one ExpenseAccessGrant
+     * const expenseAccessGrant = await prisma.expenseAccessGrant.update({
+     *   where: {
+     *     // ... provide filter here
+     *   },
+     *   data: {
+     *     // ... provide data here
+     *   }
+     * })
+     * 
+     */
+    update<T extends ExpenseAccessGrantUpdateArgs>(args: SelectSubset<T, ExpenseAccessGrantUpdateArgs<ExtArgs>>): Prisma__ExpenseAccessGrantClient<$Result.GetResult<Prisma.$ExpenseAccessGrantPayload<ExtArgs>, T, "update", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Delete zero or more ExpenseAccessGrants.
+     * @param {ExpenseAccessGrantDeleteManyArgs} args - Arguments to filter ExpenseAccessGrants to delete.
+     * @example
+     * // Delete a few ExpenseAccessGrants
+     * const { count } = await prisma.expenseAccessGrant.deleteMany({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     * 
+     */
+    deleteMany<T extends ExpenseAccessGrantDeleteManyArgs>(args?: SelectSubset<T, ExpenseAccessGrantDeleteManyArgs<ExtArgs>>): Prisma.PrismaPromise<BatchPayload>
+
+    /**
+     * Update zero or more ExpenseAccessGrants.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {ExpenseAccessGrantUpdateManyArgs} args - Arguments to update one or more rows.
+     * @example
+     * // Update many ExpenseAccessGrants
+     * const expenseAccessGrant = await prisma.expenseAccessGrant.updateMany({
+     *   where: {
+     *     // ... provide filter here
+     *   },
+     *   data: {
+     *     // ... provide data here
+     *   }
+     * })
+     * 
+     */
+    updateMany<T extends ExpenseAccessGrantUpdateManyArgs>(args: SelectSubset<T, ExpenseAccessGrantUpdateManyArgs<ExtArgs>>): Prisma.PrismaPromise<BatchPayload>
+
+    /**
+     * Update zero or more ExpenseAccessGrants and returns the data updated in the database.
+     * @param {ExpenseAccessGrantUpdateManyAndReturnArgs} args - Arguments to update many ExpenseAccessGrants.
+     * @example
+     * // Update many ExpenseAccessGrants
+     * const expenseAccessGrant = await prisma.expenseAccessGrant.updateManyAndReturn({
+     *   where: {
+     *     // ... provide filter here
+     *   },
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     * 
+     * // Update zero or more ExpenseAccessGrants and only return the `id`
+     * const expenseAccessGrantWithIdOnly = await prisma.expenseAccessGrant.updateManyAndReturn({
+     *   select: { id: true },
+     *   where: {
+     *     // ... provide filter here
+     *   },
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * 
+     */
+    updateManyAndReturn<T extends ExpenseAccessGrantUpdateManyAndReturnArgs>(args: SelectSubset<T, ExpenseAccessGrantUpdateManyAndReturnArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$ExpenseAccessGrantPayload<ExtArgs>, T, "updateManyAndReturn", GlobalOmitOptions>>
+
+    /**
+     * Create or update one ExpenseAccessGrant.
+     * @param {ExpenseAccessGrantUpsertArgs} args - Arguments to update or create a ExpenseAccessGrant.
+     * @example
+     * // Update or create a ExpenseAccessGrant
+     * const expenseAccessGrant = await prisma.expenseAccessGrant.upsert({
+     *   create: {
+     *     // ... data to create a ExpenseAccessGrant
+     *   },
+     *   update: {
+     *     // ... in case it already exists, update
+     *   },
+     *   where: {
+     *     // ... the filter for the ExpenseAccessGrant we want to update
+     *   }
+     * })
+     */
+    upsert<T extends ExpenseAccessGrantUpsertArgs>(args: SelectSubset<T, ExpenseAccessGrantUpsertArgs<ExtArgs>>): Prisma__ExpenseAccessGrantClient<$Result.GetResult<Prisma.$ExpenseAccessGrantPayload<ExtArgs>, T, "upsert", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+
+    /**
+     * Count the number of ExpenseAccessGrants.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {ExpenseAccessGrantCountArgs} args - Arguments to filter ExpenseAccessGrants to count.
+     * @example
+     * // Count the number of ExpenseAccessGrants
+     * const count = await prisma.expenseAccessGrant.count({
+     *   where: {
+     *     // ... the filter for the ExpenseAccessGrants we want to count
+     *   }
+     * })
+    **/
+    count<T extends ExpenseAccessGrantCountArgs>(
+      args?: Subset<T, ExpenseAccessGrantCountArgs>,
+    ): Prisma.PrismaPromise<
+      T extends $Utils.Record<'select', any>
+        ? T['select'] extends true
+          ? number
+          : GetScalarType<T['select'], ExpenseAccessGrantCountAggregateOutputType>
+        : number
+    >
+
+    /**
+     * Allows you to perform aggregations operations on a ExpenseAccessGrant.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {ExpenseAccessGrantAggregateArgs} args - Select which aggregations you would like to apply and on what fields.
+     * @example
+     * // Ordered by age ascending
+     * // Where email contains prisma.io
+     * // Limited to the 10 users
+     * const aggregations = await prisma.user.aggregate({
+     *   _avg: {
+     *     age: true,
+     *   },
+     *   where: {
+     *     email: {
+     *       contains: "prisma.io",
+     *     },
+     *   },
+     *   orderBy: {
+     *     age: "asc",
+     *   },
+     *   take: 10,
+     * })
+    **/
+    aggregate<T extends ExpenseAccessGrantAggregateArgs>(args: Subset<T, ExpenseAccessGrantAggregateArgs>): Prisma.PrismaPromise<GetExpenseAccessGrantAggregateType<T>>
+
+    /**
+     * Group by ExpenseAccessGrant.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {ExpenseAccessGrantGroupByArgs} args - Group by arguments.
+     * @example
+     * // Group by city, order by createdAt, get count
+     * const result = await prisma.user.groupBy({
+     *   by: ['city', 'createdAt'],
+     *   orderBy: {
+     *     createdAt: true
+     *   },
+     *   _count: {
+     *     _all: true
+     *   },
+     * })
+     * 
+    **/
+    groupBy<
+      T extends ExpenseAccessGrantGroupByArgs,
+      HasSelectOrTake extends Or<
+        Extends<'skip', Keys<T>>,
+        Extends<'take', Keys<T>>
+      >,
+      OrderByArg extends True extends HasSelectOrTake
+        ? { orderBy: ExpenseAccessGrantGroupByArgs['orderBy'] }
+        : { orderBy?: ExpenseAccessGrantGroupByArgs['orderBy'] },
+      OrderFields extends ExcludeUnderscoreKeys<Keys<MaybeTupleToUnion<T['orderBy']>>>,
+      ByFields extends MaybeTupleToUnion<T['by']>,
+      ByValid extends Has<ByFields, OrderFields>,
+      HavingFields extends GetHavingFields<T['having']>,
+      HavingValid extends Has<ByFields, HavingFields>,
+      ByEmpty extends T['by'] extends never[] ? True : False,
+      InputErrors extends ByEmpty extends True
+      ? `Error: "by" must not be empty.`
+      : HavingValid extends False
+      ? {
+          [P in HavingFields]: P extends ByFields
+            ? never
+            : P extends string
+            ? `Error: Field "${P}" used in "having" needs to be provided in "by".`
+            : [
+                Error,
+                'Field ',
+                P,
+                ` in "having" needs to be provided in "by"`,
+              ]
+        }[HavingFields]
+      : 'take' extends Keys<T>
+      ? 'orderBy' extends Keys<T>
+        ? ByValid extends True
+          ? {}
+          : {
+              [P in OrderFields]: P extends ByFields
+                ? never
+                : `Error: Field "${P}" in "orderBy" needs to be provided in "by"`
+            }[OrderFields]
+        : 'Error: If you provide "take", you also need to provide "orderBy"'
+      : 'skip' extends Keys<T>
+      ? 'orderBy' extends Keys<T>
+        ? ByValid extends True
+          ? {}
+          : {
+              [P in OrderFields]: P extends ByFields
+                ? never
+                : `Error: Field "${P}" in "orderBy" needs to be provided in "by"`
+            }[OrderFields]
+        : 'Error: If you provide "skip", you also need to provide "orderBy"'
+      : ByValid extends True
+      ? {}
+      : {
+          [P in OrderFields]: P extends ByFields
+            ? never
+            : `Error: Field "${P}" in "orderBy" needs to be provided in "by"`
+        }[OrderFields]
+    >(args: SubsetIntersection<T, ExpenseAccessGrantGroupByArgs, OrderByArg> & InputErrors): {} extends InputErrors ? GetExpenseAccessGrantGroupByPayload<T> : Prisma.PrismaPromise<InputErrors>
+  /**
+   * Fields of the ExpenseAccessGrant model
+   */
+  readonly fields: ExpenseAccessGrantFieldRefs;
+  }
+
+  /**
+   * The delegate class that acts as a "Promise-like" for ExpenseAccessGrant.
+   * Why is this prefixed with `Prisma__`?
+   * Because we want to prevent naming conflicts as mentioned in
+   * https://github.com/prisma/prisma-client-js/issues/707
+   */
+  export interface Prisma__ExpenseAccessGrantClient<T, Null = never, ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs, GlobalOmitOptions = {}> extends Prisma.PrismaPromise<T> {
+    readonly [Symbol.toStringTag]: "PrismaPromise"
+    /**
+     * Attaches callbacks for the resolution and/or rejection of the Promise.
+     * @param onfulfilled The callback to execute when the Promise is resolved.
+     * @param onrejected The callback to execute when the Promise is rejected.
+     * @returns A Promise for the completion of which ever callback is executed.
+     */
+    then<TResult1 = T, TResult2 = never>(onfulfilled?: ((value: T) => TResult1 | PromiseLike<TResult1>) | undefined | null, onrejected?: ((reason: any) => TResult2 | PromiseLike<TResult2>) | undefined | null): $Utils.JsPromise<TResult1 | TResult2>
+    /**
+     * Attaches a callback for only the rejection of the Promise.
+     * @param onrejected The callback to execute when the Promise is rejected.
+     * @returns A Promise for the completion of the callback.
+     */
+    catch<TResult = never>(onrejected?: ((reason: any) => TResult | PromiseLike<TResult>) | undefined | null): $Utils.JsPromise<T | TResult>
+    /**
+     * Attaches a callback that is invoked when the Promise is settled (fulfilled or rejected). The
+     * resolved value cannot be modified from the callback.
+     * @param onfinally The callback to execute when the Promise is settled (fulfilled or rejected).
+     * @returns A Promise for the completion of the callback.
+     */
+    finally(onfinally?: (() => void) | undefined | null): $Utils.JsPromise<T>
+  }
+
+
+
+
+  /**
+   * Fields of the ExpenseAccessGrant model
+   */
+  interface ExpenseAccessGrantFieldRefs {
+    readonly id: FieldRef<"ExpenseAccessGrant", 'Int'>
+    readonly email: FieldRef<"ExpenseAccessGrant", 'String'>
+    readonly level: FieldRef<"ExpenseAccessGrant", 'String'>
+    readonly tableKey: FieldRef<"ExpenseAccessGrant", 'String'>
+    readonly subDivision: FieldRef<"ExpenseAccessGrant", 'String'>
+    readonly canCreate: FieldRef<"ExpenseAccessGrant", 'Boolean'>
+    readonly canUpdate: FieldRef<"ExpenseAccessGrant", 'Boolean'>
+    readonly canDelete: FieldRef<"ExpenseAccessGrant", 'Boolean'>
+    readonly isActive: FieldRef<"ExpenseAccessGrant", 'Boolean'>
+    readonly note: FieldRef<"ExpenseAccessGrant", 'String'>
+    readonly grantedById: FieldRef<"ExpenseAccessGrant", 'Int'>
+    readonly grantedByName: FieldRef<"ExpenseAccessGrant", 'String'>
+    readonly createdAt: FieldRef<"ExpenseAccessGrant", 'DateTime'>
+    readonly updatedAt: FieldRef<"ExpenseAccessGrant", 'DateTime'>
+  }
+    
+
+  // Custom InputTypes
+  /**
+   * ExpenseAccessGrant findUnique
+   */
+  export type ExpenseAccessGrantFindUniqueArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the ExpenseAccessGrant
+     */
+    select?: ExpenseAccessGrantSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the ExpenseAccessGrant
+     */
+    omit?: ExpenseAccessGrantOmit<ExtArgs> | null
+    /**
+     * Filter, which ExpenseAccessGrant to fetch.
+     */
+    where: ExpenseAccessGrantWhereUniqueInput
+  }
+
+  /**
+   * ExpenseAccessGrant findUniqueOrThrow
+   */
+  export type ExpenseAccessGrantFindUniqueOrThrowArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the ExpenseAccessGrant
+     */
+    select?: ExpenseAccessGrantSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the ExpenseAccessGrant
+     */
+    omit?: ExpenseAccessGrantOmit<ExtArgs> | null
+    /**
+     * Filter, which ExpenseAccessGrant to fetch.
+     */
+    where: ExpenseAccessGrantWhereUniqueInput
+  }
+
+  /**
+   * ExpenseAccessGrant findFirst
+   */
+  export type ExpenseAccessGrantFindFirstArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the ExpenseAccessGrant
+     */
+    select?: ExpenseAccessGrantSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the ExpenseAccessGrant
+     */
+    omit?: ExpenseAccessGrantOmit<ExtArgs> | null
+    /**
+     * Filter, which ExpenseAccessGrant to fetch.
+     */
+    where?: ExpenseAccessGrantWhereInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
+     * 
+     * Determine the order of ExpenseAccessGrants to fetch.
+     */
+    orderBy?: ExpenseAccessGrantOrderByWithRelationInput | ExpenseAccessGrantOrderByWithRelationInput[]
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
+     * 
+     * Sets the position for searching for ExpenseAccessGrants.
+     */
+    cursor?: ExpenseAccessGrantWhereUniqueInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Take `±n` ExpenseAccessGrants from the position of the cursor.
+     */
+    take?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Skip the first `n` ExpenseAccessGrants.
+     */
+    skip?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/distinct Distinct Docs}
+     * 
+     * Filter by unique combinations of ExpenseAccessGrants.
+     */
+    distinct?: ExpenseAccessGrantScalarFieldEnum | ExpenseAccessGrantScalarFieldEnum[]
+  }
+
+  /**
+   * ExpenseAccessGrant findFirstOrThrow
+   */
+  export type ExpenseAccessGrantFindFirstOrThrowArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the ExpenseAccessGrant
+     */
+    select?: ExpenseAccessGrantSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the ExpenseAccessGrant
+     */
+    omit?: ExpenseAccessGrantOmit<ExtArgs> | null
+    /**
+     * Filter, which ExpenseAccessGrant to fetch.
+     */
+    where?: ExpenseAccessGrantWhereInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
+     * 
+     * Determine the order of ExpenseAccessGrants to fetch.
+     */
+    orderBy?: ExpenseAccessGrantOrderByWithRelationInput | ExpenseAccessGrantOrderByWithRelationInput[]
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
+     * 
+     * Sets the position for searching for ExpenseAccessGrants.
+     */
+    cursor?: ExpenseAccessGrantWhereUniqueInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Take `±n` ExpenseAccessGrants from the position of the cursor.
+     */
+    take?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Skip the first `n` ExpenseAccessGrants.
+     */
+    skip?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/distinct Distinct Docs}
+     * 
+     * Filter by unique combinations of ExpenseAccessGrants.
+     */
+    distinct?: ExpenseAccessGrantScalarFieldEnum | ExpenseAccessGrantScalarFieldEnum[]
+  }
+
+  /**
+   * ExpenseAccessGrant findMany
+   */
+  export type ExpenseAccessGrantFindManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the ExpenseAccessGrant
+     */
+    select?: ExpenseAccessGrantSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the ExpenseAccessGrant
+     */
+    omit?: ExpenseAccessGrantOmit<ExtArgs> | null
+    /**
+     * Filter, which ExpenseAccessGrants to fetch.
+     */
+    where?: ExpenseAccessGrantWhereInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
+     * 
+     * Determine the order of ExpenseAccessGrants to fetch.
+     */
+    orderBy?: ExpenseAccessGrantOrderByWithRelationInput | ExpenseAccessGrantOrderByWithRelationInput[]
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
+     * 
+     * Sets the position for listing ExpenseAccessGrants.
+     */
+    cursor?: ExpenseAccessGrantWhereUniqueInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Take `±n` ExpenseAccessGrants from the position of the cursor.
+     */
+    take?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Skip the first `n` ExpenseAccessGrants.
+     */
+    skip?: number
+    distinct?: ExpenseAccessGrantScalarFieldEnum | ExpenseAccessGrantScalarFieldEnum[]
+  }
+
+  /**
+   * ExpenseAccessGrant create
+   */
+  export type ExpenseAccessGrantCreateArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the ExpenseAccessGrant
+     */
+    select?: ExpenseAccessGrantSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the ExpenseAccessGrant
+     */
+    omit?: ExpenseAccessGrantOmit<ExtArgs> | null
+    /**
+     * The data needed to create a ExpenseAccessGrant.
+     */
+    data: XOR<ExpenseAccessGrantCreateInput, ExpenseAccessGrantUncheckedCreateInput>
+  }
+
+  /**
+   * ExpenseAccessGrant createMany
+   */
+  export type ExpenseAccessGrantCreateManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * The data used to create many ExpenseAccessGrants.
+     */
+    data: ExpenseAccessGrantCreateManyInput | ExpenseAccessGrantCreateManyInput[]
+    skipDuplicates?: boolean
+  }
+
+  /**
+   * ExpenseAccessGrant createManyAndReturn
+   */
+  export type ExpenseAccessGrantCreateManyAndReturnArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the ExpenseAccessGrant
+     */
+    select?: ExpenseAccessGrantSelectCreateManyAndReturn<ExtArgs> | null
+    /**
+     * Omit specific fields from the ExpenseAccessGrant
+     */
+    omit?: ExpenseAccessGrantOmit<ExtArgs> | null
+    /**
+     * The data used to create many ExpenseAccessGrants.
+     */
+    data: ExpenseAccessGrantCreateManyInput | ExpenseAccessGrantCreateManyInput[]
+    skipDuplicates?: boolean
+  }
+
+  /**
+   * ExpenseAccessGrant update
+   */
+  export type ExpenseAccessGrantUpdateArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the ExpenseAccessGrant
+     */
+    select?: ExpenseAccessGrantSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the ExpenseAccessGrant
+     */
+    omit?: ExpenseAccessGrantOmit<ExtArgs> | null
+    /**
+     * The data needed to update a ExpenseAccessGrant.
+     */
+    data: XOR<ExpenseAccessGrantUpdateInput, ExpenseAccessGrantUncheckedUpdateInput>
+    /**
+     * Choose, which ExpenseAccessGrant to update.
+     */
+    where: ExpenseAccessGrantWhereUniqueInput
+  }
+
+  /**
+   * ExpenseAccessGrant updateMany
+   */
+  export type ExpenseAccessGrantUpdateManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * The data used to update ExpenseAccessGrants.
+     */
+    data: XOR<ExpenseAccessGrantUpdateManyMutationInput, ExpenseAccessGrantUncheckedUpdateManyInput>
+    /**
+     * Filter which ExpenseAccessGrants to update
+     */
+    where?: ExpenseAccessGrantWhereInput
+    /**
+     * Limit how many ExpenseAccessGrants to update.
+     */
+    limit?: number
+  }
+
+  /**
+   * ExpenseAccessGrant updateManyAndReturn
+   */
+  export type ExpenseAccessGrantUpdateManyAndReturnArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the ExpenseAccessGrant
+     */
+    select?: ExpenseAccessGrantSelectUpdateManyAndReturn<ExtArgs> | null
+    /**
+     * Omit specific fields from the ExpenseAccessGrant
+     */
+    omit?: ExpenseAccessGrantOmit<ExtArgs> | null
+    /**
+     * The data used to update ExpenseAccessGrants.
+     */
+    data: XOR<ExpenseAccessGrantUpdateManyMutationInput, ExpenseAccessGrantUncheckedUpdateManyInput>
+    /**
+     * Filter which ExpenseAccessGrants to update
+     */
+    where?: ExpenseAccessGrantWhereInput
+    /**
+     * Limit how many ExpenseAccessGrants to update.
+     */
+    limit?: number
+  }
+
+  /**
+   * ExpenseAccessGrant upsert
+   */
+  export type ExpenseAccessGrantUpsertArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the ExpenseAccessGrant
+     */
+    select?: ExpenseAccessGrantSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the ExpenseAccessGrant
+     */
+    omit?: ExpenseAccessGrantOmit<ExtArgs> | null
+    /**
+     * The filter to search for the ExpenseAccessGrant to update in case it exists.
+     */
+    where: ExpenseAccessGrantWhereUniqueInput
+    /**
+     * In case the ExpenseAccessGrant found by the `where` argument doesn't exist, create a new ExpenseAccessGrant with this data.
+     */
+    create: XOR<ExpenseAccessGrantCreateInput, ExpenseAccessGrantUncheckedCreateInput>
+    /**
+     * In case the ExpenseAccessGrant was found with the provided `where` argument, update it with this data.
+     */
+    update: XOR<ExpenseAccessGrantUpdateInput, ExpenseAccessGrantUncheckedUpdateInput>
+  }
+
+  /**
+   * ExpenseAccessGrant delete
+   */
+  export type ExpenseAccessGrantDeleteArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the ExpenseAccessGrant
+     */
+    select?: ExpenseAccessGrantSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the ExpenseAccessGrant
+     */
+    omit?: ExpenseAccessGrantOmit<ExtArgs> | null
+    /**
+     * Filter which ExpenseAccessGrant to delete.
+     */
+    where: ExpenseAccessGrantWhereUniqueInput
+  }
+
+  /**
+   * ExpenseAccessGrant deleteMany
+   */
+  export type ExpenseAccessGrantDeleteManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Filter which ExpenseAccessGrants to delete
+     */
+    where?: ExpenseAccessGrantWhereInput
+    /**
+     * Limit how many ExpenseAccessGrants to delete.
+     */
+    limit?: number
+  }
+
+  /**
+   * ExpenseAccessGrant without action
+   */
+  export type ExpenseAccessGrantDefaultArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the ExpenseAccessGrant
+     */
+    select?: ExpenseAccessGrantSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the ExpenseAccessGrant
+     */
+    omit?: ExpenseAccessGrantOmit<ExtArgs> | null
+  }
+
+
+  /**
+   * Model ExpenseAuditLog
+   */
+
+  export type AggregateExpenseAuditLog = {
+    _count: ExpenseAuditLogCountAggregateOutputType | null
+    _avg: ExpenseAuditLogAvgAggregateOutputType | null
+    _sum: ExpenseAuditLogSumAggregateOutputType | null
+    _min: ExpenseAuditLogMinAggregateOutputType | null
+    _max: ExpenseAuditLogMaxAggregateOutputType | null
+  }
+
+  export type ExpenseAuditLogAvgAggregateOutputType = {
+    id: number | null
+    actorId: number | null
+  }
+
+  export type ExpenseAuditLogSumAggregateOutputType = {
+    id: number | null
+    actorId: number | null
+  }
+
+  export type ExpenseAuditLogMinAggregateOutputType = {
+    id: number | null
+    requestId: string | null
+    tableKey: string | null
+    rowId: string | null
+    operation: $Enums.ExpenseChangeOperation | null
+    eventType: $Enums.ExpenseAuditEventType | null
+    stageKey: string | null
+    stageLabel: string | null
+    actorId: number | null
+    actorName: string | null
+    actorEmail: string | null
+    comment: string | null
+    occurredAt: Date | null
+  }
+
+  export type ExpenseAuditLogMaxAggregateOutputType = {
+    id: number | null
+    requestId: string | null
+    tableKey: string | null
+    rowId: string | null
+    operation: $Enums.ExpenseChangeOperation | null
+    eventType: $Enums.ExpenseAuditEventType | null
+    stageKey: string | null
+    stageLabel: string | null
+    actorId: number | null
+    actorName: string | null
+    actorEmail: string | null
+    comment: string | null
+    occurredAt: Date | null
+  }
+
+  export type ExpenseAuditLogCountAggregateOutputType = {
+    id: number
+    requestId: number
+    tableKey: number
+    rowId: number
+    operation: number
+    eventType: number
+    stageKey: number
+    stageLabel: number
+    actorId: number
+    actorName: number
+    actorEmail: number
+    comment: number
+    details: number
+    occurredAt: number
+    _all: number
+  }
+
+
+  export type ExpenseAuditLogAvgAggregateInputType = {
+    id?: true
+    actorId?: true
+  }
+
+  export type ExpenseAuditLogSumAggregateInputType = {
+    id?: true
+    actorId?: true
+  }
+
+  export type ExpenseAuditLogMinAggregateInputType = {
+    id?: true
+    requestId?: true
+    tableKey?: true
+    rowId?: true
+    operation?: true
+    eventType?: true
+    stageKey?: true
+    stageLabel?: true
+    actorId?: true
+    actorName?: true
+    actorEmail?: true
+    comment?: true
+    occurredAt?: true
+  }
+
+  export type ExpenseAuditLogMaxAggregateInputType = {
+    id?: true
+    requestId?: true
+    tableKey?: true
+    rowId?: true
+    operation?: true
+    eventType?: true
+    stageKey?: true
+    stageLabel?: true
+    actorId?: true
+    actorName?: true
+    actorEmail?: true
+    comment?: true
+    occurredAt?: true
+  }
+
+  export type ExpenseAuditLogCountAggregateInputType = {
+    id?: true
+    requestId?: true
+    tableKey?: true
+    rowId?: true
+    operation?: true
+    eventType?: true
+    stageKey?: true
+    stageLabel?: true
+    actorId?: true
+    actorName?: true
+    actorEmail?: true
+    comment?: true
+    details?: true
+    occurredAt?: true
+    _all?: true
+  }
+
+  export type ExpenseAuditLogAggregateArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Filter which ExpenseAuditLog to aggregate.
+     */
+    where?: ExpenseAuditLogWhereInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
+     * 
+     * Determine the order of ExpenseAuditLogs to fetch.
+     */
+    orderBy?: ExpenseAuditLogOrderByWithRelationInput | ExpenseAuditLogOrderByWithRelationInput[]
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
+     * 
+     * Sets the start position
+     */
+    cursor?: ExpenseAuditLogWhereUniqueInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Take `±n` ExpenseAuditLogs from the position of the cursor.
+     */
+    take?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Skip the first `n` ExpenseAuditLogs.
+     */
+    skip?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     * 
+     * Count returned ExpenseAuditLogs
+    **/
+    _count?: true | ExpenseAuditLogCountAggregateInputType
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     * 
+     * Select which fields to average
+    **/
+    _avg?: ExpenseAuditLogAvgAggregateInputType
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     * 
+     * Select which fields to sum
+    **/
+    _sum?: ExpenseAuditLogSumAggregateInputType
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     * 
+     * Select which fields to find the minimum value
+    **/
+    _min?: ExpenseAuditLogMinAggregateInputType
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     * 
+     * Select which fields to find the maximum value
+    **/
+    _max?: ExpenseAuditLogMaxAggregateInputType
+  }
+
+  export type GetExpenseAuditLogAggregateType<T extends ExpenseAuditLogAggregateArgs> = {
+        [P in keyof T & keyof AggregateExpenseAuditLog]: P extends '_count' | 'count'
+      ? T[P] extends true
+        ? number
+        : GetScalarType<T[P], AggregateExpenseAuditLog[P]>
+      : GetScalarType<T[P], AggregateExpenseAuditLog[P]>
+  }
+
+
+
+
+  export type ExpenseAuditLogGroupByArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    where?: ExpenseAuditLogWhereInput
+    orderBy?: ExpenseAuditLogOrderByWithAggregationInput | ExpenseAuditLogOrderByWithAggregationInput[]
+    by: ExpenseAuditLogScalarFieldEnum[] | ExpenseAuditLogScalarFieldEnum
+    having?: ExpenseAuditLogScalarWhereWithAggregatesInput
+    take?: number
+    skip?: number
+    _count?: ExpenseAuditLogCountAggregateInputType | true
+    _avg?: ExpenseAuditLogAvgAggregateInputType
+    _sum?: ExpenseAuditLogSumAggregateInputType
+    _min?: ExpenseAuditLogMinAggregateInputType
+    _max?: ExpenseAuditLogMaxAggregateInputType
+  }
+
+  export type ExpenseAuditLogGroupByOutputType = {
+    id: number
+    requestId: string
+    tableKey: string
+    rowId: string | null
+    operation: $Enums.ExpenseChangeOperation
+    eventType: $Enums.ExpenseAuditEventType
+    stageKey: string | null
+    stageLabel: string | null
+    actorId: number | null
+    actorName: string | null
+    actorEmail: string | null
+    comment: string | null
+    details: JsonValue | null
+    occurredAt: Date
+    _count: ExpenseAuditLogCountAggregateOutputType | null
+    _avg: ExpenseAuditLogAvgAggregateOutputType | null
+    _sum: ExpenseAuditLogSumAggregateOutputType | null
+    _min: ExpenseAuditLogMinAggregateOutputType | null
+    _max: ExpenseAuditLogMaxAggregateOutputType | null
+  }
+
+  type GetExpenseAuditLogGroupByPayload<T extends ExpenseAuditLogGroupByArgs> = Prisma.PrismaPromise<
+    Array<
+      PickEnumerable<ExpenseAuditLogGroupByOutputType, T['by']> &
+        {
+          [P in ((keyof T) & (keyof ExpenseAuditLogGroupByOutputType))]: P extends '_count'
+            ? T[P] extends boolean
+              ? number
+              : GetScalarType<T[P], ExpenseAuditLogGroupByOutputType[P]>
+            : GetScalarType<T[P], ExpenseAuditLogGroupByOutputType[P]>
+        }
+      >
+    >
+
+
+  export type ExpenseAuditLogSelect<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
+    id?: boolean
+    requestId?: boolean
+    tableKey?: boolean
+    rowId?: boolean
+    operation?: boolean
+    eventType?: boolean
+    stageKey?: boolean
+    stageLabel?: boolean
+    actorId?: boolean
+    actorName?: boolean
+    actorEmail?: boolean
+    comment?: boolean
+    details?: boolean
+    occurredAt?: boolean
+  }, ExtArgs["result"]["expenseAuditLog"]>
+
+  export type ExpenseAuditLogSelectCreateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
+    id?: boolean
+    requestId?: boolean
+    tableKey?: boolean
+    rowId?: boolean
+    operation?: boolean
+    eventType?: boolean
+    stageKey?: boolean
+    stageLabel?: boolean
+    actorId?: boolean
+    actorName?: boolean
+    actorEmail?: boolean
+    comment?: boolean
+    details?: boolean
+    occurredAt?: boolean
+  }, ExtArgs["result"]["expenseAuditLog"]>
+
+  export type ExpenseAuditLogSelectUpdateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
+    id?: boolean
+    requestId?: boolean
+    tableKey?: boolean
+    rowId?: boolean
+    operation?: boolean
+    eventType?: boolean
+    stageKey?: boolean
+    stageLabel?: boolean
+    actorId?: boolean
+    actorName?: boolean
+    actorEmail?: boolean
+    comment?: boolean
+    details?: boolean
+    occurredAt?: boolean
+  }, ExtArgs["result"]["expenseAuditLog"]>
+
+  export type ExpenseAuditLogSelectScalar = {
+    id?: boolean
+    requestId?: boolean
+    tableKey?: boolean
+    rowId?: boolean
+    operation?: boolean
+    eventType?: boolean
+    stageKey?: boolean
+    stageLabel?: boolean
+    actorId?: boolean
+    actorName?: boolean
+    actorEmail?: boolean
+    comment?: boolean
+    details?: boolean
+    occurredAt?: boolean
+  }
+
+  export type ExpenseAuditLogOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<"id" | "requestId" | "tableKey" | "rowId" | "operation" | "eventType" | "stageKey" | "stageLabel" | "actorId" | "actorName" | "actorEmail" | "comment" | "details" | "occurredAt", ExtArgs["result"]["expenseAuditLog"]>
+
+  export type $ExpenseAuditLogPayload<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    name: "ExpenseAuditLog"
+    objects: {}
+    scalars: $Extensions.GetPayloadResult<{
+      id: number
+      requestId: string
+      tableKey: string
+      /**
+       * The affected master row's id. Null only for a REQUESTED/STAGE_* event on
+       * a not-yet-applied CREATE, which has no row yet.
+       */
+      rowId: string | null
+      operation: $Enums.ExpenseChangeOperation
+      eventType: $Enums.ExpenseAuditEventType
+      stageKey: string | null
+      stageLabel: string | null
+      actorId: number | null
+      actorName: string | null
+      actorEmail: string | null
+      comment: string | null
+      /**
+       * Event-shaped detail, e.g. { changes: {field:{old,new}} } for REQUESTED/
+       * APPLIED, { editedFields } for a STAGE_APPROVED that edited values, or
+       * { error } for APPLY_FAILED/AUTO_REJECTED.
+       */
+      details: Prisma.JsonValue | null
+      occurredAt: Date
+    }, ExtArgs["result"]["expenseAuditLog"]>
+    composites: {}
+  }
+
+  type ExpenseAuditLogGetPayload<S extends boolean | null | undefined | ExpenseAuditLogDefaultArgs> = $Result.GetResult<Prisma.$ExpenseAuditLogPayload, S>
+
+  type ExpenseAuditLogCountArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> =
+    Omit<ExpenseAuditLogFindManyArgs, 'select' | 'include' | 'distinct' | 'omit'> & {
+      select?: ExpenseAuditLogCountAggregateInputType | true
+    }
+
+  export interface ExpenseAuditLogDelegate<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs, GlobalOmitOptions = {}> {
+    [K: symbol]: { types: Prisma.TypeMap<ExtArgs>['model']['ExpenseAuditLog'], meta: { name: 'ExpenseAuditLog' } }
+    /**
+     * Find zero or one ExpenseAuditLog that matches the filter.
+     * @param {ExpenseAuditLogFindUniqueArgs} args - Arguments to find a ExpenseAuditLog
+     * @example
+     * // Get one ExpenseAuditLog
+     * const expenseAuditLog = await prisma.expenseAuditLog.findUnique({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     */
+    findUnique<T extends ExpenseAuditLogFindUniqueArgs>(args: SelectSubset<T, ExpenseAuditLogFindUniqueArgs<ExtArgs>>): Prisma__ExpenseAuditLogClient<$Result.GetResult<Prisma.$ExpenseAuditLogPayload<ExtArgs>, T, "findUnique", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Find one ExpenseAuditLog that matches the filter or throw an error with `error.code='P2025'`
+     * if no matches were found.
+     * @param {ExpenseAuditLogFindUniqueOrThrowArgs} args - Arguments to find a ExpenseAuditLog
+     * @example
+     * // Get one ExpenseAuditLog
+     * const expenseAuditLog = await prisma.expenseAuditLog.findUniqueOrThrow({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     */
+    findUniqueOrThrow<T extends ExpenseAuditLogFindUniqueOrThrowArgs>(args: SelectSubset<T, ExpenseAuditLogFindUniqueOrThrowArgs<ExtArgs>>): Prisma__ExpenseAuditLogClient<$Result.GetResult<Prisma.$ExpenseAuditLogPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Find the first ExpenseAuditLog that matches the filter.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {ExpenseAuditLogFindFirstArgs} args - Arguments to find a ExpenseAuditLog
+     * @example
+     * // Get one ExpenseAuditLog
+     * const expenseAuditLog = await prisma.expenseAuditLog.findFirst({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     */
+    findFirst<T extends ExpenseAuditLogFindFirstArgs>(args?: SelectSubset<T, ExpenseAuditLogFindFirstArgs<ExtArgs>>): Prisma__ExpenseAuditLogClient<$Result.GetResult<Prisma.$ExpenseAuditLogPayload<ExtArgs>, T, "findFirst", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Find the first ExpenseAuditLog that matches the filter or
+     * throw `PrismaKnownClientError` with `P2025` code if no matches were found.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {ExpenseAuditLogFindFirstOrThrowArgs} args - Arguments to find a ExpenseAuditLog
+     * @example
+     * // Get one ExpenseAuditLog
+     * const expenseAuditLog = await prisma.expenseAuditLog.findFirstOrThrow({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     */
+    findFirstOrThrow<T extends ExpenseAuditLogFindFirstOrThrowArgs>(args?: SelectSubset<T, ExpenseAuditLogFindFirstOrThrowArgs<ExtArgs>>): Prisma__ExpenseAuditLogClient<$Result.GetResult<Prisma.$ExpenseAuditLogPayload<ExtArgs>, T, "findFirstOrThrow", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Find zero or more ExpenseAuditLogs that matches the filter.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {ExpenseAuditLogFindManyArgs} args - Arguments to filter and select certain fields only.
+     * @example
+     * // Get all ExpenseAuditLogs
+     * const expenseAuditLogs = await prisma.expenseAuditLog.findMany()
+     * 
+     * // Get first 10 ExpenseAuditLogs
+     * const expenseAuditLogs = await prisma.expenseAuditLog.findMany({ take: 10 })
+     * 
+     * // Only select the `id`
+     * const expenseAuditLogWithIdOnly = await prisma.expenseAuditLog.findMany({ select: { id: true } })
+     * 
+     */
+    findMany<T extends ExpenseAuditLogFindManyArgs>(args?: SelectSubset<T, ExpenseAuditLogFindManyArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$ExpenseAuditLogPayload<ExtArgs>, T, "findMany", GlobalOmitOptions>>
+
+    /**
+     * Create a ExpenseAuditLog.
+     * @param {ExpenseAuditLogCreateArgs} args - Arguments to create a ExpenseAuditLog.
+     * @example
+     * // Create one ExpenseAuditLog
+     * const ExpenseAuditLog = await prisma.expenseAuditLog.create({
+     *   data: {
+     *     // ... data to create a ExpenseAuditLog
+     *   }
+     * })
+     * 
+     */
+    create<T extends ExpenseAuditLogCreateArgs>(args: SelectSubset<T, ExpenseAuditLogCreateArgs<ExtArgs>>): Prisma__ExpenseAuditLogClient<$Result.GetResult<Prisma.$ExpenseAuditLogPayload<ExtArgs>, T, "create", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Create many ExpenseAuditLogs.
+     * @param {ExpenseAuditLogCreateManyArgs} args - Arguments to create many ExpenseAuditLogs.
+     * @example
+     * // Create many ExpenseAuditLogs
+     * const expenseAuditLog = await prisma.expenseAuditLog.createMany({
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     *     
+     */
+    createMany<T extends ExpenseAuditLogCreateManyArgs>(args?: SelectSubset<T, ExpenseAuditLogCreateManyArgs<ExtArgs>>): Prisma.PrismaPromise<BatchPayload>
+
+    /**
+     * Create many ExpenseAuditLogs and returns the data saved in the database.
+     * @param {ExpenseAuditLogCreateManyAndReturnArgs} args - Arguments to create many ExpenseAuditLogs.
+     * @example
+     * // Create many ExpenseAuditLogs
+     * const expenseAuditLog = await prisma.expenseAuditLog.createManyAndReturn({
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     * 
+     * // Create many ExpenseAuditLogs and only return the `id`
+     * const expenseAuditLogWithIdOnly = await prisma.expenseAuditLog.createManyAndReturn({
+     *   select: { id: true },
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * 
+     */
+    createManyAndReturn<T extends ExpenseAuditLogCreateManyAndReturnArgs>(args?: SelectSubset<T, ExpenseAuditLogCreateManyAndReturnArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$ExpenseAuditLogPayload<ExtArgs>, T, "createManyAndReturn", GlobalOmitOptions>>
+
+    /**
+     * Delete a ExpenseAuditLog.
+     * @param {ExpenseAuditLogDeleteArgs} args - Arguments to delete one ExpenseAuditLog.
+     * @example
+     * // Delete one ExpenseAuditLog
+     * const ExpenseAuditLog = await prisma.expenseAuditLog.delete({
+     *   where: {
+     *     // ... filter to delete one ExpenseAuditLog
+     *   }
+     * })
+     * 
+     */
+    delete<T extends ExpenseAuditLogDeleteArgs>(args: SelectSubset<T, ExpenseAuditLogDeleteArgs<ExtArgs>>): Prisma__ExpenseAuditLogClient<$Result.GetResult<Prisma.$ExpenseAuditLogPayload<ExtArgs>, T, "delete", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Update one ExpenseAuditLog.
+     * @param {ExpenseAuditLogUpdateArgs} args - Arguments to update one ExpenseAuditLog.
+     * @example
+     * // Update one ExpenseAuditLog
+     * const expenseAuditLog = await prisma.expenseAuditLog.update({
+     *   where: {
+     *     // ... provide filter here
+     *   },
+     *   data: {
+     *     // ... provide data here
+     *   }
+     * })
+     * 
+     */
+    update<T extends ExpenseAuditLogUpdateArgs>(args: SelectSubset<T, ExpenseAuditLogUpdateArgs<ExtArgs>>): Prisma__ExpenseAuditLogClient<$Result.GetResult<Prisma.$ExpenseAuditLogPayload<ExtArgs>, T, "update", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Delete zero or more ExpenseAuditLogs.
+     * @param {ExpenseAuditLogDeleteManyArgs} args - Arguments to filter ExpenseAuditLogs to delete.
+     * @example
+     * // Delete a few ExpenseAuditLogs
+     * const { count } = await prisma.expenseAuditLog.deleteMany({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     * 
+     */
+    deleteMany<T extends ExpenseAuditLogDeleteManyArgs>(args?: SelectSubset<T, ExpenseAuditLogDeleteManyArgs<ExtArgs>>): Prisma.PrismaPromise<BatchPayload>
+
+    /**
+     * Update zero or more ExpenseAuditLogs.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {ExpenseAuditLogUpdateManyArgs} args - Arguments to update one or more rows.
+     * @example
+     * // Update many ExpenseAuditLogs
+     * const expenseAuditLog = await prisma.expenseAuditLog.updateMany({
+     *   where: {
+     *     // ... provide filter here
+     *   },
+     *   data: {
+     *     // ... provide data here
+     *   }
+     * })
+     * 
+     */
+    updateMany<T extends ExpenseAuditLogUpdateManyArgs>(args: SelectSubset<T, ExpenseAuditLogUpdateManyArgs<ExtArgs>>): Prisma.PrismaPromise<BatchPayload>
+
+    /**
+     * Update zero or more ExpenseAuditLogs and returns the data updated in the database.
+     * @param {ExpenseAuditLogUpdateManyAndReturnArgs} args - Arguments to update many ExpenseAuditLogs.
+     * @example
+     * // Update many ExpenseAuditLogs
+     * const expenseAuditLog = await prisma.expenseAuditLog.updateManyAndReturn({
+     *   where: {
+     *     // ... provide filter here
+     *   },
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     * 
+     * // Update zero or more ExpenseAuditLogs and only return the `id`
+     * const expenseAuditLogWithIdOnly = await prisma.expenseAuditLog.updateManyAndReturn({
+     *   select: { id: true },
+     *   where: {
+     *     // ... provide filter here
+     *   },
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * 
+     */
+    updateManyAndReturn<T extends ExpenseAuditLogUpdateManyAndReturnArgs>(args: SelectSubset<T, ExpenseAuditLogUpdateManyAndReturnArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$ExpenseAuditLogPayload<ExtArgs>, T, "updateManyAndReturn", GlobalOmitOptions>>
+
+    /**
+     * Create or update one ExpenseAuditLog.
+     * @param {ExpenseAuditLogUpsertArgs} args - Arguments to update or create a ExpenseAuditLog.
+     * @example
+     * // Update or create a ExpenseAuditLog
+     * const expenseAuditLog = await prisma.expenseAuditLog.upsert({
+     *   create: {
+     *     // ... data to create a ExpenseAuditLog
+     *   },
+     *   update: {
+     *     // ... in case it already exists, update
+     *   },
+     *   where: {
+     *     // ... the filter for the ExpenseAuditLog we want to update
+     *   }
+     * })
+     */
+    upsert<T extends ExpenseAuditLogUpsertArgs>(args: SelectSubset<T, ExpenseAuditLogUpsertArgs<ExtArgs>>): Prisma__ExpenseAuditLogClient<$Result.GetResult<Prisma.$ExpenseAuditLogPayload<ExtArgs>, T, "upsert", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+
+    /**
+     * Count the number of ExpenseAuditLogs.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {ExpenseAuditLogCountArgs} args - Arguments to filter ExpenseAuditLogs to count.
+     * @example
+     * // Count the number of ExpenseAuditLogs
+     * const count = await prisma.expenseAuditLog.count({
+     *   where: {
+     *     // ... the filter for the ExpenseAuditLogs we want to count
+     *   }
+     * })
+    **/
+    count<T extends ExpenseAuditLogCountArgs>(
+      args?: Subset<T, ExpenseAuditLogCountArgs>,
+    ): Prisma.PrismaPromise<
+      T extends $Utils.Record<'select', any>
+        ? T['select'] extends true
+          ? number
+          : GetScalarType<T['select'], ExpenseAuditLogCountAggregateOutputType>
+        : number
+    >
+
+    /**
+     * Allows you to perform aggregations operations on a ExpenseAuditLog.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {ExpenseAuditLogAggregateArgs} args - Select which aggregations you would like to apply and on what fields.
+     * @example
+     * // Ordered by age ascending
+     * // Where email contains prisma.io
+     * // Limited to the 10 users
+     * const aggregations = await prisma.user.aggregate({
+     *   _avg: {
+     *     age: true,
+     *   },
+     *   where: {
+     *     email: {
+     *       contains: "prisma.io",
+     *     },
+     *   },
+     *   orderBy: {
+     *     age: "asc",
+     *   },
+     *   take: 10,
+     * })
+    **/
+    aggregate<T extends ExpenseAuditLogAggregateArgs>(args: Subset<T, ExpenseAuditLogAggregateArgs>): Prisma.PrismaPromise<GetExpenseAuditLogAggregateType<T>>
+
+    /**
+     * Group by ExpenseAuditLog.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {ExpenseAuditLogGroupByArgs} args - Group by arguments.
+     * @example
+     * // Group by city, order by createdAt, get count
+     * const result = await prisma.user.groupBy({
+     *   by: ['city', 'createdAt'],
+     *   orderBy: {
+     *     createdAt: true
+     *   },
+     *   _count: {
+     *     _all: true
+     *   },
+     * })
+     * 
+    **/
+    groupBy<
+      T extends ExpenseAuditLogGroupByArgs,
+      HasSelectOrTake extends Or<
+        Extends<'skip', Keys<T>>,
+        Extends<'take', Keys<T>>
+      >,
+      OrderByArg extends True extends HasSelectOrTake
+        ? { orderBy: ExpenseAuditLogGroupByArgs['orderBy'] }
+        : { orderBy?: ExpenseAuditLogGroupByArgs['orderBy'] },
+      OrderFields extends ExcludeUnderscoreKeys<Keys<MaybeTupleToUnion<T['orderBy']>>>,
+      ByFields extends MaybeTupleToUnion<T['by']>,
+      ByValid extends Has<ByFields, OrderFields>,
+      HavingFields extends GetHavingFields<T['having']>,
+      HavingValid extends Has<ByFields, HavingFields>,
+      ByEmpty extends T['by'] extends never[] ? True : False,
+      InputErrors extends ByEmpty extends True
+      ? `Error: "by" must not be empty.`
+      : HavingValid extends False
+      ? {
+          [P in HavingFields]: P extends ByFields
+            ? never
+            : P extends string
+            ? `Error: Field "${P}" used in "having" needs to be provided in "by".`
+            : [
+                Error,
+                'Field ',
+                P,
+                ` in "having" needs to be provided in "by"`,
+              ]
+        }[HavingFields]
+      : 'take' extends Keys<T>
+      ? 'orderBy' extends Keys<T>
+        ? ByValid extends True
+          ? {}
+          : {
+              [P in OrderFields]: P extends ByFields
+                ? never
+                : `Error: Field "${P}" in "orderBy" needs to be provided in "by"`
+            }[OrderFields]
+        : 'Error: If you provide "take", you also need to provide "orderBy"'
+      : 'skip' extends Keys<T>
+      ? 'orderBy' extends Keys<T>
+        ? ByValid extends True
+          ? {}
+          : {
+              [P in OrderFields]: P extends ByFields
+                ? never
+                : `Error: Field "${P}" in "orderBy" needs to be provided in "by"`
+            }[OrderFields]
+        : 'Error: If you provide "skip", you also need to provide "orderBy"'
+      : ByValid extends True
+      ? {}
+      : {
+          [P in OrderFields]: P extends ByFields
+            ? never
+            : `Error: Field "${P}" in "orderBy" needs to be provided in "by"`
+        }[OrderFields]
+    >(args: SubsetIntersection<T, ExpenseAuditLogGroupByArgs, OrderByArg> & InputErrors): {} extends InputErrors ? GetExpenseAuditLogGroupByPayload<T> : Prisma.PrismaPromise<InputErrors>
+  /**
+   * Fields of the ExpenseAuditLog model
+   */
+  readonly fields: ExpenseAuditLogFieldRefs;
+  }
+
+  /**
+   * The delegate class that acts as a "Promise-like" for ExpenseAuditLog.
+   * Why is this prefixed with `Prisma__`?
+   * Because we want to prevent naming conflicts as mentioned in
+   * https://github.com/prisma/prisma-client-js/issues/707
+   */
+  export interface Prisma__ExpenseAuditLogClient<T, Null = never, ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs, GlobalOmitOptions = {}> extends Prisma.PrismaPromise<T> {
+    readonly [Symbol.toStringTag]: "PrismaPromise"
+    /**
+     * Attaches callbacks for the resolution and/or rejection of the Promise.
+     * @param onfulfilled The callback to execute when the Promise is resolved.
+     * @param onrejected The callback to execute when the Promise is rejected.
+     * @returns A Promise for the completion of which ever callback is executed.
+     */
+    then<TResult1 = T, TResult2 = never>(onfulfilled?: ((value: T) => TResult1 | PromiseLike<TResult1>) | undefined | null, onrejected?: ((reason: any) => TResult2 | PromiseLike<TResult2>) | undefined | null): $Utils.JsPromise<TResult1 | TResult2>
+    /**
+     * Attaches a callback for only the rejection of the Promise.
+     * @param onrejected The callback to execute when the Promise is rejected.
+     * @returns A Promise for the completion of the callback.
+     */
+    catch<TResult = never>(onrejected?: ((reason: any) => TResult | PromiseLike<TResult>) | undefined | null): $Utils.JsPromise<T | TResult>
+    /**
+     * Attaches a callback that is invoked when the Promise is settled (fulfilled or rejected). The
+     * resolved value cannot be modified from the callback.
+     * @param onfinally The callback to execute when the Promise is settled (fulfilled or rejected).
+     * @returns A Promise for the completion of the callback.
+     */
+    finally(onfinally?: (() => void) | undefined | null): $Utils.JsPromise<T>
+  }
+
+
+
+
+  /**
+   * Fields of the ExpenseAuditLog model
+   */
+  interface ExpenseAuditLogFieldRefs {
+    readonly id: FieldRef<"ExpenseAuditLog", 'Int'>
+    readonly requestId: FieldRef<"ExpenseAuditLog", 'String'>
+    readonly tableKey: FieldRef<"ExpenseAuditLog", 'String'>
+    readonly rowId: FieldRef<"ExpenseAuditLog", 'String'>
+    readonly operation: FieldRef<"ExpenseAuditLog", 'ExpenseChangeOperation'>
+    readonly eventType: FieldRef<"ExpenseAuditLog", 'ExpenseAuditEventType'>
+    readonly stageKey: FieldRef<"ExpenseAuditLog", 'String'>
+    readonly stageLabel: FieldRef<"ExpenseAuditLog", 'String'>
+    readonly actorId: FieldRef<"ExpenseAuditLog", 'Int'>
+    readonly actorName: FieldRef<"ExpenseAuditLog", 'String'>
+    readonly actorEmail: FieldRef<"ExpenseAuditLog", 'String'>
+    readonly comment: FieldRef<"ExpenseAuditLog", 'String'>
+    readonly details: FieldRef<"ExpenseAuditLog", 'Json'>
+    readonly occurredAt: FieldRef<"ExpenseAuditLog", 'DateTime'>
+  }
+    
+
+  // Custom InputTypes
+  /**
+   * ExpenseAuditLog findUnique
+   */
+  export type ExpenseAuditLogFindUniqueArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the ExpenseAuditLog
+     */
+    select?: ExpenseAuditLogSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the ExpenseAuditLog
+     */
+    omit?: ExpenseAuditLogOmit<ExtArgs> | null
+    /**
+     * Filter, which ExpenseAuditLog to fetch.
+     */
+    where: ExpenseAuditLogWhereUniqueInput
+  }
+
+  /**
+   * ExpenseAuditLog findUniqueOrThrow
+   */
+  export type ExpenseAuditLogFindUniqueOrThrowArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the ExpenseAuditLog
+     */
+    select?: ExpenseAuditLogSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the ExpenseAuditLog
+     */
+    omit?: ExpenseAuditLogOmit<ExtArgs> | null
+    /**
+     * Filter, which ExpenseAuditLog to fetch.
+     */
+    where: ExpenseAuditLogWhereUniqueInput
+  }
+
+  /**
+   * ExpenseAuditLog findFirst
+   */
+  export type ExpenseAuditLogFindFirstArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the ExpenseAuditLog
+     */
+    select?: ExpenseAuditLogSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the ExpenseAuditLog
+     */
+    omit?: ExpenseAuditLogOmit<ExtArgs> | null
+    /**
+     * Filter, which ExpenseAuditLog to fetch.
+     */
+    where?: ExpenseAuditLogWhereInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
+     * 
+     * Determine the order of ExpenseAuditLogs to fetch.
+     */
+    orderBy?: ExpenseAuditLogOrderByWithRelationInput | ExpenseAuditLogOrderByWithRelationInput[]
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
+     * 
+     * Sets the position for searching for ExpenseAuditLogs.
+     */
+    cursor?: ExpenseAuditLogWhereUniqueInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Take `±n` ExpenseAuditLogs from the position of the cursor.
+     */
+    take?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Skip the first `n` ExpenseAuditLogs.
+     */
+    skip?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/distinct Distinct Docs}
+     * 
+     * Filter by unique combinations of ExpenseAuditLogs.
+     */
+    distinct?: ExpenseAuditLogScalarFieldEnum | ExpenseAuditLogScalarFieldEnum[]
+  }
+
+  /**
+   * ExpenseAuditLog findFirstOrThrow
+   */
+  export type ExpenseAuditLogFindFirstOrThrowArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the ExpenseAuditLog
+     */
+    select?: ExpenseAuditLogSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the ExpenseAuditLog
+     */
+    omit?: ExpenseAuditLogOmit<ExtArgs> | null
+    /**
+     * Filter, which ExpenseAuditLog to fetch.
+     */
+    where?: ExpenseAuditLogWhereInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
+     * 
+     * Determine the order of ExpenseAuditLogs to fetch.
+     */
+    orderBy?: ExpenseAuditLogOrderByWithRelationInput | ExpenseAuditLogOrderByWithRelationInput[]
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
+     * 
+     * Sets the position for searching for ExpenseAuditLogs.
+     */
+    cursor?: ExpenseAuditLogWhereUniqueInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Take `±n` ExpenseAuditLogs from the position of the cursor.
+     */
+    take?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Skip the first `n` ExpenseAuditLogs.
+     */
+    skip?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/distinct Distinct Docs}
+     * 
+     * Filter by unique combinations of ExpenseAuditLogs.
+     */
+    distinct?: ExpenseAuditLogScalarFieldEnum | ExpenseAuditLogScalarFieldEnum[]
+  }
+
+  /**
+   * ExpenseAuditLog findMany
+   */
+  export type ExpenseAuditLogFindManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the ExpenseAuditLog
+     */
+    select?: ExpenseAuditLogSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the ExpenseAuditLog
+     */
+    omit?: ExpenseAuditLogOmit<ExtArgs> | null
+    /**
+     * Filter, which ExpenseAuditLogs to fetch.
+     */
+    where?: ExpenseAuditLogWhereInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
+     * 
+     * Determine the order of ExpenseAuditLogs to fetch.
+     */
+    orderBy?: ExpenseAuditLogOrderByWithRelationInput | ExpenseAuditLogOrderByWithRelationInput[]
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
+     * 
+     * Sets the position for listing ExpenseAuditLogs.
+     */
+    cursor?: ExpenseAuditLogWhereUniqueInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Take `±n` ExpenseAuditLogs from the position of the cursor.
+     */
+    take?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Skip the first `n` ExpenseAuditLogs.
+     */
+    skip?: number
+    distinct?: ExpenseAuditLogScalarFieldEnum | ExpenseAuditLogScalarFieldEnum[]
+  }
+
+  /**
+   * ExpenseAuditLog create
+   */
+  export type ExpenseAuditLogCreateArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the ExpenseAuditLog
+     */
+    select?: ExpenseAuditLogSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the ExpenseAuditLog
+     */
+    omit?: ExpenseAuditLogOmit<ExtArgs> | null
+    /**
+     * The data needed to create a ExpenseAuditLog.
+     */
+    data: XOR<ExpenseAuditLogCreateInput, ExpenseAuditLogUncheckedCreateInput>
+  }
+
+  /**
+   * ExpenseAuditLog createMany
+   */
+  export type ExpenseAuditLogCreateManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * The data used to create many ExpenseAuditLogs.
+     */
+    data: ExpenseAuditLogCreateManyInput | ExpenseAuditLogCreateManyInput[]
+    skipDuplicates?: boolean
+  }
+
+  /**
+   * ExpenseAuditLog createManyAndReturn
+   */
+  export type ExpenseAuditLogCreateManyAndReturnArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the ExpenseAuditLog
+     */
+    select?: ExpenseAuditLogSelectCreateManyAndReturn<ExtArgs> | null
+    /**
+     * Omit specific fields from the ExpenseAuditLog
+     */
+    omit?: ExpenseAuditLogOmit<ExtArgs> | null
+    /**
+     * The data used to create many ExpenseAuditLogs.
+     */
+    data: ExpenseAuditLogCreateManyInput | ExpenseAuditLogCreateManyInput[]
+    skipDuplicates?: boolean
+  }
+
+  /**
+   * ExpenseAuditLog update
+   */
+  export type ExpenseAuditLogUpdateArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the ExpenseAuditLog
+     */
+    select?: ExpenseAuditLogSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the ExpenseAuditLog
+     */
+    omit?: ExpenseAuditLogOmit<ExtArgs> | null
+    /**
+     * The data needed to update a ExpenseAuditLog.
+     */
+    data: XOR<ExpenseAuditLogUpdateInput, ExpenseAuditLogUncheckedUpdateInput>
+    /**
+     * Choose, which ExpenseAuditLog to update.
+     */
+    where: ExpenseAuditLogWhereUniqueInput
+  }
+
+  /**
+   * ExpenseAuditLog updateMany
+   */
+  export type ExpenseAuditLogUpdateManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * The data used to update ExpenseAuditLogs.
+     */
+    data: XOR<ExpenseAuditLogUpdateManyMutationInput, ExpenseAuditLogUncheckedUpdateManyInput>
+    /**
+     * Filter which ExpenseAuditLogs to update
+     */
+    where?: ExpenseAuditLogWhereInput
+    /**
+     * Limit how many ExpenseAuditLogs to update.
+     */
+    limit?: number
+  }
+
+  /**
+   * ExpenseAuditLog updateManyAndReturn
+   */
+  export type ExpenseAuditLogUpdateManyAndReturnArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the ExpenseAuditLog
+     */
+    select?: ExpenseAuditLogSelectUpdateManyAndReturn<ExtArgs> | null
+    /**
+     * Omit specific fields from the ExpenseAuditLog
+     */
+    omit?: ExpenseAuditLogOmit<ExtArgs> | null
+    /**
+     * The data used to update ExpenseAuditLogs.
+     */
+    data: XOR<ExpenseAuditLogUpdateManyMutationInput, ExpenseAuditLogUncheckedUpdateManyInput>
+    /**
+     * Filter which ExpenseAuditLogs to update
+     */
+    where?: ExpenseAuditLogWhereInput
+    /**
+     * Limit how many ExpenseAuditLogs to update.
+     */
+    limit?: number
+  }
+
+  /**
+   * ExpenseAuditLog upsert
+   */
+  export type ExpenseAuditLogUpsertArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the ExpenseAuditLog
+     */
+    select?: ExpenseAuditLogSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the ExpenseAuditLog
+     */
+    omit?: ExpenseAuditLogOmit<ExtArgs> | null
+    /**
+     * The filter to search for the ExpenseAuditLog to update in case it exists.
+     */
+    where: ExpenseAuditLogWhereUniqueInput
+    /**
+     * In case the ExpenseAuditLog found by the `where` argument doesn't exist, create a new ExpenseAuditLog with this data.
+     */
+    create: XOR<ExpenseAuditLogCreateInput, ExpenseAuditLogUncheckedCreateInput>
+    /**
+     * In case the ExpenseAuditLog was found with the provided `where` argument, update it with this data.
+     */
+    update: XOR<ExpenseAuditLogUpdateInput, ExpenseAuditLogUncheckedUpdateInput>
+  }
+
+  /**
+   * ExpenseAuditLog delete
+   */
+  export type ExpenseAuditLogDeleteArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the ExpenseAuditLog
+     */
+    select?: ExpenseAuditLogSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the ExpenseAuditLog
+     */
+    omit?: ExpenseAuditLogOmit<ExtArgs> | null
+    /**
+     * Filter which ExpenseAuditLog to delete.
+     */
+    where: ExpenseAuditLogWhereUniqueInput
+  }
+
+  /**
+   * ExpenseAuditLog deleteMany
+   */
+  export type ExpenseAuditLogDeleteManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Filter which ExpenseAuditLogs to delete
+     */
+    where?: ExpenseAuditLogWhereInput
+    /**
+     * Limit how many ExpenseAuditLogs to delete.
+     */
+    limit?: number
+  }
+
+  /**
+   * ExpenseAuditLog without action
+   */
+  export type ExpenseAuditLogDefaultArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the ExpenseAuditLog
+     */
+    select?: ExpenseAuditLogSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the ExpenseAuditLog
+     */
+    omit?: ExpenseAuditLogOmit<ExtArgs> | null
+  }
+
+
+  /**
    * Enums
    */
 
@@ -54285,6 +64086,8 @@ export namespace Prisma {
     fabCost: 'fabCost',
     fabCons: 'fabCons',
     width: 'width',
+    vendorFabricRate: 'vendorFabricRate',
+    valueAddCost: 'valueAddCost',
     bodyArticle: 'bodyArticle',
     bodyArticleDescription: 'bodyArticleDescription',
     fabricArticleNumber: 'fabricArticleNumber',
@@ -54398,6 +64201,7 @@ export namespace Prisma {
     role: 'role',
     division: 'division',
     subDivision: 'subDivision',
+    businessDivision: 'businessDivision',
     isActive: 'isActive',
     lastLogin: 'lastLogin',
     createdAt: 'createdAt',
@@ -54743,6 +64547,44 @@ export namespace Prisma {
   export type RawArticleScalarFieldEnum = (typeof RawArticleScalarFieldEnum)[keyof typeof RawArticleScalarFieldEnum]
 
 
+  export const FabricRawDataScalarFieldEnum: {
+    id: 'id',
+    presentationNo: 'presentationNo',
+    uniqueKey: 'uniqueKey',
+    vendorCode: 'vendorCode',
+    vendorName: 'vendorName',
+    vendorCity: 'vendorCity',
+    division: 'division',
+    subDivision: 'subDivision',
+    majorCategory: 'majorCategory',
+    presentationsType: 'presentationsType',
+    designNumber: 'designNumber',
+    articleNumber: 'articleNumber',
+    fabric: 'fabric',
+    noOfColors: 'noOfColors',
+    price: 'price',
+    imageUrl: 'imageUrl',
+    source: 'source',
+    season: 'season',
+    garmentWeight: 'garmentWeight',
+    availableQty: 'availableQty',
+    approvedBy: 'approvedBy',
+    notes: 'notes',
+    status: 'status',
+    retryCount: 'retryCount',
+    errorMessage: 'errorMessage',
+    extractedData: 'extractedData',
+    extractedAt: 'extractedAt',
+    flatId: 'flatId',
+    lockedUntil: 'lockedUntil',
+    presentationReceivedDate: 'presentationReceivedDate',
+    createdAt: 'createdAt',
+    updatedAt: 'updatedAt'
+  };
+
+  export type FabricRawDataScalarFieldEnum = (typeof FabricRawDataScalarFieldEnum)[keyof typeof FabricRawDataScalarFieldEnum]
+
+
   export const SrmSyncRunScalarFieldEnum: {
     id: 'id',
     triggeredBy: 'triggeredBy',
@@ -54820,6 +64662,58 @@ export namespace Prisma {
   };
 
   export type NationalGridMasterScalarFieldEnum = (typeof NationalGridMasterScalarFieldEnum)[keyof typeof NationalGridMasterScalarFieldEnum]
+
+
+  export const BroaderMenuScalarFieldEnum: {
+    id: 'id',
+    sn: 'sn',
+    mcCd: 'mcCd',
+    seg: 'seg',
+    div: 'div',
+    subDiv: 'subDiv',
+    majCatCd: 'majCatCd',
+    majCatNm: 'majCatNm',
+    subCatCd: 'subCatCd',
+    subCatDesc: 'subCatDesc',
+    mcDesc: 'mcDesc',
+    ssn: 'ssn',
+    mcStat: 'mcStat',
+    subCatStat: 'subCatStat',
+    majCatStat: 'majCatStat',
+    sizeApplicable: 'sizeApplicable',
+    divStat: 'divStat',
+    mcPkSz: 'mcPkSz',
+    subCatPkSz: 'subCatPkSz',
+    noOfOptions: 'noOfOptions',
+    avgDensity: 'avgDensity',
+    accDensity: 'accDensity',
+    wgDensity: 'wgDensity',
+    fg46FtDensity: 'fg46FtDensity',
+    fg5FtDensity: 'fg5FtDensity',
+    fg4ADensity: 'fg4ADensity',
+    fg8ADensity: 'fg8ADensity',
+    acp: 'acp',
+    oldDensity: 'oldDensity',
+    seq: 'seq',
+    mjCatTyp: 'mjCatTyp',
+    fixtr: 'fixtr',
+    newMcCd: 'newMcCd',
+    newMcDesc: 'newMcDesc',
+    oldMcDesc: 'oldMcDesc',
+    oldSubCatCd: 'oldSubCatCd',
+    oldSubCatDesc: 'oldSubCatDesc',
+    legacyMcDesc: 'legacyMcDesc',
+    effectiveDate: 'effectiveDate',
+    remarks: 'remarks',
+    gmStatus: 'gmStatus',
+    currentMcStatus: 'currentMcStatus',
+    fullMcName: 'fullMcName',
+    winterStatus: 'winterStatus',
+    uploadedAt: 'uploadedAt',
+    updatedAt: 'updatedAt'
+  };
+
+  export type BroaderMenuScalarFieldEnum = (typeof BroaderMenuScalarFieldEnum)[keyof typeof BroaderMenuScalarFieldEnum]
 
 
   export const MajorCatMasterScalarFieldEnum: {
@@ -54901,16 +64795,25 @@ export namespace Prisma {
     mLycra: 'mLycra',
     fabricArticleNumber: 'fabricArticleNumber',
     fabricArticleDescription: 'fabricArticleDescription',
+    flatId: 'flatId',
     division: 'division',
     subDivision: 'subDivision',
     majorCategory: 'majorCategory',
+    mcDescription: 'mcDescription',
     vendorName: 'vendorName',
     vendorCode: 'vendorCode',
+    designNumber: 'designNumber',
+    fabricRate: 'fabricRate',
+    v2FabricRate: 'v2FabricRate',
+    valueAddCost: 'valueAddCost',
+    articleFashionType: 'articleFashionType',
     approvalStatus: 'approvalStatus',
     approvedAt: 'approvedAt',
     approvedBy: 'approvedBy',
     sapSyncStatus: 'sapSyncStatus',
     sapSyncMessage: 'sapSyncMessage',
+    imageUrl: 'imageUrl',
+    fabricArticleType: 'fabricArticleType',
     userName: 'userName',
     createdAt: 'createdAt',
     updatedAt: 'updatedAt'
@@ -54940,11 +64843,15 @@ export namespace Prisma {
     mSet: 'mSet',
     bodyArticleNumber: 'bodyArticleNumber',
     bodyArticleDescription: 'bodyArticleDescription',
+    imageUrl: 'imageUrl',
+    bodyArticleType: 'bodyArticleType',
+    designNumber: 'designNumber',
     cmtpCost: 'cmtpCost',
     cmpCost: 'cmpCost',
     fabCost: 'fabCost',
     fabCons: 'fabCons',
     width: 'width',
+    basicTrimCost: 'basicTrimCost',
     flatId: 'flatId',
     articleNumber: 'articleNumber',
     division: 'division',
@@ -54957,6 +64864,7 @@ export namespace Prisma {
     year: 'year',
     hsnTaxCode: 'hsnTaxCode',
     approvalStatus: 'approvalStatus',
+    fgCreatorApproved: 'fgCreatorApproved',
     approvedAt: 'approvedAt',
     approvedBy: 'approvedBy',
     sapSyncStatus: 'sapSyncStatus',
@@ -54967,6 +64875,104 @@ export namespace Prisma {
   };
 
   export type BodyArticleDataScalarFieldEnum = (typeof BodyArticleDataScalarFieldEnum)[keyof typeof BodyArticleDataScalarFieldEnum]
+
+
+  export const MajorCategoryDetailsScalarFieldEnum: {
+    id: 'id',
+    seg: 'seg',
+    div: 'div',
+    subDiv: 'subDiv',
+    majCat: 'majCat',
+    mcCode: 'mcCode',
+    mcDes: 'mcDes',
+    hsnCode: 'hsnCode',
+    mcStatus: 'mcStatus',
+    createdAt: 'createdAt'
+  };
+
+  export type MajorCategoryDetailsScalarFieldEnum = (typeof MajorCategoryDetailsScalarFieldEnum)[keyof typeof MajorCategoryDetailsScalarFieldEnum]
+
+
+  export const ExpenseApprovalStageScalarFieldEnum: {
+    id: 'id',
+    tableKey: 'tableKey',
+    key: 'key',
+    label: 'label',
+    description: 'description',
+    sortOrder: 'sortOrder',
+    isActive: 'isActive',
+    createdById: 'createdById',
+    createdByName: 'createdByName',
+    createdAt: 'createdAt',
+    updatedAt: 'updatedAt'
+  };
+
+  export type ExpenseApprovalStageScalarFieldEnum = (typeof ExpenseApprovalStageScalarFieldEnum)[keyof typeof ExpenseApprovalStageScalarFieldEnum]
+
+
+  export const ExpenseChangeRequestScalarFieldEnum: {
+    id: 'id',
+    tableKey: 'tableKey',
+    operation: 'operation',
+    rowId: 'rowId',
+    appliedRowId: 'appliedRowId',
+    rowLabel: 'rowLabel',
+    changes: 'changes',
+    reason: 'reason',
+    dueDate: 'dueDate',
+    status: 'status',
+    currentStageKey: 'currentStageKey',
+    approvalTrail: 'approvalTrail',
+    requestedById: 'requestedById',
+    requestedByName: 'requestedByName',
+    requestedByEmail: 'requestedByEmail',
+    requestedAt: 'requestedAt',
+    requesterBusinessDivision: 'requesterBusinessDivision',
+    createdAt: 'createdAt',
+    updatedAt: 'updatedAt'
+  };
+
+  export type ExpenseChangeRequestScalarFieldEnum = (typeof ExpenseChangeRequestScalarFieldEnum)[keyof typeof ExpenseChangeRequestScalarFieldEnum]
+
+
+  export const ExpenseAccessGrantScalarFieldEnum: {
+    id: 'id',
+    email: 'email',
+    level: 'level',
+    tableKey: 'tableKey',
+    subDivision: 'subDivision',
+    canCreate: 'canCreate',
+    canUpdate: 'canUpdate',
+    canDelete: 'canDelete',
+    isActive: 'isActive',
+    note: 'note',
+    grantedById: 'grantedById',
+    grantedByName: 'grantedByName',
+    createdAt: 'createdAt',
+    updatedAt: 'updatedAt'
+  };
+
+  export type ExpenseAccessGrantScalarFieldEnum = (typeof ExpenseAccessGrantScalarFieldEnum)[keyof typeof ExpenseAccessGrantScalarFieldEnum]
+
+
+  export const ExpenseAuditLogScalarFieldEnum: {
+    id: 'id',
+    requestId: 'requestId',
+    tableKey: 'tableKey',
+    rowId: 'rowId',
+    operation: 'operation',
+    eventType: 'eventType',
+    stageKey: 'stageKey',
+    stageLabel: 'stageLabel',
+    actorId: 'actorId',
+    actorName: 'actorName',
+    actorEmail: 'actorEmail',
+    comment: 'comment',
+    details: 'details',
+    occurredAt: 'occurredAt'
+  };
+
+  export type ExpenseAuditLogScalarFieldEnum = (typeof ExpenseAuditLogScalarFieldEnum)[keyof typeof ExpenseAuditLogScalarFieldEnum]
 
 
   export const SortOrder: {
@@ -55268,7 +65274,8 @@ export namespace Prisma {
     password: 'password',
     name: 'name',
     division: 'division',
-    subDivision: 'subDivision'
+    subDivision: 'subDivision',
+    businessDivision: 'businessDivision'
   };
 
   export type UserOrderByRelevanceFieldEnum = (typeof UserOrderByRelevanceFieldEnum)[keyof typeof UserOrderByRelevanceFieldEnum]
@@ -55536,6 +65543,32 @@ export namespace Prisma {
   export type RawArticleOrderByRelevanceFieldEnum = (typeof RawArticleOrderByRelevanceFieldEnum)[keyof typeof RawArticleOrderByRelevanceFieldEnum]
 
 
+  export const FabricRawDataOrderByRelevanceFieldEnum: {
+    id: 'id',
+    presentationNo: 'presentationNo',
+    uniqueKey: 'uniqueKey',
+    vendorCode: 'vendorCode',
+    vendorName: 'vendorName',
+    vendorCity: 'vendorCity',
+    division: 'division',
+    subDivision: 'subDivision',
+    majorCategory: 'majorCategory',
+    presentationsType: 'presentationsType',
+    designNumber: 'designNumber',
+    articleNumber: 'articleNumber',
+    fabric: 'fabric',
+    imageUrl: 'imageUrl',
+    source: 'source',
+    season: 'season',
+    approvedBy: 'approvedBy',
+    notes: 'notes',
+    errorMessage: 'errorMessage',
+    flatId: 'flatId'
+  };
+
+  export type FabricRawDataOrderByRelevanceFieldEnum = (typeof FabricRawDataOrderByRelevanceFieldEnum)[keyof typeof FabricRawDataOrderByRelevanceFieldEnum]
+
+
   export const SrmSyncRunOrderByRelevanceFieldEnum: {
     id: 'id',
     triggeredBy: 'triggeredBy',
@@ -55582,6 +65615,35 @@ export namespace Prisma {
   };
 
   export type NationalGridMasterOrderByRelevanceFieldEnum = (typeof NationalGridMasterOrderByRelevanceFieldEnum)[keyof typeof NationalGridMasterOrderByRelevanceFieldEnum]
+
+
+  export const BroaderMenuOrderByRelevanceFieldEnum: {
+    seg: 'seg',
+    div: 'div',
+    subDiv: 'subDiv',
+    majCatNm: 'majCatNm',
+    subCatDesc: 'subCatDesc',
+    mcDesc: 'mcDesc',
+    ssn: 'ssn',
+    mcStat: 'mcStat',
+    subCatStat: 'subCatStat',
+    majCatStat: 'majCatStat',
+    sizeApplicable: 'sizeApplicable',
+    divStat: 'divStat',
+    mjCatTyp: 'mjCatTyp',
+    fixtr: 'fixtr',
+    newMcDesc: 'newMcDesc',
+    oldMcDesc: 'oldMcDesc',
+    oldSubCatDesc: 'oldSubCatDesc',
+    legacyMcDesc: 'legacyMcDesc',
+    remarks: 'remarks',
+    gmStatus: 'gmStatus',
+    currentMcStatus: 'currentMcStatus',
+    fullMcName: 'fullMcName',
+    winterStatus: 'winterStatus'
+  };
+
+  export type BroaderMenuOrderByRelevanceFieldEnum = (typeof BroaderMenuOrderByRelevanceFieldEnum)[keyof typeof BroaderMenuOrderByRelevanceFieldEnum]
 
 
   export const MajorCatMasterOrderByRelevanceFieldEnum: {
@@ -55651,14 +65713,20 @@ export namespace Prisma {
     mLycra: 'mLycra',
     fabricArticleNumber: 'fabricArticleNumber',
     fabricArticleDescription: 'fabricArticleDescription',
+    flatId: 'flatId',
     division: 'division',
     subDivision: 'subDivision',
     majorCategory: 'majorCategory',
+    mcDescription: 'mcDescription',
     vendorName: 'vendorName',
     vendorCode: 'vendorCode',
+    designNumber: 'designNumber',
+    articleFashionType: 'articleFashionType',
     approvalStatus: 'approvalStatus',
     sapSyncStatus: 'sapSyncStatus',
     sapSyncMessage: 'sapSyncMessage',
+    imageUrl: 'imageUrl',
+    fabricArticleType: 'fabricArticleType',
     userName: 'userName'
   };
 
@@ -55686,6 +65754,9 @@ export namespace Prisma {
     mSet: 'mSet',
     bodyArticleNumber: 'bodyArticleNumber',
     bodyArticleDescription: 'bodyArticleDescription',
+    imageUrl: 'imageUrl',
+    bodyArticleType: 'bodyArticleType',
+    designNumber: 'designNumber',
     flatId: 'flatId',
     articleNumber: 'articleNumber',
     division: 'division',
@@ -55698,12 +65769,80 @@ export namespace Prisma {
     year: 'year',
     hsnTaxCode: 'hsnTaxCode',
     approvalStatus: 'approvalStatus',
+    fgCreatorApproved: 'fgCreatorApproved',
     sapSyncStatus: 'sapSyncStatus',
     sapSyncMessage: 'sapSyncMessage',
     userName: 'userName'
   };
 
   export type BodyArticleDataOrderByRelevanceFieldEnum = (typeof BodyArticleDataOrderByRelevanceFieldEnum)[keyof typeof BodyArticleDataOrderByRelevanceFieldEnum]
+
+
+  export const MajorCategoryDetailsOrderByRelevanceFieldEnum: {
+    seg: 'seg',
+    div: 'div',
+    subDiv: 'subDiv',
+    majCat: 'majCat',
+    mcCode: 'mcCode',
+    mcDes: 'mcDes',
+    hsnCode: 'hsnCode',
+    mcStatus: 'mcStatus'
+  };
+
+  export type MajorCategoryDetailsOrderByRelevanceFieldEnum = (typeof MajorCategoryDetailsOrderByRelevanceFieldEnum)[keyof typeof MajorCategoryDetailsOrderByRelevanceFieldEnum]
+
+
+  export const ExpenseApprovalStageOrderByRelevanceFieldEnum: {
+    tableKey: 'tableKey',
+    key: 'key',
+    label: 'label',
+    description: 'description',
+    createdByName: 'createdByName'
+  };
+
+  export type ExpenseApprovalStageOrderByRelevanceFieldEnum = (typeof ExpenseApprovalStageOrderByRelevanceFieldEnum)[keyof typeof ExpenseApprovalStageOrderByRelevanceFieldEnum]
+
+
+  export const ExpenseChangeRequestOrderByRelevanceFieldEnum: {
+    id: 'id',
+    tableKey: 'tableKey',
+    rowId: 'rowId',
+    appliedRowId: 'appliedRowId',
+    rowLabel: 'rowLabel',
+    reason: 'reason',
+    currentStageKey: 'currentStageKey',
+    requestedByName: 'requestedByName',
+    requestedByEmail: 'requestedByEmail',
+    requesterBusinessDivision: 'requesterBusinessDivision'
+  };
+
+  export type ExpenseChangeRequestOrderByRelevanceFieldEnum = (typeof ExpenseChangeRequestOrderByRelevanceFieldEnum)[keyof typeof ExpenseChangeRequestOrderByRelevanceFieldEnum]
+
+
+  export const ExpenseAccessGrantOrderByRelevanceFieldEnum: {
+    email: 'email',
+    level: 'level',
+    tableKey: 'tableKey',
+    subDivision: 'subDivision',
+    note: 'note',
+    grantedByName: 'grantedByName'
+  };
+
+  export type ExpenseAccessGrantOrderByRelevanceFieldEnum = (typeof ExpenseAccessGrantOrderByRelevanceFieldEnum)[keyof typeof ExpenseAccessGrantOrderByRelevanceFieldEnum]
+
+
+  export const ExpenseAuditLogOrderByRelevanceFieldEnum: {
+    requestId: 'requestId',
+    tableKey: 'tableKey',
+    rowId: 'rowId',
+    stageKey: 'stageKey',
+    stageLabel: 'stageLabel',
+    actorName: 'actorName',
+    actorEmail: 'actorEmail',
+    comment: 'comment'
+  };
+
+  export type ExpenseAuditLogOrderByRelevanceFieldEnum = (typeof ExpenseAuditLogOrderByRelevanceFieldEnum)[keyof typeof ExpenseAuditLogOrderByRelevanceFieldEnum]
 
 
   /**
@@ -55939,6 +66078,48 @@ export namespace Prisma {
    * Reference to a field of type 'PoolBBatchStatus[]'
    */
   export type ListEnumPoolBBatchStatusFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'PoolBBatchStatus[]'>
+    
+
+
+  /**
+   * Reference to a field of type 'ExpenseChangeOperation'
+   */
+  export type EnumExpenseChangeOperationFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'ExpenseChangeOperation'>
+    
+
+
+  /**
+   * Reference to a field of type 'ExpenseChangeOperation[]'
+   */
+  export type ListEnumExpenseChangeOperationFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'ExpenseChangeOperation[]'>
+    
+
+
+  /**
+   * Reference to a field of type 'ExpenseChangeStatus'
+   */
+  export type EnumExpenseChangeStatusFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'ExpenseChangeStatus'>
+    
+
+
+  /**
+   * Reference to a field of type 'ExpenseChangeStatus[]'
+   */
+  export type ListEnumExpenseChangeStatusFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'ExpenseChangeStatus[]'>
+    
+
+
+  /**
+   * Reference to a field of type 'ExpenseAuditEventType'
+   */
+  export type EnumExpenseAuditEventTypeFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'ExpenseAuditEventType'>
+    
+
+
+  /**
+   * Reference to a field of type 'ExpenseAuditEventType[]'
+   */
+  export type ListEnumExpenseAuditEventTypeFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'ExpenseAuditEventType[]'>
     
 
 
@@ -56904,6 +67085,8 @@ export namespace Prisma {
     fabCost?: DecimalNullableFilter<"ExtractionResultFlat"> | Decimal | DecimalJsLike | number | string | null
     fabCons?: DecimalNullableFilter<"ExtractionResultFlat"> | Decimal | DecimalJsLike | number | string | null
     width?: DecimalNullableFilter<"ExtractionResultFlat"> | Decimal | DecimalJsLike | number | string | null
+    vendorFabricRate?: DecimalNullableFilter<"ExtractionResultFlat"> | Decimal | DecimalJsLike | number | string | null
+    valueAddCost?: DecimalNullableFilter<"ExtractionResultFlat"> | Decimal | DecimalJsLike | number | string | null
     bodyArticle?: StringNullableFilter<"ExtractionResultFlat"> | string | null
     bodyArticleDescription?: StringNullableFilter<"ExtractionResultFlat"> | string | null
     fabricArticleNumber?: StringNullableFilter<"ExtractionResultFlat"> | string | null
@@ -57047,6 +67230,8 @@ export namespace Prisma {
     fabCost?: SortOrderInput | SortOrder
     fabCons?: SortOrderInput | SortOrder
     width?: SortOrderInput | SortOrder
+    vendorFabricRate?: SortOrderInput | SortOrder
+    valueAddCost?: SortOrderInput | SortOrder
     bodyArticle?: SortOrderInput | SortOrder
     bodyArticleDescription?: SortOrderInput | SortOrder
     fabricArticleNumber?: SortOrderInput | SortOrder
@@ -57195,6 +67380,8 @@ export namespace Prisma {
     fabCost?: DecimalNullableFilter<"ExtractionResultFlat"> | Decimal | DecimalJsLike | number | string | null
     fabCons?: DecimalNullableFilter<"ExtractionResultFlat"> | Decimal | DecimalJsLike | number | string | null
     width?: DecimalNullableFilter<"ExtractionResultFlat"> | Decimal | DecimalJsLike | number | string | null
+    vendorFabricRate?: DecimalNullableFilter<"ExtractionResultFlat"> | Decimal | DecimalJsLike | number | string | null
+    valueAddCost?: DecimalNullableFilter<"ExtractionResultFlat"> | Decimal | DecimalJsLike | number | string | null
     bodyArticle?: StringNullableFilter<"ExtractionResultFlat"> | string | null
     bodyArticleDescription?: StringNullableFilter<"ExtractionResultFlat"> | string | null
     fabricArticleNumber?: StringNullableFilter<"ExtractionResultFlat"> | string | null
@@ -57337,6 +67524,8 @@ export namespace Prisma {
     fabCost?: SortOrderInput | SortOrder
     fabCons?: SortOrderInput | SortOrder
     width?: SortOrderInput | SortOrder
+    vendorFabricRate?: SortOrderInput | SortOrder
+    valueAddCost?: SortOrderInput | SortOrder
     bodyArticle?: SortOrderInput | SortOrder
     bodyArticleDescription?: SortOrderInput | SortOrder
     fabricArticleNumber?: SortOrderInput | SortOrder
@@ -57485,6 +67674,8 @@ export namespace Prisma {
     fabCost?: DecimalNullableWithAggregatesFilter<"ExtractionResultFlat"> | Decimal | DecimalJsLike | number | string | null
     fabCons?: DecimalNullableWithAggregatesFilter<"ExtractionResultFlat"> | Decimal | DecimalJsLike | number | string | null
     width?: DecimalNullableWithAggregatesFilter<"ExtractionResultFlat"> | Decimal | DecimalJsLike | number | string | null
+    vendorFabricRate?: DecimalNullableWithAggregatesFilter<"ExtractionResultFlat"> | Decimal | DecimalJsLike | number | string | null
+    valueAddCost?: DecimalNullableWithAggregatesFilter<"ExtractionResultFlat"> | Decimal | DecimalJsLike | number | string | null
     bodyArticle?: StringNullableWithAggregatesFilter<"ExtractionResultFlat"> | string | null
     bodyArticleDescription?: StringNullableWithAggregatesFilter<"ExtractionResultFlat"> | string | null
     fabricArticleNumber?: StringNullableWithAggregatesFilter<"ExtractionResultFlat"> | string | null
@@ -57852,6 +68043,7 @@ export namespace Prisma {
     role?: EnumUserRoleFilter<"User"> | $Enums.UserRole
     division?: StringNullableFilter<"User"> | string | null
     subDivision?: StringNullableFilter<"User"> | string | null
+    businessDivision?: StringNullableFilter<"User"> | string | null
     isActive?: BoolFilter<"User"> | boolean
     lastLogin?: DateTimeNullableFilter<"User"> | Date | string | null
     createdAt?: DateTimeFilter<"User"> | Date | string
@@ -57871,6 +68063,7 @@ export namespace Prisma {
     role?: SortOrder
     division?: SortOrderInput | SortOrder
     subDivision?: SortOrderInput | SortOrder
+    businessDivision?: SortOrderInput | SortOrder
     isActive?: SortOrder
     lastLogin?: SortOrderInput | SortOrder
     createdAt?: SortOrder
@@ -57894,6 +68087,7 @@ export namespace Prisma {
     role?: EnumUserRoleFilter<"User"> | $Enums.UserRole
     division?: StringNullableFilter<"User"> | string | null
     subDivision?: StringNullableFilter<"User"> | string | null
+    businessDivision?: StringNullableFilter<"User"> | string | null
     isActive?: BoolFilter<"User"> | boolean
     lastLogin?: DateTimeNullableFilter<"User"> | Date | string | null
     createdAt?: DateTimeFilter<"User"> | Date | string
@@ -57913,6 +68107,7 @@ export namespace Prisma {
     role?: SortOrder
     division?: SortOrderInput | SortOrder
     subDivision?: SortOrderInput | SortOrder
+    businessDivision?: SortOrderInput | SortOrder
     isActive?: SortOrder
     lastLogin?: SortOrderInput | SortOrder
     createdAt?: SortOrder
@@ -57935,6 +68130,7 @@ export namespace Prisma {
     role?: EnumUserRoleWithAggregatesFilter<"User"> | $Enums.UserRole
     division?: StringNullableWithAggregatesFilter<"User"> | string | null
     subDivision?: StringNullableWithAggregatesFilter<"User"> | string | null
+    businessDivision?: StringNullableWithAggregatesFilter<"User"> | string | null
     isActive?: BoolWithAggregatesFilter<"User"> | boolean
     lastLogin?: DateTimeNullableWithAggregatesFilter<"User"> | Date | string | null
     createdAt?: DateTimeWithAggregatesFilter<"User"> | Date | string
@@ -59656,6 +69852,196 @@ export namespace Prisma {
     updatedAt?: DateTimeWithAggregatesFilter<"RawArticle"> | Date | string
   }
 
+  export type FabricRawDataWhereInput = {
+    AND?: FabricRawDataWhereInput | FabricRawDataWhereInput[]
+    OR?: FabricRawDataWhereInput[]
+    NOT?: FabricRawDataWhereInput | FabricRawDataWhereInput[]
+    id?: StringFilter<"FabricRawData"> | string
+    presentationNo?: StringFilter<"FabricRawData"> | string
+    uniqueKey?: StringFilter<"FabricRawData"> | string
+    vendorCode?: StringNullableFilter<"FabricRawData"> | string | null
+    vendorName?: StringNullableFilter<"FabricRawData"> | string | null
+    vendorCity?: StringNullableFilter<"FabricRawData"> | string | null
+    division?: StringNullableFilter<"FabricRawData"> | string | null
+    subDivision?: StringNullableFilter<"FabricRawData"> | string | null
+    majorCategory?: StringNullableFilter<"FabricRawData"> | string | null
+    presentationsType?: StringNullableFilter<"FabricRawData"> | string | null
+    designNumber?: StringNullableFilter<"FabricRawData"> | string | null
+    articleNumber?: StringNullableFilter<"FabricRawData"> | string | null
+    fabric?: StringNullableFilter<"FabricRawData"> | string | null
+    noOfColors?: IntNullableFilter<"FabricRawData"> | number | null
+    price?: DecimalNullableFilter<"FabricRawData"> | Decimal | DecimalJsLike | number | string | null
+    imageUrl?: StringNullableFilter<"FabricRawData"> | string | null
+    source?: StringNullableFilter<"FabricRawData"> | string | null
+    season?: StringNullableFilter<"FabricRawData"> | string | null
+    garmentWeight?: DecimalNullableFilter<"FabricRawData"> | Decimal | DecimalJsLike | number | string | null
+    availableQty?: DecimalNullableFilter<"FabricRawData"> | Decimal | DecimalJsLike | number | string | null
+    approvedBy?: StringNullableFilter<"FabricRawData"> | string | null
+    notes?: StringNullableFilter<"FabricRawData"> | string | null
+    status?: EnumRawArticleStatusFilter<"FabricRawData"> | $Enums.RawArticleStatus
+    retryCount?: IntFilter<"FabricRawData"> | number
+    errorMessage?: StringNullableFilter<"FabricRawData"> | string | null
+    extractedData?: JsonNullableFilter<"FabricRawData">
+    extractedAt?: DateTimeNullableFilter<"FabricRawData"> | Date | string | null
+    flatId?: StringNullableFilter<"FabricRawData"> | string | null
+    lockedUntil?: DateTimeNullableFilter<"FabricRawData"> | Date | string | null
+    presentationReceivedDate?: DateTimeNullableFilter<"FabricRawData"> | Date | string | null
+    createdAt?: DateTimeFilter<"FabricRawData"> | Date | string
+    updatedAt?: DateTimeFilter<"FabricRawData"> | Date | string
+  }
+
+  export type FabricRawDataOrderByWithRelationInput = {
+    id?: SortOrder
+    presentationNo?: SortOrder
+    uniqueKey?: SortOrder
+    vendorCode?: SortOrderInput | SortOrder
+    vendorName?: SortOrderInput | SortOrder
+    vendorCity?: SortOrderInput | SortOrder
+    division?: SortOrderInput | SortOrder
+    subDivision?: SortOrderInput | SortOrder
+    majorCategory?: SortOrderInput | SortOrder
+    presentationsType?: SortOrderInput | SortOrder
+    designNumber?: SortOrderInput | SortOrder
+    articleNumber?: SortOrderInput | SortOrder
+    fabric?: SortOrderInput | SortOrder
+    noOfColors?: SortOrderInput | SortOrder
+    price?: SortOrderInput | SortOrder
+    imageUrl?: SortOrderInput | SortOrder
+    source?: SortOrderInput | SortOrder
+    season?: SortOrderInput | SortOrder
+    garmentWeight?: SortOrderInput | SortOrder
+    availableQty?: SortOrderInput | SortOrder
+    approvedBy?: SortOrderInput | SortOrder
+    notes?: SortOrderInput | SortOrder
+    status?: SortOrder
+    retryCount?: SortOrder
+    errorMessage?: SortOrderInput | SortOrder
+    extractedData?: SortOrderInput | SortOrder
+    extractedAt?: SortOrderInput | SortOrder
+    flatId?: SortOrderInput | SortOrder
+    lockedUntil?: SortOrderInput | SortOrder
+    presentationReceivedDate?: SortOrderInput | SortOrder
+    createdAt?: SortOrder
+    updatedAt?: SortOrder
+    _relevance?: FabricRawDataOrderByRelevanceInput
+  }
+
+  export type FabricRawDataWhereUniqueInput = Prisma.AtLeast<{
+    id?: string
+    uniqueKey?: string
+    AND?: FabricRawDataWhereInput | FabricRawDataWhereInput[]
+    OR?: FabricRawDataWhereInput[]
+    NOT?: FabricRawDataWhereInput | FabricRawDataWhereInput[]
+    presentationNo?: StringFilter<"FabricRawData"> | string
+    vendorCode?: StringNullableFilter<"FabricRawData"> | string | null
+    vendorName?: StringNullableFilter<"FabricRawData"> | string | null
+    vendorCity?: StringNullableFilter<"FabricRawData"> | string | null
+    division?: StringNullableFilter<"FabricRawData"> | string | null
+    subDivision?: StringNullableFilter<"FabricRawData"> | string | null
+    majorCategory?: StringNullableFilter<"FabricRawData"> | string | null
+    presentationsType?: StringNullableFilter<"FabricRawData"> | string | null
+    designNumber?: StringNullableFilter<"FabricRawData"> | string | null
+    articleNumber?: StringNullableFilter<"FabricRawData"> | string | null
+    fabric?: StringNullableFilter<"FabricRawData"> | string | null
+    noOfColors?: IntNullableFilter<"FabricRawData"> | number | null
+    price?: DecimalNullableFilter<"FabricRawData"> | Decimal | DecimalJsLike | number | string | null
+    imageUrl?: StringNullableFilter<"FabricRawData"> | string | null
+    source?: StringNullableFilter<"FabricRawData"> | string | null
+    season?: StringNullableFilter<"FabricRawData"> | string | null
+    garmentWeight?: DecimalNullableFilter<"FabricRawData"> | Decimal | DecimalJsLike | number | string | null
+    availableQty?: DecimalNullableFilter<"FabricRawData"> | Decimal | DecimalJsLike | number | string | null
+    approvedBy?: StringNullableFilter<"FabricRawData"> | string | null
+    notes?: StringNullableFilter<"FabricRawData"> | string | null
+    status?: EnumRawArticleStatusFilter<"FabricRawData"> | $Enums.RawArticleStatus
+    retryCount?: IntFilter<"FabricRawData"> | number
+    errorMessage?: StringNullableFilter<"FabricRawData"> | string | null
+    extractedData?: JsonNullableFilter<"FabricRawData">
+    extractedAt?: DateTimeNullableFilter<"FabricRawData"> | Date | string | null
+    flatId?: StringNullableFilter<"FabricRawData"> | string | null
+    lockedUntil?: DateTimeNullableFilter<"FabricRawData"> | Date | string | null
+    presentationReceivedDate?: DateTimeNullableFilter<"FabricRawData"> | Date | string | null
+    createdAt?: DateTimeFilter<"FabricRawData"> | Date | string
+    updatedAt?: DateTimeFilter<"FabricRawData"> | Date | string
+  }, "id" | "uniqueKey">
+
+  export type FabricRawDataOrderByWithAggregationInput = {
+    id?: SortOrder
+    presentationNo?: SortOrder
+    uniqueKey?: SortOrder
+    vendorCode?: SortOrderInput | SortOrder
+    vendorName?: SortOrderInput | SortOrder
+    vendorCity?: SortOrderInput | SortOrder
+    division?: SortOrderInput | SortOrder
+    subDivision?: SortOrderInput | SortOrder
+    majorCategory?: SortOrderInput | SortOrder
+    presentationsType?: SortOrderInput | SortOrder
+    designNumber?: SortOrderInput | SortOrder
+    articleNumber?: SortOrderInput | SortOrder
+    fabric?: SortOrderInput | SortOrder
+    noOfColors?: SortOrderInput | SortOrder
+    price?: SortOrderInput | SortOrder
+    imageUrl?: SortOrderInput | SortOrder
+    source?: SortOrderInput | SortOrder
+    season?: SortOrderInput | SortOrder
+    garmentWeight?: SortOrderInput | SortOrder
+    availableQty?: SortOrderInput | SortOrder
+    approvedBy?: SortOrderInput | SortOrder
+    notes?: SortOrderInput | SortOrder
+    status?: SortOrder
+    retryCount?: SortOrder
+    errorMessage?: SortOrderInput | SortOrder
+    extractedData?: SortOrderInput | SortOrder
+    extractedAt?: SortOrderInput | SortOrder
+    flatId?: SortOrderInput | SortOrder
+    lockedUntil?: SortOrderInput | SortOrder
+    presentationReceivedDate?: SortOrderInput | SortOrder
+    createdAt?: SortOrder
+    updatedAt?: SortOrder
+    _count?: FabricRawDataCountOrderByAggregateInput
+    _avg?: FabricRawDataAvgOrderByAggregateInput
+    _max?: FabricRawDataMaxOrderByAggregateInput
+    _min?: FabricRawDataMinOrderByAggregateInput
+    _sum?: FabricRawDataSumOrderByAggregateInput
+  }
+
+  export type FabricRawDataScalarWhereWithAggregatesInput = {
+    AND?: FabricRawDataScalarWhereWithAggregatesInput | FabricRawDataScalarWhereWithAggregatesInput[]
+    OR?: FabricRawDataScalarWhereWithAggregatesInput[]
+    NOT?: FabricRawDataScalarWhereWithAggregatesInput | FabricRawDataScalarWhereWithAggregatesInput[]
+    id?: StringWithAggregatesFilter<"FabricRawData"> | string
+    presentationNo?: StringWithAggregatesFilter<"FabricRawData"> | string
+    uniqueKey?: StringWithAggregatesFilter<"FabricRawData"> | string
+    vendorCode?: StringNullableWithAggregatesFilter<"FabricRawData"> | string | null
+    vendorName?: StringNullableWithAggregatesFilter<"FabricRawData"> | string | null
+    vendorCity?: StringNullableWithAggregatesFilter<"FabricRawData"> | string | null
+    division?: StringNullableWithAggregatesFilter<"FabricRawData"> | string | null
+    subDivision?: StringNullableWithAggregatesFilter<"FabricRawData"> | string | null
+    majorCategory?: StringNullableWithAggregatesFilter<"FabricRawData"> | string | null
+    presentationsType?: StringNullableWithAggregatesFilter<"FabricRawData"> | string | null
+    designNumber?: StringNullableWithAggregatesFilter<"FabricRawData"> | string | null
+    articleNumber?: StringNullableWithAggregatesFilter<"FabricRawData"> | string | null
+    fabric?: StringNullableWithAggregatesFilter<"FabricRawData"> | string | null
+    noOfColors?: IntNullableWithAggregatesFilter<"FabricRawData"> | number | null
+    price?: DecimalNullableWithAggregatesFilter<"FabricRawData"> | Decimal | DecimalJsLike | number | string | null
+    imageUrl?: StringNullableWithAggregatesFilter<"FabricRawData"> | string | null
+    source?: StringNullableWithAggregatesFilter<"FabricRawData"> | string | null
+    season?: StringNullableWithAggregatesFilter<"FabricRawData"> | string | null
+    garmentWeight?: DecimalNullableWithAggregatesFilter<"FabricRawData"> | Decimal | DecimalJsLike | number | string | null
+    availableQty?: DecimalNullableWithAggregatesFilter<"FabricRawData"> | Decimal | DecimalJsLike | number | string | null
+    approvedBy?: StringNullableWithAggregatesFilter<"FabricRawData"> | string | null
+    notes?: StringNullableWithAggregatesFilter<"FabricRawData"> | string | null
+    status?: EnumRawArticleStatusWithAggregatesFilter<"FabricRawData"> | $Enums.RawArticleStatus
+    retryCount?: IntWithAggregatesFilter<"FabricRawData"> | number
+    errorMessage?: StringNullableWithAggregatesFilter<"FabricRawData"> | string | null
+    extractedData?: JsonNullableWithAggregatesFilter<"FabricRawData">
+    extractedAt?: DateTimeNullableWithAggregatesFilter<"FabricRawData"> | Date | string | null
+    flatId?: StringNullableWithAggregatesFilter<"FabricRawData"> | string | null
+    lockedUntil?: DateTimeNullableWithAggregatesFilter<"FabricRawData"> | Date | string | null
+    presentationReceivedDate?: DateTimeNullableWithAggregatesFilter<"FabricRawData"> | Date | string | null
+    createdAt?: DateTimeWithAggregatesFilter<"FabricRawData"> | Date | string
+    updatedAt?: DateTimeWithAggregatesFilter<"FabricRawData"> | Date | string
+  }
+
   export type SrmSyncRunWhereInput = {
     AND?: SrmSyncRunWhereInput | SrmSyncRunWhereInput[]
     OR?: SrmSyncRunWhereInput[]
@@ -60065,6 +70451,266 @@ export namespace Prisma {
     createdAt?: DateTimeWithAggregatesFilter<"NationalGridMaster"> | Date | string
   }
 
+  export type BroaderMenuWhereInput = {
+    AND?: BroaderMenuWhereInput | BroaderMenuWhereInput[]
+    OR?: BroaderMenuWhereInput[]
+    NOT?: BroaderMenuWhereInput | BroaderMenuWhereInput[]
+    id?: IntFilter<"BroaderMenu"> | number
+    sn?: IntNullableFilter<"BroaderMenu"> | number | null
+    mcCd?: IntFilter<"BroaderMenu"> | number
+    seg?: StringNullableFilter<"BroaderMenu"> | string | null
+    div?: StringNullableFilter<"BroaderMenu"> | string | null
+    subDiv?: StringNullableFilter<"BroaderMenu"> | string | null
+    majCatCd?: IntNullableFilter<"BroaderMenu"> | number | null
+    majCatNm?: StringNullableFilter<"BroaderMenu"> | string | null
+    subCatCd?: IntNullableFilter<"BroaderMenu"> | number | null
+    subCatDesc?: StringNullableFilter<"BroaderMenu"> | string | null
+    mcDesc?: StringNullableFilter<"BroaderMenu"> | string | null
+    ssn?: StringNullableFilter<"BroaderMenu"> | string | null
+    mcStat?: StringNullableFilter<"BroaderMenu"> | string | null
+    subCatStat?: StringNullableFilter<"BroaderMenu"> | string | null
+    majCatStat?: StringNullableFilter<"BroaderMenu"> | string | null
+    sizeApplicable?: StringNullableFilter<"BroaderMenu"> | string | null
+    divStat?: StringNullableFilter<"BroaderMenu"> | string | null
+    mcPkSz?: IntNullableFilter<"BroaderMenu"> | number | null
+    subCatPkSz?: IntNullableFilter<"BroaderMenu"> | number | null
+    noOfOptions?: IntNullableFilter<"BroaderMenu"> | number | null
+    avgDensity?: DecimalNullableFilter<"BroaderMenu"> | Decimal | DecimalJsLike | number | string | null
+    accDensity?: DecimalNullableFilter<"BroaderMenu"> | Decimal | DecimalJsLike | number | string | null
+    wgDensity?: DecimalNullableFilter<"BroaderMenu"> | Decimal | DecimalJsLike | number | string | null
+    fg46FtDensity?: DecimalNullableFilter<"BroaderMenu"> | Decimal | DecimalJsLike | number | string | null
+    fg5FtDensity?: DecimalNullableFilter<"BroaderMenu"> | Decimal | DecimalJsLike | number | string | null
+    fg4ADensity?: DecimalNullableFilter<"BroaderMenu"> | Decimal | DecimalJsLike | number | string | null
+    fg8ADensity?: DecimalNullableFilter<"BroaderMenu"> | Decimal | DecimalJsLike | number | string | null
+    acp?: DecimalNullableFilter<"BroaderMenu"> | Decimal | DecimalJsLike | number | string | null
+    oldDensity?: DecimalNullableFilter<"BroaderMenu"> | Decimal | DecimalJsLike | number | string | null
+    seq?: IntNullableFilter<"BroaderMenu"> | number | null
+    mjCatTyp?: StringNullableFilter<"BroaderMenu"> | string | null
+    fixtr?: StringNullableFilter<"BroaderMenu"> | string | null
+    newMcCd?: IntNullableFilter<"BroaderMenu"> | number | null
+    newMcDesc?: StringNullableFilter<"BroaderMenu"> | string | null
+    oldMcDesc?: StringNullableFilter<"BroaderMenu"> | string | null
+    oldSubCatCd?: IntNullableFilter<"BroaderMenu"> | number | null
+    oldSubCatDesc?: StringNullableFilter<"BroaderMenu"> | string | null
+    legacyMcDesc?: StringNullableFilter<"BroaderMenu"> | string | null
+    effectiveDate?: DateTimeNullableFilter<"BroaderMenu"> | Date | string | null
+    remarks?: StringNullableFilter<"BroaderMenu"> | string | null
+    gmStatus?: StringNullableFilter<"BroaderMenu"> | string | null
+    currentMcStatus?: StringNullableFilter<"BroaderMenu"> | string | null
+    fullMcName?: StringNullableFilter<"BroaderMenu"> | string | null
+    winterStatus?: StringNullableFilter<"BroaderMenu"> | string | null
+    uploadedAt?: DateTimeFilter<"BroaderMenu"> | Date | string
+    updatedAt?: DateTimeFilter<"BroaderMenu"> | Date | string
+  }
+
+  export type BroaderMenuOrderByWithRelationInput = {
+    id?: SortOrder
+    sn?: SortOrderInput | SortOrder
+    mcCd?: SortOrder
+    seg?: SortOrderInput | SortOrder
+    div?: SortOrderInput | SortOrder
+    subDiv?: SortOrderInput | SortOrder
+    majCatCd?: SortOrderInput | SortOrder
+    majCatNm?: SortOrderInput | SortOrder
+    subCatCd?: SortOrderInput | SortOrder
+    subCatDesc?: SortOrderInput | SortOrder
+    mcDesc?: SortOrderInput | SortOrder
+    ssn?: SortOrderInput | SortOrder
+    mcStat?: SortOrderInput | SortOrder
+    subCatStat?: SortOrderInput | SortOrder
+    majCatStat?: SortOrderInput | SortOrder
+    sizeApplicable?: SortOrderInput | SortOrder
+    divStat?: SortOrderInput | SortOrder
+    mcPkSz?: SortOrderInput | SortOrder
+    subCatPkSz?: SortOrderInput | SortOrder
+    noOfOptions?: SortOrderInput | SortOrder
+    avgDensity?: SortOrderInput | SortOrder
+    accDensity?: SortOrderInput | SortOrder
+    wgDensity?: SortOrderInput | SortOrder
+    fg46FtDensity?: SortOrderInput | SortOrder
+    fg5FtDensity?: SortOrderInput | SortOrder
+    fg4ADensity?: SortOrderInput | SortOrder
+    fg8ADensity?: SortOrderInput | SortOrder
+    acp?: SortOrderInput | SortOrder
+    oldDensity?: SortOrderInput | SortOrder
+    seq?: SortOrderInput | SortOrder
+    mjCatTyp?: SortOrderInput | SortOrder
+    fixtr?: SortOrderInput | SortOrder
+    newMcCd?: SortOrderInput | SortOrder
+    newMcDesc?: SortOrderInput | SortOrder
+    oldMcDesc?: SortOrderInput | SortOrder
+    oldSubCatCd?: SortOrderInput | SortOrder
+    oldSubCatDesc?: SortOrderInput | SortOrder
+    legacyMcDesc?: SortOrderInput | SortOrder
+    effectiveDate?: SortOrderInput | SortOrder
+    remarks?: SortOrderInput | SortOrder
+    gmStatus?: SortOrderInput | SortOrder
+    currentMcStatus?: SortOrderInput | SortOrder
+    fullMcName?: SortOrderInput | SortOrder
+    winterStatus?: SortOrderInput | SortOrder
+    uploadedAt?: SortOrder
+    updatedAt?: SortOrder
+    _relevance?: BroaderMenuOrderByRelevanceInput
+  }
+
+  export type BroaderMenuWhereUniqueInput = Prisma.AtLeast<{
+    id?: number
+    mcCd?: number
+    AND?: BroaderMenuWhereInput | BroaderMenuWhereInput[]
+    OR?: BroaderMenuWhereInput[]
+    NOT?: BroaderMenuWhereInput | BroaderMenuWhereInput[]
+    sn?: IntNullableFilter<"BroaderMenu"> | number | null
+    seg?: StringNullableFilter<"BroaderMenu"> | string | null
+    div?: StringNullableFilter<"BroaderMenu"> | string | null
+    subDiv?: StringNullableFilter<"BroaderMenu"> | string | null
+    majCatCd?: IntNullableFilter<"BroaderMenu"> | number | null
+    majCatNm?: StringNullableFilter<"BroaderMenu"> | string | null
+    subCatCd?: IntNullableFilter<"BroaderMenu"> | number | null
+    subCatDesc?: StringNullableFilter<"BroaderMenu"> | string | null
+    mcDesc?: StringNullableFilter<"BroaderMenu"> | string | null
+    ssn?: StringNullableFilter<"BroaderMenu"> | string | null
+    mcStat?: StringNullableFilter<"BroaderMenu"> | string | null
+    subCatStat?: StringNullableFilter<"BroaderMenu"> | string | null
+    majCatStat?: StringNullableFilter<"BroaderMenu"> | string | null
+    sizeApplicable?: StringNullableFilter<"BroaderMenu"> | string | null
+    divStat?: StringNullableFilter<"BroaderMenu"> | string | null
+    mcPkSz?: IntNullableFilter<"BroaderMenu"> | number | null
+    subCatPkSz?: IntNullableFilter<"BroaderMenu"> | number | null
+    noOfOptions?: IntNullableFilter<"BroaderMenu"> | number | null
+    avgDensity?: DecimalNullableFilter<"BroaderMenu"> | Decimal | DecimalJsLike | number | string | null
+    accDensity?: DecimalNullableFilter<"BroaderMenu"> | Decimal | DecimalJsLike | number | string | null
+    wgDensity?: DecimalNullableFilter<"BroaderMenu"> | Decimal | DecimalJsLike | number | string | null
+    fg46FtDensity?: DecimalNullableFilter<"BroaderMenu"> | Decimal | DecimalJsLike | number | string | null
+    fg5FtDensity?: DecimalNullableFilter<"BroaderMenu"> | Decimal | DecimalJsLike | number | string | null
+    fg4ADensity?: DecimalNullableFilter<"BroaderMenu"> | Decimal | DecimalJsLike | number | string | null
+    fg8ADensity?: DecimalNullableFilter<"BroaderMenu"> | Decimal | DecimalJsLike | number | string | null
+    acp?: DecimalNullableFilter<"BroaderMenu"> | Decimal | DecimalJsLike | number | string | null
+    oldDensity?: DecimalNullableFilter<"BroaderMenu"> | Decimal | DecimalJsLike | number | string | null
+    seq?: IntNullableFilter<"BroaderMenu"> | number | null
+    mjCatTyp?: StringNullableFilter<"BroaderMenu"> | string | null
+    fixtr?: StringNullableFilter<"BroaderMenu"> | string | null
+    newMcCd?: IntNullableFilter<"BroaderMenu"> | number | null
+    newMcDesc?: StringNullableFilter<"BroaderMenu"> | string | null
+    oldMcDesc?: StringNullableFilter<"BroaderMenu"> | string | null
+    oldSubCatCd?: IntNullableFilter<"BroaderMenu"> | number | null
+    oldSubCatDesc?: StringNullableFilter<"BroaderMenu"> | string | null
+    legacyMcDesc?: StringNullableFilter<"BroaderMenu"> | string | null
+    effectiveDate?: DateTimeNullableFilter<"BroaderMenu"> | Date | string | null
+    remarks?: StringNullableFilter<"BroaderMenu"> | string | null
+    gmStatus?: StringNullableFilter<"BroaderMenu"> | string | null
+    currentMcStatus?: StringNullableFilter<"BroaderMenu"> | string | null
+    fullMcName?: StringNullableFilter<"BroaderMenu"> | string | null
+    winterStatus?: StringNullableFilter<"BroaderMenu"> | string | null
+    uploadedAt?: DateTimeFilter<"BroaderMenu"> | Date | string
+    updatedAt?: DateTimeFilter<"BroaderMenu"> | Date | string
+  }, "id" | "mcCd">
+
+  export type BroaderMenuOrderByWithAggregationInput = {
+    id?: SortOrder
+    sn?: SortOrderInput | SortOrder
+    mcCd?: SortOrder
+    seg?: SortOrderInput | SortOrder
+    div?: SortOrderInput | SortOrder
+    subDiv?: SortOrderInput | SortOrder
+    majCatCd?: SortOrderInput | SortOrder
+    majCatNm?: SortOrderInput | SortOrder
+    subCatCd?: SortOrderInput | SortOrder
+    subCatDesc?: SortOrderInput | SortOrder
+    mcDesc?: SortOrderInput | SortOrder
+    ssn?: SortOrderInput | SortOrder
+    mcStat?: SortOrderInput | SortOrder
+    subCatStat?: SortOrderInput | SortOrder
+    majCatStat?: SortOrderInput | SortOrder
+    sizeApplicable?: SortOrderInput | SortOrder
+    divStat?: SortOrderInput | SortOrder
+    mcPkSz?: SortOrderInput | SortOrder
+    subCatPkSz?: SortOrderInput | SortOrder
+    noOfOptions?: SortOrderInput | SortOrder
+    avgDensity?: SortOrderInput | SortOrder
+    accDensity?: SortOrderInput | SortOrder
+    wgDensity?: SortOrderInput | SortOrder
+    fg46FtDensity?: SortOrderInput | SortOrder
+    fg5FtDensity?: SortOrderInput | SortOrder
+    fg4ADensity?: SortOrderInput | SortOrder
+    fg8ADensity?: SortOrderInput | SortOrder
+    acp?: SortOrderInput | SortOrder
+    oldDensity?: SortOrderInput | SortOrder
+    seq?: SortOrderInput | SortOrder
+    mjCatTyp?: SortOrderInput | SortOrder
+    fixtr?: SortOrderInput | SortOrder
+    newMcCd?: SortOrderInput | SortOrder
+    newMcDesc?: SortOrderInput | SortOrder
+    oldMcDesc?: SortOrderInput | SortOrder
+    oldSubCatCd?: SortOrderInput | SortOrder
+    oldSubCatDesc?: SortOrderInput | SortOrder
+    legacyMcDesc?: SortOrderInput | SortOrder
+    effectiveDate?: SortOrderInput | SortOrder
+    remarks?: SortOrderInput | SortOrder
+    gmStatus?: SortOrderInput | SortOrder
+    currentMcStatus?: SortOrderInput | SortOrder
+    fullMcName?: SortOrderInput | SortOrder
+    winterStatus?: SortOrderInput | SortOrder
+    uploadedAt?: SortOrder
+    updatedAt?: SortOrder
+    _count?: BroaderMenuCountOrderByAggregateInput
+    _avg?: BroaderMenuAvgOrderByAggregateInput
+    _max?: BroaderMenuMaxOrderByAggregateInput
+    _min?: BroaderMenuMinOrderByAggregateInput
+    _sum?: BroaderMenuSumOrderByAggregateInput
+  }
+
+  export type BroaderMenuScalarWhereWithAggregatesInput = {
+    AND?: BroaderMenuScalarWhereWithAggregatesInput | BroaderMenuScalarWhereWithAggregatesInput[]
+    OR?: BroaderMenuScalarWhereWithAggregatesInput[]
+    NOT?: BroaderMenuScalarWhereWithAggregatesInput | BroaderMenuScalarWhereWithAggregatesInput[]
+    id?: IntWithAggregatesFilter<"BroaderMenu"> | number
+    sn?: IntNullableWithAggregatesFilter<"BroaderMenu"> | number | null
+    mcCd?: IntWithAggregatesFilter<"BroaderMenu"> | number
+    seg?: StringNullableWithAggregatesFilter<"BroaderMenu"> | string | null
+    div?: StringNullableWithAggregatesFilter<"BroaderMenu"> | string | null
+    subDiv?: StringNullableWithAggregatesFilter<"BroaderMenu"> | string | null
+    majCatCd?: IntNullableWithAggregatesFilter<"BroaderMenu"> | number | null
+    majCatNm?: StringNullableWithAggregatesFilter<"BroaderMenu"> | string | null
+    subCatCd?: IntNullableWithAggregatesFilter<"BroaderMenu"> | number | null
+    subCatDesc?: StringNullableWithAggregatesFilter<"BroaderMenu"> | string | null
+    mcDesc?: StringNullableWithAggregatesFilter<"BroaderMenu"> | string | null
+    ssn?: StringNullableWithAggregatesFilter<"BroaderMenu"> | string | null
+    mcStat?: StringNullableWithAggregatesFilter<"BroaderMenu"> | string | null
+    subCatStat?: StringNullableWithAggregatesFilter<"BroaderMenu"> | string | null
+    majCatStat?: StringNullableWithAggregatesFilter<"BroaderMenu"> | string | null
+    sizeApplicable?: StringNullableWithAggregatesFilter<"BroaderMenu"> | string | null
+    divStat?: StringNullableWithAggregatesFilter<"BroaderMenu"> | string | null
+    mcPkSz?: IntNullableWithAggregatesFilter<"BroaderMenu"> | number | null
+    subCatPkSz?: IntNullableWithAggregatesFilter<"BroaderMenu"> | number | null
+    noOfOptions?: IntNullableWithAggregatesFilter<"BroaderMenu"> | number | null
+    avgDensity?: DecimalNullableWithAggregatesFilter<"BroaderMenu"> | Decimal | DecimalJsLike | number | string | null
+    accDensity?: DecimalNullableWithAggregatesFilter<"BroaderMenu"> | Decimal | DecimalJsLike | number | string | null
+    wgDensity?: DecimalNullableWithAggregatesFilter<"BroaderMenu"> | Decimal | DecimalJsLike | number | string | null
+    fg46FtDensity?: DecimalNullableWithAggregatesFilter<"BroaderMenu"> | Decimal | DecimalJsLike | number | string | null
+    fg5FtDensity?: DecimalNullableWithAggregatesFilter<"BroaderMenu"> | Decimal | DecimalJsLike | number | string | null
+    fg4ADensity?: DecimalNullableWithAggregatesFilter<"BroaderMenu"> | Decimal | DecimalJsLike | number | string | null
+    fg8ADensity?: DecimalNullableWithAggregatesFilter<"BroaderMenu"> | Decimal | DecimalJsLike | number | string | null
+    acp?: DecimalNullableWithAggregatesFilter<"BroaderMenu"> | Decimal | DecimalJsLike | number | string | null
+    oldDensity?: DecimalNullableWithAggregatesFilter<"BroaderMenu"> | Decimal | DecimalJsLike | number | string | null
+    seq?: IntNullableWithAggregatesFilter<"BroaderMenu"> | number | null
+    mjCatTyp?: StringNullableWithAggregatesFilter<"BroaderMenu"> | string | null
+    fixtr?: StringNullableWithAggregatesFilter<"BroaderMenu"> | string | null
+    newMcCd?: IntNullableWithAggregatesFilter<"BroaderMenu"> | number | null
+    newMcDesc?: StringNullableWithAggregatesFilter<"BroaderMenu"> | string | null
+    oldMcDesc?: StringNullableWithAggregatesFilter<"BroaderMenu"> | string | null
+    oldSubCatCd?: IntNullableWithAggregatesFilter<"BroaderMenu"> | number | null
+    oldSubCatDesc?: StringNullableWithAggregatesFilter<"BroaderMenu"> | string | null
+    legacyMcDesc?: StringNullableWithAggregatesFilter<"BroaderMenu"> | string | null
+    effectiveDate?: DateTimeNullableWithAggregatesFilter<"BroaderMenu"> | Date | string | null
+    remarks?: StringNullableWithAggregatesFilter<"BroaderMenu"> | string | null
+    gmStatus?: StringNullableWithAggregatesFilter<"BroaderMenu"> | string | null
+    currentMcStatus?: StringNullableWithAggregatesFilter<"BroaderMenu"> | string | null
+    fullMcName?: StringNullableWithAggregatesFilter<"BroaderMenu"> | string | null
+    winterStatus?: StringNullableWithAggregatesFilter<"BroaderMenu"> | string | null
+    uploadedAt?: DateTimeWithAggregatesFilter<"BroaderMenu"> | Date | string
+    updatedAt?: DateTimeWithAggregatesFilter<"BroaderMenu"> | Date | string
+  }
+
   export type MajorCatMasterWhereInput = {
     AND?: MajorCatMasterWhereInput | MajorCatMasterWhereInput[]
     OR?: MajorCatMasterWhereInput[]
@@ -60393,16 +71039,25 @@ export namespace Prisma {
     mLycra?: StringNullableFilter<"FabricArticleData"> | string | null
     fabricArticleNumber?: StringNullableFilter<"FabricArticleData"> | string | null
     fabricArticleDescription?: StringNullableFilter<"FabricArticleData"> | string | null
+    flatId?: StringNullableFilter<"FabricArticleData"> | string | null
     division?: StringNullableFilter<"FabricArticleData"> | string | null
     subDivision?: StringNullableFilter<"FabricArticleData"> | string | null
     majorCategory?: StringNullableFilter<"FabricArticleData"> | string | null
+    mcDescription?: StringNullableFilter<"FabricArticleData"> | string | null
     vendorName?: StringNullableFilter<"FabricArticleData"> | string | null
     vendorCode?: StringNullableFilter<"FabricArticleData"> | string | null
+    designNumber?: StringNullableFilter<"FabricArticleData"> | string | null
+    fabricRate?: DecimalNullableFilter<"FabricArticleData"> | Decimal | DecimalJsLike | number | string | null
+    v2FabricRate?: DecimalNullableFilter<"FabricArticleData"> | Decimal | DecimalJsLike | number | string | null
+    valueAddCost?: DecimalNullableFilter<"FabricArticleData"> | Decimal | DecimalJsLike | number | string | null
+    articleFashionType?: StringNullableFilter<"FabricArticleData"> | string | null
     approvalStatus?: StringFilter<"FabricArticleData"> | string
     approvedAt?: DateTimeNullableFilter<"FabricArticleData"> | Date | string | null
     approvedBy?: IntNullableFilter<"FabricArticleData"> | number | null
     sapSyncStatus?: StringFilter<"FabricArticleData"> | string
     sapSyncMessage?: StringNullableFilter<"FabricArticleData"> | string | null
+    imageUrl?: StringNullableFilter<"FabricArticleData"> | string | null
+    fabricArticleType?: StringNullableFilter<"FabricArticleData"> | string | null
     userName?: StringNullableFilter<"FabricArticleData"> | string | null
     createdAt?: DateTimeFilter<"FabricArticleData"> | Date | string
     updatedAt?: DateTimeFilter<"FabricArticleData"> | Date | string
@@ -60426,16 +71081,25 @@ export namespace Prisma {
     mLycra?: SortOrderInput | SortOrder
     fabricArticleNumber?: SortOrderInput | SortOrder
     fabricArticleDescription?: SortOrderInput | SortOrder
+    flatId?: SortOrderInput | SortOrder
     division?: SortOrderInput | SortOrder
     subDivision?: SortOrderInput | SortOrder
     majorCategory?: SortOrderInput | SortOrder
+    mcDescription?: SortOrderInput | SortOrder
     vendorName?: SortOrderInput | SortOrder
     vendorCode?: SortOrderInput | SortOrder
+    designNumber?: SortOrderInput | SortOrder
+    fabricRate?: SortOrderInput | SortOrder
+    v2FabricRate?: SortOrderInput | SortOrder
+    valueAddCost?: SortOrderInput | SortOrder
+    articleFashionType?: SortOrderInput | SortOrder
     approvalStatus?: SortOrder
     approvedAt?: SortOrderInput | SortOrder
     approvedBy?: SortOrderInput | SortOrder
     sapSyncStatus?: SortOrder
     sapSyncMessage?: SortOrderInput | SortOrder
+    imageUrl?: SortOrderInput | SortOrder
+    fabricArticleType?: SortOrderInput | SortOrder
     userName?: SortOrderInput | SortOrder
     createdAt?: SortOrder
     updatedAt?: SortOrder
@@ -60463,16 +71127,25 @@ export namespace Prisma {
     mLycra?: StringNullableFilter<"FabricArticleData"> | string | null
     fabricArticleNumber?: StringNullableFilter<"FabricArticleData"> | string | null
     fabricArticleDescription?: StringNullableFilter<"FabricArticleData"> | string | null
+    flatId?: StringNullableFilter<"FabricArticleData"> | string | null
     division?: StringNullableFilter<"FabricArticleData"> | string | null
     subDivision?: StringNullableFilter<"FabricArticleData"> | string | null
     majorCategory?: StringNullableFilter<"FabricArticleData"> | string | null
+    mcDescription?: StringNullableFilter<"FabricArticleData"> | string | null
     vendorName?: StringNullableFilter<"FabricArticleData"> | string | null
     vendorCode?: StringNullableFilter<"FabricArticleData"> | string | null
+    designNumber?: StringNullableFilter<"FabricArticleData"> | string | null
+    fabricRate?: DecimalNullableFilter<"FabricArticleData"> | Decimal | DecimalJsLike | number | string | null
+    v2FabricRate?: DecimalNullableFilter<"FabricArticleData"> | Decimal | DecimalJsLike | number | string | null
+    valueAddCost?: DecimalNullableFilter<"FabricArticleData"> | Decimal | DecimalJsLike | number | string | null
+    articleFashionType?: StringNullableFilter<"FabricArticleData"> | string | null
     approvalStatus?: StringFilter<"FabricArticleData"> | string
     approvedAt?: DateTimeNullableFilter<"FabricArticleData"> | Date | string | null
     approvedBy?: IntNullableFilter<"FabricArticleData"> | number | null
     sapSyncStatus?: StringFilter<"FabricArticleData"> | string
     sapSyncMessage?: StringNullableFilter<"FabricArticleData"> | string | null
+    imageUrl?: StringNullableFilter<"FabricArticleData"> | string | null
+    fabricArticleType?: StringNullableFilter<"FabricArticleData"> | string | null
     userName?: StringNullableFilter<"FabricArticleData"> | string | null
     createdAt?: DateTimeFilter<"FabricArticleData"> | Date | string
     updatedAt?: DateTimeFilter<"FabricArticleData"> | Date | string
@@ -60496,16 +71169,25 @@ export namespace Prisma {
     mLycra?: SortOrderInput | SortOrder
     fabricArticleNumber?: SortOrderInput | SortOrder
     fabricArticleDescription?: SortOrderInput | SortOrder
+    flatId?: SortOrderInput | SortOrder
     division?: SortOrderInput | SortOrder
     subDivision?: SortOrderInput | SortOrder
     majorCategory?: SortOrderInput | SortOrder
+    mcDescription?: SortOrderInput | SortOrder
     vendorName?: SortOrderInput | SortOrder
     vendorCode?: SortOrderInput | SortOrder
+    designNumber?: SortOrderInput | SortOrder
+    fabricRate?: SortOrderInput | SortOrder
+    v2FabricRate?: SortOrderInput | SortOrder
+    valueAddCost?: SortOrderInput | SortOrder
+    articleFashionType?: SortOrderInput | SortOrder
     approvalStatus?: SortOrder
     approvedAt?: SortOrderInput | SortOrder
     approvedBy?: SortOrderInput | SortOrder
     sapSyncStatus?: SortOrder
     sapSyncMessage?: SortOrderInput | SortOrder
+    imageUrl?: SortOrderInput | SortOrder
+    fabricArticleType?: SortOrderInput | SortOrder
     userName?: SortOrderInput | SortOrder
     createdAt?: SortOrder
     updatedAt?: SortOrder
@@ -60537,16 +71219,25 @@ export namespace Prisma {
     mLycra?: StringNullableWithAggregatesFilter<"FabricArticleData"> | string | null
     fabricArticleNumber?: StringNullableWithAggregatesFilter<"FabricArticleData"> | string | null
     fabricArticleDescription?: StringNullableWithAggregatesFilter<"FabricArticleData"> | string | null
+    flatId?: StringNullableWithAggregatesFilter<"FabricArticleData"> | string | null
     division?: StringNullableWithAggregatesFilter<"FabricArticleData"> | string | null
     subDivision?: StringNullableWithAggregatesFilter<"FabricArticleData"> | string | null
     majorCategory?: StringNullableWithAggregatesFilter<"FabricArticleData"> | string | null
+    mcDescription?: StringNullableWithAggregatesFilter<"FabricArticleData"> | string | null
     vendorName?: StringNullableWithAggregatesFilter<"FabricArticleData"> | string | null
     vendorCode?: StringNullableWithAggregatesFilter<"FabricArticleData"> | string | null
+    designNumber?: StringNullableWithAggregatesFilter<"FabricArticleData"> | string | null
+    fabricRate?: DecimalNullableWithAggregatesFilter<"FabricArticleData"> | Decimal | DecimalJsLike | number | string | null
+    v2FabricRate?: DecimalNullableWithAggregatesFilter<"FabricArticleData"> | Decimal | DecimalJsLike | number | string | null
+    valueAddCost?: DecimalNullableWithAggregatesFilter<"FabricArticleData"> | Decimal | DecimalJsLike | number | string | null
+    articleFashionType?: StringNullableWithAggregatesFilter<"FabricArticleData"> | string | null
     approvalStatus?: StringWithAggregatesFilter<"FabricArticleData"> | string
     approvedAt?: DateTimeNullableWithAggregatesFilter<"FabricArticleData"> | Date | string | null
     approvedBy?: IntNullableWithAggregatesFilter<"FabricArticleData"> | number | null
     sapSyncStatus?: StringWithAggregatesFilter<"FabricArticleData"> | string
     sapSyncMessage?: StringNullableWithAggregatesFilter<"FabricArticleData"> | string | null
+    imageUrl?: StringNullableWithAggregatesFilter<"FabricArticleData"> | string | null
+    fabricArticleType?: StringNullableWithAggregatesFilter<"FabricArticleData"> | string | null
     userName?: StringNullableWithAggregatesFilter<"FabricArticleData"> | string | null
     createdAt?: DateTimeWithAggregatesFilter<"FabricArticleData"> | Date | string
     updatedAt?: DateTimeWithAggregatesFilter<"FabricArticleData"> | Date | string
@@ -60576,11 +71267,15 @@ export namespace Prisma {
     mSet?: StringNullableFilter<"BodyArticleData"> | string | null
     bodyArticleNumber?: StringNullableFilter<"BodyArticleData"> | string | null
     bodyArticleDescription?: StringNullableFilter<"BodyArticleData"> | string | null
+    imageUrl?: StringNullableFilter<"BodyArticleData"> | string | null
+    bodyArticleType?: StringNullableFilter<"BodyArticleData"> | string | null
+    designNumber?: StringNullableFilter<"BodyArticleData"> | string | null
     cmtpCost?: DecimalNullableFilter<"BodyArticleData"> | Decimal | DecimalJsLike | number | string | null
     cmpCost?: DecimalNullableFilter<"BodyArticleData"> | Decimal | DecimalJsLike | number | string | null
     fabCost?: DecimalNullableFilter<"BodyArticleData"> | Decimal | DecimalJsLike | number | string | null
     fabCons?: DecimalNullableFilter<"BodyArticleData"> | Decimal | DecimalJsLike | number | string | null
     width?: DecimalNullableFilter<"BodyArticleData"> | Decimal | DecimalJsLike | number | string | null
+    basicTrimCost?: DecimalNullableFilter<"BodyArticleData"> | Decimal | DecimalJsLike | number | string | null
     flatId?: StringNullableFilter<"BodyArticleData"> | string | null
     articleNumber?: StringNullableFilter<"BodyArticleData"> | string | null
     division?: StringNullableFilter<"BodyArticleData"> | string | null
@@ -60593,6 +71288,7 @@ export namespace Prisma {
     year?: StringNullableFilter<"BodyArticleData"> | string | null
     hsnTaxCode?: StringNullableFilter<"BodyArticleData"> | string | null
     approvalStatus?: StringFilter<"BodyArticleData"> | string
+    fgCreatorApproved?: StringFilter<"BodyArticleData"> | string
     approvedAt?: DateTimeNullableFilter<"BodyArticleData"> | Date | string | null
     approvedBy?: IntNullableFilter<"BodyArticleData"> | number | null
     sapSyncStatus?: StringFilter<"BodyArticleData"> | string
@@ -60623,11 +71319,15 @@ export namespace Prisma {
     mSet?: SortOrderInput | SortOrder
     bodyArticleNumber?: SortOrderInput | SortOrder
     bodyArticleDescription?: SortOrderInput | SortOrder
+    imageUrl?: SortOrderInput | SortOrder
+    bodyArticleType?: SortOrderInput | SortOrder
+    designNumber?: SortOrderInput | SortOrder
     cmtpCost?: SortOrderInput | SortOrder
     cmpCost?: SortOrderInput | SortOrder
     fabCost?: SortOrderInput | SortOrder
     fabCons?: SortOrderInput | SortOrder
     width?: SortOrderInput | SortOrder
+    basicTrimCost?: SortOrderInput | SortOrder
     flatId?: SortOrderInput | SortOrder
     articleNumber?: SortOrderInput | SortOrder
     division?: SortOrderInput | SortOrder
@@ -60640,6 +71340,7 @@ export namespace Prisma {
     year?: SortOrderInput | SortOrder
     hsnTaxCode?: SortOrderInput | SortOrder
     approvalStatus?: SortOrder
+    fgCreatorApproved?: SortOrder
     approvedAt?: SortOrderInput | SortOrder
     approvedBy?: SortOrderInput | SortOrder
     sapSyncStatus?: SortOrder
@@ -60674,11 +71375,15 @@ export namespace Prisma {
     mSet?: StringNullableFilter<"BodyArticleData"> | string | null
     bodyArticleNumber?: StringNullableFilter<"BodyArticleData"> | string | null
     bodyArticleDescription?: StringNullableFilter<"BodyArticleData"> | string | null
+    imageUrl?: StringNullableFilter<"BodyArticleData"> | string | null
+    bodyArticleType?: StringNullableFilter<"BodyArticleData"> | string | null
+    designNumber?: StringNullableFilter<"BodyArticleData"> | string | null
     cmtpCost?: DecimalNullableFilter<"BodyArticleData"> | Decimal | DecimalJsLike | number | string | null
     cmpCost?: DecimalNullableFilter<"BodyArticleData"> | Decimal | DecimalJsLike | number | string | null
     fabCost?: DecimalNullableFilter<"BodyArticleData"> | Decimal | DecimalJsLike | number | string | null
     fabCons?: DecimalNullableFilter<"BodyArticleData"> | Decimal | DecimalJsLike | number | string | null
     width?: DecimalNullableFilter<"BodyArticleData"> | Decimal | DecimalJsLike | number | string | null
+    basicTrimCost?: DecimalNullableFilter<"BodyArticleData"> | Decimal | DecimalJsLike | number | string | null
     flatId?: StringNullableFilter<"BodyArticleData"> | string | null
     articleNumber?: StringNullableFilter<"BodyArticleData"> | string | null
     division?: StringNullableFilter<"BodyArticleData"> | string | null
@@ -60691,6 +71396,7 @@ export namespace Prisma {
     year?: StringNullableFilter<"BodyArticleData"> | string | null
     hsnTaxCode?: StringNullableFilter<"BodyArticleData"> | string | null
     approvalStatus?: StringFilter<"BodyArticleData"> | string
+    fgCreatorApproved?: StringFilter<"BodyArticleData"> | string
     approvedAt?: DateTimeNullableFilter<"BodyArticleData"> | Date | string | null
     approvedBy?: IntNullableFilter<"BodyArticleData"> | number | null
     sapSyncStatus?: StringFilter<"BodyArticleData"> | string
@@ -60721,11 +71427,15 @@ export namespace Prisma {
     mSet?: SortOrderInput | SortOrder
     bodyArticleNumber?: SortOrderInput | SortOrder
     bodyArticleDescription?: SortOrderInput | SortOrder
+    imageUrl?: SortOrderInput | SortOrder
+    bodyArticleType?: SortOrderInput | SortOrder
+    designNumber?: SortOrderInput | SortOrder
     cmtpCost?: SortOrderInput | SortOrder
     cmpCost?: SortOrderInput | SortOrder
     fabCost?: SortOrderInput | SortOrder
     fabCons?: SortOrderInput | SortOrder
     width?: SortOrderInput | SortOrder
+    basicTrimCost?: SortOrderInput | SortOrder
     flatId?: SortOrderInput | SortOrder
     articleNumber?: SortOrderInput | SortOrder
     division?: SortOrderInput | SortOrder
@@ -60738,6 +71448,7 @@ export namespace Prisma {
     year?: SortOrderInput | SortOrder
     hsnTaxCode?: SortOrderInput | SortOrder
     approvalStatus?: SortOrder
+    fgCreatorApproved?: SortOrder
     approvedAt?: SortOrderInput | SortOrder
     approvedBy?: SortOrderInput | SortOrder
     sapSyncStatus?: SortOrder
@@ -60776,11 +71487,15 @@ export namespace Prisma {
     mSet?: StringNullableWithAggregatesFilter<"BodyArticleData"> | string | null
     bodyArticleNumber?: StringNullableWithAggregatesFilter<"BodyArticleData"> | string | null
     bodyArticleDescription?: StringNullableWithAggregatesFilter<"BodyArticleData"> | string | null
+    imageUrl?: StringNullableWithAggregatesFilter<"BodyArticleData"> | string | null
+    bodyArticleType?: StringNullableWithAggregatesFilter<"BodyArticleData"> | string | null
+    designNumber?: StringNullableWithAggregatesFilter<"BodyArticleData"> | string | null
     cmtpCost?: DecimalNullableWithAggregatesFilter<"BodyArticleData"> | Decimal | DecimalJsLike | number | string | null
     cmpCost?: DecimalNullableWithAggregatesFilter<"BodyArticleData"> | Decimal | DecimalJsLike | number | string | null
     fabCost?: DecimalNullableWithAggregatesFilter<"BodyArticleData"> | Decimal | DecimalJsLike | number | string | null
     fabCons?: DecimalNullableWithAggregatesFilter<"BodyArticleData"> | Decimal | DecimalJsLike | number | string | null
     width?: DecimalNullableWithAggregatesFilter<"BodyArticleData"> | Decimal | DecimalJsLike | number | string | null
+    basicTrimCost?: DecimalNullableWithAggregatesFilter<"BodyArticleData"> | Decimal | DecimalJsLike | number | string | null
     flatId?: StringNullableWithAggregatesFilter<"BodyArticleData"> | string | null
     articleNumber?: StringNullableWithAggregatesFilter<"BodyArticleData"> | string | null
     division?: StringNullableWithAggregatesFilter<"BodyArticleData"> | string | null
@@ -60793,6 +71508,7 @@ export namespace Prisma {
     year?: StringNullableWithAggregatesFilter<"BodyArticleData"> | string | null
     hsnTaxCode?: StringNullableWithAggregatesFilter<"BodyArticleData"> | string | null
     approvalStatus?: StringWithAggregatesFilter<"BodyArticleData"> | string
+    fgCreatorApproved?: StringWithAggregatesFilter<"BodyArticleData"> | string
     approvedAt?: DateTimeNullableWithAggregatesFilter<"BodyArticleData"> | Date | string | null
     approvedBy?: IntNullableWithAggregatesFilter<"BodyArticleData"> | number | null
     sapSyncStatus?: StringWithAggregatesFilter<"BodyArticleData"> | string
@@ -60800,6 +71516,498 @@ export namespace Prisma {
     userName?: StringNullableWithAggregatesFilter<"BodyArticleData"> | string | null
     createdAt?: DateTimeWithAggregatesFilter<"BodyArticleData"> | Date | string
     updatedAt?: DateTimeWithAggregatesFilter<"BodyArticleData"> | Date | string
+  }
+
+  export type MajorCategoryDetailsWhereInput = {
+    AND?: MajorCategoryDetailsWhereInput | MajorCategoryDetailsWhereInput[]
+    OR?: MajorCategoryDetailsWhereInput[]
+    NOT?: MajorCategoryDetailsWhereInput | MajorCategoryDetailsWhereInput[]
+    id?: IntFilter<"MajorCategoryDetails"> | number
+    seg?: StringNullableFilter<"MajorCategoryDetails"> | string | null
+    div?: StringNullableFilter<"MajorCategoryDetails"> | string | null
+    subDiv?: StringNullableFilter<"MajorCategoryDetails"> | string | null
+    majCat?: StringNullableFilter<"MajorCategoryDetails"> | string | null
+    mcCode?: StringNullableFilter<"MajorCategoryDetails"> | string | null
+    mcDes?: StringNullableFilter<"MajorCategoryDetails"> | string | null
+    hsnCode?: StringNullableFilter<"MajorCategoryDetails"> | string | null
+    mcStatus?: StringNullableFilter<"MajorCategoryDetails"> | string | null
+    createdAt?: DateTimeFilter<"MajorCategoryDetails"> | Date | string
+  }
+
+  export type MajorCategoryDetailsOrderByWithRelationInput = {
+    id?: SortOrder
+    seg?: SortOrderInput | SortOrder
+    div?: SortOrderInput | SortOrder
+    subDiv?: SortOrderInput | SortOrder
+    majCat?: SortOrderInput | SortOrder
+    mcCode?: SortOrderInput | SortOrder
+    mcDes?: SortOrderInput | SortOrder
+    hsnCode?: SortOrderInput | SortOrder
+    mcStatus?: SortOrderInput | SortOrder
+    createdAt?: SortOrder
+    _relevance?: MajorCategoryDetailsOrderByRelevanceInput
+  }
+
+  export type MajorCategoryDetailsWhereUniqueInput = Prisma.AtLeast<{
+    id?: number
+    AND?: MajorCategoryDetailsWhereInput | MajorCategoryDetailsWhereInput[]
+    OR?: MajorCategoryDetailsWhereInput[]
+    NOT?: MajorCategoryDetailsWhereInput | MajorCategoryDetailsWhereInput[]
+    seg?: StringNullableFilter<"MajorCategoryDetails"> | string | null
+    div?: StringNullableFilter<"MajorCategoryDetails"> | string | null
+    subDiv?: StringNullableFilter<"MajorCategoryDetails"> | string | null
+    majCat?: StringNullableFilter<"MajorCategoryDetails"> | string | null
+    mcCode?: StringNullableFilter<"MajorCategoryDetails"> | string | null
+    mcDes?: StringNullableFilter<"MajorCategoryDetails"> | string | null
+    hsnCode?: StringNullableFilter<"MajorCategoryDetails"> | string | null
+    mcStatus?: StringNullableFilter<"MajorCategoryDetails"> | string | null
+    createdAt?: DateTimeFilter<"MajorCategoryDetails"> | Date | string
+  }, "id">
+
+  export type MajorCategoryDetailsOrderByWithAggregationInput = {
+    id?: SortOrder
+    seg?: SortOrderInput | SortOrder
+    div?: SortOrderInput | SortOrder
+    subDiv?: SortOrderInput | SortOrder
+    majCat?: SortOrderInput | SortOrder
+    mcCode?: SortOrderInput | SortOrder
+    mcDes?: SortOrderInput | SortOrder
+    hsnCode?: SortOrderInput | SortOrder
+    mcStatus?: SortOrderInput | SortOrder
+    createdAt?: SortOrder
+    _count?: MajorCategoryDetailsCountOrderByAggregateInput
+    _avg?: MajorCategoryDetailsAvgOrderByAggregateInput
+    _max?: MajorCategoryDetailsMaxOrderByAggregateInput
+    _min?: MajorCategoryDetailsMinOrderByAggregateInput
+    _sum?: MajorCategoryDetailsSumOrderByAggregateInput
+  }
+
+  export type MajorCategoryDetailsScalarWhereWithAggregatesInput = {
+    AND?: MajorCategoryDetailsScalarWhereWithAggregatesInput | MajorCategoryDetailsScalarWhereWithAggregatesInput[]
+    OR?: MajorCategoryDetailsScalarWhereWithAggregatesInput[]
+    NOT?: MajorCategoryDetailsScalarWhereWithAggregatesInput | MajorCategoryDetailsScalarWhereWithAggregatesInput[]
+    id?: IntWithAggregatesFilter<"MajorCategoryDetails"> | number
+    seg?: StringNullableWithAggregatesFilter<"MajorCategoryDetails"> | string | null
+    div?: StringNullableWithAggregatesFilter<"MajorCategoryDetails"> | string | null
+    subDiv?: StringNullableWithAggregatesFilter<"MajorCategoryDetails"> | string | null
+    majCat?: StringNullableWithAggregatesFilter<"MajorCategoryDetails"> | string | null
+    mcCode?: StringNullableWithAggregatesFilter<"MajorCategoryDetails"> | string | null
+    mcDes?: StringNullableWithAggregatesFilter<"MajorCategoryDetails"> | string | null
+    hsnCode?: StringNullableWithAggregatesFilter<"MajorCategoryDetails"> | string | null
+    mcStatus?: StringNullableWithAggregatesFilter<"MajorCategoryDetails"> | string | null
+    createdAt?: DateTimeWithAggregatesFilter<"MajorCategoryDetails"> | Date | string
+  }
+
+  export type ExpenseApprovalStageWhereInput = {
+    AND?: ExpenseApprovalStageWhereInput | ExpenseApprovalStageWhereInput[]
+    OR?: ExpenseApprovalStageWhereInput[]
+    NOT?: ExpenseApprovalStageWhereInput | ExpenseApprovalStageWhereInput[]
+    id?: IntFilter<"ExpenseApprovalStage"> | number
+    tableKey?: StringFilter<"ExpenseApprovalStage"> | string
+    key?: StringFilter<"ExpenseApprovalStage"> | string
+    label?: StringFilter<"ExpenseApprovalStage"> | string
+    description?: StringNullableFilter<"ExpenseApprovalStage"> | string | null
+    sortOrder?: IntFilter<"ExpenseApprovalStage"> | number
+    isActive?: BoolFilter<"ExpenseApprovalStage"> | boolean
+    createdById?: IntNullableFilter<"ExpenseApprovalStage"> | number | null
+    createdByName?: StringNullableFilter<"ExpenseApprovalStage"> | string | null
+    createdAt?: DateTimeFilter<"ExpenseApprovalStage"> | Date | string
+    updatedAt?: DateTimeFilter<"ExpenseApprovalStage"> | Date | string
+  }
+
+  export type ExpenseApprovalStageOrderByWithRelationInput = {
+    id?: SortOrder
+    tableKey?: SortOrder
+    key?: SortOrder
+    label?: SortOrder
+    description?: SortOrderInput | SortOrder
+    sortOrder?: SortOrder
+    isActive?: SortOrder
+    createdById?: SortOrderInput | SortOrder
+    createdByName?: SortOrderInput | SortOrder
+    createdAt?: SortOrder
+    updatedAt?: SortOrder
+    _relevance?: ExpenseApprovalStageOrderByRelevanceInput
+  }
+
+  export type ExpenseApprovalStageWhereUniqueInput = Prisma.AtLeast<{
+    id?: number
+    tableKey_key?: ExpenseApprovalStageTableKeyKeyCompoundUniqueInput
+    AND?: ExpenseApprovalStageWhereInput | ExpenseApprovalStageWhereInput[]
+    OR?: ExpenseApprovalStageWhereInput[]
+    NOT?: ExpenseApprovalStageWhereInput | ExpenseApprovalStageWhereInput[]
+    tableKey?: StringFilter<"ExpenseApprovalStage"> | string
+    key?: StringFilter<"ExpenseApprovalStage"> | string
+    label?: StringFilter<"ExpenseApprovalStage"> | string
+    description?: StringNullableFilter<"ExpenseApprovalStage"> | string | null
+    sortOrder?: IntFilter<"ExpenseApprovalStage"> | number
+    isActive?: BoolFilter<"ExpenseApprovalStage"> | boolean
+    createdById?: IntNullableFilter<"ExpenseApprovalStage"> | number | null
+    createdByName?: StringNullableFilter<"ExpenseApprovalStage"> | string | null
+    createdAt?: DateTimeFilter<"ExpenseApprovalStage"> | Date | string
+    updatedAt?: DateTimeFilter<"ExpenseApprovalStage"> | Date | string
+  }, "id" | "tableKey_key">
+
+  export type ExpenseApprovalStageOrderByWithAggregationInput = {
+    id?: SortOrder
+    tableKey?: SortOrder
+    key?: SortOrder
+    label?: SortOrder
+    description?: SortOrderInput | SortOrder
+    sortOrder?: SortOrder
+    isActive?: SortOrder
+    createdById?: SortOrderInput | SortOrder
+    createdByName?: SortOrderInput | SortOrder
+    createdAt?: SortOrder
+    updatedAt?: SortOrder
+    _count?: ExpenseApprovalStageCountOrderByAggregateInput
+    _avg?: ExpenseApprovalStageAvgOrderByAggregateInput
+    _max?: ExpenseApprovalStageMaxOrderByAggregateInput
+    _min?: ExpenseApprovalStageMinOrderByAggregateInput
+    _sum?: ExpenseApprovalStageSumOrderByAggregateInput
+  }
+
+  export type ExpenseApprovalStageScalarWhereWithAggregatesInput = {
+    AND?: ExpenseApprovalStageScalarWhereWithAggregatesInput | ExpenseApprovalStageScalarWhereWithAggregatesInput[]
+    OR?: ExpenseApprovalStageScalarWhereWithAggregatesInput[]
+    NOT?: ExpenseApprovalStageScalarWhereWithAggregatesInput | ExpenseApprovalStageScalarWhereWithAggregatesInput[]
+    id?: IntWithAggregatesFilter<"ExpenseApprovalStage"> | number
+    tableKey?: StringWithAggregatesFilter<"ExpenseApprovalStage"> | string
+    key?: StringWithAggregatesFilter<"ExpenseApprovalStage"> | string
+    label?: StringWithAggregatesFilter<"ExpenseApprovalStage"> | string
+    description?: StringNullableWithAggregatesFilter<"ExpenseApprovalStage"> | string | null
+    sortOrder?: IntWithAggregatesFilter<"ExpenseApprovalStage"> | number
+    isActive?: BoolWithAggregatesFilter<"ExpenseApprovalStage"> | boolean
+    createdById?: IntNullableWithAggregatesFilter<"ExpenseApprovalStage"> | number | null
+    createdByName?: StringNullableWithAggregatesFilter<"ExpenseApprovalStage"> | string | null
+    createdAt?: DateTimeWithAggregatesFilter<"ExpenseApprovalStage"> | Date | string
+    updatedAt?: DateTimeWithAggregatesFilter<"ExpenseApprovalStage"> | Date | string
+  }
+
+  export type ExpenseChangeRequestWhereInput = {
+    AND?: ExpenseChangeRequestWhereInput | ExpenseChangeRequestWhereInput[]
+    OR?: ExpenseChangeRequestWhereInput[]
+    NOT?: ExpenseChangeRequestWhereInput | ExpenseChangeRequestWhereInput[]
+    id?: StringFilter<"ExpenseChangeRequest"> | string
+    tableKey?: StringFilter<"ExpenseChangeRequest"> | string
+    operation?: EnumExpenseChangeOperationFilter<"ExpenseChangeRequest"> | $Enums.ExpenseChangeOperation
+    rowId?: StringNullableFilter<"ExpenseChangeRequest"> | string | null
+    appliedRowId?: StringNullableFilter<"ExpenseChangeRequest"> | string | null
+    rowLabel?: StringNullableFilter<"ExpenseChangeRequest"> | string | null
+    changes?: JsonFilter<"ExpenseChangeRequest">
+    reason?: StringFilter<"ExpenseChangeRequest"> | string
+    dueDate?: DateTimeNullableFilter<"ExpenseChangeRequest"> | Date | string | null
+    status?: EnumExpenseChangeStatusFilter<"ExpenseChangeRequest"> | $Enums.ExpenseChangeStatus
+    currentStageKey?: StringNullableFilter<"ExpenseChangeRequest"> | string | null
+    approvalTrail?: JsonFilter<"ExpenseChangeRequest">
+    requestedById?: IntFilter<"ExpenseChangeRequest"> | number
+    requestedByName?: StringFilter<"ExpenseChangeRequest"> | string
+    requestedByEmail?: StringFilter<"ExpenseChangeRequest"> | string
+    requestedAt?: DateTimeFilter<"ExpenseChangeRequest"> | Date | string
+    requesterBusinessDivision?: StringNullableFilter<"ExpenseChangeRequest"> | string | null
+    createdAt?: DateTimeFilter<"ExpenseChangeRequest"> | Date | string
+    updatedAt?: DateTimeFilter<"ExpenseChangeRequest"> | Date | string
+  }
+
+  export type ExpenseChangeRequestOrderByWithRelationInput = {
+    id?: SortOrder
+    tableKey?: SortOrder
+    operation?: SortOrder
+    rowId?: SortOrderInput | SortOrder
+    appliedRowId?: SortOrderInput | SortOrder
+    rowLabel?: SortOrderInput | SortOrder
+    changes?: SortOrder
+    reason?: SortOrder
+    dueDate?: SortOrderInput | SortOrder
+    status?: SortOrder
+    currentStageKey?: SortOrderInput | SortOrder
+    approvalTrail?: SortOrder
+    requestedById?: SortOrder
+    requestedByName?: SortOrder
+    requestedByEmail?: SortOrder
+    requestedAt?: SortOrder
+    requesterBusinessDivision?: SortOrderInput | SortOrder
+    createdAt?: SortOrder
+    updatedAt?: SortOrder
+    _relevance?: ExpenseChangeRequestOrderByRelevanceInput
+  }
+
+  export type ExpenseChangeRequestWhereUniqueInput = Prisma.AtLeast<{
+    id?: string
+    AND?: ExpenseChangeRequestWhereInput | ExpenseChangeRequestWhereInput[]
+    OR?: ExpenseChangeRequestWhereInput[]
+    NOT?: ExpenseChangeRequestWhereInput | ExpenseChangeRequestWhereInput[]
+    tableKey?: StringFilter<"ExpenseChangeRequest"> | string
+    operation?: EnumExpenseChangeOperationFilter<"ExpenseChangeRequest"> | $Enums.ExpenseChangeOperation
+    rowId?: StringNullableFilter<"ExpenseChangeRequest"> | string | null
+    appliedRowId?: StringNullableFilter<"ExpenseChangeRequest"> | string | null
+    rowLabel?: StringNullableFilter<"ExpenseChangeRequest"> | string | null
+    changes?: JsonFilter<"ExpenseChangeRequest">
+    reason?: StringFilter<"ExpenseChangeRequest"> | string
+    dueDate?: DateTimeNullableFilter<"ExpenseChangeRequest"> | Date | string | null
+    status?: EnumExpenseChangeStatusFilter<"ExpenseChangeRequest"> | $Enums.ExpenseChangeStatus
+    currentStageKey?: StringNullableFilter<"ExpenseChangeRequest"> | string | null
+    approvalTrail?: JsonFilter<"ExpenseChangeRequest">
+    requestedById?: IntFilter<"ExpenseChangeRequest"> | number
+    requestedByName?: StringFilter<"ExpenseChangeRequest"> | string
+    requestedByEmail?: StringFilter<"ExpenseChangeRequest"> | string
+    requestedAt?: DateTimeFilter<"ExpenseChangeRequest"> | Date | string
+    requesterBusinessDivision?: StringNullableFilter<"ExpenseChangeRequest"> | string | null
+    createdAt?: DateTimeFilter<"ExpenseChangeRequest"> | Date | string
+    updatedAt?: DateTimeFilter<"ExpenseChangeRequest"> | Date | string
+  }, "id">
+
+  export type ExpenseChangeRequestOrderByWithAggregationInput = {
+    id?: SortOrder
+    tableKey?: SortOrder
+    operation?: SortOrder
+    rowId?: SortOrderInput | SortOrder
+    appliedRowId?: SortOrderInput | SortOrder
+    rowLabel?: SortOrderInput | SortOrder
+    changes?: SortOrder
+    reason?: SortOrder
+    dueDate?: SortOrderInput | SortOrder
+    status?: SortOrder
+    currentStageKey?: SortOrderInput | SortOrder
+    approvalTrail?: SortOrder
+    requestedById?: SortOrder
+    requestedByName?: SortOrder
+    requestedByEmail?: SortOrder
+    requestedAt?: SortOrder
+    requesterBusinessDivision?: SortOrderInput | SortOrder
+    createdAt?: SortOrder
+    updatedAt?: SortOrder
+    _count?: ExpenseChangeRequestCountOrderByAggregateInput
+    _avg?: ExpenseChangeRequestAvgOrderByAggregateInput
+    _max?: ExpenseChangeRequestMaxOrderByAggregateInput
+    _min?: ExpenseChangeRequestMinOrderByAggregateInput
+    _sum?: ExpenseChangeRequestSumOrderByAggregateInput
+  }
+
+  export type ExpenseChangeRequestScalarWhereWithAggregatesInput = {
+    AND?: ExpenseChangeRequestScalarWhereWithAggregatesInput | ExpenseChangeRequestScalarWhereWithAggregatesInput[]
+    OR?: ExpenseChangeRequestScalarWhereWithAggregatesInput[]
+    NOT?: ExpenseChangeRequestScalarWhereWithAggregatesInput | ExpenseChangeRequestScalarWhereWithAggregatesInput[]
+    id?: StringWithAggregatesFilter<"ExpenseChangeRequest"> | string
+    tableKey?: StringWithAggregatesFilter<"ExpenseChangeRequest"> | string
+    operation?: EnumExpenseChangeOperationWithAggregatesFilter<"ExpenseChangeRequest"> | $Enums.ExpenseChangeOperation
+    rowId?: StringNullableWithAggregatesFilter<"ExpenseChangeRequest"> | string | null
+    appliedRowId?: StringNullableWithAggregatesFilter<"ExpenseChangeRequest"> | string | null
+    rowLabel?: StringNullableWithAggregatesFilter<"ExpenseChangeRequest"> | string | null
+    changes?: JsonWithAggregatesFilter<"ExpenseChangeRequest">
+    reason?: StringWithAggregatesFilter<"ExpenseChangeRequest"> | string
+    dueDate?: DateTimeNullableWithAggregatesFilter<"ExpenseChangeRequest"> | Date | string | null
+    status?: EnumExpenseChangeStatusWithAggregatesFilter<"ExpenseChangeRequest"> | $Enums.ExpenseChangeStatus
+    currentStageKey?: StringNullableWithAggregatesFilter<"ExpenseChangeRequest"> | string | null
+    approvalTrail?: JsonWithAggregatesFilter<"ExpenseChangeRequest">
+    requestedById?: IntWithAggregatesFilter<"ExpenseChangeRequest"> | number
+    requestedByName?: StringWithAggregatesFilter<"ExpenseChangeRequest"> | string
+    requestedByEmail?: StringWithAggregatesFilter<"ExpenseChangeRequest"> | string
+    requestedAt?: DateTimeWithAggregatesFilter<"ExpenseChangeRequest"> | Date | string
+    requesterBusinessDivision?: StringNullableWithAggregatesFilter<"ExpenseChangeRequest"> | string | null
+    createdAt?: DateTimeWithAggregatesFilter<"ExpenseChangeRequest"> | Date | string
+    updatedAt?: DateTimeWithAggregatesFilter<"ExpenseChangeRequest"> | Date | string
+  }
+
+  export type ExpenseAccessGrantWhereInput = {
+    AND?: ExpenseAccessGrantWhereInput | ExpenseAccessGrantWhereInput[]
+    OR?: ExpenseAccessGrantWhereInput[]
+    NOT?: ExpenseAccessGrantWhereInput | ExpenseAccessGrantWhereInput[]
+    id?: IntFilter<"ExpenseAccessGrant"> | number
+    email?: StringFilter<"ExpenseAccessGrant"> | string
+    level?: StringFilter<"ExpenseAccessGrant"> | string
+    tableKey?: StringFilter<"ExpenseAccessGrant"> | string
+    subDivision?: StringNullableFilter<"ExpenseAccessGrant"> | string | null
+    canCreate?: BoolFilter<"ExpenseAccessGrant"> | boolean
+    canUpdate?: BoolFilter<"ExpenseAccessGrant"> | boolean
+    canDelete?: BoolFilter<"ExpenseAccessGrant"> | boolean
+    isActive?: BoolFilter<"ExpenseAccessGrant"> | boolean
+    note?: StringNullableFilter<"ExpenseAccessGrant"> | string | null
+    grantedById?: IntNullableFilter<"ExpenseAccessGrant"> | number | null
+    grantedByName?: StringNullableFilter<"ExpenseAccessGrant"> | string | null
+    createdAt?: DateTimeFilter<"ExpenseAccessGrant"> | Date | string
+    updatedAt?: DateTimeFilter<"ExpenseAccessGrant"> | Date | string
+  }
+
+  export type ExpenseAccessGrantOrderByWithRelationInput = {
+    id?: SortOrder
+    email?: SortOrder
+    level?: SortOrder
+    tableKey?: SortOrder
+    subDivision?: SortOrderInput | SortOrder
+    canCreate?: SortOrder
+    canUpdate?: SortOrder
+    canDelete?: SortOrder
+    isActive?: SortOrder
+    note?: SortOrderInput | SortOrder
+    grantedById?: SortOrderInput | SortOrder
+    grantedByName?: SortOrderInput | SortOrder
+    createdAt?: SortOrder
+    updatedAt?: SortOrder
+    _relevance?: ExpenseAccessGrantOrderByRelevanceInput
+  }
+
+  export type ExpenseAccessGrantWhereUniqueInput = Prisma.AtLeast<{
+    id?: number
+    email_level_tableKey?: ExpenseAccessGrantEmailLevelTableKeyCompoundUniqueInput
+    AND?: ExpenseAccessGrantWhereInput | ExpenseAccessGrantWhereInput[]
+    OR?: ExpenseAccessGrantWhereInput[]
+    NOT?: ExpenseAccessGrantWhereInput | ExpenseAccessGrantWhereInput[]
+    email?: StringFilter<"ExpenseAccessGrant"> | string
+    level?: StringFilter<"ExpenseAccessGrant"> | string
+    tableKey?: StringFilter<"ExpenseAccessGrant"> | string
+    subDivision?: StringNullableFilter<"ExpenseAccessGrant"> | string | null
+    canCreate?: BoolFilter<"ExpenseAccessGrant"> | boolean
+    canUpdate?: BoolFilter<"ExpenseAccessGrant"> | boolean
+    canDelete?: BoolFilter<"ExpenseAccessGrant"> | boolean
+    isActive?: BoolFilter<"ExpenseAccessGrant"> | boolean
+    note?: StringNullableFilter<"ExpenseAccessGrant"> | string | null
+    grantedById?: IntNullableFilter<"ExpenseAccessGrant"> | number | null
+    grantedByName?: StringNullableFilter<"ExpenseAccessGrant"> | string | null
+    createdAt?: DateTimeFilter<"ExpenseAccessGrant"> | Date | string
+    updatedAt?: DateTimeFilter<"ExpenseAccessGrant"> | Date | string
+  }, "id" | "email_level_tableKey">
+
+  export type ExpenseAccessGrantOrderByWithAggregationInput = {
+    id?: SortOrder
+    email?: SortOrder
+    level?: SortOrder
+    tableKey?: SortOrder
+    subDivision?: SortOrderInput | SortOrder
+    canCreate?: SortOrder
+    canUpdate?: SortOrder
+    canDelete?: SortOrder
+    isActive?: SortOrder
+    note?: SortOrderInput | SortOrder
+    grantedById?: SortOrderInput | SortOrder
+    grantedByName?: SortOrderInput | SortOrder
+    createdAt?: SortOrder
+    updatedAt?: SortOrder
+    _count?: ExpenseAccessGrantCountOrderByAggregateInput
+    _avg?: ExpenseAccessGrantAvgOrderByAggregateInput
+    _max?: ExpenseAccessGrantMaxOrderByAggregateInput
+    _min?: ExpenseAccessGrantMinOrderByAggregateInput
+    _sum?: ExpenseAccessGrantSumOrderByAggregateInput
+  }
+
+  export type ExpenseAccessGrantScalarWhereWithAggregatesInput = {
+    AND?: ExpenseAccessGrantScalarWhereWithAggregatesInput | ExpenseAccessGrantScalarWhereWithAggregatesInput[]
+    OR?: ExpenseAccessGrantScalarWhereWithAggregatesInput[]
+    NOT?: ExpenseAccessGrantScalarWhereWithAggregatesInput | ExpenseAccessGrantScalarWhereWithAggregatesInput[]
+    id?: IntWithAggregatesFilter<"ExpenseAccessGrant"> | number
+    email?: StringWithAggregatesFilter<"ExpenseAccessGrant"> | string
+    level?: StringWithAggregatesFilter<"ExpenseAccessGrant"> | string
+    tableKey?: StringWithAggregatesFilter<"ExpenseAccessGrant"> | string
+    subDivision?: StringNullableWithAggregatesFilter<"ExpenseAccessGrant"> | string | null
+    canCreate?: BoolWithAggregatesFilter<"ExpenseAccessGrant"> | boolean
+    canUpdate?: BoolWithAggregatesFilter<"ExpenseAccessGrant"> | boolean
+    canDelete?: BoolWithAggregatesFilter<"ExpenseAccessGrant"> | boolean
+    isActive?: BoolWithAggregatesFilter<"ExpenseAccessGrant"> | boolean
+    note?: StringNullableWithAggregatesFilter<"ExpenseAccessGrant"> | string | null
+    grantedById?: IntNullableWithAggregatesFilter<"ExpenseAccessGrant"> | number | null
+    grantedByName?: StringNullableWithAggregatesFilter<"ExpenseAccessGrant"> | string | null
+    createdAt?: DateTimeWithAggregatesFilter<"ExpenseAccessGrant"> | Date | string
+    updatedAt?: DateTimeWithAggregatesFilter<"ExpenseAccessGrant"> | Date | string
+  }
+
+  export type ExpenseAuditLogWhereInput = {
+    AND?: ExpenseAuditLogWhereInput | ExpenseAuditLogWhereInput[]
+    OR?: ExpenseAuditLogWhereInput[]
+    NOT?: ExpenseAuditLogWhereInput | ExpenseAuditLogWhereInput[]
+    id?: IntFilter<"ExpenseAuditLog"> | number
+    requestId?: StringFilter<"ExpenseAuditLog"> | string
+    tableKey?: StringFilter<"ExpenseAuditLog"> | string
+    rowId?: StringNullableFilter<"ExpenseAuditLog"> | string | null
+    operation?: EnumExpenseChangeOperationFilter<"ExpenseAuditLog"> | $Enums.ExpenseChangeOperation
+    eventType?: EnumExpenseAuditEventTypeFilter<"ExpenseAuditLog"> | $Enums.ExpenseAuditEventType
+    stageKey?: StringNullableFilter<"ExpenseAuditLog"> | string | null
+    stageLabel?: StringNullableFilter<"ExpenseAuditLog"> | string | null
+    actorId?: IntNullableFilter<"ExpenseAuditLog"> | number | null
+    actorName?: StringNullableFilter<"ExpenseAuditLog"> | string | null
+    actorEmail?: StringNullableFilter<"ExpenseAuditLog"> | string | null
+    comment?: StringNullableFilter<"ExpenseAuditLog"> | string | null
+    details?: JsonNullableFilter<"ExpenseAuditLog">
+    occurredAt?: DateTimeFilter<"ExpenseAuditLog"> | Date | string
+  }
+
+  export type ExpenseAuditLogOrderByWithRelationInput = {
+    id?: SortOrder
+    requestId?: SortOrder
+    tableKey?: SortOrder
+    rowId?: SortOrderInput | SortOrder
+    operation?: SortOrder
+    eventType?: SortOrder
+    stageKey?: SortOrderInput | SortOrder
+    stageLabel?: SortOrderInput | SortOrder
+    actorId?: SortOrderInput | SortOrder
+    actorName?: SortOrderInput | SortOrder
+    actorEmail?: SortOrderInput | SortOrder
+    comment?: SortOrderInput | SortOrder
+    details?: SortOrderInput | SortOrder
+    occurredAt?: SortOrder
+    _relevance?: ExpenseAuditLogOrderByRelevanceInput
+  }
+
+  export type ExpenseAuditLogWhereUniqueInput = Prisma.AtLeast<{
+    id?: number
+    AND?: ExpenseAuditLogWhereInput | ExpenseAuditLogWhereInput[]
+    OR?: ExpenseAuditLogWhereInput[]
+    NOT?: ExpenseAuditLogWhereInput | ExpenseAuditLogWhereInput[]
+    requestId?: StringFilter<"ExpenseAuditLog"> | string
+    tableKey?: StringFilter<"ExpenseAuditLog"> | string
+    rowId?: StringNullableFilter<"ExpenseAuditLog"> | string | null
+    operation?: EnumExpenseChangeOperationFilter<"ExpenseAuditLog"> | $Enums.ExpenseChangeOperation
+    eventType?: EnumExpenseAuditEventTypeFilter<"ExpenseAuditLog"> | $Enums.ExpenseAuditEventType
+    stageKey?: StringNullableFilter<"ExpenseAuditLog"> | string | null
+    stageLabel?: StringNullableFilter<"ExpenseAuditLog"> | string | null
+    actorId?: IntNullableFilter<"ExpenseAuditLog"> | number | null
+    actorName?: StringNullableFilter<"ExpenseAuditLog"> | string | null
+    actorEmail?: StringNullableFilter<"ExpenseAuditLog"> | string | null
+    comment?: StringNullableFilter<"ExpenseAuditLog"> | string | null
+    details?: JsonNullableFilter<"ExpenseAuditLog">
+    occurredAt?: DateTimeFilter<"ExpenseAuditLog"> | Date | string
+  }, "id">
+
+  export type ExpenseAuditLogOrderByWithAggregationInput = {
+    id?: SortOrder
+    requestId?: SortOrder
+    tableKey?: SortOrder
+    rowId?: SortOrderInput | SortOrder
+    operation?: SortOrder
+    eventType?: SortOrder
+    stageKey?: SortOrderInput | SortOrder
+    stageLabel?: SortOrderInput | SortOrder
+    actorId?: SortOrderInput | SortOrder
+    actorName?: SortOrderInput | SortOrder
+    actorEmail?: SortOrderInput | SortOrder
+    comment?: SortOrderInput | SortOrder
+    details?: SortOrderInput | SortOrder
+    occurredAt?: SortOrder
+    _count?: ExpenseAuditLogCountOrderByAggregateInput
+    _avg?: ExpenseAuditLogAvgOrderByAggregateInput
+    _max?: ExpenseAuditLogMaxOrderByAggregateInput
+    _min?: ExpenseAuditLogMinOrderByAggregateInput
+    _sum?: ExpenseAuditLogSumOrderByAggregateInput
+  }
+
+  export type ExpenseAuditLogScalarWhereWithAggregatesInput = {
+    AND?: ExpenseAuditLogScalarWhereWithAggregatesInput | ExpenseAuditLogScalarWhereWithAggregatesInput[]
+    OR?: ExpenseAuditLogScalarWhereWithAggregatesInput[]
+    NOT?: ExpenseAuditLogScalarWhereWithAggregatesInput | ExpenseAuditLogScalarWhereWithAggregatesInput[]
+    id?: IntWithAggregatesFilter<"ExpenseAuditLog"> | number
+    requestId?: StringWithAggregatesFilter<"ExpenseAuditLog"> | string
+    tableKey?: StringWithAggregatesFilter<"ExpenseAuditLog"> | string
+    rowId?: StringNullableWithAggregatesFilter<"ExpenseAuditLog"> | string | null
+    operation?: EnumExpenseChangeOperationWithAggregatesFilter<"ExpenseAuditLog"> | $Enums.ExpenseChangeOperation
+    eventType?: EnumExpenseAuditEventTypeWithAggregatesFilter<"ExpenseAuditLog"> | $Enums.ExpenseAuditEventType
+    stageKey?: StringNullableWithAggregatesFilter<"ExpenseAuditLog"> | string | null
+    stageLabel?: StringNullableWithAggregatesFilter<"ExpenseAuditLog"> | string | null
+    actorId?: IntNullableWithAggregatesFilter<"ExpenseAuditLog"> | number | null
+    actorName?: StringNullableWithAggregatesFilter<"ExpenseAuditLog"> | string | null
+    actorEmail?: StringNullableWithAggregatesFilter<"ExpenseAuditLog"> | string | null
+    comment?: StringNullableWithAggregatesFilter<"ExpenseAuditLog"> | string | null
+    details?: JsonNullableWithAggregatesFilter<"ExpenseAuditLog">
+    occurredAt?: DateTimeWithAggregatesFilter<"ExpenseAuditLog"> | Date | string
   }
 
   export type DepartmentCreateInput = {
@@ -61830,6 +73038,8 @@ export namespace Prisma {
     fabCost?: Decimal | DecimalJsLike | number | string | null
     fabCons?: Decimal | DecimalJsLike | number | string | null
     width?: Decimal | DecimalJsLike | number | string | null
+    vendorFabricRate?: Decimal | DecimalJsLike | number | string | null
+    valueAddCost?: Decimal | DecimalJsLike | number | string | null
     bodyArticle?: string | null
     bodyArticleDescription?: string | null
     fabricArticleNumber?: string | null
@@ -61972,6 +73182,8 @@ export namespace Prisma {
     fabCost?: Decimal | DecimalJsLike | number | string | null
     fabCons?: Decimal | DecimalJsLike | number | string | null
     width?: Decimal | DecimalJsLike | number | string | null
+    vendorFabricRate?: Decimal | DecimalJsLike | number | string | null
+    valueAddCost?: Decimal | DecimalJsLike | number | string | null
     bodyArticle?: string | null
     bodyArticleDescription?: string | null
     fabricArticleNumber?: string | null
@@ -62112,6 +73324,8 @@ export namespace Prisma {
     fabCost?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
     fabCons?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
     width?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    vendorFabricRate?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    valueAddCost?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
     bodyArticle?: NullableStringFieldUpdateOperationsInput | string | null
     bodyArticleDescription?: NullableStringFieldUpdateOperationsInput | string | null
     fabricArticleNumber?: NullableStringFieldUpdateOperationsInput | string | null
@@ -62254,6 +73468,8 @@ export namespace Prisma {
     fabCost?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
     fabCons?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
     width?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    vendorFabricRate?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    valueAddCost?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
     bodyArticle?: NullableStringFieldUpdateOperationsInput | string | null
     bodyArticleDescription?: NullableStringFieldUpdateOperationsInput | string | null
     fabricArticleNumber?: NullableStringFieldUpdateOperationsInput | string | null
@@ -62395,6 +73611,8 @@ export namespace Prisma {
     fabCost?: Decimal | DecimalJsLike | number | string | null
     fabCons?: Decimal | DecimalJsLike | number | string | null
     width?: Decimal | DecimalJsLike | number | string | null
+    vendorFabricRate?: Decimal | DecimalJsLike | number | string | null
+    valueAddCost?: Decimal | DecimalJsLike | number | string | null
     bodyArticle?: string | null
     bodyArticleDescription?: string | null
     fabricArticleNumber?: string | null
@@ -62534,6 +73752,8 @@ export namespace Prisma {
     fabCost?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
     fabCons?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
     width?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    vendorFabricRate?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    valueAddCost?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
     bodyArticle?: NullableStringFieldUpdateOperationsInput | string | null
     bodyArticleDescription?: NullableStringFieldUpdateOperationsInput | string | null
     fabricArticleNumber?: NullableStringFieldUpdateOperationsInput | string | null
@@ -62673,6 +73893,8 @@ export namespace Prisma {
     fabCost?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
     fabCons?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
     width?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    vendorFabricRate?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    valueAddCost?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
     bodyArticle?: NullableStringFieldUpdateOperationsInput | string | null
     bodyArticleDescription?: NullableStringFieldUpdateOperationsInput | string | null
     fabricArticleNumber?: NullableStringFieldUpdateOperationsInput | string | null
@@ -63070,6 +74292,7 @@ export namespace Prisma {
     role?: $Enums.UserRole
     division?: string | null
     subDivision?: string | null
+    businessDivision?: string | null
     isActive?: boolean
     lastLogin?: Date | string | null
     createdAt?: Date | string
@@ -63089,6 +74312,7 @@ export namespace Prisma {
     role?: $Enums.UserRole
     division?: string | null
     subDivision?: string | null
+    businessDivision?: string | null
     isActive?: boolean
     lastLogin?: Date | string | null
     createdAt?: Date | string
@@ -63107,6 +74331,7 @@ export namespace Prisma {
     role?: EnumUserRoleFieldUpdateOperationsInput | $Enums.UserRole
     division?: NullableStringFieldUpdateOperationsInput | string | null
     subDivision?: NullableStringFieldUpdateOperationsInput | string | null
+    businessDivision?: NullableStringFieldUpdateOperationsInput | string | null
     isActive?: BoolFieldUpdateOperationsInput | boolean
     lastLogin?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
@@ -63126,6 +74351,7 @@ export namespace Prisma {
     role?: EnumUserRoleFieldUpdateOperationsInput | $Enums.UserRole
     division?: NullableStringFieldUpdateOperationsInput | string | null
     subDivision?: NullableStringFieldUpdateOperationsInput | string | null
+    businessDivision?: NullableStringFieldUpdateOperationsInput | string | null
     isActive?: BoolFieldUpdateOperationsInput | boolean
     lastLogin?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
@@ -63145,6 +74371,7 @@ export namespace Prisma {
     role?: $Enums.UserRole
     division?: string | null
     subDivision?: string | null
+    businessDivision?: string | null
     isActive?: boolean
     lastLogin?: Date | string | null
     createdAt?: Date | string
@@ -63158,6 +74385,7 @@ export namespace Prisma {
     role?: EnumUserRoleFieldUpdateOperationsInput | $Enums.UserRole
     division?: NullableStringFieldUpdateOperationsInput | string | null
     subDivision?: NullableStringFieldUpdateOperationsInput | string | null
+    businessDivision?: NullableStringFieldUpdateOperationsInput | string | null
     isActive?: BoolFieldUpdateOperationsInput | boolean
     lastLogin?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
@@ -63172,6 +74400,7 @@ export namespace Prisma {
     role?: EnumUserRoleFieldUpdateOperationsInput | $Enums.UserRole
     division?: NullableStringFieldUpdateOperationsInput | string | null
     subDivision?: NullableStringFieldUpdateOperationsInput | string | null
+    businessDivision?: NullableStringFieldUpdateOperationsInput | string | null
     isActive?: BoolFieldUpdateOperationsInput | boolean
     lastLogin?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
@@ -65237,6 +76466,251 @@ export namespace Prisma {
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
   }
 
+  export type FabricRawDataCreateInput = {
+    id?: string
+    presentationNo: string
+    uniqueKey: string
+    vendorCode?: string | null
+    vendorName?: string | null
+    vendorCity?: string | null
+    division?: string | null
+    subDivision?: string | null
+    majorCategory?: string | null
+    presentationsType?: string | null
+    designNumber?: string | null
+    articleNumber?: string | null
+    fabric?: string | null
+    noOfColors?: number | null
+    price?: Decimal | DecimalJsLike | number | string | null
+    imageUrl?: string | null
+    source?: string | null
+    season?: string | null
+    garmentWeight?: Decimal | DecimalJsLike | number | string | null
+    availableQty?: Decimal | DecimalJsLike | number | string | null
+    approvedBy?: string | null
+    notes?: string | null
+    status?: $Enums.RawArticleStatus
+    retryCount?: number
+    errorMessage?: string | null
+    extractedData?: NullableJsonNullValueInput | InputJsonValue
+    extractedAt?: Date | string | null
+    flatId?: string | null
+    lockedUntil?: Date | string | null
+    presentationReceivedDate?: Date | string | null
+    createdAt?: Date | string
+    updatedAt?: Date | string
+  }
+
+  export type FabricRawDataUncheckedCreateInput = {
+    id?: string
+    presentationNo: string
+    uniqueKey: string
+    vendorCode?: string | null
+    vendorName?: string | null
+    vendorCity?: string | null
+    division?: string | null
+    subDivision?: string | null
+    majorCategory?: string | null
+    presentationsType?: string | null
+    designNumber?: string | null
+    articleNumber?: string | null
+    fabric?: string | null
+    noOfColors?: number | null
+    price?: Decimal | DecimalJsLike | number | string | null
+    imageUrl?: string | null
+    source?: string | null
+    season?: string | null
+    garmentWeight?: Decimal | DecimalJsLike | number | string | null
+    availableQty?: Decimal | DecimalJsLike | number | string | null
+    approvedBy?: string | null
+    notes?: string | null
+    status?: $Enums.RawArticleStatus
+    retryCount?: number
+    errorMessage?: string | null
+    extractedData?: NullableJsonNullValueInput | InputJsonValue
+    extractedAt?: Date | string | null
+    flatId?: string | null
+    lockedUntil?: Date | string | null
+    presentationReceivedDate?: Date | string | null
+    createdAt?: Date | string
+    updatedAt?: Date | string
+  }
+
+  export type FabricRawDataUpdateInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    presentationNo?: StringFieldUpdateOperationsInput | string
+    uniqueKey?: StringFieldUpdateOperationsInput | string
+    vendorCode?: NullableStringFieldUpdateOperationsInput | string | null
+    vendorName?: NullableStringFieldUpdateOperationsInput | string | null
+    vendorCity?: NullableStringFieldUpdateOperationsInput | string | null
+    division?: NullableStringFieldUpdateOperationsInput | string | null
+    subDivision?: NullableStringFieldUpdateOperationsInput | string | null
+    majorCategory?: NullableStringFieldUpdateOperationsInput | string | null
+    presentationsType?: NullableStringFieldUpdateOperationsInput | string | null
+    designNumber?: NullableStringFieldUpdateOperationsInput | string | null
+    articleNumber?: NullableStringFieldUpdateOperationsInput | string | null
+    fabric?: NullableStringFieldUpdateOperationsInput | string | null
+    noOfColors?: NullableIntFieldUpdateOperationsInput | number | null
+    price?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    imageUrl?: NullableStringFieldUpdateOperationsInput | string | null
+    source?: NullableStringFieldUpdateOperationsInput | string | null
+    season?: NullableStringFieldUpdateOperationsInput | string | null
+    garmentWeight?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    availableQty?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    approvedBy?: NullableStringFieldUpdateOperationsInput | string | null
+    notes?: NullableStringFieldUpdateOperationsInput | string | null
+    status?: EnumRawArticleStatusFieldUpdateOperationsInput | $Enums.RawArticleStatus
+    retryCount?: IntFieldUpdateOperationsInput | number
+    errorMessage?: NullableStringFieldUpdateOperationsInput | string | null
+    extractedData?: NullableJsonNullValueInput | InputJsonValue
+    extractedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    flatId?: NullableStringFieldUpdateOperationsInput | string | null
+    lockedUntil?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    presentationReceivedDate?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+  }
+
+  export type FabricRawDataUncheckedUpdateInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    presentationNo?: StringFieldUpdateOperationsInput | string
+    uniqueKey?: StringFieldUpdateOperationsInput | string
+    vendorCode?: NullableStringFieldUpdateOperationsInput | string | null
+    vendorName?: NullableStringFieldUpdateOperationsInput | string | null
+    vendorCity?: NullableStringFieldUpdateOperationsInput | string | null
+    division?: NullableStringFieldUpdateOperationsInput | string | null
+    subDivision?: NullableStringFieldUpdateOperationsInput | string | null
+    majorCategory?: NullableStringFieldUpdateOperationsInput | string | null
+    presentationsType?: NullableStringFieldUpdateOperationsInput | string | null
+    designNumber?: NullableStringFieldUpdateOperationsInput | string | null
+    articleNumber?: NullableStringFieldUpdateOperationsInput | string | null
+    fabric?: NullableStringFieldUpdateOperationsInput | string | null
+    noOfColors?: NullableIntFieldUpdateOperationsInput | number | null
+    price?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    imageUrl?: NullableStringFieldUpdateOperationsInput | string | null
+    source?: NullableStringFieldUpdateOperationsInput | string | null
+    season?: NullableStringFieldUpdateOperationsInput | string | null
+    garmentWeight?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    availableQty?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    approvedBy?: NullableStringFieldUpdateOperationsInput | string | null
+    notes?: NullableStringFieldUpdateOperationsInput | string | null
+    status?: EnumRawArticleStatusFieldUpdateOperationsInput | $Enums.RawArticleStatus
+    retryCount?: IntFieldUpdateOperationsInput | number
+    errorMessage?: NullableStringFieldUpdateOperationsInput | string | null
+    extractedData?: NullableJsonNullValueInput | InputJsonValue
+    extractedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    flatId?: NullableStringFieldUpdateOperationsInput | string | null
+    lockedUntil?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    presentationReceivedDate?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+  }
+
+  export type FabricRawDataCreateManyInput = {
+    id?: string
+    presentationNo: string
+    uniqueKey: string
+    vendorCode?: string | null
+    vendorName?: string | null
+    vendorCity?: string | null
+    division?: string | null
+    subDivision?: string | null
+    majorCategory?: string | null
+    presentationsType?: string | null
+    designNumber?: string | null
+    articleNumber?: string | null
+    fabric?: string | null
+    noOfColors?: number | null
+    price?: Decimal | DecimalJsLike | number | string | null
+    imageUrl?: string | null
+    source?: string | null
+    season?: string | null
+    garmentWeight?: Decimal | DecimalJsLike | number | string | null
+    availableQty?: Decimal | DecimalJsLike | number | string | null
+    approvedBy?: string | null
+    notes?: string | null
+    status?: $Enums.RawArticleStatus
+    retryCount?: number
+    errorMessage?: string | null
+    extractedData?: NullableJsonNullValueInput | InputJsonValue
+    extractedAt?: Date | string | null
+    flatId?: string | null
+    lockedUntil?: Date | string | null
+    presentationReceivedDate?: Date | string | null
+    createdAt?: Date | string
+    updatedAt?: Date | string
+  }
+
+  export type FabricRawDataUpdateManyMutationInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    presentationNo?: StringFieldUpdateOperationsInput | string
+    uniqueKey?: StringFieldUpdateOperationsInput | string
+    vendorCode?: NullableStringFieldUpdateOperationsInput | string | null
+    vendorName?: NullableStringFieldUpdateOperationsInput | string | null
+    vendorCity?: NullableStringFieldUpdateOperationsInput | string | null
+    division?: NullableStringFieldUpdateOperationsInput | string | null
+    subDivision?: NullableStringFieldUpdateOperationsInput | string | null
+    majorCategory?: NullableStringFieldUpdateOperationsInput | string | null
+    presentationsType?: NullableStringFieldUpdateOperationsInput | string | null
+    designNumber?: NullableStringFieldUpdateOperationsInput | string | null
+    articleNumber?: NullableStringFieldUpdateOperationsInput | string | null
+    fabric?: NullableStringFieldUpdateOperationsInput | string | null
+    noOfColors?: NullableIntFieldUpdateOperationsInput | number | null
+    price?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    imageUrl?: NullableStringFieldUpdateOperationsInput | string | null
+    source?: NullableStringFieldUpdateOperationsInput | string | null
+    season?: NullableStringFieldUpdateOperationsInput | string | null
+    garmentWeight?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    availableQty?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    approvedBy?: NullableStringFieldUpdateOperationsInput | string | null
+    notes?: NullableStringFieldUpdateOperationsInput | string | null
+    status?: EnumRawArticleStatusFieldUpdateOperationsInput | $Enums.RawArticleStatus
+    retryCount?: IntFieldUpdateOperationsInput | number
+    errorMessage?: NullableStringFieldUpdateOperationsInput | string | null
+    extractedData?: NullableJsonNullValueInput | InputJsonValue
+    extractedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    flatId?: NullableStringFieldUpdateOperationsInput | string | null
+    lockedUntil?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    presentationReceivedDate?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+  }
+
+  export type FabricRawDataUncheckedUpdateManyInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    presentationNo?: StringFieldUpdateOperationsInput | string
+    uniqueKey?: StringFieldUpdateOperationsInput | string
+    vendorCode?: NullableStringFieldUpdateOperationsInput | string | null
+    vendorName?: NullableStringFieldUpdateOperationsInput | string | null
+    vendorCity?: NullableStringFieldUpdateOperationsInput | string | null
+    division?: NullableStringFieldUpdateOperationsInput | string | null
+    subDivision?: NullableStringFieldUpdateOperationsInput | string | null
+    majorCategory?: NullableStringFieldUpdateOperationsInput | string | null
+    presentationsType?: NullableStringFieldUpdateOperationsInput | string | null
+    designNumber?: NullableStringFieldUpdateOperationsInput | string | null
+    articleNumber?: NullableStringFieldUpdateOperationsInput | string | null
+    fabric?: NullableStringFieldUpdateOperationsInput | string | null
+    noOfColors?: NullableIntFieldUpdateOperationsInput | number | null
+    price?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    imageUrl?: NullableStringFieldUpdateOperationsInput | string | null
+    source?: NullableStringFieldUpdateOperationsInput | string | null
+    season?: NullableStringFieldUpdateOperationsInput | string | null
+    garmentWeight?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    availableQty?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    approvedBy?: NullableStringFieldUpdateOperationsInput | string | null
+    notes?: NullableStringFieldUpdateOperationsInput | string | null
+    status?: EnumRawArticleStatusFieldUpdateOperationsInput | $Enums.RawArticleStatus
+    retryCount?: IntFieldUpdateOperationsInput | number
+    errorMessage?: NullableStringFieldUpdateOperationsInput | string | null
+    extractedData?: NullableJsonNullValueInput | InputJsonValue
+    extractedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    flatId?: NullableStringFieldUpdateOperationsInput | string | null
+    lockedUntil?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    presentationReceivedDate?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+  }
+
   export type SrmSyncRunCreateInput = {
     id?: string
     triggeredBy?: string
@@ -65687,6 +77161,346 @@ export namespace Prisma {
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
   }
 
+  export type BroaderMenuCreateInput = {
+    sn?: number | null
+    mcCd: number
+    seg?: string | null
+    div?: string | null
+    subDiv?: string | null
+    majCatCd?: number | null
+    majCatNm?: string | null
+    subCatCd?: number | null
+    subCatDesc?: string | null
+    mcDesc?: string | null
+    ssn?: string | null
+    mcStat?: string | null
+    subCatStat?: string | null
+    majCatStat?: string | null
+    sizeApplicable?: string | null
+    divStat?: string | null
+    mcPkSz?: number | null
+    subCatPkSz?: number | null
+    noOfOptions?: number | null
+    avgDensity?: Decimal | DecimalJsLike | number | string | null
+    accDensity?: Decimal | DecimalJsLike | number | string | null
+    wgDensity?: Decimal | DecimalJsLike | number | string | null
+    fg46FtDensity?: Decimal | DecimalJsLike | number | string | null
+    fg5FtDensity?: Decimal | DecimalJsLike | number | string | null
+    fg4ADensity?: Decimal | DecimalJsLike | number | string | null
+    fg8ADensity?: Decimal | DecimalJsLike | number | string | null
+    acp?: Decimal | DecimalJsLike | number | string | null
+    oldDensity?: Decimal | DecimalJsLike | number | string | null
+    seq?: number | null
+    mjCatTyp?: string | null
+    fixtr?: string | null
+    newMcCd?: number | null
+    newMcDesc?: string | null
+    oldMcDesc?: string | null
+    oldSubCatCd?: number | null
+    oldSubCatDesc?: string | null
+    legacyMcDesc?: string | null
+    effectiveDate?: Date | string | null
+    remarks?: string | null
+    gmStatus?: string | null
+    currentMcStatus?: string | null
+    fullMcName?: string | null
+    winterStatus?: string | null
+    uploadedAt?: Date | string
+    updatedAt?: Date | string
+  }
+
+  export type BroaderMenuUncheckedCreateInput = {
+    id?: number
+    sn?: number | null
+    mcCd: number
+    seg?: string | null
+    div?: string | null
+    subDiv?: string | null
+    majCatCd?: number | null
+    majCatNm?: string | null
+    subCatCd?: number | null
+    subCatDesc?: string | null
+    mcDesc?: string | null
+    ssn?: string | null
+    mcStat?: string | null
+    subCatStat?: string | null
+    majCatStat?: string | null
+    sizeApplicable?: string | null
+    divStat?: string | null
+    mcPkSz?: number | null
+    subCatPkSz?: number | null
+    noOfOptions?: number | null
+    avgDensity?: Decimal | DecimalJsLike | number | string | null
+    accDensity?: Decimal | DecimalJsLike | number | string | null
+    wgDensity?: Decimal | DecimalJsLike | number | string | null
+    fg46FtDensity?: Decimal | DecimalJsLike | number | string | null
+    fg5FtDensity?: Decimal | DecimalJsLike | number | string | null
+    fg4ADensity?: Decimal | DecimalJsLike | number | string | null
+    fg8ADensity?: Decimal | DecimalJsLike | number | string | null
+    acp?: Decimal | DecimalJsLike | number | string | null
+    oldDensity?: Decimal | DecimalJsLike | number | string | null
+    seq?: number | null
+    mjCatTyp?: string | null
+    fixtr?: string | null
+    newMcCd?: number | null
+    newMcDesc?: string | null
+    oldMcDesc?: string | null
+    oldSubCatCd?: number | null
+    oldSubCatDesc?: string | null
+    legacyMcDesc?: string | null
+    effectiveDate?: Date | string | null
+    remarks?: string | null
+    gmStatus?: string | null
+    currentMcStatus?: string | null
+    fullMcName?: string | null
+    winterStatus?: string | null
+    uploadedAt?: Date | string
+    updatedAt?: Date | string
+  }
+
+  export type BroaderMenuUpdateInput = {
+    sn?: NullableIntFieldUpdateOperationsInput | number | null
+    mcCd?: IntFieldUpdateOperationsInput | number
+    seg?: NullableStringFieldUpdateOperationsInput | string | null
+    div?: NullableStringFieldUpdateOperationsInput | string | null
+    subDiv?: NullableStringFieldUpdateOperationsInput | string | null
+    majCatCd?: NullableIntFieldUpdateOperationsInput | number | null
+    majCatNm?: NullableStringFieldUpdateOperationsInput | string | null
+    subCatCd?: NullableIntFieldUpdateOperationsInput | number | null
+    subCatDesc?: NullableStringFieldUpdateOperationsInput | string | null
+    mcDesc?: NullableStringFieldUpdateOperationsInput | string | null
+    ssn?: NullableStringFieldUpdateOperationsInput | string | null
+    mcStat?: NullableStringFieldUpdateOperationsInput | string | null
+    subCatStat?: NullableStringFieldUpdateOperationsInput | string | null
+    majCatStat?: NullableStringFieldUpdateOperationsInput | string | null
+    sizeApplicable?: NullableStringFieldUpdateOperationsInput | string | null
+    divStat?: NullableStringFieldUpdateOperationsInput | string | null
+    mcPkSz?: NullableIntFieldUpdateOperationsInput | number | null
+    subCatPkSz?: NullableIntFieldUpdateOperationsInput | number | null
+    noOfOptions?: NullableIntFieldUpdateOperationsInput | number | null
+    avgDensity?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    accDensity?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    wgDensity?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    fg46FtDensity?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    fg5FtDensity?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    fg4ADensity?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    fg8ADensity?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    acp?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    oldDensity?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    seq?: NullableIntFieldUpdateOperationsInput | number | null
+    mjCatTyp?: NullableStringFieldUpdateOperationsInput | string | null
+    fixtr?: NullableStringFieldUpdateOperationsInput | string | null
+    newMcCd?: NullableIntFieldUpdateOperationsInput | number | null
+    newMcDesc?: NullableStringFieldUpdateOperationsInput | string | null
+    oldMcDesc?: NullableStringFieldUpdateOperationsInput | string | null
+    oldSubCatCd?: NullableIntFieldUpdateOperationsInput | number | null
+    oldSubCatDesc?: NullableStringFieldUpdateOperationsInput | string | null
+    legacyMcDesc?: NullableStringFieldUpdateOperationsInput | string | null
+    effectiveDate?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    remarks?: NullableStringFieldUpdateOperationsInput | string | null
+    gmStatus?: NullableStringFieldUpdateOperationsInput | string | null
+    currentMcStatus?: NullableStringFieldUpdateOperationsInput | string | null
+    fullMcName?: NullableStringFieldUpdateOperationsInput | string | null
+    winterStatus?: NullableStringFieldUpdateOperationsInput | string | null
+    uploadedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+  }
+
+  export type BroaderMenuUncheckedUpdateInput = {
+    id?: IntFieldUpdateOperationsInput | number
+    sn?: NullableIntFieldUpdateOperationsInput | number | null
+    mcCd?: IntFieldUpdateOperationsInput | number
+    seg?: NullableStringFieldUpdateOperationsInput | string | null
+    div?: NullableStringFieldUpdateOperationsInput | string | null
+    subDiv?: NullableStringFieldUpdateOperationsInput | string | null
+    majCatCd?: NullableIntFieldUpdateOperationsInput | number | null
+    majCatNm?: NullableStringFieldUpdateOperationsInput | string | null
+    subCatCd?: NullableIntFieldUpdateOperationsInput | number | null
+    subCatDesc?: NullableStringFieldUpdateOperationsInput | string | null
+    mcDesc?: NullableStringFieldUpdateOperationsInput | string | null
+    ssn?: NullableStringFieldUpdateOperationsInput | string | null
+    mcStat?: NullableStringFieldUpdateOperationsInput | string | null
+    subCatStat?: NullableStringFieldUpdateOperationsInput | string | null
+    majCatStat?: NullableStringFieldUpdateOperationsInput | string | null
+    sizeApplicable?: NullableStringFieldUpdateOperationsInput | string | null
+    divStat?: NullableStringFieldUpdateOperationsInput | string | null
+    mcPkSz?: NullableIntFieldUpdateOperationsInput | number | null
+    subCatPkSz?: NullableIntFieldUpdateOperationsInput | number | null
+    noOfOptions?: NullableIntFieldUpdateOperationsInput | number | null
+    avgDensity?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    accDensity?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    wgDensity?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    fg46FtDensity?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    fg5FtDensity?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    fg4ADensity?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    fg8ADensity?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    acp?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    oldDensity?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    seq?: NullableIntFieldUpdateOperationsInput | number | null
+    mjCatTyp?: NullableStringFieldUpdateOperationsInput | string | null
+    fixtr?: NullableStringFieldUpdateOperationsInput | string | null
+    newMcCd?: NullableIntFieldUpdateOperationsInput | number | null
+    newMcDesc?: NullableStringFieldUpdateOperationsInput | string | null
+    oldMcDesc?: NullableStringFieldUpdateOperationsInput | string | null
+    oldSubCatCd?: NullableIntFieldUpdateOperationsInput | number | null
+    oldSubCatDesc?: NullableStringFieldUpdateOperationsInput | string | null
+    legacyMcDesc?: NullableStringFieldUpdateOperationsInput | string | null
+    effectiveDate?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    remarks?: NullableStringFieldUpdateOperationsInput | string | null
+    gmStatus?: NullableStringFieldUpdateOperationsInput | string | null
+    currentMcStatus?: NullableStringFieldUpdateOperationsInput | string | null
+    fullMcName?: NullableStringFieldUpdateOperationsInput | string | null
+    winterStatus?: NullableStringFieldUpdateOperationsInput | string | null
+    uploadedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+  }
+
+  export type BroaderMenuCreateManyInput = {
+    id?: number
+    sn?: number | null
+    mcCd: number
+    seg?: string | null
+    div?: string | null
+    subDiv?: string | null
+    majCatCd?: number | null
+    majCatNm?: string | null
+    subCatCd?: number | null
+    subCatDesc?: string | null
+    mcDesc?: string | null
+    ssn?: string | null
+    mcStat?: string | null
+    subCatStat?: string | null
+    majCatStat?: string | null
+    sizeApplicable?: string | null
+    divStat?: string | null
+    mcPkSz?: number | null
+    subCatPkSz?: number | null
+    noOfOptions?: number | null
+    avgDensity?: Decimal | DecimalJsLike | number | string | null
+    accDensity?: Decimal | DecimalJsLike | number | string | null
+    wgDensity?: Decimal | DecimalJsLike | number | string | null
+    fg46FtDensity?: Decimal | DecimalJsLike | number | string | null
+    fg5FtDensity?: Decimal | DecimalJsLike | number | string | null
+    fg4ADensity?: Decimal | DecimalJsLike | number | string | null
+    fg8ADensity?: Decimal | DecimalJsLike | number | string | null
+    acp?: Decimal | DecimalJsLike | number | string | null
+    oldDensity?: Decimal | DecimalJsLike | number | string | null
+    seq?: number | null
+    mjCatTyp?: string | null
+    fixtr?: string | null
+    newMcCd?: number | null
+    newMcDesc?: string | null
+    oldMcDesc?: string | null
+    oldSubCatCd?: number | null
+    oldSubCatDesc?: string | null
+    legacyMcDesc?: string | null
+    effectiveDate?: Date | string | null
+    remarks?: string | null
+    gmStatus?: string | null
+    currentMcStatus?: string | null
+    fullMcName?: string | null
+    winterStatus?: string | null
+    uploadedAt?: Date | string
+    updatedAt?: Date | string
+  }
+
+  export type BroaderMenuUpdateManyMutationInput = {
+    sn?: NullableIntFieldUpdateOperationsInput | number | null
+    mcCd?: IntFieldUpdateOperationsInput | number
+    seg?: NullableStringFieldUpdateOperationsInput | string | null
+    div?: NullableStringFieldUpdateOperationsInput | string | null
+    subDiv?: NullableStringFieldUpdateOperationsInput | string | null
+    majCatCd?: NullableIntFieldUpdateOperationsInput | number | null
+    majCatNm?: NullableStringFieldUpdateOperationsInput | string | null
+    subCatCd?: NullableIntFieldUpdateOperationsInput | number | null
+    subCatDesc?: NullableStringFieldUpdateOperationsInput | string | null
+    mcDesc?: NullableStringFieldUpdateOperationsInput | string | null
+    ssn?: NullableStringFieldUpdateOperationsInput | string | null
+    mcStat?: NullableStringFieldUpdateOperationsInput | string | null
+    subCatStat?: NullableStringFieldUpdateOperationsInput | string | null
+    majCatStat?: NullableStringFieldUpdateOperationsInput | string | null
+    sizeApplicable?: NullableStringFieldUpdateOperationsInput | string | null
+    divStat?: NullableStringFieldUpdateOperationsInput | string | null
+    mcPkSz?: NullableIntFieldUpdateOperationsInput | number | null
+    subCatPkSz?: NullableIntFieldUpdateOperationsInput | number | null
+    noOfOptions?: NullableIntFieldUpdateOperationsInput | number | null
+    avgDensity?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    accDensity?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    wgDensity?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    fg46FtDensity?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    fg5FtDensity?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    fg4ADensity?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    fg8ADensity?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    acp?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    oldDensity?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    seq?: NullableIntFieldUpdateOperationsInput | number | null
+    mjCatTyp?: NullableStringFieldUpdateOperationsInput | string | null
+    fixtr?: NullableStringFieldUpdateOperationsInput | string | null
+    newMcCd?: NullableIntFieldUpdateOperationsInput | number | null
+    newMcDesc?: NullableStringFieldUpdateOperationsInput | string | null
+    oldMcDesc?: NullableStringFieldUpdateOperationsInput | string | null
+    oldSubCatCd?: NullableIntFieldUpdateOperationsInput | number | null
+    oldSubCatDesc?: NullableStringFieldUpdateOperationsInput | string | null
+    legacyMcDesc?: NullableStringFieldUpdateOperationsInput | string | null
+    effectiveDate?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    remarks?: NullableStringFieldUpdateOperationsInput | string | null
+    gmStatus?: NullableStringFieldUpdateOperationsInput | string | null
+    currentMcStatus?: NullableStringFieldUpdateOperationsInput | string | null
+    fullMcName?: NullableStringFieldUpdateOperationsInput | string | null
+    winterStatus?: NullableStringFieldUpdateOperationsInput | string | null
+    uploadedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+  }
+
+  export type BroaderMenuUncheckedUpdateManyInput = {
+    id?: IntFieldUpdateOperationsInput | number
+    sn?: NullableIntFieldUpdateOperationsInput | number | null
+    mcCd?: IntFieldUpdateOperationsInput | number
+    seg?: NullableStringFieldUpdateOperationsInput | string | null
+    div?: NullableStringFieldUpdateOperationsInput | string | null
+    subDiv?: NullableStringFieldUpdateOperationsInput | string | null
+    majCatCd?: NullableIntFieldUpdateOperationsInput | number | null
+    majCatNm?: NullableStringFieldUpdateOperationsInput | string | null
+    subCatCd?: NullableIntFieldUpdateOperationsInput | number | null
+    subCatDesc?: NullableStringFieldUpdateOperationsInput | string | null
+    mcDesc?: NullableStringFieldUpdateOperationsInput | string | null
+    ssn?: NullableStringFieldUpdateOperationsInput | string | null
+    mcStat?: NullableStringFieldUpdateOperationsInput | string | null
+    subCatStat?: NullableStringFieldUpdateOperationsInput | string | null
+    majCatStat?: NullableStringFieldUpdateOperationsInput | string | null
+    sizeApplicable?: NullableStringFieldUpdateOperationsInput | string | null
+    divStat?: NullableStringFieldUpdateOperationsInput | string | null
+    mcPkSz?: NullableIntFieldUpdateOperationsInput | number | null
+    subCatPkSz?: NullableIntFieldUpdateOperationsInput | number | null
+    noOfOptions?: NullableIntFieldUpdateOperationsInput | number | null
+    avgDensity?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    accDensity?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    wgDensity?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    fg46FtDensity?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    fg5FtDensity?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    fg4ADensity?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    fg8ADensity?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    acp?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    oldDensity?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    seq?: NullableIntFieldUpdateOperationsInput | number | null
+    mjCatTyp?: NullableStringFieldUpdateOperationsInput | string | null
+    fixtr?: NullableStringFieldUpdateOperationsInput | string | null
+    newMcCd?: NullableIntFieldUpdateOperationsInput | number | null
+    newMcDesc?: NullableStringFieldUpdateOperationsInput | string | null
+    oldMcDesc?: NullableStringFieldUpdateOperationsInput | string | null
+    oldSubCatCd?: NullableIntFieldUpdateOperationsInput | number | null
+    oldSubCatDesc?: NullableStringFieldUpdateOperationsInput | string | null
+    legacyMcDesc?: NullableStringFieldUpdateOperationsInput | string | null
+    effectiveDate?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    remarks?: NullableStringFieldUpdateOperationsInput | string | null
+    gmStatus?: NullableStringFieldUpdateOperationsInput | string | null
+    currentMcStatus?: NullableStringFieldUpdateOperationsInput | string | null
+    fullMcName?: NullableStringFieldUpdateOperationsInput | string | null
+    winterStatus?: NullableStringFieldUpdateOperationsInput | string | null
+    uploadedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+  }
+
   export type MajorCatMasterCreateInput = {
     majCat: string
     name?: string | null
@@ -66036,16 +77850,25 @@ export namespace Prisma {
     mLycra?: string | null
     fabricArticleNumber?: string | null
     fabricArticleDescription?: string | null
+    flatId?: string | null
     division?: string | null
     subDivision?: string | null
     majorCategory?: string | null
+    mcDescription?: string | null
     vendorName?: string | null
     vendorCode?: string | null
+    designNumber?: string | null
+    fabricRate?: Decimal | DecimalJsLike | number | string | null
+    v2FabricRate?: Decimal | DecimalJsLike | number | string | null
+    valueAddCost?: Decimal | DecimalJsLike | number | string | null
+    articleFashionType?: string | null
     approvalStatus?: string
     approvedAt?: Date | string | null
     approvedBy?: number | null
     sapSyncStatus?: string
     sapSyncMessage?: string | null
+    imageUrl?: string | null
+    fabricArticleType?: string | null
     userName?: string | null
     createdAt?: Date | string
     updatedAt?: Date | string
@@ -66069,16 +77892,25 @@ export namespace Prisma {
     mLycra?: string | null
     fabricArticleNumber?: string | null
     fabricArticleDescription?: string | null
+    flatId?: string | null
     division?: string | null
     subDivision?: string | null
     majorCategory?: string | null
+    mcDescription?: string | null
     vendorName?: string | null
     vendorCode?: string | null
+    designNumber?: string | null
+    fabricRate?: Decimal | DecimalJsLike | number | string | null
+    v2FabricRate?: Decimal | DecimalJsLike | number | string | null
+    valueAddCost?: Decimal | DecimalJsLike | number | string | null
+    articleFashionType?: string | null
     approvalStatus?: string
     approvedAt?: Date | string | null
     approvedBy?: number | null
     sapSyncStatus?: string
     sapSyncMessage?: string | null
+    imageUrl?: string | null
+    fabricArticleType?: string | null
     userName?: string | null
     createdAt?: Date | string
     updatedAt?: Date | string
@@ -66102,16 +77934,25 @@ export namespace Prisma {
     mLycra?: NullableStringFieldUpdateOperationsInput | string | null
     fabricArticleNumber?: NullableStringFieldUpdateOperationsInput | string | null
     fabricArticleDescription?: NullableStringFieldUpdateOperationsInput | string | null
+    flatId?: NullableStringFieldUpdateOperationsInput | string | null
     division?: NullableStringFieldUpdateOperationsInput | string | null
     subDivision?: NullableStringFieldUpdateOperationsInput | string | null
     majorCategory?: NullableStringFieldUpdateOperationsInput | string | null
+    mcDescription?: NullableStringFieldUpdateOperationsInput | string | null
     vendorName?: NullableStringFieldUpdateOperationsInput | string | null
     vendorCode?: NullableStringFieldUpdateOperationsInput | string | null
+    designNumber?: NullableStringFieldUpdateOperationsInput | string | null
+    fabricRate?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    v2FabricRate?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    valueAddCost?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    articleFashionType?: NullableStringFieldUpdateOperationsInput | string | null
     approvalStatus?: StringFieldUpdateOperationsInput | string
     approvedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     approvedBy?: NullableIntFieldUpdateOperationsInput | number | null
     sapSyncStatus?: StringFieldUpdateOperationsInput | string
     sapSyncMessage?: NullableStringFieldUpdateOperationsInput | string | null
+    imageUrl?: NullableStringFieldUpdateOperationsInput | string | null
+    fabricArticleType?: NullableStringFieldUpdateOperationsInput | string | null
     userName?: NullableStringFieldUpdateOperationsInput | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
@@ -66135,16 +77976,25 @@ export namespace Prisma {
     mLycra?: NullableStringFieldUpdateOperationsInput | string | null
     fabricArticleNumber?: NullableStringFieldUpdateOperationsInput | string | null
     fabricArticleDescription?: NullableStringFieldUpdateOperationsInput | string | null
+    flatId?: NullableStringFieldUpdateOperationsInput | string | null
     division?: NullableStringFieldUpdateOperationsInput | string | null
     subDivision?: NullableStringFieldUpdateOperationsInput | string | null
     majorCategory?: NullableStringFieldUpdateOperationsInput | string | null
+    mcDescription?: NullableStringFieldUpdateOperationsInput | string | null
     vendorName?: NullableStringFieldUpdateOperationsInput | string | null
     vendorCode?: NullableStringFieldUpdateOperationsInput | string | null
+    designNumber?: NullableStringFieldUpdateOperationsInput | string | null
+    fabricRate?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    v2FabricRate?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    valueAddCost?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    articleFashionType?: NullableStringFieldUpdateOperationsInput | string | null
     approvalStatus?: StringFieldUpdateOperationsInput | string
     approvedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     approvedBy?: NullableIntFieldUpdateOperationsInput | number | null
     sapSyncStatus?: StringFieldUpdateOperationsInput | string
     sapSyncMessage?: NullableStringFieldUpdateOperationsInput | string | null
+    imageUrl?: NullableStringFieldUpdateOperationsInput | string | null
+    fabricArticleType?: NullableStringFieldUpdateOperationsInput | string | null
     userName?: NullableStringFieldUpdateOperationsInput | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
@@ -66168,16 +78018,25 @@ export namespace Prisma {
     mLycra?: string | null
     fabricArticleNumber?: string | null
     fabricArticleDescription?: string | null
+    flatId?: string | null
     division?: string | null
     subDivision?: string | null
     majorCategory?: string | null
+    mcDescription?: string | null
     vendorName?: string | null
     vendorCode?: string | null
+    designNumber?: string | null
+    fabricRate?: Decimal | DecimalJsLike | number | string | null
+    v2FabricRate?: Decimal | DecimalJsLike | number | string | null
+    valueAddCost?: Decimal | DecimalJsLike | number | string | null
+    articleFashionType?: string | null
     approvalStatus?: string
     approvedAt?: Date | string | null
     approvedBy?: number | null
     sapSyncStatus?: string
     sapSyncMessage?: string | null
+    imageUrl?: string | null
+    fabricArticleType?: string | null
     userName?: string | null
     createdAt?: Date | string
     updatedAt?: Date | string
@@ -66201,16 +78060,25 @@ export namespace Prisma {
     mLycra?: NullableStringFieldUpdateOperationsInput | string | null
     fabricArticleNumber?: NullableStringFieldUpdateOperationsInput | string | null
     fabricArticleDescription?: NullableStringFieldUpdateOperationsInput | string | null
+    flatId?: NullableStringFieldUpdateOperationsInput | string | null
     division?: NullableStringFieldUpdateOperationsInput | string | null
     subDivision?: NullableStringFieldUpdateOperationsInput | string | null
     majorCategory?: NullableStringFieldUpdateOperationsInput | string | null
+    mcDescription?: NullableStringFieldUpdateOperationsInput | string | null
     vendorName?: NullableStringFieldUpdateOperationsInput | string | null
     vendorCode?: NullableStringFieldUpdateOperationsInput | string | null
+    designNumber?: NullableStringFieldUpdateOperationsInput | string | null
+    fabricRate?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    v2FabricRate?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    valueAddCost?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    articleFashionType?: NullableStringFieldUpdateOperationsInput | string | null
     approvalStatus?: StringFieldUpdateOperationsInput | string
     approvedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     approvedBy?: NullableIntFieldUpdateOperationsInput | number | null
     sapSyncStatus?: StringFieldUpdateOperationsInput | string
     sapSyncMessage?: NullableStringFieldUpdateOperationsInput | string | null
+    imageUrl?: NullableStringFieldUpdateOperationsInput | string | null
+    fabricArticleType?: NullableStringFieldUpdateOperationsInput | string | null
     userName?: NullableStringFieldUpdateOperationsInput | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
@@ -66234,16 +78102,25 @@ export namespace Prisma {
     mLycra?: NullableStringFieldUpdateOperationsInput | string | null
     fabricArticleNumber?: NullableStringFieldUpdateOperationsInput | string | null
     fabricArticleDescription?: NullableStringFieldUpdateOperationsInput | string | null
+    flatId?: NullableStringFieldUpdateOperationsInput | string | null
     division?: NullableStringFieldUpdateOperationsInput | string | null
     subDivision?: NullableStringFieldUpdateOperationsInput | string | null
     majorCategory?: NullableStringFieldUpdateOperationsInput | string | null
+    mcDescription?: NullableStringFieldUpdateOperationsInput | string | null
     vendorName?: NullableStringFieldUpdateOperationsInput | string | null
     vendorCode?: NullableStringFieldUpdateOperationsInput | string | null
+    designNumber?: NullableStringFieldUpdateOperationsInput | string | null
+    fabricRate?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    v2FabricRate?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    valueAddCost?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    articleFashionType?: NullableStringFieldUpdateOperationsInput | string | null
     approvalStatus?: StringFieldUpdateOperationsInput | string
     approvedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     approvedBy?: NullableIntFieldUpdateOperationsInput | number | null
     sapSyncStatus?: StringFieldUpdateOperationsInput | string
     sapSyncMessage?: NullableStringFieldUpdateOperationsInput | string | null
+    imageUrl?: NullableStringFieldUpdateOperationsInput | string | null
+    fabricArticleType?: NullableStringFieldUpdateOperationsInput | string | null
     userName?: NullableStringFieldUpdateOperationsInput | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
@@ -66270,11 +78147,15 @@ export namespace Prisma {
     mSet?: string | null
     bodyArticleNumber?: string | null
     bodyArticleDescription?: string | null
+    imageUrl?: string | null
+    bodyArticleType?: string | null
+    designNumber?: string | null
     cmtpCost?: Decimal | DecimalJsLike | number | string | null
     cmpCost?: Decimal | DecimalJsLike | number | string | null
     fabCost?: Decimal | DecimalJsLike | number | string | null
     fabCons?: Decimal | DecimalJsLike | number | string | null
     width?: Decimal | DecimalJsLike | number | string | null
+    basicTrimCost?: Decimal | DecimalJsLike | number | string | null
     flatId?: string | null
     articleNumber?: string | null
     division?: string | null
@@ -66287,6 +78168,7 @@ export namespace Prisma {
     year?: string | null
     hsnTaxCode?: string | null
     approvalStatus?: string
+    fgCreatorApproved?: string
     approvedAt?: Date | string | null
     approvedBy?: number | null
     sapSyncStatus?: string
@@ -66317,11 +78199,15 @@ export namespace Prisma {
     mSet?: string | null
     bodyArticleNumber?: string | null
     bodyArticleDescription?: string | null
+    imageUrl?: string | null
+    bodyArticleType?: string | null
+    designNumber?: string | null
     cmtpCost?: Decimal | DecimalJsLike | number | string | null
     cmpCost?: Decimal | DecimalJsLike | number | string | null
     fabCost?: Decimal | DecimalJsLike | number | string | null
     fabCons?: Decimal | DecimalJsLike | number | string | null
     width?: Decimal | DecimalJsLike | number | string | null
+    basicTrimCost?: Decimal | DecimalJsLike | number | string | null
     flatId?: string | null
     articleNumber?: string | null
     division?: string | null
@@ -66334,6 +78220,7 @@ export namespace Prisma {
     year?: string | null
     hsnTaxCode?: string | null
     approvalStatus?: string
+    fgCreatorApproved?: string
     approvedAt?: Date | string | null
     approvedBy?: number | null
     sapSyncStatus?: string
@@ -66364,11 +78251,15 @@ export namespace Prisma {
     mSet?: NullableStringFieldUpdateOperationsInput | string | null
     bodyArticleNumber?: NullableStringFieldUpdateOperationsInput | string | null
     bodyArticleDescription?: NullableStringFieldUpdateOperationsInput | string | null
+    imageUrl?: NullableStringFieldUpdateOperationsInput | string | null
+    bodyArticleType?: NullableStringFieldUpdateOperationsInput | string | null
+    designNumber?: NullableStringFieldUpdateOperationsInput | string | null
     cmtpCost?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
     cmpCost?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
     fabCost?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
     fabCons?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
     width?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    basicTrimCost?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
     flatId?: NullableStringFieldUpdateOperationsInput | string | null
     articleNumber?: NullableStringFieldUpdateOperationsInput | string | null
     division?: NullableStringFieldUpdateOperationsInput | string | null
@@ -66381,6 +78272,7 @@ export namespace Prisma {
     year?: NullableStringFieldUpdateOperationsInput | string | null
     hsnTaxCode?: NullableStringFieldUpdateOperationsInput | string | null
     approvalStatus?: StringFieldUpdateOperationsInput | string
+    fgCreatorApproved?: StringFieldUpdateOperationsInput | string
     approvedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     approvedBy?: NullableIntFieldUpdateOperationsInput | number | null
     sapSyncStatus?: StringFieldUpdateOperationsInput | string
@@ -66411,11 +78303,15 @@ export namespace Prisma {
     mSet?: NullableStringFieldUpdateOperationsInput | string | null
     bodyArticleNumber?: NullableStringFieldUpdateOperationsInput | string | null
     bodyArticleDescription?: NullableStringFieldUpdateOperationsInput | string | null
+    imageUrl?: NullableStringFieldUpdateOperationsInput | string | null
+    bodyArticleType?: NullableStringFieldUpdateOperationsInput | string | null
+    designNumber?: NullableStringFieldUpdateOperationsInput | string | null
     cmtpCost?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
     cmpCost?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
     fabCost?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
     fabCons?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
     width?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    basicTrimCost?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
     flatId?: NullableStringFieldUpdateOperationsInput | string | null
     articleNumber?: NullableStringFieldUpdateOperationsInput | string | null
     division?: NullableStringFieldUpdateOperationsInput | string | null
@@ -66428,6 +78324,7 @@ export namespace Prisma {
     year?: NullableStringFieldUpdateOperationsInput | string | null
     hsnTaxCode?: NullableStringFieldUpdateOperationsInput | string | null
     approvalStatus?: StringFieldUpdateOperationsInput | string
+    fgCreatorApproved?: StringFieldUpdateOperationsInput | string
     approvedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     approvedBy?: NullableIntFieldUpdateOperationsInput | number | null
     sapSyncStatus?: StringFieldUpdateOperationsInput | string
@@ -66458,11 +78355,15 @@ export namespace Prisma {
     mSet?: string | null
     bodyArticleNumber?: string | null
     bodyArticleDescription?: string | null
+    imageUrl?: string | null
+    bodyArticleType?: string | null
+    designNumber?: string | null
     cmtpCost?: Decimal | DecimalJsLike | number | string | null
     cmpCost?: Decimal | DecimalJsLike | number | string | null
     fabCost?: Decimal | DecimalJsLike | number | string | null
     fabCons?: Decimal | DecimalJsLike | number | string | null
     width?: Decimal | DecimalJsLike | number | string | null
+    basicTrimCost?: Decimal | DecimalJsLike | number | string | null
     flatId?: string | null
     articleNumber?: string | null
     division?: string | null
@@ -66475,6 +78376,7 @@ export namespace Prisma {
     year?: string | null
     hsnTaxCode?: string | null
     approvalStatus?: string
+    fgCreatorApproved?: string
     approvedAt?: Date | string | null
     approvedBy?: number | null
     sapSyncStatus?: string
@@ -66505,11 +78407,15 @@ export namespace Prisma {
     mSet?: NullableStringFieldUpdateOperationsInput | string | null
     bodyArticleNumber?: NullableStringFieldUpdateOperationsInput | string | null
     bodyArticleDescription?: NullableStringFieldUpdateOperationsInput | string | null
+    imageUrl?: NullableStringFieldUpdateOperationsInput | string | null
+    bodyArticleType?: NullableStringFieldUpdateOperationsInput | string | null
+    designNumber?: NullableStringFieldUpdateOperationsInput | string | null
     cmtpCost?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
     cmpCost?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
     fabCost?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
     fabCons?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
     width?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    basicTrimCost?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
     flatId?: NullableStringFieldUpdateOperationsInput | string | null
     articleNumber?: NullableStringFieldUpdateOperationsInput | string | null
     division?: NullableStringFieldUpdateOperationsInput | string | null
@@ -66522,6 +78428,7 @@ export namespace Prisma {
     year?: NullableStringFieldUpdateOperationsInput | string | null
     hsnTaxCode?: NullableStringFieldUpdateOperationsInput | string | null
     approvalStatus?: StringFieldUpdateOperationsInput | string
+    fgCreatorApproved?: StringFieldUpdateOperationsInput | string
     approvedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     approvedBy?: NullableIntFieldUpdateOperationsInput | number | null
     sapSyncStatus?: StringFieldUpdateOperationsInput | string
@@ -66552,11 +78459,15 @@ export namespace Prisma {
     mSet?: NullableStringFieldUpdateOperationsInput | string | null
     bodyArticleNumber?: NullableStringFieldUpdateOperationsInput | string | null
     bodyArticleDescription?: NullableStringFieldUpdateOperationsInput | string | null
+    imageUrl?: NullableStringFieldUpdateOperationsInput | string | null
+    bodyArticleType?: NullableStringFieldUpdateOperationsInput | string | null
+    designNumber?: NullableStringFieldUpdateOperationsInput | string | null
     cmtpCost?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
     cmpCost?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
     fabCost?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
     fabCons?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
     width?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    basicTrimCost?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
     flatId?: NullableStringFieldUpdateOperationsInput | string | null
     articleNumber?: NullableStringFieldUpdateOperationsInput | string | null
     division?: NullableStringFieldUpdateOperationsInput | string | null
@@ -66569,6 +78480,7 @@ export namespace Prisma {
     year?: NullableStringFieldUpdateOperationsInput | string | null
     hsnTaxCode?: NullableStringFieldUpdateOperationsInput | string | null
     approvalStatus?: StringFieldUpdateOperationsInput | string
+    fgCreatorApproved?: StringFieldUpdateOperationsInput | string
     approvedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     approvedBy?: NullableIntFieldUpdateOperationsInput | number | null
     sapSyncStatus?: StringFieldUpdateOperationsInput | string
@@ -66576,6 +78488,575 @@ export namespace Prisma {
     userName?: NullableStringFieldUpdateOperationsInput | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+  }
+
+  export type MajorCategoryDetailsCreateInput = {
+    seg?: string | null
+    div?: string | null
+    subDiv?: string | null
+    majCat?: string | null
+    mcCode?: string | null
+    mcDes?: string | null
+    hsnCode?: string | null
+    mcStatus?: string | null
+    createdAt?: Date | string
+  }
+
+  export type MajorCategoryDetailsUncheckedCreateInput = {
+    id?: number
+    seg?: string | null
+    div?: string | null
+    subDiv?: string | null
+    majCat?: string | null
+    mcCode?: string | null
+    mcDes?: string | null
+    hsnCode?: string | null
+    mcStatus?: string | null
+    createdAt?: Date | string
+  }
+
+  export type MajorCategoryDetailsUpdateInput = {
+    seg?: NullableStringFieldUpdateOperationsInput | string | null
+    div?: NullableStringFieldUpdateOperationsInput | string | null
+    subDiv?: NullableStringFieldUpdateOperationsInput | string | null
+    majCat?: NullableStringFieldUpdateOperationsInput | string | null
+    mcCode?: NullableStringFieldUpdateOperationsInput | string | null
+    mcDes?: NullableStringFieldUpdateOperationsInput | string | null
+    hsnCode?: NullableStringFieldUpdateOperationsInput | string | null
+    mcStatus?: NullableStringFieldUpdateOperationsInput | string | null
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+  }
+
+  export type MajorCategoryDetailsUncheckedUpdateInput = {
+    id?: IntFieldUpdateOperationsInput | number
+    seg?: NullableStringFieldUpdateOperationsInput | string | null
+    div?: NullableStringFieldUpdateOperationsInput | string | null
+    subDiv?: NullableStringFieldUpdateOperationsInput | string | null
+    majCat?: NullableStringFieldUpdateOperationsInput | string | null
+    mcCode?: NullableStringFieldUpdateOperationsInput | string | null
+    mcDes?: NullableStringFieldUpdateOperationsInput | string | null
+    hsnCode?: NullableStringFieldUpdateOperationsInput | string | null
+    mcStatus?: NullableStringFieldUpdateOperationsInput | string | null
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+  }
+
+  export type MajorCategoryDetailsCreateManyInput = {
+    id?: number
+    seg?: string | null
+    div?: string | null
+    subDiv?: string | null
+    majCat?: string | null
+    mcCode?: string | null
+    mcDes?: string | null
+    hsnCode?: string | null
+    mcStatus?: string | null
+    createdAt?: Date | string
+  }
+
+  export type MajorCategoryDetailsUpdateManyMutationInput = {
+    seg?: NullableStringFieldUpdateOperationsInput | string | null
+    div?: NullableStringFieldUpdateOperationsInput | string | null
+    subDiv?: NullableStringFieldUpdateOperationsInput | string | null
+    majCat?: NullableStringFieldUpdateOperationsInput | string | null
+    mcCode?: NullableStringFieldUpdateOperationsInput | string | null
+    mcDes?: NullableStringFieldUpdateOperationsInput | string | null
+    hsnCode?: NullableStringFieldUpdateOperationsInput | string | null
+    mcStatus?: NullableStringFieldUpdateOperationsInput | string | null
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+  }
+
+  export type MajorCategoryDetailsUncheckedUpdateManyInput = {
+    id?: IntFieldUpdateOperationsInput | number
+    seg?: NullableStringFieldUpdateOperationsInput | string | null
+    div?: NullableStringFieldUpdateOperationsInput | string | null
+    subDiv?: NullableStringFieldUpdateOperationsInput | string | null
+    majCat?: NullableStringFieldUpdateOperationsInput | string | null
+    mcCode?: NullableStringFieldUpdateOperationsInput | string | null
+    mcDes?: NullableStringFieldUpdateOperationsInput | string | null
+    hsnCode?: NullableStringFieldUpdateOperationsInput | string | null
+    mcStatus?: NullableStringFieldUpdateOperationsInput | string | null
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+  }
+
+  export type ExpenseApprovalStageCreateInput = {
+    tableKey?: string
+    key: string
+    label: string
+    description?: string | null
+    sortOrder: number
+    isActive?: boolean
+    createdById?: number | null
+    createdByName?: string | null
+    createdAt?: Date | string
+    updatedAt?: Date | string
+  }
+
+  export type ExpenseApprovalStageUncheckedCreateInput = {
+    id?: number
+    tableKey?: string
+    key: string
+    label: string
+    description?: string | null
+    sortOrder: number
+    isActive?: boolean
+    createdById?: number | null
+    createdByName?: string | null
+    createdAt?: Date | string
+    updatedAt?: Date | string
+  }
+
+  export type ExpenseApprovalStageUpdateInput = {
+    tableKey?: StringFieldUpdateOperationsInput | string
+    key?: StringFieldUpdateOperationsInput | string
+    label?: StringFieldUpdateOperationsInput | string
+    description?: NullableStringFieldUpdateOperationsInput | string | null
+    sortOrder?: IntFieldUpdateOperationsInput | number
+    isActive?: BoolFieldUpdateOperationsInput | boolean
+    createdById?: NullableIntFieldUpdateOperationsInput | number | null
+    createdByName?: NullableStringFieldUpdateOperationsInput | string | null
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+  }
+
+  export type ExpenseApprovalStageUncheckedUpdateInput = {
+    id?: IntFieldUpdateOperationsInput | number
+    tableKey?: StringFieldUpdateOperationsInput | string
+    key?: StringFieldUpdateOperationsInput | string
+    label?: StringFieldUpdateOperationsInput | string
+    description?: NullableStringFieldUpdateOperationsInput | string | null
+    sortOrder?: IntFieldUpdateOperationsInput | number
+    isActive?: BoolFieldUpdateOperationsInput | boolean
+    createdById?: NullableIntFieldUpdateOperationsInput | number | null
+    createdByName?: NullableStringFieldUpdateOperationsInput | string | null
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+  }
+
+  export type ExpenseApprovalStageCreateManyInput = {
+    id?: number
+    tableKey?: string
+    key: string
+    label: string
+    description?: string | null
+    sortOrder: number
+    isActive?: boolean
+    createdById?: number | null
+    createdByName?: string | null
+    createdAt?: Date | string
+    updatedAt?: Date | string
+  }
+
+  export type ExpenseApprovalStageUpdateManyMutationInput = {
+    tableKey?: StringFieldUpdateOperationsInput | string
+    key?: StringFieldUpdateOperationsInput | string
+    label?: StringFieldUpdateOperationsInput | string
+    description?: NullableStringFieldUpdateOperationsInput | string | null
+    sortOrder?: IntFieldUpdateOperationsInput | number
+    isActive?: BoolFieldUpdateOperationsInput | boolean
+    createdById?: NullableIntFieldUpdateOperationsInput | number | null
+    createdByName?: NullableStringFieldUpdateOperationsInput | string | null
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+  }
+
+  export type ExpenseApprovalStageUncheckedUpdateManyInput = {
+    id?: IntFieldUpdateOperationsInput | number
+    tableKey?: StringFieldUpdateOperationsInput | string
+    key?: StringFieldUpdateOperationsInput | string
+    label?: StringFieldUpdateOperationsInput | string
+    description?: NullableStringFieldUpdateOperationsInput | string | null
+    sortOrder?: IntFieldUpdateOperationsInput | number
+    isActive?: BoolFieldUpdateOperationsInput | boolean
+    createdById?: NullableIntFieldUpdateOperationsInput | number | null
+    createdByName?: NullableStringFieldUpdateOperationsInput | string | null
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+  }
+
+  export type ExpenseChangeRequestCreateInput = {
+    id?: string
+    tableKey: string
+    operation?: $Enums.ExpenseChangeOperation
+    rowId?: string | null
+    appliedRowId?: string | null
+    rowLabel?: string | null
+    changes: JsonNullValueInput | InputJsonValue
+    reason: string
+    dueDate?: Date | string | null
+    status?: $Enums.ExpenseChangeStatus
+    currentStageKey?: string | null
+    approvalTrail?: JsonNullValueInput | InputJsonValue
+    requestedById: number
+    requestedByName: string
+    requestedByEmail: string
+    requestedAt?: Date | string
+    requesterBusinessDivision?: string | null
+    createdAt?: Date | string
+    updatedAt?: Date | string
+  }
+
+  export type ExpenseChangeRequestUncheckedCreateInput = {
+    id?: string
+    tableKey: string
+    operation?: $Enums.ExpenseChangeOperation
+    rowId?: string | null
+    appliedRowId?: string | null
+    rowLabel?: string | null
+    changes: JsonNullValueInput | InputJsonValue
+    reason: string
+    dueDate?: Date | string | null
+    status?: $Enums.ExpenseChangeStatus
+    currentStageKey?: string | null
+    approvalTrail?: JsonNullValueInput | InputJsonValue
+    requestedById: number
+    requestedByName: string
+    requestedByEmail: string
+    requestedAt?: Date | string
+    requesterBusinessDivision?: string | null
+    createdAt?: Date | string
+    updatedAt?: Date | string
+  }
+
+  export type ExpenseChangeRequestUpdateInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    tableKey?: StringFieldUpdateOperationsInput | string
+    operation?: EnumExpenseChangeOperationFieldUpdateOperationsInput | $Enums.ExpenseChangeOperation
+    rowId?: NullableStringFieldUpdateOperationsInput | string | null
+    appliedRowId?: NullableStringFieldUpdateOperationsInput | string | null
+    rowLabel?: NullableStringFieldUpdateOperationsInput | string | null
+    changes?: JsonNullValueInput | InputJsonValue
+    reason?: StringFieldUpdateOperationsInput | string
+    dueDate?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    status?: EnumExpenseChangeStatusFieldUpdateOperationsInput | $Enums.ExpenseChangeStatus
+    currentStageKey?: NullableStringFieldUpdateOperationsInput | string | null
+    approvalTrail?: JsonNullValueInput | InputJsonValue
+    requestedById?: IntFieldUpdateOperationsInput | number
+    requestedByName?: StringFieldUpdateOperationsInput | string
+    requestedByEmail?: StringFieldUpdateOperationsInput | string
+    requestedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    requesterBusinessDivision?: NullableStringFieldUpdateOperationsInput | string | null
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+  }
+
+  export type ExpenseChangeRequestUncheckedUpdateInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    tableKey?: StringFieldUpdateOperationsInput | string
+    operation?: EnumExpenseChangeOperationFieldUpdateOperationsInput | $Enums.ExpenseChangeOperation
+    rowId?: NullableStringFieldUpdateOperationsInput | string | null
+    appliedRowId?: NullableStringFieldUpdateOperationsInput | string | null
+    rowLabel?: NullableStringFieldUpdateOperationsInput | string | null
+    changes?: JsonNullValueInput | InputJsonValue
+    reason?: StringFieldUpdateOperationsInput | string
+    dueDate?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    status?: EnumExpenseChangeStatusFieldUpdateOperationsInput | $Enums.ExpenseChangeStatus
+    currentStageKey?: NullableStringFieldUpdateOperationsInput | string | null
+    approvalTrail?: JsonNullValueInput | InputJsonValue
+    requestedById?: IntFieldUpdateOperationsInput | number
+    requestedByName?: StringFieldUpdateOperationsInput | string
+    requestedByEmail?: StringFieldUpdateOperationsInput | string
+    requestedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    requesterBusinessDivision?: NullableStringFieldUpdateOperationsInput | string | null
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+  }
+
+  export type ExpenseChangeRequestCreateManyInput = {
+    id?: string
+    tableKey: string
+    operation?: $Enums.ExpenseChangeOperation
+    rowId?: string | null
+    appliedRowId?: string | null
+    rowLabel?: string | null
+    changes: JsonNullValueInput | InputJsonValue
+    reason: string
+    dueDate?: Date | string | null
+    status?: $Enums.ExpenseChangeStatus
+    currentStageKey?: string | null
+    approvalTrail?: JsonNullValueInput | InputJsonValue
+    requestedById: number
+    requestedByName: string
+    requestedByEmail: string
+    requestedAt?: Date | string
+    requesterBusinessDivision?: string | null
+    createdAt?: Date | string
+    updatedAt?: Date | string
+  }
+
+  export type ExpenseChangeRequestUpdateManyMutationInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    tableKey?: StringFieldUpdateOperationsInput | string
+    operation?: EnumExpenseChangeOperationFieldUpdateOperationsInput | $Enums.ExpenseChangeOperation
+    rowId?: NullableStringFieldUpdateOperationsInput | string | null
+    appliedRowId?: NullableStringFieldUpdateOperationsInput | string | null
+    rowLabel?: NullableStringFieldUpdateOperationsInput | string | null
+    changes?: JsonNullValueInput | InputJsonValue
+    reason?: StringFieldUpdateOperationsInput | string
+    dueDate?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    status?: EnumExpenseChangeStatusFieldUpdateOperationsInput | $Enums.ExpenseChangeStatus
+    currentStageKey?: NullableStringFieldUpdateOperationsInput | string | null
+    approvalTrail?: JsonNullValueInput | InputJsonValue
+    requestedById?: IntFieldUpdateOperationsInput | number
+    requestedByName?: StringFieldUpdateOperationsInput | string
+    requestedByEmail?: StringFieldUpdateOperationsInput | string
+    requestedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    requesterBusinessDivision?: NullableStringFieldUpdateOperationsInput | string | null
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+  }
+
+  export type ExpenseChangeRequestUncheckedUpdateManyInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    tableKey?: StringFieldUpdateOperationsInput | string
+    operation?: EnumExpenseChangeOperationFieldUpdateOperationsInput | $Enums.ExpenseChangeOperation
+    rowId?: NullableStringFieldUpdateOperationsInput | string | null
+    appliedRowId?: NullableStringFieldUpdateOperationsInput | string | null
+    rowLabel?: NullableStringFieldUpdateOperationsInput | string | null
+    changes?: JsonNullValueInput | InputJsonValue
+    reason?: StringFieldUpdateOperationsInput | string
+    dueDate?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    status?: EnumExpenseChangeStatusFieldUpdateOperationsInput | $Enums.ExpenseChangeStatus
+    currentStageKey?: NullableStringFieldUpdateOperationsInput | string | null
+    approvalTrail?: JsonNullValueInput | InputJsonValue
+    requestedById?: IntFieldUpdateOperationsInput | number
+    requestedByName?: StringFieldUpdateOperationsInput | string
+    requestedByEmail?: StringFieldUpdateOperationsInput | string
+    requestedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    requesterBusinessDivision?: NullableStringFieldUpdateOperationsInput | string | null
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+  }
+
+  export type ExpenseAccessGrantCreateInput = {
+    email: string
+    level: string
+    tableKey?: string
+    subDivision?: string | null
+    canCreate?: boolean
+    canUpdate?: boolean
+    canDelete?: boolean
+    isActive?: boolean
+    note?: string | null
+    grantedById?: number | null
+    grantedByName?: string | null
+    createdAt?: Date | string
+    updatedAt?: Date | string
+  }
+
+  export type ExpenseAccessGrantUncheckedCreateInput = {
+    id?: number
+    email: string
+    level: string
+    tableKey?: string
+    subDivision?: string | null
+    canCreate?: boolean
+    canUpdate?: boolean
+    canDelete?: boolean
+    isActive?: boolean
+    note?: string | null
+    grantedById?: number | null
+    grantedByName?: string | null
+    createdAt?: Date | string
+    updatedAt?: Date | string
+  }
+
+  export type ExpenseAccessGrantUpdateInput = {
+    email?: StringFieldUpdateOperationsInput | string
+    level?: StringFieldUpdateOperationsInput | string
+    tableKey?: StringFieldUpdateOperationsInput | string
+    subDivision?: NullableStringFieldUpdateOperationsInput | string | null
+    canCreate?: BoolFieldUpdateOperationsInput | boolean
+    canUpdate?: BoolFieldUpdateOperationsInput | boolean
+    canDelete?: BoolFieldUpdateOperationsInput | boolean
+    isActive?: BoolFieldUpdateOperationsInput | boolean
+    note?: NullableStringFieldUpdateOperationsInput | string | null
+    grantedById?: NullableIntFieldUpdateOperationsInput | number | null
+    grantedByName?: NullableStringFieldUpdateOperationsInput | string | null
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+  }
+
+  export type ExpenseAccessGrantUncheckedUpdateInput = {
+    id?: IntFieldUpdateOperationsInput | number
+    email?: StringFieldUpdateOperationsInput | string
+    level?: StringFieldUpdateOperationsInput | string
+    tableKey?: StringFieldUpdateOperationsInput | string
+    subDivision?: NullableStringFieldUpdateOperationsInput | string | null
+    canCreate?: BoolFieldUpdateOperationsInput | boolean
+    canUpdate?: BoolFieldUpdateOperationsInput | boolean
+    canDelete?: BoolFieldUpdateOperationsInput | boolean
+    isActive?: BoolFieldUpdateOperationsInput | boolean
+    note?: NullableStringFieldUpdateOperationsInput | string | null
+    grantedById?: NullableIntFieldUpdateOperationsInput | number | null
+    grantedByName?: NullableStringFieldUpdateOperationsInput | string | null
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+  }
+
+  export type ExpenseAccessGrantCreateManyInput = {
+    id?: number
+    email: string
+    level: string
+    tableKey?: string
+    subDivision?: string | null
+    canCreate?: boolean
+    canUpdate?: boolean
+    canDelete?: boolean
+    isActive?: boolean
+    note?: string | null
+    grantedById?: number | null
+    grantedByName?: string | null
+    createdAt?: Date | string
+    updatedAt?: Date | string
+  }
+
+  export type ExpenseAccessGrantUpdateManyMutationInput = {
+    email?: StringFieldUpdateOperationsInput | string
+    level?: StringFieldUpdateOperationsInput | string
+    tableKey?: StringFieldUpdateOperationsInput | string
+    subDivision?: NullableStringFieldUpdateOperationsInput | string | null
+    canCreate?: BoolFieldUpdateOperationsInput | boolean
+    canUpdate?: BoolFieldUpdateOperationsInput | boolean
+    canDelete?: BoolFieldUpdateOperationsInput | boolean
+    isActive?: BoolFieldUpdateOperationsInput | boolean
+    note?: NullableStringFieldUpdateOperationsInput | string | null
+    grantedById?: NullableIntFieldUpdateOperationsInput | number | null
+    grantedByName?: NullableStringFieldUpdateOperationsInput | string | null
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+  }
+
+  export type ExpenseAccessGrantUncheckedUpdateManyInput = {
+    id?: IntFieldUpdateOperationsInput | number
+    email?: StringFieldUpdateOperationsInput | string
+    level?: StringFieldUpdateOperationsInput | string
+    tableKey?: StringFieldUpdateOperationsInput | string
+    subDivision?: NullableStringFieldUpdateOperationsInput | string | null
+    canCreate?: BoolFieldUpdateOperationsInput | boolean
+    canUpdate?: BoolFieldUpdateOperationsInput | boolean
+    canDelete?: BoolFieldUpdateOperationsInput | boolean
+    isActive?: BoolFieldUpdateOperationsInput | boolean
+    note?: NullableStringFieldUpdateOperationsInput | string | null
+    grantedById?: NullableIntFieldUpdateOperationsInput | number | null
+    grantedByName?: NullableStringFieldUpdateOperationsInput | string | null
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+  }
+
+  export type ExpenseAuditLogCreateInput = {
+    requestId: string
+    tableKey: string
+    rowId?: string | null
+    operation: $Enums.ExpenseChangeOperation
+    eventType: $Enums.ExpenseAuditEventType
+    stageKey?: string | null
+    stageLabel?: string | null
+    actorId?: number | null
+    actorName?: string | null
+    actorEmail?: string | null
+    comment?: string | null
+    details?: NullableJsonNullValueInput | InputJsonValue
+    occurredAt?: Date | string
+  }
+
+  export type ExpenseAuditLogUncheckedCreateInput = {
+    id?: number
+    requestId: string
+    tableKey: string
+    rowId?: string | null
+    operation: $Enums.ExpenseChangeOperation
+    eventType: $Enums.ExpenseAuditEventType
+    stageKey?: string | null
+    stageLabel?: string | null
+    actorId?: number | null
+    actorName?: string | null
+    actorEmail?: string | null
+    comment?: string | null
+    details?: NullableJsonNullValueInput | InputJsonValue
+    occurredAt?: Date | string
+  }
+
+  export type ExpenseAuditLogUpdateInput = {
+    requestId?: StringFieldUpdateOperationsInput | string
+    tableKey?: StringFieldUpdateOperationsInput | string
+    rowId?: NullableStringFieldUpdateOperationsInput | string | null
+    operation?: EnumExpenseChangeOperationFieldUpdateOperationsInput | $Enums.ExpenseChangeOperation
+    eventType?: EnumExpenseAuditEventTypeFieldUpdateOperationsInput | $Enums.ExpenseAuditEventType
+    stageKey?: NullableStringFieldUpdateOperationsInput | string | null
+    stageLabel?: NullableStringFieldUpdateOperationsInput | string | null
+    actorId?: NullableIntFieldUpdateOperationsInput | number | null
+    actorName?: NullableStringFieldUpdateOperationsInput | string | null
+    actorEmail?: NullableStringFieldUpdateOperationsInput | string | null
+    comment?: NullableStringFieldUpdateOperationsInput | string | null
+    details?: NullableJsonNullValueInput | InputJsonValue
+    occurredAt?: DateTimeFieldUpdateOperationsInput | Date | string
+  }
+
+  export type ExpenseAuditLogUncheckedUpdateInput = {
+    id?: IntFieldUpdateOperationsInput | number
+    requestId?: StringFieldUpdateOperationsInput | string
+    tableKey?: StringFieldUpdateOperationsInput | string
+    rowId?: NullableStringFieldUpdateOperationsInput | string | null
+    operation?: EnumExpenseChangeOperationFieldUpdateOperationsInput | $Enums.ExpenseChangeOperation
+    eventType?: EnumExpenseAuditEventTypeFieldUpdateOperationsInput | $Enums.ExpenseAuditEventType
+    stageKey?: NullableStringFieldUpdateOperationsInput | string | null
+    stageLabel?: NullableStringFieldUpdateOperationsInput | string | null
+    actorId?: NullableIntFieldUpdateOperationsInput | number | null
+    actorName?: NullableStringFieldUpdateOperationsInput | string | null
+    actorEmail?: NullableStringFieldUpdateOperationsInput | string | null
+    comment?: NullableStringFieldUpdateOperationsInput | string | null
+    details?: NullableJsonNullValueInput | InputJsonValue
+    occurredAt?: DateTimeFieldUpdateOperationsInput | Date | string
+  }
+
+  export type ExpenseAuditLogCreateManyInput = {
+    id?: number
+    requestId: string
+    tableKey: string
+    rowId?: string | null
+    operation: $Enums.ExpenseChangeOperation
+    eventType: $Enums.ExpenseAuditEventType
+    stageKey?: string | null
+    stageLabel?: string | null
+    actorId?: number | null
+    actorName?: string | null
+    actorEmail?: string | null
+    comment?: string | null
+    details?: NullableJsonNullValueInput | InputJsonValue
+    occurredAt?: Date | string
+  }
+
+  export type ExpenseAuditLogUpdateManyMutationInput = {
+    requestId?: StringFieldUpdateOperationsInput | string
+    tableKey?: StringFieldUpdateOperationsInput | string
+    rowId?: NullableStringFieldUpdateOperationsInput | string | null
+    operation?: EnumExpenseChangeOperationFieldUpdateOperationsInput | $Enums.ExpenseChangeOperation
+    eventType?: EnumExpenseAuditEventTypeFieldUpdateOperationsInput | $Enums.ExpenseAuditEventType
+    stageKey?: NullableStringFieldUpdateOperationsInput | string | null
+    stageLabel?: NullableStringFieldUpdateOperationsInput | string | null
+    actorId?: NullableIntFieldUpdateOperationsInput | number | null
+    actorName?: NullableStringFieldUpdateOperationsInput | string | null
+    actorEmail?: NullableStringFieldUpdateOperationsInput | string | null
+    comment?: NullableStringFieldUpdateOperationsInput | string | null
+    details?: NullableJsonNullValueInput | InputJsonValue
+    occurredAt?: DateTimeFieldUpdateOperationsInput | Date | string
+  }
+
+  export type ExpenseAuditLogUncheckedUpdateManyInput = {
+    id?: IntFieldUpdateOperationsInput | number
+    requestId?: StringFieldUpdateOperationsInput | string
+    tableKey?: StringFieldUpdateOperationsInput | string
+    rowId?: NullableStringFieldUpdateOperationsInput | string | null
+    operation?: EnumExpenseChangeOperationFieldUpdateOperationsInput | $Enums.ExpenseChangeOperation
+    eventType?: EnumExpenseAuditEventTypeFieldUpdateOperationsInput | $Enums.ExpenseAuditEventType
+    stageKey?: NullableStringFieldUpdateOperationsInput | string | null
+    stageLabel?: NullableStringFieldUpdateOperationsInput | string | null
+    actorId?: NullableIntFieldUpdateOperationsInput | number | null
+    actorName?: NullableStringFieldUpdateOperationsInput | string | null
+    actorEmail?: NullableStringFieldUpdateOperationsInput | string | null
+    comment?: NullableStringFieldUpdateOperationsInput | string | null
+    details?: NullableJsonNullValueInput | InputJsonValue
+    occurredAt?: DateTimeFieldUpdateOperationsInput | Date | string
   }
 
   export type IntFilter<$PrismaModel = never> = {
@@ -67741,6 +80222,8 @@ export namespace Prisma {
     fabCost?: SortOrder
     fabCons?: SortOrder
     width?: SortOrder
+    vendorFabricRate?: SortOrder
+    valueAddCost?: SortOrder
     bodyArticle?: SortOrder
     bodyArticleDescription?: SortOrder
     fabricArticleNumber?: SortOrder
@@ -67796,6 +80279,8 @@ export namespace Prisma {
     fabCost?: SortOrder
     fabCons?: SortOrder
     width?: SortOrder
+    vendorFabricRate?: SortOrder
+    valueAddCost?: SortOrder
     mrp?: SortOrder
     approvedBy?: SortOrder
   }
@@ -67901,6 +80386,8 @@ export namespace Prisma {
     fabCost?: SortOrder
     fabCons?: SortOrder
     width?: SortOrder
+    vendorFabricRate?: SortOrder
+    valueAddCost?: SortOrder
     bodyArticle?: SortOrder
     bodyArticleDescription?: SortOrder
     fabricArticleNumber?: SortOrder
@@ -68040,6 +80527,8 @@ export namespace Prisma {
     fabCost?: SortOrder
     fabCons?: SortOrder
     width?: SortOrder
+    vendorFabricRate?: SortOrder
+    valueAddCost?: SortOrder
     bodyArticle?: SortOrder
     bodyArticleDescription?: SortOrder
     fabricArticleNumber?: SortOrder
@@ -68094,6 +80583,8 @@ export namespace Prisma {
     fabCost?: SortOrder
     fabCons?: SortOrder
     width?: SortOrder
+    vendorFabricRate?: SortOrder
+    valueAddCost?: SortOrder
     mrp?: SortOrder
     approvedBy?: SortOrder
   }
@@ -68397,6 +80888,7 @@ export namespace Prisma {
     role?: SortOrder
     division?: SortOrder
     subDivision?: SortOrder
+    businessDivision?: SortOrder
     isActive?: SortOrder
     lastLogin?: SortOrder
     createdAt?: SortOrder
@@ -68415,6 +80907,7 @@ export namespace Prisma {
     role?: SortOrder
     division?: SortOrder
     subDivision?: SortOrder
+    businessDivision?: SortOrder
     isActive?: SortOrder
     lastLogin?: SortOrder
     createdAt?: SortOrder
@@ -68429,6 +80922,7 @@ export namespace Prisma {
     role?: SortOrder
     division?: SortOrder
     subDivision?: SortOrder
+    businessDivision?: SortOrder
     isActive?: SortOrder
     lastLogin?: SortOrder
     createdAt?: SortOrder
@@ -69666,6 +82160,131 @@ export namespace Prisma {
     _max?: NestedEnumRawArticleStatusFilter<$PrismaModel>
   }
 
+  export type FabricRawDataOrderByRelevanceInput = {
+    fields: FabricRawDataOrderByRelevanceFieldEnum | FabricRawDataOrderByRelevanceFieldEnum[]
+    sort: SortOrder
+    search: string
+  }
+
+  export type FabricRawDataCountOrderByAggregateInput = {
+    id?: SortOrder
+    presentationNo?: SortOrder
+    uniqueKey?: SortOrder
+    vendorCode?: SortOrder
+    vendorName?: SortOrder
+    vendorCity?: SortOrder
+    division?: SortOrder
+    subDivision?: SortOrder
+    majorCategory?: SortOrder
+    presentationsType?: SortOrder
+    designNumber?: SortOrder
+    articleNumber?: SortOrder
+    fabric?: SortOrder
+    noOfColors?: SortOrder
+    price?: SortOrder
+    imageUrl?: SortOrder
+    source?: SortOrder
+    season?: SortOrder
+    garmentWeight?: SortOrder
+    availableQty?: SortOrder
+    approvedBy?: SortOrder
+    notes?: SortOrder
+    status?: SortOrder
+    retryCount?: SortOrder
+    errorMessage?: SortOrder
+    extractedData?: SortOrder
+    extractedAt?: SortOrder
+    flatId?: SortOrder
+    lockedUntil?: SortOrder
+    presentationReceivedDate?: SortOrder
+    createdAt?: SortOrder
+    updatedAt?: SortOrder
+  }
+
+  export type FabricRawDataAvgOrderByAggregateInput = {
+    noOfColors?: SortOrder
+    price?: SortOrder
+    garmentWeight?: SortOrder
+    availableQty?: SortOrder
+    retryCount?: SortOrder
+  }
+
+  export type FabricRawDataMaxOrderByAggregateInput = {
+    id?: SortOrder
+    presentationNo?: SortOrder
+    uniqueKey?: SortOrder
+    vendorCode?: SortOrder
+    vendorName?: SortOrder
+    vendorCity?: SortOrder
+    division?: SortOrder
+    subDivision?: SortOrder
+    majorCategory?: SortOrder
+    presentationsType?: SortOrder
+    designNumber?: SortOrder
+    articleNumber?: SortOrder
+    fabric?: SortOrder
+    noOfColors?: SortOrder
+    price?: SortOrder
+    imageUrl?: SortOrder
+    source?: SortOrder
+    season?: SortOrder
+    garmentWeight?: SortOrder
+    availableQty?: SortOrder
+    approvedBy?: SortOrder
+    notes?: SortOrder
+    status?: SortOrder
+    retryCount?: SortOrder
+    errorMessage?: SortOrder
+    extractedAt?: SortOrder
+    flatId?: SortOrder
+    lockedUntil?: SortOrder
+    presentationReceivedDate?: SortOrder
+    createdAt?: SortOrder
+    updatedAt?: SortOrder
+  }
+
+  export type FabricRawDataMinOrderByAggregateInput = {
+    id?: SortOrder
+    presentationNo?: SortOrder
+    uniqueKey?: SortOrder
+    vendorCode?: SortOrder
+    vendorName?: SortOrder
+    vendorCity?: SortOrder
+    division?: SortOrder
+    subDivision?: SortOrder
+    majorCategory?: SortOrder
+    presentationsType?: SortOrder
+    designNumber?: SortOrder
+    articleNumber?: SortOrder
+    fabric?: SortOrder
+    noOfColors?: SortOrder
+    price?: SortOrder
+    imageUrl?: SortOrder
+    source?: SortOrder
+    season?: SortOrder
+    garmentWeight?: SortOrder
+    availableQty?: SortOrder
+    approvedBy?: SortOrder
+    notes?: SortOrder
+    status?: SortOrder
+    retryCount?: SortOrder
+    errorMessage?: SortOrder
+    extractedAt?: SortOrder
+    flatId?: SortOrder
+    lockedUntil?: SortOrder
+    presentationReceivedDate?: SortOrder
+    createdAt?: SortOrder
+    updatedAt?: SortOrder
+  }
+
+  export type FabricRawDataSumOrderByAggregateInput = {
+    noOfColors?: SortOrder
+    price?: SortOrder
+    garmentWeight?: SortOrder
+    availableQty?: SortOrder
+    retryCount?: SortOrder
+  }
+
   export type SrmSyncRunOrderByRelevanceInput = {
     fields: SrmSyncRunOrderByRelevanceFieldEnum | SrmSyncRunOrderByRelevanceFieldEnum[]
     sort: SortOrder
@@ -70032,6 +82651,205 @@ export namespace Prisma {
     id?: SortOrder
   }
 
+  export type BroaderMenuOrderByRelevanceInput = {
+    fields: BroaderMenuOrderByRelevanceFieldEnum | BroaderMenuOrderByRelevanceFieldEnum[]
+    sort: SortOrder
+    search: string
+  }
+
+  export type BroaderMenuCountOrderByAggregateInput = {
+    id?: SortOrder
+    sn?: SortOrder
+    mcCd?: SortOrder
+    seg?: SortOrder
+    div?: SortOrder
+    subDiv?: SortOrder
+    majCatCd?: SortOrder
+    majCatNm?: SortOrder
+    subCatCd?: SortOrder
+    subCatDesc?: SortOrder
+    mcDesc?: SortOrder
+    ssn?: SortOrder
+    mcStat?: SortOrder
+    subCatStat?: SortOrder
+    majCatStat?: SortOrder
+    sizeApplicable?: SortOrder
+    divStat?: SortOrder
+    mcPkSz?: SortOrder
+    subCatPkSz?: SortOrder
+    noOfOptions?: SortOrder
+    avgDensity?: SortOrder
+    accDensity?: SortOrder
+    wgDensity?: SortOrder
+    fg46FtDensity?: SortOrder
+    fg5FtDensity?: SortOrder
+    fg4ADensity?: SortOrder
+    fg8ADensity?: SortOrder
+    acp?: SortOrder
+    oldDensity?: SortOrder
+    seq?: SortOrder
+    mjCatTyp?: SortOrder
+    fixtr?: SortOrder
+    newMcCd?: SortOrder
+    newMcDesc?: SortOrder
+    oldMcDesc?: SortOrder
+    oldSubCatCd?: SortOrder
+    oldSubCatDesc?: SortOrder
+    legacyMcDesc?: SortOrder
+    effectiveDate?: SortOrder
+    remarks?: SortOrder
+    gmStatus?: SortOrder
+    currentMcStatus?: SortOrder
+    fullMcName?: SortOrder
+    winterStatus?: SortOrder
+    uploadedAt?: SortOrder
+    updatedAt?: SortOrder
+  }
+
+  export type BroaderMenuAvgOrderByAggregateInput = {
+    id?: SortOrder
+    sn?: SortOrder
+    mcCd?: SortOrder
+    majCatCd?: SortOrder
+    subCatCd?: SortOrder
+    mcPkSz?: SortOrder
+    subCatPkSz?: SortOrder
+    noOfOptions?: SortOrder
+    avgDensity?: SortOrder
+    accDensity?: SortOrder
+    wgDensity?: SortOrder
+    fg46FtDensity?: SortOrder
+    fg5FtDensity?: SortOrder
+    fg4ADensity?: SortOrder
+    fg8ADensity?: SortOrder
+    acp?: SortOrder
+    oldDensity?: SortOrder
+    seq?: SortOrder
+    newMcCd?: SortOrder
+    oldSubCatCd?: SortOrder
+  }
+
+  export type BroaderMenuMaxOrderByAggregateInput = {
+    id?: SortOrder
+    sn?: SortOrder
+    mcCd?: SortOrder
+    seg?: SortOrder
+    div?: SortOrder
+    subDiv?: SortOrder
+    majCatCd?: SortOrder
+    majCatNm?: SortOrder
+    subCatCd?: SortOrder
+    subCatDesc?: SortOrder
+    mcDesc?: SortOrder
+    ssn?: SortOrder
+    mcStat?: SortOrder
+    subCatStat?: SortOrder
+    majCatStat?: SortOrder
+    sizeApplicable?: SortOrder
+    divStat?: SortOrder
+    mcPkSz?: SortOrder
+    subCatPkSz?: SortOrder
+    noOfOptions?: SortOrder
+    avgDensity?: SortOrder
+    accDensity?: SortOrder
+    wgDensity?: SortOrder
+    fg46FtDensity?: SortOrder
+    fg5FtDensity?: SortOrder
+    fg4ADensity?: SortOrder
+    fg8ADensity?: SortOrder
+    acp?: SortOrder
+    oldDensity?: SortOrder
+    seq?: SortOrder
+    mjCatTyp?: SortOrder
+    fixtr?: SortOrder
+    newMcCd?: SortOrder
+    newMcDesc?: SortOrder
+    oldMcDesc?: SortOrder
+    oldSubCatCd?: SortOrder
+    oldSubCatDesc?: SortOrder
+    legacyMcDesc?: SortOrder
+    effectiveDate?: SortOrder
+    remarks?: SortOrder
+    gmStatus?: SortOrder
+    currentMcStatus?: SortOrder
+    fullMcName?: SortOrder
+    winterStatus?: SortOrder
+    uploadedAt?: SortOrder
+    updatedAt?: SortOrder
+  }
+
+  export type BroaderMenuMinOrderByAggregateInput = {
+    id?: SortOrder
+    sn?: SortOrder
+    mcCd?: SortOrder
+    seg?: SortOrder
+    div?: SortOrder
+    subDiv?: SortOrder
+    majCatCd?: SortOrder
+    majCatNm?: SortOrder
+    subCatCd?: SortOrder
+    subCatDesc?: SortOrder
+    mcDesc?: SortOrder
+    ssn?: SortOrder
+    mcStat?: SortOrder
+    subCatStat?: SortOrder
+    majCatStat?: SortOrder
+    sizeApplicable?: SortOrder
+    divStat?: SortOrder
+    mcPkSz?: SortOrder
+    subCatPkSz?: SortOrder
+    noOfOptions?: SortOrder
+    avgDensity?: SortOrder
+    accDensity?: SortOrder
+    wgDensity?: SortOrder
+    fg46FtDensity?: SortOrder
+    fg5FtDensity?: SortOrder
+    fg4ADensity?: SortOrder
+    fg8ADensity?: SortOrder
+    acp?: SortOrder
+    oldDensity?: SortOrder
+    seq?: SortOrder
+    mjCatTyp?: SortOrder
+    fixtr?: SortOrder
+    newMcCd?: SortOrder
+    newMcDesc?: SortOrder
+    oldMcDesc?: SortOrder
+    oldSubCatCd?: SortOrder
+    oldSubCatDesc?: SortOrder
+    legacyMcDesc?: SortOrder
+    effectiveDate?: SortOrder
+    remarks?: SortOrder
+    gmStatus?: SortOrder
+    currentMcStatus?: SortOrder
+    fullMcName?: SortOrder
+    winterStatus?: SortOrder
+    uploadedAt?: SortOrder
+    updatedAt?: SortOrder
+  }
+
+  export type BroaderMenuSumOrderByAggregateInput = {
+    id?: SortOrder
+    sn?: SortOrder
+    mcCd?: SortOrder
+    majCatCd?: SortOrder
+    subCatCd?: SortOrder
+    mcPkSz?: SortOrder
+    subCatPkSz?: SortOrder
+    noOfOptions?: SortOrder
+    avgDensity?: SortOrder
+    accDensity?: SortOrder
+    wgDensity?: SortOrder
+    fg46FtDensity?: SortOrder
+    fg5FtDensity?: SortOrder
+    fg4ADensity?: SortOrder
+    fg8ADensity?: SortOrder
+    acp?: SortOrder
+    oldDensity?: SortOrder
+    seq?: SortOrder
+    newMcCd?: SortOrder
+    oldSubCatCd?: SortOrder
+  }
+
   export type MajorCatMasterOrderByRelevanceInput = {
     fields: MajorCatMasterOrderByRelevanceFieldEnum | MajorCatMasterOrderByRelevanceFieldEnum[]
     sort: SortOrder
@@ -70269,22 +83087,34 @@ export namespace Prisma {
     mLycra?: SortOrder
     fabricArticleNumber?: SortOrder
     fabricArticleDescription?: SortOrder
+    flatId?: SortOrder
     division?: SortOrder
     subDivision?: SortOrder
     majorCategory?: SortOrder
+    mcDescription?: SortOrder
     vendorName?: SortOrder
     vendorCode?: SortOrder
+    designNumber?: SortOrder
+    fabricRate?: SortOrder
+    v2FabricRate?: SortOrder
+    valueAddCost?: SortOrder
+    articleFashionType?: SortOrder
     approvalStatus?: SortOrder
     approvedAt?: SortOrder
     approvedBy?: SortOrder
     sapSyncStatus?: SortOrder
     sapSyncMessage?: SortOrder
+    imageUrl?: SortOrder
+    fabricArticleType?: SortOrder
     userName?: SortOrder
     createdAt?: SortOrder
     updatedAt?: SortOrder
   }
 
   export type FabricArticleDataAvgOrderByAggregateInput = {
+    fabricRate?: SortOrder
+    v2FabricRate?: SortOrder
+    valueAddCost?: SortOrder
     approvedBy?: SortOrder
   }
 
@@ -70306,16 +83136,25 @@ export namespace Prisma {
     mLycra?: SortOrder
     fabricArticleNumber?: SortOrder
     fabricArticleDescription?: SortOrder
+    flatId?: SortOrder
     division?: SortOrder
     subDivision?: SortOrder
     majorCategory?: SortOrder
+    mcDescription?: SortOrder
     vendorName?: SortOrder
     vendorCode?: SortOrder
+    designNumber?: SortOrder
+    fabricRate?: SortOrder
+    v2FabricRate?: SortOrder
+    valueAddCost?: SortOrder
+    articleFashionType?: SortOrder
     approvalStatus?: SortOrder
     approvedAt?: SortOrder
     approvedBy?: SortOrder
     sapSyncStatus?: SortOrder
     sapSyncMessage?: SortOrder
+    imageUrl?: SortOrder
+    fabricArticleType?: SortOrder
     userName?: SortOrder
     createdAt?: SortOrder
     updatedAt?: SortOrder
@@ -70339,22 +83178,34 @@ export namespace Prisma {
     mLycra?: SortOrder
     fabricArticleNumber?: SortOrder
     fabricArticleDescription?: SortOrder
+    flatId?: SortOrder
     division?: SortOrder
     subDivision?: SortOrder
     majorCategory?: SortOrder
+    mcDescription?: SortOrder
     vendorName?: SortOrder
     vendorCode?: SortOrder
+    designNumber?: SortOrder
+    fabricRate?: SortOrder
+    v2FabricRate?: SortOrder
+    valueAddCost?: SortOrder
+    articleFashionType?: SortOrder
     approvalStatus?: SortOrder
     approvedAt?: SortOrder
     approvedBy?: SortOrder
     sapSyncStatus?: SortOrder
     sapSyncMessage?: SortOrder
+    imageUrl?: SortOrder
+    fabricArticleType?: SortOrder
     userName?: SortOrder
     createdAt?: SortOrder
     updatedAt?: SortOrder
   }
 
   export type FabricArticleDataSumOrderByAggregateInput = {
+    fabricRate?: SortOrder
+    v2FabricRate?: SortOrder
+    valueAddCost?: SortOrder
     approvedBy?: SortOrder
   }
 
@@ -70385,11 +83236,15 @@ export namespace Prisma {
     mSet?: SortOrder
     bodyArticleNumber?: SortOrder
     bodyArticleDescription?: SortOrder
+    imageUrl?: SortOrder
+    bodyArticleType?: SortOrder
+    designNumber?: SortOrder
     cmtpCost?: SortOrder
     cmpCost?: SortOrder
     fabCost?: SortOrder
     fabCons?: SortOrder
     width?: SortOrder
+    basicTrimCost?: SortOrder
     flatId?: SortOrder
     articleNumber?: SortOrder
     division?: SortOrder
@@ -70402,6 +83257,7 @@ export namespace Prisma {
     year?: SortOrder
     hsnTaxCode?: SortOrder
     approvalStatus?: SortOrder
+    fgCreatorApproved?: SortOrder
     approvedAt?: SortOrder
     approvedBy?: SortOrder
     sapSyncStatus?: SortOrder
@@ -70417,6 +83273,7 @@ export namespace Prisma {
     fabCost?: SortOrder
     fabCons?: SortOrder
     width?: SortOrder
+    basicTrimCost?: SortOrder
     approvedBy?: SortOrder
   }
 
@@ -70441,11 +83298,15 @@ export namespace Prisma {
     mSet?: SortOrder
     bodyArticleNumber?: SortOrder
     bodyArticleDescription?: SortOrder
+    imageUrl?: SortOrder
+    bodyArticleType?: SortOrder
+    designNumber?: SortOrder
     cmtpCost?: SortOrder
     cmpCost?: SortOrder
     fabCost?: SortOrder
     fabCons?: SortOrder
     width?: SortOrder
+    basicTrimCost?: SortOrder
     flatId?: SortOrder
     articleNumber?: SortOrder
     division?: SortOrder
@@ -70458,6 +83319,7 @@ export namespace Prisma {
     year?: SortOrder
     hsnTaxCode?: SortOrder
     approvalStatus?: SortOrder
+    fgCreatorApproved?: SortOrder
     approvedAt?: SortOrder
     approvedBy?: SortOrder
     sapSyncStatus?: SortOrder
@@ -70488,11 +83350,15 @@ export namespace Prisma {
     mSet?: SortOrder
     bodyArticleNumber?: SortOrder
     bodyArticleDescription?: SortOrder
+    imageUrl?: SortOrder
+    bodyArticleType?: SortOrder
+    designNumber?: SortOrder
     cmtpCost?: SortOrder
     cmpCost?: SortOrder
     fabCost?: SortOrder
     fabCons?: SortOrder
     width?: SortOrder
+    basicTrimCost?: SortOrder
     flatId?: SortOrder
     articleNumber?: SortOrder
     division?: SortOrder
@@ -70505,6 +83371,7 @@ export namespace Prisma {
     year?: SortOrder
     hsnTaxCode?: SortOrder
     approvalStatus?: SortOrder
+    fgCreatorApproved?: SortOrder
     approvedAt?: SortOrder
     approvedBy?: SortOrder
     sapSyncStatus?: SortOrder
@@ -70520,7 +83387,391 @@ export namespace Prisma {
     fabCost?: SortOrder
     fabCons?: SortOrder
     width?: SortOrder
+    basicTrimCost?: SortOrder
     approvedBy?: SortOrder
+  }
+
+  export type MajorCategoryDetailsOrderByRelevanceInput = {
+    fields: MajorCategoryDetailsOrderByRelevanceFieldEnum | MajorCategoryDetailsOrderByRelevanceFieldEnum[]
+    sort: SortOrder
+    search: string
+  }
+
+  export type MajorCategoryDetailsCountOrderByAggregateInput = {
+    id?: SortOrder
+    seg?: SortOrder
+    div?: SortOrder
+    subDiv?: SortOrder
+    majCat?: SortOrder
+    mcCode?: SortOrder
+    mcDes?: SortOrder
+    hsnCode?: SortOrder
+    mcStatus?: SortOrder
+    createdAt?: SortOrder
+  }
+
+  export type MajorCategoryDetailsAvgOrderByAggregateInput = {
+    id?: SortOrder
+  }
+
+  export type MajorCategoryDetailsMaxOrderByAggregateInput = {
+    id?: SortOrder
+    seg?: SortOrder
+    div?: SortOrder
+    subDiv?: SortOrder
+    majCat?: SortOrder
+    mcCode?: SortOrder
+    mcDes?: SortOrder
+    hsnCode?: SortOrder
+    mcStatus?: SortOrder
+    createdAt?: SortOrder
+  }
+
+  export type MajorCategoryDetailsMinOrderByAggregateInput = {
+    id?: SortOrder
+    seg?: SortOrder
+    div?: SortOrder
+    subDiv?: SortOrder
+    majCat?: SortOrder
+    mcCode?: SortOrder
+    mcDes?: SortOrder
+    hsnCode?: SortOrder
+    mcStatus?: SortOrder
+    createdAt?: SortOrder
+  }
+
+  export type MajorCategoryDetailsSumOrderByAggregateInput = {
+    id?: SortOrder
+  }
+
+  export type ExpenseApprovalStageOrderByRelevanceInput = {
+    fields: ExpenseApprovalStageOrderByRelevanceFieldEnum | ExpenseApprovalStageOrderByRelevanceFieldEnum[]
+    sort: SortOrder
+    search: string
+  }
+
+  export type ExpenseApprovalStageTableKeyKeyCompoundUniqueInput = {
+    tableKey: string
+    key: string
+  }
+
+  export type ExpenseApprovalStageCountOrderByAggregateInput = {
+    id?: SortOrder
+    tableKey?: SortOrder
+    key?: SortOrder
+    label?: SortOrder
+    description?: SortOrder
+    sortOrder?: SortOrder
+    isActive?: SortOrder
+    createdById?: SortOrder
+    createdByName?: SortOrder
+    createdAt?: SortOrder
+    updatedAt?: SortOrder
+  }
+
+  export type ExpenseApprovalStageAvgOrderByAggregateInput = {
+    id?: SortOrder
+    sortOrder?: SortOrder
+    createdById?: SortOrder
+  }
+
+  export type ExpenseApprovalStageMaxOrderByAggregateInput = {
+    id?: SortOrder
+    tableKey?: SortOrder
+    key?: SortOrder
+    label?: SortOrder
+    description?: SortOrder
+    sortOrder?: SortOrder
+    isActive?: SortOrder
+    createdById?: SortOrder
+    createdByName?: SortOrder
+    createdAt?: SortOrder
+    updatedAt?: SortOrder
+  }
+
+  export type ExpenseApprovalStageMinOrderByAggregateInput = {
+    id?: SortOrder
+    tableKey?: SortOrder
+    key?: SortOrder
+    label?: SortOrder
+    description?: SortOrder
+    sortOrder?: SortOrder
+    isActive?: SortOrder
+    createdById?: SortOrder
+    createdByName?: SortOrder
+    createdAt?: SortOrder
+    updatedAt?: SortOrder
+  }
+
+  export type ExpenseApprovalStageSumOrderByAggregateInput = {
+    id?: SortOrder
+    sortOrder?: SortOrder
+    createdById?: SortOrder
+  }
+
+  export type EnumExpenseChangeOperationFilter<$PrismaModel = never> = {
+    equals?: $Enums.ExpenseChangeOperation | EnumExpenseChangeOperationFieldRefInput<$PrismaModel>
+    in?: $Enums.ExpenseChangeOperation[] | ListEnumExpenseChangeOperationFieldRefInput<$PrismaModel>
+    notIn?: $Enums.ExpenseChangeOperation[] | ListEnumExpenseChangeOperationFieldRefInput<$PrismaModel>
+    not?: NestedEnumExpenseChangeOperationFilter<$PrismaModel> | $Enums.ExpenseChangeOperation
+  }
+
+  export type EnumExpenseChangeStatusFilter<$PrismaModel = never> = {
+    equals?: $Enums.ExpenseChangeStatus | EnumExpenseChangeStatusFieldRefInput<$PrismaModel>
+    in?: $Enums.ExpenseChangeStatus[] | ListEnumExpenseChangeStatusFieldRefInput<$PrismaModel>
+    notIn?: $Enums.ExpenseChangeStatus[] | ListEnumExpenseChangeStatusFieldRefInput<$PrismaModel>
+    not?: NestedEnumExpenseChangeStatusFilter<$PrismaModel> | $Enums.ExpenseChangeStatus
+  }
+
+  export type ExpenseChangeRequestOrderByRelevanceInput = {
+    fields: ExpenseChangeRequestOrderByRelevanceFieldEnum | ExpenseChangeRequestOrderByRelevanceFieldEnum[]
+    sort: SortOrder
+    search: string
+  }
+
+  export type ExpenseChangeRequestCountOrderByAggregateInput = {
+    id?: SortOrder
+    tableKey?: SortOrder
+    operation?: SortOrder
+    rowId?: SortOrder
+    appliedRowId?: SortOrder
+    rowLabel?: SortOrder
+    changes?: SortOrder
+    reason?: SortOrder
+    dueDate?: SortOrder
+    status?: SortOrder
+    currentStageKey?: SortOrder
+    approvalTrail?: SortOrder
+    requestedById?: SortOrder
+    requestedByName?: SortOrder
+    requestedByEmail?: SortOrder
+    requestedAt?: SortOrder
+    requesterBusinessDivision?: SortOrder
+    createdAt?: SortOrder
+    updatedAt?: SortOrder
+  }
+
+  export type ExpenseChangeRequestAvgOrderByAggregateInput = {
+    requestedById?: SortOrder
+  }
+
+  export type ExpenseChangeRequestMaxOrderByAggregateInput = {
+    id?: SortOrder
+    tableKey?: SortOrder
+    operation?: SortOrder
+    rowId?: SortOrder
+    appliedRowId?: SortOrder
+    rowLabel?: SortOrder
+    reason?: SortOrder
+    dueDate?: SortOrder
+    status?: SortOrder
+    currentStageKey?: SortOrder
+    requestedById?: SortOrder
+    requestedByName?: SortOrder
+    requestedByEmail?: SortOrder
+    requestedAt?: SortOrder
+    requesterBusinessDivision?: SortOrder
+    createdAt?: SortOrder
+    updatedAt?: SortOrder
+  }
+
+  export type ExpenseChangeRequestMinOrderByAggregateInput = {
+    id?: SortOrder
+    tableKey?: SortOrder
+    operation?: SortOrder
+    rowId?: SortOrder
+    appliedRowId?: SortOrder
+    rowLabel?: SortOrder
+    reason?: SortOrder
+    dueDate?: SortOrder
+    status?: SortOrder
+    currentStageKey?: SortOrder
+    requestedById?: SortOrder
+    requestedByName?: SortOrder
+    requestedByEmail?: SortOrder
+    requestedAt?: SortOrder
+    requesterBusinessDivision?: SortOrder
+    createdAt?: SortOrder
+    updatedAt?: SortOrder
+  }
+
+  export type ExpenseChangeRequestSumOrderByAggregateInput = {
+    requestedById?: SortOrder
+  }
+
+  export type EnumExpenseChangeOperationWithAggregatesFilter<$PrismaModel = never> = {
+    equals?: $Enums.ExpenseChangeOperation | EnumExpenseChangeOperationFieldRefInput<$PrismaModel>
+    in?: $Enums.ExpenseChangeOperation[] | ListEnumExpenseChangeOperationFieldRefInput<$PrismaModel>
+    notIn?: $Enums.ExpenseChangeOperation[] | ListEnumExpenseChangeOperationFieldRefInput<$PrismaModel>
+    not?: NestedEnumExpenseChangeOperationWithAggregatesFilter<$PrismaModel> | $Enums.ExpenseChangeOperation
+    _count?: NestedIntFilter<$PrismaModel>
+    _min?: NestedEnumExpenseChangeOperationFilter<$PrismaModel>
+    _max?: NestedEnumExpenseChangeOperationFilter<$PrismaModel>
+  }
+
+  export type EnumExpenseChangeStatusWithAggregatesFilter<$PrismaModel = never> = {
+    equals?: $Enums.ExpenseChangeStatus | EnumExpenseChangeStatusFieldRefInput<$PrismaModel>
+    in?: $Enums.ExpenseChangeStatus[] | ListEnumExpenseChangeStatusFieldRefInput<$PrismaModel>
+    notIn?: $Enums.ExpenseChangeStatus[] | ListEnumExpenseChangeStatusFieldRefInput<$PrismaModel>
+    not?: NestedEnumExpenseChangeStatusWithAggregatesFilter<$PrismaModel> | $Enums.ExpenseChangeStatus
+    _count?: NestedIntFilter<$PrismaModel>
+    _min?: NestedEnumExpenseChangeStatusFilter<$PrismaModel>
+    _max?: NestedEnumExpenseChangeStatusFilter<$PrismaModel>
+  }
+
+  export type ExpenseAccessGrantOrderByRelevanceInput = {
+    fields: ExpenseAccessGrantOrderByRelevanceFieldEnum | ExpenseAccessGrantOrderByRelevanceFieldEnum[]
+    sort: SortOrder
+    search: string
+  }
+
+  export type ExpenseAccessGrantEmailLevelTableKeyCompoundUniqueInput = {
+    email: string
+    level: string
+    tableKey: string
+  }
+
+  export type ExpenseAccessGrantCountOrderByAggregateInput = {
+    id?: SortOrder
+    email?: SortOrder
+    level?: SortOrder
+    tableKey?: SortOrder
+    subDivision?: SortOrder
+    canCreate?: SortOrder
+    canUpdate?: SortOrder
+    canDelete?: SortOrder
+    isActive?: SortOrder
+    note?: SortOrder
+    grantedById?: SortOrder
+    grantedByName?: SortOrder
+    createdAt?: SortOrder
+    updatedAt?: SortOrder
+  }
+
+  export type ExpenseAccessGrantAvgOrderByAggregateInput = {
+    id?: SortOrder
+    grantedById?: SortOrder
+  }
+
+  export type ExpenseAccessGrantMaxOrderByAggregateInput = {
+    id?: SortOrder
+    email?: SortOrder
+    level?: SortOrder
+    tableKey?: SortOrder
+    subDivision?: SortOrder
+    canCreate?: SortOrder
+    canUpdate?: SortOrder
+    canDelete?: SortOrder
+    isActive?: SortOrder
+    note?: SortOrder
+    grantedById?: SortOrder
+    grantedByName?: SortOrder
+    createdAt?: SortOrder
+    updatedAt?: SortOrder
+  }
+
+  export type ExpenseAccessGrantMinOrderByAggregateInput = {
+    id?: SortOrder
+    email?: SortOrder
+    level?: SortOrder
+    tableKey?: SortOrder
+    subDivision?: SortOrder
+    canCreate?: SortOrder
+    canUpdate?: SortOrder
+    canDelete?: SortOrder
+    isActive?: SortOrder
+    note?: SortOrder
+    grantedById?: SortOrder
+    grantedByName?: SortOrder
+    createdAt?: SortOrder
+    updatedAt?: SortOrder
+  }
+
+  export type ExpenseAccessGrantSumOrderByAggregateInput = {
+    id?: SortOrder
+    grantedById?: SortOrder
+  }
+
+  export type EnumExpenseAuditEventTypeFilter<$PrismaModel = never> = {
+    equals?: $Enums.ExpenseAuditEventType | EnumExpenseAuditEventTypeFieldRefInput<$PrismaModel>
+    in?: $Enums.ExpenseAuditEventType[] | ListEnumExpenseAuditEventTypeFieldRefInput<$PrismaModel>
+    notIn?: $Enums.ExpenseAuditEventType[] | ListEnumExpenseAuditEventTypeFieldRefInput<$PrismaModel>
+    not?: NestedEnumExpenseAuditEventTypeFilter<$PrismaModel> | $Enums.ExpenseAuditEventType
+  }
+
+  export type ExpenseAuditLogOrderByRelevanceInput = {
+    fields: ExpenseAuditLogOrderByRelevanceFieldEnum | ExpenseAuditLogOrderByRelevanceFieldEnum[]
+    sort: SortOrder
+    search: string
+  }
+
+  export type ExpenseAuditLogCountOrderByAggregateInput = {
+    id?: SortOrder
+    requestId?: SortOrder
+    tableKey?: SortOrder
+    rowId?: SortOrder
+    operation?: SortOrder
+    eventType?: SortOrder
+    stageKey?: SortOrder
+    stageLabel?: SortOrder
+    actorId?: SortOrder
+    actorName?: SortOrder
+    actorEmail?: SortOrder
+    comment?: SortOrder
+    details?: SortOrder
+    occurredAt?: SortOrder
+  }
+
+  export type ExpenseAuditLogAvgOrderByAggregateInput = {
+    id?: SortOrder
+    actorId?: SortOrder
+  }
+
+  export type ExpenseAuditLogMaxOrderByAggregateInput = {
+    id?: SortOrder
+    requestId?: SortOrder
+    tableKey?: SortOrder
+    rowId?: SortOrder
+    operation?: SortOrder
+    eventType?: SortOrder
+    stageKey?: SortOrder
+    stageLabel?: SortOrder
+    actorId?: SortOrder
+    actorName?: SortOrder
+    actorEmail?: SortOrder
+    comment?: SortOrder
+    occurredAt?: SortOrder
+  }
+
+  export type ExpenseAuditLogMinOrderByAggregateInput = {
+    id?: SortOrder
+    requestId?: SortOrder
+    tableKey?: SortOrder
+    rowId?: SortOrder
+    operation?: SortOrder
+    eventType?: SortOrder
+    stageKey?: SortOrder
+    stageLabel?: SortOrder
+    actorId?: SortOrder
+    actorName?: SortOrder
+    actorEmail?: SortOrder
+    comment?: SortOrder
+    occurredAt?: SortOrder
+  }
+
+  export type ExpenseAuditLogSumOrderByAggregateInput = {
+    id?: SortOrder
+    actorId?: SortOrder
+  }
+
+  export type EnumExpenseAuditEventTypeWithAggregatesFilter<$PrismaModel = never> = {
+    equals?: $Enums.ExpenseAuditEventType | EnumExpenseAuditEventTypeFieldRefInput<$PrismaModel>
+    in?: $Enums.ExpenseAuditEventType[] | ListEnumExpenseAuditEventTypeFieldRefInput<$PrismaModel>
+    notIn?: $Enums.ExpenseAuditEventType[] | ListEnumExpenseAuditEventTypeFieldRefInput<$PrismaModel>
+    not?: NestedEnumExpenseAuditEventTypeWithAggregatesFilter<$PrismaModel> | $Enums.ExpenseAuditEventType
+    _count?: NestedIntFilter<$PrismaModel>
+    _min?: NestedEnumExpenseAuditEventTypeFilter<$PrismaModel>
+    _max?: NestedEnumExpenseAuditEventTypeFilter<$PrismaModel>
   }
 
   export type SubDepartmentCreateNestedManyWithoutDepartmentInput = {
@@ -71916,6 +85167,18 @@ export namespace Prisma {
     update?: XOR<XOR<PoolBJobUpdateToOneWithWhereWithoutBatchesInput, PoolBJobUpdateWithoutBatchesInput>, PoolBJobUncheckedUpdateWithoutBatchesInput>
   }
 
+  export type EnumExpenseChangeOperationFieldUpdateOperationsInput = {
+    set?: $Enums.ExpenseChangeOperation
+  }
+
+  export type EnumExpenseChangeStatusFieldUpdateOperationsInput = {
+    set?: $Enums.ExpenseChangeStatus
+  }
+
+  export type EnumExpenseAuditEventTypeFieldUpdateOperationsInput = {
+    set?: $Enums.ExpenseAuditEventType
+  }
+
   export type NestedIntFilter<$PrismaModel = never> = {
     equals?: number | IntFieldRefInput<$PrismaModel>
     in?: number[] | ListIntFieldRefInput<$PrismaModel>
@@ -72433,6 +85696,57 @@ export namespace Prisma {
     _count?: NestedIntFilter<$PrismaModel>
     _min?: NestedEnumPoolBBatchStatusFilter<$PrismaModel>
     _max?: NestedEnumPoolBBatchStatusFilter<$PrismaModel>
+  }
+
+  export type NestedEnumExpenseChangeOperationFilter<$PrismaModel = never> = {
+    equals?: $Enums.ExpenseChangeOperation | EnumExpenseChangeOperationFieldRefInput<$PrismaModel>
+    in?: $Enums.ExpenseChangeOperation[] | ListEnumExpenseChangeOperationFieldRefInput<$PrismaModel>
+    notIn?: $Enums.ExpenseChangeOperation[] | ListEnumExpenseChangeOperationFieldRefInput<$PrismaModel>
+    not?: NestedEnumExpenseChangeOperationFilter<$PrismaModel> | $Enums.ExpenseChangeOperation
+  }
+
+  export type NestedEnumExpenseChangeStatusFilter<$PrismaModel = never> = {
+    equals?: $Enums.ExpenseChangeStatus | EnumExpenseChangeStatusFieldRefInput<$PrismaModel>
+    in?: $Enums.ExpenseChangeStatus[] | ListEnumExpenseChangeStatusFieldRefInput<$PrismaModel>
+    notIn?: $Enums.ExpenseChangeStatus[] | ListEnumExpenseChangeStatusFieldRefInput<$PrismaModel>
+    not?: NestedEnumExpenseChangeStatusFilter<$PrismaModel> | $Enums.ExpenseChangeStatus
+  }
+
+  export type NestedEnumExpenseChangeOperationWithAggregatesFilter<$PrismaModel = never> = {
+    equals?: $Enums.ExpenseChangeOperation | EnumExpenseChangeOperationFieldRefInput<$PrismaModel>
+    in?: $Enums.ExpenseChangeOperation[] | ListEnumExpenseChangeOperationFieldRefInput<$PrismaModel>
+    notIn?: $Enums.ExpenseChangeOperation[] | ListEnumExpenseChangeOperationFieldRefInput<$PrismaModel>
+    not?: NestedEnumExpenseChangeOperationWithAggregatesFilter<$PrismaModel> | $Enums.ExpenseChangeOperation
+    _count?: NestedIntFilter<$PrismaModel>
+    _min?: NestedEnumExpenseChangeOperationFilter<$PrismaModel>
+    _max?: NestedEnumExpenseChangeOperationFilter<$PrismaModel>
+  }
+
+  export type NestedEnumExpenseChangeStatusWithAggregatesFilter<$PrismaModel = never> = {
+    equals?: $Enums.ExpenseChangeStatus | EnumExpenseChangeStatusFieldRefInput<$PrismaModel>
+    in?: $Enums.ExpenseChangeStatus[] | ListEnumExpenseChangeStatusFieldRefInput<$PrismaModel>
+    notIn?: $Enums.ExpenseChangeStatus[] | ListEnumExpenseChangeStatusFieldRefInput<$PrismaModel>
+    not?: NestedEnumExpenseChangeStatusWithAggregatesFilter<$PrismaModel> | $Enums.ExpenseChangeStatus
+    _count?: NestedIntFilter<$PrismaModel>
+    _min?: NestedEnumExpenseChangeStatusFilter<$PrismaModel>
+    _max?: NestedEnumExpenseChangeStatusFilter<$PrismaModel>
+  }
+
+  export type NestedEnumExpenseAuditEventTypeFilter<$PrismaModel = never> = {
+    equals?: $Enums.ExpenseAuditEventType | EnumExpenseAuditEventTypeFieldRefInput<$PrismaModel>
+    in?: $Enums.ExpenseAuditEventType[] | ListEnumExpenseAuditEventTypeFieldRefInput<$PrismaModel>
+    notIn?: $Enums.ExpenseAuditEventType[] | ListEnumExpenseAuditEventTypeFieldRefInput<$PrismaModel>
+    not?: NestedEnumExpenseAuditEventTypeFilter<$PrismaModel> | $Enums.ExpenseAuditEventType
+  }
+
+  export type NestedEnumExpenseAuditEventTypeWithAggregatesFilter<$PrismaModel = never> = {
+    equals?: $Enums.ExpenseAuditEventType | EnumExpenseAuditEventTypeFieldRefInput<$PrismaModel>
+    in?: $Enums.ExpenseAuditEventType[] | ListEnumExpenseAuditEventTypeFieldRefInput<$PrismaModel>
+    notIn?: $Enums.ExpenseAuditEventType[] | ListEnumExpenseAuditEventTypeFieldRefInput<$PrismaModel>
+    not?: NestedEnumExpenseAuditEventTypeWithAggregatesFilter<$PrismaModel> | $Enums.ExpenseAuditEventType
+    _count?: NestedIntFilter<$PrismaModel>
+    _min?: NestedEnumExpenseAuditEventTypeFilter<$PrismaModel>
+    _max?: NestedEnumExpenseAuditEventTypeFilter<$PrismaModel>
   }
 
   export type SubDepartmentCreateWithoutDepartmentInput = {
@@ -73485,6 +86799,7 @@ export namespace Prisma {
     role?: $Enums.UserRole
     division?: string | null
     subDivision?: string | null
+    businessDivision?: string | null
     isActive?: boolean
     lastLogin?: Date | string | null
     createdAt?: Date | string
@@ -73503,6 +86818,7 @@ export namespace Prisma {
     role?: $Enums.UserRole
     division?: string | null
     subDivision?: string | null
+    businessDivision?: string | null
     isActive?: boolean
     lastLogin?: Date | string | null
     createdAt?: Date | string
@@ -73658,6 +86974,8 @@ export namespace Prisma {
     fabCost?: Decimal | DecimalJsLike | number | string | null
     fabCons?: Decimal | DecimalJsLike | number | string | null
     width?: Decimal | DecimalJsLike | number | string | null
+    vendorFabricRate?: Decimal | DecimalJsLike | number | string | null
+    valueAddCost?: Decimal | DecimalJsLike | number | string | null
     bodyArticle?: string | null
     bodyArticleDescription?: string | null
     fabricArticleNumber?: string | null
@@ -73798,6 +87116,8 @@ export namespace Prisma {
     fabCost?: Decimal | DecimalJsLike | number | string | null
     fabCons?: Decimal | DecimalJsLike | number | string | null
     width?: Decimal | DecimalJsLike | number | string | null
+    vendorFabricRate?: Decimal | DecimalJsLike | number | string | null
+    valueAddCost?: Decimal | DecimalJsLike | number | string | null
     bodyArticle?: string | null
     bodyArticleDescription?: string | null
     fabricArticleNumber?: string | null
@@ -73907,6 +87227,7 @@ export namespace Prisma {
     role?: EnumUserRoleFieldUpdateOperationsInput | $Enums.UserRole
     division?: NullableStringFieldUpdateOperationsInput | string | null
     subDivision?: NullableStringFieldUpdateOperationsInput | string | null
+    businessDivision?: NullableStringFieldUpdateOperationsInput | string | null
     isActive?: BoolFieldUpdateOperationsInput | boolean
     lastLogin?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
@@ -73925,6 +87246,7 @@ export namespace Prisma {
     role?: EnumUserRoleFieldUpdateOperationsInput | $Enums.UserRole
     division?: NullableStringFieldUpdateOperationsInput | string | null
     subDivision?: NullableStringFieldUpdateOperationsInput | string | null
+    businessDivision?: NullableStringFieldUpdateOperationsInput | string | null
     isActive?: BoolFieldUpdateOperationsInput | boolean
     lastLogin?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
@@ -74062,6 +87384,8 @@ export namespace Prisma {
     fabCost?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
     fabCons?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
     width?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    vendorFabricRate?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    valueAddCost?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
     bodyArticle?: NullableStringFieldUpdateOperationsInput | string | null
     bodyArticleDescription?: NullableStringFieldUpdateOperationsInput | string | null
     fabricArticleNumber?: NullableStringFieldUpdateOperationsInput | string | null
@@ -74202,6 +87526,8 @@ export namespace Prisma {
     fabCost?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
     fabCons?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
     width?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    vendorFabricRate?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    valueAddCost?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
     bodyArticle?: NullableStringFieldUpdateOperationsInput | string | null
     bodyArticleDescription?: NullableStringFieldUpdateOperationsInput | string | null
     fabricArticleNumber?: NullableStringFieldUpdateOperationsInput | string | null
@@ -74394,6 +87720,7 @@ export namespace Prisma {
     role?: $Enums.UserRole
     division?: string | null
     subDivision?: string | null
+    businessDivision?: string | null
     isActive?: boolean
     lastLogin?: Date | string | null
     createdAt?: Date | string
@@ -74412,6 +87739,7 @@ export namespace Prisma {
     role?: $Enums.UserRole
     division?: string | null
     subDivision?: string | null
+    businessDivision?: string | null
     isActive?: boolean
     lastLogin?: Date | string | null
     createdAt?: Date | string
@@ -74608,6 +87936,7 @@ export namespace Prisma {
     role?: EnumUserRoleFieldUpdateOperationsInput | $Enums.UserRole
     division?: NullableStringFieldUpdateOperationsInput | string | null
     subDivision?: NullableStringFieldUpdateOperationsInput | string | null
+    businessDivision?: NullableStringFieldUpdateOperationsInput | string | null
     isActive?: BoolFieldUpdateOperationsInput | boolean
     lastLogin?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
@@ -74626,6 +87955,7 @@ export namespace Prisma {
     role?: EnumUserRoleFieldUpdateOperationsInput | $Enums.UserRole
     division?: NullableStringFieldUpdateOperationsInput | string | null
     subDivision?: NullableStringFieldUpdateOperationsInput | string | null
+    businessDivision?: NullableStringFieldUpdateOperationsInput | string | null
     isActive?: BoolFieldUpdateOperationsInput | boolean
     lastLogin?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
@@ -74643,6 +87973,7 @@ export namespace Prisma {
     role?: $Enums.UserRole
     division?: string | null
     subDivision?: string | null
+    businessDivision?: string | null
     isActive?: boolean
     lastLogin?: Date | string | null
     createdAt?: Date | string
@@ -74661,6 +87992,7 @@ export namespace Prisma {
     role?: $Enums.UserRole
     division?: string | null
     subDivision?: string | null
+    businessDivision?: string | null
     isActive?: boolean
     lastLogin?: Date | string | null
     createdAt?: Date | string
@@ -74785,6 +88117,7 @@ export namespace Prisma {
     role?: EnumUserRoleFieldUpdateOperationsInput | $Enums.UserRole
     division?: NullableStringFieldUpdateOperationsInput | string | null
     subDivision?: NullableStringFieldUpdateOperationsInput | string | null
+    businessDivision?: NullableStringFieldUpdateOperationsInput | string | null
     isActive?: BoolFieldUpdateOperationsInput | boolean
     lastLogin?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
@@ -74803,6 +88136,7 @@ export namespace Prisma {
     role?: EnumUserRoleFieldUpdateOperationsInput | $Enums.UserRole
     division?: NullableStringFieldUpdateOperationsInput | string | null
     subDivision?: NullableStringFieldUpdateOperationsInput | string | null
+    businessDivision?: NullableStringFieldUpdateOperationsInput | string | null
     isActive?: BoolFieldUpdateOperationsInput | boolean
     lastLogin?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
@@ -75180,6 +88514,8 @@ export namespace Prisma {
     fabCost?: Decimal | DecimalJsLike | number | string | null
     fabCons?: Decimal | DecimalJsLike | number | string | null
     width?: Decimal | DecimalJsLike | number | string | null
+    vendorFabricRate?: Decimal | DecimalJsLike | number | string | null
+    valueAddCost?: Decimal | DecimalJsLike | number | string | null
     bodyArticle?: string | null
     bodyArticleDescription?: string | null
     fabricArticleNumber?: string | null
@@ -75321,6 +88657,8 @@ export namespace Prisma {
     fabCost?: Decimal | DecimalJsLike | number | string | null
     fabCons?: Decimal | DecimalJsLike | number | string | null
     width?: Decimal | DecimalJsLike | number | string | null
+    vendorFabricRate?: Decimal | DecimalJsLike | number | string | null
+    valueAddCost?: Decimal | DecimalJsLike | number | string | null
     bodyArticle?: string | null
     bodyArticleDescription?: string | null
     fabricArticleNumber?: string | null
@@ -75591,6 +88929,8 @@ export namespace Prisma {
     fabCost?: DecimalNullableFilter<"ExtractionResultFlat"> | Decimal | DecimalJsLike | number | string | null
     fabCons?: DecimalNullableFilter<"ExtractionResultFlat"> | Decimal | DecimalJsLike | number | string | null
     width?: DecimalNullableFilter<"ExtractionResultFlat"> | Decimal | DecimalJsLike | number | string | null
+    vendorFabricRate?: DecimalNullableFilter<"ExtractionResultFlat"> | Decimal | DecimalJsLike | number | string | null
+    valueAddCost?: DecimalNullableFilter<"ExtractionResultFlat"> | Decimal | DecimalJsLike | number | string | null
     bodyArticle?: StringNullableFilter<"ExtractionResultFlat"> | string | null
     bodyArticleDescription?: StringNullableFilter<"ExtractionResultFlat"> | string | null
     fabricArticleNumber?: StringNullableFilter<"ExtractionResultFlat"> | string | null
@@ -75637,6 +88977,7 @@ export namespace Prisma {
     role?: $Enums.UserRole
     division?: string | null
     subDivision?: string | null
+    businessDivision?: string | null
     isActive?: boolean
     lastLogin?: Date | string | null
     createdAt?: Date | string
@@ -75655,6 +88996,7 @@ export namespace Prisma {
     role?: $Enums.UserRole
     division?: string | null
     subDivision?: string | null
+    businessDivision?: string | null
     isActive?: boolean
     lastLogin?: Date | string | null
     createdAt?: Date | string
@@ -75688,6 +89030,7 @@ export namespace Prisma {
     role?: EnumUserRoleFieldUpdateOperationsInput | $Enums.UserRole
     division?: NullableStringFieldUpdateOperationsInput | string | null
     subDivision?: NullableStringFieldUpdateOperationsInput | string | null
+    businessDivision?: NullableStringFieldUpdateOperationsInput | string | null
     isActive?: BoolFieldUpdateOperationsInput | boolean
     lastLogin?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
@@ -75706,6 +89049,7 @@ export namespace Prisma {
     role?: EnumUserRoleFieldUpdateOperationsInput | $Enums.UserRole
     division?: NullableStringFieldUpdateOperationsInput | string | null
     subDivision?: NullableStringFieldUpdateOperationsInput | string | null
+    businessDivision?: NullableStringFieldUpdateOperationsInput | string | null
     isActive?: BoolFieldUpdateOperationsInput | boolean
     lastLogin?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
@@ -75723,6 +89067,7 @@ export namespace Prisma {
     role?: $Enums.UserRole
     division?: string | null
     subDivision?: string | null
+    businessDivision?: string | null
     isActive?: boolean
     lastLogin?: Date | string | null
     createdAt?: Date | string
@@ -75741,6 +89086,7 @@ export namespace Prisma {
     role?: $Enums.UserRole
     division?: string | null
     subDivision?: string | null
+    businessDivision?: string | null
     isActive?: boolean
     lastLogin?: Date | string | null
     createdAt?: Date | string
@@ -75774,6 +89120,7 @@ export namespace Prisma {
     role?: EnumUserRoleFieldUpdateOperationsInput | $Enums.UserRole
     division?: NullableStringFieldUpdateOperationsInput | string | null
     subDivision?: NullableStringFieldUpdateOperationsInput | string | null
+    businessDivision?: NullableStringFieldUpdateOperationsInput | string | null
     isActive?: BoolFieldUpdateOperationsInput | boolean
     lastLogin?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
@@ -75792,6 +89139,7 @@ export namespace Prisma {
     role?: EnumUserRoleFieldUpdateOperationsInput | $Enums.UserRole
     division?: NullableStringFieldUpdateOperationsInput | string | null
     subDivision?: NullableStringFieldUpdateOperationsInput | string | null
+    businessDivision?: NullableStringFieldUpdateOperationsInput | string | null
     isActive?: BoolFieldUpdateOperationsInput | boolean
     lastLogin?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
@@ -77149,6 +90497,8 @@ export namespace Prisma {
     fabCost?: Decimal | DecimalJsLike | number | string | null
     fabCons?: Decimal | DecimalJsLike | number | string | null
     width?: Decimal | DecimalJsLike | number | string | null
+    vendorFabricRate?: Decimal | DecimalJsLike | number | string | null
+    valueAddCost?: Decimal | DecimalJsLike | number | string | null
     bodyArticle?: string | null
     bodyArticleDescription?: string | null
     fabricArticleNumber?: string | null
@@ -77290,6 +90640,8 @@ export namespace Prisma {
     fabCost?: Decimal | DecimalJsLike | number | string | null
     fabCons?: Decimal | DecimalJsLike | number | string | null
     width?: Decimal | DecimalJsLike | number | string | null
+    vendorFabricRate?: Decimal | DecimalJsLike | number | string | null
+    valueAddCost?: Decimal | DecimalJsLike | number | string | null
     bodyArticle?: string | null
     bodyArticleDescription?: string | null
     fabricArticleNumber?: string | null
@@ -77482,6 +90834,8 @@ export namespace Prisma {
     fabCost?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
     fabCons?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
     width?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    vendorFabricRate?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    valueAddCost?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
     bodyArticle?: NullableStringFieldUpdateOperationsInput | string | null
     bodyArticleDescription?: NullableStringFieldUpdateOperationsInput | string | null
     fabricArticleNumber?: NullableStringFieldUpdateOperationsInput | string | null
@@ -77623,6 +90977,8 @@ export namespace Prisma {
     fabCost?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
     fabCons?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
     width?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    vendorFabricRate?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    valueAddCost?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
     bodyArticle?: NullableStringFieldUpdateOperationsInput | string | null
     bodyArticleDescription?: NullableStringFieldUpdateOperationsInput | string | null
     fabricArticleNumber?: NullableStringFieldUpdateOperationsInput | string | null
@@ -78538,6 +91894,8 @@ export namespace Prisma {
     fabCost?: Decimal | DecimalJsLike | number | string | null
     fabCons?: Decimal | DecimalJsLike | number | string | null
     width?: Decimal | DecimalJsLike | number | string | null
+    vendorFabricRate?: Decimal | DecimalJsLike | number | string | null
+    valueAddCost?: Decimal | DecimalJsLike | number | string | null
     bodyArticle?: string | null
     bodyArticleDescription?: string | null
     fabricArticleNumber?: string | null
@@ -78838,6 +92196,8 @@ export namespace Prisma {
     fabCost?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
     fabCons?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
     width?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    vendorFabricRate?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    valueAddCost?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
     bodyArticle?: NullableStringFieldUpdateOperationsInput | string | null
     bodyArticleDescription?: NullableStringFieldUpdateOperationsInput | string | null
     fabricArticleNumber?: NullableStringFieldUpdateOperationsInput | string | null
@@ -78979,6 +92339,8 @@ export namespace Prisma {
     fabCost?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
     fabCons?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
     width?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    vendorFabricRate?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    valueAddCost?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
     bodyArticle?: NullableStringFieldUpdateOperationsInput | string | null
     bodyArticleDescription?: NullableStringFieldUpdateOperationsInput | string | null
     fabricArticleNumber?: NullableStringFieldUpdateOperationsInput | string | null
@@ -79119,6 +92481,8 @@ export namespace Prisma {
     fabCost?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
     fabCons?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
     width?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    vendorFabricRate?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    valueAddCost?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
     bodyArticle?: NullableStringFieldUpdateOperationsInput | string | null
     bodyArticleDescription?: NullableStringFieldUpdateOperationsInput | string | null
     fabricArticleNumber?: NullableStringFieldUpdateOperationsInput | string | null

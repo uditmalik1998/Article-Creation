@@ -49,6 +49,7 @@ import {
 } from '@/shared/components/ui-tw';
 import { message } from '@/lib/message';
 import { cn } from '@/lib/utils';
+import { useDragToPan } from '@/shared/hooks/ui/useDragToPan';
 import type { ApproverItem, MasterAttribute } from './ApproverTable';
 import {
   SCHEMA_KEY_TO_EXCEL_ATTR,
@@ -56,7 +57,7 @@ import {
   SAP_NAME_TO_SCHEMA_KEY,
   normalizeMajorCategory,
 } from '../../../data/majCatAttributeMap';
-import { getMajorCategoriesByDivision, getMcCodeByMajorCategory } from '../../../data/majorCategoryMcCodeMap';
+import { getMcCodeByMajorCategory } from '../../../data/majorCategoryMcCodeMap';
 import {
   preloadAttributeValues,
   getCachedValues,
@@ -91,6 +92,29 @@ const bomCache = new Map<string, Promise<Record<string, Record<string, string>>>
 // Module-level national grid cache — body article dropdown values from national_grid_master
 type NationalGridValues = Record<string, { code: string; fullForm: string }[]>;
 let nationalGridPromise: Promise<NationalGridValues> | null = null;
+
+// Module-level major category cache keyed by normalised division (e.g. "MENS")
+const majorCatByDivision = new Map<string, string[]>();
+const majorCatPromises = new Map<string, Promise<string[]>>();
+const fetchMajorCategoriesByDivision = (division: string): Promise<string[]> => {
+  const div = (division || '').trim().toUpperCase() === 'MEN' ? 'MENS' : (division || '').trim().toUpperCase();
+  if (majorCatByDivision.has(div)) return Promise.resolve(majorCatByDivision.get(div)!);
+  if (majorCatPromises.has(div)) return majorCatPromises.get(div)!;
+  const token = localStorage.getItem('authToken');
+  const url = div
+    ? `${APP_CONFIG.api.baseURL}/approver/major-categories?division=${encodeURIComponent(div)}`
+    : `${APP_CONFIG.api.baseURL}/approver/major-categories`;
+  const promise = fetch(url, { headers: token ? { Authorization: `Bearer ${token}` } : {} })
+    .then((r) => r.json())
+    .then((res: any) => {
+      const list: string[] = Array.isArray(res?.data) ? res.data : [];
+      majorCatByDivision.set(div, list);
+      return list;
+    })
+    .catch(() => []);
+  majorCatPromises.set(div, promise);
+  return promise;
+};
 const fetchNationalGridValues = (): Promise<NationalGridValues> => {
   if (!nationalGridPromise) {
     const token = localStorage.getItem('authToken');
@@ -202,6 +226,7 @@ const ATTRIBUTE_GROUPS: { group: string; color: string; fields: { field: string;
       { field: 'fWidth', schemaKey: 'f_width' },
       { field: 'lycra', schemaKey: 'lycra_non_lycra' },
       { field: 'shade', schemaKey: 'shade', freeText: true },
+      { field: 'vendorFabricRate', schemaKey: 'vendor_fabric_rate', freeText: true },
     ],
   },
   {
@@ -241,6 +266,7 @@ const ATTRIBUTE_GROUPS: { group: string; color: string; fields: { field: string;
       { field: 'patches', schemaKey: 'patches' },
       { field: 'htrfType', schemaKey: 'htrf_type' },
       { field: 'htrfStyle', schemaKey: 'htrf_style' },
+      { field: 'valueAddCost', schemaKey: 'value_add_cost', freeText: true },
     ],
   },
   {
@@ -362,6 +388,14 @@ const GROUP_ORDER = ['FAB', 'BODY', 'VA ACC.', 'VA PRCS', 'BUSINESS'];
 //   main_mvgr        → M_FAB_MAIN_MVGR_1
 //   fabric_main_mvgr → M_FAB_MAIN_MVGR_2
 const FAB_PRIORITY_KEYS = ['fab_div', 'yarn_01', 'main_mvgr', 'fabric_main_mvgr'];
+// Canonical BODY & CONSTRUCTION field order — enforced in buildCardGroups so
+// every user session sees fields in the same sequence regardless of DB displayOrder.
+const BODY_PRIORITY_KEYS = [
+  'collar', 'collar_style', 'neck_details', 'neck', 'placket',
+  'father_belt', 'child_belt', 'sleeve', 'sleeve_fold', 'set',
+  'bottom_fold', 'no_of_pocket', 'pocket_type', 'extra_pocket',
+  'fit', 'body_style', 'length',
+];
 
 // ─── Redesign tokens — header/icon palette per group ──────────────────────────
 const GROUP_LABELS: Record<string, string> = {
@@ -420,6 +454,15 @@ function buildCardGroups(entries: { key: string; type: string; group: string }[]
       };
       fields = [...fields].sort((a, b) => rank(a.schemaKey) - rank(b.schemaKey));
     }
+    if (g === 'BODY') {
+      // Enforce canonical BODY field order so every user sees the same sequence
+      // regardless of DB displayOrder (which can be non-deterministic when tied).
+      const rank = (k: string) => {
+        const i = BODY_PRIORITY_KEYS.indexOf(k);
+        return i === -1 ? BODY_PRIORITY_KEYS.length : i;
+      };
+      fields = [...fields].sort((a, b) => rank(a.schemaKey) - rank(b.schemaKey));
+    }
     return {
       group: g,
       color: GROUP_COLORS[g] || '#f0f0f0',
@@ -471,6 +514,8 @@ export interface ApproverArticleListProps {
   pathType?: 'old' | 'new' | 'rejected' | 'created' | 'failed';
   /** When set, only these attribute group names are shown in article cards. */
   allowGroups?: string[];
+  /** When true, hides the "Create Body Article" button (used by BodyArticleList). */
+  hideCreateBody?: boolean;
   serverPagination: {
     total: number;
     current: number;
@@ -504,6 +549,7 @@ const ArticleCard = React.memo(
     cardGroups,
     pathType,
     allowGroups,
+    hideCreateBody,
   }: {
     item: ApproverItem;
     isSelected: boolean;
@@ -519,6 +565,7 @@ const ArticleCard = React.memo(
     cardGroups: CardGroup[];
     pathType?: 'old' | 'new' | 'rejected' | 'created' | 'failed';
     allowGroups?: string[];
+    hideCreateBody?: boolean;
   }) => {
     const [showVariants, setShowVariants] = useState(true);
     const [imgModalOpen, setImgModalOpen] = useState(false);
@@ -554,13 +601,39 @@ const ArticleCard = React.memo(
       fabCons: string | number | null; width: string | number | null;
     }[]>([]);
     const [bodyNoLoading, setBodyNoLoading] = useState(false);
+    const [bodyNoSearched, setBodyNoSearched] = useState(false);
+    const [fabDescQuery, setFabDescQuery] = useState('');
+    const [fabDescResults, setFabDescResults] = useState<{
+      fabricArticleNumber: string;
+      fabricArticleDescription: string | null;
+      mFabDiv: string | null; mYarn: string | null;
+      mFabMainMvgr1: string | null; mFabMainMvgr2: string | null;
+      mConstruction: string | null; mOunz: string | null; mWidth: string | null;
+      mWeave01: string | null; mWeave02: string | null; mCount: string | null;
+      mComposition: string | null; mFinish: string | null; mGsm: string | null; mLycra: string | null;
+    }[]>([]);
+    const [fabDescLoading, setFabDescLoading] = useState(false);
+    const [fabDescSearched, setFabDescSearched] = useState(false);
+    const autoSavedFabDescRef = React.useRef<string | null>(null);
     const [imgZoom, setImgZoom] = useState(1);
     const [imgRotation, setImgRotation] = useState(0);
+    // The image's real (natural) pixel size, captured on load. `transform: scale()`
+    // alone is purely visual — it never grows the parent's scrollable area, which is
+    // why zooming in previously left no real room to scroll/drag to the far edges.
+    // Sizing the <img> with actual width/height (computed from this) instead makes
+    // the browser's own overflow/scroll math account for the true zoomed size.
+    const [naturalSize, setNaturalSize] = useState<{ w: number; h: number } | null>(null);
     const [catOpen, setCatOpen] = useState(false);
     const [catSearch, setCatSearch] = useState('');
     // Search term for the attribute-value dropdown. A single shared term is
     // enough because only one attribute (editingField) is open at a time.
     const [attrSearch, setAttrSearch] = useState('');
+
+    // ── Major categories from DB (major_category_details table) ─────────────
+    const [dbMajorCategories, setDbMajorCategories] = useState<string[]>([]);
+    useEffect(() => {
+      fetchMajorCategoriesByDivision(item.division || '').then(setDbMajorCategories);
+    }, [item.division]);
 
     // ── National grid values for Body Article dropdowns ─────────────────────
     const [nationalGrid, setNationalGrid] = useState<NationalGridValues>({});
@@ -573,11 +646,13 @@ const ArticleCard = React.memo(
       });
     }, [allowGroups]);
 
+    const isBodyArticle = allowGroups?.includes('BODY') ?? false;
+
     // ── Created-page "Modify" flow ──────────────────────────────────────────
     // On the Created page, articles are already APPROVED + SAP-synced. We keep
     // them editable, but stage edits as `pendingChanges` instead of auto-saving;
     // the user then clicks "Modify" to push the diff to SAP (and only then the DB).
-    const isModifyMode = pathType === 'created' && !!onModify;
+    const isModifyMode = pathType === 'created' && !!onModify && !isBodyArticle;
     const [pendingChanges, setPendingChanges] = useState<Record<string, string | null>>({});
     const [modifying, setModifying] = useState(false);
 
@@ -585,6 +660,18 @@ const ArticleCard = React.memo(
       setImgZoom(1);
       setImgRotation(0);
     }, []);
+
+    // Click-and-drag panning once zoomed in — an alternative to relying on the
+    // mouse wheel/scrollbars to see different parts of a zoomed-in image.
+    const { containerRef: panRef, onMouseDown: onPanMouseDown, isDragging: isImgPanning } = useDragToPan<HTMLDivElement>(imgZoom > 1);
+
+    const [imgViewportSize, setImgViewportSize] = useState({ w: window.innerWidth, h: window.innerHeight });
+    useEffect(() => {
+      if (!imgModalOpen) return;
+      const onResize = () => setImgViewportSize({ w: window.innerWidth, h: window.innerHeight });
+      window.addEventListener('resize', onResize);
+      return () => window.removeEventListener('resize', onResize);
+    }, [imgModalOpen]);
 
     const prevItemRef = React.useRef<ApproverItem>(item);
     React.useEffect(() => {
@@ -976,8 +1063,10 @@ const ArticleCard = React.memo(
     // expected to follow this same convention).
     const buildBodyDescription = useCallback(
       (getVal: (field: string) => string | null) => {
-        const parts = BODY_FIELDS.map((f) => getVal(f.field)).filter(Boolean) as string[];
-        return parts.length > 0 ? parts.join('-').slice(0, 40) : null;
+        const parts = BODY_FIELDS
+          .map((f) => getVal(f.field))
+          .filter((v): v is string => !!v && !/^-+$/.test(v.trim()));
+        return parts.length > 0 ? parts.join('-') : null;
       },
       [BODY_FIELDS],
     );
@@ -991,6 +1080,8 @@ const ArticleCard = React.memo(
     );
 
     // Reactively rebuild fabric/body descriptions whenever visible fields or item changes.
+    // Also persists bodyArticleDescription to DB when it's missing (null in DB but computable
+    // from the current body attribute values).
     React.useEffect(() => {
       if (item.approvalStatus !== 'PENDING') return;
       setLocalValues((prev) => {
@@ -999,7 +1090,7 @@ const ArticleCard = React.memo(
           return v ? String(v).trim() : null;
         };
         const fabParts = FAB_FIELDS.map((f) => getVal(f.field)).filter(Boolean) as string[];
-        const newFabDesc = fabParts.length > 0 ? fabParts.join('-').slice(0, 40) : null;
+        const newFabDesc = fabParts.length > 0 ? fabParts.join('-') : null;
         const newBodyDesc = buildBodyDescription(getVal);
         // REFERENCE ARTICLE DESC — built like ARTICLE DESC but from a fixed,
         // user-confirmed sequence spanning multiple cards:
@@ -1011,6 +1102,20 @@ const ArticleCard = React.memo(
         if (newFabDesc !== null && newFabDesc !== prev['fabricArticleDescription']) updates['fabricArticleDescription'] = newFabDesc;
         if (newBodyDesc !== null && newBodyDesc !== prev['bodyArticleDescription']) updates['bodyArticleDescription'] = newBodyDesc;
         if (newRefDesc !== null && newRefDesc !== prev['referenceArticleDescription']) updates['referenceArticleDescription'] = newRefDesc;
+        // Persist bodyArticleDescription to DB when it was missing (null) but is now computable.
+        if (newBodyDesc && !item.bodyArticleDescription) {
+          setTimeout(() => {
+            onSave({ ...item } as any, { bodyArticleDescription: newBodyDesc }, { silent: true });
+          }, 0);
+        }
+        // Persist fabricArticleDescription to DB whenever the computed value differs from what's
+        // stored — guards against stale Gemini-extracted strings that don't match the joined fields.
+        if (newFabDesc && newFabDesc !== item.fabricArticleDescription && autoSavedFabDescRef.current !== newFabDesc) {
+          autoSavedFabDescRef.current = newFabDesc;
+          setTimeout(() => {
+            onSave({ ...item } as any, { fabricArticleDescription: newFabDesc }, { silent: true });
+          }, 0);
+        }
         return Object.keys(updates).length > 0 ? { ...prev, ...updates } : prev;
       });
     }, [item, FAB_FIELDS, buildBodyDescription]);
@@ -1028,6 +1133,7 @@ const ArticleCard = React.memo(
       'vendorCode', 'vendorName', 'mrp', 'rate', 'colour',
       'designNumber', 'division', 'subDivision', 'majorCategory', 'segment',
     ]);
+    // Body & Construction fields are read-only in FG article context — values
    const isFieldLocked = (field: string) =>
     field === 'segment' ||
     isLocked ||
@@ -1193,6 +1299,34 @@ const ArticleCard = React.memo(
             onSave({ ...item, segment: seg } as ApproverItem, { segment: seg } as Record<string, unknown>);
           }
         });
+        // Clear body/fabric article number and description only — attributes remain unchanged
+        updates['bodyArticle'] = '';
+        updates['bodyArticleDescription'] = '';
+        updates['fabricArticleNumber'] = '';
+        updates['fabricArticleDescription'] = '';
+      }
+      // When a Body & Construction attribute changes, recompute bodyArticleDescription
+      // and bundle it into the same save so the DB value stays in sync with the UI.
+      const bodyFieldKeys = new Set(BODY_FIELDS.map((bf) => bf.field));
+      if (bodyFieldKeys.has(field)) {
+        const getVal = (f: string) => {
+          const v = updates[f] !== undefined ? updates[f] : (localValues[f] !== undefined ? localValues[f] : (item as any)[f]);
+          return v ? String(v).trim() : null;
+        };
+        const newDesc = buildBodyDescription(getVal);
+        if (newDesc) updates['bodyArticleDescription'] = newDesc;
+      }
+      // When a Construction & Fabric attribute changes, recompute fabricArticleDescription
+      // and bundle it into the same save so the DB value stays in sync with the UI.
+      const fabFieldKeys = new Set(FAB_FIELDS.map((ff) => ff.field));
+      if (fabFieldKeys.has(field)) {
+        const getVal = (f: string) => {
+          const v = updates[f] !== undefined ? updates[f] : (localValues[f] !== undefined ? localValues[f] : (item as any)[f]);
+          return v ? String(v).trim() : null;
+        };
+        const fabParts = FAB_FIELDS.map((f) => getVal(f.field)).filter(Boolean) as string[];
+        const newFabDesc = fabParts.length > 0 ? fabParts.join('-') : null;
+        if (newFabDesc) updates['fabricArticleDescription'] = newFabDesc;
       }
       setLocalValues((prev) => ({ ...prev, ...updates }));
       setEditingField(null);
@@ -1337,19 +1471,17 @@ const ArticleCard = React.memo(
 
     const HEADER_FIELDS = [
       { label: 'MAJOR CATEGORY', field: 'majorCategory', editable: true, required: false, color: '#2f54eb' },
-      {
-        label: 'ARTICLE NUMBER',
-        field: 'articleNumber',
-        editable: !item.sapArticleId,
-        required: false,
-        color: item.sapArticleId ? '#15803d' : '#FF6F61',
-      },
+      isBodyArticle
+        ? { label: 'BODY ARTICLE NUMBER', field: 'bodyArticle', editable: false, required: false, color: '#15803d' }
+        : { label: 'ARTICLE NUMBER', field: 'articleNumber', editable: !item.sapArticleId, required: false, color: item.sapArticleId ? '#15803d' : '#FF6F61' },
       { label: 'VENDOR CODE', field: 'vendorCode', editable: true, required: true, color: '#1f2937' },
       { label: 'VENDOR NAME', field: 'vendorName', editable: true, required: true, color: '#1f2937' },
-      { label: 'ARTICLE DESC', field: 'articleDescription', editable: true, required: false, color: '#4b5563' },
-      { label: 'REFERENCE ARTICLE', field: 'referenceArticleNumber', editable: true, required: false, color: '#1f2937' },
-      { label: 'REFERENCE ARTICLE DESC', field: 'referenceArticleDescription', editable: true, required: false, color: '#1f2937' },
-    ] as const;
+      ...(!isBodyArticle ? [
+        { label: 'ARTICLE DESC', field: 'articleDescription', editable: true, required: false, color: '#4b5563' },
+        { label: 'REFERENCE ARTICLE', field: 'referenceArticleNumber', editable: true, required: false, color: '#1f2937' },
+        { label: 'REFERENCE ARTICLE DESC', field: 'referenceArticleDescription', editable: true, required: false, color: '#1f2937' },
+      ] : []),
+    ];
 
     const renderHeaderField = ({
       label,
@@ -1361,6 +1493,8 @@ const ArticleCard = React.memo(
       const baseValue =
         field === 'articleNumber'
           ? item.sapArticleId || (item as any)[field]
+          : field === 'bodyArticle'
+          ? (item as any)['bodyArticle']
           : field === 'majorCategory'
           ? effectiveMajCat || (item as any)[field]
           : (item as any)[field];
@@ -1416,7 +1550,7 @@ const ArticleCard = React.memo(
                       />
                     </div>
                     <div className="max-h-56 overflow-y-auto py-1">
-                      {getMajorCategoriesByDivision(item.division || '')
+                      {dbMajorCategories
                         .filter((cat) =>
                           cat.toLowerCase().includes(catSearch.toLowerCase()),
                         )
@@ -1434,7 +1568,7 @@ const ArticleCard = React.memo(
                             {cat}
                           </button>
                         ))}
-                      {getMajorCategoriesByDivision(item.division || '').filter((cat) =>
+                      {dbMajorCategories.filter((cat) =>
                         cat.toLowerCase().includes(catSearch.toLowerCase()),
                       ).length === 0 && (
                         <div className="px-3 py-2 text-xs text-muted-foreground">
@@ -1727,6 +1861,31 @@ const ArticleCard = React.memo(
     const qualityColor = (level: string) =>
       level === 'High' ? 'text-emerald-600' : level === 'Medium' ? 'text-amber-600' : 'text-rose-600';
 
+    // Base (100%-zoom) display size, fit to the same 85vw/75vh box the old
+    // maxWidth/maxHeight CSS used — then scaled up by the zoom factor. Rotation at
+    // 90/270° swaps which axis is width vs height so the post-rotation footprint
+    // (what the scroll container needs to accommodate) is what actually gets laid out.
+    const isImgSideways = imgRotation === 90 || imgRotation === 270;
+    // `imgFrame*` is the viewing window: the image's footprint at 100% zoom. It stays put
+    // as you zoom so the dialog doesn't grow with every step — only `imgBox*` (the image
+    // itself) scales, overflowing the frame and becoming scrollable/draggable.
+    const IMG_VIEWER_PADDING = 16; // matches the `p-4` on the preview container
+    let imgFrameWidth: number | undefined;
+    let imgFrameHeight: number | undefined;
+    let imgBoxWidth: number | undefined;
+    let imgBoxHeight: number | undefined;
+    if (naturalSize) {
+      const maxW = imgViewportSize.w * 0.85 - IMG_VIEWER_PADDING * 2;
+      const maxH = imgViewportSize.h * 0.75 - IMG_VIEWER_PADDING * 2;
+      const fitScale = Math.min(1, maxW / naturalSize.w, maxH / naturalSize.h);
+      const baseW = naturalSize.w * fitScale;
+      const baseH = naturalSize.h * fitScale;
+      imgFrameWidth = isImgSideways ? baseH : baseW;
+      imgFrameHeight = isImgSideways ? baseW : baseH;
+      imgBoxWidth = imgFrameWidth * imgZoom;
+      imgBoxHeight = imgFrameHeight * imgZoom;
+    }
+
     return (
       <>
         <div
@@ -1742,7 +1901,7 @@ const ArticleCard = React.memo(
             <div className="flex min-w-0 flex-1 items-center gap-3">
               <Checkbox
                 checked={isSelected}
-                disabled={item.approvalStatus === 'REJECTED'}
+                disabled={item.approvalStatus === 'REJECTED' && !hideCreateBody}
                 onCheckedChange={() => onToggleSelect(item.id)}
                 className="border-white/60 bg-white/10 data-[state=checked]:bg-white data-[state=checked]:text-[#FF6F61]"
               />
@@ -2259,7 +2418,7 @@ const ArticleCard = React.memo(
                                     })
                                     .filter(Boolean);
                                   if (parts.length > 0)
-                                    handleSave('fabricArticleDescription', parts.join('-').slice(0, 40));
+                                    handleSave('fabricArticleDescription', parts.join('-'));
                                 };
                                 const isFabNoEditing = editingField === 'bot_fabricArticleNumber';
                                 const fabNoDisplayVal =
@@ -2384,7 +2543,170 @@ const ArticleCard = React.memo(
                                         </div>
                                       )}
                                     </div>
-                                    {renderField('fabricArticleDescription', 'FABRIC ARTICLE DESC', fabAutoFill, 40)}
+                                    {/* FABRIC ARTICLE DESC — search dropdown from fabric_article_data (no category filter) */}
+                                    {(() => {
+                                      const isFabDescEditing = editingField === 'bot_fabricArticleDescription';
+                                      const fabDescDisplayVal =
+                                        localValues['fabricArticleDescription'] !== undefined
+                                          ? localValues['fabricArticleDescription']
+                                          : (item as any)['fabricArticleDescription'];
+                                      const runFabDescSearch = (q: string) => {
+                                        if (!q.trim()) { setFabDescResults([]); setFabDescSearched(false); return; }
+                                        setFabDescLoading(true);
+                                        setFabDescSearched(false);
+                                        const token = localStorage.getItem('authToken');
+                                        fetch(
+                                          `${APP_CONFIG.api.baseURL}/approver/fabric-article-data/search?q=${encodeURIComponent(q)}`,
+                                          { headers: { Authorization: `Bearer ${token}` } },
+                                        )
+                                          .then((r) => r.json())
+                                          .then((d) => { setFabDescResults(d.results ?? []); setFabDescSearched(true); })
+                                          .catch(() => { setFabDescResults([]); setFabDescSearched(true); })
+                                          .finally(() => setFabDescLoading(false));
+                                      };
+                                      return (
+                                        <div
+                                          key="fabricArticleDescription"
+                                          className="mt-1 border-t border-border bg-muted/30 px-2 py-1.5"
+                                          style={{ cursor: isLocked ? 'default' : 'pointer' }}
+                                          onClick={() => {
+                                            if (!isLocked && !isFabDescEditing) {
+                                              setEditingField('bot_fabricArticleDescription');
+                                              setFabDescQuery(fabDescDisplayVal || '');
+                                              setFabDescSearched(false);
+                                              if (fabDescDisplayVal) runFabDescSearch(fabDescDisplayVal);
+                                              else setFabDescResults([]);
+                                            }
+                                          }}
+                                        >
+                                          <div className="mb-0.5 flex items-center justify-between gap-1">
+                                            <span className="text-[9px] font-semibold uppercase tracking-wider text-muted-foreground">
+                                              FABRIC ARTICLE DESC
+                                            </span>
+                                            {!isFabDescEditing && !isLocked && (
+                                              <button
+                                                type="button"
+                                                className="text-[9px] text-slate-700 underline hover:text-[#FF6F61]"
+                                                onClick={(e) => {
+                                                  e.stopPropagation();
+                                                  fabAutoFill();
+                                                }}
+                                              >
+                                                Auto-fill
+                                              </button>
+                                            )}
+                                          </div>
+                                          {isFabDescEditing ? (
+                                            <Popover
+                                              open
+                                              onOpenChange={(o) => {
+                                                if (!o) {
+                                                  setEditingField(null);
+                                                  setFabDescResults([]);
+                                                  setFabDescSearched(false);
+                                                }
+                                              }}
+                                            >
+                                              <PopoverAnchor asChild>
+                                                <Input
+                                                  autoFocus
+                                                  value={fabDescQuery}
+                                                  placeholder="Search fabric article desc…"
+                                                  className="h-6 px-1 text-[11px]"
+                                                  onClick={(e) => e.stopPropagation()}
+                                                  onChange={(e) => {
+                                                    const q = e.target.value;
+                                                    setFabDescQuery(q);
+                                                    runFabDescSearch(q);
+                                                  }}
+                                                  onBlur={() => {
+                                                    if (fabDescLoading || fabDescSearched) return;
+                                                    const trimmed = fabDescQuery.trim();
+                                                    if (trimmed) handleSave('fabricArticleDescription', trimmed);
+                                                    setEditingField(null);
+                                                    setFabDescResults([]);
+                                                  }}
+                                                  onKeyDown={(e) => {
+                                                    if (e.key === 'Escape') {
+                                                      setEditingField(null);
+                                                      setFabDescResults([]);
+                                                    }
+                                                    if (e.key === 'Enter' && fabDescQuery.trim()) {
+                                                      handleSave('fabricArticleDescription', fabDescQuery.trim() || null);
+                                                      setEditingField(null);
+                                                      setFabDescResults([]);
+                                                    }
+                                                  }}
+                                                />
+                                              </PopoverAnchor>
+                                              {(fabDescResults.length > 0 || fabDescLoading || fabDescSearched) && (
+                                                <PopoverContent
+                                                  align="start"
+                                                  sideOffset={2}
+                                                  className="w-[260px] p-0"
+                                                  onOpenAutoFocus={(e) => e.preventDefault()}
+                                                  onClick={(e) => e.stopPropagation()}
+                                                >
+                                                  <div className="max-h-56 overflow-y-auto py-1">
+                                                    {fabDescLoading ? (
+                                                      <div className="px-3 py-2 text-[11px] text-muted-foreground">Searching…</div>
+                                                    ) : fabDescResults.length === 0 ? (
+                                                      <div className="px-3 py-2 text-[11px] text-muted-foreground">No Fabric Article found</div>
+                                                    ) : (
+                                                      fabDescResults.map((r, i) => (
+                                                        <button
+                                                          key={r.fabricArticleNumber + i}
+                                                          type="button"
+                                                          className="flex w-full flex-col gap-0.5 px-3 py-1.5 text-left hover:bg-[#FF6F61]/10"
+                                                          onMouseDown={(e) => {
+                                                            e.preventDefault();
+                                                            const gridUpdates: Record<string, string | null> = {
+                                                              fabricArticleNumber:      r.fabricArticleNumber,
+                                                              fabricArticleDescription: r.fabricArticleDescription,
+                                                              fabDiv:                   r.mFabDiv,
+                                                              yarn1:                    r.mYarn,
+                                                              mainMvgr:                 r.mFabMainMvgr1,
+                                                              fabricMainMvgr:           r.mFabMainMvgr2,
+                                                              fConstruction:            r.mConstruction,
+                                                              fOunce:                   r.mOunz,
+                                                              fWidth:                   r.mWidth,
+                                                              weave:                    r.mWeave01,
+                                                              mFab2:                    r.mWeave02,
+                                                              fCount:                   r.mCount,
+                                                              composition:              r.mComposition,
+                                                              finish:                   r.mFinish,
+                                                              gsm:                      r.mGsm,
+                                                              lycra:                    r.mLycra,
+                                                            };
+                                                            setLocalValues((prev) => ({ ...prev, ...gridUpdates }));
+                                                            setEditingField(null);
+                                                            setFabDescResults([]);
+                                                            setFabDescSearched(false);
+                                                            onSave({ ...item, ...gridUpdates } as any, gridUpdates);
+                                                          }}
+                                                        >
+                                                          <span className="text-[11px] font-medium text-gray-900">{r.fabricArticleDescription || '—'}</span>
+                                                          {r.fabricArticleNumber && (
+                                                            <span className="truncate text-[10px] text-muted-foreground">{r.fabricArticleNumber}</span>
+                                                          )}
+                                                        </button>
+                                                      ))
+                                                    )}
+                                                  </div>
+                                                </PopoverContent>
+                                              )}
+                                            </Popover>
+                                          ) : (
+                                            <div
+                                              className="truncate text-[11px]"
+                                              style={{ color: fabDescDisplayVal ? '#111827' : '#9ca3af' }}
+                                            >
+                                              {fabDescDisplayVal || (isLocked ? '—' : 'Click to fill')}
+                                            </div>
+                                          )}
+                                        </div>
+                                      );
+                                    })()}
                                     <div className="border-t border-border px-2 py-1.5">
                                       <Button
                                         size="sm"
@@ -2410,7 +2732,7 @@ const ArticleCard = React.memo(
                                     })
                                     .filter(Boolean);
                                   if (parts.length > 0)
-                                    handleSave('bodyArticleDescription', parts.join('-').slice(0, 40));
+                                    handleSave('bodyArticleDescription', parts.join('-'));
                                 };
                                 const isBodyNoEditing = editingField === 'bot_bodyArticle';
                                 const bodyNoDisplayVal =
@@ -2427,8 +2749,9 @@ const ArticleCard = React.memo(
                                 // of "Category" under Article Information) so results never include body
                                 // articles that belong to a different major category.
                                 const runBodySearch = (q: string) => {
-                                  if (!q.trim()) { setBodyNoResults([]); return; }
+                                  if (!q.trim()) { setBodyNoResults([]); setBodyNoSearched(false); return; }
                                   setBodyNoLoading(true);
+                                  setBodyNoSearched(false);
                                   const token = localStorage.getItem('authToken');
                                   const params = new URLSearchParams({ q });
                                   if (effectiveMajCat) params.set('majorCategory', effectiveMajCat);
@@ -2437,8 +2760,8 @@ const ArticleCard = React.memo(
                                     { headers: { Authorization: `Bearer ${token}` } },
                                   )
                                     .then((r) => r.json())
-                                    .then((d) => setBodyNoResults(d.results ?? []))
-                                    .catch(() => setBodyNoResults([]))
+                                    .then((d) => { setBodyNoResults(d.results ?? []); setBodyNoSearched(true); })
+                                    .catch(() => { setBodyNoResults([]); setBodyNoSearched(true); })
                                     .finally(() => setBodyNoLoading(false));
                                 };
                                 // Selecting a search result (by number or by description) fills every
@@ -2448,7 +2771,9 @@ const ArticleCard = React.memo(
                                 // description — so it always ends up in the same canonical format as when
                                 // each field is picked by hand (and stays a meaningful search key later).
                                 const applyBodyArticleRow = (r: (typeof bodyNoResults)[number]) => {
-                                  const sourceMap: Record<string, string | number | null | undefined> = {
+                                  // Body attribute fields: always overwrite (even with null/empty) so that
+                                  // fields absent in body_article_data don't inherit stale FG article values.
+                                  const bodyAttrMap: Record<string, string | null | undefined> = {
                                     collar:        r.mCollarType,
                                     collarStyle:   r.mCollarStyle,
                                     neckDetails:   r.mNeckStyle,
@@ -2466,13 +2791,22 @@ const ArticleCard = React.memo(
                                     fit:           r.mFit,
                                     pattern:       r.mBodyStyle,
                                     length:        r.mLength,
-                                    cmtpCost:      r.cmtpCost,
-                                    cmpCost:       r.cmpCost,
-                                    fabCons:       r.fabCons,
-                                    width:         r.width,
+                                  };
+                                  // BOM cost fields: only overwrite when the body article has a value.
+                                  const bomMap: Record<string, string | number | null | undefined> = {
+                                    cmtpCost: r.cmtpCost,
+                                    cmpCost:  r.cmpCost,
+                                    fabCons:  r.fabCons,
+                                    width:    r.width,
                                   };
                                   const gridUpdates: Record<string, string> = { bodyArticle: r.bodyArticleNumber || '' };
-                                  Object.entries(sourceMap).forEach(([field, v]) => {
+                                  // Always write body attributes — clear old values when body_article_data has null
+                                  Object.entries(bodyAttrMap).forEach(([field, v]) => {
+                                    const str = (v !== null && v !== undefined) ? String(v).trim() : '';
+                                    gridUpdates[field] = str;
+                                  });
+                                  // BOM: only overwrite if non-empty
+                                  Object.entries(bomMap).forEach(([field, v]) => {
                                     if (v !== null && v !== undefined && String(v).trim() !== '') {
                                       gridUpdates[field] = String(v).trim();
                                     }
@@ -2487,6 +2821,7 @@ const ArticleCard = React.memo(
                                   setLocalValues((prev) => ({ ...prev, ...gridUpdates }));
                                   setEditingField(null);
                                   setBodyNoResults([]);
+                                  setBodyNoSearched(false);
                                   onSave({ ...item, ...gridUpdates } as any, gridUpdates);
                                 };
                                 return (
@@ -2501,6 +2836,7 @@ const ArticleCard = React.memo(
                                           setEditingField('bot_bodyArticle');
                                           setBodyNoQuery(bodyNoDisplayVal || '');
                                           setBodyNoResults([]);
+                                          setBodyNoSearched(false);
                                         }
                                       }}
                                     >
@@ -2520,6 +2856,7 @@ const ArticleCard = React.memo(
                                             if (!o) {
                                               setEditingField(null);
                                               setBodyNoResults([]);
+                                              setBodyNoSearched(false);
                                             }
                                           }}
                                         >
@@ -2536,10 +2873,10 @@ const ArticleCard = React.memo(
                                                 runBodySearch(q);
                                               }}
                                               onBlur={() => {
-                                                // Falls back to closing directly when no PopoverContent is mounted
-                                                // (e.g. before any results have loaded) so Radix has no dismissable
-                                                // layer to catch the outside click itself. Clicking a result is safe —
-                                                // its onMouseDown calls preventDefault(), so this blur never fires for it.
+                                                // Don't close while a "No Body Article found" message or loading
+                                                // indicator is showing — the PopoverContent mounting can steal focus
+                                                // momentarily, firing this blur before the user has seen the result.
+                                                if (bodyNoLoading || bodyNoSearched) return;
                                                 setEditingField(null);
                                                 setBodyNoResults([]);
                                               }}
@@ -2556,7 +2893,7 @@ const ArticleCard = React.memo(
                                               }}
                                             />
                                           </PopoverAnchor>
-                                          {(bodyNoResults.length > 0 || bodyNoLoading) && (
+                                          {(bodyNoResults.length > 0 || bodyNoLoading || bodyNoSearched) && (
                                             <PopoverContent
                                               align="start"
                                               sideOffset={2}
@@ -2567,6 +2904,8 @@ const ArticleCard = React.memo(
                                               <div className="max-h-56 overflow-y-auto py-1">
                                                 {bodyNoLoading ? (
                                                   <div className="px-3 py-2 text-[11px] text-muted-foreground">Searching…</div>
+                                                ) : bodyNoResults.length === 0 ? (
+                                                  <div className="px-3 py-2 text-[11px] text-muted-foreground">No Body Article found</div>
                                                 ) : (
                                                   bodyNoResults.map((r) => (
                                                     <button
@@ -2607,6 +2946,7 @@ const ArticleCard = React.memo(
                                         if (!isLocked && !isBodyDescEditing) {
                                           setEditingField('bot_bodyArticleDescription');
                                           setBodyNoQuery(bodyDescDisplayVal || '');
+                                          setBodyNoSearched(false);
                                           // Whatever's already been composed from the fields filled so far
                                           // (via the live rebuild above) becomes the starting search — no
                                           // need to retype it before matches show up.
@@ -2639,6 +2979,7 @@ const ArticleCard = React.memo(
                                             if (!o) {
                                               setEditingField(null);
                                               setBodyNoResults([]);
+                                              setBodyNoSearched(false);
                                             }
                                           }}
                                         >
@@ -2656,6 +2997,10 @@ const ArticleCard = React.memo(
                                                 runBodySearch(q);
                                               }}
                                               onBlur={() => {
+                                                // Don't close while "No Body Article found" is showing
+                                                if (bodyNoLoading || bodyNoSearched) return;
+                                                const trimmed = bodyNoQuery.trim();
+                                                if (trimmed) handleSave('bodyArticleDescription', trimmed);
                                                 setEditingField(null);
                                                 setBodyNoResults([]);
                                               }}
@@ -2665,14 +3010,14 @@ const ArticleCard = React.memo(
                                                   setBodyNoResults([]);
                                                 }
                                                 if (e.key === 'Enter' && bodyNoQuery.trim()) {
-                                                  handleSave('bodyArticleDescription', bodyNoQuery.trim().slice(0, 40) || null);
+                                                  handleSave('bodyArticleDescription', bodyNoQuery.trim() || null);
                                                   setEditingField(null);
                                                   setBodyNoResults([]);
                                                 }
                                               }}
                                             />
                                           </PopoverAnchor>
-                                          {(bodyNoResults.length > 0 || bodyNoLoading) && (
+                                          {(bodyNoResults.length > 0 || bodyNoLoading || bodyNoSearched) && (
                                             <PopoverContent
                                               align="start"
                                               sideOffset={2}
@@ -2683,6 +3028,8 @@ const ArticleCard = React.memo(
                                               <div className="max-h-56 overflow-y-auto py-1">
                                                 {bodyNoLoading ? (
                                                   <div className="px-3 py-2 text-[11px] text-muted-foreground">Searching…</div>
+                                                ) : bodyNoResults.length === 0 ? (
+                                                  <div className="px-3 py-2 text-[11px] text-muted-foreground">No Body Article found</div>
                                                 ) : (
                                                   bodyNoResults.map((r) => (
                                                     <button
@@ -2714,6 +3061,7 @@ const ArticleCard = React.memo(
                                         </div>
                                       )}
                                     </div>
+                                    {!hideCreateBody && (
                                     <div className="border-t border-border px-2 py-1.5">
                                       <Button
                                         size="sm"
@@ -2724,6 +3072,7 @@ const ArticleCard = React.memo(
                                         Create Body Article
                                       </Button>
                                     </div>
+                                    )}
                                   </>
                                 );
                               })()}
@@ -2750,10 +3099,11 @@ const ArticleCard = React.memo(
                     <div className="space-y-0 p-1">
                       {(allowGroups?.includes('BODY')
                         ? [
-                            { label: 'CMTP Cost', field: 'cmtpCost', editable: true, mandatory: true, isDropdown: false, isColor: false, isMarkdown: false },
-                            { label: 'CMP Cost',  field: 'cmpCost',  editable: true, mandatory: true, isDropdown: false, isColor: false, isMarkdown: false },
-                            { label: 'FAB Con',  field: 'fabCons',  editable: true, mandatory: true, isDropdown: false, isColor: false, isMarkdown: false },
-                            { label: 'Width',  field: 'width',  editable: true, mandatory: true, isDropdown: false, isColor: false, isMarkdown: false },
+                            { label: 'CMTP Cost', field: 'cmtpCost', editable: true, mandatory: false, isDropdown: false, isColor: false, isMarkdown: false },
+                            { label: 'CMP Cost',  field: 'cmpCost',  editable: true, mandatory: false, isDropdown: false, isColor: false, isMarkdown: false },
+                            { label: 'FAB Con',  field: 'fabCons',  editable: true, mandatory: false, isDropdown: false, isColor: false, isMarkdown: false },
+                            { label: 'Width',  field: 'width',  editable: true, mandatory: false, isDropdown: false, isColor: false, isMarkdown: false },
+                            { label: 'Basic Trim Cost', field: 'basicTrimCost', editable: true, mandatory: false, isDropdown: false, isColor: false, isMarkdown: false },
                           ]
                         : [
                             { label: 'RATE / COST', field: 'rate', editable: true, mandatory: true, isDropdown: false, isColor: false, isMarkdown: false },
@@ -2872,8 +3222,8 @@ const ArticleCard = React.memo(
                 </div>
               )}
 
-              {/* Proceed for FG Article Creation — hidden on New Articles and Failed Creations */}
-              {!item.articleNumber && pathType !== 'new' && pathType !== 'failed' &&
+              {/* Proceed for FG Article Creation — hidden on Body Article pages, New Articles, and Failed Creations */}
+              {!isBodyArticle && !item.articleNumber && pathType !== 'new' && pathType !== 'failed' &&
                 (() => {
                   const effectiveVendorCode =
                     localValues['vendorCode'] !== undefined ? localValues['vendorCode'] : item.vendorCode;
@@ -2997,18 +3347,62 @@ const ArticleCard = React.memo(
                 </Button>
               </div>
             </DialogHeader>
-            <div className="flex items-center justify-center overflow-auto p-4" style={{ maxHeight: '80vh' }}>
+            <div
+              ref={panRef}
+              onMouseDown={onPanMouseDown}
+              className={`flex overflow-auto p-4 ${
+                imgZoom > 1 ? (isImgPanning ? 'cursor-grabbing' : 'cursor-grab') : ''
+              }`}
+              // Fixed to the image's 100%-zoom footprint (plus padding, via border-box)
+              // so the dialog stays the same size at every zoom level — zooming scrolls
+              // within this frame instead of growing it.
+              //
+              // "safe center" degrades to plain "center" in browsers that don't support
+              // it — but plain centering of overflowing flex content can make the start
+              // edge unreachable by scroll, which is the other half of the "can't reach
+              // the top" bug. "safe" keeps it centered until it overflows, then falls
+              // back to start-aligned so every edge stays reachable.
+              style={{
+                width: imgFrameWidth ? imgFrameWidth + IMG_VIEWER_PADDING * 2 : undefined,
+                height: imgFrameHeight ? imgFrameHeight + IMG_VIEWER_PADDING * 2 : undefined,
+                maxWidth: '85vw',
+                maxHeight: '80vh',
+                alignItems: 'safe center',
+                justifyContent: 'safe center',
+              } as React.CSSProperties}
+            >
               <img
                 src={imgUrl || ''}
                 alt={item.imageName || 'preview'}
-                className="block transition-transform duration-200 will-change-transform"
-                style={{
-                  maxWidth: '85vw',
-                  maxHeight: '75vh',
-                  objectFit: 'contain',
-                  transform: `scale(${imgZoom}) rotate(${imgRotation}deg)`,
-                  transformOrigin: 'center',
+                draggable={false}
+                onLoad={(e) => {
+                  const t = e.currentTarget;
+                  setNaturalSize({ w: t.naturalWidth, h: t.naturalHeight });
                 }}
+                className="block shrink-0 transition-[width,height,transform] duration-200 will-change-transform"
+                style={
+                  imgBoxWidth && imgBoxHeight
+                    ? {
+                        width: imgBoxWidth,
+                        height: imgBoxHeight,
+                        // Tailwind Preflight sets `img { max-width: 100% }`, which would
+                        // cap the zoomed width at the dialog's width while the height grew
+                        // freely — distorting the box so `object-fit: contain` letterboxed
+                        // the image with empty bands instead of actually zooming it.
+                        maxWidth: 'none',
+                        maxHeight: 'none',
+                        objectFit: 'contain',
+                        transform: `rotate(${imgRotation}deg)`,
+                        transformOrigin: 'center',
+                      }
+                    : {
+                        maxWidth: '85vw',
+                        maxHeight: '75vh',
+                        objectFit: 'contain',
+                        transform: `scale(${imgZoom}) rotate(${imgRotation}deg)`,
+                        transformOrigin: 'center',
+                      }
+                }
               />
             </div>
           </DialogContent>
@@ -3067,6 +3461,7 @@ export const ApproverArticleList: React.FC<ApproverArticleListProps> = ({
   onRefresh,
   pathType,
   allowGroups,
+  hideCreateBody,
   serverPagination,
 }) => {
   const [cardGroups, setCardGroups] = useState<CardGroup[]>(() => {
@@ -3154,6 +3549,7 @@ export const ApproverArticleList: React.FC<ApproverArticleListProps> = ({
           cardGroups={visibleCardGroups}
           pathType={pathType}
           allowGroups={allowGroups}
+          hideCreateBody={hideCreateBody}
         />
       ))}
     </div>

@@ -1,7 +1,8 @@
 import { Router } from 'express';
 import multer from 'multer';
 import { ApproverController } from '../controllers/ApproverController';
-import { authenticate, requireApprover, requireApprovalRights, requireModifyRights } from '../middleware/auth';
+import { getMajorCategories } from '../controllers/adminController';
+import { authenticate, requireApprover, requireApprovalRights, requireModifyRights, requireBodyApprovalRights, requireFabricApprovalRights } from '../middleware/auth';
 import { asyncHandler } from '../middleware/asyncHandler';
 
 const router = Router();
@@ -82,6 +83,38 @@ router.get('/fabric-article-data/search', h(ApproverController.searchFabricArtic
 // (an exact Body Article Number match is always included even if outside the top 10)
 router.get('/body-article-data/search', h(ApproverController.searchBodyArticleData));
 
+// Create body article from FG article — copies Body & Construction fields into body_article_data
+router.post('/create-body-article', h(ApproverController.createBodyArticleFromFG));
+
+// Create fabric article from FG article — copies Construction & Fabric fields into fabric_article_data
+router.post('/create-fabric-article', h(ApproverController.createFabricArticleFromFG));
+
+// Body Article list (type=FG) — paginated list from body_article_data for the Body Article New Articles page
+router.get('/body-articles', h(ApproverController.getBodyArticleItems));
+
+// Fabric Article data list (fabric_article_type=FG) — for FG New Articles page in Fabric Article tab
+router.get('/fabric-article-data', h(ApproverController.getFabricArticleDataItems));
+
+// Submit FG New Articles to SAP via ZMM_FAB_ART_CREATION_RFC
+// Submit fabric articles to SAP via ZMM_FAB_ART_CREATION_RFC — FABRIC_APPROVER and ADMIN only
+router.post('/fabric-article-data/submit', requireFabricApprovalRights, h(ApproverController.submitFabricArticleData));
+
+// Get / Update a single fabric_article_data record (used by FG New Articles detail page)
+router.get('/fabric-article-data/:id', h(ApproverController.getFabricArticleDataById));
+router.put('/fabric-article-data/:id', h(ApproverController.updateFabricArticleData));
+
+// Delete body articles (used on reject in Body Article New Articles page)
+router.post('/body-articles/bulk-delete', requireBodyApprovalRights, h(ApproverController.deleteBodyArticles));
+
+// Submit body articles to SAP via ZMM_BODY_ART_CRT_V3 — BODY_APPROVER and ADMIN only
+router.post('/body-articles/submit', requireBodyApprovalRights, h(ApproverController.submitBodyArticles));
+
+// Get / Update a single body_article_data record (used by Body Article detail page)
+router.get('/body-articles/:id',         h(ApproverController.getBodyArticleById));
+router.put('/body-articles/:id',         h(ApproverController.updateBodyArticle));
+// Creator confirms body article — makes it visible to BODY_APPROVER
+router.post('/body-articles/:id/confirm', h(ApproverController.creatorConfirmBodyArticle));
+
 // Sizes for a given major category (from maj_cat_sizes table)
 router.get('/sizes-for-majcat/:majCat', h(ApproverController.getSizesForMajCat));
 
@@ -103,5 +136,12 @@ router.get('/fabric-grid-values', h(ApproverController.getFabricGridValues));
 
 // Body attribute grid values from national_grid_master (M_COLLAR_TYPE, M_NO_OF_POCKET, etc.)
 router.get('/national-grid-values', h(ApproverController.getNationalGridValues));
+
+// Major category details — full table (seg, div, sub_div, maj_cat, mc_code, mc_des, hsn_code, mc_status)
+// Supports ?div=MENS&mcStatus=ACT&search=SHIRT for optional filtering
+router.get('/major-category-details', h(ApproverController.getMajorCategoryDetails));
+
+// Major categories list — accessible to all authenticated roles (Creator, Approver, Admin, etc.)
+router.get('/major-categories', h(getMajorCategories));
 
 export default router;

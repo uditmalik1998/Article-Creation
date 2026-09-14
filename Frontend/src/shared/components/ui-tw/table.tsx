@@ -1,9 +1,19 @@
 import * as React from 'react';
 import { cn } from '@/lib/utils';
 
-const Table = React.forwardRef<HTMLTableElement, React.HTMLAttributes<HTMLTableElement>>(
-  ({ className, ...props }, ref) => (
-    <div className="relative w-full overflow-auto">
+interface TableProps extends React.HTMLAttributes<HTMLTableElement> {
+  /** Customize the wrapping scroll container (defaults to `relative w-full overflow-auto`)
+   * — used by DataTable to fold its own scroll region into this one instead of nesting
+   * a second overflow-auto div around it, which left the scrollbar/sticky-header behavior
+   * ambiguous between two containers. */
+  wrapperClassName?: string;
+  wrapperStyle?: React.CSSProperties;
+  wrapperRef?: React.Ref<HTMLDivElement>;
+}
+
+const Table = React.forwardRef<HTMLTableElement, TableProps>(
+  ({ className, wrapperClassName, wrapperStyle, wrapperRef, ...props }, ref) => (
+    <div ref={wrapperRef} className={cn('relative w-full overflow-auto', wrapperClassName)} style={wrapperStyle}>
       <table ref={ref} className={cn('w-full caption-bottom text-sm', className)} {...props} />
     </div>
   ),

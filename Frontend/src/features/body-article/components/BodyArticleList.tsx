@@ -11,4 +11,4 @@ export const BodyArticleList: React.FC<ApproverArticleListProps> = ({
   fabHierarchy: _fabHierarchy,
   forceStaticGroups: _forceStaticGroups,
   ...rest
-}) => <ApproverArticleList {...rest} allowGroups={BODY_ALLOW_GROUPS} />;
+}) => <ApproverArticleList {...rest} allowGroups={BODY_ALLOW_GROUPS} hideCreateBody />;

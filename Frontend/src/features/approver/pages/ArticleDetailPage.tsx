@@ -483,6 +483,15 @@ export default function ArticleDetailPage() {
       // Color is mandatory on New Articles — on Save & Submit the approver's
       // direct approval auto-generates variants from this BOM color.
       if (pathType === 'new' && !item.colour) missing.push('COLOUR');
+      // Body Article NO and DESC are mandatory for FG articles.
+      // Body Article NO must be exactly 10 digits.
+      const bodyNo = (item.bodyArticle || '').trim();
+      if (!bodyNo) {
+        missing.push('BODY ARTICLE NO.');
+      } else if (!/^\d{10}$/.test(bodyNo)) {
+        missing.push('BODY ARTICLE NO. (must be exactly 10 digits)');
+      }
+      if (!(item.bodyArticleDescription || '').trim()) missing.push('BODY ARTICLE DESC.');
       missing.push(...getMissingMandatoryFields(item));
       if (missing.length > 0) acc.push({ articleId: item.sapArticleId || item.articleNumber || item.imageName || item.id, missing });
       return acc;
@@ -598,7 +607,11 @@ export default function ArticleDetailPage() {
         method: 'POST', headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` },
         body: JSON.stringify({ ids: [item.id] }),
       });
-      if (!r.ok) throw new Error('Request failed');
+      const data = await r.json();
+      if (!r.ok) {
+        message.error(data.error || 'Failed to create fabric article');
+        return;
+      }
       message.success('Fabric article creation initiated');
       await refetchCurrentItem();
     } catch { message.error('Failed to create fabric article'); }
@@ -611,7 +624,11 @@ export default function ArticleDetailPage() {
         method: 'POST', headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` },
         body: JSON.stringify({ ids: [item.id] }),
       });
-      if (!r.ok) throw new Error('Request failed');
+      const data = await r.json();
+      if (!r.ok) {
+        message.error(data.error || 'Failed to create body article');
+        return;
+      }
       message.success('Body article creation initiated');
       await refetchCurrentItem();
     } catch { message.error('Failed to create body article'); }

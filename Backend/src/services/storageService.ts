@@ -31,6 +31,7 @@ export interface WatermarkLabel {
   year?: string | null;
   rate?: number | string | null;
   mrp?: number | string | null;
+  approved_by?: string | null;
 }
 
 // Custom HTTPS agent: disables TLS packet-length strict checks that cause
@@ -462,10 +463,13 @@ export class StorageService {
         const safeColor = colorCode ? this.sanitizeColor(colorCode) : undefined;
         const wantWatermark = !!labelData;
 
+        console.log(`[WM_DIAG] uploadApprovedImage: article=${safeArticleNumber} wantWatermark=${wantWatermark} sourceUrl="${sourceImageUrl}"`);
+
         // Preferred path: direct S3-to-S3 copy — no HTTP download, no network fetch needed.
         // Works for both public CDN URLs and signed R2 URLs.
         // SKIPPED when watermarking is requested — we have to touch the bytes.
         const sourceKey = this.extractKeyFromAnyUrl(sourceImageUrl);
+        console.log(`[WM_DIAG] extractKeyFromAnyUrl → "${sourceKey}"`);
         if (sourceKey && !wantWatermark) {
             const extension = this.extensionFromPath(sourceKey) || 'jpg';
             const destKey = this.buildApprovedKey(safeArticleNumber, extension, safeColor);
@@ -488,6 +492,7 @@ export class StorageService {
             const fallbackDestKey = this.buildApprovedKey(safeArticleNumber, fallbackExt, safeColor);
             // Second fallback (and watermark path): GetObject from source bucket → optionally watermark → PutObject.
             try {
+                console.log(`[WM_DIAG] Trying S3 GetObject: bucket=${this.bucket} key=${sourceKey}`);
                 const getResult = await this.s3Client.send(new GetObjectCommand({ Bucket: this.bucket, Key: sourceKey }));
                 const sourceMime = getResult.ContentType || 'image/jpeg';
                 const chunks: Uint8Array[] = [];

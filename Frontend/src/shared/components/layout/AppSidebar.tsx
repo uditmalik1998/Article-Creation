@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
+import { useQuery } from '@tanstack/react-query';
 import {
   Home,
   ShoppingBag,
@@ -58,6 +59,7 @@ import {
   type NotificationItem,
 } from '../../services/notifications/notificationStore';
 import { resetExtractionSession } from '../../hooks/extraction/useImageExtraction';
+import { getMyExpenseAccess } from '../../../services/adminApi';
 
 const COLLAPSED_KEY = 'appSidebarCollapsed';
 
@@ -116,6 +118,17 @@ export const AppSidebar: React.FC<AppSidebarProps> = ({ collapsed, onCollapsedCh
 
   // PD_DESIGNER is a single-purpose role — only Model Generation, no other nav.
   const isPdDesigner = role === 'PD_DESIGNER';
+
+  // Expense Data access is per-email, not per-role, so the only way to know
+  // whether to show its nav entry is to ask. Admins already reach it through
+  // the Admin Panel, so they are skipped.
+  const { data: expenseAccess } = useQuery({
+    queryKey: ['my-expense-access', undefined],
+    queryFn: () => getMyExpenseAccess(),
+    enabled: !isPdDesigner && !isAdmin && !!userData?.id,
+    staleTime: 5 * 60_000,
+    retry: false,
+  });
   // PD is an approval-only role: article queues + PD Approval, no extraction/admin.
   const isPd = role === 'PD';
 
@@ -175,6 +188,7 @@ export const AppSidebar: React.FC<AppSidebarProps> = ({ collapsed, onCollapsedCh
     (role === 'APPROVER' ||
       role === 'CATEGORY_HEAD' ||
       role === 'SUB_DIVISION_HEAD' ||
+      role === 'FABRIC_APPROVER' ||
       isAdmin ||
       role === 'CREATOR' ||
       role === 'PO_COMMITTEE' ||
@@ -186,24 +200,49 @@ export const AppSidebar: React.FC<AppSidebarProps> = ({ collapsed, onCollapsedCh
       label: 'Fabric Article',
       children: [
         { key: '/fabric-article', Icon: FileText, label: 'New articles' },
-        { key: '/fabric-article/old-articles', Icon: History, label: 'Old articles' },
         { key: '/fabric-article/rejected', Icon: XCircle, label: 'Rejected' },
         { key: '/fabric-article/created', Icon: CheckCircle2, label: 'Created' },
         { key: '/fabric-article/failed', Icon: AlertTriangle, label: 'Failed Creations' },
+        { key: '/fabric-article/fg-new', Icon: FileText, label: 'FG New Articles' },
+        { key: '/fabric-article/fg-created', Icon: CheckCircle2, label: 'FG Created' },
       ],
     });
+  }
+
+  // Body Article — visible to standard approver roles AND the dedicated BODY_APPROVER role
+  if (
+    !isPdDesigner &&
+    (role === 'APPROVER' ||
+      role === 'CATEGORY_HEAD' ||
+      role === 'SUB_DIVISION_HEAD' ||
+      role === 'BODY_APPROVER' ||
+      isAdmin ||
+      role === 'CREATOR' ||
+      role === 'PO_COMMITTEE' ||
+      isPd)
+  ) {
     items.push({
       key: '/body-article-group',
       Icon: CheckSquare,
       label: 'Body Article',
       children: [
         { key: '/body-article', Icon: FileText, label: 'New articles' },
+        { key: '/body-article/created', Icon: CheckCircle2, label: 'Created' },
       ],
     });
   }
 
   if (!isPdDesigner && (role === 'APPROVER' || role === 'CATEGORY_HEAD' || role === 'SUB_DIVISION_HEAD' || isAdmin)) {
     items.push({ key: '/po-presentation', Icon: FileText, label: 'PO Presentation' });
+  }
+
+  // Expense Data: CREATOR/APPROVER get requester rights by role, everyone
+  // else in `canView` (a historic view role, or a grant) gets read access —
+  // `canView` from /expense/my-access folds both in. Admin reaches the same
+  // tables via the full Admin → Expenses page instead.
+  if (!isPdDesigner && !isAdmin && expenseAccess?.canView) {
+    items.push({ key: '/admin/expense-masters', Icon: ShoppingBag, label: 'Expense Data' });
+    items.push({ key: '/admin/expense-change-requests', Icon: ClipboardList, label: 'Expense Change Requests' });
   }
 
   if (!isPdDesigner && isAdmin) {
@@ -216,6 +255,7 @@ export const AppSidebar: React.FC<AppSidebarProps> = ({ collapsed, onCollapsedCh
         { key: '/admin/hierarchy', Icon: Globe, label: 'Hierarchy' },
         { key: '/admin/users', Icon: User, label: 'Users' },
         { key: '/admin/expenses', Icon: ShoppingBag, label: 'Expenses' },
+        { key: '/admin/expense-audit-log', Icon: History, label: 'Expense Audit Log' },
         { key: '/admin/srm-failed', Icon: AlertTriangle, label: 'Failed Extractions' },
         { key: '/admin/ksml-uploader', Icon: Upload, label: 'KSML Uploader' },
         { key: '/admin/poolb-uploader', Icon: Upload, label: 'Pool B Uploader' },

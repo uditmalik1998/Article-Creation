@@ -1,4 +1,5 @@
 import { useEffect, useState, useCallback, useRef } from 'react';
+import { useNavigate } from 'react-router-dom';
 import dayjs, { type Dayjs } from 'dayjs';
 import {
   User,
@@ -16,6 +17,8 @@ import {
   Table as TableIcon,
   Inbox,
   Download,
+  ClipboardList,
+  History,
 } from 'lucide-react';
 import {
   Alert,
@@ -43,9 +46,18 @@ import { APP_CONFIG } from '../../../constants/app/config';
 
 const api = new BackendApiService();
 
+interface VendorSyncResult {
+  upserted: number;
+  pages: number;
+  durationMs: number;
+  startedAt: string;
+  error?: string;
+}
 interface VendorMasterStatus {
   count: number;
   lastSyncedAt: string | null;
+  inProgress?: boolean;
+  lastResult?: VendorSyncResult | null;
 }
 
 interface MajCatGridMeta {
@@ -117,6 +129,24 @@ interface BodyArticleDataMeta {
   truncated?: number;
 }
 
+interface BroaderMenuMeta {
+  uploadedAt?: string;
+  fileName?: string;
+  sheet?: string;
+  total?: number;
+  majCats?: number;
+  subCats?: number;
+  active?: number;
+  lastUpload?: string;
+  inserted?: number;
+  updated?: number;
+  skipped?: number;
+  truncated?: number;
+  duplicates?: number;
+  unmappedValues?: number;
+  missingColumns?: string[];
+}
+
 interface SegmentMasterMeta {
   total?: number;
   categories?: number;
@@ -165,6 +195,7 @@ interface TestApiResult {
 const RAW_ARTICLES_MIN_DATE = dayjs('2026-05-27');
 
 export default function Admin() {
+  const navigate = useNavigate();
   const [stats, setStats] = useState({ totalUploads: 0, completed: 0, failed: 0, pending: 0 });
   const [expenseData, setExpenseData] = useState<any>(null);
   const [imageData, setImageData] = useState<any>(null);
@@ -237,6 +268,11 @@ export default function Admin() {
   const [bodyArticleDataUploading, setBodyArticleDataUploading] = useState(false);
   const [bodyArticleDataProgress, setBodyArticleDataProgress] = useState<number>(0);
   const bodyArticleDataFileRef = useRef<HTMLInputElement | null>(null);
+  const [broaderMenuMeta, setBroaderMenuMeta] = useState<BroaderMenuMeta | null>(null);
+  const [broaderMenuStatusLoading, setBroaderMenuStatusLoading] = useState(false);
+  const [broaderMenuUploading, setBroaderMenuUploading] = useState(false);
+  const [broaderMenuProgress, setBroaderMenuProgress] = useState<number>(0);
+  const broaderMenuFileRef = useRef<HTMLInputElement | null>(null);
 
   // Segment Master (maj_cat_segment)
   const [segmentMasterMeta, setSegmentMasterMeta] = useState<SegmentMasterMeta | null>(null);
@@ -290,11 +326,35 @@ export default function Admin() {
       });
       const data = await res.json();
       if (!res.ok) throw new Error(data.error || 'Vendor master sync failed');
-      message.success('Vendor master sync started in background. Records will update shortly.');
-      setTimeout(() => loadVendorStatus(), 5000);
+      message.info('Vendor master sync started — polling for completion…');
+
+      // Poll status every 4s until inProgress flips to false
+      const poll = async () => {
+        const token = localStorage.getItem('authToken');
+        const statusRes = await fetch(`${APP_CONFIG.api.baseURL}/admin/vendor-master/status`, {
+          headers: token ? { Authorization: `Bearer ${token}` } : {},
+        });
+        const statusData = await statusRes.json();
+        if (statusData.success) {
+          setVendorStatus(statusData.data);
+          if (statusData.data.inProgress) {
+            setTimeout(poll, 4000);
+          } else {
+            setVendorSyncing(false);
+            const result = statusData.data.lastResult;
+            if (result?.error) {
+              message.error(`Sync failed: ${result.error}`);
+            } else if (result) {
+              message.success(`Sync complete — ${result.upserted.toLocaleString()} records updated in ${result.pages} pages`);
+            }
+          }
+        } else {
+          setVendorSyncing(false);
+        }
+      };
+      setTimeout(poll, 4000);
     } catch (err: any) {
       message.error(err?.message || 'Vendor master sync failed');
-    } finally {
       setVendorSyncing(false);
     }
   };
@@ -394,6 +454,24 @@ export default function Admin() {
   };
 
   // ─────────────────────────────── Maj-Cat Grid ───────────────────────────────
+  const downloadMajCatGridData = () => {
+    const token = localStorage.getItem('authToken');
+    const url = `${APP_CONFIG.api.baseURL}/admin/majcat-grid/download`;
+    fetch(url, { headers: token ? { Authorization: `Bearer ${token}` } : {} })
+      .then((r) => {
+        if (!r.ok) throw new Error('Download failed');
+        return r.blob();
+      })
+      .then((blob) => {
+        const today = new Date().toISOString().slice(0, 10);
+        const a = document.createElement('a');
+        a.href = URL.createObjectURL(blob);
+        a.download = `MAJ_CAT_GRID_${today}.xlsx`;
+        a.click();
+      })
+      .catch(() => message.error('Failed to download major category grid data'));
+  };
+
   const downloadMajCatTemplate = () => {
     const token = localStorage.getItem('authToken');
     const url = `${APP_CONFIG.api.baseURL}/admin/majcat-grid/template`;
@@ -588,6 +666,24 @@ export default function Admin() {
       .catch(() => message.error('Failed to download template'));
   };
 
+  const downloadSizeMasterData = () => {
+    const token = localStorage.getItem('authToken');
+    const url = `${APP_CONFIG.api.baseURL}/admin/size-master/download`;
+    fetch(url, { headers: token ? { Authorization: `Bearer ${token}` } : {} })
+      .then((r) => {
+        if (!r.ok) throw new Error('Download failed');
+        return r.blob();
+      })
+      .then((blob) => {
+        const today = new Date().toISOString().slice(0, 10);
+        const a = document.createElement('a');
+        a.href = URL.createObjectURL(blob);
+        a.download = `SIZE_MASTER_${today}.xlsx`;
+        a.click();
+      })
+      .catch(() => message.error('Failed to download size master data'));
+  };
+
   const handleSizeMasterUpload = async (file: File) => {
     setSizeMasterUploading(true);
     setSizeMasterProgress(0);
@@ -648,6 +744,24 @@ export default function Admin() {
         a.click();
       })
       .catch(() => message.error('Failed to download template'));
+  };
+
+  const downloadColorMasterData = () => {
+    const token = localStorage.getItem('authToken');
+    const url = `${APP_CONFIG.api.baseURL}/admin/color-master/download`;
+    fetch(url, { headers: token ? { Authorization: `Bearer ${token}` } : {} })
+      .then((r) => {
+        if (!r.ok) throw new Error('Download failed');
+        return r.blob();
+      })
+      .then((blob) => {
+        const today = new Date().toISOString().slice(0, 10);
+        const a = document.createElement('a');
+        a.href = URL.createObjectURL(blob);
+        a.download = `COLOR_MASTER_${today}.xlsx`;
+        a.click();
+      })
+      .catch(() => message.error('Failed to download color master data'));
   };
 
   const handleColorMasterUpload = async (file: File) => {
@@ -760,6 +874,24 @@ export default function Admin() {
     }
   }, []);
 
+  const downloadFabricArticleMasterData = () => {
+    const token = localStorage.getItem('authToken');
+    const url = `${APP_CONFIG.api.baseURL}/admin/fabric-article-master/download`;
+    fetch(url, { headers: token ? { Authorization: `Bearer ${token}` } : {} })
+      .then((r) => {
+        if (!r.ok) throw new Error('Download failed');
+        return r.blob();
+      })
+      .then((blob) => {
+        const today = new Date().toISOString().slice(0, 10);
+        const a = document.createElement('a');
+        a.href = URL.createObjectURL(blob);
+        a.download = `FABRIC_ARTICLE_MASTER_${today}.xlsx`;
+        a.click();
+      })
+      .catch(() => message.error('Failed to download fabric article master data'));
+  };
+
   const downloadFabricArticleMasterTemplate = () => {
     const token = localStorage.getItem('authToken');
     const url = `${APP_CONFIG.api.baseURL}/admin/fabric-article-master/template`;
@@ -863,6 +995,71 @@ export default function Admin() {
       setBodyArticleDataUploading(false);
       setTimeout(() => setBodyArticleDataProgress(0), 1500);
       if (bodyArticleDataFileRef.current) bodyArticleDataFileRef.current.value = '';
+    }
+  };
+
+  // ─────────────────────────────── Broader Menu ───────────────────────────────
+  const loadBroaderMenuStatus = useCallback(async () => {
+    setBroaderMenuStatusLoading(true);
+    try {
+      const token = localStorage.getItem('authToken');
+      const res = await fetch(`${APP_CONFIG.api.baseURL}/admin/broader-menu/status`, {
+        headers: token ? { Authorization: `Bearer ${token}` } : {},
+      });
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.error || 'Failed to load broader menu status');
+      setBroaderMenuMeta((prev) => ({ ...prev, ...data.data }));
+    } catch (err: any) {
+      message.error(err?.message || 'Failed to load broader menu status');
+    } finally {
+      setBroaderMenuStatusLoading(false);
+    }
+  }, []);
+
+  const downloadBroaderMenuTemplate = () => {
+    const token = localStorage.getItem('authToken');
+    const url = `${APP_CONFIG.api.baseURL}/admin/broader-menu/template`;
+    fetch(url, { headers: token ? { Authorization: `Bearer ${token}` } : {} })
+      .then((r) => r.blob())
+      .then((blob) => {
+        const a = document.createElement('a');
+        a.href = URL.createObjectURL(blob);
+        a.download = 'BROADER_MENU_TEMPLATE.xlsx';
+        a.click();
+      })
+      .catch(() => message.error('Failed to download template'));
+  };
+
+  const handleBroaderMenuUpload = async (file: File) => {
+    setBroaderMenuUploading(true);
+    setBroaderMenuProgress(0);
+    try {
+      const token = localStorage.getItem('authToken');
+      const formData = new FormData();
+      formData.append('file', file);
+      const progressInterval = setInterval(() => {
+        setBroaderMenuProgress((prev) => Math.min(prev + 5, 90));
+      }, 500);
+      const res = await fetch(`${APP_CONFIG.api.baseURL}/admin/broader-menu/upload`, {
+        method: 'POST',
+        headers: token ? { Authorization: `Bearer ${token}` } : {},
+        body: formData,
+      });
+      clearInterval(progressInterval);
+      setBroaderMenuProgress(100);
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.error || 'Upload failed');
+      message.success(data.message);
+      setBroaderMenuMeta(data.data);
+      // Refresh the derived counts (maj cats / sub cats / active) the upload
+      // response doesn't carry.
+      await loadBroaderMenuStatus();
+    } catch (err: any) {
+      message.error(err?.message || 'Upload failed');
+    } finally {
+      setBroaderMenuUploading(false);
+      setTimeout(() => setBroaderMenuProgress(0), 1500);
+      if (broaderMenuFileRef.current) broaderMenuFileRef.current.value = '';
     }
   };
 
@@ -1206,12 +1403,13 @@ export default function Admin() {
     loadFabricArticleDataStatus();
     loadFabricArticleMasterStatus();
     loadBodyArticleDataStatus();
+    loadBroaderMenuStatus();
     loadSegmentMasterStatus();
     loadNationalGridStatus();
     loadHierarchyExcelStatus();
     loadPipelineStatus();
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [loadVendorStatus, loadMajCatGridStatus, loadMandatoryGridStatus, loadSizeMasterStatus, loadColorMasterStatus, loadFabricArticleDataStatus, loadFabricArticleMasterStatus, loadBodyArticleDataStatus, loadSegmentMasterStatus, loadNationalGridStatus, loadHierarchyExcelStatus, loadPipelineStatus]);
+  }, [loadVendorStatus, loadMajCatGridStatus, loadMandatoryGridStatus, loadSizeMasterStatus, loadColorMasterStatus, loadFabricArticleDataStatus, loadFabricArticleMasterStatus, loadBodyArticleDataStatus, loadBroaderMenuStatus, loadSegmentMasterStatus, loadNationalGridStatus, loadHierarchyExcelStatus, loadPipelineStatus]);
 
   const loadData = async () => {
     setLoading(true);
@@ -1319,10 +1517,29 @@ export default function Admin() {
           <h1 className="m-0 text-xl font-bold text-white">Admin Dashboard</h1>
           <p className="m-0 mt-0.5 text-xs text-white/60">System health, sync status &amp; analytics</p>
         </div>
-        <Button onClick={loadData} disabled={loading} variant="outline" className="border-white/30 bg-white/10 text-white hover:bg-white/20 hover:text-white">
-          <RotateCw className={loading ? 'animate-spin' : ''} />
-          Refresh
-        </Button>
+        <div className="flex gap-2">
+          <Button
+            onClick={() => navigate('/admin/expense-change-requests')}
+            variant="outline"
+            className="border-white/30 bg-white/10 text-white hover:bg-white/20 hover:text-white"
+          >
+            <ClipboardList />
+            Change Requests
+          </Button>
+          <Button
+            onClick={() => navigate('/admin/expense-audit-log')}
+            variant="outline"
+            className="border-white/30 bg-white/10 text-white hover:bg-white/20 hover:text-white"
+            title="Every request raised, every stage action, and every write to a master table"
+          >
+            <History />
+            Audit Log
+          </Button>
+          <Button onClick={loadData} disabled={loading} variant="outline" className="border-white/30 bg-white/10 text-white hover:bg-white/20 hover:text-white">
+            <RotateCw className={loading ? 'animate-spin' : ''} />
+            Refresh
+          </Button>
+        </div>
       </div>
 
       <Spinner spinning={loading}>
@@ -1377,10 +1594,16 @@ export default function Admin() {
               <Search className="h-4 w-4" />
               raw_articles Pipeline
             </CardTitle>
-            <Button size="sm" variant="outline" onClick={loadPipelineStatus} disabled={pipelineStatusLoading}>
-              <RotateCw className={pipelineStatusLoading ? 'animate-spin' : ''} />
-              Refresh Status
-            </Button>
+            <div className="flex gap-2">
+              <Button size="sm" variant="outline" onClick={() => navigate('/admin/expense/raw-articles')}>
+                <Eye />
+                View Data
+              </Button>
+              <Button size="sm" variant="outline" onClick={loadPipelineStatus} disabled={pipelineStatusLoading}>
+                <RotateCw className={pipelineStatusLoading ? 'animate-spin' : ''} />
+                Refresh Status
+              </Button>
+            </div>
           </CardHeader>
           <CardContent>
             {/* Pipeline status row */}
@@ -1573,10 +1796,16 @@ export default function Admin() {
               <RefreshCw className="h-4 w-4" />
               Vendor Master Sync
             </CardTitle>
-            <Button size="sm" variant="outline" onClick={loadVendorStatus} disabled={vendorStatusLoading}>
-              <RotateCw className={vendorStatusLoading ? 'animate-spin' : ''} />
-              Refresh Status
-            </Button>
+            <div className="flex gap-2">
+              <Button size="sm" variant="outline" onClick={() => navigate('/admin/expense/vendor-master')}>
+                <Eye />
+                View Data
+              </Button>
+              <Button size="sm" variant="outline" onClick={loadVendorStatus} disabled={vendorStatusLoading}>
+                <RotateCw className={vendorStatusLoading ? 'animate-spin' : ''} />
+                Refresh Status
+              </Button>
+            </div>
           </CardHeader>
           <CardContent>
             <Spinner spinning={vendorStatusLoading}>
@@ -1598,9 +1827,29 @@ export default function Admin() {
                     <Descriptions.Item label="Schedule">Daily at 2:00 AM IST</Descriptions.Item>
                     <Descriptions.Item label="Source API">
                       <span className="font-mono text-xs text-muted-foreground">
-                        https://my-dab-app.azurewebsites.net/api/ET_Supplier_Master
+                        https://my-dab-app.azurewebsites.net/api/DY_SUPPLIER_MST
                       </span>
                     </Descriptions.Item>
+                    {vendorStatus.inProgress && (
+                      <Descriptions.Item label="Status">
+                        <span className="flex items-center gap-1.5 text-blue-600">
+                          <RefreshCw className="h-3.5 w-3.5 animate-spin" /> Sync in progress…
+                        </span>
+                      </Descriptions.Item>
+                    )}
+                    {vendorStatus.lastResult && (
+                      <Descriptions.Item label="Last Run">
+                        {vendorStatus.lastResult.error ? (
+                          <span className="font-mono text-xs text-red-600">
+                            ❌ {vendorStatus.lastResult.error}
+                          </span>
+                        ) : (
+                          <span className="text-xs text-green-700">
+                            ✅ {vendorStatus.lastResult.upserted.toLocaleString()} records in {vendorStatus.lastResult.pages} pages ({(vendorStatus.lastResult.durationMs / 1000).toFixed(1)}s)
+                          </span>
+                        )}
+                      </Descriptions.Item>
+                    )}
                   </Descriptions>
 
                   <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
@@ -1639,6 +1888,14 @@ export default function Admin() {
               Major Category Grid (Dropdown Values)
             </CardTitle>
             <div className="flex gap-2">
+              <Button size="sm" variant="outline" onClick={() => navigate('/admin/expense/major-category-grid')}>
+                <Eye />
+                View Data
+              </Button>
+              <Button size="sm" variant="outline" onClick={downloadMajCatGridData}>
+                <Download />
+                Download Data
+              </Button>
               <Button size="sm" variant="outline" onClick={downloadMajCatTemplate}>
                 <Download />
                 Download Template
@@ -1749,6 +2006,14 @@ export default function Admin() {
               Size Master (Sizes per Major Category)
             </CardTitle>
             <div className="flex gap-2">
+              <Button size="sm" variant="outline" onClick={() => navigate('/admin/expense/size-master')}>
+                <Eye />
+                View Data
+              </Button>
+              <Button size="sm" variant="outline" onClick={downloadSizeMasterData}>
+                <Download />
+                Download Data
+              </Button>
               <Button size="sm" variant="outline" onClick={downloadSizeMasterTemplate}>
                 <Download />
                 Download Template
@@ -1861,6 +2126,14 @@ export default function Admin() {
               Color Master (Father / Child Colours)
             </CardTitle>
             <div className="flex gap-2">
+              <Button size="sm" variant="outline" onClick={() => navigate('/admin/expense/color-master')}>
+                <Eye />
+                View Data
+              </Button>
+              <Button size="sm" variant="outline" onClick={downloadColorMasterData}>
+                <Download />
+                Download Data
+              </Button>
               <Button size="sm" variant="outline" onClick={downloadColorMasterTemplate}>
                 <Download />
                 Download Template
@@ -1971,6 +2244,10 @@ export default function Admin() {
               Fabric Article Data (Bulk Insert)
             </CardTitle>
             <div className="flex gap-2">
+              <Button size="sm" variant="outline" onClick={() => navigate('/admin/expense/fabric-article-data')}>
+                <Eye />
+                View Data
+              </Button>
               <Button size="sm" variant="outline" onClick={downloadFabricArticleDataTemplate}>
                 <Download />
                 Download Template
@@ -2083,9 +2360,17 @@ export default function Admin() {
               Fabric Article Master (Fabric Hierarchy)
             </CardTitle>
             <div className="flex gap-2">
+              <Button size="sm" variant="outline" onClick={() => navigate('/admin/expense/fabric-article-master')}>
+                <Eye />
+                View Data
+              </Button>
               <Button size="sm" variant="outline" onClick={downloadFabricArticleMasterTemplate}>
                 <Download />
                 Download Template
+              </Button>
+              <Button size="sm" variant="outline" onClick={downloadFabricArticleMasterData}>
+                <Download />
+                Download Data
               </Button>
               <Button size="sm" variant="outline" onClick={loadFabricArticleMasterStatus} disabled={fabricArticleMasterStatusLoading}>
                 <RotateCw className={fabricArticleMasterStatusLoading ? 'animate-spin' : ''} />
@@ -2131,7 +2416,7 @@ export default function Admin() {
                       type="warning"
                       showIcon
                       message="No fabric article master uploaded yet"
-                      description="Upload the Fabric Article Master Excel (columns: DIV, SUB-DIV, MJ_CAT, MC_CD, MC_DESC) to populate fabric hierarchy dropdowns."
+                      description="Upload the Fabric Article Master Excel (columns: SEG, DIV, SUB DIV, MAJ CAT, MC CODE, MC DES, STATUS, HSN CD, ART_TYPE) to populate fabric hierarchy dropdowns."
                     />
                   )}
                 </div>
@@ -2141,8 +2426,8 @@ export default function Admin() {
                   <div className="rounded-md border border-border p-4">
                     <div className="mb-1 font-semibold">Upload Fabric Article Master Excel</div>
                     <div className="mb-3 text-xs text-muted-foreground">
-                      Sheet <strong>FAB UPLAODER FORMAT</strong> (or first sheet), headers in row 3, data from row 5 —
-                      columns A (DIV), B (SUB-DIV), C (MJ_CAT), D (MC_CD), E (MC_DESC). Replaces the entire table.
+                      Sheet <strong>HIERARCHY MASTER</strong> (or first sheet), headers in row 3, data from row 5 —
+                      columns: SEG, DIV, SUB DIV, MAJ CAT, MC CODE, MC DES, STATUS, HSN CD, ART_TYPE. Replaces the entire table.
                     </div>
 
                     <input
@@ -2192,6 +2477,10 @@ export default function Admin() {
               Mandatory Grid (Field Visibility per Major Category)
             </CardTitle>
             <div className="flex gap-2">
+              <Button size="sm" variant="outline" onClick={() => navigate('/admin/expense/mandatory-grid')}>
+                <Eye />
+                View Data
+              </Button>
               <Button size="sm" variant="outline" onClick={downloadMandatoryTemplate}>
                 <Download />
                 Download Template
@@ -2303,6 +2592,10 @@ export default function Admin() {
               National Grid (Attribute Values)
             </CardTitle>
             <div className="flex gap-2">
+              <Button size="sm" variant="outline" onClick={() => navigate('/admin/expense/national-grid')}>
+                <Eye />
+                View Data
+              </Button>
               <Button size="sm" variant="outline" onClick={downloadNationalGridTemplate}>
                 <Download />
                 Download Template
@@ -2392,10 +2685,16 @@ export default function Admin() {
               <TableIcon className="h-4 w-4" />
               Hierarchy Excel Upload (Division / Sub-Division / Major Category)
             </CardTitle>
-            <Button size="sm" variant="outline" onClick={loadHierarchyExcelStatus} disabled={hierarchyExcelStatusLoading}>
-              <RotateCw className={hierarchyExcelStatusLoading ? 'animate-spin' : ''} />
-              Refresh Status
-            </Button>
+            <div className="flex gap-2">
+              <Button size="sm" variant="outline" onClick={() => navigate('/admin/expense/hierarchy')}>
+                <Eye />
+                View Data
+              </Button>
+              <Button size="sm" variant="outline" onClick={loadHierarchyExcelStatus} disabled={hierarchyExcelStatusLoading}>
+                <RotateCw className={hierarchyExcelStatusLoading ? 'animate-spin' : ''} />
+                Refresh Status
+              </Button>
+            </div>
           </CardHeader>
           <CardContent>
             <Spinner spinning={hierarchyExcelStatusLoading}>
@@ -2562,13 +2861,17 @@ export default function Admin() {
               Segment Master (Price Segments per Major Category)
             </CardTitle>
             <div className="flex gap-2">
+              <Button size="sm" variant="outline" onClick={() => navigate('/admin/expense/segment-master')}>
+                <Eye />
+                View Data
+              </Button>
               <Button size="sm" variant="outline" onClick={downloadSegmentMasterTemplate}>
                 <Download />
                 Download Template
               </Button>
               <Button size="sm" variant="outline" onClick={exportSegmentMaster}>
                 <Download />
-                Export Data
+                Download Data
               </Button>
               <Button size="sm" variant="outline" onClick={loadSegmentMasterStatus} disabled={segmentMasterStatusLoading}>
                 <RotateCw className={segmentMasterStatusLoading ? 'animate-spin' : ''} />
@@ -2667,6 +2970,10 @@ export default function Admin() {
               Body Article Data (Bulk Update)
             </CardTitle>
             <div className="flex gap-2">
+              <Button size="sm" variant="outline" onClick={() => navigate('/admin/expense/body-article-data')}>
+                <Eye />
+                View Data
+              </Button>
               <Button size="sm" variant="outline" onClick={downloadBodyArticleDataTemplate}>
                 <Download />
                 Download Template
@@ -2771,6 +3078,164 @@ export default function Admin() {
                       <button
                         type="button"
                         onClick={() => bodyArticleDataFileRef.current?.click()}
+                        className="flex w-full flex-col items-center justify-center rounded-md border-2 border-dashed border-border bg-muted/30 px-4 py-6 transition-colors hover:border-[#FF6F61] hover:bg-[#FF6F61]/5"
+                      >
+                        <Inbox className="mb-2 h-8 w-8 text-[#FF6F61]" />
+                        <p className="text-[13px]">
+                          Click to upload <strong>.xlsx</strong> file
+                        </p>
+                        <p className="text-[11px] text-muted-foreground">Only Excel files. Max 50 MB.</p>
+                      </button>
+                    )}
+                  </div>
+                </div>
+              </div>
+            </Spinner>
+          </CardContent>
+        </Card>
+
+        {/* Broader Menu Upload (BM-H merchandising master → broader_menu) */}
+        <Card className="mb-6 glass rounded-2xl border border-white/60">
+          <CardHeader className="flex flex-row items-center justify-between">
+            <CardTitle className="flex items-center gap-2 text-base">
+              <TableIcon className="h-4 w-4" />
+              Broader Menu (Merchandising Master)
+            </CardTitle>
+            <div className="flex gap-2">
+              <Button size="sm" variant="outline" onClick={() => navigate('/admin/expense/broader-menu')}>
+                <Eye />
+                View Data
+              </Button>
+              <Button size="sm" variant="outline" onClick={downloadBroaderMenuTemplate}>
+                <Download />
+                Download Template
+              </Button>
+              <Button size="sm" variant="outline" onClick={loadBroaderMenuStatus} disabled={broaderMenuStatusLoading}>
+                <RotateCw className={broaderMenuStatusLoading ? 'animate-spin' : ''} />
+                Refresh Status
+              </Button>
+            </div>
+          </CardHeader>
+          <CardContent>
+            <Spinner spinning={broaderMenuStatusLoading}>
+              <div className="grid grid-cols-1 gap-4 md:grid-cols-12">
+                {/* Status panel */}
+                <div className="md:col-span-7">
+                  {broaderMenuMeta && (broaderMenuMeta.total ?? 0) > 0 ? (
+                    <Descriptions bordered>
+                      {(broaderMenuMeta.uploadedAt || broaderMenuMeta.lastUpload) && (
+                        <Descriptions.Item label="Last Upload">
+                          {new Date((broaderMenuMeta.uploadedAt || broaderMenuMeta.lastUpload)!).toLocaleString('en-IN', {
+                            timeZone: 'Asia/Kolkata', dateStyle: 'medium', timeStyle: 'short',
+                          }) + ' IST'}
+                        </Descriptions.Item>
+                      )}
+                      {broaderMenuMeta.fileName && (
+                        <Descriptions.Item label="File">
+                          <span className="font-mono text-xs">{broaderMenuMeta.fileName}</span>
+                        </Descriptions.Item>
+                      )}
+                      <Descriptions.Item label="Total MC Codes">
+                        <Badge variant="info">{(broaderMenuMeta.total ?? 0).toLocaleString()}</Badge>
+                      </Descriptions.Item>
+                      {broaderMenuMeta.active != null && (
+                        <Descriptions.Item label="Active MCs">
+                          <Badge variant="success">{(broaderMenuMeta.active ?? 0).toLocaleString()}</Badge>
+                        </Descriptions.Item>
+                      )}
+                      {broaderMenuMeta.majCats != null && (
+                        <Descriptions.Item label="Major Categories">
+                          <Badge variant="secondary">{(broaderMenuMeta.majCats ?? 0).toLocaleString()}</Badge>
+                        </Descriptions.Item>
+                      )}
+                      {broaderMenuMeta.subCats != null && (
+                        <Descriptions.Item label="Sub Categories">
+                          <Badge variant="secondary">{(broaderMenuMeta.subCats ?? 0).toLocaleString()}</Badge>
+                        </Descriptions.Item>
+                      )}
+                      {broaderMenuMeta.inserted != null && (
+                        <Descriptions.Item label="Rows Inserted">
+                          <Badge variant="secondary">{(broaderMenuMeta.inserted ?? 0).toLocaleString()}</Badge>
+                        </Descriptions.Item>
+                      )}
+                      {broaderMenuMeta.updated != null && (
+                        <Descriptions.Item label="Rows Updated">
+                          <Badge variant="secondary">{(broaderMenuMeta.updated ?? 0).toLocaleString()}</Badge>
+                        </Descriptions.Item>
+                      )}
+                      {broaderMenuMeta.skipped != null && (
+                        <Descriptions.Item label="Rows Skipped">
+                          <Badge variant={(broaderMenuMeta.skipped ?? 0) > 0 ? 'warning' : 'secondary'}>
+                            {(broaderMenuMeta.skipped ?? 0).toLocaleString()}
+                          </Badge>
+                        </Descriptions.Item>
+                      )}
+                      {broaderMenuMeta.duplicates != null && (
+                        <Descriptions.Item label="Duplicate MC CDs">
+                          <Badge variant={(broaderMenuMeta.duplicates ?? 0) > 0 ? 'warning' : 'secondary'}>
+                            {(broaderMenuMeta.duplicates ?? 0).toLocaleString()}
+                          </Badge>
+                        </Descriptions.Item>
+                      )}
+                      {broaderMenuMeta.truncated != null && (
+                        <Descriptions.Item label="Values Truncated">
+                          <Badge variant={(broaderMenuMeta.truncated ?? 0) > 0 ? 'warning' : 'secondary'}>
+                            {(broaderMenuMeta.truncated ?? 0).toLocaleString()}
+                          </Badge>
+                        </Descriptions.Item>
+                      )}
+                      {(broaderMenuMeta.unmappedValues ?? 0) > 0 && (
+                        <Descriptions.Item label="Not Imported">
+                          <Badge variant="warning">
+                            {(broaderMenuMeta.unmappedValues ?? 0).toLocaleString()} value(s) in unmapped columns
+                          </Badge>
+                        </Descriptions.Item>
+                      )}
+                    </Descriptions>
+                  ) : (
+                    <Alert
+                      type="warning"
+                      showIcon
+                      message="No broader menu data uploaded yet"
+                      description="Upload the BROADER MENU workbook to populate the merchandising master — one row per MC CD with its SEG / DIV / SUB_DIV / MAJ_CAT / SUB_CAT hierarchy, status flags, pack sizes and fixture densities."
+                    />
+                  )}
+                </div>
+
+                {/* Upload panel */}
+                <div className="md:col-span-5">
+                  <div className="rounded-md border border-border p-4">
+                    <div className="mb-1 font-semibold">Upload Broader Menu Excel</div>
+                    <div className="mb-3 text-xs text-muted-foreground">
+                      Sheet <strong>BM-H</strong> (or first sheet), headers in row 3, data from row 5. Columns are
+                      matched <strong>by header name</strong>, so the original workbook can be uploaded unchanged —
+                      its 84-column per-store density block is simply ignored. <strong>MC CD</strong> is the key:
+                      an existing code is updated, a new one is inserted, and an upload never deletes rows.
+                    </div>
+
+                    <input
+                      ref={broaderMenuFileRef}
+                      type="file"
+                      accept=".xlsx,.xls"
+                      className="hidden"
+                      onChange={(e) => {
+                        const file = e.target.files?.[0];
+                        if (file) handleBroaderMenuUpload(file);
+                      }}
+                    />
+
+                    {broaderMenuUploading ? (
+                      <div>
+                        <div className="mb-2 text-[13px] text-[#FF6F61]">
+                          <RefreshCw className="mr-1.5 inline-block h-3.5 w-3.5 animate-spin" />
+                          Parsing Excel &amp; updating table...
+                        </div>
+                        <Progress value={broaderMenuProgress} />
+                      </div>
+                    ) : (
+                      <button
+                        type="button"
+                        onClick={() => broaderMenuFileRef.current?.click()}
                         className="flex w-full flex-col items-center justify-center rounded-md border-2 border-dashed border-border bg-muted/30 px-4 py-6 transition-colors hover:border-[#FF6F61] hover:bg-[#FF6F61]/5"
                       >
                         <Inbox className="mb-2 h-8 w-8 text-[#FF6F61]" />
