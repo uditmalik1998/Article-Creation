@@ -1922,8 +1922,10 @@ export class ApproverController {
                 return res.status(404).json({ error: 'Item not found' });
             }
 
-            // Prevent updating approved items
-            if (existingItem.approvalStatus === 'APPROVED') {
+            // Prevent updating approved items, EXCEPT variantWeight which must be
+            // settable after approval so SAP retry can proceed.
+            const isWeightOnlyUpdate = Object.keys(data).length === 1 && data.variantWeight !== undefined;
+            if (existingItem.approvalStatus === 'APPROVED' && !isWeightOnlyUpdate) {
                 return res.status(403).json({ error: 'Cannot update an approved item. It is locked for SAP sync.' });
             }
 
@@ -4020,23 +4022,23 @@ export class ApproverController {
     // pathType=new  → all non-APPROVED articles
     // pathType=created → approval_status=APPROVED (SAP-created articles)
 
-    static getFabricArticleDataItems = async (req: Request, res: Response) => {
-        const {
-            page = '1', limit = '50',
-            pathType = 'new',
-            status, division, subDivision, majorCategory,
-            search, startDate, endDate,
-        } = req.query as Record<string, string>;
+    private static buildFabricArticleDataWhere(query: Record<string, string>) {
+        const { pathType = 'new', status, division, subDivision, majorCategory, search, startDate, endDate, source } = query;
 
-        const skip = (parseInt(page, 10) - 1) * parseInt(limit, 10);
-        const take = parseInt(limit, 10);
+        // SRM mode: query fabric_article_data by source='SRM'
+        // FG mode (default): query by fabricArticleType='FG'
+        const isSrmMode = source === 'SRM';
+        const where: any = isSrmMode ? { source: 'SRM' } : { fabricArticleType: 'FG' };
 
-        const where: any = { fabricArticleType: 'FG' };
-
-        if (pathType === 'created') {
+        if (pathType === 'new') {
+            where.approvalStatus = 'PENDING';
+        } else if (pathType === 'rejected') {
+            where.approvalStatus = 'REJECTED';
+        } else if (pathType === 'created') {
             where.approvalStatus = 'APPROVED';
+        } else if (pathType === 'failed') {
+            where.sapSyncStatus = 'FAILED';
         } else {
-            // 'new' tab: exclude already-approved articles (those belong in FG Created)
             if (status && status !== 'ALL') {
                 const statuses = status.split(',').map((s: string) => s.trim()).filter(Boolean).filter(s => s !== 'APPROVED');
                 where.approvalStatus = statuses.length === 1 ? statuses[0] : { in: statuses };
@@ -4044,50 +4046,88 @@ export class ApproverController {
                 where.approvalStatus = { not: 'APPROVED' };
             }
         }
+
         if (division && division !== 'ALL') where.division = { contains: division, mode: 'insensitive' };
         if (subDivision && subDivision !== 'ALL') where.subDivision = { equals: subDivision, mode: 'insensitive' };
         if (majorCategory) where.majorCategory = { equals: majorCategory, mode: 'insensitive' };
-        if (startDate || endDate) {
-            where.createdAt = {};
-            if (startDate) where.createdAt.gte = new Date(startDate);
-            if (endDate)   where.createdAt.lte = new Date(endDate);
+
+        const sapSyncStatus = String(query.sapSyncStatus || '').trim().toUpperCase();
+        if (['SYNCED', 'PENDING', 'FAILED', 'NOT_SYNCED'].includes(sapSyncStatus)) {
+            where.sapSyncStatus = sapSyncStatus;
         }
+
+        const dateField = pathType === 'created' ? 'approvedAt' : 'createdAt';
+        if (startDate || endDate) {
+            where[dateField] = {};
+            if (startDate) where[dateField].gte = new Date(startDate);
+            if (endDate)   where[dateField].lte = new Date(endDate);
+        }
+
         if (search) {
             where.OR = [
                 { fabricArticleNumber:      { contains: search, mode: 'insensitive' } },
                 { fabricArticleDescription: { contains: search, mode: 'insensitive' } },
                 { vendorName:              { contains: search, mode: 'insensitive' } },
                 { vendorCode:              { contains: search, mode: 'insensitive' } },
+                { designNumber:            { contains: search, mode: 'insensitive' } },
                 { majorCategory:           { contains: search, mode: 'insensitive' } },
             ];
         }
 
+        return { where, dateField };
+    }
+
+    private static FABRIC_ARTICLE_DATA_SELECT = {
+        id: true,
+        fabricArticleNumber: true, fabricArticleDescription: true,
+        fabricArticleType: true,
+        division: true, subDivision: true, majorCategory: true,
+        vendorName: true, vendorCode: true,
+        approvalStatus: true, approvedAt: true,
+        sapSyncStatus: true, sapSyncMessage: true,
+        imageUrl: true, userName: true,
+        createdAt: true, updatedAt: true,
+        mFabDiv: true, mYarn: true, mFabMainMvgr1: true, mFabMainMvgr2: true,
+        mConstruction: true, mOunz: true, mWidth: true, mWeave02: true,
+        mCount: true, mWeave01: true, mComposition: true, mFinish: true,
+        mGsm: true, mLycra: true, fabricRate: true, v2FabricRate: true, valueAddCost: true, articleFashionType: true,
+        designNumber: true, mcDescription: true, source: true,
+    } as const;
+
+    static getFabricArticleDataItems = async (req: Request, res: Response) => {
+        const query = req.query as Record<string, string>;
+        const page = parseInt(query.page || '1', 10);
+        const take = parseInt(query.limit || '50', 10);
+        const skip = (page - 1) * take;
+        const pathType = query.pathType || 'new';
+
+        const { where } = ApproverController.buildFabricArticleDataWhere(query);
+
+        const orderBy = pathType === 'created'
+            ? ({ approvedAt: { sort: 'desc', nulls: 'last' } } as const)
+            : ({ createdAt: 'desc' } as const);
+
         const [rows, total] = await Promise.all([
-            prisma.fabricArticleData.findMany({
-                where, skip, take,
-                orderBy: { createdAt: 'desc' },
-                select: {
-                    id: true,
-                    fabricArticleNumber: true, fabricArticleDescription: true,
-                    fabricArticleType: true,
-                    division: true, subDivision: true, majorCategory: true,
-                    vendorName: true, vendorCode: true,
-                    approvalStatus: true, approvedAt: true,
-                    sapSyncStatus: true, sapSyncMessage: true,
-                    imageUrl: true, userName: true,
-                    createdAt: true, updatedAt: true,
-                    mFabDiv: true, mYarn: true, mFabMainMvgr1: true, mFabMainMvgr2: true,
-                    mConstruction: true, mOunz: true, mWidth: true, mWeave02: true,
-                    mCount: true, mWeave01: true, mComposition: true, mFinish: true,
-                    mGsm: true, mLycra: true, fabricRate: true, v2FabricRate: true, valueAddCost: true, articleFashionType: true,
-                    designNumber: true, mcDescription: true,
-                },
-            }),
+            prisma.fabricArticleData.findMany({ where, skip, take, orderBy, select: ApproverController.FABRIC_ARTICLE_DATA_SELECT }),
             prisma.fabricArticleData.count({ where }),
         ]);
 
         const data = rows.map((r) => ApproverController.fabricArticleDataRowToItem(r));
-        return res.json({ data, meta: { total, page: parseInt(page, 10), limit: take } });
+        return res.json({ data, meta: { total, page, limit: take } });
+    };
+
+    static getFabricArticleDataExportAll = async (req: Request, res: Response) => {
+        const query = req.query as Record<string, string>;
+        const pathType = query.pathType || 'new';
+        const { where } = ApproverController.buildFabricArticleDataWhere(query);
+
+        const orderBy = pathType === 'created'
+            ? ({ approvedAt: { sort: 'desc', nulls: 'last' } } as const)
+            : ({ createdAt: 'desc' } as const);
+
+        const rows = await prisma.fabricArticleData.findMany({ where, orderBy, select: ApproverController.FABRIC_ARTICLE_DATA_SELECT });
+        const data = rows.map((r) => ApproverController.fabricArticleDataRowToItem(r));
+        return res.json({ data });
     };
 
     static getFabricArticleDataById = async (req: Request, res: Response) => {
@@ -4190,8 +4230,9 @@ export class ApproverController {
             v2FabricRate:       r.v2FabricRate != null ? Number(r.v2FabricRate) : null,
             valueAddCost:       r.valueAddCost != null ? Number(r.valueAddCost) : null,
             articleFashionType: r.articleFashionType ?? null,
+            source: r.source ?? null,
             // Fields not present in fabric_article_data — nulled out
-            pptNumber: null, source: null, rate: null, mrp: null,
+            pptNumber: null, rate: null, mrp: null,
             size: null, colour: null, wash: null, shade: null, weight: null,
             referenceArticleNumber: null, referenceArticleDescription: null,
             segment: null, articleDescription: null,

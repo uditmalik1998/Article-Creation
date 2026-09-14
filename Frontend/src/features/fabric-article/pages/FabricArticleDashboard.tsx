@@ -197,12 +197,10 @@ export default function ApproverDashboard({ pathType }: ApproverDashboardProps =
   const seed = (key: keyof DetailFilters, fallback: string) =>
     searchParams.get(key as string) ?? restoredFilters?.[key] ?? fallback;
 
-  const [statusFilter, setStatusFilter] = useState<string>('ALL');
   const [searchText, setSearchText] = useState(() => seed('search', ''));
   const [divisionFilter, setDivisionFilter] = useState<string>(() => seed('division', 'ALL'));
   const [subDivisionFilter, setSubDivisionFilter] = useState<string>(() => seed('subDivision', 'ALL'));
   const [majorCategoryFilter, setMajorCategoryFilter] = useState<string>(() => seed('majorCategory', ''));
-  const [sourceFilter, setSourceFilter] = useState<string>(() => seed('source', 'ALL'));
   // SAP sync-status filter (Created tab): ALL | SYNCED | PENDING | FAILED
   const [sapSyncFilter, setSapSyncFilter] = useState<string>('ALL');
   const [dateRangeFilter, setDateRangeFilter] = useState<[Dayjs | null, Dayjs | null] | null>(() => {
@@ -257,9 +255,7 @@ export default function ApproverDashboard({ pathType }: ApproverDashboardProps =
     }).then(r => r.json()).then(setFabHierarchy).catch(() => {});
   }, []);
 
-  useEffect(() => {
-    if (pathType === 'created') setStatusFilter('APPROVED');
-  }, [pathType]);
+
 
   const handleSearchChange = useCallback((e: React.ChangeEvent<HTMLInputElement>) => {
     const value = e.target.value;
@@ -280,24 +276,17 @@ export default function ApproverDashboard({ pathType }: ApproverDashboardProps =
         const params = new URLSearchParams();
         params.set('page', String(page));
         params.set('limit', String(PAGE_SIZE));
-        const effectiveStatus =
-          pathType === 'new' ? 'PENDING'
-          : pathType === 'rejected' ? 'REJECTED'
-          : pathType === 'created' ? 'APPROVED'
-          : statusFilter;
-        params.set('status', effectiveStatus);
+        params.set('source', 'SRM');
+        if (pathType) params.set('pathType', pathType);
         if (divisionFilter !== 'ALL') params.set('division', divisionFilter);
         if (subDivisionFilter !== 'ALL') params.set('subDivision', subDivisionFilter);
         if (majorCategoryFilter) params.set('majorCategory', majorCategoryFilter);
-        if (sourceFilter !== 'ALL') params.set('source', sourceFilter);
         if (sapSyncFilter !== 'ALL') params.set('sapSyncStatus', sapSyncFilter);
         if (searchText) params.set('search', searchText);
         if (dateRangeFilter?.[0]) params.set('startDate', dateRangeFilter[0].startOf('day').toISOString());
         if (dateRangeFilter?.[1]) params.set('endDate', dateRangeFilter[1].endOf('day').toISOString());
-        if (pathType) params.set('pathType', pathType);
-        params.set('presentationsType', 'Fabric Article');
 
-        const response = await fetch(`${APP_CONFIG.api.baseURL}/approver/items?${params}`, {
+        const response = await fetch(`${APP_CONFIG.api.baseURL}/approver/fabric-article-data?${params}`, {
           headers: { Authorization: `Bearer ${token}` },
         });
         if (!response.ok) throw new Error('Failed to fetch items');
@@ -314,7 +303,7 @@ export default function ApproverDashboard({ pathType }: ApproverDashboardProps =
         setLoading(false);
       }
     },
-    [statusFilter, divisionFilter, subDivisionFilter, majorCategoryFilter, sourceFilter, sapSyncFilter, searchText, dateRangeFilter, pathType],
+    [divisionFilter, subDivisionFilter, majorCategoryFilter, sapSyncFilter, searchText, dateRangeFilter, pathType],
   );
 
   useEffect(() => {
@@ -342,14 +331,13 @@ export default function ApproverDashboard({ pathType }: ApproverDashboardProps =
       setOrDel('division', divisionFilter !== 'ALL' ? divisionFilter : '');
       setOrDel('subDivision', subDivisionFilter !== 'ALL' ? subDivisionFilter : '');
       setOrDel('majorCategory', majorCategoryFilter);
-      setOrDel('source', sourceFilter !== 'ALL' ? sourceFilter : '');
       setOrDel('startDate', dateRangeFilter?.[0]?.toISOString());
       setOrDel('endDate', dateRangeFilter?.[1]?.toISOString());
       return p;
     }, { replace: true });
   // setSearchParams is stable; these drive the sync
   // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [currentPage, searchText, divisionFilter, subDivisionFilter, majorCategoryFilter, sourceFilter, dateRangeFilter]);
+  }, [currentPage, searchText, divisionFilter, subDivisionFilter, majorCategoryFilter, dateRangeFilter]);
 
   // ─── Export ──────────────────────────────────────────────────────────────────
 
@@ -425,21 +413,16 @@ export default function ApproverDashboard({ pathType }: ApproverDashboardProps =
     try {
       const token = localStorage.getItem('authToken');
       const params = new URLSearchParams();
-      const effectiveStatus =
-        pathType === 'new' ? 'PENDING' : pathType === 'rejected' ? 'REJECTED'
-        : pathType === 'created' ? 'APPROVED' : statusFilter;
-      params.set('status', effectiveStatus);
+      params.set('source', 'SRM');
+      if (pathType) params.set('pathType', pathType);
       if (divisionFilter !== 'ALL') params.set('division', divisionFilter);
       if (subDivisionFilter !== 'ALL') params.set('subDivision', subDivisionFilter);
       if (majorCategoryFilter) params.set('majorCategory', majorCategoryFilter);
-      if (sourceFilter !== 'ALL') params.set('source', sourceFilter);
       if (searchText) params.set('search', searchText);
       if (dateRangeFilter?.[0]) params.set('startDate', dateRangeFilter[0].startOf('day').toISOString());
       if (dateRangeFilter?.[1]) params.set('endDate', dateRangeFilter[1].endOf('day').toISOString());
-      if (pathType) params.set('pathType', pathType);
-      params.set('presentationsType', 'Fabric Article');
 
-      const response = await fetch(`${APP_CONFIG.api.baseURL}/approver/items/export-all?${params}`, {
+      const response = await fetch(`${APP_CONFIG.api.baseURL}/approver/fabric-article-data/export-all?${params}`, {
         headers: { Authorization: `Bearer ${token}` },
       });
       if (!response.ok) throw new Error('Export failed');
@@ -466,7 +449,7 @@ export default function ApproverDashboard({ pathType }: ApproverDashboardProps =
     } finally {
       setExportingAll(false);
     }
-  }, [statusFilter, divisionFilter, subDivisionFilter, majorCategoryFilter, sourceFilter, searchText, dateRangeFilter, pathType, buildApproverExportData, exportHeaders]);
+  }, [divisionFilter, subDivisionFilter, majorCategoryFilter, searchText, dateRangeFilter, pathType, buildApproverExportData, exportHeaders]);
 
   // ─── Export with variants (Created tab only) ──────────────────────────────────
 
@@ -476,18 +459,16 @@ export default function ApproverDashboard({ pathType }: ApproverDashboardProps =
     try {
       const token = localStorage.getItem('authToken');
       const params = new URLSearchParams();
-      params.set('status', 'APPROVED');
+      params.set('source', 'SRM');
+      params.set('pathType', 'created');
       if (divisionFilter !== 'ALL') params.set('division', divisionFilter);
       if (subDivisionFilter !== 'ALL') params.set('subDivision', subDivisionFilter);
       if (majorCategoryFilter) params.set('majorCategory', majorCategoryFilter);
-      if (sourceFilter !== 'ALL') params.set('source', sourceFilter);
       if (searchText) params.set('search', searchText);
       if (dateRangeFilter?.[0]) params.set('startDate', dateRangeFilter[0].startOf('day').toISOString());
       if (dateRangeFilter?.[1]) params.set('endDate', dateRangeFilter[1].endOf('day').toISOString());
-      params.set('pathType', 'created');
-      params.set('presentationsType', 'Fabric Article');
 
-      const response = await fetch(`${APP_CONFIG.api.baseURL}/approver/items/export-all-with-variants?${params}`, {
+      const response = await fetch(`${APP_CONFIG.api.baseURL}/approver/fabric-article-data/export-all?${params}`, {
         headers: { Authorization: `Bearer ${token}` },
       });
       if (!response.ok) throw new Error('Export failed');
@@ -512,7 +493,7 @@ export default function ApproverDashboard({ pathType }: ApproverDashboardProps =
     } finally {
       setExportingWithVariants(false);
     }
-  }, [divisionFilter, subDivisionFilter, majorCategoryFilter, sourceFilter, searchText, dateRangeFilter, exportHeaders]);
+  }, [divisionFilter, subDivisionFilter, majorCategoryFilter, searchText, dateRangeFilter, exportHeaders]);
 
   // ─── Selective export ─────────────────────────────────────────────────────────
 
@@ -543,38 +524,12 @@ export default function ApproverDashboard({ pathType }: ApproverDashboardProps =
       return;
     }
 
-    // Created tab: fetch and include variants for each selected article
+    // Created tab: export selected records directly
     if (pathType === 'created') {
-      const loadingId = message.loading('Fetching variants for selected articles…');
-      try {
-        const token = localStorage.getItem('authToken');
-        const params = new URLSearchParams();
-        params.set('pathType', 'created');
-        params.set('presentationsType', 'Fabric Article');
-        params.set('status', 'APPROVED');
-        params.set('ids', rows.map((r) => r.id).join(','));
-
-        const response = await fetch(`${APP_CONFIG.api.baseURL}/approver/items/export-all-with-variants?${params}`, {
-          headers: { Authorization: `Bearer ${token}` },
-        });
-        if (!response.ok) throw new Error('Export failed');
-        const result = await response.json();
-        const allRows: any[] = result.data || [];
-        if (allRows.length === 0) {
-          message.dismiss(loadingId);
-          message.warning('No data found for selected articles');
-          return;
-        }
-
-        const variantHeaders = [...exportHeaders, ...VARIANT_EXTRA_HEADERS];
-        const divLabel = divisionFilter !== 'ALL' ? ` - ${divisionFilter}` : '';
-        await exportToExcel(allRows.map(mapVariantExportRow), variantHeaders, [], `Created Articles${divLabel} - Selected`);
-        message.dismiss(loadingId);
-        message.success(`Exported ${allRows.length} rows (${rows.length} articles)`);
-      } catch {
-        message.dismiss(loadingId);
-        message.error('Export failed. Please try again.');
-      }
+      const exportData = buildApproverExportData(rows);
+      const divLabel = divisionFilter !== 'ALL' ? ` - ${divisionFilter}` : '';
+      await exportToExcel(exportData, exportHeaders, [], `Created Articles${divLabel} - Selected`);
+      message.success(`Exported ${rows.length} selected records`);
       return;
     }
 
@@ -592,8 +547,8 @@ export default function ApproverDashboard({ pathType }: ApproverDashboardProps =
 
   // Keep the ref pointed at the latest values every render (cheap, render-safe).
   cardClickDataRef.current = {
-    items, currentPage, totalCount, statusFilter, divisionFilter, subDivisionFilter,
-    majorCategoryFilter, sourceFilter, searchText, dateRangeFilter, pathType,
+    items, currentPage, totalCount, divisionFilter, subDivisionFilter,
+    majorCategoryFilter, searchText, dateRangeFilter, pathType,
   };
 
   // Stable handler (deps: [navigate]) so memoized ArticleCards never re-render
@@ -602,23 +557,22 @@ export default function ApproverDashboard({ pathType }: ApproverDashboardProps =
     const d = cardClickDataRef.current;
     const effectiveStatus =
       d.pathType === 'new' ? 'PENDING' : d.pathType === 'rejected' ? 'REJECTED'
-      : d.pathType === 'created' ? 'APPROVED' : d.statusFilter;
+      : d.pathType === 'created' ? 'APPROVED' : 'PENDING';
     const filters: DetailFilters = {
       status: effectiveStatus,
       division: d.divisionFilter,
       subDivision: d.subDivisionFilter,
       majorCategory: d.majorCategoryFilter,
-      source: d.sourceFilter,
+      source: 'SRM',
       search: d.searchText,
       startDate: d.dateRangeFilter?.[0]?.toISOString(),
       endDate: d.dateRangeFilter?.[1]?.toISOString(),
       pathType: d.pathType,
     };
     const basePath =
-      d.pathType === 'old' ? '/approver/old-articles'
-      : d.pathType === 'rejected' ? '/approver/rejected'
-      : d.pathType === 'created' ? '/approver/created'
-      : d.pathType === 'failed' ? '/approver/failed'
+      d.pathType === 'rejected' ? '/fabric-article/rejected'
+      : d.pathType === 'created' ? '/fabric-article/created'
+      : d.pathType === 'failed' ? '/fabric-article/failed'
       : '/fabric-article';
     const state: DetailNavigationState = {
       items: d.items, currentIndex: index, currentPage: d.currentPage,
@@ -707,17 +661,6 @@ export default function ApproverDashboard({ pathType }: ApproverDashboardProps =
                 onClear={() => setSearchText('')}
                 className="!h-7 w-full text-[12px] sm:w-[240px]"
               />
-              {pathType !== 'rejected' && pathType !== 'created' && pathType !== 'new' && (
-                <Select value={statusFilter} onValueChange={setStatusFilter}>
-                  <SelectTrigger className="!h-7 w-[130px] text-[12px]"><SelectValue /></SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="ALL">All Statuses</SelectItem>
-                    <SelectItem value="PENDING">Pending</SelectItem>
-                    <SelectItem value="APPROVED">Approved</SelectItem>
-                    <SelectItem value="FAILED">Failed</SelectItem>
-                  </SelectContent>
-                </Select>
-              )}
               {(showDivisionFilter || isUnscoped) && (
                 <Select value={divisionFilter} onValueChange={(v) => { setDivisionFilter(v); setSubDivisionFilter('ALL'); setMajorCategoryFilter(''); }}>
                   <SelectTrigger className="!h-7 w-[130px] text-[12px]"><SelectValue placeholder="Division" /></SelectTrigger>
@@ -862,15 +805,6 @@ export default function ApproverDashboard({ pathType }: ApproverDashboardProps =
                   </div>
                 </PopoverContent>
               </Popover>
-              <Select value={sourceFilter} onValueChange={setSourceFilter}>
-                <SelectTrigger className="!h-7 w-[110px] text-[12px]"><SelectValue /></SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="ALL">All Sources</SelectItem>
-                  <SelectItem value="SRM">SRM</SelectItem>
-                  <SelectItem value="WATCHER">Watcher</SelectItem>
-                  <SelectItem value="USER">User</SelectItem>
-                </SelectContent>
-              </Select>
               {pathType === 'created' && (
                 <Select value={sapSyncFilter} onValueChange={setSapSyncFilter}>
                   <SelectTrigger className="!h-7 w-[120px] text-[12px]"><SelectValue /></SelectTrigger>
