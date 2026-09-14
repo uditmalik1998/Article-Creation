@@ -549,7 +549,7 @@ const App: React.FC = () => {
                 element={
                   <ApproverRoute>
                     <MainLayout>
-                      <FabricArticleDetailPage />
+                      <FabricArticleDetailPage itemsBaseEndpoint="/approver/fabric-article-data" approveEndpoint="/approver/fabric-article-data/submit" />
                     </MainLayout>
                   </ApproverRoute>
                 }
@@ -569,7 +569,7 @@ const App: React.FC = () => {
                 element={
                   <ApproverRoute>
                     <MainLayout>
-                      <FabricArticleDetailPage />
+                      <FabricArticleDetailPage itemsBaseEndpoint="/approver/fabric-article-data" approveEndpoint="/approver/fabric-article-data/submit" />
                     </MainLayout>
                   </ApproverRoute>
                 }
@@ -589,7 +589,7 @@ const App: React.FC = () => {
                 element={
                   <ApproverRoute>
                     <MainLayout>
-                      <FabricArticleDetailPage />
+                      <FabricArticleDetailPage itemsBaseEndpoint="/approver/fabric-article-data" approveEndpoint="/approver/fabric-article-data/submit" />
                     </MainLayout>
                   </ApproverRoute>
                 }
@@ -600,6 +600,16 @@ const App: React.FC = () => {
                   <ApproverRoute>
                     <MainLayout>
                       <FabricArticleDashboard key="fabric-failed-articles" pathType="failed" />
+                    </MainLayout>
+                  </ApproverRoute>
+                }
+              />
+              <Route
+                path="/fabric-article/failed/:id"
+                element={
+                  <ApproverRoute>
+                    <MainLayout>
+                      <FabricArticleDetailPage itemsBaseEndpoint="/approver/fabric-article-data" approveEndpoint="/approver/fabric-article-data/submit" />
                     </MainLayout>
                   </ApproverRoute>
                 }

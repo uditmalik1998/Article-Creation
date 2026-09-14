@@ -95,8 +95,9 @@ router.post('/create-fabric-article', h(ApproverController.createFabricArticleFr
 // Body Article list (type=FG) — paginated list from body_article_data for the Body Article New Articles page
 router.get('/body-articles', h(ApproverController.getBodyArticleItems));
 
-// Fabric Article data list (fabric_article_type=FG) — for FG New Articles page in Fabric Article tab
+// Fabric Article data list — source=SRM for SRM pages, default=FG for FG New Articles page
 router.get('/fabric-article-data', h(ApproverController.getFabricArticleDataItems));
+router.get('/fabric-article-data/export-all', h(ApproverController.getFabricArticleDataExportAll));
 
 // Submit FG New Articles to SAP via ZMM_FAB_ART_CREATION_RFC
 // Submit fabric articles to SAP via ZMM_FAB_ART_CREATION_RFC — FABRIC_APPROVER and ADMIN only
