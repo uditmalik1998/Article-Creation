@@ -226,7 +226,7 @@ const ATTRIBUTE_GROUPS: { group: string; color: string; fields: { field: string;
       { field: 'fWidth', schemaKey: 'f_width' },
       { field: 'lycra', schemaKey: 'lycra_non_lycra' },
       { field: 'shade', schemaKey: 'shade', freeText: true },
-      { field: 'vendorFabricRate', schemaKey: 'vendor_fabric_rate', freeText: true },
+      { field: 'vendorFabricRate', schemaKey: 'vendor_fabric_rate', freeText: true, mandatory: true },
     ],
   },
   {
