@@ -3580,6 +3580,9 @@ export class ApproverController {
 
     static async searchFabricArticleData(req: Request, res: Response) {
         const q = String(req.query.q ?? '').trim();
+        // Accept comma-separated types e.g. ?type=FG,uploader
+        const typeParam = String(req.query.type ?? '').trim();
+        const types = typeParam ? typeParam.split(',').map((t) => t.trim().toUpperCase()).filter(Boolean) : [];
         if (!q) return res.json({ results: [] });
         const results = await prisma.fabricArticleData.findMany({
             where: {
@@ -3588,6 +3591,11 @@ export class ApproverController {
                     { fabricArticleDescription: { contains: q, mode: 'insensitive' } },
                 ],
                 NOT: { fabricArticleNumber: null },
+                ...(types.length === 1
+                    ? { fabricArticleType: types[0] }
+                    : types.length > 1
+                    ? { fabricArticleType: { in: types } }
+                    : {}),
             },
             select: {
                 fabricArticleNumber: true,
@@ -4371,8 +4379,20 @@ export class ApproverController {
         return res.json({ success: true, created: created.length });
     };
 
+    // Division → fabric master lookup. K/RFD_K → KNITS_MIX (mFabDiv K),
+    // W/RFD_W → WOVEN_MIX (W), DNM → DENIM_MIX (D).
+    // Static fabric master mapping from FABRIC MASTER MIX VDR.XLSX
+    // Key = FG article's fabDiv value. All fabric_article_data fields come from here — never from the FG article's garment division.
+    private static readonly DIVISION_TO_FABRIC: Record<string, { division: string; subDivision: string; majorCategory: string; mcDes: string; mFabDiv: string }> = {
+        K:     { division: 'K', subDivision: 'K_MIX', majorCategory: 'KNITS_MIX', mcDes: 'KNITS_MIX', mFabDiv: 'K'     },
+        RFD_K: { division: 'K', subDivision: 'K_MIX', majorCategory: 'KNITS_MIX', mcDes: 'KNITS_MIX', mFabDiv: 'RFD_K' },
+        W:     { division: 'W', subDivision: 'W_MIX', majorCategory: 'WOVEN_MIX', mcDes: 'WOVEN_MIX', mFabDiv: 'W'     },
+        RFD_W: { division: 'W', subDivision: 'W_MIX', majorCategory: 'WOVEN_MIX', mcDes: 'WOVEN_MIX', mFabDiv: 'RFD_W' },
+        DNM:   { division: 'D', subDivision: 'D_MIX', majorCategory: 'DENIM_MIX', mcDes: 'DENIM_MIX', mFabDiv: 'DNM'   },
+    };
+
     static createFabricArticleFromFG = async (req: Request, res: Response) => {
-        const { ids } = req.body as { ids?: string[] };
+        const { ids, submitNow } = req.body as { ids?: string[]; submitNow?: boolean };
         if (!Array.isArray(ids) || ids.length === 0) {
             return res.status(400).json({ error: 'ids array is required' });
         }
@@ -4382,12 +4402,12 @@ export class ApproverController {
             where: { id: { in: ids } },
             select: {
                 id: true, articleNumber: true, designNumber: true,
-                majorCategory: true,
+                majorCategory: true, division: true, subDivision: true,
                 vendorName: true, vendorCode: true,
                 imageUrl: true, userName: true,
                 fabricArticleDescription: true,
                 vendorFabricRate: true,
-                // Construction & Fabric attributes
+                articleFashionType: true,
                 fabDiv: true, yarn1: true,
                 mainMvgr: true, fabricMainMvgr: true,
                 fConstruction: true, fOunce: true, fWidth: true,
@@ -4400,69 +4420,113 @@ export class ApproverController {
             return res.status(404).json({ error: 'No items found for the given ids' });
         }
 
-        // Check 1: fabric_article_data already has a row for the same majorCategory + fabricArticleDescription
+        // All fabric_article_data fields come from the static DIVISION_TO_FABRIC map (Excel reference),
+        // keyed by the FG article's fabDiv (K/W/D/DNM). Never use the FG garment division (MENS/WOMENS etc.).
+        type FabRowEntry = { fabricRowId: string; flatId: string };
+        const toSubmit: FabRowEntry[] = [];
+
         for (const item of items) {
-            if (item.majorCategory && item.fabricArticleDescription) {
-                const descMatch = await prisma.fabricArticleData.findFirst({
-                    where: {
-                        majorCategory: item.majorCategory,
-                        fabricArticleDescription: item.fabricArticleDescription,
-                    },
-                    select: { fabricArticleNumber: true },
-                });
-                if (descMatch) {
+            const desc = item.fabricArticleDescription;
+            if (!desc) continue;
+
+            const fabDivKey = (item.fabDiv || '').trim().toUpperCase();
+            const mapped = ApproverController.DIVISION_TO_FABRIC[fabDivKey];
+            if (!mapped) {
+                return res.status(400).json({ error: `Cannot resolve fabric master for fabDiv "${item.fabDiv}". Expected K, W, D, or DNM.` });
+            }
+
+            const existing = await prisma.fabricArticleData.findFirst({
+                where: { fabricArticleDescription: { equals: desc, mode: 'insensitive' } },
+                select: { id: true, fabricArticleNumber: true, mcDescription: true },
+            });
+
+            if (existing) {
+                if (existing.fabricArticleNumber) {
                     return res.status(409).json({
-                        error: `For this ${item.majorCategory} Major Category, Fabric Article is already Present: ${descMatch.fabricArticleNumber || 'N/A'}`,
+                        error: `Fabric Article already created for this description. Fabric Article No: ${existing.fabricArticleNumber}`,
+                        fabricArticleNumber: existing.fabricArticleNumber,
                     });
                 }
+                // Reuse existing row — patch with correct static values if missing
+                if (!existing.mcDescription) {
+                    await prisma.fabricArticleData.update({
+                        where: { id: existing.id },
+                        data: {
+                            division:     mapped.division,
+                            subDivision:  mapped.subDivision,
+                            majorCategory: mapped.majorCategory,
+                            mcDescription: mapped.mcDes,
+                            mFabDiv:       mapped.mFabDiv,
+                        },
+                    });
+                }
+                toSubmit.push({ fabricRowId: existing.id, flatId: item.id });
+            } else {
+                const newRow = await prisma.fabricArticleData.create({
+                    data: {
+                        flatId:                   item.id,
+                        fabricArticleType:        'FG',
+                        vendorName:               'MIX VENDOR',
+                        vendorCode:               '200681',
+                        designNumber:             item.designNumber,
+                        imageUrl:                 item.imageUrl,
+                        userName:                 item.userName,
+                        // Static values from Excel — NOT the FG garment fields
+                        division:                 mapped.division,
+                        subDivision:              mapped.subDivision,
+                        majorCategory:            mapped.majorCategory,
+                        mcDescription:            mapped.mcDes,
+                        mFabDiv:                  mapped.mFabDiv,
+                        fabricArticleDescription: desc,
+                        articleFashionType:       item.articleFashionType,
+                        // Construction & Fabric attributes from FG article
+                        mYarn:           item.yarn1,
+                        mFabMainMvgr1:   item.mainMvgr,
+                        mFabMainMvgr2:   item.fabricMainMvgr,
+                        mConstruction:   item.fConstruction,
+                        mOunz:           item.fOunce,
+                        mWidth:          item.fWidth,
+                        mWeave02:        item.mFab2,
+                        mCount:          item.fCount,
+                        mWeave01:        item.weave,
+                        mComposition:    item.composition,
+                        mFinish:         item.finish,
+                        mGsm:            item.gsm,
+                        mLycra:          item.lycra,
+                        fabricRate:      item.vendorFabricRate ?? null,
+                    },
+                });
+                toSubmit.push({ fabricRowId: newRow.id, flatId: item.id });
             }
         }
 
-        // Check 2: this flat article has already been sent to Fabric Article
-        const existing = await prisma.fabricArticleData.findMany({
-            where: { flatId: { in: ids } },
-            select: { flatId: true },
-        });
-        if (existing.length > 0) {
-            return res.status(409).json({
-                error: 'Fabric Article went for Approval Already. Cannot Create Duplicate.',
-                duplicateFlatIds: existing.map((e) => e.flatId),
-            });
+        if (toSubmit.length === 0) {
+            return res.json({ success: true, created: 0, results: [] });
         }
 
-        const created = await Promise.all(items.map((item) =>
-            prisma.fabricArticleData.create({
-                data: {
-                    flatId:          item.id,
-                    fabricArticleType: 'FG',
-                    vendorName:      item.vendorName,
-                    vendorCode:      item.vendorCode,
-                    designNumber:    item.designNumber,
-                    imageUrl:        item.imageUrl,
-                    userName:        item.userName,
-                    // Construction & Fabric card attributes
-                    mFabDiv:         item.fabDiv,
-                    mYarn:           item.yarn1,
-                    mFabMainMvgr1:   item.mainMvgr,
-                    mFabMainMvgr2:   item.fabricMainMvgr,
-                    mConstruction:   item.fConstruction,
-                    mOunz:           item.fOunce,
-                    mWidth:          item.fWidth,
-                    mWeave02:        item.mFab2,
-                    mCount:          item.fCount,
-                    mWeave01:        item.weave,
-                    mComposition:    item.composition,
-                    mFinish:         item.finish,
-                    mGsm:            item.gsm,
-                    mLycra:          item.lycra,
-                    fabricRate:      item.vendorFabricRate ?? null,
-                    // division / subDivision / majorCategory intentionally omitted —
-                    // fabric articles have their own separate category hierarchy
-                },
-            })
-        ));
+        // Immediately submit to SAP and write fabricArticleNumber back to extraction_results_flat
+        if (submitNow) {
+            const { submitFabricArticles } = await import('../services/zmmFabArtCreationService');
+            const submitResult = await submitFabricArticles(toSubmit.map((e) => e.fabricRowId));
 
-        return res.json({ success: true, created: created.length });
+            await Promise.all(
+                submitResult.results
+                    .filter((r) => r.success && r.sapArticleNumber)
+                    .map(async (r) => {
+                        const entry = toSubmit.find((e) => e.fabricRowId === r.id);
+                        if (entry?.flatId) {
+                            await prisma.extractionResultFlat.update({
+                                where: { id: entry.flatId },
+                                data: { fabricArticleNumber: r.sapArticleNumber },
+                            });
+                        }
+                    }),
+            );
+
+            return res.json({ success: true, created: toSubmit.length, results: submitResult.results });
+        }
+
+        return res.json({ success: true, created: toSubmit.length });
     };
 
     static getMajorCategoryDetails = async (req: Request, res: Response) => {
