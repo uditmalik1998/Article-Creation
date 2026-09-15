@@ -118,6 +118,8 @@ function getMissingMandatoryFields(item: any): string[] {
   if (!item.mrp) missing.push('MRP');
   if (!item.articleFashionType) missing.push('ARTICLE FASHION TYPE');
   if (!item.segment) missing.push('SEGMENT');
+  if (!item.fabricArticleNumber) missing.push('FABRIC ARTICLE NO.');
+  if (!item.vendorFabricRate) missing.push('VENDOR FABRIC RATE');
   const majorCat = item.majorCategory || '';
   if (!majorCat) return missing;
   for (const [schemaKey, dbField] of Object.entries(SCHEMA_KEY_TO_DB_FIELD)) {
