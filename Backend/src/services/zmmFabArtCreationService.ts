@@ -136,19 +136,19 @@ export async function submitFabricArticles(ids: string[]): Promise<{
         }
 
         // Duplicate check: same majorCategory + fabricArticleDescription already has an article number
+        // Duplicate check: fabricArticleDescription is unique across all categories
         const desc = str(row.fabricArticleDescription);
-        if (majCat && desc) {
+        if (desc) {
             const duplicate = await prisma.fabricArticleData.findFirst({
                 where: {
                     id: { not: row.id },
-                    majorCategory: { equals: majCat, mode: 'insensitive' },
                     fabricArticleDescription: { equals: desc, mode: 'insensitive' },
                     fabricArticleNumber: { not: null },
                 },
                 select: { id: true, fabricArticleNumber: true },
             });
             if (duplicate) {
-                const msg = `Fabric Article already created for the given Grid (existing: ${duplicate.fabricArticleNumber}).`;
+                const msg = `Fabric Article already created for this description (existing: ${duplicate.fabricArticleNumber}).`;
                 console.warn(`[ZMM_FAB_RFC] Duplicate blocked id=${row.id} — ${msg}`);
                 await prisma.fabricArticleData.update({
                     where: { id: row.id },
@@ -165,8 +165,6 @@ export async function submitFabricArticles(ids: string[]): Promise<{
         });
         const payload = { bapiname: 'ZMM_FAB_ART_CREATION_RFC', IM_DATA: [imData] };
 
-        console.log(`[ZMM_FAB_RFC] Submitting id=${row.id} majCat=${majCat} mcDes=${mcDes} mcCode=${masterRow.mcCode} hsn=${masterRow.hsnCd} artType=${masterRow.artType}`);
-        console.log(`[ZMM_FAB_RFC] Payload:`, JSON.stringify(payload));
 
         try {
             const ctrl = new AbortController();
@@ -180,7 +178,6 @@ export async function submitFabricArticles(ids: string[]): Promise<{
             clearTimeout(timer);
 
             const rawText = await res.text().catch(() => '');
-            console.log(`[ZMM_FAB_RFC] HTTP ${res.status} id=${row.id} raw:`, rawText);
 
             let json: any = {};
             try { json = JSON.parse(rawText); } catch { /* non-JSON */ }
@@ -191,7 +188,6 @@ export async function submitFabricArticles(ids: string[]): Promise<{
                 try { ev = JSON.parse(json.EV_JSON); } catch { ev = json; }
             }
 
-            console.log(`[ZMM_FAB_RFC] Parsed ev id=${row.id}:`, JSON.stringify(ev));
 
             // ZMM_FAB_ART_CREATION_RFC returns EX_RETURN array
             // Success: EX_RETURN[0].MSG_TYP === 'S', FAB_ART = new fabric article number

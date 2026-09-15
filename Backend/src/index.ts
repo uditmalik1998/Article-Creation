@@ -212,6 +212,9 @@ app.use('/api/', (req, res, next) => {
   if (req.path.endsWith('/retry-variants') || req.path === '/approver/approve') {
     return requestTimeout(15 * 60 * 1000)(req, res, next);
   }
+  if (req.path === '/approver/create-fabric-article') {
+    return requestTimeout(5 * 60 * 1000)(req, res, next);
+  }
   return requestTimeout(90 * 1000)(req, res, next);
 });
 

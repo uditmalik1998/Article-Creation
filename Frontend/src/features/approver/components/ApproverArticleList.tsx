@@ -1047,7 +1047,7 @@ const ArticleCard = React.memo(
     const FAB_FIELDS = useMemo(
       () =>
         (cardGroups.find((g) => g.group === 'FAB' || g.group === 'FABRIC')?.fields ?? []).filter(
-          (f) => !f.freeText,
+          (f) => !f.freeText && f.field !== 'mainMvgr',
         ),
       [cardGroups],
     );
@@ -2460,7 +2460,7 @@ const ArticleCard = React.memo(
                                               setFabNoLoading(true);
                                               const token = localStorage.getItem('authToken');
                                               fetch(
-                                                `${APP_CONFIG.api.baseURL}/approver/fabric-article-data/search?q=${encodeURIComponent(q)}`,
+                                                `${APP_CONFIG.api.baseURL}/approver/fabric-article-data/search?q=${encodeURIComponent(q)}&type=FG,uploader`,
                                                 { headers: { Authorization: `Bearer ${token}` } },
                                               )
                                                 .then((r) => r.json())
@@ -2537,9 +2537,12 @@ const ArticleCard = React.memo(
                                       ) : (
                                         <div
                                           className="truncate text-[11px]"
-                                          style={{ color: fabNoDisplayVal ? '#111827' : '#9ca3af' }}
+                                          style={{
+                                            color: fabNoDisplayVal ? '#111827' : '#9ca3af',
+                                            fontWeight: 600,
+                                          }}
                                         >
-                                          {fabNoDisplayVal || (isLocked ? '—' : 'Click to fill')}
+                                          {fabNoDisplayVal || '—'}
                                         </div>
                                       )}
                                     </div>
@@ -2556,7 +2559,7 @@ const ArticleCard = React.memo(
                                         setFabDescSearched(false);
                                         const token = localStorage.getItem('authToken');
                                         fetch(
-                                          `${APP_CONFIG.api.baseURL}/approver/fabric-article-data/search?q=${encodeURIComponent(q)}`,
+                                          `${APP_CONFIG.api.baseURL}/approver/fabric-article-data/search?q=${encodeURIComponent(q)}&type=FG,uploader`,
                                           { headers: { Authorization: `Bearer ${token}` } },
                                         )
                                           .then((r) => r.json())

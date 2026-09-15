@@ -31,6 +31,7 @@ import {
   Tooltip,
 } from '@/shared/components/ui-tw';
 import { message } from '@/lib/message';
+import { toast } from 'sonner';
 import { ApproverArticleList } from '../components/ApproverArticleList';
 import type { ApproverItem, MasterAttribute } from '../components/ApproverTable';
 import { APP_CONFIG } from '../../../constants/app/config';
@@ -83,11 +84,40 @@ const SCHEMA_KEY_TO_ALL_SAP_KEYS: Record<string, string[]> = Object.entries(SAP_
   {} as Record<string, string[]>,
 );
 
+// Fields that must be filled before a Fabric Article can be created from an FG article.
+// Each entry: [db field name, SAP key used in the mandatory grid, display label].
+const FAB_CREATION_FIELDS: [string, string, string][] = [
+  ['yarn1',          'M_YARN',           'M_YARN'],
+  ['mainMvgr',       'M_FAB_MAIN_MVGR_1','M_FAB_MAIN_MVGR_1'],
+  ['fabricMainMvgr', 'M_FAB_MAIN_MVGR_2','M_FAB_MAIN_MVGR_2'],
+  ['fConstruction',  'M_CONSTRUCTION',   'M_CONSTRUCTION'],
+  ['mFab2',          'M_WEAVE_02',       'M_WEAVE_02'],
+  ['weave',          'M_WEAVE_01',       'M_WEAVE_01'],
+  ['gsm',            'M_GSM',            'M_GSM'],
+  ['lycra',          'M_LYCRA',          'M_LYCRA'],
+  ['composition',    'M_COMPOSITION',    'M_COMPOSITION'],
+  ['finish',         'M_FINISH',         'M_FINISH'],
+];
+
+function getMissingFabricCreationFields(item: any): string[] {
+  const missing: string[] = [];
+  if (!item.fabricArticleDescription) missing.push('FABRIC ARTICLE DESC');
+  if (!item.vendorFabricRate) missing.push('VENDOR FABRIC RATE');
+  const majorCat = item.majorCategory || '';
+  for (const [dbField, sapKey, label] of FAB_CREATION_FIELDS) {
+    const isActive = isMandatoryGridFieldActive(majorCat, sapKey) === true;
+    if (isActive && !item[dbField]) missing.push(label);
+  }
+  return missing;
+}
+
 function getMissingMandatoryFields(item: any): string[] {
   const missing: string[] = [];
   if (!item.vendorName) missing.push('VENDOR NAME');
   if (!item.rate) missing.push('RATE / COST');
   if (!item.mrp) missing.push('MRP');
+  if (!item.articleFashionType) missing.push('ARTICLE FASHION TYPE');
+  if (!item.segment) missing.push('SEGMENT');
   const majorCat = item.majorCategory || '';
   if (!majorCat) return missing;
   for (const [schemaKey, dbField] of Object.entries(SCHEMA_KEY_TO_DB_FIELD)) {
@@ -601,20 +631,32 @@ export default function ArticleDetailPage() {
   };
 
   const doCreateFabric = async (item: ApproverItem) => {
+    const tid = 'fabric-create';
+    toast.loading('Creating fabric article and syncing to SAP…', { id: tid });
     try {
       const token = localStorage.getItem('authToken');
       const r = await fetch(`${APP_CONFIG.api.baseURL}/approver/create-fabric-article`, {
-        method: 'POST', headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` },
-        body: JSON.stringify({ ids: [item.id] }),
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` },
+        body: JSON.stringify({ ids: [item.id], submitNow: true }),
       });
       const data = await r.json();
       if (!r.ok) {
-        message.error(data.error || 'Failed to create fabric article');
+        toast.error(data.error || 'Failed to create fabric article', { id: tid, duration: 8000 });
         return;
       }
-      message.success('Fabric article creation initiated');
+      const result = data.results?.[0];
+      if (result?.success && result?.sapArticleNumber) {
+        toast.success(`Fabric article created: ${result.sapArticleNumber}`, { id: tid, duration: 6000 });
+      } else if (result && !result.success) {
+        toast.warning(`Row created but SAP sync failed: ${result.message || 'Unknown error'}`, { id: tid, duration: 8000 });
+      } else {
+        toast.success('Fabric article created', { id: tid });
+      }
       await refetchCurrentItem();
-    } catch { message.error('Failed to create fabric article'); }
+    } catch {
+      toast.error('Failed to create fabric article', { id: tid });
+    }
   };
 
   const doCreateBody = async (item: ApproverItem) => {
@@ -1017,7 +1059,14 @@ export default function ArticleDetailPage() {
           selectedRowKeys={selectedRowKeys}
           onSelectionChange={setSelectedRowKeys}
           onEdit={handleEdit}
-          onCreateFabricArticle={item => setConfirmDialog({ kind: 'createFabric', item })}
+          onCreateFabricArticle={item => {
+            const missing = getMissingFabricCreationFields(item);
+            if (missing.length > 0) {
+              message.error(`Fill mandatory fields before creating Fabric Article: ${missing.join(', ')}`);
+              return;
+            }
+            setConfirmDialog({ kind: 'createFabric', item });
+          }}
           onCreateBodyArticle={item => setConfirmDialog({ kind: 'createBody', item })}
           onProceedFGArticle={item => setConfirmDialog({ kind: 'proceedFG', item })}
           onDuplicate={async () => {}}
