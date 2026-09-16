@@ -179,9 +179,7 @@ function parseVariantRfcResponse(
 
         return {
             ok: isSuccess,
-            sapArticleNumber:         isSuccess && sapArt ? sapArt : undefined,
-            fabricArticleNumber:      isSuccess && sapArt ? sapArt : undefined,
-            fabricArticleDescription: msgText || undefined,
+            sapArticleNumber: isSuccess && sapArt ? sapArt : undefined,
             message,
         };
     }
@@ -212,9 +210,7 @@ function parseVariantRfcResponse(
 
     return {
         ok,
-        sapArticleNumber:         sapArt || undefined,
-        fabricArticleNumber:      sapArt || undefined,
-        fabricArticleDescription: sapMessageText || undefined,
+        sapArticleNumber: sapArt || undefined,
         message,
     };
 }
