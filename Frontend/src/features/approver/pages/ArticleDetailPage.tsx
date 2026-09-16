@@ -554,8 +554,8 @@ export default function ArticleDetailPage() {
       }
       if (!(item.bodyArticleDescription || '').trim()) missing.push('BODY ARTICLE DESC.');
       missing.push(...getMissingMandatoryFields(item));
-      const missingWeightCount = variantWeightIssues[item.id];
-      if (missingWeightCount) missing.push(`VARIANT WEIGHT (${missingWeightCount} variant${missingWeightCount > 1 ? 's' : ''} missing)`);
+      // const missingWeightCount = variantWeightIssues[item.id];
+      // if (missingWeightCount) missing.push(`VARIANT WEIGHT (${missingWeightCount} variant${missingWeightCount > 1 ? 's' : ''} missing)`);
       if (missing.length > 0) acc.push({ articleId: item.sapArticleId || item.articleNumber || item.imageName || item.id, missing });
       return acc;
     }, []);

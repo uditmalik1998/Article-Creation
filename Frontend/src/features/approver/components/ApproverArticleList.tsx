@@ -1066,7 +1066,7 @@ const ArticleCard = React.memo(
         const parts = BODY_FIELDS
           .map((f) => getVal(f.field))
           .filter((v): v is string => !!v && !/^-+$/.test(v.trim()));
-        return parts.length > 0 ? parts.join('-') : null;
+        return parts.length > 0 ? parts.join('-').replace(/-{2,}/g, '-') : null;
       },
       [BODY_FIELDS],
     );
@@ -1090,7 +1090,7 @@ const ArticleCard = React.memo(
           return v ? String(v).trim() : null;
         };
         const fabParts = FAB_FIELDS.map((f) => getVal(f.field)).filter(Boolean) as string[];
-        const newFabDesc = fabParts.length > 0 ? fabParts.join('-') : null;
+        const newFabDesc = fabParts.length > 0 ? fabParts.join('-').replace(/-{2,}/g, '-') : null;
         const newBodyDesc = buildBodyDescription(getVal);
         // REFERENCE ARTICLE DESC — built like ARTICLE DESC but from a fixed,
         // user-confirmed sequence spanning multiple cards:
@@ -1325,7 +1325,7 @@ const ArticleCard = React.memo(
           return v ? String(v).trim() : null;
         };
         const fabParts = FAB_FIELDS.map((f) => getVal(f.field)).filter(Boolean) as string[];
-        const newFabDesc = fabParts.length > 0 ? fabParts.join('-') : null;
+        const newFabDesc = fabParts.length > 0 ? fabParts.join('-').replace(/-{2,}/g, '-') : null;
         if (newFabDesc) updates['fabricArticleDescription'] = newFabDesc;
       }
       setLocalValues((prev) => ({ ...prev, ...updates }));
@@ -2418,7 +2418,7 @@ const ArticleCard = React.memo(
                                     })
                                     .filter(Boolean);
                                   if (parts.length > 0)
-                                    handleSave('fabricArticleDescription', parts.join('-'));
+                                    handleSave('fabricArticleDescription', parts.join('-').replace(/-{2,}/g, '-'));
                                 };
                                 const isFabNoEditing = editingField === 'bot_fabricArticleNumber';
                                 const fabNoDisplayVal =
