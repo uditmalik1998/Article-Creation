@@ -2728,6 +2728,18 @@ export class ApproverController {
                     }
                 } catch (varErr: any) {
                     console.error('[VARIANT_RFC] Variant sync failed (non-fatal):', varErr?.message);
+                    // Mark stuck-PENDING variants as FAILED so the retry worker can pick them up
+                    await prisma.extractionResultFlat.updateMany({
+                        where: {
+                            genericArticleId: { in: successfullyApprovedIds },
+                            isGeneric: false,
+                            sapArticleId: null,
+                        },
+                        data: {
+                            sapSyncStatus: SapSyncStatus.FAILED,
+                            sapSyncMessage: `Variant RFC exception: ${varErr?.message ?? 'unknown'}`,
+                        },
+                    }).catch(() => {});
                 }
             }
             // ─────────────────────────────────────────────────────────────────
@@ -2797,6 +2809,7 @@ export class ApproverController {
             ApproverController._approvalSyncRunning = false;
         }
     }
+
 
     // Re-queue FAILED generics for the background worker. Only generics never
     // created in SAP (sapArticleId IS NULL) are re-queued — never a duplicate.
@@ -2991,11 +3004,13 @@ export class ApproverController {
             }
 
             // 3. Find variants that need (re)syncing to SAP
+            // Include PENDING/SYNCED — covers variants stuck at approval time or marked SYNCED with no article number
             const variants = await prisma.extractionResultFlat.findMany({
                 where: {
                     genericArticleId: id,
                     isGeneric: false,
-                    sapSyncStatus: { in: ['FAILED', 'NOT_SYNCED'] }
+                    sapArticleId: null,
+                    sapSyncStatus: { in: ['FAILED', 'NOT_SYNCED', 'PENDING', 'SYNCED'] }
                 }
             });
 

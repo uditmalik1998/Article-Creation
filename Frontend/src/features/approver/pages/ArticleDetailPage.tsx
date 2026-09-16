@@ -334,7 +334,7 @@ export default function ArticleDetailPage() {
   useEffect(() => {
     const token = localStorage.getItem('authToken');
     fetch(`${APP_CONFIG.api.baseURL}/approver/attributes`, { headers: { Authorization: `Bearer ${token}` } })
-      .then(r => r.json()).then(setAttributes).catch(() => {});
+      .then(r => r.json()).then(data => { if (Array.isArray(data)) setAttributes(data); }).catch(() => {});
   }, []);
 
   // Fetch by ID when opened directly (no navigation state)

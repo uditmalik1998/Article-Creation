@@ -898,17 +898,6 @@ const VariantSubTable: React.FC<VariantSubTableProps> = ({
       },
     },
     {
-      title: 'Status',
-      dataIndex: 'approvalStatus',
-      key: 'approvalStatus',
-      width: 100,
-      render: (status: string) => {
-        const variant: 'success' | 'destructive' | 'warning' =
-          status === 'APPROVED' ? 'success' : status === 'REJECTED' ? 'destructive' : 'warning';
-        return <Badge variant={variant}>{status || 'PENDING'}</Badge>;
-      },
-    },
-    {
       title: 'Major Category',
       dataIndex: 'majorCategory',
       key: 'majorCategory',
@@ -964,7 +953,8 @@ const VariantSubTable: React.FC<VariantSubTableProps> = ({
       render: (sapId, record) => {
         if (sapId) return <strong className="text-xs text-emerald-700">{sapId}</strong>;
         const status = record.sapSyncStatus;
-        if (status === 'FAILED') {
+        // SYNCED with no article number = effectively failed — treat as FAILED
+        if (status === 'FAILED' || status === 'SYNCED') {
           return (
             <Tooltip title={record.sapSyncMessage || 'SAP returned an error'} side="top">
               <Badge variant="destructive" className="cursor-help gap-1 text-[11px]">
@@ -973,64 +963,7 @@ const VariantSubTable: React.FC<VariantSubTableProps> = ({
             </Tooltip>
           );
         }
-        if (status === 'SYNCED') return <Badge variant="warning" className="text-[11px]">SYNCED</Badge>;
         return <span className="text-[11px] text-muted-foreground">Pending SAP</span>;
-      },
-    },
-    {
-      title: '',
-      key: 'actions',
-      width: 200,
-      render: (_v, record) => {
-        const colorKey = (record.variantColor || '').toUpperCase();
-        const isFirstOfColor = colorKey && firstIdByColor.get(colorKey) === record.id;
-        const colorSynced = colorKey ? syncedColors.has(colorKey) : false;
-        return (
-          <div className="flex flex-wrap gap-1.5">
-            {!record.fabricArticleNumber && (
-              <Button size="sm" variant="outline" onClick={() => setEditingVariant(record)}>
-                <Pencil />
-                Edit
-              </Button>
-            )}
-            {(!record.approvalStatus || record.approvalStatus === 'PENDING') && (
-              <Popconfirm
-                title="Delete variant?"
-                description="This cannot be undone."
-                onConfirm={() => handleDeleteVariant(record.id)}
-                okText="Delete"
-              >
-                <Button size="sm" variant="destructive">
-                  <Trash2 />
-                </Button>
-              </Popconfirm>
-            )}
-            {isFirstOfColor && !colorSynced && colorKey && (
-              deletingColor === colorKey ? (
-                <Button size="sm" variant="destructive" className="gap-1 text-[11px]" disabled>
-                  <span className="flex items-center gap-0.5">
-                    <span className="animate-bounce [animation-delay:0ms]">.</span>
-                    <span className="animate-bounce [animation-delay:150ms]">.</span>
-                    <span className="animate-bounce [animation-delay:300ms]">.</span>
-                  </span>
-                  Deleting
-                </Button>
-              ) : (
-                <Popconfirm
-                  title={`Delete all "${record.variantColor}" variants?`}
-                  description={`This will delete all ${variants.filter((v) => (v.variantColor || '').toUpperCase() === colorKey).length} size variants for this color.`}
-                  onConfirm={() => handleDeleteColorVariants(record.variantColor || colorKey)}
-                  okText="Delete All"
-                >
-                  <Button size="sm" variant="destructive" className="gap-1 text-[11px]">
-                    <Trash2 className="h-3 w-3" />
-                    Delete Color
-                  </Button>
-                </Popconfirm>
-              )
-            )}
-          </div>
-        );
       },
     },
   ];
@@ -1065,9 +998,12 @@ const VariantSubTable: React.FC<VariantSubTableProps> = ({
 
   const retryNeededCount = variants.filter(
     (v) =>
-      v.sapSyncStatus === 'FAILED' ||
-      (v.approvalStatus === 'APPROVED' && v.sapSyncStatus === 'NOT_SYNCED') ||
-      v.approvalStatus === 'PENDING',
+      !v.sapArticleId && (
+        v.sapSyncStatus === 'FAILED' ||
+        v.sapSyncStatus === 'SYNCED' ||
+        (v.approvalStatus === 'APPROVED' && (v.sapSyncStatus === 'NOT_SYNCED' || v.sapSyncStatus === 'PENDING')) ||
+        v.approvalStatus === 'PENDING'
+      ),
   ).length;
 
   return (
