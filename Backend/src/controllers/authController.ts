@@ -102,7 +102,7 @@ export const register = async (req: Request, res: Response): Promise<void> => {
         sessionIssuedAt,
       },
       JWT_SECRET,
-      { expiresIn: '7d' }
+      { expiresIn: '15d' }
     );
 
     res.status(201).json({
@@ -176,7 +176,7 @@ export const login = async (req: Request, res: Response): Promise<void> => {
         sessionIssuedAt,
       },
       JWT_SECRET,
-      { expiresIn: '7d' }
+      { expiresIn: '15d' }
     );
 
     res.json({
