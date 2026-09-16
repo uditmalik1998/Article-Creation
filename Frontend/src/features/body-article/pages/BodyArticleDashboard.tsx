@@ -168,7 +168,6 @@ export default function BodyArticleDashboard({ pathType }: BodyArticleDashboardP
     return start || end ? [start ? dayjs(start) : null, end ? dayjs(end) : null] : null;
   });
   const [exportingAll, setExportingAll] = useState(false);
-  const [exportingWithVariants, setExportingWithVariants] = useState(false);
   const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set());
 
   const [subDivOpen, setSubDivOpen] = useState(false);
@@ -366,14 +365,13 @@ export default function BodyArticleDashboard({ pathType }: BodyArticleDashboardP
       if (divisionFilter !== 'ALL') params.set('division', divisionFilter);
       if (subDivisionFilter !== 'ALL') params.set('subDivision', subDivisionFilter);
       if (majorCategoryFilter) params.set('majorCategory', majorCategoryFilter);
-      if (sourceFilter !== 'ALL') params.set('source', sourceFilter);
       if (searchText) params.set('search', searchText);
       if (dateRangeFilter?.[0]) params.set('startDate', dateRangeFilter[0].startOf('day').toISOString());
       if (dateRangeFilter?.[1]) params.set('endDate', dateRangeFilter[1].endOf('day').toISOString());
-      if (pathType) params.set('pathType', pathType);
-      params.set('presentationsType', PRESENTATIONS_TYPE);
+      params.set('limit', '9999');
 
-      const response = await fetch(`${APP_CONFIG.api.baseURL}/approver/items/export-all?${params}`, {
+      // Always export from body_article_data (not extraction_results_flat)
+      const response = await fetch(`${APP_CONFIG.api.baseURL}/approver/body-articles?${params}`, {
         headers: { Authorization: `Bearer ${token}` },
       });
       if (!response.ok) throw new Error('Export failed');
@@ -385,8 +383,9 @@ export default function BodyArticleDashboard({ pathType }: BodyArticleDashboardP
         message.dismiss(loadingId); message.warning('No records found for the current filters'); return;
       }
       const exportData = buildExportData(allRows);
-      const fileName = pathType === 'old' ? 'Body Old Articles' : pathType === 'new' ? 'Body New Articles'
-        : pathType === 'rejected' ? 'Body Rejected Articles' : 'Body Articles';
+      const fileName = pathType === 'new' ? 'Body New Articles'
+        : pathType === 'rejected' ? 'Body Rejected Articles'
+        : pathType === 'created' ? 'Body Created Articles' : 'Body Articles';
       const divLabel = divisionFilter !== 'ALL' ? ` - ${divisionFilter}` : '';
       await exportToExcel(exportData, exportHeaders, [], `${fileName}${divLabel}`);
       message.dismiss(loadingId);
@@ -397,46 +396,7 @@ export default function BodyArticleDashboard({ pathType }: BodyArticleDashboardP
     } finally {
       setExportingAll(false);
     }
-  }, [statusFilter, divisionFilter, subDivisionFilter, majorCategoryFilter, sourceFilter, searchText, dateRangeFilter, pathType, buildExportData, exportHeaders]);
-
-  const handleExportWithVariants = useCallback(async () => {
-    setExportingWithVariants(true);
-    const loadingId = message.loading('Fetching articles with variants…');
-    try {
-      const token = localStorage.getItem('authToken');
-      const params = new URLSearchParams();
-      params.set('status', 'APPROVED');
-      if (divisionFilter !== 'ALL') params.set('division', divisionFilter);
-      if (subDivisionFilter !== 'ALL') params.set('subDivision', subDivisionFilter);
-      if (majorCategoryFilter) params.set('majorCategory', majorCategoryFilter);
-      if (sourceFilter !== 'ALL') params.set('source', sourceFilter);
-      if (searchText) params.set('search', searchText);
-      if (dateRangeFilter?.[0]) params.set('startDate', dateRangeFilter[0].startOf('day').toISOString());
-      if (dateRangeFilter?.[1]) params.set('endDate', dateRangeFilter[1].endOf('day').toISOString());
-      params.set('pathType', 'created');
-      params.set('presentationsType', PRESENTATIONS_TYPE);
-
-      const response = await fetch(`${APP_CONFIG.api.baseURL}/approver/items/export-all-with-variants?${params}`, {
-        headers: { Authorization: `Bearer ${token}` },
-      });
-      if (!response.ok) throw new Error('Export failed');
-      const result = await response.json();
-      const allRows: any[] = result.data || [];
-      if (allRows.length === 0) {
-        message.dismiss(loadingId); message.warning('No records found'); return;
-      }
-      const variantHeaders = [...exportHeaders, ...VARIANT_EXTRA_HEADERS];
-      const divLabel = divisionFilter !== 'ALL' ? ` - ${divisionFilter}` : '';
-      await exportToExcel(allRows.map(mapExportRow), variantHeaders, [], `Body Created Articles - Variants${divLabel}`);
-      message.dismiss(loadingId);
-      message.success(`Exported ${allRows.length} rows`);
-    } catch {
-      message.dismiss(loadingId);
-      message.error('Export failed. Please try again.');
-    } finally {
-      setExportingWithVariants(false);
-    }
-  }, [divisionFilter, subDivisionFilter, majorCategoryFilter, sourceFilter, searchText, dateRangeFilter, exportHeaders]);
+  }, [statusFilter, divisionFilter, subDivisionFilter, majorCategoryFilter, searchText, dateRangeFilter, pathType, buildExportData, exportHeaders]);
 
   const toggleSelect = useCallback((item: ApproverItem) => {
     setSelectedIds((prev) => {
@@ -584,12 +544,6 @@ export default function BodyArticleDashboard({ pathType }: BodyArticleDashboardP
                 className="h-7 border-white/30 bg-white/10 px-2.5 text-[12px] text-white hover:bg-white/20 hover:text-white">
                 <RotateCw /> Refresh
               </Button>
-              {pathType === 'created' && (
-                <Button size="sm" variant="outline" onClick={handleExportWithVariants} disabled={exportingWithVariants}
-                  className="h-7 border-white/30 bg-white/10 px-2.5 text-[12px] text-white hover:bg-white/20 hover:text-white disabled:opacity-50">
-                  <Download /> Export Variants
-                </Button>
-              )}
               <Button size="sm" variant="outline" onClick={handleExportAll} disabled={exportingAll}
                 className="h-7 border-white/30 bg-white/10 px-2.5 text-[12px] text-white hover:bg-white/20 hover:text-white disabled:opacity-50">
                 <Download /> Export ({totalCount})

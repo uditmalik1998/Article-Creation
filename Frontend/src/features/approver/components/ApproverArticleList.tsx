@@ -402,7 +402,7 @@ const GROUP_LABELS: Record<string, string> = {
   FAB: 'Construction & Fabric',
   BODY: 'Body & Construction',
   'VA ACC.': 'Trims & Accessories',
-  'VA PRCS': 'Finishing & Process',
+  'VA PRCS': 'Value Addition',
   BUSINESS: 'Business & Misc',
 };
 
@@ -3225,33 +3225,6 @@ const ArticleCard = React.memo(
                   {effectiveMajCat ? `No attributes defined for ${effectiveMajCat}` : 'No major category set.'}
                 </div>
               )}
-
-              {/* Proceed for FG Article Creation — hidden on Body Article pages, New Articles, and Failed Creations */}
-              {!isBodyArticle && !item.articleNumber && pathType !== 'new' && pathType !== 'failed' &&
-                (() => {
-                  const effectiveVendorCode =
-                    localValues['vendorCode'] !== undefined ? localValues['vendorCode'] : item.vendorCode;
-                  const vendorCodeMissing = !effectiveVendorCode;
-                  return (
-                    <div className="mt-2 shrink-0">
-                      <Tooltip title={vendorCodeMissing ? 'Vendor Code is required before proceeding' : undefined}>
-                        <Button
-                          disabled={vendorCodeMissing}
-                          onClick={() => onProceedFGArticle(item)}
-                          className="h-8 w-full text-[12px] font-semibold transition-all"
-                          style={{
-                            background: vendorCodeMissing ? '#f3f4f6' : '#FF6F61',
-                            color: vendorCodeMissing ? '#9ca3af' : '#fff',
-                            border: 'none',
-                          }}
-                        >
-                          <Rocket />
-                          Proceed for FG Article Creation
-                        </Button>
-                      </Tooltip>
-                    </div>
-                  );
-                })()}
             </section>
 
           </div>

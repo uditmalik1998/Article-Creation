@@ -314,6 +314,9 @@ export default function ArticleDetailPage() {
   // race where the gate ran before the grid cache was populated).
   const [gridVersion, setGridVersion] = useState(0);
 
+  // Maps itemId → number of variants missing weight (for Save & Submit gate)
+  const [variantWeightIssues, setVariantWeightIssues] = useState<Record<string, number>>({});
+
   // Edit modal
   const [isEditModalOpen, setIsEditModalOpen] = useState(false);
   const [editingItem, setEditingItem] = useState<ApproverItem | null>(null);
@@ -507,6 +510,32 @@ export default function ArticleDetailPage() {
     [selectedRowKeys, items],
   );
 
+  // Fetch variants for all pending-selected items and check for missing weight.
+  // Runs whenever the selection or items list changes.
+  useEffect(() => {
+    if (pendingSelectedKeys.length === 0) { setVariantWeightIssues({}); return; }
+    const token = localStorage.getItem('authToken');
+    const issues: Record<string, number> = {};
+    Promise.all(
+      pendingSelectedKeys.map(async (id) => {
+        try {
+          const r = await fetch(`${APP_CONFIG.api.baseURL}/approver/items/${id}/variants`, {
+            headers: { Authorization: `Bearer ${token}` },
+          });
+          if (!r.ok) return;
+          const data = await r.json();
+          const variantList: any[] = data.data || data;
+          if (!Array.isArray(variantList)) return;
+          const missing = variantList.filter(
+            (v) => !v.isGeneric && (v.variantWeight === null || v.variantWeight === undefined || String(v.variantWeight).trim() === ''),
+          ).length;
+          if (missing > 0) issues[String(id)] = missing;
+        } catch { /* non-blocking */ }
+      }),
+    ).then(() => setVariantWeightIssues({ ...issues }));
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [pendingSelectedKeys.join(',')]);
+
   const approveBlockedReasons = useMemo(() => {
     const pendingItems = items.filter(i => pendingSelectedKeys.includes(i.id));
     return pendingItems.reduce<{ articleId: string; missing: string[] }[]>((acc, item) => {
@@ -525,11 +554,13 @@ export default function ArticleDetailPage() {
       }
       if (!(item.bodyArticleDescription || '').trim()) missing.push('BODY ARTICLE DESC.');
       missing.push(...getMissingMandatoryFields(item));
+      const missingWeightCount = variantWeightIssues[item.id];
+      if (missingWeightCount) missing.push(`VARIANT WEIGHT (${missingWeightCount} variant${missingWeightCount > 1 ? 's' : ''} missing)`);
       if (missing.length > 0) acc.push({ articleId: item.sapArticleId || item.articleNumber || item.imageName || item.id, missing });
       return acc;
     }, []);
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [pendingSelectedKeys, items, gridVersion, pathType]);
+  }, [pendingSelectedKeys, items, gridVersion, pathType, variantWeightIssues]);
 
   const handleApproveClick = async () => {
     if (pendingSelectedKeys.length === 0) return;
