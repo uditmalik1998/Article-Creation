@@ -94,7 +94,6 @@ export default function FGNewArticleDashboard({ pathType = 'new' }: FGNewArticle
     return start || end ? [start ? dayjs(start) : null, end ? dayjs(end) : null] : null;
   });
   const [exportingAll, setExportingAll] = useState(false);
-  const [exportingRoughCosting, setExportingRoughCosting] = useState(false);
   const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set());
 
   const [subDivOpen, setSubDivOpen] = useState(false);
@@ -197,65 +196,46 @@ export default function FGNewArticleDashboard({ pathType = 'new' }: FGNewArticle
   }, [currentPage, searchText, divisionFilter, subDivisionFilter, majorCategoryFilter, sourceFilter, dateRangeFilter]);
 
   const buildExportData = useCallback((rows: ApproverItem[]) => {
-    const dateSource: 'createdAt' | 'approvedAt' = pathType === 'created' ? 'approvedAt' : 'createdAt';
-    return rows.map((row) => {
-      const rawDate = (row as any)[dateSource];
-      const parsedDate = rawDate ? new Date(rawDate) : null;
-      const formattedDate = parsedDate && !Number.isNaN(parsedDate.getTime()) ? parsedDate.toLocaleDateString('en-GB') : '';
+    return rows.map((row: any) => {
+      const rawDate = row.createdAt ? new Date(row.createdAt) : null;
+      const formattedDate = rawDate && !Number.isNaN(rawDate.getTime()) ? rawDate.toLocaleDateString('en-GB') : '';
       return {
-        'Article Number': row.articleNumber || '', Division: row.division || '',
-        'Sub Division': row.subDivision || '', 'Major Category': row.majorCategory || '',
-        'MC Code': row.mcCode || '', Status: row.approvalStatus || '',
-        'Vendor Name': row.vendorName || '', 'Vendor Code': row.vendorCode || '',
-        'Design Number': row.designNumber || '', 'PPT Number': row.pptNumber || '',
-        'Article Description': row.articleDescription || '',
-        'Reference Article Number': row.referenceArticleNumber || '',
-        'Reference Article Description': row.referenceArticleDescription || '',
-        Season: row.season || '', 'HSN Tax Code': row.hsnTaxCode || '',
-        Year: row.year || '', 'Article Type': row.articleType || '',
-        Rate: row.rate == null ? undefined : Number(row.rate),
-        MRP: row.mrp == null ? undefined : Number(row.mrp),
-        M_FAB_MAIN_MVGR_1: row.mainMvgr || '', M_FAB_MAIN_MVGR_2: row.fabricMainMvgr || '',
-        M_WEAVE_01: row.weave || '', M_WEAVE_02: row.mFab2 || '', M_YARN: row.yarn1 || '',
-        M_COMPOSITION: row.composition || '', M_COUNT: row.fCount || '',
-        M_CONSTRUCTION: row.fConstruction || '', M_LYCRA: row.lycra || '',
-        M_FINISH: row.finish || '', M_GSM: row.gsm || '', M_OUNZ: row.fOunce || '',
-        M_WIDTH: row.fWidth || '', M_FAB_DIV: row.fabDiv || '', M_FAB_VDR: (row as any).fabVdr || '',
-        SHADE: row.shade || '', WEIGHT: row.weight || '',
-        M_BODY_STYLE: row.pattern || '', M_COLLAR_TYPE: row.collar || '',
-        M_COLLAR_STYLE: row.collarStyle || '', M_NECK_TYPE: row.neck || '',
-        M_NECK_STYLE: row.neckDetails || '', M_PLACKET: row.placket || '',
-        M_BLT_TYPE: row.fatherBelt || '', M_BLT_STYLE: row.childBelt || '',
-        M_SLEEVES_MAIN_STYLE: row.sleeve || '', M_SLEEVE_FOLD: row.sleeveFold || '',
-        M_BTM_FOLD: row.bottomFold || '', M_NO_OF_POCKET: row.noOfPocket || '',
-        M_POCKET: row.pocketType || '', M_EXTRA_POCKET: row.extraPocket || '',
-        M_FIT: row.fit || '', M_LENGTH: row.length || '',
-        M_DC_STYLE: row.drawcord || '', M_DC_SHAPE: row.dcShape || '',
-        M_BTN_TYPE: row.button || '', M_BTN_CLR: row.btnColour || '',
-        M_ZIP_TYPE: row.zipper || '', M_ZIP_COL: row.zipColour || '',
-        M_PATCH_STYLE: row.patchesType || '', M_PATCHE_TYPE: row.patches || '',
-        M_HTRF_TYPE: row.htrfType || '', M_HTRF_STYLE: row.htrfStyle || '',
-        M_PRINT_TYPE: row.printType || '', M_PRINT_STYLE: row.printStyle || '',
-        M_PRINT_PLACEMENT: row.printPlacement || '', M_EMB_TYPE: row.embroidery || '',
-        M_EMBROIDERY_STYLE: row.embroideryType || '', M_EMB_PLACEMENT: row.embPlacement || '',
-        M_WASH: row.wash || '', M_IMP_ATBT: row.impAtrbt2 || '',
-        M_AGE_GROUP: row.ageGroup || '', 'ARTICLE FASHION TYPE': row.articleFashionType || '',
-        SEGMENT: row.segment || '', 'Extracted By': row.userName || '',
-        'Created Date': formattedDate,
-        ...(pathType === 'created' ? {
-          'Approved By Name': row.approver?.name || '',
-          'Approved By Email': row.approver?.email || '',
-        } : {}),
+        'Fabric Article Number':      row.fabricArticleNumber || '',
+        'Fabric Article Description': row.fabricArticleDescription || '',
+        Division:                     row.division || '',
+        'Sub Division':               row.subDivision || '',
+        'Major Category':             row.majorCategory || '',
+        'MC Description':             row.mcDescription || '',
+        Status:                       row.approvalStatus || '',
+        'SAP Sync Status':            row.sapSyncStatus || '',
+        'Vendor Name':                row.vendorName || '',
+        'Vendor Code':                row.vendorCode || '',
+        'Design Number':              row.designNumber || '',
+        M_FAB_DIV:                    row.fabDiv || '',
+        M_YARN:                       row.yarn1 || '',
+        M_FAB_MAIN_MVGR_1:            row.mainMvgr || '',
+        M_FAB_MAIN_MVGR_2:            row.fabricMainMvgr || '',
+        M_CONSTRUCTION:               row.fConstruction || '',
+        M_OUNZ:                       row.fOunce || '',
+        M_WIDTH:                      row.fWidth || '',
+        M_WEAVE_02:                   row.mFab2 || '',
+        M_COUNT:                      row.fCount || '',
+        M_WEAVE_01:                   row.weave || '',
+        M_COMPOSITION:                row.composition || '',
+        M_FINISH:                     row.finish || '',
+        M_GSM:                        row.gsm || '',
+        M_LYCRA:                      row.lycra || '',
+        'Fabric Rate':                row.fabricRate == null ? undefined : Number(row.fabricRate),
+        'V2 Fabric Rate':             row.v2FabricRate == null ? undefined : Number(row.v2FabricRate),
+        'Value Add Cost':             row.valueAddCost == null ? undefined : Number(row.valueAddCost),
+        'Article Fashion Type':       row.articleFashionType || '',
+        Source:                       row.source || '',
+        'Created Date':               formattedDate,
       } as Record<string, string | number | undefined>;
     });
-  }, [pathType]);
+  }, []);
 
-  const exportHeaders = useMemo(
-    () => pathType === 'created'
-      ? [...SIMPLE_APPROVER_EXPORT_HEADERS, 'Approved By Name', 'Approved By Email']
-      : [...SIMPLE_APPROVER_EXPORT_HEADERS],
-    [pathType],
-  );
+  const exportHeaders = useMemo(() => [...SIMPLE_APPROVER_EXPORT_HEADERS], []);
 
   const handleExportAll = useCallback(async () => {
     setExportingAll(true);
@@ -300,42 +280,6 @@ export default function FGNewArticleDashboard({ pathType = 'new' }: FGNewArticle
     }
   }, [statusFilter, divisionFilter, subDivisionFilter, majorCategoryFilter, sourceFilter, searchText, dateRangeFilter, pathType, buildExportData, exportHeaders]);
 
-  const handleRoughCostingExport = useCallback(async () => {
-    setExportingRoughCosting(true);
-    const loadingId = message.loading('Generating Rough Costing report…');
-    try {
-      const token = localStorage.getItem('authToken');
-      const params = new URLSearchParams();
-      params.set('pathType', 'created');
-      if (divisionFilter !== 'ALL') params.set('division', divisionFilter);
-      if (subDivisionFilter !== 'ALL') params.set('subDivision', subDivisionFilter);
-      if (majorCategoryFilter) params.set('majorCategory', majorCategoryFilter);
-      if (searchText) params.set('search', searchText);
-      if (dateRangeFilter?.[0]) params.set('startDate', dateRangeFilter[0].startOf('day').toISOString());
-      if (dateRangeFilter?.[1]) params.set('endDate', dateRangeFilter[1].endOf('day').toISOString());
-
-      const response = await fetch(`${APP_CONFIG.api.baseURL}/approver/items/rough-costing-export?${params}`, {
-        headers: { Authorization: `Bearer ${token}` },
-      });
-      if (!response.ok) throw new Error('Export failed');
-      const blob = await response.blob();
-      const url = URL.createObjectURL(blob);
-      const a = document.createElement('a');
-      a.href = url;
-      a.download = `Rough_Costing_${new Date().toISOString().slice(0, 10)}.xlsx`;
-      document.body.appendChild(a);
-      a.click();
-      document.body.removeChild(a);
-      URL.revokeObjectURL(url);
-      message.dismiss(loadingId);
-      message.success('Rough Costing report downloaded');
-    } catch {
-      message.dismiss(loadingId);
-      message.error('Failed to generate Rough Costing report. Please try again.');
-    } finally {
-      setExportingRoughCosting(false);
-    }
-  }, [divisionFilter, subDivisionFilter, majorCategoryFilter, searchText, dateRangeFilter]);
 
   const toggleSelect = useCallback((item: ApproverItem) => {
     setSelectedIds((prev) => {
@@ -457,12 +401,6 @@ export default function FGNewArticleDashboard({ pathType = 'new' }: FGNewArticle
                 className="h-7 border-white/30 bg-white/10 px-2.5 text-[12px] text-white hover:bg-white/20 hover:text-white">
                 <RotateCw /> Refresh
               </Button>
-              {pathType === 'created' && (
-                <Button size="sm" variant="outline" onClick={handleRoughCostingExport} disabled={exportingRoughCosting}
-                  className="h-7 border-white/30 bg-white/10 px-2.5 text-[12px] text-white hover:bg-white/20 hover:text-white disabled:opacity-50">
-                  <Download /> Rough Costing
-                </Button>
-              )}
               <Button size="sm" variant="outline" onClick={handleExportAll} disabled={exportingAll}
                 className="h-7 border-white/30 bg-white/10 px-2.5 text-[12px] text-white hover:bg-white/20 hover:text-white disabled:opacity-50">
                 <Download /> Export ({totalCount})

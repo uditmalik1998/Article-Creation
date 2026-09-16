@@ -396,6 +396,11 @@ export default function ArticleDetailPage({
 
   function getBasePath() {
     const prefix = location.pathname.startsWith('/body-article') ? '/body-article' : '/fabric-article';
+    if (isFGMode) {
+      if (pathType === 'created') return `${prefix}/fg-created`;
+      if (pathType === 'failed') return `${prefix}/fg-failed`;
+      return `${prefix}/fg-new`;
+    }
     if (pathType === 'old') return `${prefix}/old-articles`;
     if (pathType === 'rejected') return `${prefix}/rejected`;
     if (pathType === 'created') return `${prefix}/created`;
@@ -646,10 +651,15 @@ export default function ArticleDetailPage({
         body: JSON.stringify({ ids: pendingSelectedKeys }),
       });
       if (!r.ok) throw new Error('Rejection failed');
-      message.success('Items rejected');
       setSelectedRowKeys([]);
-      await refetchCurrentItem();
-    } catch { message.error('Failed to reject items'); }
+      if (isFGMode) {
+        message.success('Fabric article deleted');
+        navigate(buildBackUrl());
+      } else {
+        message.success('Items rejected');
+        await refetchCurrentItem();
+      }
+    } catch { message.error(isFGMode ? 'Failed to delete fabric article' : 'Failed to reject items'); }
   };
 
   const doCreateFabric = async (item: ApproverItem) => {
@@ -967,7 +977,9 @@ export default function ArticleDetailPage({
               </div>
               <div className="min-w-0">
                 <div className="font-display truncate text-[13px] font-semibold leading-tight tracking-tight">
-                  {pathType === 'old' ? 'Old Articles' : pathType === 'new' ? 'New Articles'
+                  {isFGMode
+                    ? (pathType === 'created' ? 'FG Created Articles' : 'FG New Articles')
+                    : pathType === 'old' ? 'Old Articles' : pathType === 'new' ? 'New Articles'
                     : pathType === 'rejected' ? 'Rejected Articles'
                     : pathType === 'created' ? 'Created Articles'
                     : 'Article Detail'}
@@ -1301,8 +1313,8 @@ export default function ArticleDetailPage({
           )}
           {confirmDialog?.kind === 'reject' && (
             <>
-              <DialogHeader><DialogTitle>Confirm Rejection</DialogTitle></DialogHeader>
-              <p className="m-0">Are you sure you want to reject {confirmDialog.count} items?</p>
+              <DialogHeader><DialogTitle>{isFGMode ? 'Confirm Deletion' : 'Confirm Rejection'}</DialogTitle></DialogHeader>
+              <p className="m-0">{isFGMode ? `Delete ${confirmDialog.count} fabric article${confirmDialog.count > 1 ? 's' : ''} from the system?` : `Are you sure you want to reject ${confirmDialog.count} items?`}</p>
               <DialogFooter>
                 <Button variant="outline" onClick={() => setConfirmDialog(null)}>Cancel</Button>
                 <Button variant="destructive" onClick={async () => { setConfirmDialog(null); await doReject(); }}>Reject</Button>
