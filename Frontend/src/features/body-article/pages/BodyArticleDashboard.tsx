@@ -56,23 +56,19 @@ const getSubDivisionOptions = (division?: string): string[] => {
 };
 
 export const SIMPLE_BODY_EXPORT_HEADERS = [
-  'Article Number', 'Division', 'Sub Division', 'Major Category', 'MC Code', 'Status',
-  'Vendor Name', 'Vendor Code', 'Design Number', 'PPT Number', 'Article Description',
-  'Reference Article Number', 'Reference Article Description', 'Season', 'HSN Tax Code',
-  'Year', 'Article Type',
-  'Rate', 'MRP',
-  'M_FAB_MAIN_MVGR_1', 'M_FAB_MAIN_MVGR_2', 'M_WEAVE_01', 'M_WEAVE_02', 'M_YARN',
-  'M_COMPOSITION', 'M_COUNT', 'M_CONSTRUCTION', 'M_LYCRA', 'M_FINISH', 'M_GSM',
-  'M_OUNZ', 'M_WIDTH', 'M_FAB_DIV', 'M_FAB_VDR', 'SHADE', 'WEIGHT',
-  'M_BODY_STYLE', 'M_COLLAR_TYPE', 'M_COLLAR_STYLE', 'M_NECK_TYPE', 'M_NECK_STYLE',
-  'M_PLACKET', 'M_BLT_TYPE', 'M_BLT_STYLE', 'M_SLEEVES_MAIN_STYLE', 'M_SLEEVE_FOLD',
-  'M_BTM_FOLD', 'M_NO_OF_POCKET', 'M_POCKET', 'M_EXTRA_POCKET', 'M_FIT', 'M_LENGTH',
-  'M_DC_STYLE', 'M_DC_SHAPE', 'M_BTN_TYPE', 'M_BTN_CLR', 'M_ZIP_TYPE', 'M_ZIP_COL',
-  'M_PATCH_STYLE', 'M_PATCHE_TYPE', 'M_HTRF_TYPE', 'M_HTRF_STYLE',
-  'M_PRINT_TYPE', 'M_PRINT_STYLE', 'M_PRINT_PLACEMENT', 'M_EMB_TYPE',
-  'M_EMBROIDERY_STYLE', 'M_EMB_PLACEMENT', 'M_WASH',
-  'M_IMP_ATBT', 'M_AGE_GROUP', 'ARTICLE FASHION TYPE', 'SEGMENT',
-  'Extracted By', 'Created Date',
+  'Body Article Number', 'Body Article Description',
+  'Division', 'Sub Division', 'Major Category', 'MC Code',
+  'Status', 'SAP Sync Status',
+  'Vendor Name', 'Vendor Code', 'Design Number',
+  'Season', 'Year', 'HSN Tax Code',
+  'M_COLLAR_TYPE', 'M_COLLAR_STYLE', 'M_NECK_TYPE', 'M_NECK_STYLE',
+  'M_PLACKET', 'M_BLT_TYPE', 'M_BLT_STYLE',
+  'M_SLEEVES_MAIN_STYLE', 'M_SLEEVE_FOLD', 'M_BTM_FOLD',
+  'M_NO_OF_POCKET', 'M_POCKET', 'M_EXTRA_POCKET',
+  'M_FIT', 'M_BODY_STYLE', 'M_LENGTH', 'M_SET',
+  'CMTP Cost', 'CMP Cost', 'Fab Cost', 'Fab Cons', 'Width',
+  'Basic Trim Cost', 'Rough CMP Cost',
+  'Created Date',
 ] as const;
 
 const VARIANT_EXTRA_HEADERS = ['Row Type', 'Parent Article Number', 'Variant Size', 'Variant Color', 'SAP Article ID'] as const;
@@ -292,65 +288,55 @@ export default function BodyArticleDashboard({ pathType }: BodyArticleDashboardP
   }, [currentPage, searchText, divisionFilter, subDivisionFilter, majorCategoryFilter, sourceFilter, dateRangeFilter]);
 
   const buildExportData = useCallback((rows: ApproverItem[]) => {
-    const dateSource: 'createdAt' | 'approvedAt' = pathType === 'created' ? 'approvedAt' : 'createdAt';
-    return rows.map((row) => {
-      const rawDate = (row as any)[dateSource];
+    return rows.map((row: any) => {
+      const rawDate = row.createdAt;
       const parsedDate = rawDate ? new Date(rawDate) : null;
       const formattedDate = parsedDate && !Number.isNaN(parsedDate.getTime()) ? parsedDate.toLocaleDateString('en-GB') : '';
       return {
-        'Article Number': row.articleNumber || '', Division: row.division || '',
-        'Sub Division': row.subDivision || '', 'Major Category': row.majorCategory || '',
-        'MC Code': row.mcCode || '', Status: row.approvalStatus || '',
-        'Vendor Name': row.vendorName || '', 'Vendor Code': row.vendorCode || '',
-        'Design Number': row.designNumber || '', 'PPT Number': row.pptNumber || '',
-        'Article Description': row.articleDescription || '',
-        'Reference Article Number': row.referenceArticleNumber || '',
-        'Reference Article Description': row.referenceArticleDescription || '',
-        Season: row.season || '', 'HSN Tax Code': row.hsnTaxCode || '',
-        Year: row.year || '', 'Article Type': row.articleType || '',
-        Rate: row.rate == null ? undefined : Number(row.rate),
-        MRP: row.mrp == null ? undefined : Number(row.mrp),
-        M_FAB_MAIN_MVGR_1: row.mainMvgr || '', M_FAB_MAIN_MVGR_2: row.fabricMainMvgr || '',
-        M_WEAVE_01: row.weave || '', M_WEAVE_02: row.mFab2 || '', M_YARN: row.yarn1 || '',
-        M_COMPOSITION: row.composition || '', M_COUNT: row.fCount || '',
-        M_CONSTRUCTION: row.fConstruction || '', M_LYCRA: row.lycra || '',
-        M_FINISH: row.finish || '', M_GSM: row.gsm || '', M_OUNZ: row.fOunce || '',
-        M_WIDTH: row.fWidth || '', M_FAB_DIV: row.fabDiv || '', M_FAB_VDR: (row as any).fabVdr || '',
-        SHADE: row.shade || '', WEIGHT: row.weight || '',
-        M_BODY_STYLE: row.pattern || '', M_COLLAR_TYPE: row.collar || '',
-        M_COLLAR_STYLE: row.collarStyle || '', M_NECK_TYPE: row.neck || '',
-        M_NECK_STYLE: row.neckDetails || '', M_PLACKET: row.placket || '',
-        M_BLT_TYPE: row.fatherBelt || '', M_BLT_STYLE: row.childBelt || '',
-        M_SLEEVES_MAIN_STYLE: row.sleeve || '', M_SLEEVE_FOLD: row.sleeveFold || '',
-        M_BTM_FOLD: row.bottomFold || '', M_NO_OF_POCKET: row.noOfPocket || '',
-        M_POCKET: row.pocketType || '', M_EXTRA_POCKET: row.extraPocket || '',
-        M_FIT: row.fit || '', M_LENGTH: row.length || '',
-        M_DC_STYLE: row.drawcord || '', M_DC_SHAPE: row.dcShape || '',
-        M_BTN_TYPE: row.button || '', M_BTN_CLR: row.btnColour || '',
-        M_ZIP_TYPE: row.zipper || '', M_ZIP_COL: row.zipColour || '',
-        M_PATCH_STYLE: row.patchesType || '', M_PATCHE_TYPE: row.patches || '',
-        M_HTRF_TYPE: row.htrfType || '', M_HTRF_STYLE: row.htrfStyle || '',
-        M_PRINT_TYPE: row.printType || '', M_PRINT_STYLE: row.printStyle || '',
-        M_PRINT_PLACEMENT: row.printPlacement || '', M_EMB_TYPE: row.embroidery || '',
-        M_EMBROIDERY_STYLE: row.embroideryType || '', M_EMB_PLACEMENT: row.embPlacement || '',
-        M_WASH: row.wash || '', M_IMP_ATBT: row.impAtrbt2 || '',
-        M_AGE_GROUP: row.ageGroup || '', 'ARTICLE FASHION TYPE': row.articleFashionType || '',
-        SEGMENT: row.segment || '', 'Extracted By': row.userName || '',
-        'Created Date': formattedDate,
-        ...(pathType === 'created' ? {
-          'Approved By Name': row.approver?.name || '',
-          'Approved By Email': row.approver?.email || '',
-        } : {}),
+        'Body Article Number':      row.bodyArticle || '',
+        'Body Article Description': row.bodyArticleDescription || '',
+        Division:                   row.division || '',
+        'Sub Division':             row.subDivision || '',
+        'Major Category':           row.majorCategory || '',
+        'MC Code':                  row.mcCode || '',
+        Status:                     row.approvalStatus || '',
+        'SAP Sync Status':          row.sapSyncStatus || '',
+        'Vendor Name':              row.vendorName || '',
+        'Vendor Code':              row.vendorCode || '',
+        'Design Number':            row.designNumber || '',
+        Season:                     row.season || '',
+        Year:                       row.year || '',
+        'HSN Tax Code':             row.hsnTaxCode || '',
+        M_COLLAR_TYPE:              row.collar || '',
+        M_COLLAR_STYLE:             row.collarStyle || '',
+        M_NECK_TYPE:                row.neck || '',
+        M_NECK_STYLE:               row.neckDetails || '',
+        M_PLACKET:                  row.placket || '',
+        M_BLT_TYPE:                 row.fatherBelt || '',
+        M_BLT_STYLE:                row.childBelt || '',
+        M_SLEEVES_MAIN_STYLE:       row.sleeve || '',
+        M_SLEEVE_FOLD:              row.sleeveFold || '',
+        M_BTM_FOLD:                 row.bottomFold || '',
+        M_NO_OF_POCKET:             row.noOfPocket || '',
+        M_POCKET:                   row.pocketType || '',
+        M_EXTRA_POCKET:             row.extraPocket || '',
+        M_FIT:                      row.fit || '',
+        M_BODY_STYLE:               row.pattern || '',
+        M_LENGTH:                   row.length || '',
+        M_SET:                      row.mSet || '',
+        'CMTP Cost':                row.cmtpCost == null ? undefined : Number(row.cmtpCost),
+        'CMP Cost':                 row.cmpCost  == null ? undefined : Number(row.cmpCost),
+        'Fab Cost':                 row.fabCost  == null ? undefined : Number(row.fabCost),
+        'Fab Cons':                 row.fabCons  == null ? undefined : Number(row.fabCons),
+        Width:                      row.bodyWidth == null ? undefined : Number(row.bodyWidth),
+        'Basic Trim Cost':          row.basicTrimCost == null ? undefined : Number(row.basicTrimCost),
+        'Rough CMP Cost':           row.roughCmpCost  == null ? undefined : Number(row.roughCmpCost),
+        'Created Date':             formattedDate,
       } as Record<string, string | number | undefined>;
     });
-  }, [pathType]);
+  }, []);
 
-  const exportHeaders = useMemo(
-    () => pathType === 'created'
-      ? [...SIMPLE_BODY_EXPORT_HEADERS, 'Approved By Name', 'Approved By Email']
-      : [...SIMPLE_BODY_EXPORT_HEADERS],
-    [pathType],
-  );
+  const exportHeaders = useMemo(() => [...SIMPLE_BODY_EXPORT_HEADERS], []);
 
   const handleExportAll = useCallback(async () => {
     setExportingAll(true);
