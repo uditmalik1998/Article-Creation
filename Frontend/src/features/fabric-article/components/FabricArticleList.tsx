@@ -818,7 +818,7 @@ const ArticleCard = React.memo(
           return v ? String(v).trim() : null;
         };
         const fabParts = FAB_FIELDS.map((f) => getVal(f.field)).filter(Boolean) as string[];
-        const fabJoined = fabParts.length > 0 ? fabParts.join('-') : null;
+        const fabJoined = fabParts.length > 0 ? fabParts.join('-').replace(/-{2,}/g, '-') : null;
         const newFabDesc = fabJoined !== null ? (isFGMode ? fabJoined : fabJoined.slice(0, 40)) : null;
         const updates: Record<string, string | null> = {};
         if (newFabDesc !== null && newFabDesc !== prev['fabricArticleDescription']) updates['fabricArticleDescription'] = newFabDesc;
@@ -835,7 +835,7 @@ const ArticleCard = React.memo(
         return v ? String(v).trim() : null;
       }).filter(Boolean) as string[];
       if (fabParts.length === 0) return;
-      const computed = fabParts.join('-');
+      const computed = fabParts.join('-').replace(/-{2,}/g, '-');
       if (autoSavedFabDescRef.current === computed) return; // already auto-saved this value
       autoSavedFabDescRef.current = computed;
       onSave({ ...item, fabricArticleDescription: computed } as ApproverItem, { fabricArticleDescription: computed }, { silent: true });
@@ -993,7 +993,7 @@ const ArticleCard = React.memo(
           return v ? String(v).trim() : null;
         };
         const fabParts = FAB_FIELDS.map((f) => getVal(f.field)).filter(Boolean) as string[];
-        const newFabDesc = fabParts.length > 0 ? fabParts.join('-') : null;
+        const newFabDesc = fabParts.length > 0 ? fabParts.join('-').replace(/-{2,}/g, '-') : null;
         if (newFabDesc) updates['fabricArticleDescription'] = newFabDesc;
       }
       setLocalValues((prev) => ({ ...prev, ...updates }));
@@ -1659,35 +1659,13 @@ const ArticleCard = React.memo(
                   {item.sapArticleId || item.articleNumber}
                 </Badge>
               )}
-              {/* ── Editable Design + Vendor + Price + Date ── */}
+              {/* ── Design (read-only) + Vendor + Price ── */}
               <span className="ml-2 flex flex-wrap items-center gap-1.5 truncate text-[11px] text-white/75">
                 <span className="flex items-center gap-1">
                   <span className="text-[10px] font-semibold uppercase tracking-wider text-white/60">Design:</span>
-                  {editingField === 'topbar_designNumber' ? (
-                    <Input
-                      autoFocus
-                      defaultValue={(localValues['designNumber'] ?? item.designNumber) || ''}
-                      className="h-5 w-24 border-white/30 bg-white/10 px-1 text-[11px] text-white"
-                      onKeyDown={(e) =>
-                        e.key === 'Enter' &&
-                        handleSave('designNumber', (e.target as HTMLInputElement).value || null)
-                      }
-                      onBlur={(e) => handleSave('designNumber', e.target.value || null)}
-                      onClick={(e) => e.stopPropagation()}
-                    />
-                  ) : (
-                    <span
-                      onClick={() => {
-                        if (!isFieldLocked('designNumber')) setEditingField('topbar_designNumber');
-                      }}
-                      style={{
-                        cursor: isFieldLocked('designNumber') ? 'default' : 'pointer',
-                        borderBottom: isFieldLocked('designNumber') ? 'none' : '1px dashed rgba(255,255,255,0.4)',
-                      }}
-                    >
-                      {(localValues['designNumber'] ?? item.designNumber) || (isFieldLocked('designNumber') ? '—' : 'Click to fill')}
-                    </span>
-                  )}
+                  <span>
+                    {(localValues['designNumber'] ?? item.designNumber) || '—'}
+                  </span>
                 </span>
                 {item.vendorName && <span className="text-white/40">·</span>}
                 {item.vendorName}
@@ -2006,7 +1984,7 @@ const ArticleCard = React.memo(
                                     })
                                     .filter(Boolean);
                                   if (parts.length > 0)
-                                    handleSave('fabricArticleDescription', isFGMode ? parts.join('-') : parts.join('-').slice(0, 40));
+                                    handleSave('fabricArticleDescription', isFGMode ? parts.join('-').replace(/-{2,}/g, '-') : parts.join('-').replace(/-{2,}/g, '-').slice(0, 40));
                                 };
                                 return (
                                   <>

@@ -4169,6 +4169,18 @@ export class ApproverController {
         return res.json(ApproverController.fabricArticleDataRowToItem(row));
     };
 
+    // Delete FG-type fabric_article_data rows (called on Reject in FG New Articles page)
+    static deleteFGFabricArticles = async (req: Request, res: Response) => {
+        const { ids } = req.body as { ids?: string[] };
+        if (!Array.isArray(ids) || ids.length === 0) {
+            return res.status(400).json({ error: 'ids array is required' });
+        }
+        const result = await prisma.fabricArticleData.deleteMany({
+            where: { id: { in: ids }, fabricArticleType: 'FG' },
+        });
+        return res.json({ success: true, deleted: result.count });
+    };
+
     // Client field → DB column mapping for fabric_article_data
     private static FABRIC_ARTICLE_DATA_FIELD_MAP: Record<string, string> = {
         division:                 'division',
