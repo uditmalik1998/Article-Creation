@@ -940,7 +940,7 @@ const VariantSubTable: React.FC<VariantSubTableProps> = ({
       render: (_v, record) => (
         <WeightCell
           variant={record}
-          synced={!!(record.fabricArticleNumber || record.sapArticleId)}
+          synced={!!record.sapArticleId}
           onSaved={() => fetchVariants(true)}
         />
       ),
