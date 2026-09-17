@@ -4897,6 +4897,23 @@ export const uploadFabricArticleData = async (req: Request, res: Response): Prom
   }
 };
 
+// Column order for the Fabric Article Data export — the same relevant-data-
+// first, workflow/audit-fields-last order as the View Data page's own column
+// config (EXPENSE_TABLE_REGISTRY['fabric-article-data']), rather than
+// whatever order Postgres happens to report them in. Any column not listed
+// here (e.g. one added to the table after this list was last updated) still
+// gets exported — `SELECT *` never changes — it's just appended at the end
+// instead of silently dropped.
+const FABRIC_ARTICLE_DATA_EXPORT_COLUMN_ORDER = [
+  'fabric_article_number', 'fabric_article_description', 'fabric_article_type',
+  'division', 'sub_division', 'major_category', 'vendor_name', 'vendor_code', 'fabric_rate',
+  'm_fab_div', 'm_yarn', 'm_fab_main_mvgr_1', 'm_fab_main_mvgr_2',
+  'm_construction', 'm_ounz', 'm_width', 'm_weave_01', 'm_weave_02',
+  'm_count', 'm_composition', 'm_finish', 'm_gsm', 'm_lycra',
+  'approval_status', 'approved_at', 'approved_by', 'sap_sync_status', 'sap_sync_message',
+  'user_name', 'created_at', 'updated_at',
+];
+
 /**
  * GET /api/admin/fabric-article-data/export
  * Admin-only (this whole router is mounted behind `requireAdmin`). Dumps
@@ -4904,11 +4921,21 @@ export const uploadFabricArticleData = async (req: Request, res: Response): Prom
  * so the export can never silently drop a column the Prisma model hasn't
  * caught up with yet.
  */
-export const downloadFabricArticleDataMaster = async (_req: Request, res: Response): Promise<void> => {
+export const downloadFabricArticleDataMaster = async (req: Request, res: Response): Promise<void> => {
   try {
-    const rows: Record<string, any>[] = await prisma.$queryRaw`
-      SELECT * FROM fabric_article_data ORDER BY created_at ASC, id ASC
-    `;
+    // Optional ?articleType=uploader|FG — lets a "Download Master" caller
+    // export just the uploader-entered rows or just the ones generated from
+    // an approved FG presentation, instead of always getting everything.
+    const articleTypeParam = req.query.articleType;
+    const articleType = typeof articleTypeParam === 'string' && articleTypeParam.trim() ? articleTypeParam.trim() : null;
+
+    const rows: Record<string, any>[] = articleType
+      ? await prisma.$queryRaw`
+          SELECT * FROM fabric_article_data WHERE fabric_article_type = ${articleType} ORDER BY created_at ASC, id ASC
+        `
+      : await prisma.$queryRaw`
+          SELECT * FROM fabric_article_data ORDER BY created_at ASC, id ASC
+        `;
 
     const ExcelJS = require('exceljs');
     const wb = new ExcelJS.Workbook();
@@ -4916,19 +4943,15 @@ export const downloadFabricArticleDataMaster = async (_req: Request, res: Respon
 
     // 'id' is Supabase's own surrogate primary key — not meaningful to
     // whoever opens this file, so it's dropped here same as everywhere else
-    // in the Expense Data views; every other column ships as-is.
-    const headers = (rows.length > 0
-      ? Object.keys(rows[0])
-      : [
-          'id', 'fabric_article_number', 'fabric_article_description',
-          'division', 'sub_division', 'major_category', 'vendor_name', 'vendor_code', 'fabric_rate',
-          'm_fab_div', 'm_yarn', 'm_fab_main_mvgr_1', 'm_fab_main_mvgr_2',
-          'm_construction', 'm_ounz', 'm_width', 'm_weave_01', 'm_weave_02',
-          'm_count', 'm_gsm', 'm_composition', 'm_finish', 'm_lycra',
-          'approval_status', 'approved_at', 'approved_by', 'sap_sync_status', 'sap_sync_message',
-          'user_name', 'created_at', 'updated_at',
-        ]
-    ).filter((h) => h !== 'id');
+    // in the Expense Data views; every other column ships as-is, reordered
+    // to match the View Data page (relevant fields first, workflow/audit
+    // fields last) instead of raw Postgres column order.
+    const availableColumns = (rows.length > 0 ? Object.keys(rows[0]) : FABRIC_ARTICLE_DATA_EXPORT_COLUMN_ORDER).filter(
+      (h) => h !== 'id'
+    );
+    const orderedKnown = FABRIC_ARTICLE_DATA_EXPORT_COLUMN_ORDER.filter((h) => availableColumns.includes(h));
+    const remaining = availableColumns.filter((h) => !FABRIC_ARTICLE_DATA_EXPORT_COLUMN_ORDER.includes(h));
+    const headers = [...orderedKnown, ...remaining];
 
     const headerRow = ws.addRow(headers.map((h) => h.toUpperCase()));
     headerRow.eachCell((cell: any) => {
@@ -4949,7 +4972,8 @@ export const downloadFabricArticleDataMaster = async (_req: Request, res: Respon
 
     ws.columns = headers.map(() => ({ width: 20 }));
 
-    const filename = `FABRIC_ARTICLE_DATA_MASTER_${new Date().toISOString().slice(0, 10)}.xlsx`;
+    const typeSuffix = articleType ? `_${articleType.toUpperCase().replace(/[^A-Z0-9]+/g, '_')}` : '';
+    const filename = `FABRIC_ARTICLE_DATA_MASTER${typeSuffix}_${new Date().toISOString().slice(0, 10)}.xlsx`;
     res.setHeader('Content-Type', 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');
     res.setHeader('Content-Disposition', `attachment; filename="${filename}"`);
     await wb.xlsx.write(res);
@@ -5490,6 +5514,23 @@ export const uploadBodyArticleData = async (req: Request, res: Response): Promis
   }
 };
 
+// Column order for the Body Article Data export — same relevant-data-first,
+// workflow/audit-fields-last order as the View Data page's own column config
+// (EXPENSE_TABLE_REGISTRY['body-article-data']); see the Fabric Article Data
+// export's column-order constant above for why unlisted columns still ship,
+// just appended at the end.
+const BODY_ARTICLE_DATA_EXPORT_COLUMN_ORDER = [
+  'body_article_number', 'body_article_description', 'body_article_type',
+  'division', 'sub_division', 'major_category', 'mc_code', 'article_number', 'flat_id',
+  'vendor_name', 'vendor_code', 'season', 'year', 'hsn_tax_code',
+  'm_collar_type', 'm_collar_style', 'm_neck_type', 'm_neck_style', 'm_placket',
+  'm_blt_type', 'm_blt_style', 'm_sleeves_main_style', 'm_sleeve_fold', 'm_btm_fold',
+  'm_no_of_pocket', 'm_pocket', 'm_extra_pocket', 'm_fit', 'm_body_style', 'm_length', 'm_set',
+  'cmtp_cost', 'cmp_cost', 'fab_cost', 'fab_cons', 'width',
+  'approval_status', 'approved_at', 'approved_by', 'sap_sync_status', 'sap_sync_message',
+  'user_name', 'created_at', 'updated_at',
+];
+
 /**
  * GET /api/admin/body-article-data/export
  * Admin-only (this whole router is mounted behind `requireAdmin`). Same
@@ -5497,11 +5538,21 @@ export const uploadBodyArticleData = async (req: Request, res: Response): Promis
  * newly added column (see FABRIC_RATE there) is always included with no
  * further code change, minus the surrogate `id` primary key.
  */
-export const downloadBodyArticleDataMaster = async (_req: Request, res: Response): Promise<void> => {
+export const downloadBodyArticleDataMaster = async (req: Request, res: Response): Promise<void> => {
   try {
-    const rows: Record<string, any>[] = await prisma.$queryRaw`
-      SELECT * FROM body_article_data ORDER BY created_at ASC, id ASC
-    `;
+    // Optional ?articleType=uploader|FG — lets a "Download Master" caller
+    // export just the uploader-entered rows or just the ones generated from
+    // an approved FG presentation, instead of always getting everything.
+    const articleTypeParam = req.query.articleType;
+    const articleType = typeof articleTypeParam === 'string' && articleTypeParam.trim() ? articleTypeParam.trim() : null;
+
+    const rows: Record<string, any>[] = articleType
+      ? await prisma.$queryRaw`
+          SELECT * FROM body_article_data WHERE body_article_type = ${articleType} ORDER BY created_at ASC, id ASC
+        `
+      : await prisma.$queryRaw`
+          SELECT * FROM body_article_data ORDER BY created_at ASC, id ASC
+        `;
 
     const ExcelJS = require('exceljs');
     const wb = new ExcelJS.Workbook();
@@ -5509,22 +5560,15 @@ export const downloadBodyArticleDataMaster = async (_req: Request, res: Response
 
     // 'id' is Supabase's own surrogate primary key — not meaningful to
     // whoever opens this file, so it's dropped here same as the Fabric
-    // Article Data master export; every other column ships as-is.
-    const headers = (rows.length > 0
-      ? Object.keys(rows[0])
-      : [
-          'body_article_number', 'body_article_description', 'flat_id', 'article_number',
-          'division', 'sub_division', 'major_category', 'mc_code', 'vendor_name', 'vendor_code',
-          'season', 'year', 'hsn_tax_code',
-          'm_collar_type', 'm_collar_style', 'm_neck_type', 'm_neck_style', 'm_placket',
-          'm_blt_type', 'm_blt_style', 'm_sleeves_main_style', 'm_sleeve_fold', 'm_btm_fold',
-          'm_no_of_pocket', 'm_pocket', 'm_extra_pocket', 'm_fit', 'm_body_style', 'm_length', 'm_set',
-          'cmtp_cost', 'cmp_cost', 'fab_cost', 'fab_cons', 'width',
-          'approval_status', 'approved_at', 'approved_by', 'sap_sync_status', 'sap_sync_message',
-          'user_name', 'created_at', 'updated_at', 'image_url', 'body_article_type',
-          'design_number',
-        ]
-    ).filter((h) => h !== 'id');
+    // Article Data master export; every other column ships as-is, reordered
+    // to match the View Data page (relevant fields first, workflow/audit
+    // fields last) instead of raw Postgres column order.
+    const availableColumns = (rows.length > 0 ? Object.keys(rows[0]) : BODY_ARTICLE_DATA_EXPORT_COLUMN_ORDER).filter(
+      (h) => h !== 'id'
+    );
+    const orderedKnown = BODY_ARTICLE_DATA_EXPORT_COLUMN_ORDER.filter((h) => availableColumns.includes(h));
+    const remaining = availableColumns.filter((h) => !BODY_ARTICLE_DATA_EXPORT_COLUMN_ORDER.includes(h));
+    const headers = [...orderedKnown, ...remaining];
 
     const headerRow = ws.addRow(headers.map((h) => h.toUpperCase()));
     headerRow.eachCell((cell: any) => {
@@ -5545,7 +5589,8 @@ export const downloadBodyArticleDataMaster = async (_req: Request, res: Response
 
     ws.columns = headers.map(() => ({ width: 20 }));
 
-    const filename = `BODY_ARTICLE_DATA_MASTER_${new Date().toISOString().slice(0, 10)}.xlsx`;
+    const typeSuffix = articleType ? `_${articleType.toUpperCase().replace(/[^A-Z0-9]+/g, '_')}` : '';
+    const filename = `BODY_ARTICLE_DATA_MASTER${typeSuffix}_${new Date().toISOString().slice(0, 10)}.xlsx`;
     res.setHeader('Content-Type', 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');
     res.setHeader('Content-Disposition', `attachment; filename="${filename}"`);
     await wb.xlsx.write(res);
@@ -6168,6 +6213,7 @@ export const EXPENSE_TABLE_REGISTRY: Record<string, ExpenseTableConfig> = {
       { key: 'id', label: 'ID', editable: false },
       { key: 'fabricArticleNumber', label: 'Fabric Article No.' },
       { key: 'fabricArticleDescription', label: 'Description' },
+      { key: 'fabricArticleType', label: 'Article Type', editable: false },
       { key: 'division', label: 'Division' },
       { key: 'subDivision', label: 'Sub Division' },
       { key: 'majorCategory', label: 'Major Category' },
@@ -6317,6 +6363,7 @@ export const EXPENSE_TABLE_REGISTRY: Record<string, ExpenseTableConfig> = {
       { key: 'id', label: 'ID', editable: false },
       { key: 'bodyArticleNumber', label: 'Body Article No.' },
       { key: 'bodyArticleDescription', label: 'Description' },
+      { key: 'bodyArticleType', label: 'Article Type', editable: false },
       { key: 'division', label: 'Division' },
       { key: 'subDivision', label: 'Sub Division' },
       { key: 'majorCategory', label: 'Major Category' },

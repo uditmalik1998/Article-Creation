@@ -26,10 +26,14 @@ import { ColumnCheckboxFilter } from '../components/ColumnCheckboxFilter';
 
 /** Tables with a full "download master" export — admin-only, wired up ad hoc
  * per table on the backend (e.g. GET /admin/fabric-article-data/export)
- * rather than through the generic paginated read used for the on-page table. */
-const DOWNLOAD_MASTER_TABLE_KEYS: Record<string, { endpoint: string; filenamePrefix: string }> = {
-  'fabric-article-data': { endpoint: '/admin/fabric-article-data/export', filenamePrefix: 'FABRIC_ARTICLE_DATA_MASTER' },
-  'body-article-data': { endpoint: '/admin/body-article-data/export', filenamePrefix: 'BODY_ARTICLE_DATA_MASTER' },
+ * rather than through the generic paginated read used for the on-page table.
+ * `typeColumn`, when set, names the filterable column (e.g. Fabric/Body
+ * Article Type — "uploader" vs "FG") whose distinct values populate an
+ * "Article Type" dropdown next to the button, sent through as ?articleType=
+ * so the download can be scoped instead of always exporting every row. */
+const DOWNLOAD_MASTER_TABLE_KEYS: Record<string, { endpoint: string; filenamePrefix: string; typeColumn?: string }> = {
+  'fabric-article-data': { endpoint: '/admin/fabric-article-data/export', filenamePrefix: 'FABRIC_ARTICLE_DATA_MASTER', typeColumn: 'fabricArticleType' },
+  'body-article-data': { endpoint: '/admin/body-article-data/export', filenamePrefix: 'BODY_ARTICLE_DATA_MASTER', typeColumn: 'bodyArticleType' },
 };
 
 const PAGE_SIZE = 50;
@@ -93,20 +97,30 @@ export default function ExpenseTableDetailPage() {
   const downloadMaster = tableKey ? DOWNLOAD_MASTER_TABLE_KEYS[tableKey] : undefined;
   const canDownloadMaster = !!downloadMaster && !!access?.isAdmin;
   const [downloadingMaster, setDownloadingMaster] = useState(false);
+  // 'all' or one of the article-type column's distinct values (e.g.
+  // "uploader" / "FG") — scopes the export, reset whenever the table changes.
+  const [downloadArticleType, setDownloadArticleType] = useState<string>('all');
 
   const handleDownloadMaster = async () => {
     if (!downloadMaster) return;
     setDownloadingMaster(true);
     try {
       const token = localStorage.getItem('authToken');
-      const res = await fetch(`${APP_CONFIG.api.baseURL}${downloadMaster.endpoint}`, {
+      // `baseURL` may be a relative path (e.g. "/api" in production), so the
+      // URL is resolved against the current origin rather than parsed bare.
+      const url = new URL(`${APP_CONFIG.api.baseURL}${downloadMaster.endpoint}`, window.location.origin);
+      if (downloadMaster.typeColumn && downloadArticleType !== 'all') {
+        url.searchParams.set('articleType', downloadArticleType);
+      }
+      const res = await fetch(url.toString(), {
         headers: token ? { Authorization: `Bearer ${token}` } : {},
       });
       if (!res.ok) throw new Error('Failed to download master file');
       const blob = await res.blob();
       const a = document.createElement('a');
       a.href = URL.createObjectURL(blob);
-      a.download = `${downloadMaster.filenamePrefix}_${dayjs().format('YYYY-MM-DD')}.xlsx`;
+      const suffix = downloadMaster.typeColumn && downloadArticleType !== 'all' ? `_${downloadArticleType.toUpperCase()}` : '';
+      a.download = `${downloadMaster.filenamePrefix}${suffix}_${dayjs().format('YYYY-MM-DD')}.xlsx`;
       a.click();
     } catch (err: any) {
       message.error(err?.message || 'Failed to download master file');
@@ -281,6 +295,21 @@ export default function ExpenseTableDetailPage() {
           <p className="text-xs text-muted-foreground">{config.description}</p>
         </div>
         <div className="flex items-center gap-2">
+          {canDownloadMaster && downloadMaster?.typeColumn && (
+            <Select value={downloadArticleType} onValueChange={setDownloadArticleType}>
+              <SelectTrigger className="w-40">
+                <SelectValue placeholder="Article Type" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="all">All Article Types</SelectItem>
+                {(filterOptionsByColumn[downloadMaster.typeColumn]?.options ?? []).map((opt) => (
+                  <SelectItem key={opt} value={opt}>
+                    {opt}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+          )}
           {canDownloadMaster && (
             <Button size="sm" variant="outline" onClick={handleDownloadMaster} disabled={downloadingMaster}>
               <Download className="h-4 w-4" />
