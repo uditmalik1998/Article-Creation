@@ -189,7 +189,7 @@ const EditVariantModal: React.FC<EditVariantModalProps> = ({ open, variant, attr
         shade: v.shade ?? '',
         composition: v.composition ?? '',
         finish: v.finish ?? '',
-        gsm: v.gsm ?? '',
+        gsm: v.gsm != null ? String(v.gsm) : '',
         weight: v.weight ?? '',
         drawcord: v.drawcord ?? '',
         button: v.button ?? '',

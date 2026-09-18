@@ -817,9 +817,9 @@ const ArticleCard = React.memo(
           const v = prev[field] !== undefined ? prev[field] : (item as any)[field];
           return v ? String(v).trim() : null;
         };
-        const fabParts = FAB_FIELDS.map((f) => getVal(f.field)).filter(Boolean) as string[];
-        const fabJoined = fabParts.length > 0 ? fabParts.join('-').replace(/-{2,}/g, '-') : null;
-        const newFabDesc = fabJoined !== null ? (isFGMode ? fabJoined : fabJoined.slice(0, 40)) : null;
+        const fabParts = FAB_FIELDS.map((f) => getVal(f.field)).filter((v): v is string => Boolean(v) && !/^-+$/.test(v as string));
+        const fabJoined = fabParts.length > 0 ? fabParts.join('-').replace(/-{2,}/g, '-').replace(/-+$/, '') : null;
+        const newFabDesc = fabJoined !== null ? (isFGMode ? fabJoined : fabJoined.slice(0, 40).replace(/-+$/, '')) : null;
         const updates: Record<string, string | null> = {};
         if (newFabDesc !== null && newFabDesc !== prev['fabricArticleDescription']) updates['fabricArticleDescription'] = newFabDesc;
         return Object.keys(updates).length > 0 ? { ...prev, ...updates } : prev;
@@ -833,9 +833,9 @@ const ArticleCard = React.memo(
       const fabParts = FAB_FIELDS.map((f) => {
         const v = (item as any)[f.field];
         return v ? String(v).trim() : null;
-      }).filter(Boolean) as string[];
+      }).filter((v): v is string => Boolean(v) && !/^-+$/.test(v as string));
       if (fabParts.length === 0) return;
-      const computed = fabParts.join('-').replace(/-{2,}/g, '-');
+      const computed = fabParts.join('-').replace(/-{2,}/g, '-').replace(/-+$/, '');
       if (autoSavedFabDescRef.current === computed) return; // already auto-saved this value
       autoSavedFabDescRef.current = computed;
       onSave({ ...item, fabricArticleDescription: computed } as ApproverItem, { fabricArticleDescription: computed }, { silent: true });
@@ -992,8 +992,8 @@ const ArticleCard = React.memo(
           const v = updates[f] !== undefined ? updates[f] : (localValues[f] !== undefined ? localValues[f] : (item as any)[f]);
           return v ? String(v).trim() : null;
         };
-        const fabParts = FAB_FIELDS.map((f) => getVal(f.field)).filter(Boolean) as string[];
-        const newFabDesc = fabParts.length > 0 ? fabParts.join('-').replace(/-{2,}/g, '-') : null;
+        const fabParts = FAB_FIELDS.map((f) => getVal(f.field)).filter((v): v is string => Boolean(v) && !/^-+$/.test(v as string));
+        const newFabDesc = fabParts.length > 0 ? fabParts.join('-').replace(/-{2,}/g, '-').replace(/-+$/, '') : null;
         if (newFabDesc) updates['fabricArticleDescription'] = newFabDesc;
       }
       setLocalValues((prev) => ({ ...prev, ...updates }));
@@ -1982,9 +1982,9 @@ const ArticleCard = React.memo(
                                       const v = localValues[ff.field] !== undefined ? localValues[ff.field] : (item as any)[ff.field];
                                       return v ? String(v).trim() : null;
                                     })
-                                    .filter(Boolean);
+                                    .filter((v): v is string => Boolean(v) && !/^-+$/.test(v as string));
                                   if (parts.length > 0)
-                                    handleSave('fabricArticleDescription', isFGMode ? parts.join('-').replace(/-{2,}/g, '-') : parts.join('-').replace(/-{2,}/g, '-').slice(0, 40));
+                                    handleSave('fabricArticleDescription', isFGMode ? parts.join('-').replace(/-{2,}/g, '-').replace(/-+$/, '') : parts.join('-').replace(/-{2,}/g, '-').replace(/-+$/, '').slice(0, 40).replace(/-+$/, ''));
                                 };
                                 return (
                                   <>
@@ -1994,7 +1994,25 @@ const ArticleCard = React.memo(
                                       <div className="border-t border-border px-2 py-1.5">
                                         <Button
                                           size="sm"
-                                          onClick={() => onCreateFabricArticle(item)}
+                                          onClick={async () => {
+                                            const mergedItem = {
+                                              ...item,
+                                              ...Object.fromEntries(
+                                                Object.entries(localValues).filter(([, v]) => v !== null && v !== undefined)
+                                              ),
+                                            } as ApproverItem;
+                                            if (isModifyMode) {
+                                              const fabDesc = mergedItem.fabricArticleDescription;
+                                              if (fabDesc && fabDesc !== item.fabricArticleDescription) {
+                                                await onSave(
+                                                  { ...item, fabricArticleDescription: fabDesc } as ApproverItem,
+                                                  { fabricArticleDescription: fabDesc } as Record<string, unknown>,
+                                                  { silent: true },
+                                                );
+                                              }
+                                            }
+                                            onCreateFabricArticle(mergedItem);
+                                          }}
                                           className="h-7 w-full border border-slate-300 bg-slate-50 text-[11px] font-medium text-slate-700 hover:bg-[#FF6F61]/10 hover:border-[#FF6F61]/40 hover:text-[#FF6F61]"
                                         >
                                           <FileText />

@@ -1928,10 +1928,13 @@ export class ApproverController {
                 return res.status(404).json({ error: 'Item not found' });
             }
 
-            // Prevent updating approved items, EXCEPT variantWeight which must be
-            // settable after approval so SAP retry can proceed.
-            const isWeightOnlyUpdate = Object.keys(data).length === 1 && data.variantWeight !== undefined;
-            if (existingItem.approvalStatus === 'APPROVED' && !isWeightOnlyUpdate) {
+            // Prevent updating approved items, EXCEPT:
+            // - variantWeight: must be settable after approval so SAP retry can proceed
+            // - fabricArticleDescription + vendorFabricRate: internal fields pre-saved before
+            //   fabric article creation in modify mode; not part of SAP attribute sync
+            const APPROVED_ITEM_ALLOWED_FIELDS = new Set(['variantWeight', 'fabricArticleDescription', 'vendorFabricRate', 'fabricArticleNumber']);
+            const isAllowedUpdate = Object.keys(data).every((k) => APPROVED_ITEM_ALLOWED_FIELDS.has(k));
+            if (existingItem.approvalStatus === 'APPROVED' && !isAllowedUpdate) {
                 return res.status(403).json({ error: 'Cannot update an approved item. It is locked for SAP sync.' });
             }
 
@@ -3712,6 +3715,20 @@ export class ApproverController {
         return res.json({ results });
     }
 
+    static getBodyFabricConsumption = async (req: Request, res: Response) => {
+        const majorCategory = String(req.query.majorCategory ?? '').trim();
+        if (!majorCategory) return res.json([]);
+        const rows = await prisma.bodyFabricConsumption.findMany({
+            where: { majorCategory: { equals: majorCategory, mode: 'insensitive' } },
+            select: { fabWidth: true, fabConsumption: true },
+            orderBy: { fabWidth: 'asc' },
+        });
+        return res.json(rows.map((r) => ({
+            fabWidth:       r.fabWidth       != null ? Number(r.fabWidth)       : null,
+            fabConsumption: r.fabConsumption != null ? Number(r.fabConsumption) : null,
+        })));
+    };
+
     static getBodyArticleItems = async (req: Request, res: Response) => {
         const {
             page = '1', limit = '50',
@@ -3774,7 +3791,9 @@ export class ApproverController {
                     mFit: true, mBodyStyle: true, mLength: true, mSet: true,
                     bodyArticleNumber: true, bodyArticleDescription: true,
                     cmtpCost: true, cmpCost: true, fabCost: true, fabCons: true,
-                    width: true, basicTrimCost: true, roughCmpCost: true,
+                    width: true, basicTrimCost: true, roughCmpCost: true, costingType: true,
+                    bodyConsumptionType: true, gsm: true, ratio: true, consumptionKg: true, consumptionMeter: true,
+                    preciseWidth: true, preciseGsm: true, preciseRatio: true, preciseConsumptionKg: true, preciseConsumptionMeter: true,
                 },
             }),
             prisma.bodyArticleData.count({ where }),
@@ -3830,11 +3849,22 @@ export class ApproverController {
             fabCost:                  r.fabCost  != null ? Number(r.fabCost)  : null,
             fabCons:                  r.fabCons  != null ? Number(r.fabCons)  : null,
             bodyWidth:                r.width    != null ? Number(r.width)    : null,
-            basicTrimCost:            r.basicTrimCost  != null ? Number(r.basicTrimCost)  : null,
-            roughCmpCost:             r.roughCmpCost   != null ? Number(r.roughCmpCost)   : null,
+            basicTrimCost:            r.basicTrimCost    != null ? Number(r.basicTrimCost)    : null,
+            roughCmpCost:             r.roughCmpCost     != null ? Number(r.roughCmpCost)     : null,
+            costingType:              r.costingType ?? null,
+            bodyConsumptionType:      r.bodyConsumptionType ?? null,
+            gsm:                      r.gsm              != null ? Number(r.gsm)              : null,
+            ratio:                    r.ratio            != null ? Number(r.ratio)            : null,
+            consumptionKg:            r.consumptionKg    != null ? Number(r.consumptionKg)    : null,
+            consumptionMeter:         r.consumptionMeter    != null ? Number(r.consumptionMeter)    : null,
+            preciseWidth:             r.preciseWidth        != null ? Number(r.preciseWidth)        : null,
+            preciseGsm:               r.preciseGsm          != null ? Number(r.preciseGsm)          : null,
+            preciseRatio:             r.preciseRatio        != null ? Number(r.preciseRatio)        : null,
+            preciseConsumptionKg:     r.preciseConsumptionKg    != null ? Number(r.preciseConsumptionKg)    : null,
+            preciseConsumptionMeter:  r.preciseConsumptionMeter != null ? Number(r.preciseConsumptionMeter) : null,
             // Fields not in body_article_data — nulled out
             pptNumber: null, source: null, rate: null, mrp: null,
-            size: null, colour: null, fabricMainMvgr: null, composition: null, gsm: null,
+            size: null, colour: null, fabricMainMvgr: null, composition: null,
             wash: null, referenceArticleNumber: null, referenceArticleDescription: null,
             fabricArticleNumber: null, fabricArticleDescription: null, mcDescription: null,
             segment: null, articleDescription: null, fashionGrid: null, articleType: null,
@@ -3885,6 +3915,17 @@ export class ApproverController {
         width:                'width',
         basicTrimCost:        'basicTrimCost',
         roughCmpCost:         'roughCmpCost',
+        costingType:          'costingType',
+        bodyConsumptionType:     'bodyConsumptionType',
+        gsm:                     'gsm',
+        ratio:                   'ratio',
+        consumptionKg:           'consumptionKg',
+        consumptionMeter:        'consumptionMeter',
+        preciseWidth:            'preciseWidth',
+        preciseGsm:              'preciseGsm',
+        preciseRatio:            'preciseRatio',
+        preciseConsumptionKg:    'preciseConsumptionKg',
+        preciseConsumptionMeter: 'preciseConsumptionMeter',
         vendorCode:           'vendorCode',
         vendorName:           'vendorName',
         majorCategory:        'majorCategory',
@@ -3947,26 +3988,27 @@ export class ApproverController {
             fabCons: r.fabCons ?? null,
             fWidth: r.width ?? null,
             width: r.width ?? null,
-            basicTrimCost: r.basicTrimCost ?? null,
-            roughCmpCost:  r.roughCmpCost ?? null,
+            basicTrimCost:       r.basicTrimCost ?? null,
+            roughCmpCost:        r.roughCmpCost ?? null,
+            costingType:         r.costingType ?? null,
+            bodyConsumptionType: r.bodyConsumptionType ?? null,
+            gsm:                 r.gsm ?? null,
+            ratio:               r.ratio ?? null,
+            consumptionKg:       r.consumptionKg ?? null,
+            consumptionMeter:        r.consumptionMeter ?? null,
+            preciseWidth:            r.preciseWidth ?? null,
+            preciseGsm:              r.preciseGsm ?? null,
+            preciseRatio:            r.preciseRatio ?? null,
+            preciseConsumptionKg:    r.preciseConsumptionKg ?? null,
+            preciseConsumptionMeter: r.preciseConsumptionMeter ?? null,
             pptNumber: null, source: null, rate: null, mrp: null,
-            size: null, colour: null, fabricMainMvgr: null, composition: null, gsm: null,
+            size: null, colour: null, fabricMainMvgr: null, composition: null,
             wash: null, referenceArticleNumber: null, referenceArticleDescription: null,
             fabricArticleNumber: null, fabricArticleDescription: null, mcDescription: null,
             segment: null, articleDescription: null, fashionGrid: null, articleType: null,
             yarn1: null, yarn2: null, weave: null, macroMvgr: null, mainMvgr: null,
             mFab2: null, finish: null, shade: null, weight: null, lycra: null,
         };
-    }
-
-    private static async resolveRoughCmpCost(row: { roughCmpCost?: any; majorCategory?: string | null }): Promise<number | null> {
-        if (row.roughCmpCost != null) return Number(row.roughCmpCost);
-        if (!row.majorCategory) return null;
-        const master = await prisma.roughCmpCostMaster.findFirst({
-            where: { majCat: { equals: row.majorCategory, mode: 'insensitive' } },
-            select: { cmpCost: true },
-        });
-        return master?.cmpCost != null ? Number(master.cmpCost) : null;
     }
 
     /**
@@ -4003,7 +4045,6 @@ export class ApproverController {
         const row = await prisma.bodyArticleData.findUnique({ where: { id } });
         if (!row) return res.status(404).json({ error: 'Item not found' });
         const item = ApproverController.bodyRowToApproverItem(row);
-        item.roughCmpCost = await ApproverController.resolveRoughCmpCost(row);
         item.basicTrimCost = await ApproverController.resolveBasicTrimCost(row);
         return res.json(item);
     };
@@ -4021,7 +4062,6 @@ export class ApproverController {
             const row = await prisma.bodyArticleData.findUnique({ where: { id } });
             if (!row) return res.status(404).json({ error: 'Item not found' });
             const item = ApproverController.bodyRowToApproverItem(row);
-            item.roughCmpCost = await ApproverController.resolveRoughCmpCost(row);
             item.basicTrimCost = await ApproverController.resolveBasicTrimCost(row);
             return res.json(item);
         }
@@ -4048,7 +4088,6 @@ export class ApproverController {
         try {
             const row = await prisma.bodyArticleData.update({ where: { id }, data });
             const item = ApproverController.bodyRowToApproverItem(row);
-            item.roughCmpCost = await ApproverController.resolveRoughCmpCost(row);
             item.basicTrimCost = await ApproverController.resolveBasicTrimCost(row);
             return res.json(item);
         } catch (err: any) {
@@ -4460,7 +4499,15 @@ export class ApproverController {
     };
 
     static createFabricArticleFromFG = async (req: Request, res: Response) => {
-        const { ids, submitNow } = req.body as { ids?: string[]; submitNow?: boolean };
+        const { ids, submitNow, skipFlatUpdate, overrides } = req.body as {
+            ids?: string[];
+            submitNow?: boolean;
+            skipFlatUpdate?: boolean;
+            // Optional field overrides (extraction_results_flat field names) sent by the
+            // Created-page modify flow so the fabric article is built from current UI
+            // values rather than potentially-stale DB values.
+            overrides?: Record<string, unknown>;
+        };
         if (!Array.isArray(ids) || ids.length === 0) {
             return res.status(400).json({ error: 'ids array is required' });
         }
@@ -4493,7 +4540,11 @@ export class ApproverController {
         type FabRowEntry = { fabricRowId: string; flatId: string };
         const toSubmit: FabRowEntry[] = [];
 
-        for (const item of items) {
+        for (const rawItem of items) {
+            // Merge UI overrides (if provided) over the DB row so the fabric article
+            // is built from the current UI values, not potentially-stale DB values.
+            const item = overrides ? { ...rawItem, ...overrides } : rawItem;
+
             const desc = item.fabricArticleDescription;
             if (!desc) continue;
 
@@ -4572,24 +4623,28 @@ export class ApproverController {
             return res.json({ success: true, created: 0, results: [] });
         }
 
-        // Immediately submit to SAP and write fabricArticleNumber back to extraction_results_flat
+        // Immediately submit to SAP and write fabricArticleNumber back to extraction_results_flat.
+        // When skipFlatUpdate=true (modify-mode flow), the SAP number is returned to the
+        // frontend so it can be staged as a pending change and saved only when Modify is clicked.
         if (submitNow) {
             const { submitFabricArticles } = await import('../services/zmmFabArtCreationService');
             const submitResult = await submitFabricArticles(toSubmit.map((e) => e.fabricRowId));
 
-            await Promise.all(
-                submitResult.results
-                    .filter((r) => r.success && r.sapArticleNumber)
-                    .map(async (r) => {
-                        const entry = toSubmit.find((e) => e.fabricRowId === r.id);
-                        if (entry?.flatId) {
-                            await prisma.extractionResultFlat.update({
-                                where: { id: entry.flatId },
-                                data: { fabricArticleNumber: r.sapArticleNumber },
-                            });
-                        }
-                    }),
-            );
+            if (!skipFlatUpdate) {
+                await Promise.all(
+                    submitResult.results
+                        .filter((r) => r.success && r.sapArticleNumber)
+                        .map(async (r) => {
+                            const entry = toSubmit.find((e) => e.fabricRowId === r.id);
+                            if (entry?.flatId) {
+                                await prisma.extractionResultFlat.update({
+                                    where: { id: entry.flatId },
+                                    data: { fabricArticleNumber: r.sapArticleNumber },
+                                });
+                            }
+                        }),
+                );
+            }
 
             return res.json({ success: true, created: toSubmit.length, results: submitResult.results });
         }

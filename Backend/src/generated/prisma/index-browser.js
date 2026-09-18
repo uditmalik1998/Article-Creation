@@ -1024,6 +1024,17 @@ exports.Prisma.BodyArticleDataScalarFieldEnum = {
   width: 'width',
   basicTrimCost: 'basicTrimCost',
   roughCmpCost: 'roughCmpCost',
+  costingType: 'costingType',
+  bodyConsumptionType: 'bodyConsumptionType',
+  gsm: 'gsm',
+  ratio: 'ratio',
+  consumptionKg: 'consumptionKg',
+  consumptionMeter: 'consumptionMeter',
+  preciseWidth: 'preciseWidth',
+  preciseGsm: 'preciseGsm',
+  preciseRatio: 'preciseRatio',
+  preciseConsumptionKg: 'preciseConsumptionKg',
+  preciseConsumptionMeter: 'preciseConsumptionMeter',
   flatId: 'flatId',
   articleNumber: 'articleNumber',
   division: 'division',
@@ -1044,6 +1055,16 @@ exports.Prisma.BodyArticleDataScalarFieldEnum = {
   userName: 'userName',
   createdAt: 'createdAt',
   updatedAt: 'updatedAt'
+};
+
+exports.Prisma.BodyFabricConsumptionScalarFieldEnum = {
+  id: 'id',
+  division: 'division',
+  subDivision: 'subDivision',
+  majorCategory: 'majorCategory',
+  fabWidth: 'fabWidth',
+  fabConsumption: 'fabConsumption',
+  createdAt: 'createdAt'
 };
 
 exports.Prisma.RoughCmpCostMasterScalarFieldEnum = {
@@ -1807,6 +1828,8 @@ exports.Prisma.BodyArticleDataOrderByRelevanceFieldEnum = {
   imageUrl: 'imageUrl',
   bodyArticleType: 'bodyArticleType',
   designNumber: 'designNumber',
+  costingType: 'costingType',
+  bodyConsumptionType: 'bodyConsumptionType',
   flatId: 'flatId',
   articleNumber: 'articleNumber',
   division: 'division',
@@ -1823,6 +1846,12 @@ exports.Prisma.BodyArticleDataOrderByRelevanceFieldEnum = {
   sapSyncStatus: 'sapSyncStatus',
   sapSyncMessage: 'sapSyncMessage',
   userName: 'userName'
+};
+
+exports.Prisma.BodyFabricConsumptionOrderByRelevanceFieldEnum = {
+  division: 'division',
+  subDivision: 'subDivision',
+  majorCategory: 'majorCategory'
 };
 
 exports.Prisma.RoughCmpCostMasterOrderByRelevanceFieldEnum = {
@@ -2039,6 +2068,7 @@ exports.Prisma.ModelName = {
   ModifyLog: 'ModifyLog',
   FabricArticleData: 'FabricArticleData',
   BodyArticleData: 'BodyArticleData',
+  BodyFabricConsumption: 'BodyFabricConsumption',
   RoughCmpCostMaster: 'RoughCmpCostMaster',
   BasicTrimCostMaster: 'BasicTrimCostMaster',
   BasicTrimCostComponent: 'BasicTrimCostComponent',
