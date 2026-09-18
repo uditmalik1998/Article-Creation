@@ -4897,6 +4897,188 @@ export const uploadFabricArticleData = async (req: Request, res: Response): Prom
   }
 };
 
+// Shared cap for both Fabric and Body Article Data bulk-delete requests —
+// keeps a single upload/confirm from trying to touch an unbounded number of
+// rows in one go.
+const MAX_BULK_DELETE_KEYS = 5000;
+
+/**
+ * GET /api/admin/fabric-article-data/delete-template
+ * A minimal template for bulk-deleting fabric_article_data rows: one column,
+ * FABRIC_ARTICLE_NUMBER. Deliberately carries no sample data row (unlike the
+ * insert template) — a sample value sitting where the parser expects real
+ * data would risk an accidental delete once the file is filled in and
+ * re-uploaded as-is.
+ */
+export const downloadFabricArticleDataDeleteTemplate = async (_req: Request, res: Response): Promise<void> => {
+  try {
+    const ExcelJS = require('exceljs');
+    const wb = new ExcelJS.Workbook();
+    const ws = wb.addWorksheet('FABRIC ARTICLE DATA DELETE');
+
+    const titleCell = ws.getCell('A1');
+    titleCell.value = 'FABRIC ARTICLE DATA — BULK DELETE';
+    titleCell.font = { bold: true, size: 13 };
+    ws.getRow(1).height = 22;
+
+    ws.addRow([]);
+
+    const headerRow = ws.addRow(['FABRIC_ARTICLE_NUMBER']);
+    headerRow.eachCell((cell: any) => {
+      cell.font = { bold: true, color: { argb: 'FFFFFFFF' } };
+      cell.fill = { type: 'pattern', pattern: 'solid', fgColor: { argb: 'FFC62828' } };
+      cell.alignment = { horizontal: 'center' };
+    });
+
+    const noteRow = ws.addRow([
+      '⚠ List one Fabric Article Number per row below (starting Row 5). Matching rows are PERMANENTLY deleted — but only after you confirm in the app. Numbers not found here are skipped, never created.',
+    ]);
+    noteRow.getCell(1).font = { italic: true, size: 10 };
+    noteRow.getCell(1).fill = { type: 'pattern', pattern: 'solid', fgColor: { argb: 'FFFFF3CD' } };
+
+    ws.columns = [{ width: 30 }];
+
+    res.setHeader('Content-Type', 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');
+    res.setHeader('Content-Disposition', 'attachment; filename="FABRIC_ARTICLE_DATA_DELETE_TEMPLATE.xlsx"');
+    await wb.xlsx.write(res);
+    res.end();
+  } catch (error: any) {
+    console.error('[FabricArticleData] Delete template error:', error);
+    res.status(500).json({ success: false, error: error.message });
+  }
+};
+
+/**
+ * POST /api/admin/fabric-article-data/bulk-delete/preview
+ * Parses an uploaded delete-template Excel (FABRIC_ARTICLE_NUMBER, one per
+ * row from row 5) and reports which numbers match existing fabric_article_data
+ * rows — nothing is deleted here. The frontend holds on to `matchedArticleNumbers`
+ * from the response and sends it back to .../bulk-delete/confirm.
+ */
+export const previewFabricArticleDataBulkDelete = async (req: Request, res: Response): Promise<void> => {
+  try {
+    if (!req.file) {
+      res.status(400).json({ success: false, error: 'No file uploaded. Send a .xlsx file as "file" field.' });
+      return;
+    }
+
+    const ExcelJS = (await import('exceljs')).default;
+    const wb = new ExcelJS.Workbook();
+    await wb.xlsx.load(req.file.buffer as any);
+
+    const ws = wb.getWorksheet('FABRIC ARTICLE DATA DELETE') ?? wb.worksheets[0];
+    if (!ws) {
+      res.status(400).json({ success: false, error: 'No worksheets found in the uploaded Excel file.' });
+      return;
+    }
+
+    const cell = (row: any, c: number): string => {
+      let v = row.getCell(c).value;
+      if (v && typeof v === 'object' && 'result' in v) v = (v as any).result;
+      if (v && typeof v === 'object' && 'text' in v) v = (v as any).text;
+      return v == null ? '' : String(v).trim();
+    };
+
+    const seen = new Set<string>();
+    const articleNumbers: string[] = [];
+    for (let r = 5; r <= ws.rowCount; r++) {
+      const value = cell(ws.getRow(r), 1);
+      if (!value || seen.has(value)) continue;
+      seen.add(value);
+      articleNumbers.push(value);
+    }
+
+    if (articleNumbers.length === 0) {
+      res.status(400).json({ success: false, error: 'No Fabric Article Numbers found in the file (expected one per row, starting Row 5).' });
+      return;
+    }
+    if (articleNumbers.length > MAX_BULK_DELETE_KEYS) {
+      res.status(400).json({ success: false, error: `Too many rows — max ${MAX_BULK_DELETE_KEYS} article numbers per delete batch.` });
+      return;
+    }
+
+    const matched = await prisma.fabricArticleData.findMany({
+      where: { fabricArticleNumber: { in: articleNumbers } },
+      select: { id: true, fabricArticleNumber: true, fabricArticleDescription: true },
+    });
+    const matchedNumbers = matched.map((m) => m.fabricArticleNumber).filter((v): v is string => !!v);
+    const matchedSet = new Set(matchedNumbers);
+    const unmatched = articleNumbers.filter((n) => !matchedSet.has(n));
+
+    res.json({
+      success: true,
+      data: {
+        totalRequested: articleNumbers.length,
+        matchedCount: matched.length,
+        unmatchedCount: unmatched.length,
+        matched: matched.slice(0, 200),
+        matchedArticleNumbers: matchedNumbers,
+        unmatchedSample: unmatched.slice(0, 50),
+      },
+    });
+  } catch (error: any) {
+    console.error('[FabricArticleData] Bulk delete preview error:', error);
+    res.status(500).json({ success: false, error: error.message });
+  }
+};
+
+/**
+ * POST /api/admin/fabric-article-data/bulk-delete/confirm
+ * Body: { articleNumbers: string[] } — normally the `matchedArticleNumbers`
+ * list a prior .../bulk-delete/preview call returned. Permanently deletes
+ * every fabric_article_data row whose fabric_article_number is in that list.
+ */
+export const confirmFabricArticleDataBulkDelete = async (req: Request, res: Response): Promise<void> => {
+  try {
+    const { articleNumbers } = req.body as { articleNumbers?: unknown };
+    const keys = Array.isArray(articleNumbers)
+      ? [...new Set(articleNumbers.filter((v): v is string => typeof v === 'string' && v.trim() !== '').map((v) => v.trim()))]
+      : [];
+    if (keys.length === 0) {
+      res.status(400).json({ success: false, error: 'articleNumbers must be a non-empty array.' });
+      return;
+    }
+    if (keys.length > MAX_BULK_DELETE_KEYS) {
+      res.status(400).json({ success: false, error: `Too many rows — max ${MAX_BULK_DELETE_KEYS} article numbers per delete batch.` });
+      return;
+    }
+
+    const BATCH = 1000;
+    let deletedCount = 0;
+    await prisma.$transaction(async (tx) => {
+      for (let i = 0; i < keys.length; i += BATCH) {
+        const chunk = keys.slice(i, i + BATCH);
+        const { count } = await tx.fabricArticleData.deleteMany({ where: { fabricArticleNumber: { in: chunk } } });
+        deletedCount += count;
+      }
+    }, { timeout: 5 * 60 * 1000 });
+
+    console.log(`[FabricArticleData] Bulk delete — ${deletedCount} row(s) deleted for ${keys.length} requested article number(s).`);
+
+    res.json({ success: true, data: { deletedCount } });
+  } catch (error: any) {
+    console.error('[FabricArticleData] Bulk delete confirm error:', error);
+    res.status(500).json({ success: false, error: error.message });
+  }
+};
+
+// Column order for the Fabric Article Data export — the same relevant-data-
+// first, workflow/audit-fields-last order as the View Data page's own column
+// config (EXPENSE_TABLE_REGISTRY['fabric-article-data']), rather than
+// whatever order Postgres happens to report them in. Any column not listed
+// here (e.g. one added to the table after this list was last updated) still
+// gets exported — `SELECT *` never changes — it's just appended at the end
+// instead of silently dropped.
+const FABRIC_ARTICLE_DATA_EXPORT_COLUMN_ORDER = [
+  'fabric_article_number', 'fabric_article_description', 'fabric_article_type',
+  'division', 'sub_division', 'major_category', 'vendor_name', 'vendor_code', 'fabric_rate',
+  'm_fab_div', 'm_yarn', 'm_fab_main_mvgr_1', 'm_fab_main_mvgr_2',
+  'm_construction', 'm_ounz', 'm_width', 'm_weave_01', 'm_weave_02',
+  'm_count', 'm_composition', 'm_finish', 'm_gsm', 'm_lycra',
+  'approval_status', 'approved_at', 'approved_by', 'sap_sync_status', 'sap_sync_message',
+  'user_name', 'created_at', 'updated_at',
+];
+
 /**
  * GET /api/admin/fabric-article-data/export
  * Admin-only (this whole router is mounted behind `requireAdmin`). Dumps
@@ -4904,11 +5086,21 @@ export const uploadFabricArticleData = async (req: Request, res: Response): Prom
  * so the export can never silently drop a column the Prisma model hasn't
  * caught up with yet.
  */
-export const downloadFabricArticleDataMaster = async (_req: Request, res: Response): Promise<void> => {
+export const downloadFabricArticleDataMaster = async (req: Request, res: Response): Promise<void> => {
   try {
-    const rows: Record<string, any>[] = await prisma.$queryRaw`
-      SELECT * FROM fabric_article_data ORDER BY created_at ASC, id ASC
-    `;
+    // Optional ?articleType=uploader|FG — lets a "Download Master" caller
+    // export just the uploader-entered rows or just the ones generated from
+    // an approved FG presentation, instead of always getting everything.
+    const articleTypeParam = req.query.articleType;
+    const articleType = typeof articleTypeParam === 'string' && articleTypeParam.trim() ? articleTypeParam.trim() : null;
+
+    const rows: Record<string, any>[] = articleType
+      ? await prisma.$queryRaw`
+          SELECT * FROM fabric_article_data WHERE fabric_article_type = ${articleType} ORDER BY created_at ASC, id ASC
+        `
+      : await prisma.$queryRaw`
+          SELECT * FROM fabric_article_data ORDER BY created_at ASC, id ASC
+        `;
 
     const ExcelJS = require('exceljs');
     const wb = new ExcelJS.Workbook();
@@ -4916,19 +5108,15 @@ export const downloadFabricArticleDataMaster = async (_req: Request, res: Respon
 
     // 'id' is Supabase's own surrogate primary key — not meaningful to
     // whoever opens this file, so it's dropped here same as everywhere else
-    // in the Expense Data views; every other column ships as-is.
-    const headers = (rows.length > 0
-      ? Object.keys(rows[0])
-      : [
-          'id', 'fabric_article_number', 'fabric_article_description',
-          'division', 'sub_division', 'major_category', 'vendor_name', 'vendor_code', 'fabric_rate',
-          'm_fab_div', 'm_yarn', 'm_fab_main_mvgr_1', 'm_fab_main_mvgr_2',
-          'm_construction', 'm_ounz', 'm_width', 'm_weave_01', 'm_weave_02',
-          'm_count', 'm_gsm', 'm_composition', 'm_finish', 'm_lycra',
-          'approval_status', 'approved_at', 'approved_by', 'sap_sync_status', 'sap_sync_message',
-          'user_name', 'created_at', 'updated_at',
-        ]
-    ).filter((h) => h !== 'id');
+    // in the Expense Data views; every other column ships as-is, reordered
+    // to match the View Data page (relevant fields first, workflow/audit
+    // fields last) instead of raw Postgres column order.
+    const availableColumns = (rows.length > 0 ? Object.keys(rows[0]) : FABRIC_ARTICLE_DATA_EXPORT_COLUMN_ORDER).filter(
+      (h) => h !== 'id'
+    );
+    const orderedKnown = FABRIC_ARTICLE_DATA_EXPORT_COLUMN_ORDER.filter((h) => availableColumns.includes(h));
+    const remaining = availableColumns.filter((h) => !FABRIC_ARTICLE_DATA_EXPORT_COLUMN_ORDER.includes(h));
+    const headers = [...orderedKnown, ...remaining];
 
     const headerRow = ws.addRow(headers.map((h) => h.toUpperCase()));
     headerRow.eachCell((cell: any) => {
@@ -4949,7 +5137,8 @@ export const downloadFabricArticleDataMaster = async (_req: Request, res: Respon
 
     ws.columns = headers.map(() => ({ width: 20 }));
 
-    const filename = `FABRIC_ARTICLE_DATA_MASTER_${new Date().toISOString().slice(0, 10)}.xlsx`;
+    const typeSuffix = articleType ? `_${articleType.toUpperCase().replace(/[^A-Z0-9]+/g, '_')}` : '';
+    const filename = `FABRIC_ARTICLE_DATA_MASTER${typeSuffix}_${new Date().toISOString().slice(0, 10)}.xlsx`;
     res.setHeader('Content-Type', 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');
     res.setHeader('Content-Disposition', `attachment; filename="${filename}"`);
     await wb.xlsx.write(res);
@@ -5491,17 +5680,202 @@ export const uploadBodyArticleData = async (req: Request, res: Response): Promis
 };
 
 /**
+ * GET /api/admin/body-article-data/delete-template
+ * A minimal template for bulk-deleting body_article_data rows: one column,
+ * BODY_ARTICLE_NUMBER. See downloadFabricArticleDataDeleteTemplate above for
+ * why there's deliberately no sample data row.
+ */
+export const downloadBodyArticleDataDeleteTemplate = async (_req: Request, res: Response): Promise<void> => {
+  try {
+    const ExcelJS = require('exceljs');
+    const wb = new ExcelJS.Workbook();
+    const ws = wb.addWorksheet('BODY ARTICLE DATA DELETE');
+
+    const titleCell = ws.getCell('A1');
+    titleCell.value = 'BODY ARTICLE DATA — BULK DELETE';
+    titleCell.font = { bold: true, size: 13 };
+    ws.getRow(1).height = 22;
+
+    ws.addRow([]);
+
+    const headerRow = ws.addRow(['BODY_ARTICLE_NUMBER']);
+    headerRow.eachCell((cell: any) => {
+      cell.font = { bold: true, color: { argb: 'FFFFFFFF' } };
+      cell.fill = { type: 'pattern', pattern: 'solid', fgColor: { argb: 'FFC62828' } };
+      cell.alignment = { horizontal: 'center' };
+    });
+
+    const noteRow = ws.addRow([
+      '⚠ List one Body Article Number per row below (starting Row 5). Matching rows are PERMANENTLY deleted — but only after you confirm in the app. Numbers not found here are skipped, never created.',
+    ]);
+    noteRow.getCell(1).font = { italic: true, size: 10 };
+    noteRow.getCell(1).fill = { type: 'pattern', pattern: 'solid', fgColor: { argb: 'FFFFF3CD' } };
+
+    ws.columns = [{ width: 30 }];
+
+    res.setHeader('Content-Type', 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');
+    res.setHeader('Content-Disposition', 'attachment; filename="BODY_ARTICLE_DATA_DELETE_TEMPLATE.xlsx"');
+    await wb.xlsx.write(res);
+    res.end();
+  } catch (error: any) {
+    console.error('[BodyArticleData] Delete template error:', error);
+    res.status(500).json({ success: false, error: error.message });
+  }
+};
+
+/**
+ * POST /api/admin/body-article-data/bulk-delete/preview
+ * Parses an uploaded delete-template Excel (BODY_ARTICLE_NUMBER, one per row
+ * from row 5) and reports which numbers match existing body_article_data
+ * rows — nothing is deleted here. The frontend holds on to `matchedArticleNumbers`
+ * from the response and sends it back to .../bulk-delete/confirm.
+ */
+export const previewBodyArticleDataBulkDelete = async (req: Request, res: Response): Promise<void> => {
+  try {
+    if (!req.file) {
+      res.status(400).json({ success: false, error: 'No file uploaded. Send a .xlsx file as "file" field.' });
+      return;
+    }
+
+    const ExcelJS = (await import('exceljs')).default;
+    const wb = new ExcelJS.Workbook();
+    await wb.xlsx.load(req.file.buffer as any);
+
+    const ws = wb.getWorksheet('BODY ARTICLE DATA DELETE') ?? wb.worksheets[0];
+    if (!ws) {
+      res.status(400).json({ success: false, error: 'No worksheets found in the uploaded Excel file.' });
+      return;
+    }
+
+    const cell = (row: any, c: number): string => {
+      let v = row.getCell(c).value;
+      if (v && typeof v === 'object' && 'result' in v) v = (v as any).result;
+      if (v && typeof v === 'object' && 'text' in v) v = (v as any).text;
+      return v == null ? '' : String(v).trim();
+    };
+
+    const seen = new Set<string>();
+    const articleNumbers: string[] = [];
+    for (let r = 5; r <= ws.rowCount; r++) {
+      const value = cell(ws.getRow(r), 1);
+      if (!value || seen.has(value)) continue;
+      seen.add(value);
+      articleNumbers.push(value);
+    }
+
+    if (articleNumbers.length === 0) {
+      res.status(400).json({ success: false, error: 'No Body Article Numbers found in the file (expected one per row, starting Row 5).' });
+      return;
+    }
+    if (articleNumbers.length > MAX_BULK_DELETE_KEYS) {
+      res.status(400).json({ success: false, error: `Too many rows — max ${MAX_BULK_DELETE_KEYS} article numbers per delete batch.` });
+      return;
+    }
+
+    const matched = await prisma.bodyArticleData.findMany({
+      where: { bodyArticleNumber: { in: articleNumbers } },
+      select: { id: true, bodyArticleNumber: true, bodyArticleDescription: true },
+    });
+    const matchedNumbers = matched.map((m) => m.bodyArticleNumber).filter((v): v is string => !!v);
+    const matchedSet = new Set(matchedNumbers);
+    const unmatched = articleNumbers.filter((n) => !matchedSet.has(n));
+
+    res.json({
+      success: true,
+      data: {
+        totalRequested: articleNumbers.length,
+        matchedCount: matched.length,
+        unmatchedCount: unmatched.length,
+        matched: matched.slice(0, 200),
+        matchedArticleNumbers: matchedNumbers,
+        unmatchedSample: unmatched.slice(0, 50),
+      },
+    });
+  } catch (error: any) {
+    console.error('[BodyArticleData] Bulk delete preview error:', error);
+    res.status(500).json({ success: false, error: error.message });
+  }
+};
+
+/**
+ * POST /api/admin/body-article-data/bulk-delete/confirm
+ * Body: { articleNumbers: string[] } — normally the `matchedArticleNumbers`
+ * list a prior .../bulk-delete/preview call returned. Permanently deletes
+ * every body_article_data row whose body_article_number is in that list.
+ */
+export const confirmBodyArticleDataBulkDelete = async (req: Request, res: Response): Promise<void> => {
+  try {
+    const { articleNumbers } = req.body as { articleNumbers?: unknown };
+    const keys = Array.isArray(articleNumbers)
+      ? [...new Set(articleNumbers.filter((v): v is string => typeof v === 'string' && v.trim() !== '').map((v) => v.trim()))]
+      : [];
+    if (keys.length === 0) {
+      res.status(400).json({ success: false, error: 'articleNumbers must be a non-empty array.' });
+      return;
+    }
+    if (keys.length > MAX_BULK_DELETE_KEYS) {
+      res.status(400).json({ success: false, error: `Too many rows — max ${MAX_BULK_DELETE_KEYS} article numbers per delete batch.` });
+      return;
+    }
+
+    const BATCH = 1000;
+    let deletedCount = 0;
+    await prisma.$transaction(async (tx) => {
+      for (let i = 0; i < keys.length; i += BATCH) {
+        const chunk = keys.slice(i, i + BATCH);
+        const { count } = await tx.bodyArticleData.deleteMany({ where: { bodyArticleNumber: { in: chunk } } });
+        deletedCount += count;
+      }
+    }, { timeout: 5 * 60 * 1000 });
+
+    console.log(`[BodyArticleData] Bulk delete — ${deletedCount} row(s) deleted for ${keys.length} requested article number(s).`);
+
+    res.json({ success: true, data: { deletedCount } });
+  } catch (error: any) {
+    console.error('[BodyArticleData] Bulk delete confirm error:', error);
+    res.status(500).json({ success: false, error: error.message });
+  }
+};
+
+// Column order for the Body Article Data export — same relevant-data-first,
+// workflow/audit-fields-last order as the View Data page's own column config
+// (EXPENSE_TABLE_REGISTRY['body-article-data']); see the Fabric Article Data
+// export's column-order constant above for why unlisted columns still ship,
+// just appended at the end.
+const BODY_ARTICLE_DATA_EXPORT_COLUMN_ORDER = [
+  'body_article_number', 'body_article_description', 'body_article_type',
+  'division', 'sub_division', 'major_category', 'mc_code', 'article_number', 'flat_id',
+  'vendor_name', 'vendor_code', 'season', 'year', 'hsn_tax_code',
+  'm_collar_type', 'm_collar_style', 'm_neck_type', 'm_neck_style', 'm_placket',
+  'm_blt_type', 'm_blt_style', 'm_sleeves_main_style', 'm_sleeve_fold', 'm_btm_fold',
+  'm_no_of_pocket', 'm_pocket', 'm_extra_pocket', 'm_fit', 'm_body_style', 'm_length', 'm_set',
+  'cmtp_cost', 'cmp_cost', 'fab_cost', 'fab_cons', 'width',
+  'approval_status', 'approved_at', 'approved_by', 'sap_sync_status', 'sap_sync_message',
+  'user_name', 'created_at', 'updated_at',
+];
+
+/**
  * GET /api/admin/body-article-data/export
  * Admin-only (this whole router is mounted behind `requireAdmin`). Same
  * shape as the Fabric Article Data master export: a raw `SELECT *` so a
  * newly added column (see FABRIC_RATE there) is always included with no
  * further code change, minus the surrogate `id` primary key.
  */
-export const downloadBodyArticleDataMaster = async (_req: Request, res: Response): Promise<void> => {
+export const downloadBodyArticleDataMaster = async (req: Request, res: Response): Promise<void> => {
   try {
-    const rows: Record<string, any>[] = await prisma.$queryRaw`
-      SELECT * FROM body_article_data ORDER BY created_at ASC, id ASC
-    `;
+    // Optional ?articleType=uploader|FG — lets a "Download Master" caller
+    // export just the uploader-entered rows or just the ones generated from
+    // an approved FG presentation, instead of always getting everything.
+    const articleTypeParam = req.query.articleType;
+    const articleType = typeof articleTypeParam === 'string' && articleTypeParam.trim() ? articleTypeParam.trim() : null;
+
+    const rows: Record<string, any>[] = articleType
+      ? await prisma.$queryRaw`
+          SELECT * FROM body_article_data WHERE body_article_type = ${articleType} ORDER BY created_at ASC, id ASC
+        `
+      : await prisma.$queryRaw`
+          SELECT * FROM body_article_data ORDER BY created_at ASC, id ASC
+        `;
 
     const ExcelJS = require('exceljs');
     const wb = new ExcelJS.Workbook();
@@ -5509,22 +5883,15 @@ export const downloadBodyArticleDataMaster = async (_req: Request, res: Response
 
     // 'id' is Supabase's own surrogate primary key — not meaningful to
     // whoever opens this file, so it's dropped here same as the Fabric
-    // Article Data master export; every other column ships as-is.
-    const headers = (rows.length > 0
-      ? Object.keys(rows[0])
-      : [
-          'body_article_number', 'body_article_description', 'flat_id', 'article_number',
-          'division', 'sub_division', 'major_category', 'mc_code', 'vendor_name', 'vendor_code',
-          'season', 'year', 'hsn_tax_code',
-          'm_collar_type', 'm_collar_style', 'm_neck_type', 'm_neck_style', 'm_placket',
-          'm_blt_type', 'm_blt_style', 'm_sleeves_main_style', 'm_sleeve_fold', 'm_btm_fold',
-          'm_no_of_pocket', 'm_pocket', 'm_extra_pocket', 'm_fit', 'm_body_style', 'm_length', 'm_set',
-          'cmtp_cost', 'cmp_cost', 'fab_cost', 'fab_cons', 'width',
-          'approval_status', 'approved_at', 'approved_by', 'sap_sync_status', 'sap_sync_message',
-          'user_name', 'created_at', 'updated_at', 'image_url', 'body_article_type',
-          'design_number',
-        ]
-    ).filter((h) => h !== 'id');
+    // Article Data master export; every other column ships as-is, reordered
+    // to match the View Data page (relevant fields first, workflow/audit
+    // fields last) instead of raw Postgres column order.
+    const availableColumns = (rows.length > 0 ? Object.keys(rows[0]) : BODY_ARTICLE_DATA_EXPORT_COLUMN_ORDER).filter(
+      (h) => h !== 'id'
+    );
+    const orderedKnown = BODY_ARTICLE_DATA_EXPORT_COLUMN_ORDER.filter((h) => availableColumns.includes(h));
+    const remaining = availableColumns.filter((h) => !BODY_ARTICLE_DATA_EXPORT_COLUMN_ORDER.includes(h));
+    const headers = [...orderedKnown, ...remaining];
 
     const headerRow = ws.addRow(headers.map((h) => h.toUpperCase()));
     headerRow.eachCell((cell: any) => {
@@ -5545,7 +5912,8 @@ export const downloadBodyArticleDataMaster = async (_req: Request, res: Response
 
     ws.columns = headers.map(() => ({ width: 20 }));
 
-    const filename = `BODY_ARTICLE_DATA_MASTER_${new Date().toISOString().slice(0, 10)}.xlsx`;
+    const typeSuffix = articleType ? `_${articleType.toUpperCase().replace(/[^A-Z0-9]+/g, '_')}` : '';
+    const filename = `BODY_ARTICLE_DATA_MASTER${typeSuffix}_${new Date().toISOString().slice(0, 10)}.xlsx`;
     res.setHeader('Content-Type', 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');
     res.setHeader('Content-Disposition', `attachment; filename="${filename}"`);
     await wb.xlsx.write(res);
@@ -6168,6 +6536,7 @@ export const EXPENSE_TABLE_REGISTRY: Record<string, ExpenseTableConfig> = {
       { key: 'id', label: 'ID', editable: false },
       { key: 'fabricArticleNumber', label: 'Fabric Article No.' },
       { key: 'fabricArticleDescription', label: 'Description' },
+      { key: 'fabricArticleType', label: 'Article Type', editable: false },
       { key: 'division', label: 'Division' },
       { key: 'subDivision', label: 'Sub Division' },
       { key: 'majorCategory', label: 'Major Category' },
@@ -6317,6 +6686,7 @@ export const EXPENSE_TABLE_REGISTRY: Record<string, ExpenseTableConfig> = {
       { key: 'id', label: 'ID', editable: false },
       { key: 'bodyArticleNumber', label: 'Body Article No.' },
       { key: 'bodyArticleDescription', label: 'Description' },
+      { key: 'bodyArticleType', label: 'Article Type', editable: false },
       { key: 'division', label: 'Division' },
       { key: 'subDivision', label: 'Sub Division' },
       { key: 'majorCategory', label: 'Major Category' },

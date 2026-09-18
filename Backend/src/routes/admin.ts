@@ -275,6 +275,9 @@ router.get('/fabric-article-data/status',   h(adminController.getFabricArticleDa
 router.get('/fabric-article-data/template', h(adminController.downloadFabricArticleDataTemplate));
 router.post('/fabric-article-data/upload',  excelUpload.single('file'), h(adminController.uploadFabricArticleData));
 router.get('/fabric-article-data/export',   h(adminController.downloadFabricArticleDataMaster));
+router.get('/fabric-article-data/delete-template',     h(adminController.downloadFabricArticleDataDeleteTemplate));
+router.post('/fabric-article-data/bulk-delete/preview', excelUpload.single('file'), h(adminController.previewFabricArticleDataBulkDelete));
+router.post('/fabric-article-data/bulk-delete/confirm', h(adminController.confirmFabricArticleDataBulkDelete));
 
 // ═══════════════════════════════════════════════════════
 // FABRIC ARTICLE MASTER (ADMIN) — fabric_article_master
@@ -291,6 +294,9 @@ router.get('/body-article-data/status',   h(adminController.getBodyArticleDataSt
 router.get('/body-article-data/template', h(adminController.downloadBodyArticleDataTemplate));
 router.post('/body-article-data/upload',  excelUpload.single('file'), h(adminController.uploadBodyArticleData));
 router.get('/body-article-data/export',   h(adminController.downloadBodyArticleDataMaster));
+router.get('/body-article-data/delete-template',     h(adminController.downloadBodyArticleDataDeleteTemplate));
+router.post('/body-article-data/bulk-delete/preview', excelUpload.single('file'), h(adminController.previewBodyArticleDataBulkDelete));
+router.post('/body-article-data/bulk-delete/confirm', h(adminController.confirmBodyArticleDataBulkDelete));
 
 // ═════════════════════════════════════════════════════
 // BROADER MENU (ADMIN) — broader_menu
