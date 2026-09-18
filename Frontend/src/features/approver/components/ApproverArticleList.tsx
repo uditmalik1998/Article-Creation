@@ -1293,6 +1293,12 @@ const ArticleCard = React.memo(
         }
       }
       const updates: Record<string, string | null> = { [field]: value };
+      // Auto-compute Consumption in Kg when any of its inputs change
+      if (isBodyArticle && (field === 'gsm' || field === 'consumptionMeter' || field === 'width')) {
+        const getRV = (f: string) => parseFloat(String(updates[f] !== undefined ? updates[f] : (localValues[f] !== undefined ? localValues[f] : (item as any)[f])) || '') || 0;
+        const w = getRV('width'), g = getRV('gsm'), m = getRV('consumptionMeter');
+        updates['consumptionKg'] = String(((w * g * m) / 10000).toFixed(4));
+      }
       if (field === 'rate') {
         const rate = parseFloat(String(value ?? ''));
         if (!isNaN(rate) && rate > 0) updates['mrp'] = String(calcMrpFromRate(rate));
@@ -3352,9 +3358,13 @@ const ArticleCard = React.memo(
                                             key={opt.fabWidth}
                                             type="button"
                                             onClick={() => {
+                                              const w = opt.fabWidth ?? 0;
+                                              const m = opt.fabConsumption ?? 0;
+                                              const g = parseFloat(String(localValues['gsm'] !== undefined ? localValues['gsm'] : (item as any)['gsm']) || '') || 0;
                                               const updates: Record<string, string | null> = {
-                                                width: String(opt.fabWidth),
-                                                consumptionMeter: String(opt.fabConsumption),
+                                                width: String(w),
+                                                consumptionMeter: String(m),
+                                                consumptionKg: String(((w * g * m) / 10000).toFixed(4)),
                                               };
                                               setLocalValues((prev) => ({ ...prev, ...updates }));
                                               setEditingField(null);
