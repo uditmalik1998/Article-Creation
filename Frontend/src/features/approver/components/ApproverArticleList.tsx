@@ -1293,11 +1293,11 @@ const ArticleCard = React.memo(
         }
       }
       const updates: Record<string, string | null> = { [field]: value };
-      // Auto-compute Consumption in Kg when any of its inputs change
+      // Auto-compute Consumption in g when any of its inputs change
       if (isBodyArticle && (field === 'gsm' || field === 'consumptionMeter' || field === 'width')) {
         const getRV = (f: string) => parseFloat(String(updates[f] !== undefined ? updates[f] : (localValues[f] !== undefined ? localValues[f] : (item as any)[f])) || '') || 0;
         const w = getRV('width'), g = getRV('gsm'), m = getRV('consumptionMeter');
-        updates['consumptionKg'] = String(((w * g * m) / 10000).toFixed(4));
+        updates['consumptionKg'] = String(((w * g * m) / 100).toFixed(4));
       }
       if (field === 'rate') {
         const rate = parseFloat(String(value ?? ''));
@@ -3261,7 +3261,7 @@ const ArticleCard = React.memo(
                             { label: 'Width',             field: 'width',            editable: true, mandatory: false, isDropdown: false, isColor: false, isMarkdown: false },
                             { label: 'Gsm',               field: 'gsm',              editable: true, mandatory: false, isDropdown: false, isColor: false, isMarkdown: false },
                             { label: 'Ratio',                 field: 'ratio',               editable: true, mandatory: false, isDropdown: false, isColor: false, isMarkdown: false },
-                            { label: 'Consumption in Kg',     field: 'consumptionKg',       editable: true, mandatory: false, isDropdown: false, isColor: false, isMarkdown: false },
+                            { label: 'Consumption in g',      field: 'consumptionKg',       editable: true, mandatory: false, isDropdown: false, isColor: false, isMarkdown: false },
                             { label: 'Consumption in Meter',  field: 'consumptionMeter',    editable: true, mandatory: false, isDropdown: false, isColor: false, isMarkdown: false },
                           ]
                         : [
@@ -3364,7 +3364,7 @@ const ArticleCard = React.memo(
                                               const updates: Record<string, string | null> = {
                                                 width: String(w),
                                                 consumptionMeter: String(m),
-                                                consumptionKg: String(((w * g * m) / 10000).toFixed(4)),
+                                                consumptionKg: String(((w * g * m) / 100).toFixed(4)),
                                               };
                                               setLocalValues((prev) => ({ ...prev, ...updates }));
                                               setEditingField(null);
@@ -3515,7 +3515,7 @@ const ArticleCard = React.memo(
                             { label: 'Width',            field: 'preciseWidth' },
                             { label: 'Gsm',              field: 'preciseGsm' },
                             { label: 'Ratio',            field: 'preciseRatio' },
-                            { label: 'Consumption in Kg',    field: 'preciseConsumptionKg' },
+                            { label: 'Consumption in g',     field: 'preciseConsumptionKg' },
                             { label: 'Consumption in Meter', field: 'preciseConsumptionMeter' },
                           ] as { label: string; field: string }[]
                         ).map(({ label, field }) => {
