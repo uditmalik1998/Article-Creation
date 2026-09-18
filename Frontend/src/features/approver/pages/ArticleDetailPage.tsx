@@ -1102,7 +1102,7 @@ export default function ArticleDetailPage() {
           }}
           onCreateBodyArticle={item => setConfirmDialog({ kind: 'createBody', item })}
           onProceedFGArticle={item => setConfirmDialog({ kind: 'proceedFG', item })}
-          onDuplicate={async () => {}}
+          onDuplicate={async (_item, _designNumber) => {}}
           onModify={async (row, changes) => {
             if (!changes || Object.keys(changes).length === 0) return;
 

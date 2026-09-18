@@ -79,7 +79,7 @@ const BASE_SIMPLIFIED_SCHEMA: SchemaItem[] = [
   // user-selected (not AI-guessed) and injected as pre-filled attributes after
   // extraction so flatteningService uses the correct user-chosen values.
   { key: 'major_category', label: 'Major Category', type: 'select', allowedValues: MAJOR_CATEGORY_ALLOWED_VALUES },
-  { key: 'design_number', label: 'Design Number', type: 'text' },
+  { key: 'design_number', label: 'Design Number', type: 'text', required: true },
   { key: 'vendor_name', label: 'Vendor Name', type: 'text' },
   { key: 'reference_article_number', label: 'Reference Article Number', type: 'text' },
   { key: 'reference_article_description', label: 'Reference Article Description', type: 'text', required: false },
@@ -292,7 +292,8 @@ const SimplifiedExtractionPage = () => {
         };
       }
       const majCatValues = getMajCatAllowedValues(division, item.key);
-      const isRequired = mandatoryKeys.has(item.key);
+      // design_number is always required regardless of major category config
+      const isRequired = item.key === 'design_number' ? true : mandatoryKeys.has(item.key);
       return { ...item, ...(majCatValues ? { allowedValues: majCatValues } : {}), required: isRequired };
     });
     setSimplifiedSchema(filtered);
@@ -336,6 +337,13 @@ const SimplifiedExtractionPage = () => {
     },
     [addImages, selectedSubDivision],
   );
+
+  // "Start Batch" is blocked when any pending row is missing a Design Number
+  const pendingRows = extractedRows.filter((r) => r.status === 'Pending' || r.status === 'Error' || r.status === 'Queued');
+  const anyMissingDesignNo = pendingRows.some((row) => {
+    const val = row.attributes?.['design_number'];
+    return !String(val?.schemaValue ?? val?.rawValue ?? '').trim();
+  });
 
   const handleStartBatch = useCallback(() => {
     if (!selectedSubDivision) return;
@@ -599,11 +607,17 @@ const SimplifiedExtractionPage = () => {
                       <Button
                         size="lg"
                         onClick={handleStartBatch}
-                        disabled={!selectedSubDivision}
-                        title={!selectedSubDivision ? 'Go back and select a Sub-Division first' : undefined}
+                        disabled={!selectedSubDivision || anyMissingDesignNo}
+                        title={
+                          !selectedSubDivision
+                            ? 'Go back and select a Sub-Division first'
+                            : anyMissingDesignNo
+                            ? 'Fill in the Design Number for all rows before starting'
+                            : undefined
+                        }
                         className="border-none font-semibold"
                         style={
-                          selectedSubDivision
+                          selectedSubDivision && !anyMissingDesignNo
                             ? { background: 'linear-gradient(135deg, #7DB9B6 0%, #E6C79C 100%)' }
                             : undefined
                         }
