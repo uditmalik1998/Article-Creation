@@ -1323,6 +1323,24 @@ const ArticleCard = React.memo(
         const w = getRV('width'), g = getRV('gsm'), m = getRV('consumptionMeter');
         updates['consumptionKg'] = String(((w * g * m) / 100).toFixed(4));
       }
+      // Auto-compute Precise Consumption in Kg: width x gsm x consumption(meter) x 2.54 / 100000
+      if (
+        isBodyArticle &&
+        (field === 'preciseWidth' || field === 'preciseGsm' || field === 'preciseConsumptionMeter')
+      ) {
+        const getRV = (f: string) =>
+          parseFloat(
+            String(
+              updates[f] !== undefined
+                ? updates[f]
+                : localValues[f] !== undefined
+                ? localValues[f]
+                : (item as any)[f],
+            ) || '',
+          ) || 0;
+        const w = getRV('preciseWidth'), g = getRV('preciseGsm'), m = getRV('preciseConsumptionMeter');
+        updates['preciseConsumptionKg'] = String(((w * g * m * 2.54) / 100000).toFixed(4));
+      }
       if (field === 'rate') {
         const rate = parseFloat(String(value ?? ''));
         if (!isNaN(rate) && rate > 0) updates['mrp'] = String(calcMrpFromRate(rate));
@@ -3285,7 +3303,7 @@ const ArticleCard = React.memo(
                             { label: 'Width',             field: 'width',            editable: true, mandatory: false, isDropdown: false, isColor: false, isMarkdown: false },
                             { label: 'Gsm',               field: 'gsm',              editable: true, mandatory: false, isDropdown: false, isColor: false, isMarkdown: false },
                             { label: 'Ratio',                 field: 'ratio',               editable: true, mandatory: false, isDropdown: false, isColor: false, isMarkdown: false },
-                            { label: 'Consumption in g',      field: 'consumptionKg',       editable: true, mandatory: false, isDropdown: false, isColor: false, isMarkdown: false },
+                            { label: 'Consumption in Kg',      field: 'consumptionKg',       editable: true, mandatory: false, isDropdown: false, isColor: false, isMarkdown: false },
                             { label: 'Consumption in Meter',  field: 'consumptionMeter',    editable: true, mandatory: false, isDropdown: false, isColor: false, isMarkdown: false },
                           ]
                         : [
@@ -3539,13 +3557,23 @@ const ArticleCard = React.memo(
                             { label: 'Width',            field: 'preciseWidth' },
                             { label: 'Gsm',              field: 'preciseGsm' },
                             { label: 'Ratio',            field: 'preciseRatio' },
-                            { label: 'Consumption in g',     field: 'preciseConsumptionKg' },
+                            { label: 'Consumption in Kg',     field: 'preciseConsumptionKg' },
                             { label: 'Consumption in Meter', field: 'preciseConsumptionMeter' },
                           ] as { label: string; field: string }[]
                         ).map(({ label, field }) => {
                           const isEditingPrecise = editingField === `precise_${field}`;
-                          const preciseLocked = isFieldLocked(field);
-                          const preciseVal = String(getValue(field) ?? '').trim() || '—';
+                          // Consumption in Kg is always derived:
+                          // width x gsm x consumption(meter) x 2.54 / 100000
+                          const isDerivedKg = field === 'preciseConsumptionKg';
+                          const preciseLocked = isFieldLocked(field) || isDerivedKg;
+                          let preciseVal = String(getValue(field) ?? '').trim() || '—';
+                          if (isDerivedKg) {
+                            const num = (f: string) => parseFloat(String(getValue(f) ?? '')) || 0;
+                            const kg =
+                              (num('preciseWidth') * num('preciseGsm') * num('preciseConsumptionMeter') * 2.54) /
+                              100000;
+                            preciseVal = kg > 0 ? kg.toFixed(4) : '—';
+                          }
                           const preciseEmpty = preciseVal === '—';
                           return (
                             <div
