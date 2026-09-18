@@ -4618,9 +4618,25 @@ export class ApproverController {
                 fabricRate:      item.vendorFabricRate ?? null,
             };
 
-            // Priority 1: row for this exact flat_id already exists → update it
+            // Priority 1: block if any row with same desc is already APPROVED and has a number
+            const existingByDesc = await prisma.fabricArticleData.findFirst({
+                where: {
+                    fabricArticleDescription: { equals: desc, mode: 'insensitive' },
+                    approvalStatus: 'APPROVED',
+                    fabricArticleNumber: { not: null },
+                },
+                select: { id: true, fabricArticleNumber: true },
+            });
+            if (existingByDesc) {
+                return res.status(409).json({
+                    error: `Fabric Article already created for this description. Fabric Article No: ${existingByDesc.fabricArticleNumber}`,
+                    fabricArticleNumber: existingByDesc.fabricArticleNumber,
+                });
+            }
+
+            // Priority 2: same flat_id, PENDING, no number → update and retry SAP
             const existingByFlatId = await prisma.fabricArticleData.findFirst({
-                where: { flatId: item.id },
+                where: { flatId: item.id, approvalStatus: 'PENDING', fabricArticleNumber: null },
                 select: { id: true },
             });
             if (existingByFlatId) {
@@ -4630,18 +4646,6 @@ export class ApproverController {
                 });
                 toSubmit.push({ fabricRowId: existingByFlatId.id, flatId: item.id });
                 continue;
-            }
-
-            // Priority 2: different flat_id row with same desc — only block if APPROVED + has number
-            const existingByDesc = await prisma.fabricArticleData.findFirst({
-                where: { fabricArticleDescription: { equals: desc, mode: 'insensitive' } },
-                select: { id: true, fabricArticleNumber: true, approvalStatus: true },
-            });
-            if (existingByDesc && existingByDesc.approvalStatus === 'APPROVED' && existingByDesc.fabricArticleNumber) {
-                return res.status(409).json({
-                    error: `Fabric Article already created for this description. Fabric Article No: ${existingByDesc.fabricArticleNumber}`,
-                    fabricArticleNumber: existingByDesc.fabricArticleNumber,
-                });
             }
 
             // Priority 3: create a fresh row for this flat_id
