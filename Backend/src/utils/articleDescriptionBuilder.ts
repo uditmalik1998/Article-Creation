@@ -87,8 +87,8 @@ export const buildArticleDescription = (
 
   if (tokens.length === 0) return null;
 
-  // Join with dash, then slice from the end if over maxLength
-  return tokens.join('-').slice(0, maxLength);
+  // Join with dash, slice from the front if over maxLength, then strip any trailing dash
+  return tokens.join('-').slice(0, maxLength).replace(/-+$/, '');
 };
 
 export const ARTICLE_DESCRIPTION_SOURCE_FIELDS = ARTICLE_DESCRIPTION_FIELDS;
@@ -137,7 +137,7 @@ export const buildReferenceArticleDescription = (
 
   if (tokens.length === 0) return null;
 
-  return tokens.join('-').slice(0, maxLength);
+  return tokens.join('-').slice(0, maxLength).replace(/-+$/, '');
 };
 
 export const REFERENCE_ARTICLE_DESCRIPTION_SOURCE_FIELDS = REFERENCE_ARTICLE_DESCRIPTION_FIELDS;

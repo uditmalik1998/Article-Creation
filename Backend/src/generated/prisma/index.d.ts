@@ -56536,6 +56536,15 @@ export namespace Prisma {
     width: Decimal | null
     basicTrimCost: Decimal | null
     roughCmpCost: Decimal | null
+    gsm: Decimal | null
+    ratio: Decimal | null
+    consumptionKg: Decimal | null
+    consumptionMeter: Decimal | null
+    preciseWidth: Decimal | null
+    preciseGsm: Decimal | null
+    preciseRatio: Decimal | null
+    preciseConsumptionKg: Decimal | null
+    preciseConsumptionMeter: Decimal | null
     approvedBy: number | null
   }
 
@@ -56547,6 +56556,15 @@ export namespace Prisma {
     width: Decimal | null
     basicTrimCost: Decimal | null
     roughCmpCost: Decimal | null
+    gsm: Decimal | null
+    ratio: Decimal | null
+    consumptionKg: Decimal | null
+    consumptionMeter: Decimal | null
+    preciseWidth: Decimal | null
+    preciseGsm: Decimal | null
+    preciseRatio: Decimal | null
+    preciseConsumptionKg: Decimal | null
+    preciseConsumptionMeter: Decimal | null
     approvedBy: number | null
   }
 
@@ -56581,6 +56599,17 @@ export namespace Prisma {
     width: Decimal | null
     basicTrimCost: Decimal | null
     roughCmpCost: Decimal | null
+    costingType: string | null
+    bodyConsumptionType: string | null
+    gsm: Decimal | null
+    ratio: Decimal | null
+    consumptionKg: Decimal | null
+    consumptionMeter: Decimal | null
+    preciseWidth: Decimal | null
+    preciseGsm: Decimal | null
+    preciseRatio: Decimal | null
+    preciseConsumptionKg: Decimal | null
+    preciseConsumptionMeter: Decimal | null
     flatId: string | null
     articleNumber: string | null
     division: string | null
@@ -56634,6 +56663,17 @@ export namespace Prisma {
     width: Decimal | null
     basicTrimCost: Decimal | null
     roughCmpCost: Decimal | null
+    costingType: string | null
+    bodyConsumptionType: string | null
+    gsm: Decimal | null
+    ratio: Decimal | null
+    consumptionKg: Decimal | null
+    consumptionMeter: Decimal | null
+    preciseWidth: Decimal | null
+    preciseGsm: Decimal | null
+    preciseRatio: Decimal | null
+    preciseConsumptionKg: Decimal | null
+    preciseConsumptionMeter: Decimal | null
     flatId: string | null
     articleNumber: string | null
     division: string | null
@@ -56687,6 +56727,17 @@ export namespace Prisma {
     width: number
     basicTrimCost: number
     roughCmpCost: number
+    costingType: number
+    bodyConsumptionType: number
+    gsm: number
+    ratio: number
+    consumptionKg: number
+    consumptionMeter: number
+    preciseWidth: number
+    preciseGsm: number
+    preciseRatio: number
+    preciseConsumptionKg: number
+    preciseConsumptionMeter: number
     flatId: number
     articleNumber: number
     division: number
@@ -56719,6 +56770,15 @@ export namespace Prisma {
     width?: true
     basicTrimCost?: true
     roughCmpCost?: true
+    gsm?: true
+    ratio?: true
+    consumptionKg?: true
+    consumptionMeter?: true
+    preciseWidth?: true
+    preciseGsm?: true
+    preciseRatio?: true
+    preciseConsumptionKg?: true
+    preciseConsumptionMeter?: true
     approvedBy?: true
   }
 
@@ -56730,6 +56790,15 @@ export namespace Prisma {
     width?: true
     basicTrimCost?: true
     roughCmpCost?: true
+    gsm?: true
+    ratio?: true
+    consumptionKg?: true
+    consumptionMeter?: true
+    preciseWidth?: true
+    preciseGsm?: true
+    preciseRatio?: true
+    preciseConsumptionKg?: true
+    preciseConsumptionMeter?: true
     approvedBy?: true
   }
 
@@ -56764,6 +56833,17 @@ export namespace Prisma {
     width?: true
     basicTrimCost?: true
     roughCmpCost?: true
+    costingType?: true
+    bodyConsumptionType?: true
+    gsm?: true
+    ratio?: true
+    consumptionKg?: true
+    consumptionMeter?: true
+    preciseWidth?: true
+    preciseGsm?: true
+    preciseRatio?: true
+    preciseConsumptionKg?: true
+    preciseConsumptionMeter?: true
     flatId?: true
     articleNumber?: true
     division?: true
@@ -56817,6 +56897,17 @@ export namespace Prisma {
     width?: true
     basicTrimCost?: true
     roughCmpCost?: true
+    costingType?: true
+    bodyConsumptionType?: true
+    gsm?: true
+    ratio?: true
+    consumptionKg?: true
+    consumptionMeter?: true
+    preciseWidth?: true
+    preciseGsm?: true
+    preciseRatio?: true
+    preciseConsumptionKg?: true
+    preciseConsumptionMeter?: true
     flatId?: true
     articleNumber?: true
     division?: true
@@ -56870,6 +56961,17 @@ export namespace Prisma {
     width?: true
     basicTrimCost?: true
     roughCmpCost?: true
+    costingType?: true
+    bodyConsumptionType?: true
+    gsm?: true
+    ratio?: true
+    consumptionKg?: true
+    consumptionMeter?: true
+    preciseWidth?: true
+    preciseGsm?: true
+    preciseRatio?: true
+    preciseConsumptionKg?: true
+    preciseConsumptionMeter?: true
     flatId?: true
     articleNumber?: true
     division?: true
@@ -57010,6 +57112,17 @@ export namespace Prisma {
     width: Decimal | null
     basicTrimCost: Decimal | null
     roughCmpCost: Decimal | null
+    costingType: string | null
+    bodyConsumptionType: string | null
+    gsm: Decimal | null
+    ratio: Decimal | null
+    consumptionKg: Decimal | null
+    consumptionMeter: Decimal | null
+    preciseWidth: Decimal | null
+    preciseGsm: Decimal | null
+    preciseRatio: Decimal | null
+    preciseConsumptionKg: Decimal | null
+    preciseConsumptionMeter: Decimal | null
     flatId: string | null
     articleNumber: string | null
     division: string | null
@@ -57082,6 +57195,17 @@ export namespace Prisma {
     width?: boolean
     basicTrimCost?: boolean
     roughCmpCost?: boolean
+    costingType?: boolean
+    bodyConsumptionType?: boolean
+    gsm?: boolean
+    ratio?: boolean
+    consumptionKg?: boolean
+    consumptionMeter?: boolean
+    preciseWidth?: boolean
+    preciseGsm?: boolean
+    preciseRatio?: boolean
+    preciseConsumptionKg?: boolean
+    preciseConsumptionMeter?: boolean
     flatId?: boolean
     articleNumber?: boolean
     division?: boolean
@@ -57135,6 +57259,17 @@ export namespace Prisma {
     width?: boolean
     basicTrimCost?: boolean
     roughCmpCost?: boolean
+    costingType?: boolean
+    bodyConsumptionType?: boolean
+    gsm?: boolean
+    ratio?: boolean
+    consumptionKg?: boolean
+    consumptionMeter?: boolean
+    preciseWidth?: boolean
+    preciseGsm?: boolean
+    preciseRatio?: boolean
+    preciseConsumptionKg?: boolean
+    preciseConsumptionMeter?: boolean
     flatId?: boolean
     articleNumber?: boolean
     division?: boolean
@@ -57188,6 +57323,17 @@ export namespace Prisma {
     width?: boolean
     basicTrimCost?: boolean
     roughCmpCost?: boolean
+    costingType?: boolean
+    bodyConsumptionType?: boolean
+    gsm?: boolean
+    ratio?: boolean
+    consumptionKg?: boolean
+    consumptionMeter?: boolean
+    preciseWidth?: boolean
+    preciseGsm?: boolean
+    preciseRatio?: boolean
+    preciseConsumptionKg?: boolean
+    preciseConsumptionMeter?: boolean
     flatId?: boolean
     articleNumber?: boolean
     division?: boolean
@@ -57241,6 +57387,17 @@ export namespace Prisma {
     width?: boolean
     basicTrimCost?: boolean
     roughCmpCost?: boolean
+    costingType?: boolean
+    bodyConsumptionType?: boolean
+    gsm?: boolean
+    ratio?: boolean
+    consumptionKg?: boolean
+    consumptionMeter?: boolean
+    preciseWidth?: boolean
+    preciseGsm?: boolean
+    preciseRatio?: boolean
+    preciseConsumptionKg?: boolean
+    preciseConsumptionMeter?: boolean
     flatId?: boolean
     articleNumber?: boolean
     division?: boolean
@@ -57263,7 +57420,7 @@ export namespace Prisma {
     updatedAt?: boolean
   }
 
-  export type BodyArticleDataOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<"id" | "mCollarType" | "mCollarStyle" | "mNeckType" | "mNeckStyle" | "mPlacket" | "mBltType" | "mBltStyle" | "mSleevesMainStyle" | "mSleeveFold" | "mBtmFold" | "mNoOfPocket" | "mPocket" | "mExtraPocket" | "mFit" | "mBodyStyle" | "mLength" | "mSet" | "bodyArticleNumber" | "bodyArticleDescription" | "imageUrl" | "bodyArticleType" | "designNumber" | "cmtpCost" | "cmpCost" | "fabCost" | "fabCons" | "width" | "basicTrimCost" | "roughCmpCost" | "flatId" | "articleNumber" | "division" | "subDivision" | "majorCategory" | "mcCode" | "vendorName" | "vendorCode" | "season" | "year" | "hsnTaxCode" | "approvalStatus" | "fgCreatorApproved" | "approvedAt" | "approvedBy" | "sapSyncStatus" | "sapSyncMessage" | "userName" | "createdAt" | "updatedAt", ExtArgs["result"]["bodyArticleData"]>
+  export type BodyArticleDataOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<"id" | "mCollarType" | "mCollarStyle" | "mNeckType" | "mNeckStyle" | "mPlacket" | "mBltType" | "mBltStyle" | "mSleevesMainStyle" | "mSleeveFold" | "mBtmFold" | "mNoOfPocket" | "mPocket" | "mExtraPocket" | "mFit" | "mBodyStyle" | "mLength" | "mSet" | "bodyArticleNumber" | "bodyArticleDescription" | "imageUrl" | "bodyArticleType" | "designNumber" | "cmtpCost" | "cmpCost" | "fabCost" | "fabCons" | "width" | "basicTrimCost" | "roughCmpCost" | "costingType" | "bodyConsumptionType" | "gsm" | "ratio" | "consumptionKg" | "consumptionMeter" | "preciseWidth" | "preciseGsm" | "preciseRatio" | "preciseConsumptionKg" | "preciseConsumptionMeter" | "flatId" | "articleNumber" | "division" | "subDivision" | "majorCategory" | "mcCode" | "vendorName" | "vendorCode" | "season" | "year" | "hsnTaxCode" | "approvalStatus" | "fgCreatorApproved" | "approvedAt" | "approvedBy" | "sapSyncStatus" | "sapSyncMessage" | "userName" | "createdAt" | "updatedAt", ExtArgs["result"]["bodyArticleData"]>
 
   export type $BodyArticleDataPayload<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
     name: "BodyArticleData"
@@ -57299,6 +57456,17 @@ export namespace Prisma {
       width: Prisma.Decimal | null
       basicTrimCost: Prisma.Decimal | null
       roughCmpCost: Prisma.Decimal | null
+      costingType: string | null
+      bodyConsumptionType: string | null
+      gsm: Prisma.Decimal | null
+      ratio: Prisma.Decimal | null
+      consumptionKg: Prisma.Decimal | null
+      consumptionMeter: Prisma.Decimal | null
+      preciseWidth: Prisma.Decimal | null
+      preciseGsm: Prisma.Decimal | null
+      preciseRatio: Prisma.Decimal | null
+      preciseConsumptionKg: Prisma.Decimal | null
+      preciseConsumptionMeter: Prisma.Decimal | null
       flatId: string | null
       articleNumber: string | null
       division: string | null
@@ -57772,6 +57940,17 @@ export namespace Prisma {
     readonly width: FieldRef<"BodyArticleData", 'Decimal'>
     readonly basicTrimCost: FieldRef<"BodyArticleData", 'Decimal'>
     readonly roughCmpCost: FieldRef<"BodyArticleData", 'Decimal'>
+    readonly costingType: FieldRef<"BodyArticleData", 'String'>
+    readonly bodyConsumptionType: FieldRef<"BodyArticleData", 'String'>
+    readonly gsm: FieldRef<"BodyArticleData", 'Decimal'>
+    readonly ratio: FieldRef<"BodyArticleData", 'Decimal'>
+    readonly consumptionKg: FieldRef<"BodyArticleData", 'Decimal'>
+    readonly consumptionMeter: FieldRef<"BodyArticleData", 'Decimal'>
+    readonly preciseWidth: FieldRef<"BodyArticleData", 'Decimal'>
+    readonly preciseGsm: FieldRef<"BodyArticleData", 'Decimal'>
+    readonly preciseRatio: FieldRef<"BodyArticleData", 'Decimal'>
+    readonly preciseConsumptionKg: FieldRef<"BodyArticleData", 'Decimal'>
+    readonly preciseConsumptionMeter: FieldRef<"BodyArticleData", 'Decimal'>
     readonly flatId: FieldRef<"BodyArticleData", 'String'>
     readonly articleNumber: FieldRef<"BodyArticleData", 'String'>
     readonly division: FieldRef<"BodyArticleData", 'String'>
@@ -66034,6 +66213,17 @@ export namespace Prisma {
     width: 'width',
     basicTrimCost: 'basicTrimCost',
     roughCmpCost: 'roughCmpCost',
+    costingType: 'costingType',
+    bodyConsumptionType: 'bodyConsumptionType',
+    gsm: 'gsm',
+    ratio: 'ratio',
+    consumptionKg: 'consumptionKg',
+    consumptionMeter: 'consumptionMeter',
+    preciseWidth: 'preciseWidth',
+    preciseGsm: 'preciseGsm',
+    preciseRatio: 'preciseRatio',
+    preciseConsumptionKg: 'preciseConsumptionKg',
+    preciseConsumptionMeter: 'preciseConsumptionMeter',
     flatId: 'flatId',
     articleNumber: 'articleNumber',
     division: 'division',
@@ -66953,6 +67143,8 @@ export namespace Prisma {
     imageUrl: 'imageUrl',
     bodyArticleType: 'bodyArticleType',
     designNumber: 'designNumber',
+    costingType: 'costingType',
+    bodyConsumptionType: 'bodyConsumptionType',
     flatId: 'flatId',
     articleNumber: 'articleNumber',
     division: 'division',
@@ -72487,6 +72679,17 @@ export namespace Prisma {
     width?: DecimalNullableFilter<"BodyArticleData"> | Decimal | DecimalJsLike | number | string | null
     basicTrimCost?: DecimalNullableFilter<"BodyArticleData"> | Decimal | DecimalJsLike | number | string | null
     roughCmpCost?: DecimalNullableFilter<"BodyArticleData"> | Decimal | DecimalJsLike | number | string | null
+    costingType?: StringNullableFilter<"BodyArticleData"> | string | null
+    bodyConsumptionType?: StringNullableFilter<"BodyArticleData"> | string | null
+    gsm?: DecimalNullableFilter<"BodyArticleData"> | Decimal | DecimalJsLike | number | string | null
+    ratio?: DecimalNullableFilter<"BodyArticleData"> | Decimal | DecimalJsLike | number | string | null
+    consumptionKg?: DecimalNullableFilter<"BodyArticleData"> | Decimal | DecimalJsLike | number | string | null
+    consumptionMeter?: DecimalNullableFilter<"BodyArticleData"> | Decimal | DecimalJsLike | number | string | null
+    preciseWidth?: DecimalNullableFilter<"BodyArticleData"> | Decimal | DecimalJsLike | number | string | null
+    preciseGsm?: DecimalNullableFilter<"BodyArticleData"> | Decimal | DecimalJsLike | number | string | null
+    preciseRatio?: DecimalNullableFilter<"BodyArticleData"> | Decimal | DecimalJsLike | number | string | null
+    preciseConsumptionKg?: DecimalNullableFilter<"BodyArticleData"> | Decimal | DecimalJsLike | number | string | null
+    preciseConsumptionMeter?: DecimalNullableFilter<"BodyArticleData"> | Decimal | DecimalJsLike | number | string | null
     flatId?: StringNullableFilter<"BodyArticleData"> | string | null
     articleNumber?: StringNullableFilter<"BodyArticleData"> | string | null
     division?: StringNullableFilter<"BodyArticleData"> | string | null
@@ -72540,6 +72743,17 @@ export namespace Prisma {
     width?: SortOrderInput | SortOrder
     basicTrimCost?: SortOrderInput | SortOrder
     roughCmpCost?: SortOrderInput | SortOrder
+    costingType?: SortOrderInput | SortOrder
+    bodyConsumptionType?: SortOrderInput | SortOrder
+    gsm?: SortOrderInput | SortOrder
+    ratio?: SortOrderInput | SortOrder
+    consumptionKg?: SortOrderInput | SortOrder
+    consumptionMeter?: SortOrderInput | SortOrder
+    preciseWidth?: SortOrderInput | SortOrder
+    preciseGsm?: SortOrderInput | SortOrder
+    preciseRatio?: SortOrderInput | SortOrder
+    preciseConsumptionKg?: SortOrderInput | SortOrder
+    preciseConsumptionMeter?: SortOrderInput | SortOrder
     flatId?: SortOrderInput | SortOrder
     articleNumber?: SortOrderInput | SortOrder
     division?: SortOrderInput | SortOrder
@@ -72597,6 +72811,17 @@ export namespace Prisma {
     width?: DecimalNullableFilter<"BodyArticleData"> | Decimal | DecimalJsLike | number | string | null
     basicTrimCost?: DecimalNullableFilter<"BodyArticleData"> | Decimal | DecimalJsLike | number | string | null
     roughCmpCost?: DecimalNullableFilter<"BodyArticleData"> | Decimal | DecimalJsLike | number | string | null
+    costingType?: StringNullableFilter<"BodyArticleData"> | string | null
+    bodyConsumptionType?: StringNullableFilter<"BodyArticleData"> | string | null
+    gsm?: DecimalNullableFilter<"BodyArticleData"> | Decimal | DecimalJsLike | number | string | null
+    ratio?: DecimalNullableFilter<"BodyArticleData"> | Decimal | DecimalJsLike | number | string | null
+    consumptionKg?: DecimalNullableFilter<"BodyArticleData"> | Decimal | DecimalJsLike | number | string | null
+    consumptionMeter?: DecimalNullableFilter<"BodyArticleData"> | Decimal | DecimalJsLike | number | string | null
+    preciseWidth?: DecimalNullableFilter<"BodyArticleData"> | Decimal | DecimalJsLike | number | string | null
+    preciseGsm?: DecimalNullableFilter<"BodyArticleData"> | Decimal | DecimalJsLike | number | string | null
+    preciseRatio?: DecimalNullableFilter<"BodyArticleData"> | Decimal | DecimalJsLike | number | string | null
+    preciseConsumptionKg?: DecimalNullableFilter<"BodyArticleData"> | Decimal | DecimalJsLike | number | string | null
+    preciseConsumptionMeter?: DecimalNullableFilter<"BodyArticleData"> | Decimal | DecimalJsLike | number | string | null
     flatId?: StringNullableFilter<"BodyArticleData"> | string | null
     articleNumber?: StringNullableFilter<"BodyArticleData"> | string | null
     division?: StringNullableFilter<"BodyArticleData"> | string | null
@@ -72650,6 +72875,17 @@ export namespace Prisma {
     width?: SortOrderInput | SortOrder
     basicTrimCost?: SortOrderInput | SortOrder
     roughCmpCost?: SortOrderInput | SortOrder
+    costingType?: SortOrderInput | SortOrder
+    bodyConsumptionType?: SortOrderInput | SortOrder
+    gsm?: SortOrderInput | SortOrder
+    ratio?: SortOrderInput | SortOrder
+    consumptionKg?: SortOrderInput | SortOrder
+    consumptionMeter?: SortOrderInput | SortOrder
+    preciseWidth?: SortOrderInput | SortOrder
+    preciseGsm?: SortOrderInput | SortOrder
+    preciseRatio?: SortOrderInput | SortOrder
+    preciseConsumptionKg?: SortOrderInput | SortOrder
+    preciseConsumptionMeter?: SortOrderInput | SortOrder
     flatId?: SortOrderInput | SortOrder
     articleNumber?: SortOrderInput | SortOrder
     division?: SortOrderInput | SortOrder
@@ -72711,6 +72947,17 @@ export namespace Prisma {
     width?: DecimalNullableWithAggregatesFilter<"BodyArticleData"> | Decimal | DecimalJsLike | number | string | null
     basicTrimCost?: DecimalNullableWithAggregatesFilter<"BodyArticleData"> | Decimal | DecimalJsLike | number | string | null
     roughCmpCost?: DecimalNullableWithAggregatesFilter<"BodyArticleData"> | Decimal | DecimalJsLike | number | string | null
+    costingType?: StringNullableWithAggregatesFilter<"BodyArticleData"> | string | null
+    bodyConsumptionType?: StringNullableWithAggregatesFilter<"BodyArticleData"> | string | null
+    gsm?: DecimalNullableWithAggregatesFilter<"BodyArticleData"> | Decimal | DecimalJsLike | number | string | null
+    ratio?: DecimalNullableWithAggregatesFilter<"BodyArticleData"> | Decimal | DecimalJsLike | number | string | null
+    consumptionKg?: DecimalNullableWithAggregatesFilter<"BodyArticleData"> | Decimal | DecimalJsLike | number | string | null
+    consumptionMeter?: DecimalNullableWithAggregatesFilter<"BodyArticleData"> | Decimal | DecimalJsLike | number | string | null
+    preciseWidth?: DecimalNullableWithAggregatesFilter<"BodyArticleData"> | Decimal | DecimalJsLike | number | string | null
+    preciseGsm?: DecimalNullableWithAggregatesFilter<"BodyArticleData"> | Decimal | DecimalJsLike | number | string | null
+    preciseRatio?: DecimalNullableWithAggregatesFilter<"BodyArticleData"> | Decimal | DecimalJsLike | number | string | null
+    preciseConsumptionKg?: DecimalNullableWithAggregatesFilter<"BodyArticleData"> | Decimal | DecimalJsLike | number | string | null
+    preciseConsumptionMeter?: DecimalNullableWithAggregatesFilter<"BodyArticleData"> | Decimal | DecimalJsLike | number | string | null
     flatId?: StringNullableWithAggregatesFilter<"BodyArticleData"> | string | null
     articleNumber?: StringNullableWithAggregatesFilter<"BodyArticleData"> | string | null
     division?: StringNullableWithAggregatesFilter<"BodyArticleData"> | string | null
@@ -79445,6 +79692,17 @@ export namespace Prisma {
     width?: Decimal | DecimalJsLike | number | string | null
     basicTrimCost?: Decimal | DecimalJsLike | number | string | null
     roughCmpCost?: Decimal | DecimalJsLike | number | string | null
+    costingType?: string | null
+    bodyConsumptionType?: string | null
+    gsm?: Decimal | DecimalJsLike | number | string | null
+    ratio?: Decimal | DecimalJsLike | number | string | null
+    consumptionKg?: Decimal | DecimalJsLike | number | string | null
+    consumptionMeter?: Decimal | DecimalJsLike | number | string | null
+    preciseWidth?: Decimal | DecimalJsLike | number | string | null
+    preciseGsm?: Decimal | DecimalJsLike | number | string | null
+    preciseRatio?: Decimal | DecimalJsLike | number | string | null
+    preciseConsumptionKg?: Decimal | DecimalJsLike | number | string | null
+    preciseConsumptionMeter?: Decimal | DecimalJsLike | number | string | null
     flatId?: string | null
     articleNumber?: string | null
     division?: string | null
@@ -79498,6 +79756,17 @@ export namespace Prisma {
     width?: Decimal | DecimalJsLike | number | string | null
     basicTrimCost?: Decimal | DecimalJsLike | number | string | null
     roughCmpCost?: Decimal | DecimalJsLike | number | string | null
+    costingType?: string | null
+    bodyConsumptionType?: string | null
+    gsm?: Decimal | DecimalJsLike | number | string | null
+    ratio?: Decimal | DecimalJsLike | number | string | null
+    consumptionKg?: Decimal | DecimalJsLike | number | string | null
+    consumptionMeter?: Decimal | DecimalJsLike | number | string | null
+    preciseWidth?: Decimal | DecimalJsLike | number | string | null
+    preciseGsm?: Decimal | DecimalJsLike | number | string | null
+    preciseRatio?: Decimal | DecimalJsLike | number | string | null
+    preciseConsumptionKg?: Decimal | DecimalJsLike | number | string | null
+    preciseConsumptionMeter?: Decimal | DecimalJsLike | number | string | null
     flatId?: string | null
     articleNumber?: string | null
     division?: string | null
@@ -79551,6 +79820,17 @@ export namespace Prisma {
     width?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
     basicTrimCost?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
     roughCmpCost?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    costingType?: NullableStringFieldUpdateOperationsInput | string | null
+    bodyConsumptionType?: NullableStringFieldUpdateOperationsInput | string | null
+    gsm?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    ratio?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    consumptionKg?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    consumptionMeter?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    preciseWidth?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    preciseGsm?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    preciseRatio?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    preciseConsumptionKg?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    preciseConsumptionMeter?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
     flatId?: NullableStringFieldUpdateOperationsInput | string | null
     articleNumber?: NullableStringFieldUpdateOperationsInput | string | null
     division?: NullableStringFieldUpdateOperationsInput | string | null
@@ -79604,6 +79884,17 @@ export namespace Prisma {
     width?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
     basicTrimCost?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
     roughCmpCost?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    costingType?: NullableStringFieldUpdateOperationsInput | string | null
+    bodyConsumptionType?: NullableStringFieldUpdateOperationsInput | string | null
+    gsm?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    ratio?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    consumptionKg?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    consumptionMeter?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    preciseWidth?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    preciseGsm?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    preciseRatio?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    preciseConsumptionKg?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    preciseConsumptionMeter?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
     flatId?: NullableStringFieldUpdateOperationsInput | string | null
     articleNumber?: NullableStringFieldUpdateOperationsInput | string | null
     division?: NullableStringFieldUpdateOperationsInput | string | null
@@ -79657,6 +79948,17 @@ export namespace Prisma {
     width?: Decimal | DecimalJsLike | number | string | null
     basicTrimCost?: Decimal | DecimalJsLike | number | string | null
     roughCmpCost?: Decimal | DecimalJsLike | number | string | null
+    costingType?: string | null
+    bodyConsumptionType?: string | null
+    gsm?: Decimal | DecimalJsLike | number | string | null
+    ratio?: Decimal | DecimalJsLike | number | string | null
+    consumptionKg?: Decimal | DecimalJsLike | number | string | null
+    consumptionMeter?: Decimal | DecimalJsLike | number | string | null
+    preciseWidth?: Decimal | DecimalJsLike | number | string | null
+    preciseGsm?: Decimal | DecimalJsLike | number | string | null
+    preciseRatio?: Decimal | DecimalJsLike | number | string | null
+    preciseConsumptionKg?: Decimal | DecimalJsLike | number | string | null
+    preciseConsumptionMeter?: Decimal | DecimalJsLike | number | string | null
     flatId?: string | null
     articleNumber?: string | null
     division?: string | null
@@ -79710,6 +80012,17 @@ export namespace Prisma {
     width?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
     basicTrimCost?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
     roughCmpCost?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    costingType?: NullableStringFieldUpdateOperationsInput | string | null
+    bodyConsumptionType?: NullableStringFieldUpdateOperationsInput | string | null
+    gsm?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    ratio?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    consumptionKg?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    consumptionMeter?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    preciseWidth?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    preciseGsm?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    preciseRatio?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    preciseConsumptionKg?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    preciseConsumptionMeter?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
     flatId?: NullableStringFieldUpdateOperationsInput | string | null
     articleNumber?: NullableStringFieldUpdateOperationsInput | string | null
     division?: NullableStringFieldUpdateOperationsInput | string | null
@@ -79763,6 +80076,17 @@ export namespace Prisma {
     width?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
     basicTrimCost?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
     roughCmpCost?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    costingType?: NullableStringFieldUpdateOperationsInput | string | null
+    bodyConsumptionType?: NullableStringFieldUpdateOperationsInput | string | null
+    gsm?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    ratio?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    consumptionKg?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    consumptionMeter?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    preciseWidth?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    preciseGsm?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    preciseRatio?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    preciseConsumptionKg?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    preciseConsumptionMeter?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
     flatId?: NullableStringFieldUpdateOperationsInput | string | null
     articleNumber?: NullableStringFieldUpdateOperationsInput | string | null
     division?: NullableStringFieldUpdateOperationsInput | string | null
@@ -84611,6 +84935,17 @@ export namespace Prisma {
     width?: SortOrder
     basicTrimCost?: SortOrder
     roughCmpCost?: SortOrder
+    costingType?: SortOrder
+    bodyConsumptionType?: SortOrder
+    gsm?: SortOrder
+    ratio?: SortOrder
+    consumptionKg?: SortOrder
+    consumptionMeter?: SortOrder
+    preciseWidth?: SortOrder
+    preciseGsm?: SortOrder
+    preciseRatio?: SortOrder
+    preciseConsumptionKg?: SortOrder
+    preciseConsumptionMeter?: SortOrder
     flatId?: SortOrder
     articleNumber?: SortOrder
     division?: SortOrder
@@ -84641,6 +84976,15 @@ export namespace Prisma {
     width?: SortOrder
     basicTrimCost?: SortOrder
     roughCmpCost?: SortOrder
+    gsm?: SortOrder
+    ratio?: SortOrder
+    consumptionKg?: SortOrder
+    consumptionMeter?: SortOrder
+    preciseWidth?: SortOrder
+    preciseGsm?: SortOrder
+    preciseRatio?: SortOrder
+    preciseConsumptionKg?: SortOrder
+    preciseConsumptionMeter?: SortOrder
     approvedBy?: SortOrder
   }
 
@@ -84675,6 +85019,17 @@ export namespace Prisma {
     width?: SortOrder
     basicTrimCost?: SortOrder
     roughCmpCost?: SortOrder
+    costingType?: SortOrder
+    bodyConsumptionType?: SortOrder
+    gsm?: SortOrder
+    ratio?: SortOrder
+    consumptionKg?: SortOrder
+    consumptionMeter?: SortOrder
+    preciseWidth?: SortOrder
+    preciseGsm?: SortOrder
+    preciseRatio?: SortOrder
+    preciseConsumptionKg?: SortOrder
+    preciseConsumptionMeter?: SortOrder
     flatId?: SortOrder
     articleNumber?: SortOrder
     division?: SortOrder
@@ -84728,6 +85083,17 @@ export namespace Prisma {
     width?: SortOrder
     basicTrimCost?: SortOrder
     roughCmpCost?: SortOrder
+    costingType?: SortOrder
+    bodyConsumptionType?: SortOrder
+    gsm?: SortOrder
+    ratio?: SortOrder
+    consumptionKg?: SortOrder
+    consumptionMeter?: SortOrder
+    preciseWidth?: SortOrder
+    preciseGsm?: SortOrder
+    preciseRatio?: SortOrder
+    preciseConsumptionKg?: SortOrder
+    preciseConsumptionMeter?: SortOrder
     flatId?: SortOrder
     articleNumber?: SortOrder
     division?: SortOrder
@@ -84758,6 +85124,15 @@ export namespace Prisma {
     width?: SortOrder
     basicTrimCost?: SortOrder
     roughCmpCost?: SortOrder
+    gsm?: SortOrder
+    ratio?: SortOrder
+    consumptionKg?: SortOrder
+    consumptionMeter?: SortOrder
+    preciseWidth?: SortOrder
+    preciseGsm?: SortOrder
+    preciseRatio?: SortOrder
+    preciseConsumptionKg?: SortOrder
+    preciseConsumptionMeter?: SortOrder
     approvedBy?: SortOrder
   }
 

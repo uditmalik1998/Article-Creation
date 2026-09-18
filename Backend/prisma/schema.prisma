@@ -1536,8 +1536,19 @@ model BodyArticleData {
   fabCost                  Decimal?  @map("fab_cost")        @db.Decimal(10, 2)
   fabCons                  Decimal?  @map("fab_cons")        @db.Decimal(10, 2)
   width                    Decimal?  @map("width")           @db.Decimal(10, 2)
-  basicTrimCost            Decimal?  @map("basic_trim_cost")  @db.Decimal(10, 2)
-  roughCmpCost             Decimal?  @map("rough_cmp_cost")   @db.Decimal(10, 2)
+  basicTrimCost            Decimal?  @map("basic_trim_cost")   @db.Decimal(10, 2)
+  roughCmpCost             Decimal?  @map("rough_cmp_cost")    @db.Decimal(10, 2)
+  costingType              String?   @map("costing_type")      @db.VarChar(20)
+  bodyConsumptionType      String?   @map("body_consumption_type")    @db.VarChar(20)
+  gsm                      Decimal?  @map("gsm")                      @db.Decimal(10, 2)
+  ratio                    Decimal?  @map("ratio")                    @db.Decimal(10, 4)
+  consumptionKg            Decimal?  @map("consumption_kg")           @db.Decimal(10, 4)
+  consumptionMeter         Decimal?  @map("consumption_meter")        @db.Decimal(10, 4)
+  preciseWidth             Decimal?  @map("precise_width")            @db.Decimal(10, 2)
+  preciseGsm               Decimal?  @map("precise_gsm")              @db.Decimal(10, 2)
+  preciseRatio             Decimal?  @map("precise_ratio")            @db.Decimal(10, 4)
+  preciseConsumptionKg     Decimal?  @map("precise_consumption_kg")   @db.Decimal(10, 4)
+  preciseConsumptionMeter  Decimal?  @map("precise_consumption_meter") @db.Decimal(10, 4)
 
   // Article context (mirrored from parent extraction_results_flat row)
   flatId                   String?   @map("flat_id")                @db.VarChar(100)
@@ -1574,6 +1585,20 @@ model BodyArticleData {
   @@index([articleNumber])
   @@index([createdAt(sort: Desc)])
   @@map("body_article_data")
+  @@schema("public")
+}
+
+model BodyFabricConsumption {
+  id             Int      @id @default(autoincrement())
+  division       String?  @map("division")       @db.VarChar(100)
+  subDivision    String?  @map("sub_division")   @db.VarChar(100)
+  majorCategory  String?  @map("major_category") @db.VarChar(200)
+  fabWidth       Decimal? @map("fab_width")       @db.Decimal(10, 2)
+  fabConsumption Decimal? @map("fab_consumption") @db.Decimal(10, 6)
+  createdAt      DateTime @default(now())         @map("created_at")
+
+  @@unique([division, subDivision, majorCategory, fabWidth])
+  @@map("body_fabric_consumption")
   @@schema("public")
 }
 

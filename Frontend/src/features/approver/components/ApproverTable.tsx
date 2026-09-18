@@ -144,6 +144,17 @@ export interface ApproverItem {
   valueAddCost: number | string | null;
   basicTrimCost: number | string | null;
   roughCmpCost: number | string | null;
+  costingType: string | null;
+  bodyConsumptionType: string | null;
+  gsm: number | string | null;
+  ratio: number | string | null;
+  consumptionKg: number | string | null;
+  consumptionMeter: number | string | null;
+  preciseWidth: number | string | null;
+  preciseGsm: number | string | null;
+  preciseRatio: number | string | null;
+  preciseConsumptionKg: number | string | null;
+  preciseConsumptionMeter: number | string | null;
   isGeneric: boolean;
   genericArticleId: string | null;
   variantSize: string | null;
