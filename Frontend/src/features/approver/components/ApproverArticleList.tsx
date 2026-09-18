@@ -1317,11 +1317,11 @@ const ArticleCard = React.memo(
         }
       }
       const updates: Record<string, string | null> = { [field]: value };
-      // Auto-compute Consumption in g when any of its inputs change
+      // Auto-compute Consumption in Kg: width x gsm x consumption(meter) x 2.54 / 100000
       if (isBodyArticle && (field === 'gsm' || field === 'consumptionMeter' || field === 'width')) {
         const getRV = (f: string) => parseFloat(String(updates[f] !== undefined ? updates[f] : (localValues[f] !== undefined ? localValues[f] : (item as any)[f])) || '') || 0;
         const w = getRV('width'), g = getRV('gsm'), m = getRV('consumptionMeter');
-        updates['consumptionKg'] = String(((w * g * m) / 100).toFixed(4));
+        updates['consumptionKg'] = String(((w * g * m * 2.54) / 100000).toFixed(4));
       }
       // Auto-compute Precise Consumption in Kg: width x gsm x consumption(meter) x 2.54 / 100000
       if (
@@ -3316,12 +3316,22 @@ const ArticleCard = React.memo(
                           ]
                       ).map((bom) => {
                         const isEditingBom = editingField === `bom_${bom.field}`;
-                        const bomLocked = isFieldLocked(bom.field);
-                        const val = bom.isMarkdown
+                        // Consumption in Kg is always derived, same as the precise section:
+                        // width x gsm x consumption(meter) x 2.54 / 100000. Deriving it on every
+                        // render (rather than only when an input changes) keeps rows saved under
+                        // the old formula from showing a stale figure.
+                        const isDerivedBomKg = bom.field === 'consumptionKg';
+                        const bomLocked = isFieldLocked(bom.field) || isDerivedBomKg;
+                        let val = bom.isMarkdown
                           ? markdown
                           : bom.isAfterTax
                           ? afterTax
                           : String(getValue(bom.field) ?? '').trim() || '—';
+                        if (isDerivedBomKg) {
+                          const num = (f: string) => parseFloat(String(getValue(f) ?? '')) || 0;
+                          const kg = (num('width') * num('gsm') * num('consumptionMeter') * 2.54) / 100000;
+                          val = kg > 0 ? kg.toFixed(4) : '—';
+                        }
                         const isEmpty = val === '—';
                         const dropdownOptions: string[] = bom.isDropdown
                           ? bom.field === 'bodyConsumptionType'
@@ -3406,7 +3416,7 @@ const ArticleCard = React.memo(
                                               const updates: Record<string, string | null> = {
                                                 width: String(w),
                                                 consumptionMeter: String(m),
-                                                consumptionKg: String(((w * g * m) / 100).toFixed(4)),
+                                                consumptionKg: String(((w * g * m * 2.54) / 100000).toFixed(4)),
                                               };
                                               setLocalValues((prev) => ({ ...prev, ...updates }));
                                               setEditingField(null);
