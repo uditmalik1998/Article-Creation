@@ -57411,7 +57411,7 @@ export namespace Prisma {
     mBodyStyle: string | null
     mLength: string | null
     mSet: string | null
-    bodyArticleNumber: string
+    bodyArticleNumber: string | null
     bodyArticleDescription: string | null
     imageUrl: string | null
     bodyArticleType: string | null
@@ -57755,7 +57755,7 @@ export namespace Prisma {
       mBodyStyle: string | null
       mLength: string | null
       mSet: string | null
-      bodyArticleNumber: string
+      bodyArticleNumber: string | null
       bodyArticleDescription: string | null
       imageUrl: string | null
       bodyArticleType: string | null
@@ -76428,7 +76428,7 @@ export namespace Prisma {
     mBodyStyle?: StringNullableFilter<"BodyArticleData"> | string | null
     mLength?: StringNullableFilter<"BodyArticleData"> | string | null
     mSet?: StringNullableFilter<"BodyArticleData"> | string | null
-    bodyArticleNumber?: StringFilter<"BodyArticleData"> | string
+    bodyArticleNumber?: StringNullableFilter<"BodyArticleData"> | string | null
     bodyArticleDescription?: StringNullableFilter<"BodyArticleData"> | string | null
     imageUrl?: StringNullableFilter<"BodyArticleData"> | string | null
     bodyArticleType?: StringNullableFilter<"BodyArticleData"> | string | null
@@ -76492,7 +76492,7 @@ export namespace Prisma {
     mBodyStyle?: SortOrderInput | SortOrder
     mLength?: SortOrderInput | SortOrder
     mSet?: SortOrderInput | SortOrder
-    bodyArticleNumber?: SortOrder
+    bodyArticleNumber?: SortOrderInput | SortOrder
     bodyArticleDescription?: SortOrderInput | SortOrder
     imageUrl?: SortOrderInput | SortOrder
     bodyArticleType?: SortOrderInput | SortOrder
@@ -76624,7 +76624,7 @@ export namespace Prisma {
     mBodyStyle?: SortOrderInput | SortOrder
     mLength?: SortOrderInput | SortOrder
     mSet?: SortOrderInput | SortOrder
-    bodyArticleNumber?: SortOrder
+    bodyArticleNumber?: SortOrderInput | SortOrder
     bodyArticleDescription?: SortOrderInput | SortOrder
     imageUrl?: SortOrderInput | SortOrder
     bodyArticleType?: SortOrderInput | SortOrder
@@ -76696,7 +76696,7 @@ export namespace Prisma {
     mBodyStyle?: StringNullableWithAggregatesFilter<"BodyArticleData"> | string | null
     mLength?: StringNullableWithAggregatesFilter<"BodyArticleData"> | string | null
     mSet?: StringNullableWithAggregatesFilter<"BodyArticleData"> | string | null
-    bodyArticleNumber?: StringWithAggregatesFilter<"BodyArticleData"> | string
+    bodyArticleNumber?: StringNullableWithAggregatesFilter<"BodyArticleData"> | string | null
     bodyArticleDescription?: StringNullableWithAggregatesFilter<"BodyArticleData"> | string | null
     imageUrl?: StringNullableWithAggregatesFilter<"BodyArticleData"> | string | null
     bodyArticleType?: StringNullableWithAggregatesFilter<"BodyArticleData"> | string | null
@@ -83659,7 +83659,7 @@ export namespace Prisma {
     mBodyStyle?: string | null
     mLength?: string | null
     mSet?: string | null
-    bodyArticleNumber: string
+    bodyArticleNumber?: string | null
     bodyArticleDescription?: string | null
     imageUrl?: string | null
     bodyArticleType?: string | null
@@ -83723,7 +83723,7 @@ export namespace Prisma {
     mBodyStyle?: string | null
     mLength?: string | null
     mSet?: string | null
-    bodyArticleNumber: string
+    bodyArticleNumber?: string | null
     bodyArticleDescription?: string | null
     imageUrl?: string | null
     bodyArticleType?: string | null
@@ -83787,7 +83787,7 @@ export namespace Prisma {
     mBodyStyle?: NullableStringFieldUpdateOperationsInput | string | null
     mLength?: NullableStringFieldUpdateOperationsInput | string | null
     mSet?: NullableStringFieldUpdateOperationsInput | string | null
-    bodyArticleNumber?: StringFieldUpdateOperationsInput | string
+    bodyArticleNumber?: NullableStringFieldUpdateOperationsInput | string | null
     bodyArticleDescription?: NullableStringFieldUpdateOperationsInput | string | null
     imageUrl?: NullableStringFieldUpdateOperationsInput | string | null
     bodyArticleType?: NullableStringFieldUpdateOperationsInput | string | null
@@ -83851,7 +83851,7 @@ export namespace Prisma {
     mBodyStyle?: NullableStringFieldUpdateOperationsInput | string | null
     mLength?: NullableStringFieldUpdateOperationsInput | string | null
     mSet?: NullableStringFieldUpdateOperationsInput | string | null
-    bodyArticleNumber?: StringFieldUpdateOperationsInput | string
+    bodyArticleNumber?: NullableStringFieldUpdateOperationsInput | string | null
     bodyArticleDescription?: NullableStringFieldUpdateOperationsInput | string | null
     imageUrl?: NullableStringFieldUpdateOperationsInput | string | null
     bodyArticleType?: NullableStringFieldUpdateOperationsInput | string | null
@@ -83915,7 +83915,7 @@ export namespace Prisma {
     mBodyStyle?: string | null
     mLength?: string | null
     mSet?: string | null
-    bodyArticleNumber: string
+    bodyArticleNumber?: string | null
     bodyArticleDescription?: string | null
     imageUrl?: string | null
     bodyArticleType?: string | null
@@ -83979,7 +83979,7 @@ export namespace Prisma {
     mBodyStyle?: NullableStringFieldUpdateOperationsInput | string | null
     mLength?: NullableStringFieldUpdateOperationsInput | string | null
     mSet?: NullableStringFieldUpdateOperationsInput | string | null
-    bodyArticleNumber?: StringFieldUpdateOperationsInput | string
+    bodyArticleNumber?: NullableStringFieldUpdateOperationsInput | string | null
     bodyArticleDescription?: NullableStringFieldUpdateOperationsInput | string | null
     imageUrl?: NullableStringFieldUpdateOperationsInput | string | null
     bodyArticleType?: NullableStringFieldUpdateOperationsInput | string | null
@@ -84043,7 +84043,7 @@ export namespace Prisma {
     mBodyStyle?: NullableStringFieldUpdateOperationsInput | string | null
     mLength?: NullableStringFieldUpdateOperationsInput | string | null
     mSet?: NullableStringFieldUpdateOperationsInput | string | null
-    bodyArticleNumber?: StringFieldUpdateOperationsInput | string
+    bodyArticleNumber?: NullableStringFieldUpdateOperationsInput | string | null
     bodyArticleDescription?: NullableStringFieldUpdateOperationsInput | string | null
     imageUrl?: NullableStringFieldUpdateOperationsInput | string | null
     bodyArticleType?: NullableStringFieldUpdateOperationsInput | string | null
