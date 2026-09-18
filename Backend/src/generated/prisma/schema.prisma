@@ -1524,7 +1524,7 @@ model BodyArticleData {
   mSet              String? @map("m_set") @db.VarChar(100)
 
   // Body article output fields
-  bodyArticleNumber      String? @map("body_article_number") @db.VarChar(100)
+  bodyArticleNumber      String  @unique @map("body_article_number") @db.VarChar(100)
   bodyArticleDescription String? @map("body_article_description") @db.VarChar(255)
   imageUrl               String? @map("image_url") @db.Text
   bodyArticleType        String? @map("body_article_type") @db.VarChar(100)
@@ -1615,6 +1615,51 @@ model RoughCmpCostMaster {
   @@unique([div, subDiv, majCat])
   @@index([majCat])
   @@map("rough_cmp_cost_master")
+  @@schema("public")
+}
+
+/// BasicTrimCostMaster: Per-piece basic trim, packaging and thread costs by major category,
+/// imported from the "MAJ CAT WISE BASIC ACCESSORIES DETAILS" workbook via
+/// scripts/import-basic-trim-cost-master.ts. basicTrimsCost is the workbook's own
+/// "BASIC & TRIMS COST" column (packaging + thread) and is what auto-fills
+/// body_article_data.basic_trim_cost when an article has no value of its own.
+/// trimsTotal / packagingTotal / threadCost and the component breakdown are kept so the
+/// figure can be recomposed differently later without re-importing.
+model BasicTrimCostMaster {
+  id             Int      @id @default(autoincrement())
+  div            String?  @map("div") @db.VarChar(50)
+  subDiv         String?  @map("sub_div") @db.VarChar(50)
+  majCat         String   @unique @map("maj_cat") @db.VarChar(100)
+  trimsTotal     Decimal? @map("trims_total") @db.Decimal(10, 4)
+  packagingTotal Decimal? @map("packaging_total") @db.Decimal(10, 4)
+  threadCost     Decimal? @map("thread_cost") @db.Decimal(10, 4)
+  basicTrimsCost Decimal? @map("basic_trims_cost") @db.Decimal(10, 4)
+  createdAt      DateTime @default(now()) @map("created_at")
+  updatedAt      DateTime @updatedAt @map("updated_at")
+
+  components BasicTrimCostComponent[]
+
+  @@index([majCat])
+  @@map("basic_trim_cost_master")
+  @@schema("public")
+}
+
+/// BasicTrimCostComponent: one row per trim/packaging component of a BasicTrimCostMaster row,
+/// holding the workbook's per-piece consumption and rate so a rate change can be re-costed.
+model BasicTrimCostComponent {
+  id        Int      @id @default(autoincrement())
+  masterId  Int      @map("master_id")
+  kind      String   @map("kind") @db.VarChar(20)
+  component String   @map("component") @db.VarChar(50)
+  qty       Decimal? @map("qty") @db.Decimal(10, 4)
+  rate      Decimal? @map("rate") @db.Decimal(10, 4)
+  value     Decimal? @map("value") @db.Decimal(10, 4)
+
+  master BasicTrimCostMaster @relation(fields: [masterId], references: [id], onDelete: Cascade)
+
+  @@unique([masterId, component])
+  @@index([masterId])
+  @@map("basic_trim_cost_component")
   @@schema("public")
 }
 

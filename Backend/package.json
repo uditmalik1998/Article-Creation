@@ -27,6 +27,7 @@
     "db:refresh:mfab2": "ts-node scripts/refresh-mfab2-from-json.ts",
     "db:normalize:fabric-values": "ts-node scripts/normalize-fabric-attribute-values.ts",
     "db:sync:major-categories": "ts-node scripts/sync-major-categories-from-json.ts",
+    "db:import:basic-trim-cost": "ts-node scripts/import-basic-trim-cost-master.ts",
     "db:subdivisions:upsert-final": "ts-node scripts/upsert-final-subdivisions.ts",
     "sap:unique-values": "ts-node scripts/extract-sap-unique-values.ts",
     "sap:sync": "ts-node scripts/sync-sap-attribute-values.ts",

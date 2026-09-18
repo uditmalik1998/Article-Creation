@@ -1485,10 +1485,15 @@ export class ApproverController {
             const bodyRows = bodyNums.length > 0
                 ? await prisma.bodyArticleData.findMany({
                     where: { bodyArticleNumber: { in: bodyNums } },
-                    select: { bodyArticleNumber: true, fabCons: true, basicTrimCost: true, cmpCost: true },
+                    select: { bodyArticleNumber: true, fabCons: true, basicTrimCost: true, cmpCost: true, majorCategory: true },
                 })
                 : [];
             const bodyMap = new Map(bodyRows.map(r => [r.bodyArticleNumber!, r]));
+
+            // Body articles with no basic trim cost of their own fall back to the major-category master
+            const trimCostByMajCat = await ApproverController.lookupBasicTrimCosts(
+                bodyRows.filter(r => r.basicTrimCost == null).map(r => r.majorCategory),
+            );
 
             // Batch-load fabric_article_data by fabric article number
             const fabricNums = [...new Set(fgArticles.map(a => a.fabricArticleNumber).filter(Boolean) as string[])];
@@ -1557,7 +1562,8 @@ export class ApproverController {
                 const fabCons = toNum(bodyData?.fabCons);
                 const vdrRate = toNum(a.vendorFabricRate);
                 const v2Rate = toNum(fabricData?.v2FabricRate);
-                const basicTrim = toNum(bodyData?.basicTrimCost);
+                const basicTrim = toNum(bodyData?.basicTrimCost)
+                    ?? (bodyData?.majorCategory ? trimCostByMajCat.get(bodyData.majorCategory.trim().toUpperCase()) ?? null : null);
                 const cmpCost = toNum(bodyData?.cmpCost);
                 const fgValAdd = toNum(a.valueAddCost);
                 const fabValAdd = toNum(fabricData?.valueAddCost);
@@ -3866,6 +3872,18 @@ export class ApproverController {
             mFab2: null, finish: null, shade: null, weight: null, lycra: null,
         }));
 
+        // Fill basic trim cost from the major-category master for rows with no value of their own,
+        // so the list and its Excel download show the same figure as the detail page.
+        const trimCosts = await ApproverController.lookupBasicTrimCosts(
+            data.filter((d) => d.basicTrimCost == null).map((d) => d.majorCategory),
+        );
+        if (trimCosts.size > 0) {
+            for (const item of data) {
+                if (item.basicTrimCost != null || !item.majorCategory) continue;
+                item.basicTrimCost = trimCosts.get(item.majorCategory.trim().toUpperCase()) ?? null;
+            }
+        }
+
         return res.json({ data, meta: { total, page: parseInt(page, 10), limit: take } });
     };
 
@@ -3993,11 +4011,41 @@ export class ApproverController {
         };
     }
 
+    /**
+     * Per-major-category basic trim cost from basic_trim_cost_master. Uses the workbook's own
+     * "BASIC & TRIMS COST" column, falling back to packaging + thread (the same formula) for the
+     * rows where that cell was left blank in the workbook.
+     */
+    private static async lookupBasicTrimCosts(majorCategories: (string | null | undefined)[]): Promise<Map<string, number>> {
+        const keys = [...new Set(
+            majorCategories.map((m) => (m ?? '').trim().toUpperCase()).filter(Boolean),
+        )];
+        if (keys.length === 0) return new Map();
+
+        const rows = await prisma.$queryRaw<{ maj_cat: string; cost: string | null }[]>`
+            SELECT UPPER(TRIM(maj_cat)) AS maj_cat,
+                   COALESCE(basic_trims_cost, packaging_total + thread_cost)::text AS cost
+            FROM basic_trim_cost_master
+            WHERE UPPER(TRIM(maj_cat)) IN (${Prisma.join(keys)})
+        `;
+        return new Map(
+            rows.filter((r) => r.cost != null).map((r) => [r.maj_cat, Number(r.cost)]),
+        );
+    }
+
+    private static async resolveBasicTrimCost(row: { basicTrimCost?: any; majorCategory?: string | null }): Promise<number | null> {
+        if (row.basicTrimCost != null) return Number(row.basicTrimCost);
+        if (!row.majorCategory) return null;
+        const costs = await ApproverController.lookupBasicTrimCosts([row.majorCategory]);
+        return costs.get(row.majorCategory.trim().toUpperCase()) ?? null;
+    }
+
     static getBodyArticleById = async (req: Request, res: Response) => {
         const { id } = req.params;
         const row = await prisma.bodyArticleData.findUnique({ where: { id } });
         if (!row) return res.status(404).json({ error: 'Item not found' });
         const item = ApproverController.bodyRowToApproverItem(row);
+        item.basicTrimCost = await ApproverController.resolveBasicTrimCost(row);
         return res.json(item);
     };
 
@@ -4013,11 +4061,19 @@ export class ApproverController {
         if (Object.keys(data).length === 0) {
             const row = await prisma.bodyArticleData.findUnique({ where: { id } });
             if (!row) return res.status(404).json({ error: 'Item not found' });
-            return res.json(ApproverController.bodyRowToApproverItem(row));
+            const item = ApproverController.bodyRowToApproverItem(row);
+            item.basicTrimCost = await ApproverController.resolveBasicTrimCost(row);
+            return res.json(item);
         }
 
-        // If bodyArticleNumber is being set, check it isn't already owned by a different row
-        if (data.bodyArticleNumber) {
+        // body_article_number is required and unique — never allow it to be cleared,
+        // and check upfront that a new value isn't already owned by a different row.
+        if ('bodyArticleNumber' in data) {
+            if (!data.bodyArticleNumber || !String(data.bodyArticleNumber).trim()) {
+                return res.status(400).json({
+                    error: 'Body Article Number cannot be empty.',
+                });
+            }
             const conflict = await prisma.bodyArticleData.findFirst({
                 where: { bodyArticleNumber: data.bodyArticleNumber as string, NOT: { id } },
                 select: { id: true, bodyArticleDescription: true },
@@ -4031,11 +4087,18 @@ export class ApproverController {
 
         try {
             const row = await prisma.bodyArticleData.update({ where: { id }, data });
-            return res.json(ApproverController.bodyRowToApproverItem(row));
+            const item = ApproverController.bodyRowToApproverItem(row);
+            item.basicTrimCost = await ApproverController.resolveBasicTrimCost(row);
+            return res.json(item);
         } catch (err: any) {
             if (err?.code === 'P2002' && err?.meta?.target?.includes('body_article_number')) {
                 return res.status(409).json({
                     error: `Body Article Number ${data.bodyArticleNumber} is already assigned to another record.`,
+                });
+            }
+            if (err?.code === 'P2011' || err?.code === 'P2009') {
+                return res.status(400).json({
+                    error: 'Body Article Number cannot be empty.',
                 });
             }
             throw err;
@@ -4410,46 +4473,17 @@ export class ApproverController {
             }
         }
 
-        const created = await Promise.all(items.map((item) =>
-            prisma.bodyArticleData.create({
-                data: {
-                    flatId:               item.id,
-                    articleNumber:        item.articleNumber,
-                    designNumber:         item.designNumber,
-                    division:             item.division,
-                    subDivision:          item.subDivision,
-                    majorCategory:        item.majorCategory,
-                    mcCode:               item.mcCode,
-                    vendorName:           item.vendorName,
-                    vendorCode:           item.vendorCode,
-                    season:               item.season,
-                    year:                 item.year,
-                    hsnTaxCode:           item.hsnTaxCode,
-                    imageUrl:             item.imageUrl,
-                    userName:             item.userName,
-                    bodyArticleType:      'FG',
-                    mCollarType:          item.collar,
-                    mCollarStyle:         item.collarStyle,
-                    mNeckType:            item.neck,
-                    mNeckStyle:           item.neckDetails,
-                    mPlacket:             item.placket,
-                    mBltType:             item.fatherBelt,
-                    mBltStyle:            item.childBelt,
-                    mSleevesMainStyle:    item.sleeve,
-                    mSleeveFold:          item.sleeveFold,
-                    mSet:                 item.mSet,
-                    mBtmFold:             item.bottomFold,
-                    mNoOfPocket:          item.noOfPocket,
-                    mPocket:              item.pocketType,
-                    mExtraPocket:         item.extraPocket,
-                    mFit:                 item.fit,
-                    mBodyStyle:           item.pattern,
-                    mLength:              item.length,
-                },
-            })
-        ));
-
-        return res.json({ success: true, created: created.length });
+        // body_article_number is now a required, unique column (see
+        // prisma/migrations/enforce_body_article_number_not_null.sql). This endpoint
+        // used to create a PENDING row with no number at all, filled in later by a
+        // separate SAP-submit step (zmmBodyArtCreationService) — that left an
+        // unbounded number of abandoned NULL rows whenever the SAP step never ran.
+        // Blocked for now until the create+SAP-number-assignment flow is reworked to
+        // supply a real number upfront; return a clear error instead of letting the
+        // NOT NULL constraint throw and crash the request.
+        return res.status(400).json({
+            error: 'Creating a Body Article requires a Body Article Number, which this flow does not yet provide upfront (it used to be assigned later via a separate SAP sync step). This action is temporarily disabled until that flow is reworked — contact admin.',
+        });
     };
 
     // Division → fabric master lookup. K/RFD_K → KNITS_MIX (mFabDiv K),
