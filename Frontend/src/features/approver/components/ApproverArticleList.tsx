@@ -1317,11 +1317,11 @@ const ArticleCard = React.memo(
         }
       }
       const updates: Record<string, string | null> = { [field]: value };
-      // Auto-compute Consumption in g when any of its inputs change
+      // Auto-compute Consumption in Kg: width x gsm x consumption(meter) x 2.54 / 100000
       if (isBodyArticle && (field === 'gsm' || field === 'consumptionMeter' || field === 'width')) {
         const getRV = (f: string) => parseFloat(String(updates[f] !== undefined ? updates[f] : (localValues[f] !== undefined ? localValues[f] : (item as any)[f])) || '') || 0;
         const w = getRV('width'), g = getRV('gsm'), m = getRV('consumptionMeter');
-        updates['consumptionKg'] = String(((w * g * m) / 100).toFixed(4));
+        updates['consumptionKg'] = String(((w * g * m * 2.54) / 100000).toFixed(4));
       }
       // Auto-compute Precise Consumption in Kg: width x gsm x consumption(meter) x 2.54 / 100000
       if (
@@ -3406,7 +3406,7 @@ const ArticleCard = React.memo(
                                               const updates: Record<string, string | null> = {
                                                 width: String(w),
                                                 consumptionMeter: String(m),
-                                                consumptionKg: String(((w * g * m) / 100).toFixed(4)),
+                                                consumptionKg: String(((w * g * m * 2.54) / 100000).toFixed(4)),
                                               };
                                               setLocalValues((prev) => ({ ...prev, ...updates }));
                                               setEditingField(null);
