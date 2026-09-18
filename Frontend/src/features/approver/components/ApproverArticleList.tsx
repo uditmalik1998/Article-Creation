@@ -501,7 +501,7 @@ export interface ApproverArticleListProps {
   onCreateFabricArticle: (item: ApproverItem) => void;
   onCreateBodyArticle: (item: ApproverItem) => void;
   onProceedFGArticle: (item: ApproverItem) => void;
-  onDuplicate: (item: ApproverItem) => Promise<void>;
+  onDuplicate: (item: ApproverItem, designNumber: string) => Promise<void>;
   /**
    * Modify an already-created (SAP-synced) article. Receives only the changed
    * fields. Used by the "Modify" button on the Created Articles page; pushes to
@@ -558,7 +558,7 @@ const ArticleCard = React.memo(
     onCreateFabricArticle: (item: ApproverItem) => void;
     onCreateBodyArticle: (item: ApproverItem) => void;
     onProceedFGArticle: (item: ApproverItem) => void;
-    onDuplicate: (item: ApproverItem) => Promise<void>;
+    onDuplicate: (item: ApproverItem, designNumber: string) => Promise<void>;
     onModify?: (item: ApproverItem, changes: Record<string, unknown>) => Promise<void>;
     attributes: MasterAttribute[];
     onRefresh: () => void;
@@ -574,6 +574,7 @@ const ArticleCard = React.memo(
     const [localValues, setLocalValues] = useState<Record<string, string | null>>({});
     const [dupConfirmOpen, setDupConfirmOpen] = useState(false);
     const [duplicating, setDuplicating] = useState(false);
+    const [dupDesignNo, setDupDesignNo] = useState('');
     const [allCollapsed, setAllCollapsed] = useState(false);
     const [collapsedGroups, setCollapsedGroups] = useState<Set<string>>(new Set());
     const [fabNoQuery, setFabNoQuery] = useState('');
@@ -3752,32 +3753,57 @@ const ArticleCard = React.memo(
           </DialogContent>
         </Dialog>
 
-        {/* Duplicate confirmation */}
-        <Dialog open={dupConfirmOpen} onOpenChange={(o) => !duplicating && setDupConfirmOpen(o)}>
+        {/* Duplicate — asks for Design Number before creating the copy */}
+        <Dialog open={dupConfirmOpen} onOpenChange={(o) => { if (!duplicating) { setDupConfirmOpen(o); if (!o) setDupDesignNo(''); } }}>
           <DialogContent>
             <DialogHeader>
-              <DialogTitle>Confirm Duplicate</DialogTitle>
+              <DialogTitle>Duplicate Article</DialogTitle>
             </DialogHeader>
-            <p className="m-0">A new copy of this article will be created with all the same values. Do you want to continue?</p>
+            <p className="m-0 text-sm text-muted-foreground">
+              A new copy of this article will be created with all the same values.
+              Enter a Design Number for the duplicate article.
+            </p>
+            <div className="mt-2 flex flex-col gap-1">
+              <label className="text-xs font-semibold uppercase tracking-wide text-slate-600">
+                Design Number <span className="text-red-500">*</span>
+              </label>
+              <Input
+                autoFocus
+                placeholder="Enter design number…"
+                value={dupDesignNo}
+                onChange={(e) => setDupDesignNo(e.target.value)}
+                onKeyDown={(e) => e.key === 'Enter' && !duplicating && dupDesignNo.trim() && (async () => {
+                  setDuplicating(true);
+                  try { await onDuplicate(item, dupDesignNo.trim()); }
+                  catch (err) { message.error(err instanceof Error ? err.message : 'Failed to duplicate article'); }
+                  finally { setDuplicating(false); setDupConfirmOpen(false); setDupDesignNo(''); }
+                })()}
+                disabled={duplicating}
+              />
+              {dupDesignNo.trim() === '' && dupConfirmOpen && (
+                <p className="text-xs text-red-500">Design Number is required.</p>
+              )}
+            </div>
             <DialogFooter>
-              <Button variant="outline" onClick={() => setDupConfirmOpen(false)} disabled={duplicating}>
+              <Button variant="outline" onClick={() => { setDupConfirmOpen(false); setDupDesignNo(''); }} disabled={duplicating}>
                 Cancel
               </Button>
               <Button
-                disabled={duplicating}
+                disabled={duplicating || dupDesignNo.trim() === ''}
                 onClick={async () => {
                   setDuplicating(true);
                   try {
-                    await onDuplicate(item);
+                    await onDuplicate(item, dupDesignNo.trim());
                   } catch (err) {
                     message.error(err instanceof Error ? err.message : 'Failed to duplicate article');
                   } finally {
                     setDuplicating(false);
                     setDupConfirmOpen(false);
+                    setDupDesignNo('');
                   }
                 }}
               >
-                {duplicating ? 'Duplicating…' : 'Continue'}
+                {duplicating ? 'Duplicating…' : 'Duplicate'}
               </Button>
             </DialogFooter>
           </DialogContent>
@@ -3920,11 +3946,12 @@ export const ApproverArticleList: React.FC<ApproverArticleListProps> = ({
   }, [items, selectedRowKeys, onSelectionChange]);
 
   const handleDuplicate = useCallback(
-    async (item: ApproverItem): Promise<void> => {
+    async (item: ApproverItem, designNumber: string): Promise<void> => {
       const token = localStorage.getItem('authToken');
       const res = await fetch(`${APP_CONFIG.api.baseURL}/approver/items/${item.id}/duplicate`, {
         method: 'POST',
-        headers: { Authorization: `Bearer ${token}` },
+        headers: { Authorization: `Bearer ${token}`, 'Content-Type': 'application/json' },
+        body: JSON.stringify({ designNumber }),
       });
       if (!res.ok) {
         const data = await res.json().catch(() => null);

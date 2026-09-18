@@ -35,6 +35,7 @@ export class EnhancedExtractionController {
     department?: string;
     subDepartment?: string;
     presentationsType?: string;
+    designNumber?: string;
     watcherFields?: {
       division?: string;
       vendorName?: string;
@@ -64,7 +65,7 @@ export class EnhancedExtractionController {
         return Array.from(tokens);
       };
 
-      const { image, schema, categoryName, resolvedCategoryCode, userId, result, originalFilename, folderName, department, subDepartment, presentationsType } = params;
+      const { image, schema, categoryName, resolvedCategoryCode, userId, result, originalFilename, folderName, department, subDepartment, presentationsType, designNumber } = params;
 
       const extractVendorCodeFromMetadata = (metadata: any): string | null => {
         if (!metadata || typeof metadata !== 'object') return null;
@@ -406,6 +407,10 @@ export class EnhancedExtractionController {
 
           if (presentationsType) {
             directFill.presentationsType = presentationsType;
+          }
+
+          if (designNumber) {
+            directFill.designNumber = designNumber;
           }
 
           if (image) {
@@ -871,6 +876,7 @@ export class EnhancedExtractionController {
         fileName, // Optional: original filename
         folderName, // Optional: vendor code source from uploaded folder
         presentationsType, // Optional: e.g. 'FG Article', 'Fabric Article'
+        designNumber, // Optional: batch-level design number supplied by user
       }: ExtractionRequest & {
         department?: string;
         subDepartment?: string;
@@ -879,6 +885,7 @@ export class EnhancedExtractionController {
         fileName?: string;
         folderName?: string;
         presentationsType?: string;
+        designNumber?: string;
       } = req.body;
 
       // RBAC: Enforce Division/SubDivision for Creators
@@ -1017,6 +1024,7 @@ export class EnhancedExtractionController {
         department: enforcedDepartment,
         subDepartment: enforcedSubDepartment,
         presentationsType: presentationsType || 'FG Article',
+        designNumber: designNumber?.trim() || undefined,
       });
 
       res.json({

@@ -92,7 +92,17 @@ export const useBatchExtraction = (
         r.id === row.id ? { ...r, status: 'Extracting', processingProgress: 10 } : r
       ));
 
-      const task = extractFunc(row, schema, categoryName, categoryCode, metadata, presentationsType)
+      // Merge per-row design_number attribute into metadata so each image
+      // gets its own design number persisted to the DB during extraction.
+      const rowDesignNo = String(
+        row.attributes?.['design_number']?.schemaValue ??
+        row.attributes?.['design_number']?.rawValue ?? ''
+      ).trim();
+      const rowMetadata = rowDesignNo
+        ? { ...metadata, designNumber: rowDesignNo }
+        : metadata;
+
+      const task = extractFunc(row, schema, categoryName, categoryCode, rowMetadata, presentationsType)
         .then(updated => { 
           if (updated.status === 'Done') {
             successCount++;

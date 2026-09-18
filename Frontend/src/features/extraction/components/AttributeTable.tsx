@@ -153,17 +153,22 @@ export const AttributeTable: React.FC<AttributeTableProps> = ({
           const nextRow = extractedRows[currentRowIndex + 1];
           nextCellKey = nextRow ? `${nextRow.id}::${schemaItem.key}` : null;
         }
+        const cellVal = record.attributes[schemaItem.key];
+        const isEmpty = !String(cellVal?.schemaValue ?? cellVal?.rawValue ?? '').trim();
+        const showRequired = schemaItem.required && isEmpty && record.status !== 'Extracting';
         return (
-          <AttributeCell
-            attribute={record.attributes[schemaItem.key]}
-            schemaItem={schemaItem}
-            onChange={(value) => onAttributeChange(record.id, schemaItem.key, value)}
-            onAddToSchema={(value) => onAddToSchema?.(schemaItem.key, value)}
-            disabled={record.status === 'Extracting' || disableEditing}
-            autoFocus={focusedCellKey === cellKey}
-            onAutoFocused={() => setFocusedCellKey(null)}
-            onSaveAndNext={nextCellKey ? () => setFocusedCellKey(nextCellKey) : undefined}
-          />
+          <div className={cn(showRequired && 'rounded border border-red-400 bg-red-50/40')}>
+            <AttributeCell
+              attribute={cellVal}
+              schemaItem={schemaItem}
+              onChange={(value) => onAttributeChange(record.id, schemaItem.key, value)}
+              onAddToSchema={(value) => onAddToSchema?.(schemaItem.key, value)}
+              disabled={record.status === 'Extracting' || disableEditing}
+              autoFocus={focusedCellKey === cellKey}
+              onAutoFocused={() => setFocusedCellKey(null)}
+              onSaveAndNext={nextCellKey ? () => setFocusedCellKey(nextCellKey) : undefined}
+            />
+          </div>
         );
       },
     }));
