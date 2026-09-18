@@ -141,6 +141,7 @@ export async function submitBodyArticles(ids: string[]): Promise<{
                     id: { not: row.id },
                     majorCategory: { equals: majCat, mode: 'insensitive' },
                     bodyArticleDescription: { equals: desc, mode: 'insensitive' },
+                    bodyArticleNumber: { not: null },
                 },
                 select: { id: true, bodyArticleNumber: true },
             });
