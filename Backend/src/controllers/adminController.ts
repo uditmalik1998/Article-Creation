@@ -4897,6 +4897,171 @@ export const uploadFabricArticleData = async (req: Request, res: Response): Prom
   }
 };
 
+// Shared cap for both Fabric and Body Article Data bulk-delete requests —
+// keeps a single upload/confirm from trying to touch an unbounded number of
+// rows in one go.
+const MAX_BULK_DELETE_KEYS = 5000;
+
+/**
+ * GET /api/admin/fabric-article-data/delete-template
+ * A minimal template for bulk-deleting fabric_article_data rows: one column,
+ * FABRIC_ARTICLE_NUMBER. Deliberately carries no sample data row (unlike the
+ * insert template) — a sample value sitting where the parser expects real
+ * data would risk an accidental delete once the file is filled in and
+ * re-uploaded as-is.
+ */
+export const downloadFabricArticleDataDeleteTemplate = async (_req: Request, res: Response): Promise<void> => {
+  try {
+    const ExcelJS = require('exceljs');
+    const wb = new ExcelJS.Workbook();
+    const ws = wb.addWorksheet('FABRIC ARTICLE DATA DELETE');
+
+    const titleCell = ws.getCell('A1');
+    titleCell.value = 'FABRIC ARTICLE DATA — BULK DELETE';
+    titleCell.font = { bold: true, size: 13 };
+    ws.getRow(1).height = 22;
+
+    ws.addRow([]);
+
+    const headerRow = ws.addRow(['FABRIC_ARTICLE_NUMBER']);
+    headerRow.eachCell((cell: any) => {
+      cell.font = { bold: true, color: { argb: 'FFFFFFFF' } };
+      cell.fill = { type: 'pattern', pattern: 'solid', fgColor: { argb: 'FFC62828' } };
+      cell.alignment = { horizontal: 'center' };
+    });
+
+    const noteRow = ws.addRow([
+      '⚠ List one Fabric Article Number per row below (starting Row 5). Matching rows are PERMANENTLY deleted — but only after you confirm in the app. Numbers not found here are skipped, never created.',
+    ]);
+    noteRow.getCell(1).font = { italic: true, size: 10 };
+    noteRow.getCell(1).fill = { type: 'pattern', pattern: 'solid', fgColor: { argb: 'FFFFF3CD' } };
+
+    ws.columns = [{ width: 30 }];
+
+    res.setHeader('Content-Type', 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');
+    res.setHeader('Content-Disposition', 'attachment; filename="FABRIC_ARTICLE_DATA_DELETE_TEMPLATE.xlsx"');
+    await wb.xlsx.write(res);
+    res.end();
+  } catch (error: any) {
+    console.error('[FabricArticleData] Delete template error:', error);
+    res.status(500).json({ success: false, error: error.message });
+  }
+};
+
+/**
+ * POST /api/admin/fabric-article-data/bulk-delete/preview
+ * Parses an uploaded delete-template Excel (FABRIC_ARTICLE_NUMBER, one per
+ * row from row 5) and reports which numbers match existing fabric_article_data
+ * rows — nothing is deleted here. The frontend holds on to `matchedArticleNumbers`
+ * from the response and sends it back to .../bulk-delete/confirm.
+ */
+export const previewFabricArticleDataBulkDelete = async (req: Request, res: Response): Promise<void> => {
+  try {
+    if (!req.file) {
+      res.status(400).json({ success: false, error: 'No file uploaded. Send a .xlsx file as "file" field.' });
+      return;
+    }
+
+    const ExcelJS = (await import('exceljs')).default;
+    const wb = new ExcelJS.Workbook();
+    await wb.xlsx.load(req.file.buffer as any);
+
+    const ws = wb.getWorksheet('FABRIC ARTICLE DATA DELETE') ?? wb.worksheets[0];
+    if (!ws) {
+      res.status(400).json({ success: false, error: 'No worksheets found in the uploaded Excel file.' });
+      return;
+    }
+
+    const cell = (row: any, c: number): string => {
+      let v = row.getCell(c).value;
+      if (v && typeof v === 'object' && 'result' in v) v = (v as any).result;
+      if (v && typeof v === 'object' && 'text' in v) v = (v as any).text;
+      return v == null ? '' : String(v).trim();
+    };
+
+    const seen = new Set<string>();
+    const articleNumbers: string[] = [];
+    for (let r = 5; r <= ws.rowCount; r++) {
+      const value = cell(ws.getRow(r), 1);
+      if (!value || seen.has(value)) continue;
+      seen.add(value);
+      articleNumbers.push(value);
+    }
+
+    if (articleNumbers.length === 0) {
+      res.status(400).json({ success: false, error: 'No Fabric Article Numbers found in the file (expected one per row, starting Row 5).' });
+      return;
+    }
+    if (articleNumbers.length > MAX_BULK_DELETE_KEYS) {
+      res.status(400).json({ success: false, error: `Too many rows — max ${MAX_BULK_DELETE_KEYS} article numbers per delete batch.` });
+      return;
+    }
+
+    const matched = await prisma.fabricArticleData.findMany({
+      where: { fabricArticleNumber: { in: articleNumbers } },
+      select: { id: true, fabricArticleNumber: true, fabricArticleDescription: true },
+    });
+    const matchedNumbers = matched.map((m) => m.fabricArticleNumber).filter((v): v is string => !!v);
+    const matchedSet = new Set(matchedNumbers);
+    const unmatched = articleNumbers.filter((n) => !matchedSet.has(n));
+
+    res.json({
+      success: true,
+      data: {
+        totalRequested: articleNumbers.length,
+        matchedCount: matched.length,
+        unmatchedCount: unmatched.length,
+        matched: matched.slice(0, 200),
+        matchedArticleNumbers: matchedNumbers,
+        unmatchedSample: unmatched.slice(0, 50),
+      },
+    });
+  } catch (error: any) {
+    console.error('[FabricArticleData] Bulk delete preview error:', error);
+    res.status(500).json({ success: false, error: error.message });
+  }
+};
+
+/**
+ * POST /api/admin/fabric-article-data/bulk-delete/confirm
+ * Body: { articleNumbers: string[] } — normally the `matchedArticleNumbers`
+ * list a prior .../bulk-delete/preview call returned. Permanently deletes
+ * every fabric_article_data row whose fabric_article_number is in that list.
+ */
+export const confirmFabricArticleDataBulkDelete = async (req: Request, res: Response): Promise<void> => {
+  try {
+    const { articleNumbers } = req.body as { articleNumbers?: unknown };
+    const keys = Array.isArray(articleNumbers)
+      ? [...new Set(articleNumbers.filter((v): v is string => typeof v === 'string' && v.trim() !== '').map((v) => v.trim()))]
+      : [];
+    if (keys.length === 0) {
+      res.status(400).json({ success: false, error: 'articleNumbers must be a non-empty array.' });
+      return;
+    }
+    if (keys.length > MAX_BULK_DELETE_KEYS) {
+      res.status(400).json({ success: false, error: `Too many rows — max ${MAX_BULK_DELETE_KEYS} article numbers per delete batch.` });
+      return;
+    }
+
+    const BATCH = 1000;
+    let deletedCount = 0;
+    await prisma.$transaction(async (tx) => {
+      for (let i = 0; i < keys.length; i += BATCH) {
+        const chunk = keys.slice(i, i + BATCH);
+        const { count } = await tx.fabricArticleData.deleteMany({ where: { fabricArticleNumber: { in: chunk } } });
+        deletedCount += count;
+      }
+    }, { timeout: 5 * 60 * 1000 });
+
+    console.log(`[FabricArticleData] Bulk delete — ${deletedCount} row(s) deleted for ${keys.length} requested article number(s).`);
+
+    res.json({ success: true, data: { deletedCount } });
+  } catch (error: any) {
+    console.error('[FabricArticleData] Bulk delete confirm error:', error);
+    res.status(500).json({ success: false, error: error.message });
+  }
+};
+
 // Column order for the Fabric Article Data export — the same relevant-data-
 // first, workflow/audit-fields-last order as the View Data page's own column
 // config (EXPENSE_TABLE_REGISTRY['fabric-article-data']), rather than
@@ -5510,6 +5675,164 @@ export const uploadBodyArticleData = async (req: Request, res: Response): Promis
     });
   } catch (error: any) {
     console.error('[BodyArticleData] Upload error:', error);
+    res.status(500).json({ success: false, error: error.message });
+  }
+};
+
+/**
+ * GET /api/admin/body-article-data/delete-template
+ * A minimal template for bulk-deleting body_article_data rows: one column,
+ * BODY_ARTICLE_NUMBER. See downloadFabricArticleDataDeleteTemplate above for
+ * why there's deliberately no sample data row.
+ */
+export const downloadBodyArticleDataDeleteTemplate = async (_req: Request, res: Response): Promise<void> => {
+  try {
+    const ExcelJS = require('exceljs');
+    const wb = new ExcelJS.Workbook();
+    const ws = wb.addWorksheet('BODY ARTICLE DATA DELETE');
+
+    const titleCell = ws.getCell('A1');
+    titleCell.value = 'BODY ARTICLE DATA — BULK DELETE';
+    titleCell.font = { bold: true, size: 13 };
+    ws.getRow(1).height = 22;
+
+    ws.addRow([]);
+
+    const headerRow = ws.addRow(['BODY_ARTICLE_NUMBER']);
+    headerRow.eachCell((cell: any) => {
+      cell.font = { bold: true, color: { argb: 'FFFFFFFF' } };
+      cell.fill = { type: 'pattern', pattern: 'solid', fgColor: { argb: 'FFC62828' } };
+      cell.alignment = { horizontal: 'center' };
+    });
+
+    const noteRow = ws.addRow([
+      '⚠ List one Body Article Number per row below (starting Row 5). Matching rows are PERMANENTLY deleted — but only after you confirm in the app. Numbers not found here are skipped, never created.',
+    ]);
+    noteRow.getCell(1).font = { italic: true, size: 10 };
+    noteRow.getCell(1).fill = { type: 'pattern', pattern: 'solid', fgColor: { argb: 'FFFFF3CD' } };
+
+    ws.columns = [{ width: 30 }];
+
+    res.setHeader('Content-Type', 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');
+    res.setHeader('Content-Disposition', 'attachment; filename="BODY_ARTICLE_DATA_DELETE_TEMPLATE.xlsx"');
+    await wb.xlsx.write(res);
+    res.end();
+  } catch (error: any) {
+    console.error('[BodyArticleData] Delete template error:', error);
+    res.status(500).json({ success: false, error: error.message });
+  }
+};
+
+/**
+ * POST /api/admin/body-article-data/bulk-delete/preview
+ * Parses an uploaded delete-template Excel (BODY_ARTICLE_NUMBER, one per row
+ * from row 5) and reports which numbers match existing body_article_data
+ * rows — nothing is deleted here. The frontend holds on to `matchedArticleNumbers`
+ * from the response and sends it back to .../bulk-delete/confirm.
+ */
+export const previewBodyArticleDataBulkDelete = async (req: Request, res: Response): Promise<void> => {
+  try {
+    if (!req.file) {
+      res.status(400).json({ success: false, error: 'No file uploaded. Send a .xlsx file as "file" field.' });
+      return;
+    }
+
+    const ExcelJS = (await import('exceljs')).default;
+    const wb = new ExcelJS.Workbook();
+    await wb.xlsx.load(req.file.buffer as any);
+
+    const ws = wb.getWorksheet('BODY ARTICLE DATA DELETE') ?? wb.worksheets[0];
+    if (!ws) {
+      res.status(400).json({ success: false, error: 'No worksheets found in the uploaded Excel file.' });
+      return;
+    }
+
+    const cell = (row: any, c: number): string => {
+      let v = row.getCell(c).value;
+      if (v && typeof v === 'object' && 'result' in v) v = (v as any).result;
+      if (v && typeof v === 'object' && 'text' in v) v = (v as any).text;
+      return v == null ? '' : String(v).trim();
+    };
+
+    const seen = new Set<string>();
+    const articleNumbers: string[] = [];
+    for (let r = 5; r <= ws.rowCount; r++) {
+      const value = cell(ws.getRow(r), 1);
+      if (!value || seen.has(value)) continue;
+      seen.add(value);
+      articleNumbers.push(value);
+    }
+
+    if (articleNumbers.length === 0) {
+      res.status(400).json({ success: false, error: 'No Body Article Numbers found in the file (expected one per row, starting Row 5).' });
+      return;
+    }
+    if (articleNumbers.length > MAX_BULK_DELETE_KEYS) {
+      res.status(400).json({ success: false, error: `Too many rows — max ${MAX_BULK_DELETE_KEYS} article numbers per delete batch.` });
+      return;
+    }
+
+    const matched = await prisma.bodyArticleData.findMany({
+      where: { bodyArticleNumber: { in: articleNumbers } },
+      select: { id: true, bodyArticleNumber: true, bodyArticleDescription: true },
+    });
+    const matchedNumbers = matched.map((m) => m.bodyArticleNumber).filter((v): v is string => !!v);
+    const matchedSet = new Set(matchedNumbers);
+    const unmatched = articleNumbers.filter((n) => !matchedSet.has(n));
+
+    res.json({
+      success: true,
+      data: {
+        totalRequested: articleNumbers.length,
+        matchedCount: matched.length,
+        unmatchedCount: unmatched.length,
+        matched: matched.slice(0, 200),
+        matchedArticleNumbers: matchedNumbers,
+        unmatchedSample: unmatched.slice(0, 50),
+      },
+    });
+  } catch (error: any) {
+    console.error('[BodyArticleData] Bulk delete preview error:', error);
+    res.status(500).json({ success: false, error: error.message });
+  }
+};
+
+/**
+ * POST /api/admin/body-article-data/bulk-delete/confirm
+ * Body: { articleNumbers: string[] } — normally the `matchedArticleNumbers`
+ * list a prior .../bulk-delete/preview call returned. Permanently deletes
+ * every body_article_data row whose body_article_number is in that list.
+ */
+export const confirmBodyArticleDataBulkDelete = async (req: Request, res: Response): Promise<void> => {
+  try {
+    const { articleNumbers } = req.body as { articleNumbers?: unknown };
+    const keys = Array.isArray(articleNumbers)
+      ? [...new Set(articleNumbers.filter((v): v is string => typeof v === 'string' && v.trim() !== '').map((v) => v.trim()))]
+      : [];
+    if (keys.length === 0) {
+      res.status(400).json({ success: false, error: 'articleNumbers must be a non-empty array.' });
+      return;
+    }
+    if (keys.length > MAX_BULK_DELETE_KEYS) {
+      res.status(400).json({ success: false, error: `Too many rows — max ${MAX_BULK_DELETE_KEYS} article numbers per delete batch.` });
+      return;
+    }
+
+    const BATCH = 1000;
+    let deletedCount = 0;
+    await prisma.$transaction(async (tx) => {
+      for (let i = 0; i < keys.length; i += BATCH) {
+        const chunk = keys.slice(i, i + BATCH);
+        const { count } = await tx.bodyArticleData.deleteMany({ where: { bodyArticleNumber: { in: chunk } } });
+        deletedCount += count;
+      }
+    }, { timeout: 5 * 60 * 1000 });
+
+    console.log(`[BodyArticleData] Bulk delete — ${deletedCount} row(s) deleted for ${keys.length} requested article number(s).`);
+
+    res.json({ success: true, data: { deletedCount } });
+  } catch (error: any) {
+    console.error('[BodyArticleData] Bulk delete confirm error:', error);
     res.status(500).json({ success: false, error: error.message });
   }
 };
