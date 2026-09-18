@@ -759,6 +759,30 @@ const ArticleCard = React.memo(
         .catch(() => setFabricConsumptionOptions([]));
     }, [isBodyArticle, effectiveMajCat]);
 
+    // Auto-fill CMP Cost + Body Costing Type from rough_cmp_cost_master — only when cmpCost is
+    // genuinely unset in the DB (item.cmpCost === null). Never runs again once a value exists.
+    useEffect(() => {
+      if (!isBodyArticle || !effectiveMajCat) return;
+      // item.cmpCost is the DB-sourced value; if it's already set, never override.
+      if ((item as any).cmpCost != null) return;
+      const token = localStorage.getItem('authToken');
+      fetch(
+        `${APP_CONFIG.api.baseURL}/approver/rough-cmp-cost?majorCategory=${encodeURIComponent(effectiveMajCat)}`,
+        { headers: { Authorization: `Bearer ${token}` } },
+      )
+        .then((r) => r.json())
+        .then((d: { cmpCost: number | null }) => {
+          if (d.cmpCost == null) return;
+          const updates: Record<string, string> = { cmpCost: String(d.cmpCost) };
+          // Only set Costing Type to Rough if not already set in DB
+          if (!(item as any).costingType) updates['costingType'] = 'Rough';
+          setLocalValues((prev) => ({ ...prev, ...updates }));
+          onSave({ ...item, ...updates } as any, updates, { silent: true });
+        })
+        .catch(() => {});
+      // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, [isBodyArticle, effectiveMajCat, item.id]);
+
     // Auto-correct segment when ranges first load (fixes articles saved before this feature)
     useEffect(() => {
       if (segmentRanges.length === 0) return;

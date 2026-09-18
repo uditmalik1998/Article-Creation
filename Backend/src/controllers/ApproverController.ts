@@ -3723,6 +3723,17 @@ export class ApproverController {
         })));
     };
 
+    // Returns cmp_cost for a major category from rough_cmp_cost_master
+    static getRoughCmpCost = async (req: Request, res: Response) => {
+        const majorCategory = String(req.query.majorCategory ?? '').trim();
+        if (!majorCategory) return res.json({ cmpCost: null });
+        const row = await prisma.roughCmpCostMaster.findFirst({
+            where: { majCat: { equals: majorCategory, mode: 'insensitive' } },
+            select: { cmpCost: true },
+        });
+        return res.json({ cmpCost: row?.cmpCost != null ? Number(row.cmpCost) : null });
+    };
+
     static getBodyArticleItems = async (req: Request, res: Response) => {
         const {
             page = '1', limit = '50',
