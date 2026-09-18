@@ -76540,6 +76540,7 @@ export namespace Prisma {
 
   export type BodyArticleDataWhereUniqueInput = Prisma.AtLeast<{
     id?: string
+    bodyArticleNumber?: string
     AND?: BodyArticleDataWhereInput | BodyArticleDataWhereInput[]
     OR?: BodyArticleDataWhereInput[]
     NOT?: BodyArticleDataWhereInput | BodyArticleDataWhereInput[]
@@ -76560,7 +76561,6 @@ export namespace Prisma {
     mBodyStyle?: StringNullableFilter<"BodyArticleData"> | string | null
     mLength?: StringNullableFilter<"BodyArticleData"> | string | null
     mSet?: StringNullableFilter<"BodyArticleData"> | string | null
-    bodyArticleNumber?: StringNullableFilter<"BodyArticleData"> | string | null
     bodyArticleDescription?: StringNullableFilter<"BodyArticleData"> | string | null
     imageUrl?: StringNullableFilter<"BodyArticleData"> | string | null
     bodyArticleType?: StringNullableFilter<"BodyArticleData"> | string | null
@@ -76603,7 +76603,7 @@ export namespace Prisma {
     userName?: StringNullableFilter<"BodyArticleData"> | string | null
     createdAt?: DateTimeFilter<"BodyArticleData"> | Date | string
     updatedAt?: DateTimeFilter<"BodyArticleData"> | Date | string
-  }, "id">
+  }, "id" | "bodyArticleNumber">
 
   export type BodyArticleDataOrderByWithAggregationInput = {
     id?: SortOrder

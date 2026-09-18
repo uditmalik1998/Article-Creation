@@ -1524,7 +1524,7 @@ model BodyArticleData {
   mSet                     String?   @map("m_set")                  @db.VarChar(100)
 
   // Body article output fields
-  bodyArticleNumber        String?   @map("body_article_number")      @db.VarChar(100)
+  bodyArticleNumber        String?   @unique @map("body_article_number") @db.VarChar(100)
   bodyArticleDescription   String?   @map("body_article_description") @db.VarChar(255)
   imageUrl                 String?   @map("image_url")                @db.Text
   bodyArticleType          String?   @map("body_article_type")        @db.VarChar(100)
