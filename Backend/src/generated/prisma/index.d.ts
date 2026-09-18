@@ -248,6 +248,23 @@ export type BodyArticleData = $Result.DefaultSelection<Prisma.$BodyArticleDataPa
  */
 export type RoughCmpCostMaster = $Result.DefaultSelection<Prisma.$RoughCmpCostMasterPayload>
 /**
+ * Model BasicTrimCostMaster
+ * BasicTrimCostMaster: Per-piece basic trim, packaging and thread costs by major category,
+ * imported from the "MAJ CAT WISE BASIC ACCESSORIES DETAILS" workbook via
+ * scripts/import-basic-trim-cost-master.ts. basicTrimsCost is the workbook's own
+ * "BASIC & TRIMS COST" column (packaging + thread) and is what auto-fills
+ * body_article_data.basic_trim_cost when an article has no value of its own.
+ * trimsTotal / packagingTotal / threadCost and the component breakdown are kept so the
+ * figure can be recomposed differently later without re-importing.
+ */
+export type BasicTrimCostMaster = $Result.DefaultSelection<Prisma.$BasicTrimCostMasterPayload>
+/**
+ * Model BasicTrimCostComponent
+ * BasicTrimCostComponent: one row per trim/packaging component of a BasicTrimCostMaster row,
+ * holding the workbook's per-piece consumption and rate so a rate change can be re-costed.
+ */
+export type BasicTrimCostComponent = $Result.DefaultSelection<Prisma.$BasicTrimCostComponentPayload>
+/**
  * Model MajorCategoryDetails
  * MajorCategoryDetails: Master table for major category hierarchy, mc_code, and HSN codes
  */
@@ -1044,6 +1061,26 @@ export class PrismaClient<
   get roughCmpCostMaster(): Prisma.RoughCmpCostMasterDelegate<ExtArgs, ClientOptions>;
 
   /**
+   * `prisma.basicTrimCostMaster`: Exposes CRUD operations for the **BasicTrimCostMaster** model.
+    * Example usage:
+    * ```ts
+    * // Fetch zero or more BasicTrimCostMasters
+    * const basicTrimCostMasters = await prisma.basicTrimCostMaster.findMany()
+    * ```
+    */
+  get basicTrimCostMaster(): Prisma.BasicTrimCostMasterDelegate<ExtArgs, ClientOptions>;
+
+  /**
+   * `prisma.basicTrimCostComponent`: Exposes CRUD operations for the **BasicTrimCostComponent** model.
+    * Example usage:
+    * ```ts
+    * // Fetch zero or more BasicTrimCostComponents
+    * const basicTrimCostComponents = await prisma.basicTrimCostComponent.findMany()
+    * ```
+    */
+  get basicTrimCostComponent(): Prisma.BasicTrimCostComponentDelegate<ExtArgs, ClientOptions>;
+
+  /**
    * `prisma.majorCategoryDetails`: Exposes CRUD operations for the **MajorCategoryDetails** model.
     * Example usage:
     * ```ts
@@ -1574,6 +1611,8 @@ export namespace Prisma {
     FabricArticleData: 'FabricArticleData',
     BodyArticleData: 'BodyArticleData',
     RoughCmpCostMaster: 'RoughCmpCostMaster',
+    BasicTrimCostMaster: 'BasicTrimCostMaster',
+    BasicTrimCostComponent: 'BasicTrimCostComponent',
     MajorCategoryDetails: 'MajorCategoryDetails',
     ExpenseApprovalStage: 'ExpenseApprovalStage',
     ExpenseChangeRequest: 'ExpenseChangeRequest',
@@ -1597,7 +1636,7 @@ export namespace Prisma {
       omit: GlobalOmitOptions
     }
     meta: {
-      modelProps: "department" | "subDepartment" | "category" | "masterAttribute" | "attributeAllowedValue" | "categoryAttribute" | "extractionJob" | "extractionResult" | "extractionResultFlat" | "modelGenerationResult" | "modelImageApproval" | "mvgrLookup" | "masterVendorDetail" | "user" | "auditLog" | "apiKey" | "changeHistory" | "costSummary" | "article360" | "articleFab" | "articleBody" | "articleVaAcc" | "articleVaPrcs" | "articleBom" | "sapFieldConfig" | "sapAttributeValue" | "article360Flat" | "rawArticle" | "fabricRawData" | "srmSyncRun" | "srmSyncRunItem" | "poolBJob" | "poolBBatch" | "nationalGridMaster" | "broaderMenu" | "majorCatMaster" | "fabricArticleMaster" | "fabricMajCatGridValue" | "modifyLog" | "fabricArticleData" | "bodyArticleData" | "roughCmpCostMaster" | "majorCategoryDetails" | "expenseApprovalStage" | "expenseChangeRequest" | "expenseAccessGrant" | "expenseAuditLog"
+      modelProps: "department" | "subDepartment" | "category" | "masterAttribute" | "attributeAllowedValue" | "categoryAttribute" | "extractionJob" | "extractionResult" | "extractionResultFlat" | "modelGenerationResult" | "modelImageApproval" | "mvgrLookup" | "masterVendorDetail" | "user" | "auditLog" | "apiKey" | "changeHistory" | "costSummary" | "article360" | "articleFab" | "articleBody" | "articleVaAcc" | "articleVaPrcs" | "articleBom" | "sapFieldConfig" | "sapAttributeValue" | "article360Flat" | "rawArticle" | "fabricRawData" | "srmSyncRun" | "srmSyncRunItem" | "poolBJob" | "poolBBatch" | "nationalGridMaster" | "broaderMenu" | "majorCatMaster" | "fabricArticleMaster" | "fabricMajCatGridValue" | "modifyLog" | "fabricArticleData" | "bodyArticleData" | "roughCmpCostMaster" | "basicTrimCostMaster" | "basicTrimCostComponent" | "majorCategoryDetails" | "expenseApprovalStage" | "expenseChangeRequest" | "expenseAccessGrant" | "expenseAuditLog"
       txIsolationLevel: Prisma.TransactionIsolationLevel
     }
     model: {
@@ -4709,6 +4748,154 @@ export namespace Prisma {
           }
         }
       }
+      BasicTrimCostMaster: {
+        payload: Prisma.$BasicTrimCostMasterPayload<ExtArgs>
+        fields: Prisma.BasicTrimCostMasterFieldRefs
+        operations: {
+          findUnique: {
+            args: Prisma.BasicTrimCostMasterFindUniqueArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$BasicTrimCostMasterPayload> | null
+          }
+          findUniqueOrThrow: {
+            args: Prisma.BasicTrimCostMasterFindUniqueOrThrowArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$BasicTrimCostMasterPayload>
+          }
+          findFirst: {
+            args: Prisma.BasicTrimCostMasterFindFirstArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$BasicTrimCostMasterPayload> | null
+          }
+          findFirstOrThrow: {
+            args: Prisma.BasicTrimCostMasterFindFirstOrThrowArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$BasicTrimCostMasterPayload>
+          }
+          findMany: {
+            args: Prisma.BasicTrimCostMasterFindManyArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$BasicTrimCostMasterPayload>[]
+          }
+          create: {
+            args: Prisma.BasicTrimCostMasterCreateArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$BasicTrimCostMasterPayload>
+          }
+          createMany: {
+            args: Prisma.BasicTrimCostMasterCreateManyArgs<ExtArgs>
+            result: BatchPayload
+          }
+          createManyAndReturn: {
+            args: Prisma.BasicTrimCostMasterCreateManyAndReturnArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$BasicTrimCostMasterPayload>[]
+          }
+          delete: {
+            args: Prisma.BasicTrimCostMasterDeleteArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$BasicTrimCostMasterPayload>
+          }
+          update: {
+            args: Prisma.BasicTrimCostMasterUpdateArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$BasicTrimCostMasterPayload>
+          }
+          deleteMany: {
+            args: Prisma.BasicTrimCostMasterDeleteManyArgs<ExtArgs>
+            result: BatchPayload
+          }
+          updateMany: {
+            args: Prisma.BasicTrimCostMasterUpdateManyArgs<ExtArgs>
+            result: BatchPayload
+          }
+          updateManyAndReturn: {
+            args: Prisma.BasicTrimCostMasterUpdateManyAndReturnArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$BasicTrimCostMasterPayload>[]
+          }
+          upsert: {
+            args: Prisma.BasicTrimCostMasterUpsertArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$BasicTrimCostMasterPayload>
+          }
+          aggregate: {
+            args: Prisma.BasicTrimCostMasterAggregateArgs<ExtArgs>
+            result: $Utils.Optional<AggregateBasicTrimCostMaster>
+          }
+          groupBy: {
+            args: Prisma.BasicTrimCostMasterGroupByArgs<ExtArgs>
+            result: $Utils.Optional<BasicTrimCostMasterGroupByOutputType>[]
+          }
+          count: {
+            args: Prisma.BasicTrimCostMasterCountArgs<ExtArgs>
+            result: $Utils.Optional<BasicTrimCostMasterCountAggregateOutputType> | number
+          }
+        }
+      }
+      BasicTrimCostComponent: {
+        payload: Prisma.$BasicTrimCostComponentPayload<ExtArgs>
+        fields: Prisma.BasicTrimCostComponentFieldRefs
+        operations: {
+          findUnique: {
+            args: Prisma.BasicTrimCostComponentFindUniqueArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$BasicTrimCostComponentPayload> | null
+          }
+          findUniqueOrThrow: {
+            args: Prisma.BasicTrimCostComponentFindUniqueOrThrowArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$BasicTrimCostComponentPayload>
+          }
+          findFirst: {
+            args: Prisma.BasicTrimCostComponentFindFirstArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$BasicTrimCostComponentPayload> | null
+          }
+          findFirstOrThrow: {
+            args: Prisma.BasicTrimCostComponentFindFirstOrThrowArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$BasicTrimCostComponentPayload>
+          }
+          findMany: {
+            args: Prisma.BasicTrimCostComponentFindManyArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$BasicTrimCostComponentPayload>[]
+          }
+          create: {
+            args: Prisma.BasicTrimCostComponentCreateArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$BasicTrimCostComponentPayload>
+          }
+          createMany: {
+            args: Prisma.BasicTrimCostComponentCreateManyArgs<ExtArgs>
+            result: BatchPayload
+          }
+          createManyAndReturn: {
+            args: Prisma.BasicTrimCostComponentCreateManyAndReturnArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$BasicTrimCostComponentPayload>[]
+          }
+          delete: {
+            args: Prisma.BasicTrimCostComponentDeleteArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$BasicTrimCostComponentPayload>
+          }
+          update: {
+            args: Prisma.BasicTrimCostComponentUpdateArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$BasicTrimCostComponentPayload>
+          }
+          deleteMany: {
+            args: Prisma.BasicTrimCostComponentDeleteManyArgs<ExtArgs>
+            result: BatchPayload
+          }
+          updateMany: {
+            args: Prisma.BasicTrimCostComponentUpdateManyArgs<ExtArgs>
+            result: BatchPayload
+          }
+          updateManyAndReturn: {
+            args: Prisma.BasicTrimCostComponentUpdateManyAndReturnArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$BasicTrimCostComponentPayload>[]
+          }
+          upsert: {
+            args: Prisma.BasicTrimCostComponentUpsertArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$BasicTrimCostComponentPayload>
+          }
+          aggregate: {
+            args: Prisma.BasicTrimCostComponentAggregateArgs<ExtArgs>
+            result: $Utils.Optional<AggregateBasicTrimCostComponent>
+          }
+          groupBy: {
+            args: Prisma.BasicTrimCostComponentGroupByArgs<ExtArgs>
+            result: $Utils.Optional<BasicTrimCostComponentGroupByOutputType>[]
+          }
+          count: {
+            args: Prisma.BasicTrimCostComponentCountArgs<ExtArgs>
+            result: $Utils.Optional<BasicTrimCostComponentCountAggregateOutputType> | number
+          }
+        }
+      }
       MajorCategoryDetails: {
         payload: Prisma.$MajorCategoryDetailsPayload<ExtArgs>
         fields: Prisma.MajorCategoryDetailsFieldRefs
@@ -5213,6 +5400,8 @@ export namespace Prisma {
     fabricArticleData?: FabricArticleDataOmit
     bodyArticleData?: BodyArticleDataOmit
     roughCmpCostMaster?: RoughCmpCostMasterOmit
+    basicTrimCostMaster?: BasicTrimCostMasterOmit
+    basicTrimCostComponent?: BasicTrimCostComponentOmit
     majorCategoryDetails?: MajorCategoryDetailsOmit
     expenseApprovalStage?: ExpenseApprovalStageOmit
     expenseChangeRequest?: ExpenseChangeRequestOmit
@@ -5685,6 +5874,37 @@ export namespace Prisma {
    */
   export type PoolBJobCountOutputTypeCountBatchesArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
     where?: PoolBBatchWhereInput
+  }
+
+
+  /**
+   * Count Type BasicTrimCostMasterCountOutputType
+   */
+
+  export type BasicTrimCostMasterCountOutputType = {
+    components: number
+  }
+
+  export type BasicTrimCostMasterCountOutputTypeSelect<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    components?: boolean | BasicTrimCostMasterCountOutputTypeCountComponentsArgs
+  }
+
+  // Custom InputTypes
+  /**
+   * BasicTrimCostMasterCountOutputType without action
+   */
+  export type BasicTrimCostMasterCountOutputTypeDefaultArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the BasicTrimCostMasterCountOutputType
+     */
+    select?: BasicTrimCostMasterCountOutputTypeSelect<ExtArgs> | null
+  }
+
+  /**
+   * BasicTrimCostMasterCountOutputType without action
+   */
+  export type BasicTrimCostMasterCountOutputTypeCountComponentsArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    where?: BasicTrimCostComponentWhereInput
   }
 
 
@@ -59218,6 +59438,2325 @@ export namespace Prisma {
 
 
   /**
+   * Model BasicTrimCostMaster
+   */
+
+  export type AggregateBasicTrimCostMaster = {
+    _count: BasicTrimCostMasterCountAggregateOutputType | null
+    _avg: BasicTrimCostMasterAvgAggregateOutputType | null
+    _sum: BasicTrimCostMasterSumAggregateOutputType | null
+    _min: BasicTrimCostMasterMinAggregateOutputType | null
+    _max: BasicTrimCostMasterMaxAggregateOutputType | null
+  }
+
+  export type BasicTrimCostMasterAvgAggregateOutputType = {
+    id: number | null
+    trimsTotal: Decimal | null
+    packagingTotal: Decimal | null
+    threadCost: Decimal | null
+    basicTrimsCost: Decimal | null
+  }
+
+  export type BasicTrimCostMasterSumAggregateOutputType = {
+    id: number | null
+    trimsTotal: Decimal | null
+    packagingTotal: Decimal | null
+    threadCost: Decimal | null
+    basicTrimsCost: Decimal | null
+  }
+
+  export type BasicTrimCostMasterMinAggregateOutputType = {
+    id: number | null
+    div: string | null
+    subDiv: string | null
+    majCat: string | null
+    trimsTotal: Decimal | null
+    packagingTotal: Decimal | null
+    threadCost: Decimal | null
+    basicTrimsCost: Decimal | null
+    createdAt: Date | null
+    updatedAt: Date | null
+  }
+
+  export type BasicTrimCostMasterMaxAggregateOutputType = {
+    id: number | null
+    div: string | null
+    subDiv: string | null
+    majCat: string | null
+    trimsTotal: Decimal | null
+    packagingTotal: Decimal | null
+    threadCost: Decimal | null
+    basicTrimsCost: Decimal | null
+    createdAt: Date | null
+    updatedAt: Date | null
+  }
+
+  export type BasicTrimCostMasterCountAggregateOutputType = {
+    id: number
+    div: number
+    subDiv: number
+    majCat: number
+    trimsTotal: number
+    packagingTotal: number
+    threadCost: number
+    basicTrimsCost: number
+    createdAt: number
+    updatedAt: number
+    _all: number
+  }
+
+
+  export type BasicTrimCostMasterAvgAggregateInputType = {
+    id?: true
+    trimsTotal?: true
+    packagingTotal?: true
+    threadCost?: true
+    basicTrimsCost?: true
+  }
+
+  export type BasicTrimCostMasterSumAggregateInputType = {
+    id?: true
+    trimsTotal?: true
+    packagingTotal?: true
+    threadCost?: true
+    basicTrimsCost?: true
+  }
+
+  export type BasicTrimCostMasterMinAggregateInputType = {
+    id?: true
+    div?: true
+    subDiv?: true
+    majCat?: true
+    trimsTotal?: true
+    packagingTotal?: true
+    threadCost?: true
+    basicTrimsCost?: true
+    createdAt?: true
+    updatedAt?: true
+  }
+
+  export type BasicTrimCostMasterMaxAggregateInputType = {
+    id?: true
+    div?: true
+    subDiv?: true
+    majCat?: true
+    trimsTotal?: true
+    packagingTotal?: true
+    threadCost?: true
+    basicTrimsCost?: true
+    createdAt?: true
+    updatedAt?: true
+  }
+
+  export type BasicTrimCostMasterCountAggregateInputType = {
+    id?: true
+    div?: true
+    subDiv?: true
+    majCat?: true
+    trimsTotal?: true
+    packagingTotal?: true
+    threadCost?: true
+    basicTrimsCost?: true
+    createdAt?: true
+    updatedAt?: true
+    _all?: true
+  }
+
+  export type BasicTrimCostMasterAggregateArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Filter which BasicTrimCostMaster to aggregate.
+     */
+    where?: BasicTrimCostMasterWhereInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
+     * 
+     * Determine the order of BasicTrimCostMasters to fetch.
+     */
+    orderBy?: BasicTrimCostMasterOrderByWithRelationInput | BasicTrimCostMasterOrderByWithRelationInput[]
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
+     * 
+     * Sets the start position
+     */
+    cursor?: BasicTrimCostMasterWhereUniqueInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Take `±n` BasicTrimCostMasters from the position of the cursor.
+     */
+    take?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Skip the first `n` BasicTrimCostMasters.
+     */
+    skip?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     * 
+     * Count returned BasicTrimCostMasters
+    **/
+    _count?: true | BasicTrimCostMasterCountAggregateInputType
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     * 
+     * Select which fields to average
+    **/
+    _avg?: BasicTrimCostMasterAvgAggregateInputType
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     * 
+     * Select which fields to sum
+    **/
+    _sum?: BasicTrimCostMasterSumAggregateInputType
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     * 
+     * Select which fields to find the minimum value
+    **/
+    _min?: BasicTrimCostMasterMinAggregateInputType
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     * 
+     * Select which fields to find the maximum value
+    **/
+    _max?: BasicTrimCostMasterMaxAggregateInputType
+  }
+
+  export type GetBasicTrimCostMasterAggregateType<T extends BasicTrimCostMasterAggregateArgs> = {
+        [P in keyof T & keyof AggregateBasicTrimCostMaster]: P extends '_count' | 'count'
+      ? T[P] extends true
+        ? number
+        : GetScalarType<T[P], AggregateBasicTrimCostMaster[P]>
+      : GetScalarType<T[P], AggregateBasicTrimCostMaster[P]>
+  }
+
+
+
+
+  export type BasicTrimCostMasterGroupByArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    where?: BasicTrimCostMasterWhereInput
+    orderBy?: BasicTrimCostMasterOrderByWithAggregationInput | BasicTrimCostMasterOrderByWithAggregationInput[]
+    by: BasicTrimCostMasterScalarFieldEnum[] | BasicTrimCostMasterScalarFieldEnum
+    having?: BasicTrimCostMasterScalarWhereWithAggregatesInput
+    take?: number
+    skip?: number
+    _count?: BasicTrimCostMasterCountAggregateInputType | true
+    _avg?: BasicTrimCostMasterAvgAggregateInputType
+    _sum?: BasicTrimCostMasterSumAggregateInputType
+    _min?: BasicTrimCostMasterMinAggregateInputType
+    _max?: BasicTrimCostMasterMaxAggregateInputType
+  }
+
+  export type BasicTrimCostMasterGroupByOutputType = {
+    id: number
+    div: string | null
+    subDiv: string | null
+    majCat: string
+    trimsTotal: Decimal | null
+    packagingTotal: Decimal | null
+    threadCost: Decimal | null
+    basicTrimsCost: Decimal | null
+    createdAt: Date
+    updatedAt: Date
+    _count: BasicTrimCostMasterCountAggregateOutputType | null
+    _avg: BasicTrimCostMasterAvgAggregateOutputType | null
+    _sum: BasicTrimCostMasterSumAggregateOutputType | null
+    _min: BasicTrimCostMasterMinAggregateOutputType | null
+    _max: BasicTrimCostMasterMaxAggregateOutputType | null
+  }
+
+  type GetBasicTrimCostMasterGroupByPayload<T extends BasicTrimCostMasterGroupByArgs> = Prisma.PrismaPromise<
+    Array<
+      PickEnumerable<BasicTrimCostMasterGroupByOutputType, T['by']> &
+        {
+          [P in ((keyof T) & (keyof BasicTrimCostMasterGroupByOutputType))]: P extends '_count'
+            ? T[P] extends boolean
+              ? number
+              : GetScalarType<T[P], BasicTrimCostMasterGroupByOutputType[P]>
+            : GetScalarType<T[P], BasicTrimCostMasterGroupByOutputType[P]>
+        }
+      >
+    >
+
+
+  export type BasicTrimCostMasterSelect<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
+    id?: boolean
+    div?: boolean
+    subDiv?: boolean
+    majCat?: boolean
+    trimsTotal?: boolean
+    packagingTotal?: boolean
+    threadCost?: boolean
+    basicTrimsCost?: boolean
+    createdAt?: boolean
+    updatedAt?: boolean
+    components?: boolean | BasicTrimCostMaster$componentsArgs<ExtArgs>
+    _count?: boolean | BasicTrimCostMasterCountOutputTypeDefaultArgs<ExtArgs>
+  }, ExtArgs["result"]["basicTrimCostMaster"]>
+
+  export type BasicTrimCostMasterSelectCreateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
+    id?: boolean
+    div?: boolean
+    subDiv?: boolean
+    majCat?: boolean
+    trimsTotal?: boolean
+    packagingTotal?: boolean
+    threadCost?: boolean
+    basicTrimsCost?: boolean
+    createdAt?: boolean
+    updatedAt?: boolean
+  }, ExtArgs["result"]["basicTrimCostMaster"]>
+
+  export type BasicTrimCostMasterSelectUpdateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
+    id?: boolean
+    div?: boolean
+    subDiv?: boolean
+    majCat?: boolean
+    trimsTotal?: boolean
+    packagingTotal?: boolean
+    threadCost?: boolean
+    basicTrimsCost?: boolean
+    createdAt?: boolean
+    updatedAt?: boolean
+  }, ExtArgs["result"]["basicTrimCostMaster"]>
+
+  export type BasicTrimCostMasterSelectScalar = {
+    id?: boolean
+    div?: boolean
+    subDiv?: boolean
+    majCat?: boolean
+    trimsTotal?: boolean
+    packagingTotal?: boolean
+    threadCost?: boolean
+    basicTrimsCost?: boolean
+    createdAt?: boolean
+    updatedAt?: boolean
+  }
+
+  export type BasicTrimCostMasterOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<"id" | "div" | "subDiv" | "majCat" | "trimsTotal" | "packagingTotal" | "threadCost" | "basicTrimsCost" | "createdAt" | "updatedAt", ExtArgs["result"]["basicTrimCostMaster"]>
+  export type BasicTrimCostMasterInclude<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    components?: boolean | BasicTrimCostMaster$componentsArgs<ExtArgs>
+    _count?: boolean | BasicTrimCostMasterCountOutputTypeDefaultArgs<ExtArgs>
+  }
+  export type BasicTrimCostMasterIncludeCreateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {}
+  export type BasicTrimCostMasterIncludeUpdateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {}
+
+  export type $BasicTrimCostMasterPayload<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    name: "BasicTrimCostMaster"
+    objects: {
+      components: Prisma.$BasicTrimCostComponentPayload<ExtArgs>[]
+    }
+    scalars: $Extensions.GetPayloadResult<{
+      id: number
+      div: string | null
+      subDiv: string | null
+      majCat: string
+      trimsTotal: Prisma.Decimal | null
+      packagingTotal: Prisma.Decimal | null
+      threadCost: Prisma.Decimal | null
+      basicTrimsCost: Prisma.Decimal | null
+      createdAt: Date
+      updatedAt: Date
+    }, ExtArgs["result"]["basicTrimCostMaster"]>
+    composites: {}
+  }
+
+  type BasicTrimCostMasterGetPayload<S extends boolean | null | undefined | BasicTrimCostMasterDefaultArgs> = $Result.GetResult<Prisma.$BasicTrimCostMasterPayload, S>
+
+  type BasicTrimCostMasterCountArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> =
+    Omit<BasicTrimCostMasterFindManyArgs, 'select' | 'include' | 'distinct' | 'omit'> & {
+      select?: BasicTrimCostMasterCountAggregateInputType | true
+    }
+
+  export interface BasicTrimCostMasterDelegate<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs, GlobalOmitOptions = {}> {
+    [K: symbol]: { types: Prisma.TypeMap<ExtArgs>['model']['BasicTrimCostMaster'], meta: { name: 'BasicTrimCostMaster' } }
+    /**
+     * Find zero or one BasicTrimCostMaster that matches the filter.
+     * @param {BasicTrimCostMasterFindUniqueArgs} args - Arguments to find a BasicTrimCostMaster
+     * @example
+     * // Get one BasicTrimCostMaster
+     * const basicTrimCostMaster = await prisma.basicTrimCostMaster.findUnique({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     */
+    findUnique<T extends BasicTrimCostMasterFindUniqueArgs>(args: SelectSubset<T, BasicTrimCostMasterFindUniqueArgs<ExtArgs>>): Prisma__BasicTrimCostMasterClient<$Result.GetResult<Prisma.$BasicTrimCostMasterPayload<ExtArgs>, T, "findUnique", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Find one BasicTrimCostMaster that matches the filter or throw an error with `error.code='P2025'`
+     * if no matches were found.
+     * @param {BasicTrimCostMasterFindUniqueOrThrowArgs} args - Arguments to find a BasicTrimCostMaster
+     * @example
+     * // Get one BasicTrimCostMaster
+     * const basicTrimCostMaster = await prisma.basicTrimCostMaster.findUniqueOrThrow({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     */
+    findUniqueOrThrow<T extends BasicTrimCostMasterFindUniqueOrThrowArgs>(args: SelectSubset<T, BasicTrimCostMasterFindUniqueOrThrowArgs<ExtArgs>>): Prisma__BasicTrimCostMasterClient<$Result.GetResult<Prisma.$BasicTrimCostMasterPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Find the first BasicTrimCostMaster that matches the filter.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {BasicTrimCostMasterFindFirstArgs} args - Arguments to find a BasicTrimCostMaster
+     * @example
+     * // Get one BasicTrimCostMaster
+     * const basicTrimCostMaster = await prisma.basicTrimCostMaster.findFirst({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     */
+    findFirst<T extends BasicTrimCostMasterFindFirstArgs>(args?: SelectSubset<T, BasicTrimCostMasterFindFirstArgs<ExtArgs>>): Prisma__BasicTrimCostMasterClient<$Result.GetResult<Prisma.$BasicTrimCostMasterPayload<ExtArgs>, T, "findFirst", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Find the first BasicTrimCostMaster that matches the filter or
+     * throw `PrismaKnownClientError` with `P2025` code if no matches were found.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {BasicTrimCostMasterFindFirstOrThrowArgs} args - Arguments to find a BasicTrimCostMaster
+     * @example
+     * // Get one BasicTrimCostMaster
+     * const basicTrimCostMaster = await prisma.basicTrimCostMaster.findFirstOrThrow({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     */
+    findFirstOrThrow<T extends BasicTrimCostMasterFindFirstOrThrowArgs>(args?: SelectSubset<T, BasicTrimCostMasterFindFirstOrThrowArgs<ExtArgs>>): Prisma__BasicTrimCostMasterClient<$Result.GetResult<Prisma.$BasicTrimCostMasterPayload<ExtArgs>, T, "findFirstOrThrow", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Find zero or more BasicTrimCostMasters that matches the filter.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {BasicTrimCostMasterFindManyArgs} args - Arguments to filter and select certain fields only.
+     * @example
+     * // Get all BasicTrimCostMasters
+     * const basicTrimCostMasters = await prisma.basicTrimCostMaster.findMany()
+     * 
+     * // Get first 10 BasicTrimCostMasters
+     * const basicTrimCostMasters = await prisma.basicTrimCostMaster.findMany({ take: 10 })
+     * 
+     * // Only select the `id`
+     * const basicTrimCostMasterWithIdOnly = await prisma.basicTrimCostMaster.findMany({ select: { id: true } })
+     * 
+     */
+    findMany<T extends BasicTrimCostMasterFindManyArgs>(args?: SelectSubset<T, BasicTrimCostMasterFindManyArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$BasicTrimCostMasterPayload<ExtArgs>, T, "findMany", GlobalOmitOptions>>
+
+    /**
+     * Create a BasicTrimCostMaster.
+     * @param {BasicTrimCostMasterCreateArgs} args - Arguments to create a BasicTrimCostMaster.
+     * @example
+     * // Create one BasicTrimCostMaster
+     * const BasicTrimCostMaster = await prisma.basicTrimCostMaster.create({
+     *   data: {
+     *     // ... data to create a BasicTrimCostMaster
+     *   }
+     * })
+     * 
+     */
+    create<T extends BasicTrimCostMasterCreateArgs>(args: SelectSubset<T, BasicTrimCostMasterCreateArgs<ExtArgs>>): Prisma__BasicTrimCostMasterClient<$Result.GetResult<Prisma.$BasicTrimCostMasterPayload<ExtArgs>, T, "create", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Create many BasicTrimCostMasters.
+     * @param {BasicTrimCostMasterCreateManyArgs} args - Arguments to create many BasicTrimCostMasters.
+     * @example
+     * // Create many BasicTrimCostMasters
+     * const basicTrimCostMaster = await prisma.basicTrimCostMaster.createMany({
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     *     
+     */
+    createMany<T extends BasicTrimCostMasterCreateManyArgs>(args?: SelectSubset<T, BasicTrimCostMasterCreateManyArgs<ExtArgs>>): Prisma.PrismaPromise<BatchPayload>
+
+    /**
+     * Create many BasicTrimCostMasters and returns the data saved in the database.
+     * @param {BasicTrimCostMasterCreateManyAndReturnArgs} args - Arguments to create many BasicTrimCostMasters.
+     * @example
+     * // Create many BasicTrimCostMasters
+     * const basicTrimCostMaster = await prisma.basicTrimCostMaster.createManyAndReturn({
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     * 
+     * // Create many BasicTrimCostMasters and only return the `id`
+     * const basicTrimCostMasterWithIdOnly = await prisma.basicTrimCostMaster.createManyAndReturn({
+     *   select: { id: true },
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * 
+     */
+    createManyAndReturn<T extends BasicTrimCostMasterCreateManyAndReturnArgs>(args?: SelectSubset<T, BasicTrimCostMasterCreateManyAndReturnArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$BasicTrimCostMasterPayload<ExtArgs>, T, "createManyAndReturn", GlobalOmitOptions>>
+
+    /**
+     * Delete a BasicTrimCostMaster.
+     * @param {BasicTrimCostMasterDeleteArgs} args - Arguments to delete one BasicTrimCostMaster.
+     * @example
+     * // Delete one BasicTrimCostMaster
+     * const BasicTrimCostMaster = await prisma.basicTrimCostMaster.delete({
+     *   where: {
+     *     // ... filter to delete one BasicTrimCostMaster
+     *   }
+     * })
+     * 
+     */
+    delete<T extends BasicTrimCostMasterDeleteArgs>(args: SelectSubset<T, BasicTrimCostMasterDeleteArgs<ExtArgs>>): Prisma__BasicTrimCostMasterClient<$Result.GetResult<Prisma.$BasicTrimCostMasterPayload<ExtArgs>, T, "delete", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Update one BasicTrimCostMaster.
+     * @param {BasicTrimCostMasterUpdateArgs} args - Arguments to update one BasicTrimCostMaster.
+     * @example
+     * // Update one BasicTrimCostMaster
+     * const basicTrimCostMaster = await prisma.basicTrimCostMaster.update({
+     *   where: {
+     *     // ... provide filter here
+     *   },
+     *   data: {
+     *     // ... provide data here
+     *   }
+     * })
+     * 
+     */
+    update<T extends BasicTrimCostMasterUpdateArgs>(args: SelectSubset<T, BasicTrimCostMasterUpdateArgs<ExtArgs>>): Prisma__BasicTrimCostMasterClient<$Result.GetResult<Prisma.$BasicTrimCostMasterPayload<ExtArgs>, T, "update", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Delete zero or more BasicTrimCostMasters.
+     * @param {BasicTrimCostMasterDeleteManyArgs} args - Arguments to filter BasicTrimCostMasters to delete.
+     * @example
+     * // Delete a few BasicTrimCostMasters
+     * const { count } = await prisma.basicTrimCostMaster.deleteMany({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     * 
+     */
+    deleteMany<T extends BasicTrimCostMasterDeleteManyArgs>(args?: SelectSubset<T, BasicTrimCostMasterDeleteManyArgs<ExtArgs>>): Prisma.PrismaPromise<BatchPayload>
+
+    /**
+     * Update zero or more BasicTrimCostMasters.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {BasicTrimCostMasterUpdateManyArgs} args - Arguments to update one or more rows.
+     * @example
+     * // Update many BasicTrimCostMasters
+     * const basicTrimCostMaster = await prisma.basicTrimCostMaster.updateMany({
+     *   where: {
+     *     // ... provide filter here
+     *   },
+     *   data: {
+     *     // ... provide data here
+     *   }
+     * })
+     * 
+     */
+    updateMany<T extends BasicTrimCostMasterUpdateManyArgs>(args: SelectSubset<T, BasicTrimCostMasterUpdateManyArgs<ExtArgs>>): Prisma.PrismaPromise<BatchPayload>
+
+    /**
+     * Update zero or more BasicTrimCostMasters and returns the data updated in the database.
+     * @param {BasicTrimCostMasterUpdateManyAndReturnArgs} args - Arguments to update many BasicTrimCostMasters.
+     * @example
+     * // Update many BasicTrimCostMasters
+     * const basicTrimCostMaster = await prisma.basicTrimCostMaster.updateManyAndReturn({
+     *   where: {
+     *     // ... provide filter here
+     *   },
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     * 
+     * // Update zero or more BasicTrimCostMasters and only return the `id`
+     * const basicTrimCostMasterWithIdOnly = await prisma.basicTrimCostMaster.updateManyAndReturn({
+     *   select: { id: true },
+     *   where: {
+     *     // ... provide filter here
+     *   },
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * 
+     */
+    updateManyAndReturn<T extends BasicTrimCostMasterUpdateManyAndReturnArgs>(args: SelectSubset<T, BasicTrimCostMasterUpdateManyAndReturnArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$BasicTrimCostMasterPayload<ExtArgs>, T, "updateManyAndReturn", GlobalOmitOptions>>
+
+    /**
+     * Create or update one BasicTrimCostMaster.
+     * @param {BasicTrimCostMasterUpsertArgs} args - Arguments to update or create a BasicTrimCostMaster.
+     * @example
+     * // Update or create a BasicTrimCostMaster
+     * const basicTrimCostMaster = await prisma.basicTrimCostMaster.upsert({
+     *   create: {
+     *     // ... data to create a BasicTrimCostMaster
+     *   },
+     *   update: {
+     *     // ... in case it already exists, update
+     *   },
+     *   where: {
+     *     // ... the filter for the BasicTrimCostMaster we want to update
+     *   }
+     * })
+     */
+    upsert<T extends BasicTrimCostMasterUpsertArgs>(args: SelectSubset<T, BasicTrimCostMasterUpsertArgs<ExtArgs>>): Prisma__BasicTrimCostMasterClient<$Result.GetResult<Prisma.$BasicTrimCostMasterPayload<ExtArgs>, T, "upsert", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+
+    /**
+     * Count the number of BasicTrimCostMasters.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {BasicTrimCostMasterCountArgs} args - Arguments to filter BasicTrimCostMasters to count.
+     * @example
+     * // Count the number of BasicTrimCostMasters
+     * const count = await prisma.basicTrimCostMaster.count({
+     *   where: {
+     *     // ... the filter for the BasicTrimCostMasters we want to count
+     *   }
+     * })
+    **/
+    count<T extends BasicTrimCostMasterCountArgs>(
+      args?: Subset<T, BasicTrimCostMasterCountArgs>,
+    ): Prisma.PrismaPromise<
+      T extends $Utils.Record<'select', any>
+        ? T['select'] extends true
+          ? number
+          : GetScalarType<T['select'], BasicTrimCostMasterCountAggregateOutputType>
+        : number
+    >
+
+    /**
+     * Allows you to perform aggregations operations on a BasicTrimCostMaster.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {BasicTrimCostMasterAggregateArgs} args - Select which aggregations you would like to apply and on what fields.
+     * @example
+     * // Ordered by age ascending
+     * // Where email contains prisma.io
+     * // Limited to the 10 users
+     * const aggregations = await prisma.user.aggregate({
+     *   _avg: {
+     *     age: true,
+     *   },
+     *   where: {
+     *     email: {
+     *       contains: "prisma.io",
+     *     },
+     *   },
+     *   orderBy: {
+     *     age: "asc",
+     *   },
+     *   take: 10,
+     * })
+    **/
+    aggregate<T extends BasicTrimCostMasterAggregateArgs>(args: Subset<T, BasicTrimCostMasterAggregateArgs>): Prisma.PrismaPromise<GetBasicTrimCostMasterAggregateType<T>>
+
+    /**
+     * Group by BasicTrimCostMaster.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {BasicTrimCostMasterGroupByArgs} args - Group by arguments.
+     * @example
+     * // Group by city, order by createdAt, get count
+     * const result = await prisma.user.groupBy({
+     *   by: ['city', 'createdAt'],
+     *   orderBy: {
+     *     createdAt: true
+     *   },
+     *   _count: {
+     *     _all: true
+     *   },
+     * })
+     * 
+    **/
+    groupBy<
+      T extends BasicTrimCostMasterGroupByArgs,
+      HasSelectOrTake extends Or<
+        Extends<'skip', Keys<T>>,
+        Extends<'take', Keys<T>>
+      >,
+      OrderByArg extends True extends HasSelectOrTake
+        ? { orderBy: BasicTrimCostMasterGroupByArgs['orderBy'] }
+        : { orderBy?: BasicTrimCostMasterGroupByArgs['orderBy'] },
+      OrderFields extends ExcludeUnderscoreKeys<Keys<MaybeTupleToUnion<T['orderBy']>>>,
+      ByFields extends MaybeTupleToUnion<T['by']>,
+      ByValid extends Has<ByFields, OrderFields>,
+      HavingFields extends GetHavingFields<T['having']>,
+      HavingValid extends Has<ByFields, HavingFields>,
+      ByEmpty extends T['by'] extends never[] ? True : False,
+      InputErrors extends ByEmpty extends True
+      ? `Error: "by" must not be empty.`
+      : HavingValid extends False
+      ? {
+          [P in HavingFields]: P extends ByFields
+            ? never
+            : P extends string
+            ? `Error: Field "${P}" used in "having" needs to be provided in "by".`
+            : [
+                Error,
+                'Field ',
+                P,
+                ` in "having" needs to be provided in "by"`,
+              ]
+        }[HavingFields]
+      : 'take' extends Keys<T>
+      ? 'orderBy' extends Keys<T>
+        ? ByValid extends True
+          ? {}
+          : {
+              [P in OrderFields]: P extends ByFields
+                ? never
+                : `Error: Field "${P}" in "orderBy" needs to be provided in "by"`
+            }[OrderFields]
+        : 'Error: If you provide "take", you also need to provide "orderBy"'
+      : 'skip' extends Keys<T>
+      ? 'orderBy' extends Keys<T>
+        ? ByValid extends True
+          ? {}
+          : {
+              [P in OrderFields]: P extends ByFields
+                ? never
+                : `Error: Field "${P}" in "orderBy" needs to be provided in "by"`
+            }[OrderFields]
+        : 'Error: If you provide "skip", you also need to provide "orderBy"'
+      : ByValid extends True
+      ? {}
+      : {
+          [P in OrderFields]: P extends ByFields
+            ? never
+            : `Error: Field "${P}" in "orderBy" needs to be provided in "by"`
+        }[OrderFields]
+    >(args: SubsetIntersection<T, BasicTrimCostMasterGroupByArgs, OrderByArg> & InputErrors): {} extends InputErrors ? GetBasicTrimCostMasterGroupByPayload<T> : Prisma.PrismaPromise<InputErrors>
+  /**
+   * Fields of the BasicTrimCostMaster model
+   */
+  readonly fields: BasicTrimCostMasterFieldRefs;
+  }
+
+  /**
+   * The delegate class that acts as a "Promise-like" for BasicTrimCostMaster.
+   * Why is this prefixed with `Prisma__`?
+   * Because we want to prevent naming conflicts as mentioned in
+   * https://github.com/prisma/prisma-client-js/issues/707
+   */
+  export interface Prisma__BasicTrimCostMasterClient<T, Null = never, ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs, GlobalOmitOptions = {}> extends Prisma.PrismaPromise<T> {
+    readonly [Symbol.toStringTag]: "PrismaPromise"
+    components<T extends BasicTrimCostMaster$componentsArgs<ExtArgs> = {}>(args?: Subset<T, BasicTrimCostMaster$componentsArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$BasicTrimCostComponentPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
+    /**
+     * Attaches callbacks for the resolution and/or rejection of the Promise.
+     * @param onfulfilled The callback to execute when the Promise is resolved.
+     * @param onrejected The callback to execute when the Promise is rejected.
+     * @returns A Promise for the completion of which ever callback is executed.
+     */
+    then<TResult1 = T, TResult2 = never>(onfulfilled?: ((value: T) => TResult1 | PromiseLike<TResult1>) | undefined | null, onrejected?: ((reason: any) => TResult2 | PromiseLike<TResult2>) | undefined | null): $Utils.JsPromise<TResult1 | TResult2>
+    /**
+     * Attaches a callback for only the rejection of the Promise.
+     * @param onrejected The callback to execute when the Promise is rejected.
+     * @returns A Promise for the completion of the callback.
+     */
+    catch<TResult = never>(onrejected?: ((reason: any) => TResult | PromiseLike<TResult>) | undefined | null): $Utils.JsPromise<T | TResult>
+    /**
+     * Attaches a callback that is invoked when the Promise is settled (fulfilled or rejected). The
+     * resolved value cannot be modified from the callback.
+     * @param onfinally The callback to execute when the Promise is settled (fulfilled or rejected).
+     * @returns A Promise for the completion of the callback.
+     */
+    finally(onfinally?: (() => void) | undefined | null): $Utils.JsPromise<T>
+  }
+
+
+
+
+  /**
+   * Fields of the BasicTrimCostMaster model
+   */
+  interface BasicTrimCostMasterFieldRefs {
+    readonly id: FieldRef<"BasicTrimCostMaster", 'Int'>
+    readonly div: FieldRef<"BasicTrimCostMaster", 'String'>
+    readonly subDiv: FieldRef<"BasicTrimCostMaster", 'String'>
+    readonly majCat: FieldRef<"BasicTrimCostMaster", 'String'>
+    readonly trimsTotal: FieldRef<"BasicTrimCostMaster", 'Decimal'>
+    readonly packagingTotal: FieldRef<"BasicTrimCostMaster", 'Decimal'>
+    readonly threadCost: FieldRef<"BasicTrimCostMaster", 'Decimal'>
+    readonly basicTrimsCost: FieldRef<"BasicTrimCostMaster", 'Decimal'>
+    readonly createdAt: FieldRef<"BasicTrimCostMaster", 'DateTime'>
+    readonly updatedAt: FieldRef<"BasicTrimCostMaster", 'DateTime'>
+  }
+    
+
+  // Custom InputTypes
+  /**
+   * BasicTrimCostMaster findUnique
+   */
+  export type BasicTrimCostMasterFindUniqueArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the BasicTrimCostMaster
+     */
+    select?: BasicTrimCostMasterSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the BasicTrimCostMaster
+     */
+    omit?: BasicTrimCostMasterOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: BasicTrimCostMasterInclude<ExtArgs> | null
+    /**
+     * Filter, which BasicTrimCostMaster to fetch.
+     */
+    where: BasicTrimCostMasterWhereUniqueInput
+  }
+
+  /**
+   * BasicTrimCostMaster findUniqueOrThrow
+   */
+  export type BasicTrimCostMasterFindUniqueOrThrowArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the BasicTrimCostMaster
+     */
+    select?: BasicTrimCostMasterSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the BasicTrimCostMaster
+     */
+    omit?: BasicTrimCostMasterOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: BasicTrimCostMasterInclude<ExtArgs> | null
+    /**
+     * Filter, which BasicTrimCostMaster to fetch.
+     */
+    where: BasicTrimCostMasterWhereUniqueInput
+  }
+
+  /**
+   * BasicTrimCostMaster findFirst
+   */
+  export type BasicTrimCostMasterFindFirstArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the BasicTrimCostMaster
+     */
+    select?: BasicTrimCostMasterSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the BasicTrimCostMaster
+     */
+    omit?: BasicTrimCostMasterOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: BasicTrimCostMasterInclude<ExtArgs> | null
+    /**
+     * Filter, which BasicTrimCostMaster to fetch.
+     */
+    where?: BasicTrimCostMasterWhereInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
+     * 
+     * Determine the order of BasicTrimCostMasters to fetch.
+     */
+    orderBy?: BasicTrimCostMasterOrderByWithRelationInput | BasicTrimCostMasterOrderByWithRelationInput[]
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
+     * 
+     * Sets the position for searching for BasicTrimCostMasters.
+     */
+    cursor?: BasicTrimCostMasterWhereUniqueInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Take `±n` BasicTrimCostMasters from the position of the cursor.
+     */
+    take?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Skip the first `n` BasicTrimCostMasters.
+     */
+    skip?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/distinct Distinct Docs}
+     * 
+     * Filter by unique combinations of BasicTrimCostMasters.
+     */
+    distinct?: BasicTrimCostMasterScalarFieldEnum | BasicTrimCostMasterScalarFieldEnum[]
+  }
+
+  /**
+   * BasicTrimCostMaster findFirstOrThrow
+   */
+  export type BasicTrimCostMasterFindFirstOrThrowArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the BasicTrimCostMaster
+     */
+    select?: BasicTrimCostMasterSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the BasicTrimCostMaster
+     */
+    omit?: BasicTrimCostMasterOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: BasicTrimCostMasterInclude<ExtArgs> | null
+    /**
+     * Filter, which BasicTrimCostMaster to fetch.
+     */
+    where?: BasicTrimCostMasterWhereInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
+     * 
+     * Determine the order of BasicTrimCostMasters to fetch.
+     */
+    orderBy?: BasicTrimCostMasterOrderByWithRelationInput | BasicTrimCostMasterOrderByWithRelationInput[]
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
+     * 
+     * Sets the position for searching for BasicTrimCostMasters.
+     */
+    cursor?: BasicTrimCostMasterWhereUniqueInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Take `±n` BasicTrimCostMasters from the position of the cursor.
+     */
+    take?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Skip the first `n` BasicTrimCostMasters.
+     */
+    skip?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/distinct Distinct Docs}
+     * 
+     * Filter by unique combinations of BasicTrimCostMasters.
+     */
+    distinct?: BasicTrimCostMasterScalarFieldEnum | BasicTrimCostMasterScalarFieldEnum[]
+  }
+
+  /**
+   * BasicTrimCostMaster findMany
+   */
+  export type BasicTrimCostMasterFindManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the BasicTrimCostMaster
+     */
+    select?: BasicTrimCostMasterSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the BasicTrimCostMaster
+     */
+    omit?: BasicTrimCostMasterOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: BasicTrimCostMasterInclude<ExtArgs> | null
+    /**
+     * Filter, which BasicTrimCostMasters to fetch.
+     */
+    where?: BasicTrimCostMasterWhereInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
+     * 
+     * Determine the order of BasicTrimCostMasters to fetch.
+     */
+    orderBy?: BasicTrimCostMasterOrderByWithRelationInput | BasicTrimCostMasterOrderByWithRelationInput[]
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
+     * 
+     * Sets the position for listing BasicTrimCostMasters.
+     */
+    cursor?: BasicTrimCostMasterWhereUniqueInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Take `±n` BasicTrimCostMasters from the position of the cursor.
+     */
+    take?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Skip the first `n` BasicTrimCostMasters.
+     */
+    skip?: number
+    distinct?: BasicTrimCostMasterScalarFieldEnum | BasicTrimCostMasterScalarFieldEnum[]
+  }
+
+  /**
+   * BasicTrimCostMaster create
+   */
+  export type BasicTrimCostMasterCreateArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the BasicTrimCostMaster
+     */
+    select?: BasicTrimCostMasterSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the BasicTrimCostMaster
+     */
+    omit?: BasicTrimCostMasterOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: BasicTrimCostMasterInclude<ExtArgs> | null
+    /**
+     * The data needed to create a BasicTrimCostMaster.
+     */
+    data: XOR<BasicTrimCostMasterCreateInput, BasicTrimCostMasterUncheckedCreateInput>
+  }
+
+  /**
+   * BasicTrimCostMaster createMany
+   */
+  export type BasicTrimCostMasterCreateManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * The data used to create many BasicTrimCostMasters.
+     */
+    data: BasicTrimCostMasterCreateManyInput | BasicTrimCostMasterCreateManyInput[]
+    skipDuplicates?: boolean
+  }
+
+  /**
+   * BasicTrimCostMaster createManyAndReturn
+   */
+  export type BasicTrimCostMasterCreateManyAndReturnArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the BasicTrimCostMaster
+     */
+    select?: BasicTrimCostMasterSelectCreateManyAndReturn<ExtArgs> | null
+    /**
+     * Omit specific fields from the BasicTrimCostMaster
+     */
+    omit?: BasicTrimCostMasterOmit<ExtArgs> | null
+    /**
+     * The data used to create many BasicTrimCostMasters.
+     */
+    data: BasicTrimCostMasterCreateManyInput | BasicTrimCostMasterCreateManyInput[]
+    skipDuplicates?: boolean
+  }
+
+  /**
+   * BasicTrimCostMaster update
+   */
+  export type BasicTrimCostMasterUpdateArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the BasicTrimCostMaster
+     */
+    select?: BasicTrimCostMasterSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the BasicTrimCostMaster
+     */
+    omit?: BasicTrimCostMasterOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: BasicTrimCostMasterInclude<ExtArgs> | null
+    /**
+     * The data needed to update a BasicTrimCostMaster.
+     */
+    data: XOR<BasicTrimCostMasterUpdateInput, BasicTrimCostMasterUncheckedUpdateInput>
+    /**
+     * Choose, which BasicTrimCostMaster to update.
+     */
+    where: BasicTrimCostMasterWhereUniqueInput
+  }
+
+  /**
+   * BasicTrimCostMaster updateMany
+   */
+  export type BasicTrimCostMasterUpdateManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * The data used to update BasicTrimCostMasters.
+     */
+    data: XOR<BasicTrimCostMasterUpdateManyMutationInput, BasicTrimCostMasterUncheckedUpdateManyInput>
+    /**
+     * Filter which BasicTrimCostMasters to update
+     */
+    where?: BasicTrimCostMasterWhereInput
+    /**
+     * Limit how many BasicTrimCostMasters to update.
+     */
+    limit?: number
+  }
+
+  /**
+   * BasicTrimCostMaster updateManyAndReturn
+   */
+  export type BasicTrimCostMasterUpdateManyAndReturnArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the BasicTrimCostMaster
+     */
+    select?: BasicTrimCostMasterSelectUpdateManyAndReturn<ExtArgs> | null
+    /**
+     * Omit specific fields from the BasicTrimCostMaster
+     */
+    omit?: BasicTrimCostMasterOmit<ExtArgs> | null
+    /**
+     * The data used to update BasicTrimCostMasters.
+     */
+    data: XOR<BasicTrimCostMasterUpdateManyMutationInput, BasicTrimCostMasterUncheckedUpdateManyInput>
+    /**
+     * Filter which BasicTrimCostMasters to update
+     */
+    where?: BasicTrimCostMasterWhereInput
+    /**
+     * Limit how many BasicTrimCostMasters to update.
+     */
+    limit?: number
+  }
+
+  /**
+   * BasicTrimCostMaster upsert
+   */
+  export type BasicTrimCostMasterUpsertArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the BasicTrimCostMaster
+     */
+    select?: BasicTrimCostMasterSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the BasicTrimCostMaster
+     */
+    omit?: BasicTrimCostMasterOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: BasicTrimCostMasterInclude<ExtArgs> | null
+    /**
+     * The filter to search for the BasicTrimCostMaster to update in case it exists.
+     */
+    where: BasicTrimCostMasterWhereUniqueInput
+    /**
+     * In case the BasicTrimCostMaster found by the `where` argument doesn't exist, create a new BasicTrimCostMaster with this data.
+     */
+    create: XOR<BasicTrimCostMasterCreateInput, BasicTrimCostMasterUncheckedCreateInput>
+    /**
+     * In case the BasicTrimCostMaster was found with the provided `where` argument, update it with this data.
+     */
+    update: XOR<BasicTrimCostMasterUpdateInput, BasicTrimCostMasterUncheckedUpdateInput>
+  }
+
+  /**
+   * BasicTrimCostMaster delete
+   */
+  export type BasicTrimCostMasterDeleteArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the BasicTrimCostMaster
+     */
+    select?: BasicTrimCostMasterSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the BasicTrimCostMaster
+     */
+    omit?: BasicTrimCostMasterOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: BasicTrimCostMasterInclude<ExtArgs> | null
+    /**
+     * Filter which BasicTrimCostMaster to delete.
+     */
+    where: BasicTrimCostMasterWhereUniqueInput
+  }
+
+  /**
+   * BasicTrimCostMaster deleteMany
+   */
+  export type BasicTrimCostMasterDeleteManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Filter which BasicTrimCostMasters to delete
+     */
+    where?: BasicTrimCostMasterWhereInput
+    /**
+     * Limit how many BasicTrimCostMasters to delete.
+     */
+    limit?: number
+  }
+
+  /**
+   * BasicTrimCostMaster.components
+   */
+  export type BasicTrimCostMaster$componentsArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the BasicTrimCostComponent
+     */
+    select?: BasicTrimCostComponentSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the BasicTrimCostComponent
+     */
+    omit?: BasicTrimCostComponentOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: BasicTrimCostComponentInclude<ExtArgs> | null
+    where?: BasicTrimCostComponentWhereInput
+    orderBy?: BasicTrimCostComponentOrderByWithRelationInput | BasicTrimCostComponentOrderByWithRelationInput[]
+    cursor?: BasicTrimCostComponentWhereUniqueInput
+    take?: number
+    skip?: number
+    distinct?: BasicTrimCostComponentScalarFieldEnum | BasicTrimCostComponentScalarFieldEnum[]
+  }
+
+  /**
+   * BasicTrimCostMaster without action
+   */
+  export type BasicTrimCostMasterDefaultArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the BasicTrimCostMaster
+     */
+    select?: BasicTrimCostMasterSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the BasicTrimCostMaster
+     */
+    omit?: BasicTrimCostMasterOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: BasicTrimCostMasterInclude<ExtArgs> | null
+  }
+
+
+  /**
+   * Model BasicTrimCostComponent
+   */
+
+  export type AggregateBasicTrimCostComponent = {
+    _count: BasicTrimCostComponentCountAggregateOutputType | null
+    _avg: BasicTrimCostComponentAvgAggregateOutputType | null
+    _sum: BasicTrimCostComponentSumAggregateOutputType | null
+    _min: BasicTrimCostComponentMinAggregateOutputType | null
+    _max: BasicTrimCostComponentMaxAggregateOutputType | null
+  }
+
+  export type BasicTrimCostComponentAvgAggregateOutputType = {
+    id: number | null
+    masterId: number | null
+    qty: Decimal | null
+    rate: Decimal | null
+    value: Decimal | null
+  }
+
+  export type BasicTrimCostComponentSumAggregateOutputType = {
+    id: number | null
+    masterId: number | null
+    qty: Decimal | null
+    rate: Decimal | null
+    value: Decimal | null
+  }
+
+  export type BasicTrimCostComponentMinAggregateOutputType = {
+    id: number | null
+    masterId: number | null
+    kind: string | null
+    component: string | null
+    qty: Decimal | null
+    rate: Decimal | null
+    value: Decimal | null
+  }
+
+  export type BasicTrimCostComponentMaxAggregateOutputType = {
+    id: number | null
+    masterId: number | null
+    kind: string | null
+    component: string | null
+    qty: Decimal | null
+    rate: Decimal | null
+    value: Decimal | null
+  }
+
+  export type BasicTrimCostComponentCountAggregateOutputType = {
+    id: number
+    masterId: number
+    kind: number
+    component: number
+    qty: number
+    rate: number
+    value: number
+    _all: number
+  }
+
+
+  export type BasicTrimCostComponentAvgAggregateInputType = {
+    id?: true
+    masterId?: true
+    qty?: true
+    rate?: true
+    value?: true
+  }
+
+  export type BasicTrimCostComponentSumAggregateInputType = {
+    id?: true
+    masterId?: true
+    qty?: true
+    rate?: true
+    value?: true
+  }
+
+  export type BasicTrimCostComponentMinAggregateInputType = {
+    id?: true
+    masterId?: true
+    kind?: true
+    component?: true
+    qty?: true
+    rate?: true
+    value?: true
+  }
+
+  export type BasicTrimCostComponentMaxAggregateInputType = {
+    id?: true
+    masterId?: true
+    kind?: true
+    component?: true
+    qty?: true
+    rate?: true
+    value?: true
+  }
+
+  export type BasicTrimCostComponentCountAggregateInputType = {
+    id?: true
+    masterId?: true
+    kind?: true
+    component?: true
+    qty?: true
+    rate?: true
+    value?: true
+    _all?: true
+  }
+
+  export type BasicTrimCostComponentAggregateArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Filter which BasicTrimCostComponent to aggregate.
+     */
+    where?: BasicTrimCostComponentWhereInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
+     * 
+     * Determine the order of BasicTrimCostComponents to fetch.
+     */
+    orderBy?: BasicTrimCostComponentOrderByWithRelationInput | BasicTrimCostComponentOrderByWithRelationInput[]
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
+     * 
+     * Sets the start position
+     */
+    cursor?: BasicTrimCostComponentWhereUniqueInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Take `±n` BasicTrimCostComponents from the position of the cursor.
+     */
+    take?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Skip the first `n` BasicTrimCostComponents.
+     */
+    skip?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     * 
+     * Count returned BasicTrimCostComponents
+    **/
+    _count?: true | BasicTrimCostComponentCountAggregateInputType
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     * 
+     * Select which fields to average
+    **/
+    _avg?: BasicTrimCostComponentAvgAggregateInputType
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     * 
+     * Select which fields to sum
+    **/
+    _sum?: BasicTrimCostComponentSumAggregateInputType
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     * 
+     * Select which fields to find the minimum value
+    **/
+    _min?: BasicTrimCostComponentMinAggregateInputType
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     * 
+     * Select which fields to find the maximum value
+    **/
+    _max?: BasicTrimCostComponentMaxAggregateInputType
+  }
+
+  export type GetBasicTrimCostComponentAggregateType<T extends BasicTrimCostComponentAggregateArgs> = {
+        [P in keyof T & keyof AggregateBasicTrimCostComponent]: P extends '_count' | 'count'
+      ? T[P] extends true
+        ? number
+        : GetScalarType<T[P], AggregateBasicTrimCostComponent[P]>
+      : GetScalarType<T[P], AggregateBasicTrimCostComponent[P]>
+  }
+
+
+
+
+  export type BasicTrimCostComponentGroupByArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    where?: BasicTrimCostComponentWhereInput
+    orderBy?: BasicTrimCostComponentOrderByWithAggregationInput | BasicTrimCostComponentOrderByWithAggregationInput[]
+    by: BasicTrimCostComponentScalarFieldEnum[] | BasicTrimCostComponentScalarFieldEnum
+    having?: BasicTrimCostComponentScalarWhereWithAggregatesInput
+    take?: number
+    skip?: number
+    _count?: BasicTrimCostComponentCountAggregateInputType | true
+    _avg?: BasicTrimCostComponentAvgAggregateInputType
+    _sum?: BasicTrimCostComponentSumAggregateInputType
+    _min?: BasicTrimCostComponentMinAggregateInputType
+    _max?: BasicTrimCostComponentMaxAggregateInputType
+  }
+
+  export type BasicTrimCostComponentGroupByOutputType = {
+    id: number
+    masterId: number
+    kind: string
+    component: string
+    qty: Decimal | null
+    rate: Decimal | null
+    value: Decimal | null
+    _count: BasicTrimCostComponentCountAggregateOutputType | null
+    _avg: BasicTrimCostComponentAvgAggregateOutputType | null
+    _sum: BasicTrimCostComponentSumAggregateOutputType | null
+    _min: BasicTrimCostComponentMinAggregateOutputType | null
+    _max: BasicTrimCostComponentMaxAggregateOutputType | null
+  }
+
+  type GetBasicTrimCostComponentGroupByPayload<T extends BasicTrimCostComponentGroupByArgs> = Prisma.PrismaPromise<
+    Array<
+      PickEnumerable<BasicTrimCostComponentGroupByOutputType, T['by']> &
+        {
+          [P in ((keyof T) & (keyof BasicTrimCostComponentGroupByOutputType))]: P extends '_count'
+            ? T[P] extends boolean
+              ? number
+              : GetScalarType<T[P], BasicTrimCostComponentGroupByOutputType[P]>
+            : GetScalarType<T[P], BasicTrimCostComponentGroupByOutputType[P]>
+        }
+      >
+    >
+
+
+  export type BasicTrimCostComponentSelect<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
+    id?: boolean
+    masterId?: boolean
+    kind?: boolean
+    component?: boolean
+    qty?: boolean
+    rate?: boolean
+    value?: boolean
+    master?: boolean | BasicTrimCostMasterDefaultArgs<ExtArgs>
+  }, ExtArgs["result"]["basicTrimCostComponent"]>
+
+  export type BasicTrimCostComponentSelectCreateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
+    id?: boolean
+    masterId?: boolean
+    kind?: boolean
+    component?: boolean
+    qty?: boolean
+    rate?: boolean
+    value?: boolean
+    master?: boolean | BasicTrimCostMasterDefaultArgs<ExtArgs>
+  }, ExtArgs["result"]["basicTrimCostComponent"]>
+
+  export type BasicTrimCostComponentSelectUpdateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
+    id?: boolean
+    masterId?: boolean
+    kind?: boolean
+    component?: boolean
+    qty?: boolean
+    rate?: boolean
+    value?: boolean
+    master?: boolean | BasicTrimCostMasterDefaultArgs<ExtArgs>
+  }, ExtArgs["result"]["basicTrimCostComponent"]>
+
+  export type BasicTrimCostComponentSelectScalar = {
+    id?: boolean
+    masterId?: boolean
+    kind?: boolean
+    component?: boolean
+    qty?: boolean
+    rate?: boolean
+    value?: boolean
+  }
+
+  export type BasicTrimCostComponentOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<"id" | "masterId" | "kind" | "component" | "qty" | "rate" | "value", ExtArgs["result"]["basicTrimCostComponent"]>
+  export type BasicTrimCostComponentInclude<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    master?: boolean | BasicTrimCostMasterDefaultArgs<ExtArgs>
+  }
+  export type BasicTrimCostComponentIncludeCreateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    master?: boolean | BasicTrimCostMasterDefaultArgs<ExtArgs>
+  }
+  export type BasicTrimCostComponentIncludeUpdateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    master?: boolean | BasicTrimCostMasterDefaultArgs<ExtArgs>
+  }
+
+  export type $BasicTrimCostComponentPayload<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    name: "BasicTrimCostComponent"
+    objects: {
+      master: Prisma.$BasicTrimCostMasterPayload<ExtArgs>
+    }
+    scalars: $Extensions.GetPayloadResult<{
+      id: number
+      masterId: number
+      kind: string
+      component: string
+      qty: Prisma.Decimal | null
+      rate: Prisma.Decimal | null
+      value: Prisma.Decimal | null
+    }, ExtArgs["result"]["basicTrimCostComponent"]>
+    composites: {}
+  }
+
+  type BasicTrimCostComponentGetPayload<S extends boolean | null | undefined | BasicTrimCostComponentDefaultArgs> = $Result.GetResult<Prisma.$BasicTrimCostComponentPayload, S>
+
+  type BasicTrimCostComponentCountArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> =
+    Omit<BasicTrimCostComponentFindManyArgs, 'select' | 'include' | 'distinct' | 'omit'> & {
+      select?: BasicTrimCostComponentCountAggregateInputType | true
+    }
+
+  export interface BasicTrimCostComponentDelegate<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs, GlobalOmitOptions = {}> {
+    [K: symbol]: { types: Prisma.TypeMap<ExtArgs>['model']['BasicTrimCostComponent'], meta: { name: 'BasicTrimCostComponent' } }
+    /**
+     * Find zero or one BasicTrimCostComponent that matches the filter.
+     * @param {BasicTrimCostComponentFindUniqueArgs} args - Arguments to find a BasicTrimCostComponent
+     * @example
+     * // Get one BasicTrimCostComponent
+     * const basicTrimCostComponent = await prisma.basicTrimCostComponent.findUnique({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     */
+    findUnique<T extends BasicTrimCostComponentFindUniqueArgs>(args: SelectSubset<T, BasicTrimCostComponentFindUniqueArgs<ExtArgs>>): Prisma__BasicTrimCostComponentClient<$Result.GetResult<Prisma.$BasicTrimCostComponentPayload<ExtArgs>, T, "findUnique", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Find one BasicTrimCostComponent that matches the filter or throw an error with `error.code='P2025'`
+     * if no matches were found.
+     * @param {BasicTrimCostComponentFindUniqueOrThrowArgs} args - Arguments to find a BasicTrimCostComponent
+     * @example
+     * // Get one BasicTrimCostComponent
+     * const basicTrimCostComponent = await prisma.basicTrimCostComponent.findUniqueOrThrow({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     */
+    findUniqueOrThrow<T extends BasicTrimCostComponentFindUniqueOrThrowArgs>(args: SelectSubset<T, BasicTrimCostComponentFindUniqueOrThrowArgs<ExtArgs>>): Prisma__BasicTrimCostComponentClient<$Result.GetResult<Prisma.$BasicTrimCostComponentPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Find the first BasicTrimCostComponent that matches the filter.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {BasicTrimCostComponentFindFirstArgs} args - Arguments to find a BasicTrimCostComponent
+     * @example
+     * // Get one BasicTrimCostComponent
+     * const basicTrimCostComponent = await prisma.basicTrimCostComponent.findFirst({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     */
+    findFirst<T extends BasicTrimCostComponentFindFirstArgs>(args?: SelectSubset<T, BasicTrimCostComponentFindFirstArgs<ExtArgs>>): Prisma__BasicTrimCostComponentClient<$Result.GetResult<Prisma.$BasicTrimCostComponentPayload<ExtArgs>, T, "findFirst", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Find the first BasicTrimCostComponent that matches the filter or
+     * throw `PrismaKnownClientError` with `P2025` code if no matches were found.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {BasicTrimCostComponentFindFirstOrThrowArgs} args - Arguments to find a BasicTrimCostComponent
+     * @example
+     * // Get one BasicTrimCostComponent
+     * const basicTrimCostComponent = await prisma.basicTrimCostComponent.findFirstOrThrow({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     */
+    findFirstOrThrow<T extends BasicTrimCostComponentFindFirstOrThrowArgs>(args?: SelectSubset<T, BasicTrimCostComponentFindFirstOrThrowArgs<ExtArgs>>): Prisma__BasicTrimCostComponentClient<$Result.GetResult<Prisma.$BasicTrimCostComponentPayload<ExtArgs>, T, "findFirstOrThrow", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Find zero or more BasicTrimCostComponents that matches the filter.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {BasicTrimCostComponentFindManyArgs} args - Arguments to filter and select certain fields only.
+     * @example
+     * // Get all BasicTrimCostComponents
+     * const basicTrimCostComponents = await prisma.basicTrimCostComponent.findMany()
+     * 
+     * // Get first 10 BasicTrimCostComponents
+     * const basicTrimCostComponents = await prisma.basicTrimCostComponent.findMany({ take: 10 })
+     * 
+     * // Only select the `id`
+     * const basicTrimCostComponentWithIdOnly = await prisma.basicTrimCostComponent.findMany({ select: { id: true } })
+     * 
+     */
+    findMany<T extends BasicTrimCostComponentFindManyArgs>(args?: SelectSubset<T, BasicTrimCostComponentFindManyArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$BasicTrimCostComponentPayload<ExtArgs>, T, "findMany", GlobalOmitOptions>>
+
+    /**
+     * Create a BasicTrimCostComponent.
+     * @param {BasicTrimCostComponentCreateArgs} args - Arguments to create a BasicTrimCostComponent.
+     * @example
+     * // Create one BasicTrimCostComponent
+     * const BasicTrimCostComponent = await prisma.basicTrimCostComponent.create({
+     *   data: {
+     *     // ... data to create a BasicTrimCostComponent
+     *   }
+     * })
+     * 
+     */
+    create<T extends BasicTrimCostComponentCreateArgs>(args: SelectSubset<T, BasicTrimCostComponentCreateArgs<ExtArgs>>): Prisma__BasicTrimCostComponentClient<$Result.GetResult<Prisma.$BasicTrimCostComponentPayload<ExtArgs>, T, "create", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Create many BasicTrimCostComponents.
+     * @param {BasicTrimCostComponentCreateManyArgs} args - Arguments to create many BasicTrimCostComponents.
+     * @example
+     * // Create many BasicTrimCostComponents
+     * const basicTrimCostComponent = await prisma.basicTrimCostComponent.createMany({
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     *     
+     */
+    createMany<T extends BasicTrimCostComponentCreateManyArgs>(args?: SelectSubset<T, BasicTrimCostComponentCreateManyArgs<ExtArgs>>): Prisma.PrismaPromise<BatchPayload>
+
+    /**
+     * Create many BasicTrimCostComponents and returns the data saved in the database.
+     * @param {BasicTrimCostComponentCreateManyAndReturnArgs} args - Arguments to create many BasicTrimCostComponents.
+     * @example
+     * // Create many BasicTrimCostComponents
+     * const basicTrimCostComponent = await prisma.basicTrimCostComponent.createManyAndReturn({
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     * 
+     * // Create many BasicTrimCostComponents and only return the `id`
+     * const basicTrimCostComponentWithIdOnly = await prisma.basicTrimCostComponent.createManyAndReturn({
+     *   select: { id: true },
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * 
+     */
+    createManyAndReturn<T extends BasicTrimCostComponentCreateManyAndReturnArgs>(args?: SelectSubset<T, BasicTrimCostComponentCreateManyAndReturnArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$BasicTrimCostComponentPayload<ExtArgs>, T, "createManyAndReturn", GlobalOmitOptions>>
+
+    /**
+     * Delete a BasicTrimCostComponent.
+     * @param {BasicTrimCostComponentDeleteArgs} args - Arguments to delete one BasicTrimCostComponent.
+     * @example
+     * // Delete one BasicTrimCostComponent
+     * const BasicTrimCostComponent = await prisma.basicTrimCostComponent.delete({
+     *   where: {
+     *     // ... filter to delete one BasicTrimCostComponent
+     *   }
+     * })
+     * 
+     */
+    delete<T extends BasicTrimCostComponentDeleteArgs>(args: SelectSubset<T, BasicTrimCostComponentDeleteArgs<ExtArgs>>): Prisma__BasicTrimCostComponentClient<$Result.GetResult<Prisma.$BasicTrimCostComponentPayload<ExtArgs>, T, "delete", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Update one BasicTrimCostComponent.
+     * @param {BasicTrimCostComponentUpdateArgs} args - Arguments to update one BasicTrimCostComponent.
+     * @example
+     * // Update one BasicTrimCostComponent
+     * const basicTrimCostComponent = await prisma.basicTrimCostComponent.update({
+     *   where: {
+     *     // ... provide filter here
+     *   },
+     *   data: {
+     *     // ... provide data here
+     *   }
+     * })
+     * 
+     */
+    update<T extends BasicTrimCostComponentUpdateArgs>(args: SelectSubset<T, BasicTrimCostComponentUpdateArgs<ExtArgs>>): Prisma__BasicTrimCostComponentClient<$Result.GetResult<Prisma.$BasicTrimCostComponentPayload<ExtArgs>, T, "update", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Delete zero or more BasicTrimCostComponents.
+     * @param {BasicTrimCostComponentDeleteManyArgs} args - Arguments to filter BasicTrimCostComponents to delete.
+     * @example
+     * // Delete a few BasicTrimCostComponents
+     * const { count } = await prisma.basicTrimCostComponent.deleteMany({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     * 
+     */
+    deleteMany<T extends BasicTrimCostComponentDeleteManyArgs>(args?: SelectSubset<T, BasicTrimCostComponentDeleteManyArgs<ExtArgs>>): Prisma.PrismaPromise<BatchPayload>
+
+    /**
+     * Update zero or more BasicTrimCostComponents.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {BasicTrimCostComponentUpdateManyArgs} args - Arguments to update one or more rows.
+     * @example
+     * // Update many BasicTrimCostComponents
+     * const basicTrimCostComponent = await prisma.basicTrimCostComponent.updateMany({
+     *   where: {
+     *     // ... provide filter here
+     *   },
+     *   data: {
+     *     // ... provide data here
+     *   }
+     * })
+     * 
+     */
+    updateMany<T extends BasicTrimCostComponentUpdateManyArgs>(args: SelectSubset<T, BasicTrimCostComponentUpdateManyArgs<ExtArgs>>): Prisma.PrismaPromise<BatchPayload>
+
+    /**
+     * Update zero or more BasicTrimCostComponents and returns the data updated in the database.
+     * @param {BasicTrimCostComponentUpdateManyAndReturnArgs} args - Arguments to update many BasicTrimCostComponents.
+     * @example
+     * // Update many BasicTrimCostComponents
+     * const basicTrimCostComponent = await prisma.basicTrimCostComponent.updateManyAndReturn({
+     *   where: {
+     *     // ... provide filter here
+     *   },
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     * 
+     * // Update zero or more BasicTrimCostComponents and only return the `id`
+     * const basicTrimCostComponentWithIdOnly = await prisma.basicTrimCostComponent.updateManyAndReturn({
+     *   select: { id: true },
+     *   where: {
+     *     // ... provide filter here
+     *   },
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * 
+     */
+    updateManyAndReturn<T extends BasicTrimCostComponentUpdateManyAndReturnArgs>(args: SelectSubset<T, BasicTrimCostComponentUpdateManyAndReturnArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$BasicTrimCostComponentPayload<ExtArgs>, T, "updateManyAndReturn", GlobalOmitOptions>>
+
+    /**
+     * Create or update one BasicTrimCostComponent.
+     * @param {BasicTrimCostComponentUpsertArgs} args - Arguments to update or create a BasicTrimCostComponent.
+     * @example
+     * // Update or create a BasicTrimCostComponent
+     * const basicTrimCostComponent = await prisma.basicTrimCostComponent.upsert({
+     *   create: {
+     *     // ... data to create a BasicTrimCostComponent
+     *   },
+     *   update: {
+     *     // ... in case it already exists, update
+     *   },
+     *   where: {
+     *     // ... the filter for the BasicTrimCostComponent we want to update
+     *   }
+     * })
+     */
+    upsert<T extends BasicTrimCostComponentUpsertArgs>(args: SelectSubset<T, BasicTrimCostComponentUpsertArgs<ExtArgs>>): Prisma__BasicTrimCostComponentClient<$Result.GetResult<Prisma.$BasicTrimCostComponentPayload<ExtArgs>, T, "upsert", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+
+    /**
+     * Count the number of BasicTrimCostComponents.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {BasicTrimCostComponentCountArgs} args - Arguments to filter BasicTrimCostComponents to count.
+     * @example
+     * // Count the number of BasicTrimCostComponents
+     * const count = await prisma.basicTrimCostComponent.count({
+     *   where: {
+     *     // ... the filter for the BasicTrimCostComponents we want to count
+     *   }
+     * })
+    **/
+    count<T extends BasicTrimCostComponentCountArgs>(
+      args?: Subset<T, BasicTrimCostComponentCountArgs>,
+    ): Prisma.PrismaPromise<
+      T extends $Utils.Record<'select', any>
+        ? T['select'] extends true
+          ? number
+          : GetScalarType<T['select'], BasicTrimCostComponentCountAggregateOutputType>
+        : number
+    >
+
+    /**
+     * Allows you to perform aggregations operations on a BasicTrimCostComponent.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {BasicTrimCostComponentAggregateArgs} args - Select which aggregations you would like to apply and on what fields.
+     * @example
+     * // Ordered by age ascending
+     * // Where email contains prisma.io
+     * // Limited to the 10 users
+     * const aggregations = await prisma.user.aggregate({
+     *   _avg: {
+     *     age: true,
+     *   },
+     *   where: {
+     *     email: {
+     *       contains: "prisma.io",
+     *     },
+     *   },
+     *   orderBy: {
+     *     age: "asc",
+     *   },
+     *   take: 10,
+     * })
+    **/
+    aggregate<T extends BasicTrimCostComponentAggregateArgs>(args: Subset<T, BasicTrimCostComponentAggregateArgs>): Prisma.PrismaPromise<GetBasicTrimCostComponentAggregateType<T>>
+
+    /**
+     * Group by BasicTrimCostComponent.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {BasicTrimCostComponentGroupByArgs} args - Group by arguments.
+     * @example
+     * // Group by city, order by createdAt, get count
+     * const result = await prisma.user.groupBy({
+     *   by: ['city', 'createdAt'],
+     *   orderBy: {
+     *     createdAt: true
+     *   },
+     *   _count: {
+     *     _all: true
+     *   },
+     * })
+     * 
+    **/
+    groupBy<
+      T extends BasicTrimCostComponentGroupByArgs,
+      HasSelectOrTake extends Or<
+        Extends<'skip', Keys<T>>,
+        Extends<'take', Keys<T>>
+      >,
+      OrderByArg extends True extends HasSelectOrTake
+        ? { orderBy: BasicTrimCostComponentGroupByArgs['orderBy'] }
+        : { orderBy?: BasicTrimCostComponentGroupByArgs['orderBy'] },
+      OrderFields extends ExcludeUnderscoreKeys<Keys<MaybeTupleToUnion<T['orderBy']>>>,
+      ByFields extends MaybeTupleToUnion<T['by']>,
+      ByValid extends Has<ByFields, OrderFields>,
+      HavingFields extends GetHavingFields<T['having']>,
+      HavingValid extends Has<ByFields, HavingFields>,
+      ByEmpty extends T['by'] extends never[] ? True : False,
+      InputErrors extends ByEmpty extends True
+      ? `Error: "by" must not be empty.`
+      : HavingValid extends False
+      ? {
+          [P in HavingFields]: P extends ByFields
+            ? never
+            : P extends string
+            ? `Error: Field "${P}" used in "having" needs to be provided in "by".`
+            : [
+                Error,
+                'Field ',
+                P,
+                ` in "having" needs to be provided in "by"`,
+              ]
+        }[HavingFields]
+      : 'take' extends Keys<T>
+      ? 'orderBy' extends Keys<T>
+        ? ByValid extends True
+          ? {}
+          : {
+              [P in OrderFields]: P extends ByFields
+                ? never
+                : `Error: Field "${P}" in "orderBy" needs to be provided in "by"`
+            }[OrderFields]
+        : 'Error: If you provide "take", you also need to provide "orderBy"'
+      : 'skip' extends Keys<T>
+      ? 'orderBy' extends Keys<T>
+        ? ByValid extends True
+          ? {}
+          : {
+              [P in OrderFields]: P extends ByFields
+                ? never
+                : `Error: Field "${P}" in "orderBy" needs to be provided in "by"`
+            }[OrderFields]
+        : 'Error: If you provide "skip", you also need to provide "orderBy"'
+      : ByValid extends True
+      ? {}
+      : {
+          [P in OrderFields]: P extends ByFields
+            ? never
+            : `Error: Field "${P}" in "orderBy" needs to be provided in "by"`
+        }[OrderFields]
+    >(args: SubsetIntersection<T, BasicTrimCostComponentGroupByArgs, OrderByArg> & InputErrors): {} extends InputErrors ? GetBasicTrimCostComponentGroupByPayload<T> : Prisma.PrismaPromise<InputErrors>
+  /**
+   * Fields of the BasicTrimCostComponent model
+   */
+  readonly fields: BasicTrimCostComponentFieldRefs;
+  }
+
+  /**
+   * The delegate class that acts as a "Promise-like" for BasicTrimCostComponent.
+   * Why is this prefixed with `Prisma__`?
+   * Because we want to prevent naming conflicts as mentioned in
+   * https://github.com/prisma/prisma-client-js/issues/707
+   */
+  export interface Prisma__BasicTrimCostComponentClient<T, Null = never, ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs, GlobalOmitOptions = {}> extends Prisma.PrismaPromise<T> {
+    readonly [Symbol.toStringTag]: "PrismaPromise"
+    master<T extends BasicTrimCostMasterDefaultArgs<ExtArgs> = {}>(args?: Subset<T, BasicTrimCostMasterDefaultArgs<ExtArgs>>): Prisma__BasicTrimCostMasterClient<$Result.GetResult<Prisma.$BasicTrimCostMasterPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | Null, Null, ExtArgs, GlobalOmitOptions>
+    /**
+     * Attaches callbacks for the resolution and/or rejection of the Promise.
+     * @param onfulfilled The callback to execute when the Promise is resolved.
+     * @param onrejected The callback to execute when the Promise is rejected.
+     * @returns A Promise for the completion of which ever callback is executed.
+     */
+    then<TResult1 = T, TResult2 = never>(onfulfilled?: ((value: T) => TResult1 | PromiseLike<TResult1>) | undefined | null, onrejected?: ((reason: any) => TResult2 | PromiseLike<TResult2>) | undefined | null): $Utils.JsPromise<TResult1 | TResult2>
+    /**
+     * Attaches a callback for only the rejection of the Promise.
+     * @param onrejected The callback to execute when the Promise is rejected.
+     * @returns A Promise for the completion of the callback.
+     */
+    catch<TResult = never>(onrejected?: ((reason: any) => TResult | PromiseLike<TResult>) | undefined | null): $Utils.JsPromise<T | TResult>
+    /**
+     * Attaches a callback that is invoked when the Promise is settled (fulfilled or rejected). The
+     * resolved value cannot be modified from the callback.
+     * @param onfinally The callback to execute when the Promise is settled (fulfilled or rejected).
+     * @returns A Promise for the completion of the callback.
+     */
+    finally(onfinally?: (() => void) | undefined | null): $Utils.JsPromise<T>
+  }
+
+
+
+
+  /**
+   * Fields of the BasicTrimCostComponent model
+   */
+  interface BasicTrimCostComponentFieldRefs {
+    readonly id: FieldRef<"BasicTrimCostComponent", 'Int'>
+    readonly masterId: FieldRef<"BasicTrimCostComponent", 'Int'>
+    readonly kind: FieldRef<"BasicTrimCostComponent", 'String'>
+    readonly component: FieldRef<"BasicTrimCostComponent", 'String'>
+    readonly qty: FieldRef<"BasicTrimCostComponent", 'Decimal'>
+    readonly rate: FieldRef<"BasicTrimCostComponent", 'Decimal'>
+    readonly value: FieldRef<"BasicTrimCostComponent", 'Decimal'>
+  }
+    
+
+  // Custom InputTypes
+  /**
+   * BasicTrimCostComponent findUnique
+   */
+  export type BasicTrimCostComponentFindUniqueArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the BasicTrimCostComponent
+     */
+    select?: BasicTrimCostComponentSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the BasicTrimCostComponent
+     */
+    omit?: BasicTrimCostComponentOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: BasicTrimCostComponentInclude<ExtArgs> | null
+    /**
+     * Filter, which BasicTrimCostComponent to fetch.
+     */
+    where: BasicTrimCostComponentWhereUniqueInput
+  }
+
+  /**
+   * BasicTrimCostComponent findUniqueOrThrow
+   */
+  export type BasicTrimCostComponentFindUniqueOrThrowArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the BasicTrimCostComponent
+     */
+    select?: BasicTrimCostComponentSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the BasicTrimCostComponent
+     */
+    omit?: BasicTrimCostComponentOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: BasicTrimCostComponentInclude<ExtArgs> | null
+    /**
+     * Filter, which BasicTrimCostComponent to fetch.
+     */
+    where: BasicTrimCostComponentWhereUniqueInput
+  }
+
+  /**
+   * BasicTrimCostComponent findFirst
+   */
+  export type BasicTrimCostComponentFindFirstArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the BasicTrimCostComponent
+     */
+    select?: BasicTrimCostComponentSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the BasicTrimCostComponent
+     */
+    omit?: BasicTrimCostComponentOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: BasicTrimCostComponentInclude<ExtArgs> | null
+    /**
+     * Filter, which BasicTrimCostComponent to fetch.
+     */
+    where?: BasicTrimCostComponentWhereInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
+     * 
+     * Determine the order of BasicTrimCostComponents to fetch.
+     */
+    orderBy?: BasicTrimCostComponentOrderByWithRelationInput | BasicTrimCostComponentOrderByWithRelationInput[]
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
+     * 
+     * Sets the position for searching for BasicTrimCostComponents.
+     */
+    cursor?: BasicTrimCostComponentWhereUniqueInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Take `±n` BasicTrimCostComponents from the position of the cursor.
+     */
+    take?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Skip the first `n` BasicTrimCostComponents.
+     */
+    skip?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/distinct Distinct Docs}
+     * 
+     * Filter by unique combinations of BasicTrimCostComponents.
+     */
+    distinct?: BasicTrimCostComponentScalarFieldEnum | BasicTrimCostComponentScalarFieldEnum[]
+  }
+
+  /**
+   * BasicTrimCostComponent findFirstOrThrow
+   */
+  export type BasicTrimCostComponentFindFirstOrThrowArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the BasicTrimCostComponent
+     */
+    select?: BasicTrimCostComponentSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the BasicTrimCostComponent
+     */
+    omit?: BasicTrimCostComponentOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: BasicTrimCostComponentInclude<ExtArgs> | null
+    /**
+     * Filter, which BasicTrimCostComponent to fetch.
+     */
+    where?: BasicTrimCostComponentWhereInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
+     * 
+     * Determine the order of BasicTrimCostComponents to fetch.
+     */
+    orderBy?: BasicTrimCostComponentOrderByWithRelationInput | BasicTrimCostComponentOrderByWithRelationInput[]
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
+     * 
+     * Sets the position for searching for BasicTrimCostComponents.
+     */
+    cursor?: BasicTrimCostComponentWhereUniqueInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Take `±n` BasicTrimCostComponents from the position of the cursor.
+     */
+    take?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Skip the first `n` BasicTrimCostComponents.
+     */
+    skip?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/distinct Distinct Docs}
+     * 
+     * Filter by unique combinations of BasicTrimCostComponents.
+     */
+    distinct?: BasicTrimCostComponentScalarFieldEnum | BasicTrimCostComponentScalarFieldEnum[]
+  }
+
+  /**
+   * BasicTrimCostComponent findMany
+   */
+  export type BasicTrimCostComponentFindManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the BasicTrimCostComponent
+     */
+    select?: BasicTrimCostComponentSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the BasicTrimCostComponent
+     */
+    omit?: BasicTrimCostComponentOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: BasicTrimCostComponentInclude<ExtArgs> | null
+    /**
+     * Filter, which BasicTrimCostComponents to fetch.
+     */
+    where?: BasicTrimCostComponentWhereInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
+     * 
+     * Determine the order of BasicTrimCostComponents to fetch.
+     */
+    orderBy?: BasicTrimCostComponentOrderByWithRelationInput | BasicTrimCostComponentOrderByWithRelationInput[]
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
+     * 
+     * Sets the position for listing BasicTrimCostComponents.
+     */
+    cursor?: BasicTrimCostComponentWhereUniqueInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Take `±n` BasicTrimCostComponents from the position of the cursor.
+     */
+    take?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Skip the first `n` BasicTrimCostComponents.
+     */
+    skip?: number
+    distinct?: BasicTrimCostComponentScalarFieldEnum | BasicTrimCostComponentScalarFieldEnum[]
+  }
+
+  /**
+   * BasicTrimCostComponent create
+   */
+  export type BasicTrimCostComponentCreateArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the BasicTrimCostComponent
+     */
+    select?: BasicTrimCostComponentSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the BasicTrimCostComponent
+     */
+    omit?: BasicTrimCostComponentOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: BasicTrimCostComponentInclude<ExtArgs> | null
+    /**
+     * The data needed to create a BasicTrimCostComponent.
+     */
+    data: XOR<BasicTrimCostComponentCreateInput, BasicTrimCostComponentUncheckedCreateInput>
+  }
+
+  /**
+   * BasicTrimCostComponent createMany
+   */
+  export type BasicTrimCostComponentCreateManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * The data used to create many BasicTrimCostComponents.
+     */
+    data: BasicTrimCostComponentCreateManyInput | BasicTrimCostComponentCreateManyInput[]
+    skipDuplicates?: boolean
+  }
+
+  /**
+   * BasicTrimCostComponent createManyAndReturn
+   */
+  export type BasicTrimCostComponentCreateManyAndReturnArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the BasicTrimCostComponent
+     */
+    select?: BasicTrimCostComponentSelectCreateManyAndReturn<ExtArgs> | null
+    /**
+     * Omit specific fields from the BasicTrimCostComponent
+     */
+    omit?: BasicTrimCostComponentOmit<ExtArgs> | null
+    /**
+     * The data used to create many BasicTrimCostComponents.
+     */
+    data: BasicTrimCostComponentCreateManyInput | BasicTrimCostComponentCreateManyInput[]
+    skipDuplicates?: boolean
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: BasicTrimCostComponentIncludeCreateManyAndReturn<ExtArgs> | null
+  }
+
+  /**
+   * BasicTrimCostComponent update
+   */
+  export type BasicTrimCostComponentUpdateArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the BasicTrimCostComponent
+     */
+    select?: BasicTrimCostComponentSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the BasicTrimCostComponent
+     */
+    omit?: BasicTrimCostComponentOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: BasicTrimCostComponentInclude<ExtArgs> | null
+    /**
+     * The data needed to update a BasicTrimCostComponent.
+     */
+    data: XOR<BasicTrimCostComponentUpdateInput, BasicTrimCostComponentUncheckedUpdateInput>
+    /**
+     * Choose, which BasicTrimCostComponent to update.
+     */
+    where: BasicTrimCostComponentWhereUniqueInput
+  }
+
+  /**
+   * BasicTrimCostComponent updateMany
+   */
+  export type BasicTrimCostComponentUpdateManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * The data used to update BasicTrimCostComponents.
+     */
+    data: XOR<BasicTrimCostComponentUpdateManyMutationInput, BasicTrimCostComponentUncheckedUpdateManyInput>
+    /**
+     * Filter which BasicTrimCostComponents to update
+     */
+    where?: BasicTrimCostComponentWhereInput
+    /**
+     * Limit how many BasicTrimCostComponents to update.
+     */
+    limit?: number
+  }
+
+  /**
+   * BasicTrimCostComponent updateManyAndReturn
+   */
+  export type BasicTrimCostComponentUpdateManyAndReturnArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the BasicTrimCostComponent
+     */
+    select?: BasicTrimCostComponentSelectUpdateManyAndReturn<ExtArgs> | null
+    /**
+     * Omit specific fields from the BasicTrimCostComponent
+     */
+    omit?: BasicTrimCostComponentOmit<ExtArgs> | null
+    /**
+     * The data used to update BasicTrimCostComponents.
+     */
+    data: XOR<BasicTrimCostComponentUpdateManyMutationInput, BasicTrimCostComponentUncheckedUpdateManyInput>
+    /**
+     * Filter which BasicTrimCostComponents to update
+     */
+    where?: BasicTrimCostComponentWhereInput
+    /**
+     * Limit how many BasicTrimCostComponents to update.
+     */
+    limit?: number
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: BasicTrimCostComponentIncludeUpdateManyAndReturn<ExtArgs> | null
+  }
+
+  /**
+   * BasicTrimCostComponent upsert
+   */
+  export type BasicTrimCostComponentUpsertArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the BasicTrimCostComponent
+     */
+    select?: BasicTrimCostComponentSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the BasicTrimCostComponent
+     */
+    omit?: BasicTrimCostComponentOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: BasicTrimCostComponentInclude<ExtArgs> | null
+    /**
+     * The filter to search for the BasicTrimCostComponent to update in case it exists.
+     */
+    where: BasicTrimCostComponentWhereUniqueInput
+    /**
+     * In case the BasicTrimCostComponent found by the `where` argument doesn't exist, create a new BasicTrimCostComponent with this data.
+     */
+    create: XOR<BasicTrimCostComponentCreateInput, BasicTrimCostComponentUncheckedCreateInput>
+    /**
+     * In case the BasicTrimCostComponent was found with the provided `where` argument, update it with this data.
+     */
+    update: XOR<BasicTrimCostComponentUpdateInput, BasicTrimCostComponentUncheckedUpdateInput>
+  }
+
+  /**
+   * BasicTrimCostComponent delete
+   */
+  export type BasicTrimCostComponentDeleteArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the BasicTrimCostComponent
+     */
+    select?: BasicTrimCostComponentSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the BasicTrimCostComponent
+     */
+    omit?: BasicTrimCostComponentOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: BasicTrimCostComponentInclude<ExtArgs> | null
+    /**
+     * Filter which BasicTrimCostComponent to delete.
+     */
+    where: BasicTrimCostComponentWhereUniqueInput
+  }
+
+  /**
+   * BasicTrimCostComponent deleteMany
+   */
+  export type BasicTrimCostComponentDeleteManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Filter which BasicTrimCostComponents to delete
+     */
+    where?: BasicTrimCostComponentWhereInput
+    /**
+     * Limit how many BasicTrimCostComponents to delete.
+     */
+    limit?: number
+  }
+
+  /**
+   * BasicTrimCostComponent without action
+   */
+  export type BasicTrimCostComponentDefaultArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the BasicTrimCostComponent
+     */
+    select?: BasicTrimCostComponentSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the BasicTrimCostComponent
+     */
+    omit?: BasicTrimCostComponentOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: BasicTrimCostComponentInclude<ExtArgs> | null
+  }
+
+
+  /**
    * Model MajorCategoryDetails
    */
 
@@ -66072,6 +68611,35 @@ export namespace Prisma {
   export type RoughCmpCostMasterScalarFieldEnum = (typeof RoughCmpCostMasterScalarFieldEnum)[keyof typeof RoughCmpCostMasterScalarFieldEnum]
 
 
+  export const BasicTrimCostMasterScalarFieldEnum: {
+    id: 'id',
+    div: 'div',
+    subDiv: 'subDiv',
+    majCat: 'majCat',
+    trimsTotal: 'trimsTotal',
+    packagingTotal: 'packagingTotal',
+    threadCost: 'threadCost',
+    basicTrimsCost: 'basicTrimsCost',
+    createdAt: 'createdAt',
+    updatedAt: 'updatedAt'
+  };
+
+  export type BasicTrimCostMasterScalarFieldEnum = (typeof BasicTrimCostMasterScalarFieldEnum)[keyof typeof BasicTrimCostMasterScalarFieldEnum]
+
+
+  export const BasicTrimCostComponentScalarFieldEnum: {
+    id: 'id',
+    masterId: 'masterId',
+    kind: 'kind',
+    component: 'component',
+    qty: 'qty',
+    rate: 'rate',
+    value: 'value'
+  };
+
+  export type BasicTrimCostComponentScalarFieldEnum = (typeof BasicTrimCostComponentScalarFieldEnum)[keyof typeof BasicTrimCostComponentScalarFieldEnum]
+
+
   export const MajorCategoryDetailsScalarFieldEnum: {
     id: 'id',
     seg: 'seg',
@@ -66981,6 +69549,23 @@ export namespace Prisma {
   };
 
   export type RoughCmpCostMasterOrderByRelevanceFieldEnum = (typeof RoughCmpCostMasterOrderByRelevanceFieldEnum)[keyof typeof RoughCmpCostMasterOrderByRelevanceFieldEnum]
+
+
+  export const BasicTrimCostMasterOrderByRelevanceFieldEnum: {
+    div: 'div',
+    subDiv: 'subDiv',
+    majCat: 'majCat'
+  };
+
+  export type BasicTrimCostMasterOrderByRelevanceFieldEnum = (typeof BasicTrimCostMasterOrderByRelevanceFieldEnum)[keyof typeof BasicTrimCostMasterOrderByRelevanceFieldEnum]
+
+
+  export const BasicTrimCostComponentOrderByRelevanceFieldEnum: {
+    kind: 'kind',
+    component: 'component'
+  };
+
+  export type BasicTrimCostComponentOrderByRelevanceFieldEnum = (typeof BasicTrimCostComponentOrderByRelevanceFieldEnum)[keyof typeof BasicTrimCostComponentOrderByRelevanceFieldEnum]
 
 
   export const MajorCategoryDetailsOrderByRelevanceFieldEnum: {
@@ -72797,6 +75382,158 @@ export namespace Prisma {
     cmpCost?: DecimalNullableWithAggregatesFilter<"RoughCmpCostMaster"> | Decimal | DecimalJsLike | number | string | null
     createdAt?: DateTimeWithAggregatesFilter<"RoughCmpCostMaster"> | Date | string
     updatedAt?: DateTimeWithAggregatesFilter<"RoughCmpCostMaster"> | Date | string
+  }
+
+  export type BasicTrimCostMasterWhereInput = {
+    AND?: BasicTrimCostMasterWhereInput | BasicTrimCostMasterWhereInput[]
+    OR?: BasicTrimCostMasterWhereInput[]
+    NOT?: BasicTrimCostMasterWhereInput | BasicTrimCostMasterWhereInput[]
+    id?: IntFilter<"BasicTrimCostMaster"> | number
+    div?: StringNullableFilter<"BasicTrimCostMaster"> | string | null
+    subDiv?: StringNullableFilter<"BasicTrimCostMaster"> | string | null
+    majCat?: StringFilter<"BasicTrimCostMaster"> | string
+    trimsTotal?: DecimalNullableFilter<"BasicTrimCostMaster"> | Decimal | DecimalJsLike | number | string | null
+    packagingTotal?: DecimalNullableFilter<"BasicTrimCostMaster"> | Decimal | DecimalJsLike | number | string | null
+    threadCost?: DecimalNullableFilter<"BasicTrimCostMaster"> | Decimal | DecimalJsLike | number | string | null
+    basicTrimsCost?: DecimalNullableFilter<"BasicTrimCostMaster"> | Decimal | DecimalJsLike | number | string | null
+    createdAt?: DateTimeFilter<"BasicTrimCostMaster"> | Date | string
+    updatedAt?: DateTimeFilter<"BasicTrimCostMaster"> | Date | string
+    components?: BasicTrimCostComponentListRelationFilter
+  }
+
+  export type BasicTrimCostMasterOrderByWithRelationInput = {
+    id?: SortOrder
+    div?: SortOrderInput | SortOrder
+    subDiv?: SortOrderInput | SortOrder
+    majCat?: SortOrder
+    trimsTotal?: SortOrderInput | SortOrder
+    packagingTotal?: SortOrderInput | SortOrder
+    threadCost?: SortOrderInput | SortOrder
+    basicTrimsCost?: SortOrderInput | SortOrder
+    createdAt?: SortOrder
+    updatedAt?: SortOrder
+    components?: BasicTrimCostComponentOrderByRelationAggregateInput
+    _relevance?: BasicTrimCostMasterOrderByRelevanceInput
+  }
+
+  export type BasicTrimCostMasterWhereUniqueInput = Prisma.AtLeast<{
+    id?: number
+    majCat?: string
+    AND?: BasicTrimCostMasterWhereInput | BasicTrimCostMasterWhereInput[]
+    OR?: BasicTrimCostMasterWhereInput[]
+    NOT?: BasicTrimCostMasterWhereInput | BasicTrimCostMasterWhereInput[]
+    div?: StringNullableFilter<"BasicTrimCostMaster"> | string | null
+    subDiv?: StringNullableFilter<"BasicTrimCostMaster"> | string | null
+    trimsTotal?: DecimalNullableFilter<"BasicTrimCostMaster"> | Decimal | DecimalJsLike | number | string | null
+    packagingTotal?: DecimalNullableFilter<"BasicTrimCostMaster"> | Decimal | DecimalJsLike | number | string | null
+    threadCost?: DecimalNullableFilter<"BasicTrimCostMaster"> | Decimal | DecimalJsLike | number | string | null
+    basicTrimsCost?: DecimalNullableFilter<"BasicTrimCostMaster"> | Decimal | DecimalJsLike | number | string | null
+    createdAt?: DateTimeFilter<"BasicTrimCostMaster"> | Date | string
+    updatedAt?: DateTimeFilter<"BasicTrimCostMaster"> | Date | string
+    components?: BasicTrimCostComponentListRelationFilter
+  }, "id" | "majCat">
+
+  export type BasicTrimCostMasterOrderByWithAggregationInput = {
+    id?: SortOrder
+    div?: SortOrderInput | SortOrder
+    subDiv?: SortOrderInput | SortOrder
+    majCat?: SortOrder
+    trimsTotal?: SortOrderInput | SortOrder
+    packagingTotal?: SortOrderInput | SortOrder
+    threadCost?: SortOrderInput | SortOrder
+    basicTrimsCost?: SortOrderInput | SortOrder
+    createdAt?: SortOrder
+    updatedAt?: SortOrder
+    _count?: BasicTrimCostMasterCountOrderByAggregateInput
+    _avg?: BasicTrimCostMasterAvgOrderByAggregateInput
+    _max?: BasicTrimCostMasterMaxOrderByAggregateInput
+    _min?: BasicTrimCostMasterMinOrderByAggregateInput
+    _sum?: BasicTrimCostMasterSumOrderByAggregateInput
+  }
+
+  export type BasicTrimCostMasterScalarWhereWithAggregatesInput = {
+    AND?: BasicTrimCostMasterScalarWhereWithAggregatesInput | BasicTrimCostMasterScalarWhereWithAggregatesInput[]
+    OR?: BasicTrimCostMasterScalarWhereWithAggregatesInput[]
+    NOT?: BasicTrimCostMasterScalarWhereWithAggregatesInput | BasicTrimCostMasterScalarWhereWithAggregatesInput[]
+    id?: IntWithAggregatesFilter<"BasicTrimCostMaster"> | number
+    div?: StringNullableWithAggregatesFilter<"BasicTrimCostMaster"> | string | null
+    subDiv?: StringNullableWithAggregatesFilter<"BasicTrimCostMaster"> | string | null
+    majCat?: StringWithAggregatesFilter<"BasicTrimCostMaster"> | string
+    trimsTotal?: DecimalNullableWithAggregatesFilter<"BasicTrimCostMaster"> | Decimal | DecimalJsLike | number | string | null
+    packagingTotal?: DecimalNullableWithAggregatesFilter<"BasicTrimCostMaster"> | Decimal | DecimalJsLike | number | string | null
+    threadCost?: DecimalNullableWithAggregatesFilter<"BasicTrimCostMaster"> | Decimal | DecimalJsLike | number | string | null
+    basicTrimsCost?: DecimalNullableWithAggregatesFilter<"BasicTrimCostMaster"> | Decimal | DecimalJsLike | number | string | null
+    createdAt?: DateTimeWithAggregatesFilter<"BasicTrimCostMaster"> | Date | string
+    updatedAt?: DateTimeWithAggregatesFilter<"BasicTrimCostMaster"> | Date | string
+  }
+
+  export type BasicTrimCostComponentWhereInput = {
+    AND?: BasicTrimCostComponentWhereInput | BasicTrimCostComponentWhereInput[]
+    OR?: BasicTrimCostComponentWhereInput[]
+    NOT?: BasicTrimCostComponentWhereInput | BasicTrimCostComponentWhereInput[]
+    id?: IntFilter<"BasicTrimCostComponent"> | number
+    masterId?: IntFilter<"BasicTrimCostComponent"> | number
+    kind?: StringFilter<"BasicTrimCostComponent"> | string
+    component?: StringFilter<"BasicTrimCostComponent"> | string
+    qty?: DecimalNullableFilter<"BasicTrimCostComponent"> | Decimal | DecimalJsLike | number | string | null
+    rate?: DecimalNullableFilter<"BasicTrimCostComponent"> | Decimal | DecimalJsLike | number | string | null
+    value?: DecimalNullableFilter<"BasicTrimCostComponent"> | Decimal | DecimalJsLike | number | string | null
+    master?: XOR<BasicTrimCostMasterScalarRelationFilter, BasicTrimCostMasterWhereInput>
+  }
+
+  export type BasicTrimCostComponentOrderByWithRelationInput = {
+    id?: SortOrder
+    masterId?: SortOrder
+    kind?: SortOrder
+    component?: SortOrder
+    qty?: SortOrderInput | SortOrder
+    rate?: SortOrderInput | SortOrder
+    value?: SortOrderInput | SortOrder
+    master?: BasicTrimCostMasterOrderByWithRelationInput
+    _relevance?: BasicTrimCostComponentOrderByRelevanceInput
+  }
+
+  export type BasicTrimCostComponentWhereUniqueInput = Prisma.AtLeast<{
+    id?: number
+    masterId_component?: BasicTrimCostComponentMasterIdComponentCompoundUniqueInput
+    AND?: BasicTrimCostComponentWhereInput | BasicTrimCostComponentWhereInput[]
+    OR?: BasicTrimCostComponentWhereInput[]
+    NOT?: BasicTrimCostComponentWhereInput | BasicTrimCostComponentWhereInput[]
+    masterId?: IntFilter<"BasicTrimCostComponent"> | number
+    kind?: StringFilter<"BasicTrimCostComponent"> | string
+    component?: StringFilter<"BasicTrimCostComponent"> | string
+    qty?: DecimalNullableFilter<"BasicTrimCostComponent"> | Decimal | DecimalJsLike | number | string | null
+    rate?: DecimalNullableFilter<"BasicTrimCostComponent"> | Decimal | DecimalJsLike | number | string | null
+    value?: DecimalNullableFilter<"BasicTrimCostComponent"> | Decimal | DecimalJsLike | number | string | null
+    master?: XOR<BasicTrimCostMasterScalarRelationFilter, BasicTrimCostMasterWhereInput>
+  }, "id" | "masterId_component">
+
+  export type BasicTrimCostComponentOrderByWithAggregationInput = {
+    id?: SortOrder
+    masterId?: SortOrder
+    kind?: SortOrder
+    component?: SortOrder
+    qty?: SortOrderInput | SortOrder
+    rate?: SortOrderInput | SortOrder
+    value?: SortOrderInput | SortOrder
+    _count?: BasicTrimCostComponentCountOrderByAggregateInput
+    _avg?: BasicTrimCostComponentAvgOrderByAggregateInput
+    _max?: BasicTrimCostComponentMaxOrderByAggregateInput
+    _min?: BasicTrimCostComponentMinOrderByAggregateInput
+    _sum?: BasicTrimCostComponentSumOrderByAggregateInput
+  }
+
+  export type BasicTrimCostComponentScalarWhereWithAggregatesInput = {
+    AND?: BasicTrimCostComponentScalarWhereWithAggregatesInput | BasicTrimCostComponentScalarWhereWithAggregatesInput[]
+    OR?: BasicTrimCostComponentScalarWhereWithAggregatesInput[]
+    NOT?: BasicTrimCostComponentScalarWhereWithAggregatesInput | BasicTrimCostComponentScalarWhereWithAggregatesInput[]
+    id?: IntWithAggregatesFilter<"BasicTrimCostComponent"> | number
+    masterId?: IntWithAggregatesFilter<"BasicTrimCostComponent"> | number
+    kind?: StringWithAggregatesFilter<"BasicTrimCostComponent"> | string
+    component?: StringWithAggregatesFilter<"BasicTrimCostComponent"> | string
+    qty?: DecimalNullableWithAggregatesFilter<"BasicTrimCostComponent"> | Decimal | DecimalJsLike | number | string | null
+    rate?: DecimalNullableWithAggregatesFilter<"BasicTrimCostComponent"> | Decimal | DecimalJsLike | number | string | null
+    value?: DecimalNullableWithAggregatesFilter<"BasicTrimCostComponent"> | Decimal | DecimalJsLike | number | string | null
   }
 
   export type MajorCategoryDetailsWhereInput = {
@@ -79852,6 +82589,164 @@ export namespace Prisma {
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
   }
 
+  export type BasicTrimCostMasterCreateInput = {
+    div?: string | null
+    subDiv?: string | null
+    majCat: string
+    trimsTotal?: Decimal | DecimalJsLike | number | string | null
+    packagingTotal?: Decimal | DecimalJsLike | number | string | null
+    threadCost?: Decimal | DecimalJsLike | number | string | null
+    basicTrimsCost?: Decimal | DecimalJsLike | number | string | null
+    createdAt?: Date | string
+    updatedAt?: Date | string
+    components?: BasicTrimCostComponentCreateNestedManyWithoutMasterInput
+  }
+
+  export type BasicTrimCostMasterUncheckedCreateInput = {
+    id?: number
+    div?: string | null
+    subDiv?: string | null
+    majCat: string
+    trimsTotal?: Decimal | DecimalJsLike | number | string | null
+    packagingTotal?: Decimal | DecimalJsLike | number | string | null
+    threadCost?: Decimal | DecimalJsLike | number | string | null
+    basicTrimsCost?: Decimal | DecimalJsLike | number | string | null
+    createdAt?: Date | string
+    updatedAt?: Date | string
+    components?: BasicTrimCostComponentUncheckedCreateNestedManyWithoutMasterInput
+  }
+
+  export type BasicTrimCostMasterUpdateInput = {
+    div?: NullableStringFieldUpdateOperationsInput | string | null
+    subDiv?: NullableStringFieldUpdateOperationsInput | string | null
+    majCat?: StringFieldUpdateOperationsInput | string
+    trimsTotal?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    packagingTotal?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    threadCost?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    basicTrimsCost?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    components?: BasicTrimCostComponentUpdateManyWithoutMasterNestedInput
+  }
+
+  export type BasicTrimCostMasterUncheckedUpdateInput = {
+    id?: IntFieldUpdateOperationsInput | number
+    div?: NullableStringFieldUpdateOperationsInput | string | null
+    subDiv?: NullableStringFieldUpdateOperationsInput | string | null
+    majCat?: StringFieldUpdateOperationsInput | string
+    trimsTotal?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    packagingTotal?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    threadCost?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    basicTrimsCost?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    components?: BasicTrimCostComponentUncheckedUpdateManyWithoutMasterNestedInput
+  }
+
+  export type BasicTrimCostMasterCreateManyInput = {
+    id?: number
+    div?: string | null
+    subDiv?: string | null
+    majCat: string
+    trimsTotal?: Decimal | DecimalJsLike | number | string | null
+    packagingTotal?: Decimal | DecimalJsLike | number | string | null
+    threadCost?: Decimal | DecimalJsLike | number | string | null
+    basicTrimsCost?: Decimal | DecimalJsLike | number | string | null
+    createdAt?: Date | string
+    updatedAt?: Date | string
+  }
+
+  export type BasicTrimCostMasterUpdateManyMutationInput = {
+    div?: NullableStringFieldUpdateOperationsInput | string | null
+    subDiv?: NullableStringFieldUpdateOperationsInput | string | null
+    majCat?: StringFieldUpdateOperationsInput | string
+    trimsTotal?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    packagingTotal?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    threadCost?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    basicTrimsCost?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+  }
+
+  export type BasicTrimCostMasterUncheckedUpdateManyInput = {
+    id?: IntFieldUpdateOperationsInput | number
+    div?: NullableStringFieldUpdateOperationsInput | string | null
+    subDiv?: NullableStringFieldUpdateOperationsInput | string | null
+    majCat?: StringFieldUpdateOperationsInput | string
+    trimsTotal?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    packagingTotal?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    threadCost?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    basicTrimsCost?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+  }
+
+  export type BasicTrimCostComponentCreateInput = {
+    kind: string
+    component: string
+    qty?: Decimal | DecimalJsLike | number | string | null
+    rate?: Decimal | DecimalJsLike | number | string | null
+    value?: Decimal | DecimalJsLike | number | string | null
+    master: BasicTrimCostMasterCreateNestedOneWithoutComponentsInput
+  }
+
+  export type BasicTrimCostComponentUncheckedCreateInput = {
+    id?: number
+    masterId: number
+    kind: string
+    component: string
+    qty?: Decimal | DecimalJsLike | number | string | null
+    rate?: Decimal | DecimalJsLike | number | string | null
+    value?: Decimal | DecimalJsLike | number | string | null
+  }
+
+  export type BasicTrimCostComponentUpdateInput = {
+    kind?: StringFieldUpdateOperationsInput | string
+    component?: StringFieldUpdateOperationsInput | string
+    qty?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    rate?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    value?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    master?: BasicTrimCostMasterUpdateOneRequiredWithoutComponentsNestedInput
+  }
+
+  export type BasicTrimCostComponentUncheckedUpdateInput = {
+    id?: IntFieldUpdateOperationsInput | number
+    masterId?: IntFieldUpdateOperationsInput | number
+    kind?: StringFieldUpdateOperationsInput | string
+    component?: StringFieldUpdateOperationsInput | string
+    qty?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    rate?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    value?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+  }
+
+  export type BasicTrimCostComponentCreateManyInput = {
+    id?: number
+    masterId: number
+    kind: string
+    component: string
+    qty?: Decimal | DecimalJsLike | number | string | null
+    rate?: Decimal | DecimalJsLike | number | string | null
+    value?: Decimal | DecimalJsLike | number | string | null
+  }
+
+  export type BasicTrimCostComponentUpdateManyMutationInput = {
+    kind?: StringFieldUpdateOperationsInput | string
+    component?: StringFieldUpdateOperationsInput | string
+    qty?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    rate?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    value?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+  }
+
+  export type BasicTrimCostComponentUncheckedUpdateManyInput = {
+    id?: IntFieldUpdateOperationsInput | number
+    masterId?: IntFieldUpdateOperationsInput | number
+    kind?: StringFieldUpdateOperationsInput | string
+    component?: StringFieldUpdateOperationsInput | string
+    qty?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    rate?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    value?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+  }
+
   export type MajorCategoryDetailsCreateInput = {
     seg?: string | null
     div?: string | null
@@ -84813,6 +87708,139 @@ export namespace Prisma {
     cmpCost?: SortOrder
   }
 
+  export type BasicTrimCostComponentListRelationFilter = {
+    every?: BasicTrimCostComponentWhereInput
+    some?: BasicTrimCostComponentWhereInput
+    none?: BasicTrimCostComponentWhereInput
+  }
+
+  export type BasicTrimCostComponentOrderByRelationAggregateInput = {
+    _count?: SortOrder
+  }
+
+  export type BasicTrimCostMasterOrderByRelevanceInput = {
+    fields: BasicTrimCostMasterOrderByRelevanceFieldEnum | BasicTrimCostMasterOrderByRelevanceFieldEnum[]
+    sort: SortOrder
+    search: string
+  }
+
+  export type BasicTrimCostMasterCountOrderByAggregateInput = {
+    id?: SortOrder
+    div?: SortOrder
+    subDiv?: SortOrder
+    majCat?: SortOrder
+    trimsTotal?: SortOrder
+    packagingTotal?: SortOrder
+    threadCost?: SortOrder
+    basicTrimsCost?: SortOrder
+    createdAt?: SortOrder
+    updatedAt?: SortOrder
+  }
+
+  export type BasicTrimCostMasterAvgOrderByAggregateInput = {
+    id?: SortOrder
+    trimsTotal?: SortOrder
+    packagingTotal?: SortOrder
+    threadCost?: SortOrder
+    basicTrimsCost?: SortOrder
+  }
+
+  export type BasicTrimCostMasterMaxOrderByAggregateInput = {
+    id?: SortOrder
+    div?: SortOrder
+    subDiv?: SortOrder
+    majCat?: SortOrder
+    trimsTotal?: SortOrder
+    packagingTotal?: SortOrder
+    threadCost?: SortOrder
+    basicTrimsCost?: SortOrder
+    createdAt?: SortOrder
+    updatedAt?: SortOrder
+  }
+
+  export type BasicTrimCostMasterMinOrderByAggregateInput = {
+    id?: SortOrder
+    div?: SortOrder
+    subDiv?: SortOrder
+    majCat?: SortOrder
+    trimsTotal?: SortOrder
+    packagingTotal?: SortOrder
+    threadCost?: SortOrder
+    basicTrimsCost?: SortOrder
+    createdAt?: SortOrder
+    updatedAt?: SortOrder
+  }
+
+  export type BasicTrimCostMasterSumOrderByAggregateInput = {
+    id?: SortOrder
+    trimsTotal?: SortOrder
+    packagingTotal?: SortOrder
+    threadCost?: SortOrder
+    basicTrimsCost?: SortOrder
+  }
+
+  export type BasicTrimCostMasterScalarRelationFilter = {
+    is?: BasicTrimCostMasterWhereInput
+    isNot?: BasicTrimCostMasterWhereInput
+  }
+
+  export type BasicTrimCostComponentOrderByRelevanceInput = {
+    fields: BasicTrimCostComponentOrderByRelevanceFieldEnum | BasicTrimCostComponentOrderByRelevanceFieldEnum[]
+    sort: SortOrder
+    search: string
+  }
+
+  export type BasicTrimCostComponentMasterIdComponentCompoundUniqueInput = {
+    masterId: number
+    component: string
+  }
+
+  export type BasicTrimCostComponentCountOrderByAggregateInput = {
+    id?: SortOrder
+    masterId?: SortOrder
+    kind?: SortOrder
+    component?: SortOrder
+    qty?: SortOrder
+    rate?: SortOrder
+    value?: SortOrder
+  }
+
+  export type BasicTrimCostComponentAvgOrderByAggregateInput = {
+    id?: SortOrder
+    masterId?: SortOrder
+    qty?: SortOrder
+    rate?: SortOrder
+    value?: SortOrder
+  }
+
+  export type BasicTrimCostComponentMaxOrderByAggregateInput = {
+    id?: SortOrder
+    masterId?: SortOrder
+    kind?: SortOrder
+    component?: SortOrder
+    qty?: SortOrder
+    rate?: SortOrder
+    value?: SortOrder
+  }
+
+  export type BasicTrimCostComponentMinOrderByAggregateInput = {
+    id?: SortOrder
+    masterId?: SortOrder
+    kind?: SortOrder
+    component?: SortOrder
+    qty?: SortOrder
+    rate?: SortOrder
+    value?: SortOrder
+  }
+
+  export type BasicTrimCostComponentSumOrderByAggregateInput = {
+    id?: SortOrder
+    masterId?: SortOrder
+    qty?: SortOrder
+    rate?: SortOrder
+    value?: SortOrder
+  }
+
   export type MajorCategoryDetailsOrderByRelevanceInput = {
     fields: MajorCategoryDetailsOrderByRelevanceFieldEnum | MajorCategoryDetailsOrderByRelevanceFieldEnum[]
     sort: SortOrder
@@ -86587,6 +89615,62 @@ export namespace Prisma {
     upsert?: PoolBJobUpsertWithoutBatchesInput
     connect?: PoolBJobWhereUniqueInput
     update?: XOR<XOR<PoolBJobUpdateToOneWithWhereWithoutBatchesInput, PoolBJobUpdateWithoutBatchesInput>, PoolBJobUncheckedUpdateWithoutBatchesInput>
+  }
+
+  export type BasicTrimCostComponentCreateNestedManyWithoutMasterInput = {
+    create?: XOR<BasicTrimCostComponentCreateWithoutMasterInput, BasicTrimCostComponentUncheckedCreateWithoutMasterInput> | BasicTrimCostComponentCreateWithoutMasterInput[] | BasicTrimCostComponentUncheckedCreateWithoutMasterInput[]
+    connectOrCreate?: BasicTrimCostComponentCreateOrConnectWithoutMasterInput | BasicTrimCostComponentCreateOrConnectWithoutMasterInput[]
+    createMany?: BasicTrimCostComponentCreateManyMasterInputEnvelope
+    connect?: BasicTrimCostComponentWhereUniqueInput | BasicTrimCostComponentWhereUniqueInput[]
+  }
+
+  export type BasicTrimCostComponentUncheckedCreateNestedManyWithoutMasterInput = {
+    create?: XOR<BasicTrimCostComponentCreateWithoutMasterInput, BasicTrimCostComponentUncheckedCreateWithoutMasterInput> | BasicTrimCostComponentCreateWithoutMasterInput[] | BasicTrimCostComponentUncheckedCreateWithoutMasterInput[]
+    connectOrCreate?: BasicTrimCostComponentCreateOrConnectWithoutMasterInput | BasicTrimCostComponentCreateOrConnectWithoutMasterInput[]
+    createMany?: BasicTrimCostComponentCreateManyMasterInputEnvelope
+    connect?: BasicTrimCostComponentWhereUniqueInput | BasicTrimCostComponentWhereUniqueInput[]
+  }
+
+  export type BasicTrimCostComponentUpdateManyWithoutMasterNestedInput = {
+    create?: XOR<BasicTrimCostComponentCreateWithoutMasterInput, BasicTrimCostComponentUncheckedCreateWithoutMasterInput> | BasicTrimCostComponentCreateWithoutMasterInput[] | BasicTrimCostComponentUncheckedCreateWithoutMasterInput[]
+    connectOrCreate?: BasicTrimCostComponentCreateOrConnectWithoutMasterInput | BasicTrimCostComponentCreateOrConnectWithoutMasterInput[]
+    upsert?: BasicTrimCostComponentUpsertWithWhereUniqueWithoutMasterInput | BasicTrimCostComponentUpsertWithWhereUniqueWithoutMasterInput[]
+    createMany?: BasicTrimCostComponentCreateManyMasterInputEnvelope
+    set?: BasicTrimCostComponentWhereUniqueInput | BasicTrimCostComponentWhereUniqueInput[]
+    disconnect?: BasicTrimCostComponentWhereUniqueInput | BasicTrimCostComponentWhereUniqueInput[]
+    delete?: BasicTrimCostComponentWhereUniqueInput | BasicTrimCostComponentWhereUniqueInput[]
+    connect?: BasicTrimCostComponentWhereUniqueInput | BasicTrimCostComponentWhereUniqueInput[]
+    update?: BasicTrimCostComponentUpdateWithWhereUniqueWithoutMasterInput | BasicTrimCostComponentUpdateWithWhereUniqueWithoutMasterInput[]
+    updateMany?: BasicTrimCostComponentUpdateManyWithWhereWithoutMasterInput | BasicTrimCostComponentUpdateManyWithWhereWithoutMasterInput[]
+    deleteMany?: BasicTrimCostComponentScalarWhereInput | BasicTrimCostComponentScalarWhereInput[]
+  }
+
+  export type BasicTrimCostComponentUncheckedUpdateManyWithoutMasterNestedInput = {
+    create?: XOR<BasicTrimCostComponentCreateWithoutMasterInput, BasicTrimCostComponentUncheckedCreateWithoutMasterInput> | BasicTrimCostComponentCreateWithoutMasterInput[] | BasicTrimCostComponentUncheckedCreateWithoutMasterInput[]
+    connectOrCreate?: BasicTrimCostComponentCreateOrConnectWithoutMasterInput | BasicTrimCostComponentCreateOrConnectWithoutMasterInput[]
+    upsert?: BasicTrimCostComponentUpsertWithWhereUniqueWithoutMasterInput | BasicTrimCostComponentUpsertWithWhereUniqueWithoutMasterInput[]
+    createMany?: BasicTrimCostComponentCreateManyMasterInputEnvelope
+    set?: BasicTrimCostComponentWhereUniqueInput | BasicTrimCostComponentWhereUniqueInput[]
+    disconnect?: BasicTrimCostComponentWhereUniqueInput | BasicTrimCostComponentWhereUniqueInput[]
+    delete?: BasicTrimCostComponentWhereUniqueInput | BasicTrimCostComponentWhereUniqueInput[]
+    connect?: BasicTrimCostComponentWhereUniqueInput | BasicTrimCostComponentWhereUniqueInput[]
+    update?: BasicTrimCostComponentUpdateWithWhereUniqueWithoutMasterInput | BasicTrimCostComponentUpdateWithWhereUniqueWithoutMasterInput[]
+    updateMany?: BasicTrimCostComponentUpdateManyWithWhereWithoutMasterInput | BasicTrimCostComponentUpdateManyWithWhereWithoutMasterInput[]
+    deleteMany?: BasicTrimCostComponentScalarWhereInput | BasicTrimCostComponentScalarWhereInput[]
+  }
+
+  export type BasicTrimCostMasterCreateNestedOneWithoutComponentsInput = {
+    create?: XOR<BasicTrimCostMasterCreateWithoutComponentsInput, BasicTrimCostMasterUncheckedCreateWithoutComponentsInput>
+    connectOrCreate?: BasicTrimCostMasterCreateOrConnectWithoutComponentsInput
+    connect?: BasicTrimCostMasterWhereUniqueInput
+  }
+
+  export type BasicTrimCostMasterUpdateOneRequiredWithoutComponentsNestedInput = {
+    create?: XOR<BasicTrimCostMasterCreateWithoutComponentsInput, BasicTrimCostMasterUncheckedCreateWithoutComponentsInput>
+    connectOrCreate?: BasicTrimCostMasterCreateOrConnectWithoutComponentsInput
+    upsert?: BasicTrimCostMasterUpsertWithoutComponentsInput
+    connect?: BasicTrimCostMasterWhereUniqueInput
+    update?: XOR<XOR<BasicTrimCostMasterUpdateToOneWithWhereWithoutComponentsInput, BasicTrimCostMasterUpdateWithoutComponentsInput>, BasicTrimCostMasterUncheckedUpdateWithoutComponentsInput>
   }
 
   export type EnumExpenseChangeOperationFieldUpdateOperationsInput = {
@@ -92591,6 +95675,128 @@ export namespace Prisma {
     completedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   }
 
+  export type BasicTrimCostComponentCreateWithoutMasterInput = {
+    kind: string
+    component: string
+    qty?: Decimal | DecimalJsLike | number | string | null
+    rate?: Decimal | DecimalJsLike | number | string | null
+    value?: Decimal | DecimalJsLike | number | string | null
+  }
+
+  export type BasicTrimCostComponentUncheckedCreateWithoutMasterInput = {
+    id?: number
+    kind: string
+    component: string
+    qty?: Decimal | DecimalJsLike | number | string | null
+    rate?: Decimal | DecimalJsLike | number | string | null
+    value?: Decimal | DecimalJsLike | number | string | null
+  }
+
+  export type BasicTrimCostComponentCreateOrConnectWithoutMasterInput = {
+    where: BasicTrimCostComponentWhereUniqueInput
+    create: XOR<BasicTrimCostComponentCreateWithoutMasterInput, BasicTrimCostComponentUncheckedCreateWithoutMasterInput>
+  }
+
+  export type BasicTrimCostComponentCreateManyMasterInputEnvelope = {
+    data: BasicTrimCostComponentCreateManyMasterInput | BasicTrimCostComponentCreateManyMasterInput[]
+    skipDuplicates?: boolean
+  }
+
+  export type BasicTrimCostComponentUpsertWithWhereUniqueWithoutMasterInput = {
+    where: BasicTrimCostComponentWhereUniqueInput
+    update: XOR<BasicTrimCostComponentUpdateWithoutMasterInput, BasicTrimCostComponentUncheckedUpdateWithoutMasterInput>
+    create: XOR<BasicTrimCostComponentCreateWithoutMasterInput, BasicTrimCostComponentUncheckedCreateWithoutMasterInput>
+  }
+
+  export type BasicTrimCostComponentUpdateWithWhereUniqueWithoutMasterInput = {
+    where: BasicTrimCostComponentWhereUniqueInput
+    data: XOR<BasicTrimCostComponentUpdateWithoutMasterInput, BasicTrimCostComponentUncheckedUpdateWithoutMasterInput>
+  }
+
+  export type BasicTrimCostComponentUpdateManyWithWhereWithoutMasterInput = {
+    where: BasicTrimCostComponentScalarWhereInput
+    data: XOR<BasicTrimCostComponentUpdateManyMutationInput, BasicTrimCostComponentUncheckedUpdateManyWithoutMasterInput>
+  }
+
+  export type BasicTrimCostComponentScalarWhereInput = {
+    AND?: BasicTrimCostComponentScalarWhereInput | BasicTrimCostComponentScalarWhereInput[]
+    OR?: BasicTrimCostComponentScalarWhereInput[]
+    NOT?: BasicTrimCostComponentScalarWhereInput | BasicTrimCostComponentScalarWhereInput[]
+    id?: IntFilter<"BasicTrimCostComponent"> | number
+    masterId?: IntFilter<"BasicTrimCostComponent"> | number
+    kind?: StringFilter<"BasicTrimCostComponent"> | string
+    component?: StringFilter<"BasicTrimCostComponent"> | string
+    qty?: DecimalNullableFilter<"BasicTrimCostComponent"> | Decimal | DecimalJsLike | number | string | null
+    rate?: DecimalNullableFilter<"BasicTrimCostComponent"> | Decimal | DecimalJsLike | number | string | null
+    value?: DecimalNullableFilter<"BasicTrimCostComponent"> | Decimal | DecimalJsLike | number | string | null
+  }
+
+  export type BasicTrimCostMasterCreateWithoutComponentsInput = {
+    div?: string | null
+    subDiv?: string | null
+    majCat: string
+    trimsTotal?: Decimal | DecimalJsLike | number | string | null
+    packagingTotal?: Decimal | DecimalJsLike | number | string | null
+    threadCost?: Decimal | DecimalJsLike | number | string | null
+    basicTrimsCost?: Decimal | DecimalJsLike | number | string | null
+    createdAt?: Date | string
+    updatedAt?: Date | string
+  }
+
+  export type BasicTrimCostMasterUncheckedCreateWithoutComponentsInput = {
+    id?: number
+    div?: string | null
+    subDiv?: string | null
+    majCat: string
+    trimsTotal?: Decimal | DecimalJsLike | number | string | null
+    packagingTotal?: Decimal | DecimalJsLike | number | string | null
+    threadCost?: Decimal | DecimalJsLike | number | string | null
+    basicTrimsCost?: Decimal | DecimalJsLike | number | string | null
+    createdAt?: Date | string
+    updatedAt?: Date | string
+  }
+
+  export type BasicTrimCostMasterCreateOrConnectWithoutComponentsInput = {
+    where: BasicTrimCostMasterWhereUniqueInput
+    create: XOR<BasicTrimCostMasterCreateWithoutComponentsInput, BasicTrimCostMasterUncheckedCreateWithoutComponentsInput>
+  }
+
+  export type BasicTrimCostMasterUpsertWithoutComponentsInput = {
+    update: XOR<BasicTrimCostMasterUpdateWithoutComponentsInput, BasicTrimCostMasterUncheckedUpdateWithoutComponentsInput>
+    create: XOR<BasicTrimCostMasterCreateWithoutComponentsInput, BasicTrimCostMasterUncheckedCreateWithoutComponentsInput>
+    where?: BasicTrimCostMasterWhereInput
+  }
+
+  export type BasicTrimCostMasterUpdateToOneWithWhereWithoutComponentsInput = {
+    where?: BasicTrimCostMasterWhereInput
+    data: XOR<BasicTrimCostMasterUpdateWithoutComponentsInput, BasicTrimCostMasterUncheckedUpdateWithoutComponentsInput>
+  }
+
+  export type BasicTrimCostMasterUpdateWithoutComponentsInput = {
+    div?: NullableStringFieldUpdateOperationsInput | string | null
+    subDiv?: NullableStringFieldUpdateOperationsInput | string | null
+    majCat?: StringFieldUpdateOperationsInput | string
+    trimsTotal?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    packagingTotal?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    threadCost?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    basicTrimsCost?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+  }
+
+  export type BasicTrimCostMasterUncheckedUpdateWithoutComponentsInput = {
+    id?: IntFieldUpdateOperationsInput | number
+    div?: NullableStringFieldUpdateOperationsInput | string | null
+    subDiv?: NullableStringFieldUpdateOperationsInput | string | null
+    majCat?: StringFieldUpdateOperationsInput | string
+    trimsTotal?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    packagingTotal?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    threadCost?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    basicTrimsCost?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+  }
+
   export type SubDepartmentCreateManyDepartmentInput = {
     id?: number
     code: string
@@ -94076,6 +97282,41 @@ export namespace Prisma {
     completedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     results?: NullableJsonNullValueInput | InputJsonValue
     errorMessage?: NullableStringFieldUpdateOperationsInput | string | null
+  }
+
+  export type BasicTrimCostComponentCreateManyMasterInput = {
+    id?: number
+    kind: string
+    component: string
+    qty?: Decimal | DecimalJsLike | number | string | null
+    rate?: Decimal | DecimalJsLike | number | string | null
+    value?: Decimal | DecimalJsLike | number | string | null
+  }
+
+  export type BasicTrimCostComponentUpdateWithoutMasterInput = {
+    kind?: StringFieldUpdateOperationsInput | string
+    component?: StringFieldUpdateOperationsInput | string
+    qty?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    rate?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    value?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+  }
+
+  export type BasicTrimCostComponentUncheckedUpdateWithoutMasterInput = {
+    id?: IntFieldUpdateOperationsInput | number
+    kind?: StringFieldUpdateOperationsInput | string
+    component?: StringFieldUpdateOperationsInput | string
+    qty?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    rate?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    value?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+  }
+
+  export type BasicTrimCostComponentUncheckedUpdateManyWithoutMasterInput = {
+    id?: IntFieldUpdateOperationsInput | number
+    kind?: StringFieldUpdateOperationsInput | string
+    component?: StringFieldUpdateOperationsInput | string
+    qty?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    rate?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    value?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
   }
 
 

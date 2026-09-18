@@ -1056,6 +1056,29 @@ exports.Prisma.RoughCmpCostMasterScalarFieldEnum = {
   updatedAt: 'updatedAt'
 };
 
+exports.Prisma.BasicTrimCostMasterScalarFieldEnum = {
+  id: 'id',
+  div: 'div',
+  subDiv: 'subDiv',
+  majCat: 'majCat',
+  trimsTotal: 'trimsTotal',
+  packagingTotal: 'packagingTotal',
+  threadCost: 'threadCost',
+  basicTrimsCost: 'basicTrimsCost',
+  createdAt: 'createdAt',
+  updatedAt: 'updatedAt'
+};
+
+exports.Prisma.BasicTrimCostComponentScalarFieldEnum = {
+  id: 'id',
+  masterId: 'masterId',
+  kind: 'kind',
+  component: 'component',
+  qty: 'qty',
+  rate: 'rate',
+  value: 'value'
+};
+
 exports.Prisma.MajorCategoryDetailsScalarFieldEnum = {
   id: 'id',
   seg: 'seg',
@@ -1808,6 +1831,17 @@ exports.Prisma.RoughCmpCostMasterOrderByRelevanceFieldEnum = {
   majCat: 'majCat'
 };
 
+exports.Prisma.BasicTrimCostMasterOrderByRelevanceFieldEnum = {
+  div: 'div',
+  subDiv: 'subDiv',
+  majCat: 'majCat'
+};
+
+exports.Prisma.BasicTrimCostComponentOrderByRelevanceFieldEnum = {
+  kind: 'kind',
+  component: 'component'
+};
+
 exports.Prisma.MajorCategoryDetailsOrderByRelevanceFieldEnum = {
   seg: 'seg',
   div: 'div',
@@ -2006,6 +2040,8 @@ exports.Prisma.ModelName = {
   FabricArticleData: 'FabricArticleData',
   BodyArticleData: 'BodyArticleData',
   RoughCmpCostMaster: 'RoughCmpCostMaster',
+  BasicTrimCostMaster: 'BasicTrimCostMaster',
+  BasicTrimCostComponent: 'BasicTrimCostComponent',
   MajorCategoryDetails: 'MajorCategoryDetails',
   ExpenseApprovalStage: 'ExpenseApprovalStage',
   ExpenseChangeRequest: 'ExpenseChangeRequest',
