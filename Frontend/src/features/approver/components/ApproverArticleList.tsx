@@ -638,6 +638,8 @@ const ArticleCard = React.memo(
     // ── National grid values for Body Article dropdowns ─────────────────────
     const [nationalGrid, setNationalGrid] = useState<NationalGridValues>({});
     const [nationalGridReady, setNationalGridReady] = useState(false);
+    const [fabricCreating, setFabricCreating] = useState(false);
+    const [fabConfirmItem, setFabConfirmItem] = useState<ApproverItem | null>(null);
     useEffect(() => {
       if (!allowGroups) return;
       fetchNationalGridValues().then((data) => {
@@ -674,17 +676,22 @@ const ArticleCard = React.memo(
     }, [imgModalOpen]);
 
     const prevItemRef = React.useRef<ApproverItem>(item);
+    const pendingChangesRef = React.useRef(pendingChanges);
+    pendingChangesRef.current = pendingChanges;
     React.useEffect(() => {
       const prev = prevItemRef.current;
       prevItemRef.current = item;
       if (prev === item) return;
       setLocalValues((local) => {
         const next: Record<string, string | null> = {};
+        const staged = pendingChangesRef.current;
         for (const [k, v] of Object.entries(local)) {
+          // Always keep keys that the user has staged — they haven't been saved yet
+          if (k in staged) { next[k] = v; continue; }
           const itemVal = (item as any)[k] ?? null;
           const strItemVal = itemVal === null ? null : String(itemVal);
           if (strItemVal !== (v === null ? null : String(v ?? ''))) {
-            // server wins
+            // server wins (field not staged, item has a different value)
           } else {
             next[k] = v;
           }
@@ -1089,8 +1096,8 @@ const ArticleCard = React.memo(
           const v = prev[field] !== undefined ? prev[field] : (item as any)[field];
           return v ? String(v).trim() : null;
         };
-        const fabParts = FAB_FIELDS.map((f) => getVal(f.field)).filter(Boolean) as string[];
-        const newFabDesc = fabParts.length > 0 ? fabParts.join('-').replace(/-{2,}/g, '-') : null;
+        const fabParts = FAB_FIELDS.map((f) => getVal(f.field)).filter((v): v is string => Boolean(v) && !/^-+$/.test(v as string));
+        const newFabDesc = fabParts.length > 0 ? fabParts.join('-').replace(/-{2,}/g, '-').replace(/-+$/, '') : null;
         const newBodyDesc = buildBodyDescription(getVal);
         // REFERENCE ARTICLE DESC — built like ARTICLE DESC but from a fixed,
         // user-confirmed sequence spanning multiple cards:
@@ -1317,16 +1324,18 @@ const ArticleCard = React.memo(
         if (newDesc) updates['bodyArticleDescription'] = newDesc;
       }
       // When a Construction & Fabric attribute changes, recompute fabricArticleDescription
-      // and bundle it into the same save so the DB value stays in sync with the UI.
+      // and clear fabricArticleNumber in modify mode (it was linked to the old description;
+      // user must re-create or re-link after modifying fabric attributes).
       const fabFieldKeys = new Set(FAB_FIELDS.map((ff) => ff.field));
       if (fabFieldKeys.has(field)) {
         const getVal = (f: string) => {
           const v = updates[f] !== undefined ? updates[f] : (localValues[f] !== undefined ? localValues[f] : (item as any)[f]);
           return v ? String(v).trim() : null;
         };
-        const fabParts = FAB_FIELDS.map((f) => getVal(f.field)).filter(Boolean) as string[];
-        const newFabDesc = fabParts.length > 0 ? fabParts.join('-').replace(/-{2,}/g, '-') : null;
+        const fabParts = FAB_FIELDS.map((f) => getVal(f.field)).filter((v): v is string => Boolean(v) && !/^-+$/.test(v as string));
+        const newFabDesc = fabParts.length > 0 ? fabParts.join('-').replace(/-{2,}/g, '-').replace(/-+$/, '') : null;
         if (newFabDesc) updates['fabricArticleDescription'] = newFabDesc;
+        if (isModifyMode) updates['fabricArticleNumber'] = null;
       }
       setLocalValues((prev) => ({ ...prev, ...updates }));
       setEditingField(null);
@@ -2265,11 +2274,8 @@ const ArticleCard = React.memo(
                           <div className="space-y-0 p-1">
                             {groupMap[g.group].attrs.map((attr) => renderAttributeRow(attr))}
 
-                            {/* CMTP/CMP Cost, FAB Con, Width — numbered rows continuing straight on from
-                                M_LENGTH, alongside the rest of the counted BODY attributes. Skipped on the
-                                Body Article tab (allowGroups=['BODY']), whose BOM card already shows these
-                                same 4 values — FG Article tab's BOM card shows different fields, so these
-                                stay visible there. */}
+                            {/* CMTP/CMP Cost, FAB Con, Width — numbered rows for FG articles only.
+                                Body Articles show Costing Type/CMP/Basic Trim/CMTP in their own block below. */}
                             {g.group === 'BODY' && !allowGroups?.includes('BODY') &&
                               [
                                 { field: 'cmtpCost', label: 'CMTP COST' },
@@ -2323,6 +2329,119 @@ const ArticleCard = React.memo(
                                   </div>
                                 );
                               })}
+
+                            {/* Costing Type, CMP Cost, Basic Trim Cost, CMTP Cost — Body Article only,
+                                appended after the 17 Body & Construction attribute rows. */}
+                            {g.group === 'BODY' && allowGroups?.includes('BODY') &&
+                              (() => {
+                                const COSTING_FIELDS: { field: string; label: string; isDropdown?: boolean }[] = [
+                                  { field: 'costingType',  label: 'BODY COSTING TYPE', isDropdown: true },
+                                  { field: 'cmpCost',      label: 'CMP COST' },
+                                  { field: 'basicTrimCost', label: 'BASIC TRIM COST' },
+                                  { field: 'cmtpCost',     label: 'CMTP COST' },
+                                ];
+                                return COSTING_FIELDS.map(({ field, label, isDropdown }) => {
+                                  _attrCounter += 1;
+                                  const num = _attrCounter;
+                                  const displayVal = localValues[field] !== undefined ? localValues[field] : (item as any)[field];
+                                  const isEffectivelyEmpty = !displayVal || String(displayVal).trim() === '';
+                                  const isEditingThis = editingField === `costing_${field}`;
+                                  const fieldLocked = isFieldLocked(field);
+                                  return (
+                                    <div
+                                      key={field}
+                                      className="group flex items-center gap-1.5 rounded px-1 py-0.5 transition-colors hover:bg-muted/40"
+                                      style={{ cursor: fieldLocked ? 'default' : 'pointer' }}
+                                      onClick={() => {
+                                        if (!fieldLocked && !isEditingThis) setEditingField(`costing_${field}`);
+                                      }}
+                                    >
+                                      <span className="w-4 shrink-0 text-right text-[10px] font-bold tabular-nums text-muted-foreground">{num}.</span>
+                                      <span className="flex-1 truncate text-[10.5px] font-semibold leading-snug text-foreground/80">
+                                        {label}
+                                      </span>
+                                      <div className="w-[110px] shrink-0">
+                                        {isDropdown ? (
+                                          <Popover
+                                            open={isEditingThis}
+                                            onOpenChange={(o) => { if (!o) setEditingField(null); }}
+                                          >
+                                            <PopoverAnchor asChild>
+                                              <span
+                                                className="flex items-center justify-end gap-1 text-right text-[11px]"
+                                                style={{
+                                                  color: isEffectivelyEmpty ? '#9ca3af' : '#111827',
+                                                  fontStyle: isEffectivelyEmpty ? 'italic' : 'normal',
+                                                  fontWeight: 600,
+                                                }}
+                                              >
+                                                <span className="truncate">
+                                                  {isEffectivelyEmpty ? (fieldLocked ? '—' : 'Click') : String(displayVal)}
+                                                </span>
+                                                <ChevronDown className="h-3 w-3 shrink-0 opacity-40" />
+                                              </span>
+                                            </PopoverAnchor>
+                                            {isEditingThis && (
+                                              <PopoverContent
+                                                className="w-36 p-0"
+                                                align="end"
+                                                onClick={(e) => e.stopPropagation()}
+                                              >
+                                                {!isEffectivelyEmpty && (
+                                                  <button
+                                                    type="button"
+                                                    onClick={() => { handleSave(field, null); setEditingField(null); }}
+                                                    className="flex w-full items-center gap-1.5 border-b px-3 py-1.5 text-left text-[11px] font-medium text-red-600 hover:bg-red-50"
+                                                  >
+                                                    <X className="h-3 w-3 shrink-0" />
+                                                    Clear selection
+                                                  </button>
+                                                )}
+                                                <div className="py-1">
+                                                  {['Rough', 'Precise'].map((opt) => (
+                                                    <button
+                                                      key={opt}
+                                                      type="button"
+                                                      onClick={() => { handleSave(field, opt); setEditingField(null); }}
+                                                      className={cn(
+                                                        'flex w-full px-3 py-1.5 text-left text-[11px] hover:bg-accent hover:text-accent-foreground',
+                                                        String(displayVal) === opt && 'bg-accent/60',
+                                                      )}
+                                                    >
+                                                      <span className="font-medium">{opt}</span>
+                                                    </button>
+                                                  ))}
+                                                </div>
+                                              </PopoverContent>
+                                            )}
+                                          </Popover>
+                                        ) : isEditingThis ? (
+                                          <Input
+                                            autoFocus
+                                            defaultValue={isEffectivelyEmpty ? '' : String(displayVal)}
+                                            className="h-6 px-1 text-[11px]"
+                                            onKeyDown={(e) =>
+                                              e.key === 'Enter' && handleSave(field, (e.target as HTMLInputElement).value || null)
+                                            }
+                                            onBlur={(e) => handleSave(field, e.target.value || null)}
+                                          />
+                                        ) : (
+                                          <span
+                                            className="block truncate text-right text-[11px]"
+                                            style={{
+                                              color: isEffectivelyEmpty ? '#9ca3af' : '#111827',
+                                              fontStyle: isEffectivelyEmpty ? 'italic' : 'normal',
+                                              fontWeight: 600,
+                                            }}
+                                          >
+                                            {isEffectivelyEmpty ? (fieldLocked ? '—' : 'Click') : String(displayVal)}
+                                          </span>
+                                        )}
+                                      </div>
+                                    </div>
+                                  );
+                                });
+                              })()}
 
                             {/* FAB: fabric article number + description + button */}
                             {g.group === 'FAB' &&
@@ -2394,9 +2513,9 @@ const ArticleCard = React.memo(
                                       const v = localValues[ff.field] !== undefined ? localValues[ff.field] : (item as any)[ff.field];
                                       return v ? String(v).trim() : null;
                                     })
-                                    .filter(Boolean);
+                                    .filter((v): v is string => Boolean(v) && !/^-+$/.test(v as string));
                                   if (parts.length > 0)
-                                    handleSave('fabricArticleDescription', parts.join('-').replace(/-{2,}/g, '-'));
+                                    handleSave('fabricArticleDescription', parts.join('-').replace(/-{2,}/g, '-').replace(/-+$/, ''));
                                 };
                                 const isFabNoEditing = editingField === 'bot_fabricArticleNumber';
                                 const fabNoDisplayVal =
@@ -2499,7 +2618,11 @@ const ArticleCard = React.memo(
                                                       setLocalValues((prev) => ({ ...prev, ...gridUpdates }));
                                                       setEditingField(null);
                                                       setFabNoResults([]);
-                                                      onSave({ ...item, ...gridUpdates } as any, gridUpdates);
+                                                      if (isModifyMode) {
+                                                        setPendingChanges((prev) => ({ ...prev, ...gridUpdates }));
+                                                      } else {
+                                                        onSave({ ...item, ...gridUpdates } as any, gridUpdates);
+                                                      }
                                                     }}
                                                   >
                                                     <span className="text-[11px] font-medium text-gray-900">{r.fabricArticleNumber}</span>
@@ -2663,7 +2786,14 @@ const ArticleCard = React.memo(
                                                             setEditingField(null);
                                                             setFabDescResults([]);
                                                             setFabDescSearched(false);
-                                                            onSave({ ...item, ...gridUpdates } as any, gridUpdates);
+                                                            if (isModifyMode) {
+                                                              // Stage ALL fields atomically — bypasses handleSave so the
+                                                              // FAB-field side-effect (clearing fabricArticleNumber) doesn't
+                                                              // overwrite the number we just selected from the dropdown.
+                                                              setPendingChanges((prev) => ({ ...prev, ...gridUpdates }));
+                                                            } else {
+                                                              onSave({ ...item, ...gridUpdates } as any, gridUpdates);
+                                                            }
                                                           }}
                                                         >
                                                           <span className="text-[11px] font-medium text-gray-900">{r.fabricArticleDescription || '—'}</span>
@@ -2691,11 +2821,37 @@ const ArticleCard = React.memo(
                                     <div className="border-t border-border px-2 py-1.5">
                                       <Button
                                         size="sm"
-                                        onClick={() => onCreateFabricArticle(item)}
-                                        className="h-7 w-full border border-slate-300 bg-slate-50 text-[11px] font-medium text-slate-700 hover:bg-[#FF6F61]/10 hover:border-[#FF6F61]/40 hover:text-[#FF6F61]"
+                                        disabled={fabricCreating}
+                                        onClick={() => {
+                                          if (fabricCreating) return;
+                                          const mergedItem = {
+                                            ...item,
+                                            ...Object.fromEntries(
+                                              Object.entries(localValues).filter(([, v]) => v !== null && v !== undefined)
+                                            ),
+                                          } as ApproverItem;
+
+                                          if (isModifyMode) {
+                                            // Validate required fields against the merged (UI) values
+                                            const missing: string[] = [];
+                                            if (!mergedItem.fabricArticleDescription) missing.push('FABRIC ARTICLE DESC');
+                                            if (!mergedItem.vendorFabricRate) missing.push('VENDOR FABRIC RATE');
+                                            if (missing.length > 0) {
+                                              message.error(`Fill mandatory fields before creating Fabric Article: ${missing.join(', ')}`);
+                                              return;
+                                            }
+                                            // Open confirm dialog — actual creation runs on confirm
+                                            setFabConfirmItem(mergedItem);
+                                            return;
+                                          }
+
+                                          // Non-modify mode: use the standard parent flow (modal in parent)
+                                          onCreateFabricArticle(mergedItem);
+                                        }}
+                                        className="h-7 w-full border border-slate-300 bg-slate-50 text-[11px] font-medium text-slate-700 hover:bg-[#FF6F61]/10 hover:border-[#FF6F61]/40 hover:text-[#FF6F61] disabled:opacity-50 disabled:cursor-not-allowed"
                                       >
                                         <FileText />
-                                        Create Fabric Article
+                                        {fabricCreating ? 'Creating...' : 'Create Fabric Article'}
                                       </Button>
                                     </div>
                                   </>
@@ -3063,7 +3219,7 @@ const ArticleCard = React.memo(
                     );
                   })}
 
-                  {/* BOM card */}
+                  {/* BOM / Consumption card */}
                   <div
                     className="overflow-hidden rounded-lg border bg-white"
                     style={{ borderColor: '#fde68a' }}
@@ -3074,18 +3230,17 @@ const ArticleCard = React.memo(
                     >
                       <span className="flex items-center gap-1 text-[10px] font-bold uppercase tracking-wider text-amber-700">
                         <DollarSign className="h-3 w-3" />
-                        BOM
+                        {isBodyArticle ? 'ROUGH CONSUMPTION' : 'BOM'}
                       </span>
                     </div>
                     <div className="space-y-0 p-1">
                       {(allowGroups?.includes('BODY')
                         ? [
-                            { label: 'CMTP Cost', field: 'cmtpCost', editable: true, mandatory: false, isDropdown: false, isColor: false, isMarkdown: false },
-                            { label: 'CMP Cost',  field: 'cmpCost',  editable: true, mandatory: false, isDropdown: false, isColor: false, isMarkdown: false },
-                            { label: 'FAB Con',  field: 'fabCons',  editable: true, mandatory: false, isDropdown: false, isColor: false, isMarkdown: false },
-                            { label: 'Width',  field: 'width',  editable: true, mandatory: false, isDropdown: false, isColor: false, isMarkdown: false },
-                            { label: 'Basic Trim Cost', field: 'basicTrimCost', editable: true, mandatory: false, isDropdown: false, isColor: false, isMarkdown: false },
-                            { label: 'Rough CMP Cost', field: 'roughCmpCost',  editable: true, mandatory: false, isDropdown: false, isColor: false, isMarkdown: false },
+                            { label: 'Width',             field: 'width',            editable: true, mandatory: false, isDropdown: false, isColor: false, isMarkdown: false },
+                            { label: 'Gsm',               field: 'gsm',              editable: true, mandatory: false, isDropdown: false, isColor: false, isMarkdown: false },
+                            { label: 'Ratio',                 field: 'ratio',               editable: true, mandatory: false, isDropdown: false, isColor: false, isMarkdown: false },
+                            { label: 'Consumption in Kg',     field: 'consumptionKg',       editable: true, mandatory: false, isDropdown: false, isColor: false, isMarkdown: false },
+                            { label: 'Consumption in Meter',  field: 'consumptionMeter',    editable: true, mandatory: false, isDropdown: false, isColor: false, isMarkdown: false },
                           ]
                         : [
                             { label: 'RATE / COST', field: 'rate', editable: true, mandatory: true, isDropdown: false, isColor: false, isMarkdown: false },
@@ -3105,7 +3260,9 @@ const ArticleCard = React.memo(
                           : String(getValue(bom.field) ?? '').trim() || '—';
                         const isEmpty = val === '—';
                         const dropdownOptions: string[] = bom.isDropdown
-                          ? bom.field === 'impAtrbt2'
+                          ? bom.field === 'bodyConsumptionType'
+                            ? ['Rough', 'Actual']
+                            : bom.field === 'impAtrbt2'
                             ? getMajCatGridEntry(effectiveMajCat, 'IMP ATBT') ??
                               attributes.find((a) => a.key === 'imp_atrbt2')?.allowedValues.map((v) => v.shortForm) ??
                               getCachedValues(item.division ?? '', 'impAtrbt2') ??
@@ -3139,7 +3296,59 @@ const ArticleCard = React.memo(
                               {bom.label}
                             </span>
                             <div className="w-[100px] shrink-0 text-right">
-                              {isEditingBom && bom.isColor ? (
+                              {bom.field === 'bodyConsumptionType' ? (
+                                <Popover
+                                  open={isEditingBom}
+                                  onOpenChange={(o) => { if (!o) setEditingField(null); }}
+                                >
+                                  <PopoverAnchor asChild>
+                                    <span
+                                      className="flex items-center justify-end gap-1 text-right text-[11px]"
+                                      style={{
+                                        color: isEmpty ? '#9ca3af' : '#111827',
+                                        fontStyle: isEmpty ? 'italic' : 'normal',
+                                        fontWeight: 600,
+                                      }}
+                                    >
+                                      <span className="truncate">{isEmpty ? (bomLocked ? '—' : 'Click') : val}</span>
+                                      <ChevronDown className="h-3 w-3 shrink-0 opacity-40" />
+                                    </span>
+                                  </PopoverAnchor>
+                                  {isEditingBom && (
+                                    <PopoverContent
+                                      className="w-36 p-0"
+                                      align="end"
+                                      onClick={(e) => e.stopPropagation()}
+                                    >
+                                      {!isEmpty && (
+                                        <button
+                                          type="button"
+                                          onClick={() => { handleSave(bom.field, null); setEditingField(null); }}
+                                          className="flex w-full items-center gap-1.5 border-b px-3 py-1.5 text-left text-[11px] font-medium text-red-600 hover:bg-red-50"
+                                        >
+                                          <X className="h-3 w-3 shrink-0" />
+                                          Clear selection
+                                        </button>
+                                      )}
+                                      <div className="py-1">
+                                        {dropdownOptions.map((opt) => (
+                                          <button
+                                            key={opt}
+                                            type="button"
+                                            onClick={() => { handleSave(bom.field, opt); setEditingField(null); }}
+                                            className={cn(
+                                              'flex w-full px-3 py-1.5 text-left text-[11px] hover:bg-accent hover:text-accent-foreground',
+                                              val === opt && 'bg-accent/60',
+                                            )}
+                                          >
+                                            <span className="font-medium">{opt}</span>
+                                          </button>
+                                        ))}
+                                      </div>
+                                    </PopoverContent>
+                                  )}
+                                </Popover>
+                              ) : isEditingBom && bom.isColor ? (
                                 <ColorSelect
                                   value={val === '—' ? null : val}
                                   options={masterColors}
@@ -3197,6 +3406,75 @@ const ArticleCard = React.memo(
                       })}
                     </div>
                   </div>
+
+                  {/* PRECISE CONSUMPTION card — Body Articles only */}
+                  {isBodyArticle && (
+                    <div
+                      className="overflow-hidden rounded-lg border bg-white"
+                      style={{ borderColor: '#fde68a' }}
+                    >
+                      <div
+                        className="flex items-center justify-between border-b px-2 py-1"
+                        style={{ background: '#fffbeb', borderColor: '#fde68a' }}
+                      >
+                        <span className="flex items-center gap-1 text-[10px] font-bold uppercase tracking-wider text-amber-700">
+                          <DollarSign className="h-3 w-3" />
+                          PRECISE CONSUMPTION
+                        </span>
+                      </div>
+                      <div className="space-y-0 p-1">
+                        {(
+                          [
+                            { label: 'Width',            field: 'preciseWidth' },
+                            { label: 'Gsm',              field: 'preciseGsm' },
+                            { label: 'Ratio',            field: 'preciseRatio' },
+                            { label: 'Consumption in Kg',    field: 'preciseConsumptionKg' },
+                            { label: 'Consumption in Meter', field: 'preciseConsumptionMeter' },
+                          ] as { label: string; field: string }[]
+                        ).map(({ label, field }) => {
+                          const isEditingPrecise = editingField === `precise_${field}`;
+                          const preciseLocked = isFieldLocked(field);
+                          const preciseVal = String(getValue(field) ?? '').trim() || '—';
+                          const preciseEmpty = preciseVal === '—';
+                          return (
+                            <div
+                              key={field}
+                              className="flex items-center gap-1.5 rounded px-1 py-0.5 transition-colors hover:bg-muted/40"
+                              style={{ cursor: preciseLocked ? 'default' : 'pointer' }}
+                              onClick={() => {
+                                if (!preciseLocked && !isEditingPrecise) setEditingField(`precise_${field}`);
+                              }}
+                            >
+                              <span className="flex-1 truncate text-[11px]" style={{ color: '#374151' }}>
+                                {label}
+                              </span>
+                              <div className="w-[100px] shrink-0 text-right">
+                                {isEditingPrecise ? (
+                                  <Input
+                                    autoFocus
+                                    defaultValue={preciseEmpty ? '' : preciseVal}
+                                    className="h-6 px-1 text-[11px]"
+                                    onKeyDown={(e) =>
+                                      e.key === 'Enter' &&
+                                      handleSave(field, (e.target as HTMLInputElement).value || null)
+                                    }
+                                    onBlur={(e) => handleSave(field, e.target.value || null)}
+                                  />
+                                ) : (
+                                  <span
+                                    className="block truncate text-[11px]"
+                                    style={{ color: preciseEmpty ? '#9ca3af' : '#111827' }}
+                                  >
+                                    {preciseVal}
+                                  </span>
+                                )}
+                              </div>
+                            </div>
+                          );
+                        })}
+                      </div>
+                    </div>
+                  )}
                 </div>
               ) : (
                 <div className="rounded-md border border-border bg-muted/30 px-4 py-3 text-xs text-muted-foreground">
@@ -3389,6 +3667,83 @@ const ArticleCard = React.memo(
                 }}
               >
                 {duplicating ? 'Duplicating…' : 'Continue'}
+              </Button>
+            </DialogFooter>
+          </DialogContent>
+        </Dialog>
+
+        {/* Create Fabric Article confirmation (modify mode) */}
+        <Dialog open={!!fabConfirmItem && !fabricCreating} onOpenChange={(o) => { if (!o && !fabricCreating) setFabConfirmItem(null); }}>
+          <DialogContent>
+            <DialogHeader>
+              <DialogTitle className="flex items-center gap-2">
+                <FileText className="h-4 w-4 text-sky-500" />
+                Create Fabric Article
+              </DialogTitle>
+            </DialogHeader>
+            <p className="m-0">
+              Create fabric article for &quot;{fabConfirmItem?.articleNumber || fabConfirmItem?.imageName || fabConfirmItem?.id}&quot;?
+            </p>
+            <DialogFooter>
+              <Button variant="outline" onClick={() => setFabConfirmItem(null)} disabled={fabricCreating}>
+                Cancel
+              </Button>
+              <Button
+                disabled={fabricCreating}
+                className="bg-[#FF6F61] hover:bg-[#e85d50] text-white"
+                onClick={async () => {
+                  if (!fabConfirmItem) return;
+                  const mergedItem = fabConfirmItem;
+                  setFabricCreating(true);
+                  try {
+                    const token = localStorage.getItem('authToken');
+                    // Send current UI values as overrides so the backend builds the fabric
+                    // article from the screen values, not the (potentially stale) DB row.
+                    // Keys match extraction_results_flat column names.
+                    const overrides: Record<string, unknown> = {
+                      fabricArticleDescription: mergedItem.fabricArticleDescription ?? null,
+                      vendorFabricRate:         mergedItem.vendorFabricRate ?? null,
+                      fabDiv:                   (mergedItem as any).fabDiv ?? null,
+                      yarn1:                    (mergedItem as any).yarn1 ?? null,
+                      mainMvgr:                 (mergedItem as any).mainMvgr ?? null,
+                      fabricMainMvgr:           (mergedItem as any).fabricMainMvgr ?? null,
+                      fConstruction:            (mergedItem as any).fConstruction ?? null,
+                      fOunce:                   (mergedItem as any).fOunce ?? null,
+                      fWidth:                   (mergedItem as any).fWidth ?? null,
+                      mFab2:                    (mergedItem as any).mFab2 ?? null,
+                      fCount:                   (mergedItem as any).fCount ?? null,
+                      weave:                    (mergedItem as any).weave ?? null,
+                      composition:              (mergedItem as any).composition ?? null,
+                      finish:                   (mergedItem as any).finish ?? null,
+                      gsm:                      (mergedItem as any).gsm ?? null,
+                      lycra:                    (mergedItem as any).lycra ?? null,
+                    };
+                    // Create fabric article; skipFlatUpdate so fabricArticleNumber is NOT
+                    // written to DB yet — it is staged here and saved only when Modify is clicked.
+                    const r = await fetch(`${APP_CONFIG.api.baseURL}/approver/create-fabric-article`, {
+                      method: 'POST',
+                      headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` },
+                      body: JSON.stringify({ ids: [item.id], submitNow: true, skipFlatUpdate: true, overrides }),
+                    });
+                    const data = await r.json();
+                    if (!r.ok) {
+                      message.error(data.error || 'Failed to create fabric article');
+                      return;
+                    }
+                    const result = data.results?.[0];
+                    if (result?.success && result?.sapArticleNumber) {
+                      handleSave('fabricArticleNumber', result.sapArticleNumber);
+                      message.success(`Fabric article created: ${result.sapArticleNumber}. Click Modify to save.`);
+                    } else if (result && !result.success) {
+                      message.error(`Fabric article created but SAP sync failed: ${result.message || 'Unknown error'}`);
+                    }
+                  } finally {
+                    setFabricCreating(false);
+                    setFabConfirmItem(null);
+                  }
+                }}
+              >
+                {fabricCreating ? 'Creating...' : 'Create Fabric Article'}
               </Button>
             </DialogFooter>
           </DialogContent>
