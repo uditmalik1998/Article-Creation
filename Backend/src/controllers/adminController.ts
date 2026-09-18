@@ -5869,12 +5869,19 @@ export const downloadBodyArticleDataMaster = async (req: Request, res: Response)
     const articleTypeParam = req.query.articleType;
     const articleType = typeof articleTypeParam === 'string' && articleTypeParam.trim() ? articleTypeParam.trim() : null;
 
+    // Created body articles only — same rule as the View Data page this button
+    // sits on (EXPENSE_TABLE_REGISTRY['body-article-data'].baseWhere). Rows still
+    // pending in the New Articles tab are working state, not master data.
     const rows: Record<string, any>[] = articleType
       ? await prisma.$queryRaw`
-          SELECT * FROM body_article_data WHERE body_article_type = ${articleType} ORDER BY created_at ASC, id ASC
+          SELECT * FROM body_article_data
+          WHERE approval_status = 'APPROVED' AND body_article_type = ${articleType}
+          ORDER BY created_at ASC, id ASC
         `
       : await prisma.$queryRaw`
-          SELECT * FROM body_article_data ORDER BY created_at ASC, id ASC
+          SELECT * FROM body_article_data
+          WHERE approval_status = 'APPROVED'
+          ORDER BY created_at ASC, id ASC
         `;
 
     const ExcelJS = require('exceljs');
@@ -6410,6 +6417,12 @@ export interface PrismaExpenseTableConfig extends ExpenseTableCapabilities {
   idColumn: string;
   /** true when the Prisma model's id field is an Int (autoincrement) rather than a uuid string. */
   idIsNumeric?: boolean;
+  /**
+   * Always-on filter for this table — ANDed into every read (rows, counts and
+   * the column filter dropdowns). Use it when the table holds rows the master
+   * view is not meant to expose at all, rather than rows a user could filter to.
+   */
+  baseWhere?: Record<string, unknown>;
   columns: ExpenseTableColumn[];
   searchColumns: string[];
   displayColumns: string[];
@@ -6682,6 +6695,11 @@ export const EXPENSE_TABLE_REGISTRY: Record<string, ExpenseTableConfig> = {
     kind: 'prisma',
     delegateName: 'bodyArticleData',
     idColumn: 'id',
+    // Master view and its export cover created body articles only — the ones
+    // SAP has assigned a number to. Rows still sitting in the New Articles tab
+    // (PENDING/REJECTED, often with no body article number yet) are working
+    // state, not master data, so they never surface here.
+    baseWhere: { approvalStatus: 'APPROVED' },
     columns: [
       { key: 'id', label: 'ID', editable: false },
       { key: 'bodyArticleNumber', label: 'Body Article No.' },
@@ -6864,6 +6882,7 @@ export async function getExpenseTableData(req: Request, res: Response) {
       const columnFilters = parseExpenseColumnFilters(filters, validFields);
 
       const andConditions: any[] = [];
+      if (config.baseWhere) andConditions.push(config.baseWhere);
       if (searchTerm) {
         andConditions.push({ OR: config.searchColumns.map((f) => ({ [f]: { contains: searchTerm, mode: 'insensitive' as const } })) });
       }
@@ -6991,6 +7010,7 @@ export async function getExpenseColumnOptions(req: Request, res: Response) {
       const delegate = (prisma as any)[config.delegateName];
       const rows = (await withPrismaRetry(() =>
         delegate.findMany({
+          where: config.baseWhere ?? {},
           distinct: [column],
           select: { [column]: true },
           orderBy: { [column]: 'asc' },
