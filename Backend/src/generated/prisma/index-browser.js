@@ -1057,6 +1057,16 @@ exports.Prisma.BodyArticleDataScalarFieldEnum = {
   updatedAt: 'updatedAt'
 };
 
+exports.Prisma.BodyFabricConsumptionScalarFieldEnum = {
+  id: 'id',
+  division: 'division',
+  subDivision: 'subDivision',
+  majorCategory: 'majorCategory',
+  fabWidth: 'fabWidth',
+  fabConsumption: 'fabConsumption',
+  createdAt: 'createdAt'
+};
+
 exports.Prisma.RoughCmpCostMasterScalarFieldEnum = {
   id: 'id',
   div: 'div',
@@ -1815,6 +1825,12 @@ exports.Prisma.BodyArticleDataOrderByRelevanceFieldEnum = {
   userName: 'userName'
 };
 
+exports.Prisma.BodyFabricConsumptionOrderByRelevanceFieldEnum = {
+  division: 'division',
+  subDivision: 'subDivision',
+  majorCategory: 'majorCategory'
+};
+
 exports.Prisma.RoughCmpCostMasterOrderByRelevanceFieldEnum = {
   div: 'div',
   subDiv: 'subDiv',
@@ -2018,6 +2034,7 @@ exports.Prisma.ModelName = {
   ModifyLog: 'ModifyLog',
   FabricArticleData: 'FabricArticleData',
   BodyArticleData: 'BodyArticleData',
+  BodyFabricConsumption: 'BodyFabricConsumption',
   RoughCmpCostMaster: 'RoughCmpCostMaster',
   MajorCategoryDetails: 'MajorCategoryDetails',
   ExpenseApprovalStage: 'ExpenseApprovalStage',

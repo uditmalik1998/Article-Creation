@@ -1588,6 +1588,20 @@ model BodyArticleData {
   @@schema("public")
 }
 
+model BodyFabricConsumption {
+  id             Int      @id @default(autoincrement())
+  division       String?  @map("division") @db.VarChar(100)
+  subDivision    String?  @map("sub_division") @db.VarChar(100)
+  majorCategory  String?  @map("major_category") @db.VarChar(200)
+  fabWidth       Decimal? @map("fab_width") @db.Decimal(10, 2)
+  fabConsumption Decimal? @map("fab_consumption") @db.Decimal(10, 6)
+  createdAt      DateTime @default(now()) @map("created_at")
+
+  @@unique([division, subDivision, majorCategory, fabWidth])
+  @@map("body_fabric_consumption")
+  @@schema("public")
+}
+
 /// RoughCmpCostMaster: Master table for rough CMP cost by division, sub-division, and major category
 model RoughCmpCostMaster {
   id        Int      @id @default(autoincrement())

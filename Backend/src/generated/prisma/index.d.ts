@@ -243,6 +243,11 @@ export type FabricArticleData = $Result.DefaultSelection<Prisma.$FabricArticleDa
  */
 export type BodyArticleData = $Result.DefaultSelection<Prisma.$BodyArticleDataPayload>
 /**
+ * Model BodyFabricConsumption
+ * 
+ */
+export type BodyFabricConsumption = $Result.DefaultSelection<Prisma.$BodyFabricConsumptionPayload>
+/**
  * Model RoughCmpCostMaster
  * RoughCmpCostMaster: Master table for rough CMP cost by division, sub-division, and major category
  */
@@ -1034,6 +1039,16 @@ export class PrismaClient<
   get bodyArticleData(): Prisma.BodyArticleDataDelegate<ExtArgs, ClientOptions>;
 
   /**
+   * `prisma.bodyFabricConsumption`: Exposes CRUD operations for the **BodyFabricConsumption** model.
+    * Example usage:
+    * ```ts
+    * // Fetch zero or more BodyFabricConsumptions
+    * const bodyFabricConsumptions = await prisma.bodyFabricConsumption.findMany()
+    * ```
+    */
+  get bodyFabricConsumption(): Prisma.BodyFabricConsumptionDelegate<ExtArgs, ClientOptions>;
+
+  /**
    * `prisma.roughCmpCostMaster`: Exposes CRUD operations for the **RoughCmpCostMaster** model.
     * Example usage:
     * ```ts
@@ -1573,6 +1588,7 @@ export namespace Prisma {
     ModifyLog: 'ModifyLog',
     FabricArticleData: 'FabricArticleData',
     BodyArticleData: 'BodyArticleData',
+    BodyFabricConsumption: 'BodyFabricConsumption',
     RoughCmpCostMaster: 'RoughCmpCostMaster',
     MajorCategoryDetails: 'MajorCategoryDetails',
     ExpenseApprovalStage: 'ExpenseApprovalStage',
@@ -1597,7 +1613,7 @@ export namespace Prisma {
       omit: GlobalOmitOptions
     }
     meta: {
-      modelProps: "department" | "subDepartment" | "category" | "masterAttribute" | "attributeAllowedValue" | "categoryAttribute" | "extractionJob" | "extractionResult" | "extractionResultFlat" | "modelGenerationResult" | "modelImageApproval" | "mvgrLookup" | "masterVendorDetail" | "user" | "auditLog" | "apiKey" | "changeHistory" | "costSummary" | "article360" | "articleFab" | "articleBody" | "articleVaAcc" | "articleVaPrcs" | "articleBom" | "sapFieldConfig" | "sapAttributeValue" | "article360Flat" | "rawArticle" | "fabricRawData" | "srmSyncRun" | "srmSyncRunItem" | "poolBJob" | "poolBBatch" | "nationalGridMaster" | "broaderMenu" | "majorCatMaster" | "fabricArticleMaster" | "fabricMajCatGridValue" | "modifyLog" | "fabricArticleData" | "bodyArticleData" | "roughCmpCostMaster" | "majorCategoryDetails" | "expenseApprovalStage" | "expenseChangeRequest" | "expenseAccessGrant" | "expenseAuditLog"
+      modelProps: "department" | "subDepartment" | "category" | "masterAttribute" | "attributeAllowedValue" | "categoryAttribute" | "extractionJob" | "extractionResult" | "extractionResultFlat" | "modelGenerationResult" | "modelImageApproval" | "mvgrLookup" | "masterVendorDetail" | "user" | "auditLog" | "apiKey" | "changeHistory" | "costSummary" | "article360" | "articleFab" | "articleBody" | "articleVaAcc" | "articleVaPrcs" | "articleBom" | "sapFieldConfig" | "sapAttributeValue" | "article360Flat" | "rawArticle" | "fabricRawData" | "srmSyncRun" | "srmSyncRunItem" | "poolBJob" | "poolBBatch" | "nationalGridMaster" | "broaderMenu" | "majorCatMaster" | "fabricArticleMaster" | "fabricMajCatGridValue" | "modifyLog" | "fabricArticleData" | "bodyArticleData" | "bodyFabricConsumption" | "roughCmpCostMaster" | "majorCategoryDetails" | "expenseApprovalStage" | "expenseChangeRequest" | "expenseAccessGrant" | "expenseAuditLog"
       txIsolationLevel: Prisma.TransactionIsolationLevel
     }
     model: {
@@ -4635,6 +4651,80 @@ export namespace Prisma {
           }
         }
       }
+      BodyFabricConsumption: {
+        payload: Prisma.$BodyFabricConsumptionPayload<ExtArgs>
+        fields: Prisma.BodyFabricConsumptionFieldRefs
+        operations: {
+          findUnique: {
+            args: Prisma.BodyFabricConsumptionFindUniqueArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$BodyFabricConsumptionPayload> | null
+          }
+          findUniqueOrThrow: {
+            args: Prisma.BodyFabricConsumptionFindUniqueOrThrowArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$BodyFabricConsumptionPayload>
+          }
+          findFirst: {
+            args: Prisma.BodyFabricConsumptionFindFirstArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$BodyFabricConsumptionPayload> | null
+          }
+          findFirstOrThrow: {
+            args: Prisma.BodyFabricConsumptionFindFirstOrThrowArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$BodyFabricConsumptionPayload>
+          }
+          findMany: {
+            args: Prisma.BodyFabricConsumptionFindManyArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$BodyFabricConsumptionPayload>[]
+          }
+          create: {
+            args: Prisma.BodyFabricConsumptionCreateArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$BodyFabricConsumptionPayload>
+          }
+          createMany: {
+            args: Prisma.BodyFabricConsumptionCreateManyArgs<ExtArgs>
+            result: BatchPayload
+          }
+          createManyAndReturn: {
+            args: Prisma.BodyFabricConsumptionCreateManyAndReturnArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$BodyFabricConsumptionPayload>[]
+          }
+          delete: {
+            args: Prisma.BodyFabricConsumptionDeleteArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$BodyFabricConsumptionPayload>
+          }
+          update: {
+            args: Prisma.BodyFabricConsumptionUpdateArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$BodyFabricConsumptionPayload>
+          }
+          deleteMany: {
+            args: Prisma.BodyFabricConsumptionDeleteManyArgs<ExtArgs>
+            result: BatchPayload
+          }
+          updateMany: {
+            args: Prisma.BodyFabricConsumptionUpdateManyArgs<ExtArgs>
+            result: BatchPayload
+          }
+          updateManyAndReturn: {
+            args: Prisma.BodyFabricConsumptionUpdateManyAndReturnArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$BodyFabricConsumptionPayload>[]
+          }
+          upsert: {
+            args: Prisma.BodyFabricConsumptionUpsertArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$BodyFabricConsumptionPayload>
+          }
+          aggregate: {
+            args: Prisma.BodyFabricConsumptionAggregateArgs<ExtArgs>
+            result: $Utils.Optional<AggregateBodyFabricConsumption>
+          }
+          groupBy: {
+            args: Prisma.BodyFabricConsumptionGroupByArgs<ExtArgs>
+            result: $Utils.Optional<BodyFabricConsumptionGroupByOutputType>[]
+          }
+          count: {
+            args: Prisma.BodyFabricConsumptionCountArgs<ExtArgs>
+            result: $Utils.Optional<BodyFabricConsumptionCountAggregateOutputType> | number
+          }
+        }
+      }
       RoughCmpCostMaster: {
         payload: Prisma.$RoughCmpCostMasterPayload<ExtArgs>
         fields: Prisma.RoughCmpCostMasterFieldRefs
@@ -5212,6 +5302,7 @@ export namespace Prisma {
     modifyLog?: ModifyLogOmit
     fabricArticleData?: FabricArticleDataOmit
     bodyArticleData?: BodyArticleDataOmit
+    bodyFabricConsumption?: BodyFabricConsumptionOmit
     roughCmpCostMaster?: RoughCmpCostMasterOmit
     majorCategoryDetails?: MajorCategoryDetailsOmit
     expenseApprovalStage?: ExpenseApprovalStageOmit
@@ -58338,6 +58429,1069 @@ export namespace Prisma {
 
 
   /**
+   * Model BodyFabricConsumption
+   */
+
+  export type AggregateBodyFabricConsumption = {
+    _count: BodyFabricConsumptionCountAggregateOutputType | null
+    _avg: BodyFabricConsumptionAvgAggregateOutputType | null
+    _sum: BodyFabricConsumptionSumAggregateOutputType | null
+    _min: BodyFabricConsumptionMinAggregateOutputType | null
+    _max: BodyFabricConsumptionMaxAggregateOutputType | null
+  }
+
+  export type BodyFabricConsumptionAvgAggregateOutputType = {
+    id: number | null
+    fabWidth: Decimal | null
+    fabConsumption: Decimal | null
+  }
+
+  export type BodyFabricConsumptionSumAggregateOutputType = {
+    id: number | null
+    fabWidth: Decimal | null
+    fabConsumption: Decimal | null
+  }
+
+  export type BodyFabricConsumptionMinAggregateOutputType = {
+    id: number | null
+    division: string | null
+    subDivision: string | null
+    majorCategory: string | null
+    fabWidth: Decimal | null
+    fabConsumption: Decimal | null
+    createdAt: Date | null
+  }
+
+  export type BodyFabricConsumptionMaxAggregateOutputType = {
+    id: number | null
+    division: string | null
+    subDivision: string | null
+    majorCategory: string | null
+    fabWidth: Decimal | null
+    fabConsumption: Decimal | null
+    createdAt: Date | null
+  }
+
+  export type BodyFabricConsumptionCountAggregateOutputType = {
+    id: number
+    division: number
+    subDivision: number
+    majorCategory: number
+    fabWidth: number
+    fabConsumption: number
+    createdAt: number
+    _all: number
+  }
+
+
+  export type BodyFabricConsumptionAvgAggregateInputType = {
+    id?: true
+    fabWidth?: true
+    fabConsumption?: true
+  }
+
+  export type BodyFabricConsumptionSumAggregateInputType = {
+    id?: true
+    fabWidth?: true
+    fabConsumption?: true
+  }
+
+  export type BodyFabricConsumptionMinAggregateInputType = {
+    id?: true
+    division?: true
+    subDivision?: true
+    majorCategory?: true
+    fabWidth?: true
+    fabConsumption?: true
+    createdAt?: true
+  }
+
+  export type BodyFabricConsumptionMaxAggregateInputType = {
+    id?: true
+    division?: true
+    subDivision?: true
+    majorCategory?: true
+    fabWidth?: true
+    fabConsumption?: true
+    createdAt?: true
+  }
+
+  export type BodyFabricConsumptionCountAggregateInputType = {
+    id?: true
+    division?: true
+    subDivision?: true
+    majorCategory?: true
+    fabWidth?: true
+    fabConsumption?: true
+    createdAt?: true
+    _all?: true
+  }
+
+  export type BodyFabricConsumptionAggregateArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Filter which BodyFabricConsumption to aggregate.
+     */
+    where?: BodyFabricConsumptionWhereInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
+     * 
+     * Determine the order of BodyFabricConsumptions to fetch.
+     */
+    orderBy?: BodyFabricConsumptionOrderByWithRelationInput | BodyFabricConsumptionOrderByWithRelationInput[]
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
+     * 
+     * Sets the start position
+     */
+    cursor?: BodyFabricConsumptionWhereUniqueInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Take `±n` BodyFabricConsumptions from the position of the cursor.
+     */
+    take?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Skip the first `n` BodyFabricConsumptions.
+     */
+    skip?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     * 
+     * Count returned BodyFabricConsumptions
+    **/
+    _count?: true | BodyFabricConsumptionCountAggregateInputType
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     * 
+     * Select which fields to average
+    **/
+    _avg?: BodyFabricConsumptionAvgAggregateInputType
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     * 
+     * Select which fields to sum
+    **/
+    _sum?: BodyFabricConsumptionSumAggregateInputType
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     * 
+     * Select which fields to find the minimum value
+    **/
+    _min?: BodyFabricConsumptionMinAggregateInputType
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     * 
+     * Select which fields to find the maximum value
+    **/
+    _max?: BodyFabricConsumptionMaxAggregateInputType
+  }
+
+  export type GetBodyFabricConsumptionAggregateType<T extends BodyFabricConsumptionAggregateArgs> = {
+        [P in keyof T & keyof AggregateBodyFabricConsumption]: P extends '_count' | 'count'
+      ? T[P] extends true
+        ? number
+        : GetScalarType<T[P], AggregateBodyFabricConsumption[P]>
+      : GetScalarType<T[P], AggregateBodyFabricConsumption[P]>
+  }
+
+
+
+
+  export type BodyFabricConsumptionGroupByArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    where?: BodyFabricConsumptionWhereInput
+    orderBy?: BodyFabricConsumptionOrderByWithAggregationInput | BodyFabricConsumptionOrderByWithAggregationInput[]
+    by: BodyFabricConsumptionScalarFieldEnum[] | BodyFabricConsumptionScalarFieldEnum
+    having?: BodyFabricConsumptionScalarWhereWithAggregatesInput
+    take?: number
+    skip?: number
+    _count?: BodyFabricConsumptionCountAggregateInputType | true
+    _avg?: BodyFabricConsumptionAvgAggregateInputType
+    _sum?: BodyFabricConsumptionSumAggregateInputType
+    _min?: BodyFabricConsumptionMinAggregateInputType
+    _max?: BodyFabricConsumptionMaxAggregateInputType
+  }
+
+  export type BodyFabricConsumptionGroupByOutputType = {
+    id: number
+    division: string | null
+    subDivision: string | null
+    majorCategory: string | null
+    fabWidth: Decimal | null
+    fabConsumption: Decimal | null
+    createdAt: Date
+    _count: BodyFabricConsumptionCountAggregateOutputType | null
+    _avg: BodyFabricConsumptionAvgAggregateOutputType | null
+    _sum: BodyFabricConsumptionSumAggregateOutputType | null
+    _min: BodyFabricConsumptionMinAggregateOutputType | null
+    _max: BodyFabricConsumptionMaxAggregateOutputType | null
+  }
+
+  type GetBodyFabricConsumptionGroupByPayload<T extends BodyFabricConsumptionGroupByArgs> = Prisma.PrismaPromise<
+    Array<
+      PickEnumerable<BodyFabricConsumptionGroupByOutputType, T['by']> &
+        {
+          [P in ((keyof T) & (keyof BodyFabricConsumptionGroupByOutputType))]: P extends '_count'
+            ? T[P] extends boolean
+              ? number
+              : GetScalarType<T[P], BodyFabricConsumptionGroupByOutputType[P]>
+            : GetScalarType<T[P], BodyFabricConsumptionGroupByOutputType[P]>
+        }
+      >
+    >
+
+
+  export type BodyFabricConsumptionSelect<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
+    id?: boolean
+    division?: boolean
+    subDivision?: boolean
+    majorCategory?: boolean
+    fabWidth?: boolean
+    fabConsumption?: boolean
+    createdAt?: boolean
+  }, ExtArgs["result"]["bodyFabricConsumption"]>
+
+  export type BodyFabricConsumptionSelectCreateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
+    id?: boolean
+    division?: boolean
+    subDivision?: boolean
+    majorCategory?: boolean
+    fabWidth?: boolean
+    fabConsumption?: boolean
+    createdAt?: boolean
+  }, ExtArgs["result"]["bodyFabricConsumption"]>
+
+  export type BodyFabricConsumptionSelectUpdateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
+    id?: boolean
+    division?: boolean
+    subDivision?: boolean
+    majorCategory?: boolean
+    fabWidth?: boolean
+    fabConsumption?: boolean
+    createdAt?: boolean
+  }, ExtArgs["result"]["bodyFabricConsumption"]>
+
+  export type BodyFabricConsumptionSelectScalar = {
+    id?: boolean
+    division?: boolean
+    subDivision?: boolean
+    majorCategory?: boolean
+    fabWidth?: boolean
+    fabConsumption?: boolean
+    createdAt?: boolean
+  }
+
+  export type BodyFabricConsumptionOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<"id" | "division" | "subDivision" | "majorCategory" | "fabWidth" | "fabConsumption" | "createdAt", ExtArgs["result"]["bodyFabricConsumption"]>
+
+  export type $BodyFabricConsumptionPayload<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    name: "BodyFabricConsumption"
+    objects: {}
+    scalars: $Extensions.GetPayloadResult<{
+      id: number
+      division: string | null
+      subDivision: string | null
+      majorCategory: string | null
+      fabWidth: Prisma.Decimal | null
+      fabConsumption: Prisma.Decimal | null
+      createdAt: Date
+    }, ExtArgs["result"]["bodyFabricConsumption"]>
+    composites: {}
+  }
+
+  type BodyFabricConsumptionGetPayload<S extends boolean | null | undefined | BodyFabricConsumptionDefaultArgs> = $Result.GetResult<Prisma.$BodyFabricConsumptionPayload, S>
+
+  type BodyFabricConsumptionCountArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> =
+    Omit<BodyFabricConsumptionFindManyArgs, 'select' | 'include' | 'distinct' | 'omit'> & {
+      select?: BodyFabricConsumptionCountAggregateInputType | true
+    }
+
+  export interface BodyFabricConsumptionDelegate<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs, GlobalOmitOptions = {}> {
+    [K: symbol]: { types: Prisma.TypeMap<ExtArgs>['model']['BodyFabricConsumption'], meta: { name: 'BodyFabricConsumption' } }
+    /**
+     * Find zero or one BodyFabricConsumption that matches the filter.
+     * @param {BodyFabricConsumptionFindUniqueArgs} args - Arguments to find a BodyFabricConsumption
+     * @example
+     * // Get one BodyFabricConsumption
+     * const bodyFabricConsumption = await prisma.bodyFabricConsumption.findUnique({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     */
+    findUnique<T extends BodyFabricConsumptionFindUniqueArgs>(args: SelectSubset<T, BodyFabricConsumptionFindUniqueArgs<ExtArgs>>): Prisma__BodyFabricConsumptionClient<$Result.GetResult<Prisma.$BodyFabricConsumptionPayload<ExtArgs>, T, "findUnique", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Find one BodyFabricConsumption that matches the filter or throw an error with `error.code='P2025'`
+     * if no matches were found.
+     * @param {BodyFabricConsumptionFindUniqueOrThrowArgs} args - Arguments to find a BodyFabricConsumption
+     * @example
+     * // Get one BodyFabricConsumption
+     * const bodyFabricConsumption = await prisma.bodyFabricConsumption.findUniqueOrThrow({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     */
+    findUniqueOrThrow<T extends BodyFabricConsumptionFindUniqueOrThrowArgs>(args: SelectSubset<T, BodyFabricConsumptionFindUniqueOrThrowArgs<ExtArgs>>): Prisma__BodyFabricConsumptionClient<$Result.GetResult<Prisma.$BodyFabricConsumptionPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Find the first BodyFabricConsumption that matches the filter.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {BodyFabricConsumptionFindFirstArgs} args - Arguments to find a BodyFabricConsumption
+     * @example
+     * // Get one BodyFabricConsumption
+     * const bodyFabricConsumption = await prisma.bodyFabricConsumption.findFirst({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     */
+    findFirst<T extends BodyFabricConsumptionFindFirstArgs>(args?: SelectSubset<T, BodyFabricConsumptionFindFirstArgs<ExtArgs>>): Prisma__BodyFabricConsumptionClient<$Result.GetResult<Prisma.$BodyFabricConsumptionPayload<ExtArgs>, T, "findFirst", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Find the first BodyFabricConsumption that matches the filter or
+     * throw `PrismaKnownClientError` with `P2025` code if no matches were found.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {BodyFabricConsumptionFindFirstOrThrowArgs} args - Arguments to find a BodyFabricConsumption
+     * @example
+     * // Get one BodyFabricConsumption
+     * const bodyFabricConsumption = await prisma.bodyFabricConsumption.findFirstOrThrow({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     */
+    findFirstOrThrow<T extends BodyFabricConsumptionFindFirstOrThrowArgs>(args?: SelectSubset<T, BodyFabricConsumptionFindFirstOrThrowArgs<ExtArgs>>): Prisma__BodyFabricConsumptionClient<$Result.GetResult<Prisma.$BodyFabricConsumptionPayload<ExtArgs>, T, "findFirstOrThrow", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Find zero or more BodyFabricConsumptions that matches the filter.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {BodyFabricConsumptionFindManyArgs} args - Arguments to filter and select certain fields only.
+     * @example
+     * // Get all BodyFabricConsumptions
+     * const bodyFabricConsumptions = await prisma.bodyFabricConsumption.findMany()
+     * 
+     * // Get first 10 BodyFabricConsumptions
+     * const bodyFabricConsumptions = await prisma.bodyFabricConsumption.findMany({ take: 10 })
+     * 
+     * // Only select the `id`
+     * const bodyFabricConsumptionWithIdOnly = await prisma.bodyFabricConsumption.findMany({ select: { id: true } })
+     * 
+     */
+    findMany<T extends BodyFabricConsumptionFindManyArgs>(args?: SelectSubset<T, BodyFabricConsumptionFindManyArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$BodyFabricConsumptionPayload<ExtArgs>, T, "findMany", GlobalOmitOptions>>
+
+    /**
+     * Create a BodyFabricConsumption.
+     * @param {BodyFabricConsumptionCreateArgs} args - Arguments to create a BodyFabricConsumption.
+     * @example
+     * // Create one BodyFabricConsumption
+     * const BodyFabricConsumption = await prisma.bodyFabricConsumption.create({
+     *   data: {
+     *     // ... data to create a BodyFabricConsumption
+     *   }
+     * })
+     * 
+     */
+    create<T extends BodyFabricConsumptionCreateArgs>(args: SelectSubset<T, BodyFabricConsumptionCreateArgs<ExtArgs>>): Prisma__BodyFabricConsumptionClient<$Result.GetResult<Prisma.$BodyFabricConsumptionPayload<ExtArgs>, T, "create", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Create many BodyFabricConsumptions.
+     * @param {BodyFabricConsumptionCreateManyArgs} args - Arguments to create many BodyFabricConsumptions.
+     * @example
+     * // Create many BodyFabricConsumptions
+     * const bodyFabricConsumption = await prisma.bodyFabricConsumption.createMany({
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     *     
+     */
+    createMany<T extends BodyFabricConsumptionCreateManyArgs>(args?: SelectSubset<T, BodyFabricConsumptionCreateManyArgs<ExtArgs>>): Prisma.PrismaPromise<BatchPayload>
+
+    /**
+     * Create many BodyFabricConsumptions and returns the data saved in the database.
+     * @param {BodyFabricConsumptionCreateManyAndReturnArgs} args - Arguments to create many BodyFabricConsumptions.
+     * @example
+     * // Create many BodyFabricConsumptions
+     * const bodyFabricConsumption = await prisma.bodyFabricConsumption.createManyAndReturn({
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     * 
+     * // Create many BodyFabricConsumptions and only return the `id`
+     * const bodyFabricConsumptionWithIdOnly = await prisma.bodyFabricConsumption.createManyAndReturn({
+     *   select: { id: true },
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * 
+     */
+    createManyAndReturn<T extends BodyFabricConsumptionCreateManyAndReturnArgs>(args?: SelectSubset<T, BodyFabricConsumptionCreateManyAndReturnArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$BodyFabricConsumptionPayload<ExtArgs>, T, "createManyAndReturn", GlobalOmitOptions>>
+
+    /**
+     * Delete a BodyFabricConsumption.
+     * @param {BodyFabricConsumptionDeleteArgs} args - Arguments to delete one BodyFabricConsumption.
+     * @example
+     * // Delete one BodyFabricConsumption
+     * const BodyFabricConsumption = await prisma.bodyFabricConsumption.delete({
+     *   where: {
+     *     // ... filter to delete one BodyFabricConsumption
+     *   }
+     * })
+     * 
+     */
+    delete<T extends BodyFabricConsumptionDeleteArgs>(args: SelectSubset<T, BodyFabricConsumptionDeleteArgs<ExtArgs>>): Prisma__BodyFabricConsumptionClient<$Result.GetResult<Prisma.$BodyFabricConsumptionPayload<ExtArgs>, T, "delete", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Update one BodyFabricConsumption.
+     * @param {BodyFabricConsumptionUpdateArgs} args - Arguments to update one BodyFabricConsumption.
+     * @example
+     * // Update one BodyFabricConsumption
+     * const bodyFabricConsumption = await prisma.bodyFabricConsumption.update({
+     *   where: {
+     *     // ... provide filter here
+     *   },
+     *   data: {
+     *     // ... provide data here
+     *   }
+     * })
+     * 
+     */
+    update<T extends BodyFabricConsumptionUpdateArgs>(args: SelectSubset<T, BodyFabricConsumptionUpdateArgs<ExtArgs>>): Prisma__BodyFabricConsumptionClient<$Result.GetResult<Prisma.$BodyFabricConsumptionPayload<ExtArgs>, T, "update", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Delete zero or more BodyFabricConsumptions.
+     * @param {BodyFabricConsumptionDeleteManyArgs} args - Arguments to filter BodyFabricConsumptions to delete.
+     * @example
+     * // Delete a few BodyFabricConsumptions
+     * const { count } = await prisma.bodyFabricConsumption.deleteMany({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     * 
+     */
+    deleteMany<T extends BodyFabricConsumptionDeleteManyArgs>(args?: SelectSubset<T, BodyFabricConsumptionDeleteManyArgs<ExtArgs>>): Prisma.PrismaPromise<BatchPayload>
+
+    /**
+     * Update zero or more BodyFabricConsumptions.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {BodyFabricConsumptionUpdateManyArgs} args - Arguments to update one or more rows.
+     * @example
+     * // Update many BodyFabricConsumptions
+     * const bodyFabricConsumption = await prisma.bodyFabricConsumption.updateMany({
+     *   where: {
+     *     // ... provide filter here
+     *   },
+     *   data: {
+     *     // ... provide data here
+     *   }
+     * })
+     * 
+     */
+    updateMany<T extends BodyFabricConsumptionUpdateManyArgs>(args: SelectSubset<T, BodyFabricConsumptionUpdateManyArgs<ExtArgs>>): Prisma.PrismaPromise<BatchPayload>
+
+    /**
+     * Update zero or more BodyFabricConsumptions and returns the data updated in the database.
+     * @param {BodyFabricConsumptionUpdateManyAndReturnArgs} args - Arguments to update many BodyFabricConsumptions.
+     * @example
+     * // Update many BodyFabricConsumptions
+     * const bodyFabricConsumption = await prisma.bodyFabricConsumption.updateManyAndReturn({
+     *   where: {
+     *     // ... provide filter here
+     *   },
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     * 
+     * // Update zero or more BodyFabricConsumptions and only return the `id`
+     * const bodyFabricConsumptionWithIdOnly = await prisma.bodyFabricConsumption.updateManyAndReturn({
+     *   select: { id: true },
+     *   where: {
+     *     // ... provide filter here
+     *   },
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * 
+     */
+    updateManyAndReturn<T extends BodyFabricConsumptionUpdateManyAndReturnArgs>(args: SelectSubset<T, BodyFabricConsumptionUpdateManyAndReturnArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$BodyFabricConsumptionPayload<ExtArgs>, T, "updateManyAndReturn", GlobalOmitOptions>>
+
+    /**
+     * Create or update one BodyFabricConsumption.
+     * @param {BodyFabricConsumptionUpsertArgs} args - Arguments to update or create a BodyFabricConsumption.
+     * @example
+     * // Update or create a BodyFabricConsumption
+     * const bodyFabricConsumption = await prisma.bodyFabricConsumption.upsert({
+     *   create: {
+     *     // ... data to create a BodyFabricConsumption
+     *   },
+     *   update: {
+     *     // ... in case it already exists, update
+     *   },
+     *   where: {
+     *     // ... the filter for the BodyFabricConsumption we want to update
+     *   }
+     * })
+     */
+    upsert<T extends BodyFabricConsumptionUpsertArgs>(args: SelectSubset<T, BodyFabricConsumptionUpsertArgs<ExtArgs>>): Prisma__BodyFabricConsumptionClient<$Result.GetResult<Prisma.$BodyFabricConsumptionPayload<ExtArgs>, T, "upsert", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+
+    /**
+     * Count the number of BodyFabricConsumptions.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {BodyFabricConsumptionCountArgs} args - Arguments to filter BodyFabricConsumptions to count.
+     * @example
+     * // Count the number of BodyFabricConsumptions
+     * const count = await prisma.bodyFabricConsumption.count({
+     *   where: {
+     *     // ... the filter for the BodyFabricConsumptions we want to count
+     *   }
+     * })
+    **/
+    count<T extends BodyFabricConsumptionCountArgs>(
+      args?: Subset<T, BodyFabricConsumptionCountArgs>,
+    ): Prisma.PrismaPromise<
+      T extends $Utils.Record<'select', any>
+        ? T['select'] extends true
+          ? number
+          : GetScalarType<T['select'], BodyFabricConsumptionCountAggregateOutputType>
+        : number
+    >
+
+    /**
+     * Allows you to perform aggregations operations on a BodyFabricConsumption.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {BodyFabricConsumptionAggregateArgs} args - Select which aggregations you would like to apply and on what fields.
+     * @example
+     * // Ordered by age ascending
+     * // Where email contains prisma.io
+     * // Limited to the 10 users
+     * const aggregations = await prisma.user.aggregate({
+     *   _avg: {
+     *     age: true,
+     *   },
+     *   where: {
+     *     email: {
+     *       contains: "prisma.io",
+     *     },
+     *   },
+     *   orderBy: {
+     *     age: "asc",
+     *   },
+     *   take: 10,
+     * })
+    **/
+    aggregate<T extends BodyFabricConsumptionAggregateArgs>(args: Subset<T, BodyFabricConsumptionAggregateArgs>): Prisma.PrismaPromise<GetBodyFabricConsumptionAggregateType<T>>
+
+    /**
+     * Group by BodyFabricConsumption.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {BodyFabricConsumptionGroupByArgs} args - Group by arguments.
+     * @example
+     * // Group by city, order by createdAt, get count
+     * const result = await prisma.user.groupBy({
+     *   by: ['city', 'createdAt'],
+     *   orderBy: {
+     *     createdAt: true
+     *   },
+     *   _count: {
+     *     _all: true
+     *   },
+     * })
+     * 
+    **/
+    groupBy<
+      T extends BodyFabricConsumptionGroupByArgs,
+      HasSelectOrTake extends Or<
+        Extends<'skip', Keys<T>>,
+        Extends<'take', Keys<T>>
+      >,
+      OrderByArg extends True extends HasSelectOrTake
+        ? { orderBy: BodyFabricConsumptionGroupByArgs['orderBy'] }
+        : { orderBy?: BodyFabricConsumptionGroupByArgs['orderBy'] },
+      OrderFields extends ExcludeUnderscoreKeys<Keys<MaybeTupleToUnion<T['orderBy']>>>,
+      ByFields extends MaybeTupleToUnion<T['by']>,
+      ByValid extends Has<ByFields, OrderFields>,
+      HavingFields extends GetHavingFields<T['having']>,
+      HavingValid extends Has<ByFields, HavingFields>,
+      ByEmpty extends T['by'] extends never[] ? True : False,
+      InputErrors extends ByEmpty extends True
+      ? `Error: "by" must not be empty.`
+      : HavingValid extends False
+      ? {
+          [P in HavingFields]: P extends ByFields
+            ? never
+            : P extends string
+            ? `Error: Field "${P}" used in "having" needs to be provided in "by".`
+            : [
+                Error,
+                'Field ',
+                P,
+                ` in "having" needs to be provided in "by"`,
+              ]
+        }[HavingFields]
+      : 'take' extends Keys<T>
+      ? 'orderBy' extends Keys<T>
+        ? ByValid extends True
+          ? {}
+          : {
+              [P in OrderFields]: P extends ByFields
+                ? never
+                : `Error: Field "${P}" in "orderBy" needs to be provided in "by"`
+            }[OrderFields]
+        : 'Error: If you provide "take", you also need to provide "orderBy"'
+      : 'skip' extends Keys<T>
+      ? 'orderBy' extends Keys<T>
+        ? ByValid extends True
+          ? {}
+          : {
+              [P in OrderFields]: P extends ByFields
+                ? never
+                : `Error: Field "${P}" in "orderBy" needs to be provided in "by"`
+            }[OrderFields]
+        : 'Error: If you provide "skip", you also need to provide "orderBy"'
+      : ByValid extends True
+      ? {}
+      : {
+          [P in OrderFields]: P extends ByFields
+            ? never
+            : `Error: Field "${P}" in "orderBy" needs to be provided in "by"`
+        }[OrderFields]
+    >(args: SubsetIntersection<T, BodyFabricConsumptionGroupByArgs, OrderByArg> & InputErrors): {} extends InputErrors ? GetBodyFabricConsumptionGroupByPayload<T> : Prisma.PrismaPromise<InputErrors>
+  /**
+   * Fields of the BodyFabricConsumption model
+   */
+  readonly fields: BodyFabricConsumptionFieldRefs;
+  }
+
+  /**
+   * The delegate class that acts as a "Promise-like" for BodyFabricConsumption.
+   * Why is this prefixed with `Prisma__`?
+   * Because we want to prevent naming conflicts as mentioned in
+   * https://github.com/prisma/prisma-client-js/issues/707
+   */
+  export interface Prisma__BodyFabricConsumptionClient<T, Null = never, ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs, GlobalOmitOptions = {}> extends Prisma.PrismaPromise<T> {
+    readonly [Symbol.toStringTag]: "PrismaPromise"
+    /**
+     * Attaches callbacks for the resolution and/or rejection of the Promise.
+     * @param onfulfilled The callback to execute when the Promise is resolved.
+     * @param onrejected The callback to execute when the Promise is rejected.
+     * @returns A Promise for the completion of which ever callback is executed.
+     */
+    then<TResult1 = T, TResult2 = never>(onfulfilled?: ((value: T) => TResult1 | PromiseLike<TResult1>) | undefined | null, onrejected?: ((reason: any) => TResult2 | PromiseLike<TResult2>) | undefined | null): $Utils.JsPromise<TResult1 | TResult2>
+    /**
+     * Attaches a callback for only the rejection of the Promise.
+     * @param onrejected The callback to execute when the Promise is rejected.
+     * @returns A Promise for the completion of the callback.
+     */
+    catch<TResult = never>(onrejected?: ((reason: any) => TResult | PromiseLike<TResult>) | undefined | null): $Utils.JsPromise<T | TResult>
+    /**
+     * Attaches a callback that is invoked when the Promise is settled (fulfilled or rejected). The
+     * resolved value cannot be modified from the callback.
+     * @param onfinally The callback to execute when the Promise is settled (fulfilled or rejected).
+     * @returns A Promise for the completion of the callback.
+     */
+    finally(onfinally?: (() => void) | undefined | null): $Utils.JsPromise<T>
+  }
+
+
+
+
+  /**
+   * Fields of the BodyFabricConsumption model
+   */
+  interface BodyFabricConsumptionFieldRefs {
+    readonly id: FieldRef<"BodyFabricConsumption", 'Int'>
+    readonly division: FieldRef<"BodyFabricConsumption", 'String'>
+    readonly subDivision: FieldRef<"BodyFabricConsumption", 'String'>
+    readonly majorCategory: FieldRef<"BodyFabricConsumption", 'String'>
+    readonly fabWidth: FieldRef<"BodyFabricConsumption", 'Decimal'>
+    readonly fabConsumption: FieldRef<"BodyFabricConsumption", 'Decimal'>
+    readonly createdAt: FieldRef<"BodyFabricConsumption", 'DateTime'>
+  }
+    
+
+  // Custom InputTypes
+  /**
+   * BodyFabricConsumption findUnique
+   */
+  export type BodyFabricConsumptionFindUniqueArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the BodyFabricConsumption
+     */
+    select?: BodyFabricConsumptionSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the BodyFabricConsumption
+     */
+    omit?: BodyFabricConsumptionOmit<ExtArgs> | null
+    /**
+     * Filter, which BodyFabricConsumption to fetch.
+     */
+    where: BodyFabricConsumptionWhereUniqueInput
+  }
+
+  /**
+   * BodyFabricConsumption findUniqueOrThrow
+   */
+  export type BodyFabricConsumptionFindUniqueOrThrowArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the BodyFabricConsumption
+     */
+    select?: BodyFabricConsumptionSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the BodyFabricConsumption
+     */
+    omit?: BodyFabricConsumptionOmit<ExtArgs> | null
+    /**
+     * Filter, which BodyFabricConsumption to fetch.
+     */
+    where: BodyFabricConsumptionWhereUniqueInput
+  }
+
+  /**
+   * BodyFabricConsumption findFirst
+   */
+  export type BodyFabricConsumptionFindFirstArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the BodyFabricConsumption
+     */
+    select?: BodyFabricConsumptionSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the BodyFabricConsumption
+     */
+    omit?: BodyFabricConsumptionOmit<ExtArgs> | null
+    /**
+     * Filter, which BodyFabricConsumption to fetch.
+     */
+    where?: BodyFabricConsumptionWhereInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
+     * 
+     * Determine the order of BodyFabricConsumptions to fetch.
+     */
+    orderBy?: BodyFabricConsumptionOrderByWithRelationInput | BodyFabricConsumptionOrderByWithRelationInput[]
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
+     * 
+     * Sets the position for searching for BodyFabricConsumptions.
+     */
+    cursor?: BodyFabricConsumptionWhereUniqueInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Take `±n` BodyFabricConsumptions from the position of the cursor.
+     */
+    take?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Skip the first `n` BodyFabricConsumptions.
+     */
+    skip?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/distinct Distinct Docs}
+     * 
+     * Filter by unique combinations of BodyFabricConsumptions.
+     */
+    distinct?: BodyFabricConsumptionScalarFieldEnum | BodyFabricConsumptionScalarFieldEnum[]
+  }
+
+  /**
+   * BodyFabricConsumption findFirstOrThrow
+   */
+  export type BodyFabricConsumptionFindFirstOrThrowArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the BodyFabricConsumption
+     */
+    select?: BodyFabricConsumptionSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the BodyFabricConsumption
+     */
+    omit?: BodyFabricConsumptionOmit<ExtArgs> | null
+    /**
+     * Filter, which BodyFabricConsumption to fetch.
+     */
+    where?: BodyFabricConsumptionWhereInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
+     * 
+     * Determine the order of BodyFabricConsumptions to fetch.
+     */
+    orderBy?: BodyFabricConsumptionOrderByWithRelationInput | BodyFabricConsumptionOrderByWithRelationInput[]
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
+     * 
+     * Sets the position for searching for BodyFabricConsumptions.
+     */
+    cursor?: BodyFabricConsumptionWhereUniqueInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Take `±n` BodyFabricConsumptions from the position of the cursor.
+     */
+    take?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Skip the first `n` BodyFabricConsumptions.
+     */
+    skip?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/distinct Distinct Docs}
+     * 
+     * Filter by unique combinations of BodyFabricConsumptions.
+     */
+    distinct?: BodyFabricConsumptionScalarFieldEnum | BodyFabricConsumptionScalarFieldEnum[]
+  }
+
+  /**
+   * BodyFabricConsumption findMany
+   */
+  export type BodyFabricConsumptionFindManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the BodyFabricConsumption
+     */
+    select?: BodyFabricConsumptionSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the BodyFabricConsumption
+     */
+    omit?: BodyFabricConsumptionOmit<ExtArgs> | null
+    /**
+     * Filter, which BodyFabricConsumptions to fetch.
+     */
+    where?: BodyFabricConsumptionWhereInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
+     * 
+     * Determine the order of BodyFabricConsumptions to fetch.
+     */
+    orderBy?: BodyFabricConsumptionOrderByWithRelationInput | BodyFabricConsumptionOrderByWithRelationInput[]
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
+     * 
+     * Sets the position for listing BodyFabricConsumptions.
+     */
+    cursor?: BodyFabricConsumptionWhereUniqueInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Take `±n` BodyFabricConsumptions from the position of the cursor.
+     */
+    take?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Skip the first `n` BodyFabricConsumptions.
+     */
+    skip?: number
+    distinct?: BodyFabricConsumptionScalarFieldEnum | BodyFabricConsumptionScalarFieldEnum[]
+  }
+
+  /**
+   * BodyFabricConsumption create
+   */
+  export type BodyFabricConsumptionCreateArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the BodyFabricConsumption
+     */
+    select?: BodyFabricConsumptionSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the BodyFabricConsumption
+     */
+    omit?: BodyFabricConsumptionOmit<ExtArgs> | null
+    /**
+     * The data needed to create a BodyFabricConsumption.
+     */
+    data?: XOR<BodyFabricConsumptionCreateInput, BodyFabricConsumptionUncheckedCreateInput>
+  }
+
+  /**
+   * BodyFabricConsumption createMany
+   */
+  export type BodyFabricConsumptionCreateManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * The data used to create many BodyFabricConsumptions.
+     */
+    data: BodyFabricConsumptionCreateManyInput | BodyFabricConsumptionCreateManyInput[]
+    skipDuplicates?: boolean
+  }
+
+  /**
+   * BodyFabricConsumption createManyAndReturn
+   */
+  export type BodyFabricConsumptionCreateManyAndReturnArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the BodyFabricConsumption
+     */
+    select?: BodyFabricConsumptionSelectCreateManyAndReturn<ExtArgs> | null
+    /**
+     * Omit specific fields from the BodyFabricConsumption
+     */
+    omit?: BodyFabricConsumptionOmit<ExtArgs> | null
+    /**
+     * The data used to create many BodyFabricConsumptions.
+     */
+    data: BodyFabricConsumptionCreateManyInput | BodyFabricConsumptionCreateManyInput[]
+    skipDuplicates?: boolean
+  }
+
+  /**
+   * BodyFabricConsumption update
+   */
+  export type BodyFabricConsumptionUpdateArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the BodyFabricConsumption
+     */
+    select?: BodyFabricConsumptionSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the BodyFabricConsumption
+     */
+    omit?: BodyFabricConsumptionOmit<ExtArgs> | null
+    /**
+     * The data needed to update a BodyFabricConsumption.
+     */
+    data: XOR<BodyFabricConsumptionUpdateInput, BodyFabricConsumptionUncheckedUpdateInput>
+    /**
+     * Choose, which BodyFabricConsumption to update.
+     */
+    where: BodyFabricConsumptionWhereUniqueInput
+  }
+
+  /**
+   * BodyFabricConsumption updateMany
+   */
+  export type BodyFabricConsumptionUpdateManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * The data used to update BodyFabricConsumptions.
+     */
+    data: XOR<BodyFabricConsumptionUpdateManyMutationInput, BodyFabricConsumptionUncheckedUpdateManyInput>
+    /**
+     * Filter which BodyFabricConsumptions to update
+     */
+    where?: BodyFabricConsumptionWhereInput
+    /**
+     * Limit how many BodyFabricConsumptions to update.
+     */
+    limit?: number
+  }
+
+  /**
+   * BodyFabricConsumption updateManyAndReturn
+   */
+  export type BodyFabricConsumptionUpdateManyAndReturnArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the BodyFabricConsumption
+     */
+    select?: BodyFabricConsumptionSelectUpdateManyAndReturn<ExtArgs> | null
+    /**
+     * Omit specific fields from the BodyFabricConsumption
+     */
+    omit?: BodyFabricConsumptionOmit<ExtArgs> | null
+    /**
+     * The data used to update BodyFabricConsumptions.
+     */
+    data: XOR<BodyFabricConsumptionUpdateManyMutationInput, BodyFabricConsumptionUncheckedUpdateManyInput>
+    /**
+     * Filter which BodyFabricConsumptions to update
+     */
+    where?: BodyFabricConsumptionWhereInput
+    /**
+     * Limit how many BodyFabricConsumptions to update.
+     */
+    limit?: number
+  }
+
+  /**
+   * BodyFabricConsumption upsert
+   */
+  export type BodyFabricConsumptionUpsertArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the BodyFabricConsumption
+     */
+    select?: BodyFabricConsumptionSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the BodyFabricConsumption
+     */
+    omit?: BodyFabricConsumptionOmit<ExtArgs> | null
+    /**
+     * The filter to search for the BodyFabricConsumption to update in case it exists.
+     */
+    where: BodyFabricConsumptionWhereUniqueInput
+    /**
+     * In case the BodyFabricConsumption found by the `where` argument doesn't exist, create a new BodyFabricConsumption with this data.
+     */
+    create: XOR<BodyFabricConsumptionCreateInput, BodyFabricConsumptionUncheckedCreateInput>
+    /**
+     * In case the BodyFabricConsumption was found with the provided `where` argument, update it with this data.
+     */
+    update: XOR<BodyFabricConsumptionUpdateInput, BodyFabricConsumptionUncheckedUpdateInput>
+  }
+
+  /**
+   * BodyFabricConsumption delete
+   */
+  export type BodyFabricConsumptionDeleteArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the BodyFabricConsumption
+     */
+    select?: BodyFabricConsumptionSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the BodyFabricConsumption
+     */
+    omit?: BodyFabricConsumptionOmit<ExtArgs> | null
+    /**
+     * Filter which BodyFabricConsumption to delete.
+     */
+    where: BodyFabricConsumptionWhereUniqueInput
+  }
+
+  /**
+   * BodyFabricConsumption deleteMany
+   */
+  export type BodyFabricConsumptionDeleteManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Filter which BodyFabricConsumptions to delete
+     */
+    where?: BodyFabricConsumptionWhereInput
+    /**
+     * Limit how many BodyFabricConsumptions to delete.
+     */
+    limit?: number
+  }
+
+  /**
+   * BodyFabricConsumption without action
+   */
+  export type BodyFabricConsumptionDefaultArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the BodyFabricConsumption
+     */
+    select?: BodyFabricConsumptionSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the BodyFabricConsumption
+     */
+    omit?: BodyFabricConsumptionOmit<ExtArgs> | null
+  }
+
+
+  /**
    * Model RoughCmpCostMaster
    */
 
@@ -66249,6 +67403,19 @@ export namespace Prisma {
   export type BodyArticleDataScalarFieldEnum = (typeof BodyArticleDataScalarFieldEnum)[keyof typeof BodyArticleDataScalarFieldEnum]
 
 
+  export const BodyFabricConsumptionScalarFieldEnum: {
+    id: 'id',
+    division: 'division',
+    subDivision: 'subDivision',
+    majorCategory: 'majorCategory',
+    fabWidth: 'fabWidth',
+    fabConsumption: 'fabConsumption',
+    createdAt: 'createdAt'
+  };
+
+  export type BodyFabricConsumptionScalarFieldEnum = (typeof BodyFabricConsumptionScalarFieldEnum)[keyof typeof BodyFabricConsumptionScalarFieldEnum]
+
+
   export const RoughCmpCostMasterScalarFieldEnum: {
     id: 'id',
     div: 'div',
@@ -67164,6 +68331,15 @@ export namespace Prisma {
   };
 
   export type BodyArticleDataOrderByRelevanceFieldEnum = (typeof BodyArticleDataOrderByRelevanceFieldEnum)[keyof typeof BodyArticleDataOrderByRelevanceFieldEnum]
+
+
+  export const BodyFabricConsumptionOrderByRelevanceFieldEnum: {
+    division: 'division',
+    subDivision: 'subDivision',
+    majorCategory: 'majorCategory'
+  };
+
+  export type BodyFabricConsumptionOrderByRelevanceFieldEnum = (typeof BodyFabricConsumptionOrderByRelevanceFieldEnum)[keyof typeof BodyFabricConsumptionOrderByRelevanceFieldEnum]
 
 
   export const RoughCmpCostMasterOrderByRelevanceFieldEnum: {
@@ -72978,6 +74154,72 @@ export namespace Prisma {
     userName?: StringNullableWithAggregatesFilter<"BodyArticleData"> | string | null
     createdAt?: DateTimeWithAggregatesFilter<"BodyArticleData"> | Date | string
     updatedAt?: DateTimeWithAggregatesFilter<"BodyArticleData"> | Date | string
+  }
+
+  export type BodyFabricConsumptionWhereInput = {
+    AND?: BodyFabricConsumptionWhereInput | BodyFabricConsumptionWhereInput[]
+    OR?: BodyFabricConsumptionWhereInput[]
+    NOT?: BodyFabricConsumptionWhereInput | BodyFabricConsumptionWhereInput[]
+    id?: IntFilter<"BodyFabricConsumption"> | number
+    division?: StringNullableFilter<"BodyFabricConsumption"> | string | null
+    subDivision?: StringNullableFilter<"BodyFabricConsumption"> | string | null
+    majorCategory?: StringNullableFilter<"BodyFabricConsumption"> | string | null
+    fabWidth?: DecimalNullableFilter<"BodyFabricConsumption"> | Decimal | DecimalJsLike | number | string | null
+    fabConsumption?: DecimalNullableFilter<"BodyFabricConsumption"> | Decimal | DecimalJsLike | number | string | null
+    createdAt?: DateTimeFilter<"BodyFabricConsumption"> | Date | string
+  }
+
+  export type BodyFabricConsumptionOrderByWithRelationInput = {
+    id?: SortOrder
+    division?: SortOrderInput | SortOrder
+    subDivision?: SortOrderInput | SortOrder
+    majorCategory?: SortOrderInput | SortOrder
+    fabWidth?: SortOrderInput | SortOrder
+    fabConsumption?: SortOrderInput | SortOrder
+    createdAt?: SortOrder
+    _relevance?: BodyFabricConsumptionOrderByRelevanceInput
+  }
+
+  export type BodyFabricConsumptionWhereUniqueInput = Prisma.AtLeast<{
+    id?: number
+    division_subDivision_majorCategory_fabWidth?: BodyFabricConsumptionDivisionSubDivisionMajorCategoryFabWidthCompoundUniqueInput
+    AND?: BodyFabricConsumptionWhereInput | BodyFabricConsumptionWhereInput[]
+    OR?: BodyFabricConsumptionWhereInput[]
+    NOT?: BodyFabricConsumptionWhereInput | BodyFabricConsumptionWhereInput[]
+    division?: StringNullableFilter<"BodyFabricConsumption"> | string | null
+    subDivision?: StringNullableFilter<"BodyFabricConsumption"> | string | null
+    majorCategory?: StringNullableFilter<"BodyFabricConsumption"> | string | null
+    fabWidth?: DecimalNullableFilter<"BodyFabricConsumption"> | Decimal | DecimalJsLike | number | string | null
+    fabConsumption?: DecimalNullableFilter<"BodyFabricConsumption"> | Decimal | DecimalJsLike | number | string | null
+    createdAt?: DateTimeFilter<"BodyFabricConsumption"> | Date | string
+  }, "id" | "division_subDivision_majorCategory_fabWidth">
+
+  export type BodyFabricConsumptionOrderByWithAggregationInput = {
+    id?: SortOrder
+    division?: SortOrderInput | SortOrder
+    subDivision?: SortOrderInput | SortOrder
+    majorCategory?: SortOrderInput | SortOrder
+    fabWidth?: SortOrderInput | SortOrder
+    fabConsumption?: SortOrderInput | SortOrder
+    createdAt?: SortOrder
+    _count?: BodyFabricConsumptionCountOrderByAggregateInput
+    _avg?: BodyFabricConsumptionAvgOrderByAggregateInput
+    _max?: BodyFabricConsumptionMaxOrderByAggregateInput
+    _min?: BodyFabricConsumptionMinOrderByAggregateInput
+    _sum?: BodyFabricConsumptionSumOrderByAggregateInput
+  }
+
+  export type BodyFabricConsumptionScalarWhereWithAggregatesInput = {
+    AND?: BodyFabricConsumptionScalarWhereWithAggregatesInput | BodyFabricConsumptionScalarWhereWithAggregatesInput[]
+    OR?: BodyFabricConsumptionScalarWhereWithAggregatesInput[]
+    NOT?: BodyFabricConsumptionScalarWhereWithAggregatesInput | BodyFabricConsumptionScalarWhereWithAggregatesInput[]
+    id?: IntWithAggregatesFilter<"BodyFabricConsumption"> | number
+    division?: StringNullableWithAggregatesFilter<"BodyFabricConsumption"> | string | null
+    subDivision?: StringNullableWithAggregatesFilter<"BodyFabricConsumption"> | string | null
+    majorCategory?: StringNullableWithAggregatesFilter<"BodyFabricConsumption"> | string | null
+    fabWidth?: DecimalNullableWithAggregatesFilter<"BodyFabricConsumption"> | Decimal | DecimalJsLike | number | string | null
+    fabConsumption?: DecimalNullableWithAggregatesFilter<"BodyFabricConsumption"> | Decimal | DecimalJsLike | number | string | null
+    createdAt?: DateTimeWithAggregatesFilter<"BodyFabricConsumption"> | Date | string
   }
 
   export type RoughCmpCostMasterWhereInput = {
@@ -80109,6 +81351,73 @@ export namespace Prisma {
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
   }
 
+  export type BodyFabricConsumptionCreateInput = {
+    division?: string | null
+    subDivision?: string | null
+    majorCategory?: string | null
+    fabWidth?: Decimal | DecimalJsLike | number | string | null
+    fabConsumption?: Decimal | DecimalJsLike | number | string | null
+    createdAt?: Date | string
+  }
+
+  export type BodyFabricConsumptionUncheckedCreateInput = {
+    id?: number
+    division?: string | null
+    subDivision?: string | null
+    majorCategory?: string | null
+    fabWidth?: Decimal | DecimalJsLike | number | string | null
+    fabConsumption?: Decimal | DecimalJsLike | number | string | null
+    createdAt?: Date | string
+  }
+
+  export type BodyFabricConsumptionUpdateInput = {
+    division?: NullableStringFieldUpdateOperationsInput | string | null
+    subDivision?: NullableStringFieldUpdateOperationsInput | string | null
+    majorCategory?: NullableStringFieldUpdateOperationsInput | string | null
+    fabWidth?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    fabConsumption?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+  }
+
+  export type BodyFabricConsumptionUncheckedUpdateInput = {
+    id?: IntFieldUpdateOperationsInput | number
+    division?: NullableStringFieldUpdateOperationsInput | string | null
+    subDivision?: NullableStringFieldUpdateOperationsInput | string | null
+    majorCategory?: NullableStringFieldUpdateOperationsInput | string | null
+    fabWidth?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    fabConsumption?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+  }
+
+  export type BodyFabricConsumptionCreateManyInput = {
+    id?: number
+    division?: string | null
+    subDivision?: string | null
+    majorCategory?: string | null
+    fabWidth?: Decimal | DecimalJsLike | number | string | null
+    fabConsumption?: Decimal | DecimalJsLike | number | string | null
+    createdAt?: Date | string
+  }
+
+  export type BodyFabricConsumptionUpdateManyMutationInput = {
+    division?: NullableStringFieldUpdateOperationsInput | string | null
+    subDivision?: NullableStringFieldUpdateOperationsInput | string | null
+    majorCategory?: NullableStringFieldUpdateOperationsInput | string | null
+    fabWidth?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    fabConsumption?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+  }
+
+  export type BodyFabricConsumptionUncheckedUpdateManyInput = {
+    id?: IntFieldUpdateOperationsInput | number
+    division?: NullableStringFieldUpdateOperationsInput | string | null
+    subDivision?: NullableStringFieldUpdateOperationsInput | string | null
+    majorCategory?: NullableStringFieldUpdateOperationsInput | string | null
+    fabWidth?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    fabConsumption?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+  }
+
   export type RoughCmpCostMasterCreateInput = {
     div?: string | null
     subDiv?: string | null
@@ -85134,6 +86443,61 @@ export namespace Prisma {
     preciseConsumptionKg?: SortOrder
     preciseConsumptionMeter?: SortOrder
     approvedBy?: SortOrder
+  }
+
+  export type BodyFabricConsumptionOrderByRelevanceInput = {
+    fields: BodyFabricConsumptionOrderByRelevanceFieldEnum | BodyFabricConsumptionOrderByRelevanceFieldEnum[]
+    sort: SortOrder
+    search: string
+  }
+
+  export type BodyFabricConsumptionDivisionSubDivisionMajorCategoryFabWidthCompoundUniqueInput = {
+    division: string
+    subDivision: string
+    majorCategory: string
+    fabWidth: Decimal | DecimalJsLike | number | string
+  }
+
+  export type BodyFabricConsumptionCountOrderByAggregateInput = {
+    id?: SortOrder
+    division?: SortOrder
+    subDivision?: SortOrder
+    majorCategory?: SortOrder
+    fabWidth?: SortOrder
+    fabConsumption?: SortOrder
+    createdAt?: SortOrder
+  }
+
+  export type BodyFabricConsumptionAvgOrderByAggregateInput = {
+    id?: SortOrder
+    fabWidth?: SortOrder
+    fabConsumption?: SortOrder
+  }
+
+  export type BodyFabricConsumptionMaxOrderByAggregateInput = {
+    id?: SortOrder
+    division?: SortOrder
+    subDivision?: SortOrder
+    majorCategory?: SortOrder
+    fabWidth?: SortOrder
+    fabConsumption?: SortOrder
+    createdAt?: SortOrder
+  }
+
+  export type BodyFabricConsumptionMinOrderByAggregateInput = {
+    id?: SortOrder
+    division?: SortOrder
+    subDivision?: SortOrder
+    majorCategory?: SortOrder
+    fabWidth?: SortOrder
+    fabConsumption?: SortOrder
+    createdAt?: SortOrder
+  }
+
+  export type BodyFabricConsumptionSumOrderByAggregateInput = {
+    id?: SortOrder
+    fabWidth?: SortOrder
+    fabConsumption?: SortOrder
   }
 
   export type RoughCmpCostMasterOrderByRelevanceInput = {
