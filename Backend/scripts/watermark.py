@@ -139,7 +139,7 @@ def watermark(image_bytes, row, fmt="png"):
     # Add a solid-white strip BELOW the original photo and write the label
     # there. Strip height is AUTO-FIT to the content (no wasted whitespace) —
     # font size is proportional to the source image height instead.
-    font_size = max(14, min(32, int(height * 0.013)))
+    font_size = max(26, min(60, int(height * 0.030)))
     line_h = int(font_size * 1.35)
     pad_x = max(14, font_size)
     pad_y = max(14, int(font_size * 0.7))

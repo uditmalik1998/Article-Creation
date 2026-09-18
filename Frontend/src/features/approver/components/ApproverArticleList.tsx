@@ -743,6 +743,22 @@ const ArticleCard = React.memo(
       fetchSegmentRangesFor(effectiveMajCat).then((ranges) => setSegmentRanges(ranges));
     }, [effectiveMajCat]);
 
+    // Body fabric consumption options (width → consumption meter) — Body Articles only
+    const [fabricConsumptionOptions, setFabricConsumptionOptions] = useState<
+      { fabWidth: number; fabConsumption: number }[]
+    >([]);
+    useEffect(() => {
+      if (!isBodyArticle || !effectiveMajCat) return;
+      const token = localStorage.getItem('authToken');
+      fetch(
+        `${APP_CONFIG.api.baseURL}/approver/body-fabric-consumption?majorCategory=${encodeURIComponent(effectiveMajCat)}`,
+        { headers: { Authorization: `Bearer ${token}` } },
+      )
+        .then((r) => r.json())
+        .then((d: { fabWidth: number; fabConsumption: number }[]) => setFabricConsumptionOptions(d ?? []))
+        .catch(() => setFabricConsumptionOptions([]));
+    }, [isBodyArticle, effectiveMajCat]);
+
     // Auto-correct segment when ranges first load (fixes articles saved before this feature)
     useEffect(() => {
       if (segmentRanges.length === 0) return;
@@ -3296,7 +3312,68 @@ const ArticleCard = React.memo(
                               {bom.label}
                             </span>
                             <div className="w-[100px] shrink-0 text-right">
-                              {bom.field === 'bodyConsumptionType' ? (
+                              {bom.field === 'width' && isBodyArticle && fabricConsumptionOptions.length > 0 ? (
+                                <Popover
+                                  open={isEditingBom}
+                                  onOpenChange={(o) => { if (!o) setEditingField(null); }}
+                                >
+                                  <PopoverAnchor asChild>
+                                    <span
+                                      className="flex items-center justify-end gap-1 text-right text-[11px]"
+                                      style={{
+                                        color: isEmpty ? '#9ca3af' : '#111827',
+                                        fontStyle: isEmpty ? 'italic' : 'normal',
+                                        fontWeight: 600,
+                                      }}
+                                    >
+                                      <span className="truncate">{isEmpty ? (bomLocked ? '—' : 'Click') : val}</span>
+                                      <ChevronDown className="h-3 w-3 shrink-0 opacity-40" />
+                                    </span>
+                                  </PopoverAnchor>
+                                  {isEditingBom && (
+                                    <PopoverContent
+                                      className="w-44 p-0"
+                                      align="end"
+                                      onClick={(e) => e.stopPropagation()}
+                                    >
+                                      {!isEmpty && (
+                                        <button
+                                          type="button"
+                                          onClick={() => { handleSave('width', null); setEditingField(null); }}
+                                          className="flex w-full items-center gap-1.5 border-b px-3 py-1.5 text-left text-[11px] font-medium text-red-600 hover:bg-red-50"
+                                        >
+                                          <X className="h-3 w-3 shrink-0" />
+                                          Clear selection
+                                        </button>
+                                      )}
+                                      <div className="max-h-48 overflow-y-auto py-1">
+                                        {fabricConsumptionOptions.map((opt) => (
+                                          <button
+                                            key={opt.fabWidth}
+                                            type="button"
+                                            onClick={() => {
+                                              const updates: Record<string, string | null> = {
+                                                width: String(opt.fabWidth),
+                                                consumptionMeter: String(opt.fabConsumption),
+                                              };
+                                              setLocalValues((prev) => ({ ...prev, ...updates }));
+                                              setEditingField(null);
+                                              onSave({ ...item, ...updates } as any, updates);
+                                            }}
+                                            className={cn(
+                                              'flex w-full items-center justify-between px-3 py-1.5 text-left text-[11px] hover:bg-accent hover:text-accent-foreground',
+                                              val === String(opt.fabWidth) && 'bg-accent/60',
+                                            )}
+                                          >
+                                            <span className="font-medium">{opt.fabWidth}</span>
+                                            <span className="text-[10px] text-muted-foreground">→ {opt.fabConsumption}</span>
+                                          </button>
+                                        ))}
+                                      </div>
+                                    </PopoverContent>
+                                  )}
+                                </Popover>
+                              ) : bom.field === 'bodyConsumptionType' ? (
                                 <Popover
                                   open={isEditingBom}
                                   onOpenChange={(o) => { if (!o) setEditingField(null); }}
