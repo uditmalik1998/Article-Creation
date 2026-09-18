@@ -3316,12 +3316,22 @@ const ArticleCard = React.memo(
                           ]
                       ).map((bom) => {
                         const isEditingBom = editingField === `bom_${bom.field}`;
-                        const bomLocked = isFieldLocked(bom.field);
-                        const val = bom.isMarkdown
+                        // Consumption in Kg is always derived, same as the precise section:
+                        // width x gsm x consumption(meter) x 2.54 / 100000. Deriving it on every
+                        // render (rather than only when an input changes) keeps rows saved under
+                        // the old formula from showing a stale figure.
+                        const isDerivedBomKg = bom.field === 'consumptionKg';
+                        const bomLocked = isFieldLocked(bom.field) || isDerivedBomKg;
+                        let val = bom.isMarkdown
                           ? markdown
                           : bom.isAfterTax
                           ? afterTax
                           : String(getValue(bom.field) ?? '').trim() || '—';
+                        if (isDerivedBomKg) {
+                          const num = (f: string) => parseFloat(String(getValue(f) ?? '')) || 0;
+                          const kg = (num('width') * num('gsm') * num('consumptionMeter') * 2.54) / 100000;
+                          val = kg > 0 ? kg.toFixed(4) : '—';
+                        }
                         const isEmpty = val === '—';
                         const dropdownOptions: string[] = bom.isDropdown
                           ? bom.field === 'bodyConsumptionType'
