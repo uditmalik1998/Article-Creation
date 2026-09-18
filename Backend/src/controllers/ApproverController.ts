@@ -3709,6 +3709,20 @@ export class ApproverController {
         return res.json({ results });
     }
 
+    static getBodyFabricConsumption = async (req: Request, res: Response) => {
+        const majorCategory = String(req.query.majorCategory ?? '').trim();
+        if (!majorCategory) return res.json([]);
+        const rows = await prisma.bodyFabricConsumption.findMany({
+            where: { majorCategory: { equals: majorCategory, mode: 'insensitive' } },
+            select: { fabWidth: true, fabConsumption: true },
+            orderBy: { fabWidth: 'asc' },
+        });
+        return res.json(rows.map((r) => ({
+            fabWidth:       r.fabWidth       != null ? Number(r.fabWidth)       : null,
+            fabConsumption: r.fabConsumption != null ? Number(r.fabConsumption) : null,
+        })));
+    };
+
     static getBodyArticleItems = async (req: Request, res: Response) => {
         const {
             page = '1', limit = '50',

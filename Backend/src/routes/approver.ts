@@ -85,6 +85,7 @@ router.get('/fabric-article-data/search', h(ApproverController.searchFabricArtic
 // Body article data search — returns up to 10 matching body_article_data rows by number or description
 // (an exact Body Article Number match is always included even if outside the top 10)
 router.get('/body-article-data/search', h(ApproverController.searchBodyArticleData));
+router.get('/body-fabric-consumption',  h(ApproverController.getBodyFabricConsumption));
 
 // Create body article from FG article — copies Body & Construction fields into body_article_data
 router.post('/create-body-article', h(ApproverController.createBodyArticleFromFG));
