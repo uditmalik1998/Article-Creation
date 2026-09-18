@@ -56998,7 +56998,7 @@ export namespace Prisma {
     mBodyStyle: string | null
     mLength: string | null
     mSet: string | null
-    bodyArticleNumber: string | null
+    bodyArticleNumber: string
     bodyArticleDescription: string | null
     imageUrl: string | null
     bodyArticleType: string | null
@@ -57287,7 +57287,7 @@ export namespace Prisma {
       mBodyStyle: string | null
       mLength: string | null
       mSet: string | null
-      bodyArticleNumber: string | null
+      bodyArticleNumber: string
       bodyArticleDescription: string | null
       imageUrl: string | null
       bodyArticleType: string | null
@@ -72475,7 +72475,7 @@ export namespace Prisma {
     mBodyStyle?: StringNullableFilter<"BodyArticleData"> | string | null
     mLength?: StringNullableFilter<"BodyArticleData"> | string | null
     mSet?: StringNullableFilter<"BodyArticleData"> | string | null
-    bodyArticleNumber?: StringNullableFilter<"BodyArticleData"> | string | null
+    bodyArticleNumber?: StringFilter<"BodyArticleData"> | string
     bodyArticleDescription?: StringNullableFilter<"BodyArticleData"> | string | null
     imageUrl?: StringNullableFilter<"BodyArticleData"> | string | null
     bodyArticleType?: StringNullableFilter<"BodyArticleData"> | string | null
@@ -72528,7 +72528,7 @@ export namespace Prisma {
     mBodyStyle?: SortOrderInput | SortOrder
     mLength?: SortOrderInput | SortOrder
     mSet?: SortOrderInput | SortOrder
-    bodyArticleNumber?: SortOrderInput | SortOrder
+    bodyArticleNumber?: SortOrder
     bodyArticleDescription?: SortOrderInput | SortOrder
     imageUrl?: SortOrderInput | SortOrder
     bodyArticleType?: SortOrderInput | SortOrder
@@ -72565,6 +72565,7 @@ export namespace Prisma {
 
   export type BodyArticleDataWhereUniqueInput = Prisma.AtLeast<{
     id?: string
+    bodyArticleNumber?: string
     AND?: BodyArticleDataWhereInput | BodyArticleDataWhereInput[]
     OR?: BodyArticleDataWhereInput[]
     NOT?: BodyArticleDataWhereInput | BodyArticleDataWhereInput[]
@@ -72585,7 +72586,6 @@ export namespace Prisma {
     mBodyStyle?: StringNullableFilter<"BodyArticleData"> | string | null
     mLength?: StringNullableFilter<"BodyArticleData"> | string | null
     mSet?: StringNullableFilter<"BodyArticleData"> | string | null
-    bodyArticleNumber?: StringNullableFilter<"BodyArticleData"> | string | null
     bodyArticleDescription?: StringNullableFilter<"BodyArticleData"> | string | null
     imageUrl?: StringNullableFilter<"BodyArticleData"> | string | null
     bodyArticleType?: StringNullableFilter<"BodyArticleData"> | string | null
@@ -72617,7 +72617,7 @@ export namespace Prisma {
     userName?: StringNullableFilter<"BodyArticleData"> | string | null
     createdAt?: DateTimeFilter<"BodyArticleData"> | Date | string
     updatedAt?: DateTimeFilter<"BodyArticleData"> | Date | string
-  }, "id">
+  }, "id" | "bodyArticleNumber">
 
   export type BodyArticleDataOrderByWithAggregationInput = {
     id?: SortOrder
@@ -72638,7 +72638,7 @@ export namespace Prisma {
     mBodyStyle?: SortOrderInput | SortOrder
     mLength?: SortOrderInput | SortOrder
     mSet?: SortOrderInput | SortOrder
-    bodyArticleNumber?: SortOrderInput | SortOrder
+    bodyArticleNumber?: SortOrder
     bodyArticleDescription?: SortOrderInput | SortOrder
     imageUrl?: SortOrderInput | SortOrder
     bodyArticleType?: SortOrderInput | SortOrder
@@ -72699,7 +72699,7 @@ export namespace Prisma {
     mBodyStyle?: StringNullableWithAggregatesFilter<"BodyArticleData"> | string | null
     mLength?: StringNullableWithAggregatesFilter<"BodyArticleData"> | string | null
     mSet?: StringNullableWithAggregatesFilter<"BodyArticleData"> | string | null
-    bodyArticleNumber?: StringNullableWithAggregatesFilter<"BodyArticleData"> | string | null
+    bodyArticleNumber?: StringWithAggregatesFilter<"BodyArticleData"> | string
     bodyArticleDescription?: StringNullableWithAggregatesFilter<"BodyArticleData"> | string | null
     imageUrl?: StringNullableWithAggregatesFilter<"BodyArticleData"> | string | null
     bodyArticleType?: StringNullableWithAggregatesFilter<"BodyArticleData"> | string | null
@@ -79433,7 +79433,7 @@ export namespace Prisma {
     mBodyStyle?: string | null
     mLength?: string | null
     mSet?: string | null
-    bodyArticleNumber?: string | null
+    bodyArticleNumber: string
     bodyArticleDescription?: string | null
     imageUrl?: string | null
     bodyArticleType?: string | null
@@ -79486,7 +79486,7 @@ export namespace Prisma {
     mBodyStyle?: string | null
     mLength?: string | null
     mSet?: string | null
-    bodyArticleNumber?: string | null
+    bodyArticleNumber: string
     bodyArticleDescription?: string | null
     imageUrl?: string | null
     bodyArticleType?: string | null
@@ -79539,7 +79539,7 @@ export namespace Prisma {
     mBodyStyle?: NullableStringFieldUpdateOperationsInput | string | null
     mLength?: NullableStringFieldUpdateOperationsInput | string | null
     mSet?: NullableStringFieldUpdateOperationsInput | string | null
-    bodyArticleNumber?: NullableStringFieldUpdateOperationsInput | string | null
+    bodyArticleNumber?: StringFieldUpdateOperationsInput | string
     bodyArticleDescription?: NullableStringFieldUpdateOperationsInput | string | null
     imageUrl?: NullableStringFieldUpdateOperationsInput | string | null
     bodyArticleType?: NullableStringFieldUpdateOperationsInput | string | null
@@ -79592,7 +79592,7 @@ export namespace Prisma {
     mBodyStyle?: NullableStringFieldUpdateOperationsInput | string | null
     mLength?: NullableStringFieldUpdateOperationsInput | string | null
     mSet?: NullableStringFieldUpdateOperationsInput | string | null
-    bodyArticleNumber?: NullableStringFieldUpdateOperationsInput | string | null
+    bodyArticleNumber?: StringFieldUpdateOperationsInput | string
     bodyArticleDescription?: NullableStringFieldUpdateOperationsInput | string | null
     imageUrl?: NullableStringFieldUpdateOperationsInput | string | null
     bodyArticleType?: NullableStringFieldUpdateOperationsInput | string | null
@@ -79645,7 +79645,7 @@ export namespace Prisma {
     mBodyStyle?: string | null
     mLength?: string | null
     mSet?: string | null
-    bodyArticleNumber?: string | null
+    bodyArticleNumber: string
     bodyArticleDescription?: string | null
     imageUrl?: string | null
     bodyArticleType?: string | null
@@ -79698,7 +79698,7 @@ export namespace Prisma {
     mBodyStyle?: NullableStringFieldUpdateOperationsInput | string | null
     mLength?: NullableStringFieldUpdateOperationsInput | string | null
     mSet?: NullableStringFieldUpdateOperationsInput | string | null
-    bodyArticleNumber?: NullableStringFieldUpdateOperationsInput | string | null
+    bodyArticleNumber?: StringFieldUpdateOperationsInput | string
     bodyArticleDescription?: NullableStringFieldUpdateOperationsInput | string | null
     imageUrl?: NullableStringFieldUpdateOperationsInput | string | null
     bodyArticleType?: NullableStringFieldUpdateOperationsInput | string | null
@@ -79751,7 +79751,7 @@ export namespace Prisma {
     mBodyStyle?: NullableStringFieldUpdateOperationsInput | string | null
     mLength?: NullableStringFieldUpdateOperationsInput | string | null
     mSet?: NullableStringFieldUpdateOperationsInput | string | null
-    bodyArticleNumber?: NullableStringFieldUpdateOperationsInput | string | null
+    bodyArticleNumber?: StringFieldUpdateOperationsInput | string
     bodyArticleDescription?: NullableStringFieldUpdateOperationsInput | string | null
     imageUrl?: NullableStringFieldUpdateOperationsInput | string | null
     bodyArticleType?: NullableStringFieldUpdateOperationsInput | string | null

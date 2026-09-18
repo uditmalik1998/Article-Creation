@@ -3977,8 +3977,14 @@ export class ApproverController {
             return res.json(item);
         }
 
-        // If bodyArticleNumber is being set, check it isn't already owned by a different row
-        if (data.bodyArticleNumber) {
+        // body_article_number is required and unique — never allow it to be cleared,
+        // and check upfront that a new value isn't already owned by a different row.
+        if ('bodyArticleNumber' in data) {
+            if (!data.bodyArticleNumber || !String(data.bodyArticleNumber).trim()) {
+                return res.status(400).json({
+                    error: 'Body Article Number cannot be empty.',
+                });
+            }
             const conflict = await prisma.bodyArticleData.findFirst({
                 where: { bodyArticleNumber: data.bodyArticleNumber as string, NOT: { id } },
                 select: { id: true, bodyArticleDescription: true },
@@ -3999,6 +4005,11 @@ export class ApproverController {
             if (err?.code === 'P2002' && err?.meta?.target?.includes('body_article_number')) {
                 return res.status(409).json({
                     error: `Body Article Number ${data.bodyArticleNumber} is already assigned to another record.`,
+                });
+            }
+            if (err?.code === 'P2011' || err?.code === 'P2009') {
+                return res.status(400).json({
+                    error: 'Body Article Number cannot be empty.',
                 });
             }
             throw err;
@@ -4373,46 +4384,17 @@ export class ApproverController {
             }
         }
 
-        const created = await Promise.all(items.map((item) =>
-            prisma.bodyArticleData.create({
-                data: {
-                    flatId:               item.id,
-                    articleNumber:        item.articleNumber,
-                    designNumber:         item.designNumber,
-                    division:             item.division,
-                    subDivision:          item.subDivision,
-                    majorCategory:        item.majorCategory,
-                    mcCode:               item.mcCode,
-                    vendorName:           item.vendorName,
-                    vendorCode:           item.vendorCode,
-                    season:               item.season,
-                    year:                 item.year,
-                    hsnTaxCode:           item.hsnTaxCode,
-                    imageUrl:             item.imageUrl,
-                    userName:             item.userName,
-                    bodyArticleType:      'FG',
-                    mCollarType:          item.collar,
-                    mCollarStyle:         item.collarStyle,
-                    mNeckType:            item.neck,
-                    mNeckStyle:           item.neckDetails,
-                    mPlacket:             item.placket,
-                    mBltType:             item.fatherBelt,
-                    mBltStyle:            item.childBelt,
-                    mSleevesMainStyle:    item.sleeve,
-                    mSleeveFold:          item.sleeveFold,
-                    mSet:                 item.mSet,
-                    mBtmFold:             item.bottomFold,
-                    mNoOfPocket:          item.noOfPocket,
-                    mPocket:              item.pocketType,
-                    mExtraPocket:         item.extraPocket,
-                    mFit:                 item.fit,
-                    mBodyStyle:           item.pattern,
-                    mLength:              item.length,
-                },
-            })
-        ));
-
-        return res.json({ success: true, created: created.length });
+        // body_article_number is now a required, unique column (see
+        // prisma/migrations/enforce_body_article_number_not_null.sql). This endpoint
+        // used to create a PENDING row with no number at all, filled in later by a
+        // separate SAP-submit step (zmmBodyArtCreationService) — that left an
+        // unbounded number of abandoned NULL rows whenever the SAP step never ran.
+        // Blocked for now until the create+SAP-number-assignment flow is reworked to
+        // supply a real number upfront; return a clear error instead of letting the
+        // NOT NULL constraint throw and crash the request.
+        return res.status(400).json({
+            error: 'Creating a Body Article requires a Body Article Number, which this flow does not yet provide upfront (it used to be assigned later via a separate SAP sync step). This action is temporarily disabled until that flow is reworked — contact admin.',
+        });
     };
 
     // Division → fabric master lookup. K/RFD_K → KNITS_MIX (mFabDiv K),
