@@ -69,7 +69,6 @@ export interface ApproverItem {
   sleeve: string | null;
   length: string | null;
   composition: string | null;
-  gsm: string | null;
   wash: string | null;
   pptNumber: string | null;
   referenceArticleNumber: string | null;
