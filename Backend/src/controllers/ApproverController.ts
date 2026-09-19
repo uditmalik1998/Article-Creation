@@ -4418,19 +4418,29 @@ export class ApproverController {
             return res.status(404).json({ error: 'No items found for the given ids' });
         }
 
-        // Check 1: body_article_data already has a row for the same majorCategory + bodyArticleDescription
+        // Check 1: a body article for the same majorCategory + bodyArticleDescription already exists.
+        // Only a row that carries a body article number counts as "already present" — that is the
+        // number the user is told to reuse. Rows still waiting in the New Articles tab have no
+        // number yet, so blocking on them told the user an article "is already Present: N/A" and
+        // left them with nothing to act on; those are caught at SAP submit instead
+        // (zmmBodyArtCreationService blocks a duplicate grid with the real number).
+        // This flat article's own row is excluded — Check 2 below owns that case.
         for (const item of items) {
             if (item.majorCategory && item.bodyArticleDescription) {
                 const descMatch = await prisma.bodyArticleData.findFirst({
                     where: {
-                        majorCategory: item.majorCategory,
-                        bodyArticleDescription: item.bodyArticleDescription,
+                        majorCategory:          { equals: item.majorCategory, mode: 'insensitive' },
+                        bodyArticleDescription: { equals: item.bodyArticleDescription, mode: 'insensitive' },
+                        bodyArticleNumber:      { not: null },
+                        // Explicit OR rather than `flatId: { not: item.id }` so master rows
+                        // uploaded without a flatId still count as duplicates.
+                        OR: [{ flatId: null }, { flatId: { not: item.id } }],
                     },
                     select: { bodyArticleNumber: true },
                 });
                 if (descMatch) {
                     return res.status(409).json({
-                        error: `For this ${item.majorCategory} Major Category, Body Article is already Present: ${descMatch.bodyArticleNumber || 'N/A'}`,
+                        error: `For this ${item.majorCategory} Major Category, Body Article is already Present: ${descMatch.bodyArticleNumber}`,
                     });
                 }
             }
@@ -4443,21 +4453,27 @@ export class ApproverController {
         });
         if (existing.length > 0) {
             const itemMap = new Map(items.map((i) => [i.id, i]));
-            const sameExact: string[] = [];  // same category + same description → true duplicate, block
-            const staleToDelete: string[] = []; // safe to replace (NOT_SYNCED, desc or category changed)
+            const sameExact: string[] = [];  // already in SAP with the same grid → true duplicate, block
+            const staleToDelete: string[] = []; // safe to replace — no number and never synced
 
             for (const ex of existing) {
                 const item = itemMap.get(ex.flatId ?? '');
                 if (!item) continue;
+
+                if (!ex.bodyArticleNumber && ex.sapSyncStatus !== 'SYNCED') {
+                    // The row this flat article created earlier never reached SAP (NOT_SYNCED, or a
+                    // FAILED attempt that got no number). Re-creating just refreshes it with the
+                    // current Body & Construction values, so replace it instead of blocking — the
+                    // user has nothing to reuse and no way forward otherwise.
+                    staleToDelete.push(ex.id);
+                    continue;
+                }
+
                 const sameCat  = ex.majorCategory === item.majorCategory;
                 const sameDesc = (ex.bodyArticleDescription ?? '') === (item.bodyArticleDescription ?? '');
-
                 if (sameCat && sameDesc) {
-                    // Exact duplicate — same category + same description, block it
+                    // Same grid, already carries a number / is in SAP — a real duplicate
                     sameExact.push(ex.flatId ?? '');
-                } else if (!ex.bodyArticleNumber && ex.sapSyncStatus === 'NOT_SYNCED') {
-                    // Description or category changed and not yet in SAP — safe to replace
-                    staleToDelete.push(ex.id);
                 }
                 // Already in SAP but desc/category changed → leave old row, create new PENDING row
             }
@@ -4491,6 +4507,10 @@ export class ApproverController {
                     imageUrl:             item.imageUrl,
                     userName:             item.userName,
                     bodyArticleType:      'FG',
+                    // Carried over so the New Articles row shows the grid it was created from and
+                    // the SAP-submit duplicate guard can see it; the dashboard overwrites it when
+                    // the Body & Construction values are edited there.
+                    bodyArticleDescription: item.bodyArticleDescription,
                     mCollarType:          item.collar,
                     mCollarStyle:         item.collarStyle,
                     mNeckType:            item.neck,
