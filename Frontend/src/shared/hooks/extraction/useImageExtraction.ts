@@ -202,9 +202,14 @@ export const useImageExtraction = () => {
         // 🔧 VALIDATION: Only enable discovery mode when explicitly set
         console.log(`🔍 Frontend Extraction - Discovery Enabled: ${discoveryEnabled}, Category: ${categoryName}, Code: ${categoryCode}, Has Metadata: ${!!metadata}`);
 
-        // Use category-based extraction if category code and metadata are provided
+        // Use category-based extraction only when metadata contains fields beyond
+        // designNumber — designNumber alone is passed via the legacy path to avoid
+        // triggering a DB category lookup (e.g. 'MENS-MU' is not a category code).
+        const hasRichMetadata = metadata != null && Object.keys(metadata).some(
+          k => k !== 'designNumber' && (metadata as Record<string, unknown>)[k] != null
+        );
         let result: EnhancedExtractionResult;
-        if (categoryCode && metadata && Object.keys(metadata).length > 0) {
+        if (categoryCode && hasRichMetadata) {
           console.log(`Using category-based extraction with metadata for ${categoryCode}`);
           result = await backendApi.extractWithCategory({
             image: base64Image,
@@ -235,6 +240,7 @@ export const useImageExtraction = () => {
             ...(legacyScope.division    ? { department:     legacyScope.division    } : {}),
             ...(legacyScope.subDivision ? { subDepartment:  legacyScope.subDivision } : {}),
             ...(presentationsType       ? { presentationsType }                      : {}),
+            ...(metadata?.designNumber  ? { designNumber: metadata.designNumber }    : {}),
           });
         }
 
@@ -473,11 +479,9 @@ export const useImageExtraction = () => {
         })
       );
 
-      // Persist user edits once extraction row has been saved to backend.
-      if (!persistedJobId) {
-        message.warning('This field was updated locally but could not be saved — extraction has not been persisted yet. Please re-extract or refresh.');
-        return;
-      }
+      // Row not yet persisted — local edit is fine; the value will be sent to
+      // the backend when extraction runs. No warning needed.
+      if (!persistedJobId) return;
 
       const token = localStorage.getItem('authToken');
       fetch(`${APP_CONFIG.api.baseURL}/user/extraction/history/flat/job/${encodeURIComponent(persistedJobId)}/attribute`, {

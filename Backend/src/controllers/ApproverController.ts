@@ -3132,10 +3132,14 @@ export class ApproverController {
         }
     }
 
-    // Duplicate an existing article — creates a new PENDING copy with all fields copied
+    // Duplicate an existing article — creates a new PENDING copy with the supplied design number
     static async duplicateItem(req: Request, res: Response) {
         try {
             const { id } = req.params;
+            const { designNumber } = req.body as { designNumber?: string };
+            if (!designNumber || !designNumber.trim()) {
+                return res.status(400).json({ error: 'Design Number is required to duplicate an article.' });
+            }
             const source = await prisma.extractionResultFlat.findUnique({ where: { id } });
             if (!source) return res.status(404).json({ error: 'Article not found' });
 
@@ -3207,6 +3211,7 @@ export class ApproverController {
                     articleNumber: null,
                     fabricArticleNumber: null,
                     fabricArticleDescription: null,
+                    designNumber: designNumber.trim(),
                     // A manual duplicate has no pending AI extraction — mark it COMPLETED
                     // so it isn't hidden by the 30-minute SRM extraction gate (which only
                     // holds back source=SRM rows still in SRM_IMPORT) and isn't re-processed
@@ -4603,69 +4608,71 @@ export class ApproverController {
                 return res.status(400).json({ error: `Cannot resolve fabric master for fabDiv "${item.fabDiv}". Expected K, W, D, or DNM.` });
             }
 
-            const existing = await prisma.fabricArticleData.findFirst({
-                where: { fabricArticleDescription: { equals: desc, mode: 'insensitive' } },
-                select: { id: true, fabricArticleNumber: true, mcDescription: true },
-            });
+            const fabricFields = {
+                fabricArticleType:        'FG',
+                vendorName:               'MIX VENDOR',
+                vendorCode:               '200681',
+                designNumber:             item.designNumber,
+                imageUrl:                 item.imageUrl,
+                userName:                 item.userName,
+                division:                 mapped.division,
+                subDivision:              mapped.subDivision,
+                majorCategory:            mapped.majorCategory,
+                mcDescription:            mapped.mcDes,
+                mFabDiv:                  mapped.mFabDiv,
+                fabricArticleDescription: desc,
+                articleFashionType:       item.articleFashionType,
+                mYarn:           item.yarn1,
+                mFabMainMvgr1:   item.mainMvgr,
+                mFabMainMvgr2:   item.fabricMainMvgr,
+                mConstruction:   item.fConstruction,
+                mOunz:           item.fOunce,
+                mWidth:          item.fWidth,
+                mWeave02:        item.mFab2,
+                mCount:          item.fCount,
+                mWeave01:        item.weave,
+                mComposition:    item.composition,
+                mFinish:         item.finish,
+                mGsm:            item.gsm,
+                mLycra:          item.lycra,
+                fabricRate:      item.vendorFabricRate ?? null,
+            };
 
-            if (existing) {
-                if (existing.fabricArticleNumber) {
-                    return res.status(409).json({
-                        error: `Fabric Article already created for this description. Fabric Article No: ${existing.fabricArticleNumber}`,
-                        fabricArticleNumber: existing.fabricArticleNumber,
-                    });
-                }
-                // Reuse existing row — patch with correct static values if missing
-                if (!existing.mcDescription) {
-                    await prisma.fabricArticleData.update({
-                        where: { id: existing.id },
-                        data: {
-                            division:     mapped.division,
-                            subDivision:  mapped.subDivision,
-                            majorCategory: mapped.majorCategory,
-                            mcDescription: mapped.mcDes,
-                            mFabDiv:       mapped.mFabDiv,
-                        },
-                    });
-                }
-                toSubmit.push({ fabricRowId: existing.id, flatId: item.id });
-            } else {
-                const newRow = await prisma.fabricArticleData.create({
-                    data: {
-                        flatId:                   item.id,
-                        fabricArticleType:        'FG',
-                        vendorName:               'MIX VENDOR',
-                        vendorCode:               '200681',
-                        designNumber:             item.designNumber,
-                        imageUrl:                 item.imageUrl,
-                        userName:                 item.userName,
-                        // Static values from Excel — NOT the FG garment fields
-                        division:                 mapped.division,
-                        subDivision:              mapped.subDivision,
-                        majorCategory:            mapped.majorCategory,
-                        mcDescription:            mapped.mcDes,
-                        mFabDiv:                  mapped.mFabDiv,
-                        fabricArticleDescription: desc,
-                        articleFashionType:       item.articleFashionType,
-                        // Construction & Fabric attributes from FG article
-                        mYarn:           item.yarn1,
-                        mFabMainMvgr1:   item.mainMvgr,
-                        mFabMainMvgr2:   item.fabricMainMvgr,
-                        mConstruction:   item.fConstruction,
-                        mOunz:           item.fOunce,
-                        mWidth:          item.fWidth,
-                        mWeave02:        item.mFab2,
-                        mCount:          item.fCount,
-                        mWeave01:        item.weave,
-                        mComposition:    item.composition,
-                        mFinish:         item.finish,
-                        mGsm:            item.gsm,
-                        mLycra:          item.lycra,
-                        fabricRate:      item.vendorFabricRate ?? null,
-                    },
+            // Priority 1: block if any row with same desc is already APPROVED and has a number
+            const existingByDesc = await prisma.fabricArticleData.findFirst({
+                where: {
+                    fabricArticleDescription: { equals: desc, mode: 'insensitive' },
+                    approvalStatus: 'APPROVED',
+                    fabricArticleNumber: { not: null },
+                },
+                select: { id: true, fabricArticleNumber: true },
+            });
+            if (existingByDesc) {
+                return res.status(409).json({
+                    error: `Fabric Article already created for this description. Fabric Article No: ${existingByDesc.fabricArticleNumber}`,
+                    fabricArticleNumber: existingByDesc.fabricArticleNumber,
                 });
-                toSubmit.push({ fabricRowId: newRow.id, flatId: item.id });
             }
+
+            // Priority 2: same flat_id, PENDING, no number → update and retry SAP
+            const existingByFlatId = await prisma.fabricArticleData.findFirst({
+                where: { flatId: item.id, approvalStatus: 'PENDING', fabricArticleNumber: null },
+                select: { id: true },
+            });
+            if (existingByFlatId) {
+                await prisma.fabricArticleData.update({
+                    where: { id: existingByFlatId.id },
+                    data: fabricFields,
+                });
+                toSubmit.push({ fabricRowId: existingByFlatId.id, flatId: item.id });
+                continue;
+            }
+
+            // Priority 3: create a fresh row for this flat_id
+            const newRow = await prisma.fabricArticleData.create({
+                data: { flatId: item.id, ...fabricFields },
+            });
+            toSubmit.push({ fabricRowId: newRow.id, flatId: item.id });
         }
 
         if (toSubmit.length === 0) {
