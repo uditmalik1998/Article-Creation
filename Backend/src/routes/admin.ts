@@ -305,4 +305,10 @@ router.get('/broader-menu/status',   h(adminController.getBroaderMenuStatus));
 router.get('/broader-menu/template', h(adminController.downloadBroaderMenuTemplate));
 router.post('/broader-menu/upload',  excelUpload.single('file'), h(adminController.uploadBroaderMenu));
 
+// ═════════════════════════════════════════════════════
+// BODY FABRIC CONSUMPTION — body_fabric_consumption
+// ═════════════════════════════════════════════════════
+router.get('/body-fabric-consumption/status', h(adminController.getBodyFabricConsumptionStatus));
+router.post('/body-fabric-consumption/upload', excelUpload.single('file'), h(adminController.uploadBodyFabricConsumption));
+
 export default router;

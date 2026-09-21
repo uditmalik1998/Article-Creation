@@ -7325,3 +7325,124 @@ export function buildExpenseRowLabel(tableKey: string, row: Record<string, any>)
   const parts = config.displayColumns.map((c) => row[c]).filter((v) => v !== null && v !== undefined && v !== '');
   return parts.length > 0 ? parts.join(' / ') : undefined;
 }
+
+// ─────────────────────────────── Body Fabric Consumption ────────────────────
+
+/**
+ * GET /api/admin/body-fabric-consumption/status
+ * Returns row count from body_fabric_consumption.
+ */
+export const getBodyFabricConsumptionStatus = async (_req: Request, res: Response): Promise<void> => {
+  try {
+    const rows = await prisma.$queryRaw<{ total: bigint; categories: bigint }[]>`
+      SELECT COUNT(*)::bigint                    AS total,
+             COUNT(DISTINCT major_category)::bigint AS categories
+      FROM body_fabric_consumption
+    `;
+    const r = rows[0] ?? { total: 0n, categories: 0n };
+    res.json({ success: true, data: { total: Number(r.total), categories: Number(r.categories) } });
+  } catch (error: any) {
+    res.status(500).json({ success: false, error: error.message });
+  }
+};
+
+/**
+ * POST /api/admin/body-fabric-consumption/upload
+ * Accepts an Excel file. Reads columns: DIV(0), SUB DIV(1), MAJ CAT(2), FAB_WIDTH(3), FAB CONSUMPTION(last/34).
+ * Truncates and replaces the entire body_fabric_consumption table.
+ */
+export const uploadBodyFabricConsumption = async (req: Request, res: Response): Promise<void> => {
+  try {
+    if (!req.file) {
+      res.status(400).json({ success: false, error: 'No file uploaded.' });
+      return;
+    }
+
+    const ExcelJS = (await import('exceljs')).default;
+    const wb = new ExcelJS.Workbook();
+    await wb.xlsx.load(req.file.buffer as any);
+
+    const ws = wb.worksheets[0];
+    if (!ws) {
+      res.status(400).json({ success: false, error: 'No worksheets found in the uploaded file.' });
+      return;
+    }
+
+    const cell = (row: any, c: number): string => {
+      let v = row.getCell(c).value;
+      if (v && typeof v === 'object' && 'result' in v) v = (v as any).result;
+      if (v && typeof v === 'object' && 'text' in v) v = (v as any).text;
+      return v == null ? '' : String(v).trim();
+    };
+
+    type FabRow = { division: string | null; sub_division: string | null; major_category: string; fab_width: number | null; fab_consumption: number | null };
+    const rows: FabRow[] = [];
+    const seen = new Set<string>();
+    let skipped = 0;
+
+    // Row 1 = headers (0-indexed), rows 1-2 empty, data from row 3 (ExcelJS is 1-indexed → data from row 4)
+    // Columns: A=DIV(1), B=SUB DIV(2), C=MAJ CAT(3), D=FAB_WIDTH(4), last column=FAB CONSUMPTION
+    // Detect last column dynamically by reading header row
+    let fabConsCol = 35; // default: column 35 (AJ) = index 34 in 0-based
+    const headerRow = ws.getRow(1);
+    for (let c = 1; c <= 50; c++) {
+      const h = cell(headerRow, c).toUpperCase().replace(/\s+/g, ' ');
+      if (h === 'FAB CONSUMPTION') { fabConsCol = c; break; }
+    }
+
+    for (let r = 4; r <= ws.rowCount; r++) {
+      const row = ws.getRow(r);
+      const div    = cell(row, 1);
+      const sub    = cell(row, 2);
+      const majCat = cell(row, 3);
+      const widthRaw = cell(row, 4);
+      const consRaw  = cell(row, fabConsCol);
+
+      if (!majCat && !div && !widthRaw) { skipped++; continue; }
+      if (!majCat) { skipped++; continue; }
+
+      const fabWidth = widthRaw !== '' ? parseFloat(widthRaw) : null;
+      const fabCons  = consRaw  !== '' ? parseFloat(consRaw)  : null;
+
+      const key = `${div}|${sub}|${majCat}|${widthRaw}`;
+      if (seen.has(key)) continue;
+      seen.add(key);
+
+      rows.push({
+        division:      div  || null,
+        sub_division:  sub  || null,
+        major_category: majCat,
+        fab_width:     fabWidth !== null && !isNaN(fabWidth) ? fabWidth : null,
+        fab_consumption: fabCons !== null && !isNaN(fabCons) ? fabCons : null,
+      });
+    }
+
+    const total = rows.length;
+    const categories = new Set(rows.map(r => r.major_category)).size;
+
+    const BATCH = 2000;
+    await prisma.$transaction(async (tx) => {
+      await tx.$executeRaw`TRUNCATE TABLE body_fabric_consumption RESTART IDENTITY`;
+      for (let i = 0; i < rows.length; i += BATCH) {
+        const batch = rows.slice(i, i + BATCH);
+        await tx.$executeRaw`
+          INSERT INTO body_fabric_consumption (division, sub_division, major_category, fab_width, fab_consumption)
+          SELECT v.division, v.sub_division, v.major_category,
+                 v.fab_width::numeric, v.fab_consumption::numeric
+          FROM jsonb_to_recordset(${JSON.stringify(batch)}::jsonb)
+            AS v(division text, sub_division text, major_category text, fab_width text, fab_consumption text)
+        `;
+      }
+    }, { timeout: 5 * 60 * 1000 });
+
+    console.log(`[BodyFabricConsumption] Done — ${total} rows across ${categories} major categories; ${skipped} skipped.`);
+    res.json({
+      success: true,
+      message: `Uploaded ${total} rows across ${categories} major categories (${skipped} skipped).`,
+      data: { total, categories },
+    });
+  } catch (error: any) {
+    console.error('[BodyFabricConsumption] Upload error:', error);
+    res.status(500).json({ success: false, error: error.message });
+  }
+};

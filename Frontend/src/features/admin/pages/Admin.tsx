@@ -297,6 +297,13 @@ export default function Admin() {
   const [nationalGridProgress, setNationalGridProgress] = useState<number>(0);
   const nationalGridFileRef = useRef<HTMLInputElement | null>(null);
 
+  // Body Fabric Consumption
+  const [bodyFabConsTotal, setBodyFabConsTotal] = useState<{ total: number; categories: number } | null>(null);
+  const [bodyFabConsStatusLoading, setBodyFabConsStatusLoading] = useState(false);
+  const [bodyFabConsUploading, setBodyFabConsUploading] = useState(false);
+  const [bodyFabConsProgress, setBodyFabConsProgress] = useState<number>(0);
+  const bodyFabConsFileRef = useRef<HTMLInputElement | null>(null);
+
   // Hierarchy Excel Upload (two-step)
   const [hierarchyExcelStatus, setHierarchyExcelStatus] = useState<HierarchyExcelStatus | null>(null);
   const [hierarchyExcelStatusLoading, setHierarchyExcelStatusLoading] = useState(false);
@@ -1357,6 +1364,54 @@ export default function Admin() {
       setNationalGridUploading(false);
       setTimeout(() => setNationalGridProgress(0), 1500);
       if (nationalGridFileRef.current) nationalGridFileRef.current.value = '';
+    }
+  };
+
+  // ─────────────────────────────── Body Fabric Consumption ───────────────────────────────
+  const loadBodyFabConsStatus = useCallback(async () => {
+    setBodyFabConsStatusLoading(true);
+    try {
+      const token = localStorage.getItem('authToken');
+      const res = await fetch(`${APP_CONFIG.api.baseURL}/admin/body-fabric-consumption/status`, {
+        headers: token ? { Authorization: `Bearer ${token}` } : {},
+      });
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.error || 'Failed to load status');
+      setBodyFabConsTotal(data.data);
+    } catch (err: any) {
+      message.error(err?.message || 'Failed to load body fabric consumption status');
+    } finally {
+      setBodyFabConsStatusLoading(false);
+    }
+  }, []);
+
+  const handleBodyFabConsUpload = async (file: File) => {
+    setBodyFabConsUploading(true);
+    setBodyFabConsProgress(0);
+    try {
+      const token = localStorage.getItem('authToken');
+      const formData = new FormData();
+      formData.append('file', file);
+      const progressInterval = setInterval(() => {
+        setBodyFabConsProgress((prev) => Math.min(prev + 5, 90));
+      }, 400);
+      const res = await fetch(`${APP_CONFIG.api.baseURL}/admin/body-fabric-consumption/upload`, {
+        method: 'POST',
+        headers: token ? { Authorization: `Bearer ${token}` } : {},
+        body: formData,
+      });
+      clearInterval(progressInterval);
+      setBodyFabConsProgress(100);
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.error || 'Upload failed');
+      message.success(data.message);
+      setBodyFabConsTotal(data.data);
+    } catch (err: any) {
+      message.error(err?.message || 'Upload failed');
+    } finally {
+      setBodyFabConsUploading(false);
+      setTimeout(() => setBodyFabConsProgress(0), 1500);
+      if (bodyFabConsFileRef.current) bodyFabConsFileRef.current.value = '';
     }
   };
 
@@ -2704,6 +2759,92 @@ export default function Admin() {
                       <button
                         type="button"
                         onClick={() => mandatoryFileRef.current?.click()}
+                        className="flex w-full flex-col items-center justify-center rounded-md border-2 border-dashed border-border bg-muted/30 px-4 py-6 transition-colors hover:border-[#FF6F61] hover:bg-[#FF6F61]/5"
+                      >
+                        <Inbox className="mb-2 h-8 w-8 text-[#FF6F61]" />
+                        <p className="text-[13px]">
+                          Click to upload <strong>.xlsx</strong> file
+                        </p>
+                        <p className="text-[11px] text-muted-foreground">Only Excel files. Max 50 MB.</p>
+                      </button>
+                    )}
+                  </div>
+                </div>
+              </div>
+            </Spinner>
+          </CardContent>
+        </Card>
+
+        {/* Body Fabric Consumption Upload (body_fabric_consumption) */}
+        <Card className="mb-6 glass rounded-2xl border border-white/60">
+          <CardHeader className="flex flex-row items-center justify-between">
+            <CardTitle className="flex items-center gap-2 text-base">
+              <TableIcon className="h-4 w-4" />
+              Body Fabric Consumption Master
+            </CardTitle>
+            <div className="flex gap-2">
+              <Button size="sm" variant="outline" onClick={loadBodyFabConsStatus} disabled={bodyFabConsStatusLoading}>
+                <RotateCw className={bodyFabConsStatusLoading ? 'animate-spin' : ''} />
+                Refresh Status
+              </Button>
+            </div>
+          </CardHeader>
+          <CardContent>
+            <Spinner spinning={bodyFabConsStatusLoading}>
+              <div className="grid grid-cols-1 gap-4 md:grid-cols-12">
+                {/* Status panel */}
+                <div className="md:col-span-7">
+                  {bodyFabConsTotal && bodyFabConsTotal.total > 0 ? (
+                    <Descriptions bordered>
+                      <Descriptions.Item label="Total Rows">
+                        <Badge variant="success">{bodyFabConsTotal.total.toLocaleString()}</Badge>
+                      </Descriptions.Item>
+                      <Descriptions.Item label="Major Categories">
+                        {bodyFabConsTotal.categories.toLocaleString()}
+                      </Descriptions.Item>
+                    </Descriptions>
+                  ) : (
+                    <Alert
+                      type="warning"
+                      showIcon
+                      message="No body fabric consumption data loaded"
+                      description="Upload FAB CONSUMPTION MASTER Excel. Reads columns: DIV, SUB DIV, MAJ CAT, FAB_WIDTH, FAB CONSUMPTION. All other columns are ignored. Replaces the entire table."
+                    />
+                  )}
+                </div>
+
+                {/* Upload panel */}
+                <div className="md:col-span-5">
+                  <div className="rounded-md border border-border p-4">
+                    <div className="mb-1 font-semibold">Upload FAB CONSUMPTION MASTER Excel</div>
+                    <div className="mb-3 text-xs text-muted-foreground">
+                      Columns used: <strong>DIV</strong>, <strong>SUB DIV</strong>, <strong>MAJ CAT</strong>, <strong>FAB_WIDTH</strong>, <strong>FAB CONSUMPTION</strong>.
+                      All other size/age columns are ignored. <strong className="text-destructive">Replaces entire table.</strong>
+                    </div>
+
+                    <input
+                      ref={bodyFabConsFileRef}
+                      type="file"
+                      accept=".xlsx,.xls"
+                      className="hidden"
+                      onChange={(e) => {
+                        const file = e.target.files?.[0];
+                        if (file) handleBodyFabConsUpload(file);
+                      }}
+                    />
+
+                    {bodyFabConsUploading ? (
+                      <div>
+                        <div className="mb-2 text-[13px] text-[#FF6F61]">
+                          <RefreshCw className="mr-1.5 inline-block h-3.5 w-3.5 animate-spin" />
+                          Parsing Excel &amp; replacing table...
+                        </div>
+                        <Progress value={bodyFabConsProgress} />
+                      </div>
+                    ) : (
+                      <button
+                        type="button"
+                        onClick={() => bodyFabConsFileRef.current?.click()}
                         className="flex w-full flex-col items-center justify-center rounded-md border-2 border-dashed border-border bg-muted/30 px-4 py-6 transition-colors hover:border-[#FF6F61] hover:bg-[#FF6F61]/5"
                       >
                         <Inbox className="mb-2 h-8 w-8 text-[#FF6F61]" />
