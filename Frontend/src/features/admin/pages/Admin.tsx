@@ -324,6 +324,12 @@ export default function Admin() {
   const [vaacProgress, setVaacProgress] = useState<number>(0);
   const vaacFileRef = useRef<HTMLInputElement | null>(null);
 
+  const [mcdTotal, setMcdTotal] = useState<{ total: number; categories: number } | null>(null);
+  const [mcdStatusLoading, setMcdStatusLoading] = useState(false);
+  const [mcdUploading, setMcdUploading] = useState(false);
+  const [mcdProgress, setMcdProgress] = useState<number>(0);
+  const mcdFileRef = useRef<HTMLInputElement | null>(null);
+
   // Hierarchy Excel Upload (two-step)
   const [hierarchyExcelStatus, setHierarchyExcelStatus] = useState<HierarchyExcelStatus | null>(null);
   const [hierarchyExcelStatusLoading, setHierarchyExcelStatusLoading] = useState(false);
@@ -1625,6 +1631,82 @@ export default function Admin() {
       setVaacUploading(false);
       setTimeout(() => setVaacProgress(0), 1500);
       if (vaacFileRef.current) vaacFileRef.current.value = '';
+    }
+  };
+
+  // ─────────────────────────────── Major Category Details ───────────────────────
+  const loadMcdStatus = useCallback(async () => {
+    setMcdStatusLoading(true);
+    try {
+      const token = localStorage.getItem('authToken');
+      const res = await fetch(`${APP_CONFIG.api.baseURL}/admin/major-category-details/status`, {
+        headers: token ? { Authorization: `Bearer ${token}` } : {},
+      });
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.error || 'Failed to load status');
+      setMcdTotal(data.data);
+    } catch (err: any) {
+      message.error(err?.message || 'Failed to load status');
+    } finally {
+      setMcdStatusLoading(false);
+    }
+  }, []);
+
+  const downloadMcdTemplate = () => {
+    const token = localStorage.getItem('authToken');
+    const url = `${APP_CONFIG.api.baseURL}/admin/major-category-details/template`;
+    fetch(url, { headers: token ? { Authorization: `Bearer ${token}` } : {} })
+      .then((r) => r.blob())
+      .then((blob) => {
+        const a = document.createElement('a');
+        a.href = URL.createObjectURL(blob);
+        a.download = 'MAJOR_CATEGORY_DETAILS_TEMPLATE.xlsx';
+        a.click();
+      })
+      .catch(() => message.error('Download failed'));
+  };
+
+  const downloadMcdData = () => {
+    const token = localStorage.getItem('authToken');
+    const url = `${APP_CONFIG.api.baseURL}/admin/major-category-details/download`;
+    fetch(url, { headers: token ? { Authorization: `Bearer ${token}` } : {} })
+      .then((r) => r.blob())
+      .then((blob) => {
+        const a = document.createElement('a');
+        a.href = URL.createObjectURL(blob);
+        a.download = `MAJOR_CATEGORY_DETAILS_${new Date().toISOString().slice(0, 10)}.xlsx`;
+        a.click();
+      })
+      .catch(() => message.error('Download failed'));
+  };
+
+  const handleMcdUpload = async (file: File) => {
+    setMcdUploading(true);
+    setMcdProgress(0);
+    try {
+      const token = localStorage.getItem('authToken');
+      const formData = new FormData();
+      formData.append('file', file);
+      const progressInterval = setInterval(() => {
+        setMcdProgress((prev) => Math.min(prev + 5, 90));
+      }, 400);
+      const res = await fetch(`${APP_CONFIG.api.baseURL}/admin/major-category-details/upload`, {
+        method: 'POST',
+        headers: token ? { Authorization: `Bearer ${token}` } : {},
+        body: formData,
+      });
+      clearInterval(progressInterval);
+      setMcdProgress(100);
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.error || 'Upload failed');
+      message.success(`Uploaded ${data.data?.inserted ?? 0} rows successfully`);
+      loadMcdStatus();
+    } catch (err: any) {
+      message.error(err?.message || 'Upload failed');
+    } finally {
+      setMcdUploading(false);
+      setTimeout(() => setMcdProgress(0), 1500);
+      if (mcdFileRef.current) mcdFileRef.current.value = '';
     }
   };
 
@@ -3143,6 +3225,95 @@ export default function Admin() {
                       <button
                         type="button"
                         onClick={() => vaacFileRef.current?.click()}
+                        className="flex w-full flex-col items-center justify-center rounded-md border-2 border-dashed border-border bg-muted/30 px-4 py-6 transition-colors hover:border-[#FF6F61] hover:bg-[#FF6F61]/5"
+                      >
+                        <Inbox className="mb-2 h-8 w-8 text-[#FF6F61]" />
+                        <p className="text-[13px]">
+                          Click to upload <strong>.xlsx</strong> file
+                        </p>
+                        <p className="text-[11px] text-muted-foreground">Only Excel files. Max 50 MB.</p>
+                      </button>
+                    )}
+                  </div>
+                </div>
+              </div>
+            </Spinner>
+          </CardContent>
+        </Card>
+
+        {/* Major Category Details Upload */}
+        <Card className="mb-6 glass rounded-2xl border border-white/60">
+          <CardHeader className="flex flex-row items-center justify-between">
+            <CardTitle className="flex items-center gap-2 text-base">
+              <TableIcon className="h-4 w-4" />
+              Major Category Details Master
+            </CardTitle>
+            <div className="flex gap-2">
+              <Button size="sm" variant="outline" onClick={downloadMcdData}>
+                <Download />
+                Download Data
+              </Button>
+              <Button size="sm" variant="outline" onClick={downloadMcdTemplate}>
+                <Download />
+                Download Template
+              </Button>
+              <Button size="sm" variant="outline" onClick={loadMcdStatus} disabled={mcdStatusLoading}>
+                <RotateCw className={mcdStatusLoading ? 'animate-spin' : ''} />
+                Refresh Status
+              </Button>
+            </div>
+          </CardHeader>
+          <CardContent>
+            <Spinner spinning={mcdStatusLoading}>
+              <div className="grid grid-cols-1 gap-4 md:grid-cols-12">
+                <div className="md:col-span-7">
+                  {mcdTotal && mcdTotal.total > 0 ? (
+                    <Descriptions bordered>
+                      <Descriptions.Item label="Total Rows">
+                        <Badge variant="success">{mcdTotal.total.toLocaleString()}</Badge>
+                      </Descriptions.Item>
+                      <Descriptions.Item label="Major Categories">
+                        {mcdTotal.categories.toLocaleString()}
+                      </Descriptions.Item>
+                    </Descriptions>
+                  ) : (
+                    <Alert
+                      type="warning"
+                      showIcon
+                      message="No major category details loaded"
+                      description="Upload MAJOR CATEGORY DETAILS Excel. Columns: SEG, DIV, SUB DIV, MAJ CAT, MC CODE, MC DES, HSN CODE, MC STATUS. Data starts at row 4. Replaces the entire table."
+                    />
+                  )}
+                </div>
+                <div className="md:col-span-5">
+                  <div className="rounded-md border border-border p-4">
+                    <div className="mb-1 font-semibold">Upload Major Category Details Excel</div>
+                    <div className="mb-3 text-xs text-muted-foreground">
+                      Columns: <strong>SEG</strong>, <strong>DIV</strong>, <strong>SUB DIV</strong>, <strong>MAJ CAT</strong>, <strong>MC CODE</strong>, <strong>MC DES</strong>, <strong>HSN CODE</strong>, <strong>MC STATUS</strong>.{' '}
+                      <strong className="text-destructive">Replaces entire table.</strong>
+                    </div>
+                    <input
+                      ref={mcdFileRef}
+                      type="file"
+                      accept=".xlsx,.xls"
+                      className="hidden"
+                      onChange={(e) => {
+                        const file = e.target.files?.[0];
+                        if (file) handleMcdUpload(file);
+                      }}
+                    />
+                    {mcdUploading ? (
+                      <div>
+                        <div className="mb-2 text-[13px] text-[#FF6F61]">
+                          <RefreshCw className="mr-1.5 inline-block h-3.5 w-3.5 animate-spin" />
+                          Parsing Excel &amp; replacing table...
+                        </div>
+                        <Progress value={mcdProgress} />
+                      </div>
+                    ) : (
+                      <button
+                        type="button"
+                        onClick={() => mcdFileRef.current?.click()}
                         className="flex w-full flex-col items-center justify-center rounded-md border-2 border-dashed border-border bg-muted/30 px-4 py-6 transition-colors hover:border-[#FF6F61] hover:bg-[#FF6F61]/5"
                       >
                         <Inbox className="mb-2 h-8 w-8 text-[#FF6F61]" />

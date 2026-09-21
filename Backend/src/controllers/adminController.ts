@@ -8602,3 +8602,140 @@ export const lookupVaacTotalValue = async (req: Request, res: Response): Promise
     res.status(500).json({ success: false, error: error.message });
   }
 };
+
+// ─────────────────────────────── Major Category Details ──────────────────────
+
+const MCD_HEADERS = ['SEG', 'DIV', 'SUB DIV', 'MAJ CAT', 'MC CODE', 'MC DES', 'HSN CODE', 'MC STATUS'];
+
+function buildMcdSheet(wb: any, dataRows: any[][]): any {
+  const ExcelJS = require('exceljs');
+  const ws = wb.addWorksheet('MAJ CAT DETAILS');
+
+  // Row 1: title
+  ws.getRow(1).getCell(1).value = 'MAJOR CATEGORY DETAILS MASTER';
+  ws.getRow(1).getCell(1).font = { bold: true, size: 14 };
+
+  // Row 2: blank
+  // Row 3: headers
+  const headerRow = ws.getRow(3);
+  MCD_HEADERS.forEach((h, i) => {
+    const cell = headerRow.getCell(i + 1);
+    cell.value = h;
+    cell.font = { bold: true };
+    cell.fill = { type: 'pattern', pattern: 'solid', fgColor: { argb: 'FFFFE699' } };
+    cell.border = {
+      top: { style: 'thin' }, bottom: { style: 'thin' },
+      left: { style: 'thin' }, right: { style: 'thin' },
+    };
+  });
+
+  // Data rows from row 4
+  dataRows.forEach((row, ri) => {
+    const wsRow = ws.getRow(ri + 4);
+    row.forEach((val, ci) => { wsRow.getCell(ci + 1).value = val ?? ''; });
+  });
+
+  ws.columns = [
+    { width: 10 }, { width: 14 }, { width: 18 }, { width: 30 },
+    { width: 14 }, { width: 30 }, { width: 14 }, { width: 14 },
+  ];
+  return ws;
+}
+
+export const getMcdStatus = async (_req: Request, res: Response): Promise<void> => {
+  try {
+    const rows = await prisma.$queryRaw<{ total: bigint; categories: bigint }[]>`
+      SELECT COUNT(*)::bigint AS total,
+             COUNT(DISTINCT maj_cat)::bigint AS categories
+      FROM major_category_details
+    `;
+    const r = rows[0] ?? { total: 0n, categories: 0n };
+    res.json({ success: true, data: { total: Number(r.total), categories: Number(r.categories) } });
+  } catch (error: any) {
+    res.status(500).json({ success: false, error: error.message });
+  }
+};
+
+export const downloadMcdTemplate = async (_req: Request, res: Response): Promise<void> => {
+  try {
+    const ExcelJS = require('exceljs');
+    const wb = new ExcelJS.Workbook();
+    buildMcdSheet(wb, []);
+    res.setHeader('Content-Type', 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');
+    res.setHeader('Content-Disposition', 'attachment; filename="MAJOR_CATEGORY_DETAILS_TEMPLATE.xlsx"');
+    await wb.xlsx.write(res);
+    res.end();
+  } catch (error: any) {
+    res.status(500).json({ success: false, error: error.message });
+  }
+};
+
+export const downloadMcdData = async (_req: Request, res: Response): Promise<void> => {
+  try {
+    const ExcelJS = require('exceljs');
+    const dbRows: any[] = await prisma.$queryRaw`
+      SELECT seg, div, sub_div, maj_cat, mc_code, mc_des, hsn_code, mc_status
+      FROM major_category_details
+      ORDER BY div, sub_div, maj_cat
+    `;
+    const dataRows = dbRows.map((r) => [
+      r.seg ?? '', r.div ?? '', r.sub_div ?? '', r.maj_cat ?? '',
+      r.mc_code ?? '', r.mc_des ?? '', r.hsn_code ?? '', r.mc_status ?? '',
+    ]);
+    const wb = new ExcelJS.Workbook();
+    buildMcdSheet(wb, dataRows);
+    const filename = `MAJOR_CATEGORY_DETAILS_${new Date().toISOString().slice(0, 10)}.xlsx`;
+    res.setHeader('Content-Type', 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');
+    res.setHeader('Content-Disposition', `attachment; filename="${filename}"`);
+    await wb.xlsx.write(res);
+    res.end();
+  } catch (error: any) {
+    res.status(500).json({ success: false, error: error.message });
+  }
+};
+
+export const uploadMcd = async (req: Request, res: Response): Promise<void> => {
+  try {
+    if (!req.file) { res.status(400).json({ success: false, error: 'No file uploaded' }); return; }
+    const ExcelJS = require('exceljs');
+    const wb = new ExcelJS.Workbook();
+    await wb.xlsx.load(req.file.buffer);
+    const ws = wb.worksheets[0];
+    if (!ws) { res.status(400).json({ success: false, error: 'No worksheet found' }); return; }
+
+    const dataRows: { seg: string; div: string; sub_div: string; maj_cat: string; mc_code: string; mc_des: string; hsn_code: string; mc_status: string }[] = [];
+    ws.eachRow((row: any, rowNumber: number) => {
+      if (rowNumber < 4) return; // skip title + blank + header
+      const seg     = String(row.getCell(1).value ?? '').trim();
+      const div     = String(row.getCell(2).value ?? '').trim();
+      const subDiv  = String(row.getCell(3).value ?? '').trim();
+      const majCat  = String(row.getCell(4).value ?? '').trim();
+      const mcCode  = String(row.getCell(5).value ?? '').trim();
+      const mcDes   = String(row.getCell(6).value ?? '').trim();
+      const hsnCode = String(row.getCell(7).value ?? '').trim();
+      const mcStatus = String(row.getCell(8).value ?? '').trim();
+      if (!majCat && !mcCode) return; // skip empty rows
+      dataRows.push({ seg, div, sub_div: subDiv, maj_cat: majCat, mc_code: mcCode, mc_des: mcDes, hsn_code: hsnCode, mc_status: mcStatus });
+    });
+
+    if (dataRows.length === 0) { res.status(400).json({ success: false, error: 'No data rows found (data must start at row 4)' }); return; }
+
+    const BATCH = 500;
+    await prisma.$transaction(async (tx) => {
+      await tx.$executeRaw`TRUNCATE TABLE major_category_details RESTART IDENTITY`;
+      for (let i = 0; i < dataRows.length; i += BATCH) {
+        const batch = dataRows.slice(i, i + BATCH);
+        await tx.$executeRaw`
+          INSERT INTO major_category_details (seg, div, sub_div, maj_cat, mc_code, mc_des, hsn_code, mc_status)
+          SELECT r.seg, r.div, r.sub_div, r.maj_cat, r.mc_code, r.mc_des, r.hsn_code, r.mc_status
+          FROM jsonb_to_recordset(${JSON.stringify(batch)}::jsonb)
+            AS r(seg text, div text, sub_div text, maj_cat text, mc_code text, mc_des text, hsn_code text, mc_status text)
+        `;
+      }
+    });
+
+    res.json({ success: true, data: { inserted: dataRows.length } });
+  } catch (error: any) {
+    res.status(500).json({ success: false, error: error.message });
+  }
+};

@@ -322,6 +322,11 @@ router.get('/body-fabric-consumption/template', h(adminController.downloadBodyFa
 router.get('/body-fabric-consumption/download', h(adminController.downloadBodyFabricConsumptionData));
 router.post('/body-fabric-consumption/upload',  excelUpload.single('file'), h(adminController.uploadBodyFabricConsumption));
 
+router.get('/major-category-details/status',   h(adminController.getMcdStatus));
+router.get('/major-category-details/template', h(adminController.downloadMcdTemplate));
+router.get('/major-category-details/download', h(adminController.downloadMcdData));
+router.post('/major-category-details/upload',  excelUpload.single('file'), h(adminController.uploadMcd));
+
 router.get('/value-addition-accessories-cost/status',   h(adminController.getVaacStatus));
 router.get('/value-addition-accessories-cost/lookup',   h(adminController.lookupVaacTotalValue));
 router.get('/value-addition-accessories-cost/template', h(adminController.downloadVaacTemplate));
