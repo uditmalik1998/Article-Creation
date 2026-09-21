@@ -4658,6 +4658,577 @@ export const uploadSegmentMaster = async (req: Request, res: Response): Promise<
 };
 
 // ═══════════════════════════════════════════════════════
+// BASIC ACCESSORIES (basic_trim_cost_master + basic_trim_cost_component)
+//
+// The "MAJ CAT WISE BASIC ACCESSORIES DETAILS" workbook as an Expense master:
+// per-piece consumption (QTY), RATE and VALUE for every basic trim and packing
+// accessory, one row per major category. Template / Download Data / Upload all
+// speak the workbook's own two-sheet layout (see BA_SHEETS below), so a file
+// downloaded here can be edited and uploaded straight back.
+//
+// Storage is the pair of tables scripts/import-basic-trim-cost-master.ts already
+// fills: one master row per MAJ CAT (the totals) plus one component row per
+// accessory (qty / rate / value). Upload upserts BY MAJ CAT — it does not
+// truncate — so a partial workbook updates only the categories it contains.
+// ═══════════════════════════════════════════════════════
+
+type BasicAccessorySpec = {
+  /** Stored in basic_trim_cost_component.component. */
+  key: string;
+  /** The workbook's group header over that component's QTY/RATE/VALUE triplet. */
+  label: string;
+  /** Column letter of the group's QTY cell; RATE and VALUE follow it. */
+  startCol: string;
+};
+
+const BA_TRIM_COMPONENTS: BasicAccessorySpec[] = [
+  { key: 'BUTTON',        label: 'BUTTON',               startCol: 'F' },
+  { key: 'ZIPPER',        label: 'ZIPPER',               startCol: 'I' },
+  { key: 'ELASTIC',       label: 'ELASTIC',              startCol: 'L' },
+  { key: 'LACE',          label: 'LACE',                 startCol: 'O' },
+  { key: 'DRAW_CORD',     label: 'DRAW CORD',            startCol: 'R' },
+  { key: 'HOOK_AND_LOOP', label: 'HOOK & LOOP (VELCRO)', startCol: 'U' },
+  { key: 'INTERLINING',   label: 'INTERLINING',          startCol: 'X' },
+];
+
+const BA_PACKAGING_COMPONENTS: BasicAccessorySpec[] = [
+  { key: 'POLY_BAG',     label: 'POLY BAG',                    startCol: 'F' },
+  { key: 'PRICE_TAG',    label: 'PRICE TAG / BIN CARD',        startCol: 'I' },
+  { key: 'KIMBALL_TAG',  label: 'KIMBALL TAG / BUTTERFLY PIN', startCol: 'L' },
+  { key: 'HANGER',       label: 'HANGER',                      startCol: 'O' },
+  { key: 'TISSUE_PAPER', label: 'TISSUE PAPER',                startCol: 'R' },
+  { key: 'CARTON',       label: 'CARTON (PACKING SHARE)',      startCol: 'U' },
+];
+
+/** Both sheets share a layout: data starts at column C, a merged group-header
+ * row 1, a blank row 2, the QTY/RATE/VALUE header on row 3, data from row 4. */
+const BA_HEADER_ROW = 3;
+const BA_FIRST_DATA_ROW = 4;
+
+const BA_SHEETS = {
+  trims: {
+    name: 'ACC LIST',
+    kind: 'TRIM' as const,
+    title: 'ACC DETAILS WITH PER PC CONSUMPTION WITH PER PC RATE  (BASIC TRIMS)',
+    components: BA_TRIM_COMPONENTS,
+    /** Column holding TOTAL VALUE PER PC — the sum of every group's VALUE. */
+    totalCol: 'AA',
+    totalLabel: 'TOTAL VALUE PER PC (RS)',
+    /** Header cell checked on upload to confirm the layout hasn't shifted. */
+    layoutCol: 'AA',
+    layoutLabel: 'TOTAL VALUE PER PC (RS)',
+    lastCol: 'AA',
+    notes: [
+      'LEGEND:',
+      'Blue figures (Qty & Rate) are ILLUSTRATIVE / TYPICAL INDUSTRY-STANDARD DRAFT BENCHMARKS (e.g. a full-sleeve shirt ~ 12 buttons @ Rs 0.30/pc) - NOT your confirmed vendor rates.',
+      'Grey "-" = item not typically used on this garment type. Change to a number and it will compute automatically once you overwrite the Qty/Rate.',
+      '"VALUE (RS) = QTY x RATE" and "TOTAL VALUE PER PC" are live formulas - edit Qty or Rate and totals update automatically.',
+      'MANDATORY: Please have your vendor / costing team verify and overwrite every Qty and Rate cell with actual confirmed figures before using this sheet for costing, purchase orders, or vendor payments.',
+      'Covers basic trims only (Button, Zipper, Elastic, Lace, Draw Cord, Hook & Loop, Interlining). See "Packaging Master" tab for packing accessories.',
+    ],
+  },
+  packaging: {
+    name: 'Packaging Master',
+    kind: 'PACKAGING' as const,
+    title: 'PACKING ACC DETAILS WITH PER PC CONSUMPTION WITH PER PC RATE',
+    components: BA_PACKAGING_COMPONENTS,
+    totalCol: 'X',
+    totalLabel: 'TOTAL VALUE PER PC (RS)',
+    layoutCol: 'Z',
+    layoutLabel: 'BASIC & TRIMS COST',
+    lastCol: 'Z',
+    notes: [
+      'LEGEND:',
+      'Blue figures (Qty & Rate) are ILLUSTRATIVE / TYPICAL INDUSTRY-STANDARD DRAFT BENCHMARKS - NOT your confirmed vendor rates.',
+      'Poly Bag, Price Tag/Bin Card, Kimball Tag/Butterfly Pin, and Carton (packing share) are shown for every Major Category (near-universal packing items).',
+      'Hanger and Tissue Paper are shown only for garments typically hung/boxed (shirts, kurtas, blazers, jackets, suits, frocks, tops, sarees, dupattas, stoles, shawls); grey - elsewhere.',
+      'Carton (packing share) assumes ~50 pcs per carton @ Rs 100/carton as a placeholder - replace with your actual carton cost and pack ratio.',
+      '"VALUE (RS) = QTY x RATE" and "TOTAL VALUE PER PC" are live formulas.',
+      'MANDATORY: Please have your vendor / costing team verify and overwrite every Qty and Rate cell with actual confirmed figures before using this sheet for costing, purchase orders, or vendor payments.',
+    ],
+  },
+};
+
+type BasicAccessorySheet = typeof BA_SHEETS.trims | typeof BA_SHEETS.packaging;
+
+type BasicAccessoryCell = { qty: number | null; rate: number | null; value: number | null };
+
+type BasicAccessoryRow = {
+  div: string | null;
+  subDiv: string | null;
+  majCat: string;
+  threadCost: number | null;
+  basicTrimsCost: number | null;
+  /** component key -> its cells, for both kinds. */
+  components: Record<string, BasicAccessoryCell>;
+};
+
+/** Shifts a column letter right by n ('F' + 1 = 'G', 'Z' + 1 = 'AA'). */
+function baShiftCol(col: string, n: number): string {
+  let index = 0;
+  for (const ch of col) index = index * 26 + (ch.charCodeAt(0) - 64);
+  index += n;
+  let out = '';
+  while (index > 0) {
+    const rem = (index - 1) % 26;
+    out = String.fromCharCode(65 + rem) + out;
+    index = Math.floor((index - 1) / 26);
+  }
+  return out;
+}
+
+/** The workbook writes "-" for "this accessory isn't used on this garment". */
+const BA_NOT_APPLICABLE = '-';
+
+function baNum(value: unknown): number | null {
+  if (value === null || value === undefined || value === '') return null;
+  const n = Number(value);
+  return Number.isFinite(n) ? Number(n.toFixed(4)) : null;
+}
+
+/**
+ * Writes one sheet of the workbook — used for both the blank template (a single
+ * example row) and the full data export, which differ only in `rows`.
+ */
+function buildBasicAccessoriesSheet(wb: any, sheet: BasicAccessorySheet, rows: BasicAccessoryRow[]): void {
+  const ws = wb.addWorksheet(sheet.name);
+
+  const blue = (cell: any) => {
+    cell.font = { bold: true, color: { argb: 'FFFFFFFF' } };
+    cell.fill = { type: 'pattern', pattern: 'solid', fgColor: { argb: 'FF1565C0' } };
+    cell.alignment = { horizontal: 'center', vertical: 'middle', wrapText: true };
+  };
+
+  // Row 1 — title + one merged header per accessory, over its QTY/RATE/VALUE triplet.
+  const titleRow = ws.getRow(1);
+  titleRow.getCell('C').value = sheet.title;
+  blue(titleRow.getCell('C'));
+  ws.mergeCells('C1:E1');
+  for (const c of sheet.components) {
+    titleRow.getCell(c.startCol).value = c.label;
+    blue(titleRow.getCell(c.startCol));
+    ws.mergeCells(`${c.startCol}1:${baShiftCol(c.startCol, 2)}1`);
+  }
+  titleRow.getCell(sheet.totalCol).value = 'TOTAL';
+  blue(titleRow.getCell(sheet.totalCol));
+  titleRow.height = 30;
+
+  // Row 3 — the per-column header. (Row 2 is deliberately left blank.)
+  const headerRow = ws.getRow(BA_HEADER_ROW);
+  headerRow.getCell('C').value = 'DIV';
+  headerRow.getCell('D').value = 'SUB DIV';
+  headerRow.getCell('E').value = 'MAJ CAT';
+  for (const c of sheet.components) {
+    headerRow.getCell(c.startCol).value = 'PER PC CONSUMPTION (QTY)';
+    headerRow.getCell(baShiftCol(c.startCol, 1)).value = 'RATE (RS PER UNIT)';
+    headerRow.getCell(baShiftCol(c.startCol, 2)).value = 'VALUE (RS) = QTY x RATE';
+  }
+  headerRow.getCell(sheet.totalCol).value = sheet.totalLabel;
+  if (sheet.kind === 'PACKAGING') {
+    headerRow.getCell('Y').value = 'THREAD COST';
+    headerRow.getCell('Z').value = 'BASIC & TRIMS COST';
+  }
+  headerRow.eachCell({ includeEmpty: false }, (cell: any) => blue(cell));
+  headerRow.height = 42;
+
+  // Data rows. VALUE and TOTAL stay live formulas, exactly as in the source
+  // workbook, so editing a Qty or Rate re-costs the sheet in place.
+  rows.forEach((r, i) => {
+    const rowNo = BA_FIRST_DATA_ROW + i;
+    const row = ws.getRow(rowNo);
+    row.getCell('C').value = r.div ?? '';
+    row.getCell('D').value = r.subDiv ?? '';
+    row.getCell('E').value = r.majCat;
+
+    const valueRefs: string[] = [];
+    for (const c of sheet.components) {
+      const cell = r.components[c.key];
+      const qtyCol = c.startCol;
+      const rateCol = baShiftCol(c.startCol, 1);
+      const valCol = baShiftCol(c.startCol, 2);
+      valueRefs.push(`${valCol}${rowNo}`);
+
+      if (!cell || (cell.qty === null && cell.rate === null)) {
+        row.getCell(qtyCol).value = BA_NOT_APPLICABLE;
+        row.getCell(rateCol).value = BA_NOT_APPLICABLE;
+        row.getCell(valCol).value = BA_NOT_APPLICABLE;
+        continue;
+      }
+      row.getCell(qtyCol).value = cell.qty ?? 0;
+      row.getCell(rateCol).value = cell.rate ?? 0;
+      row.getCell(valCol).value = { formula: `${qtyCol}${rowNo}*${rateCol}${rowNo}`, result: cell.value ?? undefined };
+    }
+
+    row.getCell(sheet.totalCol).value = {
+      formula: valueRefs.map((ref) => `IF(ISNUMBER(${ref}),${ref},0)`).join('+'),
+    };
+    if (sheet.kind === 'PACKAGING') {
+      row.getCell('Y').value = r.threadCost ?? '';
+      row.getCell('Z').value = r.basicTrimsCost ?? '';
+    }
+  });
+
+  // Legend / mandatory-verification notes, two blank rows below the data.
+  const firstNoteRow = BA_FIRST_DATA_ROW + rows.length + 2;
+  sheet.notes.forEach((note, i) => {
+    const rowNo = firstNoteRow + i;
+    const cell = ws.getRow(rowNo).getCell('C');
+    cell.value = note;
+    cell.font = note.startsWith('MANDATORY')
+      ? { bold: true, size: 10, color: { argb: 'FF9C0006' } }
+      : { bold: i === 0, italic: i > 0, size: 10 };
+    if (note.startsWith('MANDATORY')) {
+      cell.fill = { type: 'pattern', pattern: 'solid', fgColor: { argb: 'FFFFF3CD' } };
+    }
+    ws.mergeCells(`C${rowNo}:${sheet.lastCol}${rowNo}`);
+  });
+
+  ws.getColumn('C').width = 12;
+  ws.getColumn('D').width = 16;
+  ws.getColumn('E').width = 26;
+  for (const c of sheet.components) {
+    ws.getColumn(c.startCol).width = 16;
+    ws.getColumn(baShiftCol(c.startCol, 1)).width = 14;
+    ws.getColumn(baShiftCol(c.startCol, 2)).width = 16;
+  }
+  ws.getColumn(sheet.totalCol).width = 18;
+  if (sheet.kind === 'PACKAGING') {
+    ws.getColumn('Y').width = 14;
+    ws.getColumn('Z').width = 20;
+  }
+  ws.views = [{ state: 'frozen', xSplit: 5, ySplit: BA_HEADER_ROW }];
+}
+
+function buildBasicAccessoriesWorkbook(rows: BasicAccessoryRow[]): any {
+  const ExcelJS = require('exceljs');
+  const wb = new ExcelJS.Workbook();
+  buildBasicAccessoriesSheet(wb, BA_SHEETS.trims, rows);
+  buildBasicAccessoriesSheet(wb, BA_SHEETS.packaging, rows);
+  return wb;
+}
+
+/** Every stored row, in the shape the workbook builder wants. */
+async function loadBasicAccessoryRows(): Promise<BasicAccessoryRow[]> {
+  const masters = await prisma.basicTrimCostMaster.findMany({
+    orderBy: [{ div: 'asc' }, { subDiv: 'asc' }, { majCat: 'asc' }],
+    include: { components: true },
+  });
+
+  return masters.map((m) => {
+    const components: Record<string, BasicAccessoryCell> = {};
+    for (const c of m.components) {
+      components[c.component] = {
+        qty: c.qty === null ? null : Number(c.qty),
+        rate: c.rate === null ? null : Number(c.rate),
+        value: c.value === null ? null : Number(c.value),
+      };
+    }
+    return {
+      div: m.div,
+      subDiv: m.subDiv,
+      majCat: m.majCat,
+      threadCost: m.threadCost === null ? null : Number(m.threadCost),
+      basicTrimsCost: m.basicTrimsCost === null ? null : Number(m.basicTrimsCost),
+      components,
+    };
+  });
+}
+
+/** GET /api/admin/basic-accessories/status */
+export const getBasicAccessoriesStatus = async (_req: Request, res: Response): Promise<void> => {
+  try {
+    const [total, components, lastUpdatedRow, withCost] = await Promise.all([
+      prisma.basicTrimCostMaster.count(),
+      prisma.basicTrimCostComponent.count(),
+      prisma.basicTrimCostMaster.findFirst({ orderBy: { updatedAt: 'desc' }, select: { updatedAt: true } }),
+      prisma.basicTrimCostMaster.count({ where: { basicTrimsCost: { not: null } } }),
+    ]);
+
+    res.json({
+      success: true,
+      data: {
+        total,
+        categories: total,
+        components,
+        withCost,
+        lastUpdated: lastUpdatedRow?.updatedAt ? lastUpdatedRow.updatedAt.toISOString() : null,
+      },
+    });
+  } catch (error: any) {
+    console.error('[BasicAccessories] Status error:', error);
+    res.status(500).json({ success: false, error: error.message });
+  }
+};
+
+/**
+ * GET /api/admin/basic-accessories/template
+ * The workbook's own layout with a single example major category filled in —
+ * overwrite the example, add your rows under it, upload.
+ */
+export const downloadBasicAccessoriesTemplate = async (_req: Request, res: Response): Promise<void> => {
+  try {
+    const example: BasicAccessoryRow = {
+      div: 'KIDS',
+      subDiv: 'KBW-U',
+      majCat: 'IBW_JKT_FS',
+      threadCost: 3,
+      basicTrimsCost: null,
+      components: {
+        BUTTON:        { qty: 5,    rate: 0.5, value: 2.5 },
+        ZIPPER:        { qty: 1,    rate: 8,   value: 8 },
+        HOOK_AND_LOOP: { qty: 1,    rate: 1.5, value: 1.5 },
+        INTERLINING:   { qty: 0.2,  rate: 5,   value: 1 },
+        POLY_BAG:      { qty: 1,    rate: 0.8, value: 0.8 },
+        PRICE_TAG:     { qty: 1,    rate: 0.5, value: 0.5 },
+        KIMBALL_TAG:   { qty: 1,    rate: 0.2, value: 0.2 },
+        HANGER:        { qty: 1,    rate: 3,   value: 3 },
+        TISSUE_PAPER:  { qty: 1,    rate: 0.3, value: 0.3 },
+        CARTON:        { qty: 0.02, rate: 100, value: 2 },
+      },
+    };
+
+    const wb = buildBasicAccessoriesWorkbook([example]);
+    res.setHeader('Content-Type', 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');
+    res.setHeader('Content-Disposition', 'attachment; filename="BASIC_ACCESSORIES_TEMPLATE.xlsx"');
+    await wb.xlsx.write(res);
+    res.end();
+  } catch (error: any) {
+    console.error('[BasicAccessories] Template error:', error);
+    res.status(500).json({ success: false, error: error.message });
+  }
+};
+
+/** GET /api/admin/basic-accessories/export — every stored row, same layout. */
+export const exportBasicAccessories = async (_req: Request, res: Response): Promise<void> => {
+  try {
+    const rows = await loadBasicAccessoryRows();
+    const wb = buildBasicAccessoriesWorkbook(rows);
+    res.setHeader('Content-Type', 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');
+    res.setHeader('Content-Disposition', 'attachment; filename="BASIC_ACCESSORIES_EXPORT.xlsx"');
+    await wb.xlsx.write(res);
+    res.end();
+  } catch (error: any) {
+    console.error('[BasicAccessories] Export error:', error);
+    res.status(500).json({ success: false, error: error.message });
+  }
+};
+
+/**
+ * POST /api/admin/basic-accessories/upload
+ * Bulk update from the workbook. Upserts by MAJ CAT and replaces that category's
+ * component breakdown; categories absent from the file are left untouched.
+ */
+export const uploadBasicAccessories = async (req: Request, res: Response): Promise<void> => {
+  try {
+    if (!req.file) {
+      res.status(400).json({ success: false, error: 'No file uploaded. Send a .xlsx file as "file" field.' });
+      return;
+    }
+
+    const ExcelJS = (await import('exceljs')).default;
+    const wb = new ExcelJS.Workbook();
+    await wb.xlsx.load(req.file.buffer as any);
+
+    const accSheet = wb.getWorksheet(BA_SHEETS.trims.name);
+    const pkgSheet = wb.getWorksheet(BA_SHEETS.packaging.name);
+    if (!accSheet && !pkgSheet) {
+      res.status(400).json({
+        success: false,
+        error: `Workbook must contain an "${BA_SHEETS.trims.name}" and/or "${BA_SHEETS.packaging.name}" sheet. ` +
+          `Found: ${wb.worksheets.map((w: any) => w.name).join(', ') || 'no sheets'}.`,
+      });
+      return;
+    }
+
+    /** Excel cells can hold a formula result or rich text — unwrap to a scalar. */
+    const raw = (ws: any, col: string, rowNo: number): unknown => {
+      let v = ws.getRow(rowNo).getCell(col).value;
+      if (v && typeof v === 'object' && 'richText' in v) {
+        return (v as any).richText.map((t: any) => t.text).join('');
+      }
+      if (v && typeof v === 'object' && 'result' in v) v = (v as any).result;
+      if (v && typeof v === 'object' && 'text' in v) v = (v as any).text;
+      return v;
+    };
+    const str = (ws: any, col: string, rowNo: number): string | null => {
+      const v = raw(ws, col, rowNo);
+      if (v === null || v === undefined) return null;
+      const s = String(v).trim();
+      return s && s !== BA_NOT_APPLICABLE ? s : null;
+    };
+    const num = (ws: any, col: string, rowNo: number): number | null => {
+      const v = raw(ws, col, rowNo);
+      if (typeof v === 'string' && !/^-?\d/.test(v.trim())) return null;
+      return baNum(v);
+    };
+
+    // Guard against a silently re-arranged workbook — every column below is
+    // addressed by letter, so a shifted layout would import garbage.
+    const layoutError = (ws: any, sheet: BasicAccessorySheet): string | null => {
+      const majCat = str(ws, 'E', BA_HEADER_ROW);
+      const total = str(ws, sheet.layoutCol, BA_HEADER_ROW);
+      if (majCat !== 'MAJ CAT' || total !== sheet.layoutLabel) {
+        return `Unexpected layout in sheet "${sheet.name}": E${BA_HEADER_ROW}="${majCat ?? ''}", ` +
+          `${sheet.layoutCol}${BA_HEADER_ROW}="${total ?? ''}" (expected "MAJ CAT" / "${sheet.layoutLabel}"). ` +
+          `Download the template and paste your rows into it.`;
+      }
+      return null;
+    };
+
+    const rowsByMajCat = new Map<string, BasicAccessoryRow>();
+    let skipped = 0;
+
+    const readSheet = (ws: any, sheet: BasicAccessorySheet): string | null => {
+      const err = layoutError(ws, sheet);
+      if (err) return err;
+
+      for (let rowNo = BA_FIRST_DATA_ROW; rowNo <= ws.rowCount; rowNo++) {
+        const majCat = str(ws, 'E', rowNo);
+        // Below the data the sheet carries legend/instruction lines, merged
+        // across the full width — so MAJ CAT reads back as the note's text.
+        // A real major category is a single code, never a sentence, and never
+        // part of a merged range.
+        if (!majCat) continue;
+        if (ws.getRow(rowNo).getCell('E').isMerged || /\s/.test(majCat) || majCat.length > 100) {
+          continue;
+        }
+        const key = majCat.toUpperCase();
+
+        let row = rowsByMajCat.get(key);
+        if (!row) {
+          row = {
+            div: null,
+            subDiv: null,
+            majCat,
+            threadCost: null,
+            basicTrimsCost: null,
+            components: {},
+          };
+          rowsByMajCat.set(key, row);
+        }
+        row.div = row.div ?? str(ws, 'C', rowNo);
+        row.subDiv = row.subDiv ?? str(ws, 'D', rowNo);
+
+        for (const c of sheet.components) {
+          const qty = num(ws, c.startCol, rowNo);
+          const rate = num(ws, baShiftCol(c.startCol, 1), rowNo);
+          let value = num(ws, baShiftCol(c.startCol, 2), rowNo);
+          if (qty === null && rate === null && value === null) continue;
+          // VALUE is a formula in the workbook; a file saved by a tool that
+          // doesn't evaluate formulas arrives with it empty, so recompute.
+          if (value === null && qty !== null && rate !== null) value = baNum(qty * rate);
+          row.components[c.key] = { qty, rate, value };
+        }
+
+        if (sheet.kind === 'PACKAGING') {
+          row.threadCost = num(ws, 'Y', rowNo);
+          row.basicTrimsCost = num(ws, 'Z', rowNo);
+        }
+      }
+      return null;
+    };
+
+    for (const [ws, sheet] of [[accSheet, BA_SHEETS.trims], [pkgSheet, BA_SHEETS.packaging]] as const) {
+      if (!ws) continue;
+      const err = readSheet(ws, sheet);
+      if (err) {
+        res.status(400).json({ success: false, error: err });
+        return;
+      }
+    }
+
+    const records = [...rowsByMajCat.values()];
+    if (records.length === 0) {
+      res.status(400).json({ success: false, error: 'No valid rows found in the Excel file.' });
+      return;
+    }
+
+    // Totals are derived, never read from the sheet's own TOTAL column — the
+    // uploaded file's formulas may not have been evaluated by whatever wrote it.
+    const sumOf = (row: BasicAccessoryRow, specs: BasicAccessorySpec[]): number | null => {
+      const values = specs
+        .map((s) => row.components[s.key]?.value)
+        .filter((v): v is number => typeof v === 'number');
+      return values.length > 0 ? Number(values.reduce((a, b) => a + b, 0).toFixed(4)) : null;
+    };
+
+    const now = new Date();
+    const CHUNK = 200;
+    for (let i = 0; i < records.length; i += CHUNK) {
+      const batch = records.slice(i, i + CHUNK);
+      const values = batch.map((r) => Prisma.sql`(
+        ${r.majCat}, ${r.div}, ${r.subDiv},
+        ${sumOf(r, BA_TRIM_COMPONENTS)}, ${sumOf(r, BA_PACKAGING_COMPONENTS)},
+        ${r.threadCost}, ${r.basicTrimsCost}, ${now}, ${now}
+      )`);
+      await prisma.$executeRaw`
+        INSERT INTO basic_trim_cost_master
+          (maj_cat, div, sub_div, trims_total, packaging_total, thread_cost, basic_trims_cost, created_at, updated_at)
+        VALUES ${Prisma.join(values)}
+        ON CONFLICT (maj_cat) DO UPDATE SET
+          div              = EXCLUDED.div,
+          sub_div          = EXCLUDED.sub_div,
+          trims_total      = EXCLUDED.trims_total,
+          packaging_total  = EXCLUDED.packaging_total,
+          thread_cost      = EXCLUDED.thread_cost,
+          basic_trims_cost = EXCLUDED.basic_trims_cost,
+          updated_at       = EXCLUDED.updated_at
+      `;
+    }
+
+    const ids = new Map(
+      (await prisma.basicTrimCostMaster.findMany({
+        where: { majCat: { in: records.map((r) => r.majCat) } },
+        select: { id: true, majCat: true },
+      })).map((m) => [m.majCat, m.id]),
+    );
+
+    const componentRows = records.flatMap((r) => {
+      const masterId = ids.get(r.majCat);
+      if (masterId === undefined) return [];
+      const of = (specs: BasicAccessorySpec[], kind: 'TRIM' | 'PACKAGING') =>
+        specs
+          .filter((s) => r.components[s.key])
+          .map((s) => ({ masterId, kind, component: s.key, ...r.components[s.key] }));
+      return [...of(BA_TRIM_COMPONENTS, 'TRIM'), ...of(BA_PACKAGING_COMPONENTS, 'PACKAGING')];
+    });
+
+    const masterIds = [...ids.values()];
+    for (let i = 0; i < masterIds.length; i += CHUNK) {
+      await prisma.basicTrimCostComponent.deleteMany({
+        where: { masterId: { in: masterIds.slice(i, i + CHUNK) } },
+      });
+    }
+    for (let i = 0; i < componentRows.length; i += 1000) {
+      await prisma.basicTrimCostComponent.createMany({ data: componentRows.slice(i, i + 1000) });
+    }
+
+    const [total, components] = await Promise.all([
+      prisma.basicTrimCostMaster.count(),
+      prisma.basicTrimCostComponent.count(),
+    ]);
+
+    console.log(`[BasicAccessories] Upserted ${records.length} major categories, ${componentRows.length} component rows`);
+
+    res.json({
+      success: true,
+      message: `Basic Accessories updated: ${records.length} major categories, ${componentRows.length} accessory rows${skipped > 0 ? `, ${skipped} rows skipped` : ''}.`,
+      data: {
+        total,
+        categories: total,
+        components,
+        updated: records.length,
+        skipped,
+        lastUpdated: now.toISOString(),
+      },
+    });
+  } catch (error: any) {
+    console.error('[BasicAccessories] Upload error:', error);
+    res.status(500).json({ success: false, error: error.message });
+  }
+};
+
+// ═══════════════════════════════════════════════════════
 // FABRIC ARTICLE DATA (fabric_article_data)
 // ═══════════════════════════════════════════════════════
 
@@ -6785,6 +7356,33 @@ export const EXPENSE_TABLE_REGISTRY: Record<string, ExpenseTableConfig> = {
     searchColumns: ['presentationNo', 'vendorCode', 'vendorName', 'division', 'subDivision', 'majorCategory', 'designNumber', 'articleNumber', 'status'],
     displayColumns: ['presentationNo'],
     defaultSort: { field: 'createdAt', dir: 'desc' },
+  },
+  // Basic Accessories — the totals row per major category. The per-accessory
+  // qty/rate breakdown lives in basic_trim_cost_component and is maintained
+  // through the Excel upload/export on the Admin Expenses page, not this grid.
+  'basic-accessories': {
+    kind: 'prisma',
+    delegateName: 'basicTrimCostMaster',
+    idColumn: 'id',
+    idIsNumeric: true,
+    allowCreate: true,
+    allowDelete: true,
+    requiredOnCreate: ['majCat'],
+    columns: [
+      { key: 'id', label: 'ID', editable: false },
+      { key: 'div', label: 'Division' },
+      { key: 'subDiv', label: 'Sub Division' },
+      { key: 'majCat', label: 'Major Category' },
+      { key: 'trimsTotal', label: 'Basic Trims Total (Rs/pc)', align: 'right' },
+      { key: 'packagingTotal', label: 'Packaging Total (Rs/pc)', align: 'right' },
+      { key: 'threadCost', label: 'Thread Cost (Rs/pc)', align: 'right' },
+      { key: 'basicTrimsCost', label: 'Basic & Trims Cost (Rs/pc)', align: 'right' },
+      { key: 'createdAt', label: 'Created At', type: 'date', editable: false },
+      { key: 'updatedAt', label: 'Updated At', type: 'date', editable: false },
+    ],
+    searchColumns: ['div', 'subDiv', 'majCat'],
+    displayColumns: ['majCat', 'div'],
+    defaultSort: { field: 'majCat', dir: 'asc' },
   },
   'vendor-master': {
     kind: 'prisma',
