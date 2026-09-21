@@ -19,7 +19,6 @@ import {
   Download,
   ClipboardList,
   History,
-  Trash2,
 } from 'lucide-react';
 import {
   Alert,
@@ -44,7 +43,6 @@ import {
 import { message } from '@/lib/message';
 import { BackendApiService } from '../../../services/api/backendApi';
 import { APP_CONFIG } from '../../../constants/app/config';
-import { BulkDeleteByArticleNumberDialog } from '../components/BulkDeleteByArticleNumberDialog';
 
 const api = new BackendApiService();
 
@@ -271,7 +269,6 @@ export default function Admin() {
   const [fabricArticleDataUploading, setFabricArticleDataUploading] = useState(false);
   const [fabricArticleDataProgress, setFabricArticleDataProgress] = useState<number>(0);
   const fabricArticleDataFileRef = useRef<HTMLInputElement | null>(null);
-  const [fabricBulkDeleteOpen, setFabricBulkDeleteOpen] = useState(false);
 
   // Fabric Article Master (fabric_article_master)
   const [fabricArticleMasterMeta, setFabricArticleMasterMeta] = useState<FabricArticleMasterMeta | null>(null);
@@ -286,7 +283,6 @@ export default function Admin() {
   const [bodyArticleDataUploading, setBodyArticleDataUploading] = useState(false);
   const [bodyArticleDataProgress, setBodyArticleDataProgress] = useState<number>(0);
   const bodyArticleDataFileRef = useRef<HTMLInputElement | null>(null);
-  const [bodyBulkDeleteOpen, setBodyBulkDeleteOpen] = useState(false);
   const [broaderMenuMeta, setBroaderMenuMeta] = useState<BroaderMenuMeta | null>(null);
   const [broaderMenuStatusLoading, setBroaderMenuStatusLoading] = useState(false);
   const [broaderMenuUploading, setBroaderMenuUploading] = useState(false);
@@ -2647,10 +2643,6 @@ export default function Admin() {
                 <RotateCw className={fabricArticleDataStatusLoading ? 'animate-spin' : ''} />
                 Refresh Status
               </Button>
-              <Button size="sm" variant="destructive" onClick={() => setFabricBulkDeleteOpen(true)}>
-                <Trash2 />
-                Bulk Delete
-              </Button>
             </div>
           </CardHeader>
           <CardContent>
@@ -2746,20 +2738,6 @@ export default function Admin() {
             </Spinner>
           </CardContent>
         </Card>
-
-        <BulkDeleteByArticleNumberDialog
-          open={fabricBulkDeleteOpen}
-          onOpenChange={setFabricBulkDeleteOpen}
-          label="Fabric Article Data"
-          articleNumberLabel="Fabric Article Number"
-          articleNumberKey="fabricArticleNumber"
-          articleDescriptionKey="fabricArticleDescription"
-          deleteTemplateEndpoint="/admin/fabric-article-data/delete-template"
-          deleteTemplateFilename="FABRIC_ARTICLE_DATA_DELETE_TEMPLATE.xlsx"
-          previewEndpoint="/admin/fabric-article-data/bulk-delete/preview"
-          confirmEndpoint="/admin/fabric-article-data/bulk-delete/confirm"
-          onDeleted={() => loadFabricArticleDataStatus()}
-        />
 
         {/* Fabric Article Master Upload (fabric hierarchy → fabric_article_master) */}
         <Card className="mb-6 glass rounded-2xl border border-white/60">
@@ -3704,10 +3682,6 @@ export default function Admin() {
                 <RotateCw className={bodyArticleDataStatusLoading ? 'animate-spin' : ''} />
                 Refresh Status
               </Button>
-              <Button size="sm" variant="destructive" onClick={() => setBodyBulkDeleteOpen(true)}>
-                <Trash2 />
-                Bulk Delete
-              </Button>
             </div>
           </CardHeader>
           <CardContent>
@@ -3819,20 +3793,6 @@ export default function Admin() {
             </Spinner>
           </CardContent>
         </Card>
-
-        <BulkDeleteByArticleNumberDialog
-          open={bodyBulkDeleteOpen}
-          onOpenChange={setBodyBulkDeleteOpen}
-          label="Body Article Data"
-          articleNumberLabel="Body Article Number"
-          articleNumberKey="bodyArticleNumber"
-          articleDescriptionKey="bodyArticleDescription"
-          deleteTemplateEndpoint="/admin/body-article-data/delete-template"
-          deleteTemplateFilename="BODY_ARTICLE_DATA_DELETE_TEMPLATE.xlsx"
-          previewEndpoint="/admin/body-article-data/bulk-delete/preview"
-          confirmEndpoint="/admin/body-article-data/bulk-delete/confirm"
-          onDeleted={() => loadBodyArticleDataStatus()}
-        />
 
         {/* Broader Menu Upload (BM-H merchandising master → broader_menu) */}
         <Card className="mb-6 glass rounded-2xl border border-white/60">
