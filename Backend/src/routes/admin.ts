@@ -322,4 +322,10 @@ router.get('/body-fabric-consumption/template', h(adminController.downloadBodyFa
 router.get('/body-fabric-consumption/download', h(adminController.downloadBodyFabricConsumptionData));
 router.post('/body-fabric-consumption/upload',  excelUpload.single('file'), h(adminController.uploadBodyFabricConsumption));
 
+router.get('/value-addition-accessories-cost/status',   h(adminController.getVaacStatus));
+router.get('/value-addition-accessories-cost/lookup',   h(adminController.lookupVaacTotalValue));
+router.get('/value-addition-accessories-cost/template', h(adminController.downloadVaacTemplate));
+router.get('/value-addition-accessories-cost/download', h(adminController.downloadVaacData));
+router.post('/value-addition-accessories-cost/upload',  excelUpload.single('file'), h(adminController.uploadVaac));
+
 export default router;

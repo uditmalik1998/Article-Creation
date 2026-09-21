@@ -238,6 +238,13 @@ export type ModifyLog = $Result.DefaultSelection<Prisma.$ModifyLogPayload>
  */
 export type FabricArticleData = $Result.DefaultSelection<Prisma.$FabricArticleDataPayload>
 /**
+ * Model ValueAdditionAccessoriesCost
+ * Value Addition Accessories Cost master — one row per DIV + SUB_DIV + MAJ_CAT.
+ * Sourced from "val add acc master.xlsx" (ACC LIST sheet).
+ * Each of the 7 accessory types has qty, rate, and value columns.
+ */
+export type ValueAdditionAccessoriesCost = $Result.DefaultSelection<Prisma.$ValueAdditionAccessoriesCostPayload>
+/**
  * Model BodyArticleData
  * BodyArticleData: One row per body article created from the Body & Construction card
  */
@@ -1046,6 +1053,16 @@ export class PrismaClient<
   get fabricArticleData(): Prisma.FabricArticleDataDelegate<ExtArgs, ClientOptions>;
 
   /**
+   * `prisma.valueAdditionAccessoriesCost`: Exposes CRUD operations for the **ValueAdditionAccessoriesCost** model.
+    * Example usage:
+    * ```ts
+    * // Fetch zero or more ValueAdditionAccessoriesCosts
+    * const valueAdditionAccessoriesCosts = await prisma.valueAdditionAccessoriesCost.findMany()
+    * ```
+    */
+  get valueAdditionAccessoriesCost(): Prisma.ValueAdditionAccessoriesCostDelegate<ExtArgs, ClientOptions>;
+
+  /**
    * `prisma.bodyArticleData`: Exposes CRUD operations for the **BodyArticleData** model.
     * Example usage:
     * ```ts
@@ -1624,6 +1641,7 @@ export namespace Prisma {
     FabricMajCatGridValue: 'FabricMajCatGridValue',
     ModifyLog: 'ModifyLog',
     FabricArticleData: 'FabricArticleData',
+    ValueAdditionAccessoriesCost: 'ValueAdditionAccessoriesCost',
     BodyArticleData: 'BodyArticleData',
     BodyFabricConsumption: 'BodyFabricConsumption',
     RoughCmpCostMaster: 'RoughCmpCostMaster',
@@ -1652,7 +1670,7 @@ export namespace Prisma {
       omit: GlobalOmitOptions
     }
     meta: {
-      modelProps: "department" | "subDepartment" | "category" | "masterAttribute" | "attributeAllowedValue" | "categoryAttribute" | "extractionJob" | "extractionResult" | "extractionResultFlat" | "modelGenerationResult" | "modelImageApproval" | "mvgrLookup" | "masterVendorDetail" | "user" | "auditLog" | "apiKey" | "changeHistory" | "costSummary" | "article360" | "articleFab" | "articleBody" | "articleVaAcc" | "articleVaPrcs" | "articleBom" | "sapFieldConfig" | "sapAttributeValue" | "article360Flat" | "rawArticle" | "fabricRawData" | "srmSyncRun" | "srmSyncRunItem" | "poolBJob" | "poolBBatch" | "nationalGridMaster" | "broaderMenu" | "majorCatMaster" | "fabricArticleMaster" | "fabricMajCatGridValue" | "modifyLog" | "fabricArticleData" | "bodyArticleData" | "bodyFabricConsumption" | "roughCmpCostMaster" | "basicTrimCostMaster" | "basicTrimCostComponent" | "majorCategoryDetails" | "expenseApprovalStage" | "expenseChangeRequest" | "expenseAccessGrant" | "expenseAuditLog"
+      modelProps: "department" | "subDepartment" | "category" | "masterAttribute" | "attributeAllowedValue" | "categoryAttribute" | "extractionJob" | "extractionResult" | "extractionResultFlat" | "modelGenerationResult" | "modelImageApproval" | "mvgrLookup" | "masterVendorDetail" | "user" | "auditLog" | "apiKey" | "changeHistory" | "costSummary" | "article360" | "articleFab" | "articleBody" | "articleVaAcc" | "articleVaPrcs" | "articleBom" | "sapFieldConfig" | "sapAttributeValue" | "article360Flat" | "rawArticle" | "fabricRawData" | "srmSyncRun" | "srmSyncRunItem" | "poolBJob" | "poolBBatch" | "nationalGridMaster" | "broaderMenu" | "majorCatMaster" | "fabricArticleMaster" | "fabricMajCatGridValue" | "modifyLog" | "fabricArticleData" | "valueAdditionAccessoriesCost" | "bodyArticleData" | "bodyFabricConsumption" | "roughCmpCostMaster" | "basicTrimCostMaster" | "basicTrimCostComponent" | "majorCategoryDetails" | "expenseApprovalStage" | "expenseChangeRequest" | "expenseAccessGrant" | "expenseAuditLog"
       txIsolationLevel: Prisma.TransactionIsolationLevel
     }
     model: {
@@ -4616,6 +4634,80 @@ export namespace Prisma {
           }
         }
       }
+      ValueAdditionAccessoriesCost: {
+        payload: Prisma.$ValueAdditionAccessoriesCostPayload<ExtArgs>
+        fields: Prisma.ValueAdditionAccessoriesCostFieldRefs
+        operations: {
+          findUnique: {
+            args: Prisma.ValueAdditionAccessoriesCostFindUniqueArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$ValueAdditionAccessoriesCostPayload> | null
+          }
+          findUniqueOrThrow: {
+            args: Prisma.ValueAdditionAccessoriesCostFindUniqueOrThrowArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$ValueAdditionAccessoriesCostPayload>
+          }
+          findFirst: {
+            args: Prisma.ValueAdditionAccessoriesCostFindFirstArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$ValueAdditionAccessoriesCostPayload> | null
+          }
+          findFirstOrThrow: {
+            args: Prisma.ValueAdditionAccessoriesCostFindFirstOrThrowArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$ValueAdditionAccessoriesCostPayload>
+          }
+          findMany: {
+            args: Prisma.ValueAdditionAccessoriesCostFindManyArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$ValueAdditionAccessoriesCostPayload>[]
+          }
+          create: {
+            args: Prisma.ValueAdditionAccessoriesCostCreateArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$ValueAdditionAccessoriesCostPayload>
+          }
+          createMany: {
+            args: Prisma.ValueAdditionAccessoriesCostCreateManyArgs<ExtArgs>
+            result: BatchPayload
+          }
+          createManyAndReturn: {
+            args: Prisma.ValueAdditionAccessoriesCostCreateManyAndReturnArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$ValueAdditionAccessoriesCostPayload>[]
+          }
+          delete: {
+            args: Prisma.ValueAdditionAccessoriesCostDeleteArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$ValueAdditionAccessoriesCostPayload>
+          }
+          update: {
+            args: Prisma.ValueAdditionAccessoriesCostUpdateArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$ValueAdditionAccessoriesCostPayload>
+          }
+          deleteMany: {
+            args: Prisma.ValueAdditionAccessoriesCostDeleteManyArgs<ExtArgs>
+            result: BatchPayload
+          }
+          updateMany: {
+            args: Prisma.ValueAdditionAccessoriesCostUpdateManyArgs<ExtArgs>
+            result: BatchPayload
+          }
+          updateManyAndReturn: {
+            args: Prisma.ValueAdditionAccessoriesCostUpdateManyAndReturnArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$ValueAdditionAccessoriesCostPayload>[]
+          }
+          upsert: {
+            args: Prisma.ValueAdditionAccessoriesCostUpsertArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$ValueAdditionAccessoriesCostPayload>
+          }
+          aggregate: {
+            args: Prisma.ValueAdditionAccessoriesCostAggregateArgs<ExtArgs>
+            result: $Utils.Optional<AggregateValueAdditionAccessoriesCost>
+          }
+          groupBy: {
+            args: Prisma.ValueAdditionAccessoriesCostGroupByArgs<ExtArgs>
+            result: $Utils.Optional<ValueAdditionAccessoriesCostGroupByOutputType>[]
+          }
+          count: {
+            args: Prisma.ValueAdditionAccessoriesCostCountArgs<ExtArgs>
+            result: $Utils.Optional<ValueAdditionAccessoriesCostCountAggregateOutputType> | number
+          }
+        }
+      }
       BodyArticleData: {
         payload: Prisma.$BodyArticleDataPayload<ExtArgs>
         fields: Prisma.BodyArticleDataFieldRefs
@@ -5488,6 +5580,7 @@ export namespace Prisma {
     fabricMajCatGridValue?: FabricMajCatGridValueOmit
     modifyLog?: ModifyLogOmit
     fabricArticleData?: FabricArticleDataOmit
+    valueAdditionAccessoriesCost?: ValueAdditionAccessoriesCostOmit
     bodyArticleData?: BodyArticleDataOmit
     bodyFabricConsumption?: BodyFabricConsumptionOmit
     roughCmpCostMaster?: RoughCmpCostMasterOmit
@@ -16080,6 +16173,7 @@ export namespace Prisma {
     width: Decimal | null
     vendorFabricRate: Decimal | null
     valueAddCost: Decimal | null
+    valueAddProcessCost: Decimal | null
     mrp: Decimal | null
     approvedBy: number | null
   }
@@ -16102,6 +16196,7 @@ export namespace Prisma {
     width: Decimal | null
     vendorFabricRate: Decimal | null
     valueAddCost: Decimal | null
+    valueAddProcessCost: Decimal | null
     mrp: Decimal | null
     approvedBy: number | null
   }
@@ -16208,7 +16303,9 @@ export namespace Prisma {
     fabCons: Decimal | null
     width: Decimal | null
     vendorFabricRate: Decimal | null
+    valueAddAccCostType: string | null
     valueAddCost: Decimal | null
+    valueAddProcessCost: Decimal | null
     bodyArticle: string | null
     bodyArticleDescription: string | null
     fabricArticleNumber: string | null
@@ -16349,7 +16446,9 @@ export namespace Prisma {
     fabCons: Decimal | null
     width: Decimal | null
     vendorFabricRate: Decimal | null
+    valueAddAccCostType: string | null
     valueAddCost: Decimal | null
+    valueAddProcessCost: Decimal | null
     bodyArticle: string | null
     bodyArticleDescription: string | null
     fabricArticleNumber: string | null
@@ -16490,7 +16589,9 @@ export namespace Prisma {
     fabCons: number
     width: number
     vendorFabricRate: number
+    valueAddAccCostType: number
     valueAddCost: number
+    valueAddProcessCost: number
     bodyArticle: number
     bodyArticleDescription: number
     fabricArticleNumber: number
@@ -16550,6 +16651,7 @@ export namespace Prisma {
     width?: true
     vendorFabricRate?: true
     valueAddCost?: true
+    valueAddProcessCost?: true
     mrp?: true
     approvedBy?: true
   }
@@ -16572,6 +16674,7 @@ export namespace Prisma {
     width?: true
     vendorFabricRate?: true
     valueAddCost?: true
+    valueAddProcessCost?: true
     mrp?: true
     approvedBy?: true
   }
@@ -16678,7 +16781,9 @@ export namespace Prisma {
     fabCons?: true
     width?: true
     vendorFabricRate?: true
+    valueAddAccCostType?: true
     valueAddCost?: true
+    valueAddProcessCost?: true
     bodyArticle?: true
     bodyArticleDescription?: true
     fabricArticleNumber?: true
@@ -16819,7 +16924,9 @@ export namespace Prisma {
     fabCons?: true
     width?: true
     vendorFabricRate?: true
+    valueAddAccCostType?: true
     valueAddCost?: true
+    valueAddProcessCost?: true
     bodyArticle?: true
     bodyArticleDescription?: true
     fabricArticleNumber?: true
@@ -16960,7 +17067,9 @@ export namespace Prisma {
     fabCons?: true
     width?: true
     vendorFabricRate?: true
+    valueAddAccCostType?: true
     valueAddCost?: true
+    valueAddProcessCost?: true
     bodyArticle?: true
     bodyArticleDescription?: true
     fabricArticleNumber?: true
@@ -17189,7 +17298,9 @@ export namespace Prisma {
     fabCons: Decimal | null
     width: Decimal | null
     vendorFabricRate: Decimal | null
+    valueAddAccCostType: string | null
     valueAddCost: Decimal | null
+    valueAddProcessCost: Decimal | null
     bodyArticle: string | null
     bodyArticleDescription: string | null
     fabricArticleNumber: string | null
@@ -17350,7 +17461,9 @@ export namespace Prisma {
     fabCons?: boolean
     width?: boolean
     vendorFabricRate?: boolean
+    valueAddAccCostType?: boolean
     valueAddCost?: boolean
+    valueAddProcessCost?: boolean
     bodyArticle?: boolean
     bodyArticleDescription?: boolean
     fabricArticleNumber?: boolean
@@ -17496,7 +17609,9 @@ export namespace Prisma {
     fabCons?: boolean
     width?: boolean
     vendorFabricRate?: boolean
+    valueAddAccCostType?: boolean
     valueAddCost?: boolean
+    valueAddProcessCost?: boolean
     bodyArticle?: boolean
     bodyArticleDescription?: boolean
     fabricArticleNumber?: boolean
@@ -17640,7 +17755,9 @@ export namespace Prisma {
     fabCons?: boolean
     width?: boolean
     vendorFabricRate?: boolean
+    valueAddAccCostType?: boolean
     valueAddCost?: boolean
+    valueAddProcessCost?: boolean
     bodyArticle?: boolean
     bodyArticleDescription?: boolean
     fabricArticleNumber?: boolean
@@ -17784,7 +17901,9 @@ export namespace Prisma {
     fabCons?: boolean
     width?: boolean
     vendorFabricRate?: boolean
+    valueAddAccCostType?: boolean
     valueAddCost?: boolean
+    valueAddProcessCost?: boolean
     bodyArticle?: boolean
     bodyArticleDescription?: boolean
     fabricArticleNumber?: boolean
@@ -17824,7 +17943,7 @@ export namespace Prisma {
     imageExtractionRawData?: boolean
   }
 
-  export type ExtractionResultFlatOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<"id" | "jobId" | "imageName" | "imageUrl" | "articleNumber" | "extractionStatus" | "aiModel" | "avgConfidence" | "processingTimeMs" | "totalAttributes" | "extractedCount" | "inputTokens" | "outputTokens" | "totalTokens" | "apiCost" | "userId" | "userName" | "extractionDate" | "createdAt" | "updatedAt" | "majorCategory" | "vendorName" | "designNumber" | "pptNumber" | "rate" | "size" | "yarn1" | "yarn2" | "fabricMainMvgr" | "weave" | "weaveFullForm" | "composition" | "finish" | "gsm" | "macroMvgr" | "macroMvgrFullForm" | "mainMvgr" | "mainMvgrFullForm" | "mFab2" | "mFab2FullForm" | "shade" | "weight" | "lycra" | "neck" | "neckDetails" | "collar" | "placket" | "sleeve" | "bottomFold" | "frontOpenStyle" | "pocketType" | "fit" | "pattern" | "length" | "colour" | "secondaryColour" | "drawcord" | "button" | "zipper" | "zipColour" | "printType" | "printStyle" | "printPlacement" | "patches" | "patchesType" | "embroidery" | "embroideryType" | "wash" | "fatherBelt" | "childBelt" | "division" | "subDivision" | "referenceArticleNumber" | "referenceArticleDescription" | "collarStyle" | "sleeveFold" | "mSet" | "noOfPocket" | "extraPocket" | "dcShape" | "btnColour" | "fCount" | "fConstruction" | "fOunce" | "fWidth" | "fabDiv" | "fabVdr" | "htrfType" | "htrfStyle" | "embPlacement" | "ageGroup" | "mNoOfSize" | "mNoOfClr" | "articleFashionType" | "articleDimension" | "cmtpCost" | "cmpCost" | "fabCost" | "fabCons" | "width" | "vendorFabricRate" | "valueAddCost" | "bodyArticle" | "bodyArticleDescription" | "fabricArticleNumber" | "fabricArticleDescription" | "attrArticleNums" | "mvgrBrandVendor" | "mcDescription" | "vendorCode" | "mrp" | "impAtrbt2" | "mcCode" | "segment" | "season" | "hsnTaxCode" | "articleDescription" | "fashionGrid" | "year" | "articleType" | "presentationsType" | "approvalStatus" | "pdStatus" | "approvedBy" | "approvedAt" | "source" | "imageUncPath" | "isOldArticle" | "isGeneric" | "genericArticleId" | "variantSize" | "variantColor" | "variantWeight" | "sapSyncStatus" | "sapArticleId" | "sapSyncMessage" | "srmOriginalDesignNumber" | "srmUniqueId" | "imageExtractionRawData", ExtArgs["result"]["extractionResultFlat"]>
+  export type ExtractionResultFlatOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<"id" | "jobId" | "imageName" | "imageUrl" | "articleNumber" | "extractionStatus" | "aiModel" | "avgConfidence" | "processingTimeMs" | "totalAttributes" | "extractedCount" | "inputTokens" | "outputTokens" | "totalTokens" | "apiCost" | "userId" | "userName" | "extractionDate" | "createdAt" | "updatedAt" | "majorCategory" | "vendorName" | "designNumber" | "pptNumber" | "rate" | "size" | "yarn1" | "yarn2" | "fabricMainMvgr" | "weave" | "weaveFullForm" | "composition" | "finish" | "gsm" | "macroMvgr" | "macroMvgrFullForm" | "mainMvgr" | "mainMvgrFullForm" | "mFab2" | "mFab2FullForm" | "shade" | "weight" | "lycra" | "neck" | "neckDetails" | "collar" | "placket" | "sleeve" | "bottomFold" | "frontOpenStyle" | "pocketType" | "fit" | "pattern" | "length" | "colour" | "secondaryColour" | "drawcord" | "button" | "zipper" | "zipColour" | "printType" | "printStyle" | "printPlacement" | "patches" | "patchesType" | "embroidery" | "embroideryType" | "wash" | "fatherBelt" | "childBelt" | "division" | "subDivision" | "referenceArticleNumber" | "referenceArticleDescription" | "collarStyle" | "sleeveFold" | "mSet" | "noOfPocket" | "extraPocket" | "dcShape" | "btnColour" | "fCount" | "fConstruction" | "fOunce" | "fWidth" | "fabDiv" | "fabVdr" | "htrfType" | "htrfStyle" | "embPlacement" | "ageGroup" | "mNoOfSize" | "mNoOfClr" | "articleFashionType" | "articleDimension" | "cmtpCost" | "cmpCost" | "fabCost" | "fabCons" | "width" | "vendorFabricRate" | "valueAddAccCostType" | "valueAddCost" | "valueAddProcessCost" | "bodyArticle" | "bodyArticleDescription" | "fabricArticleNumber" | "fabricArticleDescription" | "attrArticleNums" | "mvgrBrandVendor" | "mcDescription" | "vendorCode" | "mrp" | "impAtrbt2" | "mcCode" | "segment" | "season" | "hsnTaxCode" | "articleDescription" | "fashionGrid" | "year" | "articleType" | "presentationsType" | "approvalStatus" | "pdStatus" | "approvedBy" | "approvedAt" | "source" | "imageUncPath" | "isOldArticle" | "isGeneric" | "genericArticleId" | "variantSize" | "variantColor" | "variantWeight" | "sapSyncStatus" | "sapArticleId" | "sapSyncMessage" | "srmOriginalDesignNumber" | "srmUniqueId" | "imageExtractionRawData", ExtArgs["result"]["extractionResultFlat"]>
   export type ExtractionResultFlatInclude<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
     approver?: boolean | ExtractionResultFlat$approverArgs<ExtArgs>
     job?: boolean | ExtractionResultFlat$jobArgs<ExtArgs>
@@ -17949,7 +18068,9 @@ export namespace Prisma {
       fabCons: Prisma.Decimal | null
       width: Prisma.Decimal | null
       vendorFabricRate: Prisma.Decimal | null
+      valueAddAccCostType: string | null
       valueAddCost: Prisma.Decimal | null
+      valueAddProcessCost: Prisma.Decimal | null
       bodyArticle: string | null
       bodyArticleDescription: string | null
       fabricArticleNumber: string | null
@@ -18514,7 +18635,9 @@ export namespace Prisma {
     readonly fabCons: FieldRef<"ExtractionResultFlat", 'Decimal'>
     readonly width: FieldRef<"ExtractionResultFlat", 'Decimal'>
     readonly vendorFabricRate: FieldRef<"ExtractionResultFlat", 'Decimal'>
+    readonly valueAddAccCostType: FieldRef<"ExtractionResultFlat", 'String'>
     readonly valueAddCost: FieldRef<"ExtractionResultFlat", 'Decimal'>
+    readonly valueAddProcessCost: FieldRef<"ExtractionResultFlat", 'Decimal'>
     readonly bodyArticle: FieldRef<"ExtractionResultFlat", 'String'>
     readonly bodyArticleDescription: FieldRef<"ExtractionResultFlat", 'String'>
     readonly fabricArticleNumber: FieldRef<"ExtractionResultFlat", 'String'>
@@ -55347,6 +55470,7 @@ export namespace Prisma {
     fabricRate: Decimal | null
     v2FabricRate: Decimal | null
     valueAddCost: Decimal | null
+    mrp: Decimal | null
     approvedBy: number | null
   }
 
@@ -55354,6 +55478,7 @@ export namespace Prisma {
     fabricRate: Decimal | null
     v2FabricRate: Decimal | null
     valueAddCost: Decimal | null
+    mrp: Decimal | null
     approvedBy: number | null
   }
 
@@ -55383,9 +55508,13 @@ export namespace Prisma {
     vendorName: string | null
     vendorCode: string | null
     designNumber: string | null
+    pptNumber: string | null
     fabricRate: Decimal | null
     v2FabricRate: Decimal | null
     valueAddCost: Decimal | null
+    mrp: Decimal | null
+    baseColor: string | null
+    segment: string | null
     articleFashionType: string | null
     approvalStatus: string | null
     approvedAt: Date | null
@@ -55426,9 +55555,13 @@ export namespace Prisma {
     vendorName: string | null
     vendorCode: string | null
     designNumber: string | null
+    pptNumber: string | null
     fabricRate: Decimal | null
     v2FabricRate: Decimal | null
     valueAddCost: Decimal | null
+    mrp: Decimal | null
+    baseColor: string | null
+    segment: string | null
     articleFashionType: string | null
     approvalStatus: string | null
     approvedAt: Date | null
@@ -55469,9 +55602,13 @@ export namespace Prisma {
     vendorName: number
     vendorCode: number
     designNumber: number
+    pptNumber: number
     fabricRate: number
     v2FabricRate: number
     valueAddCost: number
+    mrp: number
+    baseColor: number
+    segment: number
     articleFashionType: number
     approvalStatus: number
     approvedAt: number
@@ -55492,6 +55629,7 @@ export namespace Prisma {
     fabricRate?: true
     v2FabricRate?: true
     valueAddCost?: true
+    mrp?: true
     approvedBy?: true
   }
 
@@ -55499,6 +55637,7 @@ export namespace Prisma {
     fabricRate?: true
     v2FabricRate?: true
     valueAddCost?: true
+    mrp?: true
     approvedBy?: true
   }
 
@@ -55528,9 +55667,13 @@ export namespace Prisma {
     vendorName?: true
     vendorCode?: true
     designNumber?: true
+    pptNumber?: true
     fabricRate?: true
     v2FabricRate?: true
     valueAddCost?: true
+    mrp?: true
+    baseColor?: true
+    segment?: true
     articleFashionType?: true
     approvalStatus?: true
     approvedAt?: true
@@ -55571,9 +55714,13 @@ export namespace Prisma {
     vendorName?: true
     vendorCode?: true
     designNumber?: true
+    pptNumber?: true
     fabricRate?: true
     v2FabricRate?: true
     valueAddCost?: true
+    mrp?: true
+    baseColor?: true
+    segment?: true
     articleFashionType?: true
     approvalStatus?: true
     approvedAt?: true
@@ -55614,9 +55761,13 @@ export namespace Prisma {
     vendorName?: true
     vendorCode?: true
     designNumber?: true
+    pptNumber?: true
     fabricRate?: true
     v2FabricRate?: true
     valueAddCost?: true
+    mrp?: true
+    baseColor?: true
+    segment?: true
     articleFashionType?: true
     approvalStatus?: true
     approvedAt?: true
@@ -55744,9 +55895,13 @@ export namespace Prisma {
     vendorName: string | null
     vendorCode: string | null
     designNumber: string | null
+    pptNumber: string | null
     fabricRate: Decimal | null
     v2FabricRate: Decimal | null
     valueAddCost: Decimal | null
+    mrp: Decimal | null
+    baseColor: string | null
+    segment: string | null
     articleFashionType: string | null
     approvalStatus: string
     approvedAt: Date | null
@@ -55806,9 +55961,13 @@ export namespace Prisma {
     vendorName?: boolean
     vendorCode?: boolean
     designNumber?: boolean
+    pptNumber?: boolean
     fabricRate?: boolean
     v2FabricRate?: boolean
     valueAddCost?: boolean
+    mrp?: boolean
+    baseColor?: boolean
+    segment?: boolean
     articleFashionType?: boolean
     approvalStatus?: boolean
     approvedAt?: boolean
@@ -55849,9 +56008,13 @@ export namespace Prisma {
     vendorName?: boolean
     vendorCode?: boolean
     designNumber?: boolean
+    pptNumber?: boolean
     fabricRate?: boolean
     v2FabricRate?: boolean
     valueAddCost?: boolean
+    mrp?: boolean
+    baseColor?: boolean
+    segment?: boolean
     articleFashionType?: boolean
     approvalStatus?: boolean
     approvedAt?: boolean
@@ -55892,9 +56055,13 @@ export namespace Prisma {
     vendorName?: boolean
     vendorCode?: boolean
     designNumber?: boolean
+    pptNumber?: boolean
     fabricRate?: boolean
     v2FabricRate?: boolean
     valueAddCost?: boolean
+    mrp?: boolean
+    baseColor?: boolean
+    segment?: boolean
     articleFashionType?: boolean
     approvalStatus?: boolean
     approvedAt?: boolean
@@ -55935,9 +56102,13 @@ export namespace Prisma {
     vendorName?: boolean
     vendorCode?: boolean
     designNumber?: boolean
+    pptNumber?: boolean
     fabricRate?: boolean
     v2FabricRate?: boolean
     valueAddCost?: boolean
+    mrp?: boolean
+    baseColor?: boolean
+    segment?: boolean
     articleFashionType?: boolean
     approvalStatus?: boolean
     approvedAt?: boolean
@@ -55952,7 +56123,7 @@ export namespace Prisma {
     updatedAt?: boolean
   }
 
-  export type FabricArticleDataOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<"id" | "mFabDiv" | "mYarn" | "mFabMainMvgr1" | "mFabMainMvgr2" | "mConstruction" | "mOunz" | "mWidth" | "mWeave02" | "mCount" | "mWeave01" | "mComposition" | "mFinish" | "mGsm" | "mLycra" | "fabricArticleNumber" | "fabricArticleDescription" | "flatId" | "division" | "subDivision" | "majorCategory" | "mcDescription" | "vendorName" | "vendorCode" | "designNumber" | "fabricRate" | "v2FabricRate" | "valueAddCost" | "articleFashionType" | "approvalStatus" | "approvedAt" | "approvedBy" | "sapSyncStatus" | "sapSyncMessage" | "imageUrl" | "fabricArticleType" | "source" | "userName" | "createdAt" | "updatedAt", ExtArgs["result"]["fabricArticleData"]>
+  export type FabricArticleDataOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<"id" | "mFabDiv" | "mYarn" | "mFabMainMvgr1" | "mFabMainMvgr2" | "mConstruction" | "mOunz" | "mWidth" | "mWeave02" | "mCount" | "mWeave01" | "mComposition" | "mFinish" | "mGsm" | "mLycra" | "fabricArticleNumber" | "fabricArticleDescription" | "flatId" | "division" | "subDivision" | "majorCategory" | "mcDescription" | "vendorName" | "vendorCode" | "designNumber" | "pptNumber" | "fabricRate" | "v2FabricRate" | "valueAddCost" | "mrp" | "baseColor" | "segment" | "articleFashionType" | "approvalStatus" | "approvedAt" | "approvedBy" | "sapSyncStatus" | "sapSyncMessage" | "imageUrl" | "fabricArticleType" | "source" | "userName" | "createdAt" | "updatedAt", ExtArgs["result"]["fabricArticleData"]>
 
   export type $FabricArticleDataPayload<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
     name: "FabricArticleData"
@@ -55983,9 +56154,13 @@ export namespace Prisma {
       vendorName: string | null
       vendorCode: string | null
       designNumber: string | null
+      pptNumber: string | null
       fabricRate: Prisma.Decimal | null
       v2FabricRate: Prisma.Decimal | null
       valueAddCost: Prisma.Decimal | null
+      mrp: Prisma.Decimal | null
+      baseColor: string | null
+      segment: string | null
       articleFashionType: string | null
       approvalStatus: string
       approvedAt: Date | null
@@ -56446,9 +56621,13 @@ export namespace Prisma {
     readonly vendorName: FieldRef<"FabricArticleData", 'String'>
     readonly vendorCode: FieldRef<"FabricArticleData", 'String'>
     readonly designNumber: FieldRef<"FabricArticleData", 'String'>
+    readonly pptNumber: FieldRef<"FabricArticleData", 'String'>
     readonly fabricRate: FieldRef<"FabricArticleData", 'Decimal'>
     readonly v2FabricRate: FieldRef<"FabricArticleData", 'Decimal'>
     readonly valueAddCost: FieldRef<"FabricArticleData", 'Decimal'>
+    readonly mrp: FieldRef<"FabricArticleData", 'Decimal'>
+    readonly baseColor: FieldRef<"FabricArticleData", 'String'>
+    readonly segment: FieldRef<"FabricArticleData", 'String'>
     readonly articleFashionType: FieldRef<"FabricArticleData", 'String'>
     readonly approvalStatus: FieldRef<"FabricArticleData", 'String'>
     readonly approvedAt: FieldRef<"FabricArticleData", 'DateTime'>
@@ -56824,6 +57003,1422 @@ export namespace Prisma {
      * Omit specific fields from the FabricArticleData
      */
     omit?: FabricArticleDataOmit<ExtArgs> | null
+  }
+
+
+  /**
+   * Model ValueAdditionAccessoriesCost
+   */
+
+  export type AggregateValueAdditionAccessoriesCost = {
+    _count: ValueAdditionAccessoriesCostCountAggregateOutputType | null
+    _avg: ValueAdditionAccessoriesCostAvgAggregateOutputType | null
+    _sum: ValueAdditionAccessoriesCostSumAggregateOutputType | null
+    _min: ValueAdditionAccessoriesCostMinAggregateOutputType | null
+    _max: ValueAdditionAccessoriesCostMaxAggregateOutputType | null
+  }
+
+  export type ValueAdditionAccessoriesCostAvgAggregateOutputType = {
+    id: number | null
+    btnQty: Decimal | null
+    btnRate: Decimal | null
+    btnValue: Decimal | null
+    zipQty: Decimal | null
+    zipRate: Decimal | null
+    zipValue: Decimal | null
+    elaQty: Decimal | null
+    elaRate: Decimal | null
+    elaValue: Decimal | null
+    laceQty: Decimal | null
+    laceRate: Decimal | null
+    laceValue: Decimal | null
+    drawCordQty: Decimal | null
+    drawCordRate: Decimal | null
+    drawCordValue: Decimal | null
+    velcroQty: Decimal | null
+    velcroRate: Decimal | null
+    velcroValue: Decimal | null
+    interliningQty: Decimal | null
+    interliningRate: Decimal | null
+    interliningValue: Decimal | null
+    totalValue: Decimal | null
+  }
+
+  export type ValueAdditionAccessoriesCostSumAggregateOutputType = {
+    id: number | null
+    btnQty: Decimal | null
+    btnRate: Decimal | null
+    btnValue: Decimal | null
+    zipQty: Decimal | null
+    zipRate: Decimal | null
+    zipValue: Decimal | null
+    elaQty: Decimal | null
+    elaRate: Decimal | null
+    elaValue: Decimal | null
+    laceQty: Decimal | null
+    laceRate: Decimal | null
+    laceValue: Decimal | null
+    drawCordQty: Decimal | null
+    drawCordRate: Decimal | null
+    drawCordValue: Decimal | null
+    velcroQty: Decimal | null
+    velcroRate: Decimal | null
+    velcroValue: Decimal | null
+    interliningQty: Decimal | null
+    interliningRate: Decimal | null
+    interliningValue: Decimal | null
+    totalValue: Decimal | null
+  }
+
+  export type ValueAdditionAccessoriesCostMinAggregateOutputType = {
+    id: number | null
+    division: string | null
+    subDivision: string | null
+    majorCategory: string | null
+    btnQty: Decimal | null
+    btnRate: Decimal | null
+    btnValue: Decimal | null
+    zipQty: Decimal | null
+    zipRate: Decimal | null
+    zipValue: Decimal | null
+    elaQty: Decimal | null
+    elaRate: Decimal | null
+    elaValue: Decimal | null
+    laceQty: Decimal | null
+    laceRate: Decimal | null
+    laceValue: Decimal | null
+    drawCordQty: Decimal | null
+    drawCordRate: Decimal | null
+    drawCordValue: Decimal | null
+    velcroQty: Decimal | null
+    velcroRate: Decimal | null
+    velcroValue: Decimal | null
+    interliningQty: Decimal | null
+    interliningRate: Decimal | null
+    interliningValue: Decimal | null
+    totalValue: Decimal | null
+    createdAt: Date | null
+    updatedAt: Date | null
+  }
+
+  export type ValueAdditionAccessoriesCostMaxAggregateOutputType = {
+    id: number | null
+    division: string | null
+    subDivision: string | null
+    majorCategory: string | null
+    btnQty: Decimal | null
+    btnRate: Decimal | null
+    btnValue: Decimal | null
+    zipQty: Decimal | null
+    zipRate: Decimal | null
+    zipValue: Decimal | null
+    elaQty: Decimal | null
+    elaRate: Decimal | null
+    elaValue: Decimal | null
+    laceQty: Decimal | null
+    laceRate: Decimal | null
+    laceValue: Decimal | null
+    drawCordQty: Decimal | null
+    drawCordRate: Decimal | null
+    drawCordValue: Decimal | null
+    velcroQty: Decimal | null
+    velcroRate: Decimal | null
+    velcroValue: Decimal | null
+    interliningQty: Decimal | null
+    interliningRate: Decimal | null
+    interliningValue: Decimal | null
+    totalValue: Decimal | null
+    createdAt: Date | null
+    updatedAt: Date | null
+  }
+
+  export type ValueAdditionAccessoriesCostCountAggregateOutputType = {
+    id: number
+    division: number
+    subDivision: number
+    majorCategory: number
+    btnQty: number
+    btnRate: number
+    btnValue: number
+    zipQty: number
+    zipRate: number
+    zipValue: number
+    elaQty: number
+    elaRate: number
+    elaValue: number
+    laceQty: number
+    laceRate: number
+    laceValue: number
+    drawCordQty: number
+    drawCordRate: number
+    drawCordValue: number
+    velcroQty: number
+    velcroRate: number
+    velcroValue: number
+    interliningQty: number
+    interliningRate: number
+    interliningValue: number
+    totalValue: number
+    createdAt: number
+    updatedAt: number
+    _all: number
+  }
+
+
+  export type ValueAdditionAccessoriesCostAvgAggregateInputType = {
+    id?: true
+    btnQty?: true
+    btnRate?: true
+    btnValue?: true
+    zipQty?: true
+    zipRate?: true
+    zipValue?: true
+    elaQty?: true
+    elaRate?: true
+    elaValue?: true
+    laceQty?: true
+    laceRate?: true
+    laceValue?: true
+    drawCordQty?: true
+    drawCordRate?: true
+    drawCordValue?: true
+    velcroQty?: true
+    velcroRate?: true
+    velcroValue?: true
+    interliningQty?: true
+    interliningRate?: true
+    interliningValue?: true
+    totalValue?: true
+  }
+
+  export type ValueAdditionAccessoriesCostSumAggregateInputType = {
+    id?: true
+    btnQty?: true
+    btnRate?: true
+    btnValue?: true
+    zipQty?: true
+    zipRate?: true
+    zipValue?: true
+    elaQty?: true
+    elaRate?: true
+    elaValue?: true
+    laceQty?: true
+    laceRate?: true
+    laceValue?: true
+    drawCordQty?: true
+    drawCordRate?: true
+    drawCordValue?: true
+    velcroQty?: true
+    velcroRate?: true
+    velcroValue?: true
+    interliningQty?: true
+    interliningRate?: true
+    interliningValue?: true
+    totalValue?: true
+  }
+
+  export type ValueAdditionAccessoriesCostMinAggregateInputType = {
+    id?: true
+    division?: true
+    subDivision?: true
+    majorCategory?: true
+    btnQty?: true
+    btnRate?: true
+    btnValue?: true
+    zipQty?: true
+    zipRate?: true
+    zipValue?: true
+    elaQty?: true
+    elaRate?: true
+    elaValue?: true
+    laceQty?: true
+    laceRate?: true
+    laceValue?: true
+    drawCordQty?: true
+    drawCordRate?: true
+    drawCordValue?: true
+    velcroQty?: true
+    velcroRate?: true
+    velcroValue?: true
+    interliningQty?: true
+    interliningRate?: true
+    interliningValue?: true
+    totalValue?: true
+    createdAt?: true
+    updatedAt?: true
+  }
+
+  export type ValueAdditionAccessoriesCostMaxAggregateInputType = {
+    id?: true
+    division?: true
+    subDivision?: true
+    majorCategory?: true
+    btnQty?: true
+    btnRate?: true
+    btnValue?: true
+    zipQty?: true
+    zipRate?: true
+    zipValue?: true
+    elaQty?: true
+    elaRate?: true
+    elaValue?: true
+    laceQty?: true
+    laceRate?: true
+    laceValue?: true
+    drawCordQty?: true
+    drawCordRate?: true
+    drawCordValue?: true
+    velcroQty?: true
+    velcroRate?: true
+    velcroValue?: true
+    interliningQty?: true
+    interliningRate?: true
+    interliningValue?: true
+    totalValue?: true
+    createdAt?: true
+    updatedAt?: true
+  }
+
+  export type ValueAdditionAccessoriesCostCountAggregateInputType = {
+    id?: true
+    division?: true
+    subDivision?: true
+    majorCategory?: true
+    btnQty?: true
+    btnRate?: true
+    btnValue?: true
+    zipQty?: true
+    zipRate?: true
+    zipValue?: true
+    elaQty?: true
+    elaRate?: true
+    elaValue?: true
+    laceQty?: true
+    laceRate?: true
+    laceValue?: true
+    drawCordQty?: true
+    drawCordRate?: true
+    drawCordValue?: true
+    velcroQty?: true
+    velcroRate?: true
+    velcroValue?: true
+    interliningQty?: true
+    interliningRate?: true
+    interliningValue?: true
+    totalValue?: true
+    createdAt?: true
+    updatedAt?: true
+    _all?: true
+  }
+
+  export type ValueAdditionAccessoriesCostAggregateArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Filter which ValueAdditionAccessoriesCost to aggregate.
+     */
+    where?: ValueAdditionAccessoriesCostWhereInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
+     * 
+     * Determine the order of ValueAdditionAccessoriesCosts to fetch.
+     */
+    orderBy?: ValueAdditionAccessoriesCostOrderByWithRelationInput | ValueAdditionAccessoriesCostOrderByWithRelationInput[]
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
+     * 
+     * Sets the start position
+     */
+    cursor?: ValueAdditionAccessoriesCostWhereUniqueInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Take `±n` ValueAdditionAccessoriesCosts from the position of the cursor.
+     */
+    take?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Skip the first `n` ValueAdditionAccessoriesCosts.
+     */
+    skip?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     * 
+     * Count returned ValueAdditionAccessoriesCosts
+    **/
+    _count?: true | ValueAdditionAccessoriesCostCountAggregateInputType
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     * 
+     * Select which fields to average
+    **/
+    _avg?: ValueAdditionAccessoriesCostAvgAggregateInputType
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     * 
+     * Select which fields to sum
+    **/
+    _sum?: ValueAdditionAccessoriesCostSumAggregateInputType
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     * 
+     * Select which fields to find the minimum value
+    **/
+    _min?: ValueAdditionAccessoriesCostMinAggregateInputType
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     * 
+     * Select which fields to find the maximum value
+    **/
+    _max?: ValueAdditionAccessoriesCostMaxAggregateInputType
+  }
+
+  export type GetValueAdditionAccessoriesCostAggregateType<T extends ValueAdditionAccessoriesCostAggregateArgs> = {
+        [P in keyof T & keyof AggregateValueAdditionAccessoriesCost]: P extends '_count' | 'count'
+      ? T[P] extends true
+        ? number
+        : GetScalarType<T[P], AggregateValueAdditionAccessoriesCost[P]>
+      : GetScalarType<T[P], AggregateValueAdditionAccessoriesCost[P]>
+  }
+
+
+
+
+  export type ValueAdditionAccessoriesCostGroupByArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    where?: ValueAdditionAccessoriesCostWhereInput
+    orderBy?: ValueAdditionAccessoriesCostOrderByWithAggregationInput | ValueAdditionAccessoriesCostOrderByWithAggregationInput[]
+    by: ValueAdditionAccessoriesCostScalarFieldEnum[] | ValueAdditionAccessoriesCostScalarFieldEnum
+    having?: ValueAdditionAccessoriesCostScalarWhereWithAggregatesInput
+    take?: number
+    skip?: number
+    _count?: ValueAdditionAccessoriesCostCountAggregateInputType | true
+    _avg?: ValueAdditionAccessoriesCostAvgAggregateInputType
+    _sum?: ValueAdditionAccessoriesCostSumAggregateInputType
+    _min?: ValueAdditionAccessoriesCostMinAggregateInputType
+    _max?: ValueAdditionAccessoriesCostMaxAggregateInputType
+  }
+
+  export type ValueAdditionAccessoriesCostGroupByOutputType = {
+    id: number
+    division: string | null
+    subDivision: string | null
+    majorCategory: string
+    btnQty: Decimal | null
+    btnRate: Decimal | null
+    btnValue: Decimal | null
+    zipQty: Decimal | null
+    zipRate: Decimal | null
+    zipValue: Decimal | null
+    elaQty: Decimal | null
+    elaRate: Decimal | null
+    elaValue: Decimal | null
+    laceQty: Decimal | null
+    laceRate: Decimal | null
+    laceValue: Decimal | null
+    drawCordQty: Decimal | null
+    drawCordRate: Decimal | null
+    drawCordValue: Decimal | null
+    velcroQty: Decimal | null
+    velcroRate: Decimal | null
+    velcroValue: Decimal | null
+    interliningQty: Decimal | null
+    interliningRate: Decimal | null
+    interliningValue: Decimal | null
+    totalValue: Decimal | null
+    createdAt: Date
+    updatedAt: Date
+    _count: ValueAdditionAccessoriesCostCountAggregateOutputType | null
+    _avg: ValueAdditionAccessoriesCostAvgAggregateOutputType | null
+    _sum: ValueAdditionAccessoriesCostSumAggregateOutputType | null
+    _min: ValueAdditionAccessoriesCostMinAggregateOutputType | null
+    _max: ValueAdditionAccessoriesCostMaxAggregateOutputType | null
+  }
+
+  type GetValueAdditionAccessoriesCostGroupByPayload<T extends ValueAdditionAccessoriesCostGroupByArgs> = Prisma.PrismaPromise<
+    Array<
+      PickEnumerable<ValueAdditionAccessoriesCostGroupByOutputType, T['by']> &
+        {
+          [P in ((keyof T) & (keyof ValueAdditionAccessoriesCostGroupByOutputType))]: P extends '_count'
+            ? T[P] extends boolean
+              ? number
+              : GetScalarType<T[P], ValueAdditionAccessoriesCostGroupByOutputType[P]>
+            : GetScalarType<T[P], ValueAdditionAccessoriesCostGroupByOutputType[P]>
+        }
+      >
+    >
+
+
+  export type ValueAdditionAccessoriesCostSelect<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
+    id?: boolean
+    division?: boolean
+    subDivision?: boolean
+    majorCategory?: boolean
+    btnQty?: boolean
+    btnRate?: boolean
+    btnValue?: boolean
+    zipQty?: boolean
+    zipRate?: boolean
+    zipValue?: boolean
+    elaQty?: boolean
+    elaRate?: boolean
+    elaValue?: boolean
+    laceQty?: boolean
+    laceRate?: boolean
+    laceValue?: boolean
+    drawCordQty?: boolean
+    drawCordRate?: boolean
+    drawCordValue?: boolean
+    velcroQty?: boolean
+    velcroRate?: boolean
+    velcroValue?: boolean
+    interliningQty?: boolean
+    interliningRate?: boolean
+    interliningValue?: boolean
+    totalValue?: boolean
+    createdAt?: boolean
+    updatedAt?: boolean
+  }, ExtArgs["result"]["valueAdditionAccessoriesCost"]>
+
+  export type ValueAdditionAccessoriesCostSelectCreateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
+    id?: boolean
+    division?: boolean
+    subDivision?: boolean
+    majorCategory?: boolean
+    btnQty?: boolean
+    btnRate?: boolean
+    btnValue?: boolean
+    zipQty?: boolean
+    zipRate?: boolean
+    zipValue?: boolean
+    elaQty?: boolean
+    elaRate?: boolean
+    elaValue?: boolean
+    laceQty?: boolean
+    laceRate?: boolean
+    laceValue?: boolean
+    drawCordQty?: boolean
+    drawCordRate?: boolean
+    drawCordValue?: boolean
+    velcroQty?: boolean
+    velcroRate?: boolean
+    velcroValue?: boolean
+    interliningQty?: boolean
+    interliningRate?: boolean
+    interliningValue?: boolean
+    totalValue?: boolean
+    createdAt?: boolean
+    updatedAt?: boolean
+  }, ExtArgs["result"]["valueAdditionAccessoriesCost"]>
+
+  export type ValueAdditionAccessoriesCostSelectUpdateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
+    id?: boolean
+    division?: boolean
+    subDivision?: boolean
+    majorCategory?: boolean
+    btnQty?: boolean
+    btnRate?: boolean
+    btnValue?: boolean
+    zipQty?: boolean
+    zipRate?: boolean
+    zipValue?: boolean
+    elaQty?: boolean
+    elaRate?: boolean
+    elaValue?: boolean
+    laceQty?: boolean
+    laceRate?: boolean
+    laceValue?: boolean
+    drawCordQty?: boolean
+    drawCordRate?: boolean
+    drawCordValue?: boolean
+    velcroQty?: boolean
+    velcroRate?: boolean
+    velcroValue?: boolean
+    interliningQty?: boolean
+    interliningRate?: boolean
+    interliningValue?: boolean
+    totalValue?: boolean
+    createdAt?: boolean
+    updatedAt?: boolean
+  }, ExtArgs["result"]["valueAdditionAccessoriesCost"]>
+
+  export type ValueAdditionAccessoriesCostSelectScalar = {
+    id?: boolean
+    division?: boolean
+    subDivision?: boolean
+    majorCategory?: boolean
+    btnQty?: boolean
+    btnRate?: boolean
+    btnValue?: boolean
+    zipQty?: boolean
+    zipRate?: boolean
+    zipValue?: boolean
+    elaQty?: boolean
+    elaRate?: boolean
+    elaValue?: boolean
+    laceQty?: boolean
+    laceRate?: boolean
+    laceValue?: boolean
+    drawCordQty?: boolean
+    drawCordRate?: boolean
+    drawCordValue?: boolean
+    velcroQty?: boolean
+    velcroRate?: boolean
+    velcroValue?: boolean
+    interliningQty?: boolean
+    interliningRate?: boolean
+    interliningValue?: boolean
+    totalValue?: boolean
+    createdAt?: boolean
+    updatedAt?: boolean
+  }
+
+  export type ValueAdditionAccessoriesCostOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<"id" | "division" | "subDivision" | "majorCategory" | "btnQty" | "btnRate" | "btnValue" | "zipQty" | "zipRate" | "zipValue" | "elaQty" | "elaRate" | "elaValue" | "laceQty" | "laceRate" | "laceValue" | "drawCordQty" | "drawCordRate" | "drawCordValue" | "velcroQty" | "velcroRate" | "velcroValue" | "interliningQty" | "interliningRate" | "interliningValue" | "totalValue" | "createdAt" | "updatedAt", ExtArgs["result"]["valueAdditionAccessoriesCost"]>
+
+  export type $ValueAdditionAccessoriesCostPayload<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    name: "ValueAdditionAccessoriesCost"
+    objects: {}
+    scalars: $Extensions.GetPayloadResult<{
+      id: number
+      division: string | null
+      subDivision: string | null
+      majorCategory: string
+      btnQty: Prisma.Decimal | null
+      btnRate: Prisma.Decimal | null
+      btnValue: Prisma.Decimal | null
+      zipQty: Prisma.Decimal | null
+      zipRate: Prisma.Decimal | null
+      zipValue: Prisma.Decimal | null
+      elaQty: Prisma.Decimal | null
+      elaRate: Prisma.Decimal | null
+      elaValue: Prisma.Decimal | null
+      laceQty: Prisma.Decimal | null
+      laceRate: Prisma.Decimal | null
+      laceValue: Prisma.Decimal | null
+      drawCordQty: Prisma.Decimal | null
+      drawCordRate: Prisma.Decimal | null
+      drawCordValue: Prisma.Decimal | null
+      velcroQty: Prisma.Decimal | null
+      velcroRate: Prisma.Decimal | null
+      velcroValue: Prisma.Decimal | null
+      interliningQty: Prisma.Decimal | null
+      interliningRate: Prisma.Decimal | null
+      interliningValue: Prisma.Decimal | null
+      totalValue: Prisma.Decimal | null
+      createdAt: Date
+      updatedAt: Date
+    }, ExtArgs["result"]["valueAdditionAccessoriesCost"]>
+    composites: {}
+  }
+
+  type ValueAdditionAccessoriesCostGetPayload<S extends boolean | null | undefined | ValueAdditionAccessoriesCostDefaultArgs> = $Result.GetResult<Prisma.$ValueAdditionAccessoriesCostPayload, S>
+
+  type ValueAdditionAccessoriesCostCountArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> =
+    Omit<ValueAdditionAccessoriesCostFindManyArgs, 'select' | 'include' | 'distinct' | 'omit'> & {
+      select?: ValueAdditionAccessoriesCostCountAggregateInputType | true
+    }
+
+  export interface ValueAdditionAccessoriesCostDelegate<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs, GlobalOmitOptions = {}> {
+    [K: symbol]: { types: Prisma.TypeMap<ExtArgs>['model']['ValueAdditionAccessoriesCost'], meta: { name: 'ValueAdditionAccessoriesCost' } }
+    /**
+     * Find zero or one ValueAdditionAccessoriesCost that matches the filter.
+     * @param {ValueAdditionAccessoriesCostFindUniqueArgs} args - Arguments to find a ValueAdditionAccessoriesCost
+     * @example
+     * // Get one ValueAdditionAccessoriesCost
+     * const valueAdditionAccessoriesCost = await prisma.valueAdditionAccessoriesCost.findUnique({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     */
+    findUnique<T extends ValueAdditionAccessoriesCostFindUniqueArgs>(args: SelectSubset<T, ValueAdditionAccessoriesCostFindUniqueArgs<ExtArgs>>): Prisma__ValueAdditionAccessoriesCostClient<$Result.GetResult<Prisma.$ValueAdditionAccessoriesCostPayload<ExtArgs>, T, "findUnique", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Find one ValueAdditionAccessoriesCost that matches the filter or throw an error with `error.code='P2025'`
+     * if no matches were found.
+     * @param {ValueAdditionAccessoriesCostFindUniqueOrThrowArgs} args - Arguments to find a ValueAdditionAccessoriesCost
+     * @example
+     * // Get one ValueAdditionAccessoriesCost
+     * const valueAdditionAccessoriesCost = await prisma.valueAdditionAccessoriesCost.findUniqueOrThrow({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     */
+    findUniqueOrThrow<T extends ValueAdditionAccessoriesCostFindUniqueOrThrowArgs>(args: SelectSubset<T, ValueAdditionAccessoriesCostFindUniqueOrThrowArgs<ExtArgs>>): Prisma__ValueAdditionAccessoriesCostClient<$Result.GetResult<Prisma.$ValueAdditionAccessoriesCostPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Find the first ValueAdditionAccessoriesCost that matches the filter.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {ValueAdditionAccessoriesCostFindFirstArgs} args - Arguments to find a ValueAdditionAccessoriesCost
+     * @example
+     * // Get one ValueAdditionAccessoriesCost
+     * const valueAdditionAccessoriesCost = await prisma.valueAdditionAccessoriesCost.findFirst({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     */
+    findFirst<T extends ValueAdditionAccessoriesCostFindFirstArgs>(args?: SelectSubset<T, ValueAdditionAccessoriesCostFindFirstArgs<ExtArgs>>): Prisma__ValueAdditionAccessoriesCostClient<$Result.GetResult<Prisma.$ValueAdditionAccessoriesCostPayload<ExtArgs>, T, "findFirst", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Find the first ValueAdditionAccessoriesCost that matches the filter or
+     * throw `PrismaKnownClientError` with `P2025` code if no matches were found.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {ValueAdditionAccessoriesCostFindFirstOrThrowArgs} args - Arguments to find a ValueAdditionAccessoriesCost
+     * @example
+     * // Get one ValueAdditionAccessoriesCost
+     * const valueAdditionAccessoriesCost = await prisma.valueAdditionAccessoriesCost.findFirstOrThrow({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     */
+    findFirstOrThrow<T extends ValueAdditionAccessoriesCostFindFirstOrThrowArgs>(args?: SelectSubset<T, ValueAdditionAccessoriesCostFindFirstOrThrowArgs<ExtArgs>>): Prisma__ValueAdditionAccessoriesCostClient<$Result.GetResult<Prisma.$ValueAdditionAccessoriesCostPayload<ExtArgs>, T, "findFirstOrThrow", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Find zero or more ValueAdditionAccessoriesCosts that matches the filter.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {ValueAdditionAccessoriesCostFindManyArgs} args - Arguments to filter and select certain fields only.
+     * @example
+     * // Get all ValueAdditionAccessoriesCosts
+     * const valueAdditionAccessoriesCosts = await prisma.valueAdditionAccessoriesCost.findMany()
+     * 
+     * // Get first 10 ValueAdditionAccessoriesCosts
+     * const valueAdditionAccessoriesCosts = await prisma.valueAdditionAccessoriesCost.findMany({ take: 10 })
+     * 
+     * // Only select the `id`
+     * const valueAdditionAccessoriesCostWithIdOnly = await prisma.valueAdditionAccessoriesCost.findMany({ select: { id: true } })
+     * 
+     */
+    findMany<T extends ValueAdditionAccessoriesCostFindManyArgs>(args?: SelectSubset<T, ValueAdditionAccessoriesCostFindManyArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$ValueAdditionAccessoriesCostPayload<ExtArgs>, T, "findMany", GlobalOmitOptions>>
+
+    /**
+     * Create a ValueAdditionAccessoriesCost.
+     * @param {ValueAdditionAccessoriesCostCreateArgs} args - Arguments to create a ValueAdditionAccessoriesCost.
+     * @example
+     * // Create one ValueAdditionAccessoriesCost
+     * const ValueAdditionAccessoriesCost = await prisma.valueAdditionAccessoriesCost.create({
+     *   data: {
+     *     // ... data to create a ValueAdditionAccessoriesCost
+     *   }
+     * })
+     * 
+     */
+    create<T extends ValueAdditionAccessoriesCostCreateArgs>(args: SelectSubset<T, ValueAdditionAccessoriesCostCreateArgs<ExtArgs>>): Prisma__ValueAdditionAccessoriesCostClient<$Result.GetResult<Prisma.$ValueAdditionAccessoriesCostPayload<ExtArgs>, T, "create", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Create many ValueAdditionAccessoriesCosts.
+     * @param {ValueAdditionAccessoriesCostCreateManyArgs} args - Arguments to create many ValueAdditionAccessoriesCosts.
+     * @example
+     * // Create many ValueAdditionAccessoriesCosts
+     * const valueAdditionAccessoriesCost = await prisma.valueAdditionAccessoriesCost.createMany({
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     *     
+     */
+    createMany<T extends ValueAdditionAccessoriesCostCreateManyArgs>(args?: SelectSubset<T, ValueAdditionAccessoriesCostCreateManyArgs<ExtArgs>>): Prisma.PrismaPromise<BatchPayload>
+
+    /**
+     * Create many ValueAdditionAccessoriesCosts and returns the data saved in the database.
+     * @param {ValueAdditionAccessoriesCostCreateManyAndReturnArgs} args - Arguments to create many ValueAdditionAccessoriesCosts.
+     * @example
+     * // Create many ValueAdditionAccessoriesCosts
+     * const valueAdditionAccessoriesCost = await prisma.valueAdditionAccessoriesCost.createManyAndReturn({
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     * 
+     * // Create many ValueAdditionAccessoriesCosts and only return the `id`
+     * const valueAdditionAccessoriesCostWithIdOnly = await prisma.valueAdditionAccessoriesCost.createManyAndReturn({
+     *   select: { id: true },
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * 
+     */
+    createManyAndReturn<T extends ValueAdditionAccessoriesCostCreateManyAndReturnArgs>(args?: SelectSubset<T, ValueAdditionAccessoriesCostCreateManyAndReturnArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$ValueAdditionAccessoriesCostPayload<ExtArgs>, T, "createManyAndReturn", GlobalOmitOptions>>
+
+    /**
+     * Delete a ValueAdditionAccessoriesCost.
+     * @param {ValueAdditionAccessoriesCostDeleteArgs} args - Arguments to delete one ValueAdditionAccessoriesCost.
+     * @example
+     * // Delete one ValueAdditionAccessoriesCost
+     * const ValueAdditionAccessoriesCost = await prisma.valueAdditionAccessoriesCost.delete({
+     *   where: {
+     *     // ... filter to delete one ValueAdditionAccessoriesCost
+     *   }
+     * })
+     * 
+     */
+    delete<T extends ValueAdditionAccessoriesCostDeleteArgs>(args: SelectSubset<T, ValueAdditionAccessoriesCostDeleteArgs<ExtArgs>>): Prisma__ValueAdditionAccessoriesCostClient<$Result.GetResult<Prisma.$ValueAdditionAccessoriesCostPayload<ExtArgs>, T, "delete", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Update one ValueAdditionAccessoriesCost.
+     * @param {ValueAdditionAccessoriesCostUpdateArgs} args - Arguments to update one ValueAdditionAccessoriesCost.
+     * @example
+     * // Update one ValueAdditionAccessoriesCost
+     * const valueAdditionAccessoriesCost = await prisma.valueAdditionAccessoriesCost.update({
+     *   where: {
+     *     // ... provide filter here
+     *   },
+     *   data: {
+     *     // ... provide data here
+     *   }
+     * })
+     * 
+     */
+    update<T extends ValueAdditionAccessoriesCostUpdateArgs>(args: SelectSubset<T, ValueAdditionAccessoriesCostUpdateArgs<ExtArgs>>): Prisma__ValueAdditionAccessoriesCostClient<$Result.GetResult<Prisma.$ValueAdditionAccessoriesCostPayload<ExtArgs>, T, "update", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Delete zero or more ValueAdditionAccessoriesCosts.
+     * @param {ValueAdditionAccessoriesCostDeleteManyArgs} args - Arguments to filter ValueAdditionAccessoriesCosts to delete.
+     * @example
+     * // Delete a few ValueAdditionAccessoriesCosts
+     * const { count } = await prisma.valueAdditionAccessoriesCost.deleteMany({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     * 
+     */
+    deleteMany<T extends ValueAdditionAccessoriesCostDeleteManyArgs>(args?: SelectSubset<T, ValueAdditionAccessoriesCostDeleteManyArgs<ExtArgs>>): Prisma.PrismaPromise<BatchPayload>
+
+    /**
+     * Update zero or more ValueAdditionAccessoriesCosts.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {ValueAdditionAccessoriesCostUpdateManyArgs} args - Arguments to update one or more rows.
+     * @example
+     * // Update many ValueAdditionAccessoriesCosts
+     * const valueAdditionAccessoriesCost = await prisma.valueAdditionAccessoriesCost.updateMany({
+     *   where: {
+     *     // ... provide filter here
+     *   },
+     *   data: {
+     *     // ... provide data here
+     *   }
+     * })
+     * 
+     */
+    updateMany<T extends ValueAdditionAccessoriesCostUpdateManyArgs>(args: SelectSubset<T, ValueAdditionAccessoriesCostUpdateManyArgs<ExtArgs>>): Prisma.PrismaPromise<BatchPayload>
+
+    /**
+     * Update zero or more ValueAdditionAccessoriesCosts and returns the data updated in the database.
+     * @param {ValueAdditionAccessoriesCostUpdateManyAndReturnArgs} args - Arguments to update many ValueAdditionAccessoriesCosts.
+     * @example
+     * // Update many ValueAdditionAccessoriesCosts
+     * const valueAdditionAccessoriesCost = await prisma.valueAdditionAccessoriesCost.updateManyAndReturn({
+     *   where: {
+     *     // ... provide filter here
+     *   },
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     * 
+     * // Update zero or more ValueAdditionAccessoriesCosts and only return the `id`
+     * const valueAdditionAccessoriesCostWithIdOnly = await prisma.valueAdditionAccessoriesCost.updateManyAndReturn({
+     *   select: { id: true },
+     *   where: {
+     *     // ... provide filter here
+     *   },
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * 
+     */
+    updateManyAndReturn<T extends ValueAdditionAccessoriesCostUpdateManyAndReturnArgs>(args: SelectSubset<T, ValueAdditionAccessoriesCostUpdateManyAndReturnArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$ValueAdditionAccessoriesCostPayload<ExtArgs>, T, "updateManyAndReturn", GlobalOmitOptions>>
+
+    /**
+     * Create or update one ValueAdditionAccessoriesCost.
+     * @param {ValueAdditionAccessoriesCostUpsertArgs} args - Arguments to update or create a ValueAdditionAccessoriesCost.
+     * @example
+     * // Update or create a ValueAdditionAccessoriesCost
+     * const valueAdditionAccessoriesCost = await prisma.valueAdditionAccessoriesCost.upsert({
+     *   create: {
+     *     // ... data to create a ValueAdditionAccessoriesCost
+     *   },
+     *   update: {
+     *     // ... in case it already exists, update
+     *   },
+     *   where: {
+     *     // ... the filter for the ValueAdditionAccessoriesCost we want to update
+     *   }
+     * })
+     */
+    upsert<T extends ValueAdditionAccessoriesCostUpsertArgs>(args: SelectSubset<T, ValueAdditionAccessoriesCostUpsertArgs<ExtArgs>>): Prisma__ValueAdditionAccessoriesCostClient<$Result.GetResult<Prisma.$ValueAdditionAccessoriesCostPayload<ExtArgs>, T, "upsert", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+
+    /**
+     * Count the number of ValueAdditionAccessoriesCosts.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {ValueAdditionAccessoriesCostCountArgs} args - Arguments to filter ValueAdditionAccessoriesCosts to count.
+     * @example
+     * // Count the number of ValueAdditionAccessoriesCosts
+     * const count = await prisma.valueAdditionAccessoriesCost.count({
+     *   where: {
+     *     // ... the filter for the ValueAdditionAccessoriesCosts we want to count
+     *   }
+     * })
+    **/
+    count<T extends ValueAdditionAccessoriesCostCountArgs>(
+      args?: Subset<T, ValueAdditionAccessoriesCostCountArgs>,
+    ): Prisma.PrismaPromise<
+      T extends $Utils.Record<'select', any>
+        ? T['select'] extends true
+          ? number
+          : GetScalarType<T['select'], ValueAdditionAccessoriesCostCountAggregateOutputType>
+        : number
+    >
+
+    /**
+     * Allows you to perform aggregations operations on a ValueAdditionAccessoriesCost.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {ValueAdditionAccessoriesCostAggregateArgs} args - Select which aggregations you would like to apply and on what fields.
+     * @example
+     * // Ordered by age ascending
+     * // Where email contains prisma.io
+     * // Limited to the 10 users
+     * const aggregations = await prisma.user.aggregate({
+     *   _avg: {
+     *     age: true,
+     *   },
+     *   where: {
+     *     email: {
+     *       contains: "prisma.io",
+     *     },
+     *   },
+     *   orderBy: {
+     *     age: "asc",
+     *   },
+     *   take: 10,
+     * })
+    **/
+    aggregate<T extends ValueAdditionAccessoriesCostAggregateArgs>(args: Subset<T, ValueAdditionAccessoriesCostAggregateArgs>): Prisma.PrismaPromise<GetValueAdditionAccessoriesCostAggregateType<T>>
+
+    /**
+     * Group by ValueAdditionAccessoriesCost.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {ValueAdditionAccessoriesCostGroupByArgs} args - Group by arguments.
+     * @example
+     * // Group by city, order by createdAt, get count
+     * const result = await prisma.user.groupBy({
+     *   by: ['city', 'createdAt'],
+     *   orderBy: {
+     *     createdAt: true
+     *   },
+     *   _count: {
+     *     _all: true
+     *   },
+     * })
+     * 
+    **/
+    groupBy<
+      T extends ValueAdditionAccessoriesCostGroupByArgs,
+      HasSelectOrTake extends Or<
+        Extends<'skip', Keys<T>>,
+        Extends<'take', Keys<T>>
+      >,
+      OrderByArg extends True extends HasSelectOrTake
+        ? { orderBy: ValueAdditionAccessoriesCostGroupByArgs['orderBy'] }
+        : { orderBy?: ValueAdditionAccessoriesCostGroupByArgs['orderBy'] },
+      OrderFields extends ExcludeUnderscoreKeys<Keys<MaybeTupleToUnion<T['orderBy']>>>,
+      ByFields extends MaybeTupleToUnion<T['by']>,
+      ByValid extends Has<ByFields, OrderFields>,
+      HavingFields extends GetHavingFields<T['having']>,
+      HavingValid extends Has<ByFields, HavingFields>,
+      ByEmpty extends T['by'] extends never[] ? True : False,
+      InputErrors extends ByEmpty extends True
+      ? `Error: "by" must not be empty.`
+      : HavingValid extends False
+      ? {
+          [P in HavingFields]: P extends ByFields
+            ? never
+            : P extends string
+            ? `Error: Field "${P}" used in "having" needs to be provided in "by".`
+            : [
+                Error,
+                'Field ',
+                P,
+                ` in "having" needs to be provided in "by"`,
+              ]
+        }[HavingFields]
+      : 'take' extends Keys<T>
+      ? 'orderBy' extends Keys<T>
+        ? ByValid extends True
+          ? {}
+          : {
+              [P in OrderFields]: P extends ByFields
+                ? never
+                : `Error: Field "${P}" in "orderBy" needs to be provided in "by"`
+            }[OrderFields]
+        : 'Error: If you provide "take", you also need to provide "orderBy"'
+      : 'skip' extends Keys<T>
+      ? 'orderBy' extends Keys<T>
+        ? ByValid extends True
+          ? {}
+          : {
+              [P in OrderFields]: P extends ByFields
+                ? never
+                : `Error: Field "${P}" in "orderBy" needs to be provided in "by"`
+            }[OrderFields]
+        : 'Error: If you provide "skip", you also need to provide "orderBy"'
+      : ByValid extends True
+      ? {}
+      : {
+          [P in OrderFields]: P extends ByFields
+            ? never
+            : `Error: Field "${P}" in "orderBy" needs to be provided in "by"`
+        }[OrderFields]
+    >(args: SubsetIntersection<T, ValueAdditionAccessoriesCostGroupByArgs, OrderByArg> & InputErrors): {} extends InputErrors ? GetValueAdditionAccessoriesCostGroupByPayload<T> : Prisma.PrismaPromise<InputErrors>
+  /**
+   * Fields of the ValueAdditionAccessoriesCost model
+   */
+  readonly fields: ValueAdditionAccessoriesCostFieldRefs;
+  }
+
+  /**
+   * The delegate class that acts as a "Promise-like" for ValueAdditionAccessoriesCost.
+   * Why is this prefixed with `Prisma__`?
+   * Because we want to prevent naming conflicts as mentioned in
+   * https://github.com/prisma/prisma-client-js/issues/707
+   */
+  export interface Prisma__ValueAdditionAccessoriesCostClient<T, Null = never, ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs, GlobalOmitOptions = {}> extends Prisma.PrismaPromise<T> {
+    readonly [Symbol.toStringTag]: "PrismaPromise"
+    /**
+     * Attaches callbacks for the resolution and/or rejection of the Promise.
+     * @param onfulfilled The callback to execute when the Promise is resolved.
+     * @param onrejected The callback to execute when the Promise is rejected.
+     * @returns A Promise for the completion of which ever callback is executed.
+     */
+    then<TResult1 = T, TResult2 = never>(onfulfilled?: ((value: T) => TResult1 | PromiseLike<TResult1>) | undefined | null, onrejected?: ((reason: any) => TResult2 | PromiseLike<TResult2>) | undefined | null): $Utils.JsPromise<TResult1 | TResult2>
+    /**
+     * Attaches a callback for only the rejection of the Promise.
+     * @param onrejected The callback to execute when the Promise is rejected.
+     * @returns A Promise for the completion of the callback.
+     */
+    catch<TResult = never>(onrejected?: ((reason: any) => TResult | PromiseLike<TResult>) | undefined | null): $Utils.JsPromise<T | TResult>
+    /**
+     * Attaches a callback that is invoked when the Promise is settled (fulfilled or rejected). The
+     * resolved value cannot be modified from the callback.
+     * @param onfinally The callback to execute when the Promise is settled (fulfilled or rejected).
+     * @returns A Promise for the completion of the callback.
+     */
+    finally(onfinally?: (() => void) | undefined | null): $Utils.JsPromise<T>
+  }
+
+
+
+
+  /**
+   * Fields of the ValueAdditionAccessoriesCost model
+   */
+  interface ValueAdditionAccessoriesCostFieldRefs {
+    readonly id: FieldRef<"ValueAdditionAccessoriesCost", 'Int'>
+    readonly division: FieldRef<"ValueAdditionAccessoriesCost", 'String'>
+    readonly subDivision: FieldRef<"ValueAdditionAccessoriesCost", 'String'>
+    readonly majorCategory: FieldRef<"ValueAdditionAccessoriesCost", 'String'>
+    readonly btnQty: FieldRef<"ValueAdditionAccessoriesCost", 'Decimal'>
+    readonly btnRate: FieldRef<"ValueAdditionAccessoriesCost", 'Decimal'>
+    readonly btnValue: FieldRef<"ValueAdditionAccessoriesCost", 'Decimal'>
+    readonly zipQty: FieldRef<"ValueAdditionAccessoriesCost", 'Decimal'>
+    readonly zipRate: FieldRef<"ValueAdditionAccessoriesCost", 'Decimal'>
+    readonly zipValue: FieldRef<"ValueAdditionAccessoriesCost", 'Decimal'>
+    readonly elaQty: FieldRef<"ValueAdditionAccessoriesCost", 'Decimal'>
+    readonly elaRate: FieldRef<"ValueAdditionAccessoriesCost", 'Decimal'>
+    readonly elaValue: FieldRef<"ValueAdditionAccessoriesCost", 'Decimal'>
+    readonly laceQty: FieldRef<"ValueAdditionAccessoriesCost", 'Decimal'>
+    readonly laceRate: FieldRef<"ValueAdditionAccessoriesCost", 'Decimal'>
+    readonly laceValue: FieldRef<"ValueAdditionAccessoriesCost", 'Decimal'>
+    readonly drawCordQty: FieldRef<"ValueAdditionAccessoriesCost", 'Decimal'>
+    readonly drawCordRate: FieldRef<"ValueAdditionAccessoriesCost", 'Decimal'>
+    readonly drawCordValue: FieldRef<"ValueAdditionAccessoriesCost", 'Decimal'>
+    readonly velcroQty: FieldRef<"ValueAdditionAccessoriesCost", 'Decimal'>
+    readonly velcroRate: FieldRef<"ValueAdditionAccessoriesCost", 'Decimal'>
+    readonly velcroValue: FieldRef<"ValueAdditionAccessoriesCost", 'Decimal'>
+    readonly interliningQty: FieldRef<"ValueAdditionAccessoriesCost", 'Decimal'>
+    readonly interliningRate: FieldRef<"ValueAdditionAccessoriesCost", 'Decimal'>
+    readonly interliningValue: FieldRef<"ValueAdditionAccessoriesCost", 'Decimal'>
+    readonly totalValue: FieldRef<"ValueAdditionAccessoriesCost", 'Decimal'>
+    readonly createdAt: FieldRef<"ValueAdditionAccessoriesCost", 'DateTime'>
+    readonly updatedAt: FieldRef<"ValueAdditionAccessoriesCost", 'DateTime'>
+  }
+    
+
+  // Custom InputTypes
+  /**
+   * ValueAdditionAccessoriesCost findUnique
+   */
+  export type ValueAdditionAccessoriesCostFindUniqueArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the ValueAdditionAccessoriesCost
+     */
+    select?: ValueAdditionAccessoriesCostSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the ValueAdditionAccessoriesCost
+     */
+    omit?: ValueAdditionAccessoriesCostOmit<ExtArgs> | null
+    /**
+     * Filter, which ValueAdditionAccessoriesCost to fetch.
+     */
+    where: ValueAdditionAccessoriesCostWhereUniqueInput
+  }
+
+  /**
+   * ValueAdditionAccessoriesCost findUniqueOrThrow
+   */
+  export type ValueAdditionAccessoriesCostFindUniqueOrThrowArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the ValueAdditionAccessoriesCost
+     */
+    select?: ValueAdditionAccessoriesCostSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the ValueAdditionAccessoriesCost
+     */
+    omit?: ValueAdditionAccessoriesCostOmit<ExtArgs> | null
+    /**
+     * Filter, which ValueAdditionAccessoriesCost to fetch.
+     */
+    where: ValueAdditionAccessoriesCostWhereUniqueInput
+  }
+
+  /**
+   * ValueAdditionAccessoriesCost findFirst
+   */
+  export type ValueAdditionAccessoriesCostFindFirstArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the ValueAdditionAccessoriesCost
+     */
+    select?: ValueAdditionAccessoriesCostSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the ValueAdditionAccessoriesCost
+     */
+    omit?: ValueAdditionAccessoriesCostOmit<ExtArgs> | null
+    /**
+     * Filter, which ValueAdditionAccessoriesCost to fetch.
+     */
+    where?: ValueAdditionAccessoriesCostWhereInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
+     * 
+     * Determine the order of ValueAdditionAccessoriesCosts to fetch.
+     */
+    orderBy?: ValueAdditionAccessoriesCostOrderByWithRelationInput | ValueAdditionAccessoriesCostOrderByWithRelationInput[]
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
+     * 
+     * Sets the position for searching for ValueAdditionAccessoriesCosts.
+     */
+    cursor?: ValueAdditionAccessoriesCostWhereUniqueInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Take `±n` ValueAdditionAccessoriesCosts from the position of the cursor.
+     */
+    take?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Skip the first `n` ValueAdditionAccessoriesCosts.
+     */
+    skip?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/distinct Distinct Docs}
+     * 
+     * Filter by unique combinations of ValueAdditionAccessoriesCosts.
+     */
+    distinct?: ValueAdditionAccessoriesCostScalarFieldEnum | ValueAdditionAccessoriesCostScalarFieldEnum[]
+  }
+
+  /**
+   * ValueAdditionAccessoriesCost findFirstOrThrow
+   */
+  export type ValueAdditionAccessoriesCostFindFirstOrThrowArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the ValueAdditionAccessoriesCost
+     */
+    select?: ValueAdditionAccessoriesCostSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the ValueAdditionAccessoriesCost
+     */
+    omit?: ValueAdditionAccessoriesCostOmit<ExtArgs> | null
+    /**
+     * Filter, which ValueAdditionAccessoriesCost to fetch.
+     */
+    where?: ValueAdditionAccessoriesCostWhereInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
+     * 
+     * Determine the order of ValueAdditionAccessoriesCosts to fetch.
+     */
+    orderBy?: ValueAdditionAccessoriesCostOrderByWithRelationInput | ValueAdditionAccessoriesCostOrderByWithRelationInput[]
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
+     * 
+     * Sets the position for searching for ValueAdditionAccessoriesCosts.
+     */
+    cursor?: ValueAdditionAccessoriesCostWhereUniqueInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Take `±n` ValueAdditionAccessoriesCosts from the position of the cursor.
+     */
+    take?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Skip the first `n` ValueAdditionAccessoriesCosts.
+     */
+    skip?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/distinct Distinct Docs}
+     * 
+     * Filter by unique combinations of ValueAdditionAccessoriesCosts.
+     */
+    distinct?: ValueAdditionAccessoriesCostScalarFieldEnum | ValueAdditionAccessoriesCostScalarFieldEnum[]
+  }
+
+  /**
+   * ValueAdditionAccessoriesCost findMany
+   */
+  export type ValueAdditionAccessoriesCostFindManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the ValueAdditionAccessoriesCost
+     */
+    select?: ValueAdditionAccessoriesCostSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the ValueAdditionAccessoriesCost
+     */
+    omit?: ValueAdditionAccessoriesCostOmit<ExtArgs> | null
+    /**
+     * Filter, which ValueAdditionAccessoriesCosts to fetch.
+     */
+    where?: ValueAdditionAccessoriesCostWhereInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
+     * 
+     * Determine the order of ValueAdditionAccessoriesCosts to fetch.
+     */
+    orderBy?: ValueAdditionAccessoriesCostOrderByWithRelationInput | ValueAdditionAccessoriesCostOrderByWithRelationInput[]
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
+     * 
+     * Sets the position for listing ValueAdditionAccessoriesCosts.
+     */
+    cursor?: ValueAdditionAccessoriesCostWhereUniqueInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Take `±n` ValueAdditionAccessoriesCosts from the position of the cursor.
+     */
+    take?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Skip the first `n` ValueAdditionAccessoriesCosts.
+     */
+    skip?: number
+    distinct?: ValueAdditionAccessoriesCostScalarFieldEnum | ValueAdditionAccessoriesCostScalarFieldEnum[]
+  }
+
+  /**
+   * ValueAdditionAccessoriesCost create
+   */
+  export type ValueAdditionAccessoriesCostCreateArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the ValueAdditionAccessoriesCost
+     */
+    select?: ValueAdditionAccessoriesCostSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the ValueAdditionAccessoriesCost
+     */
+    omit?: ValueAdditionAccessoriesCostOmit<ExtArgs> | null
+    /**
+     * The data needed to create a ValueAdditionAccessoriesCost.
+     */
+    data: XOR<ValueAdditionAccessoriesCostCreateInput, ValueAdditionAccessoriesCostUncheckedCreateInput>
+  }
+
+  /**
+   * ValueAdditionAccessoriesCost createMany
+   */
+  export type ValueAdditionAccessoriesCostCreateManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * The data used to create many ValueAdditionAccessoriesCosts.
+     */
+    data: ValueAdditionAccessoriesCostCreateManyInput | ValueAdditionAccessoriesCostCreateManyInput[]
+    skipDuplicates?: boolean
+  }
+
+  /**
+   * ValueAdditionAccessoriesCost createManyAndReturn
+   */
+  export type ValueAdditionAccessoriesCostCreateManyAndReturnArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the ValueAdditionAccessoriesCost
+     */
+    select?: ValueAdditionAccessoriesCostSelectCreateManyAndReturn<ExtArgs> | null
+    /**
+     * Omit specific fields from the ValueAdditionAccessoriesCost
+     */
+    omit?: ValueAdditionAccessoriesCostOmit<ExtArgs> | null
+    /**
+     * The data used to create many ValueAdditionAccessoriesCosts.
+     */
+    data: ValueAdditionAccessoriesCostCreateManyInput | ValueAdditionAccessoriesCostCreateManyInput[]
+    skipDuplicates?: boolean
+  }
+
+  /**
+   * ValueAdditionAccessoriesCost update
+   */
+  export type ValueAdditionAccessoriesCostUpdateArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the ValueAdditionAccessoriesCost
+     */
+    select?: ValueAdditionAccessoriesCostSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the ValueAdditionAccessoriesCost
+     */
+    omit?: ValueAdditionAccessoriesCostOmit<ExtArgs> | null
+    /**
+     * The data needed to update a ValueAdditionAccessoriesCost.
+     */
+    data: XOR<ValueAdditionAccessoriesCostUpdateInput, ValueAdditionAccessoriesCostUncheckedUpdateInput>
+    /**
+     * Choose, which ValueAdditionAccessoriesCost to update.
+     */
+    where: ValueAdditionAccessoriesCostWhereUniqueInput
+  }
+
+  /**
+   * ValueAdditionAccessoriesCost updateMany
+   */
+  export type ValueAdditionAccessoriesCostUpdateManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * The data used to update ValueAdditionAccessoriesCosts.
+     */
+    data: XOR<ValueAdditionAccessoriesCostUpdateManyMutationInput, ValueAdditionAccessoriesCostUncheckedUpdateManyInput>
+    /**
+     * Filter which ValueAdditionAccessoriesCosts to update
+     */
+    where?: ValueAdditionAccessoriesCostWhereInput
+    /**
+     * Limit how many ValueAdditionAccessoriesCosts to update.
+     */
+    limit?: number
+  }
+
+  /**
+   * ValueAdditionAccessoriesCost updateManyAndReturn
+   */
+  export type ValueAdditionAccessoriesCostUpdateManyAndReturnArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the ValueAdditionAccessoriesCost
+     */
+    select?: ValueAdditionAccessoriesCostSelectUpdateManyAndReturn<ExtArgs> | null
+    /**
+     * Omit specific fields from the ValueAdditionAccessoriesCost
+     */
+    omit?: ValueAdditionAccessoriesCostOmit<ExtArgs> | null
+    /**
+     * The data used to update ValueAdditionAccessoriesCosts.
+     */
+    data: XOR<ValueAdditionAccessoriesCostUpdateManyMutationInput, ValueAdditionAccessoriesCostUncheckedUpdateManyInput>
+    /**
+     * Filter which ValueAdditionAccessoriesCosts to update
+     */
+    where?: ValueAdditionAccessoriesCostWhereInput
+    /**
+     * Limit how many ValueAdditionAccessoriesCosts to update.
+     */
+    limit?: number
+  }
+
+  /**
+   * ValueAdditionAccessoriesCost upsert
+   */
+  export type ValueAdditionAccessoriesCostUpsertArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the ValueAdditionAccessoriesCost
+     */
+    select?: ValueAdditionAccessoriesCostSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the ValueAdditionAccessoriesCost
+     */
+    omit?: ValueAdditionAccessoriesCostOmit<ExtArgs> | null
+    /**
+     * The filter to search for the ValueAdditionAccessoriesCost to update in case it exists.
+     */
+    where: ValueAdditionAccessoriesCostWhereUniqueInput
+    /**
+     * In case the ValueAdditionAccessoriesCost found by the `where` argument doesn't exist, create a new ValueAdditionAccessoriesCost with this data.
+     */
+    create: XOR<ValueAdditionAccessoriesCostCreateInput, ValueAdditionAccessoriesCostUncheckedCreateInput>
+    /**
+     * In case the ValueAdditionAccessoriesCost was found with the provided `where` argument, update it with this data.
+     */
+    update: XOR<ValueAdditionAccessoriesCostUpdateInput, ValueAdditionAccessoriesCostUncheckedUpdateInput>
+  }
+
+  /**
+   * ValueAdditionAccessoriesCost delete
+   */
+  export type ValueAdditionAccessoriesCostDeleteArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the ValueAdditionAccessoriesCost
+     */
+    select?: ValueAdditionAccessoriesCostSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the ValueAdditionAccessoriesCost
+     */
+    omit?: ValueAdditionAccessoriesCostOmit<ExtArgs> | null
+    /**
+     * Filter which ValueAdditionAccessoriesCost to delete.
+     */
+    where: ValueAdditionAccessoriesCostWhereUniqueInput
+  }
+
+  /**
+   * ValueAdditionAccessoriesCost deleteMany
+   */
+  export type ValueAdditionAccessoriesCostDeleteManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Filter which ValueAdditionAccessoriesCosts to delete
+     */
+    where?: ValueAdditionAccessoriesCostWhereInput
+    /**
+     * Limit how many ValueAdditionAccessoriesCosts to delete.
+     */
+    limit?: number
+  }
+
+  /**
+   * ValueAdditionAccessoriesCost without action
+   */
+  export type ValueAdditionAccessoriesCostDefaultArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the ValueAdditionAccessoriesCost
+     */
+    select?: ValueAdditionAccessoriesCostSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the ValueAdditionAccessoriesCost
+     */
+    omit?: ValueAdditionAccessoriesCostOmit<ExtArgs> | null
   }
 
 
@@ -69139,7 +70734,9 @@ export namespace Prisma {
     fabCons: 'fabCons',
     width: 'width',
     vendorFabricRate: 'vendorFabricRate',
+    valueAddAccCostType: 'valueAddAccCostType',
     valueAddCost: 'valueAddCost',
+    valueAddProcessCost: 'valueAddProcessCost',
     bodyArticle: 'bodyArticle',
     bodyArticleDescription: 'bodyArticleDescription',
     fabricArticleNumber: 'fabricArticleNumber',
@@ -69855,9 +71452,13 @@ export namespace Prisma {
     vendorName: 'vendorName',
     vendorCode: 'vendorCode',
     designNumber: 'designNumber',
+    pptNumber: 'pptNumber',
     fabricRate: 'fabricRate',
     v2FabricRate: 'v2FabricRate',
     valueAddCost: 'valueAddCost',
+    mrp: 'mrp',
+    baseColor: 'baseColor',
+    segment: 'segment',
     articleFashionType: 'articleFashionType',
     approvalStatus: 'approvalStatus',
     approvedAt: 'approvedAt',
@@ -69873,6 +71474,40 @@ export namespace Prisma {
   };
 
   export type FabricArticleDataScalarFieldEnum = (typeof FabricArticleDataScalarFieldEnum)[keyof typeof FabricArticleDataScalarFieldEnum]
+
+
+  export const ValueAdditionAccessoriesCostScalarFieldEnum: {
+    id: 'id',
+    division: 'division',
+    subDivision: 'subDivision',
+    majorCategory: 'majorCategory',
+    btnQty: 'btnQty',
+    btnRate: 'btnRate',
+    btnValue: 'btnValue',
+    zipQty: 'zipQty',
+    zipRate: 'zipRate',
+    zipValue: 'zipValue',
+    elaQty: 'elaQty',
+    elaRate: 'elaRate',
+    elaValue: 'elaValue',
+    laceQty: 'laceQty',
+    laceRate: 'laceRate',
+    laceValue: 'laceValue',
+    drawCordQty: 'drawCordQty',
+    drawCordRate: 'drawCordRate',
+    drawCordValue: 'drawCordValue',
+    velcroQty: 'velcroQty',
+    velcroRate: 'velcroRate',
+    velcroValue: 'velcroValue',
+    interliningQty: 'interliningQty',
+    interliningRate: 'interliningRate',
+    interliningValue: 'interliningValue',
+    totalValue: 'totalValue',
+    createdAt: 'createdAt',
+    updatedAt: 'updatedAt'
+  };
+
+  export type ValueAdditionAccessoriesCostScalarFieldEnum = (typeof ValueAdditionAccessoriesCostScalarFieldEnum)[keyof typeof ValueAdditionAccessoriesCostScalarFieldEnum]
 
 
   export const BodyArticleDataScalarFieldEnum: {
@@ -70311,6 +71946,7 @@ export namespace Prisma {
     mNoOfClr: 'mNoOfClr',
     articleFashionType: 'articleFashionType',
     articleDimension: 'articleDimension',
+    valueAddAccCostType: 'valueAddAccCostType',
     bodyArticle: 'bodyArticle',
     bodyArticleDescription: 'bodyArticleDescription',
     fabricArticleNumber: 'fabricArticleNumber',
@@ -70841,6 +72477,9 @@ export namespace Prisma {
     vendorName: 'vendorName',
     vendorCode: 'vendorCode',
     designNumber: 'designNumber',
+    pptNumber: 'pptNumber',
+    baseColor: 'baseColor',
+    segment: 'segment',
     articleFashionType: 'articleFashionType',
     approvalStatus: 'approvalStatus',
     sapSyncStatus: 'sapSyncStatus',
@@ -70852,6 +72491,15 @@ export namespace Prisma {
   };
 
   export type FabricArticleDataOrderByRelevanceFieldEnum = (typeof FabricArticleDataOrderByRelevanceFieldEnum)[keyof typeof FabricArticleDataOrderByRelevanceFieldEnum]
+
+
+  export const ValueAdditionAccessoriesCostOrderByRelevanceFieldEnum: {
+    division: 'division',
+    subDivision: 'subDivision',
+    majorCategory: 'majorCategory'
+  };
+
+  export type ValueAdditionAccessoriesCostOrderByRelevanceFieldEnum = (typeof ValueAdditionAccessoriesCostOrderByRelevanceFieldEnum)[keyof typeof ValueAdditionAccessoriesCostOrderByRelevanceFieldEnum]
 
 
   export const BodyArticleDataOrderByRelevanceFieldEnum: {
@@ -72244,7 +73892,9 @@ export namespace Prisma {
     fabCons?: DecimalNullableFilter<"ExtractionResultFlat"> | Decimal | DecimalJsLike | number | string | null
     width?: DecimalNullableFilter<"ExtractionResultFlat"> | Decimal | DecimalJsLike | number | string | null
     vendorFabricRate?: DecimalNullableFilter<"ExtractionResultFlat"> | Decimal | DecimalJsLike | number | string | null
+    valueAddAccCostType?: StringNullableFilter<"ExtractionResultFlat"> | string | null
     valueAddCost?: DecimalNullableFilter<"ExtractionResultFlat"> | Decimal | DecimalJsLike | number | string | null
+    valueAddProcessCost?: DecimalNullableFilter<"ExtractionResultFlat"> | Decimal | DecimalJsLike | number | string | null
     bodyArticle?: StringNullableFilter<"ExtractionResultFlat"> | string | null
     bodyArticleDescription?: StringNullableFilter<"ExtractionResultFlat"> | string | null
     fabricArticleNumber?: StringNullableFilter<"ExtractionResultFlat"> | string | null
@@ -72389,7 +74039,9 @@ export namespace Prisma {
     fabCons?: SortOrderInput | SortOrder
     width?: SortOrderInput | SortOrder
     vendorFabricRate?: SortOrderInput | SortOrder
+    valueAddAccCostType?: SortOrderInput | SortOrder
     valueAddCost?: SortOrderInput | SortOrder
+    valueAddProcessCost?: SortOrderInput | SortOrder
     bodyArticle?: SortOrderInput | SortOrder
     bodyArticleDescription?: SortOrderInput | SortOrder
     fabricArticleNumber?: SortOrderInput | SortOrder
@@ -72539,7 +74191,9 @@ export namespace Prisma {
     fabCons?: DecimalNullableFilter<"ExtractionResultFlat"> | Decimal | DecimalJsLike | number | string | null
     width?: DecimalNullableFilter<"ExtractionResultFlat"> | Decimal | DecimalJsLike | number | string | null
     vendorFabricRate?: DecimalNullableFilter<"ExtractionResultFlat"> | Decimal | DecimalJsLike | number | string | null
+    valueAddAccCostType?: StringNullableFilter<"ExtractionResultFlat"> | string | null
     valueAddCost?: DecimalNullableFilter<"ExtractionResultFlat"> | Decimal | DecimalJsLike | number | string | null
+    valueAddProcessCost?: DecimalNullableFilter<"ExtractionResultFlat"> | Decimal | DecimalJsLike | number | string | null
     bodyArticle?: StringNullableFilter<"ExtractionResultFlat"> | string | null
     bodyArticleDescription?: StringNullableFilter<"ExtractionResultFlat"> | string | null
     fabricArticleNumber?: StringNullableFilter<"ExtractionResultFlat"> | string | null
@@ -72683,7 +74337,9 @@ export namespace Prisma {
     fabCons?: SortOrderInput | SortOrder
     width?: SortOrderInput | SortOrder
     vendorFabricRate?: SortOrderInput | SortOrder
+    valueAddAccCostType?: SortOrderInput | SortOrder
     valueAddCost?: SortOrderInput | SortOrder
+    valueAddProcessCost?: SortOrderInput | SortOrder
     bodyArticle?: SortOrderInput | SortOrder
     bodyArticleDescription?: SortOrderInput | SortOrder
     fabricArticleNumber?: SortOrderInput | SortOrder
@@ -72833,7 +74489,9 @@ export namespace Prisma {
     fabCons?: DecimalNullableWithAggregatesFilter<"ExtractionResultFlat"> | Decimal | DecimalJsLike | number | string | null
     width?: DecimalNullableWithAggregatesFilter<"ExtractionResultFlat"> | Decimal | DecimalJsLike | number | string | null
     vendorFabricRate?: DecimalNullableWithAggregatesFilter<"ExtractionResultFlat"> | Decimal | DecimalJsLike | number | string | null
+    valueAddAccCostType?: StringNullableWithAggregatesFilter<"ExtractionResultFlat"> | string | null
     valueAddCost?: DecimalNullableWithAggregatesFilter<"ExtractionResultFlat"> | Decimal | DecimalJsLike | number | string | null
+    valueAddProcessCost?: DecimalNullableWithAggregatesFilter<"ExtractionResultFlat"> | Decimal | DecimalJsLike | number | string | null
     bodyArticle?: StringNullableWithAggregatesFilter<"ExtractionResultFlat"> | string | null
     bodyArticleDescription?: StringNullableWithAggregatesFilter<"ExtractionResultFlat"> | string | null
     fabricArticleNumber?: StringNullableWithAggregatesFilter<"ExtractionResultFlat"> | string | null
@@ -76205,9 +77863,13 @@ export namespace Prisma {
     vendorName?: StringNullableFilter<"FabricArticleData"> | string | null
     vendorCode?: StringNullableFilter<"FabricArticleData"> | string | null
     designNumber?: StringNullableFilter<"FabricArticleData"> | string | null
+    pptNumber?: StringNullableFilter<"FabricArticleData"> | string | null
     fabricRate?: DecimalNullableFilter<"FabricArticleData"> | Decimal | DecimalJsLike | number | string | null
     v2FabricRate?: DecimalNullableFilter<"FabricArticleData"> | Decimal | DecimalJsLike | number | string | null
     valueAddCost?: DecimalNullableFilter<"FabricArticleData"> | Decimal | DecimalJsLike | number | string | null
+    mrp?: DecimalNullableFilter<"FabricArticleData"> | Decimal | DecimalJsLike | number | string | null
+    baseColor?: StringNullableFilter<"FabricArticleData"> | string | null
+    segment?: StringNullableFilter<"FabricArticleData"> | string | null
     articleFashionType?: StringNullableFilter<"FabricArticleData"> | string | null
     approvalStatus?: StringFilter<"FabricArticleData"> | string
     approvedAt?: DateTimeNullableFilter<"FabricArticleData"> | Date | string | null
@@ -76248,9 +77910,13 @@ export namespace Prisma {
     vendorName?: SortOrderInput | SortOrder
     vendorCode?: SortOrderInput | SortOrder
     designNumber?: SortOrderInput | SortOrder
+    pptNumber?: SortOrderInput | SortOrder
     fabricRate?: SortOrderInput | SortOrder
     v2FabricRate?: SortOrderInput | SortOrder
     valueAddCost?: SortOrderInput | SortOrder
+    mrp?: SortOrderInput | SortOrder
+    baseColor?: SortOrderInput | SortOrder
+    segment?: SortOrderInput | SortOrder
     articleFashionType?: SortOrderInput | SortOrder
     approvalStatus?: SortOrder
     approvedAt?: SortOrderInput | SortOrder
@@ -76295,9 +77961,13 @@ export namespace Prisma {
     vendorName?: StringNullableFilter<"FabricArticleData"> | string | null
     vendorCode?: StringNullableFilter<"FabricArticleData"> | string | null
     designNumber?: StringNullableFilter<"FabricArticleData"> | string | null
+    pptNumber?: StringNullableFilter<"FabricArticleData"> | string | null
     fabricRate?: DecimalNullableFilter<"FabricArticleData"> | Decimal | DecimalJsLike | number | string | null
     v2FabricRate?: DecimalNullableFilter<"FabricArticleData"> | Decimal | DecimalJsLike | number | string | null
     valueAddCost?: DecimalNullableFilter<"FabricArticleData"> | Decimal | DecimalJsLike | number | string | null
+    mrp?: DecimalNullableFilter<"FabricArticleData"> | Decimal | DecimalJsLike | number | string | null
+    baseColor?: StringNullableFilter<"FabricArticleData"> | string | null
+    segment?: StringNullableFilter<"FabricArticleData"> | string | null
     articleFashionType?: StringNullableFilter<"FabricArticleData"> | string | null
     approvalStatus?: StringFilter<"FabricArticleData"> | string
     approvedAt?: DateTimeNullableFilter<"FabricArticleData"> | Date | string | null
@@ -76338,9 +78008,13 @@ export namespace Prisma {
     vendorName?: SortOrderInput | SortOrder
     vendorCode?: SortOrderInput | SortOrder
     designNumber?: SortOrderInput | SortOrder
+    pptNumber?: SortOrderInput | SortOrder
     fabricRate?: SortOrderInput | SortOrder
     v2FabricRate?: SortOrderInput | SortOrder
     valueAddCost?: SortOrderInput | SortOrder
+    mrp?: SortOrderInput | SortOrder
+    baseColor?: SortOrderInput | SortOrder
+    segment?: SortOrderInput | SortOrder
     articleFashionType?: SortOrderInput | SortOrder
     approvalStatus?: SortOrder
     approvedAt?: SortOrderInput | SortOrder
@@ -76389,9 +78063,13 @@ export namespace Prisma {
     vendorName?: StringNullableWithAggregatesFilter<"FabricArticleData"> | string | null
     vendorCode?: StringNullableWithAggregatesFilter<"FabricArticleData"> | string | null
     designNumber?: StringNullableWithAggregatesFilter<"FabricArticleData"> | string | null
+    pptNumber?: StringNullableWithAggregatesFilter<"FabricArticleData"> | string | null
     fabricRate?: DecimalNullableWithAggregatesFilter<"FabricArticleData"> | Decimal | DecimalJsLike | number | string | null
     v2FabricRate?: DecimalNullableWithAggregatesFilter<"FabricArticleData"> | Decimal | DecimalJsLike | number | string | null
     valueAddCost?: DecimalNullableWithAggregatesFilter<"FabricArticleData"> | Decimal | DecimalJsLike | number | string | null
+    mrp?: DecimalNullableWithAggregatesFilter<"FabricArticleData"> | Decimal | DecimalJsLike | number | string | null
+    baseColor?: StringNullableWithAggregatesFilter<"FabricArticleData"> | string | null
+    segment?: StringNullableWithAggregatesFilter<"FabricArticleData"> | string | null
     articleFashionType?: StringNullableWithAggregatesFilter<"FabricArticleData"> | string | null
     approvalStatus?: StringWithAggregatesFilter<"FabricArticleData"> | string
     approvedAt?: DateTimeNullableWithAggregatesFilter<"FabricArticleData"> | Date | string | null
@@ -76404,6 +78082,177 @@ export namespace Prisma {
     userName?: StringNullableWithAggregatesFilter<"FabricArticleData"> | string | null
     createdAt?: DateTimeWithAggregatesFilter<"FabricArticleData"> | Date | string
     updatedAt?: DateTimeWithAggregatesFilter<"FabricArticleData"> | Date | string
+  }
+
+  export type ValueAdditionAccessoriesCostWhereInput = {
+    AND?: ValueAdditionAccessoriesCostWhereInput | ValueAdditionAccessoriesCostWhereInput[]
+    OR?: ValueAdditionAccessoriesCostWhereInput[]
+    NOT?: ValueAdditionAccessoriesCostWhereInput | ValueAdditionAccessoriesCostWhereInput[]
+    id?: IntFilter<"ValueAdditionAccessoriesCost"> | number
+    division?: StringNullableFilter<"ValueAdditionAccessoriesCost"> | string | null
+    subDivision?: StringNullableFilter<"ValueAdditionAccessoriesCost"> | string | null
+    majorCategory?: StringFilter<"ValueAdditionAccessoriesCost"> | string
+    btnQty?: DecimalNullableFilter<"ValueAdditionAccessoriesCost"> | Decimal | DecimalJsLike | number | string | null
+    btnRate?: DecimalNullableFilter<"ValueAdditionAccessoriesCost"> | Decimal | DecimalJsLike | number | string | null
+    btnValue?: DecimalNullableFilter<"ValueAdditionAccessoriesCost"> | Decimal | DecimalJsLike | number | string | null
+    zipQty?: DecimalNullableFilter<"ValueAdditionAccessoriesCost"> | Decimal | DecimalJsLike | number | string | null
+    zipRate?: DecimalNullableFilter<"ValueAdditionAccessoriesCost"> | Decimal | DecimalJsLike | number | string | null
+    zipValue?: DecimalNullableFilter<"ValueAdditionAccessoriesCost"> | Decimal | DecimalJsLike | number | string | null
+    elaQty?: DecimalNullableFilter<"ValueAdditionAccessoriesCost"> | Decimal | DecimalJsLike | number | string | null
+    elaRate?: DecimalNullableFilter<"ValueAdditionAccessoriesCost"> | Decimal | DecimalJsLike | number | string | null
+    elaValue?: DecimalNullableFilter<"ValueAdditionAccessoriesCost"> | Decimal | DecimalJsLike | number | string | null
+    laceQty?: DecimalNullableFilter<"ValueAdditionAccessoriesCost"> | Decimal | DecimalJsLike | number | string | null
+    laceRate?: DecimalNullableFilter<"ValueAdditionAccessoriesCost"> | Decimal | DecimalJsLike | number | string | null
+    laceValue?: DecimalNullableFilter<"ValueAdditionAccessoriesCost"> | Decimal | DecimalJsLike | number | string | null
+    drawCordQty?: DecimalNullableFilter<"ValueAdditionAccessoriesCost"> | Decimal | DecimalJsLike | number | string | null
+    drawCordRate?: DecimalNullableFilter<"ValueAdditionAccessoriesCost"> | Decimal | DecimalJsLike | number | string | null
+    drawCordValue?: DecimalNullableFilter<"ValueAdditionAccessoriesCost"> | Decimal | DecimalJsLike | number | string | null
+    velcroQty?: DecimalNullableFilter<"ValueAdditionAccessoriesCost"> | Decimal | DecimalJsLike | number | string | null
+    velcroRate?: DecimalNullableFilter<"ValueAdditionAccessoriesCost"> | Decimal | DecimalJsLike | number | string | null
+    velcroValue?: DecimalNullableFilter<"ValueAdditionAccessoriesCost"> | Decimal | DecimalJsLike | number | string | null
+    interliningQty?: DecimalNullableFilter<"ValueAdditionAccessoriesCost"> | Decimal | DecimalJsLike | number | string | null
+    interliningRate?: DecimalNullableFilter<"ValueAdditionAccessoriesCost"> | Decimal | DecimalJsLike | number | string | null
+    interliningValue?: DecimalNullableFilter<"ValueAdditionAccessoriesCost"> | Decimal | DecimalJsLike | number | string | null
+    totalValue?: DecimalNullableFilter<"ValueAdditionAccessoriesCost"> | Decimal | DecimalJsLike | number | string | null
+    createdAt?: DateTimeFilter<"ValueAdditionAccessoriesCost"> | Date | string
+    updatedAt?: DateTimeFilter<"ValueAdditionAccessoriesCost"> | Date | string
+  }
+
+  export type ValueAdditionAccessoriesCostOrderByWithRelationInput = {
+    id?: SortOrder
+    division?: SortOrderInput | SortOrder
+    subDivision?: SortOrderInput | SortOrder
+    majorCategory?: SortOrder
+    btnQty?: SortOrderInput | SortOrder
+    btnRate?: SortOrderInput | SortOrder
+    btnValue?: SortOrderInput | SortOrder
+    zipQty?: SortOrderInput | SortOrder
+    zipRate?: SortOrderInput | SortOrder
+    zipValue?: SortOrderInput | SortOrder
+    elaQty?: SortOrderInput | SortOrder
+    elaRate?: SortOrderInput | SortOrder
+    elaValue?: SortOrderInput | SortOrder
+    laceQty?: SortOrderInput | SortOrder
+    laceRate?: SortOrderInput | SortOrder
+    laceValue?: SortOrderInput | SortOrder
+    drawCordQty?: SortOrderInput | SortOrder
+    drawCordRate?: SortOrderInput | SortOrder
+    drawCordValue?: SortOrderInput | SortOrder
+    velcroQty?: SortOrderInput | SortOrder
+    velcroRate?: SortOrderInput | SortOrder
+    velcroValue?: SortOrderInput | SortOrder
+    interliningQty?: SortOrderInput | SortOrder
+    interliningRate?: SortOrderInput | SortOrder
+    interliningValue?: SortOrderInput | SortOrder
+    totalValue?: SortOrderInput | SortOrder
+    createdAt?: SortOrder
+    updatedAt?: SortOrder
+    _relevance?: ValueAdditionAccessoriesCostOrderByRelevanceInput
+  }
+
+  export type ValueAdditionAccessoriesCostWhereUniqueInput = Prisma.AtLeast<{
+    id?: number
+    majorCategory_subDivision_division?: ValueAdditionAccessoriesCostMajorCategorySubDivisionDivisionCompoundUniqueInput
+    AND?: ValueAdditionAccessoriesCostWhereInput | ValueAdditionAccessoriesCostWhereInput[]
+    OR?: ValueAdditionAccessoriesCostWhereInput[]
+    NOT?: ValueAdditionAccessoriesCostWhereInput | ValueAdditionAccessoriesCostWhereInput[]
+    division?: StringNullableFilter<"ValueAdditionAccessoriesCost"> | string | null
+    subDivision?: StringNullableFilter<"ValueAdditionAccessoriesCost"> | string | null
+    majorCategory?: StringFilter<"ValueAdditionAccessoriesCost"> | string
+    btnQty?: DecimalNullableFilter<"ValueAdditionAccessoriesCost"> | Decimal | DecimalJsLike | number | string | null
+    btnRate?: DecimalNullableFilter<"ValueAdditionAccessoriesCost"> | Decimal | DecimalJsLike | number | string | null
+    btnValue?: DecimalNullableFilter<"ValueAdditionAccessoriesCost"> | Decimal | DecimalJsLike | number | string | null
+    zipQty?: DecimalNullableFilter<"ValueAdditionAccessoriesCost"> | Decimal | DecimalJsLike | number | string | null
+    zipRate?: DecimalNullableFilter<"ValueAdditionAccessoriesCost"> | Decimal | DecimalJsLike | number | string | null
+    zipValue?: DecimalNullableFilter<"ValueAdditionAccessoriesCost"> | Decimal | DecimalJsLike | number | string | null
+    elaQty?: DecimalNullableFilter<"ValueAdditionAccessoriesCost"> | Decimal | DecimalJsLike | number | string | null
+    elaRate?: DecimalNullableFilter<"ValueAdditionAccessoriesCost"> | Decimal | DecimalJsLike | number | string | null
+    elaValue?: DecimalNullableFilter<"ValueAdditionAccessoriesCost"> | Decimal | DecimalJsLike | number | string | null
+    laceQty?: DecimalNullableFilter<"ValueAdditionAccessoriesCost"> | Decimal | DecimalJsLike | number | string | null
+    laceRate?: DecimalNullableFilter<"ValueAdditionAccessoriesCost"> | Decimal | DecimalJsLike | number | string | null
+    laceValue?: DecimalNullableFilter<"ValueAdditionAccessoriesCost"> | Decimal | DecimalJsLike | number | string | null
+    drawCordQty?: DecimalNullableFilter<"ValueAdditionAccessoriesCost"> | Decimal | DecimalJsLike | number | string | null
+    drawCordRate?: DecimalNullableFilter<"ValueAdditionAccessoriesCost"> | Decimal | DecimalJsLike | number | string | null
+    drawCordValue?: DecimalNullableFilter<"ValueAdditionAccessoriesCost"> | Decimal | DecimalJsLike | number | string | null
+    velcroQty?: DecimalNullableFilter<"ValueAdditionAccessoriesCost"> | Decimal | DecimalJsLike | number | string | null
+    velcroRate?: DecimalNullableFilter<"ValueAdditionAccessoriesCost"> | Decimal | DecimalJsLike | number | string | null
+    velcroValue?: DecimalNullableFilter<"ValueAdditionAccessoriesCost"> | Decimal | DecimalJsLike | number | string | null
+    interliningQty?: DecimalNullableFilter<"ValueAdditionAccessoriesCost"> | Decimal | DecimalJsLike | number | string | null
+    interliningRate?: DecimalNullableFilter<"ValueAdditionAccessoriesCost"> | Decimal | DecimalJsLike | number | string | null
+    interliningValue?: DecimalNullableFilter<"ValueAdditionAccessoriesCost"> | Decimal | DecimalJsLike | number | string | null
+    totalValue?: DecimalNullableFilter<"ValueAdditionAccessoriesCost"> | Decimal | DecimalJsLike | number | string | null
+    createdAt?: DateTimeFilter<"ValueAdditionAccessoriesCost"> | Date | string
+    updatedAt?: DateTimeFilter<"ValueAdditionAccessoriesCost"> | Date | string
+  }, "id" | "majorCategory_subDivision_division">
+
+  export type ValueAdditionAccessoriesCostOrderByWithAggregationInput = {
+    id?: SortOrder
+    division?: SortOrderInput | SortOrder
+    subDivision?: SortOrderInput | SortOrder
+    majorCategory?: SortOrder
+    btnQty?: SortOrderInput | SortOrder
+    btnRate?: SortOrderInput | SortOrder
+    btnValue?: SortOrderInput | SortOrder
+    zipQty?: SortOrderInput | SortOrder
+    zipRate?: SortOrderInput | SortOrder
+    zipValue?: SortOrderInput | SortOrder
+    elaQty?: SortOrderInput | SortOrder
+    elaRate?: SortOrderInput | SortOrder
+    elaValue?: SortOrderInput | SortOrder
+    laceQty?: SortOrderInput | SortOrder
+    laceRate?: SortOrderInput | SortOrder
+    laceValue?: SortOrderInput | SortOrder
+    drawCordQty?: SortOrderInput | SortOrder
+    drawCordRate?: SortOrderInput | SortOrder
+    drawCordValue?: SortOrderInput | SortOrder
+    velcroQty?: SortOrderInput | SortOrder
+    velcroRate?: SortOrderInput | SortOrder
+    velcroValue?: SortOrderInput | SortOrder
+    interliningQty?: SortOrderInput | SortOrder
+    interliningRate?: SortOrderInput | SortOrder
+    interliningValue?: SortOrderInput | SortOrder
+    totalValue?: SortOrderInput | SortOrder
+    createdAt?: SortOrder
+    updatedAt?: SortOrder
+    _count?: ValueAdditionAccessoriesCostCountOrderByAggregateInput
+    _avg?: ValueAdditionAccessoriesCostAvgOrderByAggregateInput
+    _max?: ValueAdditionAccessoriesCostMaxOrderByAggregateInput
+    _min?: ValueAdditionAccessoriesCostMinOrderByAggregateInput
+    _sum?: ValueAdditionAccessoriesCostSumOrderByAggregateInput
+  }
+
+  export type ValueAdditionAccessoriesCostScalarWhereWithAggregatesInput = {
+    AND?: ValueAdditionAccessoriesCostScalarWhereWithAggregatesInput | ValueAdditionAccessoriesCostScalarWhereWithAggregatesInput[]
+    OR?: ValueAdditionAccessoriesCostScalarWhereWithAggregatesInput[]
+    NOT?: ValueAdditionAccessoriesCostScalarWhereWithAggregatesInput | ValueAdditionAccessoriesCostScalarWhereWithAggregatesInput[]
+    id?: IntWithAggregatesFilter<"ValueAdditionAccessoriesCost"> | number
+    division?: StringNullableWithAggregatesFilter<"ValueAdditionAccessoriesCost"> | string | null
+    subDivision?: StringNullableWithAggregatesFilter<"ValueAdditionAccessoriesCost"> | string | null
+    majorCategory?: StringWithAggregatesFilter<"ValueAdditionAccessoriesCost"> | string
+    btnQty?: DecimalNullableWithAggregatesFilter<"ValueAdditionAccessoriesCost"> | Decimal | DecimalJsLike | number | string | null
+    btnRate?: DecimalNullableWithAggregatesFilter<"ValueAdditionAccessoriesCost"> | Decimal | DecimalJsLike | number | string | null
+    btnValue?: DecimalNullableWithAggregatesFilter<"ValueAdditionAccessoriesCost"> | Decimal | DecimalJsLike | number | string | null
+    zipQty?: DecimalNullableWithAggregatesFilter<"ValueAdditionAccessoriesCost"> | Decimal | DecimalJsLike | number | string | null
+    zipRate?: DecimalNullableWithAggregatesFilter<"ValueAdditionAccessoriesCost"> | Decimal | DecimalJsLike | number | string | null
+    zipValue?: DecimalNullableWithAggregatesFilter<"ValueAdditionAccessoriesCost"> | Decimal | DecimalJsLike | number | string | null
+    elaQty?: DecimalNullableWithAggregatesFilter<"ValueAdditionAccessoriesCost"> | Decimal | DecimalJsLike | number | string | null
+    elaRate?: DecimalNullableWithAggregatesFilter<"ValueAdditionAccessoriesCost"> | Decimal | DecimalJsLike | number | string | null
+    elaValue?: DecimalNullableWithAggregatesFilter<"ValueAdditionAccessoriesCost"> | Decimal | DecimalJsLike | number | string | null
+    laceQty?: DecimalNullableWithAggregatesFilter<"ValueAdditionAccessoriesCost"> | Decimal | DecimalJsLike | number | string | null
+    laceRate?: DecimalNullableWithAggregatesFilter<"ValueAdditionAccessoriesCost"> | Decimal | DecimalJsLike | number | string | null
+    laceValue?: DecimalNullableWithAggregatesFilter<"ValueAdditionAccessoriesCost"> | Decimal | DecimalJsLike | number | string | null
+    drawCordQty?: DecimalNullableWithAggregatesFilter<"ValueAdditionAccessoriesCost"> | Decimal | DecimalJsLike | number | string | null
+    drawCordRate?: DecimalNullableWithAggregatesFilter<"ValueAdditionAccessoriesCost"> | Decimal | DecimalJsLike | number | string | null
+    drawCordValue?: DecimalNullableWithAggregatesFilter<"ValueAdditionAccessoriesCost"> | Decimal | DecimalJsLike | number | string | null
+    velcroQty?: DecimalNullableWithAggregatesFilter<"ValueAdditionAccessoriesCost"> | Decimal | DecimalJsLike | number | string | null
+    velcroRate?: DecimalNullableWithAggregatesFilter<"ValueAdditionAccessoriesCost"> | Decimal | DecimalJsLike | number | string | null
+    velcroValue?: DecimalNullableWithAggregatesFilter<"ValueAdditionAccessoriesCost"> | Decimal | DecimalJsLike | number | string | null
+    interliningQty?: DecimalNullableWithAggregatesFilter<"ValueAdditionAccessoriesCost"> | Decimal | DecimalJsLike | number | string | null
+    interliningRate?: DecimalNullableWithAggregatesFilter<"ValueAdditionAccessoriesCost"> | Decimal | DecimalJsLike | number | string | null
+    interliningValue?: DecimalNullableWithAggregatesFilter<"ValueAdditionAccessoriesCost"> | Decimal | DecimalJsLike | number | string | null
+    totalValue?: DecimalNullableWithAggregatesFilter<"ValueAdditionAccessoriesCost"> | Decimal | DecimalJsLike | number | string | null
+    createdAt?: DateTimeWithAggregatesFilter<"ValueAdditionAccessoriesCost"> | Date | string
+    updatedAt?: DateTimeWithAggregatesFilter<"ValueAdditionAccessoriesCost"> | Date | string
   }
 
   export type BodyArticleDataWhereInput = {
@@ -78546,7 +80395,9 @@ export namespace Prisma {
     fabCons?: Decimal | DecimalJsLike | number | string | null
     width?: Decimal | DecimalJsLike | number | string | null
     vendorFabricRate?: Decimal | DecimalJsLike | number | string | null
+    valueAddAccCostType?: string | null
     valueAddCost?: Decimal | DecimalJsLike | number | string | null
+    valueAddProcessCost?: Decimal | DecimalJsLike | number | string | null
     bodyArticle?: string | null
     bodyArticleDescription?: string | null
     fabricArticleNumber?: string | null
@@ -78690,7 +80541,9 @@ export namespace Prisma {
     fabCons?: Decimal | DecimalJsLike | number | string | null
     width?: Decimal | DecimalJsLike | number | string | null
     vendorFabricRate?: Decimal | DecimalJsLike | number | string | null
+    valueAddAccCostType?: string | null
     valueAddCost?: Decimal | DecimalJsLike | number | string | null
+    valueAddProcessCost?: Decimal | DecimalJsLike | number | string | null
     bodyArticle?: string | null
     bodyArticleDescription?: string | null
     fabricArticleNumber?: string | null
@@ -78832,7 +80685,9 @@ export namespace Prisma {
     fabCons?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
     width?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
     vendorFabricRate?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    valueAddAccCostType?: NullableStringFieldUpdateOperationsInput | string | null
     valueAddCost?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    valueAddProcessCost?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
     bodyArticle?: NullableStringFieldUpdateOperationsInput | string | null
     bodyArticleDescription?: NullableStringFieldUpdateOperationsInput | string | null
     fabricArticleNumber?: NullableStringFieldUpdateOperationsInput | string | null
@@ -78976,7 +80831,9 @@ export namespace Prisma {
     fabCons?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
     width?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
     vendorFabricRate?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    valueAddAccCostType?: NullableStringFieldUpdateOperationsInput | string | null
     valueAddCost?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    valueAddProcessCost?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
     bodyArticle?: NullableStringFieldUpdateOperationsInput | string | null
     bodyArticleDescription?: NullableStringFieldUpdateOperationsInput | string | null
     fabricArticleNumber?: NullableStringFieldUpdateOperationsInput | string | null
@@ -79119,7 +80976,9 @@ export namespace Prisma {
     fabCons?: Decimal | DecimalJsLike | number | string | null
     width?: Decimal | DecimalJsLike | number | string | null
     vendorFabricRate?: Decimal | DecimalJsLike | number | string | null
+    valueAddAccCostType?: string | null
     valueAddCost?: Decimal | DecimalJsLike | number | string | null
+    valueAddProcessCost?: Decimal | DecimalJsLike | number | string | null
     bodyArticle?: string | null
     bodyArticleDescription?: string | null
     fabricArticleNumber?: string | null
@@ -79260,7 +81119,9 @@ export namespace Prisma {
     fabCons?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
     width?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
     vendorFabricRate?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    valueAddAccCostType?: NullableStringFieldUpdateOperationsInput | string | null
     valueAddCost?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    valueAddProcessCost?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
     bodyArticle?: NullableStringFieldUpdateOperationsInput | string | null
     bodyArticleDescription?: NullableStringFieldUpdateOperationsInput | string | null
     fabricArticleNumber?: NullableStringFieldUpdateOperationsInput | string | null
@@ -79401,7 +81262,9 @@ export namespace Prisma {
     fabCons?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
     width?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
     vendorFabricRate?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    valueAddAccCostType?: NullableStringFieldUpdateOperationsInput | string | null
     valueAddCost?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    valueAddProcessCost?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
     bodyArticle?: NullableStringFieldUpdateOperationsInput | string | null
     bodyArticleDescription?: NullableStringFieldUpdateOperationsInput | string | null
     fabricArticleNumber?: NullableStringFieldUpdateOperationsInput | string | null
@@ -83365,9 +85228,13 @@ export namespace Prisma {
     vendorName?: string | null
     vendorCode?: string | null
     designNumber?: string | null
+    pptNumber?: string | null
     fabricRate?: Decimal | DecimalJsLike | number | string | null
     v2FabricRate?: Decimal | DecimalJsLike | number | string | null
     valueAddCost?: Decimal | DecimalJsLike | number | string | null
+    mrp?: Decimal | DecimalJsLike | number | string | null
+    baseColor?: string | null
+    segment?: string | null
     articleFashionType?: string | null
     approvalStatus?: string
     approvedAt?: Date | string | null
@@ -83408,9 +85275,13 @@ export namespace Prisma {
     vendorName?: string | null
     vendorCode?: string | null
     designNumber?: string | null
+    pptNumber?: string | null
     fabricRate?: Decimal | DecimalJsLike | number | string | null
     v2FabricRate?: Decimal | DecimalJsLike | number | string | null
     valueAddCost?: Decimal | DecimalJsLike | number | string | null
+    mrp?: Decimal | DecimalJsLike | number | string | null
+    baseColor?: string | null
+    segment?: string | null
     articleFashionType?: string | null
     approvalStatus?: string
     approvedAt?: Date | string | null
@@ -83451,9 +85322,13 @@ export namespace Prisma {
     vendorName?: NullableStringFieldUpdateOperationsInput | string | null
     vendorCode?: NullableStringFieldUpdateOperationsInput | string | null
     designNumber?: NullableStringFieldUpdateOperationsInput | string | null
+    pptNumber?: NullableStringFieldUpdateOperationsInput | string | null
     fabricRate?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
     v2FabricRate?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
     valueAddCost?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    mrp?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    baseColor?: NullableStringFieldUpdateOperationsInput | string | null
+    segment?: NullableStringFieldUpdateOperationsInput | string | null
     articleFashionType?: NullableStringFieldUpdateOperationsInput | string | null
     approvalStatus?: StringFieldUpdateOperationsInput | string
     approvedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
@@ -83494,9 +85369,13 @@ export namespace Prisma {
     vendorName?: NullableStringFieldUpdateOperationsInput | string | null
     vendorCode?: NullableStringFieldUpdateOperationsInput | string | null
     designNumber?: NullableStringFieldUpdateOperationsInput | string | null
+    pptNumber?: NullableStringFieldUpdateOperationsInput | string | null
     fabricRate?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
     v2FabricRate?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
     valueAddCost?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    mrp?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    baseColor?: NullableStringFieldUpdateOperationsInput | string | null
+    segment?: NullableStringFieldUpdateOperationsInput | string | null
     articleFashionType?: NullableStringFieldUpdateOperationsInput | string | null
     approvalStatus?: StringFieldUpdateOperationsInput | string
     approvedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
@@ -83537,9 +85416,13 @@ export namespace Prisma {
     vendorName?: string | null
     vendorCode?: string | null
     designNumber?: string | null
+    pptNumber?: string | null
     fabricRate?: Decimal | DecimalJsLike | number | string | null
     v2FabricRate?: Decimal | DecimalJsLike | number | string | null
     valueAddCost?: Decimal | DecimalJsLike | number | string | null
+    mrp?: Decimal | DecimalJsLike | number | string | null
+    baseColor?: string | null
+    segment?: string | null
     articleFashionType?: string | null
     approvalStatus?: string
     approvedAt?: Date | string | null
@@ -83580,9 +85463,13 @@ export namespace Prisma {
     vendorName?: NullableStringFieldUpdateOperationsInput | string | null
     vendorCode?: NullableStringFieldUpdateOperationsInput | string | null
     designNumber?: NullableStringFieldUpdateOperationsInput | string | null
+    pptNumber?: NullableStringFieldUpdateOperationsInput | string | null
     fabricRate?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
     v2FabricRate?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
     valueAddCost?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    mrp?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    baseColor?: NullableStringFieldUpdateOperationsInput | string | null
+    segment?: NullableStringFieldUpdateOperationsInput | string | null
     articleFashionType?: NullableStringFieldUpdateOperationsInput | string | null
     approvalStatus?: StringFieldUpdateOperationsInput | string
     approvedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
@@ -83623,9 +85510,13 @@ export namespace Prisma {
     vendorName?: NullableStringFieldUpdateOperationsInput | string | null
     vendorCode?: NullableStringFieldUpdateOperationsInput | string | null
     designNumber?: NullableStringFieldUpdateOperationsInput | string | null
+    pptNumber?: NullableStringFieldUpdateOperationsInput | string | null
     fabricRate?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
     v2FabricRate?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
     valueAddCost?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    mrp?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    baseColor?: NullableStringFieldUpdateOperationsInput | string | null
+    segment?: NullableStringFieldUpdateOperationsInput | string | null
     articleFashionType?: NullableStringFieldUpdateOperationsInput | string | null
     approvalStatus?: StringFieldUpdateOperationsInput | string
     approvedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
@@ -83636,6 +85527,220 @@ export namespace Prisma {
     fabricArticleType?: NullableStringFieldUpdateOperationsInput | string | null
     source?: NullableStringFieldUpdateOperationsInput | string | null
     userName?: NullableStringFieldUpdateOperationsInput | string | null
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+  }
+
+  export type ValueAdditionAccessoriesCostCreateInput = {
+    division?: string | null
+    subDivision?: string | null
+    majorCategory: string
+    btnQty?: Decimal | DecimalJsLike | number | string | null
+    btnRate?: Decimal | DecimalJsLike | number | string | null
+    btnValue?: Decimal | DecimalJsLike | number | string | null
+    zipQty?: Decimal | DecimalJsLike | number | string | null
+    zipRate?: Decimal | DecimalJsLike | number | string | null
+    zipValue?: Decimal | DecimalJsLike | number | string | null
+    elaQty?: Decimal | DecimalJsLike | number | string | null
+    elaRate?: Decimal | DecimalJsLike | number | string | null
+    elaValue?: Decimal | DecimalJsLike | number | string | null
+    laceQty?: Decimal | DecimalJsLike | number | string | null
+    laceRate?: Decimal | DecimalJsLike | number | string | null
+    laceValue?: Decimal | DecimalJsLike | number | string | null
+    drawCordQty?: Decimal | DecimalJsLike | number | string | null
+    drawCordRate?: Decimal | DecimalJsLike | number | string | null
+    drawCordValue?: Decimal | DecimalJsLike | number | string | null
+    velcroQty?: Decimal | DecimalJsLike | number | string | null
+    velcroRate?: Decimal | DecimalJsLike | number | string | null
+    velcroValue?: Decimal | DecimalJsLike | number | string | null
+    interliningQty?: Decimal | DecimalJsLike | number | string | null
+    interliningRate?: Decimal | DecimalJsLike | number | string | null
+    interliningValue?: Decimal | DecimalJsLike | number | string | null
+    totalValue?: Decimal | DecimalJsLike | number | string | null
+    createdAt?: Date | string
+    updatedAt?: Date | string
+  }
+
+  export type ValueAdditionAccessoriesCostUncheckedCreateInput = {
+    id?: number
+    division?: string | null
+    subDivision?: string | null
+    majorCategory: string
+    btnQty?: Decimal | DecimalJsLike | number | string | null
+    btnRate?: Decimal | DecimalJsLike | number | string | null
+    btnValue?: Decimal | DecimalJsLike | number | string | null
+    zipQty?: Decimal | DecimalJsLike | number | string | null
+    zipRate?: Decimal | DecimalJsLike | number | string | null
+    zipValue?: Decimal | DecimalJsLike | number | string | null
+    elaQty?: Decimal | DecimalJsLike | number | string | null
+    elaRate?: Decimal | DecimalJsLike | number | string | null
+    elaValue?: Decimal | DecimalJsLike | number | string | null
+    laceQty?: Decimal | DecimalJsLike | number | string | null
+    laceRate?: Decimal | DecimalJsLike | number | string | null
+    laceValue?: Decimal | DecimalJsLike | number | string | null
+    drawCordQty?: Decimal | DecimalJsLike | number | string | null
+    drawCordRate?: Decimal | DecimalJsLike | number | string | null
+    drawCordValue?: Decimal | DecimalJsLike | number | string | null
+    velcroQty?: Decimal | DecimalJsLike | number | string | null
+    velcroRate?: Decimal | DecimalJsLike | number | string | null
+    velcroValue?: Decimal | DecimalJsLike | number | string | null
+    interliningQty?: Decimal | DecimalJsLike | number | string | null
+    interliningRate?: Decimal | DecimalJsLike | number | string | null
+    interliningValue?: Decimal | DecimalJsLike | number | string | null
+    totalValue?: Decimal | DecimalJsLike | number | string | null
+    createdAt?: Date | string
+    updatedAt?: Date | string
+  }
+
+  export type ValueAdditionAccessoriesCostUpdateInput = {
+    division?: NullableStringFieldUpdateOperationsInput | string | null
+    subDivision?: NullableStringFieldUpdateOperationsInput | string | null
+    majorCategory?: StringFieldUpdateOperationsInput | string
+    btnQty?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    btnRate?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    btnValue?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    zipQty?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    zipRate?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    zipValue?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    elaQty?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    elaRate?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    elaValue?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    laceQty?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    laceRate?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    laceValue?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    drawCordQty?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    drawCordRate?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    drawCordValue?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    velcroQty?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    velcroRate?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    velcroValue?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    interliningQty?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    interliningRate?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    interliningValue?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    totalValue?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+  }
+
+  export type ValueAdditionAccessoriesCostUncheckedUpdateInput = {
+    id?: IntFieldUpdateOperationsInput | number
+    division?: NullableStringFieldUpdateOperationsInput | string | null
+    subDivision?: NullableStringFieldUpdateOperationsInput | string | null
+    majorCategory?: StringFieldUpdateOperationsInput | string
+    btnQty?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    btnRate?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    btnValue?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    zipQty?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    zipRate?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    zipValue?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    elaQty?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    elaRate?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    elaValue?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    laceQty?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    laceRate?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    laceValue?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    drawCordQty?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    drawCordRate?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    drawCordValue?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    velcroQty?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    velcroRate?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    velcroValue?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    interliningQty?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    interliningRate?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    interliningValue?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    totalValue?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+  }
+
+  export type ValueAdditionAccessoriesCostCreateManyInput = {
+    id?: number
+    division?: string | null
+    subDivision?: string | null
+    majorCategory: string
+    btnQty?: Decimal | DecimalJsLike | number | string | null
+    btnRate?: Decimal | DecimalJsLike | number | string | null
+    btnValue?: Decimal | DecimalJsLike | number | string | null
+    zipQty?: Decimal | DecimalJsLike | number | string | null
+    zipRate?: Decimal | DecimalJsLike | number | string | null
+    zipValue?: Decimal | DecimalJsLike | number | string | null
+    elaQty?: Decimal | DecimalJsLike | number | string | null
+    elaRate?: Decimal | DecimalJsLike | number | string | null
+    elaValue?: Decimal | DecimalJsLike | number | string | null
+    laceQty?: Decimal | DecimalJsLike | number | string | null
+    laceRate?: Decimal | DecimalJsLike | number | string | null
+    laceValue?: Decimal | DecimalJsLike | number | string | null
+    drawCordQty?: Decimal | DecimalJsLike | number | string | null
+    drawCordRate?: Decimal | DecimalJsLike | number | string | null
+    drawCordValue?: Decimal | DecimalJsLike | number | string | null
+    velcroQty?: Decimal | DecimalJsLike | number | string | null
+    velcroRate?: Decimal | DecimalJsLike | number | string | null
+    velcroValue?: Decimal | DecimalJsLike | number | string | null
+    interliningQty?: Decimal | DecimalJsLike | number | string | null
+    interliningRate?: Decimal | DecimalJsLike | number | string | null
+    interliningValue?: Decimal | DecimalJsLike | number | string | null
+    totalValue?: Decimal | DecimalJsLike | number | string | null
+    createdAt?: Date | string
+    updatedAt?: Date | string
+  }
+
+  export type ValueAdditionAccessoriesCostUpdateManyMutationInput = {
+    division?: NullableStringFieldUpdateOperationsInput | string | null
+    subDivision?: NullableStringFieldUpdateOperationsInput | string | null
+    majorCategory?: StringFieldUpdateOperationsInput | string
+    btnQty?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    btnRate?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    btnValue?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    zipQty?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    zipRate?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    zipValue?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    elaQty?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    elaRate?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    elaValue?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    laceQty?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    laceRate?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    laceValue?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    drawCordQty?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    drawCordRate?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    drawCordValue?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    velcroQty?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    velcroRate?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    velcroValue?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    interliningQty?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    interliningRate?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    interliningValue?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    totalValue?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+  }
+
+  export type ValueAdditionAccessoriesCostUncheckedUpdateManyInput = {
+    id?: IntFieldUpdateOperationsInput | number
+    division?: NullableStringFieldUpdateOperationsInput | string | null
+    subDivision?: NullableStringFieldUpdateOperationsInput | string | null
+    majorCategory?: StringFieldUpdateOperationsInput | string
+    btnQty?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    btnRate?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    btnValue?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    zipQty?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    zipRate?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    zipValue?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    elaQty?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    elaRate?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    elaValue?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    laceQty?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    laceRate?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    laceValue?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    drawCordQty?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    drawCordRate?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    drawCordValue?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    velcroQty?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    velcroRate?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    velcroValue?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    interliningQty?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    interliningRate?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    interliningValue?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    totalValue?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
   }
@@ -86113,7 +88218,9 @@ export namespace Prisma {
     fabCons?: SortOrder
     width?: SortOrder
     vendorFabricRate?: SortOrder
+    valueAddAccCostType?: SortOrder
     valueAddCost?: SortOrder
+    valueAddProcessCost?: SortOrder
     bodyArticle?: SortOrder
     bodyArticleDescription?: SortOrder
     fabricArticleNumber?: SortOrder
@@ -86171,6 +88278,7 @@ export namespace Prisma {
     width?: SortOrder
     vendorFabricRate?: SortOrder
     valueAddCost?: SortOrder
+    valueAddProcessCost?: SortOrder
     mrp?: SortOrder
     approvedBy?: SortOrder
   }
@@ -86277,7 +88385,9 @@ export namespace Prisma {
     fabCons?: SortOrder
     width?: SortOrder
     vendorFabricRate?: SortOrder
+    valueAddAccCostType?: SortOrder
     valueAddCost?: SortOrder
+    valueAddProcessCost?: SortOrder
     bodyArticle?: SortOrder
     bodyArticleDescription?: SortOrder
     fabricArticleNumber?: SortOrder
@@ -86418,7 +88528,9 @@ export namespace Prisma {
     fabCons?: SortOrder
     width?: SortOrder
     vendorFabricRate?: SortOrder
+    valueAddAccCostType?: SortOrder
     valueAddCost?: SortOrder
+    valueAddProcessCost?: SortOrder
     bodyArticle?: SortOrder
     bodyArticleDescription?: SortOrder
     fabricArticleNumber?: SortOrder
@@ -86475,6 +88587,7 @@ export namespace Prisma {
     width?: SortOrder
     vendorFabricRate?: SortOrder
     valueAddCost?: SortOrder
+    valueAddProcessCost?: SortOrder
     mrp?: SortOrder
     approvedBy?: SortOrder
   }
@@ -88985,9 +91098,13 @@ export namespace Prisma {
     vendorName?: SortOrder
     vendorCode?: SortOrder
     designNumber?: SortOrder
+    pptNumber?: SortOrder
     fabricRate?: SortOrder
     v2FabricRate?: SortOrder
     valueAddCost?: SortOrder
+    mrp?: SortOrder
+    baseColor?: SortOrder
+    segment?: SortOrder
     articleFashionType?: SortOrder
     approvalStatus?: SortOrder
     approvedAt?: SortOrder
@@ -89006,6 +91123,7 @@ export namespace Prisma {
     fabricRate?: SortOrder
     v2FabricRate?: SortOrder
     valueAddCost?: SortOrder
+    mrp?: SortOrder
     approvedBy?: SortOrder
   }
 
@@ -89035,9 +91153,13 @@ export namespace Prisma {
     vendorName?: SortOrder
     vendorCode?: SortOrder
     designNumber?: SortOrder
+    pptNumber?: SortOrder
     fabricRate?: SortOrder
     v2FabricRate?: SortOrder
     valueAddCost?: SortOrder
+    mrp?: SortOrder
+    baseColor?: SortOrder
+    segment?: SortOrder
     articleFashionType?: SortOrder
     approvalStatus?: SortOrder
     approvedAt?: SortOrder
@@ -89078,9 +91200,13 @@ export namespace Prisma {
     vendorName?: SortOrder
     vendorCode?: SortOrder
     designNumber?: SortOrder
+    pptNumber?: SortOrder
     fabricRate?: SortOrder
     v2FabricRate?: SortOrder
     valueAddCost?: SortOrder
+    mrp?: SortOrder
+    baseColor?: SortOrder
+    segment?: SortOrder
     articleFashionType?: SortOrder
     approvalStatus?: SortOrder
     approvedAt?: SortOrder
@@ -89099,7 +91225,165 @@ export namespace Prisma {
     fabricRate?: SortOrder
     v2FabricRate?: SortOrder
     valueAddCost?: SortOrder
+    mrp?: SortOrder
     approvedBy?: SortOrder
+  }
+
+  export type ValueAdditionAccessoriesCostOrderByRelevanceInput = {
+    fields: ValueAdditionAccessoriesCostOrderByRelevanceFieldEnum | ValueAdditionAccessoriesCostOrderByRelevanceFieldEnum[]
+    sort: SortOrder
+    search: string
+  }
+
+  export type ValueAdditionAccessoriesCostMajorCategorySubDivisionDivisionCompoundUniqueInput = {
+    majorCategory: string
+    subDivision: string
+    division: string
+  }
+
+  export type ValueAdditionAccessoriesCostCountOrderByAggregateInput = {
+    id?: SortOrder
+    division?: SortOrder
+    subDivision?: SortOrder
+    majorCategory?: SortOrder
+    btnQty?: SortOrder
+    btnRate?: SortOrder
+    btnValue?: SortOrder
+    zipQty?: SortOrder
+    zipRate?: SortOrder
+    zipValue?: SortOrder
+    elaQty?: SortOrder
+    elaRate?: SortOrder
+    elaValue?: SortOrder
+    laceQty?: SortOrder
+    laceRate?: SortOrder
+    laceValue?: SortOrder
+    drawCordQty?: SortOrder
+    drawCordRate?: SortOrder
+    drawCordValue?: SortOrder
+    velcroQty?: SortOrder
+    velcroRate?: SortOrder
+    velcroValue?: SortOrder
+    interliningQty?: SortOrder
+    interliningRate?: SortOrder
+    interliningValue?: SortOrder
+    totalValue?: SortOrder
+    createdAt?: SortOrder
+    updatedAt?: SortOrder
+  }
+
+  export type ValueAdditionAccessoriesCostAvgOrderByAggregateInput = {
+    id?: SortOrder
+    btnQty?: SortOrder
+    btnRate?: SortOrder
+    btnValue?: SortOrder
+    zipQty?: SortOrder
+    zipRate?: SortOrder
+    zipValue?: SortOrder
+    elaQty?: SortOrder
+    elaRate?: SortOrder
+    elaValue?: SortOrder
+    laceQty?: SortOrder
+    laceRate?: SortOrder
+    laceValue?: SortOrder
+    drawCordQty?: SortOrder
+    drawCordRate?: SortOrder
+    drawCordValue?: SortOrder
+    velcroQty?: SortOrder
+    velcroRate?: SortOrder
+    velcroValue?: SortOrder
+    interliningQty?: SortOrder
+    interliningRate?: SortOrder
+    interliningValue?: SortOrder
+    totalValue?: SortOrder
+  }
+
+  export type ValueAdditionAccessoriesCostMaxOrderByAggregateInput = {
+    id?: SortOrder
+    division?: SortOrder
+    subDivision?: SortOrder
+    majorCategory?: SortOrder
+    btnQty?: SortOrder
+    btnRate?: SortOrder
+    btnValue?: SortOrder
+    zipQty?: SortOrder
+    zipRate?: SortOrder
+    zipValue?: SortOrder
+    elaQty?: SortOrder
+    elaRate?: SortOrder
+    elaValue?: SortOrder
+    laceQty?: SortOrder
+    laceRate?: SortOrder
+    laceValue?: SortOrder
+    drawCordQty?: SortOrder
+    drawCordRate?: SortOrder
+    drawCordValue?: SortOrder
+    velcroQty?: SortOrder
+    velcroRate?: SortOrder
+    velcroValue?: SortOrder
+    interliningQty?: SortOrder
+    interliningRate?: SortOrder
+    interliningValue?: SortOrder
+    totalValue?: SortOrder
+    createdAt?: SortOrder
+    updatedAt?: SortOrder
+  }
+
+  export type ValueAdditionAccessoriesCostMinOrderByAggregateInput = {
+    id?: SortOrder
+    division?: SortOrder
+    subDivision?: SortOrder
+    majorCategory?: SortOrder
+    btnQty?: SortOrder
+    btnRate?: SortOrder
+    btnValue?: SortOrder
+    zipQty?: SortOrder
+    zipRate?: SortOrder
+    zipValue?: SortOrder
+    elaQty?: SortOrder
+    elaRate?: SortOrder
+    elaValue?: SortOrder
+    laceQty?: SortOrder
+    laceRate?: SortOrder
+    laceValue?: SortOrder
+    drawCordQty?: SortOrder
+    drawCordRate?: SortOrder
+    drawCordValue?: SortOrder
+    velcroQty?: SortOrder
+    velcroRate?: SortOrder
+    velcroValue?: SortOrder
+    interliningQty?: SortOrder
+    interliningRate?: SortOrder
+    interliningValue?: SortOrder
+    totalValue?: SortOrder
+    createdAt?: SortOrder
+    updatedAt?: SortOrder
+  }
+
+  export type ValueAdditionAccessoriesCostSumOrderByAggregateInput = {
+    id?: SortOrder
+    btnQty?: SortOrder
+    btnRate?: SortOrder
+    btnValue?: SortOrder
+    zipQty?: SortOrder
+    zipRate?: SortOrder
+    zipValue?: SortOrder
+    elaQty?: SortOrder
+    elaRate?: SortOrder
+    elaValue?: SortOrder
+    laceQty?: SortOrder
+    laceRate?: SortOrder
+    laceValue?: SortOrder
+    drawCordQty?: SortOrder
+    drawCordRate?: SortOrder
+    drawCordValue?: SortOrder
+    velcroQty?: SortOrder
+    velcroRate?: SortOrder
+    velcroValue?: SortOrder
+    interliningQty?: SortOrder
+    interliningRate?: SortOrder
+    interliningValue?: SortOrder
+    totalValue?: SortOrder
   }
 
   export type BodyArticleDataOrderByRelevanceInput = {
@@ -93220,7 +95504,9 @@ export namespace Prisma {
     fabCons?: Decimal | DecimalJsLike | number | string | null
     width?: Decimal | DecimalJsLike | number | string | null
     vendorFabricRate?: Decimal | DecimalJsLike | number | string | null
+    valueAddAccCostType?: string | null
     valueAddCost?: Decimal | DecimalJsLike | number | string | null
+    valueAddProcessCost?: Decimal | DecimalJsLike | number | string | null
     bodyArticle?: string | null
     bodyArticleDescription?: string | null
     fabricArticleNumber?: string | null
@@ -93362,7 +95648,9 @@ export namespace Prisma {
     fabCons?: Decimal | DecimalJsLike | number | string | null
     width?: Decimal | DecimalJsLike | number | string | null
     vendorFabricRate?: Decimal | DecimalJsLike | number | string | null
+    valueAddAccCostType?: string | null
     valueAddCost?: Decimal | DecimalJsLike | number | string | null
+    valueAddProcessCost?: Decimal | DecimalJsLike | number | string | null
     bodyArticle?: string | null
     bodyArticleDescription?: string | null
     fabricArticleNumber?: string | null
@@ -93630,7 +95918,9 @@ export namespace Prisma {
     fabCons?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
     width?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
     vendorFabricRate?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    valueAddAccCostType?: NullableStringFieldUpdateOperationsInput | string | null
     valueAddCost?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    valueAddProcessCost?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
     bodyArticle?: NullableStringFieldUpdateOperationsInput | string | null
     bodyArticleDescription?: NullableStringFieldUpdateOperationsInput | string | null
     fabricArticleNumber?: NullableStringFieldUpdateOperationsInput | string | null
@@ -93772,7 +96062,9 @@ export namespace Prisma {
     fabCons?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
     width?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
     vendorFabricRate?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    valueAddAccCostType?: NullableStringFieldUpdateOperationsInput | string | null
     valueAddCost?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    valueAddProcessCost?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
     bodyArticle?: NullableStringFieldUpdateOperationsInput | string | null
     bodyArticleDescription?: NullableStringFieldUpdateOperationsInput | string | null
     fabricArticleNumber?: NullableStringFieldUpdateOperationsInput | string | null
@@ -94760,7 +97052,9 @@ export namespace Prisma {
     fabCons?: Decimal | DecimalJsLike | number | string | null
     width?: Decimal | DecimalJsLike | number | string | null
     vendorFabricRate?: Decimal | DecimalJsLike | number | string | null
+    valueAddAccCostType?: string | null
     valueAddCost?: Decimal | DecimalJsLike | number | string | null
+    valueAddProcessCost?: Decimal | DecimalJsLike | number | string | null
     bodyArticle?: string | null
     bodyArticleDescription?: string | null
     fabricArticleNumber?: string | null
@@ -94903,7 +97197,9 @@ export namespace Prisma {
     fabCons?: Decimal | DecimalJsLike | number | string | null
     width?: Decimal | DecimalJsLike | number | string | null
     vendorFabricRate?: Decimal | DecimalJsLike | number | string | null
+    valueAddAccCostType?: string | null
     valueAddCost?: Decimal | DecimalJsLike | number | string | null
+    valueAddProcessCost?: Decimal | DecimalJsLike | number | string | null
     bodyArticle?: string | null
     bodyArticleDescription?: string | null
     fabricArticleNumber?: string | null
@@ -95175,7 +97471,9 @@ export namespace Prisma {
     fabCons?: DecimalNullableFilter<"ExtractionResultFlat"> | Decimal | DecimalJsLike | number | string | null
     width?: DecimalNullableFilter<"ExtractionResultFlat"> | Decimal | DecimalJsLike | number | string | null
     vendorFabricRate?: DecimalNullableFilter<"ExtractionResultFlat"> | Decimal | DecimalJsLike | number | string | null
+    valueAddAccCostType?: StringNullableFilter<"ExtractionResultFlat"> | string | null
     valueAddCost?: DecimalNullableFilter<"ExtractionResultFlat"> | Decimal | DecimalJsLike | number | string | null
+    valueAddProcessCost?: DecimalNullableFilter<"ExtractionResultFlat"> | Decimal | DecimalJsLike | number | string | null
     bodyArticle?: StringNullableFilter<"ExtractionResultFlat"> | string | null
     bodyArticleDescription?: StringNullableFilter<"ExtractionResultFlat"> | string | null
     fabricArticleNumber?: StringNullableFilter<"ExtractionResultFlat"> | string | null
@@ -96743,7 +99041,9 @@ export namespace Prisma {
     fabCons?: Decimal | DecimalJsLike | number | string | null
     width?: Decimal | DecimalJsLike | number | string | null
     vendorFabricRate?: Decimal | DecimalJsLike | number | string | null
+    valueAddAccCostType?: string | null
     valueAddCost?: Decimal | DecimalJsLike | number | string | null
+    valueAddProcessCost?: Decimal | DecimalJsLike | number | string | null
     bodyArticle?: string | null
     bodyArticleDescription?: string | null
     fabricArticleNumber?: string | null
@@ -96886,7 +99186,9 @@ export namespace Prisma {
     fabCons?: Decimal | DecimalJsLike | number | string | null
     width?: Decimal | DecimalJsLike | number | string | null
     vendorFabricRate?: Decimal | DecimalJsLike | number | string | null
+    valueAddAccCostType?: string | null
     valueAddCost?: Decimal | DecimalJsLike | number | string | null
+    valueAddProcessCost?: Decimal | DecimalJsLike | number | string | null
     bodyArticle?: string | null
     bodyArticleDescription?: string | null
     fabricArticleNumber?: string | null
@@ -97080,7 +99382,9 @@ export namespace Prisma {
     fabCons?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
     width?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
     vendorFabricRate?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    valueAddAccCostType?: NullableStringFieldUpdateOperationsInput | string | null
     valueAddCost?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    valueAddProcessCost?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
     bodyArticle?: NullableStringFieldUpdateOperationsInput | string | null
     bodyArticleDescription?: NullableStringFieldUpdateOperationsInput | string | null
     fabricArticleNumber?: NullableStringFieldUpdateOperationsInput | string | null
@@ -97223,7 +99527,9 @@ export namespace Prisma {
     fabCons?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
     width?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
     vendorFabricRate?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    valueAddAccCostType?: NullableStringFieldUpdateOperationsInput | string | null
     valueAddCost?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    valueAddProcessCost?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
     bodyArticle?: NullableStringFieldUpdateOperationsInput | string | null
     bodyArticleDescription?: NullableStringFieldUpdateOperationsInput | string | null
     fabricArticleNumber?: NullableStringFieldUpdateOperationsInput | string | null
@@ -98262,7 +100568,9 @@ export namespace Prisma {
     fabCons?: Decimal | DecimalJsLike | number | string | null
     width?: Decimal | DecimalJsLike | number | string | null
     vendorFabricRate?: Decimal | DecimalJsLike | number | string | null
+    valueAddAccCostType?: string | null
     valueAddCost?: Decimal | DecimalJsLike | number | string | null
+    valueAddProcessCost?: Decimal | DecimalJsLike | number | string | null
     bodyArticle?: string | null
     bodyArticleDescription?: string | null
     fabricArticleNumber?: string | null
@@ -98564,7 +100872,9 @@ export namespace Prisma {
     fabCons?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
     width?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
     vendorFabricRate?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    valueAddAccCostType?: NullableStringFieldUpdateOperationsInput | string | null
     valueAddCost?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    valueAddProcessCost?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
     bodyArticle?: NullableStringFieldUpdateOperationsInput | string | null
     bodyArticleDescription?: NullableStringFieldUpdateOperationsInput | string | null
     fabricArticleNumber?: NullableStringFieldUpdateOperationsInput | string | null
@@ -98707,7 +101017,9 @@ export namespace Prisma {
     fabCons?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
     width?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
     vendorFabricRate?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    valueAddAccCostType?: NullableStringFieldUpdateOperationsInput | string | null
     valueAddCost?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    valueAddProcessCost?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
     bodyArticle?: NullableStringFieldUpdateOperationsInput | string | null
     bodyArticleDescription?: NullableStringFieldUpdateOperationsInput | string | null
     fabricArticleNumber?: NullableStringFieldUpdateOperationsInput | string | null
@@ -98849,7 +101161,9 @@ export namespace Prisma {
     fabCons?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
     width?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
     vendorFabricRate?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    valueAddAccCostType?: NullableStringFieldUpdateOperationsInput | string | null
     valueAddCost?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    valueAddProcessCost?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
     bodyArticle?: NullableStringFieldUpdateOperationsInput | string | null
     bodyArticleDescription?: NullableStringFieldUpdateOperationsInput | string | null
     fabricArticleNumber?: NullableStringFieldUpdateOperationsInput | string | null
