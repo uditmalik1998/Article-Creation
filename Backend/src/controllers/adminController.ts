@@ -4899,11 +4899,18 @@ function buildBasicAccessoriesSheet(wb: any, sheet: BasicAccessorySheet, rows: B
   ws.views = [{ state: 'frozen', xSplit: 5, ySplit: BA_HEADER_ROW }];
 }
 
-function buildBasicAccessoriesWorkbook(rows: BasicAccessoryRow[]): any {
+/**
+ * `sheets` defaults to the full two-sheet workbook (the export). The template
+ * passes the packaging sheet alone — the trims sheet is no longer handed out
+ * for filling in.
+ */
+function buildBasicAccessoriesWorkbook(
+  rows: BasicAccessoryRow[],
+  sheets: BasicAccessorySheet[] = [BA_SHEETS.trims, BA_SHEETS.packaging],
+): any {
   const ExcelJS = require('exceljs');
   const wb = new ExcelJS.Workbook();
-  buildBasicAccessoriesSheet(wb, BA_SHEETS.trims, rows);
-  buildBasicAccessoriesSheet(wb, BA_SHEETS.packaging, rows);
+  for (const sheet of sheets) buildBasicAccessoriesSheet(wb, sheet, rows);
   return wb;
 }
 
@@ -4962,8 +4969,10 @@ export const getBasicAccessoriesStatus = async (_req: Request, res: Response): P
 
 /**
  * GET /api/admin/basic-accessories/template
- * The workbook's own layout with a single example major category filled in —
- * overwrite the example, add your rows under it, upload.
+ * The "Packaging Master" sheet on its own, with a single example major category
+ * filled in — overwrite the example, add your rows under it, upload. The trims
+ * ("ACC LIST") sheet is deliberately not included; upload accepts either sheet,
+ * so a packaging-only workbook imports fine.
  */
 export const downloadBasicAccessoriesTemplate = async (_req: Request, res: Response): Promise<void> => {
   try {
@@ -4974,22 +4983,18 @@ export const downloadBasicAccessoriesTemplate = async (_req: Request, res: Respo
       threadCost: 3,
       basicTrimsCost: null,
       components: {
-        BUTTON:        { qty: 5,    rate: 0.5, value: 2.5 },
-        ZIPPER:        { qty: 1,    rate: 8,   value: 8 },
-        HOOK_AND_LOOP: { qty: 1,    rate: 1.5, value: 1.5 },
-        INTERLINING:   { qty: 0.2,  rate: 5,   value: 1 },
-        POLY_BAG:      { qty: 1,    rate: 0.8, value: 0.8 },
-        PRICE_TAG:     { qty: 1,    rate: 0.5, value: 0.5 },
-        KIMBALL_TAG:   { qty: 1,    rate: 0.2, value: 0.2 },
-        HANGER:        { qty: 1,    rate: 3,   value: 3 },
-        TISSUE_PAPER:  { qty: 1,    rate: 0.3, value: 0.3 },
-        CARTON:        { qty: 0.02, rate: 100, value: 2 },
+        POLY_BAG:     { qty: 1,    rate: 0.8, value: 0.8 },
+        PRICE_TAG:    { qty: 1,    rate: 0.5, value: 0.5 },
+        KIMBALL_TAG:  { qty: 1,    rate: 0.2, value: 0.2 },
+        HANGER:       { qty: 1,    rate: 3,   value: 3 },
+        TISSUE_PAPER: { qty: 1,    rate: 0.3, value: 0.3 },
+        CARTON:       { qty: 0.02, rate: 100, value: 2 },
       },
     };
 
-    const wb = buildBasicAccessoriesWorkbook([example]);
+    const wb = buildBasicAccessoriesWorkbook([example], [BA_SHEETS.packaging]);
     res.setHeader('Content-Type', 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');
-    res.setHeader('Content-Disposition', 'attachment; filename="BASIC_ACCESSORIES_TEMPLATE.xlsx"');
+    res.setHeader('Content-Disposition', 'attachment; filename="PACKAGING_MASTER_TEMPLATE.xlsx"');
     await wb.xlsx.write(res);
     res.end();
   } catch (error: any) {
