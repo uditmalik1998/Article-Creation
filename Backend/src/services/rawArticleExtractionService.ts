@@ -109,32 +109,16 @@ export async function runRawArticleExtraction(
       where: { id: { in: claimed.map(r => r.id) } },
     });
 
-    // ── Process each row — all retries happen immediately before moving on ──
-    // Attempt 1 (initial) + up to (MAX_RETRIES - 1) immediate retries.
-    // Only after all attempts are exhausted is the row marked PERM_FAILED
-    // and the next image picked up. No waiting for the next cron tick.
+    // ── Process each row — single attempt, no retries ────────────────────
+    // If extraction fails, mark PERM_FAILED immediately and move to next image.
     for (const row of rows) {
-      let succeeded = false;
-      let lastErr: any = null;
-
-      for (let attempt = 1; attempt <= MAX_RETRIES; attempt++) {
-        try {
-          await processOneRow(row);
-          succeeded = true;
-          completed++;
-          break;
-        } catch (err: any) {
-          lastErr = err;
-          console.error(`[RawExtract] ❌ ${row.id} attempt ${attempt}/${MAX_RETRIES}: ${err.message}`);
-          if (attempt < MAX_RETRIES) {
-            console.log(`[RawExtract] ↩ Retrying ${row.id} (attempt ${attempt + 1}/${MAX_RETRIES})…`);
-            await new Promise(r => setTimeout(r, 3000)); // 3 s between retries
-          }
-        }
-      }
-
-      if (!succeeded) {
+      try {
+        await processOneRow(row);
+        completed++;
+      } catch (err: any) {
         errors++;
+        console.error(`[RawExtract] ❌ ${row.id}: ${err.message}`);
+
         // Re-fetch flat_id — processOneRow may have saved one before throwing
         const current = await prisma.rawArticle.findUnique({
           where:  { id: row.id },
@@ -142,8 +126,8 @@ export async function runRawArticleExtraction(
         });
         let flatId = current?.flatId ?? null;
 
-        // PERM_FAILED guarantee: always create a fallback SRM-only flat record
-        // so the article is visible in extraction_results_flat even without VLM.
+        // Always create a fallback SRM-only flat record so the article is
+        // visible in extraction_results_flat even without VLM attributes.
         if (!flatId) {
           try {
             const srmRow: SrmRow = {
@@ -175,8 +159,8 @@ export async function runRawArticleExtraction(
           where: { id: row.id },
           data: {
             status:       'PERM_FAILED',
-            retryCount:   MAX_RETRIES,
-            errorMessage: (lastErr?.message ?? 'Unknown error').slice(0, 1000),
+            retryCount:   (row.retryCount ?? 0) + 1,
+            errorMessage: (err.message ?? 'Unknown error').slice(0, 1000),
             lockedUntil:  null,
             ...(flatId ? { flatId } : {}),
           },
