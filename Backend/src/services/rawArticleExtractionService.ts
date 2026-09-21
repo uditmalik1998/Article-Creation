@@ -109,28 +109,42 @@ export async function runRawArticleExtraction(
       where: { id: { in: claimed.map(r => r.id) } },
     });
 
-    // ── Process each row ──────────────────────────────────────────────────
+    // ── Process each row — all retries happen immediately before moving on ──
+    // Attempt 1 (initial) + up to (MAX_RETRIES - 1) immediate retries.
+    // Only after all attempts are exhausted is the row marked PERM_FAILED
+    // and the next image picked up. No waiting for the next cron tick.
     for (const row of rows) {
-      try {
-        await processOneRow(row);
-        completed++;
-      } catch (err: any) {
-        errors++;
-        const newCount = (row.retryCount ?? 0) + 1;
-        const isPermFailed = newCount >= MAX_RETRIES;
-        console.error(`[RawExtract] ❌ Error on ${row.id} (attempt ${newCount}): ${err.message}`);
+      let succeeded = false;
+      let lastErr: any = null;
 
-        // Re-fetch current flat_id (processOneRow may have saved it before failing)
+      for (let attempt = 1; attempt <= MAX_RETRIES; attempt++) {
+        try {
+          await processOneRow(row);
+          succeeded = true;
+          completed++;
+          break;
+        } catch (err: any) {
+          lastErr = err;
+          console.error(`[RawExtract] ❌ ${row.id} attempt ${attempt}/${MAX_RETRIES}: ${err.message}`);
+          if (attempt < MAX_RETRIES) {
+            console.log(`[RawExtract] ↩ Retrying ${row.id} (attempt ${attempt + 1}/${MAX_RETRIES})…`);
+            await new Promise(r => setTimeout(r, 3000)); // 3 s between retries
+          }
+        }
+      }
+
+      if (!succeeded) {
+        errors++;
+        // Re-fetch flat_id — processOneRow may have saved one before throwing
         const current = await prisma.rawArticle.findUnique({
           where:  { id: row.id },
           select: { flatId: true },
         });
         let flatId = current?.flatId ?? null;
 
-        // PERM_FAILED guarantee: if still no flat record exists, create one now
-        // with the raw SRM data (extractionStatus = 'SRM_IMPORT') so the article
-        // is always visible in extraction_results_flat even without VLM attributes.
-        if (isPermFailed && !flatId) {
+        // PERM_FAILED guarantee: always create a fallback SRM-only flat record
+        // so the article is visible in extraction_results_flat even without VLM.
+        if (!flatId) {
           try {
             const srmRow: SrmRow = {
               presentation_no:            row.presentationNo,
@@ -150,7 +164,7 @@ export async function runRawArticleExtraction(
             const created = await insertRawArticleAsFlat(srmRow, row.id);
             if (created) {
               flatId = created.id;
-              console.log(`[RawExtract] ⚠️ PERM_FAILED fallback — created SRM-only flat record ${flatId} for ${row.presentationNo}/${row.designNumber}`);
+              console.log(`[RawExtract] ⚠️ PERM_FAILED fallback — SRM-only flat record ${flatId} for ${row.presentationNo}/${row.designNumber}`);
             }
           } catch (flatErr: any) {
             console.error(`[RawExtract] ⚠️ Could not create fallback flat record for ${row.id}: ${flatErr.message}`);
@@ -160,9 +174,9 @@ export async function runRawArticleExtraction(
         await prisma.rawArticle.update({
           where: { id: row.id },
           data: {
-            status:       isPermFailed ? 'PERM_FAILED' : 'FAILED',
-            retryCount:   newCount,
-            errorMessage: (err.message ?? 'Unknown error').slice(0, 1000),
+            status:       'PERM_FAILED',
+            retryCount:   MAX_RETRIES,
+            errorMessage: (lastErr?.message ?? 'Unknown error').slice(0, 1000),
             lockedUntil:  null,
             ...(flatId ? { flatId } : {}),
           },
