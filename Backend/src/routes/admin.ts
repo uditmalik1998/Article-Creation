@@ -189,6 +189,14 @@ router.get('/segment-master/export', h(adminController.exportSegmentMaster));
 router.post('/segment-master/upload', excelUpload.single('file'), h(adminController.uploadSegmentMaster));
 
 // ═══════════════════════════════════════════════════════
+// BASIC ACCESSORIES (ADMIN) — basic_trim_cost_master + basic_trim_cost_component
+// ═══════════════════════════════════════════════════════
+router.get('/basic-accessories/status', h(adminController.getBasicAccessoriesStatus));
+router.get('/basic-accessories/template', h(adminController.downloadBasicAccessoriesTemplate));
+router.get('/basic-accessories/export', h(adminController.exportBasicAccessories));
+router.post('/basic-accessories/upload', excelUpload.single('file'), h(adminController.uploadBasicAccessories));
+
+// ═══════════════════════════════════════════════════════
 // GRID VALUES EDITOR (ADMIN) — maj_cat_grid_values
 // Group → Attribute → Major Category browser + per-value add/delete.
 // POST used for mutations to avoid the Express 5 DELETE registration quirk.

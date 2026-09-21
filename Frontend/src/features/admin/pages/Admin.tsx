@@ -149,6 +149,16 @@ interface BroaderMenuMeta {
   missingColumns?: string[];
 }
 
+interface BasicAccessoriesMeta {
+  total?: number;
+  categories?: number;
+  components?: number;
+  withCost?: number;
+  updated?: number;
+  skipped?: number;
+  lastUpdated?: string;
+}
+
 interface SegmentMasterMeta {
   total?: number;
   categories?: number;
@@ -289,6 +299,13 @@ export default function Admin() {
   const [segmentMasterUploading, setSegmentMasterUploading] = useState(false);
   const [segmentMasterProgress, setSegmentMasterProgress] = useState<number>(0);
   const segmentFileRef = useRef<HTMLInputElement | null>(null);
+
+  // Basic Accessories (basic_trim_cost_master + basic_trim_cost_component)
+  const [basicAccessoriesMeta, setBasicAccessoriesMeta] = useState<BasicAccessoriesMeta | null>(null);
+  const [basicAccessoriesStatusLoading, setBasicAccessoriesStatusLoading] = useState(false);
+  const [basicAccessoriesUploading, setBasicAccessoriesUploading] = useState(false);
+  const [basicAccessoriesProgress, setBasicAccessoriesProgress] = useState<number>(0);
+  const basicAccessoriesFileRef = useRef<HTMLInputElement | null>(null);
 
   // National Grid Master
   const [nationalGridTotal, setNationalGridTotal] = useState<number | null>(null);
@@ -1198,6 +1215,68 @@ export default function Admin() {
     }
   };
 
+  // ─────────────────────────────── Basic Accessories ──────────────────────────────
+  const loadBasicAccessoriesStatus = useCallback(async () => {
+    setBasicAccessoriesStatusLoading(true);
+    try {
+      const token = localStorage.getItem('authToken');
+      const res = await fetch(`${APP_CONFIG.api.baseURL}/admin/basic-accessories/status`, {
+        headers: token ? { Authorization: `Bearer ${token}` } : {},
+      });
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.error || 'Failed to load basic accessories status');
+      setBasicAccessoriesMeta(data.data);
+    } catch (err: any) {
+      message.error(err?.message || 'Failed to load basic accessories status');
+    } finally {
+      setBasicAccessoriesStatusLoading(false);
+    }
+  }, []);
+
+  const downloadBasicAccessoriesFile = (kind: 'template' | 'export') => {
+    const token = localStorage.getItem('authToken');
+    const url = `${APP_CONFIG.api.baseURL}/admin/basic-accessories/${kind}`;
+    fetch(url, { headers: token ? { Authorization: `Bearer ${token}` } : {} })
+      .then((r) => r.blob())
+      .then((blob) => {
+        const a = document.createElement('a');
+        a.href = URL.createObjectURL(blob);
+        a.download = kind === 'template' ? 'BASIC_ACCESSORIES_TEMPLATE.xlsx' : 'BASIC_ACCESSORIES_EXPORT.xlsx';
+        a.click();
+      })
+      .catch(() => message.error(kind === 'template' ? 'Failed to download template' : 'Failed to export basic accessories'));
+  };
+
+  const handleBasicAccessoriesUpload = async (file: File) => {
+    setBasicAccessoriesUploading(true);
+    setBasicAccessoriesProgress(0);
+    try {
+      const token = localStorage.getItem('authToken');
+      const formData = new FormData();
+      formData.append('file', file);
+      const progressInterval = setInterval(() => {
+        setBasicAccessoriesProgress((prev) => Math.min(prev + 5, 90));
+      }, 500);
+      const res = await fetch(`${APP_CONFIG.api.baseURL}/admin/basic-accessories/upload`, {
+        method: 'POST',
+        headers: token ? { Authorization: `Bearer ${token}` } : {},
+        body: formData,
+      });
+      clearInterval(progressInterval);
+      setBasicAccessoriesProgress(100);
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.error || 'Upload failed');
+      message.success(data.message);
+      setBasicAccessoriesMeta(data.data);
+    } catch (err: any) {
+      message.error(err?.message || 'Upload failed');
+    } finally {
+      setBasicAccessoriesUploading(false);
+      setTimeout(() => setBasicAccessoriesProgress(0), 1500);
+      if (basicAccessoriesFileRef.current) basicAccessoriesFileRef.current.value = '';
+    }
+  };
+
   // ─────────────────────────────── National Grid Master ───────────────────────────────
   const downloadNationalGridTemplate = async () => {
     try {
@@ -1512,12 +1591,13 @@ export default function Admin() {
     loadBodyArticleDataStatus();
     loadBroaderMenuStatus();
     loadSegmentMasterStatus();
+    loadBasicAccessoriesStatus();
     loadNationalGridStatus();
     loadHierarchyExcelStatus();
     loadPipelineStatus();
     loadFabricRawStatus();
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [loadVendorStatus, loadMajCatGridStatus, loadMandatoryGridStatus, loadSizeMasterStatus, loadColorMasterStatus, loadFabricArticleDataStatus, loadFabricArticleMasterStatus, loadBodyArticleDataStatus, loadBroaderMenuStatus, loadSegmentMasterStatus, loadNationalGridStatus, loadHierarchyExcelStatus, loadPipelineStatus, loadFabricRawStatus]);
+  }, [loadVendorStatus, loadMajCatGridStatus, loadMandatoryGridStatus, loadSizeMasterStatus, loadColorMasterStatus, loadFabricArticleDataStatus, loadFabricArticleMasterStatus, loadBodyArticleDataStatus, loadBroaderMenuStatus, loadSegmentMasterStatus, loadBasicAccessoriesStatus, loadNationalGridStatus, loadHierarchyExcelStatus, loadPipelineStatus, loadFabricRawStatus]);
 
   const loadData = async () => {
     setLoading(true);
@@ -3223,6 +3303,127 @@ export default function Admin() {
                       <button
                         type="button"
                         onClick={() => segmentFileRef.current?.click()}
+                        className="flex w-full flex-col items-center justify-center rounded-md border-2 border-dashed border-border bg-muted/30 px-4 py-6 transition-colors hover:border-[#FF6F61] hover:bg-[#FF6F61]/5"
+                      >
+                        <Inbox className="mb-2 h-8 w-8 text-[#FF6F61]" />
+                        <p className="text-[13px]">
+                          Click to upload <strong>.xlsx</strong> file
+                        </p>
+                        <p className="text-[11px] text-muted-foreground">Only Excel files. Max 50 MB.</p>
+                      </button>
+                    )}
+                  </div>
+                </div>
+              </div>
+            </Spinner>
+          </CardContent>
+        </Card>
+
+        {/* Basic Accessories (trims + packaging per-pc cost → basic_trim_cost_master) */}
+        <Card className="mb-6 glass rounded-2xl border border-white/60">
+          <CardHeader className="flex flex-row items-center justify-between">
+            <CardTitle className="flex items-center gap-2 text-base">
+              <TableIcon className="h-4 w-4" />
+              Basic Accessories (Trims &amp; Packaging Cost per Major Category)
+            </CardTitle>
+            <div className="flex gap-2">
+              <Button size="sm" variant="outline" onClick={() => navigate('/admin/expense/basic-accessories')}>
+                <Eye />
+                View Data
+              </Button>
+              <Button size="sm" variant="outline" onClick={() => downloadBasicAccessoriesFile('template')}>
+                <Download />
+                Download Template
+              </Button>
+              <Button size="sm" variant="outline" onClick={() => downloadBasicAccessoriesFile('export')}>
+                <Download />
+                Download Data
+              </Button>
+              <Button size="sm" variant="outline" onClick={loadBasicAccessoriesStatus} disabled={basicAccessoriesStatusLoading}>
+                <RotateCw className={basicAccessoriesStatusLoading ? 'animate-spin' : ''} />
+                Refresh Status
+              </Button>
+            </div>
+          </CardHeader>
+          <CardContent>
+            <Spinner spinning={basicAccessoriesStatusLoading}>
+              <div className="grid grid-cols-1 gap-4 md:grid-cols-12">
+                {/* Status panel */}
+                <div className="md:col-span-7">
+                  {basicAccessoriesMeta && (basicAccessoriesMeta.total ?? 0) > 0 ? (
+                    <Descriptions bordered>
+                      {basicAccessoriesMeta.lastUpdated && (
+                        <Descriptions.Item label="Last Updated">
+                          {new Date(basicAccessoriesMeta.lastUpdated).toLocaleString('en-IN', {
+                            timeZone: 'Asia/Kolkata', dateStyle: 'medium', timeStyle: 'short',
+                          }) + ' IST'}
+                        </Descriptions.Item>
+                      )}
+                      <Descriptions.Item label="Major Categories">
+                        <Badge variant="info">{(basicAccessoriesMeta.categories ?? 0).toLocaleString()}</Badge>
+                      </Descriptions.Item>
+                      <Descriptions.Item label="Accessory Rows">
+                        <Badge variant="success">{(basicAccessoriesMeta.components ?? 0).toLocaleString()}</Badge>
+                      </Descriptions.Item>
+                      {basicAccessoriesMeta.withCost != null && (
+                        <Descriptions.Item label="With Basic &amp; Trims Cost">
+                          <Badge variant="info">{(basicAccessoriesMeta.withCost ?? 0).toLocaleString()}</Badge>
+                        </Descriptions.Item>
+                      )}
+                      {basicAccessoriesMeta.updated != null && (
+                        <Descriptions.Item label="Updated in Last Upload">
+                          <Badge variant="success">{(basicAccessoriesMeta.updated ?? 0).toLocaleString()}</Badge>
+                        </Descriptions.Item>
+                      )}
+                      {basicAccessoriesMeta.skipped != null && (basicAccessoriesMeta.skipped ?? 0) > 0 && (
+                        <Descriptions.Item label="Rows Skipped">
+                          <Badge variant="warning">{(basicAccessoriesMeta.skipped ?? 0).toLocaleString()}</Badge>
+                        </Descriptions.Item>
+                      )}
+                    </Descriptions>
+                  ) : (
+                    <Alert
+                      type="warning"
+                      showIcon
+                      message="No basic accessories data"
+                      description={'Upload the "MAJ CAT WISE BASIC ACCESSORIES DETAILS" workbook — sheets "ACC LIST" (Button, Zipper, Elastic, Lace, Draw Cord, Hook & Loop, Interlining) and "Packaging Master" (Poly Bag, Price Tag, Kimball Tag, Hanger, Tissue Paper, Carton), each with PER PC CONSUMPTION (QTY), RATE and VALUE per major category.'}
+                    />
+                  )}
+                </div>
+
+                {/* Upload panel */}
+                <div className="md:col-span-5">
+                  <div className="rounded-md border border-border p-4">
+                    <div className="mb-1 font-semibold">Upload Basic Accessories Excel</div>
+                    <div className="mb-3 text-xs text-muted-foreground">
+                      Sheets: <strong>ACC LIST</strong> + <strong>Packaging Master</strong>, headers on row 3 starting at column C
+                      (DIV, SUB DIV, MAJ CAT, then QTY / RATE / VALUE per accessory). Download the template for the exact layout.{' '}
+                      <strong>Updates by MAJ CAT</strong> — categories not in the file are left untouched.
+                    </div>
+
+                    <input
+                      ref={basicAccessoriesFileRef}
+                      type="file"
+                      accept=".xlsx,.xls"
+                      className="hidden"
+                      onChange={(e) => {
+                        const file = e.target.files?.[0];
+                        if (file) handleBasicAccessoriesUpload(file);
+                      }}
+                    />
+
+                    {basicAccessoriesUploading ? (
+                      <div>
+                        <div className="mb-2 text-[13px] text-[#FF6F61]">
+                          <RefreshCw className="mr-1.5 inline-block h-3.5 w-3.5 animate-spin" />
+                          Parsing Excel &amp; updating accessories...
+                        </div>
+                        <Progress value={basicAccessoriesProgress} />
+                      </div>
+                    ) : (
+                      <button
+                        type="button"
+                        onClick={() => basicAccessoriesFileRef.current?.click()}
                         className="flex w-full flex-col items-center justify-center rounded-md border-2 border-dashed border-border bg-muted/30 px-4 py-6 transition-colors hover:border-[#FF6F61] hover:bg-[#FF6F61]/5"
                       >
                         <Inbox className="mb-2 h-8 w-8 text-[#FF6F61]" />
