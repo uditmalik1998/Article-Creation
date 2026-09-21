@@ -76,6 +76,7 @@ async function processRow(row: {
   subDivision: string | null;
   majorCategory: string | null;
   designNumber: string | null;
+  presentationNo: string | null;
   price: any;
   presentationsType: string | null;
   source: string | null;
@@ -83,19 +84,26 @@ async function processRow(row: {
   let finalImageUrl: string | null = row.imageUrl;
   let imageUploaded = false;
 
-  // Step 1: Upload image to R2
-  if (row.imageUrl) {
+  // Step 1: Decide whether to mirror to R2
+  if (!row.imageUrl) {
+    // No image at all — nothing to upload
+    imageUploaded = true;
+  } else if (row.imageUrl.includes('r2.dev')) {
+    // Already a Cloudflare R2 URL — use as-is, no re-upload needed
+    finalImageUrl = row.imageUrl;
+    imageUploaded = true;
+    console.log(`[FabricRaw] Image already in R2, skipping upload for row ${row.id}`);
+  } else {
+    // Supabase bucket URL (or other) — try to mirror to R2
     const r2Url = await mirrorFabricImageToR2(row.imageUrl);
     if (r2Url) {
       finalImageUrl = r2Url;
       imageUploaded = true;
     } else {
-      // Keep original SRM URL as fallback — record will still be created
-      console.warn(`[FabricRaw] R2 upload failed for row ${row.id} — using original URL as fallback`);
+      // R2 upload failed — keep original Supabase URL as-is
+      console.warn(`[FabricRaw] R2 upload failed for row ${row.id} — keeping original URL`);
+      finalImageUrl = row.imageUrl;
     }
-  } else {
-    // No image at all — treat as uploaded (nothing to upload)
-    imageUploaded = true;
   }
 
   // Step 2: Insert into fabric_article_data
@@ -108,6 +116,7 @@ async function processRow(row: {
         subDivision:       row.subDivision,
         majorCategory:     row.majorCategory,
         designNumber:      row.designNumber,
+        pptNumber:         row.presentationNo ?? null,
         fabricRate:        row.price ?? null,
         fabricArticleType: row.presentationsType ?? null,
         source:            'SRM',
@@ -186,7 +195,7 @@ export async function runFabricRawDataProcessing(triggeredBy = 'CRON'): Promise<
       select: {
         id: true, imageUrl: true, vendorCode: true, vendorName: true,
         division: true, subDivision: true, majorCategory: true,
-        designNumber: true, price: true, presentationsType: true, source: true,
+        designNumber: true, presentationNo: true, price: true, presentationsType: true, source: true,
       },
     });
 

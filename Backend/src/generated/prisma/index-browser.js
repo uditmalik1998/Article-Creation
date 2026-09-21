@@ -353,7 +353,9 @@ exports.Prisma.ExtractionResultFlatScalarFieldEnum = {
   fabCons: 'fabCons',
   width: 'width',
   vendorFabricRate: 'vendorFabricRate',
+  valueAddAccCostType: 'valueAddAccCostType',
   valueAddCost: 'valueAddCost',
+  valueAddProcessCost: 'valueAddProcessCost',
   bodyArticle: 'bodyArticle',
   bodyArticleDescription: 'bodyArticleDescription',
   fabricArticleNumber: 'fabricArticleNumber',
@@ -976,9 +978,13 @@ exports.Prisma.FabricArticleDataScalarFieldEnum = {
   vendorName: 'vendorName',
   vendorCode: 'vendorCode',
   designNumber: 'designNumber',
+  pptNumber: 'pptNumber',
   fabricRate: 'fabricRate',
   v2FabricRate: 'v2FabricRate',
   valueAddCost: 'valueAddCost',
+  mrp: 'mrp',
+  baseColor: 'baseColor',
+  segment: 'segment',
   articleFashionType: 'articleFashionType',
   approvalStatus: 'approvalStatus',
   approvedAt: 'approvedAt',
@@ -989,6 +995,37 @@ exports.Prisma.FabricArticleDataScalarFieldEnum = {
   fabricArticleType: 'fabricArticleType',
   source: 'source',
   userName: 'userName',
+  createdAt: 'createdAt',
+  updatedAt: 'updatedAt'
+};
+
+exports.Prisma.ValueAdditionAccessoriesCostScalarFieldEnum = {
+  id: 'id',
+  division: 'division',
+  subDivision: 'subDivision',
+  majorCategory: 'majorCategory',
+  btnQty: 'btnQty',
+  btnRate: 'btnRate',
+  btnValue: 'btnValue',
+  zipQty: 'zipQty',
+  zipRate: 'zipRate',
+  zipValue: 'zipValue',
+  elaQty: 'elaQty',
+  elaRate: 'elaRate',
+  elaValue: 'elaValue',
+  laceQty: 'laceQty',
+  laceRate: 'laceRate',
+  laceValue: 'laceValue',
+  drawCordQty: 'drawCordQty',
+  drawCordRate: 'drawCordRate',
+  drawCordValue: 'drawCordValue',
+  velcroQty: 'velcroQty',
+  velcroRate: 'velcroRate',
+  velcroValue: 'velcroValue',
+  interliningQty: 'interliningQty',
+  interliningRate: 'interliningRate',
+  interliningValue: 'interliningValue',
+  totalValue: 'totalValue',
   createdAt: 'createdAt',
   updatedAt: 'updatedAt'
 };
@@ -1357,6 +1394,7 @@ exports.Prisma.ExtractionResultFlatOrderByRelevanceFieldEnum = {
   mNoOfClr: 'mNoOfClr',
   articleFashionType: 'articleFashionType',
   articleDimension: 'articleDimension',
+  valueAddAccCostType: 'valueAddAccCostType',
   bodyArticle: 'bodyArticle',
   bodyArticleDescription: 'bodyArticleDescription',
   fabricArticleNumber: 'fabricArticleNumber',
@@ -1794,6 +1832,9 @@ exports.Prisma.FabricArticleDataOrderByRelevanceFieldEnum = {
   vendorName: 'vendorName',
   vendorCode: 'vendorCode',
   designNumber: 'designNumber',
+  pptNumber: 'pptNumber',
+  baseColor: 'baseColor',
+  segment: 'segment',
   articleFashionType: 'articleFashionType',
   approvalStatus: 'approvalStatus',
   sapSyncStatus: 'sapSyncStatus',
@@ -1802,6 +1843,12 @@ exports.Prisma.FabricArticleDataOrderByRelevanceFieldEnum = {
   fabricArticleType: 'fabricArticleType',
   source: 'source',
   userName: 'userName'
+};
+
+exports.Prisma.ValueAdditionAccessoriesCostOrderByRelevanceFieldEnum = {
+  division: 'division',
+  subDivision: 'subDivision',
+  majorCategory: 'majorCategory'
 };
 
 exports.Prisma.BodyArticleDataOrderByRelevanceFieldEnum = {
@@ -2067,6 +2114,7 @@ exports.Prisma.ModelName = {
   FabricMajCatGridValue: 'FabricMajCatGridValue',
   ModifyLog: 'ModifyLog',
   FabricArticleData: 'FabricArticleData',
+  ValueAdditionAccessoriesCost: 'ValueAdditionAccessoriesCost',
   BodyArticleData: 'BodyArticleData',
   BodyFabricConsumption: 'BodyFabricConsumption',
   RoughCmpCostMaster: 'RoughCmpCostMaster',

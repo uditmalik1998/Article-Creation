@@ -8214,3 +8214,269 @@ export const downloadBodyFabricConsumptionData = async (_req: Request, res: Resp
     res.status(500).json({ success: false, error: error.message });
   }
 };
+
+// ─────────────────────────────── Value Addition Accessories Cost ──────────────
+
+const VAAC_HEADERS = [
+  'DIV', 'SUB DIV', 'MAJ CAT',
+  'BTN_QTY', 'BTN_RATE', 'BTN_VALUE',
+  'ZIP_QTY', 'ZIP_RATE', 'ZIP_VALUE',
+  'ELA_QTY', 'ELA_RATE', 'ELA_VALUE',
+  'LACE_QTY', 'LACE_RATE', 'LACE_VALUE',
+  'DRAW_CORD_QTY', 'DRAW_CORD_RATE', 'DRAW_CORD_VALUE',
+  'VELCRO_QTY', 'VELCRO_RATE', 'VELCRO_VALUE',
+  'INTERLINING_QTY', 'INTERLINING_RATE', 'INTERLINING_VALUE',
+  'TOTAL_VALUE',
+];
+
+function buildVaacSheet(wb: any, dataRows: any[]): void {
+  const ws = wb.addWorksheet('ACC LIST');
+
+  // Row 1 — group header (matching source format)
+  ws.addRow([
+    'ACC DETAILS WITH PER PC CONSUMPTION WITH PER PC RATE  (BASIC TRIMS)',
+    null, null,
+    'BUTTON', null, null,
+    'ZIPPER', null, null,
+    'ELASTIC', null, null,
+    'LACE', null, null,
+    'DRAW CORD', null, null,
+    'HOOK & LOOP (VELCRO)', null, null,
+    'INTERLINING', null, null,
+    'TOTAL',
+  ]);
+  ws.addRow([]); // Row 2 blank
+  // Row 3 — column headers
+  const headerRow = ws.addRow(VAAC_HEADERS);
+  headerRow.eachCell((cell: any) => {
+    cell.font = { bold: true, color: { argb: 'FFFFFFFF' } };
+    cell.fill = { type: 'pattern', pattern: 'solid', fgColor: { argb: 'FF1565C0' } };
+    cell.alignment = { horizontal: 'center' };
+  });
+
+  for (const row of dataRows) ws.addRow(row);
+
+  ws.columns = [
+    { width: 12 }, { width: 14 }, { width: 26 },
+    ...Array(21).fill({ width: 14 }),
+    { width: 14 },
+  ];
+}
+
+/**
+ * GET /api/admin/value-addition-accessories-cost/status
+ */
+export const getVaacStatus = async (_req: Request, res: Response): Promise<void> => {
+  try {
+    const rows = await prisma.$queryRaw<{ total: bigint; categories: bigint }[]>`
+      SELECT COUNT(*)::bigint                    AS total,
+             COUNT(DISTINCT major_category)::bigint AS categories
+      FROM value_addition_accessories_cost
+    `;
+    const r = rows[0] ?? { total: 0n, categories: 0n };
+    res.json({ success: true, data: { total: Number(r.total), categories: Number(r.categories) } });
+  } catch (error: any) {
+    res.status(500).json({ success: false, error: error.message });
+  }
+};
+
+/**
+ * POST /api/admin/value-addition-accessories-cost/upload
+ * Reads the source Excel (headers at row 3, data from row 4).
+ * Columns: DIV(1), SUB DIV(2), MAJ CAT(3), then 7×3 accessory columns, TOTAL(25).
+ * Truncates and replaces entire table.
+ */
+export const uploadVaac = async (req: Request, res: Response): Promise<void> => {
+  try {
+    if (!req.file) { res.status(400).json({ success: false, error: 'No file uploaded.' }); return; }
+
+    const ExcelJS = (await import('exceljs')).default;
+    const wb = new ExcelJS.Workbook();
+    await wb.xlsx.load(req.file.buffer as any);
+
+    const ws = wb.worksheets[0];
+    if (!ws) { res.status(400).json({ success: false, error: 'No worksheets found.' }); return; }
+
+    const cellVal = (row: any, c: number): string => {
+      let v = row.getCell(c).value;
+      if (v && typeof v === 'object' && 'result' in v) v = (v as any).result;
+      if (v && typeof v === 'object' && 'text' in v) v = (v as any).text;
+      return v == null ? '' : String(v).trim();
+    };
+    const num = (s: string) => { const n = parseFloat(s); return s === '' || isNaN(n) ? null : n; };
+
+    type VaacRow = {
+      division: string | null; sub_division: string | null; major_category: string;
+      btn_qty: number|null; btn_rate: number|null; btn_value: number|null;
+      zip_qty: number|null; zip_rate: number|null; zip_value: number|null;
+      ela_qty: number|null; ela_rate: number|null; ela_value: number|null;
+      lace_qty: number|null; lace_rate: number|null; lace_value: number|null;
+      draw_cord_qty: number|null; draw_cord_rate: number|null; draw_cord_value: number|null;
+      velcro_qty: number|null; velcro_rate: number|null; velcro_value: number|null;
+      interlining_qty: number|null; interlining_rate: number|null; interlining_value: number|null;
+      total_value: number|null;
+    };
+
+    const dataRows: VaacRow[] = [];
+    const seen = new Set<string>();
+    let skipped = 0;
+
+    // Source file: row 1 = group header, row 2 = blank, row 3 = col headers, data from row 4
+    for (let r = 4; r <= ws.rowCount; r++) {
+      const row = ws.getRow(r);
+      const div    = cellVal(row, 1);
+      const sub    = cellVal(row, 2);
+      const majCat = cellVal(row, 3);
+      if (!majCat) { skipped++; continue; }
+
+      const key = `${div}|${sub}|${majCat}`;
+      if (seen.has(key)) { skipped++; continue; }
+      seen.add(key);
+
+      dataRows.push({
+        division: div || null, sub_division: sub || null, major_category: majCat,
+        btn_qty:  num(cellVal(row, 4)),  btn_rate:  num(cellVal(row, 5)),  btn_value:  num(cellVal(row, 6)),
+        zip_qty:  num(cellVal(row, 7)),  zip_rate:  num(cellVal(row, 8)),  zip_value:  num(cellVal(row, 9)),
+        ela_qty:  num(cellVal(row, 10)), ela_rate:  num(cellVal(row, 11)), ela_value:  num(cellVal(row, 12)),
+        lace_qty: num(cellVal(row, 13)), lace_rate: num(cellVal(row, 14)), lace_value: num(cellVal(row, 15)),
+        draw_cord_qty:   num(cellVal(row, 16)), draw_cord_rate:   num(cellVal(row, 17)), draw_cord_value:   num(cellVal(row, 18)),
+        velcro_qty:      num(cellVal(row, 19)), velcro_rate:      num(cellVal(row, 20)), velcro_value:      num(cellVal(row, 21)),
+        interlining_qty: num(cellVal(row, 22)), interlining_rate: num(cellVal(row, 23)), interlining_value: num(cellVal(row, 24)),
+        total_value: num(cellVal(row, 25)),
+      });
+    }
+
+    const total = dataRows.length;
+    const categories = new Set(dataRows.map(r => r.major_category)).size;
+
+    const BATCH = 500;
+    await prisma.$transaction(async (tx) => {
+      await tx.$executeRaw`TRUNCATE TABLE value_addition_accessories_cost RESTART IDENTITY`;
+      for (let i = 0; i < dataRows.length; i += BATCH) {
+        const batch = dataRows.slice(i, i + BATCH);
+        await tx.$executeRaw`
+          INSERT INTO value_addition_accessories_cost
+            (division, sub_division, major_category,
+             btn_qty, btn_rate, btn_value,
+             zip_qty, zip_rate, zip_value,
+             ela_qty, ela_rate, ela_value,
+             lace_qty, lace_rate, lace_value,
+             draw_cord_qty, draw_cord_rate, draw_cord_value,
+             velcro_qty, velcro_rate, velcro_value,
+             interlining_qty, interlining_rate, interlining_value,
+             total_value)
+          SELECT v.division, v.sub_division, v.major_category,
+                 v.btn_qty::numeric, v.btn_rate::numeric, v.btn_value::numeric,
+                 v.zip_qty::numeric, v.zip_rate::numeric, v.zip_value::numeric,
+                 v.ela_qty::numeric, v.ela_rate::numeric, v.ela_value::numeric,
+                 v.lace_qty::numeric, v.lace_rate::numeric, v.lace_value::numeric,
+                 v.draw_cord_qty::numeric, v.draw_cord_rate::numeric, v.draw_cord_value::numeric,
+                 v.velcro_qty::numeric, v.velcro_rate::numeric, v.velcro_value::numeric,
+                 v.interlining_qty::numeric, v.interlining_rate::numeric, v.interlining_value::numeric,
+                 v.total_value::numeric
+          FROM jsonb_to_recordset(${JSON.stringify(batch)}::jsonb)
+            AS v(division text, sub_division text, major_category text,
+                 btn_qty text, btn_rate text, btn_value text,
+                 zip_qty text, zip_rate text, zip_value text,
+                 ela_qty text, ela_rate text, ela_value text,
+                 lace_qty text, lace_rate text, lace_value text,
+                 draw_cord_qty text, draw_cord_rate text, draw_cord_value text,
+                 velcro_qty text, velcro_rate text, velcro_value text,
+                 interlining_qty text, interlining_rate text, interlining_value text,
+                 total_value text)
+        `;
+      }
+    }, { timeout: 5 * 60 * 1000 });
+
+    console.log(`[VAAC] Done — ${total} rows across ${categories} major categories; ${skipped} skipped.`);
+    res.json({ success: true, message: `Uploaded ${total} rows across ${categories} major categories (${skipped} skipped).`, data: { total, categories } });
+  } catch (error: any) {
+    console.error('[VAAC] Upload error:', error);
+    res.status(500).json({ success: false, error: error.message });
+  }
+};
+
+/**
+ * GET /api/admin/value-addition-accessories-cost/template
+ */
+export const downloadVaacTemplate = async (_req: Request, res: Response): Promise<void> => {
+  try {
+    const ExcelJS = require('exceljs');
+    const wb = new ExcelJS.Workbook();
+    buildVaacSheet(wb, []);
+    res.setHeader('Content-Type', 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');
+    res.setHeader('Content-Disposition', 'attachment; filename="VAL_ADD_ACC_COST_TEMPLATE.xlsx"');
+    await wb.xlsx.write(res);
+    res.end();
+  } catch (error: any) {
+    res.status(500).json({ success: false, error: error.message });
+  }
+};
+
+/**
+ * GET /api/admin/value-addition-accessories-cost/download
+ */
+export const downloadVaacData = async (_req: Request, res: Response): Promise<void> => {
+  try {
+    const ExcelJS = require('exceljs');
+    const dbRows: any[] = await prisma.$queryRaw`
+      SELECT division, sub_division, major_category,
+             btn_qty, btn_rate, btn_value,
+             zip_qty, zip_rate, zip_value,
+             ela_qty, ela_rate, ela_value,
+             lace_qty, lace_rate, lace_value,
+             draw_cord_qty, draw_cord_rate, draw_cord_value,
+             velcro_qty, velcro_rate, velcro_value,
+             interlining_qty, interlining_rate, interlining_value,
+             total_value
+      FROM value_addition_accessories_cost
+      ORDER BY division, sub_division, major_category
+    `;
+
+    const n = (v: any) => v != null ? Number(v) : '';
+    const dataRows = dbRows.map((r) => [
+      r.division ?? '', r.sub_division ?? '', r.major_category ?? '',
+      n(r.btn_qty), n(r.btn_rate), n(r.btn_value),
+      n(r.zip_qty), n(r.zip_rate), n(r.zip_value),
+      n(r.ela_qty), n(r.ela_rate), n(r.ela_value),
+      n(r.lace_qty), n(r.lace_rate), n(r.lace_value),
+      n(r.draw_cord_qty), n(r.draw_cord_rate), n(r.draw_cord_value),
+      n(r.velcro_qty), n(r.velcro_rate), n(r.velcro_value),
+      n(r.interlining_qty), n(r.interlining_rate), n(r.interlining_value),
+      n(r.total_value),
+    ]);
+
+    const wb = new ExcelJS.Workbook();
+    buildVaacSheet(wb, dataRows);
+
+    const filename = `VAL_ADD_ACC_COST_${new Date().toISOString().slice(0, 10)}.xlsx`;
+    res.setHeader('Content-Type', 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');
+    res.setHeader('Content-Disposition', `attachment; filename="${filename}"`);
+    await wb.xlsx.write(res);
+    res.end();
+  } catch (error: any) {
+    res.status(500).json({ success: false, error: error.message });
+  }
+};
+
+export const lookupVaacTotalValue = async (req: Request, res: Response): Promise<void> => {
+  try {
+    const majorCategory = (req.query.majorCategory as string | undefined)?.trim();
+    if (!majorCategory) {
+      res.status(400).json({ success: false, error: 'majorCategory is required' });
+      return;
+    }
+    const rows = await prisma.$queryRaw<{ total_value: string | null }[]>(
+      Prisma.sql`
+        SELECT total_value
+        FROM value_addition_accessories_cost
+        WHERE LOWER(major_category) = LOWER(${majorCategory})
+        LIMIT 1
+      `
+    );
+    const totalValue = rows[0]?.total_value != null ? Number(rows[0].total_value) : null;
+    res.json({ success: true, data: { totalValue } });
+  } catch (error: any) {
+    res.status(500).json({ success: false, error: error.message });
+  }
+};

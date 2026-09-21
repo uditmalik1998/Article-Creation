@@ -157,6 +157,28 @@ const fetchSegmentRangesFor = async (mc: string): Promise<SegmentRange[]> => {
   return [];
 };
 
+const vaacCache = new Map<string, number | null>();
+const fetchVaacTotalValue = async (majorCategory: string): Promise<number | null> => {
+  const key = (majorCategory || '').trim().toUpperCase();
+  if (!key) return null;
+  if (vaacCache.has(key)) return vaacCache.get(key)!;
+  try {
+    const token = localStorage.getItem('authToken');
+    const r = await fetch(
+      `${APP_CONFIG.api.baseURL}/admin/value-addition-accessories-cost/lookup?majorCategory=${encodeURIComponent(majorCategory)}`,
+      { headers: token ? { Authorization: `Bearer ${token}` } : {} },
+    );
+    if (r.ok) {
+      const json = await r.json();
+      const val = json.data?.totalValue ?? null;
+      vaacCache.set(key, val);
+      return val;
+    }
+  } catch { /* ignore */ }
+  vaacCache.set(key, null);
+  return null;
+};
+
 const computeSegmentFromMrp = (mrp: string | null | undefined, ranges: SegmentRange[]): string | null => {
   const m = parseFloat(String(mrp ?? ''));
   if (isNaN(m) || ranges.length === 0) return null;
@@ -266,6 +288,7 @@ const ATTRIBUTE_GROUPS: { group: string; color: string; fields: { field: string;
       { field: 'patches', schemaKey: 'patches' },
       { field: 'htrfType', schemaKey: 'htrf_type' },
       { field: 'htrfStyle', schemaKey: 'htrf_style' },
+      { field: 'valueAddAccCostType', schemaKey: 'value_add_acc_cost_type' },
       { field: 'valueAddCost', schemaKey: 'value_add_cost', freeText: true },
     ],
   },
@@ -280,6 +303,7 @@ const ATTRIBUTE_GROUPS: { group: string; color: string; fields: { field: string;
       { field: 'embroideryType', schemaKey: 'embroidery_type' },
       { field: 'embPlacement', schemaKey: 'emb_placement' },
       { field: 'wash', schemaKey: 'wash' },
+      { field: 'valueAddProcessCost', schemaKey: 'value_add_process_cost', freeText: true },
     ],
   },
   {
@@ -476,7 +500,6 @@ function buildCardGroups(entries: { key: string; type: string; group: string }[]
     for (const staticGroup of ATTRIBUTE_GROUPS) {
       const builtGroup = built.find((g) => g.group === staticGroup.group);
       for (const sf of staticGroup.fields) {
-        if (!sf.freeText) continue;
         if (builtGroup && builtGroup.fields.some((f) => f.field === sf.field && f.schemaKey === sf.schemaKey)) continue;
         if (builtGroup) {
           builtGroup.fields.push(sf);
@@ -756,7 +779,25 @@ const ArticleCard = React.memo(
         { headers: { Authorization: `Bearer ${token}` } },
       )
         .then((r) => r.json())
-        .then((d: { fabWidth: number; fabConsumption: number }[]) => setFabricConsumptionOptions(d ?? []))
+        .then((d: { fabWidth: number; fabConsumption: number }[]) => {
+          setFabricConsumptionOptions(d ?? []);
+          // Auto-select the row with the smallest fab_consumption only when
+          // width and consumptionMeter are not already set on this article.
+          if (!d || d.length === 0) return;
+          const currentWidth = (item as any).width ?? localValues['width'];
+          const currentMeter = (item as any).consumptionMeter ?? localValues['consumptionMeter'];
+          if (currentWidth || currentMeter) return;
+          const best = d.reduce((min, row) =>
+            (row.fabConsumption ?? Infinity) < (min.fabConsumption ?? Infinity) ? row : min
+          );
+          if (best.fabWidth == null || best.fabConsumption == null) return;
+          const updates: Record<string, string> = {
+            width: String(best.fabWidth),
+            consumptionMeter: String(best.fabConsumption),
+          };
+          setLocalValues((prev) => ({ ...prev, ...updates }));
+          onSave({ ...item, ...updates } as any, updates, { silent: true });
+        })
         .catch(() => setFabricConsumptionOptions([]));
     }, [isBodyArticle, effectiveMajCat]);
 
@@ -879,6 +920,25 @@ const ArticleCard = React.memo(
             values: [],
             freeText: true,
             isMandatory,
+            mandatory: af.mandatory,
+          });
+          continue;
+        }
+
+        // Static-options fields — always visible, values hardcoded (not from grid)
+        if (af.schemaKey === 'value_add_acc_cost_type') {
+          visible.push({
+            field: af.field,
+            label: af.label,
+            schemaKey: af.schemaKey,
+            group: af.group,
+            groupColor: af.groupColor,
+            values: [
+              { shortForm: 'Rough', fullForm: 'Rough' },
+              { shortForm: 'Precise', fullForm: 'Precise' },
+            ],
+            freeText: false,
+            isMandatory: false,
             mandatory: af.mandatory,
           });
           continue;
@@ -1011,6 +1071,20 @@ const ArticleCard = React.memo(
         .then(() => setCatConfigReady(true))
         .catch(() => setCatConfigReady(true));
     }, [effectiveMajCat]);
+
+    // Auto-fill VALUE ADD ACC. COST from the VAAC table on initial load (only if empty).
+    useEffect(() => {
+      if (!effectiveMajCat) return;
+      const current = (item as any).valueAddCost ?? localValues['valueAddCost'];
+      if (current != null && String(current).trim() !== '') return; // already has a value — skip
+      fetchVaacTotalValue(effectiveMajCat).then((val) => {
+        if (val == null) return;
+        const strVal = String(val);
+        setLocalValues((prev) => ({ ...prev, valueAddCost: strVal }));
+        onSave({ ...item, valueAddCost: strVal } as ApproverItem, { valueAddCost: strVal } as Record<string, unknown>);
+      });
+      // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, []); // intentionally run only on mount
 
     // Preload the major-category grid (dropdown values) for THIS article's
     // category only — not the entire grid. Re-runs if the category changes.
@@ -1371,6 +1445,16 @@ const ArticleCard = React.memo(
             onSave({ ...item, segment: seg } as ApproverItem, { segment: seg } as Record<string, unknown>);
           }
         });
+        // Async: fetch VAAC total value for the new major category — skip if user chose Precise
+        const effectiveCostType = localValues['valueAddAccCostType'] ?? (item as any).valueAddAccCostType ?? 'Rough';
+        if (effectiveCostType !== 'Precise') {
+          fetchVaacTotalValue(value).then((val) => {
+            if (val == null) return;
+            const strVal = String(val);
+            setLocalValues((prev) => ({ ...prev, valueAddCost: strVal }));
+            onSave({ ...item, valueAddCost: strVal } as ApproverItem, { valueAddCost: strVal } as Record<string, unknown>);
+          });
+        }
         // Clear body/fabric article number and description only — attributes remain unchanged
         updates['bodyArticle'] = '';
         updates['bodyArticleDescription'] = '';

@@ -1659,18 +1659,44 @@ const ArticleCard = React.memo(
                   {item.sapArticleId || item.articleNumber}
                 </Badge>
               )}
-              {/* ── Design (read-only) + Vendor + Price ── */}
-              <span className="ml-2 flex flex-wrap items-center gap-1.5 truncate text-[11px] text-white/75">
-                <span className="flex items-center gap-1">
-                  <span className="text-[10px] font-semibold uppercase tracking-wider text-white/60">Design:</span>
-                  <span>
-                    {(localValues['designNumber'] ?? item.designNumber) || '—'}
+              {/* ── Design + Vendor + Price ── */}
+              {(() => {
+                const designLocked = item.approvalStatus !== 'PENDING' && item.sapSyncStatus !== 'FAILED';
+                return (
+                  <span className="ml-2 flex flex-wrap items-center gap-1.5 truncate text-[11px] text-white/75">
+                    <span className="flex items-center gap-1">
+                      <span className="text-[10px] font-semibold uppercase tracking-wider text-white/60">Design:</span>
+                      {editingField === 'topbar_designNumber' ? (
+                        <input
+                          autoFocus
+                          defaultValue={(localValues['designNumber'] ?? item.designNumber) || ''}
+                          className="h-5 w-24 rounded border border-white/30 bg-white/10 px-1 text-[11px] text-white outline-none"
+                          onBlur={(e) => { handleSave('designNumber', e.target.value.trim() || null); setEditingField(null); }}
+                          onKeyDown={(e) => {
+                            if (e.key === 'Enter') { handleSave('designNumber', (e.target as HTMLInputElement).value.trim() || null); setEditingField(null); }
+                            if (e.key === 'Escape') setEditingField(null);
+                          }}
+                        />
+                      ) : (
+                        <span
+                          onClick={() => { if (!designLocked) setEditingField('topbar_designNumber'); }}
+                          style={{
+                            cursor: designLocked ? 'default' : 'pointer',
+                            borderBottom: designLocked ? 'none' : '1px dashed rgba(255,255,255,0.4)',
+                            fontStyle: (localValues['designNumber'] ?? item.designNumber) ? 'normal' : 'italic',
+                            opacity: (localValues['designNumber'] ?? item.designNumber) ? 1 : 0.7,
+                          }}
+                        >
+                          {(localValues['designNumber'] ?? item.designNumber) || (designLocked ? '—' : 'set design')}
+                        </span>
+                      )}
+                    </span>
+                    {item.vendorName && <span className="text-white/40">·</span>}
+                    {item.vendorName}
+                    {item.mrp != null && Number(item.mrp) > 1 && <> · ₹{item.mrp}</>}
                   </span>
-                </span>
-                {item.vendorName && <span className="text-white/40">·</span>}
-                {item.vendorName}
-                {item.mrp != null && Number(item.mrp) > 1 && <> · ₹{item.mrp}</>}
-              </span>
+                );
+              })()}
             </div>
             <div className="flex shrink-0 items-center gap-2">
               {item.pptNumber && (
@@ -2058,7 +2084,7 @@ const ArticleCard = React.memo(
                         ...(isFGMode ? [
                           { label: 'VENDOR FABRIC RATE', field: 'fabricRate', editable: true, mandatory: false, isDropdown: false, isColor: false, isMarkdown: false },
                           { label: 'V2 FABRIC RATE', field: 'v2FabricRate', editable: true, mandatory: false, isDropdown: false, isColor: false, isMarkdown: false },
-                          { label: 'VALUE ADD COST', field: 'valueAddCost', editable: true, mandatory: false, isDropdown: false, isColor: false, isMarkdown: false },
+                          { label: 'VALUE ADD ACC. COST', field: 'valueAddCost', editable: true, mandatory: false, isDropdown: false, isColor: false, isMarkdown: false },
                         ] : []),
                       ].map((bom) => {
                         const isEditingBom = editingField === `bom_${bom.field}`;

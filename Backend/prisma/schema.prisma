@@ -324,8 +324,10 @@ model ExtractionResultFlat {
   fabCost                     Decimal?      @map("fab_cost")  @db.Decimal(10, 2)
   fabCons                     Decimal?      @map("fab_cons")  @db.Decimal(10, 2)
   width                       Decimal?      @map("width")     @db.Decimal(10, 2)
-  vendorFabricRate            Decimal?      @map("vendor_fabric_rate") @db.Decimal(10, 2)
-  valueAddCost                Decimal?      @map("value_add_cost")     @db.Decimal(10, 2)
+  vendorFabricRate            Decimal?      @map("vendor_fabric_rate")         @db.Decimal(10, 2)
+  valueAddAccCostType         String?       @map("value_add_acc_cost_type")    @db.VarChar(50)
+  valueAddCost                Decimal?      @map("value_add_cost")             @db.Decimal(10, 2)
+  valueAddProcessCost         Decimal?      @map("value_add_process_cost")     @db.Decimal(10, 2)
 
   // ===== ARTICLE REFERENCE FIELDS =====
   bodyArticle                 String?       @map("body_article") @db.VarChar(100)
@@ -1468,9 +1470,13 @@ model FabricArticleData {
   vendorName               String?   @map("vendor_name")       @db.VarChar(200)
   vendorCode               String?   @map("vendor_code")   @db.VarChar(100)
   designNumber             String?   @map("design_number") @db.VarChar(100)
+  pptNumber                String?   @map("ppt_number")    @db.VarChar(100)
   fabricRate               Decimal?  @map("fabric_rate")         @db.Decimal(10, 2)
   v2FabricRate             Decimal?  @map("v2_fabric_rate")      @db.Decimal(10, 2)
   valueAddCost             Decimal?  @map("value_add_cost")      @db.Decimal(10, 2)
+  mrp                      Decimal?  @map("mrp")                 @db.Decimal(10, 2)
+  baseColor                String?   @map("base_color")          @db.VarChar(100)
+  segment                  String?   @map("segment")             @db.VarChar(100)
   articleFashionType       String?   @map("article_fashion_type") @db.VarChar(100)
 
   // Workflow
@@ -1497,6 +1503,65 @@ model FabricArticleData {
   @@index([division])
   @@index([createdAt(sort: Desc)])
   @@map("fabric_article_data")
+  @@schema("public")
+}
+
+/// Value Addition Accessories Cost master — one row per DIV + SUB_DIV + MAJ_CAT.
+/// Sourced from "val add acc master.xlsx" (ACC LIST sheet).
+/// Each of the 7 accessory types has qty, rate, and value columns.
+model ValueAdditionAccessoriesCost {
+  id             Int      @id @default(autoincrement())
+
+  division       String?  @map("division")       @db.VarChar(100)
+  subDivision    String?  @map("sub_division")   @db.VarChar(100)
+  majorCategory  String   @map("major_category") @db.VarChar(200)
+
+  // BUTTON
+  btnQty         Decimal? @map("btn_qty")         @db.Decimal(10, 4)
+  btnRate        Decimal? @map("btn_rate")         @db.Decimal(10, 4)
+  btnValue       Decimal? @map("btn_value")        @db.Decimal(10, 4)
+
+  // ZIPPER
+  zipQty         Decimal? @map("zip_qty")          @db.Decimal(10, 4)
+  zipRate        Decimal? @map("zip_rate")          @db.Decimal(10, 4)
+  zipValue       Decimal? @map("zip_value")         @db.Decimal(10, 4)
+
+  // ELASTIC
+  elaQty         Decimal? @map("ela_qty")           @db.Decimal(10, 4)
+  elaRate        Decimal? @map("ela_rate")           @db.Decimal(10, 4)
+  elaValue       Decimal? @map("ela_value")          @db.Decimal(10, 4)
+
+  // LACE
+  laceQty        Decimal? @map("lace_qty")           @db.Decimal(10, 4)
+  laceRate       Decimal? @map("lace_rate")           @db.Decimal(10, 4)
+  laceValue      Decimal? @map("lace_value")          @db.Decimal(10, 4)
+
+  // DRAW CORD
+  drawCordQty    Decimal? @map("draw_cord_qty")      @db.Decimal(10, 4)
+  drawCordRate   Decimal? @map("draw_cord_rate")      @db.Decimal(10, 4)
+  drawCordValue  Decimal? @map("draw_cord_value")     @db.Decimal(10, 4)
+
+  // HOOK & LOOP (VELCRO)
+  velcroQty      Decimal? @map("velcro_qty")          @db.Decimal(10, 4)
+  velcroRate     Decimal? @map("velcro_rate")          @db.Decimal(10, 4)
+  velcroValue    Decimal? @map("velcro_value")         @db.Decimal(10, 4)
+
+  // INTERLINING
+  interliningQty    Decimal? @map("interlining_qty")    @db.Decimal(10, 4)
+  interliningRate   Decimal? @map("interlining_rate")   @db.Decimal(10, 4)
+  interliningValue  Decimal? @map("interlining_value")  @db.Decimal(10, 4)
+
+  // TOTAL
+  totalValue     Decimal? @map("total_value")      @db.Decimal(10, 4)
+
+  createdAt      DateTime @default(now()) @map("created_at")
+  updatedAt      DateTime @updatedAt      @map("updated_at")
+
+  @@unique([majorCategory, subDivision, division])
+  @@index([majorCategory])
+  @@index([division])
+  @@index([subDivision])
+  @@map("value_addition_accessories_cost")
   @@schema("public")
 }
 
