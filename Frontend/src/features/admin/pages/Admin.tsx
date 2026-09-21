@@ -1241,7 +1241,7 @@ export default function Admin() {
       .then((blob) => {
         const a = document.createElement('a');
         a.href = URL.createObjectURL(blob);
-        a.download = kind === 'template' ? 'BASIC_ACCESSORIES_TEMPLATE.xlsx' : 'BASIC_ACCESSORIES_EXPORT.xlsx';
+        a.download = kind === 'template' ? 'PACKAGING_MASTER_TEMPLATE.xlsx' : 'BASIC_ACCESSORIES_EXPORT.xlsx';
         a.click();
       })
       .catch(() => message.error(kind === 'template' ? 'Failed to download template' : 'Failed to export basic accessories'));
