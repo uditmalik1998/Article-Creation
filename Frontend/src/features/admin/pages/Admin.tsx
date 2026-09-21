@@ -1278,6 +1278,24 @@ export default function Admin() {
   };
 
   // ─────────────────────────────── National Grid Master ───────────────────────────────
+  const downloadNationalGridData = () => {
+    const token = localStorage.getItem('authToken');
+    const url = `${APP_CONFIG.api.baseURL}/admin/national-grid/download`;
+    fetch(url, { headers: token ? { Authorization: `Bearer ${token}` } : {} })
+      .then((r) => {
+        if (!r.ok) throw new Error('Download failed');
+        return r.blob();
+      })
+      .then((blob) => {
+        const today = new Date().toISOString().slice(0, 10);
+        const a = document.createElement('a');
+        a.href = URL.createObjectURL(blob);
+        a.download = `NATIONAL_GRID_${today}.xlsx`;
+        a.click();
+      })
+      .catch(() => message.error('Failed to download national grid data'));
+  };
+
   const downloadNationalGridTemplate = async () => {
     try {
       const xlsx = await import('xlsx');
@@ -1463,6 +1481,41 @@ export default function Admin() {
       setBodyFabConsStatusLoading(false);
     }
   }, []);
+
+  const downloadBodyFabConsTemplate = () => {
+    const token = localStorage.getItem('authToken');
+    const url = `${APP_CONFIG.api.baseURL}/admin/body-fabric-consumption/template`;
+    fetch(url, { headers: token ? { Authorization: `Bearer ${token}` } : {} })
+      .then((r) => {
+        if (!r.ok) throw new Error('Download failed');
+        return r.blob();
+      })
+      .then((blob) => {
+        const a = document.createElement('a');
+        a.href = URL.createObjectURL(blob);
+        a.download = 'FAB_CONSUMPTION_MASTER_TEMPLATE.xlsx';
+        a.click();
+      })
+      .catch(() => message.error('Failed to download template'));
+  };
+
+  const downloadBodyFabConsData = () => {
+    const token = localStorage.getItem('authToken');
+    const url = `${APP_CONFIG.api.baseURL}/admin/body-fabric-consumption/download`;
+    fetch(url, { headers: token ? { Authorization: `Bearer ${token}` } : {} })
+      .then((r) => {
+        if (!r.ok) throw new Error('Download failed');
+        return r.blob();
+      })
+      .then((blob) => {
+        const today = new Date().toISOString().slice(0, 10);
+        const a = document.createElement('a');
+        a.href = URL.createObjectURL(blob);
+        a.download = `FAB_CONSUMPTION_MASTER_${today}.xlsx`;
+        a.click();
+      })
+      .catch(() => message.error('Failed to download body fabric consumption data'));
+  };
 
   const handleBodyFabConsUpload = async (file: File) => {
     setBodyFabConsUploading(true);
@@ -2863,6 +2916,14 @@ export default function Admin() {
               Body Fabric Consumption Master
             </CardTitle>
             <div className="flex gap-2">
+              <Button size="sm" variant="outline" onClick={downloadBodyFabConsData}>
+                <Download />
+                Download Data
+              </Button>
+              <Button size="sm" variant="outline" onClick={downloadBodyFabConsTemplate}>
+                <Download />
+                Download Template
+              </Button>
               <Button size="sm" variant="outline" onClick={loadBodyFabConsStatus} disabled={bodyFabConsStatusLoading}>
                 <RotateCw className={bodyFabConsStatusLoading ? 'animate-spin' : ''} />
                 Refresh Status
@@ -2952,6 +3013,10 @@ export default function Admin() {
               <Button size="sm" variant="outline" onClick={() => navigate('/admin/expense/national-grid')}>
                 <Eye />
                 View Data
+              </Button>
+              <Button size="sm" variant="outline" onClick={downloadNationalGridData}>
+                <Download />
+                Download Data
               </Button>
               <Button size="sm" variant="outline" onClick={downloadNationalGridTemplate}>
                 <Download />
