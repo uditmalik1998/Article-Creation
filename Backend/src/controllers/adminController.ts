@@ -4404,6 +4404,61 @@ export async function importNationalGrid(req: Request, res: Response) {
     return res.json({ success: true, upserted: deduped.length });
 }
 
+export async function downloadNationalGridData(_req: Request, res: Response) {
+    try {
+        const ExcelJS = require('exceljs');
+        const rows = await prisma.nationalGridMaster.findMany({
+            orderBy: [{ attributeName: 'asc' }, { code: 'asc' }],
+        });
+
+        const wb = new ExcelJS.Workbook();
+        const ws = wb.addWorksheet('NATIONAL_GRID');
+
+        // Row 1 — title
+        ws.mergeCells('A1:D1');
+        const titleCell = ws.getCell('A1');
+        titleCell.value = 'MDM NATIONAL GRID - ATTRIBUTE VALUES';
+        titleCell.font = { bold: true, size: 13, color: { argb: 'FFFFFFFF' } };
+        titleCell.fill = { type: 'pattern', pattern: 'solid', fgColor: { argb: 'FF1565C0' } };
+        titleCell.alignment = { horizontal: 'center' };
+
+        // Row 2 — empty
+        ws.addRow([]);
+
+        // Row 3 — headers
+        const headerRow = ws.addRow(['M_GRID_NM', 'G_CHILD_GRID_VAL', 'FULL FORM', 'GRID_STATUS']);
+        headerRow.eachCell((cell: any) => {
+            cell.font = { bold: true, color: { argb: 'FFFFFFFF' } };
+            cell.fill = { type: 'pattern', pattern: 'solid', fgColor: { argb: 'FF1565C0' } };
+            cell.alignment = { horizontal: 'center' };
+        });
+
+        // Row 4 — empty
+        ws.addRow([]);
+
+        // Row 5+ — data
+        for (const row of rows) {
+            ws.addRow([
+                row.attributeName,
+                row.code,
+                row.fullForm ?? '',
+                row.isActive ? 'ACT' : 'INACT',
+            ]);
+        }
+
+        ws.columns = [{ width: 28 }, { width: 22 }, { width: 36 }, { width: 14 }];
+
+        const filename = `NATIONAL_GRID_${new Date().toISOString().slice(0, 10)}.xlsx`;
+        res.setHeader('Content-Type', 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');
+        res.setHeader('Content-Disposition', `attachment; filename="${filename}"`);
+        await wb.xlsx.write(res);
+        res.end();
+    } catch (error: any) {
+        console.error('[NationalGrid] Download error:', error);
+        res.status(500).json({ success: false, error: error.message });
+    }
+}
+
 // ═══════════════════════════════════════════════════════
 // SEGMENT MASTER (maj_cat_segment)
 // ═══════════════════════════════════════════════════════
@@ -8046,6 +8101,116 @@ export const uploadBodyFabricConsumption = async (req: Request, res: Response): 
     });
   } catch (error: any) {
     console.error('[BodyFabricConsumption] Upload error:', error);
+    res.status(500).json({ success: false, error: error.message });
+  }
+};
+
+// All 35 columns in the source Excel (sheet "summary", headers at row 4).
+// The uploader only reads cols 0-3 (DIV/SUB DIV/MAJ CAT/FAB_WIDTH) and the
+// last col (FAB CONSUMPTION). The 30 size/age columns in between are ignored
+// on import but must be present in the template so re-uploading works.
+const FAB_CONS_HEADERS = [
+  'DIV', 'SUB DIV', 'MAJ CAT', 'FAB_WIDTH',
+  'M_06_12', 'M_12_18', 'M_18_24',
+  'YR_02_03', 'YR_04_05', 'YR_06_07', 'YR_08_09', 'YR_10_11',
+  'YR_12_13', 'YR_14_15', 'YR_14', 'YR_15', 'YR_16', 'YR_17',
+  'S', 'M', 'L', 'XL', 'XXL', 'XXXL', 'XXXXL',
+  'S_26', 'S_28', 'S_30', 'S_38', 'S_32', 'S_34', 'S_36',
+  'M_00_03', 'M_03_06',
+  'FAB CONSUMPTION',
+];
+
+function buildFabConsSheet(wb: any, dataRows: any[]): any {
+  const ws = wb.addWorksheet('summary');
+
+  // Rows 1-3 empty (matching source file where data range starts at row 4)
+  ws.addRow([]);
+  ws.addRow([]);
+  ws.addRow([]);
+
+  // Row 4 — headers
+  const headerRow = ws.addRow(FAB_CONS_HEADERS);
+  headerRow.eachCell((cell: any) => {
+    cell.font = { bold: true, color: { argb: 'FFFFFFFF' } };
+    cell.fill = { type: 'pattern', pattern: 'solid', fgColor: { argb: 'FF1565C0' } };
+    cell.alignment = { horizontal: 'center' };
+  });
+
+  // Rows 5-6 empty
+  ws.addRow([]);
+  ws.addRow([]);
+
+  // Data
+  for (const row of dataRows) ws.addRow(row);
+
+  // Column widths
+  ws.columns = [
+    { width: 12 }, { width: 14 }, { width: 26 }, { width: 12 },
+    ...Array(30).fill({ width: 10 }),
+    { width: 18 },
+  ];
+
+  return ws;
+}
+
+/**
+ * GET /api/admin/body-fabric-consumption/template
+ * Downloads a blank Excel template matching the source upload format exactly
+ * (sheet "summary", 35 columns, headers at row 4, no data rows).
+ */
+export const downloadBodyFabricConsumptionTemplate = async (_req: Request, res: Response): Promise<void> => {
+  try {
+    const ExcelJS = require('exceljs');
+    const wb = new ExcelJS.Workbook();
+    buildFabConsSheet(wb, []);
+
+    res.setHeader('Content-Type', 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');
+    res.setHeader('Content-Disposition', 'attachment; filename="FAB_CONSUMPTION_MASTER_TEMPLATE.xlsx"');
+    await wb.xlsx.write(res);
+    res.end();
+  } catch (error: any) {
+    console.error('[BodyFabricConsumption] Template error:', error);
+    res.status(500).json({ success: false, error: error.message });
+  }
+};
+
+/**
+ * GET /api/admin/body-fabric-consumption/download
+ * Exports the full body_fabric_consumption table in the same 35-column format
+ * as the source file. Only cols A-D and the last col (FAB CONSUMPTION/AI) are
+ * populated; the 30 size/age columns in between are left blank (they are not
+ * stored in the DB).
+ */
+export const downloadBodyFabricConsumptionData = async (_req: Request, res: Response): Promise<void> => {
+  try {
+    const ExcelJS = require('exceljs');
+    const dbRows: any[] = await prisma.$queryRaw`
+      SELECT division, sub_division, major_category, fab_width, fab_consumption
+      FROM body_fabric_consumption
+      ORDER BY division, sub_division, major_category, fab_width
+    `;
+
+    // Build a 35-element array per row: A-D filled, E-AH blank, AI = fab_consumption
+    const dataRows = dbRows.map((r) => {
+      const row: any[] = new Array(35).fill('');
+      row[0]  = r.division ?? '';
+      row[1]  = r.sub_division ?? '';
+      row[2]  = r.major_category ?? '';
+      row[3]  = r.fab_width != null ? Number(r.fab_width) : '';
+      row[34] = r.fab_consumption != null ? Number(r.fab_consumption) : '';
+      return row;
+    });
+
+    const wb = new ExcelJS.Workbook();
+    buildFabConsSheet(wb, dataRows);
+
+    const filename = `FAB_CONSUMPTION_MASTER_${new Date().toISOString().slice(0, 10)}.xlsx`;
+    res.setHeader('Content-Type', 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');
+    res.setHeader('Content-Disposition', `attachment; filename="${filename}"`);
+    await wb.xlsx.write(res);
+    res.end();
+  } catch (error: any) {
+    console.error('[BodyFabricConsumption] Download error:', error);
     res.status(500).json({ success: false, error: error.message });
   }
 };

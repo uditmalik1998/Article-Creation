@@ -237,6 +237,7 @@ router.get('/modify-logs/group/:groupId', h(adminController.getModifyLogsByGroup
 router.get('/modify-logs',               h(adminController.getModifyLogs));
 
 router.get('/national-grid',             h(adminController.getNationalGrid));
+router.get('/national-grid/download',    h(adminController.downloadNationalGridData));
 router.post('/national-grid/import',     h(adminController.importNationalGrid));
 
 // NOTE: Expense Data read/edit-workflow routes moved to routes/expense.ts,
@@ -316,7 +317,9 @@ router.post('/broader-menu/upload',  excelUpload.single('file'), h(adminControll
 // ═════════════════════════════════════════════════════
 // BODY FABRIC CONSUMPTION — body_fabric_consumption
 // ═════════════════════════════════════════════════════
-router.get('/body-fabric-consumption/status', h(adminController.getBodyFabricConsumptionStatus));
-router.post('/body-fabric-consumption/upload', excelUpload.single('file'), h(adminController.uploadBodyFabricConsumption));
+router.get('/body-fabric-consumption/status',   h(adminController.getBodyFabricConsumptionStatus));
+router.get('/body-fabric-consumption/template', h(adminController.downloadBodyFabricConsumptionTemplate));
+router.get('/body-fabric-consumption/download', h(adminController.downloadBodyFabricConsumptionData));
+router.post('/body-fabric-consumption/upload',  excelUpload.single('file'), h(adminController.uploadBodyFabricConsumption));
 
 export default router;
