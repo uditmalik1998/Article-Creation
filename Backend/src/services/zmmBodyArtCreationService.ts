@@ -5,6 +5,7 @@
  */
 
 import { prismaClient as prisma } from '../utils/prisma';
+import { storageService } from './storageService';
 
 const SAP_RFC_PROXY_URL = (process.env.SAP_RFC_PROXY_URL || 'https://sap-api.v2retail.net').replace(/\/$/, '');
 const SAP_RFC_KEY       = process.env.SAP_RFC_KEY || 'v2-rfc-proxy-2026';
@@ -229,6 +230,34 @@ export async function submitBodyArticles(ids: string[]): Promise<{
                     approvedAt:        success ? new Date() : undefined,
                 },
             });
+
+            // After a successful SAP creation, mirror the image to R2 at
+            // body_article/<articleNumber> and update the stored URL.
+            if (success && sapNumber && row.imageUrl) {
+                try {
+                    const imgRes = await fetch(row.imageUrl);
+                    if (imgRes.ok) {
+                        const contentType = imgRes.headers.get('content-type') || 'image/jpeg';
+                        const mimeBase = contentType.split(';')[0].trim().toLowerCase();
+                        const ext = mimeBase.includes('png') ? 'png'
+                            : mimeBase.includes('webp') ? 'webp'
+                            : mimeBase.includes('gif') ? 'gif'
+                            : 'jpg';
+                        const buffer = Buffer.from(await imgRes.arrayBuffer());
+                        const key = `body_article/${sapNumber}.${ext}`;
+                        const r2Url = await storageService.uploadToPrimaryKey(key, buffer, mimeBase);
+                        await prisma.bodyArticleData.update({
+                            where: { id: row.id },
+                            data: { imageUrl: r2Url },
+                        });
+                        console.log(`[ZMM_BODY_RFC] ✅ Image uploaded to R2: ${key}`);
+                    } else {
+                        console.warn(`[ZMM_BODY_RFC] Image fetch failed (${imgRes.status}) for row ${row.id} — skipping R2 upload`);
+                    }
+                } catch (imgErr: any) {
+                    console.warn(`[ZMM_BODY_RFC] R2 image upload failed for ${row.id}: ${imgErr.message}`);
+                }
+            }
 
             return { id: row.id, success, sapArticleNumber: sapNumber ?? undefined, message: msg };
         } catch (err: any) {

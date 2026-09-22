@@ -783,6 +783,24 @@ export class StorageService {
         if (deleted) console.log(`🗑️  Deleted ${deleted} model image(s) under ${prefix}`);
         return deleted;
     }
+
+    /**
+     * Upload a buffer to an exact key in the primary R2 bucket.
+     * Returns the public URL when R2_PUBLIC_URL_BASE is configured, otherwise a 7-day signed URL.
+     */
+    async uploadToPrimaryKey(key: string, buffer: Buffer, mimeType: string): Promise<string> {
+        await this.s3Client.send(new PutObjectCommand({
+            Bucket: this.bucket,
+            Key: key,
+            Body: buffer,
+            ContentType: mimeType,
+        }));
+        console.log(`✅ Uploaded to R2 primary bucket: ${key}`);
+        if (this.publicUrlBase) {
+            return this.buildPublicUrl(this.publicUrlBase, this.bucket, key);
+        }
+        return getSignedUrl(this.s3Client, new GetObjectCommand({ Bucket: this.bucket, Key: key }), { expiresIn: 604800 });
+    }
 }
 
 export const storageService = new StorageService();
