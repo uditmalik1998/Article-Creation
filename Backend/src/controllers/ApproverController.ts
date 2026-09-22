@@ -4340,15 +4340,26 @@ export class ApproverController {
         const { id } = req.params;
         const body = req.body as Record<string, unknown>;
 
+        const existing = await prisma.fabricArticleData.findUnique({ where: { id } });
+        if (!existing) return res.status(404).json({ error: 'Item not found' });
+
+        // APPROVED articles are locked — only allow updating fields that don't affect SAP sync.
+        const APPROVED_ALLOWED: Set<string> = new Set(['fabricArticleDescription', 'vendorFabricRate', 'fabricArticleNumber', 'imageUrl']);
+        if (existing.approvalStatus === 'APPROVED') {
+            const incoming = Object.keys(body).filter(k => ApproverController.FABRIC_ARTICLE_DATA_FIELD_MAP[k]);
+            const blocked = incoming.filter(k => !APPROVED_ALLOWED.has(k));
+            if (blocked.length > 0) {
+                return res.status(403).json({ error: 'Cannot update an approved item. It is locked for SAP sync.' });
+            }
+        }
+
         const data: Record<string, unknown> = {};
         for (const [clientKey, value] of Object.entries(body)) {
             const dbKey = ApproverController.FABRIC_ARTICLE_DATA_FIELD_MAP[clientKey];
             if (dbKey) data[dbKey] = value === undefined ? null : value;
         }
         if (Object.keys(data).length === 0) {
-            const row = await prisma.fabricArticleData.findUnique({ where: { id } });
-            if (!row) return res.status(404).json({ error: 'Item not found' });
-            return res.json(ApproverController.fabricArticleDataRowToItem(row));
+            return res.json(ApproverController.fabricArticleDataRowToItem(existing));
         }
         const row = await prisma.fabricArticleData.update({ where: { id }, data });
         return res.json(ApproverController.fabricArticleDataRowToItem(row));
