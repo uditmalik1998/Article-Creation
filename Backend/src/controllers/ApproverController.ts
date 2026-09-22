@@ -4319,6 +4319,8 @@ export class ApproverController {
         v2FabricRate:             'v2FabricRate',
         valueAddCost:             'valueAddCost',
         articleFashionType:       'articleFashionType',
+        mrp:                      'mrp',
+        segment:                  'segment',
         // Fabric construction fields
         fabDiv:        'mFabDiv',
         yarn1:         'mYarn',
