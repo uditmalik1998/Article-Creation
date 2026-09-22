@@ -1452,7 +1452,7 @@ export class ApproverController {
     }
 
     // Rough Costing Excel export — for FG Created articles.
-    // Produces 5 rows per article: 1 summary row + 4 component rows (Fab_art, Body Article, Basic Trim Cost, Val add cos).
+    // Produces 6 rows per article: 1 summary row + 5 component rows (Fab_art, Body Article, Basic Trim Cost, Value Add Acc Cost, Value Add Prcs Cost).
     // Joins body_article_data (by bodyArticleNumber) and fabric_article_data (by fabricArticleNumber) for cost data.
     static async roughCostingExport(req: Request, res: Response) {
         try {
@@ -1572,11 +1572,11 @@ export class ApproverController {
                     ?? (bodyData?.majorCategory ? trimCostByMajCat.get(bodyData.majorCategory.trim().toUpperCase()) ?? null : null);
                 const cmpCost = toNum(bodyData?.cmpCost);
                 const fgValAdd = toNum(a.valueAddCost);
-                const fabValAdd = toNum(fabricData?.valueAddCost);
+                const fgProcessCost = toNum(a.valueAddProcessCost);
 
                 const summaryRowNum = dataRow;
                 const compStart = dataRow + 1;
-                const compEnd = dataRow + 4;
+                const compEnd = dataRow + 5;
 
                 // Common FG columns A–J for all 5 rows
                 const fgCols = [
@@ -1591,7 +1591,7 @@ export class ApproverController {
                 const sumRow = ws.addRow([
                     ...fgCols,
                     null, null, null, null, null,
-                    { formula: `SUM(P${compStart}:P${compEnd})` },
+                    { formula: `SUM(P${compStart}:P${compEnd})*1.1` },
                     null, null,
                     { formula: `SUM(S${compStart}:S${compEnd})` },
                     { formula: `P${summaryRowNum}-S${summaryRowNum}` },
@@ -1639,19 +1639,30 @@ export class ApproverController {
                 [16, 19].forEach(c => { trimRow.getCell(c).numFmt = '#,##0.00'; });
                 dataRow++;
 
-                // Value Addition Cost row
-                const valRow = ws.addRow([
+                // Value Add Acc Cost row (from extraction_results_flat.value_add_cost)
+                const valAccRow = ws.addRow([
                     ...fgCols,
-                    'Value Addition Cost', null, null,
+                    'Value Add Acc Cost', null, null,
                     null, null, fgValAdd,
-                    null, null, fabValAdd,
+                    null, null, fgValAdd,
                     null, null,
                 ]);
-                [16, 19].forEach(c => { valRow.getCell(c).numFmt = '#,##0.00'; });
+                [16, 19].forEach(c => { valAccRow.getCell(c).numFmt = '#,##0.00'; });
+                dataRow++;
+
+                // Value Add Process Cost row (from extraction_results_flat.value_add_process_cost)
+                const valPrcsRow = ws.addRow([
+                    ...fgCols,
+                    'Value Add Prcs Cost', null, null,
+                    null, null, fgProcessCost,
+                    null, null, fgProcessCost,
+                    null, null,
+                ]);
+                [16, 19].forEach(c => { valPrcsRow.getCell(c).numFmt = '#,##0.00'; });
 
                 // Light grey separator between articles
-                [summaryRowNum, summaryRowNum + 1, summaryRowNum + 2, summaryRowNum + 3, summaryRowNum + 4].forEach(rn => {
-                    ws.getRow(rn).getCell(1).border = { left: { style: 'medium', color: { argb: 'FFAAAAAA' } } };
+                [0, 1, 2, 3, 4, 5].forEach(offset => {
+                    ws.getRow(summaryRowNum + offset).getCell(1).border = { left: { style: 'medium', color: { argb: 'FFAAAAAA' } } };
                 });
 
                 dataRow++;

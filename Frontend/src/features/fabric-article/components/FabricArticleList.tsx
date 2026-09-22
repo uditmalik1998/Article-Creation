@@ -444,6 +444,7 @@ const ArticleCard = React.memo(
     // Search term for the attribute-value dropdown. A single shared term is
     // enough because only one attribute (editingField) is open at a time.
     const [attrSearch, setAttrSearch] = useState('');
+    const [subDivSearch, setSubDivSearch] = useState('');
 
     // ── Created-page "Modify" flow ──────────────────────────────────────────
     // On the Created page, articles are already APPROVED + SAP-synced. We keep
@@ -1619,25 +1620,78 @@ const ArticleCard = React.memo(
                 )}
                 <span className="text-white/40">›</span>
                 {editingField === 'topbar_subDivision' ? (
-                  <Select
-                    defaultValue={(localValues['subDivision'] ?? item.subDivision) || undefined}
-                    onValueChange={(val) => handleSave('subDivision', val || null)}
+                  <Popover
+                    open
+                    onOpenChange={(open) => { if (!open) { setEditingField(null); setSubDivSearch(''); } }}
                   >
-                    <SelectTrigger className="h-6 w-32 border-white/30 bg-white/10 text-[11px] text-white">
-                      <SelectValue placeholder="Select sub-division" />
-                    </SelectTrigger>
-                    <SelectContent>
+                    <PopoverTrigger asChild>
+                      <button
+                        type="button"
+                        className="flex h-6 w-36 items-center justify-between rounded border border-white/30 bg-white/10 px-2 text-[11px] text-white"
+                      >
+                        <span className="truncate">
+                          {(localValues['subDivision'] ?? item.subDivision) || 'Select sub-division'}
+                        </span>
+                        <ChevronDown className="ml-1 h-3 w-3 shrink-0 opacity-60" />
+                      </button>
+                    </PopoverTrigger>
+                    <PopoverContent
+                      className="w-52 p-0"
+                      align="start"
+                      onClick={(e) => e.stopPropagation()}
+                    >
                       {(() => {
                         const effectiveDiv = (localValues['division'] ?? item.division) || '';
                         const opts = (effectiveDiv && fabHierarchy?.subDivsByDiv[effectiveDiv])
                           ? fabHierarchy.subDivsByDiv[effectiveDiv]
                           : Object.values(fabHierarchy?.subDivsByDiv ?? {}).flat();
-                        return opts.map((sd: string) => (
-                          <SelectItem key={sd} value={sd}>{sd}</SelectItem>
-                        ));
+                        const q = subDivSearch.trim().toLowerCase();
+                        const filtered = opts.filter((sd: string) => sd.toLowerCase().includes(q));
+                        const currentSubDiv = (localValues['subDivision'] ?? item.subDivision) || '';
+                        return (
+                          <>
+                            <div className="flex items-center border-b px-2 py-1.5">
+                              <Search className="mr-1.5 h-3.5 w-3.5 shrink-0 text-muted-foreground" />
+                              <input
+                                autoFocus
+                                value={subDivSearch}
+                                onChange={(e) => setSubDivSearch(e.target.value)}
+                                placeholder="Search..."
+                                className="flex-1 bg-transparent text-[11px] outline-none placeholder:text-muted-foreground"
+                              />
+                            </div>
+                            {currentSubDiv && (
+                              <button
+                                type="button"
+                                onClick={() => { handleSave('subDivision', null); setSubDivSearch(''); setEditingField(null); }}
+                                className="flex w-full items-center gap-1.5 border-b px-3 py-1.5 text-left text-[11px] font-medium text-red-600 hover:bg-red-50"
+                              >
+                                <X className="h-3 w-3 shrink-0" />
+                                Clear selection
+                              </button>
+                            )}
+                            <div className="max-h-56 overflow-y-auto py-1">
+                              {filtered.length === 0 ? (
+                                <div className="px-3 py-2 text-[11px] text-muted-foreground">No options found</div>
+                              ) : filtered.map((sd: string) => (
+                                <button
+                                  key={sd}
+                                  type="button"
+                                  onClick={() => { handleSave('subDivision', sd); setSubDivSearch(''); setEditingField(null); }}
+                                  className={cn(
+                                    'flex w-full px-3 py-1.5 text-left text-[11px] hover:bg-accent hover:text-accent-foreground',
+                                    sd === currentSubDiv && 'bg-accent/60 font-medium',
+                                  )}
+                                >
+                                  {sd}
+                                </button>
+                              ))}
+                            </div>
+                          </>
+                        );
                       })()}
-                    </SelectContent>
-                  </Select>
+                    </PopoverContent>
+                  </Popover>
                 ) : (
                   <span
                     onClick={() => {
