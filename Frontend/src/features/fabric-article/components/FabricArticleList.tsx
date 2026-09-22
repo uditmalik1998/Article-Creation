@@ -499,7 +499,7 @@ const ArticleCard = React.memo(
     // Auto-correct segment when ranges first load (fixes articles saved before this feature)
     useEffect(() => {
       if (segmentRanges.length === 0) return;
-      if (item.approvalStatus === 'APPROVED' || item.approvalStatus === 'REJECTED') return;
+      if (item.approvalStatus !== 'PENDING') return;
       const mrpVal = String((localValues['mrp'] !== undefined ? localValues['mrp'] : item.mrp) ?? '');
       const expected = computeSegmentFromMrp(mrpVal, segmentRanges);
       if (!expected) return;
@@ -1105,8 +1105,6 @@ const ArticleCard = React.memo(
       { label: 'VENDOR NAME', field: 'vendorName', editable: true, required: true, color: '#1f2937' },
       ...(!isFGMode ? [
         { label: 'ARTICLE DESC', field: 'articleDescription', editable: true, required: false, color: '#4b5563' },
-        { label: 'REFERENCE ARTICLE', field: 'referenceArticleNumber', editable: true, required: false, color: '#1f2937' },
-        { label: 'REFERENCE ARTICLE DESC', field: 'referenceArticleDescription', editable: true, required: false, color: '#1f2937' },
       ] : []),
     ];
 
@@ -2070,36 +2068,6 @@ const ArticleCard = React.memo(
                                   <>
                                     {renderField('fabricArticleNumber', 'FABRIC ARTICLE NO.')}
                                     {renderField('fabricArticleDescription', 'FABRIC ARTICLE DESC', fabAutoFill, isFGMode ? undefined : 40)}
-                                    {!isFGMode && (
-                                      <div className="border-t border-border px-2 py-1.5">
-                                        <Button
-                                          size="sm"
-                                          onClick={async () => {
-                                            const mergedItem = {
-                                              ...item,
-                                              ...Object.fromEntries(
-                                                Object.entries(localValues).filter(([, v]) => v !== null && v !== undefined)
-                                              ),
-                                            } as ApproverItem;
-                                            if (isModifyMode) {
-                                              const fabDesc = mergedItem.fabricArticleDescription;
-                                              if (fabDesc && fabDesc !== item.fabricArticleDescription) {
-                                                await onSave(
-                                                  { ...item, fabricArticleDescription: fabDesc } as ApproverItem,
-                                                  { fabricArticleDescription: fabDesc } as Record<string, unknown>,
-                                                  { silent: true },
-                                                );
-                                              }
-                                            }
-                                            onCreateFabricArticle(mergedItem);
-                                          }}
-                                          className="h-7 w-full border border-slate-300 bg-slate-50 text-[11px] font-medium text-slate-700 hover:bg-[#FF6F61]/10 hover:border-[#FF6F61]/40 hover:text-[#FF6F61]"
-                                        >
-                                          <FileText />
-                                          Create Fabric Article
-                                        </Button>
-                                      </div>
-                                    )}
                                   </>
                                 );
                               })()}
