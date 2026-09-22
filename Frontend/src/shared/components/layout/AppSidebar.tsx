@@ -149,7 +149,6 @@ export const AppSidebar: React.FC<AppSidebarProps> = ({ collapsed, onCollapsedCh
         label: 'Extraction',
         children: [
           { key: '/extraction/fg-article', Icon: FileText, label: 'FG Article' },
-          { key: '/extraction/fabric-article', Icon: FileText, label: 'Fabric Article' },
         ],
       });
     }

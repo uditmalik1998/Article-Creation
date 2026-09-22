@@ -1073,18 +1073,16 @@ const ArticleCard = React.memo(
     }, [effectiveMajCat]);
 
     // Auto-fill VALUE ADD ACC. COST from the VAAC table on initial load (only if empty).
-    // For PENDING articles: fetches VAAC value and saves it to DB.
-    // For APPROVED articles: fetches VAAC value for display only — never saves (article is locked).
+    // Only for PENDING articles — Approved articles show their stored DB value directly.
     useEffect(() => {
       if (!effectiveMajCat) return;
+      if (item.approvalStatus !== 'PENDING') return; // Approved articles: skip API, show stored value
       const current = (item as any).valueAddCost ?? localValues['valueAddCost'];
       if (current != null && String(current).trim() !== '') return; // already has a value — skip
       fetchVaacTotalValue(effectiveMajCat).then((val) => {
         if (val == null) return;
         const strVal = String(val);
         setLocalValues((prev) => ({ ...prev, valueAddCost: strVal }));
-        // Only persist to DB for PENDING articles — APPROVED articles are locked for SAP sync.
-        if (item.approvalStatus !== 'PENDING') return;
         onSave({ ...item, valueAddCost: strVal } as ApproverItem, { valueAddCost: strVal } as Record<string, unknown>);
       });
       // eslint-disable-next-line react-hooks/exhaustive-deps

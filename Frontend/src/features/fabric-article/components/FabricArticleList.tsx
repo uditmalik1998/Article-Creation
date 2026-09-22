@@ -1103,9 +1103,6 @@ const ArticleCard = React.memo(
       },
       { label: 'VENDOR CODE', field: 'vendorCode', editable: true, required: true, color: '#1f2937' },
       { label: 'VENDOR NAME', field: 'vendorName', editable: true, required: true, color: '#1f2937' },
-      ...(!isFGMode ? [
-        { label: 'ARTICLE DESC', field: 'articleDescription', editable: true, required: false, color: '#4b5563' },
-      ] : []),
     ];
 
     const renderHeaderField = ({
@@ -2120,9 +2117,7 @@ const ArticleCard = React.memo(
                               getCachedValues(item.division ?? '', 'impAtrbt2') ??
                               []
                             : bom.field === 'articleFashionType'
-                            ? attributes.find((a) => a.key === 'article_fashion_type')?.allowedValues.map((v) => v.shortForm) ??
-                              getCachedValues(item.division ?? '', 'articleFashionType') ??
-                              []
+                            ? ['C']
                             : getCachedValues(item.division ?? '', bom.field) ?? []
                           : [];
                         return (
