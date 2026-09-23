@@ -6952,10 +6952,10 @@ export const getMajorCategories = async (req: Request, res: Response) => {
   }
   const rows = await prisma.majorCategoryDetails.findMany({
     where,
-    select: { mcDes: true },
-    orderBy: { mcDes: 'asc' },
+    select: { majCat: true },
+    orderBy: { majCat: 'asc' },
   });
-  const data = rows.map((r) => r.mcDes).filter(Boolean) as string[];
+  const data = rows.map((r) => r.majCat).filter(Boolean) as string[];
   res.json({ success: true, data });
 };
 // ═══════════════════════════════════════════════════════
