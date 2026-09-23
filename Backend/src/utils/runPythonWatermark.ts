@@ -89,11 +89,12 @@ export async function runPythonWatermark(
 
     py.on('close', (code: number | null) => {
       clearTimeout(timer);
+      const errText = Buffer.concat(errChunks).toString().trim();
+      if (errText) console.log(`[watermark stderr] ${errText}`);
       if (code === 0 && outBytes > 0) {
         finish({ success: true, buffer: Buffer.concat(outChunks), mimeType, durationMs: 0 });
         return;
       }
-      const errText = Buffer.concat(errChunks).toString().trim();
       finish({
         success: false,
         error: errText || `Python exited with code ${code} and no output`,
