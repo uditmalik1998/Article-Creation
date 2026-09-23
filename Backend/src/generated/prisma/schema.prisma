@@ -375,6 +375,14 @@ model ExtractionResultFlat {
   variantColor     String? @map("variant_color") @db.VarChar(100)
   variantWeight    String? @map("variant_weight") @db.VarChar(50)
 
+  // Combo/Set articles (e.g. Kurti Set, Baba Suit) — a parent article
+  // assembled from multiple child pieces; only the parent syncs to SAP.
+  comboRole       ComboRole              @default(NONE) @map("combo_role")
+  comboParentId   String?                @map("combo_parent_id")
+  comboParent     ExtractionResultFlat?  @relation("ComboChildren", fields: [comboParentId], references: [id], onDelete: Cascade)
+  comboChildren   ExtractionResultFlat[] @relation("ComboChildren")
+  comboChildOrder Int?                   @map("combo_child_order")
+
   // SAP Sync (Placeholder)
   sapSyncStatus  SapSyncStatus @default(NOT_SYNCED) @map("sap_sync_status")
   sapArticleId   String?       @map("sap_article_id") @db.VarChar(100)
@@ -413,6 +421,8 @@ model ExtractionResultFlat {
   @@index([isGeneric, approvalStatus, division])
   @@index([isOldArticle, approvalStatus])
   @@index([approvalStatus, pdStatus], map: "idx_erf_approval_pd")
+  @@index([comboParentId])
+  @@index([comboRole])
   @@map("extraction_results_flat")
   @@schema("public")
 }
@@ -710,6 +720,15 @@ enum SapSyncStatus {
   FAILED
 
   @@map("sap_sync_status")
+  @@schema("public")
+}
+
+enum ComboRole {
+  NONE
+  PARENT
+  CHILD
+
+  @@map("combo_role")
   @@schema("public")
 }
 

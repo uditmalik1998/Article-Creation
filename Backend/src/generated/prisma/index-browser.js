@@ -387,6 +387,9 @@ exports.Prisma.ExtractionResultFlatScalarFieldEnum = {
   variantSize: 'variantSize',
   variantColor: 'variantColor',
   variantWeight: 'variantWeight',
+  comboRole: 'comboRole',
+  comboParentId: 'comboParentId',
+  comboChildOrder: 'comboChildOrder',
   sapSyncStatus: 'sapSyncStatus',
   sapArticleId: 'sapArticleId',
   sapSyncMessage: 'sapSyncMessage',
@@ -1419,6 +1422,7 @@ exports.Prisma.ExtractionResultFlatOrderByRelevanceFieldEnum = {
   variantSize: 'variantSize',
   variantColor: 'variantColor',
   variantWeight: 'variantWeight',
+  comboParentId: 'comboParentId',
   sapArticleId: 'sapArticleId',
   sapSyncMessage: 'sapSyncMessage',
   srmOriginalDesignNumber: 'srmOriginalDesignNumber',
@@ -1999,6 +2003,12 @@ exports.ApprovalStatus = exports.$Enums.ApprovalStatus = {
 exports.PdStatus = exports.$Enums.PdStatus = {
   PENDING: 'PENDING',
   COMPLETED: 'COMPLETED'
+};
+
+exports.ComboRole = exports.$Enums.ComboRole = {
+  NONE: 'NONE',
+  PARENT: 'PARENT',
+  CHILD: 'CHILD'
 };
 
 exports.SapSyncStatus = exports.$Enums.SapSyncStatus = {

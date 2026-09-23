@@ -19,6 +19,8 @@ import { prismaClient as prisma } from '../utils/prisma';
 import { syncGenericToVariants, addColorVariants, getSizesForMajCat, isSizeAllowed } from '../services/variantCreationService';
 import { hasVendorCode, isValidVendorCode, normalizeVendorCode } from '../utils/vendorCode';
 import { mirror360FlatUpdate } from '../utils/mirror360Flat';
+import { isComboMajorCategory } from '../config/comboMajorCategories';
+import { getComboChildTemplate } from '../config/comboChildTemplates';
 
 // Fields a client is allowed to update / modify on an article. Shared by
 // updateItem (PUT) and modifyItem (SAP patch-bulk). Anything not in this list
@@ -720,6 +722,10 @@ export class ApproverController {
                 where.presentationsType = String(presentationsType);
             }
 
+            // Combo/set children (Kurti Set, Baba Suit, ...) are never listed as
+            // independent rows — they only ever surface nested under their parent.
+            where.comboRole = { not: 'CHILD' };
+
             // Status Filtering (Multi-select support)
             // Supports virtual FAILED status mapped from sapSyncStatus=FAILED.
             // Skip status filter when pathType already forces a specific status.
@@ -953,6 +959,9 @@ export class ApproverController {
                     approver: {
                         select: { name: true, email: true },
                     },
+                    comboRole: true,
+                    comboParentId: true,
+                    comboChildOrder: true,
                 }
             };
 
@@ -1743,6 +1752,7 @@ export class ApproverController {
                     isGeneric: true, genericArticleId: true, variantSize: true, variantColor: true,
                     approvedBy: true, approvedAt: true,
                     approver: { select: { name: true, email: true } },
+                    comboRole: true, comboParentId: true, comboChildOrder: true,
                 },
             });
             if (!item) return res.status(404).json({ error: 'Item not found' });
@@ -2290,6 +2300,178 @@ export class ApproverController {
         }
     }
 
+    // ─── Combo/Set articles (Kurti Set, Baba Suit, ...) ──────────────────────────
+    // A parent extraction_results_flat row (major category gated by
+    // isComboMajorCategory) is assembled from N ≥ 2 child rows. Children are
+    // real, persisted rows so they're visible for audit, but they never sync to
+    // SAP on their own (see the comboRole guards in approveItems /
+    // runApprovalSyncTick / getItems). Only the assembled parent gets approved.
+
+    // GET /combo-articles/:parentId — parent row + its ordered children.
+    // The first time a combo parent is opened, its mandatory children (per
+    // COMBO_CHILD_TEMPLATES) are auto-provisioned so the user only has to fill
+    // them in, not create them from scratch.
+    static getComboArticle = async (req: Request, res: Response) => {
+        const { parentId } = req.params;
+        const parent = await prisma.extractionResultFlat.findUnique({ where: { id: parentId } });
+        if (!parent) return res.status(404).json({ error: 'Parent article not found' });
+
+        let children = await prisma.extractionResultFlat.findMany({
+            where: { comboParentId: parentId, comboRole: 'CHILD' },
+            orderBy: { comboChildOrder: 'asc' },
+        });
+
+        if (children.length === 0) {
+            const template = getComboChildTemplate(parent.majorCategory);
+            if (template.length > 0) {
+                await prisma.$transaction(
+                    template.map((t, i) => prisma.extractionResultFlat.create({
+                        data: {
+                            comboRole: 'CHILD',
+                            comboParentId: parentId,
+                            comboChildOrder: i + 1,
+                            presentationsType: parent.presentationsType,
+                            source: parent.source,
+                            pptNumber: parent.pptNumber,
+                            vendorName: parent.vendorName,
+                            division: parent.division,
+                            subDivision: parent.subDivision,
+                            majorCategory: t.majorCategory,
+                            articleDescription: t.label,
+                            designNumber: parent.designNumber,
+                            isGeneric: true,
+                            isOldArticle: false,
+                            approvalStatus: 'PENDING',
+                            sapSyncStatus: 'NOT_SYNCED',
+                            userName: parent.userName,
+                        },
+                    })),
+                );
+                children = await prisma.extractionResultFlat.findMany({
+                    where: { comboParentId: parentId, comboRole: 'CHILD' },
+                    orderBy: { comboChildOrder: 'asc' },
+                });
+            }
+        }
+
+        const mandatoryMajorCategories = new Set(getComboChildTemplate(parent.majorCategory).map((t) => t.majorCategory));
+        const childrenWithFlag = children.map((c) => ({ ...c, isMandatoryChild: mandatoryMajorCategories.has(c.majorCategory || '') }));
+
+        return res.json({ parent, children: childrenWithFlag });
+    };
+
+    // POST /combo-articles/:parentId/children — add a new child article, cloning
+    // read-only context from the parent so the user only has to fill in the
+    // child's own detail fields.
+    static addComboChild = async (req: Request, res: Response) => {
+        const { parentId } = req.params;
+        const parent = await prisma.extractionResultFlat.findUnique({ where: { id: parentId } });
+        if (!parent) return res.status(404).json({ error: 'Parent article not found' });
+        if (!isComboMajorCategory(parent.majorCategory)) {
+            return res.status(400).json({ error: `Major category "${parent.majorCategory ?? ''}" is not enabled for combo/set articles.` });
+        }
+        if (parent.sapSyncStatus === 'SYNCED') {
+            return res.status(400).json({ error: 'This combo article has already been submitted to SAP — cannot add more children.' });
+        }
+
+        const existingCount = await prisma.extractionResultFlat.count({ where: { comboParentId: parentId, comboRole: 'CHILD' } });
+
+        const child = await prisma.extractionResultFlat.create({
+            data: {
+                comboRole: 'CHILD',
+                comboParentId: parentId,
+                comboChildOrder: existingCount + 1,
+                presentationsType: parent.presentationsType,
+                source: parent.source,
+                pptNumber: parent.pptNumber,
+                vendorName: parent.vendorName,
+                division: parent.division,
+                subDivision: parent.subDivision,
+                majorCategory: parent.majorCategory,
+                designNumber: parent.designNumber,
+                isGeneric: true,
+                isOldArticle: false,
+                approvalStatus: 'PENDING',
+                sapSyncStatus: 'NOT_SYNCED',
+                userName: parent.userName,
+            },
+        });
+
+        return res.status(201).json(child);
+    };
+
+    // DELETE /combo-articles/children/:childId — remove a not-yet-submitted child
+    static deleteComboChild = async (req: Request, res: Response) => {
+        const { childId } = req.params;
+        const child = await prisma.extractionResultFlat.findUnique({ where: { id: childId } });
+        if (!child || child.comboRole !== 'CHILD') return res.status(404).json({ error: 'Child article not found' });
+
+        if (child.comboParentId) {
+            const parent = await prisma.extractionResultFlat.findUnique({ where: { id: child.comboParentId } });
+            if (parent?.sapSyncStatus === 'SYNCED') {
+                return res.status(400).json({ error: 'This combo article has already been submitted to SAP — children can no longer be removed.' });
+            }
+            const isMandatory = getComboChildTemplate(parent?.majorCategory).some((t) => t.majorCategory === child.majorCategory);
+            if (isMandatory) {
+                return res.status(400).json({ error: `"${child.articleDescription || child.majorCategory}" is a mandatory child for this combo category and cannot be removed.` });
+            }
+        }
+
+        await prisma.extractionResultFlat.delete({ where: { id: childId } });
+        return res.json({ success: true });
+    };
+
+    // POST /combo-articles/:parentId/assemble — auto-derive the parent's fields
+    // from its children (sum rate/MRP, join descriptions), then queue ONLY the
+    // parent for SAP approval via the existing async approve → background-worker
+    // path (runApprovalSyncTick → syncArticlesToSapViaRfc). Children are left
+    // untouched — they never get their own SAP article number.
+    static assembleComboArticle = async (req: Request, res: Response) => {
+        const { parentId } = req.params;
+        // @ts-ignore
+        const userId = req.user?.id;
+        const parent = await prisma.extractionResultFlat.findUnique({ where: { id: parentId } });
+        if (!parent) return res.status(404).json({ error: 'Parent article not found' });
+
+        const children = await prisma.extractionResultFlat.findMany({
+            where: { comboParentId: parentId, comboRole: 'CHILD' },
+            orderBy: { comboChildOrder: 'asc' },
+        });
+        if (children.length < 2) {
+            return res.status(400).json({ error: 'At least 2 child articles are required before submitting a combo article.' });
+        }
+
+        const sumDecimal = (values: (Prisma.Decimal | number | null)[]): number | null => {
+            const nums = values.map((v) => (v == null ? null : Number(v))).filter((n): n is number => n != null && !Number.isNaN(n));
+            if (nums.length === 0) return null;
+            return nums.reduce((a, b) => a + b, 0);
+        };
+
+        const description = children
+            .map((c) => (c.articleDescription || '').trim())
+            .filter(Boolean)
+            .join(' + ') || parent.articleDescription;
+
+        await prisma.extractionResultFlat.update({
+            where: { id: parentId },
+            data: {
+                comboRole: 'PARENT',
+                articleDescription: description,
+                rate: sumDecimal(children.map((c) => c.rate)) ?? undefined,
+                mrp: sumDecimal(children.map((c) => c.mrp)) ?? undefined,
+                approvalStatus: 'APPROVED',
+                approvedBy: userId ? Number(userId) : null,
+                approvedAt: new Date(),
+                sapSyncStatus: SapSyncStatus.PENDING,
+            },
+        });
+
+        ApproverController.itemsCache.clear();
+        ApproverController.countCache.clear();
+
+        return res.status(202).json({ queued: true });
+    };
+
     static async approveItems(req: Request, res: Response) {
         ApproverController.itemsCache.clear();
         ApproverController.countCache.clear();
@@ -2328,7 +2510,10 @@ export class ApproverController {
 
             const whereClause: any = {
                 id: { in: ids },
-                approvalStatus: 'PENDING'
+                approvalStatus: 'PENDING',
+                // Combo/set children (Kurti Set, Baba Suit, ...) never sync to SAP on
+                // their own — only their assembled parent does, via /combo-articles/:parentId/assemble.
+                comboRole: { not: 'CHILD' },
             };
 
             // RBAC: Enforce scope by role
@@ -2797,6 +2982,7 @@ export class ApproverController {
                     WHERE is_generic = true
                       AND approval_status::text = 'APPROVED'
                       AND sap_sync_status::text = 'PENDING'
+                      AND combo_role::text != 'CHILD'
                       AND (sap_lock_until IS NULL OR sap_lock_until < NOW())
                     ORDER BY approved_at ASC
                     LIMIT ${batchSize}
@@ -2808,7 +2994,7 @@ export class ApproverController {
             const ids = claimed.map((c) => c.id);
 
             const remaining = await prisma.extractionResultFlat.count({
-                where: { isGeneric: true, approvalStatus: 'APPROVED', sapSyncStatus: SapSyncStatus.PENDING },
+                where: { isGeneric: true, approvalStatus: 'APPROVED', sapSyncStatus: SapSyncStatus.PENDING, comboRole: { not: 'CHILD' } },
             });
             console.log(`[ApprovalSync] Claimed ${ids.length} approved article(s) to sync (${remaining} still queued)`);
 

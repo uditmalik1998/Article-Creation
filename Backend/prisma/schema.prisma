@@ -220,176 +220,184 @@ model ExtractionResult {
 
 /// Extraction Result Flat: Denormalized table for fast querying and Excel export
 model ExtractionResultFlat {
-  id                          String        @id @default(uuid())
-  jobId                       String?       @unique @map("job_id")
-  imageName                   String?       @map("image_name") @db.VarChar(255)
-  imageUrl                    String?       @map("image_url")
-  articleNumber               String?       @map("article_number") @db.VarChar(100)
-  extractionStatus            String?       @map("extraction_status") @db.VarChar(50)
-  aiModel                     String?       @map("ai_model") @db.VarChar(100)
-  avgConfidence               Decimal?      @map("avg_confidence") @db.Decimal(5, 2)
-  processingTimeMs            Int?          @map("processing_time_ms")
-  totalAttributes             Int?          @map("total_attributes")
-  extractedCount              Int?          @map("extracted_count")
-  inputTokens                 Int?          @map("input_tokens")
-  outputTokens                Int?          @map("output_tokens")
-  totalTokens                 Int?          @map("total_tokens")
-  apiCost                     Decimal?      @map("api_cost") @db.Decimal(10, 6)
-  userId                      Int?          @map("user_id")
-  userName                    String?       @map("user_name") @db.VarChar(200)
-  extractionDate              DateTime?     @map("extraction_date") @db.Date
-  createdAt                   DateTime      @default(now()) @map("created_at")
-  updatedAt                   DateTime      @updatedAt @map("updated_at")
-  majorCategory               String?       @map("major_category") @db.VarChar(200)
-  vendorName                  String?       @map("vendor_name") @db.VarChar(200)
-  designNumber                String?       @map("design_number") @db.VarChar(100)
-  pptNumber                   String?       @map("ppt_number") @db.VarChar(100)
-  rate                        Decimal?      @db.Decimal(10, 2)
-  size                        String?       @db.VarChar(50)
-  yarn1                       String?       @map("yarn_1") @db.VarChar(100)
-  yarn2                       String?       @map("yarn_2") @db.VarChar(100)
-  fabricMainMvgr              String?       @map("fabric_main_mvgr") @db.VarChar(100)
-  weave                       String?       @db.VarChar(100)
-  weaveFullForm               String?       @map("weave_full_form") @db.VarChar(200)
-  composition                 String?       @db.VarChar(200)
-  finish                      String?       @db.VarChar(100)
-  gsm                         String?       @db.VarChar(50)
-  macroMvgr                   String?       @map("macro_mvgr") @db.VarChar(100)
-  macroMvgrFullForm           String?       @map("macro_mvgr_full_form") @db.VarChar(200)
-  mainMvgr                    String?       @map("main_mvgr") @db.VarChar(100)
-  mainMvgrFullForm            String?       @map("main_mvgr_full_form") @db.VarChar(200)
-  mFab2                       String?       @map("m_fab2") @db.VarChar(100)
-  mFab2FullForm               String?       @map("m_fab2_full_form") @db.VarChar(200)
-  shade                       String?       @db.VarChar(100)
-  weight                      String?       @db.VarChar(100)
-  lycra                       String?       @db.VarChar(50)
-  neck                        String?       @db.VarChar(100)
-  neckDetails                 String?       @map("neck_details") @db.VarChar(200)
-  collar                      String?       @db.VarChar(100)
-  placket                     String?       @db.VarChar(100)
-  sleeve                      String?       @db.VarChar(100)
-  bottomFold                  String?       @map("bottom_fold") @db.VarChar(100)
-  frontOpenStyle              String?       @map("front_open_style") @db.VarChar(100)
-  pocketType                  String?       @map("pocket_type") @db.VarChar(100)
-  fit                         String?       @db.VarChar(100)
-  pattern                     String?       @db.VarChar(100)
-  length                      String?       @db.VarChar(100)
-  colour                      String?       @db.VarChar(100)
-  secondaryColour             String?       @map("secondary_colour") @db.VarChar(100)
-  drawcord                    String?       @db.VarChar(100)
-  button                      String?       @db.VarChar(100)
-  zipper                      String?       @db.VarChar(100)
-  zipColour                   String?       @map("zip_colour") @db.VarChar(100)
-  printType                   String?       @map("print_type") @db.VarChar(100)
-  printStyle                  String?       @map("print_style") @db.VarChar(100)
-  printPlacement              String?       @map("print_placement") @db.VarChar(100)
-  patches                     String?       @db.VarChar(100)
-  patchesType                 String?       @map("patches_type") @db.VarChar(100)
-  embroidery                  String?       @db.VarChar(100)
-  embroideryType              String?       @map("embroidery_type") @db.VarChar(100)
-  wash                        String?       @db.VarChar(100)
-  fatherBelt                  String?       @map("father_belt") @db.VarChar(100)
-  childBelt                   String?       @map("child_belt") @db.VarChar(100)
-  division                    String?       @db.VarChar(100)
-  subDivision                 String?       @map("sub_division") @db.VarChar(100)
-  referenceArticleNumber      String?       @map("reference_article_number") @db.VarChar(100)
-  referenceArticleDescription String?       @map("reference_article_description")
+  id                          String    @id @default(uuid())
+  jobId                       String?   @unique @map("job_id")
+  imageName                   String?   @map("image_name") @db.VarChar(255)
+  imageUrl                    String?   @map("image_url")
+  articleNumber               String?   @map("article_number") @db.VarChar(100)
+  extractionStatus            String?   @map("extraction_status") @db.VarChar(50)
+  aiModel                     String?   @map("ai_model") @db.VarChar(100)
+  avgConfidence               Decimal?  @map("avg_confidence") @db.Decimal(5, 2)
+  processingTimeMs            Int?      @map("processing_time_ms")
+  totalAttributes             Int?      @map("total_attributes")
+  extractedCount              Int?      @map("extracted_count")
+  inputTokens                 Int?      @map("input_tokens")
+  outputTokens                Int?      @map("output_tokens")
+  totalTokens                 Int?      @map("total_tokens")
+  apiCost                     Decimal?  @map("api_cost") @db.Decimal(10, 6)
+  userId                      Int?      @map("user_id")
+  userName                    String?   @map("user_name") @db.VarChar(200)
+  extractionDate              DateTime? @map("extraction_date") @db.Date
+  createdAt                   DateTime  @default(now()) @map("created_at")
+  updatedAt                   DateTime  @updatedAt @map("updated_at")
+  majorCategory               String?   @map("major_category") @db.VarChar(200)
+  vendorName                  String?   @map("vendor_name") @db.VarChar(200)
+  designNumber                String?   @map("design_number") @db.VarChar(100)
+  pptNumber                   String?   @map("ppt_number") @db.VarChar(100)
+  rate                        Decimal?  @db.Decimal(10, 2)
+  size                        String?   @db.VarChar(50)
+  yarn1                       String?   @map("yarn_1") @db.VarChar(100)
+  yarn2                       String?   @map("yarn_2") @db.VarChar(100)
+  fabricMainMvgr              String?   @map("fabric_main_mvgr") @db.VarChar(100)
+  weave                       String?   @db.VarChar(100)
+  weaveFullForm               String?   @map("weave_full_form") @db.VarChar(200)
+  composition                 String?   @db.VarChar(200)
+  finish                      String?   @db.VarChar(100)
+  gsm                         String?   @db.VarChar(50)
+  macroMvgr                   String?   @map("macro_mvgr") @db.VarChar(100)
+  macroMvgrFullForm           String?   @map("macro_mvgr_full_form") @db.VarChar(200)
+  mainMvgr                    String?   @map("main_mvgr") @db.VarChar(100)
+  mainMvgrFullForm            String?   @map("main_mvgr_full_form") @db.VarChar(200)
+  mFab2                       String?   @map("m_fab2") @db.VarChar(100)
+  mFab2FullForm               String?   @map("m_fab2_full_form") @db.VarChar(200)
+  shade                       String?   @db.VarChar(100)
+  weight                      String?   @db.VarChar(100)
+  lycra                       String?   @db.VarChar(50)
+  neck                        String?   @db.VarChar(100)
+  neckDetails                 String?   @map("neck_details") @db.VarChar(200)
+  collar                      String?   @db.VarChar(100)
+  placket                     String?   @db.VarChar(100)
+  sleeve                      String?   @db.VarChar(100)
+  bottomFold                  String?   @map("bottom_fold") @db.VarChar(100)
+  frontOpenStyle              String?   @map("front_open_style") @db.VarChar(100)
+  pocketType                  String?   @map("pocket_type") @db.VarChar(100)
+  fit                         String?   @db.VarChar(100)
+  pattern                     String?   @db.VarChar(100)
+  length                      String?   @db.VarChar(100)
+  colour                      String?   @db.VarChar(100)
+  secondaryColour             String?   @map("secondary_colour") @db.VarChar(100)
+  drawcord                    String?   @db.VarChar(100)
+  button                      String?   @db.VarChar(100)
+  zipper                      String?   @db.VarChar(100)
+  zipColour                   String?   @map("zip_colour") @db.VarChar(100)
+  printType                   String?   @map("print_type") @db.VarChar(100)
+  printStyle                  String?   @map("print_style") @db.VarChar(100)
+  printPlacement              String?   @map("print_placement") @db.VarChar(100)
+  patches                     String?   @db.VarChar(100)
+  patchesType                 String?   @map("patches_type") @db.VarChar(100)
+  embroidery                  String?   @db.VarChar(100)
+  embroideryType              String?   @map("embroidery_type") @db.VarChar(100)
+  wash                        String?   @db.VarChar(100)
+  fatherBelt                  String?   @map("father_belt") @db.VarChar(100)
+  childBelt                   String?   @map("child_belt") @db.VarChar(100)
+  division                    String?   @db.VarChar(100)
+  subDivision                 String?   @map("sub_division") @db.VarChar(100)
+  referenceArticleNumber      String?   @map("reference_article_number") @db.VarChar(100)
+  referenceArticleDescription String?   @map("reference_article_description")
 
   // ===== GARMENT ATTRIBUTE FIELDS =====
-  collarStyle                 String?       @map("collar_style") @db.VarChar(100)
-  sleeveFold                  String?       @map("sleeve_fold") @db.VarChar(100)
-  mSet                        String?       @map("m_set") @db.VarChar(100)
-  noOfPocket                  String?       @map("no_of_pocket") @db.VarChar(50)
-  extraPocket                 String?       @map("extra_pocket") @db.VarChar(100)
-  dcShape                     String?       @map("dc_shape") @db.VarChar(100)
-  btnColour                   String?       @map("btn_colour") @db.VarChar(100)
-  fCount                      String?       @map("f_count") @db.VarChar(100)
-  fConstruction               String?       @map("f_construction") @db.VarChar(100)
-  fOunce                      String?       @map("f_ounce") @db.VarChar(100)
-  fWidth                      String?       @map("f_width") @db.VarChar(100)
-  fabDiv                      String?       @map("fab_div") @db.VarChar(100)
-  fabVdr                      String?       @map("fab_vdr") @db.VarChar(100)
-  htrfType                    String?       @map("htrf_type") @db.VarChar(100)
-  htrfStyle                   String?       @map("htrf_style") @db.VarChar(100)
-  embPlacement                String?       @map("emb_placement") @db.VarChar(100)
-  ageGroup                    String?       @map("age_group") @db.VarChar(100)
-  mNoOfSize                   String?       @map("m_no_of_size") @db.VarChar(100)
-  mNoOfClr                    String?       @map("m_no_of_clr") @db.VarChar(100)
-  articleFashionType          String?       @map("article_fashion_type") @db.VarChar(100)
-  articleDimension            String?       @map("article_dimension") @db.VarChar(100)
+  collarStyle        String? @map("collar_style") @db.VarChar(100)
+  sleeveFold         String? @map("sleeve_fold") @db.VarChar(100)
+  mSet               String? @map("m_set") @db.VarChar(100)
+  noOfPocket         String? @map("no_of_pocket") @db.VarChar(50)
+  extraPocket        String? @map("extra_pocket") @db.VarChar(100)
+  dcShape            String? @map("dc_shape") @db.VarChar(100)
+  btnColour          String? @map("btn_colour") @db.VarChar(100)
+  fCount             String? @map("f_count") @db.VarChar(100)
+  fConstruction      String? @map("f_construction") @db.VarChar(100)
+  fOunce             String? @map("f_ounce") @db.VarChar(100)
+  fWidth             String? @map("f_width") @db.VarChar(100)
+  fabDiv             String? @map("fab_div") @db.VarChar(100)
+  fabVdr             String? @map("fab_vdr") @db.VarChar(100)
+  htrfType           String? @map("htrf_type") @db.VarChar(100)
+  htrfStyle          String? @map("htrf_style") @db.VarChar(100)
+  embPlacement       String? @map("emb_placement") @db.VarChar(100)
+  ageGroup           String? @map("age_group") @db.VarChar(100)
+  mNoOfSize          String? @map("m_no_of_size") @db.VarChar(100)
+  mNoOfClr           String? @map("m_no_of_clr") @db.VarChar(100)
+  articleFashionType String? @map("article_fashion_type") @db.VarChar(100)
+  articleDimension   String? @map("article_dimension") @db.VarChar(100)
 
   // ===== BODY ARTICLE COST FIELDS =====
-  cmtpCost                    Decimal?      @map("cmtp_cost") @db.Decimal(10, 2)
-  cmpCost                     Decimal?      @map("cmp_cost")  @db.Decimal(10, 2)
-  fabCost                     Decimal?      @map("fab_cost")  @db.Decimal(10, 2)
-  fabCons                     Decimal?      @map("fab_cons")  @db.Decimal(10, 2)
-  width                       Decimal?      @map("width")     @db.Decimal(10, 2)
-  vendorFabricRate            Decimal?      @map("vendor_fabric_rate")         @db.Decimal(10, 2)
-  valueAddAccCostType         String?       @map("value_add_acc_cost_type")    @db.VarChar(50)
-  valueAddCost                Decimal?      @map("value_add_cost")             @db.Decimal(10, 2)
-  valueAddProcessCost         Decimal?      @map("value_add_process_cost")     @db.Decimal(10, 2)
+  cmtpCost            Decimal? @map("cmtp_cost") @db.Decimal(10, 2)
+  cmpCost             Decimal? @map("cmp_cost") @db.Decimal(10, 2)
+  fabCost             Decimal? @map("fab_cost") @db.Decimal(10, 2)
+  fabCons             Decimal? @map("fab_cons") @db.Decimal(10, 2)
+  width               Decimal? @map("width") @db.Decimal(10, 2)
+  vendorFabricRate    Decimal? @map("vendor_fabric_rate") @db.Decimal(10, 2)
+  valueAddAccCostType String?  @map("value_add_acc_cost_type") @db.VarChar(50)
+  valueAddCost        Decimal? @map("value_add_cost") @db.Decimal(10, 2)
+  valueAddProcessCost Decimal? @map("value_add_process_cost") @db.Decimal(10, 2)
 
   // ===== ARTICLE REFERENCE FIELDS =====
-  bodyArticle                 String?       @map("body_article") @db.VarChar(100)
-  bodyArticleDescription      String?       @map("body_article_description")
-  fabricArticleNumber         String?       @map("fabric_article_number") @db.VarChar(100)
-  fabricArticleDescription    String?       @map("fabric_article_description")
-  attrArticleNums             String?       @map("attr_article_nums")  // JSON string
-  mvgrBrandVendor             String?       @map("mvgr_brand_vendor") @db.VarChar(100)
+  bodyArticle              String? @map("body_article") @db.VarChar(100)
+  bodyArticleDescription   String? @map("body_article_description")
+  fabricArticleNumber      String? @map("fabric_article_number") @db.VarChar(100)
+  fabricArticleDescription String? @map("fabric_article_description")
+  attrArticleNums          String? @map("attr_article_nums") // JSON string
+  mvgrBrandVendor          String? @map("mvgr_brand_vendor") @db.VarChar(100)
 
   // ===== NEW BUSINESS FIELDS =====
-  mcDescription               String?       @map("mc_description") @db.VarChar(200)
-  vendorCode                  String?       @map("vendor_code") @db.VarChar(100)
-  mrp                         Decimal?      @db.Decimal(10, 2)
-  impAtrbt2                   String?       @map("imp_atrbt_2") @db.VarChar(200)
-  mcCode                      String?       @map("mc_code") @db.VarChar(100)
-  segment                     String?       @db.VarChar(100)
-  season                      String?       @db.VarChar(100)
-  hsnTaxCode                  String?       @map("hsn_tax_code") @db.VarChar(100)
-  articleDescription          String?       @map("article_description")
-  fashionGrid                 String?       @map("fashion_grid") @db.VarChar(100)
-  year                        String?       @db.VarChar(20)
-  articleType                 String?       @map("article_type") @db.VarChar(100)
-  presentationsType           String?       @map("Presentations_type") @db.VarChar(100)
+  mcDescription      String?  @map("mc_description") @db.VarChar(200)
+  vendorCode         String?  @map("vendor_code") @db.VarChar(100)
+  mrp                Decimal? @db.Decimal(10, 2)
+  impAtrbt2          String?  @map("imp_atrbt_2") @db.VarChar(200)
+  mcCode             String?  @map("mc_code") @db.VarChar(100)
+  segment            String?  @db.VarChar(100)
+  season             String?  @db.VarChar(100)
+  hsnTaxCode         String?  @map("hsn_tax_code") @db.VarChar(100)
+  articleDescription String?  @map("article_description")
+  fashionGrid        String?  @map("fashion_grid") @db.VarChar(100)
+  year               String?  @db.VarChar(20)
+  articleType        String?  @map("article_type") @db.VarChar(100)
+  presentationsType  String?  @map("Presentations_type") @db.VarChar(100)
 
   // Approval Workflow
-  approvalStatus              ApprovalStatus @default(PENDING) @map("approval_status")
-  pdStatus                    PdStatus       @default(PENDING) @map("pd_status")
-  approvedBy                  Int?           @map("approved_by")
-  approvedAt                  DateTime?      @map("approved_at")
-  approver                    User?          @relation("ApproverRelation", fields: [approvedBy], references: [id])
+  approvalStatus ApprovalStatus @default(PENDING) @map("approval_status")
+  pdStatus       PdStatus       @default(PENDING) @map("pd_status")
+  approvedBy     Int?           @map("approved_by")
+  approvedAt     DateTime?      @map("approved_at")
+  approver       User?          @relation("ApproverRelation", fields: [approvedBy], references: [id])
 
   // Watcher fields (set when image is auto-ingested from shared folder)
-  source                      String?        @db.VarChar(20)   // 'MANUAL' | 'WATCHER'
-  imageUncPath                String?        @unique @map("image_unc_path")
+  source       String? @db.VarChar(20) // 'MANUAL' | 'WATCHER'
+  imageUncPath String? @unique @map("image_unc_path")
 
   // Persistent "old article" flag, maintained by the DB trigger trg_set_is_old_article.
   // True when image_unc_path matches an old-path marker, OR (PENDING + 10-digit numeric
   // article/image name). Replaces the old runtime ILIKE+regex+giant IN/NOT IN lists.
-  isOldArticle                Boolean        @default(false) @map("is_old_article")
+  isOldArticle Boolean @default(false) @map("is_old_article")
 
   // Variant fields
-  isGeneric                   Boolean        @default(true) @map("is_generic")
-  genericArticleId            String?        @map("generic_article_id")
-  variantSize                 String?        @map("variant_size") @db.VarChar(50)
-  variantColor                String?        @map("variant_color") @db.VarChar(100)
-  variantWeight               String?        @map("variant_weight") @db.VarChar(50)
+  isGeneric        Boolean @default(true) @map("is_generic")
+  genericArticleId String? @map("generic_article_id")
+  variantSize      String? @map("variant_size") @db.VarChar(50)
+  variantColor     String? @map("variant_color") @db.VarChar(100)
+  variantWeight    String? @map("variant_weight") @db.VarChar(50)
+
+  // Combo/Set articles (e.g. Kurti Set, Baba Suit) — a parent article
+  // assembled from multiple child pieces; only the parent syncs to SAP.
+  comboRole       ComboRole              @default(NONE) @map("combo_role")
+  comboParentId   String?                @map("combo_parent_id")
+  comboParent     ExtractionResultFlat?  @relation("ComboChildren", fields: [comboParentId], references: [id], onDelete: Cascade)
+  comboChildren   ExtractionResultFlat[] @relation("ComboChildren")
+  comboChildOrder Int?                   @map("combo_child_order")
 
   // SAP Sync (Placeholder)
-  sapSyncStatus               SapSyncStatus  @default(NOT_SYNCED) @map("sap_sync_status")
-  sapArticleId                String?        @map("sap_article_id") @db.VarChar(100)
-  sapSyncMessage              String?        @map("sap_sync_message")
+  sapSyncStatus  SapSyncStatus @default(NOT_SYNCED) @map("sap_sync_status")
+  sapArticleId   String?       @map("sap_article_id") @db.VarChar(100)
+  sapSyncMessage String?       @map("sap_sync_message")
 
   // SRM dedup key — set ONCE on insert from SRM, NEVER updated even if user edits designNumber
-  srmOriginalDesignNumber     String?        @map("srm_original_design_number") @db.VarChar(255)
+  srmOriginalDesignNumber String? @map("srm_original_design_number") @db.VarChar(255)
   // FK to raw_articles.id — only set when extraction came from SRM/raw_articles flow
-  srmUniqueId                 String?        @map("srm_unique_id") @db.VarChar(100)
+  srmUniqueId             String? @map("srm_unique_id") @db.VarChar(100)
 
   // Raw Gemini response: full JSON output from VLM including all_extracted_attributes
-  imageExtractionRawData      Json?          @map("image_extraction_raw_data")
+  imageExtractionRawData Json? @map("image_extraction_raw_data")
 
-  job                         ExtractionJob? @relation(fields: [jobId], references: [id], onDelete: Cascade)
-  srmSyncRunItems             SrmSyncRunItem[]
+  job             ExtractionJob?   @relation(fields: [jobId], references: [id], onDelete: Cascade)
+  srmSyncRunItems SrmSyncRunItem[]
 
   @@index([jobId])
   @@index([imageName])
@@ -413,6 +421,8 @@ model ExtractionResultFlat {
   @@index([isGeneric, approvalStatus, division])
   @@index([isOldArticle, approvalStatus])
   @@index([approvalStatus, pdStatus], map: "idx_erf_approval_pd")
+  @@index([comboParentId])
+  @@index([comboRole])
   @@map("extraction_results_flat")
   @@schema("public")
 }
@@ -423,12 +433,12 @@ model ModelGenerationResult {
   id            String   @id @default(uuid())
   jobId         String   @map("job_id") @db.VarChar(100)
   articleNumber String   @map("article_number") @db.VarChar(100)
-  status        String   @db.VarChar(20)              // DONE | PARTIAL | FAILED
+  status        String   @db.VarChar(20) // DONE | PARTIAL | FAILED
   viewsTotal    Int      @map("views_total")
   viewsDone     Int      @map("views_done")
   viewsFailed   Int      @map("views_failed")
-  imageUrls     Json?    @map("image_urls")           // { front: url, back: url, ... }
-  error         String?                                // failure reason (first failed view)
+  imageUrls     Json?    @map("image_urls") // { front: url, back: url, ... }
+  error         String? // failure reason (first failed view)
   gender        String?  @db.VarChar(30)
   colour        String?  @db.VarChar(100)
   userId        Int?     @map("user_id")
@@ -454,11 +464,11 @@ model ModelImageApproval {
   id            String   @id @default(uuid())
   articleNumber String   @unique @map("article_number") @db.VarChar(100)
   status        String   @default("APPROVED") @db.VarChar(20)
-  approvedBy    Int?     @map("approved_by")             // users.id of the approver
+  approvedBy    Int?     @map("approved_by") // users.id of the approver
   approvedAt    DateTime @default(now()) @map("approved_at")
-  reviewedBy    Int?     @map("reviewed_by")             // users.id of whoever last acted
+  reviewedBy    Int?     @map("reviewed_by") // users.id of whoever last acted
   reviewedAt    DateTime @default(now()) @map("reviewed_at")
-  ecommerceUrls Json?    @map("ecommerce_urls")          // { "1": url, "2": url, ... }
+  ecommerceUrls Json?    @map("ecommerce_urls") // { "1": url, "2": url, ... }
   createdAt     DateTime @default(now()) @map("created_at")
   updatedAt     DateTime @updatedAt @map("updated_at")
 
@@ -471,7 +481,7 @@ model ModelImageApproval {
 /// MVGR Lookup: Reference table for Macro MVGR, Main MVGR, and M_FAB2 codes
 model MvgrLookup {
   id        Int      @id @default(autoincrement())
-  type      String   @db.VarChar(20)   // 'MACRO_MVGR' | 'MAIN_MVGR' | 'M_FAB2'
+  type      String   @db.VarChar(20) // 'MACRO_MVGR' | 'MAIN_MVGR' | 'M_FAB2'
   code      String   @db.VarChar(100)
   fullForm  String   @map("full_form") @db.VarChar(200)
   createdAt DateTime @default(now()) @map("created_at")
@@ -484,16 +494,16 @@ model MvgrLookup {
 
 /// Vendor Master: Synced from DAB API (ET_Supplier_Master)
 model MasterVendorDetail {
-  id               Int      @id @default(autoincrement())
-  vendorCode       String   @unique @map("vendor_code") @db.VarChar(20)
-  vendorName       String?  @map("vendor_name") @db.VarChar(200)
-  vendorCity       String?  @map("vendor_city") @db.VarChar(100)
-  vendorRegion     String?  @map("vendor_region") @db.VarChar(50)
-  mergeVendorCode  String?  @map("merge_vendor_code") @db.VarChar(20)
-  mergeVendorName  String?  @map("merge_vendor_name") @db.VarChar(200)
-  mergeVendorCity  String?  @map("merge_vendor_city") @db.VarChar(100)
-  mergeVendorRegion String? @map("merge_vendor_region") @db.VarChar(50)
-  syncedAt         DateTime @default(now()) @updatedAt @map("synced_at")
+  id                Int      @id @default(autoincrement())
+  vendorCode        String   @unique @map("vendor_code") @db.VarChar(20)
+  vendorName        String?  @map("vendor_name") @db.VarChar(200)
+  vendorCity        String?  @map("vendor_city") @db.VarChar(100)
+  vendorRegion      String?  @map("vendor_region") @db.VarChar(50)
+  mergeVendorCode   String?  @map("merge_vendor_code") @db.VarChar(20)
+  mergeVendorName   String?  @map("merge_vendor_name") @db.VarChar(200)
+  mergeVendorCity   String?  @map("merge_vendor_city") @db.VarChar(100)
+  mergeVendorRegion String?  @map("merge_vendor_region") @db.VarChar(50)
+  syncedAt          DateTime @default(now()) @updatedAt @map("synced_at")
 
   @@index([vendorName])
   @@map("master_vendor_details")
@@ -502,13 +512,13 @@ model MasterVendorDetail {
 
 /// User: Admin and regular users
 model User {
-  id             Int                @id @default(autoincrement())
-  email          String             @unique @db.VarChar(255)
-  password       String             @db.VarChar(255)
-  name           String             @db.VarChar(100)
-  role           UserRole           @default(CREATOR)
-  division       String?            @db.VarChar(200)  // Linked to Department.name
-  subDivision    String?            @map("sub_division") @db.VarChar(500) // Linked to SubDepartment.code
+  id               Int                    @id @default(autoincrement())
+  email            String                 @unique @db.VarChar(255)
+  password         String                 @db.VarChar(255)
+  name             String                 @db.VarChar(100)
+  role             UserRole               @default(CREATOR)
+  division         String?                @db.VarChar(200) // Linked to Department.name
+  subDivision      String?                @map("sub_division") @db.VarChar(500) // Linked to SubDepartment.code
   /// Coarse business-unit tag, independent of `division`/`subDivision` above
   /// (those are tied to the Department/SubDepartment hierarchy for
   /// extraction routing, and `division` can hold several comma-separated
@@ -516,16 +526,16 @@ model User {
   /// admin-editable from the Users page, and every user is meant to end up
   /// with one — shown in the UI as "Business Division" to avoid being
   /// confused with the existing Sub Division field.
-  businessDivision String?          @map("business_division") @db.VarChar(20)
-  isActive       Boolean            @default(true) @map("is_active")
-  lastLogin      DateTime?          @map("last_login")
-  createdAt      DateTime           @default(now()) @map("created_at")
-  updatedAt      DateTime           @updatedAt @map("updated_at")
-  apiKeys        ApiKey[]
-  costSummary    CostSummary?
-  extractionJobs ExtractionJob[]
-  verifications  ExtractionResult[] @relation("UserVerifications")
-  approvedItems  ExtractionResultFlat[] @relation("ApproverRelation")
+  businessDivision String?                @map("business_division") @db.VarChar(20)
+  isActive         Boolean                @default(true) @map("is_active")
+  lastLogin        DateTime?              @map("last_login")
+  createdAt        DateTime               @default(now()) @map("created_at")
+  updatedAt        DateTime               @updatedAt @map("updated_at")
+  apiKeys          ApiKey[]
+  costSummary      CostSummary?
+  extractionJobs   ExtractionJob[]
+  verifications    ExtractionResult[]     @relation("UserVerifications")
+  approvedItems    ExtractionResultFlat[] @relation("ApproverRelation")
 
   @@index([email])
   @@index([role])
@@ -713,47 +723,56 @@ enum SapSyncStatus {
   @@schema("public")
 }
 
+enum ComboRole {
+  NONE
+  PARENT
+  CHILD
+
+  @@map("combo_role")
+  @@schema("public")
+}
+
 // ═══════════════════════════════════════════════════════════════════════
 // 360article schema — new article creation & attribute data store
 // ═══════════════════════════════════════════════════════════════════════
 
 /// Article360: Master record for every article created through the 360 workflow
 model Article360 {
-  id                          String   @id @default(uuid())
-  jobId                       String?  @unique @map("job_id")     // links back to public.extraction_jobs
-  flatId                      String?  @unique @map("flat_id")    // links back to public.extraction_results_flat
+  id     String  @id @default(uuid())
+  jobId  String? @unique @map("job_id") // links back to public.extraction_jobs
+  flatId String? @unique @map("flat_id") // links back to public.extraction_results_flat
 
   // Identity / Header
-  division                    String?  @db.VarChar(100)
-  subDivision                 String?  @map("sub_division") @db.VarChar(100)
-  majorCategory               String?  @map("major_category") @db.VarChar(200)
-  designNumber                String?  @map("design_number") @db.VarChar(100)
-  vendorName                  String?  @map("vendor_name") @db.VarChar(200)
-  vendorCode                  String?  @map("vendor_code") @db.VarChar(100)
-  referenceArticleNumber      String?  @map("reference_article_number") @db.VarChar(100)
-  referenceArticleDescription String?  @map("reference_article_description")
-  articleNumber               String?  @map("article_number") @db.VarChar(100)
-  sapArticleId                String?  @map("sap_article_id") @db.VarChar(100)
-  imageName                   String?  @map("image_name") @db.VarChar(255)
-  imageUrl                    String?  @map("image_url")
+  division                    String? @db.VarChar(100)
+  subDivision                 String? @map("sub_division") @db.VarChar(100)
+  majorCategory               String? @map("major_category") @db.VarChar(200)
+  designNumber                String? @map("design_number") @db.VarChar(100)
+  vendorName                  String? @map("vendor_name") @db.VarChar(200)
+  vendorCode                  String? @map("vendor_code") @db.VarChar(100)
+  referenceArticleNumber      String? @map("reference_article_number") @db.VarChar(100)
+  referenceArticleDescription String? @map("reference_article_description")
+  articleNumber               String? @map("article_number") @db.VarChar(100)
+  sapArticleId                String? @map("sap_article_id") @db.VarChar(100)
+  imageName                   String? @map("image_name") @db.VarChar(255)
+  imageUrl                    String? @map("image_url")
 
   // Status
-  approvalStatus              String   @default("PENDING") @map("approval_status") @db.VarChar(20)
-  sapSyncStatus               String   @default("NOT_SYNCED") @map("sap_sync_status") @db.VarChar(20)
+  approvalStatus String @default("PENDING") @map("approval_status") @db.VarChar(20)
+  sapSyncStatus  String @default("NOT_SYNCED") @map("sap_sync_status") @db.VarChar(20)
 
   // Audit
-  userId                      Int?     @map("user_id")
-  userName                    String?  @map("user_name") @db.VarChar(200)
-  userEmail                   String?  @map("user_email") @db.VarChar(255)
-  createdAt                   DateTime @default(now()) @map("created_at")
-  updatedAt                   DateTime @updatedAt @map("updated_at")
+  userId    Int?     @map("user_id")
+  userName  String?  @map("user_name") @db.VarChar(200)
+  userEmail String?  @map("user_email") @db.VarChar(255)
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
 
   // Relations to attribute group tables
-  fab       ArticleFab?
-  body      ArticleBody?
-  vaAcc     ArticleVaAcc?
-  vaPrcs    ArticleVaPrcs?
-  bom       ArticleBom?
+  fab    ArticleFab?
+  body   ArticleBody?
+  vaAcc  ArticleVaAcc?
+  vaPrcs ArticleVaPrcs?
+  bom    ArticleBom?
 
   @@index([jobId])
   @@index([flatId])
@@ -769,26 +788,26 @@ model Article360 {
 
 /// ArticleFab: FAB group attributes for an Article360
 model ArticleFab {
-  id            String     @id @default(uuid())
-  articleId     String     @unique @map("article_id")
-  macroMvgr     String?    @map("macro_mvgr") @db.VarChar(100)
-  yarn1         String?    @map("yarn_1") @db.VarChar(100)
-  mainMvgr      String?    @map("main_mvgr") @db.VarChar(100)
-  fabricMainMvgr String?   @map("fabric_main_mvgr") @db.VarChar(100)
-  weave         String?    @db.VarChar(100)
-  mFab2         String?    @map("m_fab2") @db.VarChar(100)
-  composition   String?    @db.VarChar(200)
-  fCount        String?    @map("f_count") @db.VarChar(100)
-  fConstruction String?    @map("f_construction") @db.VarChar(100)
-  lycra         String?    @db.VarChar(50)
-  finish        String?    @db.VarChar(100)
-  gsm           String?    @db.VarChar(50)
-  fOunce        String?    @map("f_ounce") @db.VarChar(100)
-  fWidth        String?    @map("f_width") @db.VarChar(100)
-  fabDiv        String?    @map("fab_div") @db.VarChar(100)
-  createdAt     DateTime   @default(now()) @map("created_at")
-  updatedAt     DateTime   @updatedAt @map("updated_at")
-  article       Article360 @relation(fields: [articleId], references: [id], onDelete: Cascade)
+  id             String     @id @default(uuid())
+  articleId      String     @unique @map("article_id")
+  macroMvgr      String?    @map("macro_mvgr") @db.VarChar(100)
+  yarn1          String?    @map("yarn_1") @db.VarChar(100)
+  mainMvgr       String?    @map("main_mvgr") @db.VarChar(100)
+  fabricMainMvgr String?    @map("fabric_main_mvgr") @db.VarChar(100)
+  weave          String?    @db.VarChar(100)
+  mFab2          String?    @map("m_fab2") @db.VarChar(100)
+  composition    String?    @db.VarChar(200)
+  fCount         String?    @map("f_count") @db.VarChar(100)
+  fConstruction  String?    @map("f_construction") @db.VarChar(100)
+  lycra          String?    @db.VarChar(50)
+  finish         String?    @db.VarChar(100)
+  gsm            String?    @db.VarChar(50)
+  fOunce         String?    @map("f_ounce") @db.VarChar(100)
+  fWidth         String?    @map("f_width") @db.VarChar(100)
+  fabDiv         String?    @map("fab_div") @db.VarChar(100)
+  createdAt      DateTime   @default(now()) @map("created_at")
+  updatedAt      DateTime   @updatedAt @map("updated_at")
+  article        Article360 @relation(fields: [articleId], references: [id], onDelete: Cascade)
 
   @@map("article_fab")
   @@schema("360article")
@@ -796,27 +815,27 @@ model ArticleFab {
 
 /// ArticleBody: BODY group attributes for an Article360
 model ArticleBody {
-  id           String     @id @default(uuid())
-  articleId    String     @unique @map("article_id")
-  collar       String?    @db.VarChar(100)
-  collarStyle  String?    @map("collar_style") @db.VarChar(100)
-  neck         String?    @db.VarChar(100)
-  neckDetails  String?    @map("neck_details") @db.VarChar(200)
-  placket      String?    @db.VarChar(100)
-  fatherBelt   String?    @map("father_belt") @db.VarChar(100)
-  sleeve       String?    @db.VarChar(100)
-  sleeveFold   String?    @map("sleeve_fold") @db.VarChar(100)
-  mSet         String?    @map("m_set") @db.VarChar(100)
-  bottomFold   String?    @map("bottom_fold") @db.VarChar(100)
-  noOfPocket   String?    @map("no_of_pocket") @db.VarChar(50)
-  pocketType   String?    @map("pocket_type") @db.VarChar(100)
-  extraPocket  String?    @map("extra_pocket") @db.VarChar(100)
-  fit          String?    @db.VarChar(100)
-  bodyStyle    String?    @map("body_style") @db.VarChar(100)
-  length       String?    @db.VarChar(100)
-  createdAt    DateTime   @default(now()) @map("created_at")
-  updatedAt    DateTime   @updatedAt @map("updated_at")
-  article      Article360 @relation(fields: [articleId], references: [id], onDelete: Cascade)
+  id          String     @id @default(uuid())
+  articleId   String     @unique @map("article_id")
+  collar      String?    @db.VarChar(100)
+  collarStyle String?    @map("collar_style") @db.VarChar(100)
+  neck        String?    @db.VarChar(100)
+  neckDetails String?    @map("neck_details") @db.VarChar(200)
+  placket     String?    @db.VarChar(100)
+  fatherBelt  String?    @map("father_belt") @db.VarChar(100)
+  sleeve      String?    @db.VarChar(100)
+  sleeveFold  String?    @map("sleeve_fold") @db.VarChar(100)
+  mSet        String?    @map("m_set") @db.VarChar(100)
+  bottomFold  String?    @map("bottom_fold") @db.VarChar(100)
+  noOfPocket  String?    @map("no_of_pocket") @db.VarChar(50)
+  pocketType  String?    @map("pocket_type") @db.VarChar(100)
+  extraPocket String?    @map("extra_pocket") @db.VarChar(100)
+  fit         String?    @db.VarChar(100)
+  bodyStyle   String?    @map("body_style") @db.VarChar(100)
+  length      String?    @db.VarChar(100)
+  createdAt   DateTime   @default(now()) @map("created_at")
+  updatedAt   DateTime   @updatedAt @map("updated_at")
+  article     Article360 @relation(fields: [articleId], references: [id], onDelete: Cascade)
 
   @@map("article_body")
   @@schema("360article")
@@ -862,14 +881,14 @@ model ArticleVaPrcs {
 
 /// ArticleBom: BOM (Bill of Materials) data for an Article360
 model ArticleBom {
-  id         String     @id @default(uuid())
-  articleId  String     @unique @map("article_id")
-  rate       Decimal?   @db.Decimal(10, 2)
-  mrp        Decimal?   @db.Decimal(10, 2)
-  impAtrbt2  String?    @map("imp_atrbt_2") @db.VarChar(200)
-  createdAt  DateTime   @default(now()) @map("created_at")
-  updatedAt  DateTime   @updatedAt @map("updated_at")
-  article    Article360 @relation(fields: [articleId], references: [id], onDelete: Cascade)
+  id        String     @id @default(uuid())
+  articleId String     @unique @map("article_id")
+  rate      Decimal?   @db.Decimal(10, 2)
+  mrp       Decimal?   @db.Decimal(10, 2)
+  impAtrbt2 String?    @map("imp_atrbt_2") @db.VarChar(200)
+  createdAt DateTime   @default(now()) @map("created_at")
+  updatedAt DateTime   @updatedAt @map("updated_at")
+  article   Article360 @relation(fields: [articleId], references: [id], onDelete: Cascade)
 
   @@map("article_bom")
   @@schema("360article")
@@ -913,102 +932,102 @@ model SapAttributeValue {
 
 /// Article360Flat: Denormalized flat table — single row per article, all fields in one place
 model Article360Flat {
-  id                            String    @id @default(uuid())
+  id String @id @default(uuid())
 
   // Links to existing public schema records
-  jobId                         String?   @unique @map("job_id")
-  flatId                        String?   @unique @map("flat_id")
+  jobId  String? @unique @map("job_id")
+  flatId String? @unique @map("flat_id")
 
   // Image / File
-  imageName                     String?   @map("image_name") @db.VarChar(255)
-  imageUrl                      String?   @map("image_url")
+  imageName String? @map("image_name") @db.VarChar(255)
+  imageUrl  String? @map("image_url")
 
   // Header
-  division                      String?   @db.VarChar(100)
-  subDivision                   String?   @map("sub_division") @db.VarChar(100)
-  majorCategory                 String?   @map("major_category") @db.VarChar(200)
-  designNumber                  String?   @map("design_number") @db.VarChar(100)
-  vendorName                    String?   @map("vendor_name") @db.VarChar(200)
-  vendorCode                    String?   @map("vendor_code") @db.VarChar(100)
-  referenceArticleNumber        String?   @map("reference_article_number") @db.VarChar(100)
-  referenceArticleDescription   String?   @map("reference_article_description")
-  articleNumber                 String?   @map("article_number") @db.VarChar(100)
-  sapArticleId                  String?   @map("sap_article_id") @db.VarChar(100)
-  mcCode                        String?   @map("mc_code") @db.VarChar(100)
+  division                    String? @db.VarChar(100)
+  subDivision                 String? @map("sub_division") @db.VarChar(100)
+  majorCategory               String? @map("major_category") @db.VarChar(200)
+  designNumber                String? @map("design_number") @db.VarChar(100)
+  vendorName                  String? @map("vendor_name") @db.VarChar(200)
+  vendorCode                  String? @map("vendor_code") @db.VarChar(100)
+  referenceArticleNumber      String? @map("reference_article_number") @db.VarChar(100)
+  referenceArticleDescription String? @map("reference_article_description")
+  articleNumber               String? @map("article_number") @db.VarChar(100)
+  sapArticleId                String? @map("sap_article_id") @db.VarChar(100)
+  mcCode                      String? @map("mc_code") @db.VarChar(100)
 
   // BOM
-  rate                          Decimal?  @db.Decimal(10, 2)
-  mrp                           Decimal?  @db.Decimal(10, 2)
-  impAtrbt2                     String?   @map("imp_atrbt_2") @db.VarChar(200)
+  rate      Decimal? @db.Decimal(10, 2)
+  mrp       Decimal? @db.Decimal(10, 2)
+  impAtrbt2 String?  @map("imp_atrbt_2") @db.VarChar(200)
 
   // FAB
-  macroMvgr                     String?   @map("macro_mvgr") @db.VarChar(100)
-  yarn1                         String?   @map("yarn_1") @db.VarChar(100)
-  mainMvgr                      String?   @map("main_mvgr") @db.VarChar(100)
-  fabricMainMvgr                String?   @map("fabric_main_mvgr") @db.VarChar(100)
-  weave                         String?   @db.VarChar(100)
-  mFab2                         String?   @map("m_fab2") @db.VarChar(100)
-  composition                   String?   @db.VarChar(200)
-  fCount                        String?   @map("f_count") @db.VarChar(100)
-  fConstruction                 String?   @map("f_construction") @db.VarChar(100)
-  lycra                         String?   @db.VarChar(50)
-  finish                        String?   @db.VarChar(100)
-  gsm                           String?   @db.VarChar(50)
-  fOunce                        String?   @map("f_ounce") @db.VarChar(100)
-  fWidth                        String?   @map("f_width") @db.VarChar(100)
-  fabDiv                        String?   @map("fab_div") @db.VarChar(100)
-  fabVdr                        String?   @map("fab_vdr") @db.VarChar(100)
+  macroMvgr      String? @map("macro_mvgr") @db.VarChar(100)
+  yarn1          String? @map("yarn_1") @db.VarChar(100)
+  mainMvgr       String? @map("main_mvgr") @db.VarChar(100)
+  fabricMainMvgr String? @map("fabric_main_mvgr") @db.VarChar(100)
+  weave          String? @db.VarChar(100)
+  mFab2          String? @map("m_fab2") @db.VarChar(100)
+  composition    String? @db.VarChar(200)
+  fCount         String? @map("f_count") @db.VarChar(100)
+  fConstruction  String? @map("f_construction") @db.VarChar(100)
+  lycra          String? @db.VarChar(50)
+  finish         String? @db.VarChar(100)
+  gsm            String? @db.VarChar(50)
+  fOunce         String? @map("f_ounce") @db.VarChar(100)
+  fWidth         String? @map("f_width") @db.VarChar(100)
+  fabDiv         String? @map("fab_div") @db.VarChar(100)
+  fabVdr         String? @map("fab_vdr") @db.VarChar(100)
 
   // BODY
-  collar                        String?   @db.VarChar(100)
-  collarStyle                   String?   @map("collar_style") @db.VarChar(100)
-  neck                          String?   @db.VarChar(100)
-  neckDetails                   String?   @map("neck_details") @db.VarChar(200)
-  placket                       String?   @db.VarChar(100)
-  fatherBelt                    String?   @map("father_belt") @db.VarChar(100)
-  sleeve                        String?   @db.VarChar(100)
-  sleeveFold                    String?   @map("sleeve_fold") @db.VarChar(100)
-  mSet                          String?   @map("m_set") @db.VarChar(100)
-  bottomFold                    String?   @map("bottom_fold") @db.VarChar(100)
-  noOfPocket                    String?   @map("no_of_pocket") @db.VarChar(50)
-  pocketType                    String?   @map("pocket_type") @db.VarChar(100)
-  extraPocket                   String?   @map("extra_pocket") @db.VarChar(100)
-  fit                           String?   @db.VarChar(100)
-  bodyStyle                     String?   @map("body_style") @db.VarChar(100)
-  length                        String?   @db.VarChar(100)
+  collar      String? @db.VarChar(100)
+  collarStyle String? @map("collar_style") @db.VarChar(100)
+  neck        String? @db.VarChar(100)
+  neckDetails String? @map("neck_details") @db.VarChar(200)
+  placket     String? @db.VarChar(100)
+  fatherBelt  String? @map("father_belt") @db.VarChar(100)
+  sleeve      String? @db.VarChar(100)
+  sleeveFold  String? @map("sleeve_fold") @db.VarChar(100)
+  mSet        String? @map("m_set") @db.VarChar(100)
+  bottomFold  String? @map("bottom_fold") @db.VarChar(100)
+  noOfPocket  String? @map("no_of_pocket") @db.VarChar(50)
+  pocketType  String? @map("pocket_type") @db.VarChar(100)
+  extraPocket String? @map("extra_pocket") @db.VarChar(100)
+  fit         String? @db.VarChar(100)
+  bodyStyle   String? @map("body_style") @db.VarChar(100)
+  length      String? @db.VarChar(100)
 
   // VA ACC
-  drawcord                      String?   @db.VarChar(100)
-  dcShape                       String?   @map("dc_shape") @db.VarChar(100)
-  button                        String?   @db.VarChar(100)
-  btnColour                     String?   @map("btn_colour") @db.VarChar(100)
-  zipper                        String?   @db.VarChar(100)
-  zipColour                     String?   @map("zip_colour") @db.VarChar(100)
-  patches                       String?   @db.VarChar(100)
-  patchesType                   String?   @map("patches_type") @db.VarChar(100)
+  drawcord    String? @db.VarChar(100)
+  dcShape     String? @map("dc_shape") @db.VarChar(100)
+  button      String? @db.VarChar(100)
+  btnColour   String? @map("btn_colour") @db.VarChar(100)
+  zipper      String? @db.VarChar(100)
+  zipColour   String? @map("zip_colour") @db.VarChar(100)
+  patches     String? @db.VarChar(100)
+  patchesType String? @map("patches_type") @db.VarChar(100)
 
   // VA PRCS
-  printType                     String?   @map("print_type") @db.VarChar(100)
-  printStyle                    String?   @map("print_style") @db.VarChar(100)
-  printPlacement                String?   @map("print_placement") @db.VarChar(100)
-  embroidery                    String?   @db.VarChar(100)
-  embroideryType                String?   @map("embroidery_type") @db.VarChar(100)
-  wash                          String?   @db.VarChar(100)
+  printType      String? @map("print_type") @db.VarChar(100)
+  printStyle     String? @map("print_style") @db.VarChar(100)
+  printPlacement String? @map("print_placement") @db.VarChar(100)
+  embroidery     String? @db.VarChar(100)
+  embroideryType String? @map("embroidery_type") @db.VarChar(100)
+  wash           String? @db.VarChar(100)
 
   // Workflow
-  extractionStatus              String?   @default("PENDING") @map("extraction_status") @db.VarChar(50)
-  approvalStatus                String    @default("PENDING") @map("approval_status") @db.VarChar(20)
-  approvedBy                    Int?      @map("approved_by")
-  approvedAt                    DateTime? @map("approved_at")
-  sapSyncStatus                 String    @default("NOT_SYNCED") @map("sap_sync_status") @db.VarChar(20)
-  sapSyncMessage                String?   @map("sap_sync_message")
+  extractionStatus String?   @default("PENDING") @map("extraction_status") @db.VarChar(50)
+  approvalStatus   String    @default("PENDING") @map("approval_status") @db.VarChar(20)
+  approvedBy       Int?      @map("approved_by")
+  approvedAt       DateTime? @map("approved_at")
+  sapSyncStatus    String    @default("NOT_SYNCED") @map("sap_sync_status") @db.VarChar(20)
+  sapSyncMessage   String?   @map("sap_sync_message")
 
   // Audit
-  userId                        Int?      @map("user_id")
-  userName                      String?   @map("user_name") @db.VarChar(200)
-  userEmail                     String?   @map("user_email") @db.VarChar(255)
-  createdAt                     DateTime  @default(now()) @map("created_at")
-  updatedAt                     DateTime  @updatedAt @map("updated_at")
+  userId    Int?     @map("user_id")
+  userName  String?  @map("user_name") @db.VarChar(200)
+  userEmail String?  @map("user_email") @db.VarChar(255)
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
 
   @@index([jobId])
   @@index([flatId])
@@ -1043,43 +1062,43 @@ enum RawArticleStatus {
 /// status tracks the processing pipeline state: PENDING → PROCESSING → COMPLETED | FAILED → PERM_FAILED
 /// source: ADMIN_MANUAL (admin panel fetch) | CRON_SYNC (12PM/8PM SRM cron)
 model RawArticle {
-  id                         String            @id @default(uuid())
+  id String @id @default(uuid())
 
   // SRM fields (as received)
-  presentationNo             String            @map("presentation_no") @db.VarChar(100)
-  vendorCode                 String?           @map("vendor_code") @db.VarChar(50)
-  vendorName                 String?           @map("vendor_name") @db.VarChar(200)
-  division                   String?           @db.VarChar(100)
-  subDivision                String?           @map("sub_division") @db.VarChar(100)
-  majorCategory              String?           @map("major_category") @db.VarChar(200)
-  presentationReceivedDate   DateTime?         @map("presentation_received_date")
-  designNumber               String?           @map("design_number") @db.VarChar(255)
-  fabric                     String?           @db.VarChar(100)
-  noOfColors                 Int?              @map("no_of_colors")
-  price                      Decimal?          @db.Decimal(10, 2)
-  imageUrl                   String?           @map("image_url")
-  presentationsType          String?           @map("Presentations_type") @db.VarChar(200)
+  presentationNo           String    @map("presentation_no") @db.VarChar(100)
+  vendorCode               String?   @map("vendor_code") @db.VarChar(50)
+  vendorName               String?   @map("vendor_name") @db.VarChar(200)
+  division                 String?   @db.VarChar(100)
+  subDivision              String?   @map("sub_division") @db.VarChar(100)
+  majorCategory            String?   @map("major_category") @db.VarChar(200)
+  presentationReceivedDate DateTime? @map("presentation_received_date")
+  designNumber             String?   @map("design_number") @db.VarChar(255)
+  fabric                   String?   @db.VarChar(100)
+  noOfColors               Int?      @map("no_of_colors")
+  price                    Decimal?  @db.Decimal(10, 2)
+  imageUrl                 String?   @map("image_url")
+  presentationsType        String?   @map("Presentations_type") @db.VarChar(200)
 
   // Dedup key: presentation_no::design_number::image_url (set on insert, never changed)
-  uniqueKey                  String            @unique @map("unique_key")
+  uniqueKey String @unique @map("unique_key")
 
   // Who staged this row: ADMIN_MANUAL (admin panel) or CRON_SYNC (12PM/8PM SRM cron)
-  source                     String?           @map("source") @db.VarChar(50)
+  source String? @map("source") @db.VarChar(50)
 
   // Processing state
-  status                     RawArticleStatus  @default(PENDING)
+  status RawArticleStatus @default(PENDING)
 
   // Extraction pipeline columns
-  retryCount                 Int               @default(0)  @map("retry_count")
-  errorMessage               String?           @map("error_message")
-  extractedData              Json?             @map("extracted_data")
-  extractedAt                DateTime?         @map("extracted_at")
-  flatId                     String?           @map("flat_id")        // FK ref to extraction_results_flat
-  lockedUntil                DateTime?         @map("locked_until")   // worker lock expiry
-  articleNumber              String?           @map("article_number") @db.VarChar(100)
+  retryCount    Int       @default(0) @map("retry_count")
+  errorMessage  String?   @map("error_message")
+  extractedData Json?     @map("extracted_data")
+  extractedAt   DateTime? @map("extracted_at")
+  flatId        String?   @map("flat_id") // FK ref to extraction_results_flat
+  lockedUntil   DateTime? @map("locked_until") // worker lock expiry
+  articleNumber String?   @map("article_number") @db.VarChar(100)
 
-  createdAt                  DateTime          @default(now()) @map("created_at")
-  updatedAt                  DateTime          @updatedAt @map("updated_at")
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
 
   @@index([presentationNo])
   @@index([status])
@@ -1094,52 +1113,52 @@ model RawArticle {
 
 /// Fabric Raw Data: staging table for fabric presentations (mirrors raw_articles + fabric-specific columns)
 model FabricRawData {
-  id                       String           @id @default(uuid())
+  id String @id @default(uuid())
 
   // SRM / presentation fields
-  presentationNo           String           @map("presentation_no") @db.VarChar(100)
-  uniqueKey                String           @unique @map("unique_key")
+  presentationNo String @map("presentation_no") @db.VarChar(100)
+  uniqueKey      String @unique @map("unique_key")
 
   // Vendor info
-  vendorCode               String?          @map("vendor_code") @db.VarChar(50)
-  vendorName               String?          @map("vendor_name") @db.VarChar(200)
-  vendorCity               String?          @map("vendor_city") @db.VarChar(100)
+  vendorCode String? @map("vendor_code") @db.VarChar(50)
+  vendorName String? @map("vendor_name") @db.VarChar(200)
+  vendorCity String? @map("vendor_city") @db.VarChar(100)
 
   // Classification
-  division                 String?          @db.VarChar(100)
-  subDivision              String?          @map("sub_division") @db.VarChar(100)
-  majorCategory            String?          @map("major_category") @db.VarChar(200)
-  presentationsType        String?          @map("presentations_type")
+  division          String? @db.VarChar(100)
+  subDivision       String? @map("sub_division") @db.VarChar(100)
+  majorCategory     String? @map("major_category") @db.VarChar(200)
+  presentationsType String? @map("presentations_type")
 
   // Article details
-  designNumber             String?          @map("design_number") @db.VarChar(255)
-  articleNumber            String?          @map("article_number") @db.VarChar(100)
-  fabric                   String?          @db.VarChar(100)
-  noOfColors               Int?             @map("no_of_colors")
-  price                    Decimal?         @db.Decimal(10, 2)
-  imageUrl                 String?          @map("image_url")
-  source                   String?          @db.VarChar(50)
+  designNumber  String?  @map("design_number") @db.VarChar(255)
+  articleNumber String?  @map("article_number") @db.VarChar(100)
+  fabric        String?  @db.VarChar(100)
+  noOfColors    Int?     @map("no_of_colors")
+  price         Decimal? @db.Decimal(10, 2)
+  imageUrl      String?  @map("image_url")
+  source        String?  @db.VarChar(50)
 
   // Fabric-specific extras
-  season                   String?          @db.VarChar(50)
-  garmentWeight            Decimal?         @map("garment_weight") @db.Decimal(8, 2)
-  availableQty             Decimal?         @map("available_qty") @db.Decimal(12, 2)
-  approvedBy               String?          @map("approved_by") @db.VarChar(200)
-  notes                    String?
+  season        String?  @db.VarChar(50)
+  garmentWeight Decimal? @map("garment_weight") @db.Decimal(8, 2)
+  availableQty  Decimal? @map("available_qty") @db.Decimal(12, 2)
+  approvedBy    String?  @map("approved_by") @db.VarChar(200)
+  notes         String?
 
   // Pipeline tracking
-  status                   RawArticleStatus @default(PENDING)
-  retryCount               Int              @default(0)   @map("retry_count")
-  errorMessage             String?          @map("error_message")
-  extractedData            Json?            @map("extracted_data")
-  extractedAt              DateTime?        @map("extracted_at")
-  flatId                   String?          @map("flat_id")
-  lockedUntil              DateTime?        @map("locked_until")
+  status        RawArticleStatus @default(PENDING)
+  retryCount    Int              @default(0) @map("retry_count")
+  errorMessage  String?          @map("error_message")
+  extractedData Json?            @map("extracted_data")
+  extractedAt   DateTime?        @map("extracted_at")
+  flatId        String?          @map("flat_id")
+  lockedUntil   DateTime?        @map("locked_until")
 
   // Dates
-  presentationReceivedDate DateTime?        @map("presentation_received_date")
-  createdAt                DateTime         @default(now()) @map("created_at")
-  updatedAt                DateTime         @updatedAt     @map("updated_at")
+  presentationReceivedDate DateTime? @map("presentation_received_date")
+  createdAt                DateTime  @default(now()) @map("created_at")
+  updatedAt                DateTime  @updatedAt @map("updated_at")
 
   @@index([presentationNo])
   @@index([status])
@@ -1153,18 +1172,18 @@ model FabricRawData {
 
 /// One row per cron/admin/webhook sync execution
 model SrmSyncRun {
-  id           String         @id @default(uuid())
-  triggeredBy  String         @default("CRON") @map("triggered_by") @db.VarChar(64)
-  startedAt    DateTime       @default(now()) @map("started_at")
-  completedAt  DateTime?      @map("completed_at")
-  total        Int            @default(0)
-  inserted     Int            @default(0)
-  skipped      Int            @default(0)
-  patched      Int            @default(0)
-  errors       Int            @default(0)
-  notes        String?
+  id          String    @id @default(uuid())
+  triggeredBy String    @default("CRON") @map("triggered_by") @db.VarChar(64)
+  startedAt   DateTime  @default(now()) @map("started_at")
+  completedAt DateTime? @map("completed_at")
+  total       Int       @default(0)
+  inserted    Int       @default(0)
+  skipped     Int       @default(0)
+  patched     Int       @default(0)
+  errors      Int       @default(0)
+  notes       String?
 
-  items        SrmSyncRunItem[]
+  items SrmSyncRunItem[]
 
   @@map("srm_sync_runs")
   @@schema("public")
@@ -1172,17 +1191,17 @@ model SrmSyncRun {
 
 /// One row per article processed in a sync run — stable link via flat_id even after design number edits
 model SrmSyncRunItem {
-  id               String               @id @default(uuid())
-  runId            String               @map("run_id")
-  pptNumber        String?              @map("ppt_number") @db.VarChar(64)
-  srmDesignNumber  String?              @map("srm_design_number") @db.VarChar(255)
-  flatId           String?              @map("flat_id")
-  action           String               @db.VarChar(16)   // INSERTED | SKIPPED | PATCHED | ERROR
-  errorMessage     String?              @map("error_message")
-  createdAt        DateTime             @default(now()) @map("created_at")
+  id              String   @id @default(uuid())
+  runId           String   @map("run_id")
+  pptNumber       String?  @map("ppt_number") @db.VarChar(64)
+  srmDesignNumber String?  @map("srm_design_number") @db.VarChar(255)
+  flatId          String?  @map("flat_id")
+  action          String   @db.VarChar(16) // INSERTED | SKIPPED | PATCHED | ERROR
+  errorMessage    String?  @map("error_message")
+  createdAt       DateTime @default(now()) @map("created_at")
 
-  run              SrmSyncRun           @relation(fields: [runId], references: [id], onDelete: Cascade)
-  flat             ExtractionResultFlat? @relation(fields: [flatId], references: [id], onDelete: SetNull)
+  run  SrmSyncRun            @relation(fields: [runId], references: [id], onDelete: Cascade)
+  flat ExtractionResultFlat? @relation(fields: [flatId], references: [id], onDelete: SetNull)
 
   @@index([runId])
   @@index([flatId])
@@ -1233,7 +1252,7 @@ model PoolBJob {
 
 model PoolBBatch {
   id           String           @id @default(uuid()) @db.Uuid
-  jobId        String           @db.Uuid @map("job_id")
+  jobId        String           @map("job_id") @db.Uuid
   batchIndex   Int              @map("batch_index")
   status       PoolBBatchStatus @default(QUEUED)
   startRow     Int              @map("start_row")
@@ -1255,9 +1274,9 @@ model PoolBBatch {
 /// NationalGridMaster: Valid attribute code/value pairs imported from the National Grid Excel
 model NationalGridMaster {
   id            Int      @id @default(autoincrement())
-  attributeName String   @db.VarChar(100) @map("attribute_name")
+  attributeName String   @map("attribute_name") @db.VarChar(100)
   code          String   @db.VarChar(100)
-  fullForm      String?  @db.VarChar(500) @map("full_form")
+  fullForm      String?  @map("full_form") @db.VarChar(500)
   isActive      Boolean  @default(true) @map("is_active")
   createdAt     DateTime @default(now()) @map("created_at")
 
@@ -1285,14 +1304,14 @@ model BroaderMenu {
   /// Merchandise Category code. The natural key: one row per MC CD.
   mcCd Int  @unique @map("mc_cd")
 
-  seg         String? @db.VarChar(50)
-  div         String? @db.VarChar(50)
-  subDiv      String? @map("sub_div") @db.VarChar(50)
-  majCatCd    Int?    @map("maj_cat_cd")
-  majCatNm    String? @map("maj_cat_nm") @db.VarChar(200)
-  subCatCd    Int?    @map("sub_cat_cd")
-  subCatDesc  String? @map("sub_cat_desc") @db.VarChar(200)
-  mcDesc      String? @map("mc_desc") @db.VarChar(300)
+  seg        String? @db.VarChar(50)
+  div        String? @db.VarChar(50)
+  subDiv     String? @map("sub_div") @db.VarChar(50)
+  majCatCd   Int?    @map("maj_cat_cd")
+  majCatNm   String? @map("maj_cat_nm") @db.VarChar(200)
+  subCatCd   Int?    @map("sub_cat_cd")
+  subCatDesc String? @map("sub_cat_desc") @db.VarChar(200)
+  mcDesc     String? @map("mc_desc") @db.VarChar(300)
 
   /// Season: A / S / PW / HW / OC / MW / SSNL
   ssn String? @db.VarChar(20)
@@ -1304,9 +1323,9 @@ model BroaderMenu {
   sizeApplicable String? @map("size_applicable") @db.VarChar(10)
   divStat        String? @map("div_stat") @db.VarChar(20)
 
-  mcPkSz       Int? @map("mc_pk_sz")
-  subCatPkSz   Int? @map("sub_cat_pk_sz")
-  noOfOptions  Int? @map("no_of_options")
+  mcPkSz      Int? @map("mc_pk_sz")
+  subCatPkSz  Int? @map("sub_cat_pk_sz")
+  noOfOptions Int? @map("no_of_options")
 
   /// Fixture densities. avgDensity/acp carry fractions, the rest are whole numbers
   /// in practice — all Decimal so a future file with fractions doesn't get rounded.
@@ -1361,7 +1380,7 @@ model MajorCatMaster {
   name      String?  @db.VarChar(200)
   div       String?  @db.VarChar(50)
   idealFor  String?  @map("ideal_for") @db.VarChar(50)
-  frame     String   @db.VarChar(20)   // 'fw' | 'upper' | 'lower' | 'set'
+  frame     String   @db.VarChar(20) // 'fw' | 'upper' | 'lower' | 'set'
   isActive  Boolean  @default(true) @map("is_active")
   createdAt DateTime @default(now()) @map("created_at")
   updatedAt DateTime @updatedAt @map("updated_at")
@@ -1376,14 +1395,14 @@ model MajorCatMaster {
 /// One row per MC description (article type + major category combination).
 model FabricArticleMaster {
   id        Int      @id @default(autoincrement())
-  seg       String   @db.VarChar(20)           // Segment (e.g. FAB)
-  div       String   @db.VarChar(50)           // Division (e.g. K)
+  seg       String   @db.VarChar(20) // Segment (e.g. FAB)
+  div       String   @db.VarChar(50) // Division (e.g. K)
   subDiv    String   @map("sub_div") @db.VarChar(100) // Sub Division (e.g. K_PC)
   majCat    String   @map("maj_cat") @db.VarChar(100) // Major Category (e.g. K_PC_FLC)
-  mcCode    String   @map("mc_code") @db.VarChar(20)  // MC Code (e.g. 910101001)
-  mcDes     String   @map("mc_des") @db.VarChar(200)  // MC Description (e.g. K_PC_FLC_SLD)
-  status    String   @db.VarChar(10)           // ACT / INACT
-  hsnCd     String   @map("hsn_cd") @db.VarChar(20)   // HSN Code
+  mcCode    String   @map("mc_code") @db.VarChar(20) // MC Code (e.g. 910101001)
+  mcDes     String   @map("mc_des") @db.VarChar(200) // MC Description (e.g. K_PC_FLC_SLD)
+  status    String   @db.VarChar(10) // ACT / INACT
+  hsnCd     String   @map("hsn_cd") @db.VarChar(20) // HSN Code
   artType   String   @map("art_type") @db.VarChar(20) // Article Type code
   createdAt DateTime @default(now()) @map("created_at")
   updatedAt DateTime @updatedAt @map("updated_at")
@@ -1401,8 +1420,8 @@ model FabricArticleMaster {
 /// One row per (characteristic, code) pair — e.g. characteristic="M_FAB_DIV", code="K", full_form="KNIT".
 model FabricMajCatGridValue {
   id             Int      @id @default(autoincrement())
-  characteristic String   @db.VarChar(50)   // Column name from MASTER sheet (e.g. M_FAB_DIV)
-  code           String   @db.VarChar(100)  // Short code value (e.g. K)
+  characteristic String   @db.VarChar(50) // Column name from MASTER sheet (e.g. M_FAB_DIV)
+  code           String   @db.VarChar(100) // Short code value (e.g. K)
   fullForm       String   @map("full_form") @db.VarChar(500) // Full description (e.g. KNIT)
   createdAt      DateTime @default(now()) @map("created_at")
   updatedAt      DateTime @updatedAt @map("updated_at")
@@ -1416,15 +1435,15 @@ model FabricMajCatGridValue {
 /// ModifyLog: One row per changed label per successful article modification
 model ModifyLog {
   id                  Int      @id @default(autoincrement())
-  modificationGroupId String   @db.Uuid @map("modification_group_id")
-  articleNumber       String   @db.VarChar(30) @map("article_number")
-  labelName           String   @db.VarChar(100) @map("label_name")
+  modificationGroupId String   @map("modification_group_id") @db.Uuid
+  articleNumber       String   @map("article_number") @db.VarChar(30)
+  labelName           String   @map("label_name") @db.VarChar(100)
   oldValue            String?  @map("old_value")
   newValue            String?  @map("new_value")
-  modifiedByName      String   @default("") @db.VarChar(200) @map("modified_by_name") // denormalised: user name at time of change
-  modifiedByEmail     String   @default("") @db.VarChar(255) @map("modified_by_email") // denormalised: user email at time of change
+  modifiedByName      String   @default("") @map("modified_by_name") @db.VarChar(200) // denormalised: user name at time of change
+  modifiedByEmail     String   @default("") @map("modified_by_email") @db.VarChar(255) // denormalised: user email at time of change
   modifiedAt          DateTime @default(now()) @map("modified_at")
-  sapStatus           String   @default("SUCCESS") @db.VarChar(20) @map("sap_status")
+  sapStatus           String   @default("SUCCESS") @map("sap_status") @db.VarChar(20)
 
   @@index([articleNumber, modifiedAt(sort: Desc)])
   @@index([modificationGroupId])
@@ -1437,64 +1456,64 @@ model ModifyLog {
 
 /// FabricArticleData: One row per fabric article created from the Construction & Fabric card
 model FabricArticleData {
-  id                       String    @id @default(uuid())
+  id String @id @default(uuid())
 
   // Construction & Fabric card fields (column names = SAP attribute names in lowercase)
-  mFabDiv                  String?   @map("m_fab_div")          @db.VarChar(100)
-  mYarn                    String?   @map("m_yarn")             @db.VarChar(100)
-  mFabMainMvgr1            String?   @map("m_fab_main_mvgr_1")  @db.VarChar(100)
-  mFabMainMvgr2            String?   @map("m_fab_main_mvgr_2")  @db.VarChar(100)
-  mConstruction            String?   @map("m_construction")     @db.VarChar(100)
-  mOunz                    String?   @map("m_ounz")             @db.VarChar(100)
-  mWidth                   String?   @map("m_width")            @db.VarChar(100)
-  mWeave02                 String?   @map("m_weave_02")         @db.VarChar(100)
-  mCount                   String?   @map("m_count")            @db.VarChar(100)
-  mWeave01                 String?   @map("m_weave_01")         @db.VarChar(100)
-  mComposition             String?   @map("m_composition")      @db.VarChar(200)
-  mFinish                  String?   @map("m_finish")           @db.VarChar(100)
-  mGsm                     String?   @map("m_gsm")              @db.VarChar(50)
-  mLycra                   String?   @map("m_lycra")            @db.VarChar(50)
+  mFabDiv       String? @map("m_fab_div") @db.VarChar(100)
+  mYarn         String? @map("m_yarn") @db.VarChar(100)
+  mFabMainMvgr1 String? @map("m_fab_main_mvgr_1") @db.VarChar(100)
+  mFabMainMvgr2 String? @map("m_fab_main_mvgr_2") @db.VarChar(100)
+  mConstruction String? @map("m_construction") @db.VarChar(100)
+  mOunz         String? @map("m_ounz") @db.VarChar(100)
+  mWidth        String? @map("m_width") @db.VarChar(100)
+  mWeave02      String? @map("m_weave_02") @db.VarChar(100)
+  mCount        String? @map("m_count") @db.VarChar(100)
+  mWeave01      String? @map("m_weave_01") @db.VarChar(100)
+  mComposition  String? @map("m_composition") @db.VarChar(200)
+  mFinish       String? @map("m_finish") @db.VarChar(100)
+  mGsm          String? @map("m_gsm") @db.VarChar(50)
+  mLycra        String? @map("m_lycra") @db.VarChar(50)
 
   // Fabric article output fields
-  fabricArticleNumber      String?   @map("fabric_article_number")      @db.VarChar(100)
-  fabricArticleDescription String?   @map("fabric_article_description") @db.VarChar(255)
+  fabricArticleNumber      String? @map("fabric_article_number") @db.VarChar(100)
+  fabricArticleDescription String? @map("fabric_article_description") @db.VarChar(255)
 
   // Source FG article reference (extraction_results_flat.id) — used for deduplication
-  flatId                   String?   @map("flat_id") @db.VarChar(100)
+  flatId String? @map("flat_id") @db.VarChar(100)
 
   // Article context (vendor only; division/sub_division/major_category intentionally omitted for fabric)
-  division                 String?   @map("division")      @db.VarChar(100)
-  subDivision              String?   @map("sub_division")  @db.VarChar(100)
-  majorCategory            String?   @map("major_category")    @db.VarChar(200)
-  mcDescription            String?   @map("mc_description")    @db.VarChar(200)
-  vendorName               String?   @map("vendor_name")       @db.VarChar(200)
-  vendorCode               String?   @map("vendor_code")   @db.VarChar(100)
-  designNumber             String?   @map("design_number") @db.VarChar(100)
-  pptNumber                String?   @map("ppt_number")    @db.VarChar(100)
-  fabricRate               Decimal?  @map("fabric_rate")         @db.Decimal(10, 2)
-  v2FabricRate             Decimal?  @map("v2_fabric_rate")      @db.Decimal(10, 2)
-  valueAddCost             Decimal?  @map("value_add_cost")      @db.Decimal(10, 2)
-  mrp                      Decimal?  @map("mrp")                 @db.Decimal(10, 2)
-  baseColor                String?   @map("base_color")          @db.VarChar(100)
-  segment                  String?   @map("segment")             @db.VarChar(100)
-  articleFashionType       String?   @map("article_fashion_type") @db.VarChar(100)
+  division           String?  @map("division") @db.VarChar(100)
+  subDivision        String?  @map("sub_division") @db.VarChar(100)
+  majorCategory      String?  @map("major_category") @db.VarChar(200)
+  mcDescription      String?  @map("mc_description") @db.VarChar(200)
+  vendorName         String?  @map("vendor_name") @db.VarChar(200)
+  vendorCode         String?  @map("vendor_code") @db.VarChar(100)
+  designNumber       String?  @map("design_number") @db.VarChar(100)
+  pptNumber          String?  @map("ppt_number") @db.VarChar(100)
+  fabricRate         Decimal? @map("fabric_rate") @db.Decimal(10, 2)
+  v2FabricRate       Decimal? @map("v2_fabric_rate") @db.Decimal(10, 2)
+  valueAddCost       Decimal? @map("value_add_cost") @db.Decimal(10, 2)
+  mrp                Decimal? @map("mrp") @db.Decimal(10, 2)
+  baseColor          String?  @map("base_color") @db.VarChar(100)
+  segment            String?  @map("segment") @db.VarChar(100)
+  articleFashionType String?  @map("article_fashion_type") @db.VarChar(100)
 
   // Workflow
-  approvalStatus           String    @default("PENDING")    @map("approval_status")    @db.VarChar(20)
-  approvedAt               DateTime? @map("approved_at")
-  approvedBy               Int?      @map("approved_by")
-  sapSyncStatus            String    @default("NOT_SYNCED") @map("sap_sync_status")    @db.VarChar(20)
-  sapSyncMessage           String?   @map("sap_sync_message")
+  approvalStatus String    @default("PENDING") @map("approval_status") @db.VarChar(20)
+  approvedAt     DateTime? @map("approved_at")
+  approvedBy     Int?      @map("approved_by")
+  sapSyncStatus  String    @default("NOT_SYNCED") @map("sap_sync_status") @db.VarChar(20)
+  sapSyncMessage String?   @map("sap_sync_message")
 
   // Media & classification
-  imageUrl                 String?   @map("image_url")            @db.Text
-  fabricArticleType        String?   @map("fabric_article_type")  @db.VarChar(100)
-  source                   String?   @map("source")               @db.VarChar(50)
+  imageUrl          String? @map("image_url") @db.Text
+  fabricArticleType String? @map("fabric_article_type") @db.VarChar(100)
+  source            String? @map("source") @db.VarChar(50)
 
   // Audit
-  userName                 String?   @map("user_name")  @db.VarChar(200)
-  createdAt                DateTime  @default(now())    @map("created_at")
-  updatedAt                DateTime  @updatedAt         @map("updated_at")
+  userName  String?  @map("user_name") @db.VarChar(200)
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
 
   @@index([approvalStatus])
   @@index([sapSyncStatus])
@@ -1510,52 +1529,52 @@ model FabricArticleData {
 /// Sourced from "val add acc master.xlsx" (ACC LIST sheet).
 /// Each of the 7 accessory types has qty, rate, and value columns.
 model ValueAdditionAccessoriesCost {
-  id             Int      @id @default(autoincrement())
+  id Int @id @default(autoincrement())
 
-  division       String?  @map("division")       @db.VarChar(100)
-  subDivision    String?  @map("sub_division")   @db.VarChar(100)
-  majorCategory  String   @map("major_category") @db.VarChar(200)
+  division      String? @map("division") @db.VarChar(100)
+  subDivision   String? @map("sub_division") @db.VarChar(100)
+  majorCategory String  @map("major_category") @db.VarChar(200)
 
   // BUTTON
-  btnQty         Decimal? @map("btn_qty")         @db.Decimal(10, 4)
-  btnRate        Decimal? @map("btn_rate")         @db.Decimal(10, 4)
-  btnValue       Decimal? @map("btn_value")        @db.Decimal(10, 4)
+  btnQty   Decimal? @map("btn_qty") @db.Decimal(10, 4)
+  btnRate  Decimal? @map("btn_rate") @db.Decimal(10, 4)
+  btnValue Decimal? @map("btn_value") @db.Decimal(10, 4)
 
   // ZIPPER
-  zipQty         Decimal? @map("zip_qty")          @db.Decimal(10, 4)
-  zipRate        Decimal? @map("zip_rate")          @db.Decimal(10, 4)
-  zipValue       Decimal? @map("zip_value")         @db.Decimal(10, 4)
+  zipQty   Decimal? @map("zip_qty") @db.Decimal(10, 4)
+  zipRate  Decimal? @map("zip_rate") @db.Decimal(10, 4)
+  zipValue Decimal? @map("zip_value") @db.Decimal(10, 4)
 
   // ELASTIC
-  elaQty         Decimal? @map("ela_qty")           @db.Decimal(10, 4)
-  elaRate        Decimal? @map("ela_rate")           @db.Decimal(10, 4)
-  elaValue       Decimal? @map("ela_value")          @db.Decimal(10, 4)
+  elaQty   Decimal? @map("ela_qty") @db.Decimal(10, 4)
+  elaRate  Decimal? @map("ela_rate") @db.Decimal(10, 4)
+  elaValue Decimal? @map("ela_value") @db.Decimal(10, 4)
 
   // LACE
-  laceQty        Decimal? @map("lace_qty")           @db.Decimal(10, 4)
-  laceRate       Decimal? @map("lace_rate")           @db.Decimal(10, 4)
-  laceValue      Decimal? @map("lace_value")          @db.Decimal(10, 4)
+  laceQty   Decimal? @map("lace_qty") @db.Decimal(10, 4)
+  laceRate  Decimal? @map("lace_rate") @db.Decimal(10, 4)
+  laceValue Decimal? @map("lace_value") @db.Decimal(10, 4)
 
   // DRAW CORD
-  drawCordQty    Decimal? @map("draw_cord_qty")      @db.Decimal(10, 4)
-  drawCordRate   Decimal? @map("draw_cord_rate")      @db.Decimal(10, 4)
-  drawCordValue  Decimal? @map("draw_cord_value")     @db.Decimal(10, 4)
+  drawCordQty   Decimal? @map("draw_cord_qty") @db.Decimal(10, 4)
+  drawCordRate  Decimal? @map("draw_cord_rate") @db.Decimal(10, 4)
+  drawCordValue Decimal? @map("draw_cord_value") @db.Decimal(10, 4)
 
   // HOOK & LOOP (VELCRO)
-  velcroQty      Decimal? @map("velcro_qty")          @db.Decimal(10, 4)
-  velcroRate     Decimal? @map("velcro_rate")          @db.Decimal(10, 4)
-  velcroValue    Decimal? @map("velcro_value")         @db.Decimal(10, 4)
+  velcroQty   Decimal? @map("velcro_qty") @db.Decimal(10, 4)
+  velcroRate  Decimal? @map("velcro_rate") @db.Decimal(10, 4)
+  velcroValue Decimal? @map("velcro_value") @db.Decimal(10, 4)
 
   // INTERLINING
-  interliningQty    Decimal? @map("interlining_qty")    @db.Decimal(10, 4)
-  interliningRate   Decimal? @map("interlining_rate")   @db.Decimal(10, 4)
-  interliningValue  Decimal? @map("interlining_value")  @db.Decimal(10, 4)
+  interliningQty   Decimal? @map("interlining_qty") @db.Decimal(10, 4)
+  interliningRate  Decimal? @map("interlining_rate") @db.Decimal(10, 4)
+  interliningValue Decimal? @map("interlining_value") @db.Decimal(10, 4)
 
   // TOTAL
-  totalValue     Decimal? @map("total_value")      @db.Decimal(10, 4)
+  totalValue Decimal? @map("total_value") @db.Decimal(10, 4)
 
-  createdAt      DateTime @default(now()) @map("created_at")
-  updatedAt      DateTime @updatedAt      @map("updated_at")
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
 
   @@unique([majorCategory, subDivision, division])
   @@index([majorCategory])
@@ -1567,79 +1586,79 @@ model ValueAdditionAccessoriesCost {
 
 /// BodyArticleData: One row per body article created from the Body & Construction card
 model BodyArticleData {
-  id                       String    @id @default(uuid())
+  id String @id @default(uuid())
 
   // Body & Construction card attributes (column names = SAP attribute names in lowercase)
-  mCollarType              String?   @map("m_collar_type")          @db.VarChar(100)
-  mCollarStyle             String?   @map("m_collar_style")         @db.VarChar(100)
-  mNeckType                String?   @map("m_neck_type")            @db.VarChar(100)
-  mNeckStyle               String?   @map("m_neck_style")           @db.VarChar(100)
-  mPlacket                 String?   @map("m_placket")              @db.VarChar(100)
-  mBltType                 String?   @map("m_blt_type")             @db.VarChar(100)
-  mBltStyle                String?   @map("m_blt_style")            @db.VarChar(100)
-  mSleevesMainStyle        String?   @map("m_sleeves_main_style")   @db.VarChar(100)
-  mSleeveFold              String?   @map("m_sleeve_fold")          @db.VarChar(100)
-  mBtmFold                 String?   @map("m_btm_fold")             @db.VarChar(100)
-  mNoOfPocket              String?   @map("m_no_of_pocket")         @db.VarChar(100)
-  mPocket                  String?   @map("m_pocket")               @db.VarChar(100)
-  mExtraPocket             String?   @map("m_extra_pocket")         @db.VarChar(100)
-  mFit                     String?   @map("m_fit")                  @db.VarChar(100)
-  mBodyStyle               String?   @map("m_body_style")           @db.VarChar(100)
-  mLength                  String?   @map("m_length")               @db.VarChar(100)
-  mSet                     String?   @map("m_set")                  @db.VarChar(100)
+  mCollarType       String? @map("m_collar_type") @db.VarChar(100)
+  mCollarStyle      String? @map("m_collar_style") @db.VarChar(100)
+  mNeckType         String? @map("m_neck_type") @db.VarChar(100)
+  mNeckStyle        String? @map("m_neck_style") @db.VarChar(100)
+  mPlacket          String? @map("m_placket") @db.VarChar(100)
+  mBltType          String? @map("m_blt_type") @db.VarChar(100)
+  mBltStyle         String? @map("m_blt_style") @db.VarChar(100)
+  mSleevesMainStyle String? @map("m_sleeves_main_style") @db.VarChar(100)
+  mSleeveFold       String? @map("m_sleeve_fold") @db.VarChar(100)
+  mBtmFold          String? @map("m_btm_fold") @db.VarChar(100)
+  mNoOfPocket       String? @map("m_no_of_pocket") @db.VarChar(100)
+  mPocket           String? @map("m_pocket") @db.VarChar(100)
+  mExtraPocket      String? @map("m_extra_pocket") @db.VarChar(100)
+  mFit              String? @map("m_fit") @db.VarChar(100)
+  mBodyStyle        String? @map("m_body_style") @db.VarChar(100)
+  mLength           String? @map("m_length") @db.VarChar(100)
+  mSet              String? @map("m_set") @db.VarChar(100)
 
   // Body article output fields
-  bodyArticleNumber        String?   @unique @map("body_article_number") @db.VarChar(100)
-  bodyArticleDescription   String?   @map("body_article_description") @db.VarChar(255)
-  imageUrl                 String?   @map("image_url")                @db.Text
-  bodyArticleType          String?   @map("body_article_type")        @db.VarChar(100)
-  designNumber             String?   @map("design_number")            @db.VarChar(100)
+  bodyArticleNumber      String? @unique @map("body_article_number") @db.VarChar(100)
+  bodyArticleDescription String? @map("body_article_description") @db.VarChar(255)
+  imageUrl               String? @map("image_url") @db.Text
+  bodyArticleType        String? @map("body_article_type") @db.VarChar(100)
+  designNumber           String? @map("design_number") @db.VarChar(100)
 
   // Cost fields
-  cmtpCost                 Decimal?  @map("cmtp_cost")       @db.Decimal(10, 2)
-  cmpCost                  Decimal?  @map("cmp_cost")        @db.Decimal(10, 2)
-  fabCost                  Decimal?  @map("fab_cost")        @db.Decimal(10, 2)
-  fabCons                  Decimal?  @map("fab_cons")        @db.Decimal(10, 2)
-  width                    Decimal?  @map("width")           @db.Decimal(10, 2)
-  basicTrimCost            Decimal?  @map("basic_trim_cost")   @db.Decimal(10, 2)
-  roughCmpCost             Decimal?  @map("rough_cmp_cost")    @db.Decimal(10, 2)
-  costingType              String?   @map("costing_type")      @db.VarChar(20)
-  bodyConsumptionType      String?   @map("body_consumption_type")    @db.VarChar(20)
-  gsm                      Decimal?  @map("gsm")                      @db.Decimal(10, 2)
-  ratio                    Decimal?  @map("ratio")                    @db.Decimal(10, 4)
-  consumptionKg            Decimal?  @map("consumption_kg")           @db.Decimal(10, 4)
-  consumptionMeter         Decimal?  @map("consumption_meter")        @db.Decimal(10, 4)
-  preciseWidth             Decimal?  @map("precise_width")            @db.Decimal(10, 2)
-  preciseGsm               Decimal?  @map("precise_gsm")              @db.Decimal(10, 2)
-  preciseRatio             Decimal?  @map("precise_ratio")            @db.Decimal(10, 4)
-  preciseConsumptionKg     Decimal?  @map("precise_consumption_kg")   @db.Decimal(10, 4)
-  preciseConsumptionMeter  Decimal?  @map("precise_consumption_meter") @db.Decimal(10, 4)
+  cmtpCost                Decimal? @map("cmtp_cost") @db.Decimal(10, 2)
+  cmpCost                 Decimal? @map("cmp_cost") @db.Decimal(10, 2)
+  fabCost                 Decimal? @map("fab_cost") @db.Decimal(10, 2)
+  fabCons                 Decimal? @map("fab_cons") @db.Decimal(10, 2)
+  width                   Decimal? @map("width") @db.Decimal(10, 2)
+  basicTrimCost           Decimal? @map("basic_trim_cost") @db.Decimal(10, 2)
+  roughCmpCost            Decimal? @map("rough_cmp_cost") @db.Decimal(10, 2)
+  costingType             String?  @map("costing_type") @db.VarChar(20)
+  bodyConsumptionType     String?  @map("body_consumption_type") @db.VarChar(20)
+  gsm                     Decimal? @map("gsm") @db.Decimal(10, 2)
+  ratio                   Decimal? @map("ratio") @db.Decimal(10, 4)
+  consumptionKg           Decimal? @map("consumption_kg") @db.Decimal(10, 4)
+  consumptionMeter        Decimal? @map("consumption_meter") @db.Decimal(10, 4)
+  preciseWidth            Decimal? @map("precise_width") @db.Decimal(10, 2)
+  preciseGsm              Decimal? @map("precise_gsm") @db.Decimal(10, 2)
+  preciseRatio            Decimal? @map("precise_ratio") @db.Decimal(10, 4)
+  preciseConsumptionKg    Decimal? @map("precise_consumption_kg") @db.Decimal(10, 4)
+  preciseConsumptionMeter Decimal? @map("precise_consumption_meter") @db.Decimal(10, 4)
 
   // Article context (mirrored from parent extraction_results_flat row)
-  flatId                   String?   @map("flat_id")                @db.VarChar(100)
-  articleNumber            String?   @map("article_number")         @db.VarChar(100)
-  division                 String?   @map("division")               @db.VarChar(100)
-  subDivision              String?   @map("sub_division")           @db.VarChar(100)
-  majorCategory            String?   @map("major_category")         @db.VarChar(200)
-  mcCode                   String?   @map("mc_code")                @db.VarChar(50)
-  vendorName               String?   @map("vendor_name")            @db.VarChar(200)
-  vendorCode               String?   @map("vendor_code")            @db.VarChar(100)
-  season                   String?   @map("season")                 @db.VarChar(50)
-  year                     String?   @map("year")                   @db.VarChar(10)
-  hsnTaxCode               String?   @map("hsn_tax_code")           @db.VarChar(50)
+  flatId        String? @map("flat_id") @db.VarChar(100)
+  articleNumber String? @map("article_number") @db.VarChar(100)
+  division      String? @map("division") @db.VarChar(100)
+  subDivision   String? @map("sub_division") @db.VarChar(100)
+  majorCategory String? @map("major_category") @db.VarChar(200)
+  mcCode        String? @map("mc_code") @db.VarChar(50)
+  vendorName    String? @map("vendor_name") @db.VarChar(200)
+  vendorCode    String? @map("vendor_code") @db.VarChar(100)
+  season        String? @map("season") @db.VarChar(50)
+  year          String? @map("year") @db.VarChar(10)
+  hsnTaxCode    String? @map("hsn_tax_code") @db.VarChar(50)
 
   // Workflow
-  approvalStatus           String    @default("PENDING")    @map("approval_status")      @db.VarChar(20)
-  fgCreatorApproved        String    @default("PENDING")    @map("fg_creator_approved")  @db.VarChar(20)
-  approvedAt               DateTime? @map("approved_at")
-  approvedBy               Int?      @map("approved_by")
-  sapSyncStatus            String    @default("NOT_SYNCED") @map("sap_sync_status")      @db.VarChar(20)
-  sapSyncMessage           String?   @map("sap_sync_message")
+  approvalStatus    String    @default("PENDING") @map("approval_status") @db.VarChar(20)
+  fgCreatorApproved String    @default("PENDING") @map("fg_creator_approved") @db.VarChar(20)
+  approvedAt        DateTime? @map("approved_at")
+  approvedBy        Int?      @map("approved_by")
+  sapSyncStatus     String    @default("NOT_SYNCED") @map("sap_sync_status") @db.VarChar(20)
+  sapSyncMessage    String?   @map("sap_sync_message")
 
   // Audit
-  userName                 String?   @map("user_name")   @db.VarChar(200)
-  createdAt                DateTime  @default(now())     @map("created_at")
-  updatedAt                DateTime  @updatedAt          @map("updated_at")
+  userName  String?  @map("user_name") @db.VarChar(200)
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
 
   @@index([approvalStatus])
   @@index([sapSyncStatus])
@@ -1655,12 +1674,12 @@ model BodyArticleData {
 
 model BodyFabricConsumption {
   id             Int      @id @default(autoincrement())
-  division       String?  @map("division")       @db.VarChar(100)
-  subDivision    String?  @map("sub_division")   @db.VarChar(100)
+  division       String?  @map("division") @db.VarChar(100)
+  subDivision    String?  @map("sub_division") @db.VarChar(100)
   majorCategory  String?  @map("major_category") @db.VarChar(200)
-  fabWidth       Decimal? @map("fab_width")       @db.Decimal(10, 2)
+  fabWidth       Decimal? @map("fab_width") @db.Decimal(10, 2)
   fabConsumption Decimal? @map("fab_consumption") @db.Decimal(10, 6)
-  createdAt      DateTime @default(now())         @map("created_at")
+  createdAt      DateTime @default(now()) @map("created_at")
 
   @@unique([division, subDivision, majorCategory, fabWidth])
   @@map("body_fabric_consumption")
@@ -1669,13 +1688,13 @@ model BodyFabricConsumption {
 
 /// RoughCmpCostMaster: Master table for rough CMP cost by division, sub-division, and major category
 model RoughCmpCostMaster {
-  id         Int       @id @default(autoincrement())
-  div        String?   @map("div")     @db.VarChar(50)
-  subDiv     String?   @map("sub_div") @db.VarChar(50)
-  majCat     String    @map("maj_cat") @db.VarChar(100)
-  cmpCost    Decimal?  @map("cmp_cost") @db.Decimal(10, 4)
-  createdAt  DateTime  @default(now()) @map("created_at")
-  updatedAt  DateTime  @updatedAt      @map("updated_at")
+  id        Int      @id @default(autoincrement())
+  div       String?  @map("div") @db.VarChar(50)
+  subDiv    String?  @map("sub_div") @db.VarChar(50)
+  majCat    String   @map("maj_cat") @db.VarChar(100)
+  cmpCost   Decimal? @map("cmp_cost") @db.Decimal(10, 4)
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
 
   @@unique([div, subDiv, majCat])
   @@index([majCat])
@@ -1691,18 +1710,18 @@ model RoughCmpCostMaster {
 /// trimsTotal / packagingTotal / threadCost and the component breakdown are kept so the
 /// figure can be recomposed differently later without re-importing.
 model BasicTrimCostMaster {
-  id             Int       @id @default(autoincrement())
-  div            String?   @map("div")     @db.VarChar(50)
-  subDiv         String?   @map("sub_div") @db.VarChar(50)
-  majCat         String    @unique @map("maj_cat") @db.VarChar(100)
-  trimsTotal     Decimal?  @map("trims_total")      @db.Decimal(10, 4)
-  packagingTotal Decimal?  @map("packaging_total")  @db.Decimal(10, 4)
-  threadCost     Decimal?  @map("thread_cost")      @db.Decimal(10, 4)
-  basicTrimsCost Decimal?  @map("basic_trims_cost") @db.Decimal(10, 4)
-  createdAt      DateTime  @default(now()) @map("created_at")
-  updatedAt      DateTime  @updatedAt      @map("updated_at")
+  id             Int      @id @default(autoincrement())
+  div            String?  @map("div") @db.VarChar(50)
+  subDiv         String?  @map("sub_div") @db.VarChar(50)
+  majCat         String   @unique @map("maj_cat") @db.VarChar(100)
+  trimsTotal     Decimal? @map("trims_total") @db.Decimal(10, 4)
+  packagingTotal Decimal? @map("packaging_total") @db.Decimal(10, 4)
+  threadCost     Decimal? @map("thread_cost") @db.Decimal(10, 4)
+  basicTrimsCost Decimal? @map("basic_trims_cost") @db.Decimal(10, 4)
+  createdAt      DateTime @default(now()) @map("created_at")
+  updatedAt      DateTime @updatedAt @map("updated_at")
 
-  components     BasicTrimCostComponent[]
+  components BasicTrimCostComponent[]
 
   @@index([majCat])
   @@map("basic_trim_cost_master")
@@ -1714,13 +1733,13 @@ model BasicTrimCostMaster {
 model BasicTrimCostComponent {
   id        Int      @id @default(autoincrement())
   masterId  Int      @map("master_id")
-  kind      String   @map("kind")      @db.VarChar(20)
+  kind      String   @map("kind") @db.VarChar(20)
   component String   @map("component") @db.VarChar(50)
-  qty       Decimal? @map("qty")   @db.Decimal(10, 4)
-  rate      Decimal? @map("rate")  @db.Decimal(10, 4)
+  qty       Decimal? @map("qty") @db.Decimal(10, 4)
+  rate      Decimal? @map("rate") @db.Decimal(10, 4)
   value     Decimal? @map("value") @db.Decimal(10, 4)
 
-  master    BasicTrimCostMaster @relation(fields: [masterId], references: [id], onDelete: Cascade)
+  master BasicTrimCostMaster @relation(fields: [masterId], references: [id], onDelete: Cascade)
 
   @@unique([masterId, component])
   @@index([masterId])
@@ -1730,16 +1749,16 @@ model BasicTrimCostComponent {
 
 /// MajorCategoryDetails: Master table for major category hierarchy, mc_code, and HSN codes
 model MajorCategoryDetails {
-  id         Int      @id @default(autoincrement())
-  seg        String?  @map("seg")       @db.VarChar(50)
-  div        String?  @map("div")       @db.VarChar(100)
-  subDiv     String?  @map("sub_div")   @db.VarChar(100)
-  majCat     String?  @map("maj_cat")   @db.VarChar(200)
-  mcCode     String?  @map("mc_code")   @db.VarChar(50)
-  mcDes      String?  @map("mc_des")    @db.VarChar(200)
-  hsnCode    String?  @map("hsn_code")  @db.VarChar(20)
-  mcStatus   String?  @map("mc_status") @db.VarChar(20)
-  createdAt  DateTime @default(now())   @map("created_at")
+  id        Int      @id @default(autoincrement())
+  seg       String?  @map("seg") @db.VarChar(50)
+  div       String?  @map("div") @db.VarChar(100)
+  subDiv    String?  @map("sub_div") @db.VarChar(100)
+  majCat    String?  @map("maj_cat") @db.VarChar(200)
+  mcCode    String?  @map("mc_code") @db.VarChar(50)
+  mcDes     String?  @map("mc_des") @db.VarChar(200)
+  hsnCode   String?  @map("hsn_code") @db.VarChar(20)
+  mcStatus  String?  @map("mc_status") @db.VarChar(20)
+  createdAt DateTime @default(now()) @map("created_at")
 
   @@index([mcCode])
   @@index([majCat])
@@ -1788,7 +1807,7 @@ enum ExpenseChangeStatus {
 /// approval, moves to the next-lowest active stage above its current one;
 /// approving the highest-sortOrder active stage applies the change for real.
 model ExpenseApprovalStage {
-  id Int @id @default(autoincrement())
+  id          Int     @id @default(autoincrement())
   /// Which table's chain this stage belongs to, or the sentinel '*' (see
   /// ALL_TABLES in expenseAccessService.ts) for the SHARED DEFAULT chain
   /// every table walks unless it has rows of its own here. A table with
@@ -1805,7 +1824,7 @@ model ExpenseApprovalStage {
   /// A retired stage is skipped when building new chains and can no longer
   /// be granted, but is kept (not deleted) so past requests' trails still
   /// resolve its label — see `key`.
-  isActive Boolean @default(true) @map("is_active")
+  isActive    Boolean @default(true) @map("is_active")
 
   createdById   Int?    @map("created_by_id")
   createdByName String? @map("created_by_name") @db.VarChar(200)
@@ -1820,38 +1839,38 @@ model ExpenseApprovalStage {
 }
 
 model ExpenseChangeRequest {
-  id        String                 @id @default(uuid())
-  tableKey  String                 @map("table_key") @db.VarChar(50)
-  operation ExpenseChangeOperation @default(UPDATE)
+  id           String                 @id @default(uuid())
+  tableKey     String                 @map("table_key") @db.VarChar(50)
+  operation    ExpenseChangeOperation @default(UPDATE)
   /// Null only for CREATE requests, which have no row yet — `appliedRowId`
   /// records the id the insert actually got once the chain finishes.
-  rowId        String? @map("row_id") @db.VarChar(100)
-  appliedRowId String? @map("applied_row_id") @db.VarChar(100)
-  rowLabel     String? @map("row_label") @db.VarChar(300)
+  rowId        String?                @map("row_id") @db.VarChar(100)
+  appliedRowId String?                @map("applied_row_id") @db.VarChar(100)
+  rowLabel     String?                @map("row_label") @db.VarChar(300)
   /// UPDATE: { field: { old, new } }. CREATE: { field: { old: null, new } }.
   /// DELETE: { field: { old, new: null } } — a full snapshot of the row that
   /// is being removed, so the audit trail survives the row itself.
-  changes Json
-  reason  String
+  changes      Json
+  reason       String
   /// The date the requester needs this done by — advisory, shown at every
   /// stage so approvers can see what is running late.
-  dueDate DateTime? @map("due_date")
+  dueDate      DateTime?              @map("due_date")
 
-  status ExpenseChangeStatus @default(PENDING)
+  status          ExpenseChangeStatus @default(PENDING)
   /// The ExpenseApprovalStage.key this request is waiting on. Set to the
   /// chain's first active stage on creation, advanced on each approval, and
   /// null once status is APPROVED or REJECTED.
-  currentStageKey String? @map("current_stage_key") @db.VarChar(50)
+  currentStageKey String?             @map("current_stage_key") @db.VarChar(50)
   /// Ordered log of every action taken on this request's chain — one entry
   /// per approval/rejection: { stageKey, stageLabel, action: 'APPROVE'|
   /// 'REJECT', byId, byName, byEmail, at, comment }. Replaces a fixed
   /// approver/final column pair so the trail scales to any chain length.
-  approvalTrail Json @default("[]") @map("approval_trail")
+  approvalTrail   Json                @default("[]") @map("approval_trail")
 
-  requestedById    Int
-  requestedByName  String   @map("requested_by_name") @db.VarChar(200)
-  requestedByEmail String   @map("requested_by_email") @db.VarChar(255)
-  requestedAt      DateTime @default(now()) @map("requested_at")
+  requestedById             Int
+  requestedByName           String   @map("requested_by_name") @db.VarChar(200)
+  requestedByEmail          String   @map("requested_by_email") @db.VarChar(255)
+  requestedAt               DateTime @default(now()) @map("requested_at")
   /// The requester's OWN User.businessDivision at the moment they raised
   /// this request — captured once, immutable afterward (a later change to
   /// their profile must never re-route a request already in flight). This
@@ -1859,7 +1878,7 @@ model ExpenseChangeRequest {
   /// businessDivision matches, instead of any Category Head being able to
   /// act on any request — see canActOnExpenseRequestStage in
   /// expenseAccessService.ts.
-  requesterBusinessDivision String? @map("requester_business_division") @db.VarChar(20)
+  requesterBusinessDivision String?  @map("requester_business_division") @db.VarChar(20)
 
   createdAt DateTime @default(now()) @map("created_at")
   updatedAt DateTime @updatedAt @map("updated_at")
@@ -1884,14 +1903,14 @@ model ExpenseChangeRequest {
 /// grant on every table plus a requester grant on one); rights are the union
 /// of all of them.
 model ExpenseAccessGrant {
-  id    Int    @id @default(autoincrement())
-  email String @db.VarChar(255)
+  id          Int     @id @default(autoincrement())
+  email       String  @db.VarChar(255)
   /// Either the constant "SUB_DIVISION" (the fixed requester role — raises
   /// add/edit/delete requests) or an ExpenseApprovalStage.key (an approval
   /// right for that rung of the chain). Not a DB enum on purpose: new stages
   /// must be grantable the moment an admin creates them, with no migration.
-  level    String @db.VarChar(50)
-  tableKey String @default("*") @map("table_key") @db.VarChar(50)
+  level       String  @db.VarChar(50)
+  tableKey    String  @default("*") @map("table_key") @db.VarChar(50)
   /// Informational label for SUB_DIVISION grants (which sub-division this
   /// person edits for) — shown in the admin list and on their requests.
   subDivision String? @map("sub_division") @db.VarChar(100)

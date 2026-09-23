@@ -58,6 +58,13 @@ router.post('/items/:id/modify', requireModifyRights, h(ApproverController.modif
 // FINAL submit — creates the article in SAP.
 router.post('/approve', requireApprovalRights, h(ApproverController.approveItems));
 
+// Combo/Set articles (Kurti Set, Baba Suit, ...) — a parent FG article
+// assembled from multiple child pieces, only the parent ever syncs to SAP.
+router.get('/combo-articles/:parentId', h(ApproverController.getComboArticle));
+router.post('/combo-articles/:parentId/children', h(ApproverController.addComboChild));
+router.delete('/combo-articles/children/:childId', h(ApproverController.deleteComboChild));
+router.post('/combo-articles/:parentId/assemble', requireApprovalRights, h(ApproverController.assembleComboArticle));
+
 // Reject selected items — approver roles + PD + ADMIN
 router.post('/reject', requireApprovalRights, h(ApproverController.rejectItems));
 

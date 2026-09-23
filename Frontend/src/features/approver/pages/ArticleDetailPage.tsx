@@ -3,7 +3,7 @@ import { useParams, useNavigate, useLocation } from 'react-router-dom';
 import { useForm } from 'react-hook-form';
 import {
   CheckCircle2, XCircle, FileText, LayoutGrid, Rocket, Sparkles,
-  ChevronLeft, ChevronRight, ArrowLeft, Loader2, RotateCw,
+  ChevronLeft, ChevronRight, ArrowLeft, Loader2, RotateCw, Plus, Trash2, PackagePlus,
 } from 'lucide-react';
 import {
   Button,
@@ -52,6 +52,7 @@ import {
 } from '../../../services/articleConfigService';
 import { formatDivisionLabel } from '../../../shared/utils/ui/formatters';
 import { variantCreatingIds } from '../../fabric-article/variantCreationState';
+import { isComboMajorCategory } from '../../../data/comboMajorCategories';
 
 // ─── Helpers ─────────────────────────────────────────────────────────────────
 
@@ -383,6 +384,7 @@ export default function ArticleDetailPage() {
   const batchSize = items.length;
   const isFirstArticle = currentIndex === 0;
   const isLastArticle = currentIndex >= items.length - 1;
+  const isComboItem = isComboMajorCategory(currentItem?.majorCategory);
 
   function getBasePath() {
     if (pathType === 'old') return '/approver/old-articles';
@@ -504,6 +506,86 @@ export default function ArticleDetailPage() {
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [currentItem?.id]);
+
+  // ─── Combo/Set articles (Kurti Set, Baba Suit, ...) ─────────────────────────
+  // A parent article of a gated major category is assembled from N ≥ 2 child
+  // articles; children reuse the exact same edit modal below, one at a time,
+  // and never sync to SAP on their own — only the assembled parent does.
+  const [comboChildren, setComboChildren] = useState<ApproverItem[]>([]);
+  const [comboLoading, setComboLoading] = useState(false);
+  const [submittingCombo, setSubmittingCombo] = useState(false);
+
+  const loadComboChildren = useCallback(async () => {
+    if (!currentItem) return;
+    setComboLoading(true);
+    const token = localStorage.getItem('authToken');
+    try {
+      const r = await fetch(`${APP_CONFIG.api.baseURL}/approver/combo-articles/${currentItem.id}`, {
+        headers: { Authorization: `Bearer ${token}` },
+      });
+      if (r.ok) {
+        const payload = await r.json();
+        setComboChildren(payload.children ?? []);
+      }
+    } catch { /* transient */ }
+    finally { setComboLoading(false); }
+  }, [currentItem?.id]);
+
+  useEffect(() => {
+    if (isComboItem) void loadComboChildren();
+    else setComboChildren([]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [isComboItem, currentItem?.id]);
+
+  const addComboChild = async () => {
+    if (!currentItem) return;
+    const token = localStorage.getItem('authToken');
+    try {
+      const r = await fetch(`${APP_CONFIG.api.baseURL}/approver/combo-articles/${currentItem.id}/children`, {
+        method: 'POST', headers: { Authorization: `Bearer ${token}` },
+      });
+      if (!r.ok) {
+        const p = await r.json().catch(() => null);
+        throw new Error(p?.error || 'Failed to add child article');
+      }
+      const child = await r.json();
+      setComboChildren(prev => [...prev, child]);
+      handleEdit(child);
+    } catch (err) { message.error(err instanceof Error ? err.message : 'Failed to add child article'); }
+  };
+
+  const removeComboChild = async (childId: string) => {
+    const token = localStorage.getItem('authToken');
+    try {
+      const r = await fetch(`${APP_CONFIG.api.baseURL}/approver/combo-articles/children/${childId}`, {
+        method: 'DELETE', headers: { Authorization: `Bearer ${token}` },
+      });
+      if (!r.ok) {
+        const p = await r.json().catch(() => null);
+        throw new Error(p?.error || 'Failed to remove child article');
+      }
+      setComboChildren(prev => prev.filter(c => c.id !== childId));
+    } catch (err) { message.error(err instanceof Error ? err.message : 'Failed to remove child article'); }
+  };
+
+  const submitCombo = async () => {
+    if (!currentItem || comboChildren.length < 2) return;
+    setSubmittingCombo(true);
+    const token = localStorage.getItem('authToken');
+    try {
+      const r = await fetch(`${APP_CONFIG.api.baseURL}/approver/combo-articles/${currentItem.id}/assemble`, {
+        method: 'POST', headers: { Authorization: `Bearer ${token}` },
+      });
+      if (!r.ok && r.status !== 202) {
+        const payload = await r.json().catch(() => null);
+        throw new Error(payload?.error || 'Failed to submit combo article');
+      }
+      message.success('Combo article queued — creating in SAP in the background…');
+      await refetchCurrentItem();
+      pollUntilSynced(currentItem.id);
+    } catch (err) { message.error(err instanceof Error ? err.message : 'Failed to submit combo article'); }
+    finally { setSubmittingCombo(false); }
+  };
 
   const pendingSelectedKeys = useMemo(
     () => selectedRowKeys.filter(key => items.find(i => i.id === key)?.approvalStatus === 'PENDING'),
@@ -777,8 +859,10 @@ export default function ArticleDetailPage() {
       }
       message.success('Item updated');
       setIsEditModalOpen(false);
+      const wasEditingChild = editingItem && editingItem.id !== currentItem?.id;
       setEditingItem(null);
-      await refetchCurrentItem();
+      if (wasEditingChild) await loadComboChildren();
+      else await refetchCurrentItem();
     } catch (err) { message.error(err instanceof Error ? err.message : 'Failed to update item'); }
   };
 
@@ -1042,7 +1126,9 @@ export default function ArticleDetailPage() {
                 side="bottom"
                 contentClassName="bg-white text-foreground border border-border p-0 max-w-xs shadow-lg"
                 title={
-                  !canApprove
+                  isComboItem
+                    ? 'This is a combo/set article — use "Submit Combo to SAP" below instead'
+                    : !canApprove
                     ? 'Only Approver, Sub-Division Head, Category Head or Admin can approve articles'
                     : approveBlockedReasons.length > 0
                     ? (
@@ -1067,7 +1153,7 @@ export default function ArticleDetailPage() {
                 {/* span wrapper: disabled <button> swallows pointer events; span keeps hover alive */}
                 <span className="inline-block">
                   <Button size="sm" onClick={handleApproveClick}
-                    disabled={!canApprove || pendingSelectedKeys.length === 0 || approveBlockedReasons.length > 0}
+                    disabled={!canApprove || pendingSelectedKeys.length === 0 || approveBlockedReasons.length > 0 || isComboItem}
                     className="h-7 border-none bg-[#FF6F61] px-3 text-[12px] font-semibold text-white shadow-sm hover:bg-[#ff5b4d] disabled:bg-white/20 disabled:text-white/50">
                     <CheckCircle2 /> Save &amp; Submit
                     {approveBlockedReasons.length > 0 && <span className="ml-1 text-[10px] text-amber-200">⚠ {approveBlockedReasons.length}</span>}
@@ -1078,6 +1164,62 @@ export default function ArticleDetailPage() {
           </div>
         </div>
       </div>
+
+      {/* Combo/Set article panel — Kurti Set, Baba Suit, ... */}
+      {!loadingItem && isComboItem && currentItem && (
+        <div className="mb-2 rounded-xl border border-amber-200 bg-amber-50/60 p-3">
+          <div className="mb-2 flex flex-wrap items-center justify-between gap-2">
+            <div className="flex items-center gap-1.5 text-[13px] font-semibold text-amber-900">
+              <PackagePlus className="h-4 w-4" />
+              Combo/Set Article — {currentItem.majorCategory}
+              <span className="font-normal text-amber-700">({comboChildren.length} child article{comboChildren.length === 1 ? '' : 's'})</span>
+            </div>
+            <div className="flex items-center gap-1.5">
+              <Button size="sm" variant="outline" onClick={addComboChild} disabled={currentItem.sapSyncStatus === 'SYNCED'} className="h-7 px-2.5 text-[12px]">
+                <Plus className="h-3.5 w-3.5" /> Add Extra Child
+              </Button>
+              <Tooltip title={comboChildren.length < 2 ? 'Add at least 2 child articles first' : undefined}>
+                <span className="inline-block">
+                  <Button size="sm" onClick={submitCombo}
+                    disabled={comboChildren.length < 2 || submittingCombo || currentItem.sapSyncStatus === 'SYNCED' || !canApprove}
+                    className="h-7 border-none bg-[#FF6F61] px-3 text-[12px] font-semibold text-white shadow-sm hover:bg-[#ff5b4d] disabled:bg-white/40 disabled:text-white/60">
+                    <CheckCircle2 className="h-3.5 w-3.5" /> {submittingCombo ? 'Submitting…' : 'Submit Combo to SAP'}
+                  </Button>
+                </span>
+              </Tooltip>
+            </div>
+          </div>
+          {comboLoading ? (
+            <div className="flex items-center gap-2 px-1 py-2 text-[12px] text-amber-700">
+              <Loader2 className="h-3.5 w-3.5 animate-spin" /> Loading child articles…
+            </div>
+          ) : comboChildren.length === 0 ? (
+            <div className="rounded-md border border-dashed border-amber-300 bg-white/50 px-3 py-4 text-center text-[12px] text-amber-700">
+              No child articles yet — add at least 2 (e.g. Upper, Lower, Dupatta) before submitting.
+            </div>
+          ) : (
+            <div className="grid gap-1.5 sm:grid-cols-2 lg:grid-cols-3">
+              {comboChildren.map((child, idx) => (
+                <div key={child.id} className="flex items-center justify-between gap-2 rounded-md border border-amber-200 bg-white px-2.5 py-1.5">
+                  <button type="button" onClick={() => handleEdit(child)} className="min-w-0 flex-1 truncate text-left text-[12px] font-medium text-slate-800 hover:underline">
+                    #{idx + 1} {child.articleDescription || <span className="italic text-slate-400">Untitled — click to fill in</span>}
+                    {child.isMandatoryChild && <span className="ml-1 text-[10px] font-normal text-amber-600">(required)</span>}
+                  </button>
+                  <Tooltip title={child.isMandatoryChild ? 'Mandatory child for this combo category — cannot be removed' : undefined}>
+                    <span className="inline-block">
+                      <Button size="sm" variant="ghost" onClick={() => removeComboChild(child.id)}
+                        disabled={currentItem.sapSyncStatus === 'SYNCED' || child.isMandatoryChild}
+                        className="h-6 w-6 p-0 text-rose-500 hover:bg-rose-50 hover:text-rose-600 disabled:text-slate-300">
+                        <Trash2 className="h-3.5 w-3.5" />
+                      </Button>
+                    </span>
+                  </Tooltip>
+                </div>
+              ))}
+            </div>
+          )}
+        </div>
+      )}
 
       {/* Article detail */}
       {loadingItem ? (
