@@ -18,6 +18,7 @@ Exit codes:
 import argparse
 import io
 import json
+import os
 import sys
 import traceback
 from datetime import date
@@ -86,23 +87,41 @@ def _truncate_for_width(draw, text, font, max_width):
 
 
 def _load_font(size):
-    """Try to load a TrueType font for nicer rendering; fall back to bitmap default."""
+    """Load a TrueType font at the requested size.
+
+    Checks the bundled DejaVuSans.ttf (same directory as this script) first so
+    the watermark always renders at the correct size regardless of what fonts
+    the host OS has installed.
+    """
+    _here = os.path.dirname(os.path.abspath(__file__))
     candidates = [
+        # Bundled font — always deployed alongside this script
+        os.path.join(_here, "DejaVuSans.ttf"),
         # Windows
         "C:/Windows/Fonts/arial.ttf",
         "C:/Windows/Fonts/segoeui.ttf",
-        # Linux
+        # Linux — common paths across Ubuntu/Debian/Alpine/Arch
         "/usr/share/fonts/truetype/dejavu/DejaVuSans.ttf",
         "/usr/share/fonts/truetype/liberation/LiberationSans-Regular.ttf",
+        "/usr/share/fonts/truetype/freefont/FreeSans.ttf",
+        "/usr/share/fonts/truetype/ubuntu/Ubuntu-R.ttf",
+        "/usr/share/fonts/dejavu-sans-fonts/DejaVuSans.ttf",
+        "/usr/share/fonts/TTF/DejaVuSans.ttf",
+        "/usr/share/fonts/dejavu/DejaVuSans.ttf",
         # macOS
         "/Library/Fonts/Arial.ttf",
+        "/System/Library/Fonts/Helvetica.ttc",
     ]
     for path in candidates:
         try:
             return ImageFont.truetype(path, size)
         except (OSError, IOError):
             continue
-    return ImageFont.load_default()
+    # Pillow >= 10 supports load_default(size=N); older versions ignore size.
+    try:
+        return ImageFont.load_default(size=20)
+    except TypeError:
+        return ImageFont.load_default()
 
 
 def _save(img, fmt):
@@ -139,7 +158,7 @@ def watermark(image_bytes, row, fmt="png"):
     # Add a solid-white strip BELOW the original photo and write the label
     # there. Strip height is AUTO-FIT to the content (no wasted whitespace) —
     # font size is proportional to the source image height instead.
-    font_size = max(60, int(height * 0.065))
+    font_size = min(130, max(30, int(height * 0.065)))
     line_h = int(font_size * 1.35)
     pad_x = max(20, font_size)
     pad_y = max(20, int(font_size * 0.7))
