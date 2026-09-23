@@ -210,6 +210,10 @@ const statusTagClass = (s: JobStatus | 'PENDING' | 'RUNNING' | 'DONE' | 'FAILED'
 };
 
 export default function ModelGenerationPage() {
+  const userData = localStorage.getItem('user') ? JSON.parse(localStorage.getItem('user')!) : null;
+  const userRole = userData?.role as string | undefined;
+  const canViewModelImages = userRole === 'ADMIN' || userRole === 'PD_DESIGNER';
+
   const form = useForm<FormValues>({
     defaultValues: {
       gender: 'female',
@@ -736,26 +740,30 @@ export default function ModelGenerationPage() {
           <UploadIcon />
           Upload Garments
         </Button>
-        <Button
-          type="button"
-          size="sm"
-          variant={pageMode === 'from-article-list' ? 'default' : 'outline'}
-          className={cn(pageMode === 'from-article-list' && 'bg-[#FF6F61] text-white hover:bg-[#ff5b4d]')}
-          onClick={() => setPageMode('from-article-list')}
-        >
-          <List />
-          From Article List
-        </Button>
-        <Button
-          type="button"
-          size="sm"
-          variant={pageMode === 'model-images' ? 'default' : 'outline'}
-          className={cn(pageMode === 'model-images' && 'bg-[#FF6F61] text-white hover:bg-[#ff5b4d]')}
-          onClick={() => setPageMode('model-images')}
-        >
-          <Images />
-          model-images
-        </Button>
+        {canViewModelImages && (
+          <Button
+            type="button"
+            size="sm"
+            variant={pageMode === 'from-article-list' ? 'default' : 'outline'}
+            className={cn(pageMode === 'from-article-list' && 'bg-[#FF6F61] text-white hover:bg-[#ff5b4d]')}
+            onClick={() => setPageMode('from-article-list')}
+          >
+            <List />
+            From Article List
+          </Button>
+        )}
+        {canViewModelImages && (
+          <Button
+            type="button"
+            size="sm"
+            variant={pageMode === 'model-images' ? 'default' : 'outline'}
+            className={cn(pageMode === 'model-images' && 'bg-[#FF6F61] text-white hover:bg-[#ff5b4d]')}
+            onClick={() => setPageMode('model-images')}
+          >
+            <Images />
+            model-images
+          </Button>
+        )}
 
         {/* Manage the MAJ CAT master (add new categories + their model-image frame) */}
         <div className="ml-auto">
@@ -763,7 +771,7 @@ export default function ModelGenerationPage() {
         </div>
       </div>
 
-      {pageMode === 'model-images' && <ModelImagesBrowser />}
+      {canViewModelImages && pageMode === 'model-images' && <ModelImagesBrowser />}
 
       {pageMode !== 'model-images' && (
       <div className="grid grid-cols-1 gap-6 lg:grid-cols-[9fr_15fr]">
@@ -771,11 +779,11 @@ export default function ModelGenerationPage() {
         <Card className="sticky top-20 self-start glass rounded-2xl border border-white/60">
           <CardHeader>
             <CardTitle className="text-base">
-              {pageMode === 'from-article-list' ? 'Article List Settings' : 'Generation Settings'}
+              {canViewModelImages && pageMode === 'from-article-list' ? 'Article List Settings' : 'Generation Settings'}
             </CardTitle>
           </CardHeader>
           <CardContent>
-            {pageMode === 'from-article-list' ? (
+            {canViewModelImages && pageMode === 'from-article-list' ? (
               <ArticleListPanel submitting={loading} onSubmit={handleArticleListSubmit} />
             ) : null}
             {pageMode === 'upload-garments' ? (
