@@ -825,11 +825,11 @@ const VariantSubTable: React.FC<VariantSubTableProps> = ({
     [variants, fetchVariants],
   );
 
-  // Colors where at least one variant has a SAP article number (synced) — hide delete button for these.
+  // Colors where at least one variant has a SAP article ID — hide delete button for these.
   const syncedColors = useMemo(() => {
     const s = new Set<string>();
     for (const v of variants) {
-      if (v.fabricArticleNumber || v.sapArticleId) {
+      if (v.sapArticleId) {
         const c = (v.variantColor || '').toUpperCase();
         if (c) s.add(c);
       }
@@ -964,6 +964,42 @@ const VariantSubTable: React.FC<VariantSubTableProps> = ({
           );
         }
         return <span className="text-[11px] text-muted-foreground">Pending SAP</span>;
+      },
+    },
+    {
+      title: '',
+      key: 'actions',
+      width: 90,
+      render: (_v, record) => {
+        const color = (record.variantColor || '').toUpperCase();
+        if (syncedColors.has(color)) return null;
+        const isFirstOfColor = firstIdByColor.get(color) === record.id;
+        return (
+          <div className="flex items-center gap-1">
+            <Popconfirm
+              title="Delete this variant?"
+              onConfirm={() => handleDeleteVariant(record.id)}
+              okText="Delete"
+              cancelText="Cancel"
+            >
+              <Button size="sm" variant="ghost" className="h-6 w-6 p-0 text-destructive hover:text-destructive">
+                <Trash2 className="h-3.5 w-3.5" />
+              </Button>
+            </Popconfirm>
+            {isFirstOfColor && (
+              <Popconfirm
+                title={`Delete all variants for color ${color}?`}
+                onConfirm={() => handleDeleteColorVariants(color)}
+                okText="Delete All"
+                cancelText="Cancel"
+              >
+                <Button size="sm" variant="destructive" className="h-6 px-2 text-[10px] font-medium">
+                  Delete Color
+                </Button>
+              </Popconfirm>
+            )}
+          </div>
+        );
       },
     },
   ];
