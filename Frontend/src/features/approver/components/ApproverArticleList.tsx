@@ -77,6 +77,7 @@ import {
   isMajCatInMandatoryGrid,
 } from '../../../services/articleConfigService';
 import { getImageUrl } from '../../../shared/utils/common/helpers';
+import { calculateMrpFromRate } from '../../../shared/utils/common/pricing';
 import { APP_CONFIG } from '../../../constants/app/config';
 import { formatDivisionLabel } from '../../../shared/utils/ui/formatters';
 import { SIMPLIFIED_HIERARCHY } from '../../extraction/components/SimplifiedCategorySelector';
@@ -740,7 +741,7 @@ const ArticleCard = React.memo(
       const storedMrp = parseFloat(String((item as any).mrp ?? ''));
       const rate = parseFloat(String((item as any).rate ?? ''));
       if (isNaN(rate) || rate <= 0) return;
-      const calculatedMrp = Math.ceil((rate * 1.47) / 50) * 50;
+      const calculatedMrp = calculateMrpFromRate(rate);
       // Skip if MRP is already saved and matches what we'd calculate — no API call needed
       if (!isNaN(storedMrp) && storedMrp > 0 && storedMrp === calculatedMrp) return;
       // Skip if MRP is already saved as any valid positive number (user may have set it manually)
@@ -1307,7 +1308,7 @@ const ArticleCard = React.memo(
       }
     }, [item.id]);
 
-    const calcMrpFromRate = (rate: number): number => Math.ceil((rate * 1.47) / 50) * 50;
+    const calcMrpFromRate = (rate: number): number => calculateMrpFromRate(rate);
 
     const getValue = (field: string): string | null => {
       if (field in localValues) return localValues[field];

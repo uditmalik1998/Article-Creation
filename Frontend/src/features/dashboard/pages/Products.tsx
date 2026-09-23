@@ -28,6 +28,7 @@ import type { SchemaItem } from '../../../shared/types/extraction/ExtractionType
 import { exportToExcel, mapMasterAttributes } from '../../../shared/utils/export/extractionExport';
 import { SIMPLE_APPROVER_EXPORT_HEADERS } from '../../approver/pages/ApproverDashboard';
 import { getImageUrl } from '../../../shared/utils/common/helpers';
+import { calculateMrpFromRate } from '../../../shared/utils/common/pricing';
 import { formatDivisionLabel } from '../../../shared/utils/ui/formatters';
 import './Products.css';
 
@@ -1081,7 +1082,7 @@ export default function Products() {
                             if (item.key === 'rate') {
                               const rate = parseFloat(val);
                               if (!isNaN(rate) && rate > 0) {
-                                next['mrp'] = String(Math.ceil((rate * 1.47) / 25) * 25);
+                                next['mrp'] = String(calculateMrpFromRate(rate));
                               }
                             }
                             return next;

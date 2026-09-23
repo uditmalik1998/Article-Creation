@@ -17,10 +17,15 @@ export const parseNumericValue = (value: unknown): number | null => {
     return Number.isNaN(parsed) ? null : parsed;
 };
 
-// MRP = rate + 47%, rounded up to the nearest multiple of 25.
+export const MRP_MARGIN_MULTIPLIER = 1.47;
+// 50, never 25: the step also sets the cost ceiling (MRP x 0.79).
+export const MRP_ROUNDING_STEP = 50;
+
+// MRP = rate + 47%, rounded up to the nearest multiple of 50.
+// Keep in step with Frontend/src/shared/utils/common/pricing.ts.
 export const calculateMrpFromRate = (rateOrCost: unknown): number => {
     const rate = parseNumericValue(rateOrCost);
     if (rate === null || rate <= 0) return 1;
-    const withMargin = rate * 1.47;
-    return Math.ceil(withMargin / 25) * 25;
+    const withMargin = rate * MRP_MARGIN_MULTIPLIER;
+    return Math.ceil(withMargin / MRP_ROUNDING_STEP) * MRP_ROUNDING_STEP;
 };
