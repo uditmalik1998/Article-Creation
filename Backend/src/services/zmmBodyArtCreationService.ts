@@ -186,7 +186,6 @@ export async function submitBodyArticles(ids: string[]): Promise<{
             clearTimeout(timer);
 
             const rawText = await res.text().catch(() => '');
-            console.log(`[ZMM_BODY_RFC] HTTP ${res.status} id=${row.id} raw:`, rawText);
 
             let json: any = {};
             try { json = JSON.parse(rawText); } catch { /* non-JSON response */ }
@@ -195,8 +194,6 @@ export async function submitBodyArticles(ids: string[]): Promise<{
             if (json?.EV_JSON) {
                 try { ev = JSON.parse(json.EV_JSON); } catch { ev = json; }
             }
-
-            console.log(`[ZMM_BODY_RFC] Parsed ev id=${row.id}:`, JSON.stringify(ev));
 
             // ZMM_BODY_ART_CRT_V3 returns EX_DATA array — article number in SAP_ART, errors in MSG_TYP=E rows
             const exDataArray: any[] = Array.isArray(ev?.EX_DATA) ? ev.EX_DATA : [];

@@ -2635,10 +2635,8 @@ export class ApproverController {
                 const variantsToUpload = variants.filter(
                     v => v.imageUrl && !storageService.extractApprovedKeyFromUrl(v.imageUrl)
                 );
-                console.log(`[VARIANT_IMG] ${variantsToUpload.length}/${variants.length} variant(s) to upload for generic ${baseArticleNumber}`);
                 await Promise.allSettled(variantsToUpload.map(async (v) => {
                     const colorCode = v.variantColor || v.colour || undefined;
-                    console.log(`[VARIANT_IMG] Uploading: variantId=${v.id} base=${baseArticleNumber} color=${colorCode} src=${v.imageUrl}`);
                     try {
                         const upload = await storageService.uploadApprovedImageFromSourceUrl(
                             String(v.imageUrl),
@@ -2650,7 +2648,6 @@ export class ApproverController {
                             where: { id: v.id },
                             data: { imageUrl: upload.url },
                         });
-                        console.log(`✅ [VARIANT_IMG] Saved to article-master: ${upload.key}`);
                     } catch (imgErr: any) {
                         console.error(`❌ [VARIANT_IMG] Upload failed for ${v.id}:`, imgErr?.message);
                     }
@@ -3008,7 +3005,6 @@ export class ApproverController {
                 (v) => v.imageUrl && !storageService.extractApprovedKeyFromUrl(v.imageUrl)
             );
             if (needsRetroUpload.length > 0) {
-                console.log(`[RETRY_VARIANTS] Retroactive image upload for ${needsRetroUpload.length} SYNCED variant(s)`);
                 await Promise.allSettled(needsRetroUpload.map(async (v) => {
                     const colorCode = v.variantColor || v.colour || undefined;
                     try {
@@ -3022,7 +3018,6 @@ export class ApproverController {
                             where: { id: v.id },
                             data: { imageUrl: upload.url },
                         });
-                        console.log(`✅ [RETRY_VARIANTS] Retroactive image upload: ${upload.key}`);
                     } catch (imgErr: any) {
                         console.error(`❌ [RETRY_VARIANTS] Retroactive upload failed for ${v.id}:`, imgErr?.message);
                     }
@@ -3126,7 +3121,6 @@ export class ApproverController {
                                 where: { id: r.id },
                                 data: { imageUrl: upload.url },
                             });
-                            console.log(`✅ [RETRY_VARIANTS] Variant image saved to article-master: ${upload.key}`);
                         } catch (imgErr: any) {
                             console.error(`❌ [RETRY_VARIANTS] Variant image upload failed for ${r.id}:`, imgErr?.message);
                         }
