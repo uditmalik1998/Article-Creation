@@ -1491,7 +1491,7 @@ export class ApproverController {
             const bodyRows = bodyNums.length > 0
                 ? await prisma.bodyArticleData.findMany({
                     where: { bodyArticleNumber: { in: bodyNums } },
-                    select: { bodyArticleNumber: true, fabCons: true, basicTrimCost: true, cmpCost: true, majorCategory: true },
+                    select: { bodyArticleNumber: true, consumptionKg: true, consumptionMeter: true, basicTrimCost: true, cmpCost: true, majorCategory: true },
                 })
                 : [];
             const bodyMap = new Map(bodyRows.map(r => [r.bodyArticleNumber!, r]));
@@ -1565,13 +1565,13 @@ export class ApproverController {
                 const fabricData = a.fabricArticleNumber ? fabricMap.get(a.fabricArticleNumber) : null;
 
                 const fgNum = a.sapArticleId || a.articleNumber || '';
-                const fabCons = toNum(bodyData?.fabCons);
+                const fabCons = toNum(bodyData?.consumptionKg) ?? toNum(bodyData?.consumptionMeter) ?? 0;
                 const vdrRate = toNum(a.vendorFabricRate);
                 const v2Rate = toNum(fabricData?.v2FabricRate);
                 const basicTrim = toNum(bodyData?.basicTrimCost)
                     ?? (bodyData?.majorCategory ? trimCostByMajCat.get(bodyData.majorCategory.trim().toUpperCase()) ?? null : null);
                 const cmpCost = toNum(bodyData?.cmpCost);
-                const fgValAdd = toNum(a.valueAddCost);
+                const fgValAdd = toNum(a.valueAddCost) ?? 0;
                 const fgProcessCost = toNum(a.valueAddProcessCost);
 
                 const summaryRowNum = dataRow;
@@ -1609,9 +1609,9 @@ export class ApproverController {
                     ...fgCols,
                     'Fabric Article', a.fabricArticleNumber || '', a.fabricArticleNumber ? (a.fabricArticleDescription || '') : '',
                     fabCons, vdrRate,
-                    fabCons != null && vdrRate != null ? { formula: `N${dataRow}*O${dataRow}` } : null,
+                    vdrRate != null ? { formula: `N${dataRow}*O${dataRow}` } : null,
                     fabCons, v2Rate,
-                    fabCons != null && v2Rate != null ? { formula: `Q${dataRow}*R${dataRow}` } : null,
+                    v2Rate != null ? { formula: `Q${dataRow}*R${dataRow}` } : null,
                     null, null,
                 ]);
                 [14, 15, 16, 17, 18, 19].forEach(c => { fabRow.getCell(c).numFmt = '#,##0.00'; });
@@ -1621,8 +1621,8 @@ export class ApproverController {
                 const bodyRow = ws.addRow([
                     ...fgCols,
                     'Body Article', a.bodyArticle || '', a.bodyArticle ? (a.bodyArticleDescription || '') : '',
-                    fabCons, null, cmpCost,
-                    fabCons, null, cmpCost,
+                    null, null, cmpCost ?? 0,
+                    null, null, cmpCost ?? 0,
                     null, null,
                 ]);
                 [14, 16, 17, 19].forEach(c => { bodyRow.getCell(c).numFmt = '#,##0.00'; });
