@@ -1073,10 +1073,8 @@ const ArticleCard = React.memo(
     }, [effectiveMajCat]);
 
     // Auto-fill VALUE ADD ACC. COST from the VAAC table on initial load (only if empty).
-    // Only for PENDING articles — Approved articles show their stored DB value directly.
     useEffect(() => {
       if (!effectiveMajCat) return;
-      if (item.approvalStatus !== 'PENDING') return; // Approved articles: skip API, show stored value
       const current = (item as any).valueAddCost ?? localValues['valueAddCost'];
       if (current != null && String(current).trim() !== '') return; // already has a value — skip
       fetchVaacTotalValue(effectiveMajCat).then((val) => {

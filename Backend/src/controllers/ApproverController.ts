@@ -1949,7 +1949,7 @@ export class ApproverController {
             // - variantWeight: must be settable after approval so SAP retry can proceed
             // - fabricArticleDescription + vendorFabricRate: internal fields pre-saved before
             //   fabric article creation in modify mode; not part of SAP attribute sync
-            const APPROVED_ITEM_ALLOWED_FIELDS = new Set(['variantWeight', 'fabricArticleDescription', 'vendorFabricRate', 'fabricArticleNumber']);
+            const APPROVED_ITEM_ALLOWED_FIELDS = new Set(['variantWeight', 'fabricArticleDescription', 'vendorFabricRate', 'fabricArticleNumber', 'valueAddCost']);
             const isAllowedUpdate = Object.keys(data).every((k) => APPROVED_ITEM_ALLOWED_FIELDS.has(k));
             if (existingItem.approvalStatus === 'APPROVED' && !isAllowedUpdate) {
                 return res.status(403).json({ error: 'Cannot update an approved item. It is locked for SAP sync.' });
