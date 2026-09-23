@@ -463,36 +463,29 @@ export class StorageService {
         const safeColor = colorCode ? this.sanitizeColor(colorCode) : undefined;
         const wantWatermark = !!labelData;
 
-        console.log(`[WM_DIAG] uploadApprovedImage: article=${safeArticleNumber} wantWatermark=${wantWatermark} sourceUrl="${sourceImageUrl}"`);
-
         // Preferred path: direct S3-to-S3 copy — no HTTP download, no network fetch needed.
         // Works for both public CDN URLs and signed R2 URLs.
         // SKIPPED when watermarking is requested — we have to touch the bytes.
         const sourceKey = this.extractKeyFromAnyUrl(sourceImageUrl);
-        console.log(`[WM_DIAG] extractKeyFromAnyUrl → "${sourceKey}"`);
         if (sourceKey && !wantWatermark) {
             const extension = this.extensionFromPath(sourceKey) || 'jpg';
             const destKey = this.buildApprovedKey(safeArticleNumber, extension, safeColor);
             try {
-                console.log(`📦 Direct S3 copy: ${this.bucket}/${sourceKey} → ${this.approvedBucket}/${destKey}`);
                 await this.approvedS3Client.send(new CopyObjectCommand({
                     Bucket: this.approvedBucket,
                     CopySource: `${this.bucket}/${sourceKey}`,
                     Key: destKey
                 }));
-                console.log(`✅ Direct S3 copy succeeded: ${destKey}`);
                 return { url: await this.buildApprovedUrl(destKey), path: destKey, key: destKey, uuid: safeArticleNumber };
             } catch (copyError: any) {
-                console.warn(`⚠️ Direct S3 copy failed (${copyError?.message}), trying S3 GetObject fallback...`);
+                console.warn(`⚠️ Direct S3 copy failed for ${destKey} (${copyError?.message}), trying S3 GetObject fallback...`);
             }
         }
 
         if (sourceKey) {
             const fallbackExt = this.extensionFromPath(sourceKey) || 'jpg';
             const fallbackDestKey = this.buildApprovedKey(safeArticleNumber, fallbackExt, safeColor);
-            // Second fallback (and watermark path): GetObject from source bucket → optionally watermark → PutObject.
             try {
-                console.log(`[WM_DIAG] Trying S3 GetObject: bucket=${this.bucket} key=${sourceKey}`);
                 const getResult = await this.s3Client.send(new GetObjectCommand({ Bucket: this.bucket, Key: sourceKey }));
                 const sourceMime = getResult.ContentType || 'image/jpeg';
                 const chunks: Uint8Array[] = [];
@@ -509,10 +502,9 @@ export class StorageService {
                 }
 
                 await this.putApprovedObject(this.approvedS3Client, this.approvedBucket, destKey, fileBuffer, mimeType, safeArticleNumber);
-                console.log(`✅ ${wantWatermark ? 'Watermarked' : 'S3 GetObject'} upload succeeded: ${destKey}`);
                 return { url: await this.buildApprovedUrl(destKey), path: destKey, key: destKey, uuid: safeArticleNumber };
             } catch (getError: any) {
-                console.warn(`⚠️ S3 GetObject path failed (${getError?.message}), falling back to HTTP fetch...`);
+                console.warn(`⚠️ S3 GetObject path failed for ${safeArticleNumber} (${getError?.message}), falling back to HTTP fetch...`);
             }
         }
 
