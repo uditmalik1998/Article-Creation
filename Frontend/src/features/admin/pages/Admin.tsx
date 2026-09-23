@@ -157,6 +157,13 @@ interface BasicAccessoriesMeta {
   lastUpdated?: string;
 }
 
+interface CmpCostMasterMeta {
+  total?: number;
+  categories?: number;
+  skipped?: number;
+  lastUpdated?: string;
+}
+
 interface SegmentMasterMeta {
   total?: number;
   categories?: number;
@@ -302,6 +309,13 @@ export default function Admin() {
   const [basicAccessoriesUploading, setBasicAccessoriesUploading] = useState(false);
   const [basicAccessoriesProgress, setBasicAccessoriesProgress] = useState<number>(0);
   const basicAccessoriesFileRef = useRef<HTMLInputElement | null>(null);
+
+  // CMP Cost Master (rough_cmp_cost_master)
+  const [cmpCostMasterMeta, setCmpCostMasterMeta] = useState<CmpCostMasterMeta | null>(null);
+  const [cmpCostMasterStatusLoading, setCmpCostMasterStatusLoading] = useState(false);
+  const [cmpCostMasterUploading, setCmpCostMasterUploading] = useState(false);
+  const [cmpCostMasterProgress, setCmpCostMasterProgress] = useState<number>(0);
+  const cmpCostMasterFileRef = useRef<HTMLInputElement | null>(null);
 
   // National Grid Master
   const [nationalGridTotal, setNationalGridTotal] = useState<number | null>(null);
@@ -1286,6 +1300,68 @@ export default function Admin() {
     }
   };
 
+  // ─────────────────────────────── CMP Cost Master ─────────────────────────────
+  const loadCmpCostMasterStatus = useCallback(async () => {
+    setCmpCostMasterStatusLoading(true);
+    try {
+      const token = localStorage.getItem('authToken');
+      const res = await fetch(`${APP_CONFIG.api.baseURL}/admin/cmp-cost-master/status`, {
+        headers: token ? { Authorization: `Bearer ${token}` } : {},
+      });
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.error || 'Failed to load CMP cost master status');
+      setCmpCostMasterMeta(data.data);
+    } catch (err: any) {
+      message.error(err?.message || 'Failed to load CMP cost master status');
+    } finally {
+      setCmpCostMasterStatusLoading(false);
+    }
+  }, []);
+
+  const downloadCmpCostMasterFile = (kind: 'template' | 'export') => {
+    const token = localStorage.getItem('authToken');
+    const url = `${APP_CONFIG.api.baseURL}/admin/cmp-cost-master/${kind}`;
+    fetch(url, { headers: token ? { Authorization: `Bearer ${token}` } : {} })
+      .then((r) => r.blob())
+      .then((blob) => {
+        const a = document.createElement('a');
+        a.href = URL.createObjectURL(blob);
+        a.download = kind === 'template' ? 'CMP_COST_MASTER_TEMPLATE.xlsx' : 'CMP_COST_MASTER_EXPORT.xlsx';
+        a.click();
+      })
+      .catch(() => message.error(kind === 'template' ? 'Failed to download template' : 'Failed to export CMP cost master'));
+  };
+
+  const handleCmpCostMasterUpload = async (file: File) => {
+    setCmpCostMasterUploading(true);
+    setCmpCostMasterProgress(0);
+    try {
+      const token = localStorage.getItem('authToken');
+      const formData = new FormData();
+      formData.append('file', file);
+      const progressInterval = setInterval(() => {
+        setCmpCostMasterProgress((prev) => Math.min(prev + 5, 90));
+      }, 500);
+      const res = await fetch(`${APP_CONFIG.api.baseURL}/admin/cmp-cost-master/upload`, {
+        method: 'POST',
+        headers: token ? { Authorization: `Bearer ${token}` } : {},
+        body: formData,
+      });
+      clearInterval(progressInterval);
+      setCmpCostMasterProgress(100);
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.error || 'Upload failed');
+      message.success(data.message);
+      setCmpCostMasterMeta(data.data);
+    } catch (err: any) {
+      message.error(err?.message || 'Upload failed');
+    } finally {
+      setCmpCostMasterUploading(false);
+      setTimeout(() => setCmpCostMasterProgress(0), 1500);
+      if (cmpCostMasterFileRef.current) cmpCostMasterFileRef.current.value = '';
+    }
+  };
+
   // ─────────────────────────────── National Grid Master ───────────────────────────────
   const downloadNationalGridData = () => {
     const token = localStorage.getItem('authToken');
@@ -1808,12 +1884,13 @@ export default function Admin() {
     loadBroaderMenuStatus();
     loadSegmentMasterStatus();
     loadBasicAccessoriesStatus();
+    loadCmpCostMasterStatus();
     loadNationalGridStatus();
     loadHierarchyExcelStatus();
     loadPipelineStatus();
     loadFabricRawStatus();
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [loadVendorStatus, loadMajCatGridStatus, loadMandatoryGridStatus, loadSizeMasterStatus, loadColorMasterStatus, loadFabricArticleDataStatus, loadFabricArticleMasterStatus, loadBodyArticleDataStatus, loadBroaderMenuStatus, loadSegmentMasterStatus, loadBasicAccessoriesStatus, loadNationalGridStatus, loadHierarchyExcelStatus, loadPipelineStatus, loadFabricRawStatus]);
+  }, [loadVendorStatus, loadMajCatGridStatus, loadMandatoryGridStatus, loadSizeMasterStatus, loadColorMasterStatus, loadFabricArticleDataStatus, loadFabricArticleMasterStatus, loadBodyArticleDataStatus, loadBroaderMenuStatus, loadSegmentMasterStatus, loadBasicAccessoriesStatus, loadCmpCostMasterStatus, loadNationalGridStatus, loadHierarchyExcelStatus, loadPipelineStatus, loadFabricRawStatus]);
 
   const loadData = async () => {
     setLoading(true);
@@ -3817,6 +3894,116 @@ export default function Admin() {
                       <button
                         type="button"
                         onClick={() => basicAccessoriesFileRef.current?.click()}
+                        className="flex w-full flex-col items-center justify-center rounded-md border-2 border-dashed border-border bg-muted/30 px-4 py-6 transition-colors hover:border-[#FF6F61] hover:bg-[#FF6F61]/5"
+                      >
+                        <Inbox className="mb-2 h-8 w-8 text-[#FF6F61]" />
+                        <p className="text-[13px]">
+                          Click to upload <strong>.xlsx</strong> file
+                        </p>
+                        <p className="text-[11px] text-muted-foreground">Only Excel files. Max 50 MB.</p>
+                      </button>
+                    )}
+                  </div>
+                </div>
+              </div>
+            </Spinner>
+          </CardContent>
+        </Card>
+
+        {/* CMP Cost Master (rough CMP cost per major category → rough_cmp_cost_master) */}
+        <Card className="mb-6 glass rounded-2xl border border-white/60">
+          <CardHeader className="flex flex-row items-center justify-between">
+            <CardTitle className="flex items-center gap-2 text-base">
+              <TableIcon className="h-4 w-4" />
+              CMP Cost Master (Rough CMP Cost per Major Category)
+            </CardTitle>
+            <div className="flex gap-2">
+              <Button size="sm" variant="outline" onClick={() => navigate('/admin/expense/cmp-cost-master')}>
+                <Eye />
+                View Data
+              </Button>
+              <Button size="sm" variant="outline" onClick={() => downloadCmpCostMasterFile('template')}>
+                <Download />
+                Download Template
+              </Button>
+              <Button size="sm" variant="outline" onClick={() => downloadCmpCostMasterFile('export')}>
+                <Download />
+                Download Data
+              </Button>
+              <Button size="sm" variant="outline" onClick={loadCmpCostMasterStatus} disabled={cmpCostMasterStatusLoading}>
+                <RotateCw className={cmpCostMasterStatusLoading ? 'animate-spin' : ''} />
+                Refresh Status
+              </Button>
+            </div>
+          </CardHeader>
+          <CardContent>
+            <Spinner spinning={cmpCostMasterStatusLoading}>
+              <div className="grid grid-cols-1 gap-4 md:grid-cols-12">
+                {/* Status panel */}
+                <div className="md:col-span-7">
+                  {cmpCostMasterMeta && (cmpCostMasterMeta.total ?? 0) > 0 ? (
+                    <Descriptions bordered>
+                      {cmpCostMasterMeta.lastUpdated && (
+                        <Descriptions.Item label="Last Updated">
+                          {new Date(cmpCostMasterMeta.lastUpdated).toLocaleString('en-IN', {
+                            timeZone: 'Asia/Kolkata', dateStyle: 'medium', timeStyle: 'short',
+                          }) + ' IST'}
+                        </Descriptions.Item>
+                      )}
+                      <Descriptions.Item label="Major Categories">
+                        <Badge variant="info">{(cmpCostMasterMeta.categories ?? 0).toLocaleString()}</Badge>
+                      </Descriptions.Item>
+                      <Descriptions.Item label="Total Rows">
+                        <Badge variant="success">{(cmpCostMasterMeta.total ?? 0).toLocaleString()}</Badge>
+                      </Descriptions.Item>
+                      {cmpCostMasterMeta.skipped != null && (cmpCostMasterMeta.skipped ?? 0) > 0 && (
+                        <Descriptions.Item label="Rows Skipped">
+                          <Badge variant="warning">{(cmpCostMasterMeta.skipped ?? 0).toLocaleString()}</Badge>
+                        </Descriptions.Item>
+                      )}
+                    </Descriptions>
+                  ) : (
+                    <Alert
+                      type="warning"
+                      showIcon
+                      message="No CMP cost master data"
+                      description="Upload the CMP Cost Excel (columns: DIV, SUB_DIV, MAJ_CAT, Total). Auto-fills a Body Article's CMP Cost on the New Article page when a pending article of that major category has none of its own yet."
+                    />
+                  )}
+                </div>
+
+                {/* Upload panel */}
+                <div className="md:col-span-5">
+                  <div className="rounded-md border border-border p-4">
+                    <div className="mb-1 font-semibold">Upload CMP Cost Master Excel</div>
+                    <div className="mb-3 text-xs text-muted-foreground">
+                      Columns: <strong>DIV, SUB_DIV, MAJ_CAT, Total</strong>. Download the template for the exact layout.{' '}
+                      <strong>Upserts by DIV + SUB_DIV + MAJ_CAT</strong> — combinations not in the file are left untouched.
+                    </div>
+
+                    <input
+                      ref={cmpCostMasterFileRef}
+                      type="file"
+                      accept=".xlsx,.xls"
+                      className="hidden"
+                      onChange={(e) => {
+                        const file = e.target.files?.[0];
+                        if (file) handleCmpCostMasterUpload(file);
+                      }}
+                    />
+
+                    {cmpCostMasterUploading ? (
+                      <div>
+                        <div className="mb-2 text-[13px] text-[#FF6F61]">
+                          <RefreshCw className="mr-1.5 inline-block h-3.5 w-3.5 animate-spin" />
+                          Parsing Excel &amp; updating CMP costs...
+                        </div>
+                        <Progress value={cmpCostMasterProgress} />
+                      </div>
+                    ) : (
+                      <button
+                        type="button"
+                        onClick={() => cmpCostMasterFileRef.current?.click()}
                         className="flex w-full flex-col items-center justify-center rounded-md border-2 border-dashed border-border bg-muted/30 px-4 py-6 transition-colors hover:border-[#FF6F61] hover:bg-[#FF6F61]/5"
                       >
                         <Inbox className="mb-2 h-8 w-8 text-[#FF6F61]" />
