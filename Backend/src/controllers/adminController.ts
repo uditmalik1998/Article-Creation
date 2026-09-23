@@ -5370,6 +5370,269 @@ export const uploadBasicAccessories = async (req: Request, res: Response): Promi
 };
 
 // ═══════════════════════════════════════════════════════
+// CMP COST MASTER (rough_cmp_cost_master)
+//
+// Rough CMP cost per major category, from the "SAM MASTER.xlsx" workbook's
+// Sheet5 pivot ("Average of TOTAL CMP COST": DIV, SUB_DIV, MAJ_CAT, Total).
+// Template / Download Data / Upload all speak that same four-column layout,
+// so a file downloaded here can be edited and uploaded straight back.
+//
+// Consumed by ApproverController.getRoughCmpCost to auto-fill a Body Article's
+// CMP Cost (and default its Costing Type to "Rough") on the New Article page
+// the first time a pending article with that major category is opened, as
+// long as cmpCost is still unset. Upload upserts by (DIV, SUB DIV, MAJ CAT) —
+// the same combination the table's own unique index is on — so a partial
+// workbook only touches the rows it contains.
+// ═══════════════════════════════════════════════════════
+
+const CMP_HEADER_ROW = 2;
+const CMP_FIRST_DATA_ROW = 3;
+const CMP_SHEET_NAME = 'CMP COST';
+
+type CmpCostRow = { div: string | null; subDiv: string | null; majCat: string; cmpCost: number | null };
+
+/**
+ * Writes the sheet — used for both the blank template (a single example row)
+ * and the full data export, which differ only in `rows`.
+ */
+function buildCmpCostMasterSheet(wb: any, rows: CmpCostRow[]): void {
+  const ws = wb.addWorksheet(CMP_SHEET_NAME);
+
+  const blue = (cell: any) => {
+    cell.font = { bold: true, color: { argb: 'FFFFFFFF' } };
+    cell.fill = { type: 'pattern', pattern: 'solid', fgColor: { argb: 'FF1565C0' } };
+    cell.alignment = { horizontal: 'center' };
+  };
+
+  // Row 1 — title, matching the source pivot's own layout (no blank row after it).
+  const titleRow = ws.addRow(['Average of TOTAL CMP COST']);
+  blue(titleRow.getCell(1));
+
+  // Row 2 — header.
+  const headerRow = ws.addRow(['DIV', 'SUB_DIV', 'MAJ_CAT', 'Total']);
+  headerRow.eachCell((cell: any) => blue(cell));
+
+  // Data rows.
+  for (const r of rows) {
+    ws.addRow([r.div ?? '', r.subDiv ?? '', r.majCat, r.cmpCost ?? '']);
+  }
+
+  const noteRowNo = CMP_FIRST_DATA_ROW + rows.length + 1;
+  const noteRow = ws.getRow(noteRowNo);
+  noteRow.getCell(1).value =
+    'MANDATORY: figures are AVERAGE CMP costs by major category — have your costing team verify before relying on these for a specific article.';
+  noteRow.getCell(1).font = { bold: true, size: 10, color: { argb: 'FF9C0006' } };
+  noteRow.getCell(1).fill = { type: 'pattern', pattern: 'solid', fgColor: { argb: 'FFFFF3CD' } };
+  ws.mergeCells(`A${noteRowNo}:D${noteRowNo}`);
+  const note2Row = ws.getRow(noteRowNo + 1);
+  note2Row.getCell(1).value =
+    'Rows are matched by DIV + SUB_DIV + MAJ_CAT together — the same major category under a different sub-division is a separate row, not a duplicate.';
+  note2Row.getCell(1).font = { italic: true, size: 10 };
+  ws.mergeCells(`A${noteRowNo + 1}:D${noteRowNo + 1}`);
+
+  ws.columns = [{ width: 14 }, { width: 16 }, { width: 26 }, { width: 14 }];
+  ws.views = [{ state: 'frozen', xSplit: 0, ySplit: CMP_HEADER_ROW }];
+}
+
+function buildCmpCostMasterWorkbook(rows: CmpCostRow[]): any {
+  const ExcelJS = require('exceljs');
+  const wb = new ExcelJS.Workbook();
+  buildCmpCostMasterSheet(wb, rows);
+  return wb;
+}
+
+/** GET /admin/cmp-cost-master/status */
+export const getCmpCostMasterStatus = async (_req: Request, res: Response): Promise<void> => {
+  try {
+    const rows = await prisma.$queryRaw<{ total: bigint; categories: bigint; last_updated: Date | null }[]>`
+      SELECT COUNT(*)::bigint AS total,
+             COUNT(DISTINCT maj_cat)::bigint AS categories,
+             MAX(updated_at) AS last_updated
+      FROM rough_cmp_cost_master
+    `;
+    const r = rows[0] ?? { total: 0n, categories: 0n, last_updated: null };
+    res.json({
+      success: true,
+      data: {
+        total: Number(r.total),
+        categories: Number(r.categories),
+        lastUpdated: r.last_updated ? r.last_updated.toISOString() : null,
+      },
+    });
+  } catch (error: any) {
+    console.error('[CmpCostMaster] Status error:', error);
+    res.status(500).json({ success: false, error: error.message });
+  }
+};
+
+/**
+ * GET /admin/cmp-cost-master/template
+ * The workbook's own layout with a single example major category filled in —
+ * overwrite the example, add your rows under it, upload.
+ */
+export const downloadCmpCostMasterTemplate = async (_req: Request, res: Response): Promise<void> => {
+  try {
+    const example: CmpCostRow = { div: 'KIDS', subDiv: 'IB', majCat: 'IB_BERMUDA', cmpCost: 46.73 };
+    const wb = buildCmpCostMasterWorkbook([example]);
+    res.setHeader('Content-Type', 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');
+    res.setHeader('Content-Disposition', 'attachment; filename="CMP_COST_MASTER_TEMPLATE.xlsx"');
+    await wb.xlsx.write(res);
+    res.end();
+  } catch (error: any) {
+    console.error('[CmpCostMaster] Template error:', error);
+    res.status(500).json({ success: false, error: error.message });
+  }
+};
+
+/** GET /admin/cmp-cost-master/export — every stored row, same layout. */
+export const exportCmpCostMaster = async (_req: Request, res: Response): Promise<void> => {
+  try {
+    const masters = await prisma.roughCmpCostMaster.findMany({
+      orderBy: [{ div: 'asc' }, { subDiv: 'asc' }, { majCat: 'asc' }],
+    });
+    const rows: CmpCostRow[] = masters.map((m) => ({
+      div: m.div,
+      subDiv: m.subDiv,
+      majCat: m.majCat,
+      cmpCost: m.cmpCost === null ? null : Number(m.cmpCost),
+    }));
+    const wb = buildCmpCostMasterWorkbook(rows);
+    res.setHeader('Content-Type', 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');
+    res.setHeader('Content-Disposition', 'attachment; filename="CMP_COST_MASTER_EXPORT.xlsx"');
+    await wb.xlsx.write(res);
+    res.end();
+  } catch (error: any) {
+    console.error('[CmpCostMaster] Export error:', error);
+    res.status(500).json({ success: false, error: error.message });
+  }
+};
+
+/**
+ * POST /admin/cmp-cost-master/upload
+ * Bulk update from the workbook. Upserts by DIV + SUB DIV + MAJ CAT (the
+ * table's own unique index) — rows for a combination absent from the file are
+ * left untouched.
+ */
+export const uploadCmpCostMaster = async (req: Request, res: Response): Promise<void> => {
+  try {
+    if (!req.file) {
+      res.status(400).json({ success: false, error: 'No file uploaded. Send a .xlsx file as "file" field.' });
+      return;
+    }
+
+    const ExcelJS = (await import('exceljs')).default;
+    const wb = new ExcelJS.Workbook();
+    await wb.xlsx.load(req.file.buffer as any);
+
+    const ws = wb.getWorksheet(CMP_SHEET_NAME) ?? wb.worksheets[0];
+    if (!ws) {
+      res.status(400).json({ success: false, error: 'No worksheets found in the uploaded Excel file.' });
+      return;
+    }
+
+    const cellStr = (row: any, c: number): string => {
+      let v = row.getCell(c).value;
+      if (v && typeof v === 'object' && 'richText' in v) return (v as any).richText.map((t: any) => t.text).join('').trim();
+      if (v && typeof v === 'object' && 'result' in v) v = (v as any).result;
+      if (v && typeof v === 'object' && 'text' in v) v = (v as any).text;
+      return v == null ? '' : String(v).trim();
+    };
+
+    // Auto-detect the header row (first row with DIV and MAJ CAT columns) —
+    // same approach as Segment Master, so a re-arranged/re-titled workbook
+    // (or one pasted straight from Excel's pivot-table UI) still uploads.
+    let headerRowNo = CMP_HEADER_ROW;
+    for (let r = 1; r <= Math.min(6, ws.rowCount); r++) {
+      const row = ws.getRow(r);
+      const line = [1, 2, 3, 4].map((c) => cellStr(row, c).toUpperCase()).join(' ');
+      if (line.includes('DIV') && (line.includes('MAJ') || line.includes('CAT'))) {
+        headerRowNo = r;
+        break;
+      }
+    }
+
+    let cDiv = 1, cSubDiv = 2, cMajCat = 3, cCost = 4;
+    const hdr = ws.getRow(headerRowNo);
+    for (let c = 1; c <= 8; c++) {
+      const h = cellStr(hdr, c).toUpperCase().replace(/[-_ ]/g, '');
+      if (h === 'DIV' || h === 'DIVISION') cDiv = c;
+      else if (h.includes('SUBDIV')) cSubDiv = c;
+      else if (h.includes('MAJCAT') || h === 'MC') cMajCat = c;
+      else if (h === 'TOTAL' || h.includes('CMPCOST') || h === 'CMP') cCost = c;
+    }
+
+    const numOf = (v: unknown): number | null => {
+      if (v === null || v === undefined || v === '') return null;
+      const n = Number(v);
+      return Number.isFinite(n) ? Number(n.toFixed(4)) : null;
+    };
+
+    const rowsByKey = new Map<string, CmpCostRow>();
+    let skipped = 0;
+
+    for (let r = headerRowNo + 1; r <= ws.rowCount; r++) {
+      const row = ws.getRow(r);
+      const majCat = cellStr(row, cMajCat);
+      // Below the data the workbook may carry legend/instruction lines merged
+      // across the full width — a real major category is a single code, never
+      // a sentence, and never part of a merged range.
+      if (!majCat || row.getCell(cMajCat).isMerged || /\s/.test(majCat) || majCat.length > 100) {
+        if (majCat) skipped++;
+        continue;
+      }
+
+      const div = cellStr(row, cDiv) || null;
+      const subDiv = cellStr(row, cSubDiv) || null;
+      let costRaw = row.getCell(cCost).value;
+      if (costRaw && typeof costRaw === 'object' && 'result' in costRaw) costRaw = (costRaw as any).result;
+      const cmpCost = numOf(costRaw);
+
+      const key = `${(div ?? '').toUpperCase()}|${(subDiv ?? '').toUpperCase()}|${majCat.toUpperCase()}`;
+      rowsByKey.set(key, { div, subDiv, majCat, cmpCost });
+    }
+
+    const records = [...rowsByKey.values()];
+    if (records.length === 0) {
+      res.status(400).json({ success: false, error: 'No valid rows found in the Excel file.' });
+      return;
+    }
+
+    const now = new Date();
+    const CHUNK = 200;
+    for (let i = 0; i < records.length; i += CHUNK) {
+      const batch = records.slice(i, i + CHUNK);
+      const values = batch.map((r) => Prisma.sql`(${r.majCat}, ${r.div}, ${r.subDiv}, ${r.cmpCost}, ${now}, ${now})`);
+      await prisma.$executeRaw`
+        INSERT INTO rough_cmp_cost_master (maj_cat, div, sub_div, cmp_cost, created_at, updated_at)
+        VALUES ${Prisma.join(values)}
+        ON CONFLICT (div, sub_div, maj_cat) DO UPDATE SET
+          cmp_cost   = EXCLUDED.cmp_cost,
+          updated_at = EXCLUDED.updated_at
+      `;
+    }
+
+    const total = await prisma.roughCmpCostMaster.count();
+    const categories = (await prisma.roughCmpCostMaster.findMany({ distinct: ['majCat'], select: { majCat: true } })).length;
+
+    console.log(`[CmpCostMaster] Upserted ${records.length} rows (${skipped} skipped)`);
+
+    res.json({
+      success: true,
+      message: `CMP Cost Master updated: ${records.length} rows${skipped > 0 ? `, ${skipped} rows skipped` : ''}.`,
+      data: {
+        total,
+        categories,
+        skipped,
+        lastUpdated: now.toISOString(),
+      },
+    });
+  } catch (error: any) {
+    console.error('[CmpCostMaster] Upload error:', error);
+    res.status(500).json({ success: false, error: error.message });
+  }
+};
+
+// ═══════════════════════════════════════════════════════
 // FABRIC ARTICLE DATA (fabric_article_data)
 // ═══════════════════════════════════════════════════════
 
@@ -7561,6 +7824,30 @@ export const EXPENSE_TABLE_REGISTRY: Record<string, ExpenseTableConfig> = {
       { key: 'basicTrimsCost', label: 'Basic & Trims Cost (Rs/pc)', align: 'right' },
       { key: 'createdAt', label: 'Created At', type: 'date', editable: false },
       { key: 'updatedAt', label: 'Updated At', type: 'date', editable: false },
+    ],
+    searchColumns: ['div', 'subDiv', 'majCat'],
+    displayColumns: ['majCat', 'div'],
+    defaultSort: { field: 'majCat', dir: 'asc' },
+  },
+  // CMP Cost Master — average rough CMP cost per major category, from the
+  // "SAM MASTER.xlsx" workbook. Auto-fills body_article_data.cmp_cost on the
+  // New Article page (see ApproverController.getRoughCmpCost).
+  'cmp-cost-master': {
+    kind: 'prisma',
+    delegateName: 'roughCmpCostMaster',
+    idColumn: 'id',
+    idIsNumeric: true,
+    allowCreate: true,
+    allowDelete: true,
+    requiredOnCreate: ['majCat'],
+    columns: [
+      { key: 'id', label: 'ID', editable: false },
+      { key: 'div', label: 'Division' },
+      { key: 'subDiv', label: 'Sub Division' },
+      { key: 'majCat', label: 'Major Category' },
+      { key: 'cmpCost', label: 'CMP Cost (Rs/pc)', align: 'right' },
+      { key: 'createdAt', label: 'Created At', editable: false },
+      { key: 'updatedAt', label: 'Updated At', editable: false },
     ],
     searchColumns: ['div', 'subDiv', 'majCat'],
     displayColumns: ['majCat', 'div'],
