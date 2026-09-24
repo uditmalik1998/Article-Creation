@@ -2077,12 +2077,12 @@ const ArticleCard = React.memo(
                                     })
                                     .filter((v): v is string => Boolean(v) && !/^-+$/.test(v as string));
                                   if (parts.length > 0)
-                                    handleSave('fabricArticleDescription', isFGMode ? parts.join('-').replace(/-{2,}/g, '-').replace(/-+$/, '') : parts.join('-').replace(/-{2,}/g, '-').replace(/-+$/, '').slice(0, 40).replace(/-+$/, ''));
+                                    handleSave('fabricArticleDescription', parts.join('-').replace(/-{2,}/g, '-').replace(/-+$/, ''));
                                 };
                                 return (
                                   <>
                                     {renderField('fabricArticleNumber', 'FABRIC ARTICLE NO.')}
-                                    {renderField('fabricArticleDescription', 'FABRIC ARTICLE DESC', fabAutoFill, isFGMode ? undefined : 40)}
+                                    {renderField('fabricArticleDescription', 'FABRIC ARTICLE DESC', fabAutoFill)}
                                   </>
                                 );
                               })()}
