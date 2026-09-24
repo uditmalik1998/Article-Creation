@@ -165,17 +165,17 @@ const fetchVaacTotalValue = async (majorCategory: string): Promise<number | null
   try {
     const token = localStorage.getItem('authToken');
     const r = await fetch(
-      `${APP_CONFIG.api.baseURL}/admin/value-addition-accessories-cost/lookup?majorCategory=${encodeURIComponent(majorCategory)}`,
+      `${APP_CONFIG.api.baseURL}/approver/value-addition-accessories-cost/lookup?majorCategory=${encodeURIComponent(majorCategory)}`,
       { headers: token ? { Authorization: `Bearer ${token}` } : {} },
     );
     if (r.ok) {
       const json = await r.json();
       const val = json.data?.totalValue ?? null;
-      vaacCache.set(key, val);
+      vaacCache.set(key, val); // only cache on success so HTTP errors are retried
       return val;
     }
-  } catch { /* ignore */ }
-  vaacCache.set(key, null);
+    // HTTP error (403/404/500) — don't cache, allow retry on next render
+  } catch { /* network error — don't cache, allow retry */ }
   return null;
 };
 

@@ -2476,11 +2476,7 @@ export class ApproverController {
                 }
             });
 
-            console.log(`[APPROVE_DEBUG] approvedItems=${approvedItems.length}, ids=${approvedItems.map(i => i.id).join(',')}`);
-            approvedItems.forEach(i => console.log(`[APPROVE_DEBUG] id=${i.id} majorCategory="${i.majorCategory}" finish="${i.finish}"`));
             const syncResults = await syncArticlesToSapViaRfc(approvedItems);
-            const syncOk = syncResults.filter((r: any) => r.success).length;
-            console.log(`[APPROVE_DEBUG] syncResults: ${syncOk}/${syncResults.length} succeeded`);
             const approvedItemById = new Map(approvedItems.map((item) => [item.id, item]));
 
             // Phase 1: Persist SAP article creation/sync outcome first.
@@ -2818,7 +2814,6 @@ export class ApproverController {
             const remaining = await prisma.extractionResultFlat.count({
                 where: { isGeneric: true, approvalStatus: 'APPROVED', sapSyncStatus: SapSyncStatus.PENDING },
             });
-            console.log(`[ApprovalSync] Claimed ${ids.length} approved article(s) to sync (${remaining} still queued)`);
 
             const r = await ApproverController.syncApprovedToSap(ids);
             ApproverController.itemsCache.clear();
@@ -4240,7 +4235,7 @@ export class ApproverController {
         mCount: true, mWeave01: true, mComposition: true, mFinish: true,
         mGsm: true, mLycra: true, fabricRate: true, v2FabricRate: true, valueAddCost: true, articleFashionType: true,
         designNumber: true, pptNumber: true, mcDescription: true, source: true,
-        mrp: true, baseColor: true, segment: true,
+        rate: true, segment: true,
     } as const;
 
     static getFabricArticleDataItems = async (req: Request, res: Response) => {
@@ -4313,7 +4308,7 @@ export class ApproverController {
         v2FabricRate:             'v2FabricRate',
         valueAddCost:             'valueAddCost',
         articleFashionType:       'articleFashionType',
-        mrp:                      'mrp',
+        mrp:                      'rate',
         segment:                  'segment',
         // Fabric construction fields
         fabDiv:        'mFabDiv',
@@ -4361,9 +4356,140 @@ export class ApproverController {
         return res.json(ApproverController.fabricArticleDataRowToItem(row));
     };
 
+    private static fabricVariantRowToItem(r: any) {
+        return {
+            id:                  r.id,
+            genericArticleId:    r.genericArticleId ?? null,
+            genericArticleNumber:r.genericArticleNumber ?? null,
+            variantColor:        r.variantColor ?? null,
+            variantArticleNumber:r.variantArticleNumber ?? null,
+            division:            r.division ?? null,
+            subDivision:         r.subDivision ?? null,
+            majorCategory:       r.majorCategory ?? null,
+            mcDescription:       r.mcDescription ?? null,
+            vendorName:          r.vendorName ?? null,
+            vendorCode:          r.vendorCode ?? null,
+            designNumber:        r.designNumber ?? null,
+            mrp:                 r.mrp != null ? Number(r.mrp) : null,
+            rate:                r.rate != null ? Number(r.rate) : null,
+            approvalStatus:      r.approvalStatus ?? 'PENDING',
+            approvedAt:          r.approvedAt?.toISOString() ?? null,
+            sapSyncStatus:       r.sapSyncStatus ?? 'NOT_SYNCED',
+            sapSyncMessage:      r.sapSyncMessage ?? null,
+            imageUrl:            r.imageUrl ?? null,
+            userName:            r.userName ?? null,
+            createdAt:           r.createdAt.toISOString(),
+            updatedAt:           r.updatedAt.toISOString(),
+        };
+    }
+
+    static getFabricArticleVariants = async (req: Request, res: Response) => {
+        const { genericId } = req.params;
+        const rows = await prisma.fabricVariantArticleData.findMany({
+            where: { genericArticleId: genericId },
+            orderBy: { createdAt: 'asc' },
+        });
+        return res.json({ data: rows.map((r) => ApproverController.fabricVariantRowToItem(r)) });
+    };
+
+    static addFabricArticleVariants = async (req: Request, res: Response) => {
+        const { genericId } = req.params;
+        const { colors, colorImages } = req.body as { colors?: string[]; colorImages?: Record<string, string> };
+
+        if (!Array.isArray(colors) || colors.length === 0) {
+            return res.status(400).json({ error: 'colors array is required' });
+        }
+
+        const parent = await prisma.fabricArticleData.findUnique({ where: { id: genericId } });
+        if (!parent) return res.status(404).json({ error: 'Generic article not found' });
+
+        const existing = await prisma.fabricVariantArticleData.findMany({
+            where: { genericArticleId: genericId },
+            select: { variantColor: true },
+        });
+        const existingColors = new Set(existing.map((e) => (e.variantColor ?? '').toUpperCase()));
+
+        const toCreate = colors.filter((c) => !existingColors.has(c.toUpperCase()));
+        if (toCreate.length === 0) return res.status(409).json({ error: 'All selected colors already exist' });
+
+        const rows = await prisma.$transaction(
+            toCreate.map((color) =>
+                prisma.fabricVariantArticleData.create({
+                    data: {
+                        genericArticleId:     genericId,
+                        genericArticleNumber: parent.fabricArticleNumber ?? null,
+                        variantColor:         color,
+                        division:             parent.division ?? null,
+                        subDivision:          parent.subDivision ?? null,
+                        majorCategory:        parent.majorCategory ?? null,
+                        mcDescription:        parent.mcDescription ?? null,
+                        vendorName:           parent.vendorName ?? null,
+                        vendorCode:           parent.vendorCode ?? null,
+                        designNumber:         parent.designNumber ?? null,
+                        mrp:                  parent.rate ?? null,
+                        imageUrl:             colorImages?.[color] ?? parent.imageUrl ?? null,
+                        userName:             parent.userName ?? null,
+                    },
+                })
+            )
+        );
+
+        return res.status(201).json({ count: rows.length, created: rows.map((r) => ApproverController.fabricVariantRowToItem(r)) });
+    };
+
+    static updateFabricArticleVariant = async (req: Request, res: Response) => {
+        const { id } = req.params;
+        const body = req.body as Record<string, unknown>;
+
+        const existing = await prisma.fabricVariantArticleData.findUnique({ where: { id } });
+        if (!existing) return res.status(404).json({ error: 'Variant not found' });
+
+        const ALLOWED_KEYS = new Set(['vendorName', 'vendorCode', 'mrp', 'rate', 'variantColor', 'imageUrl']);
+        const data: Record<string, unknown> = {};
+        for (const [k, v] of Object.entries(body)) {
+            if (!ALLOWED_KEYS.has(k)) continue;
+            if (k === 'mrp' || k === 'rate') {
+                data[k] = v !== '' && v != null ? Number(v) : null;
+            } else {
+                data[k] = v || null;
+            }
+        }
+
+        if (Object.keys(data).length === 0) return res.json(ApproverController.fabricVariantRowToItem(existing));
+        const row = await prisma.fabricVariantArticleData.update({ where: { id }, data });
+        return res.json(ApproverController.fabricVariantRowToItem(row));
+    };
+
+    static retryFabricArticleVariants = async (req: Request, res: Response) => {
+        const { genericId } = req.params;
+        const parent = await prisma.fabricArticleData.findUnique({ where: { id: genericId } });
+        if (!parent) return res.status(404).json({ error: 'Generic article not found' });
+        if (!parent.fabricArticleNumber) {
+            return res.status(400).json({ error: 'Parent fabric article has not been submitted to SAP yet' });
+        }
+        const { submitFabricVariants } = await import('../services/zmmFabArtCreationService');
+        await submitFabricVariants(genericId, parent.fabricArticleNumber, parent);
+        const variants = await prisma.fabricVariantArticleData.findMany({ where: { genericArticleId: genericId } });
+        const synced = variants.filter((v) => v.sapSyncStatus === 'SYNCED').length;
+        const failed = variants.filter((v) => v.sapSyncStatus === 'FAILED').length;
+        return res.json({ synced, failed, message: `${synced} synced, ${failed} failed` });
+    };
+
+    static deleteFabricArticleVariant = async (req: Request, res: Response) => {
+        const { id } = req.params;
+        const existing = await prisma.fabricVariantArticleData.findUnique({ where: { id } });
+        if (!existing) return res.status(404).json({ error: 'Variant not found' });
+        if (existing.approvalStatus === 'APPROVED') {
+            return res.status(403).json({ error: 'Cannot delete an approved variant' });
+        }
+        await prisma.fabricVariantArticleData.delete({ where: { id } });
+        return res.json({ success: true });
+    };
+
     private static fabricArticleDataRowToItem(r: any) {
         return {
             id:                       r.id,
+            isGeneric:                r.source === 'SRM',
             imageName:                null,
             imageUrl:                 r.imageUrl ?? null,
             articleNumber:            r.fabricArticleNumber ?? null,
@@ -4406,8 +4532,7 @@ export class ApproverController {
             articleFashionType: r.articleFashionType ?? null,
             source: r.source ?? null,
             pptNumber: r.pptNumber ?? null,
-            mrp: r.mrp != null ? Number(r.mrp) : null,
-            baseColor: r.baseColor ?? null,
+            mrp: r.rate != null ? Number(r.rate) : null,
             segment: r.segment ?? null,
             // Fields not present in fabric_article_data — nulled out
             rate: null,
@@ -4643,7 +4768,7 @@ export class ApproverController {
                 vendorCode:               '200681',
                 designNumber:             item.designNumber,
                 pptNumber:                item.pptNumber,
-                mrp:                      item.mrp ?? null,
+                rate:                     item.mrp ?? null,
                 segment:                  item.segment ?? null,
                 imageUrl:                 item.imageUrl,
                 userName:                 item.userName,

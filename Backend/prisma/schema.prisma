@@ -1474,8 +1474,7 @@ model FabricArticleData {
   fabricRate               Decimal?  @map("fabric_rate")         @db.Decimal(10, 2)
   v2FabricRate             Decimal?  @map("v2_fabric_rate")      @db.Decimal(10, 2)
   valueAddCost             Decimal?  @map("value_add_cost")      @db.Decimal(10, 2)
-  mrp                      Decimal?  @map("mrp")                 @db.Decimal(10, 2)
-  baseColor                String?   @map("base_color")          @db.VarChar(100)
+  rate                     Decimal?  @map("rate")                @db.Decimal(10, 2)
   segment                  String?   @map("segment")             @db.VarChar(100)
   articleFashionType       String?   @map("article_fashion_type") @db.VarChar(100)
 
@@ -1503,6 +1502,58 @@ model FabricArticleData {
   @@index([division])
   @@index([createdAt(sort: Desc)])
   @@map("fabric_article_data")
+  @@schema("public")
+}
+
+/// FabricVariantArticleData: One row per variant (size × color) under a fabric article.
+/// Generic parent is tracked via generic_article_id (fabric_article_data.id) and
+/// generic_article_number (SAP article number of the parent).
+model FabricVariantArticleData {
+  id                       String    @id @default(uuid())
+
+  // Parent references
+  genericArticleId         String?   @map("generic_article_id")         @db.VarChar(100)
+  genericArticleNumber     String?   @map("generic_article_number")     @db.VarChar(100)
+
+  // Variant identity (color-only — fabric variants have no size dimension)
+  variantColor             String?   @map("variant_color")              @db.VarChar(100)
+  variantArticleNumber     String?   @map("variant_article_number")     @db.VarChar(100)
+
+  // Article context (inherited from parent)
+  division                 String?   @map("division")                   @db.VarChar(100)
+  subDivision              String?   @map("sub_division")               @db.VarChar(100)
+  majorCategory            String?   @map("major_category")             @db.VarChar(200)
+  mcDescription            String?   @map("mc_description")             @db.VarChar(200)
+  vendorName               String?   @map("vendor_name")                @db.VarChar(200)
+  vendorCode               String?   @map("vendor_code")                @db.VarChar(100)
+  designNumber             String?   @map("design_number")              @db.VarChar(100)
+
+  // Pricing
+  mrp                      Decimal?  @map("mrp")                        @db.Decimal(10, 2)
+  rate                     Decimal?  @map("rate")                       @db.Decimal(10, 2)
+
+  // Workflow
+  approvalStatus           String    @default("PENDING")    @map("approval_status")    @db.VarChar(20)
+  approvedAt               DateTime? @map("approved_at")
+  approvedBy               Int?      @map("approved_by")
+  sapSyncStatus            String    @default("NOT_SYNCED") @map("sap_sync_status")    @db.VarChar(20)
+  sapSyncMessage           String?   @map("sap_sync_message")
+
+  // Media
+  imageUrl                 String?   @map("image_url")                  @db.Text
+
+  // Audit
+  userName                 String?   @map("user_name")                  @db.VarChar(200)
+  createdAt                DateTime  @default(now())    @map("created_at")
+  updatedAt                DateTime  @updatedAt         @map("updated_at")
+
+  @@index([genericArticleId])
+  @@index([genericArticleNumber])
+  @@index([approvalStatus])
+  @@index([sapSyncStatus])
+  @@index([variantArticleNumber])
+  @@index([createdAt(sort: Desc)])
+  @@map("fabric_variants_article_data")
   @@schema("public")
 }
 

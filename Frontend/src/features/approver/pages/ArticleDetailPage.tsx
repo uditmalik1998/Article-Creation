@@ -280,7 +280,13 @@ export interface DetailNavigationState {
 
 // ─── Component ────────────────────────────────────────────────────────────────
 
-export default function ArticleDetailPage() {
+export default function ArticleDetailPage({
+  baseRoute = '/approver',
+  extraApproverRoles = [],
+}: {
+  baseRoute?: string;
+  extraApproverRoles?: string[];
+} = {}) {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
   const location = useLocation();
@@ -288,11 +294,11 @@ export default function ArticleDetailPage() {
   // Prefer the nav-state pathType; fall back to the URL so a hard refresh of a
   // detail page (esp. the PD page) keeps the correct flow (Save & Submit target).
   const pathFromUrl: DetailNavigationState['pathType'] =
-    location.pathname.startsWith('/approver/old-articles') ? 'old'
-    : location.pathname.startsWith('/approver/rejected') ? 'rejected'
-    : location.pathname.startsWith('/approver/created') ? 'created'
-    : location.pathname.startsWith('/approver/failed') ? 'failed'
-    : location.pathname.startsWith('/approver') ? 'new'
+    location.pathname.startsWith(`${baseRoute}/old-articles`) ? 'old'
+    : location.pathname.startsWith(`${baseRoute}/rejected`) ? 'rejected'
+    : location.pathname.startsWith(`${baseRoute}/created`) ? 'created'
+    : location.pathname.startsWith(`${baseRoute}/failed`) ? 'failed'
+    : location.pathname.startsWith(baseRoute) ? 'new'
     : undefined;
   const pathType = navState?.pathType ?? pathFromUrl;
 
@@ -325,7 +331,7 @@ export default function ArticleDetailPage() {
   const [editActiveTab, setEditActiveTab] = useState<'core' | 'attributes' | 'business'>('core');
   const modalDivision = editForm.watch('division');
 
-  const canApprove = user?.role === 'ADMIN' || user?.role === 'APPROVER' || user?.role === 'CATEGORY_HEAD' || user?.role === 'SUB_DIVISION_HEAD' || user?.role === 'PO_COMMITTEE' || user?.role === 'PD';
+  const canApprove = user?.role === 'ADMIN' || user?.role === 'APPROVER' || user?.role === 'CATEGORY_HEAD' || user?.role === 'SUB_DIVISION_HEAD' || user?.role === 'PO_COMMITTEE' || user?.role === 'PD' || (extraApproverRoles.length > 0 && extraApproverRoles.includes(user?.role));
 
   // ─── Init ───────────────────────────────────────────────────────────────────
 
@@ -385,11 +391,11 @@ export default function ArticleDetailPage() {
   const isLastArticle = currentIndex >= items.length - 1;
 
   function getBasePath() {
-    if (pathType === 'old') return '/approver/old-articles';
-    if (pathType === 'rejected') return '/approver/rejected';
-    if (pathType === 'created') return '/approver/created';
-    if (pathType === 'failed') return '/approver/failed';
-    return '/approver';
+    if (pathType === 'old') return `${baseRoute}/old-articles`;
+    if (pathType === 'rejected') return `${baseRoute}/rejected`;
+    if (pathType === 'created') return `${baseRoute}/created`;
+    if (pathType === 'failed') return `${baseRoute}/failed`;
+    return baseRoute;
   }
 
   // Rebuild the list URL with the same filters that were active when the card was
