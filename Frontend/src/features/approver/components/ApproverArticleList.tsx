@@ -1073,8 +1073,10 @@ const ArticleCard = React.memo(
     }, [effectiveMajCat]);
 
     // Auto-fill VALUE ADD ACC. COST from the VAAC table on initial load (only if empty).
+    // Only runs for PENDING articles — approved/rejected articles already have their value locked.
     useEffect(() => {
       if (!effectiveMajCat) return;
+      if (item.approvalStatus !== 'PENDING') return;
       const current = (item as any).valueAddCost ?? localValues['valueAddCost'];
       if (current != null && String(current).trim() !== '') return; // already has a value — skip
       fetchVaacTotalValue(effectiveMajCat).then((val) => {
