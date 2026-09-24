@@ -535,12 +535,17 @@ export default function ArticleDetailPage({
     return pendingItems.reduce<{ articleId: string; missing: string[] }[]>((acc, item) => {
       const missing: string[] = [];
       if (!item.vendorCode) missing.push('VENDOR CODE');
-      // Color is mandatory on New Articles — skipped in FG mode (no colour field).
-      if (pathType === 'new' && !isFGMode && !item.colour) missing.push('COLOUR');
+      // Color is mandatory on New Articles — skipped in FG and SRM Fabric Article mode.
+      if (pathType === 'new' && !isFGMode && item.source !== 'SRM' && !item.colour) missing.push('COLOUR');
       // Fabric Article Desc and MC Description are mandatory in FG mode.
       if (isFGMode) {
         if (!(item.fabricArticleDescription || '').trim()) missing.push('FABRIC ARTICLE DESC.');
         if (!(item.mcDescription || '').trim()) missing.push('MC DESCRIPTION');
+      }
+      // Segment and Article Fashion Type are mandatory for SRM Fabric Articles.
+      if (item.source === 'SRM') {
+        if (!item.segment) missing.push('SEGMENT');
+        if (!item.articleFashionType) missing.push('ARTICLE FASHION TYPE');
       }
       missing.push(...getMissingMandatoryFields(item, isFGMode));
       if (missing.length > 0) acc.push({ articleId: item.sapArticleId || item.articleNumber || item.imageName || item.id, missing });

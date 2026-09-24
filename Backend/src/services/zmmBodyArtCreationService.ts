@@ -172,7 +172,6 @@ export async function submitBodyArticles(ids: string[]): Promise<{
         const imData = buildImData(row, { mcCode: mcDetails.mcCode, hsnCode: mcDetails.hsnCode });
         const payload = { bapiname: 'ZMM_BODY_ART_CRT_V3', IM_DATA: [imData] };
 
-        console.log(`[ZMM_BODY_RFC] Submitting id=${row.id} majCat=${majCat} mcCode=${mcDetails.mcCode} hsn=${mcDetails.hsnCode}`);
 
         try {
             const ctrl = new AbortController();
@@ -247,7 +246,6 @@ export async function submitBodyArticles(ids: string[]): Promise<{
                             where: { id: row.id },
                             data: { imageUrl: r2Url },
                         });
-                        console.log(`[ZMM_BODY_RFC] ✅ Image uploaded to R2: ${key}`);
                     } else {
                         console.warn(`[ZMM_BODY_RFC] Image fetch failed (${imgRes.status}) for row ${row.id} — skipping R2 upload`);
                     }

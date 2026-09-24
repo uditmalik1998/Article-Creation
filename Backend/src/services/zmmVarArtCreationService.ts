@@ -175,7 +175,6 @@ function parseVariantRfcResponse(
 
         const message = msgText || (isSuccess ? `Variant created: ${sapArt}` : `SAP error (TYPE=${type})`);
 
-        console.log(`[ZMM_VAR_RFC] EX_RETURN parsed: TYPE=${type} FIELD=${sapArt} MESSAGE=${msgText}`);
 
         return {
             ok: isSuccess,
@@ -302,11 +301,6 @@ export async function syncVariantsToSapViaRfc(
                 const outcome = parseVariantRfcResponse(response.status, responseText);
 
                 if (outcome.ok) {
-                    console.log(
-                        `[ZMM_VAR_RFC] ✅ Variant created: ${outcome.sapArticleNumber ?? 'no art num'}` +
-                        ` fabricArticleNumber=${outcome.fabricArticleNumber ?? '-'}` +
-                        ` for variantId=${variant.id}`
-                    );
                     out.push({
                         id: variant.id,
                         success: true,

@@ -76,6 +76,7 @@ import { APP_CONFIG } from '../../../constants/app/config';
 import { formatDivisionLabel } from '../../../shared/utils/ui/formatters';
 import { SIMPLIFIED_HIERARCHY } from '../../extraction/components/SimplifiedCategorySelector';
 import FabricVariantSubTable from './FabricVariantSubTable';
+import FabricArticleVariantSubTable from './FabricArticleVariantSubTable';
 
 // Alias so the combobox trigger can use a distinct name from the plain icon
 const ChevronDownIcon = ChevronDown;
@@ -427,7 +428,7 @@ const ArticleCard = React.memo(
       mcDesByMajCat: Record<string, string[]>;
     };
   }) => {
-    const [showVariants, setShowVariants] = useState(false);
+    const [showVariants, setShowVariants] = useState(item.source === 'SRM');
     const [imgModalOpen, setImgModalOpen] = useState(false);
     const [localValues, setLocalValues] = useState<Record<string, string | null>>({});
     const [dupConfirmOpen, setDupConfirmOpen] = useState(false);
@@ -798,7 +799,7 @@ const ArticleCard = React.memo(
     const FAB_FIELDS = useMemo(
       () =>
         (cardGroups.find((g) => g.group === 'FAB' || g.group === 'FABRIC')?.fields ?? []).filter(
-          (f) => !f.freeText,
+          (f) => !f.freeText && f.field !== 'mainMvgr',
         ),
       [cardGroups],
     );
@@ -820,28 +821,37 @@ const ArticleCard = React.memo(
         };
         const fabParts = FAB_FIELDS.map((f) => getVal(f.field)).filter((v): v is string => Boolean(v) && !/^-+$/.test(v as string));
         const fabJoined = fabParts.length > 0 ? fabParts.join('-').replace(/-{2,}/g, '-').replace(/-+$/, '') : null;
-        const newFabDesc = fabJoined !== null ? (isFGMode ? fabJoined : fabJoined.slice(0, 40).replace(/-+$/, '')) : null;
+        const newFabDesc = fabJoined;
         const updates: Record<string, string | null> = {};
         if (newFabDesc !== null && newFabDesc !== prev['fabricArticleDescription']) updates['fabricArticleDescription'] = newFabDesc;
         return Object.keys(updates).length > 0 ? { ...prev, ...updates } : prev;
       });
     }, [item, FAB_FIELDS]);
 
-    // In FG mode: auto-save the computed fabric description to DB when DB value is empty.
+    // Auto-save the computed fabric description to DB whenever it differs from the DB value.
+    // FG mode: only fires when DB value is empty (first-time fill).
+    // SRM mode: fires whenever any fabric attribute changes and description drifts from DB.
     React.useEffect(() => {
-      if (!isFGMode || item.approvalStatus !== 'PENDING') return;
-      if (item.fabricArticleDescription) return; // already has a value in DB
-      const fabParts = FAB_FIELDS.map((f) => {
-        const v = (item as any)[f.field];
+      if (item.approvalStatus !== 'PENDING') return;
+      if (isFGMode && item.fabricArticleDescription) return; // FG: don't overwrite existing
+      // Use ATTRIBUTE_GROUPS FAB fields as fallback if cardGroups didn't populate FAB_FIELDS
+      const effectiveFabFields = FAB_FIELDS.length > 0
+        ? FAB_FIELDS
+        : (ATTRIBUTE_GROUPS.find((g) => g.group === 'FAB')?.fields ?? []).filter(
+            (f) => !f.freeText && f.field !== 'mainMvgr',
+          );
+      const fabParts = effectiveFabFields.map((f) => {
+        const v = (localValues[f.field] !== undefined ? localValues[f.field] : (item as any)[f.field]);
         return v ? String(v).trim() : null;
       }).filter((v): v is string => Boolean(v) && !/^-+$/.test(v as string));
       if (fabParts.length === 0) return;
       const computed = fabParts.join('-').replace(/-{2,}/g, '-').replace(/-+$/, '');
-      if (autoSavedFabDescRef.current === computed) return; // already auto-saved this value
+      if (computed === item.fabricArticleDescription) return; // already in DB
+      if (autoSavedFabDescRef.current === computed) return; // already queued this save
       autoSavedFabDescRef.current = computed;
       onSave({ ...item, fabricArticleDescription: computed } as ApproverItem, { fabricArticleDescription: computed }, { silent: true });
     // eslint-disable-next-line react-hooks/exhaustive-deps
-    }, [item.id, item.fabricArticleDescription, FAB_FIELDS, isFGMode]);
+    }, [item.id, item.fabricArticleDescription, FAB_FIELDS, isFGMode, localValues]);
 
     // APPROVED/REJECTED articles are normally read-only. EXCEPTION: on the
     // Created page (modify mode) we keep them editable so the user can stage
@@ -975,6 +985,8 @@ const ArticleCard = React.memo(
       if (field === 'majorCategory' && value) {
         const newMcCode = getMcCodeByMajorCategory(value);
         if (newMcCode) updates['mcCode'] = newMcCode;
+        const mcDesOptions = fabHierarchy?.mcDesByMajCat[value] ?? [];
+        if (mcDesOptions.length > 0) updates['mcDescription'] = mcDesOptions[0];
         const currentMrp = getValue('mrp');
         fetchSegmentRangesFor(value).then((ranges) => {
           setSegmentRanges(ranges);
@@ -1097,9 +1109,9 @@ const ArticleCard = React.memo(
       {
         label: isFGMode ? 'FABRIC ARTICLE NUMBER' : 'ARTICLE NUMBER',
         field: 'articleNumber',
-        editable: !item.sapArticleId,
+        editable: !item.sapArticleId && !item.fabricArticleNumber,
         required: false,
-        color: item.sapArticleId ? '#15803d' : '#FF6F61',
+        color: (item.sapArticleId || item.fabricArticleNumber) ? '#15803d' : '#FF6F61',
       },
       { label: 'VENDOR CODE', field: 'vendorCode', editable: true, required: true, color: '#1f2937' },
       { label: 'VENDOR NAME', field: 'vendorName', editable: true, required: true, color: '#1f2937' },
@@ -1837,12 +1849,14 @@ const ArticleCard = React.memo(
                   </span>
                 </div>
                 <div className="space-y-0.5 px-2 py-1 text-[10.5px] font-medium">
-                  <div className="flex items-start justify-between gap-2">
-                    <span className="font-semibold text-muted-foreground">Article ID</span>
-                    <span className="truncate text-right font-bold text-foreground">
-                      {item.sapArticleId || item.articleNumber || item.imageName || '—'}
-                    </span>
-                  </div>
+                  {item.source !== 'SRM' && (
+                    <div className="flex items-start justify-between gap-2">
+                      <span className="font-semibold text-muted-foreground">Article ID</span>
+                      <span className="truncate text-right font-bold text-foreground">
+                        {item.sapArticleId || item.articleNumber || item.imageName || '—'}
+                      </span>
+                    </div>
+                  )}
                   <div className="flex items-start justify-between gap-2">
                     <span className="font-semibold text-muted-foreground">Category</span>
                     <span className="truncate text-right text-[11px] font-semibold text-foreground">
@@ -1851,24 +1865,28 @@ const ArticleCard = React.memo(
                         .join(' › ') || '—'}
                     </span>
                   </div>
-                  <div className="flex items-start justify-between gap-2">
-                    <span className="font-semibold text-muted-foreground">AI Confidence</span>
-                    <Badge variant="success">{aiConfidence}%</Badge>
-                  </div>
-                  <div className="flex items-start justify-between gap-2">
-                    <span className="font-semibold text-muted-foreground">Image Quality</span>
-                    <span className={`font-bold ${qualityColor(imageQualityLevel)}`}>{imageQualityLevel}</span>
-                  </div>
-                  <div className="flex items-start justify-between gap-2">
-                    <span className="font-semibold text-muted-foreground">Product Clarity</span>
-                    <span className={`font-bold ${qualityColor(productClarityLevel)}`}>{productClarityLevel}</span>
-                  </div>
-                  <div className="flex items-start justify-between gap-2">
-                    <span className="font-semibold text-muted-foreground">Attribute Match</span>
-                    <span className={`font-bold ${qualityColor(attrMatchLevel)}`}>
-                      {attrMatchLevel} ({filledAttrCount}/{visibleAttrs.length})
-                    </span>
-                  </div>
+                  {item.source !== 'SRM' && (
+                    <>
+                      <div className="flex items-start justify-between gap-2">
+                        <span className="font-semibold text-muted-foreground">AI Confidence</span>
+                        <Badge variant="success">{aiConfidence}%</Badge>
+                      </div>
+                      <div className="flex items-start justify-between gap-2">
+                        <span className="font-semibold text-muted-foreground">Image Quality</span>
+                        <span className={`font-bold ${qualityColor(imageQualityLevel)}`}>{imageQualityLevel}</span>
+                      </div>
+                      <div className="flex items-start justify-between gap-2">
+                        <span className="font-semibold text-muted-foreground">Product Clarity</span>
+                        <span className={`font-bold ${qualityColor(productClarityLevel)}`}>{productClarityLevel}</span>
+                      </div>
+                      <div className="flex items-start justify-between gap-2">
+                        <span className="font-semibold text-muted-foreground">Attribute Match</span>
+                        <span className={`font-bold ${qualityColor(attrMatchLevel)}`}>
+                          {attrMatchLevel} ({filledAttrCount}/{visibleAttrs.length})
+                        </span>
+                      </div>
+                    </>
+                  )}
                   <div className="flex items-start justify-between gap-2">
                     <span className="font-semibold text-muted-foreground">{pathType === 'created' ? 'Last Updated' : 'Created'}</span>
                     <span className="text-[11px] font-semibold text-foreground">
@@ -2092,9 +2110,10 @@ const ArticleCard = React.memo(
                     <div className="space-y-0 p-1">
                       {[
                         ...(!isFGMode ? [
-                          { label: 'MRP', field: 'mrp', editable: true, mandatory: true, isDropdown: false, isColor: false, isMarkdown: false },
-                          { label: 'Base Color', field: 'colour', editable: true, mandatory: false, isDropdown: true, isColor: true, isMarkdown: false },
-                          { label: 'Secondary Color', field: 'secondaryColour', editable: true, mandatory: false, isDropdown: true, isColor: true, isMarkdown: false },
+                          { label: 'RATE', field: 'mrp', editable: true, mandatory: true, isDropdown: false, isColor: false, isMarkdown: false },
+                          ...(!item.source || item.source !== 'SRM' ? [
+                            { label: 'Base Color', field: 'colour', editable: true, mandatory: false, isDropdown: true, isColor: true, isMarkdown: false },
+                          ] : []),
                         ] : []),
                         { label: 'ARTICLE FASHION TYPE', field: 'articleFashionType', editable: true, mandatory: true, isDropdown: true, isColor: false, isMarkdown: false, boldLabel: true },
                         ...(!isFGMode ? [
@@ -2156,8 +2175,10 @@ const ArticleCard = React.memo(
                                 />
                               ) : isEditingBom && bom.isDropdown ? (
                                 <Select
+                                  defaultOpen
                                   defaultValue={val === '—' ? undefined : val}
                                   onValueChange={(v) => handleSave(bom.field, v ?? null)}
+                                  onOpenChange={(open) => { if (!open) setEditingField(null); }}
                                 >
                                   <SelectTrigger className="h-6 w-full text-[11px]">
                                     <SelectValue />
@@ -2239,7 +2260,7 @@ const ArticleCard = React.memo(
 
           </div>
 
-          {/* ─── Variants section ─── */}
+          {/* ─── Variants section — SRM Fabric Articles only ─── */}
           {item.isGeneric && (
             <div className="border-t border-border">
               <button
@@ -2250,18 +2271,26 @@ const ArticleCard = React.memo(
               >
                 <span className="flex items-center gap-2 text-xs font-semibold text-slate-700">
                   <Users className="h-3.5 w-3.5" />
-                  Variants
+                  Color Variants
                 </span>
                 <span className="text-[11px] text-muted-foreground">{showVariants ? '▲ Hide' : '▼ Show'}</span>
               </button>
               {showVariants && (
-                <FabricVariantSubTable
-                  genericId={item.id}
-                  genericRecord={item}
-                  attributes={attributes}
-                  onRefresh={onRefresh}
-                  pathType={pathType}
-                />
+                item.source === 'SRM' ? (
+                  <FabricArticleVariantSubTable
+                    genericId={item.id}
+                    genericRecord={item}
+                    pathType={pathType}
+                  />
+                ) : (
+                  <FabricVariantSubTable
+                    genericId={item.id}
+                    genericRecord={item}
+                    attributes={attributes}
+                    onRefresh={onRefresh}
+                    pathType={pathType}
+                  />
+                )
               )}
             </div>
           )}

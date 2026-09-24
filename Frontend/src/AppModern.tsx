@@ -32,6 +32,8 @@ import FGNewArticleDashboard from './features/fabric-article/pages/FGNewArticleD
 import FGNewArticleDetailPage from './features/fabric-article/pages/FGNewArticleDetailPage'; // FG New Article detail view
 import BodyArticleDashboard from './features/body-article/pages/BodyArticleDashboard'; // Body Article Dashboard
 import BodyArticleDetailPage from './features/body-article/pages/BodyArticleDetailPage'; // Body Article detail view
+import GMArticleDashboard from './features/gm-article/pages/GMArticleDashboard'; // GM Article Dashboard (wraps ApproverDashboard)
+import GMArticleDetailPage from './features/gm-article/pages/GMArticleDetailPage'; // GM Article detail view (wraps ArticleDetailPage)
 import POPresentationPage from './features/po-presentation/pages/POPresentationPage'; // PO Presentation
 import ModelGenerationPage from './features/model-generation/pages/ModelGenerationPage';
 
@@ -754,6 +756,108 @@ const App: React.FC = () => {
                   <ApproverRoute>
                     <MainLayout>
                       <BodyArticleDetailPage />
+                    </MainLayout>
+                  </ApproverRoute>
+                }
+              />
+
+              {/* GM Article Routes */}
+              <Route
+                path="/gm-article"
+                element={
+                  <ApproverRoute>
+                    <MainLayout>
+                      <GMArticleDashboard key="gm-new-articles" pathType="new" />
+                    </MainLayout>
+                  </ApproverRoute>
+                }
+              />
+              <Route
+                path="/gm-article/:id"
+                element={
+                  <ApproverRoute>
+                    <MainLayout>
+                      <GMArticleDetailPage />
+                    </MainLayout>
+                  </ApproverRoute>
+                }
+              />
+              <Route
+                path="/gm-article/old-articles"
+                element={
+                  <ApproverRoute>
+                    <MainLayout>
+                      <GMArticleDashboard key="gm-old-articles" pathType="old" />
+                    </MainLayout>
+                  </ApproverRoute>
+                }
+              />
+              <Route
+                path="/gm-article/old-articles/:id"
+                element={
+                  <ApproverRoute>
+                    <MainLayout>
+                      <GMArticleDetailPage />
+                    </MainLayout>
+                  </ApproverRoute>
+                }
+              />
+              <Route
+                path="/gm-article/rejected"
+                element={
+                  <ApproverRoute>
+                    <MainLayout>
+                      <GMArticleDashboard key="gm-rejected-articles" pathType="rejected" />
+                    </MainLayout>
+                  </ApproverRoute>
+                }
+              />
+              <Route
+                path="/gm-article/rejected/:id"
+                element={
+                  <ApproverRoute>
+                    <MainLayout>
+                      <GMArticleDetailPage />
+                    </MainLayout>
+                  </ApproverRoute>
+                }
+              />
+              <Route
+                path="/gm-article/created"
+                element={
+                  <ApproverRoute>
+                    <MainLayout>
+                      <GMArticleDashboard key="gm-created-articles" pathType="created" />
+                    </MainLayout>
+                  </ApproverRoute>
+                }
+              />
+              <Route
+                path="/gm-article/created/:id"
+                element={
+                  <ApproverRoute>
+                    <MainLayout>
+                      <GMArticleDetailPage />
+                    </MainLayout>
+                  </ApproverRoute>
+                }
+              />
+              <Route
+                path="/gm-article/failed"
+                element={
+                  <ApproverRoute>
+                    <MainLayout>
+                      <GMArticleDashboard key="gm-failed-articles" pathType="failed" />
+                    </MainLayout>
+                  </ApproverRoute>
+                }
+              />
+              <Route
+                path="/gm-article/failed/:id"
+                element={
+                  <ApproverRoute>
+                    <MainLayout>
+                      <GMArticleDetailPage />
                     </MainLayout>
                   </ApproverRoute>
                 }

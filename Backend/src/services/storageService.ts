@@ -463,24 +463,7 @@ export class StorageService {
         const safeColor = colorCode ? this.sanitizeColor(colorCode) : undefined;
         const wantWatermark = !!labelData;
 
-        // Preferred path: direct S3-to-S3 copy — no HTTP download, no network fetch needed.
-        // Works for both public CDN URLs and signed R2 URLs.
-        // SKIPPED when watermarking is requested — we have to touch the bytes.
         const sourceKey = this.extractKeyFromAnyUrl(sourceImageUrl);
-        if (sourceKey && !wantWatermark) {
-            const extension = this.extensionFromPath(sourceKey) || 'jpg';
-            const destKey = this.buildApprovedKey(safeArticleNumber, extension, safeColor);
-            try {
-                await this.approvedS3Client.send(new CopyObjectCommand({
-                    Bucket: this.approvedBucket,
-                    CopySource: `${this.bucket}/${sourceKey}`,
-                    Key: destKey
-                }));
-                return { url: await this.buildApprovedUrl(destKey), path: destKey, key: destKey, uuid: safeArticleNumber };
-            } catch (copyError: any) {
-                console.warn(`⚠️ Direct S3 copy failed for ${destKey} (${copyError?.message}), trying S3 GetObject fallback...`);
-            }
-        }
 
         if (sourceKey) {
             const fallbackExt = this.extensionFromPath(sourceKey) || 'jpg';
@@ -787,7 +770,6 @@ export class StorageService {
             Body: buffer,
             ContentType: mimeType,
         }));
-        console.log(`✅ Uploaded to R2 primary bucket: ${key}`);
         if (this.publicUrlBase) {
             return this.buildPublicUrl(this.publicUrlBase, this.bucket, key);
         }

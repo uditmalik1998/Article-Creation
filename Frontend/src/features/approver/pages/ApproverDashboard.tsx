@@ -168,9 +168,11 @@ const PAGE_SIZE = 50;
 
 interface ApproverDashboardProps {
   pathType?: 'old' | 'new' | 'rejected' | 'created' | 'failed';
+  baseRoute?: string;
+  presentationsType?: string;
 }
 
-export default function ApproverDashboard({ pathType }: ApproverDashboardProps = {}) {
+export default function ApproverDashboard({ pathType, baseRoute = '/approver', presentationsType = 'FG Article' }: ApproverDashboardProps = {}) {
   const navigate = useNavigate();
   const location = useLocation();
   const [searchParams, setSearchParams] = useSearchParams();
@@ -282,7 +284,7 @@ export default function ApproverDashboard({ pathType }: ApproverDashboardProps =
         if (dateRangeFilter?.[0]) params.set('startDate', dateRangeFilter[0].startOf('day').toISOString());
         if (dateRangeFilter?.[1]) params.set('endDate', dateRangeFilter[1].endOf('day').toISOString());
         if (pathType) params.set('pathType', pathType);
-        params.set('presentationsType', 'FG Article');
+        params.set('presentationsType', presentationsType);
 
         const response = await fetch(`${APP_CONFIG.api.baseURL}/approver/items?${params}`, {
           headers: { Authorization: `Bearer ${token}` },
@@ -574,7 +576,7 @@ export default function ApproverDashboard({ pathType }: ApproverDashboardProps =
         const token = localStorage.getItem('authToken');
         const params = new URLSearchParams();
         params.set('pathType', 'created');
-        params.set('presentationsType', 'FG Article');
+        params.set('presentationsType', presentationsType);
         params.set('status', 'APPROVED');
         params.set('ids', rows.map((r) => r.id).join(','));
 
@@ -617,7 +619,7 @@ export default function ApproverDashboard({ pathType }: ApproverDashboardProps =
   // Keep the ref pointed at the latest values every render (cheap, render-safe).
   cardClickDataRef.current = {
     items, currentPage, totalCount, statusFilter, divisionFilter, subDivisionFilter,
-    majorCategoryFilter, sourceFilter, searchText, dateRangeFilter, pathType,
+    majorCategoryFilter, sourceFilter, searchText, dateRangeFilter, pathType, baseRoute,
   };
 
   // Stable handler (deps: [navigate]) so memoized ArticleCards never re-render
@@ -639,11 +641,11 @@ export default function ApproverDashboard({ pathType }: ApproverDashboardProps =
       pathType: d.pathType,
     };
     const basePath =
-      d.pathType === 'old' ? '/approver/old-articles'
-      : d.pathType === 'rejected' ? '/approver/rejected'
-      : d.pathType === 'created' ? '/approver/created'
-      : d.pathType === 'failed' ? '/approver/failed'
-      : '/approver';
+      d.pathType === 'old' ? `${d.baseRoute}/old-articles`
+      : d.pathType === 'rejected' ? `${d.baseRoute}/rejected`
+      : d.pathType === 'created' ? `${d.baseRoute}/created`
+      : d.pathType === 'failed' ? `${d.baseRoute}/failed`
+      : d.baseRoute;
     const state: DetailNavigationState = {
       items: d.items, currentIndex: index, currentPage: d.currentPage,
       totalCount: d.totalCount, pathType: d.pathType, filters,
