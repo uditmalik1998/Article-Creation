@@ -110,9 +110,9 @@ export async function runRawArticleExtraction(
       where: { id: { in: claimed.map(r => r.id) } },
     });
 
-    // ── Process rows with 2 parallel Gemini calls ────────────────────────
+    // ── Process rows with 4 parallel Gemini calls ────────────────────────
     // Each lane has its own try/catch so one failure doesn't abort the other.
-    const results = await mapWithConcurrency(rows, 3, async (row) => {
+    const results = await mapWithConcurrency(rows, 4, async (row) => {
       try {
         await processOneRow(row);
         return { ok: true } as const;

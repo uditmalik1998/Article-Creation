@@ -246,7 +246,7 @@ export class EnhancedExtractionController {
       );
       const gridReady = gridValues.size > 0;
       if (!gridReady) {
-        console.log(`[Enhanced] No grid values for major category "${majorMetaValue ?? '(none)'}" — grid-governed garment attributes not stored (strict).`);
+        console.log(`[Enhanced] No grid values for major category "${majorMetaValue ?? '(none)'}" — grid-governed attributes will be saved as raw values (no snapping).`);
       }
 
       const attributeEntries = Object.entries(result.attributes || {})
@@ -263,21 +263,36 @@ export class EnhancedExtractionController {
           const isGridGoverned = masterKey ? gridGovernedKeys.has(masterKey) : false;
 
           if (isGridGoverned) {
-            // STRICT grid scoping: drop the garment attribute when no grid is
-            // resolvable, or this attribute has no grid values for the category.
-            const allowed = (gridReady && masterKey) ? gridValues.get(masterKey) : undefined;
-            if (!allowed || allowed.length === 0) return null;
-
             const extracted = v.schemaValue ?? v.rawValue ?? null;
-            // Snap to the nearest grid value; null when there is no reasonable match.
-            const snapped = extracted != null ? snapValueToGrid(String(extracted), allowed) : null;
-            // Keep rawValue aligned with finalValue so the downstream flattener
-            // (which falls back to rawValue when finalValue is null) cannot
-            // resurrect an off-grid value.
+            if (extracted == null) return null;
+
+            if (gridReady && masterKey) {
+              // Grid is resolvable — snap to the nearest allowed value.
+              // Drop the attribute only when this specific key has no allowed values
+              // for the resolved major category (truly out-of-scope field).
+              const allowed = gridValues.get(masterKey);
+              if (!allowed || allowed.length === 0) return null;
+              const snapped = snapValueToGrid(String(extracted), allowed);
+              // Keep rawValue aligned with finalValue so the downstream flattener
+              // (which falls back to rawValue when finalValue is null) cannot
+              // resurrect an off-grid value.
+              return {
+                attributeId,
+                rawValue: snapped,
+                finalValue: snapped,
+                confidence: v.visualConfidence ?? null,
+                extractionMethod: 'VLM',
+              };
+            }
+
+            // No major category resolved — save the raw extracted value without
+            // grid-snapping so attributes aren't silently lost when Gemini
+            // can't identify the category. The user can set major_category
+            // afterwards and the values will be visible immediately.
             return {
               attributeId,
-              rawValue: snapped,
-              finalValue: snapped,
+              rawValue: String(extracted),
+              finalValue: String(extracted),
               confidence: v.visualConfidence ?? null,
               extractionMethod: 'VLM',
             };
