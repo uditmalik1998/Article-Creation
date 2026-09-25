@@ -1711,6 +1711,7 @@ model BodyFabricConsumption {
   majorCategory  String?  @map("major_category") @db.VarChar(200)
   fabWidth       Decimal? @map("fab_width")       @db.Decimal(10, 2)
   fabConsumption Decimal? @map("fab_consumption") @db.Decimal(10, 6)
+  gsm            Decimal? @map("gsm")              @db.Decimal(10, 2)
   createdAt      DateTime @default(now())         @map("created_at")
 
   @@unique([division, subDivision, majorCategory, fabWidth])

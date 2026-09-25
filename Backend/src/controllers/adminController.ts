@@ -7554,6 +7554,30 @@ export const EXPENSE_TABLE_REGISTRY: Record<string, ExpenseTableConfig> = {
     displayColumns: ['major_category', 'segment_type'],
     defaultSort: { column: 'id', dir: 'desc' },
   },
+  'body-fabric-consumption': {
+    kind: 'raw',
+    tableName: 'body_fabric_consumption',
+    idColumn: 'id',
+    // Same reasoning as segment-master/cmp-cost-master: maintained mainly via
+    // the Excel re-upload on the Admin -> Expenses page, but row-by-row
+    // add/delete stays available for one-off fixes between re-uploads.
+    allowCreate: true,
+    allowDelete: true,
+    requiredOnCreate: ['major_category', 'fab_width'],
+    columns: [
+      { key: 'id', label: 'ID', editable: false },
+      { key: 'division', label: 'Division' },
+      { key: 'sub_division', label: 'Sub Division' },
+      { key: 'major_category', label: 'Major Category' },
+      { key: 'fab_width', label: 'Fab Width', align: 'right' },
+      { key: 'fab_consumption', label: 'Fab Consumption', align: 'right' },
+      { key: 'gsm', label: 'GSM', align: 'right' },
+      { key: 'created_at', label: 'Created At', editable: false },
+    ],
+    searchColumns: ['division', 'sub_division', 'major_category'],
+    displayColumns: ['major_category', 'fab_width'],
+    defaultSort: { column: 'id', dir: 'desc' },
+  },
   'fabric-article-data': {
     kind: 'prisma',
     delegateName: 'fabricArticleData',
@@ -8415,7 +8439,7 @@ export const getBodyFabricConsumptionStatus = async (_req: Request, res: Respons
 
 /**
  * POST /api/admin/body-fabric-consumption/upload
- * Accepts an Excel file. Reads columns: DIV(0), SUB DIV(1), MAJ CAT(2), FAB_WIDTH(3), FAB CONSUMPTION(last/34).
+ * Accepts an Excel file. Reads columns: DIV(0), SUB DIV(1), MAJ CAT(2), FAB_WIDTH(3), FAB CONSUMPTION(last/34), GSM(35).
  * Truncates and replaces the entire body_fabric_consumption table.
  */
 export const uploadBodyFabricConsumption = async (req: Request, res: Response): Promise<void> => {
@@ -8442,34 +8466,38 @@ export const uploadBodyFabricConsumption = async (req: Request, res: Response): 
       return v == null ? '' : String(v).trim();
     };
 
-    type FabRow = { division: string | null; sub_division: string | null; major_category: string; fab_width: number | null; fab_consumption: number | null };
+    type FabRow = { division: string | null; sub_division: string | null; major_category: string; fab_width: number | null; fab_consumption: number | null; gsm: number | null };
     const rows: FabRow[] = [];
     const seen = new Set<string>();
     let skipped = 0;
 
-    // Row 1 = headers (0-indexed), rows 1-2 empty, data from row 3 (ExcelJS is 1-indexed → data from row 4)
-    // Columns: A=DIV(1), B=SUB DIV(2), C=MAJ CAT(3), D=FAB_WIDTH(4), last column=FAB CONSUMPTION
-    // Detect last column dynamically by reading header row
-    let fabConsCol = 35; // default: column 35 (AJ) = index 34 in 0-based
-    const headerRow = ws.getRow(1);
+    // Rows 1-3 empty, row 4 = headers, data from row 5 (matches both the
+    // generated template and the real source workbook's layout).
+    // Columns: A=DIV(1), B=SUB DIV(2), C=MAJ CAT(3), D=FAB_WIDTH(4), FAB CONSUMPTION and GSM detected by header text.
+    let fabConsCol = 35; // default: column 35 (AI) = index 34 in 0-based
+    let gsmCol = 36;     // default: column 36 (AJ) = index 35 in 0-based
+    const headerRow = ws.getRow(4);
     for (let c = 1; c <= 50; c++) {
       const h = cell(headerRow, c).toUpperCase().replace(/\s+/g, ' ');
-      if (h === 'FAB CONSUMPTION') { fabConsCol = c; break; }
+      if (h === 'FAB CONSUMPTION') fabConsCol = c;
+      if (h === 'GSM') gsmCol = c;
     }
 
-    for (let r = 4; r <= ws.rowCount; r++) {
+    for (let r = 5; r <= ws.rowCount; r++) {
       const row = ws.getRow(r);
       const div    = cell(row, 1);
       const sub    = cell(row, 2);
       const majCat = cell(row, 3);
       const widthRaw = cell(row, 4);
       const consRaw  = cell(row, fabConsCol);
+      const gsmRaw   = cell(row, gsmCol);
 
       if (!majCat && !div && !widthRaw) { skipped++; continue; }
       if (!majCat) { skipped++; continue; }
 
       const fabWidth = widthRaw !== '' ? parseFloat(widthRaw) : null;
       const fabCons  = consRaw  !== '' ? parseFloat(consRaw)  : null;
+      const gsm      = gsmRaw   !== '' ? parseFloat(gsmRaw)   : null;
 
       const key = `${div}|${sub}|${majCat}|${widthRaw}`;
       if (seen.has(key)) continue;
@@ -8481,6 +8509,7 @@ export const uploadBodyFabricConsumption = async (req: Request, res: Response): 
         major_category: majCat,
         fab_width:     fabWidth !== null && !isNaN(fabWidth) ? fabWidth : null,
         fab_consumption: fabCons !== null && !isNaN(fabCons) ? fabCons : null,
+        gsm:           gsm !== null && !isNaN(gsm) ? gsm : null,
       });
     }
 
@@ -8493,11 +8522,11 @@ export const uploadBodyFabricConsumption = async (req: Request, res: Response): 
       for (let i = 0; i < rows.length; i += BATCH) {
         const batch = rows.slice(i, i + BATCH);
         await tx.$executeRaw`
-          INSERT INTO body_fabric_consumption (division, sub_division, major_category, fab_width, fab_consumption)
+          INSERT INTO body_fabric_consumption (division, sub_division, major_category, fab_width, fab_consumption, gsm)
           SELECT v.division, v.sub_division, v.major_category,
-                 v.fab_width::numeric, v.fab_consumption::numeric
+                 v.fab_width::numeric, v.fab_consumption::numeric, v.gsm::numeric
           FROM jsonb_to_recordset(${JSON.stringify(batch)}::jsonb)
-            AS v(division text, sub_division text, major_category text, fab_width text, fab_consumption text)
+            AS v(division text, sub_division text, major_category text, fab_width text, fab_consumption text, gsm text)
         `;
       }
     }, { timeout: 5 * 60 * 1000 });
@@ -8514,10 +8543,10 @@ export const uploadBodyFabricConsumption = async (req: Request, res: Response): 
   }
 };
 
-// All 35 columns in the source Excel (sheet "summary", headers at row 4).
+// All 36 columns in the source Excel (sheet "summary", headers at row 4).
 // The uploader only reads cols 0-3 (DIV/SUB DIV/MAJ CAT/FAB_WIDTH) and the
-// last col (FAB CONSUMPTION). The 30 size/age columns in between are ignored
-// on import but must be present in the template so re-uploading works.
+// last two cols (FAB CONSUMPTION, GSM). The 30 size/age columns in between
+// are ignored on import but must be present in the template so re-uploading works.
 const FAB_CONS_HEADERS = [
   'DIV', 'SUB DIV', 'MAJ CAT', 'FAB_WIDTH',
   'M_06_12', 'M_12_18', 'M_18_24',
@@ -8526,7 +8555,7 @@ const FAB_CONS_HEADERS = [
   'S', 'M', 'L', 'XL', 'XXL', 'XXXL', 'XXXXL',
   'S_26', 'S_28', 'S_30', 'S_38', 'S_32', 'S_34', 'S_36',
   'M_00_03', 'M_03_06',
-  'FAB CONSUMPTION',
+  'FAB CONSUMPTION', 'GSM',
 ];
 
 function buildFabConsSheet(wb: any, dataRows: any[]): any {
@@ -8556,7 +8585,7 @@ function buildFabConsSheet(wb: any, dataRows: any[]): any {
   ws.columns = [
     { width: 12 }, { width: 14 }, { width: 26 }, { width: 12 },
     ...Array(30).fill({ width: 10 }),
-    { width: 18 },
+    { width: 18 }, { width: 10 },
   ];
 
   return ws;
@@ -8565,7 +8594,7 @@ function buildFabConsSheet(wb: any, dataRows: any[]): any {
 /**
  * GET /api/admin/body-fabric-consumption/template
  * Downloads a blank Excel template matching the source upload format exactly
- * (sheet "summary", 35 columns, headers at row 4, no data rows).
+ * (sheet "summary", 36 columns, headers at row 4, no data rows).
  */
 export const downloadBodyFabricConsumptionTemplate = async (_req: Request, res: Response): Promise<void> => {
   try {
@@ -8585,28 +8614,29 @@ export const downloadBodyFabricConsumptionTemplate = async (_req: Request, res: 
 
 /**
  * GET /api/admin/body-fabric-consumption/download
- * Exports the full body_fabric_consumption table in the same 35-column format
- * as the source file. Only cols A-D and the last col (FAB CONSUMPTION/AI) are
- * populated; the 30 size/age columns in between are left blank (they are not
- * stored in the DB).
+ * Exports the full body_fabric_consumption table in the same 36-column format
+ * as the source file. Only cols A-D and the last two cols (FAB CONSUMPTION/AI,
+ * GSM/AJ) are populated; the 30 size/age columns in between are left blank
+ * (they are not stored in the DB).
  */
 export const downloadBodyFabricConsumptionData = async (_req: Request, res: Response): Promise<void> => {
   try {
     const ExcelJS = require('exceljs');
     const dbRows: any[] = await prisma.$queryRaw`
-      SELECT division, sub_division, major_category, fab_width, fab_consumption
+      SELECT division, sub_division, major_category, fab_width, fab_consumption, gsm
       FROM body_fabric_consumption
       ORDER BY division, sub_division, major_category, fab_width
     `;
 
-    // Build a 35-element array per row: A-D filled, E-AH blank, AI = fab_consumption
+    // Build a 36-element array per row: A-D filled, E-AH blank, AI = fab_consumption, AJ = gsm
     const dataRows = dbRows.map((r) => {
-      const row: any[] = new Array(35).fill('');
+      const row: any[] = new Array(36).fill('');
       row[0]  = r.division ?? '';
       row[1]  = r.sub_division ?? '';
       row[2]  = r.major_category ?? '';
       row[3]  = r.fab_width != null ? Number(r.fab_width) : '';
       row[34] = r.fab_consumption != null ? Number(r.fab_consumption) : '';
+      row[35] = r.gsm != null ? Number(r.gsm) : '';
       return row;
     });
 

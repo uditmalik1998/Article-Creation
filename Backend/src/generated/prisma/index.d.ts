@@ -61610,12 +61610,14 @@ export namespace Prisma {
     id: number | null
     fabWidth: Decimal | null
     fabConsumption: Decimal | null
+    gsm: Decimal | null
   }
 
   export type BodyFabricConsumptionSumAggregateOutputType = {
     id: number | null
     fabWidth: Decimal | null
     fabConsumption: Decimal | null
+    gsm: Decimal | null
   }
 
   export type BodyFabricConsumptionMinAggregateOutputType = {
@@ -61625,6 +61627,7 @@ export namespace Prisma {
     majorCategory: string | null
     fabWidth: Decimal | null
     fabConsumption: Decimal | null
+    gsm: Decimal | null
     createdAt: Date | null
   }
 
@@ -61635,6 +61638,7 @@ export namespace Prisma {
     majorCategory: string | null
     fabWidth: Decimal | null
     fabConsumption: Decimal | null
+    gsm: Decimal | null
     createdAt: Date | null
   }
 
@@ -61645,6 +61649,7 @@ export namespace Prisma {
     majorCategory: number
     fabWidth: number
     fabConsumption: number
+    gsm: number
     createdAt: number
     _all: number
   }
@@ -61654,12 +61659,14 @@ export namespace Prisma {
     id?: true
     fabWidth?: true
     fabConsumption?: true
+    gsm?: true
   }
 
   export type BodyFabricConsumptionSumAggregateInputType = {
     id?: true
     fabWidth?: true
     fabConsumption?: true
+    gsm?: true
   }
 
   export type BodyFabricConsumptionMinAggregateInputType = {
@@ -61669,6 +61676,7 @@ export namespace Prisma {
     majorCategory?: true
     fabWidth?: true
     fabConsumption?: true
+    gsm?: true
     createdAt?: true
   }
 
@@ -61679,6 +61687,7 @@ export namespace Prisma {
     majorCategory?: true
     fabWidth?: true
     fabConsumption?: true
+    gsm?: true
     createdAt?: true
   }
 
@@ -61689,6 +61698,7 @@ export namespace Prisma {
     majorCategory?: true
     fabWidth?: true
     fabConsumption?: true
+    gsm?: true
     createdAt?: true
     _all?: true
   }
@@ -61786,6 +61796,7 @@ export namespace Prisma {
     majorCategory: string | null
     fabWidth: Decimal | null
     fabConsumption: Decimal | null
+    gsm: Decimal | null
     createdAt: Date
     _count: BodyFabricConsumptionCountAggregateOutputType | null
     _avg: BodyFabricConsumptionAvgAggregateOutputType | null
@@ -61815,6 +61826,7 @@ export namespace Prisma {
     majorCategory?: boolean
     fabWidth?: boolean
     fabConsumption?: boolean
+    gsm?: boolean
     createdAt?: boolean
   }, ExtArgs["result"]["bodyFabricConsumption"]>
 
@@ -61825,6 +61837,7 @@ export namespace Prisma {
     majorCategory?: boolean
     fabWidth?: boolean
     fabConsumption?: boolean
+    gsm?: boolean
     createdAt?: boolean
   }, ExtArgs["result"]["bodyFabricConsumption"]>
 
@@ -61835,6 +61848,7 @@ export namespace Prisma {
     majorCategory?: boolean
     fabWidth?: boolean
     fabConsumption?: boolean
+    gsm?: boolean
     createdAt?: boolean
   }, ExtArgs["result"]["bodyFabricConsumption"]>
 
@@ -61845,10 +61859,11 @@ export namespace Prisma {
     majorCategory?: boolean
     fabWidth?: boolean
     fabConsumption?: boolean
+    gsm?: boolean
     createdAt?: boolean
   }
 
-  export type BodyFabricConsumptionOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<"id" | "division" | "subDivision" | "majorCategory" | "fabWidth" | "fabConsumption" | "createdAt", ExtArgs["result"]["bodyFabricConsumption"]>
+  export type BodyFabricConsumptionOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<"id" | "division" | "subDivision" | "majorCategory" | "fabWidth" | "fabConsumption" | "gsm" | "createdAt", ExtArgs["result"]["bodyFabricConsumption"]>
 
   export type $BodyFabricConsumptionPayload<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
     name: "BodyFabricConsumption"
@@ -61860,6 +61875,7 @@ export namespace Prisma {
       majorCategory: string | null
       fabWidth: Prisma.Decimal | null
       fabConsumption: Prisma.Decimal | null
+      gsm: Prisma.Decimal | null
       createdAt: Date
     }, ExtArgs["result"]["bodyFabricConsumption"]>
     composites: {}
@@ -62290,6 +62306,7 @@ export namespace Prisma {
     readonly majorCategory: FieldRef<"BodyFabricConsumption", 'String'>
     readonly fabWidth: FieldRef<"BodyFabricConsumption", 'Decimal'>
     readonly fabConsumption: FieldRef<"BodyFabricConsumption", 'Decimal'>
+    readonly gsm: FieldRef<"BodyFabricConsumption", 'Decimal'>
     readonly createdAt: FieldRef<"BodyFabricConsumption", 'DateTime'>
   }
     
@@ -72963,6 +72980,7 @@ export namespace Prisma {
     majorCategory: 'majorCategory',
     fabWidth: 'fabWidth',
     fabConsumption: 'fabConsumption',
+    gsm: 'gsm',
     createdAt: 'createdAt'
   };
 
@@ -80141,6 +80159,7 @@ export namespace Prisma {
     majorCategory?: StringNullableFilter<"BodyFabricConsumption"> | string | null
     fabWidth?: DecimalNullableFilter<"BodyFabricConsumption"> | Decimal | DecimalJsLike | number | string | null
     fabConsumption?: DecimalNullableFilter<"BodyFabricConsumption"> | Decimal | DecimalJsLike | number | string | null
+    gsm?: DecimalNullableFilter<"BodyFabricConsumption"> | Decimal | DecimalJsLike | number | string | null
     createdAt?: DateTimeFilter<"BodyFabricConsumption"> | Date | string
   }
 
@@ -80151,6 +80170,7 @@ export namespace Prisma {
     majorCategory?: SortOrderInput | SortOrder
     fabWidth?: SortOrderInput | SortOrder
     fabConsumption?: SortOrderInput | SortOrder
+    gsm?: SortOrderInput | SortOrder
     createdAt?: SortOrder
     _relevance?: BodyFabricConsumptionOrderByRelevanceInput
   }
@@ -80166,6 +80186,7 @@ export namespace Prisma {
     majorCategory?: StringNullableFilter<"BodyFabricConsumption"> | string | null
     fabWidth?: DecimalNullableFilter<"BodyFabricConsumption"> | Decimal | DecimalJsLike | number | string | null
     fabConsumption?: DecimalNullableFilter<"BodyFabricConsumption"> | Decimal | DecimalJsLike | number | string | null
+    gsm?: DecimalNullableFilter<"BodyFabricConsumption"> | Decimal | DecimalJsLike | number | string | null
     createdAt?: DateTimeFilter<"BodyFabricConsumption"> | Date | string
   }, "id" | "division_subDivision_majorCategory_fabWidth">
 
@@ -80176,6 +80197,7 @@ export namespace Prisma {
     majorCategory?: SortOrderInput | SortOrder
     fabWidth?: SortOrderInput | SortOrder
     fabConsumption?: SortOrderInput | SortOrder
+    gsm?: SortOrderInput | SortOrder
     createdAt?: SortOrder
     _count?: BodyFabricConsumptionCountOrderByAggregateInput
     _avg?: BodyFabricConsumptionAvgOrderByAggregateInput
@@ -80194,6 +80216,7 @@ export namespace Prisma {
     majorCategory?: StringNullableWithAggregatesFilter<"BodyFabricConsumption"> | string | null
     fabWidth?: DecimalNullableWithAggregatesFilter<"BodyFabricConsumption"> | Decimal | DecimalJsLike | number | string | null
     fabConsumption?: DecimalNullableWithAggregatesFilter<"BodyFabricConsumption"> | Decimal | DecimalJsLike | number | string | null
+    gsm?: DecimalNullableWithAggregatesFilter<"BodyFabricConsumption"> | Decimal | DecimalJsLike | number | string | null
     createdAt?: DateTimeWithAggregatesFilter<"BodyFabricConsumption"> | Date | string
   }
 
@@ -87915,6 +87938,7 @@ export namespace Prisma {
     majorCategory?: string | null
     fabWidth?: Decimal | DecimalJsLike | number | string | null
     fabConsumption?: Decimal | DecimalJsLike | number | string | null
+    gsm?: Decimal | DecimalJsLike | number | string | null
     createdAt?: Date | string
   }
 
@@ -87925,6 +87949,7 @@ export namespace Prisma {
     majorCategory?: string | null
     fabWidth?: Decimal | DecimalJsLike | number | string | null
     fabConsumption?: Decimal | DecimalJsLike | number | string | null
+    gsm?: Decimal | DecimalJsLike | number | string | null
     createdAt?: Date | string
   }
 
@@ -87934,6 +87959,7 @@ export namespace Prisma {
     majorCategory?: NullableStringFieldUpdateOperationsInput | string | null
     fabWidth?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
     fabConsumption?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    gsm?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
   }
 
@@ -87944,6 +87970,7 @@ export namespace Prisma {
     majorCategory?: NullableStringFieldUpdateOperationsInput | string | null
     fabWidth?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
     fabConsumption?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    gsm?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
   }
 
@@ -87954,6 +87981,7 @@ export namespace Prisma {
     majorCategory?: string | null
     fabWidth?: Decimal | DecimalJsLike | number | string | null
     fabConsumption?: Decimal | DecimalJsLike | number | string | null
+    gsm?: Decimal | DecimalJsLike | number | string | null
     createdAt?: Date | string
   }
 
@@ -87963,6 +87991,7 @@ export namespace Prisma {
     majorCategory?: NullableStringFieldUpdateOperationsInput | string | null
     fabWidth?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
     fabConsumption?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    gsm?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
   }
 
@@ -87973,6 +88002,7 @@ export namespace Prisma {
     majorCategory?: NullableStringFieldUpdateOperationsInput | string | null
     fabWidth?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
     fabConsumption?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    gsm?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
   }
 
@@ -93453,6 +93483,7 @@ export namespace Prisma {
     majorCategory?: SortOrder
     fabWidth?: SortOrder
     fabConsumption?: SortOrder
+    gsm?: SortOrder
     createdAt?: SortOrder
   }
 
@@ -93460,6 +93491,7 @@ export namespace Prisma {
     id?: SortOrder
     fabWidth?: SortOrder
     fabConsumption?: SortOrder
+    gsm?: SortOrder
   }
 
   export type BodyFabricConsumptionMaxOrderByAggregateInput = {
@@ -93469,6 +93501,7 @@ export namespace Prisma {
     majorCategory?: SortOrder
     fabWidth?: SortOrder
     fabConsumption?: SortOrder
+    gsm?: SortOrder
     createdAt?: SortOrder
   }
 
@@ -93479,6 +93512,7 @@ export namespace Prisma {
     majorCategory?: SortOrder
     fabWidth?: SortOrder
     fabConsumption?: SortOrder
+    gsm?: SortOrder
     createdAt?: SortOrder
   }
 
@@ -93486,6 +93520,7 @@ export namespace Prisma {
     id?: SortOrder
     fabWidth?: SortOrder
     fabConsumption?: SortOrder
+    gsm?: SortOrder
   }
 
   export type RoughCmpCostMasterOrderByRelevanceInput = {

@@ -3210,7 +3210,7 @@ export default function Admin() {
                       type="warning"
                       showIcon
                       message="No body fabric consumption data loaded"
-                      description="Upload FAB CONSUMPTION MASTER Excel. Reads columns: DIV, SUB DIV, MAJ CAT, FAB_WIDTH, FAB CONSUMPTION. All other columns are ignored. Replaces the entire table."
+                      description="Upload FAB CONSUMPTION MASTER Excel. Reads columns: DIV, SUB DIV, MAJ CAT, FAB_WIDTH, FAB CONSUMPTION, GSM. All other columns are ignored. Replaces the entire table."
                     />
                   )}
                 </div>
@@ -3220,7 +3220,7 @@ export default function Admin() {
                   <div className="rounded-md border border-border p-4">
                     <div className="mb-1 font-semibold">Upload FAB CONSUMPTION MASTER Excel</div>
                     <div className="mb-3 text-xs text-muted-foreground">
-                      Columns used: <strong>DIV</strong>, <strong>SUB DIV</strong>, <strong>MAJ CAT</strong>, <strong>FAB_WIDTH</strong>, <strong>FAB CONSUMPTION</strong>.
+                      Columns used: <strong>DIV</strong>, <strong>SUB DIV</strong>, <strong>MAJ CAT</strong>, <strong>FAB_WIDTH</strong>, <strong>FAB CONSUMPTION</strong>, <strong>GSM</strong>.
                       All other size/age columns are ignored. <strong className="text-destructive">Replaces entire table.</strong>
                     </div>
 

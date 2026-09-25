@@ -1126,6 +1126,7 @@ exports.Prisma.BodyFabricConsumptionScalarFieldEnum = {
   majorCategory: 'majorCategory',
   fabWidth: 'fabWidth',
   fabConsumption: 'fabConsumption',
+  gsm: 'gsm',
   createdAt: 'createdAt'
 };
 
