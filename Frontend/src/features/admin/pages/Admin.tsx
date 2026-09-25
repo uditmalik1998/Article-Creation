@@ -19,7 +19,6 @@ import {
   Download,
   ClipboardList,
   History,
-  Trash2,
 } from 'lucide-react';
 import {
   Alert,
@@ -330,7 +329,6 @@ export default function Admin() {
   const [bodyFabConsStatusLoading, setBodyFabConsStatusLoading] = useState(false);
   const [bodyFabConsUploading, setBodyFabConsUploading] = useState(false);
   const [bodyFabConsProgress, setBodyFabConsProgress] = useState<number>(0);
-  const [bodyFabConsDeleting, setBodyFabConsDeleting] = useState(false);
   const bodyFabConsFileRef = useRef<HTMLInputElement | null>(null);
 
   // Value Addition Accessories Cost
@@ -1652,25 +1650,6 @@ export default function Admin() {
     }
   };
 
-  const handleDeleteAllBodyFabCons = async () => {
-    setBodyFabConsDeleting(true);
-    try {
-      const token = localStorage.getItem('authToken');
-      const res = await fetch(`${APP_CONFIG.api.baseURL}/admin/body-fabric-consumption/all`, {
-        method: 'DELETE',
-        headers: token ? { Authorization: `Bearer ${token}` } : {},
-      });
-      const data = await res.json();
-      if (!res.ok) throw new Error(data.error || 'Delete failed');
-      message.success(data.message);
-      setBodyFabConsTotal(data.data);
-    } catch (err: any) {
-      message.error(err?.message || 'Failed to delete body fabric consumption data');
-    } finally {
-      setBodyFabConsDeleting(false);
-    }
-  };
-
   // ─────────────────────────────── Value Addition Accessories Cost ──────────────
   const loadVaacStatus = useCallback(async () => {
     setVaacStatusLoading(true);
@@ -1928,8 +1907,9 @@ export default function Admin() {
     loadHierarchyExcelStatus();
     loadPipelineStatus();
     loadFabricRawStatus();
+    loadBodyFabConsStatus();
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [loadVendorStatus, loadMajCatGridStatus, loadMandatoryGridStatus, loadSizeMasterStatus, loadColorMasterStatus, loadFabricArticleDataStatus, loadFabricArticleMasterStatus, loadBodyArticleDataStatus, loadBroaderMenuStatus, loadSegmentMasterStatus, loadBasicAccessoriesStatus, loadCmpCostMasterStatus, loadNationalGridStatus, loadHierarchyExcelStatus, loadPipelineStatus, loadFabricRawStatus]);
+  }, [loadVendorStatus, loadMajCatGridStatus, loadMandatoryGridStatus, loadSizeMasterStatus, loadColorMasterStatus, loadFabricArticleDataStatus, loadFabricArticleMasterStatus, loadBodyArticleDataStatus, loadBroaderMenuStatus, loadSegmentMasterStatus, loadBasicAccessoriesStatus, loadCmpCostMasterStatus, loadNationalGridStatus, loadHierarchyExcelStatus, loadPipelineStatus, loadFabricRawStatus, loadBodyFabConsStatus]);
 
   const loadData = async () => {
     setLoading(true);
@@ -3193,23 +3173,6 @@ export default function Admin() {
                 <RotateCw className={bodyFabConsStatusLoading ? 'animate-spin' : ''} />
                 Refresh Status
               </Button>
-              <Popconfirm
-                title="Delete ALL body fabric consumption data?"
-                description="This permanently wipes every row from body_fabric_consumption. This cannot be undone."
-                onConfirm={handleDeleteAllBodyFabCons}
-                okText="Yes, delete all"
-                cancelText="Cancel"
-                disabled={!bodyFabConsTotal || bodyFabConsTotal.total === 0}
-              >
-                <Button
-                  size="sm"
-                  variant="destructive"
-                  disabled={bodyFabConsDeleting || !bodyFabConsTotal || bodyFabConsTotal.total === 0}
-                >
-                  {bodyFabConsDeleting ? <RefreshCw className="animate-spin" /> : <Trash2 />}
-                  {bodyFabConsDeleting ? 'Deleting...' : 'Delete All'}
-                </Button>
-              </Popconfirm>
             </div>
           </CardHeader>
           <CardContent>
@@ -3231,7 +3194,7 @@ export default function Admin() {
                       type="warning"
                       showIcon
                       message="No body fabric consumption data loaded"
-                      description="Upload FAB CONSUMPTION MASTER Excel. Reads columns: DIV, SUB DIV, MAJ CAT, FAB_WIDTH, FAB CONSUMPTION. All other columns are ignored. Replaces the entire table."
+                      description="Upload FAB CONSUMPTION MASTER Excel. Reads columns: DIV, SUB DIV, MAJ CAT, FAB_WIDTH, FAB CONSUMPTION, GSM. All other columns are ignored. Replaces the entire table."
                     />
                   )}
                 </div>
@@ -3241,7 +3204,7 @@ export default function Admin() {
                   <div className="rounded-md border border-border p-4">
                     <div className="mb-1 font-semibold">Upload FAB CONSUMPTION MASTER Excel</div>
                     <div className="mb-3 text-xs text-muted-foreground">
-                      Columns used: <strong>DIV</strong>, <strong>SUB DIV</strong>, <strong>MAJ CAT</strong>, <strong>FAB_WIDTH</strong>, <strong>FAB CONSUMPTION</strong>.
+                      Columns used: <strong>DIV</strong>, <strong>SUB DIV</strong>, <strong>MAJ CAT</strong>, <strong>FAB_WIDTH</strong>, <strong>FAB CONSUMPTION</strong>, <strong>GSM</strong>.
                       All other size/age columns are ignored. <strong className="text-destructive">Replaces entire table.</strong>
                     </div>
 

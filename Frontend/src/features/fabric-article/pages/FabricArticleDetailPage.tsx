@@ -312,6 +312,7 @@ export default function ArticleDetailPage({
   const [editActiveTab, setEditActiveTab] = useState<'core' | 'attributes' | 'business'>('core');
   const modalDivision = editForm.watch('division');
   const modalSubDivision = editForm.watch('subDivision');
+  const modalMajorCategory = editForm.watch('majorCategory');
 
   // Fabric article master hierarchy (div → sub_div → maj_cat)
   const [fabHierarchy, setFabHierarchy] = useState<{
@@ -349,6 +350,26 @@ export default function ArticleDetailPage({
       headers: { Authorization: `Bearer ${token}` },
     }).then(r => r.json()).then(setFabHierarchy).catch(() => {});
   }, []);
+
+  // Auto-fill GSM from body_fabric_consumption when the edit modal is open and
+  // has a Major Category — on first open and whenever it's changed — but never
+  // overwrite a GSM value the article already has.
+  useEffect(() => {
+    if (!isEditModalOpen || !modalMajorCategory) return;
+    if (editForm.getValues('gsm')) return;
+    const token = localStorage.getItem('authToken');
+    fetch(
+      `${APP_CONFIG.api.baseURL}/approver/body-fabric-consumption/gsm?majorCategory=${encodeURIComponent(modalMajorCategory)}`,
+      { headers: { Authorization: `Bearer ${token}` } },
+    )
+      .then(r => r.json())
+      .then((d: { gsm: number | null }) => {
+        if (d.gsm == null) return;
+        if (editForm.getValues('gsm')) return;
+        editForm.setValue('gsm', String(d.gsm));
+      })
+      .catch(() => {});
+  }, [isEditModalOpen, modalMajorCategory]);
 
   // Fetch by ID when opened directly (no navigation state)
   useEffect(() => {

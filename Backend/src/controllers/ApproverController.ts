@@ -3748,6 +3748,20 @@ export class ApproverController {
         })));
     };
 
+    // Returns GSM for a major category from body_fabric_consumption (gsm is
+    // stored once per major category, duplicated across its fab_width rows —
+    // any non-null match is the value). Used to auto-fill Fabric Article
+    // Data's GSM field on the New FG Article page.
+    static getFabricGsmByMajorCategory = async (req: Request, res: Response) => {
+        const majorCategory = String(req.query.majorCategory ?? '').trim();
+        if (!majorCategory) return res.json({ gsm: null });
+        const row = await prisma.bodyFabricConsumption.findFirst({
+            where: { majorCategory: { equals: majorCategory, mode: 'insensitive' }, gsm: { not: null } },
+            select: { gsm: true },
+        });
+        return res.json({ gsm: row?.gsm != null ? Number(row.gsm) : null });
+    };
+
     // Returns cmp_cost for a major category from rough_cmp_cost_master
     static getRoughCmpCost = async (req: Request, res: Response) => {
         const majorCategory = String(req.query.majorCategory ?? '').trim();

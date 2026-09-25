@@ -1156,6 +1156,7 @@ exports.Prisma.BodyFabricConsumptionScalarFieldEnum = {
   majorCategory: 'majorCategory',
   fabWidth: 'fabWidth',
   fabConsumption: 'fabConsumption',
+  gsm: 'gsm',
   createdAt: 'createdAt'
 };
 
@@ -2267,7 +2268,7 @@ const config = {
       "value": "prisma-client-js"
     },
     "output": {
-      "value": "C:\\Users\\Administrator\\Desktop\\New_Article_Creation\\Article-Creation\\Backend\\src\\generated\\prisma",
+      "value": "C:\\Users\\Administrator\\Desktop\\V2 Projects\\gemini\\Article-Creation\\Backend\\src\\generated\\prisma",
       "fromEnvVar": null
     },
     "config": {
@@ -2291,7 +2292,7 @@ const config = {
     "previewFeatures": [
       "fullTextSearchPostgres"
     ],
-    "sourceFilePath": "C:\\Users\\Administrator\\Desktop\\New_Article_Creation\\Article-Creation\\Backend\\prisma\\schema.prisma",
+    "sourceFilePath": "C:\\Users\\Administrator\\Desktop\\V2 Projects\\gemini\\Article-Creation\\Backend\\prisma\\schema.prisma",
     "isCustomOutput": true
   },
   "relativeEnvPaths": {

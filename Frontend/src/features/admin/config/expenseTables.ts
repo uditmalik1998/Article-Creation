@@ -138,6 +138,27 @@ export const EXPENSE_TABLE_CONFIGS: Record<string, ExpenseTableConfig> = {
       { dataIndex: 'updated_at', title: 'Updated At', type: 'date', editable: false },
     ],
   },
+  'body-fabric-consumption': {
+    title: 'Body Fabric Consumption Master (Consumption & GSM per Major Category)',
+    description:
+      'All rows currently stored in body_fabric_consumption — fabric consumption and width per major category/division, plus GSM. Auto-fills a Body Article’s Fab Cons/Width, and a Fabric Article’s GSM, the first time an article of that major category is opened. Bulk-maintained via the Excel upload on the Admin → Expenses page.',
+    rowKey: 'id',
+    defaultSortBy: 'id',
+    defaultSortDir: 'desc',
+    allowCreate: true,
+    allowDelete: true,
+    requiredOnCreate: ['major_category', 'fab_width'],
+    columns: [
+      { dataIndex: 'id', title: 'ID', width: 80, editable: false },
+      { dataIndex: 'division', title: 'Division', pickFromExisting: true, filterable: true },
+      { dataIndex: 'sub_division', title: 'Sub Division', pickFromExisting: true, filterable: true },
+      { dataIndex: 'major_category', title: 'Major Category', pickFromExisting: true, filterable: true },
+      { dataIndex: 'fab_width', title: 'Fab Width', align: 'right' },
+      { dataIndex: 'fab_consumption', title: 'Fab Consumption', align: 'right' },
+      { dataIndex: 'gsm', title: 'GSM', align: 'right' },
+      { dataIndex: 'created_at', title: 'Created At', type: 'date', editable: false },
+    ],
+  },
   'fabric-article-data': {
     title: 'Fabric Article Data (Bulk Insert)',
     description: 'All rows currently stored in fabric_article_data.',

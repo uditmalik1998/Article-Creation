@@ -86,6 +86,7 @@ router.get('/fabric-article-data/search', h(ApproverController.searchFabricArtic
 // (an exact Body Article Number match is always included even if outside the top 10)
 router.get('/body-article-data/search', h(ApproverController.searchBodyArticleData));
 router.get('/body-fabric-consumption',  h(ApproverController.getBodyFabricConsumption));
+router.get('/body-fabric-consumption/gsm', h(ApproverController.getFabricGsmByMajorCategory));
 router.get('/rough-cmp-cost',           h(ApproverController.getRoughCmpCost));
 
 // Create body article from FG article — copies Body & Construction fields into body_article_data
