@@ -280,6 +280,7 @@ export const AppSidebar: React.FC<AppSidebarProps> = ({ collapsed, onCollapsedCh
         { key: '/admin/expense-audit-log', Icon: History, label: 'Expense Audit Log' },
 
         { key: '/admin/poolb-uploader', Icon: Upload, label: 'Pool B Uploader' },
+        { key: '/admin/ksml-uploader', Icon: Upload, label: 'KSML Uploader' },
         { key: '/admin/modify-logs', Icon: ClipboardList, label: 'Modification Logs' },
       ],
     });
