@@ -327,6 +327,7 @@ router.get('/body-fabric-consumption/status',   h(adminController.getBodyFabricC
 router.get('/body-fabric-consumption/template', h(adminController.downloadBodyFabricConsumptionTemplate));
 router.get('/body-fabric-consumption/download', h(adminController.downloadBodyFabricConsumptionData));
 router.post('/body-fabric-consumption/upload',  excelUpload.single('file'), h(adminController.uploadBodyFabricConsumption));
+router.delete('/body-fabric-consumption/all',   h(adminController.deleteAllBodyFabricConsumption));
 
 router.get('/major-category-details/status',   h(adminController.getMcdStatus));
 router.get('/major-category-details/template', h(adminController.downloadMcdTemplate));
