@@ -8624,6 +8624,21 @@ export const downloadBodyFabricConsumptionData = async (_req: Request, res: Resp
   }
 };
 
+/**
+ * DELETE /api/admin/body-fabric-consumption/all
+ * Wipes every row from body_fabric_consumption.
+ */
+export const deleteAllBodyFabricConsumption = async (_req: Request, res: Response): Promise<void> => {
+  try {
+    await prisma.$executeRaw`TRUNCATE TABLE body_fabric_consumption RESTART IDENTITY`;
+    console.log('[BodyFabricConsumption] All rows deleted.');
+    res.json({ success: true, message: 'All body fabric consumption data deleted.', data: { total: 0, categories: 0 } });
+  } catch (error: any) {
+    console.error('[BodyFabricConsumption] Delete-all error:', error);
+    res.status(500).json({ success: false, error: error.message });
+  }
+};
+
 // ─────────────────────────────── Value Addition Accessories Cost ──────────────
 
 const VAAC_HEADERS = [

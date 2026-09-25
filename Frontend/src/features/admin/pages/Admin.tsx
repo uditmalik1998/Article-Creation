@@ -19,6 +19,7 @@ import {
   Download,
   ClipboardList,
   History,
+  Trash2,
 } from 'lucide-react';
 import {
   Alert,
@@ -329,6 +330,7 @@ export default function Admin() {
   const [bodyFabConsStatusLoading, setBodyFabConsStatusLoading] = useState(false);
   const [bodyFabConsUploading, setBodyFabConsUploading] = useState(false);
   const [bodyFabConsProgress, setBodyFabConsProgress] = useState<number>(0);
+  const [bodyFabConsDeleting, setBodyFabConsDeleting] = useState(false);
   const bodyFabConsFileRef = useRef<HTMLInputElement | null>(null);
 
   // Value Addition Accessories Cost
@@ -1629,6 +1631,25 @@ export default function Admin() {
       setBodyFabConsUploading(false);
       setTimeout(() => setBodyFabConsProgress(0), 1500);
       if (bodyFabConsFileRef.current) bodyFabConsFileRef.current.value = '';
+    }
+  };
+
+  const handleDeleteAllBodyFabCons = async () => {
+    setBodyFabConsDeleting(true);
+    try {
+      const token = localStorage.getItem('authToken');
+      const res = await fetch(`${APP_CONFIG.api.baseURL}/admin/body-fabric-consumption/all`, {
+        method: 'DELETE',
+        headers: token ? { Authorization: `Bearer ${token}` } : {},
+      });
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.error || 'Delete failed');
+      message.success(data.message);
+      setBodyFabConsTotal(data.data);
+    } catch (err: any) {
+      message.error(err?.message || 'Failed to delete body fabric consumption data');
+    } finally {
+      setBodyFabConsDeleting(false);
     }
   };
 
@@ -3150,6 +3171,23 @@ export default function Admin() {
                 <RotateCw className={bodyFabConsStatusLoading ? 'animate-spin' : ''} />
                 Refresh Status
               </Button>
+              <Popconfirm
+                title="Delete ALL body fabric consumption data?"
+                description="This permanently wipes every row from body_fabric_consumption. This cannot be undone."
+                onConfirm={handleDeleteAllBodyFabCons}
+                okText="Yes, delete all"
+                cancelText="Cancel"
+                disabled={!bodyFabConsTotal || bodyFabConsTotal.total === 0}
+              >
+                <Button
+                  size="sm"
+                  variant="destructive"
+                  disabled={bodyFabConsDeleting || !bodyFabConsTotal || bodyFabConsTotal.total === 0}
+                >
+                  {bodyFabConsDeleting ? <RefreshCw className="animate-spin" /> : <Trash2 />}
+                  {bodyFabConsDeleting ? 'Deleting...' : 'Delete All'}
+                </Button>
+              </Popconfirm>
             </div>
           </CardHeader>
           <CardContent>
