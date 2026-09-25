@@ -1216,12 +1216,9 @@ const ArticleCard = React.memo(
         const fabParts = FAB_FIELDS.map((f) => getVal(f.field)).filter((v): v is string => Boolean(v) && !/^-+$/.test(v as string));
         const newFabDesc = fabParts.length > 0 ? fabParts.join('-').replace(/-{2,}/g, '-').replace(/-+$/, '') : null;
         const newBodyDesc = buildBodyDescription(getVal);
-        // REFERENCE ARTICLE DESC — built like ARTICLE DESC but from a fixed,
-        // user-confirmed sequence spanning multiple cards:
-        //   M_FAB_MAIN_MVGR_2 → M_WEAVE_02 → M_BLT_TYPE → M_BLT_STYLE →
-        //   M_FIT → M_BODY_STYLE → M_PRINT_PLACEMENT → M_WASH
-        const refParts = REF_DESC_FIELDS.map((f) => getVal(f)).filter(Boolean) as string[];
-        const newRefDesc = refParts.length > 0 ? refParts.join('-').slice(0, 40) : null;
+        // REFERENCE ARTICLE DESC = FABRIC ARTICLE DESC + BODY ARTICLE DESC joined by '-'
+        const refParts = [newFabDesc, newBodyDesc].filter(Boolean) as string[];
+        const newRefDesc = refParts.length > 0 ? refParts.join('-') : null;
         const updates: Record<string, string | null> = {};
         if (newFabDesc !== null && newFabDesc !== prev['fabricArticleDescription']) updates['fabricArticleDescription'] = newFabDesc;
         if (newBodyDesc !== null && newBodyDesc !== prev['bodyArticleDescription']) updates['bodyArticleDescription'] = newBodyDesc;

@@ -257,6 +257,12 @@ export type ValueAdditionAccessoriesCost = $Result.DefaultSelection<Prisma.$Valu
  */
 export type BodyArticleData = $Result.DefaultSelection<Prisma.$BodyArticleDataPayload>
 /**
+ * Model ReferenceArticleData
+ * ReferenceArticleData: One row per reference article created from both
+ * the Construction & Fabric card and the Body & Construction card.
+ */
+export type ReferenceArticleData = $Result.DefaultSelection<Prisma.$ReferenceArticleDataPayload>
+/**
  * Model BodyFabricConsumption
  * 
  */
@@ -1090,6 +1096,16 @@ export class PrismaClient<
   get bodyArticleData(): Prisma.BodyArticleDataDelegate<ExtArgs, ClientOptions>;
 
   /**
+   * `prisma.referenceArticleData`: Exposes CRUD operations for the **ReferenceArticleData** model.
+    * Example usage:
+    * ```ts
+    * // Fetch zero or more ReferenceArticleData
+    * const referenceArticleData = await prisma.referenceArticleData.findMany()
+    * ```
+    */
+  get referenceArticleData(): Prisma.ReferenceArticleDataDelegate<ExtArgs, ClientOptions>;
+
+  /**
    * `prisma.bodyFabricConsumption`: Exposes CRUD operations for the **BodyFabricConsumption** model.
     * Example usage:
     * ```ts
@@ -1661,6 +1677,7 @@ export namespace Prisma {
     FabricVariantArticleData: 'FabricVariantArticleData',
     ValueAdditionAccessoriesCost: 'ValueAdditionAccessoriesCost',
     BodyArticleData: 'BodyArticleData',
+    ReferenceArticleData: 'ReferenceArticleData',
     BodyFabricConsumption: 'BodyFabricConsumption',
     RoughCmpCostMaster: 'RoughCmpCostMaster',
     BasicTrimCostMaster: 'BasicTrimCostMaster',
@@ -1688,7 +1705,7 @@ export namespace Prisma {
       omit: GlobalOmitOptions
     }
     meta: {
-      modelProps: "department" | "subDepartment" | "category" | "masterAttribute" | "attributeAllowedValue" | "categoryAttribute" | "extractionJob" | "extractionResult" | "extractionResultFlat" | "modelGenerationResult" | "modelImageApproval" | "mvgrLookup" | "masterVendorDetail" | "user" | "auditLog" | "apiKey" | "changeHistory" | "costSummary" | "article360" | "articleFab" | "articleBody" | "articleVaAcc" | "articleVaPrcs" | "articleBom" | "sapFieldConfig" | "sapAttributeValue" | "article360Flat" | "rawArticle" | "fabricRawData" | "srmSyncRun" | "srmSyncRunItem" | "poolBJob" | "poolBBatch" | "nationalGridMaster" | "broaderMenu" | "majorCatMaster" | "fabricArticleMaster" | "fabricMajCatGridValue" | "modifyLog" | "fabricArticleData" | "fabricVariantArticleData" | "valueAdditionAccessoriesCost" | "bodyArticleData" | "bodyFabricConsumption" | "roughCmpCostMaster" | "basicTrimCostMaster" | "basicTrimCostComponent" | "majorCategoryDetails" | "expenseApprovalStage" | "expenseChangeRequest" | "expenseAccessGrant" | "expenseAuditLog"
+      modelProps: "department" | "subDepartment" | "category" | "masterAttribute" | "attributeAllowedValue" | "categoryAttribute" | "extractionJob" | "extractionResult" | "extractionResultFlat" | "modelGenerationResult" | "modelImageApproval" | "mvgrLookup" | "masterVendorDetail" | "user" | "auditLog" | "apiKey" | "changeHistory" | "costSummary" | "article360" | "articleFab" | "articleBody" | "articleVaAcc" | "articleVaPrcs" | "articleBom" | "sapFieldConfig" | "sapAttributeValue" | "article360Flat" | "rawArticle" | "fabricRawData" | "srmSyncRun" | "srmSyncRunItem" | "poolBJob" | "poolBBatch" | "nationalGridMaster" | "broaderMenu" | "majorCatMaster" | "fabricArticleMaster" | "fabricMajCatGridValue" | "modifyLog" | "fabricArticleData" | "fabricVariantArticleData" | "valueAdditionAccessoriesCost" | "bodyArticleData" | "referenceArticleData" | "bodyFabricConsumption" | "roughCmpCostMaster" | "basicTrimCostMaster" | "basicTrimCostComponent" | "majorCategoryDetails" | "expenseApprovalStage" | "expenseChangeRequest" | "expenseAccessGrant" | "expenseAuditLog"
       txIsolationLevel: Prisma.TransactionIsolationLevel
     }
     model: {
@@ -4874,6 +4891,80 @@ export namespace Prisma {
           }
         }
       }
+      ReferenceArticleData: {
+        payload: Prisma.$ReferenceArticleDataPayload<ExtArgs>
+        fields: Prisma.ReferenceArticleDataFieldRefs
+        operations: {
+          findUnique: {
+            args: Prisma.ReferenceArticleDataFindUniqueArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$ReferenceArticleDataPayload> | null
+          }
+          findUniqueOrThrow: {
+            args: Prisma.ReferenceArticleDataFindUniqueOrThrowArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$ReferenceArticleDataPayload>
+          }
+          findFirst: {
+            args: Prisma.ReferenceArticleDataFindFirstArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$ReferenceArticleDataPayload> | null
+          }
+          findFirstOrThrow: {
+            args: Prisma.ReferenceArticleDataFindFirstOrThrowArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$ReferenceArticleDataPayload>
+          }
+          findMany: {
+            args: Prisma.ReferenceArticleDataFindManyArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$ReferenceArticleDataPayload>[]
+          }
+          create: {
+            args: Prisma.ReferenceArticleDataCreateArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$ReferenceArticleDataPayload>
+          }
+          createMany: {
+            args: Prisma.ReferenceArticleDataCreateManyArgs<ExtArgs>
+            result: BatchPayload
+          }
+          createManyAndReturn: {
+            args: Prisma.ReferenceArticleDataCreateManyAndReturnArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$ReferenceArticleDataPayload>[]
+          }
+          delete: {
+            args: Prisma.ReferenceArticleDataDeleteArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$ReferenceArticleDataPayload>
+          }
+          update: {
+            args: Prisma.ReferenceArticleDataUpdateArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$ReferenceArticleDataPayload>
+          }
+          deleteMany: {
+            args: Prisma.ReferenceArticleDataDeleteManyArgs<ExtArgs>
+            result: BatchPayload
+          }
+          updateMany: {
+            args: Prisma.ReferenceArticleDataUpdateManyArgs<ExtArgs>
+            result: BatchPayload
+          }
+          updateManyAndReturn: {
+            args: Prisma.ReferenceArticleDataUpdateManyAndReturnArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$ReferenceArticleDataPayload>[]
+          }
+          upsert: {
+            args: Prisma.ReferenceArticleDataUpsertArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$ReferenceArticleDataPayload>
+          }
+          aggregate: {
+            args: Prisma.ReferenceArticleDataAggregateArgs<ExtArgs>
+            result: $Utils.Optional<AggregateReferenceArticleData>
+          }
+          groupBy: {
+            args: Prisma.ReferenceArticleDataGroupByArgs<ExtArgs>
+            result: $Utils.Optional<ReferenceArticleDataGroupByOutputType>[]
+          }
+          count: {
+            args: Prisma.ReferenceArticleDataCountArgs<ExtArgs>
+            result: $Utils.Optional<ReferenceArticleDataCountAggregateOutputType> | number
+          }
+        }
+      }
       BodyFabricConsumption: {
         payload: Prisma.$BodyFabricConsumptionPayload<ExtArgs>
         fields: Prisma.BodyFabricConsumptionFieldRefs
@@ -5675,6 +5766,7 @@ export namespace Prisma {
     fabricVariantArticleData?: FabricVariantArticleDataOmit
     valueAdditionAccessoriesCost?: ValueAdditionAccessoriesCostOmit
     bodyArticleData?: BodyArticleDataOmit
+    referenceArticleData?: ReferenceArticleDataOmit
     bodyFabricConsumption?: BodyFabricConsumptionOmit
     roughCmpCostMaster?: RoughCmpCostMasterOmit
     basicTrimCostMaster?: BasicTrimCostMasterOmit
@@ -61595,6 +61687,1685 @@ export namespace Prisma {
 
 
   /**
+   * Model ReferenceArticleData
+   */
+
+  export type AggregateReferenceArticleData = {
+    _count: ReferenceArticleDataCountAggregateOutputType | null
+    _avg: ReferenceArticleDataAvgAggregateOutputType | null
+    _sum: ReferenceArticleDataSumAggregateOutputType | null
+    _min: ReferenceArticleDataMinAggregateOutputType | null
+    _max: ReferenceArticleDataMaxAggregateOutputType | null
+  }
+
+  export type ReferenceArticleDataAvgAggregateOutputType = {
+    approvedBy: number | null
+  }
+
+  export type ReferenceArticleDataSumAggregateOutputType = {
+    approvedBy: number | null
+  }
+
+  export type ReferenceArticleDataMinAggregateOutputType = {
+    id: string | null
+    mFabDiv: string | null
+    mYarn: string | null
+    mFabMainMvgr1: string | null
+    mFabMainMvgr2: string | null
+    mFabVdr: string | null
+    mWeave01: string | null
+    mWeave02: string | null
+    mCount: string | null
+    mGsm: string | null
+    mOunz: string | null
+    mConstruction: string | null
+    mComposition: string | null
+    mFinish: string | null
+    mWidth: string | null
+    mLycra: string | null
+    mCollarType: string | null
+    mCollarStyle: string | null
+    mNeckType: string | null
+    mNeckStyle: string | null
+    mPlacket: string | null
+    mBltType: string | null
+    mBltStyle: string | null
+    mSleevesMainStyle: string | null
+    mSleeveFold: string | null
+    mBtmFold: string | null
+    mNoOfPocket: string | null
+    mPocket: string | null
+    mExtraPocket: string | null
+    mFit: string | null
+    mBodyStyle: string | null
+    mLength: string | null
+    mSet: string | null
+    fabricArticleNo: string | null
+    fabricArticleDescription: string | null
+    bodyArticleNo: string | null
+    bodyArticleDescription: string | null
+    referenceArticleNo: string | null
+    referenceArticleDescription: string | null
+    flatId: string | null
+    division: string | null
+    subDivision: string | null
+    majorCategory: string | null
+    mcCode: string | null
+    vendorName: string | null
+    vendorCode: string | null
+    hsnTaxCode: string | null
+    approvalStatus: string | null
+    approvedAt: Date | null
+    approvedBy: number | null
+    sapSyncStatus: string | null
+    sapSyncMessage: string | null
+    userName: string | null
+    createdAt: Date | null
+    updatedAt: Date | null
+  }
+
+  export type ReferenceArticleDataMaxAggregateOutputType = {
+    id: string | null
+    mFabDiv: string | null
+    mYarn: string | null
+    mFabMainMvgr1: string | null
+    mFabMainMvgr2: string | null
+    mFabVdr: string | null
+    mWeave01: string | null
+    mWeave02: string | null
+    mCount: string | null
+    mGsm: string | null
+    mOunz: string | null
+    mConstruction: string | null
+    mComposition: string | null
+    mFinish: string | null
+    mWidth: string | null
+    mLycra: string | null
+    mCollarType: string | null
+    mCollarStyle: string | null
+    mNeckType: string | null
+    mNeckStyle: string | null
+    mPlacket: string | null
+    mBltType: string | null
+    mBltStyle: string | null
+    mSleevesMainStyle: string | null
+    mSleeveFold: string | null
+    mBtmFold: string | null
+    mNoOfPocket: string | null
+    mPocket: string | null
+    mExtraPocket: string | null
+    mFit: string | null
+    mBodyStyle: string | null
+    mLength: string | null
+    mSet: string | null
+    fabricArticleNo: string | null
+    fabricArticleDescription: string | null
+    bodyArticleNo: string | null
+    bodyArticleDescription: string | null
+    referenceArticleNo: string | null
+    referenceArticleDescription: string | null
+    flatId: string | null
+    division: string | null
+    subDivision: string | null
+    majorCategory: string | null
+    mcCode: string | null
+    vendorName: string | null
+    vendorCode: string | null
+    hsnTaxCode: string | null
+    approvalStatus: string | null
+    approvedAt: Date | null
+    approvedBy: number | null
+    sapSyncStatus: string | null
+    sapSyncMessage: string | null
+    userName: string | null
+    createdAt: Date | null
+    updatedAt: Date | null
+  }
+
+  export type ReferenceArticleDataCountAggregateOutputType = {
+    id: number
+    mFabDiv: number
+    mYarn: number
+    mFabMainMvgr1: number
+    mFabMainMvgr2: number
+    mFabVdr: number
+    mWeave01: number
+    mWeave02: number
+    mCount: number
+    mGsm: number
+    mOunz: number
+    mConstruction: number
+    mComposition: number
+    mFinish: number
+    mWidth: number
+    mLycra: number
+    mCollarType: number
+    mCollarStyle: number
+    mNeckType: number
+    mNeckStyle: number
+    mPlacket: number
+    mBltType: number
+    mBltStyle: number
+    mSleevesMainStyle: number
+    mSleeveFold: number
+    mBtmFold: number
+    mNoOfPocket: number
+    mPocket: number
+    mExtraPocket: number
+    mFit: number
+    mBodyStyle: number
+    mLength: number
+    mSet: number
+    fabricArticleNo: number
+    fabricArticleDescription: number
+    bodyArticleNo: number
+    bodyArticleDescription: number
+    referenceArticleNo: number
+    referenceArticleDescription: number
+    flatId: number
+    division: number
+    subDivision: number
+    majorCategory: number
+    mcCode: number
+    vendorName: number
+    vendorCode: number
+    hsnTaxCode: number
+    approvalStatus: number
+    approvedAt: number
+    approvedBy: number
+    sapSyncStatus: number
+    sapSyncMessage: number
+    userName: number
+    createdAt: number
+    updatedAt: number
+    _all: number
+  }
+
+
+  export type ReferenceArticleDataAvgAggregateInputType = {
+    approvedBy?: true
+  }
+
+  export type ReferenceArticleDataSumAggregateInputType = {
+    approvedBy?: true
+  }
+
+  export type ReferenceArticleDataMinAggregateInputType = {
+    id?: true
+    mFabDiv?: true
+    mYarn?: true
+    mFabMainMvgr1?: true
+    mFabMainMvgr2?: true
+    mFabVdr?: true
+    mWeave01?: true
+    mWeave02?: true
+    mCount?: true
+    mGsm?: true
+    mOunz?: true
+    mConstruction?: true
+    mComposition?: true
+    mFinish?: true
+    mWidth?: true
+    mLycra?: true
+    mCollarType?: true
+    mCollarStyle?: true
+    mNeckType?: true
+    mNeckStyle?: true
+    mPlacket?: true
+    mBltType?: true
+    mBltStyle?: true
+    mSleevesMainStyle?: true
+    mSleeveFold?: true
+    mBtmFold?: true
+    mNoOfPocket?: true
+    mPocket?: true
+    mExtraPocket?: true
+    mFit?: true
+    mBodyStyle?: true
+    mLength?: true
+    mSet?: true
+    fabricArticleNo?: true
+    fabricArticleDescription?: true
+    bodyArticleNo?: true
+    bodyArticleDescription?: true
+    referenceArticleNo?: true
+    referenceArticleDescription?: true
+    flatId?: true
+    division?: true
+    subDivision?: true
+    majorCategory?: true
+    mcCode?: true
+    vendorName?: true
+    vendorCode?: true
+    hsnTaxCode?: true
+    approvalStatus?: true
+    approvedAt?: true
+    approvedBy?: true
+    sapSyncStatus?: true
+    sapSyncMessage?: true
+    userName?: true
+    createdAt?: true
+    updatedAt?: true
+  }
+
+  export type ReferenceArticleDataMaxAggregateInputType = {
+    id?: true
+    mFabDiv?: true
+    mYarn?: true
+    mFabMainMvgr1?: true
+    mFabMainMvgr2?: true
+    mFabVdr?: true
+    mWeave01?: true
+    mWeave02?: true
+    mCount?: true
+    mGsm?: true
+    mOunz?: true
+    mConstruction?: true
+    mComposition?: true
+    mFinish?: true
+    mWidth?: true
+    mLycra?: true
+    mCollarType?: true
+    mCollarStyle?: true
+    mNeckType?: true
+    mNeckStyle?: true
+    mPlacket?: true
+    mBltType?: true
+    mBltStyle?: true
+    mSleevesMainStyle?: true
+    mSleeveFold?: true
+    mBtmFold?: true
+    mNoOfPocket?: true
+    mPocket?: true
+    mExtraPocket?: true
+    mFit?: true
+    mBodyStyle?: true
+    mLength?: true
+    mSet?: true
+    fabricArticleNo?: true
+    fabricArticleDescription?: true
+    bodyArticleNo?: true
+    bodyArticleDescription?: true
+    referenceArticleNo?: true
+    referenceArticleDescription?: true
+    flatId?: true
+    division?: true
+    subDivision?: true
+    majorCategory?: true
+    mcCode?: true
+    vendorName?: true
+    vendorCode?: true
+    hsnTaxCode?: true
+    approvalStatus?: true
+    approvedAt?: true
+    approvedBy?: true
+    sapSyncStatus?: true
+    sapSyncMessage?: true
+    userName?: true
+    createdAt?: true
+    updatedAt?: true
+  }
+
+  export type ReferenceArticleDataCountAggregateInputType = {
+    id?: true
+    mFabDiv?: true
+    mYarn?: true
+    mFabMainMvgr1?: true
+    mFabMainMvgr2?: true
+    mFabVdr?: true
+    mWeave01?: true
+    mWeave02?: true
+    mCount?: true
+    mGsm?: true
+    mOunz?: true
+    mConstruction?: true
+    mComposition?: true
+    mFinish?: true
+    mWidth?: true
+    mLycra?: true
+    mCollarType?: true
+    mCollarStyle?: true
+    mNeckType?: true
+    mNeckStyle?: true
+    mPlacket?: true
+    mBltType?: true
+    mBltStyle?: true
+    mSleevesMainStyle?: true
+    mSleeveFold?: true
+    mBtmFold?: true
+    mNoOfPocket?: true
+    mPocket?: true
+    mExtraPocket?: true
+    mFit?: true
+    mBodyStyle?: true
+    mLength?: true
+    mSet?: true
+    fabricArticleNo?: true
+    fabricArticleDescription?: true
+    bodyArticleNo?: true
+    bodyArticleDescription?: true
+    referenceArticleNo?: true
+    referenceArticleDescription?: true
+    flatId?: true
+    division?: true
+    subDivision?: true
+    majorCategory?: true
+    mcCode?: true
+    vendorName?: true
+    vendorCode?: true
+    hsnTaxCode?: true
+    approvalStatus?: true
+    approvedAt?: true
+    approvedBy?: true
+    sapSyncStatus?: true
+    sapSyncMessage?: true
+    userName?: true
+    createdAt?: true
+    updatedAt?: true
+    _all?: true
+  }
+
+  export type ReferenceArticleDataAggregateArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Filter which ReferenceArticleData to aggregate.
+     */
+    where?: ReferenceArticleDataWhereInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
+     * 
+     * Determine the order of ReferenceArticleData to fetch.
+     */
+    orderBy?: ReferenceArticleDataOrderByWithRelationInput | ReferenceArticleDataOrderByWithRelationInput[]
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
+     * 
+     * Sets the start position
+     */
+    cursor?: ReferenceArticleDataWhereUniqueInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Take `±n` ReferenceArticleData from the position of the cursor.
+     */
+    take?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Skip the first `n` ReferenceArticleData.
+     */
+    skip?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     * 
+     * Count returned ReferenceArticleData
+    **/
+    _count?: true | ReferenceArticleDataCountAggregateInputType
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     * 
+     * Select which fields to average
+    **/
+    _avg?: ReferenceArticleDataAvgAggregateInputType
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     * 
+     * Select which fields to sum
+    **/
+    _sum?: ReferenceArticleDataSumAggregateInputType
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     * 
+     * Select which fields to find the minimum value
+    **/
+    _min?: ReferenceArticleDataMinAggregateInputType
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     * 
+     * Select which fields to find the maximum value
+    **/
+    _max?: ReferenceArticleDataMaxAggregateInputType
+  }
+
+  export type GetReferenceArticleDataAggregateType<T extends ReferenceArticleDataAggregateArgs> = {
+        [P in keyof T & keyof AggregateReferenceArticleData]: P extends '_count' | 'count'
+      ? T[P] extends true
+        ? number
+        : GetScalarType<T[P], AggregateReferenceArticleData[P]>
+      : GetScalarType<T[P], AggregateReferenceArticleData[P]>
+  }
+
+
+
+
+  export type ReferenceArticleDataGroupByArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    where?: ReferenceArticleDataWhereInput
+    orderBy?: ReferenceArticleDataOrderByWithAggregationInput | ReferenceArticleDataOrderByWithAggregationInput[]
+    by: ReferenceArticleDataScalarFieldEnum[] | ReferenceArticleDataScalarFieldEnum
+    having?: ReferenceArticleDataScalarWhereWithAggregatesInput
+    take?: number
+    skip?: number
+    _count?: ReferenceArticleDataCountAggregateInputType | true
+    _avg?: ReferenceArticleDataAvgAggregateInputType
+    _sum?: ReferenceArticleDataSumAggregateInputType
+    _min?: ReferenceArticleDataMinAggregateInputType
+    _max?: ReferenceArticleDataMaxAggregateInputType
+  }
+
+  export type ReferenceArticleDataGroupByOutputType = {
+    id: string
+    mFabDiv: string | null
+    mYarn: string | null
+    mFabMainMvgr1: string | null
+    mFabMainMvgr2: string | null
+    mFabVdr: string | null
+    mWeave01: string | null
+    mWeave02: string | null
+    mCount: string | null
+    mGsm: string | null
+    mOunz: string | null
+    mConstruction: string | null
+    mComposition: string | null
+    mFinish: string | null
+    mWidth: string | null
+    mLycra: string | null
+    mCollarType: string | null
+    mCollarStyle: string | null
+    mNeckType: string | null
+    mNeckStyle: string | null
+    mPlacket: string | null
+    mBltType: string | null
+    mBltStyle: string | null
+    mSleevesMainStyle: string | null
+    mSleeveFold: string | null
+    mBtmFold: string | null
+    mNoOfPocket: string | null
+    mPocket: string | null
+    mExtraPocket: string | null
+    mFit: string | null
+    mBodyStyle: string | null
+    mLength: string | null
+    mSet: string | null
+    fabricArticleNo: string | null
+    fabricArticleDescription: string | null
+    bodyArticleNo: string | null
+    bodyArticleDescription: string | null
+    referenceArticleNo: string | null
+    referenceArticleDescription: string | null
+    flatId: string | null
+    division: string | null
+    subDivision: string | null
+    majorCategory: string | null
+    mcCode: string | null
+    vendorName: string | null
+    vendorCode: string | null
+    hsnTaxCode: string | null
+    approvalStatus: string
+    approvedAt: Date | null
+    approvedBy: number | null
+    sapSyncStatus: string
+    sapSyncMessage: string | null
+    userName: string | null
+    createdAt: Date
+    updatedAt: Date
+    _count: ReferenceArticleDataCountAggregateOutputType | null
+    _avg: ReferenceArticleDataAvgAggregateOutputType | null
+    _sum: ReferenceArticleDataSumAggregateOutputType | null
+    _min: ReferenceArticleDataMinAggregateOutputType | null
+    _max: ReferenceArticleDataMaxAggregateOutputType | null
+  }
+
+  type GetReferenceArticleDataGroupByPayload<T extends ReferenceArticleDataGroupByArgs> = Prisma.PrismaPromise<
+    Array<
+      PickEnumerable<ReferenceArticleDataGroupByOutputType, T['by']> &
+        {
+          [P in ((keyof T) & (keyof ReferenceArticleDataGroupByOutputType))]: P extends '_count'
+            ? T[P] extends boolean
+              ? number
+              : GetScalarType<T[P], ReferenceArticleDataGroupByOutputType[P]>
+            : GetScalarType<T[P], ReferenceArticleDataGroupByOutputType[P]>
+        }
+      >
+    >
+
+
+  export type ReferenceArticleDataSelect<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
+    id?: boolean
+    mFabDiv?: boolean
+    mYarn?: boolean
+    mFabMainMvgr1?: boolean
+    mFabMainMvgr2?: boolean
+    mFabVdr?: boolean
+    mWeave01?: boolean
+    mWeave02?: boolean
+    mCount?: boolean
+    mGsm?: boolean
+    mOunz?: boolean
+    mConstruction?: boolean
+    mComposition?: boolean
+    mFinish?: boolean
+    mWidth?: boolean
+    mLycra?: boolean
+    mCollarType?: boolean
+    mCollarStyle?: boolean
+    mNeckType?: boolean
+    mNeckStyle?: boolean
+    mPlacket?: boolean
+    mBltType?: boolean
+    mBltStyle?: boolean
+    mSleevesMainStyle?: boolean
+    mSleeveFold?: boolean
+    mBtmFold?: boolean
+    mNoOfPocket?: boolean
+    mPocket?: boolean
+    mExtraPocket?: boolean
+    mFit?: boolean
+    mBodyStyle?: boolean
+    mLength?: boolean
+    mSet?: boolean
+    fabricArticleNo?: boolean
+    fabricArticleDescription?: boolean
+    bodyArticleNo?: boolean
+    bodyArticleDescription?: boolean
+    referenceArticleNo?: boolean
+    referenceArticleDescription?: boolean
+    flatId?: boolean
+    division?: boolean
+    subDivision?: boolean
+    majorCategory?: boolean
+    mcCode?: boolean
+    vendorName?: boolean
+    vendorCode?: boolean
+    hsnTaxCode?: boolean
+    approvalStatus?: boolean
+    approvedAt?: boolean
+    approvedBy?: boolean
+    sapSyncStatus?: boolean
+    sapSyncMessage?: boolean
+    userName?: boolean
+    createdAt?: boolean
+    updatedAt?: boolean
+  }, ExtArgs["result"]["referenceArticleData"]>
+
+  export type ReferenceArticleDataSelectCreateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
+    id?: boolean
+    mFabDiv?: boolean
+    mYarn?: boolean
+    mFabMainMvgr1?: boolean
+    mFabMainMvgr2?: boolean
+    mFabVdr?: boolean
+    mWeave01?: boolean
+    mWeave02?: boolean
+    mCount?: boolean
+    mGsm?: boolean
+    mOunz?: boolean
+    mConstruction?: boolean
+    mComposition?: boolean
+    mFinish?: boolean
+    mWidth?: boolean
+    mLycra?: boolean
+    mCollarType?: boolean
+    mCollarStyle?: boolean
+    mNeckType?: boolean
+    mNeckStyle?: boolean
+    mPlacket?: boolean
+    mBltType?: boolean
+    mBltStyle?: boolean
+    mSleevesMainStyle?: boolean
+    mSleeveFold?: boolean
+    mBtmFold?: boolean
+    mNoOfPocket?: boolean
+    mPocket?: boolean
+    mExtraPocket?: boolean
+    mFit?: boolean
+    mBodyStyle?: boolean
+    mLength?: boolean
+    mSet?: boolean
+    fabricArticleNo?: boolean
+    fabricArticleDescription?: boolean
+    bodyArticleNo?: boolean
+    bodyArticleDescription?: boolean
+    referenceArticleNo?: boolean
+    referenceArticleDescription?: boolean
+    flatId?: boolean
+    division?: boolean
+    subDivision?: boolean
+    majorCategory?: boolean
+    mcCode?: boolean
+    vendorName?: boolean
+    vendorCode?: boolean
+    hsnTaxCode?: boolean
+    approvalStatus?: boolean
+    approvedAt?: boolean
+    approvedBy?: boolean
+    sapSyncStatus?: boolean
+    sapSyncMessage?: boolean
+    userName?: boolean
+    createdAt?: boolean
+    updatedAt?: boolean
+  }, ExtArgs["result"]["referenceArticleData"]>
+
+  export type ReferenceArticleDataSelectUpdateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
+    id?: boolean
+    mFabDiv?: boolean
+    mYarn?: boolean
+    mFabMainMvgr1?: boolean
+    mFabMainMvgr2?: boolean
+    mFabVdr?: boolean
+    mWeave01?: boolean
+    mWeave02?: boolean
+    mCount?: boolean
+    mGsm?: boolean
+    mOunz?: boolean
+    mConstruction?: boolean
+    mComposition?: boolean
+    mFinish?: boolean
+    mWidth?: boolean
+    mLycra?: boolean
+    mCollarType?: boolean
+    mCollarStyle?: boolean
+    mNeckType?: boolean
+    mNeckStyle?: boolean
+    mPlacket?: boolean
+    mBltType?: boolean
+    mBltStyle?: boolean
+    mSleevesMainStyle?: boolean
+    mSleeveFold?: boolean
+    mBtmFold?: boolean
+    mNoOfPocket?: boolean
+    mPocket?: boolean
+    mExtraPocket?: boolean
+    mFit?: boolean
+    mBodyStyle?: boolean
+    mLength?: boolean
+    mSet?: boolean
+    fabricArticleNo?: boolean
+    fabricArticleDescription?: boolean
+    bodyArticleNo?: boolean
+    bodyArticleDescription?: boolean
+    referenceArticleNo?: boolean
+    referenceArticleDescription?: boolean
+    flatId?: boolean
+    division?: boolean
+    subDivision?: boolean
+    majorCategory?: boolean
+    mcCode?: boolean
+    vendorName?: boolean
+    vendorCode?: boolean
+    hsnTaxCode?: boolean
+    approvalStatus?: boolean
+    approvedAt?: boolean
+    approvedBy?: boolean
+    sapSyncStatus?: boolean
+    sapSyncMessage?: boolean
+    userName?: boolean
+    createdAt?: boolean
+    updatedAt?: boolean
+  }, ExtArgs["result"]["referenceArticleData"]>
+
+  export type ReferenceArticleDataSelectScalar = {
+    id?: boolean
+    mFabDiv?: boolean
+    mYarn?: boolean
+    mFabMainMvgr1?: boolean
+    mFabMainMvgr2?: boolean
+    mFabVdr?: boolean
+    mWeave01?: boolean
+    mWeave02?: boolean
+    mCount?: boolean
+    mGsm?: boolean
+    mOunz?: boolean
+    mConstruction?: boolean
+    mComposition?: boolean
+    mFinish?: boolean
+    mWidth?: boolean
+    mLycra?: boolean
+    mCollarType?: boolean
+    mCollarStyle?: boolean
+    mNeckType?: boolean
+    mNeckStyle?: boolean
+    mPlacket?: boolean
+    mBltType?: boolean
+    mBltStyle?: boolean
+    mSleevesMainStyle?: boolean
+    mSleeveFold?: boolean
+    mBtmFold?: boolean
+    mNoOfPocket?: boolean
+    mPocket?: boolean
+    mExtraPocket?: boolean
+    mFit?: boolean
+    mBodyStyle?: boolean
+    mLength?: boolean
+    mSet?: boolean
+    fabricArticleNo?: boolean
+    fabricArticleDescription?: boolean
+    bodyArticleNo?: boolean
+    bodyArticleDescription?: boolean
+    referenceArticleNo?: boolean
+    referenceArticleDescription?: boolean
+    flatId?: boolean
+    division?: boolean
+    subDivision?: boolean
+    majorCategory?: boolean
+    mcCode?: boolean
+    vendorName?: boolean
+    vendorCode?: boolean
+    hsnTaxCode?: boolean
+    approvalStatus?: boolean
+    approvedAt?: boolean
+    approvedBy?: boolean
+    sapSyncStatus?: boolean
+    sapSyncMessage?: boolean
+    userName?: boolean
+    createdAt?: boolean
+    updatedAt?: boolean
+  }
+
+  export type ReferenceArticleDataOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<"id" | "mFabDiv" | "mYarn" | "mFabMainMvgr1" | "mFabMainMvgr2" | "mFabVdr" | "mWeave01" | "mWeave02" | "mCount" | "mGsm" | "mOunz" | "mConstruction" | "mComposition" | "mFinish" | "mWidth" | "mLycra" | "mCollarType" | "mCollarStyle" | "mNeckType" | "mNeckStyle" | "mPlacket" | "mBltType" | "mBltStyle" | "mSleevesMainStyle" | "mSleeveFold" | "mBtmFold" | "mNoOfPocket" | "mPocket" | "mExtraPocket" | "mFit" | "mBodyStyle" | "mLength" | "mSet" | "fabricArticleNo" | "fabricArticleDescription" | "bodyArticleNo" | "bodyArticleDescription" | "referenceArticleNo" | "referenceArticleDescription" | "flatId" | "division" | "subDivision" | "majorCategory" | "mcCode" | "vendorName" | "vendorCode" | "hsnTaxCode" | "approvalStatus" | "approvedAt" | "approvedBy" | "sapSyncStatus" | "sapSyncMessage" | "userName" | "createdAt" | "updatedAt", ExtArgs["result"]["referenceArticleData"]>
+
+  export type $ReferenceArticleDataPayload<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    name: "ReferenceArticleData"
+    objects: {}
+    scalars: $Extensions.GetPayloadResult<{
+      id: string
+      mFabDiv: string | null
+      mYarn: string | null
+      mFabMainMvgr1: string | null
+      mFabMainMvgr2: string | null
+      mFabVdr: string | null
+      mWeave01: string | null
+      mWeave02: string | null
+      mCount: string | null
+      mGsm: string | null
+      mOunz: string | null
+      mConstruction: string | null
+      mComposition: string | null
+      mFinish: string | null
+      mWidth: string | null
+      mLycra: string | null
+      mCollarType: string | null
+      mCollarStyle: string | null
+      mNeckType: string | null
+      mNeckStyle: string | null
+      mPlacket: string | null
+      mBltType: string | null
+      mBltStyle: string | null
+      mSleevesMainStyle: string | null
+      mSleeveFold: string | null
+      mBtmFold: string | null
+      mNoOfPocket: string | null
+      mPocket: string | null
+      mExtraPocket: string | null
+      mFit: string | null
+      mBodyStyle: string | null
+      mLength: string | null
+      mSet: string | null
+      fabricArticleNo: string | null
+      fabricArticleDescription: string | null
+      bodyArticleNo: string | null
+      bodyArticleDescription: string | null
+      referenceArticleNo: string | null
+      referenceArticleDescription: string | null
+      flatId: string | null
+      division: string | null
+      subDivision: string | null
+      majorCategory: string | null
+      mcCode: string | null
+      vendorName: string | null
+      vendorCode: string | null
+      hsnTaxCode: string | null
+      approvalStatus: string
+      approvedAt: Date | null
+      approvedBy: number | null
+      sapSyncStatus: string
+      sapSyncMessage: string | null
+      userName: string | null
+      createdAt: Date
+      updatedAt: Date
+    }, ExtArgs["result"]["referenceArticleData"]>
+    composites: {}
+  }
+
+  type ReferenceArticleDataGetPayload<S extends boolean | null | undefined | ReferenceArticleDataDefaultArgs> = $Result.GetResult<Prisma.$ReferenceArticleDataPayload, S>
+
+  type ReferenceArticleDataCountArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> =
+    Omit<ReferenceArticleDataFindManyArgs, 'select' | 'include' | 'distinct' | 'omit'> & {
+      select?: ReferenceArticleDataCountAggregateInputType | true
+    }
+
+  export interface ReferenceArticleDataDelegate<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs, GlobalOmitOptions = {}> {
+    [K: symbol]: { types: Prisma.TypeMap<ExtArgs>['model']['ReferenceArticleData'], meta: { name: 'ReferenceArticleData' } }
+    /**
+     * Find zero or one ReferenceArticleData that matches the filter.
+     * @param {ReferenceArticleDataFindUniqueArgs} args - Arguments to find a ReferenceArticleData
+     * @example
+     * // Get one ReferenceArticleData
+     * const referenceArticleData = await prisma.referenceArticleData.findUnique({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     */
+    findUnique<T extends ReferenceArticleDataFindUniqueArgs>(args: SelectSubset<T, ReferenceArticleDataFindUniqueArgs<ExtArgs>>): Prisma__ReferenceArticleDataClient<$Result.GetResult<Prisma.$ReferenceArticleDataPayload<ExtArgs>, T, "findUnique", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Find one ReferenceArticleData that matches the filter or throw an error with `error.code='P2025'`
+     * if no matches were found.
+     * @param {ReferenceArticleDataFindUniqueOrThrowArgs} args - Arguments to find a ReferenceArticleData
+     * @example
+     * // Get one ReferenceArticleData
+     * const referenceArticleData = await prisma.referenceArticleData.findUniqueOrThrow({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     */
+    findUniqueOrThrow<T extends ReferenceArticleDataFindUniqueOrThrowArgs>(args: SelectSubset<T, ReferenceArticleDataFindUniqueOrThrowArgs<ExtArgs>>): Prisma__ReferenceArticleDataClient<$Result.GetResult<Prisma.$ReferenceArticleDataPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Find the first ReferenceArticleData that matches the filter.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {ReferenceArticleDataFindFirstArgs} args - Arguments to find a ReferenceArticleData
+     * @example
+     * // Get one ReferenceArticleData
+     * const referenceArticleData = await prisma.referenceArticleData.findFirst({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     */
+    findFirst<T extends ReferenceArticleDataFindFirstArgs>(args?: SelectSubset<T, ReferenceArticleDataFindFirstArgs<ExtArgs>>): Prisma__ReferenceArticleDataClient<$Result.GetResult<Prisma.$ReferenceArticleDataPayload<ExtArgs>, T, "findFirst", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Find the first ReferenceArticleData that matches the filter or
+     * throw `PrismaKnownClientError` with `P2025` code if no matches were found.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {ReferenceArticleDataFindFirstOrThrowArgs} args - Arguments to find a ReferenceArticleData
+     * @example
+     * // Get one ReferenceArticleData
+     * const referenceArticleData = await prisma.referenceArticleData.findFirstOrThrow({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     */
+    findFirstOrThrow<T extends ReferenceArticleDataFindFirstOrThrowArgs>(args?: SelectSubset<T, ReferenceArticleDataFindFirstOrThrowArgs<ExtArgs>>): Prisma__ReferenceArticleDataClient<$Result.GetResult<Prisma.$ReferenceArticleDataPayload<ExtArgs>, T, "findFirstOrThrow", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Find zero or more ReferenceArticleData that matches the filter.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {ReferenceArticleDataFindManyArgs} args - Arguments to filter and select certain fields only.
+     * @example
+     * // Get all ReferenceArticleData
+     * const referenceArticleData = await prisma.referenceArticleData.findMany()
+     * 
+     * // Get first 10 ReferenceArticleData
+     * const referenceArticleData = await prisma.referenceArticleData.findMany({ take: 10 })
+     * 
+     * // Only select the `id`
+     * const referenceArticleDataWithIdOnly = await prisma.referenceArticleData.findMany({ select: { id: true } })
+     * 
+     */
+    findMany<T extends ReferenceArticleDataFindManyArgs>(args?: SelectSubset<T, ReferenceArticleDataFindManyArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$ReferenceArticleDataPayload<ExtArgs>, T, "findMany", GlobalOmitOptions>>
+
+    /**
+     * Create a ReferenceArticleData.
+     * @param {ReferenceArticleDataCreateArgs} args - Arguments to create a ReferenceArticleData.
+     * @example
+     * // Create one ReferenceArticleData
+     * const ReferenceArticleData = await prisma.referenceArticleData.create({
+     *   data: {
+     *     // ... data to create a ReferenceArticleData
+     *   }
+     * })
+     * 
+     */
+    create<T extends ReferenceArticleDataCreateArgs>(args: SelectSubset<T, ReferenceArticleDataCreateArgs<ExtArgs>>): Prisma__ReferenceArticleDataClient<$Result.GetResult<Prisma.$ReferenceArticleDataPayload<ExtArgs>, T, "create", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Create many ReferenceArticleData.
+     * @param {ReferenceArticleDataCreateManyArgs} args - Arguments to create many ReferenceArticleData.
+     * @example
+     * // Create many ReferenceArticleData
+     * const referenceArticleData = await prisma.referenceArticleData.createMany({
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     *     
+     */
+    createMany<T extends ReferenceArticleDataCreateManyArgs>(args?: SelectSubset<T, ReferenceArticleDataCreateManyArgs<ExtArgs>>): Prisma.PrismaPromise<BatchPayload>
+
+    /**
+     * Create many ReferenceArticleData and returns the data saved in the database.
+     * @param {ReferenceArticleDataCreateManyAndReturnArgs} args - Arguments to create many ReferenceArticleData.
+     * @example
+     * // Create many ReferenceArticleData
+     * const referenceArticleData = await prisma.referenceArticleData.createManyAndReturn({
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     * 
+     * // Create many ReferenceArticleData and only return the `id`
+     * const referenceArticleDataWithIdOnly = await prisma.referenceArticleData.createManyAndReturn({
+     *   select: { id: true },
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * 
+     */
+    createManyAndReturn<T extends ReferenceArticleDataCreateManyAndReturnArgs>(args?: SelectSubset<T, ReferenceArticleDataCreateManyAndReturnArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$ReferenceArticleDataPayload<ExtArgs>, T, "createManyAndReturn", GlobalOmitOptions>>
+
+    /**
+     * Delete a ReferenceArticleData.
+     * @param {ReferenceArticleDataDeleteArgs} args - Arguments to delete one ReferenceArticleData.
+     * @example
+     * // Delete one ReferenceArticleData
+     * const ReferenceArticleData = await prisma.referenceArticleData.delete({
+     *   where: {
+     *     // ... filter to delete one ReferenceArticleData
+     *   }
+     * })
+     * 
+     */
+    delete<T extends ReferenceArticleDataDeleteArgs>(args: SelectSubset<T, ReferenceArticleDataDeleteArgs<ExtArgs>>): Prisma__ReferenceArticleDataClient<$Result.GetResult<Prisma.$ReferenceArticleDataPayload<ExtArgs>, T, "delete", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Update one ReferenceArticleData.
+     * @param {ReferenceArticleDataUpdateArgs} args - Arguments to update one ReferenceArticleData.
+     * @example
+     * // Update one ReferenceArticleData
+     * const referenceArticleData = await prisma.referenceArticleData.update({
+     *   where: {
+     *     // ... provide filter here
+     *   },
+     *   data: {
+     *     // ... provide data here
+     *   }
+     * })
+     * 
+     */
+    update<T extends ReferenceArticleDataUpdateArgs>(args: SelectSubset<T, ReferenceArticleDataUpdateArgs<ExtArgs>>): Prisma__ReferenceArticleDataClient<$Result.GetResult<Prisma.$ReferenceArticleDataPayload<ExtArgs>, T, "update", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Delete zero or more ReferenceArticleData.
+     * @param {ReferenceArticleDataDeleteManyArgs} args - Arguments to filter ReferenceArticleData to delete.
+     * @example
+     * // Delete a few ReferenceArticleData
+     * const { count } = await prisma.referenceArticleData.deleteMany({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     * 
+     */
+    deleteMany<T extends ReferenceArticleDataDeleteManyArgs>(args?: SelectSubset<T, ReferenceArticleDataDeleteManyArgs<ExtArgs>>): Prisma.PrismaPromise<BatchPayload>
+
+    /**
+     * Update zero or more ReferenceArticleData.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {ReferenceArticleDataUpdateManyArgs} args - Arguments to update one or more rows.
+     * @example
+     * // Update many ReferenceArticleData
+     * const referenceArticleData = await prisma.referenceArticleData.updateMany({
+     *   where: {
+     *     // ... provide filter here
+     *   },
+     *   data: {
+     *     // ... provide data here
+     *   }
+     * })
+     * 
+     */
+    updateMany<T extends ReferenceArticleDataUpdateManyArgs>(args: SelectSubset<T, ReferenceArticleDataUpdateManyArgs<ExtArgs>>): Prisma.PrismaPromise<BatchPayload>
+
+    /**
+     * Update zero or more ReferenceArticleData and returns the data updated in the database.
+     * @param {ReferenceArticleDataUpdateManyAndReturnArgs} args - Arguments to update many ReferenceArticleData.
+     * @example
+     * // Update many ReferenceArticleData
+     * const referenceArticleData = await prisma.referenceArticleData.updateManyAndReturn({
+     *   where: {
+     *     // ... provide filter here
+     *   },
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     * 
+     * // Update zero or more ReferenceArticleData and only return the `id`
+     * const referenceArticleDataWithIdOnly = await prisma.referenceArticleData.updateManyAndReturn({
+     *   select: { id: true },
+     *   where: {
+     *     // ... provide filter here
+     *   },
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * 
+     */
+    updateManyAndReturn<T extends ReferenceArticleDataUpdateManyAndReturnArgs>(args: SelectSubset<T, ReferenceArticleDataUpdateManyAndReturnArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$ReferenceArticleDataPayload<ExtArgs>, T, "updateManyAndReturn", GlobalOmitOptions>>
+
+    /**
+     * Create or update one ReferenceArticleData.
+     * @param {ReferenceArticleDataUpsertArgs} args - Arguments to update or create a ReferenceArticleData.
+     * @example
+     * // Update or create a ReferenceArticleData
+     * const referenceArticleData = await prisma.referenceArticleData.upsert({
+     *   create: {
+     *     // ... data to create a ReferenceArticleData
+     *   },
+     *   update: {
+     *     // ... in case it already exists, update
+     *   },
+     *   where: {
+     *     // ... the filter for the ReferenceArticleData we want to update
+     *   }
+     * })
+     */
+    upsert<T extends ReferenceArticleDataUpsertArgs>(args: SelectSubset<T, ReferenceArticleDataUpsertArgs<ExtArgs>>): Prisma__ReferenceArticleDataClient<$Result.GetResult<Prisma.$ReferenceArticleDataPayload<ExtArgs>, T, "upsert", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+
+    /**
+     * Count the number of ReferenceArticleData.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {ReferenceArticleDataCountArgs} args - Arguments to filter ReferenceArticleData to count.
+     * @example
+     * // Count the number of ReferenceArticleData
+     * const count = await prisma.referenceArticleData.count({
+     *   where: {
+     *     // ... the filter for the ReferenceArticleData we want to count
+     *   }
+     * })
+    **/
+    count<T extends ReferenceArticleDataCountArgs>(
+      args?: Subset<T, ReferenceArticleDataCountArgs>,
+    ): Prisma.PrismaPromise<
+      T extends $Utils.Record<'select', any>
+        ? T['select'] extends true
+          ? number
+          : GetScalarType<T['select'], ReferenceArticleDataCountAggregateOutputType>
+        : number
+    >
+
+    /**
+     * Allows you to perform aggregations operations on a ReferenceArticleData.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {ReferenceArticleDataAggregateArgs} args - Select which aggregations you would like to apply and on what fields.
+     * @example
+     * // Ordered by age ascending
+     * // Where email contains prisma.io
+     * // Limited to the 10 users
+     * const aggregations = await prisma.user.aggregate({
+     *   _avg: {
+     *     age: true,
+     *   },
+     *   where: {
+     *     email: {
+     *       contains: "prisma.io",
+     *     },
+     *   },
+     *   orderBy: {
+     *     age: "asc",
+     *   },
+     *   take: 10,
+     * })
+    **/
+    aggregate<T extends ReferenceArticleDataAggregateArgs>(args: Subset<T, ReferenceArticleDataAggregateArgs>): Prisma.PrismaPromise<GetReferenceArticleDataAggregateType<T>>
+
+    /**
+     * Group by ReferenceArticleData.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {ReferenceArticleDataGroupByArgs} args - Group by arguments.
+     * @example
+     * // Group by city, order by createdAt, get count
+     * const result = await prisma.user.groupBy({
+     *   by: ['city', 'createdAt'],
+     *   orderBy: {
+     *     createdAt: true
+     *   },
+     *   _count: {
+     *     _all: true
+     *   },
+     * })
+     * 
+    **/
+    groupBy<
+      T extends ReferenceArticleDataGroupByArgs,
+      HasSelectOrTake extends Or<
+        Extends<'skip', Keys<T>>,
+        Extends<'take', Keys<T>>
+      >,
+      OrderByArg extends True extends HasSelectOrTake
+        ? { orderBy: ReferenceArticleDataGroupByArgs['orderBy'] }
+        : { orderBy?: ReferenceArticleDataGroupByArgs['orderBy'] },
+      OrderFields extends ExcludeUnderscoreKeys<Keys<MaybeTupleToUnion<T['orderBy']>>>,
+      ByFields extends MaybeTupleToUnion<T['by']>,
+      ByValid extends Has<ByFields, OrderFields>,
+      HavingFields extends GetHavingFields<T['having']>,
+      HavingValid extends Has<ByFields, HavingFields>,
+      ByEmpty extends T['by'] extends never[] ? True : False,
+      InputErrors extends ByEmpty extends True
+      ? `Error: "by" must not be empty.`
+      : HavingValid extends False
+      ? {
+          [P in HavingFields]: P extends ByFields
+            ? never
+            : P extends string
+            ? `Error: Field "${P}" used in "having" needs to be provided in "by".`
+            : [
+                Error,
+                'Field ',
+                P,
+                ` in "having" needs to be provided in "by"`,
+              ]
+        }[HavingFields]
+      : 'take' extends Keys<T>
+      ? 'orderBy' extends Keys<T>
+        ? ByValid extends True
+          ? {}
+          : {
+              [P in OrderFields]: P extends ByFields
+                ? never
+                : `Error: Field "${P}" in "orderBy" needs to be provided in "by"`
+            }[OrderFields]
+        : 'Error: If you provide "take", you also need to provide "orderBy"'
+      : 'skip' extends Keys<T>
+      ? 'orderBy' extends Keys<T>
+        ? ByValid extends True
+          ? {}
+          : {
+              [P in OrderFields]: P extends ByFields
+                ? never
+                : `Error: Field "${P}" in "orderBy" needs to be provided in "by"`
+            }[OrderFields]
+        : 'Error: If you provide "skip", you also need to provide "orderBy"'
+      : ByValid extends True
+      ? {}
+      : {
+          [P in OrderFields]: P extends ByFields
+            ? never
+            : `Error: Field "${P}" in "orderBy" needs to be provided in "by"`
+        }[OrderFields]
+    >(args: SubsetIntersection<T, ReferenceArticleDataGroupByArgs, OrderByArg> & InputErrors): {} extends InputErrors ? GetReferenceArticleDataGroupByPayload<T> : Prisma.PrismaPromise<InputErrors>
+  /**
+   * Fields of the ReferenceArticleData model
+   */
+  readonly fields: ReferenceArticleDataFieldRefs;
+  }
+
+  /**
+   * The delegate class that acts as a "Promise-like" for ReferenceArticleData.
+   * Why is this prefixed with `Prisma__`?
+   * Because we want to prevent naming conflicts as mentioned in
+   * https://github.com/prisma/prisma-client-js/issues/707
+   */
+  export interface Prisma__ReferenceArticleDataClient<T, Null = never, ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs, GlobalOmitOptions = {}> extends Prisma.PrismaPromise<T> {
+    readonly [Symbol.toStringTag]: "PrismaPromise"
+    /**
+     * Attaches callbacks for the resolution and/or rejection of the Promise.
+     * @param onfulfilled The callback to execute when the Promise is resolved.
+     * @param onrejected The callback to execute when the Promise is rejected.
+     * @returns A Promise for the completion of which ever callback is executed.
+     */
+    then<TResult1 = T, TResult2 = never>(onfulfilled?: ((value: T) => TResult1 | PromiseLike<TResult1>) | undefined | null, onrejected?: ((reason: any) => TResult2 | PromiseLike<TResult2>) | undefined | null): $Utils.JsPromise<TResult1 | TResult2>
+    /**
+     * Attaches a callback for only the rejection of the Promise.
+     * @param onrejected The callback to execute when the Promise is rejected.
+     * @returns A Promise for the completion of the callback.
+     */
+    catch<TResult = never>(onrejected?: ((reason: any) => TResult | PromiseLike<TResult>) | undefined | null): $Utils.JsPromise<T | TResult>
+    /**
+     * Attaches a callback that is invoked when the Promise is settled (fulfilled or rejected). The
+     * resolved value cannot be modified from the callback.
+     * @param onfinally The callback to execute when the Promise is settled (fulfilled or rejected).
+     * @returns A Promise for the completion of the callback.
+     */
+    finally(onfinally?: (() => void) | undefined | null): $Utils.JsPromise<T>
+  }
+
+
+
+
+  /**
+   * Fields of the ReferenceArticleData model
+   */
+  interface ReferenceArticleDataFieldRefs {
+    readonly id: FieldRef<"ReferenceArticleData", 'String'>
+    readonly mFabDiv: FieldRef<"ReferenceArticleData", 'String'>
+    readonly mYarn: FieldRef<"ReferenceArticleData", 'String'>
+    readonly mFabMainMvgr1: FieldRef<"ReferenceArticleData", 'String'>
+    readonly mFabMainMvgr2: FieldRef<"ReferenceArticleData", 'String'>
+    readonly mFabVdr: FieldRef<"ReferenceArticleData", 'String'>
+    readonly mWeave01: FieldRef<"ReferenceArticleData", 'String'>
+    readonly mWeave02: FieldRef<"ReferenceArticleData", 'String'>
+    readonly mCount: FieldRef<"ReferenceArticleData", 'String'>
+    readonly mGsm: FieldRef<"ReferenceArticleData", 'String'>
+    readonly mOunz: FieldRef<"ReferenceArticleData", 'String'>
+    readonly mConstruction: FieldRef<"ReferenceArticleData", 'String'>
+    readonly mComposition: FieldRef<"ReferenceArticleData", 'String'>
+    readonly mFinish: FieldRef<"ReferenceArticleData", 'String'>
+    readonly mWidth: FieldRef<"ReferenceArticleData", 'String'>
+    readonly mLycra: FieldRef<"ReferenceArticleData", 'String'>
+    readonly mCollarType: FieldRef<"ReferenceArticleData", 'String'>
+    readonly mCollarStyle: FieldRef<"ReferenceArticleData", 'String'>
+    readonly mNeckType: FieldRef<"ReferenceArticleData", 'String'>
+    readonly mNeckStyle: FieldRef<"ReferenceArticleData", 'String'>
+    readonly mPlacket: FieldRef<"ReferenceArticleData", 'String'>
+    readonly mBltType: FieldRef<"ReferenceArticleData", 'String'>
+    readonly mBltStyle: FieldRef<"ReferenceArticleData", 'String'>
+    readonly mSleevesMainStyle: FieldRef<"ReferenceArticleData", 'String'>
+    readonly mSleeveFold: FieldRef<"ReferenceArticleData", 'String'>
+    readonly mBtmFold: FieldRef<"ReferenceArticleData", 'String'>
+    readonly mNoOfPocket: FieldRef<"ReferenceArticleData", 'String'>
+    readonly mPocket: FieldRef<"ReferenceArticleData", 'String'>
+    readonly mExtraPocket: FieldRef<"ReferenceArticleData", 'String'>
+    readonly mFit: FieldRef<"ReferenceArticleData", 'String'>
+    readonly mBodyStyle: FieldRef<"ReferenceArticleData", 'String'>
+    readonly mLength: FieldRef<"ReferenceArticleData", 'String'>
+    readonly mSet: FieldRef<"ReferenceArticleData", 'String'>
+    readonly fabricArticleNo: FieldRef<"ReferenceArticleData", 'String'>
+    readonly fabricArticleDescription: FieldRef<"ReferenceArticleData", 'String'>
+    readonly bodyArticleNo: FieldRef<"ReferenceArticleData", 'String'>
+    readonly bodyArticleDescription: FieldRef<"ReferenceArticleData", 'String'>
+    readonly referenceArticleNo: FieldRef<"ReferenceArticleData", 'String'>
+    readonly referenceArticleDescription: FieldRef<"ReferenceArticleData", 'String'>
+    readonly flatId: FieldRef<"ReferenceArticleData", 'String'>
+    readonly division: FieldRef<"ReferenceArticleData", 'String'>
+    readonly subDivision: FieldRef<"ReferenceArticleData", 'String'>
+    readonly majorCategory: FieldRef<"ReferenceArticleData", 'String'>
+    readonly mcCode: FieldRef<"ReferenceArticleData", 'String'>
+    readonly vendorName: FieldRef<"ReferenceArticleData", 'String'>
+    readonly vendorCode: FieldRef<"ReferenceArticleData", 'String'>
+    readonly hsnTaxCode: FieldRef<"ReferenceArticleData", 'String'>
+    readonly approvalStatus: FieldRef<"ReferenceArticleData", 'String'>
+    readonly approvedAt: FieldRef<"ReferenceArticleData", 'DateTime'>
+    readonly approvedBy: FieldRef<"ReferenceArticleData", 'Int'>
+    readonly sapSyncStatus: FieldRef<"ReferenceArticleData", 'String'>
+    readonly sapSyncMessage: FieldRef<"ReferenceArticleData", 'String'>
+    readonly userName: FieldRef<"ReferenceArticleData", 'String'>
+    readonly createdAt: FieldRef<"ReferenceArticleData", 'DateTime'>
+    readonly updatedAt: FieldRef<"ReferenceArticleData", 'DateTime'>
+  }
+    
+
+  // Custom InputTypes
+  /**
+   * ReferenceArticleData findUnique
+   */
+  export type ReferenceArticleDataFindUniqueArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the ReferenceArticleData
+     */
+    select?: ReferenceArticleDataSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the ReferenceArticleData
+     */
+    omit?: ReferenceArticleDataOmit<ExtArgs> | null
+    /**
+     * Filter, which ReferenceArticleData to fetch.
+     */
+    where: ReferenceArticleDataWhereUniqueInput
+  }
+
+  /**
+   * ReferenceArticleData findUniqueOrThrow
+   */
+  export type ReferenceArticleDataFindUniqueOrThrowArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the ReferenceArticleData
+     */
+    select?: ReferenceArticleDataSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the ReferenceArticleData
+     */
+    omit?: ReferenceArticleDataOmit<ExtArgs> | null
+    /**
+     * Filter, which ReferenceArticleData to fetch.
+     */
+    where: ReferenceArticleDataWhereUniqueInput
+  }
+
+  /**
+   * ReferenceArticleData findFirst
+   */
+  export type ReferenceArticleDataFindFirstArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the ReferenceArticleData
+     */
+    select?: ReferenceArticleDataSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the ReferenceArticleData
+     */
+    omit?: ReferenceArticleDataOmit<ExtArgs> | null
+    /**
+     * Filter, which ReferenceArticleData to fetch.
+     */
+    where?: ReferenceArticleDataWhereInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
+     * 
+     * Determine the order of ReferenceArticleData to fetch.
+     */
+    orderBy?: ReferenceArticleDataOrderByWithRelationInput | ReferenceArticleDataOrderByWithRelationInput[]
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
+     * 
+     * Sets the position for searching for ReferenceArticleData.
+     */
+    cursor?: ReferenceArticleDataWhereUniqueInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Take `±n` ReferenceArticleData from the position of the cursor.
+     */
+    take?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Skip the first `n` ReferenceArticleData.
+     */
+    skip?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/distinct Distinct Docs}
+     * 
+     * Filter by unique combinations of ReferenceArticleData.
+     */
+    distinct?: ReferenceArticleDataScalarFieldEnum | ReferenceArticleDataScalarFieldEnum[]
+  }
+
+  /**
+   * ReferenceArticleData findFirstOrThrow
+   */
+  export type ReferenceArticleDataFindFirstOrThrowArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the ReferenceArticleData
+     */
+    select?: ReferenceArticleDataSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the ReferenceArticleData
+     */
+    omit?: ReferenceArticleDataOmit<ExtArgs> | null
+    /**
+     * Filter, which ReferenceArticleData to fetch.
+     */
+    where?: ReferenceArticleDataWhereInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
+     * 
+     * Determine the order of ReferenceArticleData to fetch.
+     */
+    orderBy?: ReferenceArticleDataOrderByWithRelationInput | ReferenceArticleDataOrderByWithRelationInput[]
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
+     * 
+     * Sets the position for searching for ReferenceArticleData.
+     */
+    cursor?: ReferenceArticleDataWhereUniqueInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Take `±n` ReferenceArticleData from the position of the cursor.
+     */
+    take?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Skip the first `n` ReferenceArticleData.
+     */
+    skip?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/distinct Distinct Docs}
+     * 
+     * Filter by unique combinations of ReferenceArticleData.
+     */
+    distinct?: ReferenceArticleDataScalarFieldEnum | ReferenceArticleDataScalarFieldEnum[]
+  }
+
+  /**
+   * ReferenceArticleData findMany
+   */
+  export type ReferenceArticleDataFindManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the ReferenceArticleData
+     */
+    select?: ReferenceArticleDataSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the ReferenceArticleData
+     */
+    omit?: ReferenceArticleDataOmit<ExtArgs> | null
+    /**
+     * Filter, which ReferenceArticleData to fetch.
+     */
+    where?: ReferenceArticleDataWhereInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
+     * 
+     * Determine the order of ReferenceArticleData to fetch.
+     */
+    orderBy?: ReferenceArticleDataOrderByWithRelationInput | ReferenceArticleDataOrderByWithRelationInput[]
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
+     * 
+     * Sets the position for listing ReferenceArticleData.
+     */
+    cursor?: ReferenceArticleDataWhereUniqueInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Take `±n` ReferenceArticleData from the position of the cursor.
+     */
+    take?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Skip the first `n` ReferenceArticleData.
+     */
+    skip?: number
+    distinct?: ReferenceArticleDataScalarFieldEnum | ReferenceArticleDataScalarFieldEnum[]
+  }
+
+  /**
+   * ReferenceArticleData create
+   */
+  export type ReferenceArticleDataCreateArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the ReferenceArticleData
+     */
+    select?: ReferenceArticleDataSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the ReferenceArticleData
+     */
+    omit?: ReferenceArticleDataOmit<ExtArgs> | null
+    /**
+     * The data needed to create a ReferenceArticleData.
+     */
+    data: XOR<ReferenceArticleDataCreateInput, ReferenceArticleDataUncheckedCreateInput>
+  }
+
+  /**
+   * ReferenceArticleData createMany
+   */
+  export type ReferenceArticleDataCreateManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * The data used to create many ReferenceArticleData.
+     */
+    data: ReferenceArticleDataCreateManyInput | ReferenceArticleDataCreateManyInput[]
+    skipDuplicates?: boolean
+  }
+
+  /**
+   * ReferenceArticleData createManyAndReturn
+   */
+  export type ReferenceArticleDataCreateManyAndReturnArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the ReferenceArticleData
+     */
+    select?: ReferenceArticleDataSelectCreateManyAndReturn<ExtArgs> | null
+    /**
+     * Omit specific fields from the ReferenceArticleData
+     */
+    omit?: ReferenceArticleDataOmit<ExtArgs> | null
+    /**
+     * The data used to create many ReferenceArticleData.
+     */
+    data: ReferenceArticleDataCreateManyInput | ReferenceArticleDataCreateManyInput[]
+    skipDuplicates?: boolean
+  }
+
+  /**
+   * ReferenceArticleData update
+   */
+  export type ReferenceArticleDataUpdateArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the ReferenceArticleData
+     */
+    select?: ReferenceArticleDataSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the ReferenceArticleData
+     */
+    omit?: ReferenceArticleDataOmit<ExtArgs> | null
+    /**
+     * The data needed to update a ReferenceArticleData.
+     */
+    data: XOR<ReferenceArticleDataUpdateInput, ReferenceArticleDataUncheckedUpdateInput>
+    /**
+     * Choose, which ReferenceArticleData to update.
+     */
+    where: ReferenceArticleDataWhereUniqueInput
+  }
+
+  /**
+   * ReferenceArticleData updateMany
+   */
+  export type ReferenceArticleDataUpdateManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * The data used to update ReferenceArticleData.
+     */
+    data: XOR<ReferenceArticleDataUpdateManyMutationInput, ReferenceArticleDataUncheckedUpdateManyInput>
+    /**
+     * Filter which ReferenceArticleData to update
+     */
+    where?: ReferenceArticleDataWhereInput
+    /**
+     * Limit how many ReferenceArticleData to update.
+     */
+    limit?: number
+  }
+
+  /**
+   * ReferenceArticleData updateManyAndReturn
+   */
+  export type ReferenceArticleDataUpdateManyAndReturnArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the ReferenceArticleData
+     */
+    select?: ReferenceArticleDataSelectUpdateManyAndReturn<ExtArgs> | null
+    /**
+     * Omit specific fields from the ReferenceArticleData
+     */
+    omit?: ReferenceArticleDataOmit<ExtArgs> | null
+    /**
+     * The data used to update ReferenceArticleData.
+     */
+    data: XOR<ReferenceArticleDataUpdateManyMutationInput, ReferenceArticleDataUncheckedUpdateManyInput>
+    /**
+     * Filter which ReferenceArticleData to update
+     */
+    where?: ReferenceArticleDataWhereInput
+    /**
+     * Limit how many ReferenceArticleData to update.
+     */
+    limit?: number
+  }
+
+  /**
+   * ReferenceArticleData upsert
+   */
+  export type ReferenceArticleDataUpsertArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the ReferenceArticleData
+     */
+    select?: ReferenceArticleDataSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the ReferenceArticleData
+     */
+    omit?: ReferenceArticleDataOmit<ExtArgs> | null
+    /**
+     * The filter to search for the ReferenceArticleData to update in case it exists.
+     */
+    where: ReferenceArticleDataWhereUniqueInput
+    /**
+     * In case the ReferenceArticleData found by the `where` argument doesn't exist, create a new ReferenceArticleData with this data.
+     */
+    create: XOR<ReferenceArticleDataCreateInput, ReferenceArticleDataUncheckedCreateInput>
+    /**
+     * In case the ReferenceArticleData was found with the provided `where` argument, update it with this data.
+     */
+    update: XOR<ReferenceArticleDataUpdateInput, ReferenceArticleDataUncheckedUpdateInput>
+  }
+
+  /**
+   * ReferenceArticleData delete
+   */
+  export type ReferenceArticleDataDeleteArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the ReferenceArticleData
+     */
+    select?: ReferenceArticleDataSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the ReferenceArticleData
+     */
+    omit?: ReferenceArticleDataOmit<ExtArgs> | null
+    /**
+     * Filter which ReferenceArticleData to delete.
+     */
+    where: ReferenceArticleDataWhereUniqueInput
+  }
+
+  /**
+   * ReferenceArticleData deleteMany
+   */
+  export type ReferenceArticleDataDeleteManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Filter which ReferenceArticleData to delete
+     */
+    where?: ReferenceArticleDataWhereInput
+    /**
+     * Limit how many ReferenceArticleData to delete.
+     */
+    limit?: number
+  }
+
+  /**
+   * ReferenceArticleData without action
+   */
+  export type ReferenceArticleDataDefaultArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the ReferenceArticleData
+     */
+    select?: ReferenceArticleDataSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the ReferenceArticleData
+     */
+    omit?: ReferenceArticleDataOmit<ExtArgs> | null
+  }
+
+
+  /**
    * Model BodyFabricConsumption
    */
 
@@ -72973,6 +74744,67 @@ export namespace Prisma {
   export type BodyArticleDataScalarFieldEnum = (typeof BodyArticleDataScalarFieldEnum)[keyof typeof BodyArticleDataScalarFieldEnum]
 
 
+  export const ReferenceArticleDataScalarFieldEnum: {
+    id: 'id',
+    mFabDiv: 'mFabDiv',
+    mYarn: 'mYarn',
+    mFabMainMvgr1: 'mFabMainMvgr1',
+    mFabMainMvgr2: 'mFabMainMvgr2',
+    mFabVdr: 'mFabVdr',
+    mWeave01: 'mWeave01',
+    mWeave02: 'mWeave02',
+    mCount: 'mCount',
+    mGsm: 'mGsm',
+    mOunz: 'mOunz',
+    mConstruction: 'mConstruction',
+    mComposition: 'mComposition',
+    mFinish: 'mFinish',
+    mWidth: 'mWidth',
+    mLycra: 'mLycra',
+    mCollarType: 'mCollarType',
+    mCollarStyle: 'mCollarStyle',
+    mNeckType: 'mNeckType',
+    mNeckStyle: 'mNeckStyle',
+    mPlacket: 'mPlacket',
+    mBltType: 'mBltType',
+    mBltStyle: 'mBltStyle',
+    mSleevesMainStyle: 'mSleevesMainStyle',
+    mSleeveFold: 'mSleeveFold',
+    mBtmFold: 'mBtmFold',
+    mNoOfPocket: 'mNoOfPocket',
+    mPocket: 'mPocket',
+    mExtraPocket: 'mExtraPocket',
+    mFit: 'mFit',
+    mBodyStyle: 'mBodyStyle',
+    mLength: 'mLength',
+    mSet: 'mSet',
+    fabricArticleNo: 'fabricArticleNo',
+    fabricArticleDescription: 'fabricArticleDescription',
+    bodyArticleNo: 'bodyArticleNo',
+    bodyArticleDescription: 'bodyArticleDescription',
+    referenceArticleNo: 'referenceArticleNo',
+    referenceArticleDescription: 'referenceArticleDescription',
+    flatId: 'flatId',
+    division: 'division',
+    subDivision: 'subDivision',
+    majorCategory: 'majorCategory',
+    mcCode: 'mcCode',
+    vendorName: 'vendorName',
+    vendorCode: 'vendorCode',
+    hsnTaxCode: 'hsnTaxCode',
+    approvalStatus: 'approvalStatus',
+    approvedAt: 'approvedAt',
+    approvedBy: 'approvedBy',
+    sapSyncStatus: 'sapSyncStatus',
+    sapSyncMessage: 'sapSyncMessage',
+    userName: 'userName',
+    createdAt: 'createdAt',
+    updatedAt: 'updatedAt'
+  };
+
+  export type ReferenceArticleDataScalarFieldEnum = (typeof ReferenceArticleDataScalarFieldEnum)[keyof typeof ReferenceArticleDataScalarFieldEnum]
+
+
   export const BodyFabricConsumptionScalarFieldEnum: {
     id: 'id',
     division: 'division',
@@ -73966,6 +75798,63 @@ export namespace Prisma {
   };
 
   export type BodyArticleDataOrderByRelevanceFieldEnum = (typeof BodyArticleDataOrderByRelevanceFieldEnum)[keyof typeof BodyArticleDataOrderByRelevanceFieldEnum]
+
+
+  export const ReferenceArticleDataOrderByRelevanceFieldEnum: {
+    id: 'id',
+    mFabDiv: 'mFabDiv',
+    mYarn: 'mYarn',
+    mFabMainMvgr1: 'mFabMainMvgr1',
+    mFabMainMvgr2: 'mFabMainMvgr2',
+    mFabVdr: 'mFabVdr',
+    mWeave01: 'mWeave01',
+    mWeave02: 'mWeave02',
+    mCount: 'mCount',
+    mGsm: 'mGsm',
+    mOunz: 'mOunz',
+    mConstruction: 'mConstruction',
+    mComposition: 'mComposition',
+    mFinish: 'mFinish',
+    mWidth: 'mWidth',
+    mLycra: 'mLycra',
+    mCollarType: 'mCollarType',
+    mCollarStyle: 'mCollarStyle',
+    mNeckType: 'mNeckType',
+    mNeckStyle: 'mNeckStyle',
+    mPlacket: 'mPlacket',
+    mBltType: 'mBltType',
+    mBltStyle: 'mBltStyle',
+    mSleevesMainStyle: 'mSleevesMainStyle',
+    mSleeveFold: 'mSleeveFold',
+    mBtmFold: 'mBtmFold',
+    mNoOfPocket: 'mNoOfPocket',
+    mPocket: 'mPocket',
+    mExtraPocket: 'mExtraPocket',
+    mFit: 'mFit',
+    mBodyStyle: 'mBodyStyle',
+    mLength: 'mLength',
+    mSet: 'mSet',
+    fabricArticleNo: 'fabricArticleNo',
+    fabricArticleDescription: 'fabricArticleDescription',
+    bodyArticleNo: 'bodyArticleNo',
+    bodyArticleDescription: 'bodyArticleDescription',
+    referenceArticleNo: 'referenceArticleNo',
+    referenceArticleDescription: 'referenceArticleDescription',
+    flatId: 'flatId',
+    division: 'division',
+    subDivision: 'subDivision',
+    majorCategory: 'majorCategory',
+    mcCode: 'mcCode',
+    vendorName: 'vendorName',
+    vendorCode: 'vendorCode',
+    hsnTaxCode: 'hsnTaxCode',
+    approvalStatus: 'approvalStatus',
+    sapSyncStatus: 'sapSyncStatus',
+    sapSyncMessage: 'sapSyncMessage',
+    userName: 'userName'
+  };
+
+  export type ReferenceArticleDataOrderByRelevanceFieldEnum = (typeof ReferenceArticleDataOrderByRelevanceFieldEnum)[keyof typeof ReferenceArticleDataOrderByRelevanceFieldEnum]
 
 
   export const BodyFabricConsumptionOrderByRelevanceFieldEnum: {
@@ -80147,6 +82036,311 @@ export namespace Prisma {
     userName?: StringNullableWithAggregatesFilter<"BodyArticleData"> | string | null
     createdAt?: DateTimeWithAggregatesFilter<"BodyArticleData"> | Date | string
     updatedAt?: DateTimeWithAggregatesFilter<"BodyArticleData"> | Date | string
+  }
+
+  export type ReferenceArticleDataWhereInput = {
+    AND?: ReferenceArticleDataWhereInput | ReferenceArticleDataWhereInput[]
+    OR?: ReferenceArticleDataWhereInput[]
+    NOT?: ReferenceArticleDataWhereInput | ReferenceArticleDataWhereInput[]
+    id?: StringFilter<"ReferenceArticleData"> | string
+    mFabDiv?: StringNullableFilter<"ReferenceArticleData"> | string | null
+    mYarn?: StringNullableFilter<"ReferenceArticleData"> | string | null
+    mFabMainMvgr1?: StringNullableFilter<"ReferenceArticleData"> | string | null
+    mFabMainMvgr2?: StringNullableFilter<"ReferenceArticleData"> | string | null
+    mFabVdr?: StringNullableFilter<"ReferenceArticleData"> | string | null
+    mWeave01?: StringNullableFilter<"ReferenceArticleData"> | string | null
+    mWeave02?: StringNullableFilter<"ReferenceArticleData"> | string | null
+    mCount?: StringNullableFilter<"ReferenceArticleData"> | string | null
+    mGsm?: StringNullableFilter<"ReferenceArticleData"> | string | null
+    mOunz?: StringNullableFilter<"ReferenceArticleData"> | string | null
+    mConstruction?: StringNullableFilter<"ReferenceArticleData"> | string | null
+    mComposition?: StringNullableFilter<"ReferenceArticleData"> | string | null
+    mFinish?: StringNullableFilter<"ReferenceArticleData"> | string | null
+    mWidth?: StringNullableFilter<"ReferenceArticleData"> | string | null
+    mLycra?: StringNullableFilter<"ReferenceArticleData"> | string | null
+    mCollarType?: StringNullableFilter<"ReferenceArticleData"> | string | null
+    mCollarStyle?: StringNullableFilter<"ReferenceArticleData"> | string | null
+    mNeckType?: StringNullableFilter<"ReferenceArticleData"> | string | null
+    mNeckStyle?: StringNullableFilter<"ReferenceArticleData"> | string | null
+    mPlacket?: StringNullableFilter<"ReferenceArticleData"> | string | null
+    mBltType?: StringNullableFilter<"ReferenceArticleData"> | string | null
+    mBltStyle?: StringNullableFilter<"ReferenceArticleData"> | string | null
+    mSleevesMainStyle?: StringNullableFilter<"ReferenceArticleData"> | string | null
+    mSleeveFold?: StringNullableFilter<"ReferenceArticleData"> | string | null
+    mBtmFold?: StringNullableFilter<"ReferenceArticleData"> | string | null
+    mNoOfPocket?: StringNullableFilter<"ReferenceArticleData"> | string | null
+    mPocket?: StringNullableFilter<"ReferenceArticleData"> | string | null
+    mExtraPocket?: StringNullableFilter<"ReferenceArticleData"> | string | null
+    mFit?: StringNullableFilter<"ReferenceArticleData"> | string | null
+    mBodyStyle?: StringNullableFilter<"ReferenceArticleData"> | string | null
+    mLength?: StringNullableFilter<"ReferenceArticleData"> | string | null
+    mSet?: StringNullableFilter<"ReferenceArticleData"> | string | null
+    fabricArticleNo?: StringNullableFilter<"ReferenceArticleData"> | string | null
+    fabricArticleDescription?: StringNullableFilter<"ReferenceArticleData"> | string | null
+    bodyArticleNo?: StringNullableFilter<"ReferenceArticleData"> | string | null
+    bodyArticleDescription?: StringNullableFilter<"ReferenceArticleData"> | string | null
+    referenceArticleNo?: StringNullableFilter<"ReferenceArticleData"> | string | null
+    referenceArticleDescription?: StringNullableFilter<"ReferenceArticleData"> | string | null
+    flatId?: StringNullableFilter<"ReferenceArticleData"> | string | null
+    division?: StringNullableFilter<"ReferenceArticleData"> | string | null
+    subDivision?: StringNullableFilter<"ReferenceArticleData"> | string | null
+    majorCategory?: StringNullableFilter<"ReferenceArticleData"> | string | null
+    mcCode?: StringNullableFilter<"ReferenceArticleData"> | string | null
+    vendorName?: StringNullableFilter<"ReferenceArticleData"> | string | null
+    vendorCode?: StringNullableFilter<"ReferenceArticleData"> | string | null
+    hsnTaxCode?: StringNullableFilter<"ReferenceArticleData"> | string | null
+    approvalStatus?: StringFilter<"ReferenceArticleData"> | string
+    approvedAt?: DateTimeNullableFilter<"ReferenceArticleData"> | Date | string | null
+    approvedBy?: IntNullableFilter<"ReferenceArticleData"> | number | null
+    sapSyncStatus?: StringFilter<"ReferenceArticleData"> | string
+    sapSyncMessage?: StringNullableFilter<"ReferenceArticleData"> | string | null
+    userName?: StringNullableFilter<"ReferenceArticleData"> | string | null
+    createdAt?: DateTimeFilter<"ReferenceArticleData"> | Date | string
+    updatedAt?: DateTimeFilter<"ReferenceArticleData"> | Date | string
+  }
+
+  export type ReferenceArticleDataOrderByWithRelationInput = {
+    id?: SortOrder
+    mFabDiv?: SortOrderInput | SortOrder
+    mYarn?: SortOrderInput | SortOrder
+    mFabMainMvgr1?: SortOrderInput | SortOrder
+    mFabMainMvgr2?: SortOrderInput | SortOrder
+    mFabVdr?: SortOrderInput | SortOrder
+    mWeave01?: SortOrderInput | SortOrder
+    mWeave02?: SortOrderInput | SortOrder
+    mCount?: SortOrderInput | SortOrder
+    mGsm?: SortOrderInput | SortOrder
+    mOunz?: SortOrderInput | SortOrder
+    mConstruction?: SortOrderInput | SortOrder
+    mComposition?: SortOrderInput | SortOrder
+    mFinish?: SortOrderInput | SortOrder
+    mWidth?: SortOrderInput | SortOrder
+    mLycra?: SortOrderInput | SortOrder
+    mCollarType?: SortOrderInput | SortOrder
+    mCollarStyle?: SortOrderInput | SortOrder
+    mNeckType?: SortOrderInput | SortOrder
+    mNeckStyle?: SortOrderInput | SortOrder
+    mPlacket?: SortOrderInput | SortOrder
+    mBltType?: SortOrderInput | SortOrder
+    mBltStyle?: SortOrderInput | SortOrder
+    mSleevesMainStyle?: SortOrderInput | SortOrder
+    mSleeveFold?: SortOrderInput | SortOrder
+    mBtmFold?: SortOrderInput | SortOrder
+    mNoOfPocket?: SortOrderInput | SortOrder
+    mPocket?: SortOrderInput | SortOrder
+    mExtraPocket?: SortOrderInput | SortOrder
+    mFit?: SortOrderInput | SortOrder
+    mBodyStyle?: SortOrderInput | SortOrder
+    mLength?: SortOrderInput | SortOrder
+    mSet?: SortOrderInput | SortOrder
+    fabricArticleNo?: SortOrderInput | SortOrder
+    fabricArticleDescription?: SortOrderInput | SortOrder
+    bodyArticleNo?: SortOrderInput | SortOrder
+    bodyArticleDescription?: SortOrderInput | SortOrder
+    referenceArticleNo?: SortOrderInput | SortOrder
+    referenceArticleDescription?: SortOrderInput | SortOrder
+    flatId?: SortOrderInput | SortOrder
+    division?: SortOrderInput | SortOrder
+    subDivision?: SortOrderInput | SortOrder
+    majorCategory?: SortOrderInput | SortOrder
+    mcCode?: SortOrderInput | SortOrder
+    vendorName?: SortOrderInput | SortOrder
+    vendorCode?: SortOrderInput | SortOrder
+    hsnTaxCode?: SortOrderInput | SortOrder
+    approvalStatus?: SortOrder
+    approvedAt?: SortOrderInput | SortOrder
+    approvedBy?: SortOrderInput | SortOrder
+    sapSyncStatus?: SortOrder
+    sapSyncMessage?: SortOrderInput | SortOrder
+    userName?: SortOrderInput | SortOrder
+    createdAt?: SortOrder
+    updatedAt?: SortOrder
+    _relevance?: ReferenceArticleDataOrderByRelevanceInput
+  }
+
+  export type ReferenceArticleDataWhereUniqueInput = Prisma.AtLeast<{
+    id?: string
+    AND?: ReferenceArticleDataWhereInput | ReferenceArticleDataWhereInput[]
+    OR?: ReferenceArticleDataWhereInput[]
+    NOT?: ReferenceArticleDataWhereInput | ReferenceArticleDataWhereInput[]
+    mFabDiv?: StringNullableFilter<"ReferenceArticleData"> | string | null
+    mYarn?: StringNullableFilter<"ReferenceArticleData"> | string | null
+    mFabMainMvgr1?: StringNullableFilter<"ReferenceArticleData"> | string | null
+    mFabMainMvgr2?: StringNullableFilter<"ReferenceArticleData"> | string | null
+    mFabVdr?: StringNullableFilter<"ReferenceArticleData"> | string | null
+    mWeave01?: StringNullableFilter<"ReferenceArticleData"> | string | null
+    mWeave02?: StringNullableFilter<"ReferenceArticleData"> | string | null
+    mCount?: StringNullableFilter<"ReferenceArticleData"> | string | null
+    mGsm?: StringNullableFilter<"ReferenceArticleData"> | string | null
+    mOunz?: StringNullableFilter<"ReferenceArticleData"> | string | null
+    mConstruction?: StringNullableFilter<"ReferenceArticleData"> | string | null
+    mComposition?: StringNullableFilter<"ReferenceArticleData"> | string | null
+    mFinish?: StringNullableFilter<"ReferenceArticleData"> | string | null
+    mWidth?: StringNullableFilter<"ReferenceArticleData"> | string | null
+    mLycra?: StringNullableFilter<"ReferenceArticleData"> | string | null
+    mCollarType?: StringNullableFilter<"ReferenceArticleData"> | string | null
+    mCollarStyle?: StringNullableFilter<"ReferenceArticleData"> | string | null
+    mNeckType?: StringNullableFilter<"ReferenceArticleData"> | string | null
+    mNeckStyle?: StringNullableFilter<"ReferenceArticleData"> | string | null
+    mPlacket?: StringNullableFilter<"ReferenceArticleData"> | string | null
+    mBltType?: StringNullableFilter<"ReferenceArticleData"> | string | null
+    mBltStyle?: StringNullableFilter<"ReferenceArticleData"> | string | null
+    mSleevesMainStyle?: StringNullableFilter<"ReferenceArticleData"> | string | null
+    mSleeveFold?: StringNullableFilter<"ReferenceArticleData"> | string | null
+    mBtmFold?: StringNullableFilter<"ReferenceArticleData"> | string | null
+    mNoOfPocket?: StringNullableFilter<"ReferenceArticleData"> | string | null
+    mPocket?: StringNullableFilter<"ReferenceArticleData"> | string | null
+    mExtraPocket?: StringNullableFilter<"ReferenceArticleData"> | string | null
+    mFit?: StringNullableFilter<"ReferenceArticleData"> | string | null
+    mBodyStyle?: StringNullableFilter<"ReferenceArticleData"> | string | null
+    mLength?: StringNullableFilter<"ReferenceArticleData"> | string | null
+    mSet?: StringNullableFilter<"ReferenceArticleData"> | string | null
+    fabricArticleNo?: StringNullableFilter<"ReferenceArticleData"> | string | null
+    fabricArticleDescription?: StringNullableFilter<"ReferenceArticleData"> | string | null
+    bodyArticleNo?: StringNullableFilter<"ReferenceArticleData"> | string | null
+    bodyArticleDescription?: StringNullableFilter<"ReferenceArticleData"> | string | null
+    referenceArticleNo?: StringNullableFilter<"ReferenceArticleData"> | string | null
+    referenceArticleDescription?: StringNullableFilter<"ReferenceArticleData"> | string | null
+    flatId?: StringNullableFilter<"ReferenceArticleData"> | string | null
+    division?: StringNullableFilter<"ReferenceArticleData"> | string | null
+    subDivision?: StringNullableFilter<"ReferenceArticleData"> | string | null
+    majorCategory?: StringNullableFilter<"ReferenceArticleData"> | string | null
+    mcCode?: StringNullableFilter<"ReferenceArticleData"> | string | null
+    vendorName?: StringNullableFilter<"ReferenceArticleData"> | string | null
+    vendorCode?: StringNullableFilter<"ReferenceArticleData"> | string | null
+    hsnTaxCode?: StringNullableFilter<"ReferenceArticleData"> | string | null
+    approvalStatus?: StringFilter<"ReferenceArticleData"> | string
+    approvedAt?: DateTimeNullableFilter<"ReferenceArticleData"> | Date | string | null
+    approvedBy?: IntNullableFilter<"ReferenceArticleData"> | number | null
+    sapSyncStatus?: StringFilter<"ReferenceArticleData"> | string
+    sapSyncMessage?: StringNullableFilter<"ReferenceArticleData"> | string | null
+    userName?: StringNullableFilter<"ReferenceArticleData"> | string | null
+    createdAt?: DateTimeFilter<"ReferenceArticleData"> | Date | string
+    updatedAt?: DateTimeFilter<"ReferenceArticleData"> | Date | string
+  }, "id">
+
+  export type ReferenceArticleDataOrderByWithAggregationInput = {
+    id?: SortOrder
+    mFabDiv?: SortOrderInput | SortOrder
+    mYarn?: SortOrderInput | SortOrder
+    mFabMainMvgr1?: SortOrderInput | SortOrder
+    mFabMainMvgr2?: SortOrderInput | SortOrder
+    mFabVdr?: SortOrderInput | SortOrder
+    mWeave01?: SortOrderInput | SortOrder
+    mWeave02?: SortOrderInput | SortOrder
+    mCount?: SortOrderInput | SortOrder
+    mGsm?: SortOrderInput | SortOrder
+    mOunz?: SortOrderInput | SortOrder
+    mConstruction?: SortOrderInput | SortOrder
+    mComposition?: SortOrderInput | SortOrder
+    mFinish?: SortOrderInput | SortOrder
+    mWidth?: SortOrderInput | SortOrder
+    mLycra?: SortOrderInput | SortOrder
+    mCollarType?: SortOrderInput | SortOrder
+    mCollarStyle?: SortOrderInput | SortOrder
+    mNeckType?: SortOrderInput | SortOrder
+    mNeckStyle?: SortOrderInput | SortOrder
+    mPlacket?: SortOrderInput | SortOrder
+    mBltType?: SortOrderInput | SortOrder
+    mBltStyle?: SortOrderInput | SortOrder
+    mSleevesMainStyle?: SortOrderInput | SortOrder
+    mSleeveFold?: SortOrderInput | SortOrder
+    mBtmFold?: SortOrderInput | SortOrder
+    mNoOfPocket?: SortOrderInput | SortOrder
+    mPocket?: SortOrderInput | SortOrder
+    mExtraPocket?: SortOrderInput | SortOrder
+    mFit?: SortOrderInput | SortOrder
+    mBodyStyle?: SortOrderInput | SortOrder
+    mLength?: SortOrderInput | SortOrder
+    mSet?: SortOrderInput | SortOrder
+    fabricArticleNo?: SortOrderInput | SortOrder
+    fabricArticleDescription?: SortOrderInput | SortOrder
+    bodyArticleNo?: SortOrderInput | SortOrder
+    bodyArticleDescription?: SortOrderInput | SortOrder
+    referenceArticleNo?: SortOrderInput | SortOrder
+    referenceArticleDescription?: SortOrderInput | SortOrder
+    flatId?: SortOrderInput | SortOrder
+    division?: SortOrderInput | SortOrder
+    subDivision?: SortOrderInput | SortOrder
+    majorCategory?: SortOrderInput | SortOrder
+    mcCode?: SortOrderInput | SortOrder
+    vendorName?: SortOrderInput | SortOrder
+    vendorCode?: SortOrderInput | SortOrder
+    hsnTaxCode?: SortOrderInput | SortOrder
+    approvalStatus?: SortOrder
+    approvedAt?: SortOrderInput | SortOrder
+    approvedBy?: SortOrderInput | SortOrder
+    sapSyncStatus?: SortOrder
+    sapSyncMessage?: SortOrderInput | SortOrder
+    userName?: SortOrderInput | SortOrder
+    createdAt?: SortOrder
+    updatedAt?: SortOrder
+    _count?: ReferenceArticleDataCountOrderByAggregateInput
+    _avg?: ReferenceArticleDataAvgOrderByAggregateInput
+    _max?: ReferenceArticleDataMaxOrderByAggregateInput
+    _min?: ReferenceArticleDataMinOrderByAggregateInput
+    _sum?: ReferenceArticleDataSumOrderByAggregateInput
+  }
+
+  export type ReferenceArticleDataScalarWhereWithAggregatesInput = {
+    AND?: ReferenceArticleDataScalarWhereWithAggregatesInput | ReferenceArticleDataScalarWhereWithAggregatesInput[]
+    OR?: ReferenceArticleDataScalarWhereWithAggregatesInput[]
+    NOT?: ReferenceArticleDataScalarWhereWithAggregatesInput | ReferenceArticleDataScalarWhereWithAggregatesInput[]
+    id?: StringWithAggregatesFilter<"ReferenceArticleData"> | string
+    mFabDiv?: StringNullableWithAggregatesFilter<"ReferenceArticleData"> | string | null
+    mYarn?: StringNullableWithAggregatesFilter<"ReferenceArticleData"> | string | null
+    mFabMainMvgr1?: StringNullableWithAggregatesFilter<"ReferenceArticleData"> | string | null
+    mFabMainMvgr2?: StringNullableWithAggregatesFilter<"ReferenceArticleData"> | string | null
+    mFabVdr?: StringNullableWithAggregatesFilter<"ReferenceArticleData"> | string | null
+    mWeave01?: StringNullableWithAggregatesFilter<"ReferenceArticleData"> | string | null
+    mWeave02?: StringNullableWithAggregatesFilter<"ReferenceArticleData"> | string | null
+    mCount?: StringNullableWithAggregatesFilter<"ReferenceArticleData"> | string | null
+    mGsm?: StringNullableWithAggregatesFilter<"ReferenceArticleData"> | string | null
+    mOunz?: StringNullableWithAggregatesFilter<"ReferenceArticleData"> | string | null
+    mConstruction?: StringNullableWithAggregatesFilter<"ReferenceArticleData"> | string | null
+    mComposition?: StringNullableWithAggregatesFilter<"ReferenceArticleData"> | string | null
+    mFinish?: StringNullableWithAggregatesFilter<"ReferenceArticleData"> | string | null
+    mWidth?: StringNullableWithAggregatesFilter<"ReferenceArticleData"> | string | null
+    mLycra?: StringNullableWithAggregatesFilter<"ReferenceArticleData"> | string | null
+    mCollarType?: StringNullableWithAggregatesFilter<"ReferenceArticleData"> | string | null
+    mCollarStyle?: StringNullableWithAggregatesFilter<"ReferenceArticleData"> | string | null
+    mNeckType?: StringNullableWithAggregatesFilter<"ReferenceArticleData"> | string | null
+    mNeckStyle?: StringNullableWithAggregatesFilter<"ReferenceArticleData"> | string | null
+    mPlacket?: StringNullableWithAggregatesFilter<"ReferenceArticleData"> | string | null
+    mBltType?: StringNullableWithAggregatesFilter<"ReferenceArticleData"> | string | null
+    mBltStyle?: StringNullableWithAggregatesFilter<"ReferenceArticleData"> | string | null
+    mSleevesMainStyle?: StringNullableWithAggregatesFilter<"ReferenceArticleData"> | string | null
+    mSleeveFold?: StringNullableWithAggregatesFilter<"ReferenceArticleData"> | string | null
+    mBtmFold?: StringNullableWithAggregatesFilter<"ReferenceArticleData"> | string | null
+    mNoOfPocket?: StringNullableWithAggregatesFilter<"ReferenceArticleData"> | string | null
+    mPocket?: StringNullableWithAggregatesFilter<"ReferenceArticleData"> | string | null
+    mExtraPocket?: StringNullableWithAggregatesFilter<"ReferenceArticleData"> | string | null
+    mFit?: StringNullableWithAggregatesFilter<"ReferenceArticleData"> | string | null
+    mBodyStyle?: StringNullableWithAggregatesFilter<"ReferenceArticleData"> | string | null
+    mLength?: StringNullableWithAggregatesFilter<"ReferenceArticleData"> | string | null
+    mSet?: StringNullableWithAggregatesFilter<"ReferenceArticleData"> | string | null
+    fabricArticleNo?: StringNullableWithAggregatesFilter<"ReferenceArticleData"> | string | null
+    fabricArticleDescription?: StringNullableWithAggregatesFilter<"ReferenceArticleData"> | string | null
+    bodyArticleNo?: StringNullableWithAggregatesFilter<"ReferenceArticleData"> | string | null
+    bodyArticleDescription?: StringNullableWithAggregatesFilter<"ReferenceArticleData"> | string | null
+    referenceArticleNo?: StringNullableWithAggregatesFilter<"ReferenceArticleData"> | string | null
+    referenceArticleDescription?: StringNullableWithAggregatesFilter<"ReferenceArticleData"> | string | null
+    flatId?: StringNullableWithAggregatesFilter<"ReferenceArticleData"> | string | null
+    division?: StringNullableWithAggregatesFilter<"ReferenceArticleData"> | string | null
+    subDivision?: StringNullableWithAggregatesFilter<"ReferenceArticleData"> | string | null
+    majorCategory?: StringNullableWithAggregatesFilter<"ReferenceArticleData"> | string | null
+    mcCode?: StringNullableWithAggregatesFilter<"ReferenceArticleData"> | string | null
+    vendorName?: StringNullableWithAggregatesFilter<"ReferenceArticleData"> | string | null
+    vendorCode?: StringNullableWithAggregatesFilter<"ReferenceArticleData"> | string | null
+    hsnTaxCode?: StringNullableWithAggregatesFilter<"ReferenceArticleData"> | string | null
+    approvalStatus?: StringWithAggregatesFilter<"ReferenceArticleData"> | string
+    approvedAt?: DateTimeNullableWithAggregatesFilter<"ReferenceArticleData"> | Date | string | null
+    approvedBy?: IntNullableWithAggregatesFilter<"ReferenceArticleData"> | number | null
+    sapSyncStatus?: StringWithAggregatesFilter<"ReferenceArticleData"> | string
+    sapSyncMessage?: StringNullableWithAggregatesFilter<"ReferenceArticleData"> | string | null
+    userName?: StringNullableWithAggregatesFilter<"ReferenceArticleData"> | string | null
+    createdAt?: DateTimeWithAggregatesFilter<"ReferenceArticleData"> | Date | string
+    updatedAt?: DateTimeWithAggregatesFilter<"ReferenceArticleData"> | Date | string
   }
 
   export type BodyFabricConsumptionWhereInput = {
@@ -87932,6 +90126,412 @@ export namespace Prisma {
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
   }
 
+  export type ReferenceArticleDataCreateInput = {
+    id?: string
+    mFabDiv?: string | null
+    mYarn?: string | null
+    mFabMainMvgr1?: string | null
+    mFabMainMvgr2?: string | null
+    mFabVdr?: string | null
+    mWeave01?: string | null
+    mWeave02?: string | null
+    mCount?: string | null
+    mGsm?: string | null
+    mOunz?: string | null
+    mConstruction?: string | null
+    mComposition?: string | null
+    mFinish?: string | null
+    mWidth?: string | null
+    mLycra?: string | null
+    mCollarType?: string | null
+    mCollarStyle?: string | null
+    mNeckType?: string | null
+    mNeckStyle?: string | null
+    mPlacket?: string | null
+    mBltType?: string | null
+    mBltStyle?: string | null
+    mSleevesMainStyle?: string | null
+    mSleeveFold?: string | null
+    mBtmFold?: string | null
+    mNoOfPocket?: string | null
+    mPocket?: string | null
+    mExtraPocket?: string | null
+    mFit?: string | null
+    mBodyStyle?: string | null
+    mLength?: string | null
+    mSet?: string | null
+    fabricArticleNo?: string | null
+    fabricArticleDescription?: string | null
+    bodyArticleNo?: string | null
+    bodyArticleDescription?: string | null
+    referenceArticleNo?: string | null
+    referenceArticleDescription?: string | null
+    flatId?: string | null
+    division?: string | null
+    subDivision?: string | null
+    majorCategory?: string | null
+    mcCode?: string | null
+    vendorName?: string | null
+    vendorCode?: string | null
+    hsnTaxCode?: string | null
+    approvalStatus?: string
+    approvedAt?: Date | string | null
+    approvedBy?: number | null
+    sapSyncStatus?: string
+    sapSyncMessage?: string | null
+    userName?: string | null
+    createdAt?: Date | string
+    updatedAt?: Date | string
+  }
+
+  export type ReferenceArticleDataUncheckedCreateInput = {
+    id?: string
+    mFabDiv?: string | null
+    mYarn?: string | null
+    mFabMainMvgr1?: string | null
+    mFabMainMvgr2?: string | null
+    mFabVdr?: string | null
+    mWeave01?: string | null
+    mWeave02?: string | null
+    mCount?: string | null
+    mGsm?: string | null
+    mOunz?: string | null
+    mConstruction?: string | null
+    mComposition?: string | null
+    mFinish?: string | null
+    mWidth?: string | null
+    mLycra?: string | null
+    mCollarType?: string | null
+    mCollarStyle?: string | null
+    mNeckType?: string | null
+    mNeckStyle?: string | null
+    mPlacket?: string | null
+    mBltType?: string | null
+    mBltStyle?: string | null
+    mSleevesMainStyle?: string | null
+    mSleeveFold?: string | null
+    mBtmFold?: string | null
+    mNoOfPocket?: string | null
+    mPocket?: string | null
+    mExtraPocket?: string | null
+    mFit?: string | null
+    mBodyStyle?: string | null
+    mLength?: string | null
+    mSet?: string | null
+    fabricArticleNo?: string | null
+    fabricArticleDescription?: string | null
+    bodyArticleNo?: string | null
+    bodyArticleDescription?: string | null
+    referenceArticleNo?: string | null
+    referenceArticleDescription?: string | null
+    flatId?: string | null
+    division?: string | null
+    subDivision?: string | null
+    majorCategory?: string | null
+    mcCode?: string | null
+    vendorName?: string | null
+    vendorCode?: string | null
+    hsnTaxCode?: string | null
+    approvalStatus?: string
+    approvedAt?: Date | string | null
+    approvedBy?: number | null
+    sapSyncStatus?: string
+    sapSyncMessage?: string | null
+    userName?: string | null
+    createdAt?: Date | string
+    updatedAt?: Date | string
+  }
+
+  export type ReferenceArticleDataUpdateInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    mFabDiv?: NullableStringFieldUpdateOperationsInput | string | null
+    mYarn?: NullableStringFieldUpdateOperationsInput | string | null
+    mFabMainMvgr1?: NullableStringFieldUpdateOperationsInput | string | null
+    mFabMainMvgr2?: NullableStringFieldUpdateOperationsInput | string | null
+    mFabVdr?: NullableStringFieldUpdateOperationsInput | string | null
+    mWeave01?: NullableStringFieldUpdateOperationsInput | string | null
+    mWeave02?: NullableStringFieldUpdateOperationsInput | string | null
+    mCount?: NullableStringFieldUpdateOperationsInput | string | null
+    mGsm?: NullableStringFieldUpdateOperationsInput | string | null
+    mOunz?: NullableStringFieldUpdateOperationsInput | string | null
+    mConstruction?: NullableStringFieldUpdateOperationsInput | string | null
+    mComposition?: NullableStringFieldUpdateOperationsInput | string | null
+    mFinish?: NullableStringFieldUpdateOperationsInput | string | null
+    mWidth?: NullableStringFieldUpdateOperationsInput | string | null
+    mLycra?: NullableStringFieldUpdateOperationsInput | string | null
+    mCollarType?: NullableStringFieldUpdateOperationsInput | string | null
+    mCollarStyle?: NullableStringFieldUpdateOperationsInput | string | null
+    mNeckType?: NullableStringFieldUpdateOperationsInput | string | null
+    mNeckStyle?: NullableStringFieldUpdateOperationsInput | string | null
+    mPlacket?: NullableStringFieldUpdateOperationsInput | string | null
+    mBltType?: NullableStringFieldUpdateOperationsInput | string | null
+    mBltStyle?: NullableStringFieldUpdateOperationsInput | string | null
+    mSleevesMainStyle?: NullableStringFieldUpdateOperationsInput | string | null
+    mSleeveFold?: NullableStringFieldUpdateOperationsInput | string | null
+    mBtmFold?: NullableStringFieldUpdateOperationsInput | string | null
+    mNoOfPocket?: NullableStringFieldUpdateOperationsInput | string | null
+    mPocket?: NullableStringFieldUpdateOperationsInput | string | null
+    mExtraPocket?: NullableStringFieldUpdateOperationsInput | string | null
+    mFit?: NullableStringFieldUpdateOperationsInput | string | null
+    mBodyStyle?: NullableStringFieldUpdateOperationsInput | string | null
+    mLength?: NullableStringFieldUpdateOperationsInput | string | null
+    mSet?: NullableStringFieldUpdateOperationsInput | string | null
+    fabricArticleNo?: NullableStringFieldUpdateOperationsInput | string | null
+    fabricArticleDescription?: NullableStringFieldUpdateOperationsInput | string | null
+    bodyArticleNo?: NullableStringFieldUpdateOperationsInput | string | null
+    bodyArticleDescription?: NullableStringFieldUpdateOperationsInput | string | null
+    referenceArticleNo?: NullableStringFieldUpdateOperationsInput | string | null
+    referenceArticleDescription?: NullableStringFieldUpdateOperationsInput | string | null
+    flatId?: NullableStringFieldUpdateOperationsInput | string | null
+    division?: NullableStringFieldUpdateOperationsInput | string | null
+    subDivision?: NullableStringFieldUpdateOperationsInput | string | null
+    majorCategory?: NullableStringFieldUpdateOperationsInput | string | null
+    mcCode?: NullableStringFieldUpdateOperationsInput | string | null
+    vendorName?: NullableStringFieldUpdateOperationsInput | string | null
+    vendorCode?: NullableStringFieldUpdateOperationsInput | string | null
+    hsnTaxCode?: NullableStringFieldUpdateOperationsInput | string | null
+    approvalStatus?: StringFieldUpdateOperationsInput | string
+    approvedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    approvedBy?: NullableIntFieldUpdateOperationsInput | number | null
+    sapSyncStatus?: StringFieldUpdateOperationsInput | string
+    sapSyncMessage?: NullableStringFieldUpdateOperationsInput | string | null
+    userName?: NullableStringFieldUpdateOperationsInput | string | null
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+  }
+
+  export type ReferenceArticleDataUncheckedUpdateInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    mFabDiv?: NullableStringFieldUpdateOperationsInput | string | null
+    mYarn?: NullableStringFieldUpdateOperationsInput | string | null
+    mFabMainMvgr1?: NullableStringFieldUpdateOperationsInput | string | null
+    mFabMainMvgr2?: NullableStringFieldUpdateOperationsInput | string | null
+    mFabVdr?: NullableStringFieldUpdateOperationsInput | string | null
+    mWeave01?: NullableStringFieldUpdateOperationsInput | string | null
+    mWeave02?: NullableStringFieldUpdateOperationsInput | string | null
+    mCount?: NullableStringFieldUpdateOperationsInput | string | null
+    mGsm?: NullableStringFieldUpdateOperationsInput | string | null
+    mOunz?: NullableStringFieldUpdateOperationsInput | string | null
+    mConstruction?: NullableStringFieldUpdateOperationsInput | string | null
+    mComposition?: NullableStringFieldUpdateOperationsInput | string | null
+    mFinish?: NullableStringFieldUpdateOperationsInput | string | null
+    mWidth?: NullableStringFieldUpdateOperationsInput | string | null
+    mLycra?: NullableStringFieldUpdateOperationsInput | string | null
+    mCollarType?: NullableStringFieldUpdateOperationsInput | string | null
+    mCollarStyle?: NullableStringFieldUpdateOperationsInput | string | null
+    mNeckType?: NullableStringFieldUpdateOperationsInput | string | null
+    mNeckStyle?: NullableStringFieldUpdateOperationsInput | string | null
+    mPlacket?: NullableStringFieldUpdateOperationsInput | string | null
+    mBltType?: NullableStringFieldUpdateOperationsInput | string | null
+    mBltStyle?: NullableStringFieldUpdateOperationsInput | string | null
+    mSleevesMainStyle?: NullableStringFieldUpdateOperationsInput | string | null
+    mSleeveFold?: NullableStringFieldUpdateOperationsInput | string | null
+    mBtmFold?: NullableStringFieldUpdateOperationsInput | string | null
+    mNoOfPocket?: NullableStringFieldUpdateOperationsInput | string | null
+    mPocket?: NullableStringFieldUpdateOperationsInput | string | null
+    mExtraPocket?: NullableStringFieldUpdateOperationsInput | string | null
+    mFit?: NullableStringFieldUpdateOperationsInput | string | null
+    mBodyStyle?: NullableStringFieldUpdateOperationsInput | string | null
+    mLength?: NullableStringFieldUpdateOperationsInput | string | null
+    mSet?: NullableStringFieldUpdateOperationsInput | string | null
+    fabricArticleNo?: NullableStringFieldUpdateOperationsInput | string | null
+    fabricArticleDescription?: NullableStringFieldUpdateOperationsInput | string | null
+    bodyArticleNo?: NullableStringFieldUpdateOperationsInput | string | null
+    bodyArticleDescription?: NullableStringFieldUpdateOperationsInput | string | null
+    referenceArticleNo?: NullableStringFieldUpdateOperationsInput | string | null
+    referenceArticleDescription?: NullableStringFieldUpdateOperationsInput | string | null
+    flatId?: NullableStringFieldUpdateOperationsInput | string | null
+    division?: NullableStringFieldUpdateOperationsInput | string | null
+    subDivision?: NullableStringFieldUpdateOperationsInput | string | null
+    majorCategory?: NullableStringFieldUpdateOperationsInput | string | null
+    mcCode?: NullableStringFieldUpdateOperationsInput | string | null
+    vendorName?: NullableStringFieldUpdateOperationsInput | string | null
+    vendorCode?: NullableStringFieldUpdateOperationsInput | string | null
+    hsnTaxCode?: NullableStringFieldUpdateOperationsInput | string | null
+    approvalStatus?: StringFieldUpdateOperationsInput | string
+    approvedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    approvedBy?: NullableIntFieldUpdateOperationsInput | number | null
+    sapSyncStatus?: StringFieldUpdateOperationsInput | string
+    sapSyncMessage?: NullableStringFieldUpdateOperationsInput | string | null
+    userName?: NullableStringFieldUpdateOperationsInput | string | null
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+  }
+
+  export type ReferenceArticleDataCreateManyInput = {
+    id?: string
+    mFabDiv?: string | null
+    mYarn?: string | null
+    mFabMainMvgr1?: string | null
+    mFabMainMvgr2?: string | null
+    mFabVdr?: string | null
+    mWeave01?: string | null
+    mWeave02?: string | null
+    mCount?: string | null
+    mGsm?: string | null
+    mOunz?: string | null
+    mConstruction?: string | null
+    mComposition?: string | null
+    mFinish?: string | null
+    mWidth?: string | null
+    mLycra?: string | null
+    mCollarType?: string | null
+    mCollarStyle?: string | null
+    mNeckType?: string | null
+    mNeckStyle?: string | null
+    mPlacket?: string | null
+    mBltType?: string | null
+    mBltStyle?: string | null
+    mSleevesMainStyle?: string | null
+    mSleeveFold?: string | null
+    mBtmFold?: string | null
+    mNoOfPocket?: string | null
+    mPocket?: string | null
+    mExtraPocket?: string | null
+    mFit?: string | null
+    mBodyStyle?: string | null
+    mLength?: string | null
+    mSet?: string | null
+    fabricArticleNo?: string | null
+    fabricArticleDescription?: string | null
+    bodyArticleNo?: string | null
+    bodyArticleDescription?: string | null
+    referenceArticleNo?: string | null
+    referenceArticleDescription?: string | null
+    flatId?: string | null
+    division?: string | null
+    subDivision?: string | null
+    majorCategory?: string | null
+    mcCode?: string | null
+    vendorName?: string | null
+    vendorCode?: string | null
+    hsnTaxCode?: string | null
+    approvalStatus?: string
+    approvedAt?: Date | string | null
+    approvedBy?: number | null
+    sapSyncStatus?: string
+    sapSyncMessage?: string | null
+    userName?: string | null
+    createdAt?: Date | string
+    updatedAt?: Date | string
+  }
+
+  export type ReferenceArticleDataUpdateManyMutationInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    mFabDiv?: NullableStringFieldUpdateOperationsInput | string | null
+    mYarn?: NullableStringFieldUpdateOperationsInput | string | null
+    mFabMainMvgr1?: NullableStringFieldUpdateOperationsInput | string | null
+    mFabMainMvgr2?: NullableStringFieldUpdateOperationsInput | string | null
+    mFabVdr?: NullableStringFieldUpdateOperationsInput | string | null
+    mWeave01?: NullableStringFieldUpdateOperationsInput | string | null
+    mWeave02?: NullableStringFieldUpdateOperationsInput | string | null
+    mCount?: NullableStringFieldUpdateOperationsInput | string | null
+    mGsm?: NullableStringFieldUpdateOperationsInput | string | null
+    mOunz?: NullableStringFieldUpdateOperationsInput | string | null
+    mConstruction?: NullableStringFieldUpdateOperationsInput | string | null
+    mComposition?: NullableStringFieldUpdateOperationsInput | string | null
+    mFinish?: NullableStringFieldUpdateOperationsInput | string | null
+    mWidth?: NullableStringFieldUpdateOperationsInput | string | null
+    mLycra?: NullableStringFieldUpdateOperationsInput | string | null
+    mCollarType?: NullableStringFieldUpdateOperationsInput | string | null
+    mCollarStyle?: NullableStringFieldUpdateOperationsInput | string | null
+    mNeckType?: NullableStringFieldUpdateOperationsInput | string | null
+    mNeckStyle?: NullableStringFieldUpdateOperationsInput | string | null
+    mPlacket?: NullableStringFieldUpdateOperationsInput | string | null
+    mBltType?: NullableStringFieldUpdateOperationsInput | string | null
+    mBltStyle?: NullableStringFieldUpdateOperationsInput | string | null
+    mSleevesMainStyle?: NullableStringFieldUpdateOperationsInput | string | null
+    mSleeveFold?: NullableStringFieldUpdateOperationsInput | string | null
+    mBtmFold?: NullableStringFieldUpdateOperationsInput | string | null
+    mNoOfPocket?: NullableStringFieldUpdateOperationsInput | string | null
+    mPocket?: NullableStringFieldUpdateOperationsInput | string | null
+    mExtraPocket?: NullableStringFieldUpdateOperationsInput | string | null
+    mFit?: NullableStringFieldUpdateOperationsInput | string | null
+    mBodyStyle?: NullableStringFieldUpdateOperationsInput | string | null
+    mLength?: NullableStringFieldUpdateOperationsInput | string | null
+    mSet?: NullableStringFieldUpdateOperationsInput | string | null
+    fabricArticleNo?: NullableStringFieldUpdateOperationsInput | string | null
+    fabricArticleDescription?: NullableStringFieldUpdateOperationsInput | string | null
+    bodyArticleNo?: NullableStringFieldUpdateOperationsInput | string | null
+    bodyArticleDescription?: NullableStringFieldUpdateOperationsInput | string | null
+    referenceArticleNo?: NullableStringFieldUpdateOperationsInput | string | null
+    referenceArticleDescription?: NullableStringFieldUpdateOperationsInput | string | null
+    flatId?: NullableStringFieldUpdateOperationsInput | string | null
+    division?: NullableStringFieldUpdateOperationsInput | string | null
+    subDivision?: NullableStringFieldUpdateOperationsInput | string | null
+    majorCategory?: NullableStringFieldUpdateOperationsInput | string | null
+    mcCode?: NullableStringFieldUpdateOperationsInput | string | null
+    vendorName?: NullableStringFieldUpdateOperationsInput | string | null
+    vendorCode?: NullableStringFieldUpdateOperationsInput | string | null
+    hsnTaxCode?: NullableStringFieldUpdateOperationsInput | string | null
+    approvalStatus?: StringFieldUpdateOperationsInput | string
+    approvedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    approvedBy?: NullableIntFieldUpdateOperationsInput | number | null
+    sapSyncStatus?: StringFieldUpdateOperationsInput | string
+    sapSyncMessage?: NullableStringFieldUpdateOperationsInput | string | null
+    userName?: NullableStringFieldUpdateOperationsInput | string | null
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+  }
+
+  export type ReferenceArticleDataUncheckedUpdateManyInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    mFabDiv?: NullableStringFieldUpdateOperationsInput | string | null
+    mYarn?: NullableStringFieldUpdateOperationsInput | string | null
+    mFabMainMvgr1?: NullableStringFieldUpdateOperationsInput | string | null
+    mFabMainMvgr2?: NullableStringFieldUpdateOperationsInput | string | null
+    mFabVdr?: NullableStringFieldUpdateOperationsInput | string | null
+    mWeave01?: NullableStringFieldUpdateOperationsInput | string | null
+    mWeave02?: NullableStringFieldUpdateOperationsInput | string | null
+    mCount?: NullableStringFieldUpdateOperationsInput | string | null
+    mGsm?: NullableStringFieldUpdateOperationsInput | string | null
+    mOunz?: NullableStringFieldUpdateOperationsInput | string | null
+    mConstruction?: NullableStringFieldUpdateOperationsInput | string | null
+    mComposition?: NullableStringFieldUpdateOperationsInput | string | null
+    mFinish?: NullableStringFieldUpdateOperationsInput | string | null
+    mWidth?: NullableStringFieldUpdateOperationsInput | string | null
+    mLycra?: NullableStringFieldUpdateOperationsInput | string | null
+    mCollarType?: NullableStringFieldUpdateOperationsInput | string | null
+    mCollarStyle?: NullableStringFieldUpdateOperationsInput | string | null
+    mNeckType?: NullableStringFieldUpdateOperationsInput | string | null
+    mNeckStyle?: NullableStringFieldUpdateOperationsInput | string | null
+    mPlacket?: NullableStringFieldUpdateOperationsInput | string | null
+    mBltType?: NullableStringFieldUpdateOperationsInput | string | null
+    mBltStyle?: NullableStringFieldUpdateOperationsInput | string | null
+    mSleevesMainStyle?: NullableStringFieldUpdateOperationsInput | string | null
+    mSleeveFold?: NullableStringFieldUpdateOperationsInput | string | null
+    mBtmFold?: NullableStringFieldUpdateOperationsInput | string | null
+    mNoOfPocket?: NullableStringFieldUpdateOperationsInput | string | null
+    mPocket?: NullableStringFieldUpdateOperationsInput | string | null
+    mExtraPocket?: NullableStringFieldUpdateOperationsInput | string | null
+    mFit?: NullableStringFieldUpdateOperationsInput | string | null
+    mBodyStyle?: NullableStringFieldUpdateOperationsInput | string | null
+    mLength?: NullableStringFieldUpdateOperationsInput | string | null
+    mSet?: NullableStringFieldUpdateOperationsInput | string | null
+    fabricArticleNo?: NullableStringFieldUpdateOperationsInput | string | null
+    fabricArticleDescription?: NullableStringFieldUpdateOperationsInput | string | null
+    bodyArticleNo?: NullableStringFieldUpdateOperationsInput | string | null
+    bodyArticleDescription?: NullableStringFieldUpdateOperationsInput | string | null
+    referenceArticleNo?: NullableStringFieldUpdateOperationsInput | string | null
+    referenceArticleDescription?: NullableStringFieldUpdateOperationsInput | string | null
+    flatId?: NullableStringFieldUpdateOperationsInput | string | null
+    division?: NullableStringFieldUpdateOperationsInput | string | null
+    subDivision?: NullableStringFieldUpdateOperationsInput | string | null
+    majorCategory?: NullableStringFieldUpdateOperationsInput | string | null
+    mcCode?: NullableStringFieldUpdateOperationsInput | string | null
+    vendorName?: NullableStringFieldUpdateOperationsInput | string | null
+    vendorCode?: NullableStringFieldUpdateOperationsInput | string | null
+    hsnTaxCode?: NullableStringFieldUpdateOperationsInput | string | null
+    approvalStatus?: StringFieldUpdateOperationsInput | string
+    approvedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    approvedBy?: NullableIntFieldUpdateOperationsInput | number | null
+    sapSyncStatus?: StringFieldUpdateOperationsInput | string
+    sapSyncMessage?: NullableStringFieldUpdateOperationsInput | string | null
+    userName?: NullableStringFieldUpdateOperationsInput | string | null
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+  }
+
   export type BodyFabricConsumptionCreateInput = {
     division?: string | null
     subDivision?: string | null
@@ -93460,6 +96060,194 @@ export namespace Prisma {
     preciseRatio?: SortOrder
     preciseConsumptionKg?: SortOrder
     preciseConsumptionMeter?: SortOrder
+    approvedBy?: SortOrder
+  }
+
+  export type ReferenceArticleDataOrderByRelevanceInput = {
+    fields: ReferenceArticleDataOrderByRelevanceFieldEnum | ReferenceArticleDataOrderByRelevanceFieldEnum[]
+    sort: SortOrder
+    search: string
+  }
+
+  export type ReferenceArticleDataCountOrderByAggregateInput = {
+    id?: SortOrder
+    mFabDiv?: SortOrder
+    mYarn?: SortOrder
+    mFabMainMvgr1?: SortOrder
+    mFabMainMvgr2?: SortOrder
+    mFabVdr?: SortOrder
+    mWeave01?: SortOrder
+    mWeave02?: SortOrder
+    mCount?: SortOrder
+    mGsm?: SortOrder
+    mOunz?: SortOrder
+    mConstruction?: SortOrder
+    mComposition?: SortOrder
+    mFinish?: SortOrder
+    mWidth?: SortOrder
+    mLycra?: SortOrder
+    mCollarType?: SortOrder
+    mCollarStyle?: SortOrder
+    mNeckType?: SortOrder
+    mNeckStyle?: SortOrder
+    mPlacket?: SortOrder
+    mBltType?: SortOrder
+    mBltStyle?: SortOrder
+    mSleevesMainStyle?: SortOrder
+    mSleeveFold?: SortOrder
+    mBtmFold?: SortOrder
+    mNoOfPocket?: SortOrder
+    mPocket?: SortOrder
+    mExtraPocket?: SortOrder
+    mFit?: SortOrder
+    mBodyStyle?: SortOrder
+    mLength?: SortOrder
+    mSet?: SortOrder
+    fabricArticleNo?: SortOrder
+    fabricArticleDescription?: SortOrder
+    bodyArticleNo?: SortOrder
+    bodyArticleDescription?: SortOrder
+    referenceArticleNo?: SortOrder
+    referenceArticleDescription?: SortOrder
+    flatId?: SortOrder
+    division?: SortOrder
+    subDivision?: SortOrder
+    majorCategory?: SortOrder
+    mcCode?: SortOrder
+    vendorName?: SortOrder
+    vendorCode?: SortOrder
+    hsnTaxCode?: SortOrder
+    approvalStatus?: SortOrder
+    approvedAt?: SortOrder
+    approvedBy?: SortOrder
+    sapSyncStatus?: SortOrder
+    sapSyncMessage?: SortOrder
+    userName?: SortOrder
+    createdAt?: SortOrder
+    updatedAt?: SortOrder
+  }
+
+  export type ReferenceArticleDataAvgOrderByAggregateInput = {
+    approvedBy?: SortOrder
+  }
+
+  export type ReferenceArticleDataMaxOrderByAggregateInput = {
+    id?: SortOrder
+    mFabDiv?: SortOrder
+    mYarn?: SortOrder
+    mFabMainMvgr1?: SortOrder
+    mFabMainMvgr2?: SortOrder
+    mFabVdr?: SortOrder
+    mWeave01?: SortOrder
+    mWeave02?: SortOrder
+    mCount?: SortOrder
+    mGsm?: SortOrder
+    mOunz?: SortOrder
+    mConstruction?: SortOrder
+    mComposition?: SortOrder
+    mFinish?: SortOrder
+    mWidth?: SortOrder
+    mLycra?: SortOrder
+    mCollarType?: SortOrder
+    mCollarStyle?: SortOrder
+    mNeckType?: SortOrder
+    mNeckStyle?: SortOrder
+    mPlacket?: SortOrder
+    mBltType?: SortOrder
+    mBltStyle?: SortOrder
+    mSleevesMainStyle?: SortOrder
+    mSleeveFold?: SortOrder
+    mBtmFold?: SortOrder
+    mNoOfPocket?: SortOrder
+    mPocket?: SortOrder
+    mExtraPocket?: SortOrder
+    mFit?: SortOrder
+    mBodyStyle?: SortOrder
+    mLength?: SortOrder
+    mSet?: SortOrder
+    fabricArticleNo?: SortOrder
+    fabricArticleDescription?: SortOrder
+    bodyArticleNo?: SortOrder
+    bodyArticleDescription?: SortOrder
+    referenceArticleNo?: SortOrder
+    referenceArticleDescription?: SortOrder
+    flatId?: SortOrder
+    division?: SortOrder
+    subDivision?: SortOrder
+    majorCategory?: SortOrder
+    mcCode?: SortOrder
+    vendorName?: SortOrder
+    vendorCode?: SortOrder
+    hsnTaxCode?: SortOrder
+    approvalStatus?: SortOrder
+    approvedAt?: SortOrder
+    approvedBy?: SortOrder
+    sapSyncStatus?: SortOrder
+    sapSyncMessage?: SortOrder
+    userName?: SortOrder
+    createdAt?: SortOrder
+    updatedAt?: SortOrder
+  }
+
+  export type ReferenceArticleDataMinOrderByAggregateInput = {
+    id?: SortOrder
+    mFabDiv?: SortOrder
+    mYarn?: SortOrder
+    mFabMainMvgr1?: SortOrder
+    mFabMainMvgr2?: SortOrder
+    mFabVdr?: SortOrder
+    mWeave01?: SortOrder
+    mWeave02?: SortOrder
+    mCount?: SortOrder
+    mGsm?: SortOrder
+    mOunz?: SortOrder
+    mConstruction?: SortOrder
+    mComposition?: SortOrder
+    mFinish?: SortOrder
+    mWidth?: SortOrder
+    mLycra?: SortOrder
+    mCollarType?: SortOrder
+    mCollarStyle?: SortOrder
+    mNeckType?: SortOrder
+    mNeckStyle?: SortOrder
+    mPlacket?: SortOrder
+    mBltType?: SortOrder
+    mBltStyle?: SortOrder
+    mSleevesMainStyle?: SortOrder
+    mSleeveFold?: SortOrder
+    mBtmFold?: SortOrder
+    mNoOfPocket?: SortOrder
+    mPocket?: SortOrder
+    mExtraPocket?: SortOrder
+    mFit?: SortOrder
+    mBodyStyle?: SortOrder
+    mLength?: SortOrder
+    mSet?: SortOrder
+    fabricArticleNo?: SortOrder
+    fabricArticleDescription?: SortOrder
+    bodyArticleNo?: SortOrder
+    bodyArticleDescription?: SortOrder
+    referenceArticleNo?: SortOrder
+    referenceArticleDescription?: SortOrder
+    flatId?: SortOrder
+    division?: SortOrder
+    subDivision?: SortOrder
+    majorCategory?: SortOrder
+    mcCode?: SortOrder
+    vendorName?: SortOrder
+    vendorCode?: SortOrder
+    hsnTaxCode?: SortOrder
+    approvalStatus?: SortOrder
+    approvedAt?: SortOrder
+    approvedBy?: SortOrder
+    sapSyncStatus?: SortOrder
+    sapSyncMessage?: SortOrder
+    userName?: SortOrder
+    createdAt?: SortOrder
+    updatedAt?: SortOrder
+  }
+
+  export type ReferenceArticleDataSumOrderByAggregateInput = {
     approvedBy?: SortOrder
   }
 

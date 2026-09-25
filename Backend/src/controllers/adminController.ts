@@ -4014,6 +4014,129 @@ export const uploadMandatoryGrid = async (req: Request, res: Response): Promise<
   }
 };
 
+/**
+ * GET /api/admin/mandatory-grid/download
+ * Exports the current maj_cat_mandatory_grid rows as .xlsx in the same pivot
+ * format as the template: Row 1 = title, Row 2 = empty, Row 3 = SAP keys,
+ * Row 4 = labels, Row 5 = empty, Row 6+ = data (1 = active, empty = inactive).
+ */
+export const downloadMandatoryGridData = async (_req: Request, res: Response): Promise<void> => {
+  try {
+    const ExcelJS = require('exceljs');
+
+    // Fetch all rows ordered by major_category so we can pivot them
+    const rows = await prisma.$queryRaw<{
+      major_category: string;
+      div: string | null;
+      sub_div: string | null;
+      sap_key: string;
+      label: string | null;
+      is_active: boolean;
+    }[]>`
+      SELECT major_category, div, sub_div, sap_key, label, is_active
+      FROM maj_cat_mandatory_grid
+      ORDER BY major_category, sap_key
+    `;
+
+    // Preserve the canonical column order from the template
+    const SAP_KEY_ORDER = [
+      'M_FAB_DIV', 'M_YARN', 'M_YARN-02', 'M_WEAVE_2', 'M_FAB', 'M_FAB2',
+      'M_COMPOSITION', 'M_COUNT', 'M_CONSTRUCTION', 'M_LYCRA', 'M_FINISH',
+      'M_GSM', 'M_OUNZ', 'M_WIDTH', 'M_COLLAR', 'M_COLLAR_STYLE',
+      'M_NECK_BAND_STYLE', 'M_NECK_BAND', 'M_PLACKET', 'M_BLT_MAIN_STYLE',
+      'M_SUB_STYLE_BLT', 'M_SLEEVES_MAIN_STYLE', 'M_SLEEVE_FOLD', 'M_BTM_FOLD',
+      'M_NO_OF_POCKET', 'M_POCKET', 'M_EXTRA_POCKET', 'M_FIT', 'M_PATTERN',
+      'M_LENGTH', 'M_DC_SUB_STYLE', 'M_DC_SHAPE', 'M_BTN_MAIN_MVGR', 'M_BTN_CLR',
+      'M_ZIP', 'M_ZIP_COL', 'M_PATCH_TYPE', 'M_PATCHES', 'M_HTRF_STYLE',
+      'M_HTRF_TYPE', 'M_PRINT_TYPE', 'M_PRINT_STYLE', 'M_PRINT_PLACEMENT',
+      'M_EMBROIDERY', 'M_EMB_TYPE', 'M_EMB_PLACEMENT', 'M_WASH',
+      'M_AGE_GROUP', 'PRICE_BAND_CATEGORY', 'FASHION_GRADE', 'PURCH_PRICE', 'MRP',
+      'VENDOR-NM', 'G_WEIGHT', 'ARTICLE DIMENSION',
+    ];
+
+    // Build set of all sap_keys present in DB; append any extras not in the canonical list
+    const dbKeys = [...new Set(rows.map(r => r.sap_key))];
+    const extras = dbKeys.filter(k => !SAP_KEY_ORDER.includes(k));
+    const allKeys = [...SAP_KEY_ORDER.filter(k => dbKeys.includes(k)), ...extras];
+
+    // Collect label per sap_key (any row that has one)
+    const keyLabel: Record<string, string> = {};
+    for (const r of rows) {
+      if (r.label && !keyLabel[r.sap_key]) keyLabel[r.sap_key] = r.label;
+    }
+
+    // Pivot: major_category → { div, sub_div, sap_key → is_active }
+    type McRow = { div: string | null; sub_div: string | null; cells: Record<string, boolean> };
+    const pivot: Record<string, McRow> = {};
+    for (const r of rows) {
+      if (!pivot[r.major_category]) {
+        pivot[r.major_category] = { div: r.div, sub_div: r.sub_div, cells: {} };
+      }
+      pivot[r.major_category].cells[r.sap_key] = r.is_active;
+    }
+
+    const wb = new ExcelJS.Workbook();
+    const ws = wb.addWorksheet('MANDATORY-GRID-DATA');
+
+    // Row 1 — title
+    const totalCols = 3 + allKeys.length;
+    ws.mergeCells(1, 1, 1, totalCols);
+    const titleCell = ws.getCell('A1');
+    titleCell.value = 'MAJOR CATEGORY WISE MANDATORY GRID DATA';
+    titleCell.font = { bold: true, size: 13 };
+    titleCell.alignment = { horizontal: 'center' };
+    ws.getRow(1).height = 22;
+
+    // Row 2 — empty
+    ws.addRow([]);
+
+    // Row 3 — SAP keys
+    const sapKeyRow = ws.addRow(['DIV', 'SUB-DIV', 'MAJOR_CATEGORY', ...allKeys]);
+    sapKeyRow.eachCell((cell: any) => {
+      cell.font = { bold: true, color: { argb: 'FFFFFFFF' } };
+      cell.fill = { type: 'pattern', pattern: 'solid', fgColor: { argb: 'FF1565C0' } };
+      cell.alignment = { horizontal: 'center' };
+    });
+
+    // Row 4 — labels (fall back to sap_key when no label stored)
+    const labelRow = ws.addRow(['DIV', 'SUB-DIV', 'MAJOR_CATEGORY', ...allKeys.map(k => keyLabel[k] || k)]);
+    labelRow.eachCell((cell: any) => {
+      cell.font = { bold: true, color: { argb: 'FF000000' } };
+      cell.fill = { type: 'pattern', pattern: 'solid', fgColor: { argb: 'FFBBDEFB' } };
+      cell.alignment = { horizontal: 'center' };
+    });
+
+    // Row 5 — empty
+    ws.addRow([]);
+
+    // Row 6+ — data rows
+    for (const [majCat, mcRow] of Object.entries(pivot)) {
+      const rowData = [
+        mcRow.div ?? '',
+        mcRow.sub_div ?? '',
+        majCat,
+        ...allKeys.map(k => (mcRow.cells[k] ? 1 : null)),
+      ];
+      ws.addRow(rowData);
+    }
+
+    // Auto column widths
+    ws.getColumn(1).width = 10;
+    ws.getColumn(2).width = 14;
+    ws.getColumn(3).width = 22;
+    for (let i = 4; i <= totalCols; i++) ws.getColumn(i).width = 18;
+
+    const today = new Date().toISOString().slice(0, 10);
+    res.setHeader('Content-Type', 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');
+    res.setHeader('Content-Disposition', `attachment; filename="MANDATORY_GRID_DATA_${today}.xlsx"`);
+    await wb.xlsx.write(res);
+    res.end();
+  } catch (error: any) {
+    console.error('[MandatoryGrid] Download error:', error);
+    res.status(500).json({ success: false, error: error.message });
+  }
+};
+
 // ═══════════════════════════════════════════════════════════════════════════════
 // HIERARCHY EXCEL UPLOAD
 // Reads DIV / SUB-DIV / MAJOR_CATEGORY columns from the Mandatory Grid Excel

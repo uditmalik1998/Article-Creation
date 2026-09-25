@@ -703,6 +703,24 @@ export default function Admin() {
       .catch(() => message.error('Failed to download template'));
   };
 
+  const downloadMandatoryGridData = () => {
+    const token = localStorage.getItem('authToken');
+    const url = `${APP_CONFIG.api.baseURL}/admin/mandatory-grid/download`;
+    fetch(url, { headers: token ? { Authorization: `Bearer ${token}` } : {} })
+      .then((r) => {
+        if (!r.ok) throw new Error('Download failed');
+        return r.blob();
+      })
+      .then((blob) => {
+        const today = new Date().toISOString().slice(0, 10);
+        const a = document.createElement('a');
+        a.href = URL.createObjectURL(blob);
+        a.download = `MANDATORY_GRID_DATA_${today}.xlsx`;
+        a.click();
+      })
+      .catch(() => message.error('Failed to download mandatory grid data'));
+  };
+
   const handleMandatoryGridUpload = async (file: File) => {
     setMandatoryGridUploading(true);
     setMandatoryGridProgress(0);
@@ -3031,6 +3049,10 @@ export default function Admin() {
               <Button size="sm" variant="outline" onClick={downloadMandatoryTemplate}>
                 <Download />
                 Download Template
+              </Button>
+              <Button size="sm" variant="outline" onClick={downloadMandatoryGridData}>
+                <Download />
+                Download Data
               </Button>
               <Button size="sm" variant="outline" onClick={loadMandatoryGridStatus} disabled={mandatoryGridStatusLoading}>
                 <RotateCw className={mandatoryGridStatusLoading ? 'animate-spin' : ''} />

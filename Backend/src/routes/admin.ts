@@ -162,6 +162,7 @@ router.get('/majcat-grid/upload-status/:jobId', h(adminController.getMajCatGridU
 router.get('/mandatory-grid/status', h(adminController.getMandatoryGridStatus));
 router.get('/mandatory-grid/values', h(adminController.getMandatoryGridValues));
 router.get('/mandatory-grid/template', h(adminController.downloadMandatoryGridTemplate));
+router.get('/mandatory-grid/download', h(adminController.downloadMandatoryGridData));
 router.post('/mandatory-grid/upload', excelUpload.single('file'), h(adminController.uploadMandatoryGrid));
 
 // ═══════════════════════════════════════════════════════
