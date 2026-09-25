@@ -1116,6 +1116,7 @@ export default function ArticleDetailPage({
             const mergedItem = { ...row, ...(changes as any) };
             const missing = getMissingMandatoryFields(mergedItem);
             if (!mergedItem.vendorCode) missing.unshift('VENDOR CODE');
+            if (!mergedItem.bodyArticle) missing.push('BODY ARTICLE NO.');
             if (missing.length > 0) {
               const articleId = mergedItem.sapArticleId || mergedItem.articleNumber || mergedItem.id;
               setInfoDialog({ kind: 'mandatoryMissing', errors: [{ articleId, missing }] });
@@ -1124,11 +1125,38 @@ export default function ArticleDetailPage({
 
             const ivMatnr = String(row.articleNumber ?? '').padStart(18, '0');
             const ivChanges = MODIFY_FIELDS
+              .filter(({ field }) => field in changes)
               .map(({ field, sapName }) => {
-                const val = field in changes ? changes[field] : (row as any)[field];
-                return `${sapName}=${val != null ? String(val) : ''}`;
+                const val = changes[field];
+                return `${sapName}=${val != null ? String(val).trim() : ''}`;
               })
               .join('|');
+            // If none of the changed fields map to SAP attributes, skip the RFC call
+            // and go straight to DB save (e.g. only bodyArticle/BOM fields changed).
+            if (!ivChanges) {
+              const token = localStorage.getItem('authToken');
+              const dbRes = await fetch(`${APP_CONFIG.api.baseURL}/approver/items/${row.id}/modify`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` },
+                body: JSON.stringify({ changes, skipSap: true }),
+              });
+              if (!dbRes.ok) {
+                let errMsg = 'Failed to save to database';
+                try { const p = await dbRes.json(); if (p?.error) errMsg = p.error; } catch { /* skip */ }
+                message.error(errMsg);
+                throw new Error(errMsg);
+              }
+              const saved = await dbRes.json();
+              setItems(prev => {
+                const idx = prev.findIndex(i => i.id === row.id);
+                if (idx === -1) return prev;
+                const copy = [...prev];
+                copy[idx] = { ...copy[idx], ...saved, mcCode: saved.mcCode || inferMcCode(saved.majorCategory) || copy[idx].mcCode || '' };
+                return copy;
+              });
+              message.success('Changes saved to database');
+              return;
+            }
             try {
               // National Grid validation — must pass before SAP is touched.
               const token = localStorage.getItem('authToken');
@@ -1163,20 +1191,38 @@ export default function ArticleDetailPage({
                   IV_TEST_MODE: '',
                 }),
               });
-              if (!r.ok) {
-                let errMsg = 'Failed to modify article in SAP';
-                try { const p = await r.json(); if (p?.error) errMsg = p.error; } catch { /* skip */ }
+              const body = await r.json().catch(() => ({}));
+              // Some RFC proxy versions return non-2xx for RFCs without an EX_RETURN
+              // parameter, even when the RFC executed successfully in SAP. Detect this
+              // by looking for "RFC executed successfully" in the top-level message.
+              const proxyMsg: string = body?.message || body?.error || body?.MESSAGE || '';
+              const rfcSucceeded = r.ok || proxyMsg.toLowerCase().includes('rfc executed successfully');
+              if (!rfcSucceeded) {
+                const errMsg = body?.error || body?.message || 'Failed to modify article in SAP';
                 message.error(errMsg);
                 throw new Error(errMsg);
               }
-              const body = await r.json();
               let evJson: any = body.EV_JSON ?? {};
               if (typeof evJson === 'string') {
                 try { evJson = JSON.parse(evJson); } catch { evJson = {}; }
               }
               const exReturn = body.EX_RETURN ?? {};
-              if (evJson.ok === false || exReturn.TYPE === 'E' || exReturn.TYPE === 'A') {
-                const errMsg = exReturn.MESSAGE || 'SAP modification failed';
+              // When ok=false, SAP returns a plan but applies nothing.
+              // Show which attributes couldn't be resolved so the user knows what to fix in CT04/KSML.
+              if (evJson.ok === false && Array.isArray(evJson.plan)) {
+                const badFields = (evJson.plan as any[])
+                  .filter((p) => p.status === 'UNKNOWN' || p.status === 'NOT_IN_CLASS')
+                  .map((p) => p.fn);
+                if (badFields.length > 0) {
+                  const errMsg = `SAP could not resolve attributes: ${badFields.join(', ')}. Assign them to the article's class in CT04/KSML and retry.`;
+                  message.error(errMsg);
+                  throw new Error(errMsg);
+                }
+              }
+              const sapFailed = exReturn.TYPE === 'E' || exReturn.TYPE === 'A'
+                || (exReturn.TYPE !== 'S' && evJson.ok === false);
+              if (sapFailed) {
+                const errMsg = exReturn.MESSAGE || evJson.message || 'SAP modification failed';
                 message.error(errMsg);
                 throw new Error(errMsg);
               }

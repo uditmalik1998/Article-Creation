@@ -50,7 +50,7 @@ const ITEM_UPDATE_ALLOWED_FIELDS = [
     'vendorCode', 'mrp', 'mcCode', 'segment', 'season',
     'hsnTaxCode', 'articleDescription', 'fashionGrid', 'year', 'articleType',
     // Body article cost fields
-    'cmpCost', 'fabCost', 'fabCons', 'fWidth', 'width',
+    'cmtpCost', 'cmpCost', 'fabCost', 'fabCons', 'fWidth', 'width',
     'vendorFabricRate', 'valueAddAccCostType', 'valueAddCost', 'valueAddProcessCost',
     // Card footer fields (fabric/body article builder)
     'fabricArticleNumber', 'fabricArticleDescription',
@@ -937,6 +937,11 @@ export class ApproverController {
                     valueAddAccCostType: true,
                     valueAddCost: true,
                     valueAddProcessCost: true,
+                    // BOM cost fields
+                    cmtpCost: true,
+                    cmpCost: true,
+                    fabCons: true,
+                    width: true,
                     // Article reference fields
                     bodyArticle: true,
                     bodyArticleDescription: true,
@@ -1753,6 +1758,9 @@ export class ApproverController {
                     attrArticleNums: true, mvgrBrandVendor: true,
                     isGeneric: true, genericArticleId: true, variantSize: true, variantColor: true,
                     approvedBy: true, approvedAt: true,
+                    cmtpCost: true, cmpCost: true, fabCost: true, fabCons: true, width: true,
+                    vendorFabricRate: true, valueAddAccCostType: true, valueAddCost: true, valueAddProcessCost: true,
+                    mcDescription: true,
                     approver: { select: { name: true, email: true } },
                 },
             });

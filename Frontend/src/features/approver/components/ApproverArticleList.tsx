@@ -1473,9 +1473,10 @@ const ArticleCard = React.memo(
         };
         const newDesc = buildBodyDescription(getVal);
         if (newDesc) updates['bodyArticleDescription'] = newDesc;
+        updates['bodyArticle'] = null;
       }
       // When a Construction & Fabric attribute changes, recompute fabricArticleDescription
-      // and clear fabricArticleNumber in modify mode (it was linked to the old description;
+      // and clear fabricArticleNumber (it was linked to the old description;
       // user must re-create or re-link after modifying fabric attributes).
       const fabFieldKeys = new Set(FAB_FIELDS.map((ff) => ff.field));
       if (fabFieldKeys.has(field)) {
@@ -1486,7 +1487,7 @@ const ArticleCard = React.memo(
         const fabParts = FAB_FIELDS.map((f) => getVal(f.field)).filter((v): v is string => Boolean(v) && !/^-+$/.test(v as string));
         const newFabDesc = fabParts.length > 0 ? fabParts.join('-').replace(/-{2,}/g, '-').replace(/-+$/, '') : null;
         if (newFabDesc) updates['fabricArticleDescription'] = newFabDesc;
-        if (isModifyMode) updates['fabricArticleNumber'] = null;
+        updates['fabricArticleNumber'] = null;
       }
       setLocalValues((prev) => ({ ...prev, ...updates }));
       setEditingField(null);
@@ -2685,7 +2686,7 @@ const ArticleCard = React.memo(
                                   );
                                 };
                                 const fabAutoFill = () => {
-                                  const parts = FAB_FIELDS.filter((ff) => mandatoryKeys.has(ff.schemaKey))
+                                  const parts = FAB_FIELDS
                                     .map((ff) => {
                                       const v = localValues[ff.field] !== undefined ? localValues[ff.field] : (item as any)[ff.field];
                                       return v ? String(v).trim() : null;
@@ -3039,14 +3040,8 @@ const ArticleCard = React.memo(
                             {g.group === 'BODY' &&
                               (() => {
                                 const bodyAutoFill = () => {
-                                  const parts = BODY_FIELDS.filter((bf) => mandatoryKeys.has(bf.schemaKey))
-                                    .map((bf) => {
-                                      const v = localValues[bf.field] !== undefined ? localValues[bf.field] : (item as any)[bf.field];
-                                      return v ? String(v).trim() : null;
-                                    })
-                                    .filter(Boolean);
-                                  if (parts.length > 0)
-                                    handleSave('bodyArticleDescription', parts.join('-'));
+                                  const desc = buildBodyDescription(getFieldVal);
+                                  if (desc) handleSave('bodyArticleDescription', desc);
                                 };
                                 const isBodyNoEditing = editingField === 'bot_bodyArticle';
                                 const bodyNoDisplayVal =
@@ -3136,7 +3131,11 @@ const ArticleCard = React.memo(
                                   setEditingField(null);
                                   setBodyNoResults([]);
                                   setBodyNoSearched(false);
-                                  onSave({ ...item, ...gridUpdates } as any, gridUpdates);
+                                  if (isModifyMode) {
+                                    setPendingChanges((prev) => ({ ...prev, ...gridUpdates }));
+                                  } else {
+                                    onSave({ ...item, ...gridUpdates } as any, gridUpdates);
+                                  }
                                 };
                                 return (
                                   <>
