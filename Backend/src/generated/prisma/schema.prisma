@@ -1704,6 +1704,94 @@ model BodyArticleData {
   @@schema("public")
 }
 
+/// ReferenceArticleData: One row per reference article created from both
+/// the Construction & Fabric card and the Body & Construction card.
+model ReferenceArticleData {
+  id String @id @default(uuid())
+
+  // Construction & Fabric card attributes (column names = SAP attribute names in lowercase)
+  mFabDiv          String? @map("m_fab_div") @db.VarChar(100)
+  mYarn            String? @map("m_yarn") @db.VarChar(100)
+  mFabMainMvgr1    String? @map("m_fab_main_mvgr_1") @db.VarChar(100)
+  mFabMainMvgr2    String? @map("m_fab_main_mvgr_2") @db.VarChar(100)
+  mFabVdr          String? @map("m_fab_vdr") @db.VarChar(100)
+  mWeave01         String? @map("m_weave_01") @db.VarChar(100)
+  mWeave02         String? @map("m_weave_02") @db.VarChar(100)
+  mCount           String? @map("m_count") @db.VarChar(100)
+  mGsm             String? @map("m_gsm") @db.VarChar(100)
+  mOunz            String? @map("m_ounz") @db.VarChar(100)
+  mConstruction    String? @map("m_construction") @db.VarChar(100)
+  mComposition     String? @map("m_composition") @db.VarChar(100)
+  mFinish          String? @map("m_finish") @db.VarChar(100)
+  mWidth           String? @map("m_width") @db.VarChar(100)
+  mLycra           String? @map("m_lycra") @db.VarChar(100)
+  shade            String? @map("shade") @db.VarChar(100)
+  vendorFabricRate String? @map("vendor_fabric_rate") @db.VarChar(100)
+
+  // Body & Construction card attributes (column names = SAP attribute names in lowercase)
+  mCollarType       String? @map("m_collar_type") @db.VarChar(100)
+  mCollarStyle      String? @map("m_collar_style") @db.VarChar(100)
+  mNeckType         String? @map("m_neck_type") @db.VarChar(100)
+  mNeckStyle        String? @map("m_neck_style") @db.VarChar(100)
+  mPlacket          String? @map("m_placket") @db.VarChar(100)
+  mBltType          String? @map("m_blt_type") @db.VarChar(100)
+  mBltStyle         String? @map("m_blt_style") @db.VarChar(100)
+  mSleevesMainStyle String? @map("m_sleeves_main_style") @db.VarChar(100)
+  mSleeveFold       String? @map("m_sleeve_fold") @db.VarChar(100)
+  mBtmFold          String? @map("m_btm_fold") @db.VarChar(100)
+  mNoOfPocket       String? @map("m_no_of_pocket") @db.VarChar(100)
+  mPocket           String? @map("m_pocket") @db.VarChar(100)
+  mExtraPocket      String? @map("m_extra_pocket") @db.VarChar(100)
+  mFit              String? @map("m_fit") @db.VarChar(100)
+  mBodyStyle        String? @map("m_body_style") @db.VarChar(100)
+  mLength           String? @map("m_length") @db.VarChar(100)
+  mSet              String? @map("m_set") @db.VarChar(100)
+
+  // Linked article references
+  fabricArticleNo          String? @map("fabric_article_no") @db.VarChar(100)
+  fabricArticleDescription String? @map("fabric_article_description") @db.VarChar(500)
+  bodyArticleNo            String? @map("body_article_no") @db.VarChar(100)
+  bodyArticleDescription   String? @map("body_article_description") @db.VarChar(500)
+
+  // Reference article output
+  referenceArticleNo          String? @map("reference_article_no") @db.VarChar(100)
+  referenceArticleDescription String? @map("reference_article_description") @db.VarChar(500)
+
+  // Article context (mirrored from parent extraction_results_flat row)
+  flatId        String? @map("flat_id") @db.VarChar(100)
+  division      String? @map("division") @db.VarChar(100)
+  subDivision   String? @map("sub_division") @db.VarChar(100)
+  majorCategory String? @map("major_category") @db.VarChar(200)
+  mcCode        String? @map("mc_code") @db.VarChar(50)
+  vendorName    String? @map("vendor_name") @db.VarChar(200)
+  vendorCode    String? @map("vendor_code") @db.VarChar(100)
+  hsnTaxCode    String? @map("hsn_tax_code") @db.VarChar(50)
+
+  // Workflow
+  approvalStatus String    @default("PENDING") @map("approval_status") @db.VarChar(20)
+  approvedAt     DateTime? @map("approved_at")
+  approvedBy     Int?      @map("approved_by")
+  sapSyncStatus  String    @default("NOT_SYNCED") @map("sap_sync_status") @db.VarChar(20)
+  sapSyncMessage String?   @map("sap_sync_message")
+
+  // Audit
+  userName  String?  @map("user_name") @db.VarChar(200)
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
+
+  @@index([approvalStatus])
+  @@index([sapSyncStatus])
+  @@index([referenceArticleNo])
+  @@index([fabricArticleNo])
+  @@index([bodyArticleNo])
+  @@index([majorCategory])
+  @@index([division])
+  @@index([flatId])
+  @@index([createdAt(sort: Desc)])
+  @@map("reference_article_data")
+  @@schema("public")
+}
+
 model BodyFabricConsumption {
   id             Int      @id @default(autoincrement())
   division       String?  @map("division") @db.VarChar(100)

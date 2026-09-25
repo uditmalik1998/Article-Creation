@@ -4786,7 +4786,7 @@ export class ApproverController {
                 mcDescription:            mapped.mcDes,
                 mFabDiv:                  mapped.mFabDiv,
                 fabricArticleDescription: desc,
-                articleFashionType:       item.articleFashionType,
+                articleFashionType:       'C',
                 mYarn:           item.yarn1,
                 mFabMainMvgr1:   item.mainMvgr,
                 mFabMainMvgr2:   item.fabricMainMvgr,

@@ -138,7 +138,6 @@ export const AppSidebar: React.FC<AppSidebarProps> = ({ collapsed, onCollapsedCh
 
   if (!isPdDesigner) {
     if (isAdmin) {
-      items.push({ key: '/products', Icon: ShoppingBag, label: 'Products' });
     }
     // Extraction is available to creator-side roles and to APPROVER.
     // (CATEGORY_HEAD and PD remain approval-only and do not get it.)
@@ -254,9 +253,6 @@ export const AppSidebar: React.FC<AppSidebarProps> = ({ collapsed, onCollapsedCh
     });
   }
 
-  if (!isPdDesigner && (role === 'APPROVER' || role === 'CATEGORY_HEAD' || role === 'SUB_DIVISION_HEAD' || isAdmin)) {
-    items.push({ key: '/po-presentation', Icon: FileText, label: 'PO Presentation' });
-  }
 
   // Expense Data: CREATOR/APPROVER get requester rights by role, everyone
   // else in `canView` (a historic view role, or a grant) gets read access —
