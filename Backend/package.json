@@ -23,6 +23,7 @@
     "db:backfill:image-urls": "ts-node scripts/backfill-image-urls.ts",
     "db:backfill:image-uploads": "ts-node scripts/backfill-missing-image-uploads.ts",
     "db:backfill:mrp": "ts-node scripts/backfill-mrp-from-rate.ts",
+    "db:backfill:combo-links": "ts-node scripts/backfill-combo-links.ts",
     "db:backfill:gsm-weight": "ts-node scripts/backfill-gsm-weight.ts",
     "db:refresh:mfab2": "ts-node scripts/refresh-mfab2-from-json.ts",
     "db:normalize:fabric-values": "ts-node scripts/normalize-fabric-attribute-values.ts",

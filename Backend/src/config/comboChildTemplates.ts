@@ -1,29 +1,20 @@
-// Hardcoded mandatory-child templates per combo major category. When a combo
-// parent (see comboMajorCategories.ts) is opened for the first time, its
-// mandatory children are auto-created from this list — each pre-set with its
-// own major category, matching the parent/child breakdown the business
-// defines (e.g. Kurti Set → Kurti Upper + Kurti Lower). Users can still add
-// extra optional children (e.g. a Dupatta) on top of these via "Add Child Article".
+// Combo/set children (Top, Lower, Dupatta, ...) arrive from SRM as their own
+// rows — this file only decides which child is the "primary" (Top/Upper)
+// piece. The parent's descriptive attributes (body, fit, composition, ...)
+// mirror the primary child; costs are summed across all children.
 //
-// Extend this map as more combo categories + their child breakdowns are confirmed.
-export interface ComboChildTemplate {
-  label: string;
-  majorCategory: string;
+// Matched as substrings of the child's major category code, in priority order.
+export const COMBO_PRIMARY_CHILD_PATTERNS = ['TOP', 'UPR', 'UPPER', 'SHIRT', 'KURTA', 'KURTI', 'TEE', 'T_SHIRT'];
+
+export function primaryChildRank(majorCategory?: string | null): number {
+  const normalized = (majorCategory || '').trim().toUpperCase();
+  const idx = COMBO_PRIMARY_CHILD_PATTERNS.findIndex((p) => normalized.includes(p));
+  return idx === -1 ? Number.MAX_SAFE_INTEGER : idx;
 }
 
-// Keyed by the same substrings used in COMBO_MAJOR_CATEGORIES (comboMajorCategories.ts).
-export const COMBO_CHILD_TEMPLATES: Record<string, ComboChildTemplate[]> = {
-  KURTI_ST: [
-    { label: 'Kurti Upper', majorCategory: 'L_KURTI_UPR' },
-    { label: 'Kurti Lower', majorCategory: 'L_KURTI_LOW' },
-  ],
-};
-
-export function getComboChildTemplate(majorCategory?: string | null): ComboChildTemplate[] {
-  if (!majorCategory) return [];
-  const normalized = majorCategory.trim().toUpperCase();
-  for (const [key, templates] of Object.entries(COMBO_CHILD_TEMPLATES)) {
-    if (normalized.includes(key)) return templates;
-  }
-  return [];
+// Stable child ordering: primary (Top) first, then by creation time.
+export function sortComboChildren<T extends { majorCategory?: string | null; createdAt: Date }>(children: T[]): T[] {
+  return [...children].sort((a, b) =>
+    primaryChildRank(a.majorCategory) - primaryChildRank(b.majorCategory)
+    || a.createdAt.getTime() - b.createdAt.getTime());
 }

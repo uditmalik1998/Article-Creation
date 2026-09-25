@@ -539,6 +539,8 @@ export interface ApproverArticleListProps {
   allowGroups?: string[];
   /** When true, hides the "Create Body Article" button (used by BodyArticleList). */
   hideCreateBody?: boolean;
+  /** When true, cards are display-only (e.g. a combo/set parent derived from its pieces). */
+  readOnly?: boolean;
   serverPagination: {
     total: number;
     current: number;
@@ -573,6 +575,7 @@ const ArticleCard = React.memo(
     pathType,
     allowGroups,
     hideCreateBody,
+    readOnly,
   }: {
     item: ApproverItem;
     isSelected: boolean;
@@ -589,6 +592,7 @@ const ArticleCard = React.memo(
     pathType?: 'old' | 'new' | 'rejected' | 'created' | 'failed';
     allowGroups?: string[];
     hideCreateBody?: boolean;
+    readOnly?: boolean;
   }) => {
     const [showVariants, setShowVariants] = useState(true);
     const [imgModalOpen, setImgModalOpen] = useState(false);
@@ -1247,7 +1251,7 @@ const ArticleCard = React.memo(
     // APPROVED/REJECTED articles are normally read-only. EXCEPTION: on the
     // Created page (modify mode) we keep them editable so the user can stage
     // changes and push them to SAP via the "Modify" button.
-    const isLocked = (item.approvalStatus === 'APPROVED' || item.approvalStatus === 'REJECTED') && !isModifyMode;
+    const isLocked = readOnly || ((item.approvalStatus === 'APPROVED' || item.approvalStatus === 'REJECTED') && !isModifyMode);
     const status = getDisplayStatus(item);
 
     // Created-article identity/price fields are LOCKED even in modify mode — they
@@ -4059,6 +4063,7 @@ export const ApproverArticleList: React.FC<ApproverArticleListProps> = ({
   pathType,
   allowGroups,
   hideCreateBody,
+  readOnly,
   serverPagination,
 }) => {
   const [cardGroups, setCardGroups] = useState<CardGroup[]>(() => {
@@ -4148,6 +4153,7 @@ export const ApproverArticleList: React.FC<ApproverArticleListProps> = ({
           pathType={pathType}
           allowGroups={allowGroups}
           hideCreateBody={hideCreateBody}
+          readOnly={readOnly}
         />
       ))}
     </div>

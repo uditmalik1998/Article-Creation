@@ -20,6 +20,7 @@
 import { prismaClient as prisma, isDbCircuitOpen, openDbCircuit } from '../utils/prisma';
 import { enrichSrmRowWithVlmAdmin, insertRawArticleAsFlat, type SrmRow } from './srmSyncService';
 import { mapWithConcurrency } from '../utils/concurrency';
+import { linkComboGroup } from './comboLinkService';
 
 
 // ── Cutoff: presentations on or before this date are already in extraction_results_flat
@@ -171,6 +172,18 @@ export async function runRawArticleExtraction(
 
     for (const r of results) {
       if (r.ok) completed++; else { errors++; failed++; }
+    }
+
+    // Link combo/set pieces (Baba Suit + Top + Lower share presentation + design
+    // number). Runs after VLM so the parent mirrors the enriched Top attributes.
+    // Pieces can land in different batches — linkComboGroup is idempotent.
+    const groups = new Map(rows.filter(r => r.designNumber).map(r => [`${r.presentationNo}|${r.designNumber}`, r]));
+    for (const r of groups.values()) {
+      try {
+        await linkComboGroup(r.presentationNo, r.designNumber);
+      } catch (linkErr: any) {
+        console.error(`[RawExtract] ⚠️ Combo link failed for ${r.presentationNo}/${r.designNumber}: ${linkErr.message}`);
+      }
     }
 
     console.log(`[RawExtract] Done — completed:${completed} failed:${failed} errors:${errors}`);
