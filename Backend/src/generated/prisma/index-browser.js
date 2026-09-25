@@ -985,8 +985,7 @@ exports.Prisma.FabricArticleDataScalarFieldEnum = {
   fabricRate: 'fabricRate',
   v2FabricRate: 'v2FabricRate',
   valueAddCost: 'valueAddCost',
-  mrp: 'mrp',
-  baseColor: 'baseColor',
+  rate: 'rate',
   segment: 'segment',
   articleFashionType: 'articleFashionType',
   approvalStatus: 'approvalStatus',
@@ -997,6 +996,32 @@ exports.Prisma.FabricArticleDataScalarFieldEnum = {
   imageUrl: 'imageUrl',
   fabricArticleType: 'fabricArticleType',
   source: 'source',
+  userName: 'userName',
+  createdAt: 'createdAt',
+  updatedAt: 'updatedAt'
+};
+
+exports.Prisma.FabricVariantArticleDataScalarFieldEnum = {
+  id: 'id',
+  genericArticleId: 'genericArticleId',
+  genericArticleNumber: 'genericArticleNumber',
+  variantColor: 'variantColor',
+  variantArticleNumber: 'variantArticleNumber',
+  division: 'division',
+  subDivision: 'subDivision',
+  majorCategory: 'majorCategory',
+  mcDescription: 'mcDescription',
+  vendorName: 'vendorName',
+  vendorCode: 'vendorCode',
+  designNumber: 'designNumber',
+  mrp: 'mrp',
+  rate: 'rate',
+  approvalStatus: 'approvalStatus',
+  approvedAt: 'approvedAt',
+  approvedBy: 'approvedBy',
+  sapSyncStatus: 'sapSyncStatus',
+  sapSyncMessage: 'sapSyncMessage',
+  imageUrl: 'imageUrl',
   userName: 'userName',
   createdAt: 'createdAt',
   updatedAt: 'updatedAt'
@@ -1837,7 +1862,6 @@ exports.Prisma.FabricArticleDataOrderByRelevanceFieldEnum = {
   vendorCode: 'vendorCode',
   designNumber: 'designNumber',
   pptNumber: 'pptNumber',
-  baseColor: 'baseColor',
   segment: 'segment',
   articleFashionType: 'articleFashionType',
   approvalStatus: 'approvalStatus',
@@ -1846,6 +1870,26 @@ exports.Prisma.FabricArticleDataOrderByRelevanceFieldEnum = {
   imageUrl: 'imageUrl',
   fabricArticleType: 'fabricArticleType',
   source: 'source',
+  userName: 'userName'
+};
+
+exports.Prisma.FabricVariantArticleDataOrderByRelevanceFieldEnum = {
+  id: 'id',
+  genericArticleId: 'genericArticleId',
+  genericArticleNumber: 'genericArticleNumber',
+  variantColor: 'variantColor',
+  variantArticleNumber: 'variantArticleNumber',
+  division: 'division',
+  subDivision: 'subDivision',
+  majorCategory: 'majorCategory',
+  mcDescription: 'mcDescription',
+  vendorName: 'vendorName',
+  vendorCode: 'vendorCode',
+  designNumber: 'designNumber',
+  approvalStatus: 'approvalStatus',
+  sapSyncStatus: 'sapSyncStatus',
+  sapSyncMessage: 'sapSyncMessage',
+  imageUrl: 'imageUrl',
   userName: 'userName'
 };
 
@@ -2124,6 +2168,7 @@ exports.Prisma.ModelName = {
   FabricMajCatGridValue: 'FabricMajCatGridValue',
   ModifyLog: 'ModifyLog',
   FabricArticleData: 'FabricArticleData',
+  FabricVariantArticleData: 'FabricVariantArticleData',
   ValueAdditionAccessoriesCost: 'ValueAdditionAccessoriesCost',
   BodyArticleData: 'BodyArticleData',
   BodyFabricConsumption: 'BodyFabricConsumption',

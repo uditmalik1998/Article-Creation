@@ -415,6 +415,26 @@ export const EXPENSE_TABLE_CONFIGS: Record<string, ExpenseTableConfig> = {
       { dataIndex: 'updatedAt', title: 'Updated At', type: 'date', editable: false },
     ],
   },
+  'cmp-cost-master': {
+    title: 'CMP Cost Master (Rough CMP Cost per Major Category)',
+    description:
+      'Average CMP cost per major category from the "SAM MASTER.xlsx" workbook (Sheet5). Auto-fills a Body Article’s CMP Cost on the New Article page the first time a pending article of that major category is opened.',
+    rowKey: 'id',
+    defaultSortBy: 'majCat',
+    defaultSortDir: 'asc',
+    allowCreate: true,
+    allowDelete: true,
+    requiredOnCreate: ['majCat'],
+    columns: [
+      { dataIndex: 'id', title: 'ID', width: 80, editable: false },
+      { dataIndex: 'div', title: 'Division', pickFromExisting: true, filterable: true },
+      { dataIndex: 'subDiv', title: 'Sub Division', pickFromExisting: true, filterable: true },
+      { dataIndex: 'majCat', title: 'Major Category', pickFromExisting: true, filterable: true },
+      { dataIndex: 'cmpCost', title: 'CMP Cost (Rs/pc)', align: 'right' },
+      { dataIndex: 'createdAt', title: 'Created At', type: 'date', editable: false },
+      { dataIndex: 'updatedAt', title: 'Updated At', type: 'date', editable: false },
+    ],
+  },
   'vendor-master': {
     title: 'Vendor Master (DAB Sync)',
     description: 'All rows currently stored in master_vendor_details. Read-only — synced automatically from the DAB vendor master, so edits here would just be overwritten by the next sync.',

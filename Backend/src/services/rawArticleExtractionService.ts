@@ -19,6 +19,7 @@
 
 import { prismaClient as prisma, isDbCircuitOpen, openDbCircuit } from '../utils/prisma';
 import { enrichSrmRowWithVlmAdmin, insertRawArticleAsFlat, type SrmRow } from './srmSyncService';
+import { mapWithConcurrency } from '../utils/concurrency';
 
 
 // ── Cutoff: presentations on or before this date are already in extraction_results_flat
@@ -26,7 +27,7 @@ import { enrichSrmRowWithVlmAdmin, insertRawArticleAsFlat, type SrmRow } from '.
 export const RAW_PIPELINE_CUTOFF = new Date('2026-05-26T23:59:59.999Z');
 
 // ── Constants ─────────────────────────────────────────────────────────────────
-const BATCH_SIZE      = 10;   // rows claimed per run
+const BATCH_SIZE      = 20;   // rows claimed per run
 const LOCK_MINUTES    = 12;   // lock duration (must be > max VLM time per row)
 const MAX_RETRIES     = 3;    // after this many failures → PERM_FAILED
 
@@ -109,14 +110,13 @@ export async function runRawArticleExtraction(
       where: { id: { in: claimed.map(r => r.id) } },
     });
 
-    // ── Process each row — single attempt, no retries ────────────────────
-    // If extraction fails, mark PERM_FAILED immediately and move to next image.
-    for (const row of rows) {
+    // ── Process rows with 2 parallel Gemini calls ────────────────────────
+    // Each lane has its own try/catch so one failure doesn't abort the other.
+    const results = await mapWithConcurrency(rows, 3, async (row) => {
       try {
         await processOneRow(row);
-        completed++;
+        return { ok: true } as const;
       } catch (err: any) {
-        errors++;
         console.error(`[RawExtract] ❌ ${row.id}: ${err.message}`);
 
         // Re-fetch flat_id — processOneRow may have saved one before throwing
@@ -165,8 +165,12 @@ export async function runRawArticleExtraction(
             ...(flatId ? { flatId } : {}),
           },
         });
-        failed++;
+        return { ok: false, err: err.message } as const;
       }
+    });
+
+    for (const r of results) {
+      if (r.ok) completed++; else { errors++; failed++; }
     }
 
     console.log(`[RawExtract] Done — completed:${completed} failed:${failed} errors:${errors}`);

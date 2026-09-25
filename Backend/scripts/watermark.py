@@ -18,6 +18,7 @@ Exit codes:
 import argparse
 import io
 import json
+import os
 import sys
 import traceback
 from datetime import date
@@ -49,6 +50,17 @@ def _build_lines(row):
     ppt = row.get("presentation_no")
     lines.append(f"PPT No.: {str(ppt).strip() if ppt and str(ppt).strip() else '-'}")
 
+    # Cost comes before Vendor so Cost lands in col-1 and Vendor spans the rest.
+    add("Cost", row.get("rate"), formatter=lambda v: f"Rs {v}")
+    # Some callers send `price` (SRM), others `rate` (DB). Only add Cost if rate wasn't already shown.
+    if row.get("price") is not None and row.get("rate") is None:
+        add("Cost", row.get("price"), formatter=lambda v: f"Rs {v}")
+
+    add("Category", row.get("major_category"))
+    add("Design No.", row.get("design_number"))
+    add("Colors", row.get("no_of_colors"))
+
+    # Vendor is last — renderer gives it remaining column width when col >= 1.
     vendor_code = row.get("vendor_code")
     vendor_name = row.get("vendor_name")
     if vendor_code:
@@ -56,14 +68,6 @@ def _build_lines(row):
         if vendor_name and str(vendor_name).strip():
             vendor = f"{vendor_code} / {vendor_name}"
         lines.append(f"Vendor: {vendor}")
-
-    add("Category", row.get("major_category"))
-    add("Design No.", row.get("design_number"))
-    add("Colors", row.get("no_of_colors"))
-    add("Cost", row.get("rate"), formatter=lambda v: f"Rs {v}")
-    # Some callers send `price` (SRM), others `rate` (DB). Only add Cost if rate wasn't already shown.
-    if row.get("price") is not None and row.get("rate") is None:
-        add("Cost", row.get("price"), formatter=lambda v: f"Rs {v}")
 
     add("Approved By", row.get("approved_by"))
 
@@ -86,23 +90,41 @@ def _truncate_for_width(draw, text, font, max_width):
 
 
 def _load_font(size):
-    """Try to load a TrueType font for nicer rendering; fall back to bitmap default."""
+    """Load a TrueType font at the requested size.
+
+    Checks the bundled DejaVuSans.ttf (same directory as this script) first so
+    the watermark always renders at the correct size regardless of what fonts
+    the host OS has installed.
+    """
+    _here = os.path.dirname(os.path.abspath(__file__))
     candidates = [
+        # Bundled font — always deployed alongside this script
+        os.path.join(_here, "DejaVuSans.ttf"),
         # Windows
         "C:/Windows/Fonts/arial.ttf",
         "C:/Windows/Fonts/segoeui.ttf",
-        # Linux
+        # Linux — common paths across Ubuntu/Debian/Alpine/Arch
         "/usr/share/fonts/truetype/dejavu/DejaVuSans.ttf",
         "/usr/share/fonts/truetype/liberation/LiberationSans-Regular.ttf",
+        "/usr/share/fonts/truetype/freefont/FreeSans.ttf",
+        "/usr/share/fonts/truetype/ubuntu/Ubuntu-R.ttf",
+        "/usr/share/fonts/dejavu-sans-fonts/DejaVuSans.ttf",
+        "/usr/share/fonts/TTF/DejaVuSans.ttf",
+        "/usr/share/fonts/dejavu/DejaVuSans.ttf",
         # macOS
         "/Library/Fonts/Arial.ttf",
+        "/System/Library/Fonts/Helvetica.ttc",
     ]
     for path in candidates:
         try:
             return ImageFont.truetype(path, size)
         except (OSError, IOError):
             continue
-    return ImageFont.load_default()
+    # Pillow >= 10 supports load_default(size=N); older versions ignore size.
+    try:
+        return ImageFont.load_default(size=20)
+    except TypeError:
+        return ImageFont.load_default()
 
 
 def _save(img, fmt):
@@ -139,10 +161,10 @@ def watermark(image_bytes, row, fmt="png"):
     # Add a solid-white strip BELOW the original photo and write the label
     # there. Strip height is AUTO-FIT to the content (no wasted whitespace) —
     # font size is proportional to the source image height instead.
-    font_size = max(36, int(height * 0.035))
+    font_size = min(60, max(18, int(height * 0.065)))
     line_h = int(font_size * 1.35)
-    pad_x = max(14, font_size)
-    pad_y = max(14, int(font_size * 0.7))
+    pad_x = max(8, int(font_size * 0.25))
+    pad_y = max(20, int(font_size * 0.7))
 
     # 1-3 columns based on field count to keep the strip compact.
     n_cols = 3 if len(lines) >= 7 else (2 if len(lines) >= 4 else 1)
@@ -174,7 +196,12 @@ def watermark(image_bytes, row, fmt="png"):
         row_in_col = i % rows_per_col
         x = pad_x + col * col_w
         y = text_top + row_in_col * line_h
-        fitted = _truncate_for_width(draw, line, font, text_max_w)
+        # Vendor spans all remaining columns so the full name fits without truncation.
+        if line.startswith("Vendor:") and col >= 1:
+            remaining_w = (n_cols - col) * col_w - 12
+            fitted = _truncate_for_width(draw, line, font, max(text_max_w, remaining_w))
+        else:
+            fitted = _truncate_for_width(draw, line, font, text_max_w)
         draw.text((x, y), fitted, fill=(34, 34, 34), font=font)
 
     return _save(canvas, fmt)

@@ -5,6 +5,7 @@
  */
 
 import { prismaClient as prisma } from '../utils/prisma';
+import { storageService } from './storageService';
 
 const SAP_RFC_PROXY_URL = (process.env.SAP_RFC_PROXY_URL || 'https://sap-api.v2retail.net').replace(/\/$/, '');
 const SAP_RFC_KEY       = process.env.SAP_RFC_KEY || 'v2-rfc-proxy-2026';
@@ -79,6 +80,106 @@ function buildImData(
         A_SHADE:             '',
         A_FINISH_TYPE:       '',
     };
+}
+
+const SAP_RFC_PROXY_KEY = process.env.SAP_RFC_PROXY_KEY || SAP_RFC_KEY;
+const SAP_SITE       = process.env.SAP_SITE        || 'DH24';
+const SAP_PUR_GRP    = process.env.SAP_PUR_GRP     || '124';
+const SAP_SALES_ORG  = process.env.SAP_SALES_ORG   || '1100';
+const SAP_SALES_UNIT = process.env.SAP_SALES_UNIT  || 'EA';
+const SAP_TAX_CODE   = process.env.SAP_TAX_CODE    || 'J2';
+
+export async function submitFabricVariants(
+    parentId: string,
+    sapArticleNumber: string,
+    parentRow: any,
+    proxyUrl?: string,
+): Promise<void> {
+    const url = proxyUrl ?? `${SAP_RFC_PROXY_URL}/api/rfc/proxy?env=${SAP_RFC_ENV}`;
+
+    // Backfill generic_article_number on any variants that have it null
+    await prisma.fabricVariantArticleData.updateMany({
+        where: { genericArticleId: parentId, genericArticleNumber: null },
+        data: { genericArticleNumber: sapArticleNumber },
+    });
+
+    const variants = await prisma.fabricVariantArticleData.findMany({
+        where: { genericArticleId: parentId, variantArticleNumber: null },
+    });
+
+    if (variants.length === 0) return;
+
+    const now = new Date();
+    const fromDate = `${now.getFullYear()}${String(now.getMonth() + 1).padStart(2, '0')}${String(now.getDate()).padStart(2, '0')}`;
+    const vendor = str(parentRow.vendorCode).replace(/\D/g, '').padStart(10, '0');
+
+    for (const variant of variants) {
+        const imData = {
+            GENERIC_ARTICLE: sapArticleNumber,
+            VAR1CHAR1:       'V2_COLOR',
+            VAR1VAL1:        str(variant.variantColor),
+            VAR1CHAR2:       'V2_SIZE',
+            VAR1VAL2:        'A',
+            VENDOR:          vendor,
+            NET_PRICE:       str(variant.rate),
+            MRP_TYPE:        str(variant.mrp),
+            FROM_DATE:       fromDate,
+            VARIANT_ARTICLE: '',
+            SITE:            SAP_SITE,
+            PUR_GRP:         SAP_PUR_GRP,
+            SALES_ORG:       SAP_SALES_ORG,
+            SALES_UNIT:      SAP_SALES_UNIT,
+            TO_DATE:         '99991231',
+            OLD_MAT_NO:      '',
+            TAX_CODE:        SAP_TAX_CODE,
+        };
+        const payload = { bapiname: 'ZMM_VAR_ART_CRT_V8', IM_DATA: [imData] };
+
+        try {
+            const ctrl = new AbortController();
+            const timer = setTimeout(() => ctrl.abort(), 120_000);
+            const res = await fetch(url, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json', 'X-RFC-Key': SAP_RFC_PROXY_KEY },
+                body: JSON.stringify(payload),
+                signal: ctrl.signal,
+            });
+            clearTimeout(timer);
+
+            const rawText = await res.text().catch(() => '');
+            let parsed: any = {};
+            try { parsed = JSON.parse(rawText); } catch { /* non-JSON */ }
+            if (parsed?.EV_JSON) { try { parsed = JSON.parse(parsed.EV_JSON); } catch { /* keep */ } }
+
+            const exReturn: any[] = Array.isArray(parsed?.EX_RETURN) ? parsed.EX_RETURN : [];
+            const first = exReturn[0] ?? {};
+            const type = String(first?.TYPE ?? '').toUpperCase();
+            const sapArt = String(first?.FIELD ?? '').trim();
+            const variantMsg = String(first?.MESSAGE ?? first?.MSG ?? '').trim();
+            const ok = res.ok && type === 'S' && !!sapArt;
+
+            console.log(`[ZMM_FAB_RFC] Variant ${variant.id} color=${variant.variantColor} → ${ok ? '✅ ' + sapArt : '❌ ' + variantMsg}`);
+
+            await prisma.fabricVariantArticleData.update({
+                where: { id: variant.id },
+                data: {
+                    approvalStatus:      ok ? 'APPROVED' : 'PENDING',
+                    sapSyncStatus:       ok ? 'SYNCED'   : 'FAILED',
+                    sapSyncMessage:      variantMsg || (ok ? 'Created' : `SAP HTTP ${res.status}`),
+                    variantArticleNumber:ok ? sapArt   : null,
+                    approvedAt:          ok ? new Date() : undefined,
+                    genericArticleNumber:sapArticleNumber,
+                },
+            });
+        } catch (err: any) {
+            const errMsg = err?.message ?? 'Network error';
+            console.warn(`[ZMM_FAB_RFC] Variant ${variant.id} SAP call failed: ${errMsg}`);
+            await prisma.fabricVariantArticleData.update({
+                where: { id: variant.id },
+                data: { sapSyncStatus: 'FAILED', sapSyncMessage: errMsg, genericArticleNumber: sapArticleNumber },
+            });
+        }
+    }
 }
 
 export async function submitFabricArticles(ids: string[]): Promise<{
@@ -214,6 +315,42 @@ export async function submitFabricArticles(ids: string[]): Promise<{
                     approvedAt:           isSuccess ? new Date() : undefined,
                 },
             });
+
+            // After parent creation, backfill generic_article_number on all child variants
+            // and submit each one to SAP via ZMM_VAR_ART_CRT_V8.
+            if (isSuccess && sapNumber) {
+                await submitFabricVariants(row.id, sapNumber, row, url).catch((e) =>
+                    console.warn(`[ZMM_FAB_RFC] Variant submission error for parent ${row.id}:`, e?.message)
+                );
+            }
+
+            // After successful SAP creation, mirror the image to R2 at
+            // fabric_article/<articleNumber> and update the stored URL.
+            if (isSuccess && sapNumber && row.imageUrl) {
+                try {
+                    const imgRes = await fetch(row.imageUrl);
+                    if (imgRes.ok) {
+                        const contentType = imgRes.headers.get('content-type') || 'image/jpeg';
+                        const mimeBase = contentType.split(';')[0].trim().toLowerCase();
+                        const ext = mimeBase.includes('png') ? 'png'
+                            : mimeBase.includes('webp') ? 'webp'
+                            : mimeBase.includes('gif') ? 'gif'
+                            : 'jpg';
+                        const buffer = Buffer.from(await imgRes.arrayBuffer());
+                        const key = `fabric_article/${sapNumber}.${ext}`;
+                        const r2Url = await storageService.uploadToPrimaryKey(key, buffer, mimeBase);
+                        await prisma.fabricArticleData.update({
+                            where: { id: row.id },
+                            data: { imageUrl: r2Url },
+                        });
+                        console.log(`[ZMM_FAB_RFC] ✅ Image uploaded to R2: ${key}`);
+                    } else {
+                        console.warn(`[ZMM_FAB_RFC] Image fetch failed (${imgRes.status}) for row ${row.id} — skipping R2 upload`);
+                    }
+                } catch (imgErr: any) {
+                    console.warn(`[ZMM_FAB_RFC] R2 image upload failed for ${row.id}: ${imgErr.message}`);
+                }
+            }
 
             return { id: row.id, success: isSuccess, sapArticleNumber: sapNumber ?? undefined, message: msg };
         } catch (err: any) {

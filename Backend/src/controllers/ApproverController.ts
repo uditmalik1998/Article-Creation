@@ -1461,7 +1461,7 @@ export class ApproverController {
     }
 
     // Rough Costing Excel export — for FG Created articles.
-    // Produces 5 rows per article: 1 summary row + 4 component rows (Fab_art, Body Article, Basic Trim Cost, Val add cos).
+    // Produces 6 rows per article: 1 summary row + 5 component rows (Fab_art, Body Article, Basic Trim Cost, Value Add Acc Cost, Value Add Prcs Cost).
     // Joins body_article_data (by bodyArticleNumber) and fabric_article_data (by fabricArticleNumber) for cost data.
     static async roughCostingExport(req: Request, res: Response) {
         try {
@@ -1500,7 +1500,7 @@ export class ApproverController {
             const bodyRows = bodyNums.length > 0
                 ? await prisma.bodyArticleData.findMany({
                     where: { bodyArticleNumber: { in: bodyNums } },
-                    select: { bodyArticleNumber: true, fabCons: true, basicTrimCost: true, cmpCost: true, majorCategory: true },
+                    select: { bodyArticleNumber: true, consumptionKg: true, consumptionMeter: true, basicTrimCost: true, cmpCost: true, majorCategory: true },
                 })
                 : [];
             const bodyMap = new Map(bodyRows.map(r => [r.bodyArticleNumber!, r]));
@@ -1574,18 +1574,18 @@ export class ApproverController {
                 const fabricData = a.fabricArticleNumber ? fabricMap.get(a.fabricArticleNumber) : null;
 
                 const fgNum = a.sapArticleId || a.articleNumber || '';
-                const fabCons = toNum(bodyData?.fabCons);
+                const fabCons = toNum(bodyData?.consumptionKg) ?? toNum(bodyData?.consumptionMeter) ?? 0;
                 const vdrRate = toNum(a.vendorFabricRate);
                 const v2Rate = toNum(fabricData?.v2FabricRate);
                 const basicTrim = toNum(bodyData?.basicTrimCost)
                     ?? (bodyData?.majorCategory ? trimCostByMajCat.get(bodyData.majorCategory.trim().toUpperCase()) ?? null : null);
                 const cmpCost = toNum(bodyData?.cmpCost);
-                const fgValAdd = toNum(a.valueAddCost);
-                const fabValAdd = toNum(fabricData?.valueAddCost);
+                const fgValAdd = toNum(a.valueAddCost) ?? 0;
+                const fgProcessCost = toNum(a.valueAddProcessCost);
 
                 const summaryRowNum = dataRow;
                 const compStart = dataRow + 1;
-                const compEnd = dataRow + 4;
+                const compEnd = dataRow + 5;
 
                 // Common FG columns A–J for all 5 rows
                 const fgCols = [
@@ -1600,7 +1600,7 @@ export class ApproverController {
                 const sumRow = ws.addRow([
                     ...fgCols,
                     null, null, null, null, null,
-                    { formula: `SUM(P${compStart}:P${compEnd})` },
+                    { formula: `SUM(P${compStart}:P${compEnd})*1.1` },
                     null, null,
                     { formula: `SUM(S${compStart}:S${compEnd})` },
                     { formula: `P${summaryRowNum}-S${summaryRowNum}` },
@@ -1618,9 +1618,9 @@ export class ApproverController {
                     ...fgCols,
                     'Fabric Article', a.fabricArticleNumber || '', a.fabricArticleNumber ? (a.fabricArticleDescription || '') : '',
                     fabCons, vdrRate,
-                    fabCons != null && vdrRate != null ? { formula: `N${dataRow}*O${dataRow}` } : null,
+                    vdrRate != null ? { formula: `N${dataRow}*O${dataRow}` } : null,
                     fabCons, v2Rate,
-                    fabCons != null && v2Rate != null ? { formula: `Q${dataRow}*R${dataRow}` } : null,
+                    v2Rate != null ? { formula: `Q${dataRow}*R${dataRow}` } : null,
                     null, null,
                 ]);
                 [14, 15, 16, 17, 18, 19].forEach(c => { fabRow.getCell(c).numFmt = '#,##0.00'; });
@@ -1630,8 +1630,8 @@ export class ApproverController {
                 const bodyRow = ws.addRow([
                     ...fgCols,
                     'Body Article', a.bodyArticle || '', a.bodyArticle ? (a.bodyArticleDescription || '') : '',
-                    fabCons, null, cmpCost,
-                    fabCons, null, cmpCost,
+                    null, null, cmpCost ?? 0,
+                    null, null, cmpCost ?? 0,
                     null, null,
                 ]);
                 [14, 16, 17, 19].forEach(c => { bodyRow.getCell(c).numFmt = '#,##0.00'; });
@@ -1648,19 +1648,30 @@ export class ApproverController {
                 [16, 19].forEach(c => { trimRow.getCell(c).numFmt = '#,##0.00'; });
                 dataRow++;
 
-                // Value Addition Cost row
-                const valRow = ws.addRow([
+                // Value Add Acc Cost row (from extraction_results_flat.value_add_cost)
+                const valAccRow = ws.addRow([
                     ...fgCols,
-                    'Value Addition Cost', null, null,
+                    'Value Add Acc Cost', null, null,
                     null, null, fgValAdd,
-                    null, null, fabValAdd,
+                    null, null, fgValAdd,
                     null, null,
                 ]);
-                [16, 19].forEach(c => { valRow.getCell(c).numFmt = '#,##0.00'; });
+                [16, 19].forEach(c => { valAccRow.getCell(c).numFmt = '#,##0.00'; });
+                dataRow++;
+
+                // Value Add Process Cost row (from extraction_results_flat.value_add_process_cost)
+                const valPrcsRow = ws.addRow([
+                    ...fgCols,
+                    'Value Add Prcs Cost', null, null,
+                    null, null, fgProcessCost,
+                    null, null, fgProcessCost,
+                    null, null,
+                ]);
+                [16, 19].forEach(c => { valPrcsRow.getCell(c).numFmt = '#,##0.00'; });
 
                 // Light grey separator between articles
-                [summaryRowNum, summaryRowNum + 1, summaryRowNum + 2, summaryRowNum + 3, summaryRowNum + 4].forEach(rn => {
-                    ws.getRow(rn).getCell(1).border = { left: { style: 'medium', color: { argb: 'FFAAAAAA' } } };
+                [0, 1, 2, 3, 4, 5].forEach(offset => {
+                    ws.getRow(summaryRowNum + offset).getCell(1).border = { left: { style: 'medium', color: { argb: 'FFAAAAAA' } } };
                 });
 
                 dataRow++;
@@ -1948,7 +1959,7 @@ export class ApproverController {
             // - variantWeight: must be settable after approval so SAP retry can proceed
             // - fabricArticleDescription + vendorFabricRate: internal fields pre-saved before
             //   fabric article creation in modify mode; not part of SAP attribute sync
-            const APPROVED_ITEM_ALLOWED_FIELDS = new Set(['variantWeight', 'fabricArticleDescription', 'vendorFabricRate', 'fabricArticleNumber']);
+            const APPROVED_ITEM_ALLOWED_FIELDS = new Set(['variantWeight', 'fabricArticleDescription', 'vendorFabricRate', 'fabricArticleNumber', 'valueAddCost']);
             const isAllowedUpdate = Object.keys(data).every((k) => APPROVED_ITEM_ALLOWED_FIELDS.has(k));
             if (existingItem.approvalStatus === 'APPROVED' && !isAllowedUpdate) {
                 return res.status(403).json({ error: 'Cannot update an approved item. It is locked for SAP sync.' });
@@ -2650,11 +2661,7 @@ export class ApproverController {
                 }
             });
 
-            console.log(`[APPROVE_DEBUG] approvedItems=${approvedItems.length}, ids=${approvedItems.map(i => i.id).join(',')}`);
-            approvedItems.forEach(i => console.log(`[APPROVE_DEBUG] id=${i.id} majorCategory="${i.majorCategory}" finish="${i.finish}"`));
             const syncResults = await syncArticlesToSapViaRfc(approvedItems);
-            const syncOk = syncResults.filter((r: any) => r.success).length;
-            console.log(`[APPROVE_DEBUG] syncResults: ${syncOk}/${syncResults.length} succeeded`);
             const approvedItemById = new Map(approvedItems.map((item) => [item.id, item]));
 
             // Phase 1: Persist SAP article creation/sync outcome first.
@@ -2809,10 +2816,8 @@ export class ApproverController {
                 const variantsToUpload = variants.filter(
                     v => v.imageUrl && !storageService.extractApprovedKeyFromUrl(v.imageUrl)
                 );
-                console.log(`[VARIANT_IMG] ${variantsToUpload.length}/${variants.length} variant(s) to upload for generic ${baseArticleNumber}`);
                 await Promise.allSettled(variantsToUpload.map(async (v) => {
                     const colorCode = v.variantColor || v.colour || undefined;
-                    console.log(`[VARIANT_IMG] Uploading: variantId=${v.id} base=${baseArticleNumber} color=${colorCode} src=${v.imageUrl}`);
                     try {
                         const upload = await storageService.uploadApprovedImageFromSourceUrl(
                             String(v.imageUrl),
@@ -2824,7 +2829,6 @@ export class ApproverController {
                             where: { id: v.id },
                             data: { imageUrl: upload.url },
                         });
-                        console.log(`✅ [VARIANT_IMG] Saved to article-master: ${upload.key}`);
                     } catch (imgErr: any) {
                         console.error(`❌ [VARIANT_IMG] Upload failed for ${v.id}:`, imgErr?.message);
                     }
@@ -2996,7 +3000,6 @@ export class ApproverController {
             const remaining = await prisma.extractionResultFlat.count({
                 where: { isGeneric: true, approvalStatus: 'APPROVED', sapSyncStatus: SapSyncStatus.PENDING, comboRole: { not: 'CHILD' } },
             });
-            console.log(`[ApprovalSync] Claimed ${ids.length} approved article(s) to sync (${remaining} still queued)`);
 
             const r = await ApproverController.syncApprovedToSap(ids);
             ApproverController.itemsCache.clear();
@@ -3183,7 +3186,6 @@ export class ApproverController {
                 (v) => v.imageUrl && !storageService.extractApprovedKeyFromUrl(v.imageUrl)
             );
             if (needsRetroUpload.length > 0) {
-                console.log(`[RETRY_VARIANTS] Retroactive image upload for ${needsRetroUpload.length} SYNCED variant(s)`);
                 await Promise.allSettled(needsRetroUpload.map(async (v) => {
                     const colorCode = v.variantColor || v.colour || undefined;
                     try {
@@ -3197,7 +3199,6 @@ export class ApproverController {
                             where: { id: v.id },
                             data: { imageUrl: upload.url },
                         });
-                        console.log(`✅ [RETRY_VARIANTS] Retroactive image upload: ${upload.key}`);
                     } catch (imgErr: any) {
                         console.error(`❌ [RETRY_VARIANTS] Retroactive upload failed for ${v.id}:`, imgErr?.message);
                     }
@@ -3301,7 +3302,6 @@ export class ApproverController {
                                 where: { id: r.id },
                                 data: { imageUrl: upload.url },
                             });
-                            console.log(`✅ [RETRY_VARIANTS] Variant image saved to article-master: ${upload.key}`);
                         } catch (imgErr: any) {
                             console.error(`❌ [RETRY_VARIANTS] Variant image upload failed for ${r.id}:`, imgErr?.message);
                         }
@@ -4421,7 +4421,7 @@ export class ApproverController {
         mCount: true, mWeave01: true, mComposition: true, mFinish: true,
         mGsm: true, mLycra: true, fabricRate: true, v2FabricRate: true, valueAddCost: true, articleFashionType: true,
         designNumber: true, pptNumber: true, mcDescription: true, source: true,
-        mrp: true, baseColor: true, segment: true,
+        rate: true, segment: true,
     } as const;
 
     static getFabricArticleDataItems = async (req: Request, res: Response) => {
@@ -4494,6 +4494,8 @@ export class ApproverController {
         v2FabricRate:             'v2FabricRate',
         valueAddCost:             'valueAddCost',
         articleFashionType:       'articleFashionType',
+        mrp:                      'rate',
+        segment:                  'segment',
         // Fabric construction fields
         fabDiv:        'mFabDiv',
         yarn1:         'mYarn',
@@ -4515,23 +4517,165 @@ export class ApproverController {
         const { id } = req.params;
         const body = req.body as Record<string, unknown>;
 
+        const existing = await prisma.fabricArticleData.findUnique({ where: { id } });
+        if (!existing) return res.status(404).json({ error: 'Item not found' });
+
+        // APPROVED articles are locked — only allow updating fields that don't affect SAP sync.
+        const APPROVED_ALLOWED: Set<string> = new Set(['fabricArticleDescription', 'vendorFabricRate', 'fabricArticleNumber', 'imageUrl']);
+        if (existing.approvalStatus === 'APPROVED') {
+            const incoming = Object.keys(body).filter(k => ApproverController.FABRIC_ARTICLE_DATA_FIELD_MAP[k]);
+            const blocked = incoming.filter(k => !APPROVED_ALLOWED.has(k));
+            if (blocked.length > 0) {
+                return res.status(403).json({ error: 'Cannot update an approved item. It is locked for SAP sync.' });
+            }
+        }
+
         const data: Record<string, unknown> = {};
         for (const [clientKey, value] of Object.entries(body)) {
             const dbKey = ApproverController.FABRIC_ARTICLE_DATA_FIELD_MAP[clientKey];
             if (dbKey) data[dbKey] = value === undefined ? null : value;
         }
         if (Object.keys(data).length === 0) {
-            const row = await prisma.fabricArticleData.findUnique({ where: { id } });
-            if (!row) return res.status(404).json({ error: 'Item not found' });
-            return res.json(ApproverController.fabricArticleDataRowToItem(row));
+            return res.json(ApproverController.fabricArticleDataRowToItem(existing));
         }
         const row = await prisma.fabricArticleData.update({ where: { id }, data });
         return res.json(ApproverController.fabricArticleDataRowToItem(row));
     };
 
+    private static fabricVariantRowToItem(r: any) {
+        return {
+            id:                  r.id,
+            genericArticleId:    r.genericArticleId ?? null,
+            genericArticleNumber:r.genericArticleNumber ?? null,
+            variantColor:        r.variantColor ?? null,
+            variantArticleNumber:r.variantArticleNumber ?? null,
+            division:            r.division ?? null,
+            subDivision:         r.subDivision ?? null,
+            majorCategory:       r.majorCategory ?? null,
+            mcDescription:       r.mcDescription ?? null,
+            vendorName:          r.vendorName ?? null,
+            vendorCode:          r.vendorCode ?? null,
+            designNumber:        r.designNumber ?? null,
+            mrp:                 r.mrp != null ? Number(r.mrp) : null,
+            rate:                r.rate != null ? Number(r.rate) : null,
+            approvalStatus:      r.approvalStatus ?? 'PENDING',
+            approvedAt:          r.approvedAt?.toISOString() ?? null,
+            sapSyncStatus:       r.sapSyncStatus ?? 'NOT_SYNCED',
+            sapSyncMessage:      r.sapSyncMessage ?? null,
+            imageUrl:            r.imageUrl ?? null,
+            userName:            r.userName ?? null,
+            createdAt:           r.createdAt.toISOString(),
+            updatedAt:           r.updatedAt.toISOString(),
+        };
+    }
+
+    static getFabricArticleVariants = async (req: Request, res: Response) => {
+        const { genericId } = req.params;
+        const rows = await prisma.fabricVariantArticleData.findMany({
+            where: { genericArticleId: genericId },
+            orderBy: { createdAt: 'asc' },
+        });
+        return res.json({ data: rows.map((r) => ApproverController.fabricVariantRowToItem(r)) });
+    };
+
+    static addFabricArticleVariants = async (req: Request, res: Response) => {
+        const { genericId } = req.params;
+        const { colors, colorImages } = req.body as { colors?: string[]; colorImages?: Record<string, string> };
+
+        if (!Array.isArray(colors) || colors.length === 0) {
+            return res.status(400).json({ error: 'colors array is required' });
+        }
+
+        const parent = await prisma.fabricArticleData.findUnique({ where: { id: genericId } });
+        if (!parent) return res.status(404).json({ error: 'Generic article not found' });
+
+        const existing = await prisma.fabricVariantArticleData.findMany({
+            where: { genericArticleId: genericId },
+            select: { variantColor: true },
+        });
+        const existingColors = new Set(existing.map((e) => (e.variantColor ?? '').toUpperCase()));
+
+        const toCreate = colors.filter((c) => !existingColors.has(c.toUpperCase()));
+        if (toCreate.length === 0) return res.status(409).json({ error: 'All selected colors already exist' });
+
+        const rows = await prisma.$transaction(
+            toCreate.map((color) =>
+                prisma.fabricVariantArticleData.create({
+                    data: {
+                        genericArticleId:     genericId,
+                        genericArticleNumber: parent.fabricArticleNumber ?? null,
+                        variantColor:         color,
+                        division:             parent.division ?? null,
+                        subDivision:          parent.subDivision ?? null,
+                        majorCategory:        parent.majorCategory ?? null,
+                        mcDescription:        parent.mcDescription ?? null,
+                        vendorName:           parent.vendorName ?? null,
+                        vendorCode:           parent.vendorCode ?? null,
+                        designNumber:         parent.designNumber ?? null,
+                        mrp:                  parent.rate ?? null,
+                        imageUrl:             colorImages?.[color] ?? parent.imageUrl ?? null,
+                        userName:             parent.userName ?? null,
+                    },
+                })
+            )
+        );
+
+        return res.status(201).json({ count: rows.length, created: rows.map((r) => ApproverController.fabricVariantRowToItem(r)) });
+    };
+
+    static updateFabricArticleVariant = async (req: Request, res: Response) => {
+        const { id } = req.params;
+        const body = req.body as Record<string, unknown>;
+
+        const existing = await prisma.fabricVariantArticleData.findUnique({ where: { id } });
+        if (!existing) return res.status(404).json({ error: 'Variant not found' });
+
+        const ALLOWED_KEYS = new Set(['vendorName', 'vendorCode', 'mrp', 'rate', 'variantColor', 'imageUrl']);
+        const data: Record<string, unknown> = {};
+        for (const [k, v] of Object.entries(body)) {
+            if (!ALLOWED_KEYS.has(k)) continue;
+            if (k === 'mrp' || k === 'rate') {
+                data[k] = v !== '' && v != null ? Number(v) : null;
+            } else {
+                data[k] = v || null;
+            }
+        }
+
+        if (Object.keys(data).length === 0) return res.json(ApproverController.fabricVariantRowToItem(existing));
+        const row = await prisma.fabricVariantArticleData.update({ where: { id }, data });
+        return res.json(ApproverController.fabricVariantRowToItem(row));
+    };
+
+    static retryFabricArticleVariants = async (req: Request, res: Response) => {
+        const { genericId } = req.params;
+        const parent = await prisma.fabricArticleData.findUnique({ where: { id: genericId } });
+        if (!parent) return res.status(404).json({ error: 'Generic article not found' });
+        if (!parent.fabricArticleNumber) {
+            return res.status(400).json({ error: 'Parent fabric article has not been submitted to SAP yet' });
+        }
+        const { submitFabricVariants } = await import('../services/zmmFabArtCreationService');
+        await submitFabricVariants(genericId, parent.fabricArticleNumber, parent);
+        const variants = await prisma.fabricVariantArticleData.findMany({ where: { genericArticleId: genericId } });
+        const synced = variants.filter((v) => v.sapSyncStatus === 'SYNCED').length;
+        const failed = variants.filter((v) => v.sapSyncStatus === 'FAILED').length;
+        return res.json({ synced, failed, message: `${synced} synced, ${failed} failed` });
+    };
+
+    static deleteFabricArticleVariant = async (req: Request, res: Response) => {
+        const { id } = req.params;
+        const existing = await prisma.fabricVariantArticleData.findUnique({ where: { id } });
+        if (!existing) return res.status(404).json({ error: 'Variant not found' });
+        if (existing.approvalStatus === 'APPROVED') {
+            return res.status(403).json({ error: 'Cannot delete an approved variant' });
+        }
+        await prisma.fabricVariantArticleData.delete({ where: { id } });
+        return res.json({ success: true });
+    };
+
     private static fabricArticleDataRowToItem(r: any) {
         return {
             id:                       r.id,
+            isGeneric:                r.source === 'SRM',
             imageName:                null,
             imageUrl:                 r.imageUrl ?? null,
             articleNumber:            r.fabricArticleNumber ?? null,
@@ -4574,8 +4718,7 @@ export class ApproverController {
             articleFashionType: r.articleFashionType ?? null,
             source: r.source ?? null,
             pptNumber: r.pptNumber ?? null,
-            mrp: r.mrp != null ? Number(r.mrp) : null,
-            baseColor: r.baseColor ?? null,
+            mrp: r.rate != null ? Number(r.rate) : null,
             segment: r.segment ?? null,
             // Fields not present in fabric_article_data — nulled out
             rate: null,
@@ -4811,7 +4954,7 @@ export class ApproverController {
                 vendorCode:               '200681',
                 designNumber:             item.designNumber,
                 pptNumber:                item.pptNumber,
-                mrp:                      item.mrp ?? null,
+                rate:                     item.mrp ?? null,
                 segment:                  item.segment ?? null,
                 imageUrl:                 item.imageUrl,
                 userName:                 item.userName,

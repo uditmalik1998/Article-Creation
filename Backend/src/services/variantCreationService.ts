@@ -235,7 +235,6 @@ export async function syncGenericToVariants(genericId: string, updatedData: Reco
     // Mirror sync to 360article (fire-and-forget)
     void Promise.all(variantIds.map(v => mirror360FlatUpdate(v.id, syncData)));
 
-    console.log(`[VariantSync] Synced ${Object.keys(syncData).length} fields to variants of generic=${genericId}`);
   } catch (err: any) {
     // Log but do not rethrow — variant sync failure must not crash the main update request
     console.error(`[VariantSync] Failed to sync variants for generic=${genericId}:`, err?.message ?? err);

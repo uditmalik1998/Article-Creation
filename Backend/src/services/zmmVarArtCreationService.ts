@@ -175,7 +175,6 @@ function parseVariantRfcResponse(
 
         const message = msgText || (isSuccess ? `Variant created: ${sapArt}` : `SAP error (TYPE=${type})`);
 
-        console.log(`[ZMM_VAR_RFC] EX_RETURN parsed: TYPE=${type} FIELD=${sapArt} MESSAGE=${msgText}`);
 
         return {
             ok: isSuccess,
@@ -279,12 +278,6 @@ export async function syncVariantsToSapViaRfc(
                 ? `${SAP_RFC_PROXY_URL}?env=${encodeURIComponent(SAP_RFC_PROXY_ENV)}`
                 : SAP_RFC_PROXY_URL;
 
-            console.log(
-                `[ZMM_VAR_RFC] Creating variant → variantDbId=${variant.id}\n` +
-                `  URL: ${proxyUrl}\n` +
-                `  Full payload: ${JSON.stringify(requestBody, null, 2)}\n` +
-                `  Variant DB fields: variantSize=${variant.variantSize} colour=${variant.colour} variantColor=${variant.variantColor} vendorCode=${variant.vendorCode} rate=${variant.rate} mrp=${variant.mrp}`
-            );
 
             const ctrl = new AbortController();
             const timer = setTimeout(() => ctrl.abort(), SAP_RFC_TIMEOUT_MS);
@@ -308,11 +301,6 @@ export async function syncVariantsToSapViaRfc(
                 const outcome = parseVariantRfcResponse(response.status, responseText);
 
                 if (outcome.ok) {
-                    console.log(
-                        `[ZMM_VAR_RFC] ✅ Variant created: ${outcome.sapArticleNumber ?? 'no art num'}` +
-                        ` fabricArticleNumber=${outcome.fabricArticleNumber ?? '-'}` +
-                        ` for variantId=${variant.id}`
-                    );
                     out.push({
                         id: variant.id,
                         success: true,

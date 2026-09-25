@@ -22,7 +22,7 @@ import type { ApproverItem } from '../components/FabricArticleTable';
 import { FabricArticleCard } from '../components/FabricArticleCard';
 import { APP_CONFIG } from '../../../constants/app/config';
 import { SIMPLIFIED_HIERARCHY } from '../../extraction/components/SimplifiedCategorySelector';
-import { getMcCodeByMajorCategory, MAJOR_CATEGORY_ALLOWED_VALUES } from '../../../data/majorCategoryMcCodeMap';
+import { getMcCodeByMajorCategory } from '../../../data/majorCategoryMcCodeMap';
 import { exportToExcel } from '../../../shared/utils/export/extractionExport';
 import { formatDivisionLabel } from '../../../shared/utils/ui/formatters';
 import { SIMPLE_APPROVER_EXPORT_HEADERS } from './FabricArticleDashboard';
@@ -100,6 +100,7 @@ export default function FGNewArticleDashboard({ pathType = 'new' }: FGNewArticle
   const [subDivSearch, setSubDivSearch] = useState('');
   const [majCatOpen, setMajCatOpen] = useState(false);
   const [majCatSearch, setMajCatSearch] = useState('');
+  const [majorCategoryOptions, setMajorCategoryOptions] = useState<string[]>([]);
 
   const searchDebounceRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const isInitialFetch = useRef(true);
@@ -119,6 +120,18 @@ export default function FGNewArticleDashboard({ pathType = 'new' }: FGNewArticle
   useEffect(() => {
     if (pathType === 'created') setStatusFilter('APPROVED');
   }, [pathType]);
+
+  useEffect(() => {
+    const token = localStorage.getItem('authToken');
+    const div = divisionFilter !== 'ALL' ? divisionFilter : '';
+    const url = div
+      ? `${APP_CONFIG.api.baseURL}/approver/major-categories?division=${encodeURIComponent(div)}`
+      : `${APP_CONFIG.api.baseURL}/approver/major-categories`;
+    fetch(url, { headers: { Authorization: `Bearer ${token}` } })
+      .then((r) => r.json())
+      .then((res: any) => setMajorCategoryOptions(Array.isArray(res?.data) ? res.data : []))
+      .catch(() => {});
+  }, [divisionFilter]);
 
   const handleSearchChange = useCallback((e: React.ChangeEvent<HTMLInputElement>) => {
     const value = e.target.value;
@@ -495,14 +508,9 @@ export default function FGNewArticleDashboard({ pathType = 'new' }: FGNewArticle
                   </div>
                   <div className="max-h-56 overflow-y-auto py-1">
                     {(() => {
-                      const div = divisionFilter === 'ALL' ? '' : divisionFilter;
-                      let prefixRegex: RegExp | null = null;
-                      if (div.match(/MEN/i)) prefixRegex = /^M|^MW/i;
-                      else if (div.match(/LADIES|WOMEN/i)) prefixRegex = /^L|^LW/i;
-                      else if (div.match(/KIDS/i)) prefixRegex = /^(K|I|J|Y|G)/i;
-                      const filtered = MAJOR_CATEGORY_ALLOWED_VALUES
-                        .filter((v) => !prefixRegex || v.shortForm.match(prefixRegex))
-                        .filter((v) => v.shortForm.toLowerCase().includes(majCatSearch.toLowerCase()));
+                      const filtered = majorCategoryOptions.filter((v) =>
+                        v.toLowerCase().includes(majCatSearch.toLowerCase()),
+                      );
                       return (
                         <>
                           {!majCatSearch && (
@@ -513,10 +521,10 @@ export default function FGNewArticleDashboard({ pathType = 'new' }: FGNewArticle
                             </button>
                           )}
                           {filtered.map((v) => (
-                            <button key={v.shortForm} type="button"
-                              onClick={() => { setMajorCategoryFilter(v.shortForm); setMajCatOpen(false); setMajCatSearch(''); }}
-                              className={cn('w-full px-3 py-1.5 text-left text-xs hover:bg-accent hover:text-accent-foreground', majorCategoryFilter === v.shortForm && 'bg-accent font-medium')}>
-                              {v.shortForm}
+                            <button key={v} type="button"
+                              onClick={() => { setMajorCategoryFilter(v); setMajCatOpen(false); setMajCatSearch(''); }}
+                              className={cn('w-full px-3 py-1.5 text-left text-xs hover:bg-accent hover:text-accent-foreground', majorCategoryFilter === v && 'bg-accent font-medium')}>
+                              {v}
                             </button>
                           ))}
                           {filtered.length === 0 && (

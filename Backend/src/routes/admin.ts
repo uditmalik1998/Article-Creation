@@ -197,6 +197,14 @@ router.get('/basic-accessories/export', h(adminController.exportBasicAccessories
 router.post('/basic-accessories/upload', excelUpload.single('file'), h(adminController.uploadBasicAccessories));
 
 // ═══════════════════════════════════════════════════════
+// CMP COST MASTER (ADMIN) — rough_cmp_cost_master
+// ═══════════════════════════════════════════════════════
+router.get('/cmp-cost-master/status', h(adminController.getCmpCostMasterStatus));
+router.get('/cmp-cost-master/template', h(adminController.downloadCmpCostMasterTemplate));
+router.get('/cmp-cost-master/export', h(adminController.exportCmpCostMaster));
+router.post('/cmp-cost-master/upload', excelUpload.single('file'), h(adminController.uploadCmpCostMaster));
+
+// ═══════════════════════════════════════════════════════
 // GRID VALUES EDITOR (ADMIN) — maj_cat_grid_values
 // Group → Attribute → Major Category browser + per-value add/delete.
 // POST used for mutations to avoid the Express 5 DELETE registration quirk.
@@ -211,8 +219,6 @@ router.post('/grid-values/delete', h(adminController.deleteGridValue));
 // Status dashboard — generic-article counts by status, grouped division → sub-division
 router.get('/status-dashboard', h(adminController.getStatusDashboard));
 
-// Major categories from major_category_details table (ACT only, optionally filtered by division)
-router.get('/major-categories', h(adminController.getMajorCategories));
 
 // Size Master editor (maj_cat_sizes) — browse per major category, add/remove with audit
 router.get('/size-master/categories', h(adminController.getSizeMasterCategories));

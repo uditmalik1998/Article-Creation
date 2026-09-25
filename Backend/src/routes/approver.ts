@@ -1,7 +1,7 @@
 import { Router } from 'express';
 import multer from 'multer';
 import { ApproverController } from '../controllers/ApproverController';
-import { getMajorCategories } from '../controllers/adminController';
+import { getMajorCategories, lookupVaacTotalValue } from '../controllers/adminController';
 import { authenticate, requireApprover, requireApprovalRights, requireModifyRights, requireBodyApprovalRights, requireFabricApprovalRights } from '../middleware/auth';
 import { asyncHandler } from '../middleware/asyncHandler';
 
@@ -115,6 +115,13 @@ router.post('/fabric-article-data/submit', requireFabricApprovalRights, h(Approv
 // Delete FG-type fabric_article_data rows on reject (FG New Articles page only)
 router.post('/fabric-article-data/delete', requireFabricApprovalRights, h(ApproverController.deleteFGFabricArticles));
 
+// Fabric Article Variants (fabric_variants_article_data) — SRM Fabric Articles tab only
+router.get('/fabric-article-data/:genericId/variants', h(ApproverController.getFabricArticleVariants));
+router.post('/fabric-article-data/:genericId/variants', h(ApproverController.addFabricArticleVariants));
+router.post('/fabric-article-data/:genericId/retry-variants', h(ApproverController.retryFabricArticleVariants));
+router.put('/fabric-article-variant/:id', h(ApproverController.updateFabricArticleVariant));
+router.delete('/fabric-article-variant/:id', h(ApproverController.deleteFabricArticleVariant));
+
 // Get / Update a single fabric_article_data record (used by FG New Articles detail page)
 router.get('/fabric-article-data/:id', h(ApproverController.getFabricArticleDataById));
 router.put('/fabric-article-data/:id', h(ApproverController.updateFabricArticleData));
@@ -159,5 +166,8 @@ router.get('/major-category-details', h(ApproverController.getMajorCategoryDetai
 
 // Major categories list — accessible to all authenticated roles (Creator, Approver, Admin, etc.)
 router.get('/major-categories', h(getMajorCategories));
+
+// VAAC lookup — accessible to all authenticated roles so the FG Article detail page can auto-fill Value Add Acc. Cost
+router.get('/value-addition-accessories-cost/lookup', h(lookupVaacTotalValue));
 
 export default router;

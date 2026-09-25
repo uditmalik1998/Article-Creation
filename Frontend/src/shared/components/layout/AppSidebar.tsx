@@ -149,7 +149,6 @@ export const AppSidebar: React.FC<AppSidebarProps> = ({ collapsed, onCollapsedCh
         label: 'Extraction',
         children: [
           { key: '/extraction/fg-article', Icon: FileText, label: 'FG Article' },
-          { key: '/extraction/fabric-article', Icon: FileText, label: 'Fabric Article' },
         ],
       });
     }
@@ -202,7 +201,6 @@ export const AppSidebar: React.FC<AppSidebarProps> = ({ collapsed, onCollapsedCh
         { key: '/fabric-article', Icon: FileText, label: 'New articles' },
         { key: '/fabric-article/rejected', Icon: XCircle, label: 'Rejected' },
         { key: '/fabric-article/created', Icon: CheckCircle2, label: 'Created' },
-        { key: '/fabric-article/failed', Icon: AlertTriangle, label: 'Failed Creations' },
         { key: '/fabric-article/fg-new', Icon: FileText, label: 'FG New Articles' },
         { key: '/fabric-article/fg-created', Icon: CheckCircle2, label: 'FG Created' },
       ],
@@ -232,6 +230,30 @@ export const AppSidebar: React.FC<AppSidebarProps> = ({ collapsed, onCollapsedCh
     });
   }
 
+  // GM Article — visible to standard approver roles AND the dedicated GM_APPROVER role
+  if (
+    !isPdDesigner &&
+    (role === 'APPROVER' ||
+      role === 'CATEGORY_HEAD' ||
+      role === 'SUB_DIVISION_HEAD' ||
+      role === 'GM_APPROVER' ||
+      isAdmin ||
+      role === 'CREATOR' ||
+      role === 'PO_COMMITTEE' ||
+      isPd)
+  ) {
+    items.push({
+      key: '/gm-article-group',
+      Icon: CheckSquare,
+      label: 'GM Article',
+      children: [
+        { key: '/gm-article', Icon: FileText, label: 'New articles' },
+        { key: '/gm-article/rejected', Icon: XCircle, label: 'Rejected' },
+        { key: '/gm-article/created', Icon: CheckCircle2, label: 'Created' },
+      ],
+    });
+  }
+
   if (!isPdDesigner && (role === 'APPROVER' || role === 'CATEGORY_HEAD' || role === 'SUB_DIVISION_HEAD' || isAdmin)) {
     items.push({ key: '/po-presentation', Icon: FileText, label: 'PO Presentation' });
   }
@@ -256,8 +278,7 @@ export const AppSidebar: React.FC<AppSidebarProps> = ({ collapsed, onCollapsedCh
         { key: '/admin/users', Icon: User, label: 'Users' },
         { key: '/admin/expenses', Icon: ShoppingBag, label: 'Expenses' },
         { key: '/admin/expense-audit-log', Icon: History, label: 'Expense Audit Log' },
-        { key: '/admin/srm-failed', Icon: AlertTriangle, label: 'Failed Extractions' },
-        { key: '/admin/ksml-uploader', Icon: Upload, label: 'KSML Uploader' },
+
         { key: '/admin/poolb-uploader', Icon: Upload, label: 'Pool B Uploader' },
         { key: '/admin/modify-logs', Icon: ClipboardList, label: 'Modification Logs' },
       ],
