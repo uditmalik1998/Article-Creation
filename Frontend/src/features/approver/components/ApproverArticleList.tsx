@@ -978,9 +978,10 @@ const ArticleCard = React.memo(
 
           const forceMandatory = af.mandatory === true;
           if (isActiveMandatory || forceMandatory) {
-            // TIER 1: Mandatory — only shown + tracked when the field has a value.
-            // Hidden mandatory fields are neither rendered nor block submission.
-            if (hasValue) {
+            // TIER 1: Mandatory — shown if field has a value OR has dropdown options.
+            // Hidden only when no value AND no dropdown options (un-fillable); those
+            // hidden fields are not tracked in mandatoryKeys so they don't block submit.
+            if (hasValue || hasDropdownValues) {
               mandatory.add(af.schemaKey);
               visible.push({
                 field: af.field,
@@ -1007,8 +1008,8 @@ const ArticleCard = React.memo(
               isMandatory: false,
               mandatory: af.mandatory,
             });
-          } else if (forceMandatory && hasValue) {
-            // Force-show only when mandatory override is set AND field has a value
+          } else if (forceMandatory && (hasValue || hasDropdownValues)) {
+            // Force-show when mandatory override is set AND field has a value or dropdown options
             visible.push({
               field: af.field,
               label: af.label,
