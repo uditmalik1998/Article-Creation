@@ -904,8 +904,7 @@ const ArticleCard = React.memo(
         const curVal = localValues[af.field] !== undefined ? localValues[af.field] : (item as any)[af.field];
         const hasValue = curVal != null && String(curVal).trim() !== '' && !/^-+$/.test(String(curVal).trim());
 
-        // freeText fields (shade, weight, segment…) are always visible when they have a value.
-        // Mandatory freeText fields without a value are tracked for validation but not rendered.
+        // freeText fields (vendor fabric rate, segment…) are always visible — user can type into them.
         if (af.freeText) {
           const sapKeys = SCHEMA_KEY_TO_ALL_SAP_KEYS[af.schemaKey] ?? [];
           const gridMandatory =
@@ -914,7 +913,6 @@ const ArticleCard = React.memo(
             mandatoryGridReady &&
             sapKeys.some((sk) => isMandatoryGridFieldActive(effectiveMajCat, sk) === true);
           const isMandatory = af.mandatory === true || gridMandatory;
-          if (isMandatory && !hasValue) continue;
           if (isMandatory) mandatory.add(af.schemaKey);
           visible.push({
             field: af.field,
