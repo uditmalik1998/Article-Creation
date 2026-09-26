@@ -88,7 +88,6 @@ const FIELD_LABELS: Record<string, string> = {
   cmtpCost: 'CMTP Cost', cmpCost: 'CMP Cost', fabCost: 'Fab Cost',
   fabCons: 'Fab Consumption', width: 'Width', fabricArticleNumber: 'Fabric Article No.',
   bodyArticle: 'Body Article No.', mvgrBrandVendor: 'M_BRAND / Vendor MVGR',
-  mNoOfSize: 'M_NO_OF_SIZE', mNoOfClr: 'M_NO_OF_CLR',
   variantColor: 'Variant Colour', variantWeight: 'Variant Weight',
 };
 
