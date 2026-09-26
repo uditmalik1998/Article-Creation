@@ -48,6 +48,9 @@ router.all('/items/:id', h(async (req, res, next) => {
   return;
 }));
 
+// Change history for a single FG article
+router.get('/items/:id/history', h(ApproverController.getFgArticleHistory));
+
 // Validate changes against National Grid without touching SAP or the DB.
 router.post('/items/:id/validate-modify', h(ApproverController.validateModify));
 
