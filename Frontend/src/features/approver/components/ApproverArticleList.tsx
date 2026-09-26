@@ -900,8 +900,12 @@ const ArticleCard = React.memo(
         // Fields explicitly hidden from the card (shade, weight)
         if (HIDDEN_CARD_SCHEMA_KEYS.has(af.schemaKey)) continue;
 
-        // freeText fields (shade, weight, segment…) are always visible.
-        // They CAN be mandatory if the mandatory grid marks them as active — check the grid.
+        // Compute whether this field has a value (used to gate mandatory-but-empty visibility)
+        const curVal = localValues[af.field] !== undefined ? localValues[af.field] : (item as any)[af.field];
+        const hasValue = curVal != null && String(curVal).trim() !== '' && !/^-+$/.test(String(curVal).trim());
+
+        // freeText fields (shade, weight, segment…) are always visible when they have a value.
+        // Mandatory freeText fields without a value are tracked for validation but not rendered.
         if (af.freeText) {
           const sapKeys = SCHEMA_KEY_TO_ALL_SAP_KEYS[af.schemaKey] ?? [];
           const gridMandatory =
@@ -910,6 +914,7 @@ const ArticleCard = React.memo(
             mandatoryGridReady &&
             sapKeys.some((sk) => isMandatoryGridFieldActive(effectiveMajCat, sk) === true);
           const isMandatory = af.mandatory === true || gridMandatory;
+          if (isMandatory && !hasValue) continue;
           if (isMandatory) mandatory.add(af.schemaKey);
           visible.push({
             field: af.field,
@@ -973,19 +978,22 @@ const ArticleCard = React.memo(
 
           const forceMandatory = af.mandatory === true;
           if (isActiveMandatory || forceMandatory) {
-            // TIER 1: Mandatory — bold + * in card, required for approve
-            mandatory.add(af.schemaKey);
-            visible.push({
-              field: af.field,
-              label: af.label,
-              schemaKey: af.schemaKey,
-              group: af.group,
-              groupColor: af.groupColor,
-              values,
-              freeText: false,
-              isMandatory: true,
-              mandatory: af.mandatory,
-            });
+            // TIER 1: Mandatory — only shown + tracked when the field has a value.
+            // Hidden mandatory fields are neither rendered nor block submission.
+            if (hasValue) {
+              mandatory.add(af.schemaKey);
+              visible.push({
+                field: af.field,
+                label: af.label,
+                schemaKey: af.schemaKey,
+                group: af.group,
+                groupColor: af.groupColor,
+                values,
+                freeText: false,
+                isMandatory: true,
+                mandatory: af.mandatory,
+              });
+            }
           } else if (hasDropdownValues) {
             // TIER 2: Optional — has dropdown values but not mandatory
             visible.push({
@@ -999,8 +1007,8 @@ const ArticleCard = React.memo(
               isMandatory: false,
               mandatory: af.mandatory,
             });
-          } else if (forceMandatory) {
-            // Force-show even with no dropdown values when mandatory override is set
+          } else if (forceMandatory && hasValue) {
+            // Force-show only when mandatory override is set AND field has a value
             visible.push({
               field: af.field,
               label: af.label,
@@ -1016,17 +1024,21 @@ const ArticleCard = React.memo(
           // TIER 3: Neither → skip (completely hidden for configured categories)
         } else {
           // ── Grids not yet loaded OR category has no grid data: graceful fallback ──
-          visible.push({
-            field: af.field,
-            label: af.label,
-            schemaKey: af.schemaKey,
-            group: af.group,
-            groupColor: af.groupColor,
-            values,
-            freeText: false,
-            isMandatory: af.mandatory === true,
-            mandatory: af.mandatory,
-          });
+          const isMandatoryFallback = af.mandatory === true;
+          if (!isMandatoryFallback || hasValue) {
+            if (isMandatoryFallback) mandatory.add(af.schemaKey);
+            visible.push({
+              field: af.field,
+              label: af.label,
+              schemaKey: af.schemaKey,
+              group: af.group,
+              groupColor: af.groupColor,
+              values,
+              freeText: false,
+              isMandatory: isMandatoryFallback,
+              mandatory: af.mandatory,
+            });
+          }
         }
       }
 

@@ -3,7 +3,7 @@ import { useParams, useNavigate, useLocation } from 'react-router-dom';
 import { useForm } from 'react-hook-form';
 import {
   CheckCircle2, XCircle, FileText, LayoutGrid, Rocket, Sparkles,
-  ChevronLeft, ChevronRight, ArrowLeft, Loader2, RotateCw,
+  ChevronLeft, ChevronRight, ArrowLeft, Loader2, RotateCw, History,
 } from 'lucide-react';
 import {
   Button,
@@ -52,6 +52,45 @@ import {
 } from '../../../services/articleConfigService';
 import { formatDivisionLabel } from '../../../shared/utils/ui/formatters';
 import { variantCreatingIds } from '../../fabric-article/variantCreationState';
+
+// ─── History field display labels (camelCase → human label) ──────────────────
+const FIELD_LABELS: Record<string, string> = {
+  majorCategory: 'Major Category', mrp: 'MRP', rate: 'Rate / Cost',
+  vendorCode: 'Vendor Code', vendorName: 'Vendor Name',
+  designNumber: 'Design Number', pptNumber: 'PPT Number',
+  articleNumber: 'Article Number', division: 'Division', subDivision: 'Sub Division',
+  segment: 'Segment', season: 'Season', year: 'Year',
+  fabDiv: 'M_FAB_DIV', yarn1: 'M_YARN', yarn2: 'M_YARN-02',
+  mainMvgr: 'M_FAB_MAIN_MVGR_1', fabricMainMvgr: 'M_FAB_MAIN_MVGR_2',
+  weave: 'M_WEAVE_01', mFab2: 'M_WEAVE_02',
+  composition: 'M_COMPOSITION', finish: 'M_FINISH',
+  fConstruction: 'M_CONSTRUCTION', shade: 'M_SHADE', lycra: 'M_LYCRA',
+  gsm: 'M_GSM', fCount: 'M_COUNT', fOunce: 'M_OUNZ', fWidth: 'M_WIDTH',
+  fabVdr: 'M_FAB_VDR', macroMvgr: 'M_MACRO_MVGR', impAtrbt2: 'M_IMP_ATBT',
+  collar: 'M_COLLAR_TYPE', collarStyle: 'M_COLLAR_STYLE',
+  neck: 'M_NECK_TYPE', neckDetails: 'M_NECK_STYLE',
+  placket: 'M_PLACKET', fatherBelt: 'M_BLT_TYPE', childBelt: 'M_BLT_STYLE',
+  sleeve: 'M_SLEEVES_MAIN_STYLE', sleeveFold: 'M_SLEEVE_FOLD', mSet: 'M_SET',
+  bottomFold: 'M_BTM_FOLD', noOfPocket: 'M_NO_OF_POCKET', pocketType: 'M_POCKET',
+  extraPocket: 'M_EXTRA_POCKET', fit: 'M_FIT', pattern: 'M_BODY_STYLE', length: 'M_LENGTH',
+  drawcord: 'M_DC_STYLE', dcShape: 'M_DC_SHAPE', button: 'M_BTN_TYPE', btnColour: 'M_BTN_CLR',
+  zipper: 'M_ZIP_TYPE', zipColour: 'M_ZIP_COL',
+  patches: 'M_PATCHE_TYPE', patchesType: 'M_PATCH_STYLE',
+  htrfType: 'M_HTRF_TYPE', htrfStyle: 'M_HTRF_STYLE',
+  printType: 'M_PRINT_TYPE', printPlacement: 'M_PRINT_PLACEMENT', printStyle: 'M_PRINT_STYLE',
+  embroidery: 'M_EMB_TYPE', embroideryType: 'M_EMBROIDERY_STYLE', embPlacement: 'M_EMB_PLACEMENT',
+  wash: 'M_WASH', ageGroup: 'M_AGE_GROUP', mNoOfSize: 'M_NO_OF_SIZE', mNoOfClr: 'M_NO_OF_CLR',
+  weight: 'M_FAB_WEIGHT', colour: 'Colour', fashionGrid: 'Fashion Grid',
+  articleType: 'Article Type', articleFashionType: 'M_ARTICLE_FASHION_TYPE',
+  articleDimension: 'Article Dimension', referenceArticleNumber: 'Reference Article No.',
+  valueAddAccCostType: 'Value Add Acc. Cost Type', valueAddCost: 'Value Add Acc. Cost',
+  valueAddProcessCost: 'Value Add Process Cost', vendorFabricRate: 'Vendor Fabric Rate',
+  cmtpCost: 'CMTP Cost', cmpCost: 'CMP Cost', fabCost: 'Fab Cost',
+  fabCons: 'Fab Consumption', width: 'Width', fabricArticleNumber: 'Fabric Article No.',
+  bodyArticle: 'Body Article No.', mvgrBrandVendor: 'M_BRAND / Vendor MVGR',
+  mNoOfSize: 'M_NO_OF_SIZE', mNoOfClr: 'M_NO_OF_CLR',
+  variantColor: 'Variant Colour', variantWeight: 'Variant Weight',
+};
 
 // ─── Helpers ─────────────────────────────────────────────────────────────────
 
@@ -322,6 +361,11 @@ export default function ArticleDetailPage({
 
   // Maps itemId → number of variants missing weight (for Save & Submit gate)
   const [variantWeightIssues, setVariantWeightIssues] = useState<Record<string, number>>({});
+
+  // Article change history
+  const [historyOpen, setHistoryOpen] = useState(false);
+  const [historyRecords, setHistoryRecords] = useState<any[]>([]);
+  const [historyLoading, setHistoryLoading] = useState(false);
 
   // Edit modal
   const [isEditModalOpen, setIsEditModalOpen] = useState(false);
@@ -667,6 +711,21 @@ export default function ArticleDetailPage({
       setSelectedRowKeys([]);
       await refetchCurrentItem();
     } catch { message.error('Failed to reject items'); }
+  };
+
+  const openHistory = async (articleId: string) => {
+    setHistoryOpen(true);
+    setHistoryLoading(true);
+    setHistoryRecords([]);
+    try {
+      const token = localStorage.getItem('authToken');
+      const r = await fetch(`${APP_CONFIG.api.baseURL}/approver/items/${articleId}/history`, {
+        headers: { Authorization: `Bearer ${token}` },
+      });
+      if (!r.ok) throw new Error('Failed');
+      setHistoryRecords(await r.json());
+    } catch { message.error('Failed to load history'); }
+    finally { setHistoryLoading(false); }
   };
 
   const doCreateFabric = async (item: ApproverItem) => {
@@ -1044,6 +1103,15 @@ export default function ArticleDetailPage({
                   </Button>
                 </span>
               </Tooltip>
+              {currentItem && (
+                <Tooltip title="View change history for this article">
+                  <Button size="sm" variant="outline"
+                    onClick={() => openHistory(currentItem.id)}
+                    className="h-7 w-7 p-0">
+                    <History className="h-3.5 w-3.5" />
+                  </Button>
+                </Tooltip>
+              )}
               <Tooltip
                 side="bottom"
                 contentClassName="bg-white text-foreground border border-border p-0 max-w-xs shadow-lg"
@@ -1440,6 +1508,54 @@ export default function ArticleDetailPage({
               <DialogFooter><Button onClick={() => setInfoDialog(null)}>OK</Button></DialogFooter>
             </>
           )}
+        </DialogContent>
+      </Dialog>
+
+      {/* Article change history dialog */}
+      <Dialog open={historyOpen} onOpenChange={o => !o && setHistoryOpen(false)}>
+        <DialogContent className="max-w-3xl">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2">
+              <History className="h-4 w-4 text-blue-500" /> Article Change History
+            </DialogTitle>
+          </DialogHeader>
+          <div className="max-h-[480px] overflow-y-auto">
+            {historyLoading ? (
+              <div className="flex items-center justify-center py-12 text-muted-foreground text-sm">
+                <Loader2 className="h-4 w-4 animate-spin mr-2" /> Loading history…
+              </div>
+            ) : historyRecords.length === 0 ? (
+              <div className="py-10 text-center text-sm text-muted-foreground">No changes recorded yet.</div>
+            ) : (
+              <table className="w-full text-[12px] border-collapse">
+                <thead>
+                  <tr className="border-b bg-muted/40 text-left text-[11px] font-semibold uppercase tracking-wide text-muted-foreground">
+                    <th className="px-3 py-2 w-36">Date / Time</th>
+                    <th className="px-3 py-2 w-28">Changed By</th>
+                    <th className="px-3 py-2 w-36">Field</th>
+                    <th className="px-3 py-2">Old Value</th>
+                    <th className="px-3 py-2">New Value</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {historyRecords.map((r, i) => (
+                    <tr key={r.id ?? i} className="border-b last:border-0 hover:bg-muted/20">
+                      <td className="px-3 py-2 whitespace-nowrap text-muted-foreground">
+                        {new Date(r.changed_at).toLocaleString('en-IN', { day: '2-digit', month: 'short', year: 'numeric', hour: '2-digit', minute: '2-digit' })}
+                      </td>
+                      <td className="px-3 py-2 font-medium">{r.changed_by_name ?? '—'}</td>
+                      <td className="px-3 py-2 font-mono text-[11px] text-blue-700">{FIELD_LABELS[r.field_name] ?? r.field_name}</td>
+                      <td className="px-3 py-2 text-red-600 max-w-[160px] truncate" title={r.old_value ?? ''}>{r.old_value ?? <span className="text-muted-foreground italic">empty</span>}</td>
+                      <td className="px-3 py-2 text-green-700 max-w-[160px] truncate" title={r.new_value ?? ''}>{r.new_value ?? <span className="text-muted-foreground italic">empty</span>}</td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            )}
+          </div>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setHistoryOpen(false)}>Close</Button>
+          </DialogFooter>
         </DialogContent>
       </Dialog>
     </div>

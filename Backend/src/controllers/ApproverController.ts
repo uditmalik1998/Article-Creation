@@ -64,6 +64,17 @@ const ITEM_UPDATE_ALLOWED_FIELDS = [
     'variantColor', 'variantSize', 'variantWeight',
 ];
 
+// Fields never written to history_fg_article (auto-derived or explicitly excluded by product)
+const HISTORY_EXCLUDED_FIELDS = new Set([
+    'fabricArticleDescription', 'bodyArticleDescription',
+    'articleDescription', 'mcCode', 'hsnTaxCode', 'mcDescription', 'attrArticleNums',
+]);
+
+// camelCase → snake_case (e.g. fabDiv → fab_div, mrp → mrp)
+function camelToSnake(s: string): string {
+    return s.replace(/([A-Z])/g, '_$1').toLowerCase();
+}
+
 export class ApproverController {
     private static readonly STARTUP_BACKFILL_BATCH_SIZE = parseInt(process.env.STARTUP_BACKFILL_BATCH_SIZE || '250', 10);
     private static readonly STARTUP_BACKFILL_DELAY_MS = parseInt(process.env.STARTUP_BACKFILL_DELAY_MS || '15000', 10);
@@ -1799,6 +1810,53 @@ export class ApproverController {
         }
     }
 
+    // Record per-field change history into history_fg_article (fire-and-forget safe).
+    private static async recordFgArticleHistory(
+        articleId: string,
+        user: any,
+        changes: Record<string, any>,
+        oldRow: Record<string, any>
+    ): Promise<void> {
+        const inserts: Array<{ fieldName: string; oldValue: string | null; newValue: string | null }> = [];
+        for (const [field, newVal] of Object.entries(changes)) {
+            if (HISTORY_EXCLUDED_FIELDS.has(field)) continue;
+            const dbCol = camelToSnake(field);
+            const oldVal = oldRow[dbCol];
+            const oldStr = oldVal == null ? null : String(oldVal);
+            const newStr = newVal == null ? null : String(newVal);
+            if (oldStr !== newStr) {
+                inserts.push({ fieldName: field, oldValue: oldStr, newValue: newStr });
+            }
+        }
+        if (inserts.length === 0) return;
+        const userId: number | null = user?.id ?? null;
+        const userName: string | null = user?.name ?? null;
+        for (const { fieldName, oldValue, newValue } of inserts) {
+            await prisma.$executeRaw`
+                INSERT INTO history_fg_article (article_id, changed_by_id, changed_by_name, field_name, old_value, new_value)
+                VALUES (${articleId}, ${userId}, ${userName}, ${fieldName}, ${oldValue}, ${newValue})
+            `;
+        }
+    }
+
+    // GET /approver/items/:id/history — returns change log for a single FG article
+    static async getFgArticleHistory(req: Request, res: Response) {
+        const { id } = req.params;
+        try {
+            const history = await prisma.$queryRaw<any[]>`
+                SELECT id, article_id, changed_by_id, changed_by_name,
+                       changed_at, field_name, old_value, new_value
+                FROM history_fg_article
+                WHERE article_id = ${id}
+                ORDER BY changed_at DESC
+                LIMIT 500
+            `;
+            return res.json(history);
+        } catch (err: any) {
+            return res.status(500).json({ error: err?.message ?? 'Failed to fetch history' });
+        }
+    }
+
     // Update item details (Edit)
     static async updateItem(req: Request, res: Response) {
         ApproverController.itemsCache.clear();
@@ -1873,6 +1931,12 @@ export class ApproverController {
             } else if (data.mcCode !== undefined) {
                 data.hsnTaxCode = getHsnCodeByMcCode(data.mcCode) || null;
             }
+
+            // Snapshot full row for history comparison (before the update)
+            const oldRowSnap = await prisma.$queryRawUnsafe<any[]>(
+                `SELECT * FROM extraction_results_flat WHERE id = $1`, id
+            );
+            const oldRow: Record<string, any> = oldRowSnap[0] ?? {};
 
             // RBAC: Check access for Approvers & Validate Status
             const existingItem = await prisma.extractionResultFlat.findUnique({
@@ -2045,6 +2109,10 @@ export class ApproverController {
 
             // Mirror to 360article.article_360_flat (fire-and-forget)
             void mirror360FlatUpdate(id, data).catch((err: any) => console.error('[mirror360] update failed:', err?.message));
+
+            // Record per-field history (fire-and-forget)
+            void ApproverController.recordFgArticleHistory(id, req.user, data, oldRow)
+                .catch((err: any) => console.error('[fgArticleHistory] record failed:', err?.message));
 
             // NOTE: We intentionally update ONLY this edited row. The correct
             // mcCode/hsnTaxCode for the new majorCategory are already applied to
