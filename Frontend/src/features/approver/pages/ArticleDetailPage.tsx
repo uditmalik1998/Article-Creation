@@ -366,6 +366,8 @@ export default function ArticleDetailPage({
   const [historyOpen, setHistoryOpen] = useState(false);
   const [historyRecords, setHistoryRecords] = useState<any[]>([]);
   const [historyLoading, setHistoryLoading] = useState(false);
+  const [historySearch, setHistorySearch] = useState('');
+  const [historyUserFilter, setHistoryUserFilter] = useState('__ALL__');
 
   // Edit modal
   const [isEditModalOpen, setIsEditModalOpen] = useState(false);
@@ -717,6 +719,8 @@ export default function ArticleDetailPage({
     setHistoryOpen(true);
     setHistoryLoading(true);
     setHistoryRecords([]);
+    setHistorySearch('');
+    setHistoryUserFilter('__ALL__');
     try {
       const token = localStorage.getItem('authToken');
       const r = await fetch(`${APP_CONFIG.api.baseURL}/approver/items/${articleId}/history`, {
@@ -1104,13 +1108,14 @@ export default function ArticleDetailPage({
                 </span>
               </Tooltip>
               {currentItem && (
-                <Tooltip title="View change history for this article">
-                  <Button size="sm" variant="outline"
-                    onClick={() => openHistory(currentItem.id)}
-                    className="h-7 w-7 p-0">
-                    <History className="h-3.5 w-3.5" />
-                  </Button>
-                </Tooltip>
+                <button
+                  onClick={() => openHistory(currentItem.id)}
+                  title="View change history"
+                  className="group flex h-7 items-center gap-1.5 rounded-md bg-red-500 px-2.5 text-[12px] font-medium text-white transition-colors hover:bg-red-600 active:bg-red-700"
+                >
+                  <History className="h-3.5 w-3.5 transition-transform group-hover:rotate-12" />
+                  <span>History</span>
+                </button>
               )}
               <Tooltip
                 side="bottom"
@@ -1512,50 +1517,146 @@ export default function ArticleDetailPage({
       </Dialog>
 
       {/* Article change history dialog */}
-      <Dialog open={historyOpen} onOpenChange={o => !o && setHistoryOpen(false)}>
-        <DialogContent className="max-w-3xl">
-          <DialogHeader>
-            <DialogTitle className="flex items-center gap-2">
-              <History className="h-4 w-4 text-blue-500" /> Article Change History
-            </DialogTitle>
-          </DialogHeader>
-          <div className="max-h-[480px] overflow-y-auto">
+      <Dialog open={historyOpen} onOpenChange={o => { if (!o) { setHistoryOpen(false); setHistorySearch(''); setHistoryUserFilter('__ALL__'); } }}>
+        <DialogContent className="max-w-3xl p-0 overflow-hidden">
+          {/* Header */}
+          <div className="flex items-center gap-3 border-b bg-gradient-to-r from-slate-50 to-white px-5 py-4">
+            <div className="flex h-8 w-8 items-center justify-center rounded-full bg-red-100">
+              <History className="h-4 w-4 text-red-500" />
+            </div>
+            <div>
+              <h2 className="text-[15px] font-semibold leading-tight text-foreground">Article Change History</h2>
+              <p className="text-[11px] text-muted-foreground leading-tight mt-0.5">
+                {historyLoading ? 'Loading…' : `${historyRecords.length} change${historyRecords.length !== 1 ? 's' : ''} recorded`}
+              </p>
+            </div>
+          </div>
+
+          {/* Filters */}
+          {!historyLoading && historyRecords.length > 0 && (() => {
+            const uniqueUsers = Array.from(new Set(historyRecords.map(r => r.changed_by_name ?? '—')));
+            return (
+              <div className="flex gap-2 border-b bg-slate-50/60 px-4 py-3">
+                <div className="relative flex-1">
+                  <svg className="absolute left-2.5 top-1/2 -translate-y-1/2 h-3.5 w-3.5 text-muted-foreground" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" /></svg>
+                  <Input
+                    placeholder="Search field, old or new value…"
+                    value={historySearch}
+                    onChange={e => setHistorySearch(e.target.value)}
+                    className="h-8 pl-8 text-[12px] bg-white"
+                  />
+                </div>
+                <Select value={historyUserFilter} onValueChange={setHistoryUserFilter}>
+                  <SelectTrigger className="h-8 w-[140px] bg-white text-[12px]">
+                    <SelectValue placeholder="All users" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="__ALL__">All users</SelectItem>
+                    {uniqueUsers.map(u => <SelectItem key={u} value={u}>{u}</SelectItem>)}
+                  </SelectContent>
+                </Select>
+              </div>
+            );
+          })()}
+
+          {/* Body */}
+          <div className="max-h-[420px] overflow-y-auto">
             {historyLoading ? (
-              <div className="flex items-center justify-center py-12 text-muted-foreground text-sm">
-                <Loader2 className="h-4 w-4 animate-spin mr-2" /> Loading history…
+              <div className="flex flex-col items-center justify-center gap-3 py-16 text-muted-foreground">
+                <Loader2 className="h-6 w-6 animate-spin text-red-400" />
+                <span className="text-[13px]">Loading history…</span>
               </div>
             ) : historyRecords.length === 0 ? (
-              <div className="py-10 text-center text-sm text-muted-foreground">No changes recorded yet.</div>
-            ) : (
-              <table className="w-full text-[12px] border-collapse">
-                <thead>
-                  <tr className="border-b bg-muted/40 text-left text-[11px] font-semibold uppercase tracking-wide text-muted-foreground">
-                    <th className="px-3 py-2 w-36">Date / Time</th>
-                    <th className="px-3 py-2 w-28">Changed By</th>
-                    <th className="px-3 py-2 w-36">Field</th>
-                    <th className="px-3 py-2">Old Value</th>
-                    <th className="px-3 py-2">New Value</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {historyRecords.map((r, i) => (
-                    <tr key={r.id ?? i} className="border-b last:border-0 hover:bg-muted/20">
-                      <td className="px-3 py-2 whitespace-nowrap text-muted-foreground">
-                        {new Date(r.changed_at).toLocaleString('en-IN', { day: '2-digit', month: 'short', year: 'numeric', hour: '2-digit', minute: '2-digit' })}
-                      </td>
-                      <td className="px-3 py-2 font-medium">{r.changed_by_name ?? '—'}</td>
-                      <td className="px-3 py-2 font-mono text-[11px] text-blue-700">{FIELD_LABELS[r.field_name] ?? r.field_name}</td>
-                      <td className="px-3 py-2 text-red-600 max-w-[160px] truncate" title={r.old_value ?? ''}>{r.old_value ?? <span className="text-muted-foreground italic">empty</span>}</td>
-                      <td className="px-3 py-2 text-green-700 max-w-[160px] truncate" title={r.new_value ?? ''}>{r.new_value ?? <span className="text-muted-foreground italic">empty</span>}</td>
+              <div className="flex flex-col items-center justify-center gap-2 py-16 text-muted-foreground">
+                <History className="h-8 w-8 opacity-20" />
+                <span className="text-[13px]">No changes recorded yet.</span>
+                <span className="text-[11px] opacity-70">Changes will appear here after the first save.</span>
+              </div>
+            ) : (() => {
+              const q = historySearch.toLowerCase();
+              const filtered = historyRecords.filter(r => {
+                if (historyUserFilter !== '__ALL__' && (r.changed_by_name ?? '—') !== historyUserFilter) return false;
+                if (!q) return true;
+                const label = (FIELD_LABELS[r.field_name] ?? r.field_name).toLowerCase();
+                return (
+                  label.includes(q) ||
+                  (r.old_value ?? '').toLowerCase().includes(q) ||
+                  (r.new_value ?? '').toLowerCase().includes(q) ||
+                  (r.changed_by_name ?? '').toLowerCase().includes(q)
+                );
+              });
+              return filtered.length === 0 ? (
+                <div className="flex flex-col items-center justify-center gap-2 py-14 text-muted-foreground">
+                  <span className="text-[13px]">No results match your search.</span>
+                </div>
+              ) : (
+                <table className="w-full text-[12px] border-collapse">
+                  <thead className="sticky top-0 z-10">
+                    <tr className="border-b bg-slate-50 text-left">
+                      <th className="px-4 py-2.5 w-36 text-[10px] font-semibold uppercase tracking-wider text-slate-500">Date / Time</th>
+                      <th className="px-4 py-2.5 w-28 text-[10px] font-semibold uppercase tracking-wider text-slate-500">Changed By</th>
+                      <th className="px-4 py-2.5 w-36 text-[10px] font-semibold uppercase tracking-wider text-slate-500">Field</th>
+                      <th className="px-4 py-2.5 text-[10px] font-semibold uppercase tracking-wider text-slate-500">Old Value</th>
+                      <th className="px-4 py-2.5 text-[10px] font-semibold uppercase tracking-wider text-slate-500">New Value</th>
                     </tr>
-                  ))}
-                </tbody>
-              </table>
-            )}
+                  </thead>
+                  <tbody className="divide-y divide-slate-100">
+                    {filtered.map((r, i) => (
+                      <tr key={r.id ?? i} className="group transition-colors hover:bg-slate-50/80">
+                        <td className="px-4 py-3 whitespace-nowrap">
+                          <span className="text-[11px] text-slate-500">
+                            {new Date(r.changed_at).toLocaleString('en-IN', { day: '2-digit', month: 'short', year: 'numeric', hour: '2-digit', minute: '2-digit' })}
+                          </span>
+                        </td>
+                        <td className="px-4 py-3">
+                          <div className="flex items-center gap-1.5">
+                            <div className="flex h-5 w-5 flex-shrink-0 items-center justify-center rounded-full bg-slate-200 text-[9px] font-bold text-slate-600">
+                              {(r.changed_by_name ?? '?')[0].toUpperCase()}
+                            </div>
+                            <span className="text-[12px] font-medium text-slate-700">{r.changed_by_name ?? '—'}</span>
+                          </div>
+                        </td>
+                        <td className="px-4 py-3">
+                          <span className="inline-block rounded bg-slate-100 px-1.5 py-0.5 text-[11px] font-medium text-slate-700">
+                            {FIELD_LABELS[r.field_name] ?? r.field_name}
+                          </span>
+                        </td>
+                        <td className="px-4 py-3 max-w-[140px]">
+                          {r.old_value
+                            ? <span className="inline-block max-w-full truncate rounded bg-red-50 px-1.5 py-0.5 text-[11px] font-medium text-red-600 border border-red-100" title={r.old_value}>{r.old_value}</span>
+                            : <span className="text-[11px] italic text-slate-400">empty</span>}
+                        </td>
+                        <td className="px-4 py-3 max-w-[140px]">
+                          {r.new_value
+                            ? <span className="inline-block max-w-full truncate rounded bg-green-50 px-1.5 py-0.5 text-[11px] font-medium text-green-700 border border-green-100" title={r.new_value}>{r.new_value}</span>
+                            : <span className="text-[11px] italic text-slate-400">empty</span>}
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              );
+            })()}
           </div>
-          <DialogFooter>
-            <Button variant="outline" onClick={() => setHistoryOpen(false)}>Close</Button>
-          </DialogFooter>
+
+          {/* Footer */}
+          <div className="flex items-center justify-between border-t bg-slate-50/60 px-5 py-3">
+            <span className="text-[11px] text-muted-foreground">
+              {(() => {
+                const q = historySearch.toLowerCase();
+                const filtered = historyRecords.filter(r => {
+                  if (historyUserFilter !== '__ALL__' && (r.changed_by_name ?? '—') !== historyUserFilter) return false;
+                  if (!q) return true;
+                  const label = (FIELD_LABELS[r.field_name] ?? r.field_name).toLowerCase();
+                  return label.includes(q) || (r.old_value ?? '').toLowerCase().includes(q) || (r.new_value ?? '').toLowerCase().includes(q) || (r.changed_by_name ?? '').toLowerCase().includes(q);
+                });
+                return filtered.length !== historyRecords.length
+                  ? `Showing ${filtered.length} of ${historyRecords.length} changes`
+                  : `${historyRecords.length} total change${historyRecords.length !== 1 ? 's' : ''}`;
+              })()}
+            </span>
+            <Button variant="outline" size="sm" onClick={() => setHistoryOpen(false)} className="h-7 px-4 text-[12px]">Close</Button>
+          </div>
         </DialogContent>
       </Dialog>
     </div>
