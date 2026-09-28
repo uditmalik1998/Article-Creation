@@ -12,6 +12,7 @@ import { FLAT_TO_RFC, FLAT_TO_SAP_KEY } from '../data/flatToRfcMap';
 import { randomUUID } from 'crypto';
 import { validateAgainstNationalGrid } from '../services/nationalGridValidation';
 import { syncVariantsToSapViaRfc } from '../services/zmmVarArtCreationService';
+import { buildHandoffArticle, sendHandoffToPoWise } from '../services/poWiseHandoffService';
 import { storageService, type WatermarkLabel } from '../services/storageService';
 import { ARTICLE_DESCRIPTION_SOURCE_FIELDS, buildArticleDescription } from '../utils/articleDescriptionBuilder';
 import { getExcludedDescriptionFields } from '../utils/categoryFieldVisibility';
@@ -2820,6 +2821,11 @@ export class ApproverController {
                         if (variantSyncUpdates.length > 0) {
                             await Promise.allSettled(variantSyncUpdates);
                         }
+
+                        // Tell PO-Wise now instead of in 2-3 h via Snowflake. Fire-and-forget:
+                        // it never throws and never fails article creation.
+                        void sendHandoffToPoWise(() => Array.from(variantsByGenericId.entries()).map(([gId, vs]) =>
+                            buildHandoffArticle(approvedItemById.get(gId) ?? {}, genericSapArticleMap.get(gId), vs, variantSyncResults)));
                     }
                 } catch (varErr: any) {
                     console.error('[VARIANT_RFC] Variant sync failed (non-fatal):', varErr?.message);
@@ -3168,6 +3174,9 @@ export class ApproverController {
                 }
                 return prisma.extractionResultFlat.update({ where: { id: r.id }, data });
             }));
+
+            // Tell PO-Wise now instead of in 2-3 h via Snowflake (fire-and-forget, never throws).
+            void sendHandoffToPoWise(() => [buildHandoffArticle(generic, generic.sapArticleId, allToSync, results)]);
 
             // 7. Upload images for newly synced variants
             const variantById = new Map(allToSync.map((v: any) => [v.id, v]));
