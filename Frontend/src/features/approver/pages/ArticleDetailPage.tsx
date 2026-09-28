@@ -142,9 +142,13 @@ function getMissingFabricCreationFields(item: any): string[] {
   if (!item.fabricArticleDescription) missing.push('FABRIC ARTICLE DESC');
   if (!item.vendorFabricRate) missing.push('VENDOR FABRIC RATE');
   const majorCat = item.majorCategory || '';
+  const division = item.division || '';
   for (const [dbField, sapKey, label] of FAB_CREATION_FIELDS) {
     const isActive = isMandatoryGridFieldActive(majorCat, sapKey) === true;
-    if (isActive && !item[dbField]) missing.push(label);
+    if (!isActive) continue;
+    // Skip fields not visible in the UI (no allowed values configured)
+    if (getMajCatAllowedValues(division, dbField) === null) continue;
+    if (!item[dbField]) missing.push(label);
   }
   return missing;
 }
@@ -160,11 +164,14 @@ function getMissingMandatoryFields(item: any): string[] {
   if (!item.vendorFabricRate) missing.push('VENDOR FABRIC RATE');
   const majorCat = item.majorCategory || '';
   if (!majorCat) return missing;
+  const division = item.division || '';
   for (const [schemaKey, dbField] of Object.entries(SCHEMA_KEY_TO_DB_FIELD)) {
     const sapKeys = SCHEMA_KEY_TO_ALL_SAP_KEYS[schemaKey] ?? [];
     if (sapKeys.length === 0) continue;
     const isActive = sapKeys.some((sk) => isMandatoryGridFieldActive(majorCat, sk) === true);
     if (!isActive) continue;
+    // Skip fields that have no allowed values — they won't be shown in the UI
+    if (getMajCatAllowedValues(division, schemaKey) === null) continue;
     const value = item[dbField as string];
     if (!value) {
       const activeSapKey = sapKeys.find((sk) => isMandatoryGridFieldActive(majorCat, sk) === true)!;
