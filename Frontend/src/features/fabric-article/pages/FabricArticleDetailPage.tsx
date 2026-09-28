@@ -89,11 +89,14 @@ function getMissingMandatoryFields(item: any, isFGMode = false): string[] {
   if (isFGMode && !item.articleFashionType) missing.push('ARTICLE FASHION TYPE');
   const majorCat = item.majorCategory || '';
   if (!majorCat) return missing;
+  const division = item.division || '';
   for (const [schemaKey, dbField] of Object.entries(SCHEMA_KEY_TO_DB_FIELD)) {
     const sapKeys = SCHEMA_KEY_TO_ALL_SAP_KEYS[schemaKey] ?? [];
     if (sapKeys.length === 0) continue;
     const isActive = sapKeys.some((sk) => isMandatoryGridFieldActive(majorCat, sk) === true);
     if (!isActive) continue;
+    // Skip fields that have no allowed values — they won't be shown in the UI
+    if (getMajCatAllowedValues(division, schemaKey) === null) continue;
     const value = item[dbField as string];
     if (!value) {
       const activeSapKey = sapKeys.find((sk) => isMandatoryGridFieldActive(majorCat, sk) === true)!;
