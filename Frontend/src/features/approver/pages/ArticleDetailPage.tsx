@@ -43,12 +43,14 @@ import {
   normalizeMajorCategory,
   SAP_NAME_TO_SCHEMA_KEY,
   SCHEMA_KEY_TO_DB_FIELD,
+  SCHEMA_KEY_TO_EXCEL_ATTR,
 } from '../../../data/majCatAttributeMap';
 import {
   preloadAttributeValues,
   preloadMandatoryGridFor,
   isMandatoryGridFieldActive,
   getMandatoryGridFieldLabel,
+  getMajCatGridEntry,
 } from '../../../services/articleConfigService';
 import { formatDivisionLabel } from '../../../shared/utils/ui/formatters';
 import { variantCreatingIds } from '../../fabric-article/variantCreationState';
@@ -137,19 +139,25 @@ const FAB_CREATION_FIELDS: [string, string, string][] = [
   ['finish',         'M_FINISH',         'M_FINISH'],
 ];
 
+// Returns true when a field has major-category-specific dropdown values configured —
+// the same check the inline card uses to decide whether to show a field.
+function hasGridDropdownValues(majorCat: string, schemaKey: string): boolean {
+  const excelAttr = SCHEMA_KEY_TO_EXCEL_ATTR[schemaKey];
+  if (!excelAttr) return false;
+  return (getMajCatGridEntry(majorCat, excelAttr)?.length ?? 0) > 0;
+}
+
 function getMissingFabricCreationFields(item: any): string[] {
   const missing: string[] = [];
   if (!item.fabricArticleDescription) missing.push('FABRIC ARTICLE DESC');
   if (!item.vendorFabricRate) missing.push('VENDOR FABRIC RATE');
   const majorCat = item.majorCategory || '';
-  const division = item.division || '';
-  // Mirror the exact same visibility check the attributes tab UI uses
-  const mandatoryKeys = getMajCatMandatoryKeys(majorCat);
   for (const [dbField, sapKey, label] of FAB_CREATION_FIELDS) {
     const schemaKey = SAP_NAME_TO_SCHEMA_KEY[sapKey];
     if (!schemaKey) continue;
-    if (!mandatoryKeys.has(schemaKey)) continue;
-    if (getMajCatAllowedValues(division, schemaKey) === null) continue;
+    // Only validate when mandatory in the grid AND has dropdown values (i.e. visible in UI)
+    if (!isMandatoryGridFieldActive(majorCat, sapKey)) continue;
+    if (!hasGridDropdownValues(majorCat, schemaKey)) continue;
     if (!item[dbField]) missing.push(label);
   }
   return missing;
@@ -166,17 +174,13 @@ function getMissingMandatoryFields(item: any): string[] {
   if (!item.vendorFabricRate) missing.push('VENDOR FABRIC RATE');
   const majorCat = item.majorCategory || '';
   if (!majorCat) return missing;
-  const division = item.division || '';
-  const mandatoryKeys = getMajCatMandatoryKeys(majorCat);
   for (const [schemaKey, dbField] of Object.entries(SCHEMA_KEY_TO_DB_FIELD)) {
     const sapKeys = SCHEMA_KEY_TO_ALL_SAP_KEYS[schemaKey] ?? [];
     if (sapKeys.length === 0) continue;
-    // Only validate if mandatory in the grid (original check)
+    // Only validate when mandatory in the grid AND has dropdown values (i.e. visible in UI)
     const isActive = sapKeys.some((sk) => isMandatoryGridFieldActive(majorCat, sk) === true);
     if (!isActive) continue;
-    // Skip if field is not shown in the UI: no * mark (not in mandatoryKeys) or no dropdown values
-    if (!mandatoryKeys.has(schemaKey)) continue;
-    if (getMajCatAllowedValues(division, schemaKey) === null) continue;
+    if (!hasGridDropdownValues(majorCat, schemaKey)) continue;
     const value = item[dbField as string];
     if (!value) {
       const activeSapKey = sapKeys.find((sk) => isMandatoryGridFieldActive(majorCat, sk) === true)!;
