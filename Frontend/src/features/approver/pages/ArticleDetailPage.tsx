@@ -143,11 +143,13 @@ function getMissingFabricCreationFields(item: any): string[] {
   if (!item.vendorFabricRate) missing.push('VENDOR FABRIC RATE');
   const majorCat = item.majorCategory || '';
   const division = item.division || '';
+  // Mirror the exact same visibility check the attributes tab UI uses
+  const mandatoryKeys = getMajCatMandatoryKeys(majorCat);
   for (const [dbField, sapKey, label] of FAB_CREATION_FIELDS) {
-    const isActive = isMandatoryGridFieldActive(majorCat, sapKey) === true;
-    if (!isActive) continue;
-    // Skip fields not visible in the UI (no allowed values configured)
-    if (getMajCatAllowedValues(division, dbField) === null) continue;
+    const schemaKey = SAP_NAME_TO_SCHEMA_KEY[sapKey];
+    if (!schemaKey) continue;
+    if (!mandatoryKeys.has(schemaKey)) continue;
+    if (getMajCatAllowedValues(division, schemaKey) === null) continue;
     if (!item[dbField]) missing.push(label);
   }
   return missing;
@@ -165,17 +167,16 @@ function getMissingMandatoryFields(item: any): string[] {
   const majorCat = item.majorCategory || '';
   if (!majorCat) return missing;
   const division = item.division || '';
+  // Use the same mandatory + visibility logic as the attributes tab UI
+  const mandatoryKeys = getMajCatMandatoryKeys(majorCat);
   for (const [schemaKey, dbField] of Object.entries(SCHEMA_KEY_TO_DB_FIELD)) {
-    const sapKeys = SCHEMA_KEY_TO_ALL_SAP_KEYS[schemaKey] ?? [];
-    if (sapKeys.length === 0) continue;
-    const isActive = sapKeys.some((sk) => isMandatoryGridFieldActive(majorCat, sk) === true);
-    if (!isActive) continue;
-    // Skip fields that have no allowed values — they won't be shown in the UI
+    if (!mandatoryKeys.has(schemaKey)) continue;
     if (getMajCatAllowedValues(division, schemaKey) === null) continue;
     const value = item[dbField as string];
     if (!value) {
-      const activeSapKey = sapKeys.find((sk) => isMandatoryGridFieldActive(majorCat, sk) === true)!;
-      missing.push(getMandatoryGridFieldLabel(activeSapKey) || activeSapKey);
+      const sapKeys = SCHEMA_KEY_TO_ALL_SAP_KEYS[schemaKey] ?? [];
+      const label = sapKeys[0] || schemaKey;
+      missing.push(getMandatoryGridFieldLabel(label) || label);
     }
   }
   return missing;
