@@ -42,12 +42,14 @@ import {
   normalizeMajorCategory,
   SAP_NAME_TO_SCHEMA_KEY,
   SCHEMA_KEY_TO_DB_FIELD,
+  SCHEMA_KEY_TO_EXCEL_ATTR,
 } from '../../../data/majCatAttributeMap';
 import {
   preloadAttributeValues,
   preloadMandatoryGridFor,
   isMandatoryGridFieldActive,
   getMandatoryGridFieldLabel,
+  getMajCatGridEntry,
 } from '../../../services/articleConfigService';
 import { formatDivisionLabel } from '../../../shared/utils/ui/formatters';
 
@@ -82,6 +84,12 @@ const SCHEMA_KEY_TO_ALL_SAP_KEYS: Record<string, string[]> = Object.entries(SAP_
   {} as Record<string, string[]>,
 );
 
+function hasGridDropdownValues(majorCat: string, schemaKey: string): boolean {
+  const excelAttr = SCHEMA_KEY_TO_EXCEL_ATTR[schemaKey];
+  if (!excelAttr) return false;
+  return (getMajCatGridEntry(majorCat, excelAttr)?.length ?? 0) > 0;
+}
+
 function getMissingMandatoryFields(item: any, isFGMode = false): string[] {
   const missing: string[] = [];
   if (!item.vendorName) missing.push('VENDOR NAME');
@@ -89,15 +97,13 @@ function getMissingMandatoryFields(item: any, isFGMode = false): string[] {
   if (isFGMode && !item.articleFashionType) missing.push('ARTICLE FASHION TYPE');
   const majorCat = item.majorCategory || '';
   if (!majorCat) return missing;
-  const division = item.division || '';
-  const mandatoryKeys = getMajCatMandatoryKeys(majorCat);
   for (const [schemaKey, dbField] of Object.entries(SCHEMA_KEY_TO_DB_FIELD)) {
     const sapKeys = SCHEMA_KEY_TO_ALL_SAP_KEYS[schemaKey] ?? [];
     if (sapKeys.length === 0) continue;
+    // Only validate when mandatory in the grid AND has dropdown values (i.e. visible in UI)
     const isActive = sapKeys.some((sk) => isMandatoryGridFieldActive(majorCat, sk) === true);
     if (!isActive) continue;
-    if (!mandatoryKeys.has(schemaKey)) continue;
-    if (getMajCatAllowedValues(division, schemaKey) === null) continue;
+    if (!hasGridDropdownValues(majorCat, schemaKey)) continue;
     const value = item[dbField as string];
     if (!value) {
       const activeSapKey = sapKeys.find((sk) => isMandatoryGridFieldActive(majorCat, sk) === true)!;
