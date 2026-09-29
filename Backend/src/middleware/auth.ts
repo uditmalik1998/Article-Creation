@@ -449,6 +449,32 @@ export const requireFabricApprovalRights = (
 };
 
 /**
+ * Require ADMIN, APPROVER, CATEGORY_HEAD, SUB_DIVISION_HEAD, PO_COMMITTEE, PD, or GM_APPROVER
+ * to approve GM (FG Article) items. Must be used after authenticate middleware.
+ */
+export const requireGMApprovalRights = (
+  req: Request,
+  res: Response,
+  next: NextFunction
+): void => {
+  if (!req.user) {
+    res.status(401).json({ success: false, error: 'Authentication required.', code: 'NOT_AUTHENTICATED' });
+    return;
+  }
+  const role = String(req.user.role || '');
+  if (role !== 'ADMIN' && role !== 'APPROVER' && role !== 'CATEGORY_HEAD' && role !== 'SUB_DIVISION_HEAD' && role !== 'PO_COMMITTEE' && role !== 'PD' && role !== 'GM_APPROVER') {
+    res.status(403).json({
+      success: false,
+      error: 'You do not have permission to approve GM articles.',
+      code: 'INSUFFICIENT_PERMISSIONS',
+      userRole: role
+    });
+    return;
+  }
+  next();
+};
+
+/**
  * Require approval rights OR CREATOR — allows modifying already-created article
  * attributes without granting approve/reject permissions to creators.
  * Must be used after authenticate middleware.

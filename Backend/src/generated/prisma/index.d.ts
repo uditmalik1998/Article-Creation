@@ -238,6 +238,14 @@ export type ModifyLog = $Result.DefaultSelection<Prisma.$ModifyLogPayload>
  */
 export type FabricArticleData = $Result.DefaultSelection<Prisma.$FabricArticleDataPayload>
 /**
+ * Model GmArticleData
+ * GmArticleData: One row per GM article. Attribute columns map 1-to-1 to the
+ * unique family_code values in gm_major_category_details. Not every column
+ * applies to every major category — only the codes listed in
+ * gm_major_category_details for that category are shown in the UI.
+ */
+export type GmArticleData = $Result.DefaultSelection<Prisma.$GmArticleDataPayload>
+/**
  * Model FabricVariantArticleData
  * FabricVariantArticleData: One row per variant (size × color) under a fabric article.
  * Generic parent is tracked via generic_article_id (fabric_article_data.id) and
@@ -386,7 +394,8 @@ export const UserRole: {
   PD: 'PD',
   BODY_APPROVER: 'BODY_APPROVER',
   FABRIC_APPROVER: 'FABRIC_APPROVER',
-  PLANNING: 'PLANNING'
+  PLANNING: 'PLANNING',
+  GM_APPROVER: 'GM_APPROVER'
 };
 
 export type UserRole = (typeof UserRole)[keyof typeof UserRole]
@@ -1066,6 +1075,16 @@ export class PrismaClient<
   get fabricArticleData(): Prisma.FabricArticleDataDelegate<ExtArgs, ClientOptions>;
 
   /**
+   * `prisma.gmArticleData`: Exposes CRUD operations for the **GmArticleData** model.
+    * Example usage:
+    * ```ts
+    * // Fetch zero or more GmArticleData
+    * const gmArticleData = await prisma.gmArticleData.findMany()
+    * ```
+    */
+  get gmArticleData(): Prisma.GmArticleDataDelegate<ExtArgs, ClientOptions>;
+
+  /**
    * `prisma.fabricVariantArticleData`: Exposes CRUD operations for the **FabricVariantArticleData** model.
     * Example usage:
     * ```ts
@@ -1674,6 +1693,7 @@ export namespace Prisma {
     FabricMajCatGridValue: 'FabricMajCatGridValue',
     ModifyLog: 'ModifyLog',
     FabricArticleData: 'FabricArticleData',
+    GmArticleData: 'GmArticleData',
     FabricVariantArticleData: 'FabricVariantArticleData',
     ValueAdditionAccessoriesCost: 'ValueAdditionAccessoriesCost',
     BodyArticleData: 'BodyArticleData',
@@ -1705,7 +1725,7 @@ export namespace Prisma {
       omit: GlobalOmitOptions
     }
     meta: {
-      modelProps: "department" | "subDepartment" | "category" | "masterAttribute" | "attributeAllowedValue" | "categoryAttribute" | "extractionJob" | "extractionResult" | "extractionResultFlat" | "modelGenerationResult" | "modelImageApproval" | "mvgrLookup" | "masterVendorDetail" | "user" | "auditLog" | "apiKey" | "changeHistory" | "costSummary" | "article360" | "articleFab" | "articleBody" | "articleVaAcc" | "articleVaPrcs" | "articleBom" | "sapFieldConfig" | "sapAttributeValue" | "article360Flat" | "rawArticle" | "fabricRawData" | "srmSyncRun" | "srmSyncRunItem" | "poolBJob" | "poolBBatch" | "nationalGridMaster" | "broaderMenu" | "majorCatMaster" | "fabricArticleMaster" | "fabricMajCatGridValue" | "modifyLog" | "fabricArticleData" | "fabricVariantArticleData" | "valueAdditionAccessoriesCost" | "bodyArticleData" | "referenceArticleData" | "bodyFabricConsumption" | "roughCmpCostMaster" | "basicTrimCostMaster" | "basicTrimCostComponent" | "majorCategoryDetails" | "expenseApprovalStage" | "expenseChangeRequest" | "expenseAccessGrant" | "expenseAuditLog"
+      modelProps: "department" | "subDepartment" | "category" | "masterAttribute" | "attributeAllowedValue" | "categoryAttribute" | "extractionJob" | "extractionResult" | "extractionResultFlat" | "modelGenerationResult" | "modelImageApproval" | "mvgrLookup" | "masterVendorDetail" | "user" | "auditLog" | "apiKey" | "changeHistory" | "costSummary" | "article360" | "articleFab" | "articleBody" | "articleVaAcc" | "articleVaPrcs" | "articleBom" | "sapFieldConfig" | "sapAttributeValue" | "article360Flat" | "rawArticle" | "fabricRawData" | "srmSyncRun" | "srmSyncRunItem" | "poolBJob" | "poolBBatch" | "nationalGridMaster" | "broaderMenu" | "majorCatMaster" | "fabricArticleMaster" | "fabricMajCatGridValue" | "modifyLog" | "fabricArticleData" | "gmArticleData" | "fabricVariantArticleData" | "valueAdditionAccessoriesCost" | "bodyArticleData" | "referenceArticleData" | "bodyFabricConsumption" | "roughCmpCostMaster" | "basicTrimCostMaster" | "basicTrimCostComponent" | "majorCategoryDetails" | "expenseApprovalStage" | "expenseChangeRequest" | "expenseAccessGrant" | "expenseAuditLog"
       txIsolationLevel: Prisma.TransactionIsolationLevel
     }
     model: {
@@ -4669,6 +4689,80 @@ export namespace Prisma {
           }
         }
       }
+      GmArticleData: {
+        payload: Prisma.$GmArticleDataPayload<ExtArgs>
+        fields: Prisma.GmArticleDataFieldRefs
+        operations: {
+          findUnique: {
+            args: Prisma.GmArticleDataFindUniqueArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$GmArticleDataPayload> | null
+          }
+          findUniqueOrThrow: {
+            args: Prisma.GmArticleDataFindUniqueOrThrowArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$GmArticleDataPayload>
+          }
+          findFirst: {
+            args: Prisma.GmArticleDataFindFirstArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$GmArticleDataPayload> | null
+          }
+          findFirstOrThrow: {
+            args: Prisma.GmArticleDataFindFirstOrThrowArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$GmArticleDataPayload>
+          }
+          findMany: {
+            args: Prisma.GmArticleDataFindManyArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$GmArticleDataPayload>[]
+          }
+          create: {
+            args: Prisma.GmArticleDataCreateArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$GmArticleDataPayload>
+          }
+          createMany: {
+            args: Prisma.GmArticleDataCreateManyArgs<ExtArgs>
+            result: BatchPayload
+          }
+          createManyAndReturn: {
+            args: Prisma.GmArticleDataCreateManyAndReturnArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$GmArticleDataPayload>[]
+          }
+          delete: {
+            args: Prisma.GmArticleDataDeleteArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$GmArticleDataPayload>
+          }
+          update: {
+            args: Prisma.GmArticleDataUpdateArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$GmArticleDataPayload>
+          }
+          deleteMany: {
+            args: Prisma.GmArticleDataDeleteManyArgs<ExtArgs>
+            result: BatchPayload
+          }
+          updateMany: {
+            args: Prisma.GmArticleDataUpdateManyArgs<ExtArgs>
+            result: BatchPayload
+          }
+          updateManyAndReturn: {
+            args: Prisma.GmArticleDataUpdateManyAndReturnArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$GmArticleDataPayload>[]
+          }
+          upsert: {
+            args: Prisma.GmArticleDataUpsertArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$GmArticleDataPayload>
+          }
+          aggregate: {
+            args: Prisma.GmArticleDataAggregateArgs<ExtArgs>
+            result: $Utils.Optional<AggregateGmArticleData>
+          }
+          groupBy: {
+            args: Prisma.GmArticleDataGroupByArgs<ExtArgs>
+            result: $Utils.Optional<GmArticleDataGroupByOutputType>[]
+          }
+          count: {
+            args: Prisma.GmArticleDataCountArgs<ExtArgs>
+            result: $Utils.Optional<GmArticleDataCountAggregateOutputType> | number
+          }
+        }
+      }
       FabricVariantArticleData: {
         payload: Prisma.$FabricVariantArticleDataPayload<ExtArgs>
         fields: Prisma.FabricVariantArticleDataFieldRefs
@@ -5763,6 +5857,7 @@ export namespace Prisma {
     fabricMajCatGridValue?: FabricMajCatGridValueOmit
     modifyLog?: ModifyLogOmit
     fabricArticleData?: FabricArticleDataOmit
+    gmArticleData?: GmArticleDataOmit
     fabricVariantArticleData?: FabricVariantArticleDataOmit
     valueAdditionAccessoriesCost?: ValueAdditionAccessoriesCostOmit
     bodyArticleData?: BodyArticleDataOmit
@@ -57179,6 +57274,2343 @@ export namespace Prisma {
 
 
   /**
+   * Model GmArticleData
+   */
+
+  export type AggregateGmArticleData = {
+    _count: GmArticleDataCountAggregateOutputType | null
+    _avg: GmArticleDataAvgAggregateOutputType | null
+    _sum: GmArticleDataSumAggregateOutputType | null
+    _min: GmArticleDataMinAggregateOutputType | null
+    _max: GmArticleDataMaxAggregateOutputType | null
+  }
+
+  export type GmArticleDataAvgAggregateOutputType = {
+    rate: Decimal | null
+    mrp: Decimal | null
+    approvedBy: number | null
+  }
+
+  export type GmArticleDataSumAggregateOutputType = {
+    rate: Decimal | null
+    mrp: Decimal | null
+    approvedBy: number | null
+  }
+
+  export type GmArticleDataMinAggregateOutputType = {
+    id: string | null
+    gmAgeGrade: string | null
+    gmApplicator: string | null
+    gmBaseType: string | null
+    gmBatteryType: string | null
+    gmBpaFree: string | null
+    gmBpcForm: string | null
+    gmBrand: string | null
+    gmBrandType: string | null
+    gmCapacityMl: string | null
+    gmCareInstruction: string | null
+    gmCertification: string | null
+    gmClosureType: string | null
+    gmCoating: string | null
+    gmColourFamily: string | null
+    gmColourShade: string | null
+    gmCompartmentCount: string | null
+    gmComposition: string | null
+    gmCosmeticFinish: string | null
+    gmDiameterCm: string | null
+    gmDimStandard: string | null
+    gmDishwasherSafe: string | null
+    gmFoldable: string | null
+    gmFoodContactSafe: string | null
+    gmFragranceConc: string | null
+    gmFragranceFamily: string | null
+    gmFreeFrom: string | null
+    gmFwHeelHtCm: string | null
+    gmFwHeelType: string | null
+    gmFwSize: string | null
+    gmFwSole: string | null
+    gmFwToe: string | null
+    gmFwUpper: string | null
+    gmGsm: string | null
+    gmHeatRetentionHr: string | null
+    gmHeightCm: string | null
+    gmInsulationType: string | null
+    gmKeyIngredient: string | null
+    gmLeakProof: string | null
+    gmLengthCm: string | null
+    gmLicence: string | null
+    gmLidType: string | null
+    gmLifestage: string | null
+    gmLiningMaterial: string | null
+    gmManufacturer: string | null
+    gmMaterial: string | null
+    gmMaterialGroup: string | null
+    gmMaterialSecondary: string | null
+    gmMicrowaveSafe: string | null
+    gmMountType: string | null
+    gmNetContent: string | null
+    gmNetContentUom: string | null
+    gmNetWeightG: string | null
+    gmPackQty: string | null
+    gmPattern: string | null
+    gmPlayPattern: string | null
+    gmPlayerCount: string | null
+    gmPowerSource: string | null
+    gmPriceTier: string | null
+    gmPrintTheme: string | null
+    gmSeason: string | null
+    gmSellUom: string | null
+    gmSetContents: string | null
+    gmShelfLifeMonths: string | null
+    gmSkinType: string | null
+    gmSpf: string | null
+    gmSport: string | null
+    gmStrapType: string | null
+    gmSurfaceFinish: string | null
+    gmTextileFabric: string | null
+    gmThreadCount: string | null
+    gmUsageOccasion: string | null
+    gmVoltageV: string | null
+    gmWarrantyMonths: string | null
+    gmWattageW: string | null
+    gmWeave: string | null
+    gmWheelCount: string | null
+    gmWidthCm: string | null
+    gmYarn: string | null
+    gmArticleNumber: string | null
+    gmArticleDescription: string | null
+    flatId: string | null
+    division: string | null
+    subDivision: string | null
+    majorCategory: string | null
+    mcDescription: string | null
+    vendorName: string | null
+    vendorCode: string | null
+    designNumber: string | null
+    pptNumber: string | null
+    rate: Decimal | null
+    mrp: Decimal | null
+    segment: string | null
+    articleFashionType: string | null
+    approvalStatus: string | null
+    approvedAt: Date | null
+    approvedBy: number | null
+    sapSyncStatus: string | null
+    sapSyncMessage: string | null
+    imageUrl: string | null
+    gmArticleType: string | null
+    source: string | null
+    userName: string | null
+    createdAt: Date | null
+    updatedAt: Date | null
+  }
+
+  export type GmArticleDataMaxAggregateOutputType = {
+    id: string | null
+    gmAgeGrade: string | null
+    gmApplicator: string | null
+    gmBaseType: string | null
+    gmBatteryType: string | null
+    gmBpaFree: string | null
+    gmBpcForm: string | null
+    gmBrand: string | null
+    gmBrandType: string | null
+    gmCapacityMl: string | null
+    gmCareInstruction: string | null
+    gmCertification: string | null
+    gmClosureType: string | null
+    gmCoating: string | null
+    gmColourFamily: string | null
+    gmColourShade: string | null
+    gmCompartmentCount: string | null
+    gmComposition: string | null
+    gmCosmeticFinish: string | null
+    gmDiameterCm: string | null
+    gmDimStandard: string | null
+    gmDishwasherSafe: string | null
+    gmFoldable: string | null
+    gmFoodContactSafe: string | null
+    gmFragranceConc: string | null
+    gmFragranceFamily: string | null
+    gmFreeFrom: string | null
+    gmFwHeelHtCm: string | null
+    gmFwHeelType: string | null
+    gmFwSize: string | null
+    gmFwSole: string | null
+    gmFwToe: string | null
+    gmFwUpper: string | null
+    gmGsm: string | null
+    gmHeatRetentionHr: string | null
+    gmHeightCm: string | null
+    gmInsulationType: string | null
+    gmKeyIngredient: string | null
+    gmLeakProof: string | null
+    gmLengthCm: string | null
+    gmLicence: string | null
+    gmLidType: string | null
+    gmLifestage: string | null
+    gmLiningMaterial: string | null
+    gmManufacturer: string | null
+    gmMaterial: string | null
+    gmMaterialGroup: string | null
+    gmMaterialSecondary: string | null
+    gmMicrowaveSafe: string | null
+    gmMountType: string | null
+    gmNetContent: string | null
+    gmNetContentUom: string | null
+    gmNetWeightG: string | null
+    gmPackQty: string | null
+    gmPattern: string | null
+    gmPlayPattern: string | null
+    gmPlayerCount: string | null
+    gmPowerSource: string | null
+    gmPriceTier: string | null
+    gmPrintTheme: string | null
+    gmSeason: string | null
+    gmSellUom: string | null
+    gmSetContents: string | null
+    gmShelfLifeMonths: string | null
+    gmSkinType: string | null
+    gmSpf: string | null
+    gmSport: string | null
+    gmStrapType: string | null
+    gmSurfaceFinish: string | null
+    gmTextileFabric: string | null
+    gmThreadCount: string | null
+    gmUsageOccasion: string | null
+    gmVoltageV: string | null
+    gmWarrantyMonths: string | null
+    gmWattageW: string | null
+    gmWeave: string | null
+    gmWheelCount: string | null
+    gmWidthCm: string | null
+    gmYarn: string | null
+    gmArticleNumber: string | null
+    gmArticleDescription: string | null
+    flatId: string | null
+    division: string | null
+    subDivision: string | null
+    majorCategory: string | null
+    mcDescription: string | null
+    vendorName: string | null
+    vendorCode: string | null
+    designNumber: string | null
+    pptNumber: string | null
+    rate: Decimal | null
+    mrp: Decimal | null
+    segment: string | null
+    articleFashionType: string | null
+    approvalStatus: string | null
+    approvedAt: Date | null
+    approvedBy: number | null
+    sapSyncStatus: string | null
+    sapSyncMessage: string | null
+    imageUrl: string | null
+    gmArticleType: string | null
+    source: string | null
+    userName: string | null
+    createdAt: Date | null
+    updatedAt: Date | null
+  }
+
+  export type GmArticleDataCountAggregateOutputType = {
+    id: number
+    gmAgeGrade: number
+    gmApplicator: number
+    gmBaseType: number
+    gmBatteryType: number
+    gmBpaFree: number
+    gmBpcForm: number
+    gmBrand: number
+    gmBrandType: number
+    gmCapacityMl: number
+    gmCareInstruction: number
+    gmCertification: number
+    gmClosureType: number
+    gmCoating: number
+    gmColourFamily: number
+    gmColourShade: number
+    gmCompartmentCount: number
+    gmComposition: number
+    gmCosmeticFinish: number
+    gmDiameterCm: number
+    gmDimStandard: number
+    gmDishwasherSafe: number
+    gmFoldable: number
+    gmFoodContactSafe: number
+    gmFragranceConc: number
+    gmFragranceFamily: number
+    gmFreeFrom: number
+    gmFwHeelHtCm: number
+    gmFwHeelType: number
+    gmFwSize: number
+    gmFwSole: number
+    gmFwToe: number
+    gmFwUpper: number
+    gmGsm: number
+    gmHeatRetentionHr: number
+    gmHeightCm: number
+    gmInsulationType: number
+    gmKeyIngredient: number
+    gmLeakProof: number
+    gmLengthCm: number
+    gmLicence: number
+    gmLidType: number
+    gmLifestage: number
+    gmLiningMaterial: number
+    gmManufacturer: number
+    gmMaterial: number
+    gmMaterialGroup: number
+    gmMaterialSecondary: number
+    gmMicrowaveSafe: number
+    gmMountType: number
+    gmNetContent: number
+    gmNetContentUom: number
+    gmNetWeightG: number
+    gmPackQty: number
+    gmPattern: number
+    gmPlayPattern: number
+    gmPlayerCount: number
+    gmPowerSource: number
+    gmPriceTier: number
+    gmPrintTheme: number
+    gmSeason: number
+    gmSellUom: number
+    gmSetContents: number
+    gmShelfLifeMonths: number
+    gmSkinType: number
+    gmSpf: number
+    gmSport: number
+    gmStrapType: number
+    gmSurfaceFinish: number
+    gmTextileFabric: number
+    gmThreadCount: number
+    gmUsageOccasion: number
+    gmVoltageV: number
+    gmWarrantyMonths: number
+    gmWattageW: number
+    gmWeave: number
+    gmWheelCount: number
+    gmWidthCm: number
+    gmYarn: number
+    gmArticleNumber: number
+    gmArticleDescription: number
+    flatId: number
+    division: number
+    subDivision: number
+    majorCategory: number
+    mcDescription: number
+    vendorName: number
+    vendorCode: number
+    designNumber: number
+    pptNumber: number
+    rate: number
+    mrp: number
+    segment: number
+    articleFashionType: number
+    approvalStatus: number
+    approvedAt: number
+    approvedBy: number
+    sapSyncStatus: number
+    sapSyncMessage: number
+    imageUrl: number
+    gmArticleType: number
+    source: number
+    userName: number
+    createdAt: number
+    updatedAt: number
+    _all: number
+  }
+
+
+  export type GmArticleDataAvgAggregateInputType = {
+    rate?: true
+    mrp?: true
+    approvedBy?: true
+  }
+
+  export type GmArticleDataSumAggregateInputType = {
+    rate?: true
+    mrp?: true
+    approvedBy?: true
+  }
+
+  export type GmArticleDataMinAggregateInputType = {
+    id?: true
+    gmAgeGrade?: true
+    gmApplicator?: true
+    gmBaseType?: true
+    gmBatteryType?: true
+    gmBpaFree?: true
+    gmBpcForm?: true
+    gmBrand?: true
+    gmBrandType?: true
+    gmCapacityMl?: true
+    gmCareInstruction?: true
+    gmCertification?: true
+    gmClosureType?: true
+    gmCoating?: true
+    gmColourFamily?: true
+    gmColourShade?: true
+    gmCompartmentCount?: true
+    gmComposition?: true
+    gmCosmeticFinish?: true
+    gmDiameterCm?: true
+    gmDimStandard?: true
+    gmDishwasherSafe?: true
+    gmFoldable?: true
+    gmFoodContactSafe?: true
+    gmFragranceConc?: true
+    gmFragranceFamily?: true
+    gmFreeFrom?: true
+    gmFwHeelHtCm?: true
+    gmFwHeelType?: true
+    gmFwSize?: true
+    gmFwSole?: true
+    gmFwToe?: true
+    gmFwUpper?: true
+    gmGsm?: true
+    gmHeatRetentionHr?: true
+    gmHeightCm?: true
+    gmInsulationType?: true
+    gmKeyIngredient?: true
+    gmLeakProof?: true
+    gmLengthCm?: true
+    gmLicence?: true
+    gmLidType?: true
+    gmLifestage?: true
+    gmLiningMaterial?: true
+    gmManufacturer?: true
+    gmMaterial?: true
+    gmMaterialGroup?: true
+    gmMaterialSecondary?: true
+    gmMicrowaveSafe?: true
+    gmMountType?: true
+    gmNetContent?: true
+    gmNetContentUom?: true
+    gmNetWeightG?: true
+    gmPackQty?: true
+    gmPattern?: true
+    gmPlayPattern?: true
+    gmPlayerCount?: true
+    gmPowerSource?: true
+    gmPriceTier?: true
+    gmPrintTheme?: true
+    gmSeason?: true
+    gmSellUom?: true
+    gmSetContents?: true
+    gmShelfLifeMonths?: true
+    gmSkinType?: true
+    gmSpf?: true
+    gmSport?: true
+    gmStrapType?: true
+    gmSurfaceFinish?: true
+    gmTextileFabric?: true
+    gmThreadCount?: true
+    gmUsageOccasion?: true
+    gmVoltageV?: true
+    gmWarrantyMonths?: true
+    gmWattageW?: true
+    gmWeave?: true
+    gmWheelCount?: true
+    gmWidthCm?: true
+    gmYarn?: true
+    gmArticleNumber?: true
+    gmArticleDescription?: true
+    flatId?: true
+    division?: true
+    subDivision?: true
+    majorCategory?: true
+    mcDescription?: true
+    vendorName?: true
+    vendorCode?: true
+    designNumber?: true
+    pptNumber?: true
+    rate?: true
+    mrp?: true
+    segment?: true
+    articleFashionType?: true
+    approvalStatus?: true
+    approvedAt?: true
+    approvedBy?: true
+    sapSyncStatus?: true
+    sapSyncMessage?: true
+    imageUrl?: true
+    gmArticleType?: true
+    source?: true
+    userName?: true
+    createdAt?: true
+    updatedAt?: true
+  }
+
+  export type GmArticleDataMaxAggregateInputType = {
+    id?: true
+    gmAgeGrade?: true
+    gmApplicator?: true
+    gmBaseType?: true
+    gmBatteryType?: true
+    gmBpaFree?: true
+    gmBpcForm?: true
+    gmBrand?: true
+    gmBrandType?: true
+    gmCapacityMl?: true
+    gmCareInstruction?: true
+    gmCertification?: true
+    gmClosureType?: true
+    gmCoating?: true
+    gmColourFamily?: true
+    gmColourShade?: true
+    gmCompartmentCount?: true
+    gmComposition?: true
+    gmCosmeticFinish?: true
+    gmDiameterCm?: true
+    gmDimStandard?: true
+    gmDishwasherSafe?: true
+    gmFoldable?: true
+    gmFoodContactSafe?: true
+    gmFragranceConc?: true
+    gmFragranceFamily?: true
+    gmFreeFrom?: true
+    gmFwHeelHtCm?: true
+    gmFwHeelType?: true
+    gmFwSize?: true
+    gmFwSole?: true
+    gmFwToe?: true
+    gmFwUpper?: true
+    gmGsm?: true
+    gmHeatRetentionHr?: true
+    gmHeightCm?: true
+    gmInsulationType?: true
+    gmKeyIngredient?: true
+    gmLeakProof?: true
+    gmLengthCm?: true
+    gmLicence?: true
+    gmLidType?: true
+    gmLifestage?: true
+    gmLiningMaterial?: true
+    gmManufacturer?: true
+    gmMaterial?: true
+    gmMaterialGroup?: true
+    gmMaterialSecondary?: true
+    gmMicrowaveSafe?: true
+    gmMountType?: true
+    gmNetContent?: true
+    gmNetContentUom?: true
+    gmNetWeightG?: true
+    gmPackQty?: true
+    gmPattern?: true
+    gmPlayPattern?: true
+    gmPlayerCount?: true
+    gmPowerSource?: true
+    gmPriceTier?: true
+    gmPrintTheme?: true
+    gmSeason?: true
+    gmSellUom?: true
+    gmSetContents?: true
+    gmShelfLifeMonths?: true
+    gmSkinType?: true
+    gmSpf?: true
+    gmSport?: true
+    gmStrapType?: true
+    gmSurfaceFinish?: true
+    gmTextileFabric?: true
+    gmThreadCount?: true
+    gmUsageOccasion?: true
+    gmVoltageV?: true
+    gmWarrantyMonths?: true
+    gmWattageW?: true
+    gmWeave?: true
+    gmWheelCount?: true
+    gmWidthCm?: true
+    gmYarn?: true
+    gmArticleNumber?: true
+    gmArticleDescription?: true
+    flatId?: true
+    division?: true
+    subDivision?: true
+    majorCategory?: true
+    mcDescription?: true
+    vendorName?: true
+    vendorCode?: true
+    designNumber?: true
+    pptNumber?: true
+    rate?: true
+    mrp?: true
+    segment?: true
+    articleFashionType?: true
+    approvalStatus?: true
+    approvedAt?: true
+    approvedBy?: true
+    sapSyncStatus?: true
+    sapSyncMessage?: true
+    imageUrl?: true
+    gmArticleType?: true
+    source?: true
+    userName?: true
+    createdAt?: true
+    updatedAt?: true
+  }
+
+  export type GmArticleDataCountAggregateInputType = {
+    id?: true
+    gmAgeGrade?: true
+    gmApplicator?: true
+    gmBaseType?: true
+    gmBatteryType?: true
+    gmBpaFree?: true
+    gmBpcForm?: true
+    gmBrand?: true
+    gmBrandType?: true
+    gmCapacityMl?: true
+    gmCareInstruction?: true
+    gmCertification?: true
+    gmClosureType?: true
+    gmCoating?: true
+    gmColourFamily?: true
+    gmColourShade?: true
+    gmCompartmentCount?: true
+    gmComposition?: true
+    gmCosmeticFinish?: true
+    gmDiameterCm?: true
+    gmDimStandard?: true
+    gmDishwasherSafe?: true
+    gmFoldable?: true
+    gmFoodContactSafe?: true
+    gmFragranceConc?: true
+    gmFragranceFamily?: true
+    gmFreeFrom?: true
+    gmFwHeelHtCm?: true
+    gmFwHeelType?: true
+    gmFwSize?: true
+    gmFwSole?: true
+    gmFwToe?: true
+    gmFwUpper?: true
+    gmGsm?: true
+    gmHeatRetentionHr?: true
+    gmHeightCm?: true
+    gmInsulationType?: true
+    gmKeyIngredient?: true
+    gmLeakProof?: true
+    gmLengthCm?: true
+    gmLicence?: true
+    gmLidType?: true
+    gmLifestage?: true
+    gmLiningMaterial?: true
+    gmManufacturer?: true
+    gmMaterial?: true
+    gmMaterialGroup?: true
+    gmMaterialSecondary?: true
+    gmMicrowaveSafe?: true
+    gmMountType?: true
+    gmNetContent?: true
+    gmNetContentUom?: true
+    gmNetWeightG?: true
+    gmPackQty?: true
+    gmPattern?: true
+    gmPlayPattern?: true
+    gmPlayerCount?: true
+    gmPowerSource?: true
+    gmPriceTier?: true
+    gmPrintTheme?: true
+    gmSeason?: true
+    gmSellUom?: true
+    gmSetContents?: true
+    gmShelfLifeMonths?: true
+    gmSkinType?: true
+    gmSpf?: true
+    gmSport?: true
+    gmStrapType?: true
+    gmSurfaceFinish?: true
+    gmTextileFabric?: true
+    gmThreadCount?: true
+    gmUsageOccasion?: true
+    gmVoltageV?: true
+    gmWarrantyMonths?: true
+    gmWattageW?: true
+    gmWeave?: true
+    gmWheelCount?: true
+    gmWidthCm?: true
+    gmYarn?: true
+    gmArticleNumber?: true
+    gmArticleDescription?: true
+    flatId?: true
+    division?: true
+    subDivision?: true
+    majorCategory?: true
+    mcDescription?: true
+    vendorName?: true
+    vendorCode?: true
+    designNumber?: true
+    pptNumber?: true
+    rate?: true
+    mrp?: true
+    segment?: true
+    articleFashionType?: true
+    approvalStatus?: true
+    approvedAt?: true
+    approvedBy?: true
+    sapSyncStatus?: true
+    sapSyncMessage?: true
+    imageUrl?: true
+    gmArticleType?: true
+    source?: true
+    userName?: true
+    createdAt?: true
+    updatedAt?: true
+    _all?: true
+  }
+
+  export type GmArticleDataAggregateArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Filter which GmArticleData to aggregate.
+     */
+    where?: GmArticleDataWhereInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
+     * 
+     * Determine the order of GmArticleData to fetch.
+     */
+    orderBy?: GmArticleDataOrderByWithRelationInput | GmArticleDataOrderByWithRelationInput[]
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
+     * 
+     * Sets the start position
+     */
+    cursor?: GmArticleDataWhereUniqueInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Take `±n` GmArticleData from the position of the cursor.
+     */
+    take?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Skip the first `n` GmArticleData.
+     */
+    skip?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     * 
+     * Count returned GmArticleData
+    **/
+    _count?: true | GmArticleDataCountAggregateInputType
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     * 
+     * Select which fields to average
+    **/
+    _avg?: GmArticleDataAvgAggregateInputType
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     * 
+     * Select which fields to sum
+    **/
+    _sum?: GmArticleDataSumAggregateInputType
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     * 
+     * Select which fields to find the minimum value
+    **/
+    _min?: GmArticleDataMinAggregateInputType
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     * 
+     * Select which fields to find the maximum value
+    **/
+    _max?: GmArticleDataMaxAggregateInputType
+  }
+
+  export type GetGmArticleDataAggregateType<T extends GmArticleDataAggregateArgs> = {
+        [P in keyof T & keyof AggregateGmArticleData]: P extends '_count' | 'count'
+      ? T[P] extends true
+        ? number
+        : GetScalarType<T[P], AggregateGmArticleData[P]>
+      : GetScalarType<T[P], AggregateGmArticleData[P]>
+  }
+
+
+
+
+  export type GmArticleDataGroupByArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    where?: GmArticleDataWhereInput
+    orderBy?: GmArticleDataOrderByWithAggregationInput | GmArticleDataOrderByWithAggregationInput[]
+    by: GmArticleDataScalarFieldEnum[] | GmArticleDataScalarFieldEnum
+    having?: GmArticleDataScalarWhereWithAggregatesInput
+    take?: number
+    skip?: number
+    _count?: GmArticleDataCountAggregateInputType | true
+    _avg?: GmArticleDataAvgAggregateInputType
+    _sum?: GmArticleDataSumAggregateInputType
+    _min?: GmArticleDataMinAggregateInputType
+    _max?: GmArticleDataMaxAggregateInputType
+  }
+
+  export type GmArticleDataGroupByOutputType = {
+    id: string
+    gmAgeGrade: string | null
+    gmApplicator: string | null
+    gmBaseType: string | null
+    gmBatteryType: string | null
+    gmBpaFree: string | null
+    gmBpcForm: string | null
+    gmBrand: string | null
+    gmBrandType: string | null
+    gmCapacityMl: string | null
+    gmCareInstruction: string | null
+    gmCertification: string | null
+    gmClosureType: string | null
+    gmCoating: string | null
+    gmColourFamily: string | null
+    gmColourShade: string | null
+    gmCompartmentCount: string | null
+    gmComposition: string | null
+    gmCosmeticFinish: string | null
+    gmDiameterCm: string | null
+    gmDimStandard: string | null
+    gmDishwasherSafe: string | null
+    gmFoldable: string | null
+    gmFoodContactSafe: string | null
+    gmFragranceConc: string | null
+    gmFragranceFamily: string | null
+    gmFreeFrom: string | null
+    gmFwHeelHtCm: string | null
+    gmFwHeelType: string | null
+    gmFwSize: string | null
+    gmFwSole: string | null
+    gmFwToe: string | null
+    gmFwUpper: string | null
+    gmGsm: string | null
+    gmHeatRetentionHr: string | null
+    gmHeightCm: string | null
+    gmInsulationType: string | null
+    gmKeyIngredient: string | null
+    gmLeakProof: string | null
+    gmLengthCm: string | null
+    gmLicence: string | null
+    gmLidType: string | null
+    gmLifestage: string | null
+    gmLiningMaterial: string | null
+    gmManufacturer: string | null
+    gmMaterial: string | null
+    gmMaterialGroup: string | null
+    gmMaterialSecondary: string | null
+    gmMicrowaveSafe: string | null
+    gmMountType: string | null
+    gmNetContent: string | null
+    gmNetContentUom: string | null
+    gmNetWeightG: string | null
+    gmPackQty: string | null
+    gmPattern: string | null
+    gmPlayPattern: string | null
+    gmPlayerCount: string | null
+    gmPowerSource: string | null
+    gmPriceTier: string | null
+    gmPrintTheme: string | null
+    gmSeason: string | null
+    gmSellUom: string | null
+    gmSetContents: string | null
+    gmShelfLifeMonths: string | null
+    gmSkinType: string | null
+    gmSpf: string | null
+    gmSport: string | null
+    gmStrapType: string | null
+    gmSurfaceFinish: string | null
+    gmTextileFabric: string | null
+    gmThreadCount: string | null
+    gmUsageOccasion: string | null
+    gmVoltageV: string | null
+    gmWarrantyMonths: string | null
+    gmWattageW: string | null
+    gmWeave: string | null
+    gmWheelCount: string | null
+    gmWidthCm: string | null
+    gmYarn: string | null
+    gmArticleNumber: string | null
+    gmArticleDescription: string | null
+    flatId: string | null
+    division: string | null
+    subDivision: string | null
+    majorCategory: string | null
+    mcDescription: string | null
+    vendorName: string | null
+    vendorCode: string | null
+    designNumber: string | null
+    pptNumber: string | null
+    rate: Decimal | null
+    mrp: Decimal | null
+    segment: string | null
+    articleFashionType: string | null
+    approvalStatus: string
+    approvedAt: Date | null
+    approvedBy: number | null
+    sapSyncStatus: string
+    sapSyncMessage: string | null
+    imageUrl: string | null
+    gmArticleType: string | null
+    source: string | null
+    userName: string | null
+    createdAt: Date
+    updatedAt: Date
+    _count: GmArticleDataCountAggregateOutputType | null
+    _avg: GmArticleDataAvgAggregateOutputType | null
+    _sum: GmArticleDataSumAggregateOutputType | null
+    _min: GmArticleDataMinAggregateOutputType | null
+    _max: GmArticleDataMaxAggregateOutputType | null
+  }
+
+  type GetGmArticleDataGroupByPayload<T extends GmArticleDataGroupByArgs> = Prisma.PrismaPromise<
+    Array<
+      PickEnumerable<GmArticleDataGroupByOutputType, T['by']> &
+        {
+          [P in ((keyof T) & (keyof GmArticleDataGroupByOutputType))]: P extends '_count'
+            ? T[P] extends boolean
+              ? number
+              : GetScalarType<T[P], GmArticleDataGroupByOutputType[P]>
+            : GetScalarType<T[P], GmArticleDataGroupByOutputType[P]>
+        }
+      >
+    >
+
+
+  export type GmArticleDataSelect<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
+    id?: boolean
+    gmAgeGrade?: boolean
+    gmApplicator?: boolean
+    gmBaseType?: boolean
+    gmBatteryType?: boolean
+    gmBpaFree?: boolean
+    gmBpcForm?: boolean
+    gmBrand?: boolean
+    gmBrandType?: boolean
+    gmCapacityMl?: boolean
+    gmCareInstruction?: boolean
+    gmCertification?: boolean
+    gmClosureType?: boolean
+    gmCoating?: boolean
+    gmColourFamily?: boolean
+    gmColourShade?: boolean
+    gmCompartmentCount?: boolean
+    gmComposition?: boolean
+    gmCosmeticFinish?: boolean
+    gmDiameterCm?: boolean
+    gmDimStandard?: boolean
+    gmDishwasherSafe?: boolean
+    gmFoldable?: boolean
+    gmFoodContactSafe?: boolean
+    gmFragranceConc?: boolean
+    gmFragranceFamily?: boolean
+    gmFreeFrom?: boolean
+    gmFwHeelHtCm?: boolean
+    gmFwHeelType?: boolean
+    gmFwSize?: boolean
+    gmFwSole?: boolean
+    gmFwToe?: boolean
+    gmFwUpper?: boolean
+    gmGsm?: boolean
+    gmHeatRetentionHr?: boolean
+    gmHeightCm?: boolean
+    gmInsulationType?: boolean
+    gmKeyIngredient?: boolean
+    gmLeakProof?: boolean
+    gmLengthCm?: boolean
+    gmLicence?: boolean
+    gmLidType?: boolean
+    gmLifestage?: boolean
+    gmLiningMaterial?: boolean
+    gmManufacturer?: boolean
+    gmMaterial?: boolean
+    gmMaterialGroup?: boolean
+    gmMaterialSecondary?: boolean
+    gmMicrowaveSafe?: boolean
+    gmMountType?: boolean
+    gmNetContent?: boolean
+    gmNetContentUom?: boolean
+    gmNetWeightG?: boolean
+    gmPackQty?: boolean
+    gmPattern?: boolean
+    gmPlayPattern?: boolean
+    gmPlayerCount?: boolean
+    gmPowerSource?: boolean
+    gmPriceTier?: boolean
+    gmPrintTheme?: boolean
+    gmSeason?: boolean
+    gmSellUom?: boolean
+    gmSetContents?: boolean
+    gmShelfLifeMonths?: boolean
+    gmSkinType?: boolean
+    gmSpf?: boolean
+    gmSport?: boolean
+    gmStrapType?: boolean
+    gmSurfaceFinish?: boolean
+    gmTextileFabric?: boolean
+    gmThreadCount?: boolean
+    gmUsageOccasion?: boolean
+    gmVoltageV?: boolean
+    gmWarrantyMonths?: boolean
+    gmWattageW?: boolean
+    gmWeave?: boolean
+    gmWheelCount?: boolean
+    gmWidthCm?: boolean
+    gmYarn?: boolean
+    gmArticleNumber?: boolean
+    gmArticleDescription?: boolean
+    flatId?: boolean
+    division?: boolean
+    subDivision?: boolean
+    majorCategory?: boolean
+    mcDescription?: boolean
+    vendorName?: boolean
+    vendorCode?: boolean
+    designNumber?: boolean
+    pptNumber?: boolean
+    rate?: boolean
+    mrp?: boolean
+    segment?: boolean
+    articleFashionType?: boolean
+    approvalStatus?: boolean
+    approvedAt?: boolean
+    approvedBy?: boolean
+    sapSyncStatus?: boolean
+    sapSyncMessage?: boolean
+    imageUrl?: boolean
+    gmArticleType?: boolean
+    source?: boolean
+    userName?: boolean
+    createdAt?: boolean
+    updatedAt?: boolean
+  }, ExtArgs["result"]["gmArticleData"]>
+
+  export type GmArticleDataSelectCreateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
+    id?: boolean
+    gmAgeGrade?: boolean
+    gmApplicator?: boolean
+    gmBaseType?: boolean
+    gmBatteryType?: boolean
+    gmBpaFree?: boolean
+    gmBpcForm?: boolean
+    gmBrand?: boolean
+    gmBrandType?: boolean
+    gmCapacityMl?: boolean
+    gmCareInstruction?: boolean
+    gmCertification?: boolean
+    gmClosureType?: boolean
+    gmCoating?: boolean
+    gmColourFamily?: boolean
+    gmColourShade?: boolean
+    gmCompartmentCount?: boolean
+    gmComposition?: boolean
+    gmCosmeticFinish?: boolean
+    gmDiameterCm?: boolean
+    gmDimStandard?: boolean
+    gmDishwasherSafe?: boolean
+    gmFoldable?: boolean
+    gmFoodContactSafe?: boolean
+    gmFragranceConc?: boolean
+    gmFragranceFamily?: boolean
+    gmFreeFrom?: boolean
+    gmFwHeelHtCm?: boolean
+    gmFwHeelType?: boolean
+    gmFwSize?: boolean
+    gmFwSole?: boolean
+    gmFwToe?: boolean
+    gmFwUpper?: boolean
+    gmGsm?: boolean
+    gmHeatRetentionHr?: boolean
+    gmHeightCm?: boolean
+    gmInsulationType?: boolean
+    gmKeyIngredient?: boolean
+    gmLeakProof?: boolean
+    gmLengthCm?: boolean
+    gmLicence?: boolean
+    gmLidType?: boolean
+    gmLifestage?: boolean
+    gmLiningMaterial?: boolean
+    gmManufacturer?: boolean
+    gmMaterial?: boolean
+    gmMaterialGroup?: boolean
+    gmMaterialSecondary?: boolean
+    gmMicrowaveSafe?: boolean
+    gmMountType?: boolean
+    gmNetContent?: boolean
+    gmNetContentUom?: boolean
+    gmNetWeightG?: boolean
+    gmPackQty?: boolean
+    gmPattern?: boolean
+    gmPlayPattern?: boolean
+    gmPlayerCount?: boolean
+    gmPowerSource?: boolean
+    gmPriceTier?: boolean
+    gmPrintTheme?: boolean
+    gmSeason?: boolean
+    gmSellUom?: boolean
+    gmSetContents?: boolean
+    gmShelfLifeMonths?: boolean
+    gmSkinType?: boolean
+    gmSpf?: boolean
+    gmSport?: boolean
+    gmStrapType?: boolean
+    gmSurfaceFinish?: boolean
+    gmTextileFabric?: boolean
+    gmThreadCount?: boolean
+    gmUsageOccasion?: boolean
+    gmVoltageV?: boolean
+    gmWarrantyMonths?: boolean
+    gmWattageW?: boolean
+    gmWeave?: boolean
+    gmWheelCount?: boolean
+    gmWidthCm?: boolean
+    gmYarn?: boolean
+    gmArticleNumber?: boolean
+    gmArticleDescription?: boolean
+    flatId?: boolean
+    division?: boolean
+    subDivision?: boolean
+    majorCategory?: boolean
+    mcDescription?: boolean
+    vendorName?: boolean
+    vendorCode?: boolean
+    designNumber?: boolean
+    pptNumber?: boolean
+    rate?: boolean
+    mrp?: boolean
+    segment?: boolean
+    articleFashionType?: boolean
+    approvalStatus?: boolean
+    approvedAt?: boolean
+    approvedBy?: boolean
+    sapSyncStatus?: boolean
+    sapSyncMessage?: boolean
+    imageUrl?: boolean
+    gmArticleType?: boolean
+    source?: boolean
+    userName?: boolean
+    createdAt?: boolean
+    updatedAt?: boolean
+  }, ExtArgs["result"]["gmArticleData"]>
+
+  export type GmArticleDataSelectUpdateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
+    id?: boolean
+    gmAgeGrade?: boolean
+    gmApplicator?: boolean
+    gmBaseType?: boolean
+    gmBatteryType?: boolean
+    gmBpaFree?: boolean
+    gmBpcForm?: boolean
+    gmBrand?: boolean
+    gmBrandType?: boolean
+    gmCapacityMl?: boolean
+    gmCareInstruction?: boolean
+    gmCertification?: boolean
+    gmClosureType?: boolean
+    gmCoating?: boolean
+    gmColourFamily?: boolean
+    gmColourShade?: boolean
+    gmCompartmentCount?: boolean
+    gmComposition?: boolean
+    gmCosmeticFinish?: boolean
+    gmDiameterCm?: boolean
+    gmDimStandard?: boolean
+    gmDishwasherSafe?: boolean
+    gmFoldable?: boolean
+    gmFoodContactSafe?: boolean
+    gmFragranceConc?: boolean
+    gmFragranceFamily?: boolean
+    gmFreeFrom?: boolean
+    gmFwHeelHtCm?: boolean
+    gmFwHeelType?: boolean
+    gmFwSize?: boolean
+    gmFwSole?: boolean
+    gmFwToe?: boolean
+    gmFwUpper?: boolean
+    gmGsm?: boolean
+    gmHeatRetentionHr?: boolean
+    gmHeightCm?: boolean
+    gmInsulationType?: boolean
+    gmKeyIngredient?: boolean
+    gmLeakProof?: boolean
+    gmLengthCm?: boolean
+    gmLicence?: boolean
+    gmLidType?: boolean
+    gmLifestage?: boolean
+    gmLiningMaterial?: boolean
+    gmManufacturer?: boolean
+    gmMaterial?: boolean
+    gmMaterialGroup?: boolean
+    gmMaterialSecondary?: boolean
+    gmMicrowaveSafe?: boolean
+    gmMountType?: boolean
+    gmNetContent?: boolean
+    gmNetContentUom?: boolean
+    gmNetWeightG?: boolean
+    gmPackQty?: boolean
+    gmPattern?: boolean
+    gmPlayPattern?: boolean
+    gmPlayerCount?: boolean
+    gmPowerSource?: boolean
+    gmPriceTier?: boolean
+    gmPrintTheme?: boolean
+    gmSeason?: boolean
+    gmSellUom?: boolean
+    gmSetContents?: boolean
+    gmShelfLifeMonths?: boolean
+    gmSkinType?: boolean
+    gmSpf?: boolean
+    gmSport?: boolean
+    gmStrapType?: boolean
+    gmSurfaceFinish?: boolean
+    gmTextileFabric?: boolean
+    gmThreadCount?: boolean
+    gmUsageOccasion?: boolean
+    gmVoltageV?: boolean
+    gmWarrantyMonths?: boolean
+    gmWattageW?: boolean
+    gmWeave?: boolean
+    gmWheelCount?: boolean
+    gmWidthCm?: boolean
+    gmYarn?: boolean
+    gmArticleNumber?: boolean
+    gmArticleDescription?: boolean
+    flatId?: boolean
+    division?: boolean
+    subDivision?: boolean
+    majorCategory?: boolean
+    mcDescription?: boolean
+    vendorName?: boolean
+    vendorCode?: boolean
+    designNumber?: boolean
+    pptNumber?: boolean
+    rate?: boolean
+    mrp?: boolean
+    segment?: boolean
+    articleFashionType?: boolean
+    approvalStatus?: boolean
+    approvedAt?: boolean
+    approvedBy?: boolean
+    sapSyncStatus?: boolean
+    sapSyncMessage?: boolean
+    imageUrl?: boolean
+    gmArticleType?: boolean
+    source?: boolean
+    userName?: boolean
+    createdAt?: boolean
+    updatedAt?: boolean
+  }, ExtArgs["result"]["gmArticleData"]>
+
+  export type GmArticleDataSelectScalar = {
+    id?: boolean
+    gmAgeGrade?: boolean
+    gmApplicator?: boolean
+    gmBaseType?: boolean
+    gmBatteryType?: boolean
+    gmBpaFree?: boolean
+    gmBpcForm?: boolean
+    gmBrand?: boolean
+    gmBrandType?: boolean
+    gmCapacityMl?: boolean
+    gmCareInstruction?: boolean
+    gmCertification?: boolean
+    gmClosureType?: boolean
+    gmCoating?: boolean
+    gmColourFamily?: boolean
+    gmColourShade?: boolean
+    gmCompartmentCount?: boolean
+    gmComposition?: boolean
+    gmCosmeticFinish?: boolean
+    gmDiameterCm?: boolean
+    gmDimStandard?: boolean
+    gmDishwasherSafe?: boolean
+    gmFoldable?: boolean
+    gmFoodContactSafe?: boolean
+    gmFragranceConc?: boolean
+    gmFragranceFamily?: boolean
+    gmFreeFrom?: boolean
+    gmFwHeelHtCm?: boolean
+    gmFwHeelType?: boolean
+    gmFwSize?: boolean
+    gmFwSole?: boolean
+    gmFwToe?: boolean
+    gmFwUpper?: boolean
+    gmGsm?: boolean
+    gmHeatRetentionHr?: boolean
+    gmHeightCm?: boolean
+    gmInsulationType?: boolean
+    gmKeyIngredient?: boolean
+    gmLeakProof?: boolean
+    gmLengthCm?: boolean
+    gmLicence?: boolean
+    gmLidType?: boolean
+    gmLifestage?: boolean
+    gmLiningMaterial?: boolean
+    gmManufacturer?: boolean
+    gmMaterial?: boolean
+    gmMaterialGroup?: boolean
+    gmMaterialSecondary?: boolean
+    gmMicrowaveSafe?: boolean
+    gmMountType?: boolean
+    gmNetContent?: boolean
+    gmNetContentUom?: boolean
+    gmNetWeightG?: boolean
+    gmPackQty?: boolean
+    gmPattern?: boolean
+    gmPlayPattern?: boolean
+    gmPlayerCount?: boolean
+    gmPowerSource?: boolean
+    gmPriceTier?: boolean
+    gmPrintTheme?: boolean
+    gmSeason?: boolean
+    gmSellUom?: boolean
+    gmSetContents?: boolean
+    gmShelfLifeMonths?: boolean
+    gmSkinType?: boolean
+    gmSpf?: boolean
+    gmSport?: boolean
+    gmStrapType?: boolean
+    gmSurfaceFinish?: boolean
+    gmTextileFabric?: boolean
+    gmThreadCount?: boolean
+    gmUsageOccasion?: boolean
+    gmVoltageV?: boolean
+    gmWarrantyMonths?: boolean
+    gmWattageW?: boolean
+    gmWeave?: boolean
+    gmWheelCount?: boolean
+    gmWidthCm?: boolean
+    gmYarn?: boolean
+    gmArticleNumber?: boolean
+    gmArticleDescription?: boolean
+    flatId?: boolean
+    division?: boolean
+    subDivision?: boolean
+    majorCategory?: boolean
+    mcDescription?: boolean
+    vendorName?: boolean
+    vendorCode?: boolean
+    designNumber?: boolean
+    pptNumber?: boolean
+    rate?: boolean
+    mrp?: boolean
+    segment?: boolean
+    articleFashionType?: boolean
+    approvalStatus?: boolean
+    approvedAt?: boolean
+    approvedBy?: boolean
+    sapSyncStatus?: boolean
+    sapSyncMessage?: boolean
+    imageUrl?: boolean
+    gmArticleType?: boolean
+    source?: boolean
+    userName?: boolean
+    createdAt?: boolean
+    updatedAt?: boolean
+  }
+
+  export type GmArticleDataOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<"id" | "gmAgeGrade" | "gmApplicator" | "gmBaseType" | "gmBatteryType" | "gmBpaFree" | "gmBpcForm" | "gmBrand" | "gmBrandType" | "gmCapacityMl" | "gmCareInstruction" | "gmCertification" | "gmClosureType" | "gmCoating" | "gmColourFamily" | "gmColourShade" | "gmCompartmentCount" | "gmComposition" | "gmCosmeticFinish" | "gmDiameterCm" | "gmDimStandard" | "gmDishwasherSafe" | "gmFoldable" | "gmFoodContactSafe" | "gmFragranceConc" | "gmFragranceFamily" | "gmFreeFrom" | "gmFwHeelHtCm" | "gmFwHeelType" | "gmFwSize" | "gmFwSole" | "gmFwToe" | "gmFwUpper" | "gmGsm" | "gmHeatRetentionHr" | "gmHeightCm" | "gmInsulationType" | "gmKeyIngredient" | "gmLeakProof" | "gmLengthCm" | "gmLicence" | "gmLidType" | "gmLifestage" | "gmLiningMaterial" | "gmManufacturer" | "gmMaterial" | "gmMaterialGroup" | "gmMaterialSecondary" | "gmMicrowaveSafe" | "gmMountType" | "gmNetContent" | "gmNetContentUom" | "gmNetWeightG" | "gmPackQty" | "gmPattern" | "gmPlayPattern" | "gmPlayerCount" | "gmPowerSource" | "gmPriceTier" | "gmPrintTheme" | "gmSeason" | "gmSellUom" | "gmSetContents" | "gmShelfLifeMonths" | "gmSkinType" | "gmSpf" | "gmSport" | "gmStrapType" | "gmSurfaceFinish" | "gmTextileFabric" | "gmThreadCount" | "gmUsageOccasion" | "gmVoltageV" | "gmWarrantyMonths" | "gmWattageW" | "gmWeave" | "gmWheelCount" | "gmWidthCm" | "gmYarn" | "gmArticleNumber" | "gmArticleDescription" | "flatId" | "division" | "subDivision" | "majorCategory" | "mcDescription" | "vendorName" | "vendorCode" | "designNumber" | "pptNumber" | "rate" | "mrp" | "segment" | "articleFashionType" | "approvalStatus" | "approvedAt" | "approvedBy" | "sapSyncStatus" | "sapSyncMessage" | "imageUrl" | "gmArticleType" | "source" | "userName" | "createdAt" | "updatedAt", ExtArgs["result"]["gmArticleData"]>
+
+  export type $GmArticleDataPayload<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    name: "GmArticleData"
+    objects: {}
+    scalars: $Extensions.GetPayloadResult<{
+      id: string
+      gmAgeGrade: string | null
+      gmApplicator: string | null
+      gmBaseType: string | null
+      gmBatteryType: string | null
+      gmBpaFree: string | null
+      gmBpcForm: string | null
+      gmBrand: string | null
+      gmBrandType: string | null
+      gmCapacityMl: string | null
+      gmCareInstruction: string | null
+      gmCertification: string | null
+      gmClosureType: string | null
+      gmCoating: string | null
+      gmColourFamily: string | null
+      gmColourShade: string | null
+      gmCompartmentCount: string | null
+      gmComposition: string | null
+      gmCosmeticFinish: string | null
+      gmDiameterCm: string | null
+      gmDimStandard: string | null
+      gmDishwasherSafe: string | null
+      gmFoldable: string | null
+      gmFoodContactSafe: string | null
+      gmFragranceConc: string | null
+      gmFragranceFamily: string | null
+      gmFreeFrom: string | null
+      gmFwHeelHtCm: string | null
+      gmFwHeelType: string | null
+      gmFwSize: string | null
+      gmFwSole: string | null
+      gmFwToe: string | null
+      gmFwUpper: string | null
+      gmGsm: string | null
+      gmHeatRetentionHr: string | null
+      gmHeightCm: string | null
+      gmInsulationType: string | null
+      gmKeyIngredient: string | null
+      gmLeakProof: string | null
+      gmLengthCm: string | null
+      gmLicence: string | null
+      gmLidType: string | null
+      gmLifestage: string | null
+      gmLiningMaterial: string | null
+      gmManufacturer: string | null
+      gmMaterial: string | null
+      gmMaterialGroup: string | null
+      gmMaterialSecondary: string | null
+      gmMicrowaveSafe: string | null
+      gmMountType: string | null
+      gmNetContent: string | null
+      gmNetContentUom: string | null
+      gmNetWeightG: string | null
+      gmPackQty: string | null
+      gmPattern: string | null
+      gmPlayPattern: string | null
+      gmPlayerCount: string | null
+      gmPowerSource: string | null
+      gmPriceTier: string | null
+      gmPrintTheme: string | null
+      gmSeason: string | null
+      gmSellUom: string | null
+      gmSetContents: string | null
+      gmShelfLifeMonths: string | null
+      gmSkinType: string | null
+      gmSpf: string | null
+      gmSport: string | null
+      gmStrapType: string | null
+      gmSurfaceFinish: string | null
+      gmTextileFabric: string | null
+      gmThreadCount: string | null
+      gmUsageOccasion: string | null
+      gmVoltageV: string | null
+      gmWarrantyMonths: string | null
+      gmWattageW: string | null
+      gmWeave: string | null
+      gmWheelCount: string | null
+      gmWidthCm: string | null
+      gmYarn: string | null
+      gmArticleNumber: string | null
+      gmArticleDescription: string | null
+      flatId: string | null
+      division: string | null
+      subDivision: string | null
+      majorCategory: string | null
+      mcDescription: string | null
+      vendorName: string | null
+      vendorCode: string | null
+      designNumber: string | null
+      pptNumber: string | null
+      rate: Prisma.Decimal | null
+      mrp: Prisma.Decimal | null
+      segment: string | null
+      articleFashionType: string | null
+      approvalStatus: string
+      approvedAt: Date | null
+      approvedBy: number | null
+      sapSyncStatus: string
+      sapSyncMessage: string | null
+      imageUrl: string | null
+      gmArticleType: string | null
+      source: string | null
+      userName: string | null
+      createdAt: Date
+      updatedAt: Date
+    }, ExtArgs["result"]["gmArticleData"]>
+    composites: {}
+  }
+
+  type GmArticleDataGetPayload<S extends boolean | null | undefined | GmArticleDataDefaultArgs> = $Result.GetResult<Prisma.$GmArticleDataPayload, S>
+
+  type GmArticleDataCountArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> =
+    Omit<GmArticleDataFindManyArgs, 'select' | 'include' | 'distinct' | 'omit'> & {
+      select?: GmArticleDataCountAggregateInputType | true
+    }
+
+  export interface GmArticleDataDelegate<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs, GlobalOmitOptions = {}> {
+    [K: symbol]: { types: Prisma.TypeMap<ExtArgs>['model']['GmArticleData'], meta: { name: 'GmArticleData' } }
+    /**
+     * Find zero or one GmArticleData that matches the filter.
+     * @param {GmArticleDataFindUniqueArgs} args - Arguments to find a GmArticleData
+     * @example
+     * // Get one GmArticleData
+     * const gmArticleData = await prisma.gmArticleData.findUnique({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     */
+    findUnique<T extends GmArticleDataFindUniqueArgs>(args: SelectSubset<T, GmArticleDataFindUniqueArgs<ExtArgs>>): Prisma__GmArticleDataClient<$Result.GetResult<Prisma.$GmArticleDataPayload<ExtArgs>, T, "findUnique", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Find one GmArticleData that matches the filter or throw an error with `error.code='P2025'`
+     * if no matches were found.
+     * @param {GmArticleDataFindUniqueOrThrowArgs} args - Arguments to find a GmArticleData
+     * @example
+     * // Get one GmArticleData
+     * const gmArticleData = await prisma.gmArticleData.findUniqueOrThrow({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     */
+    findUniqueOrThrow<T extends GmArticleDataFindUniqueOrThrowArgs>(args: SelectSubset<T, GmArticleDataFindUniqueOrThrowArgs<ExtArgs>>): Prisma__GmArticleDataClient<$Result.GetResult<Prisma.$GmArticleDataPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Find the first GmArticleData that matches the filter.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {GmArticleDataFindFirstArgs} args - Arguments to find a GmArticleData
+     * @example
+     * // Get one GmArticleData
+     * const gmArticleData = await prisma.gmArticleData.findFirst({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     */
+    findFirst<T extends GmArticleDataFindFirstArgs>(args?: SelectSubset<T, GmArticleDataFindFirstArgs<ExtArgs>>): Prisma__GmArticleDataClient<$Result.GetResult<Prisma.$GmArticleDataPayload<ExtArgs>, T, "findFirst", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Find the first GmArticleData that matches the filter or
+     * throw `PrismaKnownClientError` with `P2025` code if no matches were found.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {GmArticleDataFindFirstOrThrowArgs} args - Arguments to find a GmArticleData
+     * @example
+     * // Get one GmArticleData
+     * const gmArticleData = await prisma.gmArticleData.findFirstOrThrow({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     */
+    findFirstOrThrow<T extends GmArticleDataFindFirstOrThrowArgs>(args?: SelectSubset<T, GmArticleDataFindFirstOrThrowArgs<ExtArgs>>): Prisma__GmArticleDataClient<$Result.GetResult<Prisma.$GmArticleDataPayload<ExtArgs>, T, "findFirstOrThrow", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Find zero or more GmArticleData that matches the filter.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {GmArticleDataFindManyArgs} args - Arguments to filter and select certain fields only.
+     * @example
+     * // Get all GmArticleData
+     * const gmArticleData = await prisma.gmArticleData.findMany()
+     * 
+     * // Get first 10 GmArticleData
+     * const gmArticleData = await prisma.gmArticleData.findMany({ take: 10 })
+     * 
+     * // Only select the `id`
+     * const gmArticleDataWithIdOnly = await prisma.gmArticleData.findMany({ select: { id: true } })
+     * 
+     */
+    findMany<T extends GmArticleDataFindManyArgs>(args?: SelectSubset<T, GmArticleDataFindManyArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$GmArticleDataPayload<ExtArgs>, T, "findMany", GlobalOmitOptions>>
+
+    /**
+     * Create a GmArticleData.
+     * @param {GmArticleDataCreateArgs} args - Arguments to create a GmArticleData.
+     * @example
+     * // Create one GmArticleData
+     * const GmArticleData = await prisma.gmArticleData.create({
+     *   data: {
+     *     // ... data to create a GmArticleData
+     *   }
+     * })
+     * 
+     */
+    create<T extends GmArticleDataCreateArgs>(args: SelectSubset<T, GmArticleDataCreateArgs<ExtArgs>>): Prisma__GmArticleDataClient<$Result.GetResult<Prisma.$GmArticleDataPayload<ExtArgs>, T, "create", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Create many GmArticleData.
+     * @param {GmArticleDataCreateManyArgs} args - Arguments to create many GmArticleData.
+     * @example
+     * // Create many GmArticleData
+     * const gmArticleData = await prisma.gmArticleData.createMany({
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     *     
+     */
+    createMany<T extends GmArticleDataCreateManyArgs>(args?: SelectSubset<T, GmArticleDataCreateManyArgs<ExtArgs>>): Prisma.PrismaPromise<BatchPayload>
+
+    /**
+     * Create many GmArticleData and returns the data saved in the database.
+     * @param {GmArticleDataCreateManyAndReturnArgs} args - Arguments to create many GmArticleData.
+     * @example
+     * // Create many GmArticleData
+     * const gmArticleData = await prisma.gmArticleData.createManyAndReturn({
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     * 
+     * // Create many GmArticleData and only return the `id`
+     * const gmArticleDataWithIdOnly = await prisma.gmArticleData.createManyAndReturn({
+     *   select: { id: true },
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * 
+     */
+    createManyAndReturn<T extends GmArticleDataCreateManyAndReturnArgs>(args?: SelectSubset<T, GmArticleDataCreateManyAndReturnArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$GmArticleDataPayload<ExtArgs>, T, "createManyAndReturn", GlobalOmitOptions>>
+
+    /**
+     * Delete a GmArticleData.
+     * @param {GmArticleDataDeleteArgs} args - Arguments to delete one GmArticleData.
+     * @example
+     * // Delete one GmArticleData
+     * const GmArticleData = await prisma.gmArticleData.delete({
+     *   where: {
+     *     // ... filter to delete one GmArticleData
+     *   }
+     * })
+     * 
+     */
+    delete<T extends GmArticleDataDeleteArgs>(args: SelectSubset<T, GmArticleDataDeleteArgs<ExtArgs>>): Prisma__GmArticleDataClient<$Result.GetResult<Prisma.$GmArticleDataPayload<ExtArgs>, T, "delete", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Update one GmArticleData.
+     * @param {GmArticleDataUpdateArgs} args - Arguments to update one GmArticleData.
+     * @example
+     * // Update one GmArticleData
+     * const gmArticleData = await prisma.gmArticleData.update({
+     *   where: {
+     *     // ... provide filter here
+     *   },
+     *   data: {
+     *     // ... provide data here
+     *   }
+     * })
+     * 
+     */
+    update<T extends GmArticleDataUpdateArgs>(args: SelectSubset<T, GmArticleDataUpdateArgs<ExtArgs>>): Prisma__GmArticleDataClient<$Result.GetResult<Prisma.$GmArticleDataPayload<ExtArgs>, T, "update", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Delete zero or more GmArticleData.
+     * @param {GmArticleDataDeleteManyArgs} args - Arguments to filter GmArticleData to delete.
+     * @example
+     * // Delete a few GmArticleData
+     * const { count } = await prisma.gmArticleData.deleteMany({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     * 
+     */
+    deleteMany<T extends GmArticleDataDeleteManyArgs>(args?: SelectSubset<T, GmArticleDataDeleteManyArgs<ExtArgs>>): Prisma.PrismaPromise<BatchPayload>
+
+    /**
+     * Update zero or more GmArticleData.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {GmArticleDataUpdateManyArgs} args - Arguments to update one or more rows.
+     * @example
+     * // Update many GmArticleData
+     * const gmArticleData = await prisma.gmArticleData.updateMany({
+     *   where: {
+     *     // ... provide filter here
+     *   },
+     *   data: {
+     *     // ... provide data here
+     *   }
+     * })
+     * 
+     */
+    updateMany<T extends GmArticleDataUpdateManyArgs>(args: SelectSubset<T, GmArticleDataUpdateManyArgs<ExtArgs>>): Prisma.PrismaPromise<BatchPayload>
+
+    /**
+     * Update zero or more GmArticleData and returns the data updated in the database.
+     * @param {GmArticleDataUpdateManyAndReturnArgs} args - Arguments to update many GmArticleData.
+     * @example
+     * // Update many GmArticleData
+     * const gmArticleData = await prisma.gmArticleData.updateManyAndReturn({
+     *   where: {
+     *     // ... provide filter here
+     *   },
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     * 
+     * // Update zero or more GmArticleData and only return the `id`
+     * const gmArticleDataWithIdOnly = await prisma.gmArticleData.updateManyAndReturn({
+     *   select: { id: true },
+     *   where: {
+     *     // ... provide filter here
+     *   },
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * 
+     */
+    updateManyAndReturn<T extends GmArticleDataUpdateManyAndReturnArgs>(args: SelectSubset<T, GmArticleDataUpdateManyAndReturnArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$GmArticleDataPayload<ExtArgs>, T, "updateManyAndReturn", GlobalOmitOptions>>
+
+    /**
+     * Create or update one GmArticleData.
+     * @param {GmArticleDataUpsertArgs} args - Arguments to update or create a GmArticleData.
+     * @example
+     * // Update or create a GmArticleData
+     * const gmArticleData = await prisma.gmArticleData.upsert({
+     *   create: {
+     *     // ... data to create a GmArticleData
+     *   },
+     *   update: {
+     *     // ... in case it already exists, update
+     *   },
+     *   where: {
+     *     // ... the filter for the GmArticleData we want to update
+     *   }
+     * })
+     */
+    upsert<T extends GmArticleDataUpsertArgs>(args: SelectSubset<T, GmArticleDataUpsertArgs<ExtArgs>>): Prisma__GmArticleDataClient<$Result.GetResult<Prisma.$GmArticleDataPayload<ExtArgs>, T, "upsert", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+
+    /**
+     * Count the number of GmArticleData.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {GmArticleDataCountArgs} args - Arguments to filter GmArticleData to count.
+     * @example
+     * // Count the number of GmArticleData
+     * const count = await prisma.gmArticleData.count({
+     *   where: {
+     *     // ... the filter for the GmArticleData we want to count
+     *   }
+     * })
+    **/
+    count<T extends GmArticleDataCountArgs>(
+      args?: Subset<T, GmArticleDataCountArgs>,
+    ): Prisma.PrismaPromise<
+      T extends $Utils.Record<'select', any>
+        ? T['select'] extends true
+          ? number
+          : GetScalarType<T['select'], GmArticleDataCountAggregateOutputType>
+        : number
+    >
+
+    /**
+     * Allows you to perform aggregations operations on a GmArticleData.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {GmArticleDataAggregateArgs} args - Select which aggregations you would like to apply and on what fields.
+     * @example
+     * // Ordered by age ascending
+     * // Where email contains prisma.io
+     * // Limited to the 10 users
+     * const aggregations = await prisma.user.aggregate({
+     *   _avg: {
+     *     age: true,
+     *   },
+     *   where: {
+     *     email: {
+     *       contains: "prisma.io",
+     *     },
+     *   },
+     *   orderBy: {
+     *     age: "asc",
+     *   },
+     *   take: 10,
+     * })
+    **/
+    aggregate<T extends GmArticleDataAggregateArgs>(args: Subset<T, GmArticleDataAggregateArgs>): Prisma.PrismaPromise<GetGmArticleDataAggregateType<T>>
+
+    /**
+     * Group by GmArticleData.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {GmArticleDataGroupByArgs} args - Group by arguments.
+     * @example
+     * // Group by city, order by createdAt, get count
+     * const result = await prisma.user.groupBy({
+     *   by: ['city', 'createdAt'],
+     *   orderBy: {
+     *     createdAt: true
+     *   },
+     *   _count: {
+     *     _all: true
+     *   },
+     * })
+     * 
+    **/
+    groupBy<
+      T extends GmArticleDataGroupByArgs,
+      HasSelectOrTake extends Or<
+        Extends<'skip', Keys<T>>,
+        Extends<'take', Keys<T>>
+      >,
+      OrderByArg extends True extends HasSelectOrTake
+        ? { orderBy: GmArticleDataGroupByArgs['orderBy'] }
+        : { orderBy?: GmArticleDataGroupByArgs['orderBy'] },
+      OrderFields extends ExcludeUnderscoreKeys<Keys<MaybeTupleToUnion<T['orderBy']>>>,
+      ByFields extends MaybeTupleToUnion<T['by']>,
+      ByValid extends Has<ByFields, OrderFields>,
+      HavingFields extends GetHavingFields<T['having']>,
+      HavingValid extends Has<ByFields, HavingFields>,
+      ByEmpty extends T['by'] extends never[] ? True : False,
+      InputErrors extends ByEmpty extends True
+      ? `Error: "by" must not be empty.`
+      : HavingValid extends False
+      ? {
+          [P in HavingFields]: P extends ByFields
+            ? never
+            : P extends string
+            ? `Error: Field "${P}" used in "having" needs to be provided in "by".`
+            : [
+                Error,
+                'Field ',
+                P,
+                ` in "having" needs to be provided in "by"`,
+              ]
+        }[HavingFields]
+      : 'take' extends Keys<T>
+      ? 'orderBy' extends Keys<T>
+        ? ByValid extends True
+          ? {}
+          : {
+              [P in OrderFields]: P extends ByFields
+                ? never
+                : `Error: Field "${P}" in "orderBy" needs to be provided in "by"`
+            }[OrderFields]
+        : 'Error: If you provide "take", you also need to provide "orderBy"'
+      : 'skip' extends Keys<T>
+      ? 'orderBy' extends Keys<T>
+        ? ByValid extends True
+          ? {}
+          : {
+              [P in OrderFields]: P extends ByFields
+                ? never
+                : `Error: Field "${P}" in "orderBy" needs to be provided in "by"`
+            }[OrderFields]
+        : 'Error: If you provide "skip", you also need to provide "orderBy"'
+      : ByValid extends True
+      ? {}
+      : {
+          [P in OrderFields]: P extends ByFields
+            ? never
+            : `Error: Field "${P}" in "orderBy" needs to be provided in "by"`
+        }[OrderFields]
+    >(args: SubsetIntersection<T, GmArticleDataGroupByArgs, OrderByArg> & InputErrors): {} extends InputErrors ? GetGmArticleDataGroupByPayload<T> : Prisma.PrismaPromise<InputErrors>
+  /**
+   * Fields of the GmArticleData model
+   */
+  readonly fields: GmArticleDataFieldRefs;
+  }
+
+  /**
+   * The delegate class that acts as a "Promise-like" for GmArticleData.
+   * Why is this prefixed with `Prisma__`?
+   * Because we want to prevent naming conflicts as mentioned in
+   * https://github.com/prisma/prisma-client-js/issues/707
+   */
+  export interface Prisma__GmArticleDataClient<T, Null = never, ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs, GlobalOmitOptions = {}> extends Prisma.PrismaPromise<T> {
+    readonly [Symbol.toStringTag]: "PrismaPromise"
+    /**
+     * Attaches callbacks for the resolution and/or rejection of the Promise.
+     * @param onfulfilled The callback to execute when the Promise is resolved.
+     * @param onrejected The callback to execute when the Promise is rejected.
+     * @returns A Promise for the completion of which ever callback is executed.
+     */
+    then<TResult1 = T, TResult2 = never>(onfulfilled?: ((value: T) => TResult1 | PromiseLike<TResult1>) | undefined | null, onrejected?: ((reason: any) => TResult2 | PromiseLike<TResult2>) | undefined | null): $Utils.JsPromise<TResult1 | TResult2>
+    /**
+     * Attaches a callback for only the rejection of the Promise.
+     * @param onrejected The callback to execute when the Promise is rejected.
+     * @returns A Promise for the completion of the callback.
+     */
+    catch<TResult = never>(onrejected?: ((reason: any) => TResult | PromiseLike<TResult>) | undefined | null): $Utils.JsPromise<T | TResult>
+    /**
+     * Attaches a callback that is invoked when the Promise is settled (fulfilled or rejected). The
+     * resolved value cannot be modified from the callback.
+     * @param onfinally The callback to execute when the Promise is settled (fulfilled or rejected).
+     * @returns A Promise for the completion of the callback.
+     */
+    finally(onfinally?: (() => void) | undefined | null): $Utils.JsPromise<T>
+  }
+
+
+
+
+  /**
+   * Fields of the GmArticleData model
+   */
+  interface GmArticleDataFieldRefs {
+    readonly id: FieldRef<"GmArticleData", 'String'>
+    readonly gmAgeGrade: FieldRef<"GmArticleData", 'String'>
+    readonly gmApplicator: FieldRef<"GmArticleData", 'String'>
+    readonly gmBaseType: FieldRef<"GmArticleData", 'String'>
+    readonly gmBatteryType: FieldRef<"GmArticleData", 'String'>
+    readonly gmBpaFree: FieldRef<"GmArticleData", 'String'>
+    readonly gmBpcForm: FieldRef<"GmArticleData", 'String'>
+    readonly gmBrand: FieldRef<"GmArticleData", 'String'>
+    readonly gmBrandType: FieldRef<"GmArticleData", 'String'>
+    readonly gmCapacityMl: FieldRef<"GmArticleData", 'String'>
+    readonly gmCareInstruction: FieldRef<"GmArticleData", 'String'>
+    readonly gmCertification: FieldRef<"GmArticleData", 'String'>
+    readonly gmClosureType: FieldRef<"GmArticleData", 'String'>
+    readonly gmCoating: FieldRef<"GmArticleData", 'String'>
+    readonly gmColourFamily: FieldRef<"GmArticleData", 'String'>
+    readonly gmColourShade: FieldRef<"GmArticleData", 'String'>
+    readonly gmCompartmentCount: FieldRef<"GmArticleData", 'String'>
+    readonly gmComposition: FieldRef<"GmArticleData", 'String'>
+    readonly gmCosmeticFinish: FieldRef<"GmArticleData", 'String'>
+    readonly gmDiameterCm: FieldRef<"GmArticleData", 'String'>
+    readonly gmDimStandard: FieldRef<"GmArticleData", 'String'>
+    readonly gmDishwasherSafe: FieldRef<"GmArticleData", 'String'>
+    readonly gmFoldable: FieldRef<"GmArticleData", 'String'>
+    readonly gmFoodContactSafe: FieldRef<"GmArticleData", 'String'>
+    readonly gmFragranceConc: FieldRef<"GmArticleData", 'String'>
+    readonly gmFragranceFamily: FieldRef<"GmArticleData", 'String'>
+    readonly gmFreeFrom: FieldRef<"GmArticleData", 'String'>
+    readonly gmFwHeelHtCm: FieldRef<"GmArticleData", 'String'>
+    readonly gmFwHeelType: FieldRef<"GmArticleData", 'String'>
+    readonly gmFwSize: FieldRef<"GmArticleData", 'String'>
+    readonly gmFwSole: FieldRef<"GmArticleData", 'String'>
+    readonly gmFwToe: FieldRef<"GmArticleData", 'String'>
+    readonly gmFwUpper: FieldRef<"GmArticleData", 'String'>
+    readonly gmGsm: FieldRef<"GmArticleData", 'String'>
+    readonly gmHeatRetentionHr: FieldRef<"GmArticleData", 'String'>
+    readonly gmHeightCm: FieldRef<"GmArticleData", 'String'>
+    readonly gmInsulationType: FieldRef<"GmArticleData", 'String'>
+    readonly gmKeyIngredient: FieldRef<"GmArticleData", 'String'>
+    readonly gmLeakProof: FieldRef<"GmArticleData", 'String'>
+    readonly gmLengthCm: FieldRef<"GmArticleData", 'String'>
+    readonly gmLicence: FieldRef<"GmArticleData", 'String'>
+    readonly gmLidType: FieldRef<"GmArticleData", 'String'>
+    readonly gmLifestage: FieldRef<"GmArticleData", 'String'>
+    readonly gmLiningMaterial: FieldRef<"GmArticleData", 'String'>
+    readonly gmManufacturer: FieldRef<"GmArticleData", 'String'>
+    readonly gmMaterial: FieldRef<"GmArticleData", 'String'>
+    readonly gmMaterialGroup: FieldRef<"GmArticleData", 'String'>
+    readonly gmMaterialSecondary: FieldRef<"GmArticleData", 'String'>
+    readonly gmMicrowaveSafe: FieldRef<"GmArticleData", 'String'>
+    readonly gmMountType: FieldRef<"GmArticleData", 'String'>
+    readonly gmNetContent: FieldRef<"GmArticleData", 'String'>
+    readonly gmNetContentUom: FieldRef<"GmArticleData", 'String'>
+    readonly gmNetWeightG: FieldRef<"GmArticleData", 'String'>
+    readonly gmPackQty: FieldRef<"GmArticleData", 'String'>
+    readonly gmPattern: FieldRef<"GmArticleData", 'String'>
+    readonly gmPlayPattern: FieldRef<"GmArticleData", 'String'>
+    readonly gmPlayerCount: FieldRef<"GmArticleData", 'String'>
+    readonly gmPowerSource: FieldRef<"GmArticleData", 'String'>
+    readonly gmPriceTier: FieldRef<"GmArticleData", 'String'>
+    readonly gmPrintTheme: FieldRef<"GmArticleData", 'String'>
+    readonly gmSeason: FieldRef<"GmArticleData", 'String'>
+    readonly gmSellUom: FieldRef<"GmArticleData", 'String'>
+    readonly gmSetContents: FieldRef<"GmArticleData", 'String'>
+    readonly gmShelfLifeMonths: FieldRef<"GmArticleData", 'String'>
+    readonly gmSkinType: FieldRef<"GmArticleData", 'String'>
+    readonly gmSpf: FieldRef<"GmArticleData", 'String'>
+    readonly gmSport: FieldRef<"GmArticleData", 'String'>
+    readonly gmStrapType: FieldRef<"GmArticleData", 'String'>
+    readonly gmSurfaceFinish: FieldRef<"GmArticleData", 'String'>
+    readonly gmTextileFabric: FieldRef<"GmArticleData", 'String'>
+    readonly gmThreadCount: FieldRef<"GmArticleData", 'String'>
+    readonly gmUsageOccasion: FieldRef<"GmArticleData", 'String'>
+    readonly gmVoltageV: FieldRef<"GmArticleData", 'String'>
+    readonly gmWarrantyMonths: FieldRef<"GmArticleData", 'String'>
+    readonly gmWattageW: FieldRef<"GmArticleData", 'String'>
+    readonly gmWeave: FieldRef<"GmArticleData", 'String'>
+    readonly gmWheelCount: FieldRef<"GmArticleData", 'String'>
+    readonly gmWidthCm: FieldRef<"GmArticleData", 'String'>
+    readonly gmYarn: FieldRef<"GmArticleData", 'String'>
+    readonly gmArticleNumber: FieldRef<"GmArticleData", 'String'>
+    readonly gmArticleDescription: FieldRef<"GmArticleData", 'String'>
+    readonly flatId: FieldRef<"GmArticleData", 'String'>
+    readonly division: FieldRef<"GmArticleData", 'String'>
+    readonly subDivision: FieldRef<"GmArticleData", 'String'>
+    readonly majorCategory: FieldRef<"GmArticleData", 'String'>
+    readonly mcDescription: FieldRef<"GmArticleData", 'String'>
+    readonly vendorName: FieldRef<"GmArticleData", 'String'>
+    readonly vendorCode: FieldRef<"GmArticleData", 'String'>
+    readonly designNumber: FieldRef<"GmArticleData", 'String'>
+    readonly pptNumber: FieldRef<"GmArticleData", 'String'>
+    readonly rate: FieldRef<"GmArticleData", 'Decimal'>
+    readonly mrp: FieldRef<"GmArticleData", 'Decimal'>
+    readonly segment: FieldRef<"GmArticleData", 'String'>
+    readonly articleFashionType: FieldRef<"GmArticleData", 'String'>
+    readonly approvalStatus: FieldRef<"GmArticleData", 'String'>
+    readonly approvedAt: FieldRef<"GmArticleData", 'DateTime'>
+    readonly approvedBy: FieldRef<"GmArticleData", 'Int'>
+    readonly sapSyncStatus: FieldRef<"GmArticleData", 'String'>
+    readonly sapSyncMessage: FieldRef<"GmArticleData", 'String'>
+    readonly imageUrl: FieldRef<"GmArticleData", 'String'>
+    readonly gmArticleType: FieldRef<"GmArticleData", 'String'>
+    readonly source: FieldRef<"GmArticleData", 'String'>
+    readonly userName: FieldRef<"GmArticleData", 'String'>
+    readonly createdAt: FieldRef<"GmArticleData", 'DateTime'>
+    readonly updatedAt: FieldRef<"GmArticleData", 'DateTime'>
+  }
+    
+
+  // Custom InputTypes
+  /**
+   * GmArticleData findUnique
+   */
+  export type GmArticleDataFindUniqueArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the GmArticleData
+     */
+    select?: GmArticleDataSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the GmArticleData
+     */
+    omit?: GmArticleDataOmit<ExtArgs> | null
+    /**
+     * Filter, which GmArticleData to fetch.
+     */
+    where: GmArticleDataWhereUniqueInput
+  }
+
+  /**
+   * GmArticleData findUniqueOrThrow
+   */
+  export type GmArticleDataFindUniqueOrThrowArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the GmArticleData
+     */
+    select?: GmArticleDataSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the GmArticleData
+     */
+    omit?: GmArticleDataOmit<ExtArgs> | null
+    /**
+     * Filter, which GmArticleData to fetch.
+     */
+    where: GmArticleDataWhereUniqueInput
+  }
+
+  /**
+   * GmArticleData findFirst
+   */
+  export type GmArticleDataFindFirstArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the GmArticleData
+     */
+    select?: GmArticleDataSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the GmArticleData
+     */
+    omit?: GmArticleDataOmit<ExtArgs> | null
+    /**
+     * Filter, which GmArticleData to fetch.
+     */
+    where?: GmArticleDataWhereInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
+     * 
+     * Determine the order of GmArticleData to fetch.
+     */
+    orderBy?: GmArticleDataOrderByWithRelationInput | GmArticleDataOrderByWithRelationInput[]
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
+     * 
+     * Sets the position for searching for GmArticleData.
+     */
+    cursor?: GmArticleDataWhereUniqueInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Take `±n` GmArticleData from the position of the cursor.
+     */
+    take?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Skip the first `n` GmArticleData.
+     */
+    skip?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/distinct Distinct Docs}
+     * 
+     * Filter by unique combinations of GmArticleData.
+     */
+    distinct?: GmArticleDataScalarFieldEnum | GmArticleDataScalarFieldEnum[]
+  }
+
+  /**
+   * GmArticleData findFirstOrThrow
+   */
+  export type GmArticleDataFindFirstOrThrowArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the GmArticleData
+     */
+    select?: GmArticleDataSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the GmArticleData
+     */
+    omit?: GmArticleDataOmit<ExtArgs> | null
+    /**
+     * Filter, which GmArticleData to fetch.
+     */
+    where?: GmArticleDataWhereInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
+     * 
+     * Determine the order of GmArticleData to fetch.
+     */
+    orderBy?: GmArticleDataOrderByWithRelationInput | GmArticleDataOrderByWithRelationInput[]
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
+     * 
+     * Sets the position for searching for GmArticleData.
+     */
+    cursor?: GmArticleDataWhereUniqueInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Take `±n` GmArticleData from the position of the cursor.
+     */
+    take?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Skip the first `n` GmArticleData.
+     */
+    skip?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/distinct Distinct Docs}
+     * 
+     * Filter by unique combinations of GmArticleData.
+     */
+    distinct?: GmArticleDataScalarFieldEnum | GmArticleDataScalarFieldEnum[]
+  }
+
+  /**
+   * GmArticleData findMany
+   */
+  export type GmArticleDataFindManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the GmArticleData
+     */
+    select?: GmArticleDataSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the GmArticleData
+     */
+    omit?: GmArticleDataOmit<ExtArgs> | null
+    /**
+     * Filter, which GmArticleData to fetch.
+     */
+    where?: GmArticleDataWhereInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
+     * 
+     * Determine the order of GmArticleData to fetch.
+     */
+    orderBy?: GmArticleDataOrderByWithRelationInput | GmArticleDataOrderByWithRelationInput[]
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
+     * 
+     * Sets the position for listing GmArticleData.
+     */
+    cursor?: GmArticleDataWhereUniqueInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Take `±n` GmArticleData from the position of the cursor.
+     */
+    take?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Skip the first `n` GmArticleData.
+     */
+    skip?: number
+    distinct?: GmArticleDataScalarFieldEnum | GmArticleDataScalarFieldEnum[]
+  }
+
+  /**
+   * GmArticleData create
+   */
+  export type GmArticleDataCreateArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the GmArticleData
+     */
+    select?: GmArticleDataSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the GmArticleData
+     */
+    omit?: GmArticleDataOmit<ExtArgs> | null
+    /**
+     * The data needed to create a GmArticleData.
+     */
+    data: XOR<GmArticleDataCreateInput, GmArticleDataUncheckedCreateInput>
+  }
+
+  /**
+   * GmArticleData createMany
+   */
+  export type GmArticleDataCreateManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * The data used to create many GmArticleData.
+     */
+    data: GmArticleDataCreateManyInput | GmArticleDataCreateManyInput[]
+    skipDuplicates?: boolean
+  }
+
+  /**
+   * GmArticleData createManyAndReturn
+   */
+  export type GmArticleDataCreateManyAndReturnArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the GmArticleData
+     */
+    select?: GmArticleDataSelectCreateManyAndReturn<ExtArgs> | null
+    /**
+     * Omit specific fields from the GmArticleData
+     */
+    omit?: GmArticleDataOmit<ExtArgs> | null
+    /**
+     * The data used to create many GmArticleData.
+     */
+    data: GmArticleDataCreateManyInput | GmArticleDataCreateManyInput[]
+    skipDuplicates?: boolean
+  }
+
+  /**
+   * GmArticleData update
+   */
+  export type GmArticleDataUpdateArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the GmArticleData
+     */
+    select?: GmArticleDataSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the GmArticleData
+     */
+    omit?: GmArticleDataOmit<ExtArgs> | null
+    /**
+     * The data needed to update a GmArticleData.
+     */
+    data: XOR<GmArticleDataUpdateInput, GmArticleDataUncheckedUpdateInput>
+    /**
+     * Choose, which GmArticleData to update.
+     */
+    where: GmArticleDataWhereUniqueInput
+  }
+
+  /**
+   * GmArticleData updateMany
+   */
+  export type GmArticleDataUpdateManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * The data used to update GmArticleData.
+     */
+    data: XOR<GmArticleDataUpdateManyMutationInput, GmArticleDataUncheckedUpdateManyInput>
+    /**
+     * Filter which GmArticleData to update
+     */
+    where?: GmArticleDataWhereInput
+    /**
+     * Limit how many GmArticleData to update.
+     */
+    limit?: number
+  }
+
+  /**
+   * GmArticleData updateManyAndReturn
+   */
+  export type GmArticleDataUpdateManyAndReturnArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the GmArticleData
+     */
+    select?: GmArticleDataSelectUpdateManyAndReturn<ExtArgs> | null
+    /**
+     * Omit specific fields from the GmArticleData
+     */
+    omit?: GmArticleDataOmit<ExtArgs> | null
+    /**
+     * The data used to update GmArticleData.
+     */
+    data: XOR<GmArticleDataUpdateManyMutationInput, GmArticleDataUncheckedUpdateManyInput>
+    /**
+     * Filter which GmArticleData to update
+     */
+    where?: GmArticleDataWhereInput
+    /**
+     * Limit how many GmArticleData to update.
+     */
+    limit?: number
+  }
+
+  /**
+   * GmArticleData upsert
+   */
+  export type GmArticleDataUpsertArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the GmArticleData
+     */
+    select?: GmArticleDataSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the GmArticleData
+     */
+    omit?: GmArticleDataOmit<ExtArgs> | null
+    /**
+     * The filter to search for the GmArticleData to update in case it exists.
+     */
+    where: GmArticleDataWhereUniqueInput
+    /**
+     * In case the GmArticleData found by the `where` argument doesn't exist, create a new GmArticleData with this data.
+     */
+    create: XOR<GmArticleDataCreateInput, GmArticleDataUncheckedCreateInput>
+    /**
+     * In case the GmArticleData was found with the provided `where` argument, update it with this data.
+     */
+    update: XOR<GmArticleDataUpdateInput, GmArticleDataUncheckedUpdateInput>
+  }
+
+  /**
+   * GmArticleData delete
+   */
+  export type GmArticleDataDeleteArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the GmArticleData
+     */
+    select?: GmArticleDataSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the GmArticleData
+     */
+    omit?: GmArticleDataOmit<ExtArgs> | null
+    /**
+     * Filter which GmArticleData to delete.
+     */
+    where: GmArticleDataWhereUniqueInput
+  }
+
+  /**
+   * GmArticleData deleteMany
+   */
+  export type GmArticleDataDeleteManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Filter which GmArticleData to delete
+     */
+    where?: GmArticleDataWhereInput
+    /**
+     * Limit how many GmArticleData to delete.
+     */
+    limit?: number
+  }
+
+  /**
+   * GmArticleData without action
+   */
+  export type GmArticleDataDefaultArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the GmArticleData
+     */
+    select?: GmArticleDataSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the GmArticleData
+     */
+    omit?: GmArticleDataOmit<ExtArgs> | null
+  }
+
+
+  /**
    * Model FabricVariantArticleData
    */
 
@@ -74614,6 +77046,117 @@ export namespace Prisma {
   export type FabricArticleDataScalarFieldEnum = (typeof FabricArticleDataScalarFieldEnum)[keyof typeof FabricArticleDataScalarFieldEnum]
 
 
+  export const GmArticleDataScalarFieldEnum: {
+    id: 'id',
+    gmAgeGrade: 'gmAgeGrade',
+    gmApplicator: 'gmApplicator',
+    gmBaseType: 'gmBaseType',
+    gmBatteryType: 'gmBatteryType',
+    gmBpaFree: 'gmBpaFree',
+    gmBpcForm: 'gmBpcForm',
+    gmBrand: 'gmBrand',
+    gmBrandType: 'gmBrandType',
+    gmCapacityMl: 'gmCapacityMl',
+    gmCareInstruction: 'gmCareInstruction',
+    gmCertification: 'gmCertification',
+    gmClosureType: 'gmClosureType',
+    gmCoating: 'gmCoating',
+    gmColourFamily: 'gmColourFamily',
+    gmColourShade: 'gmColourShade',
+    gmCompartmentCount: 'gmCompartmentCount',
+    gmComposition: 'gmComposition',
+    gmCosmeticFinish: 'gmCosmeticFinish',
+    gmDiameterCm: 'gmDiameterCm',
+    gmDimStandard: 'gmDimStandard',
+    gmDishwasherSafe: 'gmDishwasherSafe',
+    gmFoldable: 'gmFoldable',
+    gmFoodContactSafe: 'gmFoodContactSafe',
+    gmFragranceConc: 'gmFragranceConc',
+    gmFragranceFamily: 'gmFragranceFamily',
+    gmFreeFrom: 'gmFreeFrom',
+    gmFwHeelHtCm: 'gmFwHeelHtCm',
+    gmFwHeelType: 'gmFwHeelType',
+    gmFwSize: 'gmFwSize',
+    gmFwSole: 'gmFwSole',
+    gmFwToe: 'gmFwToe',
+    gmFwUpper: 'gmFwUpper',
+    gmGsm: 'gmGsm',
+    gmHeatRetentionHr: 'gmHeatRetentionHr',
+    gmHeightCm: 'gmHeightCm',
+    gmInsulationType: 'gmInsulationType',
+    gmKeyIngredient: 'gmKeyIngredient',
+    gmLeakProof: 'gmLeakProof',
+    gmLengthCm: 'gmLengthCm',
+    gmLicence: 'gmLicence',
+    gmLidType: 'gmLidType',
+    gmLifestage: 'gmLifestage',
+    gmLiningMaterial: 'gmLiningMaterial',
+    gmManufacturer: 'gmManufacturer',
+    gmMaterial: 'gmMaterial',
+    gmMaterialGroup: 'gmMaterialGroup',
+    gmMaterialSecondary: 'gmMaterialSecondary',
+    gmMicrowaveSafe: 'gmMicrowaveSafe',
+    gmMountType: 'gmMountType',
+    gmNetContent: 'gmNetContent',
+    gmNetContentUom: 'gmNetContentUom',
+    gmNetWeightG: 'gmNetWeightG',
+    gmPackQty: 'gmPackQty',
+    gmPattern: 'gmPattern',
+    gmPlayPattern: 'gmPlayPattern',
+    gmPlayerCount: 'gmPlayerCount',
+    gmPowerSource: 'gmPowerSource',
+    gmPriceTier: 'gmPriceTier',
+    gmPrintTheme: 'gmPrintTheme',
+    gmSeason: 'gmSeason',
+    gmSellUom: 'gmSellUom',
+    gmSetContents: 'gmSetContents',
+    gmShelfLifeMonths: 'gmShelfLifeMonths',
+    gmSkinType: 'gmSkinType',
+    gmSpf: 'gmSpf',
+    gmSport: 'gmSport',
+    gmStrapType: 'gmStrapType',
+    gmSurfaceFinish: 'gmSurfaceFinish',
+    gmTextileFabric: 'gmTextileFabric',
+    gmThreadCount: 'gmThreadCount',
+    gmUsageOccasion: 'gmUsageOccasion',
+    gmVoltageV: 'gmVoltageV',
+    gmWarrantyMonths: 'gmWarrantyMonths',
+    gmWattageW: 'gmWattageW',
+    gmWeave: 'gmWeave',
+    gmWheelCount: 'gmWheelCount',
+    gmWidthCm: 'gmWidthCm',
+    gmYarn: 'gmYarn',
+    gmArticleNumber: 'gmArticleNumber',
+    gmArticleDescription: 'gmArticleDescription',
+    flatId: 'flatId',
+    division: 'division',
+    subDivision: 'subDivision',
+    majorCategory: 'majorCategory',
+    mcDescription: 'mcDescription',
+    vendorName: 'vendorName',
+    vendorCode: 'vendorCode',
+    designNumber: 'designNumber',
+    pptNumber: 'pptNumber',
+    rate: 'rate',
+    mrp: 'mrp',
+    segment: 'segment',
+    articleFashionType: 'articleFashionType',
+    approvalStatus: 'approvalStatus',
+    approvedAt: 'approvedAt',
+    approvedBy: 'approvedBy',
+    sapSyncStatus: 'sapSyncStatus',
+    sapSyncMessage: 'sapSyncMessage',
+    imageUrl: 'imageUrl',
+    gmArticleType: 'gmArticleType',
+    source: 'source',
+    userName: 'userName',
+    createdAt: 'createdAt',
+    updatedAt: 'updatedAt'
+  };
+
+  export type GmArticleDataScalarFieldEnum = (typeof GmArticleDataScalarFieldEnum)[keyof typeof GmArticleDataScalarFieldEnum]
+
+
   export const FabricVariantArticleDataScalarFieldEnum: {
     id: 'id',
     genericArticleId: 'genericArticleId',
@@ -75719,6 +78262,111 @@ export namespace Prisma {
   };
 
   export type FabricArticleDataOrderByRelevanceFieldEnum = (typeof FabricArticleDataOrderByRelevanceFieldEnum)[keyof typeof FabricArticleDataOrderByRelevanceFieldEnum]
+
+
+  export const GmArticleDataOrderByRelevanceFieldEnum: {
+    id: 'id',
+    gmAgeGrade: 'gmAgeGrade',
+    gmApplicator: 'gmApplicator',
+    gmBaseType: 'gmBaseType',
+    gmBatteryType: 'gmBatteryType',
+    gmBpaFree: 'gmBpaFree',
+    gmBpcForm: 'gmBpcForm',
+    gmBrand: 'gmBrand',
+    gmBrandType: 'gmBrandType',
+    gmCapacityMl: 'gmCapacityMl',
+    gmCareInstruction: 'gmCareInstruction',
+    gmCertification: 'gmCertification',
+    gmClosureType: 'gmClosureType',
+    gmCoating: 'gmCoating',
+    gmColourFamily: 'gmColourFamily',
+    gmColourShade: 'gmColourShade',
+    gmCompartmentCount: 'gmCompartmentCount',
+    gmComposition: 'gmComposition',
+    gmCosmeticFinish: 'gmCosmeticFinish',
+    gmDiameterCm: 'gmDiameterCm',
+    gmDimStandard: 'gmDimStandard',
+    gmDishwasherSafe: 'gmDishwasherSafe',
+    gmFoldable: 'gmFoldable',
+    gmFoodContactSafe: 'gmFoodContactSafe',
+    gmFragranceConc: 'gmFragranceConc',
+    gmFragranceFamily: 'gmFragranceFamily',
+    gmFreeFrom: 'gmFreeFrom',
+    gmFwHeelHtCm: 'gmFwHeelHtCm',
+    gmFwHeelType: 'gmFwHeelType',
+    gmFwSize: 'gmFwSize',
+    gmFwSole: 'gmFwSole',
+    gmFwToe: 'gmFwToe',
+    gmFwUpper: 'gmFwUpper',
+    gmGsm: 'gmGsm',
+    gmHeatRetentionHr: 'gmHeatRetentionHr',
+    gmHeightCm: 'gmHeightCm',
+    gmInsulationType: 'gmInsulationType',
+    gmKeyIngredient: 'gmKeyIngredient',
+    gmLeakProof: 'gmLeakProof',
+    gmLengthCm: 'gmLengthCm',
+    gmLicence: 'gmLicence',
+    gmLidType: 'gmLidType',
+    gmLifestage: 'gmLifestage',
+    gmLiningMaterial: 'gmLiningMaterial',
+    gmManufacturer: 'gmManufacturer',
+    gmMaterial: 'gmMaterial',
+    gmMaterialGroup: 'gmMaterialGroup',
+    gmMaterialSecondary: 'gmMaterialSecondary',
+    gmMicrowaveSafe: 'gmMicrowaveSafe',
+    gmMountType: 'gmMountType',
+    gmNetContent: 'gmNetContent',
+    gmNetContentUom: 'gmNetContentUom',
+    gmNetWeightG: 'gmNetWeightG',
+    gmPackQty: 'gmPackQty',
+    gmPattern: 'gmPattern',
+    gmPlayPattern: 'gmPlayPattern',
+    gmPlayerCount: 'gmPlayerCount',
+    gmPowerSource: 'gmPowerSource',
+    gmPriceTier: 'gmPriceTier',
+    gmPrintTheme: 'gmPrintTheme',
+    gmSeason: 'gmSeason',
+    gmSellUom: 'gmSellUom',
+    gmSetContents: 'gmSetContents',
+    gmShelfLifeMonths: 'gmShelfLifeMonths',
+    gmSkinType: 'gmSkinType',
+    gmSpf: 'gmSpf',
+    gmSport: 'gmSport',
+    gmStrapType: 'gmStrapType',
+    gmSurfaceFinish: 'gmSurfaceFinish',
+    gmTextileFabric: 'gmTextileFabric',
+    gmThreadCount: 'gmThreadCount',
+    gmUsageOccasion: 'gmUsageOccasion',
+    gmVoltageV: 'gmVoltageV',
+    gmWarrantyMonths: 'gmWarrantyMonths',
+    gmWattageW: 'gmWattageW',
+    gmWeave: 'gmWeave',
+    gmWheelCount: 'gmWheelCount',
+    gmWidthCm: 'gmWidthCm',
+    gmYarn: 'gmYarn',
+    gmArticleNumber: 'gmArticleNumber',
+    gmArticleDescription: 'gmArticleDescription',
+    flatId: 'flatId',
+    division: 'division',
+    subDivision: 'subDivision',
+    majorCategory: 'majorCategory',
+    mcDescription: 'mcDescription',
+    vendorName: 'vendorName',
+    vendorCode: 'vendorCode',
+    designNumber: 'designNumber',
+    pptNumber: 'pptNumber',
+    segment: 'segment',
+    articleFashionType: 'articleFashionType',
+    approvalStatus: 'approvalStatus',
+    sapSyncStatus: 'sapSyncStatus',
+    sapSyncMessage: 'sapSyncMessage',
+    imageUrl: 'imageUrl',
+    gmArticleType: 'gmArticleType',
+    source: 'source',
+    userName: 'userName'
+  };
+
+  export type GmArticleDataOrderByRelevanceFieldEnum = (typeof GmArticleDataOrderByRelevanceFieldEnum)[keyof typeof GmArticleDataOrderByRelevanceFieldEnum]
 
 
   export const FabricVariantArticleDataOrderByRelevanceFieldEnum: {
@@ -81385,6 +84033,561 @@ export namespace Prisma {
     userName?: StringNullableWithAggregatesFilter<"FabricArticleData"> | string | null
     createdAt?: DateTimeWithAggregatesFilter<"FabricArticleData"> | Date | string
     updatedAt?: DateTimeWithAggregatesFilter<"FabricArticleData"> | Date | string
+  }
+
+  export type GmArticleDataWhereInput = {
+    AND?: GmArticleDataWhereInput | GmArticleDataWhereInput[]
+    OR?: GmArticleDataWhereInput[]
+    NOT?: GmArticleDataWhereInput | GmArticleDataWhereInput[]
+    id?: StringFilter<"GmArticleData"> | string
+    gmAgeGrade?: StringNullableFilter<"GmArticleData"> | string | null
+    gmApplicator?: StringNullableFilter<"GmArticleData"> | string | null
+    gmBaseType?: StringNullableFilter<"GmArticleData"> | string | null
+    gmBatteryType?: StringNullableFilter<"GmArticleData"> | string | null
+    gmBpaFree?: StringNullableFilter<"GmArticleData"> | string | null
+    gmBpcForm?: StringNullableFilter<"GmArticleData"> | string | null
+    gmBrand?: StringNullableFilter<"GmArticleData"> | string | null
+    gmBrandType?: StringNullableFilter<"GmArticleData"> | string | null
+    gmCapacityMl?: StringNullableFilter<"GmArticleData"> | string | null
+    gmCareInstruction?: StringNullableFilter<"GmArticleData"> | string | null
+    gmCertification?: StringNullableFilter<"GmArticleData"> | string | null
+    gmClosureType?: StringNullableFilter<"GmArticleData"> | string | null
+    gmCoating?: StringNullableFilter<"GmArticleData"> | string | null
+    gmColourFamily?: StringNullableFilter<"GmArticleData"> | string | null
+    gmColourShade?: StringNullableFilter<"GmArticleData"> | string | null
+    gmCompartmentCount?: StringNullableFilter<"GmArticleData"> | string | null
+    gmComposition?: StringNullableFilter<"GmArticleData"> | string | null
+    gmCosmeticFinish?: StringNullableFilter<"GmArticleData"> | string | null
+    gmDiameterCm?: StringNullableFilter<"GmArticleData"> | string | null
+    gmDimStandard?: StringNullableFilter<"GmArticleData"> | string | null
+    gmDishwasherSafe?: StringNullableFilter<"GmArticleData"> | string | null
+    gmFoldable?: StringNullableFilter<"GmArticleData"> | string | null
+    gmFoodContactSafe?: StringNullableFilter<"GmArticleData"> | string | null
+    gmFragranceConc?: StringNullableFilter<"GmArticleData"> | string | null
+    gmFragranceFamily?: StringNullableFilter<"GmArticleData"> | string | null
+    gmFreeFrom?: StringNullableFilter<"GmArticleData"> | string | null
+    gmFwHeelHtCm?: StringNullableFilter<"GmArticleData"> | string | null
+    gmFwHeelType?: StringNullableFilter<"GmArticleData"> | string | null
+    gmFwSize?: StringNullableFilter<"GmArticleData"> | string | null
+    gmFwSole?: StringNullableFilter<"GmArticleData"> | string | null
+    gmFwToe?: StringNullableFilter<"GmArticleData"> | string | null
+    gmFwUpper?: StringNullableFilter<"GmArticleData"> | string | null
+    gmGsm?: StringNullableFilter<"GmArticleData"> | string | null
+    gmHeatRetentionHr?: StringNullableFilter<"GmArticleData"> | string | null
+    gmHeightCm?: StringNullableFilter<"GmArticleData"> | string | null
+    gmInsulationType?: StringNullableFilter<"GmArticleData"> | string | null
+    gmKeyIngredient?: StringNullableFilter<"GmArticleData"> | string | null
+    gmLeakProof?: StringNullableFilter<"GmArticleData"> | string | null
+    gmLengthCm?: StringNullableFilter<"GmArticleData"> | string | null
+    gmLicence?: StringNullableFilter<"GmArticleData"> | string | null
+    gmLidType?: StringNullableFilter<"GmArticleData"> | string | null
+    gmLifestage?: StringNullableFilter<"GmArticleData"> | string | null
+    gmLiningMaterial?: StringNullableFilter<"GmArticleData"> | string | null
+    gmManufacturer?: StringNullableFilter<"GmArticleData"> | string | null
+    gmMaterial?: StringNullableFilter<"GmArticleData"> | string | null
+    gmMaterialGroup?: StringNullableFilter<"GmArticleData"> | string | null
+    gmMaterialSecondary?: StringNullableFilter<"GmArticleData"> | string | null
+    gmMicrowaveSafe?: StringNullableFilter<"GmArticleData"> | string | null
+    gmMountType?: StringNullableFilter<"GmArticleData"> | string | null
+    gmNetContent?: StringNullableFilter<"GmArticleData"> | string | null
+    gmNetContentUom?: StringNullableFilter<"GmArticleData"> | string | null
+    gmNetWeightG?: StringNullableFilter<"GmArticleData"> | string | null
+    gmPackQty?: StringNullableFilter<"GmArticleData"> | string | null
+    gmPattern?: StringNullableFilter<"GmArticleData"> | string | null
+    gmPlayPattern?: StringNullableFilter<"GmArticleData"> | string | null
+    gmPlayerCount?: StringNullableFilter<"GmArticleData"> | string | null
+    gmPowerSource?: StringNullableFilter<"GmArticleData"> | string | null
+    gmPriceTier?: StringNullableFilter<"GmArticleData"> | string | null
+    gmPrintTheme?: StringNullableFilter<"GmArticleData"> | string | null
+    gmSeason?: StringNullableFilter<"GmArticleData"> | string | null
+    gmSellUom?: StringNullableFilter<"GmArticleData"> | string | null
+    gmSetContents?: StringNullableFilter<"GmArticleData"> | string | null
+    gmShelfLifeMonths?: StringNullableFilter<"GmArticleData"> | string | null
+    gmSkinType?: StringNullableFilter<"GmArticleData"> | string | null
+    gmSpf?: StringNullableFilter<"GmArticleData"> | string | null
+    gmSport?: StringNullableFilter<"GmArticleData"> | string | null
+    gmStrapType?: StringNullableFilter<"GmArticleData"> | string | null
+    gmSurfaceFinish?: StringNullableFilter<"GmArticleData"> | string | null
+    gmTextileFabric?: StringNullableFilter<"GmArticleData"> | string | null
+    gmThreadCount?: StringNullableFilter<"GmArticleData"> | string | null
+    gmUsageOccasion?: StringNullableFilter<"GmArticleData"> | string | null
+    gmVoltageV?: StringNullableFilter<"GmArticleData"> | string | null
+    gmWarrantyMonths?: StringNullableFilter<"GmArticleData"> | string | null
+    gmWattageW?: StringNullableFilter<"GmArticleData"> | string | null
+    gmWeave?: StringNullableFilter<"GmArticleData"> | string | null
+    gmWheelCount?: StringNullableFilter<"GmArticleData"> | string | null
+    gmWidthCm?: StringNullableFilter<"GmArticleData"> | string | null
+    gmYarn?: StringNullableFilter<"GmArticleData"> | string | null
+    gmArticleNumber?: StringNullableFilter<"GmArticleData"> | string | null
+    gmArticleDescription?: StringNullableFilter<"GmArticleData"> | string | null
+    flatId?: StringNullableFilter<"GmArticleData"> | string | null
+    division?: StringNullableFilter<"GmArticleData"> | string | null
+    subDivision?: StringNullableFilter<"GmArticleData"> | string | null
+    majorCategory?: StringNullableFilter<"GmArticleData"> | string | null
+    mcDescription?: StringNullableFilter<"GmArticleData"> | string | null
+    vendorName?: StringNullableFilter<"GmArticleData"> | string | null
+    vendorCode?: StringNullableFilter<"GmArticleData"> | string | null
+    designNumber?: StringNullableFilter<"GmArticleData"> | string | null
+    pptNumber?: StringNullableFilter<"GmArticleData"> | string | null
+    rate?: DecimalNullableFilter<"GmArticleData"> | Decimal | DecimalJsLike | number | string | null
+    mrp?: DecimalNullableFilter<"GmArticleData"> | Decimal | DecimalJsLike | number | string | null
+    segment?: StringNullableFilter<"GmArticleData"> | string | null
+    articleFashionType?: StringNullableFilter<"GmArticleData"> | string | null
+    approvalStatus?: StringFilter<"GmArticleData"> | string
+    approvedAt?: DateTimeNullableFilter<"GmArticleData"> | Date | string | null
+    approvedBy?: IntNullableFilter<"GmArticleData"> | number | null
+    sapSyncStatus?: StringFilter<"GmArticleData"> | string
+    sapSyncMessage?: StringNullableFilter<"GmArticleData"> | string | null
+    imageUrl?: StringNullableFilter<"GmArticleData"> | string | null
+    gmArticleType?: StringNullableFilter<"GmArticleData"> | string | null
+    source?: StringNullableFilter<"GmArticleData"> | string | null
+    userName?: StringNullableFilter<"GmArticleData"> | string | null
+    createdAt?: DateTimeFilter<"GmArticleData"> | Date | string
+    updatedAt?: DateTimeFilter<"GmArticleData"> | Date | string
+  }
+
+  export type GmArticleDataOrderByWithRelationInput = {
+    id?: SortOrder
+    gmAgeGrade?: SortOrderInput | SortOrder
+    gmApplicator?: SortOrderInput | SortOrder
+    gmBaseType?: SortOrderInput | SortOrder
+    gmBatteryType?: SortOrderInput | SortOrder
+    gmBpaFree?: SortOrderInput | SortOrder
+    gmBpcForm?: SortOrderInput | SortOrder
+    gmBrand?: SortOrderInput | SortOrder
+    gmBrandType?: SortOrderInput | SortOrder
+    gmCapacityMl?: SortOrderInput | SortOrder
+    gmCareInstruction?: SortOrderInput | SortOrder
+    gmCertification?: SortOrderInput | SortOrder
+    gmClosureType?: SortOrderInput | SortOrder
+    gmCoating?: SortOrderInput | SortOrder
+    gmColourFamily?: SortOrderInput | SortOrder
+    gmColourShade?: SortOrderInput | SortOrder
+    gmCompartmentCount?: SortOrderInput | SortOrder
+    gmComposition?: SortOrderInput | SortOrder
+    gmCosmeticFinish?: SortOrderInput | SortOrder
+    gmDiameterCm?: SortOrderInput | SortOrder
+    gmDimStandard?: SortOrderInput | SortOrder
+    gmDishwasherSafe?: SortOrderInput | SortOrder
+    gmFoldable?: SortOrderInput | SortOrder
+    gmFoodContactSafe?: SortOrderInput | SortOrder
+    gmFragranceConc?: SortOrderInput | SortOrder
+    gmFragranceFamily?: SortOrderInput | SortOrder
+    gmFreeFrom?: SortOrderInput | SortOrder
+    gmFwHeelHtCm?: SortOrderInput | SortOrder
+    gmFwHeelType?: SortOrderInput | SortOrder
+    gmFwSize?: SortOrderInput | SortOrder
+    gmFwSole?: SortOrderInput | SortOrder
+    gmFwToe?: SortOrderInput | SortOrder
+    gmFwUpper?: SortOrderInput | SortOrder
+    gmGsm?: SortOrderInput | SortOrder
+    gmHeatRetentionHr?: SortOrderInput | SortOrder
+    gmHeightCm?: SortOrderInput | SortOrder
+    gmInsulationType?: SortOrderInput | SortOrder
+    gmKeyIngredient?: SortOrderInput | SortOrder
+    gmLeakProof?: SortOrderInput | SortOrder
+    gmLengthCm?: SortOrderInput | SortOrder
+    gmLicence?: SortOrderInput | SortOrder
+    gmLidType?: SortOrderInput | SortOrder
+    gmLifestage?: SortOrderInput | SortOrder
+    gmLiningMaterial?: SortOrderInput | SortOrder
+    gmManufacturer?: SortOrderInput | SortOrder
+    gmMaterial?: SortOrderInput | SortOrder
+    gmMaterialGroup?: SortOrderInput | SortOrder
+    gmMaterialSecondary?: SortOrderInput | SortOrder
+    gmMicrowaveSafe?: SortOrderInput | SortOrder
+    gmMountType?: SortOrderInput | SortOrder
+    gmNetContent?: SortOrderInput | SortOrder
+    gmNetContentUom?: SortOrderInput | SortOrder
+    gmNetWeightG?: SortOrderInput | SortOrder
+    gmPackQty?: SortOrderInput | SortOrder
+    gmPattern?: SortOrderInput | SortOrder
+    gmPlayPattern?: SortOrderInput | SortOrder
+    gmPlayerCount?: SortOrderInput | SortOrder
+    gmPowerSource?: SortOrderInput | SortOrder
+    gmPriceTier?: SortOrderInput | SortOrder
+    gmPrintTheme?: SortOrderInput | SortOrder
+    gmSeason?: SortOrderInput | SortOrder
+    gmSellUom?: SortOrderInput | SortOrder
+    gmSetContents?: SortOrderInput | SortOrder
+    gmShelfLifeMonths?: SortOrderInput | SortOrder
+    gmSkinType?: SortOrderInput | SortOrder
+    gmSpf?: SortOrderInput | SortOrder
+    gmSport?: SortOrderInput | SortOrder
+    gmStrapType?: SortOrderInput | SortOrder
+    gmSurfaceFinish?: SortOrderInput | SortOrder
+    gmTextileFabric?: SortOrderInput | SortOrder
+    gmThreadCount?: SortOrderInput | SortOrder
+    gmUsageOccasion?: SortOrderInput | SortOrder
+    gmVoltageV?: SortOrderInput | SortOrder
+    gmWarrantyMonths?: SortOrderInput | SortOrder
+    gmWattageW?: SortOrderInput | SortOrder
+    gmWeave?: SortOrderInput | SortOrder
+    gmWheelCount?: SortOrderInput | SortOrder
+    gmWidthCm?: SortOrderInput | SortOrder
+    gmYarn?: SortOrderInput | SortOrder
+    gmArticleNumber?: SortOrderInput | SortOrder
+    gmArticleDescription?: SortOrderInput | SortOrder
+    flatId?: SortOrderInput | SortOrder
+    division?: SortOrderInput | SortOrder
+    subDivision?: SortOrderInput | SortOrder
+    majorCategory?: SortOrderInput | SortOrder
+    mcDescription?: SortOrderInput | SortOrder
+    vendorName?: SortOrderInput | SortOrder
+    vendorCode?: SortOrderInput | SortOrder
+    designNumber?: SortOrderInput | SortOrder
+    pptNumber?: SortOrderInput | SortOrder
+    rate?: SortOrderInput | SortOrder
+    mrp?: SortOrderInput | SortOrder
+    segment?: SortOrderInput | SortOrder
+    articleFashionType?: SortOrderInput | SortOrder
+    approvalStatus?: SortOrder
+    approvedAt?: SortOrderInput | SortOrder
+    approvedBy?: SortOrderInput | SortOrder
+    sapSyncStatus?: SortOrder
+    sapSyncMessage?: SortOrderInput | SortOrder
+    imageUrl?: SortOrderInput | SortOrder
+    gmArticleType?: SortOrderInput | SortOrder
+    source?: SortOrderInput | SortOrder
+    userName?: SortOrderInput | SortOrder
+    createdAt?: SortOrder
+    updatedAt?: SortOrder
+    _relevance?: GmArticleDataOrderByRelevanceInput
+  }
+
+  export type GmArticleDataWhereUniqueInput = Prisma.AtLeast<{
+    id?: string
+    AND?: GmArticleDataWhereInput | GmArticleDataWhereInput[]
+    OR?: GmArticleDataWhereInput[]
+    NOT?: GmArticleDataWhereInput | GmArticleDataWhereInput[]
+    gmAgeGrade?: StringNullableFilter<"GmArticleData"> | string | null
+    gmApplicator?: StringNullableFilter<"GmArticleData"> | string | null
+    gmBaseType?: StringNullableFilter<"GmArticleData"> | string | null
+    gmBatteryType?: StringNullableFilter<"GmArticleData"> | string | null
+    gmBpaFree?: StringNullableFilter<"GmArticleData"> | string | null
+    gmBpcForm?: StringNullableFilter<"GmArticleData"> | string | null
+    gmBrand?: StringNullableFilter<"GmArticleData"> | string | null
+    gmBrandType?: StringNullableFilter<"GmArticleData"> | string | null
+    gmCapacityMl?: StringNullableFilter<"GmArticleData"> | string | null
+    gmCareInstruction?: StringNullableFilter<"GmArticleData"> | string | null
+    gmCertification?: StringNullableFilter<"GmArticleData"> | string | null
+    gmClosureType?: StringNullableFilter<"GmArticleData"> | string | null
+    gmCoating?: StringNullableFilter<"GmArticleData"> | string | null
+    gmColourFamily?: StringNullableFilter<"GmArticleData"> | string | null
+    gmColourShade?: StringNullableFilter<"GmArticleData"> | string | null
+    gmCompartmentCount?: StringNullableFilter<"GmArticleData"> | string | null
+    gmComposition?: StringNullableFilter<"GmArticleData"> | string | null
+    gmCosmeticFinish?: StringNullableFilter<"GmArticleData"> | string | null
+    gmDiameterCm?: StringNullableFilter<"GmArticleData"> | string | null
+    gmDimStandard?: StringNullableFilter<"GmArticleData"> | string | null
+    gmDishwasherSafe?: StringNullableFilter<"GmArticleData"> | string | null
+    gmFoldable?: StringNullableFilter<"GmArticleData"> | string | null
+    gmFoodContactSafe?: StringNullableFilter<"GmArticleData"> | string | null
+    gmFragranceConc?: StringNullableFilter<"GmArticleData"> | string | null
+    gmFragranceFamily?: StringNullableFilter<"GmArticleData"> | string | null
+    gmFreeFrom?: StringNullableFilter<"GmArticleData"> | string | null
+    gmFwHeelHtCm?: StringNullableFilter<"GmArticleData"> | string | null
+    gmFwHeelType?: StringNullableFilter<"GmArticleData"> | string | null
+    gmFwSize?: StringNullableFilter<"GmArticleData"> | string | null
+    gmFwSole?: StringNullableFilter<"GmArticleData"> | string | null
+    gmFwToe?: StringNullableFilter<"GmArticleData"> | string | null
+    gmFwUpper?: StringNullableFilter<"GmArticleData"> | string | null
+    gmGsm?: StringNullableFilter<"GmArticleData"> | string | null
+    gmHeatRetentionHr?: StringNullableFilter<"GmArticleData"> | string | null
+    gmHeightCm?: StringNullableFilter<"GmArticleData"> | string | null
+    gmInsulationType?: StringNullableFilter<"GmArticleData"> | string | null
+    gmKeyIngredient?: StringNullableFilter<"GmArticleData"> | string | null
+    gmLeakProof?: StringNullableFilter<"GmArticleData"> | string | null
+    gmLengthCm?: StringNullableFilter<"GmArticleData"> | string | null
+    gmLicence?: StringNullableFilter<"GmArticleData"> | string | null
+    gmLidType?: StringNullableFilter<"GmArticleData"> | string | null
+    gmLifestage?: StringNullableFilter<"GmArticleData"> | string | null
+    gmLiningMaterial?: StringNullableFilter<"GmArticleData"> | string | null
+    gmManufacturer?: StringNullableFilter<"GmArticleData"> | string | null
+    gmMaterial?: StringNullableFilter<"GmArticleData"> | string | null
+    gmMaterialGroup?: StringNullableFilter<"GmArticleData"> | string | null
+    gmMaterialSecondary?: StringNullableFilter<"GmArticleData"> | string | null
+    gmMicrowaveSafe?: StringNullableFilter<"GmArticleData"> | string | null
+    gmMountType?: StringNullableFilter<"GmArticleData"> | string | null
+    gmNetContent?: StringNullableFilter<"GmArticleData"> | string | null
+    gmNetContentUom?: StringNullableFilter<"GmArticleData"> | string | null
+    gmNetWeightG?: StringNullableFilter<"GmArticleData"> | string | null
+    gmPackQty?: StringNullableFilter<"GmArticleData"> | string | null
+    gmPattern?: StringNullableFilter<"GmArticleData"> | string | null
+    gmPlayPattern?: StringNullableFilter<"GmArticleData"> | string | null
+    gmPlayerCount?: StringNullableFilter<"GmArticleData"> | string | null
+    gmPowerSource?: StringNullableFilter<"GmArticleData"> | string | null
+    gmPriceTier?: StringNullableFilter<"GmArticleData"> | string | null
+    gmPrintTheme?: StringNullableFilter<"GmArticleData"> | string | null
+    gmSeason?: StringNullableFilter<"GmArticleData"> | string | null
+    gmSellUom?: StringNullableFilter<"GmArticleData"> | string | null
+    gmSetContents?: StringNullableFilter<"GmArticleData"> | string | null
+    gmShelfLifeMonths?: StringNullableFilter<"GmArticleData"> | string | null
+    gmSkinType?: StringNullableFilter<"GmArticleData"> | string | null
+    gmSpf?: StringNullableFilter<"GmArticleData"> | string | null
+    gmSport?: StringNullableFilter<"GmArticleData"> | string | null
+    gmStrapType?: StringNullableFilter<"GmArticleData"> | string | null
+    gmSurfaceFinish?: StringNullableFilter<"GmArticleData"> | string | null
+    gmTextileFabric?: StringNullableFilter<"GmArticleData"> | string | null
+    gmThreadCount?: StringNullableFilter<"GmArticleData"> | string | null
+    gmUsageOccasion?: StringNullableFilter<"GmArticleData"> | string | null
+    gmVoltageV?: StringNullableFilter<"GmArticleData"> | string | null
+    gmWarrantyMonths?: StringNullableFilter<"GmArticleData"> | string | null
+    gmWattageW?: StringNullableFilter<"GmArticleData"> | string | null
+    gmWeave?: StringNullableFilter<"GmArticleData"> | string | null
+    gmWheelCount?: StringNullableFilter<"GmArticleData"> | string | null
+    gmWidthCm?: StringNullableFilter<"GmArticleData"> | string | null
+    gmYarn?: StringNullableFilter<"GmArticleData"> | string | null
+    gmArticleNumber?: StringNullableFilter<"GmArticleData"> | string | null
+    gmArticleDescription?: StringNullableFilter<"GmArticleData"> | string | null
+    flatId?: StringNullableFilter<"GmArticleData"> | string | null
+    division?: StringNullableFilter<"GmArticleData"> | string | null
+    subDivision?: StringNullableFilter<"GmArticleData"> | string | null
+    majorCategory?: StringNullableFilter<"GmArticleData"> | string | null
+    mcDescription?: StringNullableFilter<"GmArticleData"> | string | null
+    vendorName?: StringNullableFilter<"GmArticleData"> | string | null
+    vendorCode?: StringNullableFilter<"GmArticleData"> | string | null
+    designNumber?: StringNullableFilter<"GmArticleData"> | string | null
+    pptNumber?: StringNullableFilter<"GmArticleData"> | string | null
+    rate?: DecimalNullableFilter<"GmArticleData"> | Decimal | DecimalJsLike | number | string | null
+    mrp?: DecimalNullableFilter<"GmArticleData"> | Decimal | DecimalJsLike | number | string | null
+    segment?: StringNullableFilter<"GmArticleData"> | string | null
+    articleFashionType?: StringNullableFilter<"GmArticleData"> | string | null
+    approvalStatus?: StringFilter<"GmArticleData"> | string
+    approvedAt?: DateTimeNullableFilter<"GmArticleData"> | Date | string | null
+    approvedBy?: IntNullableFilter<"GmArticleData"> | number | null
+    sapSyncStatus?: StringFilter<"GmArticleData"> | string
+    sapSyncMessage?: StringNullableFilter<"GmArticleData"> | string | null
+    imageUrl?: StringNullableFilter<"GmArticleData"> | string | null
+    gmArticleType?: StringNullableFilter<"GmArticleData"> | string | null
+    source?: StringNullableFilter<"GmArticleData"> | string | null
+    userName?: StringNullableFilter<"GmArticleData"> | string | null
+    createdAt?: DateTimeFilter<"GmArticleData"> | Date | string
+    updatedAt?: DateTimeFilter<"GmArticleData"> | Date | string
+  }, "id">
+
+  export type GmArticleDataOrderByWithAggregationInput = {
+    id?: SortOrder
+    gmAgeGrade?: SortOrderInput | SortOrder
+    gmApplicator?: SortOrderInput | SortOrder
+    gmBaseType?: SortOrderInput | SortOrder
+    gmBatteryType?: SortOrderInput | SortOrder
+    gmBpaFree?: SortOrderInput | SortOrder
+    gmBpcForm?: SortOrderInput | SortOrder
+    gmBrand?: SortOrderInput | SortOrder
+    gmBrandType?: SortOrderInput | SortOrder
+    gmCapacityMl?: SortOrderInput | SortOrder
+    gmCareInstruction?: SortOrderInput | SortOrder
+    gmCertification?: SortOrderInput | SortOrder
+    gmClosureType?: SortOrderInput | SortOrder
+    gmCoating?: SortOrderInput | SortOrder
+    gmColourFamily?: SortOrderInput | SortOrder
+    gmColourShade?: SortOrderInput | SortOrder
+    gmCompartmentCount?: SortOrderInput | SortOrder
+    gmComposition?: SortOrderInput | SortOrder
+    gmCosmeticFinish?: SortOrderInput | SortOrder
+    gmDiameterCm?: SortOrderInput | SortOrder
+    gmDimStandard?: SortOrderInput | SortOrder
+    gmDishwasherSafe?: SortOrderInput | SortOrder
+    gmFoldable?: SortOrderInput | SortOrder
+    gmFoodContactSafe?: SortOrderInput | SortOrder
+    gmFragranceConc?: SortOrderInput | SortOrder
+    gmFragranceFamily?: SortOrderInput | SortOrder
+    gmFreeFrom?: SortOrderInput | SortOrder
+    gmFwHeelHtCm?: SortOrderInput | SortOrder
+    gmFwHeelType?: SortOrderInput | SortOrder
+    gmFwSize?: SortOrderInput | SortOrder
+    gmFwSole?: SortOrderInput | SortOrder
+    gmFwToe?: SortOrderInput | SortOrder
+    gmFwUpper?: SortOrderInput | SortOrder
+    gmGsm?: SortOrderInput | SortOrder
+    gmHeatRetentionHr?: SortOrderInput | SortOrder
+    gmHeightCm?: SortOrderInput | SortOrder
+    gmInsulationType?: SortOrderInput | SortOrder
+    gmKeyIngredient?: SortOrderInput | SortOrder
+    gmLeakProof?: SortOrderInput | SortOrder
+    gmLengthCm?: SortOrderInput | SortOrder
+    gmLicence?: SortOrderInput | SortOrder
+    gmLidType?: SortOrderInput | SortOrder
+    gmLifestage?: SortOrderInput | SortOrder
+    gmLiningMaterial?: SortOrderInput | SortOrder
+    gmManufacturer?: SortOrderInput | SortOrder
+    gmMaterial?: SortOrderInput | SortOrder
+    gmMaterialGroup?: SortOrderInput | SortOrder
+    gmMaterialSecondary?: SortOrderInput | SortOrder
+    gmMicrowaveSafe?: SortOrderInput | SortOrder
+    gmMountType?: SortOrderInput | SortOrder
+    gmNetContent?: SortOrderInput | SortOrder
+    gmNetContentUom?: SortOrderInput | SortOrder
+    gmNetWeightG?: SortOrderInput | SortOrder
+    gmPackQty?: SortOrderInput | SortOrder
+    gmPattern?: SortOrderInput | SortOrder
+    gmPlayPattern?: SortOrderInput | SortOrder
+    gmPlayerCount?: SortOrderInput | SortOrder
+    gmPowerSource?: SortOrderInput | SortOrder
+    gmPriceTier?: SortOrderInput | SortOrder
+    gmPrintTheme?: SortOrderInput | SortOrder
+    gmSeason?: SortOrderInput | SortOrder
+    gmSellUom?: SortOrderInput | SortOrder
+    gmSetContents?: SortOrderInput | SortOrder
+    gmShelfLifeMonths?: SortOrderInput | SortOrder
+    gmSkinType?: SortOrderInput | SortOrder
+    gmSpf?: SortOrderInput | SortOrder
+    gmSport?: SortOrderInput | SortOrder
+    gmStrapType?: SortOrderInput | SortOrder
+    gmSurfaceFinish?: SortOrderInput | SortOrder
+    gmTextileFabric?: SortOrderInput | SortOrder
+    gmThreadCount?: SortOrderInput | SortOrder
+    gmUsageOccasion?: SortOrderInput | SortOrder
+    gmVoltageV?: SortOrderInput | SortOrder
+    gmWarrantyMonths?: SortOrderInput | SortOrder
+    gmWattageW?: SortOrderInput | SortOrder
+    gmWeave?: SortOrderInput | SortOrder
+    gmWheelCount?: SortOrderInput | SortOrder
+    gmWidthCm?: SortOrderInput | SortOrder
+    gmYarn?: SortOrderInput | SortOrder
+    gmArticleNumber?: SortOrderInput | SortOrder
+    gmArticleDescription?: SortOrderInput | SortOrder
+    flatId?: SortOrderInput | SortOrder
+    division?: SortOrderInput | SortOrder
+    subDivision?: SortOrderInput | SortOrder
+    majorCategory?: SortOrderInput | SortOrder
+    mcDescription?: SortOrderInput | SortOrder
+    vendorName?: SortOrderInput | SortOrder
+    vendorCode?: SortOrderInput | SortOrder
+    designNumber?: SortOrderInput | SortOrder
+    pptNumber?: SortOrderInput | SortOrder
+    rate?: SortOrderInput | SortOrder
+    mrp?: SortOrderInput | SortOrder
+    segment?: SortOrderInput | SortOrder
+    articleFashionType?: SortOrderInput | SortOrder
+    approvalStatus?: SortOrder
+    approvedAt?: SortOrderInput | SortOrder
+    approvedBy?: SortOrderInput | SortOrder
+    sapSyncStatus?: SortOrder
+    sapSyncMessage?: SortOrderInput | SortOrder
+    imageUrl?: SortOrderInput | SortOrder
+    gmArticleType?: SortOrderInput | SortOrder
+    source?: SortOrderInput | SortOrder
+    userName?: SortOrderInput | SortOrder
+    createdAt?: SortOrder
+    updatedAt?: SortOrder
+    _count?: GmArticleDataCountOrderByAggregateInput
+    _avg?: GmArticleDataAvgOrderByAggregateInput
+    _max?: GmArticleDataMaxOrderByAggregateInput
+    _min?: GmArticleDataMinOrderByAggregateInput
+    _sum?: GmArticleDataSumOrderByAggregateInput
+  }
+
+  export type GmArticleDataScalarWhereWithAggregatesInput = {
+    AND?: GmArticleDataScalarWhereWithAggregatesInput | GmArticleDataScalarWhereWithAggregatesInput[]
+    OR?: GmArticleDataScalarWhereWithAggregatesInput[]
+    NOT?: GmArticleDataScalarWhereWithAggregatesInput | GmArticleDataScalarWhereWithAggregatesInput[]
+    id?: StringWithAggregatesFilter<"GmArticleData"> | string
+    gmAgeGrade?: StringNullableWithAggregatesFilter<"GmArticleData"> | string | null
+    gmApplicator?: StringNullableWithAggregatesFilter<"GmArticleData"> | string | null
+    gmBaseType?: StringNullableWithAggregatesFilter<"GmArticleData"> | string | null
+    gmBatteryType?: StringNullableWithAggregatesFilter<"GmArticleData"> | string | null
+    gmBpaFree?: StringNullableWithAggregatesFilter<"GmArticleData"> | string | null
+    gmBpcForm?: StringNullableWithAggregatesFilter<"GmArticleData"> | string | null
+    gmBrand?: StringNullableWithAggregatesFilter<"GmArticleData"> | string | null
+    gmBrandType?: StringNullableWithAggregatesFilter<"GmArticleData"> | string | null
+    gmCapacityMl?: StringNullableWithAggregatesFilter<"GmArticleData"> | string | null
+    gmCareInstruction?: StringNullableWithAggregatesFilter<"GmArticleData"> | string | null
+    gmCertification?: StringNullableWithAggregatesFilter<"GmArticleData"> | string | null
+    gmClosureType?: StringNullableWithAggregatesFilter<"GmArticleData"> | string | null
+    gmCoating?: StringNullableWithAggregatesFilter<"GmArticleData"> | string | null
+    gmColourFamily?: StringNullableWithAggregatesFilter<"GmArticleData"> | string | null
+    gmColourShade?: StringNullableWithAggregatesFilter<"GmArticleData"> | string | null
+    gmCompartmentCount?: StringNullableWithAggregatesFilter<"GmArticleData"> | string | null
+    gmComposition?: StringNullableWithAggregatesFilter<"GmArticleData"> | string | null
+    gmCosmeticFinish?: StringNullableWithAggregatesFilter<"GmArticleData"> | string | null
+    gmDiameterCm?: StringNullableWithAggregatesFilter<"GmArticleData"> | string | null
+    gmDimStandard?: StringNullableWithAggregatesFilter<"GmArticleData"> | string | null
+    gmDishwasherSafe?: StringNullableWithAggregatesFilter<"GmArticleData"> | string | null
+    gmFoldable?: StringNullableWithAggregatesFilter<"GmArticleData"> | string | null
+    gmFoodContactSafe?: StringNullableWithAggregatesFilter<"GmArticleData"> | string | null
+    gmFragranceConc?: StringNullableWithAggregatesFilter<"GmArticleData"> | string | null
+    gmFragranceFamily?: StringNullableWithAggregatesFilter<"GmArticleData"> | string | null
+    gmFreeFrom?: StringNullableWithAggregatesFilter<"GmArticleData"> | string | null
+    gmFwHeelHtCm?: StringNullableWithAggregatesFilter<"GmArticleData"> | string | null
+    gmFwHeelType?: StringNullableWithAggregatesFilter<"GmArticleData"> | string | null
+    gmFwSize?: StringNullableWithAggregatesFilter<"GmArticleData"> | string | null
+    gmFwSole?: StringNullableWithAggregatesFilter<"GmArticleData"> | string | null
+    gmFwToe?: StringNullableWithAggregatesFilter<"GmArticleData"> | string | null
+    gmFwUpper?: StringNullableWithAggregatesFilter<"GmArticleData"> | string | null
+    gmGsm?: StringNullableWithAggregatesFilter<"GmArticleData"> | string | null
+    gmHeatRetentionHr?: StringNullableWithAggregatesFilter<"GmArticleData"> | string | null
+    gmHeightCm?: StringNullableWithAggregatesFilter<"GmArticleData"> | string | null
+    gmInsulationType?: StringNullableWithAggregatesFilter<"GmArticleData"> | string | null
+    gmKeyIngredient?: StringNullableWithAggregatesFilter<"GmArticleData"> | string | null
+    gmLeakProof?: StringNullableWithAggregatesFilter<"GmArticleData"> | string | null
+    gmLengthCm?: StringNullableWithAggregatesFilter<"GmArticleData"> | string | null
+    gmLicence?: StringNullableWithAggregatesFilter<"GmArticleData"> | string | null
+    gmLidType?: StringNullableWithAggregatesFilter<"GmArticleData"> | string | null
+    gmLifestage?: StringNullableWithAggregatesFilter<"GmArticleData"> | string | null
+    gmLiningMaterial?: StringNullableWithAggregatesFilter<"GmArticleData"> | string | null
+    gmManufacturer?: StringNullableWithAggregatesFilter<"GmArticleData"> | string | null
+    gmMaterial?: StringNullableWithAggregatesFilter<"GmArticleData"> | string | null
+    gmMaterialGroup?: StringNullableWithAggregatesFilter<"GmArticleData"> | string | null
+    gmMaterialSecondary?: StringNullableWithAggregatesFilter<"GmArticleData"> | string | null
+    gmMicrowaveSafe?: StringNullableWithAggregatesFilter<"GmArticleData"> | string | null
+    gmMountType?: StringNullableWithAggregatesFilter<"GmArticleData"> | string | null
+    gmNetContent?: StringNullableWithAggregatesFilter<"GmArticleData"> | string | null
+    gmNetContentUom?: StringNullableWithAggregatesFilter<"GmArticleData"> | string | null
+    gmNetWeightG?: StringNullableWithAggregatesFilter<"GmArticleData"> | string | null
+    gmPackQty?: StringNullableWithAggregatesFilter<"GmArticleData"> | string | null
+    gmPattern?: StringNullableWithAggregatesFilter<"GmArticleData"> | string | null
+    gmPlayPattern?: StringNullableWithAggregatesFilter<"GmArticleData"> | string | null
+    gmPlayerCount?: StringNullableWithAggregatesFilter<"GmArticleData"> | string | null
+    gmPowerSource?: StringNullableWithAggregatesFilter<"GmArticleData"> | string | null
+    gmPriceTier?: StringNullableWithAggregatesFilter<"GmArticleData"> | string | null
+    gmPrintTheme?: StringNullableWithAggregatesFilter<"GmArticleData"> | string | null
+    gmSeason?: StringNullableWithAggregatesFilter<"GmArticleData"> | string | null
+    gmSellUom?: StringNullableWithAggregatesFilter<"GmArticleData"> | string | null
+    gmSetContents?: StringNullableWithAggregatesFilter<"GmArticleData"> | string | null
+    gmShelfLifeMonths?: StringNullableWithAggregatesFilter<"GmArticleData"> | string | null
+    gmSkinType?: StringNullableWithAggregatesFilter<"GmArticleData"> | string | null
+    gmSpf?: StringNullableWithAggregatesFilter<"GmArticleData"> | string | null
+    gmSport?: StringNullableWithAggregatesFilter<"GmArticleData"> | string | null
+    gmStrapType?: StringNullableWithAggregatesFilter<"GmArticleData"> | string | null
+    gmSurfaceFinish?: StringNullableWithAggregatesFilter<"GmArticleData"> | string | null
+    gmTextileFabric?: StringNullableWithAggregatesFilter<"GmArticleData"> | string | null
+    gmThreadCount?: StringNullableWithAggregatesFilter<"GmArticleData"> | string | null
+    gmUsageOccasion?: StringNullableWithAggregatesFilter<"GmArticleData"> | string | null
+    gmVoltageV?: StringNullableWithAggregatesFilter<"GmArticleData"> | string | null
+    gmWarrantyMonths?: StringNullableWithAggregatesFilter<"GmArticleData"> | string | null
+    gmWattageW?: StringNullableWithAggregatesFilter<"GmArticleData"> | string | null
+    gmWeave?: StringNullableWithAggregatesFilter<"GmArticleData"> | string | null
+    gmWheelCount?: StringNullableWithAggregatesFilter<"GmArticleData"> | string | null
+    gmWidthCm?: StringNullableWithAggregatesFilter<"GmArticleData"> | string | null
+    gmYarn?: StringNullableWithAggregatesFilter<"GmArticleData"> | string | null
+    gmArticleNumber?: StringNullableWithAggregatesFilter<"GmArticleData"> | string | null
+    gmArticleDescription?: StringNullableWithAggregatesFilter<"GmArticleData"> | string | null
+    flatId?: StringNullableWithAggregatesFilter<"GmArticleData"> | string | null
+    division?: StringNullableWithAggregatesFilter<"GmArticleData"> | string | null
+    subDivision?: StringNullableWithAggregatesFilter<"GmArticleData"> | string | null
+    majorCategory?: StringNullableWithAggregatesFilter<"GmArticleData"> | string | null
+    mcDescription?: StringNullableWithAggregatesFilter<"GmArticleData"> | string | null
+    vendorName?: StringNullableWithAggregatesFilter<"GmArticleData"> | string | null
+    vendorCode?: StringNullableWithAggregatesFilter<"GmArticleData"> | string | null
+    designNumber?: StringNullableWithAggregatesFilter<"GmArticleData"> | string | null
+    pptNumber?: StringNullableWithAggregatesFilter<"GmArticleData"> | string | null
+    rate?: DecimalNullableWithAggregatesFilter<"GmArticleData"> | Decimal | DecimalJsLike | number | string | null
+    mrp?: DecimalNullableWithAggregatesFilter<"GmArticleData"> | Decimal | DecimalJsLike | number | string | null
+    segment?: StringNullableWithAggregatesFilter<"GmArticleData"> | string | null
+    articleFashionType?: StringNullableWithAggregatesFilter<"GmArticleData"> | string | null
+    approvalStatus?: StringWithAggregatesFilter<"GmArticleData"> | string
+    approvedAt?: DateTimeNullableWithAggregatesFilter<"GmArticleData"> | Date | string | null
+    approvedBy?: IntNullableWithAggregatesFilter<"GmArticleData"> | number | null
+    sapSyncStatus?: StringWithAggregatesFilter<"GmArticleData"> | string
+    sapSyncMessage?: StringNullableWithAggregatesFilter<"GmArticleData"> | string | null
+    imageUrl?: StringNullableWithAggregatesFilter<"GmArticleData"> | string | null
+    gmArticleType?: StringNullableWithAggregatesFilter<"GmArticleData"> | string | null
+    source?: StringNullableWithAggregatesFilter<"GmArticleData"> | string | null
+    userName?: StringNullableWithAggregatesFilter<"GmArticleData"> | string | null
+    createdAt?: DateTimeWithAggregatesFilter<"GmArticleData"> | Date | string
+    updatedAt?: DateTimeWithAggregatesFilter<"GmArticleData"> | Date | string
   }
 
   export type FabricVariantArticleDataWhereInput = {
@@ -89282,6 +92485,762 @@ export namespace Prisma {
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
   }
 
+  export type GmArticleDataCreateInput = {
+    id?: string
+    gmAgeGrade?: string | null
+    gmApplicator?: string | null
+    gmBaseType?: string | null
+    gmBatteryType?: string | null
+    gmBpaFree?: string | null
+    gmBpcForm?: string | null
+    gmBrand?: string | null
+    gmBrandType?: string | null
+    gmCapacityMl?: string | null
+    gmCareInstruction?: string | null
+    gmCertification?: string | null
+    gmClosureType?: string | null
+    gmCoating?: string | null
+    gmColourFamily?: string | null
+    gmColourShade?: string | null
+    gmCompartmentCount?: string | null
+    gmComposition?: string | null
+    gmCosmeticFinish?: string | null
+    gmDiameterCm?: string | null
+    gmDimStandard?: string | null
+    gmDishwasherSafe?: string | null
+    gmFoldable?: string | null
+    gmFoodContactSafe?: string | null
+    gmFragranceConc?: string | null
+    gmFragranceFamily?: string | null
+    gmFreeFrom?: string | null
+    gmFwHeelHtCm?: string | null
+    gmFwHeelType?: string | null
+    gmFwSize?: string | null
+    gmFwSole?: string | null
+    gmFwToe?: string | null
+    gmFwUpper?: string | null
+    gmGsm?: string | null
+    gmHeatRetentionHr?: string | null
+    gmHeightCm?: string | null
+    gmInsulationType?: string | null
+    gmKeyIngredient?: string | null
+    gmLeakProof?: string | null
+    gmLengthCm?: string | null
+    gmLicence?: string | null
+    gmLidType?: string | null
+    gmLifestage?: string | null
+    gmLiningMaterial?: string | null
+    gmManufacturer?: string | null
+    gmMaterial?: string | null
+    gmMaterialGroup?: string | null
+    gmMaterialSecondary?: string | null
+    gmMicrowaveSafe?: string | null
+    gmMountType?: string | null
+    gmNetContent?: string | null
+    gmNetContentUom?: string | null
+    gmNetWeightG?: string | null
+    gmPackQty?: string | null
+    gmPattern?: string | null
+    gmPlayPattern?: string | null
+    gmPlayerCount?: string | null
+    gmPowerSource?: string | null
+    gmPriceTier?: string | null
+    gmPrintTheme?: string | null
+    gmSeason?: string | null
+    gmSellUom?: string | null
+    gmSetContents?: string | null
+    gmShelfLifeMonths?: string | null
+    gmSkinType?: string | null
+    gmSpf?: string | null
+    gmSport?: string | null
+    gmStrapType?: string | null
+    gmSurfaceFinish?: string | null
+    gmTextileFabric?: string | null
+    gmThreadCount?: string | null
+    gmUsageOccasion?: string | null
+    gmVoltageV?: string | null
+    gmWarrantyMonths?: string | null
+    gmWattageW?: string | null
+    gmWeave?: string | null
+    gmWheelCount?: string | null
+    gmWidthCm?: string | null
+    gmYarn?: string | null
+    gmArticleNumber?: string | null
+    gmArticleDescription?: string | null
+    flatId?: string | null
+    division?: string | null
+    subDivision?: string | null
+    majorCategory?: string | null
+    mcDescription?: string | null
+    vendorName?: string | null
+    vendorCode?: string | null
+    designNumber?: string | null
+    pptNumber?: string | null
+    rate?: Decimal | DecimalJsLike | number | string | null
+    mrp?: Decimal | DecimalJsLike | number | string | null
+    segment?: string | null
+    articleFashionType?: string | null
+    approvalStatus?: string
+    approvedAt?: Date | string | null
+    approvedBy?: number | null
+    sapSyncStatus?: string
+    sapSyncMessage?: string | null
+    imageUrl?: string | null
+    gmArticleType?: string | null
+    source?: string | null
+    userName?: string | null
+    createdAt?: Date | string
+    updatedAt?: Date | string
+  }
+
+  export type GmArticleDataUncheckedCreateInput = {
+    id?: string
+    gmAgeGrade?: string | null
+    gmApplicator?: string | null
+    gmBaseType?: string | null
+    gmBatteryType?: string | null
+    gmBpaFree?: string | null
+    gmBpcForm?: string | null
+    gmBrand?: string | null
+    gmBrandType?: string | null
+    gmCapacityMl?: string | null
+    gmCareInstruction?: string | null
+    gmCertification?: string | null
+    gmClosureType?: string | null
+    gmCoating?: string | null
+    gmColourFamily?: string | null
+    gmColourShade?: string | null
+    gmCompartmentCount?: string | null
+    gmComposition?: string | null
+    gmCosmeticFinish?: string | null
+    gmDiameterCm?: string | null
+    gmDimStandard?: string | null
+    gmDishwasherSafe?: string | null
+    gmFoldable?: string | null
+    gmFoodContactSafe?: string | null
+    gmFragranceConc?: string | null
+    gmFragranceFamily?: string | null
+    gmFreeFrom?: string | null
+    gmFwHeelHtCm?: string | null
+    gmFwHeelType?: string | null
+    gmFwSize?: string | null
+    gmFwSole?: string | null
+    gmFwToe?: string | null
+    gmFwUpper?: string | null
+    gmGsm?: string | null
+    gmHeatRetentionHr?: string | null
+    gmHeightCm?: string | null
+    gmInsulationType?: string | null
+    gmKeyIngredient?: string | null
+    gmLeakProof?: string | null
+    gmLengthCm?: string | null
+    gmLicence?: string | null
+    gmLidType?: string | null
+    gmLifestage?: string | null
+    gmLiningMaterial?: string | null
+    gmManufacturer?: string | null
+    gmMaterial?: string | null
+    gmMaterialGroup?: string | null
+    gmMaterialSecondary?: string | null
+    gmMicrowaveSafe?: string | null
+    gmMountType?: string | null
+    gmNetContent?: string | null
+    gmNetContentUom?: string | null
+    gmNetWeightG?: string | null
+    gmPackQty?: string | null
+    gmPattern?: string | null
+    gmPlayPattern?: string | null
+    gmPlayerCount?: string | null
+    gmPowerSource?: string | null
+    gmPriceTier?: string | null
+    gmPrintTheme?: string | null
+    gmSeason?: string | null
+    gmSellUom?: string | null
+    gmSetContents?: string | null
+    gmShelfLifeMonths?: string | null
+    gmSkinType?: string | null
+    gmSpf?: string | null
+    gmSport?: string | null
+    gmStrapType?: string | null
+    gmSurfaceFinish?: string | null
+    gmTextileFabric?: string | null
+    gmThreadCount?: string | null
+    gmUsageOccasion?: string | null
+    gmVoltageV?: string | null
+    gmWarrantyMonths?: string | null
+    gmWattageW?: string | null
+    gmWeave?: string | null
+    gmWheelCount?: string | null
+    gmWidthCm?: string | null
+    gmYarn?: string | null
+    gmArticleNumber?: string | null
+    gmArticleDescription?: string | null
+    flatId?: string | null
+    division?: string | null
+    subDivision?: string | null
+    majorCategory?: string | null
+    mcDescription?: string | null
+    vendorName?: string | null
+    vendorCode?: string | null
+    designNumber?: string | null
+    pptNumber?: string | null
+    rate?: Decimal | DecimalJsLike | number | string | null
+    mrp?: Decimal | DecimalJsLike | number | string | null
+    segment?: string | null
+    articleFashionType?: string | null
+    approvalStatus?: string
+    approvedAt?: Date | string | null
+    approvedBy?: number | null
+    sapSyncStatus?: string
+    sapSyncMessage?: string | null
+    imageUrl?: string | null
+    gmArticleType?: string | null
+    source?: string | null
+    userName?: string | null
+    createdAt?: Date | string
+    updatedAt?: Date | string
+  }
+
+  export type GmArticleDataUpdateInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    gmAgeGrade?: NullableStringFieldUpdateOperationsInput | string | null
+    gmApplicator?: NullableStringFieldUpdateOperationsInput | string | null
+    gmBaseType?: NullableStringFieldUpdateOperationsInput | string | null
+    gmBatteryType?: NullableStringFieldUpdateOperationsInput | string | null
+    gmBpaFree?: NullableStringFieldUpdateOperationsInput | string | null
+    gmBpcForm?: NullableStringFieldUpdateOperationsInput | string | null
+    gmBrand?: NullableStringFieldUpdateOperationsInput | string | null
+    gmBrandType?: NullableStringFieldUpdateOperationsInput | string | null
+    gmCapacityMl?: NullableStringFieldUpdateOperationsInput | string | null
+    gmCareInstruction?: NullableStringFieldUpdateOperationsInput | string | null
+    gmCertification?: NullableStringFieldUpdateOperationsInput | string | null
+    gmClosureType?: NullableStringFieldUpdateOperationsInput | string | null
+    gmCoating?: NullableStringFieldUpdateOperationsInput | string | null
+    gmColourFamily?: NullableStringFieldUpdateOperationsInput | string | null
+    gmColourShade?: NullableStringFieldUpdateOperationsInput | string | null
+    gmCompartmentCount?: NullableStringFieldUpdateOperationsInput | string | null
+    gmComposition?: NullableStringFieldUpdateOperationsInput | string | null
+    gmCosmeticFinish?: NullableStringFieldUpdateOperationsInput | string | null
+    gmDiameterCm?: NullableStringFieldUpdateOperationsInput | string | null
+    gmDimStandard?: NullableStringFieldUpdateOperationsInput | string | null
+    gmDishwasherSafe?: NullableStringFieldUpdateOperationsInput | string | null
+    gmFoldable?: NullableStringFieldUpdateOperationsInput | string | null
+    gmFoodContactSafe?: NullableStringFieldUpdateOperationsInput | string | null
+    gmFragranceConc?: NullableStringFieldUpdateOperationsInput | string | null
+    gmFragranceFamily?: NullableStringFieldUpdateOperationsInput | string | null
+    gmFreeFrom?: NullableStringFieldUpdateOperationsInput | string | null
+    gmFwHeelHtCm?: NullableStringFieldUpdateOperationsInput | string | null
+    gmFwHeelType?: NullableStringFieldUpdateOperationsInput | string | null
+    gmFwSize?: NullableStringFieldUpdateOperationsInput | string | null
+    gmFwSole?: NullableStringFieldUpdateOperationsInput | string | null
+    gmFwToe?: NullableStringFieldUpdateOperationsInput | string | null
+    gmFwUpper?: NullableStringFieldUpdateOperationsInput | string | null
+    gmGsm?: NullableStringFieldUpdateOperationsInput | string | null
+    gmHeatRetentionHr?: NullableStringFieldUpdateOperationsInput | string | null
+    gmHeightCm?: NullableStringFieldUpdateOperationsInput | string | null
+    gmInsulationType?: NullableStringFieldUpdateOperationsInput | string | null
+    gmKeyIngredient?: NullableStringFieldUpdateOperationsInput | string | null
+    gmLeakProof?: NullableStringFieldUpdateOperationsInput | string | null
+    gmLengthCm?: NullableStringFieldUpdateOperationsInput | string | null
+    gmLicence?: NullableStringFieldUpdateOperationsInput | string | null
+    gmLidType?: NullableStringFieldUpdateOperationsInput | string | null
+    gmLifestage?: NullableStringFieldUpdateOperationsInput | string | null
+    gmLiningMaterial?: NullableStringFieldUpdateOperationsInput | string | null
+    gmManufacturer?: NullableStringFieldUpdateOperationsInput | string | null
+    gmMaterial?: NullableStringFieldUpdateOperationsInput | string | null
+    gmMaterialGroup?: NullableStringFieldUpdateOperationsInput | string | null
+    gmMaterialSecondary?: NullableStringFieldUpdateOperationsInput | string | null
+    gmMicrowaveSafe?: NullableStringFieldUpdateOperationsInput | string | null
+    gmMountType?: NullableStringFieldUpdateOperationsInput | string | null
+    gmNetContent?: NullableStringFieldUpdateOperationsInput | string | null
+    gmNetContentUom?: NullableStringFieldUpdateOperationsInput | string | null
+    gmNetWeightG?: NullableStringFieldUpdateOperationsInput | string | null
+    gmPackQty?: NullableStringFieldUpdateOperationsInput | string | null
+    gmPattern?: NullableStringFieldUpdateOperationsInput | string | null
+    gmPlayPattern?: NullableStringFieldUpdateOperationsInput | string | null
+    gmPlayerCount?: NullableStringFieldUpdateOperationsInput | string | null
+    gmPowerSource?: NullableStringFieldUpdateOperationsInput | string | null
+    gmPriceTier?: NullableStringFieldUpdateOperationsInput | string | null
+    gmPrintTheme?: NullableStringFieldUpdateOperationsInput | string | null
+    gmSeason?: NullableStringFieldUpdateOperationsInput | string | null
+    gmSellUom?: NullableStringFieldUpdateOperationsInput | string | null
+    gmSetContents?: NullableStringFieldUpdateOperationsInput | string | null
+    gmShelfLifeMonths?: NullableStringFieldUpdateOperationsInput | string | null
+    gmSkinType?: NullableStringFieldUpdateOperationsInput | string | null
+    gmSpf?: NullableStringFieldUpdateOperationsInput | string | null
+    gmSport?: NullableStringFieldUpdateOperationsInput | string | null
+    gmStrapType?: NullableStringFieldUpdateOperationsInput | string | null
+    gmSurfaceFinish?: NullableStringFieldUpdateOperationsInput | string | null
+    gmTextileFabric?: NullableStringFieldUpdateOperationsInput | string | null
+    gmThreadCount?: NullableStringFieldUpdateOperationsInput | string | null
+    gmUsageOccasion?: NullableStringFieldUpdateOperationsInput | string | null
+    gmVoltageV?: NullableStringFieldUpdateOperationsInput | string | null
+    gmWarrantyMonths?: NullableStringFieldUpdateOperationsInput | string | null
+    gmWattageW?: NullableStringFieldUpdateOperationsInput | string | null
+    gmWeave?: NullableStringFieldUpdateOperationsInput | string | null
+    gmWheelCount?: NullableStringFieldUpdateOperationsInput | string | null
+    gmWidthCm?: NullableStringFieldUpdateOperationsInput | string | null
+    gmYarn?: NullableStringFieldUpdateOperationsInput | string | null
+    gmArticleNumber?: NullableStringFieldUpdateOperationsInput | string | null
+    gmArticleDescription?: NullableStringFieldUpdateOperationsInput | string | null
+    flatId?: NullableStringFieldUpdateOperationsInput | string | null
+    division?: NullableStringFieldUpdateOperationsInput | string | null
+    subDivision?: NullableStringFieldUpdateOperationsInput | string | null
+    majorCategory?: NullableStringFieldUpdateOperationsInput | string | null
+    mcDescription?: NullableStringFieldUpdateOperationsInput | string | null
+    vendorName?: NullableStringFieldUpdateOperationsInput | string | null
+    vendorCode?: NullableStringFieldUpdateOperationsInput | string | null
+    designNumber?: NullableStringFieldUpdateOperationsInput | string | null
+    pptNumber?: NullableStringFieldUpdateOperationsInput | string | null
+    rate?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    mrp?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    segment?: NullableStringFieldUpdateOperationsInput | string | null
+    articleFashionType?: NullableStringFieldUpdateOperationsInput | string | null
+    approvalStatus?: StringFieldUpdateOperationsInput | string
+    approvedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    approvedBy?: NullableIntFieldUpdateOperationsInput | number | null
+    sapSyncStatus?: StringFieldUpdateOperationsInput | string
+    sapSyncMessage?: NullableStringFieldUpdateOperationsInput | string | null
+    imageUrl?: NullableStringFieldUpdateOperationsInput | string | null
+    gmArticleType?: NullableStringFieldUpdateOperationsInput | string | null
+    source?: NullableStringFieldUpdateOperationsInput | string | null
+    userName?: NullableStringFieldUpdateOperationsInput | string | null
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+  }
+
+  export type GmArticleDataUncheckedUpdateInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    gmAgeGrade?: NullableStringFieldUpdateOperationsInput | string | null
+    gmApplicator?: NullableStringFieldUpdateOperationsInput | string | null
+    gmBaseType?: NullableStringFieldUpdateOperationsInput | string | null
+    gmBatteryType?: NullableStringFieldUpdateOperationsInput | string | null
+    gmBpaFree?: NullableStringFieldUpdateOperationsInput | string | null
+    gmBpcForm?: NullableStringFieldUpdateOperationsInput | string | null
+    gmBrand?: NullableStringFieldUpdateOperationsInput | string | null
+    gmBrandType?: NullableStringFieldUpdateOperationsInput | string | null
+    gmCapacityMl?: NullableStringFieldUpdateOperationsInput | string | null
+    gmCareInstruction?: NullableStringFieldUpdateOperationsInput | string | null
+    gmCertification?: NullableStringFieldUpdateOperationsInput | string | null
+    gmClosureType?: NullableStringFieldUpdateOperationsInput | string | null
+    gmCoating?: NullableStringFieldUpdateOperationsInput | string | null
+    gmColourFamily?: NullableStringFieldUpdateOperationsInput | string | null
+    gmColourShade?: NullableStringFieldUpdateOperationsInput | string | null
+    gmCompartmentCount?: NullableStringFieldUpdateOperationsInput | string | null
+    gmComposition?: NullableStringFieldUpdateOperationsInput | string | null
+    gmCosmeticFinish?: NullableStringFieldUpdateOperationsInput | string | null
+    gmDiameterCm?: NullableStringFieldUpdateOperationsInput | string | null
+    gmDimStandard?: NullableStringFieldUpdateOperationsInput | string | null
+    gmDishwasherSafe?: NullableStringFieldUpdateOperationsInput | string | null
+    gmFoldable?: NullableStringFieldUpdateOperationsInput | string | null
+    gmFoodContactSafe?: NullableStringFieldUpdateOperationsInput | string | null
+    gmFragranceConc?: NullableStringFieldUpdateOperationsInput | string | null
+    gmFragranceFamily?: NullableStringFieldUpdateOperationsInput | string | null
+    gmFreeFrom?: NullableStringFieldUpdateOperationsInput | string | null
+    gmFwHeelHtCm?: NullableStringFieldUpdateOperationsInput | string | null
+    gmFwHeelType?: NullableStringFieldUpdateOperationsInput | string | null
+    gmFwSize?: NullableStringFieldUpdateOperationsInput | string | null
+    gmFwSole?: NullableStringFieldUpdateOperationsInput | string | null
+    gmFwToe?: NullableStringFieldUpdateOperationsInput | string | null
+    gmFwUpper?: NullableStringFieldUpdateOperationsInput | string | null
+    gmGsm?: NullableStringFieldUpdateOperationsInput | string | null
+    gmHeatRetentionHr?: NullableStringFieldUpdateOperationsInput | string | null
+    gmHeightCm?: NullableStringFieldUpdateOperationsInput | string | null
+    gmInsulationType?: NullableStringFieldUpdateOperationsInput | string | null
+    gmKeyIngredient?: NullableStringFieldUpdateOperationsInput | string | null
+    gmLeakProof?: NullableStringFieldUpdateOperationsInput | string | null
+    gmLengthCm?: NullableStringFieldUpdateOperationsInput | string | null
+    gmLicence?: NullableStringFieldUpdateOperationsInput | string | null
+    gmLidType?: NullableStringFieldUpdateOperationsInput | string | null
+    gmLifestage?: NullableStringFieldUpdateOperationsInput | string | null
+    gmLiningMaterial?: NullableStringFieldUpdateOperationsInput | string | null
+    gmManufacturer?: NullableStringFieldUpdateOperationsInput | string | null
+    gmMaterial?: NullableStringFieldUpdateOperationsInput | string | null
+    gmMaterialGroup?: NullableStringFieldUpdateOperationsInput | string | null
+    gmMaterialSecondary?: NullableStringFieldUpdateOperationsInput | string | null
+    gmMicrowaveSafe?: NullableStringFieldUpdateOperationsInput | string | null
+    gmMountType?: NullableStringFieldUpdateOperationsInput | string | null
+    gmNetContent?: NullableStringFieldUpdateOperationsInput | string | null
+    gmNetContentUom?: NullableStringFieldUpdateOperationsInput | string | null
+    gmNetWeightG?: NullableStringFieldUpdateOperationsInput | string | null
+    gmPackQty?: NullableStringFieldUpdateOperationsInput | string | null
+    gmPattern?: NullableStringFieldUpdateOperationsInput | string | null
+    gmPlayPattern?: NullableStringFieldUpdateOperationsInput | string | null
+    gmPlayerCount?: NullableStringFieldUpdateOperationsInput | string | null
+    gmPowerSource?: NullableStringFieldUpdateOperationsInput | string | null
+    gmPriceTier?: NullableStringFieldUpdateOperationsInput | string | null
+    gmPrintTheme?: NullableStringFieldUpdateOperationsInput | string | null
+    gmSeason?: NullableStringFieldUpdateOperationsInput | string | null
+    gmSellUom?: NullableStringFieldUpdateOperationsInput | string | null
+    gmSetContents?: NullableStringFieldUpdateOperationsInput | string | null
+    gmShelfLifeMonths?: NullableStringFieldUpdateOperationsInput | string | null
+    gmSkinType?: NullableStringFieldUpdateOperationsInput | string | null
+    gmSpf?: NullableStringFieldUpdateOperationsInput | string | null
+    gmSport?: NullableStringFieldUpdateOperationsInput | string | null
+    gmStrapType?: NullableStringFieldUpdateOperationsInput | string | null
+    gmSurfaceFinish?: NullableStringFieldUpdateOperationsInput | string | null
+    gmTextileFabric?: NullableStringFieldUpdateOperationsInput | string | null
+    gmThreadCount?: NullableStringFieldUpdateOperationsInput | string | null
+    gmUsageOccasion?: NullableStringFieldUpdateOperationsInput | string | null
+    gmVoltageV?: NullableStringFieldUpdateOperationsInput | string | null
+    gmWarrantyMonths?: NullableStringFieldUpdateOperationsInput | string | null
+    gmWattageW?: NullableStringFieldUpdateOperationsInput | string | null
+    gmWeave?: NullableStringFieldUpdateOperationsInput | string | null
+    gmWheelCount?: NullableStringFieldUpdateOperationsInput | string | null
+    gmWidthCm?: NullableStringFieldUpdateOperationsInput | string | null
+    gmYarn?: NullableStringFieldUpdateOperationsInput | string | null
+    gmArticleNumber?: NullableStringFieldUpdateOperationsInput | string | null
+    gmArticleDescription?: NullableStringFieldUpdateOperationsInput | string | null
+    flatId?: NullableStringFieldUpdateOperationsInput | string | null
+    division?: NullableStringFieldUpdateOperationsInput | string | null
+    subDivision?: NullableStringFieldUpdateOperationsInput | string | null
+    majorCategory?: NullableStringFieldUpdateOperationsInput | string | null
+    mcDescription?: NullableStringFieldUpdateOperationsInput | string | null
+    vendorName?: NullableStringFieldUpdateOperationsInput | string | null
+    vendorCode?: NullableStringFieldUpdateOperationsInput | string | null
+    designNumber?: NullableStringFieldUpdateOperationsInput | string | null
+    pptNumber?: NullableStringFieldUpdateOperationsInput | string | null
+    rate?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    mrp?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    segment?: NullableStringFieldUpdateOperationsInput | string | null
+    articleFashionType?: NullableStringFieldUpdateOperationsInput | string | null
+    approvalStatus?: StringFieldUpdateOperationsInput | string
+    approvedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    approvedBy?: NullableIntFieldUpdateOperationsInput | number | null
+    sapSyncStatus?: StringFieldUpdateOperationsInput | string
+    sapSyncMessage?: NullableStringFieldUpdateOperationsInput | string | null
+    imageUrl?: NullableStringFieldUpdateOperationsInput | string | null
+    gmArticleType?: NullableStringFieldUpdateOperationsInput | string | null
+    source?: NullableStringFieldUpdateOperationsInput | string | null
+    userName?: NullableStringFieldUpdateOperationsInput | string | null
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+  }
+
+  export type GmArticleDataCreateManyInput = {
+    id?: string
+    gmAgeGrade?: string | null
+    gmApplicator?: string | null
+    gmBaseType?: string | null
+    gmBatteryType?: string | null
+    gmBpaFree?: string | null
+    gmBpcForm?: string | null
+    gmBrand?: string | null
+    gmBrandType?: string | null
+    gmCapacityMl?: string | null
+    gmCareInstruction?: string | null
+    gmCertification?: string | null
+    gmClosureType?: string | null
+    gmCoating?: string | null
+    gmColourFamily?: string | null
+    gmColourShade?: string | null
+    gmCompartmentCount?: string | null
+    gmComposition?: string | null
+    gmCosmeticFinish?: string | null
+    gmDiameterCm?: string | null
+    gmDimStandard?: string | null
+    gmDishwasherSafe?: string | null
+    gmFoldable?: string | null
+    gmFoodContactSafe?: string | null
+    gmFragranceConc?: string | null
+    gmFragranceFamily?: string | null
+    gmFreeFrom?: string | null
+    gmFwHeelHtCm?: string | null
+    gmFwHeelType?: string | null
+    gmFwSize?: string | null
+    gmFwSole?: string | null
+    gmFwToe?: string | null
+    gmFwUpper?: string | null
+    gmGsm?: string | null
+    gmHeatRetentionHr?: string | null
+    gmHeightCm?: string | null
+    gmInsulationType?: string | null
+    gmKeyIngredient?: string | null
+    gmLeakProof?: string | null
+    gmLengthCm?: string | null
+    gmLicence?: string | null
+    gmLidType?: string | null
+    gmLifestage?: string | null
+    gmLiningMaterial?: string | null
+    gmManufacturer?: string | null
+    gmMaterial?: string | null
+    gmMaterialGroup?: string | null
+    gmMaterialSecondary?: string | null
+    gmMicrowaveSafe?: string | null
+    gmMountType?: string | null
+    gmNetContent?: string | null
+    gmNetContentUom?: string | null
+    gmNetWeightG?: string | null
+    gmPackQty?: string | null
+    gmPattern?: string | null
+    gmPlayPattern?: string | null
+    gmPlayerCount?: string | null
+    gmPowerSource?: string | null
+    gmPriceTier?: string | null
+    gmPrintTheme?: string | null
+    gmSeason?: string | null
+    gmSellUom?: string | null
+    gmSetContents?: string | null
+    gmShelfLifeMonths?: string | null
+    gmSkinType?: string | null
+    gmSpf?: string | null
+    gmSport?: string | null
+    gmStrapType?: string | null
+    gmSurfaceFinish?: string | null
+    gmTextileFabric?: string | null
+    gmThreadCount?: string | null
+    gmUsageOccasion?: string | null
+    gmVoltageV?: string | null
+    gmWarrantyMonths?: string | null
+    gmWattageW?: string | null
+    gmWeave?: string | null
+    gmWheelCount?: string | null
+    gmWidthCm?: string | null
+    gmYarn?: string | null
+    gmArticleNumber?: string | null
+    gmArticleDescription?: string | null
+    flatId?: string | null
+    division?: string | null
+    subDivision?: string | null
+    majorCategory?: string | null
+    mcDescription?: string | null
+    vendorName?: string | null
+    vendorCode?: string | null
+    designNumber?: string | null
+    pptNumber?: string | null
+    rate?: Decimal | DecimalJsLike | number | string | null
+    mrp?: Decimal | DecimalJsLike | number | string | null
+    segment?: string | null
+    articleFashionType?: string | null
+    approvalStatus?: string
+    approvedAt?: Date | string | null
+    approvedBy?: number | null
+    sapSyncStatus?: string
+    sapSyncMessage?: string | null
+    imageUrl?: string | null
+    gmArticleType?: string | null
+    source?: string | null
+    userName?: string | null
+    createdAt?: Date | string
+    updatedAt?: Date | string
+  }
+
+  export type GmArticleDataUpdateManyMutationInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    gmAgeGrade?: NullableStringFieldUpdateOperationsInput | string | null
+    gmApplicator?: NullableStringFieldUpdateOperationsInput | string | null
+    gmBaseType?: NullableStringFieldUpdateOperationsInput | string | null
+    gmBatteryType?: NullableStringFieldUpdateOperationsInput | string | null
+    gmBpaFree?: NullableStringFieldUpdateOperationsInput | string | null
+    gmBpcForm?: NullableStringFieldUpdateOperationsInput | string | null
+    gmBrand?: NullableStringFieldUpdateOperationsInput | string | null
+    gmBrandType?: NullableStringFieldUpdateOperationsInput | string | null
+    gmCapacityMl?: NullableStringFieldUpdateOperationsInput | string | null
+    gmCareInstruction?: NullableStringFieldUpdateOperationsInput | string | null
+    gmCertification?: NullableStringFieldUpdateOperationsInput | string | null
+    gmClosureType?: NullableStringFieldUpdateOperationsInput | string | null
+    gmCoating?: NullableStringFieldUpdateOperationsInput | string | null
+    gmColourFamily?: NullableStringFieldUpdateOperationsInput | string | null
+    gmColourShade?: NullableStringFieldUpdateOperationsInput | string | null
+    gmCompartmentCount?: NullableStringFieldUpdateOperationsInput | string | null
+    gmComposition?: NullableStringFieldUpdateOperationsInput | string | null
+    gmCosmeticFinish?: NullableStringFieldUpdateOperationsInput | string | null
+    gmDiameterCm?: NullableStringFieldUpdateOperationsInput | string | null
+    gmDimStandard?: NullableStringFieldUpdateOperationsInput | string | null
+    gmDishwasherSafe?: NullableStringFieldUpdateOperationsInput | string | null
+    gmFoldable?: NullableStringFieldUpdateOperationsInput | string | null
+    gmFoodContactSafe?: NullableStringFieldUpdateOperationsInput | string | null
+    gmFragranceConc?: NullableStringFieldUpdateOperationsInput | string | null
+    gmFragranceFamily?: NullableStringFieldUpdateOperationsInput | string | null
+    gmFreeFrom?: NullableStringFieldUpdateOperationsInput | string | null
+    gmFwHeelHtCm?: NullableStringFieldUpdateOperationsInput | string | null
+    gmFwHeelType?: NullableStringFieldUpdateOperationsInput | string | null
+    gmFwSize?: NullableStringFieldUpdateOperationsInput | string | null
+    gmFwSole?: NullableStringFieldUpdateOperationsInput | string | null
+    gmFwToe?: NullableStringFieldUpdateOperationsInput | string | null
+    gmFwUpper?: NullableStringFieldUpdateOperationsInput | string | null
+    gmGsm?: NullableStringFieldUpdateOperationsInput | string | null
+    gmHeatRetentionHr?: NullableStringFieldUpdateOperationsInput | string | null
+    gmHeightCm?: NullableStringFieldUpdateOperationsInput | string | null
+    gmInsulationType?: NullableStringFieldUpdateOperationsInput | string | null
+    gmKeyIngredient?: NullableStringFieldUpdateOperationsInput | string | null
+    gmLeakProof?: NullableStringFieldUpdateOperationsInput | string | null
+    gmLengthCm?: NullableStringFieldUpdateOperationsInput | string | null
+    gmLicence?: NullableStringFieldUpdateOperationsInput | string | null
+    gmLidType?: NullableStringFieldUpdateOperationsInput | string | null
+    gmLifestage?: NullableStringFieldUpdateOperationsInput | string | null
+    gmLiningMaterial?: NullableStringFieldUpdateOperationsInput | string | null
+    gmManufacturer?: NullableStringFieldUpdateOperationsInput | string | null
+    gmMaterial?: NullableStringFieldUpdateOperationsInput | string | null
+    gmMaterialGroup?: NullableStringFieldUpdateOperationsInput | string | null
+    gmMaterialSecondary?: NullableStringFieldUpdateOperationsInput | string | null
+    gmMicrowaveSafe?: NullableStringFieldUpdateOperationsInput | string | null
+    gmMountType?: NullableStringFieldUpdateOperationsInput | string | null
+    gmNetContent?: NullableStringFieldUpdateOperationsInput | string | null
+    gmNetContentUom?: NullableStringFieldUpdateOperationsInput | string | null
+    gmNetWeightG?: NullableStringFieldUpdateOperationsInput | string | null
+    gmPackQty?: NullableStringFieldUpdateOperationsInput | string | null
+    gmPattern?: NullableStringFieldUpdateOperationsInput | string | null
+    gmPlayPattern?: NullableStringFieldUpdateOperationsInput | string | null
+    gmPlayerCount?: NullableStringFieldUpdateOperationsInput | string | null
+    gmPowerSource?: NullableStringFieldUpdateOperationsInput | string | null
+    gmPriceTier?: NullableStringFieldUpdateOperationsInput | string | null
+    gmPrintTheme?: NullableStringFieldUpdateOperationsInput | string | null
+    gmSeason?: NullableStringFieldUpdateOperationsInput | string | null
+    gmSellUom?: NullableStringFieldUpdateOperationsInput | string | null
+    gmSetContents?: NullableStringFieldUpdateOperationsInput | string | null
+    gmShelfLifeMonths?: NullableStringFieldUpdateOperationsInput | string | null
+    gmSkinType?: NullableStringFieldUpdateOperationsInput | string | null
+    gmSpf?: NullableStringFieldUpdateOperationsInput | string | null
+    gmSport?: NullableStringFieldUpdateOperationsInput | string | null
+    gmStrapType?: NullableStringFieldUpdateOperationsInput | string | null
+    gmSurfaceFinish?: NullableStringFieldUpdateOperationsInput | string | null
+    gmTextileFabric?: NullableStringFieldUpdateOperationsInput | string | null
+    gmThreadCount?: NullableStringFieldUpdateOperationsInput | string | null
+    gmUsageOccasion?: NullableStringFieldUpdateOperationsInput | string | null
+    gmVoltageV?: NullableStringFieldUpdateOperationsInput | string | null
+    gmWarrantyMonths?: NullableStringFieldUpdateOperationsInput | string | null
+    gmWattageW?: NullableStringFieldUpdateOperationsInput | string | null
+    gmWeave?: NullableStringFieldUpdateOperationsInput | string | null
+    gmWheelCount?: NullableStringFieldUpdateOperationsInput | string | null
+    gmWidthCm?: NullableStringFieldUpdateOperationsInput | string | null
+    gmYarn?: NullableStringFieldUpdateOperationsInput | string | null
+    gmArticleNumber?: NullableStringFieldUpdateOperationsInput | string | null
+    gmArticleDescription?: NullableStringFieldUpdateOperationsInput | string | null
+    flatId?: NullableStringFieldUpdateOperationsInput | string | null
+    division?: NullableStringFieldUpdateOperationsInput | string | null
+    subDivision?: NullableStringFieldUpdateOperationsInput | string | null
+    majorCategory?: NullableStringFieldUpdateOperationsInput | string | null
+    mcDescription?: NullableStringFieldUpdateOperationsInput | string | null
+    vendorName?: NullableStringFieldUpdateOperationsInput | string | null
+    vendorCode?: NullableStringFieldUpdateOperationsInput | string | null
+    designNumber?: NullableStringFieldUpdateOperationsInput | string | null
+    pptNumber?: NullableStringFieldUpdateOperationsInput | string | null
+    rate?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    mrp?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    segment?: NullableStringFieldUpdateOperationsInput | string | null
+    articleFashionType?: NullableStringFieldUpdateOperationsInput | string | null
+    approvalStatus?: StringFieldUpdateOperationsInput | string
+    approvedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    approvedBy?: NullableIntFieldUpdateOperationsInput | number | null
+    sapSyncStatus?: StringFieldUpdateOperationsInput | string
+    sapSyncMessage?: NullableStringFieldUpdateOperationsInput | string | null
+    imageUrl?: NullableStringFieldUpdateOperationsInput | string | null
+    gmArticleType?: NullableStringFieldUpdateOperationsInput | string | null
+    source?: NullableStringFieldUpdateOperationsInput | string | null
+    userName?: NullableStringFieldUpdateOperationsInput | string | null
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+  }
+
+  export type GmArticleDataUncheckedUpdateManyInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    gmAgeGrade?: NullableStringFieldUpdateOperationsInput | string | null
+    gmApplicator?: NullableStringFieldUpdateOperationsInput | string | null
+    gmBaseType?: NullableStringFieldUpdateOperationsInput | string | null
+    gmBatteryType?: NullableStringFieldUpdateOperationsInput | string | null
+    gmBpaFree?: NullableStringFieldUpdateOperationsInput | string | null
+    gmBpcForm?: NullableStringFieldUpdateOperationsInput | string | null
+    gmBrand?: NullableStringFieldUpdateOperationsInput | string | null
+    gmBrandType?: NullableStringFieldUpdateOperationsInput | string | null
+    gmCapacityMl?: NullableStringFieldUpdateOperationsInput | string | null
+    gmCareInstruction?: NullableStringFieldUpdateOperationsInput | string | null
+    gmCertification?: NullableStringFieldUpdateOperationsInput | string | null
+    gmClosureType?: NullableStringFieldUpdateOperationsInput | string | null
+    gmCoating?: NullableStringFieldUpdateOperationsInput | string | null
+    gmColourFamily?: NullableStringFieldUpdateOperationsInput | string | null
+    gmColourShade?: NullableStringFieldUpdateOperationsInput | string | null
+    gmCompartmentCount?: NullableStringFieldUpdateOperationsInput | string | null
+    gmComposition?: NullableStringFieldUpdateOperationsInput | string | null
+    gmCosmeticFinish?: NullableStringFieldUpdateOperationsInput | string | null
+    gmDiameterCm?: NullableStringFieldUpdateOperationsInput | string | null
+    gmDimStandard?: NullableStringFieldUpdateOperationsInput | string | null
+    gmDishwasherSafe?: NullableStringFieldUpdateOperationsInput | string | null
+    gmFoldable?: NullableStringFieldUpdateOperationsInput | string | null
+    gmFoodContactSafe?: NullableStringFieldUpdateOperationsInput | string | null
+    gmFragranceConc?: NullableStringFieldUpdateOperationsInput | string | null
+    gmFragranceFamily?: NullableStringFieldUpdateOperationsInput | string | null
+    gmFreeFrom?: NullableStringFieldUpdateOperationsInput | string | null
+    gmFwHeelHtCm?: NullableStringFieldUpdateOperationsInput | string | null
+    gmFwHeelType?: NullableStringFieldUpdateOperationsInput | string | null
+    gmFwSize?: NullableStringFieldUpdateOperationsInput | string | null
+    gmFwSole?: NullableStringFieldUpdateOperationsInput | string | null
+    gmFwToe?: NullableStringFieldUpdateOperationsInput | string | null
+    gmFwUpper?: NullableStringFieldUpdateOperationsInput | string | null
+    gmGsm?: NullableStringFieldUpdateOperationsInput | string | null
+    gmHeatRetentionHr?: NullableStringFieldUpdateOperationsInput | string | null
+    gmHeightCm?: NullableStringFieldUpdateOperationsInput | string | null
+    gmInsulationType?: NullableStringFieldUpdateOperationsInput | string | null
+    gmKeyIngredient?: NullableStringFieldUpdateOperationsInput | string | null
+    gmLeakProof?: NullableStringFieldUpdateOperationsInput | string | null
+    gmLengthCm?: NullableStringFieldUpdateOperationsInput | string | null
+    gmLicence?: NullableStringFieldUpdateOperationsInput | string | null
+    gmLidType?: NullableStringFieldUpdateOperationsInput | string | null
+    gmLifestage?: NullableStringFieldUpdateOperationsInput | string | null
+    gmLiningMaterial?: NullableStringFieldUpdateOperationsInput | string | null
+    gmManufacturer?: NullableStringFieldUpdateOperationsInput | string | null
+    gmMaterial?: NullableStringFieldUpdateOperationsInput | string | null
+    gmMaterialGroup?: NullableStringFieldUpdateOperationsInput | string | null
+    gmMaterialSecondary?: NullableStringFieldUpdateOperationsInput | string | null
+    gmMicrowaveSafe?: NullableStringFieldUpdateOperationsInput | string | null
+    gmMountType?: NullableStringFieldUpdateOperationsInput | string | null
+    gmNetContent?: NullableStringFieldUpdateOperationsInput | string | null
+    gmNetContentUom?: NullableStringFieldUpdateOperationsInput | string | null
+    gmNetWeightG?: NullableStringFieldUpdateOperationsInput | string | null
+    gmPackQty?: NullableStringFieldUpdateOperationsInput | string | null
+    gmPattern?: NullableStringFieldUpdateOperationsInput | string | null
+    gmPlayPattern?: NullableStringFieldUpdateOperationsInput | string | null
+    gmPlayerCount?: NullableStringFieldUpdateOperationsInput | string | null
+    gmPowerSource?: NullableStringFieldUpdateOperationsInput | string | null
+    gmPriceTier?: NullableStringFieldUpdateOperationsInput | string | null
+    gmPrintTheme?: NullableStringFieldUpdateOperationsInput | string | null
+    gmSeason?: NullableStringFieldUpdateOperationsInput | string | null
+    gmSellUom?: NullableStringFieldUpdateOperationsInput | string | null
+    gmSetContents?: NullableStringFieldUpdateOperationsInput | string | null
+    gmShelfLifeMonths?: NullableStringFieldUpdateOperationsInput | string | null
+    gmSkinType?: NullableStringFieldUpdateOperationsInput | string | null
+    gmSpf?: NullableStringFieldUpdateOperationsInput | string | null
+    gmSport?: NullableStringFieldUpdateOperationsInput | string | null
+    gmStrapType?: NullableStringFieldUpdateOperationsInput | string | null
+    gmSurfaceFinish?: NullableStringFieldUpdateOperationsInput | string | null
+    gmTextileFabric?: NullableStringFieldUpdateOperationsInput | string | null
+    gmThreadCount?: NullableStringFieldUpdateOperationsInput | string | null
+    gmUsageOccasion?: NullableStringFieldUpdateOperationsInput | string | null
+    gmVoltageV?: NullableStringFieldUpdateOperationsInput | string | null
+    gmWarrantyMonths?: NullableStringFieldUpdateOperationsInput | string | null
+    gmWattageW?: NullableStringFieldUpdateOperationsInput | string | null
+    gmWeave?: NullableStringFieldUpdateOperationsInput | string | null
+    gmWheelCount?: NullableStringFieldUpdateOperationsInput | string | null
+    gmWidthCm?: NullableStringFieldUpdateOperationsInput | string | null
+    gmYarn?: NullableStringFieldUpdateOperationsInput | string | null
+    gmArticleNumber?: NullableStringFieldUpdateOperationsInput | string | null
+    gmArticleDescription?: NullableStringFieldUpdateOperationsInput | string | null
+    flatId?: NullableStringFieldUpdateOperationsInput | string | null
+    division?: NullableStringFieldUpdateOperationsInput | string | null
+    subDivision?: NullableStringFieldUpdateOperationsInput | string | null
+    majorCategory?: NullableStringFieldUpdateOperationsInput | string | null
+    mcDescription?: NullableStringFieldUpdateOperationsInput | string | null
+    vendorName?: NullableStringFieldUpdateOperationsInput | string | null
+    vendorCode?: NullableStringFieldUpdateOperationsInput | string | null
+    designNumber?: NullableStringFieldUpdateOperationsInput | string | null
+    pptNumber?: NullableStringFieldUpdateOperationsInput | string | null
+    rate?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    mrp?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    segment?: NullableStringFieldUpdateOperationsInput | string | null
+    articleFashionType?: NullableStringFieldUpdateOperationsInput | string | null
+    approvalStatus?: StringFieldUpdateOperationsInput | string
+    approvedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    approvedBy?: NullableIntFieldUpdateOperationsInput | number | null
+    sapSyncStatus?: StringFieldUpdateOperationsInput | string
+    sapSyncMessage?: NullableStringFieldUpdateOperationsInput | string | null
+    imageUrl?: NullableStringFieldUpdateOperationsInput | string | null
+    gmArticleType?: NullableStringFieldUpdateOperationsInput | string | null
+    source?: NullableStringFieldUpdateOperationsInput | string | null
+    userName?: NullableStringFieldUpdateOperationsInput | string | null
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+  }
+
   export type FabricVariantArticleDataCreateInput = {
     id?: string
     genericArticleId?: string | null
@@ -95569,6 +99528,348 @@ export namespace Prisma {
     v2FabricRate?: SortOrder
     valueAddCost?: SortOrder
     rate?: SortOrder
+    approvedBy?: SortOrder
+  }
+
+  export type GmArticleDataOrderByRelevanceInput = {
+    fields: GmArticleDataOrderByRelevanceFieldEnum | GmArticleDataOrderByRelevanceFieldEnum[]
+    sort: SortOrder
+    search: string
+  }
+
+  export type GmArticleDataCountOrderByAggregateInput = {
+    id?: SortOrder
+    gmAgeGrade?: SortOrder
+    gmApplicator?: SortOrder
+    gmBaseType?: SortOrder
+    gmBatteryType?: SortOrder
+    gmBpaFree?: SortOrder
+    gmBpcForm?: SortOrder
+    gmBrand?: SortOrder
+    gmBrandType?: SortOrder
+    gmCapacityMl?: SortOrder
+    gmCareInstruction?: SortOrder
+    gmCertification?: SortOrder
+    gmClosureType?: SortOrder
+    gmCoating?: SortOrder
+    gmColourFamily?: SortOrder
+    gmColourShade?: SortOrder
+    gmCompartmentCount?: SortOrder
+    gmComposition?: SortOrder
+    gmCosmeticFinish?: SortOrder
+    gmDiameterCm?: SortOrder
+    gmDimStandard?: SortOrder
+    gmDishwasherSafe?: SortOrder
+    gmFoldable?: SortOrder
+    gmFoodContactSafe?: SortOrder
+    gmFragranceConc?: SortOrder
+    gmFragranceFamily?: SortOrder
+    gmFreeFrom?: SortOrder
+    gmFwHeelHtCm?: SortOrder
+    gmFwHeelType?: SortOrder
+    gmFwSize?: SortOrder
+    gmFwSole?: SortOrder
+    gmFwToe?: SortOrder
+    gmFwUpper?: SortOrder
+    gmGsm?: SortOrder
+    gmHeatRetentionHr?: SortOrder
+    gmHeightCm?: SortOrder
+    gmInsulationType?: SortOrder
+    gmKeyIngredient?: SortOrder
+    gmLeakProof?: SortOrder
+    gmLengthCm?: SortOrder
+    gmLicence?: SortOrder
+    gmLidType?: SortOrder
+    gmLifestage?: SortOrder
+    gmLiningMaterial?: SortOrder
+    gmManufacturer?: SortOrder
+    gmMaterial?: SortOrder
+    gmMaterialGroup?: SortOrder
+    gmMaterialSecondary?: SortOrder
+    gmMicrowaveSafe?: SortOrder
+    gmMountType?: SortOrder
+    gmNetContent?: SortOrder
+    gmNetContentUom?: SortOrder
+    gmNetWeightG?: SortOrder
+    gmPackQty?: SortOrder
+    gmPattern?: SortOrder
+    gmPlayPattern?: SortOrder
+    gmPlayerCount?: SortOrder
+    gmPowerSource?: SortOrder
+    gmPriceTier?: SortOrder
+    gmPrintTheme?: SortOrder
+    gmSeason?: SortOrder
+    gmSellUom?: SortOrder
+    gmSetContents?: SortOrder
+    gmShelfLifeMonths?: SortOrder
+    gmSkinType?: SortOrder
+    gmSpf?: SortOrder
+    gmSport?: SortOrder
+    gmStrapType?: SortOrder
+    gmSurfaceFinish?: SortOrder
+    gmTextileFabric?: SortOrder
+    gmThreadCount?: SortOrder
+    gmUsageOccasion?: SortOrder
+    gmVoltageV?: SortOrder
+    gmWarrantyMonths?: SortOrder
+    gmWattageW?: SortOrder
+    gmWeave?: SortOrder
+    gmWheelCount?: SortOrder
+    gmWidthCm?: SortOrder
+    gmYarn?: SortOrder
+    gmArticleNumber?: SortOrder
+    gmArticleDescription?: SortOrder
+    flatId?: SortOrder
+    division?: SortOrder
+    subDivision?: SortOrder
+    majorCategory?: SortOrder
+    mcDescription?: SortOrder
+    vendorName?: SortOrder
+    vendorCode?: SortOrder
+    designNumber?: SortOrder
+    pptNumber?: SortOrder
+    rate?: SortOrder
+    mrp?: SortOrder
+    segment?: SortOrder
+    articleFashionType?: SortOrder
+    approvalStatus?: SortOrder
+    approvedAt?: SortOrder
+    approvedBy?: SortOrder
+    sapSyncStatus?: SortOrder
+    sapSyncMessage?: SortOrder
+    imageUrl?: SortOrder
+    gmArticleType?: SortOrder
+    source?: SortOrder
+    userName?: SortOrder
+    createdAt?: SortOrder
+    updatedAt?: SortOrder
+  }
+
+  export type GmArticleDataAvgOrderByAggregateInput = {
+    rate?: SortOrder
+    mrp?: SortOrder
+    approvedBy?: SortOrder
+  }
+
+  export type GmArticleDataMaxOrderByAggregateInput = {
+    id?: SortOrder
+    gmAgeGrade?: SortOrder
+    gmApplicator?: SortOrder
+    gmBaseType?: SortOrder
+    gmBatteryType?: SortOrder
+    gmBpaFree?: SortOrder
+    gmBpcForm?: SortOrder
+    gmBrand?: SortOrder
+    gmBrandType?: SortOrder
+    gmCapacityMl?: SortOrder
+    gmCareInstruction?: SortOrder
+    gmCertification?: SortOrder
+    gmClosureType?: SortOrder
+    gmCoating?: SortOrder
+    gmColourFamily?: SortOrder
+    gmColourShade?: SortOrder
+    gmCompartmentCount?: SortOrder
+    gmComposition?: SortOrder
+    gmCosmeticFinish?: SortOrder
+    gmDiameterCm?: SortOrder
+    gmDimStandard?: SortOrder
+    gmDishwasherSafe?: SortOrder
+    gmFoldable?: SortOrder
+    gmFoodContactSafe?: SortOrder
+    gmFragranceConc?: SortOrder
+    gmFragranceFamily?: SortOrder
+    gmFreeFrom?: SortOrder
+    gmFwHeelHtCm?: SortOrder
+    gmFwHeelType?: SortOrder
+    gmFwSize?: SortOrder
+    gmFwSole?: SortOrder
+    gmFwToe?: SortOrder
+    gmFwUpper?: SortOrder
+    gmGsm?: SortOrder
+    gmHeatRetentionHr?: SortOrder
+    gmHeightCm?: SortOrder
+    gmInsulationType?: SortOrder
+    gmKeyIngredient?: SortOrder
+    gmLeakProof?: SortOrder
+    gmLengthCm?: SortOrder
+    gmLicence?: SortOrder
+    gmLidType?: SortOrder
+    gmLifestage?: SortOrder
+    gmLiningMaterial?: SortOrder
+    gmManufacturer?: SortOrder
+    gmMaterial?: SortOrder
+    gmMaterialGroup?: SortOrder
+    gmMaterialSecondary?: SortOrder
+    gmMicrowaveSafe?: SortOrder
+    gmMountType?: SortOrder
+    gmNetContent?: SortOrder
+    gmNetContentUom?: SortOrder
+    gmNetWeightG?: SortOrder
+    gmPackQty?: SortOrder
+    gmPattern?: SortOrder
+    gmPlayPattern?: SortOrder
+    gmPlayerCount?: SortOrder
+    gmPowerSource?: SortOrder
+    gmPriceTier?: SortOrder
+    gmPrintTheme?: SortOrder
+    gmSeason?: SortOrder
+    gmSellUom?: SortOrder
+    gmSetContents?: SortOrder
+    gmShelfLifeMonths?: SortOrder
+    gmSkinType?: SortOrder
+    gmSpf?: SortOrder
+    gmSport?: SortOrder
+    gmStrapType?: SortOrder
+    gmSurfaceFinish?: SortOrder
+    gmTextileFabric?: SortOrder
+    gmThreadCount?: SortOrder
+    gmUsageOccasion?: SortOrder
+    gmVoltageV?: SortOrder
+    gmWarrantyMonths?: SortOrder
+    gmWattageW?: SortOrder
+    gmWeave?: SortOrder
+    gmWheelCount?: SortOrder
+    gmWidthCm?: SortOrder
+    gmYarn?: SortOrder
+    gmArticleNumber?: SortOrder
+    gmArticleDescription?: SortOrder
+    flatId?: SortOrder
+    division?: SortOrder
+    subDivision?: SortOrder
+    majorCategory?: SortOrder
+    mcDescription?: SortOrder
+    vendorName?: SortOrder
+    vendorCode?: SortOrder
+    designNumber?: SortOrder
+    pptNumber?: SortOrder
+    rate?: SortOrder
+    mrp?: SortOrder
+    segment?: SortOrder
+    articleFashionType?: SortOrder
+    approvalStatus?: SortOrder
+    approvedAt?: SortOrder
+    approvedBy?: SortOrder
+    sapSyncStatus?: SortOrder
+    sapSyncMessage?: SortOrder
+    imageUrl?: SortOrder
+    gmArticleType?: SortOrder
+    source?: SortOrder
+    userName?: SortOrder
+    createdAt?: SortOrder
+    updatedAt?: SortOrder
+  }
+
+  export type GmArticleDataMinOrderByAggregateInput = {
+    id?: SortOrder
+    gmAgeGrade?: SortOrder
+    gmApplicator?: SortOrder
+    gmBaseType?: SortOrder
+    gmBatteryType?: SortOrder
+    gmBpaFree?: SortOrder
+    gmBpcForm?: SortOrder
+    gmBrand?: SortOrder
+    gmBrandType?: SortOrder
+    gmCapacityMl?: SortOrder
+    gmCareInstruction?: SortOrder
+    gmCertification?: SortOrder
+    gmClosureType?: SortOrder
+    gmCoating?: SortOrder
+    gmColourFamily?: SortOrder
+    gmColourShade?: SortOrder
+    gmCompartmentCount?: SortOrder
+    gmComposition?: SortOrder
+    gmCosmeticFinish?: SortOrder
+    gmDiameterCm?: SortOrder
+    gmDimStandard?: SortOrder
+    gmDishwasherSafe?: SortOrder
+    gmFoldable?: SortOrder
+    gmFoodContactSafe?: SortOrder
+    gmFragranceConc?: SortOrder
+    gmFragranceFamily?: SortOrder
+    gmFreeFrom?: SortOrder
+    gmFwHeelHtCm?: SortOrder
+    gmFwHeelType?: SortOrder
+    gmFwSize?: SortOrder
+    gmFwSole?: SortOrder
+    gmFwToe?: SortOrder
+    gmFwUpper?: SortOrder
+    gmGsm?: SortOrder
+    gmHeatRetentionHr?: SortOrder
+    gmHeightCm?: SortOrder
+    gmInsulationType?: SortOrder
+    gmKeyIngredient?: SortOrder
+    gmLeakProof?: SortOrder
+    gmLengthCm?: SortOrder
+    gmLicence?: SortOrder
+    gmLidType?: SortOrder
+    gmLifestage?: SortOrder
+    gmLiningMaterial?: SortOrder
+    gmManufacturer?: SortOrder
+    gmMaterial?: SortOrder
+    gmMaterialGroup?: SortOrder
+    gmMaterialSecondary?: SortOrder
+    gmMicrowaveSafe?: SortOrder
+    gmMountType?: SortOrder
+    gmNetContent?: SortOrder
+    gmNetContentUom?: SortOrder
+    gmNetWeightG?: SortOrder
+    gmPackQty?: SortOrder
+    gmPattern?: SortOrder
+    gmPlayPattern?: SortOrder
+    gmPlayerCount?: SortOrder
+    gmPowerSource?: SortOrder
+    gmPriceTier?: SortOrder
+    gmPrintTheme?: SortOrder
+    gmSeason?: SortOrder
+    gmSellUom?: SortOrder
+    gmSetContents?: SortOrder
+    gmShelfLifeMonths?: SortOrder
+    gmSkinType?: SortOrder
+    gmSpf?: SortOrder
+    gmSport?: SortOrder
+    gmStrapType?: SortOrder
+    gmSurfaceFinish?: SortOrder
+    gmTextileFabric?: SortOrder
+    gmThreadCount?: SortOrder
+    gmUsageOccasion?: SortOrder
+    gmVoltageV?: SortOrder
+    gmWarrantyMonths?: SortOrder
+    gmWattageW?: SortOrder
+    gmWeave?: SortOrder
+    gmWheelCount?: SortOrder
+    gmWidthCm?: SortOrder
+    gmYarn?: SortOrder
+    gmArticleNumber?: SortOrder
+    gmArticleDescription?: SortOrder
+    flatId?: SortOrder
+    division?: SortOrder
+    subDivision?: SortOrder
+    majorCategory?: SortOrder
+    mcDescription?: SortOrder
+    vendorName?: SortOrder
+    vendorCode?: SortOrder
+    designNumber?: SortOrder
+    pptNumber?: SortOrder
+    rate?: SortOrder
+    mrp?: SortOrder
+    segment?: SortOrder
+    articleFashionType?: SortOrder
+    approvalStatus?: SortOrder
+    approvedAt?: SortOrder
+    approvedBy?: SortOrder
+    sapSyncStatus?: SortOrder
+    sapSyncMessage?: SortOrder
+    imageUrl?: SortOrder
+    gmArticleType?: SortOrder
+    source?: SortOrder
+    userName?: SortOrder
+    createdAt?: SortOrder
+    updatedAt?: SortOrder
+  }
+
+  export type GmArticleDataSumOrderByAggregateInput = {
+    rate?: SortOrder
+    mrp?: SortOrder
     approvedBy?: SortOrder
   }
 
