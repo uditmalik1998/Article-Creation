@@ -3689,6 +3689,322 @@ export class ApproverController {
         });
     }
 
+    static async getGMHierarchy(_req: Request, res: Response) {
+        const rows = await prisma.$queryRaw<{ div: string; sub_div: string; maj_cat_nm: string; maj_cat_desc: string | null }[]>`
+            SELECT DISTINCT div, sub_div, maj_cat_nm, maj_cat_desc
+            FROM gm_major_category_details
+            WHERE div IS NOT NULL AND sub_div IS NOT NULL AND maj_cat_nm IS NOT NULL
+              AND mj_status = 'ACT'
+            ORDER BY div, sub_div, maj_cat_nm
+        `;
+
+        const divSet = new Set<string>();
+        const subDivsByDiv: Record<string, string[]> = {};
+        const majCatsBySubDiv: Record<string, string[]> = {};
+        const mcDesByMajCat: Record<string, string[]> = {};
+
+        for (const row of rows) {
+            if (!row.div || !row.sub_div || !row.maj_cat_nm) continue;
+            divSet.add(row.div);
+            if (!subDivsByDiv[row.div]) subDivsByDiv[row.div] = [];
+            if (!subDivsByDiv[row.div].includes(row.sub_div)) subDivsByDiv[row.div].push(row.sub_div);
+            if (!majCatsBySubDiv[row.sub_div]) majCatsBySubDiv[row.sub_div] = [];
+            if (!majCatsBySubDiv[row.sub_div].includes(row.maj_cat_nm)) majCatsBySubDiv[row.sub_div].push(row.maj_cat_nm);
+            if (row.maj_cat_desc) {
+                if (!mcDesByMajCat[row.maj_cat_nm]) mcDesByMajCat[row.maj_cat_nm] = [];
+                if (!mcDesByMajCat[row.maj_cat_nm].includes(row.maj_cat_desc)) mcDesByMajCat[row.maj_cat_nm].push(row.maj_cat_desc);
+            }
+        }
+
+        return res.json({
+            divisions: Array.from(divSet),
+            subDivsByDiv,
+            majCatsBySubDiv,
+            mcDesByMajCat,
+        });
+    }
+
+    static async getGMAttributes(req: Request, res: Response) {
+        const majorCategory = String(req.query.majorCategory ?? '').trim();
+        if (!majorCategory) return res.json({ familyCodes: [] });
+        const rows = await prisma.$queryRaw<{ family_code: string; family_name: string }[]>`
+            SELECT DISTINCT family_code, family_name
+            FROM gm_major_category_details
+            WHERE maj_cat_nm = ${majorCategory} AND mj_status = 'ACT' AND status = 'ACT'
+              AND family_code IS NOT NULL AND family_code <> ''
+            ORDER BY family_code
+        `;
+        return res.json({
+            familyCodes: rows.map((r) => r.family_code),
+            familyAttrs: rows.map((r) => ({ code: r.family_code, name: r.family_name ?? r.family_code })),
+        });
+    }
+
+    // ─── GM Article Data (gm_article_data) ───────────────────────────────────────
+
+    private static buildGmArticleDataWhere(query: Record<string, string>) {
+        const { pathType = 'new', division, subDivision, majorCategory, search, startDate, endDate } = query;
+        const where: any = {};
+
+        if (pathType === 'new') {
+            where.approvalStatus = 'PENDING';
+        } else if (pathType === 'rejected') {
+            where.approvalStatus = 'REJECTED';
+        } else if (pathType === 'created') {
+            where.approvalStatus = 'APPROVED';
+        } else if (pathType === 'failed') {
+            where.sapSyncStatus = 'FAILED';
+        }
+
+        if (division && division !== 'ALL') where.division = { contains: division, mode: 'insensitive' };
+        if (subDivision && subDivision !== 'ALL') where.subDivision = { equals: subDivision, mode: 'insensitive' };
+        if (majorCategory) where.majorCategory = { equals: majorCategory, mode: 'insensitive' };
+
+        const ss = String(query.sapSyncStatus || '').trim().toUpperCase();
+        if (['SYNCED', 'PENDING', 'FAILED', 'NOT_SYNCED'].includes(ss)) where.sapSyncStatus = ss;
+
+        const dateField = pathType === 'created' ? 'approvedAt' : 'createdAt';
+        if (startDate || endDate) {
+            where[dateField] = {};
+            if (startDate) where[dateField].gte = new Date(startDate);
+            if (endDate)   where[dateField].lte = new Date(endDate);
+        }
+
+        if (search) {
+            where.OR = [
+                { gmArticleNumber:      { contains: search, mode: 'insensitive' } },
+                { gmArticleDescription: { contains: search, mode: 'insensitive' } },
+                { vendorName:           { contains: search, mode: 'insensitive' } },
+                { vendorCode:           { contains: search, mode: 'insensitive' } },
+                { designNumber:         { contains: search, mode: 'insensitive' } },
+                { majorCategory:        { contains: search, mode: 'insensitive' } },
+            ];
+        }
+
+        return { where };
+    }
+
+    private static GM_ARTICLE_DATA_SELECT = {
+        id: true,
+        gmArticleNumber: true, gmArticleDescription: true, gmArticleType: true,
+        division: true, subDivision: true, majorCategory: true, mcDescription: true,
+        vendorName: true, vendorCode: true, designNumber: true, pptNumber: true,
+        approvalStatus: true, approvedAt: true, approvedBy: true,
+        sapSyncStatus: true, sapSyncMessage: true,
+        imageUrl: true, source: true, userName: true,
+        rate: true, mrp: true, segment: true, articleFashionType: true, flatId: true,
+        createdAt: true, updatedAt: true,
+        // GM attribute columns
+        gmAgeGrade: true, gmApplicator: true, gmBaseType: true, gmBatteryType: true,
+        gmBpaFree: true, gmBpcForm: true, gmBrand: true, gmBrandType: true,
+        gmCapacityMl: true, gmCareInstruction: true, gmCertification: true,
+        gmClosureType: true, gmCoating: true, gmColourFamily: true, gmColourShade: true,
+        gmCompartmentCount: true, gmComposition: true, gmCosmeticFinish: true,
+        gmDiameterCm: true, gmDimStandard: true, gmDishwasherSafe: true,
+        gmFoldable: true, gmFoodContactSafe: true, gmFragranceConc: true,
+        gmFragranceFamily: true, gmFreeFrom: true, gmFwHeelHtCm: true,
+        gmFwHeelType: true, gmFwSize: true, gmFwSole: true, gmFwToe: true,
+        gmFwUpper: true, gmGsm: true, gmHeatRetentionHr: true, gmHeightCm: true,
+        gmInsulationType: true, gmKeyIngredient: true, gmLeakProof: true,
+        gmLengthCm: true, gmLicence: true, gmLidType: true, gmLifestage: true,
+        gmLiningMaterial: true, gmManufacturer: true, gmMaterial: true,
+        gmMaterialGroup: true, gmMaterialSecondary: true, gmMicrowaveSafe: true,
+        gmMountType: true, gmNetContent: true, gmNetContentUom: true,
+        gmNetWeightG: true, gmPackQty: true, gmPattern: true, gmPlayPattern: true,
+        gmPlayerCount: true, gmPowerSource: true, gmPriceTier: true,
+        gmPrintTheme: true, gmSeason: true, gmSellUom: true, gmSetContents: true,
+        gmShelfLifeMonths: true, gmSkinType: true, gmSpf: true, gmSport: true,
+        gmStrapType: true, gmSurfaceFinish: true, gmTextileFabric: true,
+        gmThreadCount: true, gmUsageOccasion: true, gmVoltageV: true,
+        gmWarrantyMonths: true, gmWattageW: true, gmWeave: true,
+        gmWheelCount: true, gmWidthCm: true, gmYarn: true,
+    } as const;
+
+    private static gmArticleDataRowToItem(r: any) {
+        return {
+            id:                      r.id,
+            isGeneric:               false,
+            imageName:               null,
+            imageUrl:                r.imageUrl ?? null,
+            articleNumber:           r.gmArticleNumber ?? null,
+            fabricArticleNumber:     r.gmArticleNumber ?? null,
+            fabricArticleDescription: r.gmArticleDescription ?? null,
+            division:                r.division ?? null,
+            subDivision:             r.subDivision ?? null,
+            majorCategory:           r.majorCategory ?? null,
+            mcCode:                  null,
+            mcDescription:           r.mcDescription ?? null,
+            vendorName:              r.vendorName ?? null,
+            vendorCode:              r.vendorCode ?? null,
+            designNumber:            r.designNumber ?? null,
+            pptNumber:               r.pptNumber ?? null,
+            approvalStatus:          (r.approvalStatus ?? 'PENDING') as 'PENDING' | 'APPROVED' | 'REJECTED',
+            approvedAt:              r.approvedAt?.toISOString() ?? null,
+            approvedBy:              r.approvedBy ?? null,
+            sapSyncStatus:           (r.sapSyncStatus ?? 'NOT_SYNCED') as any,
+            sapSyncMessage:          r.sapSyncMessage ?? null,
+            userName:                r.userName ?? null,
+            createdAt:               r.createdAt.toISOString(),
+            updatedAt:               r.updatedAt.toISOString(),
+            source:                  r.source ?? null,
+            mrp:                     r.mrp != null ? Number(r.mrp) : null,
+            rate:                    r.rate != null ? Number(r.rate) : null,
+            segment:                 r.segment ?? null,
+            articleFashionType:      r.articleFashionType ?? null,
+            flatId:                  r.flatId ?? null,
+            // GM attribute fields — keyed by family_code (uppercase) so frontend can use attr.code directly
+            GM_AGE_GRADE: r.gmAgeGrade ?? null, GM_APPLICATOR: r.gmApplicator ?? null,
+            GM_BASE_TYPE: r.gmBaseType ?? null, GM_BATTERY_TYPE: r.gmBatteryType ?? null,
+            GM_BPA_FREE: r.gmBpaFree ?? null, GM_BPC_FORM: r.gmBpcForm ?? null,
+            GM_BRAND: r.gmBrand ?? null, GM_BRAND_TYPE: r.gmBrandType ?? null,
+            GM_CAPACITY_ML: r.gmCapacityMl ?? null, GM_CARE_INSTRUCTION: r.gmCareInstruction ?? null,
+            GM_CERTIFICATION: r.gmCertification ?? null, GM_CLOSURE_TYPE: r.gmClosureType ?? null,
+            GM_COATING: r.gmCoating ?? null, GM_COLOUR_FAMILY: r.gmColourFamily ?? null,
+            GM_COLOUR_SHADE: r.gmColourShade ?? null, GM_COMPARTMENT_COUNT: r.gmCompartmentCount ?? null,
+            GM_COMPOSITION: r.gmComposition ?? null, GM_COSMETIC_FINISH: r.gmCosmeticFinish ?? null,
+            GM_DIAMETER_CM: r.gmDiameterCm ?? null, GM_DIM_STANDARD: r.gmDimStandard ?? null,
+            GM_DISHWASHER_SAFE: r.gmDishwasherSafe ?? null, GM_FOLDABLE: r.gmFoldable ?? null,
+            GM_FOOD_CONTACT_SAFE: r.gmFoodContactSafe ?? null, GM_FRAGRANCE_CONC: r.gmFragranceConc ?? null,
+            GM_FRAGRANCE_FAMILY: r.gmFragranceFamily ?? null, GM_FREE_FROM: r.gmFreeFrom ?? null,
+            GM_FW_HEEL_HT_CM: r.gmFwHeelHtCm ?? null, GM_FW_HEEL_TYPE: r.gmFwHeelType ?? null,
+            GM_FW_SIZE: r.gmFwSize ?? null, GM_FW_SOLE: r.gmFwSole ?? null,
+            GM_FW_TOE: r.gmFwToe ?? null, GM_FW_UPPER: r.gmFwUpper ?? null,
+            GM_GSM: r.gmGsm ?? null, GM_HEAT_RETENTION_HR: r.gmHeatRetentionHr ?? null,
+            GM_HEIGHT_CM: r.gmHeightCm ?? null, GM_INSULATION_TYPE: r.gmInsulationType ?? null,
+            GM_KEY_INGREDIENT: r.gmKeyIngredient ?? null, GM_LEAK_PROOF: r.gmLeakProof ?? null,
+            GM_LENGTH_CM: r.gmLengthCm ?? null, GM_LICENCE: r.gmLicence ?? null,
+            GM_LID_TYPE: r.gmLidType ?? null, GM_LIFESTAGE: r.gmLifestage ?? null,
+            GM_LINING_MATERIAL: r.gmLiningMaterial ?? null, GM_MANUFACTURER: r.gmManufacturer ?? null,
+            GM_MATERIAL: r.gmMaterial ?? null, GM_MATERIAL_GROUP: r.gmMaterialGroup ?? null,
+            GM_MATERIAL_SECONDARY: r.gmMaterialSecondary ?? null, GM_MICROWAVE_SAFE: r.gmMicrowaveSafe ?? null,
+            GM_MOUNT_TYPE: r.gmMountType ?? null, GM_NET_CONTENT: r.gmNetContent ?? null,
+            GM_NET_CONTENT_UOM: r.gmNetContentUom ?? null, GM_NET_WEIGHT_G: r.gmNetWeightG ?? null,
+            GM_PACK_QTY: r.gmPackQty ?? null, GM_PATTERN: r.gmPattern ?? null,
+            GM_PLAY_PATTERN: r.gmPlayPattern ?? null, GM_PLAYER_COUNT: r.gmPlayerCount ?? null,
+            GM_POWER_SOURCE: r.gmPowerSource ?? null, GM_PRICE_TIER: r.gmPriceTier ?? null,
+            GM_PRINT_THEME: r.gmPrintTheme ?? null, GM_SEASON: r.gmSeason ?? null,
+            GM_SELL_UOM: r.gmSellUom ?? null, GM_SET_CONTENTS: r.gmSetContents ?? null,
+            GM_SHELF_LIFE_MONTHS: r.gmShelfLifeMonths ?? null, GM_SKIN_TYPE: r.gmSkinType ?? null,
+            GM_SPF: r.gmSpf ?? null, GM_SPORT: r.gmSport ?? null,
+            GM_STRAP_TYPE: r.gmStrapType ?? null, GM_SURFACE_FINISH: r.gmSurfaceFinish ?? null,
+            GM_TEXTILE_FABRIC: r.gmTextileFabric ?? null, GM_THREAD_COUNT: r.gmThreadCount ?? null,
+            GM_USAGE_OCCASION: r.gmUsageOccasion ?? null, GM_VOLTAGE_V: r.gmVoltageV ?? null,
+            GM_WARRANTY_MONTHS: r.gmWarrantyMonths ?? null, GM_WATTAGE_W: r.gmWattageW ?? null,
+            GM_WEAVE: r.gmWeave ?? null, GM_WHEEL_COUNT: r.gmWheelCount ?? null,
+            GM_WIDTH_CM: r.gmWidthCm ?? null, GM_YARN: r.gmYarn ?? null,
+        };
+    }
+
+    static getGmArticleItems = async (req: Request, res: Response) => {
+        const query = req.query as Record<string, string>;
+        const page = parseInt(query.page || '1', 10);
+        const take = parseInt(query.limit || '50', 10);
+        const skip = (page - 1) * take;
+        const pathType = query.pathType || 'new';
+        const { where } = ApproverController.buildGmArticleDataWhere(query);
+        const orderBy = pathType === 'created'
+            ? ({ approvedAt: { sort: 'desc', nulls: 'last' } } as const)
+            : ({ createdAt: 'desc' } as const);
+        const [rows, total] = await Promise.all([
+            prisma.gmArticleData.findMany({ where, skip, take, orderBy, select: ApproverController.GM_ARTICLE_DATA_SELECT }),
+            prisma.gmArticleData.count({ where }),
+        ]);
+        const data = rows.map((r) => ApproverController.gmArticleDataRowToItem(r));
+        return res.json({ data, meta: { total, page, limit: take } });
+    };
+
+    static getGmArticleById = async (req: Request, res: Response) => {
+        const { id } = req.params;
+        const row = await prisma.gmArticleData.findUnique({ where: { id } });
+        if (!row) return res.status(404).json({ error: 'Item not found' });
+        return res.json(ApproverController.gmArticleDataRowToItem(row));
+    };
+
+    // Allowed client-side keys → Prisma field names for gm_article_data updates
+    private static GM_ARTICLE_UPDATE_FIELDS: Record<string, string> = {
+        division: 'division', subDivision: 'subDivision', majorCategory: 'majorCategory',
+        mcDescription: 'mcDescription', vendorName: 'vendorName', vendorCode: 'vendorCode',
+        designNumber: 'designNumber', pptNumber: 'pptNumber',
+        mrp: 'mrp', rate: 'rate', segment: 'segment', articleFashionType: 'articleFashionType',
+        imageUrl: 'imageUrl', source: 'source', userName: 'userName',
+        gmArticleNumber: 'gmArticleNumber', gmArticleDescription: 'gmArticleDescription',
+        fabricArticleDescription: 'gmArticleDescription',  // frontend field alias
+        // All 79 GM attribute fields — client sends uppercase family_code, maps to Prisma camelCase
+        GM_AGE_GRADE: 'gmAgeGrade', GM_APPLICATOR: 'gmApplicator', GM_BASE_TYPE: 'gmBaseType',
+        GM_BATTERY_TYPE: 'gmBatteryType', GM_BPA_FREE: 'gmBpaFree', GM_BPC_FORM: 'gmBpcForm',
+        GM_BRAND: 'gmBrand', GM_BRAND_TYPE: 'gmBrandType', GM_CAPACITY_ML: 'gmCapacityMl',
+        GM_CARE_INSTRUCTION: 'gmCareInstruction', GM_CERTIFICATION: 'gmCertification',
+        GM_CLOSURE_TYPE: 'gmClosureType', GM_COATING: 'gmCoating', GM_COLOUR_FAMILY: 'gmColourFamily',
+        GM_COLOUR_SHADE: 'gmColourShade', GM_COMPARTMENT_COUNT: 'gmCompartmentCount',
+        GM_COMPOSITION: 'gmComposition', GM_COSMETIC_FINISH: 'gmCosmeticFinish',
+        GM_DIAMETER_CM: 'gmDiameterCm', GM_DIM_STANDARD: 'gmDimStandard',
+        GM_DISHWASHER_SAFE: 'gmDishwasherSafe', GM_FOLDABLE: 'gmFoldable',
+        GM_FOOD_CONTACT_SAFE: 'gmFoodContactSafe', GM_FRAGRANCE_CONC: 'gmFragranceConc',
+        GM_FRAGRANCE_FAMILY: 'gmFragranceFamily', GM_FREE_FROM: 'gmFreeFrom',
+        GM_FW_HEEL_HT_CM: 'gmFwHeelHtCm', GM_FW_HEEL_TYPE: 'gmFwHeelType', GM_FW_SIZE: 'gmFwSize',
+        GM_FW_SOLE: 'gmFwSole', GM_FW_TOE: 'gmFwToe', GM_FW_UPPER: 'gmFwUpper',
+        GM_GSM: 'gmGsm', GM_HEAT_RETENTION_HR: 'gmHeatRetentionHr', GM_HEIGHT_CM: 'gmHeightCm',
+        GM_INSULATION_TYPE: 'gmInsulationType', GM_KEY_INGREDIENT: 'gmKeyIngredient',
+        GM_LEAK_PROOF: 'gmLeakProof', GM_LENGTH_CM: 'gmLengthCm', GM_LICENCE: 'gmLicence',
+        GM_LID_TYPE: 'gmLidType', GM_LIFESTAGE: 'gmLifestage', GM_LINING_MATERIAL: 'gmLiningMaterial',
+        GM_MANUFACTURER: 'gmManufacturer', GM_MATERIAL: 'gmMaterial',
+        GM_MATERIAL_GROUP: 'gmMaterialGroup', GM_MATERIAL_SECONDARY: 'gmMaterialSecondary',
+        GM_MICROWAVE_SAFE: 'gmMicrowaveSafe', GM_MOUNT_TYPE: 'gmMountType',
+        GM_NET_CONTENT: 'gmNetContent', GM_NET_CONTENT_UOM: 'gmNetContentUom',
+        GM_NET_WEIGHT_G: 'gmNetWeightG', GM_PACK_QTY: 'gmPackQty', GM_PATTERN: 'gmPattern',
+        GM_PLAY_PATTERN: 'gmPlayPattern', GM_PLAYER_COUNT: 'gmPlayerCount',
+        GM_POWER_SOURCE: 'gmPowerSource', GM_PRICE_TIER: 'gmPriceTier',
+        GM_PRINT_THEME: 'gmPrintTheme', GM_SEASON: 'gmSeason', GM_SELL_UOM: 'gmSellUom',
+        GM_SET_CONTENTS: 'gmSetContents', GM_SHELF_LIFE_MONTHS: 'gmShelfLifeMonths',
+        GM_SKIN_TYPE: 'gmSkinType', GM_SPF: 'gmSpf', GM_SPORT: 'gmSport',
+        GM_STRAP_TYPE: 'gmStrapType', GM_SURFACE_FINISH: 'gmSurfaceFinish',
+        GM_TEXTILE_FABRIC: 'gmTextileFabric', GM_THREAD_COUNT: 'gmThreadCount',
+        GM_USAGE_OCCASION: 'gmUsageOccasion', GM_VOLTAGE_V: 'gmVoltageV',
+        GM_WARRANTY_MONTHS: 'gmWarrantyMonths', GM_WATTAGE_W: 'gmWattageW',
+        GM_WEAVE: 'gmWeave', GM_WHEEL_COUNT: 'gmWheelCount', GM_WIDTH_CM: 'gmWidthCm',
+        GM_YARN: 'gmYarn',
+    };
+
+    static rejectGmArticles = async (req: Request, res: Response) => {
+        const { ids } = req.body as { ids?: string[] };
+        if (!Array.isArray(ids) || ids.length === 0) {
+            return res.status(400).json({ error: 'No items selected' });
+        }
+        const result = await prisma.gmArticleData.updateMany({
+            where: { id: { in: ids } },
+            data: {
+                approvalStatus: 'REJECTED',
+                sapSyncStatus: 'NOT_SYNCED',
+                sapSyncMessage: 'Rejected by approver',
+                approvedAt: new Date(),
+            },
+        });
+        return res.json({ success: true, rejected: result.count });
+    };
+
+    static updateGmArticleData = async (req: Request, res: Response) => {
+        const { id } = req.params;
+        const body = req.body as Record<string, unknown>;
+
+        const existing = await prisma.gmArticleData.findUnique({ where: { id } });
+        if (!existing) return res.status(404).json({ error: 'Item not found' });
+
+        if (existing.approvalStatus === 'APPROVED') {
+            return res.status(403).json({ error: 'Cannot update an approved GM article. It is locked.' });
+        }
+
+        const data: Record<string, unknown> = {};
+        for (const [clientKey, value] of Object.entries(body)) {
+            const dbKey = ApproverController.GM_ARTICLE_UPDATE_FIELDS[clientKey];
+            if (dbKey) data[dbKey] = value === undefined ? null : value;
+        }
+        if (Object.keys(data).length === 0) {
+            return res.json(ApproverController.gmArticleDataRowToItem(existing));
+        }
+        const row = await prisma.gmArticleData.update({ where: { id }, data });
+        return res.json(ApproverController.gmArticleDataRowToItem(row));
+    };
+
     static async searchFabricArticleData(req: Request, res: Response) {
         const q = String(req.query.q ?? '').trim();
         // Accept comma-separated types e.g. ?type=FG,uploader

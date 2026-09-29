@@ -2,7 +2,7 @@ import { Router } from 'express';
 import multer from 'multer';
 import { ApproverController } from '../controllers/ApproverController';
 import { getMajorCategories, lookupVaacTotalValue } from '../controllers/adminController';
-import { authenticate, requireApprover, requireApprovalRights, requireModifyRights, requireBodyApprovalRights, requireFabricApprovalRights } from '../middleware/auth';
+import { authenticate, requireApprover, requireApprovalRights, requireModifyRights, requireBodyApprovalRights, requireFabricApprovalRights, requireGMApprovalRights } from '../middleware/auth';
 import { asyncHandler } from '../middleware/asyncHandler';
 
 const router = Router();
@@ -60,6 +60,9 @@ router.post('/items/:id/modify', requireModifyRights, h(ApproverController.modif
 
 // FINAL submit — creates the article in SAP.
 router.post('/approve', requireApprovalRights, h(ApproverController.approveItems));
+
+// GM Article approve — same handler as /approve but allows GM_APPROVER role.
+router.post('/gm-approve', requireGMApprovalRights, h(ApproverController.approveItems));
 
 // Reject selected items — approver roles + PD + ADMIN
 router.post('/reject', requireApprovalRights, h(ApproverController.rejectItems));
@@ -150,6 +153,21 @@ router.post('/backfill-descriptions', h(ApproverController.backfillDescriptions)
 
 // Cascading Division → Sub-Division → Major Category hierarchy from fabric_article_master
 router.get('/fabric-article-master/hierarchy', h(ApproverController.getFabricArticleMasterHierarchy));
+// Cascading Division → Sub-Division → Major Category hierarchy from gm_major_category_details
+router.get('/gm-hierarchy', h(ApproverController.getGMHierarchy));
+
+// GM attribute family codes for a major category (from gm_major_category_details.family_code)
+router.get('/gm-attributes', h(ApproverController.getGMAttributes));
+
+// GM Article data list — paginated list from gm_article_data
+router.get('/gm-articles', h(ApproverController.getGmArticleItems));
+
+// Get / Update a single gm_article_data record
+router.get('/gm-articles/:id', h(ApproverController.getGmArticleById));
+router.put('/gm-articles/:id', h(ApproverController.updateGmArticleData));
+
+// Reject GM articles — sets approvalStatus to REJECTED in gm_article_data
+router.post('/gm-articles/reject', requireGMApprovalRights, h(ApproverController.rejectGmArticles));
 
 // Fabric attribute grid values from fabric_maj_cat_grid_values (M_FAB_DIV, M_YARN, etc.)
 router.get('/fabric-grid-values', h(ApproverController.getFabricGridValues));
