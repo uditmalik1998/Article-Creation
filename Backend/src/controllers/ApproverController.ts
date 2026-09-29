@@ -3749,6 +3749,45 @@ export class ApproverController {
         });
     }
 
+    static async getGMGridValues(req: Request, res: Response) {
+        const majorCategory = String(req.query.majorCategory ?? '').trim();
+        if (!majorCategory) return res.json({ data: [] });
+        const rows = await prisma.$queryRaw<{
+            family_code: string;
+            family_name: string | null;
+            mandatory: string | null;
+            grid_val: string | null;
+        }[]>`
+            SELECT family_code, family_name, mandatory, grid_val
+            FROM gm_major_category_grid_values
+            WHERE maj_cat_nm = ${majorCategory} AND status = 'ACT'
+              AND family_code IS NOT NULL AND family_code <> ''
+            ORDER BY family_code, grid_val
+        `;
+        // Group by family_code
+        const grouped = new Map<string, { familyName: string; mandatory: boolean; values: string[] }>();
+        for (const row of rows) {
+            if (!row.family_code) continue;
+            if (!grouped.has(row.family_code)) {
+                grouped.set(row.family_code, {
+                    familyName: row.family_name ?? row.family_code,
+                    mandatory: (row.mandatory ?? '').toUpperCase() === 'MAND',
+                    values: [],
+                });
+            }
+            if (row.grid_val && row.grid_val.trim()) {
+                grouped.get(row.family_code)!.values.push(row.grid_val.trim());
+            }
+        }
+        const data = Array.from(grouped.entries()).map(([familyCode, entry]) => ({
+            familyCode,
+            familyName: entry.familyName,
+            mandatory: entry.mandatory,
+            values: entry.values,
+        }));
+        return res.json({ data });
+    }
+
     // ─── GM Article Data (gm_article_data) ───────────────────────────────────────
 
     private static buildGmArticleDataWhere(query: Record<string, string>) {

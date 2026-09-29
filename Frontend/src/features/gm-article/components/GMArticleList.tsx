@@ -70,6 +70,8 @@ import {
   isMandatoryGridLoadedFor,
   isMandatoryGridFieldActive,
   isMajCatInMandatoryGrid,
+  preloadGMGridFor,
+  type GmGridAttr,
 } from '../../../services/articleConfigService';
 import { getImageUrl } from '../../../shared/utils/common/helpers';
 import { APP_CONFIG } from '../../../constants/app/config';
@@ -154,31 +156,14 @@ const fetchBomMap = (category: string): Promise<Record<string, Record<string, st
 
 const f = (schemaKey: string) => SCHEMA_KEY_TO_EXCEL_ATTR[schemaKey] ?? schemaKey;
 
-// Module-level cache for GM attribute family attrs per major category
-type GmFamilyAttr = { code: string; name: string };
-const _gmAttrCache = new Map<string, GmFamilyAttr[]>();
-const _gmAttrPending = new Map<string, Promise<GmFamilyAttr[]>>();
+type GmFamilyAttr = { code: string; name: string; values: string[]; mandatory: boolean };
 
-const fetchGMAttributes = (majorCategory: string): Promise<GmFamilyAttr[]> => {
-  const key = majorCategory.trim().toUpperCase();
-  if (_gmAttrCache.has(key)) return Promise.resolve(_gmAttrCache.get(key)!);
-  if (_gmAttrPending.has(key)) return _gmAttrPending.get(key)!;
-  const token = localStorage.getItem('authToken') || sessionStorage.getItem('authToken');
-  const p = fetch(
-    `${APP_CONFIG.api.baseURL}/approver/gm-attributes?majorCategory=${encodeURIComponent(majorCategory)}`,
-    { headers: token ? { Authorization: `Bearer ${token}` } : {} },
-  )
-    .then((r) => (r.ok ? r.json() : { familyAttrs: [] }))
-    .then((data) => {
-      const attrs: GmFamilyAttr[] = data.familyAttrs ?? (data.familyCodes ?? []).map((c: string) => ({ code: c, name: c }));
-      _gmAttrCache.set(key, attrs);
-      return attrs;
-    })
-    .catch(() => [] as GmFamilyAttr[])
-    .finally(() => _gmAttrPending.delete(key));
-  _gmAttrPending.set(key, p);
-  return p;
-};
+const gmGridAttrToFamilyAttr = (a: GmGridAttr): GmFamilyAttr => ({
+  code: a.familyCode,
+  name: a.familyName,
+  values: a.values,
+  mandatory: a.mandatory,
+});
 
 
 const SCHEMA_KEY_TO_ALL_SAP_KEYS: Record<string, string[]> = Object.entries(SAP_NAME_TO_SCHEMA_KEY).reduce(
@@ -550,11 +535,13 @@ const ArticleCard = React.memo(
     const [fabricGrid, setFabricGrid] = useState<FabGridValues>({});
     const [fabricGridReady, setFabricGridReady] = useState(false);
 
-    // GM attribute family attrs for this article's major category
+    // GM attribute grid values for this article's major category
     const [gmFamilyAttrs, setGmFamilyAttrs] = useState<GmFamilyAttr[]>([]);
     useEffect(() => {
       if (!effectiveMajCat) { setGmFamilyAttrs([]); return; }
-      fetchGMAttributes(effectiveMajCat).then(setGmFamilyAttrs).catch(() => setGmFamilyAttrs([]));
+      preloadGMGridFor(effectiveMajCat)
+        .then((attrs) => setGmFamilyAttrs(attrs.map(gmGridAttrToFamilyAttr)))
+        .catch(() => setGmFamilyAttrs([]));
     }, [effectiveMajCat]);
 
     const attributeFields = useMemo(
@@ -2056,9 +2043,9 @@ const ArticleCard = React.memo(
                                     label: attr.code,
                                     schemaKey: attr.code,
                                     group: 'FAB',
-                                    values: [],
-                                    freeText: true,
-                                    isMandatory: false,
+                                    values: attr.values.map((v) => ({ shortForm: v, fullForm: v })),
+                                    freeText: attr.values.length === 0,
+                                    isMandatory: attr.mandatory,
                                   });
                                 })
                               : groupMap[g.group].attrs.map((attr) => renderAttributeRow(attr))
