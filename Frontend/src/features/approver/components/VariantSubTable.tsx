@@ -848,18 +848,6 @@ const VariantSubTable: React.FC<VariantSubTableProps> = ({
   }, [variants]);
 
   const handleRetryVariants = useCallback(async () => {
-    // Validate variant_weight for all un-synced variants before retrying
-    const unsynced = variants.filter((v) => !v.fabricArticleNumber && !v.sapArticleId);
-    const missingWeight = unsynced.filter(
-      (v) => !v.variantWeight || String(v.variantWeight).trim() === '',
-    );
-    if (missingWeight.length > 0) {
-      message.error(
-        `${missingWeight.length} variant${missingWeight.length > 1 ? 's are' : ' is'} missing Weight (kg). Fill in weight for all variants before retrying.`,
-      );
-      return;
-    }
-
     setRetrying(true);
     try {
       const token = localStorage.getItem('authToken');
