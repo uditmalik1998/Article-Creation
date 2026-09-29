@@ -2056,7 +2056,6 @@ const ArticleCard = React.memo(
                                     label: attr.code,
                                     schemaKey: attr.code,
                                     group: 'FAB',
-                                    groupColor: '#e6f4ff',
                                     values: [],
                                     freeText: true,
                                     isMandatory: false,
