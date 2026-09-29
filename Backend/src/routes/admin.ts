@@ -166,6 +166,24 @@ router.get('/mandatory-grid/download', h(adminController.downloadMandatoryGridDa
 router.post('/mandatory-grid/upload', excelUpload.single('file'), h(adminController.uploadMandatoryGrid));
 
 // ═══════════════════════════════════════════════════════
+// GM MAJOR CATEGORY DETAILS (ADMIN) — gm_major_category_details
+// ═══════════════════════════════════════════════════════
+router.get('/gm-mct/status', h(adminController.getGMMajCatDetailsStatus));
+router.get('/gm-mct/template', h(adminController.downloadGMMajCatDetailsTemplate));
+router.get('/gm-mct/download', h(adminController.downloadGMMajCatDetailsData));
+router.post('/gm-mct/upload', excelUpload.single('file'), h(adminController.uploadGMMajCatDetails));
+router.get('/gm-mct/upload-status/:jobId', h(adminController.getGMMajCatDetailsUploadStatus));
+
+// ═══════════════════════════════════════════════════════
+// GM MAJOR CATEGORY GRID (ADMIN) — gm_major_category_grid_values
+// ═══════════════════════════════════════════════════════
+router.get('/gm-grid/status', h(adminController.getGMGridStatus));
+router.get('/gm-grid/template', h(adminController.downloadGMGridTemplate));
+router.get('/gm-grid/download', h(adminController.downloadGMGridData));
+router.post('/gm-grid/upload', excelUpload.single('file'), h(adminController.uploadGMGrid));
+router.get('/gm-grid/upload-status/:jobId', h(adminController.getGMGridUploadStatus));
+
+// ═══════════════════════════════════════════════════════
 // SIZE MASTER (ADMIN) — maj_cat_sizes
 // ═══════════════════════════════════════════════════════
 router.get('/size-master/status', h(adminController.getSizeMasterStatus));

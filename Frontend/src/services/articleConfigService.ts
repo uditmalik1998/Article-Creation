@@ -459,3 +459,57 @@ export function invalidateMandatoryGrid(): void {
   loadedMandatoryCats.clear();
   inflightMandatoryCats.clear();
 }
+
+// ─── GM Major Category Grid Values (from gm_major_category_grid_values) ────────
+
+export interface GmGridAttr {
+  familyCode: string;
+  familyName: string;
+  mandatory: boolean;
+  values: string[];
+}
+
+const gmGridCache = new Map<string, GmGridAttr[]>();
+const gmGridPending = new Map<string, Promise<GmGridAttr[]>>();
+
+/**
+ * Fetch and cache GM attribute grid values for a major category.
+ * Returns { familyCode, familyName, mandatory, values[] } per attribute.
+ */
+export async function preloadGMGridFor(majorCategory: string): Promise<GmGridAttr[]> {
+  const key = (majorCategory || '').trim().toUpperCase();
+  if (!key) return [];
+  if (gmGridCache.has(key)) return gmGridCache.get(key)!;
+  if (gmGridPending.has(key)) return gmGridPending.get(key)!;
+
+  const p = fetch(
+    `${gridBaseURL()}/approver/gm-grid-values?majorCategory=${encodeURIComponent(majorCategory)}`,
+    { headers: authHeader() },
+  )
+    .then(r => (r.ok ? r.json() : { data: [] }))
+    .then(json => {
+      const attrs: GmGridAttr[] = (json.data ?? []).map((entry: any) => ({
+        familyCode: entry.familyCode,
+        familyName: entry.familyName ?? entry.familyCode,
+        mandatory: !!entry.mandatory,
+        values: entry.values ?? [],
+      }));
+      gmGridCache.set(key, attrs);
+      return attrs;
+    })
+    .catch(() => [] as GmGridAttr[])
+    .finally(() => gmGridPending.delete(key));
+
+  gmGridPending.set(key, p);
+  return p;
+}
+
+/** Synchronous lookup — returns null if not yet loaded. */
+export function getCachedGMGrid(majorCategory: string): GmGridAttr[] | null {
+  return gmGridCache.get((majorCategory || '').trim().toUpperCase()) ?? null;
+}
+
+export function invalidateGMGrid(): void {
+  gmGridCache.clear();
+  gmGridPending.clear();
+}

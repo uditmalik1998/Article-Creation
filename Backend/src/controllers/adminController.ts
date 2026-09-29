@@ -2639,6 +2639,333 @@ export const getMajCatGridUploadStatus = async (req: Request, res: Response): Pr
 };
 
 // ═══════════════════════════════════════════════════════════════════════════════
+// GM MAJOR CATEGORY GRID VALUES (gm_major_category_grid_values)
+// ═══════════════════════════════════════════════════════════════════════════════
+
+const GM_GRID_META_FILE = path.join(process.cwd(), 'data', 'gmGridMeta.json');
+
+type GmGridJobStatus = 'PENDING' | 'PARSING' | 'INSERTING' | 'DONE' | 'FAILED';
+interface GmGridJob {
+  status: GmGridJobStatus;
+  phase: string;
+  progress: number;
+  totalRows: number;
+  insertedRows: number;
+  error?: string;
+  meta?: Record<string, unknown>;
+  createdAt: string;
+  completedAt?: string;
+}
+const gmGridJobs = new Map<string, GmGridJob>();
+function expireGmGridJob(jobId: string) {
+  setTimeout(() => gmGridJobs.delete(jobId), 30 * 60 * 1000);
+}
+
+export const getGMGridStatus = async (_req: Request, res: Response): Promise<void> => {
+  try {
+    const counts = await prisma.$queryRaw<{ total: bigint; categories: bigint; family_codes: bigint }[]>`
+      SELECT
+        COUNT(*)                     AS total,
+        COUNT(DISTINCT maj_cat_nm)   AS categories,
+        COUNT(DISTINCT family_code)  AS family_codes
+      FROM gm_major_category_grid_values
+    `;
+    const { total, categories, family_codes } = counts[0];
+
+    let fileMeta: Record<string, any> = {};
+    if (fs.existsSync(GM_GRID_META_FILE)) {
+      try { fileMeta = JSON.parse(fs.readFileSync(GM_GRID_META_FILE, 'utf-8')); } catch {}
+    }
+
+    if (Number(total) === 0 && !fileMeta.uploadedAt) {
+      res.json({ success: true, data: null });
+      return;
+    }
+    res.json({
+      success: true,
+      data: {
+        ...fileMeta,
+        totalRows:      Number(total),
+        categoriesCount: Number(categories),
+        familyCodesCount: Number(family_codes),
+      },
+    });
+  } catch (error: any) {
+    res.status(500).json({ success: false, error: error.message });
+  }
+};
+
+export const downloadGMGridTemplate = async (_req: Request, res: Response): Promise<void> => {
+  try {
+    const ExcelJS = (await import('exceljs')).default;
+    const wb = new ExcelJS.Workbook();
+    wb.creator = 'Article Creation System';
+    wb.created = new Date();
+
+    const ws = wb.addWorksheet('GM_GRID');
+
+    const HEADERS = ['div', 'sub_div', 'seg', 'maj_cat_nm', 'family_code', 'mandatory', 'family_name', 'status', 'grid_val', 'uom'];
+    const REQUIRED_COLS = [3, 4, 8]; // maj_cat_nm, family_code, grid_val
+
+    ws.mergeCells('A1:J1');
+    const title = ws.getCell('A1');
+    title.value = 'GM MAJOR CATEGORY GRID VALUES TEMPLATE';
+    title.font = { bold: true, size: 13, color: { argb: 'FF1D3557' } };
+    title.alignment = { horizontal: 'center', vertical: 'middle' };
+    title.fill = { type: 'pattern', pattern: 'solid', fgColor: { argb: 'FFFCE4D6' } };
+    ws.getRow(1).height = 28;
+
+    const headerRow = ws.addRow(HEADERS);
+    headerRow.eachCell((cell, colNum) => {
+      const isRequired = REQUIRED_COLS.includes(colNum - 1);
+      cell.font = { bold: true, color: { argb: 'FFFFFFFF' } };
+      cell.fill = { type: 'pattern', pattern: 'solid', fgColor: { argb: isRequired ? 'FF1D6F42' : 'FF2F5496' } };
+      cell.border = { top: { style: 'thin' }, left: { style: 'thin' }, bottom: { style: 'thin' }, right: { style: 'thin' } };
+      cell.alignment = { horizontal: 'center', vertical: 'middle', wrapText: true };
+    });
+    ws.getRow(2).height = 28;
+
+    const SAMPLES = [
+      ['GM', 'HF', 'GM', 'HF_BED SHEET', 'GM_BRAND', 'MAND', 'Brand', 'ACT', 'V2', null],
+      ['GM', 'HF', 'GM', 'HF_BED SHEET', 'GM_BRAND', 'MAND', 'Brand', 'ACT', 'Sub_brand', null],
+      ['GM', 'HF', 'GM', 'HF_BED SHEET', 'GM_PRINT_THEME', 'NON MAND', 'Print theme', 'ACT', 'Abstract', null],
+      ['GM', 'HF', 'GM', 'HF_BED SHEET', 'GM_YARN', 'NON MAND', 'Yarn', 'ACT', 'Combed_cotton', null],
+    ];
+
+    SAMPLES.forEach((row, i) => {
+      const r = ws.addRow(row);
+      r.eachCell((cell, colNum) => {
+        const isRequired = REQUIRED_COLS.includes(colNum - 1);
+        cell.border = { top: { style: 'thin' }, left: { style: 'thin' }, bottom: { style: 'thin' }, right: { style: 'thin' } };
+        cell.fill = { type: 'pattern', pattern: 'solid', fgColor: { argb: i % 2 === 0 ? 'FFFFF9F5' : 'FFFFFFFF' } };
+        if (isRequired) cell.font = { bold: true };
+      });
+    });
+
+    ws.columns = [
+      { width: 8 }, { width: 10 }, { width: 8 }, { width: 22 }, { width: 22 },
+      { width: 12 }, { width: 20 }, { width: 8 }, { width: 24 }, { width: 8 },
+    ];
+
+    const noteRow = ws.rowCount + 2;
+    ws.addRow([]);
+    ws.addRow(['⚠ NOTE: Required columns (green): maj_cat_nm (D), family_code (E), grid_val (I). mandatory = MAND or NON MAND. status = ACT.']);
+    ws.mergeCells(`A${noteRow}:J${noteRow}`);
+    const noteCell = ws.getCell(`A${noteRow}`);
+    noteCell.font = { italic: true, size: 10, color: { argb: 'FF595959' } };
+    noteCell.fill = { type: 'pattern', pattern: 'solid', fgColor: { argb: 'FFFFF3CD' } };
+    noteCell.alignment = { wrapText: true };
+    ws.getRow(noteRow).height = 32;
+
+    res.setHeader('Content-Type', 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');
+    res.setHeader('Content-Disposition', 'attachment; filename="GM_GRID_TEMPLATE.xlsx"');
+    await wb.xlsx.write(res);
+    res.end();
+  } catch (error: any) {
+    res.status(500).json({ success: false, error: error.message });
+  }
+};
+
+export const downloadGMGridData = async (_req: Request, res: Response): Promise<void> => {
+  try {
+    const ExcelJS = require('exceljs');
+    const rows: any[] = await prisma.$queryRaw`
+      SELECT div, sub_div, seg, maj_cat_nm, family_code, mandatory, family_name, status, grid_val, uom
+      FROM gm_major_category_grid_values
+      ORDER BY maj_cat_nm, family_code, grid_val
+    `;
+
+    const wb = new ExcelJS.Workbook();
+    const ws = wb.addWorksheet('GM_GRID');
+
+    const HEADERS = ['div', 'sub_div', 'seg', 'maj_cat_nm', 'family_code', 'mandatory', 'family_name', 'status', 'grid_val', 'uom'];
+    const REQUIRED_COLS = [3, 4, 8];
+
+    ws.mergeCells('A1:J1');
+    const titleCell = ws.getCell('A1');
+    titleCell.value = 'GM MAJOR CATEGORY GRID VALUES';
+    titleCell.font = { bold: true, size: 13, color: { argb: 'FF1D3557' } };
+    titleCell.alignment = { horizontal: 'center', vertical: 'middle' };
+    titleCell.fill = { type: 'pattern', pattern: 'solid', fgColor: { argb: 'FFFCE4D6' } };
+    ws.getRow(1).height = 28;
+
+    const headerRow = ws.addRow(HEADERS);
+    headerRow.eachCell((cell: any, colNum: number) => {
+      const isRequired = REQUIRED_COLS.includes(colNum - 1);
+      cell.font = { bold: true, color: { argb: 'FFFFFFFF' } };
+      cell.fill = { type: 'pattern', pattern: 'solid', fgColor: { argb: isRequired ? 'FF1D6F42' : 'FF2F5496' } };
+      cell.alignment = { horizontal: 'center', vertical: 'middle', wrapText: true };
+      cell.border = { top: { style: 'thin' }, left: { style: 'thin' }, bottom: { style: 'thin' }, right: { style: 'thin' } };
+    });
+    ws.getRow(2).height = 28;
+
+    rows.forEach((row, i) => {
+      const r = ws.addRow([
+        row.div ?? '', row.sub_div ?? '', row.seg ?? '', row.maj_cat_nm ?? '',
+        row.family_code ?? '', row.mandatory ?? '', row.family_name ?? '',
+        row.status ?? '', row.grid_val ?? '', row.uom ?? '',
+      ]);
+      r.eachCell((cell: any) => {
+        cell.border = { top: { style: 'thin' }, left: { style: 'thin' }, bottom: { style: 'thin' }, right: { style: 'thin' } };
+        cell.fill = { type: 'pattern', pattern: 'solid', fgColor: { argb: i % 2 === 0 ? 'FFFFF9F5' : 'FFFFFFFF' } };
+      });
+    });
+
+    ws.columns = [
+      { width: 8 }, { width: 10 }, { width: 8 }, { width: 22 }, { width: 22 },
+      { width: 12 }, { width: 20 }, { width: 8 }, { width: 24 }, { width: 8 },
+    ];
+
+    const filename = `GM_GRID_DATA_${new Date().toISOString().slice(0, 10)}.xlsx`;
+    res.setHeader('Content-Type', 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');
+    res.setHeader('Content-Disposition', `attachment; filename="${filename}"`);
+    await wb.xlsx.write(res);
+    res.end();
+  } catch (error: any) {
+    res.status(500).json({ success: false, error: error.message });
+  }
+};
+
+export const uploadGMGrid = async (req: Request, res: Response): Promise<void> => {
+  if (!req.file) {
+    res.status(400).json({ success: false, error: 'No file uploaded.' });
+    return;
+  }
+
+  const jobId = `gmg-${Date.now()}-${Math.random().toString(36).slice(2, 8)}`;
+  const originalName = req.file.originalname;
+  const fileBuffer = req.file.buffer;
+
+  gmGridJobs.set(jobId, {
+    status: 'PENDING', phase: 'Queued', progress: 0,
+    totalRows: 0, insertedRows: 0, createdAt: new Date().toISOString(),
+  });
+
+  res.status(202).json({ success: true, jobId });
+
+  (async () => {
+    const job = gmGridJobs.get(jobId)!;
+    try {
+      job.status = 'PARSING'; job.phase = 'Parsing Excel…'; job.progress = 5;
+
+      const ExcelJS = (await import('exceljs')).default;
+      const wb = new ExcelJS.Workbook();
+      await wb.xlsx.load(fileBuffer as any);
+      const ws = wb.worksheets[0];
+      if (!ws) throw new Error('No worksheets found.');
+
+      // Column indices (1-based): match template headers
+      // div(1) sub_div(2) seg(3) maj_cat_nm(4) family_code(5) mandatory(6) family_name(7) status(8) grid_val(9) uom(10)
+      const COL_DIV = 1, COL_SUB_DIV = 2, COL_SEG = 3;
+      const COL_MAJ_CAT = 4, COL_FAMILY_CODE = 5, COL_MANDATORY = 6;
+      const COL_FAMILY_NAME = 7, COL_STATUS = 8, COL_GRID_VAL = 9, COL_UOM = 10;
+
+      type GmRow = {
+        div: string | null; sub_div: string | null; seg: string | null;
+        maj_cat_nm: string; family_code: string; mandatory: string | null;
+        family_name: string | null; status: string; grid_val: string; uom: string | null;
+      };
+      const flatRows: GmRow[] = [];
+      const seen = new Set<string>();
+      let skipped = 0;
+
+      // Auto-detect: if row 1 is a title/merged row, data starts at row 2 or 3
+      const firstDataRow = 2; // template has headers on row 2, data from row 3
+
+      for (let r = firstDataRow + 1; r <= ws.rowCount; r++) {
+        const row = ws.getRow(r);
+        const majCat    = String(row.getCell(COL_MAJ_CAT).value    ?? '').trim();
+        const famCode   = String(row.getCell(COL_FAMILY_CODE).value ?? '').trim();
+        const gridVal   = String(row.getCell(COL_GRID_VAL).value   ?? '').trim();
+        const status    = String(row.getCell(COL_STATUS).value      ?? 'ACT').trim().toUpperCase() || 'ACT';
+
+        if (!majCat || !famCode || !gridVal) { skipped++; continue; }
+
+        const key = `${majCat}||${famCode}||${gridVal}`;
+        if (seen.has(key)) continue;
+        seen.add(key);
+
+        flatRows.push({
+          div:         String(row.getCell(COL_DIV).value        ?? '').trim() || null,
+          sub_div:     String(row.getCell(COL_SUB_DIV).value    ?? '').trim() || null,
+          seg:         String(row.getCell(COL_SEG).value        ?? '').trim() || null,
+          maj_cat_nm:  majCat,
+          family_code: famCode,
+          mandatory:   String(row.getCell(COL_MANDATORY).value  ?? '').trim() || null,
+          family_name: String(row.getCell(COL_FAMILY_NAME).value ?? '').trim() || null,
+          status,
+          grid_val:    gridVal,
+          uom:         String(row.getCell(COL_UOM).value        ?? '').trim() || null,
+        });
+      }
+
+      job.totalRows = flatRows.length;
+      job.phase = `Parsed ${flatRows.length.toLocaleString()} rows — inserting…`;
+      job.progress = 20;
+      job.status = 'INSERTING';
+
+      const BATCH = 2000;
+      const totalBatches = Math.ceil(flatRows.length / BATCH);
+
+      await prisma.$transaction(async (tx) => {
+        await tx.$executeRaw`TRUNCATE TABLE gm_major_category_grid_values RESTART IDENTITY`;
+        for (let i = 0; i < flatRows.length; i += BATCH) {
+          const batch = flatRows.slice(i, i + BATCH);
+          await tx.$executeRaw`
+            INSERT INTO gm_major_category_grid_values
+              (div, sub_div, seg, maj_cat_nm, family_code, mandatory, family_name, status, grid_val, uom)
+            SELECT v.div, v.sub_div, v.seg, v.maj_cat_nm, v.family_code,
+                   v.mandatory, v.family_name, v.status, v.grid_val, v.uom
+            FROM jsonb_to_recordset(${JSON.stringify(batch)}::jsonb) AS v(
+              div text, sub_div text, seg text, maj_cat_nm text, family_code text,
+              mandatory text, family_name text, status text, grid_val text, uom text
+            )
+          `;
+          const batchDone = Math.floor(i / BATCH) + 1;
+          job.insertedRows = Math.min(i + BATCH, flatRows.length);
+          job.progress = 20 + Math.round((batchDone / totalBatches) * 75);
+          job.phase = `Inserting batch ${batchDone}/${totalBatches}…`;
+        }
+      }, { timeout: 10 * 60 * 1000 });
+
+      const categoriesCount = new Set(flatRows.map(r => r.maj_cat_nm)).size;
+      const familyCodesCount = new Set(flatRows.map(r => r.family_code)).size;
+
+      const meta = {
+        uploadedAt: new Date().toISOString(),
+        fileName: originalName,
+        totalRows: flatRows.length,
+        skippedRows: skipped,
+        categoriesCount,
+        familyCodesCount,
+      };
+      const metaDir = path.join(process.cwd(), 'data');
+      if (!fs.existsSync(metaDir)) fs.mkdirSync(metaDir, { recursive: true });
+      fs.writeFileSync(GM_GRID_META_FILE, JSON.stringify(meta, null, 2), 'utf-8');
+
+      job.status = 'DONE';
+      job.phase = `Complete — ${flatRows.length.toLocaleString()} rows across ${categoriesCount} categories`;
+      job.progress = 100;
+      job.insertedRows = flatRows.length;
+      job.meta = meta;
+      job.completedAt = new Date().toISOString();
+    } catch (err: any) {
+      const j = gmGridJobs.get(jobId);
+      if (j) { j.status = 'FAILED'; j.phase = 'Failed'; j.error = err.message; j.completedAt = new Date().toISOString(); }
+    } finally {
+      expireGmGridJob(jobId);
+    }
+  })();
+};
+
+export const getGMGridUploadStatus = async (req: Request, res: Response): Promise<void> => {
+  const { jobId } = req.params;
+  const job = gmGridJobs.get(jobId);
+  if (!job) { res.status(404).json({ success: false, error: 'Job not found or expired.' }); return; }
+  res.json({ success: true, jobId, ...job });
+};
+
+// ═══════════════════════════════════════════════════════════════════════════════
 // SIZE MASTER (maj_cat_sizes)  — major-category-wise active/inactive sizes
 // ═══════════════════════════════════════════════════════════════════════════════
 
@@ -9193,4 +9520,266 @@ export const uploadMcd = async (req: Request, res: Response): Promise<void> => {
   } catch (error: any) {
     res.status(500).json({ success: false, error: error.message });
   }
+};
+
+// ═══════════════════════════════════════════════════════════════════════════════
+// GM MAJOR CATEGORY DETAILS (gm_major_category_details)
+// Columns: id, seg, div, sub_div, maj_cat_nm, mc_cd, maj_cat_desc, mj_status,
+//          archetype, archetype_nm, family_code, family_name, status, created_at
+// ═══════════════════════════════════════════════════════════════════════════════
+
+const GM_MCT_META_FILE = path.join(__dirname, '../../data/gm-mct-meta.json');
+
+interface GmMctJob {
+  status: 'PENDING' | 'PROCESSING' | 'DONE' | 'FAILED';
+  progress: number;
+  phase: string;
+  error?: string;
+  meta?: Record<string, unknown>;
+}
+const gmMctJobs = new Map<string, GmMctJob>();
+const expireGmMctJob = (jobId: string) => setTimeout(() => gmMctJobs.delete(jobId), 30 * 60 * 1000);
+
+export const getGMMajCatDetailsStatus = async (_req: Request, res: Response): Promise<void> => {
+  try {
+    const rows = await prisma.$queryRaw<{ total: bigint; categories: bigint; family_codes: bigint }[]>`
+      SELECT COUNT(*)::bigint                         AS total,
+             COUNT(DISTINCT maj_cat_nm)::bigint        AS categories,
+             COUNT(DISTINCT family_code)::bigint       AS family_codes
+      FROM gm_major_category_details
+    `;
+    const r = rows[0] ?? { total: 0n, categories: 0n, family_codes: 0n };
+    let fileMeta: Record<string, unknown> = {};
+    try { fileMeta = JSON.parse(fs.readFileSync(GM_MCT_META_FILE, 'utf-8')); } catch { /* no file yet */ }
+    res.json({
+      success: true,
+      data: {
+        ...fileMeta,
+        total: Number(r.total),
+        categoriesCount: Number(r.categories),
+        familyCodesCount: Number(r.family_codes),
+      },
+    });
+  } catch (error: any) {
+    res.status(500).json({ success: false, error: error.message });
+  }
+};
+
+export const downloadGMMajCatDetailsTemplate = async (_req: Request, res: Response): Promise<void> => {
+  try {
+    const ExcelJS = require('exceljs');
+    const wb = new ExcelJS.Workbook();
+    const ws = wb.addWorksheet('GM_MCT');
+
+    // Row 1 — title
+    ws.mergeCells('A1:N1');
+    const titleCell = ws.getCell('A1');
+    titleCell.value = 'GM Major Category Details Template';
+    titleCell.font = { bold: true, size: 13 };
+    titleCell.alignment = { horizontal: 'center' };
+    ws.getRow(1).height = 22;
+
+    // Row 2 — headers (required cols highlighted green: seg, div, sub_div, maj_cat_nm)
+    const headers = ['seg', 'div', 'sub_div', 'maj_cat_nm', 'mc_cd', 'maj_cat_desc', 'mj_status', 'archetype', 'archetype_nm', 'family_code', 'family_name', 'status'];
+    const requiredCols = new Set([1, 2, 3, 4]); // 1-based
+    const headerRow = ws.addRow(headers);
+    headerRow.eachCell((cell: any, col: number) => {
+      cell.font = { bold: true, color: { argb: 'FFFFFFFF' } };
+      cell.fill = {
+        type: 'pattern', pattern: 'solid',
+        fgColor: { argb: requiredCols.has(col) ? 'FF2E7D32' : 'FF1565C0' },
+      };
+      cell.alignment = { horizontal: 'center' };
+    });
+
+    // Sample rows
+    ws.addRow(['GENERAL', 'GM', 'GM-HOME', 'GM_BEDSHEET', 'GMBS001', 'Bed Sheet', 'ACT', 'HOME_TEXTILE', 'Home Textile', 'GM_BRAND', 'Brand', 'ACT']);
+    ws.addRow(['GENERAL', 'GM', 'GM-HOME', 'GM_BEDSHEET', 'GMBS001', 'Bed Sheet', 'ACT', 'HOME_TEXTILE', 'Home Textile', 'GM_SIZE', 'Size', 'ACT']);
+    ws.addRow(['GENERAL', 'GM', 'GM-KITCHEN', 'GM_COOKWARE', 'GMCK001', 'Cookware', 'ACT', 'KITCHEN', 'Kitchen', 'GM_BRAND', 'Brand', 'ACT']);
+
+    ws.columns = [
+      { width: 12 }, { width: 10 }, { width: 14 }, { width: 20 }, { width: 12 },
+      { width: 20 }, { width: 12 }, { width: 16 }, { width: 18 }, { width: 18 },
+      { width: 18 }, { width: 10 },
+    ];
+
+    res.setHeader('Content-Type', 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');
+    res.setHeader('Content-Disposition', 'attachment; filename="GM_MCT_TEMPLATE.xlsx"');
+    await wb.xlsx.write(res);
+    res.end();
+  } catch (error: any) {
+    res.status(500).json({ success: false, error: error.message });
+  }
+};
+
+export const downloadGMMajCatDetailsData = async (_req: Request, res: Response): Promise<void> => {
+  try {
+    const ExcelJS = require('exceljs');
+    const rows = await prisma.$queryRaw<{
+      seg: string | null; div: string | null; sub_div: string | null; maj_cat_nm: string | null;
+      mc_cd: string | null; maj_cat_desc: string | null; mj_status: string | null;
+      archetype: string | null; archetype_nm: string | null;
+      family_code: string | null; family_name: string | null; status: string | null;
+    }[]>`
+      SELECT seg, div, sub_div, maj_cat_nm, mc_cd, maj_cat_desc, mj_status,
+             archetype, archetype_nm, family_code, family_name, status
+      FROM gm_major_category_details
+      ORDER BY div, sub_div, maj_cat_nm, family_code
+    `;
+
+    const wb = new ExcelJS.Workbook();
+    const ws = wb.addWorksheet('GM_MCT');
+    const headers = ['seg', 'div', 'sub_div', 'maj_cat_nm', 'mc_cd', 'maj_cat_desc', 'mj_status', 'archetype', 'archetype_nm', 'family_code', 'family_name', 'status'];
+    const headerRow = ws.addRow(headers);
+    headerRow.eachCell((cell: any) => {
+      cell.font = { bold: true, color: { argb: 'FFFFFFFF' } };
+      cell.fill = { type: 'pattern', pattern: 'solid', fgColor: { argb: 'FF1565C0' } };
+    });
+
+    for (const r of rows) {
+      ws.addRow([r.seg, r.div, r.sub_div, r.maj_cat_nm, r.mc_cd, r.maj_cat_desc, r.mj_status, r.archetype, r.archetype_nm, r.family_code, r.family_name, r.status]);
+    }
+
+    ws.columns = [
+      { width: 12 }, { width: 10 }, { width: 14 }, { width: 20 }, { width: 12 },
+      { width: 20 }, { width: 12 }, { width: 16 }, { width: 18 }, { width: 18 },
+      { width: 18 }, { width: 10 },
+    ];
+
+    res.setHeader('Content-Type', 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');
+    const today = new Date().toISOString().slice(0, 10);
+    res.setHeader('Content-Disposition', `attachment; filename="GM_MCT_${today}.xlsx"`);
+    await wb.xlsx.write(res);
+    res.end();
+  } catch (error: any) {
+    res.status(500).json({ success: false, error: error.message });
+  }
+};
+
+export const uploadGMMajCatDetails = async (req: Request, res: Response): Promise<void> => {
+  if (!req.file) { res.status(400).json({ success: false, error: 'No file uploaded.' }); return; }
+
+  const jobId = `gm-mct-${Date.now()}-${Math.random().toString(36).slice(2, 8)}`;
+  const job: GmMctJob = { status: 'PENDING', progress: 0, phase: 'Queued' };
+  gmMctJobs.set(jobId, job);
+  expireGmMctJob(jobId);
+
+  res.status(202).json({ success: true, jobId });
+
+  // Background processing
+  (async () => {
+    try {
+      job.status = 'PROCESSING';
+      job.phase = 'Parsing Excel…';
+      job.progress = 5;
+
+      const ExcelJS = require('exceljs');
+      const wb = new ExcelJS.Workbook();
+      await wb.xlsx.load(req.file!.buffer);
+
+      // Accept first sheet regardless of name
+      const ws = wb.worksheets[0];
+      if (!ws) throw new Error('Excel file has no worksheets.');
+
+      // Find header row — look for a row containing 'maj_cat_nm' or 'div'
+      let headerRowNum = 1;
+      ws.eachRow((row: any, rowNum: number) => {
+        const vals = (row.values as any[]).map((v: any) => String(v ?? '').trim().toLowerCase());
+        if (vals.includes('maj_cat_nm') || vals.includes('div')) headerRowNum = rowNum;
+      });
+
+      const headerRow = ws.getRow(headerRowNum);
+      const colIndex: Record<string, number> = {};
+      (headerRow.values as any[]).forEach((v: any, i: number) => {
+        if (v) colIndex[String(v).trim().toLowerCase()] = i;
+      });
+
+      const col = (row: any, name: string): string | null => {
+        const idx = colIndex[name];
+        if (idx == null) return null;
+        const v = row.values[idx];
+        return v != null ? String(v).trim() || null : null;
+      };
+
+      const dataRows: Array<{
+        seg: string | null; div: string | null; sub_div: string | null; maj_cat_nm: string | null;
+        mc_cd: string | null; maj_cat_desc: string | null; mj_status: string | null;
+        archetype: string | null; archetype_nm: string | null;
+        family_code: string | null; family_name: string | null; status: string | null;
+      }> = [];
+      let skipped = 0;
+
+      ws.eachRow((row: any, rowNum: number) => {
+        if (rowNum <= headerRowNum) return;
+        const seg = col(row, 'seg');
+        const div = col(row, 'div');
+        const sub_div = col(row, 'sub_div');
+        const maj_cat_nm = col(row, 'maj_cat_nm');
+        if (!div || !sub_div || !maj_cat_nm) { skipped++; return; }
+        dataRows.push({
+          seg, div, sub_div, maj_cat_nm,
+          mc_cd: col(row, 'mc_cd'),
+          maj_cat_desc: col(row, 'maj_cat_desc'),
+          mj_status: col(row, 'mj_status'),
+          archetype: col(row, 'archetype'),
+          archetype_nm: col(row, 'archetype_nm'),
+          family_code: col(row, 'family_code'),
+          family_name: col(row, 'family_name'),
+          status: col(row, 'status'),
+        });
+      });
+
+      job.phase = `Parsed ${dataRows.length} rows — writing to DB…`;
+      job.progress = 40;
+
+      const BATCH = 2000;
+      await prisma.$transaction(async (tx) => {
+        await tx.$executeRaw`TRUNCATE TABLE gm_major_category_details RESTART IDENTITY`;
+        for (let i = 0; i < dataRows.length; i += BATCH) {
+          const batch = dataRows.slice(i, i + BATCH);
+          await tx.$executeRaw`
+            INSERT INTO gm_major_category_details
+              (seg, div, sub_div, maj_cat_nm, mc_cd, maj_cat_desc, mj_status, archetype, archetype_nm, family_code, family_name, status)
+            SELECT r.seg, r.div, r.sub_div, r.maj_cat_nm, r.mc_cd, r.maj_cat_desc, r.mj_status,
+                   r.archetype, r.archetype_nm, r.family_code, r.family_name, r.status
+            FROM jsonb_to_recordset(${JSON.stringify(batch)}::jsonb)
+              AS r(seg text, div text, sub_div text, maj_cat_nm text, mc_cd text, maj_cat_desc text,
+                   mj_status text, archetype text, archetype_nm text, family_code text, family_name text, status text)
+          `;
+          job.progress = 40 + Math.round(((i + batch.length) / dataRows.length) * 55);
+        }
+      });
+
+      const categories = new Set(dataRows.map((r) => r.maj_cat_nm).filter(Boolean)).size;
+      const familyCodes = new Set(dataRows.map((r) => r.family_code).filter(Boolean)).size;
+      const meta = {
+        uploadedAt: new Date().toISOString(),
+        fileName: req.file!.originalname,
+        totalRows: dataRows.length,
+        skippedRows: skipped,
+        categoriesCount: categories,
+        familyCodesCount: familyCodes,
+      };
+      try {
+        fs.mkdirSync(path.dirname(GM_MCT_META_FILE), { recursive: true });
+        fs.writeFileSync(GM_MCT_META_FILE, JSON.stringify(meta));
+      } catch { /* non-fatal */ }
+
+      job.status = 'DONE';
+      job.progress = 100;
+      job.phase = 'Complete';
+      job.meta = meta;
+    } catch (err: any) {
+      job.status = 'FAILED';
+      job.error = err?.message ?? 'Unknown error';
+      job.phase = 'Failed';
+    }
+  })();
+};
+
+export const getGMMajCatDetailsUploadStatus = async (req: Request, res: Response): Promise<void> => {
+  const { jobId } = req.params;
+  const job = gmMctJobs.get(jobId);
+  if (!job) { res.status(404).json({ success: false, error: 'Job not found or expired.' }); return; }
+  res.json({ success: true, jobId, ...job });
 };

@@ -50,6 +50,8 @@ import {
   isMandatoryGridFieldActive,
   getMandatoryGridFieldLabel,
   getMajCatGridEntry,
+  preloadGMGridFor,
+  getCachedGMGrid,
 } from '../../../services/articleConfigService';
 import { formatDivisionLabel } from '../../../shared/utils/ui/formatters';
 
@@ -403,17 +405,17 @@ export default function ArticleDetailPage({
     if (editingItem?.division) preloadAttributeValues(editingItem.division).catch(() => {});
   }, [editingItem?.division]);
 
-  // Ensure the mandatory grid for every loaded article's major category is cached,
-  // then bump gridVersion so the Save & Submit gate recomputes with real data.
-  // Without this, a hard refresh runs the gate against an empty grid (every field
-  // reads as "not mandatory") and the button stays enabled despite empty Required fields.
+  // Ensure the mandatory grid + GM attribute grid for every loaded article's major
+  // category is cached, then bump gridVersion so the Save & Submit gate recomputes.
   useEffect(() => {
     const cats = Array.from(
       new Set(items.map(i => (i.majorCategory || '').trim()).filter(Boolean)),
     );
     if (cats.length === 0) return;
-    Promise.all(cats.map(c => preloadMandatoryGridFor(c).catch(() => {})))
-      .then(() => setGridVersion(v => v + 1));
+    Promise.all([
+      ...cats.map(c => preloadMandatoryGridFor(c).catch(() => {})),
+      ...cats.map(c => preloadGMGridFor(c).catch(() => {})),
+    ]).then(() => setGridVersion(v => v + 1));
   }, [items]);
 
   // ─── Navigation ─────────────────────────────────────────────────────────────
@@ -574,6 +576,15 @@ export default function ArticleDetailPage({
         if (!item.articleFashionType) missing.push('ARTICLE FASHION TYPE');
       }
       missing.push(...getMissingMandatoryFields(item, isFGMode));
+      // GM attribute mandatory check — uses gm_major_category_grid_values mandatory flag
+      const gmAttrs = getCachedGMGrid(item.majorCategory || '');
+      if (gmAttrs) {
+        for (const attr of gmAttrs) {
+          if (attr.mandatory && !(item as any)[attr.familyCode]) {
+            missing.push(attr.familyCode);
+          }
+        }
+      }
       if (missing.length > 0) acc.push({ articleId: item.sapArticleId || item.articleNumber || item.imageName || item.id, missing });
       return acc;
     }, []);

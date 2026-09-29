@@ -159,6 +159,9 @@ router.get('/gm-hierarchy', h(ApproverController.getGMHierarchy));
 // GM attribute family codes for a major category (from gm_major_category_details.family_code)
 router.get('/gm-attributes', h(ApproverController.getGMAttributes));
 
+// GM attribute grid values for a major category (from gm_major_category_grid_values)
+router.get('/gm-grid-values', h(ApproverController.getGMGridValues));
+
 // GM Article data list — paginated list from gm_article_data
 router.get('/gm-articles', h(ApproverController.getGmArticleItems));
 

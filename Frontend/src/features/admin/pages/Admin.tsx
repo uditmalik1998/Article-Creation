@@ -171,6 +171,25 @@ interface SegmentMasterMeta {
   lastUpdated?: string;
 }
 
+interface GmGridMeta {
+  uploadedAt?: string;
+  fileName?: string;
+  totalRows?: number;
+  skippedRows?: number;
+  categoriesCount?: number;
+  familyCodesCount?: number;
+  totalValues?: number;
+}
+
+interface GmMctMeta {
+  uploadedAt?: string;
+  fileName?: string;
+  totalRows?: number;
+  skippedRows?: number;
+  categoriesCount?: number;
+  familyCodesCount?: number;
+}
+
 interface HierarchyExcelStatus {
   departments: number;
   subDepartments: number;
@@ -343,6 +362,24 @@ export default function Admin() {
   const [mcdUploading, setMcdUploading] = useState(false);
   const [mcdProgress, setMcdProgress] = useState<number>(0);
   const mcdFileRef = useRef<HTMLInputElement | null>(null);
+
+  // GM Major Category Details (gm_major_category_details)
+  const [gmMctMeta, setGmMctMeta] = useState<GmMctMeta | null>(null);
+  const [gmMctStatusLoading, setGmMctStatusLoading] = useState(false);
+  const [gmMctUploading, setGmMctUploading] = useState(false);
+  const [gmMctProgress, setGmMctProgress] = useState<number>(0);
+  const [gmMctJobPhase, setGmMctJobPhase] = useState<string>('');
+  const gmMctFileRef = useRef<HTMLInputElement | null>(null);
+  const gmMctPollRef = useRef<ReturnType<typeof setInterval> | null>(null);
+
+  // GM Major Category Grid (gm_major_category_grid_values)
+  const [gmGridMeta, setGmGridMeta] = useState<GmGridMeta | null>(null);
+  const [gmGridStatusLoading, setGmGridStatusLoading] = useState(false);
+  const [gmGridUploading, setGmGridUploading] = useState(false);
+  const [gmGridProgress, setGmGridProgress] = useState<number>(0);
+  const [gmGridJobPhase, setGmGridJobPhase] = useState<string>('');
+  const gmGridFileRef = useRef<HTMLInputElement | null>(null);
+  const gmGridPollRef = useRef<ReturnType<typeof setInterval> | null>(null);
 
   // Hierarchy Excel Upload (two-step)
   const [hierarchyExcelStatus, setHierarchyExcelStatus] = useState<HierarchyExcelStatus | null>(null);
@@ -748,6 +785,239 @@ export default function Admin() {
       setMandatoryGridUploading(false);
       setTimeout(() => setMandatoryGridProgress(0), 1500);
       if (mandatoryFileRef.current) mandatoryFileRef.current.value = '';
+    }
+  };
+
+  // ─────────────────────────────── GM Major Category Details ───────────────────────────────
+  const downloadGMMctData = () => {
+    const token = localStorage.getItem('authToken');
+    fetch(`${APP_CONFIG.api.baseURL}/admin/gm-mct/download`, {
+      headers: token ? { Authorization: `Bearer ${token}` } : {},
+    })
+      .then((r) => { if (!r.ok) throw new Error('Download failed'); return r.blob(); })
+      .then((blob) => {
+        const today = new Date().toISOString().slice(0, 10);
+        const a = document.createElement('a');
+        a.href = URL.createObjectURL(blob);
+        a.download = `GM_MCT_${today}.xlsx`;
+        a.click();
+      })
+      .catch(() => message.error('Failed to download GM major category details data'));
+  };
+
+  const downloadGMMctTemplate = () => {
+    const token = localStorage.getItem('authToken');
+    fetch(`${APP_CONFIG.api.baseURL}/admin/gm-mct/template`, {
+      headers: token ? { Authorization: `Bearer ${token}` } : {},
+    })
+      .then((r) => r.blob())
+      .then((blob) => {
+        const a = document.createElement('a');
+        a.href = URL.createObjectURL(blob);
+        a.download = 'GM_MCT_TEMPLATE.xlsx';
+        document.body.appendChild(a);
+        a.click();
+        document.body.removeChild(a);
+        URL.revokeObjectURL(a.href);
+      })
+      .catch(() => message.error('Failed to download GM MCT template'));
+  };
+
+  const loadGMMctStatus = useCallback(async () => {
+    setGmMctStatusLoading(true);
+    try {
+      const token = localStorage.getItem('authToken');
+      const res = await fetch(`${APP_CONFIG.api.baseURL}/admin/gm-mct/status`, {
+        headers: token ? { Authorization: `Bearer ${token}` } : {},
+      });
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.error || 'Failed to load GM MCT status');
+      setGmMctMeta(data.data);
+    } catch (err: any) {
+      message.error(err?.message || 'Failed to load GM major category details status');
+    } finally {
+      setGmMctStatusLoading(false);
+    }
+  }, []);
+
+  const handleGMMctUpload = async (file: File) => {
+    if (gmMctPollRef.current) { clearInterval(gmMctPollRef.current); gmMctPollRef.current = null; }
+
+    setGmMctUploading(true);
+    setGmMctProgress(2);
+    setGmMctJobPhase('Uploading file…');
+
+    try {
+      const token = localStorage.getItem('authToken');
+      const formData = new FormData();
+      formData.append('file', file);
+
+      const res = await fetch(`${APP_CONFIG.api.baseURL}/admin/gm-mct/upload`, {
+        method: 'POST',
+        headers: token ? { Authorization: `Bearer ${token}` } : {},
+        body: formData,
+      });
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.error || 'Upload failed');
+
+      const { jobId } = data;
+      setGmMctJobPhase('Queued — waiting for processing…');
+
+      const poll = async () => {
+        try {
+          const sr = await fetch(`${APP_CONFIG.api.baseURL}/admin/gm-mct/upload-status/${jobId}`, {
+            headers: token ? { Authorization: `Bearer ${token}` } : {},
+          });
+          const sdata = await sr.json();
+          if (!sr.ok || !sdata.success) return;
+
+          setGmMctProgress(sdata.progress ?? 0);
+          setGmMctJobPhase(sdata.phase || '');
+
+          if (sdata.status === 'DONE') {
+            clearInterval(gmMctPollRef.current!);
+            gmMctPollRef.current = null;
+            message.success(`GM MCT uploaded — ${(sdata.meta?.totalRows ?? 0).toLocaleString()} rows across ${sdata.meta?.categoriesCount ?? 0} major categories`);
+            setGmMctMeta(sdata.meta as GmMctMeta);
+            setGmMctUploading(false);
+            setTimeout(() => { setGmMctProgress(0); setGmMctJobPhase(''); }, 1500);
+            if (gmMctFileRef.current) gmMctFileRef.current.value = '';
+          } else if (sdata.status === 'FAILED') {
+            clearInterval(gmMctPollRef.current!);
+            gmMctPollRef.current = null;
+            message.error(sdata.error || 'Upload failed during processing');
+            setGmMctUploading(false);
+            setTimeout(() => { setGmMctProgress(0); setGmMctJobPhase(''); }, 1500);
+            if (gmMctFileRef.current) gmMctFileRef.current.value = '';
+          }
+        } catch { /* network blip — keep polling */ }
+      };
+
+      poll();
+      gmMctPollRef.current = setInterval(poll, 2500);
+    } catch (err: any) {
+      message.error(err?.message || 'Upload failed');
+      setGmMctUploading(false);
+      setGmMctProgress(0);
+      setGmMctJobPhase('');
+      if (gmMctFileRef.current) gmMctFileRef.current.value = '';
+    }
+  };
+
+  // ─────────────────────────────── GM Major Category Grid ───────────────────────────────
+  const downloadGMGridData = () => {
+    const token = localStorage.getItem('authToken');
+    const url = `${APP_CONFIG.api.baseURL}/admin/gm-grid/download`;
+    fetch(url, { headers: token ? { Authorization: `Bearer ${token}` } : {} })
+      .then((r) => {
+        if (!r.ok) throw new Error('Download failed');
+        return r.blob();
+      })
+      .then((blob) => {
+        const today = new Date().toISOString().slice(0, 10);
+        const a = document.createElement('a');
+        a.href = URL.createObjectURL(blob);
+        a.download = `GM_GRID_${today}.xlsx`;
+        a.click();
+      })
+      .catch(() => message.error('Failed to download GM grid data'));
+  };
+
+  const downloadGMGridTemplate = () => {
+    const token = localStorage.getItem('authToken');
+    const url = `${APP_CONFIG.api.baseURL}/admin/gm-grid/template`;
+    fetch(url, { headers: token ? { Authorization: `Bearer ${token}` } : {} })
+      .then((r) => r.blob())
+      .then((blob) => {
+        const a = document.createElement('a');
+        a.href = URL.createObjectURL(blob);
+        a.download = 'GM_GRID_TEMPLATE.xlsx';
+        document.body.appendChild(a);
+        a.click();
+        document.body.removeChild(a);
+        URL.revokeObjectURL(a.href);
+      })
+      .catch(() => message.error('Failed to download GM grid template'));
+  };
+
+  const loadGMGridStatus = useCallback(async () => {
+    setGmGridStatusLoading(true);
+    try {
+      const token = localStorage.getItem('authToken');
+      const res = await fetch(`${APP_CONFIG.api.baseURL}/admin/gm-grid/status`, {
+        headers: token ? { Authorization: `Bearer ${token}` } : {},
+      });
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.error || 'Failed to load GM grid status');
+      setGmGridMeta(data.data);
+    } catch (err: any) {
+      message.error(err?.message || 'Failed to load GM grid status');
+    } finally {
+      setGmGridStatusLoading(false);
+    }
+  }, []);
+
+  const handleGMGridUpload = async (file: File) => {
+    if (gmGridPollRef.current) { clearInterval(gmGridPollRef.current); gmGridPollRef.current = null; }
+
+    setGmGridUploading(true);
+    setGmGridProgress(2);
+    setGmGridJobPhase('Uploading file…');
+
+    try {
+      const token = localStorage.getItem('authToken');
+      const formData = new FormData();
+      formData.append('file', file);
+
+      const res = await fetch(`${APP_CONFIG.api.baseURL}/admin/gm-grid/upload`, {
+        method: 'POST',
+        headers: token ? { Authorization: `Bearer ${token}` } : {},
+        body: formData,
+      });
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.error || 'Upload failed');
+
+      const { jobId } = data;
+      setGmGridJobPhase('Queued — waiting for processing…');
+
+      const poll = async () => {
+        try {
+          const sr = await fetch(`${APP_CONFIG.api.baseURL}/admin/gm-grid/upload-status/${jobId}`, {
+            headers: token ? { Authorization: `Bearer ${token}` } : {},
+          });
+          const sdata = await sr.json();
+          if (!sr.ok || !sdata.success) return;
+
+          setGmGridProgress(sdata.progress ?? 0);
+          setGmGridJobPhase(sdata.phase || '');
+
+          if (sdata.status === 'DONE') {
+            clearInterval(gmGridPollRef.current!);
+            gmGridPollRef.current = null;
+            message.success(`GM grid uploaded — ${(sdata.meta?.totalRows ?? 0).toLocaleString()} rows across ${sdata.meta?.categoriesCount ?? 0} major categories`);
+            setGmGridMeta(sdata.meta as GmGridMeta);
+            setGmGridUploading(false);
+            setTimeout(() => { setGmGridProgress(0); setGmGridJobPhase(''); }, 1500);
+            if (gmGridFileRef.current) gmGridFileRef.current.value = '';
+          } else if (sdata.status === 'FAILED') {
+            clearInterval(gmGridPollRef.current!);
+            gmGridPollRef.current = null;
+            message.error(sdata.error || 'Upload failed during processing');
+            setGmGridUploading(false);
+            setTimeout(() => { setGmGridProgress(0); setGmGridJobPhase(''); }, 1500);
+            if (gmGridFileRef.current) gmGridFileRef.current.value = '';
+          }
+        } catch { /* network blip — keep polling */ }
+      };
+
+      poll();
+      gmGridPollRef.current = setInterval(poll, 2500);
+    } catch (err: any) {
+      message.error(err?.message || 'Upload failed');
+      setGmGridUploading(false);
+      setGmGridProgress(0);
+      setGmGridJobPhase('');
+      if (gmGridFileRef.current) gmGridFileRef.current.value = '';
     }
   };
 
@@ -2547,6 +2817,234 @@ export default function Admin() {
                       <button
                         type="button"
                         onClick={() => majCatFileRef.current?.click()}
+                        className="flex w-full flex-col items-center justify-center rounded-md border-2 border-dashed border-border bg-muted/30 px-4 py-6 transition-colors hover:border-[#FF6F61] hover:bg-[#FF6F61]/5"
+                      >
+                        <Inbox className="mb-2 h-8 w-8 text-[#FF6F61]" />
+                        <p className="text-[13px]">
+                          Click to upload <strong>.xlsx</strong> file
+                        </p>
+                        <p className="text-[11px] text-muted-foreground">Only Excel files. Max 50 MB.</p>
+                      </button>
+                    )}
+                  </div>
+                </div>
+              </div>
+            </Spinner>
+          </CardContent>
+        </Card>
+
+        {/* GM Major Category Details (gm_major_category_details) */}
+        <Card className="mb-6 glass rounded-2xl border border-white/60">
+          <CardHeader className="flex flex-row items-center justify-between">
+            <CardTitle className="flex items-center gap-2 text-base">
+              <TableIcon className="h-4 w-4" />
+              GM Major Category Details
+            </CardTitle>
+            <div className="flex gap-2">
+              <Button size="sm" variant="outline" onClick={downloadGMMctData}>
+                <Download />
+                Download Data
+              </Button>
+              <Button size="sm" variant="outline" onClick={downloadGMMctTemplate}>
+                <Download />
+                Download Template
+              </Button>
+              <Button size="sm" variant="outline" onClick={loadGMMctStatus} disabled={gmMctStatusLoading}>
+                <RotateCw className={gmMctStatusLoading ? 'animate-spin' : ''} />
+                Refresh Status
+              </Button>
+            </div>
+          </CardHeader>
+          <CardContent>
+            <Spinner spinning={gmMctStatusLoading}>
+              <div className="grid grid-cols-1 gap-4 md:grid-cols-12">
+                {/* Status panel */}
+                <div className="md:col-span-7">
+                  {gmMctMeta && (gmMctMeta.totalRows ?? 0) > 0 ? (
+                    <Descriptions bordered>
+                      <Descriptions.Item label="Last Upload">
+                        {gmMctMeta.uploadedAt
+                          ? new Date(gmMctMeta.uploadedAt).toLocaleString('en-IN', {
+                              timeZone: 'Asia/Kolkata',
+                              dateStyle: 'medium',
+                              timeStyle: 'short',
+                            }) + ' IST'
+                          : <span className="text-muted-foreground">Unknown</span>}
+                      </Descriptions.Item>
+                      <Descriptions.Item label="File">
+                        <span className="font-mono text-xs">{gmMctMeta.fileName || '—'}</span>
+                      </Descriptions.Item>
+                      <Descriptions.Item label="Major Categories">
+                        <Badge variant="info">{(gmMctMeta.categoriesCount ?? 0).toLocaleString()}</Badge>
+                      </Descriptions.Item>
+                      <Descriptions.Item label="Family Codes">
+                        <Badge variant="secondary">{(gmMctMeta.familyCodesCount ?? 0).toLocaleString()}</Badge>
+                      </Descriptions.Item>
+                      <Descriptions.Item label="Total Rows">
+                        <Badge variant="success">{(gmMctMeta.totalRows ?? 0).toLocaleString()}</Badge>
+                      </Descriptions.Item>
+                      <Descriptions.Item label="Rows Skipped">
+                        <Badge variant={(gmMctMeta.skippedRows ?? 0) > 0 ? 'warning' : 'secondary'}>
+                          {(gmMctMeta.skippedRows ?? 0).toLocaleString()}
+                        </Badge>
+                      </Descriptions.Item>
+                    </Descriptions>
+                  ) : (
+                    <Alert
+                      type="warning"
+                      showIcon
+                      message="No GM major category details uploaded yet"
+                      description="Upload the GM MCT Excel to populate the GM article hierarchy (division → sub-division → major category) and family code mappings."
+                    />
+                  )}
+                </div>
+
+                {/* Upload panel */}
+                <div className="md:col-span-5">
+                  <div className="rounded-md border border-border p-4">
+                    <div className="mb-1 font-semibold">Upload GM MCT Excel</div>
+                    <div className="mb-3 text-xs text-muted-foreground">
+                      Columns: <strong>seg, div, sub_div, maj_cat_nm</strong> (required), mc_cd, maj_cat_desc, mj_status, archetype, archetype_nm, family_code, family_name, status. Row 1 = headers, data from Row 2. Replaces the entire table.
+                    </div>
+
+                    <input
+                      ref={gmMctFileRef}
+                      type="file"
+                      accept=".xlsx,.xls"
+                      className="hidden"
+                      onChange={(e) => {
+                        const file = e.target.files?.[0];
+                        if (file) handleGMMctUpload(file);
+                      }}
+                    />
+
+                    {gmMctUploading ? (
+                      <div>
+                        <div className="mb-2 text-[13px] text-[#FF6F61]">
+                          <RefreshCw className="mr-1.5 inline-block h-3.5 w-3.5 animate-spin" />
+                          {gmMctJobPhase || 'Processing…'}
+                        </div>
+                        <Progress value={gmMctProgress} />
+                        <div className="mt-1 text-[11px] text-muted-foreground">{gmMctProgress}% complete</div>
+                      </div>
+                    ) : (
+                      <button
+                        type="button"
+                        onClick={() => gmMctFileRef.current?.click()}
+                        className="flex w-full flex-col items-center justify-center rounded-md border-2 border-dashed border-border bg-muted/30 px-4 py-6 transition-colors hover:border-[#FF6F61] hover:bg-[#FF6F61]/5"
+                      >
+                        <Inbox className="mb-2 h-8 w-8 text-[#FF6F61]" />
+                        <p className="text-[13px]">
+                          Click to upload <strong>.xlsx</strong> file
+                        </p>
+                        <p className="text-[11px] text-muted-foreground">Only Excel files. Max 50 MB.</p>
+                      </button>
+                    )}
+                  </div>
+                </div>
+              </div>
+            </Spinner>
+          </CardContent>
+        </Card>
+
+        {/* GM Major Category Grid Values (gm_major_category_grid_values) */}
+        <Card className="mb-6 glass rounded-2xl border border-white/60">
+          <CardHeader className="flex flex-row items-center justify-between">
+            <CardTitle className="flex items-center gap-2 text-base">
+              <TableIcon className="h-4 w-4" />
+              GM Major Category Grid Values
+            </CardTitle>
+            <div className="flex gap-2">
+              <Button size="sm" variant="outline" onClick={downloadGMGridData}>
+                <Download />
+                Download Data
+              </Button>
+              <Button size="sm" variant="outline" onClick={downloadGMGridTemplate}>
+                <Download />
+                Download Template
+              </Button>
+              <Button size="sm" variant="outline" onClick={loadGMGridStatus} disabled={gmGridStatusLoading}>
+                <RotateCw className={gmGridStatusLoading ? 'animate-spin' : ''} />
+                Refresh Status
+              </Button>
+            </div>
+          </CardHeader>
+          <CardContent>
+            <Spinner spinning={gmGridStatusLoading}>
+              <div className="grid grid-cols-1 gap-4 md:grid-cols-12">
+                {/* Status panel */}
+                <div className="md:col-span-7">
+                  {gmGridMeta ? (
+                    <Descriptions bordered>
+                      <Descriptions.Item label="Last Upload">
+                        {gmGridMeta.uploadedAt
+                          ? new Date(gmGridMeta.uploadedAt).toLocaleString('en-IN', {
+                              timeZone: 'Asia/Kolkata',
+                              dateStyle: 'medium',
+                              timeStyle: 'short',
+                            }) + ' IST'
+                          : <span className="text-muted-foreground">Unknown</span>}
+                      </Descriptions.Item>
+                      <Descriptions.Item label="File">
+                        <span className="font-mono text-xs">{gmGridMeta.fileName || '—'}</span>
+                      </Descriptions.Item>
+                      <Descriptions.Item label="Major Categories">
+                        <Badge variant="info">{(gmGridMeta.categoriesCount ?? 0).toLocaleString()}</Badge>
+                      </Descriptions.Item>
+                      <Descriptions.Item label="Family Codes">
+                        <Badge variant="secondary">{(gmGridMeta.familyCodesCount ?? 0).toLocaleString()}</Badge>
+                      </Descriptions.Item>
+                      <Descriptions.Item label="Data Rows">
+                        <Badge variant="success">{(gmGridMeta.totalRows ?? gmGridMeta.totalValues ?? 0).toLocaleString()}</Badge>
+                      </Descriptions.Item>
+                      <Descriptions.Item label="Rows Skipped">
+                        <Badge variant={(gmGridMeta.skippedRows ?? 0) > 0 ? 'warning' : 'secondary'}>
+                          {(gmGridMeta.skippedRows ?? 0).toLocaleString()}
+                        </Badge>
+                      </Descriptions.Item>
+                    </Descriptions>
+                  ) : (
+                    <Alert
+                      type="warning"
+                      showIcon
+                      message="No GM grid uploaded yet"
+                      description="Upload the GM major category grid Excel to enable attribute dropdowns on the GM Article new article page."
+                    />
+                  )}
+                </div>
+
+                {/* Upload panel */}
+                <div className="md:col-span-5">
+                  <div className="rounded-md border border-border p-4">
+                    <div className="mb-1 font-semibold">Upload GM Grid Excel</div>
+                    <div className="mb-3 text-xs text-muted-foreground">
+                      Columns: <strong>div, sub_div, seg, maj_cat_nm</strong> (required), <strong>family_code</strong> (required), mandatory, family_name, status, <strong>grid_val</strong> (required), uom. Row 1 = title, Row 2 = headers, data from Row 3.
+                    </div>
+
+                    <input
+                      ref={gmGridFileRef}
+                      type="file"
+                      accept=".xlsx,.xls"
+                      className="hidden"
+                      onChange={(e) => {
+                        const file = e.target.files?.[0];
+                        if (file) handleGMGridUpload(file);
+                      }}
+                    />
+
+                    {gmGridUploading ? (
+                      <div>
+                        <div className="mb-2 text-[13px] text-[#FF6F61]">
+                          <RefreshCw className="mr-1.5 inline-block h-3.5 w-3.5 animate-spin" />
+                          {gmGridJobPhase || 'Processing…'}
+                        </div>
+                        <Progress value={gmGridProgress} />
+                        <div className="mt-1 text-[11px] text-muted-foreground">{gmGridProgress}% complete</div>
+                      </div>
+                    ) : (
+                      <button
+                        type="button"
+                        onClick={() => gmGridFileRef.current?.click()}
                         className="flex w-full flex-col items-center justify-center rounded-md border-2 border-dashed border-border bg-muted/30 px-4 py-6 transition-colors hover:border-[#FF6F61] hover:bg-[#FF6F61]/5"
                       >
                         <Inbox className="mb-2 h-8 w-8 text-[#FF6F61]" />
