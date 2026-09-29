@@ -801,6 +801,29 @@ const ArticleCard = React.memo(
         .catch(() => setFabricConsumptionOptions([]));
     }, [isBodyArticle, effectiveMajCat]);
 
+    // Auto-fill GSM (Rough Consumption) from body_fabric_consumption — only
+    // when gsm is genuinely unset in the DB (item.gsm === null) and the master
+    // table actually has a value for this major category. Never runs again
+    // once a value exists.
+    useEffect(() => {
+      if (!isBodyArticle || !effectiveMajCat) return;
+      if ((item as any).gsm != null) return;
+      const token = localStorage.getItem('authToken');
+      fetch(
+        `${APP_CONFIG.api.baseURL}/approver/body-fabric-consumption/gsm?majorCategory=${encodeURIComponent(effectiveMajCat)}`,
+        { headers: { Authorization: `Bearer ${token}` } },
+      )
+        .then((r) => r.json())
+        .then((d: { gsm: number | null }) => {
+          if (d.gsm == null) return;
+          const updates: Record<string, string> = { gsm: String(d.gsm) };
+          setLocalValues((prev) => ({ ...prev, ...updates }));
+          onSave({ ...item, ...updates } as any, updates, { silent: true });
+        })
+        .catch(() => {});
+      // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, [isBodyArticle, effectiveMajCat, item.id]);
+
     // Auto-fill CMP Cost + Body Costing Type from rough_cmp_cost_master — only when cmpCost is
     // genuinely unset in the DB (item.cmpCost === null). Never runs again once a value exists.
     useEffect(() => {
