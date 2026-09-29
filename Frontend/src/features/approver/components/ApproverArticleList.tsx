@@ -3386,7 +3386,11 @@ const ArticleCard = React.memo(
                                     <div className="border-t border-border px-2 py-1.5">
                                       <Button
                                         size="sm"
-                                        onClick={() => onCreateBodyArticle(item)}
+                                        onClick={() => {
+                                          // Merge unsaved localValues so backend gets current attribute values,
+                                          // not the stale DB values (important on Created page before Modify is clicked).
+                                          onCreateBodyArticle({ ...item, ...localValues } as typeof item);
+                                        }}
                                         className="h-7 w-full border border-purple-300 bg-purple-50 text-[11px] font-medium text-purple-700 hover:bg-purple-100"
                                       >
                                         <LayoutGrid />

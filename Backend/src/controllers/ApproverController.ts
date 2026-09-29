@@ -3832,7 +3832,7 @@ export class ApproverController {
     private static gmArticleDataRowToItem(r: any) {
         return {
             id:                      r.id,
-            isGeneric:               false,
+            isGeneric:               true,
             imageName:               null,
             imageUrl:                r.imageUrl ?? null,
             articleNumber:           r.gmArticleNumber ?? null,
@@ -4968,12 +4968,26 @@ export class ApproverController {
     }
 
     static createBodyArticleFromFG = async (req: Request, res: Response) => {
-        const { ids } = req.body as { ids?: string[] };
+        const { ids, bodyDescriptions, attributeOverrides } = req.body as {
+            ids?: string[];
+            // Per-id override for bodyArticleDescription (live computed value from frontend UI).
+            bodyDescriptions?: Record<string, string | null>;
+            // Per-id override for body construction attributes (unsaved localValues from Created page).
+            attributeOverrides?: Record<string, {
+                collar?: string | null; collarStyle?: string | null;
+                neck?: string | null; neckDetails?: string | null;
+                placket?: string | null; fatherBelt?: string | null; childBelt?: string | null;
+                sleeve?: string | null; sleeveFold?: string | null; mSet?: string | null;
+                bottomFold?: string | null; noOfPocket?: string | null;
+                pocketType?: string | null; extraPocket?: string | null;
+                fit?: string | null; pattern?: string | null; length?: string | null;
+            }>;
+        };
         if (!Array.isArray(ids) || ids.length === 0) {
             return res.status(400).json({ error: 'ids array is required' });
         }
 
-        const items = await prisma.extractionResultFlat.findMany({
+        const rawItems = await prisma.extractionResultFlat.findMany({
             where: { id: { in: ids } },
             select: {
                 id: true, articleNumber: true, designNumber: true, division: true, subDivision: true,
@@ -4988,9 +5002,40 @@ export class ApproverController {
             },
         });
 
-        if (items.length === 0) {
+        if (rawItems.length === 0) {
             return res.status(404).json({ error: 'No items found for the given ids' });
         }
+
+        // Apply frontend-supplied overrides so unsaved attribute changes on the Created page
+        // (before Modify is clicked) are used instead of stale DB values.
+        const items = rawItems.map((item) => {
+            const attrOv = attributeOverrides?.[item.id];
+            return {
+                ...item,
+                bodyArticleDescription: bodyDescriptions?.[item.id] !== undefined
+                    ? bodyDescriptions[item.id]
+                    : item.bodyArticleDescription,
+                ...(attrOv ? {
+                    collar:      attrOv.collar      !== undefined ? attrOv.collar      : item.collar,
+                    collarStyle: attrOv.collarStyle !== undefined ? attrOv.collarStyle : item.collarStyle,
+                    neck:        attrOv.neck        !== undefined ? attrOv.neck        : item.neck,
+                    neckDetails: attrOv.neckDetails !== undefined ? attrOv.neckDetails : item.neckDetails,
+                    placket:     attrOv.placket     !== undefined ? attrOv.placket     : item.placket,
+                    fatherBelt:  attrOv.fatherBelt  !== undefined ? attrOv.fatherBelt  : item.fatherBelt,
+                    childBelt:   attrOv.childBelt   !== undefined ? attrOv.childBelt   : item.childBelt,
+                    sleeve:      attrOv.sleeve      !== undefined ? attrOv.sleeve      : item.sleeve,
+                    sleeveFold:  attrOv.sleeveFold  !== undefined ? attrOv.sleeveFold  : item.sleeveFold,
+                    mSet:        attrOv.mSet        !== undefined ? attrOv.mSet        : item.mSet,
+                    bottomFold:  attrOv.bottomFold  !== undefined ? attrOv.bottomFold  : item.bottomFold,
+                    noOfPocket:  attrOv.noOfPocket  !== undefined ? attrOv.noOfPocket  : item.noOfPocket,
+                    pocketType:  attrOv.pocketType  !== undefined ? attrOv.pocketType  : item.pocketType,
+                    extraPocket: attrOv.extraPocket !== undefined ? attrOv.extraPocket : item.extraPocket,
+                    fit:         attrOv.fit         !== undefined ? attrOv.fit         : item.fit,
+                    pattern:     attrOv.pattern     !== undefined ? attrOv.pattern     : item.pattern,
+                    length:      attrOv.length      !== undefined ? attrOv.length      : item.length,
+                } : {}),
+            };
+        });
 
         // Check 1: a body article for the same majorCategory + bodyArticleDescription already exists.
         // Only a row that carries a body article number counts as "already present" — that is the
@@ -5020,93 +5065,110 @@ export class ApproverController {
             }
         }
 
-        // Check 2: this flat article has already been sent to Body Article
+        // Check 2: per-flatId logic —
+        //   a) APPROVED row with the same new desc → block (true duplicate, already approved)
+        //   b) PENDING or REJECTED row exists → update with new attributes (re-submission)
+        //   c) no matching row → create fresh
         const existing = await prisma.bodyArticleData.findMany({
             where: { flatId: { in: ids } },
-            select: { id: true, flatId: true, bodyArticleNumber: true, majorCategory: true, sapSyncStatus: true, bodyArticleDescription: true },
+            select: { id: true, flatId: true, bodyArticleNumber: true, majorCategory: true, sapSyncStatus: true, bodyArticleDescription: true, approvalStatus: true },
         });
-        if (existing.length > 0) {
-            const itemMap = new Map(items.map((i) => [i.id, i]));
-            const sameExact: string[] = [];  // already in SAP with the same grid → true duplicate, block
-            const staleToDelete: string[] = []; // safe to replace — no number and never synced
 
-            for (const ex of existing) {
-                const item = itemMap.get(ex.flatId ?? '');
-                if (!item) continue;
+        const bodyArticleData = (item: typeof items[0]) => ({
+            flatId:                 item.id,
+            articleNumber:          item.articleNumber,
+            designNumber:           item.designNumber,
+            division:               item.division,
+            subDivision:            item.subDivision,
+            majorCategory:          item.majorCategory,
+            mcCode:                 item.mcCode,
+            vendorName:             item.vendorName,
+            vendorCode:             item.vendorCode,
+            season:                 item.season,
+            year:                   item.year,
+            hsnTaxCode:             item.hsnTaxCode,
+            imageUrl:               item.imageUrl,
+            userName:               item.userName,
+            bodyArticleType:        'FG' as const,
+            bodyArticleDescription: item.bodyArticleDescription,
+            mCollarType:            item.collar,
+            mCollarStyle:           item.collarStyle,
+            mNeckType:              item.neck,
+            mNeckStyle:             item.neckDetails,
+            mPlacket:               item.placket,
+            mBltType:               item.fatherBelt,
+            mBltStyle:              item.childBelt,
+            mSleevesMainStyle:      item.sleeve,
+            mSleeveFold:            item.sleeveFold,
+            mSet:                   item.mSet,
+            mBtmFold:               item.bottomFold,
+            mNoOfPocket:            item.noOfPocket,
+            mPocket:                item.pocketType,
+            mExtraPocket:           item.extraPocket,
+            mFit:                   item.fit,
+            mBodyStyle:             item.pattern,
+            mLength:                item.length,
+        });
 
-                if (!ex.bodyArticleNumber && ex.sapSyncStatus !== 'SYNCED') {
-                    // The row this flat article created earlier never reached SAP (NOT_SYNCED, or a
-                    // FAILED attempt that got no number). Re-creating just refreshes it with the
-                    // current Body & Construction values, so replace it instead of blocking — the
-                    // user has nothing to reuse and no way forward otherwise.
-                    staleToDelete.push(ex.id);
-                    continue;
-                }
+        // Group existing rows by flatId (multiple rows per flatId are possible)
+        const existingRowsByFlatId = new Map<string, typeof existing>();
+        for (const ex of existing) {
+            const key = ex.flatId ?? '';
+            if (!existingRowsByFlatId.has(key)) existingRowsByFlatId.set(key, []);
+            existingRowsByFlatId.get(key)!.push(ex);
+        }
 
-                const sameCat  = ex.majorCategory === item.majorCategory;
-                const sameDesc = (ex.bodyArticleDescription ?? '') === (item.bodyArticleDescription ?? '');
-                if (sameCat && sameDesc) {
-                    // Same grid, already carries a number / is in SAP — a real duplicate
-                    sameExact.push(ex.flatId ?? '');
-                }
-                // Already in SAP but desc/category changed → leave old row, create new PENDING row
-            }
+        const toUpdate: Array<{ item: typeof items[0]; existingId: string }> = [];
+        const toCreate: typeof items = [];
 
-            if (sameExact.length > 0) {
+        for (const item of items) {
+            const rows = existingRowsByFlatId.get(item.id) ?? [];
+
+            // a) Block if the new desc is already APPROVED for this flatId — same message
+            //    as Check 1 so the user knows which body article number to reuse.
+            const approvedSameDesc = rows.find(
+                (r) => r.approvalStatus === 'APPROVED'
+                    && (r.bodyArticleDescription ?? '').trim() === (item.bodyArticleDescription ?? '').trim()
+            );
+            if (approvedSameDesc) {
                 return res.status(409).json({
-                    error: `Body Article go for Approval Already. Cannot Create Duplicate.`,
-                    duplicateFlatIds: sameExact,
+                    error: `For this ${approvedSameDesc.majorCategory} Major Category, Body Article is already Present: ${approvedSameDesc.bodyArticleNumber ?? 'N/A'}`,
+                    duplicateFlatIds: [item.id],
                 });
             }
-            if (staleToDelete.length > 0) {
-                await prisma.bodyArticleData.deleteMany({ where: { id: { in: staleToDelete } } });
+
+            // b) Update an existing PENDING or REJECTED row for this flatId
+            const pendingOrRejected = rows.find(
+                (r) => r.approvalStatus === 'PENDING' || r.approvalStatus === 'REJECTED'
+            );
+            if (pendingOrRejected) {
+                toUpdate.push({ item, existingId: pendingOrRejected.id });
+            } else {
+                // c) No PENDING/REJECTED row — create fresh
+                toCreate.push(item);
             }
         }
 
-        const created = await Promise.all(items.map((item) =>
-            prisma.bodyArticleData.create({
-                data: {
-                    flatId:               item.id,
-                    articleNumber:        item.articleNumber,
-                    designNumber:         item.designNumber,
-                    division:             item.division,
-                    subDivision:          item.subDivision,
-                    majorCategory:        item.majorCategory,
-                    mcCode:               item.mcCode,
-                    vendorName:           item.vendorName,
-                    vendorCode:           item.vendorCode,
-                    season:               item.season,
-                    year:                 item.year,
-                    hsnTaxCode:           item.hsnTaxCode,
-                    imageUrl:             item.imageUrl,
-                    userName:             item.userName,
-                    bodyArticleType:      'FG',
-                    // Carried over so the New Articles row shows the grid it was created from and
-                    // the SAP-submit duplicate guard can see it; the dashboard overwrites it when
-                    // the Body & Construction values are edited there.
-                    bodyArticleDescription: item.bodyArticleDescription,
-                    mCollarType:          item.collar,
-                    mCollarStyle:         item.collarStyle,
-                    mNeckType:            item.neck,
-                    mNeckStyle:           item.neckDetails,
-                    mPlacket:             item.placket,
-                    mBltType:             item.fatherBelt,
-                    mBltStyle:            item.childBelt,
-                    mSleevesMainStyle:    item.sleeve,
-                    mSleeveFold:          item.sleeveFold,
-                    mSet:                 item.mSet,
-                    mBtmFold:             item.bottomFold,
-                    mNoOfPocket:          item.noOfPocket,
-                    mPocket:              item.pocketType,
-                    mExtraPocket:         item.extraPocket,
-                    mFit:                 item.fit,
-                    mBodyStyle:           item.pattern,
-                    mLength:              item.length,
-                },
-            })
-        ));
+        let upserted = 0;
+        await Promise.all([
+            ...toUpdate.map(({ item, existingId }) =>
+                prisma.bodyArticleData.update({
+                    where: { id: existingId },
+                    data: {
+                        ...bodyArticleData(item),
+                        approvalStatus: 'PENDING',
+                        sapSyncStatus:  'NOT_SYNCED',
+                        sapSyncMessage: null,
+                    },
+                }).then(() => { upserted++; })
+            ),
+            ...toCreate.map((item) =>
+                prisma.bodyArticleData.create({ data: bodyArticleData(item) })
+                    .then(() => { upserted++; })
+            ),
+        ]);
 
-        return res.json({ success: true, created: created.length });
+        return res.json({ success: true, created: upserted });
     };
 
     // Division → fabric master lookup. K/RFD_K → KNITS_MIX (mFabDiv K),

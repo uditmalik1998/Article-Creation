@@ -781,7 +781,32 @@ export default function ArticleDetailPage({
       const token = localStorage.getItem('authToken');
       const r = await fetch(`${APP_CONFIG.api.baseURL}/approver/create-body-article`, {
         method: 'POST', headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` },
-        body: JSON.stringify({ ids: [item.id] }),
+        body: JSON.stringify({
+          ids: [item.id],
+          bodyDescriptions: { [item.id]: item.bodyArticleDescription ?? null },
+          // Pass current UI attribute values so backend doesn't use stale DB values
+          attributeOverrides: {
+            [item.id]: {
+              collar: (item as any).collar ?? null,
+              collarStyle: (item as any).collarStyle ?? null,
+              neck: (item as any).neck ?? null,
+              neckDetails: (item as any).neckDetails ?? null,
+              placket: (item as any).placket ?? null,
+              fatherBelt: (item as any).fatherBelt ?? null,
+              childBelt: (item as any).childBelt ?? null,
+              sleeve: (item as any).sleeve ?? null,
+              sleeveFold: (item as any).sleeveFold ?? null,
+              mSet: (item as any).mSet ?? null,
+              bottomFold: (item as any).bottomFold ?? null,
+              noOfPocket: (item as any).noOfPocket ?? null,
+              pocketType: (item as any).pocketType ?? null,
+              extraPocket: (item as any).extraPocket ?? null,
+              fit: (item as any).fit ?? null,
+              pattern: (item as any).pattern ?? null,
+              length: (item as any).length ?? null,
+            },
+          },
+        }),
       });
       const data = await r.json();
       if (!r.ok) {
