@@ -22,6 +22,11 @@ import {
   getFabricRawPipelineStatus,
   isFabricRawRunning,
 } from '../services/fabricRawDataService';
+import {
+  runGmRawDataProcessing,
+  getGmRawPipelineStatus,
+  isGmRawRunning,
+} from '../services/gmRawDataService';
 
 // ── SRM Paginated API (same as srmSyncService) ────────────────────────────────
 const SRM_API_BASE   = 'https://pymdqnnwwxrgeolvgvgv.supabase.co/functions/v1/srm-presentation-images-api';
@@ -450,5 +455,38 @@ export const runFabricRawProcessing = async (_req: Request, res: Response): Prom
   res.json({
     success: true,
     message: 'Fabric raw processing started in background. Check pipeline status in a few seconds.',
+  });
+};
+
+/**
+ * GET /api/test-api/gm-raw-pipeline-status
+ * Returns gm_raw_data counts grouped by status.
+ */
+export const getGmRawStatus = async (_req: Request, res: Response): Promise<void> => {
+  const status = await getGmRawPipelineStatus();
+  res.json({ success: true, data: status });
+};
+
+/**
+ * POST /api/test-api/run-gm-raw-processing
+ * Triggers the gm_raw_data → gm_article_data processing worker.
+ * Returns immediately if a run is already in progress.
+ */
+export const runGmRawProcessing = async (_req: Request, res: Response): Promise<void> => {
+  if (isGmRawRunning()) {
+    res.status(409).json({
+      success: false,
+      error: 'GM raw processing worker is already running. Try again once it completes.',
+    });
+    return;
+  }
+
+  runGmRawDataProcessing('ADMIN_MANUAL').catch(err => {
+    console.error('[TestAPI] GM raw processing error:', err.message);
+  });
+
+  res.json({
+    success: true,
+    message: 'GM raw processing started in background. Check pipeline status in a few seconds.',
   });
 };

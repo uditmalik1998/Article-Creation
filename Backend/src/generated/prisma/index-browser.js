@@ -790,6 +790,39 @@ exports.Prisma.FabricRawDataScalarFieldEnum = {
   updatedAt: 'updatedAt'
 };
 
+exports.Prisma.GmRawDataScalarFieldEnum = {
+  id: 'id',
+  presentationNo: 'presentationNo',
+  uniqueKey: 'uniqueKey',
+  vendorCode: 'vendorCode',
+  vendorName: 'vendorName',
+  vendorCity: 'vendorCity',
+  division: 'division',
+  subDivision: 'subDivision',
+  majorCategory: 'majorCategory',
+  presentationsType: 'presentationsType',
+  designNumber: 'designNumber',
+  articleNumber: 'articleNumber',
+  fabric: 'fabric',
+  noOfColors: 'noOfColors',
+  price: 'price',
+  imageUrl: 'imageUrl',
+  source: 'source',
+  season: 'season',
+  garmentWeight: 'garmentWeight',
+  availableQty: 'availableQty',
+  approvedBy: 'approvedBy',
+  notes: 'notes',
+  status: 'status',
+  errorMessage: 'errorMessage',
+  extractedAt: 'extractedAt',
+  flatId: 'flatId',
+  lockedUntil: 'lockedUntil',
+  presentationReceivedDate: 'presentationReceivedDate',
+  createdAt: 'createdAt',
+  updatedAt: 'updatedAt'
+};
+
 exports.Prisma.SrmSyncRunScalarFieldEnum = {
   id: 'id',
   triggeredBy: 'triggeredBy',
@@ -1101,6 +1134,33 @@ exports.Prisma.GmArticleDataScalarFieldEnum = {
   imageUrl: 'imageUrl',
   gmArticleType: 'gmArticleType',
   source: 'source',
+  userName: 'userName',
+  createdAt: 'createdAt',
+  updatedAt: 'updatedAt'
+};
+
+exports.Prisma.GmVariantArticleDataScalarFieldEnum = {
+  id: 'id',
+  genericArticleId: 'genericArticleId',
+  genericArticleNumber: 'genericArticleNumber',
+  variantColor: 'variantColor',
+  variantSize: 'variantSize',
+  variantArticleNumber: 'variantArticleNumber',
+  division: 'division',
+  subDivision: 'subDivision',
+  majorCategory: 'majorCategory',
+  mcDescription: 'mcDescription',
+  vendorName: 'vendorName',
+  vendorCode: 'vendorCode',
+  designNumber: 'designNumber',
+  mrp: 'mrp',
+  rate: 'rate',
+  approvalStatus: 'approvalStatus',
+  approvedAt: 'approvedAt',
+  approvedBy: 'approvedBy',
+  sapSyncStatus: 'sapSyncStatus',
+  sapSyncMessage: 'sapSyncMessage',
+  imageUrl: 'imageUrl',
   userName: 'userName',
   createdAt: 'createdAt',
   updatedAt: 'updatedAt'
@@ -1902,6 +1962,29 @@ exports.Prisma.FabricRawDataOrderByRelevanceFieldEnum = {
   flatId: 'flatId'
 };
 
+exports.Prisma.GmRawDataOrderByRelevanceFieldEnum = {
+  id: 'id',
+  presentationNo: 'presentationNo',
+  uniqueKey: 'uniqueKey',
+  vendorCode: 'vendorCode',
+  vendorName: 'vendorName',
+  vendorCity: 'vendorCity',
+  division: 'division',
+  subDivision: 'subDivision',
+  majorCategory: 'majorCategory',
+  presentationsType: 'presentationsType',
+  designNumber: 'designNumber',
+  articleNumber: 'articleNumber',
+  fabric: 'fabric',
+  imageUrl: 'imageUrl',
+  source: 'source',
+  season: 'season',
+  approvedBy: 'approvedBy',
+  notes: 'notes',
+  errorMessage: 'errorMessage',
+  flatId: 'flatId'
+};
+
 exports.Prisma.SrmSyncRunOrderByRelevanceFieldEnum = {
   id: 'id',
   triggeredBy: 'triggeredBy',
@@ -2135,6 +2218,27 @@ exports.Prisma.GmArticleDataOrderByRelevanceFieldEnum = {
   imageUrl: 'imageUrl',
   gmArticleType: 'gmArticleType',
   source: 'source',
+  userName: 'userName'
+};
+
+exports.Prisma.GmVariantArticleDataOrderByRelevanceFieldEnum = {
+  id: 'id',
+  genericArticleId: 'genericArticleId',
+  genericArticleNumber: 'genericArticleNumber',
+  variantColor: 'variantColor',
+  variantSize: 'variantSize',
+  variantArticleNumber: 'variantArticleNumber',
+  division: 'division',
+  subDivision: 'subDivision',
+  majorCategory: 'majorCategory',
+  mcDescription: 'mcDescription',
+  vendorName: 'vendorName',
+  vendorCode: 'vendorCode',
+  designNumber: 'designNumber',
+  approvalStatus: 'approvalStatus',
+  sapSyncStatus: 'sapSyncStatus',
+  sapSyncMessage: 'sapSyncMessage',
+  imageUrl: 'imageUrl',
   userName: 'userName'
 };
 
@@ -2471,6 +2575,7 @@ exports.Prisma.ModelName = {
   Article360Flat: 'Article360Flat',
   RawArticle: 'RawArticle',
   FabricRawData: 'FabricRawData',
+  GmRawData: 'GmRawData',
   SrmSyncRun: 'SrmSyncRun',
   SrmSyncRunItem: 'SrmSyncRunItem',
   PoolBJob: 'PoolBJob',
@@ -2483,6 +2588,7 @@ exports.Prisma.ModelName = {
   ModifyLog: 'ModifyLog',
   FabricArticleData: 'FabricArticleData',
   GmArticleData: 'GmArticleData',
+  GmVariantArticleData: 'GmVariantArticleData',
   FabricVariantArticleData: 'FabricVariantArticleData',
   ValueAdditionAccessoriesCost: 'ValueAdditionAccessoriesCost',
   BodyArticleData: 'BodyArticleData',

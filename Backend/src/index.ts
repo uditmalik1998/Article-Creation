@@ -44,6 +44,7 @@ import poolBRoutes from './routes/poolB';
 import { syncVendorMaster } from './services/vendorMasterSyncService';
 import { runRawArticleExtraction, isExtractionRunning } from './services/rawArticleExtractionService';
 import { runFabricRawDataProcessing, isFabricRawRunning } from './services/fabricRawDataService';
+import { runGmRawDataProcessing, isGmRawRunning } from './services/gmRawDataService';
 import { startEventLoopWatchdog } from './utils/eventLoopWatchdog';
 
 const app = express();

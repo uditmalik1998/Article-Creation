@@ -5404,4 +5404,18 @@ export class ApproverController {
 
         return res.json({ data: rows, total: rows.length });
     };
+
+    // ─── GM Article SAP Submission ───────────────────────────────────────────────
+
+    static submitGmArticles = async (req: Request, res: Response): Promise<void> => {
+        const { ids } = req.body as { ids?: string[] };
+        if (!Array.isArray(ids) || ids.length === 0) {
+            res.status(400).json({ error: 'ids array is required' });
+            return;
+        }
+        const { submitGmArticles } = await import('../services/zmmGMArtCreationService');
+        const result = await submitGmArticles(ids);
+        const allOk = result.results.every(r => r.success);
+        res.status(allOk ? 200 : 207).json(result);
+    };
 }

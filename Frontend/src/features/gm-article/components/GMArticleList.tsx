@@ -936,8 +936,18 @@ const ArticleCard = React.memo(
       }
     }, [item.id]);
 
+    const calcMrpFromRate = (rate: number): number => Math.ceil((rate * 1.47) / 50) * 50;
+
     const getValue = (field: string): string | null => {
       if (field in localValues) return localValues[field];
+      if (field === 'mrp') {
+        const stored = (item as any).mrp;
+        const storedNum = parseFloat(String(stored ?? ''));
+        if (isNaN(storedNum) || storedNum <= 1) {
+          const rate = parseFloat(String((item as any).rate ?? ''));
+          if (!isNaN(rate) && rate > 0) return String(calcMrpFromRate(rate));
+        }
+      }
       return (item as any)[field] ?? null;
     };
 
@@ -1000,6 +1010,14 @@ const ArticleCard = React.memo(
       }
       const updates: Record<string, string | null> = { [field]: value };
       if (field === 'rate') {
+        const rate = parseFloat(String(value ?? ''));
+        if (!isNaN(rate) && rate > 0) {
+          // Auto-calculate MRP only if user hasn't manually set one (≤1 = placeholder)
+          const existingMrp = parseFloat(String(getValue('mrp') ?? ''));
+          if (isNaN(existingMrp) || existingMrp <= 1) {
+            updates['mrp'] = String(calcMrpFromRate(rate));
+          }
+        }
         const seg = computeSegmentFromMrp(value, segmentRangesRef.current);
         if (seg) updates['segment'] = seg;
       }
@@ -1060,6 +1078,17 @@ const ArticleCard = React.memo(
       item.approvalStatus === 'APPROVED' ? '#f6ffed' : item.approvalStatus === 'REJECTED' ? '#fff1f0' : '#fff';
 
     // Compute markdown + active groups for render
+    const rateNum = parseFloat(String(getValue('rate') ?? ''));
+    const mrpNum  = parseFloat(String(getValue('mrp')  ?? ''));
+    const markdown =
+      !isNaN(rateNum) && !isNaN(mrpNum) && mrpNum > 0
+        ? (((mrpNum - rateNum) / mrpNum) * 100).toFixed(1) + '%'
+        : '—';
+    const afterTax =
+      !isNaN(rateNum) && !isNaN(mrpNum) && mrpNum > 0
+        ? (((mrpNum - rateNum * 1.05) / mrpNum) * 100).toFixed(1) + '%'
+        : '—';
+
     const groupMap: Record<string, { color: string; attrs: typeof visibleAttrs }> = {};
     for (const attr of visibleAttrs) {
       if (!groupMap[attr.group]) groupMap[attr.group] = { color: attr.groupColor, attrs: [] };
@@ -1953,7 +1982,7 @@ const ArticleCard = React.memo(
               <div className="mb-1.5 flex shrink-0 items-center justify-between">
                 <h3 className="flex items-center gap-1.5 text-[13px] font-bold text-slate-700">
                   <Sparkles className="h-3.5 w-3.5 text-[#FF6F61]" />
-                  GARMENT ATTRIBUTES ({visibleAttrs.length})
+                  GENERAL MERCHANDISE ATTRIBUTES
                   {/* Legend popover */}
                   <Popover>
                     <PopoverTrigger asChild>
@@ -2075,10 +2104,12 @@ const ArticleCard = React.memo(
                     <div className="space-y-0 p-1">
                       {[
                         ...(!isFGMode ? [
-                          { label: 'Cost/Rate', field: 'rate', editable: true, mandatory: true, isDropdown: false, isColor: false, isMarkdown: false },
-                          { label: 'MRP', field: 'mrp', editable: true, mandatory: true, isDropdown: false, isColor: false, isMarkdown: false },
+                          { label: 'Cost/Rate', field: 'rate', editable: true, mandatory: true, isDropdown: false, isColor: false, isMarkdown: false, isAfterTax: false },
+                          { label: 'MRP', field: 'mrp', editable: true, mandatory: true, isDropdown: false, isColor: false, isMarkdown: false, isAfterTax: false },
+                          { label: 'MARKDOWN', field: '_markdown', editable: false, mandatory: false, isDropdown: false, isColor: false, isMarkdown: true, isAfterTax: false },
+                          { label: 'AFTER TAX', field: '_afterTax', editable: false, mandatory: false, isDropdown: false, isColor: false, isMarkdown: false, isAfterTax: true },
                           ...(!item.source || item.source !== 'SRM' ? [
-                            { label: 'Base Color', field: 'colour', editable: true, mandatory: false, isDropdown: true, isColor: true, isMarkdown: false },
+                            { label: 'Base Color', field: 'colour', editable: true, mandatory: false, isDropdown: true, isColor: true, isMarkdown: false, isAfterTax: false },
                           ] : []),
                         ] : []),
                         { label: 'ARTICLE FASHION TYPE', field: 'articleFashionType', editable: true, mandatory: true, isDropdown: true, isColor: false, isMarkdown: false, boldLabel: true },
@@ -2092,8 +2123,12 @@ const ArticleCard = React.memo(
                         ] : []),
                       ].map((bom) => {
                         const isEditingBom = editingField === `bom_${bom.field}`;
-                        const bomLocked = isFieldLocked(bom.field);
-                        const val = String(getValue(bom.field) ?? '').trim() || '—';
+                        const bomLocked = isFieldLocked(bom.field) || (bom as any).isMarkdown || (bom as any).isAfterTax;
+                        const val = (bom as any).isMarkdown
+                          ? markdown
+                          : (bom as any).isAfterTax
+                          ? afterTax
+                          : String(getValue(bom.field) ?? '').trim() || '—';
                         const isEmpty = val === '—';
                         const dropdownOptions: string[] = bom.isDropdown
                           ? bom.field === 'impAtrbt2'
@@ -2125,7 +2160,7 @@ const ArticleCard = React.memo(
                               className="flex-1 truncate text-[11px]"
                               style={{
                                 color: bom.mandatory && isEmpty && !isLocked ? '#dc2626' : '#374151',
-                                fontWeight: bom.mandatory || (bom as any).boldLabel ? 600 : 400,
+                                fontWeight: bom.mandatory || (bom as any).boldLabel || (bom as any).isMarkdown || (bom as any).isAfterTax ? 600 : 400,
                               }}
                             >
                               {bom.mandatory && <span className="mr-0.5 text-red-500">*</span>}

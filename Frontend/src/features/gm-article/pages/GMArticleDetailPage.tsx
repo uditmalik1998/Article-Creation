@@ -263,7 +263,7 @@ const DEFAULT_APPROVE_ROLES = ['ADMIN', 'APPROVER', 'CATEGORY_HEAD', 'SUB_DIVISI
 export default function ArticleDetailPage({
   ListComponent = GMArticleList,
   skipMandatoryFieldsCheck = false,
-  approveEndpoint = '/approver/gm-approve',
+  approveEndpoint = '/approver/gm-articles/submit',
   itemsBaseEndpoint = '/approver/gm-articles',
   rejectEndpoint = '/approver/gm-articles/reject',
   approveRoles = DEFAULT_APPROVE_ROLES,

@@ -15,6 +15,8 @@ import {
   getRawArticles,
   getFabricRawStatus,
   runFabricRawProcessing,
+  getGmRawStatus,
+  runGmRawProcessing,
 } from '../controllers/testApiController';
 
 const router = Router();
@@ -62,5 +64,17 @@ router.get('/fabric-raw-pipeline-status', asyncHandler(getFabricRawStatus));
  * Triggers the fabric_raw_data → fabric_article_data processing worker.
  */
 router.post('/run-fabric-raw-processing', asyncHandler(runFabricRawProcessing));
+
+/**
+ * GET /api/test-api/gm-raw-pipeline-status
+ * Returns gm_raw_data counts grouped by status.
+ */
+router.get('/gm-raw-pipeline-status', asyncHandler(getGmRawStatus));
+
+/**
+ * POST /api/test-api/run-gm-raw-processing
+ * Triggers the gm_raw_data → gm_article_data processing worker.
+ */
+router.post('/run-gm-raw-processing', asyncHandler(runGmRawProcessing));
 
 export default router;
