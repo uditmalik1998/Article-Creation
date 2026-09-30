@@ -8,8 +8,8 @@
 import { prismaClient as prisma } from '../utils/prisma';
 import { storageService } from './storageService';
 
-const BATCH_SIZE  = 20;
-const LOCK_MINUTES = 10;
+const BATCH_SIZE  = 40;
+const LOCK_MINUTES = 20;
 
 let _isRunning = false;
 

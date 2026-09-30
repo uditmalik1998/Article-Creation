@@ -27,8 +27,8 @@ import { mapWithConcurrency } from '../utils/concurrency';
 export const RAW_PIPELINE_CUTOFF = new Date('2026-05-26T23:59:59.999Z');
 
 // ── Constants ─────────────────────────────────────────────────────────────────
-const BATCH_SIZE      = 20;   // rows claimed per run
-const LOCK_MINUTES    = 12;   // lock duration (must be > max VLM time per row)
+const BATCH_SIZE      = 40;   // rows claimed per run
+const LOCK_MINUTES    = 22;   // lock duration (must be > max VLM time per row)
 const MAX_RETRIES     = 3;    // after this many failures → PERM_FAILED
 
 // ── Running guard ─────────────────────────────────────────────────────────────
