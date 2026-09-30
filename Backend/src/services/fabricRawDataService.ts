@@ -1,7 +1,7 @@
 import { prismaClient as prisma } from '../utils/prisma';
 import { storageService } from './storageService';
 
-const BATCH_SIZE = 20;
+const BATCH_SIZE = 40;
 
 export async function getFabricRawPipelineStatus(): Promise<{
   PENDING: number; PROCESSING: number; COMPLETED: number; FAILED: number; total: number;
