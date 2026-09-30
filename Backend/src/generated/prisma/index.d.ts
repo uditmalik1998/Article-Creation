@@ -169,6 +169,13 @@ export type RawArticle = $Result.DefaultSelection<Prisma.$RawArticlePayload>
  */
 export type FabricRawData = $Result.DefaultSelection<Prisma.$FabricRawDataPayload>
 /**
+ * Model GmRawData
+ * GmRawData: Raw GM article data exactly as received (e.g. from SRM / presentation import).
+ * Similar to FabricRawData but without retry_count and extracted_data.
+ * unique_key prevents duplicate imports.
+ */
+export type GmRawData = $Result.DefaultSelection<Prisma.$GmRawDataPayload>
+/**
  * Model SrmSyncRun
  * One row per cron/admin/webhook sync execution
  */
@@ -245,6 +252,13 @@ export type FabricArticleData = $Result.DefaultSelection<Prisma.$FabricArticleDa
  * gm_major_category_details for that category are shown in the UI.
  */
 export type GmArticleData = $Result.DefaultSelection<Prisma.$GmArticleDataPayload>
+/**
+ * Model GmVariantArticleData
+ * GmVariantArticleData: One row per GM article variant (size × color) under a parent GM article.
+ * Similar to FabricVariantArticleData but includes variant_size since GM variants have
+ * both a size and a color dimension.
+ */
+export type GmVariantArticleData = $Result.DefaultSelection<Prisma.$GmVariantArticleDataPayload>
 /**
  * Model FabricVariantArticleData
  * FabricVariantArticleData: One row per variant (size × color) under a fabric article.
@@ -965,6 +979,16 @@ export class PrismaClient<
   get fabricRawData(): Prisma.FabricRawDataDelegate<ExtArgs, ClientOptions>;
 
   /**
+   * `prisma.gmRawData`: Exposes CRUD operations for the **GmRawData** model.
+    * Example usage:
+    * ```ts
+    * // Fetch zero or more GmRawData
+    * const gmRawData = await prisma.gmRawData.findMany()
+    * ```
+    */
+  get gmRawData(): Prisma.GmRawDataDelegate<ExtArgs, ClientOptions>;
+
+  /**
    * `prisma.srmSyncRun`: Exposes CRUD operations for the **SrmSyncRun** model.
     * Example usage:
     * ```ts
@@ -1083,6 +1107,16 @@ export class PrismaClient<
     * ```
     */
   get gmArticleData(): Prisma.GmArticleDataDelegate<ExtArgs, ClientOptions>;
+
+  /**
+   * `prisma.gmVariantArticleData`: Exposes CRUD operations for the **GmVariantArticleData** model.
+    * Example usage:
+    * ```ts
+    * // Fetch zero or more GmVariantArticleData
+    * const gmVariantArticleData = await prisma.gmVariantArticleData.findMany()
+    * ```
+    */
+  get gmVariantArticleData(): Prisma.GmVariantArticleDataDelegate<ExtArgs, ClientOptions>;
 
   /**
    * `prisma.fabricVariantArticleData`: Exposes CRUD operations for the **FabricVariantArticleData** model.
@@ -1682,6 +1716,7 @@ export namespace Prisma {
     Article360Flat: 'Article360Flat',
     RawArticle: 'RawArticle',
     FabricRawData: 'FabricRawData',
+    GmRawData: 'GmRawData',
     SrmSyncRun: 'SrmSyncRun',
     SrmSyncRunItem: 'SrmSyncRunItem',
     PoolBJob: 'PoolBJob',
@@ -1694,6 +1729,7 @@ export namespace Prisma {
     ModifyLog: 'ModifyLog',
     FabricArticleData: 'FabricArticleData',
     GmArticleData: 'GmArticleData',
+    GmVariantArticleData: 'GmVariantArticleData',
     FabricVariantArticleData: 'FabricVariantArticleData',
     ValueAdditionAccessoriesCost: 'ValueAdditionAccessoriesCost',
     BodyArticleData: 'BodyArticleData',
@@ -1725,7 +1761,7 @@ export namespace Prisma {
       omit: GlobalOmitOptions
     }
     meta: {
-      modelProps: "department" | "subDepartment" | "category" | "masterAttribute" | "attributeAllowedValue" | "categoryAttribute" | "extractionJob" | "extractionResult" | "extractionResultFlat" | "modelGenerationResult" | "modelImageApproval" | "mvgrLookup" | "masterVendorDetail" | "user" | "auditLog" | "apiKey" | "changeHistory" | "costSummary" | "article360" | "articleFab" | "articleBody" | "articleVaAcc" | "articleVaPrcs" | "articleBom" | "sapFieldConfig" | "sapAttributeValue" | "article360Flat" | "rawArticle" | "fabricRawData" | "srmSyncRun" | "srmSyncRunItem" | "poolBJob" | "poolBBatch" | "nationalGridMaster" | "broaderMenu" | "majorCatMaster" | "fabricArticleMaster" | "fabricMajCatGridValue" | "modifyLog" | "fabricArticleData" | "gmArticleData" | "fabricVariantArticleData" | "valueAdditionAccessoriesCost" | "bodyArticleData" | "referenceArticleData" | "bodyFabricConsumption" | "roughCmpCostMaster" | "basicTrimCostMaster" | "basicTrimCostComponent" | "majorCategoryDetails" | "expenseApprovalStage" | "expenseChangeRequest" | "expenseAccessGrant" | "expenseAuditLog"
+      modelProps: "department" | "subDepartment" | "category" | "masterAttribute" | "attributeAllowedValue" | "categoryAttribute" | "extractionJob" | "extractionResult" | "extractionResultFlat" | "modelGenerationResult" | "modelImageApproval" | "mvgrLookup" | "masterVendorDetail" | "user" | "auditLog" | "apiKey" | "changeHistory" | "costSummary" | "article360" | "articleFab" | "articleBody" | "articleVaAcc" | "articleVaPrcs" | "articleBom" | "sapFieldConfig" | "sapAttributeValue" | "article360Flat" | "rawArticle" | "fabricRawData" | "gmRawData" | "srmSyncRun" | "srmSyncRunItem" | "poolBJob" | "poolBBatch" | "nationalGridMaster" | "broaderMenu" | "majorCatMaster" | "fabricArticleMaster" | "fabricMajCatGridValue" | "modifyLog" | "fabricArticleData" | "gmArticleData" | "gmVariantArticleData" | "fabricVariantArticleData" | "valueAdditionAccessoriesCost" | "bodyArticleData" | "referenceArticleData" | "bodyFabricConsumption" | "roughCmpCostMaster" | "basicTrimCostMaster" | "basicTrimCostComponent" | "majorCategoryDetails" | "expenseApprovalStage" | "expenseChangeRequest" | "expenseAccessGrant" | "expenseAuditLog"
       txIsolationLevel: Prisma.TransactionIsolationLevel
     }
     model: {
@@ -3875,6 +3911,80 @@ export namespace Prisma {
           }
         }
       }
+      GmRawData: {
+        payload: Prisma.$GmRawDataPayload<ExtArgs>
+        fields: Prisma.GmRawDataFieldRefs
+        operations: {
+          findUnique: {
+            args: Prisma.GmRawDataFindUniqueArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$GmRawDataPayload> | null
+          }
+          findUniqueOrThrow: {
+            args: Prisma.GmRawDataFindUniqueOrThrowArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$GmRawDataPayload>
+          }
+          findFirst: {
+            args: Prisma.GmRawDataFindFirstArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$GmRawDataPayload> | null
+          }
+          findFirstOrThrow: {
+            args: Prisma.GmRawDataFindFirstOrThrowArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$GmRawDataPayload>
+          }
+          findMany: {
+            args: Prisma.GmRawDataFindManyArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$GmRawDataPayload>[]
+          }
+          create: {
+            args: Prisma.GmRawDataCreateArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$GmRawDataPayload>
+          }
+          createMany: {
+            args: Prisma.GmRawDataCreateManyArgs<ExtArgs>
+            result: BatchPayload
+          }
+          createManyAndReturn: {
+            args: Prisma.GmRawDataCreateManyAndReturnArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$GmRawDataPayload>[]
+          }
+          delete: {
+            args: Prisma.GmRawDataDeleteArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$GmRawDataPayload>
+          }
+          update: {
+            args: Prisma.GmRawDataUpdateArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$GmRawDataPayload>
+          }
+          deleteMany: {
+            args: Prisma.GmRawDataDeleteManyArgs<ExtArgs>
+            result: BatchPayload
+          }
+          updateMany: {
+            args: Prisma.GmRawDataUpdateManyArgs<ExtArgs>
+            result: BatchPayload
+          }
+          updateManyAndReturn: {
+            args: Prisma.GmRawDataUpdateManyAndReturnArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$GmRawDataPayload>[]
+          }
+          upsert: {
+            args: Prisma.GmRawDataUpsertArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$GmRawDataPayload>
+          }
+          aggregate: {
+            args: Prisma.GmRawDataAggregateArgs<ExtArgs>
+            result: $Utils.Optional<AggregateGmRawData>
+          }
+          groupBy: {
+            args: Prisma.GmRawDataGroupByArgs<ExtArgs>
+            result: $Utils.Optional<GmRawDataGroupByOutputType>[]
+          }
+          count: {
+            args: Prisma.GmRawDataCountArgs<ExtArgs>
+            result: $Utils.Optional<GmRawDataCountAggregateOutputType> | number
+          }
+        }
+      }
       SrmSyncRun: {
         payload: Prisma.$SrmSyncRunPayload<ExtArgs>
         fields: Prisma.SrmSyncRunFieldRefs
@@ -4760,6 +4870,80 @@ export namespace Prisma {
           count: {
             args: Prisma.GmArticleDataCountArgs<ExtArgs>
             result: $Utils.Optional<GmArticleDataCountAggregateOutputType> | number
+          }
+        }
+      }
+      GmVariantArticleData: {
+        payload: Prisma.$GmVariantArticleDataPayload<ExtArgs>
+        fields: Prisma.GmVariantArticleDataFieldRefs
+        operations: {
+          findUnique: {
+            args: Prisma.GmVariantArticleDataFindUniqueArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$GmVariantArticleDataPayload> | null
+          }
+          findUniqueOrThrow: {
+            args: Prisma.GmVariantArticleDataFindUniqueOrThrowArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$GmVariantArticleDataPayload>
+          }
+          findFirst: {
+            args: Prisma.GmVariantArticleDataFindFirstArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$GmVariantArticleDataPayload> | null
+          }
+          findFirstOrThrow: {
+            args: Prisma.GmVariantArticleDataFindFirstOrThrowArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$GmVariantArticleDataPayload>
+          }
+          findMany: {
+            args: Prisma.GmVariantArticleDataFindManyArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$GmVariantArticleDataPayload>[]
+          }
+          create: {
+            args: Prisma.GmVariantArticleDataCreateArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$GmVariantArticleDataPayload>
+          }
+          createMany: {
+            args: Prisma.GmVariantArticleDataCreateManyArgs<ExtArgs>
+            result: BatchPayload
+          }
+          createManyAndReturn: {
+            args: Prisma.GmVariantArticleDataCreateManyAndReturnArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$GmVariantArticleDataPayload>[]
+          }
+          delete: {
+            args: Prisma.GmVariantArticleDataDeleteArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$GmVariantArticleDataPayload>
+          }
+          update: {
+            args: Prisma.GmVariantArticleDataUpdateArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$GmVariantArticleDataPayload>
+          }
+          deleteMany: {
+            args: Prisma.GmVariantArticleDataDeleteManyArgs<ExtArgs>
+            result: BatchPayload
+          }
+          updateMany: {
+            args: Prisma.GmVariantArticleDataUpdateManyArgs<ExtArgs>
+            result: BatchPayload
+          }
+          updateManyAndReturn: {
+            args: Prisma.GmVariantArticleDataUpdateManyAndReturnArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$GmVariantArticleDataPayload>[]
+          }
+          upsert: {
+            args: Prisma.GmVariantArticleDataUpsertArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$GmVariantArticleDataPayload>
+          }
+          aggregate: {
+            args: Prisma.GmVariantArticleDataAggregateArgs<ExtArgs>
+            result: $Utils.Optional<AggregateGmVariantArticleData>
+          }
+          groupBy: {
+            args: Prisma.GmVariantArticleDataGroupByArgs<ExtArgs>
+            result: $Utils.Optional<GmVariantArticleDataGroupByOutputType>[]
+          }
+          count: {
+            args: Prisma.GmVariantArticleDataCountArgs<ExtArgs>
+            result: $Utils.Optional<GmVariantArticleDataCountAggregateOutputType> | number
           }
         }
       }
@@ -5846,6 +6030,7 @@ export namespace Prisma {
     article360Flat?: Article360FlatOmit
     rawArticle?: RawArticleOmit
     fabricRawData?: FabricRawDataOmit
+    gmRawData?: GmRawDataOmit
     srmSyncRun?: SrmSyncRunOmit
     srmSyncRunItem?: SrmSyncRunItemOmit
     poolBJob?: PoolBJobOmit
@@ -5858,6 +6043,7 @@ export namespace Prisma {
     modifyLog?: ModifyLogOmit
     fabricArticleData?: FabricArticleDataOmit
     gmArticleData?: GmArticleDataOmit
+    gmVariantArticleData?: GmVariantArticleDataOmit
     fabricVariantArticleData?: FabricVariantArticleDataOmit
     valueAdditionAccessoriesCost?: ValueAdditionAccessoriesCostOmit
     bodyArticleData?: BodyArticleDataOmit
@@ -43964,6 +44150,1372 @@ export namespace Prisma {
 
 
   /**
+   * Model GmRawData
+   */
+
+  export type AggregateGmRawData = {
+    _count: GmRawDataCountAggregateOutputType | null
+    _avg: GmRawDataAvgAggregateOutputType | null
+    _sum: GmRawDataSumAggregateOutputType | null
+    _min: GmRawDataMinAggregateOutputType | null
+    _max: GmRawDataMaxAggregateOutputType | null
+  }
+
+  export type GmRawDataAvgAggregateOutputType = {
+    noOfColors: number | null
+    price: Decimal | null
+    garmentWeight: Decimal | null
+    availableQty: Decimal | null
+  }
+
+  export type GmRawDataSumAggregateOutputType = {
+    noOfColors: number | null
+    price: Decimal | null
+    garmentWeight: Decimal | null
+    availableQty: Decimal | null
+  }
+
+  export type GmRawDataMinAggregateOutputType = {
+    id: string | null
+    presentationNo: string | null
+    uniqueKey: string | null
+    vendorCode: string | null
+    vendorName: string | null
+    vendorCity: string | null
+    division: string | null
+    subDivision: string | null
+    majorCategory: string | null
+    presentationsType: string | null
+    designNumber: string | null
+    articleNumber: string | null
+    fabric: string | null
+    noOfColors: number | null
+    price: Decimal | null
+    imageUrl: string | null
+    source: string | null
+    season: string | null
+    garmentWeight: Decimal | null
+    availableQty: Decimal | null
+    approvedBy: string | null
+    notes: string | null
+    status: $Enums.RawArticleStatus | null
+    errorMessage: string | null
+    extractedAt: Date | null
+    flatId: string | null
+    lockedUntil: Date | null
+    presentationReceivedDate: Date | null
+    createdAt: Date | null
+    updatedAt: Date | null
+  }
+
+  export type GmRawDataMaxAggregateOutputType = {
+    id: string | null
+    presentationNo: string | null
+    uniqueKey: string | null
+    vendorCode: string | null
+    vendorName: string | null
+    vendorCity: string | null
+    division: string | null
+    subDivision: string | null
+    majorCategory: string | null
+    presentationsType: string | null
+    designNumber: string | null
+    articleNumber: string | null
+    fabric: string | null
+    noOfColors: number | null
+    price: Decimal | null
+    imageUrl: string | null
+    source: string | null
+    season: string | null
+    garmentWeight: Decimal | null
+    availableQty: Decimal | null
+    approvedBy: string | null
+    notes: string | null
+    status: $Enums.RawArticleStatus | null
+    errorMessage: string | null
+    extractedAt: Date | null
+    flatId: string | null
+    lockedUntil: Date | null
+    presentationReceivedDate: Date | null
+    createdAt: Date | null
+    updatedAt: Date | null
+  }
+
+  export type GmRawDataCountAggregateOutputType = {
+    id: number
+    presentationNo: number
+    uniqueKey: number
+    vendorCode: number
+    vendorName: number
+    vendorCity: number
+    division: number
+    subDivision: number
+    majorCategory: number
+    presentationsType: number
+    designNumber: number
+    articleNumber: number
+    fabric: number
+    noOfColors: number
+    price: number
+    imageUrl: number
+    source: number
+    season: number
+    garmentWeight: number
+    availableQty: number
+    approvedBy: number
+    notes: number
+    status: number
+    errorMessage: number
+    extractedAt: number
+    flatId: number
+    lockedUntil: number
+    presentationReceivedDate: number
+    createdAt: number
+    updatedAt: number
+    _all: number
+  }
+
+
+  export type GmRawDataAvgAggregateInputType = {
+    noOfColors?: true
+    price?: true
+    garmentWeight?: true
+    availableQty?: true
+  }
+
+  export type GmRawDataSumAggregateInputType = {
+    noOfColors?: true
+    price?: true
+    garmentWeight?: true
+    availableQty?: true
+  }
+
+  export type GmRawDataMinAggregateInputType = {
+    id?: true
+    presentationNo?: true
+    uniqueKey?: true
+    vendorCode?: true
+    vendorName?: true
+    vendorCity?: true
+    division?: true
+    subDivision?: true
+    majorCategory?: true
+    presentationsType?: true
+    designNumber?: true
+    articleNumber?: true
+    fabric?: true
+    noOfColors?: true
+    price?: true
+    imageUrl?: true
+    source?: true
+    season?: true
+    garmentWeight?: true
+    availableQty?: true
+    approvedBy?: true
+    notes?: true
+    status?: true
+    errorMessage?: true
+    extractedAt?: true
+    flatId?: true
+    lockedUntil?: true
+    presentationReceivedDate?: true
+    createdAt?: true
+    updatedAt?: true
+  }
+
+  export type GmRawDataMaxAggregateInputType = {
+    id?: true
+    presentationNo?: true
+    uniqueKey?: true
+    vendorCode?: true
+    vendorName?: true
+    vendorCity?: true
+    division?: true
+    subDivision?: true
+    majorCategory?: true
+    presentationsType?: true
+    designNumber?: true
+    articleNumber?: true
+    fabric?: true
+    noOfColors?: true
+    price?: true
+    imageUrl?: true
+    source?: true
+    season?: true
+    garmentWeight?: true
+    availableQty?: true
+    approvedBy?: true
+    notes?: true
+    status?: true
+    errorMessage?: true
+    extractedAt?: true
+    flatId?: true
+    lockedUntil?: true
+    presentationReceivedDate?: true
+    createdAt?: true
+    updatedAt?: true
+  }
+
+  export type GmRawDataCountAggregateInputType = {
+    id?: true
+    presentationNo?: true
+    uniqueKey?: true
+    vendorCode?: true
+    vendorName?: true
+    vendorCity?: true
+    division?: true
+    subDivision?: true
+    majorCategory?: true
+    presentationsType?: true
+    designNumber?: true
+    articleNumber?: true
+    fabric?: true
+    noOfColors?: true
+    price?: true
+    imageUrl?: true
+    source?: true
+    season?: true
+    garmentWeight?: true
+    availableQty?: true
+    approvedBy?: true
+    notes?: true
+    status?: true
+    errorMessage?: true
+    extractedAt?: true
+    flatId?: true
+    lockedUntil?: true
+    presentationReceivedDate?: true
+    createdAt?: true
+    updatedAt?: true
+    _all?: true
+  }
+
+  export type GmRawDataAggregateArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Filter which GmRawData to aggregate.
+     */
+    where?: GmRawDataWhereInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
+     * 
+     * Determine the order of GmRawData to fetch.
+     */
+    orderBy?: GmRawDataOrderByWithRelationInput | GmRawDataOrderByWithRelationInput[]
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
+     * 
+     * Sets the start position
+     */
+    cursor?: GmRawDataWhereUniqueInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Take `±n` GmRawData from the position of the cursor.
+     */
+    take?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Skip the first `n` GmRawData.
+     */
+    skip?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     * 
+     * Count returned GmRawData
+    **/
+    _count?: true | GmRawDataCountAggregateInputType
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     * 
+     * Select which fields to average
+    **/
+    _avg?: GmRawDataAvgAggregateInputType
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     * 
+     * Select which fields to sum
+    **/
+    _sum?: GmRawDataSumAggregateInputType
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     * 
+     * Select which fields to find the minimum value
+    **/
+    _min?: GmRawDataMinAggregateInputType
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     * 
+     * Select which fields to find the maximum value
+    **/
+    _max?: GmRawDataMaxAggregateInputType
+  }
+
+  export type GetGmRawDataAggregateType<T extends GmRawDataAggregateArgs> = {
+        [P in keyof T & keyof AggregateGmRawData]: P extends '_count' | 'count'
+      ? T[P] extends true
+        ? number
+        : GetScalarType<T[P], AggregateGmRawData[P]>
+      : GetScalarType<T[P], AggregateGmRawData[P]>
+  }
+
+
+
+
+  export type GmRawDataGroupByArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    where?: GmRawDataWhereInput
+    orderBy?: GmRawDataOrderByWithAggregationInput | GmRawDataOrderByWithAggregationInput[]
+    by: GmRawDataScalarFieldEnum[] | GmRawDataScalarFieldEnum
+    having?: GmRawDataScalarWhereWithAggregatesInput
+    take?: number
+    skip?: number
+    _count?: GmRawDataCountAggregateInputType | true
+    _avg?: GmRawDataAvgAggregateInputType
+    _sum?: GmRawDataSumAggregateInputType
+    _min?: GmRawDataMinAggregateInputType
+    _max?: GmRawDataMaxAggregateInputType
+  }
+
+  export type GmRawDataGroupByOutputType = {
+    id: string
+    presentationNo: string
+    uniqueKey: string
+    vendorCode: string | null
+    vendorName: string | null
+    vendorCity: string | null
+    division: string | null
+    subDivision: string | null
+    majorCategory: string | null
+    presentationsType: string | null
+    designNumber: string | null
+    articleNumber: string | null
+    fabric: string | null
+    noOfColors: number | null
+    price: Decimal | null
+    imageUrl: string | null
+    source: string | null
+    season: string | null
+    garmentWeight: Decimal | null
+    availableQty: Decimal | null
+    approvedBy: string | null
+    notes: string | null
+    status: $Enums.RawArticleStatus
+    errorMessage: string | null
+    extractedAt: Date | null
+    flatId: string | null
+    lockedUntil: Date | null
+    presentationReceivedDate: Date | null
+    createdAt: Date
+    updatedAt: Date
+    _count: GmRawDataCountAggregateOutputType | null
+    _avg: GmRawDataAvgAggregateOutputType | null
+    _sum: GmRawDataSumAggregateOutputType | null
+    _min: GmRawDataMinAggregateOutputType | null
+    _max: GmRawDataMaxAggregateOutputType | null
+  }
+
+  type GetGmRawDataGroupByPayload<T extends GmRawDataGroupByArgs> = Prisma.PrismaPromise<
+    Array<
+      PickEnumerable<GmRawDataGroupByOutputType, T['by']> &
+        {
+          [P in ((keyof T) & (keyof GmRawDataGroupByOutputType))]: P extends '_count'
+            ? T[P] extends boolean
+              ? number
+              : GetScalarType<T[P], GmRawDataGroupByOutputType[P]>
+            : GetScalarType<T[P], GmRawDataGroupByOutputType[P]>
+        }
+      >
+    >
+
+
+  export type GmRawDataSelect<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
+    id?: boolean
+    presentationNo?: boolean
+    uniqueKey?: boolean
+    vendorCode?: boolean
+    vendorName?: boolean
+    vendorCity?: boolean
+    division?: boolean
+    subDivision?: boolean
+    majorCategory?: boolean
+    presentationsType?: boolean
+    designNumber?: boolean
+    articleNumber?: boolean
+    fabric?: boolean
+    noOfColors?: boolean
+    price?: boolean
+    imageUrl?: boolean
+    source?: boolean
+    season?: boolean
+    garmentWeight?: boolean
+    availableQty?: boolean
+    approvedBy?: boolean
+    notes?: boolean
+    status?: boolean
+    errorMessage?: boolean
+    extractedAt?: boolean
+    flatId?: boolean
+    lockedUntil?: boolean
+    presentationReceivedDate?: boolean
+    createdAt?: boolean
+    updatedAt?: boolean
+  }, ExtArgs["result"]["gmRawData"]>
+
+  export type GmRawDataSelectCreateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
+    id?: boolean
+    presentationNo?: boolean
+    uniqueKey?: boolean
+    vendorCode?: boolean
+    vendorName?: boolean
+    vendorCity?: boolean
+    division?: boolean
+    subDivision?: boolean
+    majorCategory?: boolean
+    presentationsType?: boolean
+    designNumber?: boolean
+    articleNumber?: boolean
+    fabric?: boolean
+    noOfColors?: boolean
+    price?: boolean
+    imageUrl?: boolean
+    source?: boolean
+    season?: boolean
+    garmentWeight?: boolean
+    availableQty?: boolean
+    approvedBy?: boolean
+    notes?: boolean
+    status?: boolean
+    errorMessage?: boolean
+    extractedAt?: boolean
+    flatId?: boolean
+    lockedUntil?: boolean
+    presentationReceivedDate?: boolean
+    createdAt?: boolean
+    updatedAt?: boolean
+  }, ExtArgs["result"]["gmRawData"]>
+
+  export type GmRawDataSelectUpdateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
+    id?: boolean
+    presentationNo?: boolean
+    uniqueKey?: boolean
+    vendorCode?: boolean
+    vendorName?: boolean
+    vendorCity?: boolean
+    division?: boolean
+    subDivision?: boolean
+    majorCategory?: boolean
+    presentationsType?: boolean
+    designNumber?: boolean
+    articleNumber?: boolean
+    fabric?: boolean
+    noOfColors?: boolean
+    price?: boolean
+    imageUrl?: boolean
+    source?: boolean
+    season?: boolean
+    garmentWeight?: boolean
+    availableQty?: boolean
+    approvedBy?: boolean
+    notes?: boolean
+    status?: boolean
+    errorMessage?: boolean
+    extractedAt?: boolean
+    flatId?: boolean
+    lockedUntil?: boolean
+    presentationReceivedDate?: boolean
+    createdAt?: boolean
+    updatedAt?: boolean
+  }, ExtArgs["result"]["gmRawData"]>
+
+  export type GmRawDataSelectScalar = {
+    id?: boolean
+    presentationNo?: boolean
+    uniqueKey?: boolean
+    vendorCode?: boolean
+    vendorName?: boolean
+    vendorCity?: boolean
+    division?: boolean
+    subDivision?: boolean
+    majorCategory?: boolean
+    presentationsType?: boolean
+    designNumber?: boolean
+    articleNumber?: boolean
+    fabric?: boolean
+    noOfColors?: boolean
+    price?: boolean
+    imageUrl?: boolean
+    source?: boolean
+    season?: boolean
+    garmentWeight?: boolean
+    availableQty?: boolean
+    approvedBy?: boolean
+    notes?: boolean
+    status?: boolean
+    errorMessage?: boolean
+    extractedAt?: boolean
+    flatId?: boolean
+    lockedUntil?: boolean
+    presentationReceivedDate?: boolean
+    createdAt?: boolean
+    updatedAt?: boolean
+  }
+
+  export type GmRawDataOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<"id" | "presentationNo" | "uniqueKey" | "vendorCode" | "vendorName" | "vendorCity" | "division" | "subDivision" | "majorCategory" | "presentationsType" | "designNumber" | "articleNumber" | "fabric" | "noOfColors" | "price" | "imageUrl" | "source" | "season" | "garmentWeight" | "availableQty" | "approvedBy" | "notes" | "status" | "errorMessage" | "extractedAt" | "flatId" | "lockedUntil" | "presentationReceivedDate" | "createdAt" | "updatedAt", ExtArgs["result"]["gmRawData"]>
+
+  export type $GmRawDataPayload<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    name: "GmRawData"
+    objects: {}
+    scalars: $Extensions.GetPayloadResult<{
+      id: string
+      presentationNo: string
+      uniqueKey: string
+      vendorCode: string | null
+      vendorName: string | null
+      vendorCity: string | null
+      division: string | null
+      subDivision: string | null
+      majorCategory: string | null
+      presentationsType: string | null
+      designNumber: string | null
+      articleNumber: string | null
+      fabric: string | null
+      noOfColors: number | null
+      price: Prisma.Decimal | null
+      imageUrl: string | null
+      source: string | null
+      season: string | null
+      garmentWeight: Prisma.Decimal | null
+      availableQty: Prisma.Decimal | null
+      approvedBy: string | null
+      notes: string | null
+      status: $Enums.RawArticleStatus
+      errorMessage: string | null
+      extractedAt: Date | null
+      flatId: string | null
+      lockedUntil: Date | null
+      presentationReceivedDate: Date | null
+      createdAt: Date
+      updatedAt: Date
+    }, ExtArgs["result"]["gmRawData"]>
+    composites: {}
+  }
+
+  type GmRawDataGetPayload<S extends boolean | null | undefined | GmRawDataDefaultArgs> = $Result.GetResult<Prisma.$GmRawDataPayload, S>
+
+  type GmRawDataCountArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> =
+    Omit<GmRawDataFindManyArgs, 'select' | 'include' | 'distinct' | 'omit'> & {
+      select?: GmRawDataCountAggregateInputType | true
+    }
+
+  export interface GmRawDataDelegate<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs, GlobalOmitOptions = {}> {
+    [K: symbol]: { types: Prisma.TypeMap<ExtArgs>['model']['GmRawData'], meta: { name: 'GmRawData' } }
+    /**
+     * Find zero or one GmRawData that matches the filter.
+     * @param {GmRawDataFindUniqueArgs} args - Arguments to find a GmRawData
+     * @example
+     * // Get one GmRawData
+     * const gmRawData = await prisma.gmRawData.findUnique({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     */
+    findUnique<T extends GmRawDataFindUniqueArgs>(args: SelectSubset<T, GmRawDataFindUniqueArgs<ExtArgs>>): Prisma__GmRawDataClient<$Result.GetResult<Prisma.$GmRawDataPayload<ExtArgs>, T, "findUnique", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Find one GmRawData that matches the filter or throw an error with `error.code='P2025'`
+     * if no matches were found.
+     * @param {GmRawDataFindUniqueOrThrowArgs} args - Arguments to find a GmRawData
+     * @example
+     * // Get one GmRawData
+     * const gmRawData = await prisma.gmRawData.findUniqueOrThrow({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     */
+    findUniqueOrThrow<T extends GmRawDataFindUniqueOrThrowArgs>(args: SelectSubset<T, GmRawDataFindUniqueOrThrowArgs<ExtArgs>>): Prisma__GmRawDataClient<$Result.GetResult<Prisma.$GmRawDataPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Find the first GmRawData that matches the filter.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {GmRawDataFindFirstArgs} args - Arguments to find a GmRawData
+     * @example
+     * // Get one GmRawData
+     * const gmRawData = await prisma.gmRawData.findFirst({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     */
+    findFirst<T extends GmRawDataFindFirstArgs>(args?: SelectSubset<T, GmRawDataFindFirstArgs<ExtArgs>>): Prisma__GmRawDataClient<$Result.GetResult<Prisma.$GmRawDataPayload<ExtArgs>, T, "findFirst", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Find the first GmRawData that matches the filter or
+     * throw `PrismaKnownClientError` with `P2025` code if no matches were found.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {GmRawDataFindFirstOrThrowArgs} args - Arguments to find a GmRawData
+     * @example
+     * // Get one GmRawData
+     * const gmRawData = await prisma.gmRawData.findFirstOrThrow({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     */
+    findFirstOrThrow<T extends GmRawDataFindFirstOrThrowArgs>(args?: SelectSubset<T, GmRawDataFindFirstOrThrowArgs<ExtArgs>>): Prisma__GmRawDataClient<$Result.GetResult<Prisma.$GmRawDataPayload<ExtArgs>, T, "findFirstOrThrow", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Find zero or more GmRawData that matches the filter.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {GmRawDataFindManyArgs} args - Arguments to filter and select certain fields only.
+     * @example
+     * // Get all GmRawData
+     * const gmRawData = await prisma.gmRawData.findMany()
+     * 
+     * // Get first 10 GmRawData
+     * const gmRawData = await prisma.gmRawData.findMany({ take: 10 })
+     * 
+     * // Only select the `id`
+     * const gmRawDataWithIdOnly = await prisma.gmRawData.findMany({ select: { id: true } })
+     * 
+     */
+    findMany<T extends GmRawDataFindManyArgs>(args?: SelectSubset<T, GmRawDataFindManyArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$GmRawDataPayload<ExtArgs>, T, "findMany", GlobalOmitOptions>>
+
+    /**
+     * Create a GmRawData.
+     * @param {GmRawDataCreateArgs} args - Arguments to create a GmRawData.
+     * @example
+     * // Create one GmRawData
+     * const GmRawData = await prisma.gmRawData.create({
+     *   data: {
+     *     // ... data to create a GmRawData
+     *   }
+     * })
+     * 
+     */
+    create<T extends GmRawDataCreateArgs>(args: SelectSubset<T, GmRawDataCreateArgs<ExtArgs>>): Prisma__GmRawDataClient<$Result.GetResult<Prisma.$GmRawDataPayload<ExtArgs>, T, "create", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Create many GmRawData.
+     * @param {GmRawDataCreateManyArgs} args - Arguments to create many GmRawData.
+     * @example
+     * // Create many GmRawData
+     * const gmRawData = await prisma.gmRawData.createMany({
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     *     
+     */
+    createMany<T extends GmRawDataCreateManyArgs>(args?: SelectSubset<T, GmRawDataCreateManyArgs<ExtArgs>>): Prisma.PrismaPromise<BatchPayload>
+
+    /**
+     * Create many GmRawData and returns the data saved in the database.
+     * @param {GmRawDataCreateManyAndReturnArgs} args - Arguments to create many GmRawData.
+     * @example
+     * // Create many GmRawData
+     * const gmRawData = await prisma.gmRawData.createManyAndReturn({
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     * 
+     * // Create many GmRawData and only return the `id`
+     * const gmRawDataWithIdOnly = await prisma.gmRawData.createManyAndReturn({
+     *   select: { id: true },
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * 
+     */
+    createManyAndReturn<T extends GmRawDataCreateManyAndReturnArgs>(args?: SelectSubset<T, GmRawDataCreateManyAndReturnArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$GmRawDataPayload<ExtArgs>, T, "createManyAndReturn", GlobalOmitOptions>>
+
+    /**
+     * Delete a GmRawData.
+     * @param {GmRawDataDeleteArgs} args - Arguments to delete one GmRawData.
+     * @example
+     * // Delete one GmRawData
+     * const GmRawData = await prisma.gmRawData.delete({
+     *   where: {
+     *     // ... filter to delete one GmRawData
+     *   }
+     * })
+     * 
+     */
+    delete<T extends GmRawDataDeleteArgs>(args: SelectSubset<T, GmRawDataDeleteArgs<ExtArgs>>): Prisma__GmRawDataClient<$Result.GetResult<Prisma.$GmRawDataPayload<ExtArgs>, T, "delete", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Update one GmRawData.
+     * @param {GmRawDataUpdateArgs} args - Arguments to update one GmRawData.
+     * @example
+     * // Update one GmRawData
+     * const gmRawData = await prisma.gmRawData.update({
+     *   where: {
+     *     // ... provide filter here
+     *   },
+     *   data: {
+     *     // ... provide data here
+     *   }
+     * })
+     * 
+     */
+    update<T extends GmRawDataUpdateArgs>(args: SelectSubset<T, GmRawDataUpdateArgs<ExtArgs>>): Prisma__GmRawDataClient<$Result.GetResult<Prisma.$GmRawDataPayload<ExtArgs>, T, "update", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Delete zero or more GmRawData.
+     * @param {GmRawDataDeleteManyArgs} args - Arguments to filter GmRawData to delete.
+     * @example
+     * // Delete a few GmRawData
+     * const { count } = await prisma.gmRawData.deleteMany({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     * 
+     */
+    deleteMany<T extends GmRawDataDeleteManyArgs>(args?: SelectSubset<T, GmRawDataDeleteManyArgs<ExtArgs>>): Prisma.PrismaPromise<BatchPayload>
+
+    /**
+     * Update zero or more GmRawData.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {GmRawDataUpdateManyArgs} args - Arguments to update one or more rows.
+     * @example
+     * // Update many GmRawData
+     * const gmRawData = await prisma.gmRawData.updateMany({
+     *   where: {
+     *     // ... provide filter here
+     *   },
+     *   data: {
+     *     // ... provide data here
+     *   }
+     * })
+     * 
+     */
+    updateMany<T extends GmRawDataUpdateManyArgs>(args: SelectSubset<T, GmRawDataUpdateManyArgs<ExtArgs>>): Prisma.PrismaPromise<BatchPayload>
+
+    /**
+     * Update zero or more GmRawData and returns the data updated in the database.
+     * @param {GmRawDataUpdateManyAndReturnArgs} args - Arguments to update many GmRawData.
+     * @example
+     * // Update many GmRawData
+     * const gmRawData = await prisma.gmRawData.updateManyAndReturn({
+     *   where: {
+     *     // ... provide filter here
+     *   },
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     * 
+     * // Update zero or more GmRawData and only return the `id`
+     * const gmRawDataWithIdOnly = await prisma.gmRawData.updateManyAndReturn({
+     *   select: { id: true },
+     *   where: {
+     *     // ... provide filter here
+     *   },
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * 
+     */
+    updateManyAndReturn<T extends GmRawDataUpdateManyAndReturnArgs>(args: SelectSubset<T, GmRawDataUpdateManyAndReturnArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$GmRawDataPayload<ExtArgs>, T, "updateManyAndReturn", GlobalOmitOptions>>
+
+    /**
+     * Create or update one GmRawData.
+     * @param {GmRawDataUpsertArgs} args - Arguments to update or create a GmRawData.
+     * @example
+     * // Update or create a GmRawData
+     * const gmRawData = await prisma.gmRawData.upsert({
+     *   create: {
+     *     // ... data to create a GmRawData
+     *   },
+     *   update: {
+     *     // ... in case it already exists, update
+     *   },
+     *   where: {
+     *     // ... the filter for the GmRawData we want to update
+     *   }
+     * })
+     */
+    upsert<T extends GmRawDataUpsertArgs>(args: SelectSubset<T, GmRawDataUpsertArgs<ExtArgs>>): Prisma__GmRawDataClient<$Result.GetResult<Prisma.$GmRawDataPayload<ExtArgs>, T, "upsert", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+
+    /**
+     * Count the number of GmRawData.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {GmRawDataCountArgs} args - Arguments to filter GmRawData to count.
+     * @example
+     * // Count the number of GmRawData
+     * const count = await prisma.gmRawData.count({
+     *   where: {
+     *     // ... the filter for the GmRawData we want to count
+     *   }
+     * })
+    **/
+    count<T extends GmRawDataCountArgs>(
+      args?: Subset<T, GmRawDataCountArgs>,
+    ): Prisma.PrismaPromise<
+      T extends $Utils.Record<'select', any>
+        ? T['select'] extends true
+          ? number
+          : GetScalarType<T['select'], GmRawDataCountAggregateOutputType>
+        : number
+    >
+
+    /**
+     * Allows you to perform aggregations operations on a GmRawData.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {GmRawDataAggregateArgs} args - Select which aggregations you would like to apply and on what fields.
+     * @example
+     * // Ordered by age ascending
+     * // Where email contains prisma.io
+     * // Limited to the 10 users
+     * const aggregations = await prisma.user.aggregate({
+     *   _avg: {
+     *     age: true,
+     *   },
+     *   where: {
+     *     email: {
+     *       contains: "prisma.io",
+     *     },
+     *   },
+     *   orderBy: {
+     *     age: "asc",
+     *   },
+     *   take: 10,
+     * })
+    **/
+    aggregate<T extends GmRawDataAggregateArgs>(args: Subset<T, GmRawDataAggregateArgs>): Prisma.PrismaPromise<GetGmRawDataAggregateType<T>>
+
+    /**
+     * Group by GmRawData.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {GmRawDataGroupByArgs} args - Group by arguments.
+     * @example
+     * // Group by city, order by createdAt, get count
+     * const result = await prisma.user.groupBy({
+     *   by: ['city', 'createdAt'],
+     *   orderBy: {
+     *     createdAt: true
+     *   },
+     *   _count: {
+     *     _all: true
+     *   },
+     * })
+     * 
+    **/
+    groupBy<
+      T extends GmRawDataGroupByArgs,
+      HasSelectOrTake extends Or<
+        Extends<'skip', Keys<T>>,
+        Extends<'take', Keys<T>>
+      >,
+      OrderByArg extends True extends HasSelectOrTake
+        ? { orderBy: GmRawDataGroupByArgs['orderBy'] }
+        : { orderBy?: GmRawDataGroupByArgs['orderBy'] },
+      OrderFields extends ExcludeUnderscoreKeys<Keys<MaybeTupleToUnion<T['orderBy']>>>,
+      ByFields extends MaybeTupleToUnion<T['by']>,
+      ByValid extends Has<ByFields, OrderFields>,
+      HavingFields extends GetHavingFields<T['having']>,
+      HavingValid extends Has<ByFields, HavingFields>,
+      ByEmpty extends T['by'] extends never[] ? True : False,
+      InputErrors extends ByEmpty extends True
+      ? `Error: "by" must not be empty.`
+      : HavingValid extends False
+      ? {
+          [P in HavingFields]: P extends ByFields
+            ? never
+            : P extends string
+            ? `Error: Field "${P}" used in "having" needs to be provided in "by".`
+            : [
+                Error,
+                'Field ',
+                P,
+                ` in "having" needs to be provided in "by"`,
+              ]
+        }[HavingFields]
+      : 'take' extends Keys<T>
+      ? 'orderBy' extends Keys<T>
+        ? ByValid extends True
+          ? {}
+          : {
+              [P in OrderFields]: P extends ByFields
+                ? never
+                : `Error: Field "${P}" in "orderBy" needs to be provided in "by"`
+            }[OrderFields]
+        : 'Error: If you provide "take", you also need to provide "orderBy"'
+      : 'skip' extends Keys<T>
+      ? 'orderBy' extends Keys<T>
+        ? ByValid extends True
+          ? {}
+          : {
+              [P in OrderFields]: P extends ByFields
+                ? never
+                : `Error: Field "${P}" in "orderBy" needs to be provided in "by"`
+            }[OrderFields]
+        : 'Error: If you provide "skip", you also need to provide "orderBy"'
+      : ByValid extends True
+      ? {}
+      : {
+          [P in OrderFields]: P extends ByFields
+            ? never
+            : `Error: Field "${P}" in "orderBy" needs to be provided in "by"`
+        }[OrderFields]
+    >(args: SubsetIntersection<T, GmRawDataGroupByArgs, OrderByArg> & InputErrors): {} extends InputErrors ? GetGmRawDataGroupByPayload<T> : Prisma.PrismaPromise<InputErrors>
+  /**
+   * Fields of the GmRawData model
+   */
+  readonly fields: GmRawDataFieldRefs;
+  }
+
+  /**
+   * The delegate class that acts as a "Promise-like" for GmRawData.
+   * Why is this prefixed with `Prisma__`?
+   * Because we want to prevent naming conflicts as mentioned in
+   * https://github.com/prisma/prisma-client-js/issues/707
+   */
+  export interface Prisma__GmRawDataClient<T, Null = never, ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs, GlobalOmitOptions = {}> extends Prisma.PrismaPromise<T> {
+    readonly [Symbol.toStringTag]: "PrismaPromise"
+    /**
+     * Attaches callbacks for the resolution and/or rejection of the Promise.
+     * @param onfulfilled The callback to execute when the Promise is resolved.
+     * @param onrejected The callback to execute when the Promise is rejected.
+     * @returns A Promise for the completion of which ever callback is executed.
+     */
+    then<TResult1 = T, TResult2 = never>(onfulfilled?: ((value: T) => TResult1 | PromiseLike<TResult1>) | undefined | null, onrejected?: ((reason: any) => TResult2 | PromiseLike<TResult2>) | undefined | null): $Utils.JsPromise<TResult1 | TResult2>
+    /**
+     * Attaches a callback for only the rejection of the Promise.
+     * @param onrejected The callback to execute when the Promise is rejected.
+     * @returns A Promise for the completion of the callback.
+     */
+    catch<TResult = never>(onrejected?: ((reason: any) => TResult | PromiseLike<TResult>) | undefined | null): $Utils.JsPromise<T | TResult>
+    /**
+     * Attaches a callback that is invoked when the Promise is settled (fulfilled or rejected). The
+     * resolved value cannot be modified from the callback.
+     * @param onfinally The callback to execute when the Promise is settled (fulfilled or rejected).
+     * @returns A Promise for the completion of the callback.
+     */
+    finally(onfinally?: (() => void) | undefined | null): $Utils.JsPromise<T>
+  }
+
+
+
+
+  /**
+   * Fields of the GmRawData model
+   */
+  interface GmRawDataFieldRefs {
+    readonly id: FieldRef<"GmRawData", 'String'>
+    readonly presentationNo: FieldRef<"GmRawData", 'String'>
+    readonly uniqueKey: FieldRef<"GmRawData", 'String'>
+    readonly vendorCode: FieldRef<"GmRawData", 'String'>
+    readonly vendorName: FieldRef<"GmRawData", 'String'>
+    readonly vendorCity: FieldRef<"GmRawData", 'String'>
+    readonly division: FieldRef<"GmRawData", 'String'>
+    readonly subDivision: FieldRef<"GmRawData", 'String'>
+    readonly majorCategory: FieldRef<"GmRawData", 'String'>
+    readonly presentationsType: FieldRef<"GmRawData", 'String'>
+    readonly designNumber: FieldRef<"GmRawData", 'String'>
+    readonly articleNumber: FieldRef<"GmRawData", 'String'>
+    readonly fabric: FieldRef<"GmRawData", 'String'>
+    readonly noOfColors: FieldRef<"GmRawData", 'Int'>
+    readonly price: FieldRef<"GmRawData", 'Decimal'>
+    readonly imageUrl: FieldRef<"GmRawData", 'String'>
+    readonly source: FieldRef<"GmRawData", 'String'>
+    readonly season: FieldRef<"GmRawData", 'String'>
+    readonly garmentWeight: FieldRef<"GmRawData", 'Decimal'>
+    readonly availableQty: FieldRef<"GmRawData", 'Decimal'>
+    readonly approvedBy: FieldRef<"GmRawData", 'String'>
+    readonly notes: FieldRef<"GmRawData", 'String'>
+    readonly status: FieldRef<"GmRawData", 'RawArticleStatus'>
+    readonly errorMessage: FieldRef<"GmRawData", 'String'>
+    readonly extractedAt: FieldRef<"GmRawData", 'DateTime'>
+    readonly flatId: FieldRef<"GmRawData", 'String'>
+    readonly lockedUntil: FieldRef<"GmRawData", 'DateTime'>
+    readonly presentationReceivedDate: FieldRef<"GmRawData", 'DateTime'>
+    readonly createdAt: FieldRef<"GmRawData", 'DateTime'>
+    readonly updatedAt: FieldRef<"GmRawData", 'DateTime'>
+  }
+    
+
+  // Custom InputTypes
+  /**
+   * GmRawData findUnique
+   */
+  export type GmRawDataFindUniqueArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the GmRawData
+     */
+    select?: GmRawDataSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the GmRawData
+     */
+    omit?: GmRawDataOmit<ExtArgs> | null
+    /**
+     * Filter, which GmRawData to fetch.
+     */
+    where: GmRawDataWhereUniqueInput
+  }
+
+  /**
+   * GmRawData findUniqueOrThrow
+   */
+  export type GmRawDataFindUniqueOrThrowArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the GmRawData
+     */
+    select?: GmRawDataSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the GmRawData
+     */
+    omit?: GmRawDataOmit<ExtArgs> | null
+    /**
+     * Filter, which GmRawData to fetch.
+     */
+    where: GmRawDataWhereUniqueInput
+  }
+
+  /**
+   * GmRawData findFirst
+   */
+  export type GmRawDataFindFirstArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the GmRawData
+     */
+    select?: GmRawDataSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the GmRawData
+     */
+    omit?: GmRawDataOmit<ExtArgs> | null
+    /**
+     * Filter, which GmRawData to fetch.
+     */
+    where?: GmRawDataWhereInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
+     * 
+     * Determine the order of GmRawData to fetch.
+     */
+    orderBy?: GmRawDataOrderByWithRelationInput | GmRawDataOrderByWithRelationInput[]
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
+     * 
+     * Sets the position for searching for GmRawData.
+     */
+    cursor?: GmRawDataWhereUniqueInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Take `±n` GmRawData from the position of the cursor.
+     */
+    take?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Skip the first `n` GmRawData.
+     */
+    skip?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/distinct Distinct Docs}
+     * 
+     * Filter by unique combinations of GmRawData.
+     */
+    distinct?: GmRawDataScalarFieldEnum | GmRawDataScalarFieldEnum[]
+  }
+
+  /**
+   * GmRawData findFirstOrThrow
+   */
+  export type GmRawDataFindFirstOrThrowArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the GmRawData
+     */
+    select?: GmRawDataSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the GmRawData
+     */
+    omit?: GmRawDataOmit<ExtArgs> | null
+    /**
+     * Filter, which GmRawData to fetch.
+     */
+    where?: GmRawDataWhereInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
+     * 
+     * Determine the order of GmRawData to fetch.
+     */
+    orderBy?: GmRawDataOrderByWithRelationInput | GmRawDataOrderByWithRelationInput[]
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
+     * 
+     * Sets the position for searching for GmRawData.
+     */
+    cursor?: GmRawDataWhereUniqueInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Take `±n` GmRawData from the position of the cursor.
+     */
+    take?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Skip the first `n` GmRawData.
+     */
+    skip?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/distinct Distinct Docs}
+     * 
+     * Filter by unique combinations of GmRawData.
+     */
+    distinct?: GmRawDataScalarFieldEnum | GmRawDataScalarFieldEnum[]
+  }
+
+  /**
+   * GmRawData findMany
+   */
+  export type GmRawDataFindManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the GmRawData
+     */
+    select?: GmRawDataSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the GmRawData
+     */
+    omit?: GmRawDataOmit<ExtArgs> | null
+    /**
+     * Filter, which GmRawData to fetch.
+     */
+    where?: GmRawDataWhereInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
+     * 
+     * Determine the order of GmRawData to fetch.
+     */
+    orderBy?: GmRawDataOrderByWithRelationInput | GmRawDataOrderByWithRelationInput[]
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
+     * 
+     * Sets the position for listing GmRawData.
+     */
+    cursor?: GmRawDataWhereUniqueInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Take `±n` GmRawData from the position of the cursor.
+     */
+    take?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Skip the first `n` GmRawData.
+     */
+    skip?: number
+    distinct?: GmRawDataScalarFieldEnum | GmRawDataScalarFieldEnum[]
+  }
+
+  /**
+   * GmRawData create
+   */
+  export type GmRawDataCreateArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the GmRawData
+     */
+    select?: GmRawDataSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the GmRawData
+     */
+    omit?: GmRawDataOmit<ExtArgs> | null
+    /**
+     * The data needed to create a GmRawData.
+     */
+    data: XOR<GmRawDataCreateInput, GmRawDataUncheckedCreateInput>
+  }
+
+  /**
+   * GmRawData createMany
+   */
+  export type GmRawDataCreateManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * The data used to create many GmRawData.
+     */
+    data: GmRawDataCreateManyInput | GmRawDataCreateManyInput[]
+    skipDuplicates?: boolean
+  }
+
+  /**
+   * GmRawData createManyAndReturn
+   */
+  export type GmRawDataCreateManyAndReturnArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the GmRawData
+     */
+    select?: GmRawDataSelectCreateManyAndReturn<ExtArgs> | null
+    /**
+     * Omit specific fields from the GmRawData
+     */
+    omit?: GmRawDataOmit<ExtArgs> | null
+    /**
+     * The data used to create many GmRawData.
+     */
+    data: GmRawDataCreateManyInput | GmRawDataCreateManyInput[]
+    skipDuplicates?: boolean
+  }
+
+  /**
+   * GmRawData update
+   */
+  export type GmRawDataUpdateArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the GmRawData
+     */
+    select?: GmRawDataSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the GmRawData
+     */
+    omit?: GmRawDataOmit<ExtArgs> | null
+    /**
+     * The data needed to update a GmRawData.
+     */
+    data: XOR<GmRawDataUpdateInput, GmRawDataUncheckedUpdateInput>
+    /**
+     * Choose, which GmRawData to update.
+     */
+    where: GmRawDataWhereUniqueInput
+  }
+
+  /**
+   * GmRawData updateMany
+   */
+  export type GmRawDataUpdateManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * The data used to update GmRawData.
+     */
+    data: XOR<GmRawDataUpdateManyMutationInput, GmRawDataUncheckedUpdateManyInput>
+    /**
+     * Filter which GmRawData to update
+     */
+    where?: GmRawDataWhereInput
+    /**
+     * Limit how many GmRawData to update.
+     */
+    limit?: number
+  }
+
+  /**
+   * GmRawData updateManyAndReturn
+   */
+  export type GmRawDataUpdateManyAndReturnArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the GmRawData
+     */
+    select?: GmRawDataSelectUpdateManyAndReturn<ExtArgs> | null
+    /**
+     * Omit specific fields from the GmRawData
+     */
+    omit?: GmRawDataOmit<ExtArgs> | null
+    /**
+     * The data used to update GmRawData.
+     */
+    data: XOR<GmRawDataUpdateManyMutationInput, GmRawDataUncheckedUpdateManyInput>
+    /**
+     * Filter which GmRawData to update
+     */
+    where?: GmRawDataWhereInput
+    /**
+     * Limit how many GmRawData to update.
+     */
+    limit?: number
+  }
+
+  /**
+   * GmRawData upsert
+   */
+  export type GmRawDataUpsertArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the GmRawData
+     */
+    select?: GmRawDataSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the GmRawData
+     */
+    omit?: GmRawDataOmit<ExtArgs> | null
+    /**
+     * The filter to search for the GmRawData to update in case it exists.
+     */
+    where: GmRawDataWhereUniqueInput
+    /**
+     * In case the GmRawData found by the `where` argument doesn't exist, create a new GmRawData with this data.
+     */
+    create: XOR<GmRawDataCreateInput, GmRawDataUncheckedCreateInput>
+    /**
+     * In case the GmRawData was found with the provided `where` argument, update it with this data.
+     */
+    update: XOR<GmRawDataUpdateInput, GmRawDataUncheckedUpdateInput>
+  }
+
+  /**
+   * GmRawData delete
+   */
+  export type GmRawDataDeleteArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the GmRawData
+     */
+    select?: GmRawDataSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the GmRawData
+     */
+    omit?: GmRawDataOmit<ExtArgs> | null
+    /**
+     * Filter which GmRawData to delete.
+     */
+    where: GmRawDataWhereUniqueInput
+  }
+
+  /**
+   * GmRawData deleteMany
+   */
+  export type GmRawDataDeleteManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Filter which GmRawData to delete
+     */
+    where?: GmRawDataWhereInput
+    /**
+     * Limit how many GmRawData to delete.
+     */
+    limit?: number
+  }
+
+  /**
+   * GmRawData without action
+   */
+  export type GmRawDataDefaultArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the GmRawData
+     */
+    select?: GmRawDataSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the GmRawData
+     */
+    omit?: GmRawDataOmit<ExtArgs> | null
+  }
+
+
+  /**
    * Model SrmSyncRun
    */
 
@@ -59607,6 +61159,1290 @@ export namespace Prisma {
      * Omit specific fields from the GmArticleData
      */
     omit?: GmArticleDataOmit<ExtArgs> | null
+  }
+
+
+  /**
+   * Model GmVariantArticleData
+   */
+
+  export type AggregateGmVariantArticleData = {
+    _count: GmVariantArticleDataCountAggregateOutputType | null
+    _avg: GmVariantArticleDataAvgAggregateOutputType | null
+    _sum: GmVariantArticleDataSumAggregateOutputType | null
+    _min: GmVariantArticleDataMinAggregateOutputType | null
+    _max: GmVariantArticleDataMaxAggregateOutputType | null
+  }
+
+  export type GmVariantArticleDataAvgAggregateOutputType = {
+    mrp: Decimal | null
+    rate: Decimal | null
+    approvedBy: number | null
+  }
+
+  export type GmVariantArticleDataSumAggregateOutputType = {
+    mrp: Decimal | null
+    rate: Decimal | null
+    approvedBy: number | null
+  }
+
+  export type GmVariantArticleDataMinAggregateOutputType = {
+    id: string | null
+    genericArticleId: string | null
+    genericArticleNumber: string | null
+    variantColor: string | null
+    variantSize: string | null
+    variantArticleNumber: string | null
+    division: string | null
+    subDivision: string | null
+    majorCategory: string | null
+    mcDescription: string | null
+    vendorName: string | null
+    vendorCode: string | null
+    designNumber: string | null
+    mrp: Decimal | null
+    rate: Decimal | null
+    approvalStatus: string | null
+    approvedAt: Date | null
+    approvedBy: number | null
+    sapSyncStatus: string | null
+    sapSyncMessage: string | null
+    imageUrl: string | null
+    userName: string | null
+    createdAt: Date | null
+    updatedAt: Date | null
+  }
+
+  export type GmVariantArticleDataMaxAggregateOutputType = {
+    id: string | null
+    genericArticleId: string | null
+    genericArticleNumber: string | null
+    variantColor: string | null
+    variantSize: string | null
+    variantArticleNumber: string | null
+    division: string | null
+    subDivision: string | null
+    majorCategory: string | null
+    mcDescription: string | null
+    vendorName: string | null
+    vendorCode: string | null
+    designNumber: string | null
+    mrp: Decimal | null
+    rate: Decimal | null
+    approvalStatus: string | null
+    approvedAt: Date | null
+    approvedBy: number | null
+    sapSyncStatus: string | null
+    sapSyncMessage: string | null
+    imageUrl: string | null
+    userName: string | null
+    createdAt: Date | null
+    updatedAt: Date | null
+  }
+
+  export type GmVariantArticleDataCountAggregateOutputType = {
+    id: number
+    genericArticleId: number
+    genericArticleNumber: number
+    variantColor: number
+    variantSize: number
+    variantArticleNumber: number
+    division: number
+    subDivision: number
+    majorCategory: number
+    mcDescription: number
+    vendorName: number
+    vendorCode: number
+    designNumber: number
+    mrp: number
+    rate: number
+    approvalStatus: number
+    approvedAt: number
+    approvedBy: number
+    sapSyncStatus: number
+    sapSyncMessage: number
+    imageUrl: number
+    userName: number
+    createdAt: number
+    updatedAt: number
+    _all: number
+  }
+
+
+  export type GmVariantArticleDataAvgAggregateInputType = {
+    mrp?: true
+    rate?: true
+    approvedBy?: true
+  }
+
+  export type GmVariantArticleDataSumAggregateInputType = {
+    mrp?: true
+    rate?: true
+    approvedBy?: true
+  }
+
+  export type GmVariantArticleDataMinAggregateInputType = {
+    id?: true
+    genericArticleId?: true
+    genericArticleNumber?: true
+    variantColor?: true
+    variantSize?: true
+    variantArticleNumber?: true
+    division?: true
+    subDivision?: true
+    majorCategory?: true
+    mcDescription?: true
+    vendorName?: true
+    vendorCode?: true
+    designNumber?: true
+    mrp?: true
+    rate?: true
+    approvalStatus?: true
+    approvedAt?: true
+    approvedBy?: true
+    sapSyncStatus?: true
+    sapSyncMessage?: true
+    imageUrl?: true
+    userName?: true
+    createdAt?: true
+    updatedAt?: true
+  }
+
+  export type GmVariantArticleDataMaxAggregateInputType = {
+    id?: true
+    genericArticleId?: true
+    genericArticleNumber?: true
+    variantColor?: true
+    variantSize?: true
+    variantArticleNumber?: true
+    division?: true
+    subDivision?: true
+    majorCategory?: true
+    mcDescription?: true
+    vendorName?: true
+    vendorCode?: true
+    designNumber?: true
+    mrp?: true
+    rate?: true
+    approvalStatus?: true
+    approvedAt?: true
+    approvedBy?: true
+    sapSyncStatus?: true
+    sapSyncMessage?: true
+    imageUrl?: true
+    userName?: true
+    createdAt?: true
+    updatedAt?: true
+  }
+
+  export type GmVariantArticleDataCountAggregateInputType = {
+    id?: true
+    genericArticleId?: true
+    genericArticleNumber?: true
+    variantColor?: true
+    variantSize?: true
+    variantArticleNumber?: true
+    division?: true
+    subDivision?: true
+    majorCategory?: true
+    mcDescription?: true
+    vendorName?: true
+    vendorCode?: true
+    designNumber?: true
+    mrp?: true
+    rate?: true
+    approvalStatus?: true
+    approvedAt?: true
+    approvedBy?: true
+    sapSyncStatus?: true
+    sapSyncMessage?: true
+    imageUrl?: true
+    userName?: true
+    createdAt?: true
+    updatedAt?: true
+    _all?: true
+  }
+
+  export type GmVariantArticleDataAggregateArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Filter which GmVariantArticleData to aggregate.
+     */
+    where?: GmVariantArticleDataWhereInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
+     * 
+     * Determine the order of GmVariantArticleData to fetch.
+     */
+    orderBy?: GmVariantArticleDataOrderByWithRelationInput | GmVariantArticleDataOrderByWithRelationInput[]
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
+     * 
+     * Sets the start position
+     */
+    cursor?: GmVariantArticleDataWhereUniqueInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Take `±n` GmVariantArticleData from the position of the cursor.
+     */
+    take?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Skip the first `n` GmVariantArticleData.
+     */
+    skip?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     * 
+     * Count returned GmVariantArticleData
+    **/
+    _count?: true | GmVariantArticleDataCountAggregateInputType
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     * 
+     * Select which fields to average
+    **/
+    _avg?: GmVariantArticleDataAvgAggregateInputType
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     * 
+     * Select which fields to sum
+    **/
+    _sum?: GmVariantArticleDataSumAggregateInputType
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     * 
+     * Select which fields to find the minimum value
+    **/
+    _min?: GmVariantArticleDataMinAggregateInputType
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     * 
+     * Select which fields to find the maximum value
+    **/
+    _max?: GmVariantArticleDataMaxAggregateInputType
+  }
+
+  export type GetGmVariantArticleDataAggregateType<T extends GmVariantArticleDataAggregateArgs> = {
+        [P in keyof T & keyof AggregateGmVariantArticleData]: P extends '_count' | 'count'
+      ? T[P] extends true
+        ? number
+        : GetScalarType<T[P], AggregateGmVariantArticleData[P]>
+      : GetScalarType<T[P], AggregateGmVariantArticleData[P]>
+  }
+
+
+
+
+  export type GmVariantArticleDataGroupByArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    where?: GmVariantArticleDataWhereInput
+    orderBy?: GmVariantArticleDataOrderByWithAggregationInput | GmVariantArticleDataOrderByWithAggregationInput[]
+    by: GmVariantArticleDataScalarFieldEnum[] | GmVariantArticleDataScalarFieldEnum
+    having?: GmVariantArticleDataScalarWhereWithAggregatesInput
+    take?: number
+    skip?: number
+    _count?: GmVariantArticleDataCountAggregateInputType | true
+    _avg?: GmVariantArticleDataAvgAggregateInputType
+    _sum?: GmVariantArticleDataSumAggregateInputType
+    _min?: GmVariantArticleDataMinAggregateInputType
+    _max?: GmVariantArticleDataMaxAggregateInputType
+  }
+
+  export type GmVariantArticleDataGroupByOutputType = {
+    id: string
+    genericArticleId: string | null
+    genericArticleNumber: string | null
+    variantColor: string | null
+    variantSize: string | null
+    variantArticleNumber: string | null
+    division: string | null
+    subDivision: string | null
+    majorCategory: string | null
+    mcDescription: string | null
+    vendorName: string | null
+    vendorCode: string | null
+    designNumber: string | null
+    mrp: Decimal | null
+    rate: Decimal | null
+    approvalStatus: string
+    approvedAt: Date | null
+    approvedBy: number | null
+    sapSyncStatus: string
+    sapSyncMessage: string | null
+    imageUrl: string | null
+    userName: string | null
+    createdAt: Date
+    updatedAt: Date
+    _count: GmVariantArticleDataCountAggregateOutputType | null
+    _avg: GmVariantArticleDataAvgAggregateOutputType | null
+    _sum: GmVariantArticleDataSumAggregateOutputType | null
+    _min: GmVariantArticleDataMinAggregateOutputType | null
+    _max: GmVariantArticleDataMaxAggregateOutputType | null
+  }
+
+  type GetGmVariantArticleDataGroupByPayload<T extends GmVariantArticleDataGroupByArgs> = Prisma.PrismaPromise<
+    Array<
+      PickEnumerable<GmVariantArticleDataGroupByOutputType, T['by']> &
+        {
+          [P in ((keyof T) & (keyof GmVariantArticleDataGroupByOutputType))]: P extends '_count'
+            ? T[P] extends boolean
+              ? number
+              : GetScalarType<T[P], GmVariantArticleDataGroupByOutputType[P]>
+            : GetScalarType<T[P], GmVariantArticleDataGroupByOutputType[P]>
+        }
+      >
+    >
+
+
+  export type GmVariantArticleDataSelect<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
+    id?: boolean
+    genericArticleId?: boolean
+    genericArticleNumber?: boolean
+    variantColor?: boolean
+    variantSize?: boolean
+    variantArticleNumber?: boolean
+    division?: boolean
+    subDivision?: boolean
+    majorCategory?: boolean
+    mcDescription?: boolean
+    vendorName?: boolean
+    vendorCode?: boolean
+    designNumber?: boolean
+    mrp?: boolean
+    rate?: boolean
+    approvalStatus?: boolean
+    approvedAt?: boolean
+    approvedBy?: boolean
+    sapSyncStatus?: boolean
+    sapSyncMessage?: boolean
+    imageUrl?: boolean
+    userName?: boolean
+    createdAt?: boolean
+    updatedAt?: boolean
+  }, ExtArgs["result"]["gmVariantArticleData"]>
+
+  export type GmVariantArticleDataSelectCreateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
+    id?: boolean
+    genericArticleId?: boolean
+    genericArticleNumber?: boolean
+    variantColor?: boolean
+    variantSize?: boolean
+    variantArticleNumber?: boolean
+    division?: boolean
+    subDivision?: boolean
+    majorCategory?: boolean
+    mcDescription?: boolean
+    vendorName?: boolean
+    vendorCode?: boolean
+    designNumber?: boolean
+    mrp?: boolean
+    rate?: boolean
+    approvalStatus?: boolean
+    approvedAt?: boolean
+    approvedBy?: boolean
+    sapSyncStatus?: boolean
+    sapSyncMessage?: boolean
+    imageUrl?: boolean
+    userName?: boolean
+    createdAt?: boolean
+    updatedAt?: boolean
+  }, ExtArgs["result"]["gmVariantArticleData"]>
+
+  export type GmVariantArticleDataSelectUpdateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
+    id?: boolean
+    genericArticleId?: boolean
+    genericArticleNumber?: boolean
+    variantColor?: boolean
+    variantSize?: boolean
+    variantArticleNumber?: boolean
+    division?: boolean
+    subDivision?: boolean
+    majorCategory?: boolean
+    mcDescription?: boolean
+    vendorName?: boolean
+    vendorCode?: boolean
+    designNumber?: boolean
+    mrp?: boolean
+    rate?: boolean
+    approvalStatus?: boolean
+    approvedAt?: boolean
+    approvedBy?: boolean
+    sapSyncStatus?: boolean
+    sapSyncMessage?: boolean
+    imageUrl?: boolean
+    userName?: boolean
+    createdAt?: boolean
+    updatedAt?: boolean
+  }, ExtArgs["result"]["gmVariantArticleData"]>
+
+  export type GmVariantArticleDataSelectScalar = {
+    id?: boolean
+    genericArticleId?: boolean
+    genericArticleNumber?: boolean
+    variantColor?: boolean
+    variantSize?: boolean
+    variantArticleNumber?: boolean
+    division?: boolean
+    subDivision?: boolean
+    majorCategory?: boolean
+    mcDescription?: boolean
+    vendorName?: boolean
+    vendorCode?: boolean
+    designNumber?: boolean
+    mrp?: boolean
+    rate?: boolean
+    approvalStatus?: boolean
+    approvedAt?: boolean
+    approvedBy?: boolean
+    sapSyncStatus?: boolean
+    sapSyncMessage?: boolean
+    imageUrl?: boolean
+    userName?: boolean
+    createdAt?: boolean
+    updatedAt?: boolean
+  }
+
+  export type GmVariantArticleDataOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<"id" | "genericArticleId" | "genericArticleNumber" | "variantColor" | "variantSize" | "variantArticleNumber" | "division" | "subDivision" | "majorCategory" | "mcDescription" | "vendorName" | "vendorCode" | "designNumber" | "mrp" | "rate" | "approvalStatus" | "approvedAt" | "approvedBy" | "sapSyncStatus" | "sapSyncMessage" | "imageUrl" | "userName" | "createdAt" | "updatedAt", ExtArgs["result"]["gmVariantArticleData"]>
+
+  export type $GmVariantArticleDataPayload<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    name: "GmVariantArticleData"
+    objects: {}
+    scalars: $Extensions.GetPayloadResult<{
+      id: string
+      genericArticleId: string | null
+      genericArticleNumber: string | null
+      variantColor: string | null
+      variantSize: string | null
+      variantArticleNumber: string | null
+      division: string | null
+      subDivision: string | null
+      majorCategory: string | null
+      mcDescription: string | null
+      vendorName: string | null
+      vendorCode: string | null
+      designNumber: string | null
+      mrp: Prisma.Decimal | null
+      rate: Prisma.Decimal | null
+      approvalStatus: string
+      approvedAt: Date | null
+      approvedBy: number | null
+      sapSyncStatus: string
+      sapSyncMessage: string | null
+      imageUrl: string | null
+      userName: string | null
+      createdAt: Date
+      updatedAt: Date
+    }, ExtArgs["result"]["gmVariantArticleData"]>
+    composites: {}
+  }
+
+  type GmVariantArticleDataGetPayload<S extends boolean | null | undefined | GmVariantArticleDataDefaultArgs> = $Result.GetResult<Prisma.$GmVariantArticleDataPayload, S>
+
+  type GmVariantArticleDataCountArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> =
+    Omit<GmVariantArticleDataFindManyArgs, 'select' | 'include' | 'distinct' | 'omit'> & {
+      select?: GmVariantArticleDataCountAggregateInputType | true
+    }
+
+  export interface GmVariantArticleDataDelegate<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs, GlobalOmitOptions = {}> {
+    [K: symbol]: { types: Prisma.TypeMap<ExtArgs>['model']['GmVariantArticleData'], meta: { name: 'GmVariantArticleData' } }
+    /**
+     * Find zero or one GmVariantArticleData that matches the filter.
+     * @param {GmVariantArticleDataFindUniqueArgs} args - Arguments to find a GmVariantArticleData
+     * @example
+     * // Get one GmVariantArticleData
+     * const gmVariantArticleData = await prisma.gmVariantArticleData.findUnique({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     */
+    findUnique<T extends GmVariantArticleDataFindUniqueArgs>(args: SelectSubset<T, GmVariantArticleDataFindUniqueArgs<ExtArgs>>): Prisma__GmVariantArticleDataClient<$Result.GetResult<Prisma.$GmVariantArticleDataPayload<ExtArgs>, T, "findUnique", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Find one GmVariantArticleData that matches the filter or throw an error with `error.code='P2025'`
+     * if no matches were found.
+     * @param {GmVariantArticleDataFindUniqueOrThrowArgs} args - Arguments to find a GmVariantArticleData
+     * @example
+     * // Get one GmVariantArticleData
+     * const gmVariantArticleData = await prisma.gmVariantArticleData.findUniqueOrThrow({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     */
+    findUniqueOrThrow<T extends GmVariantArticleDataFindUniqueOrThrowArgs>(args: SelectSubset<T, GmVariantArticleDataFindUniqueOrThrowArgs<ExtArgs>>): Prisma__GmVariantArticleDataClient<$Result.GetResult<Prisma.$GmVariantArticleDataPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Find the first GmVariantArticleData that matches the filter.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {GmVariantArticleDataFindFirstArgs} args - Arguments to find a GmVariantArticleData
+     * @example
+     * // Get one GmVariantArticleData
+     * const gmVariantArticleData = await prisma.gmVariantArticleData.findFirst({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     */
+    findFirst<T extends GmVariantArticleDataFindFirstArgs>(args?: SelectSubset<T, GmVariantArticleDataFindFirstArgs<ExtArgs>>): Prisma__GmVariantArticleDataClient<$Result.GetResult<Prisma.$GmVariantArticleDataPayload<ExtArgs>, T, "findFirst", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Find the first GmVariantArticleData that matches the filter or
+     * throw `PrismaKnownClientError` with `P2025` code if no matches were found.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {GmVariantArticleDataFindFirstOrThrowArgs} args - Arguments to find a GmVariantArticleData
+     * @example
+     * // Get one GmVariantArticleData
+     * const gmVariantArticleData = await prisma.gmVariantArticleData.findFirstOrThrow({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     */
+    findFirstOrThrow<T extends GmVariantArticleDataFindFirstOrThrowArgs>(args?: SelectSubset<T, GmVariantArticleDataFindFirstOrThrowArgs<ExtArgs>>): Prisma__GmVariantArticleDataClient<$Result.GetResult<Prisma.$GmVariantArticleDataPayload<ExtArgs>, T, "findFirstOrThrow", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Find zero or more GmVariantArticleData that matches the filter.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {GmVariantArticleDataFindManyArgs} args - Arguments to filter and select certain fields only.
+     * @example
+     * // Get all GmVariantArticleData
+     * const gmVariantArticleData = await prisma.gmVariantArticleData.findMany()
+     * 
+     * // Get first 10 GmVariantArticleData
+     * const gmVariantArticleData = await prisma.gmVariantArticleData.findMany({ take: 10 })
+     * 
+     * // Only select the `id`
+     * const gmVariantArticleDataWithIdOnly = await prisma.gmVariantArticleData.findMany({ select: { id: true } })
+     * 
+     */
+    findMany<T extends GmVariantArticleDataFindManyArgs>(args?: SelectSubset<T, GmVariantArticleDataFindManyArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$GmVariantArticleDataPayload<ExtArgs>, T, "findMany", GlobalOmitOptions>>
+
+    /**
+     * Create a GmVariantArticleData.
+     * @param {GmVariantArticleDataCreateArgs} args - Arguments to create a GmVariantArticleData.
+     * @example
+     * // Create one GmVariantArticleData
+     * const GmVariantArticleData = await prisma.gmVariantArticleData.create({
+     *   data: {
+     *     // ... data to create a GmVariantArticleData
+     *   }
+     * })
+     * 
+     */
+    create<T extends GmVariantArticleDataCreateArgs>(args: SelectSubset<T, GmVariantArticleDataCreateArgs<ExtArgs>>): Prisma__GmVariantArticleDataClient<$Result.GetResult<Prisma.$GmVariantArticleDataPayload<ExtArgs>, T, "create", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Create many GmVariantArticleData.
+     * @param {GmVariantArticleDataCreateManyArgs} args - Arguments to create many GmVariantArticleData.
+     * @example
+     * // Create many GmVariantArticleData
+     * const gmVariantArticleData = await prisma.gmVariantArticleData.createMany({
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     *     
+     */
+    createMany<T extends GmVariantArticleDataCreateManyArgs>(args?: SelectSubset<T, GmVariantArticleDataCreateManyArgs<ExtArgs>>): Prisma.PrismaPromise<BatchPayload>
+
+    /**
+     * Create many GmVariantArticleData and returns the data saved in the database.
+     * @param {GmVariantArticleDataCreateManyAndReturnArgs} args - Arguments to create many GmVariantArticleData.
+     * @example
+     * // Create many GmVariantArticleData
+     * const gmVariantArticleData = await prisma.gmVariantArticleData.createManyAndReturn({
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     * 
+     * // Create many GmVariantArticleData and only return the `id`
+     * const gmVariantArticleDataWithIdOnly = await prisma.gmVariantArticleData.createManyAndReturn({
+     *   select: { id: true },
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * 
+     */
+    createManyAndReturn<T extends GmVariantArticleDataCreateManyAndReturnArgs>(args?: SelectSubset<T, GmVariantArticleDataCreateManyAndReturnArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$GmVariantArticleDataPayload<ExtArgs>, T, "createManyAndReturn", GlobalOmitOptions>>
+
+    /**
+     * Delete a GmVariantArticleData.
+     * @param {GmVariantArticleDataDeleteArgs} args - Arguments to delete one GmVariantArticleData.
+     * @example
+     * // Delete one GmVariantArticleData
+     * const GmVariantArticleData = await prisma.gmVariantArticleData.delete({
+     *   where: {
+     *     // ... filter to delete one GmVariantArticleData
+     *   }
+     * })
+     * 
+     */
+    delete<T extends GmVariantArticleDataDeleteArgs>(args: SelectSubset<T, GmVariantArticleDataDeleteArgs<ExtArgs>>): Prisma__GmVariantArticleDataClient<$Result.GetResult<Prisma.$GmVariantArticleDataPayload<ExtArgs>, T, "delete", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Update one GmVariantArticleData.
+     * @param {GmVariantArticleDataUpdateArgs} args - Arguments to update one GmVariantArticleData.
+     * @example
+     * // Update one GmVariantArticleData
+     * const gmVariantArticleData = await prisma.gmVariantArticleData.update({
+     *   where: {
+     *     // ... provide filter here
+     *   },
+     *   data: {
+     *     // ... provide data here
+     *   }
+     * })
+     * 
+     */
+    update<T extends GmVariantArticleDataUpdateArgs>(args: SelectSubset<T, GmVariantArticleDataUpdateArgs<ExtArgs>>): Prisma__GmVariantArticleDataClient<$Result.GetResult<Prisma.$GmVariantArticleDataPayload<ExtArgs>, T, "update", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Delete zero or more GmVariantArticleData.
+     * @param {GmVariantArticleDataDeleteManyArgs} args - Arguments to filter GmVariantArticleData to delete.
+     * @example
+     * // Delete a few GmVariantArticleData
+     * const { count } = await prisma.gmVariantArticleData.deleteMany({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     * 
+     */
+    deleteMany<T extends GmVariantArticleDataDeleteManyArgs>(args?: SelectSubset<T, GmVariantArticleDataDeleteManyArgs<ExtArgs>>): Prisma.PrismaPromise<BatchPayload>
+
+    /**
+     * Update zero or more GmVariantArticleData.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {GmVariantArticleDataUpdateManyArgs} args - Arguments to update one or more rows.
+     * @example
+     * // Update many GmVariantArticleData
+     * const gmVariantArticleData = await prisma.gmVariantArticleData.updateMany({
+     *   where: {
+     *     // ... provide filter here
+     *   },
+     *   data: {
+     *     // ... provide data here
+     *   }
+     * })
+     * 
+     */
+    updateMany<T extends GmVariantArticleDataUpdateManyArgs>(args: SelectSubset<T, GmVariantArticleDataUpdateManyArgs<ExtArgs>>): Prisma.PrismaPromise<BatchPayload>
+
+    /**
+     * Update zero or more GmVariantArticleData and returns the data updated in the database.
+     * @param {GmVariantArticleDataUpdateManyAndReturnArgs} args - Arguments to update many GmVariantArticleData.
+     * @example
+     * // Update many GmVariantArticleData
+     * const gmVariantArticleData = await prisma.gmVariantArticleData.updateManyAndReturn({
+     *   where: {
+     *     // ... provide filter here
+     *   },
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     * 
+     * // Update zero or more GmVariantArticleData and only return the `id`
+     * const gmVariantArticleDataWithIdOnly = await prisma.gmVariantArticleData.updateManyAndReturn({
+     *   select: { id: true },
+     *   where: {
+     *     // ... provide filter here
+     *   },
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * 
+     */
+    updateManyAndReturn<T extends GmVariantArticleDataUpdateManyAndReturnArgs>(args: SelectSubset<T, GmVariantArticleDataUpdateManyAndReturnArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$GmVariantArticleDataPayload<ExtArgs>, T, "updateManyAndReturn", GlobalOmitOptions>>
+
+    /**
+     * Create or update one GmVariantArticleData.
+     * @param {GmVariantArticleDataUpsertArgs} args - Arguments to update or create a GmVariantArticleData.
+     * @example
+     * // Update or create a GmVariantArticleData
+     * const gmVariantArticleData = await prisma.gmVariantArticleData.upsert({
+     *   create: {
+     *     // ... data to create a GmVariantArticleData
+     *   },
+     *   update: {
+     *     // ... in case it already exists, update
+     *   },
+     *   where: {
+     *     // ... the filter for the GmVariantArticleData we want to update
+     *   }
+     * })
+     */
+    upsert<T extends GmVariantArticleDataUpsertArgs>(args: SelectSubset<T, GmVariantArticleDataUpsertArgs<ExtArgs>>): Prisma__GmVariantArticleDataClient<$Result.GetResult<Prisma.$GmVariantArticleDataPayload<ExtArgs>, T, "upsert", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+
+    /**
+     * Count the number of GmVariantArticleData.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {GmVariantArticleDataCountArgs} args - Arguments to filter GmVariantArticleData to count.
+     * @example
+     * // Count the number of GmVariantArticleData
+     * const count = await prisma.gmVariantArticleData.count({
+     *   where: {
+     *     // ... the filter for the GmVariantArticleData we want to count
+     *   }
+     * })
+    **/
+    count<T extends GmVariantArticleDataCountArgs>(
+      args?: Subset<T, GmVariantArticleDataCountArgs>,
+    ): Prisma.PrismaPromise<
+      T extends $Utils.Record<'select', any>
+        ? T['select'] extends true
+          ? number
+          : GetScalarType<T['select'], GmVariantArticleDataCountAggregateOutputType>
+        : number
+    >
+
+    /**
+     * Allows you to perform aggregations operations on a GmVariantArticleData.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {GmVariantArticleDataAggregateArgs} args - Select which aggregations you would like to apply and on what fields.
+     * @example
+     * // Ordered by age ascending
+     * // Where email contains prisma.io
+     * // Limited to the 10 users
+     * const aggregations = await prisma.user.aggregate({
+     *   _avg: {
+     *     age: true,
+     *   },
+     *   where: {
+     *     email: {
+     *       contains: "prisma.io",
+     *     },
+     *   },
+     *   orderBy: {
+     *     age: "asc",
+     *   },
+     *   take: 10,
+     * })
+    **/
+    aggregate<T extends GmVariantArticleDataAggregateArgs>(args: Subset<T, GmVariantArticleDataAggregateArgs>): Prisma.PrismaPromise<GetGmVariantArticleDataAggregateType<T>>
+
+    /**
+     * Group by GmVariantArticleData.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {GmVariantArticleDataGroupByArgs} args - Group by arguments.
+     * @example
+     * // Group by city, order by createdAt, get count
+     * const result = await prisma.user.groupBy({
+     *   by: ['city', 'createdAt'],
+     *   orderBy: {
+     *     createdAt: true
+     *   },
+     *   _count: {
+     *     _all: true
+     *   },
+     * })
+     * 
+    **/
+    groupBy<
+      T extends GmVariantArticleDataGroupByArgs,
+      HasSelectOrTake extends Or<
+        Extends<'skip', Keys<T>>,
+        Extends<'take', Keys<T>>
+      >,
+      OrderByArg extends True extends HasSelectOrTake
+        ? { orderBy: GmVariantArticleDataGroupByArgs['orderBy'] }
+        : { orderBy?: GmVariantArticleDataGroupByArgs['orderBy'] },
+      OrderFields extends ExcludeUnderscoreKeys<Keys<MaybeTupleToUnion<T['orderBy']>>>,
+      ByFields extends MaybeTupleToUnion<T['by']>,
+      ByValid extends Has<ByFields, OrderFields>,
+      HavingFields extends GetHavingFields<T['having']>,
+      HavingValid extends Has<ByFields, HavingFields>,
+      ByEmpty extends T['by'] extends never[] ? True : False,
+      InputErrors extends ByEmpty extends True
+      ? `Error: "by" must not be empty.`
+      : HavingValid extends False
+      ? {
+          [P in HavingFields]: P extends ByFields
+            ? never
+            : P extends string
+            ? `Error: Field "${P}" used in "having" needs to be provided in "by".`
+            : [
+                Error,
+                'Field ',
+                P,
+                ` in "having" needs to be provided in "by"`,
+              ]
+        }[HavingFields]
+      : 'take' extends Keys<T>
+      ? 'orderBy' extends Keys<T>
+        ? ByValid extends True
+          ? {}
+          : {
+              [P in OrderFields]: P extends ByFields
+                ? never
+                : `Error: Field "${P}" in "orderBy" needs to be provided in "by"`
+            }[OrderFields]
+        : 'Error: If you provide "take", you also need to provide "orderBy"'
+      : 'skip' extends Keys<T>
+      ? 'orderBy' extends Keys<T>
+        ? ByValid extends True
+          ? {}
+          : {
+              [P in OrderFields]: P extends ByFields
+                ? never
+                : `Error: Field "${P}" in "orderBy" needs to be provided in "by"`
+            }[OrderFields]
+        : 'Error: If you provide "skip", you also need to provide "orderBy"'
+      : ByValid extends True
+      ? {}
+      : {
+          [P in OrderFields]: P extends ByFields
+            ? never
+            : `Error: Field "${P}" in "orderBy" needs to be provided in "by"`
+        }[OrderFields]
+    >(args: SubsetIntersection<T, GmVariantArticleDataGroupByArgs, OrderByArg> & InputErrors): {} extends InputErrors ? GetGmVariantArticleDataGroupByPayload<T> : Prisma.PrismaPromise<InputErrors>
+  /**
+   * Fields of the GmVariantArticleData model
+   */
+  readonly fields: GmVariantArticleDataFieldRefs;
+  }
+
+  /**
+   * The delegate class that acts as a "Promise-like" for GmVariantArticleData.
+   * Why is this prefixed with `Prisma__`?
+   * Because we want to prevent naming conflicts as mentioned in
+   * https://github.com/prisma/prisma-client-js/issues/707
+   */
+  export interface Prisma__GmVariantArticleDataClient<T, Null = never, ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs, GlobalOmitOptions = {}> extends Prisma.PrismaPromise<T> {
+    readonly [Symbol.toStringTag]: "PrismaPromise"
+    /**
+     * Attaches callbacks for the resolution and/or rejection of the Promise.
+     * @param onfulfilled The callback to execute when the Promise is resolved.
+     * @param onrejected The callback to execute when the Promise is rejected.
+     * @returns A Promise for the completion of which ever callback is executed.
+     */
+    then<TResult1 = T, TResult2 = never>(onfulfilled?: ((value: T) => TResult1 | PromiseLike<TResult1>) | undefined | null, onrejected?: ((reason: any) => TResult2 | PromiseLike<TResult2>) | undefined | null): $Utils.JsPromise<TResult1 | TResult2>
+    /**
+     * Attaches a callback for only the rejection of the Promise.
+     * @param onrejected The callback to execute when the Promise is rejected.
+     * @returns A Promise for the completion of the callback.
+     */
+    catch<TResult = never>(onrejected?: ((reason: any) => TResult | PromiseLike<TResult>) | undefined | null): $Utils.JsPromise<T | TResult>
+    /**
+     * Attaches a callback that is invoked when the Promise is settled (fulfilled or rejected). The
+     * resolved value cannot be modified from the callback.
+     * @param onfinally The callback to execute when the Promise is settled (fulfilled or rejected).
+     * @returns A Promise for the completion of the callback.
+     */
+    finally(onfinally?: (() => void) | undefined | null): $Utils.JsPromise<T>
+  }
+
+
+
+
+  /**
+   * Fields of the GmVariantArticleData model
+   */
+  interface GmVariantArticleDataFieldRefs {
+    readonly id: FieldRef<"GmVariantArticleData", 'String'>
+    readonly genericArticleId: FieldRef<"GmVariantArticleData", 'String'>
+    readonly genericArticleNumber: FieldRef<"GmVariantArticleData", 'String'>
+    readonly variantColor: FieldRef<"GmVariantArticleData", 'String'>
+    readonly variantSize: FieldRef<"GmVariantArticleData", 'String'>
+    readonly variantArticleNumber: FieldRef<"GmVariantArticleData", 'String'>
+    readonly division: FieldRef<"GmVariantArticleData", 'String'>
+    readonly subDivision: FieldRef<"GmVariantArticleData", 'String'>
+    readonly majorCategory: FieldRef<"GmVariantArticleData", 'String'>
+    readonly mcDescription: FieldRef<"GmVariantArticleData", 'String'>
+    readonly vendorName: FieldRef<"GmVariantArticleData", 'String'>
+    readonly vendorCode: FieldRef<"GmVariantArticleData", 'String'>
+    readonly designNumber: FieldRef<"GmVariantArticleData", 'String'>
+    readonly mrp: FieldRef<"GmVariantArticleData", 'Decimal'>
+    readonly rate: FieldRef<"GmVariantArticleData", 'Decimal'>
+    readonly approvalStatus: FieldRef<"GmVariantArticleData", 'String'>
+    readonly approvedAt: FieldRef<"GmVariantArticleData", 'DateTime'>
+    readonly approvedBy: FieldRef<"GmVariantArticleData", 'Int'>
+    readonly sapSyncStatus: FieldRef<"GmVariantArticleData", 'String'>
+    readonly sapSyncMessage: FieldRef<"GmVariantArticleData", 'String'>
+    readonly imageUrl: FieldRef<"GmVariantArticleData", 'String'>
+    readonly userName: FieldRef<"GmVariantArticleData", 'String'>
+    readonly createdAt: FieldRef<"GmVariantArticleData", 'DateTime'>
+    readonly updatedAt: FieldRef<"GmVariantArticleData", 'DateTime'>
+  }
+    
+
+  // Custom InputTypes
+  /**
+   * GmVariantArticleData findUnique
+   */
+  export type GmVariantArticleDataFindUniqueArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the GmVariantArticleData
+     */
+    select?: GmVariantArticleDataSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the GmVariantArticleData
+     */
+    omit?: GmVariantArticleDataOmit<ExtArgs> | null
+    /**
+     * Filter, which GmVariantArticleData to fetch.
+     */
+    where: GmVariantArticleDataWhereUniqueInput
+  }
+
+  /**
+   * GmVariantArticleData findUniqueOrThrow
+   */
+  export type GmVariantArticleDataFindUniqueOrThrowArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the GmVariantArticleData
+     */
+    select?: GmVariantArticleDataSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the GmVariantArticleData
+     */
+    omit?: GmVariantArticleDataOmit<ExtArgs> | null
+    /**
+     * Filter, which GmVariantArticleData to fetch.
+     */
+    where: GmVariantArticleDataWhereUniqueInput
+  }
+
+  /**
+   * GmVariantArticleData findFirst
+   */
+  export type GmVariantArticleDataFindFirstArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the GmVariantArticleData
+     */
+    select?: GmVariantArticleDataSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the GmVariantArticleData
+     */
+    omit?: GmVariantArticleDataOmit<ExtArgs> | null
+    /**
+     * Filter, which GmVariantArticleData to fetch.
+     */
+    where?: GmVariantArticleDataWhereInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
+     * 
+     * Determine the order of GmVariantArticleData to fetch.
+     */
+    orderBy?: GmVariantArticleDataOrderByWithRelationInput | GmVariantArticleDataOrderByWithRelationInput[]
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
+     * 
+     * Sets the position for searching for GmVariantArticleData.
+     */
+    cursor?: GmVariantArticleDataWhereUniqueInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Take `±n` GmVariantArticleData from the position of the cursor.
+     */
+    take?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Skip the first `n` GmVariantArticleData.
+     */
+    skip?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/distinct Distinct Docs}
+     * 
+     * Filter by unique combinations of GmVariantArticleData.
+     */
+    distinct?: GmVariantArticleDataScalarFieldEnum | GmVariantArticleDataScalarFieldEnum[]
+  }
+
+  /**
+   * GmVariantArticleData findFirstOrThrow
+   */
+  export type GmVariantArticleDataFindFirstOrThrowArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the GmVariantArticleData
+     */
+    select?: GmVariantArticleDataSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the GmVariantArticleData
+     */
+    omit?: GmVariantArticleDataOmit<ExtArgs> | null
+    /**
+     * Filter, which GmVariantArticleData to fetch.
+     */
+    where?: GmVariantArticleDataWhereInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
+     * 
+     * Determine the order of GmVariantArticleData to fetch.
+     */
+    orderBy?: GmVariantArticleDataOrderByWithRelationInput | GmVariantArticleDataOrderByWithRelationInput[]
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
+     * 
+     * Sets the position for searching for GmVariantArticleData.
+     */
+    cursor?: GmVariantArticleDataWhereUniqueInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Take `±n` GmVariantArticleData from the position of the cursor.
+     */
+    take?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Skip the first `n` GmVariantArticleData.
+     */
+    skip?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/distinct Distinct Docs}
+     * 
+     * Filter by unique combinations of GmVariantArticleData.
+     */
+    distinct?: GmVariantArticleDataScalarFieldEnum | GmVariantArticleDataScalarFieldEnum[]
+  }
+
+  /**
+   * GmVariantArticleData findMany
+   */
+  export type GmVariantArticleDataFindManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the GmVariantArticleData
+     */
+    select?: GmVariantArticleDataSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the GmVariantArticleData
+     */
+    omit?: GmVariantArticleDataOmit<ExtArgs> | null
+    /**
+     * Filter, which GmVariantArticleData to fetch.
+     */
+    where?: GmVariantArticleDataWhereInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
+     * 
+     * Determine the order of GmVariantArticleData to fetch.
+     */
+    orderBy?: GmVariantArticleDataOrderByWithRelationInput | GmVariantArticleDataOrderByWithRelationInput[]
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
+     * 
+     * Sets the position for listing GmVariantArticleData.
+     */
+    cursor?: GmVariantArticleDataWhereUniqueInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Take `±n` GmVariantArticleData from the position of the cursor.
+     */
+    take?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Skip the first `n` GmVariantArticleData.
+     */
+    skip?: number
+    distinct?: GmVariantArticleDataScalarFieldEnum | GmVariantArticleDataScalarFieldEnum[]
+  }
+
+  /**
+   * GmVariantArticleData create
+   */
+  export type GmVariantArticleDataCreateArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the GmVariantArticleData
+     */
+    select?: GmVariantArticleDataSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the GmVariantArticleData
+     */
+    omit?: GmVariantArticleDataOmit<ExtArgs> | null
+    /**
+     * The data needed to create a GmVariantArticleData.
+     */
+    data: XOR<GmVariantArticleDataCreateInput, GmVariantArticleDataUncheckedCreateInput>
+  }
+
+  /**
+   * GmVariantArticleData createMany
+   */
+  export type GmVariantArticleDataCreateManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * The data used to create many GmVariantArticleData.
+     */
+    data: GmVariantArticleDataCreateManyInput | GmVariantArticleDataCreateManyInput[]
+    skipDuplicates?: boolean
+  }
+
+  /**
+   * GmVariantArticleData createManyAndReturn
+   */
+  export type GmVariantArticleDataCreateManyAndReturnArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the GmVariantArticleData
+     */
+    select?: GmVariantArticleDataSelectCreateManyAndReturn<ExtArgs> | null
+    /**
+     * Omit specific fields from the GmVariantArticleData
+     */
+    omit?: GmVariantArticleDataOmit<ExtArgs> | null
+    /**
+     * The data used to create many GmVariantArticleData.
+     */
+    data: GmVariantArticleDataCreateManyInput | GmVariantArticleDataCreateManyInput[]
+    skipDuplicates?: boolean
+  }
+
+  /**
+   * GmVariantArticleData update
+   */
+  export type GmVariantArticleDataUpdateArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the GmVariantArticleData
+     */
+    select?: GmVariantArticleDataSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the GmVariantArticleData
+     */
+    omit?: GmVariantArticleDataOmit<ExtArgs> | null
+    /**
+     * The data needed to update a GmVariantArticleData.
+     */
+    data: XOR<GmVariantArticleDataUpdateInput, GmVariantArticleDataUncheckedUpdateInput>
+    /**
+     * Choose, which GmVariantArticleData to update.
+     */
+    where: GmVariantArticleDataWhereUniqueInput
+  }
+
+  /**
+   * GmVariantArticleData updateMany
+   */
+  export type GmVariantArticleDataUpdateManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * The data used to update GmVariantArticleData.
+     */
+    data: XOR<GmVariantArticleDataUpdateManyMutationInput, GmVariantArticleDataUncheckedUpdateManyInput>
+    /**
+     * Filter which GmVariantArticleData to update
+     */
+    where?: GmVariantArticleDataWhereInput
+    /**
+     * Limit how many GmVariantArticleData to update.
+     */
+    limit?: number
+  }
+
+  /**
+   * GmVariantArticleData updateManyAndReturn
+   */
+  export type GmVariantArticleDataUpdateManyAndReturnArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the GmVariantArticleData
+     */
+    select?: GmVariantArticleDataSelectUpdateManyAndReturn<ExtArgs> | null
+    /**
+     * Omit specific fields from the GmVariantArticleData
+     */
+    omit?: GmVariantArticleDataOmit<ExtArgs> | null
+    /**
+     * The data used to update GmVariantArticleData.
+     */
+    data: XOR<GmVariantArticleDataUpdateManyMutationInput, GmVariantArticleDataUncheckedUpdateManyInput>
+    /**
+     * Filter which GmVariantArticleData to update
+     */
+    where?: GmVariantArticleDataWhereInput
+    /**
+     * Limit how many GmVariantArticleData to update.
+     */
+    limit?: number
+  }
+
+  /**
+   * GmVariantArticleData upsert
+   */
+  export type GmVariantArticleDataUpsertArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the GmVariantArticleData
+     */
+    select?: GmVariantArticleDataSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the GmVariantArticleData
+     */
+    omit?: GmVariantArticleDataOmit<ExtArgs> | null
+    /**
+     * The filter to search for the GmVariantArticleData to update in case it exists.
+     */
+    where: GmVariantArticleDataWhereUniqueInput
+    /**
+     * In case the GmVariantArticleData found by the `where` argument doesn't exist, create a new GmVariantArticleData with this data.
+     */
+    create: XOR<GmVariantArticleDataCreateInput, GmVariantArticleDataUncheckedCreateInput>
+    /**
+     * In case the GmVariantArticleData was found with the provided `where` argument, update it with this data.
+     */
+    update: XOR<GmVariantArticleDataUpdateInput, GmVariantArticleDataUncheckedUpdateInput>
+  }
+
+  /**
+   * GmVariantArticleData delete
+   */
+  export type GmVariantArticleDataDeleteArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the GmVariantArticleData
+     */
+    select?: GmVariantArticleDataSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the GmVariantArticleData
+     */
+    omit?: GmVariantArticleDataOmit<ExtArgs> | null
+    /**
+     * Filter which GmVariantArticleData to delete.
+     */
+    where: GmVariantArticleDataWhereUniqueInput
+  }
+
+  /**
+   * GmVariantArticleData deleteMany
+   */
+  export type GmVariantArticleDataDeleteManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Filter which GmVariantArticleData to delete
+     */
+    where?: GmVariantArticleDataWhereInput
+    /**
+     * Limit how many GmVariantArticleData to delete.
+     */
+    limit?: number
+  }
+
+  /**
+   * GmVariantArticleData without action
+   */
+  export type GmVariantArticleDataDefaultArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the GmVariantArticleData
+     */
+    select?: GmVariantArticleDataSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the GmVariantArticleData
+     */
+    omit?: GmVariantArticleDataOmit<ExtArgs> | null
   }
 
 
@@ -76805,6 +79641,42 @@ export namespace Prisma {
   export type FabricRawDataScalarFieldEnum = (typeof FabricRawDataScalarFieldEnum)[keyof typeof FabricRawDataScalarFieldEnum]
 
 
+  export const GmRawDataScalarFieldEnum: {
+    id: 'id',
+    presentationNo: 'presentationNo',
+    uniqueKey: 'uniqueKey',
+    vendorCode: 'vendorCode',
+    vendorName: 'vendorName',
+    vendorCity: 'vendorCity',
+    division: 'division',
+    subDivision: 'subDivision',
+    majorCategory: 'majorCategory',
+    presentationsType: 'presentationsType',
+    designNumber: 'designNumber',
+    articleNumber: 'articleNumber',
+    fabric: 'fabric',
+    noOfColors: 'noOfColors',
+    price: 'price',
+    imageUrl: 'imageUrl',
+    source: 'source',
+    season: 'season',
+    garmentWeight: 'garmentWeight',
+    availableQty: 'availableQty',
+    approvedBy: 'approvedBy',
+    notes: 'notes',
+    status: 'status',
+    errorMessage: 'errorMessage',
+    extractedAt: 'extractedAt',
+    flatId: 'flatId',
+    lockedUntil: 'lockedUntil',
+    presentationReceivedDate: 'presentationReceivedDate',
+    createdAt: 'createdAt',
+    updatedAt: 'updatedAt'
+  };
+
+  export type GmRawDataScalarFieldEnum = (typeof GmRawDataScalarFieldEnum)[keyof typeof GmRawDataScalarFieldEnum]
+
+
   export const SrmSyncRunScalarFieldEnum: {
     id: 'id',
     triggeredBy: 'triggeredBy',
@@ -77155,6 +80027,36 @@ export namespace Prisma {
   };
 
   export type GmArticleDataScalarFieldEnum = (typeof GmArticleDataScalarFieldEnum)[keyof typeof GmArticleDataScalarFieldEnum]
+
+
+  export const GmVariantArticleDataScalarFieldEnum: {
+    id: 'id',
+    genericArticleId: 'genericArticleId',
+    genericArticleNumber: 'genericArticleNumber',
+    variantColor: 'variantColor',
+    variantSize: 'variantSize',
+    variantArticleNumber: 'variantArticleNumber',
+    division: 'division',
+    subDivision: 'subDivision',
+    majorCategory: 'majorCategory',
+    mcDescription: 'mcDescription',
+    vendorName: 'vendorName',
+    vendorCode: 'vendorCode',
+    designNumber: 'designNumber',
+    mrp: 'mrp',
+    rate: 'rate',
+    approvalStatus: 'approvalStatus',
+    approvedAt: 'approvedAt',
+    approvedBy: 'approvedBy',
+    sapSyncStatus: 'sapSyncStatus',
+    sapSyncMessage: 'sapSyncMessage',
+    imageUrl: 'imageUrl',
+    userName: 'userName',
+    createdAt: 'createdAt',
+    updatedAt: 'updatedAt'
+  };
+
+  export type GmVariantArticleDataScalarFieldEnum = (typeof GmVariantArticleDataScalarFieldEnum)[keyof typeof GmVariantArticleDataScalarFieldEnum]
 
 
   export const FabricVariantArticleDataScalarFieldEnum: {
@@ -78097,6 +80999,32 @@ export namespace Prisma {
   export type FabricRawDataOrderByRelevanceFieldEnum = (typeof FabricRawDataOrderByRelevanceFieldEnum)[keyof typeof FabricRawDataOrderByRelevanceFieldEnum]
 
 
+  export const GmRawDataOrderByRelevanceFieldEnum: {
+    id: 'id',
+    presentationNo: 'presentationNo',
+    uniqueKey: 'uniqueKey',
+    vendorCode: 'vendorCode',
+    vendorName: 'vendorName',
+    vendorCity: 'vendorCity',
+    division: 'division',
+    subDivision: 'subDivision',
+    majorCategory: 'majorCategory',
+    presentationsType: 'presentationsType',
+    designNumber: 'designNumber',
+    articleNumber: 'articleNumber',
+    fabric: 'fabric',
+    imageUrl: 'imageUrl',
+    source: 'source',
+    season: 'season',
+    approvedBy: 'approvedBy',
+    notes: 'notes',
+    errorMessage: 'errorMessage',
+    flatId: 'flatId'
+  };
+
+  export type GmRawDataOrderByRelevanceFieldEnum = (typeof GmRawDataOrderByRelevanceFieldEnum)[keyof typeof GmRawDataOrderByRelevanceFieldEnum]
+
+
   export const SrmSyncRunOrderByRelevanceFieldEnum: {
     id: 'id',
     triggeredBy: 'triggeredBy',
@@ -78367,6 +81295,30 @@ export namespace Prisma {
   };
 
   export type GmArticleDataOrderByRelevanceFieldEnum = (typeof GmArticleDataOrderByRelevanceFieldEnum)[keyof typeof GmArticleDataOrderByRelevanceFieldEnum]
+
+
+  export const GmVariantArticleDataOrderByRelevanceFieldEnum: {
+    id: 'id',
+    genericArticleId: 'genericArticleId',
+    genericArticleNumber: 'genericArticleNumber',
+    variantColor: 'variantColor',
+    variantSize: 'variantSize',
+    variantArticleNumber: 'variantArticleNumber',
+    division: 'division',
+    subDivision: 'subDivision',
+    majorCategory: 'majorCategory',
+    mcDescription: 'mcDescription',
+    vendorName: 'vendorName',
+    vendorCode: 'vendorCode',
+    designNumber: 'designNumber',
+    approvalStatus: 'approvalStatus',
+    sapSyncStatus: 'sapSyncStatus',
+    sapSyncMessage: 'sapSyncMessage',
+    imageUrl: 'imageUrl',
+    userName: 'userName'
+  };
+
+  export type GmVariantArticleDataOrderByRelevanceFieldEnum = (typeof GmVariantArticleDataOrderByRelevanceFieldEnum)[keyof typeof GmVariantArticleDataOrderByRelevanceFieldEnum]
 
 
   export const FabricVariantArticleDataOrderByRelevanceFieldEnum: {
@@ -82814,6 +85766,186 @@ export namespace Prisma {
     updatedAt?: DateTimeWithAggregatesFilter<"FabricRawData"> | Date | string
   }
 
+  export type GmRawDataWhereInput = {
+    AND?: GmRawDataWhereInput | GmRawDataWhereInput[]
+    OR?: GmRawDataWhereInput[]
+    NOT?: GmRawDataWhereInput | GmRawDataWhereInput[]
+    id?: StringFilter<"GmRawData"> | string
+    presentationNo?: StringFilter<"GmRawData"> | string
+    uniqueKey?: StringFilter<"GmRawData"> | string
+    vendorCode?: StringNullableFilter<"GmRawData"> | string | null
+    vendorName?: StringNullableFilter<"GmRawData"> | string | null
+    vendorCity?: StringNullableFilter<"GmRawData"> | string | null
+    division?: StringNullableFilter<"GmRawData"> | string | null
+    subDivision?: StringNullableFilter<"GmRawData"> | string | null
+    majorCategory?: StringNullableFilter<"GmRawData"> | string | null
+    presentationsType?: StringNullableFilter<"GmRawData"> | string | null
+    designNumber?: StringNullableFilter<"GmRawData"> | string | null
+    articleNumber?: StringNullableFilter<"GmRawData"> | string | null
+    fabric?: StringNullableFilter<"GmRawData"> | string | null
+    noOfColors?: IntNullableFilter<"GmRawData"> | number | null
+    price?: DecimalNullableFilter<"GmRawData"> | Decimal | DecimalJsLike | number | string | null
+    imageUrl?: StringNullableFilter<"GmRawData"> | string | null
+    source?: StringNullableFilter<"GmRawData"> | string | null
+    season?: StringNullableFilter<"GmRawData"> | string | null
+    garmentWeight?: DecimalNullableFilter<"GmRawData"> | Decimal | DecimalJsLike | number | string | null
+    availableQty?: DecimalNullableFilter<"GmRawData"> | Decimal | DecimalJsLike | number | string | null
+    approvedBy?: StringNullableFilter<"GmRawData"> | string | null
+    notes?: StringNullableFilter<"GmRawData"> | string | null
+    status?: EnumRawArticleStatusFilter<"GmRawData"> | $Enums.RawArticleStatus
+    errorMessage?: StringNullableFilter<"GmRawData"> | string | null
+    extractedAt?: DateTimeNullableFilter<"GmRawData"> | Date | string | null
+    flatId?: StringNullableFilter<"GmRawData"> | string | null
+    lockedUntil?: DateTimeNullableFilter<"GmRawData"> | Date | string | null
+    presentationReceivedDate?: DateTimeNullableFilter<"GmRawData"> | Date | string | null
+    createdAt?: DateTimeFilter<"GmRawData"> | Date | string
+    updatedAt?: DateTimeFilter<"GmRawData"> | Date | string
+  }
+
+  export type GmRawDataOrderByWithRelationInput = {
+    id?: SortOrder
+    presentationNo?: SortOrder
+    uniqueKey?: SortOrder
+    vendorCode?: SortOrderInput | SortOrder
+    vendorName?: SortOrderInput | SortOrder
+    vendorCity?: SortOrderInput | SortOrder
+    division?: SortOrderInput | SortOrder
+    subDivision?: SortOrderInput | SortOrder
+    majorCategory?: SortOrderInput | SortOrder
+    presentationsType?: SortOrderInput | SortOrder
+    designNumber?: SortOrderInput | SortOrder
+    articleNumber?: SortOrderInput | SortOrder
+    fabric?: SortOrderInput | SortOrder
+    noOfColors?: SortOrderInput | SortOrder
+    price?: SortOrderInput | SortOrder
+    imageUrl?: SortOrderInput | SortOrder
+    source?: SortOrderInput | SortOrder
+    season?: SortOrderInput | SortOrder
+    garmentWeight?: SortOrderInput | SortOrder
+    availableQty?: SortOrderInput | SortOrder
+    approvedBy?: SortOrderInput | SortOrder
+    notes?: SortOrderInput | SortOrder
+    status?: SortOrder
+    errorMessage?: SortOrderInput | SortOrder
+    extractedAt?: SortOrderInput | SortOrder
+    flatId?: SortOrderInput | SortOrder
+    lockedUntil?: SortOrderInput | SortOrder
+    presentationReceivedDate?: SortOrderInput | SortOrder
+    createdAt?: SortOrder
+    updatedAt?: SortOrder
+    _relevance?: GmRawDataOrderByRelevanceInput
+  }
+
+  export type GmRawDataWhereUniqueInput = Prisma.AtLeast<{
+    id?: string
+    uniqueKey?: string
+    AND?: GmRawDataWhereInput | GmRawDataWhereInput[]
+    OR?: GmRawDataWhereInput[]
+    NOT?: GmRawDataWhereInput | GmRawDataWhereInput[]
+    presentationNo?: StringFilter<"GmRawData"> | string
+    vendorCode?: StringNullableFilter<"GmRawData"> | string | null
+    vendorName?: StringNullableFilter<"GmRawData"> | string | null
+    vendorCity?: StringNullableFilter<"GmRawData"> | string | null
+    division?: StringNullableFilter<"GmRawData"> | string | null
+    subDivision?: StringNullableFilter<"GmRawData"> | string | null
+    majorCategory?: StringNullableFilter<"GmRawData"> | string | null
+    presentationsType?: StringNullableFilter<"GmRawData"> | string | null
+    designNumber?: StringNullableFilter<"GmRawData"> | string | null
+    articleNumber?: StringNullableFilter<"GmRawData"> | string | null
+    fabric?: StringNullableFilter<"GmRawData"> | string | null
+    noOfColors?: IntNullableFilter<"GmRawData"> | number | null
+    price?: DecimalNullableFilter<"GmRawData"> | Decimal | DecimalJsLike | number | string | null
+    imageUrl?: StringNullableFilter<"GmRawData"> | string | null
+    source?: StringNullableFilter<"GmRawData"> | string | null
+    season?: StringNullableFilter<"GmRawData"> | string | null
+    garmentWeight?: DecimalNullableFilter<"GmRawData"> | Decimal | DecimalJsLike | number | string | null
+    availableQty?: DecimalNullableFilter<"GmRawData"> | Decimal | DecimalJsLike | number | string | null
+    approvedBy?: StringNullableFilter<"GmRawData"> | string | null
+    notes?: StringNullableFilter<"GmRawData"> | string | null
+    status?: EnumRawArticleStatusFilter<"GmRawData"> | $Enums.RawArticleStatus
+    errorMessage?: StringNullableFilter<"GmRawData"> | string | null
+    extractedAt?: DateTimeNullableFilter<"GmRawData"> | Date | string | null
+    flatId?: StringNullableFilter<"GmRawData"> | string | null
+    lockedUntil?: DateTimeNullableFilter<"GmRawData"> | Date | string | null
+    presentationReceivedDate?: DateTimeNullableFilter<"GmRawData"> | Date | string | null
+    createdAt?: DateTimeFilter<"GmRawData"> | Date | string
+    updatedAt?: DateTimeFilter<"GmRawData"> | Date | string
+  }, "id" | "uniqueKey">
+
+  export type GmRawDataOrderByWithAggregationInput = {
+    id?: SortOrder
+    presentationNo?: SortOrder
+    uniqueKey?: SortOrder
+    vendorCode?: SortOrderInput | SortOrder
+    vendorName?: SortOrderInput | SortOrder
+    vendorCity?: SortOrderInput | SortOrder
+    division?: SortOrderInput | SortOrder
+    subDivision?: SortOrderInput | SortOrder
+    majorCategory?: SortOrderInput | SortOrder
+    presentationsType?: SortOrderInput | SortOrder
+    designNumber?: SortOrderInput | SortOrder
+    articleNumber?: SortOrderInput | SortOrder
+    fabric?: SortOrderInput | SortOrder
+    noOfColors?: SortOrderInput | SortOrder
+    price?: SortOrderInput | SortOrder
+    imageUrl?: SortOrderInput | SortOrder
+    source?: SortOrderInput | SortOrder
+    season?: SortOrderInput | SortOrder
+    garmentWeight?: SortOrderInput | SortOrder
+    availableQty?: SortOrderInput | SortOrder
+    approvedBy?: SortOrderInput | SortOrder
+    notes?: SortOrderInput | SortOrder
+    status?: SortOrder
+    errorMessage?: SortOrderInput | SortOrder
+    extractedAt?: SortOrderInput | SortOrder
+    flatId?: SortOrderInput | SortOrder
+    lockedUntil?: SortOrderInput | SortOrder
+    presentationReceivedDate?: SortOrderInput | SortOrder
+    createdAt?: SortOrder
+    updatedAt?: SortOrder
+    _count?: GmRawDataCountOrderByAggregateInput
+    _avg?: GmRawDataAvgOrderByAggregateInput
+    _max?: GmRawDataMaxOrderByAggregateInput
+    _min?: GmRawDataMinOrderByAggregateInput
+    _sum?: GmRawDataSumOrderByAggregateInput
+  }
+
+  export type GmRawDataScalarWhereWithAggregatesInput = {
+    AND?: GmRawDataScalarWhereWithAggregatesInput | GmRawDataScalarWhereWithAggregatesInput[]
+    OR?: GmRawDataScalarWhereWithAggregatesInput[]
+    NOT?: GmRawDataScalarWhereWithAggregatesInput | GmRawDataScalarWhereWithAggregatesInput[]
+    id?: StringWithAggregatesFilter<"GmRawData"> | string
+    presentationNo?: StringWithAggregatesFilter<"GmRawData"> | string
+    uniqueKey?: StringWithAggregatesFilter<"GmRawData"> | string
+    vendorCode?: StringNullableWithAggregatesFilter<"GmRawData"> | string | null
+    vendorName?: StringNullableWithAggregatesFilter<"GmRawData"> | string | null
+    vendorCity?: StringNullableWithAggregatesFilter<"GmRawData"> | string | null
+    division?: StringNullableWithAggregatesFilter<"GmRawData"> | string | null
+    subDivision?: StringNullableWithAggregatesFilter<"GmRawData"> | string | null
+    majorCategory?: StringNullableWithAggregatesFilter<"GmRawData"> | string | null
+    presentationsType?: StringNullableWithAggregatesFilter<"GmRawData"> | string | null
+    designNumber?: StringNullableWithAggregatesFilter<"GmRawData"> | string | null
+    articleNumber?: StringNullableWithAggregatesFilter<"GmRawData"> | string | null
+    fabric?: StringNullableWithAggregatesFilter<"GmRawData"> | string | null
+    noOfColors?: IntNullableWithAggregatesFilter<"GmRawData"> | number | null
+    price?: DecimalNullableWithAggregatesFilter<"GmRawData"> | Decimal | DecimalJsLike | number | string | null
+    imageUrl?: StringNullableWithAggregatesFilter<"GmRawData"> | string | null
+    source?: StringNullableWithAggregatesFilter<"GmRawData"> | string | null
+    season?: StringNullableWithAggregatesFilter<"GmRawData"> | string | null
+    garmentWeight?: DecimalNullableWithAggregatesFilter<"GmRawData"> | Decimal | DecimalJsLike | number | string | null
+    availableQty?: DecimalNullableWithAggregatesFilter<"GmRawData"> | Decimal | DecimalJsLike | number | string | null
+    approvedBy?: StringNullableWithAggregatesFilter<"GmRawData"> | string | null
+    notes?: StringNullableWithAggregatesFilter<"GmRawData"> | string | null
+    status?: EnumRawArticleStatusWithAggregatesFilter<"GmRawData"> | $Enums.RawArticleStatus
+    errorMessage?: StringNullableWithAggregatesFilter<"GmRawData"> | string | null
+    extractedAt?: DateTimeNullableWithAggregatesFilter<"GmRawData"> | Date | string | null
+    flatId?: StringNullableWithAggregatesFilter<"GmRawData"> | string | null
+    lockedUntil?: DateTimeNullableWithAggregatesFilter<"GmRawData"> | Date | string | null
+    presentationReceivedDate?: DateTimeNullableWithAggregatesFilter<"GmRawData"> | Date | string | null
+    createdAt?: DateTimeWithAggregatesFilter<"GmRawData"> | Date | string
+    updatedAt?: DateTimeWithAggregatesFilter<"GmRawData"> | Date | string
+  }
+
   export type SrmSyncRunWhereInput = {
     AND?: SrmSyncRunWhereInput | SrmSyncRunWhereInput[]
     OR?: SrmSyncRunWhereInput[]
@@ -84588,6 +87720,156 @@ export namespace Prisma {
     userName?: StringNullableWithAggregatesFilter<"GmArticleData"> | string | null
     createdAt?: DateTimeWithAggregatesFilter<"GmArticleData"> | Date | string
     updatedAt?: DateTimeWithAggregatesFilter<"GmArticleData"> | Date | string
+  }
+
+  export type GmVariantArticleDataWhereInput = {
+    AND?: GmVariantArticleDataWhereInput | GmVariantArticleDataWhereInput[]
+    OR?: GmVariantArticleDataWhereInput[]
+    NOT?: GmVariantArticleDataWhereInput | GmVariantArticleDataWhereInput[]
+    id?: StringFilter<"GmVariantArticleData"> | string
+    genericArticleId?: StringNullableFilter<"GmVariantArticleData"> | string | null
+    genericArticleNumber?: StringNullableFilter<"GmVariantArticleData"> | string | null
+    variantColor?: StringNullableFilter<"GmVariantArticleData"> | string | null
+    variantSize?: StringNullableFilter<"GmVariantArticleData"> | string | null
+    variantArticleNumber?: StringNullableFilter<"GmVariantArticleData"> | string | null
+    division?: StringNullableFilter<"GmVariantArticleData"> | string | null
+    subDivision?: StringNullableFilter<"GmVariantArticleData"> | string | null
+    majorCategory?: StringNullableFilter<"GmVariantArticleData"> | string | null
+    mcDescription?: StringNullableFilter<"GmVariantArticleData"> | string | null
+    vendorName?: StringNullableFilter<"GmVariantArticleData"> | string | null
+    vendorCode?: StringNullableFilter<"GmVariantArticleData"> | string | null
+    designNumber?: StringNullableFilter<"GmVariantArticleData"> | string | null
+    mrp?: DecimalNullableFilter<"GmVariantArticleData"> | Decimal | DecimalJsLike | number | string | null
+    rate?: DecimalNullableFilter<"GmVariantArticleData"> | Decimal | DecimalJsLike | number | string | null
+    approvalStatus?: StringFilter<"GmVariantArticleData"> | string
+    approvedAt?: DateTimeNullableFilter<"GmVariantArticleData"> | Date | string | null
+    approvedBy?: IntNullableFilter<"GmVariantArticleData"> | number | null
+    sapSyncStatus?: StringFilter<"GmVariantArticleData"> | string
+    sapSyncMessage?: StringNullableFilter<"GmVariantArticleData"> | string | null
+    imageUrl?: StringNullableFilter<"GmVariantArticleData"> | string | null
+    userName?: StringNullableFilter<"GmVariantArticleData"> | string | null
+    createdAt?: DateTimeFilter<"GmVariantArticleData"> | Date | string
+    updatedAt?: DateTimeFilter<"GmVariantArticleData"> | Date | string
+  }
+
+  export type GmVariantArticleDataOrderByWithRelationInput = {
+    id?: SortOrder
+    genericArticleId?: SortOrderInput | SortOrder
+    genericArticleNumber?: SortOrderInput | SortOrder
+    variantColor?: SortOrderInput | SortOrder
+    variantSize?: SortOrderInput | SortOrder
+    variantArticleNumber?: SortOrderInput | SortOrder
+    division?: SortOrderInput | SortOrder
+    subDivision?: SortOrderInput | SortOrder
+    majorCategory?: SortOrderInput | SortOrder
+    mcDescription?: SortOrderInput | SortOrder
+    vendorName?: SortOrderInput | SortOrder
+    vendorCode?: SortOrderInput | SortOrder
+    designNumber?: SortOrderInput | SortOrder
+    mrp?: SortOrderInput | SortOrder
+    rate?: SortOrderInput | SortOrder
+    approvalStatus?: SortOrder
+    approvedAt?: SortOrderInput | SortOrder
+    approvedBy?: SortOrderInput | SortOrder
+    sapSyncStatus?: SortOrder
+    sapSyncMessage?: SortOrderInput | SortOrder
+    imageUrl?: SortOrderInput | SortOrder
+    userName?: SortOrderInput | SortOrder
+    createdAt?: SortOrder
+    updatedAt?: SortOrder
+    _relevance?: GmVariantArticleDataOrderByRelevanceInput
+  }
+
+  export type GmVariantArticleDataWhereUniqueInput = Prisma.AtLeast<{
+    id?: string
+    AND?: GmVariantArticleDataWhereInput | GmVariantArticleDataWhereInput[]
+    OR?: GmVariantArticleDataWhereInput[]
+    NOT?: GmVariantArticleDataWhereInput | GmVariantArticleDataWhereInput[]
+    genericArticleId?: StringNullableFilter<"GmVariantArticleData"> | string | null
+    genericArticleNumber?: StringNullableFilter<"GmVariantArticleData"> | string | null
+    variantColor?: StringNullableFilter<"GmVariantArticleData"> | string | null
+    variantSize?: StringNullableFilter<"GmVariantArticleData"> | string | null
+    variantArticleNumber?: StringNullableFilter<"GmVariantArticleData"> | string | null
+    division?: StringNullableFilter<"GmVariantArticleData"> | string | null
+    subDivision?: StringNullableFilter<"GmVariantArticleData"> | string | null
+    majorCategory?: StringNullableFilter<"GmVariantArticleData"> | string | null
+    mcDescription?: StringNullableFilter<"GmVariantArticleData"> | string | null
+    vendorName?: StringNullableFilter<"GmVariantArticleData"> | string | null
+    vendorCode?: StringNullableFilter<"GmVariantArticleData"> | string | null
+    designNumber?: StringNullableFilter<"GmVariantArticleData"> | string | null
+    mrp?: DecimalNullableFilter<"GmVariantArticleData"> | Decimal | DecimalJsLike | number | string | null
+    rate?: DecimalNullableFilter<"GmVariantArticleData"> | Decimal | DecimalJsLike | number | string | null
+    approvalStatus?: StringFilter<"GmVariantArticleData"> | string
+    approvedAt?: DateTimeNullableFilter<"GmVariantArticleData"> | Date | string | null
+    approvedBy?: IntNullableFilter<"GmVariantArticleData"> | number | null
+    sapSyncStatus?: StringFilter<"GmVariantArticleData"> | string
+    sapSyncMessage?: StringNullableFilter<"GmVariantArticleData"> | string | null
+    imageUrl?: StringNullableFilter<"GmVariantArticleData"> | string | null
+    userName?: StringNullableFilter<"GmVariantArticleData"> | string | null
+    createdAt?: DateTimeFilter<"GmVariantArticleData"> | Date | string
+    updatedAt?: DateTimeFilter<"GmVariantArticleData"> | Date | string
+  }, "id">
+
+  export type GmVariantArticleDataOrderByWithAggregationInput = {
+    id?: SortOrder
+    genericArticleId?: SortOrderInput | SortOrder
+    genericArticleNumber?: SortOrderInput | SortOrder
+    variantColor?: SortOrderInput | SortOrder
+    variantSize?: SortOrderInput | SortOrder
+    variantArticleNumber?: SortOrderInput | SortOrder
+    division?: SortOrderInput | SortOrder
+    subDivision?: SortOrderInput | SortOrder
+    majorCategory?: SortOrderInput | SortOrder
+    mcDescription?: SortOrderInput | SortOrder
+    vendorName?: SortOrderInput | SortOrder
+    vendorCode?: SortOrderInput | SortOrder
+    designNumber?: SortOrderInput | SortOrder
+    mrp?: SortOrderInput | SortOrder
+    rate?: SortOrderInput | SortOrder
+    approvalStatus?: SortOrder
+    approvedAt?: SortOrderInput | SortOrder
+    approvedBy?: SortOrderInput | SortOrder
+    sapSyncStatus?: SortOrder
+    sapSyncMessage?: SortOrderInput | SortOrder
+    imageUrl?: SortOrderInput | SortOrder
+    userName?: SortOrderInput | SortOrder
+    createdAt?: SortOrder
+    updatedAt?: SortOrder
+    _count?: GmVariantArticleDataCountOrderByAggregateInput
+    _avg?: GmVariantArticleDataAvgOrderByAggregateInput
+    _max?: GmVariantArticleDataMaxOrderByAggregateInput
+    _min?: GmVariantArticleDataMinOrderByAggregateInput
+    _sum?: GmVariantArticleDataSumOrderByAggregateInput
+  }
+
+  export type GmVariantArticleDataScalarWhereWithAggregatesInput = {
+    AND?: GmVariantArticleDataScalarWhereWithAggregatesInput | GmVariantArticleDataScalarWhereWithAggregatesInput[]
+    OR?: GmVariantArticleDataScalarWhereWithAggregatesInput[]
+    NOT?: GmVariantArticleDataScalarWhereWithAggregatesInput | GmVariantArticleDataScalarWhereWithAggregatesInput[]
+    id?: StringWithAggregatesFilter<"GmVariantArticleData"> | string
+    genericArticleId?: StringNullableWithAggregatesFilter<"GmVariantArticleData"> | string | null
+    genericArticleNumber?: StringNullableWithAggregatesFilter<"GmVariantArticleData"> | string | null
+    variantColor?: StringNullableWithAggregatesFilter<"GmVariantArticleData"> | string | null
+    variantSize?: StringNullableWithAggregatesFilter<"GmVariantArticleData"> | string | null
+    variantArticleNumber?: StringNullableWithAggregatesFilter<"GmVariantArticleData"> | string | null
+    division?: StringNullableWithAggregatesFilter<"GmVariantArticleData"> | string | null
+    subDivision?: StringNullableWithAggregatesFilter<"GmVariantArticleData"> | string | null
+    majorCategory?: StringNullableWithAggregatesFilter<"GmVariantArticleData"> | string | null
+    mcDescription?: StringNullableWithAggregatesFilter<"GmVariantArticleData"> | string | null
+    vendorName?: StringNullableWithAggregatesFilter<"GmVariantArticleData"> | string | null
+    vendorCode?: StringNullableWithAggregatesFilter<"GmVariantArticleData"> | string | null
+    designNumber?: StringNullableWithAggregatesFilter<"GmVariantArticleData"> | string | null
+    mrp?: DecimalNullableWithAggregatesFilter<"GmVariantArticleData"> | Decimal | DecimalJsLike | number | string | null
+    rate?: DecimalNullableWithAggregatesFilter<"GmVariantArticleData"> | Decimal | DecimalJsLike | number | string | null
+    approvalStatus?: StringWithAggregatesFilter<"GmVariantArticleData"> | string
+    approvedAt?: DateTimeNullableWithAggregatesFilter<"GmVariantArticleData"> | Date | string | null
+    approvedBy?: IntNullableWithAggregatesFilter<"GmVariantArticleData"> | number | null
+    sapSyncStatus?: StringWithAggregatesFilter<"GmVariantArticleData"> | string
+    sapSyncMessage?: StringNullableWithAggregatesFilter<"GmVariantArticleData"> | string | null
+    imageUrl?: StringNullableWithAggregatesFilter<"GmVariantArticleData"> | string | null
+    userName?: StringNullableWithAggregatesFilter<"GmVariantArticleData"> | string | null
+    createdAt?: DateTimeWithAggregatesFilter<"GmVariantArticleData"> | Date | string
+    updatedAt?: DateTimeWithAggregatesFilter<"GmVariantArticleData"> | Date | string
   }
 
   export type FabricVariantArticleDataWhereInput = {
@@ -91042,6 +94324,237 @@ export namespace Prisma {
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
   }
 
+  export type GmRawDataCreateInput = {
+    id?: string
+    presentationNo: string
+    uniqueKey: string
+    vendorCode?: string | null
+    vendorName?: string | null
+    vendorCity?: string | null
+    division?: string | null
+    subDivision?: string | null
+    majorCategory?: string | null
+    presentationsType?: string | null
+    designNumber?: string | null
+    articleNumber?: string | null
+    fabric?: string | null
+    noOfColors?: number | null
+    price?: Decimal | DecimalJsLike | number | string | null
+    imageUrl?: string | null
+    source?: string | null
+    season?: string | null
+    garmentWeight?: Decimal | DecimalJsLike | number | string | null
+    availableQty?: Decimal | DecimalJsLike | number | string | null
+    approvedBy?: string | null
+    notes?: string | null
+    status?: $Enums.RawArticleStatus
+    errorMessage?: string | null
+    extractedAt?: Date | string | null
+    flatId?: string | null
+    lockedUntil?: Date | string | null
+    presentationReceivedDate?: Date | string | null
+    createdAt?: Date | string
+    updatedAt?: Date | string
+  }
+
+  export type GmRawDataUncheckedCreateInput = {
+    id?: string
+    presentationNo: string
+    uniqueKey: string
+    vendorCode?: string | null
+    vendorName?: string | null
+    vendorCity?: string | null
+    division?: string | null
+    subDivision?: string | null
+    majorCategory?: string | null
+    presentationsType?: string | null
+    designNumber?: string | null
+    articleNumber?: string | null
+    fabric?: string | null
+    noOfColors?: number | null
+    price?: Decimal | DecimalJsLike | number | string | null
+    imageUrl?: string | null
+    source?: string | null
+    season?: string | null
+    garmentWeight?: Decimal | DecimalJsLike | number | string | null
+    availableQty?: Decimal | DecimalJsLike | number | string | null
+    approvedBy?: string | null
+    notes?: string | null
+    status?: $Enums.RawArticleStatus
+    errorMessage?: string | null
+    extractedAt?: Date | string | null
+    flatId?: string | null
+    lockedUntil?: Date | string | null
+    presentationReceivedDate?: Date | string | null
+    createdAt?: Date | string
+    updatedAt?: Date | string
+  }
+
+  export type GmRawDataUpdateInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    presentationNo?: StringFieldUpdateOperationsInput | string
+    uniqueKey?: StringFieldUpdateOperationsInput | string
+    vendorCode?: NullableStringFieldUpdateOperationsInput | string | null
+    vendorName?: NullableStringFieldUpdateOperationsInput | string | null
+    vendorCity?: NullableStringFieldUpdateOperationsInput | string | null
+    division?: NullableStringFieldUpdateOperationsInput | string | null
+    subDivision?: NullableStringFieldUpdateOperationsInput | string | null
+    majorCategory?: NullableStringFieldUpdateOperationsInput | string | null
+    presentationsType?: NullableStringFieldUpdateOperationsInput | string | null
+    designNumber?: NullableStringFieldUpdateOperationsInput | string | null
+    articleNumber?: NullableStringFieldUpdateOperationsInput | string | null
+    fabric?: NullableStringFieldUpdateOperationsInput | string | null
+    noOfColors?: NullableIntFieldUpdateOperationsInput | number | null
+    price?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    imageUrl?: NullableStringFieldUpdateOperationsInput | string | null
+    source?: NullableStringFieldUpdateOperationsInput | string | null
+    season?: NullableStringFieldUpdateOperationsInput | string | null
+    garmentWeight?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    availableQty?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    approvedBy?: NullableStringFieldUpdateOperationsInput | string | null
+    notes?: NullableStringFieldUpdateOperationsInput | string | null
+    status?: EnumRawArticleStatusFieldUpdateOperationsInput | $Enums.RawArticleStatus
+    errorMessage?: NullableStringFieldUpdateOperationsInput | string | null
+    extractedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    flatId?: NullableStringFieldUpdateOperationsInput | string | null
+    lockedUntil?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    presentationReceivedDate?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+  }
+
+  export type GmRawDataUncheckedUpdateInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    presentationNo?: StringFieldUpdateOperationsInput | string
+    uniqueKey?: StringFieldUpdateOperationsInput | string
+    vendorCode?: NullableStringFieldUpdateOperationsInput | string | null
+    vendorName?: NullableStringFieldUpdateOperationsInput | string | null
+    vendorCity?: NullableStringFieldUpdateOperationsInput | string | null
+    division?: NullableStringFieldUpdateOperationsInput | string | null
+    subDivision?: NullableStringFieldUpdateOperationsInput | string | null
+    majorCategory?: NullableStringFieldUpdateOperationsInput | string | null
+    presentationsType?: NullableStringFieldUpdateOperationsInput | string | null
+    designNumber?: NullableStringFieldUpdateOperationsInput | string | null
+    articleNumber?: NullableStringFieldUpdateOperationsInput | string | null
+    fabric?: NullableStringFieldUpdateOperationsInput | string | null
+    noOfColors?: NullableIntFieldUpdateOperationsInput | number | null
+    price?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    imageUrl?: NullableStringFieldUpdateOperationsInput | string | null
+    source?: NullableStringFieldUpdateOperationsInput | string | null
+    season?: NullableStringFieldUpdateOperationsInput | string | null
+    garmentWeight?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    availableQty?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    approvedBy?: NullableStringFieldUpdateOperationsInput | string | null
+    notes?: NullableStringFieldUpdateOperationsInput | string | null
+    status?: EnumRawArticleStatusFieldUpdateOperationsInput | $Enums.RawArticleStatus
+    errorMessage?: NullableStringFieldUpdateOperationsInput | string | null
+    extractedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    flatId?: NullableStringFieldUpdateOperationsInput | string | null
+    lockedUntil?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    presentationReceivedDate?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+  }
+
+  export type GmRawDataCreateManyInput = {
+    id?: string
+    presentationNo: string
+    uniqueKey: string
+    vendorCode?: string | null
+    vendorName?: string | null
+    vendorCity?: string | null
+    division?: string | null
+    subDivision?: string | null
+    majorCategory?: string | null
+    presentationsType?: string | null
+    designNumber?: string | null
+    articleNumber?: string | null
+    fabric?: string | null
+    noOfColors?: number | null
+    price?: Decimal | DecimalJsLike | number | string | null
+    imageUrl?: string | null
+    source?: string | null
+    season?: string | null
+    garmentWeight?: Decimal | DecimalJsLike | number | string | null
+    availableQty?: Decimal | DecimalJsLike | number | string | null
+    approvedBy?: string | null
+    notes?: string | null
+    status?: $Enums.RawArticleStatus
+    errorMessage?: string | null
+    extractedAt?: Date | string | null
+    flatId?: string | null
+    lockedUntil?: Date | string | null
+    presentationReceivedDate?: Date | string | null
+    createdAt?: Date | string
+    updatedAt?: Date | string
+  }
+
+  export type GmRawDataUpdateManyMutationInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    presentationNo?: StringFieldUpdateOperationsInput | string
+    uniqueKey?: StringFieldUpdateOperationsInput | string
+    vendorCode?: NullableStringFieldUpdateOperationsInput | string | null
+    vendorName?: NullableStringFieldUpdateOperationsInput | string | null
+    vendorCity?: NullableStringFieldUpdateOperationsInput | string | null
+    division?: NullableStringFieldUpdateOperationsInput | string | null
+    subDivision?: NullableStringFieldUpdateOperationsInput | string | null
+    majorCategory?: NullableStringFieldUpdateOperationsInput | string | null
+    presentationsType?: NullableStringFieldUpdateOperationsInput | string | null
+    designNumber?: NullableStringFieldUpdateOperationsInput | string | null
+    articleNumber?: NullableStringFieldUpdateOperationsInput | string | null
+    fabric?: NullableStringFieldUpdateOperationsInput | string | null
+    noOfColors?: NullableIntFieldUpdateOperationsInput | number | null
+    price?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    imageUrl?: NullableStringFieldUpdateOperationsInput | string | null
+    source?: NullableStringFieldUpdateOperationsInput | string | null
+    season?: NullableStringFieldUpdateOperationsInput | string | null
+    garmentWeight?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    availableQty?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    approvedBy?: NullableStringFieldUpdateOperationsInput | string | null
+    notes?: NullableStringFieldUpdateOperationsInput | string | null
+    status?: EnumRawArticleStatusFieldUpdateOperationsInput | $Enums.RawArticleStatus
+    errorMessage?: NullableStringFieldUpdateOperationsInput | string | null
+    extractedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    flatId?: NullableStringFieldUpdateOperationsInput | string | null
+    lockedUntil?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    presentationReceivedDate?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+  }
+
+  export type GmRawDataUncheckedUpdateManyInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    presentationNo?: StringFieldUpdateOperationsInput | string
+    uniqueKey?: StringFieldUpdateOperationsInput | string
+    vendorCode?: NullableStringFieldUpdateOperationsInput | string | null
+    vendorName?: NullableStringFieldUpdateOperationsInput | string | null
+    vendorCity?: NullableStringFieldUpdateOperationsInput | string | null
+    division?: NullableStringFieldUpdateOperationsInput | string | null
+    subDivision?: NullableStringFieldUpdateOperationsInput | string | null
+    majorCategory?: NullableStringFieldUpdateOperationsInput | string | null
+    presentationsType?: NullableStringFieldUpdateOperationsInput | string | null
+    designNumber?: NullableStringFieldUpdateOperationsInput | string | null
+    articleNumber?: NullableStringFieldUpdateOperationsInput | string | null
+    fabric?: NullableStringFieldUpdateOperationsInput | string | null
+    noOfColors?: NullableIntFieldUpdateOperationsInput | number | null
+    price?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    imageUrl?: NullableStringFieldUpdateOperationsInput | string | null
+    source?: NullableStringFieldUpdateOperationsInput | string | null
+    season?: NullableStringFieldUpdateOperationsInput | string | null
+    garmentWeight?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    availableQty?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    approvedBy?: NullableStringFieldUpdateOperationsInput | string | null
+    notes?: NullableStringFieldUpdateOperationsInput | string | null
+    status?: EnumRawArticleStatusFieldUpdateOperationsInput | $Enums.RawArticleStatus
+    errorMessage?: NullableStringFieldUpdateOperationsInput | string | null
+    extractedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    flatId?: NullableStringFieldUpdateOperationsInput | string | null
+    lockedUntil?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    presentationReceivedDate?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+  }
+
   export type SrmSyncRunCreateInput = {
     id?: string
     triggeredBy?: string
@@ -93236,6 +96749,195 @@ export namespace Prisma {
     imageUrl?: NullableStringFieldUpdateOperationsInput | string | null
     gmArticleType?: NullableStringFieldUpdateOperationsInput | string | null
     source?: NullableStringFieldUpdateOperationsInput | string | null
+    userName?: NullableStringFieldUpdateOperationsInput | string | null
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+  }
+
+  export type GmVariantArticleDataCreateInput = {
+    id?: string
+    genericArticleId?: string | null
+    genericArticleNumber?: string | null
+    variantColor?: string | null
+    variantSize?: string | null
+    variantArticleNumber?: string | null
+    division?: string | null
+    subDivision?: string | null
+    majorCategory?: string | null
+    mcDescription?: string | null
+    vendorName?: string | null
+    vendorCode?: string | null
+    designNumber?: string | null
+    mrp?: Decimal | DecimalJsLike | number | string | null
+    rate?: Decimal | DecimalJsLike | number | string | null
+    approvalStatus?: string
+    approvedAt?: Date | string | null
+    approvedBy?: number | null
+    sapSyncStatus?: string
+    sapSyncMessage?: string | null
+    imageUrl?: string | null
+    userName?: string | null
+    createdAt?: Date | string
+    updatedAt?: Date | string
+  }
+
+  export type GmVariantArticleDataUncheckedCreateInput = {
+    id?: string
+    genericArticleId?: string | null
+    genericArticleNumber?: string | null
+    variantColor?: string | null
+    variantSize?: string | null
+    variantArticleNumber?: string | null
+    division?: string | null
+    subDivision?: string | null
+    majorCategory?: string | null
+    mcDescription?: string | null
+    vendorName?: string | null
+    vendorCode?: string | null
+    designNumber?: string | null
+    mrp?: Decimal | DecimalJsLike | number | string | null
+    rate?: Decimal | DecimalJsLike | number | string | null
+    approvalStatus?: string
+    approvedAt?: Date | string | null
+    approvedBy?: number | null
+    sapSyncStatus?: string
+    sapSyncMessage?: string | null
+    imageUrl?: string | null
+    userName?: string | null
+    createdAt?: Date | string
+    updatedAt?: Date | string
+  }
+
+  export type GmVariantArticleDataUpdateInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    genericArticleId?: NullableStringFieldUpdateOperationsInput | string | null
+    genericArticleNumber?: NullableStringFieldUpdateOperationsInput | string | null
+    variantColor?: NullableStringFieldUpdateOperationsInput | string | null
+    variantSize?: NullableStringFieldUpdateOperationsInput | string | null
+    variantArticleNumber?: NullableStringFieldUpdateOperationsInput | string | null
+    division?: NullableStringFieldUpdateOperationsInput | string | null
+    subDivision?: NullableStringFieldUpdateOperationsInput | string | null
+    majorCategory?: NullableStringFieldUpdateOperationsInput | string | null
+    mcDescription?: NullableStringFieldUpdateOperationsInput | string | null
+    vendorName?: NullableStringFieldUpdateOperationsInput | string | null
+    vendorCode?: NullableStringFieldUpdateOperationsInput | string | null
+    designNumber?: NullableStringFieldUpdateOperationsInput | string | null
+    mrp?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    rate?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    approvalStatus?: StringFieldUpdateOperationsInput | string
+    approvedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    approvedBy?: NullableIntFieldUpdateOperationsInput | number | null
+    sapSyncStatus?: StringFieldUpdateOperationsInput | string
+    sapSyncMessage?: NullableStringFieldUpdateOperationsInput | string | null
+    imageUrl?: NullableStringFieldUpdateOperationsInput | string | null
+    userName?: NullableStringFieldUpdateOperationsInput | string | null
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+  }
+
+  export type GmVariantArticleDataUncheckedUpdateInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    genericArticleId?: NullableStringFieldUpdateOperationsInput | string | null
+    genericArticleNumber?: NullableStringFieldUpdateOperationsInput | string | null
+    variantColor?: NullableStringFieldUpdateOperationsInput | string | null
+    variantSize?: NullableStringFieldUpdateOperationsInput | string | null
+    variantArticleNumber?: NullableStringFieldUpdateOperationsInput | string | null
+    division?: NullableStringFieldUpdateOperationsInput | string | null
+    subDivision?: NullableStringFieldUpdateOperationsInput | string | null
+    majorCategory?: NullableStringFieldUpdateOperationsInput | string | null
+    mcDescription?: NullableStringFieldUpdateOperationsInput | string | null
+    vendorName?: NullableStringFieldUpdateOperationsInput | string | null
+    vendorCode?: NullableStringFieldUpdateOperationsInput | string | null
+    designNumber?: NullableStringFieldUpdateOperationsInput | string | null
+    mrp?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    rate?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    approvalStatus?: StringFieldUpdateOperationsInput | string
+    approvedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    approvedBy?: NullableIntFieldUpdateOperationsInput | number | null
+    sapSyncStatus?: StringFieldUpdateOperationsInput | string
+    sapSyncMessage?: NullableStringFieldUpdateOperationsInput | string | null
+    imageUrl?: NullableStringFieldUpdateOperationsInput | string | null
+    userName?: NullableStringFieldUpdateOperationsInput | string | null
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+  }
+
+  export type GmVariantArticleDataCreateManyInput = {
+    id?: string
+    genericArticleId?: string | null
+    genericArticleNumber?: string | null
+    variantColor?: string | null
+    variantSize?: string | null
+    variantArticleNumber?: string | null
+    division?: string | null
+    subDivision?: string | null
+    majorCategory?: string | null
+    mcDescription?: string | null
+    vendorName?: string | null
+    vendorCode?: string | null
+    designNumber?: string | null
+    mrp?: Decimal | DecimalJsLike | number | string | null
+    rate?: Decimal | DecimalJsLike | number | string | null
+    approvalStatus?: string
+    approvedAt?: Date | string | null
+    approvedBy?: number | null
+    sapSyncStatus?: string
+    sapSyncMessage?: string | null
+    imageUrl?: string | null
+    userName?: string | null
+    createdAt?: Date | string
+    updatedAt?: Date | string
+  }
+
+  export type GmVariantArticleDataUpdateManyMutationInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    genericArticleId?: NullableStringFieldUpdateOperationsInput | string | null
+    genericArticleNumber?: NullableStringFieldUpdateOperationsInput | string | null
+    variantColor?: NullableStringFieldUpdateOperationsInput | string | null
+    variantSize?: NullableStringFieldUpdateOperationsInput | string | null
+    variantArticleNumber?: NullableStringFieldUpdateOperationsInput | string | null
+    division?: NullableStringFieldUpdateOperationsInput | string | null
+    subDivision?: NullableStringFieldUpdateOperationsInput | string | null
+    majorCategory?: NullableStringFieldUpdateOperationsInput | string | null
+    mcDescription?: NullableStringFieldUpdateOperationsInput | string | null
+    vendorName?: NullableStringFieldUpdateOperationsInput | string | null
+    vendorCode?: NullableStringFieldUpdateOperationsInput | string | null
+    designNumber?: NullableStringFieldUpdateOperationsInput | string | null
+    mrp?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    rate?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    approvalStatus?: StringFieldUpdateOperationsInput | string
+    approvedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    approvedBy?: NullableIntFieldUpdateOperationsInput | number | null
+    sapSyncStatus?: StringFieldUpdateOperationsInput | string
+    sapSyncMessage?: NullableStringFieldUpdateOperationsInput | string | null
+    imageUrl?: NullableStringFieldUpdateOperationsInput | string | null
+    userName?: NullableStringFieldUpdateOperationsInput | string | null
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+  }
+
+  export type GmVariantArticleDataUncheckedUpdateManyInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    genericArticleId?: NullableStringFieldUpdateOperationsInput | string | null
+    genericArticleNumber?: NullableStringFieldUpdateOperationsInput | string | null
+    variantColor?: NullableStringFieldUpdateOperationsInput | string | null
+    variantSize?: NullableStringFieldUpdateOperationsInput | string | null
+    variantArticleNumber?: NullableStringFieldUpdateOperationsInput | string | null
+    division?: NullableStringFieldUpdateOperationsInput | string | null
+    subDivision?: NullableStringFieldUpdateOperationsInput | string | null
+    majorCategory?: NullableStringFieldUpdateOperationsInput | string | null
+    mcDescription?: NullableStringFieldUpdateOperationsInput | string | null
+    vendorName?: NullableStringFieldUpdateOperationsInput | string | null
+    vendorCode?: NullableStringFieldUpdateOperationsInput | string | null
+    designNumber?: NullableStringFieldUpdateOperationsInput | string | null
+    mrp?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    rate?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    approvalStatus?: StringFieldUpdateOperationsInput | string
+    approvedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    approvedBy?: NullableIntFieldUpdateOperationsInput | number | null
+    sapSyncStatus?: StringFieldUpdateOperationsInput | string
+    sapSyncMessage?: NullableStringFieldUpdateOperationsInput | string | null
+    imageUrl?: NullableStringFieldUpdateOperationsInput | string | null
     userName?: NullableStringFieldUpdateOperationsInput | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
@@ -98593,6 +102295,125 @@ export namespace Prisma {
     retryCount?: SortOrder
   }
 
+  export type GmRawDataOrderByRelevanceInput = {
+    fields: GmRawDataOrderByRelevanceFieldEnum | GmRawDataOrderByRelevanceFieldEnum[]
+    sort: SortOrder
+    search: string
+  }
+
+  export type GmRawDataCountOrderByAggregateInput = {
+    id?: SortOrder
+    presentationNo?: SortOrder
+    uniqueKey?: SortOrder
+    vendorCode?: SortOrder
+    vendorName?: SortOrder
+    vendorCity?: SortOrder
+    division?: SortOrder
+    subDivision?: SortOrder
+    majorCategory?: SortOrder
+    presentationsType?: SortOrder
+    designNumber?: SortOrder
+    articleNumber?: SortOrder
+    fabric?: SortOrder
+    noOfColors?: SortOrder
+    price?: SortOrder
+    imageUrl?: SortOrder
+    source?: SortOrder
+    season?: SortOrder
+    garmentWeight?: SortOrder
+    availableQty?: SortOrder
+    approvedBy?: SortOrder
+    notes?: SortOrder
+    status?: SortOrder
+    errorMessage?: SortOrder
+    extractedAt?: SortOrder
+    flatId?: SortOrder
+    lockedUntil?: SortOrder
+    presentationReceivedDate?: SortOrder
+    createdAt?: SortOrder
+    updatedAt?: SortOrder
+  }
+
+  export type GmRawDataAvgOrderByAggregateInput = {
+    noOfColors?: SortOrder
+    price?: SortOrder
+    garmentWeight?: SortOrder
+    availableQty?: SortOrder
+  }
+
+  export type GmRawDataMaxOrderByAggregateInput = {
+    id?: SortOrder
+    presentationNo?: SortOrder
+    uniqueKey?: SortOrder
+    vendorCode?: SortOrder
+    vendorName?: SortOrder
+    vendorCity?: SortOrder
+    division?: SortOrder
+    subDivision?: SortOrder
+    majorCategory?: SortOrder
+    presentationsType?: SortOrder
+    designNumber?: SortOrder
+    articleNumber?: SortOrder
+    fabric?: SortOrder
+    noOfColors?: SortOrder
+    price?: SortOrder
+    imageUrl?: SortOrder
+    source?: SortOrder
+    season?: SortOrder
+    garmentWeight?: SortOrder
+    availableQty?: SortOrder
+    approvedBy?: SortOrder
+    notes?: SortOrder
+    status?: SortOrder
+    errorMessage?: SortOrder
+    extractedAt?: SortOrder
+    flatId?: SortOrder
+    lockedUntil?: SortOrder
+    presentationReceivedDate?: SortOrder
+    createdAt?: SortOrder
+    updatedAt?: SortOrder
+  }
+
+  export type GmRawDataMinOrderByAggregateInput = {
+    id?: SortOrder
+    presentationNo?: SortOrder
+    uniqueKey?: SortOrder
+    vendorCode?: SortOrder
+    vendorName?: SortOrder
+    vendorCity?: SortOrder
+    division?: SortOrder
+    subDivision?: SortOrder
+    majorCategory?: SortOrder
+    presentationsType?: SortOrder
+    designNumber?: SortOrder
+    articleNumber?: SortOrder
+    fabric?: SortOrder
+    noOfColors?: SortOrder
+    price?: SortOrder
+    imageUrl?: SortOrder
+    source?: SortOrder
+    season?: SortOrder
+    garmentWeight?: SortOrder
+    availableQty?: SortOrder
+    approvedBy?: SortOrder
+    notes?: SortOrder
+    status?: SortOrder
+    errorMessage?: SortOrder
+    extractedAt?: SortOrder
+    flatId?: SortOrder
+    lockedUntil?: SortOrder
+    presentationReceivedDate?: SortOrder
+    createdAt?: SortOrder
+    updatedAt?: SortOrder
+  }
+
+  export type GmRawDataSumOrderByAggregateInput = {
+    noOfColors?: SortOrder
+    price?: SortOrder
+    garmentWeight?: SortOrder
+    availableQty?: SortOrder
+  }
+
   export type SrmSyncRunOrderByRelevanceInput = {
     fields: SrmSyncRunOrderByRelevanceFieldEnum | SrmSyncRunOrderByRelevanceFieldEnum[]
     sort: SortOrder
@@ -99870,6 +103691,105 @@ export namespace Prisma {
   export type GmArticleDataSumOrderByAggregateInput = {
     rate?: SortOrder
     mrp?: SortOrder
+    approvedBy?: SortOrder
+  }
+
+  export type GmVariantArticleDataOrderByRelevanceInput = {
+    fields: GmVariantArticleDataOrderByRelevanceFieldEnum | GmVariantArticleDataOrderByRelevanceFieldEnum[]
+    sort: SortOrder
+    search: string
+  }
+
+  export type GmVariantArticleDataCountOrderByAggregateInput = {
+    id?: SortOrder
+    genericArticleId?: SortOrder
+    genericArticleNumber?: SortOrder
+    variantColor?: SortOrder
+    variantSize?: SortOrder
+    variantArticleNumber?: SortOrder
+    division?: SortOrder
+    subDivision?: SortOrder
+    majorCategory?: SortOrder
+    mcDescription?: SortOrder
+    vendorName?: SortOrder
+    vendorCode?: SortOrder
+    designNumber?: SortOrder
+    mrp?: SortOrder
+    rate?: SortOrder
+    approvalStatus?: SortOrder
+    approvedAt?: SortOrder
+    approvedBy?: SortOrder
+    sapSyncStatus?: SortOrder
+    sapSyncMessage?: SortOrder
+    imageUrl?: SortOrder
+    userName?: SortOrder
+    createdAt?: SortOrder
+    updatedAt?: SortOrder
+  }
+
+  export type GmVariantArticleDataAvgOrderByAggregateInput = {
+    mrp?: SortOrder
+    rate?: SortOrder
+    approvedBy?: SortOrder
+  }
+
+  export type GmVariantArticleDataMaxOrderByAggregateInput = {
+    id?: SortOrder
+    genericArticleId?: SortOrder
+    genericArticleNumber?: SortOrder
+    variantColor?: SortOrder
+    variantSize?: SortOrder
+    variantArticleNumber?: SortOrder
+    division?: SortOrder
+    subDivision?: SortOrder
+    majorCategory?: SortOrder
+    mcDescription?: SortOrder
+    vendorName?: SortOrder
+    vendorCode?: SortOrder
+    designNumber?: SortOrder
+    mrp?: SortOrder
+    rate?: SortOrder
+    approvalStatus?: SortOrder
+    approvedAt?: SortOrder
+    approvedBy?: SortOrder
+    sapSyncStatus?: SortOrder
+    sapSyncMessage?: SortOrder
+    imageUrl?: SortOrder
+    userName?: SortOrder
+    createdAt?: SortOrder
+    updatedAt?: SortOrder
+  }
+
+  export type GmVariantArticleDataMinOrderByAggregateInput = {
+    id?: SortOrder
+    genericArticleId?: SortOrder
+    genericArticleNumber?: SortOrder
+    variantColor?: SortOrder
+    variantSize?: SortOrder
+    variantArticleNumber?: SortOrder
+    division?: SortOrder
+    subDivision?: SortOrder
+    majorCategory?: SortOrder
+    mcDescription?: SortOrder
+    vendorName?: SortOrder
+    vendorCode?: SortOrder
+    designNumber?: SortOrder
+    mrp?: SortOrder
+    rate?: SortOrder
+    approvalStatus?: SortOrder
+    approvedAt?: SortOrder
+    approvedBy?: SortOrder
+    sapSyncStatus?: SortOrder
+    sapSyncMessage?: SortOrder
+    imageUrl?: SortOrder
+    userName?: SortOrder
+    createdAt?: SortOrder
+    updatedAt?: SortOrder
+  }
+
+  export type GmVariantArticleDataSumOrderByAggregateInput = {
+    mrp?: SortOrder
+    rate?: SortOrder
     approvedBy?: SortOrder
   }
 

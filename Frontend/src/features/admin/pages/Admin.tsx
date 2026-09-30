@@ -259,6 +259,11 @@ export default function Admin() {
   const [fabricRawRunning, setFabricRawRunning] = useState(false);
   const [fabricRawMessage, setFabricRawMessage] = useState<string | null>(null);
 
+  const [gmRawStatus, setGmRawStatus] = useState<{ PENDING: number; PROCESSING: number; COMPLETED: number; FAILED: number; total: number } | null>(null);
+  const [gmRawStatusLoading, setGmRawStatusLoading] = useState(false);
+  const [gmRawRunning, setGmRawRunning] = useState(false);
+  const [gmRawMessage, setGmRawMessage] = useState<string | null>(null);
+
   // Maj-Cat Grid
   const [majCatGridMeta, setMajCatGridMeta] = useState<MajCatGridMeta | null>(null);
   const [majCatGridStatusLoading, setMajCatGridStatusLoading] = useState(false);
@@ -510,6 +515,49 @@ export default function Admin() {
       message.error(err?.message || 'Failed to start processing');
     } finally {
       setFabricRawRunning(false);
+    }
+  };
+
+  const loadGmRawStatus = useCallback(async () => {
+    setGmRawStatusLoading(true);
+    try {
+      const token = localStorage.getItem('authToken');
+      const res = await fetch(`${APP_CONFIG.api.baseURL}/test-api/gm-raw-pipeline-status`, {
+        headers: token ? { Authorization: `Bearer ${token}` } : {},
+      });
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.error || 'Failed to load GM raw pipeline status');
+      setGmRawStatus(data.data);
+    } catch (err: any) {
+      message.error(err?.message || 'Failed to load GM raw pipeline status');
+    } finally {
+      setGmRawStatusLoading(false);
+    }
+  }, []);
+
+  const triggerGmRawProcessing = async () => {
+    setGmRawRunning(true);
+    setGmRawMessage(null);
+    try {
+      const token = localStorage.getItem('authToken');
+      const res = await fetch(`${APP_CONFIG.api.baseURL}/test-api/run-gm-raw-processing`, {
+        method: 'POST',
+        headers: token ? { Authorization: `Bearer ${token}` } : {},
+      });
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.error || 'Failed to start processing');
+      setGmRawMessage(data.message);
+      message.success(data.message);
+      let polls = 0;
+      const pollInterval = setInterval(async () => {
+        polls++;
+        await loadGmRawStatus();
+        if (polls >= 12) clearInterval(pollInterval);
+      }, 5000);
+    } catch (err: any) {
+      message.error(err?.message || 'Failed to start processing');
+    } finally {
+      setGmRawRunning(false);
     }
   };
 
@@ -2177,9 +2225,10 @@ export default function Admin() {
     loadHierarchyExcelStatus();
     loadPipelineStatus();
     loadFabricRawStatus();
+    loadGmRawStatus();
     loadBodyFabConsStatus();
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [loadVendorStatus, loadMajCatGridStatus, loadMandatoryGridStatus, loadSizeMasterStatus, loadColorMasterStatus, loadFabricArticleDataStatus, loadFabricArticleMasterStatus, loadBodyArticleDataStatus, loadBroaderMenuStatus, loadSegmentMasterStatus, loadBasicAccessoriesStatus, loadCmpCostMasterStatus, loadNationalGridStatus, loadHierarchyExcelStatus, loadPipelineStatus, loadFabricRawStatus, loadBodyFabConsStatus]);
+  }, [loadVendorStatus, loadMajCatGridStatus, loadMandatoryGridStatus, loadSizeMasterStatus, loadColorMasterStatus, loadFabricArticleDataStatus, loadFabricArticleMasterStatus, loadBodyArticleDataStatus, loadBroaderMenuStatus, loadSegmentMasterStatus, loadBasicAccessoriesStatus, loadCmpCostMasterStatus, loadNationalGridStatus, loadHierarchyExcelStatus, loadPipelineStatus, loadFabricRawStatus, loadGmRawStatus, loadBodyFabConsStatus]);
 
   const loadData = async () => {
     setLoading(true);
@@ -2621,6 +2670,71 @@ export default function Admin() {
               </Spinner>
             )}
             {fabricRawMessage && <Alert type="info" showIcon className="mt-2.5" message={fabricRawMessage} />}
+          </CardContent>
+        </Card>
+
+        {/* gm_raw_data Pipeline */}
+        <Card className="mb-6 glass rounded-2xl border border-emerald-300/60">
+          <CardHeader className="flex flex-row items-center justify-between bg-emerald-50/60">
+            <CardTitle className="flex items-center gap-2 text-base">
+              <Search className="h-4 w-4" />
+              gm_raw_data Pipeline
+            </CardTitle>
+            <div className="flex gap-2">
+              <Button size="sm" variant="outline" onClick={() => navigate('/gm-article')}>
+                <Eye />
+                View Data
+              </Button>
+              <Button size="sm" variant="outline" onClick={loadGmRawStatus} disabled={gmRawStatusLoading}>
+                <RotateCw className={gmRawStatusLoading ? 'animate-spin' : ''} />
+                Refresh Status
+              </Button>
+            </div>
+          </CardHeader>
+          <CardContent className="pt-4">
+            <div className="mb-2.5 text-[13px] font-semibold">Pipeline Status</div>
+            {gmRawStatus ? (
+              <div className="flex flex-wrap items-center gap-2.5">
+                <Tag className="px-2.5 py-0.5 text-[13px]" bgColor="#fef3c7" color="#92400e" borderColor="#fde68a">
+                  PENDING: <strong className="ml-1">{gmRawStatus.PENDING}</strong>
+                </Tag>
+                <Tag className="px-2.5 py-0.5 text-[13px]" bgColor="#dbeafe" color="#1e40af" borderColor="#bfdbfe">
+                  PROCESSING: <strong className="ml-1">{gmRawStatus.PROCESSING}</strong>
+                </Tag>
+                <Tag className="px-2.5 py-0.5 text-[13px]" bgColor="#d1fae5" color="#065f46" borderColor="#a7f3d0">
+                  COMPLETED: <strong className="ml-1">{gmRawStatus.COMPLETED}</strong>
+                </Tag>
+                <Tag className="px-2.5 py-0.5 text-[13px]" bgColor="#fee2e2" color="#991b1b" borderColor="#fecaca">
+                  FAILED: <strong className="ml-1">{gmRawStatus.FAILED}</strong>
+                </Tag>
+                <Tag className="px-2.5 py-0.5 text-[13px]">
+                  TOTAL: <strong className="ml-1">{gmRawStatus.total}</strong>
+                </Tag>
+                <Popconfirm
+                  title="Run GM Raw Processing?"
+                  description="This will process up to 20 PENDING rows: upload images to R2 and save records to gm_article_data. Runs in background."
+                  onConfirm={triggerGmRawProcessing}
+                  okText="Yes, run now"
+                  cancelText="Cancel"
+                  disabled={gmRawStatus.PENDING === 0}
+                >
+                  <Button
+                    disabled={gmRawRunning || gmRawStatus.PENDING === 0}
+                    className="bg-emerald-600 hover:bg-emerald-700"
+                  >
+                    <RefreshCw className={gmRawRunning ? 'animate-spin' : ''} />
+                    {gmRawRunning
+                      ? 'Starting...'
+                      : `Run Processing (${gmRawStatus.PENDING} queued)`}
+                  </Button>
+                </Popconfirm>
+              </div>
+            ) : (
+              <Spinner spinning={gmRawStatusLoading}>
+                <span className="text-[13px] text-muted-foreground">Loading pipeline status...</span>
+              </Spinner>
+            )}
+            {gmRawMessage && <Alert type="info" showIcon className="mt-2.5" message={gmRawMessage} />}
           </CardContent>
         </Card>
 

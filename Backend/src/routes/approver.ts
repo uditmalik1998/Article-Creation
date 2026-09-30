@@ -172,6 +172,9 @@ router.put('/gm-articles/:id', h(ApproverController.updateGmArticleData));
 // Reject GM articles — sets approvalStatus to REJECTED in gm_article_data
 router.post('/gm-articles/reject', requireGMApprovalRights, h(ApproverController.rejectGmArticles));
 
+// Submit GM articles to SAP via ZMM_ART_CRT_V3 — synchronous, returns { results: [...] }
+router.post('/gm-articles/submit', requireGMApprovalRights, h(ApproverController.submitGmArticles));
+
 // Fabric attribute grid values from fabric_maj_cat_grid_values (M_FAB_DIV, M_YARN, etc.)
 router.get('/fabric-grid-values', h(ApproverController.getFabricGridValues));
 
