@@ -131,25 +131,16 @@ export async function submitGmArticles(ids: string[]): Promise<{
     const results = await Promise.all(rows.map(async (row) => {
         const majCat = str(row.majorCategory);
 
-        // Resolve MC_CD from gm_major_category_details (primary GM hierarchy)
+        // Resolve MC_CD and HSN_CODE from gm_major_category_details in a single query
         const gmMcRows = majCat
-            ? await prisma.$queryRaw<{ mc_cd: string | null }[]>`
-                SELECT DISTINCT mc_cd FROM gm_major_category_details
+            ? await prisma.$queryRaw<{ mc_cd: string | null; hsn_cd: string | null }[]>`
+                SELECT DISTINCT mc_cd, hsn_cd FROM gm_major_category_details
                 WHERE maj_cat_nm = ${majCat} AND mj_status = 'ACT'
                 LIMIT 1
               `
             : [];
-        const mcCd = gmMcRows[0]?.mc_cd ?? null;
-
-        // Resolve HSN_CODE from major_category_details
-        const hsnRows = majCat
-            ? await prisma.$queryRaw<{ hsn_code: string | null }[]>`
-                SELECT hsn_code FROM major_category_details
-                WHERE LOWER(TRIM(maj_cat)) = LOWER(TRIM(${majCat}))
-                LIMIT 1
-              `
-            : [];
-        const hsnCode = hsnRows[0]?.hsn_code ?? null;
+        const mcCd    = gmMcRows[0]?.mc_cd  ?? null;
+        const hsnCode = gmMcRows[0]?.hsn_cd ?? null;
 
         if (!mcCd) {
             const msg = `Major category "${majCat}" not found in gm_major_category_details. Cannot submit to SAP.`;
