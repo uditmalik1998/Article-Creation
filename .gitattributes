@@ -1,0 +1,5 @@
+# Force LF line endings for shell scripts — CRLF breaks sh/dash on Linux (Azure)
+*.sh text eol=lf
+
+# Default: auto line ending normalization for everything else
+* text=auto

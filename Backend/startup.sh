@@ -4,7 +4,7 @@
 # so both this script and Node's child_process.spawn can find PIL.
 PYLIB=/home/site/wwwroot/python_libs
 mkdir -p "$PYLIB"
-python3 -c "import sys; sys.path.insert(0,'$PYLIB'); import PIL" 2>/dev/null \
-  || python3 -m pip install -q --disable-pip-version-check --target "$PYLIB" Pillow==11.3.0
+if ! python3 -c "import sys; sys.path.insert(0,'$PYLIB'); import PIL" 2>/dev/null; then
+  python3 -m pip install -q --disable-pip-version-check --target "$PYLIB" Pillow==11.3.0
+fi
 exec node --max-old-space-size=2048 dist/index.js
-
