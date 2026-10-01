@@ -163,13 +163,13 @@ def watermark(image_bytes, row, fmt="png"):
     #   width >= 900 px  →  3 columns, large font
     #   width >= 650 px  →  2 columns, medium font
     #   width <  650 px  →  1 column,  small font
-    if width >= 900:
+    if width >= 1300:
         font_size = min(60, max(18, int(height * 0.065)))
         line_h    = int(font_size * 1.35)
         pad_x     = max(8, int(font_size * 0.25))
         pad_y     = max(20, int(font_size * 0.7))
         n_cols    = 3
-    elif width >= 650:
+    elif width >= 750:
         font_size = min(34, max(13, int(width * 0.036)))
         line_h    = int(font_size * 1.3)
         pad_x     = max(6, int(font_size * 0.25))
