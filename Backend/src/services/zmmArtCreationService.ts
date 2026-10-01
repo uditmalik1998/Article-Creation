@@ -518,9 +518,6 @@ function parseRfcResponse(
         statusFlag === 0     || statusFlag === '0';
     const realSapArt = isErrorResponse ? '' : sapArt;
 
-    // Log parsed fields to help debug
-    console.log(`[ZMM_RFC] Parsed → SAP_ART="${sapArt}" (real="${realSapArt}") MSG_TYP="${msgTyp}" MESSAGE="${msgText}" Status="${statusFlag}" SuccessCount=${successCount} ErrorCount=${errorCount} | Full keys: ${Object.keys(parsed || {}).join(', ')}`);
-
     // Build readable message — prefer the per-row message; fall back to summary
     const messageParts: string[] = [];
     if (msgTyp)  messageParts.push(`[${msgTyp}]`);
@@ -640,15 +637,9 @@ export async function syncArticlesToSapViaRfc(
 
             const responseText = await response.text();
 
-            // Log full raw SAP response so we can see exactly what SAP returns
-            console.log(`[ZMM_RFC] RAW SAP response (status=${response.status}) for flat_id=${item.id}:`, responseText);
-
             const outcome = parseRfcResponse(response.status, responseText);
 
             if (outcome.ok) {
-                console.log(
-                    `[ZMM_RFC] ✅ Article created: ${outcome.sapArticleNumber ?? 'no article number'} for flat_id=${item.id}`
-                );
                 return {
                     id: item.id,
                     success: true,

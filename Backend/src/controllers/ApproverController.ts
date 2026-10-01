@@ -2639,7 +2639,6 @@ export class ApproverController {
             // Also upload all variant images here using generic SAP number + variant color.
             await Promise.all(finalizedSyncResults.map(async (syncResult: any) => {
                 if (!syncResult.success || !syncResult.sapArticleNumber) {
-                    console.log(`⏭ Skipping approved image upload for ${syncResult.id}: success=${syncResult.success}, articleNumber=${syncResult.sapArticleNumber || 'none'}`);
                     return null;
                 }
 
@@ -2756,7 +2755,6 @@ export class ApproverController {
             // ── Variant RFC sync ─────────────────────────────────────────────
             // For each successfully synced generic article, create its color/size
             // variants in SAP via ZMM_VAR_ART_CREATION_RFC.
-            console.log(`[VARIANT_RFC] successfullyApprovedIds=${JSON.stringify(successfullyApprovedIds)}`);
             if (successfullyApprovedIds.length > 0) {
                 try {
                     const allVariants = await prisma.extractionResultFlat.findMany({
@@ -2893,7 +2891,6 @@ export class ApproverController {
             const r = await ApproverController.syncApprovedToSap(ids);
             ApproverController.itemsCache.clear();
             ApproverController.countCache.clear();
-            console.log(`[ApprovalSync] Done — synced:${r.synced} failed:${r.failed}`);
             return { processed: ids.length, ...r };
         } catch (err: any) {
             console.error('[ApprovalSync] tick error:', err?.message);
