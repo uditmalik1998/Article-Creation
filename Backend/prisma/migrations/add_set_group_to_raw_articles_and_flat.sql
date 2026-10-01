@@ -16,10 +16,13 @@ ALTER TABLE public.extraction_results_flat
   ADD COLUMN IF NOT EXISTS set_role     VARCHAR(20),
   ADD COLUMN IF NOT EXISTS set_name     VARCHAR(200);
 
+-- NOT VALID: the columns were just added and are all NULL, so there is
+-- nothing to check; skipping the scan avoids holding an exclusive lock on
+-- these large tables. New and updated rows are still checked.
 DO $$ BEGIN
   ALTER TABLE public.raw_articles
     ADD CONSTRAINT chk_raw_articles_set_role
-      CHECK (set_role IS NULL OR set_role IN ('PARENT', 'TOP', 'PIECE'));
+      CHECK (set_role IS NULL OR set_role IN ('PARENT', 'TOP', 'PIECE')) NOT VALID;
 EXCEPTION
   WHEN duplicate_object THEN NULL;
 END $$;
@@ -27,7 +30,7 @@ END $$;
 DO $$ BEGIN
   ALTER TABLE public.extraction_results_flat
     ADD CONSTRAINT chk_erf_set_role
-      CHECK (set_role IS NULL OR set_role IN ('PARENT', 'TOP', 'PIECE'));
+      CHECK (set_role IS NULL OR set_role IN ('PARENT', 'TOP', 'PIECE')) NOT VALID;
 EXCEPTION
   WHEN duplicate_object THEN NULL;
 END $$;
