@@ -60,6 +60,7 @@ export async function createVariantsForGeneric(genericId: string): Promise<void>
     const generic = await prisma.extractionResultFlat.findUnique({ where: { id: genericId } });
     if (!generic || !generic.majorCategory) return;
     if (!generic.isGeneric) return;
+    if (generic.comboRole === 'CHILD') return; // set pieces never get variants
 
     const sizes = await getSizesForMajCat(generic.majorCategory);
     if (sizes.length === 0) {
@@ -99,6 +100,10 @@ export async function createVariantsForGeneric(genericId: string): Promise<void>
           colour: generic.colour || null,
           variantColor: generic.colour || null,
           imageExtractionRawData: _ied1 ?? Prisma.DbNull,
+          // A variant is never itself a set parent/child — don't clone those links.
+          comboRole: 'NONE' as const,
+          comboParentId: null,
+          comboChildOrder: null,
         };
         await prisma.extractionResultFlat.create({ data: variantData });
 
@@ -123,6 +128,8 @@ export async function addColorVariants(
 ): Promise<number> {
   const generic = await prisma.extractionResultFlat.findUnique({ where: { id: genericId } });
   if (!generic) return 0;
+  // Set pieces (children) never get variants — only the parent set does.
+  if (generic.comboRole === 'CHILD') return 0;
 
   if (!generic.majorCategory) throw new Error('No Major Category found on this article — cannot create variants.');
   const allowedSizes = await getSizesForMajCat(generic.majorCategory);
@@ -187,6 +194,10 @@ export async function addColorVariants(
         variantColor: color,
         colour: color,
         imageExtractionRawData: _ied2 ?? Prisma.DbNull,
+        // A variant is never itself a set parent/child — don't clone those links.
+        comboRole: 'NONE' as const,
+        comboParentId: null,
+        comboChildOrder: null,
       };
       await prisma.extractionResultFlat.create({ data: colorVariantData });
 

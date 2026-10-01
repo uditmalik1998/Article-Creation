@@ -162,6 +162,10 @@ export interface ApproverItem {
   approvedBy?: number | null;
   approvedAt?: string | null;
   approver?: { name: string | null; email: string | null } | null;
+  comboRole?: 'NONE' | 'PARENT' | 'CHILD';
+  comboParentId?: string | null;
+  comboChildOrder?: number | null;
+  isMandatoryChild?: boolean;
 }
 
 interface EditableCellProps {

@@ -20,6 +20,7 @@
 import { prismaClient as prisma, isDbCircuitOpen, openDbCircuit } from '../utils/prisma';
 import { enrichSrmRowWithVlmAdmin, insertRawArticleAsFlat, type SrmRow } from './srmSyncService';
 import { mapWithConcurrency } from '../utils/concurrency';
+import { linkComboGroup } from './comboLinkService';
 
 
 // ── Cutoff: presentations on or before this date are already in extraction_results_flat
@@ -144,6 +145,9 @@ export async function runRawArticleExtraction(
               price:                      row.price != null ? Number(row.price) : 0,
               image_url:                  row.imageUrl,
               presentations_type:         (row as any).presentationsType ?? null,
+              set_group_id:               row.setGroupId ?? null,
+              set_role:                   row.setRole    ?? null,
+              set_name:                   row.setName    ?? null,
             };
             const created = await insertRawArticleAsFlat(srmRow, row.id);
             if (created) {
@@ -171,6 +175,21 @@ export async function runRawArticleExtraction(
 
     for (const r of results) {
       if (r.ok) completed++; else { errors++; failed++; }
+    }
+
+    // Link combo/set pieces (Baba Suit + Top + Lower share presentation + design
+    // number). Runs after VLM so the parent mirrors the enriched Top attributes.
+    // Pieces can land in different batches — linkComboGroup is idempotent.
+    // SRM set articles carry a set_group_id — link those by (presentation, set id);
+    // older rows without one fall back to presentation + design number.
+    const groups = new Map(rows.filter(r => r.designNumber || r.setGroupId)
+      .map(r => [r.setGroupId ? `${r.presentationNo}|set|${r.setGroupId}` : `${r.presentationNo}|${r.designNumber}`, r]));
+    for (const r of groups.values()) {
+      try {
+        await linkComboGroup(r.presentationNo, r.designNumber, r.setGroupId);
+      } catch (linkErr: any) {
+        console.error(`[RawExtract] ⚠️ Combo link failed for ${r.presentationNo}/${r.designNumber}: ${linkErr.message}`);
+      }
     }
 
     console.log(`[RawExtract] Done — completed:${completed} failed:${failed} errors:${errors}`);
@@ -211,6 +230,9 @@ async function processOneRow(row: {
   imageUrl: string | null;
   flatId: string | null;
   retryCount: number;
+  setGroupId?: string | null;
+  setRole?: string | null;
+  setName?: string | null;
 }): Promise<void> {
   // ── Step 1: Resolve flat record ──────────────────────────────────────────
   let flatId = row.flatId ?? null;
@@ -245,6 +267,13 @@ async function processOneRow(row: {
           data:  { srmUniqueId: row.id },
         });
       }
+      // Backfill the set fields on a flat record created before SRM sent them.
+      if (row.setGroupId) {
+        await prisma.extractionResultFlat.update({
+          where: { id: flatId },
+          data:  { setGroupId: row.setGroupId, setRole: row.setRole ?? null, setName: row.setName ?? null },
+        });
+      }
     } else {
       // Create a new flat record (same path as srmSyncService insertRow)
       const srmRow: SrmRow = {
@@ -261,6 +290,9 @@ async function processOneRow(row: {
         price:                      row.price != null ? Number(row.price) : 0,
         image_url:                  row.imageUrl,
         presentations_type:         (row as any).presentationsType ?? null,
+        set_group_id:               row.setGroupId ?? null,
+        set_role:                   row.setRole    ?? null,
+        set_name:                   row.setName    ?? null,
       };
 
       // Pass row.id so srm_unique_id is set on the flat record from creation

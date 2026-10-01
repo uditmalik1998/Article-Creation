@@ -54,6 +54,10 @@ interface SrmRow {
   price: number;
   image_url?: string | null;
   presentations_type?: string | null;
+  /** SRM set article: shared by every photo of one set; role is PARENT | TOP | PIECE. */
+  set_group_id?: string | null;
+  set_role?: string | null;
+  set_name?: string | null;
 }
 
 /** Normalise vendor code to last 6 digits (e.g. "0000200251" → "200251") */
@@ -736,6 +740,9 @@ async function insertRow(row: SrmRow, rawArticleId?: string): Promise<{ id: stri
       segment,
       extractionDate:    now,
       presentationsType: row.presentations_type || null,
+      setGroupId:        row.set_group_id || null,
+      setRole:           row.set_role     || null,
+      setName:           row.set_name     || null,
     },
   });
 

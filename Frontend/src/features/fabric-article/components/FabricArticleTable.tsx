@@ -164,6 +164,9 @@ export interface ApproverItem {
   preciseRatio: number | string | null;
   preciseConsumptionKg: number | string | null;
   preciseConsumptionMeter: number | string | null;
+  comboRole?: 'NONE' | 'PARENT' | 'CHILD';
+  comboParentId?: string | null;
+  comboChildOrder?: number | null;
 }
 
 interface EditableCellProps {

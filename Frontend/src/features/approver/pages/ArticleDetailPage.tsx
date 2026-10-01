@@ -3,7 +3,7 @@ import { useParams, useNavigate, useLocation } from 'react-router-dom';
 import { useForm } from 'react-hook-form';
 import {
   CheckCircle2, XCircle, FileText, LayoutGrid, Rocket, Sparkles,
-  ChevronLeft, ChevronRight, ArrowLeft, Loader2, RotateCw, History,
+  ChevronLeft, ChevronRight, ArrowLeft, Loader2, RotateCw, History, Plus, Trash2, PackagePlus,
 } from 'lucide-react';
 import {
   Button,
@@ -54,6 +54,7 @@ import {
 } from '../../../services/articleConfigService';
 import { formatDivisionLabel } from '../../../shared/utils/ui/formatters';
 import { variantCreatingIds } from '../../fabric-article/variantCreationState';
+import { isComboMajorCategory } from '../../../data/comboMajorCategories';
 
 // ─── History field display labels (camelCase → human label) ──────────────────
 const FIELD_LABELS: Record<string, string> = {
@@ -94,6 +95,22 @@ const FIELD_LABELS: Record<string, string> = {
 };
 
 // ─── Helpers ─────────────────────────────────────────────────────────────────
+
+// Cost fields summed from a set's pieces into the set article (see Backend comboLinkService).
+const COMBO_COST_COLUMNS: { field: string; label: string }[] = [
+  { field: 'rate', label: 'Rate' },
+  { field: 'mrp', label: 'MRP' },
+  { field: 'cmtpCost', label: 'CMTP' },
+  { field: 'cmpCost', label: 'CMP' },
+  { field: 'fabCost', label: 'Fab Cost' },
+  { field: 'valueAddCost', label: 'VA Acc' },
+  { field: 'valueAddProcessCost', label: 'VA Proc' },
+  { field: 'vendorFabricRate', label: 'Vendor Fab Rate' },
+];
+const formatComboCost = (v: unknown) => {
+  const n = v == null || v === '' ? NaN : Number(v);
+  return Number.isFinite(n) ? n.toLocaleString('en-IN', { maximumFractionDigits: 2 }) : '—';
+};
 
 const inferMcCode = (majorCategory?: string | null) => getMcCodeByMajorCategory(majorCategory);
 
@@ -450,6 +467,7 @@ export default function ArticleDetailPage({
   const batchSize = items.length;
   const isFirstArticle = currentIndex === 0;
   const isLastArticle = currentIndex >= items.length - 1;
+  const isComboItem = currentItem?.comboRole === 'PARENT' || isComboMajorCategory(currentItem?.majorCategory);
 
   function getBasePath() {
     if (pathType === 'old') return `${baseRoute}/old-articles`;
@@ -533,6 +551,8 @@ export default function ArticleDetailPage({
         if (r.ok) {
           const saved = await r.json();
           updateItemInList(saved);
+          // Set article: pieces are created first — keep their tabs current too.
+          if (saved.comboRole === 'PARENT') void loadComboChildrenRef.current();
           if (saved.sapSyncStatus === 'SYNCED') {
             stopSyncPoll();
             message.success(`SAP article created: ${saved.sapArticleId || saved.articleNumber || ''}`);
@@ -572,6 +592,132 @@ export default function ArticleDetailPage({
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [currentItem?.id]);
 
+  // ─── Combo/Set articles (Kurti Set, Baba Suit, ...) ─────────────────────────
+  // SRM sends each piece (Top, Lower, ...) as its own article, linked to the set
+  // parent by the backend. Each piece gets its own tab with the full card (its
+  // own major category drives its fields); the parent tab is read-only — its
+  // costs are the sum of the pieces and its attributes mirror the Top piece.
+  // Save & Submit on the parent submits the whole set.
+  const [comboChildren, setComboChildren] = useState<ApproverItem[]>([]);
+  const [comboLoading, setComboLoading] = useState(false);
+  const [comboTab, setComboTab] = useState<string>('parent');
+
+  const loadComboChildren = useCallback(async () => {
+    if (!currentItem) return;
+    setComboLoading(true);
+    const token = localStorage.getItem('authToken');
+    try {
+      const r = await fetch(`${APP_CONFIG.api.baseURL}/approver/combo-articles/${currentItem.id}`, {
+        headers: { Authorization: `Bearer ${token}` },
+      });
+      if (r.ok) {
+        const payload = await r.json();
+        setComboChildren(payload.children ?? []);
+        if (payload.parent) updateItemInList(payload.parent);
+      }
+    } catch { /* transient */ }
+    finally { setComboLoading(false); }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [currentItem?.id]);
+  const loadComboChildrenRef = useRef(loadComboChildren);
+  loadComboChildrenRef.current = loadComboChildren;
+
+  useEffect(() => {
+    setComboTab('parent');
+    if (isComboItem) void loadComboChildren();
+    else setComboChildren([]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [isComboItem, currentItem?.id]);
+
+  // Pieces have their own major categories — cache their mandatory grids too.
+  const comboChildCats = comboChildren.map(c => (c.majorCategory || '').trim()).filter(Boolean).join('|');
+  useEffect(() => {
+    if (!comboChildCats) return;
+    Promise.all(Array.from(new Set(comboChildCats.split('|'))).map(c => preloadMandatoryGridFor(c).catch(() => {})))
+      .then(() => setGridVersion(v => v + 1));
+  }, [comboChildCats]);
+
+  const activeComboChild = isComboItem && comboTab !== 'parent'
+    ? comboChildren.find(c => c.id === comboTab) ?? null
+    : null;
+  const displayedItem = activeComboChild ?? currentItem;
+
+  const addComboChild = async () => {
+    if (!currentItem) return;
+    const token = localStorage.getItem('authToken');
+    try {
+      const r = await fetch(`${APP_CONFIG.api.baseURL}/approver/combo-articles/${currentItem.id}/children`, {
+        method: 'POST', headers: { Authorization: `Bearer ${token}` },
+      });
+      if (!r.ok) {
+        const p = await r.json().catch(() => null);
+        throw new Error(p?.error || 'Failed to add piece');
+      }
+      const child = await r.json();
+      setComboChildren(prev => [...prev, child]);
+      setComboTab(child.id);
+    } catch (err) { message.error(err instanceof Error ? err.message : 'Failed to add piece'); }
+  };
+
+  const removeComboChild = async (childId: string) => {
+    const token = localStorage.getItem('authToken');
+    try {
+      const r = await fetch(`${APP_CONFIG.api.baseURL}/approver/combo-articles/children/${childId}`, {
+        method: 'DELETE', headers: { Authorization: `Bearer ${token}` },
+      });
+      if (!r.ok) {
+        const p = await r.json().catch(() => null);
+        throw new Error(p?.error || 'Failed to remove piece');
+      }
+      setComboTab('parent');
+      await loadComboChildren();
+    } catch (err) { message.error(err instanceof Error ? err.message : 'Failed to remove piece'); }
+  };
+
+  // Save an edit made on a piece's tab, then reload the parent so its summed
+  // costs / mirrored attributes reflect the change.
+  const saveComboChild = async (row: ApproverItem, directUpdates: Record<string, unknown> | undefined, options?: { silent?: boolean }) => {
+    const prevChildren = comboChildren;
+    const child = comboChildren.find(c => c.id === row.id);
+    if (!child) return;
+    let updatePayload: Record<string, unknown> = Object.fromEntries(
+      Object.entries(directUpdates || {}).map(([k, v]) => [k, v === undefined ? null : v]),
+    );
+    if (Object.keys(updatePayload).length === 0) {
+      updatePayload = Object.fromEntries(
+        Object.entries(row).filter(([k, v]) => (child as any)[k] !== v).map(([k, v]) => [k, v === undefined ? null : v]),
+      );
+    }
+    if (updatePayload.majorCategory && !updatePayload.mcCode) {
+      updatePayload.mcCode = inferMcCode(updatePayload.majorCategory as string) || undefined;
+    }
+    if (Object.keys(updatePayload).length === 0) return;
+    setComboChildren(prev => prev.map(c => (c.id === row.id ? { ...c, ...updatePayload } as ApproverItem : c)));
+    try {
+      const token = localStorage.getItem('authToken');
+      const r = await fetch(`${APP_CONFIG.api.baseURL}/approver/items/${row.id}`, {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` },
+        body: JSON.stringify(updatePayload),
+      });
+      if (!r.ok) {
+        let errMsg = 'Failed to save';
+        try { const p = await r.json(); if (p?.error) errMsg = p.error; } catch { /* skip */ }
+        setComboChildren(prevChildren);
+        message.error(errMsg);
+        return;
+      }
+      const saved = await r.json();
+      setComboChildren(prev => prev.map(c => (c.id === saved.id ? { ...c, ...saved } : c)));
+      // Reload the set: parent totals change, and the Top piece may change with a major category edit.
+      await loadComboChildren();
+      if (!options?.silent) message.success('Saved');
+    } catch {
+      setComboChildren(prevChildren);
+      message.error('Failed to save. Please check your connection.');
+    }
+  };
+
   const pendingSelectedKeys = useMemo(
     () => selectedRowKeys.filter(key => items.find(i => i.id === key)?.approvalStatus === 'PENDING'),
     [selectedRowKeys, items],
@@ -603,8 +749,17 @@ export default function ArticleDetailPage({
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [pendingSelectedKeys.join(',')]);
 
+  // A set article is submitted as a whole — its pending pieces are validated too.
+  const pendingComboChildren = useMemo(
+    () => (isComboItem && pendingSelectedKeys.includes(currentItem?.id ?? '') ? comboChildren.filter(c => c.approvalStatus === 'PENDING') : []),
+    [isComboItem, pendingSelectedKeys, currentItem?.id, comboChildren],
+  );
+
   const approveBlockedReasons = useMemo(() => {
-    const pendingItems = items.filter(i => pendingSelectedKeys.includes(i.id));
+    const pendingItems = [...items.filter(i => pendingSelectedKeys.includes(i.id)), ...pendingComboChildren];
+    const comboBlock = isComboItem && pendingSelectedKeys.length > 0 && comboChildren.length === 0
+      ? [{ articleId: currentItem?.designNumber || currentItem?.id || 'Set article', missing: ['CHILD PIECES (Top / Lower not linked yet)'] }]
+      : [];
     return pendingItems.reduce<{ articleId: string; missing: string[] }[]>((acc, item) => {
       const missing: string[] = [];
       if (!item.vendorCode) missing.push('VENDOR CODE');
@@ -623,11 +778,12 @@ export default function ArticleDetailPage({
       missing.push(...getMissingMandatoryFields(item));
       // const missingWeightCount = variantWeightIssues[item.id];
       // if (missingWeightCount) missing.push(`VARIANT WEIGHT (${missingWeightCount} variant${missingWeightCount > 1 ? 's' : ''} missing)`);
-      if (missing.length > 0) acc.push({ articleId: item.sapArticleId || item.articleNumber || item.imageName || item.id, missing });
+      const label = item.sapArticleId || item.articleNumber || item.imageName || item.id;
+      if (missing.length > 0) acc.push({ articleId: item.comboRole === 'CHILD' ? `${item.majorCategory || 'Piece'} — ${label}` : label, missing });
       return acc;
-    }, []);
+    }, comboBlock);
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [pendingSelectedKeys, items, gridVersion, pathType, variantWeightIssues]);
+  }, [pendingSelectedKeys, items, gridVersion, pathType, variantWeightIssues, pendingComboChildren, comboChildren.length, isComboItem]);
 
   const handleApproveClick = async () => {
     if (pendingSelectedKeys.length === 0) return;
@@ -661,7 +817,7 @@ export default function ArticleDetailPage({
     //   }
     // }
 
-    setConfirmDialog({ kind: 'approve', count: pendingSelectedKeys.length });
+    setConfirmDialog({ kind: 'approve', count: pendingSelectedKeys.length + pendingComboChildren.length });
   };
 
   const doApprove = async () => {
@@ -688,6 +844,7 @@ export default function ArticleDetailPage({
       message.success(`Approved ${approvedCount} article(s) — creating in SAP in the background…`);
       setSelectedRowKeys([]);
       await refetchCurrentItem();
+      if (isComboItem) await loadComboChildren();
       if (approvedId) pollUntilSynced(approvedId);
     } catch (e) {
       setConfirmDialog(null);
@@ -886,8 +1043,10 @@ export default function ArticleDetailPage({
       }
       message.success('Item updated');
       setIsEditModalOpen(false);
+      const wasEditingChild = editingItem && editingItem.id !== currentItem?.id;
       setEditingItem(null);
-      await refetchCurrentItem();
+      if (wasEditingChild) await loadComboChildren();
+      else await refetchCurrentItem();
     } catch (err) { message.error(err instanceof Error ? err.message : 'Failed to update item'); }
   };
 
@@ -1198,6 +1357,74 @@ export default function ArticleDetailPage({
         </div>
       </div>
 
+      {/* Combo/Set article — one tab per piece (Kurti Set, Baba Suit, ...) */}
+      {!loadingItem && isComboItem && currentItem && (
+        <div className="mb-2 rounded-xl border border-amber-200 bg-amber-50/60 p-2">
+          <div className="flex flex-wrap items-center gap-1.5">
+            <span className="mr-1 flex items-center gap-1.5 text-[12px] font-semibold text-amber-900">
+              <PackagePlus className="h-4 w-4" /> Set Article
+            </span>
+            {[{ id: 'parent', item: currentItem, label: `${currentItem.majorCategory || 'Set'} (Summary)` },
+              ...comboChildren.map((c, i) => ({ id: c.id, item: c, label: `${c.majorCategory || 'Piece'}${i === 0 ? ' · Top' : ''}` }))]
+              .map(({ id: tabId, item: tabItem, label }) => (
+                <button key={tabId} type="button" onClick={() => setComboTab(tabId)}
+                  className={`flex items-center gap-1.5 rounded-md border px-2.5 py-1 text-[12px] font-medium ${comboTab === tabId ? 'border-amber-500 bg-white text-amber-900 shadow-sm' : 'border-transparent text-amber-800 hover:bg-white/60'}`}>
+                  <span className={`h-1.5 w-1.5 rounded-full ${tabItem.sapSyncStatus === 'SYNCED' ? 'bg-emerald-500' : tabItem.sapSyncStatus === 'FAILED' ? 'bg-rose-500' : tabItem.approvalStatus === 'APPROVED' ? 'bg-amber-500' : 'bg-slate-300'}`} />
+                  {label}
+                </button>
+              ))}
+            {comboLoading && <Loader2 className="h-3.5 w-3.5 animate-spin text-amber-700" />}
+            <div className="ml-auto flex items-center gap-1.5">
+              {activeComboChild && !(activeComboChild as any).srmOriginalDesignNumber && activeComboChild.approvalStatus === 'PENDING' && (
+                <Button size="sm" variant="ghost" onClick={() => removeComboChild(activeComboChild.id)} className="h-7 px-2 text-[12px] text-rose-600 hover:bg-rose-50">
+                  <Trash2 className="h-3.5 w-3.5" /> Remove piece
+                </Button>
+              )}
+              <Button size="sm" variant="outline" onClick={addComboChild} disabled={currentItem.approvalStatus !== 'PENDING'} className="h-7 px-2.5 text-[12px]">
+                <Plus className="h-3.5 w-3.5" /> Add piece
+              </Button>
+            </div>
+          </div>
+
+          {comboTab === 'parent' && (
+            comboChildren.length === 0 ? (
+              <div className="mt-2 rounded-md border border-dashed border-amber-300 bg-white/50 px-3 py-3 text-center text-[12px] text-amber-700">
+                {comboLoading ? 'Loading pieces…' : 'No pieces linked yet — the pieces uploaded with this set in SRM are linked automatically. Use "Add piece" if one is missing.'}
+              </div>
+            ) : (
+              <div className="mt-2 overflow-x-auto rounded-md border border-amber-200 bg-white">
+                <table className="w-full text-[12px]">
+                  <thead className="bg-amber-50 text-amber-900">
+                    <tr>
+                      <th className="px-2 py-1 text-left font-semibold">Piece</th>
+                      {COMBO_COST_COLUMNS.map(c => <th key={c.field} className="px-2 py-1 text-right font-semibold">{c.label}</th>)}
+                      <th className="px-2 py-1 text-left font-semibold">SAP</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {comboChildren.map((c, i) => (
+                      <tr key={c.id} className="cursor-pointer border-t border-amber-100 hover:bg-amber-50/50" onClick={() => setComboTab(c.id)}>
+                        <td className="px-2 py-1 font-medium text-slate-800">{c.majorCategory || 'Piece'}{i === 0 && <span className="ml-1 text-[10px] text-amber-600">(Top — attributes shown on set)</span>}</td>
+                        {COMBO_COST_COLUMNS.map(col => <td key={col.field} className="px-2 py-1 text-right tabular-nums">{formatComboCost((c as any)[col.field])}</td>)}
+                        <td className="px-2 py-1 text-slate-600">{c.sapArticleId || (c.sapSyncStatus === 'FAILED' ? 'Failed' : c.approvalStatus === 'APPROVED' ? 'Creating…' : '—')}</td>
+                      </tr>
+                    ))}
+                    <tr className="border-t-2 border-amber-300 bg-amber-50/70 font-semibold text-amber-900">
+                      <td className="px-2 py-1">Set total</td>
+                      {COMBO_COST_COLUMNS.map(col => <td key={col.field} className="px-2 py-1 text-right tabular-nums">{formatComboCost((currentItem as any)[col.field])}</td>)}
+                      <td className="px-2 py-1">{currentItem.sapArticleId || '—'}</td>
+                    </tr>
+                  </tbody>
+                </table>
+                <div className="border-t border-amber-100 px-2 py-1 text-[11px] text-amber-700">
+                  The set card below is read-only: costs are the sum of the pieces and attributes come from the Top piece. Edit them on each piece's tab. Save &amp; Submit creates every piece in SAP, then the set.
+                </div>
+              </div>
+            )
+          )}
+        </div>
+      )}
+
       {/* Article detail */}
       {loadingItem ? (
         <div className="flex h-64 items-center justify-center">
@@ -1205,8 +1432,9 @@ export default function ArticleDetailPage({
         </div>
       ) : (
         <ApproverArticleList
-          items={currentItem ? [currentItem] : []}
-          majorCategory={currentItem?.majorCategory || ''}
+          items={displayedItem ? [displayedItem] : []}
+          majorCategory={displayedItem?.majorCategory || ''}
+          readOnly={isComboItem && !activeComboChild}
           loading={false}
           selectedRowKeys={selectedRowKeys}
           onSelectionChange={setSelectedRowKeys}
@@ -1365,10 +1593,11 @@ export default function ArticleDetailPage({
             }
           }}
           attributes={attributes}
-          onRefresh={refetchCurrentItem}
+          onRefresh={activeComboChild ? loadComboChildren : refetchCurrentItem}
           pathType={pathType}
           serverPagination={{ total: totalCount, current: currentPage, pageSize: PAGE_SIZE, onChange: () => {} }}
           onSave={async (row, directUpdates, options) => {
+            if (comboChildren.some(c => c.id === row.id)) { await saveComboChild(row, directUpdates, options); return; }
             const prevItems = [...items];
             const newData = [...items];
             const index = newData.findIndex(i => i.id === row.id);

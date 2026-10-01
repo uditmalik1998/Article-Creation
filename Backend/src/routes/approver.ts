@@ -64,6 +64,12 @@ router.post('/approve', requireApprovalRights, h(ApproverController.approveItems
 // GM Article approve — same handler as /approve but allows GM_APPROVER role.
 router.post('/gm-approve', requireGMApprovalRights, h(ApproverController.approveItems));
 
+// Combo/Set articles (Kurti Set, Baba Suit, ...) — a parent FG article linked
+// to its child pieces. Submitting goes through POST /approve on the parent.
+router.get('/combo-articles/:parentId', h(ApproverController.getComboArticle));
+router.post('/combo-articles/:parentId/children', h(ApproverController.addComboChild));
+router.delete('/combo-articles/children/:childId', h(ApproverController.deleteComboChild));
+
 // Reject selected items — approver roles + PD + ADMIN
 router.post('/reject', requireApprovalRights, h(ApproverController.rejectItems));
 
