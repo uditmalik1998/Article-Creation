@@ -2659,7 +2659,6 @@ export class ApproverController {
 
                 // Upload generic image (with watermark)
                 try {
-                    console.log(`📦 Copying approved image for article ${syncResult.sapArticleNumber} from source to article-master bucket...`);
 
                     const labelData: WatermarkLabel = {
                         article_number: String(syncResult.sapArticleNumber),
@@ -2690,7 +2689,6 @@ export class ApproverController {
                         where: { id: syncResult.id },
                         data: { imageUrl: approvedImageUpload.url }
                     });
-                    console.log(`✅ Generic image saved to article-master: ${approvedImageUpload.key}`);
                 } catch (error: any) {
                     console.error(`❌ Approved image upload failed for ${syncResult.id}:`, error?.message);
                     await prisma.extractionResultFlat.update({
@@ -2775,8 +2773,6 @@ export class ApproverController {
                         }
                     });
 
-                    console.log(`[VARIANT_RFC] allVariants fetched=${allVariants.length} for genericIds=${JSON.stringify(successfullyApprovedIds)}`);
-                    allVariants.forEach(v => console.log(`[VARIANT_RFC] variant id=${v.id} genericArticleId=${v.genericArticleId} size=${v.variantSize} colour=${v.colour} variantColor=${v.variantColor}`));
 
                     if (allVariants.length > 0) {
                         const variantsByGenericId = new Map<string, typeof allVariants>();
@@ -2792,10 +2788,7 @@ export class ApproverController {
                                 genericSapArticleMap.set(syncResult.id, syncResult.sapArticleNumber);
                             }
                         }
-                        console.log(`[VARIANT_RFC] genericSapArticleMap=${JSON.stringify(Object.fromEntries(genericSapArticleMap))}`);
-
                         const variantSyncResults = await syncVariantsToSapViaRfc(variantsByGenericId, genericSapArticleMap);
-                        console.log(`[VARIANT_RFC] ${variantSyncResults.filter((r: any) => r.success).length}/${variantSyncResults.length} variant(s) synced to SAP`);
 
                         const variantSyncUpdates = variantSyncResults.map((vResult: any) => {
                             const data: any = {

@@ -187,7 +187,6 @@ export class StorageService {
         try {
             const wm = await runPythonWatermark(sourceBuffer, labelData as Record<string, unknown>, { format: 'jpeg' });
             if (wm.success && wm.buffer && wm.buffer.length > 0) {
-                console.log(`🖋️  Watermark applied for ${safeArticleNumber}: ${wm.buffer.length} bytes, ${wm.durationMs}ms`);
                 return {
                     buffer: wm.buffer,
                     mimeType: wm.mimeType || 'image/jpeg',
@@ -463,7 +462,9 @@ export class StorageService {
         const safeColor = colorCode ? this.sanitizeColor(colorCode) : undefined;
         const wantWatermark = !!labelData;
 
-        const sourceKey = this.extractKeyFromAnyUrl(sourceImageUrl);
+        // Only use the S3 fast-path when the URL is from THIS bucket's public base.
+        // URLs from other R2 buckets (e.g. SRM presentation bucket) must use HTTP fetch.
+        const sourceKey = this.extractKeyFromPublicUrl(sourceImageUrl);
 
         if (sourceKey) {
             const fallbackExt = this.extensionFromPath(sourceKey) || 'jpg';
@@ -530,7 +531,6 @@ export class StorageService {
                     mimeType,
                     safeArticleNumber
                 );
-                console.log(`✅ Approved image uploaded to ${this.approvedBucket}: ${key}`);
             } catch (primaryError: any) {
                 if (!this.isAuthError(primaryError) || this.approvedS3Client === this.s3Client) {
                     throw primaryError;
@@ -545,7 +545,6 @@ export class StorageService {
                     mimeType,
                     safeArticleNumber
                 );
-                console.log(`✅ Approved image uploaded to ${this.approvedBucket} (via primary credentials): ${key}`);
             }
 
             return { url: await this.buildApprovedUrl(key), path: key, key, uuid: safeArticleNumber };
