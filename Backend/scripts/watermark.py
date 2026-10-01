@@ -158,16 +158,29 @@ def watermark(image_bytes, row, fmt="png"):
         return _save(img, fmt)
 
     # ── Extend-canvas layout ──────────────────────────────────────────────────
-    # Add a solid-white strip BELOW the original photo and write the label
-    # there. Strip height is AUTO-FIT to the content (no wasted whitespace) —
-    # font size is proportional to the source image height instead.
-    font_size = min(60, max(18, int(height * 0.065)))
-    line_h = int(font_size * 1.35)
-    pad_x = max(8, int(font_size * 0.25))
-    pad_y = max(20, int(font_size * 0.7))
-
-    # 1-3 columns based on field count to keep the strip compact.
-    n_cols = 3 if len(lines) >= 7 else (2 if len(lines) >= 4 else 1)
+    # Column count and font size are driven by image WIDTH so narrow portraits
+    # never get too many columns or oversized text.
+    #   width >= 900 px  →  3 columns, large font
+    #   width >= 650 px  →  2 columns, medium font
+    #   width <  650 px  →  1 column,  small font
+    if width >= 900:
+        font_size = min(60, max(18, int(height * 0.065)))
+        line_h    = int(font_size * 1.35)
+        pad_x     = max(8, int(font_size * 0.25))
+        pad_y     = max(20, int(font_size * 0.7))
+        n_cols    = 3
+    elif width >= 650:
+        font_size = min(34, max(13, int(width * 0.036)))
+        line_h    = int(font_size * 1.3)
+        pad_x     = max(6, int(font_size * 0.25))
+        pad_y     = max(10, int(font_size * 0.5))
+        n_cols    = 2
+    else:
+        font_size = min(26, max(11, int(width * 0.032)))
+        line_h    = int(font_size * 1.25)
+        pad_x     = max(5, int(font_size * 0.25))
+        pad_y     = max(8, int(font_size * 0.45))
+        n_cols    = 1
     rows_per_col = (len(lines) + n_cols - 1) // n_cols
     block_h = rows_per_col * line_h
 
