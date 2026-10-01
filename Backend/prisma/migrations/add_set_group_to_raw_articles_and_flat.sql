@@ -32,7 +32,11 @@ EXCEPTION
   WHEN duplicate_object THEN NULL;
 END $$;
 
+-- Partial indexes: only set rows are indexed, so they stay tiny and cheap to
+-- build on these large tables.
 CREATE INDEX IF NOT EXISTS idx_erf_ppt_set_group
-  ON public.extraction_results_flat (ppt_number, set_group_id);
+  ON public.extraction_results_flat (ppt_number, set_group_id)
+  WHERE set_group_id IS NOT NULL;
 CREATE INDEX IF NOT EXISTS idx_raw_articles_set_group
-  ON public.raw_articles (presentation_no, set_group_id);
+  ON public.raw_articles (set_group_id)
+  WHERE set_group_id IS NOT NULL;

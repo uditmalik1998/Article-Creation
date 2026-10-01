@@ -31,10 +31,14 @@ ALTER TABLE public.extraction_results_flat
   ADD COLUMN IF NOT EXISTS combo_parent_id    TEXT,
   ADD COLUMN IF NOT EXISTS combo_child_order  INTEGER;
 
+-- NOT VALID: every existing combo_parent_id is NULL, so there is nothing to
+-- check; skipping the validation scan avoids holding a write-blocking lock on
+-- this large, busy table. New rows are still checked.
 DO $$ BEGIN
   ALTER TABLE public.extraction_results_flat
     ADD CONSTRAINT fk_extraction_results_flat_combo_parent
-      FOREIGN KEY (combo_parent_id) REFERENCES public.extraction_results_flat(id) ON DELETE CASCADE;
+      FOREIGN KEY (combo_parent_id) REFERENCES public.extraction_results_flat(id) ON DELETE CASCADE
+      NOT VALID;
 EXCEPTION
   WHEN duplicate_object THEN NULL;
 END $$;

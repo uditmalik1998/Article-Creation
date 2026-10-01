@@ -21,7 +21,7 @@ import { syncGenericToVariants, addColorVariants, getSizesForMajCat, isSizeAllow
 import { hasVendorCode, isValidVendorCode, normalizeVendorCode } from '../utils/vendorCode';
 import { mirror360FlatUpdate } from '../utils/mirror360Flat';
 import { isComboMajorCategory } from '../config/comboMajorCategories';
-import { linkComboGroupForRow, recomputeComboParent, COMBO_PARENT_DERIVED_FIELDS } from '../services/comboLinkService';
+import { linkComboGroupForRow, recomputeComboParent, syncSetsFromRaw, COMBO_PARENT_DERIVED_FIELDS } from '../services/comboLinkService';
 
 // Fields a client is allowed to update / modify on an article. Shared by
 // updateItem (PUT) and modifyItem (SAP patch-bulk). Anything not in this list
@@ -634,6 +634,17 @@ export class ApproverController {
     static async getItems(req: Request, res: Response) {
         try {
             const { status, division, subDivision, majorCategory, startDate, endDate, search, page = 1, limit = 50, pathType, source, presentationsType } = req.query;
+
+            // SRM sets processed without set support arrive unlinked — link them
+            // before listing so a set shows as one row (throttled, never blocks the list).
+            try {
+                if (await syncSetsFromRaw() > 0) {
+                    ApproverController.itemsCache.clear();
+                    ApproverController.countCache.clear();
+                }
+            } catch (setErr: any) {
+                console.error('[Combo] set sync failed:', setErr?.message);
+            }
 
             // ── Response cache (8 s TTL) ───────────────────────────────────────────
             // Key includes all query params + user scope so different users/filters

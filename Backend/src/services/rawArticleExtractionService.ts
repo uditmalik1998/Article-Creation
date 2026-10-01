@@ -20,7 +20,7 @@
 import { prismaClient as prisma, isDbCircuitOpen, openDbCircuit } from '../utils/prisma';
 import { enrichSrmRowWithVlmAdmin, insertRawArticleAsFlat, type SrmRow } from './srmSyncService';
 import { mapWithConcurrency } from '../utils/concurrency';
-import { linkComboGroup } from './comboLinkService';
+import { linkComboGroup, syncSetsFromRaw } from './comboLinkService';
 
 
 // ── Cutoff: presentations on or before this date are already in extraction_results_flat
@@ -190,6 +190,11 @@ export async function runRawArticleExtraction(
       } catch (linkErr: any) {
         console.error(`[RawExtract] ⚠️ Combo link failed for ${r.presentationNo}/${r.designNumber}: ${linkErr.message}`);
       }
+    }
+    try {
+      await syncSetsFromRaw(true);
+    } catch (syncErr: any) {
+      console.error(`[RawExtract] ⚠️ Set sync failed: ${syncErr.message}`);
     }
 
     console.log(`[RawExtract] Done — completed:${completed} failed:${failed} errors:${errors}`);

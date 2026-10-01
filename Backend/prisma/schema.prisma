@@ -430,7 +430,6 @@ model ExtractionResultFlat {
   @@index([approvalStatus, pdStatus], map: "idx_erf_approval_pd")
   @@index([comboParentId])
   @@index([comboRole])
-  @@index([pptNumber, setGroupId], map: "idx_erf_ppt_set_group")
   @@map("extraction_results_flat")
   @@schema("public")
 }

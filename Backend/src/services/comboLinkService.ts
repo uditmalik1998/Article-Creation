@@ -124,8 +124,54 @@ async function applyComboLinks(label: string, parent: ComboLinkRow, rest: ComboL
 
 /** Link the set a given flat row belongs to (if any). */
 export async function linkComboGroupForRow(flatId: string): Promise<string | null> {
-    const row = await prisma.extractionResultFlat.findUnique({ where: { id: flatId }, select: { pptNumber: true, srmOriginalDesignNumber: true, setGroupId: true } });
+    let row = await prisma.extractionResultFlat.findUnique({ where: { id: flatId }, select: { pptNumber: true, srmOriginalDesignNumber: true, setGroupId: true } });
+    if (row && !row.setGroupId) {
+        // Its set fields may still be sitting on raw_articles only (see syncSetsFromRaw).
+        await syncSetsFromRaw(true);
+        row = await prisma.extractionResultFlat.findUnique({ where: { id: flatId }, select: { pptNumber: true, srmOriginalDesignNumber: true, setGroupId: true } });
+    }
     return row ? linkComboGroup(row.pptNumber, row.srmOriginalDesignNumber, row.setGroupId) : null;
+}
+
+let lastSetSyncAt = 0;
+const SET_SYNC_INTERVAL_MS = 60_000;
+
+/**
+ * SRM set photos can be turned into articles by a worker that doesn't know
+ * about sets (e.g. a server still running older code on the shared DB). Those
+ * articles arrive without set fields, so they'd show as separate articles.
+ * Copy set_group_id/set_role/set_name from their raw_articles row (via
+ * raw_articles.flat_id) and link every pending set that isn't linked yet.
+ * Throttled to once a minute unless forced. Returns the number of sets linked.
+ */
+export async function syncSetsFromRaw(force = false): Promise<number> {
+    if (!force && Date.now() - lastSetSyncAt < SET_SYNC_INTERVAL_MS) return 0;
+    lastSetSyncAt = Date.now();
+
+    await prisma.$executeRaw`
+        UPDATE public.extraction_results_flat e
+        SET set_group_id = r.set_group_id, set_role = r.set_role, set_name = r.set_name
+        FROM public.raw_articles r
+        WHERE r.set_group_id IS NOT NULL
+          AND r.flat_id IS NOT NULL
+          AND e.id = r.flat_id
+          AND e.set_group_id IS NULL`;
+
+    const groups = await prisma.$queryRaw<{ ppt_number: string; set_group_id: string }[]>`
+        SELECT e.ppt_number, e.set_group_id
+        FROM public.extraction_results_flat e
+        WHERE e.set_group_id IS NOT NULL
+          AND e.ppt_number IS NOT NULL
+          AND e.is_generic = true
+          AND e.approval_status::text = 'PENDING'
+          AND e.combo_role::text = 'NONE'
+        GROUP BY e.ppt_number, e.set_group_id`;
+
+    let linked = 0;
+    for (const g of groups) {
+        if (await linkSetGroup(g.ppt_number, g.set_group_id)) linked++;
+    }
+    return linked;
 }
 
 /** Re-derive a PARENT's summed costs + mirrored attributes from its children. */
