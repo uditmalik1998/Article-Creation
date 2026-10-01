@@ -66,8 +66,6 @@ export async function runRawArticleExtraction(
   let completed = 0, failed = 0, errors = 0;
 
   try {
-    console.log(`[RawExtract] Starting (triggered by: ${triggeredBy})`);
-
     // ── Atomically claim a batch with SKIP LOCKED ─────────────────────────
     const lockUntil = new Date(Date.now() + LOCK_MINUTES * 60_000);
 
@@ -99,7 +97,6 @@ export async function runRawArticleExtraction(
     `;
 
     if (claimed.length === 0) {
-      console.log('[RawExtract] Nothing to process — queue is empty');
       return { claimed: 0, completed: 0, failed: 0, errors: 0 };
     }
 

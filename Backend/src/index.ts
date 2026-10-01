@@ -468,8 +468,6 @@ app.use(errorHandler);
         .then(r => {
           if (r.claimed > 0) {
             console.log(`[RawExtract Cron] ✅ claimed:${r.claimed} completed:${r.completed} failed:${r.failed} errors:${r.errors}`);
-          } else {
-            console.log('[RawExtract Cron] ✔ No PENDING/FAILED rows — nothing to process');
           }
         })
         .catch(err => console.error('[RawExtract Cron] ❌ Unhandled error:', err?.message));
@@ -504,8 +502,6 @@ app.use(errorHandler);
         .then(r => {
           if (r.claimed > 0) {
             console.log(`[FabricRaw Cron] ✅ claimed:${r.claimed} completed:${r.completed} failed:${r.failed}`);
-          } else {
-            console.log('[FabricRaw Cron] ✔ No PENDING rows — nothing to process');
           }
         })
         .catch(err => console.error('[FabricRaw Cron] ❌ Unhandled error:', err?.message));

@@ -293,10 +293,6 @@ export async function syncVariantsToSapViaRfc(
                 });
 
                 const responseText = await response.text();
-                console.log(
-                    `[ZMM_VAR_RFC] RAW SAP response (status=${response.status}) for variantId=${variant.id}:`,
-                    responseText
-                );
 
                 const outcome = parseVariantRfcResponse(response.status, responseText);
 
