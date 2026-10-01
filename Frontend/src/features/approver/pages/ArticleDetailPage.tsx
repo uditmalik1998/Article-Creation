@@ -651,12 +651,12 @@ export default function ArticleDetailPage({
       });
       if (!r.ok) {
         const p = await r.json().catch(() => null);
-        throw new Error(p?.error || 'Failed to add piece');
+        throw new Error(p?.error || 'Failed to add part');
       }
       const child = await r.json();
       setComboChildren(prev => [...prev, child]);
       setComboTab(child.id);
-    } catch (err) { message.error(err instanceof Error ? err.message : 'Failed to add piece'); }
+    } catch (err) { message.error(err instanceof Error ? err.message : 'Failed to add part'); }
   };
 
   const removeComboChild = async (childId: string) => {
@@ -667,11 +667,11 @@ export default function ArticleDetailPage({
       });
       if (!r.ok) {
         const p = await r.json().catch(() => null);
-        throw new Error(p?.error || 'Failed to remove piece');
+        throw new Error(p?.error || 'Failed to remove part');
       }
       setComboTab('parent');
       await loadComboChildren();
-    } catch (err) { message.error(err instanceof Error ? err.message : 'Failed to remove piece'); }
+    } catch (err) { message.error(err instanceof Error ? err.message : 'Failed to remove part'); }
   };
 
   // Save an edit made on a piece's tab, then reload the parent so its summed
@@ -779,7 +779,7 @@ export default function ArticleDetailPage({
       // const missingWeightCount = variantWeightIssues[item.id];
       // if (missingWeightCount) missing.push(`VARIANT WEIGHT (${missingWeightCount} variant${missingWeightCount > 1 ? 's' : ''} missing)`);
       const label = item.sapArticleId || item.articleNumber || item.imageName || item.id;
-      if (missing.length > 0) acc.push({ articleId: item.comboRole === 'CHILD' ? `${item.majorCategory || 'Piece'} — ${label}` : label, missing });
+      if (missing.length > 0) acc.push({ articleId: item.comboRole === 'CHILD' ? `${item.majorCategory || 'Part'} — ${label}` : label, missing });
       return acc;
     }, comboBlock);
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -1365,7 +1365,7 @@ export default function ArticleDetailPage({
               <PackagePlus className="h-4 w-4" /> Set Article
             </span>
             {[{ id: 'parent', item: currentItem, label: `${currentItem.majorCategory || 'Set'} (Summary)` },
-              ...comboChildren.map((c, i) => ({ id: c.id, item: c, label: `${c.majorCategory || 'Piece'}${i === 0 ? ' · Top' : ''}` }))]
+              ...comboChildren.map((c, i) => ({ id: c.id, item: c, label: `${c.majorCategory || 'Part'}${i === 0 ? ' · Top' : ''}` }))]
               .map(({ id: tabId, item: tabItem, label }) => (
                 <button key={tabId} type="button" onClick={() => setComboTab(tabId)}
                   className={`flex items-center gap-1.5 rounded-md border px-2.5 py-1 text-[12px] font-medium ${comboTab === tabId ? 'border-amber-500 bg-white text-amber-900 shadow-sm' : 'border-transparent text-amber-800 hover:bg-white/60'}`}>
@@ -1377,11 +1377,11 @@ export default function ArticleDetailPage({
             <div className="ml-auto flex items-center gap-1.5">
               {activeComboChild && !(activeComboChild as any).srmOriginalDesignNumber && activeComboChild.approvalStatus === 'PENDING' && (
                 <Button size="sm" variant="ghost" onClick={() => removeComboChild(activeComboChild.id)} className="h-7 px-2 text-[12px] text-rose-600 hover:bg-rose-50">
-                  <Trash2 className="h-3.5 w-3.5" /> Remove piece
+                  <Trash2 className="h-3.5 w-3.5" /> Remove part
                 </Button>
               )}
               <Button size="sm" variant="outline" onClick={addComboChild} disabled={currentItem.approvalStatus !== 'PENDING'} className="h-7 px-2.5 text-[12px]">
-                <Plus className="h-3.5 w-3.5" /> Add piece
+                <Plus className="h-3.5 w-3.5" /> Add part
               </Button>
             </div>
           </div>
@@ -1389,14 +1389,14 @@ export default function ArticleDetailPage({
           {comboTab === 'parent' && (
             comboChildren.length === 0 ? (
               <div className="mt-2 rounded-md border border-dashed border-amber-300 bg-white/50 px-3 py-3 text-center text-[12px] text-amber-700">
-                {comboLoading ? 'Loading pieces…' : 'No pieces linked yet — the pieces uploaded with this set in SRM are linked automatically. Use "Add piece" if one is missing.'}
+                {comboLoading ? 'Loading parts…' : 'No parts linked yet — the parts uploaded with this set in SRM are linked automatically. Use "Add part" if one is missing.'}
               </div>
             ) : (
               <div className="mt-2 overflow-x-auto rounded-md border border-amber-200 bg-white">
                 <table className="w-full text-[12px]">
                   <thead className="bg-amber-50 text-amber-900">
                     <tr>
-                      <th className="px-2 py-1 text-left font-semibold">Piece</th>
+                      <th className="px-2 py-1 text-left font-semibold">Part</th>
                       {COMBO_COST_COLUMNS.map(c => <th key={c.field} className="px-2 py-1 text-right font-semibold">{c.label}</th>)}
                       <th className="px-2 py-1 text-left font-semibold">SAP</th>
                     </tr>
@@ -1404,7 +1404,7 @@ export default function ArticleDetailPage({
                   <tbody>
                     {comboChildren.map((c, i) => (
                       <tr key={c.id} className="cursor-pointer border-t border-amber-100 hover:bg-amber-50/50" onClick={() => setComboTab(c.id)}>
-                        <td className="px-2 py-1 font-medium text-slate-800">{c.majorCategory || 'Piece'}{i === 0 && <span className="ml-1 text-[10px] text-amber-600">(Top — attributes shown on set)</span>}</td>
+                        <td className="px-2 py-1 font-medium text-slate-800">{c.majorCategory || 'Part'}{i === 0 && <span className="ml-1 text-[10px] text-amber-600">(Top — attributes shown on set)</span>}</td>
                         {COMBO_COST_COLUMNS.map(col => <td key={col.field} className="px-2 py-1 text-right tabular-nums">{formatComboCost((c as any)[col.field])}</td>)}
                         <td className="px-2 py-1 text-slate-600">{c.sapArticleId || (c.sapSyncStatus === 'FAILED' ? 'Failed' : c.approvalStatus === 'APPROVED' ? 'Creating…' : '—')}</td>
                       </tr>
@@ -1417,7 +1417,7 @@ export default function ArticleDetailPage({
                   </tbody>
                 </table>
                 <div className="border-t border-amber-100 px-2 py-1 text-[11px] text-amber-700">
-                  The set card below is read-only: costs are the sum of the pieces and attributes come from the Top piece. Edit them on each piece's tab. Save &amp; Submit creates every piece in SAP, then the set.
+                  The set card below is read-only: costs are the sum of the parts and attributes come from the Top part. Edit them on each part's tab. Save &amp; Submit creates every part in SAP, then the set.
                 </div>
               </div>
             )

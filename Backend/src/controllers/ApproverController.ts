@@ -2497,10 +2497,10 @@ export class ApproverController {
         const child = await prisma.extractionResultFlat.findUnique({ where: { id: childId } });
         if (!child || child.comboRole !== 'CHILD') return res.status(404).json({ error: 'Child article not found' });
         if (child.srmUniqueId || child.srmOriginalDesignNumber) {
-            return res.status(400).json({ error: 'This piece came from SRM and cannot be removed.' });
+            return res.status(400).json({ error: 'This part came from SRM and cannot be removed.' });
         }
         if (child.approvalStatus !== 'PENDING') {
-            return res.status(400).json({ error: 'This piece has already been submitted and cannot be removed.' });
+            return res.status(400).json({ error: 'This part has already been submitted and cannot be removed.' });
         }
 
         await prisma.extractionResultFlat.delete({ where: { id: childId } });
@@ -2542,7 +2542,7 @@ export class ApproverController {
                         select: { id: true },
                     });
                     if (children.length === 0) {
-                        return res.status(422).json({ error: 'COMBO_WITHOUT_CHILDREN', detail: 'This set article has no child pieces linked yet.' });
+                        return res.status(422).json({ error: 'COMBO_WITHOUT_CHILDREN', detail: 'This set article has no parts linked yet.' });
                     }
                     await recomputeComboParent(parentId);
                     for (const id of [parentId, ...children.map((c) => c.id)]) {
@@ -2927,7 +2927,7 @@ export class ApproverController {
                         data: {
                             approvalStatus: ApprovalStatus.PENDING,
                             sapSyncStatus: SapSyncStatus.FAILED,
-                            sapSyncMessage: `Child piece ${c.majorCategory ?? ''} failed in SAP — fix it and re-submit the set.`,
+                            sapSyncMessage: `Set part ${c.majorCategory ?? ''} failed in SAP — fix it and re-submit the set.`,
                         },
                     });
                     await prisma.extractionResultFlat.updateMany({
