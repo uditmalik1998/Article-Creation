@@ -2,7 +2,7 @@
  * Backfill missing MRP values from existing rate/cost.
  *
  * Formula:
- *   MRP = ceil((rate + 47%) / 25) * 25
+ *   MRP = ceil((rate + 47%) / 50) * 50
  *
  * Usage:
  *   ts-node scripts/backfill-mrp-from-rate.ts --dry-run

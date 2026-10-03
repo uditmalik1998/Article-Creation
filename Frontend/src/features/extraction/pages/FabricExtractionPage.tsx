@@ -31,6 +31,7 @@ import { preloadAttributeValues } from '../../../services/articleConfigService';
 
 import './ExtractionPage.css';
 import '../../../styles/App.css';
+import { calculateMrpFromRate } from '../../../shared/utils/common/pricing';
 
 const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || (import.meta.env.DEV ? 'http://localhost:5001/api' : '/api');
 
@@ -258,7 +259,7 @@ const FabricExtractionPage = () => {
       if (attributeKey === 'rate') {
         const rate = parseFloat(String(value ?? ''));
         if (!isNaN(rate) && rate > 0) {
-          const mrp = Math.ceil((rate * 1.47) / 25) * 25;
+          const mrp = calculateMrpFromRate(rate);
           updateRowAttribute(rowId, 'mrp', mrp);
         }
       }
