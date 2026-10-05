@@ -2,7 +2,6 @@ import React, { useState, useMemo, useCallback, useEffect, useRef } from 'react'
 import {
   FileText,
   LayoutGrid,
-  Rocket,
   Info,
   Users,
   Copy,
@@ -2546,7 +2545,7 @@ const ArticleCard = React.memo(
                                 const COSTING_FIELDS: { field: string; label: string; isDropdown?: boolean }[] = [
                                   { field: 'costingType',  label: 'BODY COSTING TYPE', isDropdown: true },
                                   { field: 'cmpCost',      label: 'CMP COST' },
-                                  { field: 'basicTrimCost', label: 'BASIC TRIM COST' },
+                                  { field: 'basicTrimCost', label: 'PACKAGING COST' },
                                   { field: 'cmtpCost',     label: 'CMTP COST' },
                                 ];
                                 return COSTING_FIELDS.map(({ field, label, isDropdown }) => {

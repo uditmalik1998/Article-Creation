@@ -260,6 +260,12 @@ export type GmArticleData = $Result.DefaultSelection<Prisma.$GmArticleDataPayloa
  */
 export type GmVariantArticleData = $Result.DefaultSelection<Prisma.$GmVariantArticleDataPayload>
 /**
+ * Model FgVariantArticleData
+ * FgVariantArticleData: One row per FG article variant (size × color) under a parent FG article.
+ * Mirrors GmVariantArticleData but scoped to FG (extraction_result_flat) articles.
+ */
+export type FgVariantArticleData = $Result.DefaultSelection<Prisma.$FgVariantArticleDataPayload>
+/**
  * Model FabricVariantArticleData
  * FabricVariantArticleData: One row per variant (size × color) under a fabric article.
  * Generic parent is tracked via generic_article_id (fabric_article_data.id) and
@@ -1119,6 +1125,16 @@ export class PrismaClient<
   get gmVariantArticleData(): Prisma.GmVariantArticleDataDelegate<ExtArgs, ClientOptions>;
 
   /**
+   * `prisma.fgVariantArticleData`: Exposes CRUD operations for the **FgVariantArticleData** model.
+    * Example usage:
+    * ```ts
+    * // Fetch zero or more FgVariantArticleData
+    * const fgVariantArticleData = await prisma.fgVariantArticleData.findMany()
+    * ```
+    */
+  get fgVariantArticleData(): Prisma.FgVariantArticleDataDelegate<ExtArgs, ClientOptions>;
+
+  /**
    * `prisma.fabricVariantArticleData`: Exposes CRUD operations for the **FabricVariantArticleData** model.
     * Example usage:
     * ```ts
@@ -1730,6 +1746,7 @@ export namespace Prisma {
     FabricArticleData: 'FabricArticleData',
     GmArticleData: 'GmArticleData',
     GmVariantArticleData: 'GmVariantArticleData',
+    FgVariantArticleData: 'FgVariantArticleData',
     FabricVariantArticleData: 'FabricVariantArticleData',
     ValueAdditionAccessoriesCost: 'ValueAdditionAccessoriesCost',
     BodyArticleData: 'BodyArticleData',
@@ -1761,7 +1778,7 @@ export namespace Prisma {
       omit: GlobalOmitOptions
     }
     meta: {
-      modelProps: "department" | "subDepartment" | "category" | "masterAttribute" | "attributeAllowedValue" | "categoryAttribute" | "extractionJob" | "extractionResult" | "extractionResultFlat" | "modelGenerationResult" | "modelImageApproval" | "mvgrLookup" | "masterVendorDetail" | "user" | "auditLog" | "apiKey" | "changeHistory" | "costSummary" | "article360" | "articleFab" | "articleBody" | "articleVaAcc" | "articleVaPrcs" | "articleBom" | "sapFieldConfig" | "sapAttributeValue" | "article360Flat" | "rawArticle" | "fabricRawData" | "gmRawData" | "srmSyncRun" | "srmSyncRunItem" | "poolBJob" | "poolBBatch" | "nationalGridMaster" | "broaderMenu" | "majorCatMaster" | "fabricArticleMaster" | "fabricMajCatGridValue" | "modifyLog" | "fabricArticleData" | "gmArticleData" | "gmVariantArticleData" | "fabricVariantArticleData" | "valueAdditionAccessoriesCost" | "bodyArticleData" | "referenceArticleData" | "bodyFabricConsumption" | "roughCmpCostMaster" | "basicTrimCostMaster" | "basicTrimCostComponent" | "majorCategoryDetails" | "expenseApprovalStage" | "expenseChangeRequest" | "expenseAccessGrant" | "expenseAuditLog"
+      modelProps: "department" | "subDepartment" | "category" | "masterAttribute" | "attributeAllowedValue" | "categoryAttribute" | "extractionJob" | "extractionResult" | "extractionResultFlat" | "modelGenerationResult" | "modelImageApproval" | "mvgrLookup" | "masterVendorDetail" | "user" | "auditLog" | "apiKey" | "changeHistory" | "costSummary" | "article360" | "articleFab" | "articleBody" | "articleVaAcc" | "articleVaPrcs" | "articleBom" | "sapFieldConfig" | "sapAttributeValue" | "article360Flat" | "rawArticle" | "fabricRawData" | "gmRawData" | "srmSyncRun" | "srmSyncRunItem" | "poolBJob" | "poolBBatch" | "nationalGridMaster" | "broaderMenu" | "majorCatMaster" | "fabricArticleMaster" | "fabricMajCatGridValue" | "modifyLog" | "fabricArticleData" | "gmArticleData" | "gmVariantArticleData" | "fgVariantArticleData" | "fabricVariantArticleData" | "valueAdditionAccessoriesCost" | "bodyArticleData" | "referenceArticleData" | "bodyFabricConsumption" | "roughCmpCostMaster" | "basicTrimCostMaster" | "basicTrimCostComponent" | "majorCategoryDetails" | "expenseApprovalStage" | "expenseChangeRequest" | "expenseAccessGrant" | "expenseAuditLog"
       txIsolationLevel: Prisma.TransactionIsolationLevel
     }
     model: {
@@ -4947,6 +4964,80 @@ export namespace Prisma {
           }
         }
       }
+      FgVariantArticleData: {
+        payload: Prisma.$FgVariantArticleDataPayload<ExtArgs>
+        fields: Prisma.FgVariantArticleDataFieldRefs
+        operations: {
+          findUnique: {
+            args: Prisma.FgVariantArticleDataFindUniqueArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$FgVariantArticleDataPayload> | null
+          }
+          findUniqueOrThrow: {
+            args: Prisma.FgVariantArticleDataFindUniqueOrThrowArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$FgVariantArticleDataPayload>
+          }
+          findFirst: {
+            args: Prisma.FgVariantArticleDataFindFirstArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$FgVariantArticleDataPayload> | null
+          }
+          findFirstOrThrow: {
+            args: Prisma.FgVariantArticleDataFindFirstOrThrowArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$FgVariantArticleDataPayload>
+          }
+          findMany: {
+            args: Prisma.FgVariantArticleDataFindManyArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$FgVariantArticleDataPayload>[]
+          }
+          create: {
+            args: Prisma.FgVariantArticleDataCreateArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$FgVariantArticleDataPayload>
+          }
+          createMany: {
+            args: Prisma.FgVariantArticleDataCreateManyArgs<ExtArgs>
+            result: BatchPayload
+          }
+          createManyAndReturn: {
+            args: Prisma.FgVariantArticleDataCreateManyAndReturnArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$FgVariantArticleDataPayload>[]
+          }
+          delete: {
+            args: Prisma.FgVariantArticleDataDeleteArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$FgVariantArticleDataPayload>
+          }
+          update: {
+            args: Prisma.FgVariantArticleDataUpdateArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$FgVariantArticleDataPayload>
+          }
+          deleteMany: {
+            args: Prisma.FgVariantArticleDataDeleteManyArgs<ExtArgs>
+            result: BatchPayload
+          }
+          updateMany: {
+            args: Prisma.FgVariantArticleDataUpdateManyArgs<ExtArgs>
+            result: BatchPayload
+          }
+          updateManyAndReturn: {
+            args: Prisma.FgVariantArticleDataUpdateManyAndReturnArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$FgVariantArticleDataPayload>[]
+          }
+          upsert: {
+            args: Prisma.FgVariantArticleDataUpsertArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$FgVariantArticleDataPayload>
+          }
+          aggregate: {
+            args: Prisma.FgVariantArticleDataAggregateArgs<ExtArgs>
+            result: $Utils.Optional<AggregateFgVariantArticleData>
+          }
+          groupBy: {
+            args: Prisma.FgVariantArticleDataGroupByArgs<ExtArgs>
+            result: $Utils.Optional<FgVariantArticleDataGroupByOutputType>[]
+          }
+          count: {
+            args: Prisma.FgVariantArticleDataCountArgs<ExtArgs>
+            result: $Utils.Optional<FgVariantArticleDataCountAggregateOutputType> | number
+          }
+        }
+      }
       FabricVariantArticleData: {
         payload: Prisma.$FabricVariantArticleDataPayload<ExtArgs>
         fields: Prisma.FabricVariantArticleDataFieldRefs
@@ -6044,6 +6135,7 @@ export namespace Prisma {
     fabricArticleData?: FabricArticleDataOmit
     gmArticleData?: GmArticleDataOmit
     gmVariantArticleData?: GmVariantArticleDataOmit
+    fgVariantArticleData?: FgVariantArticleDataOmit
     fabricVariantArticleData?: FabricVariantArticleDataOmit
     valueAdditionAccessoriesCost?: ValueAdditionAccessoriesCostOmit
     bodyArticleData?: BodyArticleDataOmit
@@ -62447,6 +62539,1264 @@ export namespace Prisma {
 
 
   /**
+   * Model FgVariantArticleData
+   */
+
+  export type AggregateFgVariantArticleData = {
+    _count: FgVariantArticleDataCountAggregateOutputType | null
+    _avg: FgVariantArticleDataAvgAggregateOutputType | null
+    _sum: FgVariantArticleDataSumAggregateOutputType | null
+    _min: FgVariantArticleDataMinAggregateOutputType | null
+    _max: FgVariantArticleDataMaxAggregateOutputType | null
+  }
+
+  export type FgVariantArticleDataAvgAggregateOutputType = {
+    mrp: Decimal | null
+    rate: Decimal | null
+    approvedBy: number | null
+  }
+
+  export type FgVariantArticleDataSumAggregateOutputType = {
+    mrp: Decimal | null
+    rate: Decimal | null
+    approvedBy: number | null
+  }
+
+  export type FgVariantArticleDataMinAggregateOutputType = {
+    id: string | null
+    genericArticleId: string | null
+    genericArticleNumber: string | null
+    variantColor: string | null
+    variantSize: string | null
+    variantArticleNumber: string | null
+    division: string | null
+    subDivision: string | null
+    majorCategory: string | null
+    vendorName: string | null
+    vendorCode: string | null
+    designNumber: string | null
+    mrp: Decimal | null
+    rate: Decimal | null
+    approvalStatus: string | null
+    approvedAt: Date | null
+    approvedBy: number | null
+    sapSyncStatus: string | null
+    sapSyncMessage: string | null
+    imageUrl: string | null
+    createdAt: Date | null
+    updatedAt: Date | null
+  }
+
+  export type FgVariantArticleDataMaxAggregateOutputType = {
+    id: string | null
+    genericArticleId: string | null
+    genericArticleNumber: string | null
+    variantColor: string | null
+    variantSize: string | null
+    variantArticleNumber: string | null
+    division: string | null
+    subDivision: string | null
+    majorCategory: string | null
+    vendorName: string | null
+    vendorCode: string | null
+    designNumber: string | null
+    mrp: Decimal | null
+    rate: Decimal | null
+    approvalStatus: string | null
+    approvedAt: Date | null
+    approvedBy: number | null
+    sapSyncStatus: string | null
+    sapSyncMessage: string | null
+    imageUrl: string | null
+    createdAt: Date | null
+    updatedAt: Date | null
+  }
+
+  export type FgVariantArticleDataCountAggregateOutputType = {
+    id: number
+    genericArticleId: number
+    genericArticleNumber: number
+    variantColor: number
+    variantSize: number
+    variantArticleNumber: number
+    division: number
+    subDivision: number
+    majorCategory: number
+    vendorName: number
+    vendorCode: number
+    designNumber: number
+    mrp: number
+    rate: number
+    approvalStatus: number
+    approvedAt: number
+    approvedBy: number
+    sapSyncStatus: number
+    sapSyncMessage: number
+    imageUrl: number
+    createdAt: number
+    updatedAt: number
+    _all: number
+  }
+
+
+  export type FgVariantArticleDataAvgAggregateInputType = {
+    mrp?: true
+    rate?: true
+    approvedBy?: true
+  }
+
+  export type FgVariantArticleDataSumAggregateInputType = {
+    mrp?: true
+    rate?: true
+    approvedBy?: true
+  }
+
+  export type FgVariantArticleDataMinAggregateInputType = {
+    id?: true
+    genericArticleId?: true
+    genericArticleNumber?: true
+    variantColor?: true
+    variantSize?: true
+    variantArticleNumber?: true
+    division?: true
+    subDivision?: true
+    majorCategory?: true
+    vendorName?: true
+    vendorCode?: true
+    designNumber?: true
+    mrp?: true
+    rate?: true
+    approvalStatus?: true
+    approvedAt?: true
+    approvedBy?: true
+    sapSyncStatus?: true
+    sapSyncMessage?: true
+    imageUrl?: true
+    createdAt?: true
+    updatedAt?: true
+  }
+
+  export type FgVariantArticleDataMaxAggregateInputType = {
+    id?: true
+    genericArticleId?: true
+    genericArticleNumber?: true
+    variantColor?: true
+    variantSize?: true
+    variantArticleNumber?: true
+    division?: true
+    subDivision?: true
+    majorCategory?: true
+    vendorName?: true
+    vendorCode?: true
+    designNumber?: true
+    mrp?: true
+    rate?: true
+    approvalStatus?: true
+    approvedAt?: true
+    approvedBy?: true
+    sapSyncStatus?: true
+    sapSyncMessage?: true
+    imageUrl?: true
+    createdAt?: true
+    updatedAt?: true
+  }
+
+  export type FgVariantArticleDataCountAggregateInputType = {
+    id?: true
+    genericArticleId?: true
+    genericArticleNumber?: true
+    variantColor?: true
+    variantSize?: true
+    variantArticleNumber?: true
+    division?: true
+    subDivision?: true
+    majorCategory?: true
+    vendorName?: true
+    vendorCode?: true
+    designNumber?: true
+    mrp?: true
+    rate?: true
+    approvalStatus?: true
+    approvedAt?: true
+    approvedBy?: true
+    sapSyncStatus?: true
+    sapSyncMessage?: true
+    imageUrl?: true
+    createdAt?: true
+    updatedAt?: true
+    _all?: true
+  }
+
+  export type FgVariantArticleDataAggregateArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Filter which FgVariantArticleData to aggregate.
+     */
+    where?: FgVariantArticleDataWhereInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
+     * 
+     * Determine the order of FgVariantArticleData to fetch.
+     */
+    orderBy?: FgVariantArticleDataOrderByWithRelationInput | FgVariantArticleDataOrderByWithRelationInput[]
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
+     * 
+     * Sets the start position
+     */
+    cursor?: FgVariantArticleDataWhereUniqueInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Take `±n` FgVariantArticleData from the position of the cursor.
+     */
+    take?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Skip the first `n` FgVariantArticleData.
+     */
+    skip?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     * 
+     * Count returned FgVariantArticleData
+    **/
+    _count?: true | FgVariantArticleDataCountAggregateInputType
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     * 
+     * Select which fields to average
+    **/
+    _avg?: FgVariantArticleDataAvgAggregateInputType
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     * 
+     * Select which fields to sum
+    **/
+    _sum?: FgVariantArticleDataSumAggregateInputType
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     * 
+     * Select which fields to find the minimum value
+    **/
+    _min?: FgVariantArticleDataMinAggregateInputType
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     * 
+     * Select which fields to find the maximum value
+    **/
+    _max?: FgVariantArticleDataMaxAggregateInputType
+  }
+
+  export type GetFgVariantArticleDataAggregateType<T extends FgVariantArticleDataAggregateArgs> = {
+        [P in keyof T & keyof AggregateFgVariantArticleData]: P extends '_count' | 'count'
+      ? T[P] extends true
+        ? number
+        : GetScalarType<T[P], AggregateFgVariantArticleData[P]>
+      : GetScalarType<T[P], AggregateFgVariantArticleData[P]>
+  }
+
+
+
+
+  export type FgVariantArticleDataGroupByArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    where?: FgVariantArticleDataWhereInput
+    orderBy?: FgVariantArticleDataOrderByWithAggregationInput | FgVariantArticleDataOrderByWithAggregationInput[]
+    by: FgVariantArticleDataScalarFieldEnum[] | FgVariantArticleDataScalarFieldEnum
+    having?: FgVariantArticleDataScalarWhereWithAggregatesInput
+    take?: number
+    skip?: number
+    _count?: FgVariantArticleDataCountAggregateInputType | true
+    _avg?: FgVariantArticleDataAvgAggregateInputType
+    _sum?: FgVariantArticleDataSumAggregateInputType
+    _min?: FgVariantArticleDataMinAggregateInputType
+    _max?: FgVariantArticleDataMaxAggregateInputType
+  }
+
+  export type FgVariantArticleDataGroupByOutputType = {
+    id: string
+    genericArticleId: string | null
+    genericArticleNumber: string | null
+    variantColor: string | null
+    variantSize: string | null
+    variantArticleNumber: string | null
+    division: string | null
+    subDivision: string | null
+    majorCategory: string | null
+    vendorName: string | null
+    vendorCode: string | null
+    designNumber: string | null
+    mrp: Decimal | null
+    rate: Decimal | null
+    approvalStatus: string
+    approvedAt: Date | null
+    approvedBy: number | null
+    sapSyncStatus: string
+    sapSyncMessage: string | null
+    imageUrl: string | null
+    createdAt: Date
+    updatedAt: Date
+    _count: FgVariantArticleDataCountAggregateOutputType | null
+    _avg: FgVariantArticleDataAvgAggregateOutputType | null
+    _sum: FgVariantArticleDataSumAggregateOutputType | null
+    _min: FgVariantArticleDataMinAggregateOutputType | null
+    _max: FgVariantArticleDataMaxAggregateOutputType | null
+  }
+
+  type GetFgVariantArticleDataGroupByPayload<T extends FgVariantArticleDataGroupByArgs> = Prisma.PrismaPromise<
+    Array<
+      PickEnumerable<FgVariantArticleDataGroupByOutputType, T['by']> &
+        {
+          [P in ((keyof T) & (keyof FgVariantArticleDataGroupByOutputType))]: P extends '_count'
+            ? T[P] extends boolean
+              ? number
+              : GetScalarType<T[P], FgVariantArticleDataGroupByOutputType[P]>
+            : GetScalarType<T[P], FgVariantArticleDataGroupByOutputType[P]>
+        }
+      >
+    >
+
+
+  export type FgVariantArticleDataSelect<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
+    id?: boolean
+    genericArticleId?: boolean
+    genericArticleNumber?: boolean
+    variantColor?: boolean
+    variantSize?: boolean
+    variantArticleNumber?: boolean
+    division?: boolean
+    subDivision?: boolean
+    majorCategory?: boolean
+    vendorName?: boolean
+    vendorCode?: boolean
+    designNumber?: boolean
+    mrp?: boolean
+    rate?: boolean
+    approvalStatus?: boolean
+    approvedAt?: boolean
+    approvedBy?: boolean
+    sapSyncStatus?: boolean
+    sapSyncMessage?: boolean
+    imageUrl?: boolean
+    createdAt?: boolean
+    updatedAt?: boolean
+  }, ExtArgs["result"]["fgVariantArticleData"]>
+
+  export type FgVariantArticleDataSelectCreateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
+    id?: boolean
+    genericArticleId?: boolean
+    genericArticleNumber?: boolean
+    variantColor?: boolean
+    variantSize?: boolean
+    variantArticleNumber?: boolean
+    division?: boolean
+    subDivision?: boolean
+    majorCategory?: boolean
+    vendorName?: boolean
+    vendorCode?: boolean
+    designNumber?: boolean
+    mrp?: boolean
+    rate?: boolean
+    approvalStatus?: boolean
+    approvedAt?: boolean
+    approvedBy?: boolean
+    sapSyncStatus?: boolean
+    sapSyncMessage?: boolean
+    imageUrl?: boolean
+    createdAt?: boolean
+    updatedAt?: boolean
+  }, ExtArgs["result"]["fgVariantArticleData"]>
+
+  export type FgVariantArticleDataSelectUpdateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
+    id?: boolean
+    genericArticleId?: boolean
+    genericArticleNumber?: boolean
+    variantColor?: boolean
+    variantSize?: boolean
+    variantArticleNumber?: boolean
+    division?: boolean
+    subDivision?: boolean
+    majorCategory?: boolean
+    vendorName?: boolean
+    vendorCode?: boolean
+    designNumber?: boolean
+    mrp?: boolean
+    rate?: boolean
+    approvalStatus?: boolean
+    approvedAt?: boolean
+    approvedBy?: boolean
+    sapSyncStatus?: boolean
+    sapSyncMessage?: boolean
+    imageUrl?: boolean
+    createdAt?: boolean
+    updatedAt?: boolean
+  }, ExtArgs["result"]["fgVariantArticleData"]>
+
+  export type FgVariantArticleDataSelectScalar = {
+    id?: boolean
+    genericArticleId?: boolean
+    genericArticleNumber?: boolean
+    variantColor?: boolean
+    variantSize?: boolean
+    variantArticleNumber?: boolean
+    division?: boolean
+    subDivision?: boolean
+    majorCategory?: boolean
+    vendorName?: boolean
+    vendorCode?: boolean
+    designNumber?: boolean
+    mrp?: boolean
+    rate?: boolean
+    approvalStatus?: boolean
+    approvedAt?: boolean
+    approvedBy?: boolean
+    sapSyncStatus?: boolean
+    sapSyncMessage?: boolean
+    imageUrl?: boolean
+    createdAt?: boolean
+    updatedAt?: boolean
+  }
+
+  export type FgVariantArticleDataOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<"id" | "genericArticleId" | "genericArticleNumber" | "variantColor" | "variantSize" | "variantArticleNumber" | "division" | "subDivision" | "majorCategory" | "vendorName" | "vendorCode" | "designNumber" | "mrp" | "rate" | "approvalStatus" | "approvedAt" | "approvedBy" | "sapSyncStatus" | "sapSyncMessage" | "imageUrl" | "createdAt" | "updatedAt", ExtArgs["result"]["fgVariantArticleData"]>
+
+  export type $FgVariantArticleDataPayload<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    name: "FgVariantArticleData"
+    objects: {}
+    scalars: $Extensions.GetPayloadResult<{
+      id: string
+      genericArticleId: string | null
+      genericArticleNumber: string | null
+      variantColor: string | null
+      variantSize: string | null
+      variantArticleNumber: string | null
+      division: string | null
+      subDivision: string | null
+      majorCategory: string | null
+      vendorName: string | null
+      vendorCode: string | null
+      designNumber: string | null
+      mrp: Prisma.Decimal | null
+      rate: Prisma.Decimal | null
+      approvalStatus: string
+      approvedAt: Date | null
+      approvedBy: number | null
+      sapSyncStatus: string
+      sapSyncMessage: string | null
+      imageUrl: string | null
+      createdAt: Date
+      updatedAt: Date
+    }, ExtArgs["result"]["fgVariantArticleData"]>
+    composites: {}
+  }
+
+  type FgVariantArticleDataGetPayload<S extends boolean | null | undefined | FgVariantArticleDataDefaultArgs> = $Result.GetResult<Prisma.$FgVariantArticleDataPayload, S>
+
+  type FgVariantArticleDataCountArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> =
+    Omit<FgVariantArticleDataFindManyArgs, 'select' | 'include' | 'distinct' | 'omit'> & {
+      select?: FgVariantArticleDataCountAggregateInputType | true
+    }
+
+  export interface FgVariantArticleDataDelegate<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs, GlobalOmitOptions = {}> {
+    [K: symbol]: { types: Prisma.TypeMap<ExtArgs>['model']['FgVariantArticleData'], meta: { name: 'FgVariantArticleData' } }
+    /**
+     * Find zero or one FgVariantArticleData that matches the filter.
+     * @param {FgVariantArticleDataFindUniqueArgs} args - Arguments to find a FgVariantArticleData
+     * @example
+     * // Get one FgVariantArticleData
+     * const fgVariantArticleData = await prisma.fgVariantArticleData.findUnique({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     */
+    findUnique<T extends FgVariantArticleDataFindUniqueArgs>(args: SelectSubset<T, FgVariantArticleDataFindUniqueArgs<ExtArgs>>): Prisma__FgVariantArticleDataClient<$Result.GetResult<Prisma.$FgVariantArticleDataPayload<ExtArgs>, T, "findUnique", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Find one FgVariantArticleData that matches the filter or throw an error with `error.code='P2025'`
+     * if no matches were found.
+     * @param {FgVariantArticleDataFindUniqueOrThrowArgs} args - Arguments to find a FgVariantArticleData
+     * @example
+     * // Get one FgVariantArticleData
+     * const fgVariantArticleData = await prisma.fgVariantArticleData.findUniqueOrThrow({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     */
+    findUniqueOrThrow<T extends FgVariantArticleDataFindUniqueOrThrowArgs>(args: SelectSubset<T, FgVariantArticleDataFindUniqueOrThrowArgs<ExtArgs>>): Prisma__FgVariantArticleDataClient<$Result.GetResult<Prisma.$FgVariantArticleDataPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Find the first FgVariantArticleData that matches the filter.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {FgVariantArticleDataFindFirstArgs} args - Arguments to find a FgVariantArticleData
+     * @example
+     * // Get one FgVariantArticleData
+     * const fgVariantArticleData = await prisma.fgVariantArticleData.findFirst({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     */
+    findFirst<T extends FgVariantArticleDataFindFirstArgs>(args?: SelectSubset<T, FgVariantArticleDataFindFirstArgs<ExtArgs>>): Prisma__FgVariantArticleDataClient<$Result.GetResult<Prisma.$FgVariantArticleDataPayload<ExtArgs>, T, "findFirst", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Find the first FgVariantArticleData that matches the filter or
+     * throw `PrismaKnownClientError` with `P2025` code if no matches were found.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {FgVariantArticleDataFindFirstOrThrowArgs} args - Arguments to find a FgVariantArticleData
+     * @example
+     * // Get one FgVariantArticleData
+     * const fgVariantArticleData = await prisma.fgVariantArticleData.findFirstOrThrow({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     */
+    findFirstOrThrow<T extends FgVariantArticleDataFindFirstOrThrowArgs>(args?: SelectSubset<T, FgVariantArticleDataFindFirstOrThrowArgs<ExtArgs>>): Prisma__FgVariantArticleDataClient<$Result.GetResult<Prisma.$FgVariantArticleDataPayload<ExtArgs>, T, "findFirstOrThrow", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Find zero or more FgVariantArticleData that matches the filter.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {FgVariantArticleDataFindManyArgs} args - Arguments to filter and select certain fields only.
+     * @example
+     * // Get all FgVariantArticleData
+     * const fgVariantArticleData = await prisma.fgVariantArticleData.findMany()
+     * 
+     * // Get first 10 FgVariantArticleData
+     * const fgVariantArticleData = await prisma.fgVariantArticleData.findMany({ take: 10 })
+     * 
+     * // Only select the `id`
+     * const fgVariantArticleDataWithIdOnly = await prisma.fgVariantArticleData.findMany({ select: { id: true } })
+     * 
+     */
+    findMany<T extends FgVariantArticleDataFindManyArgs>(args?: SelectSubset<T, FgVariantArticleDataFindManyArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$FgVariantArticleDataPayload<ExtArgs>, T, "findMany", GlobalOmitOptions>>
+
+    /**
+     * Create a FgVariantArticleData.
+     * @param {FgVariantArticleDataCreateArgs} args - Arguments to create a FgVariantArticleData.
+     * @example
+     * // Create one FgVariantArticleData
+     * const FgVariantArticleData = await prisma.fgVariantArticleData.create({
+     *   data: {
+     *     // ... data to create a FgVariantArticleData
+     *   }
+     * })
+     * 
+     */
+    create<T extends FgVariantArticleDataCreateArgs>(args: SelectSubset<T, FgVariantArticleDataCreateArgs<ExtArgs>>): Prisma__FgVariantArticleDataClient<$Result.GetResult<Prisma.$FgVariantArticleDataPayload<ExtArgs>, T, "create", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Create many FgVariantArticleData.
+     * @param {FgVariantArticleDataCreateManyArgs} args - Arguments to create many FgVariantArticleData.
+     * @example
+     * // Create many FgVariantArticleData
+     * const fgVariantArticleData = await prisma.fgVariantArticleData.createMany({
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     *     
+     */
+    createMany<T extends FgVariantArticleDataCreateManyArgs>(args?: SelectSubset<T, FgVariantArticleDataCreateManyArgs<ExtArgs>>): Prisma.PrismaPromise<BatchPayload>
+
+    /**
+     * Create many FgVariantArticleData and returns the data saved in the database.
+     * @param {FgVariantArticleDataCreateManyAndReturnArgs} args - Arguments to create many FgVariantArticleData.
+     * @example
+     * // Create many FgVariantArticleData
+     * const fgVariantArticleData = await prisma.fgVariantArticleData.createManyAndReturn({
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     * 
+     * // Create many FgVariantArticleData and only return the `id`
+     * const fgVariantArticleDataWithIdOnly = await prisma.fgVariantArticleData.createManyAndReturn({
+     *   select: { id: true },
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * 
+     */
+    createManyAndReturn<T extends FgVariantArticleDataCreateManyAndReturnArgs>(args?: SelectSubset<T, FgVariantArticleDataCreateManyAndReturnArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$FgVariantArticleDataPayload<ExtArgs>, T, "createManyAndReturn", GlobalOmitOptions>>
+
+    /**
+     * Delete a FgVariantArticleData.
+     * @param {FgVariantArticleDataDeleteArgs} args - Arguments to delete one FgVariantArticleData.
+     * @example
+     * // Delete one FgVariantArticleData
+     * const FgVariantArticleData = await prisma.fgVariantArticleData.delete({
+     *   where: {
+     *     // ... filter to delete one FgVariantArticleData
+     *   }
+     * })
+     * 
+     */
+    delete<T extends FgVariantArticleDataDeleteArgs>(args: SelectSubset<T, FgVariantArticleDataDeleteArgs<ExtArgs>>): Prisma__FgVariantArticleDataClient<$Result.GetResult<Prisma.$FgVariantArticleDataPayload<ExtArgs>, T, "delete", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Update one FgVariantArticleData.
+     * @param {FgVariantArticleDataUpdateArgs} args - Arguments to update one FgVariantArticleData.
+     * @example
+     * // Update one FgVariantArticleData
+     * const fgVariantArticleData = await prisma.fgVariantArticleData.update({
+     *   where: {
+     *     // ... provide filter here
+     *   },
+     *   data: {
+     *     // ... provide data here
+     *   }
+     * })
+     * 
+     */
+    update<T extends FgVariantArticleDataUpdateArgs>(args: SelectSubset<T, FgVariantArticleDataUpdateArgs<ExtArgs>>): Prisma__FgVariantArticleDataClient<$Result.GetResult<Prisma.$FgVariantArticleDataPayload<ExtArgs>, T, "update", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Delete zero or more FgVariantArticleData.
+     * @param {FgVariantArticleDataDeleteManyArgs} args - Arguments to filter FgVariantArticleData to delete.
+     * @example
+     * // Delete a few FgVariantArticleData
+     * const { count } = await prisma.fgVariantArticleData.deleteMany({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     * 
+     */
+    deleteMany<T extends FgVariantArticleDataDeleteManyArgs>(args?: SelectSubset<T, FgVariantArticleDataDeleteManyArgs<ExtArgs>>): Prisma.PrismaPromise<BatchPayload>
+
+    /**
+     * Update zero or more FgVariantArticleData.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {FgVariantArticleDataUpdateManyArgs} args - Arguments to update one or more rows.
+     * @example
+     * // Update many FgVariantArticleData
+     * const fgVariantArticleData = await prisma.fgVariantArticleData.updateMany({
+     *   where: {
+     *     // ... provide filter here
+     *   },
+     *   data: {
+     *     // ... provide data here
+     *   }
+     * })
+     * 
+     */
+    updateMany<T extends FgVariantArticleDataUpdateManyArgs>(args: SelectSubset<T, FgVariantArticleDataUpdateManyArgs<ExtArgs>>): Prisma.PrismaPromise<BatchPayload>
+
+    /**
+     * Update zero or more FgVariantArticleData and returns the data updated in the database.
+     * @param {FgVariantArticleDataUpdateManyAndReturnArgs} args - Arguments to update many FgVariantArticleData.
+     * @example
+     * // Update many FgVariantArticleData
+     * const fgVariantArticleData = await prisma.fgVariantArticleData.updateManyAndReturn({
+     *   where: {
+     *     // ... provide filter here
+     *   },
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     * 
+     * // Update zero or more FgVariantArticleData and only return the `id`
+     * const fgVariantArticleDataWithIdOnly = await prisma.fgVariantArticleData.updateManyAndReturn({
+     *   select: { id: true },
+     *   where: {
+     *     // ... provide filter here
+     *   },
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * 
+     */
+    updateManyAndReturn<T extends FgVariantArticleDataUpdateManyAndReturnArgs>(args: SelectSubset<T, FgVariantArticleDataUpdateManyAndReturnArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$FgVariantArticleDataPayload<ExtArgs>, T, "updateManyAndReturn", GlobalOmitOptions>>
+
+    /**
+     * Create or update one FgVariantArticleData.
+     * @param {FgVariantArticleDataUpsertArgs} args - Arguments to update or create a FgVariantArticleData.
+     * @example
+     * // Update or create a FgVariantArticleData
+     * const fgVariantArticleData = await prisma.fgVariantArticleData.upsert({
+     *   create: {
+     *     // ... data to create a FgVariantArticleData
+     *   },
+     *   update: {
+     *     // ... in case it already exists, update
+     *   },
+     *   where: {
+     *     // ... the filter for the FgVariantArticleData we want to update
+     *   }
+     * })
+     */
+    upsert<T extends FgVariantArticleDataUpsertArgs>(args: SelectSubset<T, FgVariantArticleDataUpsertArgs<ExtArgs>>): Prisma__FgVariantArticleDataClient<$Result.GetResult<Prisma.$FgVariantArticleDataPayload<ExtArgs>, T, "upsert", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+
+    /**
+     * Count the number of FgVariantArticleData.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {FgVariantArticleDataCountArgs} args - Arguments to filter FgVariantArticleData to count.
+     * @example
+     * // Count the number of FgVariantArticleData
+     * const count = await prisma.fgVariantArticleData.count({
+     *   where: {
+     *     // ... the filter for the FgVariantArticleData we want to count
+     *   }
+     * })
+    **/
+    count<T extends FgVariantArticleDataCountArgs>(
+      args?: Subset<T, FgVariantArticleDataCountArgs>,
+    ): Prisma.PrismaPromise<
+      T extends $Utils.Record<'select', any>
+        ? T['select'] extends true
+          ? number
+          : GetScalarType<T['select'], FgVariantArticleDataCountAggregateOutputType>
+        : number
+    >
+
+    /**
+     * Allows you to perform aggregations operations on a FgVariantArticleData.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {FgVariantArticleDataAggregateArgs} args - Select which aggregations you would like to apply and on what fields.
+     * @example
+     * // Ordered by age ascending
+     * // Where email contains prisma.io
+     * // Limited to the 10 users
+     * const aggregations = await prisma.user.aggregate({
+     *   _avg: {
+     *     age: true,
+     *   },
+     *   where: {
+     *     email: {
+     *       contains: "prisma.io",
+     *     },
+     *   },
+     *   orderBy: {
+     *     age: "asc",
+     *   },
+     *   take: 10,
+     * })
+    **/
+    aggregate<T extends FgVariantArticleDataAggregateArgs>(args: Subset<T, FgVariantArticleDataAggregateArgs>): Prisma.PrismaPromise<GetFgVariantArticleDataAggregateType<T>>
+
+    /**
+     * Group by FgVariantArticleData.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {FgVariantArticleDataGroupByArgs} args - Group by arguments.
+     * @example
+     * // Group by city, order by createdAt, get count
+     * const result = await prisma.user.groupBy({
+     *   by: ['city', 'createdAt'],
+     *   orderBy: {
+     *     createdAt: true
+     *   },
+     *   _count: {
+     *     _all: true
+     *   },
+     * })
+     * 
+    **/
+    groupBy<
+      T extends FgVariantArticleDataGroupByArgs,
+      HasSelectOrTake extends Or<
+        Extends<'skip', Keys<T>>,
+        Extends<'take', Keys<T>>
+      >,
+      OrderByArg extends True extends HasSelectOrTake
+        ? { orderBy: FgVariantArticleDataGroupByArgs['orderBy'] }
+        : { orderBy?: FgVariantArticleDataGroupByArgs['orderBy'] },
+      OrderFields extends ExcludeUnderscoreKeys<Keys<MaybeTupleToUnion<T['orderBy']>>>,
+      ByFields extends MaybeTupleToUnion<T['by']>,
+      ByValid extends Has<ByFields, OrderFields>,
+      HavingFields extends GetHavingFields<T['having']>,
+      HavingValid extends Has<ByFields, HavingFields>,
+      ByEmpty extends T['by'] extends never[] ? True : False,
+      InputErrors extends ByEmpty extends True
+      ? `Error: "by" must not be empty.`
+      : HavingValid extends False
+      ? {
+          [P in HavingFields]: P extends ByFields
+            ? never
+            : P extends string
+            ? `Error: Field "${P}" used in "having" needs to be provided in "by".`
+            : [
+                Error,
+                'Field ',
+                P,
+                ` in "having" needs to be provided in "by"`,
+              ]
+        }[HavingFields]
+      : 'take' extends Keys<T>
+      ? 'orderBy' extends Keys<T>
+        ? ByValid extends True
+          ? {}
+          : {
+              [P in OrderFields]: P extends ByFields
+                ? never
+                : `Error: Field "${P}" in "orderBy" needs to be provided in "by"`
+            }[OrderFields]
+        : 'Error: If you provide "take", you also need to provide "orderBy"'
+      : 'skip' extends Keys<T>
+      ? 'orderBy' extends Keys<T>
+        ? ByValid extends True
+          ? {}
+          : {
+              [P in OrderFields]: P extends ByFields
+                ? never
+                : `Error: Field "${P}" in "orderBy" needs to be provided in "by"`
+            }[OrderFields]
+        : 'Error: If you provide "skip", you also need to provide "orderBy"'
+      : ByValid extends True
+      ? {}
+      : {
+          [P in OrderFields]: P extends ByFields
+            ? never
+            : `Error: Field "${P}" in "orderBy" needs to be provided in "by"`
+        }[OrderFields]
+    >(args: SubsetIntersection<T, FgVariantArticleDataGroupByArgs, OrderByArg> & InputErrors): {} extends InputErrors ? GetFgVariantArticleDataGroupByPayload<T> : Prisma.PrismaPromise<InputErrors>
+  /**
+   * Fields of the FgVariantArticleData model
+   */
+  readonly fields: FgVariantArticleDataFieldRefs;
+  }
+
+  /**
+   * The delegate class that acts as a "Promise-like" for FgVariantArticleData.
+   * Why is this prefixed with `Prisma__`?
+   * Because we want to prevent naming conflicts as mentioned in
+   * https://github.com/prisma/prisma-client-js/issues/707
+   */
+  export interface Prisma__FgVariantArticleDataClient<T, Null = never, ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs, GlobalOmitOptions = {}> extends Prisma.PrismaPromise<T> {
+    readonly [Symbol.toStringTag]: "PrismaPromise"
+    /**
+     * Attaches callbacks for the resolution and/or rejection of the Promise.
+     * @param onfulfilled The callback to execute when the Promise is resolved.
+     * @param onrejected The callback to execute when the Promise is rejected.
+     * @returns A Promise for the completion of which ever callback is executed.
+     */
+    then<TResult1 = T, TResult2 = never>(onfulfilled?: ((value: T) => TResult1 | PromiseLike<TResult1>) | undefined | null, onrejected?: ((reason: any) => TResult2 | PromiseLike<TResult2>) | undefined | null): $Utils.JsPromise<TResult1 | TResult2>
+    /**
+     * Attaches a callback for only the rejection of the Promise.
+     * @param onrejected The callback to execute when the Promise is rejected.
+     * @returns A Promise for the completion of the callback.
+     */
+    catch<TResult = never>(onrejected?: ((reason: any) => TResult | PromiseLike<TResult>) | undefined | null): $Utils.JsPromise<T | TResult>
+    /**
+     * Attaches a callback that is invoked when the Promise is settled (fulfilled or rejected). The
+     * resolved value cannot be modified from the callback.
+     * @param onfinally The callback to execute when the Promise is settled (fulfilled or rejected).
+     * @returns A Promise for the completion of the callback.
+     */
+    finally(onfinally?: (() => void) | undefined | null): $Utils.JsPromise<T>
+  }
+
+
+
+
+  /**
+   * Fields of the FgVariantArticleData model
+   */
+  interface FgVariantArticleDataFieldRefs {
+    readonly id: FieldRef<"FgVariantArticleData", 'String'>
+    readonly genericArticleId: FieldRef<"FgVariantArticleData", 'String'>
+    readonly genericArticleNumber: FieldRef<"FgVariantArticleData", 'String'>
+    readonly variantColor: FieldRef<"FgVariantArticleData", 'String'>
+    readonly variantSize: FieldRef<"FgVariantArticleData", 'String'>
+    readonly variantArticleNumber: FieldRef<"FgVariantArticleData", 'String'>
+    readonly division: FieldRef<"FgVariantArticleData", 'String'>
+    readonly subDivision: FieldRef<"FgVariantArticleData", 'String'>
+    readonly majorCategory: FieldRef<"FgVariantArticleData", 'String'>
+    readonly vendorName: FieldRef<"FgVariantArticleData", 'String'>
+    readonly vendorCode: FieldRef<"FgVariantArticleData", 'String'>
+    readonly designNumber: FieldRef<"FgVariantArticleData", 'String'>
+    readonly mrp: FieldRef<"FgVariantArticleData", 'Decimal'>
+    readonly rate: FieldRef<"FgVariantArticleData", 'Decimal'>
+    readonly approvalStatus: FieldRef<"FgVariantArticleData", 'String'>
+    readonly approvedAt: FieldRef<"FgVariantArticleData", 'DateTime'>
+    readonly approvedBy: FieldRef<"FgVariantArticleData", 'Int'>
+    readonly sapSyncStatus: FieldRef<"FgVariantArticleData", 'String'>
+    readonly sapSyncMessage: FieldRef<"FgVariantArticleData", 'String'>
+    readonly imageUrl: FieldRef<"FgVariantArticleData", 'String'>
+    readonly createdAt: FieldRef<"FgVariantArticleData", 'DateTime'>
+    readonly updatedAt: FieldRef<"FgVariantArticleData", 'DateTime'>
+  }
+    
+
+  // Custom InputTypes
+  /**
+   * FgVariantArticleData findUnique
+   */
+  export type FgVariantArticleDataFindUniqueArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the FgVariantArticleData
+     */
+    select?: FgVariantArticleDataSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the FgVariantArticleData
+     */
+    omit?: FgVariantArticleDataOmit<ExtArgs> | null
+    /**
+     * Filter, which FgVariantArticleData to fetch.
+     */
+    where: FgVariantArticleDataWhereUniqueInput
+  }
+
+  /**
+   * FgVariantArticleData findUniqueOrThrow
+   */
+  export type FgVariantArticleDataFindUniqueOrThrowArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the FgVariantArticleData
+     */
+    select?: FgVariantArticleDataSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the FgVariantArticleData
+     */
+    omit?: FgVariantArticleDataOmit<ExtArgs> | null
+    /**
+     * Filter, which FgVariantArticleData to fetch.
+     */
+    where: FgVariantArticleDataWhereUniqueInput
+  }
+
+  /**
+   * FgVariantArticleData findFirst
+   */
+  export type FgVariantArticleDataFindFirstArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the FgVariantArticleData
+     */
+    select?: FgVariantArticleDataSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the FgVariantArticleData
+     */
+    omit?: FgVariantArticleDataOmit<ExtArgs> | null
+    /**
+     * Filter, which FgVariantArticleData to fetch.
+     */
+    where?: FgVariantArticleDataWhereInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
+     * 
+     * Determine the order of FgVariantArticleData to fetch.
+     */
+    orderBy?: FgVariantArticleDataOrderByWithRelationInput | FgVariantArticleDataOrderByWithRelationInput[]
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
+     * 
+     * Sets the position for searching for FgVariantArticleData.
+     */
+    cursor?: FgVariantArticleDataWhereUniqueInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Take `±n` FgVariantArticleData from the position of the cursor.
+     */
+    take?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Skip the first `n` FgVariantArticleData.
+     */
+    skip?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/distinct Distinct Docs}
+     * 
+     * Filter by unique combinations of FgVariantArticleData.
+     */
+    distinct?: FgVariantArticleDataScalarFieldEnum | FgVariantArticleDataScalarFieldEnum[]
+  }
+
+  /**
+   * FgVariantArticleData findFirstOrThrow
+   */
+  export type FgVariantArticleDataFindFirstOrThrowArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the FgVariantArticleData
+     */
+    select?: FgVariantArticleDataSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the FgVariantArticleData
+     */
+    omit?: FgVariantArticleDataOmit<ExtArgs> | null
+    /**
+     * Filter, which FgVariantArticleData to fetch.
+     */
+    where?: FgVariantArticleDataWhereInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
+     * 
+     * Determine the order of FgVariantArticleData to fetch.
+     */
+    orderBy?: FgVariantArticleDataOrderByWithRelationInput | FgVariantArticleDataOrderByWithRelationInput[]
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
+     * 
+     * Sets the position for searching for FgVariantArticleData.
+     */
+    cursor?: FgVariantArticleDataWhereUniqueInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Take `±n` FgVariantArticleData from the position of the cursor.
+     */
+    take?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Skip the first `n` FgVariantArticleData.
+     */
+    skip?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/distinct Distinct Docs}
+     * 
+     * Filter by unique combinations of FgVariantArticleData.
+     */
+    distinct?: FgVariantArticleDataScalarFieldEnum | FgVariantArticleDataScalarFieldEnum[]
+  }
+
+  /**
+   * FgVariantArticleData findMany
+   */
+  export type FgVariantArticleDataFindManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the FgVariantArticleData
+     */
+    select?: FgVariantArticleDataSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the FgVariantArticleData
+     */
+    omit?: FgVariantArticleDataOmit<ExtArgs> | null
+    /**
+     * Filter, which FgVariantArticleData to fetch.
+     */
+    where?: FgVariantArticleDataWhereInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
+     * 
+     * Determine the order of FgVariantArticleData to fetch.
+     */
+    orderBy?: FgVariantArticleDataOrderByWithRelationInput | FgVariantArticleDataOrderByWithRelationInput[]
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
+     * 
+     * Sets the position for listing FgVariantArticleData.
+     */
+    cursor?: FgVariantArticleDataWhereUniqueInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Take `±n` FgVariantArticleData from the position of the cursor.
+     */
+    take?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Skip the first `n` FgVariantArticleData.
+     */
+    skip?: number
+    distinct?: FgVariantArticleDataScalarFieldEnum | FgVariantArticleDataScalarFieldEnum[]
+  }
+
+  /**
+   * FgVariantArticleData create
+   */
+  export type FgVariantArticleDataCreateArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the FgVariantArticleData
+     */
+    select?: FgVariantArticleDataSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the FgVariantArticleData
+     */
+    omit?: FgVariantArticleDataOmit<ExtArgs> | null
+    /**
+     * The data needed to create a FgVariantArticleData.
+     */
+    data: XOR<FgVariantArticleDataCreateInput, FgVariantArticleDataUncheckedCreateInput>
+  }
+
+  /**
+   * FgVariantArticleData createMany
+   */
+  export type FgVariantArticleDataCreateManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * The data used to create many FgVariantArticleData.
+     */
+    data: FgVariantArticleDataCreateManyInput | FgVariantArticleDataCreateManyInput[]
+    skipDuplicates?: boolean
+  }
+
+  /**
+   * FgVariantArticleData createManyAndReturn
+   */
+  export type FgVariantArticleDataCreateManyAndReturnArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the FgVariantArticleData
+     */
+    select?: FgVariantArticleDataSelectCreateManyAndReturn<ExtArgs> | null
+    /**
+     * Omit specific fields from the FgVariantArticleData
+     */
+    omit?: FgVariantArticleDataOmit<ExtArgs> | null
+    /**
+     * The data used to create many FgVariantArticleData.
+     */
+    data: FgVariantArticleDataCreateManyInput | FgVariantArticleDataCreateManyInput[]
+    skipDuplicates?: boolean
+  }
+
+  /**
+   * FgVariantArticleData update
+   */
+  export type FgVariantArticleDataUpdateArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the FgVariantArticleData
+     */
+    select?: FgVariantArticleDataSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the FgVariantArticleData
+     */
+    omit?: FgVariantArticleDataOmit<ExtArgs> | null
+    /**
+     * The data needed to update a FgVariantArticleData.
+     */
+    data: XOR<FgVariantArticleDataUpdateInput, FgVariantArticleDataUncheckedUpdateInput>
+    /**
+     * Choose, which FgVariantArticleData to update.
+     */
+    where: FgVariantArticleDataWhereUniqueInput
+  }
+
+  /**
+   * FgVariantArticleData updateMany
+   */
+  export type FgVariantArticleDataUpdateManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * The data used to update FgVariantArticleData.
+     */
+    data: XOR<FgVariantArticleDataUpdateManyMutationInput, FgVariantArticleDataUncheckedUpdateManyInput>
+    /**
+     * Filter which FgVariantArticleData to update
+     */
+    where?: FgVariantArticleDataWhereInput
+    /**
+     * Limit how many FgVariantArticleData to update.
+     */
+    limit?: number
+  }
+
+  /**
+   * FgVariantArticleData updateManyAndReturn
+   */
+  export type FgVariantArticleDataUpdateManyAndReturnArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the FgVariantArticleData
+     */
+    select?: FgVariantArticleDataSelectUpdateManyAndReturn<ExtArgs> | null
+    /**
+     * Omit specific fields from the FgVariantArticleData
+     */
+    omit?: FgVariantArticleDataOmit<ExtArgs> | null
+    /**
+     * The data used to update FgVariantArticleData.
+     */
+    data: XOR<FgVariantArticleDataUpdateManyMutationInput, FgVariantArticleDataUncheckedUpdateManyInput>
+    /**
+     * Filter which FgVariantArticleData to update
+     */
+    where?: FgVariantArticleDataWhereInput
+    /**
+     * Limit how many FgVariantArticleData to update.
+     */
+    limit?: number
+  }
+
+  /**
+   * FgVariantArticleData upsert
+   */
+  export type FgVariantArticleDataUpsertArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the FgVariantArticleData
+     */
+    select?: FgVariantArticleDataSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the FgVariantArticleData
+     */
+    omit?: FgVariantArticleDataOmit<ExtArgs> | null
+    /**
+     * The filter to search for the FgVariantArticleData to update in case it exists.
+     */
+    where: FgVariantArticleDataWhereUniqueInput
+    /**
+     * In case the FgVariantArticleData found by the `where` argument doesn't exist, create a new FgVariantArticleData with this data.
+     */
+    create: XOR<FgVariantArticleDataCreateInput, FgVariantArticleDataUncheckedCreateInput>
+    /**
+     * In case the FgVariantArticleData was found with the provided `where` argument, update it with this data.
+     */
+    update: XOR<FgVariantArticleDataUpdateInput, FgVariantArticleDataUncheckedUpdateInput>
+  }
+
+  /**
+   * FgVariantArticleData delete
+   */
+  export type FgVariantArticleDataDeleteArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the FgVariantArticleData
+     */
+    select?: FgVariantArticleDataSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the FgVariantArticleData
+     */
+    omit?: FgVariantArticleDataOmit<ExtArgs> | null
+    /**
+     * Filter which FgVariantArticleData to delete.
+     */
+    where: FgVariantArticleDataWhereUniqueInput
+  }
+
+  /**
+   * FgVariantArticleData deleteMany
+   */
+  export type FgVariantArticleDataDeleteManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Filter which FgVariantArticleData to delete
+     */
+    where?: FgVariantArticleDataWhereInput
+    /**
+     * Limit how many FgVariantArticleData to delete.
+     */
+    limit?: number
+  }
+
+  /**
+   * FgVariantArticleData without action
+   */
+  export type FgVariantArticleDataDefaultArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the FgVariantArticleData
+     */
+    select?: FgVariantArticleDataSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the FgVariantArticleData
+     */
+    omit?: FgVariantArticleDataOmit<ExtArgs> | null
+  }
+
+
+  /**
    * Model FabricVariantArticleData
    */
 
@@ -80059,6 +81409,34 @@ export namespace Prisma {
   export type GmVariantArticleDataScalarFieldEnum = (typeof GmVariantArticleDataScalarFieldEnum)[keyof typeof GmVariantArticleDataScalarFieldEnum]
 
 
+  export const FgVariantArticleDataScalarFieldEnum: {
+    id: 'id',
+    genericArticleId: 'genericArticleId',
+    genericArticleNumber: 'genericArticleNumber',
+    variantColor: 'variantColor',
+    variantSize: 'variantSize',
+    variantArticleNumber: 'variantArticleNumber',
+    division: 'division',
+    subDivision: 'subDivision',
+    majorCategory: 'majorCategory',
+    vendorName: 'vendorName',
+    vendorCode: 'vendorCode',
+    designNumber: 'designNumber',
+    mrp: 'mrp',
+    rate: 'rate',
+    approvalStatus: 'approvalStatus',
+    approvedAt: 'approvedAt',
+    approvedBy: 'approvedBy',
+    sapSyncStatus: 'sapSyncStatus',
+    sapSyncMessage: 'sapSyncMessage',
+    imageUrl: 'imageUrl',
+    createdAt: 'createdAt',
+    updatedAt: 'updatedAt'
+  };
+
+  export type FgVariantArticleDataScalarFieldEnum = (typeof FgVariantArticleDataScalarFieldEnum)[keyof typeof FgVariantArticleDataScalarFieldEnum]
+
+
   export const FabricVariantArticleDataScalarFieldEnum: {
     id: 'id',
     genericArticleId: 'genericArticleId',
@@ -81319,6 +82697,28 @@ export namespace Prisma {
   };
 
   export type GmVariantArticleDataOrderByRelevanceFieldEnum = (typeof GmVariantArticleDataOrderByRelevanceFieldEnum)[keyof typeof GmVariantArticleDataOrderByRelevanceFieldEnum]
+
+
+  export const FgVariantArticleDataOrderByRelevanceFieldEnum: {
+    id: 'id',
+    genericArticleId: 'genericArticleId',
+    genericArticleNumber: 'genericArticleNumber',
+    variantColor: 'variantColor',
+    variantSize: 'variantSize',
+    variantArticleNumber: 'variantArticleNumber',
+    division: 'division',
+    subDivision: 'subDivision',
+    majorCategory: 'majorCategory',
+    vendorName: 'vendorName',
+    vendorCode: 'vendorCode',
+    designNumber: 'designNumber',
+    approvalStatus: 'approvalStatus',
+    sapSyncStatus: 'sapSyncStatus',
+    sapSyncMessage: 'sapSyncMessage',
+    imageUrl: 'imageUrl'
+  };
+
+  export type FgVariantArticleDataOrderByRelevanceFieldEnum = (typeof FgVariantArticleDataOrderByRelevanceFieldEnum)[keyof typeof FgVariantArticleDataOrderByRelevanceFieldEnum]
 
 
   export const FabricVariantArticleDataOrderByRelevanceFieldEnum: {
@@ -87870,6 +89270,146 @@ export namespace Prisma {
     userName?: StringNullableWithAggregatesFilter<"GmVariantArticleData"> | string | null
     createdAt?: DateTimeWithAggregatesFilter<"GmVariantArticleData"> | Date | string
     updatedAt?: DateTimeWithAggregatesFilter<"GmVariantArticleData"> | Date | string
+  }
+
+  export type FgVariantArticleDataWhereInput = {
+    AND?: FgVariantArticleDataWhereInput | FgVariantArticleDataWhereInput[]
+    OR?: FgVariantArticleDataWhereInput[]
+    NOT?: FgVariantArticleDataWhereInput | FgVariantArticleDataWhereInput[]
+    id?: StringFilter<"FgVariantArticleData"> | string
+    genericArticleId?: StringNullableFilter<"FgVariantArticleData"> | string | null
+    genericArticleNumber?: StringNullableFilter<"FgVariantArticleData"> | string | null
+    variantColor?: StringNullableFilter<"FgVariantArticleData"> | string | null
+    variantSize?: StringNullableFilter<"FgVariantArticleData"> | string | null
+    variantArticleNumber?: StringNullableFilter<"FgVariantArticleData"> | string | null
+    division?: StringNullableFilter<"FgVariantArticleData"> | string | null
+    subDivision?: StringNullableFilter<"FgVariantArticleData"> | string | null
+    majorCategory?: StringNullableFilter<"FgVariantArticleData"> | string | null
+    vendorName?: StringNullableFilter<"FgVariantArticleData"> | string | null
+    vendorCode?: StringNullableFilter<"FgVariantArticleData"> | string | null
+    designNumber?: StringNullableFilter<"FgVariantArticleData"> | string | null
+    mrp?: DecimalNullableFilter<"FgVariantArticleData"> | Decimal | DecimalJsLike | number | string | null
+    rate?: DecimalNullableFilter<"FgVariantArticleData"> | Decimal | DecimalJsLike | number | string | null
+    approvalStatus?: StringFilter<"FgVariantArticleData"> | string
+    approvedAt?: DateTimeNullableFilter<"FgVariantArticleData"> | Date | string | null
+    approvedBy?: IntNullableFilter<"FgVariantArticleData"> | number | null
+    sapSyncStatus?: StringFilter<"FgVariantArticleData"> | string
+    sapSyncMessage?: StringNullableFilter<"FgVariantArticleData"> | string | null
+    imageUrl?: StringNullableFilter<"FgVariantArticleData"> | string | null
+    createdAt?: DateTimeFilter<"FgVariantArticleData"> | Date | string
+    updatedAt?: DateTimeFilter<"FgVariantArticleData"> | Date | string
+  }
+
+  export type FgVariantArticleDataOrderByWithRelationInput = {
+    id?: SortOrder
+    genericArticleId?: SortOrderInput | SortOrder
+    genericArticleNumber?: SortOrderInput | SortOrder
+    variantColor?: SortOrderInput | SortOrder
+    variantSize?: SortOrderInput | SortOrder
+    variantArticleNumber?: SortOrderInput | SortOrder
+    division?: SortOrderInput | SortOrder
+    subDivision?: SortOrderInput | SortOrder
+    majorCategory?: SortOrderInput | SortOrder
+    vendorName?: SortOrderInput | SortOrder
+    vendorCode?: SortOrderInput | SortOrder
+    designNumber?: SortOrderInput | SortOrder
+    mrp?: SortOrderInput | SortOrder
+    rate?: SortOrderInput | SortOrder
+    approvalStatus?: SortOrder
+    approvedAt?: SortOrderInput | SortOrder
+    approvedBy?: SortOrderInput | SortOrder
+    sapSyncStatus?: SortOrder
+    sapSyncMessage?: SortOrderInput | SortOrder
+    imageUrl?: SortOrderInput | SortOrder
+    createdAt?: SortOrder
+    updatedAt?: SortOrder
+    _relevance?: FgVariantArticleDataOrderByRelevanceInput
+  }
+
+  export type FgVariantArticleDataWhereUniqueInput = Prisma.AtLeast<{
+    id?: string
+    AND?: FgVariantArticleDataWhereInput | FgVariantArticleDataWhereInput[]
+    OR?: FgVariantArticleDataWhereInput[]
+    NOT?: FgVariantArticleDataWhereInput | FgVariantArticleDataWhereInput[]
+    genericArticleId?: StringNullableFilter<"FgVariantArticleData"> | string | null
+    genericArticleNumber?: StringNullableFilter<"FgVariantArticleData"> | string | null
+    variantColor?: StringNullableFilter<"FgVariantArticleData"> | string | null
+    variantSize?: StringNullableFilter<"FgVariantArticleData"> | string | null
+    variantArticleNumber?: StringNullableFilter<"FgVariantArticleData"> | string | null
+    division?: StringNullableFilter<"FgVariantArticleData"> | string | null
+    subDivision?: StringNullableFilter<"FgVariantArticleData"> | string | null
+    majorCategory?: StringNullableFilter<"FgVariantArticleData"> | string | null
+    vendorName?: StringNullableFilter<"FgVariantArticleData"> | string | null
+    vendorCode?: StringNullableFilter<"FgVariantArticleData"> | string | null
+    designNumber?: StringNullableFilter<"FgVariantArticleData"> | string | null
+    mrp?: DecimalNullableFilter<"FgVariantArticleData"> | Decimal | DecimalJsLike | number | string | null
+    rate?: DecimalNullableFilter<"FgVariantArticleData"> | Decimal | DecimalJsLike | number | string | null
+    approvalStatus?: StringFilter<"FgVariantArticleData"> | string
+    approvedAt?: DateTimeNullableFilter<"FgVariantArticleData"> | Date | string | null
+    approvedBy?: IntNullableFilter<"FgVariantArticleData"> | number | null
+    sapSyncStatus?: StringFilter<"FgVariantArticleData"> | string
+    sapSyncMessage?: StringNullableFilter<"FgVariantArticleData"> | string | null
+    imageUrl?: StringNullableFilter<"FgVariantArticleData"> | string | null
+    createdAt?: DateTimeFilter<"FgVariantArticleData"> | Date | string
+    updatedAt?: DateTimeFilter<"FgVariantArticleData"> | Date | string
+  }, "id">
+
+  export type FgVariantArticleDataOrderByWithAggregationInput = {
+    id?: SortOrder
+    genericArticleId?: SortOrderInput | SortOrder
+    genericArticleNumber?: SortOrderInput | SortOrder
+    variantColor?: SortOrderInput | SortOrder
+    variantSize?: SortOrderInput | SortOrder
+    variantArticleNumber?: SortOrderInput | SortOrder
+    division?: SortOrderInput | SortOrder
+    subDivision?: SortOrderInput | SortOrder
+    majorCategory?: SortOrderInput | SortOrder
+    vendorName?: SortOrderInput | SortOrder
+    vendorCode?: SortOrderInput | SortOrder
+    designNumber?: SortOrderInput | SortOrder
+    mrp?: SortOrderInput | SortOrder
+    rate?: SortOrderInput | SortOrder
+    approvalStatus?: SortOrder
+    approvedAt?: SortOrderInput | SortOrder
+    approvedBy?: SortOrderInput | SortOrder
+    sapSyncStatus?: SortOrder
+    sapSyncMessage?: SortOrderInput | SortOrder
+    imageUrl?: SortOrderInput | SortOrder
+    createdAt?: SortOrder
+    updatedAt?: SortOrder
+    _count?: FgVariantArticleDataCountOrderByAggregateInput
+    _avg?: FgVariantArticleDataAvgOrderByAggregateInput
+    _max?: FgVariantArticleDataMaxOrderByAggregateInput
+    _min?: FgVariantArticleDataMinOrderByAggregateInput
+    _sum?: FgVariantArticleDataSumOrderByAggregateInput
+  }
+
+  export type FgVariantArticleDataScalarWhereWithAggregatesInput = {
+    AND?: FgVariantArticleDataScalarWhereWithAggregatesInput | FgVariantArticleDataScalarWhereWithAggregatesInput[]
+    OR?: FgVariantArticleDataScalarWhereWithAggregatesInput[]
+    NOT?: FgVariantArticleDataScalarWhereWithAggregatesInput | FgVariantArticleDataScalarWhereWithAggregatesInput[]
+    id?: StringWithAggregatesFilter<"FgVariantArticleData"> | string
+    genericArticleId?: StringNullableWithAggregatesFilter<"FgVariantArticleData"> | string | null
+    genericArticleNumber?: StringNullableWithAggregatesFilter<"FgVariantArticleData"> | string | null
+    variantColor?: StringNullableWithAggregatesFilter<"FgVariantArticleData"> | string | null
+    variantSize?: StringNullableWithAggregatesFilter<"FgVariantArticleData"> | string | null
+    variantArticleNumber?: StringNullableWithAggregatesFilter<"FgVariantArticleData"> | string | null
+    division?: StringNullableWithAggregatesFilter<"FgVariantArticleData"> | string | null
+    subDivision?: StringNullableWithAggregatesFilter<"FgVariantArticleData"> | string | null
+    majorCategory?: StringNullableWithAggregatesFilter<"FgVariantArticleData"> | string | null
+    vendorName?: StringNullableWithAggregatesFilter<"FgVariantArticleData"> | string | null
+    vendorCode?: StringNullableWithAggregatesFilter<"FgVariantArticleData"> | string | null
+    designNumber?: StringNullableWithAggregatesFilter<"FgVariantArticleData"> | string | null
+    mrp?: DecimalNullableWithAggregatesFilter<"FgVariantArticleData"> | Decimal | DecimalJsLike | number | string | null
+    rate?: DecimalNullableWithAggregatesFilter<"FgVariantArticleData"> | Decimal | DecimalJsLike | number | string | null
+    approvalStatus?: StringWithAggregatesFilter<"FgVariantArticleData"> | string
+    approvedAt?: DateTimeNullableWithAggregatesFilter<"FgVariantArticleData"> | Date | string | null
+    approvedBy?: IntNullableWithAggregatesFilter<"FgVariantArticleData"> | number | null
+    sapSyncStatus?: StringWithAggregatesFilter<"FgVariantArticleData"> | string
+    sapSyncMessage?: StringNullableWithAggregatesFilter<"FgVariantArticleData"> | string | null
+    imageUrl?: StringNullableWithAggregatesFilter<"FgVariantArticleData"> | string | null
+    createdAt?: DateTimeWithAggregatesFilter<"FgVariantArticleData"> | Date | string
+    updatedAt?: DateTimeWithAggregatesFilter<"FgVariantArticleData"> | Date | string
   }
 
   export type FabricVariantArticleDataWhereInput = {
@@ -96943,6 +98483,181 @@ export namespace Prisma {
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
   }
 
+  export type FgVariantArticleDataCreateInput = {
+    id?: string
+    genericArticleId?: string | null
+    genericArticleNumber?: string | null
+    variantColor?: string | null
+    variantSize?: string | null
+    variantArticleNumber?: string | null
+    division?: string | null
+    subDivision?: string | null
+    majorCategory?: string | null
+    vendorName?: string | null
+    vendorCode?: string | null
+    designNumber?: string | null
+    mrp?: Decimal | DecimalJsLike | number | string | null
+    rate?: Decimal | DecimalJsLike | number | string | null
+    approvalStatus?: string
+    approvedAt?: Date | string | null
+    approvedBy?: number | null
+    sapSyncStatus?: string
+    sapSyncMessage?: string | null
+    imageUrl?: string | null
+    createdAt?: Date | string
+    updatedAt?: Date | string
+  }
+
+  export type FgVariantArticleDataUncheckedCreateInput = {
+    id?: string
+    genericArticleId?: string | null
+    genericArticleNumber?: string | null
+    variantColor?: string | null
+    variantSize?: string | null
+    variantArticleNumber?: string | null
+    division?: string | null
+    subDivision?: string | null
+    majorCategory?: string | null
+    vendorName?: string | null
+    vendorCode?: string | null
+    designNumber?: string | null
+    mrp?: Decimal | DecimalJsLike | number | string | null
+    rate?: Decimal | DecimalJsLike | number | string | null
+    approvalStatus?: string
+    approvedAt?: Date | string | null
+    approvedBy?: number | null
+    sapSyncStatus?: string
+    sapSyncMessage?: string | null
+    imageUrl?: string | null
+    createdAt?: Date | string
+    updatedAt?: Date | string
+  }
+
+  export type FgVariantArticleDataUpdateInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    genericArticleId?: NullableStringFieldUpdateOperationsInput | string | null
+    genericArticleNumber?: NullableStringFieldUpdateOperationsInput | string | null
+    variantColor?: NullableStringFieldUpdateOperationsInput | string | null
+    variantSize?: NullableStringFieldUpdateOperationsInput | string | null
+    variantArticleNumber?: NullableStringFieldUpdateOperationsInput | string | null
+    division?: NullableStringFieldUpdateOperationsInput | string | null
+    subDivision?: NullableStringFieldUpdateOperationsInput | string | null
+    majorCategory?: NullableStringFieldUpdateOperationsInput | string | null
+    vendorName?: NullableStringFieldUpdateOperationsInput | string | null
+    vendorCode?: NullableStringFieldUpdateOperationsInput | string | null
+    designNumber?: NullableStringFieldUpdateOperationsInput | string | null
+    mrp?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    rate?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    approvalStatus?: StringFieldUpdateOperationsInput | string
+    approvedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    approvedBy?: NullableIntFieldUpdateOperationsInput | number | null
+    sapSyncStatus?: StringFieldUpdateOperationsInput | string
+    sapSyncMessage?: NullableStringFieldUpdateOperationsInput | string | null
+    imageUrl?: NullableStringFieldUpdateOperationsInput | string | null
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+  }
+
+  export type FgVariantArticleDataUncheckedUpdateInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    genericArticleId?: NullableStringFieldUpdateOperationsInput | string | null
+    genericArticleNumber?: NullableStringFieldUpdateOperationsInput | string | null
+    variantColor?: NullableStringFieldUpdateOperationsInput | string | null
+    variantSize?: NullableStringFieldUpdateOperationsInput | string | null
+    variantArticleNumber?: NullableStringFieldUpdateOperationsInput | string | null
+    division?: NullableStringFieldUpdateOperationsInput | string | null
+    subDivision?: NullableStringFieldUpdateOperationsInput | string | null
+    majorCategory?: NullableStringFieldUpdateOperationsInput | string | null
+    vendorName?: NullableStringFieldUpdateOperationsInput | string | null
+    vendorCode?: NullableStringFieldUpdateOperationsInput | string | null
+    designNumber?: NullableStringFieldUpdateOperationsInput | string | null
+    mrp?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    rate?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    approvalStatus?: StringFieldUpdateOperationsInput | string
+    approvedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    approvedBy?: NullableIntFieldUpdateOperationsInput | number | null
+    sapSyncStatus?: StringFieldUpdateOperationsInput | string
+    sapSyncMessage?: NullableStringFieldUpdateOperationsInput | string | null
+    imageUrl?: NullableStringFieldUpdateOperationsInput | string | null
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+  }
+
+  export type FgVariantArticleDataCreateManyInput = {
+    id?: string
+    genericArticleId?: string | null
+    genericArticleNumber?: string | null
+    variantColor?: string | null
+    variantSize?: string | null
+    variantArticleNumber?: string | null
+    division?: string | null
+    subDivision?: string | null
+    majorCategory?: string | null
+    vendorName?: string | null
+    vendorCode?: string | null
+    designNumber?: string | null
+    mrp?: Decimal | DecimalJsLike | number | string | null
+    rate?: Decimal | DecimalJsLike | number | string | null
+    approvalStatus?: string
+    approvedAt?: Date | string | null
+    approvedBy?: number | null
+    sapSyncStatus?: string
+    sapSyncMessage?: string | null
+    imageUrl?: string | null
+    createdAt?: Date | string
+    updatedAt?: Date | string
+  }
+
+  export type FgVariantArticleDataUpdateManyMutationInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    genericArticleId?: NullableStringFieldUpdateOperationsInput | string | null
+    genericArticleNumber?: NullableStringFieldUpdateOperationsInput | string | null
+    variantColor?: NullableStringFieldUpdateOperationsInput | string | null
+    variantSize?: NullableStringFieldUpdateOperationsInput | string | null
+    variantArticleNumber?: NullableStringFieldUpdateOperationsInput | string | null
+    division?: NullableStringFieldUpdateOperationsInput | string | null
+    subDivision?: NullableStringFieldUpdateOperationsInput | string | null
+    majorCategory?: NullableStringFieldUpdateOperationsInput | string | null
+    vendorName?: NullableStringFieldUpdateOperationsInput | string | null
+    vendorCode?: NullableStringFieldUpdateOperationsInput | string | null
+    designNumber?: NullableStringFieldUpdateOperationsInput | string | null
+    mrp?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    rate?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    approvalStatus?: StringFieldUpdateOperationsInput | string
+    approvedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    approvedBy?: NullableIntFieldUpdateOperationsInput | number | null
+    sapSyncStatus?: StringFieldUpdateOperationsInput | string
+    sapSyncMessage?: NullableStringFieldUpdateOperationsInput | string | null
+    imageUrl?: NullableStringFieldUpdateOperationsInput | string | null
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+  }
+
+  export type FgVariantArticleDataUncheckedUpdateManyInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    genericArticleId?: NullableStringFieldUpdateOperationsInput | string | null
+    genericArticleNumber?: NullableStringFieldUpdateOperationsInput | string | null
+    variantColor?: NullableStringFieldUpdateOperationsInput | string | null
+    variantSize?: NullableStringFieldUpdateOperationsInput | string | null
+    variantArticleNumber?: NullableStringFieldUpdateOperationsInput | string | null
+    division?: NullableStringFieldUpdateOperationsInput | string | null
+    subDivision?: NullableStringFieldUpdateOperationsInput | string | null
+    majorCategory?: NullableStringFieldUpdateOperationsInput | string | null
+    vendorName?: NullableStringFieldUpdateOperationsInput | string | null
+    vendorCode?: NullableStringFieldUpdateOperationsInput | string | null
+    designNumber?: NullableStringFieldUpdateOperationsInput | string | null
+    mrp?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    rate?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    approvalStatus?: StringFieldUpdateOperationsInput | string
+    approvedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    approvedBy?: NullableIntFieldUpdateOperationsInput | number | null
+    sapSyncStatus?: StringFieldUpdateOperationsInput | string
+    sapSyncMessage?: NullableStringFieldUpdateOperationsInput | string | null
+    imageUrl?: NullableStringFieldUpdateOperationsInput | string | null
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+  }
+
   export type FabricVariantArticleDataCreateInput = {
     id?: string
     genericArticleId?: string | null
@@ -103788,6 +105503,99 @@ export namespace Prisma {
   }
 
   export type GmVariantArticleDataSumOrderByAggregateInput = {
+    mrp?: SortOrder
+    rate?: SortOrder
+    approvedBy?: SortOrder
+  }
+
+  export type FgVariantArticleDataOrderByRelevanceInput = {
+    fields: FgVariantArticleDataOrderByRelevanceFieldEnum | FgVariantArticleDataOrderByRelevanceFieldEnum[]
+    sort: SortOrder
+    search: string
+  }
+
+  export type FgVariantArticleDataCountOrderByAggregateInput = {
+    id?: SortOrder
+    genericArticleId?: SortOrder
+    genericArticleNumber?: SortOrder
+    variantColor?: SortOrder
+    variantSize?: SortOrder
+    variantArticleNumber?: SortOrder
+    division?: SortOrder
+    subDivision?: SortOrder
+    majorCategory?: SortOrder
+    vendorName?: SortOrder
+    vendorCode?: SortOrder
+    designNumber?: SortOrder
+    mrp?: SortOrder
+    rate?: SortOrder
+    approvalStatus?: SortOrder
+    approvedAt?: SortOrder
+    approvedBy?: SortOrder
+    sapSyncStatus?: SortOrder
+    sapSyncMessage?: SortOrder
+    imageUrl?: SortOrder
+    createdAt?: SortOrder
+    updatedAt?: SortOrder
+  }
+
+  export type FgVariantArticleDataAvgOrderByAggregateInput = {
+    mrp?: SortOrder
+    rate?: SortOrder
+    approvedBy?: SortOrder
+  }
+
+  export type FgVariantArticleDataMaxOrderByAggregateInput = {
+    id?: SortOrder
+    genericArticleId?: SortOrder
+    genericArticleNumber?: SortOrder
+    variantColor?: SortOrder
+    variantSize?: SortOrder
+    variantArticleNumber?: SortOrder
+    division?: SortOrder
+    subDivision?: SortOrder
+    majorCategory?: SortOrder
+    vendorName?: SortOrder
+    vendorCode?: SortOrder
+    designNumber?: SortOrder
+    mrp?: SortOrder
+    rate?: SortOrder
+    approvalStatus?: SortOrder
+    approvedAt?: SortOrder
+    approvedBy?: SortOrder
+    sapSyncStatus?: SortOrder
+    sapSyncMessage?: SortOrder
+    imageUrl?: SortOrder
+    createdAt?: SortOrder
+    updatedAt?: SortOrder
+  }
+
+  export type FgVariantArticleDataMinOrderByAggregateInput = {
+    id?: SortOrder
+    genericArticleId?: SortOrder
+    genericArticleNumber?: SortOrder
+    variantColor?: SortOrder
+    variantSize?: SortOrder
+    variantArticleNumber?: SortOrder
+    division?: SortOrder
+    subDivision?: SortOrder
+    majorCategory?: SortOrder
+    vendorName?: SortOrder
+    vendorCode?: SortOrder
+    designNumber?: SortOrder
+    mrp?: SortOrder
+    rate?: SortOrder
+    approvalStatus?: SortOrder
+    approvedAt?: SortOrder
+    approvedBy?: SortOrder
+    sapSyncStatus?: SortOrder
+    sapSyncMessage?: SortOrder
+    imageUrl?: SortOrder
+    createdAt?: SortOrder
+    updatedAt?: SortOrder
+  }
+
+  export type FgVariantArticleDataSumOrderByAggregateInput = {
     mrp?: SortOrder
     rate?: SortOrder
     approvedBy?: SortOrder
