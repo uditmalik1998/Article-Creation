@@ -1166,6 +1166,31 @@ exports.Prisma.GmVariantArticleDataScalarFieldEnum = {
   updatedAt: 'updatedAt'
 };
 
+exports.Prisma.FgVariantArticleDataScalarFieldEnum = {
+  id: 'id',
+  genericArticleId: 'genericArticleId',
+  genericArticleNumber: 'genericArticleNumber',
+  variantColor: 'variantColor',
+  variantSize: 'variantSize',
+  variantArticleNumber: 'variantArticleNumber',
+  division: 'division',
+  subDivision: 'subDivision',
+  majorCategory: 'majorCategory',
+  vendorName: 'vendorName',
+  vendorCode: 'vendorCode',
+  designNumber: 'designNumber',
+  mrp: 'mrp',
+  rate: 'rate',
+  approvalStatus: 'approvalStatus',
+  approvedAt: 'approvedAt',
+  approvedBy: 'approvedBy',
+  sapSyncStatus: 'sapSyncStatus',
+  sapSyncMessage: 'sapSyncMessage',
+  imageUrl: 'imageUrl',
+  createdAt: 'createdAt',
+  updatedAt: 'updatedAt'
+};
+
 exports.Prisma.FabricVariantArticleDataScalarFieldEnum = {
   id: 'id',
   genericArticleId: 'genericArticleId',
@@ -2242,6 +2267,25 @@ exports.Prisma.GmVariantArticleDataOrderByRelevanceFieldEnum = {
   userName: 'userName'
 };
 
+exports.Prisma.FgVariantArticleDataOrderByRelevanceFieldEnum = {
+  id: 'id',
+  genericArticleId: 'genericArticleId',
+  genericArticleNumber: 'genericArticleNumber',
+  variantColor: 'variantColor',
+  variantSize: 'variantSize',
+  variantArticleNumber: 'variantArticleNumber',
+  division: 'division',
+  subDivision: 'subDivision',
+  majorCategory: 'majorCategory',
+  vendorName: 'vendorName',
+  vendorCode: 'vendorCode',
+  designNumber: 'designNumber',
+  approvalStatus: 'approvalStatus',
+  sapSyncStatus: 'sapSyncStatus',
+  sapSyncMessage: 'sapSyncMessage',
+  imageUrl: 'imageUrl'
+};
+
 exports.Prisma.FabricVariantArticleDataOrderByRelevanceFieldEnum = {
   id: 'id',
   genericArticleId: 'genericArticleId',
@@ -2589,6 +2633,7 @@ exports.Prisma.ModelName = {
   FabricArticleData: 'FabricArticleData',
   GmArticleData: 'GmArticleData',
   GmVariantArticleData: 'GmVariantArticleData',
+  FgVariantArticleData: 'FgVariantArticleData',
   FabricVariantArticleData: 'FabricVariantArticleData',
   ValueAdditionAccessoriesCost: 'ValueAdditionAccessoriesCost',
   BodyArticleData: 'BodyArticleData',

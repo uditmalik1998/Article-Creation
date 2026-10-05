@@ -5028,6 +5028,7 @@ export class ApproverController {
                 sleeve: true, sleeveFold: true, mSet: true,
                 bottomFold: true, noOfPocket: true, pocketType: true, extraPocket: true,
                 fit: true, pattern: true, length: true,
+                gsm: true,
             },
         });
 
@@ -5103,7 +5104,18 @@ export class ApproverController {
             select: { id: true, flatId: true, bodyArticleNumber: true, majorCategory: true, sapSyncStatus: true, bodyArticleDescription: true, approvalStatus: true },
         });
 
-        const bodyArticleData = (item: typeof items[0]) => ({
+        // Parse a GSM value that may be a range like "100 - 120" → average 110, or a single
+        // number "150" → 150. Returns 0 (stored as null) when the source is blank/missing.
+        const parseGsmAverage = (raw: string | null | undefined): number | null => {
+            if (!raw?.trim()) return null;
+            const parts = raw.trim().split(/\s*-\s*/).map(s => parseFloat(s)).filter(n => !isNaN(n));
+            if (parts.length === 0) return null;
+            return Math.round((parts.reduce((a, b) => a + b, 0) / parts.length) * 100) / 100;
+        };
+
+        const bodyArticleData = (item: typeof items[0]) => {
+            const gsmVal = parseGsmAverage(item.gsm);
+            return {
             flatId:                 item.id,
             articleNumber:          item.articleNumber,
             designNumber:           item.designNumber,
@@ -5137,7 +5149,10 @@ export class ApproverController {
             mFit:                   item.fit,
             mBodyStyle:             item.pattern,
             mLength:                item.length,
-        });
+            gsm:                    gsmVal,
+            preciseGsm:             gsmVal,
+            };
+        };
 
         // Group existing rows by flatId (multiple rows per flatId are possible)
         const existingRowsByFlatId = new Map<string, typeof existing>();
