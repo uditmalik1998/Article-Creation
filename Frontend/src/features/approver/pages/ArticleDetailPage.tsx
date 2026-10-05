@@ -190,6 +190,8 @@ function getMissingMandatoryFields(item: any, majorCatOverride?: string | null):
   if (!item.segment) missing.push('SEGMENT');
   if (!item.fabricArticleNumber) missing.push('FABRIC ARTICLE NO.');
   if (!item.vendorFabricRate) missing.push('VENDOR FABRIC RATE');
+  // Always required by the SAP creation step (zmmArtCreationService MANDATORY), whatever the category grid says.
+  if (!item.impAtrbt2) missing.push('M_IMP_ATBT');
   const majorCat = majorCatOverride || item.majorCategory || '';
   if (!majorCat) return missing;
   for (const [schemaKey, dbField] of Object.entries(SCHEMA_KEY_TO_DB_FIELD)) {
@@ -722,10 +724,20 @@ export default function ArticleDetailPage({
     }
   };
 
+  // Set parts live in comboChildren, not items — a pending (e.g. failed) part of an
+  // already-created set must still be submittable from its own tab.
   const pendingSelectedKeys = useMemo(
-    () => selectedRowKeys.filter(key => items.find(i => i.id === key)?.approvalStatus === 'PENDING'),
-    [selectedRowKeys, items],
+    () => selectedRowKeys.filter(key => [...items, ...comboChildren].find(i => i.id === key)?.approvalStatus === 'PENDING'),
+    [selectedRowKeys, items, comboChildren],
   );
+
+  // On a set that is no longer pending itself, opening a pending part's tab selects
+  // that part so Save & Submit sends just it.
+  useEffect(() => {
+    if (activeComboChild?.approvalStatus === 'PENDING' && currentItem?.approvalStatus !== 'PENDING') {
+      setSelectedRowKeys([activeComboChild.id]);
+    }
+  }, [activeComboChild?.id, activeComboChild?.approvalStatus, currentItem?.approvalStatus]);
 
   // Fetch variants for all pending-selected items and check for missing weight.
   // Runs whenever the selection or items list changes.
@@ -760,7 +772,8 @@ export default function ArticleDetailPage({
   );
 
   const approveBlockedReasons = useMemo(() => {
-    const pendingItems = [...items.filter(i => pendingSelectedKeys.includes(i.id)), ...pendingComboChildren];
+    const selectedPending = [...items, ...comboChildren].filter(i => pendingSelectedKeys.includes(i.id));
+    const pendingItems = [...selectedPending, ...pendingComboChildren.filter(c => !selectedPending.some(s => s.id === c.id))];
     const comboBlock = isComboItem && pendingSelectedKeys.length > 0 && comboChildren.length === 0
       ? [{ articleId: currentItem?.designNumber || currentItem?.id || 'Set article', missing: ['CHILD PIECES (Top / Lower not linked yet)'] }]
       : [];
@@ -787,7 +800,7 @@ export default function ArticleDetailPage({
       return acc;
     }, comboBlock);
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [pendingSelectedKeys, items, gridVersion, pathType, variantWeightIssues, pendingComboChildren, comboChildren.length, isComboItem, setTopCategory]);
+  }, [pendingSelectedKeys, items, gridVersion, pathType, variantWeightIssues, pendingComboChildren, comboChildren, isComboItem, setTopCategory]);
 
   const handleApproveClick = async () => {
     if (pendingSelectedKeys.length === 0) return;
