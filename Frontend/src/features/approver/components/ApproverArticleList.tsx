@@ -1278,6 +1278,9 @@ const ArticleCard = React.memo(
     // Created page (modify mode) we keep them editable so the user can stage
     // changes and push them to SAP via the "Modify" button.
     const isLocked = (item.approvalStatus === 'APPROVED' || item.approvalStatus === 'REJECTED') && !isModifyMode;
+    // Body articles on the Created page: consumption sections (Rough + Precise) stay editable
+    // even though the article is APPROVED — no SAP re-sync needed for these local fields.
+    const isBodyCreatedPage = isBodyArticle && pathType === 'created';
     const status = getDisplayStatus(item);
 
     // Created-article identity/price fields are LOCKED even in modify mode — they
@@ -3467,7 +3470,7 @@ const ArticleCard = React.memo(
                         // render (rather than only when an input changes) keeps rows saved under
                         // the old formula from showing a stale figure.
                         const isDerivedBomKg = bom.field === 'consumptionKg';
-                        const bomLocked = isFieldLocked(bom.field) || isDerivedBomKg;
+                        const bomLocked = (!isBodyCreatedPage && isFieldLocked(bom.field)) || isDerivedBomKg;
                         let val = bom.isMarkdown
                           ? markdown
                           : bom.isAfterTax
@@ -3721,7 +3724,7 @@ const ArticleCard = React.memo(
                           // Consumption in Kg is always derived:
                           // width x gsm x consumption(meter) x 2.54 / 100000
                           const isDerivedKg = field === 'preciseConsumptionKg';
-                          const preciseLocked = isFieldLocked(field) || isDerivedKg;
+                          const preciseLocked = (!isBodyCreatedPage && isFieldLocked(field)) || isDerivedKg;
                           let preciseVal = String(getValue(field) ?? '').trim() || '—';
                           if (isDerivedKg) {
                             const num = (f: string) => parseFloat(String(getValue(f) ?? '')) || 0;
