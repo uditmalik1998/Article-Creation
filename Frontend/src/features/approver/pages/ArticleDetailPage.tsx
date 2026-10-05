@@ -180,7 +180,8 @@ function getMissingFabricCreationFields(item: any): string[] {
   return missing;
 }
 
-function getMissingMandatoryFields(item: any): string[] {
+// majorCatOverride: a set parent is checked against its Top part's category (see attributeMajorCategory).
+function getMissingMandatoryFields(item: any, majorCatOverride?: string | null): string[] {
   const missing: string[] = [];
   if (!item.vendorName) missing.push('VENDOR NAME');
   if (!item.rate) missing.push('RATE / COST');
@@ -189,7 +190,7 @@ function getMissingMandatoryFields(item: any): string[] {
   if (!item.segment) missing.push('SEGMENT');
   if (!item.fabricArticleNumber) missing.push('FABRIC ARTICLE NO.');
   if (!item.vendorFabricRate) missing.push('VENDOR FABRIC RATE');
-  const majorCat = item.majorCategory || '';
+  const majorCat = majorCatOverride || item.majorCategory || '';
   if (!majorCat) return missing;
   for (const [schemaKey, dbField] of Object.entries(SCHEMA_KEY_TO_DB_FIELD)) {
     const sapKeys = SCHEMA_KEY_TO_ALL_SAP_KEYS[schemaKey] ?? [];
@@ -641,6 +642,9 @@ export default function ArticleDetailPage({
     ? comboChildren.find(c => c.id === comboTab) ?? null
     : null;
   const displayedItem = activeComboChild ?? currentItem;
+  // The set's Top part (children come Top-first): the parent's attributes mirror it,
+  // so the parent shows and requires that part's attribute grid, not the set category's.
+  const setTopCategory = comboChildren[0]?.majorCategory || null;
 
   const addComboChild = async () => {
     if (!currentItem) return;
@@ -775,7 +779,7 @@ export default function ArticleDetailPage({
         missing.push('BODY ARTICLE NO. (must be exactly 10 digits)');
       }
       if (!(item.bodyArticleDescription || '').trim()) missing.push('BODY ARTICLE DESC.');
-      missing.push(...getMissingMandatoryFields(item));
+      missing.push(...getMissingMandatoryFields(item, isComboItem && item.id === currentItem?.id ? setTopCategory : null));
       // const missingWeightCount = variantWeightIssues[item.id];
       // if (missingWeightCount) missing.push(`VARIANT WEIGHT (${missingWeightCount} variant${missingWeightCount > 1 ? 's' : ''} missing)`);
       const label = item.sapArticleId || item.articleNumber || item.imageName || item.id;
@@ -783,7 +787,7 @@ export default function ArticleDetailPage({
       return acc;
     }, comboBlock);
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [pendingSelectedKeys, items, gridVersion, pathType, variantWeightIssues, pendingComboChildren, comboChildren.length, isComboItem]);
+  }, [pendingSelectedKeys, items, gridVersion, pathType, variantWeightIssues, pendingComboChildren, comboChildren.length, isComboItem, setTopCategory]);
 
   const handleApproveClick = async () => {
     if (pendingSelectedKeys.length === 0) return;
@@ -1435,6 +1439,7 @@ export default function ArticleDetailPage({
           items={displayedItem ? [displayedItem] : []}
           majorCategory={displayedItem?.majorCategory || ''}
           readOnly={isComboItem && !activeComboChild}
+          attributeMajorCategory={isComboItem && !activeComboChild ? setTopCategory || undefined : undefined}
           loading={false}
           selectedRowKeys={selectedRowKeys}
           onSelectionChange={setSelectedRowKeys}
@@ -1455,7 +1460,7 @@ export default function ArticleDetailPage({
 
             // Run the same mandatory-field validation as Save & Submit.
             const mergedItem = { ...row, ...(changes as any) };
-            const missing = getMissingMandatoryFields(mergedItem);
+            const missing = getMissingMandatoryFields(mergedItem, isComboItem && mergedItem.id === currentItem?.id ? setTopCategory : null);
             if (!mergedItem.vendorCode) missing.unshift('VENDOR CODE');
             if (!mergedItem.bodyArticle) missing.push('BODY ARTICLE NO.');
             if (missing.length > 0) {
