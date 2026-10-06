@@ -629,9 +629,71 @@ export class ApproverController {
     // ID-set helpers (getOldArticleIds / getNumericOldArticleIds) have been removed — the
     // queries below just filter on `isOldArticle`.
 
+    private static isCardGroupBy(value: unknown): value is 'vendor' | 'category' {
+        return value === 'vendor' || value === 'category';
+    }
+
+    /**
+     * One page of a card list grouped by vendor code or major category (the UI's
+     * "Group by"). Groups are ordered by their NEWEST article — so the vendor /
+     * category with today's uploads comes first — and each group is newest-first.
+     * Prisma's orderBy can't sort rows by a per-group max, so: aggregate the groups,
+     * order them here, then fetch only the group slices that fall on this page.
+     * A group is contiguous across pages, so the UI never splits it mid-page.
+     */
+    private static async findGroupedPage(model: any, args: {
+        where: any;
+        select: any;
+        skip: number;
+        take: number;
+        groupBy: 'vendor' | 'category';
+        dateField: 'createdAt' | 'approvedAt';
+    }): Promise<{ rows: any[]; total: number }> {
+        const { where, select, skip, take, groupBy, dateField } = args;
+        const field = groupBy === 'vendor' ? 'vendorCode' : 'majorCategory';
+
+        const groups: any[] = await model.groupBy({
+            by: [field],
+            where,
+            _max: { [dateField]: true },
+            _count: { _all: true },
+        });
+        // Newest group first; groups with no date at all go last, ties by key.
+        const latest = (g: any) => (g._max?.[dateField] as Date | null)?.getTime() ?? -Infinity;
+        groups.sort((a, b) => (latest(b) - latest(a)) || String(a[field] ?? '').localeCompare(String(b[field] ?? '')));
+
+        const total = groups.reduce((sum, g) => sum + g._count._all, 0);
+
+        // Which part of which group lands in [skip, skip + take).
+        const slices: { key: string | null; skip: number; take: number }[] = [];
+        let cursor = 0;
+        for (const g of groups) {
+            const start = cursor;
+            const end = cursor + g._count._all;
+            cursor = end;
+            if (end <= skip) continue;
+            if (start >= skip + take) break;
+            const localSkip = Math.max(0, skip - start);
+            slices.push({ key: g[field] ?? null, skip: localSkip, take: Math.min(end, skip + take) - (start + localSkip) });
+        }
+
+        const rowOrder = dateField === 'approvedAt'
+            ? [{ approvedAt: { sort: 'desc', nulls: 'last' } }, { id: 'asc' }]
+            : [{ createdAt: 'desc' }, { id: 'asc' }];
+        const pages = await Promise.all(slices.map((s) => model.findMany({
+            // AND keeps any existing vendorCode / majorCategory filter in `where` intact.
+            where: { AND: [where, { [field]: s.key }] },
+            orderBy: rowOrder,
+            skip: s.skip,
+            take: s.take,
+            select,
+        })));
+        return { rows: pages.flat(), total };
+    }
+
     static async getItems(req: Request, res: Response) {
         try {
-            const { status, division, subDivision, majorCategory, startDate, endDate, search, page = 1, limit = 50, pathType, source, presentationsType } = req.query;
+            const { status, division, subDivision, majorCategory, startDate, endDate, search, page = 1, limit = 50, pathType, source, presentationsType, groupBy } = req.query;
 
             // ── Response cache (8 s TTL) ───────────────────────────────────────────
             // Key includes all query params + user scope so different users/filters
@@ -644,7 +706,7 @@ export class ApproverController {
                 userId: !isUnscoped ? req.user?.id : undefined,
                 userDiv: !isUnscoped ? req.user?.division : undefined,
                 userSubDiv: !isUnscoped ? req.user?.subDivision : undefined,
-                status, division, subDivision, majorCategory, startDate, endDate, search, page, limit, pathType, source, presentationsType,
+                status, division, subDivision, majorCategory, startDate, endDate, search, page, limit, pathType, source, presentationsType, groupBy,
             });
             const cached = ApproverController.itemsCache.get(cacheKey);
             if (cached && cached.expiresAt > Date.now()) {
@@ -974,7 +1036,15 @@ export class ApproverController {
             };
 
             let items: any[];
-            if (cachedCount && cachedCount.expiresAt > Date.now()) {
+            if (ApproverController.isCardGroupBy(groupBy)) {
+                // Grouped cards: groups ordered by their newest article (see findGroupedPage).
+                const page = await ApproverController.findGroupedPage(prisma.extractionResultFlat, {
+                    where, select: findManyArgs.select, skip, take: Number(limit), groupBy,
+                    dateField: pathType === 'created' ? 'approvedAt' : 'createdAt',
+                });
+                items = page.rows;
+                total = page.total;
+            } else if (cachedCount && cachedCount.expiresAt > Date.now()) {
                 // Cache hit — total is known; only one DB query needed
                 total = cachedCount.value;
                 items = await prisma.extractionResultFlat.findMany(findManyArgs);
@@ -4043,10 +4113,16 @@ export class ApproverController {
         const orderBy = pathType === 'created'
             ? ({ approvedAt: { sort: 'desc', nulls: 'last' } } as const)
             : ({ createdAt: 'desc' } as const);
-        const [rows, total] = await Promise.all([
-            prisma.gmArticleData.findMany({ where, skip, take, orderBy, select: ApproverController.GM_ARTICLE_DATA_SELECT }),
-            prisma.gmArticleData.count({ where }),
-        ]);
+        const select = ApproverController.GM_ARTICLE_DATA_SELECT;
+        const { rows, total } = ApproverController.isCardGroupBy(query.groupBy)
+            ? await ApproverController.findGroupedPage(prisma.gmArticleData, {
+                where, select, skip, take, groupBy: query.groupBy,
+                dateField: pathType === 'created' ? 'approvedAt' : 'createdAt',
+            })
+            : await Promise.all([
+                prisma.gmArticleData.findMany({ where, skip, take, orderBy, select }),
+                prisma.gmArticleData.count({ where }),
+            ]).then(([rows, total]) => ({ rows, total }));
         const data = rows.map((r) => ApproverController.gmArticleDataRowToItem(r));
         return res.json({ data, meta: { total, page, limit: take } });
     };
@@ -4299,7 +4375,7 @@ export class ApproverController {
         const {
             page = '1', limit = '50',
             status, division, subDivision, majorCategory,
-            search, startDate, endDate,
+            search, startDate, endDate, groupBy,
         } = req.query as Record<string, string>;
 
         const skip = (parseInt(page, 10) - 1) * parseInt(limit, 10);
@@ -4337,33 +4413,32 @@ export class ApproverController {
             ];
         }
 
-        const [rows, total] = await Promise.all([
-            prisma.bodyArticleData.findMany({
-                where, skip, take,
-                orderBy: { createdAt: 'desc' },
-                select: {
-                    id: true, articleNumber: true, division: true, subDivision: true,
-                    majorCategory: true, mcCode: true, vendorName: true, vendorCode: true,
-                    designNumber: true,
-                    season: true, year: true, hsnTaxCode: true, imageUrl: true,
-                    approvalStatus: true, fgCreatorApproved: true, approvedAt: true, approvedBy: true,
-                    sapSyncStatus: true, sapSyncMessage: true,
-                    userName: true, createdAt: true, updatedAt: true,
-                    bodyArticleType: true,
-                    mCollarType: true, mCollarStyle: true, mNeckType: true, mNeckStyle: true,
-                    mPlacket: true, mBltType: true, mBltStyle: true,
-                    mSleevesMainStyle: true, mSleeveFold: true, mBtmFold: true,
-                    mNoOfPocket: true, mPocket: true, mExtraPocket: true,
-                    mFit: true, mBodyStyle: true, mLength: true, mSet: true,
-                    bodyArticleNumber: true, bodyArticleDescription: true,
-                    cmtpCost: true, cmpCost: true, fabCost: true, fabCons: true,
-                    width: true, basicTrimCost: true, roughCmpCost: true, costingType: true,
-                    bodyConsumptionType: true, gsm: true, ratio: true, consumptionKg: true, consumptionMeter: true,
-                    preciseWidth: true, preciseGsm: true, preciseRatio: true, preciseConsumptionKg: true, preciseConsumptionMeter: true,
-                },
-            }),
-            prisma.bodyArticleData.count({ where }),
-        ]);
+        const select = {
+                id: true, articleNumber: true, division: true, subDivision: true,
+                majorCategory: true, mcCode: true, vendorName: true, vendorCode: true,
+                designNumber: true,
+                season: true, year: true, hsnTaxCode: true, imageUrl: true,
+                approvalStatus: true, fgCreatorApproved: true, approvedAt: true, approvedBy: true,
+                sapSyncStatus: true, sapSyncMessage: true,
+                userName: true, createdAt: true, updatedAt: true,
+                bodyArticleType: true,
+                mCollarType: true, mCollarStyle: true, mNeckType: true, mNeckStyle: true,
+                mPlacket: true, mBltType: true, mBltStyle: true,
+                mSleevesMainStyle: true, mSleeveFold: true, mBtmFold: true,
+                mNoOfPocket: true, mPocket: true, mExtraPocket: true,
+                mFit: true, mBodyStyle: true, mLength: true, mSet: true,
+                bodyArticleNumber: true, bodyArticleDescription: true,
+                cmtpCost: true, cmpCost: true, fabCost: true, fabCons: true,
+                width: true, basicTrimCost: true, roughCmpCost: true, costingType: true,
+                bodyConsumptionType: true, gsm: true, ratio: true, consumptionKg: true, consumptionMeter: true,
+                preciseWidth: true, preciseGsm: true, preciseRatio: true, preciseConsumptionKg: true, preciseConsumptionMeter: true,
+        };
+        const { rows, total } = ApproverController.isCardGroupBy(groupBy)
+            ? await ApproverController.findGroupedPage(prisma.bodyArticleData, { where, select, skip, take, groupBy, dateField: 'createdAt' })
+            : await Promise.all([
+                prisma.bodyArticleData.findMany({ where, skip, take, orderBy: { createdAt: 'desc' }, select }),
+                prisma.bodyArticleData.count({ where }),
+            ]).then(([rows, total]) => ({ rows, total }));
 
         const data = rows.map((r) => ({
             id:                       r.id,
@@ -4794,11 +4869,17 @@ export class ApproverController {
         const orderBy = pathType === 'created'
             ? ({ approvedAt: { sort: 'desc', nulls: 'last' } } as const)
             : ({ createdAt: 'desc' } as const);
+        const select = ApproverController.FABRIC_ARTICLE_DATA_SELECT;
 
-        const [rows, total] = await Promise.all([
-            prisma.fabricArticleData.findMany({ where, skip, take, orderBy, select: ApproverController.FABRIC_ARTICLE_DATA_SELECT }),
-            prisma.fabricArticleData.count({ where }),
-        ]);
+        const { rows, total } = ApproverController.isCardGroupBy(query.groupBy)
+            ? await ApproverController.findGroupedPage(prisma.fabricArticleData, {
+                where, select, skip, take, groupBy: query.groupBy,
+                dateField: pathType === 'created' ? 'approvedAt' : 'createdAt',
+            })
+            : await Promise.all([
+                prisma.fabricArticleData.findMany({ where, skip, take, orderBy, select }),
+                prisma.fabricArticleData.count({ where }),
+            ]).then(([rows, total]) => ({ rows, total }));
 
         const data = rows.map((r) => ApproverController.fabricArticleDataRowToItem(r));
         return res.json({ data, meta: { total, page, limit: take } });

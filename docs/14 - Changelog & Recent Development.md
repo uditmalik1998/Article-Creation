@@ -5,6 +5,21 @@
 
 ---
 
+## 2026-10-06 — Spec Sheet cards + Group by on all article dashboards
+
+- New shared `shared/components/articles/ArticleSpecCard.tsx` + `ArticleCardGrid.tsx` replace the 4 duplicated
+  card components on FG / Fabric / FG-Fabric / Body / GM dashboards (design option B, picked from a 4-option canvas).
+- New **Group by: None / Vendor / Category** control; remembered per dashboard (URL + localStorage).
+- Backend: list endpoints `/approver/items`, `/fabric-article-data`, `/body-articles`, `/gm-articles` accept
+  `groupBy=vendor|category` (included in the `getItems` response cache key). Groups are ordered by their newest
+  article (today's vendor/category first), newest-first inside — `ApproverController.findGroupedPage`.
+- Filter bar redesign (option C, same day): Division as tabs in the header, one even-height filter row with
+  date presets (Any / Today / 7 days / 30 days / Custom), Reset filters, SAP sync chips on Created tabs —
+  `shared/components/articles/ArticleFilters.tsx`, applied to the same five dashboards.
+- Details: [[11 - Frontend Architecture]] → "Article list dashboards — shared card grid".
+
+---
+
 ## 2026-06-04 → 2026-07-21 — main merged into `feat/tailwind-ui-redesign`
 
 119 non-merge commits from `main` (spanning 2026-06-04 → 2026-07-21) were pulled into the branch on **2026-07-22**. The Tailwind/shadcn redesign work was already merged upstream, so this resolved to a **clean fast-forward — local branch now equals `origin/main`** (tip `9a10c47`, PR #159).
