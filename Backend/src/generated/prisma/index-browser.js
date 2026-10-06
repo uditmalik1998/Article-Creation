@@ -387,6 +387,12 @@ exports.Prisma.ExtractionResultFlatScalarFieldEnum = {
   variantSize: 'variantSize',
   variantColor: 'variantColor',
   variantWeight: 'variantWeight',
+  comboRole: 'comboRole',
+  comboParentId: 'comboParentId',
+  comboChildOrder: 'comboChildOrder',
+  setGroupId: 'setGroupId',
+  setRole: 'setRole',
+  setName: 'setName',
   sapSyncStatus: 'sapSyncStatus',
   sapArticleId: 'sapArticleId',
   sapSyncMessage: 'sapSyncMessage',
@@ -741,6 +747,9 @@ exports.Prisma.RawArticleScalarFieldEnum = {
   price: 'price',
   imageUrl: 'imageUrl',
   presentationsType: 'presentationsType',
+  setGroupId: 'setGroupId',
+  setRole: 'setRole',
+  setName: 'setName',
   uniqueKey: 'uniqueKey',
   source: 'source',
   status: 'status',
@@ -1671,6 +1680,10 @@ exports.Prisma.ExtractionResultFlatOrderByRelevanceFieldEnum = {
   variantSize: 'variantSize',
   variantColor: 'variantColor',
   variantWeight: 'variantWeight',
+  comboParentId: 'comboParentId',
+  setGroupId: 'setGroupId',
+  setRole: 'setRole',
+  setName: 'setName',
   sapArticleId: 'sapArticleId',
   sapSyncMessage: 'sapSyncMessage',
   srmOriginalDesignNumber: 'srmOriginalDesignNumber',
@@ -1932,6 +1945,9 @@ exports.Prisma.RawArticleOrderByRelevanceFieldEnum = {
   fabric: 'fabric',
   imageUrl: 'imageUrl',
   presentationsType: 'presentationsType',
+  setGroupId: 'setGroupId',
+  setRole: 'setRole',
+  setName: 'setName',
   uniqueKey: 'uniqueKey',
   source: 'source',
   errorMessage: 'errorMessage',
@@ -2470,6 +2486,12 @@ exports.ApprovalStatus = exports.$Enums.ApprovalStatus = {
 exports.PdStatus = exports.$Enums.PdStatus = {
   PENDING: 'PENDING',
   COMPLETED: 'COMPLETED'
+};
+
+exports.ComboRole = exports.$Enums.ComboRole = {
+  NONE: 'NONE',
+  PARENT: 'PARENT',
+  CHILD: 'CHILD'
 };
 
 exports.SapSyncStatus = exports.$Enums.SapSyncStatus = {

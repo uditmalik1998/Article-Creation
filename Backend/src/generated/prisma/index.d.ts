@@ -451,6 +451,15 @@ export const SapSyncStatus: {
 export type SapSyncStatus = (typeof SapSyncStatus)[keyof typeof SapSyncStatus]
 
 
+export const ComboRole: {
+  NONE: 'NONE',
+  PARENT: 'PARENT',
+  CHILD: 'CHILD'
+};
+
+export type ComboRole = (typeof ComboRole)[keyof typeof ComboRole]
+
+
 export const RawArticleStatus: {
   PENDING: 'PENDING',
   PROCESSING: 'PROCESSING',
@@ -545,6 +554,10 @@ export const PdStatus: typeof $Enums.PdStatus
 export type SapSyncStatus = $Enums.SapSyncStatus
 
 export const SapSyncStatus: typeof $Enums.SapSyncStatus
+
+export type ComboRole = $Enums.ComboRole
+
+export const ComboRole: typeof $Enums.ComboRole
 
 export type RawArticleStatus = $Enums.RawArticleStatus
 
@@ -6350,10 +6363,12 @@ export namespace Prisma {
    */
 
   export type ExtractionResultFlatCountOutputType = {
+    comboChildren: number
     srmSyncRunItems: number
   }
 
   export type ExtractionResultFlatCountOutputTypeSelect<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    comboChildren?: boolean | ExtractionResultFlatCountOutputTypeCountComboChildrenArgs
     srmSyncRunItems?: boolean | ExtractionResultFlatCountOutputTypeCountSrmSyncRunItemsArgs
   }
 
@@ -6366,6 +6381,13 @@ export namespace Prisma {
      * Select specific fields to fetch from the ExtractionResultFlatCountOutputType
      */
     select?: ExtractionResultFlatCountOutputTypeSelect<ExtArgs> | null
+  }
+
+  /**
+   * ExtractionResultFlatCountOutputType without action
+   */
+  export type ExtractionResultFlatCountOutputTypeCountComboChildrenArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    where?: ExtractionResultFlatWhereInput
   }
 
   /**
@@ -16642,6 +16664,7 @@ export namespace Prisma {
     valueAddProcessCost: Decimal | null
     mrp: Decimal | null
     approvedBy: number | null
+    comboChildOrder: number | null
   }
 
   export type ExtractionResultFlatSumAggregateOutputType = {
@@ -16665,6 +16688,7 @@ export namespace Prisma {
     valueAddProcessCost: Decimal | null
     mrp: Decimal | null
     approvedBy: number | null
+    comboChildOrder: number | null
   }
 
   export type ExtractionResultFlatMinAggregateOutputType = {
@@ -16803,6 +16827,12 @@ export namespace Prisma {
     variantSize: string | null
     variantColor: string | null
     variantWeight: string | null
+    comboRole: $Enums.ComboRole | null
+    comboParentId: string | null
+    comboChildOrder: number | null
+    setGroupId: string | null
+    setRole: string | null
+    setName: string | null
     sapSyncStatus: $Enums.SapSyncStatus | null
     sapArticleId: string | null
     sapSyncMessage: string | null
@@ -16946,6 +16976,12 @@ export namespace Prisma {
     variantSize: string | null
     variantColor: string | null
     variantWeight: string | null
+    comboRole: $Enums.ComboRole | null
+    comboParentId: string | null
+    comboChildOrder: number | null
+    setGroupId: string | null
+    setRole: string | null
+    setName: string | null
     sapSyncStatus: $Enums.SapSyncStatus | null
     sapArticleId: string | null
     sapSyncMessage: string | null
@@ -17089,6 +17125,12 @@ export namespace Prisma {
     variantSize: number
     variantColor: number
     variantWeight: number
+    comboRole: number
+    comboParentId: number
+    comboChildOrder: number
+    setGroupId: number
+    setRole: number
+    setName: number
     sapSyncStatus: number
     sapArticleId: number
     sapSyncMessage: number
@@ -17120,6 +17162,7 @@ export namespace Prisma {
     valueAddProcessCost?: true
     mrp?: true
     approvedBy?: true
+    comboChildOrder?: true
   }
 
   export type ExtractionResultFlatSumAggregateInputType = {
@@ -17143,6 +17186,7 @@ export namespace Prisma {
     valueAddProcessCost?: true
     mrp?: true
     approvedBy?: true
+    comboChildOrder?: true
   }
 
   export type ExtractionResultFlatMinAggregateInputType = {
@@ -17281,6 +17325,12 @@ export namespace Prisma {
     variantSize?: true
     variantColor?: true
     variantWeight?: true
+    comboRole?: true
+    comboParentId?: true
+    comboChildOrder?: true
+    setGroupId?: true
+    setRole?: true
+    setName?: true
     sapSyncStatus?: true
     sapArticleId?: true
     sapSyncMessage?: true
@@ -17424,6 +17474,12 @@ export namespace Prisma {
     variantSize?: true
     variantColor?: true
     variantWeight?: true
+    comboRole?: true
+    comboParentId?: true
+    comboChildOrder?: true
+    setGroupId?: true
+    setRole?: true
+    setName?: true
     sapSyncStatus?: true
     sapArticleId?: true
     sapSyncMessage?: true
@@ -17567,6 +17623,12 @@ export namespace Prisma {
     variantSize?: true
     variantColor?: true
     variantWeight?: true
+    comboRole?: true
+    comboParentId?: true
+    comboChildOrder?: true
+    setGroupId?: true
+    setRole?: true
+    setName?: true
     sapSyncStatus?: true
     sapArticleId?: true
     sapSyncMessage?: true
@@ -17798,6 +17860,12 @@ export namespace Prisma {
     variantSize: string | null
     variantColor: string | null
     variantWeight: string | null
+    comboRole: $Enums.ComboRole
+    comboParentId: string | null
+    comboChildOrder: number | null
+    setGroupId: string | null
+    setRole: string | null
+    setName: string | null
     sapSyncStatus: $Enums.SapSyncStatus
     sapArticleId: string | null
     sapSyncMessage: string | null
@@ -17961,6 +18029,12 @@ export namespace Prisma {
     variantSize?: boolean
     variantColor?: boolean
     variantWeight?: boolean
+    comboRole?: boolean
+    comboParentId?: boolean
+    comboChildOrder?: boolean
+    setGroupId?: boolean
+    setRole?: boolean
+    setName?: boolean
     sapSyncStatus?: boolean
     sapArticleId?: boolean
     sapSyncMessage?: boolean
@@ -17968,6 +18042,8 @@ export namespace Prisma {
     srmUniqueId?: boolean
     imageExtractionRawData?: boolean
     approver?: boolean | ExtractionResultFlat$approverArgs<ExtArgs>
+    comboParent?: boolean | ExtractionResultFlat$comboParentArgs<ExtArgs>
+    comboChildren?: boolean | ExtractionResultFlat$comboChildrenArgs<ExtArgs>
     job?: boolean | ExtractionResultFlat$jobArgs<ExtArgs>
     srmSyncRunItems?: boolean | ExtractionResultFlat$srmSyncRunItemsArgs<ExtArgs>
     _count?: boolean | ExtractionResultFlatCountOutputTypeDefaultArgs<ExtArgs>
@@ -18109,6 +18185,12 @@ export namespace Prisma {
     variantSize?: boolean
     variantColor?: boolean
     variantWeight?: boolean
+    comboRole?: boolean
+    comboParentId?: boolean
+    comboChildOrder?: boolean
+    setGroupId?: boolean
+    setRole?: boolean
+    setName?: boolean
     sapSyncStatus?: boolean
     sapArticleId?: boolean
     sapSyncMessage?: boolean
@@ -18116,6 +18198,7 @@ export namespace Prisma {
     srmUniqueId?: boolean
     imageExtractionRawData?: boolean
     approver?: boolean | ExtractionResultFlat$approverArgs<ExtArgs>
+    comboParent?: boolean | ExtractionResultFlat$comboParentArgs<ExtArgs>
     job?: boolean | ExtractionResultFlat$jobArgs<ExtArgs>
   }, ExtArgs["result"]["extractionResultFlat"]>
 
@@ -18255,6 +18338,12 @@ export namespace Prisma {
     variantSize?: boolean
     variantColor?: boolean
     variantWeight?: boolean
+    comboRole?: boolean
+    comboParentId?: boolean
+    comboChildOrder?: boolean
+    setGroupId?: boolean
+    setRole?: boolean
+    setName?: boolean
     sapSyncStatus?: boolean
     sapArticleId?: boolean
     sapSyncMessage?: boolean
@@ -18262,6 +18351,7 @@ export namespace Prisma {
     srmUniqueId?: boolean
     imageExtractionRawData?: boolean
     approver?: boolean | ExtractionResultFlat$approverArgs<ExtArgs>
+    comboParent?: boolean | ExtractionResultFlat$comboParentArgs<ExtArgs>
     job?: boolean | ExtractionResultFlat$jobArgs<ExtArgs>
   }, ExtArgs["result"]["extractionResultFlat"]>
 
@@ -18401,6 +18491,12 @@ export namespace Prisma {
     variantSize?: boolean
     variantColor?: boolean
     variantWeight?: boolean
+    comboRole?: boolean
+    comboParentId?: boolean
+    comboChildOrder?: boolean
+    setGroupId?: boolean
+    setRole?: boolean
+    setName?: boolean
     sapSyncStatus?: boolean
     sapArticleId?: boolean
     sapSyncMessage?: boolean
@@ -18409,19 +18505,23 @@ export namespace Prisma {
     imageExtractionRawData?: boolean
   }
 
-  export type ExtractionResultFlatOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<"id" | "jobId" | "imageName" | "imageUrl" | "articleNumber" | "extractionStatus" | "aiModel" | "avgConfidence" | "processingTimeMs" | "totalAttributes" | "extractedCount" | "inputTokens" | "outputTokens" | "totalTokens" | "apiCost" | "userId" | "userName" | "extractionDate" | "createdAt" | "updatedAt" | "majorCategory" | "vendorName" | "designNumber" | "pptNumber" | "rate" | "size" | "yarn1" | "yarn2" | "fabricMainMvgr" | "weave" | "weaveFullForm" | "composition" | "finish" | "gsm" | "macroMvgr" | "macroMvgrFullForm" | "mainMvgr" | "mainMvgrFullForm" | "mFab2" | "mFab2FullForm" | "shade" | "weight" | "lycra" | "neck" | "neckDetails" | "collar" | "placket" | "sleeve" | "bottomFold" | "frontOpenStyle" | "pocketType" | "fit" | "pattern" | "length" | "colour" | "secondaryColour" | "drawcord" | "button" | "zipper" | "zipColour" | "printType" | "printStyle" | "printPlacement" | "patches" | "patchesType" | "embroidery" | "embroideryType" | "wash" | "fatherBelt" | "childBelt" | "division" | "subDivision" | "referenceArticleNumber" | "referenceArticleDescription" | "collarStyle" | "sleeveFold" | "mSet" | "noOfPocket" | "extraPocket" | "dcShape" | "btnColour" | "fCount" | "fConstruction" | "fOunce" | "fWidth" | "fabDiv" | "fabVdr" | "htrfType" | "htrfStyle" | "embPlacement" | "ageGroup" | "mNoOfSize" | "mNoOfClr" | "articleFashionType" | "articleDimension" | "cmtpCost" | "cmpCost" | "fabCost" | "fabCons" | "width" | "vendorFabricRate" | "valueAddAccCostType" | "valueAddCost" | "valueAddProcessCost" | "bodyArticle" | "bodyArticleDescription" | "fabricArticleNumber" | "fabricArticleDescription" | "attrArticleNums" | "mvgrBrandVendor" | "mcDescription" | "vendorCode" | "mrp" | "impAtrbt2" | "mcCode" | "segment" | "season" | "hsnTaxCode" | "articleDescription" | "fashionGrid" | "year" | "articleType" | "presentationsType" | "approvalStatus" | "pdStatus" | "approvedBy" | "approvedAt" | "source" | "imageUncPath" | "isOldArticle" | "isGeneric" | "genericArticleId" | "variantSize" | "variantColor" | "variantWeight" | "sapSyncStatus" | "sapArticleId" | "sapSyncMessage" | "srmOriginalDesignNumber" | "srmUniqueId" | "imageExtractionRawData", ExtArgs["result"]["extractionResultFlat"]>
+  export type ExtractionResultFlatOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<"id" | "jobId" | "imageName" | "imageUrl" | "articleNumber" | "extractionStatus" | "aiModel" | "avgConfidence" | "processingTimeMs" | "totalAttributes" | "extractedCount" | "inputTokens" | "outputTokens" | "totalTokens" | "apiCost" | "userId" | "userName" | "extractionDate" | "createdAt" | "updatedAt" | "majorCategory" | "vendorName" | "designNumber" | "pptNumber" | "rate" | "size" | "yarn1" | "yarn2" | "fabricMainMvgr" | "weave" | "weaveFullForm" | "composition" | "finish" | "gsm" | "macroMvgr" | "macroMvgrFullForm" | "mainMvgr" | "mainMvgrFullForm" | "mFab2" | "mFab2FullForm" | "shade" | "weight" | "lycra" | "neck" | "neckDetails" | "collar" | "placket" | "sleeve" | "bottomFold" | "frontOpenStyle" | "pocketType" | "fit" | "pattern" | "length" | "colour" | "secondaryColour" | "drawcord" | "button" | "zipper" | "zipColour" | "printType" | "printStyle" | "printPlacement" | "patches" | "patchesType" | "embroidery" | "embroideryType" | "wash" | "fatherBelt" | "childBelt" | "division" | "subDivision" | "referenceArticleNumber" | "referenceArticleDescription" | "collarStyle" | "sleeveFold" | "mSet" | "noOfPocket" | "extraPocket" | "dcShape" | "btnColour" | "fCount" | "fConstruction" | "fOunce" | "fWidth" | "fabDiv" | "fabVdr" | "htrfType" | "htrfStyle" | "embPlacement" | "ageGroup" | "mNoOfSize" | "mNoOfClr" | "articleFashionType" | "articleDimension" | "cmtpCost" | "cmpCost" | "fabCost" | "fabCons" | "width" | "vendorFabricRate" | "valueAddAccCostType" | "valueAddCost" | "valueAddProcessCost" | "bodyArticle" | "bodyArticleDescription" | "fabricArticleNumber" | "fabricArticleDescription" | "attrArticleNums" | "mvgrBrandVendor" | "mcDescription" | "vendorCode" | "mrp" | "impAtrbt2" | "mcCode" | "segment" | "season" | "hsnTaxCode" | "articleDescription" | "fashionGrid" | "year" | "articleType" | "presentationsType" | "approvalStatus" | "pdStatus" | "approvedBy" | "approvedAt" | "source" | "imageUncPath" | "isOldArticle" | "isGeneric" | "genericArticleId" | "variantSize" | "variantColor" | "variantWeight" | "comboRole" | "comboParentId" | "comboChildOrder" | "setGroupId" | "setRole" | "setName" | "sapSyncStatus" | "sapArticleId" | "sapSyncMessage" | "srmOriginalDesignNumber" | "srmUniqueId" | "imageExtractionRawData", ExtArgs["result"]["extractionResultFlat"]>
   export type ExtractionResultFlatInclude<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
     approver?: boolean | ExtractionResultFlat$approverArgs<ExtArgs>
+    comboParent?: boolean | ExtractionResultFlat$comboParentArgs<ExtArgs>
+    comboChildren?: boolean | ExtractionResultFlat$comboChildrenArgs<ExtArgs>
     job?: boolean | ExtractionResultFlat$jobArgs<ExtArgs>
     srmSyncRunItems?: boolean | ExtractionResultFlat$srmSyncRunItemsArgs<ExtArgs>
     _count?: boolean | ExtractionResultFlatCountOutputTypeDefaultArgs<ExtArgs>
   }
   export type ExtractionResultFlatIncludeCreateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
     approver?: boolean | ExtractionResultFlat$approverArgs<ExtArgs>
+    comboParent?: boolean | ExtractionResultFlat$comboParentArgs<ExtArgs>
     job?: boolean | ExtractionResultFlat$jobArgs<ExtArgs>
   }
   export type ExtractionResultFlatIncludeUpdateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
     approver?: boolean | ExtractionResultFlat$approverArgs<ExtArgs>
+    comboParent?: boolean | ExtractionResultFlat$comboParentArgs<ExtArgs>
     job?: boolean | ExtractionResultFlat$jobArgs<ExtArgs>
   }
 
@@ -18429,6 +18529,8 @@ export namespace Prisma {
     name: "ExtractionResultFlat"
     objects: {
       approver: Prisma.$UserPayload<ExtArgs> | null
+      comboParent: Prisma.$ExtractionResultFlatPayload<ExtArgs> | null
+      comboChildren: Prisma.$ExtractionResultFlatPayload<ExtArgs>[]
       job: Prisma.$ExtractionJobPayload<ExtArgs> | null
       srmSyncRunItems: Prisma.$SrmSyncRunItemPayload<ExtArgs>[]
     }
@@ -18568,6 +18670,12 @@ export namespace Prisma {
       variantSize: string | null
       variantColor: string | null
       variantWeight: string | null
+      comboRole: $Enums.ComboRole
+      comboParentId: string | null
+      comboChildOrder: number | null
+      setGroupId: string | null
+      setRole: string | null
+      setName: string | null
       sapSyncStatus: $Enums.SapSyncStatus
       sapArticleId: string | null
       sapSyncMessage: string | null
@@ -18969,6 +19077,8 @@ export namespace Prisma {
   export interface Prisma__ExtractionResultFlatClient<T, Null = never, ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs, GlobalOmitOptions = {}> extends Prisma.PrismaPromise<T> {
     readonly [Symbol.toStringTag]: "PrismaPromise"
     approver<T extends ExtractionResultFlat$approverArgs<ExtArgs> = {}>(args?: Subset<T, ExtractionResultFlat$approverArgs<ExtArgs>>): Prisma__UserClient<$Result.GetResult<Prisma.$UserPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
+    comboParent<T extends ExtractionResultFlat$comboParentArgs<ExtArgs> = {}>(args?: Subset<T, ExtractionResultFlat$comboParentArgs<ExtArgs>>): Prisma__ExtractionResultFlatClient<$Result.GetResult<Prisma.$ExtractionResultFlatPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
+    comboChildren<T extends ExtractionResultFlat$comboChildrenArgs<ExtArgs> = {}>(args?: Subset<T, ExtractionResultFlat$comboChildrenArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$ExtractionResultFlatPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
     job<T extends ExtractionResultFlat$jobArgs<ExtArgs> = {}>(args?: Subset<T, ExtractionResultFlat$jobArgs<ExtArgs>>): Prisma__ExtractionJobClient<$Result.GetResult<Prisma.$ExtractionJobPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
     srmSyncRunItems<T extends ExtractionResultFlat$srmSyncRunItemsArgs<ExtArgs> = {}>(args?: Subset<T, ExtractionResultFlat$srmSyncRunItemsArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$SrmSyncRunItemPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
     /**
@@ -19135,6 +19245,12 @@ export namespace Prisma {
     readonly variantSize: FieldRef<"ExtractionResultFlat", 'String'>
     readonly variantColor: FieldRef<"ExtractionResultFlat", 'String'>
     readonly variantWeight: FieldRef<"ExtractionResultFlat", 'String'>
+    readonly comboRole: FieldRef<"ExtractionResultFlat", 'ComboRole'>
+    readonly comboParentId: FieldRef<"ExtractionResultFlat", 'String'>
+    readonly comboChildOrder: FieldRef<"ExtractionResultFlat", 'Int'>
+    readonly setGroupId: FieldRef<"ExtractionResultFlat", 'String'>
+    readonly setRole: FieldRef<"ExtractionResultFlat", 'String'>
+    readonly setName: FieldRef<"ExtractionResultFlat", 'String'>
     readonly sapSyncStatus: FieldRef<"ExtractionResultFlat", 'SapSyncStatus'>
     readonly sapArticleId: FieldRef<"ExtractionResultFlat", 'String'>
     readonly sapSyncMessage: FieldRef<"ExtractionResultFlat", 'String'>
@@ -19553,6 +19669,49 @@ export namespace Prisma {
      */
     include?: UserInclude<ExtArgs> | null
     where?: UserWhereInput
+  }
+
+  /**
+   * ExtractionResultFlat.comboParent
+   */
+  export type ExtractionResultFlat$comboParentArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the ExtractionResultFlat
+     */
+    select?: ExtractionResultFlatSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the ExtractionResultFlat
+     */
+    omit?: ExtractionResultFlatOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: ExtractionResultFlatInclude<ExtArgs> | null
+    where?: ExtractionResultFlatWhereInput
+  }
+
+  /**
+   * ExtractionResultFlat.comboChildren
+   */
+  export type ExtractionResultFlat$comboChildrenArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the ExtractionResultFlat
+     */
+    select?: ExtractionResultFlatSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the ExtractionResultFlat
+     */
+    omit?: ExtractionResultFlatOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: ExtractionResultFlatInclude<ExtArgs> | null
+    where?: ExtractionResultFlatWhereInput
+    orderBy?: ExtractionResultFlatOrderByWithRelationInput | ExtractionResultFlatOrderByWithRelationInput[]
+    cursor?: ExtractionResultFlatWhereUniqueInput
+    take?: number
+    skip?: number
+    distinct?: ExtractionResultFlatScalarFieldEnum | ExtractionResultFlatScalarFieldEnum[]
   }
 
   /**
@@ -41490,6 +41649,9 @@ export namespace Prisma {
     price: Decimal | null
     imageUrl: string | null
     presentationsType: string | null
+    setGroupId: string | null
+    setRole: string | null
+    setName: string | null
     uniqueKey: string | null
     source: string | null
     status: $Enums.RawArticleStatus | null
@@ -41518,6 +41680,9 @@ export namespace Prisma {
     price: Decimal | null
     imageUrl: string | null
     presentationsType: string | null
+    setGroupId: string | null
+    setRole: string | null
+    setName: string | null
     uniqueKey: string | null
     source: string | null
     status: $Enums.RawArticleStatus | null
@@ -41546,6 +41711,9 @@ export namespace Prisma {
     price: number
     imageUrl: number
     presentationsType: number
+    setGroupId: number
+    setRole: number
+    setName: number
     uniqueKey: number
     source: number
     status: number
@@ -41589,6 +41757,9 @@ export namespace Prisma {
     price?: true
     imageUrl?: true
     presentationsType?: true
+    setGroupId?: true
+    setRole?: true
+    setName?: true
     uniqueKey?: true
     source?: true
     status?: true
@@ -41617,6 +41788,9 @@ export namespace Prisma {
     price?: true
     imageUrl?: true
     presentationsType?: true
+    setGroupId?: true
+    setRole?: true
+    setName?: true
     uniqueKey?: true
     source?: true
     status?: true
@@ -41645,6 +41819,9 @@ export namespace Prisma {
     price?: true
     imageUrl?: true
     presentationsType?: true
+    setGroupId?: true
+    setRole?: true
+    setName?: true
     uniqueKey?: true
     source?: true
     status?: true
@@ -41761,6 +41938,9 @@ export namespace Prisma {
     price: Decimal | null
     imageUrl: string | null
     presentationsType: string | null
+    setGroupId: string | null
+    setRole: string | null
+    setName: string | null
     uniqueKey: string
     source: string | null
     status: $Enums.RawArticleStatus
@@ -41809,6 +41989,9 @@ export namespace Prisma {
     price?: boolean
     imageUrl?: boolean
     presentationsType?: boolean
+    setGroupId?: boolean
+    setRole?: boolean
+    setName?: boolean
     uniqueKey?: boolean
     source?: boolean
     status?: boolean
@@ -41838,6 +42021,9 @@ export namespace Prisma {
     price?: boolean
     imageUrl?: boolean
     presentationsType?: boolean
+    setGroupId?: boolean
+    setRole?: boolean
+    setName?: boolean
     uniqueKey?: boolean
     source?: boolean
     status?: boolean
@@ -41867,6 +42053,9 @@ export namespace Prisma {
     price?: boolean
     imageUrl?: boolean
     presentationsType?: boolean
+    setGroupId?: boolean
+    setRole?: boolean
+    setName?: boolean
     uniqueKey?: boolean
     source?: boolean
     status?: boolean
@@ -41896,6 +42085,9 @@ export namespace Prisma {
     price?: boolean
     imageUrl?: boolean
     presentationsType?: boolean
+    setGroupId?: boolean
+    setRole?: boolean
+    setName?: boolean
     uniqueKey?: boolean
     source?: boolean
     status?: boolean
@@ -41910,7 +42102,7 @@ export namespace Prisma {
     updatedAt?: boolean
   }
 
-  export type RawArticleOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<"id" | "presentationNo" | "vendorCode" | "vendorName" | "division" | "subDivision" | "majorCategory" | "presentationReceivedDate" | "designNumber" | "fabric" | "noOfColors" | "price" | "imageUrl" | "presentationsType" | "uniqueKey" | "source" | "status" | "retryCount" | "errorMessage" | "extractedData" | "extractedAt" | "flatId" | "lockedUntil" | "articleNumber" | "createdAt" | "updatedAt", ExtArgs["result"]["rawArticle"]>
+  export type RawArticleOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<"id" | "presentationNo" | "vendorCode" | "vendorName" | "division" | "subDivision" | "majorCategory" | "presentationReceivedDate" | "designNumber" | "fabric" | "noOfColors" | "price" | "imageUrl" | "presentationsType" | "setGroupId" | "setRole" | "setName" | "uniqueKey" | "source" | "status" | "retryCount" | "errorMessage" | "extractedData" | "extractedAt" | "flatId" | "lockedUntil" | "articleNumber" | "createdAt" | "updatedAt", ExtArgs["result"]["rawArticle"]>
 
   export type $RawArticlePayload<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
     name: "RawArticle"
@@ -41930,6 +42122,9 @@ export namespace Prisma {
       price: Prisma.Decimal | null
       imageUrl: string | null
       presentationsType: string | null
+      setGroupId: string | null
+      setRole: string | null
+      setName: string | null
       uniqueKey: string
       source: string | null
       status: $Enums.RawArticleStatus
@@ -42379,6 +42574,9 @@ export namespace Prisma {
     readonly price: FieldRef<"RawArticle", 'Decimal'>
     readonly imageUrl: FieldRef<"RawArticle", 'String'>
     readonly presentationsType: FieldRef<"RawArticle", 'String'>
+    readonly setGroupId: FieldRef<"RawArticle", 'String'>
+    readonly setRole: FieldRef<"RawArticle", 'String'>
+    readonly setName: FieldRef<"RawArticle", 'String'>
     readonly uniqueKey: FieldRef<"RawArticle", 'String'>
     readonly source: FieldRef<"RawArticle", 'String'>
     readonly status: FieldRef<"RawArticle", 'RawArticleStatus'>
@@ -79175,6 +79373,12 @@ export namespace Prisma {
     variantSize: 'variantSize',
     variantColor: 'variantColor',
     variantWeight: 'variantWeight',
+    comboRole: 'comboRole',
+    comboParentId: 'comboParentId',
+    comboChildOrder: 'comboChildOrder',
+    setGroupId: 'setGroupId',
+    setRole: 'setRole',
+    setName: 'setName',
     sapSyncStatus: 'sapSyncStatus',
     sapArticleId: 'sapArticleId',
     sapSyncMessage: 'sapSyncMessage',
@@ -79586,6 +79790,9 @@ export namespace Prisma {
     price: 'price',
     imageUrl: 'imageUrl',
     presentationsType: 'presentationsType',
+    setGroupId: 'setGroupId',
+    setRole: 'setRole',
+    setName: 'setName',
     uniqueKey: 'uniqueKey',
     source: 'source',
     status: 'status',
@@ -80645,6 +80852,10 @@ export namespace Prisma {
     variantSize: 'variantSize',
     variantColor: 'variantColor',
     variantWeight: 'variantWeight',
+    comboParentId: 'comboParentId',
+    setGroupId: 'setGroupId',
+    setRole: 'setRole',
+    setName: 'setName',
     sapArticleId: 'sapArticleId',
     sapSyncMessage: 'sapSyncMessage',
     srmOriginalDesignNumber: 'srmOriginalDesignNumber',
@@ -80963,6 +81174,9 @@ export namespace Prisma {
     fabric: 'fabric',
     imageUrl: 'imageUrl',
     presentationsType: 'presentationsType',
+    setGroupId: 'setGroupId',
+    setRole: 'setRole',
+    setName: 'setName',
     uniqueKey: 'uniqueKey',
     source: 'source',
     errorMessage: 'errorMessage',
@@ -81708,6 +81922,20 @@ export namespace Prisma {
    * Reference to a field of type 'PdStatus[]'
    */
   export type ListEnumPdStatusFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'PdStatus[]'>
+    
+
+
+  /**
+   * Reference to a field of type 'ComboRole'
+   */
+  export type EnumComboRoleFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'ComboRole'>
+    
+
+
+  /**
+   * Reference to a field of type 'ComboRole[]'
+   */
+  export type ListEnumComboRoleFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'ComboRole[]'>
     
 
 
@@ -82834,6 +83062,12 @@ export namespace Prisma {
     variantSize?: StringNullableFilter<"ExtractionResultFlat"> | string | null
     variantColor?: StringNullableFilter<"ExtractionResultFlat"> | string | null
     variantWeight?: StringNullableFilter<"ExtractionResultFlat"> | string | null
+    comboRole?: EnumComboRoleFilter<"ExtractionResultFlat"> | $Enums.ComboRole
+    comboParentId?: StringNullableFilter<"ExtractionResultFlat"> | string | null
+    comboChildOrder?: IntNullableFilter<"ExtractionResultFlat"> | number | null
+    setGroupId?: StringNullableFilter<"ExtractionResultFlat"> | string | null
+    setRole?: StringNullableFilter<"ExtractionResultFlat"> | string | null
+    setName?: StringNullableFilter<"ExtractionResultFlat"> | string | null
     sapSyncStatus?: EnumSapSyncStatusFilter<"ExtractionResultFlat"> | $Enums.SapSyncStatus
     sapArticleId?: StringNullableFilter<"ExtractionResultFlat"> | string | null
     sapSyncMessage?: StringNullableFilter<"ExtractionResultFlat"> | string | null
@@ -82841,6 +83075,8 @@ export namespace Prisma {
     srmUniqueId?: StringNullableFilter<"ExtractionResultFlat"> | string | null
     imageExtractionRawData?: JsonNullableFilter<"ExtractionResultFlat">
     approver?: XOR<UserNullableScalarRelationFilter, UserWhereInput> | null
+    comboParent?: XOR<ExtractionResultFlatNullableScalarRelationFilter, ExtractionResultFlatWhereInput> | null
+    comboChildren?: ExtractionResultFlatListRelationFilter
     job?: XOR<ExtractionJobNullableScalarRelationFilter, ExtractionJobWhereInput> | null
     srmSyncRunItems?: SrmSyncRunItemListRelationFilter
   }
@@ -82981,6 +83217,12 @@ export namespace Prisma {
     variantSize?: SortOrderInput | SortOrder
     variantColor?: SortOrderInput | SortOrder
     variantWeight?: SortOrderInput | SortOrder
+    comboRole?: SortOrder
+    comboParentId?: SortOrderInput | SortOrder
+    comboChildOrder?: SortOrderInput | SortOrder
+    setGroupId?: SortOrderInput | SortOrder
+    setRole?: SortOrderInput | SortOrder
+    setName?: SortOrderInput | SortOrder
     sapSyncStatus?: SortOrder
     sapArticleId?: SortOrderInput | SortOrder
     sapSyncMessage?: SortOrderInput | SortOrder
@@ -82988,6 +83230,8 @@ export namespace Prisma {
     srmUniqueId?: SortOrderInput | SortOrder
     imageExtractionRawData?: SortOrderInput | SortOrder
     approver?: UserOrderByWithRelationInput
+    comboParent?: ExtractionResultFlatOrderByWithRelationInput
+    comboChildren?: ExtractionResultFlatOrderByRelationAggregateInput
     job?: ExtractionJobOrderByWithRelationInput
     srmSyncRunItems?: SrmSyncRunItemOrderByRelationAggregateInput
     _relevance?: ExtractionResultFlatOrderByRelevanceInput
@@ -83132,6 +83376,12 @@ export namespace Prisma {
     variantSize?: StringNullableFilter<"ExtractionResultFlat"> | string | null
     variantColor?: StringNullableFilter<"ExtractionResultFlat"> | string | null
     variantWeight?: StringNullableFilter<"ExtractionResultFlat"> | string | null
+    comboRole?: EnumComboRoleFilter<"ExtractionResultFlat"> | $Enums.ComboRole
+    comboParentId?: StringNullableFilter<"ExtractionResultFlat"> | string | null
+    comboChildOrder?: IntNullableFilter<"ExtractionResultFlat"> | number | null
+    setGroupId?: StringNullableFilter<"ExtractionResultFlat"> | string | null
+    setRole?: StringNullableFilter<"ExtractionResultFlat"> | string | null
+    setName?: StringNullableFilter<"ExtractionResultFlat"> | string | null
     sapSyncStatus?: EnumSapSyncStatusFilter<"ExtractionResultFlat"> | $Enums.SapSyncStatus
     sapArticleId?: StringNullableFilter<"ExtractionResultFlat"> | string | null
     sapSyncMessage?: StringNullableFilter<"ExtractionResultFlat"> | string | null
@@ -83139,6 +83389,8 @@ export namespace Prisma {
     srmUniqueId?: StringNullableFilter<"ExtractionResultFlat"> | string | null
     imageExtractionRawData?: JsonNullableFilter<"ExtractionResultFlat">
     approver?: XOR<UserNullableScalarRelationFilter, UserWhereInput> | null
+    comboParent?: XOR<ExtractionResultFlatNullableScalarRelationFilter, ExtractionResultFlatWhereInput> | null
+    comboChildren?: ExtractionResultFlatListRelationFilter
     job?: XOR<ExtractionJobNullableScalarRelationFilter, ExtractionJobWhereInput> | null
     srmSyncRunItems?: SrmSyncRunItemListRelationFilter
   }, "id" | "jobId" | "imageUncPath">
@@ -83279,6 +83531,12 @@ export namespace Prisma {
     variantSize?: SortOrderInput | SortOrder
     variantColor?: SortOrderInput | SortOrder
     variantWeight?: SortOrderInput | SortOrder
+    comboRole?: SortOrder
+    comboParentId?: SortOrderInput | SortOrder
+    comboChildOrder?: SortOrderInput | SortOrder
+    setGroupId?: SortOrderInput | SortOrder
+    setRole?: SortOrderInput | SortOrder
+    setName?: SortOrderInput | SortOrder
     sapSyncStatus?: SortOrder
     sapArticleId?: SortOrderInput | SortOrder
     sapSyncMessage?: SortOrderInput | SortOrder
@@ -83431,6 +83689,12 @@ export namespace Prisma {
     variantSize?: StringNullableWithAggregatesFilter<"ExtractionResultFlat"> | string | null
     variantColor?: StringNullableWithAggregatesFilter<"ExtractionResultFlat"> | string | null
     variantWeight?: StringNullableWithAggregatesFilter<"ExtractionResultFlat"> | string | null
+    comboRole?: EnumComboRoleWithAggregatesFilter<"ExtractionResultFlat"> | $Enums.ComboRole
+    comboParentId?: StringNullableWithAggregatesFilter<"ExtractionResultFlat"> | string | null
+    comboChildOrder?: IntNullableWithAggregatesFilter<"ExtractionResultFlat"> | number | null
+    setGroupId?: StringNullableWithAggregatesFilter<"ExtractionResultFlat"> | string | null
+    setRole?: StringNullableWithAggregatesFilter<"ExtractionResultFlat"> | string | null
+    setName?: StringNullableWithAggregatesFilter<"ExtractionResultFlat"> | string | null
     sapSyncStatus?: EnumSapSyncStatusWithAggregatesFilter<"ExtractionResultFlat"> | $Enums.SapSyncStatus
     sapArticleId?: StringNullableWithAggregatesFilter<"ExtractionResultFlat"> | string | null
     sapSyncMessage?: StringNullableWithAggregatesFilter<"ExtractionResultFlat"> | string | null
@@ -85434,6 +85698,9 @@ export namespace Prisma {
     price?: DecimalNullableFilter<"RawArticle"> | Decimal | DecimalJsLike | number | string | null
     imageUrl?: StringNullableFilter<"RawArticle"> | string | null
     presentationsType?: StringNullableFilter<"RawArticle"> | string | null
+    setGroupId?: StringNullableFilter<"RawArticle"> | string | null
+    setRole?: StringNullableFilter<"RawArticle"> | string | null
+    setName?: StringNullableFilter<"RawArticle"> | string | null
     uniqueKey?: StringFilter<"RawArticle"> | string
     source?: StringNullableFilter<"RawArticle"> | string | null
     status?: EnumRawArticleStatusFilter<"RawArticle"> | $Enums.RawArticleStatus
@@ -85463,6 +85730,9 @@ export namespace Prisma {
     price?: SortOrderInput | SortOrder
     imageUrl?: SortOrderInput | SortOrder
     presentationsType?: SortOrderInput | SortOrder
+    setGroupId?: SortOrderInput | SortOrder
+    setRole?: SortOrderInput | SortOrder
+    setName?: SortOrderInput | SortOrder
     uniqueKey?: SortOrder
     source?: SortOrderInput | SortOrder
     status?: SortOrder
@@ -85497,6 +85767,9 @@ export namespace Prisma {
     price?: DecimalNullableFilter<"RawArticle"> | Decimal | DecimalJsLike | number | string | null
     imageUrl?: StringNullableFilter<"RawArticle"> | string | null
     presentationsType?: StringNullableFilter<"RawArticle"> | string | null
+    setGroupId?: StringNullableFilter<"RawArticle"> | string | null
+    setRole?: StringNullableFilter<"RawArticle"> | string | null
+    setName?: StringNullableFilter<"RawArticle"> | string | null
     source?: StringNullableFilter<"RawArticle"> | string | null
     status?: EnumRawArticleStatusFilter<"RawArticle"> | $Enums.RawArticleStatus
     retryCount?: IntFilter<"RawArticle"> | number
@@ -85525,6 +85798,9 @@ export namespace Prisma {
     price?: SortOrderInput | SortOrder
     imageUrl?: SortOrderInput | SortOrder
     presentationsType?: SortOrderInput | SortOrder
+    setGroupId?: SortOrderInput | SortOrder
+    setRole?: SortOrderInput | SortOrder
+    setName?: SortOrderInput | SortOrder
     uniqueKey?: SortOrder
     source?: SortOrderInput | SortOrder
     status?: SortOrder
@@ -85562,6 +85838,9 @@ export namespace Prisma {
     price?: DecimalNullableWithAggregatesFilter<"RawArticle"> | Decimal | DecimalJsLike | number | string | null
     imageUrl?: StringNullableWithAggregatesFilter<"RawArticle"> | string | null
     presentationsType?: StringNullableWithAggregatesFilter<"RawArticle"> | string | null
+    setGroupId?: StringNullableWithAggregatesFilter<"RawArticle"> | string | null
+    setRole?: StringNullableWithAggregatesFilter<"RawArticle"> | string | null
+    setName?: StringNullableWithAggregatesFilter<"RawArticle"> | string | null
     uniqueKey?: StringWithAggregatesFilter<"RawArticle"> | string
     source?: StringNullableWithAggregatesFilter<"RawArticle"> | string | null
     status?: EnumRawArticleStatusWithAggregatesFilter<"RawArticle"> | $Enums.RawArticleStatus
@@ -90671,6 +90950,11 @@ export namespace Prisma {
     variantSize?: string | null
     variantColor?: string | null
     variantWeight?: string | null
+    comboRole?: $Enums.ComboRole
+    comboChildOrder?: number | null
+    setGroupId?: string | null
+    setRole?: string | null
+    setName?: string | null
     sapSyncStatus?: $Enums.SapSyncStatus
     sapArticleId?: string | null
     sapSyncMessage?: string | null
@@ -90678,6 +90962,8 @@ export namespace Prisma {
     srmUniqueId?: string | null
     imageExtractionRawData?: NullableJsonNullValueInput | InputJsonValue
     approver?: UserCreateNestedOneWithoutApprovedItemsInput
+    comboParent?: ExtractionResultFlatCreateNestedOneWithoutComboChildrenInput
+    comboChildren?: ExtractionResultFlatCreateNestedManyWithoutComboParentInput
     job?: ExtractionJobCreateNestedOneWithoutFlatResultInput
     srmSyncRunItems?: SrmSyncRunItemCreateNestedManyWithoutFlatInput
   }
@@ -90818,12 +91104,19 @@ export namespace Prisma {
     variantSize?: string | null
     variantColor?: string | null
     variantWeight?: string | null
+    comboRole?: $Enums.ComboRole
+    comboParentId?: string | null
+    comboChildOrder?: number | null
+    setGroupId?: string | null
+    setRole?: string | null
+    setName?: string | null
     sapSyncStatus?: $Enums.SapSyncStatus
     sapArticleId?: string | null
     sapSyncMessage?: string | null
     srmOriginalDesignNumber?: string | null
     srmUniqueId?: string | null
     imageExtractionRawData?: NullableJsonNullValueInput | InputJsonValue
+    comboChildren?: ExtractionResultFlatUncheckedCreateNestedManyWithoutComboParentInput
     srmSyncRunItems?: SrmSyncRunItemUncheckedCreateNestedManyWithoutFlatInput
   }
 
@@ -90961,6 +91254,11 @@ export namespace Prisma {
     variantSize?: NullableStringFieldUpdateOperationsInput | string | null
     variantColor?: NullableStringFieldUpdateOperationsInput | string | null
     variantWeight?: NullableStringFieldUpdateOperationsInput | string | null
+    comboRole?: EnumComboRoleFieldUpdateOperationsInput | $Enums.ComboRole
+    comboChildOrder?: NullableIntFieldUpdateOperationsInput | number | null
+    setGroupId?: NullableStringFieldUpdateOperationsInput | string | null
+    setRole?: NullableStringFieldUpdateOperationsInput | string | null
+    setName?: NullableStringFieldUpdateOperationsInput | string | null
     sapSyncStatus?: EnumSapSyncStatusFieldUpdateOperationsInput | $Enums.SapSyncStatus
     sapArticleId?: NullableStringFieldUpdateOperationsInput | string | null
     sapSyncMessage?: NullableStringFieldUpdateOperationsInput | string | null
@@ -90968,6 +91266,8 @@ export namespace Prisma {
     srmUniqueId?: NullableStringFieldUpdateOperationsInput | string | null
     imageExtractionRawData?: NullableJsonNullValueInput | InputJsonValue
     approver?: UserUpdateOneWithoutApprovedItemsNestedInput
+    comboParent?: ExtractionResultFlatUpdateOneWithoutComboChildrenNestedInput
+    comboChildren?: ExtractionResultFlatUpdateManyWithoutComboParentNestedInput
     job?: ExtractionJobUpdateOneWithoutFlatResultNestedInput
     srmSyncRunItems?: SrmSyncRunItemUpdateManyWithoutFlatNestedInput
   }
@@ -91108,12 +91408,19 @@ export namespace Prisma {
     variantSize?: NullableStringFieldUpdateOperationsInput | string | null
     variantColor?: NullableStringFieldUpdateOperationsInput | string | null
     variantWeight?: NullableStringFieldUpdateOperationsInput | string | null
+    comboRole?: EnumComboRoleFieldUpdateOperationsInput | $Enums.ComboRole
+    comboParentId?: NullableStringFieldUpdateOperationsInput | string | null
+    comboChildOrder?: NullableIntFieldUpdateOperationsInput | number | null
+    setGroupId?: NullableStringFieldUpdateOperationsInput | string | null
+    setRole?: NullableStringFieldUpdateOperationsInput | string | null
+    setName?: NullableStringFieldUpdateOperationsInput | string | null
     sapSyncStatus?: EnumSapSyncStatusFieldUpdateOperationsInput | $Enums.SapSyncStatus
     sapArticleId?: NullableStringFieldUpdateOperationsInput | string | null
     sapSyncMessage?: NullableStringFieldUpdateOperationsInput | string | null
     srmOriginalDesignNumber?: NullableStringFieldUpdateOperationsInput | string | null
     srmUniqueId?: NullableStringFieldUpdateOperationsInput | string | null
     imageExtractionRawData?: NullableJsonNullValueInput | InputJsonValue
+    comboChildren?: ExtractionResultFlatUncheckedUpdateManyWithoutComboParentNestedInput
     srmSyncRunItems?: SrmSyncRunItemUncheckedUpdateManyWithoutFlatNestedInput
   }
 
@@ -91253,6 +91560,12 @@ export namespace Prisma {
     variantSize?: string | null
     variantColor?: string | null
     variantWeight?: string | null
+    comboRole?: $Enums.ComboRole
+    comboParentId?: string | null
+    comboChildOrder?: number | null
+    setGroupId?: string | null
+    setRole?: string | null
+    setName?: string | null
     sapSyncStatus?: $Enums.SapSyncStatus
     sapArticleId?: string | null
     sapSyncMessage?: string | null
@@ -91395,6 +91708,11 @@ export namespace Prisma {
     variantSize?: NullableStringFieldUpdateOperationsInput | string | null
     variantColor?: NullableStringFieldUpdateOperationsInput | string | null
     variantWeight?: NullableStringFieldUpdateOperationsInput | string | null
+    comboRole?: EnumComboRoleFieldUpdateOperationsInput | $Enums.ComboRole
+    comboChildOrder?: NullableIntFieldUpdateOperationsInput | number | null
+    setGroupId?: NullableStringFieldUpdateOperationsInput | string | null
+    setRole?: NullableStringFieldUpdateOperationsInput | string | null
+    setName?: NullableStringFieldUpdateOperationsInput | string | null
     sapSyncStatus?: EnumSapSyncStatusFieldUpdateOperationsInput | $Enums.SapSyncStatus
     sapArticleId?: NullableStringFieldUpdateOperationsInput | string | null
     sapSyncMessage?: NullableStringFieldUpdateOperationsInput | string | null
@@ -91539,6 +91857,12 @@ export namespace Prisma {
     variantSize?: NullableStringFieldUpdateOperationsInput | string | null
     variantColor?: NullableStringFieldUpdateOperationsInput | string | null
     variantWeight?: NullableStringFieldUpdateOperationsInput | string | null
+    comboRole?: EnumComboRoleFieldUpdateOperationsInput | $Enums.ComboRole
+    comboParentId?: NullableStringFieldUpdateOperationsInput | string | null
+    comboChildOrder?: NullableIntFieldUpdateOperationsInput | number | null
+    setGroupId?: NullableStringFieldUpdateOperationsInput | string | null
+    setRole?: NullableStringFieldUpdateOperationsInput | string | null
+    setName?: NullableStringFieldUpdateOperationsInput | string | null
     sapSyncStatus?: EnumSapSyncStatusFieldUpdateOperationsInput | $Enums.SapSyncStatus
     sapArticleId?: NullableStringFieldUpdateOperationsInput | string | null
     sapSyncMessage?: NullableStringFieldUpdateOperationsInput | string | null
@@ -93891,6 +94215,9 @@ export namespace Prisma {
     price?: Decimal | DecimalJsLike | number | string | null
     imageUrl?: string | null
     presentationsType?: string | null
+    setGroupId?: string | null
+    setRole?: string | null
+    setName?: string | null
     uniqueKey: string
     source?: string | null
     status?: $Enums.RawArticleStatus
@@ -93920,6 +94247,9 @@ export namespace Prisma {
     price?: Decimal | DecimalJsLike | number | string | null
     imageUrl?: string | null
     presentationsType?: string | null
+    setGroupId?: string | null
+    setRole?: string | null
+    setName?: string | null
     uniqueKey: string
     source?: string | null
     status?: $Enums.RawArticleStatus
@@ -93949,6 +94279,9 @@ export namespace Prisma {
     price?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
     imageUrl?: NullableStringFieldUpdateOperationsInput | string | null
     presentationsType?: NullableStringFieldUpdateOperationsInput | string | null
+    setGroupId?: NullableStringFieldUpdateOperationsInput | string | null
+    setRole?: NullableStringFieldUpdateOperationsInput | string | null
+    setName?: NullableStringFieldUpdateOperationsInput | string | null
     uniqueKey?: StringFieldUpdateOperationsInput | string
     source?: NullableStringFieldUpdateOperationsInput | string | null
     status?: EnumRawArticleStatusFieldUpdateOperationsInput | $Enums.RawArticleStatus
@@ -93978,6 +94311,9 @@ export namespace Prisma {
     price?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
     imageUrl?: NullableStringFieldUpdateOperationsInput | string | null
     presentationsType?: NullableStringFieldUpdateOperationsInput | string | null
+    setGroupId?: NullableStringFieldUpdateOperationsInput | string | null
+    setRole?: NullableStringFieldUpdateOperationsInput | string | null
+    setName?: NullableStringFieldUpdateOperationsInput | string | null
     uniqueKey?: StringFieldUpdateOperationsInput | string
     source?: NullableStringFieldUpdateOperationsInput | string | null
     status?: EnumRawArticleStatusFieldUpdateOperationsInput | $Enums.RawArticleStatus
@@ -94007,6 +94343,9 @@ export namespace Prisma {
     price?: Decimal | DecimalJsLike | number | string | null
     imageUrl?: string | null
     presentationsType?: string | null
+    setGroupId?: string | null
+    setRole?: string | null
+    setName?: string | null
     uniqueKey: string
     source?: string | null
     status?: $Enums.RawArticleStatus
@@ -94036,6 +94375,9 @@ export namespace Prisma {
     price?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
     imageUrl?: NullableStringFieldUpdateOperationsInput | string | null
     presentationsType?: NullableStringFieldUpdateOperationsInput | string | null
+    setGroupId?: NullableStringFieldUpdateOperationsInput | string | null
+    setRole?: NullableStringFieldUpdateOperationsInput | string | null
+    setName?: NullableStringFieldUpdateOperationsInput | string | null
     uniqueKey?: StringFieldUpdateOperationsInput | string
     source?: NullableStringFieldUpdateOperationsInput | string | null
     status?: EnumRawArticleStatusFieldUpdateOperationsInput | $Enums.RawArticleStatus
@@ -94065,6 +94407,9 @@ export namespace Prisma {
     price?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
     imageUrl?: NullableStringFieldUpdateOperationsInput | string | null
     presentationsType?: NullableStringFieldUpdateOperationsInput | string | null
+    setGroupId?: NullableStringFieldUpdateOperationsInput | string | null
+    setRole?: NullableStringFieldUpdateOperationsInput | string | null
+    setName?: NullableStringFieldUpdateOperationsInput | string | null
     uniqueKey?: StringFieldUpdateOperationsInput | string
     source?: NullableStringFieldUpdateOperationsInput | string | null
     status?: EnumRawArticleStatusFieldUpdateOperationsInput | $Enums.RawArticleStatus
@@ -100095,11 +100440,24 @@ export namespace Prisma {
     not?: NestedEnumPdStatusFilter<$PrismaModel> | $Enums.PdStatus
   }
 
+  export type EnumComboRoleFilter<$PrismaModel = never> = {
+    equals?: $Enums.ComboRole | EnumComboRoleFieldRefInput<$PrismaModel>
+    in?: $Enums.ComboRole[] | ListEnumComboRoleFieldRefInput<$PrismaModel>
+    notIn?: $Enums.ComboRole[] | ListEnumComboRoleFieldRefInput<$PrismaModel>
+    not?: NestedEnumComboRoleFilter<$PrismaModel> | $Enums.ComboRole
+  }
+
   export type EnumSapSyncStatusFilter<$PrismaModel = never> = {
     equals?: $Enums.SapSyncStatus | EnumSapSyncStatusFieldRefInput<$PrismaModel>
     in?: $Enums.SapSyncStatus[] | ListEnumSapSyncStatusFieldRefInput<$PrismaModel>
     notIn?: $Enums.SapSyncStatus[] | ListEnumSapSyncStatusFieldRefInput<$PrismaModel>
     not?: NestedEnumSapSyncStatusFilter<$PrismaModel> | $Enums.SapSyncStatus
+  }
+
+  export type ExtractionResultFlatListRelationFilter = {
+    every?: ExtractionResultFlatWhereInput
+    some?: ExtractionResultFlatWhereInput
+    none?: ExtractionResultFlatWhereInput
   }
 
   export type ExtractionJobNullableScalarRelationFilter = {
@@ -100111,6 +100469,10 @@ export namespace Prisma {
     every?: SrmSyncRunItemWhereInput
     some?: SrmSyncRunItemWhereInput
     none?: SrmSyncRunItemWhereInput
+  }
+
+  export type ExtractionResultFlatOrderByRelationAggregateInput = {
+    _count?: SortOrder
   }
 
   export type SrmSyncRunItemOrderByRelationAggregateInput = {
@@ -100259,6 +100621,12 @@ export namespace Prisma {
     variantSize?: SortOrder
     variantColor?: SortOrder
     variantWeight?: SortOrder
+    comboRole?: SortOrder
+    comboParentId?: SortOrder
+    comboChildOrder?: SortOrder
+    setGroupId?: SortOrder
+    setRole?: SortOrder
+    setName?: SortOrder
     sapSyncStatus?: SortOrder
     sapArticleId?: SortOrder
     sapSyncMessage?: SortOrder
@@ -100288,6 +100656,7 @@ export namespace Prisma {
     valueAddProcessCost?: SortOrder
     mrp?: SortOrder
     approvedBy?: SortOrder
+    comboChildOrder?: SortOrder
   }
 
   export type ExtractionResultFlatMaxOrderByAggregateInput = {
@@ -100426,6 +100795,12 @@ export namespace Prisma {
     variantSize?: SortOrder
     variantColor?: SortOrder
     variantWeight?: SortOrder
+    comboRole?: SortOrder
+    comboParentId?: SortOrder
+    comboChildOrder?: SortOrder
+    setGroupId?: SortOrder
+    setRole?: SortOrder
+    setName?: SortOrder
     sapSyncStatus?: SortOrder
     sapArticleId?: SortOrder
     sapSyncMessage?: SortOrder
@@ -100569,6 +100944,12 @@ export namespace Prisma {
     variantSize?: SortOrder
     variantColor?: SortOrder
     variantWeight?: SortOrder
+    comboRole?: SortOrder
+    comboParentId?: SortOrder
+    comboChildOrder?: SortOrder
+    setGroupId?: SortOrder
+    setRole?: SortOrder
+    setName?: SortOrder
     sapSyncStatus?: SortOrder
     sapArticleId?: SortOrder
     sapSyncMessage?: SortOrder
@@ -100597,6 +100978,7 @@ export namespace Prisma {
     valueAddProcessCost?: SortOrder
     mrp?: SortOrder
     approvedBy?: SortOrder
+    comboChildOrder?: SortOrder
   }
 
   export type EnumApprovalStatusWithAggregatesFilter<$PrismaModel = never> = {
@@ -100617,6 +100999,16 @@ export namespace Prisma {
     _count?: NestedIntFilter<$PrismaModel>
     _min?: NestedEnumPdStatusFilter<$PrismaModel>
     _max?: NestedEnumPdStatusFilter<$PrismaModel>
+  }
+
+  export type EnumComboRoleWithAggregatesFilter<$PrismaModel = never> = {
+    equals?: $Enums.ComboRole | EnumComboRoleFieldRefInput<$PrismaModel>
+    in?: $Enums.ComboRole[] | ListEnumComboRoleFieldRefInput<$PrismaModel>
+    notIn?: $Enums.ComboRole[] | ListEnumComboRoleFieldRefInput<$PrismaModel>
+    not?: NestedEnumComboRoleWithAggregatesFilter<$PrismaModel> | $Enums.ComboRole
+    _count?: NestedIntFilter<$PrismaModel>
+    _min?: NestedEnumComboRoleFilter<$PrismaModel>
+    _max?: NestedEnumComboRoleFilter<$PrismaModel>
   }
 
   export type EnumSapSyncStatusWithAggregatesFilter<$PrismaModel = never> = {
@@ -100870,17 +101262,7 @@ export namespace Prisma {
     isNot?: CostSummaryWhereInput | null
   }
 
-  export type ExtractionResultFlatListRelationFilter = {
-    every?: ExtractionResultFlatWhereInput
-    some?: ExtractionResultFlatWhereInput
-    none?: ExtractionResultFlatWhereInput
-  }
-
   export type ApiKeyOrderByRelationAggregateInput = {
-    _count?: SortOrder
-  }
-
-  export type ExtractionResultFlatOrderByRelationAggregateInput = {
     _count?: SortOrder
   }
 
@@ -102078,6 +102460,9 @@ export namespace Prisma {
     price?: SortOrder
     imageUrl?: SortOrder
     presentationsType?: SortOrder
+    setGroupId?: SortOrder
+    setRole?: SortOrder
+    setName?: SortOrder
     uniqueKey?: SortOrder
     source?: SortOrder
     status?: SortOrder
@@ -102113,6 +102498,9 @@ export namespace Prisma {
     price?: SortOrder
     imageUrl?: SortOrder
     presentationsType?: SortOrder
+    setGroupId?: SortOrder
+    setRole?: SortOrder
+    setName?: SortOrder
     uniqueKey?: SortOrder
     source?: SortOrder
     status?: SortOrder
@@ -102141,6 +102529,9 @@ export namespace Prisma {
     price?: SortOrder
     imageUrl?: SortOrder
     presentationsType?: SortOrder
+    setGroupId?: SortOrder
+    setRole?: SortOrder
+    setName?: SortOrder
     uniqueKey?: SortOrder
     source?: SortOrder
     status?: SortOrder
@@ -105749,6 +106140,19 @@ export namespace Prisma {
     connect?: UserWhereUniqueInput
   }
 
+  export type ExtractionResultFlatCreateNestedOneWithoutComboChildrenInput = {
+    create?: XOR<ExtractionResultFlatCreateWithoutComboChildrenInput, ExtractionResultFlatUncheckedCreateWithoutComboChildrenInput>
+    connectOrCreate?: ExtractionResultFlatCreateOrConnectWithoutComboChildrenInput
+    connect?: ExtractionResultFlatWhereUniqueInput
+  }
+
+  export type ExtractionResultFlatCreateNestedManyWithoutComboParentInput = {
+    create?: XOR<ExtractionResultFlatCreateWithoutComboParentInput, ExtractionResultFlatUncheckedCreateWithoutComboParentInput> | ExtractionResultFlatCreateWithoutComboParentInput[] | ExtractionResultFlatUncheckedCreateWithoutComboParentInput[]
+    connectOrCreate?: ExtractionResultFlatCreateOrConnectWithoutComboParentInput | ExtractionResultFlatCreateOrConnectWithoutComboParentInput[]
+    createMany?: ExtractionResultFlatCreateManyComboParentInputEnvelope
+    connect?: ExtractionResultFlatWhereUniqueInput | ExtractionResultFlatWhereUniqueInput[]
+  }
+
   export type ExtractionJobCreateNestedOneWithoutFlatResultInput = {
     create?: XOR<ExtractionJobCreateWithoutFlatResultInput, ExtractionJobUncheckedCreateWithoutFlatResultInput>
     connectOrCreate?: ExtractionJobCreateOrConnectWithoutFlatResultInput
@@ -105760,6 +106164,13 @@ export namespace Prisma {
     connectOrCreate?: SrmSyncRunItemCreateOrConnectWithoutFlatInput | SrmSyncRunItemCreateOrConnectWithoutFlatInput[]
     createMany?: SrmSyncRunItemCreateManyFlatInputEnvelope
     connect?: SrmSyncRunItemWhereUniqueInput | SrmSyncRunItemWhereUniqueInput[]
+  }
+
+  export type ExtractionResultFlatUncheckedCreateNestedManyWithoutComboParentInput = {
+    create?: XOR<ExtractionResultFlatCreateWithoutComboParentInput, ExtractionResultFlatUncheckedCreateWithoutComboParentInput> | ExtractionResultFlatCreateWithoutComboParentInput[] | ExtractionResultFlatUncheckedCreateWithoutComboParentInput[]
+    connectOrCreate?: ExtractionResultFlatCreateOrConnectWithoutComboParentInput | ExtractionResultFlatCreateOrConnectWithoutComboParentInput[]
+    createMany?: ExtractionResultFlatCreateManyComboParentInputEnvelope
+    connect?: ExtractionResultFlatWhereUniqueInput | ExtractionResultFlatWhereUniqueInput[]
   }
 
   export type SrmSyncRunItemUncheckedCreateNestedManyWithoutFlatInput = {
@@ -105777,6 +106188,10 @@ export namespace Prisma {
     set?: $Enums.PdStatus
   }
 
+  export type EnumComboRoleFieldUpdateOperationsInput = {
+    set?: $Enums.ComboRole
+  }
+
   export type EnumSapSyncStatusFieldUpdateOperationsInput = {
     set?: $Enums.SapSyncStatus
   }
@@ -105789,6 +106204,30 @@ export namespace Prisma {
     delete?: UserWhereInput | boolean
     connect?: UserWhereUniqueInput
     update?: XOR<XOR<UserUpdateToOneWithWhereWithoutApprovedItemsInput, UserUpdateWithoutApprovedItemsInput>, UserUncheckedUpdateWithoutApprovedItemsInput>
+  }
+
+  export type ExtractionResultFlatUpdateOneWithoutComboChildrenNestedInput = {
+    create?: XOR<ExtractionResultFlatCreateWithoutComboChildrenInput, ExtractionResultFlatUncheckedCreateWithoutComboChildrenInput>
+    connectOrCreate?: ExtractionResultFlatCreateOrConnectWithoutComboChildrenInput
+    upsert?: ExtractionResultFlatUpsertWithoutComboChildrenInput
+    disconnect?: ExtractionResultFlatWhereInput | boolean
+    delete?: ExtractionResultFlatWhereInput | boolean
+    connect?: ExtractionResultFlatWhereUniqueInput
+    update?: XOR<XOR<ExtractionResultFlatUpdateToOneWithWhereWithoutComboChildrenInput, ExtractionResultFlatUpdateWithoutComboChildrenInput>, ExtractionResultFlatUncheckedUpdateWithoutComboChildrenInput>
+  }
+
+  export type ExtractionResultFlatUpdateManyWithoutComboParentNestedInput = {
+    create?: XOR<ExtractionResultFlatCreateWithoutComboParentInput, ExtractionResultFlatUncheckedCreateWithoutComboParentInput> | ExtractionResultFlatCreateWithoutComboParentInput[] | ExtractionResultFlatUncheckedCreateWithoutComboParentInput[]
+    connectOrCreate?: ExtractionResultFlatCreateOrConnectWithoutComboParentInput | ExtractionResultFlatCreateOrConnectWithoutComboParentInput[]
+    upsert?: ExtractionResultFlatUpsertWithWhereUniqueWithoutComboParentInput | ExtractionResultFlatUpsertWithWhereUniqueWithoutComboParentInput[]
+    createMany?: ExtractionResultFlatCreateManyComboParentInputEnvelope
+    set?: ExtractionResultFlatWhereUniqueInput | ExtractionResultFlatWhereUniqueInput[]
+    disconnect?: ExtractionResultFlatWhereUniqueInput | ExtractionResultFlatWhereUniqueInput[]
+    delete?: ExtractionResultFlatWhereUniqueInput | ExtractionResultFlatWhereUniqueInput[]
+    connect?: ExtractionResultFlatWhereUniqueInput | ExtractionResultFlatWhereUniqueInput[]
+    update?: ExtractionResultFlatUpdateWithWhereUniqueWithoutComboParentInput | ExtractionResultFlatUpdateWithWhereUniqueWithoutComboParentInput[]
+    updateMany?: ExtractionResultFlatUpdateManyWithWhereWithoutComboParentInput | ExtractionResultFlatUpdateManyWithWhereWithoutComboParentInput[]
+    deleteMany?: ExtractionResultFlatScalarWhereInput | ExtractionResultFlatScalarWhereInput[]
   }
 
   export type ExtractionJobUpdateOneWithoutFlatResultNestedInput = {
@@ -105813,6 +106252,20 @@ export namespace Prisma {
     update?: SrmSyncRunItemUpdateWithWhereUniqueWithoutFlatInput | SrmSyncRunItemUpdateWithWhereUniqueWithoutFlatInput[]
     updateMany?: SrmSyncRunItemUpdateManyWithWhereWithoutFlatInput | SrmSyncRunItemUpdateManyWithWhereWithoutFlatInput[]
     deleteMany?: SrmSyncRunItemScalarWhereInput | SrmSyncRunItemScalarWhereInput[]
+  }
+
+  export type ExtractionResultFlatUncheckedUpdateManyWithoutComboParentNestedInput = {
+    create?: XOR<ExtractionResultFlatCreateWithoutComboParentInput, ExtractionResultFlatUncheckedCreateWithoutComboParentInput> | ExtractionResultFlatCreateWithoutComboParentInput[] | ExtractionResultFlatUncheckedCreateWithoutComboParentInput[]
+    connectOrCreate?: ExtractionResultFlatCreateOrConnectWithoutComboParentInput | ExtractionResultFlatCreateOrConnectWithoutComboParentInput[]
+    upsert?: ExtractionResultFlatUpsertWithWhereUniqueWithoutComboParentInput | ExtractionResultFlatUpsertWithWhereUniqueWithoutComboParentInput[]
+    createMany?: ExtractionResultFlatCreateManyComboParentInputEnvelope
+    set?: ExtractionResultFlatWhereUniqueInput | ExtractionResultFlatWhereUniqueInput[]
+    disconnect?: ExtractionResultFlatWhereUniqueInput | ExtractionResultFlatWhereUniqueInput[]
+    delete?: ExtractionResultFlatWhereUniqueInput | ExtractionResultFlatWhereUniqueInput[]
+    connect?: ExtractionResultFlatWhereUniqueInput | ExtractionResultFlatWhereUniqueInput[]
+    update?: ExtractionResultFlatUpdateWithWhereUniqueWithoutComboParentInput | ExtractionResultFlatUpdateWithWhereUniqueWithoutComboParentInput[]
+    updateMany?: ExtractionResultFlatUpdateManyWithWhereWithoutComboParentInput | ExtractionResultFlatUpdateManyWithWhereWithoutComboParentInput[]
+    deleteMany?: ExtractionResultFlatScalarWhereInput | ExtractionResultFlatScalarWhereInput[]
   }
 
   export type SrmSyncRunItemUncheckedUpdateManyWithoutFlatNestedInput = {
@@ -106908,6 +107361,13 @@ export namespace Prisma {
     not?: NestedEnumPdStatusFilter<$PrismaModel> | $Enums.PdStatus
   }
 
+  export type NestedEnumComboRoleFilter<$PrismaModel = never> = {
+    equals?: $Enums.ComboRole | EnumComboRoleFieldRefInput<$PrismaModel>
+    in?: $Enums.ComboRole[] | ListEnumComboRoleFieldRefInput<$PrismaModel>
+    notIn?: $Enums.ComboRole[] | ListEnumComboRoleFieldRefInput<$PrismaModel>
+    not?: NestedEnumComboRoleFilter<$PrismaModel> | $Enums.ComboRole
+  }
+
   export type NestedEnumSapSyncStatusFilter<$PrismaModel = never> = {
     equals?: $Enums.SapSyncStatus | EnumSapSyncStatusFieldRefInput<$PrismaModel>
     in?: $Enums.SapSyncStatus[] | ListEnumSapSyncStatusFieldRefInput<$PrismaModel>
@@ -106933,6 +107393,16 @@ export namespace Prisma {
     _count?: NestedIntFilter<$PrismaModel>
     _min?: NestedEnumPdStatusFilter<$PrismaModel>
     _max?: NestedEnumPdStatusFilter<$PrismaModel>
+  }
+
+  export type NestedEnumComboRoleWithAggregatesFilter<$PrismaModel = never> = {
+    equals?: $Enums.ComboRole | EnumComboRoleFieldRefInput<$PrismaModel>
+    in?: $Enums.ComboRole[] | ListEnumComboRoleFieldRefInput<$PrismaModel>
+    notIn?: $Enums.ComboRole[] | ListEnumComboRoleFieldRefInput<$PrismaModel>
+    not?: NestedEnumComboRoleWithAggregatesFilter<$PrismaModel> | $Enums.ComboRole
+    _count?: NestedIntFilter<$PrismaModel>
+    _min?: NestedEnumComboRoleFilter<$PrismaModel>
+    _max?: NestedEnumComboRoleFilter<$PrismaModel>
   }
 
   export type NestedEnumSapSyncStatusWithAggregatesFilter<$PrismaModel = never> = {
@@ -108390,6 +108860,11 @@ export namespace Prisma {
     variantSize?: string | null
     variantColor?: string | null
     variantWeight?: string | null
+    comboRole?: $Enums.ComboRole
+    comboChildOrder?: number | null
+    setGroupId?: string | null
+    setRole?: string | null
+    setName?: string | null
     sapSyncStatus?: $Enums.SapSyncStatus
     sapArticleId?: string | null
     sapSyncMessage?: string | null
@@ -108397,6 +108872,8 @@ export namespace Prisma {
     srmUniqueId?: string | null
     imageExtractionRawData?: NullableJsonNullValueInput | InputJsonValue
     approver?: UserCreateNestedOneWithoutApprovedItemsInput
+    comboParent?: ExtractionResultFlatCreateNestedOneWithoutComboChildrenInput
+    comboChildren?: ExtractionResultFlatCreateNestedManyWithoutComboParentInput
     srmSyncRunItems?: SrmSyncRunItemCreateNestedManyWithoutFlatInput
   }
 
@@ -108535,12 +109012,19 @@ export namespace Prisma {
     variantSize?: string | null
     variantColor?: string | null
     variantWeight?: string | null
+    comboRole?: $Enums.ComboRole
+    comboParentId?: string | null
+    comboChildOrder?: number | null
+    setGroupId?: string | null
+    setRole?: string | null
+    setName?: string | null
     sapSyncStatus?: $Enums.SapSyncStatus
     sapArticleId?: string | null
     sapSyncMessage?: string | null
     srmOriginalDesignNumber?: string | null
     srmUniqueId?: string | null
     imageExtractionRawData?: NullableJsonNullValueInput | InputJsonValue
+    comboChildren?: ExtractionResultFlatUncheckedCreateNestedManyWithoutComboParentInput
     srmSyncRunItems?: SrmSyncRunItemUncheckedCreateNestedManyWithoutFlatInput
   }
 
@@ -108804,6 +109288,11 @@ export namespace Prisma {
     variantSize?: NullableStringFieldUpdateOperationsInput | string | null
     variantColor?: NullableStringFieldUpdateOperationsInput | string | null
     variantWeight?: NullableStringFieldUpdateOperationsInput | string | null
+    comboRole?: EnumComboRoleFieldUpdateOperationsInput | $Enums.ComboRole
+    comboChildOrder?: NullableIntFieldUpdateOperationsInput | number | null
+    setGroupId?: NullableStringFieldUpdateOperationsInput | string | null
+    setRole?: NullableStringFieldUpdateOperationsInput | string | null
+    setName?: NullableStringFieldUpdateOperationsInput | string | null
     sapSyncStatus?: EnumSapSyncStatusFieldUpdateOperationsInput | $Enums.SapSyncStatus
     sapArticleId?: NullableStringFieldUpdateOperationsInput | string | null
     sapSyncMessage?: NullableStringFieldUpdateOperationsInput | string | null
@@ -108811,6 +109300,8 @@ export namespace Prisma {
     srmUniqueId?: NullableStringFieldUpdateOperationsInput | string | null
     imageExtractionRawData?: NullableJsonNullValueInput | InputJsonValue
     approver?: UserUpdateOneWithoutApprovedItemsNestedInput
+    comboParent?: ExtractionResultFlatUpdateOneWithoutComboChildrenNestedInput
+    comboChildren?: ExtractionResultFlatUpdateManyWithoutComboParentNestedInput
     srmSyncRunItems?: SrmSyncRunItemUpdateManyWithoutFlatNestedInput
   }
 
@@ -108949,12 +109440,19 @@ export namespace Prisma {
     variantSize?: NullableStringFieldUpdateOperationsInput | string | null
     variantColor?: NullableStringFieldUpdateOperationsInput | string | null
     variantWeight?: NullableStringFieldUpdateOperationsInput | string | null
+    comboRole?: EnumComboRoleFieldUpdateOperationsInput | $Enums.ComboRole
+    comboParentId?: NullableStringFieldUpdateOperationsInput | string | null
+    comboChildOrder?: NullableIntFieldUpdateOperationsInput | number | null
+    setGroupId?: NullableStringFieldUpdateOperationsInput | string | null
+    setRole?: NullableStringFieldUpdateOperationsInput | string | null
+    setName?: NullableStringFieldUpdateOperationsInput | string | null
     sapSyncStatus?: EnumSapSyncStatusFieldUpdateOperationsInput | $Enums.SapSyncStatus
     sapArticleId?: NullableStringFieldUpdateOperationsInput | string | null
     sapSyncMessage?: NullableStringFieldUpdateOperationsInput | string | null
     srmOriginalDesignNumber?: NullableStringFieldUpdateOperationsInput | string | null
     srmUniqueId?: NullableStringFieldUpdateOperationsInput | string | null
     imageExtractionRawData?: NullableJsonNullValueInput | InputJsonValue
+    comboChildren?: ExtractionResultFlatUncheckedUpdateManyWithoutComboParentNestedInput
     srmSyncRunItems?: SrmSyncRunItemUncheckedUpdateManyWithoutFlatNestedInput
   }
 
@@ -109398,6 +109896,625 @@ export namespace Prisma {
     create: XOR<UserCreateWithoutApprovedItemsInput, UserUncheckedCreateWithoutApprovedItemsInput>
   }
 
+  export type ExtractionResultFlatCreateWithoutComboChildrenInput = {
+    id?: string
+    imageName?: string | null
+    imageUrl?: string | null
+    articleNumber?: string | null
+    extractionStatus?: string | null
+    aiModel?: string | null
+    avgConfidence?: Decimal | DecimalJsLike | number | string | null
+    processingTimeMs?: number | null
+    totalAttributes?: number | null
+    extractedCount?: number | null
+    inputTokens?: number | null
+    outputTokens?: number | null
+    totalTokens?: number | null
+    apiCost?: Decimal | DecimalJsLike | number | string | null
+    userId?: number | null
+    userName?: string | null
+    extractionDate?: Date | string | null
+    createdAt?: Date | string
+    updatedAt?: Date | string
+    majorCategory?: string | null
+    vendorName?: string | null
+    designNumber?: string | null
+    pptNumber?: string | null
+    rate?: Decimal | DecimalJsLike | number | string | null
+    size?: string | null
+    yarn1?: string | null
+    yarn2?: string | null
+    fabricMainMvgr?: string | null
+    weave?: string | null
+    weaveFullForm?: string | null
+    composition?: string | null
+    finish?: string | null
+    gsm?: string | null
+    macroMvgr?: string | null
+    macroMvgrFullForm?: string | null
+    mainMvgr?: string | null
+    mainMvgrFullForm?: string | null
+    mFab2?: string | null
+    mFab2FullForm?: string | null
+    shade?: string | null
+    weight?: string | null
+    lycra?: string | null
+    neck?: string | null
+    neckDetails?: string | null
+    collar?: string | null
+    placket?: string | null
+    sleeve?: string | null
+    bottomFold?: string | null
+    frontOpenStyle?: string | null
+    pocketType?: string | null
+    fit?: string | null
+    pattern?: string | null
+    length?: string | null
+    colour?: string | null
+    secondaryColour?: string | null
+    drawcord?: string | null
+    button?: string | null
+    zipper?: string | null
+    zipColour?: string | null
+    printType?: string | null
+    printStyle?: string | null
+    printPlacement?: string | null
+    patches?: string | null
+    patchesType?: string | null
+    embroidery?: string | null
+    embroideryType?: string | null
+    wash?: string | null
+    fatherBelt?: string | null
+    childBelt?: string | null
+    division?: string | null
+    subDivision?: string | null
+    referenceArticleNumber?: string | null
+    referenceArticleDescription?: string | null
+    collarStyle?: string | null
+    sleeveFold?: string | null
+    mSet?: string | null
+    noOfPocket?: string | null
+    extraPocket?: string | null
+    dcShape?: string | null
+    btnColour?: string | null
+    fCount?: string | null
+    fConstruction?: string | null
+    fOunce?: string | null
+    fWidth?: string | null
+    fabDiv?: string | null
+    fabVdr?: string | null
+    htrfType?: string | null
+    htrfStyle?: string | null
+    embPlacement?: string | null
+    ageGroup?: string | null
+    mNoOfSize?: string | null
+    mNoOfClr?: string | null
+    articleFashionType?: string | null
+    articleDimension?: string | null
+    cmtpCost?: Decimal | DecimalJsLike | number | string | null
+    cmpCost?: Decimal | DecimalJsLike | number | string | null
+    fabCost?: Decimal | DecimalJsLike | number | string | null
+    fabCons?: Decimal | DecimalJsLike | number | string | null
+    width?: Decimal | DecimalJsLike | number | string | null
+    vendorFabricRate?: Decimal | DecimalJsLike | number | string | null
+    valueAddAccCostType?: string | null
+    valueAddCost?: Decimal | DecimalJsLike | number | string | null
+    valueAddProcessCost?: Decimal | DecimalJsLike | number | string | null
+    bodyArticle?: string | null
+    bodyArticleDescription?: string | null
+    fabricArticleNumber?: string | null
+    fabricArticleDescription?: string | null
+    attrArticleNums?: string | null
+    mvgrBrandVendor?: string | null
+    mcDescription?: string | null
+    vendorCode?: string | null
+    mrp?: Decimal | DecimalJsLike | number | string | null
+    impAtrbt2?: string | null
+    mcCode?: string | null
+    segment?: string | null
+    season?: string | null
+    hsnTaxCode?: string | null
+    articleDescription?: string | null
+    fashionGrid?: string | null
+    year?: string | null
+    articleType?: string | null
+    presentationsType?: string | null
+    approvalStatus?: $Enums.ApprovalStatus
+    pdStatus?: $Enums.PdStatus
+    approvedAt?: Date | string | null
+    source?: string | null
+    imageUncPath?: string | null
+    isOldArticle?: boolean
+    isGeneric?: boolean
+    genericArticleId?: string | null
+    variantSize?: string | null
+    variantColor?: string | null
+    variantWeight?: string | null
+    comboRole?: $Enums.ComboRole
+    comboChildOrder?: number | null
+    setGroupId?: string | null
+    setRole?: string | null
+    setName?: string | null
+    sapSyncStatus?: $Enums.SapSyncStatus
+    sapArticleId?: string | null
+    sapSyncMessage?: string | null
+    srmOriginalDesignNumber?: string | null
+    srmUniqueId?: string | null
+    imageExtractionRawData?: NullableJsonNullValueInput | InputJsonValue
+    approver?: UserCreateNestedOneWithoutApprovedItemsInput
+    comboParent?: ExtractionResultFlatCreateNestedOneWithoutComboChildrenInput
+    job?: ExtractionJobCreateNestedOneWithoutFlatResultInput
+    srmSyncRunItems?: SrmSyncRunItemCreateNestedManyWithoutFlatInput
+  }
+
+  export type ExtractionResultFlatUncheckedCreateWithoutComboChildrenInput = {
+    id?: string
+    jobId?: string | null
+    imageName?: string | null
+    imageUrl?: string | null
+    articleNumber?: string | null
+    extractionStatus?: string | null
+    aiModel?: string | null
+    avgConfidence?: Decimal | DecimalJsLike | number | string | null
+    processingTimeMs?: number | null
+    totalAttributes?: number | null
+    extractedCount?: number | null
+    inputTokens?: number | null
+    outputTokens?: number | null
+    totalTokens?: number | null
+    apiCost?: Decimal | DecimalJsLike | number | string | null
+    userId?: number | null
+    userName?: string | null
+    extractionDate?: Date | string | null
+    createdAt?: Date | string
+    updatedAt?: Date | string
+    majorCategory?: string | null
+    vendorName?: string | null
+    designNumber?: string | null
+    pptNumber?: string | null
+    rate?: Decimal | DecimalJsLike | number | string | null
+    size?: string | null
+    yarn1?: string | null
+    yarn2?: string | null
+    fabricMainMvgr?: string | null
+    weave?: string | null
+    weaveFullForm?: string | null
+    composition?: string | null
+    finish?: string | null
+    gsm?: string | null
+    macroMvgr?: string | null
+    macroMvgrFullForm?: string | null
+    mainMvgr?: string | null
+    mainMvgrFullForm?: string | null
+    mFab2?: string | null
+    mFab2FullForm?: string | null
+    shade?: string | null
+    weight?: string | null
+    lycra?: string | null
+    neck?: string | null
+    neckDetails?: string | null
+    collar?: string | null
+    placket?: string | null
+    sleeve?: string | null
+    bottomFold?: string | null
+    frontOpenStyle?: string | null
+    pocketType?: string | null
+    fit?: string | null
+    pattern?: string | null
+    length?: string | null
+    colour?: string | null
+    secondaryColour?: string | null
+    drawcord?: string | null
+    button?: string | null
+    zipper?: string | null
+    zipColour?: string | null
+    printType?: string | null
+    printStyle?: string | null
+    printPlacement?: string | null
+    patches?: string | null
+    patchesType?: string | null
+    embroidery?: string | null
+    embroideryType?: string | null
+    wash?: string | null
+    fatherBelt?: string | null
+    childBelt?: string | null
+    division?: string | null
+    subDivision?: string | null
+    referenceArticleNumber?: string | null
+    referenceArticleDescription?: string | null
+    collarStyle?: string | null
+    sleeveFold?: string | null
+    mSet?: string | null
+    noOfPocket?: string | null
+    extraPocket?: string | null
+    dcShape?: string | null
+    btnColour?: string | null
+    fCount?: string | null
+    fConstruction?: string | null
+    fOunce?: string | null
+    fWidth?: string | null
+    fabDiv?: string | null
+    fabVdr?: string | null
+    htrfType?: string | null
+    htrfStyle?: string | null
+    embPlacement?: string | null
+    ageGroup?: string | null
+    mNoOfSize?: string | null
+    mNoOfClr?: string | null
+    articleFashionType?: string | null
+    articleDimension?: string | null
+    cmtpCost?: Decimal | DecimalJsLike | number | string | null
+    cmpCost?: Decimal | DecimalJsLike | number | string | null
+    fabCost?: Decimal | DecimalJsLike | number | string | null
+    fabCons?: Decimal | DecimalJsLike | number | string | null
+    width?: Decimal | DecimalJsLike | number | string | null
+    vendorFabricRate?: Decimal | DecimalJsLike | number | string | null
+    valueAddAccCostType?: string | null
+    valueAddCost?: Decimal | DecimalJsLike | number | string | null
+    valueAddProcessCost?: Decimal | DecimalJsLike | number | string | null
+    bodyArticle?: string | null
+    bodyArticleDescription?: string | null
+    fabricArticleNumber?: string | null
+    fabricArticleDescription?: string | null
+    attrArticleNums?: string | null
+    mvgrBrandVendor?: string | null
+    mcDescription?: string | null
+    vendorCode?: string | null
+    mrp?: Decimal | DecimalJsLike | number | string | null
+    impAtrbt2?: string | null
+    mcCode?: string | null
+    segment?: string | null
+    season?: string | null
+    hsnTaxCode?: string | null
+    articleDescription?: string | null
+    fashionGrid?: string | null
+    year?: string | null
+    articleType?: string | null
+    presentationsType?: string | null
+    approvalStatus?: $Enums.ApprovalStatus
+    pdStatus?: $Enums.PdStatus
+    approvedBy?: number | null
+    approvedAt?: Date | string | null
+    source?: string | null
+    imageUncPath?: string | null
+    isOldArticle?: boolean
+    isGeneric?: boolean
+    genericArticleId?: string | null
+    variantSize?: string | null
+    variantColor?: string | null
+    variantWeight?: string | null
+    comboRole?: $Enums.ComboRole
+    comboParentId?: string | null
+    comboChildOrder?: number | null
+    setGroupId?: string | null
+    setRole?: string | null
+    setName?: string | null
+    sapSyncStatus?: $Enums.SapSyncStatus
+    sapArticleId?: string | null
+    sapSyncMessage?: string | null
+    srmOriginalDesignNumber?: string | null
+    srmUniqueId?: string | null
+    imageExtractionRawData?: NullableJsonNullValueInput | InputJsonValue
+    srmSyncRunItems?: SrmSyncRunItemUncheckedCreateNestedManyWithoutFlatInput
+  }
+
+  export type ExtractionResultFlatCreateOrConnectWithoutComboChildrenInput = {
+    where: ExtractionResultFlatWhereUniqueInput
+    create: XOR<ExtractionResultFlatCreateWithoutComboChildrenInput, ExtractionResultFlatUncheckedCreateWithoutComboChildrenInput>
+  }
+
+  export type ExtractionResultFlatCreateWithoutComboParentInput = {
+    id?: string
+    imageName?: string | null
+    imageUrl?: string | null
+    articleNumber?: string | null
+    extractionStatus?: string | null
+    aiModel?: string | null
+    avgConfidence?: Decimal | DecimalJsLike | number | string | null
+    processingTimeMs?: number | null
+    totalAttributes?: number | null
+    extractedCount?: number | null
+    inputTokens?: number | null
+    outputTokens?: number | null
+    totalTokens?: number | null
+    apiCost?: Decimal | DecimalJsLike | number | string | null
+    userId?: number | null
+    userName?: string | null
+    extractionDate?: Date | string | null
+    createdAt?: Date | string
+    updatedAt?: Date | string
+    majorCategory?: string | null
+    vendorName?: string | null
+    designNumber?: string | null
+    pptNumber?: string | null
+    rate?: Decimal | DecimalJsLike | number | string | null
+    size?: string | null
+    yarn1?: string | null
+    yarn2?: string | null
+    fabricMainMvgr?: string | null
+    weave?: string | null
+    weaveFullForm?: string | null
+    composition?: string | null
+    finish?: string | null
+    gsm?: string | null
+    macroMvgr?: string | null
+    macroMvgrFullForm?: string | null
+    mainMvgr?: string | null
+    mainMvgrFullForm?: string | null
+    mFab2?: string | null
+    mFab2FullForm?: string | null
+    shade?: string | null
+    weight?: string | null
+    lycra?: string | null
+    neck?: string | null
+    neckDetails?: string | null
+    collar?: string | null
+    placket?: string | null
+    sleeve?: string | null
+    bottomFold?: string | null
+    frontOpenStyle?: string | null
+    pocketType?: string | null
+    fit?: string | null
+    pattern?: string | null
+    length?: string | null
+    colour?: string | null
+    secondaryColour?: string | null
+    drawcord?: string | null
+    button?: string | null
+    zipper?: string | null
+    zipColour?: string | null
+    printType?: string | null
+    printStyle?: string | null
+    printPlacement?: string | null
+    patches?: string | null
+    patchesType?: string | null
+    embroidery?: string | null
+    embroideryType?: string | null
+    wash?: string | null
+    fatherBelt?: string | null
+    childBelt?: string | null
+    division?: string | null
+    subDivision?: string | null
+    referenceArticleNumber?: string | null
+    referenceArticleDescription?: string | null
+    collarStyle?: string | null
+    sleeveFold?: string | null
+    mSet?: string | null
+    noOfPocket?: string | null
+    extraPocket?: string | null
+    dcShape?: string | null
+    btnColour?: string | null
+    fCount?: string | null
+    fConstruction?: string | null
+    fOunce?: string | null
+    fWidth?: string | null
+    fabDiv?: string | null
+    fabVdr?: string | null
+    htrfType?: string | null
+    htrfStyle?: string | null
+    embPlacement?: string | null
+    ageGroup?: string | null
+    mNoOfSize?: string | null
+    mNoOfClr?: string | null
+    articleFashionType?: string | null
+    articleDimension?: string | null
+    cmtpCost?: Decimal | DecimalJsLike | number | string | null
+    cmpCost?: Decimal | DecimalJsLike | number | string | null
+    fabCost?: Decimal | DecimalJsLike | number | string | null
+    fabCons?: Decimal | DecimalJsLike | number | string | null
+    width?: Decimal | DecimalJsLike | number | string | null
+    vendorFabricRate?: Decimal | DecimalJsLike | number | string | null
+    valueAddAccCostType?: string | null
+    valueAddCost?: Decimal | DecimalJsLike | number | string | null
+    valueAddProcessCost?: Decimal | DecimalJsLike | number | string | null
+    bodyArticle?: string | null
+    bodyArticleDescription?: string | null
+    fabricArticleNumber?: string | null
+    fabricArticleDescription?: string | null
+    attrArticleNums?: string | null
+    mvgrBrandVendor?: string | null
+    mcDescription?: string | null
+    vendorCode?: string | null
+    mrp?: Decimal | DecimalJsLike | number | string | null
+    impAtrbt2?: string | null
+    mcCode?: string | null
+    segment?: string | null
+    season?: string | null
+    hsnTaxCode?: string | null
+    articleDescription?: string | null
+    fashionGrid?: string | null
+    year?: string | null
+    articleType?: string | null
+    presentationsType?: string | null
+    approvalStatus?: $Enums.ApprovalStatus
+    pdStatus?: $Enums.PdStatus
+    approvedAt?: Date | string | null
+    source?: string | null
+    imageUncPath?: string | null
+    isOldArticle?: boolean
+    isGeneric?: boolean
+    genericArticleId?: string | null
+    variantSize?: string | null
+    variantColor?: string | null
+    variantWeight?: string | null
+    comboRole?: $Enums.ComboRole
+    comboChildOrder?: number | null
+    setGroupId?: string | null
+    setRole?: string | null
+    setName?: string | null
+    sapSyncStatus?: $Enums.SapSyncStatus
+    sapArticleId?: string | null
+    sapSyncMessage?: string | null
+    srmOriginalDesignNumber?: string | null
+    srmUniqueId?: string | null
+    imageExtractionRawData?: NullableJsonNullValueInput | InputJsonValue
+    approver?: UserCreateNestedOneWithoutApprovedItemsInput
+    comboChildren?: ExtractionResultFlatCreateNestedManyWithoutComboParentInput
+    job?: ExtractionJobCreateNestedOneWithoutFlatResultInput
+    srmSyncRunItems?: SrmSyncRunItemCreateNestedManyWithoutFlatInput
+  }
+
+  export type ExtractionResultFlatUncheckedCreateWithoutComboParentInput = {
+    id?: string
+    jobId?: string | null
+    imageName?: string | null
+    imageUrl?: string | null
+    articleNumber?: string | null
+    extractionStatus?: string | null
+    aiModel?: string | null
+    avgConfidence?: Decimal | DecimalJsLike | number | string | null
+    processingTimeMs?: number | null
+    totalAttributes?: number | null
+    extractedCount?: number | null
+    inputTokens?: number | null
+    outputTokens?: number | null
+    totalTokens?: number | null
+    apiCost?: Decimal | DecimalJsLike | number | string | null
+    userId?: number | null
+    userName?: string | null
+    extractionDate?: Date | string | null
+    createdAt?: Date | string
+    updatedAt?: Date | string
+    majorCategory?: string | null
+    vendorName?: string | null
+    designNumber?: string | null
+    pptNumber?: string | null
+    rate?: Decimal | DecimalJsLike | number | string | null
+    size?: string | null
+    yarn1?: string | null
+    yarn2?: string | null
+    fabricMainMvgr?: string | null
+    weave?: string | null
+    weaveFullForm?: string | null
+    composition?: string | null
+    finish?: string | null
+    gsm?: string | null
+    macroMvgr?: string | null
+    macroMvgrFullForm?: string | null
+    mainMvgr?: string | null
+    mainMvgrFullForm?: string | null
+    mFab2?: string | null
+    mFab2FullForm?: string | null
+    shade?: string | null
+    weight?: string | null
+    lycra?: string | null
+    neck?: string | null
+    neckDetails?: string | null
+    collar?: string | null
+    placket?: string | null
+    sleeve?: string | null
+    bottomFold?: string | null
+    frontOpenStyle?: string | null
+    pocketType?: string | null
+    fit?: string | null
+    pattern?: string | null
+    length?: string | null
+    colour?: string | null
+    secondaryColour?: string | null
+    drawcord?: string | null
+    button?: string | null
+    zipper?: string | null
+    zipColour?: string | null
+    printType?: string | null
+    printStyle?: string | null
+    printPlacement?: string | null
+    patches?: string | null
+    patchesType?: string | null
+    embroidery?: string | null
+    embroideryType?: string | null
+    wash?: string | null
+    fatherBelt?: string | null
+    childBelt?: string | null
+    division?: string | null
+    subDivision?: string | null
+    referenceArticleNumber?: string | null
+    referenceArticleDescription?: string | null
+    collarStyle?: string | null
+    sleeveFold?: string | null
+    mSet?: string | null
+    noOfPocket?: string | null
+    extraPocket?: string | null
+    dcShape?: string | null
+    btnColour?: string | null
+    fCount?: string | null
+    fConstruction?: string | null
+    fOunce?: string | null
+    fWidth?: string | null
+    fabDiv?: string | null
+    fabVdr?: string | null
+    htrfType?: string | null
+    htrfStyle?: string | null
+    embPlacement?: string | null
+    ageGroup?: string | null
+    mNoOfSize?: string | null
+    mNoOfClr?: string | null
+    articleFashionType?: string | null
+    articleDimension?: string | null
+    cmtpCost?: Decimal | DecimalJsLike | number | string | null
+    cmpCost?: Decimal | DecimalJsLike | number | string | null
+    fabCost?: Decimal | DecimalJsLike | number | string | null
+    fabCons?: Decimal | DecimalJsLike | number | string | null
+    width?: Decimal | DecimalJsLike | number | string | null
+    vendorFabricRate?: Decimal | DecimalJsLike | number | string | null
+    valueAddAccCostType?: string | null
+    valueAddCost?: Decimal | DecimalJsLike | number | string | null
+    valueAddProcessCost?: Decimal | DecimalJsLike | number | string | null
+    bodyArticle?: string | null
+    bodyArticleDescription?: string | null
+    fabricArticleNumber?: string | null
+    fabricArticleDescription?: string | null
+    attrArticleNums?: string | null
+    mvgrBrandVendor?: string | null
+    mcDescription?: string | null
+    vendorCode?: string | null
+    mrp?: Decimal | DecimalJsLike | number | string | null
+    impAtrbt2?: string | null
+    mcCode?: string | null
+    segment?: string | null
+    season?: string | null
+    hsnTaxCode?: string | null
+    articleDescription?: string | null
+    fashionGrid?: string | null
+    year?: string | null
+    articleType?: string | null
+    presentationsType?: string | null
+    approvalStatus?: $Enums.ApprovalStatus
+    pdStatus?: $Enums.PdStatus
+    approvedBy?: number | null
+    approvedAt?: Date | string | null
+    source?: string | null
+    imageUncPath?: string | null
+    isOldArticle?: boolean
+    isGeneric?: boolean
+    genericArticleId?: string | null
+    variantSize?: string | null
+    variantColor?: string | null
+    variantWeight?: string | null
+    comboRole?: $Enums.ComboRole
+    comboChildOrder?: number | null
+    setGroupId?: string | null
+    setRole?: string | null
+    setName?: string | null
+    sapSyncStatus?: $Enums.SapSyncStatus
+    sapArticleId?: string | null
+    sapSyncMessage?: string | null
+    srmOriginalDesignNumber?: string | null
+    srmUniqueId?: string | null
+    imageExtractionRawData?: NullableJsonNullValueInput | InputJsonValue
+    comboChildren?: ExtractionResultFlatUncheckedCreateNestedManyWithoutComboParentInput
+    srmSyncRunItems?: SrmSyncRunItemUncheckedCreateNestedManyWithoutFlatInput
+  }
+
+  export type ExtractionResultFlatCreateOrConnectWithoutComboParentInput = {
+    where: ExtractionResultFlatWhereUniqueInput
+    create: XOR<ExtractionResultFlatCreateWithoutComboParentInput, ExtractionResultFlatUncheckedCreateWithoutComboParentInput>
+  }
+
+  export type ExtractionResultFlatCreateManyComboParentInputEnvelope = {
+    data: ExtractionResultFlatCreateManyComboParentInput | ExtractionResultFlatCreateManyComboParentInput[]
+    skipDuplicates?: boolean
+  }
+
   export type ExtractionJobCreateWithoutFlatResultInput = {
     id?: string
     imageUrl: string
@@ -109535,6 +110652,488 @@ export namespace Prisma {
     costSummary?: CostSummaryUncheckedUpdateOneWithoutUserNestedInput
     extractionJobs?: ExtractionJobUncheckedUpdateManyWithoutUserNestedInput
     verifications?: ExtractionResultUncheckedUpdateManyWithoutVerifierNestedInput
+  }
+
+  export type ExtractionResultFlatUpsertWithoutComboChildrenInput = {
+    update: XOR<ExtractionResultFlatUpdateWithoutComboChildrenInput, ExtractionResultFlatUncheckedUpdateWithoutComboChildrenInput>
+    create: XOR<ExtractionResultFlatCreateWithoutComboChildrenInput, ExtractionResultFlatUncheckedCreateWithoutComboChildrenInput>
+    where?: ExtractionResultFlatWhereInput
+  }
+
+  export type ExtractionResultFlatUpdateToOneWithWhereWithoutComboChildrenInput = {
+    where?: ExtractionResultFlatWhereInput
+    data: XOR<ExtractionResultFlatUpdateWithoutComboChildrenInput, ExtractionResultFlatUncheckedUpdateWithoutComboChildrenInput>
+  }
+
+  export type ExtractionResultFlatUpdateWithoutComboChildrenInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    imageName?: NullableStringFieldUpdateOperationsInput | string | null
+    imageUrl?: NullableStringFieldUpdateOperationsInput | string | null
+    articleNumber?: NullableStringFieldUpdateOperationsInput | string | null
+    extractionStatus?: NullableStringFieldUpdateOperationsInput | string | null
+    aiModel?: NullableStringFieldUpdateOperationsInput | string | null
+    avgConfidence?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    processingTimeMs?: NullableIntFieldUpdateOperationsInput | number | null
+    totalAttributes?: NullableIntFieldUpdateOperationsInput | number | null
+    extractedCount?: NullableIntFieldUpdateOperationsInput | number | null
+    inputTokens?: NullableIntFieldUpdateOperationsInput | number | null
+    outputTokens?: NullableIntFieldUpdateOperationsInput | number | null
+    totalTokens?: NullableIntFieldUpdateOperationsInput | number | null
+    apiCost?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    userId?: NullableIntFieldUpdateOperationsInput | number | null
+    userName?: NullableStringFieldUpdateOperationsInput | string | null
+    extractionDate?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    majorCategory?: NullableStringFieldUpdateOperationsInput | string | null
+    vendorName?: NullableStringFieldUpdateOperationsInput | string | null
+    designNumber?: NullableStringFieldUpdateOperationsInput | string | null
+    pptNumber?: NullableStringFieldUpdateOperationsInput | string | null
+    rate?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    size?: NullableStringFieldUpdateOperationsInput | string | null
+    yarn1?: NullableStringFieldUpdateOperationsInput | string | null
+    yarn2?: NullableStringFieldUpdateOperationsInput | string | null
+    fabricMainMvgr?: NullableStringFieldUpdateOperationsInput | string | null
+    weave?: NullableStringFieldUpdateOperationsInput | string | null
+    weaveFullForm?: NullableStringFieldUpdateOperationsInput | string | null
+    composition?: NullableStringFieldUpdateOperationsInput | string | null
+    finish?: NullableStringFieldUpdateOperationsInput | string | null
+    gsm?: NullableStringFieldUpdateOperationsInput | string | null
+    macroMvgr?: NullableStringFieldUpdateOperationsInput | string | null
+    macroMvgrFullForm?: NullableStringFieldUpdateOperationsInput | string | null
+    mainMvgr?: NullableStringFieldUpdateOperationsInput | string | null
+    mainMvgrFullForm?: NullableStringFieldUpdateOperationsInput | string | null
+    mFab2?: NullableStringFieldUpdateOperationsInput | string | null
+    mFab2FullForm?: NullableStringFieldUpdateOperationsInput | string | null
+    shade?: NullableStringFieldUpdateOperationsInput | string | null
+    weight?: NullableStringFieldUpdateOperationsInput | string | null
+    lycra?: NullableStringFieldUpdateOperationsInput | string | null
+    neck?: NullableStringFieldUpdateOperationsInput | string | null
+    neckDetails?: NullableStringFieldUpdateOperationsInput | string | null
+    collar?: NullableStringFieldUpdateOperationsInput | string | null
+    placket?: NullableStringFieldUpdateOperationsInput | string | null
+    sleeve?: NullableStringFieldUpdateOperationsInput | string | null
+    bottomFold?: NullableStringFieldUpdateOperationsInput | string | null
+    frontOpenStyle?: NullableStringFieldUpdateOperationsInput | string | null
+    pocketType?: NullableStringFieldUpdateOperationsInput | string | null
+    fit?: NullableStringFieldUpdateOperationsInput | string | null
+    pattern?: NullableStringFieldUpdateOperationsInput | string | null
+    length?: NullableStringFieldUpdateOperationsInput | string | null
+    colour?: NullableStringFieldUpdateOperationsInput | string | null
+    secondaryColour?: NullableStringFieldUpdateOperationsInput | string | null
+    drawcord?: NullableStringFieldUpdateOperationsInput | string | null
+    button?: NullableStringFieldUpdateOperationsInput | string | null
+    zipper?: NullableStringFieldUpdateOperationsInput | string | null
+    zipColour?: NullableStringFieldUpdateOperationsInput | string | null
+    printType?: NullableStringFieldUpdateOperationsInput | string | null
+    printStyle?: NullableStringFieldUpdateOperationsInput | string | null
+    printPlacement?: NullableStringFieldUpdateOperationsInput | string | null
+    patches?: NullableStringFieldUpdateOperationsInput | string | null
+    patchesType?: NullableStringFieldUpdateOperationsInput | string | null
+    embroidery?: NullableStringFieldUpdateOperationsInput | string | null
+    embroideryType?: NullableStringFieldUpdateOperationsInput | string | null
+    wash?: NullableStringFieldUpdateOperationsInput | string | null
+    fatherBelt?: NullableStringFieldUpdateOperationsInput | string | null
+    childBelt?: NullableStringFieldUpdateOperationsInput | string | null
+    division?: NullableStringFieldUpdateOperationsInput | string | null
+    subDivision?: NullableStringFieldUpdateOperationsInput | string | null
+    referenceArticleNumber?: NullableStringFieldUpdateOperationsInput | string | null
+    referenceArticleDescription?: NullableStringFieldUpdateOperationsInput | string | null
+    collarStyle?: NullableStringFieldUpdateOperationsInput | string | null
+    sleeveFold?: NullableStringFieldUpdateOperationsInput | string | null
+    mSet?: NullableStringFieldUpdateOperationsInput | string | null
+    noOfPocket?: NullableStringFieldUpdateOperationsInput | string | null
+    extraPocket?: NullableStringFieldUpdateOperationsInput | string | null
+    dcShape?: NullableStringFieldUpdateOperationsInput | string | null
+    btnColour?: NullableStringFieldUpdateOperationsInput | string | null
+    fCount?: NullableStringFieldUpdateOperationsInput | string | null
+    fConstruction?: NullableStringFieldUpdateOperationsInput | string | null
+    fOunce?: NullableStringFieldUpdateOperationsInput | string | null
+    fWidth?: NullableStringFieldUpdateOperationsInput | string | null
+    fabDiv?: NullableStringFieldUpdateOperationsInput | string | null
+    fabVdr?: NullableStringFieldUpdateOperationsInput | string | null
+    htrfType?: NullableStringFieldUpdateOperationsInput | string | null
+    htrfStyle?: NullableStringFieldUpdateOperationsInput | string | null
+    embPlacement?: NullableStringFieldUpdateOperationsInput | string | null
+    ageGroup?: NullableStringFieldUpdateOperationsInput | string | null
+    mNoOfSize?: NullableStringFieldUpdateOperationsInput | string | null
+    mNoOfClr?: NullableStringFieldUpdateOperationsInput | string | null
+    articleFashionType?: NullableStringFieldUpdateOperationsInput | string | null
+    articleDimension?: NullableStringFieldUpdateOperationsInput | string | null
+    cmtpCost?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    cmpCost?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    fabCost?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    fabCons?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    width?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    vendorFabricRate?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    valueAddAccCostType?: NullableStringFieldUpdateOperationsInput | string | null
+    valueAddCost?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    valueAddProcessCost?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    bodyArticle?: NullableStringFieldUpdateOperationsInput | string | null
+    bodyArticleDescription?: NullableStringFieldUpdateOperationsInput | string | null
+    fabricArticleNumber?: NullableStringFieldUpdateOperationsInput | string | null
+    fabricArticleDescription?: NullableStringFieldUpdateOperationsInput | string | null
+    attrArticleNums?: NullableStringFieldUpdateOperationsInput | string | null
+    mvgrBrandVendor?: NullableStringFieldUpdateOperationsInput | string | null
+    mcDescription?: NullableStringFieldUpdateOperationsInput | string | null
+    vendorCode?: NullableStringFieldUpdateOperationsInput | string | null
+    mrp?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    impAtrbt2?: NullableStringFieldUpdateOperationsInput | string | null
+    mcCode?: NullableStringFieldUpdateOperationsInput | string | null
+    segment?: NullableStringFieldUpdateOperationsInput | string | null
+    season?: NullableStringFieldUpdateOperationsInput | string | null
+    hsnTaxCode?: NullableStringFieldUpdateOperationsInput | string | null
+    articleDescription?: NullableStringFieldUpdateOperationsInput | string | null
+    fashionGrid?: NullableStringFieldUpdateOperationsInput | string | null
+    year?: NullableStringFieldUpdateOperationsInput | string | null
+    articleType?: NullableStringFieldUpdateOperationsInput | string | null
+    presentationsType?: NullableStringFieldUpdateOperationsInput | string | null
+    approvalStatus?: EnumApprovalStatusFieldUpdateOperationsInput | $Enums.ApprovalStatus
+    pdStatus?: EnumPdStatusFieldUpdateOperationsInput | $Enums.PdStatus
+    approvedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    source?: NullableStringFieldUpdateOperationsInput | string | null
+    imageUncPath?: NullableStringFieldUpdateOperationsInput | string | null
+    isOldArticle?: BoolFieldUpdateOperationsInput | boolean
+    isGeneric?: BoolFieldUpdateOperationsInput | boolean
+    genericArticleId?: NullableStringFieldUpdateOperationsInput | string | null
+    variantSize?: NullableStringFieldUpdateOperationsInput | string | null
+    variantColor?: NullableStringFieldUpdateOperationsInput | string | null
+    variantWeight?: NullableStringFieldUpdateOperationsInput | string | null
+    comboRole?: EnumComboRoleFieldUpdateOperationsInput | $Enums.ComboRole
+    comboChildOrder?: NullableIntFieldUpdateOperationsInput | number | null
+    setGroupId?: NullableStringFieldUpdateOperationsInput | string | null
+    setRole?: NullableStringFieldUpdateOperationsInput | string | null
+    setName?: NullableStringFieldUpdateOperationsInput | string | null
+    sapSyncStatus?: EnumSapSyncStatusFieldUpdateOperationsInput | $Enums.SapSyncStatus
+    sapArticleId?: NullableStringFieldUpdateOperationsInput | string | null
+    sapSyncMessage?: NullableStringFieldUpdateOperationsInput | string | null
+    srmOriginalDesignNumber?: NullableStringFieldUpdateOperationsInput | string | null
+    srmUniqueId?: NullableStringFieldUpdateOperationsInput | string | null
+    imageExtractionRawData?: NullableJsonNullValueInput | InputJsonValue
+    approver?: UserUpdateOneWithoutApprovedItemsNestedInput
+    comboParent?: ExtractionResultFlatUpdateOneWithoutComboChildrenNestedInput
+    job?: ExtractionJobUpdateOneWithoutFlatResultNestedInput
+    srmSyncRunItems?: SrmSyncRunItemUpdateManyWithoutFlatNestedInput
+  }
+
+  export type ExtractionResultFlatUncheckedUpdateWithoutComboChildrenInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    jobId?: NullableStringFieldUpdateOperationsInput | string | null
+    imageName?: NullableStringFieldUpdateOperationsInput | string | null
+    imageUrl?: NullableStringFieldUpdateOperationsInput | string | null
+    articleNumber?: NullableStringFieldUpdateOperationsInput | string | null
+    extractionStatus?: NullableStringFieldUpdateOperationsInput | string | null
+    aiModel?: NullableStringFieldUpdateOperationsInput | string | null
+    avgConfidence?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    processingTimeMs?: NullableIntFieldUpdateOperationsInput | number | null
+    totalAttributes?: NullableIntFieldUpdateOperationsInput | number | null
+    extractedCount?: NullableIntFieldUpdateOperationsInput | number | null
+    inputTokens?: NullableIntFieldUpdateOperationsInput | number | null
+    outputTokens?: NullableIntFieldUpdateOperationsInput | number | null
+    totalTokens?: NullableIntFieldUpdateOperationsInput | number | null
+    apiCost?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    userId?: NullableIntFieldUpdateOperationsInput | number | null
+    userName?: NullableStringFieldUpdateOperationsInput | string | null
+    extractionDate?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    majorCategory?: NullableStringFieldUpdateOperationsInput | string | null
+    vendorName?: NullableStringFieldUpdateOperationsInput | string | null
+    designNumber?: NullableStringFieldUpdateOperationsInput | string | null
+    pptNumber?: NullableStringFieldUpdateOperationsInput | string | null
+    rate?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    size?: NullableStringFieldUpdateOperationsInput | string | null
+    yarn1?: NullableStringFieldUpdateOperationsInput | string | null
+    yarn2?: NullableStringFieldUpdateOperationsInput | string | null
+    fabricMainMvgr?: NullableStringFieldUpdateOperationsInput | string | null
+    weave?: NullableStringFieldUpdateOperationsInput | string | null
+    weaveFullForm?: NullableStringFieldUpdateOperationsInput | string | null
+    composition?: NullableStringFieldUpdateOperationsInput | string | null
+    finish?: NullableStringFieldUpdateOperationsInput | string | null
+    gsm?: NullableStringFieldUpdateOperationsInput | string | null
+    macroMvgr?: NullableStringFieldUpdateOperationsInput | string | null
+    macroMvgrFullForm?: NullableStringFieldUpdateOperationsInput | string | null
+    mainMvgr?: NullableStringFieldUpdateOperationsInput | string | null
+    mainMvgrFullForm?: NullableStringFieldUpdateOperationsInput | string | null
+    mFab2?: NullableStringFieldUpdateOperationsInput | string | null
+    mFab2FullForm?: NullableStringFieldUpdateOperationsInput | string | null
+    shade?: NullableStringFieldUpdateOperationsInput | string | null
+    weight?: NullableStringFieldUpdateOperationsInput | string | null
+    lycra?: NullableStringFieldUpdateOperationsInput | string | null
+    neck?: NullableStringFieldUpdateOperationsInput | string | null
+    neckDetails?: NullableStringFieldUpdateOperationsInput | string | null
+    collar?: NullableStringFieldUpdateOperationsInput | string | null
+    placket?: NullableStringFieldUpdateOperationsInput | string | null
+    sleeve?: NullableStringFieldUpdateOperationsInput | string | null
+    bottomFold?: NullableStringFieldUpdateOperationsInput | string | null
+    frontOpenStyle?: NullableStringFieldUpdateOperationsInput | string | null
+    pocketType?: NullableStringFieldUpdateOperationsInput | string | null
+    fit?: NullableStringFieldUpdateOperationsInput | string | null
+    pattern?: NullableStringFieldUpdateOperationsInput | string | null
+    length?: NullableStringFieldUpdateOperationsInput | string | null
+    colour?: NullableStringFieldUpdateOperationsInput | string | null
+    secondaryColour?: NullableStringFieldUpdateOperationsInput | string | null
+    drawcord?: NullableStringFieldUpdateOperationsInput | string | null
+    button?: NullableStringFieldUpdateOperationsInput | string | null
+    zipper?: NullableStringFieldUpdateOperationsInput | string | null
+    zipColour?: NullableStringFieldUpdateOperationsInput | string | null
+    printType?: NullableStringFieldUpdateOperationsInput | string | null
+    printStyle?: NullableStringFieldUpdateOperationsInput | string | null
+    printPlacement?: NullableStringFieldUpdateOperationsInput | string | null
+    patches?: NullableStringFieldUpdateOperationsInput | string | null
+    patchesType?: NullableStringFieldUpdateOperationsInput | string | null
+    embroidery?: NullableStringFieldUpdateOperationsInput | string | null
+    embroideryType?: NullableStringFieldUpdateOperationsInput | string | null
+    wash?: NullableStringFieldUpdateOperationsInput | string | null
+    fatherBelt?: NullableStringFieldUpdateOperationsInput | string | null
+    childBelt?: NullableStringFieldUpdateOperationsInput | string | null
+    division?: NullableStringFieldUpdateOperationsInput | string | null
+    subDivision?: NullableStringFieldUpdateOperationsInput | string | null
+    referenceArticleNumber?: NullableStringFieldUpdateOperationsInput | string | null
+    referenceArticleDescription?: NullableStringFieldUpdateOperationsInput | string | null
+    collarStyle?: NullableStringFieldUpdateOperationsInput | string | null
+    sleeveFold?: NullableStringFieldUpdateOperationsInput | string | null
+    mSet?: NullableStringFieldUpdateOperationsInput | string | null
+    noOfPocket?: NullableStringFieldUpdateOperationsInput | string | null
+    extraPocket?: NullableStringFieldUpdateOperationsInput | string | null
+    dcShape?: NullableStringFieldUpdateOperationsInput | string | null
+    btnColour?: NullableStringFieldUpdateOperationsInput | string | null
+    fCount?: NullableStringFieldUpdateOperationsInput | string | null
+    fConstruction?: NullableStringFieldUpdateOperationsInput | string | null
+    fOunce?: NullableStringFieldUpdateOperationsInput | string | null
+    fWidth?: NullableStringFieldUpdateOperationsInput | string | null
+    fabDiv?: NullableStringFieldUpdateOperationsInput | string | null
+    fabVdr?: NullableStringFieldUpdateOperationsInput | string | null
+    htrfType?: NullableStringFieldUpdateOperationsInput | string | null
+    htrfStyle?: NullableStringFieldUpdateOperationsInput | string | null
+    embPlacement?: NullableStringFieldUpdateOperationsInput | string | null
+    ageGroup?: NullableStringFieldUpdateOperationsInput | string | null
+    mNoOfSize?: NullableStringFieldUpdateOperationsInput | string | null
+    mNoOfClr?: NullableStringFieldUpdateOperationsInput | string | null
+    articleFashionType?: NullableStringFieldUpdateOperationsInput | string | null
+    articleDimension?: NullableStringFieldUpdateOperationsInput | string | null
+    cmtpCost?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    cmpCost?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    fabCost?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    fabCons?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    width?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    vendorFabricRate?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    valueAddAccCostType?: NullableStringFieldUpdateOperationsInput | string | null
+    valueAddCost?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    valueAddProcessCost?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    bodyArticle?: NullableStringFieldUpdateOperationsInput | string | null
+    bodyArticleDescription?: NullableStringFieldUpdateOperationsInput | string | null
+    fabricArticleNumber?: NullableStringFieldUpdateOperationsInput | string | null
+    fabricArticleDescription?: NullableStringFieldUpdateOperationsInput | string | null
+    attrArticleNums?: NullableStringFieldUpdateOperationsInput | string | null
+    mvgrBrandVendor?: NullableStringFieldUpdateOperationsInput | string | null
+    mcDescription?: NullableStringFieldUpdateOperationsInput | string | null
+    vendorCode?: NullableStringFieldUpdateOperationsInput | string | null
+    mrp?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    impAtrbt2?: NullableStringFieldUpdateOperationsInput | string | null
+    mcCode?: NullableStringFieldUpdateOperationsInput | string | null
+    segment?: NullableStringFieldUpdateOperationsInput | string | null
+    season?: NullableStringFieldUpdateOperationsInput | string | null
+    hsnTaxCode?: NullableStringFieldUpdateOperationsInput | string | null
+    articleDescription?: NullableStringFieldUpdateOperationsInput | string | null
+    fashionGrid?: NullableStringFieldUpdateOperationsInput | string | null
+    year?: NullableStringFieldUpdateOperationsInput | string | null
+    articleType?: NullableStringFieldUpdateOperationsInput | string | null
+    presentationsType?: NullableStringFieldUpdateOperationsInput | string | null
+    approvalStatus?: EnumApprovalStatusFieldUpdateOperationsInput | $Enums.ApprovalStatus
+    pdStatus?: EnumPdStatusFieldUpdateOperationsInput | $Enums.PdStatus
+    approvedBy?: NullableIntFieldUpdateOperationsInput | number | null
+    approvedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    source?: NullableStringFieldUpdateOperationsInput | string | null
+    imageUncPath?: NullableStringFieldUpdateOperationsInput | string | null
+    isOldArticle?: BoolFieldUpdateOperationsInput | boolean
+    isGeneric?: BoolFieldUpdateOperationsInput | boolean
+    genericArticleId?: NullableStringFieldUpdateOperationsInput | string | null
+    variantSize?: NullableStringFieldUpdateOperationsInput | string | null
+    variantColor?: NullableStringFieldUpdateOperationsInput | string | null
+    variantWeight?: NullableStringFieldUpdateOperationsInput | string | null
+    comboRole?: EnumComboRoleFieldUpdateOperationsInput | $Enums.ComboRole
+    comboParentId?: NullableStringFieldUpdateOperationsInput | string | null
+    comboChildOrder?: NullableIntFieldUpdateOperationsInput | number | null
+    setGroupId?: NullableStringFieldUpdateOperationsInput | string | null
+    setRole?: NullableStringFieldUpdateOperationsInput | string | null
+    setName?: NullableStringFieldUpdateOperationsInput | string | null
+    sapSyncStatus?: EnumSapSyncStatusFieldUpdateOperationsInput | $Enums.SapSyncStatus
+    sapArticleId?: NullableStringFieldUpdateOperationsInput | string | null
+    sapSyncMessage?: NullableStringFieldUpdateOperationsInput | string | null
+    srmOriginalDesignNumber?: NullableStringFieldUpdateOperationsInput | string | null
+    srmUniqueId?: NullableStringFieldUpdateOperationsInput | string | null
+    imageExtractionRawData?: NullableJsonNullValueInput | InputJsonValue
+    srmSyncRunItems?: SrmSyncRunItemUncheckedUpdateManyWithoutFlatNestedInput
+  }
+
+  export type ExtractionResultFlatUpsertWithWhereUniqueWithoutComboParentInput = {
+    where: ExtractionResultFlatWhereUniqueInput
+    update: XOR<ExtractionResultFlatUpdateWithoutComboParentInput, ExtractionResultFlatUncheckedUpdateWithoutComboParentInput>
+    create: XOR<ExtractionResultFlatCreateWithoutComboParentInput, ExtractionResultFlatUncheckedCreateWithoutComboParentInput>
+  }
+
+  export type ExtractionResultFlatUpdateWithWhereUniqueWithoutComboParentInput = {
+    where: ExtractionResultFlatWhereUniqueInput
+    data: XOR<ExtractionResultFlatUpdateWithoutComboParentInput, ExtractionResultFlatUncheckedUpdateWithoutComboParentInput>
+  }
+
+  export type ExtractionResultFlatUpdateManyWithWhereWithoutComboParentInput = {
+    where: ExtractionResultFlatScalarWhereInput
+    data: XOR<ExtractionResultFlatUpdateManyMutationInput, ExtractionResultFlatUncheckedUpdateManyWithoutComboParentInput>
+  }
+
+  export type ExtractionResultFlatScalarWhereInput = {
+    AND?: ExtractionResultFlatScalarWhereInput | ExtractionResultFlatScalarWhereInput[]
+    OR?: ExtractionResultFlatScalarWhereInput[]
+    NOT?: ExtractionResultFlatScalarWhereInput | ExtractionResultFlatScalarWhereInput[]
+    id?: StringFilter<"ExtractionResultFlat"> | string
+    jobId?: StringNullableFilter<"ExtractionResultFlat"> | string | null
+    imageName?: StringNullableFilter<"ExtractionResultFlat"> | string | null
+    imageUrl?: StringNullableFilter<"ExtractionResultFlat"> | string | null
+    articleNumber?: StringNullableFilter<"ExtractionResultFlat"> | string | null
+    extractionStatus?: StringNullableFilter<"ExtractionResultFlat"> | string | null
+    aiModel?: StringNullableFilter<"ExtractionResultFlat"> | string | null
+    avgConfidence?: DecimalNullableFilter<"ExtractionResultFlat"> | Decimal | DecimalJsLike | number | string | null
+    processingTimeMs?: IntNullableFilter<"ExtractionResultFlat"> | number | null
+    totalAttributes?: IntNullableFilter<"ExtractionResultFlat"> | number | null
+    extractedCount?: IntNullableFilter<"ExtractionResultFlat"> | number | null
+    inputTokens?: IntNullableFilter<"ExtractionResultFlat"> | number | null
+    outputTokens?: IntNullableFilter<"ExtractionResultFlat"> | number | null
+    totalTokens?: IntNullableFilter<"ExtractionResultFlat"> | number | null
+    apiCost?: DecimalNullableFilter<"ExtractionResultFlat"> | Decimal | DecimalJsLike | number | string | null
+    userId?: IntNullableFilter<"ExtractionResultFlat"> | number | null
+    userName?: StringNullableFilter<"ExtractionResultFlat"> | string | null
+    extractionDate?: DateTimeNullableFilter<"ExtractionResultFlat"> | Date | string | null
+    createdAt?: DateTimeFilter<"ExtractionResultFlat"> | Date | string
+    updatedAt?: DateTimeFilter<"ExtractionResultFlat"> | Date | string
+    majorCategory?: StringNullableFilter<"ExtractionResultFlat"> | string | null
+    vendorName?: StringNullableFilter<"ExtractionResultFlat"> | string | null
+    designNumber?: StringNullableFilter<"ExtractionResultFlat"> | string | null
+    pptNumber?: StringNullableFilter<"ExtractionResultFlat"> | string | null
+    rate?: DecimalNullableFilter<"ExtractionResultFlat"> | Decimal | DecimalJsLike | number | string | null
+    size?: StringNullableFilter<"ExtractionResultFlat"> | string | null
+    yarn1?: StringNullableFilter<"ExtractionResultFlat"> | string | null
+    yarn2?: StringNullableFilter<"ExtractionResultFlat"> | string | null
+    fabricMainMvgr?: StringNullableFilter<"ExtractionResultFlat"> | string | null
+    weave?: StringNullableFilter<"ExtractionResultFlat"> | string | null
+    weaveFullForm?: StringNullableFilter<"ExtractionResultFlat"> | string | null
+    composition?: StringNullableFilter<"ExtractionResultFlat"> | string | null
+    finish?: StringNullableFilter<"ExtractionResultFlat"> | string | null
+    gsm?: StringNullableFilter<"ExtractionResultFlat"> | string | null
+    macroMvgr?: StringNullableFilter<"ExtractionResultFlat"> | string | null
+    macroMvgrFullForm?: StringNullableFilter<"ExtractionResultFlat"> | string | null
+    mainMvgr?: StringNullableFilter<"ExtractionResultFlat"> | string | null
+    mainMvgrFullForm?: StringNullableFilter<"ExtractionResultFlat"> | string | null
+    mFab2?: StringNullableFilter<"ExtractionResultFlat"> | string | null
+    mFab2FullForm?: StringNullableFilter<"ExtractionResultFlat"> | string | null
+    shade?: StringNullableFilter<"ExtractionResultFlat"> | string | null
+    weight?: StringNullableFilter<"ExtractionResultFlat"> | string | null
+    lycra?: StringNullableFilter<"ExtractionResultFlat"> | string | null
+    neck?: StringNullableFilter<"ExtractionResultFlat"> | string | null
+    neckDetails?: StringNullableFilter<"ExtractionResultFlat"> | string | null
+    collar?: StringNullableFilter<"ExtractionResultFlat"> | string | null
+    placket?: StringNullableFilter<"ExtractionResultFlat"> | string | null
+    sleeve?: StringNullableFilter<"ExtractionResultFlat"> | string | null
+    bottomFold?: StringNullableFilter<"ExtractionResultFlat"> | string | null
+    frontOpenStyle?: StringNullableFilter<"ExtractionResultFlat"> | string | null
+    pocketType?: StringNullableFilter<"ExtractionResultFlat"> | string | null
+    fit?: StringNullableFilter<"ExtractionResultFlat"> | string | null
+    pattern?: StringNullableFilter<"ExtractionResultFlat"> | string | null
+    length?: StringNullableFilter<"ExtractionResultFlat"> | string | null
+    colour?: StringNullableFilter<"ExtractionResultFlat"> | string | null
+    secondaryColour?: StringNullableFilter<"ExtractionResultFlat"> | string | null
+    drawcord?: StringNullableFilter<"ExtractionResultFlat"> | string | null
+    button?: StringNullableFilter<"ExtractionResultFlat"> | string | null
+    zipper?: StringNullableFilter<"ExtractionResultFlat"> | string | null
+    zipColour?: StringNullableFilter<"ExtractionResultFlat"> | string | null
+    printType?: StringNullableFilter<"ExtractionResultFlat"> | string | null
+    printStyle?: StringNullableFilter<"ExtractionResultFlat"> | string | null
+    printPlacement?: StringNullableFilter<"ExtractionResultFlat"> | string | null
+    patches?: StringNullableFilter<"ExtractionResultFlat"> | string | null
+    patchesType?: StringNullableFilter<"ExtractionResultFlat"> | string | null
+    embroidery?: StringNullableFilter<"ExtractionResultFlat"> | string | null
+    embroideryType?: StringNullableFilter<"ExtractionResultFlat"> | string | null
+    wash?: StringNullableFilter<"ExtractionResultFlat"> | string | null
+    fatherBelt?: StringNullableFilter<"ExtractionResultFlat"> | string | null
+    childBelt?: StringNullableFilter<"ExtractionResultFlat"> | string | null
+    division?: StringNullableFilter<"ExtractionResultFlat"> | string | null
+    subDivision?: StringNullableFilter<"ExtractionResultFlat"> | string | null
+    referenceArticleNumber?: StringNullableFilter<"ExtractionResultFlat"> | string | null
+    referenceArticleDescription?: StringNullableFilter<"ExtractionResultFlat"> | string | null
+    collarStyle?: StringNullableFilter<"ExtractionResultFlat"> | string | null
+    sleeveFold?: StringNullableFilter<"ExtractionResultFlat"> | string | null
+    mSet?: StringNullableFilter<"ExtractionResultFlat"> | string | null
+    noOfPocket?: StringNullableFilter<"ExtractionResultFlat"> | string | null
+    extraPocket?: StringNullableFilter<"ExtractionResultFlat"> | string | null
+    dcShape?: StringNullableFilter<"ExtractionResultFlat"> | string | null
+    btnColour?: StringNullableFilter<"ExtractionResultFlat"> | string | null
+    fCount?: StringNullableFilter<"ExtractionResultFlat"> | string | null
+    fConstruction?: StringNullableFilter<"ExtractionResultFlat"> | string | null
+    fOunce?: StringNullableFilter<"ExtractionResultFlat"> | string | null
+    fWidth?: StringNullableFilter<"ExtractionResultFlat"> | string | null
+    fabDiv?: StringNullableFilter<"ExtractionResultFlat"> | string | null
+    fabVdr?: StringNullableFilter<"ExtractionResultFlat"> | string | null
+    htrfType?: StringNullableFilter<"ExtractionResultFlat"> | string | null
+    htrfStyle?: StringNullableFilter<"ExtractionResultFlat"> | string | null
+    embPlacement?: StringNullableFilter<"ExtractionResultFlat"> | string | null
+    ageGroup?: StringNullableFilter<"ExtractionResultFlat"> | string | null
+    mNoOfSize?: StringNullableFilter<"ExtractionResultFlat"> | string | null
+    mNoOfClr?: StringNullableFilter<"ExtractionResultFlat"> | string | null
+    articleFashionType?: StringNullableFilter<"ExtractionResultFlat"> | string | null
+    articleDimension?: StringNullableFilter<"ExtractionResultFlat"> | string | null
+    cmtpCost?: DecimalNullableFilter<"ExtractionResultFlat"> | Decimal | DecimalJsLike | number | string | null
+    cmpCost?: DecimalNullableFilter<"ExtractionResultFlat"> | Decimal | DecimalJsLike | number | string | null
+    fabCost?: DecimalNullableFilter<"ExtractionResultFlat"> | Decimal | DecimalJsLike | number | string | null
+    fabCons?: DecimalNullableFilter<"ExtractionResultFlat"> | Decimal | DecimalJsLike | number | string | null
+    width?: DecimalNullableFilter<"ExtractionResultFlat"> | Decimal | DecimalJsLike | number | string | null
+    vendorFabricRate?: DecimalNullableFilter<"ExtractionResultFlat"> | Decimal | DecimalJsLike | number | string | null
+    valueAddAccCostType?: StringNullableFilter<"ExtractionResultFlat"> | string | null
+    valueAddCost?: DecimalNullableFilter<"ExtractionResultFlat"> | Decimal | DecimalJsLike | number | string | null
+    valueAddProcessCost?: DecimalNullableFilter<"ExtractionResultFlat"> | Decimal | DecimalJsLike | number | string | null
+    bodyArticle?: StringNullableFilter<"ExtractionResultFlat"> | string | null
+    bodyArticleDescription?: StringNullableFilter<"ExtractionResultFlat"> | string | null
+    fabricArticleNumber?: StringNullableFilter<"ExtractionResultFlat"> | string | null
+    fabricArticleDescription?: StringNullableFilter<"ExtractionResultFlat"> | string | null
+    attrArticleNums?: StringNullableFilter<"ExtractionResultFlat"> | string | null
+    mvgrBrandVendor?: StringNullableFilter<"ExtractionResultFlat"> | string | null
+    mcDescription?: StringNullableFilter<"ExtractionResultFlat"> | string | null
+    vendorCode?: StringNullableFilter<"ExtractionResultFlat"> | string | null
+    mrp?: DecimalNullableFilter<"ExtractionResultFlat"> | Decimal | DecimalJsLike | number | string | null
+    impAtrbt2?: StringNullableFilter<"ExtractionResultFlat"> | string | null
+    mcCode?: StringNullableFilter<"ExtractionResultFlat"> | string | null
+    segment?: StringNullableFilter<"ExtractionResultFlat"> | string | null
+    season?: StringNullableFilter<"ExtractionResultFlat"> | string | null
+    hsnTaxCode?: StringNullableFilter<"ExtractionResultFlat"> | string | null
+    articleDescription?: StringNullableFilter<"ExtractionResultFlat"> | string | null
+    fashionGrid?: StringNullableFilter<"ExtractionResultFlat"> | string | null
+    year?: StringNullableFilter<"ExtractionResultFlat"> | string | null
+    articleType?: StringNullableFilter<"ExtractionResultFlat"> | string | null
+    presentationsType?: StringNullableFilter<"ExtractionResultFlat"> | string | null
+    approvalStatus?: EnumApprovalStatusFilter<"ExtractionResultFlat"> | $Enums.ApprovalStatus
+    pdStatus?: EnumPdStatusFilter<"ExtractionResultFlat"> | $Enums.PdStatus
+    approvedBy?: IntNullableFilter<"ExtractionResultFlat"> | number | null
+    approvedAt?: DateTimeNullableFilter<"ExtractionResultFlat"> | Date | string | null
+    source?: StringNullableFilter<"ExtractionResultFlat"> | string | null
+    imageUncPath?: StringNullableFilter<"ExtractionResultFlat"> | string | null
+    isOldArticle?: BoolFilter<"ExtractionResultFlat"> | boolean
+    isGeneric?: BoolFilter<"ExtractionResultFlat"> | boolean
+    genericArticleId?: StringNullableFilter<"ExtractionResultFlat"> | string | null
+    variantSize?: StringNullableFilter<"ExtractionResultFlat"> | string | null
+    variantColor?: StringNullableFilter<"ExtractionResultFlat"> | string | null
+    variantWeight?: StringNullableFilter<"ExtractionResultFlat"> | string | null
+    comboRole?: EnumComboRoleFilter<"ExtractionResultFlat"> | $Enums.ComboRole
+    comboParentId?: StringNullableFilter<"ExtractionResultFlat"> | string | null
+    comboChildOrder?: IntNullableFilter<"ExtractionResultFlat"> | number | null
+    setGroupId?: StringNullableFilter<"ExtractionResultFlat"> | string | null
+    setRole?: StringNullableFilter<"ExtractionResultFlat"> | string | null
+    setName?: StringNullableFilter<"ExtractionResultFlat"> | string | null
+    sapSyncStatus?: EnumSapSyncStatusFilter<"ExtractionResultFlat"> | $Enums.SapSyncStatus
+    sapArticleId?: StringNullableFilter<"ExtractionResultFlat"> | string | null
+    sapSyncMessage?: StringNullableFilter<"ExtractionResultFlat"> | string | null
+    srmOriginalDesignNumber?: StringNullableFilter<"ExtractionResultFlat"> | string | null
+    srmUniqueId?: StringNullableFilter<"ExtractionResultFlat"> | string | null
+    imageExtractionRawData?: JsonNullableFilter<"ExtractionResultFlat">
   }
 
   export type ExtractionJobUpsertWithoutFlatResultInput = {
@@ -109938,12 +111537,19 @@ export namespace Prisma {
     variantSize?: string | null
     variantColor?: string | null
     variantWeight?: string | null
+    comboRole?: $Enums.ComboRole
+    comboChildOrder?: number | null
+    setGroupId?: string | null
+    setRole?: string | null
+    setName?: string | null
     sapSyncStatus?: $Enums.SapSyncStatus
     sapArticleId?: string | null
     sapSyncMessage?: string | null
     srmOriginalDesignNumber?: string | null
     srmUniqueId?: string | null
     imageExtractionRawData?: NullableJsonNullValueInput | InputJsonValue
+    comboParent?: ExtractionResultFlatCreateNestedOneWithoutComboChildrenInput
+    comboChildren?: ExtractionResultFlatCreateNestedManyWithoutComboParentInput
     job?: ExtractionJobCreateNestedOneWithoutFlatResultInput
     srmSyncRunItems?: SrmSyncRunItemCreateNestedManyWithoutFlatInput
   }
@@ -110083,12 +111689,19 @@ export namespace Prisma {
     variantSize?: string | null
     variantColor?: string | null
     variantWeight?: string | null
+    comboRole?: $Enums.ComboRole
+    comboParentId?: string | null
+    comboChildOrder?: number | null
+    setGroupId?: string | null
+    setRole?: string | null
+    setName?: string | null
     sapSyncStatus?: $Enums.SapSyncStatus
     sapArticleId?: string | null
     sapSyncMessage?: string | null
     srmOriginalDesignNumber?: string | null
     srmUniqueId?: string | null
     imageExtractionRawData?: NullableJsonNullValueInput | InputJsonValue
+    comboChildren?: ExtractionResultFlatUncheckedCreateNestedManyWithoutComboParentInput
     srmSyncRunItems?: SrmSyncRunItemUncheckedCreateNestedManyWithoutFlatInput
   }
 
@@ -110217,153 +111830,6 @@ export namespace Prisma {
   export type ExtractionResultFlatUpdateManyWithWhereWithoutApproverInput = {
     where: ExtractionResultFlatScalarWhereInput
     data: XOR<ExtractionResultFlatUpdateManyMutationInput, ExtractionResultFlatUncheckedUpdateManyWithoutApproverInput>
-  }
-
-  export type ExtractionResultFlatScalarWhereInput = {
-    AND?: ExtractionResultFlatScalarWhereInput | ExtractionResultFlatScalarWhereInput[]
-    OR?: ExtractionResultFlatScalarWhereInput[]
-    NOT?: ExtractionResultFlatScalarWhereInput | ExtractionResultFlatScalarWhereInput[]
-    id?: StringFilter<"ExtractionResultFlat"> | string
-    jobId?: StringNullableFilter<"ExtractionResultFlat"> | string | null
-    imageName?: StringNullableFilter<"ExtractionResultFlat"> | string | null
-    imageUrl?: StringNullableFilter<"ExtractionResultFlat"> | string | null
-    articleNumber?: StringNullableFilter<"ExtractionResultFlat"> | string | null
-    extractionStatus?: StringNullableFilter<"ExtractionResultFlat"> | string | null
-    aiModel?: StringNullableFilter<"ExtractionResultFlat"> | string | null
-    avgConfidence?: DecimalNullableFilter<"ExtractionResultFlat"> | Decimal | DecimalJsLike | number | string | null
-    processingTimeMs?: IntNullableFilter<"ExtractionResultFlat"> | number | null
-    totalAttributes?: IntNullableFilter<"ExtractionResultFlat"> | number | null
-    extractedCount?: IntNullableFilter<"ExtractionResultFlat"> | number | null
-    inputTokens?: IntNullableFilter<"ExtractionResultFlat"> | number | null
-    outputTokens?: IntNullableFilter<"ExtractionResultFlat"> | number | null
-    totalTokens?: IntNullableFilter<"ExtractionResultFlat"> | number | null
-    apiCost?: DecimalNullableFilter<"ExtractionResultFlat"> | Decimal | DecimalJsLike | number | string | null
-    userId?: IntNullableFilter<"ExtractionResultFlat"> | number | null
-    userName?: StringNullableFilter<"ExtractionResultFlat"> | string | null
-    extractionDate?: DateTimeNullableFilter<"ExtractionResultFlat"> | Date | string | null
-    createdAt?: DateTimeFilter<"ExtractionResultFlat"> | Date | string
-    updatedAt?: DateTimeFilter<"ExtractionResultFlat"> | Date | string
-    majorCategory?: StringNullableFilter<"ExtractionResultFlat"> | string | null
-    vendorName?: StringNullableFilter<"ExtractionResultFlat"> | string | null
-    designNumber?: StringNullableFilter<"ExtractionResultFlat"> | string | null
-    pptNumber?: StringNullableFilter<"ExtractionResultFlat"> | string | null
-    rate?: DecimalNullableFilter<"ExtractionResultFlat"> | Decimal | DecimalJsLike | number | string | null
-    size?: StringNullableFilter<"ExtractionResultFlat"> | string | null
-    yarn1?: StringNullableFilter<"ExtractionResultFlat"> | string | null
-    yarn2?: StringNullableFilter<"ExtractionResultFlat"> | string | null
-    fabricMainMvgr?: StringNullableFilter<"ExtractionResultFlat"> | string | null
-    weave?: StringNullableFilter<"ExtractionResultFlat"> | string | null
-    weaveFullForm?: StringNullableFilter<"ExtractionResultFlat"> | string | null
-    composition?: StringNullableFilter<"ExtractionResultFlat"> | string | null
-    finish?: StringNullableFilter<"ExtractionResultFlat"> | string | null
-    gsm?: StringNullableFilter<"ExtractionResultFlat"> | string | null
-    macroMvgr?: StringNullableFilter<"ExtractionResultFlat"> | string | null
-    macroMvgrFullForm?: StringNullableFilter<"ExtractionResultFlat"> | string | null
-    mainMvgr?: StringNullableFilter<"ExtractionResultFlat"> | string | null
-    mainMvgrFullForm?: StringNullableFilter<"ExtractionResultFlat"> | string | null
-    mFab2?: StringNullableFilter<"ExtractionResultFlat"> | string | null
-    mFab2FullForm?: StringNullableFilter<"ExtractionResultFlat"> | string | null
-    shade?: StringNullableFilter<"ExtractionResultFlat"> | string | null
-    weight?: StringNullableFilter<"ExtractionResultFlat"> | string | null
-    lycra?: StringNullableFilter<"ExtractionResultFlat"> | string | null
-    neck?: StringNullableFilter<"ExtractionResultFlat"> | string | null
-    neckDetails?: StringNullableFilter<"ExtractionResultFlat"> | string | null
-    collar?: StringNullableFilter<"ExtractionResultFlat"> | string | null
-    placket?: StringNullableFilter<"ExtractionResultFlat"> | string | null
-    sleeve?: StringNullableFilter<"ExtractionResultFlat"> | string | null
-    bottomFold?: StringNullableFilter<"ExtractionResultFlat"> | string | null
-    frontOpenStyle?: StringNullableFilter<"ExtractionResultFlat"> | string | null
-    pocketType?: StringNullableFilter<"ExtractionResultFlat"> | string | null
-    fit?: StringNullableFilter<"ExtractionResultFlat"> | string | null
-    pattern?: StringNullableFilter<"ExtractionResultFlat"> | string | null
-    length?: StringNullableFilter<"ExtractionResultFlat"> | string | null
-    colour?: StringNullableFilter<"ExtractionResultFlat"> | string | null
-    secondaryColour?: StringNullableFilter<"ExtractionResultFlat"> | string | null
-    drawcord?: StringNullableFilter<"ExtractionResultFlat"> | string | null
-    button?: StringNullableFilter<"ExtractionResultFlat"> | string | null
-    zipper?: StringNullableFilter<"ExtractionResultFlat"> | string | null
-    zipColour?: StringNullableFilter<"ExtractionResultFlat"> | string | null
-    printType?: StringNullableFilter<"ExtractionResultFlat"> | string | null
-    printStyle?: StringNullableFilter<"ExtractionResultFlat"> | string | null
-    printPlacement?: StringNullableFilter<"ExtractionResultFlat"> | string | null
-    patches?: StringNullableFilter<"ExtractionResultFlat"> | string | null
-    patchesType?: StringNullableFilter<"ExtractionResultFlat"> | string | null
-    embroidery?: StringNullableFilter<"ExtractionResultFlat"> | string | null
-    embroideryType?: StringNullableFilter<"ExtractionResultFlat"> | string | null
-    wash?: StringNullableFilter<"ExtractionResultFlat"> | string | null
-    fatherBelt?: StringNullableFilter<"ExtractionResultFlat"> | string | null
-    childBelt?: StringNullableFilter<"ExtractionResultFlat"> | string | null
-    division?: StringNullableFilter<"ExtractionResultFlat"> | string | null
-    subDivision?: StringNullableFilter<"ExtractionResultFlat"> | string | null
-    referenceArticleNumber?: StringNullableFilter<"ExtractionResultFlat"> | string | null
-    referenceArticleDescription?: StringNullableFilter<"ExtractionResultFlat"> | string | null
-    collarStyle?: StringNullableFilter<"ExtractionResultFlat"> | string | null
-    sleeveFold?: StringNullableFilter<"ExtractionResultFlat"> | string | null
-    mSet?: StringNullableFilter<"ExtractionResultFlat"> | string | null
-    noOfPocket?: StringNullableFilter<"ExtractionResultFlat"> | string | null
-    extraPocket?: StringNullableFilter<"ExtractionResultFlat"> | string | null
-    dcShape?: StringNullableFilter<"ExtractionResultFlat"> | string | null
-    btnColour?: StringNullableFilter<"ExtractionResultFlat"> | string | null
-    fCount?: StringNullableFilter<"ExtractionResultFlat"> | string | null
-    fConstruction?: StringNullableFilter<"ExtractionResultFlat"> | string | null
-    fOunce?: StringNullableFilter<"ExtractionResultFlat"> | string | null
-    fWidth?: StringNullableFilter<"ExtractionResultFlat"> | string | null
-    fabDiv?: StringNullableFilter<"ExtractionResultFlat"> | string | null
-    fabVdr?: StringNullableFilter<"ExtractionResultFlat"> | string | null
-    htrfType?: StringNullableFilter<"ExtractionResultFlat"> | string | null
-    htrfStyle?: StringNullableFilter<"ExtractionResultFlat"> | string | null
-    embPlacement?: StringNullableFilter<"ExtractionResultFlat"> | string | null
-    ageGroup?: StringNullableFilter<"ExtractionResultFlat"> | string | null
-    mNoOfSize?: StringNullableFilter<"ExtractionResultFlat"> | string | null
-    mNoOfClr?: StringNullableFilter<"ExtractionResultFlat"> | string | null
-    articleFashionType?: StringNullableFilter<"ExtractionResultFlat"> | string | null
-    articleDimension?: StringNullableFilter<"ExtractionResultFlat"> | string | null
-    cmtpCost?: DecimalNullableFilter<"ExtractionResultFlat"> | Decimal | DecimalJsLike | number | string | null
-    cmpCost?: DecimalNullableFilter<"ExtractionResultFlat"> | Decimal | DecimalJsLike | number | string | null
-    fabCost?: DecimalNullableFilter<"ExtractionResultFlat"> | Decimal | DecimalJsLike | number | string | null
-    fabCons?: DecimalNullableFilter<"ExtractionResultFlat"> | Decimal | DecimalJsLike | number | string | null
-    width?: DecimalNullableFilter<"ExtractionResultFlat"> | Decimal | DecimalJsLike | number | string | null
-    vendorFabricRate?: DecimalNullableFilter<"ExtractionResultFlat"> | Decimal | DecimalJsLike | number | string | null
-    valueAddAccCostType?: StringNullableFilter<"ExtractionResultFlat"> | string | null
-    valueAddCost?: DecimalNullableFilter<"ExtractionResultFlat"> | Decimal | DecimalJsLike | number | string | null
-    valueAddProcessCost?: DecimalNullableFilter<"ExtractionResultFlat"> | Decimal | DecimalJsLike | number | string | null
-    bodyArticle?: StringNullableFilter<"ExtractionResultFlat"> | string | null
-    bodyArticleDescription?: StringNullableFilter<"ExtractionResultFlat"> | string | null
-    fabricArticleNumber?: StringNullableFilter<"ExtractionResultFlat"> | string | null
-    fabricArticleDescription?: StringNullableFilter<"ExtractionResultFlat"> | string | null
-    attrArticleNums?: StringNullableFilter<"ExtractionResultFlat"> | string | null
-    mvgrBrandVendor?: StringNullableFilter<"ExtractionResultFlat"> | string | null
-    mcDescription?: StringNullableFilter<"ExtractionResultFlat"> | string | null
-    vendorCode?: StringNullableFilter<"ExtractionResultFlat"> | string | null
-    mrp?: DecimalNullableFilter<"ExtractionResultFlat"> | Decimal | DecimalJsLike | number | string | null
-    impAtrbt2?: StringNullableFilter<"ExtractionResultFlat"> | string | null
-    mcCode?: StringNullableFilter<"ExtractionResultFlat"> | string | null
-    segment?: StringNullableFilter<"ExtractionResultFlat"> | string | null
-    season?: StringNullableFilter<"ExtractionResultFlat"> | string | null
-    hsnTaxCode?: StringNullableFilter<"ExtractionResultFlat"> | string | null
-    articleDescription?: StringNullableFilter<"ExtractionResultFlat"> | string | null
-    fashionGrid?: StringNullableFilter<"ExtractionResultFlat"> | string | null
-    year?: StringNullableFilter<"ExtractionResultFlat"> | string | null
-    articleType?: StringNullableFilter<"ExtractionResultFlat"> | string | null
-    presentationsType?: StringNullableFilter<"ExtractionResultFlat"> | string | null
-    approvalStatus?: EnumApprovalStatusFilter<"ExtractionResultFlat"> | $Enums.ApprovalStatus
-    pdStatus?: EnumPdStatusFilter<"ExtractionResultFlat"> | $Enums.PdStatus
-    approvedBy?: IntNullableFilter<"ExtractionResultFlat"> | number | null
-    approvedAt?: DateTimeNullableFilter<"ExtractionResultFlat"> | Date | string | null
-    source?: StringNullableFilter<"ExtractionResultFlat"> | string | null
-    imageUncPath?: StringNullableFilter<"ExtractionResultFlat"> | string | null
-    isOldArticle?: BoolFilter<"ExtractionResultFlat"> | boolean
-    isGeneric?: BoolFilter<"ExtractionResultFlat"> | boolean
-    genericArticleId?: StringNullableFilter<"ExtractionResultFlat"> | string | null
-    variantSize?: StringNullableFilter<"ExtractionResultFlat"> | string | null
-    variantColor?: StringNullableFilter<"ExtractionResultFlat"> | string | null
-    variantWeight?: StringNullableFilter<"ExtractionResultFlat"> | string | null
-    sapSyncStatus?: EnumSapSyncStatusFilter<"ExtractionResultFlat"> | $Enums.SapSyncStatus
-    sapArticleId?: StringNullableFilter<"ExtractionResultFlat"> | string | null
-    sapSyncMessage?: StringNullableFilter<"ExtractionResultFlat"> | string | null
-    srmOriginalDesignNumber?: StringNullableFilter<"ExtractionResultFlat"> | string | null
-    srmUniqueId?: StringNullableFilter<"ExtractionResultFlat"> | string | null
-    imageExtractionRawData?: JsonNullableFilter<"ExtractionResultFlat">
   }
 
   export type UserCreateWithoutApiKeysInput = {
@@ -111927,6 +113393,11 @@ export namespace Prisma {
     variantSize?: string | null
     variantColor?: string | null
     variantWeight?: string | null
+    comboRole?: $Enums.ComboRole
+    comboChildOrder?: number | null
+    setGroupId?: string | null
+    setRole?: string | null
+    setName?: string | null
     sapSyncStatus?: $Enums.SapSyncStatus
     sapArticleId?: string | null
     sapSyncMessage?: string | null
@@ -111934,6 +113405,8 @@ export namespace Prisma {
     srmUniqueId?: string | null
     imageExtractionRawData?: NullableJsonNullValueInput | InputJsonValue
     approver?: UserCreateNestedOneWithoutApprovedItemsInput
+    comboParent?: ExtractionResultFlatCreateNestedOneWithoutComboChildrenInput
+    comboChildren?: ExtractionResultFlatCreateNestedManyWithoutComboParentInput
     job?: ExtractionJobCreateNestedOneWithoutFlatResultInput
   }
 
@@ -112073,12 +113546,19 @@ export namespace Prisma {
     variantSize?: string | null
     variantColor?: string | null
     variantWeight?: string | null
+    comboRole?: $Enums.ComboRole
+    comboParentId?: string | null
+    comboChildOrder?: number | null
+    setGroupId?: string | null
+    setRole?: string | null
+    setName?: string | null
     sapSyncStatus?: $Enums.SapSyncStatus
     sapArticleId?: string | null
     sapSyncMessage?: string | null
     srmOriginalDesignNumber?: string | null
     srmUniqueId?: string | null
     imageExtractionRawData?: NullableJsonNullValueInput | InputJsonValue
+    comboChildren?: ExtractionResultFlatUncheckedCreateNestedManyWithoutComboParentInput
   }
 
   export type ExtractionResultFlatCreateOrConnectWithoutSrmSyncRunItemsInput = {
@@ -112268,6 +113748,11 @@ export namespace Prisma {
     variantSize?: NullableStringFieldUpdateOperationsInput | string | null
     variantColor?: NullableStringFieldUpdateOperationsInput | string | null
     variantWeight?: NullableStringFieldUpdateOperationsInput | string | null
+    comboRole?: EnumComboRoleFieldUpdateOperationsInput | $Enums.ComboRole
+    comboChildOrder?: NullableIntFieldUpdateOperationsInput | number | null
+    setGroupId?: NullableStringFieldUpdateOperationsInput | string | null
+    setRole?: NullableStringFieldUpdateOperationsInput | string | null
+    setName?: NullableStringFieldUpdateOperationsInput | string | null
     sapSyncStatus?: EnumSapSyncStatusFieldUpdateOperationsInput | $Enums.SapSyncStatus
     sapArticleId?: NullableStringFieldUpdateOperationsInput | string | null
     sapSyncMessage?: NullableStringFieldUpdateOperationsInput | string | null
@@ -112275,6 +113760,8 @@ export namespace Prisma {
     srmUniqueId?: NullableStringFieldUpdateOperationsInput | string | null
     imageExtractionRawData?: NullableJsonNullValueInput | InputJsonValue
     approver?: UserUpdateOneWithoutApprovedItemsNestedInput
+    comboParent?: ExtractionResultFlatUpdateOneWithoutComboChildrenNestedInput
+    comboChildren?: ExtractionResultFlatUpdateManyWithoutComboParentNestedInput
     job?: ExtractionJobUpdateOneWithoutFlatResultNestedInput
   }
 
@@ -112414,12 +113901,19 @@ export namespace Prisma {
     variantSize?: NullableStringFieldUpdateOperationsInput | string | null
     variantColor?: NullableStringFieldUpdateOperationsInput | string | null
     variantWeight?: NullableStringFieldUpdateOperationsInput | string | null
+    comboRole?: EnumComboRoleFieldUpdateOperationsInput | $Enums.ComboRole
+    comboParentId?: NullableStringFieldUpdateOperationsInput | string | null
+    comboChildOrder?: NullableIntFieldUpdateOperationsInput | number | null
+    setGroupId?: NullableStringFieldUpdateOperationsInput | string | null
+    setRole?: NullableStringFieldUpdateOperationsInput | string | null
+    setName?: NullableStringFieldUpdateOperationsInput | string | null
     sapSyncStatus?: EnumSapSyncStatusFieldUpdateOperationsInput | $Enums.SapSyncStatus
     sapArticleId?: NullableStringFieldUpdateOperationsInput | string | null
     sapSyncMessage?: NullableStringFieldUpdateOperationsInput | string | null
     srmOriginalDesignNumber?: NullableStringFieldUpdateOperationsInput | string | null
     srmUniqueId?: NullableStringFieldUpdateOperationsInput | string | null
     imageExtractionRawData?: NullableJsonNullValueInput | InputJsonValue
+    comboChildren?: ExtractionResultFlatUncheckedUpdateManyWithoutComboParentNestedInput
   }
 
   export type PoolBBatchCreateWithoutJobInput = {
@@ -113226,6 +114720,155 @@ export namespace Prisma {
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
   }
 
+  export type ExtractionResultFlatCreateManyComboParentInput = {
+    id?: string
+    jobId?: string | null
+    imageName?: string | null
+    imageUrl?: string | null
+    articleNumber?: string | null
+    extractionStatus?: string | null
+    aiModel?: string | null
+    avgConfidence?: Decimal | DecimalJsLike | number | string | null
+    processingTimeMs?: number | null
+    totalAttributes?: number | null
+    extractedCount?: number | null
+    inputTokens?: number | null
+    outputTokens?: number | null
+    totalTokens?: number | null
+    apiCost?: Decimal | DecimalJsLike | number | string | null
+    userId?: number | null
+    userName?: string | null
+    extractionDate?: Date | string | null
+    createdAt?: Date | string
+    updatedAt?: Date | string
+    majorCategory?: string | null
+    vendorName?: string | null
+    designNumber?: string | null
+    pptNumber?: string | null
+    rate?: Decimal | DecimalJsLike | number | string | null
+    size?: string | null
+    yarn1?: string | null
+    yarn2?: string | null
+    fabricMainMvgr?: string | null
+    weave?: string | null
+    weaveFullForm?: string | null
+    composition?: string | null
+    finish?: string | null
+    gsm?: string | null
+    macroMvgr?: string | null
+    macroMvgrFullForm?: string | null
+    mainMvgr?: string | null
+    mainMvgrFullForm?: string | null
+    mFab2?: string | null
+    mFab2FullForm?: string | null
+    shade?: string | null
+    weight?: string | null
+    lycra?: string | null
+    neck?: string | null
+    neckDetails?: string | null
+    collar?: string | null
+    placket?: string | null
+    sleeve?: string | null
+    bottomFold?: string | null
+    frontOpenStyle?: string | null
+    pocketType?: string | null
+    fit?: string | null
+    pattern?: string | null
+    length?: string | null
+    colour?: string | null
+    secondaryColour?: string | null
+    drawcord?: string | null
+    button?: string | null
+    zipper?: string | null
+    zipColour?: string | null
+    printType?: string | null
+    printStyle?: string | null
+    printPlacement?: string | null
+    patches?: string | null
+    patchesType?: string | null
+    embroidery?: string | null
+    embroideryType?: string | null
+    wash?: string | null
+    fatherBelt?: string | null
+    childBelt?: string | null
+    division?: string | null
+    subDivision?: string | null
+    referenceArticleNumber?: string | null
+    referenceArticleDescription?: string | null
+    collarStyle?: string | null
+    sleeveFold?: string | null
+    mSet?: string | null
+    noOfPocket?: string | null
+    extraPocket?: string | null
+    dcShape?: string | null
+    btnColour?: string | null
+    fCount?: string | null
+    fConstruction?: string | null
+    fOunce?: string | null
+    fWidth?: string | null
+    fabDiv?: string | null
+    fabVdr?: string | null
+    htrfType?: string | null
+    htrfStyle?: string | null
+    embPlacement?: string | null
+    ageGroup?: string | null
+    mNoOfSize?: string | null
+    mNoOfClr?: string | null
+    articleFashionType?: string | null
+    articleDimension?: string | null
+    cmtpCost?: Decimal | DecimalJsLike | number | string | null
+    cmpCost?: Decimal | DecimalJsLike | number | string | null
+    fabCost?: Decimal | DecimalJsLike | number | string | null
+    fabCons?: Decimal | DecimalJsLike | number | string | null
+    width?: Decimal | DecimalJsLike | number | string | null
+    vendorFabricRate?: Decimal | DecimalJsLike | number | string | null
+    valueAddAccCostType?: string | null
+    valueAddCost?: Decimal | DecimalJsLike | number | string | null
+    valueAddProcessCost?: Decimal | DecimalJsLike | number | string | null
+    bodyArticle?: string | null
+    bodyArticleDescription?: string | null
+    fabricArticleNumber?: string | null
+    fabricArticleDescription?: string | null
+    attrArticleNums?: string | null
+    mvgrBrandVendor?: string | null
+    mcDescription?: string | null
+    vendorCode?: string | null
+    mrp?: Decimal | DecimalJsLike | number | string | null
+    impAtrbt2?: string | null
+    mcCode?: string | null
+    segment?: string | null
+    season?: string | null
+    hsnTaxCode?: string | null
+    articleDescription?: string | null
+    fashionGrid?: string | null
+    year?: string | null
+    articleType?: string | null
+    presentationsType?: string | null
+    approvalStatus?: $Enums.ApprovalStatus
+    pdStatus?: $Enums.PdStatus
+    approvedBy?: number | null
+    approvedAt?: Date | string | null
+    source?: string | null
+    imageUncPath?: string | null
+    isOldArticle?: boolean
+    isGeneric?: boolean
+    genericArticleId?: string | null
+    variantSize?: string | null
+    variantColor?: string | null
+    variantWeight?: string | null
+    comboRole?: $Enums.ComboRole
+    comboChildOrder?: number | null
+    setGroupId?: string | null
+    setRole?: string | null
+    setName?: string | null
+    sapSyncStatus?: $Enums.SapSyncStatus
+    sapArticleId?: string | null
+    sapSyncMessage?: string | null
+    srmOriginalDesignNumber?: string | null
+    srmUniqueId?: string | null
+    imageExtractionRawData?: NullableJsonNullValueInput | InputJsonValue
+  }
+
   export type SrmSyncRunItemCreateManyFlatInput = {
     id?: string
     runId: string
@@ -113234,6 +114877,457 @@ export namespace Prisma {
     action: string
     errorMessage?: string | null
     createdAt?: Date | string
+  }
+
+  export type ExtractionResultFlatUpdateWithoutComboParentInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    imageName?: NullableStringFieldUpdateOperationsInput | string | null
+    imageUrl?: NullableStringFieldUpdateOperationsInput | string | null
+    articleNumber?: NullableStringFieldUpdateOperationsInput | string | null
+    extractionStatus?: NullableStringFieldUpdateOperationsInput | string | null
+    aiModel?: NullableStringFieldUpdateOperationsInput | string | null
+    avgConfidence?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    processingTimeMs?: NullableIntFieldUpdateOperationsInput | number | null
+    totalAttributes?: NullableIntFieldUpdateOperationsInput | number | null
+    extractedCount?: NullableIntFieldUpdateOperationsInput | number | null
+    inputTokens?: NullableIntFieldUpdateOperationsInput | number | null
+    outputTokens?: NullableIntFieldUpdateOperationsInput | number | null
+    totalTokens?: NullableIntFieldUpdateOperationsInput | number | null
+    apiCost?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    userId?: NullableIntFieldUpdateOperationsInput | number | null
+    userName?: NullableStringFieldUpdateOperationsInput | string | null
+    extractionDate?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    majorCategory?: NullableStringFieldUpdateOperationsInput | string | null
+    vendorName?: NullableStringFieldUpdateOperationsInput | string | null
+    designNumber?: NullableStringFieldUpdateOperationsInput | string | null
+    pptNumber?: NullableStringFieldUpdateOperationsInput | string | null
+    rate?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    size?: NullableStringFieldUpdateOperationsInput | string | null
+    yarn1?: NullableStringFieldUpdateOperationsInput | string | null
+    yarn2?: NullableStringFieldUpdateOperationsInput | string | null
+    fabricMainMvgr?: NullableStringFieldUpdateOperationsInput | string | null
+    weave?: NullableStringFieldUpdateOperationsInput | string | null
+    weaveFullForm?: NullableStringFieldUpdateOperationsInput | string | null
+    composition?: NullableStringFieldUpdateOperationsInput | string | null
+    finish?: NullableStringFieldUpdateOperationsInput | string | null
+    gsm?: NullableStringFieldUpdateOperationsInput | string | null
+    macroMvgr?: NullableStringFieldUpdateOperationsInput | string | null
+    macroMvgrFullForm?: NullableStringFieldUpdateOperationsInput | string | null
+    mainMvgr?: NullableStringFieldUpdateOperationsInput | string | null
+    mainMvgrFullForm?: NullableStringFieldUpdateOperationsInput | string | null
+    mFab2?: NullableStringFieldUpdateOperationsInput | string | null
+    mFab2FullForm?: NullableStringFieldUpdateOperationsInput | string | null
+    shade?: NullableStringFieldUpdateOperationsInput | string | null
+    weight?: NullableStringFieldUpdateOperationsInput | string | null
+    lycra?: NullableStringFieldUpdateOperationsInput | string | null
+    neck?: NullableStringFieldUpdateOperationsInput | string | null
+    neckDetails?: NullableStringFieldUpdateOperationsInput | string | null
+    collar?: NullableStringFieldUpdateOperationsInput | string | null
+    placket?: NullableStringFieldUpdateOperationsInput | string | null
+    sleeve?: NullableStringFieldUpdateOperationsInput | string | null
+    bottomFold?: NullableStringFieldUpdateOperationsInput | string | null
+    frontOpenStyle?: NullableStringFieldUpdateOperationsInput | string | null
+    pocketType?: NullableStringFieldUpdateOperationsInput | string | null
+    fit?: NullableStringFieldUpdateOperationsInput | string | null
+    pattern?: NullableStringFieldUpdateOperationsInput | string | null
+    length?: NullableStringFieldUpdateOperationsInput | string | null
+    colour?: NullableStringFieldUpdateOperationsInput | string | null
+    secondaryColour?: NullableStringFieldUpdateOperationsInput | string | null
+    drawcord?: NullableStringFieldUpdateOperationsInput | string | null
+    button?: NullableStringFieldUpdateOperationsInput | string | null
+    zipper?: NullableStringFieldUpdateOperationsInput | string | null
+    zipColour?: NullableStringFieldUpdateOperationsInput | string | null
+    printType?: NullableStringFieldUpdateOperationsInput | string | null
+    printStyle?: NullableStringFieldUpdateOperationsInput | string | null
+    printPlacement?: NullableStringFieldUpdateOperationsInput | string | null
+    patches?: NullableStringFieldUpdateOperationsInput | string | null
+    patchesType?: NullableStringFieldUpdateOperationsInput | string | null
+    embroidery?: NullableStringFieldUpdateOperationsInput | string | null
+    embroideryType?: NullableStringFieldUpdateOperationsInput | string | null
+    wash?: NullableStringFieldUpdateOperationsInput | string | null
+    fatherBelt?: NullableStringFieldUpdateOperationsInput | string | null
+    childBelt?: NullableStringFieldUpdateOperationsInput | string | null
+    division?: NullableStringFieldUpdateOperationsInput | string | null
+    subDivision?: NullableStringFieldUpdateOperationsInput | string | null
+    referenceArticleNumber?: NullableStringFieldUpdateOperationsInput | string | null
+    referenceArticleDescription?: NullableStringFieldUpdateOperationsInput | string | null
+    collarStyle?: NullableStringFieldUpdateOperationsInput | string | null
+    sleeveFold?: NullableStringFieldUpdateOperationsInput | string | null
+    mSet?: NullableStringFieldUpdateOperationsInput | string | null
+    noOfPocket?: NullableStringFieldUpdateOperationsInput | string | null
+    extraPocket?: NullableStringFieldUpdateOperationsInput | string | null
+    dcShape?: NullableStringFieldUpdateOperationsInput | string | null
+    btnColour?: NullableStringFieldUpdateOperationsInput | string | null
+    fCount?: NullableStringFieldUpdateOperationsInput | string | null
+    fConstruction?: NullableStringFieldUpdateOperationsInput | string | null
+    fOunce?: NullableStringFieldUpdateOperationsInput | string | null
+    fWidth?: NullableStringFieldUpdateOperationsInput | string | null
+    fabDiv?: NullableStringFieldUpdateOperationsInput | string | null
+    fabVdr?: NullableStringFieldUpdateOperationsInput | string | null
+    htrfType?: NullableStringFieldUpdateOperationsInput | string | null
+    htrfStyle?: NullableStringFieldUpdateOperationsInput | string | null
+    embPlacement?: NullableStringFieldUpdateOperationsInput | string | null
+    ageGroup?: NullableStringFieldUpdateOperationsInput | string | null
+    mNoOfSize?: NullableStringFieldUpdateOperationsInput | string | null
+    mNoOfClr?: NullableStringFieldUpdateOperationsInput | string | null
+    articleFashionType?: NullableStringFieldUpdateOperationsInput | string | null
+    articleDimension?: NullableStringFieldUpdateOperationsInput | string | null
+    cmtpCost?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    cmpCost?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    fabCost?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    fabCons?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    width?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    vendorFabricRate?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    valueAddAccCostType?: NullableStringFieldUpdateOperationsInput | string | null
+    valueAddCost?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    valueAddProcessCost?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    bodyArticle?: NullableStringFieldUpdateOperationsInput | string | null
+    bodyArticleDescription?: NullableStringFieldUpdateOperationsInput | string | null
+    fabricArticleNumber?: NullableStringFieldUpdateOperationsInput | string | null
+    fabricArticleDescription?: NullableStringFieldUpdateOperationsInput | string | null
+    attrArticleNums?: NullableStringFieldUpdateOperationsInput | string | null
+    mvgrBrandVendor?: NullableStringFieldUpdateOperationsInput | string | null
+    mcDescription?: NullableStringFieldUpdateOperationsInput | string | null
+    vendorCode?: NullableStringFieldUpdateOperationsInput | string | null
+    mrp?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    impAtrbt2?: NullableStringFieldUpdateOperationsInput | string | null
+    mcCode?: NullableStringFieldUpdateOperationsInput | string | null
+    segment?: NullableStringFieldUpdateOperationsInput | string | null
+    season?: NullableStringFieldUpdateOperationsInput | string | null
+    hsnTaxCode?: NullableStringFieldUpdateOperationsInput | string | null
+    articleDescription?: NullableStringFieldUpdateOperationsInput | string | null
+    fashionGrid?: NullableStringFieldUpdateOperationsInput | string | null
+    year?: NullableStringFieldUpdateOperationsInput | string | null
+    articleType?: NullableStringFieldUpdateOperationsInput | string | null
+    presentationsType?: NullableStringFieldUpdateOperationsInput | string | null
+    approvalStatus?: EnumApprovalStatusFieldUpdateOperationsInput | $Enums.ApprovalStatus
+    pdStatus?: EnumPdStatusFieldUpdateOperationsInput | $Enums.PdStatus
+    approvedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    source?: NullableStringFieldUpdateOperationsInput | string | null
+    imageUncPath?: NullableStringFieldUpdateOperationsInput | string | null
+    isOldArticle?: BoolFieldUpdateOperationsInput | boolean
+    isGeneric?: BoolFieldUpdateOperationsInput | boolean
+    genericArticleId?: NullableStringFieldUpdateOperationsInput | string | null
+    variantSize?: NullableStringFieldUpdateOperationsInput | string | null
+    variantColor?: NullableStringFieldUpdateOperationsInput | string | null
+    variantWeight?: NullableStringFieldUpdateOperationsInput | string | null
+    comboRole?: EnumComboRoleFieldUpdateOperationsInput | $Enums.ComboRole
+    comboChildOrder?: NullableIntFieldUpdateOperationsInput | number | null
+    setGroupId?: NullableStringFieldUpdateOperationsInput | string | null
+    setRole?: NullableStringFieldUpdateOperationsInput | string | null
+    setName?: NullableStringFieldUpdateOperationsInput | string | null
+    sapSyncStatus?: EnumSapSyncStatusFieldUpdateOperationsInput | $Enums.SapSyncStatus
+    sapArticleId?: NullableStringFieldUpdateOperationsInput | string | null
+    sapSyncMessage?: NullableStringFieldUpdateOperationsInput | string | null
+    srmOriginalDesignNumber?: NullableStringFieldUpdateOperationsInput | string | null
+    srmUniqueId?: NullableStringFieldUpdateOperationsInput | string | null
+    imageExtractionRawData?: NullableJsonNullValueInput | InputJsonValue
+    approver?: UserUpdateOneWithoutApprovedItemsNestedInput
+    comboChildren?: ExtractionResultFlatUpdateManyWithoutComboParentNestedInput
+    job?: ExtractionJobUpdateOneWithoutFlatResultNestedInput
+    srmSyncRunItems?: SrmSyncRunItemUpdateManyWithoutFlatNestedInput
+  }
+
+  export type ExtractionResultFlatUncheckedUpdateWithoutComboParentInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    jobId?: NullableStringFieldUpdateOperationsInput | string | null
+    imageName?: NullableStringFieldUpdateOperationsInput | string | null
+    imageUrl?: NullableStringFieldUpdateOperationsInput | string | null
+    articleNumber?: NullableStringFieldUpdateOperationsInput | string | null
+    extractionStatus?: NullableStringFieldUpdateOperationsInput | string | null
+    aiModel?: NullableStringFieldUpdateOperationsInput | string | null
+    avgConfidence?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    processingTimeMs?: NullableIntFieldUpdateOperationsInput | number | null
+    totalAttributes?: NullableIntFieldUpdateOperationsInput | number | null
+    extractedCount?: NullableIntFieldUpdateOperationsInput | number | null
+    inputTokens?: NullableIntFieldUpdateOperationsInput | number | null
+    outputTokens?: NullableIntFieldUpdateOperationsInput | number | null
+    totalTokens?: NullableIntFieldUpdateOperationsInput | number | null
+    apiCost?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    userId?: NullableIntFieldUpdateOperationsInput | number | null
+    userName?: NullableStringFieldUpdateOperationsInput | string | null
+    extractionDate?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    majorCategory?: NullableStringFieldUpdateOperationsInput | string | null
+    vendorName?: NullableStringFieldUpdateOperationsInput | string | null
+    designNumber?: NullableStringFieldUpdateOperationsInput | string | null
+    pptNumber?: NullableStringFieldUpdateOperationsInput | string | null
+    rate?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    size?: NullableStringFieldUpdateOperationsInput | string | null
+    yarn1?: NullableStringFieldUpdateOperationsInput | string | null
+    yarn2?: NullableStringFieldUpdateOperationsInput | string | null
+    fabricMainMvgr?: NullableStringFieldUpdateOperationsInput | string | null
+    weave?: NullableStringFieldUpdateOperationsInput | string | null
+    weaveFullForm?: NullableStringFieldUpdateOperationsInput | string | null
+    composition?: NullableStringFieldUpdateOperationsInput | string | null
+    finish?: NullableStringFieldUpdateOperationsInput | string | null
+    gsm?: NullableStringFieldUpdateOperationsInput | string | null
+    macroMvgr?: NullableStringFieldUpdateOperationsInput | string | null
+    macroMvgrFullForm?: NullableStringFieldUpdateOperationsInput | string | null
+    mainMvgr?: NullableStringFieldUpdateOperationsInput | string | null
+    mainMvgrFullForm?: NullableStringFieldUpdateOperationsInput | string | null
+    mFab2?: NullableStringFieldUpdateOperationsInput | string | null
+    mFab2FullForm?: NullableStringFieldUpdateOperationsInput | string | null
+    shade?: NullableStringFieldUpdateOperationsInput | string | null
+    weight?: NullableStringFieldUpdateOperationsInput | string | null
+    lycra?: NullableStringFieldUpdateOperationsInput | string | null
+    neck?: NullableStringFieldUpdateOperationsInput | string | null
+    neckDetails?: NullableStringFieldUpdateOperationsInput | string | null
+    collar?: NullableStringFieldUpdateOperationsInput | string | null
+    placket?: NullableStringFieldUpdateOperationsInput | string | null
+    sleeve?: NullableStringFieldUpdateOperationsInput | string | null
+    bottomFold?: NullableStringFieldUpdateOperationsInput | string | null
+    frontOpenStyle?: NullableStringFieldUpdateOperationsInput | string | null
+    pocketType?: NullableStringFieldUpdateOperationsInput | string | null
+    fit?: NullableStringFieldUpdateOperationsInput | string | null
+    pattern?: NullableStringFieldUpdateOperationsInput | string | null
+    length?: NullableStringFieldUpdateOperationsInput | string | null
+    colour?: NullableStringFieldUpdateOperationsInput | string | null
+    secondaryColour?: NullableStringFieldUpdateOperationsInput | string | null
+    drawcord?: NullableStringFieldUpdateOperationsInput | string | null
+    button?: NullableStringFieldUpdateOperationsInput | string | null
+    zipper?: NullableStringFieldUpdateOperationsInput | string | null
+    zipColour?: NullableStringFieldUpdateOperationsInput | string | null
+    printType?: NullableStringFieldUpdateOperationsInput | string | null
+    printStyle?: NullableStringFieldUpdateOperationsInput | string | null
+    printPlacement?: NullableStringFieldUpdateOperationsInput | string | null
+    patches?: NullableStringFieldUpdateOperationsInput | string | null
+    patchesType?: NullableStringFieldUpdateOperationsInput | string | null
+    embroidery?: NullableStringFieldUpdateOperationsInput | string | null
+    embroideryType?: NullableStringFieldUpdateOperationsInput | string | null
+    wash?: NullableStringFieldUpdateOperationsInput | string | null
+    fatherBelt?: NullableStringFieldUpdateOperationsInput | string | null
+    childBelt?: NullableStringFieldUpdateOperationsInput | string | null
+    division?: NullableStringFieldUpdateOperationsInput | string | null
+    subDivision?: NullableStringFieldUpdateOperationsInput | string | null
+    referenceArticleNumber?: NullableStringFieldUpdateOperationsInput | string | null
+    referenceArticleDescription?: NullableStringFieldUpdateOperationsInput | string | null
+    collarStyle?: NullableStringFieldUpdateOperationsInput | string | null
+    sleeveFold?: NullableStringFieldUpdateOperationsInput | string | null
+    mSet?: NullableStringFieldUpdateOperationsInput | string | null
+    noOfPocket?: NullableStringFieldUpdateOperationsInput | string | null
+    extraPocket?: NullableStringFieldUpdateOperationsInput | string | null
+    dcShape?: NullableStringFieldUpdateOperationsInput | string | null
+    btnColour?: NullableStringFieldUpdateOperationsInput | string | null
+    fCount?: NullableStringFieldUpdateOperationsInput | string | null
+    fConstruction?: NullableStringFieldUpdateOperationsInput | string | null
+    fOunce?: NullableStringFieldUpdateOperationsInput | string | null
+    fWidth?: NullableStringFieldUpdateOperationsInput | string | null
+    fabDiv?: NullableStringFieldUpdateOperationsInput | string | null
+    fabVdr?: NullableStringFieldUpdateOperationsInput | string | null
+    htrfType?: NullableStringFieldUpdateOperationsInput | string | null
+    htrfStyle?: NullableStringFieldUpdateOperationsInput | string | null
+    embPlacement?: NullableStringFieldUpdateOperationsInput | string | null
+    ageGroup?: NullableStringFieldUpdateOperationsInput | string | null
+    mNoOfSize?: NullableStringFieldUpdateOperationsInput | string | null
+    mNoOfClr?: NullableStringFieldUpdateOperationsInput | string | null
+    articleFashionType?: NullableStringFieldUpdateOperationsInput | string | null
+    articleDimension?: NullableStringFieldUpdateOperationsInput | string | null
+    cmtpCost?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    cmpCost?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    fabCost?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    fabCons?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    width?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    vendorFabricRate?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    valueAddAccCostType?: NullableStringFieldUpdateOperationsInput | string | null
+    valueAddCost?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    valueAddProcessCost?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    bodyArticle?: NullableStringFieldUpdateOperationsInput | string | null
+    bodyArticleDescription?: NullableStringFieldUpdateOperationsInput | string | null
+    fabricArticleNumber?: NullableStringFieldUpdateOperationsInput | string | null
+    fabricArticleDescription?: NullableStringFieldUpdateOperationsInput | string | null
+    attrArticleNums?: NullableStringFieldUpdateOperationsInput | string | null
+    mvgrBrandVendor?: NullableStringFieldUpdateOperationsInput | string | null
+    mcDescription?: NullableStringFieldUpdateOperationsInput | string | null
+    vendorCode?: NullableStringFieldUpdateOperationsInput | string | null
+    mrp?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    impAtrbt2?: NullableStringFieldUpdateOperationsInput | string | null
+    mcCode?: NullableStringFieldUpdateOperationsInput | string | null
+    segment?: NullableStringFieldUpdateOperationsInput | string | null
+    season?: NullableStringFieldUpdateOperationsInput | string | null
+    hsnTaxCode?: NullableStringFieldUpdateOperationsInput | string | null
+    articleDescription?: NullableStringFieldUpdateOperationsInput | string | null
+    fashionGrid?: NullableStringFieldUpdateOperationsInput | string | null
+    year?: NullableStringFieldUpdateOperationsInput | string | null
+    articleType?: NullableStringFieldUpdateOperationsInput | string | null
+    presentationsType?: NullableStringFieldUpdateOperationsInput | string | null
+    approvalStatus?: EnumApprovalStatusFieldUpdateOperationsInput | $Enums.ApprovalStatus
+    pdStatus?: EnumPdStatusFieldUpdateOperationsInput | $Enums.PdStatus
+    approvedBy?: NullableIntFieldUpdateOperationsInput | number | null
+    approvedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    source?: NullableStringFieldUpdateOperationsInput | string | null
+    imageUncPath?: NullableStringFieldUpdateOperationsInput | string | null
+    isOldArticle?: BoolFieldUpdateOperationsInput | boolean
+    isGeneric?: BoolFieldUpdateOperationsInput | boolean
+    genericArticleId?: NullableStringFieldUpdateOperationsInput | string | null
+    variantSize?: NullableStringFieldUpdateOperationsInput | string | null
+    variantColor?: NullableStringFieldUpdateOperationsInput | string | null
+    variantWeight?: NullableStringFieldUpdateOperationsInput | string | null
+    comboRole?: EnumComboRoleFieldUpdateOperationsInput | $Enums.ComboRole
+    comboChildOrder?: NullableIntFieldUpdateOperationsInput | number | null
+    setGroupId?: NullableStringFieldUpdateOperationsInput | string | null
+    setRole?: NullableStringFieldUpdateOperationsInput | string | null
+    setName?: NullableStringFieldUpdateOperationsInput | string | null
+    sapSyncStatus?: EnumSapSyncStatusFieldUpdateOperationsInput | $Enums.SapSyncStatus
+    sapArticleId?: NullableStringFieldUpdateOperationsInput | string | null
+    sapSyncMessage?: NullableStringFieldUpdateOperationsInput | string | null
+    srmOriginalDesignNumber?: NullableStringFieldUpdateOperationsInput | string | null
+    srmUniqueId?: NullableStringFieldUpdateOperationsInput | string | null
+    imageExtractionRawData?: NullableJsonNullValueInput | InputJsonValue
+    comboChildren?: ExtractionResultFlatUncheckedUpdateManyWithoutComboParentNestedInput
+    srmSyncRunItems?: SrmSyncRunItemUncheckedUpdateManyWithoutFlatNestedInput
+  }
+
+  export type ExtractionResultFlatUncheckedUpdateManyWithoutComboParentInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    jobId?: NullableStringFieldUpdateOperationsInput | string | null
+    imageName?: NullableStringFieldUpdateOperationsInput | string | null
+    imageUrl?: NullableStringFieldUpdateOperationsInput | string | null
+    articleNumber?: NullableStringFieldUpdateOperationsInput | string | null
+    extractionStatus?: NullableStringFieldUpdateOperationsInput | string | null
+    aiModel?: NullableStringFieldUpdateOperationsInput | string | null
+    avgConfidence?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    processingTimeMs?: NullableIntFieldUpdateOperationsInput | number | null
+    totalAttributes?: NullableIntFieldUpdateOperationsInput | number | null
+    extractedCount?: NullableIntFieldUpdateOperationsInput | number | null
+    inputTokens?: NullableIntFieldUpdateOperationsInput | number | null
+    outputTokens?: NullableIntFieldUpdateOperationsInput | number | null
+    totalTokens?: NullableIntFieldUpdateOperationsInput | number | null
+    apiCost?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    userId?: NullableIntFieldUpdateOperationsInput | number | null
+    userName?: NullableStringFieldUpdateOperationsInput | string | null
+    extractionDate?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    majorCategory?: NullableStringFieldUpdateOperationsInput | string | null
+    vendorName?: NullableStringFieldUpdateOperationsInput | string | null
+    designNumber?: NullableStringFieldUpdateOperationsInput | string | null
+    pptNumber?: NullableStringFieldUpdateOperationsInput | string | null
+    rate?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    size?: NullableStringFieldUpdateOperationsInput | string | null
+    yarn1?: NullableStringFieldUpdateOperationsInput | string | null
+    yarn2?: NullableStringFieldUpdateOperationsInput | string | null
+    fabricMainMvgr?: NullableStringFieldUpdateOperationsInput | string | null
+    weave?: NullableStringFieldUpdateOperationsInput | string | null
+    weaveFullForm?: NullableStringFieldUpdateOperationsInput | string | null
+    composition?: NullableStringFieldUpdateOperationsInput | string | null
+    finish?: NullableStringFieldUpdateOperationsInput | string | null
+    gsm?: NullableStringFieldUpdateOperationsInput | string | null
+    macroMvgr?: NullableStringFieldUpdateOperationsInput | string | null
+    macroMvgrFullForm?: NullableStringFieldUpdateOperationsInput | string | null
+    mainMvgr?: NullableStringFieldUpdateOperationsInput | string | null
+    mainMvgrFullForm?: NullableStringFieldUpdateOperationsInput | string | null
+    mFab2?: NullableStringFieldUpdateOperationsInput | string | null
+    mFab2FullForm?: NullableStringFieldUpdateOperationsInput | string | null
+    shade?: NullableStringFieldUpdateOperationsInput | string | null
+    weight?: NullableStringFieldUpdateOperationsInput | string | null
+    lycra?: NullableStringFieldUpdateOperationsInput | string | null
+    neck?: NullableStringFieldUpdateOperationsInput | string | null
+    neckDetails?: NullableStringFieldUpdateOperationsInput | string | null
+    collar?: NullableStringFieldUpdateOperationsInput | string | null
+    placket?: NullableStringFieldUpdateOperationsInput | string | null
+    sleeve?: NullableStringFieldUpdateOperationsInput | string | null
+    bottomFold?: NullableStringFieldUpdateOperationsInput | string | null
+    frontOpenStyle?: NullableStringFieldUpdateOperationsInput | string | null
+    pocketType?: NullableStringFieldUpdateOperationsInput | string | null
+    fit?: NullableStringFieldUpdateOperationsInput | string | null
+    pattern?: NullableStringFieldUpdateOperationsInput | string | null
+    length?: NullableStringFieldUpdateOperationsInput | string | null
+    colour?: NullableStringFieldUpdateOperationsInput | string | null
+    secondaryColour?: NullableStringFieldUpdateOperationsInput | string | null
+    drawcord?: NullableStringFieldUpdateOperationsInput | string | null
+    button?: NullableStringFieldUpdateOperationsInput | string | null
+    zipper?: NullableStringFieldUpdateOperationsInput | string | null
+    zipColour?: NullableStringFieldUpdateOperationsInput | string | null
+    printType?: NullableStringFieldUpdateOperationsInput | string | null
+    printStyle?: NullableStringFieldUpdateOperationsInput | string | null
+    printPlacement?: NullableStringFieldUpdateOperationsInput | string | null
+    patches?: NullableStringFieldUpdateOperationsInput | string | null
+    patchesType?: NullableStringFieldUpdateOperationsInput | string | null
+    embroidery?: NullableStringFieldUpdateOperationsInput | string | null
+    embroideryType?: NullableStringFieldUpdateOperationsInput | string | null
+    wash?: NullableStringFieldUpdateOperationsInput | string | null
+    fatherBelt?: NullableStringFieldUpdateOperationsInput | string | null
+    childBelt?: NullableStringFieldUpdateOperationsInput | string | null
+    division?: NullableStringFieldUpdateOperationsInput | string | null
+    subDivision?: NullableStringFieldUpdateOperationsInput | string | null
+    referenceArticleNumber?: NullableStringFieldUpdateOperationsInput | string | null
+    referenceArticleDescription?: NullableStringFieldUpdateOperationsInput | string | null
+    collarStyle?: NullableStringFieldUpdateOperationsInput | string | null
+    sleeveFold?: NullableStringFieldUpdateOperationsInput | string | null
+    mSet?: NullableStringFieldUpdateOperationsInput | string | null
+    noOfPocket?: NullableStringFieldUpdateOperationsInput | string | null
+    extraPocket?: NullableStringFieldUpdateOperationsInput | string | null
+    dcShape?: NullableStringFieldUpdateOperationsInput | string | null
+    btnColour?: NullableStringFieldUpdateOperationsInput | string | null
+    fCount?: NullableStringFieldUpdateOperationsInput | string | null
+    fConstruction?: NullableStringFieldUpdateOperationsInput | string | null
+    fOunce?: NullableStringFieldUpdateOperationsInput | string | null
+    fWidth?: NullableStringFieldUpdateOperationsInput | string | null
+    fabDiv?: NullableStringFieldUpdateOperationsInput | string | null
+    fabVdr?: NullableStringFieldUpdateOperationsInput | string | null
+    htrfType?: NullableStringFieldUpdateOperationsInput | string | null
+    htrfStyle?: NullableStringFieldUpdateOperationsInput | string | null
+    embPlacement?: NullableStringFieldUpdateOperationsInput | string | null
+    ageGroup?: NullableStringFieldUpdateOperationsInput | string | null
+    mNoOfSize?: NullableStringFieldUpdateOperationsInput | string | null
+    mNoOfClr?: NullableStringFieldUpdateOperationsInput | string | null
+    articleFashionType?: NullableStringFieldUpdateOperationsInput | string | null
+    articleDimension?: NullableStringFieldUpdateOperationsInput | string | null
+    cmtpCost?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    cmpCost?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    fabCost?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    fabCons?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    width?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    vendorFabricRate?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    valueAddAccCostType?: NullableStringFieldUpdateOperationsInput | string | null
+    valueAddCost?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    valueAddProcessCost?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    bodyArticle?: NullableStringFieldUpdateOperationsInput | string | null
+    bodyArticleDescription?: NullableStringFieldUpdateOperationsInput | string | null
+    fabricArticleNumber?: NullableStringFieldUpdateOperationsInput | string | null
+    fabricArticleDescription?: NullableStringFieldUpdateOperationsInput | string | null
+    attrArticleNums?: NullableStringFieldUpdateOperationsInput | string | null
+    mvgrBrandVendor?: NullableStringFieldUpdateOperationsInput | string | null
+    mcDescription?: NullableStringFieldUpdateOperationsInput | string | null
+    vendorCode?: NullableStringFieldUpdateOperationsInput | string | null
+    mrp?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    impAtrbt2?: NullableStringFieldUpdateOperationsInput | string | null
+    mcCode?: NullableStringFieldUpdateOperationsInput | string | null
+    segment?: NullableStringFieldUpdateOperationsInput | string | null
+    season?: NullableStringFieldUpdateOperationsInput | string | null
+    hsnTaxCode?: NullableStringFieldUpdateOperationsInput | string | null
+    articleDescription?: NullableStringFieldUpdateOperationsInput | string | null
+    fashionGrid?: NullableStringFieldUpdateOperationsInput | string | null
+    year?: NullableStringFieldUpdateOperationsInput | string | null
+    articleType?: NullableStringFieldUpdateOperationsInput | string | null
+    presentationsType?: NullableStringFieldUpdateOperationsInput | string | null
+    approvalStatus?: EnumApprovalStatusFieldUpdateOperationsInput | $Enums.ApprovalStatus
+    pdStatus?: EnumPdStatusFieldUpdateOperationsInput | $Enums.PdStatus
+    approvedBy?: NullableIntFieldUpdateOperationsInput | number | null
+    approvedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    source?: NullableStringFieldUpdateOperationsInput | string | null
+    imageUncPath?: NullableStringFieldUpdateOperationsInput | string | null
+    isOldArticle?: BoolFieldUpdateOperationsInput | boolean
+    isGeneric?: BoolFieldUpdateOperationsInput | boolean
+    genericArticleId?: NullableStringFieldUpdateOperationsInput | string | null
+    variantSize?: NullableStringFieldUpdateOperationsInput | string | null
+    variantColor?: NullableStringFieldUpdateOperationsInput | string | null
+    variantWeight?: NullableStringFieldUpdateOperationsInput | string | null
+    comboRole?: EnumComboRoleFieldUpdateOperationsInput | $Enums.ComboRole
+    comboChildOrder?: NullableIntFieldUpdateOperationsInput | number | null
+    setGroupId?: NullableStringFieldUpdateOperationsInput | string | null
+    setRole?: NullableStringFieldUpdateOperationsInput | string | null
+    setName?: NullableStringFieldUpdateOperationsInput | string | null
+    sapSyncStatus?: EnumSapSyncStatusFieldUpdateOperationsInput | $Enums.SapSyncStatus
+    sapArticleId?: NullableStringFieldUpdateOperationsInput | string | null
+    sapSyncMessage?: NullableStringFieldUpdateOperationsInput | string | null
+    srmOriginalDesignNumber?: NullableStringFieldUpdateOperationsInput | string | null
+    srmUniqueId?: NullableStringFieldUpdateOperationsInput | string | null
+    imageExtractionRawData?: NullableJsonNullValueInput | InputJsonValue
   }
 
   export type SrmSyncRunItemUpdateWithoutFlatInput = {
@@ -113454,6 +115548,12 @@ export namespace Prisma {
     variantSize?: string | null
     variantColor?: string | null
     variantWeight?: string | null
+    comboRole?: $Enums.ComboRole
+    comboParentId?: string | null
+    comboChildOrder?: number | null
+    setGroupId?: string | null
+    setRole?: string | null
+    setName?: string | null
     sapSyncStatus?: $Enums.SapSyncStatus
     sapArticleId?: string | null
     sapSyncMessage?: string | null
@@ -113758,12 +115858,19 @@ export namespace Prisma {
     variantSize?: NullableStringFieldUpdateOperationsInput | string | null
     variantColor?: NullableStringFieldUpdateOperationsInput | string | null
     variantWeight?: NullableStringFieldUpdateOperationsInput | string | null
+    comboRole?: EnumComboRoleFieldUpdateOperationsInput | $Enums.ComboRole
+    comboChildOrder?: NullableIntFieldUpdateOperationsInput | number | null
+    setGroupId?: NullableStringFieldUpdateOperationsInput | string | null
+    setRole?: NullableStringFieldUpdateOperationsInput | string | null
+    setName?: NullableStringFieldUpdateOperationsInput | string | null
     sapSyncStatus?: EnumSapSyncStatusFieldUpdateOperationsInput | $Enums.SapSyncStatus
     sapArticleId?: NullableStringFieldUpdateOperationsInput | string | null
     sapSyncMessage?: NullableStringFieldUpdateOperationsInput | string | null
     srmOriginalDesignNumber?: NullableStringFieldUpdateOperationsInput | string | null
     srmUniqueId?: NullableStringFieldUpdateOperationsInput | string | null
     imageExtractionRawData?: NullableJsonNullValueInput | InputJsonValue
+    comboParent?: ExtractionResultFlatUpdateOneWithoutComboChildrenNestedInput
+    comboChildren?: ExtractionResultFlatUpdateManyWithoutComboParentNestedInput
     job?: ExtractionJobUpdateOneWithoutFlatResultNestedInput
     srmSyncRunItems?: SrmSyncRunItemUpdateManyWithoutFlatNestedInput
   }
@@ -113903,12 +116010,19 @@ export namespace Prisma {
     variantSize?: NullableStringFieldUpdateOperationsInput | string | null
     variantColor?: NullableStringFieldUpdateOperationsInput | string | null
     variantWeight?: NullableStringFieldUpdateOperationsInput | string | null
+    comboRole?: EnumComboRoleFieldUpdateOperationsInput | $Enums.ComboRole
+    comboParentId?: NullableStringFieldUpdateOperationsInput | string | null
+    comboChildOrder?: NullableIntFieldUpdateOperationsInput | number | null
+    setGroupId?: NullableStringFieldUpdateOperationsInput | string | null
+    setRole?: NullableStringFieldUpdateOperationsInput | string | null
+    setName?: NullableStringFieldUpdateOperationsInput | string | null
     sapSyncStatus?: EnumSapSyncStatusFieldUpdateOperationsInput | $Enums.SapSyncStatus
     sapArticleId?: NullableStringFieldUpdateOperationsInput | string | null
     sapSyncMessage?: NullableStringFieldUpdateOperationsInput | string | null
     srmOriginalDesignNumber?: NullableStringFieldUpdateOperationsInput | string | null
     srmUniqueId?: NullableStringFieldUpdateOperationsInput | string | null
     imageExtractionRawData?: NullableJsonNullValueInput | InputJsonValue
+    comboChildren?: ExtractionResultFlatUncheckedUpdateManyWithoutComboParentNestedInput
     srmSyncRunItems?: SrmSyncRunItemUncheckedUpdateManyWithoutFlatNestedInput
   }
 
@@ -114047,6 +116161,12 @@ export namespace Prisma {
     variantSize?: NullableStringFieldUpdateOperationsInput | string | null
     variantColor?: NullableStringFieldUpdateOperationsInput | string | null
     variantWeight?: NullableStringFieldUpdateOperationsInput | string | null
+    comboRole?: EnumComboRoleFieldUpdateOperationsInput | $Enums.ComboRole
+    comboParentId?: NullableStringFieldUpdateOperationsInput | string | null
+    comboChildOrder?: NullableIntFieldUpdateOperationsInput | number | null
+    setGroupId?: NullableStringFieldUpdateOperationsInput | string | null
+    setRole?: NullableStringFieldUpdateOperationsInput | string | null
+    setName?: NullableStringFieldUpdateOperationsInput | string | null
     sapSyncStatus?: EnumSapSyncStatusFieldUpdateOperationsInput | $Enums.SapSyncStatus
     sapArticleId?: NullableStringFieldUpdateOperationsInput | string | null
     sapSyncMessage?: NullableStringFieldUpdateOperationsInput | string | null

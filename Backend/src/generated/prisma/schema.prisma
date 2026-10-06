@@ -375,6 +375,21 @@ model ExtractionResultFlat {
   variantColor     String? @map("variant_color") @db.VarChar(100)
   variantWeight    String? @map("variant_weight") @db.VarChar(50)
 
+  // Combo/Set articles (e.g. Kurti Set, Baba Suit) — a parent article
+  // assembled from multiple child pieces. Pieces are created in SAP first,
+  // then the parent; only the parent gets colour x size variants.
+  comboRole       ComboRole              @default(NONE) @map("combo_role")
+  comboParentId   String?                @map("combo_parent_id")
+  comboParent     ExtractionResultFlat?  @relation("ComboChildren", fields: [comboParentId], references: [id], onDelete: Cascade)
+  comboChildren   ExtractionResultFlat[] @relation("ComboChildren")
+  comboChildOrder Int?                   @map("combo_child_order")
+
+  // SRM set article: every photo of one set shares set_group_id. set_role is
+  // PARENT (the set's own photo), TOP (primary piece) or PIECE. Set by SRM.
+  setGroupId String? @map("set_group_id") @db.VarChar(64)
+  setRole    String? @map("set_role") @db.VarChar(20)
+  setName    String? @map("set_name") @db.VarChar(200)
+
   // SAP Sync (Placeholder)
   sapSyncStatus  SapSyncStatus @default(NOT_SYNCED) @map("sap_sync_status")
   sapArticleId   String?       @map("sap_article_id") @db.VarChar(100)
@@ -413,6 +428,8 @@ model ExtractionResultFlat {
   @@index([isGeneric, approvalStatus, division])
   @@index([isOldArticle, approvalStatus])
   @@index([approvalStatus, pdStatus], map: "idx_erf_approval_pd")
+  @@index([comboParentId])
+  @@index([comboRole])
   @@map("extraction_results_flat")
   @@schema("public")
 }
@@ -713,6 +730,15 @@ enum SapSyncStatus {
   FAILED
 
   @@map("sap_sync_status")
+  @@schema("public")
+}
+
+enum ComboRole {
+  NONE
+  PARENT
+  CHILD
+
+  @@map("combo_role")
   @@schema("public")
 }
 
@@ -1062,6 +1088,11 @@ model RawArticle {
   price                    Decimal?  @db.Decimal(10, 2)
   imageUrl                 String?   @map("image_url")
   presentationsType        String?   @map("Presentations_type") @db.VarChar(200)
+
+  // SRM set article (see ExtractionResultFlat.setGroupId). NULL = normal article.
+  setGroupId String? @map("set_group_id") @db.VarChar(64)
+  setRole    String? @map("set_role") @db.VarChar(20)
+  setName    String? @map("set_name") @db.VarChar(200)
 
   // Dedup key: presentation_no::design_number::image_url (set on insert, never changed)
   uniqueKey String @unique @map("unique_key")
