@@ -198,7 +198,9 @@ export default function ApproverDashboard({ pathType }: ApproverDashboardProps =
     const token = localStorage.getItem('authToken');
     fetch(`${APP_CONFIG.api.baseURL}/approver/gm-hierarchy`, {
       headers: { Authorization: `Bearer ${token}` },
-    }).then(r => r.json()).then(setFabHierarchy).catch(() => {});
+    }).then(r => r.json()).then(data => {
+      if (data && typeof data.subDivsByDiv === 'object') setFabHierarchy(data);
+    }).catch(() => {});
   }, []);
 
 

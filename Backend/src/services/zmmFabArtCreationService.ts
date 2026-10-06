@@ -343,7 +343,6 @@ export async function submitFabricArticles(ids: string[]): Promise<{
                             where: { id: row.id },
                             data: { imageUrl: r2Url },
                         });
-                        console.log(`[ZMM_FAB_RFC] ✅ Image uploaded to R2: ${key}`);
                     } else {
                         console.warn(`[ZMM_FAB_RFC] Image fetch failed (${imgRes.status}) for row ${row.id} — skipping R2 upload`);
                     }
