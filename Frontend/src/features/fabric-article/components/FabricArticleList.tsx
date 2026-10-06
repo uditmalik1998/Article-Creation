@@ -289,7 +289,7 @@ const FAB_PRIORITY_KEYS = [
 
 // ─── Redesign tokens — header/icon palette per group ──────────────────────────
 const GROUP_LABELS: Record<string, string> = {
-  FAB: 'Construction & Fabric',
+  FAB: 'FABRIC AND CONSTRUCTION',
 };
 
 const GROUP_ICONS: Record<string, React.ReactNode> = {

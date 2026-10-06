@@ -422,8 +422,8 @@ const BODY_PRIORITY_KEYS = [
 
 // ─── Redesign tokens — header/icon palette per group ──────────────────────────
 const GROUP_LABELS: Record<string, string> = {
-  FAB: 'Construction & Fabric',
-  BODY: 'Body & Construction',
+  FAB: 'FABRIC AND CONSTRUCTION',
+  BODY: 'BODY AND CONSTRUCTION',
   'VA ACC.': 'Trims & Accessories',
   'VA PRCS': 'Value Addition',
   BUSINESS: 'Business & Misc',
@@ -651,6 +651,20 @@ const ArticleCard = React.memo(
     // Search term for the attribute-value dropdown. A single shared term is
     // enough because only one attribute (editingField) is open at a time.
     const [attrSearch, setAttrSearch] = useState('');
+
+    // ── Group-tab visibility filter (FG articles only) ──────────────────────
+    // Keys: FAB | BODY | VA ACC. | VA PRCS | BUSINESS | BOM
+    const [selectedGroupKeys, setSelectedGroupKeys] = useState<Set<string>>(
+      () => new Set(['FAB']),
+    );
+    const toggleGroupTab = (key: string) => {
+      setSelectedGroupKeys((prev) => {
+        if (prev.has(key) && prev.size === 1) return prev; // keep at least 1
+        const next = new Set(prev);
+        if (next.has(key)) { next.delete(key); } else { next.add(key); }
+        return next;
+      });
+    };
 
     // ── Major categories from DB (major_category_details table) ─────────────
     const [dbMajorCategories, setDbMajorCategories] = useState<string[]>([]);
@@ -1594,6 +1608,11 @@ const ArticleCard = React.memo(
     const activeGroups = ATTRIBUTE_GROUPS.filter(
       (g) => groupMap[g.group] && (!allowGroups || allowGroups.includes(g.group)),
     );
+    // For FG articles: further filter by selected group tabs
+    const visibleGroups = allowGroups
+      ? activeGroups
+      : activeGroups.filter((g) => selectedGroupKeys.has(g.group));
+    const showBomCard = allowGroups ? true : selectedGroupKeys.has('BOM');
 
     const rateVal = String(getValue('rate') ?? '').trim();
     const mrpVal = String(getValue('mrp') ?? '').trim();
@@ -2451,9 +2470,51 @@ const ArticleCard = React.memo(
                 </Button>
               </div>
 
+              {/* ── Group filter tabs (FG articles only) ── */}
+              {!allowGroups && (() => {
+                const TAB_DEFS = [
+                  { key: 'FAB',      label: 'FABRIC AND CONSTRUCTION', style: GROUP_HEADER_STYLE['FAB'] },
+                  { key: 'BODY',     label: 'BODY AND CONSTRUCTION',   style: GROUP_HEADER_STYLE['BODY'] },
+                  { key: 'VA ACC.',  label: 'TRIMS & ACCESSORIES',     style: GROUP_HEADER_STYLE['VA ACC.'] },
+                  { key: 'VA PRCS',  label: 'VALUE ADDITION',          style: GROUP_HEADER_STYLE['VA PRCS'] },
+                  { key: 'BUSINESS', label: 'BUSINESS & MISC',         style: GROUP_HEADER_STYLE['BUSINESS'] },
+                  { key: 'BOM',      label: 'BOM',                     style: { bg: '#fffbeb', fg: '#92400e', border: '#fde68a' } },
+                ];
+                return (
+                  <div className="mb-2 flex flex-wrap gap-1.5">
+                    {TAB_DEFS.map(({ key, label, style }) => {
+                      const active = selectedGroupKeys.has(key);
+                      return (
+                        <button
+                          key={key}
+                          type="button"
+                          onClick={() => toggleGroupTab(key)}
+                          className="rounded-full border-2 px-2.5 py-0.5 text-[10px] font-bold uppercase tracking-wider transition-all"
+                          style={active
+                            ? { background: style.bg, color: style.fg, borderColor: style.border }
+                            : { background: 'transparent', color: '#64748b', borderColor: '#cbd5e1' }
+                          }
+                        >
+                          {label}
+                        </button>
+                      );
+                    })}
+                  </div>
+                );
+              })()}
+
               {visibleAttrs.length > 0 ? (
-                <div className={`grid auto-rows-min grid-cols-1 gap-3 ${allowGroups ? '' : 'md:grid-cols-2 xl:grid-cols-3'}`}>
-                  {activeGroups.map((g) => {
+                <div className={`grid auto-rows-min gap-3 ${
+                  allowGroups
+                    ? 'grid-cols-1'
+                    : (() => {
+                        const visibleCount = visibleGroups.length + (showBomCard ? 1 : 0);
+                        if (visibleCount <= 1) return 'grid-cols-1';
+                        if (visibleCount <= 4) return 'grid-cols-2';
+                        return 'grid-cols-3';
+                      })()
+                }`}>
+                  {visibleGroups.map((g) => {
                     const style = GROUP_HEADER_STYLE[g.group] ?? { bg: '#f3f4f6', fg: '#374151', border: '#e5e7eb' };
                     const collapsed = isGroupCollapsed(g.group);
                     return (
@@ -3433,7 +3494,7 @@ const ArticleCard = React.memo(
                   })}
 
                   {/* BOM / Consumption card */}
-                  <div
+                  {showBomCard && <div
                     className="overflow-hidden rounded-lg border bg-white"
                     style={{ borderColor: '#fde68a' }}
                   >
@@ -3693,7 +3754,7 @@ const ArticleCard = React.memo(
                         );
                       })}
                     </div>
-                  </div>
+                  </div>}
 
                   {/* PRECISE CONSUMPTION card — Body Articles only */}
                   {isBodyArticle && (
