@@ -118,6 +118,8 @@ export const AppSidebar: React.FC<AppSidebarProps> = ({ collapsed, onCollapsedCh
 
   // PD_DESIGNER is a single-purpose role — only Model Generation, no other nav.
   const isPdDesigner = role === 'PD_DESIGNER';
+  // GM_APPROVER / GM_CREATOR are single-purpose roles — only GM Article, no other nav.
+  const isGmOnly = role === 'GM_APPROVER' || role === 'GM_CREATOR';
 
   // Expense Data access is per-email, not per-role, so the only way to know
   // whether to show its nav entry is to ask. Admins already reach it through
@@ -125,7 +127,7 @@ export const AppSidebar: React.FC<AppSidebarProps> = ({ collapsed, onCollapsedCh
   const { data: expenseAccess } = useQuery({
     queryKey: ['my-expense-access', undefined],
     queryFn: () => getMyExpenseAccess(),
-    enabled: !isPdDesigner && !isAdmin && !!userData?.id,
+    enabled: !isPdDesigner && !isGmOnly && !isAdmin && !!userData?.id,
     staleTime: 5 * 60_000,
     retry: false,
   });
@@ -134,9 +136,11 @@ export const AppSidebar: React.FC<AppSidebarProps> = ({ collapsed, onCollapsedCh
 
   const items: NavItem[] = isPdDesigner
     ? [{ key: '/model-generation', Icon: Camera, label: 'Model Generation' }]
+    : isGmOnly
+    ? []
     : [{ key: '/dashboard', Icon: Home, label: 'Home' }];
 
-  if (!isPdDesigner) {
+  if (!isPdDesigner && !isGmOnly) {
     if (isAdmin) {
     }
     // Extraction is available to creator-side roles and to APPROVER.
@@ -158,7 +162,7 @@ export const AppSidebar: React.FC<AppSidebarProps> = ({ collapsed, onCollapsedCh
   }
 
   if (
-    !isPdDesigner &&
+    !isPdDesigner && !isGmOnly &&
     (role === 'APPROVER' ||
       role === 'CATEGORY_HEAD' ||
       role === 'SUB_DIVISION_HEAD' ||
@@ -182,7 +186,7 @@ export const AppSidebar: React.FC<AppSidebarProps> = ({ collapsed, onCollapsedCh
   }
 
   if (
-    !isPdDesigner &&
+    !isPdDesigner && !isGmOnly &&
     (role === 'APPROVER' ||
       role === 'CATEGORY_HEAD' ||
       role === 'SUB_DIVISION_HEAD' ||
@@ -208,7 +212,7 @@ export const AppSidebar: React.FC<AppSidebarProps> = ({ collapsed, onCollapsedCh
 
   // Body Article — visible to standard approver roles AND the dedicated BODY_APPROVER role
   if (
-    !isPdDesigner &&
+    !isPdDesigner && !isGmOnly &&
     (role === 'APPROVER' ||
       role === 'CATEGORY_HEAD' ||
       role === 'SUB_DIVISION_HEAD' ||
@@ -229,13 +233,14 @@ export const AppSidebar: React.FC<AppSidebarProps> = ({ collapsed, onCollapsedCh
     });
   }
 
-  // GM Article — visible to standard approver roles AND the dedicated GM_APPROVER role
+  // GM Article — visible to standard approver roles AND GM_APPROVER / GM_CREATOR
   if (
     !isPdDesigner &&
     (role === 'APPROVER' ||
       role === 'CATEGORY_HEAD' ||
       role === 'SUB_DIVISION_HEAD' ||
       role === 'GM_APPROVER' ||
+      role === 'GM_CREATOR' ||
       isAdmin ||
       role === 'CREATOR' ||
       role === 'PO_COMMITTEE' ||

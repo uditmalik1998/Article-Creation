@@ -675,6 +675,9 @@ enum UserRole {
   /// Approver role specific to GM (FG Article) items — can approve/reject
   /// articles fetched via /approver/items with presentationsType=FG Article.
   GM_APPROVER
+  /// Creator role specific to GM articles — can edit attribute values but
+  /// cannot approve or reject. Only GM Article tab is visible.
+  GM_CREATOR
 
   @@map("user_role")
   @@schema("public")

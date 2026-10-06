@@ -415,7 +415,8 @@ export const UserRole: {
   BODY_APPROVER: 'BODY_APPROVER',
   FABRIC_APPROVER: 'FABRIC_APPROVER',
   PLANNING: 'PLANNING',
-  GM_APPROVER: 'GM_APPROVER'
+  GM_APPROVER: 'GM_APPROVER',
+  GM_CREATOR: 'GM_CREATOR'
 };
 
 export type UserRole = (typeof UserRole)[keyof typeof UserRole]

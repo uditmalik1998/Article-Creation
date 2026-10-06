@@ -301,8 +301,6 @@ export class StorageService {
 
             await upload.done();
 
-            console.log(`✅ Uploaded to R2: ${key}`);
-
             // R2 URL Construction
             let url: string;
             if (this.publicUrlBase) {
