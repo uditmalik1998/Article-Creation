@@ -151,7 +151,7 @@ export interface AdminUser {
   id: number;
   email: string;
   name: string;
-  role: 'ADMIN' | 'CREATOR' | 'PO_COMMITTEE' | 'APPROVER' | 'CATEGORY_HEAD' | 'SUB_DIVISION_HEAD' | 'PD_DESIGNER' | 'PD' | 'BODY_APPROVER' | 'FABRIC_APPROVER' | 'PLANNING';
+  role: 'ADMIN' | 'CREATOR' | 'PO_COMMITTEE' | 'APPROVER' | 'CATEGORY_HEAD' | 'SUB_DIVISION_HEAD' | 'PD_DESIGNER' | 'PD' | 'BODY_APPROVER' | 'FABRIC_APPROVER' | 'PLANNING' | 'GM_APPROVER' | 'GM_CREATOR';
   division?: string | null;
   subDivision?: string | null;
   businessDivision?: AdminUserBusinessDivision | null;
