@@ -1,20 +1,16 @@
 import { useEffect, useState, useCallback, useRef } from 'react';
+import { JumpNav, MasterDataCard, MasterGroup, PipelineRow, SectionHeading, SLATE_PRIMARY_BTN } from '../components/DashboardParts';
 import { useNavigate } from 'react-router-dom';
 import dayjs, { type Dayjs } from 'dayjs';
 import {
-  User,
-  CloudUpload,
   CheckCircle2,
-  XCircle,
   RotateCw,
   DollarSign,
   ImageIcon,
   Eye,
   FileText,
   RefreshCw,
-  Info,
   Search,
-  Table as TableIcon,
   Inbox,
   Download,
   ClipboardList,
@@ -37,7 +33,6 @@ import {
   Progress,
   Spinner,
   Statistic,
-  Tag,
   type DataTableColumn,
 } from '@/shared/components/ui-tw';
 import { message } from '@/lib/message';
@@ -204,6 +199,9 @@ interface HierarchyUploadResult {
   preview?: { divisions: string[]; subDivisions: string[]; majorCategories: string[] };
 }
 
+/** Master-data upload cards on this page (Attributes, GM, Fabric & body, Costs, Hierarchy). */
+const MASTER_DATA_COUNT = 18;
+
 interface PipelineStatusData {
   PENDING: number;
   PROCESSING: number;
@@ -232,7 +230,6 @@ const RAW_ARTICLES_MIN_DATE = dayjs('2026-05-27');
 
 export default function Admin() {
   const navigate = useNavigate();
-  const [stats, setStats] = useState({ totalUploads: 0, completed: 0, failed: 0, pending: 0 });
   const [expenseData, setExpenseData] = useState<any>(null);
   const [imageData, setImageData] = useState<any>(null);
   const [detailedExpenses, setDetailedExpenses] = useState<any[]>([]);
@@ -2233,13 +2230,11 @@ export default function Admin() {
   const loadData = async () => {
     setLoading(true);
     try {
-      const [adminStats, expenses, images, detailed] = await Promise.all([
-        api.getAdminStats(),
+      const [expenses, images, detailed] = await Promise.all([
         api.getExpenseAnalytics(),
         api.getImageUsageAnalytics(),
         api.getDetailedExpenses({ limit: 500 }),
       ]);
-      setStats(adminStats);
       setExpenseData(expenses);
       setImageData(images);
       setDetailedExpenses(detailed || []);
@@ -2321,22 +2316,15 @@ export default function Admin() {
       }))
     : [];
 
-  const categoryBreakdownData = imageData?.categoryBreakdown
-    ? Object.entries(imageData.categoryBreakdown).map(([category, count]: [string, any]) => ({ key: category, category, count }))
-    : [];
-
   return (
     <div className="page-scroll-enabled p-3">
-      {/* ─── Gradient Header Strip ─── */}
-      <div
-        className="mb-5 flex items-center justify-between rounded-2xl px-6 py-4 text-white shadow-lg"
-        style={{ background: 'linear-gradient(135deg, #1f2937 0%, #334155 60%, #475569 100%)' }}
-      >
+      {/* ─── Header ─── */}
+      <div className="mb-4 flex flex-wrap items-center justify-between gap-3 rounded-2xl bg-slate-800 px-6 py-4 text-white shadow-lg">
         <div>
           <h1 className="m-0 text-xl font-bold text-white">Admin Dashboard</h1>
-          <p className="m-0 mt-0.5 text-xs text-white/60">System health, sync status &amp; analytics</p>
+          <p className="m-0 mt-0.5 text-xs text-white/70">System health, sync status &amp; master data</p>
         </div>
-        <div className="flex gap-2">
+        <div className="flex flex-wrap gap-2">
           <Button
             onClick={() => navigate('/admin/expense-change-requests')}
             variant="outline"
@@ -2354,7 +2342,7 @@ export default function Admin() {
             <History />
             Audit Log
           </Button>
-          <Button onClick={loadData} disabled={loading} variant="outline" className="border-white/30 bg-white/10 text-white hover:bg-white/20 hover:text-white">
+          <Button onClick={loadData} disabled={loading} className="bg-white font-bold text-slate-800 hover:bg-slate-100">
             <RotateCw className={loading ? 'animate-spin' : ''} />
             Refresh
           </Button>
@@ -2362,125 +2350,121 @@ export default function Admin() {
       </div>
 
       <Spinner spinning={loading}>
-        {/* Main Statistics Row */}
-        <div className="mb-6 grid grid-cols-1 gap-4 sm:grid-cols-2 md:grid-cols-4">
-          <Card className="glass card-3d rounded-2xl border border-white/60">
-            <CardContent className="pt-6">
-              <Statistic
-                title="Total Uploads"
-                value={stats.totalUploads}
-                prefix={<CloudUpload className="h-5 w-5" />}
-                valueStyle={{ color: '#FF6F61' }}
-              />
-            </CardContent>
-          </Card>
-          <Card className="glass card-3d rounded-2xl border border-white/60">
-            <CardContent className="pt-6">
-              <Statistic
-                title="Completed"
-                value={stats.completed}
-                prefix={<CheckCircle2 className="h-5 w-5" />}
-                valueStyle={{ color: '#10b981' }}
-              />
-            </CardContent>
-          </Card>
-          <Card className="glass card-3d rounded-2xl border border-white/60">
-            <CardContent className="pt-6">
-              <Statistic
-                title="Failed"
-                value={stats.failed}
-                prefix={<XCircle className="h-5 w-5" />}
-                valueStyle={{ color: '#e11d48' }}
-              />
-            </CardContent>
-          </Card>
-          <Card className="glass card-3d rounded-2xl border border-white/60">
-            <CardContent className="pt-6">
-              <Statistic
-                title="Pending"
-                value={stats.pending}
-                prefix={<User className="h-5 w-5" />}
-                valueStyle={{ color: '#faad14' }}
-              />
-            </CardContent>
-          </Card>
-        </div>
-
-        {/* raw_articles Pipeline (test API — date/PPT fetch + pipeline status + run extraction) */}
-        <Card className="mb-6 glass rounded-2xl border border-amber-300/60">
-          <CardHeader className="flex flex-row items-center justify-between bg-amber-50/60">
-            <CardTitle className="flex items-center gap-2 text-base">
-              <Search className="h-4 w-4" />
-              raw_articles Pipeline
-            </CardTitle>
-            <div className="flex gap-2">
-              <Button size="sm" variant="outline" onClick={() => navigate('/admin/expense/raw-articles')}>
-                <Eye />
-                View Data
-              </Button>
-              <Button size="sm" variant="outline" onClick={loadPipelineStatus} disabled={pipelineStatusLoading}>
-                <RotateCw className={pipelineStatusLoading ? 'animate-spin' : ''} />
-                Refresh Status
-              </Button>
-            </div>
-          </CardHeader>
-          <CardContent>
-            {/* Pipeline status row */}
-            <div className="mb-5">
-              <div className="mb-2.5 text-[13px] font-semibold">Pipeline Status</div>
-              {pipelineStatus ? (
-                <div className="flex flex-wrap items-center gap-2.5">
-                  <Tag className="px-2.5 py-0.5 text-[13px]" bgColor="#fef3c7" color="#92400e" borderColor="#fde68a">
-                    PENDING: <strong className="ml-1">{pipelineStatus.PENDING}</strong>
-                  </Tag>
-                  <Tag className="px-2.5 py-0.5 text-[13px]" bgColor="#dbeafe" color="#1e40af" borderColor="#bfdbfe">
-                    PROCESSING: <strong className="ml-1">{pipelineStatus.PROCESSING}</strong>
-                  </Tag>
-                  <Tag className="px-2.5 py-0.5 text-[13px]" bgColor="#d1fae5" color="#065f46" borderColor="#a7f3d0">
-                    COMPLETED: <strong className="ml-1">{pipelineStatus.COMPLETED}</strong>
-                  </Tag>
-                  <Tag className="px-2.5 py-0.5 text-[13px]" bgColor="#fee2e2" color="#991b1b" borderColor="#fecaca">
-                    FAILED: <strong className="ml-1">{pipelineStatus.FAILED}</strong>
-                  </Tag>
-                  <Tag className="px-2.5 py-0.5 text-[13px]" bgColor="#ffe4e0" color="#FF6F61" borderColor="#ffc7bf">
-                    PERM_FAILED: <strong className="ml-1">{pipelineStatus.PERM_FAILED}</strong>
-                  </Tag>
-                  <Tag className="px-2.5 py-0.5 text-[13px]">
-                    TOTAL: <strong className="ml-1">{pipelineStatus.total}</strong>
-                  </Tag>
-                  <Popconfirm
-                    title="Run VLM Extraction?"
-                    description="This will process up to 10 PENDING/FAILED rows, run VLM on each image, and push results to extraction_results_flat. Runs in background."
-                    onConfirm={triggerExtraction}
-                    okText="Yes, run now"
-                    cancelText="Cancel"
-                    disabled={pipelineStatus.PENDING + pipelineStatus.FAILED === 0}
-                  >
-                    <Button
-                      disabled={extractionRunning || pipelineStatus.PENDING + pipelineStatus.FAILED === 0}
-                      className="bg-emerald-600 hover:bg-emerald-700"
-                    >
-                      <RefreshCw className={extractionRunning ? 'animate-spin' : ''} />
-                      {extractionRunning
-                        ? 'Starting...'
-                        : `Run Extraction (${pipelineStatus.PENDING + pipelineStatus.FAILED} queued)`}
-                    </Button>
-                  </Popconfirm>
-                </div>
-              ) : (
-                <Spinner spinning={pipelineStatusLoading}>
-                  <span className="text-[13px] text-muted-foreground">Loading pipeline status...</span>
-                </Spinner>
-              )}
-              {extractionMessage && <Alert type="info" showIcon className="mt-2.5" message={extractionMessage} />}
-            </div>
-
-            <div className="mb-3 border-t border-border pt-4">
+        <div className="flex flex-col gap-4 lg:flex-row lg:items-start">
+          <JumpNav
+            items={[
+              { id: 'pipelines', label: 'Pipelines', count: 3 },
+              { id: 'vendor', label: 'Vendor sync' },
+              { id: 'masters', label: 'Master data', count: MASTER_DATA_COUNT },
+              { id: 'analytics', label: 'Analytics' },
+            ]}
+          />
+          <div className="flex min-w-0 flex-1 flex-col gap-5">
+        <section id="pipelines" className="scroll-mt-3 overflow-hidden rounded-xl border border-border bg-card">
+          <div className="flex items-center justify-between gap-3 border-b border-border px-5 py-3">
+            <h2 className="m-0 text-[17px] font-bold">Pipelines</h2>
+            <Button
+              size="sm"
+              variant="outline"
+              onClick={() => { loadPipelineStatus(); loadFabricRawStatus(); loadGmRawStatus(); }}
+              disabled={pipelineStatusLoading || fabricRawStatusLoading || gmRawStatusLoading}
+            >
+              <RotateCw className={pipelineStatusLoading || fabricRawStatusLoading || gmRawStatusLoading ? 'animate-spin' : ''} />
+              Refresh status
+            </Button>
+          </div>
+          <PipelineRow
+            name="raw_articles"
+            counts={pipelineStatus}
+            loading={pipelineStatusLoading}
+            onView={() => navigate('/admin/expense/raw-articles')}
+            runAction={pipelineStatus ? (
+              <Popconfirm
+                                  title="Run VLM Extraction?"
+                                  description="This will process up to 10 PENDING/FAILED rows, run VLM on each image, and push results to extraction_results_flat. Runs in background."
+                                  onConfirm={triggerExtraction}
+                                  okText="Yes, run now"
+                                  cancelText="Cancel"
+                                  disabled={pipelineStatus.PENDING + pipelineStatus.FAILED === 0}
+                                >
+                                  <Button
+                                    disabled={extractionRunning || pipelineStatus.PENDING + pipelineStatus.FAILED === 0}
+                                    size="sm"
+              className={SLATE_PRIMARY_BTN}
+                                  >
+                                    <RefreshCw className={extractionRunning ? 'animate-spin' : ''} />
+                                    {extractionRunning
+                                      ? 'Starting...'
+                                      : `Run Extraction (${pipelineStatus.PENDING + pipelineStatus.FAILED} queued)`}
+                                  </Button>
+                                </Popconfirm>
+            ) : null}
+            message={extractionMessage && <Alert type="info" showIcon message={extractionMessage} />}
+          />
+          <PipelineRow
+            name="fabric_raw_data"
+            counts={fabricRawStatus}
+            loading={fabricRawStatusLoading}
+            onView={() => navigate('/admin/expense/fabric-article-data')}
+            runAction={fabricRawStatus ? (
+              <Popconfirm
+                                title="Run Fabric Raw Processing?"
+                                description="This will process up to 20 PENDING rows: upload images to R2 and save records to fabric_article_data. Runs in background."
+                                onConfirm={triggerFabricRawProcessing}
+                                okText="Yes, run now"
+                                cancelText="Cancel"
+                                disabled={fabricRawStatus.PENDING === 0}
+                              >
+                                <Button
+                                  disabled={fabricRawRunning || fabricRawStatus.PENDING === 0}
+                                  size="sm"
+              className={SLATE_PRIMARY_BTN}
+                                >
+                                  <RefreshCw className={fabricRawRunning ? 'animate-spin' : ''} />
+                                  {fabricRawRunning
+                                    ? 'Starting...'
+                                    : `Run Processing (${fabricRawStatus.PENDING} queued)`}
+                                </Button>
+                              </Popconfirm>
+            ) : null}
+            message={fabricRawMessage && <Alert type="info" showIcon message={fabricRawMessage} />}
+          />
+          <PipelineRow
+            name="gm_raw_data"
+            counts={gmRawStatus}
+            loading={gmRawStatusLoading}
+            onView={() => navigate('/gm-article')}
+            runAction={gmRawStatus ? (
+              <Popconfirm
+                                title="Run GM Raw Processing?"
+                                description="This will process up to 20 PENDING rows: upload images to R2 and save records to gm_article_data. Runs in background."
+                                onConfirm={triggerGmRawProcessing}
+                                okText="Yes, run now"
+                                cancelText="Cancel"
+                                disabled={gmRawStatus.PENDING === 0}
+                              >
+                                <Button
+                                  disabled={gmRawRunning || gmRawStatus.PENDING === 0}
+                                  size="sm"
+              className={SLATE_PRIMARY_BTN}
+                                >
+                                  <RefreshCw className={gmRawRunning ? 'animate-spin' : ''} />
+                                  {gmRawRunning
+                                    ? 'Starting...'
+                                    : `Run Processing (${gmRawStatus.PENDING} queued)`}
+                                </Button>
+                              </Popconfirm>
+            ) : null}
+            message={gmRawMessage && <Alert type="info" showIcon message={gmRawMessage} />}
+          />
+          <div className="border-t border-border bg-muted/30 px-5 py-4">
+            <div className="mb-2 text-[13px] font-semibold">Fetch SRM presentations → raw_articles</div>
+            <div>
               <div className="mb-2 text-[13px] font-semibold">Fetch Presentations to raw_articles</div>
               <div className="mb-2.5 text-xs text-muted-foreground">
                 Saves SRM presentations to <code className="rounded bg-muted px-1 py-0.5">raw_articles</code> as <strong>PENDING</strong> — no VLM triggered.
                 {testFetchMode === 'date' && (
-                  <span className="ml-1.5 text-amber-600">
+                  <span className="ml-1.5 text-amber-700 dark:text-amber-400">
                     ⚠ Only dates on or after <strong>27 May 2026</strong> allowed.
                   </span>
                 )}
@@ -2490,7 +2474,8 @@ export default function Admin() {
               <div className="mb-3 flex gap-2">
                 <Button
                   size="sm"
-                  variant={testFetchMode === 'date' ? 'default' : 'outline'}
+                  variant="outline"
+                  className={testFetchMode === 'date' ? SLATE_PRIMARY_BTN : undefined}
                   onClick={() => {
                     setTestFetchMode('date');
                     setTestResult(null);
@@ -2501,7 +2486,8 @@ export default function Admin() {
                 </Button>
                 <Button
                   size="sm"
-                  variant={testFetchMode === 'ppt' ? 'default' : 'outline'}
+                  variant="outline"
+                  className={testFetchMode === 'ppt' ? SLATE_PRIMARY_BTN : undefined}
                   onClick={() => {
                     setTestFetchMode('ppt');
                     setTestResult(null);
@@ -2549,7 +2535,8 @@ export default function Admin() {
                 <Button
                   onClick={runTestApiFetch}
                   disabled={testFetching || (testFetchMode === 'date' ? !testAfterDate : !testPptInput.trim())}
-                  className="bg-amber-500 hover:bg-amber-600"
+                  variant="outline"
+                  className="border-slate-800 font-semibold text-slate-800 dark:border-slate-200 dark:text-slate-200"
                 >
                   <Search className={testFetching ? 'animate-spin' : ''} />
                   {testFetching ? 'Fetching...' : 'Fetch to Raw Articles'}
@@ -2605,261 +2592,96 @@ export default function Admin() {
                 }
               />
             )}
-          </CardContent>
-        </Card>
+          </div>
+        </section>
 
-        {/* fabric_raw_data Pipeline */}
-        <Card className="mb-6 glass rounded-2xl border border-sky-300/60">
-          <CardHeader className="flex flex-row items-center justify-between bg-sky-50/60">
-            <CardTitle className="flex items-center gap-2 text-base">
-              <Search className="h-4 w-4" />
-              fabric_raw_data Pipeline
-            </CardTitle>
-            <div className="flex gap-2">
-              <Button size="sm" variant="outline" onClick={() => navigate('/admin/expense/fabric-article-data')}>
-                <Eye />
-                View Data
-              </Button>
-              <Button size="sm" variant="outline" onClick={loadFabricRawStatus} disabled={fabricRawStatusLoading}>
-                <RotateCw className={fabricRawStatusLoading ? 'animate-spin' : ''} />
-                Refresh Status
-              </Button>
-            </div>
-          </CardHeader>
-          <CardContent className="pt-4">
-            <div className="mb-2.5 text-[13px] font-semibold">Pipeline Status</div>
-            {fabricRawStatus ? (
-              <div className="flex flex-wrap items-center gap-2.5">
-                <Tag className="px-2.5 py-0.5 text-[13px]" bgColor="#fef3c7" color="#92400e" borderColor="#fde68a">
-                  PENDING: <strong className="ml-1">{fabricRawStatus.PENDING}</strong>
-                </Tag>
-                <Tag className="px-2.5 py-0.5 text-[13px]" bgColor="#dbeafe" color="#1e40af" borderColor="#bfdbfe">
-                  PROCESSING: <strong className="ml-1">{fabricRawStatus.PROCESSING}</strong>
-                </Tag>
-                <Tag className="px-2.5 py-0.5 text-[13px]" bgColor="#d1fae5" color="#065f46" borderColor="#a7f3d0">
-                  COMPLETED: <strong className="ml-1">{fabricRawStatus.COMPLETED}</strong>
-                </Tag>
-                <Tag className="px-2.5 py-0.5 text-[13px]" bgColor="#fee2e2" color="#991b1b" borderColor="#fecaca">
-                  FAILED: <strong className="ml-1">{fabricRawStatus.FAILED}</strong>
-                </Tag>
-                <Tag className="px-2.5 py-0.5 text-[13px]">
-                  TOTAL: <strong className="ml-1">{fabricRawStatus.total}</strong>
-                </Tag>
-                <Popconfirm
-                  title="Run Fabric Raw Processing?"
-                  description="This will process up to 20 PENDING rows: upload images to R2 and save records to fabric_article_data. Runs in background."
-                  onConfirm={triggerFabricRawProcessing}
-                  okText="Yes, run now"
-                  cancelText="Cancel"
-                  disabled={fabricRawStatus.PENDING === 0}
-                >
-                  <Button
-                    disabled={fabricRawRunning || fabricRawStatus.PENDING === 0}
-                    className="bg-sky-600 hover:bg-sky-700"
-                  >
-                    <RefreshCw className={fabricRawRunning ? 'animate-spin' : ''} />
-                    {fabricRawRunning
-                      ? 'Starting...'
-                      : `Run Processing (${fabricRawStatus.PENDING} queued)`}
-                  </Button>
-                </Popconfirm>
+        <section id="vendor" className="scroll-mt-3 rounded-xl border border-border bg-card px-5 py-4">
+          <Spinner spinning={vendorStatusLoading}>
+            <div className="flex flex-wrap items-center gap-x-7 gap-y-3">
+              <div className="flex min-w-[180px] flex-col">
+                <h2 className="m-0 text-[17px] font-bold">Vendor master sync</h2>
+                <span className="text-[12.5px] text-muted-foreground">Daily at 2:00 AM IST</span>
               </div>
-            ) : (
-              <Spinner spinning={fabricRawStatusLoading}>
-                <span className="text-[13px] text-muted-foreground">Loading pipeline status...</span>
-              </Spinner>
-            )}
-            {fabricRawMessage && <Alert type="info" showIcon className="mt-2.5" message={fabricRawMessage} />}
-          </CardContent>
-        </Card>
-
-        {/* gm_raw_data Pipeline */}
-        <Card className="mb-6 glass rounded-2xl border border-emerald-300/60">
-          <CardHeader className="flex flex-row items-center justify-between bg-emerald-50/60">
-            <CardTitle className="flex items-center gap-2 text-base">
-              <Search className="h-4 w-4" />
-              gm_raw_data Pipeline
-            </CardTitle>
-            <div className="flex gap-2">
-              <Button size="sm" variant="outline" onClick={() => navigate('/gm-article')}>
-                <Eye />
-                View Data
-              </Button>
-              <Button size="sm" variant="outline" onClick={loadGmRawStatus} disabled={gmRawStatusLoading}>
-                <RotateCw className={gmRawStatusLoading ? 'animate-spin' : ''} />
-                Refresh Status
-              </Button>
-            </div>
-          </CardHeader>
-          <CardContent className="pt-4">
-            <div className="mb-2.5 text-[13px] font-semibold">Pipeline Status</div>
-            {gmRawStatus ? (
-              <div className="flex flex-wrap items-center gap-2.5">
-                <Tag className="px-2.5 py-0.5 text-[13px]" bgColor="#fef3c7" color="#92400e" borderColor="#fde68a">
-                  PENDING: <strong className="ml-1">{gmRawStatus.PENDING}</strong>
-                </Tag>
-                <Tag className="px-2.5 py-0.5 text-[13px]" bgColor="#dbeafe" color="#1e40af" borderColor="#bfdbfe">
-                  PROCESSING: <strong className="ml-1">{gmRawStatus.PROCESSING}</strong>
-                </Tag>
-                <Tag className="px-2.5 py-0.5 text-[13px]" bgColor="#d1fae5" color="#065f46" borderColor="#a7f3d0">
-                  COMPLETED: <strong className="ml-1">{gmRawStatus.COMPLETED}</strong>
-                </Tag>
-                <Tag className="px-2.5 py-0.5 text-[13px]" bgColor="#fee2e2" color="#991b1b" borderColor="#fecaca">
-                  FAILED: <strong className="ml-1">{gmRawStatus.FAILED}</strong>
-                </Tag>
-                <Tag className="px-2.5 py-0.5 text-[13px]">
-                  TOTAL: <strong className="ml-1">{gmRawStatus.total}</strong>
-                </Tag>
-                <Popconfirm
-                  title="Run GM Raw Processing?"
-                  description="This will process up to 20 PENDING rows: upload images to R2 and save records to gm_article_data. Runs in background."
-                  onConfirm={triggerGmRawProcessing}
-                  okText="Yes, run now"
-                  cancelText="Cancel"
-                  disabled={gmRawStatus.PENDING === 0}
-                >
-                  <Button
-                    disabled={gmRawRunning || gmRawStatus.PENDING === 0}
-                    className="bg-emerald-600 hover:bg-emerald-700"
-                  >
-                    <RefreshCw className={gmRawRunning ? 'animate-spin' : ''} />
-                    {gmRawRunning
-                      ? 'Starting...'
-                      : `Run Processing (${gmRawStatus.PENDING} queued)`}
-                  </Button>
-                </Popconfirm>
-              </div>
-            ) : (
-              <Spinner spinning={gmRawStatusLoading}>
-                <span className="text-[13px] text-muted-foreground">Loading pipeline status...</span>
-              </Spinner>
-            )}
-            {gmRawMessage && <Alert type="info" showIcon className="mt-2.5" message={gmRawMessage} />}
-          </CardContent>
-        </Card>
-
-        {/* Vendor Master Sync */}
-        <Card className="mb-6 glass rounded-2xl border border-white/60">
-          <CardHeader className="flex flex-row items-center justify-between">
-            <CardTitle className="flex items-center gap-2 text-base">
-              <RefreshCw className="h-4 w-4" />
-              Vendor Master Sync
-            </CardTitle>
-            <div className="flex gap-2">
-              <Button size="sm" variant="outline" onClick={() => navigate('/admin/expense/vendor-master')}>
-                <Eye />
-                View Data
-              </Button>
-              <Button size="sm" variant="outline" onClick={loadVendorStatus} disabled={vendorStatusLoading}>
-                <RotateCw className={vendorStatusLoading ? 'animate-spin' : ''} />
-                Refresh Status
-              </Button>
-            </div>
-          </CardHeader>
-          <CardContent>
-            <Spinner spinning={vendorStatusLoading}>
               {vendorStatus ? (
                 <>
-                  <Descriptions bordered className="mb-4">
-                    <Descriptions.Item label="Records in DB">
-                      <strong className="text-lg">{vendorStatus.count.toLocaleString()}</strong>
-                    </Descriptions.Item>
-                    <Descriptions.Item label="Last Sync">
+                  <div className="flex flex-col">
+                    <span className="text-[12px] text-muted-foreground">Records</span>
+                    <strong className="text-[15px] tabular-nums">{vendorStatus.count.toLocaleString('en-IN')}</strong>
+                  </div>
+                  <div className="flex flex-col">
+                    <span className="text-[12px] text-muted-foreground">Last sync</span>
+                    <strong className="text-[15px]">
                       {vendorStatus.lastSyncedAt
-                        ? new Date(vendorStatus.lastSyncedAt).toLocaleString('en-IN', {
-                            timeZone: 'Asia/Kolkata',
-                            dateStyle: 'medium',
-                            timeStyle: 'short',
-                          }) + ' IST'
-                        : <span className="text-muted-foreground">Never</span>}
-                    </Descriptions.Item>
-                    <Descriptions.Item label="Schedule">Daily at 2:00 AM IST</Descriptions.Item>
-                    <Descriptions.Item label="Source API">
-                      <span className="font-mono text-xs text-muted-foreground">
-                        https://my-dab-app.azurewebsites.net/api/DY_SUPPLIER_MST
-                      </span>
-                    </Descriptions.Item>
-                    {vendorStatus.inProgress && (
-                      <Descriptions.Item label="Status">
-                        <span className="flex items-center gap-1.5 text-blue-600">
-                          <RefreshCw className="h-3.5 w-3.5 animate-spin" /> Sync in progress…
-                        </span>
-                      </Descriptions.Item>
-                    )}
-                    {vendorStatus.lastResult && (
-                      <Descriptions.Item label="Last Run">
-                        {vendorStatus.lastResult.error ? (
-                          <span className="font-mono text-xs text-red-600">
-                            ❌ {vendorStatus.lastResult.error}
-                          </span>
-                        ) : (
-                          <span className="text-xs text-green-700">
-                            ✅ {vendorStatus.lastResult.upserted.toLocaleString()} records in {vendorStatus.lastResult.pages} pages ({(vendorStatus.lastResult.durationMs / 1000).toFixed(1)}s)
-                          </span>
-                        )}
-                      </Descriptions.Item>
-                    )}
-                  </Descriptions>
-
-                  <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
-                    <div className="card-3d rounded-xl border border-white/60 bg-white/50 p-4 backdrop-blur-sm">
-                      <div className="mb-1 font-semibold">Sync Vendor Master</div>
-                      <div className="mb-2.5 text-xs text-muted-foreground">
-                        Fetches all vendor records from the DAB API and upserts into the local database. Runs in background — page will auto-refresh status after 5s.
-                      </div>
-                      <Popconfirm
-                        title="Trigger Vendor Master Sync?"
-                        description="Fetch all vendors from the DAB API and upsert into master_vendor_details. This may take a minute."
-                        onConfirm={runVendorSync}
-                        okText="Yes, sync now"
-                        cancelText="Cancel"
-                      >
-                        <Button disabled={vendorSyncing} className="w-full">
-                          <RefreshCw className={vendorSyncing ? 'animate-spin' : ''} />
-                          {vendorSyncing ? 'Syncing...' : 'Sync Now'}
-                        </Button>
-                      </Popconfirm>
-                    </div>
+                        ? new Date(vendorStatus.lastSyncedAt).toLocaleString('en-IN', { timeZone: 'Asia/Kolkata', dateStyle: 'medium', timeStyle: 'short' }) + ' IST'
+                        : 'Never'}
+                    </strong>
+                  </div>
+                  <div className="flex min-w-0 flex-col" title="https://my-dab-app.azurewebsites.net/api/DY_SUPPLIER_MST">
+                    <span className="text-[12px] text-muted-foreground">Source</span>
+                    <span className="truncate font-mono text-[12.5px]">DY_SUPPLIER_MST (DAB API)</span>
                   </div>
                 </>
               ) : (
-                <Empty description="Could not load vendor master status" />
+                <span className="text-[13px] text-muted-foreground">Could not load vendor master status</span>
               )}
-            </Spinner>
-          </CardContent>
-        </Card>
-
-        {/* Major-Category Grid Upload (dropdown values per major category, ported from c9e8839) */}
-        <Card className="mb-6 glass rounded-2xl border border-white/60">
-          <CardHeader className="flex flex-row items-center justify-between">
-            <CardTitle className="flex items-center gap-2 text-base">
-              <TableIcon className="h-4 w-4" />
-              Major Category Grid (Dropdown Values)
-            </CardTitle>
-            <div className="flex gap-2">
-              <Button size="sm" variant="outline" onClick={() => navigate('/admin/expense/major-category-grid')}>
-                <Eye />
-                View Data
-              </Button>
-              <Button size="sm" variant="outline" onClick={downloadMajCatGridData}>
-                <Download />
-                Download Data
-              </Button>
-              <Button size="sm" variant="outline" onClick={downloadMajCatTemplate}>
-                <Download />
-                Download Template
-              </Button>
-              <Button size="sm" variant="outline" onClick={loadMajCatGridStatus} disabled={majCatGridStatusLoading}>
-                <RotateCw className={majCatGridStatusLoading ? 'animate-spin' : ''} />
-                Refresh Status
-              </Button>
+              <div className="ml-auto flex flex-wrap items-center gap-2">
+                <Button size="sm" variant="outline" onClick={() => navigate('/admin/expense/vendor-master')}>
+                  <Eye />
+                  View data
+                </Button>
+                <Button size="icon" variant="ghost" className="h-8 w-8" onClick={loadVendorStatus} disabled={vendorStatusLoading} aria-label="Refresh vendor sync status" title="Refresh status">
+                  <RotateCw className={vendorStatusLoading ? 'animate-spin' : ''} />
+                </Button>
+                <Popconfirm
+                  title="Trigger Vendor Master Sync?"
+                  description="Fetch all vendors from the DAB API and upsert into master_vendor_details. This may take a minute."
+                  onConfirm={runVendorSync}
+                  okText="Yes, sync now"
+                  cancelText="Cancel"
+                >
+                  <Button size="sm" disabled={vendorSyncing} className={SLATE_PRIMARY_BTN}>
+                    <RefreshCw className={vendorSyncing ? 'animate-spin' : ''} />
+                    {vendorSyncing ? 'Syncing...' : 'Sync Now'}
+                  </Button>
+                </Popconfirm>
+              </div>
             </div>
-          </CardHeader>
-          <CardContent>
-            <Spinner spinning={majCatGridStatusLoading}>
-              <div className="grid grid-cols-1 gap-4 md:grid-cols-12">
-                {/* Status panel */}
-                <div className="md:col-span-7">
+            {vendorStatus?.inProgress && (
+              <div className="mt-2 flex items-center gap-1.5 text-[13px] text-blue-700 dark:text-blue-300">
+                <RefreshCw className="h-3.5 w-3.5 animate-spin" /> Sync in progress…
+              </div>
+            )}
+            {vendorStatus?.lastResult && (
+              <div className="mt-2 text-[12.5px]">
+                <span className="text-muted-foreground">Last run: </span>
+                {vendorStatus.lastResult.error ? (
+                  <span className="font-mono text-red-700 dark:text-red-400">Failed — {vendorStatus.lastResult.error}</span>
+                ) : (
+                  <span className="text-green-800 dark:text-green-400">
+                    {vendorStatus.lastResult.upserted.toLocaleString('en-IN')} records in {vendorStatus.lastResult.pages} pages ({(vendorStatus.lastResult.durationMs / 1000).toFixed(1)}s)
+                  </span>
+                )}
+              </div>
+            )}
+          </Spinner>
+        </section>
+
+        <section id="masters" className="scroll-mt-3 flex flex-col gap-3">
+          <SectionHeading title="Master data uploads" meta={`${MASTER_DATA_COUNT} datasets`} />
+          <MasterGroup title="Attributes & grids" count={7} notUploaded={((majCatGridMeta ? (majCatGridMeta.totalRows ?? majCatGridMeta.totalValues ?? 0) : null) === 0 ? 1 : 0) + ((sizeMasterMeta ? (sizeMasterMeta.total ?? 0) : null) === 0 ? 1 : 0) + ((colorMasterMeta ? (colorMasterMeta.total ?? 0) : null) === 0 ? 1 : 0) + ((mandatoryGridMeta ? (mandatoryGridMeta.totalRows ?? 0) : null) === 0 ? 1 : 0) + ((mcdTotal ? mcdTotal.total : null) === 0 ? 1 : 0) + ((nationalGridTotal) === 0 ? 1 : 0) + ((segmentMasterMeta ? (segmentMasterMeta.total ?? 0) : null) === 0 ? 1 : 0)}>
+            <MasterDataCard
+              title="Major Category Grid"
+              description="Dropdown Values"
+              rows={majCatGridMeta ? (majCatGridMeta.totalRows ?? majCatGridMeta.totalValues ?? 0) : null}
+              lastUpload={majCatGridMeta?.uploadedAt ?? null}
+              loading={majCatGridStatusLoading}
+              busy={majCatGridUploading}
+              onView={() => navigate('/admin/expense/major-category-grid')}
+              onDownload={downloadMajCatGridData}
+              onTemplate={downloadMajCatTemplate}
+              onRefresh={loadMajCatGridStatus}
+              details={
+                <>
                   {majCatGridMeta ? (
                     <Descriptions bordered>
                       <Descriptions.Item label="Last Upload">
@@ -2897,10 +2719,11 @@ export default function Admin() {
                       description="Upload ALL_300_GRIDS_SEQUENCED.xlsx to enable major-category-scoped dropdown filtering in the Approver page."
                     />
                   )}
-                </div>
 
-                {/* Upload panel */}
-                <div className="md:col-span-5">
+                </>
+              }
+              upload={
+                <>
                   <div className="rounded-md border border-border p-4">
                     <div className="mb-1 font-semibold">Upload Grid Excel</div>
                     <div className="mb-3 text-xs text-muted-foreground">
@@ -2920,7 +2743,7 @@ export default function Admin() {
 
                     {majCatGridUploading ? (
                       <div>
-                        <div className="mb-2 text-[13px] text-[#FF6F61]">
+                        <div className="mb-2 text-[13px] text-slate-600 dark:text-slate-300">
                           <RefreshCw className="mr-1.5 inline-block h-3.5 w-3.5 animate-spin" />
                           {majCatJobPhase || 'Processing…'}
                         </div>
@@ -2931,9 +2754,9 @@ export default function Admin() {
                       <button
                         type="button"
                         onClick={() => majCatFileRef.current?.click()}
-                        className="flex w-full flex-col items-center justify-center rounded-md border-2 border-dashed border-border bg-muted/30 px-4 py-6 transition-colors hover:border-[#FF6F61] hover:bg-[#FF6F61]/5"
+                        className="flex w-full flex-col items-center justify-center rounded-md border-2 border-dashed border-border bg-muted/30 px-4 py-6 transition-colors hover:border-slate-400 hover:bg-slate-50 dark:hover:bg-slate-500/10"
                       >
-                        <Inbox className="mb-2 h-8 w-8 text-[#FF6F61]" />
+                        <Inbox className="mb-2 h-8 w-8 text-slate-600 dark:text-slate-300" />
                         <p className="text-[13px]">
                           Click to upload <strong>.xlsx</strong> file
                         </p>
@@ -2941,271 +2764,23 @@ export default function Admin() {
                       </button>
                     )}
                   </div>
-                </div>
-              </div>
-            </Spinner>
-          </CardContent>
-        </Card>
 
-        {/* GM Major Category Details (gm_major_category_details) */}
-        <Card className="mb-6 glass rounded-2xl border border-white/60">
-          <CardHeader className="flex flex-row items-center justify-between">
-            <CardTitle className="flex items-center gap-2 text-base">
-              <TableIcon className="h-4 w-4" />
-              GM Major Category Details
-            </CardTitle>
-            <div className="flex gap-2">
-              <Button size="sm" variant="outline" onClick={downloadGMMctData}>
-                <Download />
-                Download Data
-              </Button>
-              <Button size="sm" variant="outline" onClick={downloadGMMctTemplate}>
-                <Download />
-                Download Template
-              </Button>
-              <Button size="sm" variant="outline" onClick={loadGMMctStatus} disabled={gmMctStatusLoading}>
-                <RotateCw className={gmMctStatusLoading ? 'animate-spin' : ''} />
-                Refresh Status
-              </Button>
-            </div>
-          </CardHeader>
-          <CardContent>
-            <Spinner spinning={gmMctStatusLoading}>
-              <div className="grid grid-cols-1 gap-4 md:grid-cols-12">
-                {/* Status panel */}
-                <div className="md:col-span-7">
-                  {gmMctMeta && (gmMctMeta.totalRows ?? 0) > 0 ? (
-                    <Descriptions bordered>
-                      <Descriptions.Item label="Last Upload">
-                        {gmMctMeta.uploadedAt
-                          ? new Date(gmMctMeta.uploadedAt).toLocaleString('en-IN', {
-                              timeZone: 'Asia/Kolkata',
-                              dateStyle: 'medium',
-                              timeStyle: 'short',
-                            }) + ' IST'
-                          : <span className="text-muted-foreground">Unknown</span>}
-                      </Descriptions.Item>
-                      <Descriptions.Item label="File">
-                        <span className="font-mono text-xs">{gmMctMeta.fileName || '—'}</span>
-                      </Descriptions.Item>
-                      <Descriptions.Item label="Major Categories">
-                        <Badge variant="info">{(gmMctMeta.categoriesCount ?? 0).toLocaleString()}</Badge>
-                      </Descriptions.Item>
-                      <Descriptions.Item label="Family Codes">
-                        <Badge variant="secondary">{(gmMctMeta.familyCodesCount ?? 0).toLocaleString()}</Badge>
-                      </Descriptions.Item>
-                      <Descriptions.Item label="Total Rows">
-                        <Badge variant="success">{(gmMctMeta.totalRows ?? 0).toLocaleString()}</Badge>
-                      </Descriptions.Item>
-                      <Descriptions.Item label="Rows Skipped">
-                        <Badge variant={(gmMctMeta.skippedRows ?? 0) > 0 ? 'warning' : 'secondary'}>
-                          {(gmMctMeta.skippedRows ?? 0).toLocaleString()}
-                        </Badge>
-                      </Descriptions.Item>
-                    </Descriptions>
-                  ) : (
-                    <Alert
-                      type="warning"
-                      showIcon
-                      message="No GM major category details uploaded yet"
-                      description="Upload the GM MCT Excel to populate the GM article hierarchy (division → sub-division → major category) and family code mappings."
-                    />
-                  )}
-                </div>
-
-                {/* Upload panel */}
-                <div className="md:col-span-5">
-                  <div className="rounded-md border border-border p-4">
-                    <div className="mb-1 font-semibold">Upload GM MCT Excel</div>
-                    <div className="mb-3 text-xs text-muted-foreground">
-                      Columns: <strong>seg, div, sub_div, maj_cat_nm</strong> (required), mc_cd, maj_cat_desc, mj_status, archetype, archetype_nm, family_code, family_name, status. Row 1 = headers, data from Row 2. Replaces the entire table.
-                    </div>
-
-                    <input
-                      ref={gmMctFileRef}
-                      type="file"
-                      accept=".xlsx,.xls"
-                      className="hidden"
-                      onChange={(e) => {
-                        const file = e.target.files?.[0];
-                        if (file) handleGMMctUpload(file);
-                      }}
-                    />
-
-                    {gmMctUploading ? (
-                      <div>
-                        <div className="mb-2 text-[13px] text-[#FF6F61]">
-                          <RefreshCw className="mr-1.5 inline-block h-3.5 w-3.5 animate-spin" />
-                          {gmMctJobPhase || 'Processing…'}
-                        </div>
-                        <Progress value={gmMctProgress} />
-                        <div className="mt-1 text-[11px] text-muted-foreground">{gmMctProgress}% complete</div>
-                      </div>
-                    ) : (
-                      <button
-                        type="button"
-                        onClick={() => gmMctFileRef.current?.click()}
-                        className="flex w-full flex-col items-center justify-center rounded-md border-2 border-dashed border-border bg-muted/30 px-4 py-6 transition-colors hover:border-[#FF6F61] hover:bg-[#FF6F61]/5"
-                      >
-                        <Inbox className="mb-2 h-8 w-8 text-[#FF6F61]" />
-                        <p className="text-[13px]">
-                          Click to upload <strong>.xlsx</strong> file
-                        </p>
-                        <p className="text-[11px] text-muted-foreground">Only Excel files. Max 50 MB.</p>
-                      </button>
-                    )}
-                  </div>
-                </div>
-              </div>
-            </Spinner>
-          </CardContent>
-        </Card>
-
-        {/* GM Major Category Grid Values (gm_major_category_grid_values) */}
-        <Card className="mb-6 glass rounded-2xl border border-white/60">
-          <CardHeader className="flex flex-row items-center justify-between">
-            <CardTitle className="flex items-center gap-2 text-base">
-              <TableIcon className="h-4 w-4" />
-              GM Major Category Grid Values
-            </CardTitle>
-            <div className="flex gap-2">
-              <Button size="sm" variant="outline" onClick={downloadGMGridData}>
-                <Download />
-                Download Data
-              </Button>
-              <Button size="sm" variant="outline" onClick={downloadGMGridTemplate}>
-                <Download />
-                Download Template
-              </Button>
-              <Button size="sm" variant="outline" onClick={loadGMGridStatus} disabled={gmGridStatusLoading}>
-                <RotateCw className={gmGridStatusLoading ? 'animate-spin' : ''} />
-                Refresh Status
-              </Button>
-            </div>
-          </CardHeader>
-          <CardContent>
-            <Spinner spinning={gmGridStatusLoading}>
-              <div className="grid grid-cols-1 gap-4 md:grid-cols-12">
-                {/* Status panel */}
-                <div className="md:col-span-7">
-                  {gmGridMeta ? (
-                    <Descriptions bordered>
-                      <Descriptions.Item label="Last Upload">
-                        {gmGridMeta.uploadedAt
-                          ? new Date(gmGridMeta.uploadedAt).toLocaleString('en-IN', {
-                              timeZone: 'Asia/Kolkata',
-                              dateStyle: 'medium',
-                              timeStyle: 'short',
-                            }) + ' IST'
-                          : <span className="text-muted-foreground">Unknown</span>}
-                      </Descriptions.Item>
-                      <Descriptions.Item label="File">
-                        <span className="font-mono text-xs">{gmGridMeta.fileName || '—'}</span>
-                      </Descriptions.Item>
-                      <Descriptions.Item label="Major Categories">
-                        <Badge variant="info">{(gmGridMeta.categoriesCount ?? 0).toLocaleString()}</Badge>
-                      </Descriptions.Item>
-                      <Descriptions.Item label="Family Codes">
-                        <Badge variant="secondary">{(gmGridMeta.familyCodesCount ?? 0).toLocaleString()}</Badge>
-                      </Descriptions.Item>
-                      <Descriptions.Item label="Data Rows">
-                        <Badge variant="success">{(gmGridMeta.totalRows ?? gmGridMeta.totalValues ?? 0).toLocaleString()}</Badge>
-                      </Descriptions.Item>
-                      <Descriptions.Item label="Rows Skipped">
-                        <Badge variant={(gmGridMeta.skippedRows ?? 0) > 0 ? 'warning' : 'secondary'}>
-                          {(gmGridMeta.skippedRows ?? 0).toLocaleString()}
-                        </Badge>
-                      </Descriptions.Item>
-                    </Descriptions>
-                  ) : (
-                    <Alert
-                      type="warning"
-                      showIcon
-                      message="No GM grid uploaded yet"
-                      description="Upload the GM major category grid Excel to enable attribute dropdowns on the GM Article new article page."
-                    />
-                  )}
-                </div>
-
-                {/* Upload panel */}
-                <div className="md:col-span-5">
-                  <div className="rounded-md border border-border p-4">
-                    <div className="mb-1 font-semibold">Upload GM Grid Excel</div>
-                    <div className="mb-3 text-xs text-muted-foreground">
-                      Columns: <strong>div, sub_div, seg, maj_cat_nm</strong> (required), <strong>family_code</strong> (required), mandatory, family_name, status, <strong>grid_val</strong> (required), uom. Row 1 = title, Row 2 = headers, data from Row 3.
-                    </div>
-
-                    <input
-                      ref={gmGridFileRef}
-                      type="file"
-                      accept=".xlsx,.xls"
-                      className="hidden"
-                      onChange={(e) => {
-                        const file = e.target.files?.[0];
-                        if (file) handleGMGridUpload(file);
-                      }}
-                    />
-
-                    {gmGridUploading ? (
-                      <div>
-                        <div className="mb-2 text-[13px] text-[#FF6F61]">
-                          <RefreshCw className="mr-1.5 inline-block h-3.5 w-3.5 animate-spin" />
-                          {gmGridJobPhase || 'Processing…'}
-                        </div>
-                        <Progress value={gmGridProgress} />
-                        <div className="mt-1 text-[11px] text-muted-foreground">{gmGridProgress}% complete</div>
-                      </div>
-                    ) : (
-                      <button
-                        type="button"
-                        onClick={() => gmGridFileRef.current?.click()}
-                        className="flex w-full flex-col items-center justify-center rounded-md border-2 border-dashed border-border bg-muted/30 px-4 py-6 transition-colors hover:border-[#FF6F61] hover:bg-[#FF6F61]/5"
-                      >
-                        <Inbox className="mb-2 h-8 w-8 text-[#FF6F61]" />
-                        <p className="text-[13px]">
-                          Click to upload <strong>.xlsx</strong> file
-                        </p>
-                        <p className="text-[11px] text-muted-foreground">Only Excel files. Max 50 MB.</p>
-                      </button>
-                    )}
-                  </div>
-                </div>
-              </div>
-            </Spinner>
-          </CardContent>
-        </Card>
-
-        {/* Size Master Upload (major-category-wise sizes → maj_cat_sizes) */}
-        <Card className="mb-6 glass rounded-2xl border border-white/60">
-          <CardHeader className="flex flex-row items-center justify-between">
-            <CardTitle className="flex items-center gap-2 text-base">
-              <TableIcon className="h-4 w-4" />
-              Size Master (Sizes per Major Category)
-            </CardTitle>
-            <div className="flex gap-2">
-              <Button size="sm" variant="outline" onClick={() => navigate('/admin/expense/size-master')}>
-                <Eye />
-                View Data
-              </Button>
-              <Button size="sm" variant="outline" onClick={downloadSizeMasterData}>
-                <Download />
-                Download Data
-              </Button>
-              <Button size="sm" variant="outline" onClick={downloadSizeMasterTemplate}>
-                <Download />
-                Download Template
-              </Button>
-              <Button size="sm" variant="outline" onClick={loadSizeMasterStatus} disabled={sizeMasterStatusLoading}>
-                <RotateCw className={sizeMasterStatusLoading ? 'animate-spin' : ''} />
-                Refresh Status
-              </Button>
-            </div>
-          </CardHeader>
-          <CardContent>
-            <Spinner spinning={sizeMasterStatusLoading}>
-              <div className="grid grid-cols-1 gap-4 md:grid-cols-12">
-                {/* Status panel */}
-                <div className="md:col-span-7">
+                </>
+              }
+            />
+            <MasterDataCard
+              title="Size Master"
+              description="Sizes per Major Category"
+              rows={sizeMasterMeta ? (sizeMasterMeta.total ?? 0) : null}
+              lastUpload={sizeMasterMeta?.uploadedAt ?? null}
+              loading={sizeMasterStatusLoading}
+              busy={sizeMasterUploading}
+              onView={() => navigate('/admin/expense/size-master')}
+              onDownload={downloadSizeMasterData}
+              onTemplate={downloadSizeMasterTemplate}
+              onRefresh={loadSizeMasterStatus}
+              details={
+                <>
                   {sizeMasterMeta && (sizeMasterMeta.total ?? 0) > 0 ? (
                     <Descriptions bordered>
                       {sizeMasterMeta.uploadedAt && (
@@ -3245,10 +2820,11 @@ export default function Admin() {
                       description="Upload the SIZE MASTER Excel (sheet COMPILE, columns: DIV, SUB-DIV, MC_CD, MC_DESC, SIZE, SIZE ST) to populate major-category-wise sizes."
                     />
                   )}
-                </div>
 
-                {/* Upload panel */}
-                <div className="md:col-span-5">
+                </>
+              }
+              upload={
+                <>
                   <div className="rounded-md border border-border p-4">
                     <div className="mb-1 font-semibold">Upload Size Master Excel</div>
                     <div className="mb-3 text-xs text-muted-foreground">
@@ -3269,7 +2845,7 @@ export default function Admin() {
 
                     {sizeMasterUploading ? (
                       <div>
-                        <div className="mb-2 text-[13px] text-[#FF6F61]">
+                        <div className="mb-2 text-[13px] text-slate-600 dark:text-slate-300">
                           <RefreshCw className="mr-1.5 inline-block h-3.5 w-3.5 animate-spin" />
                           Parsing Excel & replacing table...
                         </div>
@@ -3279,9 +2855,9 @@ export default function Admin() {
                       <button
                         type="button"
                         onClick={() => sizeFileRef.current?.click()}
-                        className="flex w-full flex-col items-center justify-center rounded-md border-2 border-dashed border-border bg-muted/30 px-4 py-6 transition-colors hover:border-[#FF6F61] hover:bg-[#FF6F61]/5"
+                        className="flex w-full flex-col items-center justify-center rounded-md border-2 border-dashed border-border bg-muted/30 px-4 py-6 transition-colors hover:border-slate-400 hover:bg-slate-50 dark:hover:bg-slate-500/10"
                       >
-                        <Inbox className="mb-2 h-8 w-8 text-[#FF6F61]" />
+                        <Inbox className="mb-2 h-8 w-8 text-slate-600 dark:text-slate-300" />
                         <p className="text-[13px]">
                           Click to upload <strong>.xlsx</strong> file
                         </p>
@@ -3289,43 +2865,23 @@ export default function Admin() {
                       </button>
                     )}
                   </div>
-                </div>
-              </div>
-            </Spinner>
-          </CardContent>
-        </Card>
 
-        {/* Color Master Upload (father/child colours → color_master) */}
-        <Card className="mb-6 glass rounded-2xl border border-white/60">
-          <CardHeader className="flex flex-row items-center justify-between">
-            <CardTitle className="flex items-center gap-2 text-base">
-              <TableIcon className="h-4 w-4" />
-              Color Master (Father / Child Colours)
-            </CardTitle>
-            <div className="flex gap-2">
-              <Button size="sm" variant="outline" onClick={() => navigate('/admin/expense/color-master')}>
-                <Eye />
-                View Data
-              </Button>
-              <Button size="sm" variant="outline" onClick={downloadColorMasterData}>
-                <Download />
-                Download Data
-              </Button>
-              <Button size="sm" variant="outline" onClick={downloadColorMasterTemplate}>
-                <Download />
-                Download Template
-              </Button>
-              <Button size="sm" variant="outline" onClick={loadColorMasterStatus} disabled={colorMasterStatusLoading}>
-                <RotateCw className={colorMasterStatusLoading ? 'animate-spin' : ''} />
-                Refresh Status
-              </Button>
-            </div>
-          </CardHeader>
-          <CardContent>
-            <Spinner spinning={colorMasterStatusLoading}>
-              <div className="grid grid-cols-1 gap-4 md:grid-cols-12">
-                {/* Status panel */}
-                <div className="md:col-span-7">
+                </>
+              }
+            />
+            <MasterDataCard
+              title="Color Master"
+              description="Father / Child Colours"
+              rows={colorMasterMeta ? (colorMasterMeta.total ?? 0) : null}
+              lastUpload={colorMasterMeta?.uploadedAt ?? null}
+              loading={colorMasterStatusLoading}
+              busy={colorMasterUploading}
+              onView={() => navigate('/admin/expense/color-master')}
+              onDownload={downloadColorMasterData}
+              onTemplate={downloadColorMasterTemplate}
+              onRefresh={loadColorMasterStatus}
+              details={
+                <>
                   {colorMasterMeta && (colorMasterMeta.total ?? 0) > 0 ? (
                     <Descriptions bordered>
                       {colorMasterMeta.uploadedAt && (
@@ -3362,10 +2918,11 @@ export default function Admin() {
                       description="Upload the COLOR CHART MASTER Excel (columns FATHER COLOR, CHILD COLOR, SAP CREATE OLD) to populate the Add Color dropdown."
                     />
                   )}
-                </div>
 
-                {/* Upload panel */}
-                <div className="md:col-span-5">
+                </>
+              }
+              upload={
+                <>
                   <div className="rounded-md border border-border p-4">
                     <div className="mb-1 font-semibold">Upload Color Master Excel</div>
                     <div className="mb-3 text-xs text-muted-foreground">
@@ -3387,7 +2944,7 @@ export default function Admin() {
 
                     {colorMasterUploading ? (
                       <div>
-                        <div className="mb-2 text-[13px] text-[#FF6F61]">
+                        <div className="mb-2 text-[13px] text-slate-600 dark:text-slate-300">
                           <RefreshCw className="mr-1.5 inline-block h-3.5 w-3.5 animate-spin" />
                           Parsing Excel & replacing table...
                         </div>
@@ -3397,9 +2954,9 @@ export default function Admin() {
                       <button
                         type="button"
                         onClick={() => colorFileRef.current?.click()}
-                        className="flex w-full flex-col items-center justify-center rounded-md border-2 border-dashed border-border bg-muted/30 px-4 py-6 transition-colors hover:border-[#FF6F61] hover:bg-[#FF6F61]/5"
+                        className="flex w-full flex-col items-center justify-center rounded-md border-2 border-dashed border-border bg-muted/30 px-4 py-6 transition-colors hover:border-slate-400 hover:bg-slate-50 dark:hover:bg-slate-500/10"
                       >
-                        <Inbox className="mb-2 h-8 w-8 text-[#FF6F61]" />
+                        <Inbox className="mb-2 h-8 w-8 text-slate-600 dark:text-slate-300" />
                         <p className="text-[13px]">
                           Click to upload <strong>.xlsx</strong> file
                         </p>
@@ -3407,276 +2964,23 @@ export default function Admin() {
                       </button>
                     )}
                   </div>
-                </div>
-              </div>
-            </Spinner>
-          </CardContent>
-        </Card>
 
-        {/* Fabric Article Data Upload (fabric article records → fabric_article_data) */}
-        <Card className="mb-6 glass rounded-2xl border border-white/60">
-          <CardHeader className="flex flex-row items-center justify-between">
-            <CardTitle className="flex items-center gap-2 text-base">
-              <TableIcon className="h-4 w-4" />
-              Fabric Article Data (Bulk Insert)
-            </CardTitle>
-            <div className="flex gap-2">
-              <Button size="sm" variant="outline" onClick={() => navigate('/admin/expense/fabric-article-data')}>
-                <Eye />
-                View Data
-              </Button>
-              <Button size="sm" variant="outline" onClick={downloadFabricArticleDataTemplate}>
-                <Download />
-                Download Template
-              </Button>
-              <Button size="sm" variant="outline" onClick={loadFabricArticleDataStatus} disabled={fabricArticleDataStatusLoading}>
-                <RotateCw className={fabricArticleDataStatusLoading ? 'animate-spin' : ''} />
-                Refresh Status
-              </Button>
-            </div>
-          </CardHeader>
-          <CardContent>
-            <Spinner spinning={fabricArticleDataStatusLoading}>
-              <div className="grid grid-cols-1 gap-4 md:grid-cols-12">
-                {/* Status panel */}
-                <div className="md:col-span-7">
-                  {fabricArticleDataMeta && (fabricArticleDataMeta.total ?? 0) > 0 ? (
-                    <Descriptions bordered>
-                      {fabricArticleDataMeta.uploadedAt && (
-                        <Descriptions.Item label="Last Upload">
-                          {new Date(fabricArticleDataMeta.uploadedAt).toLocaleString('en-IN', {
-                            timeZone: 'Asia/Kolkata', dateStyle: 'medium', timeStyle: 'short',
-                          }) + ' IST'}
-                        </Descriptions.Item>
-                      )}
-                      {fabricArticleDataMeta.fileName && (
-                        <Descriptions.Item label="File">
-                          <span className="font-mono text-xs">{fabricArticleDataMeta.fileName}</span>
-                        </Descriptions.Item>
-                      )}
-                      <Descriptions.Item label="Total Rows">
-                        <Badge variant="secondary">{(fabricArticleDataMeta.total ?? 0).toLocaleString()}</Badge>
-                      </Descriptions.Item>
-                      <Descriptions.Item label="Synced">
-                        <Badge variant="success">{(fabricArticleDataMeta.synced ?? 0).toLocaleString()}</Badge>
-                      </Descriptions.Item>
-                      <Descriptions.Item label="Pending">
-                        <Badge variant="warning">{(fabricArticleDataMeta.pending ?? 0).toLocaleString()}</Badge>
-                      </Descriptions.Item>
-                      {fabricArticleDataMeta.skipped != null && (
-                        <Descriptions.Item label="Rows Skipped">
-                          <Badge variant={(fabricArticleDataMeta.skipped ?? 0) > 0 ? 'warning' : 'secondary'}>
-                            {(fabricArticleDataMeta.skipped ?? 0).toLocaleString()}
-                          </Badge>
-                        </Descriptions.Item>
-                      )}
-                    </Descriptions>
-                  ) : (
-                    <Alert
-                      type="warning"
-                      showIcon
-                      message="No fabric article data uploaded yet"
-                      description="Upload an Excel with columns: FABRIC_ARTICLE_NUMBER, FABRIC_ARTICLE_DESC, DIVISION, SUB_DIVISION, MAJOR_CATEGORY, VENDOR_NAME, VENDOR_CODE, plus fabric attribute columns. Each row is inserted as a new record."
-                    />
-                  )}
-                </div>
-
-                {/* Upload panel */}
-                <div className="md:col-span-5">
-                  <div className="rounded-md border border-border p-4">
-                    <div className="mb-1 font-semibold">Upload Fabric Article Data Excel</div>
-                    <div className="mb-3 text-xs text-muted-foreground">
-                      Sheet <strong>FABRIC ARTICLE DATA</strong> (or first sheet), headers in row 3, data from row 5.
-                      Each row is <strong>inserted as a new record</strong> with a fresh ID.
-                    </div>
-
-                    <input
-                      ref={fabricArticleDataFileRef}
-                      type="file"
-                      accept=".xlsx,.xls"
-                      className="hidden"
-                      onChange={(e) => {
-                        const file = e.target.files?.[0];
-                        if (file) handleFabricArticleDataUpload(file);
-                      }}
-                    />
-
-                    {fabricArticleDataUploading ? (
-                      <div>
-                        <div className="mb-2 text-[13px] text-[#FF6F61]">
-                          <RefreshCw className="mr-1.5 inline-block h-3.5 w-3.5 animate-spin" />
-                          Parsing Excel & inserting records...
-                        </div>
-                        <Progress value={fabricArticleDataProgress} />
-                      </div>
-                    ) : (
-                      <button
-                        type="button"
-                        onClick={() => fabricArticleDataFileRef.current?.click()}
-                        className="flex w-full flex-col items-center justify-center rounded-md border-2 border-dashed border-border bg-muted/30 px-4 py-6 transition-colors hover:border-[#FF6F61] hover:bg-[#FF6F61]/5"
-                      >
-                        <Inbox className="mb-2 h-8 w-8 text-[#FF6F61]" />
-                        <p className="text-[13px]">
-                          Click to upload <strong>.xlsx</strong> file
-                        </p>
-                        <p className="text-[11px] text-muted-foreground">Only Excel files. Max 50 MB.</p>
-                      </button>
-                    )}
-                  </div>
-                </div>
-              </div>
-            </Spinner>
-          </CardContent>
-        </Card>
-
-        {/* Fabric Article Master Upload (fabric hierarchy → fabric_article_master) */}
-        <Card className="mb-6 glass rounded-2xl border border-white/60">
-          <CardHeader className="flex flex-row items-center justify-between">
-            <CardTitle className="flex items-center gap-2 text-base">
-              <TableIcon className="h-4 w-4" />
-              Fabric Article Master (Fabric Hierarchy)
-            </CardTitle>
-            <div className="flex gap-2">
-              <Button size="sm" variant="outline" onClick={() => navigate('/admin/expense/fabric-article-master')}>
-                <Eye />
-                View Data
-              </Button>
-              <Button size="sm" variant="outline" onClick={downloadFabricArticleMasterTemplate}>
-                <Download />
-                Download Template
-              </Button>
-              <Button size="sm" variant="outline" onClick={downloadFabricArticleMasterData}>
-                <Download />
-                Download Data
-              </Button>
-              <Button size="sm" variant="outline" onClick={loadFabricArticleMasterStatus} disabled={fabricArticleMasterStatusLoading}>
-                <RotateCw className={fabricArticleMasterStatusLoading ? 'animate-spin' : ''} />
-                Refresh Status
-              </Button>
-            </div>
-          </CardHeader>
-          <CardContent>
-            <Spinner spinning={fabricArticleMasterStatusLoading}>
-              <div className="grid grid-cols-1 gap-4 md:grid-cols-12">
-                {/* Status panel */}
-                <div className="md:col-span-7">
-                  {fabricArticleMasterMeta && (fabricArticleMasterMeta.total ?? 0) > 0 ? (
-                    <Descriptions bordered>
-                      {fabricArticleMasterMeta.uploadedAt && (
-                        <Descriptions.Item label="Last Upload">
-                          {new Date(fabricArticleMasterMeta.uploadedAt).toLocaleString('en-IN', {
-                            timeZone: 'Asia/Kolkata', dateStyle: 'medium', timeStyle: 'short',
-                          }) + ' IST'}
-                        </Descriptions.Item>
-                      )}
-                      {fabricArticleMasterMeta.fileName && (
-                        <Descriptions.Item label="File">
-                          <span className="font-mono text-xs">{fabricArticleMasterMeta.fileName}</span>
-                        </Descriptions.Item>
-                      )}
-                      <Descriptions.Item label="Major Categories">
-                        <Badge variant="info">{(fabricArticleMasterMeta.categories ?? 0).toLocaleString()}</Badge>
-                      </Descriptions.Item>
-                      <Descriptions.Item label="Total Rows">
-                        <Badge variant="secondary">{(fabricArticleMasterMeta.total ?? 0).toLocaleString()}</Badge>
-                      </Descriptions.Item>
-                      {fabricArticleMasterMeta.skipped != null && (
-                        <Descriptions.Item label="Rows Skipped">
-                          <Badge variant={(fabricArticleMasterMeta.skipped ?? 0) > 0 ? 'warning' : 'secondary'}>
-                            {(fabricArticleMasterMeta.skipped ?? 0).toLocaleString()}
-                          </Badge>
-                        </Descriptions.Item>
-                      )}
-                    </Descriptions>
-                  ) : (
-                    <Alert
-                      type="warning"
-                      showIcon
-                      message="No fabric article master uploaded yet"
-                      description="Upload the Fabric Article Master Excel (columns: SEG, DIV, SUB DIV, MAJ CAT, MC CODE, MC DES, STATUS, HSN CD, ART_TYPE) to populate fabric hierarchy dropdowns."
-                    />
-                  )}
-                </div>
-
-                {/* Upload panel */}
-                <div className="md:col-span-5">
-                  <div className="rounded-md border border-border p-4">
-                    <div className="mb-1 font-semibold">Upload Fabric Article Master Excel</div>
-                    <div className="mb-3 text-xs text-muted-foreground">
-                      Sheet <strong>HIERARCHY MASTER</strong> (or first sheet), headers in row 3, data from row 5 —
-                      columns: SEG, DIV, SUB DIV, MAJ CAT, MC CODE, MC DES, STATUS, HSN CD, ART_TYPE. Replaces the entire table.
-                    </div>
-
-                    <input
-                      ref={fabricArticleFileRef}
-                      type="file"
-                      accept=".xlsx,.xls"
-                      className="hidden"
-                      onChange={(e) => {
-                        const file = e.target.files?.[0];
-                        if (file) handleFabricArticleMasterUpload(file);
-                      }}
-                    />
-
-                    {fabricArticleMasterUploading ? (
-                      <div>
-                        <div className="mb-2 text-[13px] text-[#FF6F61]">
-                          <RefreshCw className="mr-1.5 inline-block h-3.5 w-3.5 animate-spin" />
-                          Parsing Excel & replacing table...
-                        </div>
-                        <Progress value={fabricArticleMasterProgress} />
-                      </div>
-                    ) : (
-                      <button
-                        type="button"
-                        onClick={() => fabricArticleFileRef.current?.click()}
-                        className="flex w-full flex-col items-center justify-center rounded-md border-2 border-dashed border-border bg-muted/30 px-4 py-6 transition-colors hover:border-[#FF6F61] hover:bg-[#FF6F61]/5"
-                      >
-                        <Inbox className="mb-2 h-8 w-8 text-[#FF6F61]" />
-                        <p className="text-[13px]">
-                          Click to upload <strong>.xlsx</strong> file
-                        </p>
-                        <p className="text-[11px] text-muted-foreground">Only Excel files. Max 50 MB.</p>
-                      </button>
-                    )}
-                  </div>
-                </div>
-              </div>
-            </Spinner>
-          </CardContent>
-        </Card>
-
-        {/* Mandatory Grid Upload (field visibility per major category, ported from 993f2cb) */}
-        <Card className="mb-6 glass rounded-2xl border border-white/60">
-          <CardHeader className="flex flex-row items-center justify-between">
-            <CardTitle className="flex items-center gap-2 text-base">
-              <TableIcon className="h-4 w-4" />
-              Mandatory Grid (Field Visibility per Major Category)
-            </CardTitle>
-            <div className="flex gap-2">
-              <Button size="sm" variant="outline" onClick={() => navigate('/admin/expense/mandatory-grid')}>
-                <Eye />
-                View Data
-              </Button>
-              <Button size="sm" variant="outline" onClick={downloadMandatoryTemplate}>
-                <Download />
-                Download Template
-              </Button>
-              <Button size="sm" variant="outline" onClick={downloadMandatoryGridData}>
-                <Download />
-                Download Data
-              </Button>
-              <Button size="sm" variant="outline" onClick={loadMandatoryGridStatus} disabled={mandatoryGridStatusLoading}>
-                <RotateCw className={mandatoryGridStatusLoading ? 'animate-spin' : ''} />
-                Refresh Status
-              </Button>
-            </div>
-          </CardHeader>
-          <CardContent>
-            <Spinner spinning={mandatoryGridStatusLoading}>
-              <div className="grid grid-cols-1 gap-4 md:grid-cols-12">
-                {/* Status panel */}
-                <div className="md:col-span-7">
+                </>
+              }
+            />
+            <MasterDataCard
+              title="Mandatory Grid"
+              description="Field Visibility per Major Category"
+              rows={mandatoryGridMeta ? (mandatoryGridMeta.totalRows ?? 0) : null}
+              lastUpload={mandatoryGridMeta?.uploadedAt ?? null}
+              loading={mandatoryGridStatusLoading}
+              busy={mandatoryGridUploading}
+              onView={() => navigate('/admin/expense/mandatory-grid')}
+              onDownload={downloadMandatoryGridData}
+              onTemplate={downloadMandatoryTemplate}
+              onRefresh={loadMandatoryGridStatus}
+              details={
+                <>
                   {mandatoryGridMeta ? (
                     <Descriptions bordered>
                       <Descriptions.Item label="Last Upload">
@@ -3716,10 +3020,11 @@ export default function Admin() {
                       description="Upload MANDATORY GRID DATA.xlsx — Row 3: SAP keys, Row 4: labels, Row 6+: data rows (1 = visible, 0/empty = hidden)."
                     />
                   )}
-                </div>
 
-                {/* Upload panel */}
-                <div className="md:col-span-5">
+                </>
+              }
+              upload={
+                <>
                   <div className="rounded-md border border-border p-4">
                     <div className="mb-1 font-semibold">Upload Mandatory Grid Excel</div>
                     <div className="mb-3 text-xs text-muted-foreground">
@@ -3739,7 +3044,7 @@ export default function Admin() {
 
                     {mandatoryGridUploading ? (
                       <div>
-                        <div className="mb-2 text-[13px] text-[#FF6F61]">
+                        <div className="mb-2 text-[13px] text-slate-600 dark:text-slate-300">
                           <RefreshCw className="mr-1.5 inline-block h-3.5 w-3.5 animate-spin" />
                           Parsing Excel... please wait
                         </div>
@@ -3749,9 +3054,9 @@ export default function Admin() {
                       <button
                         type="button"
                         onClick={() => mandatoryFileRef.current?.click()}
-                        className="flex w-full flex-col items-center justify-center rounded-md border-2 border-dashed border-border bg-muted/30 px-4 py-6 transition-colors hover:border-[#FF6F61] hover:bg-[#FF6F61]/5"
+                        className="flex w-full flex-col items-center justify-center rounded-md border-2 border-dashed border-border bg-muted/30 px-4 py-6 transition-colors hover:border-slate-400 hover:bg-slate-50 dark:hover:bg-slate-500/10"
                       >
-                        <Inbox className="mb-2 h-8 w-8 text-[#FF6F61]" />
+                        <Inbox className="mb-2 h-8 w-8 text-slate-600 dark:text-slate-300" />
                         <p className="text-[13px]">
                           Click to upload <strong>.xlsx</strong> file
                         </p>
@@ -3759,226 +3064,20 @@ export default function Admin() {
                       </button>
                     )}
                   </div>
-                </div>
-              </div>
-            </Spinner>
-          </CardContent>
-        </Card>
 
-        {/* Body Fabric Consumption Upload (body_fabric_consumption) */}
-        <Card className="mb-6 glass rounded-2xl border border-white/60">
-          <CardHeader className="flex flex-row items-center justify-between">
-            <CardTitle className="flex items-center gap-2 text-base">
-              <TableIcon className="h-4 w-4" />
-              Body Fabric Consumption Master
-            </CardTitle>
-            <div className="flex gap-2">
-              <Button size="sm" variant="outline" onClick={downloadBodyFabConsData}>
-                <Download />
-                Download Data
-              </Button>
-              <Button size="sm" variant="outline" onClick={downloadBodyFabConsTemplate}>
-                <Download />
-                Download Template
-              </Button>
-              <Button size="sm" variant="outline" onClick={loadBodyFabConsStatus} disabled={bodyFabConsStatusLoading}>
-                <RotateCw className={bodyFabConsStatusLoading ? 'animate-spin' : ''} />
-                Refresh Status
-              </Button>
-            </div>
-          </CardHeader>
-          <CardContent>
-            <Spinner spinning={bodyFabConsStatusLoading}>
-              <div className="grid grid-cols-1 gap-4 md:grid-cols-12">
-                {/* Status panel */}
-                <div className="md:col-span-7">
-                  {bodyFabConsTotal && bodyFabConsTotal.total > 0 ? (
-                    <Descriptions bordered>
-                      <Descriptions.Item label="Total Rows">
-                        <Badge variant="success">{bodyFabConsTotal.total.toLocaleString()}</Badge>
-                      </Descriptions.Item>
-                      <Descriptions.Item label="Major Categories">
-                        {bodyFabConsTotal.categories.toLocaleString()}
-                      </Descriptions.Item>
-                    </Descriptions>
-                  ) : (
-                    <Alert
-                      type="warning"
-                      showIcon
-                      message="No body fabric consumption data loaded"
-                      description="Upload FAB CONSUMPTION MASTER Excel. Reads columns: DIV, SUB DIV, MAJ CAT, FAB_WIDTH, FAB CONSUMPTION, GSM. All other columns are ignored. Replaces the entire table."
-                    />
-                  )}
-                </div>
-
-                {/* Upload panel */}
-                <div className="md:col-span-5">
-                  <div className="rounded-md border border-border p-4">
-                    <div className="mb-1 font-semibold">Upload FAB CONSUMPTION MASTER Excel</div>
-                    <div className="mb-3 text-xs text-muted-foreground">
-                      Columns used: <strong>DIV</strong>, <strong>SUB DIV</strong>, <strong>MAJ CAT</strong>, <strong>FAB_WIDTH</strong>, <strong>FAB CONSUMPTION</strong>, <strong>GSM</strong>.
-                      All other size/age columns are ignored. <strong className="text-destructive">Replaces entire table.</strong>
-                    </div>
-
-                    <input
-                      ref={bodyFabConsFileRef}
-                      type="file"
-                      accept=".xlsx,.xls"
-                      className="hidden"
-                      onChange={(e) => {
-                        const file = e.target.files?.[0];
-                        if (file) handleBodyFabConsUpload(file);
-                      }}
-                    />
-
-                    {bodyFabConsUploading ? (
-                      <div>
-                        <div className="mb-2 text-[13px] text-[#FF6F61]">
-                          <RefreshCw className="mr-1.5 inline-block h-3.5 w-3.5 animate-spin" />
-                          Parsing Excel &amp; replacing table...
-                        </div>
-                        <Progress value={bodyFabConsProgress} />
-                      </div>
-                    ) : (
-                      <button
-                        type="button"
-                        onClick={() => bodyFabConsFileRef.current?.click()}
-                        className="flex w-full flex-col items-center justify-center rounded-md border-2 border-dashed border-border bg-muted/30 px-4 py-6 transition-colors hover:border-[#FF6F61] hover:bg-[#FF6F61]/5"
-                      >
-                        <Inbox className="mb-2 h-8 w-8 text-[#FF6F61]" />
-                        <p className="text-[13px]">
-                          Click to upload <strong>.xlsx</strong> file
-                        </p>
-                        <p className="text-[11px] text-muted-foreground">Only Excel files. Max 50 MB.</p>
-                      </button>
-                    )}
-                  </div>
-                </div>
-              </div>
-            </Spinner>
-          </CardContent>
-        </Card>
-
-        {/* Value Addition Accessories Cost Upload */}
-        <Card className="mb-6 glass rounded-2xl border border-white/60">
-          <CardHeader className="flex flex-row items-center justify-between">
-            <CardTitle className="flex items-center gap-2 text-base">
-              <TableIcon className="h-4 w-4" />
-              Value Addition Accessories Cost Master
-            </CardTitle>
-            <div className="flex gap-2">
-              <Button size="sm" variant="outline" onClick={downloadVaacData}>
-                <Download />
-                Download Data
-              </Button>
-              <Button size="sm" variant="outline" onClick={downloadVaacTemplate}>
-                <Download />
-                Download Template
-              </Button>
-              <Button size="sm" variant="outline" onClick={loadVaacStatus} disabled={vaacStatusLoading}>
-                <RotateCw className={vaacStatusLoading ? 'animate-spin' : ''} />
-                Refresh Status
-              </Button>
-            </div>
-          </CardHeader>
-          <CardContent>
-            <Spinner spinning={vaacStatusLoading}>
-              <div className="grid grid-cols-1 gap-4 md:grid-cols-12">
-                {/* Status panel */}
-                <div className="md:col-span-7">
-                  {vaacTotal && vaacTotal.total > 0 ? (
-                    <Descriptions bordered>
-                      <Descriptions.Item label="Total Rows">
-                        <Badge variant="success">{vaacTotal.total.toLocaleString()}</Badge>
-                      </Descriptions.Item>
-                      <Descriptions.Item label="Major Categories">
-                        {vaacTotal.categories.toLocaleString()}
-                      </Descriptions.Item>
-                    </Descriptions>
-                  ) : (
-                    <Alert
-                      type="warning"
-                      showIcon
-                      message="No value addition accessories cost data loaded"
-                      description="Upload VAL ADD ACC MASTER Excel. Columns: DIV, SUB DIV, MAJ CAT + 7 accessory types (Button, Zipper, Velcro, Patch, Label, Elastic, Others) × 3 cols each. Replaces the entire table."
-                    />
-                  )}
-                </div>
-
-                {/* Upload panel */}
-                <div className="md:col-span-5">
-                  <div className="rounded-md border border-border p-4">
-                    <div className="mb-1 font-semibold">Upload VAL ADD ACC MASTER Excel</div>
-                    <div className="mb-3 text-xs text-muted-foreground">
-                      Columns used: <strong>DIV</strong>, <strong>SUB DIV</strong>, <strong>MAJ CAT</strong> + 7 accessory cost columns.{' '}
-                      <strong className="text-destructive">Replaces entire table.</strong>
-                    </div>
-
-                    <input
-                      ref={vaacFileRef}
-                      type="file"
-                      accept=".xlsx,.xls"
-                      className="hidden"
-                      onChange={(e) => {
-                        const file = e.target.files?.[0];
-                        if (file) handleVaacUpload(file);
-                      }}
-                    />
-
-                    {vaacUploading ? (
-                      <div>
-                        <div className="mb-2 text-[13px] text-[#FF6F61]">
-                          <RefreshCw className="mr-1.5 inline-block h-3.5 w-3.5 animate-spin" />
-                          Parsing Excel &amp; replacing table...
-                        </div>
-                        <Progress value={vaacProgress} />
-                      </div>
-                    ) : (
-                      <button
-                        type="button"
-                        onClick={() => vaacFileRef.current?.click()}
-                        className="flex w-full flex-col items-center justify-center rounded-md border-2 border-dashed border-border bg-muted/30 px-4 py-6 transition-colors hover:border-[#FF6F61] hover:bg-[#FF6F61]/5"
-                      >
-                        <Inbox className="mb-2 h-8 w-8 text-[#FF6F61]" />
-                        <p className="text-[13px]">
-                          Click to upload <strong>.xlsx</strong> file
-                        </p>
-                        <p className="text-[11px] text-muted-foreground">Only Excel files. Max 50 MB.</p>
-                      </button>
-                    )}
-                  </div>
-                </div>
-              </div>
-            </Spinner>
-          </CardContent>
-        </Card>
-
-        {/* Major Category Details Upload */}
-        <Card className="mb-6 glass rounded-2xl border border-white/60">
-          <CardHeader className="flex flex-row items-center justify-between">
-            <CardTitle className="flex items-center gap-2 text-base">
-              <TableIcon className="h-4 w-4" />
-              Major Category Details Master
-            </CardTitle>
-            <div className="flex gap-2">
-              <Button size="sm" variant="outline" onClick={downloadMcdData}>
-                <Download />
-                Download Data
-              </Button>
-              <Button size="sm" variant="outline" onClick={downloadMcdTemplate}>
-                <Download />
-                Download Template
-              </Button>
-              <Button size="sm" variant="outline" onClick={loadMcdStatus} disabled={mcdStatusLoading}>
-                <RotateCw className={mcdStatusLoading ? 'animate-spin' : ''} />
-                Refresh Status
-              </Button>
-            </div>
-          </CardHeader>
-          <CardContent>
-            <Spinner spinning={mcdStatusLoading}>
-              <div className="grid grid-cols-1 gap-4 md:grid-cols-12">
-                <div className="md:col-span-7">
+                </>
+              }
+            />
+            <MasterDataCard
+              title="Major Category Details"
+              rows={mcdTotal ? mcdTotal.total : null}
+              loading={mcdStatusLoading}
+              busy={mcdUploading}
+              onDownload={downloadMcdData}
+              onTemplate={downloadMcdTemplate}
+              onRefresh={loadMcdStatus}
+              details={
+                <>
                   {mcdTotal && mcdTotal.total > 0 ? (
                     <Descriptions bordered>
                       <Descriptions.Item label="Total Rows">
@@ -3996,8 +3095,11 @@ export default function Admin() {
                       description="Upload MAJOR CATEGORY DETAILS Excel. Columns: SEG, DIV, SUB DIV, MAJ CAT, MC CODE, MC DES, HSN CODE, MC STATUS. Data starts at row 4. Replaces the entire table."
                     />
                   )}
-                </div>
-                <div className="md:col-span-5">
+
+                </>
+              }
+              upload={
+                <>
                   <div className="rounded-md border border-border p-4">
                     <div className="mb-1 font-semibold">Upload Major Category Details Excel</div>
                     <div className="mb-3 text-xs text-muted-foreground">
@@ -4016,7 +3118,7 @@ export default function Admin() {
                     />
                     {mcdUploading ? (
                       <div>
-                        <div className="mb-2 text-[13px] text-[#FF6F61]">
+                        <div className="mb-2 text-[13px] text-slate-600 dark:text-slate-300">
                           <RefreshCw className="mr-1.5 inline-block h-3.5 w-3.5 animate-spin" />
                           Parsing Excel &amp; replacing table...
                         </div>
@@ -4026,9 +3128,9 @@ export default function Admin() {
                       <button
                         type="button"
                         onClick={() => mcdFileRef.current?.click()}
-                        className="flex w-full flex-col items-center justify-center rounded-md border-2 border-dashed border-border bg-muted/30 px-4 py-6 transition-colors hover:border-[#FF6F61] hover:bg-[#FF6F61]/5"
+                        className="flex w-full flex-col items-center justify-center rounded-md border-2 border-dashed border-border bg-muted/30 px-4 py-6 transition-colors hover:border-slate-400 hover:bg-slate-50 dark:hover:bg-slate-500/10"
                       >
-                        <Inbox className="mb-2 h-8 w-8 text-[#FF6F61]" />
+                        <Inbox className="mb-2 h-8 w-8 text-slate-600 dark:text-slate-300" />
                         <p className="text-[13px]">
                           Click to upload <strong>.xlsx</strong> file
                         </p>
@@ -4036,43 +3138,22 @@ export default function Admin() {
                       </button>
                     )}
                   </div>
-                </div>
-              </div>
-            </Spinner>
-          </CardContent>
-        </Card>
 
-        {/* National Grid Master Upload (attribute-code validation table) */}
-        <Card className="mb-6 glass rounded-2xl border border-white/60">
-          <CardHeader className="flex flex-row items-center justify-between">
-            <CardTitle className="flex items-center gap-2 text-base">
-              <TableIcon className="h-4 w-4" />
-              National Grid (Attribute Values)
-            </CardTitle>
-            <div className="flex gap-2">
-              <Button size="sm" variant="outline" onClick={() => navigate('/admin/expense/national-grid')}>
-                <Eye />
-                View Data
-              </Button>
-              <Button size="sm" variant="outline" onClick={downloadNationalGridData}>
-                <Download />
-                Download Data
-              </Button>
-              <Button size="sm" variant="outline" onClick={downloadNationalGridTemplate}>
-                <Download />
-                Download Template
-              </Button>
-              <Button size="sm" variant="outline" onClick={loadNationalGridStatus} disabled={nationalGridStatusLoading}>
-                <RotateCw className={nationalGridStatusLoading ? 'animate-spin' : ''} />
-                Refresh Status
-              </Button>
-            </div>
-          </CardHeader>
-          <CardContent>
-            <Spinner spinning={nationalGridStatusLoading}>
-              <div className="grid grid-cols-1 gap-4 md:grid-cols-12">
-                {/* Status panel */}
-                <div className="md:col-span-7">
+                </>
+              }
+            />
+            <MasterDataCard
+              title="National Grid"
+              description="Attribute Values"
+              rows={nationalGridTotal}
+              loading={nationalGridStatusLoading}
+              busy={nationalGridUploading}
+              onView={() => navigate('/admin/expense/national-grid')}
+              onDownload={downloadNationalGridData}
+              onTemplate={downloadNationalGridTemplate}
+              onRefresh={loadNationalGridStatus}
+              details={
+                <>
                   {nationalGridTotal !== null && nationalGridTotal > 0 ? (
                     <Descriptions bordered>
                       <Descriptions.Item label="Total (attribute, code) pairs">
@@ -4090,10 +3171,11 @@ export default function Admin() {
                       description="Upload an Excel with columns attribute_name, code, full_form to populate the validation table. The template below shows the expected format."
                     />
                   )}
-                </div>
 
-                {/* Upload panel */}
-                <div className="md:col-span-5">
+                </>
+              }
+              upload={
+                <>
                   <div className="rounded-md border border-border p-4">
                     <div className="mb-1 font-semibold">Upload National Grid Excel</div>
                     <div className="mb-3 text-xs text-muted-foreground">
@@ -4114,7 +3196,7 @@ export default function Admin() {
 
                     {nationalGridUploading ? (
                       <div>
-                        <div className="mb-2 text-[13px] text-[#FF6F61]">
+                        <div className="mb-2 text-[13px] text-slate-600 dark:text-slate-300">
                           <RefreshCw className="mr-1.5 inline-block h-3.5 w-3.5 animate-spin" />
                           Parsing &amp; importing rows...
                         </div>
@@ -4124,9 +3206,9 @@ export default function Admin() {
                       <button
                         type="button"
                         onClick={() => nationalGridFileRef.current?.click()}
-                        className="flex w-full flex-col items-center justify-center rounded-md border-2 border-dashed border-border bg-muted/30 px-4 py-6 transition-colors hover:border-[#FF6F61] hover:bg-[#FF6F61]/5"
+                        className="flex w-full flex-col items-center justify-center rounded-md border-2 border-dashed border-border bg-muted/30 px-4 py-6 transition-colors hover:border-slate-400 hover:bg-slate-50 dark:hover:bg-slate-500/10"
                       >
-                        <Inbox className="mb-2 h-8 w-8 text-[#FF6F61]" />
+                        <Inbox className="mb-2 h-8 w-8 text-slate-600 dark:text-slate-300" />
                         <p className="text-[13px]">
                           Click to upload <strong>.xlsx</strong> file
                         </p>
@@ -4134,35 +3216,972 @@ export default function Admin() {
                       </button>
                     )}
                   </div>
-                </div>
-              </div>
-            </Spinner>
-          </CardContent>
-        </Card>
 
-        {/* Hierarchy Excel Upload (Division / Sub-Division / Major Category, two-step preview→confirm) */}
-        <Card className="mb-6 glass rounded-2xl border border-white/60">
-          <CardHeader className="flex flex-row items-center justify-between">
-            <CardTitle className="flex items-center gap-2 text-base">
-              <TableIcon className="h-4 w-4" />
-              Hierarchy Excel Upload (Division / Sub-Division / Major Category)
-            </CardTitle>
-            <div className="flex gap-2">
-              <Button size="sm" variant="outline" onClick={() => navigate('/admin/expense/hierarchy')}>
-                <Eye />
-                View Data
-              </Button>
-              <Button size="sm" variant="outline" onClick={loadHierarchyExcelStatus} disabled={hierarchyExcelStatusLoading}>
-                <RotateCw className={hierarchyExcelStatusLoading ? 'animate-spin' : ''} />
-                Refresh Status
-              </Button>
-            </div>
-          </CardHeader>
-          <CardContent>
-            <Spinner spinning={hierarchyExcelStatusLoading}>
-              <div className="grid grid-cols-1 gap-4 md:grid-cols-12">
-                {/* Status panel */}
-                <div className="md:col-span-7">
+                </>
+              }
+            />
+            <MasterDataCard
+              title="Segment Master"
+              description="Price Segments per Major Category"
+              rows={segmentMasterMeta ? (segmentMasterMeta.total ?? 0) : null}
+              lastUpload={segmentMasterMeta?.lastUpdated ?? null}
+              loading={segmentMasterStatusLoading}
+              busy={segmentMasterUploading}
+              onView={() => navigate('/admin/expense/segment-master')}
+              onDownload={exportSegmentMaster}
+              onTemplate={downloadSegmentMasterTemplate}
+              onRefresh={loadSegmentMasterStatus}
+              details={
+                <>
+                  {segmentMasterMeta && (segmentMasterMeta.total ?? 0) > 0 ? (
+                    <Descriptions bordered>
+                      {segmentMasterMeta.lastUpdated && (
+                        <Descriptions.Item label="Last Updated">
+                          {new Date(segmentMasterMeta.lastUpdated).toLocaleString('en-IN', {
+                            timeZone: 'Asia/Kolkata', dateStyle: 'medium', timeStyle: 'short',
+                          }) + ' IST'}
+                        </Descriptions.Item>
+                      )}
+                      <Descriptions.Item label="Major Categories">
+                        <Badge variant="info">{(segmentMasterMeta.categories ?? 0).toLocaleString()}</Badge>
+                      </Descriptions.Item>
+                      <Descriptions.Item label="Total Rows">
+                        <Badge variant="success">{(segmentMasterMeta.total ?? 0).toLocaleString()}</Badge>
+                      </Descriptions.Item>
+                      {segmentMasterMeta.skipped != null && (segmentMasterMeta.skipped ?? 0) > 0 && (
+                        <Descriptions.Item label="Rows Skipped">
+                          <Badge variant="warning">{(segmentMasterMeta.skipped ?? 0).toLocaleString()}</Badge>
+                        </Descriptions.Item>
+                      )}
+                    </Descriptions>
+                  ) : (
+                    <Alert
+                      type="warning"
+                      showIcon
+                      message="No segment master data"
+                      description="Upload the Segment Master Excel (columns: SUB-DIVISION, MAJOR-CATEGORY, SEGMENT_TYPE, MIN, MAX). When MAX = ABOVE, that segment gets max=999999 and further segments for that MC are dropped."
+                    />
+                  )}
+
+                </>
+              }
+              upload={
+                <>
+                  <div className="rounded-md border border-border p-4">
+                    <div className="mb-1 font-semibold">Upload Segment Master Excel</div>
+                    <div className="mb-3 text-xs text-muted-foreground">
+                      Columns: <strong>SUB-DIVISION, MAJOR-CATEGORY, SEGMENT_TYPE, MIN, MAX</strong>. When MAX = <code>ABOVE</code>, max becomes 999999 and subsequent segments for that MC are dropped. <strong className="text-destructive">Replaces entire table.</strong>
+                    </div>
+
+                    <input
+                      ref={segmentFileRef}
+                      type="file"
+                      accept=".xlsx,.xls"
+                      className="hidden"
+                      onChange={(e) => {
+                        const file = e.target.files?.[0];
+                        if (file) handleSegmentMasterUpload(file);
+                      }}
+                    />
+
+                    {segmentMasterUploading ? (
+                      <div>
+                        <div className="mb-2 text-[13px] text-slate-600 dark:text-slate-300">
+                          <RefreshCw className="mr-1.5 inline-block h-3.5 w-3.5 animate-spin" />
+                          Parsing Excel &amp; replacing table...
+                        </div>
+                        <Progress value={segmentMasterProgress} />
+                      </div>
+                    ) : (
+                      <button
+                        type="button"
+                        onClick={() => segmentFileRef.current?.click()}
+                        className="flex w-full flex-col items-center justify-center rounded-md border-2 border-dashed border-border bg-muted/30 px-4 py-6 transition-colors hover:border-slate-400 hover:bg-slate-50 dark:hover:bg-slate-500/10"
+                      >
+                        <Inbox className="mb-2 h-8 w-8 text-slate-600 dark:text-slate-300" />
+                        <p className="text-[13px]">
+                          Click to upload <strong>.xlsx</strong> file
+                        </p>
+                        <p className="text-[11px] text-muted-foreground">Only Excel files. Max 50 MB.</p>
+                      </button>
+                    )}
+                  </div>
+
+                </>
+              }
+            />
+          </MasterGroup>
+          <MasterGroup title="GM" count={2} notUploaded={((gmMctMeta ? (gmMctMeta.totalRows ?? 0) : null) === 0 ? 1 : 0) + ((gmGridMeta ? (gmGridMeta.totalRows ?? gmGridMeta.totalValues ?? 0) : null) === 0 ? 1 : 0)}>
+            <MasterDataCard
+              title="GM Major Category Details"
+              rows={gmMctMeta ? (gmMctMeta.totalRows ?? 0) : null}
+              lastUpload={gmMctMeta?.uploadedAt ?? null}
+              loading={gmMctStatusLoading}
+              busy={gmMctUploading}
+              onDownload={downloadGMMctData}
+              onTemplate={downloadGMMctTemplate}
+              onRefresh={loadGMMctStatus}
+              details={
+                <>
+                  {gmMctMeta && (gmMctMeta.totalRows ?? 0) > 0 ? (
+                    <Descriptions bordered>
+                      <Descriptions.Item label="Last Upload">
+                        {gmMctMeta.uploadedAt
+                          ? new Date(gmMctMeta.uploadedAt).toLocaleString('en-IN', {
+                              timeZone: 'Asia/Kolkata',
+                              dateStyle: 'medium',
+                              timeStyle: 'short',
+                            }) + ' IST'
+                          : <span className="text-muted-foreground">Unknown</span>}
+                      </Descriptions.Item>
+                      <Descriptions.Item label="File">
+                        <span className="font-mono text-xs">{gmMctMeta.fileName || '—'}</span>
+                      </Descriptions.Item>
+                      <Descriptions.Item label="Major Categories">
+                        <Badge variant="info">{(gmMctMeta.categoriesCount ?? 0).toLocaleString()}</Badge>
+                      </Descriptions.Item>
+                      <Descriptions.Item label="Family Codes">
+                        <Badge variant="secondary">{(gmMctMeta.familyCodesCount ?? 0).toLocaleString()}</Badge>
+                      </Descriptions.Item>
+                      <Descriptions.Item label="Total Rows">
+                        <Badge variant="success">{(gmMctMeta.totalRows ?? 0).toLocaleString()}</Badge>
+                      </Descriptions.Item>
+                      <Descriptions.Item label="Rows Skipped">
+                        <Badge variant={(gmMctMeta.skippedRows ?? 0) > 0 ? 'warning' : 'secondary'}>
+                          {(gmMctMeta.skippedRows ?? 0).toLocaleString()}
+                        </Badge>
+                      </Descriptions.Item>
+                    </Descriptions>
+                  ) : (
+                    <Alert
+                      type="warning"
+                      showIcon
+                      message="No GM major category details uploaded yet"
+                      description="Upload the GM MCT Excel to populate the GM article hierarchy (division → sub-division → major category) and family code mappings."
+                    />
+                  )}
+
+                </>
+              }
+              upload={
+                <>
+                  <div className="rounded-md border border-border p-4">
+                    <div className="mb-1 font-semibold">Upload GM MCT Excel</div>
+                    <div className="mb-3 text-xs text-muted-foreground">
+                      Columns: <strong>seg, div, sub_div, maj_cat_nm</strong> (required), mc_cd, maj_cat_desc, mj_status, archetype, archetype_nm, family_code, family_name, status. Row 1 = headers, data from Row 2. Replaces the entire table.
+                    </div>
+
+                    <input
+                      ref={gmMctFileRef}
+                      type="file"
+                      accept=".xlsx,.xls"
+                      className="hidden"
+                      onChange={(e) => {
+                        const file = e.target.files?.[0];
+                        if (file) handleGMMctUpload(file);
+                      }}
+                    />
+
+                    {gmMctUploading ? (
+                      <div>
+                        <div className="mb-2 text-[13px] text-slate-600 dark:text-slate-300">
+                          <RefreshCw className="mr-1.5 inline-block h-3.5 w-3.5 animate-spin" />
+                          {gmMctJobPhase || 'Processing…'}
+                        </div>
+                        <Progress value={gmMctProgress} />
+                        <div className="mt-1 text-[11px] text-muted-foreground">{gmMctProgress}% complete</div>
+                      </div>
+                    ) : (
+                      <button
+                        type="button"
+                        onClick={() => gmMctFileRef.current?.click()}
+                        className="flex w-full flex-col items-center justify-center rounded-md border-2 border-dashed border-border bg-muted/30 px-4 py-6 transition-colors hover:border-slate-400 hover:bg-slate-50 dark:hover:bg-slate-500/10"
+                      >
+                        <Inbox className="mb-2 h-8 w-8 text-slate-600 dark:text-slate-300" />
+                        <p className="text-[13px]">
+                          Click to upload <strong>.xlsx</strong> file
+                        </p>
+                        <p className="text-[11px] text-muted-foreground">Only Excel files. Max 50 MB.</p>
+                      </button>
+                    )}
+                  </div>
+
+                </>
+              }
+            />
+            <MasterDataCard
+              title="GM Major Category Grid Values"
+              rows={gmGridMeta ? (gmGridMeta.totalRows ?? gmGridMeta.totalValues ?? 0) : null}
+              lastUpload={gmGridMeta?.uploadedAt ?? null}
+              loading={gmGridStatusLoading}
+              busy={gmGridUploading}
+              onDownload={downloadGMGridData}
+              onTemplate={downloadGMGridTemplate}
+              onRefresh={loadGMGridStatus}
+              details={
+                <>
+                  {gmGridMeta ? (
+                    <Descriptions bordered>
+                      <Descriptions.Item label="Last Upload">
+                        {gmGridMeta.uploadedAt
+                          ? new Date(gmGridMeta.uploadedAt).toLocaleString('en-IN', {
+                              timeZone: 'Asia/Kolkata',
+                              dateStyle: 'medium',
+                              timeStyle: 'short',
+                            }) + ' IST'
+                          : <span className="text-muted-foreground">Unknown</span>}
+                      </Descriptions.Item>
+                      <Descriptions.Item label="File">
+                        <span className="font-mono text-xs">{gmGridMeta.fileName || '—'}</span>
+                      </Descriptions.Item>
+                      <Descriptions.Item label="Major Categories">
+                        <Badge variant="info">{(gmGridMeta.categoriesCount ?? 0).toLocaleString()}</Badge>
+                      </Descriptions.Item>
+                      <Descriptions.Item label="Family Codes">
+                        <Badge variant="secondary">{(gmGridMeta.familyCodesCount ?? 0).toLocaleString()}</Badge>
+                      </Descriptions.Item>
+                      <Descriptions.Item label="Data Rows">
+                        <Badge variant="success">{(gmGridMeta.totalRows ?? gmGridMeta.totalValues ?? 0).toLocaleString()}</Badge>
+                      </Descriptions.Item>
+                      <Descriptions.Item label="Rows Skipped">
+                        <Badge variant={(gmGridMeta.skippedRows ?? 0) > 0 ? 'warning' : 'secondary'}>
+                          {(gmGridMeta.skippedRows ?? 0).toLocaleString()}
+                        </Badge>
+                      </Descriptions.Item>
+                    </Descriptions>
+                  ) : (
+                    <Alert
+                      type="warning"
+                      showIcon
+                      message="No GM grid uploaded yet"
+                      description="Upload the GM major category grid Excel to enable attribute dropdowns on the GM Article new article page."
+                    />
+                  )}
+
+                </>
+              }
+              upload={
+                <>
+                  <div className="rounded-md border border-border p-4">
+                    <div className="mb-1 font-semibold">Upload GM Grid Excel</div>
+                    <div className="mb-3 text-xs text-muted-foreground">
+                      Columns: <strong>div, sub_div, seg, maj_cat_nm</strong> (required), <strong>family_code</strong> (required), mandatory, family_name, status, <strong>grid_val</strong> (required), uom. Row 1 = title, Row 2 = headers, data from Row 3.
+                    </div>
+
+                    <input
+                      ref={gmGridFileRef}
+                      type="file"
+                      accept=".xlsx,.xls"
+                      className="hidden"
+                      onChange={(e) => {
+                        const file = e.target.files?.[0];
+                        if (file) handleGMGridUpload(file);
+                      }}
+                    />
+
+                    {gmGridUploading ? (
+                      <div>
+                        <div className="mb-2 text-[13px] text-slate-600 dark:text-slate-300">
+                          <RefreshCw className="mr-1.5 inline-block h-3.5 w-3.5 animate-spin" />
+                          {gmGridJobPhase || 'Processing…'}
+                        </div>
+                        <Progress value={gmGridProgress} />
+                        <div className="mt-1 text-[11px] text-muted-foreground">{gmGridProgress}% complete</div>
+                      </div>
+                    ) : (
+                      <button
+                        type="button"
+                        onClick={() => gmGridFileRef.current?.click()}
+                        className="flex w-full flex-col items-center justify-center rounded-md border-2 border-dashed border-border bg-muted/30 px-4 py-6 transition-colors hover:border-slate-400 hover:bg-slate-50 dark:hover:bg-slate-500/10"
+                      >
+                        <Inbox className="mb-2 h-8 w-8 text-slate-600 dark:text-slate-300" />
+                        <p className="text-[13px]">
+                          Click to upload <strong>.xlsx</strong> file
+                        </p>
+                        <p className="text-[11px] text-muted-foreground">Only Excel files. Max 50 MB.</p>
+                      </button>
+                    )}
+                  </div>
+
+                </>
+              }
+            />
+          </MasterGroup>
+          <MasterGroup title="Fabric & body" count={4} notUploaded={((fabricArticleDataMeta ? (fabricArticleDataMeta.total ?? 0) : null) === 0 ? 1 : 0) + ((fabricArticleMasterMeta ? (fabricArticleMasterMeta.total ?? 0) : null) === 0 ? 1 : 0) + ((bodyFabConsTotal ? bodyFabConsTotal.total : null) === 0 ? 1 : 0) + ((bodyArticleDataMeta ? (bodyArticleDataMeta.total ?? 0) : null) === 0 ? 1 : 0)}>
+            <MasterDataCard
+              title="Fabric Article Data"
+              description="Bulk Insert"
+              rows={fabricArticleDataMeta ? (fabricArticleDataMeta.total ?? 0) : null}
+              lastUpload={fabricArticleDataMeta?.uploadedAt ?? null}
+              loading={fabricArticleDataStatusLoading}
+              busy={fabricArticleDataUploading}
+              onView={() => navigate('/admin/expense/fabric-article-data')}
+              onTemplate={downloadFabricArticleDataTemplate}
+              onRefresh={loadFabricArticleDataStatus}
+              details={
+                <>
+                  {fabricArticleDataMeta && (fabricArticleDataMeta.total ?? 0) > 0 ? (
+                    <Descriptions bordered>
+                      {fabricArticleDataMeta.uploadedAt && (
+                        <Descriptions.Item label="Last Upload">
+                          {new Date(fabricArticleDataMeta.uploadedAt).toLocaleString('en-IN', {
+                            timeZone: 'Asia/Kolkata', dateStyle: 'medium', timeStyle: 'short',
+                          }) + ' IST'}
+                        </Descriptions.Item>
+                      )}
+                      {fabricArticleDataMeta.fileName && (
+                        <Descriptions.Item label="File">
+                          <span className="font-mono text-xs">{fabricArticleDataMeta.fileName}</span>
+                        </Descriptions.Item>
+                      )}
+                      <Descriptions.Item label="Total Rows">
+                        <Badge variant="secondary">{(fabricArticleDataMeta.total ?? 0).toLocaleString()}</Badge>
+                      </Descriptions.Item>
+                      <Descriptions.Item label="Synced">
+                        <Badge variant="success">{(fabricArticleDataMeta.synced ?? 0).toLocaleString()}</Badge>
+                      </Descriptions.Item>
+                      <Descriptions.Item label="Pending">
+                        <Badge variant="warning">{(fabricArticleDataMeta.pending ?? 0).toLocaleString()}</Badge>
+                      </Descriptions.Item>
+                      {fabricArticleDataMeta.skipped != null && (
+                        <Descriptions.Item label="Rows Skipped">
+                          <Badge variant={(fabricArticleDataMeta.skipped ?? 0) > 0 ? 'warning' : 'secondary'}>
+                            {(fabricArticleDataMeta.skipped ?? 0).toLocaleString()}
+                          </Badge>
+                        </Descriptions.Item>
+                      )}
+                    </Descriptions>
+                  ) : (
+                    <Alert
+                      type="warning"
+                      showIcon
+                      message="No fabric article data uploaded yet"
+                      description="Upload an Excel with columns: FABRIC_ARTICLE_NUMBER, FABRIC_ARTICLE_DESC, DIVISION, SUB_DIVISION, MAJOR_CATEGORY, VENDOR_NAME, VENDOR_CODE, plus fabric attribute columns. Each row is inserted as a new record."
+                    />
+                  )}
+
+                </>
+              }
+              upload={
+                <>
+                  <div className="rounded-md border border-border p-4">
+                    <div className="mb-1 font-semibold">Upload Fabric Article Data Excel</div>
+                    <div className="mb-3 text-xs text-muted-foreground">
+                      Sheet <strong>FABRIC ARTICLE DATA</strong> (or first sheet), headers in row 3, data from row 5.
+                      Each row is <strong>inserted as a new record</strong> with a fresh ID.
+                    </div>
+
+                    <input
+                      ref={fabricArticleDataFileRef}
+                      type="file"
+                      accept=".xlsx,.xls"
+                      className="hidden"
+                      onChange={(e) => {
+                        const file = e.target.files?.[0];
+                        if (file) handleFabricArticleDataUpload(file);
+                      }}
+                    />
+
+                    {fabricArticleDataUploading ? (
+                      <div>
+                        <div className="mb-2 text-[13px] text-slate-600 dark:text-slate-300">
+                          <RefreshCw className="mr-1.5 inline-block h-3.5 w-3.5 animate-spin" />
+                          Parsing Excel & inserting records...
+                        </div>
+                        <Progress value={fabricArticleDataProgress} />
+                      </div>
+                    ) : (
+                      <button
+                        type="button"
+                        onClick={() => fabricArticleDataFileRef.current?.click()}
+                        className="flex w-full flex-col items-center justify-center rounded-md border-2 border-dashed border-border bg-muted/30 px-4 py-6 transition-colors hover:border-slate-400 hover:bg-slate-50 dark:hover:bg-slate-500/10"
+                      >
+                        <Inbox className="mb-2 h-8 w-8 text-slate-600 dark:text-slate-300" />
+                        <p className="text-[13px]">
+                          Click to upload <strong>.xlsx</strong> file
+                        </p>
+                        <p className="text-[11px] text-muted-foreground">Only Excel files. Max 50 MB.</p>
+                      </button>
+                    )}
+                  </div>
+
+                </>
+              }
+            />
+            <MasterDataCard
+              title="Fabric Article Master"
+              description="Fabric Hierarchy"
+              rows={fabricArticleMasterMeta ? (fabricArticleMasterMeta.total ?? 0) : null}
+              lastUpload={fabricArticleMasterMeta?.uploadedAt ?? null}
+              loading={fabricArticleMasterStatusLoading}
+              busy={fabricArticleMasterUploading}
+              onView={() => navigate('/admin/expense/fabric-article-master')}
+              onDownload={downloadFabricArticleMasterData}
+              onTemplate={downloadFabricArticleMasterTemplate}
+              onRefresh={loadFabricArticleMasterStatus}
+              details={
+                <>
+                  {fabricArticleMasterMeta && (fabricArticleMasterMeta.total ?? 0) > 0 ? (
+                    <Descriptions bordered>
+                      {fabricArticleMasterMeta.uploadedAt && (
+                        <Descriptions.Item label="Last Upload">
+                          {new Date(fabricArticleMasterMeta.uploadedAt).toLocaleString('en-IN', {
+                            timeZone: 'Asia/Kolkata', dateStyle: 'medium', timeStyle: 'short',
+                          }) + ' IST'}
+                        </Descriptions.Item>
+                      )}
+                      {fabricArticleMasterMeta.fileName && (
+                        <Descriptions.Item label="File">
+                          <span className="font-mono text-xs">{fabricArticleMasterMeta.fileName}</span>
+                        </Descriptions.Item>
+                      )}
+                      <Descriptions.Item label="Major Categories">
+                        <Badge variant="info">{(fabricArticleMasterMeta.categories ?? 0).toLocaleString()}</Badge>
+                      </Descriptions.Item>
+                      <Descriptions.Item label="Total Rows">
+                        <Badge variant="secondary">{(fabricArticleMasterMeta.total ?? 0).toLocaleString()}</Badge>
+                      </Descriptions.Item>
+                      {fabricArticleMasterMeta.skipped != null && (
+                        <Descriptions.Item label="Rows Skipped">
+                          <Badge variant={(fabricArticleMasterMeta.skipped ?? 0) > 0 ? 'warning' : 'secondary'}>
+                            {(fabricArticleMasterMeta.skipped ?? 0).toLocaleString()}
+                          </Badge>
+                        </Descriptions.Item>
+                      )}
+                    </Descriptions>
+                  ) : (
+                    <Alert
+                      type="warning"
+                      showIcon
+                      message="No fabric article master uploaded yet"
+                      description="Upload the Fabric Article Master Excel (columns: SEG, DIV, SUB DIV, MAJ CAT, MC CODE, MC DES, STATUS, HSN CD, ART_TYPE) to populate fabric hierarchy dropdowns."
+                    />
+                  )}
+
+                </>
+              }
+              upload={
+                <>
+                  <div className="rounded-md border border-border p-4">
+                    <div className="mb-1 font-semibold">Upload Fabric Article Master Excel</div>
+                    <div className="mb-3 text-xs text-muted-foreground">
+                      Sheet <strong>HIERARCHY MASTER</strong> (or first sheet), headers in row 3, data from row 5 —
+                      columns: SEG, DIV, SUB DIV, MAJ CAT, MC CODE, MC DES, STATUS, HSN CD, ART_TYPE. Replaces the entire table.
+                    </div>
+
+                    <input
+                      ref={fabricArticleFileRef}
+                      type="file"
+                      accept=".xlsx,.xls"
+                      className="hidden"
+                      onChange={(e) => {
+                        const file = e.target.files?.[0];
+                        if (file) handleFabricArticleMasterUpload(file);
+                      }}
+                    />
+
+                    {fabricArticleMasterUploading ? (
+                      <div>
+                        <div className="mb-2 text-[13px] text-slate-600 dark:text-slate-300">
+                          <RefreshCw className="mr-1.5 inline-block h-3.5 w-3.5 animate-spin" />
+                          Parsing Excel & replacing table...
+                        </div>
+                        <Progress value={fabricArticleMasterProgress} />
+                      </div>
+                    ) : (
+                      <button
+                        type="button"
+                        onClick={() => fabricArticleFileRef.current?.click()}
+                        className="flex w-full flex-col items-center justify-center rounded-md border-2 border-dashed border-border bg-muted/30 px-4 py-6 transition-colors hover:border-slate-400 hover:bg-slate-50 dark:hover:bg-slate-500/10"
+                      >
+                        <Inbox className="mb-2 h-8 w-8 text-slate-600 dark:text-slate-300" />
+                        <p className="text-[13px]">
+                          Click to upload <strong>.xlsx</strong> file
+                        </p>
+                        <p className="text-[11px] text-muted-foreground">Only Excel files. Max 50 MB.</p>
+                      </button>
+                    )}
+                  </div>
+
+                </>
+              }
+            />
+            <MasterDataCard
+              title="Body Fabric Consumption"
+              rows={bodyFabConsTotal ? bodyFabConsTotal.total : null}
+              loading={bodyFabConsStatusLoading}
+              busy={bodyFabConsUploading}
+              onDownload={downloadBodyFabConsData}
+              onTemplate={downloadBodyFabConsTemplate}
+              onRefresh={loadBodyFabConsStatus}
+              details={
+                <>
+                  {bodyFabConsTotal && bodyFabConsTotal.total > 0 ? (
+                    <Descriptions bordered>
+                      <Descriptions.Item label="Total Rows">
+                        <Badge variant="success">{bodyFabConsTotal.total.toLocaleString()}</Badge>
+                      </Descriptions.Item>
+                      <Descriptions.Item label="Major Categories">
+                        {bodyFabConsTotal.categories.toLocaleString()}
+                      </Descriptions.Item>
+                    </Descriptions>
+                  ) : (
+                    <Alert
+                      type="warning"
+                      showIcon
+                      message="No body fabric consumption data loaded"
+                      description="Upload FAB CONSUMPTION MASTER Excel. Reads columns: DIV, SUB DIV, MAJ CAT, FAB_WIDTH, FAB CONSUMPTION, GSM. All other columns are ignored. Replaces the entire table."
+                    />
+                  )}
+
+                </>
+              }
+              upload={
+                <>
+                  <div className="rounded-md border border-border p-4">
+                    <div className="mb-1 font-semibold">Upload FAB CONSUMPTION MASTER Excel</div>
+                    <div className="mb-3 text-xs text-muted-foreground">
+                      Columns used: <strong>DIV</strong>, <strong>SUB DIV</strong>, <strong>MAJ CAT</strong>, <strong>FAB_WIDTH</strong>, <strong>FAB CONSUMPTION</strong>, <strong>GSM</strong>.
+                      All other size/age columns are ignored. <strong className="text-destructive">Replaces entire table.</strong>
+                    </div>
+
+                    <input
+                      ref={bodyFabConsFileRef}
+                      type="file"
+                      accept=".xlsx,.xls"
+                      className="hidden"
+                      onChange={(e) => {
+                        const file = e.target.files?.[0];
+                        if (file) handleBodyFabConsUpload(file);
+                      }}
+                    />
+
+                    {bodyFabConsUploading ? (
+                      <div>
+                        <div className="mb-2 text-[13px] text-slate-600 dark:text-slate-300">
+                          <RefreshCw className="mr-1.5 inline-block h-3.5 w-3.5 animate-spin" />
+                          Parsing Excel &amp; replacing table...
+                        </div>
+                        <Progress value={bodyFabConsProgress} />
+                      </div>
+                    ) : (
+                      <button
+                        type="button"
+                        onClick={() => bodyFabConsFileRef.current?.click()}
+                        className="flex w-full flex-col items-center justify-center rounded-md border-2 border-dashed border-border bg-muted/30 px-4 py-6 transition-colors hover:border-slate-400 hover:bg-slate-50 dark:hover:bg-slate-500/10"
+                      >
+                        <Inbox className="mb-2 h-8 w-8 text-slate-600 dark:text-slate-300" />
+                        <p className="text-[13px]">
+                          Click to upload <strong>.xlsx</strong> file
+                        </p>
+                        <p className="text-[11px] text-muted-foreground">Only Excel files. Max 50 MB.</p>
+                      </button>
+                    )}
+                  </div>
+
+                </>
+              }
+            />
+            <MasterDataCard
+              title="Body Article Data"
+              description="Bulk Update"
+              rows={bodyArticleDataMeta ? (bodyArticleDataMeta.total ?? 0) : null}
+              lastUpload={bodyArticleDataMeta?.uploadedAt ?? null}
+              loading={bodyArticleDataStatusLoading}
+              busy={bodyArticleDataUploading}
+              onView={() => navigate('/admin/expense/body-article-data')}
+              onTemplate={downloadBodyArticleDataTemplate}
+              onRefresh={loadBodyArticleDataStatus}
+              details={
+                <>
+                  {bodyArticleDataMeta && (bodyArticleDataMeta.total ?? 0) > 0 ? (
+                    <Descriptions bordered>
+                      {bodyArticleDataMeta.uploadedAt && (
+                        <Descriptions.Item label="Last Upload">
+                          {new Date(bodyArticleDataMeta.uploadedAt).toLocaleString('en-IN', {
+                            timeZone: 'Asia/Kolkata', dateStyle: 'medium', timeStyle: 'short',
+                          }) + ' IST'}
+                        </Descriptions.Item>
+                      )}
+                      {bodyArticleDataMeta.fileName && (
+                        <Descriptions.Item label="File">
+                          <span className="font-mono text-xs">{bodyArticleDataMeta.fileName}</span>
+                        </Descriptions.Item>
+                      )}
+                      <Descriptions.Item label="Body Articles">
+                        <Badge variant="info">{(bodyArticleDataMeta.bodyArticles ?? 0).toLocaleString()}</Badge>
+                      </Descriptions.Item>
+                      <Descriptions.Item label="Total Rows">
+                        <Badge variant="secondary">{(bodyArticleDataMeta.total ?? 0).toLocaleString()}</Badge>
+                      </Descriptions.Item>
+                      {bodyArticleDataMeta.inserted != null && (
+                        <Descriptions.Item label="Rows Inserted">
+                          <Badge variant="secondary">{(bodyArticleDataMeta.inserted ?? 0).toLocaleString()}</Badge>
+                        </Descriptions.Item>
+                      )}
+                      {bodyArticleDataMeta.updated != null && (
+                        <Descriptions.Item label="Rows Updated">
+                          <Badge variant="secondary">{(bodyArticleDataMeta.updated ?? 0).toLocaleString()}</Badge>
+                        </Descriptions.Item>
+                      )}
+                      {bodyArticleDataMeta.skipped != null && (
+                        <Descriptions.Item label="Rows Skipped">
+                          <Badge variant={(bodyArticleDataMeta.skipped ?? 0) > 0 ? 'warning' : 'secondary'}>
+                            {(bodyArticleDataMeta.skipped ?? 0).toLocaleString()}
+                          </Badge>
+                        </Descriptions.Item>
+                      )}
+                      {bodyArticleDataMeta.truncated != null && (
+                        <Descriptions.Item label="Values Truncated">
+                          <Badge variant={(bodyArticleDataMeta.truncated ?? 0) > 0 ? 'warning' : 'secondary'}>
+                            {(bodyArticleDataMeta.truncated ?? 0).toLocaleString()}
+                          </Badge>
+                        </Descriptions.Item>
+                      )}
+                    </Descriptions>
+                  ) : (
+                    <Alert
+                      type="warning"
+                      showIcon
+                      message="No body article data uploaded yet"
+                      description="Upload the Body Article Data Excel (Division/Sub Division/Major Category/MC Code, Body Article Number/Description, construction attributes, CMTP_COST, CMP_COST, FAB_CONS, WIDTH) to populate body article master data."
+                    />
+                  )}
+
+                </>
+              }
+              upload={
+                <>
+                  <div className="rounded-md border border-border p-4">
+                    <div className="mb-1 font-semibold">Upload Body Article Data Excel</div>
+                    <div className="mb-3 text-xs text-muted-foreground">
+                      Sheet <strong>BODY UPLOADER FORMAT</strong> (or first sheet), headers in row 3, data from row 5 —
+                      Division, Sub Division, Major Category, MC Code, Body Article Number, Description, construction attributes, CMTP_COST, CMP_COST, FAB_CONS, WIDTH.
+                      Rows matching an existing Body Article Number are updated, others are inserted; approval/SAP-sync data is untouched.
+                      Text values over 100 characters (255 for Description) are truncated to fit.
+                    </div>
+
+                    <input
+                      ref={bodyArticleDataFileRef}
+                      type="file"
+                      accept=".xlsx,.xls"
+                      className="hidden"
+                      onChange={(e) => {
+                        const file = e.target.files?.[0];
+                        if (file) handleBodyArticleDataUpload(file);
+                      }}
+                    />
+
+                    {bodyArticleDataUploading ? (
+                      <div>
+                        <div className="mb-2 text-[13px] text-slate-600 dark:text-slate-300">
+                          <RefreshCw className="mr-1.5 inline-block h-3.5 w-3.5 animate-spin" />
+                          Parsing Excel & updating table...
+                        </div>
+                        <Progress value={bodyArticleDataProgress} />
+                      </div>
+                    ) : (
+                      <button
+                        type="button"
+                        onClick={() => bodyArticleDataFileRef.current?.click()}
+                        className="flex w-full flex-col items-center justify-center rounded-md border-2 border-dashed border-border bg-muted/30 px-4 py-6 transition-colors hover:border-slate-400 hover:bg-slate-50 dark:hover:bg-slate-500/10"
+                      >
+                        <Inbox className="mb-2 h-8 w-8 text-slate-600 dark:text-slate-300" />
+                        <p className="text-[13px]">
+                          Click to upload <strong>.xlsx</strong> file
+                        </p>
+                        <p className="text-[11px] text-muted-foreground">Only Excel files. Max 50 MB.</p>
+                      </button>
+                    )}
+                  </div>
+
+                </>
+              }
+            />
+          </MasterGroup>
+          <MasterGroup title="Costs" count={3} notUploaded={((vaacTotal ? vaacTotal.total : null) === 0 ? 1 : 0) + ((basicAccessoriesMeta ? (basicAccessoriesMeta.total ?? 0) : null) === 0 ? 1 : 0) + ((cmpCostMasterMeta ? (cmpCostMasterMeta.total ?? 0) : null) === 0 ? 1 : 0)}>
+            <MasterDataCard
+              title="Value Addition Accessories Cost"
+              rows={vaacTotal ? vaacTotal.total : null}
+              loading={vaacStatusLoading}
+              busy={vaacUploading}
+              onDownload={downloadVaacData}
+              onTemplate={downloadVaacTemplate}
+              onRefresh={loadVaacStatus}
+              details={
+                <>
+                  {vaacTotal && vaacTotal.total > 0 ? (
+                    <Descriptions bordered>
+                      <Descriptions.Item label="Total Rows">
+                        <Badge variant="success">{vaacTotal.total.toLocaleString()}</Badge>
+                      </Descriptions.Item>
+                      <Descriptions.Item label="Major Categories">
+                        {vaacTotal.categories.toLocaleString()}
+                      </Descriptions.Item>
+                    </Descriptions>
+                  ) : (
+                    <Alert
+                      type="warning"
+                      showIcon
+                      message="No value addition accessories cost data loaded"
+                      description="Upload VAL ADD ACC MASTER Excel. Columns: DIV, SUB DIV, MAJ CAT + 7 accessory types (Button, Zipper, Velcro, Patch, Label, Elastic, Others) × 3 cols each. Replaces the entire table."
+                    />
+                  )}
+
+                </>
+              }
+              upload={
+                <>
+                  <div className="rounded-md border border-border p-4">
+                    <div className="mb-1 font-semibold">Upload VAL ADD ACC MASTER Excel</div>
+                    <div className="mb-3 text-xs text-muted-foreground">
+                      Columns used: <strong>DIV</strong>, <strong>SUB DIV</strong>, <strong>MAJ CAT</strong> + 7 accessory cost columns.{' '}
+                      <strong className="text-destructive">Replaces entire table.</strong>
+                    </div>
+
+                    <input
+                      ref={vaacFileRef}
+                      type="file"
+                      accept=".xlsx,.xls"
+                      className="hidden"
+                      onChange={(e) => {
+                        const file = e.target.files?.[0];
+                        if (file) handleVaacUpload(file);
+                      }}
+                    />
+
+                    {vaacUploading ? (
+                      <div>
+                        <div className="mb-2 text-[13px] text-slate-600 dark:text-slate-300">
+                          <RefreshCw className="mr-1.5 inline-block h-3.5 w-3.5 animate-spin" />
+                          Parsing Excel &amp; replacing table...
+                        </div>
+                        <Progress value={vaacProgress} />
+                      </div>
+                    ) : (
+                      <button
+                        type="button"
+                        onClick={() => vaacFileRef.current?.click()}
+                        className="flex w-full flex-col items-center justify-center rounded-md border-2 border-dashed border-border bg-muted/30 px-4 py-6 transition-colors hover:border-slate-400 hover:bg-slate-50 dark:hover:bg-slate-500/10"
+                      >
+                        <Inbox className="mb-2 h-8 w-8 text-slate-600 dark:text-slate-300" />
+                        <p className="text-[13px]">
+                          Click to upload <strong>.xlsx</strong> file
+                        </p>
+                        <p className="text-[11px] text-muted-foreground">Only Excel files. Max 50 MB.</p>
+                      </button>
+                    )}
+                  </div>
+
+                </>
+              }
+            />
+            <MasterDataCard
+              title="Basic Accessories"
+              description="Trims &amp; Packaging Cost per Major Category"
+              rows={basicAccessoriesMeta ? (basicAccessoriesMeta.total ?? 0) : null}
+              lastUpload={basicAccessoriesMeta?.lastUpdated ?? null}
+              loading={basicAccessoriesStatusLoading}
+              busy={basicAccessoriesUploading}
+              onView={() => navigate('/admin/expense/basic-accessories')}
+              onDownload={() => downloadBasicAccessoriesFile('export')}
+              onTemplate={() => downloadBasicAccessoriesFile('template')}
+              onRefresh={loadBasicAccessoriesStatus}
+              details={
+                <>
+                  {basicAccessoriesMeta && (basicAccessoriesMeta.total ?? 0) > 0 ? (
+                    <Descriptions bordered>
+                      {basicAccessoriesMeta.lastUpdated && (
+                        <Descriptions.Item label="Last Updated">
+                          {new Date(basicAccessoriesMeta.lastUpdated).toLocaleString('en-IN', {
+                            timeZone: 'Asia/Kolkata', dateStyle: 'medium', timeStyle: 'short',
+                          }) + ' IST'}
+                        </Descriptions.Item>
+                      )}
+                      <Descriptions.Item label="Major Categories">
+                        <Badge variant="info">{(basicAccessoriesMeta.categories ?? 0).toLocaleString()}</Badge>
+                      </Descriptions.Item>
+                      <Descriptions.Item label="Accessory Rows">
+                        <Badge variant="success">{(basicAccessoriesMeta.components ?? 0).toLocaleString()}</Badge>
+                      </Descriptions.Item>
+                      {basicAccessoriesMeta.withCost != null && (
+                        <Descriptions.Item label="With Basic &amp; Trims Cost">
+                          <Badge variant="info">{(basicAccessoriesMeta.withCost ?? 0).toLocaleString()}</Badge>
+                        </Descriptions.Item>
+                      )}
+                      {basicAccessoriesMeta.updated != null && (
+                        <Descriptions.Item label="Updated in Last Upload">
+                          <Badge variant="success">{(basicAccessoriesMeta.updated ?? 0).toLocaleString()}</Badge>
+                        </Descriptions.Item>
+                      )}
+                      {basicAccessoriesMeta.skipped != null && (basicAccessoriesMeta.skipped ?? 0) > 0 && (
+                        <Descriptions.Item label="Rows Skipped">
+                          <Badge variant="warning">{(basicAccessoriesMeta.skipped ?? 0).toLocaleString()}</Badge>
+                        </Descriptions.Item>
+                      )}
+                    </Descriptions>
+                  ) : (
+                    <Alert
+                      type="warning"
+                      showIcon
+                      message="No basic accessories data"
+                      description={'Upload the "MAJ CAT WISE BASIC ACCESSORIES DETAILS" workbook — sheets "ACC LIST" (Button, Zipper, Elastic, Lace, Draw Cord, Hook & Loop, Interlining) and "Packaging Master" (Poly Bag, Price Tag, Kimball Tag, Hanger, Tissue Paper, Carton), each with PER PC CONSUMPTION (QTY), RATE and VALUE per major category.'}
+                    />
+                  )}
+
+                </>
+              }
+              upload={
+                <>
+                  <div className="rounded-md border border-border p-4">
+                    <div className="mb-1 font-semibold">Upload Basic Accessories Excel</div>
+                    <div className="mb-3 text-xs text-muted-foreground">
+                      Sheets: <strong>ACC LIST</strong> + <strong>Packaging Master</strong>, headers on row 3 starting at column C
+                      (DIV, SUB DIV, MAJ CAT, then QTY / RATE / VALUE per accessory). Download the template for the exact layout.{' '}
+                      <strong>Updates by MAJ CAT</strong> — categories not in the file are left untouched.
+                    </div>
+
+                    <input
+                      ref={basicAccessoriesFileRef}
+                      type="file"
+                      accept=".xlsx,.xls"
+                      className="hidden"
+                      onChange={(e) => {
+                        const file = e.target.files?.[0];
+                        if (file) handleBasicAccessoriesUpload(file);
+                      }}
+                    />
+
+                    {basicAccessoriesUploading ? (
+                      <div>
+                        <div className="mb-2 text-[13px] text-slate-600 dark:text-slate-300">
+                          <RefreshCw className="mr-1.5 inline-block h-3.5 w-3.5 animate-spin" />
+                          Parsing Excel &amp; updating accessories...
+                        </div>
+                        <Progress value={basicAccessoriesProgress} />
+                      </div>
+                    ) : (
+                      <button
+                        type="button"
+                        onClick={() => basicAccessoriesFileRef.current?.click()}
+                        className="flex w-full flex-col items-center justify-center rounded-md border-2 border-dashed border-border bg-muted/30 px-4 py-6 transition-colors hover:border-slate-400 hover:bg-slate-50 dark:hover:bg-slate-500/10"
+                      >
+                        <Inbox className="mb-2 h-8 w-8 text-slate-600 dark:text-slate-300" />
+                        <p className="text-[13px]">
+                          Click to upload <strong>.xlsx</strong> file
+                        </p>
+                        <p className="text-[11px] text-muted-foreground">Only Excel files. Max 50 MB.</p>
+                      </button>
+                    )}
+                  </div>
+
+                </>
+              }
+            />
+            <MasterDataCard
+              title="CMP Cost Master"
+              description="Rough CMP Cost per Major Category"
+              rows={cmpCostMasterMeta ? (cmpCostMasterMeta.total ?? 0) : null}
+              lastUpload={cmpCostMasterMeta?.lastUpdated ?? null}
+              loading={cmpCostMasterStatusLoading}
+              busy={cmpCostMasterUploading}
+              onView={() => navigate('/admin/expense/cmp-cost-master')}
+              onDownload={() => downloadCmpCostMasterFile('export')}
+              onTemplate={() => downloadCmpCostMasterFile('template')}
+              onRefresh={loadCmpCostMasterStatus}
+              details={
+                <>
+                  {cmpCostMasterMeta && (cmpCostMasterMeta.total ?? 0) > 0 ? (
+                    <Descriptions bordered>
+                      {cmpCostMasterMeta.lastUpdated && (
+                        <Descriptions.Item label="Last Updated">
+                          {new Date(cmpCostMasterMeta.lastUpdated).toLocaleString('en-IN', {
+                            timeZone: 'Asia/Kolkata', dateStyle: 'medium', timeStyle: 'short',
+                          }) + ' IST'}
+                        </Descriptions.Item>
+                      )}
+                      <Descriptions.Item label="Major Categories">
+                        <Badge variant="info">{(cmpCostMasterMeta.categories ?? 0).toLocaleString()}</Badge>
+                      </Descriptions.Item>
+                      <Descriptions.Item label="Total Rows">
+                        <Badge variant="success">{(cmpCostMasterMeta.total ?? 0).toLocaleString()}</Badge>
+                      </Descriptions.Item>
+                      {cmpCostMasterMeta.skipped != null && (cmpCostMasterMeta.skipped ?? 0) > 0 && (
+                        <Descriptions.Item label="Rows Skipped">
+                          <Badge variant="warning">{(cmpCostMasterMeta.skipped ?? 0).toLocaleString()}</Badge>
+                        </Descriptions.Item>
+                      )}
+                    </Descriptions>
+                  ) : (
+                    <Alert
+                      type="warning"
+                      showIcon
+                      message="No CMP cost master data"
+                      description="Upload the CMP Cost Excel (columns: DIV, SUB_DIV, MAJ_CAT, Total). Auto-fills a Body Article's CMP Cost on the New Article page when a pending article of that major category has none of its own yet."
+                    />
+                  )}
+
+                </>
+              }
+              upload={
+                <>
+                  <div className="rounded-md border border-border p-4">
+                    <div className="mb-1 font-semibold">Upload CMP Cost Master Excel</div>
+                    <div className="mb-3 text-xs text-muted-foreground">
+                      Columns: <strong>DIV, SUB_DIV, MAJ_CAT, Total</strong>. Download the template for the exact layout.{' '}
+                      <strong>Upserts by DIV + SUB_DIV + MAJ_CAT</strong> — combinations not in the file are left untouched.
+                    </div>
+
+                    <input
+                      ref={cmpCostMasterFileRef}
+                      type="file"
+                      accept=".xlsx,.xls"
+                      className="hidden"
+                      onChange={(e) => {
+                        const file = e.target.files?.[0];
+                        if (file) handleCmpCostMasterUpload(file);
+                      }}
+                    />
+
+                    {cmpCostMasterUploading ? (
+                      <div>
+                        <div className="mb-2 text-[13px] text-slate-600 dark:text-slate-300">
+                          <RefreshCw className="mr-1.5 inline-block h-3.5 w-3.5 animate-spin" />
+                          Parsing Excel &amp; updating CMP costs...
+                        </div>
+                        <Progress value={cmpCostMasterProgress} />
+                      </div>
+                    ) : (
+                      <button
+                        type="button"
+                        onClick={() => cmpCostMasterFileRef.current?.click()}
+                        className="flex w-full flex-col items-center justify-center rounded-md border-2 border-dashed border-border bg-muted/30 px-4 py-6 transition-colors hover:border-slate-400 hover:bg-slate-50 dark:hover:bg-slate-500/10"
+                      >
+                        <Inbox className="mb-2 h-8 w-8 text-slate-600 dark:text-slate-300" />
+                        <p className="text-[13px]">
+                          Click to upload <strong>.xlsx</strong> file
+                        </p>
+                        <p className="text-[11px] text-muted-foreground">Only Excel files. Max 50 MB.</p>
+                      </button>
+                    )}
+                  </div>
+
+                </>
+              }
+            />
+          </MasterGroup>
+          <MasterGroup title="Hierarchy & menus" count={2} notUploaded={((hierarchyExcelStatus ? hierarchyExcelStatus.categories : null) === 0 ? 1 : 0) + ((broaderMenuMeta ? (broaderMenuMeta.total ?? 0) : null) === 0 ? 1 : 0)}>
+            <MasterDataCard
+              title="Hierarchy Excel"
+              description="Division / Sub-Division / Major Category"
+              rows={hierarchyExcelStatus ? hierarchyExcelStatus.categories : null}
+              rowsLabel="Major categories"
+              loading={hierarchyExcelStatusLoading}
+              busy={hierarchyExcelUploading || !!hierarchyPreview}
+              onView={() => navigate('/admin/expense/hierarchy')}
+              onRefresh={loadHierarchyExcelStatus}
+              details={
+                <>
                   {hierarchyExcelStatus ? (
                     <Descriptions bordered>
                       <Descriptions.Item label="Divisions (Departments)">
@@ -4214,10 +4233,11 @@ export default function Admin() {
                       }
                     />
                   )}
-                </div>
 
-                {/* Upload panel */}
-                <div className="md:col-span-5">
+                </>
+              }
+              upload={
+                <>
                   <div className="rounded-md border border-border p-4">
                     <div className="mb-1 font-semibold">Upload Hierarchy Excel</div>
                     <div className="mb-3 text-xs text-muted-foreground">
@@ -4237,7 +4257,7 @@ export default function Admin() {
 
                     {hierarchyExcelUploading ? (
                       <div>
-                        <div className="mb-2 text-[13px] text-[#FF6F61]">
+                        <div className="mb-2 text-[13px] text-slate-600 dark:text-slate-300">
                           <RefreshCw className="mr-1.5 inline-block h-3.5 w-3.5 animate-spin" />
                           {hierarchyPreview ? 'Importing to database...' : 'Reading Excel file...'}
                         </div>
@@ -4309,511 +4329,22 @@ export default function Admin() {
                       </button>
                     )}
                   </div>
-                </div>
-              </div>
-            </Spinner>
-          </CardContent>
-        </Card>
 
-        {/* Segment Master Upload (price segments per major category → maj_cat_segment) */}
-        <Card className="mb-6 glass rounded-2xl border border-white/60">
-          <CardHeader className="flex flex-row items-center justify-between">
-            <CardTitle className="flex items-center gap-2 text-base">
-              <TableIcon className="h-4 w-4" />
-              Segment Master (Price Segments per Major Category)
-            </CardTitle>
-            <div className="flex gap-2">
-              <Button size="sm" variant="outline" onClick={() => navigate('/admin/expense/segment-master')}>
-                <Eye />
-                View Data
-              </Button>
-              <Button size="sm" variant="outline" onClick={downloadSegmentMasterTemplate}>
-                <Download />
-                Download Template
-              </Button>
-              <Button size="sm" variant="outline" onClick={exportSegmentMaster}>
-                <Download />
-                Download Data
-              </Button>
-              <Button size="sm" variant="outline" onClick={loadSegmentMasterStatus} disabled={segmentMasterStatusLoading}>
-                <RotateCw className={segmentMasterStatusLoading ? 'animate-spin' : ''} />
-                Refresh Status
-              </Button>
-            </div>
-          </CardHeader>
-          <CardContent>
-            <Spinner spinning={segmentMasterStatusLoading}>
-              <div className="grid grid-cols-1 gap-4 md:grid-cols-12">
-                {/* Status panel */}
-                <div className="md:col-span-7">
-                  {segmentMasterMeta && (segmentMasterMeta.total ?? 0) > 0 ? (
-                    <Descriptions bordered>
-                      {segmentMasterMeta.lastUpdated && (
-                        <Descriptions.Item label="Last Updated">
-                          {new Date(segmentMasterMeta.lastUpdated).toLocaleString('en-IN', {
-                            timeZone: 'Asia/Kolkata', dateStyle: 'medium', timeStyle: 'short',
-                          }) + ' IST'}
-                        </Descriptions.Item>
-                      )}
-                      <Descriptions.Item label="Major Categories">
-                        <Badge variant="info">{(segmentMasterMeta.categories ?? 0).toLocaleString()}</Badge>
-                      </Descriptions.Item>
-                      <Descriptions.Item label="Total Rows">
-                        <Badge variant="success">{(segmentMasterMeta.total ?? 0).toLocaleString()}</Badge>
-                      </Descriptions.Item>
-                      {segmentMasterMeta.skipped != null && (segmentMasterMeta.skipped ?? 0) > 0 && (
-                        <Descriptions.Item label="Rows Skipped">
-                          <Badge variant="warning">{(segmentMasterMeta.skipped ?? 0).toLocaleString()}</Badge>
-                        </Descriptions.Item>
-                      )}
-                    </Descriptions>
-                  ) : (
-                    <Alert
-                      type="warning"
-                      showIcon
-                      message="No segment master data"
-                      description="Upload the Segment Master Excel (columns: SUB-DIVISION, MAJOR-CATEGORY, SEGMENT_TYPE, MIN, MAX). When MAX = ABOVE, that segment gets max=999999 and further segments for that MC are dropped."
-                    />
-                  )}
-                </div>
-
-                {/* Upload panel */}
-                <div className="md:col-span-5">
-                  <div className="rounded-md border border-border p-4">
-                    <div className="mb-1 font-semibold">Upload Segment Master Excel</div>
-                    <div className="mb-3 text-xs text-muted-foreground">
-                      Columns: <strong>SUB-DIVISION, MAJOR-CATEGORY, SEGMENT_TYPE, MIN, MAX</strong>. When MAX = <code>ABOVE</code>, max becomes 999999 and subsequent segments for that MC are dropped. <strong className="text-destructive">Replaces entire table.</strong>
-                    </div>
-
-                    <input
-                      ref={segmentFileRef}
-                      type="file"
-                      accept=".xlsx,.xls"
-                      className="hidden"
-                      onChange={(e) => {
-                        const file = e.target.files?.[0];
-                        if (file) handleSegmentMasterUpload(file);
-                      }}
-                    />
-
-                    {segmentMasterUploading ? (
-                      <div>
-                        <div className="mb-2 text-[13px] text-[#FF6F61]">
-                          <RefreshCw className="mr-1.5 inline-block h-3.5 w-3.5 animate-spin" />
-                          Parsing Excel &amp; replacing table...
-                        </div>
-                        <Progress value={segmentMasterProgress} />
-                      </div>
-                    ) : (
-                      <button
-                        type="button"
-                        onClick={() => segmentFileRef.current?.click()}
-                        className="flex w-full flex-col items-center justify-center rounded-md border-2 border-dashed border-border bg-muted/30 px-4 py-6 transition-colors hover:border-[#FF6F61] hover:bg-[#FF6F61]/5"
-                      >
-                        <Inbox className="mb-2 h-8 w-8 text-[#FF6F61]" />
-                        <p className="text-[13px]">
-                          Click to upload <strong>.xlsx</strong> file
-                        </p>
-                        <p className="text-[11px] text-muted-foreground">Only Excel files. Max 50 MB.</p>
-                      </button>
-                    )}
-                  </div>
-                </div>
-              </div>
-            </Spinner>
-          </CardContent>
-        </Card>
-
-        {/* Basic Accessories (trims + packaging per-pc cost → basic_trim_cost_master) */}
-        <Card className="mb-6 glass rounded-2xl border border-white/60">
-          <CardHeader className="flex flex-row items-center justify-between">
-            <CardTitle className="flex items-center gap-2 text-base">
-              <TableIcon className="h-4 w-4" />
-              Basic Accessories (Trims &amp; Packaging Cost per Major Category)
-            </CardTitle>
-            <div className="flex gap-2">
-              <Button size="sm" variant="outline" onClick={() => navigate('/admin/expense/basic-accessories')}>
-                <Eye />
-                View Data
-              </Button>
-              <Button size="sm" variant="outline" onClick={() => downloadBasicAccessoriesFile('template')}>
-                <Download />
-                Download Template
-              </Button>
-              <Button size="sm" variant="outline" onClick={() => downloadBasicAccessoriesFile('export')}>
-                <Download />
-                Download Data
-              </Button>
-              <Button size="sm" variant="outline" onClick={loadBasicAccessoriesStatus} disabled={basicAccessoriesStatusLoading}>
-                <RotateCw className={basicAccessoriesStatusLoading ? 'animate-spin' : ''} />
-                Refresh Status
-              </Button>
-            </div>
-          </CardHeader>
-          <CardContent>
-            <Spinner spinning={basicAccessoriesStatusLoading}>
-              <div className="grid grid-cols-1 gap-4 md:grid-cols-12">
-                {/* Status panel */}
-                <div className="md:col-span-7">
-                  {basicAccessoriesMeta && (basicAccessoriesMeta.total ?? 0) > 0 ? (
-                    <Descriptions bordered>
-                      {basicAccessoriesMeta.lastUpdated && (
-                        <Descriptions.Item label="Last Updated">
-                          {new Date(basicAccessoriesMeta.lastUpdated).toLocaleString('en-IN', {
-                            timeZone: 'Asia/Kolkata', dateStyle: 'medium', timeStyle: 'short',
-                          }) + ' IST'}
-                        </Descriptions.Item>
-                      )}
-                      <Descriptions.Item label="Major Categories">
-                        <Badge variant="info">{(basicAccessoriesMeta.categories ?? 0).toLocaleString()}</Badge>
-                      </Descriptions.Item>
-                      <Descriptions.Item label="Accessory Rows">
-                        <Badge variant="success">{(basicAccessoriesMeta.components ?? 0).toLocaleString()}</Badge>
-                      </Descriptions.Item>
-                      {basicAccessoriesMeta.withCost != null && (
-                        <Descriptions.Item label="With Basic &amp; Trims Cost">
-                          <Badge variant="info">{(basicAccessoriesMeta.withCost ?? 0).toLocaleString()}</Badge>
-                        </Descriptions.Item>
-                      )}
-                      {basicAccessoriesMeta.updated != null && (
-                        <Descriptions.Item label="Updated in Last Upload">
-                          <Badge variant="success">{(basicAccessoriesMeta.updated ?? 0).toLocaleString()}</Badge>
-                        </Descriptions.Item>
-                      )}
-                      {basicAccessoriesMeta.skipped != null && (basicAccessoriesMeta.skipped ?? 0) > 0 && (
-                        <Descriptions.Item label="Rows Skipped">
-                          <Badge variant="warning">{(basicAccessoriesMeta.skipped ?? 0).toLocaleString()}</Badge>
-                        </Descriptions.Item>
-                      )}
-                    </Descriptions>
-                  ) : (
-                    <Alert
-                      type="warning"
-                      showIcon
-                      message="No basic accessories data"
-                      description={'Upload the "MAJ CAT WISE BASIC ACCESSORIES DETAILS" workbook — sheets "ACC LIST" (Button, Zipper, Elastic, Lace, Draw Cord, Hook & Loop, Interlining) and "Packaging Master" (Poly Bag, Price Tag, Kimball Tag, Hanger, Tissue Paper, Carton), each with PER PC CONSUMPTION (QTY), RATE and VALUE per major category.'}
-                    />
-                  )}
-                </div>
-
-                {/* Upload panel */}
-                <div className="md:col-span-5">
-                  <div className="rounded-md border border-border p-4">
-                    <div className="mb-1 font-semibold">Upload Basic Accessories Excel</div>
-                    <div className="mb-3 text-xs text-muted-foreground">
-                      Sheets: <strong>ACC LIST</strong> + <strong>Packaging Master</strong>, headers on row 3 starting at column C
-                      (DIV, SUB DIV, MAJ CAT, then QTY / RATE / VALUE per accessory). Download the template for the exact layout.{' '}
-                      <strong>Updates by MAJ CAT</strong> — categories not in the file are left untouched.
-                    </div>
-
-                    <input
-                      ref={basicAccessoriesFileRef}
-                      type="file"
-                      accept=".xlsx,.xls"
-                      className="hidden"
-                      onChange={(e) => {
-                        const file = e.target.files?.[0];
-                        if (file) handleBasicAccessoriesUpload(file);
-                      }}
-                    />
-
-                    {basicAccessoriesUploading ? (
-                      <div>
-                        <div className="mb-2 text-[13px] text-[#FF6F61]">
-                          <RefreshCw className="mr-1.5 inline-block h-3.5 w-3.5 animate-spin" />
-                          Parsing Excel &amp; updating accessories...
-                        </div>
-                        <Progress value={basicAccessoriesProgress} />
-                      </div>
-                    ) : (
-                      <button
-                        type="button"
-                        onClick={() => basicAccessoriesFileRef.current?.click()}
-                        className="flex w-full flex-col items-center justify-center rounded-md border-2 border-dashed border-border bg-muted/30 px-4 py-6 transition-colors hover:border-[#FF6F61] hover:bg-[#FF6F61]/5"
-                      >
-                        <Inbox className="mb-2 h-8 w-8 text-[#FF6F61]" />
-                        <p className="text-[13px]">
-                          Click to upload <strong>.xlsx</strong> file
-                        </p>
-                        <p className="text-[11px] text-muted-foreground">Only Excel files. Max 50 MB.</p>
-                      </button>
-                    )}
-                  </div>
-                </div>
-              </div>
-            </Spinner>
-          </CardContent>
-        </Card>
-
-        {/* CMP Cost Master (rough CMP cost per major category → rough_cmp_cost_master) */}
-        <Card className="mb-6 glass rounded-2xl border border-white/60">
-          <CardHeader className="flex flex-row items-center justify-between">
-            <CardTitle className="flex items-center gap-2 text-base">
-              <TableIcon className="h-4 w-4" />
-              CMP Cost Master (Rough CMP Cost per Major Category)
-            </CardTitle>
-            <div className="flex gap-2">
-              <Button size="sm" variant="outline" onClick={() => navigate('/admin/expense/cmp-cost-master')}>
-                <Eye />
-                View Data
-              </Button>
-              <Button size="sm" variant="outline" onClick={() => downloadCmpCostMasterFile('template')}>
-                <Download />
-                Download Template
-              </Button>
-              <Button size="sm" variant="outline" onClick={() => downloadCmpCostMasterFile('export')}>
-                <Download />
-                Download Data
-              </Button>
-              <Button size="sm" variant="outline" onClick={loadCmpCostMasterStatus} disabled={cmpCostMasterStatusLoading}>
-                <RotateCw className={cmpCostMasterStatusLoading ? 'animate-spin' : ''} />
-                Refresh Status
-              </Button>
-            </div>
-          </CardHeader>
-          <CardContent>
-            <Spinner spinning={cmpCostMasterStatusLoading}>
-              <div className="grid grid-cols-1 gap-4 md:grid-cols-12">
-                {/* Status panel */}
-                <div className="md:col-span-7">
-                  {cmpCostMasterMeta && (cmpCostMasterMeta.total ?? 0) > 0 ? (
-                    <Descriptions bordered>
-                      {cmpCostMasterMeta.lastUpdated && (
-                        <Descriptions.Item label="Last Updated">
-                          {new Date(cmpCostMasterMeta.lastUpdated).toLocaleString('en-IN', {
-                            timeZone: 'Asia/Kolkata', dateStyle: 'medium', timeStyle: 'short',
-                          }) + ' IST'}
-                        </Descriptions.Item>
-                      )}
-                      <Descriptions.Item label="Major Categories">
-                        <Badge variant="info">{(cmpCostMasterMeta.categories ?? 0).toLocaleString()}</Badge>
-                      </Descriptions.Item>
-                      <Descriptions.Item label="Total Rows">
-                        <Badge variant="success">{(cmpCostMasterMeta.total ?? 0).toLocaleString()}</Badge>
-                      </Descriptions.Item>
-                      {cmpCostMasterMeta.skipped != null && (cmpCostMasterMeta.skipped ?? 0) > 0 && (
-                        <Descriptions.Item label="Rows Skipped">
-                          <Badge variant="warning">{(cmpCostMasterMeta.skipped ?? 0).toLocaleString()}</Badge>
-                        </Descriptions.Item>
-                      )}
-                    </Descriptions>
-                  ) : (
-                    <Alert
-                      type="warning"
-                      showIcon
-                      message="No CMP cost master data"
-                      description="Upload the CMP Cost Excel (columns: DIV, SUB_DIV, MAJ_CAT, Total). Auto-fills a Body Article's CMP Cost on the New Article page when a pending article of that major category has none of its own yet."
-                    />
-                  )}
-                </div>
-
-                {/* Upload panel */}
-                <div className="md:col-span-5">
-                  <div className="rounded-md border border-border p-4">
-                    <div className="mb-1 font-semibold">Upload CMP Cost Master Excel</div>
-                    <div className="mb-3 text-xs text-muted-foreground">
-                      Columns: <strong>DIV, SUB_DIV, MAJ_CAT, Total</strong>. Download the template for the exact layout.{' '}
-                      <strong>Upserts by DIV + SUB_DIV + MAJ_CAT</strong> — combinations not in the file are left untouched.
-                    </div>
-
-                    <input
-                      ref={cmpCostMasterFileRef}
-                      type="file"
-                      accept=".xlsx,.xls"
-                      className="hidden"
-                      onChange={(e) => {
-                        const file = e.target.files?.[0];
-                        if (file) handleCmpCostMasterUpload(file);
-                      }}
-                    />
-
-                    {cmpCostMasterUploading ? (
-                      <div>
-                        <div className="mb-2 text-[13px] text-[#FF6F61]">
-                          <RefreshCw className="mr-1.5 inline-block h-3.5 w-3.5 animate-spin" />
-                          Parsing Excel &amp; updating CMP costs...
-                        </div>
-                        <Progress value={cmpCostMasterProgress} />
-                      </div>
-                    ) : (
-                      <button
-                        type="button"
-                        onClick={() => cmpCostMasterFileRef.current?.click()}
-                        className="flex w-full flex-col items-center justify-center rounded-md border-2 border-dashed border-border bg-muted/30 px-4 py-6 transition-colors hover:border-[#FF6F61] hover:bg-[#FF6F61]/5"
-                      >
-                        <Inbox className="mb-2 h-8 w-8 text-[#FF6F61]" />
-                        <p className="text-[13px]">
-                          Click to upload <strong>.xlsx</strong> file
-                        </p>
-                        <p className="text-[11px] text-muted-foreground">Only Excel files. Max 50 MB.</p>
-                      </button>
-                    )}
-                  </div>
-                </div>
-              </div>
-            </Spinner>
-          </CardContent>
-        </Card>
-
-        {/* Body Article Data Upload (construction attributes + costs → body_article_data) */}
-        <Card className="mb-6 glass rounded-2xl border border-white/60">
-          <CardHeader className="flex flex-row items-center justify-between">
-            <CardTitle className="flex items-center gap-2 text-base">
-              <TableIcon className="h-4 w-4" />
-              Body Article Data (Bulk Update)
-            </CardTitle>
-            <div className="flex gap-2">
-              <Button size="sm" variant="outline" onClick={() => navigate('/admin/expense/body-article-data')}>
-                <Eye />
-                View Data
-              </Button>
-              <Button size="sm" variant="outline" onClick={downloadBodyArticleDataTemplate}>
-                <Download />
-                Download Template
-              </Button>
-              <Button size="sm" variant="outline" onClick={loadBodyArticleDataStatus} disabled={bodyArticleDataStatusLoading}>
-                <RotateCw className={bodyArticleDataStatusLoading ? 'animate-spin' : ''} />
-                Refresh Status
-              </Button>
-            </div>
-          </CardHeader>
-          <CardContent>
-            <Spinner spinning={bodyArticleDataStatusLoading}>
-              <div className="grid grid-cols-1 gap-4 md:grid-cols-12">
-                {/* Status panel */}
-                <div className="md:col-span-7">
-                  {bodyArticleDataMeta && (bodyArticleDataMeta.total ?? 0) > 0 ? (
-                    <Descriptions bordered>
-                      {bodyArticleDataMeta.uploadedAt && (
-                        <Descriptions.Item label="Last Upload">
-                          {new Date(bodyArticleDataMeta.uploadedAt).toLocaleString('en-IN', {
-                            timeZone: 'Asia/Kolkata', dateStyle: 'medium', timeStyle: 'short',
-                          }) + ' IST'}
-                        </Descriptions.Item>
-                      )}
-                      {bodyArticleDataMeta.fileName && (
-                        <Descriptions.Item label="File">
-                          <span className="font-mono text-xs">{bodyArticleDataMeta.fileName}</span>
-                        </Descriptions.Item>
-                      )}
-                      <Descriptions.Item label="Body Articles">
-                        <Badge variant="info">{(bodyArticleDataMeta.bodyArticles ?? 0).toLocaleString()}</Badge>
-                      </Descriptions.Item>
-                      <Descriptions.Item label="Total Rows">
-                        <Badge variant="secondary">{(bodyArticleDataMeta.total ?? 0).toLocaleString()}</Badge>
-                      </Descriptions.Item>
-                      {bodyArticleDataMeta.inserted != null && (
-                        <Descriptions.Item label="Rows Inserted">
-                          <Badge variant="secondary">{(bodyArticleDataMeta.inserted ?? 0).toLocaleString()}</Badge>
-                        </Descriptions.Item>
-                      )}
-                      {bodyArticleDataMeta.updated != null && (
-                        <Descriptions.Item label="Rows Updated">
-                          <Badge variant="secondary">{(bodyArticleDataMeta.updated ?? 0).toLocaleString()}</Badge>
-                        </Descriptions.Item>
-                      )}
-                      {bodyArticleDataMeta.skipped != null && (
-                        <Descriptions.Item label="Rows Skipped">
-                          <Badge variant={(bodyArticleDataMeta.skipped ?? 0) > 0 ? 'warning' : 'secondary'}>
-                            {(bodyArticleDataMeta.skipped ?? 0).toLocaleString()}
-                          </Badge>
-                        </Descriptions.Item>
-                      )}
-                      {bodyArticleDataMeta.truncated != null && (
-                        <Descriptions.Item label="Values Truncated">
-                          <Badge variant={(bodyArticleDataMeta.truncated ?? 0) > 0 ? 'warning' : 'secondary'}>
-                            {(bodyArticleDataMeta.truncated ?? 0).toLocaleString()}
-                          </Badge>
-                        </Descriptions.Item>
-                      )}
-                    </Descriptions>
-                  ) : (
-                    <Alert
-                      type="warning"
-                      showIcon
-                      message="No body article data uploaded yet"
-                      description="Upload the Body Article Data Excel (Division/Sub Division/Major Category/MC Code, Body Article Number/Description, construction attributes, CMTP_COST, CMP_COST, FAB_CONS, WIDTH) to populate body article master data."
-                    />
-                  )}
-                </div>
-
-                {/* Upload panel */}
-                <div className="md:col-span-5">
-                  <div className="rounded-md border border-border p-4">
-                    <div className="mb-1 font-semibold">Upload Body Article Data Excel</div>
-                    <div className="mb-3 text-xs text-muted-foreground">
-                      Sheet <strong>BODY UPLOADER FORMAT</strong> (or first sheet), headers in row 3, data from row 5 —
-                      Division, Sub Division, Major Category, MC Code, Body Article Number, Description, construction attributes, CMTP_COST, CMP_COST, FAB_CONS, WIDTH.
-                      Rows matching an existing Body Article Number are updated, others are inserted; approval/SAP-sync data is untouched.
-                      Text values over 100 characters (255 for Description) are truncated to fit.
-                    </div>
-
-                    <input
-                      ref={bodyArticleDataFileRef}
-                      type="file"
-                      accept=".xlsx,.xls"
-                      className="hidden"
-                      onChange={(e) => {
-                        const file = e.target.files?.[0];
-                        if (file) handleBodyArticleDataUpload(file);
-                      }}
-                    />
-
-                    {bodyArticleDataUploading ? (
-                      <div>
-                        <div className="mb-2 text-[13px] text-[#FF6F61]">
-                          <RefreshCw className="mr-1.5 inline-block h-3.5 w-3.5 animate-spin" />
-                          Parsing Excel & updating table...
-                        </div>
-                        <Progress value={bodyArticleDataProgress} />
-                      </div>
-                    ) : (
-                      <button
-                        type="button"
-                        onClick={() => bodyArticleDataFileRef.current?.click()}
-                        className="flex w-full flex-col items-center justify-center rounded-md border-2 border-dashed border-border bg-muted/30 px-4 py-6 transition-colors hover:border-[#FF6F61] hover:bg-[#FF6F61]/5"
-                      >
-                        <Inbox className="mb-2 h-8 w-8 text-[#FF6F61]" />
-                        <p className="text-[13px]">
-                          Click to upload <strong>.xlsx</strong> file
-                        </p>
-                        <p className="text-[11px] text-muted-foreground">Only Excel files. Max 50 MB.</p>
-                      </button>
-                    )}
-                  </div>
-                </div>
-              </div>
-            </Spinner>
-          </CardContent>
-        </Card>
-
-        {/* Broader Menu Upload (BM-H merchandising master → broader_menu) */}
-        <Card className="mb-6 glass rounded-2xl border border-white/60">
-          <CardHeader className="flex flex-row items-center justify-between">
-            <CardTitle className="flex items-center gap-2 text-base">
-              <TableIcon className="h-4 w-4" />
-              Broader Menu (Merchandising Master)
-            </CardTitle>
-            <div className="flex gap-2">
-              <Button size="sm" variant="outline" onClick={() => navigate('/admin/expense/broader-menu')}>
-                <Eye />
-                View Data
-              </Button>
-              <Button size="sm" variant="outline" onClick={downloadBroaderMenuTemplate}>
-                <Download />
-                Download Template
-              </Button>
-              <Button size="sm" variant="outline" onClick={loadBroaderMenuStatus} disabled={broaderMenuStatusLoading}>
-                <RotateCw className={broaderMenuStatusLoading ? 'animate-spin' : ''} />
-                Refresh Status
-              </Button>
-            </div>
-          </CardHeader>
-          <CardContent>
-            <Spinner spinning={broaderMenuStatusLoading}>
-              <div className="grid grid-cols-1 gap-4 md:grid-cols-12">
-                {/* Status panel */}
-                <div className="md:col-span-7">
+                </>
+              }
+            />
+            <MasterDataCard
+              title="Broader Menu"
+              description="Merchandising Master"
+              rows={broaderMenuMeta ? (broaderMenuMeta.total ?? 0) : null}
+              lastUpload={broaderMenuMeta?.uploadedAt ?? null}
+              loading={broaderMenuStatusLoading}
+              busy={broaderMenuUploading}
+              onView={() => navigate('/admin/expense/broader-menu')}
+              onTemplate={downloadBroaderMenuTemplate}
+              onRefresh={loadBroaderMenuStatus}
+              details={
+                <>
                   {broaderMenuMeta && (broaderMenuMeta.total ?? 0) > 0 ? (
                     <Descriptions bordered>
                       {(broaderMenuMeta.uploadedAt || broaderMenuMeta.lastUpload) && (
@@ -4893,10 +4424,11 @@ export default function Admin() {
                       description="Upload the BROADER MENU workbook to populate the merchandising master — one row per MC CD with its SEG / DIV / SUB_DIV / MAJ_CAT / SUB_CAT hierarchy, status flags, pack sizes and fixture densities."
                     />
                   )}
-                </div>
 
-                {/* Upload panel */}
-                <div className="md:col-span-5">
+                </>
+              }
+              upload={
+                <>
                   <div className="rounded-md border border-border p-4">
                     <div className="mb-1 font-semibold">Upload Broader Menu Excel</div>
                     <div className="mb-3 text-xs text-muted-foreground">
@@ -4919,7 +4451,7 @@ export default function Admin() {
 
                     {broaderMenuUploading ? (
                       <div>
-                        <div className="mb-2 text-[13px] text-[#FF6F61]">
+                        <div className="mb-2 text-[13px] text-slate-600 dark:text-slate-300">
                           <RefreshCw className="mr-1.5 inline-block h-3.5 w-3.5 animate-spin" />
                           Parsing Excel &amp; updating table...
                         </div>
@@ -4929,9 +4461,9 @@ export default function Admin() {
                       <button
                         type="button"
                         onClick={() => broaderMenuFileRef.current?.click()}
-                        className="flex w-full flex-col items-center justify-center rounded-md border-2 border-dashed border-border bg-muted/30 px-4 py-6 transition-colors hover:border-[#FF6F61] hover:bg-[#FF6F61]/5"
+                        className="flex w-full flex-col items-center justify-center rounded-md border-2 border-dashed border-border bg-muted/30 px-4 py-6 transition-colors hover:border-slate-400 hover:bg-slate-50 dark:hover:bg-slate-500/10"
                       >
-                        <Inbox className="mb-2 h-8 w-8 text-[#FF6F61]" />
+                        <Inbox className="mb-2 h-8 w-8 text-slate-600 dark:text-slate-300" />
                         <p className="text-[13px]">
                           Click to upload <strong>.xlsx</strong> file
                         </p>
@@ -4939,23 +4471,16 @@ export default function Admin() {
                       </button>
                     )}
                   </div>
-                </div>
-              </div>
-            </Spinner>
-          </CardContent>
-        </Card>
 
-        {/* Debug Info */}
-        <Card className="mb-6 glass rounded-2xl border border-white/60">
-          <CardContent className="pt-6">
-            <p><strong>Debug Info:</strong></p>
-            <p>Expense Data Loaded: {expenseData ? 'Yes' : 'No'}</p>
-            <p>Image Data Loaded: {imageData ? 'Yes' : 'No'}</p>
-            <p>Status Breakdown Records: {statusBreakdownData.length}</p>
-            <p>Category Breakdown Records: {categoryBreakdownData.length}</p>
-          </CardContent>
-        </Card>
+                </>
+              }
+            />
+          </MasterGroup>
+        </section>
 
+        <section id="analytics" className="flex scroll-mt-3 flex-col">
+          <SectionHeading title="Analytics" />
+          <div className="h-3" />
         {/* Expense and Image Analytics Row */}
         <div className="mb-6 grid grid-cols-1 gap-4 md:grid-cols-2">
           <Card className="glass card-3d rounded-2xl border border-white/60">
@@ -5045,21 +4570,9 @@ export default function Admin() {
           </CardContent>
         </Card>
 
-        <Card className="mt-6 glass rounded-2xl border border-white/60">
-          <CardHeader>
-            <CardTitle className="text-base">Admin Overview</CardTitle>
-          </CardHeader>
-          <CardContent>
-            <p>Use the sidebar navigation to manage the system:</p>
-            <ul className="ml-4 list-disc">
-              <li><strong>Hierarchy Management:</strong> Manage departments, categories, and attributes</li>
-              <li><strong>Expense Analytics:</strong> Track costs, selling prices, and profit margins</li>
-              <li><strong>Image Usage Analytics:</strong> Monitor total images and extraction statistics</li>
-            </ul>
-            {/* keep Tag/Info imports referenced */}
-            {false && <Tag><Info /></Tag>}
-          </CardContent>
-        </Card>
+        </section>
+          </div>
+        </div>
       </Spinner>
     </div>
   );

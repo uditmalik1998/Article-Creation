@@ -49,7 +49,6 @@ const mut = invalidateHierarchyCache;
 // ═══════════════════════════════════════════════════════
 // DASHBOARD
 // ═══════════════════════════════════════════════════════
-router.get('/stats', h(adminController.getDashboardStats));
 
 // ═══════════════════════════════════════════════════════
 // ANALYTICS (EXPENSES & IMAGE USAGE)
@@ -109,6 +108,11 @@ router.get('/hierarchy/tree', h(adminController.getHierarchyTree));
 router.get('/hierarchy/tree/lightweight', h(adminController.getHierarchyTreeLightweight));
 router.post('/hierarchy/tree/cache/clear', h(adminController.invalidateHierarchyCache));
 router.get('/hierarchy/export', h(adminController.exportHierarchy));
+
+// ═══════════════════════════════════════════════════════
+// GM SUB-DIVISIONS
+// ═══════════════════════════════════════════════════════
+router.get('/gm-sub-divisions', h(adminController.getGMSubDivisions));
 
 // ═══════════════════════════════════════════════════════
 // USERS (ADMIN ONLY)
