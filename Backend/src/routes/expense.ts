@@ -14,6 +14,7 @@ import { Router } from 'express';
 import * as adminController from '../controllers/adminController';
 import * as expenseChangeRequestController from '../controllers/expenseChangeRequestController';
 import * as expenseAccessController from '../controllers/expenseAccessController';
+import * as gridContributionController from '../controllers/gridContributionController';
 import { requireExpenseView, requireExpenseOperation } from '../middleware/expenseAccess';
 import { asyncHandler } from '../middleware/asyncHandler';
 
@@ -70,5 +71,16 @@ router.get('/change-requests/:id', h(requireExpenseView), h(expenseChangeRequest
 // controller (the chain's length is admin-configurable, so there's no fixed
 // "stage 2" to hang a separate route off).
 router.post('/change-requests/:id/act', h(expenseChangeRequestController.actOnExpenseChangeRequest));
+
+// Major Category Grid contribution % (Bgt Cont% / Pd Cont%). Who may fill
+// which column for which division is checked inside the controller against
+// grid_contribution_assignments; approving goes through /change-requests/:id/act.
+router.get('/grid-contribution/my-scope', h(gridContributionController.getMyContributionScope));
+router.get('/grid-contribution/assignments', h(requireExpenseView), h(gridContributionController.getContributionAssignments));
+router.get('/grid-contribution/attributes', h(requireExpenseView), h(gridContributionController.getContributionAttributes));
+router.get('/grid-contribution/block', h(requireExpenseView), h(gridContributionController.getContributionBlock));
+router.get('/grid-contribution/template', h(gridContributionController.downloadContributionTemplate));
+router.post('/grid-contribution/requests', h(gridContributionController.createContributionRequest));
+router.post('/grid-contribution/bulk-requests', h(gridContributionController.createContributionBulkRequests));
 
 export default router;

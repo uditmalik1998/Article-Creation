@@ -340,6 +340,15 @@ export type MajorCategoryDetails = $Result.DefaultSelection<Prisma.$MajorCategor
  */
 export type ExpenseApprovalStage = $Result.DefaultSelection<Prisma.$ExpenseApprovalStagePayload>
 /**
+ * Model GridContributionAssignment
+ * Major Category Grid contribution %: who may FILL which column (`kind`
+ * BGT -> Bgt Cont%, PD -> Pd Cont%) for which division, and the one approver
+ * their requests route to. One row per line of the business "creator and
+ * approver" sheet — deliberately independent of User.businessDivision, which
+ * doesn't match it. BGT and PD pairs never mix.
+ */
+export type GridContributionAssignment = $Result.DefaultSelection<Prisma.$GridContributionAssignmentPayload>
+/**
  * Model ExpenseChangeRequest
  * 
  */
@@ -1236,6 +1245,16 @@ export class PrismaClient<
   get expenseApprovalStage(): Prisma.ExpenseApprovalStageDelegate<ExtArgs, ClientOptions>;
 
   /**
+   * `prisma.gridContributionAssignment`: Exposes CRUD operations for the **GridContributionAssignment** model.
+    * Example usage:
+    * ```ts
+    * // Fetch zero or more GridContributionAssignments
+    * const gridContributionAssignments = await prisma.gridContributionAssignment.findMany()
+    * ```
+    */
+  get gridContributionAssignment(): Prisma.GridContributionAssignmentDelegate<ExtArgs, ClientOptions>;
+
+  /**
    * `prisma.expenseChangeRequest`: Exposes CRUD operations for the **ExpenseChangeRequest** model.
     * Example usage:
     * ```ts
@@ -1758,6 +1777,7 @@ export namespace Prisma {
     BasicTrimCostComponent: 'BasicTrimCostComponent',
     MajorCategoryDetails: 'MajorCategoryDetails',
     ExpenseApprovalStage: 'ExpenseApprovalStage',
+    GridContributionAssignment: 'GridContributionAssignment',
     ExpenseChangeRequest: 'ExpenseChangeRequest',
     ExpenseAccessGrant: 'ExpenseAccessGrant',
     ExpenseAuditLog: 'ExpenseAuditLog'
@@ -1779,7 +1799,7 @@ export namespace Prisma {
       omit: GlobalOmitOptions
     }
     meta: {
-      modelProps: "department" | "subDepartment" | "category" | "masterAttribute" | "attributeAllowedValue" | "categoryAttribute" | "extractionJob" | "extractionResult" | "extractionResultFlat" | "modelGenerationResult" | "modelImageApproval" | "mvgrLookup" | "masterVendorDetail" | "user" | "auditLog" | "apiKey" | "changeHistory" | "costSummary" | "article360" | "articleFab" | "articleBody" | "articleVaAcc" | "articleVaPrcs" | "articleBom" | "sapFieldConfig" | "sapAttributeValue" | "article360Flat" | "rawArticle" | "fabricRawData" | "gmRawData" | "srmSyncRun" | "srmSyncRunItem" | "poolBJob" | "poolBBatch" | "nationalGridMaster" | "broaderMenu" | "majorCatMaster" | "fabricArticleMaster" | "fabricMajCatGridValue" | "modifyLog" | "fabricArticleData" | "gmArticleData" | "gmVariantArticleData" | "fgVariantArticleData" | "fabricVariantArticleData" | "valueAdditionAccessoriesCost" | "bodyArticleData" | "referenceArticleData" | "bodyFabricConsumption" | "roughCmpCostMaster" | "basicTrimCostMaster" | "basicTrimCostComponent" | "majorCategoryDetails" | "expenseApprovalStage" | "expenseChangeRequest" | "expenseAccessGrant" | "expenseAuditLog"
+      modelProps: "department" | "subDepartment" | "category" | "masterAttribute" | "attributeAllowedValue" | "categoryAttribute" | "extractionJob" | "extractionResult" | "extractionResultFlat" | "modelGenerationResult" | "modelImageApproval" | "mvgrLookup" | "masterVendorDetail" | "user" | "auditLog" | "apiKey" | "changeHistory" | "costSummary" | "article360" | "articleFab" | "articleBody" | "articleVaAcc" | "articleVaPrcs" | "articleBom" | "sapFieldConfig" | "sapAttributeValue" | "article360Flat" | "rawArticle" | "fabricRawData" | "gmRawData" | "srmSyncRun" | "srmSyncRunItem" | "poolBJob" | "poolBBatch" | "nationalGridMaster" | "broaderMenu" | "majorCatMaster" | "fabricArticleMaster" | "fabricMajCatGridValue" | "modifyLog" | "fabricArticleData" | "gmArticleData" | "gmVariantArticleData" | "fgVariantArticleData" | "fabricVariantArticleData" | "valueAdditionAccessoriesCost" | "bodyArticleData" | "referenceArticleData" | "bodyFabricConsumption" | "roughCmpCostMaster" | "basicTrimCostMaster" | "basicTrimCostComponent" | "majorCategoryDetails" | "expenseApprovalStage" | "gridContributionAssignment" | "expenseChangeRequest" | "expenseAccessGrant" | "expenseAuditLog"
       txIsolationLevel: Prisma.TransactionIsolationLevel
     }
     model: {
@@ -5779,6 +5799,80 @@ export namespace Prisma {
           }
         }
       }
+      GridContributionAssignment: {
+        payload: Prisma.$GridContributionAssignmentPayload<ExtArgs>
+        fields: Prisma.GridContributionAssignmentFieldRefs
+        operations: {
+          findUnique: {
+            args: Prisma.GridContributionAssignmentFindUniqueArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$GridContributionAssignmentPayload> | null
+          }
+          findUniqueOrThrow: {
+            args: Prisma.GridContributionAssignmentFindUniqueOrThrowArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$GridContributionAssignmentPayload>
+          }
+          findFirst: {
+            args: Prisma.GridContributionAssignmentFindFirstArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$GridContributionAssignmentPayload> | null
+          }
+          findFirstOrThrow: {
+            args: Prisma.GridContributionAssignmentFindFirstOrThrowArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$GridContributionAssignmentPayload>
+          }
+          findMany: {
+            args: Prisma.GridContributionAssignmentFindManyArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$GridContributionAssignmentPayload>[]
+          }
+          create: {
+            args: Prisma.GridContributionAssignmentCreateArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$GridContributionAssignmentPayload>
+          }
+          createMany: {
+            args: Prisma.GridContributionAssignmentCreateManyArgs<ExtArgs>
+            result: BatchPayload
+          }
+          createManyAndReturn: {
+            args: Prisma.GridContributionAssignmentCreateManyAndReturnArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$GridContributionAssignmentPayload>[]
+          }
+          delete: {
+            args: Prisma.GridContributionAssignmentDeleteArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$GridContributionAssignmentPayload>
+          }
+          update: {
+            args: Prisma.GridContributionAssignmentUpdateArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$GridContributionAssignmentPayload>
+          }
+          deleteMany: {
+            args: Prisma.GridContributionAssignmentDeleteManyArgs<ExtArgs>
+            result: BatchPayload
+          }
+          updateMany: {
+            args: Prisma.GridContributionAssignmentUpdateManyArgs<ExtArgs>
+            result: BatchPayload
+          }
+          updateManyAndReturn: {
+            args: Prisma.GridContributionAssignmentUpdateManyAndReturnArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$GridContributionAssignmentPayload>[]
+          }
+          upsert: {
+            args: Prisma.GridContributionAssignmentUpsertArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$GridContributionAssignmentPayload>
+          }
+          aggregate: {
+            args: Prisma.GridContributionAssignmentAggregateArgs<ExtArgs>
+            result: $Utils.Optional<AggregateGridContributionAssignment>
+          }
+          groupBy: {
+            args: Prisma.GridContributionAssignmentGroupByArgs<ExtArgs>
+            result: $Utils.Optional<GridContributionAssignmentGroupByOutputType>[]
+          }
+          count: {
+            args: Prisma.GridContributionAssignmentCountArgs<ExtArgs>
+            result: $Utils.Optional<GridContributionAssignmentCountAggregateOutputType> | number
+          }
+        }
+      }
       ExpenseChangeRequest: {
         payload: Prisma.$ExpenseChangeRequestPayload<ExtArgs>
         fields: Prisma.ExpenseChangeRequestFieldRefs
@@ -6147,6 +6241,7 @@ export namespace Prisma {
     basicTrimCostComponent?: BasicTrimCostComponentOmit
     majorCategoryDetails?: MajorCategoryDetailsOmit
     expenseApprovalStage?: ExpenseApprovalStageOmit
+    gridContributionAssignment?: GridContributionAssignmentOmit
     expenseChangeRequest?: ExpenseChangeRequestOmit
     expenseAccessGrant?: ExpenseAccessGrantOmit
     expenseAuditLog?: ExpenseAuditLogOmit
@@ -76667,6 +76762,1074 @@ export namespace Prisma {
 
 
   /**
+   * Model GridContributionAssignment
+   */
+
+  export type AggregateGridContributionAssignment = {
+    _count: GridContributionAssignmentCountAggregateOutputType | null
+    _avg: GridContributionAssignmentAvgAggregateOutputType | null
+    _sum: GridContributionAssignmentSumAggregateOutputType | null
+    _min: GridContributionAssignmentMinAggregateOutputType | null
+    _max: GridContributionAssignmentMaxAggregateOutputType | null
+  }
+
+  export type GridContributionAssignmentAvgAggregateOutputType = {
+    id: number | null
+  }
+
+  export type GridContributionAssignmentSumAggregateOutputType = {
+    id: number | null
+  }
+
+  export type GridContributionAssignmentMinAggregateOutputType = {
+    id: number | null
+    kind: string | null
+    division: string | null
+    creatorEmail: string | null
+    approverEmail: string | null
+    isActive: boolean | null
+    createdAt: Date | null
+    updatedAt: Date | null
+  }
+
+  export type GridContributionAssignmentMaxAggregateOutputType = {
+    id: number | null
+    kind: string | null
+    division: string | null
+    creatorEmail: string | null
+    approverEmail: string | null
+    isActive: boolean | null
+    createdAt: Date | null
+    updatedAt: Date | null
+  }
+
+  export type GridContributionAssignmentCountAggregateOutputType = {
+    id: number
+    kind: number
+    division: number
+    creatorEmail: number
+    approverEmail: number
+    isActive: number
+    createdAt: number
+    updatedAt: number
+    _all: number
+  }
+
+
+  export type GridContributionAssignmentAvgAggregateInputType = {
+    id?: true
+  }
+
+  export type GridContributionAssignmentSumAggregateInputType = {
+    id?: true
+  }
+
+  export type GridContributionAssignmentMinAggregateInputType = {
+    id?: true
+    kind?: true
+    division?: true
+    creatorEmail?: true
+    approverEmail?: true
+    isActive?: true
+    createdAt?: true
+    updatedAt?: true
+  }
+
+  export type GridContributionAssignmentMaxAggregateInputType = {
+    id?: true
+    kind?: true
+    division?: true
+    creatorEmail?: true
+    approverEmail?: true
+    isActive?: true
+    createdAt?: true
+    updatedAt?: true
+  }
+
+  export type GridContributionAssignmentCountAggregateInputType = {
+    id?: true
+    kind?: true
+    division?: true
+    creatorEmail?: true
+    approverEmail?: true
+    isActive?: true
+    createdAt?: true
+    updatedAt?: true
+    _all?: true
+  }
+
+  export type GridContributionAssignmentAggregateArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Filter which GridContributionAssignment to aggregate.
+     */
+    where?: GridContributionAssignmentWhereInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
+     * 
+     * Determine the order of GridContributionAssignments to fetch.
+     */
+    orderBy?: GridContributionAssignmentOrderByWithRelationInput | GridContributionAssignmentOrderByWithRelationInput[]
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
+     * 
+     * Sets the start position
+     */
+    cursor?: GridContributionAssignmentWhereUniqueInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Take `±n` GridContributionAssignments from the position of the cursor.
+     */
+    take?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Skip the first `n` GridContributionAssignments.
+     */
+    skip?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     * 
+     * Count returned GridContributionAssignments
+    **/
+    _count?: true | GridContributionAssignmentCountAggregateInputType
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     * 
+     * Select which fields to average
+    **/
+    _avg?: GridContributionAssignmentAvgAggregateInputType
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     * 
+     * Select which fields to sum
+    **/
+    _sum?: GridContributionAssignmentSumAggregateInputType
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     * 
+     * Select which fields to find the minimum value
+    **/
+    _min?: GridContributionAssignmentMinAggregateInputType
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     * 
+     * Select which fields to find the maximum value
+    **/
+    _max?: GridContributionAssignmentMaxAggregateInputType
+  }
+
+  export type GetGridContributionAssignmentAggregateType<T extends GridContributionAssignmentAggregateArgs> = {
+        [P in keyof T & keyof AggregateGridContributionAssignment]: P extends '_count' | 'count'
+      ? T[P] extends true
+        ? number
+        : GetScalarType<T[P], AggregateGridContributionAssignment[P]>
+      : GetScalarType<T[P], AggregateGridContributionAssignment[P]>
+  }
+
+
+
+
+  export type GridContributionAssignmentGroupByArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    where?: GridContributionAssignmentWhereInput
+    orderBy?: GridContributionAssignmentOrderByWithAggregationInput | GridContributionAssignmentOrderByWithAggregationInput[]
+    by: GridContributionAssignmentScalarFieldEnum[] | GridContributionAssignmentScalarFieldEnum
+    having?: GridContributionAssignmentScalarWhereWithAggregatesInput
+    take?: number
+    skip?: number
+    _count?: GridContributionAssignmentCountAggregateInputType | true
+    _avg?: GridContributionAssignmentAvgAggregateInputType
+    _sum?: GridContributionAssignmentSumAggregateInputType
+    _min?: GridContributionAssignmentMinAggregateInputType
+    _max?: GridContributionAssignmentMaxAggregateInputType
+  }
+
+  export type GridContributionAssignmentGroupByOutputType = {
+    id: number
+    kind: string
+    division: string
+    creatorEmail: string
+    approverEmail: string
+    isActive: boolean
+    createdAt: Date
+    updatedAt: Date
+    _count: GridContributionAssignmentCountAggregateOutputType | null
+    _avg: GridContributionAssignmentAvgAggregateOutputType | null
+    _sum: GridContributionAssignmentSumAggregateOutputType | null
+    _min: GridContributionAssignmentMinAggregateOutputType | null
+    _max: GridContributionAssignmentMaxAggregateOutputType | null
+  }
+
+  type GetGridContributionAssignmentGroupByPayload<T extends GridContributionAssignmentGroupByArgs> = Prisma.PrismaPromise<
+    Array<
+      PickEnumerable<GridContributionAssignmentGroupByOutputType, T['by']> &
+        {
+          [P in ((keyof T) & (keyof GridContributionAssignmentGroupByOutputType))]: P extends '_count'
+            ? T[P] extends boolean
+              ? number
+              : GetScalarType<T[P], GridContributionAssignmentGroupByOutputType[P]>
+            : GetScalarType<T[P], GridContributionAssignmentGroupByOutputType[P]>
+        }
+      >
+    >
+
+
+  export type GridContributionAssignmentSelect<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
+    id?: boolean
+    kind?: boolean
+    division?: boolean
+    creatorEmail?: boolean
+    approverEmail?: boolean
+    isActive?: boolean
+    createdAt?: boolean
+    updatedAt?: boolean
+  }, ExtArgs["result"]["gridContributionAssignment"]>
+
+  export type GridContributionAssignmentSelectCreateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
+    id?: boolean
+    kind?: boolean
+    division?: boolean
+    creatorEmail?: boolean
+    approverEmail?: boolean
+    isActive?: boolean
+    createdAt?: boolean
+    updatedAt?: boolean
+  }, ExtArgs["result"]["gridContributionAssignment"]>
+
+  export type GridContributionAssignmentSelectUpdateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
+    id?: boolean
+    kind?: boolean
+    division?: boolean
+    creatorEmail?: boolean
+    approverEmail?: boolean
+    isActive?: boolean
+    createdAt?: boolean
+    updatedAt?: boolean
+  }, ExtArgs["result"]["gridContributionAssignment"]>
+
+  export type GridContributionAssignmentSelectScalar = {
+    id?: boolean
+    kind?: boolean
+    division?: boolean
+    creatorEmail?: boolean
+    approverEmail?: boolean
+    isActive?: boolean
+    createdAt?: boolean
+    updatedAt?: boolean
+  }
+
+  export type GridContributionAssignmentOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<"id" | "kind" | "division" | "creatorEmail" | "approverEmail" | "isActive" | "createdAt" | "updatedAt", ExtArgs["result"]["gridContributionAssignment"]>
+
+  export type $GridContributionAssignmentPayload<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    name: "GridContributionAssignment"
+    objects: {}
+    scalars: $Extensions.GetPayloadResult<{
+      id: number
+      kind: string
+      division: string
+      creatorEmail: string
+      approverEmail: string
+      isActive: boolean
+      createdAt: Date
+      updatedAt: Date
+    }, ExtArgs["result"]["gridContributionAssignment"]>
+    composites: {}
+  }
+
+  type GridContributionAssignmentGetPayload<S extends boolean | null | undefined | GridContributionAssignmentDefaultArgs> = $Result.GetResult<Prisma.$GridContributionAssignmentPayload, S>
+
+  type GridContributionAssignmentCountArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> =
+    Omit<GridContributionAssignmentFindManyArgs, 'select' | 'include' | 'distinct' | 'omit'> & {
+      select?: GridContributionAssignmentCountAggregateInputType | true
+    }
+
+  export interface GridContributionAssignmentDelegate<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs, GlobalOmitOptions = {}> {
+    [K: symbol]: { types: Prisma.TypeMap<ExtArgs>['model']['GridContributionAssignment'], meta: { name: 'GridContributionAssignment' } }
+    /**
+     * Find zero or one GridContributionAssignment that matches the filter.
+     * @param {GridContributionAssignmentFindUniqueArgs} args - Arguments to find a GridContributionAssignment
+     * @example
+     * // Get one GridContributionAssignment
+     * const gridContributionAssignment = await prisma.gridContributionAssignment.findUnique({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     */
+    findUnique<T extends GridContributionAssignmentFindUniqueArgs>(args: SelectSubset<T, GridContributionAssignmentFindUniqueArgs<ExtArgs>>): Prisma__GridContributionAssignmentClient<$Result.GetResult<Prisma.$GridContributionAssignmentPayload<ExtArgs>, T, "findUnique", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Find one GridContributionAssignment that matches the filter or throw an error with `error.code='P2025'`
+     * if no matches were found.
+     * @param {GridContributionAssignmentFindUniqueOrThrowArgs} args - Arguments to find a GridContributionAssignment
+     * @example
+     * // Get one GridContributionAssignment
+     * const gridContributionAssignment = await prisma.gridContributionAssignment.findUniqueOrThrow({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     */
+    findUniqueOrThrow<T extends GridContributionAssignmentFindUniqueOrThrowArgs>(args: SelectSubset<T, GridContributionAssignmentFindUniqueOrThrowArgs<ExtArgs>>): Prisma__GridContributionAssignmentClient<$Result.GetResult<Prisma.$GridContributionAssignmentPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Find the first GridContributionAssignment that matches the filter.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {GridContributionAssignmentFindFirstArgs} args - Arguments to find a GridContributionAssignment
+     * @example
+     * // Get one GridContributionAssignment
+     * const gridContributionAssignment = await prisma.gridContributionAssignment.findFirst({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     */
+    findFirst<T extends GridContributionAssignmentFindFirstArgs>(args?: SelectSubset<T, GridContributionAssignmentFindFirstArgs<ExtArgs>>): Prisma__GridContributionAssignmentClient<$Result.GetResult<Prisma.$GridContributionAssignmentPayload<ExtArgs>, T, "findFirst", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Find the first GridContributionAssignment that matches the filter or
+     * throw `PrismaKnownClientError` with `P2025` code if no matches were found.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {GridContributionAssignmentFindFirstOrThrowArgs} args - Arguments to find a GridContributionAssignment
+     * @example
+     * // Get one GridContributionAssignment
+     * const gridContributionAssignment = await prisma.gridContributionAssignment.findFirstOrThrow({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     */
+    findFirstOrThrow<T extends GridContributionAssignmentFindFirstOrThrowArgs>(args?: SelectSubset<T, GridContributionAssignmentFindFirstOrThrowArgs<ExtArgs>>): Prisma__GridContributionAssignmentClient<$Result.GetResult<Prisma.$GridContributionAssignmentPayload<ExtArgs>, T, "findFirstOrThrow", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Find zero or more GridContributionAssignments that matches the filter.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {GridContributionAssignmentFindManyArgs} args - Arguments to filter and select certain fields only.
+     * @example
+     * // Get all GridContributionAssignments
+     * const gridContributionAssignments = await prisma.gridContributionAssignment.findMany()
+     * 
+     * // Get first 10 GridContributionAssignments
+     * const gridContributionAssignments = await prisma.gridContributionAssignment.findMany({ take: 10 })
+     * 
+     * // Only select the `id`
+     * const gridContributionAssignmentWithIdOnly = await prisma.gridContributionAssignment.findMany({ select: { id: true } })
+     * 
+     */
+    findMany<T extends GridContributionAssignmentFindManyArgs>(args?: SelectSubset<T, GridContributionAssignmentFindManyArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$GridContributionAssignmentPayload<ExtArgs>, T, "findMany", GlobalOmitOptions>>
+
+    /**
+     * Create a GridContributionAssignment.
+     * @param {GridContributionAssignmentCreateArgs} args - Arguments to create a GridContributionAssignment.
+     * @example
+     * // Create one GridContributionAssignment
+     * const GridContributionAssignment = await prisma.gridContributionAssignment.create({
+     *   data: {
+     *     // ... data to create a GridContributionAssignment
+     *   }
+     * })
+     * 
+     */
+    create<T extends GridContributionAssignmentCreateArgs>(args: SelectSubset<T, GridContributionAssignmentCreateArgs<ExtArgs>>): Prisma__GridContributionAssignmentClient<$Result.GetResult<Prisma.$GridContributionAssignmentPayload<ExtArgs>, T, "create", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Create many GridContributionAssignments.
+     * @param {GridContributionAssignmentCreateManyArgs} args - Arguments to create many GridContributionAssignments.
+     * @example
+     * // Create many GridContributionAssignments
+     * const gridContributionAssignment = await prisma.gridContributionAssignment.createMany({
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     *     
+     */
+    createMany<T extends GridContributionAssignmentCreateManyArgs>(args?: SelectSubset<T, GridContributionAssignmentCreateManyArgs<ExtArgs>>): Prisma.PrismaPromise<BatchPayload>
+
+    /**
+     * Create many GridContributionAssignments and returns the data saved in the database.
+     * @param {GridContributionAssignmentCreateManyAndReturnArgs} args - Arguments to create many GridContributionAssignments.
+     * @example
+     * // Create many GridContributionAssignments
+     * const gridContributionAssignment = await prisma.gridContributionAssignment.createManyAndReturn({
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     * 
+     * // Create many GridContributionAssignments and only return the `id`
+     * const gridContributionAssignmentWithIdOnly = await prisma.gridContributionAssignment.createManyAndReturn({
+     *   select: { id: true },
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * 
+     */
+    createManyAndReturn<T extends GridContributionAssignmentCreateManyAndReturnArgs>(args?: SelectSubset<T, GridContributionAssignmentCreateManyAndReturnArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$GridContributionAssignmentPayload<ExtArgs>, T, "createManyAndReturn", GlobalOmitOptions>>
+
+    /**
+     * Delete a GridContributionAssignment.
+     * @param {GridContributionAssignmentDeleteArgs} args - Arguments to delete one GridContributionAssignment.
+     * @example
+     * // Delete one GridContributionAssignment
+     * const GridContributionAssignment = await prisma.gridContributionAssignment.delete({
+     *   where: {
+     *     // ... filter to delete one GridContributionAssignment
+     *   }
+     * })
+     * 
+     */
+    delete<T extends GridContributionAssignmentDeleteArgs>(args: SelectSubset<T, GridContributionAssignmentDeleteArgs<ExtArgs>>): Prisma__GridContributionAssignmentClient<$Result.GetResult<Prisma.$GridContributionAssignmentPayload<ExtArgs>, T, "delete", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Update one GridContributionAssignment.
+     * @param {GridContributionAssignmentUpdateArgs} args - Arguments to update one GridContributionAssignment.
+     * @example
+     * // Update one GridContributionAssignment
+     * const gridContributionAssignment = await prisma.gridContributionAssignment.update({
+     *   where: {
+     *     // ... provide filter here
+     *   },
+     *   data: {
+     *     // ... provide data here
+     *   }
+     * })
+     * 
+     */
+    update<T extends GridContributionAssignmentUpdateArgs>(args: SelectSubset<T, GridContributionAssignmentUpdateArgs<ExtArgs>>): Prisma__GridContributionAssignmentClient<$Result.GetResult<Prisma.$GridContributionAssignmentPayload<ExtArgs>, T, "update", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Delete zero or more GridContributionAssignments.
+     * @param {GridContributionAssignmentDeleteManyArgs} args - Arguments to filter GridContributionAssignments to delete.
+     * @example
+     * // Delete a few GridContributionAssignments
+     * const { count } = await prisma.gridContributionAssignment.deleteMany({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     * 
+     */
+    deleteMany<T extends GridContributionAssignmentDeleteManyArgs>(args?: SelectSubset<T, GridContributionAssignmentDeleteManyArgs<ExtArgs>>): Prisma.PrismaPromise<BatchPayload>
+
+    /**
+     * Update zero or more GridContributionAssignments.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {GridContributionAssignmentUpdateManyArgs} args - Arguments to update one or more rows.
+     * @example
+     * // Update many GridContributionAssignments
+     * const gridContributionAssignment = await prisma.gridContributionAssignment.updateMany({
+     *   where: {
+     *     // ... provide filter here
+     *   },
+     *   data: {
+     *     // ... provide data here
+     *   }
+     * })
+     * 
+     */
+    updateMany<T extends GridContributionAssignmentUpdateManyArgs>(args: SelectSubset<T, GridContributionAssignmentUpdateManyArgs<ExtArgs>>): Prisma.PrismaPromise<BatchPayload>
+
+    /**
+     * Update zero or more GridContributionAssignments and returns the data updated in the database.
+     * @param {GridContributionAssignmentUpdateManyAndReturnArgs} args - Arguments to update many GridContributionAssignments.
+     * @example
+     * // Update many GridContributionAssignments
+     * const gridContributionAssignment = await prisma.gridContributionAssignment.updateManyAndReturn({
+     *   where: {
+     *     // ... provide filter here
+     *   },
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     * 
+     * // Update zero or more GridContributionAssignments and only return the `id`
+     * const gridContributionAssignmentWithIdOnly = await prisma.gridContributionAssignment.updateManyAndReturn({
+     *   select: { id: true },
+     *   where: {
+     *     // ... provide filter here
+     *   },
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * 
+     */
+    updateManyAndReturn<T extends GridContributionAssignmentUpdateManyAndReturnArgs>(args: SelectSubset<T, GridContributionAssignmentUpdateManyAndReturnArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$GridContributionAssignmentPayload<ExtArgs>, T, "updateManyAndReturn", GlobalOmitOptions>>
+
+    /**
+     * Create or update one GridContributionAssignment.
+     * @param {GridContributionAssignmentUpsertArgs} args - Arguments to update or create a GridContributionAssignment.
+     * @example
+     * // Update or create a GridContributionAssignment
+     * const gridContributionAssignment = await prisma.gridContributionAssignment.upsert({
+     *   create: {
+     *     // ... data to create a GridContributionAssignment
+     *   },
+     *   update: {
+     *     // ... in case it already exists, update
+     *   },
+     *   where: {
+     *     // ... the filter for the GridContributionAssignment we want to update
+     *   }
+     * })
+     */
+    upsert<T extends GridContributionAssignmentUpsertArgs>(args: SelectSubset<T, GridContributionAssignmentUpsertArgs<ExtArgs>>): Prisma__GridContributionAssignmentClient<$Result.GetResult<Prisma.$GridContributionAssignmentPayload<ExtArgs>, T, "upsert", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+
+    /**
+     * Count the number of GridContributionAssignments.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {GridContributionAssignmentCountArgs} args - Arguments to filter GridContributionAssignments to count.
+     * @example
+     * // Count the number of GridContributionAssignments
+     * const count = await prisma.gridContributionAssignment.count({
+     *   where: {
+     *     // ... the filter for the GridContributionAssignments we want to count
+     *   }
+     * })
+    **/
+    count<T extends GridContributionAssignmentCountArgs>(
+      args?: Subset<T, GridContributionAssignmentCountArgs>,
+    ): Prisma.PrismaPromise<
+      T extends $Utils.Record<'select', any>
+        ? T['select'] extends true
+          ? number
+          : GetScalarType<T['select'], GridContributionAssignmentCountAggregateOutputType>
+        : number
+    >
+
+    /**
+     * Allows you to perform aggregations operations on a GridContributionAssignment.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {GridContributionAssignmentAggregateArgs} args - Select which aggregations you would like to apply and on what fields.
+     * @example
+     * // Ordered by age ascending
+     * // Where email contains prisma.io
+     * // Limited to the 10 users
+     * const aggregations = await prisma.user.aggregate({
+     *   _avg: {
+     *     age: true,
+     *   },
+     *   where: {
+     *     email: {
+     *       contains: "prisma.io",
+     *     },
+     *   },
+     *   orderBy: {
+     *     age: "asc",
+     *   },
+     *   take: 10,
+     * })
+    **/
+    aggregate<T extends GridContributionAssignmentAggregateArgs>(args: Subset<T, GridContributionAssignmentAggregateArgs>): Prisma.PrismaPromise<GetGridContributionAssignmentAggregateType<T>>
+
+    /**
+     * Group by GridContributionAssignment.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {GridContributionAssignmentGroupByArgs} args - Group by arguments.
+     * @example
+     * // Group by city, order by createdAt, get count
+     * const result = await prisma.user.groupBy({
+     *   by: ['city', 'createdAt'],
+     *   orderBy: {
+     *     createdAt: true
+     *   },
+     *   _count: {
+     *     _all: true
+     *   },
+     * })
+     * 
+    **/
+    groupBy<
+      T extends GridContributionAssignmentGroupByArgs,
+      HasSelectOrTake extends Or<
+        Extends<'skip', Keys<T>>,
+        Extends<'take', Keys<T>>
+      >,
+      OrderByArg extends True extends HasSelectOrTake
+        ? { orderBy: GridContributionAssignmentGroupByArgs['orderBy'] }
+        : { orderBy?: GridContributionAssignmentGroupByArgs['orderBy'] },
+      OrderFields extends ExcludeUnderscoreKeys<Keys<MaybeTupleToUnion<T['orderBy']>>>,
+      ByFields extends MaybeTupleToUnion<T['by']>,
+      ByValid extends Has<ByFields, OrderFields>,
+      HavingFields extends GetHavingFields<T['having']>,
+      HavingValid extends Has<ByFields, HavingFields>,
+      ByEmpty extends T['by'] extends never[] ? True : False,
+      InputErrors extends ByEmpty extends True
+      ? `Error: "by" must not be empty.`
+      : HavingValid extends False
+      ? {
+          [P in HavingFields]: P extends ByFields
+            ? never
+            : P extends string
+            ? `Error: Field "${P}" used in "having" needs to be provided in "by".`
+            : [
+                Error,
+                'Field ',
+                P,
+                ` in "having" needs to be provided in "by"`,
+              ]
+        }[HavingFields]
+      : 'take' extends Keys<T>
+      ? 'orderBy' extends Keys<T>
+        ? ByValid extends True
+          ? {}
+          : {
+              [P in OrderFields]: P extends ByFields
+                ? never
+                : `Error: Field "${P}" in "orderBy" needs to be provided in "by"`
+            }[OrderFields]
+        : 'Error: If you provide "take", you also need to provide "orderBy"'
+      : 'skip' extends Keys<T>
+      ? 'orderBy' extends Keys<T>
+        ? ByValid extends True
+          ? {}
+          : {
+              [P in OrderFields]: P extends ByFields
+                ? never
+                : `Error: Field "${P}" in "orderBy" needs to be provided in "by"`
+            }[OrderFields]
+        : 'Error: If you provide "skip", you also need to provide "orderBy"'
+      : ByValid extends True
+      ? {}
+      : {
+          [P in OrderFields]: P extends ByFields
+            ? never
+            : `Error: Field "${P}" in "orderBy" needs to be provided in "by"`
+        }[OrderFields]
+    >(args: SubsetIntersection<T, GridContributionAssignmentGroupByArgs, OrderByArg> & InputErrors): {} extends InputErrors ? GetGridContributionAssignmentGroupByPayload<T> : Prisma.PrismaPromise<InputErrors>
+  /**
+   * Fields of the GridContributionAssignment model
+   */
+  readonly fields: GridContributionAssignmentFieldRefs;
+  }
+
+  /**
+   * The delegate class that acts as a "Promise-like" for GridContributionAssignment.
+   * Why is this prefixed with `Prisma__`?
+   * Because we want to prevent naming conflicts as mentioned in
+   * https://github.com/prisma/prisma-client-js/issues/707
+   */
+  export interface Prisma__GridContributionAssignmentClient<T, Null = never, ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs, GlobalOmitOptions = {}> extends Prisma.PrismaPromise<T> {
+    readonly [Symbol.toStringTag]: "PrismaPromise"
+    /**
+     * Attaches callbacks for the resolution and/or rejection of the Promise.
+     * @param onfulfilled The callback to execute when the Promise is resolved.
+     * @param onrejected The callback to execute when the Promise is rejected.
+     * @returns A Promise for the completion of which ever callback is executed.
+     */
+    then<TResult1 = T, TResult2 = never>(onfulfilled?: ((value: T) => TResult1 | PromiseLike<TResult1>) | undefined | null, onrejected?: ((reason: any) => TResult2 | PromiseLike<TResult2>) | undefined | null): $Utils.JsPromise<TResult1 | TResult2>
+    /**
+     * Attaches a callback for only the rejection of the Promise.
+     * @param onrejected The callback to execute when the Promise is rejected.
+     * @returns A Promise for the completion of the callback.
+     */
+    catch<TResult = never>(onrejected?: ((reason: any) => TResult | PromiseLike<TResult>) | undefined | null): $Utils.JsPromise<T | TResult>
+    /**
+     * Attaches a callback that is invoked when the Promise is settled (fulfilled or rejected). The
+     * resolved value cannot be modified from the callback.
+     * @param onfinally The callback to execute when the Promise is settled (fulfilled or rejected).
+     * @returns A Promise for the completion of the callback.
+     */
+    finally(onfinally?: (() => void) | undefined | null): $Utils.JsPromise<T>
+  }
+
+
+
+
+  /**
+   * Fields of the GridContributionAssignment model
+   */
+  interface GridContributionAssignmentFieldRefs {
+    readonly id: FieldRef<"GridContributionAssignment", 'Int'>
+    readonly kind: FieldRef<"GridContributionAssignment", 'String'>
+    readonly division: FieldRef<"GridContributionAssignment", 'String'>
+    readonly creatorEmail: FieldRef<"GridContributionAssignment", 'String'>
+    readonly approverEmail: FieldRef<"GridContributionAssignment", 'String'>
+    readonly isActive: FieldRef<"GridContributionAssignment", 'Boolean'>
+    readonly createdAt: FieldRef<"GridContributionAssignment", 'DateTime'>
+    readonly updatedAt: FieldRef<"GridContributionAssignment", 'DateTime'>
+  }
+    
+
+  // Custom InputTypes
+  /**
+   * GridContributionAssignment findUnique
+   */
+  export type GridContributionAssignmentFindUniqueArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the GridContributionAssignment
+     */
+    select?: GridContributionAssignmentSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the GridContributionAssignment
+     */
+    omit?: GridContributionAssignmentOmit<ExtArgs> | null
+    /**
+     * Filter, which GridContributionAssignment to fetch.
+     */
+    where: GridContributionAssignmentWhereUniqueInput
+  }
+
+  /**
+   * GridContributionAssignment findUniqueOrThrow
+   */
+  export type GridContributionAssignmentFindUniqueOrThrowArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the GridContributionAssignment
+     */
+    select?: GridContributionAssignmentSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the GridContributionAssignment
+     */
+    omit?: GridContributionAssignmentOmit<ExtArgs> | null
+    /**
+     * Filter, which GridContributionAssignment to fetch.
+     */
+    where: GridContributionAssignmentWhereUniqueInput
+  }
+
+  /**
+   * GridContributionAssignment findFirst
+   */
+  export type GridContributionAssignmentFindFirstArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the GridContributionAssignment
+     */
+    select?: GridContributionAssignmentSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the GridContributionAssignment
+     */
+    omit?: GridContributionAssignmentOmit<ExtArgs> | null
+    /**
+     * Filter, which GridContributionAssignment to fetch.
+     */
+    where?: GridContributionAssignmentWhereInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
+     * 
+     * Determine the order of GridContributionAssignments to fetch.
+     */
+    orderBy?: GridContributionAssignmentOrderByWithRelationInput | GridContributionAssignmentOrderByWithRelationInput[]
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
+     * 
+     * Sets the position for searching for GridContributionAssignments.
+     */
+    cursor?: GridContributionAssignmentWhereUniqueInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Take `±n` GridContributionAssignments from the position of the cursor.
+     */
+    take?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Skip the first `n` GridContributionAssignments.
+     */
+    skip?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/distinct Distinct Docs}
+     * 
+     * Filter by unique combinations of GridContributionAssignments.
+     */
+    distinct?: GridContributionAssignmentScalarFieldEnum | GridContributionAssignmentScalarFieldEnum[]
+  }
+
+  /**
+   * GridContributionAssignment findFirstOrThrow
+   */
+  export type GridContributionAssignmentFindFirstOrThrowArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the GridContributionAssignment
+     */
+    select?: GridContributionAssignmentSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the GridContributionAssignment
+     */
+    omit?: GridContributionAssignmentOmit<ExtArgs> | null
+    /**
+     * Filter, which GridContributionAssignment to fetch.
+     */
+    where?: GridContributionAssignmentWhereInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
+     * 
+     * Determine the order of GridContributionAssignments to fetch.
+     */
+    orderBy?: GridContributionAssignmentOrderByWithRelationInput | GridContributionAssignmentOrderByWithRelationInput[]
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
+     * 
+     * Sets the position for searching for GridContributionAssignments.
+     */
+    cursor?: GridContributionAssignmentWhereUniqueInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Take `±n` GridContributionAssignments from the position of the cursor.
+     */
+    take?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Skip the first `n` GridContributionAssignments.
+     */
+    skip?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/distinct Distinct Docs}
+     * 
+     * Filter by unique combinations of GridContributionAssignments.
+     */
+    distinct?: GridContributionAssignmentScalarFieldEnum | GridContributionAssignmentScalarFieldEnum[]
+  }
+
+  /**
+   * GridContributionAssignment findMany
+   */
+  export type GridContributionAssignmentFindManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the GridContributionAssignment
+     */
+    select?: GridContributionAssignmentSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the GridContributionAssignment
+     */
+    omit?: GridContributionAssignmentOmit<ExtArgs> | null
+    /**
+     * Filter, which GridContributionAssignments to fetch.
+     */
+    where?: GridContributionAssignmentWhereInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
+     * 
+     * Determine the order of GridContributionAssignments to fetch.
+     */
+    orderBy?: GridContributionAssignmentOrderByWithRelationInput | GridContributionAssignmentOrderByWithRelationInput[]
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
+     * 
+     * Sets the position for listing GridContributionAssignments.
+     */
+    cursor?: GridContributionAssignmentWhereUniqueInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Take `±n` GridContributionAssignments from the position of the cursor.
+     */
+    take?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Skip the first `n` GridContributionAssignments.
+     */
+    skip?: number
+    distinct?: GridContributionAssignmentScalarFieldEnum | GridContributionAssignmentScalarFieldEnum[]
+  }
+
+  /**
+   * GridContributionAssignment create
+   */
+  export type GridContributionAssignmentCreateArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the GridContributionAssignment
+     */
+    select?: GridContributionAssignmentSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the GridContributionAssignment
+     */
+    omit?: GridContributionAssignmentOmit<ExtArgs> | null
+    /**
+     * The data needed to create a GridContributionAssignment.
+     */
+    data: XOR<GridContributionAssignmentCreateInput, GridContributionAssignmentUncheckedCreateInput>
+  }
+
+  /**
+   * GridContributionAssignment createMany
+   */
+  export type GridContributionAssignmentCreateManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * The data used to create many GridContributionAssignments.
+     */
+    data: GridContributionAssignmentCreateManyInput | GridContributionAssignmentCreateManyInput[]
+    skipDuplicates?: boolean
+  }
+
+  /**
+   * GridContributionAssignment createManyAndReturn
+   */
+  export type GridContributionAssignmentCreateManyAndReturnArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the GridContributionAssignment
+     */
+    select?: GridContributionAssignmentSelectCreateManyAndReturn<ExtArgs> | null
+    /**
+     * Omit specific fields from the GridContributionAssignment
+     */
+    omit?: GridContributionAssignmentOmit<ExtArgs> | null
+    /**
+     * The data used to create many GridContributionAssignments.
+     */
+    data: GridContributionAssignmentCreateManyInput | GridContributionAssignmentCreateManyInput[]
+    skipDuplicates?: boolean
+  }
+
+  /**
+   * GridContributionAssignment update
+   */
+  export type GridContributionAssignmentUpdateArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the GridContributionAssignment
+     */
+    select?: GridContributionAssignmentSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the GridContributionAssignment
+     */
+    omit?: GridContributionAssignmentOmit<ExtArgs> | null
+    /**
+     * The data needed to update a GridContributionAssignment.
+     */
+    data: XOR<GridContributionAssignmentUpdateInput, GridContributionAssignmentUncheckedUpdateInput>
+    /**
+     * Choose, which GridContributionAssignment to update.
+     */
+    where: GridContributionAssignmentWhereUniqueInput
+  }
+
+  /**
+   * GridContributionAssignment updateMany
+   */
+  export type GridContributionAssignmentUpdateManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * The data used to update GridContributionAssignments.
+     */
+    data: XOR<GridContributionAssignmentUpdateManyMutationInput, GridContributionAssignmentUncheckedUpdateManyInput>
+    /**
+     * Filter which GridContributionAssignments to update
+     */
+    where?: GridContributionAssignmentWhereInput
+    /**
+     * Limit how many GridContributionAssignments to update.
+     */
+    limit?: number
+  }
+
+  /**
+   * GridContributionAssignment updateManyAndReturn
+   */
+  export type GridContributionAssignmentUpdateManyAndReturnArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the GridContributionAssignment
+     */
+    select?: GridContributionAssignmentSelectUpdateManyAndReturn<ExtArgs> | null
+    /**
+     * Omit specific fields from the GridContributionAssignment
+     */
+    omit?: GridContributionAssignmentOmit<ExtArgs> | null
+    /**
+     * The data used to update GridContributionAssignments.
+     */
+    data: XOR<GridContributionAssignmentUpdateManyMutationInput, GridContributionAssignmentUncheckedUpdateManyInput>
+    /**
+     * Filter which GridContributionAssignments to update
+     */
+    where?: GridContributionAssignmentWhereInput
+    /**
+     * Limit how many GridContributionAssignments to update.
+     */
+    limit?: number
+  }
+
+  /**
+   * GridContributionAssignment upsert
+   */
+  export type GridContributionAssignmentUpsertArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the GridContributionAssignment
+     */
+    select?: GridContributionAssignmentSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the GridContributionAssignment
+     */
+    omit?: GridContributionAssignmentOmit<ExtArgs> | null
+    /**
+     * The filter to search for the GridContributionAssignment to update in case it exists.
+     */
+    where: GridContributionAssignmentWhereUniqueInput
+    /**
+     * In case the GridContributionAssignment found by the `where` argument doesn't exist, create a new GridContributionAssignment with this data.
+     */
+    create: XOR<GridContributionAssignmentCreateInput, GridContributionAssignmentUncheckedCreateInput>
+    /**
+     * In case the GridContributionAssignment was found with the provided `where` argument, update it with this data.
+     */
+    update: XOR<GridContributionAssignmentUpdateInput, GridContributionAssignmentUncheckedUpdateInput>
+  }
+
+  /**
+   * GridContributionAssignment delete
+   */
+  export type GridContributionAssignmentDeleteArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the GridContributionAssignment
+     */
+    select?: GridContributionAssignmentSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the GridContributionAssignment
+     */
+    omit?: GridContributionAssignmentOmit<ExtArgs> | null
+    /**
+     * Filter which GridContributionAssignment to delete.
+     */
+    where: GridContributionAssignmentWhereUniqueInput
+  }
+
+  /**
+   * GridContributionAssignment deleteMany
+   */
+  export type GridContributionAssignmentDeleteManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Filter which GridContributionAssignments to delete
+     */
+    where?: GridContributionAssignmentWhereInput
+    /**
+     * Limit how many GridContributionAssignments to delete.
+     */
+    limit?: number
+  }
+
+  /**
+   * GridContributionAssignment without action
+   */
+  export type GridContributionAssignmentDefaultArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the GridContributionAssignment
+     */
+    select?: GridContributionAssignmentSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the GridContributionAssignment
+     */
+    omit?: GridContributionAssignmentOmit<ExtArgs> | null
+  }
+
+
+  /**
    * Model ExpenseChangeRequest
    */
 
@@ -76702,6 +77865,9 @@ export namespace Prisma {
     requestedByEmail: string | null
     requestedAt: Date | null
     requesterBusinessDivision: string | null
+    requestKind: string | null
+    blockKey: string | null
+    routedApproverEmail: string | null
     createdAt: Date | null
     updatedAt: Date | null
   }
@@ -76722,6 +77888,9 @@ export namespace Prisma {
     requestedByEmail: string | null
     requestedAt: Date | null
     requesterBusinessDivision: string | null
+    requestKind: string | null
+    blockKey: string | null
+    routedApproverEmail: string | null
     createdAt: Date | null
     updatedAt: Date | null
   }
@@ -76744,6 +77913,9 @@ export namespace Prisma {
     requestedByEmail: number
     requestedAt: number
     requesterBusinessDivision: number
+    requestKind: number
+    blockKey: number
+    routedApproverEmail: number
     createdAt: number
     updatedAt: number
     _all: number
@@ -76774,6 +77946,9 @@ export namespace Prisma {
     requestedByEmail?: true
     requestedAt?: true
     requesterBusinessDivision?: true
+    requestKind?: true
+    blockKey?: true
+    routedApproverEmail?: true
     createdAt?: true
     updatedAt?: true
   }
@@ -76794,6 +77969,9 @@ export namespace Prisma {
     requestedByEmail?: true
     requestedAt?: true
     requesterBusinessDivision?: true
+    requestKind?: true
+    blockKey?: true
+    routedApproverEmail?: true
     createdAt?: true
     updatedAt?: true
   }
@@ -76816,6 +77994,9 @@ export namespace Prisma {
     requestedByEmail?: true
     requestedAt?: true
     requesterBusinessDivision?: true
+    requestKind?: true
+    blockKey?: true
+    routedApproverEmail?: true
     createdAt?: true
     updatedAt?: true
     _all?: true
@@ -76925,6 +78106,9 @@ export namespace Prisma {
     requestedByEmail: string
     requestedAt: Date
     requesterBusinessDivision: string | null
+    requestKind: string | null
+    blockKey: string | null
+    routedApproverEmail: string | null
     createdAt: Date
     updatedAt: Date
     _count: ExpenseChangeRequestCountAggregateOutputType | null
@@ -76966,6 +78150,9 @@ export namespace Prisma {
     requestedByEmail?: boolean
     requestedAt?: boolean
     requesterBusinessDivision?: boolean
+    requestKind?: boolean
+    blockKey?: boolean
+    routedApproverEmail?: boolean
     createdAt?: boolean
     updatedAt?: boolean
   }, ExtArgs["result"]["expenseChangeRequest"]>
@@ -76988,6 +78175,9 @@ export namespace Prisma {
     requestedByEmail?: boolean
     requestedAt?: boolean
     requesterBusinessDivision?: boolean
+    requestKind?: boolean
+    blockKey?: boolean
+    routedApproverEmail?: boolean
     createdAt?: boolean
     updatedAt?: boolean
   }, ExtArgs["result"]["expenseChangeRequest"]>
@@ -77010,6 +78200,9 @@ export namespace Prisma {
     requestedByEmail?: boolean
     requestedAt?: boolean
     requesterBusinessDivision?: boolean
+    requestKind?: boolean
+    blockKey?: boolean
+    routedApproverEmail?: boolean
     createdAt?: boolean
     updatedAt?: boolean
   }, ExtArgs["result"]["expenseChangeRequest"]>
@@ -77032,11 +78225,14 @@ export namespace Prisma {
     requestedByEmail?: boolean
     requestedAt?: boolean
     requesterBusinessDivision?: boolean
+    requestKind?: boolean
+    blockKey?: boolean
+    routedApproverEmail?: boolean
     createdAt?: boolean
     updatedAt?: boolean
   }
 
-  export type ExpenseChangeRequestOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<"id" | "tableKey" | "operation" | "rowId" | "appliedRowId" | "rowLabel" | "changes" | "reason" | "dueDate" | "status" | "currentStageKey" | "approvalTrail" | "requestedById" | "requestedByName" | "requestedByEmail" | "requestedAt" | "requesterBusinessDivision" | "createdAt" | "updatedAt", ExtArgs["result"]["expenseChangeRequest"]>
+  export type ExpenseChangeRequestOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<"id" | "tableKey" | "operation" | "rowId" | "appliedRowId" | "rowLabel" | "changes" | "reason" | "dueDate" | "status" | "currentStageKey" | "approvalTrail" | "requestedById" | "requestedByName" | "requestedByEmail" | "requestedAt" | "requesterBusinessDivision" | "requestKind" | "blockKey" | "routedApproverEmail" | "createdAt" | "updatedAt", ExtArgs["result"]["expenseChangeRequest"]>
 
   export type $ExpenseChangeRequestPayload<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
     name: "ExpenseChangeRequest"
@@ -77092,6 +78288,23 @@ export namespace Prisma {
        * expenseAccessService.ts.
        */
       requesterBusinessDivision: string | null
+      /**
+       * Null for an ordinary row add/edit/delete. 'BGT_CONT' / 'PD_CONT' for a
+       * Major Category Grid contribution-% request — one per (major_category,
+       * attribute_name) block, `changes` keyed by attribute VALUE: { value: {
+       * old, new } }. Walks the 'major-category-grid#contribution' chain, see
+       * services/gridContributionService.ts.
+       */
+      requestKind: string | null
+      /**
+       * "<major_category>||<attribute_name>" for a contribution request.
+       */
+      blockKey: string | null
+      /**
+       * The requesting creator's paired approver (grid_contribution_assignments),
+       * captured at creation — the only person who can act at CONT_APPROVER.
+       */
+      routedApproverEmail: string | null
       createdAt: Date
       updatedAt: Date
     }, ExtArgs["result"]["expenseChangeRequest"]>
@@ -77534,6 +78747,9 @@ export namespace Prisma {
     readonly requestedByEmail: FieldRef<"ExpenseChangeRequest", 'String'>
     readonly requestedAt: FieldRef<"ExpenseChangeRequest", 'DateTime'>
     readonly requesterBusinessDivision: FieldRef<"ExpenseChangeRequest", 'String'>
+    readonly requestKind: FieldRef<"ExpenseChangeRequest", 'String'>
+    readonly blockKey: FieldRef<"ExpenseChangeRequest", 'String'>
+    readonly routedApproverEmail: FieldRef<"ExpenseChangeRequest", 'String'>
     readonly createdAt: FieldRef<"ExpenseChangeRequest", 'DateTime'>
     readonly updatedAt: FieldRef<"ExpenseChangeRequest", 'DateTime'>
   }
@@ -81718,6 +82934,20 @@ export namespace Prisma {
   export type ExpenseApprovalStageScalarFieldEnum = (typeof ExpenseApprovalStageScalarFieldEnum)[keyof typeof ExpenseApprovalStageScalarFieldEnum]
 
 
+  export const GridContributionAssignmentScalarFieldEnum: {
+    id: 'id',
+    kind: 'kind',
+    division: 'division',
+    creatorEmail: 'creatorEmail',
+    approverEmail: 'approverEmail',
+    isActive: 'isActive',
+    createdAt: 'createdAt',
+    updatedAt: 'updatedAt'
+  };
+
+  export type GridContributionAssignmentScalarFieldEnum = (typeof GridContributionAssignmentScalarFieldEnum)[keyof typeof GridContributionAssignmentScalarFieldEnum]
+
+
   export const ExpenseChangeRequestScalarFieldEnum: {
     id: 'id',
     tableKey: 'tableKey',
@@ -81736,6 +82966,9 @@ export namespace Prisma {
     requestedByEmail: 'requestedByEmail',
     requestedAt: 'requestedAt',
     requesterBusinessDivision: 'requesterBusinessDivision',
+    requestKind: 'requestKind',
+    blockKey: 'blockKey',
+    routedApproverEmail: 'routedApproverEmail',
     createdAt: 'createdAt',
     updatedAt: 'updatedAt'
   };
@@ -82918,6 +84151,16 @@ export namespace Prisma {
   export type ExpenseApprovalStageOrderByRelevanceFieldEnum = (typeof ExpenseApprovalStageOrderByRelevanceFieldEnum)[keyof typeof ExpenseApprovalStageOrderByRelevanceFieldEnum]
 
 
+  export const GridContributionAssignmentOrderByRelevanceFieldEnum: {
+    kind: 'kind',
+    division: 'division',
+    creatorEmail: 'creatorEmail',
+    approverEmail: 'approverEmail'
+  };
+
+  export type GridContributionAssignmentOrderByRelevanceFieldEnum = (typeof GridContributionAssignmentOrderByRelevanceFieldEnum)[keyof typeof GridContributionAssignmentOrderByRelevanceFieldEnum]
+
+
   export const ExpenseChangeRequestOrderByRelevanceFieldEnum: {
     id: 'id',
     tableKey: 'tableKey',
@@ -82928,7 +84171,10 @@ export namespace Prisma {
     currentStageKey: 'currentStageKey',
     requestedByName: 'requestedByName',
     requestedByEmail: 'requestedByEmail',
-    requesterBusinessDivision: 'requesterBusinessDivision'
+    requesterBusinessDivision: 'requesterBusinessDivision',
+    requestKind: 'requestKind',
+    blockKey: 'blockKey',
+    routedApproverEmail: 'routedApproverEmail'
   };
 
   export type ExpenseChangeRequestOrderByRelevanceFieldEnum = (typeof ExpenseChangeRequestOrderByRelevanceFieldEnum)[keyof typeof ExpenseChangeRequestOrderByRelevanceFieldEnum]
@@ -90824,6 +92070,77 @@ export namespace Prisma {
     updatedAt?: DateTimeWithAggregatesFilter<"ExpenseApprovalStage"> | Date | string
   }
 
+  export type GridContributionAssignmentWhereInput = {
+    AND?: GridContributionAssignmentWhereInput | GridContributionAssignmentWhereInput[]
+    OR?: GridContributionAssignmentWhereInput[]
+    NOT?: GridContributionAssignmentWhereInput | GridContributionAssignmentWhereInput[]
+    id?: IntFilter<"GridContributionAssignment"> | number
+    kind?: StringFilter<"GridContributionAssignment"> | string
+    division?: StringFilter<"GridContributionAssignment"> | string
+    creatorEmail?: StringFilter<"GridContributionAssignment"> | string
+    approverEmail?: StringFilter<"GridContributionAssignment"> | string
+    isActive?: BoolFilter<"GridContributionAssignment"> | boolean
+    createdAt?: DateTimeFilter<"GridContributionAssignment"> | Date | string
+    updatedAt?: DateTimeFilter<"GridContributionAssignment"> | Date | string
+  }
+
+  export type GridContributionAssignmentOrderByWithRelationInput = {
+    id?: SortOrder
+    kind?: SortOrder
+    division?: SortOrder
+    creatorEmail?: SortOrder
+    approverEmail?: SortOrder
+    isActive?: SortOrder
+    createdAt?: SortOrder
+    updatedAt?: SortOrder
+    _relevance?: GridContributionAssignmentOrderByRelevanceInput
+  }
+
+  export type GridContributionAssignmentWhereUniqueInput = Prisma.AtLeast<{
+    id?: number
+    kind_division_creatorEmail?: GridContributionAssignmentKindDivisionCreatorEmailCompoundUniqueInput
+    AND?: GridContributionAssignmentWhereInput | GridContributionAssignmentWhereInput[]
+    OR?: GridContributionAssignmentWhereInput[]
+    NOT?: GridContributionAssignmentWhereInput | GridContributionAssignmentWhereInput[]
+    kind?: StringFilter<"GridContributionAssignment"> | string
+    division?: StringFilter<"GridContributionAssignment"> | string
+    creatorEmail?: StringFilter<"GridContributionAssignment"> | string
+    approverEmail?: StringFilter<"GridContributionAssignment"> | string
+    isActive?: BoolFilter<"GridContributionAssignment"> | boolean
+    createdAt?: DateTimeFilter<"GridContributionAssignment"> | Date | string
+    updatedAt?: DateTimeFilter<"GridContributionAssignment"> | Date | string
+  }, "id" | "kind_division_creatorEmail">
+
+  export type GridContributionAssignmentOrderByWithAggregationInput = {
+    id?: SortOrder
+    kind?: SortOrder
+    division?: SortOrder
+    creatorEmail?: SortOrder
+    approverEmail?: SortOrder
+    isActive?: SortOrder
+    createdAt?: SortOrder
+    updatedAt?: SortOrder
+    _count?: GridContributionAssignmentCountOrderByAggregateInput
+    _avg?: GridContributionAssignmentAvgOrderByAggregateInput
+    _max?: GridContributionAssignmentMaxOrderByAggregateInput
+    _min?: GridContributionAssignmentMinOrderByAggregateInput
+    _sum?: GridContributionAssignmentSumOrderByAggregateInput
+  }
+
+  export type GridContributionAssignmentScalarWhereWithAggregatesInput = {
+    AND?: GridContributionAssignmentScalarWhereWithAggregatesInput | GridContributionAssignmentScalarWhereWithAggregatesInput[]
+    OR?: GridContributionAssignmentScalarWhereWithAggregatesInput[]
+    NOT?: GridContributionAssignmentScalarWhereWithAggregatesInput | GridContributionAssignmentScalarWhereWithAggregatesInput[]
+    id?: IntWithAggregatesFilter<"GridContributionAssignment"> | number
+    kind?: StringWithAggregatesFilter<"GridContributionAssignment"> | string
+    division?: StringWithAggregatesFilter<"GridContributionAssignment"> | string
+    creatorEmail?: StringWithAggregatesFilter<"GridContributionAssignment"> | string
+    approverEmail?: StringWithAggregatesFilter<"GridContributionAssignment"> | string
+    isActive?: BoolWithAggregatesFilter<"GridContributionAssignment"> | boolean
+    createdAt?: DateTimeWithAggregatesFilter<"GridContributionAssignment"> | Date | string
+    updatedAt?: DateTimeWithAggregatesFilter<"GridContributionAssignment"> | Date | string
+  }
+
   export type ExpenseChangeRequestWhereInput = {
     AND?: ExpenseChangeRequestWhereInput | ExpenseChangeRequestWhereInput[]
     OR?: ExpenseChangeRequestWhereInput[]
@@ -90845,6 +92162,9 @@ export namespace Prisma {
     requestedByEmail?: StringFilter<"ExpenseChangeRequest"> | string
     requestedAt?: DateTimeFilter<"ExpenseChangeRequest"> | Date | string
     requesterBusinessDivision?: StringNullableFilter<"ExpenseChangeRequest"> | string | null
+    requestKind?: StringNullableFilter<"ExpenseChangeRequest"> | string | null
+    blockKey?: StringNullableFilter<"ExpenseChangeRequest"> | string | null
+    routedApproverEmail?: StringNullableFilter<"ExpenseChangeRequest"> | string | null
     createdAt?: DateTimeFilter<"ExpenseChangeRequest"> | Date | string
     updatedAt?: DateTimeFilter<"ExpenseChangeRequest"> | Date | string
   }
@@ -90867,6 +92187,9 @@ export namespace Prisma {
     requestedByEmail?: SortOrder
     requestedAt?: SortOrder
     requesterBusinessDivision?: SortOrderInput | SortOrder
+    requestKind?: SortOrderInput | SortOrder
+    blockKey?: SortOrderInput | SortOrder
+    routedApproverEmail?: SortOrderInput | SortOrder
     createdAt?: SortOrder
     updatedAt?: SortOrder
     _relevance?: ExpenseChangeRequestOrderByRelevanceInput
@@ -90893,6 +92216,9 @@ export namespace Prisma {
     requestedByEmail?: StringFilter<"ExpenseChangeRequest"> | string
     requestedAt?: DateTimeFilter<"ExpenseChangeRequest"> | Date | string
     requesterBusinessDivision?: StringNullableFilter<"ExpenseChangeRequest"> | string | null
+    requestKind?: StringNullableFilter<"ExpenseChangeRequest"> | string | null
+    blockKey?: StringNullableFilter<"ExpenseChangeRequest"> | string | null
+    routedApproverEmail?: StringNullableFilter<"ExpenseChangeRequest"> | string | null
     createdAt?: DateTimeFilter<"ExpenseChangeRequest"> | Date | string
     updatedAt?: DateTimeFilter<"ExpenseChangeRequest"> | Date | string
   }, "id">
@@ -90915,6 +92241,9 @@ export namespace Prisma {
     requestedByEmail?: SortOrder
     requestedAt?: SortOrder
     requesterBusinessDivision?: SortOrderInput | SortOrder
+    requestKind?: SortOrderInput | SortOrder
+    blockKey?: SortOrderInput | SortOrder
+    routedApproverEmail?: SortOrderInput | SortOrder
     createdAt?: SortOrder
     updatedAt?: SortOrder
     _count?: ExpenseChangeRequestCountOrderByAggregateInput
@@ -90945,6 +92274,9 @@ export namespace Prisma {
     requestedByEmail?: StringWithAggregatesFilter<"ExpenseChangeRequest"> | string
     requestedAt?: DateTimeWithAggregatesFilter<"ExpenseChangeRequest"> | Date | string
     requesterBusinessDivision?: StringNullableWithAggregatesFilter<"ExpenseChangeRequest"> | string | null
+    requestKind?: StringNullableWithAggregatesFilter<"ExpenseChangeRequest"> | string | null
+    blockKey?: StringNullableWithAggregatesFilter<"ExpenseChangeRequest"> | string | null
+    routedApproverEmail?: StringNullableWithAggregatesFilter<"ExpenseChangeRequest"> | string | null
     createdAt?: DateTimeWithAggregatesFilter<"ExpenseChangeRequest"> | Date | string
     updatedAt?: DateTimeWithAggregatesFilter<"ExpenseChangeRequest"> | Date | string
   }
@@ -100391,6 +101723,80 @@ export namespace Prisma {
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
   }
 
+  export type GridContributionAssignmentCreateInput = {
+    kind: string
+    division: string
+    creatorEmail: string
+    approverEmail: string
+    isActive?: boolean
+    createdAt?: Date | string
+    updatedAt?: Date | string
+  }
+
+  export type GridContributionAssignmentUncheckedCreateInput = {
+    id?: number
+    kind: string
+    division: string
+    creatorEmail: string
+    approverEmail: string
+    isActive?: boolean
+    createdAt?: Date | string
+    updatedAt?: Date | string
+  }
+
+  export type GridContributionAssignmentUpdateInput = {
+    kind?: StringFieldUpdateOperationsInput | string
+    division?: StringFieldUpdateOperationsInput | string
+    creatorEmail?: StringFieldUpdateOperationsInput | string
+    approverEmail?: StringFieldUpdateOperationsInput | string
+    isActive?: BoolFieldUpdateOperationsInput | boolean
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+  }
+
+  export type GridContributionAssignmentUncheckedUpdateInput = {
+    id?: IntFieldUpdateOperationsInput | number
+    kind?: StringFieldUpdateOperationsInput | string
+    division?: StringFieldUpdateOperationsInput | string
+    creatorEmail?: StringFieldUpdateOperationsInput | string
+    approverEmail?: StringFieldUpdateOperationsInput | string
+    isActive?: BoolFieldUpdateOperationsInput | boolean
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+  }
+
+  export type GridContributionAssignmentCreateManyInput = {
+    id?: number
+    kind: string
+    division: string
+    creatorEmail: string
+    approverEmail: string
+    isActive?: boolean
+    createdAt?: Date | string
+    updatedAt?: Date | string
+  }
+
+  export type GridContributionAssignmentUpdateManyMutationInput = {
+    kind?: StringFieldUpdateOperationsInput | string
+    division?: StringFieldUpdateOperationsInput | string
+    creatorEmail?: StringFieldUpdateOperationsInput | string
+    approverEmail?: StringFieldUpdateOperationsInput | string
+    isActive?: BoolFieldUpdateOperationsInput | boolean
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+  }
+
+  export type GridContributionAssignmentUncheckedUpdateManyInput = {
+    id?: IntFieldUpdateOperationsInput | number
+    kind?: StringFieldUpdateOperationsInput | string
+    division?: StringFieldUpdateOperationsInput | string
+    creatorEmail?: StringFieldUpdateOperationsInput | string
+    approverEmail?: StringFieldUpdateOperationsInput | string
+    isActive?: BoolFieldUpdateOperationsInput | boolean
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+  }
+
   export type ExpenseChangeRequestCreateInput = {
     id?: string
     tableKey: string
@@ -100409,6 +101815,9 @@ export namespace Prisma {
     requestedByEmail: string
     requestedAt?: Date | string
     requesterBusinessDivision?: string | null
+    requestKind?: string | null
+    blockKey?: string | null
+    routedApproverEmail?: string | null
     createdAt?: Date | string
     updatedAt?: Date | string
   }
@@ -100431,6 +101840,9 @@ export namespace Prisma {
     requestedByEmail: string
     requestedAt?: Date | string
     requesterBusinessDivision?: string | null
+    requestKind?: string | null
+    blockKey?: string | null
+    routedApproverEmail?: string | null
     createdAt?: Date | string
     updatedAt?: Date | string
   }
@@ -100453,6 +101865,9 @@ export namespace Prisma {
     requestedByEmail?: StringFieldUpdateOperationsInput | string
     requestedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     requesterBusinessDivision?: NullableStringFieldUpdateOperationsInput | string | null
+    requestKind?: NullableStringFieldUpdateOperationsInput | string | null
+    blockKey?: NullableStringFieldUpdateOperationsInput | string | null
+    routedApproverEmail?: NullableStringFieldUpdateOperationsInput | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
   }
@@ -100475,6 +101890,9 @@ export namespace Prisma {
     requestedByEmail?: StringFieldUpdateOperationsInput | string
     requestedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     requesterBusinessDivision?: NullableStringFieldUpdateOperationsInput | string | null
+    requestKind?: NullableStringFieldUpdateOperationsInput | string | null
+    blockKey?: NullableStringFieldUpdateOperationsInput | string | null
+    routedApproverEmail?: NullableStringFieldUpdateOperationsInput | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
   }
@@ -100497,6 +101915,9 @@ export namespace Prisma {
     requestedByEmail: string
     requestedAt?: Date | string
     requesterBusinessDivision?: string | null
+    requestKind?: string | null
+    blockKey?: string | null
+    routedApproverEmail?: string | null
     createdAt?: Date | string
     updatedAt?: Date | string
   }
@@ -100519,6 +101940,9 @@ export namespace Prisma {
     requestedByEmail?: StringFieldUpdateOperationsInput | string
     requestedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     requesterBusinessDivision?: NullableStringFieldUpdateOperationsInput | string | null
+    requestKind?: NullableStringFieldUpdateOperationsInput | string | null
+    blockKey?: NullableStringFieldUpdateOperationsInput | string | null
+    routedApproverEmail?: NullableStringFieldUpdateOperationsInput | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
   }
@@ -100541,6 +101965,9 @@ export namespace Prisma {
     requestedByEmail?: StringFieldUpdateOperationsInput | string
     requestedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     requesterBusinessDivision?: NullableStringFieldUpdateOperationsInput | string | null
+    requestKind?: NullableStringFieldUpdateOperationsInput | string | null
+    blockKey?: NullableStringFieldUpdateOperationsInput | string | null
+    routedApproverEmail?: NullableStringFieldUpdateOperationsInput | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
   }
@@ -106644,6 +108071,59 @@ export namespace Prisma {
     createdById?: SortOrder
   }
 
+  export type GridContributionAssignmentOrderByRelevanceInput = {
+    fields: GridContributionAssignmentOrderByRelevanceFieldEnum | GridContributionAssignmentOrderByRelevanceFieldEnum[]
+    sort: SortOrder
+    search: string
+  }
+
+  export type GridContributionAssignmentKindDivisionCreatorEmailCompoundUniqueInput = {
+    kind: string
+    division: string
+    creatorEmail: string
+  }
+
+  export type GridContributionAssignmentCountOrderByAggregateInput = {
+    id?: SortOrder
+    kind?: SortOrder
+    division?: SortOrder
+    creatorEmail?: SortOrder
+    approverEmail?: SortOrder
+    isActive?: SortOrder
+    createdAt?: SortOrder
+    updatedAt?: SortOrder
+  }
+
+  export type GridContributionAssignmentAvgOrderByAggregateInput = {
+    id?: SortOrder
+  }
+
+  export type GridContributionAssignmentMaxOrderByAggregateInput = {
+    id?: SortOrder
+    kind?: SortOrder
+    division?: SortOrder
+    creatorEmail?: SortOrder
+    approverEmail?: SortOrder
+    isActive?: SortOrder
+    createdAt?: SortOrder
+    updatedAt?: SortOrder
+  }
+
+  export type GridContributionAssignmentMinOrderByAggregateInput = {
+    id?: SortOrder
+    kind?: SortOrder
+    division?: SortOrder
+    creatorEmail?: SortOrder
+    approverEmail?: SortOrder
+    isActive?: SortOrder
+    createdAt?: SortOrder
+    updatedAt?: SortOrder
+  }
+
+  export type GridContributionAssignmentSumOrderByAggregateInput = {
+    id?: SortOrder
+  }
+
   export type EnumExpenseChangeOperationFilter<$PrismaModel = never> = {
     equals?: $Enums.ExpenseChangeOperation | EnumExpenseChangeOperationFieldRefInput<$PrismaModel>
     in?: $Enums.ExpenseChangeOperation[] | ListEnumExpenseChangeOperationFieldRefInput<$PrismaModel>
@@ -106682,6 +108162,9 @@ export namespace Prisma {
     requestedByEmail?: SortOrder
     requestedAt?: SortOrder
     requesterBusinessDivision?: SortOrder
+    requestKind?: SortOrder
+    blockKey?: SortOrder
+    routedApproverEmail?: SortOrder
     createdAt?: SortOrder
     updatedAt?: SortOrder
   }
@@ -106706,6 +108189,9 @@ export namespace Prisma {
     requestedByEmail?: SortOrder
     requestedAt?: SortOrder
     requesterBusinessDivision?: SortOrder
+    requestKind?: SortOrder
+    blockKey?: SortOrder
+    routedApproverEmail?: SortOrder
     createdAt?: SortOrder
     updatedAt?: SortOrder
   }
@@ -106726,6 +108212,9 @@ export namespace Prisma {
     requestedByEmail?: SortOrder
     requestedAt?: SortOrder
     requesterBusinessDivision?: SortOrder
+    requestKind?: SortOrder
+    blockKey?: SortOrder
+    routedApproverEmail?: SortOrder
     createdAt?: SortOrder
     updatedAt?: SortOrder
   }

@@ -2259,6 +2259,27 @@ model ExpenseApprovalStage {
   @@schema("public")
 }
 
+/// Major Category Grid contribution %: who may FILL which column (`kind`
+/// BGT -> Bgt Cont%, PD -> Pd Cont%) for which division, and the one approver
+/// their requests route to. One row per line of the business "creator and
+/// approver" sheet — deliberately independent of User.businessDivision, which
+/// doesn't match it. BGT and PD pairs never mix.
+model GridContributionAssignment {
+  id            Int      @id @default(autoincrement())
+  kind          String   @db.VarChar(10)
+  division      String   @db.VarChar(20)
+  creatorEmail  String   @map("creator_email") @db.VarChar(255)
+  approverEmail String   @map("approver_email") @db.VarChar(255)
+  isActive      Boolean  @default(true) @map("is_active")
+  createdAt     DateTime @default(now()) @map("created_at")
+  updatedAt     DateTime @default(now()) @updatedAt @map("updated_at")
+
+  @@unique([kind, division, creatorEmail])
+  @@index([approverEmail])
+  @@map("grid_contribution_assignments")
+  @@schema("public")
+}
+
 model ExpenseChangeRequest {
   id        String                 @id @default(uuid())
   tableKey  String                 @map("table_key") @db.VarChar(50)
@@ -2301,9 +2322,23 @@ model ExpenseChangeRequest {
   /// expenseAccessService.ts.
   requesterBusinessDivision String? @map("requester_business_division") @db.VarChar(20)
 
+  /// Null for an ordinary row add/edit/delete. 'BGT_CONT' / 'PD_CONT' for a
+  /// Major Category Grid contribution-% request — one per (major_category,
+  /// attribute_name) block, `changes` keyed by attribute VALUE: { value: {
+  /// old, new } }. Walks the 'major-category-grid#contribution' chain, see
+  /// services/gridContributionService.ts.
+  requestKind         String? @map("request_kind") @db.VarChar(20)
+  /// "<major_category>||<attribute_name>" for a contribution request.
+  blockKey            String? @map("block_key") @db.VarChar(300)
+  /// The requesting creator's paired approver (grid_contribution_assignments),
+  /// captured at creation — the only person who can act at CONT_APPROVER.
+  routedApproverEmail String? @map("routed_approver_email") @db.VarChar(255)
+
   createdAt DateTime @default(now()) @map("created_at")
   updatedAt DateTime @updatedAt @map("updated_at")
 
+  @@index([requestKind, blockKey, status])
+  @@index([routedApproverEmail])
   @@index([tableKey, rowId])
   @@index([status])
   @@index([currentStageKey])

@@ -35,6 +35,7 @@ import {
   getExpenseApprovalStages,
   getExpenseChangeRequests,
   getMyExpenseAccess,
+  CONTRIBUTION_KIND_LABEL,
   type AdminUserBusinessDivision,
   type ExpenseApprovalStage,
   type ExpenseChangeOperation,
@@ -45,7 +46,7 @@ import { EXPENSE_TABLE_CONFIGS } from '../config/expenseTables';
 
 const PAGE_SIZE = 50;
 
-function getCurrentUser(): { id: number; role: string } | null {
+function getCurrentUser(): { id: number; role: string; email?: string } | null {
   const raw = localStorage.getItem('user');
   return raw ? JSON.parse(raw) : null;
 }
@@ -78,6 +79,14 @@ function chainForTable(stages: ExpenseApprovalStage[], tableKey: string): Expens
   return own.length > 0 ? own : stages.filter((s) => s.tableKey === '*');
 }
 
+/** Contribution % requests walk their own chain (paired approver -> MDM),
+ * not their table's — mirrors approvalChainKey in gridContributionService.ts. */
+function chainKeyOf(request: ExpenseChangeRequest): string {
+  return request.requestKind ? 'major-category-grid#contribution' : request.tableKey;
+}
+
+const CONTRIBUTION_REQUEST_KIND: Record<'BGT_CONT' | 'PD_CONT', 'BGT' | 'PD'> = { BGT_CONT: 'BGT', PD_CONT: 'PD' };
+
 /** PENDING has no fixed label — it shows the CURRENT stage's own name, which
  * only exists once the stage catalog has loaded. */
 function StatusBadge({ request, stages }: { request: ExpenseChangeRequest; stages: ExpenseApprovalStage[] }) {
@@ -85,13 +94,24 @@ function StatusBadge({ request, stages }: { request: ExpenseChangeRequest; stage
     const meta = TERMINAL_STATUS_META[request.status];
     return <Badge className={meta.className}>{meta.label}</Badge>;
   }
-  const stageLabel = stages.find((s) => s.key === request.currentStageKey)?.label ?? request.currentStageKey ?? '—';
+  const stageLabel =
+    chainForTable(stages, chainKeyOf(request)).find((s) => s.key === request.currentStageKey)?.label ?? request.currentStageKey ?? '—';
   return <Badge className="bg-amber-100 text-amber-700 border-amber-200">Pending: {stageLabel}</Badge>;
 }
 
 function OperationBadge({ operation }: { operation: ExpenseChangeOperation }) {
   const meta = OPERATION_META[operation] ?? OPERATION_META.UPDATE;
   return <Badge className={meta.className}>{meta.label}</Badge>;
+}
+
+/** A contribution % request shows its column (Bgt / Pd Cont%) instead of "Edit". */
+function RequestTypeBadge({ request }: { request: ExpenseChangeRequest }) {
+  if (request.requestKind) {
+    return (
+      <Badge className="bg-sky-100 text-sky-700 border-sky-200">{CONTRIBUTION_KIND_LABEL[CONTRIBUTION_REQUEST_KIND[request.requestKind]]}</Badge>
+    );
+  }
+  return <OperationBadge operation={request.operation} />;
 }
 
 const BUSINESS_DIVISION_LABELS: Record<AdminUserBusinessDivision, string> = {
@@ -152,14 +172,19 @@ function DetailDialog({ request, stages, onClose, onActed }: DetailDialogProps) 
   // server's real gate (canActOnExpenseRequestStage). The server enforces
   // this regardless; this just keeps the button from being shown when it
   // would just 403.
+  // CONT_APPROVER (contribution %) is narrower still: only the approver the
+  // request was routed to, by email.
+  const myEmail = (getCurrentUser()?.email ?? '').trim().toLowerCase();
   const canAct =
     !!request &&
     request.status === 'PENDING' &&
     !!request.currentStageKey &&
     !!access?.approvableStageKeys.includes(request.currentStageKey) &&
-    (request.currentStageKey !== 'CATEGORY_HEAD' || access?.businessDivision === request.requesterBusinessDivision);
-  // A deletion has nothing to edit — only a row to remove.
-  const canEditValues = canAct && request?.operation !== 'DELETE';
+    (request.currentStageKey !== 'CATEGORY_HEAD' || access?.businessDivision === request.requesterBusinessDivision) &&
+    (request.currentStageKey !== 'CONT_APPROVER' || (request.routedApproverEmail ?? '').toLowerCase() === myEmail);
+  // A deletion has nothing to edit — only a row to remove; a contribution
+  // block is approved or rejected as a whole (the server refuses edits).
+  const canEditValues = canAct && request?.operation !== 'DELETE' && !request?.requestKind;
 
   // Seeded once from the proposed values, keyed to string form for the
   // inputs; booleans round-trip through 'true'/'false'.
@@ -173,7 +198,7 @@ function DetailDialog({ request, stages, onClose, onActed }: DetailDialogProps) 
   if (!request) return null;
 
   const tableTitle = EXPENSE_TABLE_CONFIGS[request.tableKey]?.title ?? request.tableKey;
-  const tableStages = chainForTable(stages, request.tableKey);
+  const tableStages = chainForTable(stages, chainKeyOf(request));
   const currentStage = tableStages.find((s) => s.key === request.currentStageKey);
   const isLastStage =
     !!currentStage && tableStages.filter((s) => s.isActive).every((s) => s.sortOrder <= currentStage.sortOrder);
@@ -212,8 +237,9 @@ function DetailDialog({ request, stages, onClose, onActed }: DetailDialogProps) 
   // An add has no "current" side and a delete has no "proposed" side, so only
   // an edit earns the three-column before/after layout.
   const isUpdate = request.operation === 'UPDATE';
-  const changeHeading =
-    request.operation === 'CREATE' ? 'New Row' : request.operation === 'DELETE' ? 'Row To Be Deleted' : 'Proposed Changes';
+  const changeHeading = request.requestKind
+    ? `Proposed ${CONTRIBUTION_KIND_LABEL[CONTRIBUTION_REQUEST_KIND[request.requestKind]]} (by value)`
+    : request.operation === 'CREATE' ? 'New Row' : request.operation === 'DELETE' ? 'Row To Be Deleted' : 'Proposed Changes';
 
   return (
     <Dialog open={!!request} onOpenChange={(open) => { if (!open) onClose(); }}>
@@ -227,7 +253,7 @@ function DetailDialog({ request, stages, onClose, onActed }: DetailDialogProps) 
 
         <div className="space-y-4 mt-2 text-sm">
           <div className="flex flex-wrap items-center gap-2">
-            <OperationBadge operation={request.operation} />
+            <RequestTypeBadge request={request} />
             <StatusBadge request={request} stages={stages} />
             <BusinessDivisionBadge division={request.requesterBusinessDivision} />
             {request.dueDate && (
@@ -248,7 +274,7 @@ function DetailDialog({ request, stages, onClose, onActed }: DetailDialogProps) 
               <div
                 className={`grid ${isUpdate ? 'grid-cols-3' : 'grid-cols-2'} gap-2 p-2 text-xs font-medium text-muted-foreground bg-muted/40`}
               >
-                <span>Field</span>
+                <span>{request.requestKind ? 'Value' : 'Field'}</span>
                 {isUpdate ? (
                   <>
                     <span>Current</span>
@@ -301,6 +327,11 @@ function DetailDialog({ request, stages, onClose, onActed }: DetailDialogProps) 
               Requested by <span className="font-medium text-foreground">{request.requestedByName}</span> ({request.requestedByEmail}) ·{' '}
               {dayjs(request.requestedAt).format('YYYY-MM-DD HH:mm')}
             </div>
+            {request.routedApproverEmail && (
+              <div>
+                Routed to approver <span className="font-medium text-foreground">{request.routedApproverEmail}</span>, then MDM
+              </div>
+            )}
             {request.approvalTrail.map((entry, i) => (
               <div key={i}>
                 {entry.action === 'APPROVE' ? 'Approved' : 'Rejected'} at{' '}
@@ -469,7 +500,7 @@ export default function ExpenseChangeRequestsPage() {
       width: 190,
       render: (_v, r) => (EXPENSE_TABLE_CONFIGS[r.tableKey]?.title ?? r.tableKey).split(' (')[0],
     },
-    { title: 'Type', key: 'operation', width: 100, render: (_v, r) => <OperationBadge operation={r.operation} /> },
+    { title: 'Type', key: 'operation', width: 100, render: (_v, r) => <RequestTypeBadge request={r} /> },
     {
       title: 'Row',
       key: 'rowLabel',
