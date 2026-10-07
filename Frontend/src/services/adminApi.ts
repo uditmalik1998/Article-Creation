@@ -133,14 +133,6 @@ export interface CategoryAttribute {
   attribute?: MasterAttribute;
 }
 
-export interface DashboardStats {
-  departments: number;
-  subDepartments: number;
-  categories: number;
-  masterAttributes: number;
-  allowedValues: number;
-}
-
 /** Mens / Kids / Ladies / PD — a coarse business-unit tag independent of
  * `division`/`subDivision` below (those follow the Department/SubDepartment
  * hierarchy for extraction routing; `division` can hold several values at
@@ -176,15 +168,6 @@ export interface ApiResponse<T> {
   data: T;
   error?: string;
 }
-
-// ═══════════════════════════════════════════════════════
-// DASHBOARD
-// ═══════════════════════════════════════════════════════
-
-export const getDashboardStats = async (): Promise<DashboardStats> => {
-  const { data } = await adminApi.get<ApiResponse<DashboardStats>>('/stats');
-  return data.data;
-};
 
 // ═══════════════════════════════════════════════════════
 // DEPARTMENTS
@@ -530,6 +513,15 @@ export interface StatusDashboard {
 export const getStatusDashboard = async (): Promise<StatusDashboard> => {
   const { data } = await adminApi.get('/status-dashboard');
   return { data: data.data ?? [], totals: data.totals ?? { pending: 0, approved: 0, rejected: 0, total: 0 } };
+};
+
+// ═══════════════════════════════════════════════════════
+// GM SUB-DIVISIONS
+// ═══════════════════════════════════════════════════════
+
+export const getGMSubDivisions = async (): Promise<{ subDivisions: string[]; divBySubDiv: Record<string, string> }> => {
+  const { data } = await adminApi.get<{ subDivisions: string[]; divBySubDiv: Record<string, string> }>('/gm-sub-divisions');
+  return data;
 };
 
 // ═══════════════════════════════════════════════════════

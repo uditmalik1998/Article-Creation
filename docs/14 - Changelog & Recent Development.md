@@ -5,6 +5,25 @@
 
 ---
 
+## 2026-10-07 — Admin Dashboard (Expenses) + View Data redesign
+
+- Option A from a 5-option canvas: jump menu, one Pipelines card, compact Vendor sync row, and the
+  18 master-data uploaders as compact grouped cards that expand in place to the original upload panel.
+- Option E for View Data: breadcrumb, removable filter chips, propose edit/delete/add as a side panel
+  (`RowChangeRequestDialog variant="panel"`) with "Current: …" hints. Details: [[10 - Admin Panel]].
+
+---
+
+## 2026-10-07 — Admin › Users page redesign
+
+- Option A ("refined table") from a 5-option canvas: role chips + Active/Inactive filter, compact scope chips
+  with "+N more", relative last login, status dot, icon actions, no horizontal scroll. Inactive users are now
+  viewable (default filter is still Active). Details: [[10 - Admin Panel]] → Users Management.
+- Add/Edit user dialog redesigned (option A): sectioned form, locked email, "Set a new password" link,
+  division toggles + sub-division chip grid replacing the two MultiSelects, Deactivate in the dialog footer.
+
+---
+
 ## 2026-10-06 — Spec Sheet cards + Group by on all article dashboards
 
 - New shared `shared/components/articles/ArticleSpecCard.tsx` + `ArticleCardGrid.tsx` replace the 4 duplicated

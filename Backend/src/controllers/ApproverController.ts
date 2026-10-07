@@ -3229,18 +3229,33 @@ export class ApproverController {
 
             // 2. Retroactive image upload — runs ALWAYS, even if no variants need SAP sync.
             //    Fixes SYNCED variants whose imageUrl still points to the main bucket.
-            const allSyncedVariants = await prisma.extractionResultFlat.findMany({
-                where: {
-                    genericArticleId: id,
-                    isGeneric: false,
-                    sapSyncStatus: 'SYNCED',
-                    sapArticleId: { not: null },
-                },
-                select: { id: true, imageUrl: true, variantColor: true, colour: true }
-            });
+            const [allSyncedVariantsFlat, allSyncedFgVariants] = await Promise.all([
+                prisma.extractionResultFlat.findMany({
+                    where: {
+                        genericArticleId: id,
+                        isGeneric: false,
+                        sapSyncStatus: 'SYNCED',
+                        sapArticleId: { not: null },
+                    },
+                    select: { id: true, imageUrl: true, variantColor: true, colour: true }
+                }),
+                prisma.fgVariantArticleData.findMany({
+                    where: {
+                        genericArticleId: id,
+                        sapSyncStatus: 'SYNCED',
+                        variantArticleNumber: { not: null },
+                    },
+                    select: { id: true, imageUrl: true, variantColor: true }
+                }),
+            ]);
+            const allSyncedVariants = [
+                ...allSyncedVariantsFlat,
+                ...allSyncedFgVariants.map(v => ({ ...v, colour: null as string | null })),
+            ];
             const needsRetroUpload = allSyncedVariants.filter(
                 (v) => v.imageUrl && !storageService.extractApprovedKeyFromUrl(v.imageUrl)
             );
+            const fgSyncedIdSet = new Set(allSyncedFgVariants.map(v => v.id));
             if (needsRetroUpload.length > 0) {
                 await Promise.allSettled(needsRetroUpload.map(async (v) => {
                     const colorCode = v.variantColor || v.colour || undefined;
@@ -3251,40 +3266,73 @@ export class ApproverController {
                             undefined,
                             colorCode ?? undefined,
                         );
-                        await prisma.extractionResultFlat.update({
-                            where: { id: v.id },
-                            data: { imageUrl: upload.url },
-                        });
+                        const updateData = { imageUrl: upload.url };
+                        if (fgSyncedIdSet.has(v.id)) {
+                            await prisma.fgVariantArticleData.update({ where: { id: v.id }, data: updateData });
+                        } else {
+                            await prisma.extractionResultFlat.update({ where: { id: v.id }, data: updateData });
+                        }
                     } catch (imgErr: any) {
                         console.error(`❌ [RETRY_VARIANTS] Retroactive upload failed for ${v.id}:`, imgErr?.message);
                     }
                 }));
             }
 
-            // 3. Find variants that need (re)syncing to SAP
-            // Include PENDING/SYNCED — covers variants stuck at approval time or marked SYNCED with no article number
-            const variants = await prisma.extractionResultFlat.findMany({
-                where: {
-                    genericArticleId: id,
-                    isGeneric: false,
-                    sapArticleId: null,
-                    sapSyncStatus: { in: ['FAILED', 'NOT_SYNCED', 'PENDING', 'SYNCED'] }
-                }
+            // 3. Find variants that need (re)syncing to SAP — check both tables
+            const [flatVariants, fgVariantsRaw] = await Promise.all([
+                prisma.extractionResultFlat.findMany({
+                    where: {
+                        genericArticleId: id,
+                        isGeneric: false,
+                        sapArticleId: null,
+                        sapSyncStatus: { in: ['FAILED', 'NOT_SYNCED', 'PENDING', 'SYNCED'] }
+                    }
+                }),
+                prisma.fgVariantArticleData.findMany({
+                    where: {
+                        genericArticleId: id,
+                        variantArticleNumber: null,
+                        sapSyncStatus: { in: ['FAILED', 'NOT_SYNCED', 'PENDING', 'SYNCED'] }
+                    }
+                }),
+            ]);
+
+            // Normalize fgVariants to match the extractionResultFlat shape expected by syncVariantsToSapViaRfc
+            const fgVariantIdSet = new Set(fgVariantsRaw.map(v => v.id));
+            const fgVariantsNormalized = fgVariantsRaw.map(v => ({
+                ...v,
+                colour: v.variantColor,
+                sapArticleId: v.variantArticleNumber ?? null,
+                articleNumber: v.variantArticleNumber ?? null,
+                isGeneric: false,
+                fabricArticleNumber: null,
+                fabricArticleDescription: null,
+            }));
+
+            // Auto-approve PENDING variants in both tables
+            const pendingFlatVariants = await prisma.extractionResultFlat.findMany({
+                where: { genericArticleId: id, isGeneric: false, approvalStatus: 'PENDING' }
+            });
+            const pendingFgVariants = await prisma.fgVariantArticleData.findMany({
+                where: { genericArticleId: id, approvalStatus: 'PENDING' }
             });
 
-            // Also include PENDING variants — auto-approve them first
-            const pendingVariants = await prisma.extractionResultFlat.findMany({
-                where: {
-                    genericArticleId: id,
-                    isGeneric: false,
-                    approvalStatus: 'PENDING'
-                }
-            });
-
-            if (pendingVariants.length > 0) {
+            if (pendingFlatVariants.length > 0) {
                 const userId = (req as any).user?.id;
                 await prisma.extractionResultFlat.updateMany({
-                    where: { id: { in: pendingVariants.map(v => v.id) } },
+                    where: { id: { in: pendingFlatVariants.map(v => v.id) } },
+                    data: {
+                        approvalStatus: 'APPROVED',
+                        approvedBy: userId ? Number(userId) : null,
+                        approvedAt: new Date(),
+                        sapSyncStatus: 'NOT_SYNCED'
+                    }
+                });
+            }
+            if (pendingFgVariants.length > 0) {
+                const userId = (req as any).user?.id;
+                await prisma.fgVariantArticleData.updateMany({
+                    where: { id: { in: pendingFgVariants.map(v => v.id) } },
                     data: {
                         approvalStatus: 'APPROVED',
                         approvedBy: userId ? Number(userId) : null,
@@ -3294,9 +3342,23 @@ export class ApproverController {
                 });
             }
 
+            const pendingFgNormalized = pendingFgVariants
+                .filter(p => !fgVariantIdSet.has(p.id))
+                .map(v => ({
+                    ...v,
+                    colour: v.variantColor,
+                    sapArticleId: v.variantArticleNumber ?? null,
+                    articleNumber: v.variantArticleNumber ?? null,
+                    isGeneric: false,
+                    fabricArticleNumber: null,
+                    fabricArticleDescription: null,
+                }));
+
             const allToSync = [
-                ...variants,
-                ...pendingVariants.filter(p => !variants.find(v => v.id === p.id))
+                ...flatVariants,
+                ...pendingFlatVariants.filter(p => !flatVariants.find(v => v.id === p.id)),
+                ...fgVariantsNormalized,
+                ...pendingFgNormalized,
             ];
 
             if (allToSync.length === 0) {
@@ -3309,6 +3371,12 @@ export class ApproverController {
                 });
             }
 
+            // Track which ids came from fg_variant_article_data for correct update routing
+            const allFgVariantIds = new Set([
+                ...fgVariantsRaw.map(v => v.id),
+                ...pendingFgVariants.map(v => v.id),
+            ]);
+
             // 4. Build maps for syncVariantsToSapViaRfc
             const variantsByGenericId = new Map([[id, allToSync]]);
             const genericSapArticleMap = new Map([[id, generic.sapArticleId]]);
@@ -3316,23 +3384,28 @@ export class ApproverController {
             // 5. Call the existing RFC function
             const results = await syncVariantsToSapViaRfc(variantsByGenericId, genericSapArticleMap);
 
-            // 6. Persist results back to DB
+            // 6. Persist results back to DB — route to correct table
             await Promise.allSettled(results.map(r => {
+                const isFgVariant = allFgVariantIds.has(r.id);
                 const data: Record<string, unknown> = {
                     sapSyncStatus: r.success ? SapSyncStatus.SYNCED : SapSyncStatus.FAILED,
                     sapSyncMessage: r.message
                 };
                 if (r.sapArticleNumber) {
-                    data.sapArticleId = r.sapArticleNumber;
-                    data.articleNumber = r.sapArticleNumber;
+                    if (isFgVariant) {
+                        data.variantArticleNumber = r.sapArticleNumber;
+                    } else {
+                        data.sapArticleId = r.sapArticleNumber;
+                        data.articleNumber = r.sapArticleNumber;
+                    }
                 }
-                if (r.success && r.fabricArticleNumber) {
-                    data.fabricArticleNumber = r.fabricArticleNumber;
+                if (!isFgVariant) {
+                    if (r.success && r.fabricArticleNumber) data.fabricArticleNumber = r.fabricArticleNumber;
+                    if (r.success && r.fabricArticleDescription) data.fabricArticleDescription = r.fabricArticleDescription;
                 }
-                if (r.success && r.fabricArticleDescription) {
-                    data.fabricArticleDescription = r.fabricArticleDescription;
-                }
-                return prisma.extractionResultFlat.update({ where: { id: r.id }, data });
+                return isFgVariant
+                    ? prisma.fgVariantArticleData.update({ where: { id: r.id }, data })
+                    : prisma.extractionResultFlat.update({ where: { id: r.id }, data });
             }));
 
             // Tell PO-Wise now instead of in 2-3 h via Snowflake (fire-and-forget, never throws).
@@ -3357,10 +3430,12 @@ export class ApproverController {
                                 undefined,
                                 colorCode ?? undefined,
                             );
-                            await prisma.extractionResultFlat.update({
-                                where: { id: r.id },
-                                data: { imageUrl: upload.url },
-                            });
+                            const isFg = allFgVariantIds.has(r.id);
+                            if (isFg) {
+                                await prisma.fgVariantArticleData.update({ where: { id: r.id }, data: { imageUrl: upload.url } });
+                            } else {
+                                await prisma.extractionResultFlat.update({ where: { id: r.id }, data: { imageUrl: upload.url } });
+                            }
                         } catch (imgErr: any) {
                             console.error(`❌ [RETRY_VARIANTS] Variant image upload failed for ${r.id}:`, imgErr?.message);
                         }
@@ -3858,7 +3933,7 @@ export class ApproverController {
         });
     }
 
-    static async getGMHierarchy(_req: Request, res: Response) {
+    static async getGMHierarchy(req: Request, res: Response) {
         const rows = await prisma.$queryRaw<{ div: string; sub_div: string; maj_cat_nm: string; maj_cat_desc: string | null }[]>`
             SELECT DISTINCT div, sub_div, maj_cat_nm, maj_cat_desc
             FROM gm_major_category_details
@@ -3867,6 +3942,20 @@ export class ApproverController {
             ORDER BY div, sub_div, maj_cat_nm
         `;
 
+        // Scope: GM_APPROVER / GM_CREATOR with assigned sub-divisions only see their slice
+        const reqUser = req.user as any;
+        const isGMScoped =
+            (reqUser?.role === 'GM_APPROVER' || reqUser?.role === 'GM_CREATOR') &&
+            reqUser?.subDivision;
+        const allowedSubDivs: Set<string> | null = isGMScoped
+            ? new Set(
+                String(reqUser.subDivision)
+                    .split(',')
+                    .map((s: string) => s.trim().toUpperCase())
+                    .filter(Boolean),
+              )
+            : null;
+
         const divSet = new Set<string>();
         const subDivsByDiv: Record<string, string[]> = {};
         const majCatsBySubDiv: Record<string, string[]> = {};
@@ -3874,6 +3963,7 @@ export class ApproverController {
 
         for (const row of rows) {
             if (!row.div || !row.sub_div || !row.maj_cat_nm) continue;
+            if (allowedSubDivs && !allowedSubDivs.has(row.sub_div.toUpperCase())) continue;
             divSet.add(row.div);
             if (!subDivsByDiv[row.div]) subDivsByDiv[row.div] = [];
             if (!subDivsByDiv[row.div].includes(row.sub_div)) subDivsByDiv[row.div].push(row.sub_div);
@@ -4110,6 +4200,24 @@ export class ApproverController {
         const skip = (page - 1) * take;
         const pathType = query.pathType || 'new';
         const { where } = ApproverController.buildGmArticleDataWhere(query);
+
+        // Enforce GM user scope: restrict to their assigned sub-divisions
+        const reqUser = req.user as any;
+        if (
+            (reqUser?.role === 'GM_APPROVER' || reqUser?.role === 'GM_CREATOR') &&
+            reqUser?.subDivision
+        ) {
+            const allowedSubDivs = String(reqUser.subDivision)
+                .split(',')
+                .map((s: string) => s.trim())
+                .filter(Boolean);
+            if (allowedSubDivs.length > 0 && !where.subDivision) {
+                where.AND = [
+                    ...(Array.isArray(where.AND) ? where.AND : []),
+                    { subDivision: { in: allowedSubDivs } },
+                ];
+            }
+        }
         const orderBy = pathType === 'created'
             ? ({ approvedAt: { sort: 'desc', nulls: 'last' } } as const)
             : ({ createdAt: 'desc' } as const);

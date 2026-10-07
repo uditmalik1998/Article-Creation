@@ -1,7 +1,7 @@
 import { useEffect, useMemo, useRef, useState } from 'react';
 import { useQueries } from '@tanstack/react-query';
 import dayjs, { type Dayjs } from 'dayjs';
-import { AlertTriangle } from 'lucide-react';
+import { AlertTriangle, X } from 'lucide-react';
 import {
   Button,
   DatePicker,
@@ -36,6 +36,8 @@ interface RowChangeRequestDialogProps {
   /** The row being edited or deleted; null when adding. */
   row: Record<string, any> | null;
   onSubmitted: () => void;
+  /** 'dialog' (default) is a modal; 'panel' renders the same form inline as a side panel. */
+  variant?: 'dialog' | 'panel';
 }
 
 const MODE_COPY: Record<RowChangeMode, { title: string; submit: string; reasonLabel: string; reasonHint: string }> = {
@@ -154,6 +156,7 @@ export function RowChangeRequestDialog({
   mode,
   row,
   onSubmitted,
+  variant = 'dialog',
 }: RowChangeRequestDialogProps) {
   const editableColumns = useMemo(() => config.columns.filter((c) => c.editable !== false), [config]);
   const requiredKeys = useMemo(() => new Set(config.requiredOnCreate ?? []), [config]);
@@ -297,13 +300,7 @@ export function RowChangeRequestDialog({
     }
   };
 
-  return (
-    <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="max-w-lg max-h-[85vh] overflow-y-auto">
-        <DialogHeader>
-          <DialogTitle>{copy.title}</DialogTitle>
-        </DialogHeader>
-
+  const body = (
         <div className="space-y-3 mt-2">
           {mode === 'delete' ? (
             <div className="space-y-3">
@@ -353,6 +350,14 @@ export function RowChangeRequestDialog({
                     onChange={(e) => updateValue(col.dataIndex, e.target.value)}
                   />
                 )}
+                {mode === 'update' && row && (
+                  <p className="text-[11.5px] text-muted-foreground">
+                    Current: <span className="font-mono">{displayValue(row[col.dataIndex])}</span>
+                    {String(values[col.dataIndex] ?? '') !== String(row[col.dataIndex] ?? '') && (
+                      <span className="font-semibold text-slate-800 dark:text-slate-200"> · changed</span>
+                    )}
+                  </p>
+                )}
               </div>
             ))
           )}
@@ -381,15 +386,58 @@ export function RowChangeRequestDialog({
             (and so visible to SAP) only once every stage has signed off.
           </p>
         </div>
+  );
 
-        <DialogFooter>
-          <Button variant="outline" onClick={() => onOpenChange(false)} disabled={submitting}>
-            Cancel
+  const actions = (
+    <>
+      <Button variant="outline" onClick={() => onOpenChange(false)} disabled={submitting}>
+        Cancel
+      </Button>
+      <Button
+        onClick={submit}
+        disabled={submitting}
+        variant={mode === 'delete' ? 'destructive' : 'default'}
+        className={mode === 'delete' ? undefined : 'bg-slate-800 text-white hover:bg-slate-700 dark:bg-slate-200 dark:text-slate-900 dark:hover:bg-slate-300'}
+      >
+        {submitting ? 'Submitting…' : copy.submit}
+      </Button>
+    </>
+  );
+
+  if (variant === 'panel') {
+    if (!open) return null;
+    return (
+      <aside
+        aria-label={copy.title}
+        className="flex max-h-[calc(100vh-7rem)] w-full flex-col rounded-xl border border-slate-400 bg-card shadow-lg lg:sticky lg:top-3 lg:w-[380px] lg:shrink-0 dark:border-slate-500"
+      >
+        <div className="flex items-start gap-2 border-b border-border px-4 py-3">
+          <div className="min-w-0 flex-1">
+            <span className="text-[11px] font-bold uppercase tracking-[0.08em] text-muted-foreground">{copy.title}</span>
+            {row && (
+              <p className="m-0 truncate text-[13px] font-semibold" title={config.columns.slice(0, 3).map((c) => displayValue(row[c.dataIndex])).join(' · ')}>
+                {config.columns.filter((c) => c.dataIndex !== 'id').slice(0, 2).map((c) => displayValue(row[c.dataIndex])).join(' · ')}
+              </p>
+            )}
+          </div>
+          <Button size="icon" variant="ghost" className="h-8 w-8" onClick={() => onOpenChange(false)} aria-label="Close panel">
+            <X />
           </Button>
-          <Button onClick={submit} disabled={submitting} variant={mode === 'delete' ? 'destructive' : 'default'}>
-            {submitting ? 'Submitting…' : copy.submit}
-          </Button>
-        </DialogFooter>
+        </div>
+        <div className="min-h-0 flex-1 overflow-y-auto px-4 pb-4">{body}</div>
+        <div className="flex justify-end gap-2 border-t border-border px-4 py-3">{actions}</div>
+      </aside>
+    );
+  }
+
+  return (
+    <Dialog open={open} onOpenChange={onOpenChange}>
+      <DialogContent className="max-w-lg max-h-[85vh] overflow-y-auto">
+        <DialogHeader>
+          <DialogTitle>{copy.title}</DialogTitle>
+        </DialogHeader>
+        {body}
+        <DialogFooter>{actions}</DialogFooter>
       </DialogContent>
     </Dialog>
   );

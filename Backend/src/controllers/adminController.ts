@@ -1298,10 +1298,11 @@ export const updateUser = async (req: Request, res: Response): Promise<void> => 
       return;
     }
 
+    const gmRole = finalRole === 'GM_APPROVER' || finalRole === 'GM_CREATOR';
     const updateData: any = {
       name: validated.name,
       role: validated.role as any,
-      division: finalRole === 'PO_COMMITTEE' ? null : (validated.division !== undefined ? finalDivision : undefined),
+      division: (finalRole === 'PO_COMMITTEE' || gmRole) ? null : (validated.division !== undefined ? finalDivision : undefined),
       subDivision: (finalRole === 'CATEGORY_HEAD' || finalRole === 'PO_COMMITTEE' || finalRole === 'ADMIN') ? null : (validated.subDivision !== undefined ? normalizeSubDivisionInput(validated.subDivision) : undefined),
       // Unlike division/subDivision, businessDivision has no role-based
       // clearing rule — every role can be tagged Mens/Kids/Ladies/PO.
@@ -1385,39 +1386,24 @@ export const deactivateUser = async (req: Request, res: Response): Promise<void>
   }
 };
 
-export const getDashboardStats = async (req: Request, res: Response): Promise<void> => {
+// ═══════════════════════════════════════════════════════
+// GM SUB-DIVISIONS (from gm_major_category_details)
+// ═══════════════════════════════════════════════════════
+
+export const getGMSubDivisions = async (_req: Request, res: Response): Promise<void> => {
   try {
-    const totalUploads = await prisma.extractionResultFlat.count();
-
-    const completed = await prisma.extractionResultFlat.count({
-      where: { extractionStatus: 'COMPLETED' }
-    });
-
-    const failed = await prisma.extractionResultFlat.count({
-      where: {
-        extractionStatus: {
-          in: ['FAILED', 'ERROR']
-        }
-      }
-    });
-
-    const pending = await prisma.extractionResultFlat.count({
-      where: {
-        extractionStatus: {
-          in: ['PENDING', 'PROCESSING']
-        }
-      }
-    });
-
-    res.json({
-      success: true,
-      data: {
-        totalUploads,
-        completed,
-        failed,
-        pending
-      },
-    });
+    const rows = await prisma.$queryRaw<{ sub_div: string; div: string }[]>`
+      SELECT DISTINCT sub_div, div
+      FROM gm_major_category_details
+      WHERE sub_div IS NOT NULL AND sub_div <> ''
+        AND div IS NOT NULL AND div <> ''
+        AND mj_status = 'ACT'
+      ORDER BY div, sub_div
+    `;
+    const subDivisions = rows.map((r) => r.sub_div);
+    const divBySubDiv: Record<string, string> = {};
+    rows.forEach((r) => { divBySubDiv[r.sub_div] = r.div; });
+    res.json({ subDivisions, divBySubDiv });
   } catch (error: any) {
     res.status(500).json({ success: false, error: error.message });
   }

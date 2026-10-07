@@ -183,8 +183,6 @@ export default function ApproverDashboard({ pathType }: ApproverDashboardProps =
   const userAssignedSubDivisions = useMemo(() => getSubDivisionVariants(user?.subDivision), [user]);
   // Unscoped roles (ADMIN, PD, PO_COMMITTEE) see all divisions → full division/sub-division filters.
   const isUnscoped = user?.role === 'ADMIN' || user?.role === 'PD' || user?.role === 'PO_COMMITTEE';
-  const showDivisionFilter = !isUnscoped && userAssignedDivisions.length > 1;
-  const showSubDivisionFilter = !isUnscoped && userAssignedSubDivisions.length > 1;
 
   const [fabHierarchy, setFabHierarchy] = useState<{
     divisions: string[];
@@ -192,6 +190,15 @@ export default function ApproverDashboard({ pathType }: ApproverDashboardProps =
     majCatsBySubDiv: Record<string, string[]>;
     mcDesByMajCat: Record<string, string[]>;
   }>({ divisions: [], subDivsByDiv: {}, majCatsBySubDiv: {}, mcDesByMajCat: {} });
+
+  // GM roles use the (server-scoped) fabHierarchy for their filters instead of user.division/subDivision
+  const isGMRole = user?.role === 'GM_APPROVER' || user?.role === 'GM_CREATOR';
+  const showDivisionFilter = isGMRole
+    ? fabHierarchy.divisions.length > 1
+    : !isUnscoped && userAssignedDivisions.length > 1;
+  const showSubDivisionFilter = isGMRole
+    ? Object.values(fabHierarchy.subDivsByDiv).flat().length > 1
+    : !isUnscoped && userAssignedSubDivisions.length > 1;
 
   useEffect(() => {
     const str = localStorage.getItem('user');
@@ -605,11 +612,11 @@ export default function ApproverDashboard({ pathType }: ApproverDashboardProps =
                 <Download /> Export ({totalCount})
               </Button>
             </div>
-            {(showDivisionFilter || isUnscoped) && (
+            {(showDivisionFilter || isUnscoped || isGMRole) && (
               <DivisionTabs
                 value={divisionFilter}
                 onChange={(v) => { setDivisionFilter(v); setSubDivisionFilter('ALL'); setMajorCategoryFilter(''); }}
-                options={isUnscoped ? fabHierarchy.divisions.map(divisionOption) : userAssignedDivisions.map(divisionOption)}
+                options={(isUnscoped || isGMRole) ? fabHierarchy.divisions.map(divisionOption) : userAssignedDivisions.map(divisionOption)}
               />
             )}
           </div>
@@ -626,7 +633,7 @@ export default function ApproverDashboard({ pathType }: ApproverDashboardProps =
                 onClear={() => setSearchText('')}
                 className="!h-9 w-full text-[13px] sm:w-[260px] hover:border-slate-400 focus-within:border-slate-500 focus-within:ring-slate-400/25"
               />
-              {(showSubDivisionFilter || isUnscoped) && (
+              {(showSubDivisionFilter || isUnscoped || isGMRole) && (
                 <Popover
                   open={subDivOpen}
                   onOpenChange={(o) => { setSubDivOpen(o); if (!o) setSubDivSearch(''); }}
@@ -655,7 +662,7 @@ export default function ApproverDashboard({ pathType }: ApproverDashboardProps =
                     </div>
                     <div className="max-h-56 overflow-y-auto py-1">
                       {(() => {
-                        const opts = isUnscoped
+                        const opts = (isUnscoped || isGMRole)
                           ? (divisionFilter !== 'ALL' && fabHierarchy.subDivsByDiv[divisionFilter]
                               ? fabHierarchy.subDivsByDiv[divisionFilter]
                               : Object.values(fabHierarchy.subDivsByDiv).flat())
