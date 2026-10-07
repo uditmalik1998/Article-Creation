@@ -1441,6 +1441,17 @@ exports.Prisma.ExpenseApprovalStageScalarFieldEnum = {
   updatedAt: 'updatedAt'
 };
 
+exports.Prisma.GridContributionAssignmentScalarFieldEnum = {
+  id: 'id',
+  kind: 'kind',
+  division: 'division',
+  creatorEmail: 'creatorEmail',
+  approverEmail: 'approverEmail',
+  isActive: 'isActive',
+  createdAt: 'createdAt',
+  updatedAt: 'updatedAt'
+};
+
 exports.Prisma.ExpenseChangeRequestScalarFieldEnum = {
   id: 'id',
   tableKey: 'tableKey',
@@ -1459,6 +1470,9 @@ exports.Prisma.ExpenseChangeRequestScalarFieldEnum = {
   requestedByEmail: 'requestedByEmail',
   requestedAt: 'requestedAt',
   requesterBusinessDivision: 'requesterBusinessDivision',
+  requestKind: 'requestKind',
+  blockKey: 'blockKey',
+  routedApproverEmail: 'routedApproverEmail',
   createdAt: 'createdAt',
   updatedAt: 'updatedAt'
 };
@@ -2452,6 +2466,13 @@ exports.Prisma.ExpenseApprovalStageOrderByRelevanceFieldEnum = {
   createdByName: 'createdByName'
 };
 
+exports.Prisma.GridContributionAssignmentOrderByRelevanceFieldEnum = {
+  kind: 'kind',
+  division: 'division',
+  creatorEmail: 'creatorEmail',
+  approverEmail: 'approverEmail'
+};
+
 exports.Prisma.ExpenseChangeRequestOrderByRelevanceFieldEnum = {
   id: 'id',
   tableKey: 'tableKey',
@@ -2462,7 +2483,10 @@ exports.Prisma.ExpenseChangeRequestOrderByRelevanceFieldEnum = {
   currentStageKey: 'currentStageKey',
   requestedByName: 'requestedByName',
   requestedByEmail: 'requestedByEmail',
-  requesterBusinessDivision: 'requesterBusinessDivision'
+  requesterBusinessDivision: 'requesterBusinessDivision',
+  requestKind: 'requestKind',
+  blockKey: 'blockKey',
+  routedApproverEmail: 'routedApproverEmail'
 };
 
 exports.Prisma.ExpenseAccessGrantOrderByRelevanceFieldEnum = {
@@ -2645,6 +2669,7 @@ exports.Prisma.ModelName = {
   BasicTrimCostComponent: 'BasicTrimCostComponent',
   MajorCategoryDetails: 'MajorCategoryDetails',
   ExpenseApprovalStage: 'ExpenseApprovalStage',
+  GridContributionAssignment: 'GridContributionAssignment',
   ExpenseChangeRequest: 'ExpenseChangeRequest',
   ExpenseAccessGrant: 'ExpenseAccessGrant',
   ExpenseAuditLog: 'ExpenseAuditLog'

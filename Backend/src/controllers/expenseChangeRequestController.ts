@@ -51,6 +51,15 @@ import {
   applyExpenseRowDelete,
   buildExpenseRowLabel,
 } from './adminController';
+import {
+  CONT_APPROVER_STAGE,
+  approvalChainKey,
+  kindFromRequestKind,
+  fromBlockKey,
+  findContributionDrift,
+  applyContributionChanges,
+  type BlockDiff,
+} from '../services/gridContributionService';
 
 type ReviewAction = 'APPROVE' | 'REJECT';
 
@@ -659,16 +668,24 @@ export async function getExpenseChangeRequests(req: Request, res: Response) {
   const isDivisionScopedCategoryHead = String(req.user?.role) === 'CATEGORY_HEAD' && !!req.user?.businessDivision;
   const canSeeEveryonesRequests = isAdmin || isMdmTagged;
 
+  // A contribution request is always visible to the approver it's routed
+  // to, whatever their tier — that pairing is independent of roles/divisions.
+  const routedToMe = req.user
+    ? { routedApproverEmail: { equals: req.user.email, mode: 'insensitive' as const } }
+    : null;
+
   if (mine === 'true' && req.user) {
     andConditions.push({ requestedById: req.user.id });
   } else if (!canSeeEveryonesRequests && req.user) {
+    let tierCondition: object;
     if (restrictedToTables) {
-      andConditions.push({ tableKey: { in: restrictedToTables } });
+      tierCondition = { tableKey: { in: restrictedToTables } };
     } else if (isDivisionScopedCategoryHead) {
-      andConditions.push({ requesterBusinessDivision: req.user.businessDivision });
+      tierCondition = { requesterBusinessDivision: req.user.businessDivision };
     } else {
-      andConditions.push({ requestedById: req.user.id });
+      tierCondition = { requestedById: req.user.id };
     }
+    andConditions.push({ OR: [tierCondition, routedToMe!] });
   }
   // Still open and already past the date the requester asked for.
   if (overdue === 'true') {
@@ -692,6 +709,8 @@ export async function getExpenseChangeRequests(req: Request, res: Response) {
     if (req.user.businessDivision === 'MDM') {
       or.push({ currentStageKey: 'MDM' });
     }
+    // Contribution approver stage: only requests routed to this exact person.
+    or.push({ currentStageKey: CONT_APPROVER_STAGE, ...routedToMe! });
 
     // Explicit per-email grants remain an additional path, for any stage.
     const all = await getGrantsForEmail(req.user.email);
@@ -812,13 +831,17 @@ export async function actOnExpenseChangeRequest(req: Request, res: Response) {
       tableKey: existingRequest.tableKey,
       currentStageKey: existingRequest.currentStageKey,
       requesterBusinessDivision: existingRequest.requesterBusinessDivision,
+      routedApproverEmail: existingRequest.routedApproverEmail,
     });
     if (!canAct) {
       const allStages = await getAllApprovalStages();
       const deniedStageLabel = allStages.find((s) => s.key === existingRequest.currentStageKey)?.label ?? existingRequest.currentStageKey;
       return res.status(403).json({
         success: false,
-        error: `Only the "${deniedStageLabel}" approver for this request's business division can act on it right now.`,
+        error:
+          existingRequest.currentStageKey === CONT_APPROVER_STAGE
+            ? `Only ${existingRequest.routedApproverEmail ?? 'the paired approver'} can approve this contribution request right now.`
+            : `Only the "${deniedStageLabel}" approver for this request's business division can act on it right now.`,
         code: 'NO_EXPENSE_ACCESS',
       });
     }
@@ -828,7 +851,14 @@ export async function actOnExpenseChangeRequest(req: Request, res: Response) {
     // anyone, so it's silently ignored rather than erroring.
     let effectiveChanges = existingRequest.changes as Record<string, { old: any; new: any }>;
     let editedFields: string[] | undefined;
+    const contributionKind = kindFromRequestKind(existingRequest.requestKind);
     if (action === 'APPROVE' && editedValues && Object.keys(editedValues).length > 0) {
+      if (contributionKind) {
+        return res.status(400).json({
+          success: false,
+          error: 'A contribution % request is approved or rejected as a whole block — reject it with a comment to have the creator resubmit.',
+        });
+      }
       if (existingRequest.operation === 'DELETE') {
         return res.status(400).json({ success: false, error: "A deletion request has no proposed values to edit — approve or reject it as-is." });
       }
@@ -921,7 +951,7 @@ export async function actOnExpenseChangeRequest(req: Request, res: Response) {
     }
 
     // APPROVE — advance to the next active stage, or apply if this was the last one.
-    const nextStage = await getNextApprovalStage(existingRequest.currentStageKey, existingRequest.tableKey);
+    const nextStage = await getNextApprovalStage(existingRequest.currentStageKey, approvalChainKey(existingRequest));
 
     if (nextStage) {
       const updated = await withPrismaRetry(() =>
@@ -1000,6 +1030,47 @@ export async function actOnExpenseChangeRequest(req: Request, res: Response) {
       );
       return res.status(409).json({ success: false, error: systemComment, data: rejected });
     };
+
+    if (contributionKind) {
+      // Contribution block: re-check every value's live % still equals the
+      // request's `old` (another block request may have landed), then write
+      // them all in one transaction.
+      const { majorCategory, attributeName } = fromBlockKey(existingRequest.blockKey ?? '');
+      const blockChanges = changes as unknown as BlockDiff;
+      const drifted = await findContributionDrift(majorCategory, attributeName, contributionKind, blockChanges);
+      if (drifted) {
+        return autoReject(
+          `"${drifted}" changed (or no longer exists) since this request was submitted — automatically rejected. Resubmit the block.`
+        );
+      }
+      const approved = await withPrismaRetry(() =>
+        prisma.$transaction(async (tx) => {
+          const updatedRows = await applyContributionChanges(tx, majorCategory, attributeName, contributionKind, blockChanges);
+          await logExpenseAuditEvent(
+            {
+              requestId: id,
+              tableKey: existingRequest.tableKey,
+              rowId: null,
+              operation: existingRequest.operation,
+              eventType: 'APPLIED',
+              stageKey: entry.stageKey,
+              stageLabel: entry.stageLabel,
+              actorId: actingUser.id,
+              actorName: actingUser.name,
+              actorEmail: actingUser.email,
+              comment: entry.comment,
+              details: { requestKind: existingRequest.requestKind, blockKey: existingRequest.blockKey, changes: blockChanges, updatedRows },
+            },
+            tx
+          );
+          return tx.expenseChangeRequest.update({
+            where: { id },
+            data: { status: 'APPROVED', currentStageKey: null, approvalTrail: appendTrail() },
+          });
+        })
+      );
+      return res.json({ success: true, data: approved });
+    }
 
     if (existingRequest.operation === 'CREATE') {
       const values: Record<string, any> = {};
