@@ -2,7 +2,7 @@ import { useState } from 'react';
 import { useParams, Link } from 'react-router-dom';
 import { useQueries, useQuery, useQueryClient, keepPreviousData } from '@tanstack/react-query';
 import dayjs from 'dayjs';
-import { ArrowLeft, Search, ArrowUpDown, Pencil, Trash2, Plus, ClipboardList, Download, Info, X } from 'lucide-react';
+import { ArrowLeft, Search, ArrowUpDown, Pencil, Trash2, Plus, ClipboardList, Download, Info, X, Percent } from 'lucide-react';
 import {
   Badge,
   Button,
@@ -22,6 +22,7 @@ import { APP_CONFIG } from '../../../constants/app/config';
 import { getExpenseColumnOptions, getExpenseTableData, getMyExpenseAccess } from '../../../services/adminApi';
 import { EXPENSE_TABLE_CONFIGS, type ExpenseTableColumnConfig } from '../config/expenseTables';
 import { RowChangeRequestDialog, type RowChangeMode } from '../components/RowChangeRequestDialog';
+import { GridContributionPanel } from '../components/GridContributionPanel';
 import { ColumnCheckboxFilter } from '../components/ColumnCheckboxFilter';
 import { SLATE_PRIMARY_BTN } from '../components/DashboardParts';
 
@@ -47,6 +48,9 @@ function renderCell(value: any, type?: ExpenseTableColumnConfig['type']) {
     const d = dayjs(value);
     return <span className="text-xs whitespace-nowrap">{d.isValid() ? d.format('YYYY-MM-DD HH:mm:ss') : String(value)}</span>;
   }
+  if (type === 'percent') {
+    return <span className="text-sm tabular-nums">{Number(value)}%</span>;
+  }
   if (type === 'boolean') {
     const isTrue = value === true || value === 'true';
     return (
@@ -70,6 +74,9 @@ export default function ExpenseTableDetailPage() {
   const [sortBy, setSortBy] = useState<string>(config?.defaultSortBy ?? '');
   const [sortDir, setSortDir] = useState<'asc' | 'desc'>(config?.defaultSortDir ?? 'desc');
   const [dialog, setDialog] = useState<{ mode: RowChangeMode; row: Record<string, any> | null } | null>(null);
+  // Major Category Grid only: the Bgt / Pd Cont% block panel (replaces the
+  // row panel while open — only one side panel at a time).
+  const [contribution, setContribution] = useState<{ majorCategory: string; attributeName: string } | null | undefined>(undefined);
   // Excel-style column filters (checkbox multi-select), additive to the
   // search box above — separate state so one never clobbers the other.
   const [columnFilters, setColumnFilters] = useState<Record<string, string[]>>({});
@@ -94,6 +101,15 @@ export default function ExpenseTableDetailPage() {
   const canAdd = !!config?.allowCreate && !!access?.canCreate;
   const canEdit = hasEditableColumns && !!access?.canUpdate;
   const canDelete = !!config?.allowDelete && !!access?.canDelete;
+  const canFillContribution = tableKey === 'major-category-grid' && (access?.contribution?.creator.length ?? 0) > 0;
+  const openContribution = (block: { majorCategory: string; attributeName: string } | null) => {
+    setDialog(null);
+    setContribution(block);
+  };
+  const openRowDialog = (next: { mode: RowChangeMode; row: Record<string, any> | null }) => {
+    setContribution(undefined);
+    setDialog(next);
+  };
 
   const downloadMaster = tableKey ? DOWNLOAD_MASTER_TABLE_KEYS[tableKey] : undefined;
   const canDownloadMaster = !!downloadMaster && !!access?.isAdmin;
@@ -240,21 +256,33 @@ export default function ExpenseTableDetailPage() {
       render: (value: any) => renderCell(value, col.type),
     }));
 
-  if (canEdit || canDelete) {
+  if (canEdit || canDelete || canFillContribution) {
     columns.push({
       title: '',
       key: 'action',
-      width: canEdit && canDelete ? 92 : 52,
+      width: 12 + 40 * [canEdit, canDelete, canFillContribution].filter(Boolean).length,
       align: 'center',
       fixed: 'right',
       render: (_v, record) => (
         <div className="flex items-center justify-center gap-1">
+          {canFillContribution && (
+            <Button
+              size="sm"
+              variant="outline"
+              className="h-7 w-7 p-0"
+              onClick={() => openContribution({ majorCategory: record.major_category, attributeName: record.attribute_name })}
+              title="Fill contribution % for this attribute"
+              aria-label="Fill contribution % for this row's attribute"
+            >
+              <Percent className="h-4 w-4" />
+            </Button>
+          )}
           {canEdit && (
             <Button
               size="sm"
               variant="outline"
               className="h-7 w-7 p-0"
-              onClick={() => setDialog({ mode: 'update', row: record })}
+              onClick={() => openRowDialog({ mode: 'update', row: record })}
               title="Propose an edit"
               aria-label="Propose an edit to this row"
             >
@@ -266,7 +294,7 @@ export default function ExpenseTableDetailPage() {
               size="sm"
               variant="outline"
               className="h-7 w-7 p-0 text-red-700 hover:bg-red-50 hover:text-red-800 dark:text-red-400 dark:hover:bg-red-500/10"
-              onClick={() => setDialog({ mode: 'delete', row: record })}
+              onClick={() => openRowDialog({ mode: 'delete', row: record })}
               title="Propose a deletion"
               aria-label="Propose deleting this row"
             >
@@ -338,8 +366,14 @@ export default function ExpenseTableDetailPage() {
               {downloadingMaster ? 'Downloading…' : 'Download master'}
             </Button>
           )}
+          {canFillContribution && (
+            <Button size="sm" variant="outline" onClick={() => openContribution(null)}>
+              <Percent className="h-4 w-4" />
+              Fill contribution %
+            </Button>
+          )}
           {canAdd && (
-            <Button size="sm" className={SLATE_PRIMARY_BTN} onClick={() => setDialog({ mode: 'create', row: null })}>
+            <Button size="sm" className={SLATE_PRIMARY_BTN} onClick={() => openRowDialog({ mode: 'create', row: null })}>
               <Plus className="h-4 w-4" />
               Propose new row
             </Button>
@@ -467,6 +501,16 @@ export default function ExpenseTableDetailPage() {
             )}
           </CardContent>
         </Card>
+
+        {contribution !== undefined && access?.contribution && (
+          <GridContributionPanel
+            key={contribution ? `${contribution.majorCategory}||${contribution.attributeName}` : 'new'}
+            scope={access.contribution}
+            initial={contribution}
+            onClose={() => setContribution(undefined)}
+            onSubmitted={() => queryClient.invalidateQueries({ queryKey: ['expense-change-requests'] })}
+          />
+        )}
 
         {dialog && (
           <RowChangeRequestDialog

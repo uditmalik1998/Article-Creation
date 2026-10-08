@@ -2551,6 +2551,15 @@ export const uploadMajCatGrid = async (req: Request, res: Response): Promise<voi
       console.log(`[MajCatGrid] Replacing table — ${totalRows} rows in ${totalBatches} batches…`);
 
       await prisma.$transaction(async (tx) => {
+        // The re-upload replaces every row, but the contribution % columns
+        // are maintained here, not in this file — park them and put them
+        // back onto the same (major_category, attribute_name, value).
+        await tx.$executeRaw`
+          CREATE TEMP TABLE _mcg_cont_keep ON COMMIT DROP AS
+          SELECT major_category, attribute_name, value, bgt_cont_pct, pd_cont_pct, auto_cont_pct
+          FROM maj_cat_grid_values
+          WHERE bgt_cont_pct IS NOT NULL OR pd_cont_pct IS NOT NULL OR auto_cont_pct IS NOT NULL
+        `;
         await tx.$executeRaw`TRUNCATE TABLE maj_cat_grid_values RESTART IDENTITY`;
 
         for (let i = 0; i < flatRows.length; i += BATCH) {
@@ -2568,6 +2577,13 @@ export const uploadMajCatGrid = async (req: Request, res: Response): Promise<voi
           job.progress = 20 + Math.round((batchDone / totalBatches) * 75);
           job.phase    = `Inserting batch ${batchDone}/${totalBatches}…`;
         }
+
+        await tx.$executeRaw`
+          UPDATE maj_cat_grid_values g
+          SET bgt_cont_pct = k.bgt_cont_pct, pd_cont_pct = k.pd_cont_pct, auto_cont_pct = k.auto_cont_pct
+          FROM _mcg_cont_keep k
+          WHERE g.major_category = k.major_category AND g.attribute_name = k.attribute_name AND g.value = k.value
+        `;
       }, { timeout: 14 * 60 * 1000 });
 
       // ── Phase 3: Finalize ────────────────────────────────────────────────────
@@ -7906,6 +7922,12 @@ export const EXPENSE_TABLE_REGISTRY: Record<string, ExpenseTableConfig> = {
       { key: 'major_category', label: 'Major Category' },
       { key: 'attribute_name', label: 'Attribute Name' },
       { key: 'value', label: 'Value' },
+      // Contribution % — never editable through the generic row edit: Bgt /
+      // Pd go through their own block workflow (gridContributionController),
+      // Auto will flow from Snowflake planning.
+      { key: 'bgt_cont_pct', label: 'Bgt Cont%', editable: false, align: 'right' },
+      { key: 'pd_cont_pct', label: 'Pd Cont%', editable: false, align: 'right' },
+      { key: 'auto_cont_pct', label: 'Auto Cont%', editable: false, align: 'right' },
       { key: 'uploaded_at', label: 'Uploaded At', editable: false },
     ],
     searchColumns: ['major_category', 'attribute_name', 'value'],

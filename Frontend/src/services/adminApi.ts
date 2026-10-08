@@ -740,6 +740,14 @@ export interface ExpenseChangeRequest {
    * captured once and never changed afterward — what routes the
    * CATEGORY_HEAD stage to the matching Category Head. */
   requesterBusinessDivision: AdminUserBusinessDivision | null;
+  /** Null for an ordinary row change; 'BGT_CONT' / 'PD_CONT' for a Major
+   * Category Grid contribution-% block, whose `changes` are keyed by
+   * attribute VALUE ({ REG_FIT: { old: 50, new: 60 } }). */
+  requestKind: 'BGT_CONT' | 'PD_CONT' | null;
+  /** "<major_category>||<attribute_name>" for a contribution request. */
+  blockKey: string | null;
+  /** The creator's paired approver — the only one who can act at CONT_APPROVER. */
+  routedApproverEmail: string | null;
 
   createdAt: string;
   updatedAt: string;
@@ -864,6 +872,86 @@ export async function actOnExpenseChangeRequest(
 }
 
 // ═══════════════════════════════════════════════════════
+// MAJOR CATEGORY GRID — CONTRIBUTION % (Bgt Cont% / Pd Cont%)
+// ═══════════════════════════════════════════════════════
+
+export type ContributionKind = 'BGT' | 'PD';
+
+export const CONTRIBUTION_KIND_LABEL: Record<ContributionKind, string> = { BGT: 'Bgt Cont%', PD: 'Pd Cont%' };
+
+export interface ContributionScope {
+  creator: { kind: ContributionKind; division: string; approverEmail: string }[];
+  approver: { kind: ContributionKind; division: string }[];
+}
+
+export interface ContributionBlockRow {
+  id: number;
+  value: string;
+  bgt: number | null;
+  pd: number | null;
+  auto: number | null;
+}
+
+export interface ContributionBlock {
+  majorCategory: string;
+  attributeName: string;
+  division: string | null;
+  rows: ContributionBlockRow[];
+  pending: Record<ContributionKind, { id: string; requestedByName: string; requestedByEmail: string; currentStageKey: string | null } | null>;
+}
+
+export interface ContributionBulkResult {
+  blocks: number;
+  created: number;
+  skipped: number;
+  results: { majorCategory: string; attributeName: string; status: 'CREATED' | 'SKIPPED'; requestId?: string; error?: string }[];
+}
+
+export async function getContributionAttributes(
+  majorCategory: string,
+): Promise<{ division: string | null; attributes: { attributeName: string; values: number }[] }> {
+  const res = await expenseApi.get(`/grid-contribution/attributes?majorCategory=${encodeURIComponent(majorCategory)}`);
+  return res.data.data;
+}
+
+export async function getContributionBlock(majorCategory: string, attributeName: string): Promise<ContributionBlock> {
+  const res = await expenseApi.get(
+    `/grid-contribution/block?majorCategory=${encodeURIComponent(majorCategory)}&attributeName=${encodeURIComponent(attributeName)}`,
+  );
+  return res.data.data;
+}
+
+export async function createContributionRequest(body: {
+  kind: ContributionKind;
+  majorCategory: string;
+  attributeName: string;
+  values: Record<string, number | null>;
+  reason: string;
+  dueDate: string;
+}): Promise<{ requestId: string; changedValues: number }> {
+  const res = await expenseApi.post('/grid-contribution/requests', body);
+  return res.data.data;
+}
+
+export async function createContributionBulkRequests(body: {
+  kind: ContributionKind;
+  rows: { majorCategory: string; attributeName: string; value: string; pct: number | string }[];
+  reason: string;
+  dueDate: string;
+}): Promise<ContributionBulkResult> {
+  const res = await expenseApi.post('/grid-contribution/bulk-requests', body, { timeout: 10 * 60 * 1000 });
+  return res.data.data;
+}
+
+/** The fill-in template: every grid row of the caller's own divisions for `kind`. */
+export async function downloadContributionTemplate(kind: ContributionKind, majorCategories?: string[]): Promise<Blob> {
+  const q = new URLSearchParams({ kind });
+  if (majorCategories && majorCategories.length > 0) q.set('majorCategory', majorCategories.join(','));
+  const res = await expenseApi.get(`/grid-contribution/template?${q.toString()}`, { responseType: 'blob', timeout: 10 * 60 * 1000 });
+  return res.data as Blob;
+}
+
+// ═══════════════════════════════════════════════════════
 // EXPENSE ACCESS — the caller's own rights, and the approval CHAIN's labels
 // (routing itself is by Business Division, see UsersManagement; there is no
 // more email-grant or stage-management UI)
@@ -918,6 +1006,9 @@ export interface MyExpenseAccess {
    * — used to filter the masters list and the Change Requests view down to
    * just those; the server enforces the same thing per-table regardless. */
   allowedTableKeys: string[] | null;
+  /** Major Category Grid contribution %: the (kind, division) pairs this
+   * user fills and approves — from the business creator/approver sheet. */
+  contribution: ContributionScope;
 }
 
 export async function getMyExpenseAccess(tableKey?: string): Promise<MyExpenseAccess> {
