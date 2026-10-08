@@ -7,8 +7,7 @@
  */
 import { randomUUID } from 'crypto';
 import { prismaClient as prisma } from '../utils/prisma';
-import { Prisma } from '../generated/prisma';
-import { upsert360ArticleFlatRow, mirror360FlatUpdate } from '../utils/mirror360Flat';
+import { mirror360FlatUpdate } from '../utils/mirror360Flat';
 
 /**
  * Active sizes for a major category, read from the `maj_cat_sizes` table
@@ -82,33 +81,29 @@ export async function createVariantsForGeneric(genericId: string): Promise<void>
     for (const size of sizes) {
       try {
         const variantId = randomUUID();
-        const variantData = {
-          ...rest,
-          id: variantId,
-          jobId: null,
-          imageUncPath: null,
-          approvalStatus: 'PENDING' as const,
-          approvedBy: null,
-          approvedAt: null,
-          sapSyncStatus: 'NOT_SYNCED' as const,
-          sapArticleId: null,
-          sapSyncMessage: null,
-          isGeneric: false,
-          genericArticleId: genericId,
-          variantSize: size,
-          size: size,
-          colour: generic.colour || null,
-          variantColor: generic.colour || null,
-          imageExtractionRawData: _ied1 ?? Prisma.DbNull,
-          // A variant is never itself a set parent/child — don't clone those links.
-          comboRole: 'NONE' as const,
-          comboParentId: null,
-          comboChildOrder: null,
-        };
-        await prisma.extractionResultFlat.create({ data: variantData });
 
-        // Mirror to 360article (fire-and-forget)
-        void upsert360ArticleFlatRow(variantId, variantData as Record<string, unknown>);
+        // Write only to fg_variants_article_data (new table).
+        // Legacy variants already in extraction_results_flat are kept as-is for reads.
+        await prisma.fgVariantArticleData.create({
+          data: {
+            id: variantId,
+            genericArticleId: genericId,
+            genericArticleNumber: generic.articleNumber || null,
+            variantColor: generic.colour || null,
+            variantSize: size,
+            division: generic.division || null,
+            subDivision: generic.subDivision || null,
+            majorCategory: generic.majorCategory || null,
+            vendorName: generic.vendorName || null,
+            vendorCode: generic.vendorCode || null,
+            designNumber: generic.designNumber || null,
+            mrp: generic.mrp ?? null,
+            rate: generic.rate ?? null,
+            imageUrl: generic.imageUrl || null,
+            approvalStatus: 'PENDING',
+            sapSyncStatus: 'NOT_SYNCED',
+          },
+        });
 
         console.log(`[VariantCreation] Created variant size=${size} for generic=${genericId}`);
       } catch (err: any) {
@@ -145,11 +140,19 @@ export async function addColorVariants(
 
   // Skip any (size, color) combinations that already exist for this generic so
   // re-adding a color for a new size never duplicates existing variant rows.
+  // Check both the legacy table and the new fg_variants_article_data table.
   const colorUpper = color.trim().toUpperCase();
-  const existingForColor = await prisma.extractionResultFlat.findMany({
-    where: { genericArticleId: genericId, isGeneric: false },
-    select: { variantSize: true, variantColor: true },
-  });
+  const [existingFlat, existingFgTable] = await Promise.all([
+    prisma.extractionResultFlat.findMany({
+      where: { genericArticleId: genericId, isGeneric: false },
+      select: { variantSize: true, variantColor: true },
+    }),
+    prisma.fgVariantArticleData.findMany({
+      where: { genericArticleId: genericId },
+      select: { variantSize: true, variantColor: true },
+    }),
+  ]);
+  const existingForColor = [...existingFlat, ...existingFgTable];
   const existingSizesForColor = new Set(
     existingForColor
       .filter((v) => (v.variantColor || '').trim().toUpperCase() === colorUpper)
@@ -157,15 +160,6 @@ export async function addColorVariants(
   );
   const sizes = requestedSizes.filter((s) => !existingSizesForColor.has(s.trim().toUpperCase()));
   if (sizes.length === 0) return 0; // every requested size already has this color
-
-  const {
-    id: _id, jobId: _jobId, imageUncPath: _unc, createdAt: _ca, updatedAt: _ua,
-    approvalStatus: _as, approvedBy: _ab, approvedAt: _aat,
-    sapSyncStatus: _sss, sapArticleId: _sai, sapSyncMessage: _ssm,
-    isGeneric: _ig, genericArticleId: _gai, variantSize: _vs, variantColor: _vc,
-    imageExtractionRawData: _ied2,
-    ...rest
-  } = generic;
 
   // A per-color image (uploaded in the Add Color flow) overrides the generic's
   // image so every size of this color shows that color's photo.
@@ -175,34 +169,28 @@ export async function addColorVariants(
   for (const size of sizes) {
     try {
       const colorVariantId = randomUUID();
-      const colorVariantData = {
-        ...rest,
-        id: colorVariantId,
-        jobId: null,
-        imageUrl: variantImageUrl,
-        imageUncPath: null,
-        approvalStatus: 'PENDING' as const,
-        approvedBy: null,
-        approvedAt: null,
-        sapSyncStatus: 'NOT_SYNCED' as const,
-        sapArticleId: null,
-        sapSyncMessage: null,
-        isGeneric: false,
-        genericArticleId: genericId,
-        variantSize: size,
-        size: size,
-        variantColor: color,
-        colour: color,
-        imageExtractionRawData: _ied2 ?? Prisma.DbNull,
-        // A variant is never itself a set parent/child — don't clone those links.
-        comboRole: 'NONE' as const,
-        comboParentId: null,
-        comboChildOrder: null,
-      };
-      await prisma.extractionResultFlat.create({ data: colorVariantData });
-
-      // Mirror to 360article (fire-and-forget)
-      void upsert360ArticleFlatRow(colorVariantId, colorVariantData as Record<string, unknown>);
+      // Write only to fg_variants_article_data (new table).
+      // Legacy variants already in extraction_results_flat are kept as-is for reads.
+      await prisma.fgVariantArticleData.create({
+        data: {
+          id: colorVariantId,
+          genericArticleId: genericId,
+          genericArticleNumber: generic.articleNumber || null,
+          variantColor: color,
+          variantSize: size,
+          division: generic.division || null,
+          subDivision: generic.subDivision || null,
+          majorCategory: generic.majorCategory || null,
+          vendorName: generic.vendorName || null,
+          vendorCode: generic.vendorCode || null,
+          designNumber: generic.designNumber || null,
+          mrp: generic.mrp ?? null,
+          rate: generic.rate ?? null,
+          imageUrl: variantImageUrl || null,
+          approvalStatus: 'PENDING',
+          sapSyncStatus: 'NOT_SYNCED',
+        },
+      });
 
       created++;
     } catch (err: any) {
@@ -242,6 +230,19 @@ export async function syncGenericToVariants(genericId: string, updatedData: Reco
       where: { genericArticleId: genericId, isGeneric: false },
       data: syncData
     });
+
+    // Sync overlapping fields to fg_variants_article_data
+    const fgSyncFields = ['mrp', 'rate', 'vendorCode', 'vendorName', 'designNumber', 'division', 'subDivision', 'majorCategory', 'imageUrl'];
+    const fgSyncData: Record<string, any> = {};
+    for (const key of fgSyncFields) {
+      if (key in syncData) fgSyncData[key] = syncData[key];
+    }
+    if (Object.keys(fgSyncData).length > 0) {
+      await prisma.fgVariantArticleData.updateMany({
+        where: { genericArticleId: genericId },
+        data: fgSyncData,
+      }).catch((e: any) => console.error(`[VariantSync] fg_variant sync failed for generic=${genericId}:`, e?.message));
+    }
 
     // Mirror sync to 360article (fire-and-forget)
     void Promise.all(variantIds.map(v => mirror360FlatUpdate(v.id, syncData)));

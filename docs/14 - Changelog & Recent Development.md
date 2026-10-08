@@ -5,6 +5,54 @@
 
 ---
 
+## 2026-10-07 — GM Article review page redesign (design H)
+
+- Picked H from two canvas rounds (A–E, then F–I). The GM card now has a wide photo + "Article details" rail
+  (division, sub-division, major category, MC description, design no., article no., description, vendor as
+  real fields), the GM grid split into Required / Optional only, a separate BOM card, and a Colour variants card.
+- Header Save & Submit / Reject restyled to slate. Details: [[11 - Frontend Architecture]] → GM Article review page.
+- Then shortened per Round 3 option K: 5:4 photo, Article details two fields per line (Created in its header),
+  GM grid two attributes per line (38 px rows), BOM on one line, Colour variants full width under both columns.
+  Left column ~1,320 → ~824 px at 1440 wide.
+- Round 4 on the canvas: K in five colour themes (Slate, Navy, Teal, Aubergine, Dark) — awaiting the user's pick.
+- Pending: GM article-description auto-build rule (user to send the attribute sequence).
+
+---
+
+## 2026-10-07 — Admin Dashboard (Expenses) + View Data redesign
+
+- Option A from a 5-option canvas: jump menu, one Pipelines card, compact Vendor sync row, and the
+  18 master-data uploaders as compact grouped cards that expand in place to the original upload panel.
+- Option E for View Data: breadcrumb, removable filter chips, propose edit/delete/add as a side panel
+  (`RowChangeRequestDialog variant="panel"`) with "Current: …" hints. Details: [[10 - Admin Panel]].
+
+---
+
+## 2026-10-07 — Admin › Users page redesign
+
+- Option A ("refined table") from a 5-option canvas: role chips + Active/Inactive filter, compact scope chips
+  with "+N more", relative last login, status dot, icon actions, no horizontal scroll. Inactive users are now
+  viewable (default filter is still Active). Details: [[10 - Admin Panel]] → Users Management.
+- Add/Edit user dialog redesigned (option A): sectioned form, locked email, "Set a new password" link,
+  division toggles + sub-division chip grid replacing the two MultiSelects, Deactivate in the dialog footer.
+
+---
+
+## 2026-10-06 — Spec Sheet cards + Group by on all article dashboards
+
+- New shared `shared/components/articles/ArticleSpecCard.tsx` + `ArticleCardGrid.tsx` replace the 4 duplicated
+  card components on FG / Fabric / FG-Fabric / Body / GM dashboards (design option B, picked from a 4-option canvas).
+- New **Group by: None / Vendor / Category** control; remembered per dashboard (URL + localStorage).
+- Backend: list endpoints `/approver/items`, `/fabric-article-data`, `/body-articles`, `/gm-articles` accept
+  `groupBy=vendor|category` (included in the `getItems` response cache key). Groups are ordered by their newest
+  article (today's vendor/category first), newest-first inside — `ApproverController.findGroupedPage`.
+- Filter bar redesign (option C, same day): Division as tabs in the header, one even-height filter row with
+  date presets (Any / Today / 7 days / 30 days / Custom), Reset filters, SAP sync chips on Created tabs —
+  `shared/components/articles/ArticleFilters.tsx`, applied to the same five dashboards.
+- Details: [[11 - Frontend Architecture]] → "Article list dashboards — shared card grid".
+
+---
+
 ## 2026-06-04 → 2026-07-21 — main merged into `feat/tailwind-ui-redesign`
 
 119 non-merge commits from `main` (spanning 2026-06-04 → 2026-07-21) were pulled into the branch on **2026-07-22**. The Tailwind/shadcn redesign work was already merged upstream, so this resolved to a **clean fast-forward — local branch now equals `origin/main`** (tip `9a10c47`, PR #159).

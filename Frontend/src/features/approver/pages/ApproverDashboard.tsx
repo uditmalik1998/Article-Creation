@@ -9,7 +9,6 @@ import {
   Popover,
   PopoverContent,
   PopoverTrigger,
-  RangePicker,
   Select,
   SelectContent,
   SelectItem,
@@ -19,7 +18,9 @@ import {
 import { message } from '@/lib/message';
 import { cn } from '@/lib/utils';
 import type { ApproverItem } from '../components/ApproverTable';
-import { ArticleCard } from '../components/ArticleCard';
+import { ArticleSpecCard } from '@/shared/components/articles/ArticleSpecCard';
+import { ArticleCardGrid, ARTICLE_CARD_GRID_CLASS, GroupByControl, useArticleGroupBy } from '@/shared/components/articles/ArticleCardGrid';
+import { DatePresetFilter, DivisionTabs, divisionOption, ResetFiltersButton, SapSyncChips } from '@/shared/components/articles/ArticleFilters';
 import { APP_CONFIG } from '../../../constants/app/config';
 import { SIMPLIFIED_HIERARCHY } from '../../extraction/components/SimplifiedCategorySelector';
 import { getMcCodeByMajorCategory, MAJOR_CATEGORY_ALLOWED_VALUES } from '../../../data/majorCategoryMcCodeMap';
@@ -219,6 +220,9 @@ export default function ApproverDashboard({ pathType, baseRoute = '/approver', p
   // cleared on every fetch (pagination / filter change) so it never holds ids
   // that aren't currently rendered.
   const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set());
+  const [groupBy, setGroupBy] = useArticleGroupBy(`articleGroupBy:${baseRoute}`, searchParams.get('groupBy'));
+  // Bumped by Reset to remount the (uncontrolled) search input empty.
+  const [searchKey, setSearchKey] = useState(0);
 
   // Combobox open/search state for the two searchable filter dropdowns
   const [subDivOpen, setSubDivOpen] = useState(false);
@@ -285,6 +289,7 @@ export default function ApproverDashboard({ pathType, baseRoute = '/approver', p
         if (dateRangeFilter?.[1]) params.set('endDate', dateRangeFilter[1].endOf('day').toISOString());
         if (pathType) params.set('pathType', pathType);
         params.set('presentationsType', presentationsType);
+        if (groupBy !== 'none') params.set('groupBy', groupBy);
 
         const response = await fetch(`${APP_CONFIG.api.baseURL}/approver/items?${params}`, {
           headers: { Authorization: `Bearer ${token}` },
@@ -303,7 +308,7 @@ export default function ApproverDashboard({ pathType, baseRoute = '/approver', p
         setLoading(false);
       }
     },
-    [statusFilter, divisionFilter, subDivisionFilter, majorCategoryFilter, sourceFilter, sapSyncFilter, searchText, dateRangeFilter, pathType],
+    [statusFilter, divisionFilter, subDivisionFilter, majorCategoryFilter, sourceFilter, sapSyncFilter, searchText, dateRangeFilter, pathType, groupBy],
   );
 
   useEffect(() => {
@@ -334,11 +339,12 @@ export default function ApproverDashboard({ pathType, baseRoute = '/approver', p
       setOrDel('source', sourceFilter !== 'ALL' ? sourceFilter : '');
       setOrDel('startDate', dateRangeFilter?.[0]?.toISOString());
       setOrDel('endDate', dateRangeFilter?.[1]?.toISOString());
+      setOrDel('groupBy', groupBy !== 'none' ? groupBy : '');
       return p;
     }, { replace: true });
   // setSearchParams is stable; these drive the sync
   // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [currentPage, searchText, divisionFilter, subDivisionFilter, majorCategoryFilter, sourceFilter, dateRangeFilter]);
+  }, [currentPage, searchText, divisionFilter, subDivisionFilter, majorCategoryFilter, sourceFilter, dateRangeFilter, groupBy]);
 
   // ─── Export ──────────────────────────────────────────────────────────────────
 
@@ -553,6 +559,38 @@ export default function ApproverDashboard({ pathType, baseRoute = '/approver', p
     });
   }, []);
 
+  // A group's "Select all" / "Deselect all".
+  const setSelection = useCallback((ids: string[], select: boolean) => {
+    setSelectedIds((prev) => {
+      const next = new Set(prev);
+      ids.forEach((id) => { if (select) next.add(id); else next.delete(id); });
+      return next;
+    });
+  }, []);
+
+  const hasActiveFilters = !!searchText
+    || divisionFilter !== 'ALL'
+    || subDivisionFilter !== 'ALL'
+    || !!majorCategoryFilter
+    || sourceFilter !== 'ALL'
+    || (pathType !== 'created' && statusFilter !== 'ALL')
+    || sapSyncFilter !== 'ALL'
+    || !!dateRangeFilter?.[0]
+    || !!dateRangeFilter?.[1];
+
+  const resetFilters = useCallback(() => {
+    if (searchDebounceRef.current) clearTimeout(searchDebounceRef.current);
+    setSearchText('');
+    setSearchKey((k) => k + 1);
+    setDivisionFilter('ALL');
+    setSubDivisionFilter('ALL');
+    setMajorCategoryFilter('');
+    setSourceFilter('ALL');
+    if (pathType !== 'created') setStatusFilter('ALL');
+    setSapSyncFilter('ALL');
+    setDateRangeFilter(null);
+  }, [pathType]);
+
   const allOnPageSelected = items.length > 0 && items.every((i) => selectedIds.has(i.id));
 
   const toggleSelectAllOnPage = useCallback(() => {
@@ -726,44 +764,35 @@ export default function ApproverDashboard({ pathType, baseRoute = '/approver', p
                 <Download /> Export ({totalCount})
               </Button>
             </div>
+            {(showDivisionFilter || isUnscoped) && (
+              <DivisionTabs
+                value={divisionFilter}
+                onChange={(v) => { setDivisionFilter(v); setSubDivisionFilter('ALL'); }}
+                options={isUnscoped ? ['MEN', 'LADIES', 'KIDS'].map(divisionOption) : userAssignedDivisions.map(divisionOption)}
+              />
+            )}
           </div>
 
           {/* Filter row */}
-          <div className="border-t border-border/60 bg-gradient-to-b from-slate-50/40 to-transparent px-3 py-1.5">
-            <div className="flex flex-wrap items-center gap-1.5">
+          <div className="border-t border-border/60 bg-gradient-to-b from-slate-50/40 to-transparent px-3 py-2">
+            <div className="flex flex-wrap items-center gap-2">
               <Input
+                key={searchKey}
                 placeholder="Search article, vendor, design, PPT no..."
                 defaultValue={searchText}
                 onChange={handleSearchChange}
                 allowClear
                 onClear={() => setSearchText('')}
-                className="!h-7 w-full text-[12px] sm:w-[240px]"
+                className="!h-9 w-full text-[13px] sm:w-[260px] hover:border-slate-400 focus-within:border-slate-500 focus-within:ring-slate-400/25"
               />
               {pathType !== 'rejected' && pathType !== 'created' && pathType !== 'new' && (
                 <Select value={statusFilter} onValueChange={setStatusFilter}>
-                  <SelectTrigger className="!h-7 w-[130px] text-[12px]"><SelectValue /></SelectTrigger>
+                  <SelectTrigger className="!h-9 w-[130px] text-[13px] hover:border-slate-400 focus-visible:border-slate-500 focus-visible:ring-[3px] focus-visible:ring-slate-400/25 data-[state=open]:border-slate-500 data-[state=open]:ring-[3px] data-[state=open]:ring-slate-400/25"><SelectValue /></SelectTrigger>
                   <SelectContent>
                     <SelectItem value="ALL">All Statuses</SelectItem>
                     <SelectItem value="PENDING">Pending</SelectItem>
                     <SelectItem value="APPROVED">Approved</SelectItem>
                     <SelectItem value="FAILED">Failed</SelectItem>
-                  </SelectContent>
-                </Select>
-              )}
-              {(showDivisionFilter || isUnscoped) && (
-                <Select value={divisionFilter} onValueChange={(v) => { setDivisionFilter(v); setSubDivisionFilter('ALL'); }}>
-                  <SelectTrigger className="!h-7 w-[130px] text-[12px]"><SelectValue placeholder="Division" /></SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="ALL">All Divisions</SelectItem>
-                    {isUnscoped ? (
-                      <>
-                        <SelectItem value="MEN">MENS</SelectItem>
-                        <SelectItem value="LADIES">LADIES</SelectItem>
-                        <SelectItem value="KIDS">KIDS</SelectItem>
-                      </>
-                    ) : (
-                      userAssignedDivisions.map(d => <SelectItem key={d} value={d}>{formatDivisionLabel(d)}</SelectItem>)
-                    )}
                   </SelectContent>
                 </Select>
               )}
@@ -775,7 +804,7 @@ export default function ApproverDashboard({ pathType, baseRoute = '/approver', p
                   <PopoverTrigger asChild>
                     <button
                       type="button"
-                      className="flex h-7 w-[130px] items-center justify-between rounded border border-input bg-background px-2 text-[12px] hover:border-ring focus:outline-none focus:ring-1 focus:ring-ring"
+                      className="flex h-9 w-[130px] items-center justify-between rounded-md border border-input bg-background px-2.5 text-[13px] hover:border-slate-400 focus-visible:outline-none focus-visible:border-slate-500 focus-visible:ring-[3px] focus-visible:ring-slate-400/25 data-[state=open]:border-slate-500 data-[state=open]:ring-[3px] data-[state=open]:ring-slate-400/25"
                     >
                       <span className="truncate text-left">
                         {subDivisionFilter === 'ALL' ? 'All Sub-Divs' : subDivisionFilter}
@@ -845,7 +874,7 @@ export default function ApproverDashboard({ pathType, baseRoute = '/approver', p
                 <PopoverTrigger asChild>
                   <button
                     type="button"
-                    className="flex h-7 w-[170px] items-center justify-between rounded border border-input bg-background px-2 text-[12px] hover:border-ring focus:outline-none focus:ring-1 focus:ring-ring"
+                    className="flex h-9 w-[170px] items-center justify-between rounded-md border border-input bg-background px-2.5 text-[13px] hover:border-slate-400 focus-visible:outline-none focus-visible:border-slate-500 focus-visible:ring-[3px] focus-visible:ring-slate-400/25 data-[state=open]:border-slate-500 data-[state=open]:ring-[3px] data-[state=open]:ring-slate-400/25"
                   >
                     <span className="truncate text-left">
                       {majorCategoryFilter || 'All Major Categories'}
@@ -911,7 +940,7 @@ export default function ApproverDashboard({ pathType, baseRoute = '/approver', p
                 </PopoverContent>
               </Popover>
               <Select value={sourceFilter} onValueChange={setSourceFilter}>
-                <SelectTrigger className="!h-7 w-[110px] text-[12px]"><SelectValue /></SelectTrigger>
+                <SelectTrigger className="!h-9 w-[110px] text-[13px] hover:border-slate-400 focus-visible:border-slate-500 focus-visible:ring-[3px] focus-visible:ring-slate-400/25 data-[state=open]:border-slate-500 data-[state=open]:ring-[3px] data-[state=open]:ring-slate-400/25"><SelectValue /></SelectTrigger>
                 <SelectContent>
                   <SelectItem value="ALL">All Sources</SelectItem>
                   <SelectItem value="SRM">SRM</SelectItem>
@@ -919,33 +948,29 @@ export default function ApproverDashboard({ pathType, baseRoute = '/approver', p
                   <SelectItem value="USER">User</SelectItem>
                 </SelectContent>
               </Select>
-              {pathType === 'created' && (
-                <Select value={sapSyncFilter} onValueChange={setSapSyncFilter}>
-                  <SelectTrigger className="!h-7 w-[120px] text-[12px]"><SelectValue /></SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="ALL">All SAP Sync</SelectItem>
-                    <SelectItem value="SYNCED">SAP ✓ Synced</SelectItem>
-                    <SelectItem value="PENDING">SAP … Queued</SelectItem>
-                    <SelectItem value="FAILED">SAP ✗ Failed</SelectItem>
-                  </SelectContent>
-                </Select>
-              )}
-              <RangePicker
+              <DatePresetFilter
+                label={pathType === 'created' ? 'Approved' : 'Added'}
                 value={dateRangeFilter}
                 onChange={setDateRangeFilter}
-                placeholder={pathType === 'created' ? ['Updated From', 'Updated To'] : ['Created From', 'Created To']}
               />
-              {items.length > 0 && (
-                <label className="flex h-7 cursor-pointer items-center gap-1.5 rounded border border-input bg-background px-2 text-[12px] text-muted-foreground hover:border-ring">
-                  <input
-                    type="checkbox"
-                    checked={allOnPageSelected}
-                    onChange={toggleSelectAllOnPage}
-                    className="h-3.5 w-3.5 cursor-pointer accent-primary"
-                  />
-                  Select page
-                </label>
-              )}
+              <div className="flex-1" />
+              <GroupByControl value={groupBy} onChange={setGroupBy} />
+              <div className="flex basis-full flex-wrap items-center gap-2">
+                {pathType === 'created' && <SapSyncChips value={sapSyncFilter} onChange={setSapSyncFilter} />}
+                <div className="flex-1" />
+                {hasActiveFilters && <ResetFiltersButton onClick={resetFilters} />}
+                {items.length > 0 && (
+                  <label className="flex h-9 cursor-pointer items-center gap-2 rounded-md border border-input bg-background px-3 text-[13px] text-foreground hover:border-slate-400">
+                    <input
+                      type="checkbox"
+                      checked={allOnPageSelected}
+                      onChange={toggleSelectAllOnPage}
+                      className="h-4 w-4 cursor-pointer accent-slate-800"
+                    />
+                    Select page
+                  </label>
+                )}
+              </div>
             </div>
           </div>
         </div>
@@ -953,9 +978,9 @@ export default function ApproverDashboard({ pathType, baseRoute = '/approver', p
 
       {/* Card grid */}
       {loading ? (
-        <div className="grid grid-cols-2 gap-3 p-3 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5">
-          {Array.from({ length: 10 }).map((_, i) => (
-            <div key={i} className="h-56 animate-pulse rounded-xl bg-muted" />
+        <div className={cn(ARTICLE_CARD_GRID_CLASS, 'p-3')}>
+          {Array.from({ length: 12 }).map((_, i) => (
+            <div key={i} className="h-48 animate-pulse rounded-xl bg-muted" />
           ))}
         </div>
       ) : items.length === 0 ? (
@@ -965,11 +990,15 @@ export default function ApproverDashboard({ pathType, baseRoute = '/approver', p
         </div>
       ) : (
         <>
-          <div className="grid grid-cols-2 gap-3 p-3 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5">
-            {items.map((item, index) => (
-              <ArticleCard key={item.id} item={item} index={index} onClick={handleCardClick} dateField={pathType === 'created' ? 'approvedAt' : 'createdAt'} selected={selectedIds.has(item.id)} onToggleSelect={toggleSelect} />
-            ))}
-          </div>
+          <ArticleCardGrid
+            items={items}
+            groupBy={groupBy}
+            selectedIds={selectedIds}
+            onSetSelection={setSelection}
+            renderCard={(item, index) => (
+              <ArticleSpecCard key={item.id} item={item} index={index} onClick={handleCardClick} dateField={pathType === 'created' ? 'approvedAt' : 'createdAt'} selected={selectedIds.has(item.id)} onToggleSelect={toggleSelect} />
+            )}
+          />
           {totalCount > PAGE_SIZE && (
             <div className="flex items-center justify-center gap-3 border-t py-3">
               <Button size="sm" variant="outline" disabled={currentPage === 1}

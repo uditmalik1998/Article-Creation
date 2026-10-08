@@ -56,14 +56,6 @@ export interface MasterAttribute {
   allowedValues?: AllowedValue[];
 }
 
-export interface DashboardStats {
-  departments: number;
-  subDepartments: number;
-  categories: number;
-  attributes: number;
-  allowedValues: number;
-}
-
 export interface HierarchyNode {
   id: number;
   name: string;

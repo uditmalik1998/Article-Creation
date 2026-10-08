@@ -2,7 +2,6 @@ import React, { useState, useMemo, useCallback, useEffect, useRef } from 'react'
 import {
   FileText,
   LayoutGrid,
-  Rocket,
   Info,
   Users,
   Copy,
@@ -423,8 +422,8 @@ const BODY_PRIORITY_KEYS = [
 
 // ─── Redesign tokens — header/icon palette per group ──────────────────────────
 const GROUP_LABELS: Record<string, string> = {
-  FAB: 'Construction & Fabric',
-  BODY: 'Body & Construction',
+  FAB: 'FABRIC AND CONSTRUCTION',
+  BODY: 'BODY AND CONSTRUCTION',
   'VA ACC.': 'Trims & Accessories',
   'VA PRCS': 'Value Addition',
   BUSINESS: 'Business & Misc',
@@ -660,6 +659,20 @@ const ArticleCard = React.memo(
     // Search term for the attribute-value dropdown. A single shared term is
     // enough because only one attribute (editingField) is open at a time.
     const [attrSearch, setAttrSearch] = useState('');
+
+    // ── Group-tab visibility filter (FG articles only) ──────────────────────
+    // Keys: FAB | BODY | VA ACC. | VA PRCS | BUSINESS | BOM
+    const [selectedGroupKeys, setSelectedGroupKeys] = useState<Set<string>>(
+      () => new Set(['FAB']),
+    );
+    const toggleGroupTab = (key: string) => {
+      setSelectedGroupKeys((prev) => {
+        if (prev.has(key) && prev.size === 1) return prev; // keep at least 1
+        const next = new Set(prev);
+        if (next.has(key)) { next.delete(key); } else { next.add(key); }
+        return next;
+      });
+    };
 
     // ── Major categories from DB (major_category_details table) ─────────────
     const [dbMajorCategories, setDbMajorCategories] = useState<string[]>([]);
@@ -1295,6 +1308,9 @@ const ArticleCard = React.memo(
     // Created page (modify mode) we keep them editable so the user can stage
     // changes and push them to SAP via the "Modify" button.
     const isLocked = readOnly || ((item.approvalStatus === 'APPROVED' || item.approvalStatus === 'REJECTED') && !isModifyMode);
+    // Body articles on the Created page: consumption sections (Rough + Precise) stay editable
+    // even though the article is APPROVED — no SAP re-sync needed for these local fields.
+    const isBodyCreatedPage = !readOnly && isBodyArticle && pathType === 'created';
     const status = getDisplayStatus(item);
 
     // Created-article identity/price fields are LOCKED even in modify mode — they
@@ -1608,6 +1624,11 @@ const ArticleCard = React.memo(
     const activeGroups = ATTRIBUTE_GROUPS.filter(
       (g) => groupMap[g.group] && (!allowGroups || allowGroups.includes(g.group)),
     );
+    // For FG articles: further filter by selected group tabs
+    const visibleGroups = allowGroups
+      ? activeGroups
+      : activeGroups.filter((g) => selectedGroupKeys.has(g.group));
+    const showBomCard = allowGroups ? true : selectedGroupKeys.has('BOM');
 
     const rateVal = String(getValue('rate') ?? '').trim();
     const mrpVal = String(getValue('mrp') ?? '').trim();
@@ -2465,9 +2486,51 @@ const ArticleCard = React.memo(
                 </Button>
               </div>
 
+              {/* ── Group filter tabs (FG articles only) ── */}
+              {!allowGroups && (() => {
+                const TAB_DEFS = [
+                  { key: 'FAB',      label: 'FABRIC AND CONSTRUCTION', style: GROUP_HEADER_STYLE['FAB'] },
+                  { key: 'BODY',     label: 'BODY AND CONSTRUCTION',   style: GROUP_HEADER_STYLE['BODY'] },
+                  { key: 'VA ACC.',  label: 'TRIMS & ACCESSORIES',     style: GROUP_HEADER_STYLE['VA ACC.'] },
+                  { key: 'VA PRCS',  label: 'VALUE ADDITION',          style: GROUP_HEADER_STYLE['VA PRCS'] },
+                  { key: 'BUSINESS', label: 'BUSINESS & MISC',         style: GROUP_HEADER_STYLE['BUSINESS'] },
+                  { key: 'BOM',      label: 'BOM',                     style: { bg: '#fffbeb', fg: '#92400e', border: '#fde68a' } },
+                ];
+                return (
+                  <div className="mb-2 flex flex-wrap gap-1.5">
+                    {TAB_DEFS.map(({ key, label, style }) => {
+                      const active = selectedGroupKeys.has(key);
+                      return (
+                        <button
+                          key={key}
+                          type="button"
+                          onClick={() => toggleGroupTab(key)}
+                          className="rounded-full border-2 px-2.5 py-0.5 text-[10px] font-bold uppercase tracking-wider transition-all"
+                          style={active
+                            ? { background: style.bg, color: style.fg, borderColor: style.border }
+                            : { background: 'transparent', color: '#64748b', borderColor: '#cbd5e1' }
+                          }
+                        >
+                          {label}
+                        </button>
+                      );
+                    })}
+                  </div>
+                );
+              })()}
+
               {visibleAttrs.length > 0 ? (
-                <div className={`grid auto-rows-min grid-cols-1 gap-3 ${allowGroups ? '' : 'md:grid-cols-2 xl:grid-cols-3'}`}>
-                  {activeGroups.map((g) => {
+                <div className={`grid auto-rows-min gap-3 ${
+                  allowGroups
+                    ? 'grid-cols-1'
+                    : (() => {
+                        const visibleCount = visibleGroups.length + (showBomCard ? 1 : 0);
+                        if (visibleCount <= 1) return 'grid-cols-1';
+                        if (visibleCount <= 4) return 'grid-cols-2';
+                        return 'grid-cols-3';
+                      })()
+                }`}>
+                  {visibleGroups.map((g) => {
                     const style = GROUP_HEADER_STYLE[g.group] ?? { bg: '#f3f4f6', fg: '#374151', border: '#e5e7eb' };
                     const collapsed = isGroupCollapsed(g.group);
                     return (
@@ -2562,7 +2625,7 @@ const ArticleCard = React.memo(
                                 const COSTING_FIELDS: { field: string; label: string; isDropdown?: boolean }[] = [
                                   { field: 'costingType',  label: 'BODY COSTING TYPE', isDropdown: true },
                                   { field: 'cmpCost',      label: 'CMP COST' },
-                                  { field: 'basicTrimCost', label: 'BASIC TRIM COST' },
+                                  { field: 'basicTrimCost', label: 'PACKAGING COST' },
                                   { field: 'cmtpCost',     label: 'CMTP COST' },
                                 ];
                                 return COSTING_FIELDS.map(({ field, label, isDropdown }) => {
@@ -3447,7 +3510,7 @@ const ArticleCard = React.memo(
                   })}
 
                   {/* BOM / Consumption card */}
-                  <div
+                  {showBomCard && <div
                     className="overflow-hidden rounded-lg border bg-white"
                     style={{ borderColor: '#fde68a' }}
                   >
@@ -3484,7 +3547,7 @@ const ArticleCard = React.memo(
                         // render (rather than only when an input changes) keeps rows saved under
                         // the old formula from showing a stale figure.
                         const isDerivedBomKg = bom.field === 'consumptionKg';
-                        const bomLocked = isFieldLocked(bom.field) || isDerivedBomKg;
+                        const bomLocked = (!isBodyCreatedPage && isFieldLocked(bom.field)) || isDerivedBomKg;
                         let val = bom.isMarkdown
                           ? markdown
                           : bom.isAfterTax
@@ -3707,7 +3770,7 @@ const ArticleCard = React.memo(
                         );
                       })}
                     </div>
-                  </div>
+                  </div>}
 
                   {/* PRECISE CONSUMPTION card — Body Articles only */}
                   {isBodyArticle && (
@@ -3738,7 +3801,7 @@ const ArticleCard = React.memo(
                           // Consumption in Kg is always derived:
                           // width x gsm x consumption(meter) x 2.54 / 100000
                           const isDerivedKg = field === 'preciseConsumptionKg';
-                          const preciseLocked = isFieldLocked(field) || isDerivedKg;
+                          const preciseLocked = (!isBodyCreatedPage && isFieldLocked(field)) || isDerivedKg;
                           let preciseVal = String(getValue(field) ?? '').trim() || '—';
                           if (isDerivedKg) {
                             const num = (f: string) => parseFloat(String(getValue(f) ?? '')) || 0;

@@ -9,7 +9,6 @@ import {
   getSubDepartments,
   getCategories,
   getMasterAttributes,
-  getDashboardStats,
   getHierarchyTree,
 } from '../../../services/adminApi';
 
@@ -19,17 +18,6 @@ interface PaginationParams {
   search?: string;
   departmentId?: number;
   subDepartmentId?: number;
-}
-
-/**
- * Hook to fetch dashboard statistics
- */
-export function useDashboardStats() {
-  return useQuery({
-    queryKey: ['dashboard-stats'],
-    queryFn: getDashboardStats,
-    staleTime: 5 * 60 * 1000, // 5 minutes
-  });
 }
 
 /**

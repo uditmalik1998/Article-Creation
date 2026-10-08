@@ -72,6 +72,11 @@
  */
 
 import { prismaClient as prisma, withPrismaRetry } from '../utils/prisma';
+import {
+  CONT_APPROVER_STAGE,
+  getContributionScope,
+  type ContributionScope,
+} from './gridContributionService';
 
 /** Sentinel `tableKey` meaning "every expense table". */
 export const ALL_TABLES = '*';
@@ -200,6 +205,10 @@ export type ExpenseAccess = {
    * is only so the UI doesn't have to ask table-by-table to know what to
    * hide. */
   allowedTableKeys: string[] | null;
+  /** Major Category Grid contribution %: which Bgt/Pd Cont% (kind, division)
+   * this user fills, and approves — from grid_contribution_assignments, see
+   * services/gridContributionService.ts. Independent of everything above. */
+  contribution: ContributionScope;
 };
 
 type AuthLikeUser = { email: string; role: string; businessDivision?: string | null };
@@ -356,6 +365,10 @@ export async function getExpenseAccess(user: AuthLikeUser, tableKey?: string): P
   for (const [stageKey, requiredDivision] of Object.entries(BUSINESS_DIVISION_BASED_APPROVAL_STAGES)) {
     if (businessDivision === requiredDivision) approverLevels.add(stageKey);
   }
+  // Contribution approvers hold CONT_APPROVER — coarse like the rest; acting
+  // on one request also needs to be THAT request's routed approver.
+  const contribution = await getContributionScope(user.email);
+  if (contribution.approver.length > 0) approverLevels.add(CONT_APPROVER_STAGE);
 
   // First layer: CREATOR/APPROVER/CATEGORY_HEAD get requester rights on every
   // table simply by holding that role — no grant needed. A REQUESTER_LEVEL
@@ -366,7 +379,13 @@ export async function getExpenseAccess(user: AuthLikeUser, tableKey?: string): P
 
   return {
     isAdmin,
-    canView: isAdmin || (tableAllowed && (VIEW_ROLES.has(String(user.role)) || relevant.length > 0)),
+    canView:
+      isAdmin ||
+      (tableAllowed &&
+        (VIEW_ROLES.has(String(user.role)) ||
+          relevant.length > 0 ||
+          contribution.creator.length > 0 ||
+          contribution.approver.length > 0)),
     canCreate: isAdmin || roleIsRequester || editor.some((g) => g.canCreate),
     canUpdate: isAdmin || roleIsRequester || editor.some((g) => g.canUpdate),
     canDelete: isAdmin || roleIsRequester || editor.some((g) => g.canDelete),
@@ -375,6 +394,7 @@ export async function getExpenseAccess(user: AuthLikeUser, tableKey?: string): P
     subDivisions: [...new Set(editor.map((g) => g.subDivision).filter((s): s is string => !!s))],
     businessDivision,
     allowedTableKeys,
+    contribution,
   };
 }
 
@@ -384,6 +404,8 @@ export type ExpenseRequestStageContext = {
   /** The REQUESTER's own businessDivision, captured onto the request at
    * creation — see ExpenseChangeRequest.requesterBusinessDivision. */
   requesterBusinessDivision: string | null;
+  /** Contribution requests only — the creator's paired approver. */
+  routedApproverEmail?: string | null;
 };
 
 /**
@@ -429,6 +451,16 @@ export async function canActOnExpenseRequestStage(
   }
 
   if (request.currentStageKey === 'MDM' && businessDivision === 'MDM') {
+    return true;
+  }
+
+  // Contribution approver: exactly the approver paired with the creator who
+  // raised it — BGT and PD pairs are separate, so this never crosses over.
+  if (
+    request.currentStageKey === CONT_APPROVER_STAGE &&
+    !!request.routedApproverEmail &&
+    request.routedApproverEmail.trim().toLowerCase() === String(user.email ?? '').trim().toLowerCase()
+  ) {
     return true;
   }
 

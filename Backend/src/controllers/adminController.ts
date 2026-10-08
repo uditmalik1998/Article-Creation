@@ -66,7 +66,7 @@ const AdminCreateUserSchema = z.object({
   email: z.string().email().max(255),
   password: z.string().min(6).max(128),
   name: z.string().min(1).max(100),
-  role: z.enum(['ADMIN', 'USER', 'CREATOR', 'PO_COMMITTEE', 'APPROVER', 'CATEGORY_HEAD', 'SUB_DIVISION_HEAD', 'PD_DESIGNER', 'PD', 'BODY_APPROVER', 'FABRIC_APPROVER', 'PLANNING', 'GM_APPROVER']).optional().default('USER'),
+  role: z.enum(['ADMIN', 'USER', 'CREATOR', 'PO_COMMITTEE', 'APPROVER', 'CATEGORY_HEAD', 'SUB_DIVISION_HEAD', 'PD_DESIGNER', 'PD', 'BODY_APPROVER', 'FABRIC_APPROVER', 'PLANNING', 'GM_APPROVER', 'GM_CREATOR']).optional().default('USER'),
   division: z.union([z.string(), z.array(z.string())]).optional().nullable(),
   subDivision: z.union([z.string(), z.array(z.string())]).optional().nullable(),
   // Coarse business-unit tag — independent of division/subDivision above,
@@ -85,7 +85,7 @@ const AdminUpdateUserSchema = AdminCreateUserSchema.partial().extend({
   // here with no default so an omitted role truly stays undefined, and
   // `updateUser`'s `validated.role ?? existingUser.role` correctly keeps
   // whatever role the user already had.
-  role: z.enum(['ADMIN', 'USER', 'CREATOR', 'PO_COMMITTEE', 'APPROVER', 'CATEGORY_HEAD', 'SUB_DIVISION_HEAD', 'PD_DESIGNER', 'PD', 'BODY_APPROVER', 'FABRIC_APPROVER', 'PLANNING', 'GM_APPROVER']).optional(),
+  role: z.enum(['ADMIN', 'USER', 'CREATOR', 'PO_COMMITTEE', 'APPROVER', 'CATEGORY_HEAD', 'SUB_DIVISION_HEAD', 'PD_DESIGNER', 'PD', 'BODY_APPROVER', 'FABRIC_APPROVER', 'PLANNING', 'GM_APPROVER', 'GM_CREATOR']).optional(),
 });
 
 const normalizeSubDivisionInput = (value: unknown): string | null => {
@@ -1298,10 +1298,11 @@ export const updateUser = async (req: Request, res: Response): Promise<void> => 
       return;
     }
 
+    const gmRole = finalRole === 'GM_APPROVER' || finalRole === 'GM_CREATOR';
     const updateData: any = {
       name: validated.name,
       role: validated.role as any,
-      division: finalRole === 'PO_COMMITTEE' ? null : (validated.division !== undefined ? finalDivision : undefined),
+      division: (finalRole === 'PO_COMMITTEE' || gmRole) ? null : (validated.division !== undefined ? finalDivision : undefined),
       subDivision: (finalRole === 'CATEGORY_HEAD' || finalRole === 'PO_COMMITTEE' || finalRole === 'ADMIN') ? null : (validated.subDivision !== undefined ? normalizeSubDivisionInput(validated.subDivision) : undefined),
       // Unlike division/subDivision, businessDivision has no role-based
       // clearing rule — every role can be tagged Mens/Kids/Ladies/PO.
@@ -1385,39 +1386,24 @@ export const deactivateUser = async (req: Request, res: Response): Promise<void>
   }
 };
 
-export const getDashboardStats = async (req: Request, res: Response): Promise<void> => {
+// ═══════════════════════════════════════════════════════
+// GM SUB-DIVISIONS (from gm_major_category_details)
+// ═══════════════════════════════════════════════════════
+
+export const getGMSubDivisions = async (_req: Request, res: Response): Promise<void> => {
   try {
-    const totalUploads = await prisma.extractionResultFlat.count();
-
-    const completed = await prisma.extractionResultFlat.count({
-      where: { extractionStatus: 'COMPLETED' }
-    });
-
-    const failed = await prisma.extractionResultFlat.count({
-      where: {
-        extractionStatus: {
-          in: ['FAILED', 'ERROR']
-        }
-      }
-    });
-
-    const pending = await prisma.extractionResultFlat.count({
-      where: {
-        extractionStatus: {
-          in: ['PENDING', 'PROCESSING']
-        }
-      }
-    });
-
-    res.json({
-      success: true,
-      data: {
-        totalUploads,
-        completed,
-        failed,
-        pending
-      },
-    });
+    const rows = await prisma.$queryRaw<{ sub_div: string; div: string }[]>`
+      SELECT DISTINCT sub_div, div
+      FROM gm_major_category_details
+      WHERE sub_div IS NOT NULL AND sub_div <> ''
+        AND div IS NOT NULL AND div <> ''
+        AND mj_status = 'ACT'
+      ORDER BY div, sub_div
+    `;
+    const subDivisions = rows.map((r) => r.sub_div);
+    const divBySubDiv: Record<string, string> = {};
+    rows.forEach((r) => { divBySubDiv[r.sub_div] = r.div; });
+    res.json({ subDivisions, divBySubDiv });
   } catch (error: any) {
     res.status(500).json({ success: false, error: error.message });
   }
@@ -2565,6 +2551,15 @@ export const uploadMajCatGrid = async (req: Request, res: Response): Promise<voi
       console.log(`[MajCatGrid] Replacing table — ${totalRows} rows in ${totalBatches} batches…`);
 
       await prisma.$transaction(async (tx) => {
+        // The re-upload replaces every row, but the contribution % columns
+        // are maintained here, not in this file — park them and put them
+        // back onto the same (major_category, attribute_name, value).
+        await tx.$executeRaw`
+          CREATE TEMP TABLE _mcg_cont_keep ON COMMIT DROP AS
+          SELECT major_category, attribute_name, value, bgt_cont_pct, pd_cont_pct, auto_cont_pct
+          FROM maj_cat_grid_values
+          WHERE bgt_cont_pct IS NOT NULL OR pd_cont_pct IS NOT NULL OR auto_cont_pct IS NOT NULL
+        `;
         await tx.$executeRaw`TRUNCATE TABLE maj_cat_grid_values RESTART IDENTITY`;
 
         for (let i = 0; i < flatRows.length; i += BATCH) {
@@ -2582,6 +2577,13 @@ export const uploadMajCatGrid = async (req: Request, res: Response): Promise<voi
           job.progress = 20 + Math.round((batchDone / totalBatches) * 75);
           job.phase    = `Inserting batch ${batchDone}/${totalBatches}…`;
         }
+
+        await tx.$executeRaw`
+          UPDATE maj_cat_grid_values g
+          SET bgt_cont_pct = k.bgt_cont_pct, pd_cont_pct = k.pd_cont_pct, auto_cont_pct = k.auto_cont_pct
+          FROM _mcg_cont_keep k
+          WHERE g.major_category = k.major_category AND g.attribute_name = k.attribute_name AND g.value = k.value
+        `;
       }, { timeout: 14 * 60 * 1000 });
 
       // ── Phase 3: Finalize ────────────────────────────────────────────────────
@@ -7920,6 +7922,12 @@ export const EXPENSE_TABLE_REGISTRY: Record<string, ExpenseTableConfig> = {
       { key: 'major_category', label: 'Major Category' },
       { key: 'attribute_name', label: 'Attribute Name' },
       { key: 'value', label: 'Value' },
+      // Contribution % — never editable through the generic row edit: Bgt /
+      // Pd go through their own block workflow (gridContributionController),
+      // Auto will flow from Snowflake planning.
+      { key: 'bgt_cont_pct', label: 'Bgt Cont%', editable: false, align: 'right' },
+      { key: 'pd_cont_pct', label: 'Pd Cont%', editable: false, align: 'right' },
+      { key: 'auto_cont_pct', label: 'Auto Cont%', editable: false, align: 'right' },
       { key: 'uploaded_at', label: 'Uploaded At', editable: false },
     ],
     searchColumns: ['major_category', 'attribute_name', 'value'],

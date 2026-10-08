@@ -332,19 +332,6 @@ export class BackendApiService {
   // async updateUpload(id: string, data: ...) { ... }
   // async deleteUpload(id: string) { ... }
 
-  async getAdminStats() {
-    const token = localStorage.getItem('authToken');
-    const resp = await fetch(`${this.baseURL}/admin/stats`, {
-      headers: {
-        'Authorization': `Bearer ${token}`,
-      },
-    });
-    if (!resp.ok) throw new Error(`Failed to fetch admin stats: ${resp.status}`);
-    const json = await resp.json();
-    if (!json.success) throw new Error(json.error || 'Failed to get admin stats');
-    return json.data;
-  }
-
   async getExpenseAnalytics(options?: { dateFrom?: string; dateTo?: string; status?: string }) {
     const token = localStorage.getItem('authToken');
     const params = new URLSearchParams();

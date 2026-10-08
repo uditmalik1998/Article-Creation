@@ -160,7 +160,6 @@ async function downloadAndMirrorToR2(srmImageUrl: string): Promise<string | null
 
     const buffer = Buffer.from(await res.arrayBuffer());
     const result = await storageService.uploadFile(buffer, `srm-image.${ext}`, mimeBase, 'srm-images');
-    console.log(`[SRM Image] Mirrored to R2: ${result.url.slice(0, 80)}...`);
     return result.url;
   } catch (err: any) {
     console.warn(`[SRM Image] Mirror to R2 failed: ${err.message}`);
@@ -427,19 +426,14 @@ async function enrichSrmRowWithVlm(
     return true;
   }
 
-  console.log(`[SRM VLM] Starting enrichment for ${flatId} | category: ${majorCategory} | url: ${imageUrl.slice(0, 100)}`);
-
   // ── Step 1: fetch image (once — no retry, fast-fail) ──────────────────────
   const base64Image = await fetchImageAsBase64(imageUrl);
   if (!base64Image) {
     console.warn(`[SRM VLM] ❌ Image fetch failed for ${flatId}. URL: ${imageUrl.slice(0, 120)}`);
     return false;
   }
-  console.log(`[SRM VLM] ✓ Image fetched — base64 length: ${base64Image.length} chars`);
-
   // ── Step 2: load schema (once — cached after first call) ──────────────────
   const schema = await getEnrichSchema();
-  console.log(`[SRM VLM] ✓ Schema loaded — ${schema.length} attributes`);
 
   // ── Step 2b: constrain schema to the per-major-category grid whitelist ────
   // STRICT (matches the manual extraction page): the grid is the whitelist.
@@ -465,8 +459,6 @@ async function enrichSrmRowWithVlm(
     });
     return true;
   }
-  console.log(`[SRM VLM] ✓ Grid-constrained schema — ${constrainedSchema.length}/${schema.length} attributes for "${majorCategory}"`);
-
   // ── Step 3: VLM call with up to VLM_MAX_ATTEMPTS attempts ─────────────────
   for (let attempt = 1; attempt <= VLM_MAX_ATTEMPTS; attempt++) {
     const attemptTag = attempt > 1 ? ` [retry ${attempt - 1}/${VLM_MAX_ATTEMPTS - 1}]` : '';
@@ -481,8 +473,6 @@ async function enrichSrmRowWithVlm(
       const nonNullAttrs = Object.entries(result.attributes || {})
         .filter(([, v]) => v !== null && (v as any)?.rawValue != null)
         .map(([k]) => k);
-      console.log(`[SRM VLM]${attemptTag} ✓ VLM complete — confidence: ${result.confidence}% | non-null attrs (${nonNullAttrs.length}): ${nonNullAttrs.join(', ') || 'NONE'} | model: ${result.modelUsed}`);
-
       const attrs = result.attributes || {};
       const get = (...keys: string[]): string | null => {
         for (const key of keys) {
@@ -633,7 +623,6 @@ async function enrichSrmRowWithVlm(
       }
 
       void mirror360FlatUpdate(flatId, updates);
-      console.log(`[SRM VLM]${attemptTag} ✅ Enriched ${flatId} — ${Object.keys(updates).length} fields saved`);
       return true;
 
     } catch (err: any) {

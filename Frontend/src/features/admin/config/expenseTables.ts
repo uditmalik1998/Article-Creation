@@ -9,7 +9,7 @@ export interface ExpenseTableColumnConfig {
   dataIndex: string;
   title: string;
   width?: number;
-  type?: 'date' | 'boolean';
+  type?: 'date' | 'boolean' | 'percent';
   align?: 'left' | 'right' | 'center';
   /** Defaults to true. Set false for ids/timestamps and fields owned by another
    * workflow (e.g. fabric/body article data's own approval/SAP-sync fields). */
@@ -51,7 +51,8 @@ export interface ExpenseTableConfig {
 export const EXPENSE_TABLE_CONFIGS: Record<string, ExpenseTableConfig> = {
   'major-category-grid': {
     title: 'Major Category Grid (Dropdown Values)',
-    description: 'All rows currently stored in maj_cat_grid_values.',
+    description:
+      'All rows currently stored in maj_cat_grid_values. Bgt Cont% and Pd Cont% are filled per major category + attribute block (each column adds up to 100) by their own creators, approved by each creator’s paired approver and then MDM.',
     rowKey: 'id',
     defaultSortBy: 'id',
     defaultSortDir: 'desc',
@@ -63,6 +64,12 @@ export const EXPENSE_TABLE_CONFIGS: Record<string, ExpenseTableConfig> = {
       { dataIndex: 'major_category', title: 'Major Category', pickFromExisting: true, filterable: true },
       { dataIndex: 'attribute_name', title: 'Attribute Name', pickFromExisting: true, filterable: true },
       { dataIndex: 'value', title: 'Value', filterable: true },
+      // Contribution % — filled per (major category, attribute) block through
+      // its own Bgt / Pd approval flow (GridContributionPanel), never through
+      // the generic row edit. Auto Cont% is display only for now.
+      { dataIndex: 'bgt_cont_pct', title: 'Bgt Cont%', type: 'percent', align: 'right', width: 110, editable: false },
+      { dataIndex: 'pd_cont_pct', title: 'Pd Cont%', type: 'percent', align: 'right', width: 110, editable: false },
+      { dataIndex: 'auto_cont_pct', title: 'Auto Cont%', type: 'percent', align: 'right', width: 110, editable: false },
       { dataIndex: 'uploaded_at', title: 'Uploaded At', type: 'date', editable: false },
     ],
   },

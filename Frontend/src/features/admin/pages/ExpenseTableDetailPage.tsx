@@ -2,7 +2,7 @@ import { useState } from 'react';
 import { useParams, Link } from 'react-router-dom';
 import { useQueries, useQuery, useQueryClient, keepPreviousData } from '@tanstack/react-query';
 import dayjs from 'dayjs';
-import { ArrowLeft, Search, ArrowUpDown, Pencil, Trash2, Plus, ClipboardList, Download } from 'lucide-react';
+import { ArrowLeft, Search, ArrowUpDown, Pencil, Trash2, Plus, ClipboardList, Download, Info, X, Percent } from 'lucide-react';
 import {
   Badge,
   Button,
@@ -22,7 +22,9 @@ import { APP_CONFIG } from '../../../constants/app/config';
 import { getExpenseColumnOptions, getExpenseTableData, getMyExpenseAccess } from '../../../services/adminApi';
 import { EXPENSE_TABLE_CONFIGS, type ExpenseTableColumnConfig } from '../config/expenseTables';
 import { RowChangeRequestDialog, type RowChangeMode } from '../components/RowChangeRequestDialog';
+import { GridContributionPanel } from '../components/GridContributionPanel';
 import { ColumnCheckboxFilter } from '../components/ColumnCheckboxFilter';
+import { SLATE_PRIMARY_BTN } from '../components/DashboardParts';
 
 /** Tables with a full "download master" export — admin-only, wired up ad hoc
  * per table on the backend (e.g. GET /admin/fabric-article-data/export)
@@ -45,6 +47,9 @@ function renderCell(value: any, type?: ExpenseTableColumnConfig['type']) {
   if (type === 'date') {
     const d = dayjs(value);
     return <span className="text-xs whitespace-nowrap">{d.isValid() ? d.format('YYYY-MM-DD HH:mm:ss') : String(value)}</span>;
+  }
+  if (type === 'percent') {
+    return <span className="text-sm tabular-nums">{Number(value)}%</span>;
   }
   if (type === 'boolean') {
     const isTrue = value === true || value === 'true';
@@ -69,6 +74,9 @@ export default function ExpenseTableDetailPage() {
   const [sortBy, setSortBy] = useState<string>(config?.defaultSortBy ?? '');
   const [sortDir, setSortDir] = useState<'asc' | 'desc'>(config?.defaultSortDir ?? 'desc');
   const [dialog, setDialog] = useState<{ mode: RowChangeMode; row: Record<string, any> | null } | null>(null);
+  // Major Category Grid only: the Bgt / Pd Cont% block panel (replaces the
+  // row panel while open — only one side panel at a time).
+  const [contribution, setContribution] = useState<{ majorCategory: string; attributeName: string } | null | undefined>(undefined);
   // Excel-style column filters (checkbox multi-select), additive to the
   // search box above — separate state so one never clobbers the other.
   const [columnFilters, setColumnFilters] = useState<Record<string, string[]>>({});
@@ -93,6 +101,15 @@ export default function ExpenseTableDetailPage() {
   const canAdd = !!config?.allowCreate && !!access?.canCreate;
   const canEdit = hasEditableColumns && !!access?.canUpdate;
   const canDelete = !!config?.allowDelete && !!access?.canDelete;
+  const canFillContribution = tableKey === 'major-category-grid' && (access?.contribution?.creator.length ?? 0) > 0;
+  const openContribution = (block: { majorCategory: string; attributeName: string } | null) => {
+    setDialog(null);
+    setContribution(block);
+  };
+  const openRowDialog = (next: { mode: RowChangeMode; row: Record<string, any> | null }) => {
+    setContribution(undefined);
+    setDialog(next);
+  };
 
   const downloadMaster = tableKey ? DOWNLOAD_MASTER_TABLE_KEYS[tableKey] : undefined;
   const canDownloadMaster = !!downloadMaster && !!access?.isAdmin;
@@ -239,22 +256,35 @@ export default function ExpenseTableDetailPage() {
       render: (value: any) => renderCell(value, col.type),
     }));
 
-  if (canEdit || canDelete) {
+  if (canEdit || canDelete || canFillContribution) {
     columns.push({
       title: '',
       key: 'action',
-      width: canEdit && canDelete ? 92 : 52,
+      width: 12 + 40 * [canEdit, canDelete, canFillContribution].filter(Boolean).length,
       align: 'center',
       fixed: 'right',
       render: (_v, record) => (
-        <div className="flex items-center justify-center gap-0.5">
+        <div className="flex items-center justify-center gap-1">
+          {canFillContribution && (
+            <Button
+              size="sm"
+              variant="outline"
+              className="h-7 w-7 p-0"
+              onClick={() => openContribution({ majorCategory: record.major_category, attributeName: record.attribute_name })}
+              title="Fill contribution % for this attribute"
+              aria-label="Fill contribution % for this row's attribute"
+            >
+              <Percent className="h-4 w-4" />
+            </Button>
+          )}
           {canEdit && (
             <Button
               size="sm"
-              variant="ghost"
+              variant="outline"
               className="h-7 w-7 p-0"
-              onClick={() => setDialog({ mode: 'update', row: record })}
+              onClick={() => openRowDialog({ mode: 'update', row: record })}
               title="Propose an edit"
+              aria-label="Propose an edit to this row"
             >
               <Pencil className="h-4 w-4" />
             </Button>
@@ -262,10 +292,11 @@ export default function ExpenseTableDetailPage() {
           {canDelete && (
             <Button
               size="sm"
-              variant="ghost"
-              className="h-7 w-7 p-0 text-red-600 hover:text-red-700 hover:bg-red-50"
-              onClick={() => setDialog({ mode: 'delete', row: record })}
+              variant="outline"
+              className="h-7 w-7 p-0 text-red-700 hover:bg-red-50 hover:text-red-800 dark:text-red-400 dark:hover:bg-red-500/10"
+              onClick={() => openRowDialog({ mode: 'delete', row: record })}
               title="Propose a deletion"
+              aria-label="Propose deleting this row"
             >
               <Trash2 className="h-4 w-4" />
             </Button>
@@ -275,29 +306,48 @@ export default function ExpenseTableDetailPage() {
     });
   }
 
+  const activeFilters = Object.entries(columnFilters).filter(([, values]) => values.length > 0);
+  const columnTitle = (dataIndex: string) => config.columns.find((c) => c.dataIndex === dataIndex)?.title ?? dataIndex;
+  const removeFilter = (dataIndex: string) => {
+    setPage(1);
+    setColumnFilters((prev) => {
+      const next = { ...prev };
+      delete next[dataIndex];
+      return next;
+    });
+  };
+
   return (
-    <div className="flex h-full flex-col p-4 space-y-2">
-      <div className="flex items-center justify-between">
-        <Link to={backHref} className="inline-flex items-center gap-1 text-sm text-muted-foreground hover:text-foreground">
-          <ArrowLeft className="h-4 w-4" /> Back to Expense Data
-        </Link>
-        <Link
-          to="/admin/expense-change-requests"
-          className="inline-flex items-center gap-1 text-sm text-muted-foreground hover:text-foreground"
-        >
-          <ClipboardList className="h-4 w-4" /> Change Requests
-        </Link>
+    <div className="flex h-full flex-col gap-3 p-4">
+      <div className="flex flex-wrap items-center justify-between gap-2">
+        <nav aria-label="Breadcrumb" className="flex items-center gap-1.5 text-[13px] text-muted-foreground">
+          <Link to={backHref} className="inline-flex items-center gap-1 hover:text-foreground">
+            <ArrowLeft className="h-3.5 w-3.5" />
+            {access?.isAdmin ? 'Admin Dashboard' : 'Expense Data'}
+          </Link>
+          <span aria-hidden="true">›</span>
+          <span className="font-semibold text-foreground">{config.title}</span>
+        </nav>
       </div>
 
-      <div className="flex items-start justify-between gap-4">
-        <div>
-          <h1 className="text-xl font-bold leading-tight">{config.title}</h1>
-          <p className="text-xs text-muted-foreground">{config.description}</p>
+      <div className="flex flex-wrap items-end justify-between gap-3">
+        <div className="min-w-0">
+          <h1 className="text-[22px] font-bold leading-tight">{config.title}</h1>
+          <p className="mt-0.5 flex flex-wrap gap-x-3 gap-y-0.5 text-[13px] text-muted-foreground">
+            {total > 0 && <span className="font-medium text-foreground">{total.toLocaleString('en-IN')} rows</span>}
+            <span>{config.description}</span>
+          </p>
         </div>
-        <div className="flex items-center gap-2">
+        <div className="flex flex-wrap items-center gap-2">
+          <Button asChild size="sm" variant="outline">
+            <Link to="/admin/expense-change-requests">
+              <ClipboardList className="h-4 w-4" />
+              Change requests
+            </Link>
+          </Button>
           {canDownloadMaster && downloadMaster?.typeColumn && (
             <Select value={downloadArticleType} onValueChange={setDownloadArticleType}>
-              <SelectTrigger className="w-40">
+              <SelectTrigger className="h-8 w-40 text-[13px]">
                 <SelectValue placeholder="Article Type" />
               </SelectTrigger>
               <SelectContent>
@@ -313,128 +363,172 @@ export default function ExpenseTableDetailPage() {
           {canDownloadMaster && (
             <Button size="sm" variant="outline" onClick={handleDownloadMaster} disabled={downloadingMaster}>
               <Download className="h-4 w-4" />
-              {downloadingMaster ? 'Downloading…' : 'Download Master'}
+              {downloadingMaster ? 'Downloading…' : 'Download master'}
+            </Button>
+          )}
+          {canFillContribution && (
+            <Button size="sm" variant="outline" onClick={() => openContribution(null)}>
+              <Percent className="h-4 w-4" />
+              Fill contribution %
             </Button>
           )}
           {canAdd && (
-            <Button size="sm" onClick={() => setDialog({ mode: 'create', row: null })}>
+            <Button size="sm" className={SLATE_PRIMARY_BTN} onClick={() => openRowDialog({ mode: 'create', row: null })}>
               <Plus className="h-4 w-4" />
-              Add Row
+              Propose new row
             </Button>
           )}
         </div>
       </div>
 
       {(canAdd || canEdit || canDelete) && (
-        <p className="text-xs text-muted-foreground">
-          Adds, edits and deletions are requests, not direct changes: each one needs a reason and a “needed by” date,
-          then goes through the approval chain before it touches the master.
-        </p>
+        <div role="note" className="flex items-start gap-2.5 rounded-lg border border-slate-300 bg-slate-50 px-3.5 py-2.5 text-[13px] text-slate-700 dark:border-slate-600 dark:bg-slate-500/10 dark:text-slate-300">
+          <Info className="mt-0.5 h-4 w-4 shrink-0" />
+          <span>
+            Adds, edits and deletions here are <strong>requests</strong>. Each needs a reason and a “needed by” date, and goes
+            through the approval chain before it changes the master.
+          </span>
+        </div>
       )}
 
-      <Card>
-        <CardContent className="flex flex-col gap-2 p-3 md:flex-row md:items-end">
-          <div className="relative flex-1">
-            <Search className="absolute left-2.5 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground pointer-events-none" />
-            <Input
-              className="pl-9"
-              placeholder="Search…"
-              value={draftSearch}
-              onChange={(e) => setDraftSearch(e.target.value)}
-              onKeyDown={(e) => {
-                if (e.key === 'Enter') handleApplySearch();
-              }}
-            />
+      <div className="flex min-h-0 flex-1 flex-col gap-3 lg:flex-row lg:items-start">
+        <Card className="flex min-h-0 min-w-0 flex-1 flex-col">
+          <div className="flex flex-wrap items-center gap-2 border-b border-border p-3">
+            <div className="relative w-full sm:w-[320px]">
+              <Search className="pointer-events-none absolute left-2.5 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
+              <Input
+                className="pl-9 hover:border-slate-400 focus-visible:border-slate-500 focus-visible:ring-slate-400/25"
+                placeholder="Search… (press Enter)"
+                value={draftSearch}
+                onChange={(e) => setDraftSearch(e.target.value)}
+                onKeyDown={(e) => {
+                  if (e.key === 'Enter') handleApplySearch();
+                }}
+                aria-label="Search rows"
+              />
+            </div>
+            <Button size="sm" variant="outline" onClick={handleApplySearch}>
+              Search
+            </Button>
+            {activeFilters.map(([dataIndex, values]) => (
+              <span key={dataIndex} className="flex h-8 items-center gap-1 rounded-full bg-slate-100 pl-3 text-[12.5px] dark:bg-slate-500/15">
+                <span className="text-muted-foreground">{columnTitle(dataIndex)}</span>
+                <strong className="max-w-[220px] truncate font-semibold" title={values.join(', ')}>
+                  {values.length > 2 ? `${values.slice(0, 2).join(', ')} +${values.length - 2}` : values.join(', ')}
+                </strong>
+                <button
+                  type="button"
+                  onClick={() => removeFilter(dataIndex)}
+                  aria-label={`Remove ${columnTitle(dataIndex)} filter`}
+                  className="flex h-8 w-7 items-center justify-center rounded-full text-muted-foreground hover:text-foreground"
+                >
+                  <X className="h-3.5 w-3.5" />
+                </button>
+              </span>
+            ))}
+            {activeFilters.length > 1 && (
+              <button
+                type="button"
+                onClick={() => { setPage(1); setColumnFilters({}); }}
+                className="px-1 text-[12.5px] font-semibold text-slate-800 underline underline-offset-2 dark:text-slate-200"
+              >
+                Clear filters
+              </button>
+            )}
+            <div className="flex-1" />
+            <div className="flex items-center gap-1.5">
+              <span className="text-[12.5px] text-muted-foreground">Sort</span>
+              <Select
+                value={sortBy}
+                onValueChange={(v) => {
+                  setSortBy(v);
+                  setPage(1);
+                }}
+              >
+                <SelectTrigger className="h-8 w-48 text-[13px]">
+                  <SelectValue placeholder="Sort by" />
+                </SelectTrigger>
+                <SelectContent>
+                  {config.columns.map((col) => (
+                    <SelectItem key={col.dataIndex} value={col.dataIndex}>
+                      {col.title}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+              <Button
+                size="sm"
+                variant="outline"
+                onClick={() => {
+                  setSortDir((d) => (d === 'asc' ? 'desc' : 'asc'));
+                  setPage(1);
+                }}
+                aria-label={`Sort ${sortDir === 'asc' ? 'ascending' : 'descending'} — click to flip`}
+              >
+                <ArrowUpDown className="h-4 w-4" />
+                {sortDir === 'asc' ? 'Ascending' : 'Descending'}
+              </Button>
+            </div>
           </div>
 
-          <div className="w-full md:w-56">
-            <Select
-              value={sortBy}
-              onValueChange={(v) => {
-                setSortBy(v);
-                setPage(1);
-              }}
-            >
-              <SelectTrigger>
-                <SelectValue placeholder="Sort by" />
-              </SelectTrigger>
-              <SelectContent>
-                {config.columns.map((col) => (
-                  <SelectItem key={col.dataIndex} value={col.dataIndex}>
-                    {col.title}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
-          </div>
+          <CardContent className="flex min-h-0 flex-1 flex-col p-0">
+            {isError ? (
+              <div className="py-10 text-center text-sm text-red-600">Failed to load data. Please try again.</div>
+            ) : (
+              <DataTable
+                columns={columns}
+                dataSource={rows}
+                loading={isLoading}
+                rowKey={config.rowKey}
+                size="small"
+                sticky
+                resizableColumns
+                scroll={{ x: 1100, y: '100%' }}
+                className="min-h-0 flex-1"
+                rowClassName={(record) => (dialog?.row && dialog.row[config.rowKey] === record[config.rowKey] ? 'bg-slate-100 dark:bg-slate-500/15' : '')}
+                pagination={{
+                  current: page,
+                  pageSize,
+                  total,
+                  pageSizeOptions: ['25', '50', '100', '200'],
+                  onChange: (p, ps) => {
+                    setPage(p);
+                    if (ps !== pageSize) setPageSize(ps);
+                  },
+                }}
+                locale={{ emptyText: 'No records found.' }}
+              />
+            )}
+          </CardContent>
+        </Card>
 
-          <Button
-            variant="outline"
-            onClick={() => {
-              setSortDir((d) => (d === 'asc' ? 'desc' : 'asc'));
-              setPage(1);
+        {contribution !== undefined && access?.contribution && (
+          <GridContributionPanel
+            key={contribution ? `${contribution.majorCategory}||${contribution.attributeName}` : 'new'}
+            scope={access.contribution}
+            initial={contribution}
+            onClose={() => setContribution(undefined)}
+            onSubmitted={() => queryClient.invalidateQueries({ queryKey: ['expense-change-requests'] })}
+          />
+        )}
+
+        {dialog && (
+          <RowChangeRequestDialog
+            key={`${dialog.mode}:${dialog.row ? String(dialog.row[config.rowKey]) : 'new'}`}
+            variant="panel"
+            open
+            onOpenChange={(open) => { if (!open) setDialog(null); }}
+            tableKey={tableKey}
+            config={config}
+            mode={dialog.mode}
+            row={dialog.row}
+            onSubmitted={() => {
+              setDialog(null);
+              queryClient.invalidateQueries({ queryKey: ['expense-change-requests'] });
             }}
-            title="Toggle sort direction"
-          >
-            <ArrowUpDown className="h-4 w-4" />
-            {sortDir === 'asc' ? 'Ascending' : 'Descending'}
-          </Button>
-
-          <Button onClick={handleApplySearch}>Apply</Button>
-        </CardContent>
-      </Card>
-
-      <Card className="flex min-h-0 flex-1 flex-col">
-        <CardContent className="flex min-h-0 flex-1 flex-col p-0">
-          {isError ? (
-            <div className="py-10 text-center text-red-500 text-sm">Failed to load data. Please try again.</div>
-          ) : (
-            <DataTable
-              columns={columns}
-              dataSource={rows}
-              loading={isLoading}
-              rowKey={config.rowKey}
-              size="small"
-              sticky
-              resizableColumns
-              scroll={{ x: 1100, y: '100%' }}
-              className="min-h-0 flex-1"
-              pagination={{
-                current: page,
-                pageSize,
-                total,
-                pageSizeOptions: ['25', '50', '100', '200'],
-                onChange: (p, ps) => {
-                  setPage(p);
-                  if (ps !== pageSize) setPageSize(ps);
-                },
-              }}
-              locale={{ emptyText: 'No records found.' }}
-            />
-          )}
-        </CardContent>
-      </Card>
-
-      {total > 0 && (
-        <p className="text-xs text-muted-foreground">
-          {total.toLocaleString()} total record{total !== 1 ? 's' : ''}
-        </p>
-      )}
-
-      {dialog && (
-        <RowChangeRequestDialog
-          open
-          onOpenChange={(open) => { if (!open) setDialog(null); }}
-          tableKey={tableKey}
-          config={config}
-          mode={dialog.mode}
-          row={dialog.row}
-          onSubmitted={() => {
-            setDialog(null);
-            queryClient.invalidateQueries({ queryKey: ['expense-change-requests'] });
-          }}
-        />
-      )}
+          />
+        )}
+      </div>
     </div>
   );
 }

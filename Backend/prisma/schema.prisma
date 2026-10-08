@@ -692,6 +692,9 @@ enum UserRole {
   /// Approver role specific to GM (FG Article) items — can approve/reject
   /// articles fetched via /approver/items with presentationsType=FG Article.
   GM_APPROVER
+  /// Creator role specific to GM articles — can edit attribute values but
+  /// cannot approve or reject. Only GM Article tab is visible.
+  GM_CREATOR
 
   @@map("user_role")
   @@schema("public")
@@ -1785,6 +1788,56 @@ model GmVariantArticleData {
   @@schema("public")
 }
 
+/// FgVariantArticleData: One row per FG article variant (size × color) under a parent FG article.
+/// Mirrors GmVariantArticleData but scoped to FG (extraction_result_flat) articles.
+model FgVariantArticleData {
+  id                       String    @id @default(uuid())
+
+  // Parent FG article references
+  genericArticleId         String?   @map("generic_article_id")         @db.VarChar(100)
+  genericArticleNumber     String?   @map("generic_article_number")     @db.VarChar(100)
+
+  // Variant identity (color + size)
+  variantColor             String?   @map("variant_color")              @db.VarChar(100)
+  variantSize              String?   @map("variant_size")               @db.VarChar(100)
+  variantArticleNumber     String?   @map("variant_article_number")     @db.VarChar(100)
+
+  // Article context (inherited from parent)
+  division                 String?   @map("division")                   @db.VarChar(100)
+  subDivision              String?   @map("sub_division")               @db.VarChar(100)
+  majorCategory            String?   @map("major_category")             @db.VarChar(200)
+  vendorName               String?   @map("vendor_name")                @db.VarChar(200)
+  vendorCode               String?   @map("vendor_code")                @db.VarChar(100)
+  designNumber             String?   @map("design_number")              @db.VarChar(100)
+
+  // Pricing
+  mrp                      Decimal?  @map("mrp")                        @db.Decimal(10, 2)
+  rate                     Decimal?  @map("rate")                       @db.Decimal(10, 2)
+
+  // Workflow
+  approvalStatus           String    @default("PENDING")    @map("approval_status")    @db.VarChar(20)
+  approvedAt               DateTime? @map("approved_at")
+  approvedBy               Int?      @map("approved_by")
+  sapSyncStatus            String    @default("NOT_SYNCED") @map("sap_sync_status")    @db.VarChar(20)
+  sapSyncMessage           String?   @map("sap_sync_message")
+
+  // Media
+  imageUrl                 String?   @map("image_url")                  @db.Text
+
+  // Audit
+  createdAt                DateTime  @default(now())    @map("created_at")
+  updatedAt                DateTime  @updatedAt         @map("updated_at")
+
+  @@index([genericArticleId])
+  @@index([genericArticleNumber])
+  @@index([approvalStatus])
+  @@index([sapSyncStatus])
+  @@index([variantArticleNumber])
+  @@index([createdAt(sort: Desc)])
+  @@map("fg_variants_article_data")
+  @@schema("public")
+}
+
 /// FabricVariantArticleData: One row per variant (size × color) under a fabric article.
 /// Generic parent is tracked via generic_article_id (fabric_article_data.id) and
 /// generic_article_number (SAP article number of the parent).
@@ -2237,6 +2290,27 @@ model ExpenseApprovalStage {
   @@schema("public")
 }
 
+/// Major Category Grid contribution %: who may FILL which column (`kind`
+/// BGT -> Bgt Cont%, PD -> Pd Cont%) for which division, and the one approver
+/// their requests route to. One row per line of the business "creator and
+/// approver" sheet — deliberately independent of User.businessDivision, which
+/// doesn't match it. BGT and PD pairs never mix.
+model GridContributionAssignment {
+  id            Int      @id @default(autoincrement())
+  kind          String   @db.VarChar(10)
+  division      String   @db.VarChar(20)
+  creatorEmail  String   @map("creator_email") @db.VarChar(255)
+  approverEmail String   @map("approver_email") @db.VarChar(255)
+  isActive      Boolean  @default(true) @map("is_active")
+  createdAt     DateTime @default(now()) @map("created_at")
+  updatedAt     DateTime @default(now()) @updatedAt @map("updated_at")
+
+  @@unique([kind, division, creatorEmail])
+  @@index([approverEmail])
+  @@map("grid_contribution_assignments")
+  @@schema("public")
+}
+
 model ExpenseChangeRequest {
   id        String                 @id @default(uuid())
   tableKey  String                 @map("table_key") @db.VarChar(50)
@@ -2279,9 +2353,23 @@ model ExpenseChangeRequest {
   /// expenseAccessService.ts.
   requesterBusinessDivision String? @map("requester_business_division") @db.VarChar(20)
 
+  /// Null for an ordinary row add/edit/delete. 'BGT_CONT' / 'PD_CONT' for a
+  /// Major Category Grid contribution-% request — one per (major_category,
+  /// attribute_name) block, `changes` keyed by attribute VALUE: { value: {
+  /// old, new } }. Walks the 'major-category-grid#contribution' chain, see
+  /// services/gridContributionService.ts.
+  requestKind         String? @map("request_kind") @db.VarChar(20)
+  /// "<major_category>||<attribute_name>" for a contribution request.
+  blockKey            String? @map("block_key") @db.VarChar(300)
+  /// The requesting creator's paired approver (grid_contribution_assignments),
+  /// captured at creation — the only person who can act at CONT_APPROVER.
+  routedApproverEmail String? @map("routed_approver_email") @db.VarChar(255)
+
   createdAt DateTime @default(now()) @map("created_at")
   updatedAt DateTime @updatedAt @map("updated_at")
 
+  @@index([requestKind, blockKey, status])
+  @@index([routedApproverEmail])
   @@index([tableKey, rowId])
   @@index([status])
   @@index([currentStageKey])

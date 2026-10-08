@@ -1175,6 +1175,31 @@ exports.Prisma.GmVariantArticleDataScalarFieldEnum = {
   updatedAt: 'updatedAt'
 };
 
+exports.Prisma.FgVariantArticleDataScalarFieldEnum = {
+  id: 'id',
+  genericArticleId: 'genericArticleId',
+  genericArticleNumber: 'genericArticleNumber',
+  variantColor: 'variantColor',
+  variantSize: 'variantSize',
+  variantArticleNumber: 'variantArticleNumber',
+  division: 'division',
+  subDivision: 'subDivision',
+  majorCategory: 'majorCategory',
+  vendorName: 'vendorName',
+  vendorCode: 'vendorCode',
+  designNumber: 'designNumber',
+  mrp: 'mrp',
+  rate: 'rate',
+  approvalStatus: 'approvalStatus',
+  approvedAt: 'approvedAt',
+  approvedBy: 'approvedBy',
+  sapSyncStatus: 'sapSyncStatus',
+  sapSyncMessage: 'sapSyncMessage',
+  imageUrl: 'imageUrl',
+  createdAt: 'createdAt',
+  updatedAt: 'updatedAt'
+};
+
 exports.Prisma.FabricVariantArticleDataScalarFieldEnum = {
   id: 'id',
   genericArticleId: 'genericArticleId',
@@ -1425,6 +1450,17 @@ exports.Prisma.ExpenseApprovalStageScalarFieldEnum = {
   updatedAt: 'updatedAt'
 };
 
+exports.Prisma.GridContributionAssignmentScalarFieldEnum = {
+  id: 'id',
+  kind: 'kind',
+  division: 'division',
+  creatorEmail: 'creatorEmail',
+  approverEmail: 'approverEmail',
+  isActive: 'isActive',
+  createdAt: 'createdAt',
+  updatedAt: 'updatedAt'
+};
+
 exports.Prisma.ExpenseChangeRequestScalarFieldEnum = {
   id: 'id',
   tableKey: 'tableKey',
@@ -1443,6 +1479,9 @@ exports.Prisma.ExpenseChangeRequestScalarFieldEnum = {
   requestedByEmail: 'requestedByEmail',
   requestedAt: 'requestedAt',
   requesterBusinessDivision: 'requesterBusinessDivision',
+  requestKind: 'requestKind',
+  blockKey: 'blockKey',
+  routedApproverEmail: 'routedApproverEmail',
   createdAt: 'createdAt',
   updatedAt: 'updatedAt'
 };
@@ -2258,6 +2297,25 @@ exports.Prisma.GmVariantArticleDataOrderByRelevanceFieldEnum = {
   userName: 'userName'
 };
 
+exports.Prisma.FgVariantArticleDataOrderByRelevanceFieldEnum = {
+  id: 'id',
+  genericArticleId: 'genericArticleId',
+  genericArticleNumber: 'genericArticleNumber',
+  variantColor: 'variantColor',
+  variantSize: 'variantSize',
+  variantArticleNumber: 'variantArticleNumber',
+  division: 'division',
+  subDivision: 'subDivision',
+  majorCategory: 'majorCategory',
+  vendorName: 'vendorName',
+  vendorCode: 'vendorCode',
+  designNumber: 'designNumber',
+  approvalStatus: 'approvalStatus',
+  sapSyncStatus: 'sapSyncStatus',
+  sapSyncMessage: 'sapSyncMessage',
+  imageUrl: 'imageUrl'
+};
+
 exports.Prisma.FabricVariantArticleDataOrderByRelevanceFieldEnum = {
   id: 'id',
   genericArticleId: 'genericArticleId',
@@ -2424,6 +2482,13 @@ exports.Prisma.ExpenseApprovalStageOrderByRelevanceFieldEnum = {
   createdByName: 'createdByName'
 };
 
+exports.Prisma.GridContributionAssignmentOrderByRelevanceFieldEnum = {
+  kind: 'kind',
+  division: 'division',
+  creatorEmail: 'creatorEmail',
+  approverEmail: 'approverEmail'
+};
+
 exports.Prisma.ExpenseChangeRequestOrderByRelevanceFieldEnum = {
   id: 'id',
   tableKey: 'tableKey',
@@ -2434,7 +2499,10 @@ exports.Prisma.ExpenseChangeRequestOrderByRelevanceFieldEnum = {
   currentStageKey: 'currentStageKey',
   requestedByName: 'requestedByName',
   requestedByEmail: 'requestedByEmail',
-  requesterBusinessDivision: 'requesterBusinessDivision'
+  requesterBusinessDivision: 'requesterBusinessDivision',
+  requestKind: 'requestKind',
+  blockKey: 'blockKey',
+  routedApproverEmail: 'routedApproverEmail'
 };
 
 exports.Prisma.ExpenseAccessGrantOrderByRelevanceFieldEnum = {
@@ -2514,7 +2582,8 @@ exports.UserRole = exports.$Enums.UserRole = {
   BODY_APPROVER: 'BODY_APPROVER',
   FABRIC_APPROVER: 'FABRIC_APPROVER',
   PLANNING: 'PLANNING',
-  GM_APPROVER: 'GM_APPROVER'
+  GM_APPROVER: 'GM_APPROVER',
+  GM_CREATOR: 'GM_CREATOR'
 };
 
 exports.ChangeAction = exports.$Enums.ChangeAction = {
@@ -2611,6 +2680,7 @@ exports.Prisma.ModelName = {
   FabricArticleData: 'FabricArticleData',
   GmArticleData: 'GmArticleData',
   GmVariantArticleData: 'GmVariantArticleData',
+  FgVariantArticleData: 'FgVariantArticleData',
   FabricVariantArticleData: 'FabricVariantArticleData',
   ValueAdditionAccessoriesCost: 'ValueAdditionAccessoriesCost',
   BodyArticleData: 'BodyArticleData',
@@ -2621,6 +2691,7 @@ exports.Prisma.ModelName = {
   BasicTrimCostComponent: 'BasicTrimCostComponent',
   MajorCategoryDetails: 'MajorCategoryDetails',
   ExpenseApprovalStage: 'ExpenseApprovalStage',
+  GridContributionAssignment: 'GridContributionAssignment',
   ExpenseChangeRequest: 'ExpenseChangeRequest',
   ExpenseAccessGrant: 'ExpenseAccessGrant',
   ExpenseAuditLog: 'ExpenseAuditLog'
