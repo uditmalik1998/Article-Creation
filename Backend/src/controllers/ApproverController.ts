@@ -1859,9 +1859,26 @@ export class ApproverController {
         try {
             const { id } = req.params;
 
+            // Check fg_variants_article_data first (variants added via Add Color)
+            const fgVariant = await prisma.fgVariantArticleData.findUnique({
+                where: { id },
+                select: { approvalStatus: true },
+            });
+
+            if (fgVariant) {
+                if (fgVariant.approvalStatus !== ApprovalStatus.PENDING) {
+                    return res.status(400).json({ error: 'Only PENDING variants can be deleted' });
+                }
+                await prisma.fgVariantArticleData.delete({ where: { id } });
+                ApproverController.itemsCache.clear();
+                ApproverController.countCache.clear();
+                return res.json({ success: true });
+            }
+
+            // Fall back to extraction_results_flat (original extraction variants)
             const item = await prisma.extractionResultFlat.findUnique({
                 where: { id },
-                select: { approvalStatus: true }
+                select: { approvalStatus: true },
             });
             if (!item) return res.status(404).json({ error: 'Variant not found' });
 

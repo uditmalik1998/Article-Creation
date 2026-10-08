@@ -23,6 +23,40 @@ function padVendor(v: unknown): string {
     return s.padStart(10, '0');
 }
 
+/** All GM_ attribute family codes that map 1:1 to gmArticleData fields. */
+const ALL_GM_FAMILY_CODES = [
+    'GM_BRAND', 'GM_CLOSURE_TYPE', 'GM_COLOUR_FAMILY', 'GM_COLOUR_SHADE',
+    'GM_FW_SIZE', 'GM_FW_SOLE', 'GM_FW_TOE', 'GM_FW_UPPER',
+    'GM_MATERIAL', 'GM_MATERIAL_GROUP', 'GM_PRICE_TIER', 'GM_SEASON',
+    'GM_SELL_UOM', 'GM_FW_HEEL_HT_CM', 'GM_FW_HEEL_TYPE', 'GM_LIFESTAGE',
+    'GM_LINING_MATERIAL', 'GM_MANUFACTURER', 'GM_NET_WEIGHT_G', 'GM_PATTERN',
+    'GM_USAGE_OCCASION', 'GM_APPLICATOR', 'GM_COSMETIC_FINISH', 'GM_NET_CONTENT',
+    'GM_SHELF_LIFE_MONTHS', 'GM_CERTIFICATION', 'GM_KEY_INGREDIENT', 'GM_SKIN_TYPE',
+    'GM_LENGTH_CM', 'GM_PRINT_THEME', 'GM_SURFACE_FINISH', 'GM_TEXTILE_FABRIC',
+    'GM_WEAVE', 'GM_YARN', 'GM_CAPACITY_ML', 'GM_HEIGHT_CM', 'GM_INSULATION_TYPE',
+    'GM_LEAK_PROOF', 'GM_LID_TYPE', 'GM_BPA_FREE', 'GM_HEAT_RETENTION_HR',
+    'GM_DIAMETER_CM', 'GM_DISHWASHER_SAFE', 'GM_MICROWAVE_SAFE', 'GM_COMPARTMENT_COUNT',
+    'GM_WIDTH_CM', 'GM_FRAGRANCE_CONC', 'GM_FRAGRANCE_FAMILY', 'GM_SET_CONTENTS',
+    'GM_BRAND_TYPE', 'GM_MATERIAL_SECONDARY', 'GM_WHEEL_COUNT', 'GM_CARE_INSTRUCTION',
+    'GM_STRAP_TYPE', 'GM_DIM_STANDARD', 'GM_GSM', 'GM_THREAD_COUNT',
+    'GM_COMPOSITION', 'GM_WARRANTY_MONTHS', 'GM_SPORT', 'GM_PLAYER_COUNT',
+    'GM_BPC_FORM', 'GM_NET_CONTENT_UOM', 'GM_SPF', 'GM_FREE_FROM',
+    'GM_PACK_QTY', 'GM_AGE_GRADE', 'GM_FOLDABLE', 'GM_PLAY_PATTERN',
+    'GM_POWER_SOURCE', 'GM_BATTERY_TYPE', 'GM_LICENCE', 'GM_FOOD_CONTACT_SAFE',
+    'GM_MOUNT_TYPE', 'GM_BASE_TYPE', 'GM_COATING', 'GM_VOLTAGE_V', 'GM_WATTAGE_W',
+] as const;
+
+/**
+ * Converts a GM_ family code to its camelCase Prisma field name.
+ * e.g. GM_CAPACITY_ML → gmCapacityMl
+ */
+function familyCodeToPrismaField(familyCode: string): string {
+    const withoutPrefix = familyCode.slice(3); // remove "GM_"
+    const parts = withoutPrefix.toLowerCase().split('_');
+    const camel = parts[0] + parts.slice(1).map(p => p.charAt(0).toUpperCase() + p.slice(1)).join('');
+    return 'gm' + camel.charAt(0).toUpperCase() + camel.slice(1);
+}
+
 function buildImData(
     row: any,
     mc: { mcCd: string | null; hsnCode: string | null },
@@ -152,7 +186,34 @@ export async function submitGmArticles(ids: string[]): Promise<{
             return { id: row.id, success: false, message: msg };
         }
 
-        const imData = buildImData(row, { mcCd, hsnCode });
+        // Fetch valid family codes for this major category and null out any stale attributes
+        const validFcRows = await prisma.$queryRaw<{ family_code: string }[]>`
+            SELECT DISTINCT family_code FROM gm_major_category_details
+            WHERE maj_cat_nm = ${majCat} AND mj_status = 'ACT'
+              AND family_code IS NOT NULL AND family_code <> ''
+        `;
+        const validFamilyCodes = new Set(validFcRows.map(r => r.family_code));
+
+        const nullUpdates: Record<string, null> = {};
+        for (const fc of ALL_GM_FAMILY_CODES) {
+            if (!validFamilyCodes.has(fc)) {
+                const prismaField = familyCodeToPrismaField(fc);
+                if ((row as any)[prismaField] != null) {
+                    nullUpdates[prismaField] = null;
+                }
+            }
+        }
+
+        let currentRow: typeof row = row;
+        if (Object.keys(nullUpdates).length > 0) {
+            currentRow = await prisma.gmArticleData.update({
+                where: { id: row.id },
+                data: nullUpdates,
+            }) as typeof row;
+            console.log(`[ZMM_ART_CRT_V3] Nulled ${Object.keys(nullUpdates).length} stale attrs for id=${row.id}: ${Object.keys(nullUpdates).join(', ')}`);
+        }
+
+        const imData = buildImData(currentRow, { mcCd, hsnCode });
         const payload = { bapiname: 'ZMM_ART_CRT_V3', IM_DATA: [imData] };
 
         console.log(`[ZMM_ART_CRT_V3] Submitting id=${row.id} majCat=${majCat} mc_cd=${mcCd}`);

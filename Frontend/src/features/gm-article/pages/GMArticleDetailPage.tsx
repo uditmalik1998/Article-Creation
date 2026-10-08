@@ -1092,10 +1092,10 @@ export default function ArticleDetailPage({
               <Tooltip title={!canApprove ? 'Only Approver, Sub-Division Head, Category Head or Admin can reject articles' : undefined}>
                 {/* span wrapper: disabled <button> swallows pointer events; span keeps hover alive */}
                 <span className="inline-block">
-                  <Button size="sm" variant="destructive"
+                  <Button size="sm" variant="outline"
                     onClick={() => { if (pendingSelectedKeys.length > 0) setConfirmDialog({ kind: 'reject', count: pendingSelectedKeys.length }); }}
                     disabled={!canApprove || pendingSelectedKeys.length === 0}
-                    className="h-7 px-2.5 text-[12px]">
+                    className="h-7 border-white/35 bg-transparent px-2.5 text-[12px] font-semibold text-white hover:bg-white/15 hover:text-white disabled:opacity-40">
                     <XCircle /> Reject
                   </Button>
                 </span>
@@ -1130,7 +1130,7 @@ export default function ArticleDetailPage({
                 <span className="inline-block">
                   <Button size="sm" onClick={handleApproveClick}
                     disabled={!canApprove || !canSubmitBodyArticle || !canSubmitFabricArticle || pendingSelectedKeys.length === 0 || approveBlockedReasons.length > 0}
-                    className="h-7 border-none bg-[#FF6F61] px-3 text-[12px] font-semibold text-white shadow-sm hover:bg-[#ff5b4d] disabled:bg-white/20 disabled:text-white/50">
+                    className="h-7 border-none bg-white px-3 text-[12px] font-bold text-slate-800 shadow-sm hover:bg-slate-100 disabled:bg-white/20 disabled:text-white/50">
                     <CheckCircle2 /> Save &amp; Submit
                     {approveBlockedReasons.length > 0 && <span className="ml-1 text-[10px] text-amber-200">⚠ {approveBlockedReasons.length}</span>}
                   </Button>

@@ -96,6 +96,44 @@ render their cards through one shared module in `shared/components/articles/`:
   remounts the uncontrolled search input via a `searchKey`.
 - Margin = (MRP − cost) / MRP. Fabric list rows carry `rate: null` (their rate column is mapped to `mrp`), so Fabric cards show Cost "—".
 
+## GM Article review page — design H, compacted to K (2026-10-07)
+
+`gm-article/pages/GMArticleDetailPage.tsx` (sticky slate header: back, ‹ n / N ›, Reject, Save & Submit)
+renders one `GMArticleList` card. The card (`gm-article/components/GMArticleList.tsx`, `ArticleCard`) was
+rebuilt from design H of the "GM Article Review Options" canvas, then shortened per option K
+(5:4 photo, paired detail fields, grid two attributes per line, one-line BOM, full-width colour variants):
+
+```
+ArticleCard
+├── Slate strip: checkbox · "MAJCAT · design no." / vendor · PPT · article no. · status · SAP remark · [Modify] [Duplicate]
+├── Left rail (clamp(360px, 42%, 560px))
+│   ├── Photo, 5:4, click / ⤢ → zoom-rotate dialog
+│   └── Article details (header shows Created; fields save on blur / Enter, only when changed)
+│       two per line: Division ▾ | Sub-division ▾ · Major category ▾ | MC description ▾ (searchable, hierarchy-filtered)
+│       Design number | Article number · Article description (full width)
+│       Vendor code * (6 digits, resets on invalid) | Vendor name * (vendor-search autocomplete)
+└── Right column
+    ├── General merchandise grid — rows = preloadGMGridFor(majorCategory); never hard-coded.
+    │   Two sections only: Required (mandatory) / Optional, grid order kept. Two attributes per line once the
+│   card is ≥ 42rem wide (`@container` + `@2xl:grid-cols-2`), 48px rows with a 4px gap between name and code. Label = familyName,
+    │   or derived from the code (GM_LENGTH_CM → "Length (cm)") with the family code under it (mono 11px, slate-500).
+    │   Empty = dashed "Choose…"; empty required = red "Required — choose…"; pill "Required x/y".
+    ├── BOM card (separate, one line when it fits: auto-fit minmax(110px)): Cost/rate *, MRP *, Markdown, After tax,
+    │   Base colour, Fashion type *, Segment *
+    └── Proceed for FG Article Creation (not on New / Failed)
+└── Colour variants card — full width under both columns (generic articles only)
+```
+
+- All states are slate (open/focus border-slate-500 + ring-slate-400/25, selected option bg-slate-100);
+  the header's Save & Submit is white-on-slate and Reject is an outline button (were coral / red).
+- Removed from the card: the old "Article Information" block (AI confidence, image quality, attribute match),
+  the "Reference & Vendor" click-to-edit list, the inline division / design editors in the strip, legend,
+  and Collapse all.
+- Save behaviour is unchanged (`handleSave` → `onSave`, or staged `pendingChanges` in Created/modify mode;
+  `MODIFY_LOCKED_FIELDS` still disable their inputs).
+- Article description is a manual text field for now. **Pending:** the business will give the attribute
+  sequence for an auto-built GM description (auto-filled but editable, no length limit).
+
 ## Key Component Hierarchy (Approver Flow)
 
 ```

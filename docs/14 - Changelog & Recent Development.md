@@ -5,6 +5,20 @@
 
 ---
 
+## 2026-10-07 — GM Article review page redesign (design H)
+
+- Picked H from two canvas rounds (A–E, then F–I). The GM card now has a wide photo + "Article details" rail
+  (division, sub-division, major category, MC description, design no., article no., description, vendor as
+  real fields), the GM grid split into Required / Optional only, a separate BOM card, and a Colour variants card.
+- Header Save & Submit / Reject restyled to slate. Details: [[11 - Frontend Architecture]] → GM Article review page.
+- Then shortened per Round 3 option K: 5:4 photo, Article details two fields per line (Created in its header),
+  GM grid two attributes per line (38 px rows), BOM on one line, Colour variants full width under both columns.
+  Left column ~1,320 → ~824 px at 1440 wide.
+- Round 4 on the canvas: K in five colour themes (Slate, Navy, Teal, Aubergine, Dark) — awaiting the user's pick.
+- Pending: GM article-description auto-build rule (user to send the attribute sequence).
+
+---
+
 ## 2026-10-07 — Admin Dashboard (Expenses) + View Data redesign
 
 - Option A from a 5-option canvas: jump menu, one Pipelines card, compact Vendor sync row, and the

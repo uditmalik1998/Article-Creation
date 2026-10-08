@@ -7,11 +7,8 @@ import {
   Users,
   Copy,
   Maximize2,
-  Sparkles,
   ChevronUp,
   ChevronDown,
-  Shirt,
-  DollarSign,
   Plus,
   Minus,
   RotateCw,
@@ -71,6 +68,7 @@ import {
   isMandatoryGridFieldActive,
   isMajCatInMandatoryGrid,
   preloadGMGridFor,
+  getCachedGMGrid,
   type GmGridAttr,
 } from '../../../services/articleConfigService';
 import { getImageUrl } from '../../../shared/utils/common/helpers';
@@ -79,9 +77,6 @@ import { formatDivisionLabel } from '../../../shared/utils/ui/formatters';
 import { SIMPLIFIED_HIERARCHY } from '../../extraction/components/SimplifiedCategorySelector';
 import GMVariantSubTable from './GMVariantSubTable';
 import GMArticleVariantSubTable from './GMArticleVariantSubTable';
-
-// Alias so the combobox trigger can use a distinct name from the plain icon
-const ChevronDownIcon = ChevronDown;
 
 // Module-level BOM cache (shared across card instances)
 const bomCache = new Map<string, Promise<Record<string, Record<string, string>>>>();
@@ -164,6 +159,22 @@ const gmGridAttrToFamilyAttr = (a: GmGridAttr): GmFamilyAttr => ({
   values: a.values,
   mandatory: a.mandatory,
 });
+
+// GM grid attributes are dynamic per major category. When the grid has no
+// readable family name, derive one from the code: GM_LENGTH_CM → "Length (cm)".
+const UNIT_SUFFIX: Record<string, string> = { CM: '(cm)', MM: '(mm)', G: '(g)', KG: '(kg)', ML: '(ml)' };
+const labelFromCode = (code: string): string => {
+  const parts = code.replace(/^GM_/i, '').split('_').filter(Boolean);
+  const unit = parts.length > 1 ? UNIT_SUFFIX[parts[parts.length - 1].toUpperCase()] : undefined;
+  const text = (unit ? parts.slice(0, -1) : parts)
+    .map((w) => (w.toUpperCase() === 'UOM' ? 'UOM' : w.toLowerCase()))
+    .join(' ');
+  return text ? text.charAt(0).toUpperCase() + text.slice(1) + (unit ? ` ${unit}` : '') : code;
+};
+const gmAttrLabel = (a: GmFamilyAttr): string =>
+  a.name && a.name.trim() && a.name !== a.code ? a.name : labelFromCode(a.code);
+
+const RequiredMark = () => <span className="ml-0.5 text-red-500">*</span>;
 
 
 const SCHEMA_KEY_TO_ALL_SAP_KEYS: Record<string, string[]> = Object.entries(SAP_NAME_TO_SCHEMA_KEY).reduce(
@@ -299,22 +310,6 @@ const FAB_PRIORITY_KEYS = [
   'lycra_non_lycra',  // M_LYCRA
 ];
 
-// ─── Redesign tokens — header/icon palette per group ──────────────────────────
-const GROUP_LABELS: Record<string, string> = {
-  FAB: 'General Merchandise Grid',
-};
-
-const GROUP_ICONS: Record<string, React.ReactNode> = {
-  FAB: <Shirt className="h-3.5 w-3.5" />,
-};
-
-// Group surfaces use saturated 400-tier border stops so the card edges
-// read confidently against the page. BUSINESS shifted from purple
-// (palette violation) to slate to fit the locked slate+coral palette.
-const GROUP_HEADER_STYLE: Record<string, { bg: string; fg: string; border: string }> = {
-  FAB: { bg: '#fff7ed', fg: '#9a3412', border: '#fb923c' },
-};
-
 type CardGroup = typeof ATTRIBUTE_GROUPS[number];
 
 function buildCardGroups(entries: { key: string; type: string; group: string }[]): CardGroup[] {
@@ -446,18 +441,11 @@ const ArticleCard = React.memo(
     const [dupConfirmOpen, setDupConfirmOpen] = useState(false);
     const autoSavedFabDescRef = useRef<string | null>(null);
     const [duplicating, setDuplicating] = useState(false);
-    const [allCollapsed, setAllCollapsed] = useState(false);
-    const [collapsedGroups, setCollapsedGroups] = useState<Set<string>>(new Set());
     const [imgZoom, setImgZoom] = useState(1);
     const [imgRotation, setImgRotation] = useState(0);
-    const [catOpen, setCatOpen] = useState(false);
-    const [catSearch, setCatSearch] = useState('');
-    const [mcDesOpen, setMcDesOpen] = useState(false);
-    const [mcDesSearch, setMcDesSearch] = useState('');
-    // Search term for the attribute-value dropdown. A single shared term is
-    // enough because only one attribute (editingField) is open at a time.
+    // Search term for every dropdown on the card. A single shared term is
+    // enough because only one dropdown (editingField) is open at a time.
     const [attrSearch, setAttrSearch] = useState('');
-    const [subDivSearch, setSubDivSearch] = useState('');
 
     // ── Created-page "Modify" flow ──────────────────────────────────────────
     // On the Created page, articles are already APPROVED + SAP-synced. We keep
@@ -537,11 +525,14 @@ const ArticleCard = React.memo(
 
     // GM attribute grid values for this article's major category
     const [gmFamilyAttrs, setGmFamilyAttrs] = useState<GmFamilyAttr[]>([]);
+    const [gmGridLoaded, setGmGridLoaded] = useState(false);
     useEffect(() => {
-      if (!effectiveMajCat) { setGmFamilyAttrs([]); return; }
+      if (!effectiveMajCat) { setGmFamilyAttrs([]); setGmGridLoaded(true); return; }
+      setGmGridLoaded(false);
       preloadGMGridFor(effectiveMajCat)
         .then((attrs) => setGmFamilyAttrs(attrs.map(gmGridAttrToFamilyAttr)))
-        .catch(() => setGmFamilyAttrs([]));
+        .catch(() => setGmFamilyAttrs([]))
+        .finally(() => setGmGridLoaded(true));
     }, [effectiveMajCat]);
 
     const attributeFields = useMemo(
@@ -1035,6 +1026,35 @@ const ArticleCard = React.memo(
             onSave({ ...item, segment: seg } as ApproverItem, { segment: seg } as Record<string, unknown>);
           }
         });
+        // Null only attributes that belong to the OLD category but NOT the new one.
+        // Attributes shared between both categories keep their values.
+        const applyAttrNulls = (newCatAttrs: { familyCode: string }[]) => {
+          const newFamilyCodes = new Set(newCatAttrs.map((a) => a.familyCode));
+          const nulls: Record<string, null> = {};
+          for (const attr of gmFamilyAttrs) {
+            if (!newFamilyCodes.has(attr.code)) {
+              nulls[attr.code] = null;
+            }
+          }
+          return nulls;
+        };
+        const cached = getCachedGMGrid(value);
+        if (cached !== null) {
+          Object.assign(updates, applyAttrNulls(cached));
+        } else {
+          // Grid not cached yet — fetch async then send a follow-up save
+          const oldAttrs = [...gmFamilyAttrs];
+          preloadGMGridFor(value).then((newCatAttrs) => {
+            const newFamilyCodes = new Set(newCatAttrs.map((a) => a.familyCode));
+            const nullUpdates: Record<string, null> = {};
+            for (const attr of oldAttrs) {
+              if (!newFamilyCodes.has(attr.code)) nullUpdates[attr.code] = null;
+            }
+            if (Object.keys(nullUpdates).length > 0) {
+              onSave({ ...item, ...nullUpdates } as ApproverItem, nullUpdates as Record<string, unknown>, { silent: true });
+            }
+          });
+        }
       }
       // When a Construction & Fabric attribute changes, recompute fabricArticleDescription
       // and bundle it into the same save so the DB value stays in sync with the UI.
@@ -1089,1220 +1109,752 @@ const ArticleCard = React.memo(
         ? (((mrpNum - rateNum * 1.05) / mrpNum) * 100).toFixed(1) + '%'
         : '—';
 
-    const groupMap: Record<string, { color: string; attrs: typeof visibleAttrs }> = {};
-    for (const attr of visibleAttrs) {
-      if (!groupMap[attr.group]) groupMap[attr.group] = { color: attr.groupColor, attrs: [] };
-      groupMap[attr.group].attrs.push(attr);
-    }
-    const activeGroups = ATTRIBUTE_GROUPS.filter((g) => {
-      if (hideGroups?.includes(g.group)) return false;
-      // FAB group in GM list: only show when GM family codes have loaded for this category
-      if (g.group === 'FAB' && gmFamilyAttrs.length === 0) return false;
-      return !!groupMap[g.group];
-    });
+    // ─── Card layout (design H) ─────────────────────────────────────────────────
+    // Left rail: photo + "Article details" (all identity fields as real inputs).
+    // Right: GM grid (dynamic per major category, Required / Optional), then a
+    // separate BOM card, then colour variants. Every state colour is slate.
 
-    const renderFabBodyField = (
+    const FIELD_LABEL = 'flex min-w-0 flex-col gap-[3px] text-[12px] font-semibold text-slate-600';
+    const FIELD_INPUT =
+      'h-[34px] rounded-lg border-slate-200 bg-white px-2.5 text-[13px] font-medium text-slate-900 shadow-none ' +
+      'hover:border-slate-400 focus-visible:border-slate-500 focus-visible:ring-slate-400/25 ' +
+      'disabled:bg-slate-50 disabled:text-slate-500 disabled:opacity-100';
+    const FIELD_BOX =
+      'flex h-[34px] w-full min-w-0 items-center justify-between gap-1.5 rounded-lg border border-slate-200 bg-white px-2.5 ' +
+      'text-left text-[13px] font-medium text-slate-900 transition-colors hover:border-slate-400 ' +
+      'focus:outline-none focus-visible:border-slate-500 focus-visible:ring-[3px] focus-visible:ring-slate-400/25 ' +
+      'data-[state=open]:border-slate-500 data-[state=open]:ring-[3px] data-[state=open]:ring-slate-400/25 ' +
+      'disabled:cursor-not-allowed disabled:bg-slate-50 disabled:text-slate-500 disabled:hover:border-slate-200';
+    const OPTION_ROW = 'flex w-full flex-col px-3 py-1.5 text-left text-[12px] hover:bg-slate-100';
+
+    const readField = (field: string): string => String(getValue(field) ?? '').trim();
+
+    // Text input that saves on blur / Enter, and only when the value changed.
+    // Keyed on the current value so a server or auto-calculated change (e.g. MRP
+    // from rate) re-seeds the box.
+    const renderTextField = (
       field: string,
-      label: string,
-      autoFillFn?: () => void,
-      maxLen?: number,
+      label: React.ReactNode,
+      opts: { value?: string; disabled?: boolean; placeholder?: string; mono?: boolean; invalid?: boolean } = {},
     ) => {
-      const displayVal = localValues[field] !== undefined ? localValues[field] : (item as any)[field];
-      const isEditingThis = editingField === `bot_${field}`;
-      const saveVal = (raw: string | null) => {
-        const v = raw || null;
-        handleSave(field, maxLen && v ? v.slice(0, maxLen) : v);
-      };
+      const current = opts.value ?? readField(field);
+      return (
+        <label key={field} className={FIELD_LABEL}>
+          <span>{label}</span>
+          <Input
+            key={`${field}:${current}`}
+            defaultValue={current}
+            disabled={opts.disabled}
+            placeholder={opts.disabled ? '—' : opts.placeholder}
+            invalid={opts.invalid}
+            className={cn(FIELD_INPUT, opts.mono && 'font-mono text-[12.5px]')}
+            onKeyDown={(e) => {
+              if (e.key === 'Enter') e.currentTarget.blur();
+            }}
+            onBlur={(e) => {
+              const next = e.target.value.trim();
+              if (next === current) return;
+              if (field === 'vendorCode' && next && !/^\d{6}$/.test(next)) {
+                message.error('Vendor Code must be exactly 6 digits');
+                e.target.value = current;
+                return;
+              }
+              handleSave(field, next || null);
+            }}
+          />
+        </label>
+      );
+    };
+
+    // Searchable single-select shown as a normal field box.
+    const renderPickField = (opts: {
+      id: string;
+      label: React.ReactNode;
+      value: string;
+      placeholder: string;
+      options: string[];
+      onPick: (v: string | null) => void;
+      disabled?: boolean;
+      invalid?: boolean;
+      emptyText?: string;
+      allowClear?: boolean;
+      optionLabel?: (v: string) => string;
+    }) => {
+      const open = editingField === `pick_${opts.id}`;
+      const show = (v: string) => opts.optionLabel?.(v) ?? v;
+      const q = attrSearch.trim().toLowerCase();
+      const filtered = opts.options.filter((o) => o.toLowerCase().includes(q) || show(o).toLowerCase().includes(q));
+      return (
+        <div key={opts.id} className={FIELD_LABEL}>
+          <span>{opts.label}</span>
+          <Popover
+            open={open}
+            onOpenChange={(o) => {
+              setEditingField(o ? `pick_${opts.id}` : null);
+              setAttrSearch('');
+            }}
+          >
+            <PopoverTrigger asChild>
+              <button
+                type="button"
+                disabled={opts.disabled}
+                className={cn(FIELD_BOX, opts.invalid && 'border-red-300 bg-red-50/60')}
+              >
+                <span className={cn('truncate', !opts.value && 'font-normal text-slate-400')}>
+                  {opts.value ? show(opts.value) : opts.disabled ? '—' : opts.placeholder}
+                </span>
+                {!opts.disabled && <ChevronDown className="h-3.5 w-3.5 shrink-0 text-slate-400" />}
+              </button>
+            </PopoverTrigger>
+            <PopoverContent className="w-[var(--radix-popover-trigger-width)] min-w-56 p-0" align="start">
+              <div className="flex items-center border-b px-2 py-1.5">
+                <Search className="mr-1.5 h-3.5 w-3.5 shrink-0 text-muted-foreground" />
+                <input
+                  autoFocus
+                  value={attrSearch}
+                  onChange={(e) => setAttrSearch(e.target.value)}
+                  placeholder="Search..."
+                  className="flex-1 bg-transparent text-[12px] outline-none placeholder:text-muted-foreground"
+                />
+              </div>
+              {opts.allowClear && opts.value && (
+                <button
+                  type="button"
+                  onClick={() => opts.onPick(null)}
+                  className="flex w-full items-center gap-1.5 border-b px-3 py-1.5 text-left text-[12px] font-medium text-red-600 hover:bg-red-50"
+                >
+                  <X className="h-3 w-3 shrink-0" />
+                  Clear selection
+                </button>
+              )}
+              <div className="max-h-60 overflow-y-auto py-1">
+                {filtered.length === 0 ? (
+                  <div className="px-3 py-2 text-[12px] text-muted-foreground">{opts.emptyText ?? 'No options found'}</div>
+                ) : (
+                  filtered.map((o) => (
+                    <button
+                      key={o}
+                      type="button"
+                      onClick={() => opts.onPick(o)}
+                      className={cn(OPTION_ROW, o === opts.value && 'bg-slate-100 font-semibold')}
+                    >
+                      {show(o)}
+                    </button>
+                  ))
+                )}
+              </div>
+            </PopoverContent>
+          </Popover>
+        </div>
+      );
+    };
+
+    // ── Article details: option lists from the hierarchy ──
+    const currentDivision = readField('division');
+    const currentSubDiv = readField('subDivision');
+    const currentMajCat = effectiveMajCat || readField('majorCategory');
+    const divisionOptions = fabHierarchy?.divisions ?? [];
+    const subDivOptions =
+      currentDivision && fabHierarchy?.subDivsByDiv[currentDivision]
+        ? fabHierarchy.subDivsByDiv[currentDivision]
+        : Object.values(fabHierarchy?.subDivsByDiv ?? {}).flat();
+    const majCatOptions = (() => {
+      let cats: string[];
+      if (currentSubDiv && fabHierarchy?.majCatsBySubDiv[currentSubDiv]) {
+        cats = fabHierarchy.majCatsBySubDiv[currentSubDiv];
+      } else if (currentDivision && fabHierarchy?.subDivsByDiv[currentDivision]) {
+        cats = fabHierarchy.subDivsByDiv[currentDivision].flatMap((sd) => fabHierarchy!.majCatsBySubDiv[sd] ?? []);
+      } else {
+        cats = Object.values(fabHierarchy?.majCatsBySubDiv ?? {}).flat();
+      }
+      return Array.from(new Set(cats)).sort();
+    })();
+    const mcDesOptions = fabHierarchy?.mcDesByMajCat[readField('majorCategory') || currentMajCat] ?? [];
+
+    const saveDivision = (val: string | null) => {
+      // Changing division resets subDivision (no longer valid)
+      const updates = { division: val || null, subDivision: null as string | null };
+      setLocalValues((prev) => ({ ...prev, ...updates }));
+      setEditingField(null);
+      setAttrSearch('');
+      if (isModifyMode) {
+        setPendingChanges((prev) => ({ ...prev, ...updates }));
+      } else {
+        onSave({ ...item, ...updates } as ApproverItem, updates as Record<string, unknown>);
+      }
+    };
+    const pickAndSave = (field: string) => (v: string | null) => {
+      handleSave(field, v);
+      setAttrSearch('');
+    };
+
+    const designLocked = item.approvalStatus !== 'PENDING' && item.sapSyncStatus !== 'FAILED';
+    const articleNumberEditable = !item.sapArticleId && !item.fabricArticleNumber && !isFieldLocked('articleNumber');
+    const vendorCodeVal = readField('vendorCode');
+    const vendorNameVal = readField('vendorName');
+    const createdAtRaw = (pathType === 'created' ? item.updatedAt : item.createdAt) || item.updatedAt || item.createdAt;
+
+    // ── GM grid: attributes come from the major category, never hard-coded ──
+    const gmRows = gmFamilyAttrs.map((attr) => ({ attr, value: readField(attr.code) }));
+    const gmRequiredRows = gmRows.filter((r) => r.attr.mandatory);
+    const gmOptionalRows = gmRows.filter((r) => !r.attr.mandatory);
+    const gmFilledCount = gmRows.filter((r) => r.value).length;
+    const gmRequiredDone = gmRequiredRows.filter((r) => r.value).length;
+
+    const renderGmRow = ({ attr, value }: { attr: GmFamilyAttr; value: string }) => {
+      const locked = isFieldLocked(attr.code);
+      const isEditing = editingField === attr.code;
+      const missing = attr.mandatory && !value && !isLocked;
+      const freeText = attr.values.length === 0;
+      const q = attrSearch.trim().toLowerCase();
       return (
         <div
-          className="cursor-pointer border-t border-border bg-muted/40 px-2 py-1"
-          style={{ cursor: isLocked ? 'default' : 'pointer', background: isEditingThis ? '#e6f7ff' : undefined }}
-          onClick={() => {
-            if (!isLocked && !isEditingThis) setEditingField(`bot_${field}`);
-          }}
+          key={attr.code}
+          className="grid min-h-[48px] grid-cols-[minmax(0,1fr)_minmax(0,1fr)] items-center gap-2.5 border-b border-slate-100 px-4 py-1.5 @2xl:border-r @2xl:even:border-r-0"
         >
-          <div className="mb-0.5 flex items-center gap-1">
-            <span className="text-[9px] font-semibold uppercase tracking-wider text-muted-foreground">{label}</span>
-            {autoFillFn && !isLocked && (
-              <span
-                className="cursor-pointer text-[9px] text-slate-700 underline"
-                onClick={(e) => {
-                  e.stopPropagation();
-                  autoFillFn();
-                }}
-              >
-                Auto-fill
-              </span>
-            )}
-          </div>
-          {isEditingThis ? (
+          <span className="flex min-w-0 flex-col gap-1">
+            <span className="truncate text-[13px] font-semibold leading-[18px] text-slate-900">
+              {gmAttrLabel(attr)}
+              {attr.mandatory && <RequiredMark />}
+            </span>
+            <span className="truncate font-mono text-[11px] leading-[14px] text-slate-500">{attr.code}</span>
+          </span>
+          {freeText ? (
             <Input
-              autoFocus
-              defaultValue={displayVal || ''}
-              className="h-7 px-1 text-[11px]"
-              maxLength={maxLen}
-              onKeyDown={(e) => e.key === 'Enter' && saveVal((e.target as HTMLInputElement).value)}
-              onBlur={(e) => saveVal(e.target.value)}
+              key={`${attr.code}:${value}`}
+              defaultValue={value}
+              disabled={locked}
+              placeholder={locked ? '—' : 'Type value'}
+              invalid={missing}
+              className={cn(FIELD_INPUT, 'h-8')}
+              onKeyDown={(e) => {
+                if (e.key === 'Enter') e.currentTarget.blur();
+              }}
+              onBlur={(e) => {
+                const next = e.target.value.trim();
+                if (next !== value) handleSave(attr.code, next || null);
+              }}
             />
           ) : (
-            <div className="truncate text-[11px]" style={{ color: displayVal ? '#1a1a1a' : '#bfbfbf' }}>
-              {displayVal || (isLocked ? '—' : 'Click to fill')}
-            </div>
+            <Popover
+              open={isEditing}
+              onOpenChange={(o) => {
+                setEditingField(o ? attr.code : null);
+                setAttrSearch('');
+              }}
+            >
+              <PopoverTrigger asChild>
+                <button
+                  type="button"
+                  disabled={locked}
+                  className={cn(
+                    FIELD_BOX,
+                    'h-8',
+                    !value && 'border-dashed border-slate-300 bg-slate-50 font-normal text-slate-400',
+                    missing && 'border-red-300 bg-red-50/60 text-red-600',
+                  )}
+                >
+                  <span className="truncate">{value || (locked ? '—' : missing ? 'Required — choose…' : 'Choose…')}</span>
+                  {!locked && <ChevronDown className="h-3.5 w-3.5 shrink-0 text-slate-400" />}
+                </button>
+              </PopoverTrigger>
+              <PopoverContent className="w-[var(--radix-popover-trigger-width)] min-w-56 p-0" align="end">
+                <div className="flex items-center border-b px-2 py-1.5">
+                  <Search className="mr-1.5 h-3.5 w-3.5 shrink-0 text-muted-foreground" />
+                  <input
+                    autoFocus
+                    value={attrSearch}
+                    onChange={(e) => setAttrSearch(e.target.value)}
+                    placeholder="Search..."
+                    className="flex-1 bg-transparent text-[12px] outline-none placeholder:text-muted-foreground"
+                  />
+                </div>
+                {value && (
+                  <button
+                    type="button"
+                    onClick={() => {
+                      handleSave(attr.code, null);
+                      setAttrSearch('');
+                    }}
+                    className="flex w-full items-center gap-1.5 border-b px-3 py-1.5 text-left text-[12px] font-medium text-red-600 hover:bg-red-50"
+                  >
+                    <X className="h-3 w-3 shrink-0" />
+                    Clear selection
+                  </button>
+                )}
+                <div className="max-h-60 overflow-y-auto py-1">
+                  {(() => {
+                    const matches = attr.values.filter((v) => v.toLowerCase().includes(q));
+                    if (matches.length === 0) {
+                      return <div className="px-3 py-2 text-[12px] text-muted-foreground">No options found</div>;
+                    }
+                    return matches.map((v) => (
+                      <button
+                        key={v}
+                        type="button"
+                        onClick={() => {
+                          handleSave(attr.code, v);
+                          setAttrSearch('');
+                        }}
+                        className={cn(OPTION_ROW, v === value && 'bg-slate-100 font-semibold')}
+                      >
+                        {v}
+                      </button>
+                    ));
+                  })()}
+                </div>
+              </PopoverContent>
+            </Popover>
           )}
         </div>
       );
     };
 
-    // ─── Helper closures used by the new layout ─────────────────────────────────
-
-    // Compute global 1..N numbering across all visible attributes (mockup pattern)
-    let _attrCounter = 0;
-
-    const HEADER_FIELDS = [
-      { label: 'MAJOR CATEGORY', field: 'majorCategory', editable: true, required: false, color: '#2f54eb' },
-      { label: 'MC DESCRIPTION', field: 'mcDescription', editable: true, required: false, color: '#7c3aed' },
-      {
-        label: isFGMode ? 'FABRIC ARTICLE NUMBER' : 'ARTICLE NUMBER',
-        field: 'articleNumber',
-        editable: !item.sapArticleId && !item.fabricArticleNumber,
-        required: false,
-        color: (item.sapArticleId || item.fabricArticleNumber) ? '#15803d' : '#FF6F61',
-      },
-      {
-        label: 'ARTICLE DESCRIPTION',
-        field: 'fabricArticleDescription',
-        editable: true,
-        required: false,
-        color: '#1f2937',
-      },
-      { label: 'VENDOR CODE', field: 'vendorCode', editable: true, required: true, color: '#1f2937' },
-      { label: 'VENDOR NAME', field: 'vendorName', editable: true, required: true, color: '#1f2937' },
-    ];
-
-    const renderHeaderField = ({
-      label,
-      field,
-      editable,
-      required,
-      color,
-    }: { label: string; field: string; editable: boolean; required: boolean; color: string }) => {
-      const baseValue =
-        field === 'articleNumber'
-          ? item.sapArticleId || (item as any)[field]
-          : field === 'majorCategory'
-          ? effectiveMajCat || (item as any)[field]
-          : (item as any)[field];
-      const displayVal = localValues[field] !== undefined ? localValues[field] : baseValue;
-      const isEditingThis = editingField === `hdr_${field}`;
-      const canEdit = editable && !isFieldLocked(field);
-      const isEmpty = !displayVal;
-      const showRequiredError = required && isEmpty && !isLocked;
-      return (
-        <div
-          key={field}
-          className="border-b border-border last:border-b-0"
-          style={{ cursor: canEdit ? 'pointer' : 'default' }}
-          onClick={() => {
-            if (canEdit && !isEditingThis) setEditingField(`hdr_${field}`);
-          }}
-        >
-          <div className="flex items-start justify-between gap-2 px-2 py-0.5">
-            <span
-              className="shrink-0 text-[9px] font-semibold uppercase tracking-wider"
-              style={{ color: showRequiredError ? '#dc2626' : '#6b7280' }}
-            >
-              {label}
-              {required && <span className="ml-0.5 text-red-500">*</span>}
-            </span>
-            <div className="min-w-0 flex-1 text-right">
-              {isEditingThis && field === 'majorCategory' ? (
-                <Popover
-                  open={catOpen}
-                  onOpenChange={(o) => {
-                    setCatOpen(o);
-                    if (!o) setCatSearch('');
-                  }}
-                >
-                  <PopoverTrigger asChild>
-                    <button
-                      type="button"
-                      className="flex h-7 w-full items-center justify-between rounded border border-input bg-background px-2 text-xs hover:border-ring focus:outline-none focus:ring-1 focus:ring-ring"
-                    >
-                      <span className="truncate text-left">{displayVal || 'Select...'}</span>
-                      <ChevronDownIcon className="ml-1 h-3 w-3 shrink-0 text-muted-foreground" />
-                    </button>
-                  </PopoverTrigger>
-                  <PopoverContent className="w-56 p-0" align="start">
-                    <div className="flex items-center border-b px-2 py-1.5">
-                      <Search className="mr-1.5 h-3.5 w-3.5 shrink-0 text-muted-foreground" />
-                      <input
-                        autoFocus
-                        value={catSearch}
-                        onChange={(e) => setCatSearch(e.target.value)}
-                        placeholder="Search category..."
-                        className="flex-1 bg-transparent text-xs outline-none placeholder:text-muted-foreground"
-                      />
-                    </div>
-                    <div className="max-h-56 overflow-y-auto py-1">
-                      {(() => {
-                        const effectiveSubDiv = (localValues['subDivision'] ?? item.subDivision) || '';
-                        const effectiveDiv   = (localValues['division']    ?? item.division)    || '';
-                        let cats: string[] = [];
-                        if (effectiveSubDiv && fabHierarchy?.majCatsBySubDiv[effectiveSubDiv]) {
-                          cats = fabHierarchy.majCatsBySubDiv[effectiveSubDiv];
-                        } else if (effectiveDiv && fabHierarchy?.subDivsByDiv[effectiveDiv]) {
-                          cats = fabHierarchy.subDivsByDiv[effectiveDiv]
-                            .flatMap(sd => fabHierarchy!.majCatsBySubDiv[sd] ?? []);
-                        } else {
-                          cats = Object.values(fabHierarchy?.majCatsBySubDiv ?? {}).flat();
-                        }
-                        const unique = Array.from(new Set(cats)).sort();
-                        const filtered = unique.filter(c => c.toLowerCase().includes(catSearch.toLowerCase()));
-                        return filtered.length === 0
-                          ? <div className="px-3 py-2 text-xs text-muted-foreground">No categories found</div>
-                          : filtered.map(cat => (
-                            <button
-                              key={cat}
-                              type="button"
-                              onClick={() => { handleSave(field, cat); setCatOpen(false); setCatSearch(''); }}
-                              className="w-full px-3 py-1.5 text-left text-xs hover:bg-accent hover:text-accent-foreground"
-                            >
-                              {cat}
-                            </button>
-                          ));
-                      })()}
-                    </div>
-                  </PopoverContent>
-                </Popover>
-              ) : isEditingThis && field === 'mcDescription' ? (
-                <Popover
-                  open={mcDesOpen}
-                  onOpenChange={(o) => {
-                    setMcDesOpen(o);
-                    if (!o) setMcDesSearch('');
-                  }}
-                >
-                  <PopoverTrigger asChild>
-                    <button
-                      type="button"
-                      className="flex h-7 w-full items-center justify-between rounded border border-input bg-background px-2 text-xs hover:border-ring focus:outline-none focus:ring-1 focus:ring-ring"
-                    >
-                      <span className="truncate text-left">{displayVal || 'Select...'}</span>
-                      <ChevronDownIcon className="ml-1 h-3 w-3 shrink-0 text-muted-foreground" />
-                    </button>
-                  </PopoverTrigger>
-                  <PopoverContent className="w-64 p-0" align="start">
-                    <div className="flex items-center border-b px-2 py-1.5">
-                      <Search className="mr-1.5 h-3.5 w-3.5 shrink-0 text-muted-foreground" />
-                      <input
-                        autoFocus
-                        value={mcDesSearch}
-                        onChange={(e) => setMcDesSearch(e.target.value)}
-                        placeholder="Search MC description..."
-                        className="flex-1 bg-transparent text-xs outline-none placeholder:text-muted-foreground"
-                      />
-                    </div>
-                    <div className="max-h-56 overflow-y-auto py-1">
-                      {(() => {
-                        const currentMajCat = (localValues['majorCategory'] ?? item.majorCategory) || '';
-                        const opts = (currentMajCat && fabHierarchy?.mcDesByMajCat[currentMajCat]) ?? [];
-                        const filtered = opts.filter(d => d.toLowerCase().includes(mcDesSearch.toLowerCase()));
-                        return filtered.length === 0
-                          ? <div className="px-3 py-2 text-xs text-muted-foreground">
-                              {currentMajCat ? 'No descriptions found' : 'Select a major category first'}
-                            </div>
-                          : filtered.map(d => (
-                            <button
-                              key={d}
-                              type="button"
-                              onClick={() => { handleSave(field, d); setMcDesOpen(false); setMcDesSearch(''); }}
-                              className="w-full px-3 py-1.5 text-left text-xs hover:bg-accent hover:text-accent-foreground"
-                            >
-                              {d}
-                            </button>
-                          ));
-                      })()}
-                    </div>
-                  </PopoverContent>
-                </Popover>
-              ) : isEditingThis && field === 'vendorName' ? (
-                <Autocomplete
-                  autoFocus
-                  value={vendorQuery || displayVal || ''}
-                  onChange={searchVendors}
-                  options={vendorOptions}
-                  notFoundContent={vendorSearching ? <Spinner size="sm" /> : null}
-                  onSelect={(val, option) => {
-                    // option.vendorName is the clean name (no code suffix)
-                    const cleanName = (option as any).vendorName || String(val ?? '').split('||')[0];
-                    const updates: Record<string, string | null> = { vendorName: cleanName };
-                    if ((option as any).vendorCode) updates.vendorCode = (option as any).vendorCode;
-                    setLocalValues((prev) => ({ ...prev, ...updates }));
-                    if (isModifyMode) {
-                      setPendingChanges((prev) => ({ ...prev, ...updates }));
-                    } else {
-                      onSave(
-                        { ...item, ...updates } as ApproverItem,
-                        updates as Record<string, unknown>,
-                      );
-                    }
-                    setEditingField(null);
-                    setVendorOptions([]);
-                    setVendorQuery('');
-                  }}
-                  onBlur={(e) => {
-                    const val = (e.target as HTMLInputElement).value;
-                    if (val) handleSave('vendorName', val);
-                    else setEditingField(null);
-                    setVendorOptions([]);
-                    setVendorQuery('');
-                  }}
-                  className="text-xs"
-                />
-              ) : isEditingThis ? (
-                <Input
-                  autoFocus
-                  defaultValue={displayVal || ''}
-                  className="h-7 px-1 text-xs"
-                  onKeyDown={(e) =>
-                    e.key === 'Enter' && handleSave(field, (e.target as HTMLInputElement).value || null)
-                  }
-                  onBlur={(e) => handleSave(field, e.target.value || null)}
-                />
-              ) : (
-                <span
-                  className="truncate text-xs"
-                  style={{
-                    color: displayVal ? color : showRequiredError ? '#ea580c' : '#9ca3af',
-                    fontStyle: showRequiredError ? 'italic' : 'normal',
-                  }}
-                >
-                  {displayVal || (showRequiredError ? 'Required' : canEdit ? 'Click to fill' : '—')}
-                </span>
-              )}
-            </div>
-          </div>
-        </div>
-      );
-    };
-
-    const renderAttributeRow = (attr: {
-      field: string;
+    // ── BOM card fields ──
+    type BomField = {
       label: string;
-      schemaKey: string;
-      values: any[];
-      freeText: boolean;
-      group: string;
-      isMandatory?: boolean;
-    }) => {
-      _attrCounter += 1;
-      const num = _attrCounter;
-      const currentValue = getValue(attr.field);
-      const isEffectivelyEmpty = !currentValue || currentValue.trim() === '';
-      const isEmpty = isEffectivelyEmpty;
-      const isMandatory = !attr.freeText && (attr.isMandatory ?? mandatoryKeys.has(attr.schemaKey));
-      const isEditing = editingField === attr.field;
-      const isUserEdited = !!localValues[attr.field];
-      const attrLocked = isFieldLocked(attr.field);
+      field: string;
+      mandatory: boolean;
+      kind: 'text' | 'pick' | 'colour' | 'markdown' | 'afterTax';
+      options?: string[];
+    };
+    const BOM_FIELDS: BomField[] = [
+      ...(!isFGMode
+        ? ([
+            { label: 'Cost / rate', field: 'rate', mandatory: true, kind: 'text' },
+            { label: 'MRP', field: 'mrp', mandatory: true, kind: 'text' },
+            { label: 'Markdown', field: '_markdown', mandatory: false, kind: 'markdown' },
+            { label: 'After tax', field: '_afterTax', mandatory: false, kind: 'afterTax' },
+            ...(item.source !== 'SRM' ? [{ label: 'Base colour', field: 'colour', mandatory: false, kind: 'colour' }] : []),
+          ] as BomField[])
+        : []),
+      { label: 'Fashion type', field: 'articleFashionType', mandatory: true, kind: 'pick', options: ['C'] },
+      ...(!isFGMode ? ([{ label: 'Segment', field: 'segment', mandatory: true, kind: 'text' }] as BomField[]) : []),
+      ...(isFGMode
+        ? ([
+            { label: 'Vendor fabric rate', field: 'fabricRate', mandatory: false, kind: 'text' },
+            { label: 'V2 fabric rate', field: 'v2FabricRate', mandatory: false, kind: 'text' },
+            { label: 'Value add acc. cost', field: 'valueAddCost', mandatory: false, kind: 'text' },
+          ] as BomField[])
+        : []),
+    ];
+    const bomRequired = BOM_FIELDS.filter((b) => b.mandatory);
+    const bomRequiredDone = bomRequired.filter((b) => readField(b.field)).length;
+    const colourName = (code: string) => {
+      const c = masterColors.find((m) => m.code === code);
+      return c ? `${c.name} · ${c.code}` : code;
+    };
 
-      return (
-        <div
-          key={attr.field}
-          className="group flex items-center gap-1.5 rounded px-1 py-0.5 transition-colors hover:bg-muted/40"
-          style={{
-            cursor: attrLocked ? 'default' : 'pointer',
-            background: isEditing
-              ? '#e0f2fe'
-              : isUserEdited
-              ? '#ecfdf5'
-              : isEmpty && isMandatory
-              ? '#fffbeb'
-              : !isEmpty && !isUserEdited
-              ? '#eef2ff'
-              : undefined,
-          }}
-          onClick={() => {
-            if (!attrLocked && !isEditing) setEditingField(attr.field);
-          }}
-        >
-          <span className="w-4 shrink-0 text-right text-[10px] font-bold tabular-nums text-muted-foreground">{num}.</span>
-          <span
-            className={cn(
-              'flex-1 truncate text-[10.5px] leading-snug',
-              isMandatory ? 'key-field text-foreground' : 'font-semibold text-foreground/80',
-            )}
-          >
-            {isMandatory && <span className="mandatory-mark">*</span>}
-            {attr.label}
-          </span>
-          <div className="w-[110px] shrink-0">
-            {attr.freeText ? (
-              isEditing ? (
-                <Input
-                  autoFocus
-                  defaultValue={isEffectivelyEmpty ? '' : currentValue || ''}
-                  className="h-6 px-1 text-[11px]"
-                  onKeyDown={(e) =>
-                    e.key === 'Enter' && handleSave(attr.field, (e.target as HTMLInputElement).value || null)
-                  }
-                  onBlur={(e) => handleSave(attr.field, e.target.value || null)}
-                />
-              ) : (
-                <span
-                  className="block truncate text-right text-[11px]"
-                  style={{
-                    color: isEffectivelyEmpty ? (isMandatory ? '#dc2626' : '#9ca3af') : '#111827',
-                    fontStyle: isEffectivelyEmpty && !isMandatory ? 'italic' : 'normal',
-                    fontWeight: isMandatory && isEffectivelyEmpty ? 700 : 600,
-                  }}
-                >
-                  {isEffectivelyEmpty
-                    ? isMandatory && !isLocked
-                      ? 'Required'
-                      : isLocked
-                      ? '—'
-                      : 'Click'
-                    : currentValue}
-                </span>
-              )
-            ) : isEditing ? (
-              <Popover
-                open
-                onOpenChange={(o) => {
-                  if (!o) {
-                    setEditingField(null);
-                    setAttrSearch('');
-                  }
-                }}
-              >
-                <PopoverTrigger asChild>
-                  <button
-                    type="button"
-                    className="flex h-6 w-full items-center justify-between rounded border border-input bg-background px-1.5 text-[11px] hover:border-ring focus:outline-none focus:ring-1 focus:ring-ring"
-                  >
-                    <span className="truncate text-left">
-                      {isEffectivelyEmpty ? 'Select' : currentValue}
-                    </span>
-                    <ChevronDown className="ml-1 h-3 w-3 shrink-0 text-muted-foreground" />
-                  </button>
-                </PopoverTrigger>
-                <PopoverContent
-                  className="w-48 p-0"
-                  align="end"
-                  onClick={(e) => e.stopPropagation()}
-                >
-                  <div className="flex items-center border-b px-2 py-1.5">
-                    <Search className="mr-1.5 h-3.5 w-3.5 shrink-0 text-muted-foreground" />
-                    <input
-                      autoFocus
-                      value={attrSearch}
-                      onChange={(e) => setAttrSearch(e.target.value)}
-                      placeholder="Search..."
-                      className="flex-1 bg-transparent text-[11px] outline-none placeholder:text-muted-foreground"
-                    />
-                  </div>
-                  {!isEffectivelyEmpty && (
-                    <button
-                      type="button"
-                      onClick={() => {
-                        handleSave(attr.field, null);
-                        setAttrSearch('');
-                      }}
-                      className="flex w-full items-center gap-1.5 border-b px-3 py-1.5 text-left text-[11px] font-medium text-red-600 hover:bg-red-50"
-                    >
-                      <X className="h-3 w-3 shrink-0" />
-                      Clear selection
-                    </button>
-                  )}
-                  <div className="max-h-56 overflow-y-auto py-1">
-                    {(() => {
-                      const q = attrSearch.trim().toLowerCase();
-                      const matches = attr.values.filter(
-                        (v) =>
-                          v.shortForm.toLowerCase().includes(q) ||
-                          (v.fullForm ?? '').toLowerCase().includes(q),
-                      );
-                      if (matches.length === 0) {
-                        return (
-                          <div className="px-3 py-2 text-[11px] text-muted-foreground">
-                            No options found
-                          </div>
-                        );
-                      }
-                      return matches.map((v) => (
-                        <button
-                          key={v.shortForm}
-                          type="button"
-                          onClick={() => {
-                            handleSave(attr.field, v.shortForm);
-                            setAttrSearch('');
-                          }}
-                          className={cn(
-                            'flex w-full flex-col px-3 py-1.5 text-left text-[11px] hover:bg-accent hover:text-accent-foreground',
-                            v.shortForm === currentValue && 'bg-accent/60',
-                          )}
-                        >
-                          <span className="font-medium">{v.shortForm}</span>
-                          {v.fullForm && v.fullForm !== v.shortForm && (
-                            <span className="truncate text-[10px] text-muted-foreground">
-                              {v.fullForm}
-                            </span>
-                          )}
-                        </button>
-                      ));
-                    })()}
-                  </div>
-                </PopoverContent>
-              </Popover>
-            ) : (
-              <span
-                className="flex items-center justify-end gap-1 text-right text-[11px]"
-                style={{
-                  color: isEffectivelyEmpty ? (isMandatory ? '#dc2626' : '#9ca3af') : '#111827',
-                  fontStyle: isEffectivelyEmpty && !isMandatory ? 'italic' : 'normal',
-                  fontWeight: isMandatory && isEffectivelyEmpty ? 700 : 600,
-                }}
-              >
-                <span className="truncate">
-                  {isEffectivelyEmpty ? (isMandatory ? 'Required' : '—') : currentValue}
-                </span>
-                <ChevronDown className="h-3 w-3 shrink-0 opacity-40" />
-              </span>
-            )}
-          </div>
-        </div>
+    const renderBomField = (bom: BomField) => {
+      const label = (
+        <>
+          {bom.label}
+          {bom.mandatory && <RequiredMark />}
+        </>
       );
+      if (bom.kind === 'markdown' || bom.kind === 'afterTax') {
+        return (
+          <div key={bom.field} className={FIELD_LABEL}>
+            <span>{label}</span>
+            <span className="flex h-[34px] items-center rounded-lg bg-slate-100 px-2.5 text-[13px] font-semibold tabular-nums text-slate-900">
+              {bom.kind === 'markdown' ? markdown : afterTax}
+            </span>
+          </div>
+        );
+      }
+      const value = readField(bom.field);
+      const locked = isFieldLocked(bom.field);
+      const missing = bom.mandatory && !value && !isLocked;
+      if (bom.kind === 'colour' || bom.kind === 'pick') {
+        return renderPickField({
+          id: `bom_${bom.field}`,
+          label,
+          value,
+          placeholder: 'Choose…',
+          options: bom.kind === 'colour' ? masterColors.map((c) => c.code) : bom.options ?? [],
+          optionLabel: bom.kind === 'colour' ? colourName : undefined,
+          onPick: pickAndSave(bom.field),
+          disabled: locked,
+          invalid: missing,
+        });
+      }
+      return renderTextField(bom.field, label, { value, disabled: locked, invalid: missing, placeholder: 'Type value' });
     };
 
-    const toggleGroupCollapse = (g: string) => {
-      setCollapsedGroups((prev) => {
-        const next = new Set(prev);
-        if (next.has(g)) next.delete(g);
-        else next.add(g);
-        return next;
-      });
-      setAllCollapsed(false);
-    };
-
-    const isGroupCollapsed = (g: string) => allCollapsed || collapsedGroups.has(g);
-
-    // AI confidence + heuristic quality breakdown derived from existing data.
-    // No backend signal needed — we compute Image / Clarity / Match from
-    // what's already on the item.
-    const aiConfidence = (item as any).avgConfidence
-      ? Math.round(Number((item as any).avgConfidence))
-      : 92;
-
-    // Image Quality: have a usable imageUrl?
-    const imageQualityLevel = item.imageUrl ? 'High' : 'Low';
-    // Product Clarity: do we have a confident major category?
-    const productClarityLevel = effectiveMajCat ? 'High' : 'Medium';
-    // Attribute Match: ratio of filled visible attrs (with non-null value)
-    const filledAttrCount = visibleAttrs.filter((a) => {
-      const v = (item as any)[a.field];
-      return v !== null && v !== undefined && String(v).trim() !== '';
-    }).length;
-    const attrMatchRatio = visibleAttrs.length > 0 ? filledAttrCount / visibleAttrs.length : 0;
-    const attrMatchLevel = attrMatchRatio >= 0.7 ? 'High' : attrMatchRatio >= 0.4 ? 'Medium' : 'Low';
-    const qualityColor = (level: string) =>
-      level === 'High' ? 'text-emerald-600' : level === 'Medium' ? 'text-amber-600' : 'text-rose-600';
+    const CARD = 'overflow-hidden rounded-xl border border-slate-200 bg-white';
+    const countPill = (done: number, total: number) => (
+      <span
+        className={cn(
+          'shrink-0 rounded-full px-2.5 py-0.5 text-[12px] font-bold tabular-nums',
+          done === total ? 'bg-emerald-100 text-emerald-800' : 'bg-amber-100 text-amber-800',
+        )}
+      >
+        Required {done}/{total}
+      </span>
+    );
 
     return (
       <>
         <div
           key={item.id}
-          className="animate-in flex flex-col rounded-xl border bg-white shadow-sm transition-all fade-in-50 slide-in-from-bottom-1 duration-300"
+          className="animate-in flex flex-col overflow-hidden rounded-xl border bg-slate-50/70 shadow-sm transition-all fade-in-50 slide-in-from-bottom-1 duration-300"
           style={{ borderColor }}
         >
-          {/* ─── TOP HEADER STRIP (slate, matches dashboard) ─── */}
-          <div
-            className="flex items-center justify-between gap-3 px-4 py-2 text-white"
-            style={{ background: 'linear-gradient(90deg, #1f2937 0%, #334155 100%)' }}
-          >
-            <div className="flex min-w-0 flex-1 items-center gap-3">
-              <Checkbox
-                checked={isSelected}
-                disabled={item.approvalStatus === 'REJECTED'}
-                onCheckedChange={() => onToggleSelect(item.id)}
-                className="border-white/60 bg-white/10 data-[state=checked]:bg-white data-[state=checked]:text-[#FF6F61]"
-              />
-              <Badge
-                style={{ background: status.color + 'cc', color: '#fff', borderColor: status.color }}
-                className="border px-2 py-0.5 text-[10px] font-semibold uppercase tracking-wider"
-              >
-                {status.label}
-              </Badge>
-              {item.sapSyncMessage && (
-                <Tooltip
-                  title={
-                    <div className="max-h-[260px] overflow-y-auto text-xs">
-                      <div className="mb-1.5 text-[13px] font-bold text-red-700">⚠ SAP Remark</div>
-                      <div className="whitespace-pre-wrap leading-relaxed">{item.sapSyncMessage}</div>
-                    </div>
-                  }
-                  side="bottom"
-                >
-                  <Info className="h-4 w-4 shrink-0 cursor-pointer text-amber-200" />
-                </Tooltip>
-              )}
-              {/* ── Editable Division › SubDivision ── */}
-              <span className="flex items-center gap-1 truncate text-[12px] text-white/90">
-                {editingField === 'topbar_division' ? (
-                  <Select
-                    defaultValue={(localValues['division'] ?? item.division) || undefined}
-                    onValueChange={(val) => {
-                      // Changing division resets subDivision (no longer valid)
-                      const updates = { division: val || null, subDivision: null as string | null };
-                      setLocalValues((prev) => ({ ...prev, ...updates }));
-                      setEditingField(null);
-                      if (isModifyMode) {
-                        setPendingChanges((prev) => ({ ...prev, ...updates }));
-                      } else {
-                        onSave({ ...item, ...updates } as ApproverItem, updates as Record<string, unknown>);
-                      }
-                    }}
-                  >
-                    <SelectTrigger className="h-6 w-28 border-white/30 bg-white/10 text-[11px] text-white">
-                      <SelectValue placeholder="Select division" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      {(fabHierarchy?.divisions ?? []).map((d) => (
-                        <SelectItem key={d} value={d}>{d}</SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
-                ) : (
-                  <span
-                    onClick={() => {
-                      if (canEditDivision) setEditingField('topbar_division');
-                    }}
-                    style={{
-                      cursor: canEditDivision ? 'pointer' : 'default',
-                      borderBottom: canEditDivision ? '1px dashed rgba(255,255,255,0.4)' : 'none',
-                      fontStyle: (localValues['division'] ?? item.division) ? 'normal' : 'italic',
-                      opacity: (localValues['division'] ?? item.division) ? 1 : 0.7,
-                    }}
-                  >
-                    {formatDivisionLabel(localValues['division'] ?? item.division) ||
-                      (canEditDivision ? 'set division' : '—')}
-                  </span>
-                )}
-                <span className="text-white/40">›</span>
-                {editingField === 'topbar_subDivision' ? (
-                  <Popover
-                    open
-                    onOpenChange={(open) => { if (!open) { setEditingField(null); setSubDivSearch(''); } }}
-                  >
-                    <PopoverTrigger asChild>
-                      <button
-                        type="button"
-                        className="flex h-6 w-36 items-center justify-between rounded border border-white/30 bg-white/10 px-2 text-[11px] text-white"
-                      >
-                        <span className="truncate">
-                          {(localValues['subDivision'] ?? item.subDivision) || 'Select sub-division'}
-                        </span>
-                        <ChevronDown className="ml-1 h-3 w-3 shrink-0 opacity-60" />
-                      </button>
-                    </PopoverTrigger>
-                    <PopoverContent
-                      className="w-52 p-0"
-                      align="start"
-                      onClick={(e) => e.stopPropagation()}
-                    >
-                      {(() => {
-                        const effectiveDiv = (localValues['division'] ?? item.division) || '';
-                        const opts = (effectiveDiv && fabHierarchy?.subDivsByDiv[effectiveDiv])
-                          ? fabHierarchy.subDivsByDiv[effectiveDiv]
-                          : Object.values(fabHierarchy?.subDivsByDiv ?? {}).flat();
-                        const q = subDivSearch.trim().toLowerCase();
-                        const filtered = opts.filter((sd: string) => sd.toLowerCase().includes(q));
-                        const currentSubDiv = (localValues['subDivision'] ?? item.subDivision) || '';
-                        return (
-                          <>
-                            <div className="flex items-center border-b px-2 py-1.5">
-                              <Search className="mr-1.5 h-3.5 w-3.5 shrink-0 text-muted-foreground" />
-                              <input
-                                autoFocus
-                                value={subDivSearch}
-                                onChange={(e) => setSubDivSearch(e.target.value)}
-                                placeholder="Search..."
-                                className="flex-1 bg-transparent text-[11px] outline-none placeholder:text-muted-foreground"
-                              />
-                            </div>
-                            {currentSubDiv && (
-                              <button
-                                type="button"
-                                onClick={() => { handleSave('subDivision', null); setSubDivSearch(''); setEditingField(null); }}
-                                className="flex w-full items-center gap-1.5 border-b px-3 py-1.5 text-left text-[11px] font-medium text-red-600 hover:bg-red-50"
-                              >
-                                <X className="h-3 w-3 shrink-0" />
-                                Clear selection
-                              </button>
-                            )}
-                            <div className="max-h-56 overflow-y-auto py-1">
-                              {filtered.length === 0 ? (
-                                <div className="px-3 py-2 text-[11px] text-muted-foreground">No options found</div>
-                              ) : filtered.map((sd: string) => (
-                                <button
-                                  key={sd}
-                                  type="button"
-                                  onClick={() => { handleSave('subDivision', sd); setSubDivSearch(''); setEditingField(null); }}
-                                  className={cn(
-                                    'flex w-full px-3 py-1.5 text-left text-[11px] hover:bg-accent hover:text-accent-foreground',
-                                    sd === currentSubDiv && 'bg-accent/60 font-medium',
-                                  )}
-                                >
-                                  {sd}
-                                </button>
-                              ))}
-                            </div>
-                          </>
-                        );
-                      })()}
-                    </PopoverContent>
-                  </Popover>
-                ) : (
-                  <span
-                    onClick={() => {
-                      if (!isFieldLocked('subDivision')) setEditingField('topbar_subDivision');
-                    }}
-                    style={{
-                      cursor: isFieldLocked('subDivision') ? 'default' : 'pointer',
-                      borderBottom: isFieldLocked('subDivision') ? 'none' : '1px dashed rgba(255,255,255,0.4)',
-                      fontStyle: (localValues['subDivision'] ?? item.subDivision) ? 'normal' : 'italic',
-                      opacity: (localValues['subDivision'] ?? item.subDivision) ? 1 : 0.7,
-                    }}
-                  >
-                    {(localValues['subDivision'] ?? item.subDivision) || (isFieldLocked('subDivision') ? '—' : 'set sub-div')}
-                  </span>
-                )}
+          {/* ─── Header strip: selection, status, title, per-article actions ─── */}
+          <div className="flex flex-wrap items-center gap-x-3 gap-y-2 bg-slate-800 px-4 py-2.5 text-white">
+            <Checkbox
+              checked={isSelected}
+              disabled={item.approvalStatus === 'REJECTED'}
+              onCheckedChange={() => onToggleSelect(item.id)}
+              className="border-white/60 bg-white/10 data-[state=checked]:bg-white data-[state=checked]:text-slate-800"
+            />
+            <div className="flex min-w-0 flex-1 flex-col">
+              <strong className="truncate text-[14px] font-semibold">
+                {[currentMajCat, readField('designNumber')].filter(Boolean).join(' · ') || 'Untitled article'}
+              </strong>
+              <span className="truncate text-[12px] text-slate-300">
+                {[vendorNameVal, item.pptNumber ? `PPT ${item.pptNumber}` : null, item.sapArticleId || item.articleNumber]
+                  .filter(Boolean)
+                  .join(' · ') || '—'}
               </span>
-              {(item.sapArticleId || item.articleNumber) && (
-                <Badge className="bg-white/20 px-2 py-0.5 text-[11px] font-mono text-white">
-                  {item.sapArticleId || item.articleNumber}
-                </Badge>
-              )}
-              {/* ── Design + Vendor + Price ── */}
-              {(() => {
-                const designLocked = item.approvalStatus !== 'PENDING' && item.sapSyncStatus !== 'FAILED';
-                return (
-                  <span className="ml-2 flex flex-wrap items-center gap-1.5 truncate text-[11px] text-white/75">
-                    <span className="flex items-center gap-1">
-                      <span className="text-[10px] font-semibold uppercase tracking-wider text-white/60">Design:</span>
-                      {editingField === 'topbar_designNumber' ? (
-                        <input
-                          autoFocus
-                          defaultValue={(localValues['designNumber'] ?? item.designNumber) || ''}
-                          className="h-5 w-24 rounded border border-white/30 bg-white/10 px-1 text-[11px] text-white outline-none"
-                          onBlur={(e) => { handleSave('designNumber', e.target.value.trim() || null); setEditingField(null); }}
-                          onKeyDown={(e) => {
-                            if (e.key === 'Enter') { handleSave('designNumber', (e.target as HTMLInputElement).value.trim() || null); setEditingField(null); }
-                            if (e.key === 'Escape') setEditingField(null);
-                          }}
-                        />
-                      ) : (
-                        <span
-                          onClick={() => { if (!designLocked) setEditingField('topbar_designNumber'); }}
-                          style={{
-                            cursor: designLocked ? 'default' : 'pointer',
-                            borderBottom: designLocked ? 'none' : '1px dashed rgba(255,255,255,0.4)',
-                            fontStyle: (localValues['designNumber'] ?? item.designNumber) ? 'normal' : 'italic',
-                            opacity: (localValues['designNumber'] ?? item.designNumber) ? 1 : 0.7,
-                          }}
-                        >
-                          {(localValues['designNumber'] ?? item.designNumber) || (designLocked ? '—' : 'set design')}
-                        </span>
-                      )}
-                    </span>
-                    {item.vendorName && <span className="text-white/40">·</span>}
-                    {item.vendorName}
-                    {item.mrp != null && Number(item.mrp) > 1 && <> · ₹{item.mrp}</>}
-                  </span>
-                );
-              })()}
             </div>
-            <div className="flex shrink-0 items-center gap-2">
-              {item.pptNumber && (
-                <Badge className="bg-amber-300 text-amber-950">PPT: {item.pptNumber}</Badge>
-              )}
-              {isModifyMode && (
-                <Button
-                  size="sm"
-                  onClick={handleModify}
-                  disabled={Object.keys(pendingChanges).length === 0 || modifying}
-                  className="h-8 border-none bg-[#FF6F61] px-3 text-[12px] font-semibold text-white shadow-sm hover:bg-[#ff5b4d] disabled:bg-white/20 disabled:text-white/50"
-                >
-                  {modifying ? <Spinner size="sm" /> : <Wand2 />}
-                  {modifying ? 'Modifying…' : 'Modify'}
-                  {Object.keys(pendingChanges).length > 0 && !modifying && (
-                    <span className="ml-1 rounded-full bg-white/25 px-1.5 text-[10px] tabular-nums">
-                      {Object.keys(pendingChanges).length}
-                    </span>
-                  )}
-                </Button>
-              )}
-              {pathType === 'new' &&
-                item.approvalStatus === 'PENDING' &&
-                item.division?.toUpperCase() === 'KIDS' && (
+            <Badge
+              style={{ background: status.color + 'cc', color: '#fff', borderColor: status.color }}
+              className="border px-2 py-0.5 text-[10px] font-semibold uppercase tracking-wider"
+            >
+              {status.label}
+            </Badge>
+            {item.sapSyncMessage && (
+              <Tooltip
+                title={
+                  <div className="max-h-[260px] overflow-y-auto text-xs">
+                    <div className="mb-1.5 text-[13px] font-bold text-red-700">⚠ SAP Remark</div>
+                    <div className="whitespace-pre-wrap leading-relaxed">{item.sapSyncMessage}</div>
+                  </div>
+                }
+                side="bottom"
+              >
+                <Info className="h-4 w-4 shrink-0 cursor-pointer text-amber-200" />
+              </Tooltip>
+            )}
+            {isModifyMode && (
+              <Button
+                size="sm"
+                onClick={handleModify}
+                disabled={Object.keys(pendingChanges).length === 0 || modifying}
+                className="h-8 border-none bg-white px-3 text-[12px] font-semibold text-slate-800 shadow-sm hover:bg-slate-100 disabled:bg-white/20 disabled:text-white/50"
+              >
+                {modifying ? <Spinner size="sm" /> : <Wand2 />}
+                {modifying ? 'Modifying…' : 'Modify'}
+                {Object.keys(pendingChanges).length > 0 && !modifying && (
+                  <span className="ml-1 rounded-full bg-slate-800/10 px-1.5 text-[10px] tabular-nums">
+                    {Object.keys(pendingChanges).length}
+                  </span>
+                )}
+              </Button>
+            )}
+            {pathType === 'new' && item.approvalStatus === 'PENDING' && item.division?.toUpperCase() === 'KIDS' && (
+              <Button
+                size="sm"
+                variant="outline"
+                onClick={() => setDupConfirmOpen(true)}
+                className="h-8 border-white/40 bg-white/10 text-white hover:bg-white/20 hover:text-white"
+              >
+                <Copy />
+                Duplicate
+              </Button>
+            )}
+          </div>
+
+          {/* ─── Body: details rail | GM grid + BOM + variants ─── */}
+          <div className="grid items-start gap-3 p-3 lg:grid-cols-[clamp(360px,42%,560px)_minmax(0,1fr)]">
+            <aside className="flex min-w-0 flex-col gap-3">
+              {/* Photo */}
+              <div className="group relative aspect-[5/4] w-full overflow-hidden rounded-xl border border-slate-200 bg-gradient-to-br from-slate-50 to-slate-100">
+                {imgUrl ? (
+                  <img
+                    src={imgUrl}
+                    alt=""
+                    className="block h-full w-full cursor-zoom-in object-contain p-3"
+                    onError={handleImgError}
+                    onClick={() => setImgModalOpen(true)}
+                  />
+                ) : (
+                  <div className="flex h-full w-full items-center justify-center text-sm text-muted-foreground">No Image</div>
+                )}
+                <span className="absolute bottom-2.5 left-3 rounded-md bg-white/85 px-2 py-0.5 text-[11.5px] font-medium text-slate-600">
+                  Article photo · 1 of 1
+                </span>
+                {imgUrl && (
                   <Button
-                    size="sm"
+                    size="icon"
                     variant="outline"
-                    onClick={() => setDupConfirmOpen(true)}
-                    className="h-8 border-white/40 bg-white/10 text-white hover:bg-white/20"
+                    className="absolute bottom-2 right-2 h-8 w-8 bg-white/90 shadow-[var(--shadow-md)] backdrop-blur"
+                    onClick={() => setImgModalOpen(true)}
+                    aria-label="Open photo full screen"
                   >
-                    <Copy />
-                    Duplicate
+                    <Maximize2 />
                   </Button>
                 )}
+              </div>
+
+              {/* Article details */}
+              <section className={cn(CARD, 'flex flex-col gap-2.5 px-3.5 pb-3 pt-3')}>
+                <div className="flex flex-wrap items-baseline gap-x-2.5">
+                  <h2 className="m-0 text-[14px] font-bold text-slate-900">Article details</h2>
+                  <span className="text-[12px] text-slate-500">
+                    {pathType === 'created' ? 'Last updated' : 'Created'}{' '}
+                    {createdAtRaw
+                      ? new Date(createdAtRaw as string).toLocaleString('en-IN', {
+                          day: 'numeric',
+                          month: 'short',
+                          year: 'numeric',
+                          hour: '2-digit',
+                          minute: '2-digit',
+                        })
+                      : '—'}
+                  </span>
+                </div>
+                {/* Paired fields, two per line; description spans both columns. */}
+                <div className="grid grid-cols-2 gap-x-2.5 gap-y-2">
+                  {renderPickField({
+                    id: 'division',
+                    label: 'Division',
+                    value: currentDivision,
+                    placeholder: 'Choose division',
+                    options: divisionOptions,
+                    optionLabel: (d) => formatDivisionLabel(d) || d,
+                    onPick: saveDivision,
+                    disabled: !canEditDivision,
+                  })}
+                  {renderPickField({
+                    id: 'subDivision',
+                    label: 'Sub-division',
+                    value: currentSubDiv,
+                    placeholder: 'Choose sub-division',
+                    options: subDivOptions,
+                    onPick: pickAndSave('subDivision'),
+                    disabled: isFieldLocked('subDivision'),
+                    allowClear: true,
+                  })}
+                {renderPickField({
+                  id: 'majorCategory',
+                  label: 'Major category',
+                  value: currentMajCat,
+                  placeholder: 'Choose major category',
+                  options: majCatOptions,
+                  emptyText: 'No categories found',
+                  onPick: (v) => v && pickAndSave('majorCategory')(v),
+                  disabled: isFieldLocked('majorCategory'),
+                })}
+                {renderPickField({
+                  id: 'mcDescription',
+                  label: 'MC description',
+                  value: readField('mcDescription'),
+                  placeholder: 'Choose MC description',
+                  options: mcDesOptions,
+                  emptyText: currentMajCat ? 'No descriptions found' : 'Select a major category first',
+                  onPick: (v) => v && pickAndSave('mcDescription')(v),
+                  disabled: isFieldLocked('mcDescription'),
+                })}
+                {renderTextField('designNumber', 'Design number', {
+                  disabled: designLocked,
+                  placeholder: 'Type design number',
+                  mono: true,
+                })}
+                {renderTextField('articleNumber', isFGMode ? 'Fabric article number' : 'Article number', {
+                  value: String(item.sapArticleId || getValue('articleNumber') || '').trim(),
+                  disabled: !articleNumberEditable,
+                  placeholder: 'Type article number',
+                })}
+                {/* GM description rule is pending from the business — manual text for now. */}
+                <div className="col-span-2 min-w-0">
+                  {renderTextField('fabricArticleDescription', 'Article description', {
+                    disabled: isFieldLocked('fabricArticleDescription'),
+                    placeholder: 'Type article description',
+                  })}
+                </div>
+                {renderTextField(
+                  'vendorCode',
+                  <>
+                    Vendor code
+                    <RequiredMark />
+                  </>,
+                  {
+                    value: vendorCodeVal,
+                    disabled: isFieldLocked('vendorCode'),
+                    invalid: !vendorCodeVal && !isLocked,
+                    placeholder: '6-digit vendor code',
+                  },
+                )}
+                <div className={FIELD_LABEL}>
+                  <span>
+                    Vendor name
+                    <RequiredMark />
+                  </span>
+                  {editingField === 'hdr_vendorName' ? (
+                    <Autocomplete
+                      autoFocus
+                      value={vendorQuery || vendorNameVal}
+                      onChange={searchVendors}
+                      options={vendorOptions}
+                      notFoundContent={vendorSearching ? <Spinner size="sm" /> : null}
+                      placeholder="Search vendor"
+                      onSelect={(val, option) => {
+                        // option.vendorName is the clean name (no code suffix)
+                        const cleanName = (option as any).vendorName || String(val ?? '').split('||')[0];
+                        const updates: Record<string, string | null> = { vendorName: cleanName };
+                        if ((option as any).vendorCode) updates.vendorCode = (option as any).vendorCode;
+                        setLocalValues((prev) => ({ ...prev, ...updates }));
+                        if (isModifyMode) {
+                          setPendingChanges((prev) => ({ ...prev, ...updates }));
+                        } else {
+                          onSave({ ...item, ...updates } as ApproverItem, updates as Record<string, unknown>);
+                        }
+                        setEditingField(null);
+                        setVendorOptions([]);
+                        setVendorQuery('');
+                      }}
+                      onBlur={(e) => {
+                        const val = (e.target as HTMLInputElement).value.trim();
+                        if (val && val !== vendorNameVal) handleSave('vendorName', val);
+                        else setEditingField(null);
+                        setVendorOptions([]);
+                        setVendorQuery('');
+                      }}
+                      className={FIELD_INPUT}
+                    />
+                  ) : (
+                    <button
+                      type="button"
+                      disabled={isFieldLocked('vendorName')}
+                      onClick={() => setEditingField('hdr_vendorName')}
+                      className={cn(FIELD_BOX, !vendorNameVal && !isLocked && 'border-red-300 bg-red-50/60')}
+                    >
+                      <span className={cn('truncate', !vendorNameVal && 'font-normal text-slate-400')}>
+                        {vendorNameVal || (isFieldLocked('vendorName') ? '—' : 'Search vendor')}
+                      </span>
+                      {!isFieldLocked('vendorName') && <Search className="h-3.5 w-3.5 shrink-0 text-slate-400" />}
+                    </button>
+                  )}
+                </div>
+                </div>
+              </section>
+            </aside>
+
+            <div className="flex min-w-0 flex-col gap-3">
+              {/* GM grid — rows come from this major category's grid; two per line when wide */}
+              <section className={cn(CARD, '@container')}>
+                <div className="flex flex-wrap items-center gap-x-3 gap-y-2 border-b border-slate-100 px-4 py-3.5">
+                  <div className="flex min-w-0 flex-1 flex-col gap-0.5">
+                    <h2 className="m-0 text-[16px] font-bold text-slate-900">General merchandise grid</h2>
+                    <span className="text-[12.5px] text-slate-500">
+                      {gmRows.length > 0
+                        ? `${gmRows.length} attributes for ${currentMajCat} · ${gmFilledCount} filled`
+                        : currentMajCat || 'No major category set'}
+                    </span>
+                  </div>
+                  {gmRequiredRows.length > 0 && countPill(gmRequiredDone, gmRequiredRows.length)}
+                </div>
+                {gmRows.length === 0 ? (
+                  <div className="px-4 py-6 text-center text-[13px] text-slate-500">
+                    {!currentMajCat ? (
+                      'Choose a major category to load its grid.'
+                    ) : !gmGridLoaded ? (
+                      <Spinner size="sm" />
+                    ) : (
+                      `No GM attributes are set up for ${currentMajCat}.`
+                    )}
+                  </div>
+                ) : (
+                  [
+                    { title: 'Required', rows: gmRequiredRows },
+                    { title: 'Optional', rows: gmOptionalRows },
+                  ]
+                    .filter((s) => s.rows.length > 0)
+                    .map((s) => (
+                      <div key={s.title}>
+                        <div className="flex items-center gap-2 border-b border-slate-100 bg-slate-50 px-4 py-2.5">
+                          <strong className="text-[12px] uppercase tracking-[0.06em] text-slate-700">{s.title}</strong>
+                          <span className="text-[12.5px] text-slate-500">{s.rows.length}</span>
+                        </div>
+                        <div className="grid @2xl:grid-cols-2">{s.rows.map(renderGmRow)}</div>
+                      </div>
+                    ))
+                )}
+              </section>
+
+              {/* BOM — its own card, never mixed into the grid */}
+              <section className={CARD}>
+                <div className="flex items-center gap-2.5 border-b border-slate-100 px-4 py-3.5">
+                  <h2 className="m-0 text-[16px] font-bold text-slate-900">BOM</h2>
+                  {bomRequired.length > 0 && countPill(bomRequiredDone, bomRequired.length)}
+                </div>
+                <div className="grid grid-cols-[repeat(auto-fit,minmax(110px,1fr))] gap-x-3 gap-y-3 px-4 py-3.5">
+                  {BOM_FIELDS.map(renderBomField)}
+                </div>
+              </section>
+
+              {/* Proceed for FG Article Creation — hidden on New Articles and Failed Creations */}
+              {!item.articleNumber && pathType !== 'new' && pathType !== 'failed' && (
+                <Tooltip title={!vendorCodeVal ? 'Vendor Code is required before proceeding' : undefined}>
+                  <span className="block">
+                    <Button
+                      disabled={!vendorCodeVal}
+                      onClick={() => onProceedFGArticle(item)}
+                      className="h-9 w-full border-none bg-slate-800 text-[13px] font-semibold text-white hover:bg-slate-700 disabled:bg-slate-100 disabled:text-slate-400"
+                    >
+                      <Rocket />
+                      Proceed for FG Article Creation
+                    </Button>
+                  </span>
+                </Tooltip>
+              )}
             </div>
           </div>
 
-          {/* ─── MAIN GRID — image+info | attribute groups ─── */}
-          <div className="grid items-start gap-3 p-3 lg:grid-cols-[minmax(320px,40%)_1fr] xl:grid-cols-[minmax(360px,40%)_1fr] 2xl:grid-cols-[minmax(400px,40%)_1fr]">
-            {/* ─── LEFT: Image + Article Info + Reference ───
-             *
-             * Sticky rail: image + identity stay anchored to the viewport
-             * while the attribute groups on the right scroll. Top offset =
-             * height of the dashboard's sticky brand+filter chrome (~120px).
-             */}
-            <aside className="sticky top-[120px] flex min-w-0 flex-col gap-3 self-start">
-              {/* Article image — dominant focal point, mockup-style */}
-              <div className="overflow-hidden rounded-[var(--radius-card)] border-2 border-foreground/20 bg-white shadow-[var(--shadow-md)]">
-                <div className="flex items-center justify-between border-b-2 border-foreground/15 bg-slate-50 px-2.5 py-1.5">
-                  <span className="flex items-center gap-1.5 text-[10px] font-bold uppercase tracking-wider text-slate-700">
-                    <Info className="h-3 w-3" />
-                    Article Image
-                  </span>
-                  <Badge variant="success" className="text-[9px]">1 / 1</Badge>
-                </div>
-                <div className="group relative h-[420px] w-full bg-gradient-to-br from-slate-50 to-slate-100">
-                  {imgUrl ? (
-                    <>
-                      <img
-                        src={imgUrl}
-                        alt=""
-                        className="block h-full w-full cursor-zoom-in object-contain p-3 transition-transform duration-300 ease-out group-hover:scale-[1.02]"
-                        onError={handleImgError}
-                        onClick={() => setImgModalOpen(true)}
-                      />
-                      <Button
-                        size="icon"
-                        variant="outline"
-                        className="absolute right-2 top-2 h-8 w-8 bg-white/90 opacity-0 shadow-[var(--shadow-md)] backdrop-blur transition-opacity duration-200 group-hover:opacity-100"
-                        onClick={() => setImgModalOpen(true)}
-                        aria-label="Expand image"
-                      >
-                        <Maximize2 />
-                      </Button>
-                    </>
-                  ) : (
-                    <div className="flex h-full w-full items-center justify-center text-xs text-muted-foreground">
-                      No Image
-                    </div>
-                  )}
-                </div>
-              </div>
-
-              {/* Article information */}
-              <div className="overflow-hidden rounded-lg border-2 border-foreground/20 bg-white shadow-[var(--shadow-sm)]">
-                <div className="border-b-2 border-foreground/15 bg-slate-50 px-2 py-1">
-                  <span className="text-[10px] font-extrabold uppercase tracking-wider text-slate-700">
-                    Article Information
-                  </span>
-                </div>
-                <div className="space-y-0.5 px-2 py-1 text-[10.5px] font-medium">
-                  {item.source !== 'SRM' && (
-                    <div className="flex items-start justify-between gap-2">
-                      <span className="font-semibold text-muted-foreground">Article ID</span>
-                      <span className="truncate text-right font-bold text-foreground">
-                        {item.sapArticleId || item.articleNumber || item.imageName || '—'}
-                      </span>
-                    </div>
-                  )}
-                  <div className="flex items-start justify-between gap-2">
-                    <span className="font-semibold text-muted-foreground">Category</span>
-                    <span className="truncate text-right text-[11px] font-semibold text-foreground">
-                      {[formatDivisionLabel(item.division), item.subDivision, effectiveMajCat]
-                        .filter(Boolean)
-                        .join(' › ') || '—'}
-                    </span>
-                  </div>
-                  {item.source !== 'SRM' && (
-                    <>
-                      <div className="flex items-start justify-between gap-2">
-                        <span className="font-semibold text-muted-foreground">AI Confidence</span>
-                        <Badge variant="success">{aiConfidence}%</Badge>
-                      </div>
-                      <div className="flex items-start justify-between gap-2">
-                        <span className="font-semibold text-muted-foreground">Image Quality</span>
-                        <span className={`font-bold ${qualityColor(imageQualityLevel)}`}>{imageQualityLevel}</span>
-                      </div>
-                      <div className="flex items-start justify-between gap-2">
-                        <span className="font-semibold text-muted-foreground">Product Clarity</span>
-                        <span className={`font-bold ${qualityColor(productClarityLevel)}`}>{productClarityLevel}</span>
-                      </div>
-                      <div className="flex items-start justify-between gap-2">
-                        <span className="font-semibold text-muted-foreground">Attribute Match</span>
-                        <span className={`font-bold ${qualityColor(attrMatchLevel)}`}>
-                          {attrMatchLevel} ({filledAttrCount}/{visibleAttrs.length})
-                        </span>
-                      </div>
-                    </>
-                  )}
-                  <div className="flex items-start justify-between gap-2">
-                    <span className="font-semibold text-muted-foreground">{pathType === 'created' ? 'Last Updated' : 'Created'}</span>
-                    <span className="text-[11px] font-semibold text-foreground">
-                      {(pathType === 'created' ? item.updatedAt : item.createdAt) || item.updatedAt || item.createdAt
-                        ? new Date(((pathType === 'created' ? item.updatedAt : item.createdAt) || item.updatedAt || item.createdAt) as string).toLocaleString('en-IN', {
-                            day: 'numeric',
-                            month: 'short',
-                            year: 'numeric',
-                            hour: '2-digit',
-                            minute: '2-digit',
-                          })
-                        : '—'}
-                    </span>
-                  </div>
-                </div>
-              </div>
-
-              {/* Reference & Vendor — 7 editable fields stacked */}
-              <div className="overflow-hidden rounded-lg border-2 border-foreground/20 bg-white shadow-[var(--shadow-sm)]">
-                <div className="border-b-2 border-foreground/15 bg-slate-50 px-2 py-1">
-                  <span className="text-[10px] font-extrabold uppercase tracking-wider text-slate-700">
-                    Reference &amp; Vendor
-                  </span>
-                </div>
-                <div>{HEADER_FIELDS.map((f) => renderHeaderField(f as any))}</div>
-              </div>
-            </aside>
-
-            {/* ─── RIGHT: Attribute groups + BOM + Fabric/Body + Proceed FG ─── */}
-            <section className="flex min-w-0 flex-col">
-              <div className="mb-1.5 flex shrink-0 items-center justify-between">
-                <h3 className="flex items-center gap-1.5 text-[13px] font-bold text-slate-700">
-                  <Sparkles className="h-3.5 w-3.5 text-[#FF6F61]" />
-                  GENERAL MERCHANDISE ATTRIBUTES
-                  {/* Legend popover */}
-                  <Popover>
-                    <PopoverTrigger asChild>
-                      <button
-                        type="button"
-                        className="ml-1 inline-flex h-5 w-5 items-center justify-center rounded-full border border-slate-300 text-[10px] font-bold text-slate-500 hover:bg-slate-50"
-                        aria-label="Legend"
-                      >
-                        ?
-                      </button>
-                    </PopoverTrigger>
-                    <PopoverContent className="w-56 p-3">
-                      <div className="mb-2 text-xs font-semibold uppercase tracking-wider text-muted-foreground">
-                        Legend
-                      </div>
-                      <div className="space-y-1.5 text-xs">
-                        <div className="flex items-center gap-2">
-                          <span className="inline-block h-3 w-3 rounded border border-slate-400 bg-slate-200" />
-                          AI Predicted
-                        </div>
-                        <div className="flex items-center gap-2">
-                          <span className="inline-block h-3 w-3 rounded border border-emerald-300 bg-emerald-100" />
-                          User Modified
-                        </div>
-                        <div className="flex items-center gap-2">
-                          <span className="inline-block h-3 w-3 rounded border border-amber-300 bg-amber-50" />
-                          Required (Empty)
-                        </div>
-                        <div className="flex items-center gap-2">
-                          <span className="text-base leading-none text-red-500">*</span>
-                          Mandatory Field
-                        </div>
-                      </div>
-                    </PopoverContent>
-                  </Popover>
-                </h3>
-                <Button
-                  variant="ghost"
-                  size="sm"
-                  onClick={() => {
-                    setAllCollapsed((c) => !c);
-                    setCollapsedGroups(new Set());
-                  }}
-                  className="h-7 text-xs"
-                >
-                  {allCollapsed ? <ChevronDown /> : <ChevronUp />}
-                  {allCollapsed ? 'Expand All' : 'Collapse All'}
-                </Button>
-              </div>
-
-              {visibleAttrs.length > 0 ? (
-                <div className="grid auto-rows-min grid-cols-1 gap-3">
-                  {activeGroups.map((g) => {
-                    const style = GROUP_HEADER_STYLE[g.group] ?? { bg: '#f3f4f6', fg: '#374151', border: '#e5e7eb' };
-                    const collapsed = isGroupCollapsed(g.group);
-                    return (
-                      <div
-                        key={g.group}
-                        className="overflow-hidden rounded-lg border-2 bg-white shadow-[var(--shadow-sm)]"
-                        style={{ borderColor: style.border }}
-                      >
-                        <button
-                          type="button"
-                          onClick={() => toggleGroupCollapse(g.group)}
-                          className="flex w-full items-center justify-between border-b-2 px-2 py-1.5 transition-colors hover:brightness-95"
-                          style={{ background: style.bg, borderColor: style.border }}
-                        >
-                          <span
-                            className="flex items-center gap-1 text-[10px] font-bold uppercase tracking-wider"
-                            style={{ color: style.fg }}
-                          >
-                            {GROUP_ICONS[g.group]}
-                            {GROUP_LABELS[g.group] ?? g.group}
-                          </span>
-                          {collapsed ? (
-                            <ChevronDown className="h-3 w-3" style={{ color: style.fg }} />
-                          ) : (
-                            <ChevronUp className="h-3 w-3" style={{ color: style.fg }} />
-                          )}
-                        </button>
-                        {!collapsed && (
-                          <div className="space-y-0 p-1">
-                            {g.group === 'FAB' && gmFamilyAttrs.length > 0
-                              ? gmFamilyAttrs.map((attr) => {
-                                  return renderAttributeRow({
-                                    field: attr.code,
-                                    label: attr.code,
-                                    schemaKey: attr.code,
-                                    group: 'FAB',
-                                    values: attr.values.map((v) => ({ shortForm: v, fullForm: v })),
-                                    freeText: attr.values.length === 0,
-                                    isMandatory: attr.mandatory,
-                                  });
-                                })
-                              : groupMap[g.group].attrs.map((attr) => renderAttributeRow(attr))
-                            }
-
-
-                          </div>
-                        )}
-                      </div>
-                    );
-                  })}
-
-                  {/* BOM card */}
-                  <div
-                    className="overflow-hidden rounded-lg border bg-white"
-                    style={{ borderColor: '#fde68a' }}
-                  >
-                    <div
-                      className="flex items-center justify-between border-b px-2 py-1"
-                      style={{ background: '#fffbeb', borderColor: '#fde68a' }}
-                    >
-                      <span className="flex items-center gap-1 text-[10px] font-bold uppercase tracking-wider text-amber-700">
-                        <DollarSign className="h-3 w-3" />
-                        BOM
-                      </span>
-                    </div>
-                    <div className="space-y-0 p-1">
-                      {[
-                        ...(!isFGMode ? [
-                          { label: 'Cost/Rate', field: 'rate', editable: true, mandatory: true, isDropdown: false, isColor: false, isMarkdown: false, isAfterTax: false },
-                          { label: 'MRP', field: 'mrp', editable: true, mandatory: true, isDropdown: false, isColor: false, isMarkdown: false, isAfterTax: false },
-                          { label: 'MARKDOWN', field: '_markdown', editable: false, mandatory: false, isDropdown: false, isColor: false, isMarkdown: true, isAfterTax: false },
-                          { label: 'AFTER TAX', field: '_afterTax', editable: false, mandatory: false, isDropdown: false, isColor: false, isMarkdown: false, isAfterTax: true },
-                          ...(!item.source || item.source !== 'SRM' ? [
-                            { label: 'Base Color', field: 'colour', editable: true, mandatory: false, isDropdown: true, isColor: true, isMarkdown: false, isAfterTax: false },
-                          ] : []),
-                        ] : []),
-                        { label: 'ARTICLE FASHION TYPE', field: 'articleFashionType', editable: true, mandatory: true, isDropdown: true, isColor: false, isMarkdown: false, boldLabel: true },
-                        ...(!isFGMode ? [
-                          { label: 'SEGMENT', field: 'segment', editable: true, mandatory: true, isDropdown: false, isColor: false, isMarkdown: false, boldLabel: true },
-                        ] : []),
-                        ...(isFGMode ? [
-                          { label: 'VENDOR FABRIC RATE', field: 'fabricRate', editable: true, mandatory: false, isDropdown: false, isColor: false, isMarkdown: false },
-                          { label: 'V2 FABRIC RATE', field: 'v2FabricRate', editable: true, mandatory: false, isDropdown: false, isColor: false, isMarkdown: false },
-                          { label: 'VALUE ADD ACC. COST', field: 'valueAddCost', editable: true, mandatory: false, isDropdown: false, isColor: false, isMarkdown: false },
-                        ] : []),
-                      ].map((bom) => {
-                        const isEditingBom = editingField === `bom_${bom.field}`;
-                        const bomLocked = isFieldLocked(bom.field) || (bom as any).isMarkdown || (bom as any).isAfterTax;
-                        const val = (bom as any).isMarkdown
-                          ? markdown
-                          : (bom as any).isAfterTax
-                          ? afterTax
-                          : String(getValue(bom.field) ?? '').trim() || '—';
-                        const isEmpty = val === '—';
-                        const dropdownOptions: string[] = bom.isDropdown
-                          ? bom.field === 'impAtrbt2'
-                            ? getMajCatGridEntry(effectiveMajCat, 'IMP ATBT') ??
-                              attributes.find((a) => a.key === 'imp_atrbt2')?.allowedValues.map((v) => v.shortForm) ??
-                              getCachedValues(item.division ?? '', 'impAtrbt2') ??
-                              []
-                            : bom.field === 'articleFashionType'
-                            ? ['C']
-                            : getCachedValues(item.division ?? '', bom.field) ?? []
-                          : [];
-                        return (
-                          <div
-                            key={bom.field}
-                            className="flex items-center gap-1.5 rounded px-1 py-0.5 transition-colors hover:bg-muted/40"
-                            style={{
-                              cursor: bom.editable && !bomLocked ? 'pointer' : 'default',
-                              background: isEditingBom
-                                ? '#e0f2fe'
-                                : bom.mandatory && isEmpty && !bomLocked
-                                ? '#fffbeb'
-                                : undefined,
-                            }}
-                            onClick={() => {
-                              if (bom.editable && !bomLocked && !isEditingBom) setEditingField(`bom_${bom.field}`);
-                            }}
-                          >
-                            <span
-                              className="flex-1 truncate text-[11px]"
-                              style={{
-                                color: bom.mandatory && isEmpty && !isLocked ? '#dc2626' : '#374151',
-                                fontWeight: bom.mandatory || (bom as any).boldLabel || (bom as any).isMarkdown || (bom as any).isAfterTax ? 600 : 400,
-                              }}
-                            >
-                              {bom.mandatory && <span className="mr-0.5 text-red-500">*</span>}
-                              {bom.label}
-                            </span>
-                            <div className="w-[100px] shrink-0 text-right">
-                              {isEditingBom && bom.isColor ? (
-                                <ColorSelect
-                                  value={val === '—' ? null : val}
-                                  options={masterColors}
-                                  onPick={(code) => handleSave('colour', code)}
-                                  onClose={() => setEditingField(null)}
-                                />
-                              ) : isEditingBom && bom.isDropdown ? (
-                                <Select
-                                  defaultOpen
-                                  defaultValue={val === '—' ? undefined : val}
-                                  onValueChange={(v) => handleSave(bom.field, v ?? null)}
-                                  onOpenChange={(open) => { if (!open) setEditingField(null); }}
-                                >
-                                  <SelectTrigger className="h-6 w-full text-[11px]">
-                                    <SelectValue />
-                                  </SelectTrigger>
-                                  <SelectContent>
-                                    {dropdownOptions.map((v) => (
-                                      <SelectItem key={v} value={v}>
-                                        {v}
-                                      </SelectItem>
-                                    ))}
-                                  </SelectContent>
-                                </Select>
-                              ) : isEditingBom ? (
-                                <Input
-                                  autoFocus
-                                  defaultValue={val === '—' ? '' : val}
-                                  className="h-6 px-1 text-[11px]"
-                                  onKeyDown={(e) =>
-                                    e.key === 'Enter' &&
-                                    handleSave(bom.field, (e.target as HTMLInputElement).value || null)
-                                  }
-                                  onBlur={(e) => handleSave(bom.field, e.target.value || null)}
-                                />
-                              ) : (
-                                <span
-                                  className="block truncate text-[11px]"
-                                  style={{
-                                    color: bom.mandatory && isEmpty && !isLocked
-                                      ? '#ea580c'
-                                      : isEmpty
-                                      ? '#9ca3af'
-                                      : '#111827',
-                                    fontStyle: bom.mandatory && isEmpty && !isLocked ? 'italic' : 'normal',
-                                  }}
-                                >
-                                  {bom.mandatory && isEmpty && !isLocked ? 'Required' : val}
-                                </span>
-                              )}
-                            </div>
-                          </div>
-                        );
-                      })}
-                    </div>
-                  </div>
-                </div>
-              ) : (
-                <div className="rounded-md border border-border bg-muted/30 px-4 py-3 text-xs text-muted-foreground">
-                  {effectiveMajCat ? `No attributes defined for ${effectiveMajCat}` : 'No major category set.'}
-                </div>
-              )}
-
-              {/* Proceed for FG Article Creation — hidden on New Articles and Failed Creations */}
-              {!item.articleNumber && pathType !== 'new' && pathType !== 'failed' &&
-                (() => {
-                  const effectiveVendorCode =
-                    localValues['vendorCode'] !== undefined ? localValues['vendorCode'] : item.vendorCode;
-                  const vendorCodeMissing = !effectiveVendorCode;
-                  return (
-                    <div className="mt-2 shrink-0">
-                      <Tooltip title={vendorCodeMissing ? 'Vendor Code is required before proceeding' : undefined}>
-                        <Button
-                          disabled={vendorCodeMissing}
-                          onClick={() => onProceedFGArticle(item)}
-                          className="h-8 w-full text-[12px] font-semibold transition-all"
-                          style={{
-                            background: vendorCodeMissing ? '#f3f4f6' : '#FF6F61',
-                            color: vendorCodeMissing ? '#9ca3af' : '#fff',
-                            border: 'none',
-                          }}
-                        >
-                          <Rocket />
-                          Proceed for FG Article Creation
-                        </Button>
-                      </Tooltip>
-                    </div>
-                  );
-                })()}
-            </section>
-
-          </div>
-
-          {/* ─── Variants section — SRM Fabric Articles only ─── */}
+          {/* Colour variants — generic articles only; full width under both columns */}
           {item.isGeneric && (
-            <div className="border-t border-border">
+            <section className={cn(CARD, 'mx-3 mb-3')}>
               <button
                 type="button"
                 onClick={() => setShowVariants((v) => !v)}
-                className="flex w-full items-center justify-between px-3 py-1.5 transition-colors hover:brightness-95"
-                style={{ background: showVariants ? '#e2e8f0' : '#f8fafc' }}
+                className="flex w-full items-center gap-2.5 px-4 py-3.5 text-left hover:bg-slate-50"
               >
-                <span className="flex items-center gap-2 text-xs font-semibold text-slate-700">
-                  <Users className="h-3.5 w-3.5" />
-                  Color Variants
-                </span>
-                <span className="text-[11px] text-muted-foreground">{showVariants ? '▲ Hide' : '▼ Show'}</span>
+                <Users className="h-4 w-4 text-slate-500" />
+                <h2 className="m-0 flex-1 text-[15px] font-bold text-slate-900">Colour variants</h2>
+                <span className="text-[12.5px] text-slate-500">{showVariants ? 'Hide' : 'Show'}</span>
+                {showVariants ? (
+                  <ChevronUp className="h-4 w-4 text-slate-400" />
+                ) : (
+                  <ChevronDown className="h-4 w-4 text-slate-400" />
+                )}
               </button>
               {showVariants && (
-                item.source === 'SRM' ? (
-                  <GMArticleVariantSubTable
-                    genericId={item.id}
-                    genericRecord={item}
-                    pathType={pathType}
-                  />
-                ) : (
-                  <GMVariantSubTable
-                    genericId={item.id}
-                    genericRecord={item}
-                    attributes={attributes}
-                    onRefresh={onRefresh}
-                    pathType={pathType}
-                  />
-                )
+                <div className="border-t border-slate-100">
+                  {item.source === 'SRM' ? (
+                    <GMArticleVariantSubTable genericId={item.id} genericRecord={item} pathType={pathType} />
+                  ) : (
+                    <GMVariantSubTable
+                      genericId={item.id}
+                      genericRecord={item}
+                      attributes={attributes}
+                      onRefresh={onRefresh}
+                      pathType={pathType}
+                    />
+                  )}
+                </div>
               )}
-            </div>
+            </section>
           )}
 
           {/* ─── Tip footer ─── */}
-          <div className="flex shrink-0 items-center gap-1.5 border-t border-border bg-slate-50/70 px-3 py-1 text-[10.5px] text-slate-500">
-            <Info className="h-3 w-3 text-amber-500" />
+          <div className="flex shrink-0 items-center gap-1.5 border-t border-slate-200 bg-white px-4 py-1.5 text-[11px] text-slate-500">
+            <Info className="h-3 w-3 text-slate-400" />
             <span>
               {isModifyMode
-                ? 'Click any value to edit, then press “Modify” to push your changes to SAP. Use ◀ / ▶ to move between articles.'
-                : 'Click any value to edit — all changes are saved automatically. Use ◀ / ▶ to move between articles.'}
+                ? 'Edit any field, then press “Modify” to push your changes to SAP. Use ‹ / › to move between articles.'
+                : 'Every field saves as soon as you leave it. Use ‹ / › to move between articles.'}
             </span>
           </div>
         </div>
