@@ -13,7 +13,6 @@ export const SET_MAJOR_CATEGORIES = [
   // LADIES
   'L_CO-ORD_SET', // LU
   'L_KURTI_ST', // LK&L
-  'L_N_SUIT', // LN&L
   'LW_CO_ORD_SET', // LW
   'LW_KURTI_ST', // LW
   'LW_NIGHT_SUIT', // LW
