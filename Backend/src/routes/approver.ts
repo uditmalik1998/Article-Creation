@@ -33,7 +33,9 @@ router.get('/items', h(ApproverController.getItems));
 router.get('/items/export-all', h(ApproverController.exportAll));
 
 // Rough Costing Excel report — for FG Created articles
-router.get('/items/rough-costing-export', h(ApproverController.roughCostingExport));
+router.get('/items/rough-costing-export',   h(ApproverController.roughCostingExport));
+// Precise Costing Excel report — NEW-RAM SIR 360° format
+router.get('/items/precise-costing-export', h(ApproverController.preciseCostingExport));
 
 // Export ALL items with SAP-created variants interleaved (generic row then its variant rows)
 router.get('/items/export-all-with-variants', h(ApproverController.exportAllWithVariants));
@@ -90,8 +92,9 @@ router.get('/fabric-article-data/search', h(ApproverController.searchFabricArtic
 
 // Body article data search — returns up to 10 matching body_article_data rows by number or description
 // (an exact Body Article Number match is always included even if outside the top 10)
-router.get('/body-article-data/search', h(ApproverController.searchBodyArticleData));
-router.get('/body-fabric-consumption',  h(ApproverController.getBodyFabricConsumption));
+router.get('/body-article-data/search',     h(ApproverController.searchBodyArticleData));
+router.get('/precise-body-article/search', h(ApproverController.searchPreciseBodyArticle));
+router.get('/body-fabric-consumption',     h(ApproverController.getBodyFabricConsumption));
 router.get('/body-fabric-consumption/gsm', h(ApproverController.getFabricGsmByMajorCategory));
 router.get('/rough-cmp-cost',           h(ApproverController.getRoughCmpCost));
 

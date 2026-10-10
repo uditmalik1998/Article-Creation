@@ -1511,6 +1511,15 @@ exports.Prisma.ExpenseAuditLogScalarFieldEnum = {
   occurredAt: 'occurredAt'
 };
 
+exports.Prisma.BodyArticleDescriptionFormateScalarFieldEnum = {
+  id: 'id',
+  fgMajCat: 'fgMajCat',
+  attributesMajCat: 'attributesMajCat',
+  frGridStatus: 'frGridStatus',
+  createdAt: 'createdAt',
+  updatedAt: 'updatedAt'
+};
+
 exports.Prisma.SortOrder = {
   asc: 'asc',
   desc: 'desc'
@@ -2508,6 +2517,12 @@ exports.Prisma.ExpenseAuditLogOrderByRelevanceFieldEnum = {
   actorEmail: 'actorEmail',
   comment: 'comment'
 };
+
+exports.Prisma.BodyArticleDescriptionFormateOrderByRelevanceFieldEnum = {
+  fgMajCat: 'fgMajCat',
+  attributesMajCat: 'attributesMajCat',
+  frGridStatus: 'frGridStatus'
+};
 exports.GarmentType = exports.$Enums.GarmentType = {
   UPPER: 'UPPER',
   LOWER: 'LOWER',
@@ -2672,7 +2687,8 @@ exports.Prisma.ModelName = {
   GridContributionAssignment: 'GridContributionAssignment',
   ExpenseChangeRequest: 'ExpenseChangeRequest',
   ExpenseAccessGrant: 'ExpenseAccessGrant',
-  ExpenseAuditLog: 'ExpenseAuditLog'
+  ExpenseAuditLog: 'ExpenseAuditLog',
+  BodyArticleDescriptionFormate: 'BodyArticleDescriptionFormate'
 };
 
 /**

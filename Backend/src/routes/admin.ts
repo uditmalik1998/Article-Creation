@@ -325,6 +325,14 @@ router.get('/fabric-article-master/template', h(adminController.downloadFabricAr
 router.get('/fabric-article-master/download', h(adminController.downloadFabricArticleMasterData));
 router.post('/fabric-article-master/upload',  excelUpload.single('file'), h(adminController.uploadFabricArticleMaster));
 
+// ═══════════════════════════════════════════════════════════════
+// PRECISE BODY ARTICLE CONSUMPTION — precise_body_article_consumption
+// ═══════════════════════════════════════════════════════════════
+router.get('/precise-body-article/status',   h(adminController.getPreciseBodyArticleStatus));
+router.get('/precise-body-article/template', h(adminController.downloadPreciseBodyArticleTemplate));
+router.get('/precise-body-article/download', h(adminController.downloadPreciseBodyArticleData));
+router.post('/precise-body-article/upload',  excelUpload.single('file'), h(adminController.uploadPreciseBodyArticle));
+
 // ═══════════════════════════════════════════════════════
 // BODY ARTICLE DATA (ADMIN) — body_article_data
 // ═══════════════════════════════════════════════════════

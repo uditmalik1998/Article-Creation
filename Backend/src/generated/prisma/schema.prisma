@@ -2462,3 +2462,18 @@ model ExpenseAuditLog {
   @@map("expense_audit_log")
   @@schema("public")
 }
+
+model BodyArticleDescriptionFormate {
+  id               Int      @id @default(autoincrement())
+  fgMajCat         String   @map("fg_maj_cat") @db.VarChar(200)
+  attributesMajCat String   @map("attributes_maj_cat") @db.VarChar(200)
+  frGridStatus     String   @map("fr_grid_status") @db.VarChar(20)
+  createdAt        DateTime @default(now()) @map("created_at")
+  updatedAt        DateTime @updatedAt @map("updated_at")
+
+  @@unique([fgMajCat, attributesMajCat])
+  @@index([fgMajCat])
+  @@index([frGridStatus])
+  @@map("body_article_description_formate")
+  @@schema("public")
+}

@@ -1767,6 +1767,269 @@ export class ApproverController {
         }
     }
 
+    // Precise Costing export — exact NEW-RAM SIR (360°) format.
+    // Column layout (1-indexed ExcelJS / A-V):
+    //  A=MAJ_CAT  B=SSN  C=FG_ART_NO.  D=ART_DESC.  E=  F=PIC HL
+    //  G=MATERIAL TYPE  H=MATERIAL_MC  I=ART. NO.  J=ART-ATT. HL
+    //  K=ART. DES  L=PIC HL  M=UOM  N=TTL QTY  O=RATE  P=WST %
+    //  Q=PR PC CONS.  R=VNDR PR PC COST  S=V2 PR PC COST  T=RATIO  U=MARGIN %  V=REMARKS
+    static async preciseCostingExport(req: Request, res: Response) {
+        // Phase 1 — fetch all data before touching the response stream
+        let fgArticles: any[];
+        let fabricMap: Map<string, any>;
+        try {
+            const where = ApproverController.buildExportWhere(req);
+            fgArticles = await prisma.extractionResultFlat.findMany({
+                where,
+                orderBy: { approvedAt: { sort: 'desc', nulls: 'last' } },
+                select: {
+                    sapArticleId: true,
+                    articleNumber: true,
+                    articleDescription: true,
+                    majorCategory: true,
+                    mrp: true,
+                    vendorName: true,
+                    fabricArticleNumber: true,
+                    fabricArticleDescription: true,
+                    bodyArticle: true,
+                    bodyArticleDescription: true,
+                    vendorFabricRate: true,
+                    cmtpCost: true,
+                    cmpCost: true,
+                    fabCons: true,
+                    valueAddCost: true,
+                    valueAddProcessCost: true,
+                },
+            });
+            const fabricNums = [...new Set(fgArticles.map((a: any) => a.fabricArticleNumber).filter(Boolean) as string[])];
+            const fabricRows = fabricNums.length > 0
+                ? await prisma.fabricArticleData.findMany({
+                    where: { fabricArticleNumber: { in: fabricNums } },
+                    select: { fabricArticleNumber: true, v2FabricRate: true },
+                })
+                : [];
+            fabricMap = new Map(fabricRows.map(r => [r.fabricArticleNumber!, r as any]));
+        } catch (err) {
+            console.error('[preciseCostingExport] DB error', err);
+            return res.status(500).json({ error: 'Failed to generate precise costing report' });
+        }
+
+        // Phase 2 — stream Excel row-by-row (each row is flushed immediately, no full-workbook buffer)
+        try {
+            const ExcelJS = (await import('exceljs')).default;
+
+            res.setHeader('Content-Type', 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');
+            res.setHeader('Content-Disposition', `attachment; filename="Precise_Costing_${new Date().toISOString().slice(0, 10)}.xlsx"`);
+
+            const wb: any = new (ExcelJS as any).stream.xlsx.WorkbookWriter({ stream: res, useStyles: true, useSharedStrings: true });
+            const ws: any = wb.addWorksheet('NEW-RAM SIR');
+
+            // Column widths must be declared before any rows in streaming mode
+            ws.columns = [
+                { width: 5 }, { width: 5 }, { width: 5 }, { width: 5 }, { width: 5 }, { width: 5 },
+                { width: 14 }, { width: 16 }, { width: 16 }, { width: 10 }, { width: 32 }, { width: 8 },
+                { width: 6 }, { width: 8 }, { width: 10 }, { width: 8 }, { width: 12 }, { width: 14 },
+                { width: 14 }, { width: 10 }, { width: 10 }, { width: 16 },
+            ];
+
+            // Sparse 22-element array: index 0=A … 21=V
+            const sparse = (map: Record<number, any>): any[] => {
+                const arr: any[] = new Array(22).fill(null);
+                Object.entries(map).forEach(([k, v]) => { arr[Number(k)] = v; });
+                return arr;
+            };
+
+            // Add a row, apply optional styles, then commit it to the stream (frees memory immediately)
+            const addRow = (data: any[], styleFn?: (row: any) => void): void => {
+                const row = ws.addRow(data);
+                if (styleFn) styleFn(row);
+                row.commit();
+            };
+
+            // Returns a style function that paints cols G-V (1-indexed 7-22) with a solid fill
+            const painter = (argb: string, bold = false, white = false) => (row: any) => {
+                for (let c = 7; c <= 22; c++) {
+                    const cell = row.getCell(c);
+                    cell.fill = { type: 'pattern', pattern: 'solid', fgColor: { argb } };
+                    if (bold || white) cell.font = { bold, color: white ? { argb: 'FFFFFFFF' } : undefined };
+                }
+            };
+
+            const toN = (v: any) => (v == null ? 0 : Number(v));
+            const N   = (v: any) => { const n = Number(v); return (v == null || n === 0) ? null : n; };
+
+            const DARK_BLUE  = 'FF1F4E79';
+            const NAVY       = 'FF17375E';
+            const LIGHT_BLUE = 'FFD6E4F0';
+            const PURPLE     = 'FFE8DAEF';
+            const AMBER      = 'FFFFF2CC';
+            const LT_GREEN   = 'FFE2EFDA';
+
+            const MAT_HDR = [
+                'MATERIAL TYPE', 'MATERIAL_MC', 'ART. NO.', 'ART-ATT. HL', 'ART. DES', 'PIC_HL',
+                'UOM', '', 'RATE', 'WST %', 'PR PC CONS.', 'VDR PR PC COST', 'V2 PR PC COST',
+                'DIFF', 'RATIO', 'REMARKS',
+            ];
+
+            // Global title
+            addRow(sparse({ 6: 'Detailed 360 Degree Format' }), (row) => {
+                row.getCell(7).font = { bold: true, size: 13 };
+            });
+
+            for (const a of fgArticles) {
+                const fabData  = a.fabricArticleNumber ? fabricMap.get(a.fabricArticleNumber) : null;
+                const sapNo    = a.sapArticleId || a.articleNumber || '';
+                const mrp      = toN(a.mrp);
+                const fabCons  = toN(a.fabCons);
+                const vdrRate  = toN(a.vendorFabricRate);
+                const v2Rate   = toN(fabData?.v2FabricRate);
+                const fabVdr   = fabCons > 0 && vdrRate > 0 ? +(fabCons * vdrRate * 1.15).toFixed(2) : 0;
+                const fabV2    = fabCons > 0 && v2Rate  > 0 ? +(fabCons * v2Rate  * 1.15).toFixed(2) : 0;
+                const cmtp     = toN(a.cmtpCost);
+                const cmp      = toN(a.cmpCost);
+                const valAdd   = toN(a.valueAddCost);
+                const valProc  = toN(a.valueAddProcessCost);
+                const v2Cost   = +(fabV2  + cmp + cmtp + valAdd + valProc).toFixed(2);
+                const vdrCost  = +(fabVdr + cmp + cmtp + valAdd + valProc).toFixed(2);
+                const margin   = mrp > 0 ? (mrp - v2Cost)  / mrp : 0;
+                const vdrMargn = mrp > 0 ? (mrp - vdrCost) / mrp : 0;
+                const matTtl   = +(fabV2 + cmp + cmtp).toFixed(2);
+
+                addRow([]);
+
+                // Article header label row (dark blue)
+                addRow(sparse({
+                    6: 'FG MAJOR CATEG', 7: 'FG ARTICLE NUM', 8: 'FG ARTICLE DESC',
+                    9: 'IMAGE #', 10: 'VENDOR NAME',
+                }), painter(DARK_BLUE, true, true));
+
+                // Article header value row
+                addRow(sparse({
+                    6: a.majorCategory      || '',
+                    7: sapNo,
+                    8: a.articleDescription || '',
+                    10: a.vendorName        || '',
+                }));
+
+                addRow([]);
+
+                // Cost summary — label at G (idx 6), value at H (idx 7)
+                const costRow = (label: string, val: any, argb = '', pct = false) => {
+                    addRow(sparse({ 6: label, 7: val }), (row) => {
+                        if (argb) painter(argb)(row);
+                        if (pct && val != null) row.getCell(8).numFmt = '0.00%';
+                    });
+                };
+                costRow('MRP',          N(mrp),      AMBER);
+                costRow('V2 PURCHASE',  N(v2Cost),   LT_GREEN);
+                costRow('PRODUCT',      N(v2Cost));
+                costRow('VDR_MRGN',     N(vdrMargn), '', true);
+                costRow('MATERIAL TTL', N(matTtl),   LIGHT_BLUE);
+                costRow('MARGIN',       N(margin),   '', true);
+
+                addRow([]);
+
+                // Material column header row (dark blue)
+                const matHdrArr: any[] = new Array(22).fill(null);
+                MAT_HDR.forEach((h, i) => { matHdrArr[6 + i] = h || null; });
+                addRow(matHdrArr, (row) => {
+                    painter(DARK_BLUE, true, true)(row);
+                    row.height = 30;
+                    for (let c = 7; c <= 22; c++) {
+                        row.getCell(c).alignment = { horizontal: 'center', vertical: 'middle', wrapText: true };
+                    }
+                });
+
+                addRow([]);
+                addRow(sparse({ 6: 'UPPER' }), painter(NAVY, true, true));
+                addRow([]);
+
+                // UPPER FABRIC row 1 (with real data)
+                addRow(sparse({
+                    6: 'FABRIC', 7: 'FAB_MC',
+                    8:  a.fabricArticleNumber      || null,
+                    10: a.fabricArticleDescription || null,
+                    12: 'KG',
+                    14: N(vdrRate),
+                    15: a.fabricArticleNumber ? 0.15 : null,
+                    16: N(fabCons),
+                    17: N(fabVdr),
+                    18: N(fabV2),
+                    19: (fabVdr && fabV2) ? +(fabVdr - fabV2).toFixed(2) : null,
+                }), (row) => {
+                    painter(LIGHT_BLUE)(row);
+                    if (a.fabricArticleNumber) row.getCell(16).numFmt = '0.00%';
+                });
+
+                // UPPER FABRIC row 2 (empty placeholder)
+                addRow(sparse({ 6: 'FABRIC', 7: 'FAB_MC', 12: 'KG' }), painter(LIGHT_BLUE));
+
+                addRow([]);
+                addRow(sparse({ 6: 'STICH.ACC', 7: 'THREAD', 12: 'M' }));
+                addRow([]);
+                for (const mc of ['HEAT TRANSFER', 'DRAWCORD', 'LABEL', 'TAPE', 'TAG', 'EYELET']) {
+                    addRow(sparse({ 6: 'VA_ACC', 7: mc, 12: 'EA' }));
+                }
+                addRow([]);
+                for (let i = 0; i < 3; i++) addRow(sparse({ 6: 'FNSH ACC.', 7: 'PKG_ACC', 12: 'EA' }));
+                addRow([]);
+                for (const mc of ['WASH', 'EMB', 'PRINTING']) addRow(sparse({ 6: 'PROCESSINNG', 7: mc }));
+                addRow([]);
+
+                // BODY row
+                addRow(sparse({
+                    6: 'BODY', 7: 'CMTP_COST',
+                    8:  a.bodyArticle            || null,
+                    10: a.bodyArticleDescription || null,
+                    12: 'EA',
+                    16: 1,
+                    17: N(cmtp),
+                    18: N(cmp),
+                    19: (cmtp && cmp) ? +(cmtp - cmp).toFixed(2) : null,
+                }), painter(PURPLE));
+
+                // MARGIN row
+                addRow(sparse({ 6: 'MARGIN', 7: 'MARGIN', 17: N(vdrMargn), 18: N(margin) }), (row) => {
+                    if (vdrMargn) row.getCell(18).numFmt = '0.00%';
+                    if (margin)   row.getCell(19).numFmt = '0.00%';
+                });
+
+                addRow([]);
+                addRow([]);
+                addRow(sparse({ 6: 'LOWER' }), painter(NAVY, true, true));
+                addRow([]);
+
+                // LOWER FABRIC rows (zeros)
+                for (let i = 0; i < 2; i++) {
+                    addRow(sparse({ 6: 'FABRIC', 7: 'FAB_MC', 12: 'KG', 14: 0, 15: 0, 16: 0, 17: 0, 18: 0, 19: 0 }), painter(LIGHT_BLUE));
+                }
+                addRow([]);
+                addRow(sparse({ 6: 'STICH.ACC', 7: 'THREAD', 12: 'M', 17: 0, 18: 0, 19: 0 }));
+                addRow([]);
+                for (const mc of ['HEAT TRANSFER', 'DRAWCORD', 'LABEL', 'TAPE', 'TAG', 'EYELET']) {
+                    addRow(sparse({ 6: 'VA_ACC', 7: mc, 12: 'EA', 14: 0, 16: 0, 17: 0, 18: 0, 19: 0 }));
+                }
+                addRow([]);
+                for (let i = 0; i < 3; i++) {
+                    addRow(sparse({ 6: 'FNSH ACC.', 7: 'PKG_ACC', 12: 'EA', 14: 0, 16: 0, 17: 0, 18: 0, 19: 0 }));
+                }
+                addRow([]);
+                for (const mc of ['WASH', 'EMB', 'PRINTING']) addRow(sparse({ 6: 'PROCESSINNG', 7: mc }));
+                addRow([]);
+                addRow(sparse({ 6: 'BODY', 7: 'CMTP_COST', 12: 'EA', 16: 0, 17: 0, 18: 0, 19: 0 }), painter(PURPLE));
+                addRow(sparse({ 6: 'FACTORY OVERHEAD', 7: 'FACTORY OVERHEAD', 17: 0, 18: 0, 19: 0 }));
+            }
+
+            await ws.commit();
+            await wb.commit();
+            return;
+        } catch (err) {
+            console.error('[preciseCostingExport] stream error', err);
+            if (!res.headersSent) return res.status(500).json({ error: 'Failed to generate precise costing report' });
+            return res.end();
+        }
+    }
+
     // Get master attributes for dropdowns
     static async getAttributes(req: Request, res: Response) {
         try {
@@ -4455,6 +4718,67 @@ export class ApproverController {
         }));
 
         return res.json({ results });
+    }
+
+    // Smart body article search — filters precise_body_article_consumption by major category
+    // and active grid attributes from body_article_description_formate, returns matching rows.
+    static async searchPreciseBodyArticle(req: Request, res: Response) {
+        const majorCategory = String(req.query.majorCategory ?? '').trim();
+        if (!majorCategory) return res.json({ results: [] });
+
+        const ATTR_COLS = [
+            'm_neck_type', 'm_neck_style', 'm_collar_type', 'm_collar_style',
+            'm_placket', 'm_blt_type', 'm_blt_style',
+            'm_sleeves_main_style', 'm_sleeve_fold', 'm_btm_fold',
+            'm_pocket', 'm_no_of_pocket', 'm_extra_pocket',
+            'm_fit', 'body_style', 'm_length',
+        ];
+
+        const activeRows = await prisma.$queryRaw<{ attributes_maj_cat: string }[]>`
+            SELECT attributes_maj_cat FROM body_article_description_formate
+            WHERE TRIM(LOWER(fg_maj_cat)) = TRIM(LOWER(${majorCategory}))
+              AND fr_grid_status = 'ACT'
+        `;
+        const activeAttrs = new Set(activeRows.map((r) => r.attributes_maj_cat.toLowerCase().trim()));
+
+        // Optional text filter on article number (used by NO. field smart search)
+        const q = String(req.query.q ?? '').trim();
+
+        let sql = `SELECT DISTINCT ON (micro_body_article_number) macro_body_description, micro_body_article_number
+                   FROM precise_body_article_consumption
+                   WHERE TRIM(LOWER(major_category)) = TRIM(LOWER($1))`;
+        const params: (string)[] = [majorCategory];
+        let idx = 2;
+
+        if (q) {
+            sql += ` AND LOWER(COALESCE(micro_body_article_number, '')) LIKE LOWER($${idx})`;
+            params.push(`%${q}%`);
+            idx++;
+        }
+
+        for (const col of ATTR_COLS) {
+            if (!activeAttrs.has(col)) continue;
+            const val = String(req.query[col] ?? '').trim();
+            if (!val) continue;
+            sql += ` AND TRIM(LOWER(COALESCE(${col}, ''))) = TRIM(LOWER($${idx}))`;
+            params.push(val);
+            idx++;
+        }
+
+        // DISTINCT ON requires the distinct column first in ORDER BY
+        sql += ' ORDER BY micro_body_article_number, macro_body_description LIMIT 50';
+
+        const rows = await prisma.$queryRawUnsafe<{
+            macro_body_description: string | null;
+            micro_body_article_number: string | null;
+        }[]>(sql, ...params);
+
+        return res.json({
+            results: rows.map((r) => ({
+                macroBodyDescription:   r.macro_body_description,
+                microBodyArticleNumber: r.micro_body_article_number,
+            })),
+        });
     }
 
     static getBodyFabricConsumption = async (req: Request, res: Response) => {
