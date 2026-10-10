@@ -155,8 +155,8 @@ export function MasterDataCard({
   loading: boolean;
   busy?: boolean;
   onView?: () => void;
-  onDownload?: () => void | Promise<void>;
-  onTemplate?: () => void | Promise<void>;
+  onDownload?: () => unknown;
+  onTemplate?: () => unknown;
   onRefresh?: () => void;
   details: ReactNode;
   upload: ReactNode;
