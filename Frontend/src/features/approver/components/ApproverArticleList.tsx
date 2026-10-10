@@ -610,6 +610,15 @@ const ArticleCard = React.memo(
       mComposition: string | null; mFinish: string | null; mGsm: string | null; mLycra: string | null;
     }[]>([]);
     const [fabNoLoading, setFabNoLoading] = useState(false);
+    const [bodyDescMode, setBodyDescMode] = useState<'classic' | 'smart'>('smart');
+    const [bodyNoMode, setBodyNoMode] = useState<'classic' | 'smart'>('smart');
+    const [preciseBodyResults, setPreciseBodyResults] = useState<{ macroBodyDescription: string | null; microBodyArticleNumber: string | null }[]>([]);
+    const [preciseBodyLoading, setPreciseBodyLoading] = useState(false);
+    const [preciseBodySearched, setPreciseBodySearched] = useState(false);
+    const [preciseBodyNoQuery, setPreciseBodyNoQuery] = useState('');
+    const [preciseBodyNoResults, setPreciseBodyNoResults] = useState<{ macroBodyDescription: string | null; microBodyArticleNumber: string | null }[]>([]);
+    const [preciseBodyNoLoading, setPreciseBodyNoLoading] = useState(false);
+    const [preciseBodyNoSearched, setPreciseBodyNoSearched] = useState(false);
     const [bodyNoQuery, setBodyNoQuery] = useState('');
     const [bodyNoResults, setBodyNoResults] = useState<{
       bodyArticleNumber: string | null;
@@ -3167,6 +3176,90 @@ const ArticleCard = React.memo(
                                     .catch(() => { setBodyNoResults([]); setBodyNoSearched(true); })
                                     .finally(() => setBodyNoLoading(false));
                                 };
+                                // Smart search: queries precise_body_article_consumption filtered by active grid attributes.
+                                // Fires immediately on box click — no text input. Only fills bodyArticle on apply.
+                                const SMART_ATTR_PARAM_MAP: Record<string, string> = {
+                                  collar:           'm_collar_type',
+                                  collarStyle:      'm_collar_style',
+                                  neckDetails:      'm_neck_style',
+                                  neck:             'm_neck_type',
+                                  placket:          'm_placket',
+                                  fatherBelt:       'm_blt_type',
+                                  childBelt:        'm_blt_style',
+                                  sleeve:           'm_sleeves_main_style',
+                                  sleeveFold:       'm_sleeve_fold',
+                                  bottomFold:       'm_btm_fold',
+                                  pocketType:       'm_pocket',
+                                  noOfPocket:       'm_no_of_pocket',
+                                  extraPocket:      'm_extra_pocket',
+                                  fit:              'm_fit',
+                                  pattern:          'body_style',
+                                  length:           'm_length',
+                                };
+                                const runPreciseBodySearch = () => {
+                                  setPreciseBodyLoading(true);
+                                  setPreciseBodySearched(false);
+                                  const token = localStorage.getItem('authToken');
+                                  const params = new URLSearchParams();
+                                  if (effectiveMajCat) params.set('majorCategory', effectiveMajCat);
+                                  Object.entries(SMART_ATTR_PARAM_MAP).forEach(([field, paramKey]) => {
+                                    const val = getFieldVal(field);
+                                    if (val) params.set(paramKey, val);
+                                  });
+                                  fetch(
+                                    `${APP_CONFIG.api.baseURL}/approver/precise-body-article/search?${params.toString()}`,
+                                    { headers: { Authorization: `Bearer ${token}` } },
+                                  )
+                                    .then((r) => r.json())
+                                    .then((d) => { setPreciseBodyResults(d.results ?? []); setPreciseBodySearched(true); })
+                                    .catch(() => { setPreciseBodyResults([]); setPreciseBodySearched(true); })
+                                    .finally(() => setPreciseBodyLoading(false));
+                                };
+                                const applyPreciseBodyResult = (r: { macroBodyDescription: string | null; microBodyArticleNumber: string | null }) => {
+                                  const updates: Record<string, string> = {
+                                    bodyArticle: r.microBodyArticleNumber || '',
+                                  };
+                                  setLocalValues((prev) => ({ ...prev, ...updates }));
+                                  setEditingField(null);
+                                  setPreciseBodyResults([]);
+                                  setPreciseBodySearched(false);
+                                  if (isModifyMode) {
+                                    setPendingChanges((prev) => ({ ...prev, ...updates }));
+                                  } else {
+                                    onSave({ ...item, ...updates } as any, updates);
+                                  }
+                                };
+                                // Smart search for NO. field — text search on micro_body_article_number in precise table.
+                                const runPreciseBodyNoSearch = (q: string) => {
+                                  if (!q.trim()) { setPreciseBodyNoResults([]); setPreciseBodyNoSearched(false); return; }
+                                  setPreciseBodyNoLoading(true);
+                                  setPreciseBodyNoSearched(false);
+                                  const token = localStorage.getItem('authToken');
+                                  const params = new URLSearchParams({ q });
+                                  if (effectiveMajCat) params.set('majorCategory', effectiveMajCat);
+                                  fetch(
+                                    `${APP_CONFIG.api.baseURL}/approver/precise-body-article/search?${params.toString()}`,
+                                    { headers: { Authorization: `Bearer ${token}` } },
+                                  )
+                                    .then((r) => r.json())
+                                    .then((d) => { setPreciseBodyNoResults(d.results ?? []); setPreciseBodyNoSearched(true); })
+                                    .catch(() => { setPreciseBodyNoResults([]); setPreciseBodyNoSearched(true); })
+                                    .finally(() => setPreciseBodyNoLoading(false));
+                                };
+                                const applyPreciseBodyNoResult = (r: { macroBodyDescription: string | null; microBodyArticleNumber: string | null }) => {
+                                  const updates: Record<string, string> = {
+                                    bodyArticle: r.microBodyArticleNumber || '',
+                                  };
+                                  setLocalValues((prev) => ({ ...prev, ...updates }));
+                                  setEditingField(null);
+                                  setPreciseBodyNoResults([]);
+                                  setPreciseBodyNoSearched(false);
+                                  if (isModifyMode) {
+                                    setPendingChanges((prev) => ({ ...prev, ...updates }));
+                                  } else {
+                                    onSave({ ...item, ...updates } as any, updates);
+                                  }
+                                };
                                 // Selecting a search result (by number or by description) fills every
                                 // mapped field from that body_article_data row — shared by both search boxes below.
                                 // BODY ARTICLE DESC is recomputed via buildBodyDescription from the fields
@@ -3233,7 +3326,7 @@ const ArticleCard = React.memo(
                                 };
                                 return (
                                   <>
-                                    {/* BODY ARTICLE NO. — search dropdown from body_article_data */}
+                                    {/* BODY ARTICLE NO. — Classic (body_article_data) or Smart (precise_body_article_consumption) */}
                                     <div
                                       key="bodyArticle"
                                       className="mt-1 border-t border-border bg-muted/30 px-2 py-1.5"
@@ -3241,9 +3334,15 @@ const ArticleCard = React.memo(
                                       onClick={() => {
                                         if (!isLocked && !isBodyNoEditing) {
                                           setEditingField('bot_bodyArticle');
-                                          setBodyNoQuery(bodyNoDisplayVal || '');
-                                          setBodyNoResults([]);
-                                          setBodyNoSearched(false);
+                                          if (bodyNoMode === 'classic') {
+                                            setBodyNoQuery(bodyNoDisplayVal || '');
+                                            setBodyNoResults([]);
+                                            setBodyNoSearched(false);
+                                          } else {
+                                            setPreciseBodyNoQuery('');
+                                            setPreciseBodyNoResults([]);
+                                            setPreciseBodyNoSearched(false);
+                                          }
                                         }
                                       }}
                                     >
@@ -3251,90 +3350,185 @@ const ArticleCard = React.memo(
                                         <span className="text-[9px] font-semibold uppercase tracking-wider text-muted-foreground">
                                           BODY ARTICLE NO.
                                         </span>
-                                      </div>
-                                      {isBodyNoEditing ? (
-                                        // Rendered via Popover/PopoverContent so the results list portals to
-                                        // document.body — the group card above has overflow-hidden (for its
-                                        // rounded corners), which was silently clipping a plain absolutely-
-                                        // positioned dropdown to ~2 visible rows even when more rows matched.
-                                        <Popover
-                                          open
-                                          onOpenChange={(o) => {
-                                            if (!o) {
-                                              setEditingField(null);
-                                              setBodyNoResults([]);
-                                              setBodyNoSearched(false);
-                                            }
-                                          }}
-                                        >
-                                          <PopoverAnchor asChild>
-                                            <Input
-                                              autoFocus
-                                              value={bodyNoQuery}
-                                              placeholder="Search body article no…"
-                                              className="h-6 px-1 text-[11px]"
-                                              onClick={(e) => e.stopPropagation()}
-                                              onChange={(e) => {
-                                                const q = e.target.value;
-                                                setBodyNoQuery(q);
-                                                runBodySearch(q);
-                                              }}
-                                              onBlur={() => {
-                                                // Don't close while a "No Body Article found" message or loading
-                                                // indicator is showing — the PopoverContent mounting can steal focus
-                                                // momentarily, firing this blur before the user has seen the result.
-                                                if (bodyNoLoading || bodyNoSearched) return;
+                                        {!isLocked && (
+                                          <div onClick={(e) => e.stopPropagation()}>
+                                            <button
+                                              type="button"
+                                              title={bodyNoMode === 'classic' ? 'Switch to Smart search (precise table)' : 'Switch to Classic search (body_article_data)'}
+                                              className={`flex h-4 items-center gap-0.5 rounded-full border px-1.5 text-[8px] font-semibold tracking-wide hover:opacity-80 ${bodyNoMode === 'smart' ? 'border-slate-700 bg-slate-800 text-white' : 'border-slate-300 bg-white text-slate-600'}`}
+                                              onClick={() => {
+                                                setBodyNoMode((m) => m === 'classic' ? 'smart' : 'classic');
                                                 setEditingField(null);
                                                 setBodyNoResults([]);
+                                                setBodyNoSearched(false);
+                                                setPreciseBodyNoResults([]);
+                                                setPreciseBodyNoSearched(false);
                                               }}
-                                              onKeyDown={(e) => {
-                                                if (e.key === 'Escape') {
-                                                  setEditingField(null);
-                                                  setBodyNoResults([]);
-                                                }
-                                                if (e.key === 'Enter' && bodyNoQuery.trim()) {
-                                                  handleSave('bodyArticle', bodyNoQuery.trim() || null);
-                                                  setEditingField(null);
-                                                  setBodyNoResults([]);
-                                                }
-                                              }}
-                                            />
-                                          </PopoverAnchor>
-                                          {(bodyNoResults.length > 0 || bodyNoLoading || bodyNoSearched) && (
-                                            <PopoverContent
-                                              align="start"
-                                              sideOffset={2}
-                                              className="w-[260px] p-0"
-                                              onOpenAutoFocus={(e) => e.preventDefault()}
-                                              onClick={(e) => e.stopPropagation()}
                                             >
-                                              <div className="max-h-56 overflow-y-auto py-1">
-                                                {bodyNoLoading ? (
-                                                  <div className="px-3 py-2 text-[11px] text-muted-foreground">Searching…</div>
-                                                ) : bodyNoResults.length === 0 ? (
-                                                  <div className="px-3 py-2 text-[11px] text-muted-foreground">No Body Article found</div>
-                                                ) : (
-                                                  bodyNoResults.map((r) => (
-                                                    <button
-                                                      key={r.bodyArticleNumber}
-                                                      type="button"
-                                                      className="flex w-full flex-col gap-0.5 px-3 py-1.5 text-left hover:bg-[#FF6F61]/10"
-                                                      onMouseDown={(e) => {
-                                                        e.preventDefault();
-                                                        applyBodyArticleRow(r);
-                                                      }}
-                                                    >
-                                                      <span className="text-[11px] font-medium text-gray-900">{r.bodyArticleNumber}</span>
-                                                      {r.bodyArticleDescription && (
-                                                        <span className="truncate text-[10px] text-muted-foreground">{r.bodyArticleDescription}</span>
-                                                      )}
-                                                    </button>
-                                                  ))
-                                                )}
-                                              </div>
-                                            </PopoverContent>
-                                          )}
-                                        </Popover>
+                                              {bodyNoMode === 'smart' ? '⚡ SMART' : 'CLASSIC'}
+                                            </button>
+                                          </div>
+                                        )}
+                                      </div>
+                                      {isBodyNoEditing ? (
+                                        bodyNoMode === 'classic' ? (
+                                          /* ── Classic mode: text search from body_article_data ── */
+                                          <Popover
+                                            open
+                                            onOpenChange={(o) => {
+                                              if (!o) {
+                                                setEditingField(null);
+                                                setBodyNoResults([]);
+                                                setBodyNoSearched(false);
+                                              }
+                                            }}
+                                          >
+                                            <PopoverAnchor asChild>
+                                              <Input
+                                                autoFocus
+                                                value={bodyNoQuery}
+                                                placeholder="Search body article no…"
+                                                className="h-6 px-1 text-[11px]"
+                                                onClick={(e) => e.stopPropagation()}
+                                                onChange={(e) => {
+                                                  const q = e.target.value;
+                                                  setBodyNoQuery(q);
+                                                  runBodySearch(q);
+                                                }}
+                                                onBlur={() => {
+                                                  if (bodyNoLoading || bodyNoSearched) return;
+                                                  setEditingField(null);
+                                                  setBodyNoResults([]);
+                                                }}
+                                                onKeyDown={(e) => {
+                                                  if (e.key === 'Escape') {
+                                                    setEditingField(null);
+                                                    setBodyNoResults([]);
+                                                  }
+                                                  if (e.key === 'Enter' && bodyNoQuery.trim()) {
+                                                    handleSave('bodyArticle', bodyNoQuery.trim() || null);
+                                                    setEditingField(null);
+                                                    setBodyNoResults([]);
+                                                  }
+                                                }}
+                                              />
+                                            </PopoverAnchor>
+                                            {(bodyNoResults.length > 0 || bodyNoLoading || bodyNoSearched) && (
+                                              <PopoverContent
+                                                align="start"
+                                                sideOffset={2}
+                                                className="w-[260px] p-0"
+                                                onOpenAutoFocus={(e) => e.preventDefault()}
+                                                onClick={(e) => e.stopPropagation()}
+                                              >
+                                                <div className="max-h-56 overflow-y-auto py-1">
+                                                  {bodyNoLoading ? (
+                                                    <div className="px-3 py-2 text-[11px] text-muted-foreground">Searching…</div>
+                                                  ) : bodyNoResults.length === 0 ? (
+                                                    <div className="px-3 py-2 text-[11px] text-muted-foreground">No Body Article found</div>
+                                                  ) : (
+                                                    bodyNoResults.map((r) => (
+                                                      <button
+                                                        key={r.bodyArticleNumber}
+                                                        type="button"
+                                                        className="flex w-full flex-col gap-0.5 px-3 py-1.5 text-left hover:bg-[#FF6F61]/10"
+                                                        onMouseDown={(e) => {
+                                                          e.preventDefault();
+                                                          applyBodyArticleRow(r);
+                                                        }}
+                                                      >
+                                                        <span className="text-[11px] font-medium text-gray-900">{r.bodyArticleNumber}</span>
+                                                        {r.bodyArticleDescription && (
+                                                          <span className="truncate text-[10px] text-muted-foreground">{r.bodyArticleDescription}</span>
+                                                        )}
+                                                      </button>
+                                                    ))
+                                                  )}
+                                                </div>
+                                              </PopoverContent>
+                                            )}
+                                          </Popover>
+                                        ) : (
+                                          /* ── Smart mode: text search from precise_body_article_consumption ── */
+                                          <Popover
+                                            open
+                                            onOpenChange={(o) => {
+                                              if (!o) {
+                                                setEditingField(null);
+                                                setPreciseBodyNoResults([]);
+                                                setPreciseBodyNoSearched(false);
+                                              }
+                                            }}
+                                          >
+                                            <PopoverAnchor asChild>
+                                              <Input
+                                                autoFocus
+                                                value={preciseBodyNoQuery}
+                                                placeholder="Search precise article no…"
+                                                className="h-6 px-1 text-[11px]"
+                                                onClick={(e) => e.stopPropagation()}
+                                                onChange={(e) => {
+                                                  const q = e.target.value;
+                                                  setPreciseBodyNoQuery(q);
+                                                  runPreciseBodyNoSearch(q);
+                                                }}
+                                                onBlur={() => {
+                                                  if (preciseBodyNoLoading || preciseBodyNoSearched) return;
+                                                  setEditingField(null);
+                                                  setPreciseBodyNoResults([]);
+                                                }}
+                                                onKeyDown={(e) => {
+                                                  if (e.key === 'Escape') {
+                                                    setEditingField(null);
+                                                    setPreciseBodyNoResults([]);
+                                                  }
+                                                  if (e.key === 'Enter' && preciseBodyNoQuery.trim()) {
+                                                    handleSave('bodyArticle', preciseBodyNoQuery.trim() || null);
+                                                    setEditingField(null);
+                                                    setPreciseBodyNoResults([]);
+                                                  }
+                                                }}
+                                              />
+                                            </PopoverAnchor>
+                                            {(preciseBodyNoResults.length > 0 || preciseBodyNoLoading || preciseBodyNoSearched) && (
+                                              <PopoverContent
+                                                align="start"
+                                                sideOffset={2}
+                                                className="w-[280px] p-0"
+                                                onOpenAutoFocus={(e) => e.preventDefault()}
+                                                onClick={(e) => e.stopPropagation()}
+                                              >
+                                                <div className="border-b border-border bg-slate-50 px-3 py-1.5 text-[10px] font-semibold uppercase tracking-wide text-slate-500">
+                                                  Smart match — fills article no. only
+                                                </div>
+                                                <div className="max-h-56 overflow-y-auto py-1">
+                                                  {preciseBodyNoLoading ? (
+                                                    <div className="px-3 py-2 text-[11px] text-muted-foreground">Searching…</div>
+                                                  ) : preciseBodyNoResults.length === 0 ? (
+                                                    <div className="px-3 py-2 text-[11px] text-muted-foreground">No match found</div>
+                                                  ) : (
+                                                    preciseBodyNoResults.map((r, i) => (
+                                                      <button
+                                                        key={r.microBodyArticleNumber ?? i}
+                                                        type="button"
+                                                        className="flex w-full flex-col gap-0.5 px-3 py-1.5 text-left hover:bg-slate-800/10"
+                                                        onMouseDown={(e) => {
+                                                          e.preventDefault();
+                                                          applyPreciseBodyNoResult(r);
+                                                        }}
+                                                      >
+                                                        <span className="text-[11px] font-medium text-gray-900">{r.microBodyArticleNumber || '—'}</span>
+                                                        {r.macroBodyDescription && (
+                                                          <span className="truncate text-[10px] text-muted-foreground">{r.macroBodyDescription}</span>
+                                                        )}
+                                                      </button>
+                                                    ))
+                                                  )}
+                                                </div>
+                                              </PopoverContent>
+                                            )}
+                                          </Popover>
+                                        )
                                       ) : (
                                         <div
                                           className="truncate text-[11px]"
@@ -3344,7 +3538,7 @@ const ArticleCard = React.memo(
                                         </div>
                                       )}
                                     </div>
-                                    {/* BODY ARTICLE DESC — same search dropdown, keyed off description instead of number */}
+                                    {/* BODY ARTICLE DESC — Classic (text search) or Smart (attribute-based) plugin */}
                                     <div
                                       key="bodyArticleDescription"
                                       className="mt-1 border-t border-border bg-muted/30 px-2 py-1.5"
@@ -3352,13 +3546,16 @@ const ArticleCard = React.memo(
                                       onClick={() => {
                                         if (!isLocked && !isBodyDescEditing) {
                                           setEditingField('bot_bodyArticleDescription');
-                                          setBodyNoQuery(bodyDescDisplayVal || '');
-                                          setBodyNoSearched(false);
-                                          // Whatever's already been composed from the fields filled so far
-                                          // (via the live rebuild above) becomes the starting search — no
-                                          // need to retype it before matches show up.
-                                          if (bodyDescDisplayVal) runBodySearch(bodyDescDisplayVal);
-                                          else setBodyNoResults([]);
+                                          if (bodyDescMode === 'classic') {
+                                            setBodyNoQuery(bodyDescDisplayVal || '');
+                                            setBodyNoSearched(false);
+                                            if (bodyDescDisplayVal) runBodySearch(bodyDescDisplayVal);
+                                            else setBodyNoResults([]);
+                                          } else {
+                                            setPreciseBodyResults([]);
+                                            setPreciseBodySearched(false);
+                                            runPreciseBodySearch();
+                                          }
                                         }
                                       }}
                                     >
@@ -3366,99 +3563,179 @@ const ArticleCard = React.memo(
                                         <span className="text-[9px] font-semibold uppercase tracking-wider text-muted-foreground">
                                           BODY ARTICLE DESC
                                         </span>
-                                        {!isBodyDescEditing && !isLocked && (
-                                          <button
-                                            type="button"
-                                            className="text-[9px] text-slate-700 underline hover:text-[#FF6F61]"
-                                            onClick={(e) => {
-                                              e.stopPropagation();
-                                              bodyAutoFill();
-                                            }}
-                                          >
-                                            Auto-fill
-                                          </button>
-                                        )}
-                                      </div>
-                                      {isBodyDescEditing ? (
-                                        <Popover
-                                          open
-                                          onOpenChange={(o) => {
-                                            if (!o) {
-                                              setEditingField(null);
-                                              setBodyNoResults([]);
-                                              setBodyNoSearched(false);
-                                            }
-                                          }}
-                                        >
-                                          <PopoverAnchor asChild>
-                                            <Input
-                                              autoFocus
-                                              value={bodyNoQuery}
-                                              placeholder="Search body article desc…"
-                                              maxLength={40}
-                                              className="h-6 px-1 text-[11px]"
-                                              onClick={(e) => e.stopPropagation()}
-                                              onChange={(e) => {
-                                                const q = e.target.value;
-                                                setBodyNoQuery(q);
-                                                runBodySearch(q);
-                                              }}
-                                              onBlur={() => {
-                                                // Don't close while "No Body Article found" is showing
-                                                if (bodyNoLoading || bodyNoSearched) return;
-                                                const trimmed = bodyNoQuery.trim();
-                                                if (trimmed) handleSave('bodyArticleDescription', trimmed);
+                                        <div className="flex items-center gap-1.5" onClick={(e) => e.stopPropagation()}>
+                                          {/* Mode toggle pill */}
+                                          {!isLocked && (
+                                            <button
+                                              type="button"
+                                              title={bodyDescMode === 'classic' ? 'Switch to Smart search (attribute-based)' : 'Switch to Classic search (text)'}
+                                              className={`flex h-4 items-center gap-0.5 rounded-full border px-1.5 text-[8px] font-semibold tracking-wide hover:opacity-80 ${bodyDescMode === 'smart' ? 'border-slate-700 bg-slate-800 text-white' : 'border-slate-300 bg-white text-slate-600'}`}
+                                              onClick={() => {
+                                                setBodyDescMode((m) => m === 'classic' ? 'smart' : 'classic');
                                                 setEditingField(null);
                                                 setBodyNoResults([]);
+                                                setBodyNoSearched(false);
+                                                setPreciseBodyResults([]);
+                                                setPreciseBodySearched(false);
                                               }}
-                                              onKeyDown={(e) => {
-                                                if (e.key === 'Escape') {
-                                                  setEditingField(null);
-                                                  setBodyNoResults([]);
-                                                }
-                                                if (e.key === 'Enter' && bodyNoQuery.trim()) {
-                                                  handleSave('bodyArticleDescription', bodyNoQuery.trim() || null);
-                                                  setEditingField(null);
-                                                  setBodyNoResults([]);
-                                                }
-                                              }}
-                                            />
-                                          </PopoverAnchor>
-                                          {(bodyNoResults.length > 0 || bodyNoLoading || bodyNoSearched) && (
-                                            <PopoverContent
-                                              align="start"
-                                              sideOffset={2}
-                                              className="w-[260px] p-0"
-                                              onOpenAutoFocus={(e) => e.preventDefault()}
-                                              onClick={(e) => e.stopPropagation()}
                                             >
-                                              <div className="max-h-56 overflow-y-auto py-1">
-                                                {bodyNoLoading ? (
-                                                  <div className="px-3 py-2 text-[11px] text-muted-foreground">Searching…</div>
-                                                ) : bodyNoResults.length === 0 ? (
-                                                  <div className="px-3 py-2 text-[11px] text-muted-foreground">No Body Article found</div>
-                                                ) : (
-                                                  bodyNoResults.map((r) => (
-                                                    <button
-                                                      key={r.bodyArticleNumber}
-                                                      type="button"
-                                                      className="flex w-full flex-col gap-0.5 px-3 py-1.5 text-left hover:bg-[#FF6F61]/10"
-                                                      onMouseDown={(e) => {
-                                                        e.preventDefault();
-                                                        applyBodyArticleRow(r);
-                                                      }}
-                                                    >
-                                                      <span className="text-[11px] font-medium text-gray-900">{r.bodyArticleDescription || '—'}</span>
-                                                      {r.bodyArticleNumber && (
-                                                        <span className="truncate text-[10px] text-muted-foreground">{r.bodyArticleNumber}</span>
-                                                      )}
-                                                    </button>
-                                                  ))
-                                                )}
-                                              </div>
-                                            </PopoverContent>
+                                              {bodyDescMode === 'smart' ? '⚡ SMART' : 'CLASSIC'}
+                                            </button>
                                           )}
-                                        </Popover>
+                                          {!isBodyDescEditing && !isLocked && (
+                                            <button
+                                              type="button"
+                                              className="text-[9px] text-slate-700 underline hover:text-[#FF6F61]"
+                                              onClick={(e) => {
+                                                e.stopPropagation();
+                                                bodyAutoFill();
+                                              }}
+                                            >
+                                              Auto-fill
+                                            </button>
+                                          )}
+                                        </div>
+                                      </div>
+                                      {isBodyDescEditing ? (
+                                        bodyDescMode === 'classic' ? (
+                                          /* ── Classic mode: text search ── */
+                                          <Popover
+                                            open
+                                            onOpenChange={(o) => {
+                                              if (!o) {
+                                                setEditingField(null);
+                                                setBodyNoResults([]);
+                                                setBodyNoSearched(false);
+                                              }
+                                            }}
+                                          >
+                                            <PopoverAnchor asChild>
+                                              <Input
+                                                autoFocus
+                                                value={bodyNoQuery}
+                                                placeholder="Search body article desc…"
+                                                maxLength={40}
+                                                className="h-6 px-1 text-[11px]"
+                                                onClick={(e) => e.stopPropagation()}
+                                                onChange={(e) => {
+                                                  const q = e.target.value;
+                                                  setBodyNoQuery(q);
+                                                  runBodySearch(q);
+                                                }}
+                                                onBlur={() => {
+                                                  if (bodyNoLoading || bodyNoSearched) return;
+                                                  const trimmed = bodyNoQuery.trim();
+                                                  if (trimmed) handleSave('bodyArticleDescription', trimmed);
+                                                  setEditingField(null);
+                                                  setBodyNoResults([]);
+                                                }}
+                                                onKeyDown={(e) => {
+                                                  if (e.key === 'Escape') {
+                                                    setEditingField(null);
+                                                    setBodyNoResults([]);
+                                                  }
+                                                  if (e.key === 'Enter' && bodyNoQuery.trim()) {
+                                                    handleSave('bodyArticleDescription', bodyNoQuery.trim() || null);
+                                                    setEditingField(null);
+                                                    setBodyNoResults([]);
+                                                  }
+                                                }}
+                                              />
+                                            </PopoverAnchor>
+                                            {(bodyNoResults.length > 0 || bodyNoLoading || bodyNoSearched) && (
+                                              <PopoverContent
+                                                align="start"
+                                                sideOffset={2}
+                                                className="w-[260px] p-0"
+                                                onOpenAutoFocus={(e) => e.preventDefault()}
+                                                onClick={(e) => e.stopPropagation()}
+                                              >
+                                                <div className="max-h-56 overflow-y-auto py-1">
+                                                  {bodyNoLoading ? (
+                                                    <div className="px-3 py-2 text-[11px] text-muted-foreground">Searching…</div>
+                                                  ) : bodyNoResults.length === 0 ? (
+                                                    <div className="px-3 py-2 text-[11px] text-muted-foreground">No Body Article found</div>
+                                                  ) : (
+                                                    bodyNoResults.map((r) => (
+                                                      <button
+                                                        key={r.bodyArticleNumber}
+                                                        type="button"
+                                                        className="flex w-full flex-col gap-0.5 px-3 py-1.5 text-left hover:bg-[#FF6F61]/10"
+                                                        onMouseDown={(e) => {
+                                                          e.preventDefault();
+                                                          applyBodyArticleRow(r);
+                                                        }}
+                                                      >
+                                                        <span className="text-[11px] font-medium text-gray-900">{r.bodyArticleDescription || '—'}</span>
+                                                        {r.bodyArticleNumber && (
+                                                          <span className="truncate text-[10px] text-muted-foreground">{r.bodyArticleNumber}</span>
+                                                        )}
+                                                      </button>
+                                                    ))
+                                                  )}
+                                                </div>
+                                              </PopoverContent>
+                                            )}
+                                          </Popover>
+                                        ) : (
+                                          /* ── Smart mode: attribute-based, no text input ── */
+                                          <Popover
+                                            open
+                                            onOpenChange={(o) => {
+                                              if (!o) {
+                                                setEditingField(null);
+                                                setPreciseBodyResults([]);
+                                                setPreciseBodySearched(false);
+                                              }
+                                            }}
+                                          >
+                                            <PopoverAnchor asChild>
+                                              <div
+                                                className="flex h-6 items-center rounded border border-input bg-white px-1 text-[11px] text-muted-foreground"
+                                                onClick={(e) => e.stopPropagation()}
+                                              >
+                                                {preciseBodyLoading ? 'Searching…' : 'Matching by active grid attributes'}
+                                              </div>
+                                            </PopoverAnchor>
+                                            {(preciseBodyResults.length > 0 || preciseBodyLoading || preciseBodySearched) && (
+                                              <PopoverContent
+                                                align="start"
+                                                sideOffset={2}
+                                                className="w-[280px] p-0"
+                                                onOpenAutoFocus={(e) => e.preventDefault()}
+                                                onClick={(e) => e.stopPropagation()}
+                                              >
+                                                <div className="border-b border-border bg-slate-50 px-3 py-1.5 text-[10px] font-semibold uppercase tracking-wide text-slate-500">
+                                                  Smart match — fills article no. only
+                                                </div>
+                                                <div className="max-h-56 overflow-y-auto py-1">
+                                                  {preciseBodyLoading ? (
+                                                    <div className="px-3 py-2 text-[11px] text-muted-foreground">Searching…</div>
+                                                  ) : preciseBodyResults.length === 0 ? (
+                                                    <div className="px-3 py-2 text-[11px] text-muted-foreground">No match found</div>
+                                                  ) : (
+                                                    preciseBodyResults.map((r, i) => (
+                                                      <button
+                                                        key={r.microBodyArticleNumber ?? i}
+                                                        type="button"
+                                                        className="flex w-full flex-col gap-0.5 px-3 py-1.5 text-left hover:bg-slate-800/10"
+                                                        onMouseDown={(e) => {
+                                                          e.preventDefault();
+                                                          applyPreciseBodyResult(r);
+                                                        }}
+                                                      >
+                                                        <span className="text-[11px] font-medium text-gray-900">{r.microBodyArticleNumber || '—'}</span>
+                                                        {r.macroBodyDescription && (
+                                                          <span className="truncate text-[10px] text-muted-foreground">{r.macroBodyDescription}</span>
+                                                        )}
+                                                      </button>
+                                                    ))
+                                                  )}
+                                                </div>
+                                              </PopoverContent>
+                                            )}
+                                          </Popover>
+                                        )
                                       ) : (
                                         <div
                                           className="truncate text-[11px]"

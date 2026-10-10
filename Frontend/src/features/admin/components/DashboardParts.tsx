@@ -1,5 +1,5 @@
 import { useState, type ReactNode } from 'react';
-import { ChevronRight, Download, Eye, FileSpreadsheet, RotateCw, Upload, X } from 'lucide-react';
+import { ChevronRight, Download, Eye, FileSpreadsheet, Loader2, RotateCw, Upload, X } from 'lucide-react';
 import { Button, Spinner } from '@/shared/components/ui-tw';
 import { cn } from '@/lib/utils';
 
@@ -155,14 +155,28 @@ export function MasterDataCard({
   loading: boolean;
   busy?: boolean;
   onView?: () => void;
-  onDownload?: () => void;
-  onTemplate?: () => void;
+  onDownload?: () => void | Promise<void>;
+  onTemplate?: () => void | Promise<void>;
   onRefresh?: () => void;
   details: ReactNode;
   upload: ReactNode;
 }) {
   const [open, setOpen] = useState(false);
+  const [downloadLoading, setDownloadLoading] = useState(false);
+  const [templateLoading, setTemplateLoading] = useState(false);
   const expanded = open || busy;
+
+  const handleDownload = async () => {
+    if (!onDownload || downloadLoading) return;
+    setDownloadLoading(true);
+    try { await onDownload(); } finally { setDownloadLoading(false); }
+  };
+
+  const handleTemplate = async () => {
+    if (!onTemplate || templateLoading) return;
+    setTemplateLoading(true);
+    try { await onTemplate(); } finally { setTemplateLoading(false); }
+  };
   const known = rows !== null && rows !== undefined;
   const empty = known && rows === 0;
   const status = !known ? (loading ? 'Loading' : 'Unknown') : empty ? 'Not uploaded' : 'Uploaded';
@@ -206,8 +220,18 @@ export function MasterDataCard({
           {expanded ? 'Close' : empty ? 'Upload first file' : 'Upload'}
         </Button>
         {onView && <Button size="sm" variant="outline" onClick={onView}><Eye />View</Button>}
-        {onDownload && <Button size="sm" variant="outline" onClick={onDownload}><Download />Download</Button>}
-        {onTemplate && <Button size="sm" variant="outline" onClick={onTemplate}><FileSpreadsheet />Template</Button>}
+        {onDownload && (
+          <Button size="sm" variant="outline" onClick={handleDownload} disabled={downloadLoading}>
+            {downloadLoading ? <Loader2 className="animate-spin" /> : <Download />}
+            Download
+          </Button>
+        )}
+        {onTemplate && (
+          <Button size="sm" variant="outline" onClick={handleTemplate} disabled={templateLoading}>
+            {templateLoading ? <Loader2 className="animate-spin" /> : <FileSpreadsheet />}
+            Template
+          </Button>
+        )}
         {onRefresh && (
           <Button size="icon" variant="ghost" className="ml-auto h-8 w-8" onClick={onRefresh} disabled={loading} aria-label={`Refresh ${title} status`} title="Refresh status">
             <RotateCw className={loading ? 'animate-spin' : ''} />

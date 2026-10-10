@@ -17,10 +17,10 @@ export const parseNumericValue = (value: unknown): number | null => {
     return Number.isNaN(parsed) ? null : parsed;
 };
 
-// MRP = rate + 47%, rounded up to the nearest multiple of 25.
+// MRP = rate + 30%, rounded up to the nearest multiple of 50.
 export const calculateMrpFromRate = (rateOrCost: unknown): number => {
     const rate = parseNumericValue(rateOrCost);
     if (rate === null || rate <= 0) return 1;
-    const withMargin = rate * 1.47;
-    return Math.ceil(withMargin / 25) * 25;
+    const withMargin = rate * 1.30;
+    return Math.ceil(withMargin / 50) * 50;
 };
