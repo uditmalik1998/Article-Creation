@@ -610,8 +610,9 @@ const ArticleCard = React.memo(
       mComposition: string | null; mFinish: string | null; mGsm: string | null; mLycra: string | null;
     }[]>([]);
     const [fabNoLoading, setFabNoLoading] = useState(false);
-    const [bodyDescMode, setBodyDescMode] = useState<'classic' | 'smart'>('smart');
-    const [bodyNoMode, setBodyNoMode] = useState<'classic' | 'smart'>('smart');
+    const isBodySmart = import.meta.env.VITE_IS_BODY_ARTICLE_SMART === 'true';
+    const [bodyDescMode, setBodyDescMode] = useState<'classic' | 'smart'>(isBodySmart ? 'smart' : 'classic');
+    const [bodyNoMode, setBodyNoMode] = useState<'classic' | 'smart'>(isBodySmart ? 'smart' : 'classic');
     const [preciseBodyResults, setPreciseBodyResults] = useState<{ macroBodyDescription: string | null; microBodyArticleNumber: string | null }[]>([]);
     const [preciseBodyLoading, setPreciseBodyLoading] = useState(false);
     const [preciseBodySearched, setPreciseBodySearched] = useState(false);
