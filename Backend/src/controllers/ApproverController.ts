@@ -53,7 +53,9 @@ const ITEM_UPDATE_ALLOWED_FIELDS = [
     // Body article cost fields
     'cmtpCost', 'cmpCost', 'fabCost', 'fabCons', 'fWidth',
     'autoBgt', 'roughV2', 'vendorFabricRate', 'finalCost',
-    'valueAddAccCostType', 'valueAddCost', 'valueAddProcessCost',
+    'roughRatio', 'roughConsumptionKg', 'roughConsumptionMeter',
+    'preciseRatio', 'preciseConsumptionKg', 'preciseConsumptionMeter',
+    'valueAddProcessCost',
     // Card footer fields (fabric/body article builder)
     'fabricArticleNumber', 'fabricArticleDescription',
     'bodyArticle', 'bodyArticleDescription',
@@ -1009,8 +1011,8 @@ export class ApproverController {
                     year: true,
                     articleType: true,
                     autoBgt: true, roughV2: true, vendorFabricRate: true, finalCost: true,
-                    valueAddAccCostType: true,
-                    valueAddCost: true,
+                    roughRatio: true, roughConsumptionKg: true, roughConsumptionMeter: true,
+                    preciseRatio: true, preciseConsumptionKg: true, preciseConsumptionMeter: true,
                     valueAddProcessCost: true,
                     // BOM cost fields
                     cmtpCost: true,
@@ -1330,8 +1332,8 @@ export class ApproverController {
                     fWidth: true,
                     fabDiv: true,
                     autoBgt: true, roughV2: true, vendorFabricRate: true, finalCost: true,
-                    valueAddAccCostType: true,
-                    valueAddCost: true,
+                    roughRatio: true, roughConsumptionKg: true, roughConsumptionMeter: true,
+                    preciseRatio: true, preciseConsumptionKg: true, preciseConsumptionMeter: true,
                     valueAddProcessCost: true,
                     // BODY extras
                     collarStyle: true,
@@ -1565,8 +1567,8 @@ export class ApproverController {
                     bodyArticle: true,
                     bodyArticleDescription: true,
                     autoBgt: true, roughV2: true, vendorFabricRate: true, finalCost: true,
-                    valueAddAccCostType: true,
-                    valueAddCost: true,
+                    roughRatio: true, roughConsumptionKg: true, roughConsumptionMeter: true,
+                    preciseRatio: true, preciseConsumptionKg: true, preciseConsumptionMeter: true,
                     valueAddProcessCost: true,
                     approvedAt: true,
                     approver: { select: { name: true } },
@@ -1578,14 +1580,14 @@ export class ApproverController {
             const bodyRows = bodyNums.length > 0
                 ? await prisma.bodyArticleData.findMany({
                     where: { bodyArticleNumber: { in: bodyNums } },
-                    select: { bodyArticleNumber: true, consumptionKg: true, consumptionMeter: true, basicTrimCost: true, cmpCost: true, majorCategory: true },
+                    select: { bodyArticleNumber: true, consumptionKg: true, consumptionMeter: true, cmpCost: true, majorCategory: true },
                 })
                 : [];
             const bodyMap = new Map(bodyRows.map(r => [r.bodyArticleNumber!, r]));
 
-            // Body articles with no basic trim cost of their own fall back to the major-category master
+            // Basic trim cost always comes from the major-category master
             const trimCostByMajCat = await ApproverController.lookupBasicTrimCosts(
-                bodyRows.filter(r => r.basicTrimCost == null).map(r => r.majorCategory),
+                bodyRows.map(r => r.majorCategory),
             );
 
             // Batch-load fabric_article_data by fabric article number
@@ -1655,10 +1657,11 @@ export class ApproverController {
                 const fabCons = toNum(bodyData?.consumptionKg) ?? toNum(bodyData?.consumptionMeter) ?? 0;
                 const vdrRate = toNum(a.vendorFabricRate);
                 const v2Rate = toNum(fabricData?.v2FabricRate);
-                const basicTrim = toNum(bodyData?.basicTrimCost)
-                    ?? (bodyData?.majorCategory ? trimCostByMajCat.get(bodyData.majorCategory.trim().toUpperCase()) ?? null : null);
+                const basicTrim = bodyData?.majorCategory
+                    ? trimCostByMajCat.get(bodyData.majorCategory.trim().toUpperCase()) ?? null
+                    : null;
                 const cmpCost = toNum(bodyData?.cmpCost);
-                const fgValAdd = toNum(a.valueAddCost) ?? 0;
+                const fgValAdd = 0;
                 const fgProcessCost = toNum(a.valueAddProcessCost);
 
                 const summaryRowNum = dataRow;
@@ -1794,10 +1797,11 @@ export class ApproverController {
                     bodyArticle: true,
                     bodyArticleDescription: true,
                     autoBgt: true, roughV2: true, vendorFabricRate: true, finalCost: true,
+                    roughRatio: true, roughConsumptionKg: true, roughConsumptionMeter: true,
+                    preciseRatio: true, preciseConsumptionKg: true, preciseConsumptionMeter: true,
                     cmtpCost: true,
                     cmpCost: true,
                     fabCons: true,
-                    valueAddCost: true,
                     valueAddProcessCost: true,
                 },
             });
@@ -1887,7 +1891,7 @@ export class ApproverController {
                 const fabV2    = fabCons > 0 && v2Rate  > 0 ? +(fabCons * v2Rate  * 1.15).toFixed(2) : 0;
                 const cmtp     = toN(a.cmtpCost);
                 const cmp      = toN(a.cmpCost);
-                const valAdd   = toN(a.valueAddCost);
+                const valAdd   = 0;
                 const valProc  = toN(a.valueAddProcessCost);
                 const v2Cost   = +(fabV2  + cmp + cmtp + valAdd + valProc).toFixed(2);
                 const vdrCost  = +(fabVdr + cmp + cmtp + valAdd + valProc).toFixed(2);
@@ -2105,7 +2109,9 @@ export class ApproverController {
                     approvedBy: true, approvedAt: true,
                     cmtpCost: true, cmpCost: true, fabCost: true, fabCons: true,
                     autoBgt: true, roughV2: true, vendorFabricRate: true, finalCost: true,
-                    valueAddAccCostType: true, valueAddCost: true, valueAddProcessCost: true,
+                    roughRatio: true, roughConsumptionKg: true, roughConsumptionMeter: true,
+                    preciseRatio: true, preciseConsumptionKg: true, preciseConsumptionMeter: true,
+                    valueAddProcessCost: true,
                     mcDescription: true,
                     approver: { select: { name: true, email: true } },
                 },
@@ -2373,7 +2379,7 @@ export class ApproverController {
             // - variantWeight: must be settable after approval so SAP retry can proceed
             // - fabricArticleDescription + vendorFabricRate: internal fields pre-saved before
             //   fabric article creation in modify mode; not part of SAP attribute sync
-            const APPROVED_ITEM_ALLOWED_FIELDS = new Set(['variantWeight', 'fabricArticleDescription', 'vendorFabricRate', 'fabricArticleNumber', 'valueAddCost']);
+            const APPROVED_ITEM_ALLOWED_FIELDS = new Set(['variantWeight', 'fabricArticleDescription', 'vendorFabricRate', 'fabricArticleNumber']);
             const isAllowedUpdate = Object.keys(data).every((k) => APPROVED_ITEM_ALLOWED_FIELDS.has(k));
             if (existingItem.approvalStatus === 'APPROVED' && !isAllowedUpdate) {
                 return res.status(403).json({ error: 'Cannot update an approved item. It is locked for SAP sync.' });
@@ -2903,7 +2909,9 @@ export class ApproverController {
                     articleFashionType: true, mvgrBrandVendor: true, fCount: true,
                     fConstruction: true, fOunce: true, fWidth: true, fabDiv: true, fabVdr: true, impAtrbt2: true,
                     autoBgt: true, roughV2: true, vendorFabricRate: true, finalCost: true,
-                    valueAddAccCostType: true, valueAddCost: true, valueAddProcessCost: true,
+                    roughRatio: true, roughConsumptionKg: true, roughConsumptionMeter: true,
+                    preciseRatio: true, preciseConsumptionKg: true, preciseConsumptionMeter: true,
+                    valueAddProcessCost: true,
                     mcCode: true, hsnTaxCode: true, articleDescription: true, fashionGrid: true,
                     season: true, year: true, articleType: true, referenceArticleNumber: true,
                     referenceArticleDescription: true, imageUrl: true, imageName: true,
@@ -4880,7 +4888,7 @@ export class ApproverController {
                 mFit: true, mBodyStyle: true, mLength: true, mSet: true,
                 bodyArticleNumber: true, bodyArticleDescription: true,
                 cmtpCost: true, cmpCost: true, fabCost: true, fabCons: true,
-                width: true, basicTrimCost: true, roughCmpCost: true, costingType: true,
+                width: true, roughCmpCost: true,
                 bodyConsumptionType: true, gsm: true, ratio: true, consumptionKg: true, consumptionMeter: true,
                 preciseWidth: true, preciseGsm: true, preciseRatio: true, preciseConsumptionKg: true, preciseConsumptionMeter: true,
         };
@@ -4941,9 +4949,7 @@ export class ApproverController {
             fabCost:                  r.fabCost  != null ? Number(r.fabCost)  : null,
             fabCons:                  r.fabCons  != null ? Number(r.fabCons)  : null,
             bodyWidth:                r.width    != null ? Number(r.width)    : null,
-            basicTrimCost:            r.basicTrimCost    != null ? Number(r.basicTrimCost)    : null,
             roughCmpCost:             r.roughCmpCost     != null ? Number(r.roughCmpCost)     : null,
-            costingType:              r.costingType ?? null,
             bodyConsumptionType:      r.bodyConsumptionType ?? null,
             gsm:                      r.gsm              != null ? Number(r.gsm)              : null,
             ratio:                    r.ratio            != null ? Number(r.ratio)            : null,
@@ -4963,18 +4969,6 @@ export class ApproverController {
             yarn1: null, yarn2: null, weave: null, macroMvgr: null, mainMvgr: null,
             mFab2: null, finish: null, shade: null, weight: null, lycra: null,
         }));
-
-        // Fill basic trim cost from the major-category master for rows with no value of their own,
-        // so the list and its Excel download show the same figure as the detail page.
-        const trimCosts = await ApproverController.lookupBasicTrimCosts(
-            data.filter((d) => d.basicTrimCost == null).map((d) => d.majorCategory),
-        );
-        if (trimCosts.size > 0) {
-            for (const item of data) {
-                if (item.basicTrimCost != null || !item.majorCategory) continue;
-                item.basicTrimCost = trimCosts.get(item.majorCategory.trim().toUpperCase()) ?? null;
-            }
-        }
 
         return res.json({ data, meta: { total, page: parseInt(page, 10), limit: take } });
     };
@@ -5005,9 +4999,7 @@ export class ApproverController {
         fabCons:              'fabCons',
         fWidth:               'width',
         width:                'width',
-        basicTrimCost:        'basicTrimCost',
         roughCmpCost:         'roughCmpCost',
-        costingType:          'costingType',
         bodyConsumptionType:     'bodyConsumptionType',
         gsm:                     'gsm',
         ratio:                   'ratio',
@@ -5080,9 +5072,7 @@ export class ApproverController {
             fabCons: r.fabCons ?? null,
             fWidth: r.width ?? null,
             width: r.width ?? null,
-            basicTrimCost:       r.basicTrimCost ?? null,
             roughCmpCost:        r.roughCmpCost ?? null,
-            costingType:         r.costingType ?? null,
             bodyConsumptionType: r.bodyConsumptionType ?? null,
             gsm:                 r.gsm ?? null,
             ratio:               r.ratio ?? null,
@@ -5125,19 +5115,11 @@ export class ApproverController {
         );
     }
 
-    private static async resolveBasicTrimCost(row: { basicTrimCost?: any; majorCategory?: string | null }): Promise<number | null> {
-        if (row.basicTrimCost != null) return Number(row.basicTrimCost);
-        if (!row.majorCategory) return null;
-        const costs = await ApproverController.lookupBasicTrimCosts([row.majorCategory]);
-        return costs.get(row.majorCategory.trim().toUpperCase()) ?? null;
-    }
-
     static getBodyArticleById = async (req: Request, res: Response) => {
         const { id } = req.params;
         const row = await prisma.bodyArticleData.findUnique({ where: { id } });
         if (!row) return res.status(404).json({ error: 'Item not found' });
         const item = ApproverController.bodyRowToApproverItem(row);
-        item.basicTrimCost = await ApproverController.resolveBasicTrimCost(row);
         return res.json(item);
     };
 
@@ -5154,7 +5136,6 @@ export class ApproverController {
             const row = await prisma.bodyArticleData.findUnique({ where: { id } });
             if (!row) return res.status(404).json({ error: 'Item not found' });
             const item = ApproverController.bodyRowToApproverItem(row);
-            item.basicTrimCost = await ApproverController.resolveBasicTrimCost(row);
             return res.json(item);
         }
 
@@ -5174,7 +5155,6 @@ export class ApproverController {
         try {
             const row = await prisma.bodyArticleData.update({ where: { id }, data });
             const item = ApproverController.bodyRowToApproverItem(row);
-            item.basicTrimCost = await ApproverController.resolveBasicTrimCost(row);
             return res.json(item);
         } catch (err: any) {
             if (err?.code === 'P2002' && err?.meta?.target?.includes('body_article_number')) {
@@ -5882,7 +5862,10 @@ export class ApproverController {
                 vendorName: true, vendorCode: true,
                 imageUrl: true, userName: true,
                 fabricArticleDescription: true,
-                autoBgt: true, roughV2: true, vendorFabricRate: true, finalCost: true, mrp: true, segment: true,
+                autoBgt: true, roughV2: true, vendorFabricRate: true, finalCost: true,
+                roughRatio: true, roughConsumptionKg: true, roughConsumptionMeter: true,
+                preciseRatio: true, preciseConsumptionKg: true, preciseConsumptionMeter: true,
+                mrp: true, segment: true,
                 articleFashionType: true,
                 fabDiv: true, yarn1: true,
                 mainMvgr: true, fabricMainMvgr: true,

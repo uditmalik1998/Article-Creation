@@ -17010,7 +17010,12 @@ export namespace Prisma {
     roughV2: Decimal | null
     vendorFabricRate: Decimal | null
     finalCost: Decimal | null
-    valueAddCost: Decimal | null
+    roughRatio: Decimal | null
+    roughConsumptionKg: Decimal | null
+    roughConsumptionMeter: Decimal | null
+    preciseRatio: Decimal | null
+    preciseConsumptionKg: Decimal | null
+    preciseConsumptionMeter: Decimal | null
     valueAddProcessCost: Decimal | null
     mrp: Decimal | null
     approvedBy: number | null
@@ -17035,7 +17040,12 @@ export namespace Prisma {
     roughV2: Decimal | null
     vendorFabricRate: Decimal | null
     finalCost: Decimal | null
-    valueAddCost: Decimal | null
+    roughRatio: Decimal | null
+    roughConsumptionKg: Decimal | null
+    roughConsumptionMeter: Decimal | null
+    preciseRatio: Decimal | null
+    preciseConsumptionKg: Decimal | null
+    preciseConsumptionMeter: Decimal | null
     valueAddProcessCost: Decimal | null
     mrp: Decimal | null
     approvedBy: number | null
@@ -17145,8 +17155,12 @@ export namespace Prisma {
     roughV2: Decimal | null
     vendorFabricRate: Decimal | null
     finalCost: Decimal | null
-    valueAddAccCostType: string | null
-    valueAddCost: Decimal | null
+    roughRatio: Decimal | null
+    roughConsumptionKg: Decimal | null
+    roughConsumptionMeter: Decimal | null
+    preciseRatio: Decimal | null
+    preciseConsumptionKg: Decimal | null
+    preciseConsumptionMeter: Decimal | null
     valueAddProcessCost: Decimal | null
     bodyArticle: string | null
     bodyArticleDescription: string | null
@@ -17290,8 +17304,12 @@ export namespace Prisma {
     roughV2: Decimal | null
     vendorFabricRate: Decimal | null
     finalCost: Decimal | null
-    valueAddAccCostType: string | null
-    valueAddCost: Decimal | null
+    roughRatio: Decimal | null
+    roughConsumptionKg: Decimal | null
+    roughConsumptionMeter: Decimal | null
+    preciseRatio: Decimal | null
+    preciseConsumptionKg: Decimal | null
+    preciseConsumptionMeter: Decimal | null
     valueAddProcessCost: Decimal | null
     bodyArticle: string | null
     bodyArticleDescription: string | null
@@ -17435,8 +17453,12 @@ export namespace Prisma {
     roughV2: number
     vendorFabricRate: number
     finalCost: number
-    valueAddAccCostType: number
-    valueAddCost: number
+    roughRatio: number
+    roughConsumptionKg: number
+    roughConsumptionMeter: number
+    preciseRatio: number
+    preciseConsumptionKg: number
+    preciseConsumptionMeter: number
     valueAddProcessCost: number
     bodyArticle: number
     bodyArticleDescription: number
@@ -17498,7 +17520,12 @@ export namespace Prisma {
     roughV2?: true
     vendorFabricRate?: true
     finalCost?: true
-    valueAddCost?: true
+    roughRatio?: true
+    roughConsumptionKg?: true
+    roughConsumptionMeter?: true
+    preciseRatio?: true
+    preciseConsumptionKg?: true
+    preciseConsumptionMeter?: true
     valueAddProcessCost?: true
     mrp?: true
     approvedBy?: true
@@ -17523,7 +17550,12 @@ export namespace Prisma {
     roughV2?: true
     vendorFabricRate?: true
     finalCost?: true
-    valueAddCost?: true
+    roughRatio?: true
+    roughConsumptionKg?: true
+    roughConsumptionMeter?: true
+    preciseRatio?: true
+    preciseConsumptionKg?: true
+    preciseConsumptionMeter?: true
     valueAddProcessCost?: true
     mrp?: true
     approvedBy?: true
@@ -17633,8 +17665,12 @@ export namespace Prisma {
     roughV2?: true
     vendorFabricRate?: true
     finalCost?: true
-    valueAddAccCostType?: true
-    valueAddCost?: true
+    roughRatio?: true
+    roughConsumptionKg?: true
+    roughConsumptionMeter?: true
+    preciseRatio?: true
+    preciseConsumptionKg?: true
+    preciseConsumptionMeter?: true
     valueAddProcessCost?: true
     bodyArticle?: true
     bodyArticleDescription?: true
@@ -17778,8 +17814,12 @@ export namespace Prisma {
     roughV2?: true
     vendorFabricRate?: true
     finalCost?: true
-    valueAddAccCostType?: true
-    valueAddCost?: true
+    roughRatio?: true
+    roughConsumptionKg?: true
+    roughConsumptionMeter?: true
+    preciseRatio?: true
+    preciseConsumptionKg?: true
+    preciseConsumptionMeter?: true
     valueAddProcessCost?: true
     bodyArticle?: true
     bodyArticleDescription?: true
@@ -17923,8 +17963,12 @@ export namespace Prisma {
     roughV2?: true
     vendorFabricRate?: true
     finalCost?: true
-    valueAddAccCostType?: true
-    valueAddCost?: true
+    roughRatio?: true
+    roughConsumptionKg?: true
+    roughConsumptionMeter?: true
+    preciseRatio?: true
+    preciseConsumptionKg?: true
+    preciseConsumptionMeter?: true
     valueAddProcessCost?: true
     bodyArticle?: true
     bodyArticleDescription?: true
@@ -18156,8 +18200,12 @@ export namespace Prisma {
     roughV2: Decimal | null
     vendorFabricRate: Decimal | null
     finalCost: Decimal | null
-    valueAddAccCostType: string | null
-    valueAddCost: Decimal | null
+    roughRatio: Decimal | null
+    roughConsumptionKg: Decimal | null
+    roughConsumptionMeter: Decimal | null
+    preciseRatio: Decimal | null
+    preciseConsumptionKg: Decimal | null
+    preciseConsumptionMeter: Decimal | null
     valueAddProcessCost: Decimal | null
     bodyArticle: string | null
     bodyArticleDescription: string | null
@@ -18321,8 +18369,12 @@ export namespace Prisma {
     roughV2?: boolean
     vendorFabricRate?: boolean
     finalCost?: boolean
-    valueAddAccCostType?: boolean
-    valueAddCost?: boolean
+    roughRatio?: boolean
+    roughConsumptionKg?: boolean
+    roughConsumptionMeter?: boolean
+    preciseRatio?: boolean
+    preciseConsumptionKg?: boolean
+    preciseConsumptionMeter?: boolean
     valueAddProcessCost?: boolean
     bodyArticle?: boolean
     bodyArticleDescription?: boolean
@@ -18471,8 +18523,12 @@ export namespace Prisma {
     roughV2?: boolean
     vendorFabricRate?: boolean
     finalCost?: boolean
-    valueAddAccCostType?: boolean
-    valueAddCost?: boolean
+    roughRatio?: boolean
+    roughConsumptionKg?: boolean
+    roughConsumptionMeter?: boolean
+    preciseRatio?: boolean
+    preciseConsumptionKg?: boolean
+    preciseConsumptionMeter?: boolean
     valueAddProcessCost?: boolean
     bodyArticle?: boolean
     bodyArticleDescription?: boolean
@@ -18619,8 +18675,12 @@ export namespace Prisma {
     roughV2?: boolean
     vendorFabricRate?: boolean
     finalCost?: boolean
-    valueAddAccCostType?: boolean
-    valueAddCost?: boolean
+    roughRatio?: boolean
+    roughConsumptionKg?: boolean
+    roughConsumptionMeter?: boolean
+    preciseRatio?: boolean
+    preciseConsumptionKg?: boolean
+    preciseConsumptionMeter?: boolean
     valueAddProcessCost?: boolean
     bodyArticle?: boolean
     bodyArticleDescription?: boolean
@@ -18767,8 +18827,12 @@ export namespace Prisma {
     roughV2?: boolean
     vendorFabricRate?: boolean
     finalCost?: boolean
-    valueAddAccCostType?: boolean
-    valueAddCost?: boolean
+    roughRatio?: boolean
+    roughConsumptionKg?: boolean
+    roughConsumptionMeter?: boolean
+    preciseRatio?: boolean
+    preciseConsumptionKg?: boolean
+    preciseConsumptionMeter?: boolean
     valueAddProcessCost?: boolean
     bodyArticle?: boolean
     bodyArticleDescription?: boolean
@@ -18809,7 +18873,7 @@ export namespace Prisma {
     imageExtractionRawData?: boolean
   }
 
-  export type ExtractionResultFlatOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<"id" | "jobId" | "imageName" | "imageUrl" | "articleNumber" | "extractionStatus" | "aiModel" | "avgConfidence" | "processingTimeMs" | "totalAttributes" | "extractedCount" | "inputTokens" | "outputTokens" | "totalTokens" | "apiCost" | "userId" | "userName" | "extractionDate" | "createdAt" | "updatedAt" | "majorCategory" | "vendorName" | "designNumber" | "pptNumber" | "rate" | "size" | "yarn1" | "yarn2" | "fabricMainMvgr" | "weave" | "weaveFullForm" | "composition" | "finish" | "gsm" | "macroMvgr" | "macroMvgrFullForm" | "mainMvgr" | "mainMvgrFullForm" | "mFab2" | "mFab2FullForm" | "shade" | "weight" | "lycra" | "neck" | "neckDetails" | "collar" | "placket" | "sleeve" | "bottomFold" | "frontOpenStyle" | "pocketType" | "fit" | "pattern" | "length" | "colour" | "secondaryColour" | "drawcord" | "button" | "zipper" | "zipColour" | "printType" | "printStyle" | "printPlacement" | "patches" | "patchesType" | "embroidery" | "embroideryType" | "wash" | "fatherBelt" | "childBelt" | "division" | "subDivision" | "referenceArticleNumber" | "referenceArticleDescription" | "collarStyle" | "sleeveFold" | "mSet" | "noOfPocket" | "extraPocket" | "dcShape" | "btnColour" | "fCount" | "fConstruction" | "fOunce" | "fWidth" | "fabDiv" | "fabVdr" | "htrfType" | "htrfStyle" | "embPlacement" | "ageGroup" | "mNoOfSize" | "mNoOfClr" | "articleFashionType" | "articleDimension" | "cmtpCost" | "cmpCost" | "fabCost" | "fabCons" | "autoBgt" | "roughV2" | "vendorFabricRate" | "finalCost" | "valueAddAccCostType" | "valueAddCost" | "valueAddProcessCost" | "bodyArticle" | "bodyArticleDescription" | "fabricArticleNumber" | "fabricArticleDescription" | "attrArticleNums" | "mvgrBrandVendor" | "mcDescription" | "vendorCode" | "mrp" | "impAtrbt2" | "mcCode" | "segment" | "season" | "hsnTaxCode" | "articleDescription" | "fashionGrid" | "year" | "articleType" | "presentationsType" | "approvalStatus" | "pdStatus" | "approvedBy" | "approvedAt" | "source" | "imageUncPath" | "isOldArticle" | "isGeneric" | "genericArticleId" | "variantSize" | "variantColor" | "variantWeight" | "sapSyncStatus" | "sapArticleId" | "sapSyncMessage" | "srmOriginalDesignNumber" | "srmUniqueId" | "imageExtractionRawData", ExtArgs["result"]["extractionResultFlat"]>
+  export type ExtractionResultFlatOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<"id" | "jobId" | "imageName" | "imageUrl" | "articleNumber" | "extractionStatus" | "aiModel" | "avgConfidence" | "processingTimeMs" | "totalAttributes" | "extractedCount" | "inputTokens" | "outputTokens" | "totalTokens" | "apiCost" | "userId" | "userName" | "extractionDate" | "createdAt" | "updatedAt" | "majorCategory" | "vendorName" | "designNumber" | "pptNumber" | "rate" | "size" | "yarn1" | "yarn2" | "fabricMainMvgr" | "weave" | "weaveFullForm" | "composition" | "finish" | "gsm" | "macroMvgr" | "macroMvgrFullForm" | "mainMvgr" | "mainMvgrFullForm" | "mFab2" | "mFab2FullForm" | "shade" | "weight" | "lycra" | "neck" | "neckDetails" | "collar" | "placket" | "sleeve" | "bottomFold" | "frontOpenStyle" | "pocketType" | "fit" | "pattern" | "length" | "colour" | "secondaryColour" | "drawcord" | "button" | "zipper" | "zipColour" | "printType" | "printStyle" | "printPlacement" | "patches" | "patchesType" | "embroidery" | "embroideryType" | "wash" | "fatherBelt" | "childBelt" | "division" | "subDivision" | "referenceArticleNumber" | "referenceArticleDescription" | "collarStyle" | "sleeveFold" | "mSet" | "noOfPocket" | "extraPocket" | "dcShape" | "btnColour" | "fCount" | "fConstruction" | "fOunce" | "fWidth" | "fabDiv" | "fabVdr" | "htrfType" | "htrfStyle" | "embPlacement" | "ageGroup" | "mNoOfSize" | "mNoOfClr" | "articleFashionType" | "articleDimension" | "cmtpCost" | "cmpCost" | "fabCost" | "fabCons" | "autoBgt" | "roughV2" | "vendorFabricRate" | "finalCost" | "roughRatio" | "roughConsumptionKg" | "roughConsumptionMeter" | "preciseRatio" | "preciseConsumptionKg" | "preciseConsumptionMeter" | "valueAddProcessCost" | "bodyArticle" | "bodyArticleDescription" | "fabricArticleNumber" | "fabricArticleDescription" | "attrArticleNums" | "mvgrBrandVendor" | "mcDescription" | "vendorCode" | "mrp" | "impAtrbt2" | "mcCode" | "segment" | "season" | "hsnTaxCode" | "articleDescription" | "fashionGrid" | "year" | "articleType" | "presentationsType" | "approvalStatus" | "pdStatus" | "approvedBy" | "approvedAt" | "source" | "imageUncPath" | "isOldArticle" | "isGeneric" | "genericArticleId" | "variantSize" | "variantColor" | "variantWeight" | "sapSyncStatus" | "sapArticleId" | "sapSyncMessage" | "srmOriginalDesignNumber" | "srmUniqueId" | "imageExtractionRawData", ExtArgs["result"]["extractionResultFlat"]>
   export type ExtractionResultFlatInclude<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
     approver?: boolean | ExtractionResultFlat$approverArgs<ExtArgs>
     job?: boolean | ExtractionResultFlat$jobArgs<ExtArgs>
@@ -18936,8 +19000,12 @@ export namespace Prisma {
       roughV2: Prisma.Decimal | null
       vendorFabricRate: Prisma.Decimal | null
       finalCost: Prisma.Decimal | null
-      valueAddAccCostType: string | null
-      valueAddCost: Prisma.Decimal | null
+      roughRatio: Prisma.Decimal | null
+      roughConsumptionKg: Prisma.Decimal | null
+      roughConsumptionMeter: Prisma.Decimal | null
+      preciseRatio: Prisma.Decimal | null
+      preciseConsumptionKg: Prisma.Decimal | null
+      preciseConsumptionMeter: Prisma.Decimal | null
       valueAddProcessCost: Prisma.Decimal | null
       bodyArticle: string | null
       bodyArticleDescription: string | null
@@ -19505,8 +19573,12 @@ export namespace Prisma {
     readonly roughV2: FieldRef<"ExtractionResultFlat", 'Decimal'>
     readonly vendorFabricRate: FieldRef<"ExtractionResultFlat", 'Decimal'>
     readonly finalCost: FieldRef<"ExtractionResultFlat", 'Decimal'>
-    readonly valueAddAccCostType: FieldRef<"ExtractionResultFlat", 'String'>
-    readonly valueAddCost: FieldRef<"ExtractionResultFlat", 'Decimal'>
+    readonly roughRatio: FieldRef<"ExtractionResultFlat", 'Decimal'>
+    readonly roughConsumptionKg: FieldRef<"ExtractionResultFlat", 'Decimal'>
+    readonly roughConsumptionMeter: FieldRef<"ExtractionResultFlat", 'Decimal'>
+    readonly preciseRatio: FieldRef<"ExtractionResultFlat", 'Decimal'>
+    readonly preciseConsumptionKg: FieldRef<"ExtractionResultFlat", 'Decimal'>
+    readonly preciseConsumptionMeter: FieldRef<"ExtractionResultFlat", 'Decimal'>
     readonly valueAddProcessCost: FieldRef<"ExtractionResultFlat", 'Decimal'>
     readonly bodyArticle: FieldRef<"ExtractionResultFlat", 'String'>
     readonly bodyArticleDescription: FieldRef<"ExtractionResultFlat", 'String'>
@@ -66813,7 +66885,6 @@ export namespace Prisma {
     fabCost: Decimal | null
     fabCons: Decimal | null
     width: Decimal | null
-    basicTrimCost: Decimal | null
     roughCmpCost: Decimal | null
     gsm: Decimal | null
     ratio: Decimal | null
@@ -66833,7 +66904,6 @@ export namespace Prisma {
     fabCost: Decimal | null
     fabCons: Decimal | null
     width: Decimal | null
-    basicTrimCost: Decimal | null
     roughCmpCost: Decimal | null
     gsm: Decimal | null
     ratio: Decimal | null
@@ -66876,9 +66946,7 @@ export namespace Prisma {
     fabCost: Decimal | null
     fabCons: Decimal | null
     width: Decimal | null
-    basicTrimCost: Decimal | null
     roughCmpCost: Decimal | null
-    costingType: string | null
     bodyConsumptionType: string | null
     gsm: Decimal | null
     ratio: Decimal | null
@@ -66940,9 +67008,7 @@ export namespace Prisma {
     fabCost: Decimal | null
     fabCons: Decimal | null
     width: Decimal | null
-    basicTrimCost: Decimal | null
     roughCmpCost: Decimal | null
-    costingType: string | null
     bodyConsumptionType: string | null
     gsm: Decimal | null
     ratio: Decimal | null
@@ -67004,9 +67070,7 @@ export namespace Prisma {
     fabCost: number
     fabCons: number
     width: number
-    basicTrimCost: number
     roughCmpCost: number
-    costingType: number
     bodyConsumptionType: number
     gsm: number
     ratio: number
@@ -67047,7 +67111,6 @@ export namespace Prisma {
     fabCost?: true
     fabCons?: true
     width?: true
-    basicTrimCost?: true
     roughCmpCost?: true
     gsm?: true
     ratio?: true
@@ -67067,7 +67130,6 @@ export namespace Prisma {
     fabCost?: true
     fabCons?: true
     width?: true
-    basicTrimCost?: true
     roughCmpCost?: true
     gsm?: true
     ratio?: true
@@ -67110,9 +67172,7 @@ export namespace Prisma {
     fabCost?: true
     fabCons?: true
     width?: true
-    basicTrimCost?: true
     roughCmpCost?: true
-    costingType?: true
     bodyConsumptionType?: true
     gsm?: true
     ratio?: true
@@ -67174,9 +67234,7 @@ export namespace Prisma {
     fabCost?: true
     fabCons?: true
     width?: true
-    basicTrimCost?: true
     roughCmpCost?: true
-    costingType?: true
     bodyConsumptionType?: true
     gsm?: true
     ratio?: true
@@ -67238,9 +67296,7 @@ export namespace Prisma {
     fabCost?: true
     fabCons?: true
     width?: true
-    basicTrimCost?: true
     roughCmpCost?: true
-    costingType?: true
     bodyConsumptionType?: true
     gsm?: true
     ratio?: true
@@ -67389,9 +67445,7 @@ export namespace Prisma {
     fabCost: Decimal | null
     fabCons: Decimal | null
     width: Decimal | null
-    basicTrimCost: Decimal | null
     roughCmpCost: Decimal | null
-    costingType: string | null
     bodyConsumptionType: string | null
     gsm: Decimal | null
     ratio: Decimal | null
@@ -67472,9 +67526,7 @@ export namespace Prisma {
     fabCost?: boolean
     fabCons?: boolean
     width?: boolean
-    basicTrimCost?: boolean
     roughCmpCost?: boolean
-    costingType?: boolean
     bodyConsumptionType?: boolean
     gsm?: boolean
     ratio?: boolean
@@ -67536,9 +67588,7 @@ export namespace Prisma {
     fabCost?: boolean
     fabCons?: boolean
     width?: boolean
-    basicTrimCost?: boolean
     roughCmpCost?: boolean
-    costingType?: boolean
     bodyConsumptionType?: boolean
     gsm?: boolean
     ratio?: boolean
@@ -67600,9 +67650,7 @@ export namespace Prisma {
     fabCost?: boolean
     fabCons?: boolean
     width?: boolean
-    basicTrimCost?: boolean
     roughCmpCost?: boolean
-    costingType?: boolean
     bodyConsumptionType?: boolean
     gsm?: boolean
     ratio?: boolean
@@ -67664,9 +67712,7 @@ export namespace Prisma {
     fabCost?: boolean
     fabCons?: boolean
     width?: boolean
-    basicTrimCost?: boolean
     roughCmpCost?: boolean
-    costingType?: boolean
     bodyConsumptionType?: boolean
     gsm?: boolean
     ratio?: boolean
@@ -67699,7 +67745,7 @@ export namespace Prisma {
     updatedAt?: boolean
   }
 
-  export type BodyArticleDataOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<"id" | "mCollarType" | "mCollarStyle" | "mNeckType" | "mNeckStyle" | "mPlacket" | "mBltType" | "mBltStyle" | "mSleevesMainStyle" | "mSleeveFold" | "mBtmFold" | "mNoOfPocket" | "mPocket" | "mExtraPocket" | "mFit" | "mBodyStyle" | "mLength" | "mSet" | "bodyArticleNumber" | "bodyArticleDescription" | "imageUrl" | "bodyArticleType" | "designNumber" | "cmtpCost" | "cmpCost" | "fabCost" | "fabCons" | "width" | "basicTrimCost" | "roughCmpCost" | "costingType" | "bodyConsumptionType" | "gsm" | "ratio" | "consumptionKg" | "consumptionMeter" | "preciseWidth" | "preciseGsm" | "preciseRatio" | "preciseConsumptionKg" | "preciseConsumptionMeter" | "flatId" | "articleNumber" | "division" | "subDivision" | "majorCategory" | "mcCode" | "vendorName" | "vendorCode" | "season" | "year" | "hsnTaxCode" | "approvalStatus" | "fgCreatorApproved" | "approvedAt" | "approvedBy" | "sapSyncStatus" | "sapSyncMessage" | "userName" | "createdAt" | "updatedAt", ExtArgs["result"]["bodyArticleData"]>
+  export type BodyArticleDataOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<"id" | "mCollarType" | "mCollarStyle" | "mNeckType" | "mNeckStyle" | "mPlacket" | "mBltType" | "mBltStyle" | "mSleevesMainStyle" | "mSleeveFold" | "mBtmFold" | "mNoOfPocket" | "mPocket" | "mExtraPocket" | "mFit" | "mBodyStyle" | "mLength" | "mSet" | "bodyArticleNumber" | "bodyArticleDescription" | "imageUrl" | "bodyArticleType" | "designNumber" | "cmtpCost" | "cmpCost" | "fabCost" | "fabCons" | "width" | "roughCmpCost" | "bodyConsumptionType" | "gsm" | "ratio" | "consumptionKg" | "consumptionMeter" | "preciseWidth" | "preciseGsm" | "preciseRatio" | "preciseConsumptionKg" | "preciseConsumptionMeter" | "flatId" | "articleNumber" | "division" | "subDivision" | "majorCategory" | "mcCode" | "vendorName" | "vendorCode" | "season" | "year" | "hsnTaxCode" | "approvalStatus" | "fgCreatorApproved" | "approvedAt" | "approvedBy" | "sapSyncStatus" | "sapSyncMessage" | "userName" | "createdAt" | "updatedAt", ExtArgs["result"]["bodyArticleData"]>
 
   export type $BodyArticleDataPayload<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
     name: "BodyArticleData"
@@ -67733,9 +67779,7 @@ export namespace Prisma {
       fabCost: Prisma.Decimal | null
       fabCons: Prisma.Decimal | null
       width: Prisma.Decimal | null
-      basicTrimCost: Prisma.Decimal | null
       roughCmpCost: Prisma.Decimal | null
-      costingType: string | null
       bodyConsumptionType: string | null
       gsm: Prisma.Decimal | null
       ratio: Prisma.Decimal | null
@@ -68217,9 +68261,7 @@ export namespace Prisma {
     readonly fabCost: FieldRef<"BodyArticleData", 'Decimal'>
     readonly fabCons: FieldRef<"BodyArticleData", 'Decimal'>
     readonly width: FieldRef<"BodyArticleData", 'Decimal'>
-    readonly basicTrimCost: FieldRef<"BodyArticleData", 'Decimal'>
     readonly roughCmpCost: FieldRef<"BodyArticleData", 'Decimal'>
-    readonly costingType: FieldRef<"BodyArticleData", 'String'>
     readonly bodyConsumptionType: FieldRef<"BodyArticleData", 'String'>
     readonly gsm: FieldRef<"BodyArticleData", 'Decimal'>
     readonly ratio: FieldRef<"BodyArticleData", 'Decimal'>
@@ -85043,8 +85085,12 @@ export namespace Prisma {
     roughV2: 'roughV2',
     vendorFabricRate: 'vendorFabricRate',
     finalCost: 'finalCost',
-    valueAddAccCostType: 'valueAddAccCostType',
-    valueAddCost: 'valueAddCost',
+    roughRatio: 'roughRatio',
+    roughConsumptionKg: 'roughConsumptionKg',
+    roughConsumptionMeter: 'roughConsumptionMeter',
+    preciseRatio: 'preciseRatio',
+    preciseConsumptionKg: 'preciseConsumptionKg',
+    preciseConsumptionMeter: 'preciseConsumptionMeter',
     valueAddProcessCost: 'valueAddProcessCost',
     bodyArticle: 'bodyArticle',
     bodyArticleDescription: 'bodyArticleDescription',
@@ -86081,9 +86127,7 @@ export namespace Prisma {
     fabCost: 'fabCost',
     fabCons: 'fabCons',
     width: 'width',
-    basicTrimCost: 'basicTrimCost',
     roughCmpCost: 'roughCmpCost',
-    costingType: 'costingType',
     bodyConsumptionType: 'bodyConsumptionType',
     gsm: 'gsm',
     ratio: 'ratio',
@@ -86656,7 +86700,6 @@ export namespace Prisma {
     mNoOfClr: 'mNoOfClr',
     articleFashionType: 'articleFashionType',
     articleDimension: 'articleDimension',
-    valueAddAccCostType: 'valueAddAccCostType',
     bodyArticle: 'bodyArticle',
     bodyArticleDescription: 'bodyArticleDescription',
     fabricArticleNumber: 'fabricArticleNumber',
@@ -87435,7 +87478,6 @@ export namespace Prisma {
     imageUrl: 'imageUrl',
     bodyArticleType: 'bodyArticleType',
     designNumber: 'designNumber',
-    costingType: 'costingType',
     bodyConsumptionType: 'bodyConsumptionType',
     flatId: 'flatId',
     articleNumber: 'articleNumber',
@@ -88909,8 +88951,12 @@ export namespace Prisma {
     roughV2?: DecimalNullableFilter<"ExtractionResultFlat"> | Decimal | DecimalJsLike | number | string | null
     vendorFabricRate?: DecimalNullableFilter<"ExtractionResultFlat"> | Decimal | DecimalJsLike | number | string | null
     finalCost?: DecimalNullableFilter<"ExtractionResultFlat"> | Decimal | DecimalJsLike | number | string | null
-    valueAddAccCostType?: StringNullableFilter<"ExtractionResultFlat"> | string | null
-    valueAddCost?: DecimalNullableFilter<"ExtractionResultFlat"> | Decimal | DecimalJsLike | number | string | null
+    roughRatio?: DecimalNullableFilter<"ExtractionResultFlat"> | Decimal | DecimalJsLike | number | string | null
+    roughConsumptionKg?: DecimalNullableFilter<"ExtractionResultFlat"> | Decimal | DecimalJsLike | number | string | null
+    roughConsumptionMeter?: DecimalNullableFilter<"ExtractionResultFlat"> | Decimal | DecimalJsLike | number | string | null
+    preciseRatio?: DecimalNullableFilter<"ExtractionResultFlat"> | Decimal | DecimalJsLike | number | string | null
+    preciseConsumptionKg?: DecimalNullableFilter<"ExtractionResultFlat"> | Decimal | DecimalJsLike | number | string | null
+    preciseConsumptionMeter?: DecimalNullableFilter<"ExtractionResultFlat"> | Decimal | DecimalJsLike | number | string | null
     valueAddProcessCost?: DecimalNullableFilter<"ExtractionResultFlat"> | Decimal | DecimalJsLike | number | string | null
     bodyArticle?: StringNullableFilter<"ExtractionResultFlat"> | string | null
     bodyArticleDescription?: StringNullableFilter<"ExtractionResultFlat"> | string | null
@@ -89058,8 +89104,12 @@ export namespace Prisma {
     roughV2?: SortOrderInput | SortOrder
     vendorFabricRate?: SortOrderInput | SortOrder
     finalCost?: SortOrderInput | SortOrder
-    valueAddAccCostType?: SortOrderInput | SortOrder
-    valueAddCost?: SortOrderInput | SortOrder
+    roughRatio?: SortOrderInput | SortOrder
+    roughConsumptionKg?: SortOrderInput | SortOrder
+    roughConsumptionMeter?: SortOrderInput | SortOrder
+    preciseRatio?: SortOrderInput | SortOrder
+    preciseConsumptionKg?: SortOrderInput | SortOrder
+    preciseConsumptionMeter?: SortOrderInput | SortOrder
     valueAddProcessCost?: SortOrderInput | SortOrder
     bodyArticle?: SortOrderInput | SortOrder
     bodyArticleDescription?: SortOrderInput | SortOrder
@@ -89212,8 +89262,12 @@ export namespace Prisma {
     roughV2?: DecimalNullableFilter<"ExtractionResultFlat"> | Decimal | DecimalJsLike | number | string | null
     vendorFabricRate?: DecimalNullableFilter<"ExtractionResultFlat"> | Decimal | DecimalJsLike | number | string | null
     finalCost?: DecimalNullableFilter<"ExtractionResultFlat"> | Decimal | DecimalJsLike | number | string | null
-    valueAddAccCostType?: StringNullableFilter<"ExtractionResultFlat"> | string | null
-    valueAddCost?: DecimalNullableFilter<"ExtractionResultFlat"> | Decimal | DecimalJsLike | number | string | null
+    roughRatio?: DecimalNullableFilter<"ExtractionResultFlat"> | Decimal | DecimalJsLike | number | string | null
+    roughConsumptionKg?: DecimalNullableFilter<"ExtractionResultFlat"> | Decimal | DecimalJsLike | number | string | null
+    roughConsumptionMeter?: DecimalNullableFilter<"ExtractionResultFlat"> | Decimal | DecimalJsLike | number | string | null
+    preciseRatio?: DecimalNullableFilter<"ExtractionResultFlat"> | Decimal | DecimalJsLike | number | string | null
+    preciseConsumptionKg?: DecimalNullableFilter<"ExtractionResultFlat"> | Decimal | DecimalJsLike | number | string | null
+    preciseConsumptionMeter?: DecimalNullableFilter<"ExtractionResultFlat"> | Decimal | DecimalJsLike | number | string | null
     valueAddProcessCost?: DecimalNullableFilter<"ExtractionResultFlat"> | Decimal | DecimalJsLike | number | string | null
     bodyArticle?: StringNullableFilter<"ExtractionResultFlat"> | string | null
     bodyArticleDescription?: StringNullableFilter<"ExtractionResultFlat"> | string | null
@@ -89360,8 +89414,12 @@ export namespace Prisma {
     roughV2?: SortOrderInput | SortOrder
     vendorFabricRate?: SortOrderInput | SortOrder
     finalCost?: SortOrderInput | SortOrder
-    valueAddAccCostType?: SortOrderInput | SortOrder
-    valueAddCost?: SortOrderInput | SortOrder
+    roughRatio?: SortOrderInput | SortOrder
+    roughConsumptionKg?: SortOrderInput | SortOrder
+    roughConsumptionMeter?: SortOrderInput | SortOrder
+    preciseRatio?: SortOrderInput | SortOrder
+    preciseConsumptionKg?: SortOrderInput | SortOrder
+    preciseConsumptionMeter?: SortOrderInput | SortOrder
     valueAddProcessCost?: SortOrderInput | SortOrder
     bodyArticle?: SortOrderInput | SortOrder
     bodyArticleDescription?: SortOrderInput | SortOrder
@@ -89514,8 +89572,12 @@ export namespace Prisma {
     roughV2?: DecimalNullableWithAggregatesFilter<"ExtractionResultFlat"> | Decimal | DecimalJsLike | number | string | null
     vendorFabricRate?: DecimalNullableWithAggregatesFilter<"ExtractionResultFlat"> | Decimal | DecimalJsLike | number | string | null
     finalCost?: DecimalNullableWithAggregatesFilter<"ExtractionResultFlat"> | Decimal | DecimalJsLike | number | string | null
-    valueAddAccCostType?: StringNullableWithAggregatesFilter<"ExtractionResultFlat"> | string | null
-    valueAddCost?: DecimalNullableWithAggregatesFilter<"ExtractionResultFlat"> | Decimal | DecimalJsLike | number | string | null
+    roughRatio?: DecimalNullableWithAggregatesFilter<"ExtractionResultFlat"> | Decimal | DecimalJsLike | number | string | null
+    roughConsumptionKg?: DecimalNullableWithAggregatesFilter<"ExtractionResultFlat"> | Decimal | DecimalJsLike | number | string | null
+    roughConsumptionMeter?: DecimalNullableWithAggregatesFilter<"ExtractionResultFlat"> | Decimal | DecimalJsLike | number | string | null
+    preciseRatio?: DecimalNullableWithAggregatesFilter<"ExtractionResultFlat"> | Decimal | DecimalJsLike | number | string | null
+    preciseConsumptionKg?: DecimalNullableWithAggregatesFilter<"ExtractionResultFlat"> | Decimal | DecimalJsLike | number | string | null
+    preciseConsumptionMeter?: DecimalNullableWithAggregatesFilter<"ExtractionResultFlat"> | Decimal | DecimalJsLike | number | string | null
     valueAddProcessCost?: DecimalNullableWithAggregatesFilter<"ExtractionResultFlat"> | Decimal | DecimalJsLike | number | string | null
     bodyArticle?: StringNullableWithAggregatesFilter<"ExtractionResultFlat"> | string | null
     bodyArticleDescription?: StringNullableWithAggregatesFilter<"ExtractionResultFlat"> | string | null
@@ -94477,9 +94539,7 @@ export namespace Prisma {
     fabCost?: DecimalNullableFilter<"BodyArticleData"> | Decimal | DecimalJsLike | number | string | null
     fabCons?: DecimalNullableFilter<"BodyArticleData"> | Decimal | DecimalJsLike | number | string | null
     width?: DecimalNullableFilter<"BodyArticleData"> | Decimal | DecimalJsLike | number | string | null
-    basicTrimCost?: DecimalNullableFilter<"BodyArticleData"> | Decimal | DecimalJsLike | number | string | null
     roughCmpCost?: DecimalNullableFilter<"BodyArticleData"> | Decimal | DecimalJsLike | number | string | null
-    costingType?: StringNullableFilter<"BodyArticleData"> | string | null
     bodyConsumptionType?: StringNullableFilter<"BodyArticleData"> | string | null
     gsm?: DecimalNullableFilter<"BodyArticleData"> | Decimal | DecimalJsLike | number | string | null
     ratio?: DecimalNullableFilter<"BodyArticleData"> | Decimal | DecimalJsLike | number | string | null
@@ -94541,9 +94601,7 @@ export namespace Prisma {
     fabCost?: SortOrderInput | SortOrder
     fabCons?: SortOrderInput | SortOrder
     width?: SortOrderInput | SortOrder
-    basicTrimCost?: SortOrderInput | SortOrder
     roughCmpCost?: SortOrderInput | SortOrder
-    costingType?: SortOrderInput | SortOrder
     bodyConsumptionType?: SortOrderInput | SortOrder
     gsm?: SortOrderInput | SortOrder
     ratio?: SortOrderInput | SortOrder
@@ -94609,9 +94667,7 @@ export namespace Prisma {
     fabCost?: DecimalNullableFilter<"BodyArticleData"> | Decimal | DecimalJsLike | number | string | null
     fabCons?: DecimalNullableFilter<"BodyArticleData"> | Decimal | DecimalJsLike | number | string | null
     width?: DecimalNullableFilter<"BodyArticleData"> | Decimal | DecimalJsLike | number | string | null
-    basicTrimCost?: DecimalNullableFilter<"BodyArticleData"> | Decimal | DecimalJsLike | number | string | null
     roughCmpCost?: DecimalNullableFilter<"BodyArticleData"> | Decimal | DecimalJsLike | number | string | null
-    costingType?: StringNullableFilter<"BodyArticleData"> | string | null
     bodyConsumptionType?: StringNullableFilter<"BodyArticleData"> | string | null
     gsm?: DecimalNullableFilter<"BodyArticleData"> | Decimal | DecimalJsLike | number | string | null
     ratio?: DecimalNullableFilter<"BodyArticleData"> | Decimal | DecimalJsLike | number | string | null
@@ -94673,9 +94729,7 @@ export namespace Prisma {
     fabCost?: SortOrderInput | SortOrder
     fabCons?: SortOrderInput | SortOrder
     width?: SortOrderInput | SortOrder
-    basicTrimCost?: SortOrderInput | SortOrder
     roughCmpCost?: SortOrderInput | SortOrder
-    costingType?: SortOrderInput | SortOrder
     bodyConsumptionType?: SortOrderInput | SortOrder
     gsm?: SortOrderInput | SortOrder
     ratio?: SortOrderInput | SortOrder
@@ -94745,9 +94799,7 @@ export namespace Prisma {
     fabCost?: DecimalNullableWithAggregatesFilter<"BodyArticleData"> | Decimal | DecimalJsLike | number | string | null
     fabCons?: DecimalNullableWithAggregatesFilter<"BodyArticleData"> | Decimal | DecimalJsLike | number | string | null
     width?: DecimalNullableWithAggregatesFilter<"BodyArticleData"> | Decimal | DecimalJsLike | number | string | null
-    basicTrimCost?: DecimalNullableWithAggregatesFilter<"BodyArticleData"> | Decimal | DecimalJsLike | number | string | null
     roughCmpCost?: DecimalNullableWithAggregatesFilter<"BodyArticleData"> | Decimal | DecimalJsLike | number | string | null
-    costingType?: StringNullableWithAggregatesFilter<"BodyArticleData"> | string | null
     bodyConsumptionType?: StringNullableWithAggregatesFilter<"BodyArticleData"> | string | null
     gsm?: DecimalNullableWithAggregatesFilter<"BodyArticleData"> | Decimal | DecimalJsLike | number | string | null
     ratio?: DecimalNullableWithAggregatesFilter<"BodyArticleData"> | Decimal | DecimalJsLike | number | string | null
@@ -97429,8 +97481,12 @@ export namespace Prisma {
     roughV2?: Decimal | DecimalJsLike | number | string | null
     vendorFabricRate?: Decimal | DecimalJsLike | number | string | null
     finalCost?: Decimal | DecimalJsLike | number | string | null
-    valueAddAccCostType?: string | null
-    valueAddCost?: Decimal | DecimalJsLike | number | string | null
+    roughRatio?: Decimal | DecimalJsLike | number | string | null
+    roughConsumptionKg?: Decimal | DecimalJsLike | number | string | null
+    roughConsumptionMeter?: Decimal | DecimalJsLike | number | string | null
+    preciseRatio?: Decimal | DecimalJsLike | number | string | null
+    preciseConsumptionKg?: Decimal | DecimalJsLike | number | string | null
+    preciseConsumptionMeter?: Decimal | DecimalJsLike | number | string | null
     valueAddProcessCost?: Decimal | DecimalJsLike | number | string | null
     bodyArticle?: string | null
     bodyArticleDescription?: string | null
@@ -97577,8 +97633,12 @@ export namespace Prisma {
     roughV2?: Decimal | DecimalJsLike | number | string | null
     vendorFabricRate?: Decimal | DecimalJsLike | number | string | null
     finalCost?: Decimal | DecimalJsLike | number | string | null
-    valueAddAccCostType?: string | null
-    valueAddCost?: Decimal | DecimalJsLike | number | string | null
+    roughRatio?: Decimal | DecimalJsLike | number | string | null
+    roughConsumptionKg?: Decimal | DecimalJsLike | number | string | null
+    roughConsumptionMeter?: Decimal | DecimalJsLike | number | string | null
+    preciseRatio?: Decimal | DecimalJsLike | number | string | null
+    preciseConsumptionKg?: Decimal | DecimalJsLike | number | string | null
+    preciseConsumptionMeter?: Decimal | DecimalJsLike | number | string | null
     valueAddProcessCost?: Decimal | DecimalJsLike | number | string | null
     bodyArticle?: string | null
     bodyArticleDescription?: string | null
@@ -97723,8 +97783,12 @@ export namespace Prisma {
     roughV2?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
     vendorFabricRate?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
     finalCost?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
-    valueAddAccCostType?: NullableStringFieldUpdateOperationsInput | string | null
-    valueAddCost?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    roughRatio?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    roughConsumptionKg?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    roughConsumptionMeter?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    preciseRatio?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    preciseConsumptionKg?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    preciseConsumptionMeter?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
     valueAddProcessCost?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
     bodyArticle?: NullableStringFieldUpdateOperationsInput | string | null
     bodyArticleDescription?: NullableStringFieldUpdateOperationsInput | string | null
@@ -97871,8 +97935,12 @@ export namespace Prisma {
     roughV2?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
     vendorFabricRate?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
     finalCost?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
-    valueAddAccCostType?: NullableStringFieldUpdateOperationsInput | string | null
-    valueAddCost?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    roughRatio?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    roughConsumptionKg?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    roughConsumptionMeter?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    preciseRatio?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    preciseConsumptionKg?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    preciseConsumptionMeter?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
     valueAddProcessCost?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
     bodyArticle?: NullableStringFieldUpdateOperationsInput | string | null
     bodyArticleDescription?: NullableStringFieldUpdateOperationsInput | string | null
@@ -98018,8 +98086,12 @@ export namespace Prisma {
     roughV2?: Decimal | DecimalJsLike | number | string | null
     vendorFabricRate?: Decimal | DecimalJsLike | number | string | null
     finalCost?: Decimal | DecimalJsLike | number | string | null
-    valueAddAccCostType?: string | null
-    valueAddCost?: Decimal | DecimalJsLike | number | string | null
+    roughRatio?: Decimal | DecimalJsLike | number | string | null
+    roughConsumptionKg?: Decimal | DecimalJsLike | number | string | null
+    roughConsumptionMeter?: Decimal | DecimalJsLike | number | string | null
+    preciseRatio?: Decimal | DecimalJsLike | number | string | null
+    preciseConsumptionKg?: Decimal | DecimalJsLike | number | string | null
+    preciseConsumptionMeter?: Decimal | DecimalJsLike | number | string | null
     valueAddProcessCost?: Decimal | DecimalJsLike | number | string | null
     bodyArticle?: string | null
     bodyArticleDescription?: string | null
@@ -98163,8 +98235,12 @@ export namespace Prisma {
     roughV2?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
     vendorFabricRate?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
     finalCost?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
-    valueAddAccCostType?: NullableStringFieldUpdateOperationsInput | string | null
-    valueAddCost?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    roughRatio?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    roughConsumptionKg?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    roughConsumptionMeter?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    preciseRatio?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    preciseConsumptionKg?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    preciseConsumptionMeter?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
     valueAddProcessCost?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
     bodyArticle?: NullableStringFieldUpdateOperationsInput | string | null
     bodyArticleDescription?: NullableStringFieldUpdateOperationsInput | string | null
@@ -98308,8 +98384,12 @@ export namespace Prisma {
     roughV2?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
     vendorFabricRate?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
     finalCost?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
-    valueAddAccCostType?: NullableStringFieldUpdateOperationsInput | string | null
-    valueAddCost?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    roughRatio?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    roughConsumptionKg?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    roughConsumptionMeter?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    preciseRatio?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    preciseConsumptionKg?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    preciseConsumptionMeter?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
     valueAddProcessCost?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
     bodyArticle?: NullableStringFieldUpdateOperationsInput | string | null
     bodyArticleDescription?: NullableStringFieldUpdateOperationsInput | string | null
@@ -104346,9 +104426,7 @@ export namespace Prisma {
     fabCost?: Decimal | DecimalJsLike | number | string | null
     fabCons?: Decimal | DecimalJsLike | number | string | null
     width?: Decimal | DecimalJsLike | number | string | null
-    basicTrimCost?: Decimal | DecimalJsLike | number | string | null
     roughCmpCost?: Decimal | DecimalJsLike | number | string | null
-    costingType?: string | null
     bodyConsumptionType?: string | null
     gsm?: Decimal | DecimalJsLike | number | string | null
     ratio?: Decimal | DecimalJsLike | number | string | null
@@ -104410,9 +104488,7 @@ export namespace Prisma {
     fabCost?: Decimal | DecimalJsLike | number | string | null
     fabCons?: Decimal | DecimalJsLike | number | string | null
     width?: Decimal | DecimalJsLike | number | string | null
-    basicTrimCost?: Decimal | DecimalJsLike | number | string | null
     roughCmpCost?: Decimal | DecimalJsLike | number | string | null
-    costingType?: string | null
     bodyConsumptionType?: string | null
     gsm?: Decimal | DecimalJsLike | number | string | null
     ratio?: Decimal | DecimalJsLike | number | string | null
@@ -104474,9 +104550,7 @@ export namespace Prisma {
     fabCost?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
     fabCons?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
     width?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
-    basicTrimCost?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
     roughCmpCost?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
-    costingType?: NullableStringFieldUpdateOperationsInput | string | null
     bodyConsumptionType?: NullableStringFieldUpdateOperationsInput | string | null
     gsm?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
     ratio?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
@@ -104538,9 +104612,7 @@ export namespace Prisma {
     fabCost?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
     fabCons?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
     width?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
-    basicTrimCost?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
     roughCmpCost?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
-    costingType?: NullableStringFieldUpdateOperationsInput | string | null
     bodyConsumptionType?: NullableStringFieldUpdateOperationsInput | string | null
     gsm?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
     ratio?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
@@ -104602,9 +104674,7 @@ export namespace Prisma {
     fabCost?: Decimal | DecimalJsLike | number | string | null
     fabCons?: Decimal | DecimalJsLike | number | string | null
     width?: Decimal | DecimalJsLike | number | string | null
-    basicTrimCost?: Decimal | DecimalJsLike | number | string | null
     roughCmpCost?: Decimal | DecimalJsLike | number | string | null
-    costingType?: string | null
     bodyConsumptionType?: string | null
     gsm?: Decimal | DecimalJsLike | number | string | null
     ratio?: Decimal | DecimalJsLike | number | string | null
@@ -104666,9 +104736,7 @@ export namespace Prisma {
     fabCost?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
     fabCons?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
     width?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
-    basicTrimCost?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
     roughCmpCost?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
-    costingType?: NullableStringFieldUpdateOperationsInput | string | null
     bodyConsumptionType?: NullableStringFieldUpdateOperationsInput | string | null
     gsm?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
     ratio?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
@@ -104730,9 +104798,7 @@ export namespace Prisma {
     fabCost?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
     fabCons?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
     width?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
-    basicTrimCost?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
     roughCmpCost?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
-    costingType?: NullableStringFieldUpdateOperationsInput | string | null
     bodyConsumptionType?: NullableStringFieldUpdateOperationsInput | string | null
     gsm?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
     ratio?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
@@ -107875,8 +107941,12 @@ export namespace Prisma {
     roughV2?: SortOrder
     vendorFabricRate?: SortOrder
     finalCost?: SortOrder
-    valueAddAccCostType?: SortOrder
-    valueAddCost?: SortOrder
+    roughRatio?: SortOrder
+    roughConsumptionKg?: SortOrder
+    roughConsumptionMeter?: SortOrder
+    preciseRatio?: SortOrder
+    preciseConsumptionKg?: SortOrder
+    preciseConsumptionMeter?: SortOrder
     valueAddProcessCost?: SortOrder
     bodyArticle?: SortOrder
     bodyArticleDescription?: SortOrder
@@ -107936,7 +108006,12 @@ export namespace Prisma {
     roughV2?: SortOrder
     vendorFabricRate?: SortOrder
     finalCost?: SortOrder
-    valueAddCost?: SortOrder
+    roughRatio?: SortOrder
+    roughConsumptionKg?: SortOrder
+    roughConsumptionMeter?: SortOrder
+    preciseRatio?: SortOrder
+    preciseConsumptionKg?: SortOrder
+    preciseConsumptionMeter?: SortOrder
     valueAddProcessCost?: SortOrder
     mrp?: SortOrder
     approvedBy?: SortOrder
@@ -108046,8 +108121,12 @@ export namespace Prisma {
     roughV2?: SortOrder
     vendorFabricRate?: SortOrder
     finalCost?: SortOrder
-    valueAddAccCostType?: SortOrder
-    valueAddCost?: SortOrder
+    roughRatio?: SortOrder
+    roughConsumptionKg?: SortOrder
+    roughConsumptionMeter?: SortOrder
+    preciseRatio?: SortOrder
+    preciseConsumptionKg?: SortOrder
+    preciseConsumptionMeter?: SortOrder
     valueAddProcessCost?: SortOrder
     bodyArticle?: SortOrder
     bodyArticleDescription?: SortOrder
@@ -108191,8 +108270,12 @@ export namespace Prisma {
     roughV2?: SortOrder
     vendorFabricRate?: SortOrder
     finalCost?: SortOrder
-    valueAddAccCostType?: SortOrder
-    valueAddCost?: SortOrder
+    roughRatio?: SortOrder
+    roughConsumptionKg?: SortOrder
+    roughConsumptionMeter?: SortOrder
+    preciseRatio?: SortOrder
+    preciseConsumptionKg?: SortOrder
+    preciseConsumptionMeter?: SortOrder
     valueAddProcessCost?: SortOrder
     bodyArticle?: SortOrder
     bodyArticleDescription?: SortOrder
@@ -108251,7 +108334,12 @@ export namespace Prisma {
     roughV2?: SortOrder
     vendorFabricRate?: SortOrder
     finalCost?: SortOrder
-    valueAddCost?: SortOrder
+    roughRatio?: SortOrder
+    roughConsumptionKg?: SortOrder
+    roughConsumptionMeter?: SortOrder
+    preciseRatio?: SortOrder
+    preciseConsumptionKg?: SortOrder
+    preciseConsumptionMeter?: SortOrder
     valueAddProcessCost?: SortOrder
     mrp?: SortOrder
     approvedBy?: SortOrder
@@ -111832,9 +111920,7 @@ export namespace Prisma {
     fabCost?: SortOrder
     fabCons?: SortOrder
     width?: SortOrder
-    basicTrimCost?: SortOrder
     roughCmpCost?: SortOrder
-    costingType?: SortOrder
     bodyConsumptionType?: SortOrder
     gsm?: SortOrder
     ratio?: SortOrder
@@ -111873,7 +111959,6 @@ export namespace Prisma {
     fabCost?: SortOrder
     fabCons?: SortOrder
     width?: SortOrder
-    basicTrimCost?: SortOrder
     roughCmpCost?: SortOrder
     gsm?: SortOrder
     ratio?: SortOrder
@@ -111916,9 +112001,7 @@ export namespace Prisma {
     fabCost?: SortOrder
     fabCons?: SortOrder
     width?: SortOrder
-    basicTrimCost?: SortOrder
     roughCmpCost?: SortOrder
-    costingType?: SortOrder
     bodyConsumptionType?: SortOrder
     gsm?: SortOrder
     ratio?: SortOrder
@@ -111980,9 +112063,7 @@ export namespace Prisma {
     fabCost?: SortOrder
     fabCons?: SortOrder
     width?: SortOrder
-    basicTrimCost?: SortOrder
     roughCmpCost?: SortOrder
-    costingType?: SortOrder
     bodyConsumptionType?: SortOrder
     gsm?: SortOrder
     ratio?: SortOrder
@@ -112021,7 +112102,6 @@ export namespace Prisma {
     fabCost?: SortOrder
     fabCons?: SortOrder
     width?: SortOrder
-    basicTrimCost?: SortOrder
     roughCmpCost?: SortOrder
     gsm?: SortOrder
     ratio?: SortOrder
@@ -116548,8 +116628,12 @@ export namespace Prisma {
     roughV2?: Decimal | DecimalJsLike | number | string | null
     vendorFabricRate?: Decimal | DecimalJsLike | number | string | null
     finalCost?: Decimal | DecimalJsLike | number | string | null
-    valueAddAccCostType?: string | null
-    valueAddCost?: Decimal | DecimalJsLike | number | string | null
+    roughRatio?: Decimal | DecimalJsLike | number | string | null
+    roughConsumptionKg?: Decimal | DecimalJsLike | number | string | null
+    roughConsumptionMeter?: Decimal | DecimalJsLike | number | string | null
+    preciseRatio?: Decimal | DecimalJsLike | number | string | null
+    preciseConsumptionKg?: Decimal | DecimalJsLike | number | string | null
+    preciseConsumptionMeter?: Decimal | DecimalJsLike | number | string | null
     valueAddProcessCost?: Decimal | DecimalJsLike | number | string | null
     bodyArticle?: string | null
     bodyArticleDescription?: string | null
@@ -116694,8 +116778,12 @@ export namespace Prisma {
     roughV2?: Decimal | DecimalJsLike | number | string | null
     vendorFabricRate?: Decimal | DecimalJsLike | number | string | null
     finalCost?: Decimal | DecimalJsLike | number | string | null
-    valueAddAccCostType?: string | null
-    valueAddCost?: Decimal | DecimalJsLike | number | string | null
+    roughRatio?: Decimal | DecimalJsLike | number | string | null
+    roughConsumptionKg?: Decimal | DecimalJsLike | number | string | null
+    roughConsumptionMeter?: Decimal | DecimalJsLike | number | string | null
+    preciseRatio?: Decimal | DecimalJsLike | number | string | null
+    preciseConsumptionKg?: Decimal | DecimalJsLike | number | string | null
+    preciseConsumptionMeter?: Decimal | DecimalJsLike | number | string | null
     valueAddProcessCost?: Decimal | DecimalJsLike | number | string | null
     bodyArticle?: string | null
     bodyArticleDescription?: string | null
@@ -116966,8 +117054,12 @@ export namespace Prisma {
     roughV2?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
     vendorFabricRate?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
     finalCost?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
-    valueAddAccCostType?: NullableStringFieldUpdateOperationsInput | string | null
-    valueAddCost?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    roughRatio?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    roughConsumptionKg?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    roughConsumptionMeter?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    preciseRatio?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    preciseConsumptionKg?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    preciseConsumptionMeter?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
     valueAddProcessCost?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
     bodyArticle?: NullableStringFieldUpdateOperationsInput | string | null
     bodyArticleDescription?: NullableStringFieldUpdateOperationsInput | string | null
@@ -117112,8 +117204,12 @@ export namespace Prisma {
     roughV2?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
     vendorFabricRate?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
     finalCost?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
-    valueAddAccCostType?: NullableStringFieldUpdateOperationsInput | string | null
-    valueAddCost?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    roughRatio?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    roughConsumptionKg?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    roughConsumptionMeter?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    preciseRatio?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    preciseConsumptionKg?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    preciseConsumptionMeter?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
     valueAddProcessCost?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
     bodyArticle?: NullableStringFieldUpdateOperationsInput | string | null
     bodyArticleDescription?: NullableStringFieldUpdateOperationsInput | string | null
@@ -118104,8 +118200,12 @@ export namespace Prisma {
     roughV2?: Decimal | DecimalJsLike | number | string | null
     vendorFabricRate?: Decimal | DecimalJsLike | number | string | null
     finalCost?: Decimal | DecimalJsLike | number | string | null
-    valueAddAccCostType?: string | null
-    valueAddCost?: Decimal | DecimalJsLike | number | string | null
+    roughRatio?: Decimal | DecimalJsLike | number | string | null
+    roughConsumptionKg?: Decimal | DecimalJsLike | number | string | null
+    roughConsumptionMeter?: Decimal | DecimalJsLike | number | string | null
+    preciseRatio?: Decimal | DecimalJsLike | number | string | null
+    preciseConsumptionKg?: Decimal | DecimalJsLike | number | string | null
+    preciseConsumptionMeter?: Decimal | DecimalJsLike | number | string | null
     valueAddProcessCost?: Decimal | DecimalJsLike | number | string | null
     bodyArticle?: string | null
     bodyArticleDescription?: string | null
@@ -118251,8 +118351,12 @@ export namespace Prisma {
     roughV2?: Decimal | DecimalJsLike | number | string | null
     vendorFabricRate?: Decimal | DecimalJsLike | number | string | null
     finalCost?: Decimal | DecimalJsLike | number | string | null
-    valueAddAccCostType?: string | null
-    valueAddCost?: Decimal | DecimalJsLike | number | string | null
+    roughRatio?: Decimal | DecimalJsLike | number | string | null
+    roughConsumptionKg?: Decimal | DecimalJsLike | number | string | null
+    roughConsumptionMeter?: Decimal | DecimalJsLike | number | string | null
+    preciseRatio?: Decimal | DecimalJsLike | number | string | null
+    preciseConsumptionKg?: Decimal | DecimalJsLike | number | string | null
+    preciseConsumptionMeter?: Decimal | DecimalJsLike | number | string | null
     valueAddProcessCost?: Decimal | DecimalJsLike | number | string | null
     bodyArticle?: string | null
     bodyArticleDescription?: string | null
@@ -118527,8 +118631,12 @@ export namespace Prisma {
     roughV2?: DecimalNullableFilter<"ExtractionResultFlat"> | Decimal | DecimalJsLike | number | string | null
     vendorFabricRate?: DecimalNullableFilter<"ExtractionResultFlat"> | Decimal | DecimalJsLike | number | string | null
     finalCost?: DecimalNullableFilter<"ExtractionResultFlat"> | Decimal | DecimalJsLike | number | string | null
-    valueAddAccCostType?: StringNullableFilter<"ExtractionResultFlat"> | string | null
-    valueAddCost?: DecimalNullableFilter<"ExtractionResultFlat"> | Decimal | DecimalJsLike | number | string | null
+    roughRatio?: DecimalNullableFilter<"ExtractionResultFlat"> | Decimal | DecimalJsLike | number | string | null
+    roughConsumptionKg?: DecimalNullableFilter<"ExtractionResultFlat"> | Decimal | DecimalJsLike | number | string | null
+    roughConsumptionMeter?: DecimalNullableFilter<"ExtractionResultFlat"> | Decimal | DecimalJsLike | number | string | null
+    preciseRatio?: DecimalNullableFilter<"ExtractionResultFlat"> | Decimal | DecimalJsLike | number | string | null
+    preciseConsumptionKg?: DecimalNullableFilter<"ExtractionResultFlat"> | Decimal | DecimalJsLike | number | string | null
+    preciseConsumptionMeter?: DecimalNullableFilter<"ExtractionResultFlat"> | Decimal | DecimalJsLike | number | string | null
     valueAddProcessCost?: DecimalNullableFilter<"ExtractionResultFlat"> | Decimal | DecimalJsLike | number | string | null
     bodyArticle?: StringNullableFilter<"ExtractionResultFlat"> | string | null
     bodyArticleDescription?: StringNullableFilter<"ExtractionResultFlat"> | string | null
@@ -120099,8 +120207,12 @@ export namespace Prisma {
     roughV2?: Decimal | DecimalJsLike | number | string | null
     vendorFabricRate?: Decimal | DecimalJsLike | number | string | null
     finalCost?: Decimal | DecimalJsLike | number | string | null
-    valueAddAccCostType?: string | null
-    valueAddCost?: Decimal | DecimalJsLike | number | string | null
+    roughRatio?: Decimal | DecimalJsLike | number | string | null
+    roughConsumptionKg?: Decimal | DecimalJsLike | number | string | null
+    roughConsumptionMeter?: Decimal | DecimalJsLike | number | string | null
+    preciseRatio?: Decimal | DecimalJsLike | number | string | null
+    preciseConsumptionKg?: Decimal | DecimalJsLike | number | string | null
+    preciseConsumptionMeter?: Decimal | DecimalJsLike | number | string | null
     valueAddProcessCost?: Decimal | DecimalJsLike | number | string | null
     bodyArticle?: string | null
     bodyArticleDescription?: string | null
@@ -120246,8 +120358,12 @@ export namespace Prisma {
     roughV2?: Decimal | DecimalJsLike | number | string | null
     vendorFabricRate?: Decimal | DecimalJsLike | number | string | null
     finalCost?: Decimal | DecimalJsLike | number | string | null
-    valueAddAccCostType?: string | null
-    valueAddCost?: Decimal | DecimalJsLike | number | string | null
+    roughRatio?: Decimal | DecimalJsLike | number | string | null
+    roughConsumptionKg?: Decimal | DecimalJsLike | number | string | null
+    roughConsumptionMeter?: Decimal | DecimalJsLike | number | string | null
+    preciseRatio?: Decimal | DecimalJsLike | number | string | null
+    preciseConsumptionKg?: Decimal | DecimalJsLike | number | string | null
+    preciseConsumptionMeter?: Decimal | DecimalJsLike | number | string | null
     valueAddProcessCost?: Decimal | DecimalJsLike | number | string | null
     bodyArticle?: string | null
     bodyArticleDescription?: string | null
@@ -120444,8 +120560,12 @@ export namespace Prisma {
     roughV2?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
     vendorFabricRate?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
     finalCost?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
-    valueAddAccCostType?: NullableStringFieldUpdateOperationsInput | string | null
-    valueAddCost?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    roughRatio?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    roughConsumptionKg?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    roughConsumptionMeter?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    preciseRatio?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    preciseConsumptionKg?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    preciseConsumptionMeter?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
     valueAddProcessCost?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
     bodyArticle?: NullableStringFieldUpdateOperationsInput | string | null
     bodyArticleDescription?: NullableStringFieldUpdateOperationsInput | string | null
@@ -120591,8 +120711,12 @@ export namespace Prisma {
     roughV2?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
     vendorFabricRate?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
     finalCost?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
-    valueAddAccCostType?: NullableStringFieldUpdateOperationsInput | string | null
-    valueAddCost?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    roughRatio?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    roughConsumptionKg?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    roughConsumptionMeter?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    preciseRatio?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    preciseConsumptionKg?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    preciseConsumptionMeter?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
     valueAddProcessCost?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
     bodyArticle?: NullableStringFieldUpdateOperationsInput | string | null
     bodyArticleDescription?: NullableStringFieldUpdateOperationsInput | string | null
@@ -121634,8 +121758,12 @@ export namespace Prisma {
     roughV2?: Decimal | DecimalJsLike | number | string | null
     vendorFabricRate?: Decimal | DecimalJsLike | number | string | null
     finalCost?: Decimal | DecimalJsLike | number | string | null
-    valueAddAccCostType?: string | null
-    valueAddCost?: Decimal | DecimalJsLike | number | string | null
+    roughRatio?: Decimal | DecimalJsLike | number | string | null
+    roughConsumptionKg?: Decimal | DecimalJsLike | number | string | null
+    roughConsumptionMeter?: Decimal | DecimalJsLike | number | string | null
+    preciseRatio?: Decimal | DecimalJsLike | number | string | null
+    preciseConsumptionKg?: Decimal | DecimalJsLike | number | string | null
+    preciseConsumptionMeter?: Decimal | DecimalJsLike | number | string | null
     valueAddProcessCost?: Decimal | DecimalJsLike | number | string | null
     bodyArticle?: string | null
     bodyArticleDescription?: string | null
@@ -121940,8 +122068,12 @@ export namespace Prisma {
     roughV2?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
     vendorFabricRate?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
     finalCost?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
-    valueAddAccCostType?: NullableStringFieldUpdateOperationsInput | string | null
-    valueAddCost?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    roughRatio?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    roughConsumptionKg?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    roughConsumptionMeter?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    preciseRatio?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    preciseConsumptionKg?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    preciseConsumptionMeter?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
     valueAddProcessCost?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
     bodyArticle?: NullableStringFieldUpdateOperationsInput | string | null
     bodyArticleDescription?: NullableStringFieldUpdateOperationsInput | string | null
@@ -122087,8 +122219,12 @@ export namespace Prisma {
     roughV2?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
     vendorFabricRate?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
     finalCost?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
-    valueAddAccCostType?: NullableStringFieldUpdateOperationsInput | string | null
-    valueAddCost?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    roughRatio?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    roughConsumptionKg?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    roughConsumptionMeter?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    preciseRatio?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    preciseConsumptionKg?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    preciseConsumptionMeter?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
     valueAddProcessCost?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
     bodyArticle?: NullableStringFieldUpdateOperationsInput | string | null
     bodyArticleDescription?: NullableStringFieldUpdateOperationsInput | string | null
@@ -122233,8 +122369,12 @@ export namespace Prisma {
     roughV2?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
     vendorFabricRate?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
     finalCost?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
-    valueAddAccCostType?: NullableStringFieldUpdateOperationsInput | string | null
-    valueAddCost?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    roughRatio?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    roughConsumptionKg?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    roughConsumptionMeter?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    preciseRatio?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    preciseConsumptionKg?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    preciseConsumptionMeter?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
     valueAddProcessCost?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
     bodyArticle?: NullableStringFieldUpdateOperationsInput | string | null
     bodyArticleDescription?: NullableStringFieldUpdateOperationsInput | string | null
