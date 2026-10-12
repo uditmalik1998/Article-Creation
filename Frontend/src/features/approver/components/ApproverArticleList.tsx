@@ -247,7 +247,10 @@ const ATTRIBUTE_GROUPS: { group: string; color: string; fields: { field: string;
       { field: 'fWidth', schemaKey: 'f_width' },
       { field: 'lycra', schemaKey: 'lycra_non_lycra' },
       { field: 'shade', schemaKey: 'shade', freeText: true },
+      { field: 'autoBgt', schemaKey: 'auto_bgt', freeText: true },
+      { field: 'roughV2', schemaKey: 'rough_v2', freeText: true },
       { field: 'vendorFabricRate', schemaKey: 'vendor_fabric_rate', freeText: true, mandatory: true },
+      { field: 'finalCost', schemaKey: 'final_cost', freeText: true },
     ],
   },
   {
@@ -422,11 +425,11 @@ const BODY_PRIORITY_KEYS = [
 
 // ─── Redesign tokens — header/icon palette per group ──────────────────────────
 const GROUP_LABELS: Record<string, string> = {
-  FAB: 'FABRIC AND CONSTRUCTION',
-  BODY: 'BODY AND CONSTRUCTION',
-  'VA ACC.': 'Trims & Accessories',
-  'VA PRCS': 'Value Addition',
-  BUSINESS: 'Business & Misc',
+  FAB: 'FAB',
+  BODY: 'BODY',
+  'VA ACC.': 'B TRIM',
+  'VA PRCS': 'V. ADD',
+  BUSINESS: 'OTH GRID-1',
 };
 
 const GROUP_ICONS: Record<string, React.ReactNode> = {
@@ -2483,12 +2486,12 @@ const ArticleCard = React.memo(
               {/* ── Group filter tabs (FG articles only) ── */}
               {!allowGroups && (() => {
                 const TAB_DEFS = [
-                  { key: 'FAB',      label: 'FABRIC AND CONSTRUCTION', style: GROUP_HEADER_STYLE['FAB'] },
-                  { key: 'BODY',     label: 'BODY AND CONSTRUCTION',   style: GROUP_HEADER_STYLE['BODY'] },
-                  { key: 'VA ACC.',  label: 'TRIMS & ACCESSORIES',     style: GROUP_HEADER_STYLE['VA ACC.'] },
-                  { key: 'VA PRCS',  label: 'VALUE ADDITION',          style: GROUP_HEADER_STYLE['VA PRCS'] },
-                  { key: 'BUSINESS', label: 'BUSINESS & MISC',         style: GROUP_HEADER_STYLE['BUSINESS'] },
-                  { key: 'BOM',      label: 'BOM',                     style: { bg: '#fffbeb', fg: '#92400e', border: '#fde68a' } },
+                  { key: 'FAB',      label: 'FAB',        style: GROUP_HEADER_STYLE['FAB'] },
+                  { key: 'BODY',     label: 'BODY',       style: GROUP_HEADER_STYLE['BODY'] },
+                  { key: 'VA ACC.',  label: 'B TRIM',     style: GROUP_HEADER_STYLE['VA ACC.'] },
+                  { key: 'VA PRCS',  label: 'V. ADD',     style: GROUP_HEADER_STYLE['VA PRCS'] },
+                  { key: 'BUSINESS', label: 'OTH GRID-1', style: GROUP_HEADER_STYLE['BUSINESS'] },
+                  { key: 'BOM',      label: 'OTH GRID-2', style: { bg: '#fffbeb', fg: '#92400e', border: '#fde68a' } },
                 ];
                 return (
                   <div className="mb-2 flex flex-wrap gap-1.5">
@@ -2563,7 +2566,6 @@ const ArticleCard = React.memo(
                                 { field: 'cmtpCost', label: 'CMTP COST' },
                                 { field: 'cmpCost', label: 'CMP COST' },
                                 { field: 'fabCons', label: 'FAB CON' },
-                                { field: 'width', label: 'WIDTH' },
                               ].map(({ field, label }) => {
                                 _attrCounter += 1;
                                 const num = _attrCounter;
@@ -3117,7 +3119,7 @@ const ArticleCard = React.memo(
                                             // Validate required fields against the merged (UI) values
                                             const missing: string[] = [];
                                             if (!mergedItem.fabricArticleDescription) missing.push('FABRIC ARTICLE DESC');
-                                            if (!mergedItem.vendorFabricRate) missing.push('VENDOR FABRIC RATE');
+                                            if (!mergedItem.vendorFabricRate) missing.push('VENDOR COST');
                                             if (missing.length > 0) {
                                               message.error(`Fill mandatory fields before creating Fabric Article: ${missing.join(', ')}`);
                                               return;
@@ -3782,13 +3784,12 @@ const ArticleCard = React.memo(
                     >
                       <span className="flex items-center gap-1 text-[10px] font-bold uppercase tracking-wider text-amber-700">
                         <DollarSign className="h-3 w-3" />
-                        {isBodyArticle ? 'ROUGH CONSUMPTION' : 'BOM'}
+                        {isBodyArticle ? 'ROUGH CONSUMPTION' : 'OTH GRID-2'}
                       </span>
                     </div>
                     <div className="space-y-0 p-1">
                       {(allowGroups?.includes('BODY')
                         ? [
-                            { label: 'Width',             field: 'width',            editable: true, mandatory: false, isDropdown: false, isColor: false, isMarkdown: false },
                             { label: 'Gsm',               field: 'gsm',              editable: true, mandatory: false, isDropdown: false, isColor: false, isMarkdown: false },
                             { label: 'Ratio',                 field: 'ratio',               editable: true, mandatory: false, isDropdown: false, isColor: false, isMarkdown: false },
                             { label: 'Consumption in Kg',      field: 'consumptionKg',       editable: true, mandatory: false, isDropdown: false, isColor: false, isMarkdown: false },
