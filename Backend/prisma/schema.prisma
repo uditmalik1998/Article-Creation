@@ -2153,6 +2153,23 @@ model BasicTrimCostMaster {
   @@schema("public")
 }
 
+/// PreciseTrimMaster: per-attribute-value BT-1 / BT-2 trim costs imported from
+/// "BASIC TRIMS 2 TYPE COSTING.xlsx". Keyed on (maj_cat, type).
+model PreciseTrimMaster {
+  id        Int      @id @default(autoincrement())
+  majCat    String   @map("maj_cat") @db.VarChar(100)
+  type      String   @map("type")    @db.VarChar(100)
+  bt1       Decimal? @map("bt1")     @db.Decimal(10, 4)
+  bt2       Decimal? @map("bt2")     @db.Decimal(10, 4)
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt      @map("updated_at")
+
+  @@unique([majCat, type])
+  @@index([majCat])
+  @@map("precise_trim_master")
+  @@schema("public")
+}
+
 /// BasicTrimCostComponent: one row per trim/packaging component of a BasicTrimCostMaster row,
 /// holding the workbook's per-piece consumption and rate so a rate change can be re-costed.
 model BasicTrimCostComponent {

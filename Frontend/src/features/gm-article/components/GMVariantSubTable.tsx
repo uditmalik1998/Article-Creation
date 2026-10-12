@@ -1,10 +1,8 @@
 import React, { useCallback, useEffect, useRef, useState } from 'react';
 import { useForm } from 'react-hook-form';
-import { Pencil, Trash2, Plus, Info } from 'lucide-react';
+import { Pencil, Plus } from 'lucide-react';
 import {
-  Badge,
   Button,
-  DataTable,
   Dialog,
   DialogContent,
   DialogFooter,
@@ -17,7 +15,6 @@ import {
   FormLabel,
   Input,
   MultiSelect,
-  Popconfirm,
   Select,
   SelectContent,
   SelectItem,
@@ -26,11 +23,10 @@ import {
   Spinner,
   Tag,
   Textarea,
-  Tooltip,
-  type DataTableColumn,
 } from '@/shared/components/ui-tw';
 import { message } from '@/lib/message';
 import { APP_CONFIG } from '../../../constants/app/config';
+import VariantGrid, { StatusPill } from '../../approver/components/VariantGrid';
 import type { ApproverItem, MasterAttribute } from './GMArticleTable';
 
 const FALLBACK_COLORS = ['BLACK', 'WHITE', 'RED', 'NAVY', 'GREY', 'BLUE', 'GREEN'];
@@ -623,6 +619,7 @@ const GMVariantSubTable: React.FC<VariantSubTableProps> = ({
   const [editingVariant, setEditingVariant] = useState<ApproverItem | null>(null);
   const [addColorOpen, setAddColorOpen] = useState(false);
   const [majCatSizeCount, setMajCatSizeCount] = useState<number | null>(null);
+  const [deletingColor, setDeletingColor] = useState<string | null>(null);
 
   const fetchVariants = useCallback(async (silent = false) => {
     if (!silent) setLoading(true);
@@ -689,27 +686,6 @@ const GMVariantSubTable: React.FC<VariantSubTableProps> = ({
     fetchVariants();
   }, [fetchVariants]);
 
-  const handleDeleteVariant = useCallback(
-    async (variantId: string) => {
-      try {
-        const token = localStorage.getItem('authToken');
-        const response = await fetch(`${APP_CONFIG.api.baseURL}/approver/items/${variantId}`, {
-          method: 'DELETE',
-          headers: { Authorization: `Bearer ${token}` },
-        });
-        if (!response.ok) {
-          const payload = await response.json().catch(() => null);
-          throw new Error(payload?.error || 'Failed to delete variant');
-        }
-        message.success('Variant deleted');
-        fetchVariants();
-      } catch (err) {
-        message.error(err instanceof Error ? err.message : 'Failed to delete variant');
-      }
-    },
-    [fetchVariants],
-  );
-
   const handleRetryVariants = useCallback(async () => {
     setRetrying(true);
     try {
@@ -730,138 +706,47 @@ const GMVariantSubTable: React.FC<VariantSubTableProps> = ({
     }
   }, [genericId, fetchVariants, onRefresh]);
 
-  const columns: DataTableColumn<ApproverItem>[] = [
-    {
-      title: 'Size',
-      dataIndex: 'variantSize',
-      key: 'variantSize',
-      width: 90,
-      render: (v: string | null) => v || <span className="text-muted-foreground">—</span>,
-    },
-    {
-      title: 'Color',
-      dataIndex: 'variantColor',
-      key: 'variantColor',
-      width: 140,
-      render: (v, record) => {
-        const display = v || record.colour || genericRecord.colour;
-        return display ? <Badge variant="info">{display}</Badge> : <span className="text-muted-foreground">—</span>;
-      },
-    },
-    {
-      title: 'Status',
-      dataIndex: 'approvalStatus',
-      key: 'approvalStatus',
-      width: 100,
-      render: (status: string) => {
-        const variant: 'success' | 'destructive' | 'warning' =
-          status === 'APPROVED' ? 'success' : status === 'REJECTED' ? 'destructive' : 'warning';
-        return <Badge variant={variant}>{status || 'PENDING'}</Badge>;
-      },
-    },
-    {
-      title: 'Major Category',
-      dataIndex: 'majorCategory',
-      key: 'majorCategory',
-      width: 160,
-      render: (v) => v || <span className="text-muted-foreground">—</span>,
-    },
-    {
-      title: 'Division',
-      dataIndex: 'division',
-      key: 'division',
-      width: 100,
-      render: (v) => v || <span className="text-muted-foreground">—</span>,
-    },
-    {
-      title: 'Vendor',
-      key: 'vendor',
-      width: 140,
-      render: (_v, record) =>
-        record.vendorName || record.vendorCode || <span className="text-muted-foreground">—</span>,
-    },
-    {
-      title: 'Rate',
-      dataIndex: 'rate',
-      key: 'rate',
-      width: 80,
-      render: (v) => (v != null ? String(v) : '—'),
-    },
-    {
-      title: 'MRP',
-      dataIndex: 'mrp',
-      key: 'mrp',
-      width: 80,
-      render: (v) => (v != null ? String(v) : '—'),
-    },
-    {
-      title: 'SAP Article #',
-      dataIndex: 'sapArticleId',
-      key: 'sapArticleId',
-      width: 140,
-      render: (sapId, record) => {
-        if (sapId) return <strong className="text-xs text-emerald-700">{sapId}</strong>;
-        const status = record.sapSyncStatus;
-        if (status === 'FAILED') {
-          return (
-            <Tooltip title={record.sapSyncMessage || 'SAP returned an error'} side="top">
-              <Badge variant="destructive" className="cursor-help gap-1 text-[11px]">
-                FAILED <Info className="h-3 w-3" />
-              </Badge>
-            </Tooltip>
-          );
-        }
-        if (status === 'SYNCED') return <Badge variant="warning" className="text-[11px]">SYNCED</Badge>;
-        return <span className="text-[11px] text-muted-foreground">Pending SAP</span>;
-      },
-    },
-    {
-      title: '',
-      key: 'actions',
-      width: 130,
-      render: (_v, record) => (
-        <div className="flex gap-1.5">
-          {!record.fabricArticleNumber && (
-            <Button size="sm" variant="outline" onClick={() => setEditingVariant(record)}>
-              <Pencil />
-              Edit
-            </Button>
-          )}
-          {(!record.approvalStatus || record.approvalStatus === 'PENDING') && (
-            <Popconfirm
-              title="Delete variant?"
-              description="This cannot be undone."
-              onConfirm={() => handleDeleteVariant(record.id)}
-              okText="Delete"
-            >
-              <Button size="sm" variant="destructive">
-                <Trash2 />
-              </Button>
-            </Popconfirm>
-          )}
-        </div>
-      ),
-    },
-  ];
+  // ── Grid wiring (shared VariantGrid, design "Option E") ───────────────────
+  // Only variants still pending approval can be deleted (unchanged rule).
+  const isPendingVariant = (v: ApproverItem) => !v.sapArticleId && (!v.approvalStatus || v.approvalStatus === 'PENDING');
 
-  const handleSyncColor = async () => {
+  const deleteVariants = async (ids: string[]) => {
+    const token = localStorage.getItem('authToken');
+    const results = await Promise.all(
+      ids.map((id) =>
+        fetch(`${APP_CONFIG.api.baseURL}/approver/items/${id}`, {
+          method: 'DELETE',
+          headers: { Authorization: `Bearer ${token}` },
+        }),
+      ),
+    );
+    const failed = results.filter((r) => !r.ok).length;
+    if (failed) message.error(`${failed} variant${failed !== 1 ? 's' : ''} could not be deleted`);
+    else message.success(`Deleted ${ids.length} variant${ids.length !== 1 ? 's' : ''}`);
+    fetchVariants();
+  };
+
+  const handleDeleteColorVariants = async (color: string) => {
+    const ids = variants.filter((v) => (v.variantColor || '').toUpperCase() === color).map((v) => v.id);
+    setDeletingColor(color);
     try {
-      const token = localStorage.getItem('authToken');
-      const res = await fetch(`${APP_CONFIG.api.baseURL}/approver/items/${genericId}/sync-color`, {
-        method: 'POST',
-        headers: { Authorization: `Bearer ${token}` },
-      });
-      const data = await res.json();
-      if (data.count > 0) {
-        message.success(`Colour synced to ${data.count} variants`);
-        fetchVariants();
-      } else {
-        message.info(data.message || 'Nothing to sync');
-      }
-    } catch {
-      message.error('Failed to sync colour');
+      await deleteVariants(ids);
+    } finally {
+      setDeletingColor(null);
     }
   };
+
+  const renderStatus = (v: ApproverItem) => {
+    if (v.sapArticleId) return <StatusPill tone="green">Synced</StatusPill>;
+    if (v.sapSyncStatus === 'FAILED') {
+      return <StatusPill tone="red" tooltip={v.sapSyncMessage || 'SAP returned an error'}>Failed</StatusPill>;
+    }
+    if (v.sapSyncStatus === 'SYNCED') return <StatusPill tone="amber">Synced, no #</StatusPill>;
+    if (v.approvalStatus === 'REJECTED') return <StatusPill tone="red">Rejected</StatusPill>;
+    if (v.approvalStatus === 'APPROVED') return <StatusPill tone="slate">Pending SAP</StatusPill>;
+    return <StatusPill tone="amber">Pending approval</StatusPill>;
+  };
+
 
   if (loading) {
     return (
@@ -880,41 +765,39 @@ const GMVariantSubTable: React.FC<VariantSubTableProps> = ({
   ).length;
 
   return (
-    <div className="rounded-md bg-muted/30 p-4">
-      <div className="mb-2 flex items-center justify-between">
-        <strong className="text-[13px]">Variants ({variants.length})</strong>
-        <div className="flex items-center gap-2">
-          {genericRecord.colour && (
-            <Button size="sm" variant="outline" onClick={handleSyncColor}>
-              Sync Color
+    <div>
+      <VariantGrid<ApproverItem>
+        variants={variants}
+        fallbackColor={genericRecord.colour}
+        isSelectable={isPendingVariant}
+        isDeletable={isPendingVariant}
+        onBulkDelete={deleteVariants}
+        canDeleteColor={(_color, rows) => rows.length > 0 && !!rows[0].variantColor && rows.every(isPendingVariant)}
+        onDeleteColor={handleDeleteColorVariants}
+        deletingColor={deletingColor}
+        renderStatus={renderStatus}
+        renderRowAction={(v) =>
+          !v.fabricArticleNumber ? (
+            <Button size="sm" variant="outline" className="h-6 px-2 text-[11px]" onClick={() => setEditingVariant(v)}>
+              <Pencil className="h-3 w-3" />
+              Edit
             </Button>
-          )}
-          {pathType === 'created' && retryNeededCount > 0 && (
-            <Button size="sm" variant="destructive" disabled={retrying} onClick={handleRetryVariants}>
-              {retrying ? 'Retrying…' : `Retry Variants to SAP (${retryNeededCount})`}
+          ) : null
+        }
+        toolbarActions={
+          <>
+            {pathType === 'created' && retryNeededCount > 0 && (
+              <Button size="sm" variant="destructive" className="h-7 text-[12px]" disabled={retrying} onClick={handleRetryVariants}>
+                {retrying ? 'Retrying…' : `Retry Variants to SAP (${retryNeededCount})`}
+              </Button>
+            )}
+            <Button size="sm" className="h-7 bg-slate-800 text-[12px] text-white hover:bg-slate-900" onClick={() => setAddColorOpen(true)}>
+              <Plus />
+              Add Color
             </Button>
-          )}
-          <Button size="sm" variant="outline" onClick={() => setAddColorOpen(true)}>
-            <Plus />
-            Add Color
-          </Button>
-        </div>
-      </div>
-
-      {variants.length === 0 ? (
-        <span className="text-sm text-muted-foreground">
-          No variants yet. Use "Add Color" to create color variants.
-        </span>
-      ) : (
-        <DataTable<ApproverItem>
-          columns={columns}
-          dataSource={variants}
-          rowKey="id"
-          size="small"
-          pagination={false}
-          scroll={{ x: 'max-content' }}
-        />
-      )}
+          </>
+        }
+      />
 
       <EditVariantModal
         open={!!editingVariant}

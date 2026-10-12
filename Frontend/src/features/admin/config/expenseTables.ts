@@ -487,6 +487,25 @@ export const EXPENSE_TABLE_CONFIGS: Record<string, ExpenseTableConfig> = {
       { dataIndex: 'updatedAt', title: 'Updated At', type: 'date', editable: false },
     ],
   },
+  'precise-trim-master': {
+    title: 'Precise Trim Master',
+    description: 'Basic trim costs per major category and type (BT-1, BT-2). Uploaded via the Admin → Expenses page and upserted by (MAJ_CAT, TYPE).',
+    rowKey: 'id',
+    defaultSortBy: 'majCat',
+    defaultSortDir: 'asc',
+    allowCreate: true,
+    allowDelete: true,
+    requiredOnCreate: ['majCat', 'type'],
+    columns: [
+      { dataIndex: 'id', title: 'ID', width: 80, editable: false },
+      { dataIndex: 'majCat', title: 'Major Category', pickFromExisting: true, filterable: true },
+      { dataIndex: 'type', title: 'Type', pickFromExisting: true, filterable: true },
+      { dataIndex: 'bt1', title: 'BT-1', align: 'right' },
+      { dataIndex: 'bt2', title: 'BT-2', align: 'right' },
+      { dataIndex: 'createdAt', title: 'Created At', type: 'date', editable: false },
+      { dataIndex: 'updatedAt', title: 'Updated At', type: 'date', editable: false },
+    ],
+  },
   'cmp-cost-master': {
     title: 'CMP Cost Master (Rough CMP Cost per Major Category)',
     description:

@@ -338,6 +338,13 @@ export default function Admin() {
   const [cmpCostMasterProgress, setCmpCostMasterProgress] = useState<number>(0);
   const cmpCostMasterFileRef = useRef<HTMLInputElement | null>(null);
 
+  // Precise Trim Master (precise_trim_master)
+  const [preciseTrimMasterMeta, setPreciseTrimMasterMeta] = useState<CmpCostMasterMeta | null>(null);
+  const [preciseTrimMasterStatusLoading, setPreciseTrimMasterStatusLoading] = useState(false);
+  const [preciseTrimMasterUploading, setPreciseTrimMasterUploading] = useState(false);
+  const [preciseTrimMasterProgress, setPreciseTrimMasterProgress] = useState<number>(0);
+  const preciseTrimMasterFileRef = useRef<HTMLInputElement | null>(null);
+
   // National Grid Master
   const [nationalGridTotal, setNationalGridTotal] = useState<number | null>(null);
   const [nationalGridStatusLoading, setNationalGridStatusLoading] = useState(false);
@@ -1702,6 +1709,68 @@ export default function Admin() {
     }
   };
 
+  // ─────────────────────────────── Precise Trim Master ───────────────────────────────
+  const loadPreciseTrimMasterStatus = useCallback(async () => {
+    setPreciseTrimMasterStatusLoading(true);
+    try {
+      const token = localStorage.getItem('authToken');
+      const res = await fetch(`${APP_CONFIG.api.baseURL}/admin/precise-trim-master/status`, {
+        headers: token ? { Authorization: `Bearer ${token}` } : {},
+      });
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.error || 'Failed to load precise trim master status');
+      setPreciseTrimMasterMeta(data.data);
+    } catch (err: any) {
+      message.error(err?.message || 'Failed to load precise trim master status');
+    } finally {
+      setPreciseTrimMasterStatusLoading(false);
+    }
+  }, []);
+
+  const downloadPreciseTrimMasterFile = (kind: 'template' | 'export') => {
+    const token = localStorage.getItem('authToken');
+    const url = `${APP_CONFIG.api.baseURL}/admin/precise-trim-master/${kind}`;
+    return fetch(url, { headers: token ? { Authorization: `Bearer ${token}` } : {} })
+      .then((r) => r.blob())
+      .then((blob) => {
+        const a = document.createElement('a');
+        a.href = URL.createObjectURL(blob);
+        a.download = kind === 'template' ? 'PRECISE_TRIM_MASTER_TEMPLATE.xlsx' : 'PRECISE_TRIM_MASTER_EXPORT.xlsx';
+        a.click();
+      })
+      .catch(() => message.error(kind === 'template' ? 'Failed to download template' : 'Failed to export precise trim master'));
+  };
+
+  const handlePreciseTrimMasterUpload = async (file: File) => {
+    setPreciseTrimMasterUploading(true);
+    setPreciseTrimMasterProgress(0);
+    try {
+      const token = localStorage.getItem('authToken');
+      const formData = new FormData();
+      formData.append('file', file);
+      const progressInterval = setInterval(() => {
+        setPreciseTrimMasterProgress((prev) => Math.min(prev + 5, 90));
+      }, 500);
+      const res = await fetch(`${APP_CONFIG.api.baseURL}/admin/precise-trim-master/upload`, {
+        method: 'POST',
+        headers: token ? { Authorization: `Bearer ${token}` } : {},
+        body: formData,
+      });
+      clearInterval(progressInterval);
+      setPreciseTrimMasterProgress(100);
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.error || 'Upload failed');
+      message.success(data.message);
+      setPreciseTrimMasterMeta(data.data);
+    } catch (err: any) {
+      message.error(err?.message || 'Upload failed');
+    } finally {
+      setPreciseTrimMasterUploading(false);
+      setTimeout(() => setPreciseTrimMasterProgress(0), 1500);
+      if (preciseTrimMasterFileRef.current) preciseTrimMasterFileRef.current.value = '';
+    }
+  };
+
   // ─────────────────────────────── National Grid Master ───────────────────────────────
   const downloadNationalGridData = () => {
     const token = localStorage.getItem('authToken');
@@ -2309,8 +2378,9 @@ export default function Admin() {
     loadGmRawStatus();
     loadBodyFabConsStatus();
     loadPreciseBodyArticleStatus();
+    loadPreciseTrimMasterStatus();
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [loadVendorStatus, loadMajCatGridStatus, loadMandatoryGridStatus, loadSizeMasterStatus, loadColorMasterStatus, loadFabricArticleDataStatus, loadFabricArticleMasterStatus, loadBodyArticleDataStatus, loadBroaderMenuStatus, loadSegmentMasterStatus, loadBasicAccessoriesStatus, loadCmpCostMasterStatus, loadNationalGridStatus, loadHierarchyExcelStatus, loadPipelineStatus, loadFabricRawStatus, loadGmRawStatus, loadBodyFabConsStatus, loadPreciseBodyArticleStatus]);
+  }, [loadVendorStatus, loadMajCatGridStatus, loadMandatoryGridStatus, loadSizeMasterStatus, loadColorMasterStatus, loadFabricArticleDataStatus, loadFabricArticleMasterStatus, loadBodyArticleDataStatus, loadBroaderMenuStatus, loadSegmentMasterStatus, loadBasicAccessoriesStatus, loadCmpCostMasterStatus, loadNationalGridStatus, loadHierarchyExcelStatus, loadPipelineStatus, loadFabricRawStatus, loadGmRawStatus, loadBodyFabConsStatus, loadPreciseBodyArticleStatus, loadPreciseTrimMasterStatus]);
 
   const loadData = async () => {
     setLoading(true);
@@ -3592,7 +3662,7 @@ export default function Admin() {
               }
             />
           </MasterGroup>
-          <MasterGroup title="Fabric & body" count={5} notUploaded={((fabricArticleDataMeta ? (fabricArticleDataMeta.total ?? 0) : null) === 0 ? 1 : 0) + ((fabricArticleMasterMeta ? (fabricArticleMasterMeta.total ?? 0) : null) === 0 ? 1 : 0) + ((bodyFabConsTotal ? bodyFabConsTotal.total : null) === 0 ? 1 : 0) + ((bodyArticleDataMeta ? (bodyArticleDataMeta.total ?? 0) : null) === 0 ? 1 : 0) + ((preciseBodyArticleTotal ? preciseBodyArticleTotal.total : null) === 0 ? 1 : 0)}>
+          <MasterGroup title="Fabric & body" count={4} notUploaded={((fabricArticleDataMeta ? (fabricArticleDataMeta.total ?? 0) : null) === 0 ? 1 : 0) + ((fabricArticleMasterMeta ? (fabricArticleMasterMeta.total ?? 0) : null) === 0 ? 1 : 0) + ((bodyFabConsTotal ? bodyFabConsTotal.total : null) === 0 ? 1 : 0) + ((bodyArticleDataMeta ? (bodyArticleDataMeta.total ?? 0) : null) === 0 ? 1 : 0)}>
             <MasterDataCard
               title="Fabric Article Data"
               description="Bulk Insert"
@@ -3983,6 +4053,8 @@ export default function Admin() {
                 </>
               }
             />
+          </MasterGroup>
+          <MasterGroup title="Precise" count={2} notUploaded={((preciseBodyArticleTotal ? preciseBodyArticleTotal.total : null) === 0 ? 1 : 0) + ((preciseTrimMasterMeta ? (preciseTrimMasterMeta.total ?? 0) : null) === 0 ? 1 : 0)}>
             <MasterDataCard
               title="Precise Body Article Data"
               rows={preciseBodyArticleTotal ? preciseBodyArticleTotal.total : null}
@@ -4047,6 +4119,94 @@ export default function Admin() {
                       <button
                         type="button"
                         onClick={() => preciseBodyArticleFileRef.current?.click()}
+                        className="flex w-full flex-col items-center justify-center rounded-md border-2 border-dashed border-border bg-muted/30 px-4 py-6 transition-colors hover:border-slate-400 hover:bg-slate-50 dark:hover:bg-slate-500/10"
+                      >
+                        <Inbox className="mb-2 h-8 w-8 text-slate-600 dark:text-slate-300" />
+                        <p className="text-[13px]">
+                          Click to upload <strong>.xlsx</strong> file
+                        </p>
+                        <p className="text-[11px] text-muted-foreground">Only Excel files. Max 50 MB.</p>
+                      </button>
+                    )}
+                  </div>
+                </>
+              }
+            />
+            <MasterDataCard
+              title="Precise Trim Master"
+              rows={preciseTrimMasterMeta ? (preciseTrimMasterMeta.total ?? 0) : null}
+              lastUpload={preciseTrimMasterMeta?.lastUpdated ?? null}
+              loading={preciseTrimMasterStatusLoading}
+              busy={preciseTrimMasterUploading}
+              onView={() => navigate('/admin/expense/precise-trim-master')}
+              onDownload={() => downloadPreciseTrimMasterFile('export')}
+              onTemplate={() => downloadPreciseTrimMasterFile('template')}
+              onRefresh={loadPreciseTrimMasterStatus}
+              details={
+                <>
+                  {preciseTrimMasterMeta && (preciseTrimMasterMeta.total ?? 0) > 0 ? (
+                    <Descriptions bordered>
+                      {preciseTrimMasterMeta.lastUpdated && (
+                        <Descriptions.Item label="Last Updated">
+                          {new Date(preciseTrimMasterMeta.lastUpdated).toLocaleString('en-IN', {
+                            dateStyle: 'medium', timeStyle: 'short',
+                          })}
+                        </Descriptions.Item>
+                      )}
+                      <Descriptions.Item label="Major Categories">
+                        <Badge variant="info">{(preciseTrimMasterMeta.categories ?? 0).toLocaleString()}</Badge>
+                      </Descriptions.Item>
+                      <Descriptions.Item label="Total Rows">
+                        <Badge variant="success">{(preciseTrimMasterMeta.total ?? 0).toLocaleString()}</Badge>
+                      </Descriptions.Item>
+                      {preciseTrimMasterMeta.skipped != null && (preciseTrimMasterMeta.skipped ?? 0) > 0 && (
+                        <Descriptions.Item label="Skipped">
+                          <Badge variant="warning">{(preciseTrimMasterMeta.skipped ?? 0).toLocaleString()}</Badge>
+                        </Descriptions.Item>
+                      )}
+                    </Descriptions>
+                  ) : (
+                    <Alert
+                      type="warning"
+                      showIcon
+                      message="No precise trim master data loaded"
+                      description="Upload an Excel file with columns: MAJ_CAT, TYPE, BT-1, BT-2. Upserts by (MAJ_CAT, TYPE)."
+                    />
+                  )}
+                </>
+              }
+              upload={
+                <>
+                  <div className="rounded-md border border-border p-4">
+                    <div className="mb-1 font-semibold">Upload Precise Trim Master Excel</div>
+                    <div className="mb-3 text-xs text-muted-foreground">
+                      Columns: <strong>MAJ_CAT, TYPE, BT-1, BT-2</strong>.
+                      Upserts by (MAJ_CAT + TYPE) — existing rows are updated, new rows are inserted.
+                    </div>
+
+                    <input
+                      ref={preciseTrimMasterFileRef}
+                      type="file"
+                      accept=".xlsx,.xls"
+                      className="hidden"
+                      onChange={(e) => {
+                        const file = e.target.files?.[0];
+                        if (file) handlePreciseTrimMasterUpload(file);
+                      }}
+                    />
+
+                    {preciseTrimMasterUploading ? (
+                      <div>
+                        <div className="mb-2 text-[13px] text-slate-600 dark:text-slate-300">
+                          <RefreshCw className="mr-1.5 inline-block h-3.5 w-3.5 animate-spin" />
+                          Uploading &amp; upserting rows...
+                        </div>
+                        <Progress value={preciseTrimMasterProgress} />
+                      </div>
+                    ) : (
+                      <button
+                        type="button"
+                        onClick={() => preciseTrimMasterFileRef.current?.click()}
                         className="flex w-full flex-col items-center justify-center rounded-md border-2 border-dashed border-border bg-muted/30 px-4 py-6 transition-colors hover:border-slate-400 hover:bg-slate-50 dark:hover:bg-slate-500/10"
                       >
                         <Inbox className="mb-2 h-8 w-8 text-slate-600 dark:text-slate-300" />
