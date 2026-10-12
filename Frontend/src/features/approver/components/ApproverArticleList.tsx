@@ -290,8 +290,6 @@ const ATTRIBUTE_GROUPS: { group: string; color: string; fields: { field: string;
       { field: 'patches', schemaKey: 'patches' },
       { field: 'htrfType', schemaKey: 'htrf_type' },
       { field: 'htrfStyle', schemaKey: 'htrf_style' },
-      { field: 'valueAddAccCostType', schemaKey: 'value_add_acc_cost_type' },
-      { field: 'valueAddCost', schemaKey: 'value_add_cost', freeText: true },
     ],
   },
   {
@@ -866,7 +864,6 @@ const ArticleCard = React.memo(
           if (d.cmpCost == null) return;
           const updates: Record<string, string> = { cmpCost: String(d.cmpCost) };
           // Only set Costing Type to Rough if not already set in DB
-          if (!(item as any).costingType) updates['costingType'] = 'Rough';
           setLocalValues((prev) => ({ ...prev, ...updates }));
           onSave({ ...item, ...updates } as any, updates, { silent: true });
         })
@@ -2619,9 +2616,7 @@ const ArticleCard = React.memo(
                             {g.group === 'BODY' && allowGroups?.includes('BODY') &&
                               (() => {
                                 const COSTING_FIELDS: { field: string; label: string; isDropdown?: boolean }[] = [
-                                  { field: 'costingType',  label: 'BODY COSTING TYPE', isDropdown: true },
                                   { field: 'cmpCost',      label: 'CMP COST' },
-                                  { field: 'basicTrimCost', label: 'PACKAGING COST' },
                                   { field: 'cmtpCost',     label: 'CMTP COST' },
                                 ];
                                 return COSTING_FIELDS.map(({ field, label, isDropdown }) => {
@@ -4034,6 +4029,96 @@ const ArticleCard = React.memo(
                       })}
                     </div>
                   </div>}
+
+                  {/* ROUGH CONSUMPTION card — FG Articles, BODY tab only */}
+                  {!isBodyArticle && selectedGroupKeys.has('BODY') && (
+                    <div className="overflow-hidden rounded-lg border bg-white" style={{ borderColor: '#fde68a' }}>
+                      <div className="flex items-center justify-between border-b px-2 py-1" style={{ background: '#fffbeb', borderColor: '#fde68a' }}>
+                        <span className="flex items-center gap-1 text-[10px] font-bold uppercase tracking-wider text-amber-700">
+                          <DollarSign className="h-3 w-3" />
+                          ROUGH CONSUMPTION
+                        </span>
+                      </div>
+                      <div className="space-y-0 p-1">
+                        {([
+                          { label: 'Ratio',               field: 'roughRatio' },
+                          { label: 'Consumption in Kg',   field: 'roughConsumptionKg' },
+                          { label: 'Consumption in Meter', field: 'roughConsumptionMeter' },
+                        ] as { label: string; field: string }[]).map(({ label, field }) => {
+                          const isEditingR = editingField === `rough_${field}`;
+                          const rawVal = localValues[field] !== undefined ? localValues[field] : (item as any)[field];
+                          const displayVal = rawVal !== null && rawVal !== undefined && String(rawVal).trim() !== '' ? String(rawVal) : '—';
+                          const isEmpty = displayVal === '—';
+                          return (
+                            <div
+                              key={field}
+                              className="flex cursor-pointer items-center justify-between rounded px-1.5 py-1 hover:bg-muted/40"
+                              onClick={() => { if (!isEditingR) setEditingField(`rough_${field}`); }}
+                            >
+                              <span className="text-[11.5px] text-slate-600">{label}</span>
+                              {isEditingR ? (
+                                <input
+                                  autoFocus
+                                  type="number"
+                                  className="w-24 rounded border border-border px-1 text-right text-[11.5px]"
+                                  defaultValue={isEmpty ? '' : displayVal}
+                                  onBlur={(e) => { handleSave(field, e.target.value || null); setEditingField(null); }}
+                                  onKeyDown={(e) => { if (e.key === 'Enter') (e.target as HTMLInputElement).blur(); if (e.key === 'Escape') setEditingField(null); }}
+                                />
+                              ) : (
+                                <span className="text-[11.5px]" style={{ color: isEmpty ? '#9ca3af' : '#111827' }}>{displayVal}</span>
+                              )}
+                            </div>
+                          );
+                        })}
+                      </div>
+                    </div>
+                  )}
+
+                  {/* PRECISE CONSUMPTION card — FG Articles, BODY tab only */}
+                  {!isBodyArticle && selectedGroupKeys.has('BODY') && (
+                    <div className="overflow-hidden rounded-lg border bg-white" style={{ borderColor: '#fde68a' }}>
+                      <div className="flex items-center justify-between border-b px-2 py-1" style={{ background: '#fffbeb', borderColor: '#fde68a' }}>
+                        <span className="flex items-center gap-1 text-[10px] font-bold uppercase tracking-wider text-amber-700">
+                          <DollarSign className="h-3 w-3" />
+                          PRECISE CONSUMPTION
+                        </span>
+                      </div>
+                      <div className="space-y-0 p-1">
+                        {([
+                          { label: 'Ratio',               field: 'preciseRatio' },
+                          { label: 'Consumption in Kg',   field: 'preciseConsumptionKg' },
+                          { label: 'Consumption in Meter', field: 'preciseConsumptionMeter' },
+                        ] as { label: string; field: string }[]).map(({ label, field }) => {
+                          const isEditingP = editingField === `fgprecise_${field}`;
+                          const rawVal = localValues[field] !== undefined ? localValues[field] : (item as any)[field];
+                          const displayVal = rawVal !== null && rawVal !== undefined && String(rawVal).trim() !== '' ? String(rawVal) : '—';
+                          const isEmpty = displayVal === '—';
+                          return (
+                            <div
+                              key={field}
+                              className="flex cursor-pointer items-center justify-between rounded px-1.5 py-1 hover:bg-muted/40"
+                              onClick={() => { if (!isEditingP) setEditingField(`fgprecise_${field}`); }}
+                            >
+                              <span className="text-[11.5px] text-slate-600">{label}</span>
+                              {isEditingP ? (
+                                <input
+                                  autoFocus
+                                  type="number"
+                                  className="w-24 rounded border border-border px-1 text-right text-[11.5px]"
+                                  defaultValue={isEmpty ? '' : displayVal}
+                                  onBlur={(e) => { handleSave(field, e.target.value || null); setEditingField(null); }}
+                                  onKeyDown={(e) => { if (e.key === 'Enter') (e.target as HTMLInputElement).blur(); if (e.key === 'Escape') setEditingField(null); }}
+                                />
+                              ) : (
+                                <span className="text-[11.5px]" style={{ color: isEmpty ? '#9ca3af' : '#111827' }}>{displayVal}</span>
+                              )}
+                            </div>
+                          );
+                        })}
+                      </div>
+                    </div>
+                  )}
 
                   {/* PRECISE CONSUMPTION card — Body Articles only */}
                   {isBodyArticle && (

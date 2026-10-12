@@ -142,9 +142,7 @@ export interface ApproverItem {
   vendorFabricRate: number | string | null;
   valueAddCost: number | string | null;
   valueAddProcessCost: number | string | null;
-  basicTrimCost: number | string | null;
   roughCmpCost: number | string | null;
-  costingType: string | null;
   bodyConsumptionType: string | null;
   gsm: number | string | null;
   ratio: number | string | null;

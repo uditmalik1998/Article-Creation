@@ -335,7 +335,6 @@ export default function BodyArticleDashboard({ pathType }: BodyArticleDashboardP
         'Fab Cost':                 row.fabCost  == null ? undefined : Number(row.fabCost),
         'Fab Cons':                 row.fabCons  == null ? undefined : Number(row.fabCons),
         Width:                      row.bodyWidth == null ? undefined : Number(row.bodyWidth),
-        'Basic Trim Cost':          row.basicTrimCost == null ? undefined : Number(row.basicTrimCost),
         'Rough CMP Cost':           row.roughCmpCost  == null ? undefined : Number(row.roughCmpCost),
         'Created Date':             formattedDate,
       } as Record<string, string | number | undefined>;
