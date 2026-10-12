@@ -1,10 +1,8 @@
 import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { useForm } from 'react-hook-form';
-import { Pencil, Trash2, Plus, Info } from 'lucide-react';
+import { Plus } from 'lucide-react';
 import {
-  Badge,
   Button,
-  DataTable,
   Dialog,
   DialogContent,
   DialogFooter,
@@ -17,7 +15,6 @@ import {
   FormLabel,
   Input,
   MultiSelect,
-  Popconfirm,
   Select,
   SelectContent,
   SelectItem,
@@ -26,12 +23,12 @@ import {
   Spinner,
   Tag,
   Textarea,
-  Tooltip,
-  type DataTableColumn,
 } from '@/shared/components/ui-tw';
 import { message } from '@/lib/message';
+import { cn } from '@/lib/utils';
 import { APP_CONFIG } from '../../../constants/app/config';
 import type { ApproverItem, MasterAttribute } from './ApproverTable';
+import VariantGrid, { StatusPill } from './VariantGrid';
 
 const FALLBACK_COLORS = ['BLACK', 'WHITE', 'RED', 'NAVY', 'GREY', 'BLUE', 'GREEN'];
 
@@ -646,12 +643,13 @@ const WeightCell: React.FC<{ variant: ApproverItem; synced: boolean; onSaved: ()
     }
   };
 
+  const isEmpty = !value || String(value).trim() === '';
+
   // Synced variants: show weight as plain read-only text
   if (synced) {
-    const isEmpty = !value || value.trim() === '';
     return (
-      <span className="text-[12px] text-muted-foreground">
-        {isEmpty ? '—' : String(value)}
+      <span className="block pr-2 text-right font-mono text-[11.5px] text-slate-500">
+        {isEmpty ? '—' : `${value} kg`}
       </span>
     );
   }
@@ -660,7 +658,8 @@ const WeightCell: React.FC<{ variant: ApproverItem; synced: boolean; onSaved: ()
     return (
       <input
         autoFocus
-        className="w-20 rounded border border-input bg-background px-1.5 py-0.5 text-xs focus:outline-none focus:ring-1 focus:ring-ring"
+        inputMode="decimal"
+        className="h-6 w-full rounded border border-slate-400 bg-white px-2 text-right font-mono text-[11.5px] focus:outline-none focus:ring-1 focus:ring-slate-700"
         value={value}
         onChange={(e) => setValue(e.target.value)}
         onBlur={save}
@@ -674,14 +673,19 @@ const WeightCell: React.FC<{ variant: ApproverItem; synced: boolean; onSaved: ()
     );
   }
 
-  const isEmpty = !value || value.trim() === '';
   return (
-    <span
-      className={`cursor-pointer text-[12px] ${isEmpty ? 'font-medium text-rose-500' : 'text-foreground'}`}
+    <button
+      type="button"
       onClick={() => setEditing(true)}
+      className={cn(
+        'h-6 w-full rounded border px-2 text-right font-mono text-[11.5px]',
+        isEmpty
+          ? 'border-amber-300 bg-amber-50 text-amber-800 hover:border-amber-400'
+          : 'border-slate-200 bg-white text-slate-900 hover:border-slate-400',
+      )}
     >
-      {isEmpty ? 'Required' : String(value)}
-    </span>
+      {isEmpty ? '— kg' : `${value} kg`}
+    </button>
   );
 };
 
@@ -777,27 +781,6 @@ const VariantSubTable: React.FC<VariantSubTableProps> = ({
     fetchVariants();
   }, [fetchVariants]);
 
-  const handleDeleteVariant = useCallback(
-    async (variantId: string) => {
-      try {
-        const token = localStorage.getItem('authToken');
-        const response = await fetch(`${APP_CONFIG.api.baseURL}/approver/items/${variantId}`, {
-          method: 'DELETE',
-          headers: { Authorization: `Bearer ${token}` },
-        });
-        if (!response.ok) {
-          const payload = await response.json().catch(() => null);
-          throw new Error(payload?.error || 'Failed to delete variant');
-        }
-        message.success('Variant deleted');
-        fetchVariants();
-      } catch (err) {
-        message.error(err instanceof Error ? err.message : 'Failed to delete variant');
-      }
-    },
-    [fetchVariants],
-  );
-
   const handleDeleteColorVariants = useCallback(
     async (color: string) => {
       const toDelete = variants.filter(
@@ -837,16 +820,6 @@ const VariantSubTable: React.FC<VariantSubTableProps> = ({
     return s;
   }, [variants]);
 
-  // First variant ID per color — we show the Delete Color button only on the first row of each group.
-  const firstIdByColor = useMemo(() => {
-    const m = new Map<string, string>();
-    for (const v of variants) {
-      const c = (v.variantColor || '').toUpperCase();
-      if (c && !m.has(c)) m.set(c, v.id);
-    }
-    return m;
-  }, [variants]);
-
   const handleRetryVariants = useCallback(async () => {
     setRetrying(true);
     try {
@@ -867,148 +840,54 @@ const VariantSubTable: React.FC<VariantSubTableProps> = ({
     }
   }, [genericId, variants, fetchVariants, onRefresh]);
 
-  const columns: DataTableColumn<ApproverItem>[] = [
-    {
-      title: 'Size',
-      dataIndex: 'variantSize',
-      key: 'variantSize',
-      width: 90,
-      render: (v: string | null) => v || <span className="text-muted-foreground">—</span>,
-    },
-    {
-      title: 'Color',
-      dataIndex: 'variantColor',
-      key: 'variantColor',
-      width: 140,
-      render: (v, record) => {
-        const display = v || record.colour || genericRecord.colour;
-        return display ? <Badge variant="info">{display}</Badge> : <span className="text-muted-foreground">—</span>;
-      },
-    },
-    {
-      title: 'Major Category',
-      dataIndex: 'majorCategory',
-      key: 'majorCategory',
-      width: 160,
-      render: (v) => v || <span className="text-muted-foreground">—</span>,
-    },
-    {
-      title: 'Division',
-      dataIndex: 'division',
-      key: 'division',
-      width: 100,
-      render: (v) => v || <span className="text-muted-foreground">—</span>,
-    },
-    {
-      title: 'Vendor',
-      key: 'vendor',
-      width: 140,
-      render: (_v, record) =>
-        record.vendorName || record.vendorCode || <span className="text-muted-foreground">—</span>,
-    },
-    {
-      title: 'Rate',
-      dataIndex: 'rate',
-      key: 'rate',
-      width: 80,
-      render: (v) => (v != null ? String(v) : '—'),
-    },
-    {
-      title: 'MRP',
-      dataIndex: 'mrp',
-      key: 'mrp',
-      width: 80,
-      render: (v) => (v != null ? String(v) : '—'),
-    },
-    {
-      title: 'Weight (kg) *',
-      dataIndex: 'weight',
-      key: 'weight',
-      width: 100,
-      render: (_v, record) => (
-        <WeightCell
-          variant={record}
-          synced={!!record.sapArticleId}
-          onSaved={() => fetchVariants(true)}
-        />
-      ),
-    },
-    {
-      title: 'SAP Article #',
-      dataIndex: 'sapArticleId',
-      key: 'sapArticleId',
-      width: 140,
-      render: (sapId, record) => {
-        if (sapId) return <strong className="text-xs text-emerald-700">{sapId}</strong>;
-        const status = record.sapSyncStatus;
-        // SYNCED with no article number = effectively failed — treat as FAILED
-        if (status === 'FAILED' || status === 'SYNCED') {
-          return (
-            <Tooltip title={record.sapSyncMessage || 'SAP returned an error'} side="top">
-              <Badge variant="destructive" className="cursor-help gap-1 text-[11px]">
-                FAILED <Info className="h-3 w-3" />
-              </Badge>
-            </Tooltip>
-          );
-        }
-        return <span className="text-[11px] text-muted-foreground">Pending SAP</span>;
-      },
-    },
-    {
-      title: '',
-      key: 'actions',
-      width: 90,
-      render: (_v, record) => {
-        const color = (record.variantColor || '').toUpperCase();
-        if (syncedColors.has(color)) return null;
-        const isFirstOfColor = firstIdByColor.get(color) === record.id;
-        return (
-          <div className="flex items-center gap-1">
-            <Popconfirm
-              title="Delete this variant?"
-              onConfirm={() => handleDeleteVariant(record.id)}
-              okText="Delete"
-              cancelText="Cancel"
-            >
-              <Button size="sm" variant="ghost" className="h-6 w-6 p-0 text-destructive hover:text-destructive">
-                <Trash2 className="h-3.5 w-3.5" />
-              </Button>
-            </Popconfirm>
-            {isFirstOfColor && (
-              <Popconfirm
-                title={`Delete all variants for color ${color}?`}
-                onConfirm={() => handleDeleteColorVariants(color)}
-                okText="Delete All"
-                cancelText="Cancel"
-              >
-                <Button size="sm" variant="destructive" className="h-6 px-2 text-[10px] font-medium">
-                  Delete Color
-                </Button>
-              </Popconfirm>
-            )}
-          </div>
-        );
-      },
-    },
-  ];
+  // ── Grid wiring (shared VariantGrid, design "Option E") ───────────────────
+  const hasWeight = (v: ApproverItem) => String(v.variantWeight ?? '').trim() !== '';
 
-  const handleSyncColor = async () => {
+  const handleBulkWeight = async (ids: string[], w: string) => {
     try {
       const token = localStorage.getItem('authToken');
-      const res = await fetch(`${APP_CONFIG.api.baseURL}/approver/items/${genericId}/sync-color`, {
-        method: 'POST',
-        headers: { Authorization: `Bearer ${token}` },
-      });
-      const data = await res.json();
-      if (data.count > 0) {
-        message.success(`Colour synced to ${data.count} variants`);
-        fetchVariants();
-      } else {
-        message.info(data.message || 'Nothing to sync');
-      }
+      const results = await Promise.all(
+        ids.map((id) =>
+          fetch(`${APP_CONFIG.api.baseURL}/approver/items/${id}`, {
+            method: 'PUT',
+            headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` },
+            body: JSON.stringify({ variantWeight: w }),
+          }),
+        ),
+      );
+      const failed = results.filter((r) => !r.ok).length;
+      if (failed) message.error(`Weight not saved for ${failed} variant${failed !== 1 ? 's' : ''}`);
+      else message.success(`Weight set for ${ids.length} variant${ids.length !== 1 ? 's' : ''}`);
+      fetchVariants(true);
     } catch {
-      message.error('Failed to sync colour');
+      message.error('Failed to save weight');
     }
+  };
+
+  const handleBulkDelete = async (ids: string[]) => {
+    const token = localStorage.getItem('authToken');
+    const results = await Promise.all(
+      ids.map((id) =>
+        fetch(`${APP_CONFIG.api.baseURL}/approver/items/${id}`, {
+          method: 'DELETE',
+          headers: { Authorization: `Bearer ${token}` },
+        }),
+      ),
+    );
+    const failed = results.filter((r) => !r.ok).length;
+    if (failed) message.error(`${failed} variant${failed !== 1 ? 's' : ''} could not be deleted`);
+    else message.success(`Deleted ${ids.length} variant${ids.length !== 1 ? 's' : ''}`);
+    fetchVariants();
+  };
+
+  const renderStatus = (v: ApproverItem) => {
+    if (v.sapArticleId) return <StatusPill tone="green">Synced</StatusPill>;
+    // SYNCED with no article number = effectively failed — treat as FAILED
+    if (v.sapSyncStatus === 'FAILED' || v.sapSyncStatus === 'SYNCED') {
+      return <StatusPill tone="red" tooltip={v.sapSyncMessage || 'SAP returned an error'}>Failed</StatusPill>;
+    }
+    if (!hasWeight(v)) return <StatusPill tone="amber">Needs weight</StatusPill>;
+    return <StatusPill tone="slate">Pending SAP</StatusPill>;
   };
 
   if (loading) {
@@ -1031,41 +910,38 @@ const VariantSubTable: React.FC<VariantSubTableProps> = ({
   ).length;
 
   return (
-    <div className="rounded-md bg-muted/30 p-4">
-      <div className="mb-2 flex items-center justify-between">
-        <strong className="text-[13px]">Variants ({variants.length})</strong>
-        <div className="flex items-center gap-2">
-          {genericRecord.colour && (
-            <Button size="sm" variant="outline" onClick={handleSyncColor}>
-              Sync Color
+    <div>
+      <VariantGrid<ApproverItem>
+        variants={variants}
+        fallbackColor={genericRecord.colour}
+        // Synced variants can't be edited or deleted.
+        isSelectable={(v) => !v.sapArticleId}
+        // Same rule as before: no variant of a colour that already has a SAP-synced variant.
+        isDeletable={(v) => !syncedColors.has((v.variantColor || '').toUpperCase())}
+        onBulkDelete={handleBulkDelete}
+        canDeleteColor={(color, rows) => rows.length > 0 && !!rows[0].variantColor && !syncedColors.has(color)}
+        onDeleteColor={handleDeleteColorVariants}
+        deletingColor={deletingColor}
+        renderStatus={renderStatus}
+        weight={{
+          renderCell: (v) => <WeightCell variant={v} synced={!!v.sapArticleId} onSaved={() => fetchVariants(true)} />,
+          isMissing: (v) => !v.sapArticleId && !hasWeight(v),
+          onBulkSet: handleBulkWeight,
+        }}
+        toolbarActions={
+          <>
+            {pathType === 'created' && retryNeededCount > 0 && (
+              <Button size="sm" variant="destructive" className="h-7 text-[12px]" disabled={retrying} onClick={handleRetryVariants}>
+                {retrying ? 'Retrying…' : `Retry Variants to SAP (${retryNeededCount})`}
+              </Button>
+            )}
+            <Button size="sm" className="h-7 bg-slate-800 text-[12px] text-white hover:bg-slate-900" onClick={() => setAddColorOpen(true)}>
+              <Plus />
+              Add Color
             </Button>
-          )}
-          {pathType === 'created' && retryNeededCount > 0 && (
-            <Button size="sm" variant="destructive" disabled={retrying} onClick={handleRetryVariants}>
-              {retrying ? 'Retrying…' : `Retry Variants to SAP (${retryNeededCount})`}
-            </Button>
-          )}
-          <Button size="sm" variant="outline" onClick={() => setAddColorOpen(true)}>
-            <Plus />
-            Add Color
-          </Button>
-        </div>
-      </div>
-
-      {variants.length === 0 ? (
-        <span className="text-sm text-muted-foreground">
-          No variants yet. Use "Add Color" to create color variants.
-        </span>
-      ) : (
-        <DataTable<ApproverItem>
-          columns={columns}
-          dataSource={variants}
-          rowKey="id"
-          size="small"
-          pagination={false}
-          scroll={{ x: 'max-content' }}
-        />
-      )}
+          </>
+        }
+      />
 
       <EditVariantModal
         open={!!editingVariant}

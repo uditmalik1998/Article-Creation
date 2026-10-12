@@ -50,6 +50,15 @@ import { message } from '@/lib/message';
 import { cn } from '@/lib/utils';
 import { useDragToPan } from '@/shared/hooks/ui/useDragToPan';
 import type { ApproverItem, MasterAttribute } from './ApproverTable';
+import CostingGridCard, { BTRIM_CONFIG, VADD_CONFIG, gridFields } from './CostingGridCard';
+import PkgCostCard from './PkgCostCard';
+import { CARD_ACTION_BTN, CARD_THEME } from './cardTheme';
+
+// FG cards rendered as a costing grid instead of the numbered attribute list.
+const COSTING_GRID_CONFIGS: Record<string, { config: typeof BTRIM_CONFIG; fields: Set<string> }> = {
+  'VA ACC.': { config: BTRIM_CONFIG, fields: gridFields(BTRIM_CONFIG) },
+  'VA PRCS': { config: VADD_CONFIG, fields: gridFields(VADD_CONFIG) },
+};
 import {
   SCHEMA_KEY_TO_EXCEL_ATTR,
   SCHEMA_KEY_TO_DB_FIELD,
@@ -421,6 +430,16 @@ const BODY_PRIORITY_KEYS = [
   'fit', 'body_style', 'length',
 ];
 
+// FG OTH GRID-1 card: BUSINESS attrs shown under Rate/MRP/Colours in this order
+// (M_AGE_GROUP → M_IMP_ATBT → ARTICLE FASHION TYPE → SEGMENT), rest after.
+const OTH_GRID_1_ORDER = ['age_group', 'imp_atrbt2', 'article_fashion_type', 'segment'];
+
+// Hidden from the FG cards only (UI). The attrs still exist in the DB/admin
+// config — they will be removed in Supabase later.
+//   value_add_process_cost → VALUE ADD PROCESS COST (V. ADD card)
+//   fab_weight             → M_FAB_WEIGHT (OTH GRID-1 card)
+const FG_CARD_HIDDEN_SCHEMA_KEYS = new Set(['value_add_process_cost', 'fab_weight']);
+
 // ─── Redesign tokens — header/icon palette per group ──────────────────────────
 const GROUP_LABELS: Record<string, string> = {
   FAB: 'FAB',
@@ -438,15 +457,14 @@ const GROUP_ICONS: Record<string, React.ReactNode> = {
   BUSINESS: <Briefcase className="h-3.5 w-3.5" />,
 };
 
-// Group surfaces use saturated 400-tier border stops so the card edges
-// read confidently against the page. BUSINESS shifted from purple
-// (palette violation) to slate to fit the locked slate+coral palette.
+// Every group card shares one theme (CARD_THEME, "Ink Header"); the per-group
+// colors (amber/emerald/yellow/rose/slate) were retired 2026-10-12.
 const GROUP_HEADER_STYLE: Record<string, { bg: string; fg: string; border: string }> = {
-  FAB: { bg: '#fff7ed', fg: '#9a3412', border: '#fb923c' },        // amber
-  BODY: { bg: '#ecfdf5', fg: '#065f46', border: '#34d399' },       // emerald
-  'VA ACC.': { bg: '#fef3c7', fg: '#854d0e', border: '#facc15' },  // yellow
-  'VA PRCS': { bg: '#fff1f2', fg: '#9f1239', border: '#fb7185' },  // rose
-  BUSINESS: { bg: '#f1f5f9', fg: '#1e293b', border: '#64748b' },   // slate (was purple)
+  FAB: CARD_THEME,
+  BODY: CARD_THEME,
+  'VA ACC.': CARD_THEME,
+  'VA PRCS': CARD_THEME,
+  BUSINESS: CARD_THEME,
 };
 
 type CardGroup = typeof ATTRIBUTE_GROUPS[number];
@@ -664,7 +682,7 @@ const ArticleCard = React.memo(
     const [attrSearch, setAttrSearch] = useState('');
 
     // ── Group-tab visibility filter (FG articles only) ──────────────────────
-    // Keys: FAB | BODY | VA ACC. | VA PRCS | BUSINESS | BOM
+    // Keys: FAB | BODY | VA ACC. | VA PRCS | BOM | PKG  (BUSINESS is merged into BOM)
     const [selectedGroupKeys, setSelectedGroupKeys] = useState<Set<string>>(
       () => new Set(['FAB']),
     );
@@ -1621,8 +1639,9 @@ const ArticleCard = React.memo(
     // For FG articles: further filter by selected group tabs
     const visibleGroups = allowGroups
       ? activeGroups
-      : activeGroups.filter((g) => selectedGroupKeys.has(g.group));
+      : activeGroups.filter((g) => g.group !== 'BUSINESS' && selectedGroupKeys.has(g.group));
     const showBomCard = allowGroups ? true : selectedGroupKeys.has('BOM');
+    const showPkgCard = !allowGroups && selectedGroupKeys.has('PKG');
 
     const rateVal = String(getValue('rate') ?? '').trim();
     const mrpVal = String(getValue('mrp') ?? '').trim();
@@ -2063,6 +2082,27 @@ const ArticleCard = React.memo(
 
     const isGroupCollapsed = (g: string) => allCollapsed || collapsedGroups.has(g);
 
+    // Clickable header for the non-attribute cards (OTH GRID-1, Rough/Precise
+    // Consumption) — collapses like the group cards and follows Collapse All.
+    const renderCollapsibleHeader = (key: string, title: string) => {
+      const collapsed = isGroupCollapsed(key);
+      return (
+        <button
+          type="button"
+          onClick={() => toggleGroupCollapse(key)}
+          aria-expanded={!collapsed}
+          className="flex w-full items-center justify-between border-b px-2 py-1.5 transition-colors hover:brightness-110"
+          style={{ background: CARD_THEME.bg, borderColor: CARD_THEME.bg, color: CARD_THEME.fg }}
+        >
+          <span className="flex items-center gap-1 text-[10px] font-bold uppercase tracking-wider">
+            <DollarSign className="h-3 w-3" />
+            {title}
+          </span>
+          {collapsed ? <ChevronDown className="h-3 w-3" /> : <ChevronUp className="h-3 w-3" />}
+        </button>
+      );
+    };
+
     // AI confidence + heuristic quality breakdown derived from existing data.
     // No backend signal needed — we compute Image / Clarity / Match from
     // what's already on the item.
@@ -2364,12 +2404,15 @@ const ArticleCard = React.memo(
                   </span>
                 </div>
                 <div className="space-y-0.5 px-2 py-1 text-[10.5px] font-medium">
-                  <div className="flex items-start justify-between gap-2">
-                    <span className="font-semibold text-muted-foreground">Article ID</span>
-                    <span className="truncate text-right font-bold text-foreground">
-                      {item.sapArticleId || item.articleNumber || item.imageName || '—'}
-                    </span>
-                  </div>
+                  {/* Hidden on every FG Articles page (New, Old, Rejected, Created, Failed) */}
+                  {!!allowGroups && (
+                    <div className="flex items-start justify-between gap-2">
+                      <span className="font-semibold text-muted-foreground">Article ID</span>
+                      <span className="truncate text-right font-bold text-foreground">
+                        {item.sapArticleId || item.articleNumber || item.imageName || '—'}
+                      </span>
+                    </div>
+                  )}
                   <div className="flex items-start justify-between gap-2">
                     <span className="font-semibold text-muted-foreground">Category</span>
                     <span className="truncate text-right text-[11px] font-semibold text-foreground">
@@ -2487,8 +2530,10 @@ const ArticleCard = React.memo(
                   { key: 'BODY',     label: 'BODY',       style: GROUP_HEADER_STYLE['BODY'] },
                   { key: 'VA ACC.',  label: 'B TRIM',     style: GROUP_HEADER_STYLE['VA ACC.'] },
                   { key: 'VA PRCS',  label: 'V. ADD',     style: GROUP_HEADER_STYLE['VA PRCS'] },
-                  { key: 'BUSINESS', label: 'OTH GRID-1', style: GROUP_HEADER_STYLE['BUSINESS'] },
-                  { key: 'BOM',      label: 'OTH GRID-2', style: { bg: '#fffbeb', fg: '#92400e', border: '#fde68a' } },
+                  // BUSINESS attrs are merged into the BOM card (OTH GRID-1) for FG articles.
+                  { key: 'PKG',      label: 'PKG COST',   style: CARD_THEME },
+                  // OTH GRID-1 is always last — matches its card (order-last).
+                  { key: 'BOM',      label: 'OTH GRID-1', style: CARD_THEME },
                 ];
                 return (
                   <div className="mb-2 flex flex-wrap gap-1.5">
@@ -2501,7 +2546,7 @@ const ArticleCard = React.memo(
                           onClick={() => toggleGroupTab(key)}
                           className="rounded-full border-2 px-2.5 py-0.5 text-[10px] font-bold uppercase tracking-wider transition-all"
                           style={active
-                            ? { background: style.bg, color: style.fg, borderColor: style.border }
+                            ? { background: style.bg, color: style.fg, borderColor: style.bg }
                             : { background: 'transparent', color: '#64748b', borderColor: '#cbd5e1' }
                           }
                         >
@@ -2514,19 +2559,42 @@ const ArticleCard = React.memo(
               })()}
 
               {visibleAttrs.length > 0 ? (
-                <div className={`grid auto-rows-min gap-3 ${
+                <div className={`grid auto-rows-min items-start gap-3 ${
                   allowGroups
                     ? 'grid-cols-1'
                     : (() => {
-                        const visibleCount = visibleGroups.length + (showBomCard ? 1 : 0);
+                        const visibleCount = visibleGroups.length + (showBomCard ? 1 : 0) + (showPkgCard ? 1 : 0);
                         if (visibleCount <= 1) return 'grid-cols-1';
                         if (visibleCount <= 4) return 'grid-cols-2';
                         return 'grid-cols-3';
                       })()
                 }`}>
                   {visibleGroups.map((g) => {
-                    const style = GROUP_HEADER_STYLE[g.group] ?? { bg: '#f3f4f6', fg: '#374151', border: '#e5e7eb' };
+                    const style = GROUP_HEADER_STYLE[g.group] ?? CARD_THEME;
                     const collapsed = isGroupCollapsed(g.group);
+                    // FG articles: B TRIM and V. ADD render as costing grids.
+                    const gridCfg = COSTING_GRID_CONFIGS[g.group];
+                    if (gridCfg && !allowGroups) {
+                      const groupAttrs = groupMap[g.group].attrs;
+                      return (
+                        <CostingGridCard
+                          key={g.group}
+                          config={gridCfg.config}
+                          icon={GROUP_ICONS[g.group]}
+                          style={style}
+                          collapsed={collapsed}
+                          onToggleCollapse={() => toggleGroupCollapse(g.group)}
+                          attrs={groupAttrs}
+                          getValue={getValue}
+                          onSave={handleSave}
+                          isFieldLocked={isFieldLocked}
+                          locked={isLocked}
+                          extraRows={groupAttrs
+                            .filter((a) => !gridCfg.fields.has(a.field) && !FG_CARD_HIDDEN_SCHEMA_KEYS.has(a.schemaKey))
+                            .map((a) => renderAttributeRow(a))}
+                        />
+                      );
+                    }
                     return (
                       <div
                         key={g.group}
@@ -2537,7 +2605,7 @@ const ArticleCard = React.memo(
                           type="button"
                           onClick={() => toggleGroupCollapse(g.group)}
                           className="flex w-full items-center justify-between border-b-2 px-2 py-1.5 transition-colors hover:brightness-95"
-                          style={{ background: style.bg, borderColor: style.border }}
+                          style={{ background: style.bg, borderColor: style.bg }}
                         >
                           <span
                             className="flex items-center gap-1 text-[10px] font-bold uppercase tracking-wider"
@@ -3127,7 +3195,7 @@ const ArticleCard = React.memo(
                                           // Non-modify mode: use the standard parent flow (modal in parent)
                                           onCreateFabricArticle(mergedItem);
                                         }}
-                                        className="h-7 w-full border border-slate-300 bg-slate-50 text-[11px] font-medium text-slate-700 hover:bg-[#FF6F61]/10 hover:border-[#FF6F61]/40 hover:text-[#FF6F61] disabled:opacity-50 disabled:cursor-not-allowed"
+                                        className={CARD_ACTION_BTN}
                                       >
                                         <FileText />
                                         {fabricCreating ? 'Creating...' : 'Create Fabric Article'}
@@ -3752,7 +3820,7 @@ const ArticleCard = React.memo(
                                           // not the stale DB values (important on Created page before Modify is clicked).
                                           onCreateBodyArticle({ ...item, ...localValues } as typeof item);
                                         }}
-                                        className="h-7 w-full border border-purple-300 bg-purple-50 text-[11px] font-medium text-purple-700 hover:bg-purple-100"
+                                        className={CARD_ACTION_BTN}
                                       >
                                         <LayoutGrid />
                                         Create Body Article
@@ -3769,20 +3837,13 @@ const ArticleCard = React.memo(
                   })}
 
                   {/* BOM / Consumption card */}
+                  {/* FG: OTH GRID-1 is always the last card (order-last) */}
                   {showBomCard && <div
-                    className="overflow-hidden rounded-lg border bg-white"
-                    style={{ borderColor: '#fde68a' }}
+                    className={cn('overflow-hidden rounded-lg border bg-white', !allowGroups && 'order-last')}
+                    style={{ borderColor: CARD_THEME.border }}
                   >
-                    <div
-                      className="flex items-center justify-between border-b px-2 py-1"
-                      style={{ background: '#fffbeb', borderColor: '#fde68a' }}
-                    >
-                      <span className="flex items-center gap-1 text-[10px] font-bold uppercase tracking-wider text-amber-700">
-                        <DollarSign className="h-3 w-3" />
-                        {isBodyArticle ? 'ROUGH CONSUMPTION' : 'OTH GRID-2'}
-                      </span>
-                    </div>
-                    <div className="space-y-0 p-1">
+                    {renderCollapsibleHeader('BOM', isBodyArticle ? 'ROUGH CONSUMPTION' : 'OTH GRID-1')}
+                    <div className={cn('space-y-0 p-1', isGroupCollapsed('BOM') && 'hidden')}>
                       {(allowGroups?.includes('BODY')
                         ? [
                             { label: 'Gsm',               field: 'gsm',              editable: true, mandatory: false, isDropdown: false, isColor: false, isMarkdown: false },
@@ -4027,19 +4088,37 @@ const ArticleCard = React.memo(
                           </div>
                         );
                       })}
+
+                      {/* FG: the former BUSINESS card's attrs live here (OTH GRID-1),
+                          led by Age Group → IMP ATBT → Fashion Type → Segment. */}
+                      {!allowGroups && groupMap['BUSINESS'] &&
+                        groupMap['BUSINESS'].attrs
+                          .filter((a) => !FG_CARD_HIDDEN_SCHEMA_KEYS.has(a.schemaKey))
+                          .sort((a, b) => {
+                            const rank = (k: string) => {
+                              const i = OTH_GRID_1_ORDER.indexOf(k);
+                              return i === -1 ? OTH_GRID_1_ORDER.length : i;
+                            };
+                            return rank(a.schemaKey) - rank(b.schemaKey);
+                          })
+                          .map((a) => renderAttributeRow(a))}
                     </div>
                   </div>}
 
+                  {/* PKG COST card — FG Articles, PKG tab only */}
+                  {showPkgCard && (
+                    <PkgCostCard
+                      collapsed={isGroupCollapsed('PKG')}
+                      onToggleCollapse={() => toggleGroupCollapse('PKG')}
+                      locked={isLocked}
+                    />
+                  )}
+
                   {/* ROUGH CONSUMPTION card — FG Articles, BODY tab only */}
                   {!isBodyArticle && selectedGroupKeys.has('BODY') && (
-                    <div className="overflow-hidden rounded-lg border bg-white" style={{ borderColor: '#fde68a' }}>
-                      <div className="flex items-center justify-between border-b px-2 py-1" style={{ background: '#fffbeb', borderColor: '#fde68a' }}>
-                        <span className="flex items-center gap-1 text-[10px] font-bold uppercase tracking-wider text-amber-700">
-                          <DollarSign className="h-3 w-3" />
-                          ROUGH CONSUMPTION
-                        </span>
-                      </div>
-                      <div className="space-y-0 p-1">
+                    <div className="overflow-hidden rounded-lg border bg-white" style={{ borderColor: CARD_THEME.border }}>
+                      {renderCollapsibleHeader('ROUGH', 'ROUGH CONSUMPTION')}
+                      <div className={cn('space-y-0 p-1', isGroupCollapsed('ROUGH') && 'hidden')}>
                         {([
                           { label: 'Ratio',               field: 'roughRatio' },
                           { label: 'Consumption in Kg',   field: 'roughConsumptionKg' },
@@ -4077,14 +4156,9 @@ const ArticleCard = React.memo(
 
                   {/* PRECISE CONSUMPTION card — FG Articles, BODY tab only */}
                   {!isBodyArticle && selectedGroupKeys.has('BODY') && (
-                    <div className="overflow-hidden rounded-lg border bg-white" style={{ borderColor: '#fde68a' }}>
-                      <div className="flex items-center justify-between border-b px-2 py-1" style={{ background: '#fffbeb', borderColor: '#fde68a' }}>
-                        <span className="flex items-center gap-1 text-[10px] font-bold uppercase tracking-wider text-amber-700">
-                          <DollarSign className="h-3 w-3" />
-                          PRECISE CONSUMPTION
-                        </span>
-                      </div>
-                      <div className="space-y-0 p-1">
+                    <div className="overflow-hidden rounded-lg border bg-white" style={{ borderColor: CARD_THEME.border }}>
+                      {renderCollapsibleHeader('PRECISE', 'PRECISE CONSUMPTION')}
+                      <div className={cn('space-y-0 p-1', isGroupCollapsed('PRECISE') && 'hidden')}>
                         {([
                           { label: 'Ratio',               field: 'preciseRatio' },
                           { label: 'Consumption in Kg',   field: 'preciseConsumptionKg' },
@@ -4124,18 +4198,10 @@ const ArticleCard = React.memo(
                   {isBodyArticle && (
                     <div
                       className="overflow-hidden rounded-lg border bg-white"
-                      style={{ borderColor: '#fde68a' }}
+                      style={{ borderColor: CARD_THEME.border }}
                     >
-                      <div
-                        className="flex items-center justify-between border-b px-2 py-1"
-                        style={{ background: '#fffbeb', borderColor: '#fde68a' }}
-                      >
-                        <span className="flex items-center gap-1 text-[10px] font-bold uppercase tracking-wider text-amber-700">
-                          <DollarSign className="h-3 w-3" />
-                          PRECISE CONSUMPTION
-                        </span>
-                      </div>
-                      <div className="space-y-0 p-1">
+                      {renderCollapsibleHeader('PRECISE', 'PRECISE CONSUMPTION')}
+                      <div className={cn('space-y-0 p-1', isGroupCollapsed('PRECISE') && 'hidden')}>
                         {(
                           [
                             { label: 'Width',            field: 'preciseWidth' },

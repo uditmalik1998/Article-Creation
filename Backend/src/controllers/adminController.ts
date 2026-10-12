@@ -6085,6 +6085,217 @@ export const uploadCmpCostMaster = async (req: Request, res: Response): Promise<
 };
 
 // ═══════════════════════════════════════════════════════
+// PRECISE TRIM MASTER (precise_trim_master)
+// ═══════════════════════════════════════════════════════
+
+const PTM_SHEET_NAME = 'PRECISE TRIM MASTER';
+
+type PreciseTrimRow = { majCat: string; type: string; bt1: number | null; bt2: number | null };
+
+function buildPreciseTrimMasterSheet(wb: any, rows: PreciseTrimRow[]): void {
+  const ws = wb.addWorksheet(PTM_SHEET_NAME);
+
+  const blue = (cell: any) => {
+    cell.font = { bold: true, color: { argb: 'FFFFFFFF' } };
+    cell.fill = { type: 'pattern', pattern: 'solid', fgColor: { argb: 'FF1565C0' } };
+    cell.alignment = { horizontal: 'center' };
+  };
+
+  const headerRow = ws.addRow(['MAJ_CAT', 'TYPE', 'BT-1', 'BT-2']);
+  headerRow.eachCell((cell: any) => blue(cell));
+
+  for (const r of rows) {
+    ws.addRow([r.majCat, r.type, r.bt1 ?? '', r.bt2 ?? '']);
+  }
+
+  ws.columns = [{ width: 26 }, { width: 28 }, { width: 14 }, { width: 14 }];
+  ws.views = [{ state: 'frozen', xSplit: 0, ySplit: 1 }];
+}
+
+function buildPreciseTrimMasterWorkbook(rows: PreciseTrimRow[]): any {
+  const ExcelJS = require('exceljs');
+  const wb = new ExcelJS.Workbook();
+  buildPreciseTrimMasterSheet(wb, rows);
+  return wb;
+}
+
+/** GET /admin/precise-trim-master/status */
+export const getPreciseTrimMasterStatus = async (_req: Request, res: Response): Promise<void> => {
+  try {
+    const rows = await prisma.$queryRaw<{ total: bigint; categories: bigint; last_updated: Date | null }[]>`
+      SELECT COUNT(*)::bigint AS total,
+             COUNT(DISTINCT maj_cat)::bigint AS categories,
+             MAX(updated_at) AS last_updated
+      FROM precise_trim_master
+    `;
+    const r = rows[0] ?? { total: 0n, categories: 0n, last_updated: null };
+    res.json({
+      success: true,
+      data: {
+        total: Number(r.total),
+        categories: Number(r.categories),
+        lastUpdated: r.last_updated ? r.last_updated.toISOString() : null,
+      },
+    });
+  } catch (error: any) {
+    console.error('[PreciseTrimMaster] Status error:', error);
+    res.status(500).json({ success: false, error: error.message });
+  }
+};
+
+/** GET /admin/precise-trim-master/template */
+export const downloadPreciseTrimMasterTemplate = async (_req: Request, res: Response): Promise<void> => {
+  try {
+    const example: PreciseTrimRow = { majCat: 'IB_BERMUDA', type: 'BUTTON', bt1: 1.5, bt2: 2.0 };
+    const wb = buildPreciseTrimMasterWorkbook([example]);
+    res.setHeader('Content-Type', 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');
+    res.setHeader('Content-Disposition', 'attachment; filename="PRECISE_TRIM_MASTER_TEMPLATE.xlsx"');
+    await wb.xlsx.write(res);
+    res.end();
+  } catch (error: any) {
+    console.error('[PreciseTrimMaster] Template error:', error);
+    res.status(500).json({ success: false, error: error.message });
+  }
+};
+
+/** GET /admin/precise-trim-master/export — every stored row, same layout. */
+export const exportPreciseTrimMaster = async (_req: Request, res: Response): Promise<void> => {
+  try {
+    const masters = await prisma.preciseTrimMaster.findMany({
+      orderBy: [{ majCat: 'asc' }, { type: 'asc' }],
+    });
+    const rows: PreciseTrimRow[] = masters.map((m) => ({
+      majCat: m.majCat,
+      type: m.type,
+      bt1: m.bt1 === null ? null : Number(m.bt1),
+      bt2: m.bt2 === null ? null : Number(m.bt2),
+    }));
+    const wb = buildPreciseTrimMasterWorkbook(rows);
+    res.setHeader('Content-Type', 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');
+    res.setHeader('Content-Disposition', 'attachment; filename="PRECISE_TRIM_MASTER_EXPORT.xlsx"');
+    await wb.xlsx.write(res);
+    res.end();
+  } catch (error: any) {
+    console.error('[PreciseTrimMaster] Export error:', error);
+    res.status(500).json({ success: false, error: error.message });
+  }
+};
+
+/**
+ * POST /admin/precise-trim-master/upload
+ * Upserts by (maj_cat, type).
+ */
+export const uploadPreciseTrimMaster = async (req: Request, res: Response): Promise<void> => {
+  try {
+    if (!req.file) {
+      res.status(400).json({ success: false, error: 'No file uploaded. Send a .xlsx file as "file" field.' });
+      return;
+    }
+
+    const ExcelJS = (await import('exceljs')).default;
+    const wb = new ExcelJS.Workbook();
+    await wb.xlsx.load(req.file.buffer as any);
+
+    const ws = wb.getWorksheet(PTM_SHEET_NAME) ?? wb.worksheets[0];
+    if (!ws) {
+      res.status(400).json({ success: false, error: 'No worksheets found in the uploaded Excel file.' });
+      return;
+    }
+
+    const cellStr = (row: any, c: number): string => {
+      let v = row.getCell(c).value;
+      if (v && typeof v === 'object' && 'richText' in v) return (v as any).richText.map((t: any) => t.text).join('').trim();
+      if (v && typeof v === 'object' && 'result' in v) v = (v as any).result;
+      if (v && typeof v === 'object' && 'text' in v) v = (v as any).text;
+      return v == null ? '' : String(v).trim();
+    };
+
+    const numOf = (v: unknown): number | null => {
+      if (v === null || v === undefined || v === '') return null;
+      const n = Number(v);
+      return Number.isFinite(n) ? Number(n.toFixed(4)) : null;
+    };
+
+    // Auto-detect header row
+    let headerRowNo = 1;
+    for (let r = 1; r <= Math.min(5, ws.rowCount); r++) {
+      const row = ws.getRow(r);
+      const line = [1, 2, 3, 4].map((c) => cellStr(row, c).toUpperCase()).join(' ');
+      if (line.includes('MAJ') && line.includes('TYPE')) {
+        headerRowNo = r;
+        break;
+      }
+    }
+
+    let cMajCat = 1, cType = 2, cBt1 = 3, cBt2 = 4;
+    const hdr = ws.getRow(headerRowNo);
+    for (let c = 1; c <= 6; c++) {
+      const h = cellStr(hdr, c).toUpperCase().replace(/[-_ ]/g, '');
+      if (h.includes('MAJCAT') || h === 'MAJ' || h === 'MC') cMajCat = c;
+      else if (h === 'TYPE') cType = c;
+      else if (h === 'BT1') cBt1 = c;
+      else if (h === 'BT2') cBt2 = c;
+    }
+
+    const rowsByKey = new Map<string, PreciseTrimRow>();
+    let skipped = 0;
+
+    for (let r = headerRowNo + 1; r <= ws.rowCount; r++) {
+      const row = ws.getRow(r);
+      const majCat = cellStr(row, cMajCat);
+      const type = cellStr(row, cType);
+      if (!majCat || !type || majCat === '-' || type === '-') {
+        if (majCat || type) skipped++;
+        continue;
+      }
+      let bt1Raw = row.getCell(cBt1).value;
+      let bt2Raw = row.getCell(cBt2).value;
+      if (bt1Raw && typeof bt1Raw === 'object' && 'result' in bt1Raw) bt1Raw = (bt1Raw as any).result;
+      if (bt2Raw && typeof bt2Raw === 'object' && 'result' in bt2Raw) bt2Raw = (bt2Raw as any).result;
+      const bt1 = numOf(bt1Raw);
+      const bt2 = numOf(bt2Raw);
+      const key = `${majCat.toUpperCase()}|${type.toUpperCase()}`;
+      rowsByKey.set(key, { majCat, type, bt1, bt2 });
+    }
+
+    const records = [...rowsByKey.values()];
+    if (records.length === 0) {
+      res.status(400).json({ success: false, error: 'No valid rows found in the Excel file.' });
+      return;
+    }
+
+    const now = new Date();
+    const CHUNK = 200;
+    for (let i = 0; i < records.length; i += CHUNK) {
+      const batch = records.slice(i, i + CHUNK);
+      const values = batch.map((r) => Prisma.sql`(${r.majCat}, ${r.type}, ${r.bt1}, ${r.bt2}, ${now}, ${now})`);
+      await prisma.$executeRaw`
+        INSERT INTO precise_trim_master (maj_cat, type, bt1, bt2, created_at, updated_at)
+        VALUES ${Prisma.join(values)}
+        ON CONFLICT (maj_cat, type) DO UPDATE SET
+          bt1        = EXCLUDED.bt1,
+          bt2        = EXCLUDED.bt2,
+          updated_at = EXCLUDED.updated_at
+      `;
+    }
+
+    const total = await prisma.preciseTrimMaster.count();
+    const categories = (await prisma.preciseTrimMaster.findMany({ distinct: ['majCat'], select: { majCat: true } })).length;
+
+    console.log(`[PreciseTrimMaster] Upserted ${records.length} rows (${skipped} skipped)`);
+
+    res.json({
+      success: true,
+      message: `Precise Trim Master updated: ${records.length} rows${skipped > 0 ? `, ${skipped} rows skipped` : ''}.`,
+      data: { total, categories, skipped, lastUpdated: now.toISOString() },
+    });
+  } catch (error: any) {
+    console.error('[PreciseTrimMaster] Upload error:', error);
+    res.status(500).json({ success: false, error: error.message });
+  }
+};
+
+// ═══════════════════════════════════════════════════════
 // FABRIC ARTICLE DATA (fabric_article_data)
 // ═══════════════════════════════════════════════════════
 
@@ -8359,6 +8570,27 @@ export const EXPENSE_TABLE_REGISTRY: Record<string, ExpenseTableConfig> = {
   // CMP Cost Master — average rough CMP cost per major category, from the
   // "SAM MASTER.xlsx" workbook. Auto-fills body_article_data.cmp_cost on the
   // New Article page (see ApproverController.getRoughCmpCost).
+  'precise-trim-master': {
+    kind: 'prisma',
+    delegateName: 'preciseTrimMaster',
+    idColumn: 'id',
+    idIsNumeric: true,
+    allowCreate: true,
+    allowDelete: true,
+    requiredOnCreate: ['majCat', 'type'],
+    columns: [
+      { key: 'id', label: 'ID', editable: false },
+      { key: 'majCat', label: 'Major Category' },
+      { key: 'type', label: 'Type' },
+      { key: 'bt1', label: 'BT-1', align: 'right' },
+      { key: 'bt2', label: 'BT-2', align: 'right' },
+      { key: 'createdAt', label: 'Created At', editable: false },
+      { key: 'updatedAt', label: 'Updated At', editable: false },
+    ],
+    searchColumns: ['majCat', 'type'],
+    displayColumns: ['majCat', 'type'],
+    defaultSort: { field: 'majCat', dir: 'asc' },
+  },
   'cmp-cost-master': {
     kind: 'prisma',
     delegateName: 'roughCmpCostMaster',

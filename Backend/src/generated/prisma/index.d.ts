@@ -312,6 +312,12 @@ export type RoughCmpCostMaster = $Result.DefaultSelection<Prisma.$RoughCmpCostMa
  */
 export type BasicTrimCostMaster = $Result.DefaultSelection<Prisma.$BasicTrimCostMasterPayload>
 /**
+ * Model PreciseTrimMaster
+ * PreciseTrimMaster: per-attribute-value BT-1 / BT-2 trim costs imported from
+ * "BASIC TRIMS 2 TYPE COSTING.xlsx". Keyed on (maj_cat, type).
+ */
+export type PreciseTrimMaster = $Result.DefaultSelection<Prisma.$PreciseTrimMasterPayload>
+/**
  * Model BasicTrimCostComponent
  * BasicTrimCostComponent: one row per trim/packaging component of a BasicTrimCostMaster row,
  * holding the workbook's per-piece consumption and rate so a rate change can be re-costed.
@@ -1225,6 +1231,16 @@ export class PrismaClient<
   get basicTrimCostMaster(): Prisma.BasicTrimCostMasterDelegate<ExtArgs, ClientOptions>;
 
   /**
+   * `prisma.preciseTrimMaster`: Exposes CRUD operations for the **PreciseTrimMaster** model.
+    * Example usage:
+    * ```ts
+    * // Fetch zero or more PreciseTrimMasters
+    * const preciseTrimMasters = await prisma.preciseTrimMaster.findMany()
+    * ```
+    */
+  get preciseTrimMaster(): Prisma.PreciseTrimMasterDelegate<ExtArgs, ClientOptions>;
+
+  /**
    * `prisma.basicTrimCostComponent`: Exposes CRUD operations for the **BasicTrimCostComponent** model.
     * Example usage:
     * ```ts
@@ -1804,6 +1820,7 @@ export namespace Prisma {
     BodyFabricConsumption: 'BodyFabricConsumption',
     RoughCmpCostMaster: 'RoughCmpCostMaster',
     BasicTrimCostMaster: 'BasicTrimCostMaster',
+    PreciseTrimMaster: 'PreciseTrimMaster',
     BasicTrimCostComponent: 'BasicTrimCostComponent',
     MajorCategoryDetails: 'MajorCategoryDetails',
     ExpenseApprovalStage: 'ExpenseApprovalStage',
@@ -1831,7 +1848,7 @@ export namespace Prisma {
       omit: GlobalOmitOptions
     }
     meta: {
-      modelProps: "department" | "subDepartment" | "category" | "masterAttribute" | "attributeAllowedValue" | "categoryAttribute" | "extractionJob" | "extractionResult" | "extractionResultFlat" | "modelGenerationResult" | "modelImageApproval" | "mvgrLookup" | "masterVendorDetail" | "user" | "auditLog" | "apiKey" | "changeHistory" | "costSummary" | "article360" | "articleFab" | "articleBody" | "articleVaAcc" | "articleVaPrcs" | "articleBom" | "sapFieldConfig" | "sapAttributeValue" | "article360Flat" | "rawArticle" | "fabricRawData" | "gmRawData" | "srmSyncRun" | "srmSyncRunItem" | "poolBJob" | "poolBBatch" | "nationalGridMaster" | "broaderMenu" | "majorCatMaster" | "fabricArticleMaster" | "fabricMajCatGridValue" | "modifyLog" | "fabricArticleData" | "gmArticleData" | "gmVariantArticleData" | "fgVariantArticleData" | "fabricVariantArticleData" | "valueAdditionAccessoriesCost" | "bodyArticleData" | "referenceArticleData" | "bodyFabricConsumption" | "roughCmpCostMaster" | "basicTrimCostMaster" | "basicTrimCostComponent" | "majorCategoryDetails" | "expenseApprovalStage" | "gridContributionAssignment" | "expenseChangeRequest" | "expenseAccessGrant" | "expenseAuditLog" | "bodyArticleDescriptionFormate" | "preciseBodyArticleConsumption"
+      modelProps: "department" | "subDepartment" | "category" | "masterAttribute" | "attributeAllowedValue" | "categoryAttribute" | "extractionJob" | "extractionResult" | "extractionResultFlat" | "modelGenerationResult" | "modelImageApproval" | "mvgrLookup" | "masterVendorDetail" | "user" | "auditLog" | "apiKey" | "changeHistory" | "costSummary" | "article360" | "articleFab" | "articleBody" | "articleVaAcc" | "articleVaPrcs" | "articleBom" | "sapFieldConfig" | "sapAttributeValue" | "article360Flat" | "rawArticle" | "fabricRawData" | "gmRawData" | "srmSyncRun" | "srmSyncRunItem" | "poolBJob" | "poolBBatch" | "nationalGridMaster" | "broaderMenu" | "majorCatMaster" | "fabricArticleMaster" | "fabricMajCatGridValue" | "modifyLog" | "fabricArticleData" | "gmArticleData" | "gmVariantArticleData" | "fgVariantArticleData" | "fabricVariantArticleData" | "valueAdditionAccessoriesCost" | "bodyArticleData" | "referenceArticleData" | "bodyFabricConsumption" | "roughCmpCostMaster" | "basicTrimCostMaster" | "preciseTrimMaster" | "basicTrimCostComponent" | "majorCategoryDetails" | "expenseApprovalStage" | "gridContributionAssignment" | "expenseChangeRequest" | "expenseAccessGrant" | "expenseAuditLog" | "bodyArticleDescriptionFormate" | "preciseBodyArticleConsumption"
       txIsolationLevel: Prisma.TransactionIsolationLevel
     }
     model: {
@@ -5609,6 +5626,80 @@ export namespace Prisma {
           }
         }
       }
+      PreciseTrimMaster: {
+        payload: Prisma.$PreciseTrimMasterPayload<ExtArgs>
+        fields: Prisma.PreciseTrimMasterFieldRefs
+        operations: {
+          findUnique: {
+            args: Prisma.PreciseTrimMasterFindUniqueArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$PreciseTrimMasterPayload> | null
+          }
+          findUniqueOrThrow: {
+            args: Prisma.PreciseTrimMasterFindUniqueOrThrowArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$PreciseTrimMasterPayload>
+          }
+          findFirst: {
+            args: Prisma.PreciseTrimMasterFindFirstArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$PreciseTrimMasterPayload> | null
+          }
+          findFirstOrThrow: {
+            args: Prisma.PreciseTrimMasterFindFirstOrThrowArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$PreciseTrimMasterPayload>
+          }
+          findMany: {
+            args: Prisma.PreciseTrimMasterFindManyArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$PreciseTrimMasterPayload>[]
+          }
+          create: {
+            args: Prisma.PreciseTrimMasterCreateArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$PreciseTrimMasterPayload>
+          }
+          createMany: {
+            args: Prisma.PreciseTrimMasterCreateManyArgs<ExtArgs>
+            result: BatchPayload
+          }
+          createManyAndReturn: {
+            args: Prisma.PreciseTrimMasterCreateManyAndReturnArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$PreciseTrimMasterPayload>[]
+          }
+          delete: {
+            args: Prisma.PreciseTrimMasterDeleteArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$PreciseTrimMasterPayload>
+          }
+          update: {
+            args: Prisma.PreciseTrimMasterUpdateArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$PreciseTrimMasterPayload>
+          }
+          deleteMany: {
+            args: Prisma.PreciseTrimMasterDeleteManyArgs<ExtArgs>
+            result: BatchPayload
+          }
+          updateMany: {
+            args: Prisma.PreciseTrimMasterUpdateManyArgs<ExtArgs>
+            result: BatchPayload
+          }
+          updateManyAndReturn: {
+            args: Prisma.PreciseTrimMasterUpdateManyAndReturnArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$PreciseTrimMasterPayload>[]
+          }
+          upsert: {
+            args: Prisma.PreciseTrimMasterUpsertArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$PreciseTrimMasterPayload>
+          }
+          aggregate: {
+            args: Prisma.PreciseTrimMasterAggregateArgs<ExtArgs>
+            result: $Utils.Optional<AggregatePreciseTrimMaster>
+          }
+          groupBy: {
+            args: Prisma.PreciseTrimMasterGroupByArgs<ExtArgs>
+            result: $Utils.Optional<PreciseTrimMasterGroupByOutputType>[]
+          }
+          count: {
+            args: Prisma.PreciseTrimMasterCountArgs<ExtArgs>
+            result: $Utils.Optional<PreciseTrimMasterCountAggregateOutputType> | number
+          }
+        }
+      }
       BasicTrimCostComponent: {
         payload: Prisma.$BasicTrimCostComponentPayload<ExtArgs>
         fields: Prisma.BasicTrimCostComponentFieldRefs
@@ -6418,6 +6509,7 @@ export namespace Prisma {
     bodyFabricConsumption?: BodyFabricConsumptionOmit
     roughCmpCostMaster?: RoughCmpCostMasterOmit
     basicTrimCostMaster?: BasicTrimCostMasterOmit
+    preciseTrimMaster?: PreciseTrimMasterOmit
     basicTrimCostComponent?: BasicTrimCostComponentOmit
     majorCategoryDetails?: MajorCategoryDetailsOmit
     expenseApprovalStage?: ExpenseApprovalStageOmit
@@ -73662,6 +73754,1069 @@ export namespace Prisma {
 
 
   /**
+   * Model PreciseTrimMaster
+   */
+
+  export type AggregatePreciseTrimMaster = {
+    _count: PreciseTrimMasterCountAggregateOutputType | null
+    _avg: PreciseTrimMasterAvgAggregateOutputType | null
+    _sum: PreciseTrimMasterSumAggregateOutputType | null
+    _min: PreciseTrimMasterMinAggregateOutputType | null
+    _max: PreciseTrimMasterMaxAggregateOutputType | null
+  }
+
+  export type PreciseTrimMasterAvgAggregateOutputType = {
+    id: number | null
+    bt1: Decimal | null
+    bt2: Decimal | null
+  }
+
+  export type PreciseTrimMasterSumAggregateOutputType = {
+    id: number | null
+    bt1: Decimal | null
+    bt2: Decimal | null
+  }
+
+  export type PreciseTrimMasterMinAggregateOutputType = {
+    id: number | null
+    majCat: string | null
+    type: string | null
+    bt1: Decimal | null
+    bt2: Decimal | null
+    createdAt: Date | null
+    updatedAt: Date | null
+  }
+
+  export type PreciseTrimMasterMaxAggregateOutputType = {
+    id: number | null
+    majCat: string | null
+    type: string | null
+    bt1: Decimal | null
+    bt2: Decimal | null
+    createdAt: Date | null
+    updatedAt: Date | null
+  }
+
+  export type PreciseTrimMasterCountAggregateOutputType = {
+    id: number
+    majCat: number
+    type: number
+    bt1: number
+    bt2: number
+    createdAt: number
+    updatedAt: number
+    _all: number
+  }
+
+
+  export type PreciseTrimMasterAvgAggregateInputType = {
+    id?: true
+    bt1?: true
+    bt2?: true
+  }
+
+  export type PreciseTrimMasterSumAggregateInputType = {
+    id?: true
+    bt1?: true
+    bt2?: true
+  }
+
+  export type PreciseTrimMasterMinAggregateInputType = {
+    id?: true
+    majCat?: true
+    type?: true
+    bt1?: true
+    bt2?: true
+    createdAt?: true
+    updatedAt?: true
+  }
+
+  export type PreciseTrimMasterMaxAggregateInputType = {
+    id?: true
+    majCat?: true
+    type?: true
+    bt1?: true
+    bt2?: true
+    createdAt?: true
+    updatedAt?: true
+  }
+
+  export type PreciseTrimMasterCountAggregateInputType = {
+    id?: true
+    majCat?: true
+    type?: true
+    bt1?: true
+    bt2?: true
+    createdAt?: true
+    updatedAt?: true
+    _all?: true
+  }
+
+  export type PreciseTrimMasterAggregateArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Filter which PreciseTrimMaster to aggregate.
+     */
+    where?: PreciseTrimMasterWhereInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
+     * 
+     * Determine the order of PreciseTrimMasters to fetch.
+     */
+    orderBy?: PreciseTrimMasterOrderByWithRelationInput | PreciseTrimMasterOrderByWithRelationInput[]
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
+     * 
+     * Sets the start position
+     */
+    cursor?: PreciseTrimMasterWhereUniqueInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Take `±n` PreciseTrimMasters from the position of the cursor.
+     */
+    take?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Skip the first `n` PreciseTrimMasters.
+     */
+    skip?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     * 
+     * Count returned PreciseTrimMasters
+    **/
+    _count?: true | PreciseTrimMasterCountAggregateInputType
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     * 
+     * Select which fields to average
+    **/
+    _avg?: PreciseTrimMasterAvgAggregateInputType
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     * 
+     * Select which fields to sum
+    **/
+    _sum?: PreciseTrimMasterSumAggregateInputType
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     * 
+     * Select which fields to find the minimum value
+    **/
+    _min?: PreciseTrimMasterMinAggregateInputType
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     * 
+     * Select which fields to find the maximum value
+    **/
+    _max?: PreciseTrimMasterMaxAggregateInputType
+  }
+
+  export type GetPreciseTrimMasterAggregateType<T extends PreciseTrimMasterAggregateArgs> = {
+        [P in keyof T & keyof AggregatePreciseTrimMaster]: P extends '_count' | 'count'
+      ? T[P] extends true
+        ? number
+        : GetScalarType<T[P], AggregatePreciseTrimMaster[P]>
+      : GetScalarType<T[P], AggregatePreciseTrimMaster[P]>
+  }
+
+
+
+
+  export type PreciseTrimMasterGroupByArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    where?: PreciseTrimMasterWhereInput
+    orderBy?: PreciseTrimMasterOrderByWithAggregationInput | PreciseTrimMasterOrderByWithAggregationInput[]
+    by: PreciseTrimMasterScalarFieldEnum[] | PreciseTrimMasterScalarFieldEnum
+    having?: PreciseTrimMasterScalarWhereWithAggregatesInput
+    take?: number
+    skip?: number
+    _count?: PreciseTrimMasterCountAggregateInputType | true
+    _avg?: PreciseTrimMasterAvgAggregateInputType
+    _sum?: PreciseTrimMasterSumAggregateInputType
+    _min?: PreciseTrimMasterMinAggregateInputType
+    _max?: PreciseTrimMasterMaxAggregateInputType
+  }
+
+  export type PreciseTrimMasterGroupByOutputType = {
+    id: number
+    majCat: string
+    type: string
+    bt1: Decimal | null
+    bt2: Decimal | null
+    createdAt: Date
+    updatedAt: Date
+    _count: PreciseTrimMasterCountAggregateOutputType | null
+    _avg: PreciseTrimMasterAvgAggregateOutputType | null
+    _sum: PreciseTrimMasterSumAggregateOutputType | null
+    _min: PreciseTrimMasterMinAggregateOutputType | null
+    _max: PreciseTrimMasterMaxAggregateOutputType | null
+  }
+
+  type GetPreciseTrimMasterGroupByPayload<T extends PreciseTrimMasterGroupByArgs> = Prisma.PrismaPromise<
+    Array<
+      PickEnumerable<PreciseTrimMasterGroupByOutputType, T['by']> &
+        {
+          [P in ((keyof T) & (keyof PreciseTrimMasterGroupByOutputType))]: P extends '_count'
+            ? T[P] extends boolean
+              ? number
+              : GetScalarType<T[P], PreciseTrimMasterGroupByOutputType[P]>
+            : GetScalarType<T[P], PreciseTrimMasterGroupByOutputType[P]>
+        }
+      >
+    >
+
+
+  export type PreciseTrimMasterSelect<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
+    id?: boolean
+    majCat?: boolean
+    type?: boolean
+    bt1?: boolean
+    bt2?: boolean
+    createdAt?: boolean
+    updatedAt?: boolean
+  }, ExtArgs["result"]["preciseTrimMaster"]>
+
+  export type PreciseTrimMasterSelectCreateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
+    id?: boolean
+    majCat?: boolean
+    type?: boolean
+    bt1?: boolean
+    bt2?: boolean
+    createdAt?: boolean
+    updatedAt?: boolean
+  }, ExtArgs["result"]["preciseTrimMaster"]>
+
+  export type PreciseTrimMasterSelectUpdateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
+    id?: boolean
+    majCat?: boolean
+    type?: boolean
+    bt1?: boolean
+    bt2?: boolean
+    createdAt?: boolean
+    updatedAt?: boolean
+  }, ExtArgs["result"]["preciseTrimMaster"]>
+
+  export type PreciseTrimMasterSelectScalar = {
+    id?: boolean
+    majCat?: boolean
+    type?: boolean
+    bt1?: boolean
+    bt2?: boolean
+    createdAt?: boolean
+    updatedAt?: boolean
+  }
+
+  export type PreciseTrimMasterOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<"id" | "majCat" | "type" | "bt1" | "bt2" | "createdAt" | "updatedAt", ExtArgs["result"]["preciseTrimMaster"]>
+
+  export type $PreciseTrimMasterPayload<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    name: "PreciseTrimMaster"
+    objects: {}
+    scalars: $Extensions.GetPayloadResult<{
+      id: number
+      majCat: string
+      type: string
+      bt1: Prisma.Decimal | null
+      bt2: Prisma.Decimal | null
+      createdAt: Date
+      updatedAt: Date
+    }, ExtArgs["result"]["preciseTrimMaster"]>
+    composites: {}
+  }
+
+  type PreciseTrimMasterGetPayload<S extends boolean | null | undefined | PreciseTrimMasterDefaultArgs> = $Result.GetResult<Prisma.$PreciseTrimMasterPayload, S>
+
+  type PreciseTrimMasterCountArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> =
+    Omit<PreciseTrimMasterFindManyArgs, 'select' | 'include' | 'distinct' | 'omit'> & {
+      select?: PreciseTrimMasterCountAggregateInputType | true
+    }
+
+  export interface PreciseTrimMasterDelegate<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs, GlobalOmitOptions = {}> {
+    [K: symbol]: { types: Prisma.TypeMap<ExtArgs>['model']['PreciseTrimMaster'], meta: { name: 'PreciseTrimMaster' } }
+    /**
+     * Find zero or one PreciseTrimMaster that matches the filter.
+     * @param {PreciseTrimMasterFindUniqueArgs} args - Arguments to find a PreciseTrimMaster
+     * @example
+     * // Get one PreciseTrimMaster
+     * const preciseTrimMaster = await prisma.preciseTrimMaster.findUnique({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     */
+    findUnique<T extends PreciseTrimMasterFindUniqueArgs>(args: SelectSubset<T, PreciseTrimMasterFindUniqueArgs<ExtArgs>>): Prisma__PreciseTrimMasterClient<$Result.GetResult<Prisma.$PreciseTrimMasterPayload<ExtArgs>, T, "findUnique", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Find one PreciseTrimMaster that matches the filter or throw an error with `error.code='P2025'`
+     * if no matches were found.
+     * @param {PreciseTrimMasterFindUniqueOrThrowArgs} args - Arguments to find a PreciseTrimMaster
+     * @example
+     * // Get one PreciseTrimMaster
+     * const preciseTrimMaster = await prisma.preciseTrimMaster.findUniqueOrThrow({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     */
+    findUniqueOrThrow<T extends PreciseTrimMasterFindUniqueOrThrowArgs>(args: SelectSubset<T, PreciseTrimMasterFindUniqueOrThrowArgs<ExtArgs>>): Prisma__PreciseTrimMasterClient<$Result.GetResult<Prisma.$PreciseTrimMasterPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Find the first PreciseTrimMaster that matches the filter.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {PreciseTrimMasterFindFirstArgs} args - Arguments to find a PreciseTrimMaster
+     * @example
+     * // Get one PreciseTrimMaster
+     * const preciseTrimMaster = await prisma.preciseTrimMaster.findFirst({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     */
+    findFirst<T extends PreciseTrimMasterFindFirstArgs>(args?: SelectSubset<T, PreciseTrimMasterFindFirstArgs<ExtArgs>>): Prisma__PreciseTrimMasterClient<$Result.GetResult<Prisma.$PreciseTrimMasterPayload<ExtArgs>, T, "findFirst", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Find the first PreciseTrimMaster that matches the filter or
+     * throw `PrismaKnownClientError` with `P2025` code if no matches were found.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {PreciseTrimMasterFindFirstOrThrowArgs} args - Arguments to find a PreciseTrimMaster
+     * @example
+     * // Get one PreciseTrimMaster
+     * const preciseTrimMaster = await prisma.preciseTrimMaster.findFirstOrThrow({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     */
+    findFirstOrThrow<T extends PreciseTrimMasterFindFirstOrThrowArgs>(args?: SelectSubset<T, PreciseTrimMasterFindFirstOrThrowArgs<ExtArgs>>): Prisma__PreciseTrimMasterClient<$Result.GetResult<Prisma.$PreciseTrimMasterPayload<ExtArgs>, T, "findFirstOrThrow", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Find zero or more PreciseTrimMasters that matches the filter.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {PreciseTrimMasterFindManyArgs} args - Arguments to filter and select certain fields only.
+     * @example
+     * // Get all PreciseTrimMasters
+     * const preciseTrimMasters = await prisma.preciseTrimMaster.findMany()
+     * 
+     * // Get first 10 PreciseTrimMasters
+     * const preciseTrimMasters = await prisma.preciseTrimMaster.findMany({ take: 10 })
+     * 
+     * // Only select the `id`
+     * const preciseTrimMasterWithIdOnly = await prisma.preciseTrimMaster.findMany({ select: { id: true } })
+     * 
+     */
+    findMany<T extends PreciseTrimMasterFindManyArgs>(args?: SelectSubset<T, PreciseTrimMasterFindManyArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$PreciseTrimMasterPayload<ExtArgs>, T, "findMany", GlobalOmitOptions>>
+
+    /**
+     * Create a PreciseTrimMaster.
+     * @param {PreciseTrimMasterCreateArgs} args - Arguments to create a PreciseTrimMaster.
+     * @example
+     * // Create one PreciseTrimMaster
+     * const PreciseTrimMaster = await prisma.preciseTrimMaster.create({
+     *   data: {
+     *     // ... data to create a PreciseTrimMaster
+     *   }
+     * })
+     * 
+     */
+    create<T extends PreciseTrimMasterCreateArgs>(args: SelectSubset<T, PreciseTrimMasterCreateArgs<ExtArgs>>): Prisma__PreciseTrimMasterClient<$Result.GetResult<Prisma.$PreciseTrimMasterPayload<ExtArgs>, T, "create", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Create many PreciseTrimMasters.
+     * @param {PreciseTrimMasterCreateManyArgs} args - Arguments to create many PreciseTrimMasters.
+     * @example
+     * // Create many PreciseTrimMasters
+     * const preciseTrimMaster = await prisma.preciseTrimMaster.createMany({
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     *     
+     */
+    createMany<T extends PreciseTrimMasterCreateManyArgs>(args?: SelectSubset<T, PreciseTrimMasterCreateManyArgs<ExtArgs>>): Prisma.PrismaPromise<BatchPayload>
+
+    /**
+     * Create many PreciseTrimMasters and returns the data saved in the database.
+     * @param {PreciseTrimMasterCreateManyAndReturnArgs} args - Arguments to create many PreciseTrimMasters.
+     * @example
+     * // Create many PreciseTrimMasters
+     * const preciseTrimMaster = await prisma.preciseTrimMaster.createManyAndReturn({
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     * 
+     * // Create many PreciseTrimMasters and only return the `id`
+     * const preciseTrimMasterWithIdOnly = await prisma.preciseTrimMaster.createManyAndReturn({
+     *   select: { id: true },
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * 
+     */
+    createManyAndReturn<T extends PreciseTrimMasterCreateManyAndReturnArgs>(args?: SelectSubset<T, PreciseTrimMasterCreateManyAndReturnArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$PreciseTrimMasterPayload<ExtArgs>, T, "createManyAndReturn", GlobalOmitOptions>>
+
+    /**
+     * Delete a PreciseTrimMaster.
+     * @param {PreciseTrimMasterDeleteArgs} args - Arguments to delete one PreciseTrimMaster.
+     * @example
+     * // Delete one PreciseTrimMaster
+     * const PreciseTrimMaster = await prisma.preciseTrimMaster.delete({
+     *   where: {
+     *     // ... filter to delete one PreciseTrimMaster
+     *   }
+     * })
+     * 
+     */
+    delete<T extends PreciseTrimMasterDeleteArgs>(args: SelectSubset<T, PreciseTrimMasterDeleteArgs<ExtArgs>>): Prisma__PreciseTrimMasterClient<$Result.GetResult<Prisma.$PreciseTrimMasterPayload<ExtArgs>, T, "delete", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Update one PreciseTrimMaster.
+     * @param {PreciseTrimMasterUpdateArgs} args - Arguments to update one PreciseTrimMaster.
+     * @example
+     * // Update one PreciseTrimMaster
+     * const preciseTrimMaster = await prisma.preciseTrimMaster.update({
+     *   where: {
+     *     // ... provide filter here
+     *   },
+     *   data: {
+     *     // ... provide data here
+     *   }
+     * })
+     * 
+     */
+    update<T extends PreciseTrimMasterUpdateArgs>(args: SelectSubset<T, PreciseTrimMasterUpdateArgs<ExtArgs>>): Prisma__PreciseTrimMasterClient<$Result.GetResult<Prisma.$PreciseTrimMasterPayload<ExtArgs>, T, "update", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Delete zero or more PreciseTrimMasters.
+     * @param {PreciseTrimMasterDeleteManyArgs} args - Arguments to filter PreciseTrimMasters to delete.
+     * @example
+     * // Delete a few PreciseTrimMasters
+     * const { count } = await prisma.preciseTrimMaster.deleteMany({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     * 
+     */
+    deleteMany<T extends PreciseTrimMasterDeleteManyArgs>(args?: SelectSubset<T, PreciseTrimMasterDeleteManyArgs<ExtArgs>>): Prisma.PrismaPromise<BatchPayload>
+
+    /**
+     * Update zero or more PreciseTrimMasters.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {PreciseTrimMasterUpdateManyArgs} args - Arguments to update one or more rows.
+     * @example
+     * // Update many PreciseTrimMasters
+     * const preciseTrimMaster = await prisma.preciseTrimMaster.updateMany({
+     *   where: {
+     *     // ... provide filter here
+     *   },
+     *   data: {
+     *     // ... provide data here
+     *   }
+     * })
+     * 
+     */
+    updateMany<T extends PreciseTrimMasterUpdateManyArgs>(args: SelectSubset<T, PreciseTrimMasterUpdateManyArgs<ExtArgs>>): Prisma.PrismaPromise<BatchPayload>
+
+    /**
+     * Update zero or more PreciseTrimMasters and returns the data updated in the database.
+     * @param {PreciseTrimMasterUpdateManyAndReturnArgs} args - Arguments to update many PreciseTrimMasters.
+     * @example
+     * // Update many PreciseTrimMasters
+     * const preciseTrimMaster = await prisma.preciseTrimMaster.updateManyAndReturn({
+     *   where: {
+     *     // ... provide filter here
+     *   },
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     * 
+     * // Update zero or more PreciseTrimMasters and only return the `id`
+     * const preciseTrimMasterWithIdOnly = await prisma.preciseTrimMaster.updateManyAndReturn({
+     *   select: { id: true },
+     *   where: {
+     *     // ... provide filter here
+     *   },
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * 
+     */
+    updateManyAndReturn<T extends PreciseTrimMasterUpdateManyAndReturnArgs>(args: SelectSubset<T, PreciseTrimMasterUpdateManyAndReturnArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$PreciseTrimMasterPayload<ExtArgs>, T, "updateManyAndReturn", GlobalOmitOptions>>
+
+    /**
+     * Create or update one PreciseTrimMaster.
+     * @param {PreciseTrimMasterUpsertArgs} args - Arguments to update or create a PreciseTrimMaster.
+     * @example
+     * // Update or create a PreciseTrimMaster
+     * const preciseTrimMaster = await prisma.preciseTrimMaster.upsert({
+     *   create: {
+     *     // ... data to create a PreciseTrimMaster
+     *   },
+     *   update: {
+     *     // ... in case it already exists, update
+     *   },
+     *   where: {
+     *     // ... the filter for the PreciseTrimMaster we want to update
+     *   }
+     * })
+     */
+    upsert<T extends PreciseTrimMasterUpsertArgs>(args: SelectSubset<T, PreciseTrimMasterUpsertArgs<ExtArgs>>): Prisma__PreciseTrimMasterClient<$Result.GetResult<Prisma.$PreciseTrimMasterPayload<ExtArgs>, T, "upsert", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+
+    /**
+     * Count the number of PreciseTrimMasters.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {PreciseTrimMasterCountArgs} args - Arguments to filter PreciseTrimMasters to count.
+     * @example
+     * // Count the number of PreciseTrimMasters
+     * const count = await prisma.preciseTrimMaster.count({
+     *   where: {
+     *     // ... the filter for the PreciseTrimMasters we want to count
+     *   }
+     * })
+    **/
+    count<T extends PreciseTrimMasterCountArgs>(
+      args?: Subset<T, PreciseTrimMasterCountArgs>,
+    ): Prisma.PrismaPromise<
+      T extends $Utils.Record<'select', any>
+        ? T['select'] extends true
+          ? number
+          : GetScalarType<T['select'], PreciseTrimMasterCountAggregateOutputType>
+        : number
+    >
+
+    /**
+     * Allows you to perform aggregations operations on a PreciseTrimMaster.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {PreciseTrimMasterAggregateArgs} args - Select which aggregations you would like to apply and on what fields.
+     * @example
+     * // Ordered by age ascending
+     * // Where email contains prisma.io
+     * // Limited to the 10 users
+     * const aggregations = await prisma.user.aggregate({
+     *   _avg: {
+     *     age: true,
+     *   },
+     *   where: {
+     *     email: {
+     *       contains: "prisma.io",
+     *     },
+     *   },
+     *   orderBy: {
+     *     age: "asc",
+     *   },
+     *   take: 10,
+     * })
+    **/
+    aggregate<T extends PreciseTrimMasterAggregateArgs>(args: Subset<T, PreciseTrimMasterAggregateArgs>): Prisma.PrismaPromise<GetPreciseTrimMasterAggregateType<T>>
+
+    /**
+     * Group by PreciseTrimMaster.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {PreciseTrimMasterGroupByArgs} args - Group by arguments.
+     * @example
+     * // Group by city, order by createdAt, get count
+     * const result = await prisma.user.groupBy({
+     *   by: ['city', 'createdAt'],
+     *   orderBy: {
+     *     createdAt: true
+     *   },
+     *   _count: {
+     *     _all: true
+     *   },
+     * })
+     * 
+    **/
+    groupBy<
+      T extends PreciseTrimMasterGroupByArgs,
+      HasSelectOrTake extends Or<
+        Extends<'skip', Keys<T>>,
+        Extends<'take', Keys<T>>
+      >,
+      OrderByArg extends True extends HasSelectOrTake
+        ? { orderBy: PreciseTrimMasterGroupByArgs['orderBy'] }
+        : { orderBy?: PreciseTrimMasterGroupByArgs['orderBy'] },
+      OrderFields extends ExcludeUnderscoreKeys<Keys<MaybeTupleToUnion<T['orderBy']>>>,
+      ByFields extends MaybeTupleToUnion<T['by']>,
+      ByValid extends Has<ByFields, OrderFields>,
+      HavingFields extends GetHavingFields<T['having']>,
+      HavingValid extends Has<ByFields, HavingFields>,
+      ByEmpty extends T['by'] extends never[] ? True : False,
+      InputErrors extends ByEmpty extends True
+      ? `Error: "by" must not be empty.`
+      : HavingValid extends False
+      ? {
+          [P in HavingFields]: P extends ByFields
+            ? never
+            : P extends string
+            ? `Error: Field "${P}" used in "having" needs to be provided in "by".`
+            : [
+                Error,
+                'Field ',
+                P,
+                ` in "having" needs to be provided in "by"`,
+              ]
+        }[HavingFields]
+      : 'take' extends Keys<T>
+      ? 'orderBy' extends Keys<T>
+        ? ByValid extends True
+          ? {}
+          : {
+              [P in OrderFields]: P extends ByFields
+                ? never
+                : `Error: Field "${P}" in "orderBy" needs to be provided in "by"`
+            }[OrderFields]
+        : 'Error: If you provide "take", you also need to provide "orderBy"'
+      : 'skip' extends Keys<T>
+      ? 'orderBy' extends Keys<T>
+        ? ByValid extends True
+          ? {}
+          : {
+              [P in OrderFields]: P extends ByFields
+                ? never
+                : `Error: Field "${P}" in "orderBy" needs to be provided in "by"`
+            }[OrderFields]
+        : 'Error: If you provide "skip", you also need to provide "orderBy"'
+      : ByValid extends True
+      ? {}
+      : {
+          [P in OrderFields]: P extends ByFields
+            ? never
+            : `Error: Field "${P}" in "orderBy" needs to be provided in "by"`
+        }[OrderFields]
+    >(args: SubsetIntersection<T, PreciseTrimMasterGroupByArgs, OrderByArg> & InputErrors): {} extends InputErrors ? GetPreciseTrimMasterGroupByPayload<T> : Prisma.PrismaPromise<InputErrors>
+  /**
+   * Fields of the PreciseTrimMaster model
+   */
+  readonly fields: PreciseTrimMasterFieldRefs;
+  }
+
+  /**
+   * The delegate class that acts as a "Promise-like" for PreciseTrimMaster.
+   * Why is this prefixed with `Prisma__`?
+   * Because we want to prevent naming conflicts as mentioned in
+   * https://github.com/prisma/prisma-client-js/issues/707
+   */
+  export interface Prisma__PreciseTrimMasterClient<T, Null = never, ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs, GlobalOmitOptions = {}> extends Prisma.PrismaPromise<T> {
+    readonly [Symbol.toStringTag]: "PrismaPromise"
+    /**
+     * Attaches callbacks for the resolution and/or rejection of the Promise.
+     * @param onfulfilled The callback to execute when the Promise is resolved.
+     * @param onrejected The callback to execute when the Promise is rejected.
+     * @returns A Promise for the completion of which ever callback is executed.
+     */
+    then<TResult1 = T, TResult2 = never>(onfulfilled?: ((value: T) => TResult1 | PromiseLike<TResult1>) | undefined | null, onrejected?: ((reason: any) => TResult2 | PromiseLike<TResult2>) | undefined | null): $Utils.JsPromise<TResult1 | TResult2>
+    /**
+     * Attaches a callback for only the rejection of the Promise.
+     * @param onrejected The callback to execute when the Promise is rejected.
+     * @returns A Promise for the completion of the callback.
+     */
+    catch<TResult = never>(onrejected?: ((reason: any) => TResult | PromiseLike<TResult>) | undefined | null): $Utils.JsPromise<T | TResult>
+    /**
+     * Attaches a callback that is invoked when the Promise is settled (fulfilled or rejected). The
+     * resolved value cannot be modified from the callback.
+     * @param onfinally The callback to execute when the Promise is settled (fulfilled or rejected).
+     * @returns A Promise for the completion of the callback.
+     */
+    finally(onfinally?: (() => void) | undefined | null): $Utils.JsPromise<T>
+  }
+
+
+
+
+  /**
+   * Fields of the PreciseTrimMaster model
+   */
+  interface PreciseTrimMasterFieldRefs {
+    readonly id: FieldRef<"PreciseTrimMaster", 'Int'>
+    readonly majCat: FieldRef<"PreciseTrimMaster", 'String'>
+    readonly type: FieldRef<"PreciseTrimMaster", 'String'>
+    readonly bt1: FieldRef<"PreciseTrimMaster", 'Decimal'>
+    readonly bt2: FieldRef<"PreciseTrimMaster", 'Decimal'>
+    readonly createdAt: FieldRef<"PreciseTrimMaster", 'DateTime'>
+    readonly updatedAt: FieldRef<"PreciseTrimMaster", 'DateTime'>
+  }
+    
+
+  // Custom InputTypes
+  /**
+   * PreciseTrimMaster findUnique
+   */
+  export type PreciseTrimMasterFindUniqueArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the PreciseTrimMaster
+     */
+    select?: PreciseTrimMasterSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the PreciseTrimMaster
+     */
+    omit?: PreciseTrimMasterOmit<ExtArgs> | null
+    /**
+     * Filter, which PreciseTrimMaster to fetch.
+     */
+    where: PreciseTrimMasterWhereUniqueInput
+  }
+
+  /**
+   * PreciseTrimMaster findUniqueOrThrow
+   */
+  export type PreciseTrimMasterFindUniqueOrThrowArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the PreciseTrimMaster
+     */
+    select?: PreciseTrimMasterSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the PreciseTrimMaster
+     */
+    omit?: PreciseTrimMasterOmit<ExtArgs> | null
+    /**
+     * Filter, which PreciseTrimMaster to fetch.
+     */
+    where: PreciseTrimMasterWhereUniqueInput
+  }
+
+  /**
+   * PreciseTrimMaster findFirst
+   */
+  export type PreciseTrimMasterFindFirstArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the PreciseTrimMaster
+     */
+    select?: PreciseTrimMasterSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the PreciseTrimMaster
+     */
+    omit?: PreciseTrimMasterOmit<ExtArgs> | null
+    /**
+     * Filter, which PreciseTrimMaster to fetch.
+     */
+    where?: PreciseTrimMasterWhereInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
+     * 
+     * Determine the order of PreciseTrimMasters to fetch.
+     */
+    orderBy?: PreciseTrimMasterOrderByWithRelationInput | PreciseTrimMasterOrderByWithRelationInput[]
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
+     * 
+     * Sets the position for searching for PreciseTrimMasters.
+     */
+    cursor?: PreciseTrimMasterWhereUniqueInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Take `±n` PreciseTrimMasters from the position of the cursor.
+     */
+    take?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Skip the first `n` PreciseTrimMasters.
+     */
+    skip?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/distinct Distinct Docs}
+     * 
+     * Filter by unique combinations of PreciseTrimMasters.
+     */
+    distinct?: PreciseTrimMasterScalarFieldEnum | PreciseTrimMasterScalarFieldEnum[]
+  }
+
+  /**
+   * PreciseTrimMaster findFirstOrThrow
+   */
+  export type PreciseTrimMasterFindFirstOrThrowArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the PreciseTrimMaster
+     */
+    select?: PreciseTrimMasterSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the PreciseTrimMaster
+     */
+    omit?: PreciseTrimMasterOmit<ExtArgs> | null
+    /**
+     * Filter, which PreciseTrimMaster to fetch.
+     */
+    where?: PreciseTrimMasterWhereInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
+     * 
+     * Determine the order of PreciseTrimMasters to fetch.
+     */
+    orderBy?: PreciseTrimMasterOrderByWithRelationInput | PreciseTrimMasterOrderByWithRelationInput[]
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
+     * 
+     * Sets the position for searching for PreciseTrimMasters.
+     */
+    cursor?: PreciseTrimMasterWhereUniqueInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Take `±n` PreciseTrimMasters from the position of the cursor.
+     */
+    take?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Skip the first `n` PreciseTrimMasters.
+     */
+    skip?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/distinct Distinct Docs}
+     * 
+     * Filter by unique combinations of PreciseTrimMasters.
+     */
+    distinct?: PreciseTrimMasterScalarFieldEnum | PreciseTrimMasterScalarFieldEnum[]
+  }
+
+  /**
+   * PreciseTrimMaster findMany
+   */
+  export type PreciseTrimMasterFindManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the PreciseTrimMaster
+     */
+    select?: PreciseTrimMasterSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the PreciseTrimMaster
+     */
+    omit?: PreciseTrimMasterOmit<ExtArgs> | null
+    /**
+     * Filter, which PreciseTrimMasters to fetch.
+     */
+    where?: PreciseTrimMasterWhereInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
+     * 
+     * Determine the order of PreciseTrimMasters to fetch.
+     */
+    orderBy?: PreciseTrimMasterOrderByWithRelationInput | PreciseTrimMasterOrderByWithRelationInput[]
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
+     * 
+     * Sets the position for listing PreciseTrimMasters.
+     */
+    cursor?: PreciseTrimMasterWhereUniqueInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Take `±n` PreciseTrimMasters from the position of the cursor.
+     */
+    take?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Skip the first `n` PreciseTrimMasters.
+     */
+    skip?: number
+    distinct?: PreciseTrimMasterScalarFieldEnum | PreciseTrimMasterScalarFieldEnum[]
+  }
+
+  /**
+   * PreciseTrimMaster create
+   */
+  export type PreciseTrimMasterCreateArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the PreciseTrimMaster
+     */
+    select?: PreciseTrimMasterSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the PreciseTrimMaster
+     */
+    omit?: PreciseTrimMasterOmit<ExtArgs> | null
+    /**
+     * The data needed to create a PreciseTrimMaster.
+     */
+    data: XOR<PreciseTrimMasterCreateInput, PreciseTrimMasterUncheckedCreateInput>
+  }
+
+  /**
+   * PreciseTrimMaster createMany
+   */
+  export type PreciseTrimMasterCreateManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * The data used to create many PreciseTrimMasters.
+     */
+    data: PreciseTrimMasterCreateManyInput | PreciseTrimMasterCreateManyInput[]
+    skipDuplicates?: boolean
+  }
+
+  /**
+   * PreciseTrimMaster createManyAndReturn
+   */
+  export type PreciseTrimMasterCreateManyAndReturnArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the PreciseTrimMaster
+     */
+    select?: PreciseTrimMasterSelectCreateManyAndReturn<ExtArgs> | null
+    /**
+     * Omit specific fields from the PreciseTrimMaster
+     */
+    omit?: PreciseTrimMasterOmit<ExtArgs> | null
+    /**
+     * The data used to create many PreciseTrimMasters.
+     */
+    data: PreciseTrimMasterCreateManyInput | PreciseTrimMasterCreateManyInput[]
+    skipDuplicates?: boolean
+  }
+
+  /**
+   * PreciseTrimMaster update
+   */
+  export type PreciseTrimMasterUpdateArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the PreciseTrimMaster
+     */
+    select?: PreciseTrimMasterSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the PreciseTrimMaster
+     */
+    omit?: PreciseTrimMasterOmit<ExtArgs> | null
+    /**
+     * The data needed to update a PreciseTrimMaster.
+     */
+    data: XOR<PreciseTrimMasterUpdateInput, PreciseTrimMasterUncheckedUpdateInput>
+    /**
+     * Choose, which PreciseTrimMaster to update.
+     */
+    where: PreciseTrimMasterWhereUniqueInput
+  }
+
+  /**
+   * PreciseTrimMaster updateMany
+   */
+  export type PreciseTrimMasterUpdateManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * The data used to update PreciseTrimMasters.
+     */
+    data: XOR<PreciseTrimMasterUpdateManyMutationInput, PreciseTrimMasterUncheckedUpdateManyInput>
+    /**
+     * Filter which PreciseTrimMasters to update
+     */
+    where?: PreciseTrimMasterWhereInput
+    /**
+     * Limit how many PreciseTrimMasters to update.
+     */
+    limit?: number
+  }
+
+  /**
+   * PreciseTrimMaster updateManyAndReturn
+   */
+  export type PreciseTrimMasterUpdateManyAndReturnArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the PreciseTrimMaster
+     */
+    select?: PreciseTrimMasterSelectUpdateManyAndReturn<ExtArgs> | null
+    /**
+     * Omit specific fields from the PreciseTrimMaster
+     */
+    omit?: PreciseTrimMasterOmit<ExtArgs> | null
+    /**
+     * The data used to update PreciseTrimMasters.
+     */
+    data: XOR<PreciseTrimMasterUpdateManyMutationInput, PreciseTrimMasterUncheckedUpdateManyInput>
+    /**
+     * Filter which PreciseTrimMasters to update
+     */
+    where?: PreciseTrimMasterWhereInput
+    /**
+     * Limit how many PreciseTrimMasters to update.
+     */
+    limit?: number
+  }
+
+  /**
+   * PreciseTrimMaster upsert
+   */
+  export type PreciseTrimMasterUpsertArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the PreciseTrimMaster
+     */
+    select?: PreciseTrimMasterSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the PreciseTrimMaster
+     */
+    omit?: PreciseTrimMasterOmit<ExtArgs> | null
+    /**
+     * The filter to search for the PreciseTrimMaster to update in case it exists.
+     */
+    where: PreciseTrimMasterWhereUniqueInput
+    /**
+     * In case the PreciseTrimMaster found by the `where` argument doesn't exist, create a new PreciseTrimMaster with this data.
+     */
+    create: XOR<PreciseTrimMasterCreateInput, PreciseTrimMasterUncheckedCreateInput>
+    /**
+     * In case the PreciseTrimMaster was found with the provided `where` argument, update it with this data.
+     */
+    update: XOR<PreciseTrimMasterUpdateInput, PreciseTrimMasterUncheckedUpdateInput>
+  }
+
+  /**
+   * PreciseTrimMaster delete
+   */
+  export type PreciseTrimMasterDeleteArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the PreciseTrimMaster
+     */
+    select?: PreciseTrimMasterSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the PreciseTrimMaster
+     */
+    omit?: PreciseTrimMasterOmit<ExtArgs> | null
+    /**
+     * Filter which PreciseTrimMaster to delete.
+     */
+    where: PreciseTrimMasterWhereUniqueInput
+  }
+
+  /**
+   * PreciseTrimMaster deleteMany
+   */
+  export type PreciseTrimMasterDeleteManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Filter which PreciseTrimMasters to delete
+     */
+    where?: PreciseTrimMasterWhereInput
+    /**
+     * Limit how many PreciseTrimMasters to delete.
+     */
+    limit?: number
+  }
+
+  /**
+   * PreciseTrimMaster without action
+   */
+  export type PreciseTrimMasterDefaultArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the PreciseTrimMaster
+     */
+    select?: PreciseTrimMasterSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the PreciseTrimMaster
+     */
+    omit?: PreciseTrimMasterOmit<ExtArgs> | null
+  }
+
+
+  /**
    * Model BasicTrimCostComponent
    */
 
@@ -86267,6 +87422,19 @@ export namespace Prisma {
   export type BasicTrimCostMasterScalarFieldEnum = (typeof BasicTrimCostMasterScalarFieldEnum)[keyof typeof BasicTrimCostMasterScalarFieldEnum]
 
 
+  export const PreciseTrimMasterScalarFieldEnum: {
+    id: 'id',
+    majCat: 'majCat',
+    type: 'type',
+    bt1: 'bt1',
+    bt2: 'bt2',
+    createdAt: 'createdAt',
+    updatedAt: 'updatedAt'
+  };
+
+  export type PreciseTrimMasterScalarFieldEnum = (typeof PreciseTrimMasterScalarFieldEnum)[keyof typeof PreciseTrimMasterScalarFieldEnum]
+
+
   export const BasicTrimCostComponentScalarFieldEnum: {
     id: 'id',
     masterId: 'masterId',
@@ -87582,6 +88750,14 @@ export namespace Prisma {
   };
 
   export type BasicTrimCostMasterOrderByRelevanceFieldEnum = (typeof BasicTrimCostMasterOrderByRelevanceFieldEnum)[keyof typeof BasicTrimCostMasterOrderByRelevanceFieldEnum]
+
+
+  export const PreciseTrimMasterOrderByRelevanceFieldEnum: {
+    majCat: 'majCat',
+    type: 'type'
+  };
+
+  export type PreciseTrimMasterOrderByRelevanceFieldEnum = (typeof PreciseTrimMasterOrderByRelevanceFieldEnum)[keyof typeof PreciseTrimMasterOrderByRelevanceFieldEnum]
 
 
   export const BasicTrimCostComponentOrderByRelevanceFieldEnum: {
@@ -95355,6 +96531,72 @@ export namespace Prisma {
     basicTrimsCost?: DecimalNullableWithAggregatesFilter<"BasicTrimCostMaster"> | Decimal | DecimalJsLike | number | string | null
     createdAt?: DateTimeWithAggregatesFilter<"BasicTrimCostMaster"> | Date | string
     updatedAt?: DateTimeWithAggregatesFilter<"BasicTrimCostMaster"> | Date | string
+  }
+
+  export type PreciseTrimMasterWhereInput = {
+    AND?: PreciseTrimMasterWhereInput | PreciseTrimMasterWhereInput[]
+    OR?: PreciseTrimMasterWhereInput[]
+    NOT?: PreciseTrimMasterWhereInput | PreciseTrimMasterWhereInput[]
+    id?: IntFilter<"PreciseTrimMaster"> | number
+    majCat?: StringFilter<"PreciseTrimMaster"> | string
+    type?: StringFilter<"PreciseTrimMaster"> | string
+    bt1?: DecimalNullableFilter<"PreciseTrimMaster"> | Decimal | DecimalJsLike | number | string | null
+    bt2?: DecimalNullableFilter<"PreciseTrimMaster"> | Decimal | DecimalJsLike | number | string | null
+    createdAt?: DateTimeFilter<"PreciseTrimMaster"> | Date | string
+    updatedAt?: DateTimeFilter<"PreciseTrimMaster"> | Date | string
+  }
+
+  export type PreciseTrimMasterOrderByWithRelationInput = {
+    id?: SortOrder
+    majCat?: SortOrder
+    type?: SortOrder
+    bt1?: SortOrderInput | SortOrder
+    bt2?: SortOrderInput | SortOrder
+    createdAt?: SortOrder
+    updatedAt?: SortOrder
+    _relevance?: PreciseTrimMasterOrderByRelevanceInput
+  }
+
+  export type PreciseTrimMasterWhereUniqueInput = Prisma.AtLeast<{
+    id?: number
+    majCat_type?: PreciseTrimMasterMajCatTypeCompoundUniqueInput
+    AND?: PreciseTrimMasterWhereInput | PreciseTrimMasterWhereInput[]
+    OR?: PreciseTrimMasterWhereInput[]
+    NOT?: PreciseTrimMasterWhereInput | PreciseTrimMasterWhereInput[]
+    majCat?: StringFilter<"PreciseTrimMaster"> | string
+    type?: StringFilter<"PreciseTrimMaster"> | string
+    bt1?: DecimalNullableFilter<"PreciseTrimMaster"> | Decimal | DecimalJsLike | number | string | null
+    bt2?: DecimalNullableFilter<"PreciseTrimMaster"> | Decimal | DecimalJsLike | number | string | null
+    createdAt?: DateTimeFilter<"PreciseTrimMaster"> | Date | string
+    updatedAt?: DateTimeFilter<"PreciseTrimMaster"> | Date | string
+  }, "id" | "majCat_type">
+
+  export type PreciseTrimMasterOrderByWithAggregationInput = {
+    id?: SortOrder
+    majCat?: SortOrder
+    type?: SortOrder
+    bt1?: SortOrderInput | SortOrder
+    bt2?: SortOrderInput | SortOrder
+    createdAt?: SortOrder
+    updatedAt?: SortOrder
+    _count?: PreciseTrimMasterCountOrderByAggregateInput
+    _avg?: PreciseTrimMasterAvgOrderByAggregateInput
+    _max?: PreciseTrimMasterMaxOrderByAggregateInput
+    _min?: PreciseTrimMasterMinOrderByAggregateInput
+    _sum?: PreciseTrimMasterSumOrderByAggregateInput
+  }
+
+  export type PreciseTrimMasterScalarWhereWithAggregatesInput = {
+    AND?: PreciseTrimMasterScalarWhereWithAggregatesInput | PreciseTrimMasterScalarWhereWithAggregatesInput[]
+    OR?: PreciseTrimMasterScalarWhereWithAggregatesInput[]
+    NOT?: PreciseTrimMasterScalarWhereWithAggregatesInput | PreciseTrimMasterScalarWhereWithAggregatesInput[]
+    id?: IntWithAggregatesFilter<"PreciseTrimMaster"> | number
+    majCat?: StringWithAggregatesFilter<"PreciseTrimMaster"> | string
+    type?: StringWithAggregatesFilter<"PreciseTrimMaster"> | string
+    bt1?: DecimalNullableWithAggregatesFilter<"PreciseTrimMaster"> | Decimal | DecimalJsLike | number | string | null
+    bt2?: DecimalNullableWithAggregatesFilter<"PreciseTrimMaster"> | Decimal | DecimalJsLike | number | string | null
+    createdAt?: DateTimeWithAggregatesFilter<"PreciseTrimMaster"> | Date | string
+    updatedAt?: DateTimeWithAggregatesFilter<"PreciseTrimMaster"> | Date | string
   }
 
   export type BasicTrimCostComponentWhereInput = {
@@ -105470,6 +106712,73 @@ export namespace Prisma {
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
   }
 
+  export type PreciseTrimMasterCreateInput = {
+    majCat: string
+    type: string
+    bt1?: Decimal | DecimalJsLike | number | string | null
+    bt2?: Decimal | DecimalJsLike | number | string | null
+    createdAt?: Date | string
+    updatedAt?: Date | string
+  }
+
+  export type PreciseTrimMasterUncheckedCreateInput = {
+    id?: number
+    majCat: string
+    type: string
+    bt1?: Decimal | DecimalJsLike | number | string | null
+    bt2?: Decimal | DecimalJsLike | number | string | null
+    createdAt?: Date | string
+    updatedAt?: Date | string
+  }
+
+  export type PreciseTrimMasterUpdateInput = {
+    majCat?: StringFieldUpdateOperationsInput | string
+    type?: StringFieldUpdateOperationsInput | string
+    bt1?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    bt2?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+  }
+
+  export type PreciseTrimMasterUncheckedUpdateInput = {
+    id?: IntFieldUpdateOperationsInput | number
+    majCat?: StringFieldUpdateOperationsInput | string
+    type?: StringFieldUpdateOperationsInput | string
+    bt1?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    bt2?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+  }
+
+  export type PreciseTrimMasterCreateManyInput = {
+    id?: number
+    majCat: string
+    type: string
+    bt1?: Decimal | DecimalJsLike | number | string | null
+    bt2?: Decimal | DecimalJsLike | number | string | null
+    createdAt?: Date | string
+    updatedAt?: Date | string
+  }
+
+  export type PreciseTrimMasterUpdateManyMutationInput = {
+    majCat?: StringFieldUpdateOperationsInput | string
+    type?: StringFieldUpdateOperationsInput | string
+    bt1?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    bt2?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+  }
+
+  export type PreciseTrimMasterUncheckedUpdateManyInput = {
+    id?: IntFieldUpdateOperationsInput | number
+    majCat?: StringFieldUpdateOperationsInput | string
+    type?: StringFieldUpdateOperationsInput | string
+    bt1?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    bt2?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+  }
+
   export type BasicTrimCostComponentCreateInput = {
     kind: string
     component: string
@@ -112484,6 +113793,59 @@ export namespace Prisma {
     packagingTotal?: SortOrder
     threadCost?: SortOrder
     basicTrimsCost?: SortOrder
+  }
+
+  export type PreciseTrimMasterOrderByRelevanceInput = {
+    fields: PreciseTrimMasterOrderByRelevanceFieldEnum | PreciseTrimMasterOrderByRelevanceFieldEnum[]
+    sort: SortOrder
+    search: string
+  }
+
+  export type PreciseTrimMasterMajCatTypeCompoundUniqueInput = {
+    majCat: string
+    type: string
+  }
+
+  export type PreciseTrimMasterCountOrderByAggregateInput = {
+    id?: SortOrder
+    majCat?: SortOrder
+    type?: SortOrder
+    bt1?: SortOrder
+    bt2?: SortOrder
+    createdAt?: SortOrder
+    updatedAt?: SortOrder
+  }
+
+  export type PreciseTrimMasterAvgOrderByAggregateInput = {
+    id?: SortOrder
+    bt1?: SortOrder
+    bt2?: SortOrder
+  }
+
+  export type PreciseTrimMasterMaxOrderByAggregateInput = {
+    id?: SortOrder
+    majCat?: SortOrder
+    type?: SortOrder
+    bt1?: SortOrder
+    bt2?: SortOrder
+    createdAt?: SortOrder
+    updatedAt?: SortOrder
+  }
+
+  export type PreciseTrimMasterMinOrderByAggregateInput = {
+    id?: SortOrder
+    majCat?: SortOrder
+    type?: SortOrder
+    bt1?: SortOrder
+    bt2?: SortOrder
+    createdAt?: SortOrder
+    updatedAt?: SortOrder
+  }
+
+  export type PreciseTrimMasterSumOrderByAggregateInput = {
+    id?: SortOrder
+    bt1?: SortOrder
+    bt2?: SortOrder
   }
 
   export type BasicTrimCostMasterScalarRelationFilter = {
