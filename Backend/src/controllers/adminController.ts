@@ -6090,7 +6090,7 @@ export const uploadCmpCostMaster = async (req: Request, res: Response): Promise<
 
 const PTM_SHEET_NAME = 'PRECISE TRIM MASTER';
 
-type PreciseTrimRow = { majCat: string; type: string; bt1: number | null; bt2: number | null };
+type PreciseTrimRow = { attributeName: string; type: string; bt1: number | null; bt2: number | null };
 
 function buildPreciseTrimMasterSheet(wb: any, rows: PreciseTrimRow[]): void {
   const ws = wb.addWorksheet(PTM_SHEET_NAME);
@@ -6101,11 +6101,11 @@ function buildPreciseTrimMasterSheet(wb: any, rows: PreciseTrimRow[]): void {
     cell.alignment = { horizontal: 'center' };
   };
 
-  const headerRow = ws.addRow(['MAJ_CAT', 'TYPE', 'BT-1', 'BT-2']);
+  const headerRow = ws.addRow(['ATTRIBUTE_NAME', 'TYPE', 'BT-1', 'BT-2']);
   headerRow.eachCell((cell: any) => blue(cell));
 
   for (const r of rows) {
-    ws.addRow([r.majCat, r.type, r.bt1 ?? '', r.bt2 ?? '']);
+    ws.addRow([r.attributeName, r.type, r.bt1 ?? '', r.bt2 ?? '']);
   }
 
   ws.columns = [{ width: 26 }, { width: 28 }, { width: 14 }, { width: 14 }];
@@ -6119,21 +6119,44 @@ function buildPreciseTrimMasterWorkbook(rows: PreciseTrimRow[]): any {
   return wb;
 }
 
+/** GET /admin/precise-trim-master/lookup?attributeName=X&type=Y */
+export const lookupPreciseTrimMaster = async (req: Request, res: Response): Promise<void> => {
+  const { attributeName, type } = req.query;
+  if (!attributeName || !type) {
+    res.status(400).json({ success: false, error: 'attributeName and type are required' });
+    return;
+  }
+  try {
+    const row = await prisma.preciseTrimMaster.findFirst({
+      where: { attributeName: String(attributeName), type: String(type) },
+    });
+    res.json({
+      success: true,
+      data: row
+        ? { bt1: row.bt1 === null ? null : Number(row.bt1), bt2: row.bt2 === null ? null : Number(row.bt2) }
+        : null,
+    });
+  } catch (error: any) {
+    console.error('[PreciseTrimMaster] Lookup error:', error);
+    res.status(500).json({ success: false, error: error.message });
+  }
+};
+
 /** GET /admin/precise-trim-master/status */
 export const getPreciseTrimMasterStatus = async (_req: Request, res: Response): Promise<void> => {
   try {
-    const rows = await prisma.$queryRaw<{ total: bigint; categories: bigint; last_updated: Date | null }[]>`
+    const rows = await prisma.$queryRaw<{ total: bigint; attributes: bigint; last_updated: Date | null }[]>`
       SELECT COUNT(*)::bigint AS total,
-             COUNT(DISTINCT maj_cat)::bigint AS categories,
+             COUNT(DISTINCT attribute_name)::bigint AS attributes,
              MAX(updated_at) AS last_updated
       FROM precise_trim_master
     `;
-    const r = rows[0] ?? { total: 0n, categories: 0n, last_updated: null };
+    const r = rows[0] ?? { total: 0n, attributes: 0n, last_updated: null };
     res.json({
       success: true,
       data: {
         total: Number(r.total),
-        categories: Number(r.categories),
+        attributes: Number(r.attributes),
         lastUpdated: r.last_updated ? r.last_updated.toISOString() : null,
       },
     });
@@ -6146,7 +6169,7 @@ export const getPreciseTrimMasterStatus = async (_req: Request, res: Response): 
 /** GET /admin/precise-trim-master/template */
 export const downloadPreciseTrimMasterTemplate = async (_req: Request, res: Response): Promise<void> => {
   try {
-    const example: PreciseTrimRow = { majCat: 'IB_BERMUDA', type: 'BUTTON', bt1: 1.5, bt2: 2.0 };
+    const example: PreciseTrimRow = { attributeName: 'M_DC_STYLE', type: 'SLD_DC', bt1: 1.5, bt2: 2.0 };
     const wb = buildPreciseTrimMasterWorkbook([example]);
     res.setHeader('Content-Type', 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');
     res.setHeader('Content-Disposition', 'attachment; filename="PRECISE_TRIM_MASTER_TEMPLATE.xlsx"');
@@ -6162,10 +6185,10 @@ export const downloadPreciseTrimMasterTemplate = async (_req: Request, res: Resp
 export const exportPreciseTrimMaster = async (_req: Request, res: Response): Promise<void> => {
   try {
     const masters = await prisma.preciseTrimMaster.findMany({
-      orderBy: [{ majCat: 'asc' }, { type: 'asc' }],
+      orderBy: [{ attributeName: 'asc' }, { type: 'asc' }],
     });
     const rows: PreciseTrimRow[] = masters.map((m) => ({
-      majCat: m.majCat,
+      attributeName: m.attributeName,
       type: m.type,
       bt1: m.bt1 === null ? null : Number(m.bt1),
       bt2: m.bt2 === null ? null : Number(m.bt2),
@@ -6183,7 +6206,7 @@ export const exportPreciseTrimMaster = async (_req: Request, res: Response): Pro
 
 /**
  * POST /admin/precise-trim-master/upload
- * Upserts by (maj_cat, type).
+ * Upserts by (attribute_name, type).
  */
 export const uploadPreciseTrimMaster = async (req: Request, res: Response): Promise<void> => {
   try {
@@ -6216,22 +6239,22 @@ export const uploadPreciseTrimMaster = async (req: Request, res: Response): Prom
       return Number.isFinite(n) ? Number(n.toFixed(4)) : null;
     };
 
-    // Auto-detect header row
+    // Auto-detect header row — looks for ATTRIBUTE_NAME or TYPE column
     let headerRowNo = 1;
     for (let r = 1; r <= Math.min(5, ws.rowCount); r++) {
       const row = ws.getRow(r);
       const line = [1, 2, 3, 4].map((c) => cellStr(row, c).toUpperCase()).join(' ');
-      if (line.includes('MAJ') && line.includes('TYPE')) {
+      if ((line.includes('ATTRIBUTE') || line.includes('ATTR')) && line.includes('TYPE')) {
         headerRowNo = r;
         break;
       }
     }
 
-    let cMajCat = 1, cType = 2, cBt1 = 3, cBt2 = 4;
+    let cAttr = 1, cType = 2, cBt1 = 3, cBt2 = 4;
     const hdr = ws.getRow(headerRowNo);
     for (let c = 1; c <= 6; c++) {
       const h = cellStr(hdr, c).toUpperCase().replace(/[-_ ]/g, '');
-      if (h.includes('MAJCAT') || h === 'MAJ' || h === 'MC') cMajCat = c;
+      if (h.includes('ATTRIBUTE') || h === 'ATTR' || h === 'ATTRNAME') cAttr = c;
       else if (h === 'TYPE') cType = c;
       else if (h === 'BT1') cBt1 = c;
       else if (h === 'BT2') cBt2 = c;
@@ -6242,10 +6265,10 @@ export const uploadPreciseTrimMaster = async (req: Request, res: Response): Prom
 
     for (let r = headerRowNo + 1; r <= ws.rowCount; r++) {
       const row = ws.getRow(r);
-      const majCat = cellStr(row, cMajCat);
+      const attributeName = cellStr(row, cAttr);
       const type = cellStr(row, cType);
-      if (!majCat || !type || majCat === '-' || type === '-') {
-        if (majCat || type) skipped++;
+      if (!attributeName || !type || attributeName === '-' || type === '-') {
+        if (attributeName || type) skipped++;
         continue;
       }
       let bt1Raw = row.getCell(cBt1).value;
@@ -6254,8 +6277,8 @@ export const uploadPreciseTrimMaster = async (req: Request, res: Response): Prom
       if (bt2Raw && typeof bt2Raw === 'object' && 'result' in bt2Raw) bt2Raw = (bt2Raw as any).result;
       const bt1 = numOf(bt1Raw);
       const bt2 = numOf(bt2Raw);
-      const key = `${majCat.toUpperCase()}|${type.toUpperCase()}`;
-      rowsByKey.set(key, { majCat, type, bt1, bt2 });
+      const key = `${attributeName.toUpperCase()}|${type.toUpperCase()}`;
+      rowsByKey.set(key, { attributeName, type, bt1, bt2 });
     }
 
     const records = [...rowsByKey.values()];
@@ -6268,11 +6291,11 @@ export const uploadPreciseTrimMaster = async (req: Request, res: Response): Prom
     const CHUNK = 200;
     for (let i = 0; i < records.length; i += CHUNK) {
       const batch = records.slice(i, i + CHUNK);
-      const values = batch.map((r) => Prisma.sql`(${r.majCat}, ${r.type}, ${r.bt1}, ${r.bt2}, ${now}, ${now})`);
+      const values = batch.map((r) => Prisma.sql`(${r.attributeName}, ${r.type}, ${r.bt1}, ${r.bt2}, ${now}, ${now})`);
       await prisma.$executeRaw`
-        INSERT INTO precise_trim_master (maj_cat, type, bt1, bt2, created_at, updated_at)
+        INSERT INTO precise_trim_master (attribute_name, type, bt1, bt2, created_at, updated_at)
         VALUES ${Prisma.join(values)}
-        ON CONFLICT (maj_cat, type) DO UPDATE SET
+        ON CONFLICT (attribute_name, type) DO UPDATE SET
           bt1        = EXCLUDED.bt1,
           bt2        = EXCLUDED.bt2,
           updated_at = EXCLUDED.updated_at
@@ -6280,14 +6303,14 @@ export const uploadPreciseTrimMaster = async (req: Request, res: Response): Prom
     }
 
     const total = await prisma.preciseTrimMaster.count();
-    const categories = (await prisma.preciseTrimMaster.findMany({ distinct: ['majCat'], select: { majCat: true } })).length;
+    const attributes = (await prisma.preciseTrimMaster.findMany({ distinct: ['attributeName'], select: { attributeName: true } })).length;
 
     console.log(`[PreciseTrimMaster] Upserted ${records.length} rows (${skipped} skipped)`);
 
     res.json({
       success: true,
       message: `Precise Trim Master updated: ${records.length} rows${skipped > 0 ? `, ${skipped} rows skipped` : ''}.`,
-      data: { total, categories, skipped, lastUpdated: now.toISOString() },
+      data: { total, attributes, skipped, lastUpdated: now.toISOString() },
     });
   } catch (error: any) {
     console.error('[PreciseTrimMaster] Upload error:', error);
@@ -8460,6 +8483,40 @@ export const EXPENSE_TABLE_REGISTRY: Record<string, ExpenseTableConfig> = {
     displayColumns: ['bodyArticleNumber', 'bodyArticleDescription'],
     defaultSort: { field: 'createdAt', dir: 'desc' },
   },
+  'precise-fabric-article-data': {
+    kind: 'raw',
+    tableName: 'precise_fabric_article_data',
+    idColumn: 'id',
+    columns: [
+      { key: 'id',                         label: 'ID',                      editable: false },
+      { key: 'fabric_article_number',      label: 'Fabric Article Number',   editable: false },
+      { key: 'fabric_article_description', label: 'Description',             editable: false },
+      { key: 'division',                   label: 'Division',                editable: false },
+      { key: 'sub_division',               label: 'Sub Division',            editable: false },
+      { key: 'major_category',             label: 'Major Category',          editable: false },
+      { key: 'vendor_name',                label: 'Vendor Name',             editable: false },
+      { key: 'vendor_code',                label: 'Vendor Code',             editable: false },
+      { key: 'fabric_rate',                label: 'Fabric Rate',             editable: false, align: 'right' },
+      { key: 'm_fab_div',                  label: 'M_FAB_DIV',               editable: false },
+      { key: 'm_yarn',                     label: 'M_YARN',                  editable: false },
+      { key: 'm_fab_main_mvgr_1',          label: 'M_FAB_MAIN_MVGR_1',       editable: false },
+      { key: 'm_fab_main_mvgr_2',          label: 'M_FAB_MAIN_MVGR_2',       editable: false },
+      { key: 'm_construction',             label: 'M_CONSTRUCTION',          editable: false },
+      { key: 'm_ounz',                     label: 'M_OUNZ',                  editable: false },
+      { key: 'm_width',                    label: 'M_WIDTH',                 editable: false },
+      { key: 'm_weave_01',                 label: 'M_WEAVE_01',              editable: false },
+      { key: 'm_weave_02',                 label: 'M_WEAVE_02',              editable: false },
+      { key: 'm_count',                    label: 'M_COUNT',                 editable: false },
+      { key: 'm_composition',              label: 'M_COMPOSITION',           editable: false },
+      { key: 'm_finish',                   label: 'M_FINISH',                editable: false },
+      { key: 'm_gsm',                      label: 'M_GSM',                   editable: false },
+      { key: 'm_lycra',                    label: 'M_LYCRA',                 editable: false },
+      { key: 'created_at',                 label: 'Created At',              editable: false },
+    ],
+    searchColumns: ['fabric_article_description', 'fabric_article_number', 'major_category', 'division', 'sub_division'],
+    displayColumns: ['fabric_article_number', 'fabric_article_description', 'major_category'],
+    defaultSort: { column: 'fabric_article_number', dir: 'asc' },
+  },
   'precise-body-article': {
     kind: 'raw',
     tableName: 'precise_body_article_consumption',
@@ -8577,19 +8634,19 @@ export const EXPENSE_TABLE_REGISTRY: Record<string, ExpenseTableConfig> = {
     idIsNumeric: true,
     allowCreate: true,
     allowDelete: true,
-    requiredOnCreate: ['majCat', 'type'],
+    requiredOnCreate: ['attributeName', 'type'],
     columns: [
       { key: 'id', label: 'ID', editable: false },
-      { key: 'majCat', label: 'Major Category' },
+      { key: 'attributeName', label: 'Attribute Name' },
       { key: 'type', label: 'Type' },
       { key: 'bt1', label: 'BT-1', align: 'right' },
       { key: 'bt2', label: 'BT-2', align: 'right' },
       { key: 'createdAt', label: 'Created At', editable: false },
       { key: 'updatedAt', label: 'Updated At', editable: false },
     ],
-    searchColumns: ['majCat', 'type'],
-    displayColumns: ['majCat', 'type'],
-    defaultSort: { field: 'majCat', dir: 'asc' },
+    searchColumns: ['attributeName', 'type'],
+    displayColumns: ['attributeName', 'type'],
+    defaultSort: { field: 'attributeName', dir: 'asc' },
   },
   'cmp-cost-master': {
     kind: 'prisma',
@@ -10373,6 +10430,219 @@ export const downloadPreciseBodyArticleData = async (_req: Request, res: Respons
     res.end();
   } catch (error: any) {
     console.error('[PreciseBodyArticle] Download error:', error);
+    res.status(500).json({ success: false, error: error.message });
+  }
+};
+
+// ─────────────────────────── Precise Fabric Article Data ───────────────────────────
+
+const PFAD_COL_KEYS = [
+  'fabric_article_number', 'fabric_article_description', 'division', 'sub_division',
+  'major_category', 'vendor_name', 'vendor_code', 'fabric_rate',
+  'm_fab_div', 'm_yarn', 'm_fab_main_mvgr_1', 'm_fab_main_mvgr_2',
+  'm_construction', 'm_ounz', 'm_width', 'm_weave_01', 'm_weave_02',
+  'm_count', 'm_composition', 'm_finish', 'm_gsm', 'm_lycra',
+] as const;
+
+const PFAD_HEADERS = [
+  'FABRIC ARTICLE NUMBER', 'FABRIC ARTICLE DESCRIPTION', 'DIVISION', 'SUB DIVISION',
+  'MAJOR CATEGORY', 'VENDOR NAME', 'VENDOR CODE', 'FABRIC RATE',
+  'M_FAB_DIV', 'M_YARN', 'M_FAB_MAIN_MVGR_1', 'M_FAB_MAIN_MVGR_2',
+  'M_CONSTRUCTION', 'M_OUNZ', 'M_WIDTH', 'M_WEAVE_01', 'M_WEAVE_02',
+  'M_COUNT', 'M_COMPOSITION', 'M_FINISH', 'M_GSM', 'M_LYCRA',
+];
+
+function buildPfadWorkbook(rows: Record<string, any>[]): any {
+  const ExcelJS = require('exceljs');
+  const wb = new ExcelJS.Workbook();
+  const ws = wb.addWorksheet('Precise Fabric Article Data');
+  const hRow = ws.addRow(PFAD_HEADERS);
+  hRow.eachCell((cell: any) => {
+    cell.font = { bold: true };
+    cell.fill = { type: 'pattern', pattern: 'solid', fgColor: { argb: 'FFD9EAD3' } };
+  });
+  for (const r of rows) {
+    ws.addRow(PFAD_COL_KEYS.map((c) => r[c] ?? null));
+  }
+  ws.columns = PFAD_HEADERS.map(() => ({ width: 22 }));
+  return wb;
+}
+
+/** GET /admin/precise-fabric-article-data/status */
+export const getPreciseFabricArticleDataStatus = async (_req: Request, res: Response): Promise<void> => {
+  try {
+    const rows = await prisma.$queryRaw<{ total: bigint; last_created: Date | null }[]>`
+      SELECT COUNT(*)::bigint AS total, MAX(created_at) AS last_created
+      FROM precise_fabric_article_data
+    `;
+    const r = rows[0] ?? { total: 0n, last_created: null };
+    res.json({
+      success: true,
+      data: { total: Number(r.total), lastUpdated: r.last_created ? r.last_created.toISOString() : null },
+    });
+  } catch (error: any) {
+    console.error('[PreciseFabricArticleData] Status error:', error);
+    res.status(500).json({ success: false, error: error.message });
+  }
+};
+
+/** GET /admin/precise-fabric-article-data/template */
+export const downloadPreciseFabricArticleDataTemplate = async (_req: Request, res: Response): Promise<void> => {
+  try {
+    const example: Record<string, any> = {
+      fabric_article_number: 2111078840,
+      fabric_article_description: 'K_PC_TERRY_SLD-2_THRD-20S-280-300-72',
+      division: 'K',
+      sub_division: 'K_PC',
+      major_category: 'K_PC_TERRY',
+      vendor_name: 'V2 AFS SAMPLE',
+      vendor_code: 700152,
+      fabric_rate: 530,
+      m_fab_div: 'K',
+      m_yarn: 'PC',
+      m_fab_main_mvgr_1: 'SLD',
+      m_fab_main_mvgr_2: 'SLD',
+      m_construction: null,
+      m_ounz: null,
+      m_width: '72"',
+      m_weave_01: 'TRY',
+      m_weave_02: '2THRD',
+      m_count: '20S',
+      m_composition: '67%_C_29%_P_4%_LYC',
+      m_finish: 'BIO',
+      m_gsm: '280-300',
+      m_lycra: '2W_LYC',
+    };
+    const wb = buildPfadWorkbook([example]);
+    res.setHeader('Content-Type', 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');
+    res.setHeader('Content-Disposition', 'attachment; filename="PRECISE_FABRIC_ARTICLE_DATA_TEMPLATE.xlsx"');
+    await wb.xlsx.write(res);
+    res.end();
+  } catch (error: any) {
+    console.error('[PreciseFabricArticleData] Template error:', error);
+    res.status(500).json({ success: false, error: error.message });
+  }
+};
+
+/** GET /admin/precise-fabric-article-data/export */
+export const exportPreciseFabricArticleData = async (_req: Request, res: Response): Promise<void> => {
+  try {
+    const rows = await prisma.preciseFabricArticleData.findMany({
+      orderBy: { fabricArticleNumber: 'asc' },
+    });
+    // Convert Prisma BigInt/Decimal → plain JS values for ExcelJS
+    const data = rows.map((r) => ({
+      fabric_article_number:      r.fabricArticleNumber != null ? Number(r.fabricArticleNumber) : null,
+      fabric_article_description: r.fabricArticleDescription,
+      division:                   r.division,
+      sub_division:               r.subDivision,
+      major_category:             r.majorCategory,
+      vendor_name:                r.vendorName,
+      vendor_code:                r.vendorCode,
+      fabric_rate:                r.fabricRate != null ? Number(r.fabricRate) : null,
+      m_fab_div:                  r.mFabDiv,
+      m_yarn:                     r.mYarn,
+      m_fab_main_mvgr_1:          r.mFabMainMvgr1,
+      m_fab_main_mvgr_2:          r.mFabMainMvgr2,
+      m_construction:             r.mConstruction,
+      m_ounz:                     r.mOunz,
+      m_width:                    r.mWidth,
+      m_weave_01:                 r.mWeave01,
+      m_weave_02:                 r.mWeave02,
+      m_count:                    r.mCount,
+      m_composition:              r.mComposition,
+      m_finish:                   r.mFinish,
+      m_gsm:                      r.mGsm,
+      m_lycra:                    r.mLycra,
+    }));
+    const wb = buildPfadWorkbook(data);
+    const filename = `PRECISE_FABRIC_ARTICLE_DATA_${new Date().toISOString().slice(0, 10)}.xlsx`;
+    res.setHeader('Content-Type', 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');
+    res.setHeader('Content-Disposition', `attachment; filename="${filename}"`);
+    await wb.xlsx.write(res);
+    res.end();
+  } catch (error: any) {
+    console.error('[PreciseFabricArticleData] Export error:', error);
+    res.status(500).json({ success: false, error: error.message });
+  }
+};
+
+/** POST /admin/precise-fabric-article-data/upload — replaces the entire table */
+export const uploadPreciseFabricArticleData = async (req: Request, res: Response): Promise<void> => {
+  try {
+    if (!req.file) { res.status(400).json({ success: false, error: 'No file uploaded' }); return; }
+    const ExcelJS = require('exceljs');
+    const wb = new ExcelJS.Workbook();
+    await wb.xlsx.load(req.file.buffer);
+    const ws = wb.worksheets[0];
+    if (!ws) { res.status(400).json({ success: false, error: 'No worksheet found' }); return; }
+
+    // Locate header row by scanning for FABRIC ARTICLE NUMBER
+    let headerRowNum = 0;
+    ws.eachRow((row: any, rn: number) => {
+      if (headerRowNum) return;
+      const vals: any[] = row.values;
+      if (vals.some((v: any) => typeof v === 'string' && v.replace(/\s+/g, ' ').trim().toUpperCase() === 'FABRIC ARTICLE NUMBER'))
+        headerRowNum = rn;
+    });
+    if (!headerRowNum) { res.status(400).json({ success: false, error: 'Cannot find FABRIC ARTICLE NUMBER header row' }); return; }
+
+    // Build column-index map (header text → 1-based column index from row.values)
+    const colMap: Record<string, number> = {};
+    (ws.getRow(headerRowNum).values as any[]).forEach((v: any, i: number) => {
+      if (typeof v === 'string') colMap[v.replace(/\s+/g, '_').toUpperCase()] = i;
+    });
+    const ci = (...names: string[]): number => {
+      for (const n of names) if (colMap[n] !== undefined) return colMap[n];
+      return -1;
+    };
+
+    const toStr = (v: any): string | null => { const s = v == null ? '' : String(v).trim(); return s === '' || s === '-' ? null : s; };
+    const toNum = (v: any): number | null => { const n = Number(v); return isNaN(n) ? null : n; };
+    const toBig = (v: any): bigint | null => { const n = Number(v); return isNaN(n) ? null : BigInt(Math.round(n)); };
+
+    const inserts: any[] = [];
+    ws.eachRow((row: any, rn: number) => {
+      if (rn <= headerRowNum) return;
+      const v: any[] = row.values;
+      const fan = v[ci('FABRIC_ARTICLE_NUMBER')];
+      if (fan == null || fan === '') return;
+      inserts.push({
+        fabricArticleNumber:      toBig(fan),
+        fabricArticleDescription: toStr(v[ci('FABRIC_ARTICLE_DESCRIPTION')]),
+        division:                 toStr(v[ci('DIVISION')]),
+        subDivision:              toStr(v[ci('SUB_DIVISION')]),
+        majorCategory:            toStr(v[ci('MAJOR_CATEGORY')]),
+        vendorName:               toStr(v[ci('VENDOR_NAME')]),
+        vendorCode:               toNum(v[ci('VENDOR_CODE')]),
+        fabricRate:               toNum(v[ci('FABRIC_RATE')]),
+        mFabDiv:                  toStr(v[ci('M_FAB_DIV')]),
+        mYarn:                    toStr(v[ci('M_YARN')]),
+        mFabMainMvgr1:            toStr(v[ci('M_FAB_MAIN_MVGR_1')]),
+        mFabMainMvgr2:            toStr(v[ci('M_FAB_MAIN_MVGR_2')]),
+        mConstruction:            toStr(v[ci('M_CONSTRUCTION')]),
+        mOunz:                    toStr(v[ci('M_OUNZ')]),
+        mWidth:                   toStr(v[ci('M_WIDTH')]),
+        mWeave01:                 toStr(v[ci('M_WEAVE_01')]),
+        mWeave02:                 toStr(v[ci('M_WEAVE_02')]),
+        mCount:                   toStr(v[ci('M_COUNT')]),
+        mComposition:             toStr(v[ci('M_COMPOSITION')]),
+        mFinish:                  toStr(v[ci('M_FINISH')]),
+        mGsm:                     toStr(v[ci('M_GSM')]),
+        mLycra:                   toStr(v[ci('M_LYCRA')]),
+      });
+    });
+
+    if (inserts.length === 0) { res.status(400).json({ success: false, error: 'No data rows found' }); return; }
+
+    await prisma.$transaction([
+      prisma.preciseFabricArticleData.deleteMany({}),
+      prisma.preciseFabricArticleData.createMany({ data: inserts }),
+    ]);
+
+    res.json({ success: true, data: { inserted: inserts.length } });
+  } catch (error: any) {
+    console.error('[PreciseFabricArticleData] Upload error:', error);
     res.status(500).json({ success: false, error: error.message });
   }
 };

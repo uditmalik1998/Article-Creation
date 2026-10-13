@@ -87,8 +87,10 @@ router.post('/retry-sap-sync', requireApprovalRights, h(ApproverController.retry
 // Vendor name search — returns up to 15 matching vendors from master_vendor_details
 router.get('/vendor-search', h(ApproverController.vendorSearch));
 
-// Fabric article data search — returns up to 15 matching fabric_article_data rows by number or description
-router.get('/fabric-article-data/search', h(ApproverController.searchFabricArticleData));
+// Fabric article data search — returns up to 15 matching precise_fabric_article_data rows by desc/number + attribute fallback
+router.get('/fabric-article-data/search',    h(ApproverController.searchFabricArticleData));
+// Rough-V2 rate — lowest fabric_rate from precise_fabric_article_data matching 5 exact attributes
+router.get('/fabric-article-data/rough-v2-rate', h(ApproverController.getRoughV2Rate));
 
 // Body article data search — returns up to 10 matching body_article_data rows by number or description
 // (an exact Body Article Number match is always included even if outside the top 10)
