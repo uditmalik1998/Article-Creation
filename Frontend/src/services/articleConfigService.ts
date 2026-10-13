@@ -513,3 +513,50 @@ export function invalidateGMGrid(): void {
   gmGridCache.clear();
   gmGridPending.clear();
 }
+
+// ─── GM Article Description Format (from gm_article_description_formate) ─────
+
+export interface GmDescFormatRow {
+  familyCode: string;
+  familyName: string;
+  descSeq: string;
+}
+
+const gmDescFormatCache = new Map<string, GmDescFormatRow[]>();
+const gmDescFormatPending = new Map<string, Promise<GmDescFormatRow[]>>();
+
+/**
+ * Fetch and cache the ordered description format for a GM major category.
+ * Returns rows ordered by desc_seq (numeric), only those with a sequence number.
+ */
+export async function preloadGMDescFormatFor(majorCategory: string): Promise<GmDescFormatRow[]> {
+  const key = (majorCategory || '').trim().toUpperCase();
+  if (!key) return [];
+  if (gmDescFormatCache.has(key)) return gmDescFormatCache.get(key)!;
+  if (gmDescFormatPending.has(key)) return gmDescFormatPending.get(key)!;
+
+  const p = fetch(
+    `${gridBaseURL()}/approver/gm-description-format?majorCategory=${encodeURIComponent(majorCategory)}`,
+    { headers: authHeader() },
+  )
+    .then(r => (r.ok ? r.json() : { format: [] }))
+    .then(json => {
+      const rows: GmDescFormatRow[] = (json.format ?? []).map((f: any) => ({
+        familyCode: f.familyCode,
+        familyName: f.familyName,
+        descSeq:    f.descSeq,
+      }));
+      gmDescFormatCache.set(key, rows);
+      return rows;
+    })
+    .catch(() => [] as GmDescFormatRow[])
+    .finally(() => gmDescFormatPending.delete(key));
+
+  gmDescFormatPending.set(key, p);
+  return p;
+}
+
+/** Synchronous lookup — returns null if not yet loaded. */
+export function getCachedGMDescFormat(majorCategory: string): GmDescFormatRow[] | null {
+  return gmDescFormatCache.get((majorCategory || '').trim().toUpperCase()) ?? null;
+}
