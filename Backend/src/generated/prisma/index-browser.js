@@ -361,7 +361,6 @@ exports.Prisma.ExtractionResultFlatScalarFieldEnum = {
   preciseRatio: 'preciseRatio',
   preciseConsumptionKg: 'preciseConsumptionKg',
   preciseConsumptionMeter: 'preciseConsumptionMeter',
-  valueAddProcessCost: 'valueAddProcessCost',
   bodyArticle: 'bodyArticle',
   bodyArticleDescription: 'bodyArticleDescription',
   fabricArticleNumber: 'fabricArticleNumber',
