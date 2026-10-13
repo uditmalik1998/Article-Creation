@@ -1560,6 +1560,17 @@ exports.Prisma.BodyArticleDescriptionFormateScalarFieldEnum = {
   updatedAt: 'updatedAt'
 };
 
+exports.Prisma.GmArticleDescriptionFormateScalarFieldEnum = {
+  id: 'id',
+  key: 'key',
+  archetypeNm: 'archetypeNm',
+  descSeq: 'descSeq',
+  familyCode: 'familyCode',
+  familyName: 'familyName',
+  createdAt: 'createdAt',
+  updatedAt: 'updatedAt'
+};
+
 exports.Prisma.PreciseBodyArticleConsumptionScalarFieldEnum = {
   id: 'id',
   division: 'division',
@@ -2663,6 +2674,14 @@ exports.Prisma.BodyArticleDescriptionFormateOrderByRelevanceFieldEnum = {
   frGridStatus: 'frGridStatus'
 };
 
+exports.Prisma.GmArticleDescriptionFormateOrderByRelevanceFieldEnum = {
+  key: 'key',
+  archetypeNm: 'archetypeNm',
+  descSeq: 'descSeq',
+  familyCode: 'familyCode',
+  familyName: 'familyName'
+};
+
 exports.Prisma.PreciseBodyArticleConsumptionOrderByRelevanceFieldEnum = {
   division: 'division',
   subDivision: 'subDivision',
@@ -2854,6 +2873,7 @@ exports.Prisma.ModelName = {
   ExpenseAccessGrant: 'ExpenseAccessGrant',
   ExpenseAuditLog: 'ExpenseAuditLog',
   BodyArticleDescriptionFormate: 'BodyArticleDescriptionFormate',
+  GmArticleDescriptionFormate: 'GmArticleDescriptionFormate',
   PreciseBodyArticleConsumption: 'PreciseBodyArticleConsumption'
 };
 
