@@ -149,7 +149,6 @@ export interface ApproverItem {
   approvedAt?: string | null;
   approver?: { name: string | null; email: string | null } | null;
   valueAddCost: number | string | null;
-  valueAddProcessCost: number | string | null;
   vendorFabricRate: number | string | null;
   roughCmpCost: number | string | null;
   bodyConsumptionType: string | null;

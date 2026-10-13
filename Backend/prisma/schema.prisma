@@ -333,8 +333,6 @@ model ExtractionResultFlat {
   preciseRatio                Decimal?      @map("precise_ratio")              @db.Decimal(10, 4)
   preciseConsumptionKg        Decimal?      @map("precise_consumption_kg")     @db.Decimal(10, 4)
   preciseConsumptionMeter     Decimal?      @map("precise_consumption_meter")  @db.Decimal(10, 4)
-  valueAddProcessCost         Decimal?      @map("value_add_process_cost")     @db.Decimal(10, 2)
-
   // ===== ARTICLE REFERENCE FIELDS =====
   bodyArticle                 String?       @map("body_article") @db.VarChar(100)
   bodyArticleDescription      String?       @map("body_article_description")

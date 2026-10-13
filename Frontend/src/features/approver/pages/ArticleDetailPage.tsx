@@ -86,7 +86,7 @@ const FIELD_LABELS: Record<string, string> = {
   articleType: 'Article Type', articleFashionType: 'M_ARTICLE_FASHION_TYPE',
   articleDimension: 'Article Dimension', referenceArticleNumber: 'Reference Article No.',
   valueAddAccCostType: 'Value Add Acc. Cost Type', valueAddCost: 'Value Add Acc. Cost',
-  valueAddProcessCost: 'Value Add Process Cost', vendorFabricRate: 'Vendor Fabric Rate',
+  vendorFabricRate: 'Vendor Fabric Rate',
   cmtpCost: 'CMTP Cost', cmpCost: 'CMP Cost', fabCost: 'Fab Cost',
   fabCons: 'Fab Consumption', width: 'Width', fabricArticleNumber: 'Fabric Article No.',
   bodyArticle: 'Body Article No.', mvgrBrandVendor: 'M_BRAND / Vendor MVGR',

@@ -312,7 +312,6 @@ const ATTRIBUTE_GROUPS: { group: string; color: string; fields: { field: string;
       { field: 'embroideryType', schemaKey: 'embroidery_type' },
       { field: 'embPlacement', schemaKey: 'emb_placement' },
       { field: 'wash', schemaKey: 'wash' },
-      { field: 'valueAddProcessCost', schemaKey: 'value_add_process_cost', freeText: true },
     ],
   },
   {
@@ -435,10 +434,8 @@ const BODY_PRIORITY_KEYS = [
 const OTH_GRID_1_ORDER = ['age_group', 'imp_atrbt2', 'article_fashion_type', 'segment'];
 
 // Hidden from the FG cards only (UI). The attrs still exist in the DB/admin
-// config — they will be removed in Supabase later.
-//   value_add_process_cost → VALUE ADD PROCESS COST (V. ADD card)
-//   fab_weight             → M_FAB_WEIGHT (OTH GRID-1 card)
-const FG_CARD_HIDDEN_SCHEMA_KEYS = new Set(['value_add_process_cost', 'fab_weight']);
+// fab_weight is hidden from the FG card grid (OTH GRID-1 card).
+const FG_CARD_HIDDEN_SCHEMA_KEYS = new Set(['fab_weight']);
 
 // ─── Redesign tokens — header/icon palette per group ──────────────────────────
 const GROUP_LABELS: Record<string, string> = {

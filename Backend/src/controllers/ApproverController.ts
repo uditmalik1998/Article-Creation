@@ -55,7 +55,6 @@ const ITEM_UPDATE_ALLOWED_FIELDS = [
     'autoBgt', 'roughV2', 'vendorFabricRate', 'finalCost',
     'roughRatio', 'roughConsumptionKg', 'roughConsumptionMeter',
     'preciseRatio', 'preciseConsumptionKg', 'preciseConsumptionMeter',
-    'valueAddProcessCost',
     // Card footer fields (fabric/body article builder)
     'fabricArticleNumber', 'fabricArticleDescription',
     'bodyArticle', 'bodyArticleDescription',
@@ -1013,7 +1012,6 @@ export class ApproverController {
                     autoBgt: true, roughV2: true, vendorFabricRate: true, finalCost: true,
                     roughRatio: true, roughConsumptionKg: true, roughConsumptionMeter: true,
                     preciseRatio: true, preciseConsumptionKg: true, preciseConsumptionMeter: true,
-                    valueAddProcessCost: true,
                     // BOM cost fields
                     cmtpCost: true,
                     cmpCost: true,
@@ -1334,7 +1332,6 @@ export class ApproverController {
                     autoBgt: true, roughV2: true, vendorFabricRate: true, finalCost: true,
                     roughRatio: true, roughConsumptionKg: true, roughConsumptionMeter: true,
                     preciseRatio: true, preciseConsumptionKg: true, preciseConsumptionMeter: true,
-                    valueAddProcessCost: true,
                     // BODY extras
                     collarStyle: true,
                     sleeveFold: true, mSet: true,
@@ -1569,7 +1566,6 @@ export class ApproverController {
                     autoBgt: true, roughV2: true, vendorFabricRate: true, finalCost: true,
                     roughRatio: true, roughConsumptionKg: true, roughConsumptionMeter: true,
                     preciseRatio: true, preciseConsumptionKg: true, preciseConsumptionMeter: true,
-                    valueAddProcessCost: true,
                     approvedAt: true,
                     approver: { select: { name: true } },
                 },
@@ -1662,7 +1658,7 @@ export class ApproverController {
                     : null;
                 const cmpCost = toNum(bodyData?.cmpCost);
                 const fgValAdd = 0;
-                const fgProcessCost = toNum(a.valueAddProcessCost);
+                const fgProcessCost = 0;
 
                 const summaryRowNum = dataRow;
                 const compStart = dataRow + 1;
@@ -1802,7 +1798,6 @@ export class ApproverController {
                     cmtpCost: true,
                     cmpCost: true,
                     fabCons: true,
-                    valueAddProcessCost: true,
                 },
             });
             const fabricNums = [...new Set(fgArticles.map((a: any) => a.fabricArticleNumber).filter(Boolean) as string[])];
@@ -1892,9 +1887,8 @@ export class ApproverController {
                 const cmtp     = toN(a.cmtpCost);
                 const cmp      = toN(a.cmpCost);
                 const valAdd   = 0;
-                const valProc  = toN(a.valueAddProcessCost);
-                const v2Cost   = +(fabV2  + cmp + cmtp + valAdd + valProc).toFixed(2);
-                const vdrCost  = +(fabVdr + cmp + cmtp + valAdd + valProc).toFixed(2);
+                const v2Cost   = +(fabV2  + cmp + cmtp + valAdd).toFixed(2);
+                const vdrCost  = +(fabVdr + cmp + cmtp + valAdd).toFixed(2);
                 const margin   = mrp > 0 ? (mrp - v2Cost)  / mrp : 0;
                 const vdrMargn = mrp > 0 ? (mrp - vdrCost) / mrp : 0;
                 const matTtl   = +(fabV2 + cmp + cmtp).toFixed(2);
@@ -2111,7 +2105,6 @@ export class ApproverController {
                     autoBgt: true, roughV2: true, vendorFabricRate: true, finalCost: true,
                     roughRatio: true, roughConsumptionKg: true, roughConsumptionMeter: true,
                     preciseRatio: true, preciseConsumptionKg: true, preciseConsumptionMeter: true,
-                    valueAddProcessCost: true,
                     mcDescription: true,
                     approver: { select: { name: true, email: true } },
                 },
@@ -2911,7 +2904,6 @@ export class ApproverController {
                     autoBgt: true, roughV2: true, vendorFabricRate: true, finalCost: true,
                     roughRatio: true, roughConsumptionKg: true, roughConsumptionMeter: true,
                     preciseRatio: true, preciseConsumptionKg: true, preciseConsumptionMeter: true,
-                    valueAddProcessCost: true,
                     mcCode: true, hsnTaxCode: true, articleDescription: true, fashionGrid: true,
                     season: true, year: true, articleType: true, referenceArticleNumber: true,
                     referenceArticleDescription: true, imageUrl: true, imageName: true,

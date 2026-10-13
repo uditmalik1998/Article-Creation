@@ -141,7 +141,6 @@ export interface ApproverItem {
   impAtrbt2: string | null;
   vendorFabricRate: number | string | null;
   valueAddCost: number | string | null;
-  valueAddProcessCost: number | string | null;
   roughCmpCost: number | string | null;
   bodyConsumptionType: string | null;
   gsm: number | string | null;
