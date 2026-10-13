@@ -2529,6 +2529,22 @@ model BodyArticleDescriptionFormate {
   @@schema("public")
 }
 
+model GmArticleDescriptionFormate {
+  id           Int      @id @default(autoincrement())
+  key          String   @unique                        @db.VarChar(300)
+  archetypeNm  String   @map("archetype_nm")           @db.VarChar(200)
+  descSeq      String   @map("desc_seq")               @db.VarChar(10)
+  familyCode   String   @map("family_code")            @db.VarChar(100)
+  familyName   String   @map("family_name")            @db.VarChar(200)
+  createdAt    DateTime @default(now()) @map("created_at")
+  updatedAt    DateTime @updatedAt      @map("updated_at")
+
+  @@index([archetypeNm])
+  @@index([familyCode])
+  @@map("gm_article_description_formate")
+  @@schema("public")
+}
+
 model PreciseBodyArticleConsumption {
   id                    Int      @id @default(autoincrement())
   division              String   @db.VarChar(100)

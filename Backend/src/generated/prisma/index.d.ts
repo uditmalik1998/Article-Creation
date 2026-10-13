@@ -394,6 +394,11 @@ export type ExpenseAuditLog = $Result.DefaultSelection<Prisma.$ExpenseAuditLogPa
  */
 export type BodyArticleDescriptionFormate = $Result.DefaultSelection<Prisma.$BodyArticleDescriptionFormatePayload>
 /**
+ * Model GmArticleDescriptionFormate
+ * 
+ */
+export type GmArticleDescriptionFormate = $Result.DefaultSelection<Prisma.$GmArticleDescriptionFormatePayload>
+/**
  * Model PreciseBodyArticleConsumption
  * 
  */
@@ -1337,6 +1342,16 @@ export class PrismaClient<
   get bodyArticleDescriptionFormate(): Prisma.BodyArticleDescriptionFormateDelegate<ExtArgs, ClientOptions>;
 
   /**
+   * `prisma.gmArticleDescriptionFormate`: Exposes CRUD operations for the **GmArticleDescriptionFormate** model.
+    * Example usage:
+    * ```ts
+    * // Fetch zero or more GmArticleDescriptionFormates
+    * const gmArticleDescriptionFormates = await prisma.gmArticleDescriptionFormate.findMany()
+    * ```
+    */
+  get gmArticleDescriptionFormate(): Prisma.GmArticleDescriptionFormateDelegate<ExtArgs, ClientOptions>;
+
+  /**
    * `prisma.preciseBodyArticleConsumption`: Exposes CRUD operations for the **PreciseBodyArticleConsumption** model.
     * Example usage:
     * ```ts
@@ -1846,6 +1861,7 @@ export namespace Prisma {
     ExpenseAccessGrant: 'ExpenseAccessGrant',
     ExpenseAuditLog: 'ExpenseAuditLog',
     BodyArticleDescriptionFormate: 'BodyArticleDescriptionFormate',
+    GmArticleDescriptionFormate: 'GmArticleDescriptionFormate',
     PreciseBodyArticleConsumption: 'PreciseBodyArticleConsumption'
   };
 
@@ -1865,7 +1881,7 @@ export namespace Prisma {
       omit: GlobalOmitOptions
     }
     meta: {
-      modelProps: "department" | "subDepartment" | "category" | "masterAttribute" | "attributeAllowedValue" | "categoryAttribute" | "extractionJob" | "extractionResult" | "extractionResultFlat" | "modelGenerationResult" | "modelImageApproval" | "mvgrLookup" | "masterVendorDetail" | "user" | "auditLog" | "apiKey" | "changeHistory" | "costSummary" | "article360" | "articleFab" | "articleBody" | "articleVaAcc" | "articleVaPrcs" | "articleBom" | "sapFieldConfig" | "sapAttributeValue" | "article360Flat" | "rawArticle" | "fabricRawData" | "gmRawData" | "srmSyncRun" | "srmSyncRunItem" | "poolBJob" | "poolBBatch" | "nationalGridMaster" | "broaderMenu" | "majorCatMaster" | "fabricArticleMaster" | "fabricMajCatGridValue" | "modifyLog" | "fabricArticleData" | "preciseFabricArticleData" | "gmArticleData" | "gmVariantArticleData" | "fgVariantArticleData" | "fabricVariantArticleData" | "valueAdditionAccessoriesCost" | "bodyArticleData" | "referenceArticleData" | "bodyFabricConsumption" | "roughCmpCostMaster" | "basicTrimCostMaster" | "preciseTrimMaster" | "basicTrimCostComponent" | "majorCategoryDetails" | "expenseApprovalStage" | "gridContributionAssignment" | "expenseChangeRequest" | "expenseAccessGrant" | "expenseAuditLog" | "bodyArticleDescriptionFormate" | "preciseBodyArticleConsumption"
+      modelProps: "department" | "subDepartment" | "category" | "masterAttribute" | "attributeAllowedValue" | "categoryAttribute" | "extractionJob" | "extractionResult" | "extractionResultFlat" | "modelGenerationResult" | "modelImageApproval" | "mvgrLookup" | "masterVendorDetail" | "user" | "auditLog" | "apiKey" | "changeHistory" | "costSummary" | "article360" | "articleFab" | "articleBody" | "articleVaAcc" | "articleVaPrcs" | "articleBom" | "sapFieldConfig" | "sapAttributeValue" | "article360Flat" | "rawArticle" | "fabricRawData" | "gmRawData" | "srmSyncRun" | "srmSyncRunItem" | "poolBJob" | "poolBBatch" | "nationalGridMaster" | "broaderMenu" | "majorCatMaster" | "fabricArticleMaster" | "fabricMajCatGridValue" | "modifyLog" | "fabricArticleData" | "preciseFabricArticleData" | "gmArticleData" | "gmVariantArticleData" | "fgVariantArticleData" | "fabricVariantArticleData" | "valueAdditionAccessoriesCost" | "bodyArticleData" | "referenceArticleData" | "bodyFabricConsumption" | "roughCmpCostMaster" | "basicTrimCostMaster" | "preciseTrimMaster" | "basicTrimCostComponent" | "majorCategoryDetails" | "expenseApprovalStage" | "gridContributionAssignment" | "expenseChangeRequest" | "expenseAccessGrant" | "expenseAuditLog" | "bodyArticleDescriptionFormate" | "gmArticleDescriptionFormate" | "preciseBodyArticleConsumption"
       txIsolationLevel: Prisma.TransactionIsolationLevel
     }
     model: {
@@ -6383,6 +6399,80 @@ export namespace Prisma {
           }
         }
       }
+      GmArticleDescriptionFormate: {
+        payload: Prisma.$GmArticleDescriptionFormatePayload<ExtArgs>
+        fields: Prisma.GmArticleDescriptionFormateFieldRefs
+        operations: {
+          findUnique: {
+            args: Prisma.GmArticleDescriptionFormateFindUniqueArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$GmArticleDescriptionFormatePayload> | null
+          }
+          findUniqueOrThrow: {
+            args: Prisma.GmArticleDescriptionFormateFindUniqueOrThrowArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$GmArticleDescriptionFormatePayload>
+          }
+          findFirst: {
+            args: Prisma.GmArticleDescriptionFormateFindFirstArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$GmArticleDescriptionFormatePayload> | null
+          }
+          findFirstOrThrow: {
+            args: Prisma.GmArticleDescriptionFormateFindFirstOrThrowArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$GmArticleDescriptionFormatePayload>
+          }
+          findMany: {
+            args: Prisma.GmArticleDescriptionFormateFindManyArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$GmArticleDescriptionFormatePayload>[]
+          }
+          create: {
+            args: Prisma.GmArticleDescriptionFormateCreateArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$GmArticleDescriptionFormatePayload>
+          }
+          createMany: {
+            args: Prisma.GmArticleDescriptionFormateCreateManyArgs<ExtArgs>
+            result: BatchPayload
+          }
+          createManyAndReturn: {
+            args: Prisma.GmArticleDescriptionFormateCreateManyAndReturnArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$GmArticleDescriptionFormatePayload>[]
+          }
+          delete: {
+            args: Prisma.GmArticleDescriptionFormateDeleteArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$GmArticleDescriptionFormatePayload>
+          }
+          update: {
+            args: Prisma.GmArticleDescriptionFormateUpdateArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$GmArticleDescriptionFormatePayload>
+          }
+          deleteMany: {
+            args: Prisma.GmArticleDescriptionFormateDeleteManyArgs<ExtArgs>
+            result: BatchPayload
+          }
+          updateMany: {
+            args: Prisma.GmArticleDescriptionFormateUpdateManyArgs<ExtArgs>
+            result: BatchPayload
+          }
+          updateManyAndReturn: {
+            args: Prisma.GmArticleDescriptionFormateUpdateManyAndReturnArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$GmArticleDescriptionFormatePayload>[]
+          }
+          upsert: {
+            args: Prisma.GmArticleDescriptionFormateUpsertArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$GmArticleDescriptionFormatePayload>
+          }
+          aggregate: {
+            args: Prisma.GmArticleDescriptionFormateAggregateArgs<ExtArgs>
+            result: $Utils.Optional<AggregateGmArticleDescriptionFormate>
+          }
+          groupBy: {
+            args: Prisma.GmArticleDescriptionFormateGroupByArgs<ExtArgs>
+            result: $Utils.Optional<GmArticleDescriptionFormateGroupByOutputType>[]
+          }
+          count: {
+            args: Prisma.GmArticleDescriptionFormateCountArgs<ExtArgs>
+            result: $Utils.Optional<GmArticleDescriptionFormateCountAggregateOutputType> | number
+          }
+        }
+      }
       PreciseBodyArticleConsumption: {
         payload: Prisma.$PreciseBodyArticleConsumptionPayload<ExtArgs>
         fields: Prisma.PreciseBodyArticleConsumptionFieldRefs
@@ -6610,6 +6700,7 @@ export namespace Prisma {
     expenseAccessGrant?: ExpenseAccessGrantOmit
     expenseAuditLog?: ExpenseAuditLogOmit
     bodyArticleDescriptionFormate?: BodyArticleDescriptionFormateOmit
+    gmArticleDescriptionFormate?: GmArticleDescriptionFormateOmit
     preciseBodyArticleConsumption?: PreciseBodyArticleConsumptionOmit
   }
 
@@ -85256,6 +85347,1074 @@ export namespace Prisma {
 
 
   /**
+   * Model GmArticleDescriptionFormate
+   */
+
+  export type AggregateGmArticleDescriptionFormate = {
+    _count: GmArticleDescriptionFormateCountAggregateOutputType | null
+    _avg: GmArticleDescriptionFormateAvgAggregateOutputType | null
+    _sum: GmArticleDescriptionFormateSumAggregateOutputType | null
+    _min: GmArticleDescriptionFormateMinAggregateOutputType | null
+    _max: GmArticleDescriptionFormateMaxAggregateOutputType | null
+  }
+
+  export type GmArticleDescriptionFormateAvgAggregateOutputType = {
+    id: number | null
+  }
+
+  export type GmArticleDescriptionFormateSumAggregateOutputType = {
+    id: number | null
+  }
+
+  export type GmArticleDescriptionFormateMinAggregateOutputType = {
+    id: number | null
+    key: string | null
+    archetypeNm: string | null
+    descSeq: string | null
+    familyCode: string | null
+    familyName: string | null
+    createdAt: Date | null
+    updatedAt: Date | null
+  }
+
+  export type GmArticleDescriptionFormateMaxAggregateOutputType = {
+    id: number | null
+    key: string | null
+    archetypeNm: string | null
+    descSeq: string | null
+    familyCode: string | null
+    familyName: string | null
+    createdAt: Date | null
+    updatedAt: Date | null
+  }
+
+  export type GmArticleDescriptionFormateCountAggregateOutputType = {
+    id: number
+    key: number
+    archetypeNm: number
+    descSeq: number
+    familyCode: number
+    familyName: number
+    createdAt: number
+    updatedAt: number
+    _all: number
+  }
+
+
+  export type GmArticleDescriptionFormateAvgAggregateInputType = {
+    id?: true
+  }
+
+  export type GmArticleDescriptionFormateSumAggregateInputType = {
+    id?: true
+  }
+
+  export type GmArticleDescriptionFormateMinAggregateInputType = {
+    id?: true
+    key?: true
+    archetypeNm?: true
+    descSeq?: true
+    familyCode?: true
+    familyName?: true
+    createdAt?: true
+    updatedAt?: true
+  }
+
+  export type GmArticleDescriptionFormateMaxAggregateInputType = {
+    id?: true
+    key?: true
+    archetypeNm?: true
+    descSeq?: true
+    familyCode?: true
+    familyName?: true
+    createdAt?: true
+    updatedAt?: true
+  }
+
+  export type GmArticleDescriptionFormateCountAggregateInputType = {
+    id?: true
+    key?: true
+    archetypeNm?: true
+    descSeq?: true
+    familyCode?: true
+    familyName?: true
+    createdAt?: true
+    updatedAt?: true
+    _all?: true
+  }
+
+  export type GmArticleDescriptionFormateAggregateArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Filter which GmArticleDescriptionFormate to aggregate.
+     */
+    where?: GmArticleDescriptionFormateWhereInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
+     * 
+     * Determine the order of GmArticleDescriptionFormates to fetch.
+     */
+    orderBy?: GmArticleDescriptionFormateOrderByWithRelationInput | GmArticleDescriptionFormateOrderByWithRelationInput[]
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
+     * 
+     * Sets the start position
+     */
+    cursor?: GmArticleDescriptionFormateWhereUniqueInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Take `±n` GmArticleDescriptionFormates from the position of the cursor.
+     */
+    take?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Skip the first `n` GmArticleDescriptionFormates.
+     */
+    skip?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     * 
+     * Count returned GmArticleDescriptionFormates
+    **/
+    _count?: true | GmArticleDescriptionFormateCountAggregateInputType
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     * 
+     * Select which fields to average
+    **/
+    _avg?: GmArticleDescriptionFormateAvgAggregateInputType
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     * 
+     * Select which fields to sum
+    **/
+    _sum?: GmArticleDescriptionFormateSumAggregateInputType
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     * 
+     * Select which fields to find the minimum value
+    **/
+    _min?: GmArticleDescriptionFormateMinAggregateInputType
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     * 
+     * Select which fields to find the maximum value
+    **/
+    _max?: GmArticleDescriptionFormateMaxAggregateInputType
+  }
+
+  export type GetGmArticleDescriptionFormateAggregateType<T extends GmArticleDescriptionFormateAggregateArgs> = {
+        [P in keyof T & keyof AggregateGmArticleDescriptionFormate]: P extends '_count' | 'count'
+      ? T[P] extends true
+        ? number
+        : GetScalarType<T[P], AggregateGmArticleDescriptionFormate[P]>
+      : GetScalarType<T[P], AggregateGmArticleDescriptionFormate[P]>
+  }
+
+
+
+
+  export type GmArticleDescriptionFormateGroupByArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    where?: GmArticleDescriptionFormateWhereInput
+    orderBy?: GmArticleDescriptionFormateOrderByWithAggregationInput | GmArticleDescriptionFormateOrderByWithAggregationInput[]
+    by: GmArticleDescriptionFormateScalarFieldEnum[] | GmArticleDescriptionFormateScalarFieldEnum
+    having?: GmArticleDescriptionFormateScalarWhereWithAggregatesInput
+    take?: number
+    skip?: number
+    _count?: GmArticleDescriptionFormateCountAggregateInputType | true
+    _avg?: GmArticleDescriptionFormateAvgAggregateInputType
+    _sum?: GmArticleDescriptionFormateSumAggregateInputType
+    _min?: GmArticleDescriptionFormateMinAggregateInputType
+    _max?: GmArticleDescriptionFormateMaxAggregateInputType
+  }
+
+  export type GmArticleDescriptionFormateGroupByOutputType = {
+    id: number
+    key: string
+    archetypeNm: string
+    descSeq: string
+    familyCode: string
+    familyName: string
+    createdAt: Date
+    updatedAt: Date
+    _count: GmArticleDescriptionFormateCountAggregateOutputType | null
+    _avg: GmArticleDescriptionFormateAvgAggregateOutputType | null
+    _sum: GmArticleDescriptionFormateSumAggregateOutputType | null
+    _min: GmArticleDescriptionFormateMinAggregateOutputType | null
+    _max: GmArticleDescriptionFormateMaxAggregateOutputType | null
+  }
+
+  type GetGmArticleDescriptionFormateGroupByPayload<T extends GmArticleDescriptionFormateGroupByArgs> = Prisma.PrismaPromise<
+    Array<
+      PickEnumerable<GmArticleDescriptionFormateGroupByOutputType, T['by']> &
+        {
+          [P in ((keyof T) & (keyof GmArticleDescriptionFormateGroupByOutputType))]: P extends '_count'
+            ? T[P] extends boolean
+              ? number
+              : GetScalarType<T[P], GmArticleDescriptionFormateGroupByOutputType[P]>
+            : GetScalarType<T[P], GmArticleDescriptionFormateGroupByOutputType[P]>
+        }
+      >
+    >
+
+
+  export type GmArticleDescriptionFormateSelect<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
+    id?: boolean
+    key?: boolean
+    archetypeNm?: boolean
+    descSeq?: boolean
+    familyCode?: boolean
+    familyName?: boolean
+    createdAt?: boolean
+    updatedAt?: boolean
+  }, ExtArgs["result"]["gmArticleDescriptionFormate"]>
+
+  export type GmArticleDescriptionFormateSelectCreateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
+    id?: boolean
+    key?: boolean
+    archetypeNm?: boolean
+    descSeq?: boolean
+    familyCode?: boolean
+    familyName?: boolean
+    createdAt?: boolean
+    updatedAt?: boolean
+  }, ExtArgs["result"]["gmArticleDescriptionFormate"]>
+
+  export type GmArticleDescriptionFormateSelectUpdateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
+    id?: boolean
+    key?: boolean
+    archetypeNm?: boolean
+    descSeq?: boolean
+    familyCode?: boolean
+    familyName?: boolean
+    createdAt?: boolean
+    updatedAt?: boolean
+  }, ExtArgs["result"]["gmArticleDescriptionFormate"]>
+
+  export type GmArticleDescriptionFormateSelectScalar = {
+    id?: boolean
+    key?: boolean
+    archetypeNm?: boolean
+    descSeq?: boolean
+    familyCode?: boolean
+    familyName?: boolean
+    createdAt?: boolean
+    updatedAt?: boolean
+  }
+
+  export type GmArticleDescriptionFormateOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<"id" | "key" | "archetypeNm" | "descSeq" | "familyCode" | "familyName" | "createdAt" | "updatedAt", ExtArgs["result"]["gmArticleDescriptionFormate"]>
+
+  export type $GmArticleDescriptionFormatePayload<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    name: "GmArticleDescriptionFormate"
+    objects: {}
+    scalars: $Extensions.GetPayloadResult<{
+      id: number
+      key: string
+      archetypeNm: string
+      descSeq: string
+      familyCode: string
+      familyName: string
+      createdAt: Date
+      updatedAt: Date
+    }, ExtArgs["result"]["gmArticleDescriptionFormate"]>
+    composites: {}
+  }
+
+  type GmArticleDescriptionFormateGetPayload<S extends boolean | null | undefined | GmArticleDescriptionFormateDefaultArgs> = $Result.GetResult<Prisma.$GmArticleDescriptionFormatePayload, S>
+
+  type GmArticleDescriptionFormateCountArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> =
+    Omit<GmArticleDescriptionFormateFindManyArgs, 'select' | 'include' | 'distinct' | 'omit'> & {
+      select?: GmArticleDescriptionFormateCountAggregateInputType | true
+    }
+
+  export interface GmArticleDescriptionFormateDelegate<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs, GlobalOmitOptions = {}> {
+    [K: symbol]: { types: Prisma.TypeMap<ExtArgs>['model']['GmArticleDescriptionFormate'], meta: { name: 'GmArticleDescriptionFormate' } }
+    /**
+     * Find zero or one GmArticleDescriptionFormate that matches the filter.
+     * @param {GmArticleDescriptionFormateFindUniqueArgs} args - Arguments to find a GmArticleDescriptionFormate
+     * @example
+     * // Get one GmArticleDescriptionFormate
+     * const gmArticleDescriptionFormate = await prisma.gmArticleDescriptionFormate.findUnique({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     */
+    findUnique<T extends GmArticleDescriptionFormateFindUniqueArgs>(args: SelectSubset<T, GmArticleDescriptionFormateFindUniqueArgs<ExtArgs>>): Prisma__GmArticleDescriptionFormateClient<$Result.GetResult<Prisma.$GmArticleDescriptionFormatePayload<ExtArgs>, T, "findUnique", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Find one GmArticleDescriptionFormate that matches the filter or throw an error with `error.code='P2025'`
+     * if no matches were found.
+     * @param {GmArticleDescriptionFormateFindUniqueOrThrowArgs} args - Arguments to find a GmArticleDescriptionFormate
+     * @example
+     * // Get one GmArticleDescriptionFormate
+     * const gmArticleDescriptionFormate = await prisma.gmArticleDescriptionFormate.findUniqueOrThrow({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     */
+    findUniqueOrThrow<T extends GmArticleDescriptionFormateFindUniqueOrThrowArgs>(args: SelectSubset<T, GmArticleDescriptionFormateFindUniqueOrThrowArgs<ExtArgs>>): Prisma__GmArticleDescriptionFormateClient<$Result.GetResult<Prisma.$GmArticleDescriptionFormatePayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Find the first GmArticleDescriptionFormate that matches the filter.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {GmArticleDescriptionFormateFindFirstArgs} args - Arguments to find a GmArticleDescriptionFormate
+     * @example
+     * // Get one GmArticleDescriptionFormate
+     * const gmArticleDescriptionFormate = await prisma.gmArticleDescriptionFormate.findFirst({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     */
+    findFirst<T extends GmArticleDescriptionFormateFindFirstArgs>(args?: SelectSubset<T, GmArticleDescriptionFormateFindFirstArgs<ExtArgs>>): Prisma__GmArticleDescriptionFormateClient<$Result.GetResult<Prisma.$GmArticleDescriptionFormatePayload<ExtArgs>, T, "findFirst", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Find the first GmArticleDescriptionFormate that matches the filter or
+     * throw `PrismaKnownClientError` with `P2025` code if no matches were found.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {GmArticleDescriptionFormateFindFirstOrThrowArgs} args - Arguments to find a GmArticleDescriptionFormate
+     * @example
+     * // Get one GmArticleDescriptionFormate
+     * const gmArticleDescriptionFormate = await prisma.gmArticleDescriptionFormate.findFirstOrThrow({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     */
+    findFirstOrThrow<T extends GmArticleDescriptionFormateFindFirstOrThrowArgs>(args?: SelectSubset<T, GmArticleDescriptionFormateFindFirstOrThrowArgs<ExtArgs>>): Prisma__GmArticleDescriptionFormateClient<$Result.GetResult<Prisma.$GmArticleDescriptionFormatePayload<ExtArgs>, T, "findFirstOrThrow", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Find zero or more GmArticleDescriptionFormates that matches the filter.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {GmArticleDescriptionFormateFindManyArgs} args - Arguments to filter and select certain fields only.
+     * @example
+     * // Get all GmArticleDescriptionFormates
+     * const gmArticleDescriptionFormates = await prisma.gmArticleDescriptionFormate.findMany()
+     * 
+     * // Get first 10 GmArticleDescriptionFormates
+     * const gmArticleDescriptionFormates = await prisma.gmArticleDescriptionFormate.findMany({ take: 10 })
+     * 
+     * // Only select the `id`
+     * const gmArticleDescriptionFormateWithIdOnly = await prisma.gmArticleDescriptionFormate.findMany({ select: { id: true } })
+     * 
+     */
+    findMany<T extends GmArticleDescriptionFormateFindManyArgs>(args?: SelectSubset<T, GmArticleDescriptionFormateFindManyArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$GmArticleDescriptionFormatePayload<ExtArgs>, T, "findMany", GlobalOmitOptions>>
+
+    /**
+     * Create a GmArticleDescriptionFormate.
+     * @param {GmArticleDescriptionFormateCreateArgs} args - Arguments to create a GmArticleDescriptionFormate.
+     * @example
+     * // Create one GmArticleDescriptionFormate
+     * const GmArticleDescriptionFormate = await prisma.gmArticleDescriptionFormate.create({
+     *   data: {
+     *     // ... data to create a GmArticleDescriptionFormate
+     *   }
+     * })
+     * 
+     */
+    create<T extends GmArticleDescriptionFormateCreateArgs>(args: SelectSubset<T, GmArticleDescriptionFormateCreateArgs<ExtArgs>>): Prisma__GmArticleDescriptionFormateClient<$Result.GetResult<Prisma.$GmArticleDescriptionFormatePayload<ExtArgs>, T, "create", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Create many GmArticleDescriptionFormates.
+     * @param {GmArticleDescriptionFormateCreateManyArgs} args - Arguments to create many GmArticleDescriptionFormates.
+     * @example
+     * // Create many GmArticleDescriptionFormates
+     * const gmArticleDescriptionFormate = await prisma.gmArticleDescriptionFormate.createMany({
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     *     
+     */
+    createMany<T extends GmArticleDescriptionFormateCreateManyArgs>(args?: SelectSubset<T, GmArticleDescriptionFormateCreateManyArgs<ExtArgs>>): Prisma.PrismaPromise<BatchPayload>
+
+    /**
+     * Create many GmArticleDescriptionFormates and returns the data saved in the database.
+     * @param {GmArticleDescriptionFormateCreateManyAndReturnArgs} args - Arguments to create many GmArticleDescriptionFormates.
+     * @example
+     * // Create many GmArticleDescriptionFormates
+     * const gmArticleDescriptionFormate = await prisma.gmArticleDescriptionFormate.createManyAndReturn({
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     * 
+     * // Create many GmArticleDescriptionFormates and only return the `id`
+     * const gmArticleDescriptionFormateWithIdOnly = await prisma.gmArticleDescriptionFormate.createManyAndReturn({
+     *   select: { id: true },
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * 
+     */
+    createManyAndReturn<T extends GmArticleDescriptionFormateCreateManyAndReturnArgs>(args?: SelectSubset<T, GmArticleDescriptionFormateCreateManyAndReturnArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$GmArticleDescriptionFormatePayload<ExtArgs>, T, "createManyAndReturn", GlobalOmitOptions>>
+
+    /**
+     * Delete a GmArticleDescriptionFormate.
+     * @param {GmArticleDescriptionFormateDeleteArgs} args - Arguments to delete one GmArticleDescriptionFormate.
+     * @example
+     * // Delete one GmArticleDescriptionFormate
+     * const GmArticleDescriptionFormate = await prisma.gmArticleDescriptionFormate.delete({
+     *   where: {
+     *     // ... filter to delete one GmArticleDescriptionFormate
+     *   }
+     * })
+     * 
+     */
+    delete<T extends GmArticleDescriptionFormateDeleteArgs>(args: SelectSubset<T, GmArticleDescriptionFormateDeleteArgs<ExtArgs>>): Prisma__GmArticleDescriptionFormateClient<$Result.GetResult<Prisma.$GmArticleDescriptionFormatePayload<ExtArgs>, T, "delete", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Update one GmArticleDescriptionFormate.
+     * @param {GmArticleDescriptionFormateUpdateArgs} args - Arguments to update one GmArticleDescriptionFormate.
+     * @example
+     * // Update one GmArticleDescriptionFormate
+     * const gmArticleDescriptionFormate = await prisma.gmArticleDescriptionFormate.update({
+     *   where: {
+     *     // ... provide filter here
+     *   },
+     *   data: {
+     *     // ... provide data here
+     *   }
+     * })
+     * 
+     */
+    update<T extends GmArticleDescriptionFormateUpdateArgs>(args: SelectSubset<T, GmArticleDescriptionFormateUpdateArgs<ExtArgs>>): Prisma__GmArticleDescriptionFormateClient<$Result.GetResult<Prisma.$GmArticleDescriptionFormatePayload<ExtArgs>, T, "update", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Delete zero or more GmArticleDescriptionFormates.
+     * @param {GmArticleDescriptionFormateDeleteManyArgs} args - Arguments to filter GmArticleDescriptionFormates to delete.
+     * @example
+     * // Delete a few GmArticleDescriptionFormates
+     * const { count } = await prisma.gmArticleDescriptionFormate.deleteMany({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     * 
+     */
+    deleteMany<T extends GmArticleDescriptionFormateDeleteManyArgs>(args?: SelectSubset<T, GmArticleDescriptionFormateDeleteManyArgs<ExtArgs>>): Prisma.PrismaPromise<BatchPayload>
+
+    /**
+     * Update zero or more GmArticleDescriptionFormates.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {GmArticleDescriptionFormateUpdateManyArgs} args - Arguments to update one or more rows.
+     * @example
+     * // Update many GmArticleDescriptionFormates
+     * const gmArticleDescriptionFormate = await prisma.gmArticleDescriptionFormate.updateMany({
+     *   where: {
+     *     // ... provide filter here
+     *   },
+     *   data: {
+     *     // ... provide data here
+     *   }
+     * })
+     * 
+     */
+    updateMany<T extends GmArticleDescriptionFormateUpdateManyArgs>(args: SelectSubset<T, GmArticleDescriptionFormateUpdateManyArgs<ExtArgs>>): Prisma.PrismaPromise<BatchPayload>
+
+    /**
+     * Update zero or more GmArticleDescriptionFormates and returns the data updated in the database.
+     * @param {GmArticleDescriptionFormateUpdateManyAndReturnArgs} args - Arguments to update many GmArticleDescriptionFormates.
+     * @example
+     * // Update many GmArticleDescriptionFormates
+     * const gmArticleDescriptionFormate = await prisma.gmArticleDescriptionFormate.updateManyAndReturn({
+     *   where: {
+     *     // ... provide filter here
+     *   },
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     * 
+     * // Update zero or more GmArticleDescriptionFormates and only return the `id`
+     * const gmArticleDescriptionFormateWithIdOnly = await prisma.gmArticleDescriptionFormate.updateManyAndReturn({
+     *   select: { id: true },
+     *   where: {
+     *     // ... provide filter here
+     *   },
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * 
+     */
+    updateManyAndReturn<T extends GmArticleDescriptionFormateUpdateManyAndReturnArgs>(args: SelectSubset<T, GmArticleDescriptionFormateUpdateManyAndReturnArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$GmArticleDescriptionFormatePayload<ExtArgs>, T, "updateManyAndReturn", GlobalOmitOptions>>
+
+    /**
+     * Create or update one GmArticleDescriptionFormate.
+     * @param {GmArticleDescriptionFormateUpsertArgs} args - Arguments to update or create a GmArticleDescriptionFormate.
+     * @example
+     * // Update or create a GmArticleDescriptionFormate
+     * const gmArticleDescriptionFormate = await prisma.gmArticleDescriptionFormate.upsert({
+     *   create: {
+     *     // ... data to create a GmArticleDescriptionFormate
+     *   },
+     *   update: {
+     *     // ... in case it already exists, update
+     *   },
+     *   where: {
+     *     // ... the filter for the GmArticleDescriptionFormate we want to update
+     *   }
+     * })
+     */
+    upsert<T extends GmArticleDescriptionFormateUpsertArgs>(args: SelectSubset<T, GmArticleDescriptionFormateUpsertArgs<ExtArgs>>): Prisma__GmArticleDescriptionFormateClient<$Result.GetResult<Prisma.$GmArticleDescriptionFormatePayload<ExtArgs>, T, "upsert", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+
+    /**
+     * Count the number of GmArticleDescriptionFormates.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {GmArticleDescriptionFormateCountArgs} args - Arguments to filter GmArticleDescriptionFormates to count.
+     * @example
+     * // Count the number of GmArticleDescriptionFormates
+     * const count = await prisma.gmArticleDescriptionFormate.count({
+     *   where: {
+     *     // ... the filter for the GmArticleDescriptionFormates we want to count
+     *   }
+     * })
+    **/
+    count<T extends GmArticleDescriptionFormateCountArgs>(
+      args?: Subset<T, GmArticleDescriptionFormateCountArgs>,
+    ): Prisma.PrismaPromise<
+      T extends $Utils.Record<'select', any>
+        ? T['select'] extends true
+          ? number
+          : GetScalarType<T['select'], GmArticleDescriptionFormateCountAggregateOutputType>
+        : number
+    >
+
+    /**
+     * Allows you to perform aggregations operations on a GmArticleDescriptionFormate.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {GmArticleDescriptionFormateAggregateArgs} args - Select which aggregations you would like to apply and on what fields.
+     * @example
+     * // Ordered by age ascending
+     * // Where email contains prisma.io
+     * // Limited to the 10 users
+     * const aggregations = await prisma.user.aggregate({
+     *   _avg: {
+     *     age: true,
+     *   },
+     *   where: {
+     *     email: {
+     *       contains: "prisma.io",
+     *     },
+     *   },
+     *   orderBy: {
+     *     age: "asc",
+     *   },
+     *   take: 10,
+     * })
+    **/
+    aggregate<T extends GmArticleDescriptionFormateAggregateArgs>(args: Subset<T, GmArticleDescriptionFormateAggregateArgs>): Prisma.PrismaPromise<GetGmArticleDescriptionFormateAggregateType<T>>
+
+    /**
+     * Group by GmArticleDescriptionFormate.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {GmArticleDescriptionFormateGroupByArgs} args - Group by arguments.
+     * @example
+     * // Group by city, order by createdAt, get count
+     * const result = await prisma.user.groupBy({
+     *   by: ['city', 'createdAt'],
+     *   orderBy: {
+     *     createdAt: true
+     *   },
+     *   _count: {
+     *     _all: true
+     *   },
+     * })
+     * 
+    **/
+    groupBy<
+      T extends GmArticleDescriptionFormateGroupByArgs,
+      HasSelectOrTake extends Or<
+        Extends<'skip', Keys<T>>,
+        Extends<'take', Keys<T>>
+      >,
+      OrderByArg extends True extends HasSelectOrTake
+        ? { orderBy: GmArticleDescriptionFormateGroupByArgs['orderBy'] }
+        : { orderBy?: GmArticleDescriptionFormateGroupByArgs['orderBy'] },
+      OrderFields extends ExcludeUnderscoreKeys<Keys<MaybeTupleToUnion<T['orderBy']>>>,
+      ByFields extends MaybeTupleToUnion<T['by']>,
+      ByValid extends Has<ByFields, OrderFields>,
+      HavingFields extends GetHavingFields<T['having']>,
+      HavingValid extends Has<ByFields, HavingFields>,
+      ByEmpty extends T['by'] extends never[] ? True : False,
+      InputErrors extends ByEmpty extends True
+      ? `Error: "by" must not be empty.`
+      : HavingValid extends False
+      ? {
+          [P in HavingFields]: P extends ByFields
+            ? never
+            : P extends string
+            ? `Error: Field "${P}" used in "having" needs to be provided in "by".`
+            : [
+                Error,
+                'Field ',
+                P,
+                ` in "having" needs to be provided in "by"`,
+              ]
+        }[HavingFields]
+      : 'take' extends Keys<T>
+      ? 'orderBy' extends Keys<T>
+        ? ByValid extends True
+          ? {}
+          : {
+              [P in OrderFields]: P extends ByFields
+                ? never
+                : `Error: Field "${P}" in "orderBy" needs to be provided in "by"`
+            }[OrderFields]
+        : 'Error: If you provide "take", you also need to provide "orderBy"'
+      : 'skip' extends Keys<T>
+      ? 'orderBy' extends Keys<T>
+        ? ByValid extends True
+          ? {}
+          : {
+              [P in OrderFields]: P extends ByFields
+                ? never
+                : `Error: Field "${P}" in "orderBy" needs to be provided in "by"`
+            }[OrderFields]
+        : 'Error: If you provide "skip", you also need to provide "orderBy"'
+      : ByValid extends True
+      ? {}
+      : {
+          [P in OrderFields]: P extends ByFields
+            ? never
+            : `Error: Field "${P}" in "orderBy" needs to be provided in "by"`
+        }[OrderFields]
+    >(args: SubsetIntersection<T, GmArticleDescriptionFormateGroupByArgs, OrderByArg> & InputErrors): {} extends InputErrors ? GetGmArticleDescriptionFormateGroupByPayload<T> : Prisma.PrismaPromise<InputErrors>
+  /**
+   * Fields of the GmArticleDescriptionFormate model
+   */
+  readonly fields: GmArticleDescriptionFormateFieldRefs;
+  }
+
+  /**
+   * The delegate class that acts as a "Promise-like" for GmArticleDescriptionFormate.
+   * Why is this prefixed with `Prisma__`?
+   * Because we want to prevent naming conflicts as mentioned in
+   * https://github.com/prisma/prisma-client-js/issues/707
+   */
+  export interface Prisma__GmArticleDescriptionFormateClient<T, Null = never, ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs, GlobalOmitOptions = {}> extends Prisma.PrismaPromise<T> {
+    readonly [Symbol.toStringTag]: "PrismaPromise"
+    /**
+     * Attaches callbacks for the resolution and/or rejection of the Promise.
+     * @param onfulfilled The callback to execute when the Promise is resolved.
+     * @param onrejected The callback to execute when the Promise is rejected.
+     * @returns A Promise for the completion of which ever callback is executed.
+     */
+    then<TResult1 = T, TResult2 = never>(onfulfilled?: ((value: T) => TResult1 | PromiseLike<TResult1>) | undefined | null, onrejected?: ((reason: any) => TResult2 | PromiseLike<TResult2>) | undefined | null): $Utils.JsPromise<TResult1 | TResult2>
+    /**
+     * Attaches a callback for only the rejection of the Promise.
+     * @param onrejected The callback to execute when the Promise is rejected.
+     * @returns A Promise for the completion of the callback.
+     */
+    catch<TResult = never>(onrejected?: ((reason: any) => TResult | PromiseLike<TResult>) | undefined | null): $Utils.JsPromise<T | TResult>
+    /**
+     * Attaches a callback that is invoked when the Promise is settled (fulfilled or rejected). The
+     * resolved value cannot be modified from the callback.
+     * @param onfinally The callback to execute when the Promise is settled (fulfilled or rejected).
+     * @returns A Promise for the completion of the callback.
+     */
+    finally(onfinally?: (() => void) | undefined | null): $Utils.JsPromise<T>
+  }
+
+
+
+
+  /**
+   * Fields of the GmArticleDescriptionFormate model
+   */
+  interface GmArticleDescriptionFormateFieldRefs {
+    readonly id: FieldRef<"GmArticleDescriptionFormate", 'Int'>
+    readonly key: FieldRef<"GmArticleDescriptionFormate", 'String'>
+    readonly archetypeNm: FieldRef<"GmArticleDescriptionFormate", 'String'>
+    readonly descSeq: FieldRef<"GmArticleDescriptionFormate", 'String'>
+    readonly familyCode: FieldRef<"GmArticleDescriptionFormate", 'String'>
+    readonly familyName: FieldRef<"GmArticleDescriptionFormate", 'String'>
+    readonly createdAt: FieldRef<"GmArticleDescriptionFormate", 'DateTime'>
+    readonly updatedAt: FieldRef<"GmArticleDescriptionFormate", 'DateTime'>
+  }
+    
+
+  // Custom InputTypes
+  /**
+   * GmArticleDescriptionFormate findUnique
+   */
+  export type GmArticleDescriptionFormateFindUniqueArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the GmArticleDescriptionFormate
+     */
+    select?: GmArticleDescriptionFormateSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the GmArticleDescriptionFormate
+     */
+    omit?: GmArticleDescriptionFormateOmit<ExtArgs> | null
+    /**
+     * Filter, which GmArticleDescriptionFormate to fetch.
+     */
+    where: GmArticleDescriptionFormateWhereUniqueInput
+  }
+
+  /**
+   * GmArticleDescriptionFormate findUniqueOrThrow
+   */
+  export type GmArticleDescriptionFormateFindUniqueOrThrowArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the GmArticleDescriptionFormate
+     */
+    select?: GmArticleDescriptionFormateSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the GmArticleDescriptionFormate
+     */
+    omit?: GmArticleDescriptionFormateOmit<ExtArgs> | null
+    /**
+     * Filter, which GmArticleDescriptionFormate to fetch.
+     */
+    where: GmArticleDescriptionFormateWhereUniqueInput
+  }
+
+  /**
+   * GmArticleDescriptionFormate findFirst
+   */
+  export type GmArticleDescriptionFormateFindFirstArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the GmArticleDescriptionFormate
+     */
+    select?: GmArticleDescriptionFormateSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the GmArticleDescriptionFormate
+     */
+    omit?: GmArticleDescriptionFormateOmit<ExtArgs> | null
+    /**
+     * Filter, which GmArticleDescriptionFormate to fetch.
+     */
+    where?: GmArticleDescriptionFormateWhereInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
+     * 
+     * Determine the order of GmArticleDescriptionFormates to fetch.
+     */
+    orderBy?: GmArticleDescriptionFormateOrderByWithRelationInput | GmArticleDescriptionFormateOrderByWithRelationInput[]
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
+     * 
+     * Sets the position for searching for GmArticleDescriptionFormates.
+     */
+    cursor?: GmArticleDescriptionFormateWhereUniqueInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Take `±n` GmArticleDescriptionFormates from the position of the cursor.
+     */
+    take?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Skip the first `n` GmArticleDescriptionFormates.
+     */
+    skip?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/distinct Distinct Docs}
+     * 
+     * Filter by unique combinations of GmArticleDescriptionFormates.
+     */
+    distinct?: GmArticleDescriptionFormateScalarFieldEnum | GmArticleDescriptionFormateScalarFieldEnum[]
+  }
+
+  /**
+   * GmArticleDescriptionFormate findFirstOrThrow
+   */
+  export type GmArticleDescriptionFormateFindFirstOrThrowArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the GmArticleDescriptionFormate
+     */
+    select?: GmArticleDescriptionFormateSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the GmArticleDescriptionFormate
+     */
+    omit?: GmArticleDescriptionFormateOmit<ExtArgs> | null
+    /**
+     * Filter, which GmArticleDescriptionFormate to fetch.
+     */
+    where?: GmArticleDescriptionFormateWhereInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
+     * 
+     * Determine the order of GmArticleDescriptionFormates to fetch.
+     */
+    orderBy?: GmArticleDescriptionFormateOrderByWithRelationInput | GmArticleDescriptionFormateOrderByWithRelationInput[]
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
+     * 
+     * Sets the position for searching for GmArticleDescriptionFormates.
+     */
+    cursor?: GmArticleDescriptionFormateWhereUniqueInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Take `±n` GmArticleDescriptionFormates from the position of the cursor.
+     */
+    take?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Skip the first `n` GmArticleDescriptionFormates.
+     */
+    skip?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/distinct Distinct Docs}
+     * 
+     * Filter by unique combinations of GmArticleDescriptionFormates.
+     */
+    distinct?: GmArticleDescriptionFormateScalarFieldEnum | GmArticleDescriptionFormateScalarFieldEnum[]
+  }
+
+  /**
+   * GmArticleDescriptionFormate findMany
+   */
+  export type GmArticleDescriptionFormateFindManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the GmArticleDescriptionFormate
+     */
+    select?: GmArticleDescriptionFormateSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the GmArticleDescriptionFormate
+     */
+    omit?: GmArticleDescriptionFormateOmit<ExtArgs> | null
+    /**
+     * Filter, which GmArticleDescriptionFormates to fetch.
+     */
+    where?: GmArticleDescriptionFormateWhereInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
+     * 
+     * Determine the order of GmArticleDescriptionFormates to fetch.
+     */
+    orderBy?: GmArticleDescriptionFormateOrderByWithRelationInput | GmArticleDescriptionFormateOrderByWithRelationInput[]
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
+     * 
+     * Sets the position for listing GmArticleDescriptionFormates.
+     */
+    cursor?: GmArticleDescriptionFormateWhereUniqueInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Take `±n` GmArticleDescriptionFormates from the position of the cursor.
+     */
+    take?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Skip the first `n` GmArticleDescriptionFormates.
+     */
+    skip?: number
+    distinct?: GmArticleDescriptionFormateScalarFieldEnum | GmArticleDescriptionFormateScalarFieldEnum[]
+  }
+
+  /**
+   * GmArticleDescriptionFormate create
+   */
+  export type GmArticleDescriptionFormateCreateArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the GmArticleDescriptionFormate
+     */
+    select?: GmArticleDescriptionFormateSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the GmArticleDescriptionFormate
+     */
+    omit?: GmArticleDescriptionFormateOmit<ExtArgs> | null
+    /**
+     * The data needed to create a GmArticleDescriptionFormate.
+     */
+    data: XOR<GmArticleDescriptionFormateCreateInput, GmArticleDescriptionFormateUncheckedCreateInput>
+  }
+
+  /**
+   * GmArticleDescriptionFormate createMany
+   */
+  export type GmArticleDescriptionFormateCreateManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * The data used to create many GmArticleDescriptionFormates.
+     */
+    data: GmArticleDescriptionFormateCreateManyInput | GmArticleDescriptionFormateCreateManyInput[]
+    skipDuplicates?: boolean
+  }
+
+  /**
+   * GmArticleDescriptionFormate createManyAndReturn
+   */
+  export type GmArticleDescriptionFormateCreateManyAndReturnArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the GmArticleDescriptionFormate
+     */
+    select?: GmArticleDescriptionFormateSelectCreateManyAndReturn<ExtArgs> | null
+    /**
+     * Omit specific fields from the GmArticleDescriptionFormate
+     */
+    omit?: GmArticleDescriptionFormateOmit<ExtArgs> | null
+    /**
+     * The data used to create many GmArticleDescriptionFormates.
+     */
+    data: GmArticleDescriptionFormateCreateManyInput | GmArticleDescriptionFormateCreateManyInput[]
+    skipDuplicates?: boolean
+  }
+
+  /**
+   * GmArticleDescriptionFormate update
+   */
+  export type GmArticleDescriptionFormateUpdateArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the GmArticleDescriptionFormate
+     */
+    select?: GmArticleDescriptionFormateSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the GmArticleDescriptionFormate
+     */
+    omit?: GmArticleDescriptionFormateOmit<ExtArgs> | null
+    /**
+     * The data needed to update a GmArticleDescriptionFormate.
+     */
+    data: XOR<GmArticleDescriptionFormateUpdateInput, GmArticleDescriptionFormateUncheckedUpdateInput>
+    /**
+     * Choose, which GmArticleDescriptionFormate to update.
+     */
+    where: GmArticleDescriptionFormateWhereUniqueInput
+  }
+
+  /**
+   * GmArticleDescriptionFormate updateMany
+   */
+  export type GmArticleDescriptionFormateUpdateManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * The data used to update GmArticleDescriptionFormates.
+     */
+    data: XOR<GmArticleDescriptionFormateUpdateManyMutationInput, GmArticleDescriptionFormateUncheckedUpdateManyInput>
+    /**
+     * Filter which GmArticleDescriptionFormates to update
+     */
+    where?: GmArticleDescriptionFormateWhereInput
+    /**
+     * Limit how many GmArticleDescriptionFormates to update.
+     */
+    limit?: number
+  }
+
+  /**
+   * GmArticleDescriptionFormate updateManyAndReturn
+   */
+  export type GmArticleDescriptionFormateUpdateManyAndReturnArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the GmArticleDescriptionFormate
+     */
+    select?: GmArticleDescriptionFormateSelectUpdateManyAndReturn<ExtArgs> | null
+    /**
+     * Omit specific fields from the GmArticleDescriptionFormate
+     */
+    omit?: GmArticleDescriptionFormateOmit<ExtArgs> | null
+    /**
+     * The data used to update GmArticleDescriptionFormates.
+     */
+    data: XOR<GmArticleDescriptionFormateUpdateManyMutationInput, GmArticleDescriptionFormateUncheckedUpdateManyInput>
+    /**
+     * Filter which GmArticleDescriptionFormates to update
+     */
+    where?: GmArticleDescriptionFormateWhereInput
+    /**
+     * Limit how many GmArticleDescriptionFormates to update.
+     */
+    limit?: number
+  }
+
+  /**
+   * GmArticleDescriptionFormate upsert
+   */
+  export type GmArticleDescriptionFormateUpsertArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the GmArticleDescriptionFormate
+     */
+    select?: GmArticleDescriptionFormateSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the GmArticleDescriptionFormate
+     */
+    omit?: GmArticleDescriptionFormateOmit<ExtArgs> | null
+    /**
+     * The filter to search for the GmArticleDescriptionFormate to update in case it exists.
+     */
+    where: GmArticleDescriptionFormateWhereUniqueInput
+    /**
+     * In case the GmArticleDescriptionFormate found by the `where` argument doesn't exist, create a new GmArticleDescriptionFormate with this data.
+     */
+    create: XOR<GmArticleDescriptionFormateCreateInput, GmArticleDescriptionFormateUncheckedCreateInput>
+    /**
+     * In case the GmArticleDescriptionFormate was found with the provided `where` argument, update it with this data.
+     */
+    update: XOR<GmArticleDescriptionFormateUpdateInput, GmArticleDescriptionFormateUncheckedUpdateInput>
+  }
+
+  /**
+   * GmArticleDescriptionFormate delete
+   */
+  export type GmArticleDescriptionFormateDeleteArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the GmArticleDescriptionFormate
+     */
+    select?: GmArticleDescriptionFormateSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the GmArticleDescriptionFormate
+     */
+    omit?: GmArticleDescriptionFormateOmit<ExtArgs> | null
+    /**
+     * Filter which GmArticleDescriptionFormate to delete.
+     */
+    where: GmArticleDescriptionFormateWhereUniqueInput
+  }
+
+  /**
+   * GmArticleDescriptionFormate deleteMany
+   */
+  export type GmArticleDescriptionFormateDeleteManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Filter which GmArticleDescriptionFormates to delete
+     */
+    where?: GmArticleDescriptionFormateWhereInput
+    /**
+     * Limit how many GmArticleDescriptionFormates to delete.
+     */
+    limit?: number
+  }
+
+  /**
+   * GmArticleDescriptionFormate without action
+   */
+  export type GmArticleDescriptionFormateDefaultArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the GmArticleDescriptionFormate
+     */
+    select?: GmArticleDescriptionFormateSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the GmArticleDescriptionFormate
+     */
+    omit?: GmArticleDescriptionFormateOmit<ExtArgs> | null
+  }
+
+
+  /**
    * Model PreciseBodyArticleConsumption
    */
 
@@ -88967,6 +90126,20 @@ export namespace Prisma {
   export type BodyArticleDescriptionFormateScalarFieldEnum = (typeof BodyArticleDescriptionFormateScalarFieldEnum)[keyof typeof BodyArticleDescriptionFormateScalarFieldEnum]
 
 
+  export const GmArticleDescriptionFormateScalarFieldEnum: {
+    id: 'id',
+    key: 'key',
+    archetypeNm: 'archetypeNm',
+    descSeq: 'descSeq',
+    familyCode: 'familyCode',
+    familyName: 'familyName',
+    createdAt: 'createdAt',
+    updatedAt: 'updatedAt'
+  };
+
+  export type GmArticleDescriptionFormateScalarFieldEnum = (typeof GmArticleDescriptionFormateScalarFieldEnum)[keyof typeof GmArticleDescriptionFormateScalarFieldEnum]
+
+
   export const PreciseBodyArticleConsumptionScalarFieldEnum: {
     id: 'id',
     division: 'division',
@@ -90272,6 +91445,17 @@ export namespace Prisma {
   };
 
   export type BodyArticleDescriptionFormateOrderByRelevanceFieldEnum = (typeof BodyArticleDescriptionFormateOrderByRelevanceFieldEnum)[keyof typeof BodyArticleDescriptionFormateOrderByRelevanceFieldEnum]
+
+
+  export const GmArticleDescriptionFormateOrderByRelevanceFieldEnum: {
+    key: 'key',
+    archetypeNm: 'archetypeNm',
+    descSeq: 'descSeq',
+    familyCode: 'familyCode',
+    familyName: 'familyName'
+  };
+
+  export type GmArticleDescriptionFormateOrderByRelevanceFieldEnum = (typeof GmArticleDescriptionFormateOrderByRelevanceFieldEnum)[keyof typeof GmArticleDescriptionFormateOrderByRelevanceFieldEnum]
 
 
   export const PreciseBodyArticleConsumptionOrderByRelevanceFieldEnum: {
@@ -98881,6 +100065,76 @@ export namespace Prisma {
     frGridStatus?: StringWithAggregatesFilter<"BodyArticleDescriptionFormate"> | string
     createdAt?: DateTimeWithAggregatesFilter<"BodyArticleDescriptionFormate"> | Date | string
     updatedAt?: DateTimeWithAggregatesFilter<"BodyArticleDescriptionFormate"> | Date | string
+  }
+
+  export type GmArticleDescriptionFormateWhereInput = {
+    AND?: GmArticleDescriptionFormateWhereInput | GmArticleDescriptionFormateWhereInput[]
+    OR?: GmArticleDescriptionFormateWhereInput[]
+    NOT?: GmArticleDescriptionFormateWhereInput | GmArticleDescriptionFormateWhereInput[]
+    id?: IntFilter<"GmArticleDescriptionFormate"> | number
+    key?: StringFilter<"GmArticleDescriptionFormate"> | string
+    archetypeNm?: StringFilter<"GmArticleDescriptionFormate"> | string
+    descSeq?: StringFilter<"GmArticleDescriptionFormate"> | string
+    familyCode?: StringFilter<"GmArticleDescriptionFormate"> | string
+    familyName?: StringFilter<"GmArticleDescriptionFormate"> | string
+    createdAt?: DateTimeFilter<"GmArticleDescriptionFormate"> | Date | string
+    updatedAt?: DateTimeFilter<"GmArticleDescriptionFormate"> | Date | string
+  }
+
+  export type GmArticleDescriptionFormateOrderByWithRelationInput = {
+    id?: SortOrder
+    key?: SortOrder
+    archetypeNm?: SortOrder
+    descSeq?: SortOrder
+    familyCode?: SortOrder
+    familyName?: SortOrder
+    createdAt?: SortOrder
+    updatedAt?: SortOrder
+    _relevance?: GmArticleDescriptionFormateOrderByRelevanceInput
+  }
+
+  export type GmArticleDescriptionFormateWhereUniqueInput = Prisma.AtLeast<{
+    id?: number
+    key?: string
+    AND?: GmArticleDescriptionFormateWhereInput | GmArticleDescriptionFormateWhereInput[]
+    OR?: GmArticleDescriptionFormateWhereInput[]
+    NOT?: GmArticleDescriptionFormateWhereInput | GmArticleDescriptionFormateWhereInput[]
+    archetypeNm?: StringFilter<"GmArticleDescriptionFormate"> | string
+    descSeq?: StringFilter<"GmArticleDescriptionFormate"> | string
+    familyCode?: StringFilter<"GmArticleDescriptionFormate"> | string
+    familyName?: StringFilter<"GmArticleDescriptionFormate"> | string
+    createdAt?: DateTimeFilter<"GmArticleDescriptionFormate"> | Date | string
+    updatedAt?: DateTimeFilter<"GmArticleDescriptionFormate"> | Date | string
+  }, "id" | "key">
+
+  export type GmArticleDescriptionFormateOrderByWithAggregationInput = {
+    id?: SortOrder
+    key?: SortOrder
+    archetypeNm?: SortOrder
+    descSeq?: SortOrder
+    familyCode?: SortOrder
+    familyName?: SortOrder
+    createdAt?: SortOrder
+    updatedAt?: SortOrder
+    _count?: GmArticleDescriptionFormateCountOrderByAggregateInput
+    _avg?: GmArticleDescriptionFormateAvgOrderByAggregateInput
+    _max?: GmArticleDescriptionFormateMaxOrderByAggregateInput
+    _min?: GmArticleDescriptionFormateMinOrderByAggregateInput
+    _sum?: GmArticleDescriptionFormateSumOrderByAggregateInput
+  }
+
+  export type GmArticleDescriptionFormateScalarWhereWithAggregatesInput = {
+    AND?: GmArticleDescriptionFormateScalarWhereWithAggregatesInput | GmArticleDescriptionFormateScalarWhereWithAggregatesInput[]
+    OR?: GmArticleDescriptionFormateScalarWhereWithAggregatesInput[]
+    NOT?: GmArticleDescriptionFormateScalarWhereWithAggregatesInput | GmArticleDescriptionFormateScalarWhereWithAggregatesInput[]
+    id?: IntWithAggregatesFilter<"GmArticleDescriptionFormate"> | number
+    key?: StringWithAggregatesFilter<"GmArticleDescriptionFormate"> | string
+    archetypeNm?: StringWithAggregatesFilter<"GmArticleDescriptionFormate"> | string
+    descSeq?: StringWithAggregatesFilter<"GmArticleDescriptionFormate"> | string
+    familyCode?: StringWithAggregatesFilter<"GmArticleDescriptionFormate"> | string
+    familyName?: StringWithAggregatesFilter<"GmArticleDescriptionFormate"> | string
+    createdAt?: DateTimeWithAggregatesFilter<"GmArticleDescriptionFormate"> | Date | string
+    updatedAt?: DateTimeWithAggregatesFilter<"GmArticleDescriptionFormate"> | Date | string
   }
 
   export type PreciseBodyArticleConsumptionWhereInput = {
@@ -109327,6 +110581,80 @@ export namespace Prisma {
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
   }
 
+  export type GmArticleDescriptionFormateCreateInput = {
+    key: string
+    archetypeNm: string
+    descSeq: string
+    familyCode: string
+    familyName: string
+    createdAt?: Date | string
+    updatedAt?: Date | string
+  }
+
+  export type GmArticleDescriptionFormateUncheckedCreateInput = {
+    id?: number
+    key: string
+    archetypeNm: string
+    descSeq: string
+    familyCode: string
+    familyName: string
+    createdAt?: Date | string
+    updatedAt?: Date | string
+  }
+
+  export type GmArticleDescriptionFormateUpdateInput = {
+    key?: StringFieldUpdateOperationsInput | string
+    archetypeNm?: StringFieldUpdateOperationsInput | string
+    descSeq?: StringFieldUpdateOperationsInput | string
+    familyCode?: StringFieldUpdateOperationsInput | string
+    familyName?: StringFieldUpdateOperationsInput | string
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+  }
+
+  export type GmArticleDescriptionFormateUncheckedUpdateInput = {
+    id?: IntFieldUpdateOperationsInput | number
+    key?: StringFieldUpdateOperationsInput | string
+    archetypeNm?: StringFieldUpdateOperationsInput | string
+    descSeq?: StringFieldUpdateOperationsInput | string
+    familyCode?: StringFieldUpdateOperationsInput | string
+    familyName?: StringFieldUpdateOperationsInput | string
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+  }
+
+  export type GmArticleDescriptionFormateCreateManyInput = {
+    id?: number
+    key: string
+    archetypeNm: string
+    descSeq: string
+    familyCode: string
+    familyName: string
+    createdAt?: Date | string
+    updatedAt?: Date | string
+  }
+
+  export type GmArticleDescriptionFormateUpdateManyMutationInput = {
+    key?: StringFieldUpdateOperationsInput | string
+    archetypeNm?: StringFieldUpdateOperationsInput | string
+    descSeq?: StringFieldUpdateOperationsInput | string
+    familyCode?: StringFieldUpdateOperationsInput | string
+    familyName?: StringFieldUpdateOperationsInput | string
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+  }
+
+  export type GmArticleDescriptionFormateUncheckedUpdateManyInput = {
+    id?: IntFieldUpdateOperationsInput | number
+    key?: StringFieldUpdateOperationsInput | string
+    archetypeNm?: StringFieldUpdateOperationsInput | string
+    descSeq?: StringFieldUpdateOperationsInput | string
+    familyCode?: StringFieldUpdateOperationsInput | string
+    familyName?: StringFieldUpdateOperationsInput | string
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+  }
+
   export type PreciseBodyArticleConsumptionCreateInput = {
     division: string
     subDivision: string
@@ -116306,6 +117634,53 @@ export namespace Prisma {
   }
 
   export type BodyArticleDescriptionFormateSumOrderByAggregateInput = {
+    id?: SortOrder
+  }
+
+  export type GmArticleDescriptionFormateOrderByRelevanceInput = {
+    fields: GmArticleDescriptionFormateOrderByRelevanceFieldEnum | GmArticleDescriptionFormateOrderByRelevanceFieldEnum[]
+    sort: SortOrder
+    search: string
+  }
+
+  export type GmArticleDescriptionFormateCountOrderByAggregateInput = {
+    id?: SortOrder
+    key?: SortOrder
+    archetypeNm?: SortOrder
+    descSeq?: SortOrder
+    familyCode?: SortOrder
+    familyName?: SortOrder
+    createdAt?: SortOrder
+    updatedAt?: SortOrder
+  }
+
+  export type GmArticleDescriptionFormateAvgOrderByAggregateInput = {
+    id?: SortOrder
+  }
+
+  export type GmArticleDescriptionFormateMaxOrderByAggregateInput = {
+    id?: SortOrder
+    key?: SortOrder
+    archetypeNm?: SortOrder
+    descSeq?: SortOrder
+    familyCode?: SortOrder
+    familyName?: SortOrder
+    createdAt?: SortOrder
+    updatedAt?: SortOrder
+  }
+
+  export type GmArticleDescriptionFormateMinOrderByAggregateInput = {
+    id?: SortOrder
+    key?: SortOrder
+    archetypeNm?: SortOrder
+    descSeq?: SortOrder
+    familyCode?: SortOrder
+    familyName?: SortOrder
+    createdAt?: SortOrder
+    updatedAt?: SortOrder
+  }
+
+  export type GmArticleDescriptionFormateSumOrderByAggregateInput = {
     id?: SortOrder
   }
 

@@ -704,8 +704,8 @@ const ArticleCard = React.memo(
     // eslint-disable-next-line react-hooks/exhaustive-deps
     }, []);
 
-    // Vendor-cost fallback: whenever VENDOR COST gets a value, if both ROUGH-V2
-    // and AUTO-BGT are still empty, copy it into both fields immediately.
+    // Vendor-cost fallback: whenever VENDOR COST gets a value, fill any of
+    // ROUGH-V2 / AUTO-BGT that are still empty (independently of each other).
     const currentVendorRate = String(
       (localValues['vendorFabricRate'] !== undefined ? localValues['vendorFabricRate'] : (item as any).vendorFabricRate) ?? '',
     ).trim();
@@ -717,8 +717,10 @@ const ArticleCard = React.memo(
       const autoBgtVal = String(
         (localValues['autoBgt'] !== undefined ? localValues['autoBgt'] : (item as any).autoBgt) ?? '',
       ).trim();
-      if (roughV2Val !== '' || autoBgtVal !== '') return;
-      const updates = { roughV2: currentVendorRate, autoBgt: currentVendorRate };
+      const updates: Record<string, string> = {};
+      if (roughV2Val === '') updates['roughV2'] = currentVendorRate;
+      if (autoBgtVal === '') updates['autoBgt'] = currentVendorRate;
+      if (Object.keys(updates).length === 0) return;
       setLocalValues((prev) => ({ ...prev, ...updates }));
       if (isModifyMode) {
         setPendingChanges((prev) => ({ ...prev, ...updates }));
@@ -4672,7 +4674,12 @@ const ArticleCard = React.memo(
                     });
                     const data = await r.json();
                     if (!r.ok) {
-                      message.error(data.error || 'Failed to create fabric article');
+                      if (data.fabricArticleNumber) {
+                        handleSave('fabricArticleNumber', String(data.fabricArticleNumber));
+                        message.warning(data.error || 'Fabric article already exists — number filled.');
+                      } else {
+                        message.error(data.error || 'Failed to create fabric article');
+                      }
                       return;
                     }
                     const result = data.results?.[0];
