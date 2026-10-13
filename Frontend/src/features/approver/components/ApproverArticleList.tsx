@@ -656,8 +656,9 @@ const ArticleCard = React.memo(
     const [bodyNoSearched, setBodyNoSearched] = useState(false);
     const [fabDescQuery, setFabDescQuery] = useState('');
     const [fabDescResults, setFabDescResults] = useState<{
-      fabricArticleNumber: string;
+      fabricArticleNumber: string | null;
       fabricArticleDescription: string | null;
+      fabricRate: number | null;
       mFabDiv: string | null; mYarn: string | null;
       mFabMainMvgr1: string | null; mFabMainMvgr2: string | null;
       mConstruction: string | null; mOunz: string | null; mWidth: string | null;
@@ -666,6 +667,70 @@ const ArticleCard = React.memo(
     }[]>([]);
     const [fabDescLoading, setFabDescLoading] = useState(false);
     const [fabDescSearched, setFabDescSearched] = useState(false);
+    const [roughV2Loading, setRoughV2Loading] = useState(false);
+    const roughV2FetchedRef = React.useRef(false);
+
+    // Auto-fill Rough-V2 on mount if not already set — exact match on 5 attrs
+    useEffect(() => {
+      const existingRoughV2 = (item as any).roughV2;
+      if (existingRoughV2 != null && String(existingRoughV2).trim() !== '') return;
+      if (roughV2FetchedRef.current) return;
+      roughV2FetchedRef.current = true;
+      const getV = (key: string) => String((item as any)[key] ?? '').trim();
+      const params = new URLSearchParams({
+        mYarn:         getV('yarn1'),
+        mFabDiv:       getV('fabDiv'),
+        mFabMainMvgr1: getV('mainMvgr'),
+        mWeave01:      getV('weave'),
+        mLycra:        getV('lycra'),
+      });
+      setRoughV2Loading(true);
+      const token = localStorage.getItem('authToken');
+      fetch(
+        `${APP_CONFIG.api.baseURL}/approver/fabric-article-data/rough-v2-rate?${params.toString()}`,
+        { headers: { Authorization: `Bearer ${token}` } },
+      )
+        .then((r) => r.json())
+        .then((d) => {
+          if (d.rate != null) {
+            const rateStr = String(d.rate);
+            setLocalValues((prev) => ({ ...prev, roughV2: rateStr }));
+            if (isModifyMode) {
+              setPendingChanges((prev) => ({ ...prev, roughV2: rateStr }));
+            } else {
+              onSave({ ...item, roughV2: rateStr } as any, { roughV2: rateStr });
+            }
+          }
+        })
+        .catch(() => {})
+        .finally(() => setRoughV2Loading(false));
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, []);
+
+    // Vendor-cost fallback: whenever VENDOR COST gets a value, if both ROUGH-V2
+    // and AUTO-BGT are still empty, copy it into both fields immediately.
+    const currentVendorRate = String(
+      (localValues['vendorFabricRate'] !== undefined ? localValues['vendorFabricRate'] : (item as any).vendorFabricRate) ?? '',
+    ).trim();
+    useEffect(() => {
+      if (currentVendorRate === '') return;
+      const roughV2Val = String(
+        (localValues['roughV2'] !== undefined ? localValues['roughV2'] : (item as any).roughV2) ?? '',
+      ).trim();
+      const autoBgtVal = String(
+        (localValues['autoBgt'] !== undefined ? localValues['autoBgt'] : (item as any).autoBgt) ?? '',
+      ).trim();
+      if (roughV2Val !== '' || autoBgtVal !== '') return;
+      const updates = { roughV2: currentVendorRate, autoBgt: currentVendorRate };
+      setLocalValues((prev) => ({ ...prev, ...updates }));
+      if (isModifyMode) {
+        setPendingChanges((prev) => ({ ...prev, ...updates }));
+      } else {
+        onSave({ ...item, ...updates } as any, updates);
+      }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, [currentVendorRate]);
+
     const autoSavedFabDescRef = React.useRef<string | null>(null);
     const [imgZoom, setImgZoom] = useState(1);
     const [imgRotation, setImgRotation] = useState(0);
@@ -2070,6 +2135,38 @@ const ArticleCard = React.memo(
       );
     };
 
+    const lookupRoughV2Rate = () => {
+      const getV = (key: string) =>
+        String((localValues[key] !== undefined ? localValues[key] : (item as any)[key]) ?? '').trim();
+      const params = new URLSearchParams({
+        mYarn:         getV('yarn1'),
+        mFabDiv:       getV('fabDiv'),
+        mFabMainMvgr1: getV('mainMvgr'),
+        mWeave01:      getV('weave'),
+        mLycra:        getV('lycra'),
+      });
+      setRoughV2Loading(true);
+      const token = localStorage.getItem('authToken');
+      fetch(
+        `${APP_CONFIG.api.baseURL}/approver/fabric-article-data/rough-v2-rate?${params.toString()}`,
+        { headers: { Authorization: `Bearer ${token}` } },
+      )
+        .then((r) => r.json())
+        .then((d) => {
+          if (d.rate != null) {
+            const rateStr = String(d.rate);
+            setLocalValues((prev) => ({ ...prev, roughV2: rateStr }));
+            if (isModifyMode) {
+              setPendingChanges((prev) => ({ ...prev, roughV2: rateStr }));
+            } else {
+              onSave({ ...item, roughV2: rateStr } as any, { roughV2: rateStr });
+            }
+          }
+        })
+        .catch(() => {})
+        .finally(() => setRoughV2Loading(false));
+    };
+
     const toggleGroupCollapse = (g: string) => {
       setCollapsedGroups((prev) => {
         const next = new Set(prev);
@@ -2592,6 +2689,7 @@ const ArticleCard = React.memo(
                           extraRows={groupAttrs
                             .filter((a) => !gridCfg.fields.has(a.field) && !FG_CARD_HIDDEN_SCHEMA_KEYS.has(a.schemaKey))
                             .map((a) => renderAttributeRow(a))}
+                          enablePreciseTrimLookup={g.group === 'VA ACC.'}
                         />
                       );
                     }
@@ -3001,17 +3099,47 @@ const ArticleCard = React.memo(
                                         localValues['fabricArticleDescription'] !== undefined
                                           ? localValues['fabricArticleDescription']
                                           : (item as any)['fabricArticleDescription'];
-                                      const runFabDescSearch = (q: string) => {
+                                      const runFabDescSearch = (q: string, withAttrFallback = false) => {
                                         if (!q.trim()) { setFabDescResults([]); setFabDescSearched(false); return; }
                                         setFabDescLoading(true);
                                         setFabDescSearched(false);
                                         const token = localStorage.getItem('authToken');
+                                        const getVal = (key: string) =>
+                                          (localValues[key] !== undefined ? localValues[key] : (item as any)[key]) ?? '';
+                                        const params: Record<string, string> = { q };
+                                        if (withAttrFallback) {
+                                          params.mFabDiv       = getVal('fabDiv');
+                                          params.mYarn         = getVal('yarn1');
+                                          params.mFabMainMvgr1 = getVal('mainMvgr');
+                                          params.mConstruction = getVal('fConstruction');
+                                          params.mWidth        = getVal('fWidth');
+                                          params.mWeave01      = getVal('weave');
+                                          params.mComposition  = getVal('composition');
+                                          params.mLycra        = getVal('lycra');
+                                        }
                                         fetch(
-                                          `${APP_CONFIG.api.baseURL}/approver/fabric-article-data/search?q=${encodeURIComponent(q)}&type=FG,uploader`,
+                                          `${APP_CONFIG.api.baseURL}/approver/fabric-article-data/search?${new URLSearchParams(params).toString()}`,
                                           { headers: { Authorization: `Bearer ${token}` } },
                                         )
                                           .then((r) => r.json())
-                                          .then((d) => { setFabDescResults(d.results ?? []); setFabDescSearched(true); })
+                                          .then((d) => {
+                                            const hits = d.results ?? [];
+                                            setFabDescResults(hits);
+                                            setFabDescSearched(true);
+                                            // Attribute fallback: desc had no match but rate resolved → auto-fill AUTO-BGT and close
+                                            if (hits.length === 0 && d.attributeFallbackRate != null) {
+                                              const rateStr = String(d.attributeFallbackRate);
+                                              setLocalValues((prev) => ({ ...prev, autoBgt: rateStr }));
+                                              setEditingField(null);
+                                              setFabDescResults([]);
+                                              setFabDescSearched(false);
+                                              if (isModifyMode) {
+                                                setPendingChanges((prev) => ({ ...prev, autoBgt: rateStr }));
+                                              } else {
+                                                onSave({ ...item, autoBgt: rateStr } as any, { autoBgt: rateStr });
+                                              }
+                                            }
+                                          })
                                           .catch(() => { setFabDescResults([]); setFabDescSearched(true); })
                                           .finally(() => setFabDescLoading(false));
                                       };
@@ -3068,14 +3196,20 @@ const ArticleCard = React.memo(
                                                   onChange={(e) => {
                                                     const q = e.target.value;
                                                     setFabDescQuery(q);
-                                                    runFabDescSearch(q);
+                                                    // Desc-only while typing; attribute fallback runs on Enter/blur
+                                                    runFabDescSearch(q, false);
                                                   }}
                                                   onBlur={() => {
-                                                    if (fabDescLoading || fabDescSearched) return;
+                                                    if (fabDescLoading) return;
                                                     const trimmed = fabDescQuery.trim();
-                                                    if (trimmed) handleSave('fabricArticleDescription', trimmed);
-                                                    setEditingField(null);
-                                                    setFabDescResults([]);
+                                                    if (!trimmed) { setEditingField(null); setFabDescResults([]); return; }
+                                                    // If no desc results yet, try attribute fallback before closing
+                                                    if (fabDescResults.length === 0) {
+                                                      runFabDescSearch(trimmed, true);
+                                                    } else {
+                                                      setEditingField(null);
+                                                      setFabDescResults([]);
+                                                    }
                                                   }}
                                                   onKeyDown={(e) => {
                                                     if (e.key === 'Escape') {
@@ -3083,9 +3217,8 @@ const ArticleCard = React.memo(
                                                       setFabDescResults([]);
                                                     }
                                                     if (e.key === 'Enter' && fabDescQuery.trim()) {
-                                                      handleSave('fabricArticleDescription', fabDescQuery.trim() || null);
-                                                      setEditingField(null);
-                                                      setFabDescResults([]);
+                                                      // Run with attribute fallback on explicit Enter
+                                                      runFabDescSearch(fabDescQuery.trim(), true);
                                                     }
                                                   }}
                                                 />
@@ -3114,6 +3247,7 @@ const ArticleCard = React.memo(
                                                             const gridUpdates: Record<string, string | null> = {
                                                               fabricArticleNumber:      r.fabricArticleNumber,
                                                               fabricArticleDescription: r.fabricArticleDescription,
+                                                              autoBgt:                  r.fabricRate != null ? String(r.fabricRate) : null,
                                                               fabDiv:                   r.mFabDiv,
                                                               yarn1:                    r.mYarn,
                                                               mainMvgr:                 r.mFabMainMvgr1,

@@ -1037,6 +1037,33 @@ exports.Prisma.FabricArticleDataScalarFieldEnum = {
   updatedAt: 'updatedAt'
 };
 
+exports.Prisma.PreciseFabricArticleDataScalarFieldEnum = {
+  id: 'id',
+  fabricArticleNumber: 'fabricArticleNumber',
+  fabricArticleDescription: 'fabricArticleDescription',
+  division: 'division',
+  subDivision: 'subDivision',
+  majorCategory: 'majorCategory',
+  vendorName: 'vendorName',
+  vendorCode: 'vendorCode',
+  fabricRate: 'fabricRate',
+  mFabDiv: 'mFabDiv',
+  mYarn: 'mYarn',
+  mFabMainMvgr1: 'mFabMainMvgr1',
+  mFabMainMvgr2: 'mFabMainMvgr2',
+  mConstruction: 'mConstruction',
+  mOunz: 'mOunz',
+  mWidth: 'mWidth',
+  mWeave01: 'mWeave01',
+  mWeave02: 'mWeave02',
+  mCount: 'mCount',
+  mComposition: 'mComposition',
+  mFinish: 'mFinish',
+  mGsm: 'mGsm',
+  mLycra: 'mLycra',
+  createdAt: 'createdAt'
+};
+
 exports.Prisma.GmArticleDataScalarFieldEnum = {
   id: 'id',
   gmAgeGrade: 'gmAgeGrade',
@@ -1410,7 +1437,7 @@ exports.Prisma.BasicTrimCostMasterScalarFieldEnum = {
 
 exports.Prisma.PreciseTrimMasterScalarFieldEnum = {
   id: 'id',
-  majCat: 'majCat',
+  attributeName: 'attributeName',
   type: 'type',
   bt1: 'bt1',
   bt2: 'bt2',
@@ -2254,6 +2281,28 @@ exports.Prisma.FabricArticleDataOrderByRelevanceFieldEnum = {
   userName: 'userName'
 };
 
+exports.Prisma.PreciseFabricArticleDataOrderByRelevanceFieldEnum = {
+  fabricArticleDescription: 'fabricArticleDescription',
+  division: 'division',
+  subDivision: 'subDivision',
+  majorCategory: 'majorCategory',
+  vendorName: 'vendorName',
+  mFabDiv: 'mFabDiv',
+  mYarn: 'mYarn',
+  mFabMainMvgr1: 'mFabMainMvgr1',
+  mFabMainMvgr2: 'mFabMainMvgr2',
+  mConstruction: 'mConstruction',
+  mOunz: 'mOunz',
+  mWidth: 'mWidth',
+  mWeave01: 'mWeave01',
+  mWeave02: 'mWeave02',
+  mCount: 'mCount',
+  mComposition: 'mComposition',
+  mFinish: 'mFinish',
+  mGsm: 'mGsm',
+  mLycra: 'mLycra'
+};
+
 exports.Prisma.GmArticleDataOrderByRelevanceFieldEnum = {
   id: 'id',
   gmAgeGrade: 'gmAgeGrade',
@@ -2538,7 +2587,7 @@ exports.Prisma.BasicTrimCostMasterOrderByRelevanceFieldEnum = {
 };
 
 exports.Prisma.PreciseTrimMasterOrderByRelevanceFieldEnum = {
-  majCat: 'majCat',
+  attributeName: 'attributeName',
   type: 'type'
 };
 
@@ -2786,6 +2835,7 @@ exports.Prisma.ModelName = {
   FabricMajCatGridValue: 'FabricMajCatGridValue',
   ModifyLog: 'ModifyLog',
   FabricArticleData: 'FabricArticleData',
+  PreciseFabricArticleData: 'PreciseFabricArticleData',
   GmArticleData: 'GmArticleData',
   GmVariantArticleData: 'GmVariantArticleData',
   FgVariantArticleData: 'FgVariantArticleData',

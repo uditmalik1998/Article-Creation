@@ -159,6 +159,13 @@ interface CmpCostMasterMeta {
   lastUpdated?: string;
 }
 
+interface PreciseTrimMasterMeta {
+  total?: number;
+  attributes?: number;
+  skipped?: number;
+  lastUpdated?: string;
+}
+
 interface SegmentMasterMeta {
   total?: number;
   categories?: number;
@@ -339,7 +346,7 @@ export default function Admin() {
   const cmpCostMasterFileRef = useRef<HTMLInputElement | null>(null);
 
   // Precise Trim Master (precise_trim_master)
-  const [preciseTrimMasterMeta, setPreciseTrimMasterMeta] = useState<CmpCostMasterMeta | null>(null);
+  const [preciseTrimMasterMeta, setPreciseTrimMasterMeta] = useState<PreciseTrimMasterMeta | null>(null);
   const [preciseTrimMasterStatusLoading, setPreciseTrimMasterStatusLoading] = useState(false);
   const [preciseTrimMasterUploading, setPreciseTrimMasterUploading] = useState(false);
   const [preciseTrimMasterProgress, setPreciseTrimMasterProgress] = useState<number>(0);
@@ -365,6 +372,13 @@ export default function Admin() {
   const [preciseBodyArticleUploading, setPreciseBodyArticleUploading] = useState(false);
   const [preciseBodyArticleProgress, setPreciseBodyArticleProgress] = useState<number>(0);
   const preciseBodyArticleFileRef = useRef<HTMLInputElement | null>(null);
+
+  // Precise Fabric Article Data (precise_fabric_article_data)
+  const [preciseFabricArticleMeta, setPreciseFabricArticleMeta] = useState<{ total: number; lastUpdated: string | null } | null>(null);
+  const [preciseFabricArticleStatusLoading, setPreciseFabricArticleStatusLoading] = useState(false);
+  const [preciseFabricArticleUploading, setPreciseFabricArticleUploading] = useState(false);
+  const [preciseFabricArticleProgress, setPreciseFabricArticleProgress] = useState<number>(0);
+  const preciseFabricArticleFileRef = useRef<HTMLInputElement | null>(null);
 
   // Value Addition Accessories Cost
   const [vaacTotal, setVaacTotal] = useState<{ total: number; categories: number } | null>(null);
@@ -2118,6 +2132,70 @@ export default function Admin() {
     }
   };
 
+  // ─────────────────────────────── Precise Fabric Article Data ─────────────────
+  const loadPreciseFabricArticleStatus = useCallback(async () => {
+    setPreciseFabricArticleStatusLoading(true);
+    try {
+      const token = localStorage.getItem('authToken');
+      const res = await fetch(`${APP_CONFIG.api.baseURL}/admin/precise-fabric-article-data/status`, {
+        headers: token ? { Authorization: `Bearer ${token}` } : {},
+      });
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.error || 'Failed to load status');
+      setPreciseFabricArticleMeta(data.data);
+    } catch (err: any) {
+      message.error(err?.message || 'Failed to load precise fabric article data status');
+    } finally {
+      setPreciseFabricArticleStatusLoading(false);
+    }
+  }, []);
+
+  const downloadPreciseFabricArticleFile = async (kind: 'template' | 'export') => {
+    const token = localStorage.getItem('authToken');
+    const url = `${APP_CONFIG.api.baseURL}/admin/precise-fabric-article-data/${kind}`;
+    try {
+      const res = await fetch(url, { headers: token ? { Authorization: `Bearer ${token}` } : {} });
+      if (!res.ok) throw new Error('Download failed');
+      const blob = await res.blob();
+      const a = document.createElement('a');
+      a.href = URL.createObjectURL(blob);
+      a.download = kind === 'template'
+        ? 'PRECISE_FABRIC_ARTICLE_DATA_TEMPLATE.xlsx'
+        : `PRECISE_FABRIC_ARTICLE_DATA_${new Date().toISOString().slice(0, 10)}.xlsx`;
+      a.click();
+    } catch {
+      message.error(kind === 'template' ? 'Failed to download template' : 'Failed to export precise fabric article data');
+    }
+  };
+
+  const handlePreciseFabricArticleUpload = async (file: File) => {
+    setPreciseFabricArticleUploading(true);
+    setPreciseFabricArticleProgress(0);
+    try {
+      const token = localStorage.getItem('authToken');
+      const formData = new FormData();
+      formData.append('file', file);
+      const interval = setInterval(() => setPreciseFabricArticleProgress((p) => Math.min(p + 5, 90)), 300);
+      const res = await fetch(`${APP_CONFIG.api.baseURL}/admin/precise-fabric-article-data/upload`, {
+        method: 'POST',
+        headers: token ? { Authorization: `Bearer ${token}` } : {},
+        body: formData,
+      });
+      clearInterval(interval);
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.error || 'Upload failed');
+      setPreciseFabricArticleProgress(100);
+      message.success(`Uploaded ${data.data?.inserted ?? 0} rows to precise_fabric_article_data`);
+      await loadPreciseFabricArticleStatus();
+    } catch (err: any) {
+      message.error(err?.message || 'Upload failed');
+    } finally {
+      setPreciseFabricArticleUploading(false);
+      setTimeout(() => setPreciseFabricArticleProgress(0), 1500);
+      if (preciseFabricArticleFileRef.current) preciseFabricArticleFileRef.current.value = '';
+    }
+  };
+
   // ─────────────────────────────── Value Addition Accessories Cost ──────────────
   const loadVaacStatus = useCallback(async () => {
     setVaacStatusLoading(true);
@@ -2379,8 +2457,9 @@ export default function Admin() {
     loadBodyFabConsStatus();
     loadPreciseBodyArticleStatus();
     loadPreciseTrimMasterStatus();
+    loadPreciseFabricArticleStatus();
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [loadVendorStatus, loadMajCatGridStatus, loadMandatoryGridStatus, loadSizeMasterStatus, loadColorMasterStatus, loadFabricArticleDataStatus, loadFabricArticleMasterStatus, loadBodyArticleDataStatus, loadBroaderMenuStatus, loadSegmentMasterStatus, loadBasicAccessoriesStatus, loadCmpCostMasterStatus, loadNationalGridStatus, loadHierarchyExcelStatus, loadPipelineStatus, loadFabricRawStatus, loadGmRawStatus, loadBodyFabConsStatus, loadPreciseBodyArticleStatus, loadPreciseTrimMasterStatus]);
+  }, [loadVendorStatus, loadMajCatGridStatus, loadMandatoryGridStatus, loadSizeMasterStatus, loadColorMasterStatus, loadFabricArticleDataStatus, loadFabricArticleMasterStatus, loadBodyArticleDataStatus, loadBroaderMenuStatus, loadSegmentMasterStatus, loadBasicAccessoriesStatus, loadCmpCostMasterStatus, loadNationalGridStatus, loadHierarchyExcelStatus, loadPipelineStatus, loadFabricRawStatus, loadGmRawStatus, loadBodyFabConsStatus, loadPreciseBodyArticleStatus, loadPreciseTrimMasterStatus, loadPreciseFabricArticleStatus]);
 
   const loadData = async () => {
     setLoading(true);
@@ -4054,7 +4133,7 @@ export default function Admin() {
               }
             />
           </MasterGroup>
-          <MasterGroup title="Precise" count={2} notUploaded={((preciseBodyArticleTotal ? preciseBodyArticleTotal.total : null) === 0 ? 1 : 0) + ((preciseTrimMasterMeta ? (preciseTrimMasterMeta.total ?? 0) : null) === 0 ? 1 : 0)}>
+          <MasterGroup title="Precise" count={3} notUploaded={((preciseBodyArticleTotal ? preciseBodyArticleTotal.total : null) === 0 ? 1 : 0) + ((preciseTrimMasterMeta ? (preciseTrimMasterMeta.total ?? 0) : null) === 0 ? 1 : 0) + ((preciseFabricArticleMeta ? preciseFabricArticleMeta.total : null) === 0 ? 1 : 0)}>
             <MasterDataCard
               title="Precise Body Article Data"
               rows={preciseBodyArticleTotal ? preciseBodyArticleTotal.total : null}
@@ -4153,8 +4232,8 @@ export default function Admin() {
                           })}
                         </Descriptions.Item>
                       )}
-                      <Descriptions.Item label="Major Categories">
-                        <Badge variant="info">{(preciseTrimMasterMeta.categories ?? 0).toLocaleString()}</Badge>
+                      <Descriptions.Item label="Attribute Names">
+                        <Badge variant="info">{(preciseTrimMasterMeta.attributes ?? 0).toLocaleString()}</Badge>
                       </Descriptions.Item>
                       <Descriptions.Item label="Total Rows">
                         <Badge variant="success">{(preciseTrimMasterMeta.total ?? 0).toLocaleString()}</Badge>
@@ -4207,6 +4286,87 @@ export default function Admin() {
                       <button
                         type="button"
                         onClick={() => preciseTrimMasterFileRef.current?.click()}
+                        className="flex w-full flex-col items-center justify-center rounded-md border-2 border-dashed border-border bg-muted/30 px-4 py-6 transition-colors hover:border-slate-400 hover:bg-slate-50 dark:hover:bg-slate-500/10"
+                      >
+                        <Inbox className="mb-2 h-8 w-8 text-slate-600 dark:text-slate-300" />
+                        <p className="text-[13px]">
+                          Click to upload <strong>.xlsx</strong> file
+                        </p>
+                        <p className="text-[11px] text-muted-foreground">Only Excel files. Max 50 MB.</p>
+                      </button>
+                    )}
+                  </div>
+                </>
+              }
+            />
+            <MasterDataCard
+              title="Precise Fabric Article Data"
+              rows={preciseFabricArticleMeta ? preciseFabricArticleMeta.total : null}
+              lastUpload={preciseFabricArticleMeta?.lastUpdated ?? null}
+              loading={preciseFabricArticleStatusLoading}
+              busy={preciseFabricArticleUploading}
+              onView={() => navigate('/admin/expense/precise-fabric-article-data')}
+              onDownload={() => downloadPreciseFabricArticleFile('export')}
+              onTemplate={() => downloadPreciseFabricArticleFile('template')}
+              onRefresh={loadPreciseFabricArticleStatus}
+              details={
+                <>
+                  {preciseFabricArticleMeta && preciseFabricArticleMeta.total > 0 ? (
+                    <Descriptions bordered>
+                      {preciseFabricArticleMeta.lastUpdated && (
+                        <Descriptions.Item label="Last Updated">
+                          {new Date(preciseFabricArticleMeta.lastUpdated).toLocaleString('en-IN', {
+                            dateStyle: 'medium', timeStyle: 'short',
+                          })}
+                        </Descriptions.Item>
+                      )}
+                      <Descriptions.Item label="Total Rows">
+                        <Badge variant="success">{preciseFabricArticleMeta.total.toLocaleString()}</Badge>
+                      </Descriptions.Item>
+                    </Descriptions>
+                  ) : (
+                    <Alert
+                      type="warning"
+                      showIcon
+                      message="No precise fabric article data loaded"
+                      description="Upload the FABRIC ARTICLE DATA MASTER Excel. Headers are auto-detected. Replaces the entire table."
+                    />
+                  )}
+                </>
+              }
+              upload={
+                <>
+                  <div className="rounded-md border border-border p-4">
+                    <div className="mb-1 font-semibold">Upload Precise Fabric Article Data Excel</div>
+                    <div className="mb-3 text-xs text-muted-foreground">
+                      Uses the <strong>FABRIC ARTICLE DATA MASTER</strong> format. Headers are auto-detected (looks for <strong>FABRIC ARTICLE NUMBER</strong> column).
+                      Columns: FABRIC ARTICLE NUMBER, FABRIC ARTICLE DESCRIPTION, DIVISION, SUB DIVISION, MAJOR CATEGORY, VENDOR NAME, VENDOR CODE, FABRIC RATE, M_FAB_DIV … M_LYCRA.
+                      <strong className="text-destructive"> Replaces entire table.</strong>
+                    </div>
+
+                    <input
+                      ref={preciseFabricArticleFileRef}
+                      type="file"
+                      accept=".xlsx,.xls"
+                      className="hidden"
+                      onChange={(e) => {
+                        const file = e.target.files?.[0];
+                        if (file) handlePreciseFabricArticleUpload(file);
+                      }}
+                    />
+
+                    {preciseFabricArticleUploading ? (
+                      <div>
+                        <div className="mb-2 text-[13px] text-slate-600 dark:text-slate-300">
+                          <RefreshCw className="mr-1.5 inline-block h-3.5 w-3.5 animate-spin" />
+                          Parsing Excel &amp; replacing table...
+                        </div>
+                        <Progress value={preciseFabricArticleProgress} />
+                      </div>
+                    ) : (
+                      <button
+                        type="button"
+                        onClick={() => preciseFabricArticleFileRef.current?.click()}
                         className="flex w-full flex-col items-center justify-center rounded-md border-2 border-dashed border-border bg-muted/30 px-4 py-6 transition-colors hover:border-slate-400 hover:bg-slate-50 dark:hover:bg-slate-500/10"
                       >
                         <Inbox className="mb-2 h-8 w-8 text-slate-600 dark:text-slate-300" />

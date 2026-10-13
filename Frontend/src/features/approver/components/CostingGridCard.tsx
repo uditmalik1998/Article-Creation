@@ -1,7 +1,8 @@
-import React, { useState } from 'react';
+import React, { useCallback, useState } from 'react';
 import { ChevronDown, ChevronRight, ChevronUp, Search, X } from 'lucide-react';
 import { Input, Popover, PopoverContent, PopoverTrigger } from '@/shared/components/ui-tw';
 import { cn } from '@/lib/utils';
+import { APP_CONFIG } from '../../../constants/app/config';
 
 // ─── Costing grid cards (FG articles) ─────────────────────────────────────────
 // Option B layout shared by B TRIM (group 'VA ACC.') and V. ADD ('VA PRCS'):
@@ -92,6 +93,8 @@ interface CostingGridCardProps {
   locked: boolean;
   /** Any other attrs in this group that the table doesn't cover. */
   extraRows?: React.ReactNode;
+  /** When true, each spec-cell change triggers a precise_trim_master lookup (by attribute name + value) and fills AUTO-BGT. */
+  enablePreciseTrimLookup?: boolean;
 }
 
 const SelectCell: React.FC<{
@@ -215,12 +218,41 @@ const CostingGridCard: React.FC<CostingGridCardProps> = ({
   isFieldLocked,
   locked,
   extraRows,
+  enablePreciseTrimLookup,
 }) => {
   const { grid: GRID, tabs, fixedRows, other, cellMap } = config;
   const [tab, setTab] = useState<string>(tabs[0]);
   const [otherOpen, setOtherOpen] = useState(false);
   // UI-only values: local[tab][row][col]
   const [local, setLocal] = useState<Record<string, Record<string, RowState>>>({});
+  // AUTO-BGT from precise_trim_master: row → { bt1, bt2 }
+  const [autoBgt, setAutoBgt] = useState<Record<string, { bt1: string; bt2: string }>>({});
+  const [autoBgtLoading, setAutoBgtLoading] = useState<Record<string, boolean>>({});
+
+  // attributeName = SAP field from cellMap (e.g. "drawcord" for M_DC_STYLE), value = selected shortForm
+  const lookupPreciseTrim = useCallback(async (row: string, attributeName: string, value: string) => {
+    if (!enablePreciseTrimLookup || !attributeName || !value) return;
+    setAutoBgtLoading((prev) => ({ ...prev, [row]: true }));
+    try {
+      const token = localStorage.getItem('authToken');
+      const url = `${APP_CONFIG.api.baseURL}/admin/precise-trim-master/lookup?attributeName=${encodeURIComponent(attributeName)}&type=${encodeURIComponent(value)}`;
+      const res = await fetch(url, { headers: token ? { Authorization: `Bearer ${token}` } : {} });
+      const data = await res.json();
+      if (data.success && data.data) {
+        setAutoBgt((prev) => ({
+          ...prev,
+          [row]: {
+            bt1: data.data.bt1 !== null ? String(data.data.bt1) : '',
+            bt2: data.data.bt2 !== null ? String(data.data.bt2) : '',
+          },
+        }));
+      }
+    } catch {
+      // silent — AUTO-BGT just stays as-is
+    } finally {
+      setAutoBgtLoading((prev) => ({ ...prev, [row]: false }));
+    }
+  }, [enablePreciseTrimLookup]);
 
   const attrByField = new Map(attrs.map((a) => [a.field, a]));
 
@@ -255,7 +287,10 @@ const CostingGridCard: React.FC<CostingGridCardProps> = ({
           value={toSap ? getValue(a.field) : localVal(row, col)}
           options={a.values ?? []}
           disabled={toSap ? isFieldLocked(a.field) : locked}
-          onPick={(v) => (toSap ? onSave(a.field, v) : setLocalVal(row, col, v ?? ''))}
+          onPick={(v) => {
+            if (toSap) onSave(a.field, v); else setLocalVal(row, col, v ?? '');
+            if (v) lookupPreciseTrim(row, a.field, v);
+          }}
         />
       );
     }
@@ -270,6 +305,10 @@ const CostingGridCard: React.FC<CostingGridCardProps> = ({
   const renderRow = (row: string, last: boolean) => {
     // DESC is auto-built: STYLE-TYPE (e.g. KUNDI_BTN-26L)
     const desc = [cellVal(row, 'style'), cellVal(row, 'type')].filter((p) => p && !/^-+$/.test(p)).join('-');
+    const tabIdx = tabs.indexOf(tab);
+    const bgt = autoBgt[row];
+    const autoBgtVal = bgt ? (tabIdx === 0 ? bgt.bt1 : bgt.bt2) : '';
+    const bgtLoading = autoBgtLoading[row];
     return (
       <div key={row} className={cn(GRID, 'items-center', !last && 'border-b border-slate-100')}>
         <div className="px-2.5 py-1.5 text-[11.5px] font-semibold text-slate-800">{row}</div>
@@ -279,8 +318,14 @@ const CostingGridCard: React.FC<CostingGridCardProps> = ({
         <div className={cn('truncate px-2.5 py-1.5 font-mono text-[11px]', desc ? 'text-slate-900' : 'text-slate-400')}>
           {desc || '—'}
         </div>
-        <div className="px-2.5 py-1.5 text-right font-mono text-[11px] text-slate-400" title="Auto budget — source pending">
-          —
+        <div
+          className={cn(
+            'px-2.5 py-1.5 text-right font-mono text-[11px]',
+            bgtLoading ? 'text-slate-300' : autoBgtVal ? 'font-semibold text-slate-900' : 'text-slate-400',
+          )}
+          title={autoBgtVal ? `AUTO-BGT from precise_trim_master (BT-${tabIdx + 1})` : 'Auto budget — select a spec value'}
+        >
+          {bgtLoading ? '…' : autoBgtVal || '—'}
         </div>
         <div className="px-1 py-1.5">
           <TextCell value={localVal(row, 'rough')} disabled={locked} numeric placeholder="0.00" onChange={(v) => setLocalVal(row, 'rough', v)} />

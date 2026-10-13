@@ -4619,26 +4619,19 @@ export class ApproverController {
 
     static async searchFabricArticleData(req: Request, res: Response) {
         const q = String(req.query.q ?? '').trim();
-        // Accept comma-separated types e.g. ?type=FG,uploader
-        const typeParam = String(req.query.type ?? '').trim();
-        const types = typeParam ? typeParam.split(',').map((t) => t.trim().toUpperCase()).filter(Boolean) : [];
-        if (!q) return res.json({ results: [] });
-        const results = await prisma.fabricArticleData.findMany({
+        if (!q) return res.json({ results: [], attributeFallbackRate: null });
+
+        const descResults = await prisma.preciseFabricArticleData.findMany({
             where: {
                 OR: [
-                    { fabricArticleNumber: { contains: q, mode: 'insensitive' } },
                     { fabricArticleDescription: { contains: q, mode: 'insensitive' } },
+                    ...(isNaN(Number(q)) ? [] : [{ fabricArticleNumber: { equals: BigInt(q) } }]),
                 ],
-                NOT: { fabricArticleNumber: null },
-                ...(types.length === 1
-                    ? { fabricArticleType: types[0] }
-                    : types.length > 1
-                    ? { fabricArticleType: { in: types } }
-                    : {}),
             },
             select: {
                 fabricArticleNumber: true,
                 fabricArticleDescription: true,
+                fabricRate: true,
                 mFabDiv: true,
                 mYarn: true,
                 mFabMainMvgr1: true,
@@ -4654,11 +4647,80 @@ export class ApproverController {
                 mGsm: true,
                 mLycra: true,
             },
-            distinct: ['fabricArticleNumber'],
             take: 15,
             orderBy: { fabricArticleNumber: 'asc' },
         });
-        return res.json({ results });
+
+        const results = descResults.map((r) => ({
+            ...r,
+            fabricArticleNumber: r.fabricArticleNumber ? String(r.fabricArticleNumber) : null,
+            fabricRate: r.fabricRate ? Number(r.fabricRate) : null,
+        }));
+
+        if (results.length > 0) return res.json({ results, attributeFallbackRate: null });
+
+        // Attribute-based fallback — exact match on 8 fabric attributes
+        const mFabDiv      = String(req.query.mFabDiv      ?? '').trim() || undefined;
+        const mYarn        = String(req.query.mYarn        ?? '').trim() || undefined;
+        const mFabMainMvgr1 = String(req.query.mFabMainMvgr1 ?? '').trim() || undefined;
+        const mConstruction = String(req.query.mConstruction ?? '').trim() || undefined;
+        const mWidth       = String(req.query.mWidth       ?? '').trim() || undefined;
+        const mWeave01     = String(req.query.mWeave01     ?? '').trim() || undefined;
+        const mComposition = String(req.query.mComposition ?? '').trim() || undefined;
+        const mLycra       = String(req.query.mLycra       ?? '').trim() || undefined;
+
+        const attrWhere: Record<string, unknown> = {};
+        if (mFabDiv)       attrWhere.mFabDiv       = mFabDiv;
+        if (mYarn)         attrWhere.mYarn          = mYarn;
+        if (mFabMainMvgr1) attrWhere.mFabMainMvgr1  = mFabMainMvgr1;
+        if (mConstruction) attrWhere.mConstruction  = mConstruction;
+        if (mWidth)        attrWhere.mWidth         = mWidth;
+        if (mWeave01)      attrWhere.mWeave01       = mWeave01;
+        if (mComposition)  attrWhere.mComposition   = mComposition;
+        if (mLycra)        attrWhere.mLycra         = mLycra;
+
+        let attributeFallbackRate: number | null = null;
+        if (Object.keys(attrWhere).length > 0) {
+            const attrMatches = await prisma.preciseFabricArticleData.findMany({
+                where: attrWhere,
+                select: { fabricRate: true },
+                orderBy: { fabricRate: 'asc' },
+                take: 1,
+            });
+            if (attrMatches.length > 0 && attrMatches[0].fabricRate != null) {
+                attributeFallbackRate = Number(attrMatches[0].fabricRate);
+            }
+        }
+
+        return res.json({ results: [], attributeFallbackRate });
+    }
+
+    // Rough-V2 rate lookup — exact match on 5 fabric attributes in precise_fabric_article_data,
+    // returns the lowest fabric_rate among matches (or null if no match).
+    static async getRoughV2Rate(req: Request, res: Response) {
+        const mYarn        = String(req.query.mYarn        ?? '').trim() || undefined;
+        const mFabDiv      = String(req.query.mFabDiv      ?? '').trim() || undefined;
+        const mFabMainMvgr1 = String(req.query.mFabMainMvgr1 ?? '').trim() || undefined;
+        const mWeave01     = String(req.query.mWeave01     ?? '').trim() || undefined;
+        const mLycra       = String(req.query.mLycra       ?? '').trim() || undefined;
+
+        const where: Record<string, unknown> = {};
+        if (mYarn)         where.mYarn         = mYarn;
+        if (mFabDiv)       where.mFabDiv       = mFabDiv;
+        if (mFabMainMvgr1) where.mFabMainMvgr1 = mFabMainMvgr1;
+        if (mWeave01)      where.mWeave01      = mWeave01;
+        if (mLycra)        where.mLycra        = mLycra;
+
+        if (Object.keys(where).length === 0) return res.json({ rate: null });
+
+        const match = await prisma.preciseFabricArticleData.findFirst({
+            where,
+            select: { fabricRate: true },
+            orderBy: { fabricRate: 'asc' },
+        });
+
+        const rate = match?.fabricRate != null ? Number(match.fabricRate) : null;
+        return res.json({ rate });
     }
 
     // Body Article No. search (Body & Construction card) — backed by body_article_data,

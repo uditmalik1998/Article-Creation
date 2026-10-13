@@ -230,6 +230,7 @@ router.post('/cmp-cost-master/upload', excelUpload.single('file'), h(adminContro
 // ═══════════════════════════════════════════════════════
 // PRECISE TRIM MASTER (precise_trim_master)
 // ═══════════════════════════════════════════════════════
+router.get('/precise-trim-master/lookup', h(adminController.lookupPreciseTrimMaster));
 router.get('/precise-trim-master/status', h(adminController.getPreciseTrimMasterStatus));
 router.get('/precise-trim-master/template', h(adminController.downloadPreciseTrimMasterTemplate));
 router.get('/precise-trim-master/export', h(adminController.exportPreciseTrimMaster));
@@ -340,6 +341,14 @@ router.get('/precise-body-article/status',   h(adminController.getPreciseBodyArt
 router.get('/precise-body-article/template', h(adminController.downloadPreciseBodyArticleTemplate));
 router.get('/precise-body-article/download', h(adminController.downloadPreciseBodyArticleData));
 router.post('/precise-body-article/upload',  excelUpload.single('file'), h(adminController.uploadPreciseBodyArticle));
+
+// ═══════════════════════════════════════════════════════════════
+// PRECISE FABRIC ARTICLE DATA — precise_fabric_article_data
+// ═══════════════════════════════════════════════════════════════
+router.get('/precise-fabric-article-data/status',   h(adminController.getPreciseFabricArticleDataStatus));
+router.get('/precise-fabric-article-data/template', h(adminController.downloadPreciseFabricArticleDataTemplate));
+router.get('/precise-fabric-article-data/export',   h(adminController.exportPreciseFabricArticleData));
+router.post('/precise-fabric-article-data/upload',  excelUpload.single('file'), h(adminController.uploadPreciseFabricArticleData));
 
 // ═══════════════════════════════════════════════════════
 // BODY ARTICLE DATA (ADMIN) — body_article_data

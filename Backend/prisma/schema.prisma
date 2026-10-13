@@ -1574,6 +1574,38 @@ model FabricArticleData {
   @@schema("public")
 }
 
+/// PreciseFabricArticleData: Master table of precise fabric articles seeded from Excel.
+/// Used for fabric article desc dropdown search and attribute-based AUTO-BGT lookup.
+model PreciseFabricArticleData {
+  id                       BigInt    @id @default(autoincrement())
+  fabricArticleNumber      BigInt?   @map("fabric_article_number")
+  fabricArticleDescription String?   @map("fabric_article_description") @db.Text
+  division                 String?   @map("division")           @db.VarChar(100)
+  subDivision              String?   @map("sub_division")       @db.VarChar(100)
+  majorCategory            String?   @map("major_category")     @db.VarChar(200)
+  vendorName               String?   @map("vendor_name")        @db.VarChar(200)
+  vendorCode               Int?      @map("vendor_code")
+  fabricRate               Decimal?  @map("fabric_rate")        @db.Decimal(10, 4)
+  mFabDiv                  String?   @map("m_fab_div")          @db.VarChar(100)
+  mYarn                    String?   @map("m_yarn")             @db.VarChar(100)
+  mFabMainMvgr1            String?   @map("m_fab_main_mvgr_1")  @db.VarChar(100)
+  mFabMainMvgr2            String?   @map("m_fab_main_mvgr_2")  @db.VarChar(100)
+  mConstruction            String?   @map("m_construction")     @db.VarChar(100)
+  mOunz                    String?   @map("m_ounz")             @db.VarChar(100)
+  mWidth                   String?   @map("m_width")            @db.VarChar(100)
+  mWeave01                 String?   @map("m_weave_01")         @db.VarChar(100)
+  mWeave02                 String?   @map("m_weave_02")         @db.VarChar(100)
+  mCount                   String?   @map("m_count")            @db.VarChar(100)
+  mComposition             String?   @map("m_composition")      @db.VarChar(200)
+  mFinish                  String?   @map("m_finish")           @db.VarChar(100)
+  mGsm                     String?   @map("m_gsm")              @db.VarChar(50)
+  mLycra                   String?   @map("m_lycra")            @db.VarChar(50)
+  createdAt                DateTime  @default(now())            @map("created_at")
+
+  @@map("precise_fabric_article_data")
+  @@schema("public")
+}
+
 /// GmArticleData: One row per GM article. Attribute columns map 1-to-1 to the
 /// unique family_code values in gm_major_category_details. Not every column
 /// applies to every major category — only the codes listed in
@@ -2154,18 +2186,18 @@ model BasicTrimCostMaster {
 }
 
 /// PreciseTrimMaster: per-attribute-value BT-1 / BT-2 trim costs imported from
-/// "BASIC TRIMS 2 TYPE COSTING.xlsx". Keyed on (maj_cat, type).
+/// "BASIC TRIMS 2 TYPE COSTING.xlsx". Keyed on (attribute_name, type).
 model PreciseTrimMaster {
-  id        Int      @id @default(autoincrement())
-  majCat    String   @map("maj_cat") @db.VarChar(100)
-  type      String   @map("type")    @db.VarChar(100)
-  bt1       Decimal? @map("bt1")     @db.Decimal(10, 4)
-  bt2       Decimal? @map("bt2")     @db.Decimal(10, 4)
-  createdAt DateTime @default(now()) @map("created_at")
-  updatedAt DateTime @updatedAt      @map("updated_at")
+  id            Int      @id @default(autoincrement())
+  attributeName String   @map("attribute_name") @db.VarChar(100)
+  type          String   @map("type")            @db.VarChar(100)
+  bt1           Decimal? @map("bt1")             @db.Decimal(10, 4)
+  bt2           Decimal? @map("bt2")             @db.Decimal(10, 4)
+  createdAt     DateTime @default(now())         @map("created_at")
+  updatedAt     DateTime @updatedAt              @map("updated_at")
 
-  @@unique([majCat, type])
-  @@index([majCat])
+  @@unique([attributeName, type])
+  @@index([attributeName])
   @@map("precise_trim_master")
   @@schema("public")
 }
