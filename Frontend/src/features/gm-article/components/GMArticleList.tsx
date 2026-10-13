@@ -70,6 +70,8 @@ import {
   preloadGMGridFor,
   getCachedGMGrid,
   type GmGridAttr,
+  preloadGMDescFormatFor,
+  type GmDescFormatRow,
 } from '../../../services/articleConfigService';
 import { getImageUrl } from '../../../shared/utils/common/helpers';
 import { APP_CONFIG } from '../../../constants/app/config';
@@ -441,6 +443,7 @@ const ArticleCard = React.memo(
     const [dupConfirmOpen, setDupConfirmOpen] = useState(false);
     const autoSavedFabDescRef = useRef<string | null>(null);
     const [duplicating, setDuplicating] = useState(false);
+    const [gmDescFormat, setGmDescFormat] = useState<GmDescFormatRow[]>([]);
     const [imgZoom, setImgZoom] = useState(1);
     const [imgRotation, setImgRotation] = useState(0);
     // Search term for every dropdown on the card. A single shared term is
@@ -815,6 +818,13 @@ const ArticleCard = React.memo(
         ),
       [cardGroups],
     );
+
+    // Fetch description format for this GM article's major category (non-FG only).
+    useEffect(() => {
+      if (isFGMode || !item.majorCategory) return;
+      preloadGMDescFormatFor(item.majorCategory).then(setGmDescFormat);
+    }, [isFGMode, item.majorCategory]);
+
     const getFieldVal = useCallback(
       (field: string) => {
         const v = localValues[field] !== undefined ? localValues[field] : (item as any)[field];
@@ -823,7 +833,9 @@ const ArticleCard = React.memo(
       [localValues, item],
     );
 
-    // Reactively rebuild fabric/body descriptions whenever visible fields or item changes.
+    // Rebuild description in local state whenever item data or format changes.
+    // GM: always recomputed from format — field is read-only, user cannot override.
+    // FG: always rebuilt from FAB_FIELDS (existing behaviour).
     React.useEffect(() => {
       if (item.approvalStatus !== 'PENDING') return;
       setLocalValues((prev) => {
@@ -831,39 +843,63 @@ const ArticleCard = React.memo(
           const v = prev[field] !== undefined ? prev[field] : (item as any)[field];
           return v ? String(v).trim() : null;
         };
-        const fabParts = FAB_FIELDS.map((f) => getVal(f.field)).filter((v): v is string => Boolean(v) && !/^-+$/.test(v as string));
-        const fabJoined = fabParts.length > 0 ? fabParts.join('-').replace(/-{2,}/g, '-').replace(/-+$/, '') : null;
-        const newFabDesc = fabJoined;
         const updates: Record<string, string | null> = {};
-        if (newFabDesc !== null && newFabDesc !== prev['fabricArticleDescription']) updates['fabricArticleDescription'] = newFabDesc;
+        if (!isFGMode && gmDescFormat.length > 0) {
+          const parts = gmDescFormat
+            .map((f) => getVal(f.familyCode))
+            .filter((v): v is string => Boolean(v) && !/^-+$/.test(v));
+          const desc = parts.length > 0 ? parts.join('-').replace(/-{2,}/g, '-').replace(/-+$/, '') : null;
+          if (desc !== null && desc !== prev['fabricArticleDescription']) updates['fabricArticleDescription'] = desc;
+        } else if (isFGMode) {
+          const fabParts = FAB_FIELDS.map((f) => getVal(f.field)).filter((v): v is string => Boolean(v) && !/^-+$/.test(v));
+          const fabJoined = fabParts.length > 0 ? fabParts.join('-').replace(/-{2,}/g, '-').replace(/-+$/, '') : null;
+          if (fabJoined !== null && fabJoined !== prev['fabricArticleDescription']) updates['fabricArticleDescription'] = fabJoined;
+        }
         return Object.keys(updates).length > 0 ? { ...prev, ...updates } : prev;
       });
-    }, [item, FAB_FIELDS]);
+    }, [item, FAB_FIELDS, isFGMode, gmDescFormat]);
 
-    // Auto-save the computed fabric description to DB whenever it differs from the DB value.
-    // FG mode: only fires when DB value is empty (first-time fill).
-    // SRM mode: fires whenever any fabric attribute changes and description drifts from DB.
+    // Auto-save the computed description to DB whenever it drifts from the stored value.
+    // GM: always overwrites — description is system-generated, not user-editable.
+    // FG: only fills if empty (don't overwrite manually set values).
     React.useEffect(() => {
       if (item.approvalStatus !== 'PENDING') return;
-      if (isFGMode && item.fabricArticleDescription) return; // FG: don't overwrite existing
-      // Use ATTRIBUTE_GROUPS FAB fields as fallback if cardGroups didn't populate FAB_FIELDS
-      const effectiveFabFields = FAB_FIELDS.length > 0
-        ? FAB_FIELDS
-        : (ATTRIBUTE_GROUPS.find((g) => g.group === 'FAB')?.fields ?? []).filter(
-            (f) => !f.freeText && f.field !== 'mainMvgr',
-          );
-      const fabParts = effectiveFabFields.map((f) => {
-        const v = (localValues[f.field] !== undefined ? localValues[f.field] : (item as any)[f.field]);
-        return v ? String(v).trim() : null;
-      }).filter((v): v is string => Boolean(v) && !/^-+$/.test(v as string));
-      if (fabParts.length === 0) return;
-      const computed = fabParts.join('-').replace(/-{2,}/g, '-').replace(/-+$/, '');
-      if (computed === item.fabricArticleDescription) return; // already in DB
-      if (autoSavedFabDescRef.current === computed) return; // already queued this save
+
+      let computed: string | null = null;
+
+      if (!isFGMode) {
+        if (gmDescFormat.length === 0) return;
+        const gmParts = gmDescFormat
+          .map((f) => {
+            const v = localValues[f.familyCode] !== undefined ? localValues[f.familyCode] : (item as any)[f.familyCode];
+            return v ? String(v).trim() : null;
+          })
+          .filter((v): v is string => Boolean(v) && !/^-+$/.test(v));
+        if (gmParts.length === 0) return;
+        computed = gmParts.join('-').replace(/-{2,}/g, '-').replace(/-+$/, '');
+      } else {
+        if (item.fabricArticleDescription) return; // FG: don't overwrite existing
+        const effectiveFabFields = FAB_FIELDS.length > 0
+          ? FAB_FIELDS
+          : (ATTRIBUTE_GROUPS.find((g) => g.group === 'FAB')?.fields ?? []).filter(
+              (f) => !f.freeText && f.field !== 'mainMvgr',
+            );
+        const fabParts = effectiveFabFields
+          .map((f) => {
+            const v = localValues[f.field] !== undefined ? localValues[f.field] : (item as any)[f.field];
+            return v ? String(v).trim() : null;
+          })
+          .filter((v): v is string => Boolean(v) && !/^-+$/.test(v));
+        if (fabParts.length === 0) return;
+        computed = fabParts.join('-').replace(/-{2,}/g, '-').replace(/-+$/, '');
+      }
+
+      if (computed === null || computed === item.fabricArticleDescription) return;
+      if (autoSavedFabDescRef.current === computed) return;
       autoSavedFabDescRef.current = computed;
       onSave({ ...item, fabricArticleDescription: computed } as ApproverItem, { fabricArticleDescription: computed }, { silent: true });
     // eslint-disable-next-line react-hooks/exhaustive-deps
-    }, [item.id, item.fabricArticleDescription, FAB_FIELDS, isFGMode, localValues]);
+    }, [item.id, item.fabricArticleDescription, FAB_FIELDS, isFGMode, localValues, gmDescFormat]);
 
     // APPROVED/REJECTED articles are normally read-only. EXCEPTION: on the
     // Created page (modify mode) we keep them editable so the user can stage
@@ -1056,17 +1092,27 @@ const ArticleCard = React.memo(
           });
         }
       }
-      // When a Construction & Fabric attribute changes, recompute fabricArticleDescription
-      // and bundle it into the same save so the DB value stays in sync with the UI.
-      const fabFieldKeys = new Set(FAB_FIELDS.map((ff) => ff.field));
-      if (fabFieldKeys.has(field)) {
-        const getVal = (f: string) => {
-          const v = updates[f] !== undefined ? updates[f] : (localValues[f] !== undefined ? localValues[f] : (item as any)[f]);
-          return v ? String(v).trim() : null;
-        };
-        const fabParts = FAB_FIELDS.map((f) => getVal(f.field)).filter((v): v is string => Boolean(v) && !/^-+$/.test(v as string));
-        const newFabDesc = fabParts.length > 0 ? fabParts.join('-').replace(/-{2,}/g, '-').replace(/-+$/, '') : null;
-        if (newFabDesc) updates['fabricArticleDescription'] = newFabDesc;
+      // Recompute fabricArticleDescription when a relevant attribute changes.
+      const getVal = (f: string) => {
+        const v = updates[f] !== undefined ? updates[f] : (localValues[f] !== undefined ? localValues[f] : (item as any)[f]);
+        return v ? String(v).trim() : null;
+      };
+      if (!isFGMode && gmDescFormat.length > 0) {
+        // GM mode: rebuild from description format table when any format field changes
+        const gmFormatKeys = new Set(gmDescFormat.map((f) => f.familyCode));
+        if (gmFormatKeys.has(field)) {
+          const gmParts = gmDescFormat.map((f) => getVal(f.familyCode)).filter((v): v is string => Boolean(v) && !/^-+$/.test(v));
+          const newDesc = gmParts.length > 0 ? gmParts.join('-').replace(/-{2,}/g, '-').replace(/-+$/, '') : null;
+          if (newDesc) updates['fabricArticleDescription'] = newDesc;
+        }
+      } else if (isFGMode) {
+        // FG mode: rebuild from FAB_FIELDS when a fabric attribute changes
+        const fabFieldKeys = new Set(FAB_FIELDS.map((ff) => ff.field));
+        if (fabFieldKeys.has(field)) {
+          const fabParts = FAB_FIELDS.map((f) => getVal(f.field)).filter((v): v is string => Boolean(v) && !/^-+$/.test(v));
+          const newFabDesc = fabParts.length > 0 ? fabParts.join('-').replace(/-{2,}/g, '-').replace(/-+$/, '') : null;
+          if (newFabDesc) updates['fabricArticleDescription'] = newFabDesc;
+        }
       }
       setLocalValues((prev) => ({ ...prev, ...updates }));
       setEditingField(null);
@@ -1289,7 +1335,7 @@ const ArticleCard = React.memo(
     };
 
     const designLocked = item.approvalStatus !== 'PENDING' && item.sapSyncStatus !== 'FAILED';
-    const articleNumberEditable = !item.sapArticleId && !item.fabricArticleNumber && !isFieldLocked('articleNumber');
+    const articleNumberEditable = !isFGMode ? false : !item.sapArticleId && !item.fabricArticleNumber && !isFieldLocked('articleNumber');
     const vendorCodeVal = readField('vendorCode');
     const vendorNameVal = readField('vendorName');
     const createdAtRaw = (pathType === 'created' ? item.updatedAt : item.createdAt) || item.updatedAt || item.createdAt;
@@ -1667,11 +1713,10 @@ const ArticleCard = React.memo(
                   disabled: !articleNumberEditable,
                   placeholder: 'Type article number',
                 })}
-                {/* GM description rule is pending from the business — manual text for now. */}
                 <div className="col-span-2 min-w-0">
                   {renderTextField('fabricArticleDescription', 'Article description', {
-                    disabled: isFieldLocked('fabricArticleDescription'),
-                    placeholder: 'Type article description',
+                    disabled: !isFGMode ? true : isFieldLocked('fabricArticleDescription'),
+                    placeholder: 'Auto-built from attributes',
                   })}
                 </div>
                 {renderTextField(

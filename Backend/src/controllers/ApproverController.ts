@@ -4524,6 +4524,43 @@ export class ApproverController {
         return res.json(ApproverController.gmArticleDataRowToItem(row));
     };
 
+    // Returns ordered description format rows for a given GM major category.
+    // maj_cat_nm (e.g. "ST_STATIONARY_SET") is resolved to its archetype_nm
+    // ("Stationery") via gm_major_category_details before querying the format table.
+    static getGmDescriptionFormat = async (req: Request, res: Response) => {
+        const majorCategory = String(req.query.majorCategory ?? '').trim();
+        if (!majorCategory) return res.json({ format: [] });
+
+        // Resolve maj_cat_nm → archetype_nm.
+        // Use $queryRawUnsafe to avoid pgbouncer parameter-type inference issues;
+        // inputs are sanitized to alphanumeric + safe punctuation before interpolation.
+        const safeMajCat = majorCategory.replace(/'/g, "''");
+        const archetypeRows = await prisma.$queryRawUnsafe<{ archetype_nm: string }[]>(
+            `SELECT DISTINCT archetype_nm
+             FROM public.gm_major_category_details
+             WHERE LOWER(maj_cat_nm) = LOWER('${safeMajCat}')
+             LIMIT 1`,
+        );
+        const archetypeNm = archetypeRows[0]?.archetype_nm ?? majorCategory;
+        const safeArchetype = archetypeNm.replace(/'/g, "''");
+
+        const rows = await prisma.$queryRawUnsafe<{ family_code: string; family_name: string; desc_seq: string }[]>(
+            `SELECT family_code, family_name, desc_seq
+             FROM public.gm_article_description_formate
+             WHERE LOWER(archetype_nm) = LOWER('${safeArchetype}')
+               AND desc_seq <> '-'
+             ORDER BY CAST(desc_seq AS INTEGER)`,
+        );
+
+        return res.json({
+            format: rows.map(r => ({
+                familyCode: r.family_code,
+                familyName: r.family_name,
+                descSeq:    r.desc_seq,
+            })),
+        });
+    };
+
     // Allowed client-side keys → Prisma field names for gm_article_data updates
     private static GM_ARTICLE_UPDATE_FIELDS: Record<string, string> = {
         division: 'division', subDivision: 'subDivision', majorCategory: 'majorCategory',
