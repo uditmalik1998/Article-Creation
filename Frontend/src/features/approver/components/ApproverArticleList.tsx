@@ -630,6 +630,7 @@ const ArticleCard = React.memo(
     }[]>([]);
     const [fabNoLoading, setFabNoLoading] = useState(false);
     const [cmpActPreset, setCmpActPreset] = useState<Record<string, string>>({});
+    const [cmpBgtPreset, setCmpBgtPreset] = useState<Record<string, string>>({});
     const [preciseBodyResults, setPreciseBodyResults] = useState<{ macroBodyDescription: string | null; microBodyArticleNumber: string | null }[]>([]);
     const [preciseBodyLoading, setPreciseBodyLoading] = useState(false);
     const [preciseBodySearched, setPreciseBodySearched] = useState(false);
@@ -999,6 +1000,47 @@ const ArticleCard = React.memo(
       fetchCmpActData(currentBodyArticle);
     // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [currentBodyArticle, isBodyArticle]);
+
+    // Auto-fill CMP COST card BGT column from rough_cmp_cost_master by major category.
+    // Fires once per unique major category (FG articles only).
+    const cmpBgtFetchedRef = React.useRef('');
+    useEffect(() => {
+      if (isBodyArticle || !effectiveMajCat) return;
+      if (cmpBgtFetchedRef.current === effectiveMajCat) return;
+      cmpBgtFetchedRef.current = effectiveMajCat;
+      const token = localStorage.getItem('authToken');
+      fetch(
+        `${APP_CONFIG.api.baseURL}/approver/rough-cmp-cost?majorCategory=${encodeURIComponent(effectiveMajCat)}`,
+        { headers: { Authorization: `Bearer ${token}` } },
+      )
+        .then((r) => r.json())
+        .then((d: {
+          cmpCost: number | null;
+          cuttingSam: number | null; cuttingVal: number | null;
+          stitchingSam: number | null; stitchingVal: number | null;
+          ironingSam: number | null; ironingVal: number | null;
+          finishingSam: number | null; finishingVal: number | null;
+        }) => {
+          if (!d.cuttingVal && !d.stitchingSam && !d.ironingSam && !d.finishingSam) return;
+          const fmt = (v: number | null) => (v != null ? String(v) : '');
+          const rate = (val: number | null, sam: number | null) =>
+            val != null && sam != null && sam !== 0 ? (val / sam).toFixed(4) : '';
+          setCmpBgtPreset({
+            'CUTTING|BGT|PR VAL':    fmt(d.cuttingVal),
+            'STITCHING|BGT|SAM':     fmt(d.stitchingSam),
+            'STITCHING|BGT|SAM VAL': rate(d.stitchingVal, d.stitchingSam),
+            'STITCHING|BGT|PR VAL':  fmt(d.stitchingVal),
+            'IRONING|BGT|SAM':       fmt(d.ironingSam),
+            'IRONING|BGT|SAM VAL':   rate(d.ironingVal, d.ironingSam),
+            'IRONING|BGT|PR VAL':    fmt(d.ironingVal),
+            'FINISHING|BGT|SAM':     fmt(d.finishingSam),
+            'FINISHING|BGT|SAM VAL': rate(d.finishingVal, d.finishingSam),
+            'FINISHING|BGT|PR VAL':  fmt(d.finishingVal),
+          });
+        })
+        .catch(() => {});
+      // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, [isBodyArticle, effectiveMajCat]);
 
     // fWidth effect: fetches on every genuine M_WIDTH change for rough consumption.
     // Uses a "last applied" ref so re-renders from onSave don't re-trigger the fetch.
@@ -4561,6 +4603,7 @@ const ArticleCard = React.memo(
                       collapsed={isGroupCollapsed('CMP')}
                       onToggleCollapse={() => toggleGroupCollapse('CMP')}
                       locked={isLocked}
+                      bgtPreset={cmpBgtPreset}
                       actPreset={cmpActPreset}
                     />
                   )}

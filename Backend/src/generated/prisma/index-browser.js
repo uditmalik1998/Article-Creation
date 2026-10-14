@@ -1416,7 +1416,16 @@ exports.Prisma.RoughCmpCostMasterScalarFieldEnum = {
   div: 'div',
   subDiv: 'subDiv',
   majCat: 'majCat',
+  cuttingSam: 'cuttingSam',
+  cuttingVal: 'cuttingVal',
+  stitchingSam: 'stitchingSam',
+  stitchingVal: 'stitchingVal',
+  ironingSam: 'ironingSam',
+  ironingVal: 'ironingVal',
+  finishingSam: 'finishingSam',
+  finishingVal: 'finishingVal',
   cmpCost: 'cmpCost',
+  remarks: 'remarks',
   createdAt: 'createdAt',
   updatedAt: 'updatedAt'
 };
@@ -2587,7 +2596,8 @@ exports.Prisma.BodyFabricConsumptionOrderByRelevanceFieldEnum = {
 exports.Prisma.RoughCmpCostMasterOrderByRelevanceFieldEnum = {
   div: 'div',
   subDiv: 'subDiv',
-  majCat: 'majCat'
+  majCat: 'majCat',
+  remarks: 'remarks'
 };
 
 exports.Prisma.BasicTrimCostMasterOrderByRelevanceFieldEnum = {

@@ -45,6 +45,7 @@ import {
 } from '@/shared/components/ui-tw';
 import { message } from '@/lib/message';
 import { cn } from '@/lib/utils';
+import { CARD_THEME } from '../../approver/components/cardTheme';
 import type { ApproverItem, MasterAttribute } from './FabricArticleTable';
 import {
   SCHEMA_KEY_TO_EXCEL_ATTR,
@@ -289,7 +290,7 @@ const FAB_PRIORITY_KEYS = [
 
 // ─── Redesign tokens — header/icon palette per group ──────────────────────────
 const GROUP_LABELS: Record<string, string> = {
-  FAB: 'FABRIC AND CONSTRUCTION',
+  FAB: 'FAB',
 };
 
 const GROUP_ICONS: Record<string, React.ReactNode> = {
@@ -299,8 +300,9 @@ const GROUP_ICONS: Record<string, React.ReactNode> = {
 // Group surfaces use saturated 400-tier border stops so the card edges
 // read confidently against the page. BUSINESS shifted from purple
 // (palette violation) to slate to fit the locked slate+coral palette.
+// FAB uses the same Ink card theme as the FG article page.
 const GROUP_HEADER_STYLE: Record<string, { bg: string; fg: string; border: string }> = {
-  FAB: { bg: '#fff7ed', fg: '#9a3412', border: '#fb923c' },
+  FAB: CARD_THEME,
 };
 
 type CardGroup = typeof ATTRIBUTE_GROUPS[number];
@@ -436,6 +438,8 @@ const ArticleCard = React.memo(
     const [duplicating, setDuplicating] = useState(false);
     const [allCollapsed, setAllCollapsed] = useState(false);
     const [collapsedGroups, setCollapsedGroups] = useState<Set<string>>(new Set());
+    // Left rail: Article Information / Reference & Vendor are collapsible, open by default.
+    const [openLeftCards, setOpenLeftCards] = useState<Set<string>>(() => new Set(['info', 'reference']));
     const [imgZoom, setImgZoom] = useState(1);
     const [imgRotation, setImgRotation] = useState(0);
     const [catOpen, setCatOpen] = useState(false);
@@ -1138,21 +1142,22 @@ const ArticleCard = React.memo(
       return (
         <div
           key={field}
-          className="border-b border-border last:border-b-0"
+          className="border-b border-slate-100 last:border-b-0"
           style={{ cursor: canEdit ? 'pointer' : 'default' }}
           onClick={() => {
             if (canEdit && !isEditingThis) setEditingField(`hdr_${field}`);
           }}
         >
-          <div className="flex items-start justify-between gap-2 px-2 py-0.5">
+          {/* Label stacked above a full-width value (same as the FG page). */}
+          <div className="flex flex-col gap-0.5 px-3 py-1.5">
             <span
-              className="shrink-0 text-[9px] font-semibold uppercase tracking-wider"
-              style={{ color: showRequiredError ? '#dc2626' : '#6b7280' }}
+              className="text-[10px] font-semibold uppercase tracking-wider"
+              style={{ color: showRequiredError ? '#c2410c' : '#475569' }}
             >
               {label}
-              {required && <span className="ml-0.5 text-red-500">*</span>}
+              {required && <span className="ml-0.5 text-orange-700">*</span>}
             </span>
-            <div className="min-w-0 flex-1 text-right">
+            <div className="min-w-0">
               {isEditingThis && field === 'majorCategory' ? (
                 <Popover
                   open={catOpen}
@@ -1309,11 +1314,16 @@ const ArticleCard = React.memo(
                 />
               ) : (
                 <span
-                  className="truncate text-xs"
-                  style={{
-                    color: displayVal ? color : showRequiredError ? '#ea580c' : '#9ca3af',
-                    fontStyle: showRequiredError ? 'italic' : 'normal',
-                  }}
+                  title={displayVal || undefined}
+                  className={`block truncate ${
+                    displayVal
+                      ? field === 'majorCategory' || field === 'mcDescription'
+                        ? 'font-mono text-[11.5px] text-slate-900'
+                        : 'text-[12.5px] font-semibold text-slate-900'
+                      : showRequiredError
+                      ? 'text-xs font-semibold italic text-orange-700'
+                      : 'text-xs italic text-slate-500'
+                  }`}
                 >
                   {displayVal || (showRequiredError ? 'Required' : canEdit ? 'Click to fill' : '—')}
                 </span>
@@ -1542,8 +1552,94 @@ const ArticleCard = React.memo(
     }).length;
     const attrMatchRatio = visibleAttrs.length > 0 ? filledAttrCount / visibleAttrs.length : 0;
     const attrMatchLevel = attrMatchRatio >= 0.7 ? 'High' : attrMatchRatio >= 0.4 ? 'Medium' : 'Low';
-    const qualityColor = (level: string) =>
-      level === 'High' ? 'text-emerald-600' : level === 'Medium' ? 'text-amber-600' : 'text-rose-600';
+    // ── Left rail (same design as the FG page, "Option A · Ink headers") ──
+    const levelColor = (level: string) =>
+      level === 'High' ? 'text-slate-900' : level === 'Medium' ? 'text-orange-700' : 'text-red-700';
+    const isLeftCardOpen = (key: string) => openLeftCards.has(key);
+    const toggleLeftCard = (key: string) =>
+      setOpenLeftCards((prev) => {
+        const next = new Set(prev);
+        if (next.has(key)) next.delete(key);
+        else next.add(key);
+        return next;
+      });
+    const createdOrUpdated = (pathType === 'created' ? item.updatedAt : item.createdAt) || item.updatedAt || item.createdAt;
+    const createdOrUpdatedLabel = createdOrUpdated
+      ? new Date(createdOrUpdated as string).toLocaleString('en-IN', {
+          day: 'numeric',
+          month: 'short',
+          year: 'numeric',
+          hour: '2-digit',
+          minute: '2-digit',
+        })
+      : '—';
+    // Required Reference & Vendor fields still empty — shown on the header so a
+    // closed card can't hide them.
+    const missingRequiredHeaderCount = isLocked
+      ? 0
+      : HEADER_FIELDS.filter((f) => {
+          if (!f.required) return false;
+          const v = localValues[f.field] !== undefined ? localValues[f.field] : (item as any)[f.field];
+          return !String(v ?? '').trim();
+        }).length;
+    // Ink header; with `cardKey` it becomes a toggle that shows `summary` while closed.
+    const renderInkCardHeader = (title: string, opts: { cardKey?: string; summary?: React.ReactNode; right?: React.ReactNode } = {}) => {
+      const content = (
+        <>
+          <span className="text-[10.5px] font-bold uppercase tracking-[0.08em]">{title}</span>
+          <span className="flex min-w-0 items-center gap-2">
+            {opts.cardKey && !isLeftCardOpen(opts.cardKey) && opts.summary}
+            {opts.right}
+            {opts.cardKey &&
+              (isLeftCardOpen(opts.cardKey) ? <ChevronUp className="h-3.5 w-3.5 shrink-0" /> : <ChevronDown className="h-3.5 w-3.5 shrink-0" />)}
+          </span>
+        </>
+      );
+      const cls = 'flex w-full items-center justify-between gap-2 px-3 py-2';
+      const style = { background: CARD_THEME.bg, color: CARD_THEME.fg };
+      if (!opts.cardKey) return <div className={cls} style={style}>{content}</div>;
+      const cardKey = opts.cardKey;
+      return (
+        <button
+          type="button"
+          onClick={() => toggleLeftCard(cardKey)}
+          aria-expanded={isLeftCardOpen(cardKey)}
+          className={`${cls} text-left transition-[filter] hover:brightness-125`}
+          style={style}
+        >
+          {content}
+        </button>
+      );
+    };
+    const isSrm = item.source === 'SRM';
+    const infoRows: { label: string; value: React.ReactNode }[] = [
+      ...(!isSrm
+        ? [{ label: 'Article ID', value: item.sapArticleId || item.articleNumber || item.imageName || '—' }]
+        : []),
+      {
+        label: 'Category',
+        value: [formatDivisionLabel(item.division), item.subDivision, effectiveMajCat].filter(Boolean).join(' › ') || '—',
+      },
+      ...(!isSrm
+        ? [
+            {
+              label: 'AI confidence',
+              value: <span className="rounded-full bg-slate-800 px-2 py-0.5 text-[11px] font-bold text-white">{aiConfidence}%</span>,
+            },
+            { label: 'Image quality', value: <span className={levelColor(imageQualityLevel)}>{imageQualityLevel}</span> },
+            { label: 'Product clarity', value: <span className={levelColor(productClarityLevel)}>{productClarityLevel}</span> },
+            {
+              label: 'Attribute match',
+              value: (
+                <span className={levelColor(attrMatchLevel)}>
+                  {attrMatchLevel} · {filledAttrCount} / {visibleAttrs.length}
+                </span>
+              ),
+            },
+          ]
+        : []),
+      { label: pathType === 'created' ? 'Last updated' : 'Created', value: createdOrUpdatedLabel },
+    ];
 
     return (
       <>
@@ -1804,114 +1900,87 @@ const ArticleCard = React.memo(
              * height of the dashboard's sticky brand+filter chrome (~120px).
              */}
             <aside className="sticky top-[120px] flex min-w-0 flex-col gap-3 self-start">
-              {/* Article image — dominant focal point, mockup-style */}
-              <div className="overflow-hidden rounded-[var(--radius-card)] border-2 border-foreground/20 bg-white shadow-[var(--shadow-md)]">
-                <div className="flex items-center justify-between border-b-2 border-foreground/15 bg-slate-50 px-2.5 py-1.5">
-                  <span className="flex items-center gap-1.5 text-[10px] font-bold uppercase tracking-wider text-slate-700">
-                    <Info className="h-3 w-3" />
-                    Article Image
-                  </span>
-                  <Badge variant="success" className="text-[9px]">1 / 1</Badge>
-                </div>
-                <div className="group relative h-[420px] w-full bg-gradient-to-br from-slate-50 to-slate-100">
-                  {imgUrl ? (
-                    <>
-                      <img
-                        src={imgUrl}
-                        alt=""
-                        className="block h-full w-full cursor-zoom-in object-contain p-3 transition-transform duration-300 ease-out group-hover:scale-[1.02]"
-                        onError={handleImgError}
-                        onClick={() => setImgModalOpen(true)}
-                      />
-                      <Button
-                        size="icon"
-                        variant="outline"
-                        className="absolute right-2 top-2 h-8 w-8 bg-white/90 opacity-0 shadow-[var(--shadow-md)] backdrop-blur transition-opacity duration-200 group-hover:opacity-100"
-                        onClick={() => setImgModalOpen(true)}
-                        aria-label="Expand image"
-                      >
-                        <Maximize2 />
-                      </Button>
-                    </>
-                  ) : (
-                    <div className="flex h-full w-full items-center justify-center text-xs text-muted-foreground">
-                      No Image
-                    </div>
+              {/* Same design as the FG page ("Option A · Ink headers") */}
+              <div className="overflow-hidden rounded-xl border border-slate-300 bg-white">
+                {renderInkCardHeader('Article Image', {
+                  right: <span className="rounded-full bg-slate-700 px-2 py-0.5 text-[10.5px] font-semibold">1 / 1</span>,
+                })}
+                <div className="flex flex-col gap-2 p-3">
+                  <div className="relative h-[420px] w-full overflow-hidden rounded-lg bg-slate-100">
+                    {imgUrl ? (
+                      <>
+                        <img
+                          src={imgUrl}
+                          alt=""
+                          className="block h-full w-full cursor-zoom-in object-contain p-2"
+                          onError={handleImgError}
+                          onClick={() => setImgModalOpen(true)}
+                        />
+                        <button
+                          type="button"
+                          onClick={() => setImgModalOpen(true)}
+                          aria-label="Expand image"
+                          className="absolute bottom-2.5 right-2.5 flex h-9 w-9 items-center justify-center rounded-lg bg-slate-900/75 text-white hover:bg-slate-900"
+                        >
+                          <Maximize2 className="h-4 w-4" />
+                        </button>
+                      </>
+                    ) : (
+                      <div className="flex h-full w-full items-center justify-center text-xs text-slate-500">No image</div>
+                    )}
+                  </div>
+                  {item.imageName && (
+                    <span className="truncate font-mono text-[11px] text-slate-600" title={item.imageName}>
+                      {item.imageName}
+                    </span>
                   )}
                 </div>
               </div>
 
-              {/* Article information */}
-              <div className="overflow-hidden rounded-lg border-2 border-foreground/20 bg-white shadow-[var(--shadow-sm)]">
-                <div className="border-b-2 border-foreground/15 bg-slate-50 px-2 py-1">
-                  <span className="text-[10px] font-extrabold uppercase tracking-wider text-slate-700">
-                    Article Information
-                  </span>
-                </div>
-                <div className="space-y-0.5 px-2 py-1 text-[10.5px] font-medium">
-                  {item.source !== 'SRM' && (
-                    <div className="flex items-start justify-between gap-2">
-                      <span className="font-semibold text-muted-foreground">Article ID</span>
-                      <span className="truncate text-right font-bold text-foreground">
-                        {item.sapArticleId || item.articleNumber || item.imageName || '—'}
+              <div className="overflow-hidden rounded-xl border border-slate-300 bg-white">
+                {renderInkCardHeader('Article Information', {
+                  cardKey: 'info',
+                  summary: (
+                    <span className="truncate text-[11px] font-medium text-slate-300">
+                      {isSrm
+                        ? [item.subDivision, effectiveMajCat].filter(Boolean).join(' › ')
+                        : `${aiConfidence}% · ${attrMatchLevel} ${filledAttrCount}/${visibleAttrs.length}`}
+                    </span>
+                  ),
+                })}
+                {isLeftCardOpen('info') && (
+                  <dl className="m-0 grid grid-cols-[110px_minmax(0,1fr)] px-3 py-1 text-xs">
+                    {infoRows.map(({ label, value }, i) => (
+                      <React.Fragment key={label}>
+                        <dt className={`py-1.5 text-slate-600 ${i < infoRows.length - 1 ? 'border-b border-slate-100' : ''}`}>{label}</dt>
+                        <dd
+                          className={`m-0 truncate py-1.5 text-right font-semibold text-slate-900 ${
+                            i < infoRows.length - 1 ? 'border-b border-slate-100' : ''
+                          }`}
+                        >
+                          {value}
+                        </dd>
+                      </React.Fragment>
+                    ))}
+                  </dl>
+                )}
+              </div>
+
+              <div className="overflow-hidden rounded-xl border border-slate-300 bg-white">
+                {renderInkCardHeader('Reference & Vendor', {
+                  cardKey: 'reference',
+                  summary:
+                    missingRequiredHeaderCount > 0 ? (
+                      <span className="rounded-full bg-orange-100 px-2 py-0.5 text-[10.5px] font-semibold text-orange-800">
+                        {missingRequiredHeaderCount} required empty
                       </span>
-                    </div>
-                  )}
-                  <div className="flex items-start justify-between gap-2">
-                    <span className="font-semibold text-muted-foreground">Category</span>
-                    <span className="truncate text-right text-[11px] font-semibold text-foreground">
-                      {[formatDivisionLabel(item.division), item.subDivision, effectiveMajCat]
-                        .filter(Boolean)
-                        .join(' › ') || '—'}
-                    </span>
-                  </div>
-                  {item.source !== 'SRM' && (
-                    <>
-                      <div className="flex items-start justify-between gap-2">
-                        <span className="font-semibold text-muted-foreground">AI Confidence</span>
-                        <Badge variant="success">{aiConfidence}%</Badge>
-                      </div>
-                      <div className="flex items-start justify-between gap-2">
-                        <span className="font-semibold text-muted-foreground">Image Quality</span>
-                        <span className={`font-bold ${qualityColor(imageQualityLevel)}`}>{imageQualityLevel}</span>
-                      </div>
-                      <div className="flex items-start justify-between gap-2">
-                        <span className="font-semibold text-muted-foreground">Product Clarity</span>
-                        <span className={`font-bold ${qualityColor(productClarityLevel)}`}>{productClarityLevel}</span>
-                      </div>
-                      <div className="flex items-start justify-between gap-2">
-                        <span className="font-semibold text-muted-foreground">Attribute Match</span>
-                        <span className={`font-bold ${qualityColor(attrMatchLevel)}`}>
-                          {attrMatchLevel} ({filledAttrCount}/{visibleAttrs.length})
-                        </span>
-                      </div>
-                    </>
-                  )}
-                  <div className="flex items-start justify-between gap-2">
-                    <span className="font-semibold text-muted-foreground">{pathType === 'created' ? 'Last Updated' : 'Created'}</span>
-                    <span className="text-[11px] font-semibold text-foreground">
-                      {(pathType === 'created' ? item.updatedAt : item.createdAt) || item.updatedAt || item.createdAt
-                        ? new Date(((pathType === 'created' ? item.updatedAt : item.createdAt) || item.updatedAt || item.createdAt) as string).toLocaleString('en-IN', {
-                            day: 'numeric',
-                            month: 'short',
-                            year: 'numeric',
-                            hour: '2-digit',
-                            minute: '2-digit',
-                          })
-                        : '—'}
-                    </span>
-                  </div>
-                </div>
-              </div>
-
-              {/* Reference & Vendor — 7 editable fields stacked */}
-              <div className="overflow-hidden rounded-lg border-2 border-foreground/20 bg-white shadow-[var(--shadow-sm)]">
-                <div className="border-b-2 border-foreground/15 bg-slate-50 px-2 py-1">
-                  <span className="text-[10px] font-extrabold uppercase tracking-wider text-slate-700">
-                    Reference &amp; Vendor
-                  </span>
-                </div>
-                <div>{HEADER_FIELDS.map((f) => renderHeaderField(f as any))}</div>
+                    ) : (
+                      <span className="truncate text-[11px] font-medium text-slate-300">
+                        {(localValues.vendorName !== undefined ? localValues.vendorName : item.vendorName) || ''}
+                      </span>
+                    ),
+                })}
+                {isLeftCardOpen('reference') && <div className="py-1">{HEADER_FIELDS.map((f) => renderHeaderField(f as any))}</div>}
               </div>
             </aside>
 
@@ -1985,8 +2054,8 @@ const ArticleCard = React.memo(
                         <button
                           type="button"
                           onClick={() => toggleGroupCollapse(g.group)}
-                          className="flex w-full items-center justify-between border-b-2 px-2 py-1.5 transition-colors hover:brightness-95"
-                          style={{ background: style.bg, borderColor: style.border }}
+                          className="flex w-full items-center justify-between border-b-2 px-2 py-1.5 transition-colors hover:brightness-110"
+                          style={{ background: style.bg, borderColor: style.bg }}
                         >
                           <span
                             className="flex items-center gap-1 text-[10px] font-bold uppercase tracking-wider"
@@ -2037,7 +2106,7 @@ const ArticleCard = React.memo(
                                         {autoFillFn && !isLocked && (
                                           <button
                                             type="button"
-                                            className="text-[9px] text-slate-700 underline hover:text-[#FF6F61]"
+                                            className="text-[9px] text-slate-700 underline hover:text-slate-950"
                                             onClick={(e) => {
                                               e.stopPropagation();
                                               autoFillFn();
@@ -2095,14 +2164,14 @@ const ArticleCard = React.memo(
 
                   {/* BOM card */}
                   <div
-                    className="overflow-hidden rounded-lg border bg-white"
-                    style={{ borderColor: '#fde68a' }}
+                    className="overflow-hidden rounded-lg border-2 bg-white"
+                    style={{ borderColor: CARD_THEME.border }}
                   >
                     <div
-                      className="flex items-center justify-between border-b px-2 py-1"
-                      style={{ background: '#fffbeb', borderColor: '#fde68a' }}
+                      className="flex items-center justify-between border-b px-2 py-1.5"
+                      style={{ background: CARD_THEME.bg, borderColor: CARD_THEME.bg, color: CARD_THEME.fg }}
                     >
-                      <span className="flex items-center gap-1 text-[10px] font-bold uppercase tracking-wider text-amber-700">
+                      <span className="flex items-center gap-1 text-[10px] font-bold uppercase tracking-wider">
                         <DollarSign className="h-3 w-3" />
                         BOM
                       </span>

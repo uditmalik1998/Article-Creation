@@ -240,3 +240,10 @@ FG Article tab pages only (`!allowGroups && !isBodyArticle`). No tab of its own:
 - No total row and no total in the header (user removed both from the design).
 - Values are **UI-only local state**, like PKG COST — nothing is saved yet.
 
+### Fabric Article pages — same left rail + FAB card (2026-10-14)
+
+`fabric-article/components/FabricArticleList.tsx` is a separate copy of the FG list, so the FG design was ported there:
+- Left rail: Article Image / Article Information / Reference & Vendor with ink headers (`renderInkCardHeader`), stacked Reference & Vendor fields, slate/orange/red levels. Info and Reference are collapsible but **open by default** on Fabric pages (`openLeftCards` starts with both). Article ID row kept for non-SRM items; SRM items show only Category + Created (as before).
+- "FABRIC AND CONSTRUCTION" card renamed **FAB** and given the ink theme (`CARD_THEME`); same 14 attributes + Fabric Article No./Desc. No AUTO-BGT / ROUGH-V2 / VENDOR COST / FINAL COST rows and no Create Fabric Article button (FG-only).
+- BOM card switched from yellow to the ink header.
+
