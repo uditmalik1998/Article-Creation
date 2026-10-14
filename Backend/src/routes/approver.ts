@@ -98,6 +98,9 @@ router.get('/body-article-data/search',     h(ApproverController.searchBodyArtic
 router.get('/precise-body-article/search',   h(ApproverController.searchPreciseBodyArticle));
 router.get('/precise-body-article/by-width', h(ApproverController.getPreciseConsumptionByWidth));
 router.get('/precise-body-article/cmp-data', h(ApproverController.getPreciseBodyArticleCmpData));
+
+// basic_trim_master lookup — AUTO-BGT / ROUGH-V2 auto-fill for B TRIM card
+router.get('/basic-trim-master/lookup', h(ApproverController.getBasicTrimMasterLookup));
 router.get('/body-fabric-consumption',          h(ApproverController.getBodyFabricConsumption));
 router.get('/body-fabric-consumption/by-width', h(ApproverController.getBodyFabricConsumptionByWidth));
 router.get('/body-fabric-consumption/gsm',      h(ApproverController.getFabricGsmByMajorCategory));

@@ -51,7 +51,7 @@ const ITEM_UPDATE_ALLOWED_FIELDS = [
     'vendorCode', 'mrp', 'mcCode', 'segment', 'season',
     'hsnTaxCode', 'articleDescription', 'fashionGrid', 'year', 'articleType',
     // Body article cost fields
-    'cmtpCost', 'cmpCost', 'fabCost', 'fabCons', 'fWidth',
+    'fabCost', 'fWidth',
     'autoBgt', 'roughV2', 'vendorFabricRate', 'finalCost',
     'roughRatio', 'roughConsumptionKg', 'roughConsumptionMeter',
     'preciseRatio', 'preciseConsumptionKg', 'preciseConsumptionMeter',
@@ -1012,10 +1012,6 @@ export class ApproverController {
                     autoBgt: true, roughV2: true, vendorFabricRate: true, finalCost: true,
                     roughRatio: true, roughConsumptionKg: true, roughConsumptionMeter: true,
                     preciseRatio: true, preciseConsumptionKg: true, preciseConsumptionMeter: true,
-                    // BOM cost fields
-                    cmtpCost: true,
-                    cmpCost: true,
-                    fabCons: true,
                     // Article reference fields
                     bodyArticle: true,
                     bodyArticleDescription: true,
@@ -4864,6 +4860,29 @@ export class ApproverController {
             }
         }
         return res.json({ consumption: minVal });
+    };
+
+    // basic_trim_master lookup — returns bt_1 / bt_2 for a given attribute_name + type combination.
+    // Used by the B TRIM card to auto-fill AUTO-BGT and ROUGH-V2 when a spec value is selected.
+    static getBasicTrimMasterLookup = async (req: Request, res: Response) => {
+        const attributeName = String(req.query.attributeName ?? '').trim();
+        const type          = String(req.query.type          ?? '').trim();
+        if (!attributeName || !type) return res.json({ found: false, bt1: null, bt2: null });
+
+        const row = await prisma.$queryRaw<{ bt_1: string | null; bt_2: string | null }[]>`
+            SELECT bt_1, bt_2
+            FROM basic_trim_master
+            WHERE TRIM(LOWER(attribute_name)) = TRIM(LOWER(${attributeName}))
+              AND TRIM(LOWER(type))           = TRIM(LOWER(${type}))
+            LIMIT 1
+        `;
+
+        if (!row.length) return res.json({ found: false, bt1: null, bt2: null });
+        return res.json({
+            found: true,
+            bt1: row[0].bt_1 != null ? Number(row[0].bt_1) : null,
+            bt2: row[0].bt_2 != null ? Number(row[0].bt_2) : null,
+        });
     };
 
     // CMP cost data for a body article — returns SAM/cost fields from precise_body_article_consumption

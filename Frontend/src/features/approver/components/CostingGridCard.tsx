@@ -1,4 +1,4 @@
-import React, { useCallback, useState } from 'react';
+import React, { useCallback, useRef, useState } from 'react';
 import { ChevronDown, ChevronRight, ChevronUp, Search, X } from 'lucide-react';
 import { Input, Popover, PopoverContent, PopoverTrigger } from '@/shared/components/ui-tw';
 import { cn } from '@/lib/utils';
@@ -206,6 +206,17 @@ export const TextCell: React.FC<{
   />
 );
 
+// Maps B TRIM row name → spec column → basic_trim_master attribute_name.
+// When a spec cell matching this map changes, both AUTO-BGT and ROUGH-V2 are
+// auto-filled from basic_trim_master using the tab's bt_1 / bt_2 value.
+const BASIC_TRIM_LOOKUP: Record<string, Partial<Record<SpecCol, string>>> = {
+  M_BTN:   { style: 'M_BTN_STYLE' },
+  DC:      { style: 'M_DC_STYLE' },
+  ZIP:     { type:  'M_ZIP_TYPE' },
+  PATCH:   { type:  'M_PATCH_TYPE' },
+  'H-TRF': { type:  'M_HTRF_TYPE' },
+};
+
 const CostingGridCard: React.FC<CostingGridCardProps> = ({
   config,
   icon,
@@ -225,9 +236,11 @@ const CostingGridCard: React.FC<CostingGridCardProps> = ({
   const [otherOpen, setOtherOpen] = useState(false);
   // UI-only values: local[tab][row][col]
   const [local, setLocal] = useState<Record<string, Record<string, RowState>>>({});
-  // AUTO-BGT from precise_trim_master: row → { bt1, bt2 }
+  // AUTO-BGT: row → { bt1, bt2 } — populated by both precise_trim_master and basic_trim_master lookups
   const [autoBgt, setAutoBgt] = useState<Record<string, { bt1: string; bt2: string }>>({});
   const [autoBgtLoading, setAutoBgtLoading] = useState<Record<string, boolean>>({});
+  // Track last lookup key (row:value) to avoid duplicate fetches
+  const basicTrimFetchedRef = useRef<Record<string, string>>({});
 
   // attributeName = SAP field from cellMap (e.g. "drawcord" for M_DC_STYLE), value = selected shortForm
   const lookupPreciseTrim = useCallback(async (row: string, attributeName: string, value: string) => {
@@ -253,6 +266,40 @@ const CostingGridCard: React.FC<CostingGridCardProps> = ({
       setAutoBgtLoading((prev) => ({ ...prev, [row]: false }));
     }
   }, [enablePreciseTrimLookup]);
+
+  // Lookup from basic_trim_master by attribute_name + type value.
+  // Sets AUTO-BGT and pre-fills ROUGH-V2 for both tabs simultaneously.
+  const lookupBasicTrim = useCallback(async (row: string, attributeName: string, value: string) => {
+    if (!attributeName || !value) return;
+    const key = `${row}:${value}`;
+    if (basicTrimFetchedRef.current[row] === key) return;
+    basicTrimFetchedRef.current[row] = key;
+    setAutoBgtLoading((prev) => ({ ...prev, [row]: true }));
+    try {
+      const token = localStorage.getItem('authToken');
+      const url = `${APP_CONFIG.api.baseURL}/approver/basic-trim-master/lookup?attributeName=${encodeURIComponent(attributeName)}&type=${encodeURIComponent(value)}`;
+      const res = await fetch(url, { headers: token ? { Authorization: `Bearer ${token}` } : {} });
+      const data: { found: boolean; bt1: number | null; bt2: number | null } = await res.json();
+      if (!data.found) return;
+      const bt1Str = data.bt1 != null ? String(data.bt1) : '';
+      const bt2Str = data.bt2 != null ? String(data.bt2) : '';
+      // Set AUTO-BGT state
+      setAutoBgt((prev) => ({ ...prev, [row]: { bt1: bt1Str, bt2: bt2Str } }));
+      // Pre-fill ROUGH-V2 for both tabs so switching tabs shows the right value
+      setLocal((prev) => {
+        const next = { ...prev };
+        tabs.forEach((t, i) => {
+          const val = i === 0 ? bt1Str : bt2Str;
+          next[t] = { ...next[t], [row]: { ...next[t]?.[row], rough: val } };
+        });
+        return next;
+      });
+    } catch {
+      // silent
+    } finally {
+      setAutoBgtLoading((prev) => ({ ...prev, [row]: false }));
+    }
+  }, [tabs]);
 
   const attrByField = new Map(attrs.map((a) => [a.field, a]));
 
@@ -290,6 +337,8 @@ const CostingGridCard: React.FC<CostingGridCardProps> = ({
           onPick={(v) => {
             if (toSap) onSave(a.field, v); else setLocalVal(row, col, v ?? '');
             if (v) lookupPreciseTrim(row, a.field, v);
+            const btAttr = BASIC_TRIM_LOOKUP[row]?.[col];
+            if (v && btAttr) lookupBasicTrim(row, btAttr, v);
           }}
         />
       );
