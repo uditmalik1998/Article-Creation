@@ -6094,15 +6094,13 @@ export const uploadCmpCostMaster = async (req: Request, res: Response): Promise<
       // across the full width — a real major category is a single code, never
       // a sentence, and never part of a merged range.
       if (!majCat || row.getCell(cMajCat).isMerged || /\s/.test(majCat) || majCat.length > 100) {
-        if (majCat) skipped++;
+        skipped++;
         continue;
       }
 
       const div = cellStr(row, cDiv) || null;
       const subDiv = cellStr(row, cSubDiv) || null;
-      let costRaw = row.getCell(cCost).value;
-      if (costRaw && typeof costRaw === 'object' && 'result' in costRaw) costRaw = (costRaw as any).result;
-      const cmpCost = numOf(costRaw);
+      const cmpCost = cellNum(row, cCost);
 
       const key = `${(div ?? '').toUpperCase()}|${(subDiv ?? '').toUpperCase()}|${majCat.toUpperCase()}`;
       rowsByKey.set(key, {
@@ -6162,7 +6160,10 @@ export const uploadCmpCostMaster = async (req: Request, res: Response): Promise<
     }
 
     const total = await prisma.roughCmpCostMaster.count();
-    const categories = (await prisma.roughCmpCostMaster.findMany({ distinct: ['majCat'], select: { majCat: true } })).length;
+    const [catRow] = await prisma.$queryRaw<[{ categories: bigint }]>`
+      SELECT COUNT(DISTINCT maj_cat)::bigint AS categories FROM rough_cmp_cost_master
+    `;
+    const categories = Number(catRow.categories);
 
     console.log(`[CmpCostMaster] Upserted ${records.length} rows (${skipped} skipped)`);
 
