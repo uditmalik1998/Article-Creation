@@ -233,3 +233,60 @@ Token from `localStorage.getItem('authToken')` attached as `Authorization: Beare
 - Maps to 60+ column Excel sheet
 - Includes: all attribute fields, business fields, SAP sync status
 - File name varies by pathType: "Old Articles", "New Articles", "Rejected Articles"
+
+## App sidebar — `shared/components/layout/AppSidebar.tsx` (2026-10-14, design "Option A")
+
+- Width 256px expanded / 60px collapsed (collapse state persisted in `localStorage.appSidebarCollapsed`).
+- Top-level items carry a `section` (`WORKSPACE` = Extraction, Model Generation; `ARTICLES` = FG / Fabric / Body / GM; `ADMIN` = Expense Data, Expense Change Requests, Admin Panel). A small uppercase label renders when the section changes; collapsed mode shows a thin divider instead. Home has no section.
+- Icons: FG = CheckSquare, Fabric = Layers, Body = Shirt, GM = Package.
+- States: active page = filled dark slate (`bg-slate-800 text-white`), open group containing the active page = light slate; no coral. Sub-pages hang off a thin `border-l` tree line.
+- Footer: Notifications (unread badge), segmented **Light / Dark / System** theme switch (collapsed: single cycle button), user card with ⋮ (Profile / Settings / Logout).
+- Role-based item visibility is unchanged.
+
+### Notifications popover — `shared/components/layout/NotificationsPanel.tsx` (2026-10-14, design "Option A")
+
+Opened from the sidebar's Notifications row (`AppSidebar`, controlled `notifOpen` state). `PopoverContent side="right" align="end"` (380px), so the panel's bottom lines up with the bell row and a CSS arrow on its left edge points at it; the row stays highlighted (light slate) while open.
+- Header: "N new" pill + Mark all read. Tabs **All / Unread**. Items grouped **TODAY / EARLIER** by `createdAt`, icon per `NotificationItem.type` (success / error / warning / info), bold title + dot when unread, relative time. Click an item = `markRead`.
+- Empty state "You're all caught up". Footer: red **Clear all**, "Esc to close".
+- Data/store unchanged (`services/notifications/notificationStore.ts`, localStorage per user).
+
+### Account menu (sidebar user card) — 2026-10-14
+
+Same treatment as the notifications popover: `DropdownMenuContent side="right" align="end"` (256px, `overflow-visible` for the arrow), bottom-aligned with the user card, arrow pointing at it, card highlighted while open (`data-[state=open]`). Header shows avatar, name, email and role pill; Profile (`/profile`) — Settings row removed 2026-10-14 (it duplicated Profile); red **Log out**. Slate focus states, no coral.
+
+## AI Model Generation page — `features/model-generation/pages/ModelGenerationPage.tsx` (2026-10-14, design "Option A · Studio")
+
+Layout only — all generation logic, bulk-job polling, article-list flow and model-images browser are unchanged.
+- Header: title + subtitle; source switch (Upload garments / From article list / model-images) as a slate segmented control; Major categories on the right.
+- Left settings card (440px, sticky, scrolls inside) in 3 numbered sections: **1 · Garments** (dropzone with inline "pick a folder · upload a .zip", file list with Remove zip / Clear all), **2 · Model** (Gender / Body type / Views as segmented controls — `renderSegmented`), **3 · Optional extras** (Pattern, Accessory/broach + placement, Colour lock image + name, Special instructions — collapsible rows via `renderExtraRow`, "Set" badge when filled; `openExtras` state).
+- Sticky bottom bar in the card: job status line + progress, summary ("N images · Female · Full Body · Front only") and the **Generate** button (always visible).
+- Right: Recent bulk jobs (status, mono id, per-job progress bar coloured by status, View), then results / empty state ("Results will appear here"). All coral replaced with slate.
+- `renderSegmented` / `renderExtraRow` are render functions, not components, so inputs inside keep focus while typing.
+
+## Home page — `features/dashboard/pages/Dashboard.tsx` (2026-10-14, design "Option E · Action-first")
+
+Data fetching unchanged (`/user/extraction/history/flat`, grouped by date × division × sub-division).
+- **Hero band** (dark slate): date, "Good Morning, <name>", "N extractions today · N approved · N all-time", **Start extraction** (→ `/extraction`).
+- **Quick actions** (role-filtered cards): Review new FG articles (`/approver`), Model generation (`/model-generation`), Failed creations (`/approver/failed`), and Admin panel (`/admin`, admins) or Created articles (`/approver/created`, others). Visibility mirrors the sidebar's role rules.
+- **Extraction timeline** (left): the existing table with Date / Division / Sub-division filters and pagination.
+- **"Yesterday at a glance"** (right, 360px): latest earlier day's approved/extracted per division with bars, plus "Needs a look" = up to 2 sub-divisions (≥5 extractions) with the lowest approval rate.
+- Removed: coral Start Extraction, "View Products" (it pointed at `/approver`, now the "Review new FG articles" card) and the separate Admin button (now a card).
+
+## FG Article extraction page — `features/extraction/pages/SimplifiedExtractionPage.tsx` (2026-10-14, design "Option A · one setup row")
+
+The old two screens (Step 1 Division → Step 2 Sub-Division + upload) are now one setup screen; `currentStep` is `'setup' | 'extraction'`.
+- Header "FG Article extraction" + "Step 1 of 2 · Set up & upload" (gradient hero and Steps bar removed).
+- Setup card: three slate dropdowns in a row — **1 · Division** (restricted to the profile's division list; a single assigned division is pre-filled and locked), **2 · Sub-Division** (`SIMPLIFIED_HIERARCHY`), **3 · Major Category** (`getMajorCategoriesBySubDivision`). Each resets the ones after it; **Clear** resets all. Required while the sub-division has categories.
+- Upload: `UploadArea compact` — slate drop zone (Browse files / Select folder), locked with a hint until setup is complete, pill "Uploading to MENS › MU › M_F_SHIRT_FS".
+- The chosen Major Category is pre-filled on every new row (`updateRowAttribute`) and sent as `majorCategory` with the extraction (see [[03 - Image Ingestion]]); it stays editable per row.
+- Setup (division, sub-division, major category) is remembered in `localStorage.simplifiedExtractionState`. "← Back to setup" from the results keeps it.
+- `SimplifiedCategorySelector` is no longer used here (Fabric extraction still uses it); `UploadArea` without `compact` is unchanged.
+
+### FG extraction — results screen (2026-10-14, design "Option C · ready-check + sticky action bar")
+
+Step 2 of the same page (`currentStep === 'extraction'`). Extraction logic unchanged.
+- Header title follows state: "Ready to extract" / "Extracting N images…" / "Extraction complete", subtitle = setup path + what to do next. Old gradient alerts, Statistic boxes and progress bar removed.
+- **Ready-check cards** (`renderCheckCard`, a render function): Setup chosen (orange + Open setup if no sub-division), N images added (total size → progress while extracting → done/pending/failed counts; orange when rows failed), Design Number missing (count among rows still to extract, **Show them / Show all** toggles the table to just those rows via `showMissingDesignOnly`).
+- **Table**: `AttributeTable layout="frozen"` — stays horizontal; frozen Image column (checkbox, thumbnail, file name, size) + frozen Design Number column (`left-[250px]`, must match `FROZEN_IMAGE_WIDTH`), then slate Status pill, then the other attributes. Empty required cells outlined orange. No Summary strip. Sticky header (`DataTable` sticky header raised to z-30 so frozen cells slide under it). Fabric extraction keeps the default layout.
+- **Sticky dark action bar** (bottom): ← Setup, counts (+ % while extracting), Start over, Export results, Go home (when complete), Start batch — disabled with the reason in its label ("fill 2 design numbers first" / "pick a sub-division first").
+

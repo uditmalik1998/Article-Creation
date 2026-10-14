@@ -2,32 +2,27 @@
  * Simplified Extraction Page
  *
  * Workflow:
- * 1. Select Division → Category (Upper/Lower/Sets/Denim)
- * 2. Upload images (no metadata form)
- * 3. Auto-start batch extraction
- * 4. Show only validated results
+ * 1. One setup screen: Division → Sub-Division → Major Category, then upload images
+ *    (the Major Category is pre-filled on every row and sent with the extraction)
+ * 2. Start batch extraction and review the validated results
  */
-import { useState, useCallback, useEffect } from 'react';
-import { Eraser, Download, CheckCircle2, Upload as UploadIcon, Bot, LayoutGrid } from 'lucide-react';
+import { useState, useCallback, useEffect, useMemo, type ReactNode } from 'react';
+import { Eraser, Download, Check, Bot } from 'lucide-react';
 import {
-  Alert,
   Button,
-  Card,
-  CardContent,
   Dialog,
   DialogContent,
   DialogHeader,
   DialogTitle,
-  Progress,
   Select,
   SelectContent,
   SelectItem,
   SelectTrigger,
   SelectValue,
-  Statistic,
-  Steps,
 } from '@/shared/components/ui-tw';
-import { SimplifiedCategorySelector, SIMPLIFIED_HIERARCHY } from '../components/SimplifiedCategorySelector';
+import { cn } from '@/lib/utils';
+import { formatFileSize } from '../../../shared/utils/common/helpers';
+import { SIMPLIFIED_HIERARCHY } from '../components/SimplifiedCategorySelector';
 import type { SimplifiedCategory } from '../components/SimplifiedCategorySelector';
 import { UploadArea } from '../components';
 import { AttributeTable } from '../components/AttributeTable';
@@ -156,17 +151,49 @@ const getCreatorDivision = (): string | null => {
   }
 };
 
+const normalizeDivision = (raw: string): string => {
+  const upper = raw.trim().toUpperCase();
+  if (upper === 'MEN' || upper === 'MENS') return 'MENS';
+  if (upper === 'KIDS') return 'Kids';
+  if (upper === 'LADIES') return 'Ladies';
+  return raw.trim();
+};
+
+// Divisions the user may pick: restricted to the profile's division list when it
+// has one (any role), otherwise every division.
+const getDivisionOptions = (): string[] => {
+  const all = Object.keys(SIMPLIFIED_HIERARCHY);
+  try {
+    const user = JSON.parse(localStorage.getItem('user') || '{}');
+    const assigned = String(user.division || '')
+      .split(',')
+      .map((d) => d.trim())
+      .filter(Boolean)
+      .map(normalizeDivision);
+    const allowed = all.filter((d) => assigned.includes(d));
+    return allowed.length > 0 ? allowed : all;
+  } catch {
+    return all;
+  }
+};
+
+type SavedSetup = {
+  selectedCategory?: SimplifiedCategory | null;
+  selectedSubDivision?: string | null;
+  selectedMajorCategory?: string | null;
+};
+
 const SimplifiedExtractionPage = () => {
-  const creatorDivision = getCreatorDivision();
+  const divisionOptions = useMemo(getDivisionOptions, []);
+  // A single assigned division (CREATOR profile, or a one-division list) is pre-filled and locked.
+  const creatorDivision = getCreatorDivision() ?? (divisionOptions.length === 1 ? divisionOptions[0] : null);
 
   const [selectedCategory, setSelectedCategory] = useState<SimplifiedCategory | null>(
     creatorDivision ? { department: creatorDivision, majorCategory: '', displayName: creatorDivision } : null
   );
   const [selectedSubDivision, setSelectedSubDivision] = useState<string | null>(null);
-  // CREATOR: start at upload step (division already known); ADMIN: start at category step
-  const [currentStep, setCurrentStep] = useState<'category' | 'upload' | 'extraction'>(
-    creatorDivision ? 'upload' : 'category'
-  );
+  const [selectedMajorCategory, setSelectedMajorCategory] = useState<string | null>(null);
+  const [currentStep, setCurrentStep] = useState<'setup' | 'extraction'>('setup');
   const [baseSchema, setBaseSchema] = useState<SchemaItem[]>(BASE_SIMPLIFIED_SCHEMA);
   const [simplifiedSchema, setSimplifiedSchema] = useState<SchemaItem[]>(BASE_SIMPLIFIED_SCHEMA);
   const [imageModalVisible, setImageModalVisible] = useState(false);
@@ -174,6 +201,7 @@ const SimplifiedExtractionPage = () => {
   const [exportModalVisible, setExportModalVisible] = useState(false);
   const [manualNavigation, setManualNavigation] = useState(false);
   const [missingFieldsDialog, setMissingFieldsDialog] = useState<{ rowName: string; missingLabels: string[] }[] | null>(null);
+  const [showMissingDesignOnly, setShowMissingDesignOnly] = useState(false);
 
   const {
     extractedRows,
@@ -188,20 +216,21 @@ const SimplifiedExtractionPage = () => {
   } = useImageExtraction();
 
   useEffect(() => {
-    // For CREATOR, ignore saved state — their division is always from the profile.
-    if (creatorDivision) return;
-
+    // Restore the last setup so the three dropdowns come back pre-filled. A locked
+    // (single-division) user only gets it back when it is for their own division.
+    // Never restore the 'extraction' step — the rows-loaded effect handles that.
     const saved = localStorage.getItem('simplifiedExtractionState');
-    if (saved) {
-      try {
-        const parsed = JSON.parse(saved);
-        if (parsed?.selectedCategory) setSelectedCategory(parsed.selectedCategory);
-        // Always land on 'category' step so Division/Sub-Division are always visible.
-        // The saved selectedCategory pre-fills the dropdowns — user must confirm before uploading.
-        // Never restore 'extraction' step — the rows-loaded effect handles that when rows exist.
-      } catch {
-        /* ignore */
-      }
+    if (!saved) return;
+    try {
+      const parsed = JSON.parse(saved) as SavedSetup;
+      const dept = parsed?.selectedCategory?.department;
+      if (!dept || !divisionOptions.includes(dept)) return;
+      if (creatorDivision && dept !== creatorDivision) return;
+      setSelectedCategory(parsed.selectedCategory ?? null);
+      setSelectedSubDivision(parsed.selectedSubDivision ?? null);
+      setSelectedMajorCategory(parsed.selectedMajorCategory ?? null);
+    } catch {
+      /* ignore */
     }
   }, []);
 
@@ -212,27 +241,47 @@ const SimplifiedExtractionPage = () => {
   }, [extractedRows.length, manualNavigation]);
 
   useEffect(() => {
-    if (creatorDivision) return;
-    localStorage.setItem('simplifiedExtractionState', JSON.stringify({ selectedCategory, currentStep }));
-  }, [selectedCategory, currentStep, creatorDivision]);
+    const setup: SavedSetup = { selectedCategory, selectedSubDivision, selectedMajorCategory };
+    localStorage.setItem('simplifiedExtractionState', JSON.stringify(setup));
+  }, [selectedCategory, selectedSubDivision, selectedMajorCategory]);
 
-  // Called when user clicks "Continue to Upload" in the category selector.
-  // Also called with null when the user changes division (to clear stale selection).
-  const handleCategorySelect = useCallback(
-    (category: SimplifiedCategory | null) => {
-      setSelectedCategory(category);
-      setSelectedSubDivision(null);
-      if (category) {
-        setSimplifiedSchema(baseSchema);
-        setManualNavigation(false);
-        setCurrentStep('upload');
-      }
-    },
-    [baseSchema],
+  const majorCategoryOptions = useMemo(
+    () =>
+      selectedCategory?.department && selectedSubDivision
+        ? [...new Set(getMajorCategoriesBySubDivision(selectedCategory.department, selectedSubDivision))]
+        : [],
+    [selectedCategory?.department, selectedSubDivision],
   );
+  // Major Category is required whenever the sub-division has any to pick from.
+  const isSetupComplete =
+    !!selectedCategory?.department &&
+    !!selectedSubDivision &&
+    (majorCategoryOptions.length === 0 || !!selectedMajorCategory);
+  const uploadTargetLabel = [selectedCategory?.department, selectedSubDivision, selectedMajorCategory]
+    .filter(Boolean)
+    .join(' › ');
 
-  // Note: No auto-select on load — users always start at Step 1 (category selection)
-  // so they can always see and change the Division / Sub-Division.
+  const handleDivisionChange = (department: string) => {
+    setSelectedCategory({ department, majorCategory: '', displayName: department });
+    setSelectedSubDivision(null);
+    setSelectedMajorCategory(null);
+  };
+
+  const handleSubDivisionChange = (subDivision: string) => {
+    setSelectedSubDivision(subDivision);
+    setSelectedMajorCategory(null);
+    setSelectedCategory((prev) =>
+      prev ? { ...prev, majorCategory: subDivision, displayName: `${prev.department} - ${subDivision}` } : prev,
+    );
+  };
+
+  const resetSetup = () => {
+    setSelectedSubDivision(null);
+    setSelectedMajorCategory(null);
+    setSelectedCategory(
+      creatorDivision ? { department: creatorDivision, majorCategory: '', displayName: creatorDivision } : null,
+    );
+  };
 
   useEffect(() => {
     const loadAllowedValues = async () => {
@@ -328,22 +377,31 @@ const SimplifiedExtractionPage = () => {
 
   const handleImagesUpload = useCallback(
     async (fileList: File[]) => {
-      if (!selectedSubDivision) return;
-      await addImages(fileList);
+      if (!isSetupComplete) return;
+      const rows = await addImages(fileList);
+      // Pre-fill the chosen Major Category on every new row; still editable per row.
+      if (selectedMajorCategory) {
+        rows.forEach((row) => updateRowAttribute(row.id, 'major_category', selectedMajorCategory));
+      }
       if (fileList.length > 0) {
         setManualNavigation(false);
         setCurrentStep('extraction');
       }
     },
-    [addImages, selectedSubDivision],
+    [addImages, isSetupComplete, selectedMajorCategory, updateRowAttribute],
   );
 
   // "Start Batch" is blocked when any pending row is missing a Design Number
   const pendingRows = extractedRows.filter((r) => r.status === 'Pending' || r.status === 'Error' || r.status === 'Queued');
-  const anyMissingDesignNo = pendingRows.some((row) => {
+  const missingDesignRows = pendingRows.filter((row) => {
     const val = row.attributes?.['design_number'];
     return !String(val?.schemaValue ?? val?.rawValue ?? '').trim();
   });
+  const anyMissingDesignNo = missingDesignRows.length > 0;
+  // "Show them" narrows the table to rows still missing a Design Number; it falls
+  // back to all rows on its own once they are all filled.
+  const filterMissingDesign = showMissingDesignOnly && anyMissingDesignNo;
+  const tableRows = filterMissingDesign ? missingDesignRows : extractedRows;
 
   const handleStartBatch = useCallback(() => {
     if (!selectedSubDivision) return;
@@ -353,11 +411,11 @@ const SimplifiedExtractionPage = () => {
         simplifiedSchema,
         selectedCategory.displayName,
         `${selectedCategory.department}-${subDiv}`,
-        {},
+        selectedMajorCategory ? { majorCategory: selectedMajorCategory } : {},
         'FG Article',
       );
     }
-  }, [selectedCategory, selectedSubDivision, extractAllPending, simplifiedSchema]);
+  }, [selectedCategory, selectedSubDivision, selectedMajorCategory, extractAllPending, simplifiedSchema]);
 
   const handleExportClick = useCallback(() => {
     const mandatoryItems = simplifiedSchema.filter((item) => item.required);
@@ -385,30 +443,8 @@ const SimplifiedExtractionPage = () => {
   const handleStartOver = () => {
     setManualNavigation(true);
     clearAll();
-    setSelectedSubDivision(null);
-    if (creatorDivision) {
-      // CREATOR: reset to upload step with division pre-filled, not all the way to Step 1
-      setSelectedCategory({ department: creatorDivision, majorCategory: '', displayName: creatorDivision });
-      setCurrentStep('upload');
-    } else {
-      setCurrentStep('category');
-      setSelectedCategory(null);
-      localStorage.removeItem('simplifiedExtractionState');
-    }
-  };
-
-  const handleBackToCategory = () => {
-    setManualNavigation(true);
-    setSelectedSubDivision(null);
-    if (creatorDivision) {
-      // CREATOR: "back" means reset sub-division and stay on upload step
-      setSelectedCategory({ department: creatorDivision, majorCategory: '', displayName: creatorDivision });
-      setCurrentStep('upload');
-    } else {
-      setSelectedCategory(null);
-      setCurrentStep('category');
-      localStorage.removeItem('simplifiedExtractionState');
-    }
+    resetSetup();
+    setCurrentStep('setup');
   };
 
   const handleGoHome = () => {
@@ -422,245 +458,327 @@ const SimplifiedExtractionPage = () => {
     setImageModalVisible(true);
   }, []);
 
-  const stepIndex = currentStep === 'category' ? 0 : currentStep === 'upload' ? 1 : 2;
+  const handleBackToSetup = () => {
+    setManualNavigation(true);
+    setCurrentStep('setup');
+  };
 
-  const stepItems = [
-    { title: 'Select Category', icon: <LayoutGrid className="h-4 w-4" /> },
-    { title: 'Upload Images', icon: <UploadIcon className="h-4 w-4" /> },
-    { title: 'Auto-Extract', icon: <Bot className="h-4 w-4" /> },
-  ];
+  const fieldLabel = 'text-[12px] font-semibold tracking-[0.06em] text-slate-600 dark:text-slate-400';
+  const fieldTrigger =
+    'h-11 w-full rounded-[10px] border-slate-300 bg-white text-[14.5px] font-semibold text-slate-900 focus:ring-slate-800 data-[state=open]:border-slate-800 dark:border-slate-700 dark:bg-slate-900 dark:text-slate-50';
+
+  const imageCount = `${extractedRows.length} ${extractedRows.length === 1 ? 'image' : 'images'}`;
+  const totalUploadBytes = extractedRows.reduce((sum, r) => sum + (r.file?.size ?? 0), 0);
+  const pageTitle =
+    currentStep === 'setup'
+      ? 'FG Article extraction'
+      : isExtracting
+      ? `Extracting ${imageCount}…`
+      : isBatchComplete
+      ? 'Extraction complete'
+      : 'Ready to extract';
+  const pageSubtitle =
+    currentStep === 'setup'
+      ? 'Pick where these garments belong, drop the photos, and the AI fills 42 attributes.'
+      : `${uploadTargetLabel || 'No setup chosen'} · ${
+          isExtracting
+            ? 'values fill in as each image finishes.'
+            : isBatchComplete
+            ? 'review the values, then export.'
+            : 'fix anything marked below, then start the batch.'
+        }`;
+
+  // Ready-check card (option C). A render function, not a component, so it never remounts.
+  const renderCheckCard = (opts: { ok: boolean; badge?: number; title: string; detail: ReactNode; action?: ReactNode }) => (
+    <div
+      className={cn(
+        'flex items-center gap-3 rounded-xl border px-3.5 py-3',
+        opts.ok
+          ? 'border-slate-200 bg-white dark:border-slate-800 dark:bg-slate-950'
+          : 'border-orange-300 bg-orange-50 dark:border-orange-800 dark:bg-orange-950/40',
+      )}
+    >
+      <span
+        className={cn(
+          'flex h-7 w-7 flex-none items-center justify-center rounded-full text-[13px] font-bold',
+          opts.ok ? 'bg-slate-800 text-white dark:bg-slate-200 dark:text-slate-900' : 'border-2 border-orange-600 bg-white text-orange-800',
+        )}
+      >
+        {opts.ok ? <Check className="h-3.5 w-3.5" strokeWidth={3} /> : opts.badge ?? '!'}
+      </span>
+      <div className="flex min-w-0 flex-1 flex-col">
+        <b className={cn('text-[13.5px]', opts.ok ? 'text-slate-900 dark:text-slate-50' : 'text-orange-900 dark:text-orange-200')}>
+          {opts.title}
+        </b>
+        <span className={cn('text-xs', opts.ok ? 'text-slate-600 dark:text-slate-400' : 'text-orange-800 dark:text-orange-300')}>
+          {opts.detail}
+        </span>
+      </div>
+      {opts.action}
+    </div>
+  );
+  const checkActionBtn =
+    'h-8 flex-none rounded-lg border border-orange-600 bg-white px-3 text-xs font-semibold text-orange-800 hover:bg-orange-100';
 
   return (
     <div className="extraction-scroll-page">
       <div className="content-wrapper">
-        <Card className="mb-3 border-none" style={{ background: 'linear-gradient(135deg, #7DB9B6 0%, #E6C79C 100%)' }}>
-          <CardContent className="py-4 text-center">
-            <h1 className="m-0 text-2xl font-semibold text-white">Simplified AI Fashion Extraction</h1>
-            <span className="text-white/90">Division → Category → Upload → Auto-Extract (42 attributes)</span>
-          </CardContent>
-        </Card>
-
-        <Card className="steps-card mb-3">
-          <CardContent className="px-3 py-2">
-            <Steps current={stepIndex} items={stepItems} />
-          </CardContent>
-        </Card>
+        <header className="mb-4 flex flex-wrap items-end justify-between gap-2">
+          <div>
+            <h1 className="m-0 font-display text-[28px] font-semibold text-slate-900 dark:text-slate-50">{pageTitle}</h1>
+            <p className="mt-1 text-[13.5px] text-slate-600 dark:text-slate-400">{pageSubtitle}</p>
+          </div>
+          <span className="text-[12.5px] text-slate-600 dark:text-slate-400">
+            Step <b className="text-slate-900 dark:text-slate-50">{currentStep === 'setup' ? '1 of 2' : '2 of 2'}</b> ·{' '}
+            {currentStep === 'setup' ? 'Set up & upload' : 'Extract & review'}
+          </span>
+        </header>
 
         <div className="main-grid">
           <div className="left-panel">
-            {currentStep === 'category' && (
-              <Card className="step-card border border-[#7DB9B6]/50 p-4 card-3d glass">
-                <div className="mb-4 text-center">
-                  <h4 className="mb-1 text-lg font-semibold text-[#7DB9B6]">Step 1: Select Division</h4>
-                  <span className="text-[13px] text-muted-foreground">Choose Division → Sub-Division (Upper/Lower/Sets/Denim)</span>
-                </div>
-                <SimplifiedCategorySelector
-                  key={selectedCategory?.displayName || 'none'}
-                  selectedCategory={selectedCategory}
-                  onCategorySelect={handleCategorySelect}
-                />
-              </Card>
-            )}
-
-            {currentStep === 'upload' && (
-              <Card className="step-card border border-[#E6C79C]/50 p-4 card-3d glass">
-                <div className="mb-4 text-center">
-                  <h4 className="mb-1 text-lg font-semibold text-[#CFAF7F]">Step 2: Upload Images</h4>
-                  <span className="text-[13px] text-muted-foreground">
-                    Division: <strong>{selectedCategory?.department}</strong>
-                    {selectedSubDivision ? <> · Sub-Division: <strong>{selectedSubDivision}</strong></> : null}
-                    {' '}· Upload images to auto-start extraction
-                  </span>
-                </div>
-
-                {!creatorDivision && (
-                  <div className="mb-3">
-                    <Button onClick={handleBackToCategory} variant="link" size="sm" className="pl-0">
-                      ← Change Division
-                    </Button>
+            {currentStep === 'setup' && (
+              <div className="flex flex-col gap-4">
+                <section className="flex flex-col gap-3.5 rounded-[14px] border border-slate-200 bg-white p-5 dark:border-slate-800 dark:bg-slate-950">
+                  <div className="grid grid-cols-1 gap-4 md:grid-cols-3">
+                    <div className="flex flex-col gap-1.5">
+                      <span className={fieldLabel}>1 · DIVISION</span>
+                      <Select
+                        value={selectedCategory?.department ?? ''}
+                        onValueChange={handleDivisionChange}
+                        disabled={!!creatorDivision}
+                      >
+                        <SelectTrigger className={fieldTrigger} aria-label="Division">
+                          <SelectValue placeholder="Select division" />
+                        </SelectTrigger>
+                        <SelectContent>
+                          {divisionOptions.map((dept) => (
+                            <SelectItem key={dept} value={dept}>
+                              {dept}
+                            </SelectItem>
+                          ))}
+                        </SelectContent>
+                      </Select>
+                    </div>
+                    <div className="flex flex-col gap-1.5">
+                      <span className={fieldLabel}>2 · SUB-DIVISION</span>
+                      <Select
+                        value={selectedSubDivision ?? ''}
+                        onValueChange={handleSubDivisionChange}
+                        disabled={!selectedCategory?.department}
+                      >
+                        <SelectTrigger className={fieldTrigger} aria-label="Sub-division">
+                          <SelectValue placeholder={selectedCategory?.department ? 'Select sub-division' : 'Pick a division first'} />
+                        </SelectTrigger>
+                        <SelectContent>
+                          {(SIMPLIFIED_HIERARCHY[selectedCategory?.department ?? ''] || []).map((sub) => (
+                            <SelectItem key={sub} value={sub}>
+                              {sub}
+                            </SelectItem>
+                          ))}
+                        </SelectContent>
+                      </Select>
+                    </div>
+                    <div className="flex flex-col gap-1.5">
+                      <span className={fieldLabel}>3 · MAJOR CATEGORY</span>
+                      <Select
+                        value={selectedMajorCategory ?? ''}
+                        onValueChange={setSelectedMajorCategory}
+                        disabled={majorCategoryOptions.length === 0}
+                      >
+                        <SelectTrigger className={fieldTrigger} aria-label="Major category">
+                          <SelectValue
+                            placeholder={
+                              !selectedSubDivision
+                                ? 'Pick a sub-division first'
+                                : majorCategoryOptions.length === 0
+                                ? 'None for this sub-division'
+                                : 'Select major category'
+                            }
+                          />
+                        </SelectTrigger>
+                        <SelectContent>
+                          {majorCategoryOptions.map((mc) => (
+                            <SelectItem key={mc} value={mc}>
+                              {mc}
+                            </SelectItem>
+                          ))}
+                        </SelectContent>
+                      </Select>
+                    </div>
                   </div>
-                )}
+                  <div className="flex flex-wrap items-center justify-between gap-2 text-[12.5px] text-slate-600 dark:text-slate-400">
+                    <span>
+                      Each list only shows options for the one before it. Major category is pre-filled on every image — you can
+                      still change it per row.
+                    </span>
+                    {(!!selectedSubDivision || (!creatorDivision && !!selectedCategory)) && (
+                      <button
+                        type="button"
+                        onClick={resetSetup}
+                        className="font-semibold text-slate-800 underline hover:text-slate-950 dark:text-slate-200"
+                      >
+                        Clear
+                      </button>
+                    )}
+                  </div>
+                </section>
 
-                <div className="mb-5">
-                  <span className="mb-2 block text-sm font-semibold">
-                    {creatorDivision ? '1.' : '2.'} Sub-Division
-                  </span>
-                  <Select
-                    value={selectedSubDivision ?? ''}
-                    onValueChange={(value: string) => {
-                      setSelectedSubDivision(value);
-                      setSelectedCategory((prev) =>
-                        prev ? { ...prev, majorCategory: value, displayName: `${prev.department} - ${value}` } : prev,
-                      );
-                    }}
-                  >
-                    <SelectTrigger className="h-11 w-full">
-                      <SelectValue placeholder="Select Sub-Division (e.g. MU, MW, LU, LW…)" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      {(SIMPLIFIED_HIERARCHY[selectedCategory?.department ?? ''] || []).map((sub) => (
-                        <SelectItem key={sub} value={sub}>
-                          {sub}
-                        </SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
-                </div>
-
-                {!selectedSubDivision && (
-                  <Alert
-                    type="warning"
-                    className="mb-3"
-                    message="Please select a Sub-Division before uploading images."
-                  />
-                )}
-
-                <Alert
-                  type="info"
-                  showIcon
-                  className="mb-4"
-                  message="Simplified Workflow Active"
-                  description="No metadata form required. Extraction will start automatically after upload with fixed 42 attributes."
+                <UploadArea
+                  compact
+                  disabled={!isSetupComplete}
+                  disabledHint={
+                    !selectedCategory?.department
+                      ? 'Pick a division to start'
+                      : !selectedSubDivision
+                      ? 'Pick a sub-division to unlock upload'
+                      : 'Pick a major category to unlock upload'
+                  }
+                  targetLabel={uploadTargetLabel}
+                  onUpload={async (_file: File, fileList: File[]) => {
+                    await handleImagesUpload(fileList);
+                    return false;
+                  }}
                 />
-
-                <div className={selectedSubDivision ? '' : 'pointer-events-none opacity-40'}>
-                  <UploadArea
-                    onUpload={async (_file: File, fileList: File[]) => {
-                      await handleImagesUpload(fileList);
-                      return false;
-                    }}
-                  />
-                </div>
-              </Card>
+              </div>
             )}
 
             {currentStep === 'extraction' && extractedRows.length > 0 && (
-              <Card className="step-card border border-[#A7B6D9]/50 px-4 py-3 card-3d glass">
-                <div className="mb-3">
-                  <div className="mb-2 flex items-center justify-between">
-                    <div>
-                      <h5 className="m-0 mr-3 inline-block text-base font-semibold text-[#7F8EB8]">Step 3: Auto-Extraction Results</h5>
-                      <span className="text-xs text-muted-foreground">
-                        {selectedCategory?.displayName} | {extractedRows.length} images | 42 attributes
+              <div className="flex flex-col gap-3.5">
+                {/* Ready-check cards */}
+                <section className="grid grid-cols-1 gap-3 md:grid-cols-3">
+                  {renderCheckCard({
+                    ok: !!selectedSubDivision,
+                    title: selectedSubDivision ? 'Setup chosen' : 'Setup incomplete',
+                    detail: selectedSubDivision ? uploadTargetLabel : 'Pick a sub-division before starting',
+                    action: selectedSubDivision ? undefined : (
+                      <button type="button" className={checkActionBtn} onClick={handleBackToSetup}>
+                        Open setup
+                      </button>
+                    ),
+                  })}
+                  {renderCheckCard({
+                    ok: isExtracting || stats.error === 0,
+                    badge: stats.error,
+                    title: !isExtracting && stats.error > 0 ? `${stats.error} failed` : `${imageCount} added`,
+                    detail: isExtracting ? (
+                      <span className="flex items-center gap-2">
+                        {stats.done} of {stats.total} done
+                        <span className="h-1.5 w-24 overflow-hidden rounded-full bg-slate-200 dark:bg-slate-800">
+                          <span
+                            className="block h-full rounded-full bg-slate-800 transition-all dark:bg-slate-200"
+                            style={{ width: `${Math.round(progress)}%` }}
+                          />
+                        </span>
                       </span>
+                    ) : stats.done > 0 || stats.error > 0 ? (
+                      `${stats.done} done · ${stats.pending} pending · ${stats.error} failed`
+                    ) : (
+                      `${formatFileSize(totalUploadBytes)} in total`
+                    ),
+                  })}
+                  {renderCheckCard({
+                    ok: !anyMissingDesignNo,
+                    badge: missingDesignRows.length,
+                    title: anyMissingDesignNo ? 'Design Number missing' : 'Design numbers filled',
+                    detail: anyMissingDesignNo
+                      ? `${missingDesignRows.length} of ${pendingRows.length} rows to extract`
+                      : 'Every row has one',
+                    action: anyMissingDesignNo ? (
+                      <button
+                        type="button"
+                        className={checkActionBtn}
+                        onClick={() => setShowMissingDesignOnly((v) => !v)}
+                      >
+                        {filterMissingDesign ? 'Show all' : 'Show them'}
+                      </button>
+                    ) : undefined,
+                  })}
+                </section>
+
+                {/* Horizontal results table: Image + Design Number frozen */}
+                <section className="rounded-[14px] border border-slate-200 bg-white p-3 dark:border-slate-800 dark:bg-slate-950">
+                  {filterMissingDesign && (
+                    <div className="mb-2 flex flex-wrap items-center gap-2 text-[12.5px] text-slate-600 dark:text-slate-400">
+                      Showing the {missingDesignRows.length} rows without a Design Number.
+                      <button
+                        type="button"
+                        onClick={() => setShowMissingDesignOnly(false)}
+                        className="font-semibold text-slate-800 underline hover:text-slate-950 dark:text-slate-200"
+                      >
+                        Show all rows
+                      </button>
                     </div>
-                    {stats && (
-                      <div className="flex items-center gap-4 text-xs">
-                        <span>
-                          <span className="font-bold text-[#7BAF7A]">{stats.done}</span> Done
-                        </span>
-                        <span>
-                          <span className="font-bold text-[#CFAF7F]">{stats.pending}</span> Pending
-                        </span>
-                        <span>
-                          <span className="font-bold text-[#7F8EB8]">{Math.round(stats.successRate)}%</span> Success
-                        </span>
-                      </div>
-                    )}
+                  )}
+                  <AttributeTable
+                    layout="frozen"
+                    extractedRows={tableRows}
+                    schema={simplifiedSchema}
+                    selectedRowKeys={[]}
+                    onSelectionChange={() => {}}
+                    onAttributeChange={handleAttributeChange}
+                    onDeleteRow={removeRow}
+                    onImageClick={handleImageClick}
+                    onReExtract={() => {}}
+                    onAddToSchema={handleAddToSchema}
+                    isExtracting={isExtracting}
+                  />
+                </section>
+
+                {/* Sticky action bar */}
+                <footer className="sticky bottom-3 z-40 flex flex-wrap items-center justify-between gap-3 rounded-[14px] bg-slate-800 px-5 py-3 text-slate-50 shadow-lg dark:bg-slate-900">
+                  <div className="flex flex-wrap items-center gap-4 text-[13px]">
+                    <button type="button" onClick={handleBackToSetup} className="font-semibold text-slate-50 hover:underline">
+                      ← Setup
+                    </button>
+                    <span className="text-slate-300">
+                      {imageCount} · {stats.done} done · {stats.pending} pending · {stats.error} failed
+                      {isExtracting && <> · {Math.round(progress)}%</>}
+                    </span>
                   </div>
-                </div>
-
-                {stats.pending > 0 && !isExtracting && (
-                  <Alert
-                    type="info"
-                    showIcon
-                    className="mb-3"
-                    message="Ready to Extract"
-                    description={`${stats.pending} image(s) ready for AI extraction. Click "Start Batch" to begin.`}
-                  />
-                )}
-
-                {isExtracting && !isBatchComplete && (
-                  <Progress value={Math.round(progress)} indicatorClassName="bg-gradient-to-r from-[#7DB9B6] to-[#E6C79C]" className="mb-3" />
-                )}
-
-                {isBatchComplete && (
-                  <Alert
-                    type="success"
-                    showIcon
-                    className="mb-3"
-                    message="Extraction Complete!"
-                    description={
-                      <div className="mt-2 grid grid-cols-3 gap-4">
-                        <Statistic title="Processed" value={stats.done} prefix={<CheckCircle2 className="h-4 w-4" />} valueStyle={{ fontSize: 20, color: '#7BAF7A' }} />
-                        <Statistic title="Success Rate" value={Math.round(stats.successRate)} suffix="%" valueStyle={{ fontSize: 20, color: '#7F8EB8' }} />
-                        <Statistic title="Auto-Validated" value="Enabled" valueStyle={{ fontSize: 16, color: '#7F8EB8' }} />
-                      </div>
-                    }
-                  />
-                )}
-
-                <div className="mb-3 flex items-center justify-between">
-                  <Button
-                    onClick={() => {
-                      setManualNavigation(true);
-                      setCurrentStep('upload');
-                    }}
-                    variant="link"
-                    size="sm"
-                    className="pl-0"
-                  >
-                    ← Back to Upload
-                  </Button>
-                  <div className="flex items-center gap-2">
+                  <div className="flex flex-wrap items-center gap-2">
+                    <Button
+                      variant="outline"
+                      onClick={handleStartOver}
+                      className="h-10 border-slate-500 bg-transparent text-red-200 hover:border-red-300 hover:bg-slate-700 hover:text-red-100"
+                    >
+                      <Eraser />
+                      Start over
+                    </Button>
+                    <Button
+                      variant="outline"
+                      disabled={stats?.done === 0}
+                      onClick={handleExportClick}
+                      className="h-10 border-slate-500 bg-transparent text-slate-50 hover:bg-slate-700 hover:text-white disabled:text-slate-400"
+                    >
+                      <Download />
+                      Export results
+                    </Button>
+                    {isBatchComplete && (
+                      <Button
+                        variant="outline"
+                        onClick={handleGoHome}
+                        className="h-10 border-slate-500 bg-transparent text-slate-50 hover:bg-slate-700 hover:text-white"
+                      >
+                        Go home
+                      </Button>
+                    )}
                     {!isExtracting && stats.pending > 0 && (
                       <Button
-                        size="lg"
                         onClick={handleStartBatch}
                         disabled={!selectedSubDivision || anyMissingDesignNo}
-                        title={
-                          !selectedSubDivision
-                            ? 'Go back and select a Sub-Division first'
-                            : anyMissingDesignNo
-                            ? 'Fill in the Design Number for all rows before starting'
-                            : undefined
-                        }
-                        className="border-none font-semibold"
-                        style={
-                          selectedSubDivision && !anyMissingDesignNo
-                            ? { background: 'linear-gradient(135deg, #7DB9B6 0%, #E6C79C 100%)' }
-                            : undefined
-                        }
+                        className="h-10 bg-white font-bold text-slate-900 hover:bg-slate-100 disabled:bg-slate-600 disabled:text-slate-300 disabled:opacity-100"
                       >
                         <Bot />
-                        Start Batch ({stats.pending})
+                        {!selectedSubDivision
+                          ? 'Start batch · pick a sub-division first'
+                          : anyMissingDesignNo
+                          ? `Start batch · fill ${missingDesignRows.length} design ${missingDesignRows.length === 1 ? 'number' : 'numbers'} first`
+                          : `Start batch (${stats.pending})`}
                       </Button>
                     )}
-                    <Button disabled={stats?.done === 0} onClick={handleExportClick}>
-                      <Download />
-                      Export Results
-                    </Button>
-                    {stats && stats.done === stats.total && stats.total > 0 && (
-                      <Button variant="outline" onClick={handleGoHome}>
-                        Go Home
-                      </Button>
-                    )}
-                    <Button variant="destructive" onClick={handleStartOver}>
-                      <Eraser />
-                      Start Over
-                    </Button>
                   </div>
-                </div>
-
-                <div className="mb-3 rounded-lg bg-muted/40 p-3">
-                  <strong>Extraction Results</strong>
-                  <br />
-                  <span className="text-xs text-muted-foreground">Results are validated automatically. Low-confidence values are hidden.</span>
-                </div>
-
-                <AttributeTable
-                  extractedRows={extractedRows}
-                  schema={simplifiedSchema}
-                  selectedRowKeys={[]}
-                  onSelectionChange={() => {}}
-                  onAttributeChange={handleAttributeChange}
-                  onDeleteRow={removeRow}
-                  onImageClick={handleImageClick}
-                  onReExtract={() => {}}
-                  onAddToSchema={handleAddToSchema}
-                  isExtracting={isExtracting}
-                />
-              </Card>
+                </footer>
+              </div>
             )}
           </div>
         </div>

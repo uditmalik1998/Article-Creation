@@ -73,6 +73,7 @@ image_unc_path          — full UNC path (unique identifier for dedup)
 
 **Metadata provided by user**:
 - Division, Sub Division, Major Category, Vendor Name, Design Number
+- Since 2026-10-14 Division, Sub-Division and Major Category are picked together on one setup screen before upload (see [[11 - Frontend Architecture]]). The FG page actually calls `POST /api/user/extract/base64` (`enhancedExtractionController.extractFromBase64VLM`) with `department`, `subDepartment` and, now, `majorCategory`: the chosen major category replaces the extracted `major_category` attribute before persisting, drives grid snapping (`majorMetaValue`) and is written to `extraction_results_flat.major_category` with the division/sub-division scope override. Per row, an edited `major_category` cell wins over the page-level choice (`useBatchExtraction`).
 
 ---
 

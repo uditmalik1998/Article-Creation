@@ -1,5 +1,5 @@
 import React, { useMemo, useState } from 'react';
-import { RotateCw, Eye, MoreHorizontal, Zap, AlertTriangle } from 'lucide-react';
+import { RotateCw, Eye, MoreHorizontal, Zap, AlertTriangle, Loader2 } from 'lucide-react';
 import {
   Badge,
   Button,
@@ -31,7 +31,25 @@ interface AttributeTableProps {
   onAddToSchema?: (attributeKey: string, value: string) => void;
   isExtracting?: boolean;
   disableEditing?: boolean;
+  /**
+   * 'frozen' (FG extraction page): one frozen Image column (checkbox, thumbnail,
+   * file name, size) plus a frozen Design Number column, slate status pills,
+   * orange outline on empty required cells and no Summary strip (the page shows counts).
+   */
+  layout?: 'default' | 'frozen';
 }
+
+// Width of the frozen Image column — the frozen Design Number column sits right after it
+// (its `left-[250px]` class below must match).
+const FROZEN_IMAGE_WIDTH = 250;
+
+const FROZEN_STATUS_PILL: Record<string, string> = {
+  Done: 'bg-slate-800 text-white',
+  Pending: 'border border-slate-300 bg-white text-slate-700',
+  Queued: 'border border-slate-300 bg-white text-slate-700',
+  Extracting: 'bg-slate-200 text-slate-800',
+  Error: 'border border-orange-300 bg-orange-50 text-orange-800',
+};
 
 export const AttributeTable: React.FC<AttributeTableProps> = ({
   extractedRows,
@@ -44,7 +62,9 @@ export const AttributeTable: React.FC<AttributeTableProps> = ({
   onReExtract,
   onAddToSchema,
   disableEditing = false,
+  layout = 'default',
 }) => {
+  const frozen = layout === 'frozen';
   const [focusedCellKey, setFocusedCellKey] = useState<string | null>(null);
 
   const selectedSet = useMemo(() => new Set(selectedRowKeys.map(String)), [selectedRowKeys]);
@@ -62,6 +82,77 @@ export const AttributeTable: React.FC<AttributeTableProps> = ({
   const someSelected = selectableRows.some((r) => selectedSet.has(r.id));
 
   const columns = useMemo<DataTableColumn<ExtractedRow>[]>(() => {
+    const frozenBaseColumns: DataTableColumn<ExtractedRow>[] = [
+      {
+        title: (
+          <div className="flex items-center gap-3">
+            <Checkbox
+              checked={allSelected ? true : someSelected ? 'indeterminate' : false}
+              onCheckedChange={() => {
+                if (allSelected) onSelectionChange([]);
+                else onSelectionChange(selectableRows.map((r) => r.id));
+              }}
+            />
+            <span className="text-xs">Image</span>
+          </div>
+        ),
+        key: 'image',
+        width: FROZEN_IMAGE_WIDTH,
+        fixed: 'left',
+        render: (_v, record) => (
+          <div className="flex items-center gap-3">
+            <Checkbox
+              checked={selectedSet.has(record.id)}
+              disabled={record.status === 'Extracting'}
+              onCheckedChange={() => toggleRow(record.id, record.status === 'Extracting')}
+            />
+            <img
+              src={record.imagePreviewUrl || '/placeholder.svg'}
+              alt={record.originalFileName}
+              width={44}
+              height={44}
+              className="h-11 w-11 flex-none cursor-pointer rounded-lg object-cover"
+              onClick={() => onImageClick(record.imagePreviewUrl, record.originalFileName)}
+            />
+            <div className="min-w-0">
+              <div className="truncate font-mono text-xs text-slate-900 dark:text-slate-100" title={record.originalFileName}>
+                {record.originalFileName}
+              </div>
+              <div className="text-[11px] text-slate-500">{formatFileSize(record.file.size)}</div>
+            </div>
+          </div>
+        ),
+      },
+    ];
+    const frozenStatusColumn: DataTableColumn<ExtractedRow> = {
+      title: <span className="text-xs">Status</span>,
+      key: 'status',
+      width: 120,
+      render: (_v, record) => (
+        <div>
+          <span
+            className={cn(
+              'inline-flex items-center gap-1 rounded-full px-2.5 py-0.5 text-[11px] font-semibold',
+              FROZEN_STATUS_PILL[record.status] ?? FROZEN_STATUS_PILL.Pending,
+            )}
+          >
+            {record.status === 'Extracting' && <Loader2 className="h-3 w-3 animate-spin" />}
+            {record.status}
+          </span>
+          {record.extractionTime && (
+            <div className="mt-0.5 text-[10px] text-slate-500">{formatDuration(record.extractionTime)}</div>
+          )}
+          {record.error && (
+            <Tooltip title={record.error}>
+              <div className="mt-0.5 flex cursor-help items-center gap-0.5 text-[10px] text-orange-700">
+                <AlertTriangle className="h-2.5 w-2.5" />
+                Why?
+              </div>
+            </Tooltip>
+          )}
+        </div>
+      ),
+    };
     const baseColumns: DataTableColumn<ExtractedRow>[] = [
       {
         title: (
@@ -134,14 +225,23 @@ export const AttributeTable: React.FC<AttributeTableProps> = ({
     ];
 
     const attributeColumns: DataTableColumn<ExtractedRow>[] = schema.map((schemaItem, schemaIndex) => ({
-      title: (
+      title: frozen ? (
+        <div className="text-xs">
+          {schemaItem.label}
+          {schemaItem.required && <span className="text-orange-700"> *</span>}
+        </div>
+      ) : (
         <div>
           <div className="text-xs">{schemaItem.label}</div>
           {schemaItem.required && <Tag className="mt-0.5 bg-red-50 px-1 text-[10px] text-red-700">Required</Tag>}
         </div>
       ),
       key: schemaItem.key,
-      width: 150,
+      width: frozen && schemaItem.key === 'design_number' ? 180 : 150,
+      // Frozen layout pins Design Number right after the frozen Image column.
+      ...(frozen && schemaItem.key === 'design_number'
+        ? { fixed: 'left' as const, className: 'left-[250px] bg-slate-50 dark:bg-slate-900' }
+        : {}),
       render: (_v, record) => {
         const cellKey = `${record.id}::${schemaItem.key}`;
         let nextCellKey: string | null = null;
@@ -157,7 +257,12 @@ export const AttributeTable: React.FC<AttributeTableProps> = ({
         const isEmpty = !String(cellVal?.schemaValue ?? cellVal?.rawValue ?? '').trim();
         const showRequired = schemaItem.required && isEmpty && record.status !== 'Extracting';
         return (
-          <div className={cn(showRequired && 'rounded border border-red-400 bg-red-50/40')}>
+          <div
+            className={cn(
+              showRequired &&
+                (frozen ? 'rounded border-[1.5px] border-orange-500 bg-orange-50' : 'rounded border border-red-400 bg-red-50/40'),
+            )}
+          >
             <AttributeCell
               attribute={cellVal}
               schemaItem={schemaItem}
@@ -252,8 +357,15 @@ export const AttributeTable: React.FC<AttributeTableProps> = ({
       },
     ];
 
+    if (frozen) {
+      // Design Number first (frozen), then Status, then the rest in schema order.
+      const designIdx = attributeColumns.findIndex((c) => c.key === 'design_number');
+      const designColumn = designIdx >= 0 ? attributeColumns.splice(designIdx, 1) : [];
+      return [...frozenBaseColumns, ...designColumn, frozenStatusColumn, ...attributeColumns, ...actionsColumn];
+    }
     return [...baseColumns, ...attributeColumns, ...actionsColumn];
   }, [
+    frozen,
     schema,
     extractedRows,
     onAttributeChange,
@@ -284,7 +396,8 @@ export const AttributeTable: React.FC<AttributeTableProps> = ({
         dataSource={extractedRows}
         rowKey="id"
         size="small"
-        scroll={{ x: 'max-content', y: 'calc(100vh - 320px)' }}
+        scroll={{ x: 'max-content', y: frozen ? 'calc(100vh - 380px)' : 'calc(100vh - 320px)' }}
+        sticky={frozen}
         pagination={{
           pageSize: 100,
           showSizeChanger: true,
@@ -298,13 +411,15 @@ export const AttributeTable: React.FC<AttributeTableProps> = ({
           )
         }
       />
-      <div className="mt-2 flex items-center gap-2 rounded-md bg-muted/30 px-3 py-2">
-        <strong className="text-sm">Summary:</strong>
-        <Badge variant="success">Done: {stats.done}</Badge>
-        <Badge variant="destructive">Error: {stats.error}</Badge>
-        <Badge variant="info">Pending: {stats.pending}</Badge>
-        <Badge variant="secondary">Total: {stats.total}</Badge>
-      </div>
+      {!frozen && (
+        <div className="mt-2 flex items-center gap-2 rounded-md bg-muted/30 px-3 py-2">
+          <strong className="text-sm">Summary:</strong>
+          <Badge variant="success">Done: {stats.done}</Badge>
+          <Badge variant="destructive">Error: {stats.error}</Badge>
+          <Badge variant="info">Pending: {stats.pending}</Badge>
+          <Badge variant="secondary">Total: {stats.total}</Badge>
+        </div>
+      )}
     </div>
   );
 };

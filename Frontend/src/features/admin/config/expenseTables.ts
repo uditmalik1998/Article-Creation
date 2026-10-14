@@ -146,7 +146,7 @@ export const EXPENSE_TABLE_CONFIGS: Record<string, ExpenseTableConfig> = {
     ],
   },
   'body-fabric-consumption': {
-    title: 'Body Fabric Consumption Master (Consumption & GSM per Major Category)',
+    title: 'Rough Body Fabric Consumption Master (Consumption & GSM per Major Category)',
     description:
       'All rows currently stored in body_fabric_consumption — fabric consumption and width per major category/division, plus GSM. Auto-fills a Body Article’s Fab Cons/Width, and a Fabric Article’s GSM, the first time an article of that major category is opened. Bulk-maintained via the Excel upload on the Admin → Expenses page.',
     rowKey: 'id',

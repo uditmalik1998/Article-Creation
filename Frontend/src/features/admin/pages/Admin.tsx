@@ -2001,7 +2001,7 @@ export default function Admin() {
       .then((blob) => {
         const a = document.createElement('a');
         a.href = URL.createObjectURL(blob);
-        a.download = 'FAB_CONSUMPTION_MASTER_TEMPLATE.xlsx';
+        a.download = 'ROUGH-FAB_CONSUMPTION_MASTER_TEMPLATE.xlsx';
         a.click();
       })
       .catch(() => message.error('Failed to download template'));
@@ -2019,7 +2019,7 @@ export default function Admin() {
         const today = new Date().toISOString().slice(0, 10);
         const a = document.createElement('a');
         a.href = URL.createObjectURL(blob);
-        a.download = `FAB_CONSUMPTION_MASTER_${today}.xlsx`;
+        a.download = `ROUGH-FAB_CONSUMPTION_MASTER_${today}.xlsx`;
         a.click();
       })
       .catch(() => message.error('Failed to download body fabric consumption data'));
@@ -3941,7 +3941,7 @@ export default function Admin() {
               }
             />
             <MasterDataCard
-              title="Body Fabric Consumption"
+              title="Rough Body Fabric Consumption"
               rows={bodyFabConsTotal ? bodyFabConsTotal.total : null}
               loading={bodyFabConsStatusLoading}
               busy={bodyFabConsUploading}
@@ -3963,8 +3963,8 @@ export default function Admin() {
                     <Alert
                       type="warning"
                       showIcon
-                      message="No body fabric consumption data loaded"
-                      description="Upload FAB CONSUMPTION MASTER Excel. Reads columns: DIV, SUB DIV, MAJ CAT, FAB_WIDTH, FAB CONSUMPTION, GSM. All other columns are ignored. Replaces the entire table."
+                      message="No rough body fabric consumption data loaded"
+                      description="Upload ROUGH-FAB CONSUMPTION MASTER Excel. Reads columns: DIV, SUB DIV, MAJ CAT, FAB_WIDTH, FAB CONSUMPTION, GSM. All other columns are ignored. Replaces the entire table."
                     />
                   )}
 

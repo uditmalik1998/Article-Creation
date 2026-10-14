@@ -16,6 +16,7 @@ export const useBatchExtraction = (
     metadata?: {
       vendorName?: string;
       designNumber?: string;
+      majorCategory?: string;
       pptNumber?: string;
       costPrice?: number;
       sellingPrice?: number;
@@ -40,6 +41,7 @@ export const useBatchExtraction = (
     metadata?: {
       vendorName?: string;
       designNumber?: string;
+      majorCategory?: string;
       pptNumber?: string;
       costPrice?: number;
       sellingPrice?: number;
@@ -98,8 +100,18 @@ export const useBatchExtraction = (
         row.attributes?.['design_number']?.schemaValue ??
         row.attributes?.['design_number']?.rawValue ?? ''
       ).trim();
-      const rowMetadata = rowDesignNo
-        ? { ...metadata, designNumber: rowDesignNo }
+      // Same for major_category: a per-row value (pre-filled from the page's
+      // selection, maybe edited) wins over the batch-level one.
+      const rowMajorCategory = String(
+        row.attributes?.['major_category']?.schemaValue ??
+        row.attributes?.['major_category']?.rawValue ?? ''
+      ).trim();
+      const rowMetadata = rowDesignNo || rowMajorCategory
+        ? {
+            ...metadata,
+            ...(rowDesignNo ? { designNumber: rowDesignNo } : {}),
+            ...(rowMajorCategory ? { majorCategory: rowMajorCategory } : {}),
+          }
         : metadata;
 
       const task = extractFunc(row, schema, categoryName, categoryCode, rowMetadata, presentationsType)
