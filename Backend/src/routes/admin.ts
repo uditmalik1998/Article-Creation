@@ -237,6 +237,14 @@ router.get('/precise-trim-master/export', h(adminController.exportPreciseTrimMas
 router.post('/precise-trim-master/upload', excelUpload.single('file'), h(adminController.uploadPreciseTrimMaster));
 
 // ═══════════════════════════════════════════════════════
+// BASIC TRIM MASTER (basic_trim_master)
+// ═══════════════════════════════════════════════════════
+router.get('/basic-trim-master/status', h(adminController.getBasicTrimMasterStatus));
+router.get('/basic-trim-master/template', h(adminController.downloadBasicTrimMasterTemplate));
+router.get('/basic-trim-master/export', h(adminController.exportBasicTrimMaster));
+router.post('/basic-trim-master/upload', excelUpload.single('file'), h(adminController.uploadBasicTrimMaster));
+
+// ═══════════════════════════════════════════════════════
 // GRID VALUES EDITOR (ADMIN) — maj_cat_grid_values
 // Group → Attribute → Major Category browser + per-value add/delete.
 // POST used for mutations to avoid the Express 5 DELETE registration quirk.
