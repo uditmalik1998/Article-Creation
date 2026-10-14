@@ -540,8 +540,8 @@ export const EXPENSE_TABLE_CONFIGS: Record<string, ExpenseTableConfig> = {
     ],
   },
   'basic-trim-master': {
-    title: 'Basic Trim Master',
-    description: 'BT-1 / BT-2 trim costs per SAP attribute name and type. Upserted by (ATTRIBUTE_NAME, TYPE).',
+    title: 'Precise Basic Trim Master (BT-1 / BT-2 per Attribute)',
+    description: "BT-1 and BT-2 trim costs per SAP attribute name and type, from the 'BASIC TRIMS 2 TYPE COSTING' workbook. Upserted by (ATTRIBUTE_NAME, TYPE).",
     rowKey: 'id',
     defaultSortBy: 'attributeName',
     defaultSortDir: 'asc',
