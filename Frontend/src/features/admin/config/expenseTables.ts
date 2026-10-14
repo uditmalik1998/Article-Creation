@@ -542,7 +542,7 @@ export const EXPENSE_TABLE_CONFIGS: Record<string, ExpenseTableConfig> = {
   'cmp-cost-master': {
     title: 'Rough CMP Cost Master (SAM Breakdown per Major Category)',
     description:
-      ‘Cutting/Stitching/Ironing/Finishing SAM & Val plus total CMP Cost per major category. Auto-fills a Body Article’s CMP Cost on the New Article page the first time a pending article of that major category is opened.’,
+      "Cutting/Stitching/Ironing/Finishing SAM & Val plus total CMP Cost per major category. Auto-fills a Body Article’s CMP Cost on the New Article page the first time a pending article of that major category is opened.",
     rowKey: 'id',
     defaultSortBy: 'majCat',
     defaultSortDir: 'asc',
