@@ -1425,7 +1425,16 @@ exports.Prisma.RoughCmpCostMasterScalarFieldEnum = {
   finishingSam: 'finishingSam',
   finishingVal: 'finishingVal',
   cmpCost: 'cmpCost',
-  remarks: 'remarks',
+  createdAt: 'createdAt',
+  updatedAt: 'updatedAt'
+};
+
+exports.Prisma.BasicTrimMasterScalarFieldEnum = {
+  id: 'id',
+  attributeName: 'attributeName',
+  type: 'type',
+  bt1: 'bt1',
+  bt2: 'bt2',
   createdAt: 'createdAt',
   updatedAt: 'updatedAt'
 };
@@ -2596,8 +2605,12 @@ exports.Prisma.BodyFabricConsumptionOrderByRelevanceFieldEnum = {
 exports.Prisma.RoughCmpCostMasterOrderByRelevanceFieldEnum = {
   div: 'div',
   subDiv: 'subDiv',
-  majCat: 'majCat',
-  remarks: 'remarks'
+  majCat: 'majCat'
+};
+
+exports.Prisma.BasicTrimMasterOrderByRelevanceFieldEnum = {
+  attributeName: 'attributeName',
+  type: 'type'
 };
 
 exports.Prisma.BasicTrimCostMasterOrderByRelevanceFieldEnum = {
@@ -2873,6 +2886,7 @@ exports.Prisma.ModelName = {
   ReferenceArticleData: 'ReferenceArticleData',
   BodyFabricConsumption: 'BodyFabricConsumption',
   RoughCmpCostMaster: 'RoughCmpCostMaster',
+  BasicTrimMaster: 'BasicTrimMaster',
   BasicTrimCostMaster: 'BasicTrimCostMaster',
   PreciseTrimMaster: 'PreciseTrimMaster',
   BasicTrimCostComponent: 'BasicTrimCostComponent',

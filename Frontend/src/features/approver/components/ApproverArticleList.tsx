@@ -648,8 +648,7 @@ const ArticleCard = React.memo(
       mSleevesMainStyle: string | null; mSleeveFold: string | null; mBtmFold: string | null;
       mNoOfPocket: string | null; mPocket: string | null; mExtraPocket: string | null;
       mFit: string | null; mBodyStyle: string | null; mLength: string | null; mSet: string | null;
-      cmtpCost: string | number | null; cmpCost: string | number | null;
-      fabCons: string | number | null; width: string | number | null;
+      width: string | number | null;
     }[]>([]);
     const [bodyNoLoading, setBodyNoLoading] = useState(false);
     const [bodyNoSearched, setBodyNoSearched] = useState(false);
@@ -1252,29 +1251,6 @@ const ArticleCard = React.memo(
         .then((d: { gsm: number | null }) => {
           if (d.gsm == null) return;
           const updates: Record<string, string> = { gsm: String(d.gsm) };
-          setLocalValues((prev) => ({ ...prev, ...updates }));
-          onSave({ ...item, ...updates } as any, updates, { silent: true });
-        })
-        .catch(() => {});
-      // eslint-disable-next-line react-hooks/exhaustive-deps
-    }, [isBodyArticle, effectiveMajCat, item.id]);
-
-    // Auto-fill CMP Cost + Body Costing Type from rough_cmp_cost_master — only when cmpCost is
-    // genuinely unset in the DB (item.cmpCost === null). Never runs again once a value exists.
-    useEffect(() => {
-      if (!isBodyArticle || !effectiveMajCat) return;
-      // item.cmpCost is the DB-sourced value; if it's already set, never override.
-      if ((item as any).cmpCost != null) return;
-      const token = localStorage.getItem('authToken');
-      fetch(
-        `${APP_CONFIG.api.baseURL}/approver/rough-cmp-cost?majorCategory=${encodeURIComponent(effectiveMajCat)}`,
-        { headers: { Authorization: `Bearer ${token}` } },
-      )
-        .then((r) => r.json())
-        .then((d: { cmpCost: number | null }) => {
-          if (d.cmpCost == null) return;
-          const updates: Record<string, string> = { cmpCost: String(d.cmpCost) };
-          // Only set Costing Type to Rough if not already set in DB
           setLocalValues((prev) => ({ ...prev, ...updates }));
           onSave({ ...item, ...updates } as any, updates, { silent: true });
         })
@@ -3274,61 +3250,6 @@ const ArticleCard = React.memo(
                           <div className="space-y-0 p-1">
                             {groupMap[g.group].attrs.map((attr) => renderAttributeRow(attr))}
 
-                            {/* CMTP/CMP Cost, FAB Con, Width — numbered rows for FG articles only.
-                                Body Articles show Costing Type/CMP/Basic Trim/CMTP in their own block below. */}
-                            {g.group === 'BODY' && !allowGroups?.includes('BODY') &&
-                              [
-                                { field: 'cmtpCost', label: 'CMTP COST' },
-                                { field: 'cmpCost', label: 'CMP COST' },
-                                { field: 'fabCons', label: 'FAB CON' },
-                              ].map(({ field, label }) => {
-                                _attrCounter += 1;
-                                const num = _attrCounter;
-                                const displayVal = localValues[field] !== undefined ? localValues[field] : (item as any)[field];
-                                const isEffectivelyEmpty = !displayVal || String(displayVal).trim() === '';
-                                const isEditingThis = editingField === field;
-                                const fieldLocked = isFieldLocked(field);
-                                return (
-                                  <div
-                                    key={field}
-                                    className="group flex items-center gap-1.5 rounded px-1 py-0.5 transition-colors hover:bg-muted/40"
-                                    style={{ cursor: fieldLocked ? 'default' : 'pointer' }}
-                                    onClick={() => {
-                                      if (!fieldLocked && !isEditingThis) setEditingField(field);
-                                    }}
-                                  >
-                                    <span className="w-4 shrink-0 text-right text-[10px] font-bold tabular-nums text-muted-foreground">{num}.</span>
-                                    <span className="flex-1 truncate text-[10.5px] font-semibold leading-snug text-foreground/80">
-                                      {label}
-                                    </span>
-                                    <div className="w-[110px] shrink-0">
-                                      {isEditingThis ? (
-                                        <Input
-                                          autoFocus
-                                          defaultValue={isEffectivelyEmpty ? '' : String(displayVal)}
-                                          className="h-6 px-1 text-[11px]"
-                                          onKeyDown={(e) =>
-                                            e.key === 'Enter' && handleSave(field, (e.target as HTMLInputElement).value || null)
-                                          }
-                                          onBlur={(e) => handleSave(field, e.target.value || null)}
-                                        />
-                                      ) : (
-                                        <span
-                                          className="block truncate text-right text-[11px]"
-                                          style={{
-                                            color: isEffectivelyEmpty ? '#9ca3af' : '#111827',
-                                            fontStyle: isEffectivelyEmpty ? 'italic' : 'normal',
-                                            fontWeight: 600,
-                                          }}
-                                        >
-                                          {isEffectivelyEmpty ? (isLocked ? '—' : 'Click') : String(displayVal)}
-                                        </span>
-                                      )}
-                                    </div>
-                                  </div>
-                                );
-                              })}
-
                             {/* Costing Type, CMP Cost, Basic Trim Cost, CMTP Cost — Body Article only,
                                 appended after the 17 Body & Construction attribute rows. */}
                             {g.group === 'BODY' && allowGroups?.includes('BODY') &&
@@ -4050,10 +3971,7 @@ const ArticleCard = React.memo(
                                   };
                                   // BOM cost fields: only overwrite when the body article has a value.
                                   const bomMap: Record<string, string | number | null | undefined> = {
-                                    cmtpCost: r.cmtpCost,
-                                    cmpCost:  r.cmpCost,
-                                    fabCons:  r.fabCons,
-                                    width:    r.width,
+                                    width: r.width,
                                   };
                                   const gridUpdates: Record<string, string> = { bodyArticle: r.bodyArticleNumber || '' };
                                   // Always write body attributes — clear old values when body_article_data has null

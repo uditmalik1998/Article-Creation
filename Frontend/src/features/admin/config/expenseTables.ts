@@ -539,6 +539,25 @@ export const EXPENSE_TABLE_CONFIGS: Record<string, ExpenseTableConfig> = {
       { dataIndex: 'updatedAt', title: 'Updated At', type: 'date', editable: false },
     ],
   },
+  'basic-trim-master': {
+    title: 'Precise Basic Trim Master (BT-1 / BT-2 per Attribute)',
+    description: "BT-1 and BT-2 trim costs per SAP attribute name and type, from the 'BASIC TRIMS 2 TYPE COSTING' workbook. Upserted by (ATTRIBUTE_NAME, TYPE).",
+    rowKey: 'id',
+    defaultSortBy: 'attributeName',
+    defaultSortDir: 'asc',
+    allowCreate: true,
+    allowDelete: true,
+    requiredOnCreate: ['attributeName', 'type'],
+    columns: [
+      { dataIndex: 'id', title: 'ID', width: 80, editable: false },
+      { dataIndex: 'attributeName', title: 'Attribute Name', pickFromExisting: true, filterable: true },
+      { dataIndex: 'type', title: 'Type', pickFromExisting: true, filterable: true },
+      { dataIndex: 'bt1', title: 'BT-1', align: 'right' },
+      { dataIndex: 'bt2', title: 'BT-2', align: 'right' },
+      { dataIndex: 'createdAt', title: 'Created At', type: 'date', editable: false },
+      { dataIndex: 'updatedAt', title: 'Updated At', type: 'date', editable: false },
+    ],
+  },
   'cmp-cost-master': {
     title: 'Rough CMP Cost Master (SAM Breakdown per Major Category)',
     description:

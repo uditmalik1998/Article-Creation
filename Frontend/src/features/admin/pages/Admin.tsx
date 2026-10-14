@@ -166,6 +166,13 @@ interface PreciseTrimMasterMeta {
   lastUpdated?: string;
 }
 
+interface BasicTrimMasterMeta {
+  total?: number;
+  attributes?: number;
+  skipped?: number;
+  lastUpdated?: string;
+}
+
 interface SegmentMasterMeta {
   total?: number;
   categories?: number;
@@ -206,8 +213,8 @@ interface HierarchyUploadResult {
   preview?: { divisions: string[]; subDivisions: string[]; majorCategories: string[] };
 }
 
-/** Master-data upload cards on this page (Attributes 7, GM 2, Fabric & body 5, Precise 3, Costs 2, Hierarchy & menus 2). */
-const MASTER_DATA_COUNT = 21;
+/** Master-data upload cards on this page (Attributes 7, GM 2, Fabric & body 5, Precise 4, Costs 2, Hierarchy & menus 2). */
+const MASTER_DATA_COUNT = 22;
 
 interface PipelineStatusData {
   PENDING: number;
@@ -351,6 +358,13 @@ export default function Admin() {
   const [preciseTrimMasterUploading, setPreciseTrimMasterUploading] = useState(false);
   const [preciseTrimMasterProgress, setPreciseTrimMasterProgress] = useState<number>(0);
   const preciseTrimMasterFileRef = useRef<HTMLInputElement | null>(null);
+
+  // Basic Trim Master (basic_trim_master)
+  const [basicTrimMasterMeta, setBasicTrimMasterMeta] = useState<BasicTrimMasterMeta | null>(null);
+  const [basicTrimMasterStatusLoading, setBasicTrimMasterStatusLoading] = useState(false);
+  const [basicTrimMasterUploading, setBasicTrimMasterUploading] = useState(false);
+  const [basicTrimMasterProgress, setBasicTrimMasterProgress] = useState<number>(0);
+  const basicTrimMasterFileRef = useRef<HTMLInputElement | null>(null);
 
   // National Grid Master
   const [nationalGridTotal, setNationalGridTotal] = useState<number | null>(null);
@@ -1785,6 +1799,68 @@ export default function Admin() {
     }
   };
 
+  // ─────────────────────────────── Basic Trim Master ───────────────────────────────
+  const loadBasicTrimMasterStatus = useCallback(async () => {
+    setBasicTrimMasterStatusLoading(true);
+    try {
+      const token = localStorage.getItem('authToken');
+      const res = await fetch(`${APP_CONFIG.api.baseURL}/admin/basic-trim-master/status`, {
+        headers: token ? { Authorization: `Bearer ${token}` } : {},
+      });
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.error || 'Failed to load basic trim master status');
+      setBasicTrimMasterMeta(data.data);
+    } catch (err: any) {
+      message.error(err?.message || 'Failed to load basic trim master status');
+    } finally {
+      setBasicTrimMasterStatusLoading(false);
+    }
+  }, []);
+
+  const downloadBasicTrimMasterFile = (kind: 'template' | 'export') => {
+    const token = localStorage.getItem('authToken');
+    const url = `${APP_CONFIG.api.baseURL}/admin/basic-trim-master/${kind}`;
+    return fetch(url, { headers: token ? { Authorization: `Bearer ${token}` } : {} })
+      .then((r) => r.blob())
+      .then((blob) => {
+        const a = document.createElement('a');
+        a.href = URL.createObjectURL(blob);
+        a.download = kind === 'template' ? 'BASIC_TRIM_MASTER_TEMPLATE.xlsx' : 'BASIC_TRIM_MASTER_EXPORT.xlsx';
+        a.click();
+      })
+      .catch(() => message.error(kind === 'template' ? 'Failed to download template' : 'Failed to export basic trim master'));
+  };
+
+  const handleBasicTrimMasterUpload = async (file: File) => {
+    setBasicTrimMasterUploading(true);
+    setBasicTrimMasterProgress(0);
+    try {
+      const token = localStorage.getItem('authToken');
+      const formData = new FormData();
+      formData.append('file', file);
+      const progressInterval = setInterval(() => {
+        setBasicTrimMasterProgress((prev) => Math.min(prev + 5, 90));
+      }, 500);
+      const res = await fetch(`${APP_CONFIG.api.baseURL}/admin/basic-trim-master/upload`, {
+        method: 'POST',
+        headers: token ? { Authorization: `Bearer ${token}` } : {},
+        body: formData,
+      });
+      clearInterval(progressInterval);
+      setBasicTrimMasterProgress(100);
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.error || 'Upload failed');
+      message.success(data.message);
+      setBasicTrimMasterMeta(data.data);
+    } catch (err: any) {
+      message.error(err?.message || 'Upload failed');
+    } finally {
+      setBasicTrimMasterUploading(false);
+      setTimeout(() => setBasicTrimMasterProgress(0), 1500);
+      if (basicTrimMasterFileRef.current) basicTrimMasterFileRef.current.value = '';
+    }
+  };
+
   // ─────────────────────────────── National Grid Master ───────────────────────────────
   const downloadNationalGridData = () => {
     const token = localStorage.getItem('authToken');
@@ -2457,9 +2533,10 @@ export default function Admin() {
     loadBodyFabConsStatus();
     loadPreciseBodyArticleStatus();
     loadPreciseTrimMasterStatus();
+    loadBasicTrimMasterStatus();
     loadPreciseFabricArticleStatus();
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [loadVendorStatus, loadMajCatGridStatus, loadMandatoryGridStatus, loadSizeMasterStatus, loadColorMasterStatus, loadFabricArticleDataStatus, loadFabricArticleMasterStatus, loadBodyArticleDataStatus, loadBroaderMenuStatus, loadSegmentMasterStatus, loadBasicAccessoriesStatus, loadCmpCostMasterStatus, loadNationalGridStatus, loadHierarchyExcelStatus, loadPipelineStatus, loadFabricRawStatus, loadGmRawStatus, loadBodyFabConsStatus, loadPreciseBodyArticleStatus, loadPreciseTrimMasterStatus, loadPreciseFabricArticleStatus]);
+  }, [loadVendorStatus, loadMajCatGridStatus, loadMandatoryGridStatus, loadSizeMasterStatus, loadColorMasterStatus, loadFabricArticleDataStatus, loadFabricArticleMasterStatus, loadBodyArticleDataStatus, loadBroaderMenuStatus, loadSegmentMasterStatus, loadBasicAccessoriesStatus, loadCmpCostMasterStatus, loadNationalGridStatus, loadHierarchyExcelStatus, loadPipelineStatus, loadFabricRawStatus, loadGmRawStatus, loadBodyFabConsStatus, loadPreciseBodyArticleStatus, loadPreciseTrimMasterStatus, loadBasicTrimMasterStatus, loadPreciseFabricArticleStatus]);
 
   const loadData = async () => {
     setLoading(true);
@@ -4222,7 +4299,7 @@ export default function Admin() {
               }
             />
           </MasterGroup>
-          <MasterGroup title="Precise" count={3} notUploaded={((preciseBodyArticleTotal ? preciseBodyArticleTotal.total : null) === 0 ? 1 : 0) + ((preciseTrimMasterMeta ? (preciseTrimMasterMeta.total ?? 0) : null) === 0 ? 1 : 0) + ((preciseFabricArticleMeta ? preciseFabricArticleMeta.total : null) === 0 ? 1 : 0)}>
+          <MasterGroup title="Precise" count={4} notUploaded={((preciseBodyArticleTotal ? preciseBodyArticleTotal.total : null) === 0 ? 1 : 0) + ((preciseTrimMasterMeta ? (preciseTrimMasterMeta.total ?? 0) : null) === 0 ? 1 : 0) + ((basicTrimMasterMeta ? (basicTrimMasterMeta.total ?? 0) : null) === 0 ? 1 : 0) + ((preciseFabricArticleMeta ? preciseFabricArticleMeta.total : null) === 0 ? 1 : 0)}>
             <MasterDataCard
               title="Precise Body Article Data"
               rows={preciseBodyArticleTotal ? preciseBodyArticleTotal.total : null}
@@ -4375,6 +4452,95 @@ export default function Admin() {
                       <button
                         type="button"
                         onClick={() => preciseTrimMasterFileRef.current?.click()}
+                        className="flex w-full flex-col items-center justify-center rounded-md border-2 border-dashed border-border bg-muted/30 px-4 py-6 transition-colors hover:border-slate-400 hover:bg-slate-50 dark:hover:bg-slate-500/10"
+                      >
+                        <Inbox className="mb-2 h-8 w-8 text-slate-600 dark:text-slate-300" />
+                        <p className="text-[13px]">
+                          Click to upload <strong>.xlsx</strong> file
+                        </p>
+                        <p className="text-[11px] text-muted-foreground">Only Excel files. Max 50 MB.</p>
+                      </button>
+                    )}
+                  </div>
+                </>
+              }
+            />
+            <MasterDataCard
+              title="Precise Basic Trim Master"
+              description="BT-1 / BT-2 Trim Costs per Attribute &amp; Type"
+              rows={basicTrimMasterMeta ? (basicTrimMasterMeta.total ?? 0) : null}
+              lastUpload={basicTrimMasterMeta?.lastUpdated ?? null}
+              loading={basicTrimMasterStatusLoading}
+              busy={basicTrimMasterUploading}
+              onView={() => navigate('/admin/expense/basic-trim-master')}
+              onDownload={() => downloadBasicTrimMasterFile('export')}
+              onTemplate={() => downloadBasicTrimMasterFile('template')}
+              onRefresh={loadBasicTrimMasterStatus}
+              details={
+                <>
+                  {basicTrimMasterMeta && (basicTrimMasterMeta.total ?? 0) > 0 ? (
+                    <Descriptions bordered>
+                      {basicTrimMasterMeta.lastUpdated && (
+                        <Descriptions.Item label="Last Updated">
+                          {new Date(basicTrimMasterMeta.lastUpdated).toLocaleString('en-IN', {
+                            dateStyle: 'medium', timeStyle: 'short',
+                          })}
+                        </Descriptions.Item>
+                      )}
+                      <Descriptions.Item label="Attribute Names">
+                        <Badge variant="info">{(basicTrimMasterMeta.attributes ?? 0).toLocaleString()}</Badge>
+                      </Descriptions.Item>
+                      <Descriptions.Item label="Total Rows">
+                        <Badge variant="success">{(basicTrimMasterMeta.total ?? 0).toLocaleString()}</Badge>
+                      </Descriptions.Item>
+                      {basicTrimMasterMeta.skipped != null && (basicTrimMasterMeta.skipped ?? 0) > 0 && (
+                        <Descriptions.Item label="Skipped">
+                          <Badge variant="warning">{(basicTrimMasterMeta.skipped ?? 0).toLocaleString()}</Badge>
+                        </Descriptions.Item>
+                      )}
+                    </Descriptions>
+                  ) : (
+                    <Alert
+                      type="warning"
+                      showIcon
+                      message="No basic trim master data loaded"
+                      description="Upload an Excel with columns: ATTRIBUTE_NAME, TYPE, BT-1, BT-2. Row 3 = headers, data from row 4. Upserts by (ATTRIBUTE_NAME, TYPE)."
+                    />
+                  )}
+                </>
+              }
+              upload={
+                <>
+                  <div className="rounded-md border border-border p-4">
+                    <div className="mb-1 font-semibold">Upload Basic Trim Master Excel</div>
+                    <div className="mb-3 text-xs text-muted-foreground">
+                      Row 3: headers (<strong>ATTRIBUTE NAME, TYPE, BT-1</strong>). Row 4+: data.{' '}
+                      <strong>Upserts by (ATTRIBUTE_NAME + TYPE)</strong> — existing rows are updated, new rows are inserted.
+                    </div>
+
+                    <input
+                      ref={basicTrimMasterFileRef}
+                      type="file"
+                      accept=".xlsx,.xls"
+                      className="hidden"
+                      onChange={(e) => {
+                        const file = e.target.files?.[0];
+                        if (file) handleBasicTrimMasterUpload(file);
+                      }}
+                    />
+
+                    {basicTrimMasterUploading ? (
+                      <div>
+                        <div className="mb-2 text-[13px] text-slate-600 dark:text-slate-300">
+                          <RefreshCw className="mr-1.5 inline-block h-3.5 w-3.5 animate-spin" />
+                          Uploading &amp; upserting rows...
+                        </div>
+                        <Progress value={basicTrimMasterProgress} />
+                      </div>
+                    ) : (
+                      <button
+                        type="button"
+                        onClick={() => basicTrimMasterFileRef.current?.click()}
                         className="flex w-full flex-col items-center justify-center rounded-md border-2 border-dashed border-border bg-muted/30 px-4 py-6 transition-colors hover:border-slate-400 hover:bg-slate-50 dark:hover:bg-slate-500/10"
                       >
                         <Inbox className="mb-2 h-8 w-8 text-slate-600 dark:text-slate-300" />

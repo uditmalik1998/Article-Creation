@@ -319,10 +319,7 @@ model ExtractionResultFlat {
   articleDimension            String?       @map("article_dimension") @db.VarChar(100)
 
   // ===== BODY ARTICLE COST FIELDS =====
-  cmtpCost                    Decimal?      @map("cmtp_cost") @db.Decimal(10, 2)
-  cmpCost                     Decimal?      @map("cmp_cost")  @db.Decimal(10, 2)
   fabCost                     Decimal?      @map("fab_cost")  @db.Decimal(10, 2)
-  fabCons                     Decimal?      @map("fab_cons")  @db.Decimal(10, 2)
   autoBgt                     Decimal?      @map("auto_bgt")                   @db.Decimal(10, 2)
   roughV2                     Decimal?      @map("rough_v2")                   @db.Decimal(10, 2)
   vendorFabricRate            Decimal?      @map("vendor_fabric_rate")         @db.Decimal(10, 2)
@@ -2162,6 +2159,21 @@ model RoughCmpCostMaster {
   @@unique([div, subDiv, majCat])
   @@index([majCat])
   @@map("rough_cmp_cost_master")
+  @@schema("public")
+}
+
+model BasicTrimMaster {
+  id            Int      @id @default(autoincrement())
+  attributeName String   @map("attribute_name") @db.VarChar(100)
+  type          String   @map("type")            @db.VarChar(100)
+  bt1           Decimal? @map("bt_1")            @db.Decimal(10, 4)
+  bt2           Decimal? @map("bt_2")            @db.Decimal(10, 4)
+  createdAt     DateTime @default(now())         @map("created_at")
+  updatedAt     DateTime @updatedAt              @map("updated_at")
+
+  @@unique([attributeName, type])
+  @@index([attributeName])
+  @@map("basic_trim_master")
   @@schema("public")
 }
 
