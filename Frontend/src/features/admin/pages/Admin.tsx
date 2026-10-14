@@ -206,8 +206,8 @@ interface HierarchyUploadResult {
   preview?: { divisions: string[]; subDivisions: string[]; majorCategories: string[] };
 }
 
-/** Master-data upload cards on this page (Attributes, GM, Fabric & body, Costs, Hierarchy). */
-const MASTER_DATA_COUNT = 18;
+/** Master-data upload cards on this page (Attributes 7, GM 2, Fabric & body 5, Precise 3, Costs 2, Hierarchy & menus 2). */
+const MASTER_DATA_COUNT = 21;
 
 interface PipelineStatusData {
   PENDING: number;
