@@ -6418,6 +6418,229 @@ export const uploadPreciseTrimMaster = async (req: Request, res: Response): Prom
 };
 
 // ═══════════════════════════════════════════════════════
+// BASIC TRIM MASTER (basic_trim_master)
+//
+// BT-1 trim costs per SAP attribute name and type.
+// Template / Download Data / Upload all speak the same four-column layout
+// (ATTRIBUTE_NAME, TYPE, BT-1, BT-2), so a file downloaded here can be
+// edited and uploaded straight back. The source Excel ("BASIC TRIMS 2 TYPE
+// COSTING") only provides BT-1; BT-2 is nullable and defaults to null.
+// Upload upserts by (attribute_name, type).
+// ═══════════════════════════════════════════════════════
+
+const BTM_SHEET_NAME = 'BASIC TRIM MASTER';
+
+type BasicTrimRow = { attributeName: string; type: string; bt1: number | null; bt2: number | null };
+
+function buildBasicTrimMasterSheet(wb: any, rows: BasicTrimRow[]): void {
+  const ws = wb.addWorksheet(BTM_SHEET_NAME);
+
+  const blue = (cell: any) => {
+    cell.font = { bold: true, color: { argb: 'FFFFFFFF' } };
+    cell.fill = { type: 'pattern', pattern: 'solid', fgColor: { argb: 'FF1565C0' } };
+    cell.alignment = { horizontal: 'center' };
+  };
+
+  const headerRow = ws.addRow(['ATTRIBUTE_NAME', 'TYPE', 'BT-1', 'BT-2']);
+  headerRow.eachCell((cell: any) => blue(cell));
+
+  for (const r of rows) {
+    ws.addRow([r.attributeName, r.type, r.bt1 ?? '', r.bt2 ?? '']);
+  }
+
+  ws.columns = [{ width: 26 }, { width: 28 }, { width: 14 }, { width: 14 }];
+  ws.views = [{ state: 'frozen', xSplit: 0, ySplit: 1 }];
+}
+
+function buildBasicTrimMasterWorkbook(rows: BasicTrimRow[]): any {
+  const ExcelJS = require('exceljs');
+  const wb = new ExcelJS.Workbook();
+  buildBasicTrimMasterSheet(wb, rows);
+  return wb;
+}
+
+/** GET /admin/basic-trim-master/status */
+export const getBasicTrimMasterStatus = async (_req: Request, res: Response): Promise<void> => {
+  try {
+    const rows = await prisma.$queryRaw<{ total: bigint; attributes: bigint; last_updated: Date | null }[]>`
+      SELECT COUNT(*)::bigint AS total,
+             COUNT(DISTINCT attribute_name)::bigint AS attributes,
+             MAX(updated_at) AS last_updated
+      FROM basic_trim_master
+    `;
+    const r = rows[0] ?? { total: 0n, attributes: 0n, last_updated: null };
+    res.json({
+      success: true,
+      data: {
+        total: Number(r.total),
+        attributes: Number(r.attributes),
+        lastUpdated: r.last_updated ? r.last_updated.toISOString() : null,
+      },
+    });
+  } catch (error: any) {
+    console.error('[BasicTrimMaster] Status error:', error);
+    res.status(500).json({ success: false, error: error.message });
+  }
+};
+
+/** GET /admin/basic-trim-master/template */
+export const downloadBasicTrimMasterTemplate = async (_req: Request, res: Response): Promise<void> => {
+  try {
+    const example: BasicTrimRow = { attributeName: 'M_BTN_TYPE', type: 'DYE_CAST_BTN', bt1: 2.5, bt2: null };
+    const wb = buildBasicTrimMasterWorkbook([example]);
+    res.setHeader('Content-Type', 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');
+    res.setHeader('Content-Disposition', 'attachment; filename="BASIC_TRIM_MASTER_TEMPLATE.xlsx"');
+    await wb.xlsx.write(res);
+    res.end();
+  } catch (error: any) {
+    console.error('[BasicTrimMaster] Template error:', error);
+    res.status(500).json({ success: false, error: error.message });
+  }
+};
+
+/** GET /admin/basic-trim-master/export — every stored row, same layout. */
+export const exportBasicTrimMaster = async (_req: Request, res: Response): Promise<void> => {
+  try {
+    const masters = await prisma.basicTrimMaster.findMany({
+      orderBy: [{ attributeName: 'asc' }, { type: 'asc' }],
+    });
+    const rows: BasicTrimRow[] = masters.map((m) => ({
+      attributeName: m.attributeName,
+      type: m.type,
+      bt1: m.bt1 === null ? null : Number(m.bt1),
+      bt2: m.bt2 === null ? null : Number(m.bt2),
+    }));
+    const wb = buildBasicTrimMasterWorkbook(rows);
+    res.setHeader('Content-Type', 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');
+    res.setHeader('Content-Disposition', 'attachment; filename="BASIC_TRIM_MASTER_EXPORT.xlsx"');
+    await wb.xlsx.write(res);
+    res.end();
+  } catch (error: any) {
+    console.error('[BasicTrimMaster] Export error:', error);
+    res.status(500).json({ success: false, error: error.message });
+  }
+};
+
+/**
+ * POST /admin/basic-trim-master/upload
+ * Upserts by (attribute_name, type).
+ * Source Excel has headers in row 3, col 1 empty, data from row 4.
+ */
+export const uploadBasicTrimMaster = async (req: Request, res: Response): Promise<void> => {
+  try {
+    if (!req.file) {
+      res.status(400).json({ success: false, error: 'No file uploaded. Send a .xlsx file as "file" field.' });
+      return;
+    }
+
+    const ExcelJS = (await import('exceljs')).default;
+    const wb = new ExcelJS.Workbook();
+    await wb.xlsx.load(req.file.buffer as any);
+
+    const ws = wb.getWorksheet(BTM_SHEET_NAME) ?? wb.worksheets[0];
+    if (!ws) {
+      res.status(400).json({ success: false, error: 'No worksheets found in the uploaded Excel file.' });
+      return;
+    }
+
+    const cellStr = (row: any, c: number): string => {
+      let v = row.getCell(c).value;
+      if (v && typeof v === 'object' && 'richText' in v) return (v as any).richText.map((t: any) => t.text).join('').trim();
+      if (v && typeof v === 'object' && 'result' in v) v = (v as any).result;
+      if (v && typeof v === 'object' && 'text' in v) v = (v as any).text;
+      return v == null ? '' : String(v).trim();
+    };
+
+    const numOf = (v: unknown): number | null => {
+      if (v === null || v === undefined || v === '') return null;
+      const n = Number(v);
+      return Number.isFinite(n) ? Number(n.toFixed(4)) : null;
+    };
+
+    const cellNum = (row: any, c: number): number | null => {
+      let v = row.getCell(c).value;
+      if (v && typeof v === 'object' && 'result' in v) v = (v as any).result;
+      return numOf(v);
+    };
+
+    // Auto-detect header row — looks for ATTRIBUTE and TYPE in first 5 rows
+    let headerRowNo = 1;
+    for (let r = 1; r <= Math.min(5, ws.rowCount); r++) {
+      const row = ws.getRow(r);
+      const line = [1, 2, 3, 4, 5].map((c) => cellStr(row, c).toUpperCase()).join(' ');
+      if ((line.includes('ATTRIBUTE') || line.includes('ATTR')) && line.includes('TYPE')) {
+        headerRowNo = r;
+        break;
+      }
+    }
+
+    // Default column indices match the source Excel layout (col 1 empty)
+    let cAttr = 2, cType = 3, cBt1 = 4, cBt2 = 5;
+    const hdr = ws.getRow(headerRowNo);
+    for (let c = 1; c <= 8; c++) {
+      const h = cellStr(hdr, c).toUpperCase().replace(/[-_ ]/g, '');
+      if (h.includes('ATTRIBUTE') || h === 'ATTR' || h === 'ATTRNAME') cAttr = c;
+      else if (h === 'TYPE') cType = c;
+      else if (h === 'BT1') cBt1 = c;
+      else if (h === 'BT2') cBt2 = c;
+    }
+
+    const rowsByKey = new Map<string, BasicTrimRow>();
+    let skipped = 0;
+
+    for (let r = headerRowNo + 1; r <= ws.rowCount; r++) {
+      const row = ws.getRow(r);
+      const attributeName = cellStr(row, cAttr);
+      const type = cellStr(row, cType);
+      if (!attributeName || !type || attributeName === '-' || type === '-') {
+        skipped++;
+        continue;
+      }
+      const key = `${attributeName.toUpperCase()}|${type.toUpperCase()}`;
+      rowsByKey.set(key, { attributeName, type, bt1: cellNum(row, cBt1), bt2: cellNum(row, cBt2) });
+    }
+
+    const records = [...rowsByKey.values()];
+    if (records.length === 0) {
+      res.status(400).json({ success: false, error: 'No valid rows found in the Excel file.' });
+      return;
+    }
+
+    const now = new Date();
+    const CHUNK = 200;
+    for (let i = 0; i < records.length; i += CHUNK) {
+      const batch = records.slice(i, i + CHUNK);
+      const values = batch.map((r) => Prisma.sql`(${r.attributeName}, ${r.type}, ${r.bt1}, ${r.bt2}, ${now}, ${now})`);
+      await prisma.$executeRaw`
+        INSERT INTO basic_trim_master (attribute_name, type, bt_1, bt_2, created_at, updated_at)
+        VALUES ${Prisma.join(values)}
+        ON CONFLICT (attribute_name, type) DO UPDATE SET
+          bt_1       = EXCLUDED.bt_1,
+          bt_2       = EXCLUDED.bt_2,
+          updated_at = EXCLUDED.updated_at
+      `;
+    }
+
+    const total = await prisma.basicTrimMaster.count();
+    const [attrRow] = await prisma.$queryRaw<[{ attributes: bigint }]>`
+      SELECT COUNT(DISTINCT attribute_name)::bigint AS attributes FROM basic_trim_master
+    `;
+    const attributes = Number(attrRow.attributes);
+
+    console.log(`[BasicTrimMaster] Upserted ${records.length} rows (${skipped} skipped)`);
+
+    res.json({
+      success: true,
+      message: `Basic Trim Master updated: ${records.length} rows${skipped > 0 ? `, ${skipped} rows skipped` : ''}.`,
+      data: { total, attributes, skipped, lastUpdated: now.toISOString() },
+    });
+  } catch (error: any) {
+    console.error('[BasicTrimMaster] Upload error:', error);
+    res.status(500).json({ success: false, error: error.message });
+  }
+};
+
+// ═══════════════════════════════════════════════════════
 // FABRIC ARTICLE DATA (fabric_article_data)
 // ═══════════════════════════════════════════════════════
 
@@ -8729,6 +8952,27 @@ export const EXPENSE_TABLE_REGISTRY: Record<string, ExpenseTableConfig> = {
   'precise-trim-master': {
     kind: 'prisma',
     delegateName: 'preciseTrimMaster',
+    idColumn: 'id',
+    idIsNumeric: true,
+    allowCreate: true,
+    allowDelete: true,
+    requiredOnCreate: ['attributeName', 'type'],
+    columns: [
+      { key: 'id', label: 'ID', editable: false },
+      { key: 'attributeName', label: 'Attribute Name' },
+      { key: 'type', label: 'Type' },
+      { key: 'bt1', label: 'BT-1', align: 'right' },
+      { key: 'bt2', label: 'BT-2', align: 'right' },
+      { key: 'createdAt', label: 'Created At', editable: false },
+      { key: 'updatedAt', label: 'Updated At', editable: false },
+    ],
+    searchColumns: ['attributeName', 'type'],
+    displayColumns: ['attributeName', 'type'],
+    defaultSort: { field: 'attributeName', dir: 'asc' },
+  },
+  'basic-trim-master': {
+    kind: 'prisma',
+    delegateName: 'basicTrimMaster',
     idColumn: 'id',
     idIsNumeric: true,
     allowCreate: true,

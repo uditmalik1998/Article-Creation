@@ -307,6 +307,11 @@ export type BodyFabricConsumption = $Result.DefaultSelection<Prisma.$BodyFabricC
  */
 export type RoughCmpCostMaster = $Result.DefaultSelection<Prisma.$RoughCmpCostMasterPayload>
 /**
+ * Model BasicTrimMaster
+ * 
+ */
+export type BasicTrimMaster = $Result.DefaultSelection<Prisma.$BasicTrimMasterPayload>
+/**
  * Model BasicTrimCostMaster
  * BasicTrimCostMaster: Per-piece basic trim, packaging and thread costs by major category,
  * imported from the "MAJ CAT WISE BASIC ACCESSORIES DETAILS" workbook via
@@ -1242,6 +1247,16 @@ export class PrismaClient<
   get roughCmpCostMaster(): Prisma.RoughCmpCostMasterDelegate<ExtArgs, ClientOptions>;
 
   /**
+   * `prisma.basicTrimMaster`: Exposes CRUD operations for the **BasicTrimMaster** model.
+    * Example usage:
+    * ```ts
+    * // Fetch zero or more BasicTrimMasters
+    * const basicTrimMasters = await prisma.basicTrimMaster.findMany()
+    * ```
+    */
+  get basicTrimMaster(): Prisma.BasicTrimMasterDelegate<ExtArgs, ClientOptions>;
+
+  /**
    * `prisma.basicTrimCostMaster`: Exposes CRUD operations for the **BasicTrimCostMaster** model.
     * Example usage:
     * ```ts
@@ -1851,6 +1866,7 @@ export namespace Prisma {
     ReferenceArticleData: 'ReferenceArticleData',
     BodyFabricConsumption: 'BodyFabricConsumption',
     RoughCmpCostMaster: 'RoughCmpCostMaster',
+    BasicTrimMaster: 'BasicTrimMaster',
     BasicTrimCostMaster: 'BasicTrimCostMaster',
     PreciseTrimMaster: 'PreciseTrimMaster',
     BasicTrimCostComponent: 'BasicTrimCostComponent',
@@ -1881,7 +1897,7 @@ export namespace Prisma {
       omit: GlobalOmitOptions
     }
     meta: {
-      modelProps: "department" | "subDepartment" | "category" | "masterAttribute" | "attributeAllowedValue" | "categoryAttribute" | "extractionJob" | "extractionResult" | "extractionResultFlat" | "modelGenerationResult" | "modelImageApproval" | "mvgrLookup" | "masterVendorDetail" | "user" | "auditLog" | "apiKey" | "changeHistory" | "costSummary" | "article360" | "articleFab" | "articleBody" | "articleVaAcc" | "articleVaPrcs" | "articleBom" | "sapFieldConfig" | "sapAttributeValue" | "article360Flat" | "rawArticle" | "fabricRawData" | "gmRawData" | "srmSyncRun" | "srmSyncRunItem" | "poolBJob" | "poolBBatch" | "nationalGridMaster" | "broaderMenu" | "majorCatMaster" | "fabricArticleMaster" | "fabricMajCatGridValue" | "modifyLog" | "fabricArticleData" | "preciseFabricArticleData" | "gmArticleData" | "gmVariantArticleData" | "fgVariantArticleData" | "fabricVariantArticleData" | "valueAdditionAccessoriesCost" | "bodyArticleData" | "referenceArticleData" | "bodyFabricConsumption" | "roughCmpCostMaster" | "basicTrimCostMaster" | "preciseTrimMaster" | "basicTrimCostComponent" | "majorCategoryDetails" | "expenseApprovalStage" | "gridContributionAssignment" | "expenseChangeRequest" | "expenseAccessGrant" | "expenseAuditLog" | "bodyArticleDescriptionFormate" | "gmArticleDescriptionFormate" | "preciseBodyArticleConsumption"
+      modelProps: "department" | "subDepartment" | "category" | "masterAttribute" | "attributeAllowedValue" | "categoryAttribute" | "extractionJob" | "extractionResult" | "extractionResultFlat" | "modelGenerationResult" | "modelImageApproval" | "mvgrLookup" | "masterVendorDetail" | "user" | "auditLog" | "apiKey" | "changeHistory" | "costSummary" | "article360" | "articleFab" | "articleBody" | "articleVaAcc" | "articleVaPrcs" | "articleBom" | "sapFieldConfig" | "sapAttributeValue" | "article360Flat" | "rawArticle" | "fabricRawData" | "gmRawData" | "srmSyncRun" | "srmSyncRunItem" | "poolBJob" | "poolBBatch" | "nationalGridMaster" | "broaderMenu" | "majorCatMaster" | "fabricArticleMaster" | "fabricMajCatGridValue" | "modifyLog" | "fabricArticleData" | "preciseFabricArticleData" | "gmArticleData" | "gmVariantArticleData" | "fgVariantArticleData" | "fabricVariantArticleData" | "valueAdditionAccessoriesCost" | "bodyArticleData" | "referenceArticleData" | "bodyFabricConsumption" | "roughCmpCostMaster" | "basicTrimMaster" | "basicTrimCostMaster" | "preciseTrimMaster" | "basicTrimCostComponent" | "majorCategoryDetails" | "expenseApprovalStage" | "gridContributionAssignment" | "expenseChangeRequest" | "expenseAccessGrant" | "expenseAuditLog" | "bodyArticleDescriptionFormate" | "gmArticleDescriptionFormate" | "preciseBodyArticleConsumption"
       txIsolationLevel: Prisma.TransactionIsolationLevel
     }
     model: {
@@ -5659,6 +5675,80 @@ export namespace Prisma {
           }
         }
       }
+      BasicTrimMaster: {
+        payload: Prisma.$BasicTrimMasterPayload<ExtArgs>
+        fields: Prisma.BasicTrimMasterFieldRefs
+        operations: {
+          findUnique: {
+            args: Prisma.BasicTrimMasterFindUniqueArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$BasicTrimMasterPayload> | null
+          }
+          findUniqueOrThrow: {
+            args: Prisma.BasicTrimMasterFindUniqueOrThrowArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$BasicTrimMasterPayload>
+          }
+          findFirst: {
+            args: Prisma.BasicTrimMasterFindFirstArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$BasicTrimMasterPayload> | null
+          }
+          findFirstOrThrow: {
+            args: Prisma.BasicTrimMasterFindFirstOrThrowArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$BasicTrimMasterPayload>
+          }
+          findMany: {
+            args: Prisma.BasicTrimMasterFindManyArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$BasicTrimMasterPayload>[]
+          }
+          create: {
+            args: Prisma.BasicTrimMasterCreateArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$BasicTrimMasterPayload>
+          }
+          createMany: {
+            args: Prisma.BasicTrimMasterCreateManyArgs<ExtArgs>
+            result: BatchPayload
+          }
+          createManyAndReturn: {
+            args: Prisma.BasicTrimMasterCreateManyAndReturnArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$BasicTrimMasterPayload>[]
+          }
+          delete: {
+            args: Prisma.BasicTrimMasterDeleteArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$BasicTrimMasterPayload>
+          }
+          update: {
+            args: Prisma.BasicTrimMasterUpdateArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$BasicTrimMasterPayload>
+          }
+          deleteMany: {
+            args: Prisma.BasicTrimMasterDeleteManyArgs<ExtArgs>
+            result: BatchPayload
+          }
+          updateMany: {
+            args: Prisma.BasicTrimMasterUpdateManyArgs<ExtArgs>
+            result: BatchPayload
+          }
+          updateManyAndReturn: {
+            args: Prisma.BasicTrimMasterUpdateManyAndReturnArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$BasicTrimMasterPayload>[]
+          }
+          upsert: {
+            args: Prisma.BasicTrimMasterUpsertArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$BasicTrimMasterPayload>
+          }
+          aggregate: {
+            args: Prisma.BasicTrimMasterAggregateArgs<ExtArgs>
+            result: $Utils.Optional<AggregateBasicTrimMaster>
+          }
+          groupBy: {
+            args: Prisma.BasicTrimMasterGroupByArgs<ExtArgs>
+            result: $Utils.Optional<BasicTrimMasterGroupByOutputType>[]
+          }
+          count: {
+            args: Prisma.BasicTrimMasterCountArgs<ExtArgs>
+            result: $Utils.Optional<BasicTrimMasterCountAggregateOutputType> | number
+          }
+        }
+      }
       BasicTrimCostMaster: {
         payload: Prisma.$BasicTrimCostMasterPayload<ExtArgs>
         fields: Prisma.BasicTrimCostMasterFieldRefs
@@ -6690,6 +6780,7 @@ export namespace Prisma {
     referenceArticleData?: ReferenceArticleDataOmit
     bodyFabricConsumption?: BodyFabricConsumptionOmit
     roughCmpCostMaster?: RoughCmpCostMasterOmit
+    basicTrimMaster?: BasicTrimMasterOmit
     basicTrimCostMaster?: BasicTrimCostMasterOmit
     preciseTrimMaster?: PreciseTrimMasterOmit
     basicTrimCostComponent?: BasicTrimCostComponentOmit
@@ -73015,7 +73106,6 @@ export namespace Prisma {
     finishingSam: Decimal | null
     finishingVal: Decimal | null
     cmpCost: Decimal | null
-    remarks: string | null
     createdAt: Date | null
     updatedAt: Date | null
   }
@@ -73034,7 +73124,6 @@ export namespace Prisma {
     finishingSam: Decimal | null
     finishingVal: Decimal | null
     cmpCost: Decimal | null
-    remarks: string | null
     createdAt: Date | null
     updatedAt: Date | null
   }
@@ -73053,7 +73142,6 @@ export namespace Prisma {
     finishingSam: number
     finishingVal: number
     cmpCost: number
-    remarks: number
     createdAt: number
     updatedAt: number
     _all: number
@@ -73100,7 +73188,6 @@ export namespace Prisma {
     finishingSam?: true
     finishingVal?: true
     cmpCost?: true
-    remarks?: true
     createdAt?: true
     updatedAt?: true
   }
@@ -73119,7 +73206,6 @@ export namespace Prisma {
     finishingSam?: true
     finishingVal?: true
     cmpCost?: true
-    remarks?: true
     createdAt?: true
     updatedAt?: true
   }
@@ -73138,7 +73224,6 @@ export namespace Prisma {
     finishingSam?: true
     finishingVal?: true
     cmpCost?: true
-    remarks?: true
     createdAt?: true
     updatedAt?: true
     _all?: true
@@ -73244,7 +73329,6 @@ export namespace Prisma {
     finishingSam: Decimal | null
     finishingVal: Decimal | null
     cmpCost: Decimal | null
-    remarks: string | null
     createdAt: Date
     updatedAt: Date
     _count: RoughCmpCostMasterCountAggregateOutputType | null
@@ -73282,7 +73366,6 @@ export namespace Prisma {
     finishingSam?: boolean
     finishingVal?: boolean
     cmpCost?: boolean
-    remarks?: boolean
     createdAt?: boolean
     updatedAt?: boolean
   }, ExtArgs["result"]["roughCmpCostMaster"]>
@@ -73301,7 +73384,6 @@ export namespace Prisma {
     finishingSam?: boolean
     finishingVal?: boolean
     cmpCost?: boolean
-    remarks?: boolean
     createdAt?: boolean
     updatedAt?: boolean
   }, ExtArgs["result"]["roughCmpCostMaster"]>
@@ -73320,7 +73402,6 @@ export namespace Prisma {
     finishingSam?: boolean
     finishingVal?: boolean
     cmpCost?: boolean
-    remarks?: boolean
     createdAt?: boolean
     updatedAt?: boolean
   }, ExtArgs["result"]["roughCmpCostMaster"]>
@@ -73339,12 +73420,11 @@ export namespace Prisma {
     finishingSam?: boolean
     finishingVal?: boolean
     cmpCost?: boolean
-    remarks?: boolean
     createdAt?: boolean
     updatedAt?: boolean
   }
 
-  export type RoughCmpCostMasterOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<"id" | "div" | "subDiv" | "majCat" | "cuttingSam" | "cuttingVal" | "stitchingSam" | "stitchingVal" | "ironingSam" | "ironingVal" | "finishingSam" | "finishingVal" | "cmpCost" | "remarks" | "createdAt" | "updatedAt", ExtArgs["result"]["roughCmpCostMaster"]>
+  export type RoughCmpCostMasterOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<"id" | "div" | "subDiv" | "majCat" | "cuttingSam" | "cuttingVal" | "stitchingSam" | "stitchingVal" | "ironingSam" | "ironingVal" | "finishingSam" | "finishingVal" | "cmpCost" | "createdAt" | "updatedAt", ExtArgs["result"]["roughCmpCostMaster"]>
 
   export type $RoughCmpCostMasterPayload<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
     name: "RoughCmpCostMaster"
@@ -73363,7 +73443,6 @@ export namespace Prisma {
       finishingSam: Prisma.Decimal | null
       finishingVal: Prisma.Decimal | null
       cmpCost: Prisma.Decimal | null
-      remarks: string | null
       createdAt: Date
       updatedAt: Date
     }, ExtArgs["result"]["roughCmpCostMaster"]>
@@ -73802,7 +73881,6 @@ export namespace Prisma {
     readonly finishingSam: FieldRef<"RoughCmpCostMaster", 'Decimal'>
     readonly finishingVal: FieldRef<"RoughCmpCostMaster", 'Decimal'>
     readonly cmpCost: FieldRef<"RoughCmpCostMaster", 'Decimal'>
-    readonly remarks: FieldRef<"RoughCmpCostMaster", 'String'>
     readonly createdAt: FieldRef<"RoughCmpCostMaster", 'DateTime'>
     readonly updatedAt: FieldRef<"RoughCmpCostMaster", 'DateTime'>
   }
@@ -74168,6 +74246,1069 @@ export namespace Prisma {
      * Omit specific fields from the RoughCmpCostMaster
      */
     omit?: RoughCmpCostMasterOmit<ExtArgs> | null
+  }
+
+
+  /**
+   * Model BasicTrimMaster
+   */
+
+  export type AggregateBasicTrimMaster = {
+    _count: BasicTrimMasterCountAggregateOutputType | null
+    _avg: BasicTrimMasterAvgAggregateOutputType | null
+    _sum: BasicTrimMasterSumAggregateOutputType | null
+    _min: BasicTrimMasterMinAggregateOutputType | null
+    _max: BasicTrimMasterMaxAggregateOutputType | null
+  }
+
+  export type BasicTrimMasterAvgAggregateOutputType = {
+    id: number | null
+    bt1: Decimal | null
+    bt2: Decimal | null
+  }
+
+  export type BasicTrimMasterSumAggregateOutputType = {
+    id: number | null
+    bt1: Decimal | null
+    bt2: Decimal | null
+  }
+
+  export type BasicTrimMasterMinAggregateOutputType = {
+    id: number | null
+    attributeName: string | null
+    type: string | null
+    bt1: Decimal | null
+    bt2: Decimal | null
+    createdAt: Date | null
+    updatedAt: Date | null
+  }
+
+  export type BasicTrimMasterMaxAggregateOutputType = {
+    id: number | null
+    attributeName: string | null
+    type: string | null
+    bt1: Decimal | null
+    bt2: Decimal | null
+    createdAt: Date | null
+    updatedAt: Date | null
+  }
+
+  export type BasicTrimMasterCountAggregateOutputType = {
+    id: number
+    attributeName: number
+    type: number
+    bt1: number
+    bt2: number
+    createdAt: number
+    updatedAt: number
+    _all: number
+  }
+
+
+  export type BasicTrimMasterAvgAggregateInputType = {
+    id?: true
+    bt1?: true
+    bt2?: true
+  }
+
+  export type BasicTrimMasterSumAggregateInputType = {
+    id?: true
+    bt1?: true
+    bt2?: true
+  }
+
+  export type BasicTrimMasterMinAggregateInputType = {
+    id?: true
+    attributeName?: true
+    type?: true
+    bt1?: true
+    bt2?: true
+    createdAt?: true
+    updatedAt?: true
+  }
+
+  export type BasicTrimMasterMaxAggregateInputType = {
+    id?: true
+    attributeName?: true
+    type?: true
+    bt1?: true
+    bt2?: true
+    createdAt?: true
+    updatedAt?: true
+  }
+
+  export type BasicTrimMasterCountAggregateInputType = {
+    id?: true
+    attributeName?: true
+    type?: true
+    bt1?: true
+    bt2?: true
+    createdAt?: true
+    updatedAt?: true
+    _all?: true
+  }
+
+  export type BasicTrimMasterAggregateArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Filter which BasicTrimMaster to aggregate.
+     */
+    where?: BasicTrimMasterWhereInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
+     * 
+     * Determine the order of BasicTrimMasters to fetch.
+     */
+    orderBy?: BasicTrimMasterOrderByWithRelationInput | BasicTrimMasterOrderByWithRelationInput[]
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
+     * 
+     * Sets the start position
+     */
+    cursor?: BasicTrimMasterWhereUniqueInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Take `±n` BasicTrimMasters from the position of the cursor.
+     */
+    take?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Skip the first `n` BasicTrimMasters.
+     */
+    skip?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     * 
+     * Count returned BasicTrimMasters
+    **/
+    _count?: true | BasicTrimMasterCountAggregateInputType
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     * 
+     * Select which fields to average
+    **/
+    _avg?: BasicTrimMasterAvgAggregateInputType
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     * 
+     * Select which fields to sum
+    **/
+    _sum?: BasicTrimMasterSumAggregateInputType
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     * 
+     * Select which fields to find the minimum value
+    **/
+    _min?: BasicTrimMasterMinAggregateInputType
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     * 
+     * Select which fields to find the maximum value
+    **/
+    _max?: BasicTrimMasterMaxAggregateInputType
+  }
+
+  export type GetBasicTrimMasterAggregateType<T extends BasicTrimMasterAggregateArgs> = {
+        [P in keyof T & keyof AggregateBasicTrimMaster]: P extends '_count' | 'count'
+      ? T[P] extends true
+        ? number
+        : GetScalarType<T[P], AggregateBasicTrimMaster[P]>
+      : GetScalarType<T[P], AggregateBasicTrimMaster[P]>
+  }
+
+
+
+
+  export type BasicTrimMasterGroupByArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    where?: BasicTrimMasterWhereInput
+    orderBy?: BasicTrimMasterOrderByWithAggregationInput | BasicTrimMasterOrderByWithAggregationInput[]
+    by: BasicTrimMasterScalarFieldEnum[] | BasicTrimMasterScalarFieldEnum
+    having?: BasicTrimMasterScalarWhereWithAggregatesInput
+    take?: number
+    skip?: number
+    _count?: BasicTrimMasterCountAggregateInputType | true
+    _avg?: BasicTrimMasterAvgAggregateInputType
+    _sum?: BasicTrimMasterSumAggregateInputType
+    _min?: BasicTrimMasterMinAggregateInputType
+    _max?: BasicTrimMasterMaxAggregateInputType
+  }
+
+  export type BasicTrimMasterGroupByOutputType = {
+    id: number
+    attributeName: string
+    type: string
+    bt1: Decimal | null
+    bt2: Decimal | null
+    createdAt: Date
+    updatedAt: Date
+    _count: BasicTrimMasterCountAggregateOutputType | null
+    _avg: BasicTrimMasterAvgAggregateOutputType | null
+    _sum: BasicTrimMasterSumAggregateOutputType | null
+    _min: BasicTrimMasterMinAggregateOutputType | null
+    _max: BasicTrimMasterMaxAggregateOutputType | null
+  }
+
+  type GetBasicTrimMasterGroupByPayload<T extends BasicTrimMasterGroupByArgs> = Prisma.PrismaPromise<
+    Array<
+      PickEnumerable<BasicTrimMasterGroupByOutputType, T['by']> &
+        {
+          [P in ((keyof T) & (keyof BasicTrimMasterGroupByOutputType))]: P extends '_count'
+            ? T[P] extends boolean
+              ? number
+              : GetScalarType<T[P], BasicTrimMasterGroupByOutputType[P]>
+            : GetScalarType<T[P], BasicTrimMasterGroupByOutputType[P]>
+        }
+      >
+    >
+
+
+  export type BasicTrimMasterSelect<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
+    id?: boolean
+    attributeName?: boolean
+    type?: boolean
+    bt1?: boolean
+    bt2?: boolean
+    createdAt?: boolean
+    updatedAt?: boolean
+  }, ExtArgs["result"]["basicTrimMaster"]>
+
+  export type BasicTrimMasterSelectCreateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
+    id?: boolean
+    attributeName?: boolean
+    type?: boolean
+    bt1?: boolean
+    bt2?: boolean
+    createdAt?: boolean
+    updatedAt?: boolean
+  }, ExtArgs["result"]["basicTrimMaster"]>
+
+  export type BasicTrimMasterSelectUpdateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
+    id?: boolean
+    attributeName?: boolean
+    type?: boolean
+    bt1?: boolean
+    bt2?: boolean
+    createdAt?: boolean
+    updatedAt?: boolean
+  }, ExtArgs["result"]["basicTrimMaster"]>
+
+  export type BasicTrimMasterSelectScalar = {
+    id?: boolean
+    attributeName?: boolean
+    type?: boolean
+    bt1?: boolean
+    bt2?: boolean
+    createdAt?: boolean
+    updatedAt?: boolean
+  }
+
+  export type BasicTrimMasterOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<"id" | "attributeName" | "type" | "bt1" | "bt2" | "createdAt" | "updatedAt", ExtArgs["result"]["basicTrimMaster"]>
+
+  export type $BasicTrimMasterPayload<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    name: "BasicTrimMaster"
+    objects: {}
+    scalars: $Extensions.GetPayloadResult<{
+      id: number
+      attributeName: string
+      type: string
+      bt1: Prisma.Decimal | null
+      bt2: Prisma.Decimal | null
+      createdAt: Date
+      updatedAt: Date
+    }, ExtArgs["result"]["basicTrimMaster"]>
+    composites: {}
+  }
+
+  type BasicTrimMasterGetPayload<S extends boolean | null | undefined | BasicTrimMasterDefaultArgs> = $Result.GetResult<Prisma.$BasicTrimMasterPayload, S>
+
+  type BasicTrimMasterCountArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> =
+    Omit<BasicTrimMasterFindManyArgs, 'select' | 'include' | 'distinct' | 'omit'> & {
+      select?: BasicTrimMasterCountAggregateInputType | true
+    }
+
+  export interface BasicTrimMasterDelegate<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs, GlobalOmitOptions = {}> {
+    [K: symbol]: { types: Prisma.TypeMap<ExtArgs>['model']['BasicTrimMaster'], meta: { name: 'BasicTrimMaster' } }
+    /**
+     * Find zero or one BasicTrimMaster that matches the filter.
+     * @param {BasicTrimMasterFindUniqueArgs} args - Arguments to find a BasicTrimMaster
+     * @example
+     * // Get one BasicTrimMaster
+     * const basicTrimMaster = await prisma.basicTrimMaster.findUnique({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     */
+    findUnique<T extends BasicTrimMasterFindUniqueArgs>(args: SelectSubset<T, BasicTrimMasterFindUniqueArgs<ExtArgs>>): Prisma__BasicTrimMasterClient<$Result.GetResult<Prisma.$BasicTrimMasterPayload<ExtArgs>, T, "findUnique", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Find one BasicTrimMaster that matches the filter or throw an error with `error.code='P2025'`
+     * if no matches were found.
+     * @param {BasicTrimMasterFindUniqueOrThrowArgs} args - Arguments to find a BasicTrimMaster
+     * @example
+     * // Get one BasicTrimMaster
+     * const basicTrimMaster = await prisma.basicTrimMaster.findUniqueOrThrow({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     */
+    findUniqueOrThrow<T extends BasicTrimMasterFindUniqueOrThrowArgs>(args: SelectSubset<T, BasicTrimMasterFindUniqueOrThrowArgs<ExtArgs>>): Prisma__BasicTrimMasterClient<$Result.GetResult<Prisma.$BasicTrimMasterPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Find the first BasicTrimMaster that matches the filter.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {BasicTrimMasterFindFirstArgs} args - Arguments to find a BasicTrimMaster
+     * @example
+     * // Get one BasicTrimMaster
+     * const basicTrimMaster = await prisma.basicTrimMaster.findFirst({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     */
+    findFirst<T extends BasicTrimMasterFindFirstArgs>(args?: SelectSubset<T, BasicTrimMasterFindFirstArgs<ExtArgs>>): Prisma__BasicTrimMasterClient<$Result.GetResult<Prisma.$BasicTrimMasterPayload<ExtArgs>, T, "findFirst", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Find the first BasicTrimMaster that matches the filter or
+     * throw `PrismaKnownClientError` with `P2025` code if no matches were found.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {BasicTrimMasterFindFirstOrThrowArgs} args - Arguments to find a BasicTrimMaster
+     * @example
+     * // Get one BasicTrimMaster
+     * const basicTrimMaster = await prisma.basicTrimMaster.findFirstOrThrow({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     */
+    findFirstOrThrow<T extends BasicTrimMasterFindFirstOrThrowArgs>(args?: SelectSubset<T, BasicTrimMasterFindFirstOrThrowArgs<ExtArgs>>): Prisma__BasicTrimMasterClient<$Result.GetResult<Prisma.$BasicTrimMasterPayload<ExtArgs>, T, "findFirstOrThrow", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Find zero or more BasicTrimMasters that matches the filter.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {BasicTrimMasterFindManyArgs} args - Arguments to filter and select certain fields only.
+     * @example
+     * // Get all BasicTrimMasters
+     * const basicTrimMasters = await prisma.basicTrimMaster.findMany()
+     * 
+     * // Get first 10 BasicTrimMasters
+     * const basicTrimMasters = await prisma.basicTrimMaster.findMany({ take: 10 })
+     * 
+     * // Only select the `id`
+     * const basicTrimMasterWithIdOnly = await prisma.basicTrimMaster.findMany({ select: { id: true } })
+     * 
+     */
+    findMany<T extends BasicTrimMasterFindManyArgs>(args?: SelectSubset<T, BasicTrimMasterFindManyArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$BasicTrimMasterPayload<ExtArgs>, T, "findMany", GlobalOmitOptions>>
+
+    /**
+     * Create a BasicTrimMaster.
+     * @param {BasicTrimMasterCreateArgs} args - Arguments to create a BasicTrimMaster.
+     * @example
+     * // Create one BasicTrimMaster
+     * const BasicTrimMaster = await prisma.basicTrimMaster.create({
+     *   data: {
+     *     // ... data to create a BasicTrimMaster
+     *   }
+     * })
+     * 
+     */
+    create<T extends BasicTrimMasterCreateArgs>(args: SelectSubset<T, BasicTrimMasterCreateArgs<ExtArgs>>): Prisma__BasicTrimMasterClient<$Result.GetResult<Prisma.$BasicTrimMasterPayload<ExtArgs>, T, "create", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Create many BasicTrimMasters.
+     * @param {BasicTrimMasterCreateManyArgs} args - Arguments to create many BasicTrimMasters.
+     * @example
+     * // Create many BasicTrimMasters
+     * const basicTrimMaster = await prisma.basicTrimMaster.createMany({
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     *     
+     */
+    createMany<T extends BasicTrimMasterCreateManyArgs>(args?: SelectSubset<T, BasicTrimMasterCreateManyArgs<ExtArgs>>): Prisma.PrismaPromise<BatchPayload>
+
+    /**
+     * Create many BasicTrimMasters and returns the data saved in the database.
+     * @param {BasicTrimMasterCreateManyAndReturnArgs} args - Arguments to create many BasicTrimMasters.
+     * @example
+     * // Create many BasicTrimMasters
+     * const basicTrimMaster = await prisma.basicTrimMaster.createManyAndReturn({
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     * 
+     * // Create many BasicTrimMasters and only return the `id`
+     * const basicTrimMasterWithIdOnly = await prisma.basicTrimMaster.createManyAndReturn({
+     *   select: { id: true },
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * 
+     */
+    createManyAndReturn<T extends BasicTrimMasterCreateManyAndReturnArgs>(args?: SelectSubset<T, BasicTrimMasterCreateManyAndReturnArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$BasicTrimMasterPayload<ExtArgs>, T, "createManyAndReturn", GlobalOmitOptions>>
+
+    /**
+     * Delete a BasicTrimMaster.
+     * @param {BasicTrimMasterDeleteArgs} args - Arguments to delete one BasicTrimMaster.
+     * @example
+     * // Delete one BasicTrimMaster
+     * const BasicTrimMaster = await prisma.basicTrimMaster.delete({
+     *   where: {
+     *     // ... filter to delete one BasicTrimMaster
+     *   }
+     * })
+     * 
+     */
+    delete<T extends BasicTrimMasterDeleteArgs>(args: SelectSubset<T, BasicTrimMasterDeleteArgs<ExtArgs>>): Prisma__BasicTrimMasterClient<$Result.GetResult<Prisma.$BasicTrimMasterPayload<ExtArgs>, T, "delete", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Update one BasicTrimMaster.
+     * @param {BasicTrimMasterUpdateArgs} args - Arguments to update one BasicTrimMaster.
+     * @example
+     * // Update one BasicTrimMaster
+     * const basicTrimMaster = await prisma.basicTrimMaster.update({
+     *   where: {
+     *     // ... provide filter here
+     *   },
+     *   data: {
+     *     // ... provide data here
+     *   }
+     * })
+     * 
+     */
+    update<T extends BasicTrimMasterUpdateArgs>(args: SelectSubset<T, BasicTrimMasterUpdateArgs<ExtArgs>>): Prisma__BasicTrimMasterClient<$Result.GetResult<Prisma.$BasicTrimMasterPayload<ExtArgs>, T, "update", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Delete zero or more BasicTrimMasters.
+     * @param {BasicTrimMasterDeleteManyArgs} args - Arguments to filter BasicTrimMasters to delete.
+     * @example
+     * // Delete a few BasicTrimMasters
+     * const { count } = await prisma.basicTrimMaster.deleteMany({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     * 
+     */
+    deleteMany<T extends BasicTrimMasterDeleteManyArgs>(args?: SelectSubset<T, BasicTrimMasterDeleteManyArgs<ExtArgs>>): Prisma.PrismaPromise<BatchPayload>
+
+    /**
+     * Update zero or more BasicTrimMasters.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {BasicTrimMasterUpdateManyArgs} args - Arguments to update one or more rows.
+     * @example
+     * // Update many BasicTrimMasters
+     * const basicTrimMaster = await prisma.basicTrimMaster.updateMany({
+     *   where: {
+     *     // ... provide filter here
+     *   },
+     *   data: {
+     *     // ... provide data here
+     *   }
+     * })
+     * 
+     */
+    updateMany<T extends BasicTrimMasterUpdateManyArgs>(args: SelectSubset<T, BasicTrimMasterUpdateManyArgs<ExtArgs>>): Prisma.PrismaPromise<BatchPayload>
+
+    /**
+     * Update zero or more BasicTrimMasters and returns the data updated in the database.
+     * @param {BasicTrimMasterUpdateManyAndReturnArgs} args - Arguments to update many BasicTrimMasters.
+     * @example
+     * // Update many BasicTrimMasters
+     * const basicTrimMaster = await prisma.basicTrimMaster.updateManyAndReturn({
+     *   where: {
+     *     // ... provide filter here
+     *   },
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     * 
+     * // Update zero or more BasicTrimMasters and only return the `id`
+     * const basicTrimMasterWithIdOnly = await prisma.basicTrimMaster.updateManyAndReturn({
+     *   select: { id: true },
+     *   where: {
+     *     // ... provide filter here
+     *   },
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * 
+     */
+    updateManyAndReturn<T extends BasicTrimMasterUpdateManyAndReturnArgs>(args: SelectSubset<T, BasicTrimMasterUpdateManyAndReturnArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$BasicTrimMasterPayload<ExtArgs>, T, "updateManyAndReturn", GlobalOmitOptions>>
+
+    /**
+     * Create or update one BasicTrimMaster.
+     * @param {BasicTrimMasterUpsertArgs} args - Arguments to update or create a BasicTrimMaster.
+     * @example
+     * // Update or create a BasicTrimMaster
+     * const basicTrimMaster = await prisma.basicTrimMaster.upsert({
+     *   create: {
+     *     // ... data to create a BasicTrimMaster
+     *   },
+     *   update: {
+     *     // ... in case it already exists, update
+     *   },
+     *   where: {
+     *     // ... the filter for the BasicTrimMaster we want to update
+     *   }
+     * })
+     */
+    upsert<T extends BasicTrimMasterUpsertArgs>(args: SelectSubset<T, BasicTrimMasterUpsertArgs<ExtArgs>>): Prisma__BasicTrimMasterClient<$Result.GetResult<Prisma.$BasicTrimMasterPayload<ExtArgs>, T, "upsert", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+
+    /**
+     * Count the number of BasicTrimMasters.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {BasicTrimMasterCountArgs} args - Arguments to filter BasicTrimMasters to count.
+     * @example
+     * // Count the number of BasicTrimMasters
+     * const count = await prisma.basicTrimMaster.count({
+     *   where: {
+     *     // ... the filter for the BasicTrimMasters we want to count
+     *   }
+     * })
+    **/
+    count<T extends BasicTrimMasterCountArgs>(
+      args?: Subset<T, BasicTrimMasterCountArgs>,
+    ): Prisma.PrismaPromise<
+      T extends $Utils.Record<'select', any>
+        ? T['select'] extends true
+          ? number
+          : GetScalarType<T['select'], BasicTrimMasterCountAggregateOutputType>
+        : number
+    >
+
+    /**
+     * Allows you to perform aggregations operations on a BasicTrimMaster.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {BasicTrimMasterAggregateArgs} args - Select which aggregations you would like to apply and on what fields.
+     * @example
+     * // Ordered by age ascending
+     * // Where email contains prisma.io
+     * // Limited to the 10 users
+     * const aggregations = await prisma.user.aggregate({
+     *   _avg: {
+     *     age: true,
+     *   },
+     *   where: {
+     *     email: {
+     *       contains: "prisma.io",
+     *     },
+     *   },
+     *   orderBy: {
+     *     age: "asc",
+     *   },
+     *   take: 10,
+     * })
+    **/
+    aggregate<T extends BasicTrimMasterAggregateArgs>(args: Subset<T, BasicTrimMasterAggregateArgs>): Prisma.PrismaPromise<GetBasicTrimMasterAggregateType<T>>
+
+    /**
+     * Group by BasicTrimMaster.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {BasicTrimMasterGroupByArgs} args - Group by arguments.
+     * @example
+     * // Group by city, order by createdAt, get count
+     * const result = await prisma.user.groupBy({
+     *   by: ['city', 'createdAt'],
+     *   orderBy: {
+     *     createdAt: true
+     *   },
+     *   _count: {
+     *     _all: true
+     *   },
+     * })
+     * 
+    **/
+    groupBy<
+      T extends BasicTrimMasterGroupByArgs,
+      HasSelectOrTake extends Or<
+        Extends<'skip', Keys<T>>,
+        Extends<'take', Keys<T>>
+      >,
+      OrderByArg extends True extends HasSelectOrTake
+        ? { orderBy: BasicTrimMasterGroupByArgs['orderBy'] }
+        : { orderBy?: BasicTrimMasterGroupByArgs['orderBy'] },
+      OrderFields extends ExcludeUnderscoreKeys<Keys<MaybeTupleToUnion<T['orderBy']>>>,
+      ByFields extends MaybeTupleToUnion<T['by']>,
+      ByValid extends Has<ByFields, OrderFields>,
+      HavingFields extends GetHavingFields<T['having']>,
+      HavingValid extends Has<ByFields, HavingFields>,
+      ByEmpty extends T['by'] extends never[] ? True : False,
+      InputErrors extends ByEmpty extends True
+      ? `Error: "by" must not be empty.`
+      : HavingValid extends False
+      ? {
+          [P in HavingFields]: P extends ByFields
+            ? never
+            : P extends string
+            ? `Error: Field "${P}" used in "having" needs to be provided in "by".`
+            : [
+                Error,
+                'Field ',
+                P,
+                ` in "having" needs to be provided in "by"`,
+              ]
+        }[HavingFields]
+      : 'take' extends Keys<T>
+      ? 'orderBy' extends Keys<T>
+        ? ByValid extends True
+          ? {}
+          : {
+              [P in OrderFields]: P extends ByFields
+                ? never
+                : `Error: Field "${P}" in "orderBy" needs to be provided in "by"`
+            }[OrderFields]
+        : 'Error: If you provide "take", you also need to provide "orderBy"'
+      : 'skip' extends Keys<T>
+      ? 'orderBy' extends Keys<T>
+        ? ByValid extends True
+          ? {}
+          : {
+              [P in OrderFields]: P extends ByFields
+                ? never
+                : `Error: Field "${P}" in "orderBy" needs to be provided in "by"`
+            }[OrderFields]
+        : 'Error: If you provide "skip", you also need to provide "orderBy"'
+      : ByValid extends True
+      ? {}
+      : {
+          [P in OrderFields]: P extends ByFields
+            ? never
+            : `Error: Field "${P}" in "orderBy" needs to be provided in "by"`
+        }[OrderFields]
+    >(args: SubsetIntersection<T, BasicTrimMasterGroupByArgs, OrderByArg> & InputErrors): {} extends InputErrors ? GetBasicTrimMasterGroupByPayload<T> : Prisma.PrismaPromise<InputErrors>
+  /**
+   * Fields of the BasicTrimMaster model
+   */
+  readonly fields: BasicTrimMasterFieldRefs;
+  }
+
+  /**
+   * The delegate class that acts as a "Promise-like" for BasicTrimMaster.
+   * Why is this prefixed with `Prisma__`?
+   * Because we want to prevent naming conflicts as mentioned in
+   * https://github.com/prisma/prisma-client-js/issues/707
+   */
+  export interface Prisma__BasicTrimMasterClient<T, Null = never, ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs, GlobalOmitOptions = {}> extends Prisma.PrismaPromise<T> {
+    readonly [Symbol.toStringTag]: "PrismaPromise"
+    /**
+     * Attaches callbacks for the resolution and/or rejection of the Promise.
+     * @param onfulfilled The callback to execute when the Promise is resolved.
+     * @param onrejected The callback to execute when the Promise is rejected.
+     * @returns A Promise for the completion of which ever callback is executed.
+     */
+    then<TResult1 = T, TResult2 = never>(onfulfilled?: ((value: T) => TResult1 | PromiseLike<TResult1>) | undefined | null, onrejected?: ((reason: any) => TResult2 | PromiseLike<TResult2>) | undefined | null): $Utils.JsPromise<TResult1 | TResult2>
+    /**
+     * Attaches a callback for only the rejection of the Promise.
+     * @param onrejected The callback to execute when the Promise is rejected.
+     * @returns A Promise for the completion of the callback.
+     */
+    catch<TResult = never>(onrejected?: ((reason: any) => TResult | PromiseLike<TResult>) | undefined | null): $Utils.JsPromise<T | TResult>
+    /**
+     * Attaches a callback that is invoked when the Promise is settled (fulfilled or rejected). The
+     * resolved value cannot be modified from the callback.
+     * @param onfinally The callback to execute when the Promise is settled (fulfilled or rejected).
+     * @returns A Promise for the completion of the callback.
+     */
+    finally(onfinally?: (() => void) | undefined | null): $Utils.JsPromise<T>
+  }
+
+
+
+
+  /**
+   * Fields of the BasicTrimMaster model
+   */
+  interface BasicTrimMasterFieldRefs {
+    readonly id: FieldRef<"BasicTrimMaster", 'Int'>
+    readonly attributeName: FieldRef<"BasicTrimMaster", 'String'>
+    readonly type: FieldRef<"BasicTrimMaster", 'String'>
+    readonly bt1: FieldRef<"BasicTrimMaster", 'Decimal'>
+    readonly bt2: FieldRef<"BasicTrimMaster", 'Decimal'>
+    readonly createdAt: FieldRef<"BasicTrimMaster", 'DateTime'>
+    readonly updatedAt: FieldRef<"BasicTrimMaster", 'DateTime'>
+  }
+    
+
+  // Custom InputTypes
+  /**
+   * BasicTrimMaster findUnique
+   */
+  export type BasicTrimMasterFindUniqueArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the BasicTrimMaster
+     */
+    select?: BasicTrimMasterSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the BasicTrimMaster
+     */
+    omit?: BasicTrimMasterOmit<ExtArgs> | null
+    /**
+     * Filter, which BasicTrimMaster to fetch.
+     */
+    where: BasicTrimMasterWhereUniqueInput
+  }
+
+  /**
+   * BasicTrimMaster findUniqueOrThrow
+   */
+  export type BasicTrimMasterFindUniqueOrThrowArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the BasicTrimMaster
+     */
+    select?: BasicTrimMasterSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the BasicTrimMaster
+     */
+    omit?: BasicTrimMasterOmit<ExtArgs> | null
+    /**
+     * Filter, which BasicTrimMaster to fetch.
+     */
+    where: BasicTrimMasterWhereUniqueInput
+  }
+
+  /**
+   * BasicTrimMaster findFirst
+   */
+  export type BasicTrimMasterFindFirstArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the BasicTrimMaster
+     */
+    select?: BasicTrimMasterSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the BasicTrimMaster
+     */
+    omit?: BasicTrimMasterOmit<ExtArgs> | null
+    /**
+     * Filter, which BasicTrimMaster to fetch.
+     */
+    where?: BasicTrimMasterWhereInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
+     * 
+     * Determine the order of BasicTrimMasters to fetch.
+     */
+    orderBy?: BasicTrimMasterOrderByWithRelationInput | BasicTrimMasterOrderByWithRelationInput[]
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
+     * 
+     * Sets the position for searching for BasicTrimMasters.
+     */
+    cursor?: BasicTrimMasterWhereUniqueInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Take `±n` BasicTrimMasters from the position of the cursor.
+     */
+    take?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Skip the first `n` BasicTrimMasters.
+     */
+    skip?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/distinct Distinct Docs}
+     * 
+     * Filter by unique combinations of BasicTrimMasters.
+     */
+    distinct?: BasicTrimMasterScalarFieldEnum | BasicTrimMasterScalarFieldEnum[]
+  }
+
+  /**
+   * BasicTrimMaster findFirstOrThrow
+   */
+  export type BasicTrimMasterFindFirstOrThrowArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the BasicTrimMaster
+     */
+    select?: BasicTrimMasterSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the BasicTrimMaster
+     */
+    omit?: BasicTrimMasterOmit<ExtArgs> | null
+    /**
+     * Filter, which BasicTrimMaster to fetch.
+     */
+    where?: BasicTrimMasterWhereInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
+     * 
+     * Determine the order of BasicTrimMasters to fetch.
+     */
+    orderBy?: BasicTrimMasterOrderByWithRelationInput | BasicTrimMasterOrderByWithRelationInput[]
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
+     * 
+     * Sets the position for searching for BasicTrimMasters.
+     */
+    cursor?: BasicTrimMasterWhereUniqueInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Take `±n` BasicTrimMasters from the position of the cursor.
+     */
+    take?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Skip the first `n` BasicTrimMasters.
+     */
+    skip?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/distinct Distinct Docs}
+     * 
+     * Filter by unique combinations of BasicTrimMasters.
+     */
+    distinct?: BasicTrimMasterScalarFieldEnum | BasicTrimMasterScalarFieldEnum[]
+  }
+
+  /**
+   * BasicTrimMaster findMany
+   */
+  export type BasicTrimMasterFindManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the BasicTrimMaster
+     */
+    select?: BasicTrimMasterSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the BasicTrimMaster
+     */
+    omit?: BasicTrimMasterOmit<ExtArgs> | null
+    /**
+     * Filter, which BasicTrimMasters to fetch.
+     */
+    where?: BasicTrimMasterWhereInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
+     * 
+     * Determine the order of BasicTrimMasters to fetch.
+     */
+    orderBy?: BasicTrimMasterOrderByWithRelationInput | BasicTrimMasterOrderByWithRelationInput[]
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
+     * 
+     * Sets the position for listing BasicTrimMasters.
+     */
+    cursor?: BasicTrimMasterWhereUniqueInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Take `±n` BasicTrimMasters from the position of the cursor.
+     */
+    take?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Skip the first `n` BasicTrimMasters.
+     */
+    skip?: number
+    distinct?: BasicTrimMasterScalarFieldEnum | BasicTrimMasterScalarFieldEnum[]
+  }
+
+  /**
+   * BasicTrimMaster create
+   */
+  export type BasicTrimMasterCreateArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the BasicTrimMaster
+     */
+    select?: BasicTrimMasterSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the BasicTrimMaster
+     */
+    omit?: BasicTrimMasterOmit<ExtArgs> | null
+    /**
+     * The data needed to create a BasicTrimMaster.
+     */
+    data: XOR<BasicTrimMasterCreateInput, BasicTrimMasterUncheckedCreateInput>
+  }
+
+  /**
+   * BasicTrimMaster createMany
+   */
+  export type BasicTrimMasterCreateManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * The data used to create many BasicTrimMasters.
+     */
+    data: BasicTrimMasterCreateManyInput | BasicTrimMasterCreateManyInput[]
+    skipDuplicates?: boolean
+  }
+
+  /**
+   * BasicTrimMaster createManyAndReturn
+   */
+  export type BasicTrimMasterCreateManyAndReturnArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the BasicTrimMaster
+     */
+    select?: BasicTrimMasterSelectCreateManyAndReturn<ExtArgs> | null
+    /**
+     * Omit specific fields from the BasicTrimMaster
+     */
+    omit?: BasicTrimMasterOmit<ExtArgs> | null
+    /**
+     * The data used to create many BasicTrimMasters.
+     */
+    data: BasicTrimMasterCreateManyInput | BasicTrimMasterCreateManyInput[]
+    skipDuplicates?: boolean
+  }
+
+  /**
+   * BasicTrimMaster update
+   */
+  export type BasicTrimMasterUpdateArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the BasicTrimMaster
+     */
+    select?: BasicTrimMasterSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the BasicTrimMaster
+     */
+    omit?: BasicTrimMasterOmit<ExtArgs> | null
+    /**
+     * The data needed to update a BasicTrimMaster.
+     */
+    data: XOR<BasicTrimMasterUpdateInput, BasicTrimMasterUncheckedUpdateInput>
+    /**
+     * Choose, which BasicTrimMaster to update.
+     */
+    where: BasicTrimMasterWhereUniqueInput
+  }
+
+  /**
+   * BasicTrimMaster updateMany
+   */
+  export type BasicTrimMasterUpdateManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * The data used to update BasicTrimMasters.
+     */
+    data: XOR<BasicTrimMasterUpdateManyMutationInput, BasicTrimMasterUncheckedUpdateManyInput>
+    /**
+     * Filter which BasicTrimMasters to update
+     */
+    where?: BasicTrimMasterWhereInput
+    /**
+     * Limit how many BasicTrimMasters to update.
+     */
+    limit?: number
+  }
+
+  /**
+   * BasicTrimMaster updateManyAndReturn
+   */
+  export type BasicTrimMasterUpdateManyAndReturnArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the BasicTrimMaster
+     */
+    select?: BasicTrimMasterSelectUpdateManyAndReturn<ExtArgs> | null
+    /**
+     * Omit specific fields from the BasicTrimMaster
+     */
+    omit?: BasicTrimMasterOmit<ExtArgs> | null
+    /**
+     * The data used to update BasicTrimMasters.
+     */
+    data: XOR<BasicTrimMasterUpdateManyMutationInput, BasicTrimMasterUncheckedUpdateManyInput>
+    /**
+     * Filter which BasicTrimMasters to update
+     */
+    where?: BasicTrimMasterWhereInput
+    /**
+     * Limit how many BasicTrimMasters to update.
+     */
+    limit?: number
+  }
+
+  /**
+   * BasicTrimMaster upsert
+   */
+  export type BasicTrimMasterUpsertArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the BasicTrimMaster
+     */
+    select?: BasicTrimMasterSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the BasicTrimMaster
+     */
+    omit?: BasicTrimMasterOmit<ExtArgs> | null
+    /**
+     * The filter to search for the BasicTrimMaster to update in case it exists.
+     */
+    where: BasicTrimMasterWhereUniqueInput
+    /**
+     * In case the BasicTrimMaster found by the `where` argument doesn't exist, create a new BasicTrimMaster with this data.
+     */
+    create: XOR<BasicTrimMasterCreateInput, BasicTrimMasterUncheckedCreateInput>
+    /**
+     * In case the BasicTrimMaster was found with the provided `where` argument, update it with this data.
+     */
+    update: XOR<BasicTrimMasterUpdateInput, BasicTrimMasterUncheckedUpdateInput>
+  }
+
+  /**
+   * BasicTrimMaster delete
+   */
+  export type BasicTrimMasterDeleteArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the BasicTrimMaster
+     */
+    select?: BasicTrimMasterSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the BasicTrimMaster
+     */
+    omit?: BasicTrimMasterOmit<ExtArgs> | null
+    /**
+     * Filter which BasicTrimMaster to delete.
+     */
+    where: BasicTrimMasterWhereUniqueInput
+  }
+
+  /**
+   * BasicTrimMaster deleteMany
+   */
+  export type BasicTrimMasterDeleteManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Filter which BasicTrimMasters to delete
+     */
+    where?: BasicTrimMasterWhereInput
+    /**
+     * Limit how many BasicTrimMasters to delete.
+     */
+    limit?: number
+  }
+
+  /**
+   * BasicTrimMaster without action
+   */
+  export type BasicTrimMasterDefaultArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the BasicTrimMaster
+     */
+    select?: BasicTrimMasterSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the BasicTrimMaster
+     */
+    omit?: BasicTrimMasterOmit<ExtArgs> | null
   }
 
 
@@ -90107,12 +91248,24 @@ export namespace Prisma {
     finishingSam: 'finishingSam',
     finishingVal: 'finishingVal',
     cmpCost: 'cmpCost',
-    remarks: 'remarks',
     createdAt: 'createdAt',
     updatedAt: 'updatedAt'
   };
 
   export type RoughCmpCostMasterScalarFieldEnum = (typeof RoughCmpCostMasterScalarFieldEnum)[keyof typeof RoughCmpCostMasterScalarFieldEnum]
+
+
+  export const BasicTrimMasterScalarFieldEnum: {
+    id: 'id',
+    attributeName: 'attributeName',
+    type: 'type',
+    bt1: 'bt1',
+    bt2: 'bt2',
+    createdAt: 'createdAt',
+    updatedAt: 'updatedAt'
+  };
+
+  export type BasicTrimMasterScalarFieldEnum = (typeof BasicTrimMasterScalarFieldEnum)[keyof typeof BasicTrimMasterScalarFieldEnum]
 
 
   export const BasicTrimCostMasterScalarFieldEnum: {
@@ -91485,11 +92638,18 @@ export namespace Prisma {
   export const RoughCmpCostMasterOrderByRelevanceFieldEnum: {
     div: 'div',
     subDiv: 'subDiv',
-    majCat: 'majCat',
-    remarks: 'remarks'
+    majCat: 'majCat'
   };
 
   export type RoughCmpCostMasterOrderByRelevanceFieldEnum = (typeof RoughCmpCostMasterOrderByRelevanceFieldEnum)[keyof typeof RoughCmpCostMasterOrderByRelevanceFieldEnum]
+
+
+  export const BasicTrimMasterOrderByRelevanceFieldEnum: {
+    attributeName: 'attributeName',
+    type: 'type'
+  };
+
+  export type BasicTrimMasterOrderByRelevanceFieldEnum = (typeof BasicTrimMasterOrderByRelevanceFieldEnum)[keyof typeof BasicTrimMasterOrderByRelevanceFieldEnum]
 
 
   export const BasicTrimCostMasterOrderByRelevanceFieldEnum: {
@@ -99320,7 +100480,6 @@ export namespace Prisma {
     finishingSam?: DecimalNullableFilter<"RoughCmpCostMaster"> | Decimal | DecimalJsLike | number | string | null
     finishingVal?: DecimalNullableFilter<"RoughCmpCostMaster"> | Decimal | DecimalJsLike | number | string | null
     cmpCost?: DecimalNullableFilter<"RoughCmpCostMaster"> | Decimal | DecimalJsLike | number | string | null
-    remarks?: StringNullableFilter<"RoughCmpCostMaster"> | string | null
     createdAt?: DateTimeFilter<"RoughCmpCostMaster"> | Date | string
     updatedAt?: DateTimeFilter<"RoughCmpCostMaster"> | Date | string
   }
@@ -99339,7 +100498,6 @@ export namespace Prisma {
     finishingSam?: SortOrderInput | SortOrder
     finishingVal?: SortOrderInput | SortOrder
     cmpCost?: SortOrderInput | SortOrder
-    remarks?: SortOrderInput | SortOrder
     createdAt?: SortOrder
     updatedAt?: SortOrder
     _relevance?: RoughCmpCostMasterOrderByRelevanceInput
@@ -99363,7 +100521,6 @@ export namespace Prisma {
     finishingSam?: DecimalNullableFilter<"RoughCmpCostMaster"> | Decimal | DecimalJsLike | number | string | null
     finishingVal?: DecimalNullableFilter<"RoughCmpCostMaster"> | Decimal | DecimalJsLike | number | string | null
     cmpCost?: DecimalNullableFilter<"RoughCmpCostMaster"> | Decimal | DecimalJsLike | number | string | null
-    remarks?: StringNullableFilter<"RoughCmpCostMaster"> | string | null
     createdAt?: DateTimeFilter<"RoughCmpCostMaster"> | Date | string
     updatedAt?: DateTimeFilter<"RoughCmpCostMaster"> | Date | string
   }, "id" | "div_subDiv_majCat">
@@ -99382,7 +100539,6 @@ export namespace Prisma {
     finishingSam?: SortOrderInput | SortOrder
     finishingVal?: SortOrderInput | SortOrder
     cmpCost?: SortOrderInput | SortOrder
-    remarks?: SortOrderInput | SortOrder
     createdAt?: SortOrder
     updatedAt?: SortOrder
     _count?: RoughCmpCostMasterCountOrderByAggregateInput
@@ -99409,9 +100565,74 @@ export namespace Prisma {
     finishingSam?: DecimalNullableWithAggregatesFilter<"RoughCmpCostMaster"> | Decimal | DecimalJsLike | number | string | null
     finishingVal?: DecimalNullableWithAggregatesFilter<"RoughCmpCostMaster"> | Decimal | DecimalJsLike | number | string | null
     cmpCost?: DecimalNullableWithAggregatesFilter<"RoughCmpCostMaster"> | Decimal | DecimalJsLike | number | string | null
-    remarks?: StringNullableWithAggregatesFilter<"RoughCmpCostMaster"> | string | null
     createdAt?: DateTimeWithAggregatesFilter<"RoughCmpCostMaster"> | Date | string
     updatedAt?: DateTimeWithAggregatesFilter<"RoughCmpCostMaster"> | Date | string
+  }
+
+  export type BasicTrimMasterWhereInput = {
+    AND?: BasicTrimMasterWhereInput | BasicTrimMasterWhereInput[]
+    OR?: BasicTrimMasterWhereInput[]
+    NOT?: BasicTrimMasterWhereInput | BasicTrimMasterWhereInput[]
+    id?: IntFilter<"BasicTrimMaster"> | number
+    attributeName?: StringFilter<"BasicTrimMaster"> | string
+    type?: StringFilter<"BasicTrimMaster"> | string
+    bt1?: DecimalNullableFilter<"BasicTrimMaster"> | Decimal | DecimalJsLike | number | string | null
+    bt2?: DecimalNullableFilter<"BasicTrimMaster"> | Decimal | DecimalJsLike | number | string | null
+    createdAt?: DateTimeFilter<"BasicTrimMaster"> | Date | string
+    updatedAt?: DateTimeFilter<"BasicTrimMaster"> | Date | string
+  }
+
+  export type BasicTrimMasterOrderByWithRelationInput = {
+    id?: SortOrder
+    attributeName?: SortOrder
+    type?: SortOrder
+    bt1?: SortOrderInput | SortOrder
+    bt2?: SortOrderInput | SortOrder
+    createdAt?: SortOrder
+    updatedAt?: SortOrder
+    _relevance?: BasicTrimMasterOrderByRelevanceInput
+  }
+
+  export type BasicTrimMasterWhereUniqueInput = Prisma.AtLeast<{
+    id?: number
+    attributeName_type?: BasicTrimMasterAttributeNameTypeCompoundUniqueInput
+    AND?: BasicTrimMasterWhereInput | BasicTrimMasterWhereInput[]
+    OR?: BasicTrimMasterWhereInput[]
+    NOT?: BasicTrimMasterWhereInput | BasicTrimMasterWhereInput[]
+    attributeName?: StringFilter<"BasicTrimMaster"> | string
+    type?: StringFilter<"BasicTrimMaster"> | string
+    bt1?: DecimalNullableFilter<"BasicTrimMaster"> | Decimal | DecimalJsLike | number | string | null
+    bt2?: DecimalNullableFilter<"BasicTrimMaster"> | Decimal | DecimalJsLike | number | string | null
+    createdAt?: DateTimeFilter<"BasicTrimMaster"> | Date | string
+    updatedAt?: DateTimeFilter<"BasicTrimMaster"> | Date | string
+  }, "id" | "attributeName_type">
+
+  export type BasicTrimMasterOrderByWithAggregationInput = {
+    id?: SortOrder
+    attributeName?: SortOrder
+    type?: SortOrder
+    bt1?: SortOrderInput | SortOrder
+    bt2?: SortOrderInput | SortOrder
+    createdAt?: SortOrder
+    updatedAt?: SortOrder
+    _count?: BasicTrimMasterCountOrderByAggregateInput
+    _avg?: BasicTrimMasterAvgOrderByAggregateInput
+    _max?: BasicTrimMasterMaxOrderByAggregateInput
+    _min?: BasicTrimMasterMinOrderByAggregateInput
+    _sum?: BasicTrimMasterSumOrderByAggregateInput
+  }
+
+  export type BasicTrimMasterScalarWhereWithAggregatesInput = {
+    AND?: BasicTrimMasterScalarWhereWithAggregatesInput | BasicTrimMasterScalarWhereWithAggregatesInput[]
+    OR?: BasicTrimMasterScalarWhereWithAggregatesInput[]
+    NOT?: BasicTrimMasterScalarWhereWithAggregatesInput | BasicTrimMasterScalarWhereWithAggregatesInput[]
+    id?: IntWithAggregatesFilter<"BasicTrimMaster"> | number
+    attributeName?: StringWithAggregatesFilter<"BasicTrimMaster"> | string
+    type?: StringWithAggregatesFilter<"BasicTrimMaster"> | string
+    bt1?: DecimalNullableWithAggregatesFilter<"BasicTrimMaster"> | Decimal | DecimalJsLike | number | string | null
+    bt2?: DecimalNullableWithAggregatesFilter<"BasicTrimMaster"> | Decimal | DecimalJsLike | number | string | null
+    createdAt?: DateTimeWithAggregatesFilter<"BasicTrimMaster"> | Date | string
+    updatedAt?: DateTimeWithAggregatesFilter<"BasicTrimMaster"> | Date | string
   }
 
   export type BasicTrimCostMasterWhereInput = {
@@ -109782,7 +111003,6 @@ export namespace Prisma {
     finishingSam?: Decimal | DecimalJsLike | number | string | null
     finishingVal?: Decimal | DecimalJsLike | number | string | null
     cmpCost?: Decimal | DecimalJsLike | number | string | null
-    remarks?: string | null
     createdAt?: Date | string
     updatedAt?: Date | string
   }
@@ -109801,7 +111021,6 @@ export namespace Prisma {
     finishingSam?: Decimal | DecimalJsLike | number | string | null
     finishingVal?: Decimal | DecimalJsLike | number | string | null
     cmpCost?: Decimal | DecimalJsLike | number | string | null
-    remarks?: string | null
     createdAt?: Date | string
     updatedAt?: Date | string
   }
@@ -109819,7 +111038,6 @@ export namespace Prisma {
     finishingSam?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
     finishingVal?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
     cmpCost?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
-    remarks?: NullableStringFieldUpdateOperationsInput | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
   }
@@ -109838,7 +111056,6 @@ export namespace Prisma {
     finishingSam?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
     finishingVal?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
     cmpCost?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
-    remarks?: NullableStringFieldUpdateOperationsInput | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
   }
@@ -109857,7 +111074,6 @@ export namespace Prisma {
     finishingSam?: Decimal | DecimalJsLike | number | string | null
     finishingVal?: Decimal | DecimalJsLike | number | string | null
     cmpCost?: Decimal | DecimalJsLike | number | string | null
-    remarks?: string | null
     createdAt?: Date | string
     updatedAt?: Date | string
   }
@@ -109875,7 +111091,6 @@ export namespace Prisma {
     finishingSam?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
     finishingVal?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
     cmpCost?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
-    remarks?: NullableStringFieldUpdateOperationsInput | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
   }
@@ -109894,7 +111109,73 @@ export namespace Prisma {
     finishingSam?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
     finishingVal?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
     cmpCost?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
-    remarks?: NullableStringFieldUpdateOperationsInput | string | null
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+  }
+
+  export type BasicTrimMasterCreateInput = {
+    attributeName: string
+    type: string
+    bt1?: Decimal | DecimalJsLike | number | string | null
+    bt2?: Decimal | DecimalJsLike | number | string | null
+    createdAt?: Date | string
+    updatedAt?: Date | string
+  }
+
+  export type BasicTrimMasterUncheckedCreateInput = {
+    id?: number
+    attributeName: string
+    type: string
+    bt1?: Decimal | DecimalJsLike | number | string | null
+    bt2?: Decimal | DecimalJsLike | number | string | null
+    createdAt?: Date | string
+    updatedAt?: Date | string
+  }
+
+  export type BasicTrimMasterUpdateInput = {
+    attributeName?: StringFieldUpdateOperationsInput | string
+    type?: StringFieldUpdateOperationsInput | string
+    bt1?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    bt2?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+  }
+
+  export type BasicTrimMasterUncheckedUpdateInput = {
+    id?: IntFieldUpdateOperationsInput | number
+    attributeName?: StringFieldUpdateOperationsInput | string
+    type?: StringFieldUpdateOperationsInput | string
+    bt1?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    bt2?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+  }
+
+  export type BasicTrimMasterCreateManyInput = {
+    id?: number
+    attributeName: string
+    type: string
+    bt1?: Decimal | DecimalJsLike | number | string | null
+    bt2?: Decimal | DecimalJsLike | number | string | null
+    createdAt?: Date | string
+    updatedAt?: Date | string
+  }
+
+  export type BasicTrimMasterUpdateManyMutationInput = {
+    attributeName?: StringFieldUpdateOperationsInput | string
+    type?: StringFieldUpdateOperationsInput | string
+    bt1?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    bt2?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+  }
+
+  export type BasicTrimMasterUncheckedUpdateManyInput = {
+    id?: IntFieldUpdateOperationsInput | number
+    attributeName?: StringFieldUpdateOperationsInput | string
+    type?: StringFieldUpdateOperationsInput | string
+    bt1?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    bt2?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
   }
@@ -117201,7 +118482,6 @@ export namespace Prisma {
     finishingSam?: SortOrder
     finishingVal?: SortOrder
     cmpCost?: SortOrder
-    remarks?: SortOrder
     createdAt?: SortOrder
     updatedAt?: SortOrder
   }
@@ -117233,7 +118513,6 @@ export namespace Prisma {
     finishingSam?: SortOrder
     finishingVal?: SortOrder
     cmpCost?: SortOrder
-    remarks?: SortOrder
     createdAt?: SortOrder
     updatedAt?: SortOrder
   }
@@ -117252,7 +118531,6 @@ export namespace Prisma {
     finishingSam?: SortOrder
     finishingVal?: SortOrder
     cmpCost?: SortOrder
-    remarks?: SortOrder
     createdAt?: SortOrder
     updatedAt?: SortOrder
   }
@@ -117268,6 +118546,59 @@ export namespace Prisma {
     finishingSam?: SortOrder
     finishingVal?: SortOrder
     cmpCost?: SortOrder
+  }
+
+  export type BasicTrimMasterOrderByRelevanceInput = {
+    fields: BasicTrimMasterOrderByRelevanceFieldEnum | BasicTrimMasterOrderByRelevanceFieldEnum[]
+    sort: SortOrder
+    search: string
+  }
+
+  export type BasicTrimMasterAttributeNameTypeCompoundUniqueInput = {
+    attributeName: string
+    type: string
+  }
+
+  export type BasicTrimMasterCountOrderByAggregateInput = {
+    id?: SortOrder
+    attributeName?: SortOrder
+    type?: SortOrder
+    bt1?: SortOrder
+    bt2?: SortOrder
+    createdAt?: SortOrder
+    updatedAt?: SortOrder
+  }
+
+  export type BasicTrimMasterAvgOrderByAggregateInput = {
+    id?: SortOrder
+    bt1?: SortOrder
+    bt2?: SortOrder
+  }
+
+  export type BasicTrimMasterMaxOrderByAggregateInput = {
+    id?: SortOrder
+    attributeName?: SortOrder
+    type?: SortOrder
+    bt1?: SortOrder
+    bt2?: SortOrder
+    createdAt?: SortOrder
+    updatedAt?: SortOrder
+  }
+
+  export type BasicTrimMasterMinOrderByAggregateInput = {
+    id?: SortOrder
+    attributeName?: SortOrder
+    type?: SortOrder
+    bt1?: SortOrder
+    bt2?: SortOrder
+    createdAt?: SortOrder
+    updatedAt?: SortOrder
+  }
+
+  export type BasicTrimMasterSumOrderByAggregateInput = {
+    id?: SortOrder
+    bt1?: SortOrder
+    bt2?: SortOrder
   }
 
   export type BasicTrimCostComponentListRelationFilter = {

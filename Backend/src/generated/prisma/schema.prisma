@@ -2165,6 +2165,21 @@ model RoughCmpCostMaster {
   @@schema("public")
 }
 
+model BasicTrimMaster {
+  id            Int      @id @default(autoincrement())
+  attributeName String   @map("attribute_name") @db.VarChar(100)
+  type          String   @map("type") @db.VarChar(100)
+  bt1           Decimal? @map("bt_1") @db.Decimal(10, 4)
+  bt2           Decimal? @map("bt_2") @db.Decimal(10, 4)
+  createdAt     DateTime @default(now()) @map("created_at")
+  updatedAt     DateTime @updatedAt @map("updated_at")
+
+  @@unique([attributeName, type])
+  @@index([attributeName])
+  @@map("basic_trim_master")
+  @@schema("public")
+}
+
 /// BasicTrimCostMaster: Per-piece basic trim, packaging and thread costs by major category,
 /// imported from the "MAJ CAT WISE BASIC ACCESSORIES DETAILS" workbook via
 /// scripts/import-basic-trim-cost-master.ts. basicTrimsCost is the workbook's own
