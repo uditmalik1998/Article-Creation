@@ -5841,7 +5841,20 @@ const CMP_HEADER_ROW = 2;
 const CMP_FIRST_DATA_ROW = 3;
 const CMP_SHEET_NAME = 'CMP COST';
 
-type CmpCostRow = { div: string | null; subDiv: string | null; majCat: string; cmpCost: number | null };
+type CmpCostRow = {
+  div: string | null;
+  subDiv: string | null;
+  majCat: string;
+  cuttingSam: number | null;
+  cuttingVal: number | null;
+  stitchingSam: number | null;
+  stitchingVal: number | null;
+  ironingSam: number | null;
+  ironingVal: number | null;
+  finishingSam: number | null;
+  finishingVal: number | null;
+  cmpCost: number | null;
+};
 
 /**
  * Writes the sheet — used for both the blank template (a single example row)
@@ -5856,17 +5869,31 @@ function buildCmpCostMasterSheet(wb: any, rows: CmpCostRow[]): void {
     cell.alignment = { horizontal: 'center' };
   };
 
-  // Row 1 — title, matching the source pivot's own layout (no blank row after it).
+  // Row 1 — title matching the source pivot layout.
   const titleRow = ws.addRow(['Average of TOTAL CMP COST']);
   blue(titleRow.getCell(1));
 
-  // Row 2 — header.
-  const headerRow = ws.addRow(['DIV', 'SUB_DIV', 'MAJ_CAT', 'Total']);
+  // Row 2 — headers.
+  const headerRow = ws.addRow([
+    'DIV', 'SUB_DIV', 'MAJ_CAT',
+    'CUTTING SAM', 'CUTTING VAL',
+    'STITCHING SAM', 'STITCHING VAL',
+    'IRONING SAM', 'IRONING VAL',
+    'FINISHING SAM', 'FINISHING VAL',
+    'CMP COST',
+  ]);
   headerRow.eachCell((cell: any) => blue(cell));
 
   // Data rows.
   for (const r of rows) {
-    ws.addRow([r.div ?? '', r.subDiv ?? '', r.majCat, r.cmpCost ?? '']);
+    ws.addRow([
+      r.div ?? '', r.subDiv ?? '', r.majCat,
+      r.cuttingSam ?? '', r.cuttingVal ?? '',
+      r.stitchingSam ?? '', r.stitchingVal ?? '',
+      r.ironingSam ?? '', r.ironingVal ?? '',
+      r.finishingSam ?? '', r.finishingVal ?? '',
+      r.cmpCost ?? '',
+    ]);
   }
 
   const noteRowNo = CMP_FIRST_DATA_ROW + rows.length + 1;
@@ -5875,14 +5902,21 @@ function buildCmpCostMasterSheet(wb: any, rows: CmpCostRow[]): void {
     'MANDATORY: figures are AVERAGE CMP costs by major category — have your costing team verify before relying on these for a specific article.';
   noteRow.getCell(1).font = { bold: true, size: 10, color: { argb: 'FF9C0006' } };
   noteRow.getCell(1).fill = { type: 'pattern', pattern: 'solid', fgColor: { argb: 'FFFFF3CD' } };
-  ws.mergeCells(`A${noteRowNo}:D${noteRowNo}`);
+  ws.mergeCells(`A${noteRowNo}:L${noteRowNo}`);
   const note2Row = ws.getRow(noteRowNo + 1);
   note2Row.getCell(1).value =
     'Rows are matched by DIV + SUB_DIV + MAJ_CAT together — the same major category under a different sub-division is a separate row, not a duplicate.';
   note2Row.getCell(1).font = { italic: true, size: 10 };
-  ws.mergeCells(`A${noteRowNo + 1}:D${noteRowNo + 1}`);
+  ws.mergeCells(`A${noteRowNo + 1}:L${noteRowNo + 1}`);
 
-  ws.columns = [{ width: 14 }, { width: 16 }, { width: 26 }, { width: 14 }];
+  ws.columns = [
+    { width: 14 }, { width: 16 }, { width: 26 },
+    { width: 14 }, { width: 14 },
+    { width: 16 }, { width: 14 },
+    { width: 14 }, { width: 14 },
+    { width: 16 }, { width: 16 },
+    { width: 14 },
+  ];
   ws.views = [{ state: 'frozen', xSplit: 0, ySplit: CMP_HEADER_ROW }];
 }
 
@@ -5924,7 +5958,14 @@ export const getCmpCostMasterStatus = async (_req: Request, res: Response): Prom
  */
 export const downloadCmpCostMasterTemplate = async (_req: Request, res: Response): Promise<void> => {
   try {
-    const example: CmpCostRow = { div: 'KIDS', subDiv: 'IB', majCat: 'IB_BERMUDA', cmpCost: 46.73 };
+    const example: CmpCostRow = {
+      div: 'KIDS', subDiv: 'IB', majCat: 'IB_BERMUDA',
+      cuttingSam: 2.5, cuttingVal: 3.75,
+      stitchingSam: 18.0, stitchingVal: 27.0,
+      ironingSam: 1.2, ironingVal: 1.8,
+      finishingSam: 0.8, finishingVal: 1.2,
+      cmpCost: 46.73,
+    };
     const wb = buildCmpCostMasterWorkbook([example]);
     res.setHeader('Content-Type', 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');
     res.setHeader('Content-Disposition', 'attachment; filename="CMP_COST_MASTER_TEMPLATE.xlsx"');
@@ -5946,6 +5987,14 @@ export const exportCmpCostMaster = async (_req: Request, res: Response): Promise
       div: m.div,
       subDiv: m.subDiv,
       majCat: m.majCat,
+      cuttingSam: m.cuttingSam === null ? null : Number(m.cuttingSam),
+      cuttingVal: m.cuttingVal === null ? null : Number(m.cuttingVal),
+      stitchingSam: m.stitchingSam === null ? null : Number(m.stitchingSam),
+      stitchingVal: m.stitchingVal === null ? null : Number(m.stitchingVal),
+      ironingSam: m.ironingSam === null ? null : Number(m.ironingSam),
+      ironingVal: m.ironingVal === null ? null : Number(m.ironingVal),
+      finishingSam: m.finishingSam === null ? null : Number(m.finishingSam),
+      finishingVal: m.finishingVal === null ? null : Number(m.finishingVal),
       cmpCost: m.cmpCost === null ? null : Number(m.cmpCost),
     }));
     const wb = buildCmpCostMasterWorkbook(rows);
@@ -6003,13 +6052,23 @@ export const uploadCmpCostMaster = async (req: Request, res: Response): Promise<
       }
     }
 
-    let cDiv = 1, cSubDiv = 2, cMajCat = 3, cCost = 4;
+    let cDiv = 1, cSubDiv = 2, cMajCat = 3;
+    let cCuttingSam = 4, cCuttingVal = 5, cStitchingSam = 6, cStitchingVal = 7;
+    let cIroningSam = 8, cIroningVal = 9, cFinishingSam = 10, cFinishingVal = 11, cCost = 12;
     const hdr = ws.getRow(headerRowNo);
-    for (let c = 1; c <= 8; c++) {
+    for (let c = 1; c <= 14; c++) {
       const h = cellStr(hdr, c).toUpperCase().replace(/[-_ ]/g, '');
       if (h === 'DIV' || h === 'DIVISION') cDiv = c;
       else if (h.includes('SUBDIV')) cSubDiv = c;
       else if (h.includes('MAJCAT') || h === 'MC') cMajCat = c;
+      else if (h === 'CUTTINGSAM') cCuttingSam = c;
+      else if (h === 'CUTTINGVAL') cCuttingVal = c;
+      else if (h === 'STITCHINGSAM') cStitchingSam = c;
+      else if (h === 'STITCHINGVAL') cStitchingVal = c;
+      else if (h === 'IRONINGSAM') cIroningSam = c;
+      else if (h === 'IRONINGVAL') cIroningVal = c;
+      else if (h === 'FINISHINGSAM') cFinishingSam = c;
+      else if (h === 'FINISHINGVAL') cFinishingVal = c;
       else if (h === 'TOTAL' || h.includes('CMPCOST') || h === 'CMP') cCost = c;
     }
 
@@ -6017,6 +6076,12 @@ export const uploadCmpCostMaster = async (req: Request, res: Response): Promise<
       if (v === null || v === undefined || v === '') return null;
       const n = Number(v);
       return Number.isFinite(n) ? Number(n.toFixed(4)) : null;
+    };
+
+    const cellNum = (row: any, c: number): number | null => {
+      let v = row.getCell(c).value;
+      if (v && typeof v === 'object' && 'result' in v) v = (v as any).result;
+      return numOf(v);
     };
 
     const rowsByKey = new Map<string, CmpCostRow>();
@@ -6040,7 +6105,18 @@ export const uploadCmpCostMaster = async (req: Request, res: Response): Promise<
       const cmpCost = numOf(costRaw);
 
       const key = `${(div ?? '').toUpperCase()}|${(subDiv ?? '').toUpperCase()}|${majCat.toUpperCase()}`;
-      rowsByKey.set(key, { div, subDiv, majCat, cmpCost });
+      rowsByKey.set(key, {
+        div, subDiv, majCat,
+        cuttingSam: cellNum(row, cCuttingSam),
+        cuttingVal: cellNum(row, cCuttingVal),
+        stitchingSam: cellNum(row, cStitchingSam),
+        stitchingVal: cellNum(row, cStitchingVal),
+        ironingSam: cellNum(row, cIroningSam),
+        ironingVal: cellNum(row, cIroningVal),
+        finishingSam: cellNum(row, cFinishingSam),
+        finishingVal: cellNum(row, cFinishingVal),
+        cmpCost,
+      });
     }
 
     const records = [...rowsByKey.values()];
@@ -6053,13 +6129,35 @@ export const uploadCmpCostMaster = async (req: Request, res: Response): Promise<
     const CHUNK = 200;
     for (let i = 0; i < records.length; i += CHUNK) {
       const batch = records.slice(i, i + CHUNK);
-      const values = batch.map((r) => Prisma.sql`(${r.majCat}, ${r.div}, ${r.subDiv}, ${r.cmpCost}, ${now}, ${now})`);
+      const values = batch.map((r) => Prisma.sql`(
+        ${r.majCat}, ${r.div}, ${r.subDiv},
+        ${r.cuttingSam}, ${r.cuttingVal},
+        ${r.stitchingSam}, ${r.stitchingVal},
+        ${r.ironingSam}, ${r.ironingVal},
+        ${r.finishingSam}, ${r.finishingVal},
+        ${r.cmpCost}, ${now}, ${now}
+      )`);
       await prisma.$executeRaw`
-        INSERT INTO rough_cmp_cost_master (maj_cat, div, sub_div, cmp_cost, created_at, updated_at)
+        INSERT INTO rough_cmp_cost_master (
+          maj_cat, div, sub_div,
+          cutting_sam, cutting_val,
+          stitching_sam, stitching_val,
+          ironing_sam, ironing_val,
+          finishing_sam, finishing_val,
+          cmp_cost, created_at, updated_at
+        )
         VALUES ${Prisma.join(values)}
         ON CONFLICT (div, sub_div, maj_cat) DO UPDATE SET
-          cmp_cost   = EXCLUDED.cmp_cost,
-          updated_at = EXCLUDED.updated_at
+          cutting_sam   = EXCLUDED.cutting_sam,
+          cutting_val   = EXCLUDED.cutting_val,
+          stitching_sam = EXCLUDED.stitching_sam,
+          stitching_val = EXCLUDED.stitching_val,
+          ironing_sam   = EXCLUDED.ironing_sam,
+          ironing_val   = EXCLUDED.ironing_val,
+          finishing_sam = EXCLUDED.finishing_sam,
+          finishing_val = EXCLUDED.finishing_val,
+          cmp_cost      = EXCLUDED.cmp_cost,
+          updated_at    = EXCLUDED.updated_at
       `;
     }
 
