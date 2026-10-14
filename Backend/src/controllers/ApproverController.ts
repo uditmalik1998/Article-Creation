@@ -1791,9 +1791,6 @@ export class ApproverController {
                     autoBgt: true, roughV2: true, vendorFabricRate: true, finalCost: true,
                     roughRatio: true, roughConsumptionKg: true, roughConsumptionMeter: true,
                     preciseRatio: true, preciseConsumptionKg: true, preciseConsumptionMeter: true,
-                    cmtpCost: true,
-                    cmpCost: true,
-                    fabCons: true,
                 },
             });
             const fabricNums = [...new Set(fgArticles.map((a: any) => a.fabricArticleNumber).filter(Boolean) as string[])];
@@ -1875,13 +1872,13 @@ export class ApproverController {
                 const fabData  = a.fabricArticleNumber ? fabricMap.get(a.fabricArticleNumber) : null;
                 const sapNo    = a.sapArticleId || a.articleNumber || '';
                 const mrp      = toN(a.mrp);
-                const fabCons  = toN(a.fabCons);
+                const fabCons  = 0;  // removed from extraction_results_flat
                 const vdrRate  = toN(a.vendorFabricRate);
                 const v2Rate   = toN(fabData?.v2FabricRate);
                 const fabVdr   = fabCons > 0 && vdrRate > 0 ? +(fabCons * vdrRate * 1.15).toFixed(2) : 0;
                 const fabV2    = fabCons > 0 && v2Rate  > 0 ? +(fabCons * v2Rate  * 1.15).toFixed(2) : 0;
-                const cmtp     = toN(a.cmtpCost);
-                const cmp      = toN(a.cmpCost);
+                const cmtp     = 0;  // removed from extraction_results_flat
+                const cmp      = 0;  // removed from extraction_results_flat
                 const valAdd   = 0;
                 const v2Cost   = +(fabV2  + cmp + cmtp + valAdd).toFixed(2);
                 const vdrCost  = +(fabVdr + cmp + cmtp + valAdd).toFixed(2);
@@ -2097,7 +2094,7 @@ export class ApproverController {
                     attrArticleNums: true, mvgrBrandVendor: true,
                     isGeneric: true, genericArticleId: true, variantSize: true, variantColor: true,
                     approvedBy: true, approvedAt: true,
-                    cmtpCost: true, cmpCost: true, fabCost: true, fabCons: true,
+                    fabCost: true,
                     autoBgt: true, roughV2: true, vendorFabricRate: true, finalCost: true,
                     roughRatio: true, roughConsumptionKg: true, roughConsumptionMeter: true,
                     preciseRatio: true, preciseConsumptionKg: true, preciseConsumptionMeter: true,
