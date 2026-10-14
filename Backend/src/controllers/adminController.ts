@@ -9263,19 +9263,24 @@ export const uploadBodyFabricConsumption = async (req: Request, res: Response): 
     const seen = new Set<string>();
     let skipped = 0;
 
-    // Rows 1-3 empty, row 4 = headers, data from row 5 (matches both the
-    // generated template and the real source workbook's layout).
-    // Columns: A=DIV(1), B=SUB DIV(2), C=MAJ CAT(3), D=FAB_WIDTH(4), FAB CONSUMPTION and GSM detected by header text.
-    let fabConsCol = 35; // default: column 35 (AI) = index 34 in 0-based
-    let gsmCol = 36;     // default: column 36 (AJ) = index 35 in 0-based
-    const headerRow = ws.getRow(4);
-    for (let c = 1; c <= 50; c++) {
-      const h = cell(headerRow, c).toUpperCase().replace(/\s+/g, ' ');
-      if (h === 'FAB CONSUMPTION') fabConsCol = c;
-      if (h === 'GSM') gsmCol = c;
+    // Auto-detect header row (row 1 in new 6-col format, row 4 in legacy 36-col format).
+    // FAB CONSUMPTION and GSM are found by scanning header text so both formats work.
+    // FAB_WIDTH may carry an inch mark suffix (e.g. "56\"") — stripped before parsing.
+    let headerRowNum = 1;
+    let fabConsCol = 5; // default for 6-col format
+    let gsmCol = 6;
+    for (let r = 1; r <= Math.min(ws.rowCount, 10); r++) {
+      const hr = ws.getRow(r);
+      for (let c = 1; c <= 50; c++) {
+        const h = cell(hr, c).toUpperCase().replace(/\s+/g, ' ');
+        if (h === 'FAB CONSUMPTION') { fabConsCol = c; headerRowNum = r; }
+        if (h === 'GSM') gsmCol = c;
+      }
+      if (fabConsCol !== 5 || gsmCol !== 6) break; // found
     }
+    const dataStartRow = headerRowNum + 1;
 
-    for (let r = 5; r <= ws.rowCount; r++) {
+    for (let r = dataStartRow; r <= ws.rowCount; r++) {
       const row = ws.getRow(r);
       const div    = cell(row, 1);
       const sub    = cell(row, 2);
@@ -9287,7 +9292,9 @@ export const uploadBodyFabricConsumption = async (req: Request, res: Response): 
       if (!majCat && !div && !widthRaw) { skipped++; continue; }
       if (!majCat) { skipped++; continue; }
 
-      const fabWidth = widthRaw !== '' ? parseFloat(widthRaw) : null;
+      // Strip inch mark (") before parsing — source format uses e.g. "56\""
+      const widthNum = widthRaw !== '' ? parseFloat(widthRaw.replace(/"/g, '')) : null;
+      const fabWidth = widthNum !== null && !isNaN(widthNum) ? widthNum : null;
       const fabCons  = consRaw  !== '' ? parseFloat(consRaw)  : null;
       const gsm      = gsmRaw   !== '' ? parseFloat(gsmRaw)   : null;
 
@@ -9296,12 +9303,12 @@ export const uploadBodyFabricConsumption = async (req: Request, res: Response): 
       seen.add(key);
 
       rows.push({
-        division:      div  || null,
-        sub_division:  sub  || null,
-        major_category: majCat,
-        fab_width:     fabWidth !== null && !isNaN(fabWidth) ? fabWidth : null,
+        division:        div   || null,
+        sub_division:    sub   || null,
+        major_category:  majCat,
+        fab_width:       fabWidth,
         fab_consumption: fabCons !== null && !isNaN(fabCons) ? fabCons : null,
-        gsm:           gsm !== null && !isNaN(gsm) ? gsm : null,
+        gsm:             gsm    !== null && !isNaN(gsm)      ? gsm     : null,
       });
     }
 
@@ -9335,30 +9342,13 @@ export const uploadBodyFabricConsumption = async (req: Request, res: Response): 
   }
 };
 
-// All 36 columns in the source Excel (sheet "summary", headers at row 4).
-// The uploader only reads cols 0-3 (DIV/SUB DIV/MAJ CAT/FAB_WIDTH) and the
-// last two cols (FAB CONSUMPTION, GSM). The 30 size/age columns in between
-// are ignored on import but must be present in the template so re-uploading works.
-const FAB_CONS_HEADERS = [
-  'DIV', 'SUB DIV', 'MAJ CAT', 'FAB_WIDTH',
-  'M_06_12', 'M_12_18', 'M_18_24',
-  'YR_02_03', 'YR_04_05', 'YR_06_07', 'YR_08_09', 'YR_10_11',
-  'YR_12_13', 'YR_14_15', 'YR_14', 'YR_15', 'YR_16', 'YR_17',
-  'S', 'M', 'L', 'XL', 'XXL', 'XXXL', 'XXXXL',
-  'S_26', 'S_28', 'S_30', 'S_38', 'S_32', 'S_34', 'S_36',
-  'M_00_03', 'M_03_06',
-  'FAB CONSUMPTION', 'GSM',
-];
+// 6 columns only — the 30 size/age columns are always empty and not stored.
+const FAB_CONS_HEADERS = ['DIV', 'SUB DIV', 'MAJ CAT', 'FAB_WIDTH', 'FAB CONSUMPTION', 'GSM'];
 
 function buildFabConsSheet(wb: any, dataRows: any[]): any {
   const ws = wb.addWorksheet('summary');
 
-  // Rows 1-3 empty (matching source file where data range starts at row 4)
-  ws.addRow([]);
-  ws.addRow([]);
-  ws.addRow([]);
-
-  // Row 4 — headers
+  // Row 1 — headers (no blank rows above)
   const headerRow = ws.addRow(FAB_CONS_HEADERS);
   headerRow.eachCell((cell: any) => {
     cell.font = { bold: true, color: { argb: 'FFFFFFFF' } };
@@ -9366,17 +9356,11 @@ function buildFabConsSheet(wb: any, dataRows: any[]): any {
     cell.alignment = { horizontal: 'center' };
   });
 
-  // Rows 5-6 empty
-  ws.addRow([]);
-  ws.addRow([]);
-
-  // Data
+  // Data starts at row 2
   for (const row of dataRows) ws.addRow(row);
 
-  // Column widths
   ws.columns = [
     { width: 12 }, { width: 14 }, { width: 26 }, { width: 12 },
-    ...Array(30).fill({ width: 10 }),
     { width: 18 }, { width: 10 },
   ];
 
@@ -9385,17 +9369,19 @@ function buildFabConsSheet(wb: any, dataRows: any[]): any {
 
 /**
  * GET /api/admin/body-fabric-consumption/template
- * Downloads a blank Excel template matching the source upload format exactly
- * (sheet "summary", 36 columns, headers at row 4, no data rows).
+ * Downloads an Excel template matching the source upload format exactly
+ * (sheet "summary", 36 columns, headers at row 4, one example data row at row 5).
  */
 export const downloadBodyFabricConsumptionTemplate = async (_req: Request, res: Response): Promise<void> => {
   try {
     const ExcelJS = require('exceljs');
     const wb = new ExcelJS.Workbook();
-    buildFabConsSheet(wb, []);
+    // One example row: DIV, SUB DIV, MAJ CAT, FAB_WIDTH, FAB CONSUMPTION, GSM
+    const exampleRow = ['KIDS', 'KI', 'IB_BERMUDA', '56"', 0.3, 280];
+    buildFabConsSheet(wb, [exampleRow]);
 
     res.setHeader('Content-Type', 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');
-    res.setHeader('Content-Disposition', 'attachment; filename="FAB_CONSUMPTION_MASTER_TEMPLATE.xlsx"');
+    res.setHeader('Content-Disposition', 'attachment; filename="ROUGH-FAB_CONSUMPTION_MASTER_TEMPLATE.xlsx"');
     await wb.xlsx.write(res);
     res.end();
   } catch (error: any) {
@@ -9420,22 +9406,20 @@ export const downloadBodyFabricConsumptionData = async (_req: Request, res: Resp
       ORDER BY division, sub_division, major_category, fab_width
     `;
 
-    // Build a 36-element array per row: A-D filled, E-AH blank, AI = fab_consumption, AJ = gsm
-    const dataRows = dbRows.map((r) => {
-      const row: any[] = new Array(36).fill('');
-      row[0]  = r.division ?? '';
-      row[1]  = r.sub_division ?? '';
-      row[2]  = r.major_category ?? '';
-      row[3]  = r.fab_width != null ? Number(r.fab_width) : '';
-      row[34] = r.fab_consumption != null ? Number(r.fab_consumption) : '';
-      row[35] = r.gsm != null ? Number(r.gsm) : '';
-      return row;
-    });
+    // 6-column rows: DIV, SUB DIV, MAJ CAT, FAB_WIDTH, FAB CONSUMPTION, GSM
+    const dataRows = dbRows.map((r) => [
+      r.division      ?? '',
+      r.sub_division  ?? '',
+      r.major_category ?? '',
+      r.fab_width     != null ? `${Number(r.fab_width)}"` : '',
+      r.fab_consumption != null ? Number(r.fab_consumption) : '',
+      r.gsm           != null ? Number(r.gsm) : '',
+    ]);
 
     const wb = new ExcelJS.Workbook();
     buildFabConsSheet(wb, dataRows);
 
-    const filename = `FAB_CONSUMPTION_MASTER_${new Date().toISOString().slice(0, 10)}.xlsx`;
+    const filename = `ROUGH-FAB_CONSUMPTION_MASTER_${new Date().toISOString().slice(0, 10)}.xlsx`;
     res.setHeader('Content-Type', 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');
     res.setHeader('Content-Disposition', `attachment; filename="${filename}"`);
     await wb.xlsx.write(res);

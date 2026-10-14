@@ -52,6 +52,7 @@ import { useDragToPan } from '@/shared/hooks/ui/useDragToPan';
 import type { ApproverItem, MasterAttribute } from './ApproverTable';
 import CostingGridCard, { BTRIM_CONFIG, VADD_CONFIG, gridFields } from './CostingGridCard';
 import PkgCostCard from './PkgCostCard';
+import CmpCostCard from './CmpCostCard';
 import { CARD_ACTION_BTN, CARD_THEME } from './cardTheme';
 
 // FG cards rendered as a costing grid instead of the numbered attribute list.
@@ -615,6 +616,8 @@ const ArticleCard = React.memo(
     const [dupDesignNo, setDupDesignNo] = useState('');
     const [allCollapsed, setAllCollapsed] = useState(false);
     const [collapsedGroups, setCollapsedGroups] = useState<Set<string>>(new Set());
+    // FG left rail: Article Information / Reference & Vendor start closed.
+    const [openLeftCards, setOpenLeftCards] = useState<Set<string>>(new Set());
     const [fabNoQuery, setFabNoQuery] = useState('');
     const [fabNoResults, setFabNoResults] = useState<{
       fabricArticleNumber: string;
@@ -626,9 +629,7 @@ const ArticleCard = React.memo(
       mComposition: string | null; mFinish: string | null; mGsm: string | null; mLycra: string | null;
     }[]>([]);
     const [fabNoLoading, setFabNoLoading] = useState(false);
-    const isBodySmart = import.meta.env.VITE_IS_BODY_ARTICLE_SMART === 'true';
-    const [bodyDescMode, setBodyDescMode] = useState<'classic' | 'smart'>(isBodySmart ? 'smart' : 'classic');
-    const [bodyNoMode, setBodyNoMode] = useState<'classic' | 'smart'>(isBodySmart ? 'smart' : 'classic');
+    const [cmpActPreset, setCmpActPreset] = useState<Record<string, string>>({});
     const [preciseBodyResults, setPreciseBodyResults] = useState<{ macroBodyDescription: string | null; microBodyArticleNumber: string | null }[]>([]);
     const [preciseBodyLoading, setPreciseBodyLoading] = useState(false);
     const [preciseBodySearched, setPreciseBodySearched] = useState(false);
@@ -873,7 +874,7 @@ const ArticleCard = React.memo(
       fetchSegmentRangesFor(effectiveMajCat).then((ranges) => setSegmentRanges(ranges));
     }, [effectiveMajCat]);
 
-    // Body fabric consumption options (width → consumption meter) — Body Articles only
+    // Body fabric consumption options (width → consumption meter) — drives the width dropdown
     const [fabricConsumptionOptions, setFabricConsumptionOptions] = useState<
       { fabWidth: number; fabConsumption: number }[]
     >([]);
@@ -885,27 +886,313 @@ const ArticleCard = React.memo(
         { headers: { Authorization: `Bearer ${token}` } },
       )
         .then((r) => r.json())
-        .then((d: { fabWidth: number; fabConsumption: number }[]) => {
-          setFabricConsumptionOptions(d ?? []);
-          // Auto-select the row with the smallest fab_consumption only when
-          // width and consumptionMeter are not already set on this article.
-          if (!d || d.length === 0) return;
-          const currentWidth = (item as any).width ?? localValues['width'];
-          const currentMeter = (item as any).consumptionMeter ?? localValues['consumptionMeter'];
-          if (currentWidth || currentMeter) return;
-          const best = d.reduce((min, row) =>
-            (row.fabConsumption ?? Infinity) < (min.fabConsumption ?? Infinity) ? row : min
-          );
-          if (best.fabWidth == null || best.fabConsumption == null) return;
-          const updates: Record<string, string> = {
-            width: String(best.fabWidth),
-            consumptionMeter: String(best.fabConsumption),
-          };
-          setLocalValues((prev) => ({ ...prev, ...updates }));
-          onSave({ ...item, ...updates } as any, updates, { silent: true });
-        })
+        .then((d: { fabWidth: number; fabConsumption: number }[]) => setFabricConsumptionOptions(d ?? []))
         .catch(() => setFabricConsumptionOptions([]));
     }, [isBodyArticle, effectiveMajCat]);
+
+    // Auto-fill consumptionMeter from body_fabric_consumption using M_WIDTH (fWidth).
+    // On load: only fills when consumptionMeter is null. On fWidth change: always fills.
+    const currentFWidth = String(
+      (localValues['fWidth'] !== undefined ? localValues['fWidth'] : (item as any).fWidth) ?? '',
+    ).trim().replace(/"/g, '');
+    const fWidthMountRef = React.useRef(true);
+    useEffect(() => {
+      if (!isBodyArticle || !effectiveMajCat || !currentFWidth) return;
+      // On mount: skip if consumptionMeter already has a value
+      if (fWidthMountRef.current) {
+        fWidthMountRef.current = false;
+        const existingMeter = String(
+          (localValues['consumptionMeter'] !== undefined ? localValues['consumptionMeter'] : (item as any).consumptionMeter) ?? '',
+        ).trim();
+        if (existingMeter !== '') return;
+      }
+      const token = localStorage.getItem('authToken');
+      fetch(
+        `${APP_CONFIG.api.baseURL}/approver/body-fabric-consumption/by-width?majorCategory=${encodeURIComponent(effectiveMajCat)}&fabWidth=${encodeURIComponent(currentFWidth)}`,
+        { headers: { Authorization: `Bearer ${token}` } },
+      )
+        .then((r) => r.json())
+        .then((d: { fabConsumption: number | null }) => {
+          if (d.fabConsumption == null) return;
+          const updates: Record<string, string> = {
+            width: currentFWidth,
+            consumptionMeter: String(d.fabConsumption),
+          };
+          setLocalValues((prev) => ({ ...prev, ...updates }));
+          if (isModifyMode) {
+            setPendingChanges((prev) => ({ ...prev, ...updates }));
+          } else {
+            onSave({ ...item, ...updates } as any, updates, { silent: true });
+          }
+        })
+        .catch(() => {});
+      // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, [currentFWidth, isBodyArticle, effectiveMajCat]);
+
+    // Auto-fill roughConsumptionMeter/Kg for FG articles when M_WIDTH (fWidth) changes.
+    // gsm on FG items is stored as field "gsm" (Prisma maps db column gsm → mGsm, but item prop is "gsm").
+    // gsmStr is optional: when omitted, reads current gsm from localValues/item.
+    const currentGsm = String(
+      (localValues['gsm'] !== undefined ? localValues['gsm'] : (item as any).gsm) ?? '',
+    ).trim();
+    const computeRoughKg = (meter: number, widthStr: string, gsmStr?: string) => {
+      const w = parseFloat(widthStr) || 0;
+      const rawGsm = gsmStr !== undefined ? gsmStr : currentGsm;
+      const gsmMid = (() => {
+        if (rawGsm.includes('-')) {
+          const parts = rawGsm.split('-').map(Number);
+          if (parts.length === 2 && !isNaN(parts[0]) && !isNaN(parts[1])) return (parts[0] + parts[1]) / 2;
+        }
+        return parseFloat(rawGsm) || 0;
+      })();
+      return w > 0 && gsmMid > 0 ? ((w * gsmMid * meter * 2.54) / 100000).toFixed(4) : null;
+    };
+    const applyRoughUpdates = (meter: number, widthStr: string, gsmStr?: string) => {
+      const kg = computeRoughKg(meter, widthStr, gsmStr);
+      const updates: Record<string, string> = {
+        roughConsumptionMeter: String(meter),
+        ...(kg != null ? { roughConsumptionKg: kg } : {}),
+      };
+      setLocalValues((prev) => ({ ...prev, ...updates }));
+      if (isModifyMode) setPendingChanges((prev) => ({ ...prev, ...updates }));
+      else onSave({ ...item, ...updates } as any, updates, { silent: true });
+    };
+
+    // Fetch CMP cost SAM data from precise_body_article_consumption and build the ACT preset.
+    const fetchCmpActData = (bodyArticleNumber: string) => {
+      const token = localStorage.getItem('authToken');
+      fetch(
+        `${APP_CONFIG.api.baseURL}/approver/precise-body-article/cmp-data?microBodyArticleNumber=${encodeURIComponent(bodyArticleNumber)}`,
+        { headers: { Authorization: `Bearer ${token}` } },
+      )
+        .then((r) => r.json())
+        .then((d: { found: boolean; cuttingValue: number | null; stitchingSam: number | null; samVal: number | null; ironingSam: number | null; finishingSam: number | null }) => {
+          if (!d.found) return;
+          const fmt = (v: number | null) => (v != null ? String(v) : '');
+          const stSam = d.stitchingSam ?? 0;
+          const stVal = d.samVal ?? 0;
+          const irSam = d.ironingSam ?? 0;
+          const finSam = d.finishingSam ?? 0;
+          setCmpActPreset({
+            'CUTTING|ACT|PR VAL':    fmt(d.cuttingValue),
+            'STITCHING|ACT|SAM':     fmt(d.stitchingSam),
+            'STITCHING|ACT|SAM VAL': fmt(d.samVal),
+            'STITCHING|ACT|PR VAL':  stSam && stVal ? (stSam * stVal).toFixed(4) : '',
+            'IRONING|ACT|SAM':       fmt(d.ironingSam),
+            'IRONING|ACT|SAM VAL':   '2.5',
+            'IRONING|ACT|PR VAL':    irSam ? (irSam * 2.5).toFixed(4) : '',
+            'FINISHING|ACT|SAM':     fmt(d.finishingSam),
+            'FINISHING|ACT|SAM VAL': '3',
+            'FINISHING|ACT|PR VAL':  finSam ? (finSam * 3).toFixed(4) : '',
+          });
+        })
+        .catch(() => {});
+    };
+
+    // Auto-fill CMP ACT column when body article number is set or changes.
+    const currentBodyArticle = String(localValues['bodyArticle'] ?? item.bodyArticle ?? '').trim();
+    const cmpActFetchedRef = React.useRef('');
+    useEffect(() => {
+      if (isBodyArticle || !currentBodyArticle) return;
+      if (cmpActFetchedRef.current === currentBodyArticle) return;
+      cmpActFetchedRef.current = currentBodyArticle;
+      fetchCmpActData(currentBodyArticle);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, [currentBodyArticle, isBodyArticle]);
+
+    // fWidth effect: fetches on every genuine M_WIDTH change for rough consumption.
+    // Uses a "last applied" ref so re-renders from onSave don't re-trigger the fetch.
+    // On first run: skips fetch if meter exists, backfills Kg only if missing.
+    // Fallback: if no exact width match, uses the lowest fab_consumption for that major category.
+    const roughAppliedKeyRef = React.useRef('');
+    useEffect(() => {
+      if (isBodyArticle || !effectiveMajCat || !currentFWidth) return;
+      const key = `${effectiveMajCat}:${currentFWidth}`;
+      const isFirstRun = roughAppliedKeyRef.current === '';
+      if (isFirstRun) {
+        roughAppliedKeyRef.current = key;
+        // On mount: if meter already saved, only backfill Kg if it's missing
+        const existingMeter = String(
+          (localValues['roughConsumptionMeter'] !== undefined
+            ? localValues['roughConsumptionMeter']
+            : (item as any).roughConsumptionMeter) ?? '',
+        ).trim();
+        if (existingMeter !== '') {
+          const existingKg = String(
+            (localValues['roughConsumptionKg'] !== undefined
+              ? localValues['roughConsumptionKg']
+              : (item as any).roughConsumptionKg) ?? '',
+          ).trim();
+          if (existingKg !== '') return;
+          const kg = computeRoughKg(parseFloat(existingMeter), currentFWidth);
+          if (kg == null) return;
+          const updates: Record<string, string> = { roughConsumptionKg: kg };
+          setLocalValues((prev) => ({ ...prev, ...updates }));
+          if (isModifyMode) setPendingChanges((prev) => ({ ...prev, ...updates }));
+          else onSave({ ...item, ...updates } as any, updates, { silent: true });
+          return;
+        }
+      } else {
+        // Subsequent runs: only fetch if the key actually changed (real fWidth change)
+        if (roughAppliedKeyRef.current === key) return;
+        roughAppliedKeyRef.current = key;
+      }
+      const token = localStorage.getItem('authToken');
+      const headers = { Authorization: `Bearer ${token}` };
+      fetch(
+        `${APP_CONFIG.api.baseURL}/approver/body-fabric-consumption/by-width?majorCategory=${encodeURIComponent(effectiveMajCat)}&fabWidth=${encodeURIComponent(currentFWidth)}`,
+        { headers },
+      )
+        .then((r) => r.json())
+        .then((d: { fabConsumption: number | null }) => {
+          if (d.fabConsumption != null) {
+            applyRoughUpdates(d.fabConsumption, currentFWidth);
+            return;
+          }
+          // No exact width match — fall back to lowest fab_consumption for this major category
+          fetch(
+            `${APP_CONFIG.api.baseURL}/approver/body-fabric-consumption?majorCategory=${encodeURIComponent(effectiveMajCat)}`,
+            { headers },
+          )
+            .then((r2) => r2.json())
+            .then((opts: { fabWidth: number; fabConsumption: number }[]) => {
+              const valid = opts.filter((o) => o.fabConsumption != null);
+              if (valid.length === 0) return;
+              const lowest = valid.reduce((min, o) => o.fabConsumption < min.fabConsumption ? o : min, valid[0]);
+              applyRoughUpdates(lowest.fabConsumption, currentFWidth);
+            })
+            .catch(() => {});
+        })
+        .catch(() => {});
+      // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, [currentFWidth, isBodyArticle, effectiveMajCat]);
+
+    // When M_GSM changes on an FG article, recompute roughConsumptionKg using existing meter.
+    // Skips first mount (fWidth effect handles initial Kg); only fires on genuine GSM changes.
+    const roughGsmMountRef = React.useRef(true);
+    const roughGsmAppliedRef = React.useRef('');
+    useEffect(() => {
+      if (isBodyArticle || !currentGsm) return;
+      if (roughGsmMountRef.current) { roughGsmMountRef.current = false; return; }
+      if (roughGsmAppliedRef.current === currentGsm) return;
+      roughGsmAppliedRef.current = currentGsm;
+      const existingMeter = String(
+        (localValues['roughConsumptionMeter'] !== undefined
+          ? localValues['roughConsumptionMeter']
+          : (item as any).roughConsumptionMeter) ?? '',
+      ).trim();
+      if (!existingMeter || !currentFWidth) return;
+      const kg = computeRoughKg(parseFloat(existingMeter), currentFWidth, currentGsm);
+      if (kg == null) return;
+      const updates: Record<string, string> = { roughConsumptionKg: kg };
+      setLocalValues((prev) => ({ ...prev, ...updates }));
+      if (isModifyMode) setPendingChanges((prev) => ({ ...prev, ...updates }));
+      else onSave({ ...item, ...updates } as any, updates, { silent: true });
+      // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, [currentGsm, isBodyArticle]);
+
+    // ── PRECISE CONSUMPTION (FG articles) ─────────────────────────────────────
+    // Mirrors rough consumption logic but reads from precise_body_article_consumption.
+    // Table stores consumption as width columns (width66, width58, …) per major category.
+    const computePreciseKg = (meter: number, widthStr: string, gsmStr?: string) => {
+      const w = parseFloat(widthStr) || 0;
+      const rawGsm = gsmStr !== undefined ? gsmStr : currentGsm;
+      const gsmMid = (() => {
+        if (rawGsm.includes('-')) {
+          const parts = rawGsm.split('-').map(Number);
+          if (parts.length === 2 && !isNaN(parts[0]) && !isNaN(parts[1])) return (parts[0] + parts[1]) / 2;
+        }
+        return parseFloat(rawGsm) || 0;
+      })();
+      return w > 0 && gsmMid > 0 ? ((w * gsmMid * meter * 2.54) / 100000).toFixed(4) : null;
+    };
+    const applyPreciseUpdates = (meter: number, widthStr: string, gsmStr?: string) => {
+      const kg = computePreciseKg(meter, widthStr, gsmStr);
+      const updates: Record<string, string> = {
+        preciseConsumptionMeter: String(meter),
+        ...(kg != null ? { preciseConsumptionKg: kg } : {}),
+      };
+      setLocalValues((prev) => ({ ...prev, ...updates }));
+      if (isModifyMode) setPendingChanges((prev) => ({ ...prev, ...updates }));
+      else onSave({ ...item, ...updates } as any, updates, { silent: true });
+    };
+
+    // fWidth effect: fetches on every genuine M_WIDTH change for precise consumption.
+    // Uses a "last applied" ref so re-renders from onSave don't re-trigger the fetch.
+    const preciseAppliedKeyRef = React.useRef('');
+    useEffect(() => {
+      if (isBodyArticle || !effectiveMajCat || !currentFWidth) return;
+      const key = `${effectiveMajCat}:${currentFWidth}`;
+      const isFirstRun = preciseAppliedKeyRef.current === '';
+      if (isFirstRun) {
+        preciseAppliedKeyRef.current = key;
+        const existingMeter = String(
+          (localValues['preciseConsumptionMeter'] !== undefined
+            ? localValues['preciseConsumptionMeter']
+            : (item as any).preciseConsumptionMeter) ?? '',
+        ).trim();
+        if (existingMeter !== '') {
+          const existingKg = String(
+            (localValues['preciseConsumptionKg'] !== undefined
+              ? localValues['preciseConsumptionKg']
+              : (item as any).preciseConsumptionKg) ?? '',
+          ).trim();
+          if (existingKg !== '') return;
+          const kg = computePreciseKg(parseFloat(existingMeter), currentFWidth);
+          if (kg == null) return;
+          const updates: Record<string, string> = { preciseConsumptionKg: kg };
+          setLocalValues((prev) => ({ ...prev, ...updates }));
+          if (isModifyMode) setPendingChanges((prev) => ({ ...prev, ...updates }));
+          else onSave({ ...item, ...updates } as any, updates, { silent: true });
+          return;
+        }
+      } else {
+        if (preciseAppliedKeyRef.current === key) return;
+        preciseAppliedKeyRef.current = key;
+      }
+      const token = localStorage.getItem('authToken');
+      const headers = { Authorization: `Bearer ${token}` };
+      const bodyArticleNo = String(
+        (localValues['bodyArticle'] !== undefined ? localValues['bodyArticle'] : (item as any).bodyArticle) ?? '',
+      ).trim();
+      const preciseUrl = new URL(`${APP_CONFIG.api.baseURL}/approver/precise-body-article/by-width`);
+      preciseUrl.searchParams.set('majorCategory', effectiveMajCat);
+      preciseUrl.searchParams.set('fabWidth', currentFWidth);
+      if (bodyArticleNo) preciseUrl.searchParams.set('microBodyArticleNumber', bodyArticleNo);
+      fetch(preciseUrl.toString(), { headers })
+        .then((r) => r.json())
+        .then((d: { consumption: number | null }) => {
+          if (d.consumption != null) {
+            applyPreciseUpdates(d.consumption, currentFWidth);
+          }
+        })
+        .catch(() => {});
+      // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, [currentFWidth, isBodyArticle, effectiveMajCat]);
+
+    // When M_GSM changes on an FG article, recompute preciseConsumptionKg using existing meter.
+    const preciseGsmMountRef = React.useRef(true);
+    const preciseGsmAppliedRef = React.useRef('');
+    useEffect(() => {
+      if (isBodyArticle || !currentGsm) return;
+      if (preciseGsmMountRef.current) { preciseGsmMountRef.current = false; return; }
+      if (preciseGsmAppliedRef.current === currentGsm) return;
+      preciseGsmAppliedRef.current = currentGsm;
+      const existingMeter = String(
+        (localValues['preciseConsumptionMeter'] !== undefined
+          ? localValues['preciseConsumptionMeter']
+          : (item as any).preciseConsumptionMeter) ?? '',
+      ).trim();
+      if (!existingMeter || !currentFWidth) return;
+      const kg = computePreciseKg(parseFloat(existingMeter), currentFWidth, currentGsm);
+      if (kg == null) return;
+      const updates: Record<string, string> = { preciseConsumptionKg: kg };
+      setLocalValues((prev) => ({ ...prev, ...updates }));
+      if (isModifyMode) setPendingChanges((prev) => ({ ...prev, ...updates }));
+      else onSave({ ...item, ...updates } as any, updates, { silent: true });
+      // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, [currentGsm, isBodyArticle]);
+    // ── END PRECISE CONSUMPTION ───────────────────────────────────────────────
 
     // Auto-fill GSM (Rough Consumption) from body_fabric_consumption — only
     // when gsm is genuinely unset in the DB (item.gsm === null) and the master
@@ -1533,6 +1820,39 @@ const ArticleCard = React.memo(
         }
       }
       const updates: Record<string, string | null> = { [field]: value };
+      // Auto-compute roughConsumptionKg for FG articles when roughConsumptionMeter or gsm is edited.
+      // GSM may be a range "140-160" — use midpoint. Width is fWidth (strip trailing ").
+      if (!isBodyArticle && (field === 'roughConsumptionMeter' || field === 'gsm')) {
+        const getRV = (f: string) => String(updates[f] !== undefined ? updates[f] : (localValues[f] !== undefined ? localValues[f] : (item as any)[f]) ?? '').trim();
+        const w = parseFloat(getRV('fWidth').replace(/"/g, '')) || 0;
+        const rawGsm = getRV('gsm');
+        const gsmMid = (() => {
+          if (rawGsm.includes('-')) {
+            const parts = rawGsm.split('-').map(Number);
+            if (parts.length === 2 && !isNaN(parts[0]) && !isNaN(parts[1])) return (parts[0] + parts[1]) / 2;
+          }
+          return parseFloat(rawGsm) || 0;
+        })();
+        const m = parseFloat(getRV('roughConsumptionMeter')) || 0;
+        if (w > 0 && gsmMid > 0 && m > 0)
+          updates['roughConsumptionKg'] = ((w * gsmMid * m * 2.54) / 100000).toFixed(4);
+      }
+      // Auto-compute preciseConsumptionKg for FG articles when preciseConsumptionMeter or gsm changes.
+      if (!isBodyArticle && (field === 'preciseConsumptionMeter' || field === 'gsm')) {
+        const getRV = (f: string) => String(updates[f] !== undefined ? updates[f] : (localValues[f] !== undefined ? localValues[f] : (item as any)[f]) ?? '').trim();
+        const w = parseFloat(getRV('fWidth').replace(/"/g, '')) || 0;
+        const rawGsm = getRV('gsm');
+        const gsmMid = (() => {
+          if (rawGsm.includes('-')) {
+            const parts = rawGsm.split('-').map(Number);
+            if (parts.length === 2 && !isNaN(parts[0]) && !isNaN(parts[1])) return (parts[0] + parts[1]) / 2;
+          }
+          return parseFloat(rawGsm) || 0;
+        })();
+        const m = parseFloat(getRV('preciseConsumptionMeter')) || 0;
+        if (w > 0 && gsmMid > 0 && m > 0)
+          updates['preciseConsumptionKg'] = ((w * gsmMid * m * 2.54) / 100000).toFixed(4);
+      }
       // Auto-compute Consumption in Kg: width x gsm x consumption(meter) x 2.54 / 100000
       if (isBodyArticle && (field === 'gsm' || field === 'consumptionMeter' || field === 'width')) {
         const getRV = (f: string) => parseFloat(String(updates[f] !== undefined ? updates[f] : (localValues[f] !== undefined ? localValues[f] : (item as any)[f])) || '') || 0;
@@ -1706,6 +2026,8 @@ const ArticleCard = React.memo(
       : activeGroups.filter((g) => g.group !== 'BUSINESS' && selectedGroupKeys.has(g.group));
     const showBomCard = allowGroups ? true : selectedGroupKeys.has('BOM');
     const showPkgCard = !allowGroups && selectedGroupKeys.has('PKG');
+    // CMP COST has no tab of its own — it shows with the BODY tab (FG articles only).
+    const showCmpCard = !allowGroups && !isBodyArticle && selectedGroupKeys.has('BODY');
 
     const rateVal = String(getValue('rate') ?? '').trim();
     const mrpVal = String(getValue('mrp') ?? '').trim();
@@ -1809,24 +2131,27 @@ const ArticleCard = React.memo(
       const canEdit = editable && !isFieldLocked(field);
       const isEmpty = !displayVal;
       const showRequiredError = required && isEmpty && !isLocked;
+      // FG pages (design "Option A"): label stacked above a full-width value.
+      const isFgCard = !allowGroups;
+      const monoField = field === 'majorCategory' || field === 'articleDescription' || field === 'referenceArticleDescription';
       return (
         <div
           key={field}
-          className="border-b border-border last:border-b-0"
+          className={isFgCard ? 'border-b border-slate-100 last:border-b-0' : 'border-b border-border last:border-b-0'}
           style={{ cursor: canEdit ? 'pointer' : 'default' }}
           onClick={() => {
             if (canEdit && !isEditingThis) setEditingField(`hdr_${field}`);
           }}
         >
-          <div className="flex items-start justify-between gap-2 px-2 py-0.5">
+          <div className={isFgCard ? 'flex flex-col gap-0.5 px-3 py-1.5' : 'flex items-start justify-between gap-2 px-2 py-0.5'}>
             <span
-              className="shrink-0 text-[9px] font-semibold uppercase tracking-wider"
-              style={{ color: showRequiredError ? '#dc2626' : '#6b7280' }}
+              className={isFgCard ? 'text-[10px] font-semibold uppercase tracking-wider' : 'shrink-0 text-[9px] font-semibold uppercase tracking-wider'}
+              style={{ color: showRequiredError ? (isFgCard ? '#c2410c' : '#dc2626') : isFgCard ? '#475569' : '#6b7280' }}
             >
               {label}
-              {required && <span className="ml-0.5 text-red-500">*</span>}
+              {required && <span className={isFgCard ? 'ml-0.5 text-orange-700' : 'ml-0.5 text-red-500'}>*</span>}
             </span>
-            <div className="min-w-0 flex-1 text-right">
+            <div className={isFgCard ? 'min-w-0' : 'min-w-0 flex-1 text-right'}>
               {isEditingThis && field === 'majorCategory' ? (
                 <Popover
                   open={catOpen}
@@ -1928,6 +2253,21 @@ const ArticleCard = React.memo(
                   }
                   onBlur={(e) => handleSave(field, e.target.value || null)}
                 />
+              ) : isFgCard ? (
+                <span
+                  title={displayVal || undefined}
+                  className={`block truncate ${
+                    displayVal
+                      ? monoField
+                        ? 'font-mono text-[11.5px] text-slate-900'
+                        : 'text-[12.5px] font-semibold text-slate-900'
+                      : showRequiredError
+                      ? 'text-xs font-semibold italic text-orange-700'
+                      : 'text-xs italic text-slate-500'
+                  }`}
+                >
+                  {displayVal || (showRequiredError ? 'Required' : canEdit ? 'Click to fill' : '—')}
+                </span>
               ) : (
                 <span
                   className="truncate text-xs"
@@ -2220,6 +2560,88 @@ const ArticleCard = React.memo(
     const qualityColor = (level: string) =>
       level === 'High' ? 'text-emerald-600' : level === 'Medium' ? 'text-amber-600' : 'text-rose-600';
 
+    // ── FG left rail (design "Option A · Ink headers") ──
+    const fgLevelColor = (level: string) =>
+      level === 'High' ? 'text-slate-900' : level === 'Medium' ? 'text-orange-700' : 'text-red-700';
+    const isLeftCardOpen = (key: string) => openLeftCards.has(key);
+    const toggleLeftCard = (key: string) =>
+      setOpenLeftCards((prev) => {
+        const next = new Set(prev);
+        if (next.has(key)) next.delete(key);
+        else next.add(key);
+        return next;
+      });
+    const createdOrUpdated = (pathType === 'created' ? item.updatedAt : item.createdAt) || item.updatedAt || item.createdAt;
+    const createdOrUpdatedLabel = createdOrUpdated
+      ? new Date(createdOrUpdated as string).toLocaleString('en-IN', {
+          day: 'numeric',
+          month: 'short',
+          year: 'numeric',
+          hour: '2-digit',
+          minute: '2-digit',
+        })
+      : '—';
+    // Required Reference & Vendor fields still empty — shown on the header so a
+    // closed card can't hide them.
+    const missingRequiredHeaderCount = isLocked
+      ? 0
+      : HEADER_FIELDS.filter((f) => {
+          if (!f.required) return false;
+          const v = localValues[f.field] !== undefined ? localValues[f.field] : (item as any)[f.field];
+          return !String(v ?? '').trim();
+        }).length;
+    // Ink header; with `cardKey` it becomes a toggle (closed by default) that
+    // shows `summary` while closed.
+    const renderInkCardHeader = (title: string, opts: { cardKey?: string; summary?: React.ReactNode; right?: React.ReactNode } = {}) => {
+      const content = (
+        <>
+          <span className="text-[10.5px] font-bold uppercase tracking-[0.08em]">{title}</span>
+          <span className="flex min-w-0 items-center gap-2">
+            {opts.cardKey && !isLeftCardOpen(opts.cardKey) && opts.summary}
+            {opts.right}
+            {opts.cardKey &&
+              (isLeftCardOpen(opts.cardKey) ? <ChevronUp className="h-3.5 w-3.5 shrink-0" /> : <ChevronDown className="h-3.5 w-3.5 shrink-0" />)}
+          </span>
+        </>
+      );
+      const cls = 'flex w-full items-center justify-between gap-2 px-3 py-2';
+      const style = { background: CARD_THEME.bg, color: CARD_THEME.fg };
+      if (!opts.cardKey) return <div className={cls} style={style}>{content}</div>;
+      const cardKey = opts.cardKey;
+      return (
+        <button
+          type="button"
+          onClick={() => toggleLeftCard(cardKey)}
+          aria-expanded={isLeftCardOpen(cardKey)}
+          className={`${cls} text-left transition-[filter] hover:brightness-125`}
+          style={style}
+        >
+          {content}
+        </button>
+      );
+    };
+    const fgInfoRows: { label: string; value: React.ReactNode }[] = [
+      {
+        label: 'Category',
+        value: [formatDivisionLabel(item.division), item.subDivision, effectiveMajCat].filter(Boolean).join(' › ') || '—',
+      },
+      {
+        label: 'AI confidence',
+        value: <span className="rounded-full bg-slate-800 px-2 py-0.5 text-[11px] font-bold text-white">{aiConfidence}%</span>,
+      },
+      { label: 'Image quality', value: <span className={fgLevelColor(imageQualityLevel)}>{imageQualityLevel}</span> },
+      { label: 'Product clarity', value: <span className={fgLevelColor(productClarityLevel)}>{productClarityLevel}</span> },
+      {
+        label: 'Attribute match',
+        value: (
+          <span className={fgLevelColor(attrMatchLevel)}>
+            {attrMatchLevel} · {filledAttrCount} / {visibleAttrs.length}
+          </span>
+        ),
+      },
+      { label: pathType === 'created' ? 'Last updated' : 'Created', value: createdOrUpdatedLabel },
+    ];
+
     // Base (100%-zoom) display size, fit to the same 85vw/75vh box the old
     // maxWidth/maxHeight CSS used — then scaled up by the zoom factor. Rotation at
     // 90/270° swaps which axis is width vs height so the post-rotation footprint
@@ -2455,6 +2877,93 @@ const ArticleCard = React.memo(
              * height of the dashboard's sticky brand+filter chrome (~120px).
              */}
             <aside className="sticky top-[120px] flex min-w-0 flex-col gap-3 self-start">
+              {!allowGroups ? (
+                <>
+                  {/* FG pages — design "Option A": ink headers matching the attribute cards */}
+                  <div className="overflow-hidden rounded-xl border border-slate-300 bg-white">
+                    {renderInkCardHeader('Article Image', {
+                      right: (
+                        <span className="rounded-full bg-slate-700 px-2 py-0.5 text-[10.5px] font-semibold">1 / 1</span>
+                      ),
+                    })}
+                    <div className="flex flex-col gap-2 p-3">
+                      <div className="relative aspect-square w-full overflow-hidden rounded-lg bg-slate-100">
+                        {imgUrl ? (
+                          <>
+                            <img
+                              src={imgUrl}
+                              alt=""
+                              className="block h-full w-full cursor-zoom-in object-contain p-2"
+                              onError={handleImgError}
+                              onClick={() => setImgModalOpen(true)}
+                            />
+                            <button
+                              type="button"
+                              onClick={() => setImgModalOpen(true)}
+                              aria-label="Expand image"
+                              className="absolute bottom-2.5 right-2.5 flex h-9 w-9 items-center justify-center rounded-lg bg-slate-900/75 text-white hover:bg-slate-900"
+                            >
+                              <Maximize2 className="h-4 w-4" />
+                            </button>
+                          </>
+                        ) : (
+                          <div className="flex h-full w-full items-center justify-center text-xs text-slate-500">No image</div>
+                        )}
+                      </div>
+                      {item.imageName && (
+                        <span className="truncate font-mono text-[11px] text-slate-600" title={item.imageName}>
+                          {item.imageName}
+                        </span>
+                      )}
+                    </div>
+                  </div>
+
+                  <div className="overflow-hidden rounded-xl border border-slate-300 bg-white">
+                    {renderInkCardHeader('Article Information', {
+                      cardKey: 'info',
+                      summary: (
+                        <span className="truncate text-[11px] font-medium text-slate-300">
+                          {aiConfidence}% · {attrMatchLevel} {filledAttrCount}/{visibleAttrs.length}
+                        </span>
+                      ),
+                    })}
+                    {isLeftCardOpen('info') && (
+                      <dl className="m-0 grid grid-cols-[110px_minmax(0,1fr)] px-3 py-1 text-xs">
+                        {fgInfoRows.map(({ label, value }, i) => (
+                          <React.Fragment key={label}>
+                            <dt className={`py-1.5 text-slate-600 ${i < fgInfoRows.length - 1 ? 'border-b border-slate-100' : ''}`}>{label}</dt>
+                            <dd
+                              className={`m-0 truncate py-1.5 text-right font-semibold text-slate-900 ${
+                                i < fgInfoRows.length - 1 ? 'border-b border-slate-100' : ''
+                              }`}
+                            >
+                              {value}
+                            </dd>
+                          </React.Fragment>
+                        ))}
+                      </dl>
+                    )}
+                  </div>
+
+                  <div className="overflow-hidden rounded-xl border border-slate-300 bg-white">
+                    {renderInkCardHeader('Reference & Vendor', {
+                      cardKey: 'reference',
+                      summary:
+                        missingRequiredHeaderCount > 0 ? (
+                          <span className="rounded-full bg-orange-100 px-2 py-0.5 text-[10.5px] font-semibold text-orange-800">
+                            {missingRequiredHeaderCount} required empty
+                          </span>
+                        ) : (
+                          <span className="truncate text-[11px] font-medium text-slate-300">
+                            {(localValues.vendorName !== undefined ? localValues.vendorName : item.vendorName) || ''}
+                          </span>
+                        ),
+                    })}
+                    {isLeftCardOpen('reference') && <div className="py-1">{HEADER_FIELDS.map((f) => renderHeaderField(f as any))}</div>}
+                  </div>
+                </>
+              ) : (
+                <>
               {/* Article image — dominant focal point, mockup-style */}
               <div className="overflow-hidden rounded-[var(--radius-card)] border-2 border-foreground/20 bg-white shadow-[var(--shadow-md)]">
                 <div className="flex items-center justify-between border-b-2 border-foreground/15 bg-slate-50 px-2.5 py-1.5">
@@ -2561,6 +3070,8 @@ const ArticleCard = React.memo(
                 </div>
                 <div>{HEADER_FIELDS.map((f) => renderHeaderField(f as any))}</div>
               </div>
+                </>
+              )}
             </aside>
 
             {/* ─── RIGHT: Attribute groups + BOM + Fabric/Body + Proceed FG ─── */}
@@ -3422,6 +3933,10 @@ const ArticleCard = React.memo(
                                   setEditingField(null);
                                   setPreciseBodyResults([]);
                                   setPreciseBodySearched(false);
+                                  if (r.microBodyArticleNumber) {
+                                    cmpActFetchedRef.current = r.microBodyArticleNumber;
+                                    fetchCmpActData(r.microBodyArticleNumber);
+                                  }
                                   if (isModifyMode) {
                                     setPendingChanges((prev) => ({ ...prev, ...updates }));
                                   } else {
@@ -3453,6 +3968,10 @@ const ArticleCard = React.memo(
                                   setEditingField(null);
                                   setPreciseBodyNoResults([]);
                                   setPreciseBodyNoSearched(false);
+                                  if (r.microBodyArticleNumber) {
+                                    cmpActFetchedRef.current = r.microBodyArticleNumber;
+                                    fetchCmpActData(r.microBodyArticleNumber);
+                                  }
                                   if (isModifyMode) {
                                     setPendingChanges((prev) => ({ ...prev, ...updates }));
                                   } else {
@@ -3525,7 +4044,7 @@ const ArticleCard = React.memo(
                                 };
                                 return (
                                   <>
-                                    {/* BODY ARTICLE NO. — Classic (body_article_data) or Smart (precise_body_article_consumption) */}
+                                    {/* BODY ARTICLE NO. — Smart search (precise_body_article_consumption) */}
                                     <div
                                       key="bodyArticle"
                                       className="mt-1 border-t border-border bg-muted/30 px-2 py-1.5"
@@ -3533,15 +4052,9 @@ const ArticleCard = React.memo(
                                       onClick={() => {
                                         if (!isLocked && !isBodyNoEditing) {
                                           setEditingField('bot_bodyArticle');
-                                          if (bodyNoMode === 'classic') {
-                                            setBodyNoQuery(bodyNoDisplayVal || '');
-                                            setBodyNoResults([]);
-                                            setBodyNoSearched(false);
-                                          } else {
-                                            setPreciseBodyNoQuery('');
-                                            setPreciseBodyNoResults([]);
-                                            setPreciseBodyNoSearched(false);
-                                          }
+                                          setPreciseBodyNoQuery('');
+                                          setPreciseBodyNoResults([]);
+                                          setPreciseBodyNoSearched(false);
                                         }
                                       }}
                                     >
@@ -3549,105 +4062,8 @@ const ArticleCard = React.memo(
                                         <span className="text-[9px] font-semibold uppercase tracking-wider text-muted-foreground">
                                           BODY ARTICLE NO.
                                         </span>
-                                        {!isLocked && (
-                                          <div onClick={(e) => e.stopPropagation()}>
-                                            <button
-                                              type="button"
-                                              title={bodyNoMode === 'classic' ? 'Switch to Smart search (precise table)' : 'Switch to Classic search (body_article_data)'}
-                                              className={`flex h-4 items-center gap-0.5 rounded-full border px-1.5 text-[8px] font-semibold tracking-wide hover:opacity-80 ${bodyNoMode === 'smart' ? 'border-slate-700 bg-slate-800 text-white' : 'border-slate-300 bg-white text-slate-600'}`}
-                                              onClick={() => {
-                                                setBodyNoMode((m) => m === 'classic' ? 'smart' : 'classic');
-                                                setEditingField(null);
-                                                setBodyNoResults([]);
-                                                setBodyNoSearched(false);
-                                                setPreciseBodyNoResults([]);
-                                                setPreciseBodyNoSearched(false);
-                                              }}
-                                            >
-                                              {bodyNoMode === 'smart' ? '⚡ SMART' : 'CLASSIC'}
-                                            </button>
-                                          </div>
-                                        )}
                                       </div>
                                       {isBodyNoEditing ? (
-                                        bodyNoMode === 'classic' ? (
-                                          /* ── Classic mode: text search from body_article_data ── */
-                                          <Popover
-                                            open
-                                            onOpenChange={(o) => {
-                                              if (!o) {
-                                                setEditingField(null);
-                                                setBodyNoResults([]);
-                                                setBodyNoSearched(false);
-                                              }
-                                            }}
-                                          >
-                                            <PopoverAnchor asChild>
-                                              <Input
-                                                autoFocus
-                                                value={bodyNoQuery}
-                                                placeholder="Search body article no…"
-                                                className="h-6 px-1 text-[11px]"
-                                                onClick={(e) => e.stopPropagation()}
-                                                onChange={(e) => {
-                                                  const q = e.target.value;
-                                                  setBodyNoQuery(q);
-                                                  runBodySearch(q);
-                                                }}
-                                                onBlur={() => {
-                                                  if (bodyNoLoading || bodyNoSearched) return;
-                                                  setEditingField(null);
-                                                  setBodyNoResults([]);
-                                                }}
-                                                onKeyDown={(e) => {
-                                                  if (e.key === 'Escape') {
-                                                    setEditingField(null);
-                                                    setBodyNoResults([]);
-                                                  }
-                                                  if (e.key === 'Enter' && bodyNoQuery.trim()) {
-                                                    handleSave('bodyArticle', bodyNoQuery.trim() || null);
-                                                    setEditingField(null);
-                                                    setBodyNoResults([]);
-                                                  }
-                                                }}
-                                              />
-                                            </PopoverAnchor>
-                                            {(bodyNoResults.length > 0 || bodyNoLoading || bodyNoSearched) && (
-                                              <PopoverContent
-                                                align="start"
-                                                sideOffset={2}
-                                                className="w-[260px] p-0"
-                                                onOpenAutoFocus={(e) => e.preventDefault()}
-                                                onClick={(e) => e.stopPropagation()}
-                                              >
-                                                <div className="max-h-56 overflow-y-auto py-1">
-                                                  {bodyNoLoading ? (
-                                                    <div className="px-3 py-2 text-[11px] text-muted-foreground">Searching…</div>
-                                                  ) : bodyNoResults.length === 0 ? (
-                                                    <div className="px-3 py-2 text-[11px] text-muted-foreground">No Body Article found</div>
-                                                  ) : (
-                                                    bodyNoResults.map((r) => (
-                                                      <button
-                                                        key={r.bodyArticleNumber}
-                                                        type="button"
-                                                        className="flex w-full flex-col gap-0.5 px-3 py-1.5 text-left hover:bg-[#FF6F61]/10"
-                                                        onMouseDown={(e) => {
-                                                          e.preventDefault();
-                                                          applyBodyArticleRow(r);
-                                                        }}
-                                                      >
-                                                        <span className="text-[11px] font-medium text-gray-900">{r.bodyArticleNumber}</span>
-                                                        {r.bodyArticleDescription && (
-                                                          <span className="truncate text-[10px] text-muted-foreground">{r.bodyArticleDescription}</span>
-                                                        )}
-                                                      </button>
-                                                    ))
-                                                  )}
-                                                </div>
-                                              </PopoverContent>
-                                            )}
-                                          </Popover>
-                                        ) : (
                                           /* ── Smart mode: text search from precise_body_article_consumption ── */
                                           <Popover
                                             open
@@ -3727,7 +4143,6 @@ const ArticleCard = React.memo(
                                               </PopoverContent>
                                             )}
                                           </Popover>
-                                        )
                                       ) : (
                                         <div
                                           className="truncate text-[11px]"
@@ -3737,7 +4152,7 @@ const ArticleCard = React.memo(
                                         </div>
                                       )}
                                     </div>
-                                    {/* BODY ARTICLE DESC — Classic (text search) or Smart (attribute-based) plugin */}
+                                    {/* BODY ARTICLE DESC — Smart (attribute-based) */}
                                     <div
                                       key="bodyArticleDescription"
                                       className="mt-1 border-t border-border bg-muted/30 px-2 py-1.5"
@@ -3745,16 +4160,9 @@ const ArticleCard = React.memo(
                                       onClick={() => {
                                         if (!isLocked && !isBodyDescEditing) {
                                           setEditingField('bot_bodyArticleDescription');
-                                          if (bodyDescMode === 'classic') {
-                                            setBodyNoQuery(bodyDescDisplayVal || '');
-                                            setBodyNoSearched(false);
-                                            if (bodyDescDisplayVal) runBodySearch(bodyDescDisplayVal);
-                                            else setBodyNoResults([]);
-                                          } else {
-                                            setPreciseBodyResults([]);
-                                            setPreciseBodySearched(false);
-                                            runPreciseBodySearch();
-                                          }
+                                          setPreciseBodyResults([]);
+                                          setPreciseBodySearched(false);
+                                          runPreciseBodySearch();
                                         }
                                       }}
                                     >
@@ -3763,24 +4171,6 @@ const ArticleCard = React.memo(
                                           BODY ARTICLE DESC
                                         </span>
                                         <div className="flex items-center gap-1.5" onClick={(e) => e.stopPropagation()}>
-                                          {/* Mode toggle pill */}
-                                          {!isLocked && (
-                                            <button
-                                              type="button"
-                                              title={bodyDescMode === 'classic' ? 'Switch to Smart search (attribute-based)' : 'Switch to Classic search (text)'}
-                                              className={`flex h-4 items-center gap-0.5 rounded-full border px-1.5 text-[8px] font-semibold tracking-wide hover:opacity-80 ${bodyDescMode === 'smart' ? 'border-slate-700 bg-slate-800 text-white' : 'border-slate-300 bg-white text-slate-600'}`}
-                                              onClick={() => {
-                                                setBodyDescMode((m) => m === 'classic' ? 'smart' : 'classic');
-                                                setEditingField(null);
-                                                setBodyNoResults([]);
-                                                setBodyNoSearched(false);
-                                                setPreciseBodyResults([]);
-                                                setPreciseBodySearched(false);
-                                              }}
-                                            >
-                                              {bodyDescMode === 'smart' ? '⚡ SMART' : 'CLASSIC'}
-                                            </button>
-                                          )}
                                           {!isBodyDescEditing && !isLocked && (
                                             <button
                                               type="button"
@@ -3796,87 +4186,6 @@ const ArticleCard = React.memo(
                                         </div>
                                       </div>
                                       {isBodyDescEditing ? (
-                                        bodyDescMode === 'classic' ? (
-                                          /* ── Classic mode: text search ── */
-                                          <Popover
-                                            open
-                                            onOpenChange={(o) => {
-                                              if (!o) {
-                                                setEditingField(null);
-                                                setBodyNoResults([]);
-                                                setBodyNoSearched(false);
-                                              }
-                                            }}
-                                          >
-                                            <PopoverAnchor asChild>
-                                              <Input
-                                                autoFocus
-                                                value={bodyNoQuery}
-                                                placeholder="Search body article desc…"
-                                                maxLength={40}
-                                                className="h-6 px-1 text-[11px]"
-                                                onClick={(e) => e.stopPropagation()}
-                                                onChange={(e) => {
-                                                  const q = e.target.value;
-                                                  setBodyNoQuery(q);
-                                                  runBodySearch(q);
-                                                }}
-                                                onBlur={() => {
-                                                  if (bodyNoLoading || bodyNoSearched) return;
-                                                  const trimmed = bodyNoQuery.trim();
-                                                  if (trimmed) handleSave('bodyArticleDescription', trimmed);
-                                                  setEditingField(null);
-                                                  setBodyNoResults([]);
-                                                }}
-                                                onKeyDown={(e) => {
-                                                  if (e.key === 'Escape') {
-                                                    setEditingField(null);
-                                                    setBodyNoResults([]);
-                                                  }
-                                                  if (e.key === 'Enter' && bodyNoQuery.trim()) {
-                                                    handleSave('bodyArticleDescription', bodyNoQuery.trim() || null);
-                                                    setEditingField(null);
-                                                    setBodyNoResults([]);
-                                                  }
-                                                }}
-                                              />
-                                            </PopoverAnchor>
-                                            {(bodyNoResults.length > 0 || bodyNoLoading || bodyNoSearched) && (
-                                              <PopoverContent
-                                                align="start"
-                                                sideOffset={2}
-                                                className="w-[260px] p-0"
-                                                onOpenAutoFocus={(e) => e.preventDefault()}
-                                                onClick={(e) => e.stopPropagation()}
-                                              >
-                                                <div className="max-h-56 overflow-y-auto py-1">
-                                                  {bodyNoLoading ? (
-                                                    <div className="px-3 py-2 text-[11px] text-muted-foreground">Searching…</div>
-                                                  ) : bodyNoResults.length === 0 ? (
-                                                    <div className="px-3 py-2 text-[11px] text-muted-foreground">No Body Article found</div>
-                                                  ) : (
-                                                    bodyNoResults.map((r) => (
-                                                      <button
-                                                        key={r.bodyArticleNumber}
-                                                        type="button"
-                                                        className="flex w-full flex-col gap-0.5 px-3 py-1.5 text-left hover:bg-[#FF6F61]/10"
-                                                        onMouseDown={(e) => {
-                                                          e.preventDefault();
-                                                          applyBodyArticleRow(r);
-                                                        }}
-                                                      >
-                                                        <span className="text-[11px] font-medium text-gray-900">{r.bodyArticleDescription || '—'}</span>
-                                                        {r.bodyArticleNumber && (
-                                                          <span className="truncate text-[10px] text-muted-foreground">{r.bodyArticleNumber}</span>
-                                                        )}
-                                                      </button>
-                                                    ))
-                                                  )}
-                                                </div>
-                                              </PopoverContent>
-                                            )}
-                                          </Popover>
-                                        ) : (
                                           /* ── Smart mode: attribute-based, no text input ── */
                                           <Popover
                                             open
@@ -3934,7 +4243,6 @@ const ArticleCard = React.memo(
                                               </PopoverContent>
                                             )}
                                           </Popover>
-                                        )
                                       ) : (
                                         <div
                                           className="truncate text-[11px]"
@@ -4244,6 +4552,16 @@ const ArticleCard = React.memo(
                       collapsed={isGroupCollapsed('PKG')}
                       onToggleCollapse={() => toggleGroupCollapse('PKG')}
                       locked={isLocked}
+                    />
+                  )}
+
+                  {/* CMP COST card — FG Articles, BODY tab only */}
+                  {showCmpCard && (
+                    <CmpCostCard
+                      collapsed={isGroupCollapsed('CMP')}
+                      onToggleCollapse={() => toggleGroupCollapse('CMP')}
+                      locked={isLocked}
+                      actPreset={cmpActPreset}
                     />
                   )}
 

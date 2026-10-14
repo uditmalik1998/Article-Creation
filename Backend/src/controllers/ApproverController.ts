@@ -4821,6 +4821,74 @@ export class ApproverController {
         return res.json({ results });
     }
 
+    // Returns the fabric consumption for a given major category + fabric width from
+    // precise_body_article_consumption. Width columns are named width15, width66, etc.
+    // If no exact column match, falls back to the minimum non-null value across all width columns.
+    static getPreciseConsumptionByWidth = async (req: Request, res: Response) => {
+        const majorCategory          = String(req.query.majorCategory          ?? '').trim();
+        const fabWidthRaw            = String(req.query.fabWidth               ?? '').trim().replace(/"/g, '');
+        const microBodyArticleNumber = String(req.query.microBodyArticleNumber ?? '').trim();
+        if (!majorCategory || !fabWidthRaw) return res.json({ consumption: null });
+        const fabWidthNum = Math.round(parseFloat(fabWidthRaw));
+        if (isNaN(fabWidthNum)) return res.json({ consumption: null });
+
+        const where: Record<string, unknown> = {
+            majorCategory: { equals: majorCategory, mode: 'insensitive' },
+        };
+        if (microBodyArticleNumber) {
+            where['microBodyArticleNumber'] = { equals: microBodyArticleNumber, mode: 'insensitive' };
+        }
+        const row = await prisma.preciseBodyArticleConsumption.findFirst({ where } as any);
+        if (!row) return res.json({ consumption: null });
+
+        // Try exact width column first (e.g. width66)
+        const exactKey = `width${fabWidthNum}` as keyof typeof row;
+        const exactVal = row[exactKey];
+        if (exactVal != null) return res.json({ consumption: Number(exactVal) });
+
+        // Fallback: minimum non-null value across all width columns
+        const WIDTH_KEYS: (keyof typeof row)[] = [
+            'width15','width16','width17','width18','width19',
+            'width42','width43','width44','width46','width48','width50',
+            'width53','width54','width55','width56','width57','width58','width59','width60',
+            'width61','width62','width63','width64','width65','width66','width67','width68',
+            'width69','width70','width71','width72','width73','width74','width76','width78',
+            'width82','width92','width94','width96',
+        ];
+        let minVal: number | null = null;
+        for (const k of WIDTH_KEYS) {
+            const v = row[k];
+            if (v != null) {
+                const n = Number(v);
+                if (minVal === null || n < minVal) minVal = n;
+            }
+        }
+        return res.json({ consumption: minVal });
+    };
+
+    // CMP cost data for a body article — returns SAM/cost fields from precise_body_article_consumption
+    // by microBodyArticleNumber for use in the CMP COST card ACT column auto-fill.
+    static getPreciseBodyArticleCmpData = async (req: Request, res: Response) => {
+        const microBodyArticleNumber = String(req.query.microBodyArticleNumber ?? '').trim();
+        if (!microBodyArticleNumber) return res.status(400).json({ error: 'microBodyArticleNumber required' });
+
+        const row = await prisma.preciseBodyArticleConsumption.findFirst({
+            where: { microBodyArticleNumber: { equals: microBodyArticleNumber, mode: 'insensitive' } } as any,
+            select: { cuttingValue: true, stitchingSam: true, samVal: true, ironingSam: true, finishingSam: true },
+        });
+
+        if (!row) return res.json({ found: false });
+
+        return res.json({
+            found: true,
+            cuttingValue:  row.cuttingValue  != null ? Number(row.cuttingValue)  : null,
+            stitchingSam:  row.stitchingSam  != null ? Number(row.stitchingSam)  : null,
+            samVal:        row.samVal        != null ? Number(row.samVal)        : null,
+            ironingSam:    row.ironingSam    != null ? Number(row.ironingSam)    : null,
+            finishingSam:  row.finishingSam  != null ? Number(row.finishingSam)  : null,
+        });
+    };
+
     // Smart body article search — filters precise_body_article_consumption by major category
     // and active grid attributes from body_article_description_formate, returns matching rows.
     static async searchPreciseBodyArticle(req: Request, res: Response) {
@@ -4894,6 +4962,24 @@ export class ApproverController {
             fabWidth:       r.fabWidth       != null ? Number(r.fabWidth)       : null,
             fabConsumption: r.fabConsumption != null ? Number(r.fabConsumption) : null,
         })));
+    };
+
+    // Returns fab_consumption for a specific major_category + fab_width combination.
+    // fab_width is matched by rounding the queried value to 2 decimal places.
+    static getBodyFabricConsumptionByWidth = async (req: Request, res: Response) => {
+        const majorCategory = String(req.query.majorCategory ?? '').trim();
+        const fabWidthRaw   = String(req.query.fabWidth   ?? '').trim().replace(/"/g, '');
+        if (!majorCategory || !fabWidthRaw) return res.json({ fabConsumption: null });
+        const fabWidthNum = parseFloat(fabWidthRaw);
+        if (isNaN(fabWidthNum)) return res.json({ fabConsumption: null });
+        const row = await prisma.bodyFabricConsumption.findFirst({
+            where: {
+                majorCategory: { equals: majorCategory, mode: 'insensitive' },
+                fabWidth:      { equals: fabWidthNum },
+            },
+            select: { fabConsumption: true },
+        });
+        return res.json({ fabConsumption: row?.fabConsumption != null ? Number(row.fabConsumption) : null });
     };
 
     // Returns GSM for a major category from body_fabric_consumption (gsm is
@@ -5700,8 +5786,9 @@ export class ApproverController {
     }
 
     static createBodyArticleFromFG = async (req: Request, res: Response) => {
-        const { ids, bodyDescriptions, attributeOverrides } = req.body as {
+        const { ids, bodyDescriptions, attributeOverrides, submitNow } = req.body as {
             ids?: string[];
+            submitNow?: boolean;
             // Per-id override for bodyArticleDescription (live computed value from frontend UI).
             bodyDescriptions?: Record<string, string | null>;
             // Per-id override for body construction attributes (unsaved localValues from Created page).
@@ -5791,8 +5878,17 @@ export class ApproverController {
                     select: { bodyArticleNumber: true },
                 });
                 if (descMatch) {
+                    // Auto-fill bodyArticle on the flat row so the FG article card shows the number
+                    if (descMatch.bodyArticleNumber) {
+                        await prisma.extractionResultFlat.update({
+                            where: { id: item.id },
+                            data: { bodyArticle: descMatch.bodyArticleNumber },
+                        }).catch(() => {});
+                    }
                     return res.status(409).json({
                         error: `For this ${item.majorCategory} Major Category, Body Article is already Present: ${descMatch.bodyArticleNumber}`,
+                        bodyArticleNumber: descMatch.bodyArticleNumber,
+                        flatId: item.id,
                     });
                 }
             }
@@ -5878,8 +5974,16 @@ export class ApproverController {
                     && (r.bodyArticleDescription ?? '').trim() === (item.bodyArticleDescription ?? '').trim()
             );
             if (approvedSameDesc) {
+                if (approvedSameDesc.bodyArticleNumber) {
+                    await prisma.extractionResultFlat.update({
+                        where: { id: item.id },
+                        data: { bodyArticle: approvedSameDesc.bodyArticleNumber },
+                    }).catch(() => {});
+                }
                 return res.status(409).json({
                     error: `For this ${approvedSameDesc.majorCategory} Major Category, Body Article is already Present: ${approvedSameDesc.bodyArticleNumber ?? 'N/A'}`,
+                    bodyArticleNumber: approvedSameDesc.bodyArticleNumber ?? null,
+                    flatId: item.id,
                     duplicateFlatIds: [item.id],
                 });
             }
@@ -5896,26 +6000,55 @@ export class ApproverController {
             }
         }
 
-        let upserted = 0;
+        // Collect (bodyArticleDataId → flatId) so we can write back SAP numbers when submitNow=true.
+        type BodyEntry = { bodyRowId: string; flatId: string };
+        const toSubmitEntries: BodyEntry[] = [];
+
         await Promise.all([
             ...toUpdate.map(({ item, existingId }) =>
                 prisma.bodyArticleData.update({
                     where: { id: existingId },
                     data: {
                         ...bodyArticleData(item),
-                        approvalStatus: 'PENDING',
+                        approvalStatus: submitNow ? 'APPROVED' : 'PENDING',
                         sapSyncStatus:  'NOT_SYNCED',
                         sapSyncMessage: null,
                     },
-                }).then(() => { upserted++; })
+                }).then(() => { toSubmitEntries.push({ bodyRowId: existingId, flatId: item.id }); })
             ),
             ...toCreate.map((item) =>
-                prisma.bodyArticleData.create({ data: bodyArticleData(item) })
-                    .then(() => { upserted++; })
+                prisma.bodyArticleData.create({
+                    data: {
+                        ...bodyArticleData(item),
+                        ...(submitNow ? { approvalStatus: 'APPROVED' } : {}),
+                    },
+                }).then((row) => { toSubmitEntries.push({ bodyRowId: row.id, flatId: item.id }); })
             ),
         ]);
 
-        return res.json({ success: true, created: upserted });
+        if (submitNow && toSubmitEntries.length > 0) {
+            const { submitBodyArticles } = await import('../services/zmmBodyArtCreationService');
+            const submitResult = await submitBodyArticles(toSubmitEntries.map((e) => e.bodyRowId));
+
+            // Write the SAP-issued body article number back to extraction_results_flat.body_article
+            await Promise.all(
+                submitResult.results
+                    .filter((r) => r.success && r.sapArticleNumber)
+                    .map(async (r) => {
+                        const entry = toSubmitEntries.find((e) => e.bodyRowId === r.id);
+                        if (entry?.flatId) {
+                            await prisma.extractionResultFlat.update({
+                                where: { id: entry.flatId },
+                                data: { bodyArticle: r.sapArticleNumber },
+                            });
+                        }
+                    }),
+            );
+
+            return res.json({ success: true, created: toSubmitEntries.length, results: submitResult.results });
+        }
+
+        return res.json({ success: true, created: toSubmitEntries.length });
     };
 
     // Division → fabric master lookup. K/RFD_K → KNITS_MIX (mFabDiv K),

@@ -7,6 +7,12 @@ import { cn } from '@/lib/utils';
 interface UploadAreaProps {
   onUpload: (file: File, fileList: File[]) => Promise<boolean | void>;
   disabled?: boolean;
+  /** Slate drop zone without the marketing header/feature list (FG extraction page). */
+  compact?: boolean;
+  /** compact only: shown instead of the drop hint while `disabled` (e.g. "pick a sub-division first"). */
+  disabledHint?: string;
+  /** compact only: where the photos will go, e.g. "MENS › MU › M_F_SHIRT_FS". */
+  targetLabel?: string;
 }
 
 interface FileSystemEntry {
@@ -28,7 +34,7 @@ interface FileSystemDirectoryReader {
   readEntries: (success: (entries: FileSystemEntry[]) => void, error?: (err: DOMException) => void) => void;
 }
 
-export const UploadArea: React.FC<UploadAreaProps> = ({ onUpload, disabled = false }) => {
+export const UploadArea: React.FC<UploadAreaProps> = ({ onUpload, disabled = false, compact = false, disabledHint, targetLabel }) => {
   const fileInputRef = useRef<HTMLInputElement | null>(null);
   const folderInputRef = useRef<HTMLInputElement | null>(null);
   const [isDragging, setIsDragging] = useState(false);
@@ -123,6 +129,83 @@ export const UploadArea: React.FC<UploadAreaProps> = ({ onUpload, disabled = fal
     if (e.target) e.target.value = '';
   };
 
+  const hiddenInputs = (
+    <>
+      <input ref={fileInputRef} type="file" multiple accept="image/*" className="hidden" onChange={handleInputChange} />
+      <input
+        ref={folderInputRef}
+        type="file"
+        multiple
+        // @ts-expect-error — chromium-only `webkitdirectory` attribute
+        webkitdirectory=""
+        directory=""
+        accept="image/*"
+        className="hidden"
+        onChange={handleInputChange}
+      />
+    </>
+  );
+
+  if (compact) {
+    return (
+      <div
+        onDragEnter={() => !disabled && setIsDragging(true)}
+        onDragOver={(e) => {
+          e.preventDefault();
+          !disabled && setIsDragging(true);
+        }}
+        onDragLeave={() => setIsDragging(false)}
+        onDrop={handleDrop}
+        className={cn(
+          'flex min-h-[340px] flex-col items-center justify-center gap-3 rounded-2xl border-[1.5px] border-dashed px-6 py-10 text-center transition-colors',
+          disabled
+            ? 'cursor-not-allowed border-slate-300 bg-slate-50'
+            : isDragging
+            ? 'border-slate-800 bg-slate-100'
+            : 'border-slate-400 bg-white',
+        )}
+      >
+        <span
+          className={cn(
+            'flex h-14 w-14 items-center justify-center rounded-2xl',
+            disabled ? 'bg-slate-100 text-slate-400' : 'bg-slate-100 text-slate-800',
+          )}
+        >
+          <UploadIcon className="h-6 w-6" />
+        </span>
+        <b className={cn('text-lg', disabled ? 'text-slate-500' : 'text-slate-900')}>
+          {disabled ? disabledHint || 'Upload disabled' : 'Drop garment photos or folders here'}
+        </b>
+        <span className="text-[13px] text-slate-600">JPG, PNG or WEBP · up to 10 MB each · single or bulk</span>
+        <div className="mt-1 flex flex-wrap items-center justify-center gap-2">
+          <Button
+            disabled={disabled}
+            className="h-11 bg-slate-800 px-5 text-white hover:bg-slate-900"
+            onClick={() => fileInputRef.current?.click()}
+          >
+            <UploadIcon />
+            Browse files
+          </Button>
+          <Button
+            variant="outline"
+            disabled={disabled}
+            className="h-11 border-slate-300 px-5 text-slate-800 hover:border-slate-800 hover:bg-slate-50"
+            onClick={() => folderInputRef.current?.click()}
+          >
+            <FolderOpen />
+            Select folder
+          </Button>
+        </div>
+        {targetLabel && !disabled && (
+          <span className="mt-1 rounded-full bg-slate-100 px-3 py-1 text-xs text-slate-700">
+            Uploading to <b className="text-slate-900">{targetLabel}</b>
+          </span>
+        )}
+        {hiddenInputs}
+      </div>
+    );
+  }
+
   return (
     <Card className="upload-area overflow-hidden rounded-2xl">
       <CardContent className="p-10 text-center">
@@ -198,25 +281,7 @@ export const UploadArea: React.FC<UploadAreaProps> = ({ onUpload, disabled = fal
             {disabled ? 'Processing...' : 'Select Folder'}
           </Button>
 
-          <input
-            ref={fileInputRef}
-            type="file"
-            multiple
-            accept="image/*"
-            className="hidden"
-            onChange={handleInputChange}
-          />
-          <input
-            ref={folderInputRef}
-            type="file"
-            multiple
-            // @ts-expect-error — chromium-only `webkitdirectory` attribute
-            webkitdirectory=""
-            directory=""
-            accept="image/*"
-            className="hidden"
-            onChange={handleInputChange}
-          />
+          {hiddenInputs}
 
           <div className="mt-2 text-xs text-muted-foreground">or drag and drop images/folders above</div>
         </div>

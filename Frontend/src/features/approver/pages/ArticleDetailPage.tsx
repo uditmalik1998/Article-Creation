@@ -782,12 +782,15 @@ export default function ArticleDetailPage({
   };
 
   const doCreateBody = async (item: ApproverItem) => {
+    const tid = 'body-create';
+    toast.loading('Creating body article and syncing to SAP…', { id: tid });
     try {
       const token = localStorage.getItem('authToken');
       const r = await fetch(`${APP_CONFIG.api.baseURL}/approver/create-body-article`, {
         method: 'POST', headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` },
         body: JSON.stringify({
           ids: [item.id],
+          submitNow: true,
           bodyDescriptions: { [item.id]: item.bodyArticleDescription ?? null },
           // Pass current UI attribute values so backend doesn't use stale DB values
           attributeOverrides: {
@@ -815,12 +818,25 @@ export default function ArticleDetailPage({
       });
       const data = await r.json();
       if (!r.ok) {
-        message.error(data.error || 'Failed to create body article');
+        if (r.status === 409 && data.bodyArticleNumber) {
+          // Already exists — backend already wrote the number back to flat row; just refetch
+          toast.success(`Body Article already exists: ${data.bodyArticleNumber} — auto-filled`, { id: tid, duration: 6000 });
+          await refetchCurrentItem();
+          return;
+        }
+        toast.error(data.error || 'Failed to create body article', { id: tid, duration: 8000 });
         return;
       }
-      message.success('Body article creation initiated');
+      const result = data.results?.[0];
+      if (result?.success && result?.sapArticleNumber) {
+        toast.success(`Body article created: ${result.sapArticleNumber}`, { id: tid, duration: 6000 });
+      } else if (result && !result.success) {
+        toast.warning(`Row created but SAP sync failed: ${result.message || 'Unknown error'}`, { id: tid, duration: 8000 });
+      } else {
+        toast.success('Body article created', { id: tid });
+      }
       await refetchCurrentItem();
-    } catch { message.error('Failed to create body article'); }
+    } catch { toast.error('Failed to create body article', { id: tid }); }
   };
 
   const doProceedFG = async (item: ApproverItem) => {

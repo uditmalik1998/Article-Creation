@@ -1,13 +1,10 @@
-import { useEffect, useMemo, useRef, useState } from 'react';
+import { useEffect, useMemo, useRef, useState, type ReactNode } from 'react';
 import { useForm } from 'react-hook-form';
 import {
   Upload as UploadIcon,
   Zap,
   Download,
   Trash2,
-  Camera,
-  Inbox,
-  FolderOpen,
   FileArchive,
   RotateCw,
   Eye,
@@ -15,6 +12,7 @@ import {
   X,
   List,
   Images,
+  Shirt,
 } from 'lucide-react';
 import { ArticleListPanel, type ArticleListSubmit } from '../components/ArticleListPanel';
 import { ModelImagesBrowser } from '../components/ModelImagesBrowser';
@@ -29,7 +27,6 @@ import {
   CardTitle,
   Dialog,
   DialogContent,
-  Empty,
   Form,
   FormControl,
   FormField,
@@ -42,7 +39,6 @@ import {
   SelectItem,
   SelectTrigger,
   SelectValue,
-  Separator,
   Spinner,
   Tag,
   Textarea,
@@ -239,6 +235,8 @@ export default function ModelGenerationPage() {
   const [recentJobs, setRecentJobs] = useState<JobListItem[]>([]);
   const [recentLoading, setRecentLoading] = useState(false);
   const [isDragging, setIsDragging] = useState(false);
+  // Which "Optional extras" rows are expanded (Option A layout).
+  const [openExtras, setOpenExtras] = useState<Set<string>>(new Set());
   const [previewUrl, setPreviewUrl] = useState<string | null>(null);
 
   const progressTimerRef = useRef<ReturnType<typeof setInterval> | null>(null);
@@ -716,57 +714,139 @@ export default function ModelGenerationPage() {
     addDesigns(files);
   };
 
-  return (
-    <div className="mx-auto max-w-[1200px] px-4 py-6">
-      <div className="mb-6">
-        <h1 className="m-0 flex items-center gap-2.5 text-2xl font-semibold">
-          <Camera className="h-6 w-6 text-[#FF6F61]" />
-          AI Model Generation
-        </h1>
-        <p className="mt-1 text-sm text-muted-foreground">
-          Upload garment images and generate professional fashion model photos using AI.
-        </p>
+  // ── Option A "Studio" layout helpers (2026-10-14) ─────────────────────────
+  const watchGender = form.watch('gender');
+  const watchBody = form.watch('bodytype');
+  const watchViews = form.watch('imagesCount');
+  const watchPlacement = form.watch('broach_placement');
+  const watchColorName = form.watch('color_name');
+  const watchInstructions = form.watch('special_instructions');
+  const labelOf = (opts: { label: string; value: string }[], v?: string) => opts.find((o) => o.value === v)?.label ?? v ?? '';
+  const settingsSummary = [
+    labelOf(GENDER_OPTIONS, watchGender),
+    labelOf(BODYTYPE_OPTIONS, watchBody),
+    watchViews === '4' ? 'All 4 views' : 'Front only',
+  ].join(' · ');
+  const garmentCountLabel = zipFile
+    ? `.zip${designFiles.length ? ` + ${designFiles.length} image${designFiles.length !== 1 ? 's' : ''}` : ''}`
+    : `${designFiles.length} image${designFiles.length !== 1 ? 's' : ''}`;
+
+  // Segmented control (slate) used for Gender / Body type / Views.
+  // Plain render functions (not components) so inputs inside keep focus across re-renders.
+  const renderSegmented = ({ label, value, options, onChange }: {
+    label: string;
+    value?: string;
+    options: { label: string; value: string }[];
+    onChange: (v: string) => void;
+  }) => (
+    <div className="flex items-center gap-3">
+      <span className="w-[82px] shrink-0 text-[12.5px] font-semibold text-slate-700 dark:text-slate-300">{label}</span>
+      <div role="radiogroup" aria-label={label} className="flex flex-1 rounded-[9px] bg-slate-100 p-[3px] dark:bg-slate-800">
+        {options.map((o) => {
+          const on = value === o.value;
+          return (
+            <button
+              key={o.value}
+              type="button"
+              role="radio"
+              aria-checked={on}
+              onClick={() => onChange(o.value)}
+              className={cn(
+                'h-[30px] flex-1 rounded-[7px] px-1 text-[12.5px] font-semibold transition-colors',
+                on
+                  ? 'bg-white text-slate-900 shadow-[0_1px_2px_rgba(15,23,42,0.1)] dark:bg-slate-950 dark:text-slate-50'
+                  : 'text-slate-500 hover:text-slate-900 dark:text-slate-400 dark:hover:text-slate-50',
+              )}
+            >
+              {o.label}
+            </button>
+          );
+        })}
       </div>
+    </div>
+  );
 
-      {/* Mode toggle */}
-      <div className="mb-4 flex gap-2">
-        <Button
+  // One optional-extra row: title + hint + action; expands to show its controls.
+  const renderExtraRow = ({ id, title, hint, isSet, children }: {
+    id: string;
+    title: string;
+    hint: string;
+    isSet: boolean;
+    children: ReactNode;
+  }) => {
+    const open = openExtras.has(id);
+    return (
+      <div key={id} className="border-b border-slate-100 last:border-b-0 dark:border-slate-800">
+        <button
           type="button"
-          size="sm"
-          variant={pageMode === 'upload-garments' ? 'default' : 'outline'}
-          className={cn(pageMode === 'upload-garments' && 'bg-[#FF6F61] text-white hover:bg-[#ff5b4d]')}
-          onClick={() => setPageMode('upload-garments')}
+          aria-expanded={open}
+          onClick={() =>
+            setOpenExtras((prev) => {
+              const next = new Set(prev);
+              if (next.has(id)) next.delete(id);
+              else next.add(id);
+              return next;
+            })
+          }
+          className="flex w-full items-center gap-3 px-3.5 py-2.5 text-left transition-colors hover:bg-slate-50 dark:hover:bg-slate-800/60"
         >
-          <UploadIcon />
-          Upload Garments
-        </Button>
-        {canViewModelImages && (
-          <Button
-            type="button"
-            size="sm"
-            variant={pageMode === 'from-article-list' ? 'default' : 'outline'}
-            className={cn(pageMode === 'from-article-list' && 'bg-[#FF6F61] text-white hover:bg-[#ff5b4d]')}
-            onClick={() => setPageMode('from-article-list')}
-          >
-            <List />
-            From Article List
-          </Button>
-        )}
-        {canViewModelImages && (
-          <Button
-            type="button"
-            size="sm"
-            variant={pageMode === 'model-images' ? 'default' : 'outline'}
-            className={cn(pageMode === 'model-images' && 'bg-[#FF6F61] text-white hover:bg-[#ff5b4d]')}
-            onClick={() => setPageMode('model-images')}
-          >
-            <Images />
-            model-images
-          </Button>
-        )}
+          <span className="flex min-w-0 flex-1 flex-col">
+            <span className="flex items-center gap-2 text-[13px] font-semibold text-slate-900 dark:text-slate-50">
+              {title}
+              {isSet && (
+                <span className="rounded-full bg-slate-800 px-1.5 py-px text-[10px] font-bold text-white">Set</span>
+              )}
+            </span>
+            <span className="text-[11.5px] text-slate-500">{hint}</span>
+          </span>
+          <span className="flex h-[30px] shrink-0 items-center rounded-lg border border-slate-300 bg-white px-3 text-[12px] font-semibold text-slate-800 dark:border-slate-600 dark:bg-slate-900 dark:text-slate-100">
+            {open ? 'Done' : isSet ? 'Edit' : 'Add'}
+          </span>
+        </button>
+        {open && <div className="flex flex-col gap-2.5 px-3.5 pb-3">{children}</div>}
+      </div>
+    );
+  };
 
-        {/* Manage the MAJ CAT master (add new categories + their model-image frame) */}
-        <div className="ml-auto">
+  const sectionLabel = 'mb-2 text-[12px] font-bold tracking-[0.06em] text-slate-600 dark:text-slate-400';
+
+  return (
+    <div className="mx-auto max-w-[1280px] px-4 py-6">
+      {/* Header: title + source switch + Major categories */}
+      <div className="mb-5 flex flex-wrap items-end justify-between gap-4">
+        <div>
+          <h1 className="m-0 font-display text-[28px] font-semibold text-slate-900 dark:text-slate-50">AI Model Generation</h1>
+          <p className="mt-1 text-[13.5px] text-slate-600 dark:text-slate-400">Turn garment photos into on-model shots.</p>
+        </div>
+        <div className="flex flex-wrap items-center gap-2.5">
+          <div role="tablist" aria-label="Source" className="flex rounded-[10px] bg-slate-200 p-[3px] dark:bg-slate-800">
+            {([
+              { mode: 'upload-garments', label: 'Upload garments', Icon: UploadIcon, show: true },
+              { mode: 'from-article-list', label: 'From article list', Icon: List, show: canViewModelImages },
+              { mode: 'model-images', label: 'model-images', Icon: Images, show: canViewModelImages },
+            ] as const)
+              .filter((t) => t.show)
+              .map((t) => {
+                const on = pageMode === t.mode;
+                return (
+                  <button
+                    key={t.mode}
+                    type="button"
+                    role="tab"
+                    aria-selected={on}
+                    onClick={() => setPageMode(t.mode)}
+                    className={cn(
+                      'flex h-8 items-center gap-1.5 rounded-lg px-3.5 text-[12.5px] font-semibold transition-colors',
+                      on ? 'bg-slate-800 text-white' : 'text-slate-700 hover:text-slate-900 dark:text-slate-300 dark:hover:text-slate-50',
+                    )}
+                  >
+                    <t.Icon className="h-3.5 w-3.5" />
+                    {t.label}
+                  </button>
+                );
+              })}
+          </div>
+          {/* Manage the MAJ CAT master (add new categories + their model-image frame) */}
           <MajorCategoryManager />
         </div>
       </div>
@@ -774,485 +854,411 @@ export default function ModelGenerationPage() {
       {canViewModelImages && pageMode === 'model-images' && <ModelImagesBrowser />}
 
       {pageMode !== 'model-images' && (
-      <div className="grid grid-cols-1 gap-6 lg:grid-cols-[9fr_15fr]">
-        {/* LEFT — Config Panel */}
-        <Card className="sticky top-20 self-start glass rounded-2xl border border-white/60">
-          <CardHeader>
-            <CardTitle className="text-base">
-              {canViewModelImages && pageMode === 'from-article-list' ? 'Article List Settings' : 'Generation Settings'}
-            </CardTitle>
-          </CardHeader>
-          <CardContent>
-            {canViewModelImages && pageMode === 'from-article-list' ? (
+      <div className="grid grid-cols-1 gap-5 lg:grid-cols-[440px_minmax(0,1fr)]">
+        {/* LEFT — Settings card: scrolls inside, Generate bar always visible */}
+        <section className="flex flex-col overflow-hidden rounded-[14px] border border-slate-200 bg-white lg:sticky lg:top-4 lg:max-h-[calc(100vh-2rem)] lg:self-start dark:border-slate-700 dark:bg-slate-900">
+          {canViewModelImages && pageMode === 'from-article-list' ? (
+            <div className="overflow-y-auto p-5">
+              <div className={sectionLabel}>ARTICLE LIST SETTINGS</div>
               <ArticleListPanel submitting={loading} onSubmit={handleArticleListSubmit} />
-            ) : null}
-            {pageMode === 'upload-garments' ? (
+            </div>
+          ) : null}
+          {pageMode === 'upload-garments' ? (
             <Form {...form}>
-              <form onSubmit={form.handleSubmit(handleGenerate)} className="flex flex-col gap-4">
-                {/* Garment Images */}
-                <FormItem>
-                  <FormLabel>Garment Images *</FormLabel>
-                  <div
-                    onDragEnter={() => setIsDragging(true)}
-                    onDragOver={(e) => {
-                      e.preventDefault();
-                      setIsDragging(true);
-                    }}
-                    onDragLeave={() => setIsDragging(false)}
-                    onDrop={(e) => {
-                      e.preventDefault();
-                      setIsDragging(false);
-                      handleDesignDrop(e.dataTransfer.files);
-                    }}
-                    onClick={() => designInputRef.current?.click()}
-                    className={cn(
-                      'cursor-pointer rounded-xl border-2 border-dashed py-3 text-center transition-all duration-300',
-                      isDragging ? 'border-[#FF6F61] bg-[#FF6F61]/10 shadow-lg shadow-[#FF6F61]/20' : 'border-border bg-white/40 backdrop-blur-sm hover:bg-white/60 hover:shadow-md',
-                    )}
-                  >
-                    <Inbox className="mx-auto my-2 h-7 w-7 text-[#FF6F61]" />
-                    <p className="text-[13px]">Click or drag garment images here</p>
-                  </div>
-                  <input
-                    ref={designInputRef}
-                    type="file"
-                    multiple
-                    accept="image/*"
-                    className="hidden"
-                    onChange={(e) => handleDesignDrop(e.target.files)}
-                  />
+              <form onSubmit={form.handleSubmit(handleGenerate)} className="flex min-h-0 flex-1 flex-col">
+                <div className="flex min-h-0 flex-1 flex-col gap-[18px] overflow-y-auto px-5 py-[18px]">
+                  {/* 1 · Garments */}
+                  <div>
+                    <div className={sectionLabel}>
+                      1 · GARMENTS <span className="text-red-700">*</span>
+                    </div>
+                    <div
+                      role="button"
+                      tabIndex={0}
+                      onKeyDown={(e) => (e.key === 'Enter' || e.key === ' ') && designInputRef.current?.click()}
+                      onDragEnter={() => setIsDragging(true)}
+                      onDragOver={(e) => {
+                        e.preventDefault();
+                        setIsDragging(true);
+                      }}
+                      onDragLeave={() => setIsDragging(false)}
+                      onDrop={(e) => {
+                        e.preventDefault();
+                        setIsDragging(false);
+                        handleDesignDrop(e.dataTransfer.files);
+                      }}
+                      onClick={() => designInputRef.current?.click()}
+                      className={cn(
+                        'flex h-[110px] cursor-pointer flex-col items-center justify-center gap-1.5 rounded-xl border-[1.5px] border-dashed text-slate-700 transition-colors dark:text-slate-300',
+                        isDragging
+                          ? 'border-slate-800 bg-slate-100 dark:border-slate-300 dark:bg-slate-800'
+                          : 'border-slate-400 bg-slate-50 hover:bg-slate-100 dark:border-slate-600 dark:bg-slate-800/50',
+                      )}
+                    >
+                      <UploadIcon className="h-[22px] w-[22px]" />
+                      <span className="text-[13.5px] font-semibold">Drop images here or click to browse</span>
+                      <span className="text-[11.5px] text-slate-500">
+                        or{' '}
+                        <button
+                          type="button"
+                          className="font-semibold underline hover:text-slate-900"
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            onPickFolder();
+                          }}
+                        >
+                          pick a folder
+                        </button>{' '}
+                        ·{' '}
+                        <button
+                          type="button"
+                          className="font-semibold underline hover:text-slate-900"
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            zipInputRef.current?.click();
+                          }}
+                        >
+                          upload a .zip
+                        </button>
+                      </span>
+                    </div>
+                    <input
+                      ref={designInputRef}
+                      type="file"
+                      multiple
+                      accept="image/*"
+                      className="hidden"
+                      onChange={(e) => handleDesignDrop(e.target.files)}
+                    />
+                    {/* Hidden folder + zip inputs */}
+                    <input
+                      ref={folderInputRef}
+                      type="file"
+                      multiple
+                      // webkitdirectory is non-standard, the React types don't know it
+                      {...({ webkitdirectory: '', directory: '' } as Record<string, string>)}
+                      className="hidden"
+                      onChange={onFolderInputChange}
+                    />
+                    <input
+                      ref={zipInputRef}
+                      type="file"
+                      accept=".zip,application/zip"
+                      className="hidden"
+                      onChange={(e) => {
+                        onZipPicked(e.target.files?.[0]);
+                        e.target.value = '';
+                      }}
+                    />
 
-                  {/* Folder + Zip alternative pickers */}
-                  <div className="mt-2 flex flex-wrap items-center gap-2">
-                    <Button type="button" variant="outline" size="sm" onClick={onPickFolder}>
-                      <FolderOpen />
-                      Pick Folder
-                    </Button>
-                    <Button type="button" variant="outline" size="sm" onClick={() => zipInputRef.current?.click()}>
-                      <FileArchive />
-                      {zipFile ? `Zip: ${zipFile.name.slice(0, 20)}${zipFile.name.length > 20 ? '…' : ''}` : 'Upload ZIP'}
-                    </Button>
-                    {zipFile && (
-                      <Button
-                        type="button"
-                        variant="ghost"
-                        size="sm"
-                        className="text-destructive"
-                        onClick={() => setZipFile(null)}
-                      >
-                        <Trash2 />
-                        Remove zip
-                      </Button>
-                    )}
-                  </div>
-
-                  {/* Hidden folder + zip inputs */}
-                  <input
-                    ref={folderInputRef}
-                    type="file"
-                    multiple
-                    // webkitdirectory is non-standard, the React types don't know it
-                    {...({ webkitdirectory: '', directory: '' } as Record<string, string>)}
-                    className="hidden"
-                    onChange={onFolderInputChange}
-                  />
-                  <input
-                    ref={zipInputRef}
-                    type="file"
-                    accept=".zip,application/zip"
-                    className="hidden"
-                    onChange={(e) => {
-                      onZipPicked(e.target.files?.[0]);
-                      e.target.value = '';
-                    }}
-                  />
-
-                  {(designFiles.length > 0 || zipFile) && (
-                    <div className="mt-2 max-h-52 overflow-y-auto">
-                      {designFiles.length > 0 && (
-                        <div className="flex items-center gap-2 py-1 text-[11px] text-muted-foreground">
-                          {designFiles.length} image{designFiles.length !== 1 ? 's' : ''} selected
-                          {isBulkMode && (
-                            <Tag className="border-amber-200 bg-amber-50 text-[10px] text-amber-700">Bulk mode</Tag>
+                    {(designFiles.length > 0 || zipFile) && (
+                      <div className="mt-2 rounded-lg border border-slate-200 dark:border-slate-700">
+                        <div className="flex items-center justify-between gap-2 border-b border-slate-100 px-3 py-1.5 text-[11.5px] text-slate-600 dark:border-slate-800">
+                          <span className="flex items-center gap-2">
+                            <b className="text-slate-900 dark:text-slate-50">{garmentCountLabel}</b>
+                            {isBulkMode && (
+                              <Tag className="border-amber-200 bg-amber-50 text-[10px] text-amber-700">Bulk mode</Tag>
+                            )}
+                          </span>
+                          <span className="flex items-center gap-3">
+                            {zipFile && (
+                              <button type="button" className="font-semibold text-red-700 hover:text-red-800" onClick={() => setZipFile(null)}>
+                                Remove zip
+                              </button>
+                            )}
+                            {designFiles.length > 0 && (
+                              <button type="button" className="font-semibold text-red-700 hover:text-red-800" onClick={() => setDesignFiles([])}>
+                                Clear all
+                              </button>
+                            )}
+                          </span>
+                        </div>
+                        {zipFile && (
+                          <div className="flex items-center gap-2 border-b border-slate-100 px-3 py-1.5 text-xs last:border-b-0 dark:border-slate-800">
+                            <FileArchive className="h-3.5 w-3.5 shrink-0 text-slate-500" />
+                            <span className="truncate" title={zipFile.name}>{zipFile.name}</span>
+                          </div>
+                        )}
+                        <div className="max-h-40 overflow-y-auto">
+                          {designFiles.slice(0, 8).map((f, i) => (
+                            <div key={i} className="flex items-center justify-between border-b border-slate-100 px-3 py-1 last:border-b-0 dark:border-slate-800">
+                              <span className="truncate text-xs" title={f.name}>{f.name}</span>
+                              <button
+                                type="button"
+                                aria-label={`Remove ${f.name}`}
+                                className="flex h-6 w-6 shrink-0 items-center justify-center rounded text-slate-400 hover:bg-red-50 hover:text-red-700"
+                                onClick={() => setDesignFiles((prev) => prev.filter((_, j) => j !== i))}
+                              >
+                                <Trash2 className="h-3.5 w-3.5" />
+                              </button>
+                            </div>
+                          ))}
+                          {designFiles.length > 8 && (
+                            <p className="px-3 py-1 text-[11px] text-slate-500">… and {designFiles.length - 8} more</p>
                           )}
                         </div>
-                      )}
-                      {designFiles.slice(0, 8).map((f, i) => (
-                        <div key={i} className="flex items-center justify-between border-b border-border py-1">
-                          <span className="truncate text-xs" title={f.name}>
-                            {f.name}
-                          </span>
-                          <Button
-                            type="button"
-                            variant="ghost"
-                            size="icon"
-                            className="h-6 w-6 text-destructive"
-                            onClick={() => setDesignFiles((prev) => prev.filter((_, j) => j !== i))}
-                          >
-                            <Trash2 />
-                          </Button>
-                        </div>
-                      ))}
-                      {designFiles.length > 8 && (
-                        <p className="py-1 text-[11px] text-muted-foreground">
-                          … and {designFiles.length - 8} more
-                        </p>
-                      )}
-                      {designFiles.length > 0 && (
-                        <Button
-                          type="button"
-                          variant="link"
-                          size="sm"
-                          className="h-auto p-0 text-destructive"
-                          onClick={() => setDesignFiles([])}
-                        >
-                          Clear all
-                        </Button>
-                      )}
-                    </div>
-                  )}
-                </FormItem>
-
-                <FormField
-                  control={form.control}
-                  name="gender"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>Gender</FormLabel>
-                      <FormControl>
-                        <Select value={field.value} onValueChange={field.onChange}>
-                          <SelectTrigger>
-                            <SelectValue />
-                          </SelectTrigger>
-                          <SelectContent>
-                            {GENDER_OPTIONS.map((o) => (
-                              <SelectItem key={o.value} value={o.value}>
-                                {o.label}
-                              </SelectItem>
-                            ))}
-                          </SelectContent>
-                        </Select>
-                      </FormControl>
-                    </FormItem>
-                  )}
-                />
-
-                <FormField
-                  control={form.control}
-                  name="bodytype"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>Body Type</FormLabel>
-                      <FormControl>
-                        <Select value={field.value} onValueChange={field.onChange}>
-                          <SelectTrigger>
-                            <SelectValue />
-                          </SelectTrigger>
-                          <SelectContent>
-                            {BODYTYPE_OPTIONS.map((o) => (
-                              <SelectItem key={o.value} value={o.value}>
-                                {o.label}
-                              </SelectItem>
-                            ))}
-                          </SelectContent>
-                        </Select>
-                      </FormControl>
-                    </FormItem>
-                  )}
-                />
-
-                <FormField
-                  control={form.control}
-                  name="imagesCount"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>Views</FormLabel>
-                      <FormControl>
-                        <div className="grid grid-cols-1 gap-2">
-                          <Button
-                            type="button"
-                            size="sm"
-                            variant={field.value === '1' ? 'default' : 'outline'}
-                            className={cn(
-                              'justify-start',
-                              field.value === '1' && 'bg-[#FF6F61] text-white hover:bg-[#ff5b4d]',
-                            )}
-                            onClick={() => field.onChange('1')}
-                          >
-                            Single (Front only)
-                          </Button>
-                          <Button
-                            type="button"
-                            size="sm"
-                            variant={field.value === '4' ? 'default' : 'outline'}
-                            className={cn(
-                              'justify-start',
-                              field.value === '4' && 'bg-[#FF6F61] text-white hover:bg-[#ff5b4d]',
-                            )}
-                            onClick={() => field.onChange('4')}
-                          >
-                            All Views (Front / Back / Side / Closeup)
-                          </Button>
-                        </div>
-                      </FormControl>
-                    </FormItem>
-                  )}
-                />
-
-                <Separator>Optional</Separator>
-
-                <FormItem>
-                  <FormLabel>Pattern Image</FormLabel>
-                  <div className="flex items-center gap-2">
-                    <input
-                      ref={patternInputRef}
-                      type="file"
-                      accept="image/*"
-                      className="hidden"
-                      onChange={(e) => setPatternFile(e.target.files?.[0] || null)}
-                    />
-                    <Button type="button" variant="outline" size="sm" onClick={() => patternInputRef.current?.click()}>
-                      <UploadIcon />
-                      {patternFile ? patternFile.name : 'Upload Pattern'}
-                    </Button>
-                    {patternFile && (
-                      <Button
-                        type="button"
-                        variant="ghost"
-                        size="icon"
-                        className="h-7 w-7 text-destructive"
-                        onClick={() => setPatternFile(null)}
-                      >
-                        <Trash2 />
-                      </Button>
+                      </div>
                     )}
                   </div>
-                </FormItem>
 
-                <FormItem>
-                  <FormLabel>Accessory / Broach Image</FormLabel>
-                  <div className="flex items-center gap-2">
-                    <input
-                      ref={broachInputRef}
-                      type="file"
-                      accept="image/*"
-                      className="hidden"
-                      onChange={(e) => setBroachFile(e.target.files?.[0] || null)}
+                  {/* 2 · Model */}
+                  <div className="flex flex-col gap-3">
+                    <div className={cn(sectionLabel, 'mb-0')}>2 · MODEL</div>
+                    <FormField
+                      control={form.control}
+                      name="gender"
+                      render={({ field }) =>
+                        renderSegmented({ label: 'Gender', value: field.value, options: GENDER_OPTIONS, onChange: field.onChange })
+                      }
                     />
-                    <Button type="button" variant="outline" size="sm" onClick={() => broachInputRef.current?.click()}>
-                      <UploadIcon />
-                      {broachFile ? broachFile.name : 'Upload Accessory'}
-                    </Button>
-                    {broachFile && (
-                      <Button
-                        type="button"
-                        variant="ghost"
-                        size="icon"
-                        className="h-7 w-7 text-destructive"
-                        onClick={() => setBroachFile(null)}
-                      >
-                        <Trash2 />
-                      </Button>
-                    )}
+                    <FormField
+                      control={form.control}
+                      name="bodytype"
+                      render={({ field }) =>
+                        renderSegmented({
+                          label: 'Body type',
+                          value: field.value,
+                          options: BODYTYPE_OPTIONS.map((o) => ({ ...o, label: o.label.replace(' Body', '') })),
+                          onChange: field.onChange,
+                        })
+                      }
+                    />
+                    <FormField
+                      control={form.control}
+                      name="imagesCount"
+                      render={({ field }) =>
+                        renderSegmented({
+                          label: 'Views',
+                          value: field.value,
+                          options: [
+                            { label: 'Front only', value: '1' },
+                            { label: 'All 4 views', value: '4' },
+                          ],
+                          onChange: field.onChange,
+                        })
+                      }
+                    />
                   </div>
-                </FormItem>
 
-                <FormField
-                  control={form.control}
-                  name="broach_placement"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>Broach Placement</FormLabel>
-                      <FormControl>
-                        <Select value={field.value || ''} onValueChange={field.onChange}>
-                          <SelectTrigger>
-                            <SelectValue placeholder="e.g. left chest" />
-                          </SelectTrigger>
-                          <SelectContent>
-                            {BROACH_PLACEMENT_OPTIONS.map((o) => (
-                              <SelectItem key={o.value} value={o.value}>
-                                {o.label}
-                              </SelectItem>
-                            ))}
-                          </SelectContent>
-                        </Select>
-                      </FormControl>
-                    </FormItem>
-                  )}
-                />
-
-                <FormItem>
-                  <FormLabel>Color Attachment (image lock)</FormLabel>
-                  <p className="text-[11px] text-muted-foreground">
-                    Upload a reference image. The garment will be recolored to match the dominant color of this image.
-                  </p>
-                  <div className="flex items-center gap-2">
-                    <input
-                      ref={colorInputRef}
-                      type="file"
-                      accept="image/*"
-                      className="hidden"
-                      onChange={(e) => setColorImageFile(e.target.files?.[0] || null)}
-                    />
-                    <Button type="button" variant="outline" size="sm" onClick={() => colorInputRef.current?.click()}>
-                      <UploadIcon />
-                      {colorImageFile ? colorImageFile.name : 'Upload Color Reference'}
-                    </Button>
-                    {colorImageFile && (
-                      <>
-                        <img
-                          src={URL.createObjectURL(colorImageFile)}
-                          alt="color reference"
-                          className="h-8 w-8 rounded border border-border object-cover"
+                  {/* 3 · Optional extras */}
+                  <div>
+                    <div className={sectionLabel}>3 · OPTIONAL EXTRAS</div>
+                    <div className="overflow-hidden rounded-xl border border-slate-200 dark:border-slate-700">
+                      {renderExtraRow({ id: 'pattern', title: 'Pattern image', hint: 'Keep a print or texture exact', isSet: !!patternFile, children: (<>
+                        <input
+                          ref={patternInputRef}
+                          type="file"
+                          accept="image/*"
+                          className="hidden"
+                          onChange={(e) => setPatternFile(e.target.files?.[0] || null)}
                         />
-                        <Button
-                          type="button"
-                          variant="ghost"
-                          size="icon"
-                          className="h-7 w-7 text-destructive"
-                          onClick={() => setColorImageFile(null)}
-                        >
-                          <Trash2 />
-                        </Button>
-                      </>
-                    )}
+                        <div className="flex items-center gap-2">
+                          <Button type="button" variant="outline" size="sm" onClick={() => patternInputRef.current?.click()}>
+                            <UploadIcon />
+                            {patternFile ? patternFile.name : 'Upload pattern'}
+                          </Button>
+                          {patternFile && (
+                            <Button type="button" variant="ghost" size="icon" aria-label="Remove pattern" className="h-7 w-7 text-red-700" onClick={() => setPatternFile(null)}>
+                              <Trash2 />
+                            </Button>
+                          )}
+                        </div>
+                      </>) })}
+
+                      {renderExtraRow({ id: 'accessory', title: 'Accessory / broach', hint: 'Image + placement (left chest, collar…)', isSet: !!broachFile || !!watchPlacement, children: (<>
+                        <input
+                          ref={broachInputRef}
+                          type="file"
+                          accept="image/*"
+                          className="hidden"
+                          onChange={(e) => setBroachFile(e.target.files?.[0] || null)}
+                        />
+                        <div className="flex items-center gap-2">
+                          <Button type="button" variant="outline" size="sm" onClick={() => broachInputRef.current?.click()}>
+                            <UploadIcon />
+                            {broachFile ? broachFile.name : 'Upload accessory'}
+                          </Button>
+                          {broachFile && (
+                            <Button type="button" variant="ghost" size="icon" aria-label="Remove accessory" className="h-7 w-7 text-red-700" onClick={() => setBroachFile(null)}>
+                              <Trash2 />
+                            </Button>
+                          )}
+                        </div>
+                        <FormField
+                          control={form.control}
+                          name="broach_placement"
+                          render={({ field }) => (
+                            <FormItem>
+                              <FormLabel className="text-[12px]">Placement</FormLabel>
+                              <FormControl>
+                                <Select value={field.value || ''} onValueChange={field.onChange}>
+                                  <SelectTrigger>
+                                    <SelectValue placeholder="e.g. left chest" />
+                                  </SelectTrigger>
+                                  <SelectContent>
+                                    {BROACH_PLACEMENT_OPTIONS.map((o) => (
+                                      <SelectItem key={o.value} value={o.value}>
+                                        {o.label}
+                                      </SelectItem>
+                                    ))}
+                                  </SelectContent>
+                                </Select>
+                              </FormControl>
+                            </FormItem>
+                          )}
+                        />
+                      </>) })}
+
+                      {renderExtraRow({ id: 'colour', title: 'Colour lock', hint: 'Reference image or a colour name', isSet: !!colorImageFile || !!watchColorName, children: (<>
+                        <p className="text-[11.5px] text-slate-500">
+                          The garment is recoloured to match the dominant colour of the reference image.
+                        </p>
+                        <input
+                          ref={colorInputRef}
+                          type="file"
+                          accept="image/*"
+                          className="hidden"
+                          onChange={(e) => setColorImageFile(e.target.files?.[0] || null)}
+                        />
+                        <div className="flex items-center gap-2">
+                          <Button type="button" variant="outline" size="sm" onClick={() => colorInputRef.current?.click()}>
+                            <UploadIcon />
+                            {colorImageFile ? colorImageFile.name : 'Upload colour reference'}
+                          </Button>
+                          {colorImageFile && (
+                            <>
+                              <img
+                                src={URL.createObjectURL(colorImageFile)}
+                                alt="colour reference"
+                                className="h-8 w-8 rounded border border-border object-cover"
+                              />
+                              <Button type="button" variant="ghost" size="icon" aria-label="Remove colour reference" className="h-7 w-7 text-red-700" onClick={() => setColorImageFile(null)}>
+                                <Trash2 />
+                              </Button>
+                            </>
+                          )}
+                        </div>
+                        <FormField
+                          control={form.control}
+                          name="color_name"
+                          render={({ field }) => (
+                            <FormItem>
+                              <FormLabel className="text-[12px]">Colour name</FormLabel>
+                              <FormControl>
+                                <Input placeholder="e.g. Navy Blue" {...field} value={field.value ?? ''} />
+                              </FormControl>
+                            </FormItem>
+                          )}
+                        />
+                      </>) })}
+
+                      {renderExtraRow({ id: 'notes', title: 'Special instructions', hint: 'Free text for the generator', isSet: !!watchInstructions, children: (<>
+                        <FormField
+                          control={form.control}
+                          name="special_instructions"
+                          render={({ field }) => (
+                            <FormItem>
+                              <FormControl>
+                                <Textarea rows={3} placeholder="Any specific requirements..." {...field} value={field.value ?? ''} />
+                              </FormControl>
+                            </FormItem>
+                          )}
+                        />
+                      </>) })}
+                    </div>
                   </div>
-                </FormItem>
+                </div>
 
-                <FormField
-                  control={form.control}
-                  name="color_name"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>Color Name (optional lock)</FormLabel>
-                      <FormControl>
-                        <Input placeholder="e.g. Navy Blue" {...field} value={field.value ?? ''} />
-                      </FormControl>
-                    </FormItem>
-                  )}
-                />
-
-                <FormField
-                  control={form.control}
-                  name="special_instructions"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>Special Instructions</FormLabel>
-                      <FormControl>
-                        <Textarea rows={2} placeholder="Any specific requirements..." {...field} value={field.value ?? ''} />
-                      </FormControl>
-                    </FormItem>
-                  )}
-                />
-
-                <Button
-                  type="submit"
-                  size="lg"
-                  className="w-full bg-[#FF6F61] text-white hover:bg-[#ff5b4d]"
-                  disabled={loading || (!designFiles.length && !zipFile)}
-                >
-                  <Zap />
-                  {loading
-                    ? isBulkMode
-                      ? 'Processing job...'
-                      : 'Generating...'
-                    : isBulkMode
-                      ? 'Start Bulk Job'
-                      : 'Generate Models'}
-                </Button>
-
-                {loading && progress > 0 && (
-                  <Progress
-                    value={progress}
-                    indicatorClassName="bg-gradient-to-r from-[#FF6F61] to-emerald-500"
-                    className="mt-3"
-                  />
-                )}
-
-                {job && (
-                  <Card className="mt-3">
-                    <CardContent className="flex flex-col gap-1 p-3">
-                      <span className="text-xs">
-                        Job{' '}
-                        <code className="rounded bg-muted px-1 py-0.5 text-[11px]">{job.id.slice(0, 16)}…</code>
-                      </span>
-                      <span className="text-xs">
-                        Status:{' '}
-                        <Tag className={cn('text-[10px]', statusTagClass(job.status))}>{job.status}</Tag>
-                      </span>
-                      <span className="text-xs">
+                {/* Sticky action bar — always visible */}
+                <div className="flex shrink-0 flex-col gap-2.5 border-t border-slate-200 bg-white px-5 py-3.5 dark:border-slate-700 dark:bg-slate-900">
+                  {job && (
+                    <div className="flex flex-wrap items-center gap-2 text-[11.5px] text-slate-600 dark:text-slate-300">
+                      <Tag className={cn('text-[10px]', statusTagClass(job.status))}>{job.status}</Tag>
+                      <code className="rounded bg-slate-100 px-1 py-0.5 text-[11px] dark:bg-slate-800">{job.id.slice(0, 16)}…</code>
+                      <span>
                         {job.done}/{job.total} done · {job.failed} failed · {job.running} running · {job.pending} pending
                       </span>
                       {loading && (
-                        <Button
-                          type="button"
-                          size="sm"
-                          variant="outline"
-                          className="self-start text-destructive"
-                          onClick={cancelJob}
-                        >
+                        <button type="button" className="ml-auto font-semibold text-red-700 hover:text-red-800" onClick={cancelJob}>
                           Cancel job
-                        </Button>
+                        </button>
                       )}
-                    </CardContent>
-                  </Card>
-                )}
+                    </div>
+                  )}
+                  {loading && progress > 0 && <Progress value={progress} indicatorClassName="bg-slate-800" className="h-1.5" />}
+                  <div className="flex items-center gap-3">
+                    <span className="min-w-0 flex-1 truncate text-[12px] text-slate-600 dark:text-slate-400">
+                      <b className="text-slate-900 dark:text-slate-50">{garmentCountLabel}</b> · {settingsSummary}
+                    </span>
+                    <Button
+                      type="submit"
+                      size="lg"
+                      className="h-[42px] shrink-0 rounded-[10px] bg-slate-800 px-5 font-bold text-white hover:bg-slate-900 disabled:bg-slate-300 disabled:text-slate-600 disabled:opacity-100"
+                      disabled={loading || (!designFiles.length && !zipFile)}
+                    >
+                      <Zap />
+                      {loading
+                        ? isBulkMode
+                          ? 'Processing…'
+                          : 'Generating…'
+                        : isBulkMode
+                          ? 'Start bulk job'
+                          : 'Generate'}
+                    </Button>
+                  </div>
+                </div>
               </form>
             </Form>
-            ) : null}
-          </CardContent>
-        </Card>
+          ) : null}
+        </section>
 
-        {/* RIGHT — Results Panel */}
-        <div>
+        {/* RIGHT — Jobs + results */}
+        <div className="flex min-w-0 flex-col gap-5">
           {/* Recent bulk jobs — survives tab switches; click any to view its results */}
           {recentJobs.length > 0 && (
-            <Card className="mb-4 glass rounded-2xl border border-white/60">
-              <CardHeader className="flex flex-row items-center justify-between space-y-0 py-3">
-                <CardTitle className="flex items-center gap-2 text-sm">
+            <section className="overflow-hidden rounded-[14px] border border-slate-200 bg-white dark:border-slate-700 dark:bg-slate-900">
+              <div className="flex items-center justify-between border-b border-slate-100 px-4 py-3 dark:border-slate-800">
+                <span className="flex items-center gap-2 text-[14px] font-bold text-slate-900 dark:text-slate-50">
                   <History className="h-4 w-4" />
-                  Recent Bulk Jobs
-                </CardTitle>
-                <Button type="button" variant="ghost" size="icon" className="h-7 w-7" onClick={loadRecentJobs}>
-                  <RotateCw className={cn(recentLoading && 'animate-spin')} />
+                  Recent bulk jobs
+                </span>
+                <Button type="button" variant="outline" size="icon" aria-label="Refresh jobs" className="h-8 w-8" onClick={loadRecentJobs}>
+                  <RotateCw className={cn('h-3.5 w-3.5', recentLoading && 'animate-spin')} />
                 </Button>
-              </CardHeader>
-              <CardContent className="max-h-60 overflow-y-auto px-3 py-1">
+              </div>
+              <div className="max-h-[232px] overflow-y-auto">
                 {recentJobs.map((rj) => {
                   const pct = rj.total > 0 ? Math.round(((rj.done + rj.failed) / rj.total) * 100) : 0;
+                  const donePct = rj.total > 0 ? Math.round((rj.done / rj.total) * 100) : 0;
                   const isActive = isActiveStatus(rj.status);
                   const isCurrent = job?.id === rj.id;
                   return (
                     <div
                       key={rj.id}
                       className={cn(
-                        'flex items-center gap-2 border-b border-border py-1.5 last:border-b-0',
-                        isCurrent && 'bg-[#FF6F61]/5',
+                        'grid grid-cols-[84px_minmax(0,1fr)_120px_68px] items-center gap-3 border-b border-slate-50 px-4 py-2.5 last:border-b-0 dark:border-slate-800',
+                        isCurrent && 'bg-slate-100 dark:bg-slate-800',
                       )}
                     >
-                      <Tag className={cn('min-w-[64px] justify-center text-[10px]', statusTagClass(rj.status))}>
-                        {rj.status}
-                      </Tag>
-                      <div className="min-w-0 flex-1">
-                        <span className="block truncate text-[11px]" title={rj.id}>
-                          {rj.id.slice(0, 22)}…
-                        </span>
-                        <span className="text-[10px] text-muted-foreground">
+                      <Tag className={cn('justify-center text-[10px]', statusTagClass(rj.status))}>{rj.status}</Tag>
+                      <span className="flex min-w-0 flex-col">
+                        <span className="truncate font-mono text-[12px]" title={rj.id}>{rj.id}</span>
+                        <span className="text-[11px] text-slate-500">
                           {rj.done}/{rj.total} done · {rj.failed} failed · {new Date(rj.createdAt).toLocaleTimeString()}
                         </span>
-                        {isActive && (
-                          <Progress
-                            value={pct}
-                            className="mt-1 h-1"
-                            indicatorClassName="bg-[#FF6F61]"
-                          />
-                        )}
-                      </div>
+                      </span>
+                      <Progress
+                        value={isActive ? pct : donePct}
+                        className="h-1.5"
+                        indicatorClassName={
+                          rj.status === 'FAILED' ? 'bg-red-600' : rj.status === 'PARTIAL' ? 'bg-amber-600' : isActive ? 'bg-slate-800' : 'bg-emerald-600'
+                        }
+                      />
                       <Button
                         type="button"
                         size="sm"
                         variant={isCurrent ? 'default' : 'outline'}
-                        className={cn(isCurrent && 'bg-[#FF6F61] text-white hover:bg-[#ff5b4d]')}
+                        className={cn('h-7', isCurrent && 'bg-slate-800 text-white hover:bg-slate-900')}
                         onClick={() => viewJob(rj.id)}
                       >
                         <Eye />
@@ -1261,15 +1267,15 @@ export default function ModelGenerationPage() {
                     </div>
                   );
                 })}
-              </CardContent>
-            </Card>
+              </div>
+            </section>
           )}
 
           {error && (
-            <Alert type="error" showIcon className="mb-4">
+            <Alert type="error" showIcon>
               <div className="flex items-start justify-between gap-2">
                 <span>{error}</span>
-                <button onClick={() => setError(null)} className="text-muted-foreground">
+                <button onClick={() => setError(null)} aria-label="Dismiss error" className="text-muted-foreground">
                   <X className="h-4 w-4" />
                 </button>
               </div>
@@ -1278,7 +1284,7 @@ export default function ModelGenerationPage() {
 
           {/* Per-article result summary — highlights which articles produced no model */}
           {articleStats && (articleStats.failed.length > 0 || articleStats.partial.length > 0) && (
-            <Card className="mb-4 border-rose-200 bg-rose-50/60">
+            <Card className="border-rose-200 bg-rose-50/60">
               <CardHeader className="flex flex-row items-center justify-between space-y-0 py-3">
                 <CardTitle className="text-sm text-rose-800">
                   {articleStats.failed.length} of {articleStats.total} article
@@ -1315,155 +1321,146 @@ export default function ModelGenerationPage() {
           )}
 
           {loading && garmentRows.length === 0 && (
-            <div className="py-16 text-center">
+            <section className="flex min-h-[320px] flex-col items-center justify-center gap-4 rounded-[14px] border border-slate-200 bg-white p-6 text-center dark:border-slate-700 dark:bg-slate-900">
               <Spinner size="lg" />
-              <p className="mt-4 text-sm text-muted-foreground">
+              <p className="max-w-md text-sm text-slate-600 dark:text-slate-400">
                 {isBulkMode
                   ? 'Bulk job running — images appear here as they finish. Pacing keeps Gemini below its rate limit.'
                   : 'AI is generating your fashion models. This may take 30–90 seconds...'}
               </p>
-            </div>
+            </section>
           )}
 
           {!loading && garmentRows.length === 0 && !error && (
-            <Card className="flex min-h-[400px] items-center justify-center glass rounded-2xl border border-white/60">
-              <CardContent className="pt-6">
-                <Empty
-                  description={
-                    <span className="text-muted-foreground">
-                      Upload garment images, a folder, or a .zip and click <strong>Generate</strong> to get started.
-                    </span>
-                  }
-                />
-              </CardContent>
-            </Card>
+            <section className="flex min-h-[400px] flex-col items-center justify-center gap-3 rounded-[14px] border border-slate-200 bg-white p-6 text-center dark:border-slate-700 dark:bg-slate-900">
+              <span className="flex h-16 w-16 items-center justify-center rounded-[18px] bg-slate-100 text-slate-700 dark:bg-slate-800 dark:text-slate-200">
+                <Shirt className="h-7 w-7" />
+              </span>
+              <span className="text-base font-bold text-slate-900 dark:text-slate-50">Results will appear here</span>
+              <span className="max-w-[360px] text-[13px] leading-relaxed text-slate-500">
+                Add garment images on the left, choose the model and views, then press{' '}
+                <b className="text-slate-900 dark:text-slate-50">Generate</b>.
+              </span>
+            </section>
           )}
 
           {garmentRows.length > 0 && (
-            <Card className="glass rounded-2xl border border-white/60">
-              <CardHeader className="flex flex-row items-center justify-between space-y-0">
-                <CardTitle className="flex items-center gap-2 text-base">
-                  {results.length} Generated Image{results.length !== 1 ? 's' : ''}
-                  <span className="text-xs text-muted-foreground">
+            <section className="overflow-hidden rounded-[14px] border border-slate-200 bg-white dark:border-slate-700 dark:bg-slate-900">
+              <div className="flex items-center justify-between border-b border-slate-100 px-4 py-3 dark:border-slate-800">
+                <span className="flex items-center gap-2 text-[15px] font-bold text-slate-900 dark:text-slate-50">
+                  {results.length} generated image{results.length !== 1 ? 's' : ''}
+                  <span className="text-xs font-normal text-slate-500">
                     · {garmentRows.length} garment{garmentRows.length !== 1 ? 's' : ''}
                   </span>
                   {loading && <Spinner size="sm" />}
-                </CardTitle>
+                </span>
                 <Button size="sm" variant="outline" onClick={downloadAll}>
                   <Download />
-                  Download All
+                  Download all
                 </Button>
-              </CardHeader>
-              <CardContent className="flex flex-col gap-3">
+              </div>
+              <div className="flex flex-col gap-3 p-3">
                 {/* One row per garment — [source | front | back | left side | closeup] */}
                 {garmentRows.map((row) => {
                   const columnsCount = visibleViews.length + 1; // +1 for source
                   return (
-                    <Card key={row.fileName} className="card-3d rounded-xl border border-white/50">
-                      <CardHeader className="px-3 py-2">
-                        <CardTitle className="truncate text-xs font-normal" title={row.fileName}>
-                          {row.fileName}
-                        </CardTitle>
-                      </CardHeader>
-                      <CardContent className="p-2">
-                        <div
-                          className="grid gap-2"
-                          style={{ gridTemplateColumns: `repeat(${columnsCount}, minmax(0, 1fr))` }}
-                        >
-                          {/* Source cell */}
-                          <div className="flex flex-col gap-1">
-                            {row.source ? (
-                              <img
-                                src={resolveAssetUrl(row.source)}
-                                alt={`${row.fileName} - source`}
-                                className="aspect-[2/3] w-full cursor-pointer object-cover"
-                                onClick={() => setPreviewUrl(resolveAssetUrl(row.source))}
-                              />
-                            ) : (
-                              <div className="flex aspect-[2/3] w-full items-center justify-center border border-dashed border-border bg-muted/30">
-                                <span className="text-[11px] text-muted-foreground">no source</span>
-                              </div>
-                            )}
-                            <Tag className="self-start text-[10px]">Source</Tag>
-                          </div>
+                    <div key={row.fileName} className="rounded-xl border border-slate-200 dark:border-slate-700">
+                      <div className="truncate border-b border-slate-100 px-3 py-2 text-xs font-medium text-slate-700 dark:border-slate-800 dark:text-slate-300" title={row.fileName}>
+                        {row.fileName}
+                      </div>
+                      <div className="grid gap-2 p-2" style={{ gridTemplateColumns: `repeat(${columnsCount}, minmax(0, 1fr))` }}>
+                        {/* Source cell */}
+                        <div className="flex flex-col gap-1">
+                          {row.source ? (
+                            <img
+                              src={resolveAssetUrl(row.source)}
+                              alt={`${row.fileName} - source`}
+                              className="aspect-[2/3] w-full cursor-pointer rounded-md object-cover"
+                              onClick={() => setPreviewUrl(resolveAssetUrl(row.source))}
+                            />
+                          ) : (
+                            <div className="flex aspect-[2/3] w-full items-center justify-center rounded-md border border-dashed border-slate-300 bg-slate-50 dark:border-slate-700 dark:bg-slate-800/50">
+                              <span className="text-[11px] text-slate-500">no source</span>
+                            </div>
+                          )}
+                          <Tag className="self-start text-[10px]">Source</Tag>
+                        </div>
 
-                          {/* One cell per expected view */}
-                          {visibleViews.map((view) => {
-                            const cell = row.cells[view];
-                            const url = cell?.url;
-                            const status = cell?.status;
-                            if (url && status === 'DONE') {
-                              return (
-                                <div key={view} className="flex flex-col gap-1">
-                                  <img
-                                    src={resolveAssetUrl(url)}
-                                    alt={`${row.fileName} - ${view}`}
-                                    className="aspect-[2/3] w-full cursor-pointer object-cover"
-                                    onClick={() => setPreviewUrl(resolveAssetUrl(url))}
-                                  />
-                                  <div className="flex items-center justify-between">
-                                    <Tag className="border-[#FF6F61]/30 bg-[#FF6F61]/10 text-[10px] text-[#FF6F61]">
-                                      {VIEW_LABELS[view] || view}
-                                    </Tag>
-                                    <Button
-                                      type="button"
-                                      variant="ghost"
-                                      size="icon"
-                                      className="h-6 w-6"
-                                      onClick={() =>
-                                        downloadImage(
-                                          resolveAssetUrl(url),
-                                          `${row.fileName.split('.')[0]}_${view.replace(/\s+/g, '_')}.png`,
-                                        )
-                                      }
-                                    >
-                                      <Download />
-                                    </Button>
-                                  </div>
-                                </div>
-                              );
-                            }
+                        {/* One cell per expected view */}
+                        {visibleViews.map((view) => {
+                          const cell = row.cells[view];
+                          const url = cell?.url;
+                          const status = cell?.status;
+                          if (url && status === 'DONE') {
                             return (
                               <div key={view} className="flex flex-col gap-1">
-                                <div
-                                  className={cn(
-                                    'flex aspect-[2/3] w-full flex-col items-center justify-center gap-1 border border-dashed',
-                                    status === 'FAILED'
-                                      ? 'border-rose-300 bg-rose-50'
-                                      : 'border-border bg-muted/30',
-                                  )}
-                                >
-                                  {status === 'RUNNING' && <Spinner size="sm" />}
-                                  <span className="text-[11px] text-muted-foreground">
-                                    {status === 'RUNNING'
-                                      ? 'Generating…'
-                                      : status === 'PENDING'
-                                        ? 'Queued'
-                                        : status === 'FAILED'
-                                          ? 'Failed'
-                                          : '—'}
-                                  </span>
+                                <img
+                                  src={resolveAssetUrl(url)}
+                                  alt={`${row.fileName} - ${view}`}
+                                  className="aspect-[2/3] w-full cursor-pointer rounded-md object-cover"
+                                  onClick={() => setPreviewUrl(resolveAssetUrl(url))}
+                                />
+                                <div className="flex items-center justify-between">
+                                  <Tag className="border-slate-300 bg-slate-100 text-[10px] text-slate-800 dark:border-slate-600 dark:bg-slate-800 dark:text-slate-100">
+                                    {VIEW_LABELS[view] || view}
+                                  </Tag>
+                                  <Button
+                                    type="button"
+                                    variant="ghost"
+                                    size="icon"
+                                    aria-label={`Download ${VIEW_LABELS[view] || view}`}
+                                    className="h-6 w-6"
+                                    onClick={() =>
+                                      downloadImage(
+                                        resolveAssetUrl(url),
+                                        `${row.fileName.split('.')[0]}_${view.replace(/\s+/g, '_')}.png`,
+                                      )
+                                    }
+                                  >
+                                    <Download />
+                                  </Button>
                                 </div>
-                                <Tag
-                                  className={cn(
-                                    'self-start text-[10px]',
-                                    status === 'FAILED'
-                                      ? 'border-rose-200 bg-rose-50 text-rose-700'
-                                      : '',
-                                  )}
-                                >
-                                  {VIEW_LABELS[view] || view}
-                                </Tag>
                               </div>
                             );
-                          })}
-                        </div>
-                      </CardContent>
-                    </Card>
+                          }
+                          return (
+                            <div key={view} className="flex flex-col gap-1">
+                              <div
+                                className={cn(
+                                  'flex aspect-[2/3] w-full flex-col items-center justify-center gap-1 rounded-md border border-dashed',
+                                  status === 'FAILED'
+                                    ? 'border-rose-300 bg-rose-50'
+                                    : 'border-slate-300 bg-slate-50 dark:border-slate-700 dark:bg-slate-800/50',
+                                )}
+                              >
+                                {status === 'RUNNING' && <Spinner size="sm" />}
+                                <span className="text-[11px] text-slate-500">
+                                  {status === 'RUNNING'
+                                    ? 'Generating…'
+                                    : status === 'PENDING'
+                                      ? 'Queued'
+                                      : status === 'FAILED'
+                                        ? 'Failed'
+                                        : '—'}
+                                </span>
+                              </div>
+                              <Tag
+                                className={cn(
+                                  'self-start text-[10px]',
+                                  status === 'FAILED' ? 'border-rose-200 bg-rose-50 text-rose-700' : '',
+                                )}
+                              >
+                                {VIEW_LABELS[view] || view}
+                              </Tag>
+                            </div>
+                          );
+                        })}
+                      </div>
+                    </div>
                   );
                 })}
-              </CardContent>
-            </Card>
+              </div>
+            </section>
           )}
         </div>
       </div>
