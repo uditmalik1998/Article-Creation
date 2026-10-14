@@ -159,6 +159,13 @@ interface CmpCostMasterMeta {
   lastUpdated?: string;
 }
 
+interface PreciseTrimMasterMeta {
+  total?: number;
+  attributes?: number;
+  skipped?: number;
+  lastUpdated?: string;
+}
+
 interface SegmentMasterMeta {
   total?: number;
   categories?: number;
@@ -338,6 +345,13 @@ export default function Admin() {
   const [cmpCostMasterProgress, setCmpCostMasterProgress] = useState<number>(0);
   const cmpCostMasterFileRef = useRef<HTMLInputElement | null>(null);
 
+  // Precise Trim Master (precise_trim_master)
+  const [preciseTrimMasterMeta, setPreciseTrimMasterMeta] = useState<PreciseTrimMasterMeta | null>(null);
+  const [preciseTrimMasterStatusLoading, setPreciseTrimMasterStatusLoading] = useState(false);
+  const [preciseTrimMasterUploading, setPreciseTrimMasterUploading] = useState(false);
+  const [preciseTrimMasterProgress, setPreciseTrimMasterProgress] = useState<number>(0);
+  const preciseTrimMasterFileRef = useRef<HTMLInputElement | null>(null);
+
   // National Grid Master
   const [nationalGridTotal, setNationalGridTotal] = useState<number | null>(null);
   const [nationalGridStatusLoading, setNationalGridStatusLoading] = useState(false);
@@ -351,6 +365,20 @@ export default function Admin() {
   const [bodyFabConsUploading, setBodyFabConsUploading] = useState(false);
   const [bodyFabConsProgress, setBodyFabConsProgress] = useState<number>(0);
   const bodyFabConsFileRef = useRef<HTMLInputElement | null>(null);
+
+  // Precise Body Article Consumption
+  const [preciseBodyArticleTotal, setPreciseBodyArticleTotal] = useState<{ total: number; categories: number } | null>(null);
+  const [preciseBodyArticleStatusLoading, setPreciseBodyArticleStatusLoading] = useState(false);
+  const [preciseBodyArticleUploading, setPreciseBodyArticleUploading] = useState(false);
+  const [preciseBodyArticleProgress, setPreciseBodyArticleProgress] = useState<number>(0);
+  const preciseBodyArticleFileRef = useRef<HTMLInputElement | null>(null);
+
+  // Precise Fabric Article Data (precise_fabric_article_data)
+  const [preciseFabricArticleMeta, setPreciseFabricArticleMeta] = useState<{ total: number; lastUpdated: string | null } | null>(null);
+  const [preciseFabricArticleStatusLoading, setPreciseFabricArticleStatusLoading] = useState(false);
+  const [preciseFabricArticleUploading, setPreciseFabricArticleUploading] = useState(false);
+  const [preciseFabricArticleProgress, setPreciseFabricArticleProgress] = useState<number>(0);
+  const preciseFabricArticleFileRef = useRef<HTMLInputElement | null>(null);
 
   // Value Addition Accessories Cost
   const [vaacTotal, setVaacTotal] = useState<{ total: number; categories: number } | null>(null);
@@ -638,7 +666,7 @@ export default function Admin() {
   const downloadMajCatGridData = () => {
     const token = localStorage.getItem('authToken');
     const url = `${APP_CONFIG.api.baseURL}/admin/majcat-grid/download`;
-    fetch(url, { headers: token ? { Authorization: `Bearer ${token}` } : {} })
+    return fetch(url, { headers: token ? { Authorization: `Bearer ${token}` } : {} })
       .then((r) => {
         if (!r.ok) throw new Error('Download failed');
         return r.blob();
@@ -656,7 +684,7 @@ export default function Admin() {
   const downloadMajCatTemplate = () => {
     const token = localStorage.getItem('authToken');
     const url = `${APP_CONFIG.api.baseURL}/admin/majcat-grid/template`;
-    fetch(url, { headers: token ? { Authorization: `Bearer ${token}` } : {} })
+    return fetch(url, { headers: token ? { Authorization: `Bearer ${token}` } : {} })
       .then((res) => res.blob())
       .then((blob) => {
         const a = document.createElement('a');
@@ -774,7 +802,7 @@ export default function Admin() {
   const downloadMandatoryTemplate = () => {
     const token = localStorage.getItem('authToken');
     const url = `${APP_CONFIG.api.baseURL}/admin/mandatory-grid/template`;
-    fetch(url, { headers: token ? { Authorization: `Bearer ${token}` } : {} })
+    return fetch(url, { headers: token ? { Authorization: `Bearer ${token}` } : {} })
       .then((r) => r.blob())
       .then((blob) => {
         const a = document.createElement('a');
@@ -788,7 +816,7 @@ export default function Admin() {
   const downloadMandatoryGridData = () => {
     const token = localStorage.getItem('authToken');
     const url = `${APP_CONFIG.api.baseURL}/admin/mandatory-grid/download`;
-    fetch(url, { headers: token ? { Authorization: `Bearer ${token}` } : {} })
+    return fetch(url, { headers: token ? { Authorization: `Bearer ${token}` } : {} })
       .then((r) => {
         if (!r.ok) throw new Error('Download failed');
         return r.blob();
@@ -953,7 +981,7 @@ export default function Admin() {
   const downloadGMGridData = () => {
     const token = localStorage.getItem('authToken');
     const url = `${APP_CONFIG.api.baseURL}/admin/gm-grid/download`;
-    fetch(url, { headers: token ? { Authorization: `Bearer ${token}` } : {} })
+    return fetch(url, { headers: token ? { Authorization: `Bearer ${token}` } : {} })
       .then((r) => {
         if (!r.ok) throw new Error('Download failed');
         return r.blob();
@@ -971,7 +999,7 @@ export default function Admin() {
   const downloadGMGridTemplate = () => {
     const token = localStorage.getItem('authToken');
     const url = `${APP_CONFIG.api.baseURL}/admin/gm-grid/template`;
-    fetch(url, { headers: token ? { Authorization: `Bearer ${token}` } : {} })
+    return fetch(url, { headers: token ? { Authorization: `Bearer ${token}` } : {} })
       .then((r) => r.blob())
       .then((blob) => {
         const a = document.createElement('a');
@@ -1087,7 +1115,7 @@ export default function Admin() {
   const downloadSizeMasterTemplate = () => {
     const token = localStorage.getItem('authToken');
     const url = `${APP_CONFIG.api.baseURL}/admin/size-master/template`;
-    fetch(url, { headers: token ? { Authorization: `Bearer ${token}` } : {} })
+    return fetch(url, { headers: token ? { Authorization: `Bearer ${token}` } : {} })
       .then((r) => r.blob())
       .then((blob) => {
         const a = document.createElement('a');
@@ -1101,7 +1129,7 @@ export default function Admin() {
   const downloadSizeMasterData = () => {
     const token = localStorage.getItem('authToken');
     const url = `${APP_CONFIG.api.baseURL}/admin/size-master/download`;
-    fetch(url, { headers: token ? { Authorization: `Bearer ${token}` } : {} })
+    return fetch(url, { headers: token ? { Authorization: `Bearer ${token}` } : {} })
       .then((r) => {
         if (!r.ok) throw new Error('Download failed');
         return r.blob();
@@ -1167,7 +1195,7 @@ export default function Admin() {
   const downloadColorMasterTemplate = () => {
     const token = localStorage.getItem('authToken');
     const url = `${APP_CONFIG.api.baseURL}/admin/color-master/template`;
-    fetch(url, { headers: token ? { Authorization: `Bearer ${token}` } : {} })
+    return fetch(url, { headers: token ? { Authorization: `Bearer ${token}` } : {} })
       .then((r) => r.blob())
       .then((blob) => {
         const a = document.createElement('a');
@@ -1181,7 +1209,7 @@ export default function Admin() {
   const downloadColorMasterData = () => {
     const token = localStorage.getItem('authToken');
     const url = `${APP_CONFIG.api.baseURL}/admin/color-master/download`;
-    fetch(url, { headers: token ? { Authorization: `Bearer ${token}` } : {} })
+    return fetch(url, { headers: token ? { Authorization: `Bearer ${token}` } : {} })
       .then((r) => {
         if (!r.ok) throw new Error('Download failed');
         return r.blob();
@@ -1247,7 +1275,7 @@ export default function Admin() {
   const downloadFabricArticleDataTemplate = () => {
     const token = localStorage.getItem('authToken');
     const url = `${APP_CONFIG.api.baseURL}/admin/fabric-article-data/template`;
-    fetch(url, { headers: token ? { Authorization: `Bearer ${token}` } : {} })
+    return fetch(url, { headers: token ? { Authorization: `Bearer ${token}` } : {} })
       .then((r) => r.blob())
       .then((blob) => {
         const a = document.createElement('a');
@@ -1309,7 +1337,7 @@ export default function Admin() {
   const downloadFabricArticleMasterData = () => {
     const token = localStorage.getItem('authToken');
     const url = `${APP_CONFIG.api.baseURL}/admin/fabric-article-master/download`;
-    fetch(url, { headers: token ? { Authorization: `Bearer ${token}` } : {} })
+    return fetch(url, { headers: token ? { Authorization: `Bearer ${token}` } : {} })
       .then((r) => {
         if (!r.ok) throw new Error('Download failed');
         return r.blob();
@@ -1327,7 +1355,7 @@ export default function Admin() {
   const downloadFabricArticleMasterTemplate = () => {
     const token = localStorage.getItem('authToken');
     const url = `${APP_CONFIG.api.baseURL}/admin/fabric-article-master/template`;
-    fetch(url, { headers: token ? { Authorization: `Bearer ${token}` } : {} })
+    return fetch(url, { headers: token ? { Authorization: `Bearer ${token}` } : {} })
       .then((r) => r.blob())
       .then((blob) => {
         const a = document.createElement('a');
@@ -1389,7 +1417,7 @@ export default function Admin() {
   const downloadBodyArticleDataTemplate = () => {
     const token = localStorage.getItem('authToken');
     const url = `${APP_CONFIG.api.baseURL}/admin/body-article-data/template`;
-    fetch(url, { headers: token ? { Authorization: `Bearer ${token}` } : {} })
+    return fetch(url, { headers: token ? { Authorization: `Bearer ${token}` } : {} })
       .then((r) => r.blob())
       .then((blob) => {
         const a = document.createElement('a');
@@ -1451,7 +1479,7 @@ export default function Admin() {
   const downloadBroaderMenuTemplate = () => {
     const token = localStorage.getItem('authToken');
     const url = `${APP_CONFIG.api.baseURL}/admin/broader-menu/template`;
-    fetch(url, { headers: token ? { Authorization: `Bearer ${token}` } : {} })
+    return fetch(url, { headers: token ? { Authorization: `Bearer ${token}` } : {} })
       .then((r) => r.blob())
       .then((blob) => {
         const a = document.createElement('a');
@@ -1516,7 +1544,7 @@ export default function Admin() {
   const downloadSegmentMasterTemplate = () => {
     const token = localStorage.getItem('authToken');
     const url = `${APP_CONFIG.api.baseURL}/admin/segment-master/template`;
-    fetch(url, { headers: token ? { Authorization: `Bearer ${token}` } : {} })
+    return fetch(url, { headers: token ? { Authorization: `Bearer ${token}` } : {} })
       .then((r) => r.blob())
       .then((blob) => {
         const a = document.createElement('a');
@@ -1530,7 +1558,7 @@ export default function Admin() {
   const exportSegmentMaster = () => {
     const token = localStorage.getItem('authToken');
     const url = `${APP_CONFIG.api.baseURL}/admin/segment-master/export`;
-    fetch(url, { headers: token ? { Authorization: `Bearer ${token}` } : {} })
+    return fetch(url, { headers: token ? { Authorization: `Bearer ${token}` } : {} })
       .then((r) => r.blob())
       .then((blob) => {
         const a = document.createElement('a');
@@ -1592,7 +1620,7 @@ export default function Admin() {
   const downloadBasicAccessoriesFile = (kind: 'template' | 'export') => {
     const token = localStorage.getItem('authToken');
     const url = `${APP_CONFIG.api.baseURL}/admin/basic-accessories/${kind}`;
-    fetch(url, { headers: token ? { Authorization: `Bearer ${token}` } : {} })
+    return fetch(url, { headers: token ? { Authorization: `Bearer ${token}` } : {} })
       .then((r) => r.blob())
       .then((blob) => {
         const a = document.createElement('a');
@@ -1654,7 +1682,7 @@ export default function Admin() {
   const downloadCmpCostMasterFile = (kind: 'template' | 'export') => {
     const token = localStorage.getItem('authToken');
     const url = `${APP_CONFIG.api.baseURL}/admin/cmp-cost-master/${kind}`;
-    fetch(url, { headers: token ? { Authorization: `Bearer ${token}` } : {} })
+    return fetch(url, { headers: token ? { Authorization: `Bearer ${token}` } : {} })
       .then((r) => r.blob())
       .then((blob) => {
         const a = document.createElement('a');
@@ -1695,11 +1723,73 @@ export default function Admin() {
     }
   };
 
+  // ─────────────────────────────── Precise Trim Master ───────────────────────────────
+  const loadPreciseTrimMasterStatus = useCallback(async () => {
+    setPreciseTrimMasterStatusLoading(true);
+    try {
+      const token = localStorage.getItem('authToken');
+      const res = await fetch(`${APP_CONFIG.api.baseURL}/admin/precise-trim-master/status`, {
+        headers: token ? { Authorization: `Bearer ${token}` } : {},
+      });
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.error || 'Failed to load precise trim master status');
+      setPreciseTrimMasterMeta(data.data);
+    } catch (err: any) {
+      message.error(err?.message || 'Failed to load precise trim master status');
+    } finally {
+      setPreciseTrimMasterStatusLoading(false);
+    }
+  }, []);
+
+  const downloadPreciseTrimMasterFile = (kind: 'template' | 'export') => {
+    const token = localStorage.getItem('authToken');
+    const url = `${APP_CONFIG.api.baseURL}/admin/precise-trim-master/${kind}`;
+    return fetch(url, { headers: token ? { Authorization: `Bearer ${token}` } : {} })
+      .then((r) => r.blob())
+      .then((blob) => {
+        const a = document.createElement('a');
+        a.href = URL.createObjectURL(blob);
+        a.download = kind === 'template' ? 'PRECISE_TRIM_MASTER_TEMPLATE.xlsx' : 'PRECISE_TRIM_MASTER_EXPORT.xlsx';
+        a.click();
+      })
+      .catch(() => message.error(kind === 'template' ? 'Failed to download template' : 'Failed to export precise trim master'));
+  };
+
+  const handlePreciseTrimMasterUpload = async (file: File) => {
+    setPreciseTrimMasterUploading(true);
+    setPreciseTrimMasterProgress(0);
+    try {
+      const token = localStorage.getItem('authToken');
+      const formData = new FormData();
+      formData.append('file', file);
+      const progressInterval = setInterval(() => {
+        setPreciseTrimMasterProgress((prev) => Math.min(prev + 5, 90));
+      }, 500);
+      const res = await fetch(`${APP_CONFIG.api.baseURL}/admin/precise-trim-master/upload`, {
+        method: 'POST',
+        headers: token ? { Authorization: `Bearer ${token}` } : {},
+        body: formData,
+      });
+      clearInterval(progressInterval);
+      setPreciseTrimMasterProgress(100);
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.error || 'Upload failed');
+      message.success(data.message);
+      setPreciseTrimMasterMeta(data.data);
+    } catch (err: any) {
+      message.error(err?.message || 'Upload failed');
+    } finally {
+      setPreciseTrimMasterUploading(false);
+      setTimeout(() => setPreciseTrimMasterProgress(0), 1500);
+      if (preciseTrimMasterFileRef.current) preciseTrimMasterFileRef.current.value = '';
+    }
+  };
+
   // ─────────────────────────────── National Grid Master ───────────────────────────────
   const downloadNationalGridData = () => {
     const token = localStorage.getItem('authToken');
     const url = `${APP_CONFIG.api.baseURL}/admin/national-grid/download`;
-    fetch(url, { headers: token ? { Authorization: `Bearer ${token}` } : {} })
+    return fetch(url, { headers: token ? { Authorization: `Bearer ${token}` } : {} })
       .then((r) => {
         if (!r.ok) throw new Error('Download failed');
         return r.blob();
@@ -1903,7 +1993,7 @@ export default function Admin() {
   const downloadBodyFabConsTemplate = () => {
     const token = localStorage.getItem('authToken');
     const url = `${APP_CONFIG.api.baseURL}/admin/body-fabric-consumption/template`;
-    fetch(url, { headers: token ? { Authorization: `Bearer ${token}` } : {} })
+    return fetch(url, { headers: token ? { Authorization: `Bearer ${token}` } : {} })
       .then((r) => {
         if (!r.ok) throw new Error('Download failed');
         return r.blob();
@@ -1920,7 +2010,7 @@ export default function Admin() {
   const downloadBodyFabConsData = () => {
     const token = localStorage.getItem('authToken');
     const url = `${APP_CONFIG.api.baseURL}/admin/body-fabric-consumption/download`;
-    fetch(url, { headers: token ? { Authorization: `Bearer ${token}` } : {} })
+    return fetch(url, { headers: token ? { Authorization: `Bearer ${token}` } : {} })
       .then((r) => {
         if (!r.ok) throw new Error('Download failed');
         return r.blob();
@@ -1962,6 +2052,147 @@ export default function Admin() {
       setBodyFabConsUploading(false);
       setTimeout(() => setBodyFabConsProgress(0), 1500);
       if (bodyFabConsFileRef.current) bodyFabConsFileRef.current.value = '';
+    }
+  };
+
+  // ─────────────────────────────── Precise Body Article Consumption ─────────────
+  const loadPreciseBodyArticleStatus = useCallback(async () => {
+    setPreciseBodyArticleStatusLoading(true);
+    try {
+      const token = localStorage.getItem('authToken');
+      const res = await fetch(`${APP_CONFIG.api.baseURL}/admin/precise-body-article/status`, {
+        headers: token ? { Authorization: `Bearer ${token}` } : {},
+      });
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.error || 'Failed to load status');
+      setPreciseBodyArticleTotal(data.data);
+    } catch (err: any) {
+      message.error(err?.message || 'Failed to load precise body article status');
+    } finally {
+      setPreciseBodyArticleStatusLoading(false);
+    }
+  }, []);
+
+  const downloadPreciseBodyArticleTemplate = () => {
+    const token = localStorage.getItem('authToken');
+    const url = `${APP_CONFIG.api.baseURL}/admin/precise-body-article/template`;
+    return fetch(url, { headers: token ? { Authorization: `Bearer ${token}` } : {} })
+      .then((r) => { if (!r.ok) throw new Error('Download failed'); return r.blob(); })
+      .then((blob) => {
+        const a = document.createElement('a');
+        a.href = URL.createObjectURL(blob);
+        a.download = 'PRECISE_BODY_ARTICLE_TEMPLATE.xlsx';
+        a.click();
+      })
+      .catch(() => message.error('Failed to download template'));
+  };
+
+  const downloadPreciseBodyArticleData = () => {
+    const token = localStorage.getItem('authToken');
+    const url = `${APP_CONFIG.api.baseURL}/admin/precise-body-article/download`;
+    return fetch(url, { headers: token ? { Authorization: `Bearer ${token}` } : {} })
+      .then((r) => { if (!r.ok) throw new Error('Download failed'); return r.blob(); })
+      .then((blob) => {
+        const today = new Date().toISOString().slice(0, 10);
+        const a = document.createElement('a');
+        a.href = URL.createObjectURL(blob);
+        a.download = `PRECISE_BODY_ARTICLE_${today}.xlsx`;
+        a.click();
+      })
+      .catch(() => message.error('Failed to download precise body article data'));
+  };
+
+  const handlePreciseBodyArticleUpload = async (file: File) => {
+    setPreciseBodyArticleUploading(true);
+    setPreciseBodyArticleProgress(0);
+    try {
+      const token = localStorage.getItem('authToken');
+      const formData = new FormData();
+      formData.append('file', file);
+      const progressInterval = setInterval(() => {
+        setPreciseBodyArticleProgress((prev) => Math.min(prev + 5, 90));
+      }, 400);
+      const res = await fetch(`${APP_CONFIG.api.baseURL}/admin/precise-body-article/upload`, {
+        method: 'POST',
+        headers: token ? { Authorization: `Bearer ${token}` } : {},
+        body: formData,
+      });
+      clearInterval(progressInterval);
+      setPreciseBodyArticleProgress(100);
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.error || 'Upload failed');
+      message.success(data.message);
+      setPreciseBodyArticleTotal(data.data);
+    } catch (err: any) {
+      message.error(err?.message || 'Upload failed');
+    } finally {
+      setPreciseBodyArticleUploading(false);
+      setTimeout(() => setPreciseBodyArticleProgress(0), 1500);
+      if (preciseBodyArticleFileRef.current) preciseBodyArticleFileRef.current.value = '';
+    }
+  };
+
+  // ─────────────────────────────── Precise Fabric Article Data ─────────────────
+  const loadPreciseFabricArticleStatus = useCallback(async () => {
+    setPreciseFabricArticleStatusLoading(true);
+    try {
+      const token = localStorage.getItem('authToken');
+      const res = await fetch(`${APP_CONFIG.api.baseURL}/admin/precise-fabric-article-data/status`, {
+        headers: token ? { Authorization: `Bearer ${token}` } : {},
+      });
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.error || 'Failed to load status');
+      setPreciseFabricArticleMeta(data.data);
+    } catch (err: any) {
+      message.error(err?.message || 'Failed to load precise fabric article data status');
+    } finally {
+      setPreciseFabricArticleStatusLoading(false);
+    }
+  }, []);
+
+  const downloadPreciseFabricArticleFile = async (kind: 'template' | 'export') => {
+    const token = localStorage.getItem('authToken');
+    const url = `${APP_CONFIG.api.baseURL}/admin/precise-fabric-article-data/${kind}`;
+    try {
+      const res = await fetch(url, { headers: token ? { Authorization: `Bearer ${token}` } : {} });
+      if (!res.ok) throw new Error('Download failed');
+      const blob = await res.blob();
+      const a = document.createElement('a');
+      a.href = URL.createObjectURL(blob);
+      a.download = kind === 'template'
+        ? 'PRECISE_FABRIC_ARTICLE_DATA_TEMPLATE.xlsx'
+        : `PRECISE_FABRIC_ARTICLE_DATA_${new Date().toISOString().slice(0, 10)}.xlsx`;
+      a.click();
+    } catch {
+      message.error(kind === 'template' ? 'Failed to download template' : 'Failed to export precise fabric article data');
+    }
+  };
+
+  const handlePreciseFabricArticleUpload = async (file: File) => {
+    setPreciseFabricArticleUploading(true);
+    setPreciseFabricArticleProgress(0);
+    try {
+      const token = localStorage.getItem('authToken');
+      const formData = new FormData();
+      formData.append('file', file);
+      const interval = setInterval(() => setPreciseFabricArticleProgress((p) => Math.min(p + 5, 90)), 300);
+      const res = await fetch(`${APP_CONFIG.api.baseURL}/admin/precise-fabric-article-data/upload`, {
+        method: 'POST',
+        headers: token ? { Authorization: `Bearer ${token}` } : {},
+        body: formData,
+      });
+      clearInterval(interval);
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.error || 'Upload failed');
+      setPreciseFabricArticleProgress(100);
+      message.success(`Uploaded ${data.data?.inserted ?? 0} rows to precise_fabric_article_data`);
+      await loadPreciseFabricArticleStatus();
+    } catch (err: any) {
+      message.error(err?.message || 'Upload failed');
+    } finally {
+      setPreciseFabricArticleUploading(false);
+      setTimeout(() => setPreciseFabricArticleProgress(0), 1500);
+      if (preciseFabricArticleFileRef.current) preciseFabricArticleFileRef.current.value = '';
     }
   };
 
@@ -2064,7 +2295,7 @@ export default function Admin() {
   const downloadMcdTemplate = () => {
     const token = localStorage.getItem('authToken');
     const url = `${APP_CONFIG.api.baseURL}/admin/major-category-details/template`;
-    fetch(url, { headers: token ? { Authorization: `Bearer ${token}` } : {} })
+    return fetch(url, { headers: token ? { Authorization: `Bearer ${token}` } : {} })
       .then((r) => r.blob())
       .then((blob) => {
         const a = document.createElement('a');
@@ -2078,7 +2309,7 @@ export default function Admin() {
   const downloadMcdData = () => {
     const token = localStorage.getItem('authToken');
     const url = `${APP_CONFIG.api.baseURL}/admin/major-category-details/download`;
-    fetch(url, { headers: token ? { Authorization: `Bearer ${token}` } : {} })
+    return fetch(url, { headers: token ? { Authorization: `Bearer ${token}` } : {} })
       .then((r) => r.blob())
       .then((blob) => {
         const a = document.createElement('a');
@@ -2224,8 +2455,11 @@ export default function Admin() {
     loadFabricRawStatus();
     loadGmRawStatus();
     loadBodyFabConsStatus();
+    loadPreciseBodyArticleStatus();
+    loadPreciseTrimMasterStatus();
+    loadPreciseFabricArticleStatus();
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [loadVendorStatus, loadMajCatGridStatus, loadMandatoryGridStatus, loadSizeMasterStatus, loadColorMasterStatus, loadFabricArticleDataStatus, loadFabricArticleMasterStatus, loadBodyArticleDataStatus, loadBroaderMenuStatus, loadSegmentMasterStatus, loadBasicAccessoriesStatus, loadCmpCostMasterStatus, loadNationalGridStatus, loadHierarchyExcelStatus, loadPipelineStatus, loadFabricRawStatus, loadGmRawStatus, loadBodyFabConsStatus]);
+  }, [loadVendorStatus, loadMajCatGridStatus, loadMandatoryGridStatus, loadSizeMasterStatus, loadColorMasterStatus, loadFabricArticleDataStatus, loadFabricArticleMasterStatus, loadBodyArticleDataStatus, loadBroaderMenuStatus, loadSegmentMasterStatus, loadBasicAccessoriesStatus, loadCmpCostMasterStatus, loadNationalGridStatus, loadHierarchyExcelStatus, loadPipelineStatus, loadFabricRawStatus, loadGmRawStatus, loadBodyFabConsStatus, loadPreciseBodyArticleStatus, loadPreciseTrimMasterStatus, loadPreciseFabricArticleStatus]);
 
   const loadData = async () => {
     setLoading(true);
@@ -3895,6 +4129,254 @@ export default function Admin() {
                     )}
                   </div>
 
+                </>
+              }
+            />
+          </MasterGroup>
+          <MasterGroup title="Precise" count={3} notUploaded={((preciseBodyArticleTotal ? preciseBodyArticleTotal.total : null) === 0 ? 1 : 0) + ((preciseTrimMasterMeta ? (preciseTrimMasterMeta.total ?? 0) : null) === 0 ? 1 : 0) + ((preciseFabricArticleMeta ? preciseFabricArticleMeta.total : null) === 0 ? 1 : 0)}>
+            <MasterDataCard
+              title="Precise Body Article Data"
+              rows={preciseBodyArticleTotal ? preciseBodyArticleTotal.total : null}
+              loading={preciseBodyArticleStatusLoading}
+              busy={preciseBodyArticleUploading}
+              onView={() => navigate('/admin/expense/precise-body-article')}
+              onDownload={downloadPreciseBodyArticleData}
+              onTemplate={downloadPreciseBodyArticleTemplate}
+              onRefresh={loadPreciseBodyArticleStatus}
+              details={
+                <>
+                  {preciseBodyArticleTotal && preciseBodyArticleTotal.total > 0 ? (
+                    <Descriptions bordered>
+                      <Descriptions.Item label="Total Rows">
+                        <Badge variant="success">{preciseBodyArticleTotal.total.toLocaleString()}</Badge>
+                      </Descriptions.Item>
+                      <Descriptions.Item label="Major Categories">
+                        {preciseBodyArticleTotal.categories.toLocaleString()}
+                      </Descriptions.Item>
+                    </Descriptions>
+                  ) : (
+                    <Alert
+                      type="warning"
+                      showIcon
+                      message="No precise body article data loaded"
+                      description="Upload the body article consumption Excel (COMPILE SHEET format). Headers at row 4, data from row 6. Replaces the entire table."
+                    />
+                  )}
+                </>
+              }
+              upload={
+                <>
+                  <div className="rounded-md border border-border p-4">
+                    <div className="mb-1 font-semibold">Upload Precise Body Article Excel</div>
+                    <div className="mb-3 text-xs text-muted-foreground">
+                      Uses the <strong>COMPILE SHEET OF BODY FAB CONSUMPTION</strong> format — headers at row 4, data from row 6.
+                      Columns: DIVISION, SUB_DIVISION, MAJOR_CATEGORY, MACRO BODY DESCRIPTION, MICRO BODY ARTICLE NUMBER,
+                      construction attributes (M_NECK_TYPE … BODY STYLE), CMP cost columns, and 39 width-in-inch fabric consumption columns.
+                      <strong className="text-destructive"> Replaces entire table.</strong>
+                    </div>
+
+                    <input
+                      ref={preciseBodyArticleFileRef}
+                      type="file"
+                      accept=".xlsx,.xls"
+                      className="hidden"
+                      onChange={(e) => {
+                        const file = e.target.files?.[0];
+                        if (file) handlePreciseBodyArticleUpload(file);
+                      }}
+                    />
+
+                    {preciseBodyArticleUploading ? (
+                      <div>
+                        <div className="mb-2 text-[13px] text-slate-600 dark:text-slate-300">
+                          <RefreshCw className="mr-1.5 inline-block h-3.5 w-3.5 animate-spin" />
+                          Parsing Excel &amp; replacing table...
+                        </div>
+                        <Progress value={preciseBodyArticleProgress} />
+                      </div>
+                    ) : (
+                      <button
+                        type="button"
+                        onClick={() => preciseBodyArticleFileRef.current?.click()}
+                        className="flex w-full flex-col items-center justify-center rounded-md border-2 border-dashed border-border bg-muted/30 px-4 py-6 transition-colors hover:border-slate-400 hover:bg-slate-50 dark:hover:bg-slate-500/10"
+                      >
+                        <Inbox className="mb-2 h-8 w-8 text-slate-600 dark:text-slate-300" />
+                        <p className="text-[13px]">
+                          Click to upload <strong>.xlsx</strong> file
+                        </p>
+                        <p className="text-[11px] text-muted-foreground">Only Excel files. Max 50 MB.</p>
+                      </button>
+                    )}
+                  </div>
+                </>
+              }
+            />
+            <MasterDataCard
+              title="Precise Trim Master"
+              rows={preciseTrimMasterMeta ? (preciseTrimMasterMeta.total ?? 0) : null}
+              lastUpload={preciseTrimMasterMeta?.lastUpdated ?? null}
+              loading={preciseTrimMasterStatusLoading}
+              busy={preciseTrimMasterUploading}
+              onView={() => navigate('/admin/expense/precise-trim-master')}
+              onDownload={() => downloadPreciseTrimMasterFile('export')}
+              onTemplate={() => downloadPreciseTrimMasterFile('template')}
+              onRefresh={loadPreciseTrimMasterStatus}
+              details={
+                <>
+                  {preciseTrimMasterMeta && (preciseTrimMasterMeta.total ?? 0) > 0 ? (
+                    <Descriptions bordered>
+                      {preciseTrimMasterMeta.lastUpdated && (
+                        <Descriptions.Item label="Last Updated">
+                          {new Date(preciseTrimMasterMeta.lastUpdated).toLocaleString('en-IN', {
+                            dateStyle: 'medium', timeStyle: 'short',
+                          })}
+                        </Descriptions.Item>
+                      )}
+                      <Descriptions.Item label="Attribute Names">
+                        <Badge variant="info">{(preciseTrimMasterMeta.attributes ?? 0).toLocaleString()}</Badge>
+                      </Descriptions.Item>
+                      <Descriptions.Item label="Total Rows">
+                        <Badge variant="success">{(preciseTrimMasterMeta.total ?? 0).toLocaleString()}</Badge>
+                      </Descriptions.Item>
+                      {preciseTrimMasterMeta.skipped != null && (preciseTrimMasterMeta.skipped ?? 0) > 0 && (
+                        <Descriptions.Item label="Skipped">
+                          <Badge variant="warning">{(preciseTrimMasterMeta.skipped ?? 0).toLocaleString()}</Badge>
+                        </Descriptions.Item>
+                      )}
+                    </Descriptions>
+                  ) : (
+                    <Alert
+                      type="warning"
+                      showIcon
+                      message="No precise trim master data loaded"
+                      description="Upload an Excel file with columns: MAJ_CAT, TYPE, BT-1, BT-2. Upserts by (MAJ_CAT, TYPE)."
+                    />
+                  )}
+                </>
+              }
+              upload={
+                <>
+                  <div className="rounded-md border border-border p-4">
+                    <div className="mb-1 font-semibold">Upload Precise Trim Master Excel</div>
+                    <div className="mb-3 text-xs text-muted-foreground">
+                      Columns: <strong>MAJ_CAT, TYPE, BT-1, BT-2</strong>.
+                      Upserts by (MAJ_CAT + TYPE) — existing rows are updated, new rows are inserted.
+                    </div>
+
+                    <input
+                      ref={preciseTrimMasterFileRef}
+                      type="file"
+                      accept=".xlsx,.xls"
+                      className="hidden"
+                      onChange={(e) => {
+                        const file = e.target.files?.[0];
+                        if (file) handlePreciseTrimMasterUpload(file);
+                      }}
+                    />
+
+                    {preciseTrimMasterUploading ? (
+                      <div>
+                        <div className="mb-2 text-[13px] text-slate-600 dark:text-slate-300">
+                          <RefreshCw className="mr-1.5 inline-block h-3.5 w-3.5 animate-spin" />
+                          Uploading &amp; upserting rows...
+                        </div>
+                        <Progress value={preciseTrimMasterProgress} />
+                      </div>
+                    ) : (
+                      <button
+                        type="button"
+                        onClick={() => preciseTrimMasterFileRef.current?.click()}
+                        className="flex w-full flex-col items-center justify-center rounded-md border-2 border-dashed border-border bg-muted/30 px-4 py-6 transition-colors hover:border-slate-400 hover:bg-slate-50 dark:hover:bg-slate-500/10"
+                      >
+                        <Inbox className="mb-2 h-8 w-8 text-slate-600 dark:text-slate-300" />
+                        <p className="text-[13px]">
+                          Click to upload <strong>.xlsx</strong> file
+                        </p>
+                        <p className="text-[11px] text-muted-foreground">Only Excel files. Max 50 MB.</p>
+                      </button>
+                    )}
+                  </div>
+                </>
+              }
+            />
+            <MasterDataCard
+              title="Precise Fabric Article Data"
+              rows={preciseFabricArticleMeta ? preciseFabricArticleMeta.total : null}
+              lastUpload={preciseFabricArticleMeta?.lastUpdated ?? null}
+              loading={preciseFabricArticleStatusLoading}
+              busy={preciseFabricArticleUploading}
+              onView={() => navigate('/admin/expense/precise-fabric-article-data')}
+              onDownload={() => downloadPreciseFabricArticleFile('export')}
+              onTemplate={() => downloadPreciseFabricArticleFile('template')}
+              onRefresh={loadPreciseFabricArticleStatus}
+              details={
+                <>
+                  {preciseFabricArticleMeta && preciseFabricArticleMeta.total > 0 ? (
+                    <Descriptions bordered>
+                      {preciseFabricArticleMeta.lastUpdated && (
+                        <Descriptions.Item label="Last Updated">
+                          {new Date(preciseFabricArticleMeta.lastUpdated).toLocaleString('en-IN', {
+                            dateStyle: 'medium', timeStyle: 'short',
+                          })}
+                        </Descriptions.Item>
+                      )}
+                      <Descriptions.Item label="Total Rows">
+                        <Badge variant="success">{preciseFabricArticleMeta.total.toLocaleString()}</Badge>
+                      </Descriptions.Item>
+                    </Descriptions>
+                  ) : (
+                    <Alert
+                      type="warning"
+                      showIcon
+                      message="No precise fabric article data loaded"
+                      description="Upload the FABRIC ARTICLE DATA MASTER Excel. Headers are auto-detected. Replaces the entire table."
+                    />
+                  )}
+                </>
+              }
+              upload={
+                <>
+                  <div className="rounded-md border border-border p-4">
+                    <div className="mb-1 font-semibold">Upload Precise Fabric Article Data Excel</div>
+                    <div className="mb-3 text-xs text-muted-foreground">
+                      Uses the <strong>FABRIC ARTICLE DATA MASTER</strong> format. Headers are auto-detected (looks for <strong>FABRIC ARTICLE NUMBER</strong> column).
+                      Columns: FABRIC ARTICLE NUMBER, FABRIC ARTICLE DESCRIPTION, DIVISION, SUB DIVISION, MAJOR CATEGORY, VENDOR NAME, VENDOR CODE, FABRIC RATE, M_FAB_DIV … M_LYCRA.
+                      <strong className="text-destructive"> Replaces entire table.</strong>
+                    </div>
+
+                    <input
+                      ref={preciseFabricArticleFileRef}
+                      type="file"
+                      accept=".xlsx,.xls"
+                      className="hidden"
+                      onChange={(e) => {
+                        const file = e.target.files?.[0];
+                        if (file) handlePreciseFabricArticleUpload(file);
+                      }}
+                    />
+
+                    {preciseFabricArticleUploading ? (
+                      <div>
+                        <div className="mb-2 text-[13px] text-slate-600 dark:text-slate-300">
+                          <RefreshCw className="mr-1.5 inline-block h-3.5 w-3.5 animate-spin" />
+                          Parsing Excel &amp; replacing table...
+                        </div>
+                        <Progress value={preciseFabricArticleProgress} />
+                      </div>
+                    ) : (
+                      <button
+                        type="button"
+                        onClick={() => preciseFabricArticleFileRef.current?.click()}
+                        className="flex w-full flex-col items-center justify-center rounded-md border-2 border-dashed border-border bg-muted/30 px-4 py-6 transition-colors hover:border-slate-400 hover:bg-slate-50 dark:hover:bg-slate-500/10"
+                      >
+                        <Inbox className="mb-2 h-8 w-8 text-slate-600 dark:text-slate-300" />
+                        <p className="text-[13px]">
+                          Click to upload <strong>.xlsx</strong> file
+                        </p>
+                        <p className="text-[11px] text-muted-foreground">Only Excel files. Max 50 MB.</p>
+                      </button>
+                    )}
+                  </div>
                 </>
               }
             />

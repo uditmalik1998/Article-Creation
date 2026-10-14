@@ -351,11 +351,16 @@ exports.Prisma.ExtractionResultFlatScalarFieldEnum = {
   cmpCost: 'cmpCost',
   fabCost: 'fabCost',
   fabCons: 'fabCons',
-  width: 'width',
+  autoBgt: 'autoBgt',
+  roughV2: 'roughV2',
   vendorFabricRate: 'vendorFabricRate',
-  valueAddAccCostType: 'valueAddAccCostType',
-  valueAddCost: 'valueAddCost',
-  valueAddProcessCost: 'valueAddProcessCost',
+  finalCost: 'finalCost',
+  roughRatio: 'roughRatio',
+  roughConsumptionKg: 'roughConsumptionKg',
+  roughConsumptionMeter: 'roughConsumptionMeter',
+  preciseRatio: 'preciseRatio',
+  preciseConsumptionKg: 'preciseConsumptionKg',
+  preciseConsumptionMeter: 'preciseConsumptionMeter',
   bodyArticle: 'bodyArticle',
   bodyArticleDescription: 'bodyArticleDescription',
   fabricArticleNumber: 'fabricArticleNumber',
@@ -1040,6 +1045,33 @@ exports.Prisma.FabricArticleDataScalarFieldEnum = {
   updatedAt: 'updatedAt'
 };
 
+exports.Prisma.PreciseFabricArticleDataScalarFieldEnum = {
+  id: 'id',
+  fabricArticleNumber: 'fabricArticleNumber',
+  fabricArticleDescription: 'fabricArticleDescription',
+  division: 'division',
+  subDivision: 'subDivision',
+  majorCategory: 'majorCategory',
+  vendorName: 'vendorName',
+  vendorCode: 'vendorCode',
+  fabricRate: 'fabricRate',
+  mFabDiv: 'mFabDiv',
+  mYarn: 'mYarn',
+  mFabMainMvgr1: 'mFabMainMvgr1',
+  mFabMainMvgr2: 'mFabMainMvgr2',
+  mConstruction: 'mConstruction',
+  mOunz: 'mOunz',
+  mWidth: 'mWidth',
+  mWeave01: 'mWeave01',
+  mWeave02: 'mWeave02',
+  mCount: 'mCount',
+  mComposition: 'mComposition',
+  mFinish: 'mFinish',
+  mGsm: 'mGsm',
+  mLycra: 'mLycra',
+  createdAt: 'createdAt'
+};
+
 exports.Prisma.GmArticleDataScalarFieldEnum = {
   id: 'id',
   gmAgeGrade: 'gmAgeGrade',
@@ -1286,9 +1318,7 @@ exports.Prisma.BodyArticleDataScalarFieldEnum = {
   fabCost: 'fabCost',
   fabCons: 'fabCons',
   width: 'width',
-  basicTrimCost: 'basicTrimCost',
   roughCmpCost: 'roughCmpCost',
-  costingType: 'costingType',
   bodyConsumptionType: 'bodyConsumptionType',
   gsm: 'gsm',
   ratio: 'ratio',
@@ -1413,6 +1443,16 @@ exports.Prisma.BasicTrimCostMasterScalarFieldEnum = {
   updatedAt: 'updatedAt'
 };
 
+exports.Prisma.PreciseTrimMasterScalarFieldEnum = {
+  id: 'id',
+  attributeName: 'attributeName',
+  type: 'type',
+  bt1: 'bt1',
+  bt2: 'bt2',
+  createdAt: 'createdAt',
+  updatedAt: 'updatedAt'
+};
+
 exports.Prisma.BasicTrimCostComponentScalarFieldEnum = {
   id: 'id',
   masterId: 'masterId',
@@ -1518,6 +1558,100 @@ exports.Prisma.ExpenseAuditLogScalarFieldEnum = {
   comment: 'comment',
   details: 'details',
   occurredAt: 'occurredAt'
+};
+
+exports.Prisma.BodyArticleDescriptionFormateScalarFieldEnum = {
+  id: 'id',
+  fgMajCat: 'fgMajCat',
+  attributesMajCat: 'attributesMajCat',
+  frGridStatus: 'frGridStatus',
+  createdAt: 'createdAt',
+  updatedAt: 'updatedAt'
+};
+
+exports.Prisma.GmArticleDescriptionFormateScalarFieldEnum = {
+  id: 'id',
+  key: 'key',
+  archetypeNm: 'archetypeNm',
+  descSeq: 'descSeq',
+  familyCode: 'familyCode',
+  familyName: 'familyName',
+  createdAt: 'createdAt',
+  updatedAt: 'updatedAt'
+};
+
+exports.Prisma.PreciseBodyArticleConsumptionScalarFieldEnum = {
+  id: 'id',
+  division: 'division',
+  subDivision: 'subDivision',
+  majorCategory: 'majorCategory',
+  macroBodyDescription: 'macroBodyDescription',
+  microBodyArticleNumber: 'microBodyArticleNumber',
+  mNeckType: 'mNeckType',
+  mNeckStyle: 'mNeckStyle',
+  mCollarType: 'mCollarType',
+  mCollarStyle: 'mCollarStyle',
+  mSleevesMainStyle: 'mSleevesMainStyle',
+  mSleeveFold: 'mSleeveFold',
+  mPlacket: 'mPlacket',
+  mBltType: 'mBltType',
+  mBltStyle: 'mBltStyle',
+  mBtmFold: 'mBtmFold',
+  mPocket: 'mPocket',
+  mNoOfPocket: 'mNoOfPocket',
+  mExtraPocket: 'mExtraPocket',
+  mLength: 'mLength',
+  mFit: 'mFit',
+  bodyStyle: 'bodyStyle',
+  cuttingValue: 'cuttingValue',
+  stitchingSam: 'stitchingSam',
+  samVal: 'samVal',
+  stVal: 'stVal',
+  ironingSam: 'ironingSam',
+  finishingSam: 'finishingSam',
+  finishigCost: 'finishigCost',
+  totalCmpCost: 'totalCmpCost',
+  width15: 'width15',
+  width16: 'width16',
+  width17: 'width17',
+  width18: 'width18',
+  width19: 'width19',
+  width42: 'width42',
+  width43: 'width43',
+  width44: 'width44',
+  width46: 'width46',
+  width48: 'width48',
+  width50: 'width50',
+  width53: 'width53',
+  width54: 'width54',
+  width55: 'width55',
+  width56: 'width56',
+  width57: 'width57',
+  width58: 'width58',
+  width59: 'width59',
+  width60: 'width60',
+  width61: 'width61',
+  width62: 'width62',
+  width63: 'width63',
+  width64: 'width64',
+  width65: 'width65',
+  width66: 'width66',
+  width67: 'width67',
+  width68: 'width68',
+  width69: 'width69',
+  width70: 'width70',
+  width71: 'width71',
+  width72: 'width72',
+  width73: 'width73',
+  width74: 'width74',
+  width76: 'width76',
+  width78: 'width78',
+  width82: 'width82',
+  width92: 'width92',
+  width94: 'width94',
+  width96: 'width96',
+  createdAt: 'createdAt',
+  updatedAt: 'updatedAt'
 };
 
 exports.Prisma.SortOrder = {
@@ -1694,7 +1828,6 @@ exports.Prisma.ExtractionResultFlatOrderByRelevanceFieldEnum = {
   mNoOfClr: 'mNoOfClr',
   articleFashionType: 'articleFashionType',
   articleDimension: 'articleDimension',
-  valueAddAccCostType: 'valueAddAccCostType',
   bodyArticle: 'bodyArticle',
   bodyArticleDescription: 'bodyArticleDescription',
   fabricArticleNumber: 'fabricArticleNumber',
@@ -2174,6 +2307,28 @@ exports.Prisma.FabricArticleDataOrderByRelevanceFieldEnum = {
   userName: 'userName'
 };
 
+exports.Prisma.PreciseFabricArticleDataOrderByRelevanceFieldEnum = {
+  fabricArticleDescription: 'fabricArticleDescription',
+  division: 'division',
+  subDivision: 'subDivision',
+  majorCategory: 'majorCategory',
+  vendorName: 'vendorName',
+  mFabDiv: 'mFabDiv',
+  mYarn: 'mYarn',
+  mFabMainMvgr1: 'mFabMainMvgr1',
+  mFabMainMvgr2: 'mFabMainMvgr2',
+  mConstruction: 'mConstruction',
+  mOunz: 'mOunz',
+  mWidth: 'mWidth',
+  mWeave01: 'mWeave01',
+  mWeave02: 'mWeave02',
+  mCount: 'mCount',
+  mComposition: 'mComposition',
+  mFinish: 'mFinish',
+  mGsm: 'mGsm',
+  mLycra: 'mLycra'
+};
+
 exports.Prisma.GmArticleDataOrderByRelevanceFieldEnum = {
   id: 'id',
   gmAgeGrade: 'gmAgeGrade',
@@ -2366,7 +2521,6 @@ exports.Prisma.BodyArticleDataOrderByRelevanceFieldEnum = {
   imageUrl: 'imageUrl',
   bodyArticleType: 'bodyArticleType',
   designNumber: 'designNumber',
-  costingType: 'costingType',
   bodyConsumptionType: 'bodyConsumptionType',
   flatId: 'flatId',
   articleNumber: 'articleNumber',
@@ -2458,6 +2612,11 @@ exports.Prisma.BasicTrimCostMasterOrderByRelevanceFieldEnum = {
   majCat: 'majCat'
 };
 
+exports.Prisma.PreciseTrimMasterOrderByRelevanceFieldEnum = {
+  attributeName: 'attributeName',
+  type: 'type'
+};
+
 exports.Prisma.BasicTrimCostComponentOrderByRelevanceFieldEnum = {
   kind: 'kind',
   component: 'component'
@@ -2523,6 +2682,44 @@ exports.Prisma.ExpenseAuditLogOrderByRelevanceFieldEnum = {
   actorName: 'actorName',
   actorEmail: 'actorEmail',
   comment: 'comment'
+};
+
+exports.Prisma.BodyArticleDescriptionFormateOrderByRelevanceFieldEnum = {
+  fgMajCat: 'fgMajCat',
+  attributesMajCat: 'attributesMajCat',
+  frGridStatus: 'frGridStatus'
+};
+
+exports.Prisma.GmArticleDescriptionFormateOrderByRelevanceFieldEnum = {
+  key: 'key',
+  archetypeNm: 'archetypeNm',
+  descSeq: 'descSeq',
+  familyCode: 'familyCode',
+  familyName: 'familyName'
+};
+
+exports.Prisma.PreciseBodyArticleConsumptionOrderByRelevanceFieldEnum = {
+  division: 'division',
+  subDivision: 'subDivision',
+  majorCategory: 'majorCategory',
+  macroBodyDescription: 'macroBodyDescription',
+  microBodyArticleNumber: 'microBodyArticleNumber',
+  mNeckType: 'mNeckType',
+  mNeckStyle: 'mNeckStyle',
+  mCollarType: 'mCollarType',
+  mCollarStyle: 'mCollarStyle',
+  mSleevesMainStyle: 'mSleevesMainStyle',
+  mSleeveFold: 'mSleeveFold',
+  mPlacket: 'mPlacket',
+  mBltType: 'mBltType',
+  mBltStyle: 'mBltStyle',
+  mBtmFold: 'mBtmFold',
+  mPocket: 'mPocket',
+  mNoOfPocket: 'mNoOfPocket',
+  mExtraPocket: 'mExtraPocket',
+  mLength: 'mLength',
+  mFit: 'mFit',
+  bodyStyle: 'bodyStyle'
 };
 exports.GarmentType = exports.$Enums.GarmentType = {
   UPPER: 'UPPER',
@@ -2678,6 +2875,7 @@ exports.Prisma.ModelName = {
   FabricMajCatGridValue: 'FabricMajCatGridValue',
   ModifyLog: 'ModifyLog',
   FabricArticleData: 'FabricArticleData',
+  PreciseFabricArticleData: 'PreciseFabricArticleData',
   GmArticleData: 'GmArticleData',
   GmVariantArticleData: 'GmVariantArticleData',
   FgVariantArticleData: 'FgVariantArticleData',
@@ -2688,13 +2886,17 @@ exports.Prisma.ModelName = {
   BodyFabricConsumption: 'BodyFabricConsumption',
   RoughCmpCostMaster: 'RoughCmpCostMaster',
   BasicTrimCostMaster: 'BasicTrimCostMaster',
+  PreciseTrimMaster: 'PreciseTrimMaster',
   BasicTrimCostComponent: 'BasicTrimCostComponent',
   MajorCategoryDetails: 'MajorCategoryDetails',
   ExpenseApprovalStage: 'ExpenseApprovalStage',
   GridContributionAssignment: 'GridContributionAssignment',
   ExpenseChangeRequest: 'ExpenseChangeRequest',
   ExpenseAccessGrant: 'ExpenseAccessGrant',
-  ExpenseAuditLog: 'ExpenseAuditLog'
+  ExpenseAuditLog: 'ExpenseAuditLog',
+  BodyArticleDescriptionFormate: 'BodyArticleDescriptionFormate',
+  GmArticleDescriptionFormate: 'GmArticleDescriptionFormate',
+  PreciseBodyArticleConsumption: 'PreciseBodyArticleConsumption'
 };
 
 /**

@@ -245,6 +245,12 @@ export type ModifyLog = $Result.DefaultSelection<Prisma.$ModifyLogPayload>
  */
 export type FabricArticleData = $Result.DefaultSelection<Prisma.$FabricArticleDataPayload>
 /**
+ * Model PreciseFabricArticleData
+ * PreciseFabricArticleData: Master table of precise fabric articles seeded from Excel.
+ * Used for fabric article desc dropdown search and attribute-based AUTO-BGT lookup.
+ */
+export type PreciseFabricArticleData = $Result.DefaultSelection<Prisma.$PreciseFabricArticleDataPayload>
+/**
  * Model GmArticleData
  * GmArticleData: One row per GM article. Attribute columns map 1-to-1 to the
  * unique family_code values in gm_major_category_details. Not every column
@@ -312,6 +318,12 @@ export type RoughCmpCostMaster = $Result.DefaultSelection<Prisma.$RoughCmpCostMa
  */
 export type BasicTrimCostMaster = $Result.DefaultSelection<Prisma.$BasicTrimCostMasterPayload>
 /**
+ * Model PreciseTrimMaster
+ * PreciseTrimMaster: per-attribute-value BT-1 / BT-2 trim costs imported from
+ * "BASIC TRIMS 2 TYPE COSTING.xlsx". Keyed on (attribute_name, type).
+ */
+export type PreciseTrimMaster = $Result.DefaultSelection<Prisma.$PreciseTrimMasterPayload>
+/**
  * Model BasicTrimCostComponent
  * BasicTrimCostComponent: one row per trim/packaging component of a BasicTrimCostMaster row,
  * holding the workbook's per-piece consumption and rate so a rate change can be re-costed.
@@ -376,6 +388,21 @@ export type ExpenseAccessGrant = $Result.DefaultSelection<Prisma.$ExpenseAccessG
  * row is durable proof the master data actually changed, and when).
  */
 export type ExpenseAuditLog = $Result.DefaultSelection<Prisma.$ExpenseAuditLogPayload>
+/**
+ * Model BodyArticleDescriptionFormate
+ * 
+ */
+export type BodyArticleDescriptionFormate = $Result.DefaultSelection<Prisma.$BodyArticleDescriptionFormatePayload>
+/**
+ * Model GmArticleDescriptionFormate
+ * 
+ */
+export type GmArticleDescriptionFormate = $Result.DefaultSelection<Prisma.$GmArticleDescriptionFormatePayload>
+/**
+ * Model PreciseBodyArticleConsumption
+ * 
+ */
+export type PreciseBodyArticleConsumption = $Result.DefaultSelection<Prisma.$PreciseBodyArticleConsumptionPayload>
 
 /**
  * Enums
@@ -1128,6 +1155,16 @@ export class PrismaClient<
   get fabricArticleData(): Prisma.FabricArticleDataDelegate<ExtArgs, ClientOptions>;
 
   /**
+   * `prisma.preciseFabricArticleData`: Exposes CRUD operations for the **PreciseFabricArticleData** model.
+    * Example usage:
+    * ```ts
+    * // Fetch zero or more PreciseFabricArticleData
+    * const preciseFabricArticleData = await prisma.preciseFabricArticleData.findMany()
+    * ```
+    */
+  get preciseFabricArticleData(): Prisma.PreciseFabricArticleDataDelegate<ExtArgs, ClientOptions>;
+
+  /**
    * `prisma.gmArticleData`: Exposes CRUD operations for the **GmArticleData** model.
     * Example usage:
     * ```ts
@@ -1228,6 +1265,16 @@ export class PrismaClient<
   get basicTrimCostMaster(): Prisma.BasicTrimCostMasterDelegate<ExtArgs, ClientOptions>;
 
   /**
+   * `prisma.preciseTrimMaster`: Exposes CRUD operations for the **PreciseTrimMaster** model.
+    * Example usage:
+    * ```ts
+    * // Fetch zero or more PreciseTrimMasters
+    * const preciseTrimMasters = await prisma.preciseTrimMaster.findMany()
+    * ```
+    */
+  get preciseTrimMaster(): Prisma.PreciseTrimMasterDelegate<ExtArgs, ClientOptions>;
+
+  /**
    * `prisma.basicTrimCostComponent`: Exposes CRUD operations for the **BasicTrimCostComponent** model.
     * Example usage:
     * ```ts
@@ -1296,6 +1343,36 @@ export class PrismaClient<
     * ```
     */
   get expenseAuditLog(): Prisma.ExpenseAuditLogDelegate<ExtArgs, ClientOptions>;
+
+  /**
+   * `prisma.bodyArticleDescriptionFormate`: Exposes CRUD operations for the **BodyArticleDescriptionFormate** model.
+    * Example usage:
+    * ```ts
+    * // Fetch zero or more BodyArticleDescriptionFormates
+    * const bodyArticleDescriptionFormates = await prisma.bodyArticleDescriptionFormate.findMany()
+    * ```
+    */
+  get bodyArticleDescriptionFormate(): Prisma.BodyArticleDescriptionFormateDelegate<ExtArgs, ClientOptions>;
+
+  /**
+   * `prisma.gmArticleDescriptionFormate`: Exposes CRUD operations for the **GmArticleDescriptionFormate** model.
+    * Example usage:
+    * ```ts
+    * // Fetch zero or more GmArticleDescriptionFormates
+    * const gmArticleDescriptionFormates = await prisma.gmArticleDescriptionFormate.findMany()
+    * ```
+    */
+  get gmArticleDescriptionFormate(): Prisma.GmArticleDescriptionFormateDelegate<ExtArgs, ClientOptions>;
+
+  /**
+   * `prisma.preciseBodyArticleConsumption`: Exposes CRUD operations for the **PreciseBodyArticleConsumption** model.
+    * Example usage:
+    * ```ts
+    * // Fetch zero or more PreciseBodyArticleConsumptions
+    * const preciseBodyArticleConsumptions = await prisma.preciseBodyArticleConsumption.findMany()
+    * ```
+    */
+  get preciseBodyArticleConsumption(): Prisma.PreciseBodyArticleConsumptionDelegate<ExtArgs, ClientOptions>;
 }
 
 export namespace Prisma {
@@ -1777,6 +1854,7 @@ export namespace Prisma {
     FabricMajCatGridValue: 'FabricMajCatGridValue',
     ModifyLog: 'ModifyLog',
     FabricArticleData: 'FabricArticleData',
+    PreciseFabricArticleData: 'PreciseFabricArticleData',
     GmArticleData: 'GmArticleData',
     GmVariantArticleData: 'GmVariantArticleData',
     FgVariantArticleData: 'FgVariantArticleData',
@@ -1787,13 +1865,17 @@ export namespace Prisma {
     BodyFabricConsumption: 'BodyFabricConsumption',
     RoughCmpCostMaster: 'RoughCmpCostMaster',
     BasicTrimCostMaster: 'BasicTrimCostMaster',
+    PreciseTrimMaster: 'PreciseTrimMaster',
     BasicTrimCostComponent: 'BasicTrimCostComponent',
     MajorCategoryDetails: 'MajorCategoryDetails',
     ExpenseApprovalStage: 'ExpenseApprovalStage',
     GridContributionAssignment: 'GridContributionAssignment',
     ExpenseChangeRequest: 'ExpenseChangeRequest',
     ExpenseAccessGrant: 'ExpenseAccessGrant',
-    ExpenseAuditLog: 'ExpenseAuditLog'
+    ExpenseAuditLog: 'ExpenseAuditLog',
+    BodyArticleDescriptionFormate: 'BodyArticleDescriptionFormate',
+    GmArticleDescriptionFormate: 'GmArticleDescriptionFormate',
+    PreciseBodyArticleConsumption: 'PreciseBodyArticleConsumption'
   };
 
   export type ModelName = (typeof ModelName)[keyof typeof ModelName]
@@ -1812,7 +1894,7 @@ export namespace Prisma {
       omit: GlobalOmitOptions
     }
     meta: {
-      modelProps: "department" | "subDepartment" | "category" | "masterAttribute" | "attributeAllowedValue" | "categoryAttribute" | "extractionJob" | "extractionResult" | "extractionResultFlat" | "modelGenerationResult" | "modelImageApproval" | "mvgrLookup" | "masterVendorDetail" | "user" | "auditLog" | "apiKey" | "changeHistory" | "costSummary" | "article360" | "articleFab" | "articleBody" | "articleVaAcc" | "articleVaPrcs" | "articleBom" | "sapFieldConfig" | "sapAttributeValue" | "article360Flat" | "rawArticle" | "fabricRawData" | "gmRawData" | "srmSyncRun" | "srmSyncRunItem" | "poolBJob" | "poolBBatch" | "nationalGridMaster" | "broaderMenu" | "majorCatMaster" | "fabricArticleMaster" | "fabricMajCatGridValue" | "modifyLog" | "fabricArticleData" | "gmArticleData" | "gmVariantArticleData" | "fgVariantArticleData" | "fabricVariantArticleData" | "valueAdditionAccessoriesCost" | "bodyArticleData" | "referenceArticleData" | "bodyFabricConsumption" | "roughCmpCostMaster" | "basicTrimCostMaster" | "basicTrimCostComponent" | "majorCategoryDetails" | "expenseApprovalStage" | "gridContributionAssignment" | "expenseChangeRequest" | "expenseAccessGrant" | "expenseAuditLog"
+      modelProps: "department" | "subDepartment" | "category" | "masterAttribute" | "attributeAllowedValue" | "categoryAttribute" | "extractionJob" | "extractionResult" | "extractionResultFlat" | "modelGenerationResult" | "modelImageApproval" | "mvgrLookup" | "masterVendorDetail" | "user" | "auditLog" | "apiKey" | "changeHistory" | "costSummary" | "article360" | "articleFab" | "articleBody" | "articleVaAcc" | "articleVaPrcs" | "articleBom" | "sapFieldConfig" | "sapAttributeValue" | "article360Flat" | "rawArticle" | "fabricRawData" | "gmRawData" | "srmSyncRun" | "srmSyncRunItem" | "poolBJob" | "poolBBatch" | "nationalGridMaster" | "broaderMenu" | "majorCatMaster" | "fabricArticleMaster" | "fabricMajCatGridValue" | "modifyLog" | "fabricArticleData" | "preciseFabricArticleData" | "gmArticleData" | "gmVariantArticleData" | "fgVariantArticleData" | "fabricVariantArticleData" | "valueAdditionAccessoriesCost" | "bodyArticleData" | "referenceArticleData" | "bodyFabricConsumption" | "roughCmpCostMaster" | "basicTrimCostMaster" | "preciseTrimMaster" | "basicTrimCostComponent" | "majorCategoryDetails" | "expenseApprovalStage" | "gridContributionAssignment" | "expenseChangeRequest" | "expenseAccessGrant" | "expenseAuditLog" | "bodyArticleDescriptionFormate" | "gmArticleDescriptionFormate" | "preciseBodyArticleConsumption"
       txIsolationLevel: Prisma.TransactionIsolationLevel
     }
     model: {
@@ -4850,6 +4932,80 @@ export namespace Prisma {
           }
         }
       }
+      PreciseFabricArticleData: {
+        payload: Prisma.$PreciseFabricArticleDataPayload<ExtArgs>
+        fields: Prisma.PreciseFabricArticleDataFieldRefs
+        operations: {
+          findUnique: {
+            args: Prisma.PreciseFabricArticleDataFindUniqueArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$PreciseFabricArticleDataPayload> | null
+          }
+          findUniqueOrThrow: {
+            args: Prisma.PreciseFabricArticleDataFindUniqueOrThrowArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$PreciseFabricArticleDataPayload>
+          }
+          findFirst: {
+            args: Prisma.PreciseFabricArticleDataFindFirstArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$PreciseFabricArticleDataPayload> | null
+          }
+          findFirstOrThrow: {
+            args: Prisma.PreciseFabricArticleDataFindFirstOrThrowArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$PreciseFabricArticleDataPayload>
+          }
+          findMany: {
+            args: Prisma.PreciseFabricArticleDataFindManyArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$PreciseFabricArticleDataPayload>[]
+          }
+          create: {
+            args: Prisma.PreciseFabricArticleDataCreateArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$PreciseFabricArticleDataPayload>
+          }
+          createMany: {
+            args: Prisma.PreciseFabricArticleDataCreateManyArgs<ExtArgs>
+            result: BatchPayload
+          }
+          createManyAndReturn: {
+            args: Prisma.PreciseFabricArticleDataCreateManyAndReturnArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$PreciseFabricArticleDataPayload>[]
+          }
+          delete: {
+            args: Prisma.PreciseFabricArticleDataDeleteArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$PreciseFabricArticleDataPayload>
+          }
+          update: {
+            args: Prisma.PreciseFabricArticleDataUpdateArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$PreciseFabricArticleDataPayload>
+          }
+          deleteMany: {
+            args: Prisma.PreciseFabricArticleDataDeleteManyArgs<ExtArgs>
+            result: BatchPayload
+          }
+          updateMany: {
+            args: Prisma.PreciseFabricArticleDataUpdateManyArgs<ExtArgs>
+            result: BatchPayload
+          }
+          updateManyAndReturn: {
+            args: Prisma.PreciseFabricArticleDataUpdateManyAndReturnArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$PreciseFabricArticleDataPayload>[]
+          }
+          upsert: {
+            args: Prisma.PreciseFabricArticleDataUpsertArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$PreciseFabricArticleDataPayload>
+          }
+          aggregate: {
+            args: Prisma.PreciseFabricArticleDataAggregateArgs<ExtArgs>
+            result: $Utils.Optional<AggregatePreciseFabricArticleData>
+          }
+          groupBy: {
+            args: Prisma.PreciseFabricArticleDataGroupByArgs<ExtArgs>
+            result: $Utils.Optional<PreciseFabricArticleDataGroupByOutputType>[]
+          }
+          count: {
+            args: Prisma.PreciseFabricArticleDataCountArgs<ExtArgs>
+            result: $Utils.Optional<PreciseFabricArticleDataCountAggregateOutputType> | number
+          }
+        }
+      }
       GmArticleData: {
         payload: Prisma.$GmArticleDataPayload<ExtArgs>
         fields: Prisma.GmArticleDataFieldRefs
@@ -5590,6 +5746,80 @@ export namespace Prisma {
           }
         }
       }
+      PreciseTrimMaster: {
+        payload: Prisma.$PreciseTrimMasterPayload<ExtArgs>
+        fields: Prisma.PreciseTrimMasterFieldRefs
+        operations: {
+          findUnique: {
+            args: Prisma.PreciseTrimMasterFindUniqueArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$PreciseTrimMasterPayload> | null
+          }
+          findUniqueOrThrow: {
+            args: Prisma.PreciseTrimMasterFindUniqueOrThrowArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$PreciseTrimMasterPayload>
+          }
+          findFirst: {
+            args: Prisma.PreciseTrimMasterFindFirstArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$PreciseTrimMasterPayload> | null
+          }
+          findFirstOrThrow: {
+            args: Prisma.PreciseTrimMasterFindFirstOrThrowArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$PreciseTrimMasterPayload>
+          }
+          findMany: {
+            args: Prisma.PreciseTrimMasterFindManyArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$PreciseTrimMasterPayload>[]
+          }
+          create: {
+            args: Prisma.PreciseTrimMasterCreateArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$PreciseTrimMasterPayload>
+          }
+          createMany: {
+            args: Prisma.PreciseTrimMasterCreateManyArgs<ExtArgs>
+            result: BatchPayload
+          }
+          createManyAndReturn: {
+            args: Prisma.PreciseTrimMasterCreateManyAndReturnArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$PreciseTrimMasterPayload>[]
+          }
+          delete: {
+            args: Prisma.PreciseTrimMasterDeleteArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$PreciseTrimMasterPayload>
+          }
+          update: {
+            args: Prisma.PreciseTrimMasterUpdateArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$PreciseTrimMasterPayload>
+          }
+          deleteMany: {
+            args: Prisma.PreciseTrimMasterDeleteManyArgs<ExtArgs>
+            result: BatchPayload
+          }
+          updateMany: {
+            args: Prisma.PreciseTrimMasterUpdateManyArgs<ExtArgs>
+            result: BatchPayload
+          }
+          updateManyAndReturn: {
+            args: Prisma.PreciseTrimMasterUpdateManyAndReturnArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$PreciseTrimMasterPayload>[]
+          }
+          upsert: {
+            args: Prisma.PreciseTrimMasterUpsertArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$PreciseTrimMasterPayload>
+          }
+          aggregate: {
+            args: Prisma.PreciseTrimMasterAggregateArgs<ExtArgs>
+            result: $Utils.Optional<AggregatePreciseTrimMaster>
+          }
+          groupBy: {
+            args: Prisma.PreciseTrimMasterGroupByArgs<ExtArgs>
+            result: $Utils.Optional<PreciseTrimMasterGroupByOutputType>[]
+          }
+          count: {
+            args: Prisma.PreciseTrimMasterCountArgs<ExtArgs>
+            result: $Utils.Optional<PreciseTrimMasterCountAggregateOutputType> | number
+          }
+        }
+      }
       BasicTrimCostComponent: {
         payload: Prisma.$BasicTrimCostComponentPayload<ExtArgs>
         fields: Prisma.BasicTrimCostComponentFieldRefs
@@ -6108,6 +6338,228 @@ export namespace Prisma {
           }
         }
       }
+      BodyArticleDescriptionFormate: {
+        payload: Prisma.$BodyArticleDescriptionFormatePayload<ExtArgs>
+        fields: Prisma.BodyArticleDescriptionFormateFieldRefs
+        operations: {
+          findUnique: {
+            args: Prisma.BodyArticleDescriptionFormateFindUniqueArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$BodyArticleDescriptionFormatePayload> | null
+          }
+          findUniqueOrThrow: {
+            args: Prisma.BodyArticleDescriptionFormateFindUniqueOrThrowArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$BodyArticleDescriptionFormatePayload>
+          }
+          findFirst: {
+            args: Prisma.BodyArticleDescriptionFormateFindFirstArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$BodyArticleDescriptionFormatePayload> | null
+          }
+          findFirstOrThrow: {
+            args: Prisma.BodyArticleDescriptionFormateFindFirstOrThrowArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$BodyArticleDescriptionFormatePayload>
+          }
+          findMany: {
+            args: Prisma.BodyArticleDescriptionFormateFindManyArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$BodyArticleDescriptionFormatePayload>[]
+          }
+          create: {
+            args: Prisma.BodyArticleDescriptionFormateCreateArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$BodyArticleDescriptionFormatePayload>
+          }
+          createMany: {
+            args: Prisma.BodyArticleDescriptionFormateCreateManyArgs<ExtArgs>
+            result: BatchPayload
+          }
+          createManyAndReturn: {
+            args: Prisma.BodyArticleDescriptionFormateCreateManyAndReturnArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$BodyArticleDescriptionFormatePayload>[]
+          }
+          delete: {
+            args: Prisma.BodyArticleDescriptionFormateDeleteArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$BodyArticleDescriptionFormatePayload>
+          }
+          update: {
+            args: Prisma.BodyArticleDescriptionFormateUpdateArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$BodyArticleDescriptionFormatePayload>
+          }
+          deleteMany: {
+            args: Prisma.BodyArticleDescriptionFormateDeleteManyArgs<ExtArgs>
+            result: BatchPayload
+          }
+          updateMany: {
+            args: Prisma.BodyArticleDescriptionFormateUpdateManyArgs<ExtArgs>
+            result: BatchPayload
+          }
+          updateManyAndReturn: {
+            args: Prisma.BodyArticleDescriptionFormateUpdateManyAndReturnArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$BodyArticleDescriptionFormatePayload>[]
+          }
+          upsert: {
+            args: Prisma.BodyArticleDescriptionFormateUpsertArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$BodyArticleDescriptionFormatePayload>
+          }
+          aggregate: {
+            args: Prisma.BodyArticleDescriptionFormateAggregateArgs<ExtArgs>
+            result: $Utils.Optional<AggregateBodyArticleDescriptionFormate>
+          }
+          groupBy: {
+            args: Prisma.BodyArticleDescriptionFormateGroupByArgs<ExtArgs>
+            result: $Utils.Optional<BodyArticleDescriptionFormateGroupByOutputType>[]
+          }
+          count: {
+            args: Prisma.BodyArticleDescriptionFormateCountArgs<ExtArgs>
+            result: $Utils.Optional<BodyArticleDescriptionFormateCountAggregateOutputType> | number
+          }
+        }
+      }
+      GmArticleDescriptionFormate: {
+        payload: Prisma.$GmArticleDescriptionFormatePayload<ExtArgs>
+        fields: Prisma.GmArticleDescriptionFormateFieldRefs
+        operations: {
+          findUnique: {
+            args: Prisma.GmArticleDescriptionFormateFindUniqueArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$GmArticleDescriptionFormatePayload> | null
+          }
+          findUniqueOrThrow: {
+            args: Prisma.GmArticleDescriptionFormateFindUniqueOrThrowArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$GmArticleDescriptionFormatePayload>
+          }
+          findFirst: {
+            args: Prisma.GmArticleDescriptionFormateFindFirstArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$GmArticleDescriptionFormatePayload> | null
+          }
+          findFirstOrThrow: {
+            args: Prisma.GmArticleDescriptionFormateFindFirstOrThrowArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$GmArticleDescriptionFormatePayload>
+          }
+          findMany: {
+            args: Prisma.GmArticleDescriptionFormateFindManyArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$GmArticleDescriptionFormatePayload>[]
+          }
+          create: {
+            args: Prisma.GmArticleDescriptionFormateCreateArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$GmArticleDescriptionFormatePayload>
+          }
+          createMany: {
+            args: Prisma.GmArticleDescriptionFormateCreateManyArgs<ExtArgs>
+            result: BatchPayload
+          }
+          createManyAndReturn: {
+            args: Prisma.GmArticleDescriptionFormateCreateManyAndReturnArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$GmArticleDescriptionFormatePayload>[]
+          }
+          delete: {
+            args: Prisma.GmArticleDescriptionFormateDeleteArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$GmArticleDescriptionFormatePayload>
+          }
+          update: {
+            args: Prisma.GmArticleDescriptionFormateUpdateArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$GmArticleDescriptionFormatePayload>
+          }
+          deleteMany: {
+            args: Prisma.GmArticleDescriptionFormateDeleteManyArgs<ExtArgs>
+            result: BatchPayload
+          }
+          updateMany: {
+            args: Prisma.GmArticleDescriptionFormateUpdateManyArgs<ExtArgs>
+            result: BatchPayload
+          }
+          updateManyAndReturn: {
+            args: Prisma.GmArticleDescriptionFormateUpdateManyAndReturnArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$GmArticleDescriptionFormatePayload>[]
+          }
+          upsert: {
+            args: Prisma.GmArticleDescriptionFormateUpsertArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$GmArticleDescriptionFormatePayload>
+          }
+          aggregate: {
+            args: Prisma.GmArticleDescriptionFormateAggregateArgs<ExtArgs>
+            result: $Utils.Optional<AggregateGmArticleDescriptionFormate>
+          }
+          groupBy: {
+            args: Prisma.GmArticleDescriptionFormateGroupByArgs<ExtArgs>
+            result: $Utils.Optional<GmArticleDescriptionFormateGroupByOutputType>[]
+          }
+          count: {
+            args: Prisma.GmArticleDescriptionFormateCountArgs<ExtArgs>
+            result: $Utils.Optional<GmArticleDescriptionFormateCountAggregateOutputType> | number
+          }
+        }
+      }
+      PreciseBodyArticleConsumption: {
+        payload: Prisma.$PreciseBodyArticleConsumptionPayload<ExtArgs>
+        fields: Prisma.PreciseBodyArticleConsumptionFieldRefs
+        operations: {
+          findUnique: {
+            args: Prisma.PreciseBodyArticleConsumptionFindUniqueArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$PreciseBodyArticleConsumptionPayload> | null
+          }
+          findUniqueOrThrow: {
+            args: Prisma.PreciseBodyArticleConsumptionFindUniqueOrThrowArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$PreciseBodyArticleConsumptionPayload>
+          }
+          findFirst: {
+            args: Prisma.PreciseBodyArticleConsumptionFindFirstArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$PreciseBodyArticleConsumptionPayload> | null
+          }
+          findFirstOrThrow: {
+            args: Prisma.PreciseBodyArticleConsumptionFindFirstOrThrowArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$PreciseBodyArticleConsumptionPayload>
+          }
+          findMany: {
+            args: Prisma.PreciseBodyArticleConsumptionFindManyArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$PreciseBodyArticleConsumptionPayload>[]
+          }
+          create: {
+            args: Prisma.PreciseBodyArticleConsumptionCreateArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$PreciseBodyArticleConsumptionPayload>
+          }
+          createMany: {
+            args: Prisma.PreciseBodyArticleConsumptionCreateManyArgs<ExtArgs>
+            result: BatchPayload
+          }
+          createManyAndReturn: {
+            args: Prisma.PreciseBodyArticleConsumptionCreateManyAndReturnArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$PreciseBodyArticleConsumptionPayload>[]
+          }
+          delete: {
+            args: Prisma.PreciseBodyArticleConsumptionDeleteArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$PreciseBodyArticleConsumptionPayload>
+          }
+          update: {
+            args: Prisma.PreciseBodyArticleConsumptionUpdateArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$PreciseBodyArticleConsumptionPayload>
+          }
+          deleteMany: {
+            args: Prisma.PreciseBodyArticleConsumptionDeleteManyArgs<ExtArgs>
+            result: BatchPayload
+          }
+          updateMany: {
+            args: Prisma.PreciseBodyArticleConsumptionUpdateManyArgs<ExtArgs>
+            result: BatchPayload
+          }
+          updateManyAndReturn: {
+            args: Prisma.PreciseBodyArticleConsumptionUpdateManyAndReturnArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$PreciseBodyArticleConsumptionPayload>[]
+          }
+          upsert: {
+            args: Prisma.PreciseBodyArticleConsumptionUpsertArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$PreciseBodyArticleConsumptionPayload>
+          }
+          aggregate: {
+            args: Prisma.PreciseBodyArticleConsumptionAggregateArgs<ExtArgs>
+            result: $Utils.Optional<AggregatePreciseBodyArticleConsumption>
+          }
+          groupBy: {
+            args: Prisma.PreciseBodyArticleConsumptionGroupByArgs<ExtArgs>
+            result: $Utils.Optional<PreciseBodyArticleConsumptionGroupByOutputType>[]
+          }
+          count: {
+            args: Prisma.PreciseBodyArticleConsumptionCountArgs<ExtArgs>
+            result: $Utils.Optional<PreciseBodyArticleConsumptionCountAggregateOutputType> | number
+          }
+        }
+      }
     }
   } & {
     other: {
@@ -6241,6 +6693,7 @@ export namespace Prisma {
     fabricMajCatGridValue?: FabricMajCatGridValueOmit
     modifyLog?: ModifyLogOmit
     fabricArticleData?: FabricArticleDataOmit
+    preciseFabricArticleData?: PreciseFabricArticleDataOmit
     gmArticleData?: GmArticleDataOmit
     gmVariantArticleData?: GmVariantArticleDataOmit
     fgVariantArticleData?: FgVariantArticleDataOmit
@@ -6251,6 +6704,7 @@ export namespace Prisma {
     bodyFabricConsumption?: BodyFabricConsumptionOmit
     roughCmpCostMaster?: RoughCmpCostMasterOmit
     basicTrimCostMaster?: BasicTrimCostMasterOmit
+    preciseTrimMaster?: PreciseTrimMasterOmit
     basicTrimCostComponent?: BasicTrimCostComponentOmit
     majorCategoryDetails?: MajorCategoryDetailsOmit
     expenseApprovalStage?: ExpenseApprovalStageOmit
@@ -6258,6 +6712,9 @@ export namespace Prisma {
     expenseChangeRequest?: ExpenseChangeRequestOmit
     expenseAccessGrant?: ExpenseAccessGrantOmit
     expenseAuditLog?: ExpenseAuditLogOmit
+    bodyArticleDescriptionFormate?: BodyArticleDescriptionFormateOmit
+    gmArticleDescriptionFormate?: GmArticleDescriptionFormateOmit
+    preciseBodyArticleConsumption?: PreciseBodyArticleConsumptionOmit
   }
 
   /* Types for Logging */
@@ -16846,10 +17303,16 @@ export namespace Prisma {
     cmpCost: Decimal | null
     fabCost: Decimal | null
     fabCons: Decimal | null
-    width: Decimal | null
+    autoBgt: Decimal | null
+    roughV2: Decimal | null
     vendorFabricRate: Decimal | null
-    valueAddCost: Decimal | null
-    valueAddProcessCost: Decimal | null
+    finalCost: Decimal | null
+    roughRatio: Decimal | null
+    roughConsumptionKg: Decimal | null
+    roughConsumptionMeter: Decimal | null
+    preciseRatio: Decimal | null
+    preciseConsumptionKg: Decimal | null
+    preciseConsumptionMeter: Decimal | null
     mrp: Decimal | null
     approvedBy: number | null
     comboChildOrder: number | null
@@ -16870,10 +17333,16 @@ export namespace Prisma {
     cmpCost: Decimal | null
     fabCost: Decimal | null
     fabCons: Decimal | null
-    width: Decimal | null
+    autoBgt: Decimal | null
+    roughV2: Decimal | null
     vendorFabricRate: Decimal | null
-    valueAddCost: Decimal | null
-    valueAddProcessCost: Decimal | null
+    finalCost: Decimal | null
+    roughRatio: Decimal | null
+    roughConsumptionKg: Decimal | null
+    roughConsumptionMeter: Decimal | null
+    preciseRatio: Decimal | null
+    preciseConsumptionKg: Decimal | null
+    preciseConsumptionMeter: Decimal | null
     mrp: Decimal | null
     approvedBy: number | null
     comboChildOrder: number | null
@@ -16979,11 +17448,16 @@ export namespace Prisma {
     cmpCost: Decimal | null
     fabCost: Decimal | null
     fabCons: Decimal | null
-    width: Decimal | null
+    autoBgt: Decimal | null
+    roughV2: Decimal | null
     vendorFabricRate: Decimal | null
-    valueAddAccCostType: string | null
-    valueAddCost: Decimal | null
-    valueAddProcessCost: Decimal | null
+    finalCost: Decimal | null
+    roughRatio: Decimal | null
+    roughConsumptionKg: Decimal | null
+    roughConsumptionMeter: Decimal | null
+    preciseRatio: Decimal | null
+    preciseConsumptionKg: Decimal | null
+    preciseConsumptionMeter: Decimal | null
     bodyArticle: string | null
     bodyArticleDescription: string | null
     fabricArticleNumber: string | null
@@ -17128,11 +17602,16 @@ export namespace Prisma {
     cmpCost: Decimal | null
     fabCost: Decimal | null
     fabCons: Decimal | null
-    width: Decimal | null
+    autoBgt: Decimal | null
+    roughV2: Decimal | null
     vendorFabricRate: Decimal | null
-    valueAddAccCostType: string | null
-    valueAddCost: Decimal | null
-    valueAddProcessCost: Decimal | null
+    finalCost: Decimal | null
+    roughRatio: Decimal | null
+    roughConsumptionKg: Decimal | null
+    roughConsumptionMeter: Decimal | null
+    preciseRatio: Decimal | null
+    preciseConsumptionKg: Decimal | null
+    preciseConsumptionMeter: Decimal | null
     bodyArticle: string | null
     bodyArticleDescription: string | null
     fabricArticleNumber: string | null
@@ -17277,11 +17756,16 @@ export namespace Prisma {
     cmpCost: number
     fabCost: number
     fabCons: number
-    width: number
+    autoBgt: number
+    roughV2: number
     vendorFabricRate: number
-    valueAddAccCostType: number
-    valueAddCost: number
-    valueAddProcessCost: number
+    finalCost: number
+    roughRatio: number
+    roughConsumptionKg: number
+    roughConsumptionMeter: number
+    preciseRatio: number
+    preciseConsumptionKg: number
+    preciseConsumptionMeter: number
     bodyArticle: number
     bodyArticleDescription: number
     fabricArticleNumber: number
@@ -17344,10 +17828,16 @@ export namespace Prisma {
     cmpCost?: true
     fabCost?: true
     fabCons?: true
-    width?: true
+    autoBgt?: true
+    roughV2?: true
     vendorFabricRate?: true
-    valueAddCost?: true
-    valueAddProcessCost?: true
+    finalCost?: true
+    roughRatio?: true
+    roughConsumptionKg?: true
+    roughConsumptionMeter?: true
+    preciseRatio?: true
+    preciseConsumptionKg?: true
+    preciseConsumptionMeter?: true
     mrp?: true
     approvedBy?: true
     comboChildOrder?: true
@@ -17368,10 +17858,16 @@ export namespace Prisma {
     cmpCost?: true
     fabCost?: true
     fabCons?: true
-    width?: true
+    autoBgt?: true
+    roughV2?: true
     vendorFabricRate?: true
-    valueAddCost?: true
-    valueAddProcessCost?: true
+    finalCost?: true
+    roughRatio?: true
+    roughConsumptionKg?: true
+    roughConsumptionMeter?: true
+    preciseRatio?: true
+    preciseConsumptionKg?: true
+    preciseConsumptionMeter?: true
     mrp?: true
     approvedBy?: true
     comboChildOrder?: true
@@ -17477,11 +17973,16 @@ export namespace Prisma {
     cmpCost?: true
     fabCost?: true
     fabCons?: true
-    width?: true
+    autoBgt?: true
+    roughV2?: true
     vendorFabricRate?: true
-    valueAddAccCostType?: true
-    valueAddCost?: true
-    valueAddProcessCost?: true
+    finalCost?: true
+    roughRatio?: true
+    roughConsumptionKg?: true
+    roughConsumptionMeter?: true
+    preciseRatio?: true
+    preciseConsumptionKg?: true
+    preciseConsumptionMeter?: true
     bodyArticle?: true
     bodyArticleDescription?: true
     fabricArticleNumber?: true
@@ -17626,11 +18127,16 @@ export namespace Prisma {
     cmpCost?: true
     fabCost?: true
     fabCons?: true
-    width?: true
+    autoBgt?: true
+    roughV2?: true
     vendorFabricRate?: true
-    valueAddAccCostType?: true
-    valueAddCost?: true
-    valueAddProcessCost?: true
+    finalCost?: true
+    roughRatio?: true
+    roughConsumptionKg?: true
+    roughConsumptionMeter?: true
+    preciseRatio?: true
+    preciseConsumptionKg?: true
+    preciseConsumptionMeter?: true
     bodyArticle?: true
     bodyArticleDescription?: true
     fabricArticleNumber?: true
@@ -17775,11 +18281,16 @@ export namespace Prisma {
     cmpCost?: true
     fabCost?: true
     fabCons?: true
-    width?: true
+    autoBgt?: true
+    roughV2?: true
     vendorFabricRate?: true
-    valueAddAccCostType?: true
-    valueAddCost?: true
-    valueAddProcessCost?: true
+    finalCost?: true
+    roughRatio?: true
+    roughConsumptionKg?: true
+    roughConsumptionMeter?: true
+    preciseRatio?: true
+    preciseConsumptionKg?: true
+    preciseConsumptionMeter?: true
     bodyArticle?: true
     bodyArticleDescription?: true
     fabricArticleNumber?: true
@@ -18012,11 +18523,16 @@ export namespace Prisma {
     cmpCost: Decimal | null
     fabCost: Decimal | null
     fabCons: Decimal | null
-    width: Decimal | null
+    autoBgt: Decimal | null
+    roughV2: Decimal | null
     vendorFabricRate: Decimal | null
-    valueAddAccCostType: string | null
-    valueAddCost: Decimal | null
-    valueAddProcessCost: Decimal | null
+    finalCost: Decimal | null
+    roughRatio: Decimal | null
+    roughConsumptionKg: Decimal | null
+    roughConsumptionMeter: Decimal | null
+    preciseRatio: Decimal | null
+    preciseConsumptionKg: Decimal | null
+    preciseConsumptionMeter: Decimal | null
     bodyArticle: string | null
     bodyArticleDescription: string | null
     fabricArticleNumber: string | null
@@ -18181,11 +18697,16 @@ export namespace Prisma {
     cmpCost?: boolean
     fabCost?: boolean
     fabCons?: boolean
-    width?: boolean
+    autoBgt?: boolean
+    roughV2?: boolean
     vendorFabricRate?: boolean
-    valueAddAccCostType?: boolean
-    valueAddCost?: boolean
-    valueAddProcessCost?: boolean
+    finalCost?: boolean
+    roughRatio?: boolean
+    roughConsumptionKg?: boolean
+    roughConsumptionMeter?: boolean
+    preciseRatio?: boolean
+    preciseConsumptionKg?: boolean
+    preciseConsumptionMeter?: boolean
     bodyArticle?: boolean
     bodyArticleDescription?: boolean
     fabricArticleNumber?: boolean
@@ -18337,11 +18858,16 @@ export namespace Prisma {
     cmpCost?: boolean
     fabCost?: boolean
     fabCons?: boolean
-    width?: boolean
+    autoBgt?: boolean
+    roughV2?: boolean
     vendorFabricRate?: boolean
-    valueAddAccCostType?: boolean
-    valueAddCost?: boolean
-    valueAddProcessCost?: boolean
+    finalCost?: boolean
+    roughRatio?: boolean
+    roughConsumptionKg?: boolean
+    roughConsumptionMeter?: boolean
+    preciseRatio?: boolean
+    preciseConsumptionKg?: boolean
+    preciseConsumptionMeter?: boolean
     bodyArticle?: boolean
     bodyArticleDescription?: boolean
     fabricArticleNumber?: boolean
@@ -18490,11 +19016,16 @@ export namespace Prisma {
     cmpCost?: boolean
     fabCost?: boolean
     fabCons?: boolean
-    width?: boolean
+    autoBgt?: boolean
+    roughV2?: boolean
     vendorFabricRate?: boolean
-    valueAddAccCostType?: boolean
-    valueAddCost?: boolean
-    valueAddProcessCost?: boolean
+    finalCost?: boolean
+    roughRatio?: boolean
+    roughConsumptionKg?: boolean
+    roughConsumptionMeter?: boolean
+    preciseRatio?: boolean
+    preciseConsumptionKg?: boolean
+    preciseConsumptionMeter?: boolean
     bodyArticle?: boolean
     bodyArticleDescription?: boolean
     fabricArticleNumber?: boolean
@@ -18643,11 +19174,16 @@ export namespace Prisma {
     cmpCost?: boolean
     fabCost?: boolean
     fabCons?: boolean
-    width?: boolean
+    autoBgt?: boolean
+    roughV2?: boolean
     vendorFabricRate?: boolean
-    valueAddAccCostType?: boolean
-    valueAddCost?: boolean
-    valueAddProcessCost?: boolean
+    finalCost?: boolean
+    roughRatio?: boolean
+    roughConsumptionKg?: boolean
+    roughConsumptionMeter?: boolean
+    preciseRatio?: boolean
+    preciseConsumptionKg?: boolean
+    preciseConsumptionMeter?: boolean
     bodyArticle?: boolean
     bodyArticleDescription?: boolean
     fabricArticleNumber?: boolean
@@ -18693,7 +19229,7 @@ export namespace Prisma {
     imageExtractionRawData?: boolean
   }
 
-  export type ExtractionResultFlatOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<"id" | "jobId" | "imageName" | "imageUrl" | "articleNumber" | "extractionStatus" | "aiModel" | "avgConfidence" | "processingTimeMs" | "totalAttributes" | "extractedCount" | "inputTokens" | "outputTokens" | "totalTokens" | "apiCost" | "userId" | "userName" | "extractionDate" | "createdAt" | "updatedAt" | "majorCategory" | "vendorName" | "designNumber" | "pptNumber" | "rate" | "size" | "yarn1" | "yarn2" | "fabricMainMvgr" | "weave" | "weaveFullForm" | "composition" | "finish" | "gsm" | "macroMvgr" | "macroMvgrFullForm" | "mainMvgr" | "mainMvgrFullForm" | "mFab2" | "mFab2FullForm" | "shade" | "weight" | "lycra" | "neck" | "neckDetails" | "collar" | "placket" | "sleeve" | "bottomFold" | "frontOpenStyle" | "pocketType" | "fit" | "pattern" | "length" | "colour" | "secondaryColour" | "drawcord" | "button" | "zipper" | "zipColour" | "printType" | "printStyle" | "printPlacement" | "patches" | "patchesType" | "embroidery" | "embroideryType" | "wash" | "fatherBelt" | "childBelt" | "division" | "subDivision" | "referenceArticleNumber" | "referenceArticleDescription" | "collarStyle" | "sleeveFold" | "mSet" | "noOfPocket" | "extraPocket" | "dcShape" | "btnColour" | "fCount" | "fConstruction" | "fOunce" | "fWidth" | "fabDiv" | "fabVdr" | "htrfType" | "htrfStyle" | "embPlacement" | "ageGroup" | "mNoOfSize" | "mNoOfClr" | "articleFashionType" | "articleDimension" | "cmtpCost" | "cmpCost" | "fabCost" | "fabCons" | "width" | "vendorFabricRate" | "valueAddAccCostType" | "valueAddCost" | "valueAddProcessCost" | "bodyArticle" | "bodyArticleDescription" | "fabricArticleNumber" | "fabricArticleDescription" | "attrArticleNums" | "mvgrBrandVendor" | "mcDescription" | "vendorCode" | "mrp" | "impAtrbt2" | "mcCode" | "segment" | "season" | "hsnTaxCode" | "articleDescription" | "fashionGrid" | "year" | "articleType" | "presentationsType" | "approvalStatus" | "pdStatus" | "approvedBy" | "approvedAt" | "source" | "imageUncPath" | "isOldArticle" | "isGeneric" | "genericArticleId" | "variantSize" | "variantColor" | "variantWeight" | "comboRole" | "comboParentId" | "comboChildOrder" | "setGroupId" | "setRole" | "setName" | "sapSyncStatus" | "sapArticleId" | "sapSyncMessage" | "srmOriginalDesignNumber" | "srmUniqueId" | "imageExtractionRawData", ExtArgs["result"]["extractionResultFlat"]>
+  export type ExtractionResultFlatOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<"id" | "jobId" | "imageName" | "imageUrl" | "articleNumber" | "extractionStatus" | "aiModel" | "avgConfidence" | "processingTimeMs" | "totalAttributes" | "extractedCount" | "inputTokens" | "outputTokens" | "totalTokens" | "apiCost" | "userId" | "userName" | "extractionDate" | "createdAt" | "updatedAt" | "majorCategory" | "vendorName" | "designNumber" | "pptNumber" | "rate" | "size" | "yarn1" | "yarn2" | "fabricMainMvgr" | "weave" | "weaveFullForm" | "composition" | "finish" | "gsm" | "macroMvgr" | "macroMvgrFullForm" | "mainMvgr" | "mainMvgrFullForm" | "mFab2" | "mFab2FullForm" | "shade" | "weight" | "lycra" | "neck" | "neckDetails" | "collar" | "placket" | "sleeve" | "bottomFold" | "frontOpenStyle" | "pocketType" | "fit" | "pattern" | "length" | "colour" | "secondaryColour" | "drawcord" | "button" | "zipper" | "zipColour" | "printType" | "printStyle" | "printPlacement" | "patches" | "patchesType" | "embroidery" | "embroideryType" | "wash" | "fatherBelt" | "childBelt" | "division" | "subDivision" | "referenceArticleNumber" | "referenceArticleDescription" | "collarStyle" | "sleeveFold" | "mSet" | "noOfPocket" | "extraPocket" | "dcShape" | "btnColour" | "fCount" | "fConstruction" | "fOunce" | "fWidth" | "fabDiv" | "fabVdr" | "htrfType" | "htrfStyle" | "embPlacement" | "ageGroup" | "mNoOfSize" | "mNoOfClr" | "articleFashionType" | "articleDimension" | "cmtpCost" | "cmpCost" | "fabCost" | "fabCons" | "autoBgt" | "roughV2" | "vendorFabricRate" | "finalCost" | "roughRatio" | "roughConsumptionKg" | "roughConsumptionMeter" | "preciseRatio" | "preciseConsumptionKg" | "preciseConsumptionMeter" | "bodyArticle" | "bodyArticleDescription" | "fabricArticleNumber" | "fabricArticleDescription" | "attrArticleNums" | "mvgrBrandVendor" | "mcDescription" | "vendorCode" | "mrp" | "impAtrbt2" | "mcCode" | "segment" | "season" | "hsnTaxCode" | "articleDescription" | "fashionGrid" | "year" | "articleType" | "presentationsType" | "approvalStatus" | "pdStatus" | "approvedBy" | "approvedAt" | "source" | "imageUncPath" | "isOldArticle" | "isGeneric" | "genericArticleId" | "variantSize" | "variantColor" | "variantWeight" | "comboRole" | "comboParentId" | "comboChildOrder" | "setGroupId" | "setRole" | "setName" | "sapSyncStatus" | "sapArticleId" | "sapSyncMessage" | "srmOriginalDesignNumber" | "srmUniqueId" | "imageExtractionRawData", ExtArgs["result"]["extractionResultFlat"]>
   export type ExtractionResultFlatInclude<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
     approver?: boolean | ExtractionResultFlat$approverArgs<ExtArgs>
     comboParent?: boolean | ExtractionResultFlat$comboParentArgs<ExtArgs>
@@ -18822,11 +19358,16 @@ export namespace Prisma {
       cmpCost: Prisma.Decimal | null
       fabCost: Prisma.Decimal | null
       fabCons: Prisma.Decimal | null
-      width: Prisma.Decimal | null
+      autoBgt: Prisma.Decimal | null
+      roughV2: Prisma.Decimal | null
       vendorFabricRate: Prisma.Decimal | null
-      valueAddAccCostType: string | null
-      valueAddCost: Prisma.Decimal | null
-      valueAddProcessCost: Prisma.Decimal | null
+      finalCost: Prisma.Decimal | null
+      roughRatio: Prisma.Decimal | null
+      roughConsumptionKg: Prisma.Decimal | null
+      roughConsumptionMeter: Prisma.Decimal | null
+      preciseRatio: Prisma.Decimal | null
+      preciseConsumptionKg: Prisma.Decimal | null
+      preciseConsumptionMeter: Prisma.Decimal | null
       bodyArticle: string | null
       bodyArticleDescription: string | null
       fabricArticleNumber: string | null
@@ -19397,11 +19938,16 @@ export namespace Prisma {
     readonly cmpCost: FieldRef<"ExtractionResultFlat", 'Decimal'>
     readonly fabCost: FieldRef<"ExtractionResultFlat", 'Decimal'>
     readonly fabCons: FieldRef<"ExtractionResultFlat", 'Decimal'>
-    readonly width: FieldRef<"ExtractionResultFlat", 'Decimal'>
+    readonly autoBgt: FieldRef<"ExtractionResultFlat", 'Decimal'>
+    readonly roughV2: FieldRef<"ExtractionResultFlat", 'Decimal'>
     readonly vendorFabricRate: FieldRef<"ExtractionResultFlat", 'Decimal'>
-    readonly valueAddAccCostType: FieldRef<"ExtractionResultFlat", 'String'>
-    readonly valueAddCost: FieldRef<"ExtractionResultFlat", 'Decimal'>
-    readonly valueAddProcessCost: FieldRef<"ExtractionResultFlat", 'Decimal'>
+    readonly finalCost: FieldRef<"ExtractionResultFlat", 'Decimal'>
+    readonly roughRatio: FieldRef<"ExtractionResultFlat", 'Decimal'>
+    readonly roughConsumptionKg: FieldRef<"ExtractionResultFlat", 'Decimal'>
+    readonly roughConsumptionMeter: FieldRef<"ExtractionResultFlat", 'Decimal'>
+    readonly preciseRatio: FieldRef<"ExtractionResultFlat", 'Decimal'>
+    readonly preciseConsumptionKg: FieldRef<"ExtractionResultFlat", 'Decimal'>
+    readonly preciseConsumptionMeter: FieldRef<"ExtractionResultFlat", 'Decimal'>
     readonly bodyArticle: FieldRef<"ExtractionResultFlat", 'String'>
     readonly bodyArticleDescription: FieldRef<"ExtractionResultFlat", 'String'>
     readonly fabricArticleNumber: FieldRef<"ExtractionResultFlat", 'String'>
@@ -59212,6 +59758,1294 @@ export namespace Prisma {
 
 
   /**
+   * Model PreciseFabricArticleData
+   */
+
+  export type AggregatePreciseFabricArticleData = {
+    _count: PreciseFabricArticleDataCountAggregateOutputType | null
+    _avg: PreciseFabricArticleDataAvgAggregateOutputType | null
+    _sum: PreciseFabricArticleDataSumAggregateOutputType | null
+    _min: PreciseFabricArticleDataMinAggregateOutputType | null
+    _max: PreciseFabricArticleDataMaxAggregateOutputType | null
+  }
+
+  export type PreciseFabricArticleDataAvgAggregateOutputType = {
+    id: number | null
+    fabricArticleNumber: number | null
+    vendorCode: number | null
+    fabricRate: Decimal | null
+  }
+
+  export type PreciseFabricArticleDataSumAggregateOutputType = {
+    id: bigint | null
+    fabricArticleNumber: bigint | null
+    vendorCode: number | null
+    fabricRate: Decimal | null
+  }
+
+  export type PreciseFabricArticleDataMinAggregateOutputType = {
+    id: bigint | null
+    fabricArticleNumber: bigint | null
+    fabricArticleDescription: string | null
+    division: string | null
+    subDivision: string | null
+    majorCategory: string | null
+    vendorName: string | null
+    vendorCode: number | null
+    fabricRate: Decimal | null
+    mFabDiv: string | null
+    mYarn: string | null
+    mFabMainMvgr1: string | null
+    mFabMainMvgr2: string | null
+    mConstruction: string | null
+    mOunz: string | null
+    mWidth: string | null
+    mWeave01: string | null
+    mWeave02: string | null
+    mCount: string | null
+    mComposition: string | null
+    mFinish: string | null
+    mGsm: string | null
+    mLycra: string | null
+    createdAt: Date | null
+  }
+
+  export type PreciseFabricArticleDataMaxAggregateOutputType = {
+    id: bigint | null
+    fabricArticleNumber: bigint | null
+    fabricArticleDescription: string | null
+    division: string | null
+    subDivision: string | null
+    majorCategory: string | null
+    vendorName: string | null
+    vendorCode: number | null
+    fabricRate: Decimal | null
+    mFabDiv: string | null
+    mYarn: string | null
+    mFabMainMvgr1: string | null
+    mFabMainMvgr2: string | null
+    mConstruction: string | null
+    mOunz: string | null
+    mWidth: string | null
+    mWeave01: string | null
+    mWeave02: string | null
+    mCount: string | null
+    mComposition: string | null
+    mFinish: string | null
+    mGsm: string | null
+    mLycra: string | null
+    createdAt: Date | null
+  }
+
+  export type PreciseFabricArticleDataCountAggregateOutputType = {
+    id: number
+    fabricArticleNumber: number
+    fabricArticleDescription: number
+    division: number
+    subDivision: number
+    majorCategory: number
+    vendorName: number
+    vendorCode: number
+    fabricRate: number
+    mFabDiv: number
+    mYarn: number
+    mFabMainMvgr1: number
+    mFabMainMvgr2: number
+    mConstruction: number
+    mOunz: number
+    mWidth: number
+    mWeave01: number
+    mWeave02: number
+    mCount: number
+    mComposition: number
+    mFinish: number
+    mGsm: number
+    mLycra: number
+    createdAt: number
+    _all: number
+  }
+
+
+  export type PreciseFabricArticleDataAvgAggregateInputType = {
+    id?: true
+    fabricArticleNumber?: true
+    vendorCode?: true
+    fabricRate?: true
+  }
+
+  export type PreciseFabricArticleDataSumAggregateInputType = {
+    id?: true
+    fabricArticleNumber?: true
+    vendorCode?: true
+    fabricRate?: true
+  }
+
+  export type PreciseFabricArticleDataMinAggregateInputType = {
+    id?: true
+    fabricArticleNumber?: true
+    fabricArticleDescription?: true
+    division?: true
+    subDivision?: true
+    majorCategory?: true
+    vendorName?: true
+    vendorCode?: true
+    fabricRate?: true
+    mFabDiv?: true
+    mYarn?: true
+    mFabMainMvgr1?: true
+    mFabMainMvgr2?: true
+    mConstruction?: true
+    mOunz?: true
+    mWidth?: true
+    mWeave01?: true
+    mWeave02?: true
+    mCount?: true
+    mComposition?: true
+    mFinish?: true
+    mGsm?: true
+    mLycra?: true
+    createdAt?: true
+  }
+
+  export type PreciseFabricArticleDataMaxAggregateInputType = {
+    id?: true
+    fabricArticleNumber?: true
+    fabricArticleDescription?: true
+    division?: true
+    subDivision?: true
+    majorCategory?: true
+    vendorName?: true
+    vendorCode?: true
+    fabricRate?: true
+    mFabDiv?: true
+    mYarn?: true
+    mFabMainMvgr1?: true
+    mFabMainMvgr2?: true
+    mConstruction?: true
+    mOunz?: true
+    mWidth?: true
+    mWeave01?: true
+    mWeave02?: true
+    mCount?: true
+    mComposition?: true
+    mFinish?: true
+    mGsm?: true
+    mLycra?: true
+    createdAt?: true
+  }
+
+  export type PreciseFabricArticleDataCountAggregateInputType = {
+    id?: true
+    fabricArticleNumber?: true
+    fabricArticleDescription?: true
+    division?: true
+    subDivision?: true
+    majorCategory?: true
+    vendorName?: true
+    vendorCode?: true
+    fabricRate?: true
+    mFabDiv?: true
+    mYarn?: true
+    mFabMainMvgr1?: true
+    mFabMainMvgr2?: true
+    mConstruction?: true
+    mOunz?: true
+    mWidth?: true
+    mWeave01?: true
+    mWeave02?: true
+    mCount?: true
+    mComposition?: true
+    mFinish?: true
+    mGsm?: true
+    mLycra?: true
+    createdAt?: true
+    _all?: true
+  }
+
+  export type PreciseFabricArticleDataAggregateArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Filter which PreciseFabricArticleData to aggregate.
+     */
+    where?: PreciseFabricArticleDataWhereInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
+     * 
+     * Determine the order of PreciseFabricArticleData to fetch.
+     */
+    orderBy?: PreciseFabricArticleDataOrderByWithRelationInput | PreciseFabricArticleDataOrderByWithRelationInput[]
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
+     * 
+     * Sets the start position
+     */
+    cursor?: PreciseFabricArticleDataWhereUniqueInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Take `±n` PreciseFabricArticleData from the position of the cursor.
+     */
+    take?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Skip the first `n` PreciseFabricArticleData.
+     */
+    skip?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     * 
+     * Count returned PreciseFabricArticleData
+    **/
+    _count?: true | PreciseFabricArticleDataCountAggregateInputType
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     * 
+     * Select which fields to average
+    **/
+    _avg?: PreciseFabricArticleDataAvgAggregateInputType
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     * 
+     * Select which fields to sum
+    **/
+    _sum?: PreciseFabricArticleDataSumAggregateInputType
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     * 
+     * Select which fields to find the minimum value
+    **/
+    _min?: PreciseFabricArticleDataMinAggregateInputType
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     * 
+     * Select which fields to find the maximum value
+    **/
+    _max?: PreciseFabricArticleDataMaxAggregateInputType
+  }
+
+  export type GetPreciseFabricArticleDataAggregateType<T extends PreciseFabricArticleDataAggregateArgs> = {
+        [P in keyof T & keyof AggregatePreciseFabricArticleData]: P extends '_count' | 'count'
+      ? T[P] extends true
+        ? number
+        : GetScalarType<T[P], AggregatePreciseFabricArticleData[P]>
+      : GetScalarType<T[P], AggregatePreciseFabricArticleData[P]>
+  }
+
+
+
+
+  export type PreciseFabricArticleDataGroupByArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    where?: PreciseFabricArticleDataWhereInput
+    orderBy?: PreciseFabricArticleDataOrderByWithAggregationInput | PreciseFabricArticleDataOrderByWithAggregationInput[]
+    by: PreciseFabricArticleDataScalarFieldEnum[] | PreciseFabricArticleDataScalarFieldEnum
+    having?: PreciseFabricArticleDataScalarWhereWithAggregatesInput
+    take?: number
+    skip?: number
+    _count?: PreciseFabricArticleDataCountAggregateInputType | true
+    _avg?: PreciseFabricArticleDataAvgAggregateInputType
+    _sum?: PreciseFabricArticleDataSumAggregateInputType
+    _min?: PreciseFabricArticleDataMinAggregateInputType
+    _max?: PreciseFabricArticleDataMaxAggregateInputType
+  }
+
+  export type PreciseFabricArticleDataGroupByOutputType = {
+    id: bigint
+    fabricArticleNumber: bigint | null
+    fabricArticleDescription: string | null
+    division: string | null
+    subDivision: string | null
+    majorCategory: string | null
+    vendorName: string | null
+    vendorCode: number | null
+    fabricRate: Decimal | null
+    mFabDiv: string | null
+    mYarn: string | null
+    mFabMainMvgr1: string | null
+    mFabMainMvgr2: string | null
+    mConstruction: string | null
+    mOunz: string | null
+    mWidth: string | null
+    mWeave01: string | null
+    mWeave02: string | null
+    mCount: string | null
+    mComposition: string | null
+    mFinish: string | null
+    mGsm: string | null
+    mLycra: string | null
+    createdAt: Date
+    _count: PreciseFabricArticleDataCountAggregateOutputType | null
+    _avg: PreciseFabricArticleDataAvgAggregateOutputType | null
+    _sum: PreciseFabricArticleDataSumAggregateOutputType | null
+    _min: PreciseFabricArticleDataMinAggregateOutputType | null
+    _max: PreciseFabricArticleDataMaxAggregateOutputType | null
+  }
+
+  type GetPreciseFabricArticleDataGroupByPayload<T extends PreciseFabricArticleDataGroupByArgs> = Prisma.PrismaPromise<
+    Array<
+      PickEnumerable<PreciseFabricArticleDataGroupByOutputType, T['by']> &
+        {
+          [P in ((keyof T) & (keyof PreciseFabricArticleDataGroupByOutputType))]: P extends '_count'
+            ? T[P] extends boolean
+              ? number
+              : GetScalarType<T[P], PreciseFabricArticleDataGroupByOutputType[P]>
+            : GetScalarType<T[P], PreciseFabricArticleDataGroupByOutputType[P]>
+        }
+      >
+    >
+
+
+  export type PreciseFabricArticleDataSelect<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
+    id?: boolean
+    fabricArticleNumber?: boolean
+    fabricArticleDescription?: boolean
+    division?: boolean
+    subDivision?: boolean
+    majorCategory?: boolean
+    vendorName?: boolean
+    vendorCode?: boolean
+    fabricRate?: boolean
+    mFabDiv?: boolean
+    mYarn?: boolean
+    mFabMainMvgr1?: boolean
+    mFabMainMvgr2?: boolean
+    mConstruction?: boolean
+    mOunz?: boolean
+    mWidth?: boolean
+    mWeave01?: boolean
+    mWeave02?: boolean
+    mCount?: boolean
+    mComposition?: boolean
+    mFinish?: boolean
+    mGsm?: boolean
+    mLycra?: boolean
+    createdAt?: boolean
+  }, ExtArgs["result"]["preciseFabricArticleData"]>
+
+  export type PreciseFabricArticleDataSelectCreateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
+    id?: boolean
+    fabricArticleNumber?: boolean
+    fabricArticleDescription?: boolean
+    division?: boolean
+    subDivision?: boolean
+    majorCategory?: boolean
+    vendorName?: boolean
+    vendorCode?: boolean
+    fabricRate?: boolean
+    mFabDiv?: boolean
+    mYarn?: boolean
+    mFabMainMvgr1?: boolean
+    mFabMainMvgr2?: boolean
+    mConstruction?: boolean
+    mOunz?: boolean
+    mWidth?: boolean
+    mWeave01?: boolean
+    mWeave02?: boolean
+    mCount?: boolean
+    mComposition?: boolean
+    mFinish?: boolean
+    mGsm?: boolean
+    mLycra?: boolean
+    createdAt?: boolean
+  }, ExtArgs["result"]["preciseFabricArticleData"]>
+
+  export type PreciseFabricArticleDataSelectUpdateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
+    id?: boolean
+    fabricArticleNumber?: boolean
+    fabricArticleDescription?: boolean
+    division?: boolean
+    subDivision?: boolean
+    majorCategory?: boolean
+    vendorName?: boolean
+    vendorCode?: boolean
+    fabricRate?: boolean
+    mFabDiv?: boolean
+    mYarn?: boolean
+    mFabMainMvgr1?: boolean
+    mFabMainMvgr2?: boolean
+    mConstruction?: boolean
+    mOunz?: boolean
+    mWidth?: boolean
+    mWeave01?: boolean
+    mWeave02?: boolean
+    mCount?: boolean
+    mComposition?: boolean
+    mFinish?: boolean
+    mGsm?: boolean
+    mLycra?: boolean
+    createdAt?: boolean
+  }, ExtArgs["result"]["preciseFabricArticleData"]>
+
+  export type PreciseFabricArticleDataSelectScalar = {
+    id?: boolean
+    fabricArticleNumber?: boolean
+    fabricArticleDescription?: boolean
+    division?: boolean
+    subDivision?: boolean
+    majorCategory?: boolean
+    vendorName?: boolean
+    vendorCode?: boolean
+    fabricRate?: boolean
+    mFabDiv?: boolean
+    mYarn?: boolean
+    mFabMainMvgr1?: boolean
+    mFabMainMvgr2?: boolean
+    mConstruction?: boolean
+    mOunz?: boolean
+    mWidth?: boolean
+    mWeave01?: boolean
+    mWeave02?: boolean
+    mCount?: boolean
+    mComposition?: boolean
+    mFinish?: boolean
+    mGsm?: boolean
+    mLycra?: boolean
+    createdAt?: boolean
+  }
+
+  export type PreciseFabricArticleDataOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<"id" | "fabricArticleNumber" | "fabricArticleDescription" | "division" | "subDivision" | "majorCategory" | "vendorName" | "vendorCode" | "fabricRate" | "mFabDiv" | "mYarn" | "mFabMainMvgr1" | "mFabMainMvgr2" | "mConstruction" | "mOunz" | "mWidth" | "mWeave01" | "mWeave02" | "mCount" | "mComposition" | "mFinish" | "mGsm" | "mLycra" | "createdAt", ExtArgs["result"]["preciseFabricArticleData"]>
+
+  export type $PreciseFabricArticleDataPayload<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    name: "PreciseFabricArticleData"
+    objects: {}
+    scalars: $Extensions.GetPayloadResult<{
+      id: bigint
+      fabricArticleNumber: bigint | null
+      fabricArticleDescription: string | null
+      division: string | null
+      subDivision: string | null
+      majorCategory: string | null
+      vendorName: string | null
+      vendorCode: number | null
+      fabricRate: Prisma.Decimal | null
+      mFabDiv: string | null
+      mYarn: string | null
+      mFabMainMvgr1: string | null
+      mFabMainMvgr2: string | null
+      mConstruction: string | null
+      mOunz: string | null
+      mWidth: string | null
+      mWeave01: string | null
+      mWeave02: string | null
+      mCount: string | null
+      mComposition: string | null
+      mFinish: string | null
+      mGsm: string | null
+      mLycra: string | null
+      createdAt: Date
+    }, ExtArgs["result"]["preciseFabricArticleData"]>
+    composites: {}
+  }
+
+  type PreciseFabricArticleDataGetPayload<S extends boolean | null | undefined | PreciseFabricArticleDataDefaultArgs> = $Result.GetResult<Prisma.$PreciseFabricArticleDataPayload, S>
+
+  type PreciseFabricArticleDataCountArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> =
+    Omit<PreciseFabricArticleDataFindManyArgs, 'select' | 'include' | 'distinct' | 'omit'> & {
+      select?: PreciseFabricArticleDataCountAggregateInputType | true
+    }
+
+  export interface PreciseFabricArticleDataDelegate<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs, GlobalOmitOptions = {}> {
+    [K: symbol]: { types: Prisma.TypeMap<ExtArgs>['model']['PreciseFabricArticleData'], meta: { name: 'PreciseFabricArticleData' } }
+    /**
+     * Find zero or one PreciseFabricArticleData that matches the filter.
+     * @param {PreciseFabricArticleDataFindUniqueArgs} args - Arguments to find a PreciseFabricArticleData
+     * @example
+     * // Get one PreciseFabricArticleData
+     * const preciseFabricArticleData = await prisma.preciseFabricArticleData.findUnique({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     */
+    findUnique<T extends PreciseFabricArticleDataFindUniqueArgs>(args: SelectSubset<T, PreciseFabricArticleDataFindUniqueArgs<ExtArgs>>): Prisma__PreciseFabricArticleDataClient<$Result.GetResult<Prisma.$PreciseFabricArticleDataPayload<ExtArgs>, T, "findUnique", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Find one PreciseFabricArticleData that matches the filter or throw an error with `error.code='P2025'`
+     * if no matches were found.
+     * @param {PreciseFabricArticleDataFindUniqueOrThrowArgs} args - Arguments to find a PreciseFabricArticleData
+     * @example
+     * // Get one PreciseFabricArticleData
+     * const preciseFabricArticleData = await prisma.preciseFabricArticleData.findUniqueOrThrow({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     */
+    findUniqueOrThrow<T extends PreciseFabricArticleDataFindUniqueOrThrowArgs>(args: SelectSubset<T, PreciseFabricArticleDataFindUniqueOrThrowArgs<ExtArgs>>): Prisma__PreciseFabricArticleDataClient<$Result.GetResult<Prisma.$PreciseFabricArticleDataPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Find the first PreciseFabricArticleData that matches the filter.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {PreciseFabricArticleDataFindFirstArgs} args - Arguments to find a PreciseFabricArticleData
+     * @example
+     * // Get one PreciseFabricArticleData
+     * const preciseFabricArticleData = await prisma.preciseFabricArticleData.findFirst({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     */
+    findFirst<T extends PreciseFabricArticleDataFindFirstArgs>(args?: SelectSubset<T, PreciseFabricArticleDataFindFirstArgs<ExtArgs>>): Prisma__PreciseFabricArticleDataClient<$Result.GetResult<Prisma.$PreciseFabricArticleDataPayload<ExtArgs>, T, "findFirst", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Find the first PreciseFabricArticleData that matches the filter or
+     * throw `PrismaKnownClientError` with `P2025` code if no matches were found.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {PreciseFabricArticleDataFindFirstOrThrowArgs} args - Arguments to find a PreciseFabricArticleData
+     * @example
+     * // Get one PreciseFabricArticleData
+     * const preciseFabricArticleData = await prisma.preciseFabricArticleData.findFirstOrThrow({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     */
+    findFirstOrThrow<T extends PreciseFabricArticleDataFindFirstOrThrowArgs>(args?: SelectSubset<T, PreciseFabricArticleDataFindFirstOrThrowArgs<ExtArgs>>): Prisma__PreciseFabricArticleDataClient<$Result.GetResult<Prisma.$PreciseFabricArticleDataPayload<ExtArgs>, T, "findFirstOrThrow", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Find zero or more PreciseFabricArticleData that matches the filter.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {PreciseFabricArticleDataFindManyArgs} args - Arguments to filter and select certain fields only.
+     * @example
+     * // Get all PreciseFabricArticleData
+     * const preciseFabricArticleData = await prisma.preciseFabricArticleData.findMany()
+     * 
+     * // Get first 10 PreciseFabricArticleData
+     * const preciseFabricArticleData = await prisma.preciseFabricArticleData.findMany({ take: 10 })
+     * 
+     * // Only select the `id`
+     * const preciseFabricArticleDataWithIdOnly = await prisma.preciseFabricArticleData.findMany({ select: { id: true } })
+     * 
+     */
+    findMany<T extends PreciseFabricArticleDataFindManyArgs>(args?: SelectSubset<T, PreciseFabricArticleDataFindManyArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$PreciseFabricArticleDataPayload<ExtArgs>, T, "findMany", GlobalOmitOptions>>
+
+    /**
+     * Create a PreciseFabricArticleData.
+     * @param {PreciseFabricArticleDataCreateArgs} args - Arguments to create a PreciseFabricArticleData.
+     * @example
+     * // Create one PreciseFabricArticleData
+     * const PreciseFabricArticleData = await prisma.preciseFabricArticleData.create({
+     *   data: {
+     *     // ... data to create a PreciseFabricArticleData
+     *   }
+     * })
+     * 
+     */
+    create<T extends PreciseFabricArticleDataCreateArgs>(args: SelectSubset<T, PreciseFabricArticleDataCreateArgs<ExtArgs>>): Prisma__PreciseFabricArticleDataClient<$Result.GetResult<Prisma.$PreciseFabricArticleDataPayload<ExtArgs>, T, "create", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Create many PreciseFabricArticleData.
+     * @param {PreciseFabricArticleDataCreateManyArgs} args - Arguments to create many PreciseFabricArticleData.
+     * @example
+     * // Create many PreciseFabricArticleData
+     * const preciseFabricArticleData = await prisma.preciseFabricArticleData.createMany({
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     *     
+     */
+    createMany<T extends PreciseFabricArticleDataCreateManyArgs>(args?: SelectSubset<T, PreciseFabricArticleDataCreateManyArgs<ExtArgs>>): Prisma.PrismaPromise<BatchPayload>
+
+    /**
+     * Create many PreciseFabricArticleData and returns the data saved in the database.
+     * @param {PreciseFabricArticleDataCreateManyAndReturnArgs} args - Arguments to create many PreciseFabricArticleData.
+     * @example
+     * // Create many PreciseFabricArticleData
+     * const preciseFabricArticleData = await prisma.preciseFabricArticleData.createManyAndReturn({
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     * 
+     * // Create many PreciseFabricArticleData and only return the `id`
+     * const preciseFabricArticleDataWithIdOnly = await prisma.preciseFabricArticleData.createManyAndReturn({
+     *   select: { id: true },
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * 
+     */
+    createManyAndReturn<T extends PreciseFabricArticleDataCreateManyAndReturnArgs>(args?: SelectSubset<T, PreciseFabricArticleDataCreateManyAndReturnArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$PreciseFabricArticleDataPayload<ExtArgs>, T, "createManyAndReturn", GlobalOmitOptions>>
+
+    /**
+     * Delete a PreciseFabricArticleData.
+     * @param {PreciseFabricArticleDataDeleteArgs} args - Arguments to delete one PreciseFabricArticleData.
+     * @example
+     * // Delete one PreciseFabricArticleData
+     * const PreciseFabricArticleData = await prisma.preciseFabricArticleData.delete({
+     *   where: {
+     *     // ... filter to delete one PreciseFabricArticleData
+     *   }
+     * })
+     * 
+     */
+    delete<T extends PreciseFabricArticleDataDeleteArgs>(args: SelectSubset<T, PreciseFabricArticleDataDeleteArgs<ExtArgs>>): Prisma__PreciseFabricArticleDataClient<$Result.GetResult<Prisma.$PreciseFabricArticleDataPayload<ExtArgs>, T, "delete", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Update one PreciseFabricArticleData.
+     * @param {PreciseFabricArticleDataUpdateArgs} args - Arguments to update one PreciseFabricArticleData.
+     * @example
+     * // Update one PreciseFabricArticleData
+     * const preciseFabricArticleData = await prisma.preciseFabricArticleData.update({
+     *   where: {
+     *     // ... provide filter here
+     *   },
+     *   data: {
+     *     // ... provide data here
+     *   }
+     * })
+     * 
+     */
+    update<T extends PreciseFabricArticleDataUpdateArgs>(args: SelectSubset<T, PreciseFabricArticleDataUpdateArgs<ExtArgs>>): Prisma__PreciseFabricArticleDataClient<$Result.GetResult<Prisma.$PreciseFabricArticleDataPayload<ExtArgs>, T, "update", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Delete zero or more PreciseFabricArticleData.
+     * @param {PreciseFabricArticleDataDeleteManyArgs} args - Arguments to filter PreciseFabricArticleData to delete.
+     * @example
+     * // Delete a few PreciseFabricArticleData
+     * const { count } = await prisma.preciseFabricArticleData.deleteMany({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     * 
+     */
+    deleteMany<T extends PreciseFabricArticleDataDeleteManyArgs>(args?: SelectSubset<T, PreciseFabricArticleDataDeleteManyArgs<ExtArgs>>): Prisma.PrismaPromise<BatchPayload>
+
+    /**
+     * Update zero or more PreciseFabricArticleData.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {PreciseFabricArticleDataUpdateManyArgs} args - Arguments to update one or more rows.
+     * @example
+     * // Update many PreciseFabricArticleData
+     * const preciseFabricArticleData = await prisma.preciseFabricArticleData.updateMany({
+     *   where: {
+     *     // ... provide filter here
+     *   },
+     *   data: {
+     *     // ... provide data here
+     *   }
+     * })
+     * 
+     */
+    updateMany<T extends PreciseFabricArticleDataUpdateManyArgs>(args: SelectSubset<T, PreciseFabricArticleDataUpdateManyArgs<ExtArgs>>): Prisma.PrismaPromise<BatchPayload>
+
+    /**
+     * Update zero or more PreciseFabricArticleData and returns the data updated in the database.
+     * @param {PreciseFabricArticleDataUpdateManyAndReturnArgs} args - Arguments to update many PreciseFabricArticleData.
+     * @example
+     * // Update many PreciseFabricArticleData
+     * const preciseFabricArticleData = await prisma.preciseFabricArticleData.updateManyAndReturn({
+     *   where: {
+     *     // ... provide filter here
+     *   },
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     * 
+     * // Update zero or more PreciseFabricArticleData and only return the `id`
+     * const preciseFabricArticleDataWithIdOnly = await prisma.preciseFabricArticleData.updateManyAndReturn({
+     *   select: { id: true },
+     *   where: {
+     *     // ... provide filter here
+     *   },
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * 
+     */
+    updateManyAndReturn<T extends PreciseFabricArticleDataUpdateManyAndReturnArgs>(args: SelectSubset<T, PreciseFabricArticleDataUpdateManyAndReturnArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$PreciseFabricArticleDataPayload<ExtArgs>, T, "updateManyAndReturn", GlobalOmitOptions>>
+
+    /**
+     * Create or update one PreciseFabricArticleData.
+     * @param {PreciseFabricArticleDataUpsertArgs} args - Arguments to update or create a PreciseFabricArticleData.
+     * @example
+     * // Update or create a PreciseFabricArticleData
+     * const preciseFabricArticleData = await prisma.preciseFabricArticleData.upsert({
+     *   create: {
+     *     // ... data to create a PreciseFabricArticleData
+     *   },
+     *   update: {
+     *     // ... in case it already exists, update
+     *   },
+     *   where: {
+     *     // ... the filter for the PreciseFabricArticleData we want to update
+     *   }
+     * })
+     */
+    upsert<T extends PreciseFabricArticleDataUpsertArgs>(args: SelectSubset<T, PreciseFabricArticleDataUpsertArgs<ExtArgs>>): Prisma__PreciseFabricArticleDataClient<$Result.GetResult<Prisma.$PreciseFabricArticleDataPayload<ExtArgs>, T, "upsert", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+
+    /**
+     * Count the number of PreciseFabricArticleData.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {PreciseFabricArticleDataCountArgs} args - Arguments to filter PreciseFabricArticleData to count.
+     * @example
+     * // Count the number of PreciseFabricArticleData
+     * const count = await prisma.preciseFabricArticleData.count({
+     *   where: {
+     *     // ... the filter for the PreciseFabricArticleData we want to count
+     *   }
+     * })
+    **/
+    count<T extends PreciseFabricArticleDataCountArgs>(
+      args?: Subset<T, PreciseFabricArticleDataCountArgs>,
+    ): Prisma.PrismaPromise<
+      T extends $Utils.Record<'select', any>
+        ? T['select'] extends true
+          ? number
+          : GetScalarType<T['select'], PreciseFabricArticleDataCountAggregateOutputType>
+        : number
+    >
+
+    /**
+     * Allows you to perform aggregations operations on a PreciseFabricArticleData.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {PreciseFabricArticleDataAggregateArgs} args - Select which aggregations you would like to apply and on what fields.
+     * @example
+     * // Ordered by age ascending
+     * // Where email contains prisma.io
+     * // Limited to the 10 users
+     * const aggregations = await prisma.user.aggregate({
+     *   _avg: {
+     *     age: true,
+     *   },
+     *   where: {
+     *     email: {
+     *       contains: "prisma.io",
+     *     },
+     *   },
+     *   orderBy: {
+     *     age: "asc",
+     *   },
+     *   take: 10,
+     * })
+    **/
+    aggregate<T extends PreciseFabricArticleDataAggregateArgs>(args: Subset<T, PreciseFabricArticleDataAggregateArgs>): Prisma.PrismaPromise<GetPreciseFabricArticleDataAggregateType<T>>
+
+    /**
+     * Group by PreciseFabricArticleData.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {PreciseFabricArticleDataGroupByArgs} args - Group by arguments.
+     * @example
+     * // Group by city, order by createdAt, get count
+     * const result = await prisma.user.groupBy({
+     *   by: ['city', 'createdAt'],
+     *   orderBy: {
+     *     createdAt: true
+     *   },
+     *   _count: {
+     *     _all: true
+     *   },
+     * })
+     * 
+    **/
+    groupBy<
+      T extends PreciseFabricArticleDataGroupByArgs,
+      HasSelectOrTake extends Or<
+        Extends<'skip', Keys<T>>,
+        Extends<'take', Keys<T>>
+      >,
+      OrderByArg extends True extends HasSelectOrTake
+        ? { orderBy: PreciseFabricArticleDataGroupByArgs['orderBy'] }
+        : { orderBy?: PreciseFabricArticleDataGroupByArgs['orderBy'] },
+      OrderFields extends ExcludeUnderscoreKeys<Keys<MaybeTupleToUnion<T['orderBy']>>>,
+      ByFields extends MaybeTupleToUnion<T['by']>,
+      ByValid extends Has<ByFields, OrderFields>,
+      HavingFields extends GetHavingFields<T['having']>,
+      HavingValid extends Has<ByFields, HavingFields>,
+      ByEmpty extends T['by'] extends never[] ? True : False,
+      InputErrors extends ByEmpty extends True
+      ? `Error: "by" must not be empty.`
+      : HavingValid extends False
+      ? {
+          [P in HavingFields]: P extends ByFields
+            ? never
+            : P extends string
+            ? `Error: Field "${P}" used in "having" needs to be provided in "by".`
+            : [
+                Error,
+                'Field ',
+                P,
+                ` in "having" needs to be provided in "by"`,
+              ]
+        }[HavingFields]
+      : 'take' extends Keys<T>
+      ? 'orderBy' extends Keys<T>
+        ? ByValid extends True
+          ? {}
+          : {
+              [P in OrderFields]: P extends ByFields
+                ? never
+                : `Error: Field "${P}" in "orderBy" needs to be provided in "by"`
+            }[OrderFields]
+        : 'Error: If you provide "take", you also need to provide "orderBy"'
+      : 'skip' extends Keys<T>
+      ? 'orderBy' extends Keys<T>
+        ? ByValid extends True
+          ? {}
+          : {
+              [P in OrderFields]: P extends ByFields
+                ? never
+                : `Error: Field "${P}" in "orderBy" needs to be provided in "by"`
+            }[OrderFields]
+        : 'Error: If you provide "skip", you also need to provide "orderBy"'
+      : ByValid extends True
+      ? {}
+      : {
+          [P in OrderFields]: P extends ByFields
+            ? never
+            : `Error: Field "${P}" in "orderBy" needs to be provided in "by"`
+        }[OrderFields]
+    >(args: SubsetIntersection<T, PreciseFabricArticleDataGroupByArgs, OrderByArg> & InputErrors): {} extends InputErrors ? GetPreciseFabricArticleDataGroupByPayload<T> : Prisma.PrismaPromise<InputErrors>
+  /**
+   * Fields of the PreciseFabricArticleData model
+   */
+  readonly fields: PreciseFabricArticleDataFieldRefs;
+  }
+
+  /**
+   * The delegate class that acts as a "Promise-like" for PreciseFabricArticleData.
+   * Why is this prefixed with `Prisma__`?
+   * Because we want to prevent naming conflicts as mentioned in
+   * https://github.com/prisma/prisma-client-js/issues/707
+   */
+  export interface Prisma__PreciseFabricArticleDataClient<T, Null = never, ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs, GlobalOmitOptions = {}> extends Prisma.PrismaPromise<T> {
+    readonly [Symbol.toStringTag]: "PrismaPromise"
+    /**
+     * Attaches callbacks for the resolution and/or rejection of the Promise.
+     * @param onfulfilled The callback to execute when the Promise is resolved.
+     * @param onrejected The callback to execute when the Promise is rejected.
+     * @returns A Promise for the completion of which ever callback is executed.
+     */
+    then<TResult1 = T, TResult2 = never>(onfulfilled?: ((value: T) => TResult1 | PromiseLike<TResult1>) | undefined | null, onrejected?: ((reason: any) => TResult2 | PromiseLike<TResult2>) | undefined | null): $Utils.JsPromise<TResult1 | TResult2>
+    /**
+     * Attaches a callback for only the rejection of the Promise.
+     * @param onrejected The callback to execute when the Promise is rejected.
+     * @returns A Promise for the completion of the callback.
+     */
+    catch<TResult = never>(onrejected?: ((reason: any) => TResult | PromiseLike<TResult>) | undefined | null): $Utils.JsPromise<T | TResult>
+    /**
+     * Attaches a callback that is invoked when the Promise is settled (fulfilled or rejected). The
+     * resolved value cannot be modified from the callback.
+     * @param onfinally The callback to execute when the Promise is settled (fulfilled or rejected).
+     * @returns A Promise for the completion of the callback.
+     */
+    finally(onfinally?: (() => void) | undefined | null): $Utils.JsPromise<T>
+  }
+
+
+
+
+  /**
+   * Fields of the PreciseFabricArticleData model
+   */
+  interface PreciseFabricArticleDataFieldRefs {
+    readonly id: FieldRef<"PreciseFabricArticleData", 'BigInt'>
+    readonly fabricArticleNumber: FieldRef<"PreciseFabricArticleData", 'BigInt'>
+    readonly fabricArticleDescription: FieldRef<"PreciseFabricArticleData", 'String'>
+    readonly division: FieldRef<"PreciseFabricArticleData", 'String'>
+    readonly subDivision: FieldRef<"PreciseFabricArticleData", 'String'>
+    readonly majorCategory: FieldRef<"PreciseFabricArticleData", 'String'>
+    readonly vendorName: FieldRef<"PreciseFabricArticleData", 'String'>
+    readonly vendorCode: FieldRef<"PreciseFabricArticleData", 'Int'>
+    readonly fabricRate: FieldRef<"PreciseFabricArticleData", 'Decimal'>
+    readonly mFabDiv: FieldRef<"PreciseFabricArticleData", 'String'>
+    readonly mYarn: FieldRef<"PreciseFabricArticleData", 'String'>
+    readonly mFabMainMvgr1: FieldRef<"PreciseFabricArticleData", 'String'>
+    readonly mFabMainMvgr2: FieldRef<"PreciseFabricArticleData", 'String'>
+    readonly mConstruction: FieldRef<"PreciseFabricArticleData", 'String'>
+    readonly mOunz: FieldRef<"PreciseFabricArticleData", 'String'>
+    readonly mWidth: FieldRef<"PreciseFabricArticleData", 'String'>
+    readonly mWeave01: FieldRef<"PreciseFabricArticleData", 'String'>
+    readonly mWeave02: FieldRef<"PreciseFabricArticleData", 'String'>
+    readonly mCount: FieldRef<"PreciseFabricArticleData", 'String'>
+    readonly mComposition: FieldRef<"PreciseFabricArticleData", 'String'>
+    readonly mFinish: FieldRef<"PreciseFabricArticleData", 'String'>
+    readonly mGsm: FieldRef<"PreciseFabricArticleData", 'String'>
+    readonly mLycra: FieldRef<"PreciseFabricArticleData", 'String'>
+    readonly createdAt: FieldRef<"PreciseFabricArticleData", 'DateTime'>
+  }
+    
+
+  // Custom InputTypes
+  /**
+   * PreciseFabricArticleData findUnique
+   */
+  export type PreciseFabricArticleDataFindUniqueArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the PreciseFabricArticleData
+     */
+    select?: PreciseFabricArticleDataSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the PreciseFabricArticleData
+     */
+    omit?: PreciseFabricArticleDataOmit<ExtArgs> | null
+    /**
+     * Filter, which PreciseFabricArticleData to fetch.
+     */
+    where: PreciseFabricArticleDataWhereUniqueInput
+  }
+
+  /**
+   * PreciseFabricArticleData findUniqueOrThrow
+   */
+  export type PreciseFabricArticleDataFindUniqueOrThrowArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the PreciseFabricArticleData
+     */
+    select?: PreciseFabricArticleDataSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the PreciseFabricArticleData
+     */
+    omit?: PreciseFabricArticleDataOmit<ExtArgs> | null
+    /**
+     * Filter, which PreciseFabricArticleData to fetch.
+     */
+    where: PreciseFabricArticleDataWhereUniqueInput
+  }
+
+  /**
+   * PreciseFabricArticleData findFirst
+   */
+  export type PreciseFabricArticleDataFindFirstArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the PreciseFabricArticleData
+     */
+    select?: PreciseFabricArticleDataSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the PreciseFabricArticleData
+     */
+    omit?: PreciseFabricArticleDataOmit<ExtArgs> | null
+    /**
+     * Filter, which PreciseFabricArticleData to fetch.
+     */
+    where?: PreciseFabricArticleDataWhereInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
+     * 
+     * Determine the order of PreciseFabricArticleData to fetch.
+     */
+    orderBy?: PreciseFabricArticleDataOrderByWithRelationInput | PreciseFabricArticleDataOrderByWithRelationInput[]
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
+     * 
+     * Sets the position for searching for PreciseFabricArticleData.
+     */
+    cursor?: PreciseFabricArticleDataWhereUniqueInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Take `±n` PreciseFabricArticleData from the position of the cursor.
+     */
+    take?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Skip the first `n` PreciseFabricArticleData.
+     */
+    skip?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/distinct Distinct Docs}
+     * 
+     * Filter by unique combinations of PreciseFabricArticleData.
+     */
+    distinct?: PreciseFabricArticleDataScalarFieldEnum | PreciseFabricArticleDataScalarFieldEnum[]
+  }
+
+  /**
+   * PreciseFabricArticleData findFirstOrThrow
+   */
+  export type PreciseFabricArticleDataFindFirstOrThrowArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the PreciseFabricArticleData
+     */
+    select?: PreciseFabricArticleDataSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the PreciseFabricArticleData
+     */
+    omit?: PreciseFabricArticleDataOmit<ExtArgs> | null
+    /**
+     * Filter, which PreciseFabricArticleData to fetch.
+     */
+    where?: PreciseFabricArticleDataWhereInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
+     * 
+     * Determine the order of PreciseFabricArticleData to fetch.
+     */
+    orderBy?: PreciseFabricArticleDataOrderByWithRelationInput | PreciseFabricArticleDataOrderByWithRelationInput[]
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
+     * 
+     * Sets the position for searching for PreciseFabricArticleData.
+     */
+    cursor?: PreciseFabricArticleDataWhereUniqueInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Take `±n` PreciseFabricArticleData from the position of the cursor.
+     */
+    take?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Skip the first `n` PreciseFabricArticleData.
+     */
+    skip?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/distinct Distinct Docs}
+     * 
+     * Filter by unique combinations of PreciseFabricArticleData.
+     */
+    distinct?: PreciseFabricArticleDataScalarFieldEnum | PreciseFabricArticleDataScalarFieldEnum[]
+  }
+
+  /**
+   * PreciseFabricArticleData findMany
+   */
+  export type PreciseFabricArticleDataFindManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the PreciseFabricArticleData
+     */
+    select?: PreciseFabricArticleDataSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the PreciseFabricArticleData
+     */
+    omit?: PreciseFabricArticleDataOmit<ExtArgs> | null
+    /**
+     * Filter, which PreciseFabricArticleData to fetch.
+     */
+    where?: PreciseFabricArticleDataWhereInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
+     * 
+     * Determine the order of PreciseFabricArticleData to fetch.
+     */
+    orderBy?: PreciseFabricArticleDataOrderByWithRelationInput | PreciseFabricArticleDataOrderByWithRelationInput[]
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
+     * 
+     * Sets the position for listing PreciseFabricArticleData.
+     */
+    cursor?: PreciseFabricArticleDataWhereUniqueInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Take `±n` PreciseFabricArticleData from the position of the cursor.
+     */
+    take?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Skip the first `n` PreciseFabricArticleData.
+     */
+    skip?: number
+    distinct?: PreciseFabricArticleDataScalarFieldEnum | PreciseFabricArticleDataScalarFieldEnum[]
+  }
+
+  /**
+   * PreciseFabricArticleData create
+   */
+  export type PreciseFabricArticleDataCreateArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the PreciseFabricArticleData
+     */
+    select?: PreciseFabricArticleDataSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the PreciseFabricArticleData
+     */
+    omit?: PreciseFabricArticleDataOmit<ExtArgs> | null
+    /**
+     * The data needed to create a PreciseFabricArticleData.
+     */
+    data?: XOR<PreciseFabricArticleDataCreateInput, PreciseFabricArticleDataUncheckedCreateInput>
+  }
+
+  /**
+   * PreciseFabricArticleData createMany
+   */
+  export type PreciseFabricArticleDataCreateManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * The data used to create many PreciseFabricArticleData.
+     */
+    data: PreciseFabricArticleDataCreateManyInput | PreciseFabricArticleDataCreateManyInput[]
+    skipDuplicates?: boolean
+  }
+
+  /**
+   * PreciseFabricArticleData createManyAndReturn
+   */
+  export type PreciseFabricArticleDataCreateManyAndReturnArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the PreciseFabricArticleData
+     */
+    select?: PreciseFabricArticleDataSelectCreateManyAndReturn<ExtArgs> | null
+    /**
+     * Omit specific fields from the PreciseFabricArticleData
+     */
+    omit?: PreciseFabricArticleDataOmit<ExtArgs> | null
+    /**
+     * The data used to create many PreciseFabricArticleData.
+     */
+    data: PreciseFabricArticleDataCreateManyInput | PreciseFabricArticleDataCreateManyInput[]
+    skipDuplicates?: boolean
+  }
+
+  /**
+   * PreciseFabricArticleData update
+   */
+  export type PreciseFabricArticleDataUpdateArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the PreciseFabricArticleData
+     */
+    select?: PreciseFabricArticleDataSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the PreciseFabricArticleData
+     */
+    omit?: PreciseFabricArticleDataOmit<ExtArgs> | null
+    /**
+     * The data needed to update a PreciseFabricArticleData.
+     */
+    data: XOR<PreciseFabricArticleDataUpdateInput, PreciseFabricArticleDataUncheckedUpdateInput>
+    /**
+     * Choose, which PreciseFabricArticleData to update.
+     */
+    where: PreciseFabricArticleDataWhereUniqueInput
+  }
+
+  /**
+   * PreciseFabricArticleData updateMany
+   */
+  export type PreciseFabricArticleDataUpdateManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * The data used to update PreciseFabricArticleData.
+     */
+    data: XOR<PreciseFabricArticleDataUpdateManyMutationInput, PreciseFabricArticleDataUncheckedUpdateManyInput>
+    /**
+     * Filter which PreciseFabricArticleData to update
+     */
+    where?: PreciseFabricArticleDataWhereInput
+    /**
+     * Limit how many PreciseFabricArticleData to update.
+     */
+    limit?: number
+  }
+
+  /**
+   * PreciseFabricArticleData updateManyAndReturn
+   */
+  export type PreciseFabricArticleDataUpdateManyAndReturnArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the PreciseFabricArticleData
+     */
+    select?: PreciseFabricArticleDataSelectUpdateManyAndReturn<ExtArgs> | null
+    /**
+     * Omit specific fields from the PreciseFabricArticleData
+     */
+    omit?: PreciseFabricArticleDataOmit<ExtArgs> | null
+    /**
+     * The data used to update PreciseFabricArticleData.
+     */
+    data: XOR<PreciseFabricArticleDataUpdateManyMutationInput, PreciseFabricArticleDataUncheckedUpdateManyInput>
+    /**
+     * Filter which PreciseFabricArticleData to update
+     */
+    where?: PreciseFabricArticleDataWhereInput
+    /**
+     * Limit how many PreciseFabricArticleData to update.
+     */
+    limit?: number
+  }
+
+  /**
+   * PreciseFabricArticleData upsert
+   */
+  export type PreciseFabricArticleDataUpsertArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the PreciseFabricArticleData
+     */
+    select?: PreciseFabricArticleDataSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the PreciseFabricArticleData
+     */
+    omit?: PreciseFabricArticleDataOmit<ExtArgs> | null
+    /**
+     * The filter to search for the PreciseFabricArticleData to update in case it exists.
+     */
+    where: PreciseFabricArticleDataWhereUniqueInput
+    /**
+     * In case the PreciseFabricArticleData found by the `where` argument doesn't exist, create a new PreciseFabricArticleData with this data.
+     */
+    create: XOR<PreciseFabricArticleDataCreateInput, PreciseFabricArticleDataUncheckedCreateInput>
+    /**
+     * In case the PreciseFabricArticleData was found with the provided `where` argument, update it with this data.
+     */
+    update: XOR<PreciseFabricArticleDataUpdateInput, PreciseFabricArticleDataUncheckedUpdateInput>
+  }
+
+  /**
+   * PreciseFabricArticleData delete
+   */
+  export type PreciseFabricArticleDataDeleteArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the PreciseFabricArticleData
+     */
+    select?: PreciseFabricArticleDataSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the PreciseFabricArticleData
+     */
+    omit?: PreciseFabricArticleDataOmit<ExtArgs> | null
+    /**
+     * Filter which PreciseFabricArticleData to delete.
+     */
+    where: PreciseFabricArticleDataWhereUniqueInput
+  }
+
+  /**
+   * PreciseFabricArticleData deleteMany
+   */
+  export type PreciseFabricArticleDataDeleteManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Filter which PreciseFabricArticleData to delete
+     */
+    where?: PreciseFabricArticleDataWhereInput
+    /**
+     * Limit how many PreciseFabricArticleData to delete.
+     */
+    limit?: number
+  }
+
+  /**
+   * PreciseFabricArticleData without action
+   */
+  export type PreciseFabricArticleDataDefaultArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the PreciseFabricArticleData
+     */
+    select?: PreciseFabricArticleDataSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the PreciseFabricArticleData
+     */
+    omit?: PreciseFabricArticleDataOmit<ExtArgs> | null
+  }
+
+
+  /**
    * Model GmArticleData
    */
 
@@ -66795,7 +68629,6 @@ export namespace Prisma {
     fabCost: Decimal | null
     fabCons: Decimal | null
     width: Decimal | null
-    basicTrimCost: Decimal | null
     roughCmpCost: Decimal | null
     gsm: Decimal | null
     ratio: Decimal | null
@@ -66815,7 +68648,6 @@ export namespace Prisma {
     fabCost: Decimal | null
     fabCons: Decimal | null
     width: Decimal | null
-    basicTrimCost: Decimal | null
     roughCmpCost: Decimal | null
     gsm: Decimal | null
     ratio: Decimal | null
@@ -66858,9 +68690,7 @@ export namespace Prisma {
     fabCost: Decimal | null
     fabCons: Decimal | null
     width: Decimal | null
-    basicTrimCost: Decimal | null
     roughCmpCost: Decimal | null
-    costingType: string | null
     bodyConsumptionType: string | null
     gsm: Decimal | null
     ratio: Decimal | null
@@ -66922,9 +68752,7 @@ export namespace Prisma {
     fabCost: Decimal | null
     fabCons: Decimal | null
     width: Decimal | null
-    basicTrimCost: Decimal | null
     roughCmpCost: Decimal | null
-    costingType: string | null
     bodyConsumptionType: string | null
     gsm: Decimal | null
     ratio: Decimal | null
@@ -66986,9 +68814,7 @@ export namespace Prisma {
     fabCost: number
     fabCons: number
     width: number
-    basicTrimCost: number
     roughCmpCost: number
-    costingType: number
     bodyConsumptionType: number
     gsm: number
     ratio: number
@@ -67029,7 +68855,6 @@ export namespace Prisma {
     fabCost?: true
     fabCons?: true
     width?: true
-    basicTrimCost?: true
     roughCmpCost?: true
     gsm?: true
     ratio?: true
@@ -67049,7 +68874,6 @@ export namespace Prisma {
     fabCost?: true
     fabCons?: true
     width?: true
-    basicTrimCost?: true
     roughCmpCost?: true
     gsm?: true
     ratio?: true
@@ -67092,9 +68916,7 @@ export namespace Prisma {
     fabCost?: true
     fabCons?: true
     width?: true
-    basicTrimCost?: true
     roughCmpCost?: true
-    costingType?: true
     bodyConsumptionType?: true
     gsm?: true
     ratio?: true
@@ -67156,9 +68978,7 @@ export namespace Prisma {
     fabCost?: true
     fabCons?: true
     width?: true
-    basicTrimCost?: true
     roughCmpCost?: true
-    costingType?: true
     bodyConsumptionType?: true
     gsm?: true
     ratio?: true
@@ -67220,9 +69040,7 @@ export namespace Prisma {
     fabCost?: true
     fabCons?: true
     width?: true
-    basicTrimCost?: true
     roughCmpCost?: true
-    costingType?: true
     bodyConsumptionType?: true
     gsm?: true
     ratio?: true
@@ -67371,9 +69189,7 @@ export namespace Prisma {
     fabCost: Decimal | null
     fabCons: Decimal | null
     width: Decimal | null
-    basicTrimCost: Decimal | null
     roughCmpCost: Decimal | null
-    costingType: string | null
     bodyConsumptionType: string | null
     gsm: Decimal | null
     ratio: Decimal | null
@@ -67454,9 +69270,7 @@ export namespace Prisma {
     fabCost?: boolean
     fabCons?: boolean
     width?: boolean
-    basicTrimCost?: boolean
     roughCmpCost?: boolean
-    costingType?: boolean
     bodyConsumptionType?: boolean
     gsm?: boolean
     ratio?: boolean
@@ -67518,9 +69332,7 @@ export namespace Prisma {
     fabCost?: boolean
     fabCons?: boolean
     width?: boolean
-    basicTrimCost?: boolean
     roughCmpCost?: boolean
-    costingType?: boolean
     bodyConsumptionType?: boolean
     gsm?: boolean
     ratio?: boolean
@@ -67582,9 +69394,7 @@ export namespace Prisma {
     fabCost?: boolean
     fabCons?: boolean
     width?: boolean
-    basicTrimCost?: boolean
     roughCmpCost?: boolean
-    costingType?: boolean
     bodyConsumptionType?: boolean
     gsm?: boolean
     ratio?: boolean
@@ -67646,9 +69456,7 @@ export namespace Prisma {
     fabCost?: boolean
     fabCons?: boolean
     width?: boolean
-    basicTrimCost?: boolean
     roughCmpCost?: boolean
-    costingType?: boolean
     bodyConsumptionType?: boolean
     gsm?: boolean
     ratio?: boolean
@@ -67681,7 +69489,7 @@ export namespace Prisma {
     updatedAt?: boolean
   }
 
-  export type BodyArticleDataOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<"id" | "mCollarType" | "mCollarStyle" | "mNeckType" | "mNeckStyle" | "mPlacket" | "mBltType" | "mBltStyle" | "mSleevesMainStyle" | "mSleeveFold" | "mBtmFold" | "mNoOfPocket" | "mPocket" | "mExtraPocket" | "mFit" | "mBodyStyle" | "mLength" | "mSet" | "bodyArticleNumber" | "bodyArticleDescription" | "imageUrl" | "bodyArticleType" | "designNumber" | "cmtpCost" | "cmpCost" | "fabCost" | "fabCons" | "width" | "basicTrimCost" | "roughCmpCost" | "costingType" | "bodyConsumptionType" | "gsm" | "ratio" | "consumptionKg" | "consumptionMeter" | "preciseWidth" | "preciseGsm" | "preciseRatio" | "preciseConsumptionKg" | "preciseConsumptionMeter" | "flatId" | "articleNumber" | "division" | "subDivision" | "majorCategory" | "mcCode" | "vendorName" | "vendorCode" | "season" | "year" | "hsnTaxCode" | "approvalStatus" | "fgCreatorApproved" | "approvedAt" | "approvedBy" | "sapSyncStatus" | "sapSyncMessage" | "userName" | "createdAt" | "updatedAt", ExtArgs["result"]["bodyArticleData"]>
+  export type BodyArticleDataOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<"id" | "mCollarType" | "mCollarStyle" | "mNeckType" | "mNeckStyle" | "mPlacket" | "mBltType" | "mBltStyle" | "mSleevesMainStyle" | "mSleeveFold" | "mBtmFold" | "mNoOfPocket" | "mPocket" | "mExtraPocket" | "mFit" | "mBodyStyle" | "mLength" | "mSet" | "bodyArticleNumber" | "bodyArticleDescription" | "imageUrl" | "bodyArticleType" | "designNumber" | "cmtpCost" | "cmpCost" | "fabCost" | "fabCons" | "width" | "roughCmpCost" | "bodyConsumptionType" | "gsm" | "ratio" | "consumptionKg" | "consumptionMeter" | "preciseWidth" | "preciseGsm" | "preciseRatio" | "preciseConsumptionKg" | "preciseConsumptionMeter" | "flatId" | "articleNumber" | "division" | "subDivision" | "majorCategory" | "mcCode" | "vendorName" | "vendorCode" | "season" | "year" | "hsnTaxCode" | "approvalStatus" | "fgCreatorApproved" | "approvedAt" | "approvedBy" | "sapSyncStatus" | "sapSyncMessage" | "userName" | "createdAt" | "updatedAt", ExtArgs["result"]["bodyArticleData"]>
 
   export type $BodyArticleDataPayload<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
     name: "BodyArticleData"
@@ -67715,9 +69523,7 @@ export namespace Prisma {
       fabCost: Prisma.Decimal | null
       fabCons: Prisma.Decimal | null
       width: Prisma.Decimal | null
-      basicTrimCost: Prisma.Decimal | null
       roughCmpCost: Prisma.Decimal | null
-      costingType: string | null
       bodyConsumptionType: string | null
       gsm: Prisma.Decimal | null
       ratio: Prisma.Decimal | null
@@ -68199,9 +70005,7 @@ export namespace Prisma {
     readonly fabCost: FieldRef<"BodyArticleData", 'Decimal'>
     readonly fabCons: FieldRef<"BodyArticleData", 'Decimal'>
     readonly width: FieldRef<"BodyArticleData", 'Decimal'>
-    readonly basicTrimCost: FieldRef<"BodyArticleData", 'Decimal'>
     readonly roughCmpCost: FieldRef<"BodyArticleData", 'Decimal'>
-    readonly costingType: FieldRef<"BodyArticleData", 'String'>
     readonly bodyConsumptionType: FieldRef<"BodyArticleData", 'String'>
     readonly gsm: FieldRef<"BodyArticleData", 'Decimal'>
     readonly ratio: FieldRef<"BodyArticleData", 'Decimal'>
@@ -73598,6 +75402,1069 @@ export namespace Prisma {
      * Choose, which related nodes to fetch as well
      */
     include?: BasicTrimCostMasterInclude<ExtArgs> | null
+  }
+
+
+  /**
+   * Model PreciseTrimMaster
+   */
+
+  export type AggregatePreciseTrimMaster = {
+    _count: PreciseTrimMasterCountAggregateOutputType | null
+    _avg: PreciseTrimMasterAvgAggregateOutputType | null
+    _sum: PreciseTrimMasterSumAggregateOutputType | null
+    _min: PreciseTrimMasterMinAggregateOutputType | null
+    _max: PreciseTrimMasterMaxAggregateOutputType | null
+  }
+
+  export type PreciseTrimMasterAvgAggregateOutputType = {
+    id: number | null
+    bt1: Decimal | null
+    bt2: Decimal | null
+  }
+
+  export type PreciseTrimMasterSumAggregateOutputType = {
+    id: number | null
+    bt1: Decimal | null
+    bt2: Decimal | null
+  }
+
+  export type PreciseTrimMasterMinAggregateOutputType = {
+    id: number | null
+    attributeName: string | null
+    type: string | null
+    bt1: Decimal | null
+    bt2: Decimal | null
+    createdAt: Date | null
+    updatedAt: Date | null
+  }
+
+  export type PreciseTrimMasterMaxAggregateOutputType = {
+    id: number | null
+    attributeName: string | null
+    type: string | null
+    bt1: Decimal | null
+    bt2: Decimal | null
+    createdAt: Date | null
+    updatedAt: Date | null
+  }
+
+  export type PreciseTrimMasterCountAggregateOutputType = {
+    id: number
+    attributeName: number
+    type: number
+    bt1: number
+    bt2: number
+    createdAt: number
+    updatedAt: number
+    _all: number
+  }
+
+
+  export type PreciseTrimMasterAvgAggregateInputType = {
+    id?: true
+    bt1?: true
+    bt2?: true
+  }
+
+  export type PreciseTrimMasterSumAggregateInputType = {
+    id?: true
+    bt1?: true
+    bt2?: true
+  }
+
+  export type PreciseTrimMasterMinAggregateInputType = {
+    id?: true
+    attributeName?: true
+    type?: true
+    bt1?: true
+    bt2?: true
+    createdAt?: true
+    updatedAt?: true
+  }
+
+  export type PreciseTrimMasterMaxAggregateInputType = {
+    id?: true
+    attributeName?: true
+    type?: true
+    bt1?: true
+    bt2?: true
+    createdAt?: true
+    updatedAt?: true
+  }
+
+  export type PreciseTrimMasterCountAggregateInputType = {
+    id?: true
+    attributeName?: true
+    type?: true
+    bt1?: true
+    bt2?: true
+    createdAt?: true
+    updatedAt?: true
+    _all?: true
+  }
+
+  export type PreciseTrimMasterAggregateArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Filter which PreciseTrimMaster to aggregate.
+     */
+    where?: PreciseTrimMasterWhereInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
+     * 
+     * Determine the order of PreciseTrimMasters to fetch.
+     */
+    orderBy?: PreciseTrimMasterOrderByWithRelationInput | PreciseTrimMasterOrderByWithRelationInput[]
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
+     * 
+     * Sets the start position
+     */
+    cursor?: PreciseTrimMasterWhereUniqueInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Take `±n` PreciseTrimMasters from the position of the cursor.
+     */
+    take?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Skip the first `n` PreciseTrimMasters.
+     */
+    skip?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     * 
+     * Count returned PreciseTrimMasters
+    **/
+    _count?: true | PreciseTrimMasterCountAggregateInputType
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     * 
+     * Select which fields to average
+    **/
+    _avg?: PreciseTrimMasterAvgAggregateInputType
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     * 
+     * Select which fields to sum
+    **/
+    _sum?: PreciseTrimMasterSumAggregateInputType
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     * 
+     * Select which fields to find the minimum value
+    **/
+    _min?: PreciseTrimMasterMinAggregateInputType
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     * 
+     * Select which fields to find the maximum value
+    **/
+    _max?: PreciseTrimMasterMaxAggregateInputType
+  }
+
+  export type GetPreciseTrimMasterAggregateType<T extends PreciseTrimMasterAggregateArgs> = {
+        [P in keyof T & keyof AggregatePreciseTrimMaster]: P extends '_count' | 'count'
+      ? T[P] extends true
+        ? number
+        : GetScalarType<T[P], AggregatePreciseTrimMaster[P]>
+      : GetScalarType<T[P], AggregatePreciseTrimMaster[P]>
+  }
+
+
+
+
+  export type PreciseTrimMasterGroupByArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    where?: PreciseTrimMasterWhereInput
+    orderBy?: PreciseTrimMasterOrderByWithAggregationInput | PreciseTrimMasterOrderByWithAggregationInput[]
+    by: PreciseTrimMasterScalarFieldEnum[] | PreciseTrimMasterScalarFieldEnum
+    having?: PreciseTrimMasterScalarWhereWithAggregatesInput
+    take?: number
+    skip?: number
+    _count?: PreciseTrimMasterCountAggregateInputType | true
+    _avg?: PreciseTrimMasterAvgAggregateInputType
+    _sum?: PreciseTrimMasterSumAggregateInputType
+    _min?: PreciseTrimMasterMinAggregateInputType
+    _max?: PreciseTrimMasterMaxAggregateInputType
+  }
+
+  export type PreciseTrimMasterGroupByOutputType = {
+    id: number
+    attributeName: string
+    type: string
+    bt1: Decimal | null
+    bt2: Decimal | null
+    createdAt: Date
+    updatedAt: Date
+    _count: PreciseTrimMasterCountAggregateOutputType | null
+    _avg: PreciseTrimMasterAvgAggregateOutputType | null
+    _sum: PreciseTrimMasterSumAggregateOutputType | null
+    _min: PreciseTrimMasterMinAggregateOutputType | null
+    _max: PreciseTrimMasterMaxAggregateOutputType | null
+  }
+
+  type GetPreciseTrimMasterGroupByPayload<T extends PreciseTrimMasterGroupByArgs> = Prisma.PrismaPromise<
+    Array<
+      PickEnumerable<PreciseTrimMasterGroupByOutputType, T['by']> &
+        {
+          [P in ((keyof T) & (keyof PreciseTrimMasterGroupByOutputType))]: P extends '_count'
+            ? T[P] extends boolean
+              ? number
+              : GetScalarType<T[P], PreciseTrimMasterGroupByOutputType[P]>
+            : GetScalarType<T[P], PreciseTrimMasterGroupByOutputType[P]>
+        }
+      >
+    >
+
+
+  export type PreciseTrimMasterSelect<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
+    id?: boolean
+    attributeName?: boolean
+    type?: boolean
+    bt1?: boolean
+    bt2?: boolean
+    createdAt?: boolean
+    updatedAt?: boolean
+  }, ExtArgs["result"]["preciseTrimMaster"]>
+
+  export type PreciseTrimMasterSelectCreateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
+    id?: boolean
+    attributeName?: boolean
+    type?: boolean
+    bt1?: boolean
+    bt2?: boolean
+    createdAt?: boolean
+    updatedAt?: boolean
+  }, ExtArgs["result"]["preciseTrimMaster"]>
+
+  export type PreciseTrimMasterSelectUpdateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
+    id?: boolean
+    attributeName?: boolean
+    type?: boolean
+    bt1?: boolean
+    bt2?: boolean
+    createdAt?: boolean
+    updatedAt?: boolean
+  }, ExtArgs["result"]["preciseTrimMaster"]>
+
+  export type PreciseTrimMasterSelectScalar = {
+    id?: boolean
+    attributeName?: boolean
+    type?: boolean
+    bt1?: boolean
+    bt2?: boolean
+    createdAt?: boolean
+    updatedAt?: boolean
+  }
+
+  export type PreciseTrimMasterOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<"id" | "attributeName" | "type" | "bt1" | "bt2" | "createdAt" | "updatedAt", ExtArgs["result"]["preciseTrimMaster"]>
+
+  export type $PreciseTrimMasterPayload<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    name: "PreciseTrimMaster"
+    objects: {}
+    scalars: $Extensions.GetPayloadResult<{
+      id: number
+      attributeName: string
+      type: string
+      bt1: Prisma.Decimal | null
+      bt2: Prisma.Decimal | null
+      createdAt: Date
+      updatedAt: Date
+    }, ExtArgs["result"]["preciseTrimMaster"]>
+    composites: {}
+  }
+
+  type PreciseTrimMasterGetPayload<S extends boolean | null | undefined | PreciseTrimMasterDefaultArgs> = $Result.GetResult<Prisma.$PreciseTrimMasterPayload, S>
+
+  type PreciseTrimMasterCountArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> =
+    Omit<PreciseTrimMasterFindManyArgs, 'select' | 'include' | 'distinct' | 'omit'> & {
+      select?: PreciseTrimMasterCountAggregateInputType | true
+    }
+
+  export interface PreciseTrimMasterDelegate<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs, GlobalOmitOptions = {}> {
+    [K: symbol]: { types: Prisma.TypeMap<ExtArgs>['model']['PreciseTrimMaster'], meta: { name: 'PreciseTrimMaster' } }
+    /**
+     * Find zero or one PreciseTrimMaster that matches the filter.
+     * @param {PreciseTrimMasterFindUniqueArgs} args - Arguments to find a PreciseTrimMaster
+     * @example
+     * // Get one PreciseTrimMaster
+     * const preciseTrimMaster = await prisma.preciseTrimMaster.findUnique({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     */
+    findUnique<T extends PreciseTrimMasterFindUniqueArgs>(args: SelectSubset<T, PreciseTrimMasterFindUniqueArgs<ExtArgs>>): Prisma__PreciseTrimMasterClient<$Result.GetResult<Prisma.$PreciseTrimMasterPayload<ExtArgs>, T, "findUnique", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Find one PreciseTrimMaster that matches the filter or throw an error with `error.code='P2025'`
+     * if no matches were found.
+     * @param {PreciseTrimMasterFindUniqueOrThrowArgs} args - Arguments to find a PreciseTrimMaster
+     * @example
+     * // Get one PreciseTrimMaster
+     * const preciseTrimMaster = await prisma.preciseTrimMaster.findUniqueOrThrow({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     */
+    findUniqueOrThrow<T extends PreciseTrimMasterFindUniqueOrThrowArgs>(args: SelectSubset<T, PreciseTrimMasterFindUniqueOrThrowArgs<ExtArgs>>): Prisma__PreciseTrimMasterClient<$Result.GetResult<Prisma.$PreciseTrimMasterPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Find the first PreciseTrimMaster that matches the filter.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {PreciseTrimMasterFindFirstArgs} args - Arguments to find a PreciseTrimMaster
+     * @example
+     * // Get one PreciseTrimMaster
+     * const preciseTrimMaster = await prisma.preciseTrimMaster.findFirst({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     */
+    findFirst<T extends PreciseTrimMasterFindFirstArgs>(args?: SelectSubset<T, PreciseTrimMasterFindFirstArgs<ExtArgs>>): Prisma__PreciseTrimMasterClient<$Result.GetResult<Prisma.$PreciseTrimMasterPayload<ExtArgs>, T, "findFirst", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Find the first PreciseTrimMaster that matches the filter or
+     * throw `PrismaKnownClientError` with `P2025` code if no matches were found.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {PreciseTrimMasterFindFirstOrThrowArgs} args - Arguments to find a PreciseTrimMaster
+     * @example
+     * // Get one PreciseTrimMaster
+     * const preciseTrimMaster = await prisma.preciseTrimMaster.findFirstOrThrow({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     */
+    findFirstOrThrow<T extends PreciseTrimMasterFindFirstOrThrowArgs>(args?: SelectSubset<T, PreciseTrimMasterFindFirstOrThrowArgs<ExtArgs>>): Prisma__PreciseTrimMasterClient<$Result.GetResult<Prisma.$PreciseTrimMasterPayload<ExtArgs>, T, "findFirstOrThrow", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Find zero or more PreciseTrimMasters that matches the filter.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {PreciseTrimMasterFindManyArgs} args - Arguments to filter and select certain fields only.
+     * @example
+     * // Get all PreciseTrimMasters
+     * const preciseTrimMasters = await prisma.preciseTrimMaster.findMany()
+     * 
+     * // Get first 10 PreciseTrimMasters
+     * const preciseTrimMasters = await prisma.preciseTrimMaster.findMany({ take: 10 })
+     * 
+     * // Only select the `id`
+     * const preciseTrimMasterWithIdOnly = await prisma.preciseTrimMaster.findMany({ select: { id: true } })
+     * 
+     */
+    findMany<T extends PreciseTrimMasterFindManyArgs>(args?: SelectSubset<T, PreciseTrimMasterFindManyArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$PreciseTrimMasterPayload<ExtArgs>, T, "findMany", GlobalOmitOptions>>
+
+    /**
+     * Create a PreciseTrimMaster.
+     * @param {PreciseTrimMasterCreateArgs} args - Arguments to create a PreciseTrimMaster.
+     * @example
+     * // Create one PreciseTrimMaster
+     * const PreciseTrimMaster = await prisma.preciseTrimMaster.create({
+     *   data: {
+     *     // ... data to create a PreciseTrimMaster
+     *   }
+     * })
+     * 
+     */
+    create<T extends PreciseTrimMasterCreateArgs>(args: SelectSubset<T, PreciseTrimMasterCreateArgs<ExtArgs>>): Prisma__PreciseTrimMasterClient<$Result.GetResult<Prisma.$PreciseTrimMasterPayload<ExtArgs>, T, "create", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Create many PreciseTrimMasters.
+     * @param {PreciseTrimMasterCreateManyArgs} args - Arguments to create many PreciseTrimMasters.
+     * @example
+     * // Create many PreciseTrimMasters
+     * const preciseTrimMaster = await prisma.preciseTrimMaster.createMany({
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     *     
+     */
+    createMany<T extends PreciseTrimMasterCreateManyArgs>(args?: SelectSubset<T, PreciseTrimMasterCreateManyArgs<ExtArgs>>): Prisma.PrismaPromise<BatchPayload>
+
+    /**
+     * Create many PreciseTrimMasters and returns the data saved in the database.
+     * @param {PreciseTrimMasterCreateManyAndReturnArgs} args - Arguments to create many PreciseTrimMasters.
+     * @example
+     * // Create many PreciseTrimMasters
+     * const preciseTrimMaster = await prisma.preciseTrimMaster.createManyAndReturn({
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     * 
+     * // Create many PreciseTrimMasters and only return the `id`
+     * const preciseTrimMasterWithIdOnly = await prisma.preciseTrimMaster.createManyAndReturn({
+     *   select: { id: true },
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * 
+     */
+    createManyAndReturn<T extends PreciseTrimMasterCreateManyAndReturnArgs>(args?: SelectSubset<T, PreciseTrimMasterCreateManyAndReturnArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$PreciseTrimMasterPayload<ExtArgs>, T, "createManyAndReturn", GlobalOmitOptions>>
+
+    /**
+     * Delete a PreciseTrimMaster.
+     * @param {PreciseTrimMasterDeleteArgs} args - Arguments to delete one PreciseTrimMaster.
+     * @example
+     * // Delete one PreciseTrimMaster
+     * const PreciseTrimMaster = await prisma.preciseTrimMaster.delete({
+     *   where: {
+     *     // ... filter to delete one PreciseTrimMaster
+     *   }
+     * })
+     * 
+     */
+    delete<T extends PreciseTrimMasterDeleteArgs>(args: SelectSubset<T, PreciseTrimMasterDeleteArgs<ExtArgs>>): Prisma__PreciseTrimMasterClient<$Result.GetResult<Prisma.$PreciseTrimMasterPayload<ExtArgs>, T, "delete", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Update one PreciseTrimMaster.
+     * @param {PreciseTrimMasterUpdateArgs} args - Arguments to update one PreciseTrimMaster.
+     * @example
+     * // Update one PreciseTrimMaster
+     * const preciseTrimMaster = await prisma.preciseTrimMaster.update({
+     *   where: {
+     *     // ... provide filter here
+     *   },
+     *   data: {
+     *     // ... provide data here
+     *   }
+     * })
+     * 
+     */
+    update<T extends PreciseTrimMasterUpdateArgs>(args: SelectSubset<T, PreciseTrimMasterUpdateArgs<ExtArgs>>): Prisma__PreciseTrimMasterClient<$Result.GetResult<Prisma.$PreciseTrimMasterPayload<ExtArgs>, T, "update", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Delete zero or more PreciseTrimMasters.
+     * @param {PreciseTrimMasterDeleteManyArgs} args - Arguments to filter PreciseTrimMasters to delete.
+     * @example
+     * // Delete a few PreciseTrimMasters
+     * const { count } = await prisma.preciseTrimMaster.deleteMany({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     * 
+     */
+    deleteMany<T extends PreciseTrimMasterDeleteManyArgs>(args?: SelectSubset<T, PreciseTrimMasterDeleteManyArgs<ExtArgs>>): Prisma.PrismaPromise<BatchPayload>
+
+    /**
+     * Update zero or more PreciseTrimMasters.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {PreciseTrimMasterUpdateManyArgs} args - Arguments to update one or more rows.
+     * @example
+     * // Update many PreciseTrimMasters
+     * const preciseTrimMaster = await prisma.preciseTrimMaster.updateMany({
+     *   where: {
+     *     // ... provide filter here
+     *   },
+     *   data: {
+     *     // ... provide data here
+     *   }
+     * })
+     * 
+     */
+    updateMany<T extends PreciseTrimMasterUpdateManyArgs>(args: SelectSubset<T, PreciseTrimMasterUpdateManyArgs<ExtArgs>>): Prisma.PrismaPromise<BatchPayload>
+
+    /**
+     * Update zero or more PreciseTrimMasters and returns the data updated in the database.
+     * @param {PreciseTrimMasterUpdateManyAndReturnArgs} args - Arguments to update many PreciseTrimMasters.
+     * @example
+     * // Update many PreciseTrimMasters
+     * const preciseTrimMaster = await prisma.preciseTrimMaster.updateManyAndReturn({
+     *   where: {
+     *     // ... provide filter here
+     *   },
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     * 
+     * // Update zero or more PreciseTrimMasters and only return the `id`
+     * const preciseTrimMasterWithIdOnly = await prisma.preciseTrimMaster.updateManyAndReturn({
+     *   select: { id: true },
+     *   where: {
+     *     // ... provide filter here
+     *   },
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * 
+     */
+    updateManyAndReturn<T extends PreciseTrimMasterUpdateManyAndReturnArgs>(args: SelectSubset<T, PreciseTrimMasterUpdateManyAndReturnArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$PreciseTrimMasterPayload<ExtArgs>, T, "updateManyAndReturn", GlobalOmitOptions>>
+
+    /**
+     * Create or update one PreciseTrimMaster.
+     * @param {PreciseTrimMasterUpsertArgs} args - Arguments to update or create a PreciseTrimMaster.
+     * @example
+     * // Update or create a PreciseTrimMaster
+     * const preciseTrimMaster = await prisma.preciseTrimMaster.upsert({
+     *   create: {
+     *     // ... data to create a PreciseTrimMaster
+     *   },
+     *   update: {
+     *     // ... in case it already exists, update
+     *   },
+     *   where: {
+     *     // ... the filter for the PreciseTrimMaster we want to update
+     *   }
+     * })
+     */
+    upsert<T extends PreciseTrimMasterUpsertArgs>(args: SelectSubset<T, PreciseTrimMasterUpsertArgs<ExtArgs>>): Prisma__PreciseTrimMasterClient<$Result.GetResult<Prisma.$PreciseTrimMasterPayload<ExtArgs>, T, "upsert", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+
+    /**
+     * Count the number of PreciseTrimMasters.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {PreciseTrimMasterCountArgs} args - Arguments to filter PreciseTrimMasters to count.
+     * @example
+     * // Count the number of PreciseTrimMasters
+     * const count = await prisma.preciseTrimMaster.count({
+     *   where: {
+     *     // ... the filter for the PreciseTrimMasters we want to count
+     *   }
+     * })
+    **/
+    count<T extends PreciseTrimMasterCountArgs>(
+      args?: Subset<T, PreciseTrimMasterCountArgs>,
+    ): Prisma.PrismaPromise<
+      T extends $Utils.Record<'select', any>
+        ? T['select'] extends true
+          ? number
+          : GetScalarType<T['select'], PreciseTrimMasterCountAggregateOutputType>
+        : number
+    >
+
+    /**
+     * Allows you to perform aggregations operations on a PreciseTrimMaster.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {PreciseTrimMasterAggregateArgs} args - Select which aggregations you would like to apply and on what fields.
+     * @example
+     * // Ordered by age ascending
+     * // Where email contains prisma.io
+     * // Limited to the 10 users
+     * const aggregations = await prisma.user.aggregate({
+     *   _avg: {
+     *     age: true,
+     *   },
+     *   where: {
+     *     email: {
+     *       contains: "prisma.io",
+     *     },
+     *   },
+     *   orderBy: {
+     *     age: "asc",
+     *   },
+     *   take: 10,
+     * })
+    **/
+    aggregate<T extends PreciseTrimMasterAggregateArgs>(args: Subset<T, PreciseTrimMasterAggregateArgs>): Prisma.PrismaPromise<GetPreciseTrimMasterAggregateType<T>>
+
+    /**
+     * Group by PreciseTrimMaster.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {PreciseTrimMasterGroupByArgs} args - Group by arguments.
+     * @example
+     * // Group by city, order by createdAt, get count
+     * const result = await prisma.user.groupBy({
+     *   by: ['city', 'createdAt'],
+     *   orderBy: {
+     *     createdAt: true
+     *   },
+     *   _count: {
+     *     _all: true
+     *   },
+     * })
+     * 
+    **/
+    groupBy<
+      T extends PreciseTrimMasterGroupByArgs,
+      HasSelectOrTake extends Or<
+        Extends<'skip', Keys<T>>,
+        Extends<'take', Keys<T>>
+      >,
+      OrderByArg extends True extends HasSelectOrTake
+        ? { orderBy: PreciseTrimMasterGroupByArgs['orderBy'] }
+        : { orderBy?: PreciseTrimMasterGroupByArgs['orderBy'] },
+      OrderFields extends ExcludeUnderscoreKeys<Keys<MaybeTupleToUnion<T['orderBy']>>>,
+      ByFields extends MaybeTupleToUnion<T['by']>,
+      ByValid extends Has<ByFields, OrderFields>,
+      HavingFields extends GetHavingFields<T['having']>,
+      HavingValid extends Has<ByFields, HavingFields>,
+      ByEmpty extends T['by'] extends never[] ? True : False,
+      InputErrors extends ByEmpty extends True
+      ? `Error: "by" must not be empty.`
+      : HavingValid extends False
+      ? {
+          [P in HavingFields]: P extends ByFields
+            ? never
+            : P extends string
+            ? `Error: Field "${P}" used in "having" needs to be provided in "by".`
+            : [
+                Error,
+                'Field ',
+                P,
+                ` in "having" needs to be provided in "by"`,
+              ]
+        }[HavingFields]
+      : 'take' extends Keys<T>
+      ? 'orderBy' extends Keys<T>
+        ? ByValid extends True
+          ? {}
+          : {
+              [P in OrderFields]: P extends ByFields
+                ? never
+                : `Error: Field "${P}" in "orderBy" needs to be provided in "by"`
+            }[OrderFields]
+        : 'Error: If you provide "take", you also need to provide "orderBy"'
+      : 'skip' extends Keys<T>
+      ? 'orderBy' extends Keys<T>
+        ? ByValid extends True
+          ? {}
+          : {
+              [P in OrderFields]: P extends ByFields
+                ? never
+                : `Error: Field "${P}" in "orderBy" needs to be provided in "by"`
+            }[OrderFields]
+        : 'Error: If you provide "skip", you also need to provide "orderBy"'
+      : ByValid extends True
+      ? {}
+      : {
+          [P in OrderFields]: P extends ByFields
+            ? never
+            : `Error: Field "${P}" in "orderBy" needs to be provided in "by"`
+        }[OrderFields]
+    >(args: SubsetIntersection<T, PreciseTrimMasterGroupByArgs, OrderByArg> & InputErrors): {} extends InputErrors ? GetPreciseTrimMasterGroupByPayload<T> : Prisma.PrismaPromise<InputErrors>
+  /**
+   * Fields of the PreciseTrimMaster model
+   */
+  readonly fields: PreciseTrimMasterFieldRefs;
+  }
+
+  /**
+   * The delegate class that acts as a "Promise-like" for PreciseTrimMaster.
+   * Why is this prefixed with `Prisma__`?
+   * Because we want to prevent naming conflicts as mentioned in
+   * https://github.com/prisma/prisma-client-js/issues/707
+   */
+  export interface Prisma__PreciseTrimMasterClient<T, Null = never, ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs, GlobalOmitOptions = {}> extends Prisma.PrismaPromise<T> {
+    readonly [Symbol.toStringTag]: "PrismaPromise"
+    /**
+     * Attaches callbacks for the resolution and/or rejection of the Promise.
+     * @param onfulfilled The callback to execute when the Promise is resolved.
+     * @param onrejected The callback to execute when the Promise is rejected.
+     * @returns A Promise for the completion of which ever callback is executed.
+     */
+    then<TResult1 = T, TResult2 = never>(onfulfilled?: ((value: T) => TResult1 | PromiseLike<TResult1>) | undefined | null, onrejected?: ((reason: any) => TResult2 | PromiseLike<TResult2>) | undefined | null): $Utils.JsPromise<TResult1 | TResult2>
+    /**
+     * Attaches a callback for only the rejection of the Promise.
+     * @param onrejected The callback to execute when the Promise is rejected.
+     * @returns A Promise for the completion of the callback.
+     */
+    catch<TResult = never>(onrejected?: ((reason: any) => TResult | PromiseLike<TResult>) | undefined | null): $Utils.JsPromise<T | TResult>
+    /**
+     * Attaches a callback that is invoked when the Promise is settled (fulfilled or rejected). The
+     * resolved value cannot be modified from the callback.
+     * @param onfinally The callback to execute when the Promise is settled (fulfilled or rejected).
+     * @returns A Promise for the completion of the callback.
+     */
+    finally(onfinally?: (() => void) | undefined | null): $Utils.JsPromise<T>
+  }
+
+
+
+
+  /**
+   * Fields of the PreciseTrimMaster model
+   */
+  interface PreciseTrimMasterFieldRefs {
+    readonly id: FieldRef<"PreciseTrimMaster", 'Int'>
+    readonly attributeName: FieldRef<"PreciseTrimMaster", 'String'>
+    readonly type: FieldRef<"PreciseTrimMaster", 'String'>
+    readonly bt1: FieldRef<"PreciseTrimMaster", 'Decimal'>
+    readonly bt2: FieldRef<"PreciseTrimMaster", 'Decimal'>
+    readonly createdAt: FieldRef<"PreciseTrimMaster", 'DateTime'>
+    readonly updatedAt: FieldRef<"PreciseTrimMaster", 'DateTime'>
+  }
+    
+
+  // Custom InputTypes
+  /**
+   * PreciseTrimMaster findUnique
+   */
+  export type PreciseTrimMasterFindUniqueArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the PreciseTrimMaster
+     */
+    select?: PreciseTrimMasterSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the PreciseTrimMaster
+     */
+    omit?: PreciseTrimMasterOmit<ExtArgs> | null
+    /**
+     * Filter, which PreciseTrimMaster to fetch.
+     */
+    where: PreciseTrimMasterWhereUniqueInput
+  }
+
+  /**
+   * PreciseTrimMaster findUniqueOrThrow
+   */
+  export type PreciseTrimMasterFindUniqueOrThrowArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the PreciseTrimMaster
+     */
+    select?: PreciseTrimMasterSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the PreciseTrimMaster
+     */
+    omit?: PreciseTrimMasterOmit<ExtArgs> | null
+    /**
+     * Filter, which PreciseTrimMaster to fetch.
+     */
+    where: PreciseTrimMasterWhereUniqueInput
+  }
+
+  /**
+   * PreciseTrimMaster findFirst
+   */
+  export type PreciseTrimMasterFindFirstArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the PreciseTrimMaster
+     */
+    select?: PreciseTrimMasterSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the PreciseTrimMaster
+     */
+    omit?: PreciseTrimMasterOmit<ExtArgs> | null
+    /**
+     * Filter, which PreciseTrimMaster to fetch.
+     */
+    where?: PreciseTrimMasterWhereInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
+     * 
+     * Determine the order of PreciseTrimMasters to fetch.
+     */
+    orderBy?: PreciseTrimMasterOrderByWithRelationInput | PreciseTrimMasterOrderByWithRelationInput[]
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
+     * 
+     * Sets the position for searching for PreciseTrimMasters.
+     */
+    cursor?: PreciseTrimMasterWhereUniqueInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Take `±n` PreciseTrimMasters from the position of the cursor.
+     */
+    take?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Skip the first `n` PreciseTrimMasters.
+     */
+    skip?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/distinct Distinct Docs}
+     * 
+     * Filter by unique combinations of PreciseTrimMasters.
+     */
+    distinct?: PreciseTrimMasterScalarFieldEnum | PreciseTrimMasterScalarFieldEnum[]
+  }
+
+  /**
+   * PreciseTrimMaster findFirstOrThrow
+   */
+  export type PreciseTrimMasterFindFirstOrThrowArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the PreciseTrimMaster
+     */
+    select?: PreciseTrimMasterSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the PreciseTrimMaster
+     */
+    omit?: PreciseTrimMasterOmit<ExtArgs> | null
+    /**
+     * Filter, which PreciseTrimMaster to fetch.
+     */
+    where?: PreciseTrimMasterWhereInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
+     * 
+     * Determine the order of PreciseTrimMasters to fetch.
+     */
+    orderBy?: PreciseTrimMasterOrderByWithRelationInput | PreciseTrimMasterOrderByWithRelationInput[]
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
+     * 
+     * Sets the position for searching for PreciseTrimMasters.
+     */
+    cursor?: PreciseTrimMasterWhereUniqueInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Take `±n` PreciseTrimMasters from the position of the cursor.
+     */
+    take?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Skip the first `n` PreciseTrimMasters.
+     */
+    skip?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/distinct Distinct Docs}
+     * 
+     * Filter by unique combinations of PreciseTrimMasters.
+     */
+    distinct?: PreciseTrimMasterScalarFieldEnum | PreciseTrimMasterScalarFieldEnum[]
+  }
+
+  /**
+   * PreciseTrimMaster findMany
+   */
+  export type PreciseTrimMasterFindManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the PreciseTrimMaster
+     */
+    select?: PreciseTrimMasterSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the PreciseTrimMaster
+     */
+    omit?: PreciseTrimMasterOmit<ExtArgs> | null
+    /**
+     * Filter, which PreciseTrimMasters to fetch.
+     */
+    where?: PreciseTrimMasterWhereInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
+     * 
+     * Determine the order of PreciseTrimMasters to fetch.
+     */
+    orderBy?: PreciseTrimMasterOrderByWithRelationInput | PreciseTrimMasterOrderByWithRelationInput[]
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
+     * 
+     * Sets the position for listing PreciseTrimMasters.
+     */
+    cursor?: PreciseTrimMasterWhereUniqueInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Take `±n` PreciseTrimMasters from the position of the cursor.
+     */
+    take?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Skip the first `n` PreciseTrimMasters.
+     */
+    skip?: number
+    distinct?: PreciseTrimMasterScalarFieldEnum | PreciseTrimMasterScalarFieldEnum[]
+  }
+
+  /**
+   * PreciseTrimMaster create
+   */
+  export type PreciseTrimMasterCreateArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the PreciseTrimMaster
+     */
+    select?: PreciseTrimMasterSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the PreciseTrimMaster
+     */
+    omit?: PreciseTrimMasterOmit<ExtArgs> | null
+    /**
+     * The data needed to create a PreciseTrimMaster.
+     */
+    data: XOR<PreciseTrimMasterCreateInput, PreciseTrimMasterUncheckedCreateInput>
+  }
+
+  /**
+   * PreciseTrimMaster createMany
+   */
+  export type PreciseTrimMasterCreateManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * The data used to create many PreciseTrimMasters.
+     */
+    data: PreciseTrimMasterCreateManyInput | PreciseTrimMasterCreateManyInput[]
+    skipDuplicates?: boolean
+  }
+
+  /**
+   * PreciseTrimMaster createManyAndReturn
+   */
+  export type PreciseTrimMasterCreateManyAndReturnArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the PreciseTrimMaster
+     */
+    select?: PreciseTrimMasterSelectCreateManyAndReturn<ExtArgs> | null
+    /**
+     * Omit specific fields from the PreciseTrimMaster
+     */
+    omit?: PreciseTrimMasterOmit<ExtArgs> | null
+    /**
+     * The data used to create many PreciseTrimMasters.
+     */
+    data: PreciseTrimMasterCreateManyInput | PreciseTrimMasterCreateManyInput[]
+    skipDuplicates?: boolean
+  }
+
+  /**
+   * PreciseTrimMaster update
+   */
+  export type PreciseTrimMasterUpdateArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the PreciseTrimMaster
+     */
+    select?: PreciseTrimMasterSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the PreciseTrimMaster
+     */
+    omit?: PreciseTrimMasterOmit<ExtArgs> | null
+    /**
+     * The data needed to update a PreciseTrimMaster.
+     */
+    data: XOR<PreciseTrimMasterUpdateInput, PreciseTrimMasterUncheckedUpdateInput>
+    /**
+     * Choose, which PreciseTrimMaster to update.
+     */
+    where: PreciseTrimMasterWhereUniqueInput
+  }
+
+  /**
+   * PreciseTrimMaster updateMany
+   */
+  export type PreciseTrimMasterUpdateManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * The data used to update PreciseTrimMasters.
+     */
+    data: XOR<PreciseTrimMasterUpdateManyMutationInput, PreciseTrimMasterUncheckedUpdateManyInput>
+    /**
+     * Filter which PreciseTrimMasters to update
+     */
+    where?: PreciseTrimMasterWhereInput
+    /**
+     * Limit how many PreciseTrimMasters to update.
+     */
+    limit?: number
+  }
+
+  /**
+   * PreciseTrimMaster updateManyAndReturn
+   */
+  export type PreciseTrimMasterUpdateManyAndReturnArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the PreciseTrimMaster
+     */
+    select?: PreciseTrimMasterSelectUpdateManyAndReturn<ExtArgs> | null
+    /**
+     * Omit specific fields from the PreciseTrimMaster
+     */
+    omit?: PreciseTrimMasterOmit<ExtArgs> | null
+    /**
+     * The data used to update PreciseTrimMasters.
+     */
+    data: XOR<PreciseTrimMasterUpdateManyMutationInput, PreciseTrimMasterUncheckedUpdateManyInput>
+    /**
+     * Filter which PreciseTrimMasters to update
+     */
+    where?: PreciseTrimMasterWhereInput
+    /**
+     * Limit how many PreciseTrimMasters to update.
+     */
+    limit?: number
+  }
+
+  /**
+   * PreciseTrimMaster upsert
+   */
+  export type PreciseTrimMasterUpsertArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the PreciseTrimMaster
+     */
+    select?: PreciseTrimMasterSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the PreciseTrimMaster
+     */
+    omit?: PreciseTrimMasterOmit<ExtArgs> | null
+    /**
+     * The filter to search for the PreciseTrimMaster to update in case it exists.
+     */
+    where: PreciseTrimMasterWhereUniqueInput
+    /**
+     * In case the PreciseTrimMaster found by the `where` argument doesn't exist, create a new PreciseTrimMaster with this data.
+     */
+    create: XOR<PreciseTrimMasterCreateInput, PreciseTrimMasterUncheckedCreateInput>
+    /**
+     * In case the PreciseTrimMaster was found with the provided `where` argument, update it with this data.
+     */
+    update: XOR<PreciseTrimMasterUpdateInput, PreciseTrimMasterUncheckedUpdateInput>
+  }
+
+  /**
+   * PreciseTrimMaster delete
+   */
+  export type PreciseTrimMasterDeleteArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the PreciseTrimMaster
+     */
+    select?: PreciseTrimMasterSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the PreciseTrimMaster
+     */
+    omit?: PreciseTrimMasterOmit<ExtArgs> | null
+    /**
+     * Filter which PreciseTrimMaster to delete.
+     */
+    where: PreciseTrimMasterWhereUniqueInput
+  }
+
+  /**
+   * PreciseTrimMaster deleteMany
+   */
+  export type PreciseTrimMasterDeleteManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Filter which PreciseTrimMasters to delete
+     */
+    where?: PreciseTrimMasterWhereInput
+    /**
+     * Limit how many PreciseTrimMasters to delete.
+     */
+    limit?: number
+  }
+
+  /**
+   * PreciseTrimMaster without action
+   */
+  export type PreciseTrimMasterDefaultArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the PreciseTrimMaster
+     */
+    select?: PreciseTrimMasterSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the PreciseTrimMaster
+     */
+    omit?: PreciseTrimMasterOmit<ExtArgs> | null
   }
 
 
@@ -81636,6 +84503,4191 @@ export namespace Prisma {
 
 
   /**
+   * Model BodyArticleDescriptionFormate
+   */
+
+  export type AggregateBodyArticleDescriptionFormate = {
+    _count: BodyArticleDescriptionFormateCountAggregateOutputType | null
+    _avg: BodyArticleDescriptionFormateAvgAggregateOutputType | null
+    _sum: BodyArticleDescriptionFormateSumAggregateOutputType | null
+    _min: BodyArticleDescriptionFormateMinAggregateOutputType | null
+    _max: BodyArticleDescriptionFormateMaxAggregateOutputType | null
+  }
+
+  export type BodyArticleDescriptionFormateAvgAggregateOutputType = {
+    id: number | null
+  }
+
+  export type BodyArticleDescriptionFormateSumAggregateOutputType = {
+    id: number | null
+  }
+
+  export type BodyArticleDescriptionFormateMinAggregateOutputType = {
+    id: number | null
+    fgMajCat: string | null
+    attributesMajCat: string | null
+    frGridStatus: string | null
+    createdAt: Date | null
+    updatedAt: Date | null
+  }
+
+  export type BodyArticleDescriptionFormateMaxAggregateOutputType = {
+    id: number | null
+    fgMajCat: string | null
+    attributesMajCat: string | null
+    frGridStatus: string | null
+    createdAt: Date | null
+    updatedAt: Date | null
+  }
+
+  export type BodyArticleDescriptionFormateCountAggregateOutputType = {
+    id: number
+    fgMajCat: number
+    attributesMajCat: number
+    frGridStatus: number
+    createdAt: number
+    updatedAt: number
+    _all: number
+  }
+
+
+  export type BodyArticleDescriptionFormateAvgAggregateInputType = {
+    id?: true
+  }
+
+  export type BodyArticleDescriptionFormateSumAggregateInputType = {
+    id?: true
+  }
+
+  export type BodyArticleDescriptionFormateMinAggregateInputType = {
+    id?: true
+    fgMajCat?: true
+    attributesMajCat?: true
+    frGridStatus?: true
+    createdAt?: true
+    updatedAt?: true
+  }
+
+  export type BodyArticleDescriptionFormateMaxAggregateInputType = {
+    id?: true
+    fgMajCat?: true
+    attributesMajCat?: true
+    frGridStatus?: true
+    createdAt?: true
+    updatedAt?: true
+  }
+
+  export type BodyArticleDescriptionFormateCountAggregateInputType = {
+    id?: true
+    fgMajCat?: true
+    attributesMajCat?: true
+    frGridStatus?: true
+    createdAt?: true
+    updatedAt?: true
+    _all?: true
+  }
+
+  export type BodyArticleDescriptionFormateAggregateArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Filter which BodyArticleDescriptionFormate to aggregate.
+     */
+    where?: BodyArticleDescriptionFormateWhereInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
+     * 
+     * Determine the order of BodyArticleDescriptionFormates to fetch.
+     */
+    orderBy?: BodyArticleDescriptionFormateOrderByWithRelationInput | BodyArticleDescriptionFormateOrderByWithRelationInput[]
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
+     * 
+     * Sets the start position
+     */
+    cursor?: BodyArticleDescriptionFormateWhereUniqueInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Take `±n` BodyArticleDescriptionFormates from the position of the cursor.
+     */
+    take?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Skip the first `n` BodyArticleDescriptionFormates.
+     */
+    skip?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     * 
+     * Count returned BodyArticleDescriptionFormates
+    **/
+    _count?: true | BodyArticleDescriptionFormateCountAggregateInputType
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     * 
+     * Select which fields to average
+    **/
+    _avg?: BodyArticleDescriptionFormateAvgAggregateInputType
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     * 
+     * Select which fields to sum
+    **/
+    _sum?: BodyArticleDescriptionFormateSumAggregateInputType
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     * 
+     * Select which fields to find the minimum value
+    **/
+    _min?: BodyArticleDescriptionFormateMinAggregateInputType
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     * 
+     * Select which fields to find the maximum value
+    **/
+    _max?: BodyArticleDescriptionFormateMaxAggregateInputType
+  }
+
+  export type GetBodyArticleDescriptionFormateAggregateType<T extends BodyArticleDescriptionFormateAggregateArgs> = {
+        [P in keyof T & keyof AggregateBodyArticleDescriptionFormate]: P extends '_count' | 'count'
+      ? T[P] extends true
+        ? number
+        : GetScalarType<T[P], AggregateBodyArticleDescriptionFormate[P]>
+      : GetScalarType<T[P], AggregateBodyArticleDescriptionFormate[P]>
+  }
+
+
+
+
+  export type BodyArticleDescriptionFormateGroupByArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    where?: BodyArticleDescriptionFormateWhereInput
+    orderBy?: BodyArticleDescriptionFormateOrderByWithAggregationInput | BodyArticleDescriptionFormateOrderByWithAggregationInput[]
+    by: BodyArticleDescriptionFormateScalarFieldEnum[] | BodyArticleDescriptionFormateScalarFieldEnum
+    having?: BodyArticleDescriptionFormateScalarWhereWithAggregatesInput
+    take?: number
+    skip?: number
+    _count?: BodyArticleDescriptionFormateCountAggregateInputType | true
+    _avg?: BodyArticleDescriptionFormateAvgAggregateInputType
+    _sum?: BodyArticleDescriptionFormateSumAggregateInputType
+    _min?: BodyArticleDescriptionFormateMinAggregateInputType
+    _max?: BodyArticleDescriptionFormateMaxAggregateInputType
+  }
+
+  export type BodyArticleDescriptionFormateGroupByOutputType = {
+    id: number
+    fgMajCat: string
+    attributesMajCat: string
+    frGridStatus: string
+    createdAt: Date
+    updatedAt: Date
+    _count: BodyArticleDescriptionFormateCountAggregateOutputType | null
+    _avg: BodyArticleDescriptionFormateAvgAggregateOutputType | null
+    _sum: BodyArticleDescriptionFormateSumAggregateOutputType | null
+    _min: BodyArticleDescriptionFormateMinAggregateOutputType | null
+    _max: BodyArticleDescriptionFormateMaxAggregateOutputType | null
+  }
+
+  type GetBodyArticleDescriptionFormateGroupByPayload<T extends BodyArticleDescriptionFormateGroupByArgs> = Prisma.PrismaPromise<
+    Array<
+      PickEnumerable<BodyArticleDescriptionFormateGroupByOutputType, T['by']> &
+        {
+          [P in ((keyof T) & (keyof BodyArticleDescriptionFormateGroupByOutputType))]: P extends '_count'
+            ? T[P] extends boolean
+              ? number
+              : GetScalarType<T[P], BodyArticleDescriptionFormateGroupByOutputType[P]>
+            : GetScalarType<T[P], BodyArticleDescriptionFormateGroupByOutputType[P]>
+        }
+      >
+    >
+
+
+  export type BodyArticleDescriptionFormateSelect<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
+    id?: boolean
+    fgMajCat?: boolean
+    attributesMajCat?: boolean
+    frGridStatus?: boolean
+    createdAt?: boolean
+    updatedAt?: boolean
+  }, ExtArgs["result"]["bodyArticleDescriptionFormate"]>
+
+  export type BodyArticleDescriptionFormateSelectCreateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
+    id?: boolean
+    fgMajCat?: boolean
+    attributesMajCat?: boolean
+    frGridStatus?: boolean
+    createdAt?: boolean
+    updatedAt?: boolean
+  }, ExtArgs["result"]["bodyArticleDescriptionFormate"]>
+
+  export type BodyArticleDescriptionFormateSelectUpdateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
+    id?: boolean
+    fgMajCat?: boolean
+    attributesMajCat?: boolean
+    frGridStatus?: boolean
+    createdAt?: boolean
+    updatedAt?: boolean
+  }, ExtArgs["result"]["bodyArticleDescriptionFormate"]>
+
+  export type BodyArticleDescriptionFormateSelectScalar = {
+    id?: boolean
+    fgMajCat?: boolean
+    attributesMajCat?: boolean
+    frGridStatus?: boolean
+    createdAt?: boolean
+    updatedAt?: boolean
+  }
+
+  export type BodyArticleDescriptionFormateOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<"id" | "fgMajCat" | "attributesMajCat" | "frGridStatus" | "createdAt" | "updatedAt", ExtArgs["result"]["bodyArticleDescriptionFormate"]>
+
+  export type $BodyArticleDescriptionFormatePayload<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    name: "BodyArticleDescriptionFormate"
+    objects: {}
+    scalars: $Extensions.GetPayloadResult<{
+      id: number
+      fgMajCat: string
+      attributesMajCat: string
+      frGridStatus: string
+      createdAt: Date
+      updatedAt: Date
+    }, ExtArgs["result"]["bodyArticleDescriptionFormate"]>
+    composites: {}
+  }
+
+  type BodyArticleDescriptionFormateGetPayload<S extends boolean | null | undefined | BodyArticleDescriptionFormateDefaultArgs> = $Result.GetResult<Prisma.$BodyArticleDescriptionFormatePayload, S>
+
+  type BodyArticleDescriptionFormateCountArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> =
+    Omit<BodyArticleDescriptionFormateFindManyArgs, 'select' | 'include' | 'distinct' | 'omit'> & {
+      select?: BodyArticleDescriptionFormateCountAggregateInputType | true
+    }
+
+  export interface BodyArticleDescriptionFormateDelegate<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs, GlobalOmitOptions = {}> {
+    [K: symbol]: { types: Prisma.TypeMap<ExtArgs>['model']['BodyArticleDescriptionFormate'], meta: { name: 'BodyArticleDescriptionFormate' } }
+    /**
+     * Find zero or one BodyArticleDescriptionFormate that matches the filter.
+     * @param {BodyArticleDescriptionFormateFindUniqueArgs} args - Arguments to find a BodyArticleDescriptionFormate
+     * @example
+     * // Get one BodyArticleDescriptionFormate
+     * const bodyArticleDescriptionFormate = await prisma.bodyArticleDescriptionFormate.findUnique({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     */
+    findUnique<T extends BodyArticleDescriptionFormateFindUniqueArgs>(args: SelectSubset<T, BodyArticleDescriptionFormateFindUniqueArgs<ExtArgs>>): Prisma__BodyArticleDescriptionFormateClient<$Result.GetResult<Prisma.$BodyArticleDescriptionFormatePayload<ExtArgs>, T, "findUnique", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Find one BodyArticleDescriptionFormate that matches the filter or throw an error with `error.code='P2025'`
+     * if no matches were found.
+     * @param {BodyArticleDescriptionFormateFindUniqueOrThrowArgs} args - Arguments to find a BodyArticleDescriptionFormate
+     * @example
+     * // Get one BodyArticleDescriptionFormate
+     * const bodyArticleDescriptionFormate = await prisma.bodyArticleDescriptionFormate.findUniqueOrThrow({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     */
+    findUniqueOrThrow<T extends BodyArticleDescriptionFormateFindUniqueOrThrowArgs>(args: SelectSubset<T, BodyArticleDescriptionFormateFindUniqueOrThrowArgs<ExtArgs>>): Prisma__BodyArticleDescriptionFormateClient<$Result.GetResult<Prisma.$BodyArticleDescriptionFormatePayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Find the first BodyArticleDescriptionFormate that matches the filter.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {BodyArticleDescriptionFormateFindFirstArgs} args - Arguments to find a BodyArticleDescriptionFormate
+     * @example
+     * // Get one BodyArticleDescriptionFormate
+     * const bodyArticleDescriptionFormate = await prisma.bodyArticleDescriptionFormate.findFirst({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     */
+    findFirst<T extends BodyArticleDescriptionFormateFindFirstArgs>(args?: SelectSubset<T, BodyArticleDescriptionFormateFindFirstArgs<ExtArgs>>): Prisma__BodyArticleDescriptionFormateClient<$Result.GetResult<Prisma.$BodyArticleDescriptionFormatePayload<ExtArgs>, T, "findFirst", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Find the first BodyArticleDescriptionFormate that matches the filter or
+     * throw `PrismaKnownClientError` with `P2025` code if no matches were found.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {BodyArticleDescriptionFormateFindFirstOrThrowArgs} args - Arguments to find a BodyArticleDescriptionFormate
+     * @example
+     * // Get one BodyArticleDescriptionFormate
+     * const bodyArticleDescriptionFormate = await prisma.bodyArticleDescriptionFormate.findFirstOrThrow({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     */
+    findFirstOrThrow<T extends BodyArticleDescriptionFormateFindFirstOrThrowArgs>(args?: SelectSubset<T, BodyArticleDescriptionFormateFindFirstOrThrowArgs<ExtArgs>>): Prisma__BodyArticleDescriptionFormateClient<$Result.GetResult<Prisma.$BodyArticleDescriptionFormatePayload<ExtArgs>, T, "findFirstOrThrow", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Find zero or more BodyArticleDescriptionFormates that matches the filter.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {BodyArticleDescriptionFormateFindManyArgs} args - Arguments to filter and select certain fields only.
+     * @example
+     * // Get all BodyArticleDescriptionFormates
+     * const bodyArticleDescriptionFormates = await prisma.bodyArticleDescriptionFormate.findMany()
+     * 
+     * // Get first 10 BodyArticleDescriptionFormates
+     * const bodyArticleDescriptionFormates = await prisma.bodyArticleDescriptionFormate.findMany({ take: 10 })
+     * 
+     * // Only select the `id`
+     * const bodyArticleDescriptionFormateWithIdOnly = await prisma.bodyArticleDescriptionFormate.findMany({ select: { id: true } })
+     * 
+     */
+    findMany<T extends BodyArticleDescriptionFormateFindManyArgs>(args?: SelectSubset<T, BodyArticleDescriptionFormateFindManyArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$BodyArticleDescriptionFormatePayload<ExtArgs>, T, "findMany", GlobalOmitOptions>>
+
+    /**
+     * Create a BodyArticleDescriptionFormate.
+     * @param {BodyArticleDescriptionFormateCreateArgs} args - Arguments to create a BodyArticleDescriptionFormate.
+     * @example
+     * // Create one BodyArticleDescriptionFormate
+     * const BodyArticleDescriptionFormate = await prisma.bodyArticleDescriptionFormate.create({
+     *   data: {
+     *     // ... data to create a BodyArticleDescriptionFormate
+     *   }
+     * })
+     * 
+     */
+    create<T extends BodyArticleDescriptionFormateCreateArgs>(args: SelectSubset<T, BodyArticleDescriptionFormateCreateArgs<ExtArgs>>): Prisma__BodyArticleDescriptionFormateClient<$Result.GetResult<Prisma.$BodyArticleDescriptionFormatePayload<ExtArgs>, T, "create", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Create many BodyArticleDescriptionFormates.
+     * @param {BodyArticleDescriptionFormateCreateManyArgs} args - Arguments to create many BodyArticleDescriptionFormates.
+     * @example
+     * // Create many BodyArticleDescriptionFormates
+     * const bodyArticleDescriptionFormate = await prisma.bodyArticleDescriptionFormate.createMany({
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     *     
+     */
+    createMany<T extends BodyArticleDescriptionFormateCreateManyArgs>(args?: SelectSubset<T, BodyArticleDescriptionFormateCreateManyArgs<ExtArgs>>): Prisma.PrismaPromise<BatchPayload>
+
+    /**
+     * Create many BodyArticleDescriptionFormates and returns the data saved in the database.
+     * @param {BodyArticleDescriptionFormateCreateManyAndReturnArgs} args - Arguments to create many BodyArticleDescriptionFormates.
+     * @example
+     * // Create many BodyArticleDescriptionFormates
+     * const bodyArticleDescriptionFormate = await prisma.bodyArticleDescriptionFormate.createManyAndReturn({
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     * 
+     * // Create many BodyArticleDescriptionFormates and only return the `id`
+     * const bodyArticleDescriptionFormateWithIdOnly = await prisma.bodyArticleDescriptionFormate.createManyAndReturn({
+     *   select: { id: true },
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * 
+     */
+    createManyAndReturn<T extends BodyArticleDescriptionFormateCreateManyAndReturnArgs>(args?: SelectSubset<T, BodyArticleDescriptionFormateCreateManyAndReturnArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$BodyArticleDescriptionFormatePayload<ExtArgs>, T, "createManyAndReturn", GlobalOmitOptions>>
+
+    /**
+     * Delete a BodyArticleDescriptionFormate.
+     * @param {BodyArticleDescriptionFormateDeleteArgs} args - Arguments to delete one BodyArticleDescriptionFormate.
+     * @example
+     * // Delete one BodyArticleDescriptionFormate
+     * const BodyArticleDescriptionFormate = await prisma.bodyArticleDescriptionFormate.delete({
+     *   where: {
+     *     // ... filter to delete one BodyArticleDescriptionFormate
+     *   }
+     * })
+     * 
+     */
+    delete<T extends BodyArticleDescriptionFormateDeleteArgs>(args: SelectSubset<T, BodyArticleDescriptionFormateDeleteArgs<ExtArgs>>): Prisma__BodyArticleDescriptionFormateClient<$Result.GetResult<Prisma.$BodyArticleDescriptionFormatePayload<ExtArgs>, T, "delete", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Update one BodyArticleDescriptionFormate.
+     * @param {BodyArticleDescriptionFormateUpdateArgs} args - Arguments to update one BodyArticleDescriptionFormate.
+     * @example
+     * // Update one BodyArticleDescriptionFormate
+     * const bodyArticleDescriptionFormate = await prisma.bodyArticleDescriptionFormate.update({
+     *   where: {
+     *     // ... provide filter here
+     *   },
+     *   data: {
+     *     // ... provide data here
+     *   }
+     * })
+     * 
+     */
+    update<T extends BodyArticleDescriptionFormateUpdateArgs>(args: SelectSubset<T, BodyArticleDescriptionFormateUpdateArgs<ExtArgs>>): Prisma__BodyArticleDescriptionFormateClient<$Result.GetResult<Prisma.$BodyArticleDescriptionFormatePayload<ExtArgs>, T, "update", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Delete zero or more BodyArticleDescriptionFormates.
+     * @param {BodyArticleDescriptionFormateDeleteManyArgs} args - Arguments to filter BodyArticleDescriptionFormates to delete.
+     * @example
+     * // Delete a few BodyArticleDescriptionFormates
+     * const { count } = await prisma.bodyArticleDescriptionFormate.deleteMany({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     * 
+     */
+    deleteMany<T extends BodyArticleDescriptionFormateDeleteManyArgs>(args?: SelectSubset<T, BodyArticleDescriptionFormateDeleteManyArgs<ExtArgs>>): Prisma.PrismaPromise<BatchPayload>
+
+    /**
+     * Update zero or more BodyArticleDescriptionFormates.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {BodyArticleDescriptionFormateUpdateManyArgs} args - Arguments to update one or more rows.
+     * @example
+     * // Update many BodyArticleDescriptionFormates
+     * const bodyArticleDescriptionFormate = await prisma.bodyArticleDescriptionFormate.updateMany({
+     *   where: {
+     *     // ... provide filter here
+     *   },
+     *   data: {
+     *     // ... provide data here
+     *   }
+     * })
+     * 
+     */
+    updateMany<T extends BodyArticleDescriptionFormateUpdateManyArgs>(args: SelectSubset<T, BodyArticleDescriptionFormateUpdateManyArgs<ExtArgs>>): Prisma.PrismaPromise<BatchPayload>
+
+    /**
+     * Update zero or more BodyArticleDescriptionFormates and returns the data updated in the database.
+     * @param {BodyArticleDescriptionFormateUpdateManyAndReturnArgs} args - Arguments to update many BodyArticleDescriptionFormates.
+     * @example
+     * // Update many BodyArticleDescriptionFormates
+     * const bodyArticleDescriptionFormate = await prisma.bodyArticleDescriptionFormate.updateManyAndReturn({
+     *   where: {
+     *     // ... provide filter here
+     *   },
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     * 
+     * // Update zero or more BodyArticleDescriptionFormates and only return the `id`
+     * const bodyArticleDescriptionFormateWithIdOnly = await prisma.bodyArticleDescriptionFormate.updateManyAndReturn({
+     *   select: { id: true },
+     *   where: {
+     *     // ... provide filter here
+     *   },
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * 
+     */
+    updateManyAndReturn<T extends BodyArticleDescriptionFormateUpdateManyAndReturnArgs>(args: SelectSubset<T, BodyArticleDescriptionFormateUpdateManyAndReturnArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$BodyArticleDescriptionFormatePayload<ExtArgs>, T, "updateManyAndReturn", GlobalOmitOptions>>
+
+    /**
+     * Create or update one BodyArticleDescriptionFormate.
+     * @param {BodyArticleDescriptionFormateUpsertArgs} args - Arguments to update or create a BodyArticleDescriptionFormate.
+     * @example
+     * // Update or create a BodyArticleDescriptionFormate
+     * const bodyArticleDescriptionFormate = await prisma.bodyArticleDescriptionFormate.upsert({
+     *   create: {
+     *     // ... data to create a BodyArticleDescriptionFormate
+     *   },
+     *   update: {
+     *     // ... in case it already exists, update
+     *   },
+     *   where: {
+     *     // ... the filter for the BodyArticleDescriptionFormate we want to update
+     *   }
+     * })
+     */
+    upsert<T extends BodyArticleDescriptionFormateUpsertArgs>(args: SelectSubset<T, BodyArticleDescriptionFormateUpsertArgs<ExtArgs>>): Prisma__BodyArticleDescriptionFormateClient<$Result.GetResult<Prisma.$BodyArticleDescriptionFormatePayload<ExtArgs>, T, "upsert", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+
+    /**
+     * Count the number of BodyArticleDescriptionFormates.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {BodyArticleDescriptionFormateCountArgs} args - Arguments to filter BodyArticleDescriptionFormates to count.
+     * @example
+     * // Count the number of BodyArticleDescriptionFormates
+     * const count = await prisma.bodyArticleDescriptionFormate.count({
+     *   where: {
+     *     // ... the filter for the BodyArticleDescriptionFormates we want to count
+     *   }
+     * })
+    **/
+    count<T extends BodyArticleDescriptionFormateCountArgs>(
+      args?: Subset<T, BodyArticleDescriptionFormateCountArgs>,
+    ): Prisma.PrismaPromise<
+      T extends $Utils.Record<'select', any>
+        ? T['select'] extends true
+          ? number
+          : GetScalarType<T['select'], BodyArticleDescriptionFormateCountAggregateOutputType>
+        : number
+    >
+
+    /**
+     * Allows you to perform aggregations operations on a BodyArticleDescriptionFormate.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {BodyArticleDescriptionFormateAggregateArgs} args - Select which aggregations you would like to apply and on what fields.
+     * @example
+     * // Ordered by age ascending
+     * // Where email contains prisma.io
+     * // Limited to the 10 users
+     * const aggregations = await prisma.user.aggregate({
+     *   _avg: {
+     *     age: true,
+     *   },
+     *   where: {
+     *     email: {
+     *       contains: "prisma.io",
+     *     },
+     *   },
+     *   orderBy: {
+     *     age: "asc",
+     *   },
+     *   take: 10,
+     * })
+    **/
+    aggregate<T extends BodyArticleDescriptionFormateAggregateArgs>(args: Subset<T, BodyArticleDescriptionFormateAggregateArgs>): Prisma.PrismaPromise<GetBodyArticleDescriptionFormateAggregateType<T>>
+
+    /**
+     * Group by BodyArticleDescriptionFormate.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {BodyArticleDescriptionFormateGroupByArgs} args - Group by arguments.
+     * @example
+     * // Group by city, order by createdAt, get count
+     * const result = await prisma.user.groupBy({
+     *   by: ['city', 'createdAt'],
+     *   orderBy: {
+     *     createdAt: true
+     *   },
+     *   _count: {
+     *     _all: true
+     *   },
+     * })
+     * 
+    **/
+    groupBy<
+      T extends BodyArticleDescriptionFormateGroupByArgs,
+      HasSelectOrTake extends Or<
+        Extends<'skip', Keys<T>>,
+        Extends<'take', Keys<T>>
+      >,
+      OrderByArg extends True extends HasSelectOrTake
+        ? { orderBy: BodyArticleDescriptionFormateGroupByArgs['orderBy'] }
+        : { orderBy?: BodyArticleDescriptionFormateGroupByArgs['orderBy'] },
+      OrderFields extends ExcludeUnderscoreKeys<Keys<MaybeTupleToUnion<T['orderBy']>>>,
+      ByFields extends MaybeTupleToUnion<T['by']>,
+      ByValid extends Has<ByFields, OrderFields>,
+      HavingFields extends GetHavingFields<T['having']>,
+      HavingValid extends Has<ByFields, HavingFields>,
+      ByEmpty extends T['by'] extends never[] ? True : False,
+      InputErrors extends ByEmpty extends True
+      ? `Error: "by" must not be empty.`
+      : HavingValid extends False
+      ? {
+          [P in HavingFields]: P extends ByFields
+            ? never
+            : P extends string
+            ? `Error: Field "${P}" used in "having" needs to be provided in "by".`
+            : [
+                Error,
+                'Field ',
+                P,
+                ` in "having" needs to be provided in "by"`,
+              ]
+        }[HavingFields]
+      : 'take' extends Keys<T>
+      ? 'orderBy' extends Keys<T>
+        ? ByValid extends True
+          ? {}
+          : {
+              [P in OrderFields]: P extends ByFields
+                ? never
+                : `Error: Field "${P}" in "orderBy" needs to be provided in "by"`
+            }[OrderFields]
+        : 'Error: If you provide "take", you also need to provide "orderBy"'
+      : 'skip' extends Keys<T>
+      ? 'orderBy' extends Keys<T>
+        ? ByValid extends True
+          ? {}
+          : {
+              [P in OrderFields]: P extends ByFields
+                ? never
+                : `Error: Field "${P}" in "orderBy" needs to be provided in "by"`
+            }[OrderFields]
+        : 'Error: If you provide "skip", you also need to provide "orderBy"'
+      : ByValid extends True
+      ? {}
+      : {
+          [P in OrderFields]: P extends ByFields
+            ? never
+            : `Error: Field "${P}" in "orderBy" needs to be provided in "by"`
+        }[OrderFields]
+    >(args: SubsetIntersection<T, BodyArticleDescriptionFormateGroupByArgs, OrderByArg> & InputErrors): {} extends InputErrors ? GetBodyArticleDescriptionFormateGroupByPayload<T> : Prisma.PrismaPromise<InputErrors>
+  /**
+   * Fields of the BodyArticleDescriptionFormate model
+   */
+  readonly fields: BodyArticleDescriptionFormateFieldRefs;
+  }
+
+  /**
+   * The delegate class that acts as a "Promise-like" for BodyArticleDescriptionFormate.
+   * Why is this prefixed with `Prisma__`?
+   * Because we want to prevent naming conflicts as mentioned in
+   * https://github.com/prisma/prisma-client-js/issues/707
+   */
+  export interface Prisma__BodyArticleDescriptionFormateClient<T, Null = never, ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs, GlobalOmitOptions = {}> extends Prisma.PrismaPromise<T> {
+    readonly [Symbol.toStringTag]: "PrismaPromise"
+    /**
+     * Attaches callbacks for the resolution and/or rejection of the Promise.
+     * @param onfulfilled The callback to execute when the Promise is resolved.
+     * @param onrejected The callback to execute when the Promise is rejected.
+     * @returns A Promise for the completion of which ever callback is executed.
+     */
+    then<TResult1 = T, TResult2 = never>(onfulfilled?: ((value: T) => TResult1 | PromiseLike<TResult1>) | undefined | null, onrejected?: ((reason: any) => TResult2 | PromiseLike<TResult2>) | undefined | null): $Utils.JsPromise<TResult1 | TResult2>
+    /**
+     * Attaches a callback for only the rejection of the Promise.
+     * @param onrejected The callback to execute when the Promise is rejected.
+     * @returns A Promise for the completion of the callback.
+     */
+    catch<TResult = never>(onrejected?: ((reason: any) => TResult | PromiseLike<TResult>) | undefined | null): $Utils.JsPromise<T | TResult>
+    /**
+     * Attaches a callback that is invoked when the Promise is settled (fulfilled or rejected). The
+     * resolved value cannot be modified from the callback.
+     * @param onfinally The callback to execute when the Promise is settled (fulfilled or rejected).
+     * @returns A Promise for the completion of the callback.
+     */
+    finally(onfinally?: (() => void) | undefined | null): $Utils.JsPromise<T>
+  }
+
+
+
+
+  /**
+   * Fields of the BodyArticleDescriptionFormate model
+   */
+  interface BodyArticleDescriptionFormateFieldRefs {
+    readonly id: FieldRef<"BodyArticleDescriptionFormate", 'Int'>
+    readonly fgMajCat: FieldRef<"BodyArticleDescriptionFormate", 'String'>
+    readonly attributesMajCat: FieldRef<"BodyArticleDescriptionFormate", 'String'>
+    readonly frGridStatus: FieldRef<"BodyArticleDescriptionFormate", 'String'>
+    readonly createdAt: FieldRef<"BodyArticleDescriptionFormate", 'DateTime'>
+    readonly updatedAt: FieldRef<"BodyArticleDescriptionFormate", 'DateTime'>
+  }
+    
+
+  // Custom InputTypes
+  /**
+   * BodyArticleDescriptionFormate findUnique
+   */
+  export type BodyArticleDescriptionFormateFindUniqueArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the BodyArticleDescriptionFormate
+     */
+    select?: BodyArticleDescriptionFormateSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the BodyArticleDescriptionFormate
+     */
+    omit?: BodyArticleDescriptionFormateOmit<ExtArgs> | null
+    /**
+     * Filter, which BodyArticleDescriptionFormate to fetch.
+     */
+    where: BodyArticleDescriptionFormateWhereUniqueInput
+  }
+
+  /**
+   * BodyArticleDescriptionFormate findUniqueOrThrow
+   */
+  export type BodyArticleDescriptionFormateFindUniqueOrThrowArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the BodyArticleDescriptionFormate
+     */
+    select?: BodyArticleDescriptionFormateSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the BodyArticleDescriptionFormate
+     */
+    omit?: BodyArticleDescriptionFormateOmit<ExtArgs> | null
+    /**
+     * Filter, which BodyArticleDescriptionFormate to fetch.
+     */
+    where: BodyArticleDescriptionFormateWhereUniqueInput
+  }
+
+  /**
+   * BodyArticleDescriptionFormate findFirst
+   */
+  export type BodyArticleDescriptionFormateFindFirstArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the BodyArticleDescriptionFormate
+     */
+    select?: BodyArticleDescriptionFormateSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the BodyArticleDescriptionFormate
+     */
+    omit?: BodyArticleDescriptionFormateOmit<ExtArgs> | null
+    /**
+     * Filter, which BodyArticleDescriptionFormate to fetch.
+     */
+    where?: BodyArticleDescriptionFormateWhereInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
+     * 
+     * Determine the order of BodyArticleDescriptionFormates to fetch.
+     */
+    orderBy?: BodyArticleDescriptionFormateOrderByWithRelationInput | BodyArticleDescriptionFormateOrderByWithRelationInput[]
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
+     * 
+     * Sets the position for searching for BodyArticleDescriptionFormates.
+     */
+    cursor?: BodyArticleDescriptionFormateWhereUniqueInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Take `±n` BodyArticleDescriptionFormates from the position of the cursor.
+     */
+    take?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Skip the first `n` BodyArticleDescriptionFormates.
+     */
+    skip?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/distinct Distinct Docs}
+     * 
+     * Filter by unique combinations of BodyArticleDescriptionFormates.
+     */
+    distinct?: BodyArticleDescriptionFormateScalarFieldEnum | BodyArticleDescriptionFormateScalarFieldEnum[]
+  }
+
+  /**
+   * BodyArticleDescriptionFormate findFirstOrThrow
+   */
+  export type BodyArticleDescriptionFormateFindFirstOrThrowArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the BodyArticleDescriptionFormate
+     */
+    select?: BodyArticleDescriptionFormateSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the BodyArticleDescriptionFormate
+     */
+    omit?: BodyArticleDescriptionFormateOmit<ExtArgs> | null
+    /**
+     * Filter, which BodyArticleDescriptionFormate to fetch.
+     */
+    where?: BodyArticleDescriptionFormateWhereInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
+     * 
+     * Determine the order of BodyArticleDescriptionFormates to fetch.
+     */
+    orderBy?: BodyArticleDescriptionFormateOrderByWithRelationInput | BodyArticleDescriptionFormateOrderByWithRelationInput[]
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
+     * 
+     * Sets the position for searching for BodyArticleDescriptionFormates.
+     */
+    cursor?: BodyArticleDescriptionFormateWhereUniqueInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Take `±n` BodyArticleDescriptionFormates from the position of the cursor.
+     */
+    take?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Skip the first `n` BodyArticleDescriptionFormates.
+     */
+    skip?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/distinct Distinct Docs}
+     * 
+     * Filter by unique combinations of BodyArticleDescriptionFormates.
+     */
+    distinct?: BodyArticleDescriptionFormateScalarFieldEnum | BodyArticleDescriptionFormateScalarFieldEnum[]
+  }
+
+  /**
+   * BodyArticleDescriptionFormate findMany
+   */
+  export type BodyArticleDescriptionFormateFindManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the BodyArticleDescriptionFormate
+     */
+    select?: BodyArticleDescriptionFormateSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the BodyArticleDescriptionFormate
+     */
+    omit?: BodyArticleDescriptionFormateOmit<ExtArgs> | null
+    /**
+     * Filter, which BodyArticleDescriptionFormates to fetch.
+     */
+    where?: BodyArticleDescriptionFormateWhereInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
+     * 
+     * Determine the order of BodyArticleDescriptionFormates to fetch.
+     */
+    orderBy?: BodyArticleDescriptionFormateOrderByWithRelationInput | BodyArticleDescriptionFormateOrderByWithRelationInput[]
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
+     * 
+     * Sets the position for listing BodyArticleDescriptionFormates.
+     */
+    cursor?: BodyArticleDescriptionFormateWhereUniqueInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Take `±n` BodyArticleDescriptionFormates from the position of the cursor.
+     */
+    take?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Skip the first `n` BodyArticleDescriptionFormates.
+     */
+    skip?: number
+    distinct?: BodyArticleDescriptionFormateScalarFieldEnum | BodyArticleDescriptionFormateScalarFieldEnum[]
+  }
+
+  /**
+   * BodyArticleDescriptionFormate create
+   */
+  export type BodyArticleDescriptionFormateCreateArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the BodyArticleDescriptionFormate
+     */
+    select?: BodyArticleDescriptionFormateSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the BodyArticleDescriptionFormate
+     */
+    omit?: BodyArticleDescriptionFormateOmit<ExtArgs> | null
+    /**
+     * The data needed to create a BodyArticleDescriptionFormate.
+     */
+    data: XOR<BodyArticleDescriptionFormateCreateInput, BodyArticleDescriptionFormateUncheckedCreateInput>
+  }
+
+  /**
+   * BodyArticleDescriptionFormate createMany
+   */
+  export type BodyArticleDescriptionFormateCreateManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * The data used to create many BodyArticleDescriptionFormates.
+     */
+    data: BodyArticleDescriptionFormateCreateManyInput | BodyArticleDescriptionFormateCreateManyInput[]
+    skipDuplicates?: boolean
+  }
+
+  /**
+   * BodyArticleDescriptionFormate createManyAndReturn
+   */
+  export type BodyArticleDescriptionFormateCreateManyAndReturnArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the BodyArticleDescriptionFormate
+     */
+    select?: BodyArticleDescriptionFormateSelectCreateManyAndReturn<ExtArgs> | null
+    /**
+     * Omit specific fields from the BodyArticleDescriptionFormate
+     */
+    omit?: BodyArticleDescriptionFormateOmit<ExtArgs> | null
+    /**
+     * The data used to create many BodyArticleDescriptionFormates.
+     */
+    data: BodyArticleDescriptionFormateCreateManyInput | BodyArticleDescriptionFormateCreateManyInput[]
+    skipDuplicates?: boolean
+  }
+
+  /**
+   * BodyArticleDescriptionFormate update
+   */
+  export type BodyArticleDescriptionFormateUpdateArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the BodyArticleDescriptionFormate
+     */
+    select?: BodyArticleDescriptionFormateSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the BodyArticleDescriptionFormate
+     */
+    omit?: BodyArticleDescriptionFormateOmit<ExtArgs> | null
+    /**
+     * The data needed to update a BodyArticleDescriptionFormate.
+     */
+    data: XOR<BodyArticleDescriptionFormateUpdateInput, BodyArticleDescriptionFormateUncheckedUpdateInput>
+    /**
+     * Choose, which BodyArticleDescriptionFormate to update.
+     */
+    where: BodyArticleDescriptionFormateWhereUniqueInput
+  }
+
+  /**
+   * BodyArticleDescriptionFormate updateMany
+   */
+  export type BodyArticleDescriptionFormateUpdateManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * The data used to update BodyArticleDescriptionFormates.
+     */
+    data: XOR<BodyArticleDescriptionFormateUpdateManyMutationInput, BodyArticleDescriptionFormateUncheckedUpdateManyInput>
+    /**
+     * Filter which BodyArticleDescriptionFormates to update
+     */
+    where?: BodyArticleDescriptionFormateWhereInput
+    /**
+     * Limit how many BodyArticleDescriptionFormates to update.
+     */
+    limit?: number
+  }
+
+  /**
+   * BodyArticleDescriptionFormate updateManyAndReturn
+   */
+  export type BodyArticleDescriptionFormateUpdateManyAndReturnArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the BodyArticleDescriptionFormate
+     */
+    select?: BodyArticleDescriptionFormateSelectUpdateManyAndReturn<ExtArgs> | null
+    /**
+     * Omit specific fields from the BodyArticleDescriptionFormate
+     */
+    omit?: BodyArticleDescriptionFormateOmit<ExtArgs> | null
+    /**
+     * The data used to update BodyArticleDescriptionFormates.
+     */
+    data: XOR<BodyArticleDescriptionFormateUpdateManyMutationInput, BodyArticleDescriptionFormateUncheckedUpdateManyInput>
+    /**
+     * Filter which BodyArticleDescriptionFormates to update
+     */
+    where?: BodyArticleDescriptionFormateWhereInput
+    /**
+     * Limit how many BodyArticleDescriptionFormates to update.
+     */
+    limit?: number
+  }
+
+  /**
+   * BodyArticleDescriptionFormate upsert
+   */
+  export type BodyArticleDescriptionFormateUpsertArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the BodyArticleDescriptionFormate
+     */
+    select?: BodyArticleDescriptionFormateSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the BodyArticleDescriptionFormate
+     */
+    omit?: BodyArticleDescriptionFormateOmit<ExtArgs> | null
+    /**
+     * The filter to search for the BodyArticleDescriptionFormate to update in case it exists.
+     */
+    where: BodyArticleDescriptionFormateWhereUniqueInput
+    /**
+     * In case the BodyArticleDescriptionFormate found by the `where` argument doesn't exist, create a new BodyArticleDescriptionFormate with this data.
+     */
+    create: XOR<BodyArticleDescriptionFormateCreateInput, BodyArticleDescriptionFormateUncheckedCreateInput>
+    /**
+     * In case the BodyArticleDescriptionFormate was found with the provided `where` argument, update it with this data.
+     */
+    update: XOR<BodyArticleDescriptionFormateUpdateInput, BodyArticleDescriptionFormateUncheckedUpdateInput>
+  }
+
+  /**
+   * BodyArticleDescriptionFormate delete
+   */
+  export type BodyArticleDescriptionFormateDeleteArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the BodyArticleDescriptionFormate
+     */
+    select?: BodyArticleDescriptionFormateSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the BodyArticleDescriptionFormate
+     */
+    omit?: BodyArticleDescriptionFormateOmit<ExtArgs> | null
+    /**
+     * Filter which BodyArticleDescriptionFormate to delete.
+     */
+    where: BodyArticleDescriptionFormateWhereUniqueInput
+  }
+
+  /**
+   * BodyArticleDescriptionFormate deleteMany
+   */
+  export type BodyArticleDescriptionFormateDeleteManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Filter which BodyArticleDescriptionFormates to delete
+     */
+    where?: BodyArticleDescriptionFormateWhereInput
+    /**
+     * Limit how many BodyArticleDescriptionFormates to delete.
+     */
+    limit?: number
+  }
+
+  /**
+   * BodyArticleDescriptionFormate without action
+   */
+  export type BodyArticleDescriptionFormateDefaultArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the BodyArticleDescriptionFormate
+     */
+    select?: BodyArticleDescriptionFormateSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the BodyArticleDescriptionFormate
+     */
+    omit?: BodyArticleDescriptionFormateOmit<ExtArgs> | null
+  }
+
+
+  /**
+   * Model GmArticleDescriptionFormate
+   */
+
+  export type AggregateGmArticleDescriptionFormate = {
+    _count: GmArticleDescriptionFormateCountAggregateOutputType | null
+    _avg: GmArticleDescriptionFormateAvgAggregateOutputType | null
+    _sum: GmArticleDescriptionFormateSumAggregateOutputType | null
+    _min: GmArticleDescriptionFormateMinAggregateOutputType | null
+    _max: GmArticleDescriptionFormateMaxAggregateOutputType | null
+  }
+
+  export type GmArticleDescriptionFormateAvgAggregateOutputType = {
+    id: number | null
+  }
+
+  export type GmArticleDescriptionFormateSumAggregateOutputType = {
+    id: number | null
+  }
+
+  export type GmArticleDescriptionFormateMinAggregateOutputType = {
+    id: number | null
+    key: string | null
+    archetypeNm: string | null
+    descSeq: string | null
+    familyCode: string | null
+    familyName: string | null
+    createdAt: Date | null
+    updatedAt: Date | null
+  }
+
+  export type GmArticleDescriptionFormateMaxAggregateOutputType = {
+    id: number | null
+    key: string | null
+    archetypeNm: string | null
+    descSeq: string | null
+    familyCode: string | null
+    familyName: string | null
+    createdAt: Date | null
+    updatedAt: Date | null
+  }
+
+  export type GmArticleDescriptionFormateCountAggregateOutputType = {
+    id: number
+    key: number
+    archetypeNm: number
+    descSeq: number
+    familyCode: number
+    familyName: number
+    createdAt: number
+    updatedAt: number
+    _all: number
+  }
+
+
+  export type GmArticleDescriptionFormateAvgAggregateInputType = {
+    id?: true
+  }
+
+  export type GmArticleDescriptionFormateSumAggregateInputType = {
+    id?: true
+  }
+
+  export type GmArticleDescriptionFormateMinAggregateInputType = {
+    id?: true
+    key?: true
+    archetypeNm?: true
+    descSeq?: true
+    familyCode?: true
+    familyName?: true
+    createdAt?: true
+    updatedAt?: true
+  }
+
+  export type GmArticleDescriptionFormateMaxAggregateInputType = {
+    id?: true
+    key?: true
+    archetypeNm?: true
+    descSeq?: true
+    familyCode?: true
+    familyName?: true
+    createdAt?: true
+    updatedAt?: true
+  }
+
+  export type GmArticleDescriptionFormateCountAggregateInputType = {
+    id?: true
+    key?: true
+    archetypeNm?: true
+    descSeq?: true
+    familyCode?: true
+    familyName?: true
+    createdAt?: true
+    updatedAt?: true
+    _all?: true
+  }
+
+  export type GmArticleDescriptionFormateAggregateArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Filter which GmArticleDescriptionFormate to aggregate.
+     */
+    where?: GmArticleDescriptionFormateWhereInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
+     * 
+     * Determine the order of GmArticleDescriptionFormates to fetch.
+     */
+    orderBy?: GmArticleDescriptionFormateOrderByWithRelationInput | GmArticleDescriptionFormateOrderByWithRelationInput[]
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
+     * 
+     * Sets the start position
+     */
+    cursor?: GmArticleDescriptionFormateWhereUniqueInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Take `±n` GmArticleDescriptionFormates from the position of the cursor.
+     */
+    take?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Skip the first `n` GmArticleDescriptionFormates.
+     */
+    skip?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     * 
+     * Count returned GmArticleDescriptionFormates
+    **/
+    _count?: true | GmArticleDescriptionFormateCountAggregateInputType
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     * 
+     * Select which fields to average
+    **/
+    _avg?: GmArticleDescriptionFormateAvgAggregateInputType
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     * 
+     * Select which fields to sum
+    **/
+    _sum?: GmArticleDescriptionFormateSumAggregateInputType
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     * 
+     * Select which fields to find the minimum value
+    **/
+    _min?: GmArticleDescriptionFormateMinAggregateInputType
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     * 
+     * Select which fields to find the maximum value
+    **/
+    _max?: GmArticleDescriptionFormateMaxAggregateInputType
+  }
+
+  export type GetGmArticleDescriptionFormateAggregateType<T extends GmArticleDescriptionFormateAggregateArgs> = {
+        [P in keyof T & keyof AggregateGmArticleDescriptionFormate]: P extends '_count' | 'count'
+      ? T[P] extends true
+        ? number
+        : GetScalarType<T[P], AggregateGmArticleDescriptionFormate[P]>
+      : GetScalarType<T[P], AggregateGmArticleDescriptionFormate[P]>
+  }
+
+
+
+
+  export type GmArticleDescriptionFormateGroupByArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    where?: GmArticleDescriptionFormateWhereInput
+    orderBy?: GmArticleDescriptionFormateOrderByWithAggregationInput | GmArticleDescriptionFormateOrderByWithAggregationInput[]
+    by: GmArticleDescriptionFormateScalarFieldEnum[] | GmArticleDescriptionFormateScalarFieldEnum
+    having?: GmArticleDescriptionFormateScalarWhereWithAggregatesInput
+    take?: number
+    skip?: number
+    _count?: GmArticleDescriptionFormateCountAggregateInputType | true
+    _avg?: GmArticleDescriptionFormateAvgAggregateInputType
+    _sum?: GmArticleDescriptionFormateSumAggregateInputType
+    _min?: GmArticleDescriptionFormateMinAggregateInputType
+    _max?: GmArticleDescriptionFormateMaxAggregateInputType
+  }
+
+  export type GmArticleDescriptionFormateGroupByOutputType = {
+    id: number
+    key: string
+    archetypeNm: string
+    descSeq: string
+    familyCode: string
+    familyName: string
+    createdAt: Date
+    updatedAt: Date
+    _count: GmArticleDescriptionFormateCountAggregateOutputType | null
+    _avg: GmArticleDescriptionFormateAvgAggregateOutputType | null
+    _sum: GmArticleDescriptionFormateSumAggregateOutputType | null
+    _min: GmArticleDescriptionFormateMinAggregateOutputType | null
+    _max: GmArticleDescriptionFormateMaxAggregateOutputType | null
+  }
+
+  type GetGmArticleDescriptionFormateGroupByPayload<T extends GmArticleDescriptionFormateGroupByArgs> = Prisma.PrismaPromise<
+    Array<
+      PickEnumerable<GmArticleDescriptionFormateGroupByOutputType, T['by']> &
+        {
+          [P in ((keyof T) & (keyof GmArticleDescriptionFormateGroupByOutputType))]: P extends '_count'
+            ? T[P] extends boolean
+              ? number
+              : GetScalarType<T[P], GmArticleDescriptionFormateGroupByOutputType[P]>
+            : GetScalarType<T[P], GmArticleDescriptionFormateGroupByOutputType[P]>
+        }
+      >
+    >
+
+
+  export type GmArticleDescriptionFormateSelect<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
+    id?: boolean
+    key?: boolean
+    archetypeNm?: boolean
+    descSeq?: boolean
+    familyCode?: boolean
+    familyName?: boolean
+    createdAt?: boolean
+    updatedAt?: boolean
+  }, ExtArgs["result"]["gmArticleDescriptionFormate"]>
+
+  export type GmArticleDescriptionFormateSelectCreateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
+    id?: boolean
+    key?: boolean
+    archetypeNm?: boolean
+    descSeq?: boolean
+    familyCode?: boolean
+    familyName?: boolean
+    createdAt?: boolean
+    updatedAt?: boolean
+  }, ExtArgs["result"]["gmArticleDescriptionFormate"]>
+
+  export type GmArticleDescriptionFormateSelectUpdateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
+    id?: boolean
+    key?: boolean
+    archetypeNm?: boolean
+    descSeq?: boolean
+    familyCode?: boolean
+    familyName?: boolean
+    createdAt?: boolean
+    updatedAt?: boolean
+  }, ExtArgs["result"]["gmArticleDescriptionFormate"]>
+
+  export type GmArticleDescriptionFormateSelectScalar = {
+    id?: boolean
+    key?: boolean
+    archetypeNm?: boolean
+    descSeq?: boolean
+    familyCode?: boolean
+    familyName?: boolean
+    createdAt?: boolean
+    updatedAt?: boolean
+  }
+
+  export type GmArticleDescriptionFormateOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<"id" | "key" | "archetypeNm" | "descSeq" | "familyCode" | "familyName" | "createdAt" | "updatedAt", ExtArgs["result"]["gmArticleDescriptionFormate"]>
+
+  export type $GmArticleDescriptionFormatePayload<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    name: "GmArticleDescriptionFormate"
+    objects: {}
+    scalars: $Extensions.GetPayloadResult<{
+      id: number
+      key: string
+      archetypeNm: string
+      descSeq: string
+      familyCode: string
+      familyName: string
+      createdAt: Date
+      updatedAt: Date
+    }, ExtArgs["result"]["gmArticleDescriptionFormate"]>
+    composites: {}
+  }
+
+  type GmArticleDescriptionFormateGetPayload<S extends boolean | null | undefined | GmArticleDescriptionFormateDefaultArgs> = $Result.GetResult<Prisma.$GmArticleDescriptionFormatePayload, S>
+
+  type GmArticleDescriptionFormateCountArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> =
+    Omit<GmArticleDescriptionFormateFindManyArgs, 'select' | 'include' | 'distinct' | 'omit'> & {
+      select?: GmArticleDescriptionFormateCountAggregateInputType | true
+    }
+
+  export interface GmArticleDescriptionFormateDelegate<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs, GlobalOmitOptions = {}> {
+    [K: symbol]: { types: Prisma.TypeMap<ExtArgs>['model']['GmArticleDescriptionFormate'], meta: { name: 'GmArticleDescriptionFormate' } }
+    /**
+     * Find zero or one GmArticleDescriptionFormate that matches the filter.
+     * @param {GmArticleDescriptionFormateFindUniqueArgs} args - Arguments to find a GmArticleDescriptionFormate
+     * @example
+     * // Get one GmArticleDescriptionFormate
+     * const gmArticleDescriptionFormate = await prisma.gmArticleDescriptionFormate.findUnique({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     */
+    findUnique<T extends GmArticleDescriptionFormateFindUniqueArgs>(args: SelectSubset<T, GmArticleDescriptionFormateFindUniqueArgs<ExtArgs>>): Prisma__GmArticleDescriptionFormateClient<$Result.GetResult<Prisma.$GmArticleDescriptionFormatePayload<ExtArgs>, T, "findUnique", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Find one GmArticleDescriptionFormate that matches the filter or throw an error with `error.code='P2025'`
+     * if no matches were found.
+     * @param {GmArticleDescriptionFormateFindUniqueOrThrowArgs} args - Arguments to find a GmArticleDescriptionFormate
+     * @example
+     * // Get one GmArticleDescriptionFormate
+     * const gmArticleDescriptionFormate = await prisma.gmArticleDescriptionFormate.findUniqueOrThrow({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     */
+    findUniqueOrThrow<T extends GmArticleDescriptionFormateFindUniqueOrThrowArgs>(args: SelectSubset<T, GmArticleDescriptionFormateFindUniqueOrThrowArgs<ExtArgs>>): Prisma__GmArticleDescriptionFormateClient<$Result.GetResult<Prisma.$GmArticleDescriptionFormatePayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Find the first GmArticleDescriptionFormate that matches the filter.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {GmArticleDescriptionFormateFindFirstArgs} args - Arguments to find a GmArticleDescriptionFormate
+     * @example
+     * // Get one GmArticleDescriptionFormate
+     * const gmArticleDescriptionFormate = await prisma.gmArticleDescriptionFormate.findFirst({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     */
+    findFirst<T extends GmArticleDescriptionFormateFindFirstArgs>(args?: SelectSubset<T, GmArticleDescriptionFormateFindFirstArgs<ExtArgs>>): Prisma__GmArticleDescriptionFormateClient<$Result.GetResult<Prisma.$GmArticleDescriptionFormatePayload<ExtArgs>, T, "findFirst", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Find the first GmArticleDescriptionFormate that matches the filter or
+     * throw `PrismaKnownClientError` with `P2025` code if no matches were found.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {GmArticleDescriptionFormateFindFirstOrThrowArgs} args - Arguments to find a GmArticleDescriptionFormate
+     * @example
+     * // Get one GmArticleDescriptionFormate
+     * const gmArticleDescriptionFormate = await prisma.gmArticleDescriptionFormate.findFirstOrThrow({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     */
+    findFirstOrThrow<T extends GmArticleDescriptionFormateFindFirstOrThrowArgs>(args?: SelectSubset<T, GmArticleDescriptionFormateFindFirstOrThrowArgs<ExtArgs>>): Prisma__GmArticleDescriptionFormateClient<$Result.GetResult<Prisma.$GmArticleDescriptionFormatePayload<ExtArgs>, T, "findFirstOrThrow", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Find zero or more GmArticleDescriptionFormates that matches the filter.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {GmArticleDescriptionFormateFindManyArgs} args - Arguments to filter and select certain fields only.
+     * @example
+     * // Get all GmArticleDescriptionFormates
+     * const gmArticleDescriptionFormates = await prisma.gmArticleDescriptionFormate.findMany()
+     * 
+     * // Get first 10 GmArticleDescriptionFormates
+     * const gmArticleDescriptionFormates = await prisma.gmArticleDescriptionFormate.findMany({ take: 10 })
+     * 
+     * // Only select the `id`
+     * const gmArticleDescriptionFormateWithIdOnly = await prisma.gmArticleDescriptionFormate.findMany({ select: { id: true } })
+     * 
+     */
+    findMany<T extends GmArticleDescriptionFormateFindManyArgs>(args?: SelectSubset<T, GmArticleDescriptionFormateFindManyArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$GmArticleDescriptionFormatePayload<ExtArgs>, T, "findMany", GlobalOmitOptions>>
+
+    /**
+     * Create a GmArticleDescriptionFormate.
+     * @param {GmArticleDescriptionFormateCreateArgs} args - Arguments to create a GmArticleDescriptionFormate.
+     * @example
+     * // Create one GmArticleDescriptionFormate
+     * const GmArticleDescriptionFormate = await prisma.gmArticleDescriptionFormate.create({
+     *   data: {
+     *     // ... data to create a GmArticleDescriptionFormate
+     *   }
+     * })
+     * 
+     */
+    create<T extends GmArticleDescriptionFormateCreateArgs>(args: SelectSubset<T, GmArticleDescriptionFormateCreateArgs<ExtArgs>>): Prisma__GmArticleDescriptionFormateClient<$Result.GetResult<Prisma.$GmArticleDescriptionFormatePayload<ExtArgs>, T, "create", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Create many GmArticleDescriptionFormates.
+     * @param {GmArticleDescriptionFormateCreateManyArgs} args - Arguments to create many GmArticleDescriptionFormates.
+     * @example
+     * // Create many GmArticleDescriptionFormates
+     * const gmArticleDescriptionFormate = await prisma.gmArticleDescriptionFormate.createMany({
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     *     
+     */
+    createMany<T extends GmArticleDescriptionFormateCreateManyArgs>(args?: SelectSubset<T, GmArticleDescriptionFormateCreateManyArgs<ExtArgs>>): Prisma.PrismaPromise<BatchPayload>
+
+    /**
+     * Create many GmArticleDescriptionFormates and returns the data saved in the database.
+     * @param {GmArticleDescriptionFormateCreateManyAndReturnArgs} args - Arguments to create many GmArticleDescriptionFormates.
+     * @example
+     * // Create many GmArticleDescriptionFormates
+     * const gmArticleDescriptionFormate = await prisma.gmArticleDescriptionFormate.createManyAndReturn({
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     * 
+     * // Create many GmArticleDescriptionFormates and only return the `id`
+     * const gmArticleDescriptionFormateWithIdOnly = await prisma.gmArticleDescriptionFormate.createManyAndReturn({
+     *   select: { id: true },
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * 
+     */
+    createManyAndReturn<T extends GmArticleDescriptionFormateCreateManyAndReturnArgs>(args?: SelectSubset<T, GmArticleDescriptionFormateCreateManyAndReturnArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$GmArticleDescriptionFormatePayload<ExtArgs>, T, "createManyAndReturn", GlobalOmitOptions>>
+
+    /**
+     * Delete a GmArticleDescriptionFormate.
+     * @param {GmArticleDescriptionFormateDeleteArgs} args - Arguments to delete one GmArticleDescriptionFormate.
+     * @example
+     * // Delete one GmArticleDescriptionFormate
+     * const GmArticleDescriptionFormate = await prisma.gmArticleDescriptionFormate.delete({
+     *   where: {
+     *     // ... filter to delete one GmArticleDescriptionFormate
+     *   }
+     * })
+     * 
+     */
+    delete<T extends GmArticleDescriptionFormateDeleteArgs>(args: SelectSubset<T, GmArticleDescriptionFormateDeleteArgs<ExtArgs>>): Prisma__GmArticleDescriptionFormateClient<$Result.GetResult<Prisma.$GmArticleDescriptionFormatePayload<ExtArgs>, T, "delete", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Update one GmArticleDescriptionFormate.
+     * @param {GmArticleDescriptionFormateUpdateArgs} args - Arguments to update one GmArticleDescriptionFormate.
+     * @example
+     * // Update one GmArticleDescriptionFormate
+     * const gmArticleDescriptionFormate = await prisma.gmArticleDescriptionFormate.update({
+     *   where: {
+     *     // ... provide filter here
+     *   },
+     *   data: {
+     *     // ... provide data here
+     *   }
+     * })
+     * 
+     */
+    update<T extends GmArticleDescriptionFormateUpdateArgs>(args: SelectSubset<T, GmArticleDescriptionFormateUpdateArgs<ExtArgs>>): Prisma__GmArticleDescriptionFormateClient<$Result.GetResult<Prisma.$GmArticleDescriptionFormatePayload<ExtArgs>, T, "update", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Delete zero or more GmArticleDescriptionFormates.
+     * @param {GmArticleDescriptionFormateDeleteManyArgs} args - Arguments to filter GmArticleDescriptionFormates to delete.
+     * @example
+     * // Delete a few GmArticleDescriptionFormates
+     * const { count } = await prisma.gmArticleDescriptionFormate.deleteMany({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     * 
+     */
+    deleteMany<T extends GmArticleDescriptionFormateDeleteManyArgs>(args?: SelectSubset<T, GmArticleDescriptionFormateDeleteManyArgs<ExtArgs>>): Prisma.PrismaPromise<BatchPayload>
+
+    /**
+     * Update zero or more GmArticleDescriptionFormates.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {GmArticleDescriptionFormateUpdateManyArgs} args - Arguments to update one or more rows.
+     * @example
+     * // Update many GmArticleDescriptionFormates
+     * const gmArticleDescriptionFormate = await prisma.gmArticleDescriptionFormate.updateMany({
+     *   where: {
+     *     // ... provide filter here
+     *   },
+     *   data: {
+     *     // ... provide data here
+     *   }
+     * })
+     * 
+     */
+    updateMany<T extends GmArticleDescriptionFormateUpdateManyArgs>(args: SelectSubset<T, GmArticleDescriptionFormateUpdateManyArgs<ExtArgs>>): Prisma.PrismaPromise<BatchPayload>
+
+    /**
+     * Update zero or more GmArticleDescriptionFormates and returns the data updated in the database.
+     * @param {GmArticleDescriptionFormateUpdateManyAndReturnArgs} args - Arguments to update many GmArticleDescriptionFormates.
+     * @example
+     * // Update many GmArticleDescriptionFormates
+     * const gmArticleDescriptionFormate = await prisma.gmArticleDescriptionFormate.updateManyAndReturn({
+     *   where: {
+     *     // ... provide filter here
+     *   },
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     * 
+     * // Update zero or more GmArticleDescriptionFormates and only return the `id`
+     * const gmArticleDescriptionFormateWithIdOnly = await prisma.gmArticleDescriptionFormate.updateManyAndReturn({
+     *   select: { id: true },
+     *   where: {
+     *     // ... provide filter here
+     *   },
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * 
+     */
+    updateManyAndReturn<T extends GmArticleDescriptionFormateUpdateManyAndReturnArgs>(args: SelectSubset<T, GmArticleDescriptionFormateUpdateManyAndReturnArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$GmArticleDescriptionFormatePayload<ExtArgs>, T, "updateManyAndReturn", GlobalOmitOptions>>
+
+    /**
+     * Create or update one GmArticleDescriptionFormate.
+     * @param {GmArticleDescriptionFormateUpsertArgs} args - Arguments to update or create a GmArticleDescriptionFormate.
+     * @example
+     * // Update or create a GmArticleDescriptionFormate
+     * const gmArticleDescriptionFormate = await prisma.gmArticleDescriptionFormate.upsert({
+     *   create: {
+     *     // ... data to create a GmArticleDescriptionFormate
+     *   },
+     *   update: {
+     *     // ... in case it already exists, update
+     *   },
+     *   where: {
+     *     // ... the filter for the GmArticleDescriptionFormate we want to update
+     *   }
+     * })
+     */
+    upsert<T extends GmArticleDescriptionFormateUpsertArgs>(args: SelectSubset<T, GmArticleDescriptionFormateUpsertArgs<ExtArgs>>): Prisma__GmArticleDescriptionFormateClient<$Result.GetResult<Prisma.$GmArticleDescriptionFormatePayload<ExtArgs>, T, "upsert", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+
+    /**
+     * Count the number of GmArticleDescriptionFormates.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {GmArticleDescriptionFormateCountArgs} args - Arguments to filter GmArticleDescriptionFormates to count.
+     * @example
+     * // Count the number of GmArticleDescriptionFormates
+     * const count = await prisma.gmArticleDescriptionFormate.count({
+     *   where: {
+     *     // ... the filter for the GmArticleDescriptionFormates we want to count
+     *   }
+     * })
+    **/
+    count<T extends GmArticleDescriptionFormateCountArgs>(
+      args?: Subset<T, GmArticleDescriptionFormateCountArgs>,
+    ): Prisma.PrismaPromise<
+      T extends $Utils.Record<'select', any>
+        ? T['select'] extends true
+          ? number
+          : GetScalarType<T['select'], GmArticleDescriptionFormateCountAggregateOutputType>
+        : number
+    >
+
+    /**
+     * Allows you to perform aggregations operations on a GmArticleDescriptionFormate.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {GmArticleDescriptionFormateAggregateArgs} args - Select which aggregations you would like to apply and on what fields.
+     * @example
+     * // Ordered by age ascending
+     * // Where email contains prisma.io
+     * // Limited to the 10 users
+     * const aggregations = await prisma.user.aggregate({
+     *   _avg: {
+     *     age: true,
+     *   },
+     *   where: {
+     *     email: {
+     *       contains: "prisma.io",
+     *     },
+     *   },
+     *   orderBy: {
+     *     age: "asc",
+     *   },
+     *   take: 10,
+     * })
+    **/
+    aggregate<T extends GmArticleDescriptionFormateAggregateArgs>(args: Subset<T, GmArticleDescriptionFormateAggregateArgs>): Prisma.PrismaPromise<GetGmArticleDescriptionFormateAggregateType<T>>
+
+    /**
+     * Group by GmArticleDescriptionFormate.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {GmArticleDescriptionFormateGroupByArgs} args - Group by arguments.
+     * @example
+     * // Group by city, order by createdAt, get count
+     * const result = await prisma.user.groupBy({
+     *   by: ['city', 'createdAt'],
+     *   orderBy: {
+     *     createdAt: true
+     *   },
+     *   _count: {
+     *     _all: true
+     *   },
+     * })
+     * 
+    **/
+    groupBy<
+      T extends GmArticleDescriptionFormateGroupByArgs,
+      HasSelectOrTake extends Or<
+        Extends<'skip', Keys<T>>,
+        Extends<'take', Keys<T>>
+      >,
+      OrderByArg extends True extends HasSelectOrTake
+        ? { orderBy: GmArticleDescriptionFormateGroupByArgs['orderBy'] }
+        : { orderBy?: GmArticleDescriptionFormateGroupByArgs['orderBy'] },
+      OrderFields extends ExcludeUnderscoreKeys<Keys<MaybeTupleToUnion<T['orderBy']>>>,
+      ByFields extends MaybeTupleToUnion<T['by']>,
+      ByValid extends Has<ByFields, OrderFields>,
+      HavingFields extends GetHavingFields<T['having']>,
+      HavingValid extends Has<ByFields, HavingFields>,
+      ByEmpty extends T['by'] extends never[] ? True : False,
+      InputErrors extends ByEmpty extends True
+      ? `Error: "by" must not be empty.`
+      : HavingValid extends False
+      ? {
+          [P in HavingFields]: P extends ByFields
+            ? never
+            : P extends string
+            ? `Error: Field "${P}" used in "having" needs to be provided in "by".`
+            : [
+                Error,
+                'Field ',
+                P,
+                ` in "having" needs to be provided in "by"`,
+              ]
+        }[HavingFields]
+      : 'take' extends Keys<T>
+      ? 'orderBy' extends Keys<T>
+        ? ByValid extends True
+          ? {}
+          : {
+              [P in OrderFields]: P extends ByFields
+                ? never
+                : `Error: Field "${P}" in "orderBy" needs to be provided in "by"`
+            }[OrderFields]
+        : 'Error: If you provide "take", you also need to provide "orderBy"'
+      : 'skip' extends Keys<T>
+      ? 'orderBy' extends Keys<T>
+        ? ByValid extends True
+          ? {}
+          : {
+              [P in OrderFields]: P extends ByFields
+                ? never
+                : `Error: Field "${P}" in "orderBy" needs to be provided in "by"`
+            }[OrderFields]
+        : 'Error: If you provide "skip", you also need to provide "orderBy"'
+      : ByValid extends True
+      ? {}
+      : {
+          [P in OrderFields]: P extends ByFields
+            ? never
+            : `Error: Field "${P}" in "orderBy" needs to be provided in "by"`
+        }[OrderFields]
+    >(args: SubsetIntersection<T, GmArticleDescriptionFormateGroupByArgs, OrderByArg> & InputErrors): {} extends InputErrors ? GetGmArticleDescriptionFormateGroupByPayload<T> : Prisma.PrismaPromise<InputErrors>
+  /**
+   * Fields of the GmArticleDescriptionFormate model
+   */
+  readonly fields: GmArticleDescriptionFormateFieldRefs;
+  }
+
+  /**
+   * The delegate class that acts as a "Promise-like" for GmArticleDescriptionFormate.
+   * Why is this prefixed with `Prisma__`?
+   * Because we want to prevent naming conflicts as mentioned in
+   * https://github.com/prisma/prisma-client-js/issues/707
+   */
+  export interface Prisma__GmArticleDescriptionFormateClient<T, Null = never, ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs, GlobalOmitOptions = {}> extends Prisma.PrismaPromise<T> {
+    readonly [Symbol.toStringTag]: "PrismaPromise"
+    /**
+     * Attaches callbacks for the resolution and/or rejection of the Promise.
+     * @param onfulfilled The callback to execute when the Promise is resolved.
+     * @param onrejected The callback to execute when the Promise is rejected.
+     * @returns A Promise for the completion of which ever callback is executed.
+     */
+    then<TResult1 = T, TResult2 = never>(onfulfilled?: ((value: T) => TResult1 | PromiseLike<TResult1>) | undefined | null, onrejected?: ((reason: any) => TResult2 | PromiseLike<TResult2>) | undefined | null): $Utils.JsPromise<TResult1 | TResult2>
+    /**
+     * Attaches a callback for only the rejection of the Promise.
+     * @param onrejected The callback to execute when the Promise is rejected.
+     * @returns A Promise for the completion of the callback.
+     */
+    catch<TResult = never>(onrejected?: ((reason: any) => TResult | PromiseLike<TResult>) | undefined | null): $Utils.JsPromise<T | TResult>
+    /**
+     * Attaches a callback that is invoked when the Promise is settled (fulfilled or rejected). The
+     * resolved value cannot be modified from the callback.
+     * @param onfinally The callback to execute when the Promise is settled (fulfilled or rejected).
+     * @returns A Promise for the completion of the callback.
+     */
+    finally(onfinally?: (() => void) | undefined | null): $Utils.JsPromise<T>
+  }
+
+
+
+
+  /**
+   * Fields of the GmArticleDescriptionFormate model
+   */
+  interface GmArticleDescriptionFormateFieldRefs {
+    readonly id: FieldRef<"GmArticleDescriptionFormate", 'Int'>
+    readonly key: FieldRef<"GmArticleDescriptionFormate", 'String'>
+    readonly archetypeNm: FieldRef<"GmArticleDescriptionFormate", 'String'>
+    readonly descSeq: FieldRef<"GmArticleDescriptionFormate", 'String'>
+    readonly familyCode: FieldRef<"GmArticleDescriptionFormate", 'String'>
+    readonly familyName: FieldRef<"GmArticleDescriptionFormate", 'String'>
+    readonly createdAt: FieldRef<"GmArticleDescriptionFormate", 'DateTime'>
+    readonly updatedAt: FieldRef<"GmArticleDescriptionFormate", 'DateTime'>
+  }
+    
+
+  // Custom InputTypes
+  /**
+   * GmArticleDescriptionFormate findUnique
+   */
+  export type GmArticleDescriptionFormateFindUniqueArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the GmArticleDescriptionFormate
+     */
+    select?: GmArticleDescriptionFormateSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the GmArticleDescriptionFormate
+     */
+    omit?: GmArticleDescriptionFormateOmit<ExtArgs> | null
+    /**
+     * Filter, which GmArticleDescriptionFormate to fetch.
+     */
+    where: GmArticleDescriptionFormateWhereUniqueInput
+  }
+
+  /**
+   * GmArticleDescriptionFormate findUniqueOrThrow
+   */
+  export type GmArticleDescriptionFormateFindUniqueOrThrowArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the GmArticleDescriptionFormate
+     */
+    select?: GmArticleDescriptionFormateSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the GmArticleDescriptionFormate
+     */
+    omit?: GmArticleDescriptionFormateOmit<ExtArgs> | null
+    /**
+     * Filter, which GmArticleDescriptionFormate to fetch.
+     */
+    where: GmArticleDescriptionFormateWhereUniqueInput
+  }
+
+  /**
+   * GmArticleDescriptionFormate findFirst
+   */
+  export type GmArticleDescriptionFormateFindFirstArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the GmArticleDescriptionFormate
+     */
+    select?: GmArticleDescriptionFormateSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the GmArticleDescriptionFormate
+     */
+    omit?: GmArticleDescriptionFormateOmit<ExtArgs> | null
+    /**
+     * Filter, which GmArticleDescriptionFormate to fetch.
+     */
+    where?: GmArticleDescriptionFormateWhereInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
+     * 
+     * Determine the order of GmArticleDescriptionFormates to fetch.
+     */
+    orderBy?: GmArticleDescriptionFormateOrderByWithRelationInput | GmArticleDescriptionFormateOrderByWithRelationInput[]
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
+     * 
+     * Sets the position for searching for GmArticleDescriptionFormates.
+     */
+    cursor?: GmArticleDescriptionFormateWhereUniqueInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Take `±n` GmArticleDescriptionFormates from the position of the cursor.
+     */
+    take?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Skip the first `n` GmArticleDescriptionFormates.
+     */
+    skip?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/distinct Distinct Docs}
+     * 
+     * Filter by unique combinations of GmArticleDescriptionFormates.
+     */
+    distinct?: GmArticleDescriptionFormateScalarFieldEnum | GmArticleDescriptionFormateScalarFieldEnum[]
+  }
+
+  /**
+   * GmArticleDescriptionFormate findFirstOrThrow
+   */
+  export type GmArticleDescriptionFormateFindFirstOrThrowArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the GmArticleDescriptionFormate
+     */
+    select?: GmArticleDescriptionFormateSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the GmArticleDescriptionFormate
+     */
+    omit?: GmArticleDescriptionFormateOmit<ExtArgs> | null
+    /**
+     * Filter, which GmArticleDescriptionFormate to fetch.
+     */
+    where?: GmArticleDescriptionFormateWhereInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
+     * 
+     * Determine the order of GmArticleDescriptionFormates to fetch.
+     */
+    orderBy?: GmArticleDescriptionFormateOrderByWithRelationInput | GmArticleDescriptionFormateOrderByWithRelationInput[]
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
+     * 
+     * Sets the position for searching for GmArticleDescriptionFormates.
+     */
+    cursor?: GmArticleDescriptionFormateWhereUniqueInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Take `±n` GmArticleDescriptionFormates from the position of the cursor.
+     */
+    take?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Skip the first `n` GmArticleDescriptionFormates.
+     */
+    skip?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/distinct Distinct Docs}
+     * 
+     * Filter by unique combinations of GmArticleDescriptionFormates.
+     */
+    distinct?: GmArticleDescriptionFormateScalarFieldEnum | GmArticleDescriptionFormateScalarFieldEnum[]
+  }
+
+  /**
+   * GmArticleDescriptionFormate findMany
+   */
+  export type GmArticleDescriptionFormateFindManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the GmArticleDescriptionFormate
+     */
+    select?: GmArticleDescriptionFormateSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the GmArticleDescriptionFormate
+     */
+    omit?: GmArticleDescriptionFormateOmit<ExtArgs> | null
+    /**
+     * Filter, which GmArticleDescriptionFormates to fetch.
+     */
+    where?: GmArticleDescriptionFormateWhereInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
+     * 
+     * Determine the order of GmArticleDescriptionFormates to fetch.
+     */
+    orderBy?: GmArticleDescriptionFormateOrderByWithRelationInput | GmArticleDescriptionFormateOrderByWithRelationInput[]
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
+     * 
+     * Sets the position for listing GmArticleDescriptionFormates.
+     */
+    cursor?: GmArticleDescriptionFormateWhereUniqueInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Take `±n` GmArticleDescriptionFormates from the position of the cursor.
+     */
+    take?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Skip the first `n` GmArticleDescriptionFormates.
+     */
+    skip?: number
+    distinct?: GmArticleDescriptionFormateScalarFieldEnum | GmArticleDescriptionFormateScalarFieldEnum[]
+  }
+
+  /**
+   * GmArticleDescriptionFormate create
+   */
+  export type GmArticleDescriptionFormateCreateArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the GmArticleDescriptionFormate
+     */
+    select?: GmArticleDescriptionFormateSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the GmArticleDescriptionFormate
+     */
+    omit?: GmArticleDescriptionFormateOmit<ExtArgs> | null
+    /**
+     * The data needed to create a GmArticleDescriptionFormate.
+     */
+    data: XOR<GmArticleDescriptionFormateCreateInput, GmArticleDescriptionFormateUncheckedCreateInput>
+  }
+
+  /**
+   * GmArticleDescriptionFormate createMany
+   */
+  export type GmArticleDescriptionFormateCreateManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * The data used to create many GmArticleDescriptionFormates.
+     */
+    data: GmArticleDescriptionFormateCreateManyInput | GmArticleDescriptionFormateCreateManyInput[]
+    skipDuplicates?: boolean
+  }
+
+  /**
+   * GmArticleDescriptionFormate createManyAndReturn
+   */
+  export type GmArticleDescriptionFormateCreateManyAndReturnArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the GmArticleDescriptionFormate
+     */
+    select?: GmArticleDescriptionFormateSelectCreateManyAndReturn<ExtArgs> | null
+    /**
+     * Omit specific fields from the GmArticleDescriptionFormate
+     */
+    omit?: GmArticleDescriptionFormateOmit<ExtArgs> | null
+    /**
+     * The data used to create many GmArticleDescriptionFormates.
+     */
+    data: GmArticleDescriptionFormateCreateManyInput | GmArticleDescriptionFormateCreateManyInput[]
+    skipDuplicates?: boolean
+  }
+
+  /**
+   * GmArticleDescriptionFormate update
+   */
+  export type GmArticleDescriptionFormateUpdateArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the GmArticleDescriptionFormate
+     */
+    select?: GmArticleDescriptionFormateSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the GmArticleDescriptionFormate
+     */
+    omit?: GmArticleDescriptionFormateOmit<ExtArgs> | null
+    /**
+     * The data needed to update a GmArticleDescriptionFormate.
+     */
+    data: XOR<GmArticleDescriptionFormateUpdateInput, GmArticleDescriptionFormateUncheckedUpdateInput>
+    /**
+     * Choose, which GmArticleDescriptionFormate to update.
+     */
+    where: GmArticleDescriptionFormateWhereUniqueInput
+  }
+
+  /**
+   * GmArticleDescriptionFormate updateMany
+   */
+  export type GmArticleDescriptionFormateUpdateManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * The data used to update GmArticleDescriptionFormates.
+     */
+    data: XOR<GmArticleDescriptionFormateUpdateManyMutationInput, GmArticleDescriptionFormateUncheckedUpdateManyInput>
+    /**
+     * Filter which GmArticleDescriptionFormates to update
+     */
+    where?: GmArticleDescriptionFormateWhereInput
+    /**
+     * Limit how many GmArticleDescriptionFormates to update.
+     */
+    limit?: number
+  }
+
+  /**
+   * GmArticleDescriptionFormate updateManyAndReturn
+   */
+  export type GmArticleDescriptionFormateUpdateManyAndReturnArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the GmArticleDescriptionFormate
+     */
+    select?: GmArticleDescriptionFormateSelectUpdateManyAndReturn<ExtArgs> | null
+    /**
+     * Omit specific fields from the GmArticleDescriptionFormate
+     */
+    omit?: GmArticleDescriptionFormateOmit<ExtArgs> | null
+    /**
+     * The data used to update GmArticleDescriptionFormates.
+     */
+    data: XOR<GmArticleDescriptionFormateUpdateManyMutationInput, GmArticleDescriptionFormateUncheckedUpdateManyInput>
+    /**
+     * Filter which GmArticleDescriptionFormates to update
+     */
+    where?: GmArticleDescriptionFormateWhereInput
+    /**
+     * Limit how many GmArticleDescriptionFormates to update.
+     */
+    limit?: number
+  }
+
+  /**
+   * GmArticleDescriptionFormate upsert
+   */
+  export type GmArticleDescriptionFormateUpsertArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the GmArticleDescriptionFormate
+     */
+    select?: GmArticleDescriptionFormateSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the GmArticleDescriptionFormate
+     */
+    omit?: GmArticleDescriptionFormateOmit<ExtArgs> | null
+    /**
+     * The filter to search for the GmArticleDescriptionFormate to update in case it exists.
+     */
+    where: GmArticleDescriptionFormateWhereUniqueInput
+    /**
+     * In case the GmArticleDescriptionFormate found by the `where` argument doesn't exist, create a new GmArticleDescriptionFormate with this data.
+     */
+    create: XOR<GmArticleDescriptionFormateCreateInput, GmArticleDescriptionFormateUncheckedCreateInput>
+    /**
+     * In case the GmArticleDescriptionFormate was found with the provided `where` argument, update it with this data.
+     */
+    update: XOR<GmArticleDescriptionFormateUpdateInput, GmArticleDescriptionFormateUncheckedUpdateInput>
+  }
+
+  /**
+   * GmArticleDescriptionFormate delete
+   */
+  export type GmArticleDescriptionFormateDeleteArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the GmArticleDescriptionFormate
+     */
+    select?: GmArticleDescriptionFormateSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the GmArticleDescriptionFormate
+     */
+    omit?: GmArticleDescriptionFormateOmit<ExtArgs> | null
+    /**
+     * Filter which GmArticleDescriptionFormate to delete.
+     */
+    where: GmArticleDescriptionFormateWhereUniqueInput
+  }
+
+  /**
+   * GmArticleDescriptionFormate deleteMany
+   */
+  export type GmArticleDescriptionFormateDeleteManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Filter which GmArticleDescriptionFormates to delete
+     */
+    where?: GmArticleDescriptionFormateWhereInput
+    /**
+     * Limit how many GmArticleDescriptionFormates to delete.
+     */
+    limit?: number
+  }
+
+  /**
+   * GmArticleDescriptionFormate without action
+   */
+  export type GmArticleDescriptionFormateDefaultArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the GmArticleDescriptionFormate
+     */
+    select?: GmArticleDescriptionFormateSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the GmArticleDescriptionFormate
+     */
+    omit?: GmArticleDescriptionFormateOmit<ExtArgs> | null
+  }
+
+
+  /**
+   * Model PreciseBodyArticleConsumption
+   */
+
+  export type AggregatePreciseBodyArticleConsumption = {
+    _count: PreciseBodyArticleConsumptionCountAggregateOutputType | null
+    _avg: PreciseBodyArticleConsumptionAvgAggregateOutputType | null
+    _sum: PreciseBodyArticleConsumptionSumAggregateOutputType | null
+    _min: PreciseBodyArticleConsumptionMinAggregateOutputType | null
+    _max: PreciseBodyArticleConsumptionMaxAggregateOutputType | null
+  }
+
+  export type PreciseBodyArticleConsumptionAvgAggregateOutputType = {
+    id: number | null
+    cuttingValue: Decimal | null
+    stitchingSam: Decimal | null
+    samVal: Decimal | null
+    stVal: Decimal | null
+    ironingSam: Decimal | null
+    finishingSam: Decimal | null
+    finishigCost: Decimal | null
+    totalCmpCost: Decimal | null
+    width15: Decimal | null
+    width16: Decimal | null
+    width17: Decimal | null
+    width18: Decimal | null
+    width19: Decimal | null
+    width42: Decimal | null
+    width43: Decimal | null
+    width44: Decimal | null
+    width46: Decimal | null
+    width48: Decimal | null
+    width50: Decimal | null
+    width53: Decimal | null
+    width54: Decimal | null
+    width55: Decimal | null
+    width56: Decimal | null
+    width57: Decimal | null
+    width58: Decimal | null
+    width59: Decimal | null
+    width60: Decimal | null
+    width61: Decimal | null
+    width62: Decimal | null
+    width63: Decimal | null
+    width64: Decimal | null
+    width65: Decimal | null
+    width66: Decimal | null
+    width67: Decimal | null
+    width68: Decimal | null
+    width69: Decimal | null
+    width70: Decimal | null
+    width71: Decimal | null
+    width72: Decimal | null
+    width73: Decimal | null
+    width74: Decimal | null
+    width76: Decimal | null
+    width78: Decimal | null
+    width82: Decimal | null
+    width92: Decimal | null
+    width94: Decimal | null
+    width96: Decimal | null
+  }
+
+  export type PreciseBodyArticleConsumptionSumAggregateOutputType = {
+    id: number | null
+    cuttingValue: Decimal | null
+    stitchingSam: Decimal | null
+    samVal: Decimal | null
+    stVal: Decimal | null
+    ironingSam: Decimal | null
+    finishingSam: Decimal | null
+    finishigCost: Decimal | null
+    totalCmpCost: Decimal | null
+    width15: Decimal | null
+    width16: Decimal | null
+    width17: Decimal | null
+    width18: Decimal | null
+    width19: Decimal | null
+    width42: Decimal | null
+    width43: Decimal | null
+    width44: Decimal | null
+    width46: Decimal | null
+    width48: Decimal | null
+    width50: Decimal | null
+    width53: Decimal | null
+    width54: Decimal | null
+    width55: Decimal | null
+    width56: Decimal | null
+    width57: Decimal | null
+    width58: Decimal | null
+    width59: Decimal | null
+    width60: Decimal | null
+    width61: Decimal | null
+    width62: Decimal | null
+    width63: Decimal | null
+    width64: Decimal | null
+    width65: Decimal | null
+    width66: Decimal | null
+    width67: Decimal | null
+    width68: Decimal | null
+    width69: Decimal | null
+    width70: Decimal | null
+    width71: Decimal | null
+    width72: Decimal | null
+    width73: Decimal | null
+    width74: Decimal | null
+    width76: Decimal | null
+    width78: Decimal | null
+    width82: Decimal | null
+    width92: Decimal | null
+    width94: Decimal | null
+    width96: Decimal | null
+  }
+
+  export type PreciseBodyArticleConsumptionMinAggregateOutputType = {
+    id: number | null
+    division: string | null
+    subDivision: string | null
+    majorCategory: string | null
+    macroBodyDescription: string | null
+    microBodyArticleNumber: string | null
+    mNeckType: string | null
+    mNeckStyle: string | null
+    mCollarType: string | null
+    mCollarStyle: string | null
+    mSleevesMainStyle: string | null
+    mSleeveFold: string | null
+    mPlacket: string | null
+    mBltType: string | null
+    mBltStyle: string | null
+    mBtmFold: string | null
+    mPocket: string | null
+    mNoOfPocket: string | null
+    mExtraPocket: string | null
+    mLength: string | null
+    mFit: string | null
+    bodyStyle: string | null
+    cuttingValue: Decimal | null
+    stitchingSam: Decimal | null
+    samVal: Decimal | null
+    stVal: Decimal | null
+    ironingSam: Decimal | null
+    finishingSam: Decimal | null
+    finishigCost: Decimal | null
+    totalCmpCost: Decimal | null
+    width15: Decimal | null
+    width16: Decimal | null
+    width17: Decimal | null
+    width18: Decimal | null
+    width19: Decimal | null
+    width42: Decimal | null
+    width43: Decimal | null
+    width44: Decimal | null
+    width46: Decimal | null
+    width48: Decimal | null
+    width50: Decimal | null
+    width53: Decimal | null
+    width54: Decimal | null
+    width55: Decimal | null
+    width56: Decimal | null
+    width57: Decimal | null
+    width58: Decimal | null
+    width59: Decimal | null
+    width60: Decimal | null
+    width61: Decimal | null
+    width62: Decimal | null
+    width63: Decimal | null
+    width64: Decimal | null
+    width65: Decimal | null
+    width66: Decimal | null
+    width67: Decimal | null
+    width68: Decimal | null
+    width69: Decimal | null
+    width70: Decimal | null
+    width71: Decimal | null
+    width72: Decimal | null
+    width73: Decimal | null
+    width74: Decimal | null
+    width76: Decimal | null
+    width78: Decimal | null
+    width82: Decimal | null
+    width92: Decimal | null
+    width94: Decimal | null
+    width96: Decimal | null
+    createdAt: Date | null
+    updatedAt: Date | null
+  }
+
+  export type PreciseBodyArticleConsumptionMaxAggregateOutputType = {
+    id: number | null
+    division: string | null
+    subDivision: string | null
+    majorCategory: string | null
+    macroBodyDescription: string | null
+    microBodyArticleNumber: string | null
+    mNeckType: string | null
+    mNeckStyle: string | null
+    mCollarType: string | null
+    mCollarStyle: string | null
+    mSleevesMainStyle: string | null
+    mSleeveFold: string | null
+    mPlacket: string | null
+    mBltType: string | null
+    mBltStyle: string | null
+    mBtmFold: string | null
+    mPocket: string | null
+    mNoOfPocket: string | null
+    mExtraPocket: string | null
+    mLength: string | null
+    mFit: string | null
+    bodyStyle: string | null
+    cuttingValue: Decimal | null
+    stitchingSam: Decimal | null
+    samVal: Decimal | null
+    stVal: Decimal | null
+    ironingSam: Decimal | null
+    finishingSam: Decimal | null
+    finishigCost: Decimal | null
+    totalCmpCost: Decimal | null
+    width15: Decimal | null
+    width16: Decimal | null
+    width17: Decimal | null
+    width18: Decimal | null
+    width19: Decimal | null
+    width42: Decimal | null
+    width43: Decimal | null
+    width44: Decimal | null
+    width46: Decimal | null
+    width48: Decimal | null
+    width50: Decimal | null
+    width53: Decimal | null
+    width54: Decimal | null
+    width55: Decimal | null
+    width56: Decimal | null
+    width57: Decimal | null
+    width58: Decimal | null
+    width59: Decimal | null
+    width60: Decimal | null
+    width61: Decimal | null
+    width62: Decimal | null
+    width63: Decimal | null
+    width64: Decimal | null
+    width65: Decimal | null
+    width66: Decimal | null
+    width67: Decimal | null
+    width68: Decimal | null
+    width69: Decimal | null
+    width70: Decimal | null
+    width71: Decimal | null
+    width72: Decimal | null
+    width73: Decimal | null
+    width74: Decimal | null
+    width76: Decimal | null
+    width78: Decimal | null
+    width82: Decimal | null
+    width92: Decimal | null
+    width94: Decimal | null
+    width96: Decimal | null
+    createdAt: Date | null
+    updatedAt: Date | null
+  }
+
+  export type PreciseBodyArticleConsumptionCountAggregateOutputType = {
+    id: number
+    division: number
+    subDivision: number
+    majorCategory: number
+    macroBodyDescription: number
+    microBodyArticleNumber: number
+    mNeckType: number
+    mNeckStyle: number
+    mCollarType: number
+    mCollarStyle: number
+    mSleevesMainStyle: number
+    mSleeveFold: number
+    mPlacket: number
+    mBltType: number
+    mBltStyle: number
+    mBtmFold: number
+    mPocket: number
+    mNoOfPocket: number
+    mExtraPocket: number
+    mLength: number
+    mFit: number
+    bodyStyle: number
+    cuttingValue: number
+    stitchingSam: number
+    samVal: number
+    stVal: number
+    ironingSam: number
+    finishingSam: number
+    finishigCost: number
+    totalCmpCost: number
+    width15: number
+    width16: number
+    width17: number
+    width18: number
+    width19: number
+    width42: number
+    width43: number
+    width44: number
+    width46: number
+    width48: number
+    width50: number
+    width53: number
+    width54: number
+    width55: number
+    width56: number
+    width57: number
+    width58: number
+    width59: number
+    width60: number
+    width61: number
+    width62: number
+    width63: number
+    width64: number
+    width65: number
+    width66: number
+    width67: number
+    width68: number
+    width69: number
+    width70: number
+    width71: number
+    width72: number
+    width73: number
+    width74: number
+    width76: number
+    width78: number
+    width82: number
+    width92: number
+    width94: number
+    width96: number
+    createdAt: number
+    updatedAt: number
+    _all: number
+  }
+
+
+  export type PreciseBodyArticleConsumptionAvgAggregateInputType = {
+    id?: true
+    cuttingValue?: true
+    stitchingSam?: true
+    samVal?: true
+    stVal?: true
+    ironingSam?: true
+    finishingSam?: true
+    finishigCost?: true
+    totalCmpCost?: true
+    width15?: true
+    width16?: true
+    width17?: true
+    width18?: true
+    width19?: true
+    width42?: true
+    width43?: true
+    width44?: true
+    width46?: true
+    width48?: true
+    width50?: true
+    width53?: true
+    width54?: true
+    width55?: true
+    width56?: true
+    width57?: true
+    width58?: true
+    width59?: true
+    width60?: true
+    width61?: true
+    width62?: true
+    width63?: true
+    width64?: true
+    width65?: true
+    width66?: true
+    width67?: true
+    width68?: true
+    width69?: true
+    width70?: true
+    width71?: true
+    width72?: true
+    width73?: true
+    width74?: true
+    width76?: true
+    width78?: true
+    width82?: true
+    width92?: true
+    width94?: true
+    width96?: true
+  }
+
+  export type PreciseBodyArticleConsumptionSumAggregateInputType = {
+    id?: true
+    cuttingValue?: true
+    stitchingSam?: true
+    samVal?: true
+    stVal?: true
+    ironingSam?: true
+    finishingSam?: true
+    finishigCost?: true
+    totalCmpCost?: true
+    width15?: true
+    width16?: true
+    width17?: true
+    width18?: true
+    width19?: true
+    width42?: true
+    width43?: true
+    width44?: true
+    width46?: true
+    width48?: true
+    width50?: true
+    width53?: true
+    width54?: true
+    width55?: true
+    width56?: true
+    width57?: true
+    width58?: true
+    width59?: true
+    width60?: true
+    width61?: true
+    width62?: true
+    width63?: true
+    width64?: true
+    width65?: true
+    width66?: true
+    width67?: true
+    width68?: true
+    width69?: true
+    width70?: true
+    width71?: true
+    width72?: true
+    width73?: true
+    width74?: true
+    width76?: true
+    width78?: true
+    width82?: true
+    width92?: true
+    width94?: true
+    width96?: true
+  }
+
+  export type PreciseBodyArticleConsumptionMinAggregateInputType = {
+    id?: true
+    division?: true
+    subDivision?: true
+    majorCategory?: true
+    macroBodyDescription?: true
+    microBodyArticleNumber?: true
+    mNeckType?: true
+    mNeckStyle?: true
+    mCollarType?: true
+    mCollarStyle?: true
+    mSleevesMainStyle?: true
+    mSleeveFold?: true
+    mPlacket?: true
+    mBltType?: true
+    mBltStyle?: true
+    mBtmFold?: true
+    mPocket?: true
+    mNoOfPocket?: true
+    mExtraPocket?: true
+    mLength?: true
+    mFit?: true
+    bodyStyle?: true
+    cuttingValue?: true
+    stitchingSam?: true
+    samVal?: true
+    stVal?: true
+    ironingSam?: true
+    finishingSam?: true
+    finishigCost?: true
+    totalCmpCost?: true
+    width15?: true
+    width16?: true
+    width17?: true
+    width18?: true
+    width19?: true
+    width42?: true
+    width43?: true
+    width44?: true
+    width46?: true
+    width48?: true
+    width50?: true
+    width53?: true
+    width54?: true
+    width55?: true
+    width56?: true
+    width57?: true
+    width58?: true
+    width59?: true
+    width60?: true
+    width61?: true
+    width62?: true
+    width63?: true
+    width64?: true
+    width65?: true
+    width66?: true
+    width67?: true
+    width68?: true
+    width69?: true
+    width70?: true
+    width71?: true
+    width72?: true
+    width73?: true
+    width74?: true
+    width76?: true
+    width78?: true
+    width82?: true
+    width92?: true
+    width94?: true
+    width96?: true
+    createdAt?: true
+    updatedAt?: true
+  }
+
+  export type PreciseBodyArticleConsumptionMaxAggregateInputType = {
+    id?: true
+    division?: true
+    subDivision?: true
+    majorCategory?: true
+    macroBodyDescription?: true
+    microBodyArticleNumber?: true
+    mNeckType?: true
+    mNeckStyle?: true
+    mCollarType?: true
+    mCollarStyle?: true
+    mSleevesMainStyle?: true
+    mSleeveFold?: true
+    mPlacket?: true
+    mBltType?: true
+    mBltStyle?: true
+    mBtmFold?: true
+    mPocket?: true
+    mNoOfPocket?: true
+    mExtraPocket?: true
+    mLength?: true
+    mFit?: true
+    bodyStyle?: true
+    cuttingValue?: true
+    stitchingSam?: true
+    samVal?: true
+    stVal?: true
+    ironingSam?: true
+    finishingSam?: true
+    finishigCost?: true
+    totalCmpCost?: true
+    width15?: true
+    width16?: true
+    width17?: true
+    width18?: true
+    width19?: true
+    width42?: true
+    width43?: true
+    width44?: true
+    width46?: true
+    width48?: true
+    width50?: true
+    width53?: true
+    width54?: true
+    width55?: true
+    width56?: true
+    width57?: true
+    width58?: true
+    width59?: true
+    width60?: true
+    width61?: true
+    width62?: true
+    width63?: true
+    width64?: true
+    width65?: true
+    width66?: true
+    width67?: true
+    width68?: true
+    width69?: true
+    width70?: true
+    width71?: true
+    width72?: true
+    width73?: true
+    width74?: true
+    width76?: true
+    width78?: true
+    width82?: true
+    width92?: true
+    width94?: true
+    width96?: true
+    createdAt?: true
+    updatedAt?: true
+  }
+
+  export type PreciseBodyArticleConsumptionCountAggregateInputType = {
+    id?: true
+    division?: true
+    subDivision?: true
+    majorCategory?: true
+    macroBodyDescription?: true
+    microBodyArticleNumber?: true
+    mNeckType?: true
+    mNeckStyle?: true
+    mCollarType?: true
+    mCollarStyle?: true
+    mSleevesMainStyle?: true
+    mSleeveFold?: true
+    mPlacket?: true
+    mBltType?: true
+    mBltStyle?: true
+    mBtmFold?: true
+    mPocket?: true
+    mNoOfPocket?: true
+    mExtraPocket?: true
+    mLength?: true
+    mFit?: true
+    bodyStyle?: true
+    cuttingValue?: true
+    stitchingSam?: true
+    samVal?: true
+    stVal?: true
+    ironingSam?: true
+    finishingSam?: true
+    finishigCost?: true
+    totalCmpCost?: true
+    width15?: true
+    width16?: true
+    width17?: true
+    width18?: true
+    width19?: true
+    width42?: true
+    width43?: true
+    width44?: true
+    width46?: true
+    width48?: true
+    width50?: true
+    width53?: true
+    width54?: true
+    width55?: true
+    width56?: true
+    width57?: true
+    width58?: true
+    width59?: true
+    width60?: true
+    width61?: true
+    width62?: true
+    width63?: true
+    width64?: true
+    width65?: true
+    width66?: true
+    width67?: true
+    width68?: true
+    width69?: true
+    width70?: true
+    width71?: true
+    width72?: true
+    width73?: true
+    width74?: true
+    width76?: true
+    width78?: true
+    width82?: true
+    width92?: true
+    width94?: true
+    width96?: true
+    createdAt?: true
+    updatedAt?: true
+    _all?: true
+  }
+
+  export type PreciseBodyArticleConsumptionAggregateArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Filter which PreciseBodyArticleConsumption to aggregate.
+     */
+    where?: PreciseBodyArticleConsumptionWhereInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
+     * 
+     * Determine the order of PreciseBodyArticleConsumptions to fetch.
+     */
+    orderBy?: PreciseBodyArticleConsumptionOrderByWithRelationInput | PreciseBodyArticleConsumptionOrderByWithRelationInput[]
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
+     * 
+     * Sets the start position
+     */
+    cursor?: PreciseBodyArticleConsumptionWhereUniqueInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Take `±n` PreciseBodyArticleConsumptions from the position of the cursor.
+     */
+    take?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Skip the first `n` PreciseBodyArticleConsumptions.
+     */
+    skip?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     * 
+     * Count returned PreciseBodyArticleConsumptions
+    **/
+    _count?: true | PreciseBodyArticleConsumptionCountAggregateInputType
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     * 
+     * Select which fields to average
+    **/
+    _avg?: PreciseBodyArticleConsumptionAvgAggregateInputType
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     * 
+     * Select which fields to sum
+    **/
+    _sum?: PreciseBodyArticleConsumptionSumAggregateInputType
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     * 
+     * Select which fields to find the minimum value
+    **/
+    _min?: PreciseBodyArticleConsumptionMinAggregateInputType
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     * 
+     * Select which fields to find the maximum value
+    **/
+    _max?: PreciseBodyArticleConsumptionMaxAggregateInputType
+  }
+
+  export type GetPreciseBodyArticleConsumptionAggregateType<T extends PreciseBodyArticleConsumptionAggregateArgs> = {
+        [P in keyof T & keyof AggregatePreciseBodyArticleConsumption]: P extends '_count' | 'count'
+      ? T[P] extends true
+        ? number
+        : GetScalarType<T[P], AggregatePreciseBodyArticleConsumption[P]>
+      : GetScalarType<T[P], AggregatePreciseBodyArticleConsumption[P]>
+  }
+
+
+
+
+  export type PreciseBodyArticleConsumptionGroupByArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    where?: PreciseBodyArticleConsumptionWhereInput
+    orderBy?: PreciseBodyArticleConsumptionOrderByWithAggregationInput | PreciseBodyArticleConsumptionOrderByWithAggregationInput[]
+    by: PreciseBodyArticleConsumptionScalarFieldEnum[] | PreciseBodyArticleConsumptionScalarFieldEnum
+    having?: PreciseBodyArticleConsumptionScalarWhereWithAggregatesInput
+    take?: number
+    skip?: number
+    _count?: PreciseBodyArticleConsumptionCountAggregateInputType | true
+    _avg?: PreciseBodyArticleConsumptionAvgAggregateInputType
+    _sum?: PreciseBodyArticleConsumptionSumAggregateInputType
+    _min?: PreciseBodyArticleConsumptionMinAggregateInputType
+    _max?: PreciseBodyArticleConsumptionMaxAggregateInputType
+  }
+
+  export type PreciseBodyArticleConsumptionGroupByOutputType = {
+    id: number
+    division: string
+    subDivision: string
+    majorCategory: string
+    macroBodyDescription: string
+    microBodyArticleNumber: string
+    mNeckType: string | null
+    mNeckStyle: string | null
+    mCollarType: string | null
+    mCollarStyle: string | null
+    mSleevesMainStyle: string | null
+    mSleeveFold: string | null
+    mPlacket: string | null
+    mBltType: string | null
+    mBltStyle: string | null
+    mBtmFold: string | null
+    mPocket: string | null
+    mNoOfPocket: string | null
+    mExtraPocket: string | null
+    mLength: string | null
+    mFit: string | null
+    bodyStyle: string | null
+    cuttingValue: Decimal | null
+    stitchingSam: Decimal | null
+    samVal: Decimal | null
+    stVal: Decimal | null
+    ironingSam: Decimal | null
+    finishingSam: Decimal | null
+    finishigCost: Decimal | null
+    totalCmpCost: Decimal | null
+    width15: Decimal | null
+    width16: Decimal | null
+    width17: Decimal | null
+    width18: Decimal | null
+    width19: Decimal | null
+    width42: Decimal | null
+    width43: Decimal | null
+    width44: Decimal | null
+    width46: Decimal | null
+    width48: Decimal | null
+    width50: Decimal | null
+    width53: Decimal | null
+    width54: Decimal | null
+    width55: Decimal | null
+    width56: Decimal | null
+    width57: Decimal | null
+    width58: Decimal | null
+    width59: Decimal | null
+    width60: Decimal | null
+    width61: Decimal | null
+    width62: Decimal | null
+    width63: Decimal | null
+    width64: Decimal | null
+    width65: Decimal | null
+    width66: Decimal | null
+    width67: Decimal | null
+    width68: Decimal | null
+    width69: Decimal | null
+    width70: Decimal | null
+    width71: Decimal | null
+    width72: Decimal | null
+    width73: Decimal | null
+    width74: Decimal | null
+    width76: Decimal | null
+    width78: Decimal | null
+    width82: Decimal | null
+    width92: Decimal | null
+    width94: Decimal | null
+    width96: Decimal | null
+    createdAt: Date
+    updatedAt: Date
+    _count: PreciseBodyArticleConsumptionCountAggregateOutputType | null
+    _avg: PreciseBodyArticleConsumptionAvgAggregateOutputType | null
+    _sum: PreciseBodyArticleConsumptionSumAggregateOutputType | null
+    _min: PreciseBodyArticleConsumptionMinAggregateOutputType | null
+    _max: PreciseBodyArticleConsumptionMaxAggregateOutputType | null
+  }
+
+  type GetPreciseBodyArticleConsumptionGroupByPayload<T extends PreciseBodyArticleConsumptionGroupByArgs> = Prisma.PrismaPromise<
+    Array<
+      PickEnumerable<PreciseBodyArticleConsumptionGroupByOutputType, T['by']> &
+        {
+          [P in ((keyof T) & (keyof PreciseBodyArticleConsumptionGroupByOutputType))]: P extends '_count'
+            ? T[P] extends boolean
+              ? number
+              : GetScalarType<T[P], PreciseBodyArticleConsumptionGroupByOutputType[P]>
+            : GetScalarType<T[P], PreciseBodyArticleConsumptionGroupByOutputType[P]>
+        }
+      >
+    >
+
+
+  export type PreciseBodyArticleConsumptionSelect<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
+    id?: boolean
+    division?: boolean
+    subDivision?: boolean
+    majorCategory?: boolean
+    macroBodyDescription?: boolean
+    microBodyArticleNumber?: boolean
+    mNeckType?: boolean
+    mNeckStyle?: boolean
+    mCollarType?: boolean
+    mCollarStyle?: boolean
+    mSleevesMainStyle?: boolean
+    mSleeveFold?: boolean
+    mPlacket?: boolean
+    mBltType?: boolean
+    mBltStyle?: boolean
+    mBtmFold?: boolean
+    mPocket?: boolean
+    mNoOfPocket?: boolean
+    mExtraPocket?: boolean
+    mLength?: boolean
+    mFit?: boolean
+    bodyStyle?: boolean
+    cuttingValue?: boolean
+    stitchingSam?: boolean
+    samVal?: boolean
+    stVal?: boolean
+    ironingSam?: boolean
+    finishingSam?: boolean
+    finishigCost?: boolean
+    totalCmpCost?: boolean
+    width15?: boolean
+    width16?: boolean
+    width17?: boolean
+    width18?: boolean
+    width19?: boolean
+    width42?: boolean
+    width43?: boolean
+    width44?: boolean
+    width46?: boolean
+    width48?: boolean
+    width50?: boolean
+    width53?: boolean
+    width54?: boolean
+    width55?: boolean
+    width56?: boolean
+    width57?: boolean
+    width58?: boolean
+    width59?: boolean
+    width60?: boolean
+    width61?: boolean
+    width62?: boolean
+    width63?: boolean
+    width64?: boolean
+    width65?: boolean
+    width66?: boolean
+    width67?: boolean
+    width68?: boolean
+    width69?: boolean
+    width70?: boolean
+    width71?: boolean
+    width72?: boolean
+    width73?: boolean
+    width74?: boolean
+    width76?: boolean
+    width78?: boolean
+    width82?: boolean
+    width92?: boolean
+    width94?: boolean
+    width96?: boolean
+    createdAt?: boolean
+    updatedAt?: boolean
+  }, ExtArgs["result"]["preciseBodyArticleConsumption"]>
+
+  export type PreciseBodyArticleConsumptionSelectCreateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
+    id?: boolean
+    division?: boolean
+    subDivision?: boolean
+    majorCategory?: boolean
+    macroBodyDescription?: boolean
+    microBodyArticleNumber?: boolean
+    mNeckType?: boolean
+    mNeckStyle?: boolean
+    mCollarType?: boolean
+    mCollarStyle?: boolean
+    mSleevesMainStyle?: boolean
+    mSleeveFold?: boolean
+    mPlacket?: boolean
+    mBltType?: boolean
+    mBltStyle?: boolean
+    mBtmFold?: boolean
+    mPocket?: boolean
+    mNoOfPocket?: boolean
+    mExtraPocket?: boolean
+    mLength?: boolean
+    mFit?: boolean
+    bodyStyle?: boolean
+    cuttingValue?: boolean
+    stitchingSam?: boolean
+    samVal?: boolean
+    stVal?: boolean
+    ironingSam?: boolean
+    finishingSam?: boolean
+    finishigCost?: boolean
+    totalCmpCost?: boolean
+    width15?: boolean
+    width16?: boolean
+    width17?: boolean
+    width18?: boolean
+    width19?: boolean
+    width42?: boolean
+    width43?: boolean
+    width44?: boolean
+    width46?: boolean
+    width48?: boolean
+    width50?: boolean
+    width53?: boolean
+    width54?: boolean
+    width55?: boolean
+    width56?: boolean
+    width57?: boolean
+    width58?: boolean
+    width59?: boolean
+    width60?: boolean
+    width61?: boolean
+    width62?: boolean
+    width63?: boolean
+    width64?: boolean
+    width65?: boolean
+    width66?: boolean
+    width67?: boolean
+    width68?: boolean
+    width69?: boolean
+    width70?: boolean
+    width71?: boolean
+    width72?: boolean
+    width73?: boolean
+    width74?: boolean
+    width76?: boolean
+    width78?: boolean
+    width82?: boolean
+    width92?: boolean
+    width94?: boolean
+    width96?: boolean
+    createdAt?: boolean
+    updatedAt?: boolean
+  }, ExtArgs["result"]["preciseBodyArticleConsumption"]>
+
+  export type PreciseBodyArticleConsumptionSelectUpdateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
+    id?: boolean
+    division?: boolean
+    subDivision?: boolean
+    majorCategory?: boolean
+    macroBodyDescription?: boolean
+    microBodyArticleNumber?: boolean
+    mNeckType?: boolean
+    mNeckStyle?: boolean
+    mCollarType?: boolean
+    mCollarStyle?: boolean
+    mSleevesMainStyle?: boolean
+    mSleeveFold?: boolean
+    mPlacket?: boolean
+    mBltType?: boolean
+    mBltStyle?: boolean
+    mBtmFold?: boolean
+    mPocket?: boolean
+    mNoOfPocket?: boolean
+    mExtraPocket?: boolean
+    mLength?: boolean
+    mFit?: boolean
+    bodyStyle?: boolean
+    cuttingValue?: boolean
+    stitchingSam?: boolean
+    samVal?: boolean
+    stVal?: boolean
+    ironingSam?: boolean
+    finishingSam?: boolean
+    finishigCost?: boolean
+    totalCmpCost?: boolean
+    width15?: boolean
+    width16?: boolean
+    width17?: boolean
+    width18?: boolean
+    width19?: boolean
+    width42?: boolean
+    width43?: boolean
+    width44?: boolean
+    width46?: boolean
+    width48?: boolean
+    width50?: boolean
+    width53?: boolean
+    width54?: boolean
+    width55?: boolean
+    width56?: boolean
+    width57?: boolean
+    width58?: boolean
+    width59?: boolean
+    width60?: boolean
+    width61?: boolean
+    width62?: boolean
+    width63?: boolean
+    width64?: boolean
+    width65?: boolean
+    width66?: boolean
+    width67?: boolean
+    width68?: boolean
+    width69?: boolean
+    width70?: boolean
+    width71?: boolean
+    width72?: boolean
+    width73?: boolean
+    width74?: boolean
+    width76?: boolean
+    width78?: boolean
+    width82?: boolean
+    width92?: boolean
+    width94?: boolean
+    width96?: boolean
+    createdAt?: boolean
+    updatedAt?: boolean
+  }, ExtArgs["result"]["preciseBodyArticleConsumption"]>
+
+  export type PreciseBodyArticleConsumptionSelectScalar = {
+    id?: boolean
+    division?: boolean
+    subDivision?: boolean
+    majorCategory?: boolean
+    macroBodyDescription?: boolean
+    microBodyArticleNumber?: boolean
+    mNeckType?: boolean
+    mNeckStyle?: boolean
+    mCollarType?: boolean
+    mCollarStyle?: boolean
+    mSleevesMainStyle?: boolean
+    mSleeveFold?: boolean
+    mPlacket?: boolean
+    mBltType?: boolean
+    mBltStyle?: boolean
+    mBtmFold?: boolean
+    mPocket?: boolean
+    mNoOfPocket?: boolean
+    mExtraPocket?: boolean
+    mLength?: boolean
+    mFit?: boolean
+    bodyStyle?: boolean
+    cuttingValue?: boolean
+    stitchingSam?: boolean
+    samVal?: boolean
+    stVal?: boolean
+    ironingSam?: boolean
+    finishingSam?: boolean
+    finishigCost?: boolean
+    totalCmpCost?: boolean
+    width15?: boolean
+    width16?: boolean
+    width17?: boolean
+    width18?: boolean
+    width19?: boolean
+    width42?: boolean
+    width43?: boolean
+    width44?: boolean
+    width46?: boolean
+    width48?: boolean
+    width50?: boolean
+    width53?: boolean
+    width54?: boolean
+    width55?: boolean
+    width56?: boolean
+    width57?: boolean
+    width58?: boolean
+    width59?: boolean
+    width60?: boolean
+    width61?: boolean
+    width62?: boolean
+    width63?: boolean
+    width64?: boolean
+    width65?: boolean
+    width66?: boolean
+    width67?: boolean
+    width68?: boolean
+    width69?: boolean
+    width70?: boolean
+    width71?: boolean
+    width72?: boolean
+    width73?: boolean
+    width74?: boolean
+    width76?: boolean
+    width78?: boolean
+    width82?: boolean
+    width92?: boolean
+    width94?: boolean
+    width96?: boolean
+    createdAt?: boolean
+    updatedAt?: boolean
+  }
+
+  export type PreciseBodyArticleConsumptionOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<"id" | "division" | "subDivision" | "majorCategory" | "macroBodyDescription" | "microBodyArticleNumber" | "mNeckType" | "mNeckStyle" | "mCollarType" | "mCollarStyle" | "mSleevesMainStyle" | "mSleeveFold" | "mPlacket" | "mBltType" | "mBltStyle" | "mBtmFold" | "mPocket" | "mNoOfPocket" | "mExtraPocket" | "mLength" | "mFit" | "bodyStyle" | "cuttingValue" | "stitchingSam" | "samVal" | "stVal" | "ironingSam" | "finishingSam" | "finishigCost" | "totalCmpCost" | "width15" | "width16" | "width17" | "width18" | "width19" | "width42" | "width43" | "width44" | "width46" | "width48" | "width50" | "width53" | "width54" | "width55" | "width56" | "width57" | "width58" | "width59" | "width60" | "width61" | "width62" | "width63" | "width64" | "width65" | "width66" | "width67" | "width68" | "width69" | "width70" | "width71" | "width72" | "width73" | "width74" | "width76" | "width78" | "width82" | "width92" | "width94" | "width96" | "createdAt" | "updatedAt", ExtArgs["result"]["preciseBodyArticleConsumption"]>
+
+  export type $PreciseBodyArticleConsumptionPayload<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    name: "PreciseBodyArticleConsumption"
+    objects: {}
+    scalars: $Extensions.GetPayloadResult<{
+      id: number
+      division: string
+      subDivision: string
+      majorCategory: string
+      macroBodyDescription: string
+      microBodyArticleNumber: string
+      mNeckType: string | null
+      mNeckStyle: string | null
+      mCollarType: string | null
+      mCollarStyle: string | null
+      mSleevesMainStyle: string | null
+      mSleeveFold: string | null
+      mPlacket: string | null
+      mBltType: string | null
+      mBltStyle: string | null
+      mBtmFold: string | null
+      mPocket: string | null
+      mNoOfPocket: string | null
+      mExtraPocket: string | null
+      mLength: string | null
+      mFit: string | null
+      bodyStyle: string | null
+      cuttingValue: Prisma.Decimal | null
+      stitchingSam: Prisma.Decimal | null
+      samVal: Prisma.Decimal | null
+      stVal: Prisma.Decimal | null
+      ironingSam: Prisma.Decimal | null
+      finishingSam: Prisma.Decimal | null
+      finishigCost: Prisma.Decimal | null
+      totalCmpCost: Prisma.Decimal | null
+      width15: Prisma.Decimal | null
+      width16: Prisma.Decimal | null
+      width17: Prisma.Decimal | null
+      width18: Prisma.Decimal | null
+      width19: Prisma.Decimal | null
+      width42: Prisma.Decimal | null
+      width43: Prisma.Decimal | null
+      width44: Prisma.Decimal | null
+      width46: Prisma.Decimal | null
+      width48: Prisma.Decimal | null
+      width50: Prisma.Decimal | null
+      width53: Prisma.Decimal | null
+      width54: Prisma.Decimal | null
+      width55: Prisma.Decimal | null
+      width56: Prisma.Decimal | null
+      width57: Prisma.Decimal | null
+      width58: Prisma.Decimal | null
+      width59: Prisma.Decimal | null
+      width60: Prisma.Decimal | null
+      width61: Prisma.Decimal | null
+      width62: Prisma.Decimal | null
+      width63: Prisma.Decimal | null
+      width64: Prisma.Decimal | null
+      width65: Prisma.Decimal | null
+      width66: Prisma.Decimal | null
+      width67: Prisma.Decimal | null
+      width68: Prisma.Decimal | null
+      width69: Prisma.Decimal | null
+      width70: Prisma.Decimal | null
+      width71: Prisma.Decimal | null
+      width72: Prisma.Decimal | null
+      width73: Prisma.Decimal | null
+      width74: Prisma.Decimal | null
+      width76: Prisma.Decimal | null
+      width78: Prisma.Decimal | null
+      width82: Prisma.Decimal | null
+      width92: Prisma.Decimal | null
+      width94: Prisma.Decimal | null
+      width96: Prisma.Decimal | null
+      createdAt: Date
+      updatedAt: Date
+    }, ExtArgs["result"]["preciseBodyArticleConsumption"]>
+    composites: {}
+  }
+
+  type PreciseBodyArticleConsumptionGetPayload<S extends boolean | null | undefined | PreciseBodyArticleConsumptionDefaultArgs> = $Result.GetResult<Prisma.$PreciseBodyArticleConsumptionPayload, S>
+
+  type PreciseBodyArticleConsumptionCountArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> =
+    Omit<PreciseBodyArticleConsumptionFindManyArgs, 'select' | 'include' | 'distinct' | 'omit'> & {
+      select?: PreciseBodyArticleConsumptionCountAggregateInputType | true
+    }
+
+  export interface PreciseBodyArticleConsumptionDelegate<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs, GlobalOmitOptions = {}> {
+    [K: symbol]: { types: Prisma.TypeMap<ExtArgs>['model']['PreciseBodyArticleConsumption'], meta: { name: 'PreciseBodyArticleConsumption' } }
+    /**
+     * Find zero or one PreciseBodyArticleConsumption that matches the filter.
+     * @param {PreciseBodyArticleConsumptionFindUniqueArgs} args - Arguments to find a PreciseBodyArticleConsumption
+     * @example
+     * // Get one PreciseBodyArticleConsumption
+     * const preciseBodyArticleConsumption = await prisma.preciseBodyArticleConsumption.findUnique({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     */
+    findUnique<T extends PreciseBodyArticleConsumptionFindUniqueArgs>(args: SelectSubset<T, PreciseBodyArticleConsumptionFindUniqueArgs<ExtArgs>>): Prisma__PreciseBodyArticleConsumptionClient<$Result.GetResult<Prisma.$PreciseBodyArticleConsumptionPayload<ExtArgs>, T, "findUnique", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Find one PreciseBodyArticleConsumption that matches the filter or throw an error with `error.code='P2025'`
+     * if no matches were found.
+     * @param {PreciseBodyArticleConsumptionFindUniqueOrThrowArgs} args - Arguments to find a PreciseBodyArticleConsumption
+     * @example
+     * // Get one PreciseBodyArticleConsumption
+     * const preciseBodyArticleConsumption = await prisma.preciseBodyArticleConsumption.findUniqueOrThrow({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     */
+    findUniqueOrThrow<T extends PreciseBodyArticleConsumptionFindUniqueOrThrowArgs>(args: SelectSubset<T, PreciseBodyArticleConsumptionFindUniqueOrThrowArgs<ExtArgs>>): Prisma__PreciseBodyArticleConsumptionClient<$Result.GetResult<Prisma.$PreciseBodyArticleConsumptionPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Find the first PreciseBodyArticleConsumption that matches the filter.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {PreciseBodyArticleConsumptionFindFirstArgs} args - Arguments to find a PreciseBodyArticleConsumption
+     * @example
+     * // Get one PreciseBodyArticleConsumption
+     * const preciseBodyArticleConsumption = await prisma.preciseBodyArticleConsumption.findFirst({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     */
+    findFirst<T extends PreciseBodyArticleConsumptionFindFirstArgs>(args?: SelectSubset<T, PreciseBodyArticleConsumptionFindFirstArgs<ExtArgs>>): Prisma__PreciseBodyArticleConsumptionClient<$Result.GetResult<Prisma.$PreciseBodyArticleConsumptionPayload<ExtArgs>, T, "findFirst", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Find the first PreciseBodyArticleConsumption that matches the filter or
+     * throw `PrismaKnownClientError` with `P2025` code if no matches were found.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {PreciseBodyArticleConsumptionFindFirstOrThrowArgs} args - Arguments to find a PreciseBodyArticleConsumption
+     * @example
+     * // Get one PreciseBodyArticleConsumption
+     * const preciseBodyArticleConsumption = await prisma.preciseBodyArticleConsumption.findFirstOrThrow({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     */
+    findFirstOrThrow<T extends PreciseBodyArticleConsumptionFindFirstOrThrowArgs>(args?: SelectSubset<T, PreciseBodyArticleConsumptionFindFirstOrThrowArgs<ExtArgs>>): Prisma__PreciseBodyArticleConsumptionClient<$Result.GetResult<Prisma.$PreciseBodyArticleConsumptionPayload<ExtArgs>, T, "findFirstOrThrow", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Find zero or more PreciseBodyArticleConsumptions that matches the filter.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {PreciseBodyArticleConsumptionFindManyArgs} args - Arguments to filter and select certain fields only.
+     * @example
+     * // Get all PreciseBodyArticleConsumptions
+     * const preciseBodyArticleConsumptions = await prisma.preciseBodyArticleConsumption.findMany()
+     * 
+     * // Get first 10 PreciseBodyArticleConsumptions
+     * const preciseBodyArticleConsumptions = await prisma.preciseBodyArticleConsumption.findMany({ take: 10 })
+     * 
+     * // Only select the `id`
+     * const preciseBodyArticleConsumptionWithIdOnly = await prisma.preciseBodyArticleConsumption.findMany({ select: { id: true } })
+     * 
+     */
+    findMany<T extends PreciseBodyArticleConsumptionFindManyArgs>(args?: SelectSubset<T, PreciseBodyArticleConsumptionFindManyArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$PreciseBodyArticleConsumptionPayload<ExtArgs>, T, "findMany", GlobalOmitOptions>>
+
+    /**
+     * Create a PreciseBodyArticleConsumption.
+     * @param {PreciseBodyArticleConsumptionCreateArgs} args - Arguments to create a PreciseBodyArticleConsumption.
+     * @example
+     * // Create one PreciseBodyArticleConsumption
+     * const PreciseBodyArticleConsumption = await prisma.preciseBodyArticleConsumption.create({
+     *   data: {
+     *     // ... data to create a PreciseBodyArticleConsumption
+     *   }
+     * })
+     * 
+     */
+    create<T extends PreciseBodyArticleConsumptionCreateArgs>(args: SelectSubset<T, PreciseBodyArticleConsumptionCreateArgs<ExtArgs>>): Prisma__PreciseBodyArticleConsumptionClient<$Result.GetResult<Prisma.$PreciseBodyArticleConsumptionPayload<ExtArgs>, T, "create", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Create many PreciseBodyArticleConsumptions.
+     * @param {PreciseBodyArticleConsumptionCreateManyArgs} args - Arguments to create many PreciseBodyArticleConsumptions.
+     * @example
+     * // Create many PreciseBodyArticleConsumptions
+     * const preciseBodyArticleConsumption = await prisma.preciseBodyArticleConsumption.createMany({
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     *     
+     */
+    createMany<T extends PreciseBodyArticleConsumptionCreateManyArgs>(args?: SelectSubset<T, PreciseBodyArticleConsumptionCreateManyArgs<ExtArgs>>): Prisma.PrismaPromise<BatchPayload>
+
+    /**
+     * Create many PreciseBodyArticleConsumptions and returns the data saved in the database.
+     * @param {PreciseBodyArticleConsumptionCreateManyAndReturnArgs} args - Arguments to create many PreciseBodyArticleConsumptions.
+     * @example
+     * // Create many PreciseBodyArticleConsumptions
+     * const preciseBodyArticleConsumption = await prisma.preciseBodyArticleConsumption.createManyAndReturn({
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     * 
+     * // Create many PreciseBodyArticleConsumptions and only return the `id`
+     * const preciseBodyArticleConsumptionWithIdOnly = await prisma.preciseBodyArticleConsumption.createManyAndReturn({
+     *   select: { id: true },
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * 
+     */
+    createManyAndReturn<T extends PreciseBodyArticleConsumptionCreateManyAndReturnArgs>(args?: SelectSubset<T, PreciseBodyArticleConsumptionCreateManyAndReturnArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$PreciseBodyArticleConsumptionPayload<ExtArgs>, T, "createManyAndReturn", GlobalOmitOptions>>
+
+    /**
+     * Delete a PreciseBodyArticleConsumption.
+     * @param {PreciseBodyArticleConsumptionDeleteArgs} args - Arguments to delete one PreciseBodyArticleConsumption.
+     * @example
+     * // Delete one PreciseBodyArticleConsumption
+     * const PreciseBodyArticleConsumption = await prisma.preciseBodyArticleConsumption.delete({
+     *   where: {
+     *     // ... filter to delete one PreciseBodyArticleConsumption
+     *   }
+     * })
+     * 
+     */
+    delete<T extends PreciseBodyArticleConsumptionDeleteArgs>(args: SelectSubset<T, PreciseBodyArticleConsumptionDeleteArgs<ExtArgs>>): Prisma__PreciseBodyArticleConsumptionClient<$Result.GetResult<Prisma.$PreciseBodyArticleConsumptionPayload<ExtArgs>, T, "delete", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Update one PreciseBodyArticleConsumption.
+     * @param {PreciseBodyArticleConsumptionUpdateArgs} args - Arguments to update one PreciseBodyArticleConsumption.
+     * @example
+     * // Update one PreciseBodyArticleConsumption
+     * const preciseBodyArticleConsumption = await prisma.preciseBodyArticleConsumption.update({
+     *   where: {
+     *     // ... provide filter here
+     *   },
+     *   data: {
+     *     // ... provide data here
+     *   }
+     * })
+     * 
+     */
+    update<T extends PreciseBodyArticleConsumptionUpdateArgs>(args: SelectSubset<T, PreciseBodyArticleConsumptionUpdateArgs<ExtArgs>>): Prisma__PreciseBodyArticleConsumptionClient<$Result.GetResult<Prisma.$PreciseBodyArticleConsumptionPayload<ExtArgs>, T, "update", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Delete zero or more PreciseBodyArticleConsumptions.
+     * @param {PreciseBodyArticleConsumptionDeleteManyArgs} args - Arguments to filter PreciseBodyArticleConsumptions to delete.
+     * @example
+     * // Delete a few PreciseBodyArticleConsumptions
+     * const { count } = await prisma.preciseBodyArticleConsumption.deleteMany({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     * 
+     */
+    deleteMany<T extends PreciseBodyArticleConsumptionDeleteManyArgs>(args?: SelectSubset<T, PreciseBodyArticleConsumptionDeleteManyArgs<ExtArgs>>): Prisma.PrismaPromise<BatchPayload>
+
+    /**
+     * Update zero or more PreciseBodyArticleConsumptions.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {PreciseBodyArticleConsumptionUpdateManyArgs} args - Arguments to update one or more rows.
+     * @example
+     * // Update many PreciseBodyArticleConsumptions
+     * const preciseBodyArticleConsumption = await prisma.preciseBodyArticleConsumption.updateMany({
+     *   where: {
+     *     // ... provide filter here
+     *   },
+     *   data: {
+     *     // ... provide data here
+     *   }
+     * })
+     * 
+     */
+    updateMany<T extends PreciseBodyArticleConsumptionUpdateManyArgs>(args: SelectSubset<T, PreciseBodyArticleConsumptionUpdateManyArgs<ExtArgs>>): Prisma.PrismaPromise<BatchPayload>
+
+    /**
+     * Update zero or more PreciseBodyArticleConsumptions and returns the data updated in the database.
+     * @param {PreciseBodyArticleConsumptionUpdateManyAndReturnArgs} args - Arguments to update many PreciseBodyArticleConsumptions.
+     * @example
+     * // Update many PreciseBodyArticleConsumptions
+     * const preciseBodyArticleConsumption = await prisma.preciseBodyArticleConsumption.updateManyAndReturn({
+     *   where: {
+     *     // ... provide filter here
+     *   },
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     * 
+     * // Update zero or more PreciseBodyArticleConsumptions and only return the `id`
+     * const preciseBodyArticleConsumptionWithIdOnly = await prisma.preciseBodyArticleConsumption.updateManyAndReturn({
+     *   select: { id: true },
+     *   where: {
+     *     // ... provide filter here
+     *   },
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * 
+     */
+    updateManyAndReturn<T extends PreciseBodyArticleConsumptionUpdateManyAndReturnArgs>(args: SelectSubset<T, PreciseBodyArticleConsumptionUpdateManyAndReturnArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$PreciseBodyArticleConsumptionPayload<ExtArgs>, T, "updateManyAndReturn", GlobalOmitOptions>>
+
+    /**
+     * Create or update one PreciseBodyArticleConsumption.
+     * @param {PreciseBodyArticleConsumptionUpsertArgs} args - Arguments to update or create a PreciseBodyArticleConsumption.
+     * @example
+     * // Update or create a PreciseBodyArticleConsumption
+     * const preciseBodyArticleConsumption = await prisma.preciseBodyArticleConsumption.upsert({
+     *   create: {
+     *     // ... data to create a PreciseBodyArticleConsumption
+     *   },
+     *   update: {
+     *     // ... in case it already exists, update
+     *   },
+     *   where: {
+     *     // ... the filter for the PreciseBodyArticleConsumption we want to update
+     *   }
+     * })
+     */
+    upsert<T extends PreciseBodyArticleConsumptionUpsertArgs>(args: SelectSubset<T, PreciseBodyArticleConsumptionUpsertArgs<ExtArgs>>): Prisma__PreciseBodyArticleConsumptionClient<$Result.GetResult<Prisma.$PreciseBodyArticleConsumptionPayload<ExtArgs>, T, "upsert", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+
+    /**
+     * Count the number of PreciseBodyArticleConsumptions.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {PreciseBodyArticleConsumptionCountArgs} args - Arguments to filter PreciseBodyArticleConsumptions to count.
+     * @example
+     * // Count the number of PreciseBodyArticleConsumptions
+     * const count = await prisma.preciseBodyArticleConsumption.count({
+     *   where: {
+     *     // ... the filter for the PreciseBodyArticleConsumptions we want to count
+     *   }
+     * })
+    **/
+    count<T extends PreciseBodyArticleConsumptionCountArgs>(
+      args?: Subset<T, PreciseBodyArticleConsumptionCountArgs>,
+    ): Prisma.PrismaPromise<
+      T extends $Utils.Record<'select', any>
+        ? T['select'] extends true
+          ? number
+          : GetScalarType<T['select'], PreciseBodyArticleConsumptionCountAggregateOutputType>
+        : number
+    >
+
+    /**
+     * Allows you to perform aggregations operations on a PreciseBodyArticleConsumption.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {PreciseBodyArticleConsumptionAggregateArgs} args - Select which aggregations you would like to apply and on what fields.
+     * @example
+     * // Ordered by age ascending
+     * // Where email contains prisma.io
+     * // Limited to the 10 users
+     * const aggregations = await prisma.user.aggregate({
+     *   _avg: {
+     *     age: true,
+     *   },
+     *   where: {
+     *     email: {
+     *       contains: "prisma.io",
+     *     },
+     *   },
+     *   orderBy: {
+     *     age: "asc",
+     *   },
+     *   take: 10,
+     * })
+    **/
+    aggregate<T extends PreciseBodyArticleConsumptionAggregateArgs>(args: Subset<T, PreciseBodyArticleConsumptionAggregateArgs>): Prisma.PrismaPromise<GetPreciseBodyArticleConsumptionAggregateType<T>>
+
+    /**
+     * Group by PreciseBodyArticleConsumption.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {PreciseBodyArticleConsumptionGroupByArgs} args - Group by arguments.
+     * @example
+     * // Group by city, order by createdAt, get count
+     * const result = await prisma.user.groupBy({
+     *   by: ['city', 'createdAt'],
+     *   orderBy: {
+     *     createdAt: true
+     *   },
+     *   _count: {
+     *     _all: true
+     *   },
+     * })
+     * 
+    **/
+    groupBy<
+      T extends PreciseBodyArticleConsumptionGroupByArgs,
+      HasSelectOrTake extends Or<
+        Extends<'skip', Keys<T>>,
+        Extends<'take', Keys<T>>
+      >,
+      OrderByArg extends True extends HasSelectOrTake
+        ? { orderBy: PreciseBodyArticleConsumptionGroupByArgs['orderBy'] }
+        : { orderBy?: PreciseBodyArticleConsumptionGroupByArgs['orderBy'] },
+      OrderFields extends ExcludeUnderscoreKeys<Keys<MaybeTupleToUnion<T['orderBy']>>>,
+      ByFields extends MaybeTupleToUnion<T['by']>,
+      ByValid extends Has<ByFields, OrderFields>,
+      HavingFields extends GetHavingFields<T['having']>,
+      HavingValid extends Has<ByFields, HavingFields>,
+      ByEmpty extends T['by'] extends never[] ? True : False,
+      InputErrors extends ByEmpty extends True
+      ? `Error: "by" must not be empty.`
+      : HavingValid extends False
+      ? {
+          [P in HavingFields]: P extends ByFields
+            ? never
+            : P extends string
+            ? `Error: Field "${P}" used in "having" needs to be provided in "by".`
+            : [
+                Error,
+                'Field ',
+                P,
+                ` in "having" needs to be provided in "by"`,
+              ]
+        }[HavingFields]
+      : 'take' extends Keys<T>
+      ? 'orderBy' extends Keys<T>
+        ? ByValid extends True
+          ? {}
+          : {
+              [P in OrderFields]: P extends ByFields
+                ? never
+                : `Error: Field "${P}" in "orderBy" needs to be provided in "by"`
+            }[OrderFields]
+        : 'Error: If you provide "take", you also need to provide "orderBy"'
+      : 'skip' extends Keys<T>
+      ? 'orderBy' extends Keys<T>
+        ? ByValid extends True
+          ? {}
+          : {
+              [P in OrderFields]: P extends ByFields
+                ? never
+                : `Error: Field "${P}" in "orderBy" needs to be provided in "by"`
+            }[OrderFields]
+        : 'Error: If you provide "skip", you also need to provide "orderBy"'
+      : ByValid extends True
+      ? {}
+      : {
+          [P in OrderFields]: P extends ByFields
+            ? never
+            : `Error: Field "${P}" in "orderBy" needs to be provided in "by"`
+        }[OrderFields]
+    >(args: SubsetIntersection<T, PreciseBodyArticleConsumptionGroupByArgs, OrderByArg> & InputErrors): {} extends InputErrors ? GetPreciseBodyArticleConsumptionGroupByPayload<T> : Prisma.PrismaPromise<InputErrors>
+  /**
+   * Fields of the PreciseBodyArticleConsumption model
+   */
+  readonly fields: PreciseBodyArticleConsumptionFieldRefs;
+  }
+
+  /**
+   * The delegate class that acts as a "Promise-like" for PreciseBodyArticleConsumption.
+   * Why is this prefixed with `Prisma__`?
+   * Because we want to prevent naming conflicts as mentioned in
+   * https://github.com/prisma/prisma-client-js/issues/707
+   */
+  export interface Prisma__PreciseBodyArticleConsumptionClient<T, Null = never, ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs, GlobalOmitOptions = {}> extends Prisma.PrismaPromise<T> {
+    readonly [Symbol.toStringTag]: "PrismaPromise"
+    /**
+     * Attaches callbacks for the resolution and/or rejection of the Promise.
+     * @param onfulfilled The callback to execute when the Promise is resolved.
+     * @param onrejected The callback to execute when the Promise is rejected.
+     * @returns A Promise for the completion of which ever callback is executed.
+     */
+    then<TResult1 = T, TResult2 = never>(onfulfilled?: ((value: T) => TResult1 | PromiseLike<TResult1>) | undefined | null, onrejected?: ((reason: any) => TResult2 | PromiseLike<TResult2>) | undefined | null): $Utils.JsPromise<TResult1 | TResult2>
+    /**
+     * Attaches a callback for only the rejection of the Promise.
+     * @param onrejected The callback to execute when the Promise is rejected.
+     * @returns A Promise for the completion of the callback.
+     */
+    catch<TResult = never>(onrejected?: ((reason: any) => TResult | PromiseLike<TResult>) | undefined | null): $Utils.JsPromise<T | TResult>
+    /**
+     * Attaches a callback that is invoked when the Promise is settled (fulfilled or rejected). The
+     * resolved value cannot be modified from the callback.
+     * @param onfinally The callback to execute when the Promise is settled (fulfilled or rejected).
+     * @returns A Promise for the completion of the callback.
+     */
+    finally(onfinally?: (() => void) | undefined | null): $Utils.JsPromise<T>
+  }
+
+
+
+
+  /**
+   * Fields of the PreciseBodyArticleConsumption model
+   */
+  interface PreciseBodyArticleConsumptionFieldRefs {
+    readonly id: FieldRef<"PreciseBodyArticleConsumption", 'Int'>
+    readonly division: FieldRef<"PreciseBodyArticleConsumption", 'String'>
+    readonly subDivision: FieldRef<"PreciseBodyArticleConsumption", 'String'>
+    readonly majorCategory: FieldRef<"PreciseBodyArticleConsumption", 'String'>
+    readonly macroBodyDescription: FieldRef<"PreciseBodyArticleConsumption", 'String'>
+    readonly microBodyArticleNumber: FieldRef<"PreciseBodyArticleConsumption", 'String'>
+    readonly mNeckType: FieldRef<"PreciseBodyArticleConsumption", 'String'>
+    readonly mNeckStyle: FieldRef<"PreciseBodyArticleConsumption", 'String'>
+    readonly mCollarType: FieldRef<"PreciseBodyArticleConsumption", 'String'>
+    readonly mCollarStyle: FieldRef<"PreciseBodyArticleConsumption", 'String'>
+    readonly mSleevesMainStyle: FieldRef<"PreciseBodyArticleConsumption", 'String'>
+    readonly mSleeveFold: FieldRef<"PreciseBodyArticleConsumption", 'String'>
+    readonly mPlacket: FieldRef<"PreciseBodyArticleConsumption", 'String'>
+    readonly mBltType: FieldRef<"PreciseBodyArticleConsumption", 'String'>
+    readonly mBltStyle: FieldRef<"PreciseBodyArticleConsumption", 'String'>
+    readonly mBtmFold: FieldRef<"PreciseBodyArticleConsumption", 'String'>
+    readonly mPocket: FieldRef<"PreciseBodyArticleConsumption", 'String'>
+    readonly mNoOfPocket: FieldRef<"PreciseBodyArticleConsumption", 'String'>
+    readonly mExtraPocket: FieldRef<"PreciseBodyArticleConsumption", 'String'>
+    readonly mLength: FieldRef<"PreciseBodyArticleConsumption", 'String'>
+    readonly mFit: FieldRef<"PreciseBodyArticleConsumption", 'String'>
+    readonly bodyStyle: FieldRef<"PreciseBodyArticleConsumption", 'String'>
+    readonly cuttingValue: FieldRef<"PreciseBodyArticleConsumption", 'Decimal'>
+    readonly stitchingSam: FieldRef<"PreciseBodyArticleConsumption", 'Decimal'>
+    readonly samVal: FieldRef<"PreciseBodyArticleConsumption", 'Decimal'>
+    readonly stVal: FieldRef<"PreciseBodyArticleConsumption", 'Decimal'>
+    readonly ironingSam: FieldRef<"PreciseBodyArticleConsumption", 'Decimal'>
+    readonly finishingSam: FieldRef<"PreciseBodyArticleConsumption", 'Decimal'>
+    readonly finishigCost: FieldRef<"PreciseBodyArticleConsumption", 'Decimal'>
+    readonly totalCmpCost: FieldRef<"PreciseBodyArticleConsumption", 'Decimal'>
+    readonly width15: FieldRef<"PreciseBodyArticleConsumption", 'Decimal'>
+    readonly width16: FieldRef<"PreciseBodyArticleConsumption", 'Decimal'>
+    readonly width17: FieldRef<"PreciseBodyArticleConsumption", 'Decimal'>
+    readonly width18: FieldRef<"PreciseBodyArticleConsumption", 'Decimal'>
+    readonly width19: FieldRef<"PreciseBodyArticleConsumption", 'Decimal'>
+    readonly width42: FieldRef<"PreciseBodyArticleConsumption", 'Decimal'>
+    readonly width43: FieldRef<"PreciseBodyArticleConsumption", 'Decimal'>
+    readonly width44: FieldRef<"PreciseBodyArticleConsumption", 'Decimal'>
+    readonly width46: FieldRef<"PreciseBodyArticleConsumption", 'Decimal'>
+    readonly width48: FieldRef<"PreciseBodyArticleConsumption", 'Decimal'>
+    readonly width50: FieldRef<"PreciseBodyArticleConsumption", 'Decimal'>
+    readonly width53: FieldRef<"PreciseBodyArticleConsumption", 'Decimal'>
+    readonly width54: FieldRef<"PreciseBodyArticleConsumption", 'Decimal'>
+    readonly width55: FieldRef<"PreciseBodyArticleConsumption", 'Decimal'>
+    readonly width56: FieldRef<"PreciseBodyArticleConsumption", 'Decimal'>
+    readonly width57: FieldRef<"PreciseBodyArticleConsumption", 'Decimal'>
+    readonly width58: FieldRef<"PreciseBodyArticleConsumption", 'Decimal'>
+    readonly width59: FieldRef<"PreciseBodyArticleConsumption", 'Decimal'>
+    readonly width60: FieldRef<"PreciseBodyArticleConsumption", 'Decimal'>
+    readonly width61: FieldRef<"PreciseBodyArticleConsumption", 'Decimal'>
+    readonly width62: FieldRef<"PreciseBodyArticleConsumption", 'Decimal'>
+    readonly width63: FieldRef<"PreciseBodyArticleConsumption", 'Decimal'>
+    readonly width64: FieldRef<"PreciseBodyArticleConsumption", 'Decimal'>
+    readonly width65: FieldRef<"PreciseBodyArticleConsumption", 'Decimal'>
+    readonly width66: FieldRef<"PreciseBodyArticleConsumption", 'Decimal'>
+    readonly width67: FieldRef<"PreciseBodyArticleConsumption", 'Decimal'>
+    readonly width68: FieldRef<"PreciseBodyArticleConsumption", 'Decimal'>
+    readonly width69: FieldRef<"PreciseBodyArticleConsumption", 'Decimal'>
+    readonly width70: FieldRef<"PreciseBodyArticleConsumption", 'Decimal'>
+    readonly width71: FieldRef<"PreciseBodyArticleConsumption", 'Decimal'>
+    readonly width72: FieldRef<"PreciseBodyArticleConsumption", 'Decimal'>
+    readonly width73: FieldRef<"PreciseBodyArticleConsumption", 'Decimal'>
+    readonly width74: FieldRef<"PreciseBodyArticleConsumption", 'Decimal'>
+    readonly width76: FieldRef<"PreciseBodyArticleConsumption", 'Decimal'>
+    readonly width78: FieldRef<"PreciseBodyArticleConsumption", 'Decimal'>
+    readonly width82: FieldRef<"PreciseBodyArticleConsumption", 'Decimal'>
+    readonly width92: FieldRef<"PreciseBodyArticleConsumption", 'Decimal'>
+    readonly width94: FieldRef<"PreciseBodyArticleConsumption", 'Decimal'>
+    readonly width96: FieldRef<"PreciseBodyArticleConsumption", 'Decimal'>
+    readonly createdAt: FieldRef<"PreciseBodyArticleConsumption", 'DateTime'>
+    readonly updatedAt: FieldRef<"PreciseBodyArticleConsumption", 'DateTime'>
+  }
+    
+
+  // Custom InputTypes
+  /**
+   * PreciseBodyArticleConsumption findUnique
+   */
+  export type PreciseBodyArticleConsumptionFindUniqueArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the PreciseBodyArticleConsumption
+     */
+    select?: PreciseBodyArticleConsumptionSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the PreciseBodyArticleConsumption
+     */
+    omit?: PreciseBodyArticleConsumptionOmit<ExtArgs> | null
+    /**
+     * Filter, which PreciseBodyArticleConsumption to fetch.
+     */
+    where: PreciseBodyArticleConsumptionWhereUniqueInput
+  }
+
+  /**
+   * PreciseBodyArticleConsumption findUniqueOrThrow
+   */
+  export type PreciseBodyArticleConsumptionFindUniqueOrThrowArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the PreciseBodyArticleConsumption
+     */
+    select?: PreciseBodyArticleConsumptionSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the PreciseBodyArticleConsumption
+     */
+    omit?: PreciseBodyArticleConsumptionOmit<ExtArgs> | null
+    /**
+     * Filter, which PreciseBodyArticleConsumption to fetch.
+     */
+    where: PreciseBodyArticleConsumptionWhereUniqueInput
+  }
+
+  /**
+   * PreciseBodyArticleConsumption findFirst
+   */
+  export type PreciseBodyArticleConsumptionFindFirstArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the PreciseBodyArticleConsumption
+     */
+    select?: PreciseBodyArticleConsumptionSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the PreciseBodyArticleConsumption
+     */
+    omit?: PreciseBodyArticleConsumptionOmit<ExtArgs> | null
+    /**
+     * Filter, which PreciseBodyArticleConsumption to fetch.
+     */
+    where?: PreciseBodyArticleConsumptionWhereInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
+     * 
+     * Determine the order of PreciseBodyArticleConsumptions to fetch.
+     */
+    orderBy?: PreciseBodyArticleConsumptionOrderByWithRelationInput | PreciseBodyArticleConsumptionOrderByWithRelationInput[]
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
+     * 
+     * Sets the position for searching for PreciseBodyArticleConsumptions.
+     */
+    cursor?: PreciseBodyArticleConsumptionWhereUniqueInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Take `±n` PreciseBodyArticleConsumptions from the position of the cursor.
+     */
+    take?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Skip the first `n` PreciseBodyArticleConsumptions.
+     */
+    skip?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/distinct Distinct Docs}
+     * 
+     * Filter by unique combinations of PreciseBodyArticleConsumptions.
+     */
+    distinct?: PreciseBodyArticleConsumptionScalarFieldEnum | PreciseBodyArticleConsumptionScalarFieldEnum[]
+  }
+
+  /**
+   * PreciseBodyArticleConsumption findFirstOrThrow
+   */
+  export type PreciseBodyArticleConsumptionFindFirstOrThrowArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the PreciseBodyArticleConsumption
+     */
+    select?: PreciseBodyArticleConsumptionSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the PreciseBodyArticleConsumption
+     */
+    omit?: PreciseBodyArticleConsumptionOmit<ExtArgs> | null
+    /**
+     * Filter, which PreciseBodyArticleConsumption to fetch.
+     */
+    where?: PreciseBodyArticleConsumptionWhereInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
+     * 
+     * Determine the order of PreciseBodyArticleConsumptions to fetch.
+     */
+    orderBy?: PreciseBodyArticleConsumptionOrderByWithRelationInput | PreciseBodyArticleConsumptionOrderByWithRelationInput[]
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
+     * 
+     * Sets the position for searching for PreciseBodyArticleConsumptions.
+     */
+    cursor?: PreciseBodyArticleConsumptionWhereUniqueInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Take `±n` PreciseBodyArticleConsumptions from the position of the cursor.
+     */
+    take?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Skip the first `n` PreciseBodyArticleConsumptions.
+     */
+    skip?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/distinct Distinct Docs}
+     * 
+     * Filter by unique combinations of PreciseBodyArticleConsumptions.
+     */
+    distinct?: PreciseBodyArticleConsumptionScalarFieldEnum | PreciseBodyArticleConsumptionScalarFieldEnum[]
+  }
+
+  /**
+   * PreciseBodyArticleConsumption findMany
+   */
+  export type PreciseBodyArticleConsumptionFindManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the PreciseBodyArticleConsumption
+     */
+    select?: PreciseBodyArticleConsumptionSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the PreciseBodyArticleConsumption
+     */
+    omit?: PreciseBodyArticleConsumptionOmit<ExtArgs> | null
+    /**
+     * Filter, which PreciseBodyArticleConsumptions to fetch.
+     */
+    where?: PreciseBodyArticleConsumptionWhereInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
+     * 
+     * Determine the order of PreciseBodyArticleConsumptions to fetch.
+     */
+    orderBy?: PreciseBodyArticleConsumptionOrderByWithRelationInput | PreciseBodyArticleConsumptionOrderByWithRelationInput[]
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
+     * 
+     * Sets the position for listing PreciseBodyArticleConsumptions.
+     */
+    cursor?: PreciseBodyArticleConsumptionWhereUniqueInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Take `±n` PreciseBodyArticleConsumptions from the position of the cursor.
+     */
+    take?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Skip the first `n` PreciseBodyArticleConsumptions.
+     */
+    skip?: number
+    distinct?: PreciseBodyArticleConsumptionScalarFieldEnum | PreciseBodyArticleConsumptionScalarFieldEnum[]
+  }
+
+  /**
+   * PreciseBodyArticleConsumption create
+   */
+  export type PreciseBodyArticleConsumptionCreateArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the PreciseBodyArticleConsumption
+     */
+    select?: PreciseBodyArticleConsumptionSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the PreciseBodyArticleConsumption
+     */
+    omit?: PreciseBodyArticleConsumptionOmit<ExtArgs> | null
+    /**
+     * The data needed to create a PreciseBodyArticleConsumption.
+     */
+    data: XOR<PreciseBodyArticleConsumptionCreateInput, PreciseBodyArticleConsumptionUncheckedCreateInput>
+  }
+
+  /**
+   * PreciseBodyArticleConsumption createMany
+   */
+  export type PreciseBodyArticleConsumptionCreateManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * The data used to create many PreciseBodyArticleConsumptions.
+     */
+    data: PreciseBodyArticleConsumptionCreateManyInput | PreciseBodyArticleConsumptionCreateManyInput[]
+    skipDuplicates?: boolean
+  }
+
+  /**
+   * PreciseBodyArticleConsumption createManyAndReturn
+   */
+  export type PreciseBodyArticleConsumptionCreateManyAndReturnArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the PreciseBodyArticleConsumption
+     */
+    select?: PreciseBodyArticleConsumptionSelectCreateManyAndReturn<ExtArgs> | null
+    /**
+     * Omit specific fields from the PreciseBodyArticleConsumption
+     */
+    omit?: PreciseBodyArticleConsumptionOmit<ExtArgs> | null
+    /**
+     * The data used to create many PreciseBodyArticleConsumptions.
+     */
+    data: PreciseBodyArticleConsumptionCreateManyInput | PreciseBodyArticleConsumptionCreateManyInput[]
+    skipDuplicates?: boolean
+  }
+
+  /**
+   * PreciseBodyArticleConsumption update
+   */
+  export type PreciseBodyArticleConsumptionUpdateArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the PreciseBodyArticleConsumption
+     */
+    select?: PreciseBodyArticleConsumptionSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the PreciseBodyArticleConsumption
+     */
+    omit?: PreciseBodyArticleConsumptionOmit<ExtArgs> | null
+    /**
+     * The data needed to update a PreciseBodyArticleConsumption.
+     */
+    data: XOR<PreciseBodyArticleConsumptionUpdateInput, PreciseBodyArticleConsumptionUncheckedUpdateInput>
+    /**
+     * Choose, which PreciseBodyArticleConsumption to update.
+     */
+    where: PreciseBodyArticleConsumptionWhereUniqueInput
+  }
+
+  /**
+   * PreciseBodyArticleConsumption updateMany
+   */
+  export type PreciseBodyArticleConsumptionUpdateManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * The data used to update PreciseBodyArticleConsumptions.
+     */
+    data: XOR<PreciseBodyArticleConsumptionUpdateManyMutationInput, PreciseBodyArticleConsumptionUncheckedUpdateManyInput>
+    /**
+     * Filter which PreciseBodyArticleConsumptions to update
+     */
+    where?: PreciseBodyArticleConsumptionWhereInput
+    /**
+     * Limit how many PreciseBodyArticleConsumptions to update.
+     */
+    limit?: number
+  }
+
+  /**
+   * PreciseBodyArticleConsumption updateManyAndReturn
+   */
+  export type PreciseBodyArticleConsumptionUpdateManyAndReturnArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the PreciseBodyArticleConsumption
+     */
+    select?: PreciseBodyArticleConsumptionSelectUpdateManyAndReturn<ExtArgs> | null
+    /**
+     * Omit specific fields from the PreciseBodyArticleConsumption
+     */
+    omit?: PreciseBodyArticleConsumptionOmit<ExtArgs> | null
+    /**
+     * The data used to update PreciseBodyArticleConsumptions.
+     */
+    data: XOR<PreciseBodyArticleConsumptionUpdateManyMutationInput, PreciseBodyArticleConsumptionUncheckedUpdateManyInput>
+    /**
+     * Filter which PreciseBodyArticleConsumptions to update
+     */
+    where?: PreciseBodyArticleConsumptionWhereInput
+    /**
+     * Limit how many PreciseBodyArticleConsumptions to update.
+     */
+    limit?: number
+  }
+
+  /**
+   * PreciseBodyArticleConsumption upsert
+   */
+  export type PreciseBodyArticleConsumptionUpsertArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the PreciseBodyArticleConsumption
+     */
+    select?: PreciseBodyArticleConsumptionSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the PreciseBodyArticleConsumption
+     */
+    omit?: PreciseBodyArticleConsumptionOmit<ExtArgs> | null
+    /**
+     * The filter to search for the PreciseBodyArticleConsumption to update in case it exists.
+     */
+    where: PreciseBodyArticleConsumptionWhereUniqueInput
+    /**
+     * In case the PreciseBodyArticleConsumption found by the `where` argument doesn't exist, create a new PreciseBodyArticleConsumption with this data.
+     */
+    create: XOR<PreciseBodyArticleConsumptionCreateInput, PreciseBodyArticleConsumptionUncheckedCreateInput>
+    /**
+     * In case the PreciseBodyArticleConsumption was found with the provided `where` argument, update it with this data.
+     */
+    update: XOR<PreciseBodyArticleConsumptionUpdateInput, PreciseBodyArticleConsumptionUncheckedUpdateInput>
+  }
+
+  /**
+   * PreciseBodyArticleConsumption delete
+   */
+  export type PreciseBodyArticleConsumptionDeleteArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the PreciseBodyArticleConsumption
+     */
+    select?: PreciseBodyArticleConsumptionSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the PreciseBodyArticleConsumption
+     */
+    omit?: PreciseBodyArticleConsumptionOmit<ExtArgs> | null
+    /**
+     * Filter which PreciseBodyArticleConsumption to delete.
+     */
+    where: PreciseBodyArticleConsumptionWhereUniqueInput
+  }
+
+  /**
+   * PreciseBodyArticleConsumption deleteMany
+   */
+  export type PreciseBodyArticleConsumptionDeleteManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Filter which PreciseBodyArticleConsumptions to delete
+     */
+    where?: PreciseBodyArticleConsumptionWhereInput
+    /**
+     * Limit how many PreciseBodyArticleConsumptions to delete.
+     */
+    limit?: number
+  }
+
+  /**
+   * PreciseBodyArticleConsumption without action
+   */
+  export type PreciseBodyArticleConsumptionDefaultArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the PreciseBodyArticleConsumption
+     */
+    select?: PreciseBodyArticleConsumptionSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the PreciseBodyArticleConsumption
+     */
+    omit?: PreciseBodyArticleConsumptionOmit<ExtArgs> | null
+  }
+
+
+  /**
    * Enums
    */
 
@@ -81904,11 +88956,16 @@ export namespace Prisma {
     cmpCost: 'cmpCost',
     fabCost: 'fabCost',
     fabCons: 'fabCons',
-    width: 'width',
+    autoBgt: 'autoBgt',
+    roughV2: 'roughV2',
     vendorFabricRate: 'vendorFabricRate',
-    valueAddAccCostType: 'valueAddAccCostType',
-    valueAddCost: 'valueAddCost',
-    valueAddProcessCost: 'valueAddProcessCost',
+    finalCost: 'finalCost',
+    roughRatio: 'roughRatio',
+    roughConsumptionKg: 'roughConsumptionKg',
+    roughConsumptionMeter: 'roughConsumptionMeter',
+    preciseRatio: 'preciseRatio',
+    preciseConsumptionKg: 'preciseConsumptionKg',
+    preciseConsumptionMeter: 'preciseConsumptionMeter',
     bodyArticle: 'bodyArticle',
     bodyArticleDescription: 'bodyArticleDescription',
     fabricArticleNumber: 'fabricArticleNumber',
@@ -82692,6 +89749,36 @@ export namespace Prisma {
   export type FabricArticleDataScalarFieldEnum = (typeof FabricArticleDataScalarFieldEnum)[keyof typeof FabricArticleDataScalarFieldEnum]
 
 
+  export const PreciseFabricArticleDataScalarFieldEnum: {
+    id: 'id',
+    fabricArticleNumber: 'fabricArticleNumber',
+    fabricArticleDescription: 'fabricArticleDescription',
+    division: 'division',
+    subDivision: 'subDivision',
+    majorCategory: 'majorCategory',
+    vendorName: 'vendorName',
+    vendorCode: 'vendorCode',
+    fabricRate: 'fabricRate',
+    mFabDiv: 'mFabDiv',
+    mYarn: 'mYarn',
+    mFabMainMvgr1: 'mFabMainMvgr1',
+    mFabMainMvgr2: 'mFabMainMvgr2',
+    mConstruction: 'mConstruction',
+    mOunz: 'mOunz',
+    mWidth: 'mWidth',
+    mWeave01: 'mWeave01',
+    mWeave02: 'mWeave02',
+    mCount: 'mCount',
+    mComposition: 'mComposition',
+    mFinish: 'mFinish',
+    mGsm: 'mGsm',
+    mLycra: 'mLycra',
+    createdAt: 'createdAt'
+  };
+
+  export type PreciseFabricArticleDataScalarFieldEnum = (typeof PreciseFabricArticleDataScalarFieldEnum)[keyof typeof PreciseFabricArticleDataScalarFieldEnum]
+
+
   export const GmArticleDataScalarFieldEnum: {
     id: 'id',
     gmAgeGrade: 'gmAgeGrade',
@@ -82953,9 +90040,7 @@ export namespace Prisma {
     fabCost: 'fabCost',
     fabCons: 'fabCons',
     width: 'width',
-    basicTrimCost: 'basicTrimCost',
     roughCmpCost: 'roughCmpCost',
-    costingType: 'costingType',
     bodyConsumptionType: 'bodyConsumptionType',
     gsm: 'gsm',
     ratio: 'ratio',
@@ -83095,6 +90180,19 @@ export namespace Prisma {
   export type BasicTrimCostMasterScalarFieldEnum = (typeof BasicTrimCostMasterScalarFieldEnum)[keyof typeof BasicTrimCostMasterScalarFieldEnum]
 
 
+  export const PreciseTrimMasterScalarFieldEnum: {
+    id: 'id',
+    attributeName: 'attributeName',
+    type: 'type',
+    bt1: 'bt1',
+    bt2: 'bt2',
+    createdAt: 'createdAt',
+    updatedAt: 'updatedAt'
+  };
+
+  export type PreciseTrimMasterScalarFieldEnum = (typeof PreciseTrimMasterScalarFieldEnum)[keyof typeof PreciseTrimMasterScalarFieldEnum]
+
+
   export const BasicTrimCostComponentScalarFieldEnum: {
     id: 'id',
     masterId: 'masterId',
@@ -83221,6 +90319,109 @@ export namespace Prisma {
   };
 
   export type ExpenseAuditLogScalarFieldEnum = (typeof ExpenseAuditLogScalarFieldEnum)[keyof typeof ExpenseAuditLogScalarFieldEnum]
+
+
+  export const BodyArticleDescriptionFormateScalarFieldEnum: {
+    id: 'id',
+    fgMajCat: 'fgMajCat',
+    attributesMajCat: 'attributesMajCat',
+    frGridStatus: 'frGridStatus',
+    createdAt: 'createdAt',
+    updatedAt: 'updatedAt'
+  };
+
+  export type BodyArticleDescriptionFormateScalarFieldEnum = (typeof BodyArticleDescriptionFormateScalarFieldEnum)[keyof typeof BodyArticleDescriptionFormateScalarFieldEnum]
+
+
+  export const GmArticleDescriptionFormateScalarFieldEnum: {
+    id: 'id',
+    key: 'key',
+    archetypeNm: 'archetypeNm',
+    descSeq: 'descSeq',
+    familyCode: 'familyCode',
+    familyName: 'familyName',
+    createdAt: 'createdAt',
+    updatedAt: 'updatedAt'
+  };
+
+  export type GmArticleDescriptionFormateScalarFieldEnum = (typeof GmArticleDescriptionFormateScalarFieldEnum)[keyof typeof GmArticleDescriptionFormateScalarFieldEnum]
+
+
+  export const PreciseBodyArticleConsumptionScalarFieldEnum: {
+    id: 'id',
+    division: 'division',
+    subDivision: 'subDivision',
+    majorCategory: 'majorCategory',
+    macroBodyDescription: 'macroBodyDescription',
+    microBodyArticleNumber: 'microBodyArticleNumber',
+    mNeckType: 'mNeckType',
+    mNeckStyle: 'mNeckStyle',
+    mCollarType: 'mCollarType',
+    mCollarStyle: 'mCollarStyle',
+    mSleevesMainStyle: 'mSleevesMainStyle',
+    mSleeveFold: 'mSleeveFold',
+    mPlacket: 'mPlacket',
+    mBltType: 'mBltType',
+    mBltStyle: 'mBltStyle',
+    mBtmFold: 'mBtmFold',
+    mPocket: 'mPocket',
+    mNoOfPocket: 'mNoOfPocket',
+    mExtraPocket: 'mExtraPocket',
+    mLength: 'mLength',
+    mFit: 'mFit',
+    bodyStyle: 'bodyStyle',
+    cuttingValue: 'cuttingValue',
+    stitchingSam: 'stitchingSam',
+    samVal: 'samVal',
+    stVal: 'stVal',
+    ironingSam: 'ironingSam',
+    finishingSam: 'finishingSam',
+    finishigCost: 'finishigCost',
+    totalCmpCost: 'totalCmpCost',
+    width15: 'width15',
+    width16: 'width16',
+    width17: 'width17',
+    width18: 'width18',
+    width19: 'width19',
+    width42: 'width42',
+    width43: 'width43',
+    width44: 'width44',
+    width46: 'width46',
+    width48: 'width48',
+    width50: 'width50',
+    width53: 'width53',
+    width54: 'width54',
+    width55: 'width55',
+    width56: 'width56',
+    width57: 'width57',
+    width58: 'width58',
+    width59: 'width59',
+    width60: 'width60',
+    width61: 'width61',
+    width62: 'width62',
+    width63: 'width63',
+    width64: 'width64',
+    width65: 'width65',
+    width66: 'width66',
+    width67: 'width67',
+    width68: 'width68',
+    width69: 'width69',
+    width70: 'width70',
+    width71: 'width71',
+    width72: 'width72',
+    width73: 'width73',
+    width74: 'width74',
+    width76: 'width76',
+    width78: 'width78',
+    width82: 'width82',
+    width92: 'width92',
+    width94: 'width94',
+    width96: 'width96',
+    createdAt: 'createdAt',
+    updatedAt: 'updatedAt'
+  };
+
+  export type PreciseBodyArticleConsumptionScalarFieldEnum = (typeof PreciseBodyArticleConsumptionScalarFieldEnum)[keyof typeof PreciseBodyArticleConsumptionScalarFieldEnum]
 
 
   export const SortOrder: {
@@ -83439,7 +90640,6 @@ export namespace Prisma {
     mNoOfClr: 'mNoOfClr',
     articleFashionType: 'articleFashionType',
     articleDimension: 'articleDimension',
-    valueAddAccCostType: 'valueAddAccCostType',
     bodyArticle: 'bodyArticle',
     bodyArticleDescription: 'bodyArticleDescription',
     fabricArticleNumber: 'fabricArticleNumber',
@@ -84018,6 +91218,31 @@ export namespace Prisma {
   export type FabricArticleDataOrderByRelevanceFieldEnum = (typeof FabricArticleDataOrderByRelevanceFieldEnum)[keyof typeof FabricArticleDataOrderByRelevanceFieldEnum]
 
 
+  export const PreciseFabricArticleDataOrderByRelevanceFieldEnum: {
+    fabricArticleDescription: 'fabricArticleDescription',
+    division: 'division',
+    subDivision: 'subDivision',
+    majorCategory: 'majorCategory',
+    vendorName: 'vendorName',
+    mFabDiv: 'mFabDiv',
+    mYarn: 'mYarn',
+    mFabMainMvgr1: 'mFabMainMvgr1',
+    mFabMainMvgr2: 'mFabMainMvgr2',
+    mConstruction: 'mConstruction',
+    mOunz: 'mOunz',
+    mWidth: 'mWidth',
+    mWeave01: 'mWeave01',
+    mWeave02: 'mWeave02',
+    mCount: 'mCount',
+    mComposition: 'mComposition',
+    mFinish: 'mFinish',
+    mGsm: 'mGsm',
+    mLycra: 'mLycra'
+  };
+
+  export type PreciseFabricArticleDataOrderByRelevanceFieldEnum = (typeof PreciseFabricArticleDataOrderByRelevanceFieldEnum)[keyof typeof PreciseFabricArticleDataOrderByRelevanceFieldEnum]
+
+
   export const GmArticleDataOrderByRelevanceFieldEnum: {
     id: 'id',
     gmAgeGrade: 'gmAgeGrade',
@@ -84225,7 +91450,6 @@ export namespace Prisma {
     imageUrl: 'imageUrl',
     bodyArticleType: 'bodyArticleType',
     designNumber: 'designNumber',
-    costingType: 'costingType',
     bodyConsumptionType: 'bodyConsumptionType',
     flatId: 'flatId',
     articleNumber: 'articleNumber',
@@ -84332,6 +91556,14 @@ export namespace Prisma {
   export type BasicTrimCostMasterOrderByRelevanceFieldEnum = (typeof BasicTrimCostMasterOrderByRelevanceFieldEnum)[keyof typeof BasicTrimCostMasterOrderByRelevanceFieldEnum]
 
 
+  export const PreciseTrimMasterOrderByRelevanceFieldEnum: {
+    attributeName: 'attributeName',
+    type: 'type'
+  };
+
+  export type PreciseTrimMasterOrderByRelevanceFieldEnum = (typeof PreciseTrimMasterOrderByRelevanceFieldEnum)[keyof typeof PreciseTrimMasterOrderByRelevanceFieldEnum]
+
+
   export const BasicTrimCostComponentOrderByRelevanceFieldEnum: {
     kind: 'kind',
     component: 'component'
@@ -84418,6 +91650,53 @@ export namespace Prisma {
   };
 
   export type ExpenseAuditLogOrderByRelevanceFieldEnum = (typeof ExpenseAuditLogOrderByRelevanceFieldEnum)[keyof typeof ExpenseAuditLogOrderByRelevanceFieldEnum]
+
+
+  export const BodyArticleDescriptionFormateOrderByRelevanceFieldEnum: {
+    fgMajCat: 'fgMajCat',
+    attributesMajCat: 'attributesMajCat',
+    frGridStatus: 'frGridStatus'
+  };
+
+  export type BodyArticleDescriptionFormateOrderByRelevanceFieldEnum = (typeof BodyArticleDescriptionFormateOrderByRelevanceFieldEnum)[keyof typeof BodyArticleDescriptionFormateOrderByRelevanceFieldEnum]
+
+
+  export const GmArticleDescriptionFormateOrderByRelevanceFieldEnum: {
+    key: 'key',
+    archetypeNm: 'archetypeNm',
+    descSeq: 'descSeq',
+    familyCode: 'familyCode',
+    familyName: 'familyName'
+  };
+
+  export type GmArticleDescriptionFormateOrderByRelevanceFieldEnum = (typeof GmArticleDescriptionFormateOrderByRelevanceFieldEnum)[keyof typeof GmArticleDescriptionFormateOrderByRelevanceFieldEnum]
+
+
+  export const PreciseBodyArticleConsumptionOrderByRelevanceFieldEnum: {
+    division: 'division',
+    subDivision: 'subDivision',
+    majorCategory: 'majorCategory',
+    macroBodyDescription: 'macroBodyDescription',
+    microBodyArticleNumber: 'microBodyArticleNumber',
+    mNeckType: 'mNeckType',
+    mNeckStyle: 'mNeckStyle',
+    mCollarType: 'mCollarType',
+    mCollarStyle: 'mCollarStyle',
+    mSleevesMainStyle: 'mSleevesMainStyle',
+    mSleeveFold: 'mSleeveFold',
+    mPlacket: 'mPlacket',
+    mBltType: 'mBltType',
+    mBltStyle: 'mBltStyle',
+    mBtmFold: 'mBtmFold',
+    mPocket: 'mPocket',
+    mNoOfPocket: 'mNoOfPocket',
+    mExtraPocket: 'mExtraPocket',
+    mLength: 'mLength',
+    mFit: 'mFit',
+    bodyStyle: 'bodyStyle'
+  };
+
+  export type PreciseBodyArticleConsumptionOrderByRelevanceFieldEnum = (typeof PreciseBodyArticleConsumptionOrderByRelevanceFieldEnum)[keyof typeof PreciseBodyArticleConsumptionOrderByRelevanceFieldEnum]
 
 
   /**
@@ -84667,6 +91946,20 @@ export namespace Prisma {
    * Reference to a field of type 'PoolBBatchStatus[]'
    */
   export type ListEnumPoolBBatchStatusFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'PoolBBatchStatus[]'>
+    
+
+
+  /**
+   * Reference to a field of type 'BigInt'
+   */
+  export type BigIntFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'BigInt'>
+    
+
+
+  /**
+   * Reference to a field of type 'BigInt[]'
+   */
+  export type ListBigIntFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'BigInt[]'>
     
 
 
@@ -85673,11 +92966,16 @@ export namespace Prisma {
     cmpCost?: DecimalNullableFilter<"ExtractionResultFlat"> | Decimal | DecimalJsLike | number | string | null
     fabCost?: DecimalNullableFilter<"ExtractionResultFlat"> | Decimal | DecimalJsLike | number | string | null
     fabCons?: DecimalNullableFilter<"ExtractionResultFlat"> | Decimal | DecimalJsLike | number | string | null
-    width?: DecimalNullableFilter<"ExtractionResultFlat"> | Decimal | DecimalJsLike | number | string | null
+    autoBgt?: DecimalNullableFilter<"ExtractionResultFlat"> | Decimal | DecimalJsLike | number | string | null
+    roughV2?: DecimalNullableFilter<"ExtractionResultFlat"> | Decimal | DecimalJsLike | number | string | null
     vendorFabricRate?: DecimalNullableFilter<"ExtractionResultFlat"> | Decimal | DecimalJsLike | number | string | null
-    valueAddAccCostType?: StringNullableFilter<"ExtractionResultFlat"> | string | null
-    valueAddCost?: DecimalNullableFilter<"ExtractionResultFlat"> | Decimal | DecimalJsLike | number | string | null
-    valueAddProcessCost?: DecimalNullableFilter<"ExtractionResultFlat"> | Decimal | DecimalJsLike | number | string | null
+    finalCost?: DecimalNullableFilter<"ExtractionResultFlat"> | Decimal | DecimalJsLike | number | string | null
+    roughRatio?: DecimalNullableFilter<"ExtractionResultFlat"> | Decimal | DecimalJsLike | number | string | null
+    roughConsumptionKg?: DecimalNullableFilter<"ExtractionResultFlat"> | Decimal | DecimalJsLike | number | string | null
+    roughConsumptionMeter?: DecimalNullableFilter<"ExtractionResultFlat"> | Decimal | DecimalJsLike | number | string | null
+    preciseRatio?: DecimalNullableFilter<"ExtractionResultFlat"> | Decimal | DecimalJsLike | number | string | null
+    preciseConsumptionKg?: DecimalNullableFilter<"ExtractionResultFlat"> | Decimal | DecimalJsLike | number | string | null
+    preciseConsumptionMeter?: DecimalNullableFilter<"ExtractionResultFlat"> | Decimal | DecimalJsLike | number | string | null
     bodyArticle?: StringNullableFilter<"ExtractionResultFlat"> | string | null
     bodyArticleDescription?: StringNullableFilter<"ExtractionResultFlat"> | string | null
     fabricArticleNumber?: StringNullableFilter<"ExtractionResultFlat"> | string | null
@@ -85828,11 +93126,16 @@ export namespace Prisma {
     cmpCost?: SortOrderInput | SortOrder
     fabCost?: SortOrderInput | SortOrder
     fabCons?: SortOrderInput | SortOrder
-    width?: SortOrderInput | SortOrder
+    autoBgt?: SortOrderInput | SortOrder
+    roughV2?: SortOrderInput | SortOrder
     vendorFabricRate?: SortOrderInput | SortOrder
-    valueAddAccCostType?: SortOrderInput | SortOrder
-    valueAddCost?: SortOrderInput | SortOrder
-    valueAddProcessCost?: SortOrderInput | SortOrder
+    finalCost?: SortOrderInput | SortOrder
+    roughRatio?: SortOrderInput | SortOrder
+    roughConsumptionKg?: SortOrderInput | SortOrder
+    roughConsumptionMeter?: SortOrderInput | SortOrder
+    preciseRatio?: SortOrderInput | SortOrder
+    preciseConsumptionKg?: SortOrderInput | SortOrder
+    preciseConsumptionMeter?: SortOrderInput | SortOrder
     bodyArticle?: SortOrderInput | SortOrder
     bodyArticleDescription?: SortOrderInput | SortOrder
     fabricArticleNumber?: SortOrderInput | SortOrder
@@ -85988,11 +93291,16 @@ export namespace Prisma {
     cmpCost?: DecimalNullableFilter<"ExtractionResultFlat"> | Decimal | DecimalJsLike | number | string | null
     fabCost?: DecimalNullableFilter<"ExtractionResultFlat"> | Decimal | DecimalJsLike | number | string | null
     fabCons?: DecimalNullableFilter<"ExtractionResultFlat"> | Decimal | DecimalJsLike | number | string | null
-    width?: DecimalNullableFilter<"ExtractionResultFlat"> | Decimal | DecimalJsLike | number | string | null
+    autoBgt?: DecimalNullableFilter<"ExtractionResultFlat"> | Decimal | DecimalJsLike | number | string | null
+    roughV2?: DecimalNullableFilter<"ExtractionResultFlat"> | Decimal | DecimalJsLike | number | string | null
     vendorFabricRate?: DecimalNullableFilter<"ExtractionResultFlat"> | Decimal | DecimalJsLike | number | string | null
-    valueAddAccCostType?: StringNullableFilter<"ExtractionResultFlat"> | string | null
-    valueAddCost?: DecimalNullableFilter<"ExtractionResultFlat"> | Decimal | DecimalJsLike | number | string | null
-    valueAddProcessCost?: DecimalNullableFilter<"ExtractionResultFlat"> | Decimal | DecimalJsLike | number | string | null
+    finalCost?: DecimalNullableFilter<"ExtractionResultFlat"> | Decimal | DecimalJsLike | number | string | null
+    roughRatio?: DecimalNullableFilter<"ExtractionResultFlat"> | Decimal | DecimalJsLike | number | string | null
+    roughConsumptionKg?: DecimalNullableFilter<"ExtractionResultFlat"> | Decimal | DecimalJsLike | number | string | null
+    roughConsumptionMeter?: DecimalNullableFilter<"ExtractionResultFlat"> | Decimal | DecimalJsLike | number | string | null
+    preciseRatio?: DecimalNullableFilter<"ExtractionResultFlat"> | Decimal | DecimalJsLike | number | string | null
+    preciseConsumptionKg?: DecimalNullableFilter<"ExtractionResultFlat"> | Decimal | DecimalJsLike | number | string | null
+    preciseConsumptionMeter?: DecimalNullableFilter<"ExtractionResultFlat"> | Decimal | DecimalJsLike | number | string | null
     bodyArticle?: StringNullableFilter<"ExtractionResultFlat"> | string | null
     bodyArticleDescription?: StringNullableFilter<"ExtractionResultFlat"> | string | null
     fabricArticleNumber?: StringNullableFilter<"ExtractionResultFlat"> | string | null
@@ -86142,11 +93450,16 @@ export namespace Prisma {
     cmpCost?: SortOrderInput | SortOrder
     fabCost?: SortOrderInput | SortOrder
     fabCons?: SortOrderInput | SortOrder
-    width?: SortOrderInput | SortOrder
+    autoBgt?: SortOrderInput | SortOrder
+    roughV2?: SortOrderInput | SortOrder
     vendorFabricRate?: SortOrderInput | SortOrder
-    valueAddAccCostType?: SortOrderInput | SortOrder
-    valueAddCost?: SortOrderInput | SortOrder
-    valueAddProcessCost?: SortOrderInput | SortOrder
+    finalCost?: SortOrderInput | SortOrder
+    roughRatio?: SortOrderInput | SortOrder
+    roughConsumptionKg?: SortOrderInput | SortOrder
+    roughConsumptionMeter?: SortOrderInput | SortOrder
+    preciseRatio?: SortOrderInput | SortOrder
+    preciseConsumptionKg?: SortOrderInput | SortOrder
+    preciseConsumptionMeter?: SortOrderInput | SortOrder
     bodyArticle?: SortOrderInput | SortOrder
     bodyArticleDescription?: SortOrderInput | SortOrder
     fabricArticleNumber?: SortOrderInput | SortOrder
@@ -86300,11 +93613,16 @@ export namespace Prisma {
     cmpCost?: DecimalNullableWithAggregatesFilter<"ExtractionResultFlat"> | Decimal | DecimalJsLike | number | string | null
     fabCost?: DecimalNullableWithAggregatesFilter<"ExtractionResultFlat"> | Decimal | DecimalJsLike | number | string | null
     fabCons?: DecimalNullableWithAggregatesFilter<"ExtractionResultFlat"> | Decimal | DecimalJsLike | number | string | null
-    width?: DecimalNullableWithAggregatesFilter<"ExtractionResultFlat"> | Decimal | DecimalJsLike | number | string | null
+    autoBgt?: DecimalNullableWithAggregatesFilter<"ExtractionResultFlat"> | Decimal | DecimalJsLike | number | string | null
+    roughV2?: DecimalNullableWithAggregatesFilter<"ExtractionResultFlat"> | Decimal | DecimalJsLike | number | string | null
     vendorFabricRate?: DecimalNullableWithAggregatesFilter<"ExtractionResultFlat"> | Decimal | DecimalJsLike | number | string | null
-    valueAddAccCostType?: StringNullableWithAggregatesFilter<"ExtractionResultFlat"> | string | null
-    valueAddCost?: DecimalNullableWithAggregatesFilter<"ExtractionResultFlat"> | Decimal | DecimalJsLike | number | string | null
-    valueAddProcessCost?: DecimalNullableWithAggregatesFilter<"ExtractionResultFlat"> | Decimal | DecimalJsLike | number | string | null
+    finalCost?: DecimalNullableWithAggregatesFilter<"ExtractionResultFlat"> | Decimal | DecimalJsLike | number | string | null
+    roughRatio?: DecimalNullableWithAggregatesFilter<"ExtractionResultFlat"> | Decimal | DecimalJsLike | number | string | null
+    roughConsumptionKg?: DecimalNullableWithAggregatesFilter<"ExtractionResultFlat"> | Decimal | DecimalJsLike | number | string | null
+    roughConsumptionMeter?: DecimalNullableWithAggregatesFilter<"ExtractionResultFlat"> | Decimal | DecimalJsLike | number | string | null
+    preciseRatio?: DecimalNullableWithAggregatesFilter<"ExtractionResultFlat"> | Decimal | DecimalJsLike | number | string | null
+    preciseConsumptionKg?: DecimalNullableWithAggregatesFilter<"ExtractionResultFlat"> | Decimal | DecimalJsLike | number | string | null
+    preciseConsumptionMeter?: DecimalNullableWithAggregatesFilter<"ExtractionResultFlat"> | Decimal | DecimalJsLike | number | string | null
     bodyArticle?: StringNullableWithAggregatesFilter<"ExtractionResultFlat"> | string | null
     bodyArticleDescription?: StringNullableWithAggregatesFilter<"ExtractionResultFlat"> | string | null
     fabricArticleNumber?: StringNullableWithAggregatesFilter<"ExtractionResultFlat"> | string | null
@@ -90093,6 +97411,156 @@ export namespace Prisma {
     updatedAt?: DateTimeWithAggregatesFilter<"FabricArticleData"> | Date | string
   }
 
+  export type PreciseFabricArticleDataWhereInput = {
+    AND?: PreciseFabricArticleDataWhereInput | PreciseFabricArticleDataWhereInput[]
+    OR?: PreciseFabricArticleDataWhereInput[]
+    NOT?: PreciseFabricArticleDataWhereInput | PreciseFabricArticleDataWhereInput[]
+    id?: BigIntFilter<"PreciseFabricArticleData"> | bigint | number
+    fabricArticleNumber?: BigIntNullableFilter<"PreciseFabricArticleData"> | bigint | number | null
+    fabricArticleDescription?: StringNullableFilter<"PreciseFabricArticleData"> | string | null
+    division?: StringNullableFilter<"PreciseFabricArticleData"> | string | null
+    subDivision?: StringNullableFilter<"PreciseFabricArticleData"> | string | null
+    majorCategory?: StringNullableFilter<"PreciseFabricArticleData"> | string | null
+    vendorName?: StringNullableFilter<"PreciseFabricArticleData"> | string | null
+    vendorCode?: IntNullableFilter<"PreciseFabricArticleData"> | number | null
+    fabricRate?: DecimalNullableFilter<"PreciseFabricArticleData"> | Decimal | DecimalJsLike | number | string | null
+    mFabDiv?: StringNullableFilter<"PreciseFabricArticleData"> | string | null
+    mYarn?: StringNullableFilter<"PreciseFabricArticleData"> | string | null
+    mFabMainMvgr1?: StringNullableFilter<"PreciseFabricArticleData"> | string | null
+    mFabMainMvgr2?: StringNullableFilter<"PreciseFabricArticleData"> | string | null
+    mConstruction?: StringNullableFilter<"PreciseFabricArticleData"> | string | null
+    mOunz?: StringNullableFilter<"PreciseFabricArticleData"> | string | null
+    mWidth?: StringNullableFilter<"PreciseFabricArticleData"> | string | null
+    mWeave01?: StringNullableFilter<"PreciseFabricArticleData"> | string | null
+    mWeave02?: StringNullableFilter<"PreciseFabricArticleData"> | string | null
+    mCount?: StringNullableFilter<"PreciseFabricArticleData"> | string | null
+    mComposition?: StringNullableFilter<"PreciseFabricArticleData"> | string | null
+    mFinish?: StringNullableFilter<"PreciseFabricArticleData"> | string | null
+    mGsm?: StringNullableFilter<"PreciseFabricArticleData"> | string | null
+    mLycra?: StringNullableFilter<"PreciseFabricArticleData"> | string | null
+    createdAt?: DateTimeFilter<"PreciseFabricArticleData"> | Date | string
+  }
+
+  export type PreciseFabricArticleDataOrderByWithRelationInput = {
+    id?: SortOrder
+    fabricArticleNumber?: SortOrderInput | SortOrder
+    fabricArticleDescription?: SortOrderInput | SortOrder
+    division?: SortOrderInput | SortOrder
+    subDivision?: SortOrderInput | SortOrder
+    majorCategory?: SortOrderInput | SortOrder
+    vendorName?: SortOrderInput | SortOrder
+    vendorCode?: SortOrderInput | SortOrder
+    fabricRate?: SortOrderInput | SortOrder
+    mFabDiv?: SortOrderInput | SortOrder
+    mYarn?: SortOrderInput | SortOrder
+    mFabMainMvgr1?: SortOrderInput | SortOrder
+    mFabMainMvgr2?: SortOrderInput | SortOrder
+    mConstruction?: SortOrderInput | SortOrder
+    mOunz?: SortOrderInput | SortOrder
+    mWidth?: SortOrderInput | SortOrder
+    mWeave01?: SortOrderInput | SortOrder
+    mWeave02?: SortOrderInput | SortOrder
+    mCount?: SortOrderInput | SortOrder
+    mComposition?: SortOrderInput | SortOrder
+    mFinish?: SortOrderInput | SortOrder
+    mGsm?: SortOrderInput | SortOrder
+    mLycra?: SortOrderInput | SortOrder
+    createdAt?: SortOrder
+    _relevance?: PreciseFabricArticleDataOrderByRelevanceInput
+  }
+
+  export type PreciseFabricArticleDataWhereUniqueInput = Prisma.AtLeast<{
+    id?: bigint | number
+    AND?: PreciseFabricArticleDataWhereInput | PreciseFabricArticleDataWhereInput[]
+    OR?: PreciseFabricArticleDataWhereInput[]
+    NOT?: PreciseFabricArticleDataWhereInput | PreciseFabricArticleDataWhereInput[]
+    fabricArticleNumber?: BigIntNullableFilter<"PreciseFabricArticleData"> | bigint | number | null
+    fabricArticleDescription?: StringNullableFilter<"PreciseFabricArticleData"> | string | null
+    division?: StringNullableFilter<"PreciseFabricArticleData"> | string | null
+    subDivision?: StringNullableFilter<"PreciseFabricArticleData"> | string | null
+    majorCategory?: StringNullableFilter<"PreciseFabricArticleData"> | string | null
+    vendorName?: StringNullableFilter<"PreciseFabricArticleData"> | string | null
+    vendorCode?: IntNullableFilter<"PreciseFabricArticleData"> | number | null
+    fabricRate?: DecimalNullableFilter<"PreciseFabricArticleData"> | Decimal | DecimalJsLike | number | string | null
+    mFabDiv?: StringNullableFilter<"PreciseFabricArticleData"> | string | null
+    mYarn?: StringNullableFilter<"PreciseFabricArticleData"> | string | null
+    mFabMainMvgr1?: StringNullableFilter<"PreciseFabricArticleData"> | string | null
+    mFabMainMvgr2?: StringNullableFilter<"PreciseFabricArticleData"> | string | null
+    mConstruction?: StringNullableFilter<"PreciseFabricArticleData"> | string | null
+    mOunz?: StringNullableFilter<"PreciseFabricArticleData"> | string | null
+    mWidth?: StringNullableFilter<"PreciseFabricArticleData"> | string | null
+    mWeave01?: StringNullableFilter<"PreciseFabricArticleData"> | string | null
+    mWeave02?: StringNullableFilter<"PreciseFabricArticleData"> | string | null
+    mCount?: StringNullableFilter<"PreciseFabricArticleData"> | string | null
+    mComposition?: StringNullableFilter<"PreciseFabricArticleData"> | string | null
+    mFinish?: StringNullableFilter<"PreciseFabricArticleData"> | string | null
+    mGsm?: StringNullableFilter<"PreciseFabricArticleData"> | string | null
+    mLycra?: StringNullableFilter<"PreciseFabricArticleData"> | string | null
+    createdAt?: DateTimeFilter<"PreciseFabricArticleData"> | Date | string
+  }, "id">
+
+  export type PreciseFabricArticleDataOrderByWithAggregationInput = {
+    id?: SortOrder
+    fabricArticleNumber?: SortOrderInput | SortOrder
+    fabricArticleDescription?: SortOrderInput | SortOrder
+    division?: SortOrderInput | SortOrder
+    subDivision?: SortOrderInput | SortOrder
+    majorCategory?: SortOrderInput | SortOrder
+    vendorName?: SortOrderInput | SortOrder
+    vendorCode?: SortOrderInput | SortOrder
+    fabricRate?: SortOrderInput | SortOrder
+    mFabDiv?: SortOrderInput | SortOrder
+    mYarn?: SortOrderInput | SortOrder
+    mFabMainMvgr1?: SortOrderInput | SortOrder
+    mFabMainMvgr2?: SortOrderInput | SortOrder
+    mConstruction?: SortOrderInput | SortOrder
+    mOunz?: SortOrderInput | SortOrder
+    mWidth?: SortOrderInput | SortOrder
+    mWeave01?: SortOrderInput | SortOrder
+    mWeave02?: SortOrderInput | SortOrder
+    mCount?: SortOrderInput | SortOrder
+    mComposition?: SortOrderInput | SortOrder
+    mFinish?: SortOrderInput | SortOrder
+    mGsm?: SortOrderInput | SortOrder
+    mLycra?: SortOrderInput | SortOrder
+    createdAt?: SortOrder
+    _count?: PreciseFabricArticleDataCountOrderByAggregateInput
+    _avg?: PreciseFabricArticleDataAvgOrderByAggregateInput
+    _max?: PreciseFabricArticleDataMaxOrderByAggregateInput
+    _min?: PreciseFabricArticleDataMinOrderByAggregateInput
+    _sum?: PreciseFabricArticleDataSumOrderByAggregateInput
+  }
+
+  export type PreciseFabricArticleDataScalarWhereWithAggregatesInput = {
+    AND?: PreciseFabricArticleDataScalarWhereWithAggregatesInput | PreciseFabricArticleDataScalarWhereWithAggregatesInput[]
+    OR?: PreciseFabricArticleDataScalarWhereWithAggregatesInput[]
+    NOT?: PreciseFabricArticleDataScalarWhereWithAggregatesInput | PreciseFabricArticleDataScalarWhereWithAggregatesInput[]
+    id?: BigIntWithAggregatesFilter<"PreciseFabricArticleData"> | bigint | number
+    fabricArticleNumber?: BigIntNullableWithAggregatesFilter<"PreciseFabricArticleData"> | bigint | number | null
+    fabricArticleDescription?: StringNullableWithAggregatesFilter<"PreciseFabricArticleData"> | string | null
+    division?: StringNullableWithAggregatesFilter<"PreciseFabricArticleData"> | string | null
+    subDivision?: StringNullableWithAggregatesFilter<"PreciseFabricArticleData"> | string | null
+    majorCategory?: StringNullableWithAggregatesFilter<"PreciseFabricArticleData"> | string | null
+    vendorName?: StringNullableWithAggregatesFilter<"PreciseFabricArticleData"> | string | null
+    vendorCode?: IntNullableWithAggregatesFilter<"PreciseFabricArticleData"> | number | null
+    fabricRate?: DecimalNullableWithAggregatesFilter<"PreciseFabricArticleData"> | Decimal | DecimalJsLike | number | string | null
+    mFabDiv?: StringNullableWithAggregatesFilter<"PreciseFabricArticleData"> | string | null
+    mYarn?: StringNullableWithAggregatesFilter<"PreciseFabricArticleData"> | string | null
+    mFabMainMvgr1?: StringNullableWithAggregatesFilter<"PreciseFabricArticleData"> | string | null
+    mFabMainMvgr2?: StringNullableWithAggregatesFilter<"PreciseFabricArticleData"> | string | null
+    mConstruction?: StringNullableWithAggregatesFilter<"PreciseFabricArticleData"> | string | null
+    mOunz?: StringNullableWithAggregatesFilter<"PreciseFabricArticleData"> | string | null
+    mWidth?: StringNullableWithAggregatesFilter<"PreciseFabricArticleData"> | string | null
+    mWeave01?: StringNullableWithAggregatesFilter<"PreciseFabricArticleData"> | string | null
+    mWeave02?: StringNullableWithAggregatesFilter<"PreciseFabricArticleData"> | string | null
+    mCount?: StringNullableWithAggregatesFilter<"PreciseFabricArticleData"> | string | null
+    mComposition?: StringNullableWithAggregatesFilter<"PreciseFabricArticleData"> | string | null
+    mFinish?: StringNullableWithAggregatesFilter<"PreciseFabricArticleData"> | string | null
+    mGsm?: StringNullableWithAggregatesFilter<"PreciseFabricArticleData"> | string | null
+    mLycra?: StringNullableWithAggregatesFilter<"PreciseFabricArticleData"> | string | null
+    createdAt?: DateTimeWithAggregatesFilter<"PreciseFabricArticleData"> | Date | string
+  }
+
   export type GmArticleDataWhereInput = {
     AND?: GmArticleDataWhereInput | GmArticleDataWhereInput[]
     OR?: GmArticleDataWhereInput[]
@@ -91286,9 +98754,7 @@ export namespace Prisma {
     fabCost?: DecimalNullableFilter<"BodyArticleData"> | Decimal | DecimalJsLike | number | string | null
     fabCons?: DecimalNullableFilter<"BodyArticleData"> | Decimal | DecimalJsLike | number | string | null
     width?: DecimalNullableFilter<"BodyArticleData"> | Decimal | DecimalJsLike | number | string | null
-    basicTrimCost?: DecimalNullableFilter<"BodyArticleData"> | Decimal | DecimalJsLike | number | string | null
     roughCmpCost?: DecimalNullableFilter<"BodyArticleData"> | Decimal | DecimalJsLike | number | string | null
-    costingType?: StringNullableFilter<"BodyArticleData"> | string | null
     bodyConsumptionType?: StringNullableFilter<"BodyArticleData"> | string | null
     gsm?: DecimalNullableFilter<"BodyArticleData"> | Decimal | DecimalJsLike | number | string | null
     ratio?: DecimalNullableFilter<"BodyArticleData"> | Decimal | DecimalJsLike | number | string | null
@@ -91350,9 +98816,7 @@ export namespace Prisma {
     fabCost?: SortOrderInput | SortOrder
     fabCons?: SortOrderInput | SortOrder
     width?: SortOrderInput | SortOrder
-    basicTrimCost?: SortOrderInput | SortOrder
     roughCmpCost?: SortOrderInput | SortOrder
-    costingType?: SortOrderInput | SortOrder
     bodyConsumptionType?: SortOrderInput | SortOrder
     gsm?: SortOrderInput | SortOrder
     ratio?: SortOrderInput | SortOrder
@@ -91418,9 +98882,7 @@ export namespace Prisma {
     fabCost?: DecimalNullableFilter<"BodyArticleData"> | Decimal | DecimalJsLike | number | string | null
     fabCons?: DecimalNullableFilter<"BodyArticleData"> | Decimal | DecimalJsLike | number | string | null
     width?: DecimalNullableFilter<"BodyArticleData"> | Decimal | DecimalJsLike | number | string | null
-    basicTrimCost?: DecimalNullableFilter<"BodyArticleData"> | Decimal | DecimalJsLike | number | string | null
     roughCmpCost?: DecimalNullableFilter<"BodyArticleData"> | Decimal | DecimalJsLike | number | string | null
-    costingType?: StringNullableFilter<"BodyArticleData"> | string | null
     bodyConsumptionType?: StringNullableFilter<"BodyArticleData"> | string | null
     gsm?: DecimalNullableFilter<"BodyArticleData"> | Decimal | DecimalJsLike | number | string | null
     ratio?: DecimalNullableFilter<"BodyArticleData"> | Decimal | DecimalJsLike | number | string | null
@@ -91482,9 +98944,7 @@ export namespace Prisma {
     fabCost?: SortOrderInput | SortOrder
     fabCons?: SortOrderInput | SortOrder
     width?: SortOrderInput | SortOrder
-    basicTrimCost?: SortOrderInput | SortOrder
     roughCmpCost?: SortOrderInput | SortOrder
-    costingType?: SortOrderInput | SortOrder
     bodyConsumptionType?: SortOrderInput | SortOrder
     gsm?: SortOrderInput | SortOrder
     ratio?: SortOrderInput | SortOrder
@@ -91554,9 +99014,7 @@ export namespace Prisma {
     fabCost?: DecimalNullableWithAggregatesFilter<"BodyArticleData"> | Decimal | DecimalJsLike | number | string | null
     fabCons?: DecimalNullableWithAggregatesFilter<"BodyArticleData"> | Decimal | DecimalJsLike | number | string | null
     width?: DecimalNullableWithAggregatesFilter<"BodyArticleData"> | Decimal | DecimalJsLike | number | string | null
-    basicTrimCost?: DecimalNullableWithAggregatesFilter<"BodyArticleData"> | Decimal | DecimalJsLike | number | string | null
     roughCmpCost?: DecimalNullableWithAggregatesFilter<"BodyArticleData"> | Decimal | DecimalJsLike | number | string | null
-    costingType?: StringNullableWithAggregatesFilter<"BodyArticleData"> | string | null
     bodyConsumptionType?: StringNullableWithAggregatesFilter<"BodyArticleData"> | string | null
     gsm?: DecimalNullableWithAggregatesFilter<"BodyArticleData"> | Decimal | DecimalJsLike | number | string | null
     ratio?: DecimalNullableWithAggregatesFilter<"BodyArticleData"> | Decimal | DecimalJsLike | number | string | null
@@ -92112,6 +99570,72 @@ export namespace Prisma {
     basicTrimsCost?: DecimalNullableWithAggregatesFilter<"BasicTrimCostMaster"> | Decimal | DecimalJsLike | number | string | null
     createdAt?: DateTimeWithAggregatesFilter<"BasicTrimCostMaster"> | Date | string
     updatedAt?: DateTimeWithAggregatesFilter<"BasicTrimCostMaster"> | Date | string
+  }
+
+  export type PreciseTrimMasterWhereInput = {
+    AND?: PreciseTrimMasterWhereInput | PreciseTrimMasterWhereInput[]
+    OR?: PreciseTrimMasterWhereInput[]
+    NOT?: PreciseTrimMasterWhereInput | PreciseTrimMasterWhereInput[]
+    id?: IntFilter<"PreciseTrimMaster"> | number
+    attributeName?: StringFilter<"PreciseTrimMaster"> | string
+    type?: StringFilter<"PreciseTrimMaster"> | string
+    bt1?: DecimalNullableFilter<"PreciseTrimMaster"> | Decimal | DecimalJsLike | number | string | null
+    bt2?: DecimalNullableFilter<"PreciseTrimMaster"> | Decimal | DecimalJsLike | number | string | null
+    createdAt?: DateTimeFilter<"PreciseTrimMaster"> | Date | string
+    updatedAt?: DateTimeFilter<"PreciseTrimMaster"> | Date | string
+  }
+
+  export type PreciseTrimMasterOrderByWithRelationInput = {
+    id?: SortOrder
+    attributeName?: SortOrder
+    type?: SortOrder
+    bt1?: SortOrderInput | SortOrder
+    bt2?: SortOrderInput | SortOrder
+    createdAt?: SortOrder
+    updatedAt?: SortOrder
+    _relevance?: PreciseTrimMasterOrderByRelevanceInput
+  }
+
+  export type PreciseTrimMasterWhereUniqueInput = Prisma.AtLeast<{
+    id?: number
+    attributeName_type?: PreciseTrimMasterAttributeNameTypeCompoundUniqueInput
+    AND?: PreciseTrimMasterWhereInput | PreciseTrimMasterWhereInput[]
+    OR?: PreciseTrimMasterWhereInput[]
+    NOT?: PreciseTrimMasterWhereInput | PreciseTrimMasterWhereInput[]
+    attributeName?: StringFilter<"PreciseTrimMaster"> | string
+    type?: StringFilter<"PreciseTrimMaster"> | string
+    bt1?: DecimalNullableFilter<"PreciseTrimMaster"> | Decimal | DecimalJsLike | number | string | null
+    bt2?: DecimalNullableFilter<"PreciseTrimMaster"> | Decimal | DecimalJsLike | number | string | null
+    createdAt?: DateTimeFilter<"PreciseTrimMaster"> | Date | string
+    updatedAt?: DateTimeFilter<"PreciseTrimMaster"> | Date | string
+  }, "id" | "attributeName_type">
+
+  export type PreciseTrimMasterOrderByWithAggregationInput = {
+    id?: SortOrder
+    attributeName?: SortOrder
+    type?: SortOrder
+    bt1?: SortOrderInput | SortOrder
+    bt2?: SortOrderInput | SortOrder
+    createdAt?: SortOrder
+    updatedAt?: SortOrder
+    _count?: PreciseTrimMasterCountOrderByAggregateInput
+    _avg?: PreciseTrimMasterAvgOrderByAggregateInput
+    _max?: PreciseTrimMasterMaxOrderByAggregateInput
+    _min?: PreciseTrimMasterMinOrderByAggregateInput
+    _sum?: PreciseTrimMasterSumOrderByAggregateInput
+  }
+
+  export type PreciseTrimMasterScalarWhereWithAggregatesInput = {
+    AND?: PreciseTrimMasterScalarWhereWithAggregatesInput | PreciseTrimMasterScalarWhereWithAggregatesInput[]
+    OR?: PreciseTrimMasterScalarWhereWithAggregatesInput[]
+    NOT?: PreciseTrimMasterScalarWhereWithAggregatesInput | PreciseTrimMasterScalarWhereWithAggregatesInput[]
+    id?: IntWithAggregatesFilter<"PreciseTrimMaster"> | number
+    attributeName?: StringWithAggregatesFilter<"PreciseTrimMaster"> | string
+    type?: StringWithAggregatesFilter<"PreciseTrimMaster"> | string
+    bt1?: DecimalNullableWithAggregatesFilter<"PreciseTrimMaster"> | Decimal | DecimalJsLike | number | string | null
+    bt2?: DecimalNullableWithAggregatesFilter<"PreciseTrimMaster"> | Decimal | DecimalJsLike | number | string | null
+    createdAt?: DateTimeWithAggregatesFilter<"PreciseTrimMaster"> | Date | string
+    updatedAt?: DateTimeWithAggregatesFilter<"PreciseTrimMaster"> | Date | string
   }
 
   export type BasicTrimCostComponentWhereInput = {
@@ -92759,6 +100283,522 @@ export namespace Prisma {
     comment?: StringNullableWithAggregatesFilter<"ExpenseAuditLog"> | string | null
     details?: JsonNullableWithAggregatesFilter<"ExpenseAuditLog">
     occurredAt?: DateTimeWithAggregatesFilter<"ExpenseAuditLog"> | Date | string
+  }
+
+  export type BodyArticleDescriptionFormateWhereInput = {
+    AND?: BodyArticleDescriptionFormateWhereInput | BodyArticleDescriptionFormateWhereInput[]
+    OR?: BodyArticleDescriptionFormateWhereInput[]
+    NOT?: BodyArticleDescriptionFormateWhereInput | BodyArticleDescriptionFormateWhereInput[]
+    id?: IntFilter<"BodyArticleDescriptionFormate"> | number
+    fgMajCat?: StringFilter<"BodyArticleDescriptionFormate"> | string
+    attributesMajCat?: StringFilter<"BodyArticleDescriptionFormate"> | string
+    frGridStatus?: StringFilter<"BodyArticleDescriptionFormate"> | string
+    createdAt?: DateTimeFilter<"BodyArticleDescriptionFormate"> | Date | string
+    updatedAt?: DateTimeFilter<"BodyArticleDescriptionFormate"> | Date | string
+  }
+
+  export type BodyArticleDescriptionFormateOrderByWithRelationInput = {
+    id?: SortOrder
+    fgMajCat?: SortOrder
+    attributesMajCat?: SortOrder
+    frGridStatus?: SortOrder
+    createdAt?: SortOrder
+    updatedAt?: SortOrder
+    _relevance?: BodyArticleDescriptionFormateOrderByRelevanceInput
+  }
+
+  export type BodyArticleDescriptionFormateWhereUniqueInput = Prisma.AtLeast<{
+    id?: number
+    fgMajCat_attributesMajCat?: BodyArticleDescriptionFormateFgMajCatAttributesMajCatCompoundUniqueInput
+    AND?: BodyArticleDescriptionFormateWhereInput | BodyArticleDescriptionFormateWhereInput[]
+    OR?: BodyArticleDescriptionFormateWhereInput[]
+    NOT?: BodyArticleDescriptionFormateWhereInput | BodyArticleDescriptionFormateWhereInput[]
+    fgMajCat?: StringFilter<"BodyArticleDescriptionFormate"> | string
+    attributesMajCat?: StringFilter<"BodyArticleDescriptionFormate"> | string
+    frGridStatus?: StringFilter<"BodyArticleDescriptionFormate"> | string
+    createdAt?: DateTimeFilter<"BodyArticleDescriptionFormate"> | Date | string
+    updatedAt?: DateTimeFilter<"BodyArticleDescriptionFormate"> | Date | string
+  }, "id" | "fgMajCat_attributesMajCat">
+
+  export type BodyArticleDescriptionFormateOrderByWithAggregationInput = {
+    id?: SortOrder
+    fgMajCat?: SortOrder
+    attributesMajCat?: SortOrder
+    frGridStatus?: SortOrder
+    createdAt?: SortOrder
+    updatedAt?: SortOrder
+    _count?: BodyArticleDescriptionFormateCountOrderByAggregateInput
+    _avg?: BodyArticleDescriptionFormateAvgOrderByAggregateInput
+    _max?: BodyArticleDescriptionFormateMaxOrderByAggregateInput
+    _min?: BodyArticleDescriptionFormateMinOrderByAggregateInput
+    _sum?: BodyArticleDescriptionFormateSumOrderByAggregateInput
+  }
+
+  export type BodyArticleDescriptionFormateScalarWhereWithAggregatesInput = {
+    AND?: BodyArticleDescriptionFormateScalarWhereWithAggregatesInput | BodyArticleDescriptionFormateScalarWhereWithAggregatesInput[]
+    OR?: BodyArticleDescriptionFormateScalarWhereWithAggregatesInput[]
+    NOT?: BodyArticleDescriptionFormateScalarWhereWithAggregatesInput | BodyArticleDescriptionFormateScalarWhereWithAggregatesInput[]
+    id?: IntWithAggregatesFilter<"BodyArticleDescriptionFormate"> | number
+    fgMajCat?: StringWithAggregatesFilter<"BodyArticleDescriptionFormate"> | string
+    attributesMajCat?: StringWithAggregatesFilter<"BodyArticleDescriptionFormate"> | string
+    frGridStatus?: StringWithAggregatesFilter<"BodyArticleDescriptionFormate"> | string
+    createdAt?: DateTimeWithAggregatesFilter<"BodyArticleDescriptionFormate"> | Date | string
+    updatedAt?: DateTimeWithAggregatesFilter<"BodyArticleDescriptionFormate"> | Date | string
+  }
+
+  export type GmArticleDescriptionFormateWhereInput = {
+    AND?: GmArticleDescriptionFormateWhereInput | GmArticleDescriptionFormateWhereInput[]
+    OR?: GmArticleDescriptionFormateWhereInput[]
+    NOT?: GmArticleDescriptionFormateWhereInput | GmArticleDescriptionFormateWhereInput[]
+    id?: IntFilter<"GmArticleDescriptionFormate"> | number
+    key?: StringFilter<"GmArticleDescriptionFormate"> | string
+    archetypeNm?: StringFilter<"GmArticleDescriptionFormate"> | string
+    descSeq?: StringFilter<"GmArticleDescriptionFormate"> | string
+    familyCode?: StringFilter<"GmArticleDescriptionFormate"> | string
+    familyName?: StringFilter<"GmArticleDescriptionFormate"> | string
+    createdAt?: DateTimeFilter<"GmArticleDescriptionFormate"> | Date | string
+    updatedAt?: DateTimeFilter<"GmArticleDescriptionFormate"> | Date | string
+  }
+
+  export type GmArticleDescriptionFormateOrderByWithRelationInput = {
+    id?: SortOrder
+    key?: SortOrder
+    archetypeNm?: SortOrder
+    descSeq?: SortOrder
+    familyCode?: SortOrder
+    familyName?: SortOrder
+    createdAt?: SortOrder
+    updatedAt?: SortOrder
+    _relevance?: GmArticleDescriptionFormateOrderByRelevanceInput
+  }
+
+  export type GmArticleDescriptionFormateWhereUniqueInput = Prisma.AtLeast<{
+    id?: number
+    key?: string
+    AND?: GmArticleDescriptionFormateWhereInput | GmArticleDescriptionFormateWhereInput[]
+    OR?: GmArticleDescriptionFormateWhereInput[]
+    NOT?: GmArticleDescriptionFormateWhereInput | GmArticleDescriptionFormateWhereInput[]
+    archetypeNm?: StringFilter<"GmArticleDescriptionFormate"> | string
+    descSeq?: StringFilter<"GmArticleDescriptionFormate"> | string
+    familyCode?: StringFilter<"GmArticleDescriptionFormate"> | string
+    familyName?: StringFilter<"GmArticleDescriptionFormate"> | string
+    createdAt?: DateTimeFilter<"GmArticleDescriptionFormate"> | Date | string
+    updatedAt?: DateTimeFilter<"GmArticleDescriptionFormate"> | Date | string
+  }, "id" | "key">
+
+  export type GmArticleDescriptionFormateOrderByWithAggregationInput = {
+    id?: SortOrder
+    key?: SortOrder
+    archetypeNm?: SortOrder
+    descSeq?: SortOrder
+    familyCode?: SortOrder
+    familyName?: SortOrder
+    createdAt?: SortOrder
+    updatedAt?: SortOrder
+    _count?: GmArticleDescriptionFormateCountOrderByAggregateInput
+    _avg?: GmArticleDescriptionFormateAvgOrderByAggregateInput
+    _max?: GmArticleDescriptionFormateMaxOrderByAggregateInput
+    _min?: GmArticleDescriptionFormateMinOrderByAggregateInput
+    _sum?: GmArticleDescriptionFormateSumOrderByAggregateInput
+  }
+
+  export type GmArticleDescriptionFormateScalarWhereWithAggregatesInput = {
+    AND?: GmArticleDescriptionFormateScalarWhereWithAggregatesInput | GmArticleDescriptionFormateScalarWhereWithAggregatesInput[]
+    OR?: GmArticleDescriptionFormateScalarWhereWithAggregatesInput[]
+    NOT?: GmArticleDescriptionFormateScalarWhereWithAggregatesInput | GmArticleDescriptionFormateScalarWhereWithAggregatesInput[]
+    id?: IntWithAggregatesFilter<"GmArticleDescriptionFormate"> | number
+    key?: StringWithAggregatesFilter<"GmArticleDescriptionFormate"> | string
+    archetypeNm?: StringWithAggregatesFilter<"GmArticleDescriptionFormate"> | string
+    descSeq?: StringWithAggregatesFilter<"GmArticleDescriptionFormate"> | string
+    familyCode?: StringWithAggregatesFilter<"GmArticleDescriptionFormate"> | string
+    familyName?: StringWithAggregatesFilter<"GmArticleDescriptionFormate"> | string
+    createdAt?: DateTimeWithAggregatesFilter<"GmArticleDescriptionFormate"> | Date | string
+    updatedAt?: DateTimeWithAggregatesFilter<"GmArticleDescriptionFormate"> | Date | string
+  }
+
+  export type PreciseBodyArticleConsumptionWhereInput = {
+    AND?: PreciseBodyArticleConsumptionWhereInput | PreciseBodyArticleConsumptionWhereInput[]
+    OR?: PreciseBodyArticleConsumptionWhereInput[]
+    NOT?: PreciseBodyArticleConsumptionWhereInput | PreciseBodyArticleConsumptionWhereInput[]
+    id?: IntFilter<"PreciseBodyArticleConsumption"> | number
+    division?: StringFilter<"PreciseBodyArticleConsumption"> | string
+    subDivision?: StringFilter<"PreciseBodyArticleConsumption"> | string
+    majorCategory?: StringFilter<"PreciseBodyArticleConsumption"> | string
+    macroBodyDescription?: StringFilter<"PreciseBodyArticleConsumption"> | string
+    microBodyArticleNumber?: StringFilter<"PreciseBodyArticleConsumption"> | string
+    mNeckType?: StringNullableFilter<"PreciseBodyArticleConsumption"> | string | null
+    mNeckStyle?: StringNullableFilter<"PreciseBodyArticleConsumption"> | string | null
+    mCollarType?: StringNullableFilter<"PreciseBodyArticleConsumption"> | string | null
+    mCollarStyle?: StringNullableFilter<"PreciseBodyArticleConsumption"> | string | null
+    mSleevesMainStyle?: StringNullableFilter<"PreciseBodyArticleConsumption"> | string | null
+    mSleeveFold?: StringNullableFilter<"PreciseBodyArticleConsumption"> | string | null
+    mPlacket?: StringNullableFilter<"PreciseBodyArticleConsumption"> | string | null
+    mBltType?: StringNullableFilter<"PreciseBodyArticleConsumption"> | string | null
+    mBltStyle?: StringNullableFilter<"PreciseBodyArticleConsumption"> | string | null
+    mBtmFold?: StringNullableFilter<"PreciseBodyArticleConsumption"> | string | null
+    mPocket?: StringNullableFilter<"PreciseBodyArticleConsumption"> | string | null
+    mNoOfPocket?: StringNullableFilter<"PreciseBodyArticleConsumption"> | string | null
+    mExtraPocket?: StringNullableFilter<"PreciseBodyArticleConsumption"> | string | null
+    mLength?: StringNullableFilter<"PreciseBodyArticleConsumption"> | string | null
+    mFit?: StringNullableFilter<"PreciseBodyArticleConsumption"> | string | null
+    bodyStyle?: StringNullableFilter<"PreciseBodyArticleConsumption"> | string | null
+    cuttingValue?: DecimalNullableFilter<"PreciseBodyArticleConsumption"> | Decimal | DecimalJsLike | number | string | null
+    stitchingSam?: DecimalNullableFilter<"PreciseBodyArticleConsumption"> | Decimal | DecimalJsLike | number | string | null
+    samVal?: DecimalNullableFilter<"PreciseBodyArticleConsumption"> | Decimal | DecimalJsLike | number | string | null
+    stVal?: DecimalNullableFilter<"PreciseBodyArticleConsumption"> | Decimal | DecimalJsLike | number | string | null
+    ironingSam?: DecimalNullableFilter<"PreciseBodyArticleConsumption"> | Decimal | DecimalJsLike | number | string | null
+    finishingSam?: DecimalNullableFilter<"PreciseBodyArticleConsumption"> | Decimal | DecimalJsLike | number | string | null
+    finishigCost?: DecimalNullableFilter<"PreciseBodyArticleConsumption"> | Decimal | DecimalJsLike | number | string | null
+    totalCmpCost?: DecimalNullableFilter<"PreciseBodyArticleConsumption"> | Decimal | DecimalJsLike | number | string | null
+    width15?: DecimalNullableFilter<"PreciseBodyArticleConsumption"> | Decimal | DecimalJsLike | number | string | null
+    width16?: DecimalNullableFilter<"PreciseBodyArticleConsumption"> | Decimal | DecimalJsLike | number | string | null
+    width17?: DecimalNullableFilter<"PreciseBodyArticleConsumption"> | Decimal | DecimalJsLike | number | string | null
+    width18?: DecimalNullableFilter<"PreciseBodyArticleConsumption"> | Decimal | DecimalJsLike | number | string | null
+    width19?: DecimalNullableFilter<"PreciseBodyArticleConsumption"> | Decimal | DecimalJsLike | number | string | null
+    width42?: DecimalNullableFilter<"PreciseBodyArticleConsumption"> | Decimal | DecimalJsLike | number | string | null
+    width43?: DecimalNullableFilter<"PreciseBodyArticleConsumption"> | Decimal | DecimalJsLike | number | string | null
+    width44?: DecimalNullableFilter<"PreciseBodyArticleConsumption"> | Decimal | DecimalJsLike | number | string | null
+    width46?: DecimalNullableFilter<"PreciseBodyArticleConsumption"> | Decimal | DecimalJsLike | number | string | null
+    width48?: DecimalNullableFilter<"PreciseBodyArticleConsumption"> | Decimal | DecimalJsLike | number | string | null
+    width50?: DecimalNullableFilter<"PreciseBodyArticleConsumption"> | Decimal | DecimalJsLike | number | string | null
+    width53?: DecimalNullableFilter<"PreciseBodyArticleConsumption"> | Decimal | DecimalJsLike | number | string | null
+    width54?: DecimalNullableFilter<"PreciseBodyArticleConsumption"> | Decimal | DecimalJsLike | number | string | null
+    width55?: DecimalNullableFilter<"PreciseBodyArticleConsumption"> | Decimal | DecimalJsLike | number | string | null
+    width56?: DecimalNullableFilter<"PreciseBodyArticleConsumption"> | Decimal | DecimalJsLike | number | string | null
+    width57?: DecimalNullableFilter<"PreciseBodyArticleConsumption"> | Decimal | DecimalJsLike | number | string | null
+    width58?: DecimalNullableFilter<"PreciseBodyArticleConsumption"> | Decimal | DecimalJsLike | number | string | null
+    width59?: DecimalNullableFilter<"PreciseBodyArticleConsumption"> | Decimal | DecimalJsLike | number | string | null
+    width60?: DecimalNullableFilter<"PreciseBodyArticleConsumption"> | Decimal | DecimalJsLike | number | string | null
+    width61?: DecimalNullableFilter<"PreciseBodyArticleConsumption"> | Decimal | DecimalJsLike | number | string | null
+    width62?: DecimalNullableFilter<"PreciseBodyArticleConsumption"> | Decimal | DecimalJsLike | number | string | null
+    width63?: DecimalNullableFilter<"PreciseBodyArticleConsumption"> | Decimal | DecimalJsLike | number | string | null
+    width64?: DecimalNullableFilter<"PreciseBodyArticleConsumption"> | Decimal | DecimalJsLike | number | string | null
+    width65?: DecimalNullableFilter<"PreciseBodyArticleConsumption"> | Decimal | DecimalJsLike | number | string | null
+    width66?: DecimalNullableFilter<"PreciseBodyArticleConsumption"> | Decimal | DecimalJsLike | number | string | null
+    width67?: DecimalNullableFilter<"PreciseBodyArticleConsumption"> | Decimal | DecimalJsLike | number | string | null
+    width68?: DecimalNullableFilter<"PreciseBodyArticleConsumption"> | Decimal | DecimalJsLike | number | string | null
+    width69?: DecimalNullableFilter<"PreciseBodyArticleConsumption"> | Decimal | DecimalJsLike | number | string | null
+    width70?: DecimalNullableFilter<"PreciseBodyArticleConsumption"> | Decimal | DecimalJsLike | number | string | null
+    width71?: DecimalNullableFilter<"PreciseBodyArticleConsumption"> | Decimal | DecimalJsLike | number | string | null
+    width72?: DecimalNullableFilter<"PreciseBodyArticleConsumption"> | Decimal | DecimalJsLike | number | string | null
+    width73?: DecimalNullableFilter<"PreciseBodyArticleConsumption"> | Decimal | DecimalJsLike | number | string | null
+    width74?: DecimalNullableFilter<"PreciseBodyArticleConsumption"> | Decimal | DecimalJsLike | number | string | null
+    width76?: DecimalNullableFilter<"PreciseBodyArticleConsumption"> | Decimal | DecimalJsLike | number | string | null
+    width78?: DecimalNullableFilter<"PreciseBodyArticleConsumption"> | Decimal | DecimalJsLike | number | string | null
+    width82?: DecimalNullableFilter<"PreciseBodyArticleConsumption"> | Decimal | DecimalJsLike | number | string | null
+    width92?: DecimalNullableFilter<"PreciseBodyArticleConsumption"> | Decimal | DecimalJsLike | number | string | null
+    width94?: DecimalNullableFilter<"PreciseBodyArticleConsumption"> | Decimal | DecimalJsLike | number | string | null
+    width96?: DecimalNullableFilter<"PreciseBodyArticleConsumption"> | Decimal | DecimalJsLike | number | string | null
+    createdAt?: DateTimeFilter<"PreciseBodyArticleConsumption"> | Date | string
+    updatedAt?: DateTimeFilter<"PreciseBodyArticleConsumption"> | Date | string
+  }
+
+  export type PreciseBodyArticleConsumptionOrderByWithRelationInput = {
+    id?: SortOrder
+    division?: SortOrder
+    subDivision?: SortOrder
+    majorCategory?: SortOrder
+    macroBodyDescription?: SortOrder
+    microBodyArticleNumber?: SortOrder
+    mNeckType?: SortOrderInput | SortOrder
+    mNeckStyle?: SortOrderInput | SortOrder
+    mCollarType?: SortOrderInput | SortOrder
+    mCollarStyle?: SortOrderInput | SortOrder
+    mSleevesMainStyle?: SortOrderInput | SortOrder
+    mSleeveFold?: SortOrderInput | SortOrder
+    mPlacket?: SortOrderInput | SortOrder
+    mBltType?: SortOrderInput | SortOrder
+    mBltStyle?: SortOrderInput | SortOrder
+    mBtmFold?: SortOrderInput | SortOrder
+    mPocket?: SortOrderInput | SortOrder
+    mNoOfPocket?: SortOrderInput | SortOrder
+    mExtraPocket?: SortOrderInput | SortOrder
+    mLength?: SortOrderInput | SortOrder
+    mFit?: SortOrderInput | SortOrder
+    bodyStyle?: SortOrderInput | SortOrder
+    cuttingValue?: SortOrderInput | SortOrder
+    stitchingSam?: SortOrderInput | SortOrder
+    samVal?: SortOrderInput | SortOrder
+    stVal?: SortOrderInput | SortOrder
+    ironingSam?: SortOrderInput | SortOrder
+    finishingSam?: SortOrderInput | SortOrder
+    finishigCost?: SortOrderInput | SortOrder
+    totalCmpCost?: SortOrderInput | SortOrder
+    width15?: SortOrderInput | SortOrder
+    width16?: SortOrderInput | SortOrder
+    width17?: SortOrderInput | SortOrder
+    width18?: SortOrderInput | SortOrder
+    width19?: SortOrderInput | SortOrder
+    width42?: SortOrderInput | SortOrder
+    width43?: SortOrderInput | SortOrder
+    width44?: SortOrderInput | SortOrder
+    width46?: SortOrderInput | SortOrder
+    width48?: SortOrderInput | SortOrder
+    width50?: SortOrderInput | SortOrder
+    width53?: SortOrderInput | SortOrder
+    width54?: SortOrderInput | SortOrder
+    width55?: SortOrderInput | SortOrder
+    width56?: SortOrderInput | SortOrder
+    width57?: SortOrderInput | SortOrder
+    width58?: SortOrderInput | SortOrder
+    width59?: SortOrderInput | SortOrder
+    width60?: SortOrderInput | SortOrder
+    width61?: SortOrderInput | SortOrder
+    width62?: SortOrderInput | SortOrder
+    width63?: SortOrderInput | SortOrder
+    width64?: SortOrderInput | SortOrder
+    width65?: SortOrderInput | SortOrder
+    width66?: SortOrderInput | SortOrder
+    width67?: SortOrderInput | SortOrder
+    width68?: SortOrderInput | SortOrder
+    width69?: SortOrderInput | SortOrder
+    width70?: SortOrderInput | SortOrder
+    width71?: SortOrderInput | SortOrder
+    width72?: SortOrderInput | SortOrder
+    width73?: SortOrderInput | SortOrder
+    width74?: SortOrderInput | SortOrder
+    width76?: SortOrderInput | SortOrder
+    width78?: SortOrderInput | SortOrder
+    width82?: SortOrderInput | SortOrder
+    width92?: SortOrderInput | SortOrder
+    width94?: SortOrderInput | SortOrder
+    width96?: SortOrderInput | SortOrder
+    createdAt?: SortOrder
+    updatedAt?: SortOrder
+    _relevance?: PreciseBodyArticleConsumptionOrderByRelevanceInput
+  }
+
+  export type PreciseBodyArticleConsumptionWhereUniqueInput = Prisma.AtLeast<{
+    id?: number
+    AND?: PreciseBodyArticleConsumptionWhereInput | PreciseBodyArticleConsumptionWhereInput[]
+    OR?: PreciseBodyArticleConsumptionWhereInput[]
+    NOT?: PreciseBodyArticleConsumptionWhereInput | PreciseBodyArticleConsumptionWhereInput[]
+    division?: StringFilter<"PreciseBodyArticleConsumption"> | string
+    subDivision?: StringFilter<"PreciseBodyArticleConsumption"> | string
+    majorCategory?: StringFilter<"PreciseBodyArticleConsumption"> | string
+    macroBodyDescription?: StringFilter<"PreciseBodyArticleConsumption"> | string
+    microBodyArticleNumber?: StringFilter<"PreciseBodyArticleConsumption"> | string
+    mNeckType?: StringNullableFilter<"PreciseBodyArticleConsumption"> | string | null
+    mNeckStyle?: StringNullableFilter<"PreciseBodyArticleConsumption"> | string | null
+    mCollarType?: StringNullableFilter<"PreciseBodyArticleConsumption"> | string | null
+    mCollarStyle?: StringNullableFilter<"PreciseBodyArticleConsumption"> | string | null
+    mSleevesMainStyle?: StringNullableFilter<"PreciseBodyArticleConsumption"> | string | null
+    mSleeveFold?: StringNullableFilter<"PreciseBodyArticleConsumption"> | string | null
+    mPlacket?: StringNullableFilter<"PreciseBodyArticleConsumption"> | string | null
+    mBltType?: StringNullableFilter<"PreciseBodyArticleConsumption"> | string | null
+    mBltStyle?: StringNullableFilter<"PreciseBodyArticleConsumption"> | string | null
+    mBtmFold?: StringNullableFilter<"PreciseBodyArticleConsumption"> | string | null
+    mPocket?: StringNullableFilter<"PreciseBodyArticleConsumption"> | string | null
+    mNoOfPocket?: StringNullableFilter<"PreciseBodyArticleConsumption"> | string | null
+    mExtraPocket?: StringNullableFilter<"PreciseBodyArticleConsumption"> | string | null
+    mLength?: StringNullableFilter<"PreciseBodyArticleConsumption"> | string | null
+    mFit?: StringNullableFilter<"PreciseBodyArticleConsumption"> | string | null
+    bodyStyle?: StringNullableFilter<"PreciseBodyArticleConsumption"> | string | null
+    cuttingValue?: DecimalNullableFilter<"PreciseBodyArticleConsumption"> | Decimal | DecimalJsLike | number | string | null
+    stitchingSam?: DecimalNullableFilter<"PreciseBodyArticleConsumption"> | Decimal | DecimalJsLike | number | string | null
+    samVal?: DecimalNullableFilter<"PreciseBodyArticleConsumption"> | Decimal | DecimalJsLike | number | string | null
+    stVal?: DecimalNullableFilter<"PreciseBodyArticleConsumption"> | Decimal | DecimalJsLike | number | string | null
+    ironingSam?: DecimalNullableFilter<"PreciseBodyArticleConsumption"> | Decimal | DecimalJsLike | number | string | null
+    finishingSam?: DecimalNullableFilter<"PreciseBodyArticleConsumption"> | Decimal | DecimalJsLike | number | string | null
+    finishigCost?: DecimalNullableFilter<"PreciseBodyArticleConsumption"> | Decimal | DecimalJsLike | number | string | null
+    totalCmpCost?: DecimalNullableFilter<"PreciseBodyArticleConsumption"> | Decimal | DecimalJsLike | number | string | null
+    width15?: DecimalNullableFilter<"PreciseBodyArticleConsumption"> | Decimal | DecimalJsLike | number | string | null
+    width16?: DecimalNullableFilter<"PreciseBodyArticleConsumption"> | Decimal | DecimalJsLike | number | string | null
+    width17?: DecimalNullableFilter<"PreciseBodyArticleConsumption"> | Decimal | DecimalJsLike | number | string | null
+    width18?: DecimalNullableFilter<"PreciseBodyArticleConsumption"> | Decimal | DecimalJsLike | number | string | null
+    width19?: DecimalNullableFilter<"PreciseBodyArticleConsumption"> | Decimal | DecimalJsLike | number | string | null
+    width42?: DecimalNullableFilter<"PreciseBodyArticleConsumption"> | Decimal | DecimalJsLike | number | string | null
+    width43?: DecimalNullableFilter<"PreciseBodyArticleConsumption"> | Decimal | DecimalJsLike | number | string | null
+    width44?: DecimalNullableFilter<"PreciseBodyArticleConsumption"> | Decimal | DecimalJsLike | number | string | null
+    width46?: DecimalNullableFilter<"PreciseBodyArticleConsumption"> | Decimal | DecimalJsLike | number | string | null
+    width48?: DecimalNullableFilter<"PreciseBodyArticleConsumption"> | Decimal | DecimalJsLike | number | string | null
+    width50?: DecimalNullableFilter<"PreciseBodyArticleConsumption"> | Decimal | DecimalJsLike | number | string | null
+    width53?: DecimalNullableFilter<"PreciseBodyArticleConsumption"> | Decimal | DecimalJsLike | number | string | null
+    width54?: DecimalNullableFilter<"PreciseBodyArticleConsumption"> | Decimal | DecimalJsLike | number | string | null
+    width55?: DecimalNullableFilter<"PreciseBodyArticleConsumption"> | Decimal | DecimalJsLike | number | string | null
+    width56?: DecimalNullableFilter<"PreciseBodyArticleConsumption"> | Decimal | DecimalJsLike | number | string | null
+    width57?: DecimalNullableFilter<"PreciseBodyArticleConsumption"> | Decimal | DecimalJsLike | number | string | null
+    width58?: DecimalNullableFilter<"PreciseBodyArticleConsumption"> | Decimal | DecimalJsLike | number | string | null
+    width59?: DecimalNullableFilter<"PreciseBodyArticleConsumption"> | Decimal | DecimalJsLike | number | string | null
+    width60?: DecimalNullableFilter<"PreciseBodyArticleConsumption"> | Decimal | DecimalJsLike | number | string | null
+    width61?: DecimalNullableFilter<"PreciseBodyArticleConsumption"> | Decimal | DecimalJsLike | number | string | null
+    width62?: DecimalNullableFilter<"PreciseBodyArticleConsumption"> | Decimal | DecimalJsLike | number | string | null
+    width63?: DecimalNullableFilter<"PreciseBodyArticleConsumption"> | Decimal | DecimalJsLike | number | string | null
+    width64?: DecimalNullableFilter<"PreciseBodyArticleConsumption"> | Decimal | DecimalJsLike | number | string | null
+    width65?: DecimalNullableFilter<"PreciseBodyArticleConsumption"> | Decimal | DecimalJsLike | number | string | null
+    width66?: DecimalNullableFilter<"PreciseBodyArticleConsumption"> | Decimal | DecimalJsLike | number | string | null
+    width67?: DecimalNullableFilter<"PreciseBodyArticleConsumption"> | Decimal | DecimalJsLike | number | string | null
+    width68?: DecimalNullableFilter<"PreciseBodyArticleConsumption"> | Decimal | DecimalJsLike | number | string | null
+    width69?: DecimalNullableFilter<"PreciseBodyArticleConsumption"> | Decimal | DecimalJsLike | number | string | null
+    width70?: DecimalNullableFilter<"PreciseBodyArticleConsumption"> | Decimal | DecimalJsLike | number | string | null
+    width71?: DecimalNullableFilter<"PreciseBodyArticleConsumption"> | Decimal | DecimalJsLike | number | string | null
+    width72?: DecimalNullableFilter<"PreciseBodyArticleConsumption"> | Decimal | DecimalJsLike | number | string | null
+    width73?: DecimalNullableFilter<"PreciseBodyArticleConsumption"> | Decimal | DecimalJsLike | number | string | null
+    width74?: DecimalNullableFilter<"PreciseBodyArticleConsumption"> | Decimal | DecimalJsLike | number | string | null
+    width76?: DecimalNullableFilter<"PreciseBodyArticleConsumption"> | Decimal | DecimalJsLike | number | string | null
+    width78?: DecimalNullableFilter<"PreciseBodyArticleConsumption"> | Decimal | DecimalJsLike | number | string | null
+    width82?: DecimalNullableFilter<"PreciseBodyArticleConsumption"> | Decimal | DecimalJsLike | number | string | null
+    width92?: DecimalNullableFilter<"PreciseBodyArticleConsumption"> | Decimal | DecimalJsLike | number | string | null
+    width94?: DecimalNullableFilter<"PreciseBodyArticleConsumption"> | Decimal | DecimalJsLike | number | string | null
+    width96?: DecimalNullableFilter<"PreciseBodyArticleConsumption"> | Decimal | DecimalJsLike | number | string | null
+    createdAt?: DateTimeFilter<"PreciseBodyArticleConsumption"> | Date | string
+    updatedAt?: DateTimeFilter<"PreciseBodyArticleConsumption"> | Date | string
+  }, "id">
+
+  export type PreciseBodyArticleConsumptionOrderByWithAggregationInput = {
+    id?: SortOrder
+    division?: SortOrder
+    subDivision?: SortOrder
+    majorCategory?: SortOrder
+    macroBodyDescription?: SortOrder
+    microBodyArticleNumber?: SortOrder
+    mNeckType?: SortOrderInput | SortOrder
+    mNeckStyle?: SortOrderInput | SortOrder
+    mCollarType?: SortOrderInput | SortOrder
+    mCollarStyle?: SortOrderInput | SortOrder
+    mSleevesMainStyle?: SortOrderInput | SortOrder
+    mSleeveFold?: SortOrderInput | SortOrder
+    mPlacket?: SortOrderInput | SortOrder
+    mBltType?: SortOrderInput | SortOrder
+    mBltStyle?: SortOrderInput | SortOrder
+    mBtmFold?: SortOrderInput | SortOrder
+    mPocket?: SortOrderInput | SortOrder
+    mNoOfPocket?: SortOrderInput | SortOrder
+    mExtraPocket?: SortOrderInput | SortOrder
+    mLength?: SortOrderInput | SortOrder
+    mFit?: SortOrderInput | SortOrder
+    bodyStyle?: SortOrderInput | SortOrder
+    cuttingValue?: SortOrderInput | SortOrder
+    stitchingSam?: SortOrderInput | SortOrder
+    samVal?: SortOrderInput | SortOrder
+    stVal?: SortOrderInput | SortOrder
+    ironingSam?: SortOrderInput | SortOrder
+    finishingSam?: SortOrderInput | SortOrder
+    finishigCost?: SortOrderInput | SortOrder
+    totalCmpCost?: SortOrderInput | SortOrder
+    width15?: SortOrderInput | SortOrder
+    width16?: SortOrderInput | SortOrder
+    width17?: SortOrderInput | SortOrder
+    width18?: SortOrderInput | SortOrder
+    width19?: SortOrderInput | SortOrder
+    width42?: SortOrderInput | SortOrder
+    width43?: SortOrderInput | SortOrder
+    width44?: SortOrderInput | SortOrder
+    width46?: SortOrderInput | SortOrder
+    width48?: SortOrderInput | SortOrder
+    width50?: SortOrderInput | SortOrder
+    width53?: SortOrderInput | SortOrder
+    width54?: SortOrderInput | SortOrder
+    width55?: SortOrderInput | SortOrder
+    width56?: SortOrderInput | SortOrder
+    width57?: SortOrderInput | SortOrder
+    width58?: SortOrderInput | SortOrder
+    width59?: SortOrderInput | SortOrder
+    width60?: SortOrderInput | SortOrder
+    width61?: SortOrderInput | SortOrder
+    width62?: SortOrderInput | SortOrder
+    width63?: SortOrderInput | SortOrder
+    width64?: SortOrderInput | SortOrder
+    width65?: SortOrderInput | SortOrder
+    width66?: SortOrderInput | SortOrder
+    width67?: SortOrderInput | SortOrder
+    width68?: SortOrderInput | SortOrder
+    width69?: SortOrderInput | SortOrder
+    width70?: SortOrderInput | SortOrder
+    width71?: SortOrderInput | SortOrder
+    width72?: SortOrderInput | SortOrder
+    width73?: SortOrderInput | SortOrder
+    width74?: SortOrderInput | SortOrder
+    width76?: SortOrderInput | SortOrder
+    width78?: SortOrderInput | SortOrder
+    width82?: SortOrderInput | SortOrder
+    width92?: SortOrderInput | SortOrder
+    width94?: SortOrderInput | SortOrder
+    width96?: SortOrderInput | SortOrder
+    createdAt?: SortOrder
+    updatedAt?: SortOrder
+    _count?: PreciseBodyArticleConsumptionCountOrderByAggregateInput
+    _avg?: PreciseBodyArticleConsumptionAvgOrderByAggregateInput
+    _max?: PreciseBodyArticleConsumptionMaxOrderByAggregateInput
+    _min?: PreciseBodyArticleConsumptionMinOrderByAggregateInput
+    _sum?: PreciseBodyArticleConsumptionSumOrderByAggregateInput
+  }
+
+  export type PreciseBodyArticleConsumptionScalarWhereWithAggregatesInput = {
+    AND?: PreciseBodyArticleConsumptionScalarWhereWithAggregatesInput | PreciseBodyArticleConsumptionScalarWhereWithAggregatesInput[]
+    OR?: PreciseBodyArticleConsumptionScalarWhereWithAggregatesInput[]
+    NOT?: PreciseBodyArticleConsumptionScalarWhereWithAggregatesInput | PreciseBodyArticleConsumptionScalarWhereWithAggregatesInput[]
+    id?: IntWithAggregatesFilter<"PreciseBodyArticleConsumption"> | number
+    division?: StringWithAggregatesFilter<"PreciseBodyArticleConsumption"> | string
+    subDivision?: StringWithAggregatesFilter<"PreciseBodyArticleConsumption"> | string
+    majorCategory?: StringWithAggregatesFilter<"PreciseBodyArticleConsumption"> | string
+    macroBodyDescription?: StringWithAggregatesFilter<"PreciseBodyArticleConsumption"> | string
+    microBodyArticleNumber?: StringWithAggregatesFilter<"PreciseBodyArticleConsumption"> | string
+    mNeckType?: StringNullableWithAggregatesFilter<"PreciseBodyArticleConsumption"> | string | null
+    mNeckStyle?: StringNullableWithAggregatesFilter<"PreciseBodyArticleConsumption"> | string | null
+    mCollarType?: StringNullableWithAggregatesFilter<"PreciseBodyArticleConsumption"> | string | null
+    mCollarStyle?: StringNullableWithAggregatesFilter<"PreciseBodyArticleConsumption"> | string | null
+    mSleevesMainStyle?: StringNullableWithAggregatesFilter<"PreciseBodyArticleConsumption"> | string | null
+    mSleeveFold?: StringNullableWithAggregatesFilter<"PreciseBodyArticleConsumption"> | string | null
+    mPlacket?: StringNullableWithAggregatesFilter<"PreciseBodyArticleConsumption"> | string | null
+    mBltType?: StringNullableWithAggregatesFilter<"PreciseBodyArticleConsumption"> | string | null
+    mBltStyle?: StringNullableWithAggregatesFilter<"PreciseBodyArticleConsumption"> | string | null
+    mBtmFold?: StringNullableWithAggregatesFilter<"PreciseBodyArticleConsumption"> | string | null
+    mPocket?: StringNullableWithAggregatesFilter<"PreciseBodyArticleConsumption"> | string | null
+    mNoOfPocket?: StringNullableWithAggregatesFilter<"PreciseBodyArticleConsumption"> | string | null
+    mExtraPocket?: StringNullableWithAggregatesFilter<"PreciseBodyArticleConsumption"> | string | null
+    mLength?: StringNullableWithAggregatesFilter<"PreciseBodyArticleConsumption"> | string | null
+    mFit?: StringNullableWithAggregatesFilter<"PreciseBodyArticleConsumption"> | string | null
+    bodyStyle?: StringNullableWithAggregatesFilter<"PreciseBodyArticleConsumption"> | string | null
+    cuttingValue?: DecimalNullableWithAggregatesFilter<"PreciseBodyArticleConsumption"> | Decimal | DecimalJsLike | number | string | null
+    stitchingSam?: DecimalNullableWithAggregatesFilter<"PreciseBodyArticleConsumption"> | Decimal | DecimalJsLike | number | string | null
+    samVal?: DecimalNullableWithAggregatesFilter<"PreciseBodyArticleConsumption"> | Decimal | DecimalJsLike | number | string | null
+    stVal?: DecimalNullableWithAggregatesFilter<"PreciseBodyArticleConsumption"> | Decimal | DecimalJsLike | number | string | null
+    ironingSam?: DecimalNullableWithAggregatesFilter<"PreciseBodyArticleConsumption"> | Decimal | DecimalJsLike | number | string | null
+    finishingSam?: DecimalNullableWithAggregatesFilter<"PreciseBodyArticleConsumption"> | Decimal | DecimalJsLike | number | string | null
+    finishigCost?: DecimalNullableWithAggregatesFilter<"PreciseBodyArticleConsumption"> | Decimal | DecimalJsLike | number | string | null
+    totalCmpCost?: DecimalNullableWithAggregatesFilter<"PreciseBodyArticleConsumption"> | Decimal | DecimalJsLike | number | string | null
+    width15?: DecimalNullableWithAggregatesFilter<"PreciseBodyArticleConsumption"> | Decimal | DecimalJsLike | number | string | null
+    width16?: DecimalNullableWithAggregatesFilter<"PreciseBodyArticleConsumption"> | Decimal | DecimalJsLike | number | string | null
+    width17?: DecimalNullableWithAggregatesFilter<"PreciseBodyArticleConsumption"> | Decimal | DecimalJsLike | number | string | null
+    width18?: DecimalNullableWithAggregatesFilter<"PreciseBodyArticleConsumption"> | Decimal | DecimalJsLike | number | string | null
+    width19?: DecimalNullableWithAggregatesFilter<"PreciseBodyArticleConsumption"> | Decimal | DecimalJsLike | number | string | null
+    width42?: DecimalNullableWithAggregatesFilter<"PreciseBodyArticleConsumption"> | Decimal | DecimalJsLike | number | string | null
+    width43?: DecimalNullableWithAggregatesFilter<"PreciseBodyArticleConsumption"> | Decimal | DecimalJsLike | number | string | null
+    width44?: DecimalNullableWithAggregatesFilter<"PreciseBodyArticleConsumption"> | Decimal | DecimalJsLike | number | string | null
+    width46?: DecimalNullableWithAggregatesFilter<"PreciseBodyArticleConsumption"> | Decimal | DecimalJsLike | number | string | null
+    width48?: DecimalNullableWithAggregatesFilter<"PreciseBodyArticleConsumption"> | Decimal | DecimalJsLike | number | string | null
+    width50?: DecimalNullableWithAggregatesFilter<"PreciseBodyArticleConsumption"> | Decimal | DecimalJsLike | number | string | null
+    width53?: DecimalNullableWithAggregatesFilter<"PreciseBodyArticleConsumption"> | Decimal | DecimalJsLike | number | string | null
+    width54?: DecimalNullableWithAggregatesFilter<"PreciseBodyArticleConsumption"> | Decimal | DecimalJsLike | number | string | null
+    width55?: DecimalNullableWithAggregatesFilter<"PreciseBodyArticleConsumption"> | Decimal | DecimalJsLike | number | string | null
+    width56?: DecimalNullableWithAggregatesFilter<"PreciseBodyArticleConsumption"> | Decimal | DecimalJsLike | number | string | null
+    width57?: DecimalNullableWithAggregatesFilter<"PreciseBodyArticleConsumption"> | Decimal | DecimalJsLike | number | string | null
+    width58?: DecimalNullableWithAggregatesFilter<"PreciseBodyArticleConsumption"> | Decimal | DecimalJsLike | number | string | null
+    width59?: DecimalNullableWithAggregatesFilter<"PreciseBodyArticleConsumption"> | Decimal | DecimalJsLike | number | string | null
+    width60?: DecimalNullableWithAggregatesFilter<"PreciseBodyArticleConsumption"> | Decimal | DecimalJsLike | number | string | null
+    width61?: DecimalNullableWithAggregatesFilter<"PreciseBodyArticleConsumption"> | Decimal | DecimalJsLike | number | string | null
+    width62?: DecimalNullableWithAggregatesFilter<"PreciseBodyArticleConsumption"> | Decimal | DecimalJsLike | number | string | null
+    width63?: DecimalNullableWithAggregatesFilter<"PreciseBodyArticleConsumption"> | Decimal | DecimalJsLike | number | string | null
+    width64?: DecimalNullableWithAggregatesFilter<"PreciseBodyArticleConsumption"> | Decimal | DecimalJsLike | number | string | null
+    width65?: DecimalNullableWithAggregatesFilter<"PreciseBodyArticleConsumption"> | Decimal | DecimalJsLike | number | string | null
+    width66?: DecimalNullableWithAggregatesFilter<"PreciseBodyArticleConsumption"> | Decimal | DecimalJsLike | number | string | null
+    width67?: DecimalNullableWithAggregatesFilter<"PreciseBodyArticleConsumption"> | Decimal | DecimalJsLike | number | string | null
+    width68?: DecimalNullableWithAggregatesFilter<"PreciseBodyArticleConsumption"> | Decimal | DecimalJsLike | number | string | null
+    width69?: DecimalNullableWithAggregatesFilter<"PreciseBodyArticleConsumption"> | Decimal | DecimalJsLike | number | string | null
+    width70?: DecimalNullableWithAggregatesFilter<"PreciseBodyArticleConsumption"> | Decimal | DecimalJsLike | number | string | null
+    width71?: DecimalNullableWithAggregatesFilter<"PreciseBodyArticleConsumption"> | Decimal | DecimalJsLike | number | string | null
+    width72?: DecimalNullableWithAggregatesFilter<"PreciseBodyArticleConsumption"> | Decimal | DecimalJsLike | number | string | null
+    width73?: DecimalNullableWithAggregatesFilter<"PreciseBodyArticleConsumption"> | Decimal | DecimalJsLike | number | string | null
+    width74?: DecimalNullableWithAggregatesFilter<"PreciseBodyArticleConsumption"> | Decimal | DecimalJsLike | number | string | null
+    width76?: DecimalNullableWithAggregatesFilter<"PreciseBodyArticleConsumption"> | Decimal | DecimalJsLike | number | string | null
+    width78?: DecimalNullableWithAggregatesFilter<"PreciseBodyArticleConsumption"> | Decimal | DecimalJsLike | number | string | null
+    width82?: DecimalNullableWithAggregatesFilter<"PreciseBodyArticleConsumption"> | Decimal | DecimalJsLike | number | string | null
+    width92?: DecimalNullableWithAggregatesFilter<"PreciseBodyArticleConsumption"> | Decimal | DecimalJsLike | number | string | null
+    width94?: DecimalNullableWithAggregatesFilter<"PreciseBodyArticleConsumption"> | Decimal | DecimalJsLike | number | string | null
+    width96?: DecimalNullableWithAggregatesFilter<"PreciseBodyArticleConsumption"> | Decimal | DecimalJsLike | number | string | null
+    createdAt?: DateTimeWithAggregatesFilter<"PreciseBodyArticleConsumption"> | Date | string
+    updatedAt?: DateTimeWithAggregatesFilter<"PreciseBodyArticleConsumption"> | Date | string
   }
 
   export type DepartmentCreateInput = {
@@ -93788,11 +101828,16 @@ export namespace Prisma {
     cmpCost?: Decimal | DecimalJsLike | number | string | null
     fabCost?: Decimal | DecimalJsLike | number | string | null
     fabCons?: Decimal | DecimalJsLike | number | string | null
-    width?: Decimal | DecimalJsLike | number | string | null
+    autoBgt?: Decimal | DecimalJsLike | number | string | null
+    roughV2?: Decimal | DecimalJsLike | number | string | null
     vendorFabricRate?: Decimal | DecimalJsLike | number | string | null
-    valueAddAccCostType?: string | null
-    valueAddCost?: Decimal | DecimalJsLike | number | string | null
-    valueAddProcessCost?: Decimal | DecimalJsLike | number | string | null
+    finalCost?: Decimal | DecimalJsLike | number | string | null
+    roughRatio?: Decimal | DecimalJsLike | number | string | null
+    roughConsumptionKg?: Decimal | DecimalJsLike | number | string | null
+    roughConsumptionMeter?: Decimal | DecimalJsLike | number | string | null
+    preciseRatio?: Decimal | DecimalJsLike | number | string | null
+    preciseConsumptionKg?: Decimal | DecimalJsLike | number | string | null
+    preciseConsumptionMeter?: Decimal | DecimalJsLike | number | string | null
     bodyArticle?: string | null
     bodyArticleDescription?: string | null
     fabricArticleNumber?: string | null
@@ -93941,11 +101986,16 @@ export namespace Prisma {
     cmpCost?: Decimal | DecimalJsLike | number | string | null
     fabCost?: Decimal | DecimalJsLike | number | string | null
     fabCons?: Decimal | DecimalJsLike | number | string | null
-    width?: Decimal | DecimalJsLike | number | string | null
+    autoBgt?: Decimal | DecimalJsLike | number | string | null
+    roughV2?: Decimal | DecimalJsLike | number | string | null
     vendorFabricRate?: Decimal | DecimalJsLike | number | string | null
-    valueAddAccCostType?: string | null
-    valueAddCost?: Decimal | DecimalJsLike | number | string | null
-    valueAddProcessCost?: Decimal | DecimalJsLike | number | string | null
+    finalCost?: Decimal | DecimalJsLike | number | string | null
+    roughRatio?: Decimal | DecimalJsLike | number | string | null
+    roughConsumptionKg?: Decimal | DecimalJsLike | number | string | null
+    roughConsumptionMeter?: Decimal | DecimalJsLike | number | string | null
+    preciseRatio?: Decimal | DecimalJsLike | number | string | null
+    preciseConsumptionKg?: Decimal | DecimalJsLike | number | string | null
+    preciseConsumptionMeter?: Decimal | DecimalJsLike | number | string | null
     bodyArticle?: string | null
     bodyArticleDescription?: string | null
     fabricArticleNumber?: string | null
@@ -94092,11 +102142,16 @@ export namespace Prisma {
     cmpCost?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
     fabCost?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
     fabCons?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
-    width?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    autoBgt?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    roughV2?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
     vendorFabricRate?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
-    valueAddAccCostType?: NullableStringFieldUpdateOperationsInput | string | null
-    valueAddCost?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
-    valueAddProcessCost?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    finalCost?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    roughRatio?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    roughConsumptionKg?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    roughConsumptionMeter?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    preciseRatio?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    preciseConsumptionKg?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    preciseConsumptionMeter?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
     bodyArticle?: NullableStringFieldUpdateOperationsInput | string | null
     bodyArticleDescription?: NullableStringFieldUpdateOperationsInput | string | null
     fabricArticleNumber?: NullableStringFieldUpdateOperationsInput | string | null
@@ -94245,11 +102300,16 @@ export namespace Prisma {
     cmpCost?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
     fabCost?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
     fabCons?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
-    width?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    autoBgt?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    roughV2?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
     vendorFabricRate?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
-    valueAddAccCostType?: NullableStringFieldUpdateOperationsInput | string | null
-    valueAddCost?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
-    valueAddProcessCost?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    finalCost?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    roughRatio?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    roughConsumptionKg?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    roughConsumptionMeter?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    preciseRatio?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    preciseConsumptionKg?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    preciseConsumptionMeter?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
     bodyArticle?: NullableStringFieldUpdateOperationsInput | string | null
     bodyArticleDescription?: NullableStringFieldUpdateOperationsInput | string | null
     fabricArticleNumber?: NullableStringFieldUpdateOperationsInput | string | null
@@ -94397,11 +102457,16 @@ export namespace Prisma {
     cmpCost?: Decimal | DecimalJsLike | number | string | null
     fabCost?: Decimal | DecimalJsLike | number | string | null
     fabCons?: Decimal | DecimalJsLike | number | string | null
-    width?: Decimal | DecimalJsLike | number | string | null
+    autoBgt?: Decimal | DecimalJsLike | number | string | null
+    roughV2?: Decimal | DecimalJsLike | number | string | null
     vendorFabricRate?: Decimal | DecimalJsLike | number | string | null
-    valueAddAccCostType?: string | null
-    valueAddCost?: Decimal | DecimalJsLike | number | string | null
-    valueAddProcessCost?: Decimal | DecimalJsLike | number | string | null
+    finalCost?: Decimal | DecimalJsLike | number | string | null
+    roughRatio?: Decimal | DecimalJsLike | number | string | null
+    roughConsumptionKg?: Decimal | DecimalJsLike | number | string | null
+    roughConsumptionMeter?: Decimal | DecimalJsLike | number | string | null
+    preciseRatio?: Decimal | DecimalJsLike | number | string | null
+    preciseConsumptionKg?: Decimal | DecimalJsLike | number | string | null
+    preciseConsumptionMeter?: Decimal | DecimalJsLike | number | string | null
     bodyArticle?: string | null
     bodyArticleDescription?: string | null
     fabricArticleNumber?: string | null
@@ -94546,11 +102611,16 @@ export namespace Prisma {
     cmpCost?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
     fabCost?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
     fabCons?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
-    width?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    autoBgt?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    roughV2?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
     vendorFabricRate?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
-    valueAddAccCostType?: NullableStringFieldUpdateOperationsInput | string | null
-    valueAddCost?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
-    valueAddProcessCost?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    finalCost?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    roughRatio?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    roughConsumptionKg?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    roughConsumptionMeter?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    preciseRatio?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    preciseConsumptionKg?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    preciseConsumptionMeter?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
     bodyArticle?: NullableStringFieldUpdateOperationsInput | string | null
     bodyArticleDescription?: NullableStringFieldUpdateOperationsInput | string | null
     fabricArticleNumber?: NullableStringFieldUpdateOperationsInput | string | null
@@ -94694,11 +102764,16 @@ export namespace Prisma {
     cmpCost?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
     fabCost?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
     fabCons?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
-    width?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    autoBgt?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    roughV2?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
     vendorFabricRate?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
-    valueAddAccCostType?: NullableStringFieldUpdateOperationsInput | string | null
-    valueAddCost?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
-    valueAddProcessCost?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    finalCost?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    roughRatio?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    roughConsumptionKg?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    roughConsumptionMeter?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    preciseRatio?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    preciseConsumptionKg?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    preciseConsumptionMeter?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
     bodyArticle?: NullableStringFieldUpdateOperationsInput | string | null
     bodyArticleDescription?: NullableStringFieldUpdateOperationsInput | string | null
     fabricArticleNumber?: NullableStringFieldUpdateOperationsInput | string | null
@@ -99216,6 +107291,195 @@ export namespace Prisma {
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
   }
 
+  export type PreciseFabricArticleDataCreateInput = {
+    id?: bigint | number
+    fabricArticleNumber?: bigint | number | null
+    fabricArticleDescription?: string | null
+    division?: string | null
+    subDivision?: string | null
+    majorCategory?: string | null
+    vendorName?: string | null
+    vendorCode?: number | null
+    fabricRate?: Decimal | DecimalJsLike | number | string | null
+    mFabDiv?: string | null
+    mYarn?: string | null
+    mFabMainMvgr1?: string | null
+    mFabMainMvgr2?: string | null
+    mConstruction?: string | null
+    mOunz?: string | null
+    mWidth?: string | null
+    mWeave01?: string | null
+    mWeave02?: string | null
+    mCount?: string | null
+    mComposition?: string | null
+    mFinish?: string | null
+    mGsm?: string | null
+    mLycra?: string | null
+    createdAt?: Date | string
+  }
+
+  export type PreciseFabricArticleDataUncheckedCreateInput = {
+    id?: bigint | number
+    fabricArticleNumber?: bigint | number | null
+    fabricArticleDescription?: string | null
+    division?: string | null
+    subDivision?: string | null
+    majorCategory?: string | null
+    vendorName?: string | null
+    vendorCode?: number | null
+    fabricRate?: Decimal | DecimalJsLike | number | string | null
+    mFabDiv?: string | null
+    mYarn?: string | null
+    mFabMainMvgr1?: string | null
+    mFabMainMvgr2?: string | null
+    mConstruction?: string | null
+    mOunz?: string | null
+    mWidth?: string | null
+    mWeave01?: string | null
+    mWeave02?: string | null
+    mCount?: string | null
+    mComposition?: string | null
+    mFinish?: string | null
+    mGsm?: string | null
+    mLycra?: string | null
+    createdAt?: Date | string
+  }
+
+  export type PreciseFabricArticleDataUpdateInput = {
+    id?: BigIntFieldUpdateOperationsInput | bigint | number
+    fabricArticleNumber?: NullableBigIntFieldUpdateOperationsInput | bigint | number | null
+    fabricArticleDescription?: NullableStringFieldUpdateOperationsInput | string | null
+    division?: NullableStringFieldUpdateOperationsInput | string | null
+    subDivision?: NullableStringFieldUpdateOperationsInput | string | null
+    majorCategory?: NullableStringFieldUpdateOperationsInput | string | null
+    vendorName?: NullableStringFieldUpdateOperationsInput | string | null
+    vendorCode?: NullableIntFieldUpdateOperationsInput | number | null
+    fabricRate?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    mFabDiv?: NullableStringFieldUpdateOperationsInput | string | null
+    mYarn?: NullableStringFieldUpdateOperationsInput | string | null
+    mFabMainMvgr1?: NullableStringFieldUpdateOperationsInput | string | null
+    mFabMainMvgr2?: NullableStringFieldUpdateOperationsInput | string | null
+    mConstruction?: NullableStringFieldUpdateOperationsInput | string | null
+    mOunz?: NullableStringFieldUpdateOperationsInput | string | null
+    mWidth?: NullableStringFieldUpdateOperationsInput | string | null
+    mWeave01?: NullableStringFieldUpdateOperationsInput | string | null
+    mWeave02?: NullableStringFieldUpdateOperationsInput | string | null
+    mCount?: NullableStringFieldUpdateOperationsInput | string | null
+    mComposition?: NullableStringFieldUpdateOperationsInput | string | null
+    mFinish?: NullableStringFieldUpdateOperationsInput | string | null
+    mGsm?: NullableStringFieldUpdateOperationsInput | string | null
+    mLycra?: NullableStringFieldUpdateOperationsInput | string | null
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+  }
+
+  export type PreciseFabricArticleDataUncheckedUpdateInput = {
+    id?: BigIntFieldUpdateOperationsInput | bigint | number
+    fabricArticleNumber?: NullableBigIntFieldUpdateOperationsInput | bigint | number | null
+    fabricArticleDescription?: NullableStringFieldUpdateOperationsInput | string | null
+    division?: NullableStringFieldUpdateOperationsInput | string | null
+    subDivision?: NullableStringFieldUpdateOperationsInput | string | null
+    majorCategory?: NullableStringFieldUpdateOperationsInput | string | null
+    vendorName?: NullableStringFieldUpdateOperationsInput | string | null
+    vendorCode?: NullableIntFieldUpdateOperationsInput | number | null
+    fabricRate?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    mFabDiv?: NullableStringFieldUpdateOperationsInput | string | null
+    mYarn?: NullableStringFieldUpdateOperationsInput | string | null
+    mFabMainMvgr1?: NullableStringFieldUpdateOperationsInput | string | null
+    mFabMainMvgr2?: NullableStringFieldUpdateOperationsInput | string | null
+    mConstruction?: NullableStringFieldUpdateOperationsInput | string | null
+    mOunz?: NullableStringFieldUpdateOperationsInput | string | null
+    mWidth?: NullableStringFieldUpdateOperationsInput | string | null
+    mWeave01?: NullableStringFieldUpdateOperationsInput | string | null
+    mWeave02?: NullableStringFieldUpdateOperationsInput | string | null
+    mCount?: NullableStringFieldUpdateOperationsInput | string | null
+    mComposition?: NullableStringFieldUpdateOperationsInput | string | null
+    mFinish?: NullableStringFieldUpdateOperationsInput | string | null
+    mGsm?: NullableStringFieldUpdateOperationsInput | string | null
+    mLycra?: NullableStringFieldUpdateOperationsInput | string | null
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+  }
+
+  export type PreciseFabricArticleDataCreateManyInput = {
+    id?: bigint | number
+    fabricArticleNumber?: bigint | number | null
+    fabricArticleDescription?: string | null
+    division?: string | null
+    subDivision?: string | null
+    majorCategory?: string | null
+    vendorName?: string | null
+    vendorCode?: number | null
+    fabricRate?: Decimal | DecimalJsLike | number | string | null
+    mFabDiv?: string | null
+    mYarn?: string | null
+    mFabMainMvgr1?: string | null
+    mFabMainMvgr2?: string | null
+    mConstruction?: string | null
+    mOunz?: string | null
+    mWidth?: string | null
+    mWeave01?: string | null
+    mWeave02?: string | null
+    mCount?: string | null
+    mComposition?: string | null
+    mFinish?: string | null
+    mGsm?: string | null
+    mLycra?: string | null
+    createdAt?: Date | string
+  }
+
+  export type PreciseFabricArticleDataUpdateManyMutationInput = {
+    id?: BigIntFieldUpdateOperationsInput | bigint | number
+    fabricArticleNumber?: NullableBigIntFieldUpdateOperationsInput | bigint | number | null
+    fabricArticleDescription?: NullableStringFieldUpdateOperationsInput | string | null
+    division?: NullableStringFieldUpdateOperationsInput | string | null
+    subDivision?: NullableStringFieldUpdateOperationsInput | string | null
+    majorCategory?: NullableStringFieldUpdateOperationsInput | string | null
+    vendorName?: NullableStringFieldUpdateOperationsInput | string | null
+    vendorCode?: NullableIntFieldUpdateOperationsInput | number | null
+    fabricRate?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    mFabDiv?: NullableStringFieldUpdateOperationsInput | string | null
+    mYarn?: NullableStringFieldUpdateOperationsInput | string | null
+    mFabMainMvgr1?: NullableStringFieldUpdateOperationsInput | string | null
+    mFabMainMvgr2?: NullableStringFieldUpdateOperationsInput | string | null
+    mConstruction?: NullableStringFieldUpdateOperationsInput | string | null
+    mOunz?: NullableStringFieldUpdateOperationsInput | string | null
+    mWidth?: NullableStringFieldUpdateOperationsInput | string | null
+    mWeave01?: NullableStringFieldUpdateOperationsInput | string | null
+    mWeave02?: NullableStringFieldUpdateOperationsInput | string | null
+    mCount?: NullableStringFieldUpdateOperationsInput | string | null
+    mComposition?: NullableStringFieldUpdateOperationsInput | string | null
+    mFinish?: NullableStringFieldUpdateOperationsInput | string | null
+    mGsm?: NullableStringFieldUpdateOperationsInput | string | null
+    mLycra?: NullableStringFieldUpdateOperationsInput | string | null
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+  }
+
+  export type PreciseFabricArticleDataUncheckedUpdateManyInput = {
+    id?: BigIntFieldUpdateOperationsInput | bigint | number
+    fabricArticleNumber?: NullableBigIntFieldUpdateOperationsInput | bigint | number | null
+    fabricArticleDescription?: NullableStringFieldUpdateOperationsInput | string | null
+    division?: NullableStringFieldUpdateOperationsInput | string | null
+    subDivision?: NullableStringFieldUpdateOperationsInput | string | null
+    majorCategory?: NullableStringFieldUpdateOperationsInput | string | null
+    vendorName?: NullableStringFieldUpdateOperationsInput | string | null
+    vendorCode?: NullableIntFieldUpdateOperationsInput | number | null
+    fabricRate?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    mFabDiv?: NullableStringFieldUpdateOperationsInput | string | null
+    mYarn?: NullableStringFieldUpdateOperationsInput | string | null
+    mFabMainMvgr1?: NullableStringFieldUpdateOperationsInput | string | null
+    mFabMainMvgr2?: NullableStringFieldUpdateOperationsInput | string | null
+    mConstruction?: NullableStringFieldUpdateOperationsInput | string | null
+    mOunz?: NullableStringFieldUpdateOperationsInput | string | null
+    mWidth?: NullableStringFieldUpdateOperationsInput | string | null
+    mWeave01?: NullableStringFieldUpdateOperationsInput | string | null
+    mWeave02?: NullableStringFieldUpdateOperationsInput | string | null
+    mCount?: NullableStringFieldUpdateOperationsInput | string | null
+    mComposition?: NullableStringFieldUpdateOperationsInput | string | null
+    mFinish?: NullableStringFieldUpdateOperationsInput | string | null
+    mGsm?: NullableStringFieldUpdateOperationsInput | string | null
+    mLycra?: NullableStringFieldUpdateOperationsInput | string | null
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+  }
+
   export type GmArticleDataCreateInput = {
     id?: string
     gmAgeGrade?: string | null
@@ -100761,9 +109025,7 @@ export namespace Prisma {
     fabCost?: Decimal | DecimalJsLike | number | string | null
     fabCons?: Decimal | DecimalJsLike | number | string | null
     width?: Decimal | DecimalJsLike | number | string | null
-    basicTrimCost?: Decimal | DecimalJsLike | number | string | null
     roughCmpCost?: Decimal | DecimalJsLike | number | string | null
-    costingType?: string | null
     bodyConsumptionType?: string | null
     gsm?: Decimal | DecimalJsLike | number | string | null
     ratio?: Decimal | DecimalJsLike | number | string | null
@@ -100825,9 +109087,7 @@ export namespace Prisma {
     fabCost?: Decimal | DecimalJsLike | number | string | null
     fabCons?: Decimal | DecimalJsLike | number | string | null
     width?: Decimal | DecimalJsLike | number | string | null
-    basicTrimCost?: Decimal | DecimalJsLike | number | string | null
     roughCmpCost?: Decimal | DecimalJsLike | number | string | null
-    costingType?: string | null
     bodyConsumptionType?: string | null
     gsm?: Decimal | DecimalJsLike | number | string | null
     ratio?: Decimal | DecimalJsLike | number | string | null
@@ -100889,9 +109149,7 @@ export namespace Prisma {
     fabCost?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
     fabCons?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
     width?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
-    basicTrimCost?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
     roughCmpCost?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
-    costingType?: NullableStringFieldUpdateOperationsInput | string | null
     bodyConsumptionType?: NullableStringFieldUpdateOperationsInput | string | null
     gsm?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
     ratio?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
@@ -100953,9 +109211,7 @@ export namespace Prisma {
     fabCost?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
     fabCons?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
     width?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
-    basicTrimCost?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
     roughCmpCost?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
-    costingType?: NullableStringFieldUpdateOperationsInput | string | null
     bodyConsumptionType?: NullableStringFieldUpdateOperationsInput | string | null
     gsm?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
     ratio?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
@@ -101017,9 +109273,7 @@ export namespace Prisma {
     fabCost?: Decimal | DecimalJsLike | number | string | null
     fabCons?: Decimal | DecimalJsLike | number | string | null
     width?: Decimal | DecimalJsLike | number | string | null
-    basicTrimCost?: Decimal | DecimalJsLike | number | string | null
     roughCmpCost?: Decimal | DecimalJsLike | number | string | null
-    costingType?: string | null
     bodyConsumptionType?: string | null
     gsm?: Decimal | DecimalJsLike | number | string | null
     ratio?: Decimal | DecimalJsLike | number | string | null
@@ -101081,9 +109335,7 @@ export namespace Prisma {
     fabCost?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
     fabCons?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
     width?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
-    basicTrimCost?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
     roughCmpCost?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
-    costingType?: NullableStringFieldUpdateOperationsInput | string | null
     bodyConsumptionType?: NullableStringFieldUpdateOperationsInput | string | null
     gsm?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
     ratio?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
@@ -101145,9 +109397,7 @@ export namespace Prisma {
     fabCost?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
     fabCons?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
     width?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
-    basicTrimCost?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
     roughCmpCost?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
-    costingType?: NullableStringFieldUpdateOperationsInput | string | null
     bodyConsumptionType?: NullableStringFieldUpdateOperationsInput | string | null
     gsm?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
     ratio?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
@@ -101815,6 +110065,73 @@ export namespace Prisma {
     packagingTotal?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
     threadCost?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
     basicTrimsCost?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+  }
+
+  export type PreciseTrimMasterCreateInput = {
+    attributeName: string
+    type: string
+    bt1?: Decimal | DecimalJsLike | number | string | null
+    bt2?: Decimal | DecimalJsLike | number | string | null
+    createdAt?: Date | string
+    updatedAt?: Date | string
+  }
+
+  export type PreciseTrimMasterUncheckedCreateInput = {
+    id?: number
+    attributeName: string
+    type: string
+    bt1?: Decimal | DecimalJsLike | number | string | null
+    bt2?: Decimal | DecimalJsLike | number | string | null
+    createdAt?: Date | string
+    updatedAt?: Date | string
+  }
+
+  export type PreciseTrimMasterUpdateInput = {
+    attributeName?: StringFieldUpdateOperationsInput | string
+    type?: StringFieldUpdateOperationsInput | string
+    bt1?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    bt2?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+  }
+
+  export type PreciseTrimMasterUncheckedUpdateInput = {
+    id?: IntFieldUpdateOperationsInput | number
+    attributeName?: StringFieldUpdateOperationsInput | string
+    type?: StringFieldUpdateOperationsInput | string
+    bt1?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    bt2?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+  }
+
+  export type PreciseTrimMasterCreateManyInput = {
+    id?: number
+    attributeName: string
+    type: string
+    bt1?: Decimal | DecimalJsLike | number | string | null
+    bt2?: Decimal | DecimalJsLike | number | string | null
+    createdAt?: Date | string
+    updatedAt?: Date | string
+  }
+
+  export type PreciseTrimMasterUpdateManyMutationInput = {
+    attributeName?: StringFieldUpdateOperationsInput | string
+    type?: StringFieldUpdateOperationsInput | string
+    bt1?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    bt2?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+  }
+
+  export type PreciseTrimMasterUncheckedUpdateManyInput = {
+    id?: IntFieldUpdateOperationsInput | number
+    attributeName?: StringFieldUpdateOperationsInput | string
+    type?: StringFieldUpdateOperationsInput | string
+    bt1?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    bt2?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
   }
@@ -102547,6 +110864,655 @@ export namespace Prisma {
     comment?: NullableStringFieldUpdateOperationsInput | string | null
     details?: NullableJsonNullValueInput | InputJsonValue
     occurredAt?: DateTimeFieldUpdateOperationsInput | Date | string
+  }
+
+  export type BodyArticleDescriptionFormateCreateInput = {
+    fgMajCat: string
+    attributesMajCat: string
+    frGridStatus: string
+    createdAt?: Date | string
+    updatedAt?: Date | string
+  }
+
+  export type BodyArticleDescriptionFormateUncheckedCreateInput = {
+    id?: number
+    fgMajCat: string
+    attributesMajCat: string
+    frGridStatus: string
+    createdAt?: Date | string
+    updatedAt?: Date | string
+  }
+
+  export type BodyArticleDescriptionFormateUpdateInput = {
+    fgMajCat?: StringFieldUpdateOperationsInput | string
+    attributesMajCat?: StringFieldUpdateOperationsInput | string
+    frGridStatus?: StringFieldUpdateOperationsInput | string
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+  }
+
+  export type BodyArticleDescriptionFormateUncheckedUpdateInput = {
+    id?: IntFieldUpdateOperationsInput | number
+    fgMajCat?: StringFieldUpdateOperationsInput | string
+    attributesMajCat?: StringFieldUpdateOperationsInput | string
+    frGridStatus?: StringFieldUpdateOperationsInput | string
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+  }
+
+  export type BodyArticleDescriptionFormateCreateManyInput = {
+    id?: number
+    fgMajCat: string
+    attributesMajCat: string
+    frGridStatus: string
+    createdAt?: Date | string
+    updatedAt?: Date | string
+  }
+
+  export type BodyArticleDescriptionFormateUpdateManyMutationInput = {
+    fgMajCat?: StringFieldUpdateOperationsInput | string
+    attributesMajCat?: StringFieldUpdateOperationsInput | string
+    frGridStatus?: StringFieldUpdateOperationsInput | string
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+  }
+
+  export type BodyArticleDescriptionFormateUncheckedUpdateManyInput = {
+    id?: IntFieldUpdateOperationsInput | number
+    fgMajCat?: StringFieldUpdateOperationsInput | string
+    attributesMajCat?: StringFieldUpdateOperationsInput | string
+    frGridStatus?: StringFieldUpdateOperationsInput | string
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+  }
+
+  export type GmArticleDescriptionFormateCreateInput = {
+    key: string
+    archetypeNm: string
+    descSeq: string
+    familyCode: string
+    familyName: string
+    createdAt?: Date | string
+    updatedAt?: Date | string
+  }
+
+  export type GmArticleDescriptionFormateUncheckedCreateInput = {
+    id?: number
+    key: string
+    archetypeNm: string
+    descSeq: string
+    familyCode: string
+    familyName: string
+    createdAt?: Date | string
+    updatedAt?: Date | string
+  }
+
+  export type GmArticleDescriptionFormateUpdateInput = {
+    key?: StringFieldUpdateOperationsInput | string
+    archetypeNm?: StringFieldUpdateOperationsInput | string
+    descSeq?: StringFieldUpdateOperationsInput | string
+    familyCode?: StringFieldUpdateOperationsInput | string
+    familyName?: StringFieldUpdateOperationsInput | string
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+  }
+
+  export type GmArticleDescriptionFormateUncheckedUpdateInput = {
+    id?: IntFieldUpdateOperationsInput | number
+    key?: StringFieldUpdateOperationsInput | string
+    archetypeNm?: StringFieldUpdateOperationsInput | string
+    descSeq?: StringFieldUpdateOperationsInput | string
+    familyCode?: StringFieldUpdateOperationsInput | string
+    familyName?: StringFieldUpdateOperationsInput | string
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+  }
+
+  export type GmArticleDescriptionFormateCreateManyInput = {
+    id?: number
+    key: string
+    archetypeNm: string
+    descSeq: string
+    familyCode: string
+    familyName: string
+    createdAt?: Date | string
+    updatedAt?: Date | string
+  }
+
+  export type GmArticleDescriptionFormateUpdateManyMutationInput = {
+    key?: StringFieldUpdateOperationsInput | string
+    archetypeNm?: StringFieldUpdateOperationsInput | string
+    descSeq?: StringFieldUpdateOperationsInput | string
+    familyCode?: StringFieldUpdateOperationsInput | string
+    familyName?: StringFieldUpdateOperationsInput | string
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+  }
+
+  export type GmArticleDescriptionFormateUncheckedUpdateManyInput = {
+    id?: IntFieldUpdateOperationsInput | number
+    key?: StringFieldUpdateOperationsInput | string
+    archetypeNm?: StringFieldUpdateOperationsInput | string
+    descSeq?: StringFieldUpdateOperationsInput | string
+    familyCode?: StringFieldUpdateOperationsInput | string
+    familyName?: StringFieldUpdateOperationsInput | string
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+  }
+
+  export type PreciseBodyArticleConsumptionCreateInput = {
+    division: string
+    subDivision: string
+    majorCategory: string
+    macroBodyDescription: string
+    microBodyArticleNumber: string
+    mNeckType?: string | null
+    mNeckStyle?: string | null
+    mCollarType?: string | null
+    mCollarStyle?: string | null
+    mSleevesMainStyle?: string | null
+    mSleeveFold?: string | null
+    mPlacket?: string | null
+    mBltType?: string | null
+    mBltStyle?: string | null
+    mBtmFold?: string | null
+    mPocket?: string | null
+    mNoOfPocket?: string | null
+    mExtraPocket?: string | null
+    mLength?: string | null
+    mFit?: string | null
+    bodyStyle?: string | null
+    cuttingValue?: Decimal | DecimalJsLike | number | string | null
+    stitchingSam?: Decimal | DecimalJsLike | number | string | null
+    samVal?: Decimal | DecimalJsLike | number | string | null
+    stVal?: Decimal | DecimalJsLike | number | string | null
+    ironingSam?: Decimal | DecimalJsLike | number | string | null
+    finishingSam?: Decimal | DecimalJsLike | number | string | null
+    finishigCost?: Decimal | DecimalJsLike | number | string | null
+    totalCmpCost?: Decimal | DecimalJsLike | number | string | null
+    width15?: Decimal | DecimalJsLike | number | string | null
+    width16?: Decimal | DecimalJsLike | number | string | null
+    width17?: Decimal | DecimalJsLike | number | string | null
+    width18?: Decimal | DecimalJsLike | number | string | null
+    width19?: Decimal | DecimalJsLike | number | string | null
+    width42?: Decimal | DecimalJsLike | number | string | null
+    width43?: Decimal | DecimalJsLike | number | string | null
+    width44?: Decimal | DecimalJsLike | number | string | null
+    width46?: Decimal | DecimalJsLike | number | string | null
+    width48?: Decimal | DecimalJsLike | number | string | null
+    width50?: Decimal | DecimalJsLike | number | string | null
+    width53?: Decimal | DecimalJsLike | number | string | null
+    width54?: Decimal | DecimalJsLike | number | string | null
+    width55?: Decimal | DecimalJsLike | number | string | null
+    width56?: Decimal | DecimalJsLike | number | string | null
+    width57?: Decimal | DecimalJsLike | number | string | null
+    width58?: Decimal | DecimalJsLike | number | string | null
+    width59?: Decimal | DecimalJsLike | number | string | null
+    width60?: Decimal | DecimalJsLike | number | string | null
+    width61?: Decimal | DecimalJsLike | number | string | null
+    width62?: Decimal | DecimalJsLike | number | string | null
+    width63?: Decimal | DecimalJsLike | number | string | null
+    width64?: Decimal | DecimalJsLike | number | string | null
+    width65?: Decimal | DecimalJsLike | number | string | null
+    width66?: Decimal | DecimalJsLike | number | string | null
+    width67?: Decimal | DecimalJsLike | number | string | null
+    width68?: Decimal | DecimalJsLike | number | string | null
+    width69?: Decimal | DecimalJsLike | number | string | null
+    width70?: Decimal | DecimalJsLike | number | string | null
+    width71?: Decimal | DecimalJsLike | number | string | null
+    width72?: Decimal | DecimalJsLike | number | string | null
+    width73?: Decimal | DecimalJsLike | number | string | null
+    width74?: Decimal | DecimalJsLike | number | string | null
+    width76?: Decimal | DecimalJsLike | number | string | null
+    width78?: Decimal | DecimalJsLike | number | string | null
+    width82?: Decimal | DecimalJsLike | number | string | null
+    width92?: Decimal | DecimalJsLike | number | string | null
+    width94?: Decimal | DecimalJsLike | number | string | null
+    width96?: Decimal | DecimalJsLike | number | string | null
+    createdAt?: Date | string
+    updatedAt?: Date | string
+  }
+
+  export type PreciseBodyArticleConsumptionUncheckedCreateInput = {
+    id?: number
+    division: string
+    subDivision: string
+    majorCategory: string
+    macroBodyDescription: string
+    microBodyArticleNumber: string
+    mNeckType?: string | null
+    mNeckStyle?: string | null
+    mCollarType?: string | null
+    mCollarStyle?: string | null
+    mSleevesMainStyle?: string | null
+    mSleeveFold?: string | null
+    mPlacket?: string | null
+    mBltType?: string | null
+    mBltStyle?: string | null
+    mBtmFold?: string | null
+    mPocket?: string | null
+    mNoOfPocket?: string | null
+    mExtraPocket?: string | null
+    mLength?: string | null
+    mFit?: string | null
+    bodyStyle?: string | null
+    cuttingValue?: Decimal | DecimalJsLike | number | string | null
+    stitchingSam?: Decimal | DecimalJsLike | number | string | null
+    samVal?: Decimal | DecimalJsLike | number | string | null
+    stVal?: Decimal | DecimalJsLike | number | string | null
+    ironingSam?: Decimal | DecimalJsLike | number | string | null
+    finishingSam?: Decimal | DecimalJsLike | number | string | null
+    finishigCost?: Decimal | DecimalJsLike | number | string | null
+    totalCmpCost?: Decimal | DecimalJsLike | number | string | null
+    width15?: Decimal | DecimalJsLike | number | string | null
+    width16?: Decimal | DecimalJsLike | number | string | null
+    width17?: Decimal | DecimalJsLike | number | string | null
+    width18?: Decimal | DecimalJsLike | number | string | null
+    width19?: Decimal | DecimalJsLike | number | string | null
+    width42?: Decimal | DecimalJsLike | number | string | null
+    width43?: Decimal | DecimalJsLike | number | string | null
+    width44?: Decimal | DecimalJsLike | number | string | null
+    width46?: Decimal | DecimalJsLike | number | string | null
+    width48?: Decimal | DecimalJsLike | number | string | null
+    width50?: Decimal | DecimalJsLike | number | string | null
+    width53?: Decimal | DecimalJsLike | number | string | null
+    width54?: Decimal | DecimalJsLike | number | string | null
+    width55?: Decimal | DecimalJsLike | number | string | null
+    width56?: Decimal | DecimalJsLike | number | string | null
+    width57?: Decimal | DecimalJsLike | number | string | null
+    width58?: Decimal | DecimalJsLike | number | string | null
+    width59?: Decimal | DecimalJsLike | number | string | null
+    width60?: Decimal | DecimalJsLike | number | string | null
+    width61?: Decimal | DecimalJsLike | number | string | null
+    width62?: Decimal | DecimalJsLike | number | string | null
+    width63?: Decimal | DecimalJsLike | number | string | null
+    width64?: Decimal | DecimalJsLike | number | string | null
+    width65?: Decimal | DecimalJsLike | number | string | null
+    width66?: Decimal | DecimalJsLike | number | string | null
+    width67?: Decimal | DecimalJsLike | number | string | null
+    width68?: Decimal | DecimalJsLike | number | string | null
+    width69?: Decimal | DecimalJsLike | number | string | null
+    width70?: Decimal | DecimalJsLike | number | string | null
+    width71?: Decimal | DecimalJsLike | number | string | null
+    width72?: Decimal | DecimalJsLike | number | string | null
+    width73?: Decimal | DecimalJsLike | number | string | null
+    width74?: Decimal | DecimalJsLike | number | string | null
+    width76?: Decimal | DecimalJsLike | number | string | null
+    width78?: Decimal | DecimalJsLike | number | string | null
+    width82?: Decimal | DecimalJsLike | number | string | null
+    width92?: Decimal | DecimalJsLike | number | string | null
+    width94?: Decimal | DecimalJsLike | number | string | null
+    width96?: Decimal | DecimalJsLike | number | string | null
+    createdAt?: Date | string
+    updatedAt?: Date | string
+  }
+
+  export type PreciseBodyArticleConsumptionUpdateInput = {
+    division?: StringFieldUpdateOperationsInput | string
+    subDivision?: StringFieldUpdateOperationsInput | string
+    majorCategory?: StringFieldUpdateOperationsInput | string
+    macroBodyDescription?: StringFieldUpdateOperationsInput | string
+    microBodyArticleNumber?: StringFieldUpdateOperationsInput | string
+    mNeckType?: NullableStringFieldUpdateOperationsInput | string | null
+    mNeckStyle?: NullableStringFieldUpdateOperationsInput | string | null
+    mCollarType?: NullableStringFieldUpdateOperationsInput | string | null
+    mCollarStyle?: NullableStringFieldUpdateOperationsInput | string | null
+    mSleevesMainStyle?: NullableStringFieldUpdateOperationsInput | string | null
+    mSleeveFold?: NullableStringFieldUpdateOperationsInput | string | null
+    mPlacket?: NullableStringFieldUpdateOperationsInput | string | null
+    mBltType?: NullableStringFieldUpdateOperationsInput | string | null
+    mBltStyle?: NullableStringFieldUpdateOperationsInput | string | null
+    mBtmFold?: NullableStringFieldUpdateOperationsInput | string | null
+    mPocket?: NullableStringFieldUpdateOperationsInput | string | null
+    mNoOfPocket?: NullableStringFieldUpdateOperationsInput | string | null
+    mExtraPocket?: NullableStringFieldUpdateOperationsInput | string | null
+    mLength?: NullableStringFieldUpdateOperationsInput | string | null
+    mFit?: NullableStringFieldUpdateOperationsInput | string | null
+    bodyStyle?: NullableStringFieldUpdateOperationsInput | string | null
+    cuttingValue?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    stitchingSam?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    samVal?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    stVal?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    ironingSam?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    finishingSam?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    finishigCost?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    totalCmpCost?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    width15?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    width16?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    width17?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    width18?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    width19?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    width42?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    width43?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    width44?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    width46?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    width48?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    width50?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    width53?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    width54?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    width55?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    width56?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    width57?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    width58?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    width59?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    width60?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    width61?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    width62?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    width63?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    width64?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    width65?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    width66?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    width67?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    width68?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    width69?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    width70?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    width71?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    width72?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    width73?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    width74?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    width76?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    width78?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    width82?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    width92?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    width94?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    width96?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+  }
+
+  export type PreciseBodyArticleConsumptionUncheckedUpdateInput = {
+    id?: IntFieldUpdateOperationsInput | number
+    division?: StringFieldUpdateOperationsInput | string
+    subDivision?: StringFieldUpdateOperationsInput | string
+    majorCategory?: StringFieldUpdateOperationsInput | string
+    macroBodyDescription?: StringFieldUpdateOperationsInput | string
+    microBodyArticleNumber?: StringFieldUpdateOperationsInput | string
+    mNeckType?: NullableStringFieldUpdateOperationsInput | string | null
+    mNeckStyle?: NullableStringFieldUpdateOperationsInput | string | null
+    mCollarType?: NullableStringFieldUpdateOperationsInput | string | null
+    mCollarStyle?: NullableStringFieldUpdateOperationsInput | string | null
+    mSleevesMainStyle?: NullableStringFieldUpdateOperationsInput | string | null
+    mSleeveFold?: NullableStringFieldUpdateOperationsInput | string | null
+    mPlacket?: NullableStringFieldUpdateOperationsInput | string | null
+    mBltType?: NullableStringFieldUpdateOperationsInput | string | null
+    mBltStyle?: NullableStringFieldUpdateOperationsInput | string | null
+    mBtmFold?: NullableStringFieldUpdateOperationsInput | string | null
+    mPocket?: NullableStringFieldUpdateOperationsInput | string | null
+    mNoOfPocket?: NullableStringFieldUpdateOperationsInput | string | null
+    mExtraPocket?: NullableStringFieldUpdateOperationsInput | string | null
+    mLength?: NullableStringFieldUpdateOperationsInput | string | null
+    mFit?: NullableStringFieldUpdateOperationsInput | string | null
+    bodyStyle?: NullableStringFieldUpdateOperationsInput | string | null
+    cuttingValue?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    stitchingSam?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    samVal?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    stVal?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    ironingSam?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    finishingSam?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    finishigCost?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    totalCmpCost?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    width15?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    width16?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    width17?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    width18?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    width19?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    width42?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    width43?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    width44?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    width46?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    width48?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    width50?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    width53?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    width54?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    width55?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    width56?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    width57?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    width58?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    width59?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    width60?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    width61?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    width62?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    width63?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    width64?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    width65?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    width66?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    width67?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    width68?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    width69?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    width70?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    width71?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    width72?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    width73?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    width74?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    width76?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    width78?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    width82?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    width92?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    width94?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    width96?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+  }
+
+  export type PreciseBodyArticleConsumptionCreateManyInput = {
+    id?: number
+    division: string
+    subDivision: string
+    majorCategory: string
+    macroBodyDescription: string
+    microBodyArticleNumber: string
+    mNeckType?: string | null
+    mNeckStyle?: string | null
+    mCollarType?: string | null
+    mCollarStyle?: string | null
+    mSleevesMainStyle?: string | null
+    mSleeveFold?: string | null
+    mPlacket?: string | null
+    mBltType?: string | null
+    mBltStyle?: string | null
+    mBtmFold?: string | null
+    mPocket?: string | null
+    mNoOfPocket?: string | null
+    mExtraPocket?: string | null
+    mLength?: string | null
+    mFit?: string | null
+    bodyStyle?: string | null
+    cuttingValue?: Decimal | DecimalJsLike | number | string | null
+    stitchingSam?: Decimal | DecimalJsLike | number | string | null
+    samVal?: Decimal | DecimalJsLike | number | string | null
+    stVal?: Decimal | DecimalJsLike | number | string | null
+    ironingSam?: Decimal | DecimalJsLike | number | string | null
+    finishingSam?: Decimal | DecimalJsLike | number | string | null
+    finishigCost?: Decimal | DecimalJsLike | number | string | null
+    totalCmpCost?: Decimal | DecimalJsLike | number | string | null
+    width15?: Decimal | DecimalJsLike | number | string | null
+    width16?: Decimal | DecimalJsLike | number | string | null
+    width17?: Decimal | DecimalJsLike | number | string | null
+    width18?: Decimal | DecimalJsLike | number | string | null
+    width19?: Decimal | DecimalJsLike | number | string | null
+    width42?: Decimal | DecimalJsLike | number | string | null
+    width43?: Decimal | DecimalJsLike | number | string | null
+    width44?: Decimal | DecimalJsLike | number | string | null
+    width46?: Decimal | DecimalJsLike | number | string | null
+    width48?: Decimal | DecimalJsLike | number | string | null
+    width50?: Decimal | DecimalJsLike | number | string | null
+    width53?: Decimal | DecimalJsLike | number | string | null
+    width54?: Decimal | DecimalJsLike | number | string | null
+    width55?: Decimal | DecimalJsLike | number | string | null
+    width56?: Decimal | DecimalJsLike | number | string | null
+    width57?: Decimal | DecimalJsLike | number | string | null
+    width58?: Decimal | DecimalJsLike | number | string | null
+    width59?: Decimal | DecimalJsLike | number | string | null
+    width60?: Decimal | DecimalJsLike | number | string | null
+    width61?: Decimal | DecimalJsLike | number | string | null
+    width62?: Decimal | DecimalJsLike | number | string | null
+    width63?: Decimal | DecimalJsLike | number | string | null
+    width64?: Decimal | DecimalJsLike | number | string | null
+    width65?: Decimal | DecimalJsLike | number | string | null
+    width66?: Decimal | DecimalJsLike | number | string | null
+    width67?: Decimal | DecimalJsLike | number | string | null
+    width68?: Decimal | DecimalJsLike | number | string | null
+    width69?: Decimal | DecimalJsLike | number | string | null
+    width70?: Decimal | DecimalJsLike | number | string | null
+    width71?: Decimal | DecimalJsLike | number | string | null
+    width72?: Decimal | DecimalJsLike | number | string | null
+    width73?: Decimal | DecimalJsLike | number | string | null
+    width74?: Decimal | DecimalJsLike | number | string | null
+    width76?: Decimal | DecimalJsLike | number | string | null
+    width78?: Decimal | DecimalJsLike | number | string | null
+    width82?: Decimal | DecimalJsLike | number | string | null
+    width92?: Decimal | DecimalJsLike | number | string | null
+    width94?: Decimal | DecimalJsLike | number | string | null
+    width96?: Decimal | DecimalJsLike | number | string | null
+    createdAt?: Date | string
+    updatedAt?: Date | string
+  }
+
+  export type PreciseBodyArticleConsumptionUpdateManyMutationInput = {
+    division?: StringFieldUpdateOperationsInput | string
+    subDivision?: StringFieldUpdateOperationsInput | string
+    majorCategory?: StringFieldUpdateOperationsInput | string
+    macroBodyDescription?: StringFieldUpdateOperationsInput | string
+    microBodyArticleNumber?: StringFieldUpdateOperationsInput | string
+    mNeckType?: NullableStringFieldUpdateOperationsInput | string | null
+    mNeckStyle?: NullableStringFieldUpdateOperationsInput | string | null
+    mCollarType?: NullableStringFieldUpdateOperationsInput | string | null
+    mCollarStyle?: NullableStringFieldUpdateOperationsInput | string | null
+    mSleevesMainStyle?: NullableStringFieldUpdateOperationsInput | string | null
+    mSleeveFold?: NullableStringFieldUpdateOperationsInput | string | null
+    mPlacket?: NullableStringFieldUpdateOperationsInput | string | null
+    mBltType?: NullableStringFieldUpdateOperationsInput | string | null
+    mBltStyle?: NullableStringFieldUpdateOperationsInput | string | null
+    mBtmFold?: NullableStringFieldUpdateOperationsInput | string | null
+    mPocket?: NullableStringFieldUpdateOperationsInput | string | null
+    mNoOfPocket?: NullableStringFieldUpdateOperationsInput | string | null
+    mExtraPocket?: NullableStringFieldUpdateOperationsInput | string | null
+    mLength?: NullableStringFieldUpdateOperationsInput | string | null
+    mFit?: NullableStringFieldUpdateOperationsInput | string | null
+    bodyStyle?: NullableStringFieldUpdateOperationsInput | string | null
+    cuttingValue?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    stitchingSam?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    samVal?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    stVal?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    ironingSam?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    finishingSam?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    finishigCost?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    totalCmpCost?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    width15?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    width16?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    width17?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    width18?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    width19?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    width42?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    width43?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    width44?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    width46?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    width48?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    width50?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    width53?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    width54?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    width55?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    width56?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    width57?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    width58?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    width59?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    width60?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    width61?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    width62?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    width63?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    width64?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    width65?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    width66?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    width67?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    width68?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    width69?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    width70?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    width71?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    width72?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    width73?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    width74?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    width76?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    width78?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    width82?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    width92?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    width94?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    width96?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+  }
+
+  export type PreciseBodyArticleConsumptionUncheckedUpdateManyInput = {
+    id?: IntFieldUpdateOperationsInput | number
+    division?: StringFieldUpdateOperationsInput | string
+    subDivision?: StringFieldUpdateOperationsInput | string
+    majorCategory?: StringFieldUpdateOperationsInput | string
+    macroBodyDescription?: StringFieldUpdateOperationsInput | string
+    microBodyArticleNumber?: StringFieldUpdateOperationsInput | string
+    mNeckType?: NullableStringFieldUpdateOperationsInput | string | null
+    mNeckStyle?: NullableStringFieldUpdateOperationsInput | string | null
+    mCollarType?: NullableStringFieldUpdateOperationsInput | string | null
+    mCollarStyle?: NullableStringFieldUpdateOperationsInput | string | null
+    mSleevesMainStyle?: NullableStringFieldUpdateOperationsInput | string | null
+    mSleeveFold?: NullableStringFieldUpdateOperationsInput | string | null
+    mPlacket?: NullableStringFieldUpdateOperationsInput | string | null
+    mBltType?: NullableStringFieldUpdateOperationsInput | string | null
+    mBltStyle?: NullableStringFieldUpdateOperationsInput | string | null
+    mBtmFold?: NullableStringFieldUpdateOperationsInput | string | null
+    mPocket?: NullableStringFieldUpdateOperationsInput | string | null
+    mNoOfPocket?: NullableStringFieldUpdateOperationsInput | string | null
+    mExtraPocket?: NullableStringFieldUpdateOperationsInput | string | null
+    mLength?: NullableStringFieldUpdateOperationsInput | string | null
+    mFit?: NullableStringFieldUpdateOperationsInput | string | null
+    bodyStyle?: NullableStringFieldUpdateOperationsInput | string | null
+    cuttingValue?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    stitchingSam?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    samVal?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    stVal?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    ironingSam?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    finishingSam?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    finishigCost?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    totalCmpCost?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    width15?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    width16?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    width17?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    width18?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    width19?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    width42?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    width43?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    width44?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    width46?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    width48?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    width50?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    width53?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    width54?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    width55?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    width56?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    width57?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    width58?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    width59?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    width60?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    width61?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    width62?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    width63?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    width64?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    width65?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    width66?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    width67?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    width68?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    width69?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    width70?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    width71?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    width72?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    width73?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    width74?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    width76?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    width78?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    width82?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    width92?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    width94?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    width96?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
   }
 
   export type IntFilter<$PrismaModel = never> = {
@@ -103728,11 +112694,16 @@ export namespace Prisma {
     cmpCost?: SortOrder
     fabCost?: SortOrder
     fabCons?: SortOrder
-    width?: SortOrder
+    autoBgt?: SortOrder
+    roughV2?: SortOrder
     vendorFabricRate?: SortOrder
-    valueAddAccCostType?: SortOrder
-    valueAddCost?: SortOrder
-    valueAddProcessCost?: SortOrder
+    finalCost?: SortOrder
+    roughRatio?: SortOrder
+    roughConsumptionKg?: SortOrder
+    roughConsumptionMeter?: SortOrder
+    preciseRatio?: SortOrder
+    preciseConsumptionKg?: SortOrder
+    preciseConsumptionMeter?: SortOrder
     bodyArticle?: SortOrder
     bodyArticleDescription?: SortOrder
     fabricArticleNumber?: SortOrder
@@ -103793,10 +112764,16 @@ export namespace Prisma {
     cmpCost?: SortOrder
     fabCost?: SortOrder
     fabCons?: SortOrder
-    width?: SortOrder
+    autoBgt?: SortOrder
+    roughV2?: SortOrder
     vendorFabricRate?: SortOrder
-    valueAddCost?: SortOrder
-    valueAddProcessCost?: SortOrder
+    finalCost?: SortOrder
+    roughRatio?: SortOrder
+    roughConsumptionKg?: SortOrder
+    roughConsumptionMeter?: SortOrder
+    preciseRatio?: SortOrder
+    preciseConsumptionKg?: SortOrder
+    preciseConsumptionMeter?: SortOrder
     mrp?: SortOrder
     approvedBy?: SortOrder
     comboChildOrder?: SortOrder
@@ -103902,11 +112879,16 @@ export namespace Prisma {
     cmpCost?: SortOrder
     fabCost?: SortOrder
     fabCons?: SortOrder
-    width?: SortOrder
+    autoBgt?: SortOrder
+    roughV2?: SortOrder
     vendorFabricRate?: SortOrder
-    valueAddAccCostType?: SortOrder
-    valueAddCost?: SortOrder
-    valueAddProcessCost?: SortOrder
+    finalCost?: SortOrder
+    roughRatio?: SortOrder
+    roughConsumptionKg?: SortOrder
+    roughConsumptionMeter?: SortOrder
+    preciseRatio?: SortOrder
+    preciseConsumptionKg?: SortOrder
+    preciseConsumptionMeter?: SortOrder
     bodyArticle?: SortOrder
     bodyArticleDescription?: SortOrder
     fabricArticleNumber?: SortOrder
@@ -104051,11 +113033,16 @@ export namespace Prisma {
     cmpCost?: SortOrder
     fabCost?: SortOrder
     fabCons?: SortOrder
-    width?: SortOrder
+    autoBgt?: SortOrder
+    roughV2?: SortOrder
     vendorFabricRate?: SortOrder
-    valueAddAccCostType?: SortOrder
-    valueAddCost?: SortOrder
-    valueAddProcessCost?: SortOrder
+    finalCost?: SortOrder
+    roughRatio?: SortOrder
+    roughConsumptionKg?: SortOrder
+    roughConsumptionMeter?: SortOrder
+    preciseRatio?: SortOrder
+    preciseConsumptionKg?: SortOrder
+    preciseConsumptionMeter?: SortOrder
     bodyArticle?: SortOrder
     bodyArticleDescription?: SortOrder
     fabricArticleNumber?: SortOrder
@@ -104115,10 +113102,16 @@ export namespace Prisma {
     cmpCost?: SortOrder
     fabCost?: SortOrder
     fabCons?: SortOrder
-    width?: SortOrder
+    autoBgt?: SortOrder
+    roughV2?: SortOrder
     vendorFabricRate?: SortOrder
-    valueAddCost?: SortOrder
-    valueAddProcessCost?: SortOrder
+    finalCost?: SortOrder
+    roughRatio?: SortOrder
+    roughConsumptionKg?: SortOrder
+    roughConsumptionMeter?: SortOrder
+    preciseRatio?: SortOrder
+    preciseConsumptionKg?: SortOrder
+    preciseConsumptionMeter?: SortOrder
     mrp?: SortOrder
     approvedBy?: SortOrder
     comboChildOrder?: SortOrder
@@ -106886,6 +115879,161 @@ export namespace Prisma {
     approvedBy?: SortOrder
   }
 
+  export type BigIntFilter<$PrismaModel = never> = {
+    equals?: bigint | number | BigIntFieldRefInput<$PrismaModel>
+    in?: bigint[] | number[] | ListBigIntFieldRefInput<$PrismaModel>
+    notIn?: bigint[] | number[] | ListBigIntFieldRefInput<$PrismaModel>
+    lt?: bigint | number | BigIntFieldRefInput<$PrismaModel>
+    lte?: bigint | number | BigIntFieldRefInput<$PrismaModel>
+    gt?: bigint | number | BigIntFieldRefInput<$PrismaModel>
+    gte?: bigint | number | BigIntFieldRefInput<$PrismaModel>
+    not?: NestedBigIntFilter<$PrismaModel> | bigint | number
+  }
+
+  export type BigIntNullableFilter<$PrismaModel = never> = {
+    equals?: bigint | number | BigIntFieldRefInput<$PrismaModel> | null
+    in?: bigint[] | number[] | ListBigIntFieldRefInput<$PrismaModel> | null
+    notIn?: bigint[] | number[] | ListBigIntFieldRefInput<$PrismaModel> | null
+    lt?: bigint | number | BigIntFieldRefInput<$PrismaModel>
+    lte?: bigint | number | BigIntFieldRefInput<$PrismaModel>
+    gt?: bigint | number | BigIntFieldRefInput<$PrismaModel>
+    gte?: bigint | number | BigIntFieldRefInput<$PrismaModel>
+    not?: NestedBigIntNullableFilter<$PrismaModel> | bigint | number | null
+  }
+
+  export type PreciseFabricArticleDataOrderByRelevanceInput = {
+    fields: PreciseFabricArticleDataOrderByRelevanceFieldEnum | PreciseFabricArticleDataOrderByRelevanceFieldEnum[]
+    sort: SortOrder
+    search: string
+  }
+
+  export type PreciseFabricArticleDataCountOrderByAggregateInput = {
+    id?: SortOrder
+    fabricArticleNumber?: SortOrder
+    fabricArticleDescription?: SortOrder
+    division?: SortOrder
+    subDivision?: SortOrder
+    majorCategory?: SortOrder
+    vendorName?: SortOrder
+    vendorCode?: SortOrder
+    fabricRate?: SortOrder
+    mFabDiv?: SortOrder
+    mYarn?: SortOrder
+    mFabMainMvgr1?: SortOrder
+    mFabMainMvgr2?: SortOrder
+    mConstruction?: SortOrder
+    mOunz?: SortOrder
+    mWidth?: SortOrder
+    mWeave01?: SortOrder
+    mWeave02?: SortOrder
+    mCount?: SortOrder
+    mComposition?: SortOrder
+    mFinish?: SortOrder
+    mGsm?: SortOrder
+    mLycra?: SortOrder
+    createdAt?: SortOrder
+  }
+
+  export type PreciseFabricArticleDataAvgOrderByAggregateInput = {
+    id?: SortOrder
+    fabricArticleNumber?: SortOrder
+    vendorCode?: SortOrder
+    fabricRate?: SortOrder
+  }
+
+  export type PreciseFabricArticleDataMaxOrderByAggregateInput = {
+    id?: SortOrder
+    fabricArticleNumber?: SortOrder
+    fabricArticleDescription?: SortOrder
+    division?: SortOrder
+    subDivision?: SortOrder
+    majorCategory?: SortOrder
+    vendorName?: SortOrder
+    vendorCode?: SortOrder
+    fabricRate?: SortOrder
+    mFabDiv?: SortOrder
+    mYarn?: SortOrder
+    mFabMainMvgr1?: SortOrder
+    mFabMainMvgr2?: SortOrder
+    mConstruction?: SortOrder
+    mOunz?: SortOrder
+    mWidth?: SortOrder
+    mWeave01?: SortOrder
+    mWeave02?: SortOrder
+    mCount?: SortOrder
+    mComposition?: SortOrder
+    mFinish?: SortOrder
+    mGsm?: SortOrder
+    mLycra?: SortOrder
+    createdAt?: SortOrder
+  }
+
+  export type PreciseFabricArticleDataMinOrderByAggregateInput = {
+    id?: SortOrder
+    fabricArticleNumber?: SortOrder
+    fabricArticleDescription?: SortOrder
+    division?: SortOrder
+    subDivision?: SortOrder
+    majorCategory?: SortOrder
+    vendorName?: SortOrder
+    vendorCode?: SortOrder
+    fabricRate?: SortOrder
+    mFabDiv?: SortOrder
+    mYarn?: SortOrder
+    mFabMainMvgr1?: SortOrder
+    mFabMainMvgr2?: SortOrder
+    mConstruction?: SortOrder
+    mOunz?: SortOrder
+    mWidth?: SortOrder
+    mWeave01?: SortOrder
+    mWeave02?: SortOrder
+    mCount?: SortOrder
+    mComposition?: SortOrder
+    mFinish?: SortOrder
+    mGsm?: SortOrder
+    mLycra?: SortOrder
+    createdAt?: SortOrder
+  }
+
+  export type PreciseFabricArticleDataSumOrderByAggregateInput = {
+    id?: SortOrder
+    fabricArticleNumber?: SortOrder
+    vendorCode?: SortOrder
+    fabricRate?: SortOrder
+  }
+
+  export type BigIntWithAggregatesFilter<$PrismaModel = never> = {
+    equals?: bigint | number | BigIntFieldRefInput<$PrismaModel>
+    in?: bigint[] | number[] | ListBigIntFieldRefInput<$PrismaModel>
+    notIn?: bigint[] | number[] | ListBigIntFieldRefInput<$PrismaModel>
+    lt?: bigint | number | BigIntFieldRefInput<$PrismaModel>
+    lte?: bigint | number | BigIntFieldRefInput<$PrismaModel>
+    gt?: bigint | number | BigIntFieldRefInput<$PrismaModel>
+    gte?: bigint | number | BigIntFieldRefInput<$PrismaModel>
+    not?: NestedBigIntWithAggregatesFilter<$PrismaModel> | bigint | number
+    _count?: NestedIntFilter<$PrismaModel>
+    _avg?: NestedFloatFilter<$PrismaModel>
+    _sum?: NestedBigIntFilter<$PrismaModel>
+    _min?: NestedBigIntFilter<$PrismaModel>
+    _max?: NestedBigIntFilter<$PrismaModel>
+  }
+
+  export type BigIntNullableWithAggregatesFilter<$PrismaModel = never> = {
+    equals?: bigint | number | BigIntFieldRefInput<$PrismaModel> | null
+    in?: bigint[] | number[] | ListBigIntFieldRefInput<$PrismaModel> | null
+    notIn?: bigint[] | number[] | ListBigIntFieldRefInput<$PrismaModel> | null
+    lt?: bigint | number | BigIntFieldRefInput<$PrismaModel>
+    lte?: bigint | number | BigIntFieldRefInput<$PrismaModel>
+    gt?: bigint | number | BigIntFieldRefInput<$PrismaModel>
+    gte?: bigint | number | BigIntFieldRefInput<$PrismaModel>
+    not?: NestedBigIntNullableWithAggregatesFilter<$PrismaModel> | bigint | number | null
+    _count?: NestedIntNullableFilter<$PrismaModel>
+    _avg?: NestedFloatNullableFilter<$PrismaModel>
+    _sum?: NestedBigIntNullableFilter<$PrismaModel>
+    _min?: NestedBigIntNullableFilter<$PrismaModel>
+    _max?: NestedBigIntNullableFilter<$PrismaModel>
+  }
+
   export type GmArticleDataOrderByRelevanceInput = {
     fields: GmArticleDataOrderByRelevanceFieldEnum | GmArticleDataOrderByRelevanceFieldEnum[]
     sort: SortOrder
@@ -107708,9 +116856,7 @@ export namespace Prisma {
     fabCost?: SortOrder
     fabCons?: SortOrder
     width?: SortOrder
-    basicTrimCost?: SortOrder
     roughCmpCost?: SortOrder
-    costingType?: SortOrder
     bodyConsumptionType?: SortOrder
     gsm?: SortOrder
     ratio?: SortOrder
@@ -107749,7 +116895,6 @@ export namespace Prisma {
     fabCost?: SortOrder
     fabCons?: SortOrder
     width?: SortOrder
-    basicTrimCost?: SortOrder
     roughCmpCost?: SortOrder
     gsm?: SortOrder
     ratio?: SortOrder
@@ -107792,9 +116937,7 @@ export namespace Prisma {
     fabCost?: SortOrder
     fabCons?: SortOrder
     width?: SortOrder
-    basicTrimCost?: SortOrder
     roughCmpCost?: SortOrder
-    costingType?: SortOrder
     bodyConsumptionType?: SortOrder
     gsm?: SortOrder
     ratio?: SortOrder
@@ -107856,9 +116999,7 @@ export namespace Prisma {
     fabCost?: SortOrder
     fabCons?: SortOrder
     width?: SortOrder
-    basicTrimCost?: SortOrder
     roughCmpCost?: SortOrder
-    costingType?: SortOrder
     bodyConsumptionType?: SortOrder
     gsm?: SortOrder
     ratio?: SortOrder
@@ -107897,7 +117038,6 @@ export namespace Prisma {
     fabCost?: SortOrder
     fabCons?: SortOrder
     width?: SortOrder
-    basicTrimCost?: SortOrder
     roughCmpCost?: SortOrder
     gsm?: SortOrder
     ratio?: SortOrder
@@ -108280,6 +117420,59 @@ export namespace Prisma {
     packagingTotal?: SortOrder
     threadCost?: SortOrder
     basicTrimsCost?: SortOrder
+  }
+
+  export type PreciseTrimMasterOrderByRelevanceInput = {
+    fields: PreciseTrimMasterOrderByRelevanceFieldEnum | PreciseTrimMasterOrderByRelevanceFieldEnum[]
+    sort: SortOrder
+    search: string
+  }
+
+  export type PreciseTrimMasterAttributeNameTypeCompoundUniqueInput = {
+    attributeName: string
+    type: string
+  }
+
+  export type PreciseTrimMasterCountOrderByAggregateInput = {
+    id?: SortOrder
+    attributeName?: SortOrder
+    type?: SortOrder
+    bt1?: SortOrder
+    bt2?: SortOrder
+    createdAt?: SortOrder
+    updatedAt?: SortOrder
+  }
+
+  export type PreciseTrimMasterAvgOrderByAggregateInput = {
+    id?: SortOrder
+    bt1?: SortOrder
+    bt2?: SortOrder
+  }
+
+  export type PreciseTrimMasterMaxOrderByAggregateInput = {
+    id?: SortOrder
+    attributeName?: SortOrder
+    type?: SortOrder
+    bt1?: SortOrder
+    bt2?: SortOrder
+    createdAt?: SortOrder
+    updatedAt?: SortOrder
+  }
+
+  export type PreciseTrimMasterMinOrderByAggregateInput = {
+    id?: SortOrder
+    attributeName?: SortOrder
+    type?: SortOrder
+    bt1?: SortOrder
+    bt2?: SortOrder
+    createdAt?: SortOrder
+    updatedAt?: SortOrder
+  }
+
+  export type PreciseTrimMasterSumOrderByAggregateInput = {
+    id?: SortOrder
+    bt1?: SortOrder
+    bt2?: SortOrder
   }
 
   export type BasicTrimCostMasterScalarRelationFilter = {
@@ -108787,6 +117980,429 @@ export namespace Prisma {
     _count?: NestedIntFilter<$PrismaModel>
     _min?: NestedEnumExpenseAuditEventTypeFilter<$PrismaModel>
     _max?: NestedEnumExpenseAuditEventTypeFilter<$PrismaModel>
+  }
+
+  export type BodyArticleDescriptionFormateOrderByRelevanceInput = {
+    fields: BodyArticleDescriptionFormateOrderByRelevanceFieldEnum | BodyArticleDescriptionFormateOrderByRelevanceFieldEnum[]
+    sort: SortOrder
+    search: string
+  }
+
+  export type BodyArticleDescriptionFormateFgMajCatAttributesMajCatCompoundUniqueInput = {
+    fgMajCat: string
+    attributesMajCat: string
+  }
+
+  export type BodyArticleDescriptionFormateCountOrderByAggregateInput = {
+    id?: SortOrder
+    fgMajCat?: SortOrder
+    attributesMajCat?: SortOrder
+    frGridStatus?: SortOrder
+    createdAt?: SortOrder
+    updatedAt?: SortOrder
+  }
+
+  export type BodyArticleDescriptionFormateAvgOrderByAggregateInput = {
+    id?: SortOrder
+  }
+
+  export type BodyArticleDescriptionFormateMaxOrderByAggregateInput = {
+    id?: SortOrder
+    fgMajCat?: SortOrder
+    attributesMajCat?: SortOrder
+    frGridStatus?: SortOrder
+    createdAt?: SortOrder
+    updatedAt?: SortOrder
+  }
+
+  export type BodyArticleDescriptionFormateMinOrderByAggregateInput = {
+    id?: SortOrder
+    fgMajCat?: SortOrder
+    attributesMajCat?: SortOrder
+    frGridStatus?: SortOrder
+    createdAt?: SortOrder
+    updatedAt?: SortOrder
+  }
+
+  export type BodyArticleDescriptionFormateSumOrderByAggregateInput = {
+    id?: SortOrder
+  }
+
+  export type GmArticleDescriptionFormateOrderByRelevanceInput = {
+    fields: GmArticleDescriptionFormateOrderByRelevanceFieldEnum | GmArticleDescriptionFormateOrderByRelevanceFieldEnum[]
+    sort: SortOrder
+    search: string
+  }
+
+  export type GmArticleDescriptionFormateCountOrderByAggregateInput = {
+    id?: SortOrder
+    key?: SortOrder
+    archetypeNm?: SortOrder
+    descSeq?: SortOrder
+    familyCode?: SortOrder
+    familyName?: SortOrder
+    createdAt?: SortOrder
+    updatedAt?: SortOrder
+  }
+
+  export type GmArticleDescriptionFormateAvgOrderByAggregateInput = {
+    id?: SortOrder
+  }
+
+  export type GmArticleDescriptionFormateMaxOrderByAggregateInput = {
+    id?: SortOrder
+    key?: SortOrder
+    archetypeNm?: SortOrder
+    descSeq?: SortOrder
+    familyCode?: SortOrder
+    familyName?: SortOrder
+    createdAt?: SortOrder
+    updatedAt?: SortOrder
+  }
+
+  export type GmArticleDescriptionFormateMinOrderByAggregateInput = {
+    id?: SortOrder
+    key?: SortOrder
+    archetypeNm?: SortOrder
+    descSeq?: SortOrder
+    familyCode?: SortOrder
+    familyName?: SortOrder
+    createdAt?: SortOrder
+    updatedAt?: SortOrder
+  }
+
+  export type GmArticleDescriptionFormateSumOrderByAggregateInput = {
+    id?: SortOrder
+  }
+
+  export type PreciseBodyArticleConsumptionOrderByRelevanceInput = {
+    fields: PreciseBodyArticleConsumptionOrderByRelevanceFieldEnum | PreciseBodyArticleConsumptionOrderByRelevanceFieldEnum[]
+    sort: SortOrder
+    search: string
+  }
+
+  export type PreciseBodyArticleConsumptionCountOrderByAggregateInput = {
+    id?: SortOrder
+    division?: SortOrder
+    subDivision?: SortOrder
+    majorCategory?: SortOrder
+    macroBodyDescription?: SortOrder
+    microBodyArticleNumber?: SortOrder
+    mNeckType?: SortOrder
+    mNeckStyle?: SortOrder
+    mCollarType?: SortOrder
+    mCollarStyle?: SortOrder
+    mSleevesMainStyle?: SortOrder
+    mSleeveFold?: SortOrder
+    mPlacket?: SortOrder
+    mBltType?: SortOrder
+    mBltStyle?: SortOrder
+    mBtmFold?: SortOrder
+    mPocket?: SortOrder
+    mNoOfPocket?: SortOrder
+    mExtraPocket?: SortOrder
+    mLength?: SortOrder
+    mFit?: SortOrder
+    bodyStyle?: SortOrder
+    cuttingValue?: SortOrder
+    stitchingSam?: SortOrder
+    samVal?: SortOrder
+    stVal?: SortOrder
+    ironingSam?: SortOrder
+    finishingSam?: SortOrder
+    finishigCost?: SortOrder
+    totalCmpCost?: SortOrder
+    width15?: SortOrder
+    width16?: SortOrder
+    width17?: SortOrder
+    width18?: SortOrder
+    width19?: SortOrder
+    width42?: SortOrder
+    width43?: SortOrder
+    width44?: SortOrder
+    width46?: SortOrder
+    width48?: SortOrder
+    width50?: SortOrder
+    width53?: SortOrder
+    width54?: SortOrder
+    width55?: SortOrder
+    width56?: SortOrder
+    width57?: SortOrder
+    width58?: SortOrder
+    width59?: SortOrder
+    width60?: SortOrder
+    width61?: SortOrder
+    width62?: SortOrder
+    width63?: SortOrder
+    width64?: SortOrder
+    width65?: SortOrder
+    width66?: SortOrder
+    width67?: SortOrder
+    width68?: SortOrder
+    width69?: SortOrder
+    width70?: SortOrder
+    width71?: SortOrder
+    width72?: SortOrder
+    width73?: SortOrder
+    width74?: SortOrder
+    width76?: SortOrder
+    width78?: SortOrder
+    width82?: SortOrder
+    width92?: SortOrder
+    width94?: SortOrder
+    width96?: SortOrder
+    createdAt?: SortOrder
+    updatedAt?: SortOrder
+  }
+
+  export type PreciseBodyArticleConsumptionAvgOrderByAggregateInput = {
+    id?: SortOrder
+    cuttingValue?: SortOrder
+    stitchingSam?: SortOrder
+    samVal?: SortOrder
+    stVal?: SortOrder
+    ironingSam?: SortOrder
+    finishingSam?: SortOrder
+    finishigCost?: SortOrder
+    totalCmpCost?: SortOrder
+    width15?: SortOrder
+    width16?: SortOrder
+    width17?: SortOrder
+    width18?: SortOrder
+    width19?: SortOrder
+    width42?: SortOrder
+    width43?: SortOrder
+    width44?: SortOrder
+    width46?: SortOrder
+    width48?: SortOrder
+    width50?: SortOrder
+    width53?: SortOrder
+    width54?: SortOrder
+    width55?: SortOrder
+    width56?: SortOrder
+    width57?: SortOrder
+    width58?: SortOrder
+    width59?: SortOrder
+    width60?: SortOrder
+    width61?: SortOrder
+    width62?: SortOrder
+    width63?: SortOrder
+    width64?: SortOrder
+    width65?: SortOrder
+    width66?: SortOrder
+    width67?: SortOrder
+    width68?: SortOrder
+    width69?: SortOrder
+    width70?: SortOrder
+    width71?: SortOrder
+    width72?: SortOrder
+    width73?: SortOrder
+    width74?: SortOrder
+    width76?: SortOrder
+    width78?: SortOrder
+    width82?: SortOrder
+    width92?: SortOrder
+    width94?: SortOrder
+    width96?: SortOrder
+  }
+
+  export type PreciseBodyArticleConsumptionMaxOrderByAggregateInput = {
+    id?: SortOrder
+    division?: SortOrder
+    subDivision?: SortOrder
+    majorCategory?: SortOrder
+    macroBodyDescription?: SortOrder
+    microBodyArticleNumber?: SortOrder
+    mNeckType?: SortOrder
+    mNeckStyle?: SortOrder
+    mCollarType?: SortOrder
+    mCollarStyle?: SortOrder
+    mSleevesMainStyle?: SortOrder
+    mSleeveFold?: SortOrder
+    mPlacket?: SortOrder
+    mBltType?: SortOrder
+    mBltStyle?: SortOrder
+    mBtmFold?: SortOrder
+    mPocket?: SortOrder
+    mNoOfPocket?: SortOrder
+    mExtraPocket?: SortOrder
+    mLength?: SortOrder
+    mFit?: SortOrder
+    bodyStyle?: SortOrder
+    cuttingValue?: SortOrder
+    stitchingSam?: SortOrder
+    samVal?: SortOrder
+    stVal?: SortOrder
+    ironingSam?: SortOrder
+    finishingSam?: SortOrder
+    finishigCost?: SortOrder
+    totalCmpCost?: SortOrder
+    width15?: SortOrder
+    width16?: SortOrder
+    width17?: SortOrder
+    width18?: SortOrder
+    width19?: SortOrder
+    width42?: SortOrder
+    width43?: SortOrder
+    width44?: SortOrder
+    width46?: SortOrder
+    width48?: SortOrder
+    width50?: SortOrder
+    width53?: SortOrder
+    width54?: SortOrder
+    width55?: SortOrder
+    width56?: SortOrder
+    width57?: SortOrder
+    width58?: SortOrder
+    width59?: SortOrder
+    width60?: SortOrder
+    width61?: SortOrder
+    width62?: SortOrder
+    width63?: SortOrder
+    width64?: SortOrder
+    width65?: SortOrder
+    width66?: SortOrder
+    width67?: SortOrder
+    width68?: SortOrder
+    width69?: SortOrder
+    width70?: SortOrder
+    width71?: SortOrder
+    width72?: SortOrder
+    width73?: SortOrder
+    width74?: SortOrder
+    width76?: SortOrder
+    width78?: SortOrder
+    width82?: SortOrder
+    width92?: SortOrder
+    width94?: SortOrder
+    width96?: SortOrder
+    createdAt?: SortOrder
+    updatedAt?: SortOrder
+  }
+
+  export type PreciseBodyArticleConsumptionMinOrderByAggregateInput = {
+    id?: SortOrder
+    division?: SortOrder
+    subDivision?: SortOrder
+    majorCategory?: SortOrder
+    macroBodyDescription?: SortOrder
+    microBodyArticleNumber?: SortOrder
+    mNeckType?: SortOrder
+    mNeckStyle?: SortOrder
+    mCollarType?: SortOrder
+    mCollarStyle?: SortOrder
+    mSleevesMainStyle?: SortOrder
+    mSleeveFold?: SortOrder
+    mPlacket?: SortOrder
+    mBltType?: SortOrder
+    mBltStyle?: SortOrder
+    mBtmFold?: SortOrder
+    mPocket?: SortOrder
+    mNoOfPocket?: SortOrder
+    mExtraPocket?: SortOrder
+    mLength?: SortOrder
+    mFit?: SortOrder
+    bodyStyle?: SortOrder
+    cuttingValue?: SortOrder
+    stitchingSam?: SortOrder
+    samVal?: SortOrder
+    stVal?: SortOrder
+    ironingSam?: SortOrder
+    finishingSam?: SortOrder
+    finishigCost?: SortOrder
+    totalCmpCost?: SortOrder
+    width15?: SortOrder
+    width16?: SortOrder
+    width17?: SortOrder
+    width18?: SortOrder
+    width19?: SortOrder
+    width42?: SortOrder
+    width43?: SortOrder
+    width44?: SortOrder
+    width46?: SortOrder
+    width48?: SortOrder
+    width50?: SortOrder
+    width53?: SortOrder
+    width54?: SortOrder
+    width55?: SortOrder
+    width56?: SortOrder
+    width57?: SortOrder
+    width58?: SortOrder
+    width59?: SortOrder
+    width60?: SortOrder
+    width61?: SortOrder
+    width62?: SortOrder
+    width63?: SortOrder
+    width64?: SortOrder
+    width65?: SortOrder
+    width66?: SortOrder
+    width67?: SortOrder
+    width68?: SortOrder
+    width69?: SortOrder
+    width70?: SortOrder
+    width71?: SortOrder
+    width72?: SortOrder
+    width73?: SortOrder
+    width74?: SortOrder
+    width76?: SortOrder
+    width78?: SortOrder
+    width82?: SortOrder
+    width92?: SortOrder
+    width94?: SortOrder
+    width96?: SortOrder
+    createdAt?: SortOrder
+    updatedAt?: SortOrder
+  }
+
+  export type PreciseBodyArticleConsumptionSumOrderByAggregateInput = {
+    id?: SortOrder
+    cuttingValue?: SortOrder
+    stitchingSam?: SortOrder
+    samVal?: SortOrder
+    stVal?: SortOrder
+    ironingSam?: SortOrder
+    finishingSam?: SortOrder
+    finishigCost?: SortOrder
+    totalCmpCost?: SortOrder
+    width15?: SortOrder
+    width16?: SortOrder
+    width17?: SortOrder
+    width18?: SortOrder
+    width19?: SortOrder
+    width42?: SortOrder
+    width43?: SortOrder
+    width44?: SortOrder
+    width46?: SortOrder
+    width48?: SortOrder
+    width50?: SortOrder
+    width53?: SortOrder
+    width54?: SortOrder
+    width55?: SortOrder
+    width56?: SortOrder
+    width57?: SortOrder
+    width58?: SortOrder
+    width59?: SortOrder
+    width60?: SortOrder
+    width61?: SortOrder
+    width62?: SortOrder
+    width63?: SortOrder
+    width64?: SortOrder
+    width65?: SortOrder
+    width66?: SortOrder
+    width67?: SortOrder
+    width68?: SortOrder
+    width69?: SortOrder
+    width70?: SortOrder
+    width71?: SortOrder
+    width72?: SortOrder
+    width73?: SortOrder
+    width74?: SortOrder
+    width76?: SortOrder
+    width78?: SortOrder
+    width82?: SortOrder
+    width92?: SortOrder
+    width94?: SortOrder
+    width96?: SortOrder
   }
 
   export type SubDepartmentCreateNestedManyWithoutDepartmentInput = {
@@ -110244,6 +119860,22 @@ export namespace Prisma {
     update?: XOR<XOR<PoolBJobUpdateToOneWithWhereWithoutBatchesInput, PoolBJobUpdateWithoutBatchesInput>, PoolBJobUncheckedUpdateWithoutBatchesInput>
   }
 
+  export type BigIntFieldUpdateOperationsInput = {
+    set?: bigint | number
+    increment?: bigint | number
+    decrement?: bigint | number
+    multiply?: bigint | number
+    divide?: bigint | number
+  }
+
+  export type NullableBigIntFieldUpdateOperationsInput = {
+    set?: bigint | number | null
+    increment?: bigint | number
+    decrement?: bigint | number
+    multiply?: bigint | number
+    divide?: bigint | number
+  }
+
   export type BasicTrimCostComponentCreateNestedManyWithoutMasterInput = {
     create?: XOR<BasicTrimCostComponentCreateWithoutMasterInput, BasicTrimCostComponentUncheckedCreateWithoutMasterInput> | BasicTrimCostComponentCreateWithoutMasterInput[] | BasicTrimCostComponentUncheckedCreateWithoutMasterInput[]
     connectOrCreate?: BasicTrimCostComponentCreateOrConnectWithoutMasterInput | BasicTrimCostComponentCreateOrConnectWithoutMasterInput[]
@@ -110846,6 +120478,60 @@ export namespace Prisma {
     _count?: NestedIntFilter<$PrismaModel>
     _min?: NestedEnumPoolBBatchStatusFilter<$PrismaModel>
     _max?: NestedEnumPoolBBatchStatusFilter<$PrismaModel>
+  }
+
+  export type NestedBigIntFilter<$PrismaModel = never> = {
+    equals?: bigint | number | BigIntFieldRefInput<$PrismaModel>
+    in?: bigint[] | number[] | ListBigIntFieldRefInput<$PrismaModel>
+    notIn?: bigint[] | number[] | ListBigIntFieldRefInput<$PrismaModel>
+    lt?: bigint | number | BigIntFieldRefInput<$PrismaModel>
+    lte?: bigint | number | BigIntFieldRefInput<$PrismaModel>
+    gt?: bigint | number | BigIntFieldRefInput<$PrismaModel>
+    gte?: bigint | number | BigIntFieldRefInput<$PrismaModel>
+    not?: NestedBigIntFilter<$PrismaModel> | bigint | number
+  }
+
+  export type NestedBigIntNullableFilter<$PrismaModel = never> = {
+    equals?: bigint | number | BigIntFieldRefInput<$PrismaModel> | null
+    in?: bigint[] | number[] | ListBigIntFieldRefInput<$PrismaModel> | null
+    notIn?: bigint[] | number[] | ListBigIntFieldRefInput<$PrismaModel> | null
+    lt?: bigint | number | BigIntFieldRefInput<$PrismaModel>
+    lte?: bigint | number | BigIntFieldRefInput<$PrismaModel>
+    gt?: bigint | number | BigIntFieldRefInput<$PrismaModel>
+    gte?: bigint | number | BigIntFieldRefInput<$PrismaModel>
+    not?: NestedBigIntNullableFilter<$PrismaModel> | bigint | number | null
+  }
+
+  export type NestedBigIntWithAggregatesFilter<$PrismaModel = never> = {
+    equals?: bigint | number | BigIntFieldRefInput<$PrismaModel>
+    in?: bigint[] | number[] | ListBigIntFieldRefInput<$PrismaModel>
+    notIn?: bigint[] | number[] | ListBigIntFieldRefInput<$PrismaModel>
+    lt?: bigint | number | BigIntFieldRefInput<$PrismaModel>
+    lte?: bigint | number | BigIntFieldRefInput<$PrismaModel>
+    gt?: bigint | number | BigIntFieldRefInput<$PrismaModel>
+    gte?: bigint | number | BigIntFieldRefInput<$PrismaModel>
+    not?: NestedBigIntWithAggregatesFilter<$PrismaModel> | bigint | number
+    _count?: NestedIntFilter<$PrismaModel>
+    _avg?: NestedFloatFilter<$PrismaModel>
+    _sum?: NestedBigIntFilter<$PrismaModel>
+    _min?: NestedBigIntFilter<$PrismaModel>
+    _max?: NestedBigIntFilter<$PrismaModel>
+  }
+
+  export type NestedBigIntNullableWithAggregatesFilter<$PrismaModel = never> = {
+    equals?: bigint | number | BigIntFieldRefInput<$PrismaModel> | null
+    in?: bigint[] | number[] | ListBigIntFieldRefInput<$PrismaModel> | null
+    notIn?: bigint[] | number[] | ListBigIntFieldRefInput<$PrismaModel> | null
+    lt?: bigint | number | BigIntFieldRefInput<$PrismaModel>
+    lte?: bigint | number | BigIntFieldRefInput<$PrismaModel>
+    gt?: bigint | number | BigIntFieldRefInput<$PrismaModel>
+    gte?: bigint | number | BigIntFieldRefInput<$PrismaModel>
+    not?: NestedBigIntNullableWithAggregatesFilter<$PrismaModel> | bigint | number | null
+    _count?: NestedIntNullableFilter<$PrismaModel>
+    _avg?: NestedFloatNullableFilter<$PrismaModel>
+    _sum?: NestedBigIntNullableFilter<$PrismaModel>
+    _min?: NestedBigIntNullableFilter<$PrismaModel>
+    _max?: NestedBigIntNullableFilter<$PrismaModel>
   }
 
   export type NestedEnumExpenseChangeOperationFilter<$PrismaModel = never> = {
@@ -112123,11 +121809,16 @@ export namespace Prisma {
     cmpCost?: Decimal | DecimalJsLike | number | string | null
     fabCost?: Decimal | DecimalJsLike | number | string | null
     fabCons?: Decimal | DecimalJsLike | number | string | null
-    width?: Decimal | DecimalJsLike | number | string | null
+    autoBgt?: Decimal | DecimalJsLike | number | string | null
+    roughV2?: Decimal | DecimalJsLike | number | string | null
     vendorFabricRate?: Decimal | DecimalJsLike | number | string | null
-    valueAddAccCostType?: string | null
-    valueAddCost?: Decimal | DecimalJsLike | number | string | null
-    valueAddProcessCost?: Decimal | DecimalJsLike | number | string | null
+    finalCost?: Decimal | DecimalJsLike | number | string | null
+    roughRatio?: Decimal | DecimalJsLike | number | string | null
+    roughConsumptionKg?: Decimal | DecimalJsLike | number | string | null
+    roughConsumptionMeter?: Decimal | DecimalJsLike | number | string | null
+    preciseRatio?: Decimal | DecimalJsLike | number | string | null
+    preciseConsumptionKg?: Decimal | DecimalJsLike | number | string | null
+    preciseConsumptionMeter?: Decimal | DecimalJsLike | number | string | null
     bodyArticle?: string | null
     bodyArticleDescription?: string | null
     fabricArticleNumber?: string | null
@@ -112274,11 +121965,16 @@ export namespace Prisma {
     cmpCost?: Decimal | DecimalJsLike | number | string | null
     fabCost?: Decimal | DecimalJsLike | number | string | null
     fabCons?: Decimal | DecimalJsLike | number | string | null
-    width?: Decimal | DecimalJsLike | number | string | null
+    autoBgt?: Decimal | DecimalJsLike | number | string | null
+    roughV2?: Decimal | DecimalJsLike | number | string | null
     vendorFabricRate?: Decimal | DecimalJsLike | number | string | null
-    valueAddAccCostType?: string | null
-    valueAddCost?: Decimal | DecimalJsLike | number | string | null
-    valueAddProcessCost?: Decimal | DecimalJsLike | number | string | null
+    finalCost?: Decimal | DecimalJsLike | number | string | null
+    roughRatio?: Decimal | DecimalJsLike | number | string | null
+    roughConsumptionKg?: Decimal | DecimalJsLike | number | string | null
+    roughConsumptionMeter?: Decimal | DecimalJsLike | number | string | null
+    preciseRatio?: Decimal | DecimalJsLike | number | string | null
+    preciseConsumptionKg?: Decimal | DecimalJsLike | number | string | null
+    preciseConsumptionMeter?: Decimal | DecimalJsLike | number | string | null
     bodyArticle?: string | null
     bodyArticleDescription?: string | null
     fabricArticleNumber?: string | null
@@ -112551,11 +122247,16 @@ export namespace Prisma {
     cmpCost?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
     fabCost?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
     fabCons?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
-    width?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    autoBgt?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    roughV2?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
     vendorFabricRate?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
-    valueAddAccCostType?: NullableStringFieldUpdateOperationsInput | string | null
-    valueAddCost?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
-    valueAddProcessCost?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    finalCost?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    roughRatio?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    roughConsumptionKg?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    roughConsumptionMeter?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    preciseRatio?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    preciseConsumptionKg?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    preciseConsumptionMeter?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
     bodyArticle?: NullableStringFieldUpdateOperationsInput | string | null
     bodyArticleDescription?: NullableStringFieldUpdateOperationsInput | string | null
     fabricArticleNumber?: NullableStringFieldUpdateOperationsInput | string | null
@@ -112702,11 +122403,16 @@ export namespace Prisma {
     cmpCost?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
     fabCost?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
     fabCons?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
-    width?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    autoBgt?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    roughV2?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
     vendorFabricRate?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
-    valueAddAccCostType?: NullableStringFieldUpdateOperationsInput | string | null
-    valueAddCost?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
-    valueAddProcessCost?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    finalCost?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    roughRatio?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    roughConsumptionKg?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    roughConsumptionMeter?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    preciseRatio?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    preciseConsumptionKg?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    preciseConsumptionMeter?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
     bodyArticle?: NullableStringFieldUpdateOperationsInput | string | null
     bodyArticleDescription?: NullableStringFieldUpdateOperationsInput | string | null
     fabricArticleNumber?: NullableStringFieldUpdateOperationsInput | string | null
@@ -113293,11 +122999,16 @@ export namespace Prisma {
     cmpCost?: Decimal | DecimalJsLike | number | string | null
     fabCost?: Decimal | DecimalJsLike | number | string | null
     fabCons?: Decimal | DecimalJsLike | number | string | null
-    width?: Decimal | DecimalJsLike | number | string | null
+    autoBgt?: Decimal | DecimalJsLike | number | string | null
+    roughV2?: Decimal | DecimalJsLike | number | string | null
     vendorFabricRate?: Decimal | DecimalJsLike | number | string | null
-    valueAddAccCostType?: string | null
-    valueAddCost?: Decimal | DecimalJsLike | number | string | null
-    valueAddProcessCost?: Decimal | DecimalJsLike | number | string | null
+    finalCost?: Decimal | DecimalJsLike | number | string | null
+    roughRatio?: Decimal | DecimalJsLike | number | string | null
+    roughConsumptionKg?: Decimal | DecimalJsLike | number | string | null
+    roughConsumptionMeter?: Decimal | DecimalJsLike | number | string | null
+    preciseRatio?: Decimal | DecimalJsLike | number | string | null
+    preciseConsumptionKg?: Decimal | DecimalJsLike | number | string | null
+    preciseConsumptionMeter?: Decimal | DecimalJsLike | number | string | null
     bodyArticle?: string | null
     bodyArticleDescription?: string | null
     fabricArticleNumber?: string | null
@@ -113445,11 +123156,16 @@ export namespace Prisma {
     cmpCost?: Decimal | DecimalJsLike | number | string | null
     fabCost?: Decimal | DecimalJsLike | number | string | null
     fabCons?: Decimal | DecimalJsLike | number | string | null
-    width?: Decimal | DecimalJsLike | number | string | null
+    autoBgt?: Decimal | DecimalJsLike | number | string | null
+    roughV2?: Decimal | DecimalJsLike | number | string | null
     vendorFabricRate?: Decimal | DecimalJsLike | number | string | null
-    valueAddAccCostType?: string | null
-    valueAddCost?: Decimal | DecimalJsLike | number | string | null
-    valueAddProcessCost?: Decimal | DecimalJsLike | number | string | null
+    finalCost?: Decimal | DecimalJsLike | number | string | null
+    roughRatio?: Decimal | DecimalJsLike | number | string | null
+    roughConsumptionKg?: Decimal | DecimalJsLike | number | string | null
+    roughConsumptionMeter?: Decimal | DecimalJsLike | number | string | null
+    preciseRatio?: Decimal | DecimalJsLike | number | string | null
+    preciseConsumptionKg?: Decimal | DecimalJsLike | number | string | null
+    preciseConsumptionMeter?: Decimal | DecimalJsLike | number | string | null
     bodyArticle?: string | null
     bodyArticleDescription?: string | null
     fabricArticleNumber?: string | null
@@ -113600,11 +123316,16 @@ export namespace Prisma {
     cmpCost?: Decimal | DecimalJsLike | number | string | null
     fabCost?: Decimal | DecimalJsLike | number | string | null
     fabCons?: Decimal | DecimalJsLike | number | string | null
-    width?: Decimal | DecimalJsLike | number | string | null
+    autoBgt?: Decimal | DecimalJsLike | number | string | null
+    roughV2?: Decimal | DecimalJsLike | number | string | null
     vendorFabricRate?: Decimal | DecimalJsLike | number | string | null
-    valueAddAccCostType?: string | null
-    valueAddCost?: Decimal | DecimalJsLike | number | string | null
-    valueAddProcessCost?: Decimal | DecimalJsLike | number | string | null
+    finalCost?: Decimal | DecimalJsLike | number | string | null
+    roughRatio?: Decimal | DecimalJsLike | number | string | null
+    roughConsumptionKg?: Decimal | DecimalJsLike | number | string | null
+    roughConsumptionMeter?: Decimal | DecimalJsLike | number | string | null
+    preciseRatio?: Decimal | DecimalJsLike | number | string | null
+    preciseConsumptionKg?: Decimal | DecimalJsLike | number | string | null
+    preciseConsumptionMeter?: Decimal | DecimalJsLike | number | string | null
     bodyArticle?: string | null
     bodyArticleDescription?: string | null
     fabricArticleNumber?: string | null
@@ -113752,11 +123473,16 @@ export namespace Prisma {
     cmpCost?: Decimal | DecimalJsLike | number | string | null
     fabCost?: Decimal | DecimalJsLike | number | string | null
     fabCons?: Decimal | DecimalJsLike | number | string | null
-    width?: Decimal | DecimalJsLike | number | string | null
+    autoBgt?: Decimal | DecimalJsLike | number | string | null
+    roughV2?: Decimal | DecimalJsLike | number | string | null
     vendorFabricRate?: Decimal | DecimalJsLike | number | string | null
-    valueAddAccCostType?: string | null
-    valueAddCost?: Decimal | DecimalJsLike | number | string | null
-    valueAddProcessCost?: Decimal | DecimalJsLike | number | string | null
+    finalCost?: Decimal | DecimalJsLike | number | string | null
+    roughRatio?: Decimal | DecimalJsLike | number | string | null
+    roughConsumptionKg?: Decimal | DecimalJsLike | number | string | null
+    roughConsumptionMeter?: Decimal | DecimalJsLike | number | string | null
+    preciseRatio?: Decimal | DecimalJsLike | number | string | null
+    preciseConsumptionKg?: Decimal | DecimalJsLike | number | string | null
+    preciseConsumptionMeter?: Decimal | DecimalJsLike | number | string | null
     bodyArticle?: string | null
     bodyArticleDescription?: string | null
     fabricArticleNumber?: string | null
@@ -114062,11 +123788,16 @@ export namespace Prisma {
     cmpCost?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
     fabCost?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
     fabCons?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
-    width?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    autoBgt?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    roughV2?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
     vendorFabricRate?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
-    valueAddAccCostType?: NullableStringFieldUpdateOperationsInput | string | null
-    valueAddCost?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
-    valueAddProcessCost?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    finalCost?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    roughRatio?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    roughConsumptionKg?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    roughConsumptionMeter?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    preciseRatio?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    preciseConsumptionKg?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    preciseConsumptionMeter?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
     bodyArticle?: NullableStringFieldUpdateOperationsInput | string | null
     bodyArticleDescription?: NullableStringFieldUpdateOperationsInput | string | null
     fabricArticleNumber?: NullableStringFieldUpdateOperationsInput | string | null
@@ -114214,11 +123945,16 @@ export namespace Prisma {
     cmpCost?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
     fabCost?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
     fabCons?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
-    width?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    autoBgt?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    roughV2?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
     vendorFabricRate?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
-    valueAddAccCostType?: NullableStringFieldUpdateOperationsInput | string | null
-    valueAddCost?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
-    valueAddProcessCost?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    finalCost?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    roughRatio?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    roughConsumptionKg?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    roughConsumptionMeter?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    preciseRatio?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    preciseConsumptionKg?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    preciseConsumptionMeter?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
     bodyArticle?: NullableStringFieldUpdateOperationsInput | string | null
     bodyArticleDescription?: NullableStringFieldUpdateOperationsInput | string | null
     fabricArticleNumber?: NullableStringFieldUpdateOperationsInput | string | null
@@ -114384,11 +124120,16 @@ export namespace Prisma {
     cmpCost?: DecimalNullableFilter<"ExtractionResultFlat"> | Decimal | DecimalJsLike | number | string | null
     fabCost?: DecimalNullableFilter<"ExtractionResultFlat"> | Decimal | DecimalJsLike | number | string | null
     fabCons?: DecimalNullableFilter<"ExtractionResultFlat"> | Decimal | DecimalJsLike | number | string | null
-    width?: DecimalNullableFilter<"ExtractionResultFlat"> | Decimal | DecimalJsLike | number | string | null
+    autoBgt?: DecimalNullableFilter<"ExtractionResultFlat"> | Decimal | DecimalJsLike | number | string | null
+    roughV2?: DecimalNullableFilter<"ExtractionResultFlat"> | Decimal | DecimalJsLike | number | string | null
     vendorFabricRate?: DecimalNullableFilter<"ExtractionResultFlat"> | Decimal | DecimalJsLike | number | string | null
-    valueAddAccCostType?: StringNullableFilter<"ExtractionResultFlat"> | string | null
-    valueAddCost?: DecimalNullableFilter<"ExtractionResultFlat"> | Decimal | DecimalJsLike | number | string | null
-    valueAddProcessCost?: DecimalNullableFilter<"ExtractionResultFlat"> | Decimal | DecimalJsLike | number | string | null
+    finalCost?: DecimalNullableFilter<"ExtractionResultFlat"> | Decimal | DecimalJsLike | number | string | null
+    roughRatio?: DecimalNullableFilter<"ExtractionResultFlat"> | Decimal | DecimalJsLike | number | string | null
+    roughConsumptionKg?: DecimalNullableFilter<"ExtractionResultFlat"> | Decimal | DecimalJsLike | number | string | null
+    roughConsumptionMeter?: DecimalNullableFilter<"ExtractionResultFlat"> | Decimal | DecimalJsLike | number | string | null
+    preciseRatio?: DecimalNullableFilter<"ExtractionResultFlat"> | Decimal | DecimalJsLike | number | string | null
+    preciseConsumptionKg?: DecimalNullableFilter<"ExtractionResultFlat"> | Decimal | DecimalJsLike | number | string | null
+    preciseConsumptionMeter?: DecimalNullableFilter<"ExtractionResultFlat"> | Decimal | DecimalJsLike | number | string | null
     bodyArticle?: StringNullableFilter<"ExtractionResultFlat"> | string | null
     bodyArticleDescription?: StringNullableFilter<"ExtractionResultFlat"> | string | null
     fabricArticleNumber?: StringNullableFilter<"ExtractionResultFlat"> | string | null
@@ -114800,11 +124541,16 @@ export namespace Prisma {
     cmpCost?: Decimal | DecimalJsLike | number | string | null
     fabCost?: Decimal | DecimalJsLike | number | string | null
     fabCons?: Decimal | DecimalJsLike | number | string | null
-    width?: Decimal | DecimalJsLike | number | string | null
+    autoBgt?: Decimal | DecimalJsLike | number | string | null
+    roughV2?: Decimal | DecimalJsLike | number | string | null
     vendorFabricRate?: Decimal | DecimalJsLike | number | string | null
-    valueAddAccCostType?: string | null
-    valueAddCost?: Decimal | DecimalJsLike | number | string | null
-    valueAddProcessCost?: Decimal | DecimalJsLike | number | string | null
+    finalCost?: Decimal | DecimalJsLike | number | string | null
+    roughRatio?: Decimal | DecimalJsLike | number | string | null
+    roughConsumptionKg?: Decimal | DecimalJsLike | number | string | null
+    roughConsumptionMeter?: Decimal | DecimalJsLike | number | string | null
+    preciseRatio?: Decimal | DecimalJsLike | number | string | null
+    preciseConsumptionKg?: Decimal | DecimalJsLike | number | string | null
+    preciseConsumptionMeter?: Decimal | DecimalJsLike | number | string | null
     bodyArticle?: string | null
     bodyArticleDescription?: string | null
     fabricArticleNumber?: string | null
@@ -114952,11 +124698,16 @@ export namespace Prisma {
     cmpCost?: Decimal | DecimalJsLike | number | string | null
     fabCost?: Decimal | DecimalJsLike | number | string | null
     fabCons?: Decimal | DecimalJsLike | number | string | null
-    width?: Decimal | DecimalJsLike | number | string | null
+    autoBgt?: Decimal | DecimalJsLike | number | string | null
+    roughV2?: Decimal | DecimalJsLike | number | string | null
     vendorFabricRate?: Decimal | DecimalJsLike | number | string | null
-    valueAddAccCostType?: string | null
-    valueAddCost?: Decimal | DecimalJsLike | number | string | null
-    valueAddProcessCost?: Decimal | DecimalJsLike | number | string | null
+    finalCost?: Decimal | DecimalJsLike | number | string | null
+    roughRatio?: Decimal | DecimalJsLike | number | string | null
+    roughConsumptionKg?: Decimal | DecimalJsLike | number | string | null
+    roughConsumptionMeter?: Decimal | DecimalJsLike | number | string | null
+    preciseRatio?: Decimal | DecimalJsLike | number | string | null
+    preciseConsumptionKg?: Decimal | DecimalJsLike | number | string | null
+    preciseConsumptionMeter?: Decimal | DecimalJsLike | number | string | null
     bodyArticle?: string | null
     bodyArticleDescription?: string | null
     fabricArticleNumber?: string | null
@@ -116656,11 +126407,16 @@ export namespace Prisma {
     cmpCost?: Decimal | DecimalJsLike | number | string | null
     fabCost?: Decimal | DecimalJsLike | number | string | null
     fabCons?: Decimal | DecimalJsLike | number | string | null
-    width?: Decimal | DecimalJsLike | number | string | null
+    autoBgt?: Decimal | DecimalJsLike | number | string | null
+    roughV2?: Decimal | DecimalJsLike | number | string | null
     vendorFabricRate?: Decimal | DecimalJsLike | number | string | null
-    valueAddAccCostType?: string | null
-    valueAddCost?: Decimal | DecimalJsLike | number | string | null
-    valueAddProcessCost?: Decimal | DecimalJsLike | number | string | null
+    finalCost?: Decimal | DecimalJsLike | number | string | null
+    roughRatio?: Decimal | DecimalJsLike | number | string | null
+    roughConsumptionKg?: Decimal | DecimalJsLike | number | string | null
+    roughConsumptionMeter?: Decimal | DecimalJsLike | number | string | null
+    preciseRatio?: Decimal | DecimalJsLike | number | string | null
+    preciseConsumptionKg?: Decimal | DecimalJsLike | number | string | null
+    preciseConsumptionMeter?: Decimal | DecimalJsLike | number | string | null
     bodyArticle?: string | null
     bodyArticleDescription?: string | null
     fabricArticleNumber?: string | null
@@ -116808,11 +126564,16 @@ export namespace Prisma {
     cmpCost?: Decimal | DecimalJsLike | number | string | null
     fabCost?: Decimal | DecimalJsLike | number | string | null
     fabCons?: Decimal | DecimalJsLike | number | string | null
-    width?: Decimal | DecimalJsLike | number | string | null
+    autoBgt?: Decimal | DecimalJsLike | number | string | null
+    roughV2?: Decimal | DecimalJsLike | number | string | null
     vendorFabricRate?: Decimal | DecimalJsLike | number | string | null
-    valueAddAccCostType?: string | null
-    valueAddCost?: Decimal | DecimalJsLike | number | string | null
-    valueAddProcessCost?: Decimal | DecimalJsLike | number | string | null
+    finalCost?: Decimal | DecimalJsLike | number | string | null
+    roughRatio?: Decimal | DecimalJsLike | number | string | null
+    roughConsumptionKg?: Decimal | DecimalJsLike | number | string | null
+    roughConsumptionMeter?: Decimal | DecimalJsLike | number | string | null
+    preciseRatio?: Decimal | DecimalJsLike | number | string | null
+    preciseConsumptionKg?: Decimal | DecimalJsLike | number | string | null
+    preciseConsumptionMeter?: Decimal | DecimalJsLike | number | string | null
     bodyArticle?: string | null
     bodyArticleDescription?: string | null
     fabricArticleNumber?: string | null
@@ -117011,11 +126772,16 @@ export namespace Prisma {
     cmpCost?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
     fabCost?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
     fabCons?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
-    width?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    autoBgt?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    roughV2?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
     vendorFabricRate?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
-    valueAddAccCostType?: NullableStringFieldUpdateOperationsInput | string | null
-    valueAddCost?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
-    valueAddProcessCost?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    finalCost?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    roughRatio?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    roughConsumptionKg?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    roughConsumptionMeter?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    preciseRatio?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    preciseConsumptionKg?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    preciseConsumptionMeter?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
     bodyArticle?: NullableStringFieldUpdateOperationsInput | string | null
     bodyArticleDescription?: NullableStringFieldUpdateOperationsInput | string | null
     fabricArticleNumber?: NullableStringFieldUpdateOperationsInput | string | null
@@ -117163,11 +126929,16 @@ export namespace Prisma {
     cmpCost?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
     fabCost?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
     fabCons?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
-    width?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    autoBgt?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    roughV2?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
     vendorFabricRate?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
-    valueAddAccCostType?: NullableStringFieldUpdateOperationsInput | string | null
-    valueAddCost?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
-    valueAddProcessCost?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    finalCost?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    roughRatio?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    roughConsumptionKg?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    roughConsumptionMeter?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    preciseRatio?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    preciseConsumptionKg?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    preciseConsumptionMeter?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
     bodyArticle?: NullableStringFieldUpdateOperationsInput | string | null
     bodyArticleDescription?: NullableStringFieldUpdateOperationsInput | string | null
     fabricArticleNumber?: NullableStringFieldUpdateOperationsInput | string | null
@@ -118118,11 +127889,16 @@ export namespace Prisma {
     cmpCost?: Decimal | DecimalJsLike | number | string | null
     fabCost?: Decimal | DecimalJsLike | number | string | null
     fabCons?: Decimal | DecimalJsLike | number | string | null
-    width?: Decimal | DecimalJsLike | number | string | null
+    autoBgt?: Decimal | DecimalJsLike | number | string | null
+    roughV2?: Decimal | DecimalJsLike | number | string | null
     vendorFabricRate?: Decimal | DecimalJsLike | number | string | null
-    valueAddAccCostType?: string | null
-    valueAddCost?: Decimal | DecimalJsLike | number | string | null
-    valueAddProcessCost?: Decimal | DecimalJsLike | number | string | null
+    finalCost?: Decimal | DecimalJsLike | number | string | null
+    roughRatio?: Decimal | DecimalJsLike | number | string | null
+    roughConsumptionKg?: Decimal | DecimalJsLike | number | string | null
+    roughConsumptionMeter?: Decimal | DecimalJsLike | number | string | null
+    preciseRatio?: Decimal | DecimalJsLike | number | string | null
+    preciseConsumptionKg?: Decimal | DecimalJsLike | number | string | null
+    preciseConsumptionMeter?: Decimal | DecimalJsLike | number | string | null
     bodyArticle?: string | null
     bodyArticleDescription?: string | null
     fabricArticleNumber?: string | null
@@ -118276,11 +128052,16 @@ export namespace Prisma {
     cmpCost?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
     fabCost?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
     fabCons?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
-    width?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    autoBgt?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    roughV2?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
     vendorFabricRate?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
-    valueAddAccCostType?: NullableStringFieldUpdateOperationsInput | string | null
-    valueAddCost?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
-    valueAddProcessCost?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    finalCost?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    roughRatio?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    roughConsumptionKg?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    roughConsumptionMeter?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    preciseRatio?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    preciseConsumptionKg?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    preciseConsumptionMeter?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
     bodyArticle?: NullableStringFieldUpdateOperationsInput | string | null
     bodyArticleDescription?: NullableStringFieldUpdateOperationsInput | string | null
     fabricArticleNumber?: NullableStringFieldUpdateOperationsInput | string | null
@@ -118428,11 +128209,16 @@ export namespace Prisma {
     cmpCost?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
     fabCost?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
     fabCons?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
-    width?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    autoBgt?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    roughV2?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
     vendorFabricRate?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
-    valueAddAccCostType?: NullableStringFieldUpdateOperationsInput | string | null
-    valueAddCost?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
-    valueAddProcessCost?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    finalCost?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    roughRatio?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    roughConsumptionKg?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    roughConsumptionMeter?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    preciseRatio?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    preciseConsumptionKg?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    preciseConsumptionMeter?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
     bodyArticle?: NullableStringFieldUpdateOperationsInput | string | null
     bodyArticleDescription?: NullableStringFieldUpdateOperationsInput | string | null
     fabricArticleNumber?: NullableStringFieldUpdateOperationsInput | string | null
@@ -118579,11 +128365,16 @@ export namespace Prisma {
     cmpCost?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
     fabCost?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
     fabCons?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
-    width?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    autoBgt?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    roughV2?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
     vendorFabricRate?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
-    valueAddAccCostType?: NullableStringFieldUpdateOperationsInput | string | null
-    valueAddCost?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
-    valueAddProcessCost?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    finalCost?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    roughRatio?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    roughConsumptionKg?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    roughConsumptionMeter?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    preciseRatio?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    preciseConsumptionKg?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    preciseConsumptionMeter?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
     bodyArticle?: NullableStringFieldUpdateOperationsInput | string | null
     bodyArticleDescription?: NullableStringFieldUpdateOperationsInput | string | null
     fabricArticleNumber?: NullableStringFieldUpdateOperationsInput | string | null
@@ -118811,11 +128602,16 @@ export namespace Prisma {
     cmpCost?: Decimal | DecimalJsLike | number | string | null
     fabCost?: Decimal | DecimalJsLike | number | string | null
     fabCons?: Decimal | DecimalJsLike | number | string | null
-    width?: Decimal | DecimalJsLike | number | string | null
+    autoBgt?: Decimal | DecimalJsLike | number | string | null
+    roughV2?: Decimal | DecimalJsLike | number | string | null
     vendorFabricRate?: Decimal | DecimalJsLike | number | string | null
-    valueAddAccCostType?: string | null
-    valueAddCost?: Decimal | DecimalJsLike | number | string | null
-    valueAddProcessCost?: Decimal | DecimalJsLike | number | string | null
+    finalCost?: Decimal | DecimalJsLike | number | string | null
+    roughRatio?: Decimal | DecimalJsLike | number | string | null
+    roughConsumptionKg?: Decimal | DecimalJsLike | number | string | null
+    roughConsumptionMeter?: Decimal | DecimalJsLike | number | string | null
+    preciseRatio?: Decimal | DecimalJsLike | number | string | null
+    preciseConsumptionKg?: Decimal | DecimalJsLike | number | string | null
+    preciseConsumptionMeter?: Decimal | DecimalJsLike | number | string | null
     bodyArticle?: string | null
     bodyArticleDescription?: string | null
     fabricArticleNumber?: string | null
@@ -119121,11 +128917,16 @@ export namespace Prisma {
     cmpCost?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
     fabCost?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
     fabCons?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
-    width?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    autoBgt?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    roughV2?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
     vendorFabricRate?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
-    valueAddAccCostType?: NullableStringFieldUpdateOperationsInput | string | null
-    valueAddCost?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
-    valueAddProcessCost?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    finalCost?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    roughRatio?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    roughConsumptionKg?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    roughConsumptionMeter?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    preciseRatio?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    preciseConsumptionKg?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    preciseConsumptionMeter?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
     bodyArticle?: NullableStringFieldUpdateOperationsInput | string | null
     bodyArticleDescription?: NullableStringFieldUpdateOperationsInput | string | null
     fabricArticleNumber?: NullableStringFieldUpdateOperationsInput | string | null
@@ -119273,11 +129074,16 @@ export namespace Prisma {
     cmpCost?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
     fabCost?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
     fabCons?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
-    width?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    autoBgt?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    roughV2?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
     vendorFabricRate?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
-    valueAddAccCostType?: NullableStringFieldUpdateOperationsInput | string | null
-    valueAddCost?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
-    valueAddProcessCost?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    finalCost?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    roughRatio?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    roughConsumptionKg?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    roughConsumptionMeter?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    preciseRatio?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    preciseConsumptionKg?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    preciseConsumptionMeter?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
     bodyArticle?: NullableStringFieldUpdateOperationsInput | string | null
     bodyArticleDescription?: NullableStringFieldUpdateOperationsInput | string | null
     fabricArticleNumber?: NullableStringFieldUpdateOperationsInput | string | null
@@ -119424,11 +129230,16 @@ export namespace Prisma {
     cmpCost?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
     fabCost?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
     fabCons?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
-    width?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    autoBgt?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    roughV2?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
     vendorFabricRate?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
-    valueAddAccCostType?: NullableStringFieldUpdateOperationsInput | string | null
-    valueAddCost?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
-    valueAddProcessCost?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    finalCost?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    roughRatio?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    roughConsumptionKg?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    roughConsumptionMeter?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    preciseRatio?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    preciseConsumptionKg?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    preciseConsumptionMeter?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
     bodyArticle?: NullableStringFieldUpdateOperationsInput | string | null
     bodyArticleDescription?: NullableStringFieldUpdateOperationsInput | string | null
     fabricArticleNumber?: NullableStringFieldUpdateOperationsInput | string | null

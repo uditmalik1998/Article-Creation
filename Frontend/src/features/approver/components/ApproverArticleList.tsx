@@ -50,6 +50,15 @@ import { message } from '@/lib/message';
 import { cn } from '@/lib/utils';
 import { useDragToPan } from '@/shared/hooks/ui/useDragToPan';
 import type { ApproverItem, MasterAttribute } from './ApproverTable';
+import CostingGridCard, { BTRIM_CONFIG, VADD_CONFIG, gridFields } from './CostingGridCard';
+import PkgCostCard from './PkgCostCard';
+import { CARD_ACTION_BTN, CARD_THEME } from './cardTheme';
+
+// FG cards rendered as a costing grid instead of the numbered attribute list.
+const COSTING_GRID_CONFIGS: Record<string, { config: typeof BTRIM_CONFIG; fields: Set<string> }> = {
+  'VA ACC.': { config: BTRIM_CONFIG, fields: gridFields(BTRIM_CONFIG) },
+  'VA PRCS': { config: VADD_CONFIG, fields: gridFields(VADD_CONFIG) },
+};
 import {
   SCHEMA_KEY_TO_EXCEL_ATTR,
   SCHEMA_KEY_TO_DB_FIELD,
@@ -247,7 +256,10 @@ const ATTRIBUTE_GROUPS: { group: string; color: string; fields: { field: string;
       { field: 'fWidth', schemaKey: 'f_width' },
       { field: 'lycra', schemaKey: 'lycra_non_lycra' },
       { field: 'shade', schemaKey: 'shade', freeText: true },
+      { field: 'autoBgt', schemaKey: 'auto_bgt', freeText: true },
+      { field: 'roughV2', schemaKey: 'rough_v2', freeText: true },
       { field: 'vendorFabricRate', schemaKey: 'vendor_fabric_rate', freeText: true, mandatory: true },
+      { field: 'finalCost', schemaKey: 'final_cost', freeText: true },
     ],
   },
   {
@@ -287,8 +299,6 @@ const ATTRIBUTE_GROUPS: { group: string; color: string; fields: { field: string;
       { field: 'patches', schemaKey: 'patches' },
       { field: 'htrfType', schemaKey: 'htrf_type' },
       { field: 'htrfStyle', schemaKey: 'htrf_style' },
-      { field: 'valueAddAccCostType', schemaKey: 'value_add_acc_cost_type' },
-      { field: 'valueAddCost', schemaKey: 'value_add_cost', freeText: true },
     ],
   },
   {
@@ -302,7 +312,6 @@ const ATTRIBUTE_GROUPS: { group: string; color: string; fields: { field: string;
       { field: 'embroideryType', schemaKey: 'embroidery_type' },
       { field: 'embPlacement', schemaKey: 'emb_placement' },
       { field: 'wash', schemaKey: 'wash' },
-      { field: 'valueAddProcessCost', schemaKey: 'value_add_process_cost', freeText: true },
     ],
   },
   {
@@ -420,13 +429,21 @@ const BODY_PRIORITY_KEYS = [
   'fit', 'body_style', 'length',
 ];
 
+// FG OTH GRID-1 card: BUSINESS attrs shown under Rate/MRP/Colours in this order
+// (M_AGE_GROUP → M_IMP_ATBT → ARTICLE FASHION TYPE → SEGMENT), rest after.
+const OTH_GRID_1_ORDER = ['age_group', 'imp_atrbt2', 'article_fashion_type', 'segment'];
+
+// Hidden from the FG cards only (UI). The attrs still exist in the DB/admin
+// fab_weight is hidden from the FG card grid (OTH GRID-1 card).
+const FG_CARD_HIDDEN_SCHEMA_KEYS = new Set(['fab_weight']);
+
 // ─── Redesign tokens — header/icon palette per group ──────────────────────────
 const GROUP_LABELS: Record<string, string> = {
-  FAB: 'FABRIC AND CONSTRUCTION',
-  BODY: 'BODY AND CONSTRUCTION',
-  'VA ACC.': 'Trims & Accessories',
-  'VA PRCS': 'Value Addition',
-  BUSINESS: 'Business & Misc',
+  FAB: 'FAB',
+  BODY: 'BODY',
+  'VA ACC.': 'B TRIM',
+  'VA PRCS': 'V. ADD',
+  BUSINESS: 'OTH GRID-1',
 };
 
 const GROUP_ICONS: Record<string, React.ReactNode> = {
@@ -437,15 +454,14 @@ const GROUP_ICONS: Record<string, React.ReactNode> = {
   BUSINESS: <Briefcase className="h-3.5 w-3.5" />,
 };
 
-// Group surfaces use saturated 400-tier border stops so the card edges
-// read confidently against the page. BUSINESS shifted from purple
-// (palette violation) to slate to fit the locked slate+coral palette.
+// Every group card shares one theme (CARD_THEME, "Ink Header"); the per-group
+// colors (amber/emerald/yellow/rose/slate) were retired 2026-10-12.
 const GROUP_HEADER_STYLE: Record<string, { bg: string; fg: string; border: string }> = {
-  FAB: { bg: '#fff7ed', fg: '#9a3412', border: '#fb923c' },        // amber
-  BODY: { bg: '#ecfdf5', fg: '#065f46', border: '#34d399' },       // emerald
-  'VA ACC.': { bg: '#fef3c7', fg: '#854d0e', border: '#facc15' },  // yellow
-  'VA PRCS': { bg: '#fff1f2', fg: '#9f1239', border: '#fb7185' },  // rose
-  BUSINESS: { bg: '#f1f5f9', fg: '#1e293b', border: '#64748b' },   // slate (was purple)
+  FAB: CARD_THEME,
+  BODY: CARD_THEME,
+  'VA ACC.': CARD_THEME,
+  'VA PRCS': CARD_THEME,
+  BUSINESS: CARD_THEME,
 };
 
 type CardGroup = typeof ATTRIBUTE_GROUPS[number];
@@ -618,6 +634,16 @@ const ArticleCard = React.memo(
       mComposition: string | null; mFinish: string | null; mGsm: string | null; mLycra: string | null;
     }[]>([]);
     const [fabNoLoading, setFabNoLoading] = useState(false);
+    const isBodySmart = import.meta.env.VITE_IS_BODY_ARTICLE_SMART === 'true';
+    const [bodyDescMode, setBodyDescMode] = useState<'classic' | 'smart'>(isBodySmart ? 'smart' : 'classic');
+    const [bodyNoMode, setBodyNoMode] = useState<'classic' | 'smart'>(isBodySmart ? 'smart' : 'classic');
+    const [preciseBodyResults, setPreciseBodyResults] = useState<{ macroBodyDescription: string | null; microBodyArticleNumber: string | null }[]>([]);
+    const [preciseBodyLoading, setPreciseBodyLoading] = useState(false);
+    const [preciseBodySearched, setPreciseBodySearched] = useState(false);
+    const [preciseBodyNoQuery, setPreciseBodyNoQuery] = useState('');
+    const [preciseBodyNoResults, setPreciseBodyNoResults] = useState<{ macroBodyDescription: string | null; microBodyArticleNumber: string | null }[]>([]);
+    const [preciseBodyNoLoading, setPreciseBodyNoLoading] = useState(false);
+    const [preciseBodyNoSearched, setPreciseBodyNoSearched] = useState(false);
     const [bodyNoQuery, setBodyNoQuery] = useState('');
     const [bodyNoResults, setBodyNoResults] = useState<{
       bodyArticleNumber: string | null;
@@ -635,8 +661,9 @@ const ArticleCard = React.memo(
     const [bodyNoSearched, setBodyNoSearched] = useState(false);
     const [fabDescQuery, setFabDescQuery] = useState('');
     const [fabDescResults, setFabDescResults] = useState<{
-      fabricArticleNumber: string;
+      fabricArticleNumber: string | null;
       fabricArticleDescription: string | null;
+      fabricRate: number | null;
       mFabDiv: string | null; mYarn: string | null;
       mFabMainMvgr1: string | null; mFabMainMvgr2: string | null;
       mConstruction: string | null; mOunz: string | null; mWidth: string | null;
@@ -645,6 +672,72 @@ const ArticleCard = React.memo(
     }[]>([]);
     const [fabDescLoading, setFabDescLoading] = useState(false);
     const [fabDescSearched, setFabDescSearched] = useState(false);
+    const [roughV2Loading, setRoughV2Loading] = useState(false);
+    const roughV2FetchedRef = React.useRef(false);
+
+    // Auto-fill Rough-V2 on mount if not already set — exact match on 5 attrs
+    useEffect(() => {
+      const existingRoughV2 = (item as any).roughV2;
+      if (existingRoughV2 != null && String(existingRoughV2).trim() !== '') return;
+      if (roughV2FetchedRef.current) return;
+      roughV2FetchedRef.current = true;
+      const getV = (key: string) => String((item as any)[key] ?? '').trim();
+      const params = new URLSearchParams({
+        mYarn:         getV('yarn1'),
+        mFabDiv:       getV('fabDiv'),
+        mFabMainMvgr1: getV('mainMvgr'),
+        mWeave01:      getV('weave'),
+        mLycra:        getV('lycra'),
+      });
+      setRoughV2Loading(true);
+      const token = localStorage.getItem('authToken');
+      fetch(
+        `${APP_CONFIG.api.baseURL}/approver/fabric-article-data/rough-v2-rate?${params.toString()}`,
+        { headers: { Authorization: `Bearer ${token}` } },
+      )
+        .then((r) => r.json())
+        .then((d) => {
+          if (d.rate != null) {
+            const rateStr = String(d.rate);
+            setLocalValues((prev) => ({ ...prev, roughV2: rateStr }));
+            if (isModifyMode) {
+              setPendingChanges((prev) => ({ ...prev, roughV2: rateStr }));
+            } else {
+              onSave({ ...item, roughV2: rateStr } as any, { roughV2: rateStr });
+            }
+          }
+        })
+        .catch(() => {})
+        .finally(() => setRoughV2Loading(false));
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, []);
+
+    // Vendor-cost fallback: whenever VENDOR COST gets a value, fill any of
+    // ROUGH-V2 / AUTO-BGT that are still empty (independently of each other).
+    const currentVendorRate = String(
+      (localValues['vendorFabricRate'] !== undefined ? localValues['vendorFabricRate'] : (item as any).vendorFabricRate) ?? '',
+    ).trim();
+    useEffect(() => {
+      if (currentVendorRate === '') return;
+      const roughV2Val = String(
+        (localValues['roughV2'] !== undefined ? localValues['roughV2'] : (item as any).roughV2) ?? '',
+      ).trim();
+      const autoBgtVal = String(
+        (localValues['autoBgt'] !== undefined ? localValues['autoBgt'] : (item as any).autoBgt) ?? '',
+      ).trim();
+      const updates: Record<string, string> = {};
+      if (roughV2Val === '') updates['roughV2'] = currentVendorRate;
+      if (autoBgtVal === '') updates['autoBgt'] = currentVendorRate;
+      if (Object.keys(updates).length === 0) return;
+      setLocalValues((prev) => ({ ...prev, ...updates }));
+      if (isModifyMode) {
+        setPendingChanges((prev) => ({ ...prev, ...updates }));
+      } else {
+        onSave({ ...item, ...updates } as any, updates);
+      }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, [currentVendorRate]);
+
     const autoSavedFabDescRef = React.useRef<string | null>(null);
     const [imgZoom, setImgZoom] = useState(1);
     const [imgRotation, setImgRotation] = useState(0);
@@ -661,7 +754,7 @@ const ArticleCard = React.memo(
     const [attrSearch, setAttrSearch] = useState('');
 
     // ── Group-tab visibility filter (FG articles only) ──────────────────────
-    // Keys: FAB | BODY | VA ACC. | VA PRCS | BUSINESS | BOM
+    // Keys: FAB | BODY | VA ACC. | VA PRCS | BOM | PKG  (BUSINESS is merged into BOM)
     const [selectedGroupKeys, setSelectedGroupKeys] = useState<Set<string>>(
       () => new Set(['FAB']),
     );
@@ -869,7 +962,6 @@ const ArticleCard = React.memo(
           if (d.cmpCost == null) return;
           const updates: Record<string, string> = { cmpCost: String(d.cmpCost) };
           // Only set Costing Type to Rough if not already set in DB
-          if (!(item as any).costingType) updates['costingType'] = 'Rough';
           setLocalValues((prev) => ({ ...prev, ...updates }));
           onSave({ ...item, ...updates } as any, updates, { silent: true });
         })
@@ -1627,8 +1719,9 @@ const ArticleCard = React.memo(
     // For FG articles: further filter by selected group tabs
     const visibleGroups = allowGroups
       ? activeGroups
-      : activeGroups.filter((g) => selectedGroupKeys.has(g.group));
+      : activeGroups.filter((g) => g.group !== 'BUSINESS' && selectedGroupKeys.has(g.group));
     const showBomCard = allowGroups ? true : selectedGroupKeys.has('BOM');
+    const showPkgCard = !allowGroups && selectedGroupKeys.has('PKG');
 
     const rateVal = String(getValue('rate') ?? '').trim();
     const mrpVal = String(getValue('mrp') ?? '').trim();
@@ -2057,6 +2150,38 @@ const ArticleCard = React.memo(
       );
     };
 
+    const lookupRoughV2Rate = () => {
+      const getV = (key: string) =>
+        String((localValues[key] !== undefined ? localValues[key] : (item as any)[key]) ?? '').trim();
+      const params = new URLSearchParams({
+        mYarn:         getV('yarn1'),
+        mFabDiv:       getV('fabDiv'),
+        mFabMainMvgr1: getV('mainMvgr'),
+        mWeave01:      getV('weave'),
+        mLycra:        getV('lycra'),
+      });
+      setRoughV2Loading(true);
+      const token = localStorage.getItem('authToken');
+      fetch(
+        `${APP_CONFIG.api.baseURL}/approver/fabric-article-data/rough-v2-rate?${params.toString()}`,
+        { headers: { Authorization: `Bearer ${token}` } },
+      )
+        .then((r) => r.json())
+        .then((d) => {
+          if (d.rate != null) {
+            const rateStr = String(d.rate);
+            setLocalValues((prev) => ({ ...prev, roughV2: rateStr }));
+            if (isModifyMode) {
+              setPendingChanges((prev) => ({ ...prev, roughV2: rateStr }));
+            } else {
+              onSave({ ...item, roughV2: rateStr } as any, { roughV2: rateStr });
+            }
+          }
+        })
+        .catch(() => {})
+        .finally(() => setRoughV2Loading(false));
+    };
+
     const toggleGroupCollapse = (g: string) => {
       setCollapsedGroups((prev) => {
         const next = new Set(prev);
@@ -2068,6 +2193,27 @@ const ArticleCard = React.memo(
     };
 
     const isGroupCollapsed = (g: string) => allCollapsed || collapsedGroups.has(g);
+
+    // Clickable header for the non-attribute cards (OTH GRID-1, Rough/Precise
+    // Consumption) — collapses like the group cards and follows Collapse All.
+    const renderCollapsibleHeader = (key: string, title: string) => {
+      const collapsed = isGroupCollapsed(key);
+      return (
+        <button
+          type="button"
+          onClick={() => toggleGroupCollapse(key)}
+          aria-expanded={!collapsed}
+          className="flex w-full items-center justify-between border-b px-2 py-1.5 transition-colors hover:brightness-110"
+          style={{ background: CARD_THEME.bg, borderColor: CARD_THEME.bg, color: CARD_THEME.fg }}
+        >
+          <span className="flex items-center gap-1 text-[10px] font-bold uppercase tracking-wider">
+            <DollarSign className="h-3 w-3" />
+            {title}
+          </span>
+          {collapsed ? <ChevronDown className="h-3 w-3" /> : <ChevronUp className="h-3 w-3" />}
+        </button>
+      );
+    };
 
     // AI confidence + heuristic quality breakdown derived from existing data.
     // No backend signal needed — we compute Image / Clarity / Match from
@@ -2370,12 +2516,15 @@ const ArticleCard = React.memo(
                   </span>
                 </div>
                 <div className="space-y-0.5 px-2 py-1 text-[10.5px] font-medium">
-                  <div className="flex items-start justify-between gap-2">
-                    <span className="font-semibold text-muted-foreground">Article ID</span>
-                    <span className="truncate text-right font-bold text-foreground">
-                      {item.sapArticleId || item.articleNumber || item.imageName || '—'}
-                    </span>
-                  </div>
+                  {/* Hidden on every FG Articles page (New, Old, Rejected, Created, Failed) */}
+                  {!!allowGroups && (
+                    <div className="flex items-start justify-between gap-2">
+                      <span className="font-semibold text-muted-foreground">Article ID</span>
+                      <span className="truncate text-right font-bold text-foreground">
+                        {item.sapArticleId || item.articleNumber || item.imageName || '—'}
+                      </span>
+                    </div>
+                  )}
                   <div className="flex items-start justify-between gap-2">
                     <span className="font-semibold text-muted-foreground">Category</span>
                     <span className="truncate text-right text-[11px] font-semibold text-foreground">
@@ -2489,12 +2638,14 @@ const ArticleCard = React.memo(
               {/* ── Group filter tabs (FG articles only) ── */}
               {!allowGroups && (() => {
                 const TAB_DEFS = [
-                  { key: 'FAB',      label: 'FABRIC AND CONSTRUCTION', style: GROUP_HEADER_STYLE['FAB'] },
-                  { key: 'BODY',     label: 'BODY AND CONSTRUCTION',   style: GROUP_HEADER_STYLE['BODY'] },
-                  { key: 'VA ACC.',  label: 'TRIMS & ACCESSORIES',     style: GROUP_HEADER_STYLE['VA ACC.'] },
-                  { key: 'VA PRCS',  label: 'VALUE ADDITION',          style: GROUP_HEADER_STYLE['VA PRCS'] },
-                  { key: 'BUSINESS', label: 'BUSINESS & MISC',         style: GROUP_HEADER_STYLE['BUSINESS'] },
-                  { key: 'BOM',      label: 'BOM',                     style: { bg: '#fffbeb', fg: '#92400e', border: '#fde68a' } },
+                  { key: 'FAB',      label: 'FAB',        style: GROUP_HEADER_STYLE['FAB'] },
+                  { key: 'BODY',     label: 'BODY',       style: GROUP_HEADER_STYLE['BODY'] },
+                  { key: 'VA ACC.',  label: 'B TRIM',     style: GROUP_HEADER_STYLE['VA ACC.'] },
+                  { key: 'VA PRCS',  label: 'V. ADD',     style: GROUP_HEADER_STYLE['VA PRCS'] },
+                  // BUSINESS attrs are merged into the BOM card (OTH GRID-1) for FG articles.
+                  { key: 'PKG',      label: 'PKG COST',   style: CARD_THEME },
+                  // OTH GRID-1 is always last — matches its card (order-last).
+                  { key: 'BOM',      label: 'OTH GRID-1', style: CARD_THEME },
                 ];
                 return (
                   <div className="mb-2 flex flex-wrap gap-1.5">
@@ -2507,7 +2658,7 @@ const ArticleCard = React.memo(
                           onClick={() => toggleGroupTab(key)}
                           className="rounded-full border-2 px-2.5 py-0.5 text-[10px] font-bold uppercase tracking-wider transition-all"
                           style={active
-                            ? { background: style.bg, color: style.fg, borderColor: style.border }
+                            ? { background: style.bg, color: style.fg, borderColor: style.bg }
                             : { background: 'transparent', color: '#64748b', borderColor: '#cbd5e1' }
                           }
                         >
@@ -2520,19 +2671,43 @@ const ArticleCard = React.memo(
               })()}
 
               {visibleAttrs.length > 0 ? (
-                <div className={`grid auto-rows-min gap-3 ${
+                <div className={`grid auto-rows-min items-start gap-3 ${
                   allowGroups
                     ? 'grid-cols-1'
                     : (() => {
-                        const visibleCount = visibleGroups.length + (showBomCard ? 1 : 0);
+                        const visibleCount = visibleGroups.length + (showBomCard ? 1 : 0) + (showPkgCard ? 1 : 0);
                         if (visibleCount <= 1) return 'grid-cols-1';
                         if (visibleCount <= 4) return 'grid-cols-2';
                         return 'grid-cols-3';
                       })()
                 }`}>
                   {visibleGroups.map((g) => {
-                    const style = GROUP_HEADER_STYLE[g.group] ?? { bg: '#f3f4f6', fg: '#374151', border: '#e5e7eb' };
+                    const style = GROUP_HEADER_STYLE[g.group] ?? CARD_THEME;
                     const collapsed = isGroupCollapsed(g.group);
+                    // FG articles: B TRIM and V. ADD render as costing grids.
+                    const gridCfg = COSTING_GRID_CONFIGS[g.group];
+                    if (gridCfg && !allowGroups) {
+                      const groupAttrs = groupMap[g.group].attrs;
+                      return (
+                        <CostingGridCard
+                          key={g.group}
+                          config={gridCfg.config}
+                          icon={GROUP_ICONS[g.group]}
+                          style={style}
+                          collapsed={collapsed}
+                          onToggleCollapse={() => toggleGroupCollapse(g.group)}
+                          attrs={groupAttrs}
+                          getValue={getValue}
+                          onSave={handleSave}
+                          isFieldLocked={isFieldLocked}
+                          locked={isLocked}
+                          extraRows={groupAttrs
+                            .filter((a) => !gridCfg.fields.has(a.field) && !FG_CARD_HIDDEN_SCHEMA_KEYS.has(a.schemaKey))
+                            .map((a) => renderAttributeRow(a))}
+                          enablePreciseTrimLookup={g.group === 'VA ACC.'}
+                        />
+                      );
+                    }
                     return (
                       <div
                         key={g.group}
@@ -2543,7 +2718,7 @@ const ArticleCard = React.memo(
                           type="button"
                           onClick={() => toggleGroupCollapse(g.group)}
                           className="flex w-full items-center justify-between border-b-2 px-2 py-1.5 transition-colors hover:brightness-95"
-                          style={{ background: style.bg, borderColor: style.border }}
+                          style={{ background: style.bg, borderColor: style.bg }}
                         >
                           <span
                             className="flex items-center gap-1 text-[10px] font-bold uppercase tracking-wider"
@@ -2569,7 +2744,6 @@ const ArticleCard = React.memo(
                                 { field: 'cmtpCost', label: 'CMTP COST' },
                                 { field: 'cmpCost', label: 'CMP COST' },
                                 { field: 'fabCons', label: 'FAB CON' },
-                                { field: 'width', label: 'WIDTH' },
                               ].map(({ field, label }) => {
                                 _attrCounter += 1;
                                 const num = _attrCounter;
@@ -2623,9 +2797,7 @@ const ArticleCard = React.memo(
                             {g.group === 'BODY' && allowGroups?.includes('BODY') &&
                               (() => {
                                 const COSTING_FIELDS: { field: string; label: string; isDropdown?: boolean }[] = [
-                                  { field: 'costingType',  label: 'BODY COSTING TYPE', isDropdown: true },
                                   { field: 'cmpCost',      label: 'CMP COST' },
-                                  { field: 'basicTrimCost', label: 'PACKAGING COST' },
                                   { field: 'cmtpCost',     label: 'CMTP COST' },
                                 ];
                                 return COSTING_FIELDS.map(({ field, label, isDropdown }) => {
@@ -2942,17 +3114,47 @@ const ArticleCard = React.memo(
                                         localValues['fabricArticleDescription'] !== undefined
                                           ? localValues['fabricArticleDescription']
                                           : (item as any)['fabricArticleDescription'];
-                                      const runFabDescSearch = (q: string) => {
+                                      const runFabDescSearch = (q: string, withAttrFallback = false) => {
                                         if (!q.trim()) { setFabDescResults([]); setFabDescSearched(false); return; }
                                         setFabDescLoading(true);
                                         setFabDescSearched(false);
                                         const token = localStorage.getItem('authToken');
+                                        const getVal = (key: string) =>
+                                          (localValues[key] !== undefined ? localValues[key] : (item as any)[key]) ?? '';
+                                        const params: Record<string, string> = { q };
+                                        if (withAttrFallback) {
+                                          params.mFabDiv       = getVal('fabDiv');
+                                          params.mYarn         = getVal('yarn1');
+                                          params.mFabMainMvgr1 = getVal('mainMvgr');
+                                          params.mConstruction = getVal('fConstruction');
+                                          params.mWidth        = getVal('fWidth');
+                                          params.mWeave01      = getVal('weave');
+                                          params.mComposition  = getVal('composition');
+                                          params.mLycra        = getVal('lycra');
+                                        }
                                         fetch(
-                                          `${APP_CONFIG.api.baseURL}/approver/fabric-article-data/search?q=${encodeURIComponent(q)}&type=FG,uploader`,
+                                          `${APP_CONFIG.api.baseURL}/approver/fabric-article-data/search?${new URLSearchParams(params).toString()}`,
                                           { headers: { Authorization: `Bearer ${token}` } },
                                         )
                                           .then((r) => r.json())
-                                          .then((d) => { setFabDescResults(d.results ?? []); setFabDescSearched(true); })
+                                          .then((d) => {
+                                            const hits = d.results ?? [];
+                                            setFabDescResults(hits);
+                                            setFabDescSearched(true);
+                                            // Attribute fallback: desc had no match but rate resolved → auto-fill AUTO-BGT and close
+                                            if (hits.length === 0 && d.attributeFallbackRate != null) {
+                                              const rateStr = String(d.attributeFallbackRate);
+                                              setLocalValues((prev) => ({ ...prev, autoBgt: rateStr }));
+                                              setEditingField(null);
+                                              setFabDescResults([]);
+                                              setFabDescSearched(false);
+                                              if (isModifyMode) {
+                                                setPendingChanges((prev) => ({ ...prev, autoBgt: rateStr }));
+                                              } else {
+                                                onSave({ ...item, autoBgt: rateStr } as any, { autoBgt: rateStr });
+                                              }
+                                            }
+                                          })
                                           .catch(() => { setFabDescResults([]); setFabDescSearched(true); })
                                           .finally(() => setFabDescLoading(false));
                                       };
@@ -3009,14 +3211,20 @@ const ArticleCard = React.memo(
                                                   onChange={(e) => {
                                                     const q = e.target.value;
                                                     setFabDescQuery(q);
-                                                    runFabDescSearch(q);
+                                                    // Desc-only while typing; attribute fallback runs on Enter/blur
+                                                    runFabDescSearch(q, false);
                                                   }}
                                                   onBlur={() => {
-                                                    if (fabDescLoading || fabDescSearched) return;
+                                                    if (fabDescLoading) return;
                                                     const trimmed = fabDescQuery.trim();
-                                                    if (trimmed) handleSave('fabricArticleDescription', trimmed);
-                                                    setEditingField(null);
-                                                    setFabDescResults([]);
+                                                    if (!trimmed) { setEditingField(null); setFabDescResults([]); return; }
+                                                    // If no desc results yet, try attribute fallback before closing
+                                                    if (fabDescResults.length === 0) {
+                                                      runFabDescSearch(trimmed, true);
+                                                    } else {
+                                                      setEditingField(null);
+                                                      setFabDescResults([]);
+                                                    }
                                                   }}
                                                   onKeyDown={(e) => {
                                                     if (e.key === 'Escape') {
@@ -3024,9 +3232,8 @@ const ArticleCard = React.memo(
                                                       setFabDescResults([]);
                                                     }
                                                     if (e.key === 'Enter' && fabDescQuery.trim()) {
-                                                      handleSave('fabricArticleDescription', fabDescQuery.trim() || null);
-                                                      setEditingField(null);
-                                                      setFabDescResults([]);
+                                                      // Run with attribute fallback on explicit Enter
+                                                      runFabDescSearch(fabDescQuery.trim(), true);
                                                     }
                                                   }}
                                                 />
@@ -3055,6 +3262,7 @@ const ArticleCard = React.memo(
                                                             const gridUpdates: Record<string, string | null> = {
                                                               fabricArticleNumber:      r.fabricArticleNumber,
                                                               fabricArticleDescription: r.fabricArticleDescription,
+                                                              autoBgt:                  r.fabricRate != null ? String(r.fabricRate) : null,
                                                               fabDiv:                   r.mFabDiv,
                                                               yarn1:                    r.mYarn,
                                                               mainMvgr:                 r.mFabMainMvgr1,
@@ -3123,7 +3331,7 @@ const ArticleCard = React.memo(
                                             // Validate required fields against the merged (UI) values
                                             const missing: string[] = [];
                                             if (!mergedItem.fabricArticleDescription) missing.push('FABRIC ARTICLE DESC');
-                                            if (!mergedItem.vendorFabricRate) missing.push('VENDOR FABRIC RATE');
+                                            if (!mergedItem.vendorFabricRate) missing.push('VENDOR COST');
                                             if (missing.length > 0) {
                                               message.error(`Fill mandatory fields before creating Fabric Article: ${missing.join(', ')}`);
                                               return;
@@ -3136,7 +3344,7 @@ const ArticleCard = React.memo(
                                           // Non-modify mode: use the standard parent flow (modal in parent)
                                           onCreateFabricArticle(mergedItem);
                                         }}
-                                        className="h-7 w-full border border-slate-300 bg-slate-50 text-[11px] font-medium text-slate-700 hover:bg-[#FF6F61]/10 hover:border-[#FF6F61]/40 hover:text-[#FF6F61] disabled:opacity-50 disabled:cursor-not-allowed"
+                                        className={CARD_ACTION_BTN}
                                       >
                                         <FileText />
                                         {fabricCreating ? 'Creating...' : 'Create Fabric Article'}
@@ -3182,6 +3390,90 @@ const ArticleCard = React.memo(
                                     .then((d) => { setBodyNoResults(d.results ?? []); setBodyNoSearched(true); })
                                     .catch(() => { setBodyNoResults([]); setBodyNoSearched(true); })
                                     .finally(() => setBodyNoLoading(false));
+                                };
+                                // Smart search: queries precise_body_article_consumption filtered by active grid attributes.
+                                // Fires immediately on box click — no text input. Only fills bodyArticle on apply.
+                                const SMART_ATTR_PARAM_MAP: Record<string, string> = {
+                                  collar:           'm_collar_type',
+                                  collarStyle:      'm_collar_style',
+                                  neckDetails:      'm_neck_style',
+                                  neck:             'm_neck_type',
+                                  placket:          'm_placket',
+                                  fatherBelt:       'm_blt_type',
+                                  childBelt:        'm_blt_style',
+                                  sleeve:           'm_sleeves_main_style',
+                                  sleeveFold:       'm_sleeve_fold',
+                                  bottomFold:       'm_btm_fold',
+                                  pocketType:       'm_pocket',
+                                  noOfPocket:       'm_no_of_pocket',
+                                  extraPocket:      'm_extra_pocket',
+                                  fit:              'm_fit',
+                                  pattern:          'body_style',
+                                  length:           'm_length',
+                                };
+                                const runPreciseBodySearch = () => {
+                                  setPreciseBodyLoading(true);
+                                  setPreciseBodySearched(false);
+                                  const token = localStorage.getItem('authToken');
+                                  const params = new URLSearchParams();
+                                  if (effectiveMajCat) params.set('majorCategory', effectiveMajCat);
+                                  Object.entries(SMART_ATTR_PARAM_MAP).forEach(([field, paramKey]) => {
+                                    const val = getFieldVal(field);
+                                    if (val) params.set(paramKey, val);
+                                  });
+                                  fetch(
+                                    `${APP_CONFIG.api.baseURL}/approver/precise-body-article/search?${params.toString()}`,
+                                    { headers: { Authorization: `Bearer ${token}` } },
+                                  )
+                                    .then((r) => r.json())
+                                    .then((d) => { setPreciseBodyResults(d.results ?? []); setPreciseBodySearched(true); })
+                                    .catch(() => { setPreciseBodyResults([]); setPreciseBodySearched(true); })
+                                    .finally(() => setPreciseBodyLoading(false));
+                                };
+                                const applyPreciseBodyResult = (r: { macroBodyDescription: string | null; microBodyArticleNumber: string | null }) => {
+                                  const updates: Record<string, string> = {
+                                    bodyArticle: r.microBodyArticleNumber || '',
+                                  };
+                                  setLocalValues((prev) => ({ ...prev, ...updates }));
+                                  setEditingField(null);
+                                  setPreciseBodyResults([]);
+                                  setPreciseBodySearched(false);
+                                  if (isModifyMode) {
+                                    setPendingChanges((prev) => ({ ...prev, ...updates }));
+                                  } else {
+                                    onSave({ ...item, ...updates } as any, updates);
+                                  }
+                                };
+                                // Smart search for NO. field — text search on micro_body_article_number in precise table.
+                                const runPreciseBodyNoSearch = (q: string) => {
+                                  if (!q.trim()) { setPreciseBodyNoResults([]); setPreciseBodyNoSearched(false); return; }
+                                  setPreciseBodyNoLoading(true);
+                                  setPreciseBodyNoSearched(false);
+                                  const token = localStorage.getItem('authToken');
+                                  const params = new URLSearchParams({ q });
+                                  if (effectiveMajCat) params.set('majorCategory', effectiveMajCat);
+                                  fetch(
+                                    `${APP_CONFIG.api.baseURL}/approver/precise-body-article/search?${params.toString()}`,
+                                    { headers: { Authorization: `Bearer ${token}` } },
+                                  )
+                                    .then((r) => r.json())
+                                    .then((d) => { setPreciseBodyNoResults(d.results ?? []); setPreciseBodyNoSearched(true); })
+                                    .catch(() => { setPreciseBodyNoResults([]); setPreciseBodyNoSearched(true); })
+                                    .finally(() => setPreciseBodyNoLoading(false));
+                                };
+                                const applyPreciseBodyNoResult = (r: { macroBodyDescription: string | null; microBodyArticleNumber: string | null }) => {
+                                  const updates: Record<string, string> = {
+                                    bodyArticle: r.microBodyArticleNumber || '',
+                                  };
+                                  setLocalValues((prev) => ({ ...prev, ...updates }));
+                                  setEditingField(null);
+                                  setPreciseBodyNoResults([]);
+                                  setPreciseBodyNoSearched(false);
+                                  if (isModifyMode) {
+                                    setPendingChanges((prev) => ({ ...prev, ...updates }));
+                                  } else {
+                                    onSave({ ...item, ...updates } as any, updates);
+                                  }
                                 };
                                 // Selecting a search result (by number or by description) fills every
                                 // mapped field from that body_article_data row — shared by both search boxes below.
@@ -3249,7 +3541,7 @@ const ArticleCard = React.memo(
                                 };
                                 return (
                                   <>
-                                    {/* BODY ARTICLE NO. — search dropdown from body_article_data */}
+                                    {/* BODY ARTICLE NO. — Classic (body_article_data) or Smart (precise_body_article_consumption) */}
                                     <div
                                       key="bodyArticle"
                                       className="mt-1 border-t border-border bg-muted/30 px-2 py-1.5"
@@ -3257,9 +3549,15 @@ const ArticleCard = React.memo(
                                       onClick={() => {
                                         if (!isLocked && !isBodyNoEditing) {
                                           setEditingField('bot_bodyArticle');
-                                          setBodyNoQuery(bodyNoDisplayVal || '');
-                                          setBodyNoResults([]);
-                                          setBodyNoSearched(false);
+                                          if (bodyNoMode === 'classic') {
+                                            setBodyNoQuery(bodyNoDisplayVal || '');
+                                            setBodyNoResults([]);
+                                            setBodyNoSearched(false);
+                                          } else {
+                                            setPreciseBodyNoQuery('');
+                                            setPreciseBodyNoResults([]);
+                                            setPreciseBodyNoSearched(false);
+                                          }
                                         }
                                       }}
                                     >
@@ -3267,90 +3565,185 @@ const ArticleCard = React.memo(
                                         <span className="text-[9px] font-semibold uppercase tracking-wider text-muted-foreground">
                                           BODY ARTICLE NO.
                                         </span>
-                                      </div>
-                                      {isBodyNoEditing ? (
-                                        // Rendered via Popover/PopoverContent so the results list portals to
-                                        // document.body — the group card above has overflow-hidden (for its
-                                        // rounded corners), which was silently clipping a plain absolutely-
-                                        // positioned dropdown to ~2 visible rows even when more rows matched.
-                                        <Popover
-                                          open
-                                          onOpenChange={(o) => {
-                                            if (!o) {
-                                              setEditingField(null);
-                                              setBodyNoResults([]);
-                                              setBodyNoSearched(false);
-                                            }
-                                          }}
-                                        >
-                                          <PopoverAnchor asChild>
-                                            <Input
-                                              autoFocus
-                                              value={bodyNoQuery}
-                                              placeholder="Search body article no…"
-                                              className="h-6 px-1 text-[11px]"
-                                              onClick={(e) => e.stopPropagation()}
-                                              onChange={(e) => {
-                                                const q = e.target.value;
-                                                setBodyNoQuery(q);
-                                                runBodySearch(q);
-                                              }}
-                                              onBlur={() => {
-                                                // Don't close while a "No Body Article found" message or loading
-                                                // indicator is showing — the PopoverContent mounting can steal focus
-                                                // momentarily, firing this blur before the user has seen the result.
-                                                if (bodyNoLoading || bodyNoSearched) return;
+                                        {!isLocked && (
+                                          <div onClick={(e) => e.stopPropagation()}>
+                                            <button
+                                              type="button"
+                                              title={bodyNoMode === 'classic' ? 'Switch to Smart search (precise table)' : 'Switch to Classic search (body_article_data)'}
+                                              className={`flex h-4 items-center gap-0.5 rounded-full border px-1.5 text-[8px] font-semibold tracking-wide hover:opacity-80 ${bodyNoMode === 'smart' ? 'border-slate-700 bg-slate-800 text-white' : 'border-slate-300 bg-white text-slate-600'}`}
+                                              onClick={() => {
+                                                setBodyNoMode((m) => m === 'classic' ? 'smart' : 'classic');
                                                 setEditingField(null);
                                                 setBodyNoResults([]);
+                                                setBodyNoSearched(false);
+                                                setPreciseBodyNoResults([]);
+                                                setPreciseBodyNoSearched(false);
                                               }}
-                                              onKeyDown={(e) => {
-                                                if (e.key === 'Escape') {
-                                                  setEditingField(null);
-                                                  setBodyNoResults([]);
-                                                }
-                                                if (e.key === 'Enter' && bodyNoQuery.trim()) {
-                                                  handleSave('bodyArticle', bodyNoQuery.trim() || null);
-                                                  setEditingField(null);
-                                                  setBodyNoResults([]);
-                                                }
-                                              }}
-                                            />
-                                          </PopoverAnchor>
-                                          {(bodyNoResults.length > 0 || bodyNoLoading || bodyNoSearched) && (
-                                            <PopoverContent
-                                              align="start"
-                                              sideOffset={2}
-                                              className="w-[260px] p-0"
-                                              onOpenAutoFocus={(e) => e.preventDefault()}
-                                              onClick={(e) => e.stopPropagation()}
                                             >
-                                              <div className="max-h-56 overflow-y-auto py-1">
-                                                {bodyNoLoading ? (
-                                                  <div className="px-3 py-2 text-[11px] text-muted-foreground">Searching…</div>
-                                                ) : bodyNoResults.length === 0 ? (
-                                                  <div className="px-3 py-2 text-[11px] text-muted-foreground">No Body Article found</div>
-                                                ) : (
-                                                  bodyNoResults.map((r) => (
-                                                    <button
-                                                      key={r.bodyArticleNumber}
-                                                      type="button"
-                                                      className="flex w-full flex-col gap-0.5 px-3 py-1.5 text-left hover:bg-[#FF6F61]/10"
-                                                      onMouseDown={(e) => {
-                                                        e.preventDefault();
-                                                        applyBodyArticleRow(r);
-                                                      }}
-                                                    >
-                                                      <span className="text-[11px] font-medium text-gray-900">{r.bodyArticleNumber}</span>
-                                                      {r.bodyArticleDescription && (
-                                                        <span className="truncate text-[10px] text-muted-foreground">{r.bodyArticleDescription}</span>
-                                                      )}
-                                                    </button>
-                                                  ))
-                                                )}
-                                              </div>
-                                            </PopoverContent>
-                                          )}
-                                        </Popover>
+                                              {bodyNoMode === 'smart' ? '⚡ SMART' : 'CLASSIC'}
+                                            </button>
+                                          </div>
+                                        )}
+                                      </div>
+                                      {isBodyNoEditing ? (
+                                        bodyNoMode === 'classic' ? (
+                                          /* ── Classic mode: text search from body_article_data ── */
+                                          <Popover
+                                            open
+                                            onOpenChange={(o) => {
+                                              if (!o) {
+                                                setEditingField(null);
+                                                setBodyNoResults([]);
+                                                setBodyNoSearched(false);
+                                              }
+                                            }}
+                                          >
+                                            <PopoverAnchor asChild>
+                                              <Input
+                                                autoFocus
+                                                value={bodyNoQuery}
+                                                placeholder="Search body article no…"
+                                                className="h-6 px-1 text-[11px]"
+                                                onClick={(e) => e.stopPropagation()}
+                                                onChange={(e) => {
+                                                  const q = e.target.value;
+                                                  setBodyNoQuery(q);
+                                                  runBodySearch(q);
+                                                }}
+                                                onBlur={() => {
+                                                  if (bodyNoLoading || bodyNoSearched) return;
+                                                  setEditingField(null);
+                                                  setBodyNoResults([]);
+                                                }}
+                                                onKeyDown={(e) => {
+                                                  if (e.key === 'Escape') {
+                                                    setEditingField(null);
+                                                    setBodyNoResults([]);
+                                                  }
+                                                  if (e.key === 'Enter' && bodyNoQuery.trim()) {
+                                                    handleSave('bodyArticle', bodyNoQuery.trim() || null);
+                                                    setEditingField(null);
+                                                    setBodyNoResults([]);
+                                                  }
+                                                }}
+                                              />
+                                            </PopoverAnchor>
+                                            {(bodyNoResults.length > 0 || bodyNoLoading || bodyNoSearched) && (
+                                              <PopoverContent
+                                                align="start"
+                                                sideOffset={2}
+                                                className="w-[260px] p-0"
+                                                onOpenAutoFocus={(e) => e.preventDefault()}
+                                                onClick={(e) => e.stopPropagation()}
+                                              >
+                                                <div className="max-h-56 overflow-y-auto py-1">
+                                                  {bodyNoLoading ? (
+                                                    <div className="px-3 py-2 text-[11px] text-muted-foreground">Searching…</div>
+                                                  ) : bodyNoResults.length === 0 ? (
+                                                    <div className="px-3 py-2 text-[11px] text-muted-foreground">No Body Article found</div>
+                                                  ) : (
+                                                    bodyNoResults.map((r) => (
+                                                      <button
+                                                        key={r.bodyArticleNumber}
+                                                        type="button"
+                                                        className="flex w-full flex-col gap-0.5 px-3 py-1.5 text-left hover:bg-[#FF6F61]/10"
+                                                        onMouseDown={(e) => {
+                                                          e.preventDefault();
+                                                          applyBodyArticleRow(r);
+                                                        }}
+                                                      >
+                                                        <span className="text-[11px] font-medium text-gray-900">{r.bodyArticleNumber}</span>
+                                                        {r.bodyArticleDescription && (
+                                                          <span className="truncate text-[10px] text-muted-foreground">{r.bodyArticleDescription}</span>
+                                                        )}
+                                                      </button>
+                                                    ))
+                                                  )}
+                                                </div>
+                                              </PopoverContent>
+                                            )}
+                                          </Popover>
+                                        ) : (
+                                          /* ── Smart mode: text search from precise_body_article_consumption ── */
+                                          <Popover
+                                            open
+                                            onOpenChange={(o) => {
+                                              if (!o) {
+                                                setEditingField(null);
+                                                setPreciseBodyNoResults([]);
+                                                setPreciseBodyNoSearched(false);
+                                              }
+                                            }}
+                                          >
+                                            <PopoverAnchor asChild>
+                                              <Input
+                                                autoFocus
+                                                value={preciseBodyNoQuery}
+                                                placeholder="Search precise article no…"
+                                                className="h-6 px-1 text-[11px]"
+                                                onClick={(e) => e.stopPropagation()}
+                                                onChange={(e) => {
+                                                  const q = e.target.value;
+                                                  setPreciseBodyNoQuery(q);
+                                                  runPreciseBodyNoSearch(q);
+                                                }}
+                                                onBlur={() => {
+                                                  if (preciseBodyNoLoading || preciseBodyNoSearched) return;
+                                                  setEditingField(null);
+                                                  setPreciseBodyNoResults([]);
+                                                }}
+                                                onKeyDown={(e) => {
+                                                  if (e.key === 'Escape') {
+                                                    setEditingField(null);
+                                                    setPreciseBodyNoResults([]);
+                                                  }
+                                                  if (e.key === 'Enter' && preciseBodyNoQuery.trim()) {
+                                                    handleSave('bodyArticle', preciseBodyNoQuery.trim() || null);
+                                                    setEditingField(null);
+                                                    setPreciseBodyNoResults([]);
+                                                  }
+                                                }}
+                                              />
+                                            </PopoverAnchor>
+                                            {(preciseBodyNoResults.length > 0 || preciseBodyNoLoading || preciseBodyNoSearched) && (
+                                              <PopoverContent
+                                                align="start"
+                                                sideOffset={2}
+                                                className="w-[280px] p-0"
+                                                onOpenAutoFocus={(e) => e.preventDefault()}
+                                                onClick={(e) => e.stopPropagation()}
+                                              >
+                                                <div className="border-b border-border bg-slate-50 px-3 py-1.5 text-[10px] font-semibold uppercase tracking-wide text-slate-500">
+                                                  Smart match — fills article no. only
+                                                </div>
+                                                <div className="max-h-56 overflow-y-auto py-1">
+                                                  {preciseBodyNoLoading ? (
+                                                    <div className="px-3 py-2 text-[11px] text-muted-foreground">Searching…</div>
+                                                  ) : preciseBodyNoResults.length === 0 ? (
+                                                    <div className="px-3 py-2 text-[11px] text-muted-foreground">No match found</div>
+                                                  ) : (
+                                                    preciseBodyNoResults.map((r, i) => (
+                                                      <button
+                                                        key={r.microBodyArticleNumber ?? i}
+                                                        type="button"
+                                                        className="flex w-full flex-col gap-0.5 px-3 py-1.5 text-left hover:bg-slate-800/10"
+                                                        onMouseDown={(e) => {
+                                                          e.preventDefault();
+                                                          applyPreciseBodyNoResult(r);
+                                                        }}
+                                                      >
+                                                        <span className="text-[11px] font-medium text-gray-900">{r.microBodyArticleNumber || '—'}</span>
+                                                        {r.macroBodyDescription && (
+                                                          <span className="truncate text-[10px] text-muted-foreground">{r.macroBodyDescription}</span>
+                                                        )}
+                                                      </button>
+                                                    ))
+                                                  )}
+                                                </div>
+                                              </PopoverContent>
+                                            )}
+                                          </Popover>
+                                        )
                                       ) : (
                                         <div
                                           className="truncate text-[11px]"
@@ -3360,7 +3753,7 @@ const ArticleCard = React.memo(
                                         </div>
                                       )}
                                     </div>
-                                    {/* BODY ARTICLE DESC — same search dropdown, keyed off description instead of number */}
+                                    {/* BODY ARTICLE DESC — Classic (text search) or Smart (attribute-based) plugin */}
                                     <div
                                       key="bodyArticleDescription"
                                       className="mt-1 border-t border-border bg-muted/30 px-2 py-1.5"
@@ -3368,13 +3761,16 @@ const ArticleCard = React.memo(
                                       onClick={() => {
                                         if (!isLocked && !isBodyDescEditing) {
                                           setEditingField('bot_bodyArticleDescription');
-                                          setBodyNoQuery(bodyDescDisplayVal || '');
-                                          setBodyNoSearched(false);
-                                          // Whatever's already been composed from the fields filled so far
-                                          // (via the live rebuild above) becomes the starting search — no
-                                          // need to retype it before matches show up.
-                                          if (bodyDescDisplayVal) runBodySearch(bodyDescDisplayVal);
-                                          else setBodyNoResults([]);
+                                          if (bodyDescMode === 'classic') {
+                                            setBodyNoQuery(bodyDescDisplayVal || '');
+                                            setBodyNoSearched(false);
+                                            if (bodyDescDisplayVal) runBodySearch(bodyDescDisplayVal);
+                                            else setBodyNoResults([]);
+                                          } else {
+                                            setPreciseBodyResults([]);
+                                            setPreciseBodySearched(false);
+                                            runPreciseBodySearch();
+                                          }
                                         }
                                       }}
                                     >
@@ -3382,99 +3778,179 @@ const ArticleCard = React.memo(
                                         <span className="text-[9px] font-semibold uppercase tracking-wider text-muted-foreground">
                                           BODY ARTICLE DESC
                                         </span>
-                                        {!isBodyDescEditing && !isLocked && (
-                                          <button
-                                            type="button"
-                                            className="text-[9px] text-slate-700 underline hover:text-[#FF6F61]"
-                                            onClick={(e) => {
-                                              e.stopPropagation();
-                                              bodyAutoFill();
-                                            }}
-                                          >
-                                            Auto-fill
-                                          </button>
-                                        )}
-                                      </div>
-                                      {isBodyDescEditing ? (
-                                        <Popover
-                                          open
-                                          onOpenChange={(o) => {
-                                            if (!o) {
-                                              setEditingField(null);
-                                              setBodyNoResults([]);
-                                              setBodyNoSearched(false);
-                                            }
-                                          }}
-                                        >
-                                          <PopoverAnchor asChild>
-                                            <Input
-                                              autoFocus
-                                              value={bodyNoQuery}
-                                              placeholder="Search body article desc…"
-                                              maxLength={40}
-                                              className="h-6 px-1 text-[11px]"
-                                              onClick={(e) => e.stopPropagation()}
-                                              onChange={(e) => {
-                                                const q = e.target.value;
-                                                setBodyNoQuery(q);
-                                                runBodySearch(q);
-                                              }}
-                                              onBlur={() => {
-                                                // Don't close while "No Body Article found" is showing
-                                                if (bodyNoLoading || bodyNoSearched) return;
-                                                const trimmed = bodyNoQuery.trim();
-                                                if (trimmed) handleSave('bodyArticleDescription', trimmed);
+                                        <div className="flex items-center gap-1.5" onClick={(e) => e.stopPropagation()}>
+                                          {/* Mode toggle pill */}
+                                          {!isLocked && (
+                                            <button
+                                              type="button"
+                                              title={bodyDescMode === 'classic' ? 'Switch to Smart search (attribute-based)' : 'Switch to Classic search (text)'}
+                                              className={`flex h-4 items-center gap-0.5 rounded-full border px-1.5 text-[8px] font-semibold tracking-wide hover:opacity-80 ${bodyDescMode === 'smart' ? 'border-slate-700 bg-slate-800 text-white' : 'border-slate-300 bg-white text-slate-600'}`}
+                                              onClick={() => {
+                                                setBodyDescMode((m) => m === 'classic' ? 'smart' : 'classic');
                                                 setEditingField(null);
                                                 setBodyNoResults([]);
+                                                setBodyNoSearched(false);
+                                                setPreciseBodyResults([]);
+                                                setPreciseBodySearched(false);
                                               }}
-                                              onKeyDown={(e) => {
-                                                if (e.key === 'Escape') {
-                                                  setEditingField(null);
-                                                  setBodyNoResults([]);
-                                                }
-                                                if (e.key === 'Enter' && bodyNoQuery.trim()) {
-                                                  handleSave('bodyArticleDescription', bodyNoQuery.trim() || null);
-                                                  setEditingField(null);
-                                                  setBodyNoResults([]);
-                                                }
-                                              }}
-                                            />
-                                          </PopoverAnchor>
-                                          {(bodyNoResults.length > 0 || bodyNoLoading || bodyNoSearched) && (
-                                            <PopoverContent
-                                              align="start"
-                                              sideOffset={2}
-                                              className="w-[260px] p-0"
-                                              onOpenAutoFocus={(e) => e.preventDefault()}
-                                              onClick={(e) => e.stopPropagation()}
                                             >
-                                              <div className="max-h-56 overflow-y-auto py-1">
-                                                {bodyNoLoading ? (
-                                                  <div className="px-3 py-2 text-[11px] text-muted-foreground">Searching…</div>
-                                                ) : bodyNoResults.length === 0 ? (
-                                                  <div className="px-3 py-2 text-[11px] text-muted-foreground">No Body Article found</div>
-                                                ) : (
-                                                  bodyNoResults.map((r) => (
-                                                    <button
-                                                      key={r.bodyArticleNumber}
-                                                      type="button"
-                                                      className="flex w-full flex-col gap-0.5 px-3 py-1.5 text-left hover:bg-[#FF6F61]/10"
-                                                      onMouseDown={(e) => {
-                                                        e.preventDefault();
-                                                        applyBodyArticleRow(r);
-                                                      }}
-                                                    >
-                                                      <span className="text-[11px] font-medium text-gray-900">{r.bodyArticleDescription || '—'}</span>
-                                                      {r.bodyArticleNumber && (
-                                                        <span className="truncate text-[10px] text-muted-foreground">{r.bodyArticleNumber}</span>
-                                                      )}
-                                                    </button>
-                                                  ))
-                                                )}
-                                              </div>
-                                            </PopoverContent>
+                                              {bodyDescMode === 'smart' ? '⚡ SMART' : 'CLASSIC'}
+                                            </button>
                                           )}
-                                        </Popover>
+                                          {!isBodyDescEditing && !isLocked && (
+                                            <button
+                                              type="button"
+                                              className="text-[9px] text-slate-700 underline hover:text-[#FF6F61]"
+                                              onClick={(e) => {
+                                                e.stopPropagation();
+                                                bodyAutoFill();
+                                              }}
+                                            >
+                                              Auto-fill
+                                            </button>
+                                          )}
+                                        </div>
+                                      </div>
+                                      {isBodyDescEditing ? (
+                                        bodyDescMode === 'classic' ? (
+                                          /* ── Classic mode: text search ── */
+                                          <Popover
+                                            open
+                                            onOpenChange={(o) => {
+                                              if (!o) {
+                                                setEditingField(null);
+                                                setBodyNoResults([]);
+                                                setBodyNoSearched(false);
+                                              }
+                                            }}
+                                          >
+                                            <PopoverAnchor asChild>
+                                              <Input
+                                                autoFocus
+                                                value={bodyNoQuery}
+                                                placeholder="Search body article desc…"
+                                                maxLength={40}
+                                                className="h-6 px-1 text-[11px]"
+                                                onClick={(e) => e.stopPropagation()}
+                                                onChange={(e) => {
+                                                  const q = e.target.value;
+                                                  setBodyNoQuery(q);
+                                                  runBodySearch(q);
+                                                }}
+                                                onBlur={() => {
+                                                  if (bodyNoLoading || bodyNoSearched) return;
+                                                  const trimmed = bodyNoQuery.trim();
+                                                  if (trimmed) handleSave('bodyArticleDescription', trimmed);
+                                                  setEditingField(null);
+                                                  setBodyNoResults([]);
+                                                }}
+                                                onKeyDown={(e) => {
+                                                  if (e.key === 'Escape') {
+                                                    setEditingField(null);
+                                                    setBodyNoResults([]);
+                                                  }
+                                                  if (e.key === 'Enter' && bodyNoQuery.trim()) {
+                                                    handleSave('bodyArticleDescription', bodyNoQuery.trim() || null);
+                                                    setEditingField(null);
+                                                    setBodyNoResults([]);
+                                                  }
+                                                }}
+                                              />
+                                            </PopoverAnchor>
+                                            {(bodyNoResults.length > 0 || bodyNoLoading || bodyNoSearched) && (
+                                              <PopoverContent
+                                                align="start"
+                                                sideOffset={2}
+                                                className="w-[260px] p-0"
+                                                onOpenAutoFocus={(e) => e.preventDefault()}
+                                                onClick={(e) => e.stopPropagation()}
+                                              >
+                                                <div className="max-h-56 overflow-y-auto py-1">
+                                                  {bodyNoLoading ? (
+                                                    <div className="px-3 py-2 text-[11px] text-muted-foreground">Searching…</div>
+                                                  ) : bodyNoResults.length === 0 ? (
+                                                    <div className="px-3 py-2 text-[11px] text-muted-foreground">No Body Article found</div>
+                                                  ) : (
+                                                    bodyNoResults.map((r) => (
+                                                      <button
+                                                        key={r.bodyArticleNumber}
+                                                        type="button"
+                                                        className="flex w-full flex-col gap-0.5 px-3 py-1.5 text-left hover:bg-[#FF6F61]/10"
+                                                        onMouseDown={(e) => {
+                                                          e.preventDefault();
+                                                          applyBodyArticleRow(r);
+                                                        }}
+                                                      >
+                                                        <span className="text-[11px] font-medium text-gray-900">{r.bodyArticleDescription || '—'}</span>
+                                                        {r.bodyArticleNumber && (
+                                                          <span className="truncate text-[10px] text-muted-foreground">{r.bodyArticleNumber}</span>
+                                                        )}
+                                                      </button>
+                                                    ))
+                                                  )}
+                                                </div>
+                                              </PopoverContent>
+                                            )}
+                                          </Popover>
+                                        ) : (
+                                          /* ── Smart mode: attribute-based, no text input ── */
+                                          <Popover
+                                            open
+                                            onOpenChange={(o) => {
+                                              if (!o) {
+                                                setEditingField(null);
+                                                setPreciseBodyResults([]);
+                                                setPreciseBodySearched(false);
+                                              }
+                                            }}
+                                          >
+                                            <PopoverAnchor asChild>
+                                              <div
+                                                className="flex h-6 items-center rounded border border-input bg-white px-1 text-[11px] text-muted-foreground"
+                                                onClick={(e) => e.stopPropagation()}
+                                              >
+                                                {preciseBodyLoading ? 'Searching…' : 'Matching by active grid attributes'}
+                                              </div>
+                                            </PopoverAnchor>
+                                            {(preciseBodyResults.length > 0 || preciseBodyLoading || preciseBodySearched) && (
+                                              <PopoverContent
+                                                align="start"
+                                                sideOffset={2}
+                                                className="w-[280px] p-0"
+                                                onOpenAutoFocus={(e) => e.preventDefault()}
+                                                onClick={(e) => e.stopPropagation()}
+                                              >
+                                                <div className="border-b border-border bg-slate-50 px-3 py-1.5 text-[10px] font-semibold uppercase tracking-wide text-slate-500">
+                                                  Smart match — fills article no. only
+                                                </div>
+                                                <div className="max-h-56 overflow-y-auto py-1">
+                                                  {preciseBodyLoading ? (
+                                                    <div className="px-3 py-2 text-[11px] text-muted-foreground">Searching…</div>
+                                                  ) : preciseBodyResults.length === 0 ? (
+                                                    <div className="px-3 py-2 text-[11px] text-muted-foreground">No match found</div>
+                                                  ) : (
+                                                    preciseBodyResults.map((r, i) => (
+                                                      <button
+                                                        key={r.microBodyArticleNumber ?? i}
+                                                        type="button"
+                                                        className="flex w-full flex-col gap-0.5 px-3 py-1.5 text-left hover:bg-slate-800/10"
+                                                        onMouseDown={(e) => {
+                                                          e.preventDefault();
+                                                          applyPreciseBodyResult(r);
+                                                        }}
+                                                      >
+                                                        <span className="text-[11px] font-medium text-gray-900">{r.microBodyArticleNumber || '—'}</span>
+                                                        {r.macroBodyDescription && (
+                                                          <span className="truncate text-[10px] text-muted-foreground">{r.macroBodyDescription}</span>
+                                                        )}
+                                                      </button>
+                                                    ))
+                                                  )}
+                                                </div>
+                                              </PopoverContent>
+                                            )}
+                                          </Popover>
+                                        )
                                       ) : (
                                         <div
                                           className="truncate text-[11px]"
@@ -3493,7 +3969,7 @@ const ArticleCard = React.memo(
                                           // not the stale DB values (important on Created page before Modify is clicked).
                                           onCreateBodyArticle({ ...item, ...localValues } as typeof item);
                                         }}
-                                        className="h-7 w-full border border-purple-300 bg-purple-50 text-[11px] font-medium text-purple-700 hover:bg-purple-100"
+                                        className={CARD_ACTION_BTN}
                                       >
                                         <LayoutGrid />
                                         Create Body Article
@@ -3510,23 +3986,15 @@ const ArticleCard = React.memo(
                   })}
 
                   {/* BOM / Consumption card */}
+                  {/* FG: OTH GRID-1 is always the last card (order-last) */}
                   {showBomCard && <div
-                    className="overflow-hidden rounded-lg border bg-white"
-                    style={{ borderColor: '#fde68a' }}
+                    className={cn('overflow-hidden rounded-lg border bg-white', !allowGroups && 'order-last')}
+                    style={{ borderColor: CARD_THEME.border }}
                   >
-                    <div
-                      className="flex items-center justify-between border-b px-2 py-1"
-                      style={{ background: '#fffbeb', borderColor: '#fde68a' }}
-                    >
-                      <span className="flex items-center gap-1 text-[10px] font-bold uppercase tracking-wider text-amber-700">
-                        <DollarSign className="h-3 w-3" />
-                        {isBodyArticle ? 'ROUGH CONSUMPTION' : 'BOM'}
-                      </span>
-                    </div>
-                    <div className="space-y-0 p-1">
+                    {renderCollapsibleHeader('BOM', isBodyArticle ? 'ROUGH CONSUMPTION' : 'OTH GRID-1')}
+                    <div className={cn('space-y-0 p-1', isGroupCollapsed('BOM') && 'hidden')}>
                       {(allowGroups?.includes('BODY')
                         ? [
-                            { label: 'Width',             field: 'width',            editable: true, mandatory: false, isDropdown: false, isColor: false, isMarkdown: false },
                             { label: 'Gsm',               field: 'gsm',              editable: true, mandatory: false, isDropdown: false, isColor: false, isMarkdown: false },
                             { label: 'Ratio',                 field: 'ratio',               editable: true, mandatory: false, isDropdown: false, isColor: false, isMarkdown: false },
                             { label: 'Consumption in Kg',      field: 'consumptionKg',       editable: true, mandatory: false, isDropdown: false, isColor: false, isMarkdown: false },
@@ -3769,25 +4237,120 @@ const ArticleCard = React.memo(
                           </div>
                         );
                       })}
+
+                      {/* FG: the former BUSINESS card's attrs live here (OTH GRID-1),
+                          led by Age Group → IMP ATBT → Fashion Type → Segment. */}
+                      {!allowGroups && groupMap['BUSINESS'] &&
+                        groupMap['BUSINESS'].attrs
+                          .filter((a) => !FG_CARD_HIDDEN_SCHEMA_KEYS.has(a.schemaKey))
+                          .sort((a, b) => {
+                            const rank = (k: string) => {
+                              const i = OTH_GRID_1_ORDER.indexOf(k);
+                              return i === -1 ? OTH_GRID_1_ORDER.length : i;
+                            };
+                            return rank(a.schemaKey) - rank(b.schemaKey);
+                          })
+                          .map((a) => renderAttributeRow(a))}
                     </div>
                   </div>}
+
+                  {/* PKG COST card — FG Articles, PKG tab only */}
+                  {showPkgCard && (
+                    <PkgCostCard
+                      collapsed={isGroupCollapsed('PKG')}
+                      onToggleCollapse={() => toggleGroupCollapse('PKG')}
+                      locked={isLocked}
+                    />
+                  )}
+
+                  {/* ROUGH CONSUMPTION card — FG Articles, BODY tab only */}
+                  {!isBodyArticle && selectedGroupKeys.has('BODY') && (
+                    <div className="overflow-hidden rounded-lg border bg-white" style={{ borderColor: CARD_THEME.border }}>
+                      {renderCollapsibleHeader('ROUGH', 'ROUGH CONSUMPTION')}
+                      <div className={cn('space-y-0 p-1', isGroupCollapsed('ROUGH') && 'hidden')}>
+                        {([
+                          { label: 'Ratio',               field: 'roughRatio' },
+                          { label: 'Consumption in Kg',   field: 'roughConsumptionKg' },
+                          { label: 'Consumption in Meter', field: 'roughConsumptionMeter' },
+                        ] as { label: string; field: string }[]).map(({ label, field }) => {
+                          const isEditingR = editingField === `rough_${field}`;
+                          const rawVal = localValues[field] !== undefined ? localValues[field] : (item as any)[field];
+                          const displayVal = rawVal !== null && rawVal !== undefined && String(rawVal).trim() !== '' ? String(rawVal) : '—';
+                          const isEmpty = displayVal === '—';
+                          return (
+                            <div
+                              key={field}
+                              className="flex cursor-pointer items-center justify-between rounded px-1.5 py-1 hover:bg-muted/40"
+                              onClick={() => { if (!isEditingR) setEditingField(`rough_${field}`); }}
+                            >
+                              <span className="text-[11.5px] text-slate-600">{label}</span>
+                              {isEditingR ? (
+                                <input
+                                  autoFocus
+                                  type="number"
+                                  className="w-24 rounded border border-border px-1 text-right text-[11.5px]"
+                                  defaultValue={isEmpty ? '' : displayVal}
+                                  onBlur={(e) => { handleSave(field, e.target.value || null); setEditingField(null); }}
+                                  onKeyDown={(e) => { if (e.key === 'Enter') (e.target as HTMLInputElement).blur(); if (e.key === 'Escape') setEditingField(null); }}
+                                />
+                              ) : (
+                                <span className="text-[11.5px]" style={{ color: isEmpty ? '#9ca3af' : '#111827' }}>{displayVal}</span>
+                              )}
+                            </div>
+                          );
+                        })}
+                      </div>
+                    </div>
+                  )}
+
+                  {/* PRECISE CONSUMPTION card — FG Articles, BODY tab only */}
+                  {!isBodyArticle && selectedGroupKeys.has('BODY') && (
+                    <div className="overflow-hidden rounded-lg border bg-white" style={{ borderColor: CARD_THEME.border }}>
+                      {renderCollapsibleHeader('PRECISE', 'PRECISE CONSUMPTION')}
+                      <div className={cn('space-y-0 p-1', isGroupCollapsed('PRECISE') && 'hidden')}>
+                        {([
+                          { label: 'Ratio',               field: 'preciseRatio' },
+                          { label: 'Consumption in Kg',   field: 'preciseConsumptionKg' },
+                          { label: 'Consumption in Meter', field: 'preciseConsumptionMeter' },
+                        ] as { label: string; field: string }[]).map(({ label, field }) => {
+                          const isEditingP = editingField === `fgprecise_${field}`;
+                          const rawVal = localValues[field] !== undefined ? localValues[field] : (item as any)[field];
+                          const displayVal = rawVal !== null && rawVal !== undefined && String(rawVal).trim() !== '' ? String(rawVal) : '—';
+                          const isEmpty = displayVal === '—';
+                          return (
+                            <div
+                              key={field}
+                              className="flex cursor-pointer items-center justify-between rounded px-1.5 py-1 hover:bg-muted/40"
+                              onClick={() => { if (!isEditingP) setEditingField(`fgprecise_${field}`); }}
+                            >
+                              <span className="text-[11.5px] text-slate-600">{label}</span>
+                              {isEditingP ? (
+                                <input
+                                  autoFocus
+                                  type="number"
+                                  className="w-24 rounded border border-border px-1 text-right text-[11.5px]"
+                                  defaultValue={isEmpty ? '' : displayVal}
+                                  onBlur={(e) => { handleSave(field, e.target.value || null); setEditingField(null); }}
+                                  onKeyDown={(e) => { if (e.key === 'Enter') (e.target as HTMLInputElement).blur(); if (e.key === 'Escape') setEditingField(null); }}
+                                />
+                              ) : (
+                                <span className="text-[11.5px]" style={{ color: isEmpty ? '#9ca3af' : '#111827' }}>{displayVal}</span>
+                              )}
+                            </div>
+                          );
+                        })}
+                      </div>
+                    </div>
+                  )}
 
                   {/* PRECISE CONSUMPTION card — Body Articles only */}
                   {isBodyArticle && (
                     <div
                       className="overflow-hidden rounded-lg border bg-white"
-                      style={{ borderColor: '#fde68a' }}
+                      style={{ borderColor: CARD_THEME.border }}
                     >
-                      <div
-                        className="flex items-center justify-between border-b px-2 py-1"
-                        style={{ background: '#fffbeb', borderColor: '#fde68a' }}
-                      >
-                        <span className="flex items-center gap-1 text-[10px] font-bold uppercase tracking-wider text-amber-700">
-                          <DollarSign className="h-3 w-3" />
-                          PRECISE CONSUMPTION
-                        </span>
-                      </div>
-                      <div className="space-y-0 p-1">
+                      {renderCollapsibleHeader('PRECISE', 'PRECISE CONSUMPTION')}
+                      <div className={cn('space-y-0 p-1', isGroupCollapsed('PRECISE') && 'hidden')}>
                         {(
                           [
                             { label: 'Width',            field: 'preciseWidth' },
@@ -4127,7 +4690,12 @@ const ArticleCard = React.memo(
                     });
                     const data = await r.json();
                     if (!r.ok) {
-                      message.error(data.error || 'Failed to create fabric article');
+                      if (data.fabricArticleNumber) {
+                        handleSave('fabricArticleNumber', String(data.fabricArticleNumber));
+                        message.warning(data.error || 'Fabric article already exists — number filled.');
+                      } else {
+                        message.error(data.error || 'Failed to create fabric article');
+                      }
                       return;
                     }
                     const result = data.results?.[0];

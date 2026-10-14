@@ -33,7 +33,9 @@ router.get('/items', h(ApproverController.getItems));
 router.get('/items/export-all', h(ApproverController.exportAll));
 
 // Rough Costing Excel report — for FG Created articles
-router.get('/items/rough-costing-export', h(ApproverController.roughCostingExport));
+router.get('/items/rough-costing-export',   h(ApproverController.roughCostingExport));
+// Precise Costing Excel report — NEW-RAM SIR 360° format
+router.get('/items/precise-costing-export', h(ApproverController.preciseCostingExport));
 
 // Export ALL items with SAP-created variants interleaved (generic row then its variant rows)
 router.get('/items/export-all-with-variants', h(ApproverController.exportAllWithVariants));
@@ -91,13 +93,16 @@ router.post('/retry-sap-sync', requireApprovalRights, h(ApproverController.retry
 // Vendor name search — returns up to 15 matching vendors from master_vendor_details
 router.get('/vendor-search', h(ApproverController.vendorSearch));
 
-// Fabric article data search — returns up to 15 matching fabric_article_data rows by number or description
-router.get('/fabric-article-data/search', h(ApproverController.searchFabricArticleData));
+// Fabric article data search — returns up to 15 matching precise_fabric_article_data rows by desc/number + attribute fallback
+router.get('/fabric-article-data/search',    h(ApproverController.searchFabricArticleData));
+// Rough-V2 rate — lowest fabric_rate from precise_fabric_article_data matching 5 exact attributes
+router.get('/fabric-article-data/rough-v2-rate', h(ApproverController.getRoughV2Rate));
 
 // Body article data search — returns up to 10 matching body_article_data rows by number or description
 // (an exact Body Article Number match is always included even if outside the top 10)
-router.get('/body-article-data/search', h(ApproverController.searchBodyArticleData));
-router.get('/body-fabric-consumption',  h(ApproverController.getBodyFabricConsumption));
+router.get('/body-article-data/search',     h(ApproverController.searchBodyArticleData));
+router.get('/precise-body-article/search', h(ApproverController.searchPreciseBodyArticle));
+router.get('/body-fabric-consumption',     h(ApproverController.getBodyFabricConsumption));
 router.get('/body-fabric-consumption/gsm', h(ApproverController.getFabricGsmByMajorCategory));
 router.get('/rough-cmp-cost',           h(ApproverController.getRoughCmpCost));
 
@@ -167,6 +172,9 @@ router.get('/gm-attributes', h(ApproverController.getGMAttributes));
 
 // GM attribute grid values for a major category (from gm_major_category_grid_values)
 router.get('/gm-grid-values', h(ApproverController.getGMGridValues));
+
+// GM description format — ordered family_code list for auto-building gmArticleDescription
+router.get('/gm-description-format', h(ApproverController.getGmDescriptionFormat));
 
 // GM Article data list — paginated list from gm_article_data
 router.get('/gm-articles', h(ApproverController.getGmArticleItems));

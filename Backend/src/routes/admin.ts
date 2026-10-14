@@ -228,6 +228,15 @@ router.get('/cmp-cost-master/export', h(adminController.exportCmpCostMaster));
 router.post('/cmp-cost-master/upload', excelUpload.single('file'), h(adminController.uploadCmpCostMaster));
 
 // ═══════════════════════════════════════════════════════
+// PRECISE TRIM MASTER (precise_trim_master)
+// ═══════════════════════════════════════════════════════
+router.get('/precise-trim-master/lookup', h(adminController.lookupPreciseTrimMaster));
+router.get('/precise-trim-master/status', h(adminController.getPreciseTrimMasterStatus));
+router.get('/precise-trim-master/template', h(adminController.downloadPreciseTrimMasterTemplate));
+router.get('/precise-trim-master/export', h(adminController.exportPreciseTrimMaster));
+router.post('/precise-trim-master/upload', excelUpload.single('file'), h(adminController.uploadPreciseTrimMaster));
+
+// ═══════════════════════════════════════════════════════
 // GRID VALUES EDITOR (ADMIN) — maj_cat_grid_values
 // Group → Attribute → Major Category browser + per-value add/delete.
 // POST used for mutations to avoid the Express 5 DELETE registration quirk.
@@ -324,6 +333,22 @@ router.get('/fabric-article-master/status',   h(adminController.getFabricArticle
 router.get('/fabric-article-master/template', h(adminController.downloadFabricArticleMasterTemplate));
 router.get('/fabric-article-master/download', h(adminController.downloadFabricArticleMasterData));
 router.post('/fabric-article-master/upload',  excelUpload.single('file'), h(adminController.uploadFabricArticleMaster));
+
+// ═══════════════════════════════════════════════════════════════
+// PRECISE BODY ARTICLE CONSUMPTION — precise_body_article_consumption
+// ═══════════════════════════════════════════════════════════════
+router.get('/precise-body-article/status',   h(adminController.getPreciseBodyArticleStatus));
+router.get('/precise-body-article/template', h(adminController.downloadPreciseBodyArticleTemplate));
+router.get('/precise-body-article/download', h(adminController.downloadPreciseBodyArticleData));
+router.post('/precise-body-article/upload',  excelUpload.single('file'), h(adminController.uploadPreciseBodyArticle));
+
+// ═══════════════════════════════════════════════════════════════
+// PRECISE FABRIC ARTICLE DATA — precise_fabric_article_data
+// ═══════════════════════════════════════════════════════════════
+router.get('/precise-fabric-article-data/status',   h(adminController.getPreciseFabricArticleDataStatus));
+router.get('/precise-fabric-article-data/template', h(adminController.downloadPreciseFabricArticleDataTemplate));
+router.get('/precise-fabric-article-data/export',   h(adminController.exportPreciseFabricArticleData));
+router.post('/precise-fabric-article-data/upload',  excelUpload.single('file'), h(adminController.uploadPreciseFabricArticleData));
 
 // ═══════════════════════════════════════════════════════
 // BODY ARTICLE DATA (ADMIN) — body_article_data

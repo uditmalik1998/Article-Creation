@@ -6085,6 +6085,240 @@ export const uploadCmpCostMaster = async (req: Request, res: Response): Promise<
 };
 
 // ═══════════════════════════════════════════════════════
+// PRECISE TRIM MASTER (precise_trim_master)
+// ═══════════════════════════════════════════════════════
+
+const PTM_SHEET_NAME = 'PRECISE TRIM MASTER';
+
+type PreciseTrimRow = { attributeName: string; type: string; bt1: number | null; bt2: number | null };
+
+function buildPreciseTrimMasterSheet(wb: any, rows: PreciseTrimRow[]): void {
+  const ws = wb.addWorksheet(PTM_SHEET_NAME);
+
+  const blue = (cell: any) => {
+    cell.font = { bold: true, color: { argb: 'FFFFFFFF' } };
+    cell.fill = { type: 'pattern', pattern: 'solid', fgColor: { argb: 'FF1565C0' } };
+    cell.alignment = { horizontal: 'center' };
+  };
+
+  const headerRow = ws.addRow(['ATTRIBUTE_NAME', 'TYPE', 'BT-1', 'BT-2']);
+  headerRow.eachCell((cell: any) => blue(cell));
+
+  for (const r of rows) {
+    ws.addRow([r.attributeName, r.type, r.bt1 ?? '', r.bt2 ?? '']);
+  }
+
+  ws.columns = [{ width: 26 }, { width: 28 }, { width: 14 }, { width: 14 }];
+  ws.views = [{ state: 'frozen', xSplit: 0, ySplit: 1 }];
+}
+
+function buildPreciseTrimMasterWorkbook(rows: PreciseTrimRow[]): any {
+  const ExcelJS = require('exceljs');
+  const wb = new ExcelJS.Workbook();
+  buildPreciseTrimMasterSheet(wb, rows);
+  return wb;
+}
+
+/** GET /admin/precise-trim-master/lookup?attributeName=X&type=Y */
+export const lookupPreciseTrimMaster = async (req: Request, res: Response): Promise<void> => {
+  const { attributeName, type } = req.query;
+  if (!attributeName || !type) {
+    res.status(400).json({ success: false, error: 'attributeName and type are required' });
+    return;
+  }
+  try {
+    const row = await prisma.preciseTrimMaster.findFirst({
+      where: { attributeName: String(attributeName), type: String(type) },
+    });
+    res.json({
+      success: true,
+      data: row
+        ? { bt1: row.bt1 === null ? null : Number(row.bt1), bt2: row.bt2 === null ? null : Number(row.bt2) }
+        : null,
+    });
+  } catch (error: any) {
+    console.error('[PreciseTrimMaster] Lookup error:', error);
+    res.status(500).json({ success: false, error: error.message });
+  }
+};
+
+/** GET /admin/precise-trim-master/status */
+export const getPreciseTrimMasterStatus = async (_req: Request, res: Response): Promise<void> => {
+  try {
+    const rows = await prisma.$queryRaw<{ total: bigint; attributes: bigint; last_updated: Date | null }[]>`
+      SELECT COUNT(*)::bigint AS total,
+             COUNT(DISTINCT attribute_name)::bigint AS attributes,
+             MAX(updated_at) AS last_updated
+      FROM precise_trim_master
+    `;
+    const r = rows[0] ?? { total: 0n, attributes: 0n, last_updated: null };
+    res.json({
+      success: true,
+      data: {
+        total: Number(r.total),
+        attributes: Number(r.attributes),
+        lastUpdated: r.last_updated ? r.last_updated.toISOString() : null,
+      },
+    });
+  } catch (error: any) {
+    console.error('[PreciseTrimMaster] Status error:', error);
+    res.status(500).json({ success: false, error: error.message });
+  }
+};
+
+/** GET /admin/precise-trim-master/template */
+export const downloadPreciseTrimMasterTemplate = async (_req: Request, res: Response): Promise<void> => {
+  try {
+    const example: PreciseTrimRow = { attributeName: 'M_DC_STYLE', type: 'SLD_DC', bt1: 1.5, bt2: 2.0 };
+    const wb = buildPreciseTrimMasterWorkbook([example]);
+    res.setHeader('Content-Type', 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');
+    res.setHeader('Content-Disposition', 'attachment; filename="PRECISE_TRIM_MASTER_TEMPLATE.xlsx"');
+    await wb.xlsx.write(res);
+    res.end();
+  } catch (error: any) {
+    console.error('[PreciseTrimMaster] Template error:', error);
+    res.status(500).json({ success: false, error: error.message });
+  }
+};
+
+/** GET /admin/precise-trim-master/export — every stored row, same layout. */
+export const exportPreciseTrimMaster = async (_req: Request, res: Response): Promise<void> => {
+  try {
+    const masters = await prisma.preciseTrimMaster.findMany({
+      orderBy: [{ attributeName: 'asc' }, { type: 'asc' }],
+    });
+    const rows: PreciseTrimRow[] = masters.map((m) => ({
+      attributeName: m.attributeName,
+      type: m.type,
+      bt1: m.bt1 === null ? null : Number(m.bt1),
+      bt2: m.bt2 === null ? null : Number(m.bt2),
+    }));
+    const wb = buildPreciseTrimMasterWorkbook(rows);
+    res.setHeader('Content-Type', 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');
+    res.setHeader('Content-Disposition', 'attachment; filename="PRECISE_TRIM_MASTER_EXPORT.xlsx"');
+    await wb.xlsx.write(res);
+    res.end();
+  } catch (error: any) {
+    console.error('[PreciseTrimMaster] Export error:', error);
+    res.status(500).json({ success: false, error: error.message });
+  }
+};
+
+/**
+ * POST /admin/precise-trim-master/upload
+ * Upserts by (attribute_name, type).
+ */
+export const uploadPreciseTrimMaster = async (req: Request, res: Response): Promise<void> => {
+  try {
+    if (!req.file) {
+      res.status(400).json({ success: false, error: 'No file uploaded. Send a .xlsx file as "file" field.' });
+      return;
+    }
+
+    const ExcelJS = (await import('exceljs')).default;
+    const wb = new ExcelJS.Workbook();
+    await wb.xlsx.load(req.file.buffer as any);
+
+    const ws = wb.getWorksheet(PTM_SHEET_NAME) ?? wb.worksheets[0];
+    if (!ws) {
+      res.status(400).json({ success: false, error: 'No worksheets found in the uploaded Excel file.' });
+      return;
+    }
+
+    const cellStr = (row: any, c: number): string => {
+      let v = row.getCell(c).value;
+      if (v && typeof v === 'object' && 'richText' in v) return (v as any).richText.map((t: any) => t.text).join('').trim();
+      if (v && typeof v === 'object' && 'result' in v) v = (v as any).result;
+      if (v && typeof v === 'object' && 'text' in v) v = (v as any).text;
+      return v == null ? '' : String(v).trim();
+    };
+
+    const numOf = (v: unknown): number | null => {
+      if (v === null || v === undefined || v === '') return null;
+      const n = Number(v);
+      return Number.isFinite(n) ? Number(n.toFixed(4)) : null;
+    };
+
+    // Auto-detect header row — looks for ATTRIBUTE_NAME or TYPE column
+    let headerRowNo = 1;
+    for (let r = 1; r <= Math.min(5, ws.rowCount); r++) {
+      const row = ws.getRow(r);
+      const line = [1, 2, 3, 4].map((c) => cellStr(row, c).toUpperCase()).join(' ');
+      if ((line.includes('ATTRIBUTE') || line.includes('ATTR')) && line.includes('TYPE')) {
+        headerRowNo = r;
+        break;
+      }
+    }
+
+    let cAttr = 1, cType = 2, cBt1 = 3, cBt2 = 4;
+    const hdr = ws.getRow(headerRowNo);
+    for (let c = 1; c <= 6; c++) {
+      const h = cellStr(hdr, c).toUpperCase().replace(/[-_ ]/g, '');
+      if (h.includes('ATTRIBUTE') || h === 'ATTR' || h === 'ATTRNAME') cAttr = c;
+      else if (h === 'TYPE') cType = c;
+      else if (h === 'BT1') cBt1 = c;
+      else if (h === 'BT2') cBt2 = c;
+    }
+
+    const rowsByKey = new Map<string, PreciseTrimRow>();
+    let skipped = 0;
+
+    for (let r = headerRowNo + 1; r <= ws.rowCount; r++) {
+      const row = ws.getRow(r);
+      const attributeName = cellStr(row, cAttr);
+      const type = cellStr(row, cType);
+      if (!attributeName || !type || attributeName === '-' || type === '-') {
+        if (attributeName || type) skipped++;
+        continue;
+      }
+      let bt1Raw = row.getCell(cBt1).value;
+      let bt2Raw = row.getCell(cBt2).value;
+      if (bt1Raw && typeof bt1Raw === 'object' && 'result' in bt1Raw) bt1Raw = (bt1Raw as any).result;
+      if (bt2Raw && typeof bt2Raw === 'object' && 'result' in bt2Raw) bt2Raw = (bt2Raw as any).result;
+      const bt1 = numOf(bt1Raw);
+      const bt2 = numOf(bt2Raw);
+      const key = `${attributeName.toUpperCase()}|${type.toUpperCase()}`;
+      rowsByKey.set(key, { attributeName, type, bt1, bt2 });
+    }
+
+    const records = [...rowsByKey.values()];
+    if (records.length === 0) {
+      res.status(400).json({ success: false, error: 'No valid rows found in the Excel file.' });
+      return;
+    }
+
+    const now = new Date();
+    const CHUNK = 200;
+    for (let i = 0; i < records.length; i += CHUNK) {
+      const batch = records.slice(i, i + CHUNK);
+      const values = batch.map((r) => Prisma.sql`(${r.attributeName}, ${r.type}, ${r.bt1}, ${r.bt2}, ${now}, ${now})`);
+      await prisma.$executeRaw`
+        INSERT INTO precise_trim_master (attribute_name, type, bt1, bt2, created_at, updated_at)
+        VALUES ${Prisma.join(values)}
+        ON CONFLICT (attribute_name, type) DO UPDATE SET
+          bt1        = EXCLUDED.bt1,
+          bt2        = EXCLUDED.bt2,
+          updated_at = EXCLUDED.updated_at
+      `;
+    }
+
+    const total = await prisma.preciseTrimMaster.count();
+    const attributes = (await prisma.preciseTrimMaster.findMany({ distinct: ['attributeName'], select: { attributeName: true } })).length;
+
+    console.log(`[PreciseTrimMaster] Upserted ${records.length} rows (${skipped} skipped)`);
+
+    res.json({
+      success: true,
+      message: `Precise Trim Master updated: ${records.length} rows${skipped > 0 ? `, ${skipped} rows skipped` : ''}.`,
+      data: { total, attributes, skipped, lastUpdated: now.toISOString() },
+    });
+  } catch (error: any) {
+    console.error('[PreciseTrimMaster] Upload error:', error);
+    res.status(500).json({ success: false, error: error.message });
+  }
+};
+
+// ═══════════════════════════════════════════════════════
 // FABRIC ARTICLE DATA (fabric_article_data)
 // ═══════════════════════════════════════════════════════
 
@@ -8249,6 +8483,85 @@ export const EXPENSE_TABLE_REGISTRY: Record<string, ExpenseTableConfig> = {
     displayColumns: ['bodyArticleNumber', 'bodyArticleDescription'],
     defaultSort: { field: 'createdAt', dir: 'desc' },
   },
+  'precise-fabric-article-data': {
+    kind: 'raw',
+    tableName: 'precise_fabric_article_data',
+    idColumn: 'id',
+    columns: [
+      { key: 'id',                         label: 'ID',                      editable: false },
+      { key: 'fabric_article_number',      label: 'Fabric Article Number',   editable: false },
+      { key: 'fabric_article_description', label: 'Description',             editable: false },
+      { key: 'division',                   label: 'Division',                editable: false },
+      { key: 'sub_division',               label: 'Sub Division',            editable: false },
+      { key: 'major_category',             label: 'Major Category',          editable: false },
+      { key: 'vendor_name',                label: 'Vendor Name',             editable: false },
+      { key: 'vendor_code',                label: 'Vendor Code',             editable: false },
+      { key: 'fabric_rate',                label: 'Fabric Rate',             editable: false, align: 'right' },
+      { key: 'm_fab_div',                  label: 'M_FAB_DIV',               editable: false },
+      { key: 'm_yarn',                     label: 'M_YARN',                  editable: false },
+      { key: 'm_fab_main_mvgr_1',          label: 'M_FAB_MAIN_MVGR_1',       editable: false },
+      { key: 'm_fab_main_mvgr_2',          label: 'M_FAB_MAIN_MVGR_2',       editable: false },
+      { key: 'm_construction',             label: 'M_CONSTRUCTION',          editable: false },
+      { key: 'm_ounz',                     label: 'M_OUNZ',                  editable: false },
+      { key: 'm_width',                    label: 'M_WIDTH',                 editable: false },
+      { key: 'm_weave_01',                 label: 'M_WEAVE_01',              editable: false },
+      { key: 'm_weave_02',                 label: 'M_WEAVE_02',              editable: false },
+      { key: 'm_count',                    label: 'M_COUNT',                 editable: false },
+      { key: 'm_composition',              label: 'M_COMPOSITION',           editable: false },
+      { key: 'm_finish',                   label: 'M_FINISH',                editable: false },
+      { key: 'm_gsm',                      label: 'M_GSM',                   editable: false },
+      { key: 'm_lycra',                    label: 'M_LYCRA',                 editable: false },
+      { key: 'created_at',                 label: 'Created At',              editable: false },
+    ],
+    searchColumns: ['fabric_article_description', 'fabric_article_number', 'major_category', 'division', 'sub_division'],
+    displayColumns: ['fabric_article_number', 'fabric_article_description', 'major_category'],
+    defaultSort: { column: 'fabric_article_number', dir: 'asc' },
+  },
+  'precise-body-article': {
+    kind: 'raw',
+    tableName: 'precise_body_article_consumption',
+    idColumn: 'id',
+    columns: [
+      { key: 'id',                        label: 'ID',                   editable: false },
+      { key: 'division',                  label: 'Division',             editable: false },
+      { key: 'sub_division',              label: 'Sub Division',         editable: false },
+      { key: 'major_category',            label: 'Major Category',       editable: false },
+      { key: 'macro_body_description',    label: 'Macro Body Desc',      editable: false },
+      { key: 'micro_body_article_number', label: 'Article Number',       editable: false },
+      { key: 'm_neck_type',               label: 'Neck Type',            editable: false },
+      { key: 'm_neck_style',              label: 'Neck Style',           editable: false },
+      { key: 'm_collar_type',             label: 'Collar Type',          editable: false },
+      { key: 'm_collar_style',            label: 'Collar Style',         editable: false },
+      { key: 'm_sleeves_main_style',      label: 'Sleeves Main Style',   editable: false },
+      { key: 'm_sleeve_fold',             label: 'Sleeve Fold',          editable: false },
+      { key: 'm_placket',                 label: 'Placket',              editable: false },
+      { key: 'm_blt_type',               label: 'Belt Type',             editable: false },
+      { key: 'm_blt_style',              label: 'Belt Style',             editable: false },
+      { key: 'm_btm_fold',               label: 'Bottom Fold',           editable: false },
+      { key: 'm_pocket',                 label: 'Pocket',                editable: false },
+      { key: 'm_no_of_pocket',           label: 'No. of Pockets',        editable: false },
+      { key: 'm_extra_pocket',           label: 'Extra Pocket',          editable: false },
+      { key: 'm_length',                 label: 'Length',                editable: false },
+      { key: 'm_fit',                    label: 'Fit',                   editable: false },
+      { key: 'body_style',               label: 'Body Style',            editable: false },
+      { key: 'cutting_value',            label: 'Cutting Value',         editable: false, align: 'right' },
+      { key: 'stitching_sam',            label: 'Stitching SAM',         editable: false, align: 'right' },
+      { key: 'sam_val',                  label: 'SAM Val',               editable: false, align: 'right' },
+      { key: 'st_val',                   label: 'ST Val',                editable: false, align: 'right' },
+      { key: 'ironing_sam',              label: 'Ironing SAM',           editable: false, align: 'right' },
+      { key: 'finishing_sam',            label: 'Finishing SAM',         editable: false, align: 'right' },
+      { key: 'finishig_cost',            label: 'Finishing Cost',        editable: false, align: 'right' },
+      { key: 'total_cmp_cost',           label: 'Total CMP Cost',        editable: false, align: 'right' },
+      { key: 'width_56',                 label: 'Width 56"',             editable: false, align: 'right' },
+      { key: 'width_58',                 label: 'Width 58"',             editable: false, align: 'right' },
+      { key: 'width_60',                 label: 'Width 60"',             editable: false, align: 'right' },
+      { key: 'created_at',               label: 'Created At',            editable: false },
+      { key: 'updated_at',               label: 'Updated At',            editable: false },
+    ],
+    searchColumns: ['major_category', 'sub_division', 'division', 'macro_body_description', 'micro_body_article_number'],
+    displayColumns: ['micro_body_article_number', 'macro_body_description', 'major_category'],
+    defaultSort: { column: 'id', dir: 'desc' },
+  },
   'raw-articles': {
     kind: 'prisma',
     delegateName: 'rawArticle',
@@ -8314,6 +8627,27 @@ export const EXPENSE_TABLE_REGISTRY: Record<string, ExpenseTableConfig> = {
   // CMP Cost Master — average rough CMP cost per major category, from the
   // "SAM MASTER.xlsx" workbook. Auto-fills body_article_data.cmp_cost on the
   // New Article page (see ApproverController.getRoughCmpCost).
+  'precise-trim-master': {
+    kind: 'prisma',
+    delegateName: 'preciseTrimMaster',
+    idColumn: 'id',
+    idIsNumeric: true,
+    allowCreate: true,
+    allowDelete: true,
+    requiredOnCreate: ['attributeName', 'type'],
+    columns: [
+      { key: 'id', label: 'ID', editable: false },
+      { key: 'attributeName', label: 'Attribute Name' },
+      { key: 'type', label: 'Type' },
+      { key: 'bt1', label: 'BT-1', align: 'right' },
+      { key: 'bt2', label: 'BT-2', align: 'right' },
+      { key: 'createdAt', label: 'Created At', editable: false },
+      { key: 'updatedAt', label: 'Updated At', editable: false },
+    ],
+    searchColumns: ['attributeName', 'type'],
+    displayColumns: ['attributeName', 'type'],
+    defaultSort: { field: 'attributeName', dir: 'asc' },
+  },
   'cmp-cost-master': {
     kind: 'prisma',
     delegateName: 'roughCmpCostMaster',
@@ -9790,4 +10124,525 @@ export const getGMMajCatDetailsUploadStatus = async (req: Request, res: Response
   const job = gmMctJobs.get(jobId);
   if (!job) { res.status(404).json({ success: false, error: 'Job not found or expired.' }); return; }
   res.json({ success: true, jobId, ...job });
+};
+
+// ─────────────────────────────── Precise Body Article Consumption ─────────────
+
+const PBAC_WIDTH_COLS = [15,16,17,18,19,42,43,44,46,48,50,53,54,55,56,57,58,59,60,61,62,63,64,65,66,67,68,69,70,71,72,73,74,76,78,82,92,94,96];
+
+const PBAC_ATTR_HEADERS = [
+  'M_NECK_TYPE','M_NECK_STYLE','M_COLLAR_TYPE','M_COLLAR_STYLE',
+  'M_SLEEVES_MAIN_STYLE','M_SLEEVE_FOLD','M_PLACKET',
+  'M_BLT_TYPE','M_BLT_STYLE','M_BTM_FOLD','M_POCKET',
+  'M_NO_OF_POCKET','M_EXTRA_POCKET','M_LENGTH','M_FIT','BODY STYLE',
+];
+
+const PBAC_ALL_HEADERS = [
+  'DIVISION','SUB_DIVISION','MAJOR_CATEGORY','MACRO BODY DESCRIPTION','MICRO BODY ARTTICLE NUMBER',
+  ...PBAC_ATTR_HEADERS,
+  'CUTTING_VALUE','STITCHING_SAM','SAM_VAL','ST. VAL','IRONING_SAM','FINISHING_SAM','FINISHIG_COST','total CMP COST',
+  ...PBAC_WIDTH_COLS.map(String),
+];
+
+/**
+ * GET /api/admin/precise-body-article/status
+ */
+export const getPreciseBodyArticleStatus = async (_req: Request, res: Response): Promise<void> => {
+  try {
+    const rows = await prisma.$queryRaw<{ total: bigint; categories: bigint }[]>`
+      SELECT COUNT(*)::bigint                       AS total,
+             COUNT(DISTINCT major_category)::bigint AS categories
+      FROM public.precise_body_article_consumption
+    `;
+    const r = rows[0] ?? { total: 0n, categories: 0n };
+    res.json({ success: true, data: { total: Number(r.total), categories: Number(r.categories) } });
+  } catch (error: any) {
+    res.status(500).json({ success: false, error: error.message });
+  }
+};
+
+/**
+ * GET /api/admin/precise-body-article/template
+ * Downloads a blank Excel template matching the source upload format.
+ */
+export const downloadPreciseBodyArticleTemplate = async (_req: Request, res: Response): Promise<void> => {
+  try {
+    const ExcelJS = require('exceljs');
+    const wb = new ExcelJS.Workbook();
+    const ws = wb.addWorksheet('Sheet1');
+
+    // Rows 1-3: title / empty
+    ws.addRow(['MAJ CAT WISE BODY MASTER & CONSUMPTION MASTER']);
+    ws.addRow([]);
+    ws.addRow([]);
+
+    // Row 4: headers
+    const hRow = ws.addRow(PBAC_ALL_HEADERS);
+    hRow.eachCell((cell: any) => {
+      cell.font = { bold: true, color: { argb: 'FFFFFFFF' } };
+      cell.fill = { type: 'pattern', pattern: 'solid', fgColor: { argb: 'FF1565C0' } };
+      cell.alignment = { horizontal: 'center' };
+    });
+
+    // Row 5: empty (matches source)
+    ws.addRow([]);
+
+    ws.columns = [
+      { width: 12 }, { width: 14 }, { width: 26 }, { width: 60 }, { width: 24 },
+      ...Array(16).fill({ width: 18 }),
+      ...Array(8).fill({ width: 14 }),
+      ...Array(PBAC_WIDTH_COLS.length).fill({ width: 10 }),
+    ];
+
+    res.setHeader('Content-Type', 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');
+    res.setHeader('Content-Disposition', 'attachment; filename="PRECISE_BODY_ARTICLE_TEMPLATE.xlsx"');
+    await wb.xlsx.write(res);
+    res.end();
+  } catch (error: any) {
+    console.error('[PreciseBodyArticle] Template error:', error);
+    res.status(500).json({ success: false, error: error.message });
+  }
+};
+
+/**
+ * POST /api/admin/precise-body-article/upload
+ * Reads from the standard body article consumption Excel format.
+ * Headers at row 4, data from row 6. Truncates and replaces entire table.
+ */
+export const uploadPreciseBodyArticle = async (req: Request, res: Response): Promise<void> => {
+  try {
+    if (!req.file) { res.status(400).json({ success: false, error: 'No file uploaded.' }); return; }
+
+    const ExcelJS = (await import('exceljs')).default;
+    const wb = new ExcelJS.Workbook();
+    await wb.xlsx.load(req.file.buffer as any);
+
+    const ws = wb.worksheets[0];
+    if (!ws) { res.status(400).json({ success: false, error: 'No worksheets found.' }); return; }
+
+    const cell = (row: any, c: number): string => {
+      let v = row.getCell(c).value;
+      if (v && typeof v === 'object' && 'result' in v) v = (v as any).result;
+      if (v && typeof v === 'object' && 'text' in v) v = (v as any).text;
+      return v == null ? '' : String(v).trim();
+    };
+
+    const toStr = (s: string): string | null => (s === '' || s === '-') ? null : s;
+    const toDec = (s: string): number | null => {
+      if (s === '' || s === '-') return null;
+      const n = parseFloat(s);
+      return isNaN(n) ? null : n;
+    };
+
+    // Build column index from header row (row 4)
+    const headerRow = ws.getRow(4);
+    const colIdx: Record<string, number> = {};
+    for (let c = 1; c <= 200; c++) {
+      const h = cell(headerRow, c);
+      if (h) colIdx[h] = c;
+    }
+
+    type PbacRow = Record<string, string | number | null>;
+    const rows: PbacRow[] = [];
+
+    // Data starts at row 6 (row 5 is empty in source file)
+    for (let r = 5; r <= ws.rowCount; r++) {
+      const row = ws.getRow(r);
+      const div    = cell(row, colIdx['DIVISION']   ?? 1);
+      const majCat = cell(row, colIdx['MAJOR_CATEGORY'] ?? 3);
+      const desc   = cell(row, colIdx['MACRO BODY DESCRIPTION'] ?? 4);
+      if (!majCat && !div && !desc) continue;
+      if (!majCat) continue;
+
+      const record: PbacRow = {
+        division:               div || null,
+        sub_division:           cell(row, colIdx['SUB_DIVISION']              ?? 2) || null,
+        major_category:         majCat,
+        macro_body_description: desc || '',
+        micro_body_article_number: cell(row, colIdx['MICRO BODY ARTTICLE NUMBER'] ?? 5) || '',
+        m_neck_type:          toStr(cell(row, colIdx['M_NECK_TYPE']          ?? 0)),
+        m_neck_style:         toStr(cell(row, colIdx['M_NECK_STYLE']         ?? 0)),
+        m_collar_type:        toStr(cell(row, colIdx['M_COLLAR_TYPE']        ?? 0)),
+        m_collar_style:       toStr(cell(row, colIdx['M_COLLAR_STYLE']       ?? 0)),
+        m_sleeves_main_style: toStr(cell(row, colIdx['M_SLEEVES_MAIN_STYLE'] ?? 0)),
+        m_sleeve_fold:        toStr(cell(row, colIdx['M_SLEEVE_FOLD']        ?? 0)),
+        m_placket:            toStr(cell(row, colIdx['M_PLACKET']            ?? 0)),
+        m_blt_type:           toStr(cell(row, colIdx['M_BLT_TYPE']           ?? 0)),
+        m_blt_style:          toStr(cell(row, colIdx['M_BLT_STYLE']          ?? 0)),
+        m_btm_fold:           toStr(cell(row, colIdx['M_BTM_FOLD']           ?? 0)),
+        m_pocket:             toStr(cell(row, colIdx['M_POCKET']             ?? 0)),
+        m_no_of_pocket:       toStr(cell(row, colIdx['M_NO_OF_POCKET']       ?? 0)),
+        m_extra_pocket:       toStr(cell(row, colIdx['M_EXTRA_POCKET']       ?? 0)),
+        m_length:             toStr(cell(row, colIdx['M_LENGTH']             ?? 0)),
+        m_fit:                toStr(cell(row, colIdx['M_FIT']                ?? 0)),
+        body_style:           toStr(cell(row, colIdx['BODY STYLE']           ?? 0)),
+        cutting_value:        toDec(cell(row, colIdx['CUTTING_VALUE']        ?? 0)),
+        stitching_sam:        toDec(cell(row, colIdx['STITCHING_SAM']        ?? 0)),
+        sam_val:              toDec(cell(row, colIdx['SAM_VAL']              ?? 0)),
+        st_val:               toDec(cell(row, colIdx['ST. VAL']              ?? 0)),
+        ironing_sam:          toDec(cell(row, colIdx['IRONING_SAM']          ?? 0)),
+        finishing_sam:        toDec(cell(row, colIdx['FINISHING_SAM']        ?? 0)),
+        finishig_cost:        toDec(cell(row, colIdx['FINISHIG_COST']        ?? 0)),
+        total_cmp_cost:       toDec(cell(row, colIdx['total CMP COST']       ?? 0)),
+      };
+
+      for (const w of PBAC_WIDTH_COLS) {
+        const ci = colIdx[String(w)] ?? 0;
+        record[`width_${w}`] = ci ? toDec(cell(row, ci)) : null;
+      }
+
+      rows.push(record);
+    }
+
+    const total      = rows.length;
+    const categories = new Set(rows.map(r => r.major_category)).size;
+    const BATCH      = 500;
+
+    await prisma.$transaction(async (tx) => {
+      await tx.$executeRaw`TRUNCATE TABLE public.precise_body_article_consumption RESTART IDENTITY`;
+      for (let i = 0; i < rows.length; i += BATCH) {
+        const batch = rows.slice(i, i + BATCH);
+        await tx.$executeRaw`
+          INSERT INTO public.precise_body_article_consumption
+            (division, sub_division, major_category, macro_body_description, micro_body_article_number,
+             m_neck_type, m_neck_style, m_collar_type, m_collar_style, m_sleeves_main_style,
+             m_sleeve_fold, m_placket, m_blt_type, m_blt_style, m_btm_fold, m_pocket,
+             m_no_of_pocket, m_extra_pocket, m_length, m_fit, body_style,
+             cutting_value, stitching_sam, sam_val, st_val, ironing_sam, finishing_sam, finishig_cost, total_cmp_cost,
+             width_15, width_16, width_17, width_18, width_19, width_42, width_43, width_44, width_46, width_48, width_50,
+             width_53, width_54, width_55, width_56, width_57, width_58, width_59, width_60, width_61, width_62, width_63,
+             width_64, width_65, width_66, width_67, width_68, width_69, width_70, width_71, width_72, width_73, width_74,
+             width_76, width_78, width_82, width_92, width_94, width_96,
+             created_at, updated_at)
+          SELECT
+            v.division, v.sub_division, v.major_category, v.macro_body_description, v.micro_body_article_number,
+            v.m_neck_type, v.m_neck_style, v.m_collar_type, v.m_collar_style, v.m_sleeves_main_style,
+            v.m_sleeve_fold, v.m_placket, v.m_blt_type, v.m_blt_style, v.m_btm_fold, v.m_pocket,
+            v.m_no_of_pocket, v.m_extra_pocket, v.m_length, v.m_fit, v.body_style,
+            v.cutting_value::numeric, v.stitching_sam::numeric, v.sam_val::numeric, v.st_val::numeric,
+            v.ironing_sam::numeric, v.finishing_sam::numeric, v.finishig_cost::numeric, v.total_cmp_cost::numeric,
+            v.width_15::numeric, v.width_16::numeric, v.width_17::numeric, v.width_18::numeric, v.width_19::numeric,
+            v.width_42::numeric, v.width_43::numeric, v.width_44::numeric, v.width_46::numeric, v.width_48::numeric, v.width_50::numeric,
+            v.width_53::numeric, v.width_54::numeric, v.width_55::numeric, v.width_56::numeric, v.width_57::numeric, v.width_58::numeric,
+            v.width_59::numeric, v.width_60::numeric, v.width_61::numeric, v.width_62::numeric, v.width_63::numeric,
+            v.width_64::numeric, v.width_65::numeric, v.width_66::numeric, v.width_67::numeric, v.width_68::numeric,
+            v.width_69::numeric, v.width_70::numeric, v.width_71::numeric, v.width_72::numeric, v.width_73::numeric,
+            v.width_74::numeric, v.width_76::numeric, v.width_78::numeric, v.width_82::numeric, v.width_92::numeric,
+            v.width_94::numeric, v.width_96::numeric,
+            NOW(), NOW()
+          FROM jsonb_to_recordset(${JSON.stringify(batch)}::jsonb) AS v(
+            division text, sub_division text, major_category text, macro_body_description text, micro_body_article_number text,
+            m_neck_type text, m_neck_style text, m_collar_type text, m_collar_style text, m_sleeves_main_style text,
+            m_sleeve_fold text, m_placket text, m_blt_type text, m_blt_style text, m_btm_fold text, m_pocket text,
+            m_no_of_pocket text, m_extra_pocket text, m_length text, m_fit text, body_style text,
+            cutting_value text, stitching_sam text, sam_val text, st_val text, ironing_sam text, finishing_sam text, finishig_cost text, total_cmp_cost text,
+            width_15 text, width_16 text, width_17 text, width_18 text, width_19 text, width_42 text, width_43 text, width_44 text, width_46 text, width_48 text, width_50 text,
+            width_53 text, width_54 text, width_55 text, width_56 text, width_57 text, width_58 text, width_59 text, width_60 text, width_61 text, width_62 text, width_63 text,
+            width_64 text, width_65 text, width_66 text, width_67 text, width_68 text, width_69 text, width_70 text, width_71 text, width_72 text, width_73 text, width_74 text,
+            width_76 text, width_78 text, width_82 text, width_92 text, width_94 text, width_96 text
+          )
+        `;
+      }
+    }, { timeout: 5 * 60 * 1000 });
+
+    console.log(`[PreciseBodyArticle] Done — ${total} rows across ${categories} major categories.`);
+    res.json({
+      success: true,
+      message: `Uploaded ${total} rows across ${categories} major categories.`,
+      data: { total, categories },
+    });
+  } catch (error: any) {
+    console.error('[PreciseBodyArticle] Upload error:', error);
+    res.status(500).json({ success: false, error: error.message });
+  }
+};
+
+/**
+ * GET /api/admin/precise-body-article/download
+ * Exports the full precise_body_article_consumption table as Excel
+ * in the same format as the source COMPILE SHEET.
+ */
+export const downloadPreciseBodyArticleData = async (_req: Request, res: Response): Promise<void> => {
+  try {
+    const ExcelJS = require('exceljs');
+
+    const dbRows: any[] = await prisma.$queryRaw`
+      SELECT division, sub_division, major_category, macro_body_description, micro_body_article_number,
+             m_neck_type, m_neck_style, m_collar_type, m_collar_style, m_sleeves_main_style,
+             m_sleeve_fold, m_placket, m_blt_type, m_blt_style, m_btm_fold, m_pocket,
+             m_no_of_pocket, m_extra_pocket, m_length, m_fit, body_style,
+             cutting_value, stitching_sam, sam_val, st_val, ironing_sam, finishing_sam, finishig_cost, total_cmp_cost,
+             width_15, width_16, width_17, width_18, width_19, width_42, width_43, width_44, width_46, width_48, width_50,
+             width_53, width_54, width_55, width_56, width_57, width_58, width_59, width_60, width_61, width_62, width_63,
+             width_64, width_65, width_66, width_67, width_68, width_69, width_70, width_71, width_72, width_73, width_74,
+             width_76, width_78, width_82, width_92, width_94, width_96
+      FROM public.precise_body_article_consumption
+      ORDER BY id
+    `;
+
+    const wb = new ExcelJS.Workbook();
+    const ws = wb.addWorksheet('Sheet1');
+
+    ws.addRow(['MAJ CAT WISE BODY MASTER & CONSUMPTION MASTER']);
+    ws.addRow([]);
+    ws.addRow([]);
+
+    const hRow = ws.addRow(PBAC_ALL_HEADERS);
+    hRow.eachCell((cell: any) => {
+      cell.font = { bold: true, color: { argb: 'FFFFFFFF' } };
+      cell.fill = { type: 'pattern', pattern: 'solid', fgColor: { argb: 'FF1565C0' } };
+      cell.alignment = { horizontal: 'center' };
+    });
+
+    ws.addRow([]);
+
+    for (const r of dbRows) {
+      ws.addRow([
+        r.division ?? '', r.sub_division ?? '', r.major_category ?? '',
+        r.macro_body_description ?? '', r.micro_body_article_number ?? '',
+        r.m_neck_type ?? '-', r.m_neck_style ?? '-', r.m_collar_type ?? '-', r.m_collar_style ?? '-',
+        r.m_sleeves_main_style ?? '-', r.m_sleeve_fold ?? '-', r.m_placket ?? '-',
+        r.m_blt_type ?? '-', r.m_blt_style ?? '-', r.m_btm_fold ?? '-', r.m_pocket ?? '-',
+        r.m_no_of_pocket ?? '-', r.m_extra_pocket ?? '-', r.m_length ?? '-', r.m_fit ?? '-', r.body_style ?? '-',
+        r.cutting_value != null ? Number(r.cutting_value) : '',
+        r.stitching_sam != null ? Number(r.stitching_sam) : '',
+        r.sam_val != null ? Number(r.sam_val) : '',
+        r.st_val != null ? Number(r.st_val) : '',
+        r.ironing_sam != null ? Number(r.ironing_sam) : '',
+        r.finishing_sam != null ? Number(r.finishing_sam) : '',
+        r.finishig_cost != null ? Number(r.finishig_cost) : '',
+        r.total_cmp_cost != null ? Number(r.total_cmp_cost) : '',
+        ...PBAC_WIDTH_COLS.map(w => r[`width_${w}`] != null ? Number(r[`width_${w}`]) : '-'),
+      ]);
+    }
+
+    ws.columns = [
+      { width: 12 }, { width: 14 }, { width: 26 }, { width: 60 }, { width: 24 },
+      ...Array(16).fill({ width: 18 }),
+      ...Array(8).fill({ width: 14 }),
+      ...Array(PBAC_WIDTH_COLS.length).fill({ width: 10 }),
+    ];
+
+    const filename = `PRECISE_BODY_ARTICLE_${new Date().toISOString().slice(0, 10)}.xlsx`;
+    res.setHeader('Content-Type', 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');
+    res.setHeader('Content-Disposition', `attachment; filename="${filename}"`);
+    await wb.xlsx.write(res);
+    res.end();
+  } catch (error: any) {
+    console.error('[PreciseBodyArticle] Download error:', error);
+    res.status(500).json({ success: false, error: error.message });
+  }
+};
+
+// ─────────────────────────── Precise Fabric Article Data ───────────────────────────
+
+const PFAD_COL_KEYS = [
+  'fabric_article_number', 'fabric_article_description', 'division', 'sub_division',
+  'major_category', 'vendor_name', 'vendor_code', 'fabric_rate',
+  'm_fab_div', 'm_yarn', 'm_fab_main_mvgr_1', 'm_fab_main_mvgr_2',
+  'm_construction', 'm_ounz', 'm_width', 'm_weave_01', 'm_weave_02',
+  'm_count', 'm_composition', 'm_finish', 'm_gsm', 'm_lycra',
+] as const;
+
+const PFAD_HEADERS = [
+  'FABRIC ARTICLE NUMBER', 'FABRIC ARTICLE DESCRIPTION', 'DIVISION', 'SUB DIVISION',
+  'MAJOR CATEGORY', 'VENDOR NAME', 'VENDOR CODE', 'FABRIC RATE',
+  'M_FAB_DIV', 'M_YARN', 'M_FAB_MAIN_MVGR_1', 'M_FAB_MAIN_MVGR_2',
+  'M_CONSTRUCTION', 'M_OUNZ', 'M_WIDTH', 'M_WEAVE_01', 'M_WEAVE_02',
+  'M_COUNT', 'M_COMPOSITION', 'M_FINISH', 'M_GSM', 'M_LYCRA',
+];
+
+function buildPfadWorkbook(rows: Record<string, any>[]): any {
+  const ExcelJS = require('exceljs');
+  const wb = new ExcelJS.Workbook();
+  const ws = wb.addWorksheet('Precise Fabric Article Data');
+  const hRow = ws.addRow(PFAD_HEADERS);
+  hRow.eachCell((cell: any) => {
+    cell.font = { bold: true };
+    cell.fill = { type: 'pattern', pattern: 'solid', fgColor: { argb: 'FFD9EAD3' } };
+  });
+  for (const r of rows) {
+    ws.addRow(PFAD_COL_KEYS.map((c) => r[c] ?? null));
+  }
+  ws.columns = PFAD_HEADERS.map(() => ({ width: 22 }));
+  return wb;
+}
+
+/** GET /admin/precise-fabric-article-data/status */
+export const getPreciseFabricArticleDataStatus = async (_req: Request, res: Response): Promise<void> => {
+  try {
+    const rows = await prisma.$queryRaw<{ total: bigint; last_created: Date | null }[]>`
+      SELECT COUNT(*)::bigint AS total, MAX(created_at) AS last_created
+      FROM precise_fabric_article_data
+    `;
+    const r = rows[0] ?? { total: 0n, last_created: null };
+    res.json({
+      success: true,
+      data: { total: Number(r.total), lastUpdated: r.last_created ? r.last_created.toISOString() : null },
+    });
+  } catch (error: any) {
+    console.error('[PreciseFabricArticleData] Status error:', error);
+    res.status(500).json({ success: false, error: error.message });
+  }
+};
+
+/** GET /admin/precise-fabric-article-data/template */
+export const downloadPreciseFabricArticleDataTemplate = async (_req: Request, res: Response): Promise<void> => {
+  try {
+    const example: Record<string, any> = {
+      fabric_article_number: 2111078840,
+      fabric_article_description: 'K_PC_TERRY_SLD-2_THRD-20S-280-300-72',
+      division: 'K',
+      sub_division: 'K_PC',
+      major_category: 'K_PC_TERRY',
+      vendor_name: 'V2 AFS SAMPLE',
+      vendor_code: 700152,
+      fabric_rate: 530,
+      m_fab_div: 'K',
+      m_yarn: 'PC',
+      m_fab_main_mvgr_1: 'SLD',
+      m_fab_main_mvgr_2: 'SLD',
+      m_construction: null,
+      m_ounz: null,
+      m_width: '72"',
+      m_weave_01: 'TRY',
+      m_weave_02: '2THRD',
+      m_count: '20S',
+      m_composition: '67%_C_29%_P_4%_LYC',
+      m_finish: 'BIO',
+      m_gsm: '280-300',
+      m_lycra: '2W_LYC',
+    };
+    const wb = buildPfadWorkbook([example]);
+    res.setHeader('Content-Type', 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');
+    res.setHeader('Content-Disposition', 'attachment; filename="PRECISE_FABRIC_ARTICLE_DATA_TEMPLATE.xlsx"');
+    await wb.xlsx.write(res);
+    res.end();
+  } catch (error: any) {
+    console.error('[PreciseFabricArticleData] Template error:', error);
+    res.status(500).json({ success: false, error: error.message });
+  }
+};
+
+/** GET /admin/precise-fabric-article-data/export */
+export const exportPreciseFabricArticleData = async (_req: Request, res: Response): Promise<void> => {
+  try {
+    const rows = await prisma.preciseFabricArticleData.findMany({
+      orderBy: { fabricArticleNumber: 'asc' },
+    });
+    // Convert Prisma BigInt/Decimal → plain JS values for ExcelJS
+    const data = rows.map((r) => ({
+      fabric_article_number:      r.fabricArticleNumber != null ? Number(r.fabricArticleNumber) : null,
+      fabric_article_description: r.fabricArticleDescription,
+      division:                   r.division,
+      sub_division:               r.subDivision,
+      major_category:             r.majorCategory,
+      vendor_name:                r.vendorName,
+      vendor_code:                r.vendorCode,
+      fabric_rate:                r.fabricRate != null ? Number(r.fabricRate) : null,
+      m_fab_div:                  r.mFabDiv,
+      m_yarn:                     r.mYarn,
+      m_fab_main_mvgr_1:          r.mFabMainMvgr1,
+      m_fab_main_mvgr_2:          r.mFabMainMvgr2,
+      m_construction:             r.mConstruction,
+      m_ounz:                     r.mOunz,
+      m_width:                    r.mWidth,
+      m_weave_01:                 r.mWeave01,
+      m_weave_02:                 r.mWeave02,
+      m_count:                    r.mCount,
+      m_composition:              r.mComposition,
+      m_finish:                   r.mFinish,
+      m_gsm:                      r.mGsm,
+      m_lycra:                    r.mLycra,
+    }));
+    const wb = buildPfadWorkbook(data);
+    const filename = `PRECISE_FABRIC_ARTICLE_DATA_${new Date().toISOString().slice(0, 10)}.xlsx`;
+    res.setHeader('Content-Type', 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');
+    res.setHeader('Content-Disposition', `attachment; filename="${filename}"`);
+    await wb.xlsx.write(res);
+    res.end();
+  } catch (error: any) {
+    console.error('[PreciseFabricArticleData] Export error:', error);
+    res.status(500).json({ success: false, error: error.message });
+  }
+};
+
+/** POST /admin/precise-fabric-article-data/upload — replaces the entire table */
+export const uploadPreciseFabricArticleData = async (req: Request, res: Response): Promise<void> => {
+  try {
+    if (!req.file) { res.status(400).json({ success: false, error: 'No file uploaded' }); return; }
+    const ExcelJS = require('exceljs');
+    const wb = new ExcelJS.Workbook();
+    await wb.xlsx.load(req.file.buffer);
+    const ws = wb.worksheets[0];
+    if (!ws) { res.status(400).json({ success: false, error: 'No worksheet found' }); return; }
+
+    // Locate header row by scanning for FABRIC ARTICLE NUMBER
+    let headerRowNum = 0;
+    ws.eachRow((row: any, rn: number) => {
+      if (headerRowNum) return;
+      const vals: any[] = row.values;
+      if (vals.some((v: any) => typeof v === 'string' && v.replace(/\s+/g, ' ').trim().toUpperCase() === 'FABRIC ARTICLE NUMBER'))
+        headerRowNum = rn;
+    });
+    if (!headerRowNum) { res.status(400).json({ success: false, error: 'Cannot find FABRIC ARTICLE NUMBER header row' }); return; }
+
+    // Build column-index map (header text → 1-based column index from row.values)
+    const colMap: Record<string, number> = {};
+    (ws.getRow(headerRowNum).values as any[]).forEach((v: any, i: number) => {
+      if (typeof v === 'string') colMap[v.replace(/\s+/g, '_').toUpperCase()] = i;
+    });
+    const ci = (...names: string[]): number => {
+      for (const n of names) if (colMap[n] !== undefined) return colMap[n];
+      return -1;
+    };
+
+    const toStr = (v: any): string | null => { const s = v == null ? '' : String(v).trim(); return s === '' || s === '-' ? null : s; };
+    const toNum = (v: any): number | null => { const n = Number(v); return isNaN(n) ? null : n; };
+    const toBig = (v: any): bigint | null => { const n = Number(v); return isNaN(n) ? null : BigInt(Math.round(n)); };
+
+    const inserts: any[] = [];
+    ws.eachRow((row: any, rn: number) => {
+      if (rn <= headerRowNum) return;
+      const v: any[] = row.values;
+      const fan = v[ci('FABRIC_ARTICLE_NUMBER')];
+      if (fan == null || fan === '') return;
+      inserts.push({
+        fabricArticleNumber:      toBig(fan),
+        fabricArticleDescription: toStr(v[ci('FABRIC_ARTICLE_DESCRIPTION')]),
+        division:                 toStr(v[ci('DIVISION')]),
+        subDivision:              toStr(v[ci('SUB_DIVISION')]),
+        majorCategory:            toStr(v[ci('MAJOR_CATEGORY')]),
+        vendorName:               toStr(v[ci('VENDOR_NAME')]),
+        vendorCode:               toNum(v[ci('VENDOR_CODE')]),
+        fabricRate:               toNum(v[ci('FABRIC_RATE')]),
+        mFabDiv:                  toStr(v[ci('M_FAB_DIV')]),
+        mYarn:                    toStr(v[ci('M_YARN')]),
+        mFabMainMvgr1:            toStr(v[ci('M_FAB_MAIN_MVGR_1')]),
+        mFabMainMvgr2:            toStr(v[ci('M_FAB_MAIN_MVGR_2')]),
+        mConstruction:            toStr(v[ci('M_CONSTRUCTION')]),
+        mOunz:                    toStr(v[ci('M_OUNZ')]),
+        mWidth:                   toStr(v[ci('M_WIDTH')]),
+        mWeave01:                 toStr(v[ci('M_WEAVE_01')]),
+        mWeave02:                 toStr(v[ci('M_WEAVE_02')]),
+        mCount:                   toStr(v[ci('M_COUNT')]),
+        mComposition:             toStr(v[ci('M_COMPOSITION')]),
+        mFinish:                  toStr(v[ci('M_FINISH')]),
+        mGsm:                     toStr(v[ci('M_GSM')]),
+        mLycra:                   toStr(v[ci('M_LYCRA')]),
+      });
+    });
+
+    if (inserts.length === 0) { res.status(400).json({ success: false, error: 'No data rows found' }); return; }
+
+    await prisma.$transaction([
+      prisma.preciseFabricArticleData.deleteMany({}),
+      prisma.preciseFabricArticleData.createMany({ data: inserts }),
+    ]);
+
+    res.json({ success: true, data: { inserted: inserts.length } });
+  } catch (error: any) {
+    console.error('[PreciseFabricArticleData] Upload error:', error);
+    res.status(500).json({ success: false, error: error.message });
+  }
 };
