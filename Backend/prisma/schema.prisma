@@ -2143,13 +2143,21 @@ model BodyFabricConsumption {
 
 /// RoughCmpCostMaster: Master table for rough CMP cost by division, sub-division, and major category
 model RoughCmpCostMaster {
-  id         Int       @id @default(autoincrement())
-  div        String?   @map("div")     @db.VarChar(50)
-  subDiv     String?   @map("sub_div") @db.VarChar(50)
-  majCat     String    @map("maj_cat") @db.VarChar(100)
-  cmpCost    Decimal?  @map("cmp_cost") @db.Decimal(10, 4)
-  createdAt  DateTime  @default(now()) @map("created_at")
-  updatedAt  DateTime  @updatedAt      @map("updated_at")
+  id           Int      @id @default(autoincrement())
+  div          String?  @map("div")          @db.VarChar(50)
+  subDiv       String?  @map("sub_div")      @db.VarChar(50)
+  majCat       String   @map("maj_cat")      @db.VarChar(100)
+  cuttingSam   Decimal? @map("cutting_sam")  @db.Decimal(10, 4)
+  cuttingVal   Decimal? @map("cutting_val")  @db.Decimal(10, 4)
+  stitchingSam Decimal? @map("stitching_sam") @db.Decimal(10, 4)
+  stitchingVal Decimal? @map("stitching_val") @db.Decimal(10, 4)
+  ironingSam   Decimal? @map("ironing_sam")  @db.Decimal(10, 4)
+  ironingVal   Decimal? @map("ironing_val")  @db.Decimal(10, 4)
+  finishingSam Decimal? @map("finishing_sam") @db.Decimal(10, 4)
+  finishingVal Decimal? @map("finishing_val") @db.Decimal(10, 4)
+  cmpCost      Decimal? @map("cmp_cost")     @db.Decimal(10, 4)
+  createdAt    DateTime @default(now())      @map("created_at")
+  updatedAt    DateTime @updatedAt           @map("updated_at")
 
   @@unique([div, subDiv, majCat])
   @@index([majCat])

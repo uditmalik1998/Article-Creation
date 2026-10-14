@@ -27,12 +27,20 @@ interface CmpCostCardProps {
   locked: boolean;
   /** ACT column values auto-filled from precise_body_article_consumption on body article selection. */
   actPreset?: Record<string, string>;
+  /** BGT column values auto-filled from rough_cmp_cost_master by major category. */
+  bgtPreset?: Record<string, string>;
 }
 
-const CmpCostCard: React.FC<CmpCostCardProps> = ({ collapsed, onToggleCollapse, locked, actPreset }) => {
+const CmpCostCard: React.FC<CmpCostCardProps> = ({ collapsed, onToggleCollapse, locked, actPreset, bgtPreset }) => {
   const style = CARD_THEME;
   // UI-only values keyed by "PROCESS|STAGE|MEASURE".
   const [values, setValues] = useState<Record<string, string>>({});
+
+  // Merge incoming BGT preset whenever major category changes.
+  useEffect(() => {
+    if (!bgtPreset || Object.keys(bgtPreset).length === 0) return;
+    setValues((prev) => ({ ...prev, ...bgtPreset }));
+  }, [bgtPreset]);
 
   // Merge incoming ACT preset whenever body article changes.
   useEffect(() => {

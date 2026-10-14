@@ -5002,9 +5002,27 @@ export class ApproverController {
         if (!majorCategory) return res.json({ cmpCost: null });
         const row = await prisma.roughCmpCostMaster.findFirst({
             where: { majCat: { equals: majorCategory, mode: 'insensitive' } },
-            select: { cmpCost: true },
+            select: {
+                cmpCost: true,
+                cuttingSam: true, cuttingVal: true,
+                stitchingSam: true, stitchingVal: true,
+                ironingSam: true, ironingVal: true,
+                finishingSam: true, finishingVal: true,
+            },
         });
-        return res.json({ cmpCost: row?.cmpCost != null ? Number(row.cmpCost) : null });
+        if (!row) return res.json({ cmpCost: null });
+        const n = (v: any) => (v != null ? Number(v) : null);
+        return res.json({
+            cmpCost:      n(row.cmpCost),
+            cuttingSam:   n(row.cuttingSam),
+            cuttingVal:   n(row.cuttingVal),
+            stitchingSam: n(row.stitchingSam),
+            stitchingVal: n(row.stitchingVal),
+            ironingSam:   n(row.ironingSam),
+            ironingVal:   n(row.ironingVal),
+            finishingSam: n(row.finishingSam),
+            finishingVal: n(row.finishingVal),
+        });
     };
 
     static getBodyArticleItems = async (req: Request, res: Response) => {

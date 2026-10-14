@@ -72977,11 +72977,27 @@ export namespace Prisma {
 
   export type RoughCmpCostMasterAvgAggregateOutputType = {
     id: number | null
+    cuttingSam: Decimal | null
+    cuttingVal: Decimal | null
+    stitchingSam: Decimal | null
+    stitchingVal: Decimal | null
+    ironingSam: Decimal | null
+    ironingVal: Decimal | null
+    finishingSam: Decimal | null
+    finishingVal: Decimal | null
     cmpCost: Decimal | null
   }
 
   export type RoughCmpCostMasterSumAggregateOutputType = {
     id: number | null
+    cuttingSam: Decimal | null
+    cuttingVal: Decimal | null
+    stitchingSam: Decimal | null
+    stitchingVal: Decimal | null
+    ironingSam: Decimal | null
+    ironingVal: Decimal | null
+    finishingSam: Decimal | null
+    finishingVal: Decimal | null
     cmpCost: Decimal | null
   }
 
@@ -72990,7 +73006,16 @@ export namespace Prisma {
     div: string | null
     subDiv: string | null
     majCat: string | null
+    cuttingSam: Decimal | null
+    cuttingVal: Decimal | null
+    stitchingSam: Decimal | null
+    stitchingVal: Decimal | null
+    ironingSam: Decimal | null
+    ironingVal: Decimal | null
+    finishingSam: Decimal | null
+    finishingVal: Decimal | null
     cmpCost: Decimal | null
+    remarks: string | null
     createdAt: Date | null
     updatedAt: Date | null
   }
@@ -73000,7 +73025,16 @@ export namespace Prisma {
     div: string | null
     subDiv: string | null
     majCat: string | null
+    cuttingSam: Decimal | null
+    cuttingVal: Decimal | null
+    stitchingSam: Decimal | null
+    stitchingVal: Decimal | null
+    ironingSam: Decimal | null
+    ironingVal: Decimal | null
+    finishingSam: Decimal | null
+    finishingVal: Decimal | null
     cmpCost: Decimal | null
+    remarks: string | null
     createdAt: Date | null
     updatedAt: Date | null
   }
@@ -73010,7 +73044,16 @@ export namespace Prisma {
     div: number
     subDiv: number
     majCat: number
+    cuttingSam: number
+    cuttingVal: number
+    stitchingSam: number
+    stitchingVal: number
+    ironingSam: number
+    ironingVal: number
+    finishingSam: number
+    finishingVal: number
     cmpCost: number
+    remarks: number
     createdAt: number
     updatedAt: number
     _all: number
@@ -73019,11 +73062,27 @@ export namespace Prisma {
 
   export type RoughCmpCostMasterAvgAggregateInputType = {
     id?: true
+    cuttingSam?: true
+    cuttingVal?: true
+    stitchingSam?: true
+    stitchingVal?: true
+    ironingSam?: true
+    ironingVal?: true
+    finishingSam?: true
+    finishingVal?: true
     cmpCost?: true
   }
 
   export type RoughCmpCostMasterSumAggregateInputType = {
     id?: true
+    cuttingSam?: true
+    cuttingVal?: true
+    stitchingSam?: true
+    stitchingVal?: true
+    ironingSam?: true
+    ironingVal?: true
+    finishingSam?: true
+    finishingVal?: true
     cmpCost?: true
   }
 
@@ -73032,7 +73091,16 @@ export namespace Prisma {
     div?: true
     subDiv?: true
     majCat?: true
+    cuttingSam?: true
+    cuttingVal?: true
+    stitchingSam?: true
+    stitchingVal?: true
+    ironingSam?: true
+    ironingVal?: true
+    finishingSam?: true
+    finishingVal?: true
     cmpCost?: true
+    remarks?: true
     createdAt?: true
     updatedAt?: true
   }
@@ -73042,7 +73110,16 @@ export namespace Prisma {
     div?: true
     subDiv?: true
     majCat?: true
+    cuttingSam?: true
+    cuttingVal?: true
+    stitchingSam?: true
+    stitchingVal?: true
+    ironingSam?: true
+    ironingVal?: true
+    finishingSam?: true
+    finishingVal?: true
     cmpCost?: true
+    remarks?: true
     createdAt?: true
     updatedAt?: true
   }
@@ -73052,7 +73129,16 @@ export namespace Prisma {
     div?: true
     subDiv?: true
     majCat?: true
+    cuttingSam?: true
+    cuttingVal?: true
+    stitchingSam?: true
+    stitchingVal?: true
+    ironingSam?: true
+    ironingVal?: true
+    finishingSam?: true
+    finishingVal?: true
     cmpCost?: true
+    remarks?: true
     createdAt?: true
     updatedAt?: true
     _all?: true
@@ -73149,7 +73235,16 @@ export namespace Prisma {
     div: string | null
     subDiv: string | null
     majCat: string
+    cuttingSam: Decimal | null
+    cuttingVal: Decimal | null
+    stitchingSam: Decimal | null
+    stitchingVal: Decimal | null
+    ironingSam: Decimal | null
+    ironingVal: Decimal | null
+    finishingSam: Decimal | null
+    finishingVal: Decimal | null
     cmpCost: Decimal | null
+    remarks: string | null
     createdAt: Date
     updatedAt: Date
     _count: RoughCmpCostMasterCountAggregateOutputType | null
@@ -73178,7 +73273,16 @@ export namespace Prisma {
     div?: boolean
     subDiv?: boolean
     majCat?: boolean
+    cuttingSam?: boolean
+    cuttingVal?: boolean
+    stitchingSam?: boolean
+    stitchingVal?: boolean
+    ironingSam?: boolean
+    ironingVal?: boolean
+    finishingSam?: boolean
+    finishingVal?: boolean
     cmpCost?: boolean
+    remarks?: boolean
     createdAt?: boolean
     updatedAt?: boolean
   }, ExtArgs["result"]["roughCmpCostMaster"]>
@@ -73188,7 +73292,16 @@ export namespace Prisma {
     div?: boolean
     subDiv?: boolean
     majCat?: boolean
+    cuttingSam?: boolean
+    cuttingVal?: boolean
+    stitchingSam?: boolean
+    stitchingVal?: boolean
+    ironingSam?: boolean
+    ironingVal?: boolean
+    finishingSam?: boolean
+    finishingVal?: boolean
     cmpCost?: boolean
+    remarks?: boolean
     createdAt?: boolean
     updatedAt?: boolean
   }, ExtArgs["result"]["roughCmpCostMaster"]>
@@ -73198,7 +73311,16 @@ export namespace Prisma {
     div?: boolean
     subDiv?: boolean
     majCat?: boolean
+    cuttingSam?: boolean
+    cuttingVal?: boolean
+    stitchingSam?: boolean
+    stitchingVal?: boolean
+    ironingSam?: boolean
+    ironingVal?: boolean
+    finishingSam?: boolean
+    finishingVal?: boolean
     cmpCost?: boolean
+    remarks?: boolean
     createdAt?: boolean
     updatedAt?: boolean
   }, ExtArgs["result"]["roughCmpCostMaster"]>
@@ -73208,12 +73330,21 @@ export namespace Prisma {
     div?: boolean
     subDiv?: boolean
     majCat?: boolean
+    cuttingSam?: boolean
+    cuttingVal?: boolean
+    stitchingSam?: boolean
+    stitchingVal?: boolean
+    ironingSam?: boolean
+    ironingVal?: boolean
+    finishingSam?: boolean
+    finishingVal?: boolean
     cmpCost?: boolean
+    remarks?: boolean
     createdAt?: boolean
     updatedAt?: boolean
   }
 
-  export type RoughCmpCostMasterOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<"id" | "div" | "subDiv" | "majCat" | "cmpCost" | "createdAt" | "updatedAt", ExtArgs["result"]["roughCmpCostMaster"]>
+  export type RoughCmpCostMasterOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<"id" | "div" | "subDiv" | "majCat" | "cuttingSam" | "cuttingVal" | "stitchingSam" | "stitchingVal" | "ironingSam" | "ironingVal" | "finishingSam" | "finishingVal" | "cmpCost" | "remarks" | "createdAt" | "updatedAt", ExtArgs["result"]["roughCmpCostMaster"]>
 
   export type $RoughCmpCostMasterPayload<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
     name: "RoughCmpCostMaster"
@@ -73223,7 +73354,16 @@ export namespace Prisma {
       div: string | null
       subDiv: string | null
       majCat: string
+      cuttingSam: Prisma.Decimal | null
+      cuttingVal: Prisma.Decimal | null
+      stitchingSam: Prisma.Decimal | null
+      stitchingVal: Prisma.Decimal | null
+      ironingSam: Prisma.Decimal | null
+      ironingVal: Prisma.Decimal | null
+      finishingSam: Prisma.Decimal | null
+      finishingVal: Prisma.Decimal | null
       cmpCost: Prisma.Decimal | null
+      remarks: string | null
       createdAt: Date
       updatedAt: Date
     }, ExtArgs["result"]["roughCmpCostMaster"]>
@@ -73653,7 +73793,16 @@ export namespace Prisma {
     readonly div: FieldRef<"RoughCmpCostMaster", 'String'>
     readonly subDiv: FieldRef<"RoughCmpCostMaster", 'String'>
     readonly majCat: FieldRef<"RoughCmpCostMaster", 'String'>
+    readonly cuttingSam: FieldRef<"RoughCmpCostMaster", 'Decimal'>
+    readonly cuttingVal: FieldRef<"RoughCmpCostMaster", 'Decimal'>
+    readonly stitchingSam: FieldRef<"RoughCmpCostMaster", 'Decimal'>
+    readonly stitchingVal: FieldRef<"RoughCmpCostMaster", 'Decimal'>
+    readonly ironingSam: FieldRef<"RoughCmpCostMaster", 'Decimal'>
+    readonly ironingVal: FieldRef<"RoughCmpCostMaster", 'Decimal'>
+    readonly finishingSam: FieldRef<"RoughCmpCostMaster", 'Decimal'>
+    readonly finishingVal: FieldRef<"RoughCmpCostMaster", 'Decimal'>
     readonly cmpCost: FieldRef<"RoughCmpCostMaster", 'Decimal'>
+    readonly remarks: FieldRef<"RoughCmpCostMaster", 'String'>
     readonly createdAt: FieldRef<"RoughCmpCostMaster", 'DateTime'>
     readonly updatedAt: FieldRef<"RoughCmpCostMaster", 'DateTime'>
   }
@@ -89949,7 +90098,16 @@ export namespace Prisma {
     div: 'div',
     subDiv: 'subDiv',
     majCat: 'majCat',
+    cuttingSam: 'cuttingSam',
+    cuttingVal: 'cuttingVal',
+    stitchingSam: 'stitchingSam',
+    stitchingVal: 'stitchingVal',
+    ironingSam: 'ironingSam',
+    ironingVal: 'ironingVal',
+    finishingSam: 'finishingSam',
+    finishingVal: 'finishingVal',
     cmpCost: 'cmpCost',
+    remarks: 'remarks',
     createdAt: 'createdAt',
     updatedAt: 'updatedAt'
   };
@@ -91327,7 +91485,8 @@ export namespace Prisma {
   export const RoughCmpCostMasterOrderByRelevanceFieldEnum: {
     div: 'div',
     subDiv: 'subDiv',
-    majCat: 'majCat'
+    majCat: 'majCat',
+    remarks: 'remarks'
   };
 
   export type RoughCmpCostMasterOrderByRelevanceFieldEnum = (typeof RoughCmpCostMasterOrderByRelevanceFieldEnum)[keyof typeof RoughCmpCostMasterOrderByRelevanceFieldEnum]
@@ -99152,7 +99311,16 @@ export namespace Prisma {
     div?: StringNullableFilter<"RoughCmpCostMaster"> | string | null
     subDiv?: StringNullableFilter<"RoughCmpCostMaster"> | string | null
     majCat?: StringFilter<"RoughCmpCostMaster"> | string
+    cuttingSam?: DecimalNullableFilter<"RoughCmpCostMaster"> | Decimal | DecimalJsLike | number | string | null
+    cuttingVal?: DecimalNullableFilter<"RoughCmpCostMaster"> | Decimal | DecimalJsLike | number | string | null
+    stitchingSam?: DecimalNullableFilter<"RoughCmpCostMaster"> | Decimal | DecimalJsLike | number | string | null
+    stitchingVal?: DecimalNullableFilter<"RoughCmpCostMaster"> | Decimal | DecimalJsLike | number | string | null
+    ironingSam?: DecimalNullableFilter<"RoughCmpCostMaster"> | Decimal | DecimalJsLike | number | string | null
+    ironingVal?: DecimalNullableFilter<"RoughCmpCostMaster"> | Decimal | DecimalJsLike | number | string | null
+    finishingSam?: DecimalNullableFilter<"RoughCmpCostMaster"> | Decimal | DecimalJsLike | number | string | null
+    finishingVal?: DecimalNullableFilter<"RoughCmpCostMaster"> | Decimal | DecimalJsLike | number | string | null
     cmpCost?: DecimalNullableFilter<"RoughCmpCostMaster"> | Decimal | DecimalJsLike | number | string | null
+    remarks?: StringNullableFilter<"RoughCmpCostMaster"> | string | null
     createdAt?: DateTimeFilter<"RoughCmpCostMaster"> | Date | string
     updatedAt?: DateTimeFilter<"RoughCmpCostMaster"> | Date | string
   }
@@ -99162,7 +99330,16 @@ export namespace Prisma {
     div?: SortOrderInput | SortOrder
     subDiv?: SortOrderInput | SortOrder
     majCat?: SortOrder
+    cuttingSam?: SortOrderInput | SortOrder
+    cuttingVal?: SortOrderInput | SortOrder
+    stitchingSam?: SortOrderInput | SortOrder
+    stitchingVal?: SortOrderInput | SortOrder
+    ironingSam?: SortOrderInput | SortOrder
+    ironingVal?: SortOrderInput | SortOrder
+    finishingSam?: SortOrderInput | SortOrder
+    finishingVal?: SortOrderInput | SortOrder
     cmpCost?: SortOrderInput | SortOrder
+    remarks?: SortOrderInput | SortOrder
     createdAt?: SortOrder
     updatedAt?: SortOrder
     _relevance?: RoughCmpCostMasterOrderByRelevanceInput
@@ -99177,7 +99354,16 @@ export namespace Prisma {
     div?: StringNullableFilter<"RoughCmpCostMaster"> | string | null
     subDiv?: StringNullableFilter<"RoughCmpCostMaster"> | string | null
     majCat?: StringFilter<"RoughCmpCostMaster"> | string
+    cuttingSam?: DecimalNullableFilter<"RoughCmpCostMaster"> | Decimal | DecimalJsLike | number | string | null
+    cuttingVal?: DecimalNullableFilter<"RoughCmpCostMaster"> | Decimal | DecimalJsLike | number | string | null
+    stitchingSam?: DecimalNullableFilter<"RoughCmpCostMaster"> | Decimal | DecimalJsLike | number | string | null
+    stitchingVal?: DecimalNullableFilter<"RoughCmpCostMaster"> | Decimal | DecimalJsLike | number | string | null
+    ironingSam?: DecimalNullableFilter<"RoughCmpCostMaster"> | Decimal | DecimalJsLike | number | string | null
+    ironingVal?: DecimalNullableFilter<"RoughCmpCostMaster"> | Decimal | DecimalJsLike | number | string | null
+    finishingSam?: DecimalNullableFilter<"RoughCmpCostMaster"> | Decimal | DecimalJsLike | number | string | null
+    finishingVal?: DecimalNullableFilter<"RoughCmpCostMaster"> | Decimal | DecimalJsLike | number | string | null
     cmpCost?: DecimalNullableFilter<"RoughCmpCostMaster"> | Decimal | DecimalJsLike | number | string | null
+    remarks?: StringNullableFilter<"RoughCmpCostMaster"> | string | null
     createdAt?: DateTimeFilter<"RoughCmpCostMaster"> | Date | string
     updatedAt?: DateTimeFilter<"RoughCmpCostMaster"> | Date | string
   }, "id" | "div_subDiv_majCat">
@@ -99187,7 +99373,16 @@ export namespace Prisma {
     div?: SortOrderInput | SortOrder
     subDiv?: SortOrderInput | SortOrder
     majCat?: SortOrder
+    cuttingSam?: SortOrderInput | SortOrder
+    cuttingVal?: SortOrderInput | SortOrder
+    stitchingSam?: SortOrderInput | SortOrder
+    stitchingVal?: SortOrderInput | SortOrder
+    ironingSam?: SortOrderInput | SortOrder
+    ironingVal?: SortOrderInput | SortOrder
+    finishingSam?: SortOrderInput | SortOrder
+    finishingVal?: SortOrderInput | SortOrder
     cmpCost?: SortOrderInput | SortOrder
+    remarks?: SortOrderInput | SortOrder
     createdAt?: SortOrder
     updatedAt?: SortOrder
     _count?: RoughCmpCostMasterCountOrderByAggregateInput
@@ -99205,7 +99400,16 @@ export namespace Prisma {
     div?: StringNullableWithAggregatesFilter<"RoughCmpCostMaster"> | string | null
     subDiv?: StringNullableWithAggregatesFilter<"RoughCmpCostMaster"> | string | null
     majCat?: StringWithAggregatesFilter<"RoughCmpCostMaster"> | string
+    cuttingSam?: DecimalNullableWithAggregatesFilter<"RoughCmpCostMaster"> | Decimal | DecimalJsLike | number | string | null
+    cuttingVal?: DecimalNullableWithAggregatesFilter<"RoughCmpCostMaster"> | Decimal | DecimalJsLike | number | string | null
+    stitchingSam?: DecimalNullableWithAggregatesFilter<"RoughCmpCostMaster"> | Decimal | DecimalJsLike | number | string | null
+    stitchingVal?: DecimalNullableWithAggregatesFilter<"RoughCmpCostMaster"> | Decimal | DecimalJsLike | number | string | null
+    ironingSam?: DecimalNullableWithAggregatesFilter<"RoughCmpCostMaster"> | Decimal | DecimalJsLike | number | string | null
+    ironingVal?: DecimalNullableWithAggregatesFilter<"RoughCmpCostMaster"> | Decimal | DecimalJsLike | number | string | null
+    finishingSam?: DecimalNullableWithAggregatesFilter<"RoughCmpCostMaster"> | Decimal | DecimalJsLike | number | string | null
+    finishingVal?: DecimalNullableWithAggregatesFilter<"RoughCmpCostMaster"> | Decimal | DecimalJsLike | number | string | null
     cmpCost?: DecimalNullableWithAggregatesFilter<"RoughCmpCostMaster"> | Decimal | DecimalJsLike | number | string | null
+    remarks?: StringNullableWithAggregatesFilter<"RoughCmpCostMaster"> | string | null
     createdAt?: DateTimeWithAggregatesFilter<"RoughCmpCostMaster"> | Date | string
     updatedAt?: DateTimeWithAggregatesFilter<"RoughCmpCostMaster"> | Date | string
   }
@@ -109569,7 +109773,16 @@ export namespace Prisma {
     div?: string | null
     subDiv?: string | null
     majCat: string
+    cuttingSam?: Decimal | DecimalJsLike | number | string | null
+    cuttingVal?: Decimal | DecimalJsLike | number | string | null
+    stitchingSam?: Decimal | DecimalJsLike | number | string | null
+    stitchingVal?: Decimal | DecimalJsLike | number | string | null
+    ironingSam?: Decimal | DecimalJsLike | number | string | null
+    ironingVal?: Decimal | DecimalJsLike | number | string | null
+    finishingSam?: Decimal | DecimalJsLike | number | string | null
+    finishingVal?: Decimal | DecimalJsLike | number | string | null
     cmpCost?: Decimal | DecimalJsLike | number | string | null
+    remarks?: string | null
     createdAt?: Date | string
     updatedAt?: Date | string
   }
@@ -109579,7 +109792,16 @@ export namespace Prisma {
     div?: string | null
     subDiv?: string | null
     majCat: string
+    cuttingSam?: Decimal | DecimalJsLike | number | string | null
+    cuttingVal?: Decimal | DecimalJsLike | number | string | null
+    stitchingSam?: Decimal | DecimalJsLike | number | string | null
+    stitchingVal?: Decimal | DecimalJsLike | number | string | null
+    ironingSam?: Decimal | DecimalJsLike | number | string | null
+    ironingVal?: Decimal | DecimalJsLike | number | string | null
+    finishingSam?: Decimal | DecimalJsLike | number | string | null
+    finishingVal?: Decimal | DecimalJsLike | number | string | null
     cmpCost?: Decimal | DecimalJsLike | number | string | null
+    remarks?: string | null
     createdAt?: Date | string
     updatedAt?: Date | string
   }
@@ -109588,7 +109810,16 @@ export namespace Prisma {
     div?: NullableStringFieldUpdateOperationsInput | string | null
     subDiv?: NullableStringFieldUpdateOperationsInput | string | null
     majCat?: StringFieldUpdateOperationsInput | string
+    cuttingSam?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    cuttingVal?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    stitchingSam?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    stitchingVal?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    ironingSam?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    ironingVal?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    finishingSam?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    finishingVal?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
     cmpCost?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    remarks?: NullableStringFieldUpdateOperationsInput | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
   }
@@ -109598,7 +109829,16 @@ export namespace Prisma {
     div?: NullableStringFieldUpdateOperationsInput | string | null
     subDiv?: NullableStringFieldUpdateOperationsInput | string | null
     majCat?: StringFieldUpdateOperationsInput | string
+    cuttingSam?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    cuttingVal?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    stitchingSam?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    stitchingVal?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    ironingSam?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    ironingVal?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    finishingSam?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    finishingVal?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
     cmpCost?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    remarks?: NullableStringFieldUpdateOperationsInput | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
   }
@@ -109608,7 +109848,16 @@ export namespace Prisma {
     div?: string | null
     subDiv?: string | null
     majCat: string
+    cuttingSam?: Decimal | DecimalJsLike | number | string | null
+    cuttingVal?: Decimal | DecimalJsLike | number | string | null
+    stitchingSam?: Decimal | DecimalJsLike | number | string | null
+    stitchingVal?: Decimal | DecimalJsLike | number | string | null
+    ironingSam?: Decimal | DecimalJsLike | number | string | null
+    ironingVal?: Decimal | DecimalJsLike | number | string | null
+    finishingSam?: Decimal | DecimalJsLike | number | string | null
+    finishingVal?: Decimal | DecimalJsLike | number | string | null
     cmpCost?: Decimal | DecimalJsLike | number | string | null
+    remarks?: string | null
     createdAt?: Date | string
     updatedAt?: Date | string
   }
@@ -109617,7 +109866,16 @@ export namespace Prisma {
     div?: NullableStringFieldUpdateOperationsInput | string | null
     subDiv?: NullableStringFieldUpdateOperationsInput | string | null
     majCat?: StringFieldUpdateOperationsInput | string
+    cuttingSam?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    cuttingVal?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    stitchingSam?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    stitchingVal?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    ironingSam?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    ironingVal?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    finishingSam?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    finishingVal?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
     cmpCost?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    remarks?: NullableStringFieldUpdateOperationsInput | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
   }
@@ -109627,7 +109885,16 @@ export namespace Prisma {
     div?: NullableStringFieldUpdateOperationsInput | string | null
     subDiv?: NullableStringFieldUpdateOperationsInput | string | null
     majCat?: StringFieldUpdateOperationsInput | string
+    cuttingSam?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    cuttingVal?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    stitchingSam?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    stitchingVal?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    ironingSam?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    ironingVal?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    finishingSam?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    finishingVal?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
     cmpCost?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    remarks?: NullableStringFieldUpdateOperationsInput | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
   }
@@ -116925,13 +117192,30 @@ export namespace Prisma {
     div?: SortOrder
     subDiv?: SortOrder
     majCat?: SortOrder
+    cuttingSam?: SortOrder
+    cuttingVal?: SortOrder
+    stitchingSam?: SortOrder
+    stitchingVal?: SortOrder
+    ironingSam?: SortOrder
+    ironingVal?: SortOrder
+    finishingSam?: SortOrder
+    finishingVal?: SortOrder
     cmpCost?: SortOrder
+    remarks?: SortOrder
     createdAt?: SortOrder
     updatedAt?: SortOrder
   }
 
   export type RoughCmpCostMasterAvgOrderByAggregateInput = {
     id?: SortOrder
+    cuttingSam?: SortOrder
+    cuttingVal?: SortOrder
+    stitchingSam?: SortOrder
+    stitchingVal?: SortOrder
+    ironingSam?: SortOrder
+    ironingVal?: SortOrder
+    finishingSam?: SortOrder
+    finishingVal?: SortOrder
     cmpCost?: SortOrder
   }
 
@@ -116940,7 +117224,16 @@ export namespace Prisma {
     div?: SortOrder
     subDiv?: SortOrder
     majCat?: SortOrder
+    cuttingSam?: SortOrder
+    cuttingVal?: SortOrder
+    stitchingSam?: SortOrder
+    stitchingVal?: SortOrder
+    ironingSam?: SortOrder
+    ironingVal?: SortOrder
+    finishingSam?: SortOrder
+    finishingVal?: SortOrder
     cmpCost?: SortOrder
+    remarks?: SortOrder
     createdAt?: SortOrder
     updatedAt?: SortOrder
   }
@@ -116950,13 +117243,30 @@ export namespace Prisma {
     div?: SortOrder
     subDiv?: SortOrder
     majCat?: SortOrder
+    cuttingSam?: SortOrder
+    cuttingVal?: SortOrder
+    stitchingSam?: SortOrder
+    stitchingVal?: SortOrder
+    ironingSam?: SortOrder
+    ironingVal?: SortOrder
+    finishingSam?: SortOrder
+    finishingVal?: SortOrder
     cmpCost?: SortOrder
+    remarks?: SortOrder
     createdAt?: SortOrder
     updatedAt?: SortOrder
   }
 
   export type RoughCmpCostMasterSumOrderByAggregateInput = {
     id?: SortOrder
+    cuttingSam?: SortOrder
+    cuttingVal?: SortOrder
+    stitchingSam?: SortOrder
+    stitchingVal?: SortOrder
+    ironingSam?: SortOrder
+    ironingVal?: SortOrder
+    finishingSam?: SortOrder
+    finishingVal?: SortOrder
     cmpCost?: SortOrder
   }
 
