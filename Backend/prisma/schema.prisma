@@ -1997,6 +1997,28 @@ model BodyArticleData {
   bodyArticleType          String?   @map("body_article_type")        @db.VarChar(100)
   designNumber             String?   @map("design_number")            @db.VarChar(100)
 
+  // B TRIM costing per item
+  mBtnAutoBgt              Decimal?  @map("m_btn_auto_bgt")          @db.Decimal(10, 2)
+  mBtnRoughV2              Decimal?  @map("m_btn_rough_v2")          @db.Decimal(10, 2)
+  mBtnVdrCost              Decimal?  @map("m_btn_vdr_cost")          @db.Decimal(10, 2)
+  mBtnFinalCost            Decimal?  @map("m_btn_final_cost")        @db.Decimal(10, 2)
+  dcAutoBgt                Decimal?  @map("dc_auto_bgt")             @db.Decimal(10, 2)
+  dcRoughV2                Decimal?  @map("dc_rough_v2")             @db.Decimal(10, 2)
+  dcVdrCost                Decimal?  @map("dc_vdr_cost")             @db.Decimal(10, 2)
+  dcFinalCost              Decimal?  @map("dc_final_cost")           @db.Decimal(10, 2)
+  zipAutoBgt               Decimal?  @map("zip_auto_bgt")            @db.Decimal(10, 2)
+  zipRoughV2               Decimal?  @map("zip_rough_v2")            @db.Decimal(10, 2)
+  zipVdrCost               Decimal?  @map("zip_vdr_cost")            @db.Decimal(10, 2)
+  zipFinalCost             Decimal?  @map("zip_final_cost")          @db.Decimal(10, 2)
+  patchAutoBgt             Decimal?  @map("patch_auto_bgt")          @db.Decimal(10, 2)
+  patchRoughV2             Decimal?  @map("patch_rough_v2")          @db.Decimal(10, 2)
+  patchVdrCost             Decimal?  @map("patch_vdr_cost")          @db.Decimal(10, 2)
+  patchFinalCost           Decimal?  @map("patch_final_cost")        @db.Decimal(10, 2)
+  hTrfAutoBgt              Decimal?  @map("h_trf_auto_bgt")          @db.Decimal(10, 2)
+  hTrfRoughV2              Decimal?  @map("h_trf_rough_v2")          @db.Decimal(10, 2)
+  hTrfVdrCost              Decimal?  @map("h_trf_vdr_cost")          @db.Decimal(10, 2)
+  hTrfFinalCost            Decimal?  @map("h_trf_final_cost")        @db.Decimal(10, 2)
+
   // CMP Cost PR VAL per process × scenario
   cuttingBgtPrVal          Decimal?  @map("cutting_bgt_pr_val")      @db.Decimal(10, 4)
   cuttingActPrVal          Decimal?  @map("cutting_act_pr_val")      @db.Decimal(10, 4)

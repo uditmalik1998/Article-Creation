@@ -52,6 +52,8 @@ export interface ApproverItem {
   vendorName: string | null;
   designNumber: string | null;
   approvalStatus: 'PENDING' | 'APPROVED' | 'REJECTED';
+  fgCreatorApproved?: 'PENDING' | 'APPROVED';
+  mcDescription?: string | null;
   sapSyncStatus: 'NOT_SYNCED' | 'PENDING' | 'SYNCED' | 'FAILED';
   sapSyncMessage: string | null;
   sapArticleId: string | null;
