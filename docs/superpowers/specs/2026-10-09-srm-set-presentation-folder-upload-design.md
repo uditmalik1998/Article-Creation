@@ -97,3 +97,18 @@ existing MDM sync / Article Creation / SAP flow runs unchanged.
 ## Out of scope
 Set categories from folder names, mixing divisions in one AI call, fast-track rail, SAP-side
 set flag / BOM, auto-filling attributes per part from the AI, publishing.
+
+## Amendment 2026-10-15 — the Set MC Master replaces the hard-coded set lists
+MDM's set master (`set_mc_master` in the MDM DB, Admin > Set MC Master) now decides what is a set and
+which parts each set allows. Changes to this design:
+- **"Is a set" / set categories** come from the master through `srm-set-master` (hook `useSetMaster`);
+  `isSetCategory`, `SET_MAJOR_CATEGORIES` and `SET_CATEGORY_FRAGMENTS` no longer exist.
+- **Set category per set card** is picked from the master's active sets: `DivisionCascadeSelect`
+  `onlyCategories={setMaster.setCategories}` (the `filterCategory` prop in section 1 is `onlyCategories`).
+- **Part pickers** list only the parts the card's own set allows (`onlyCategories` = that set's allowed parts).
+- **AI sorter** (`srm-set-classify`): the set candidates are the master's active sets that exist in the
+  chosen division; part candidates are the union of those sets' parts, then `restrictToSet` clears any part
+  category the chosen set does not allow (the uploader picks one). Response adds `set`.
+- **Submit** checks each set against its own category: it is an active set, has allowed parts, and every
+  part category is one of them (plus the "AI picked — check" confirmation).
+- Sets whose category has no parts in the master (M_SUIT, MW_TRACK_SUIT, IB_ROMPER_SUIT) cannot be submitted.

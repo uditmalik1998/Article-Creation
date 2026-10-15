@@ -10,6 +10,14 @@
 
 **Spec:** `docs/superpowers/specs/2026-10-09-srm-set-presentation-folder-upload-design.md`
 
+> **Amendment 2026-10-15 (built natively, step by step through Lovable).** The Set MC Master replaced the
+> hard-coded set list, so these tasks differ from the text below: (1) `isSetCategory` is gone, set checks use
+> `useSetMaster` / `makeSetLookup` (which now also exposes `setCategories`); (2) `DivisionCascadeSelect` already has
+> `onlyCategories` (Task 3 uses it instead of `filterCategory`); (3) Task 2 edits the already-changed
+> `srm-set-classify`: set candidates and the part union come from the master and `restrictToSet` narrows parts to
+> the chosen set; (4) Task 4 validates each set against its own category, not the form's top category.
+> See the amendment at the end of the spec. The exact messages sent are in the Lovable project history.
+
 **How code reaches SRM:** SRM is the Lovable project V2-SRM, `project_id a381fbb9-6fe5-4023-8259-c1b8bee9c82c`. No local clone: every code step is a Lovable `send_message` containing the exact content / edit below, telling Lovable to apply it **verbatim**, change nothing else, and run the named check. Lovable auto-commits each message; each task's "commit check" is `read_file` / `get_diff` of the changed files compared with this plan. If `send_message` times out on the client, do NOT resend: `list_messages` / `read_file` first (the edit usually landed).
 
 ## Global Constraints
