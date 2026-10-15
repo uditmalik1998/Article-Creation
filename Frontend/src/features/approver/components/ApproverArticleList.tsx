@@ -631,6 +631,30 @@ const ArticleCard = React.memo(
     const [fabNoLoading, setFabNoLoading] = useState(false);
     const [cmpActPreset, setCmpActPreset] = useState<Record<string, string>>({});
     const [cmpBgtPreset, setCmpBgtPreset] = useState<Record<string, string>>({});
+    const cmpSavedPrVals = useMemo<Record<string, string>>(() => {
+      const fmt = (v: unknown) => (v != null && v !== '' ? String(v) : '');
+      return {
+        'CUTTING|BGT|PR VAL':      fmt(item.cuttingBgtPrVal),
+        'CUTTING|ACT|PR VAL':      fmt(item.cuttingActPrVal),
+        'CUTTING|VENDOR|PR VAL':   fmt(item.cuttingVendorPrVal),
+        'CUTTING|FINAL|PR VAL':    fmt(item.cuttingFinalPrVal),
+        'STITCHING|BGT|PR VAL':    fmt(item.stitchingBgtPrVal),
+        'STITCHING|ACT|PR VAL':    fmt(item.stitchingActPrVal),
+        'STITCHING|VENDOR|PR VAL': fmt(item.stitchingVendorPrVal),
+        'STITCHING|FINAL|PR VAL':  fmt(item.stitchingFinalPrVal),
+        'IRONING|BGT|PR VAL':      fmt(item.ironingBgtPrVal),
+        'IRONING|ACT|PR VAL':      fmt(item.ironingActPrVal),
+        'IRONING|VENDOR|PR VAL':   fmt(item.ironingVendorPrVal),
+        'IRONING|FINAL|PR VAL':    fmt(item.ironingFinalPrVal),
+        'FINISHING|BGT|PR VAL':    fmt(item.finishingBgtPrVal),
+        'FINISHING|ACT|PR VAL':    fmt(item.finishingActPrVal),
+        'FINISHING|VENDOR|PR VAL': fmt(item.finishingVendorPrVal),
+        'FINISHING|FINAL|PR VAL':  fmt(item.finishingFinalPrVal),
+      };
+    }, [item.cuttingBgtPrVal, item.cuttingActPrVal, item.cuttingVendorPrVal, item.cuttingFinalPrVal,
+        item.stitchingBgtPrVal, item.stitchingActPrVal, item.stitchingVendorPrVal, item.stitchingFinalPrVal,
+        item.ironingBgtPrVal, item.ironingActPrVal, item.ironingVendorPrVal, item.ironingFinalPrVal,
+        item.finishingBgtPrVal, item.finishingActPrVal, item.finishingVendorPrVal, item.finishingFinalPrVal]);
     const [preciseBodyResults, setPreciseBodyResults] = useState<{ macroBodyDescription: string | null; microBodyArticleNumber: string | null }[]>([]);
     const [preciseBodyLoading, setPreciseBodyLoading] = useState(false);
     const [preciseBodySearched, setPreciseBodySearched] = useState(false);
@@ -4523,6 +4547,15 @@ const ArticleCard = React.memo(
                       locked={isLocked}
                       bgtPreset={cmpBgtPreset}
                       actPreset={cmpActPreset}
+                      savedPrVals={cmpSavedPrVals}
+                      onPrValChange={(field, value) => {
+                        const updates = { [field]: value };
+                        if (isModifyMode) {
+                          setPendingChanges((prev) => ({ ...prev, ...updates }));
+                        } else {
+                          onSave({ ...item, ...updates } as any, updates);
+                        }
+                      }}
                     />
                   )}
 

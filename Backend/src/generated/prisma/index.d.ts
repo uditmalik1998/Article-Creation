@@ -17379,6 +17379,22 @@ export namespace Prisma {
     preciseRatio: Decimal | null
     preciseConsumptionKg: Decimal | null
     preciseConsumptionMeter: Decimal | null
+    cuttingBgtPrVal: Decimal | null
+    cuttingActPrVal: Decimal | null
+    cuttingVendorPrVal: Decimal | null
+    cuttingFinalPrVal: Decimal | null
+    stitchingBgtPrVal: Decimal | null
+    stitchingActPrVal: Decimal | null
+    stitchingVendorPrVal: Decimal | null
+    stitchingFinalPrVal: Decimal | null
+    ironingBgtPrVal: Decimal | null
+    ironingActPrVal: Decimal | null
+    ironingVendorPrVal: Decimal | null
+    ironingFinalPrVal: Decimal | null
+    finishingBgtPrVal: Decimal | null
+    finishingActPrVal: Decimal | null
+    finishingVendorPrVal: Decimal | null
+    finishingFinalPrVal: Decimal | null
     mrp: Decimal | null
     approvedBy: number | null
   }
@@ -17405,6 +17421,22 @@ export namespace Prisma {
     preciseRatio: Decimal | null
     preciseConsumptionKg: Decimal | null
     preciseConsumptionMeter: Decimal | null
+    cuttingBgtPrVal: Decimal | null
+    cuttingActPrVal: Decimal | null
+    cuttingVendorPrVal: Decimal | null
+    cuttingFinalPrVal: Decimal | null
+    stitchingBgtPrVal: Decimal | null
+    stitchingActPrVal: Decimal | null
+    stitchingVendorPrVal: Decimal | null
+    stitchingFinalPrVal: Decimal | null
+    ironingBgtPrVal: Decimal | null
+    ironingActPrVal: Decimal | null
+    ironingVendorPrVal: Decimal | null
+    ironingFinalPrVal: Decimal | null
+    finishingBgtPrVal: Decimal | null
+    finishingActPrVal: Decimal | null
+    finishingVendorPrVal: Decimal | null
+    finishingFinalPrVal: Decimal | null
     mrp: Decimal | null
     approvedBy: number | null
   }
@@ -17516,6 +17548,22 @@ export namespace Prisma {
     preciseRatio: Decimal | null
     preciseConsumptionKg: Decimal | null
     preciseConsumptionMeter: Decimal | null
+    cuttingBgtPrVal: Decimal | null
+    cuttingActPrVal: Decimal | null
+    cuttingVendorPrVal: Decimal | null
+    cuttingFinalPrVal: Decimal | null
+    stitchingBgtPrVal: Decimal | null
+    stitchingActPrVal: Decimal | null
+    stitchingVendorPrVal: Decimal | null
+    stitchingFinalPrVal: Decimal | null
+    ironingBgtPrVal: Decimal | null
+    ironingActPrVal: Decimal | null
+    ironingVendorPrVal: Decimal | null
+    ironingFinalPrVal: Decimal | null
+    finishingBgtPrVal: Decimal | null
+    finishingActPrVal: Decimal | null
+    finishingVendorPrVal: Decimal | null
+    finishingFinalPrVal: Decimal | null
     bodyArticle: string | null
     bodyArticleDescription: string | null
     fabricArticleNumber: string | null
@@ -17661,6 +17709,22 @@ export namespace Prisma {
     preciseRatio: Decimal | null
     preciseConsumptionKg: Decimal | null
     preciseConsumptionMeter: Decimal | null
+    cuttingBgtPrVal: Decimal | null
+    cuttingActPrVal: Decimal | null
+    cuttingVendorPrVal: Decimal | null
+    cuttingFinalPrVal: Decimal | null
+    stitchingBgtPrVal: Decimal | null
+    stitchingActPrVal: Decimal | null
+    stitchingVendorPrVal: Decimal | null
+    stitchingFinalPrVal: Decimal | null
+    ironingBgtPrVal: Decimal | null
+    ironingActPrVal: Decimal | null
+    ironingVendorPrVal: Decimal | null
+    ironingFinalPrVal: Decimal | null
+    finishingBgtPrVal: Decimal | null
+    finishingActPrVal: Decimal | null
+    finishingVendorPrVal: Decimal | null
+    finishingFinalPrVal: Decimal | null
     bodyArticle: string | null
     bodyArticleDescription: string | null
     fabricArticleNumber: string | null
@@ -17806,6 +17870,22 @@ export namespace Prisma {
     preciseRatio: number
     preciseConsumptionKg: number
     preciseConsumptionMeter: number
+    cuttingBgtPrVal: number
+    cuttingActPrVal: number
+    cuttingVendorPrVal: number
+    cuttingFinalPrVal: number
+    stitchingBgtPrVal: number
+    stitchingActPrVal: number
+    stitchingVendorPrVal: number
+    stitchingFinalPrVal: number
+    ironingBgtPrVal: number
+    ironingActPrVal: number
+    ironingVendorPrVal: number
+    ironingFinalPrVal: number
+    finishingBgtPrVal: number
+    finishingActPrVal: number
+    finishingVendorPrVal: number
+    finishingFinalPrVal: number
     bodyArticle: number
     bodyArticleDescription: number
     fabricArticleNumber: number
@@ -17869,6 +17949,22 @@ export namespace Prisma {
     preciseRatio?: true
     preciseConsumptionKg?: true
     preciseConsumptionMeter?: true
+    cuttingBgtPrVal?: true
+    cuttingActPrVal?: true
+    cuttingVendorPrVal?: true
+    cuttingFinalPrVal?: true
+    stitchingBgtPrVal?: true
+    stitchingActPrVal?: true
+    stitchingVendorPrVal?: true
+    stitchingFinalPrVal?: true
+    ironingBgtPrVal?: true
+    ironingActPrVal?: true
+    ironingVendorPrVal?: true
+    ironingFinalPrVal?: true
+    finishingBgtPrVal?: true
+    finishingActPrVal?: true
+    finishingVendorPrVal?: true
+    finishingFinalPrVal?: true
     mrp?: true
     approvedBy?: true
   }
@@ -17895,6 +17991,22 @@ export namespace Prisma {
     preciseRatio?: true
     preciseConsumptionKg?: true
     preciseConsumptionMeter?: true
+    cuttingBgtPrVal?: true
+    cuttingActPrVal?: true
+    cuttingVendorPrVal?: true
+    cuttingFinalPrVal?: true
+    stitchingBgtPrVal?: true
+    stitchingActPrVal?: true
+    stitchingVendorPrVal?: true
+    stitchingFinalPrVal?: true
+    ironingBgtPrVal?: true
+    ironingActPrVal?: true
+    ironingVendorPrVal?: true
+    ironingFinalPrVal?: true
+    finishingBgtPrVal?: true
+    finishingActPrVal?: true
+    finishingVendorPrVal?: true
+    finishingFinalPrVal?: true
     mrp?: true
     approvedBy?: true
   }
@@ -18006,6 +18118,22 @@ export namespace Prisma {
     preciseRatio?: true
     preciseConsumptionKg?: true
     preciseConsumptionMeter?: true
+    cuttingBgtPrVal?: true
+    cuttingActPrVal?: true
+    cuttingVendorPrVal?: true
+    cuttingFinalPrVal?: true
+    stitchingBgtPrVal?: true
+    stitchingActPrVal?: true
+    stitchingVendorPrVal?: true
+    stitchingFinalPrVal?: true
+    ironingBgtPrVal?: true
+    ironingActPrVal?: true
+    ironingVendorPrVal?: true
+    ironingFinalPrVal?: true
+    finishingBgtPrVal?: true
+    finishingActPrVal?: true
+    finishingVendorPrVal?: true
+    finishingFinalPrVal?: true
     bodyArticle?: true
     bodyArticleDescription?: true
     fabricArticleNumber?: true
@@ -18151,6 +18279,22 @@ export namespace Prisma {
     preciseRatio?: true
     preciseConsumptionKg?: true
     preciseConsumptionMeter?: true
+    cuttingBgtPrVal?: true
+    cuttingActPrVal?: true
+    cuttingVendorPrVal?: true
+    cuttingFinalPrVal?: true
+    stitchingBgtPrVal?: true
+    stitchingActPrVal?: true
+    stitchingVendorPrVal?: true
+    stitchingFinalPrVal?: true
+    ironingBgtPrVal?: true
+    ironingActPrVal?: true
+    ironingVendorPrVal?: true
+    ironingFinalPrVal?: true
+    finishingBgtPrVal?: true
+    finishingActPrVal?: true
+    finishingVendorPrVal?: true
+    finishingFinalPrVal?: true
     bodyArticle?: true
     bodyArticleDescription?: true
     fabricArticleNumber?: true
@@ -18296,6 +18440,22 @@ export namespace Prisma {
     preciseRatio?: true
     preciseConsumptionKg?: true
     preciseConsumptionMeter?: true
+    cuttingBgtPrVal?: true
+    cuttingActPrVal?: true
+    cuttingVendorPrVal?: true
+    cuttingFinalPrVal?: true
+    stitchingBgtPrVal?: true
+    stitchingActPrVal?: true
+    stitchingVendorPrVal?: true
+    stitchingFinalPrVal?: true
+    ironingBgtPrVal?: true
+    ironingActPrVal?: true
+    ironingVendorPrVal?: true
+    ironingFinalPrVal?: true
+    finishingBgtPrVal?: true
+    finishingActPrVal?: true
+    finishingVendorPrVal?: true
+    finishingFinalPrVal?: true
     bodyArticle?: true
     bodyArticleDescription?: true
     fabricArticleNumber?: true
@@ -18529,6 +18689,22 @@ export namespace Prisma {
     preciseRatio: Decimal | null
     preciseConsumptionKg: Decimal | null
     preciseConsumptionMeter: Decimal | null
+    cuttingBgtPrVal: Decimal | null
+    cuttingActPrVal: Decimal | null
+    cuttingVendorPrVal: Decimal | null
+    cuttingFinalPrVal: Decimal | null
+    stitchingBgtPrVal: Decimal | null
+    stitchingActPrVal: Decimal | null
+    stitchingVendorPrVal: Decimal | null
+    stitchingFinalPrVal: Decimal | null
+    ironingBgtPrVal: Decimal | null
+    ironingActPrVal: Decimal | null
+    ironingVendorPrVal: Decimal | null
+    ironingFinalPrVal: Decimal | null
+    finishingBgtPrVal: Decimal | null
+    finishingActPrVal: Decimal | null
+    finishingVendorPrVal: Decimal | null
+    finishingFinalPrVal: Decimal | null
     bodyArticle: string | null
     bodyArticleDescription: string | null
     fabricArticleNumber: string | null
@@ -18694,6 +18870,22 @@ export namespace Prisma {
     preciseRatio?: boolean
     preciseConsumptionKg?: boolean
     preciseConsumptionMeter?: boolean
+    cuttingBgtPrVal?: boolean
+    cuttingActPrVal?: boolean
+    cuttingVendorPrVal?: boolean
+    cuttingFinalPrVal?: boolean
+    stitchingBgtPrVal?: boolean
+    stitchingActPrVal?: boolean
+    stitchingVendorPrVal?: boolean
+    stitchingFinalPrVal?: boolean
+    ironingBgtPrVal?: boolean
+    ironingActPrVal?: boolean
+    ironingVendorPrVal?: boolean
+    ironingFinalPrVal?: boolean
+    finishingBgtPrVal?: boolean
+    finishingActPrVal?: boolean
+    finishingVendorPrVal?: boolean
+    finishingFinalPrVal?: boolean
     bodyArticle?: boolean
     bodyArticleDescription?: boolean
     fabricArticleNumber?: boolean
@@ -18844,6 +19036,22 @@ export namespace Prisma {
     preciseRatio?: boolean
     preciseConsumptionKg?: boolean
     preciseConsumptionMeter?: boolean
+    cuttingBgtPrVal?: boolean
+    cuttingActPrVal?: boolean
+    cuttingVendorPrVal?: boolean
+    cuttingFinalPrVal?: boolean
+    stitchingBgtPrVal?: boolean
+    stitchingActPrVal?: boolean
+    stitchingVendorPrVal?: boolean
+    stitchingFinalPrVal?: boolean
+    ironingBgtPrVal?: boolean
+    ironingActPrVal?: boolean
+    ironingVendorPrVal?: boolean
+    ironingFinalPrVal?: boolean
+    finishingBgtPrVal?: boolean
+    finishingActPrVal?: boolean
+    finishingVendorPrVal?: boolean
+    finishingFinalPrVal?: boolean
     bodyArticle?: boolean
     bodyArticleDescription?: boolean
     fabricArticleNumber?: boolean
@@ -18992,6 +19200,22 @@ export namespace Prisma {
     preciseRatio?: boolean
     preciseConsumptionKg?: boolean
     preciseConsumptionMeter?: boolean
+    cuttingBgtPrVal?: boolean
+    cuttingActPrVal?: boolean
+    cuttingVendorPrVal?: boolean
+    cuttingFinalPrVal?: boolean
+    stitchingBgtPrVal?: boolean
+    stitchingActPrVal?: boolean
+    stitchingVendorPrVal?: boolean
+    stitchingFinalPrVal?: boolean
+    ironingBgtPrVal?: boolean
+    ironingActPrVal?: boolean
+    ironingVendorPrVal?: boolean
+    ironingFinalPrVal?: boolean
+    finishingBgtPrVal?: boolean
+    finishingActPrVal?: boolean
+    finishingVendorPrVal?: boolean
+    finishingFinalPrVal?: boolean
     bodyArticle?: boolean
     bodyArticleDescription?: boolean
     fabricArticleNumber?: boolean
@@ -19140,6 +19364,22 @@ export namespace Prisma {
     preciseRatio?: boolean
     preciseConsumptionKg?: boolean
     preciseConsumptionMeter?: boolean
+    cuttingBgtPrVal?: boolean
+    cuttingActPrVal?: boolean
+    cuttingVendorPrVal?: boolean
+    cuttingFinalPrVal?: boolean
+    stitchingBgtPrVal?: boolean
+    stitchingActPrVal?: boolean
+    stitchingVendorPrVal?: boolean
+    stitchingFinalPrVal?: boolean
+    ironingBgtPrVal?: boolean
+    ironingActPrVal?: boolean
+    ironingVendorPrVal?: boolean
+    ironingFinalPrVal?: boolean
+    finishingBgtPrVal?: boolean
+    finishingActPrVal?: boolean
+    finishingVendorPrVal?: boolean
+    finishingFinalPrVal?: boolean
     bodyArticle?: boolean
     bodyArticleDescription?: boolean
     fabricArticleNumber?: boolean
@@ -19179,7 +19419,7 @@ export namespace Prisma {
     imageExtractionRawData?: boolean
   }
 
-  export type ExtractionResultFlatOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<"id" | "jobId" | "imageName" | "imageUrl" | "articleNumber" | "extractionStatus" | "aiModel" | "avgConfidence" | "processingTimeMs" | "totalAttributes" | "extractedCount" | "inputTokens" | "outputTokens" | "totalTokens" | "apiCost" | "userId" | "userName" | "extractionDate" | "createdAt" | "updatedAt" | "majorCategory" | "vendorName" | "designNumber" | "pptNumber" | "rate" | "size" | "yarn1" | "yarn2" | "fabricMainMvgr" | "weave" | "weaveFullForm" | "composition" | "finish" | "gsm" | "macroMvgr" | "macroMvgrFullForm" | "mainMvgr" | "mainMvgrFullForm" | "mFab2" | "mFab2FullForm" | "shade" | "weight" | "lycra" | "neck" | "neckDetails" | "collar" | "placket" | "sleeve" | "bottomFold" | "frontOpenStyle" | "pocketType" | "fit" | "pattern" | "length" | "colour" | "secondaryColour" | "drawcord" | "button" | "zipper" | "zipColour" | "printType" | "printStyle" | "printPlacement" | "patches" | "patchesType" | "embroidery" | "embroideryType" | "wash" | "fatherBelt" | "childBelt" | "division" | "subDivision" | "referenceArticleNumber" | "referenceArticleDescription" | "collarStyle" | "sleeveFold" | "mSet" | "noOfPocket" | "extraPocket" | "dcShape" | "btnColour" | "fCount" | "fConstruction" | "fOunce" | "fWidth" | "fabDiv" | "fabVdr" | "htrfType" | "htrfStyle" | "embPlacement" | "ageGroup" | "mNoOfSize" | "mNoOfClr" | "articleFashionType" | "articleDimension" | "fabCost" | "autoBgt" | "roughV2" | "vendorFabricRate" | "finalCost" | "roughRatio" | "roughConsumptionKg" | "roughConsumptionMeter" | "preciseRatio" | "preciseConsumptionKg" | "preciseConsumptionMeter" | "bodyArticle" | "bodyArticleDescription" | "fabricArticleNumber" | "fabricArticleDescription" | "attrArticleNums" | "mvgrBrandVendor" | "mcDescription" | "vendorCode" | "mrp" | "impAtrbt2" | "mcCode" | "segment" | "season" | "hsnTaxCode" | "articleDescription" | "fashionGrid" | "year" | "articleType" | "presentationsType" | "approvalStatus" | "pdStatus" | "approvedBy" | "approvedAt" | "source" | "imageUncPath" | "isOldArticle" | "isGeneric" | "genericArticleId" | "variantSize" | "variantColor" | "variantWeight" | "sapSyncStatus" | "sapArticleId" | "sapSyncMessage" | "srmOriginalDesignNumber" | "srmUniqueId" | "imageExtractionRawData", ExtArgs["result"]["extractionResultFlat"]>
+  export type ExtractionResultFlatOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<"id" | "jobId" | "imageName" | "imageUrl" | "articleNumber" | "extractionStatus" | "aiModel" | "avgConfidence" | "processingTimeMs" | "totalAttributes" | "extractedCount" | "inputTokens" | "outputTokens" | "totalTokens" | "apiCost" | "userId" | "userName" | "extractionDate" | "createdAt" | "updatedAt" | "majorCategory" | "vendorName" | "designNumber" | "pptNumber" | "rate" | "size" | "yarn1" | "yarn2" | "fabricMainMvgr" | "weave" | "weaveFullForm" | "composition" | "finish" | "gsm" | "macroMvgr" | "macroMvgrFullForm" | "mainMvgr" | "mainMvgrFullForm" | "mFab2" | "mFab2FullForm" | "shade" | "weight" | "lycra" | "neck" | "neckDetails" | "collar" | "placket" | "sleeve" | "bottomFold" | "frontOpenStyle" | "pocketType" | "fit" | "pattern" | "length" | "colour" | "secondaryColour" | "drawcord" | "button" | "zipper" | "zipColour" | "printType" | "printStyle" | "printPlacement" | "patches" | "patchesType" | "embroidery" | "embroideryType" | "wash" | "fatherBelt" | "childBelt" | "division" | "subDivision" | "referenceArticleNumber" | "referenceArticleDescription" | "collarStyle" | "sleeveFold" | "mSet" | "noOfPocket" | "extraPocket" | "dcShape" | "btnColour" | "fCount" | "fConstruction" | "fOunce" | "fWidth" | "fabDiv" | "fabVdr" | "htrfType" | "htrfStyle" | "embPlacement" | "ageGroup" | "mNoOfSize" | "mNoOfClr" | "articleFashionType" | "articleDimension" | "fabCost" | "autoBgt" | "roughV2" | "vendorFabricRate" | "finalCost" | "roughRatio" | "roughConsumptionKg" | "roughConsumptionMeter" | "preciseRatio" | "preciseConsumptionKg" | "preciseConsumptionMeter" | "cuttingBgtPrVal" | "cuttingActPrVal" | "cuttingVendorPrVal" | "cuttingFinalPrVal" | "stitchingBgtPrVal" | "stitchingActPrVal" | "stitchingVendorPrVal" | "stitchingFinalPrVal" | "ironingBgtPrVal" | "ironingActPrVal" | "ironingVendorPrVal" | "ironingFinalPrVal" | "finishingBgtPrVal" | "finishingActPrVal" | "finishingVendorPrVal" | "finishingFinalPrVal" | "bodyArticle" | "bodyArticleDescription" | "fabricArticleNumber" | "fabricArticleDescription" | "attrArticleNums" | "mvgrBrandVendor" | "mcDescription" | "vendorCode" | "mrp" | "impAtrbt2" | "mcCode" | "segment" | "season" | "hsnTaxCode" | "articleDescription" | "fashionGrid" | "year" | "articleType" | "presentationsType" | "approvalStatus" | "pdStatus" | "approvedBy" | "approvedAt" | "source" | "imageUncPath" | "isOldArticle" | "isGeneric" | "genericArticleId" | "variantSize" | "variantColor" | "variantWeight" | "sapSyncStatus" | "sapArticleId" | "sapSyncMessage" | "srmOriginalDesignNumber" | "srmUniqueId" | "imageExtractionRawData", ExtArgs["result"]["extractionResultFlat"]>
   export type ExtractionResultFlatInclude<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
     approver?: boolean | ExtractionResultFlat$approverArgs<ExtArgs>
     job?: boolean | ExtractionResultFlat$jobArgs<ExtArgs>
@@ -19309,6 +19549,22 @@ export namespace Prisma {
       preciseRatio: Prisma.Decimal | null
       preciseConsumptionKg: Prisma.Decimal | null
       preciseConsumptionMeter: Prisma.Decimal | null
+      cuttingBgtPrVal: Prisma.Decimal | null
+      cuttingActPrVal: Prisma.Decimal | null
+      cuttingVendorPrVal: Prisma.Decimal | null
+      cuttingFinalPrVal: Prisma.Decimal | null
+      stitchingBgtPrVal: Prisma.Decimal | null
+      stitchingActPrVal: Prisma.Decimal | null
+      stitchingVendorPrVal: Prisma.Decimal | null
+      stitchingFinalPrVal: Prisma.Decimal | null
+      ironingBgtPrVal: Prisma.Decimal | null
+      ironingActPrVal: Prisma.Decimal | null
+      ironingVendorPrVal: Prisma.Decimal | null
+      ironingFinalPrVal: Prisma.Decimal | null
+      finishingBgtPrVal: Prisma.Decimal | null
+      finishingActPrVal: Prisma.Decimal | null
+      finishingVendorPrVal: Prisma.Decimal | null
+      finishingFinalPrVal: Prisma.Decimal | null
       bodyArticle: string | null
       bodyArticleDescription: string | null
       fabricArticleNumber: string | null
@@ -19878,6 +20134,22 @@ export namespace Prisma {
     readonly preciseRatio: FieldRef<"ExtractionResultFlat", 'Decimal'>
     readonly preciseConsumptionKg: FieldRef<"ExtractionResultFlat", 'Decimal'>
     readonly preciseConsumptionMeter: FieldRef<"ExtractionResultFlat", 'Decimal'>
+    readonly cuttingBgtPrVal: FieldRef<"ExtractionResultFlat", 'Decimal'>
+    readonly cuttingActPrVal: FieldRef<"ExtractionResultFlat", 'Decimal'>
+    readonly cuttingVendorPrVal: FieldRef<"ExtractionResultFlat", 'Decimal'>
+    readonly cuttingFinalPrVal: FieldRef<"ExtractionResultFlat", 'Decimal'>
+    readonly stitchingBgtPrVal: FieldRef<"ExtractionResultFlat", 'Decimal'>
+    readonly stitchingActPrVal: FieldRef<"ExtractionResultFlat", 'Decimal'>
+    readonly stitchingVendorPrVal: FieldRef<"ExtractionResultFlat", 'Decimal'>
+    readonly stitchingFinalPrVal: FieldRef<"ExtractionResultFlat", 'Decimal'>
+    readonly ironingBgtPrVal: FieldRef<"ExtractionResultFlat", 'Decimal'>
+    readonly ironingActPrVal: FieldRef<"ExtractionResultFlat", 'Decimal'>
+    readonly ironingVendorPrVal: FieldRef<"ExtractionResultFlat", 'Decimal'>
+    readonly ironingFinalPrVal: FieldRef<"ExtractionResultFlat", 'Decimal'>
+    readonly finishingBgtPrVal: FieldRef<"ExtractionResultFlat", 'Decimal'>
+    readonly finishingActPrVal: FieldRef<"ExtractionResultFlat", 'Decimal'>
+    readonly finishingVendorPrVal: FieldRef<"ExtractionResultFlat", 'Decimal'>
+    readonly finishingFinalPrVal: FieldRef<"ExtractionResultFlat", 'Decimal'>
     readonly bodyArticle: FieldRef<"ExtractionResultFlat", 'String'>
     readonly bodyArticleDescription: FieldRef<"ExtractionResultFlat", 'String'>
     readonly fabricArticleNumber: FieldRef<"ExtractionResultFlat", 'String'>
@@ -90208,6 +90480,22 @@ export namespace Prisma {
     preciseRatio: 'preciseRatio',
     preciseConsumptionKg: 'preciseConsumptionKg',
     preciseConsumptionMeter: 'preciseConsumptionMeter',
+    cuttingBgtPrVal: 'cuttingBgtPrVal',
+    cuttingActPrVal: 'cuttingActPrVal',
+    cuttingVendorPrVal: 'cuttingVendorPrVal',
+    cuttingFinalPrVal: 'cuttingFinalPrVal',
+    stitchingBgtPrVal: 'stitchingBgtPrVal',
+    stitchingActPrVal: 'stitchingActPrVal',
+    stitchingVendorPrVal: 'stitchingVendorPrVal',
+    stitchingFinalPrVal: 'stitchingFinalPrVal',
+    ironingBgtPrVal: 'ironingBgtPrVal',
+    ironingActPrVal: 'ironingActPrVal',
+    ironingVendorPrVal: 'ironingVendorPrVal',
+    ironingFinalPrVal: 'ironingFinalPrVal',
+    finishingBgtPrVal: 'finishingBgtPrVal',
+    finishingActPrVal: 'finishingActPrVal',
+    finishingVendorPrVal: 'finishingVendorPrVal',
+    finishingFinalPrVal: 'finishingFinalPrVal',
     bodyArticle: 'bodyArticle',
     bodyArticleDescription: 'bodyArticleDescription',
     fabricArticleNumber: 'fabricArticleNumber',
@@ -94226,6 +94514,22 @@ export namespace Prisma {
     preciseRatio?: DecimalNullableFilter<"ExtractionResultFlat"> | Decimal | DecimalJsLike | number | string | null
     preciseConsumptionKg?: DecimalNullableFilter<"ExtractionResultFlat"> | Decimal | DecimalJsLike | number | string | null
     preciseConsumptionMeter?: DecimalNullableFilter<"ExtractionResultFlat"> | Decimal | DecimalJsLike | number | string | null
+    cuttingBgtPrVal?: DecimalNullableFilter<"ExtractionResultFlat"> | Decimal | DecimalJsLike | number | string | null
+    cuttingActPrVal?: DecimalNullableFilter<"ExtractionResultFlat"> | Decimal | DecimalJsLike | number | string | null
+    cuttingVendorPrVal?: DecimalNullableFilter<"ExtractionResultFlat"> | Decimal | DecimalJsLike | number | string | null
+    cuttingFinalPrVal?: DecimalNullableFilter<"ExtractionResultFlat"> | Decimal | DecimalJsLike | number | string | null
+    stitchingBgtPrVal?: DecimalNullableFilter<"ExtractionResultFlat"> | Decimal | DecimalJsLike | number | string | null
+    stitchingActPrVal?: DecimalNullableFilter<"ExtractionResultFlat"> | Decimal | DecimalJsLike | number | string | null
+    stitchingVendorPrVal?: DecimalNullableFilter<"ExtractionResultFlat"> | Decimal | DecimalJsLike | number | string | null
+    stitchingFinalPrVal?: DecimalNullableFilter<"ExtractionResultFlat"> | Decimal | DecimalJsLike | number | string | null
+    ironingBgtPrVal?: DecimalNullableFilter<"ExtractionResultFlat"> | Decimal | DecimalJsLike | number | string | null
+    ironingActPrVal?: DecimalNullableFilter<"ExtractionResultFlat"> | Decimal | DecimalJsLike | number | string | null
+    ironingVendorPrVal?: DecimalNullableFilter<"ExtractionResultFlat"> | Decimal | DecimalJsLike | number | string | null
+    ironingFinalPrVal?: DecimalNullableFilter<"ExtractionResultFlat"> | Decimal | DecimalJsLike | number | string | null
+    finishingBgtPrVal?: DecimalNullableFilter<"ExtractionResultFlat"> | Decimal | DecimalJsLike | number | string | null
+    finishingActPrVal?: DecimalNullableFilter<"ExtractionResultFlat"> | Decimal | DecimalJsLike | number | string | null
+    finishingVendorPrVal?: DecimalNullableFilter<"ExtractionResultFlat"> | Decimal | DecimalJsLike | number | string | null
+    finishingFinalPrVal?: DecimalNullableFilter<"ExtractionResultFlat"> | Decimal | DecimalJsLike | number | string | null
     bodyArticle?: StringNullableFilter<"ExtractionResultFlat"> | string | null
     bodyArticleDescription?: StringNullableFilter<"ExtractionResultFlat"> | string | null
     fabricArticleNumber?: StringNullableFilter<"ExtractionResultFlat"> | string | null
@@ -94375,6 +94679,22 @@ export namespace Prisma {
     preciseRatio?: SortOrderInput | SortOrder
     preciseConsumptionKg?: SortOrderInput | SortOrder
     preciseConsumptionMeter?: SortOrderInput | SortOrder
+    cuttingBgtPrVal?: SortOrderInput | SortOrder
+    cuttingActPrVal?: SortOrderInput | SortOrder
+    cuttingVendorPrVal?: SortOrderInput | SortOrder
+    cuttingFinalPrVal?: SortOrderInput | SortOrder
+    stitchingBgtPrVal?: SortOrderInput | SortOrder
+    stitchingActPrVal?: SortOrderInput | SortOrder
+    stitchingVendorPrVal?: SortOrderInput | SortOrder
+    stitchingFinalPrVal?: SortOrderInput | SortOrder
+    ironingBgtPrVal?: SortOrderInput | SortOrder
+    ironingActPrVal?: SortOrderInput | SortOrder
+    ironingVendorPrVal?: SortOrderInput | SortOrder
+    ironingFinalPrVal?: SortOrderInput | SortOrder
+    finishingBgtPrVal?: SortOrderInput | SortOrder
+    finishingActPrVal?: SortOrderInput | SortOrder
+    finishingVendorPrVal?: SortOrderInput | SortOrder
+    finishingFinalPrVal?: SortOrderInput | SortOrder
     bodyArticle?: SortOrderInput | SortOrder
     bodyArticleDescription?: SortOrderInput | SortOrder
     fabricArticleNumber?: SortOrderInput | SortOrder
@@ -94529,6 +94849,22 @@ export namespace Prisma {
     preciseRatio?: DecimalNullableFilter<"ExtractionResultFlat"> | Decimal | DecimalJsLike | number | string | null
     preciseConsumptionKg?: DecimalNullableFilter<"ExtractionResultFlat"> | Decimal | DecimalJsLike | number | string | null
     preciseConsumptionMeter?: DecimalNullableFilter<"ExtractionResultFlat"> | Decimal | DecimalJsLike | number | string | null
+    cuttingBgtPrVal?: DecimalNullableFilter<"ExtractionResultFlat"> | Decimal | DecimalJsLike | number | string | null
+    cuttingActPrVal?: DecimalNullableFilter<"ExtractionResultFlat"> | Decimal | DecimalJsLike | number | string | null
+    cuttingVendorPrVal?: DecimalNullableFilter<"ExtractionResultFlat"> | Decimal | DecimalJsLike | number | string | null
+    cuttingFinalPrVal?: DecimalNullableFilter<"ExtractionResultFlat"> | Decimal | DecimalJsLike | number | string | null
+    stitchingBgtPrVal?: DecimalNullableFilter<"ExtractionResultFlat"> | Decimal | DecimalJsLike | number | string | null
+    stitchingActPrVal?: DecimalNullableFilter<"ExtractionResultFlat"> | Decimal | DecimalJsLike | number | string | null
+    stitchingVendorPrVal?: DecimalNullableFilter<"ExtractionResultFlat"> | Decimal | DecimalJsLike | number | string | null
+    stitchingFinalPrVal?: DecimalNullableFilter<"ExtractionResultFlat"> | Decimal | DecimalJsLike | number | string | null
+    ironingBgtPrVal?: DecimalNullableFilter<"ExtractionResultFlat"> | Decimal | DecimalJsLike | number | string | null
+    ironingActPrVal?: DecimalNullableFilter<"ExtractionResultFlat"> | Decimal | DecimalJsLike | number | string | null
+    ironingVendorPrVal?: DecimalNullableFilter<"ExtractionResultFlat"> | Decimal | DecimalJsLike | number | string | null
+    ironingFinalPrVal?: DecimalNullableFilter<"ExtractionResultFlat"> | Decimal | DecimalJsLike | number | string | null
+    finishingBgtPrVal?: DecimalNullableFilter<"ExtractionResultFlat"> | Decimal | DecimalJsLike | number | string | null
+    finishingActPrVal?: DecimalNullableFilter<"ExtractionResultFlat"> | Decimal | DecimalJsLike | number | string | null
+    finishingVendorPrVal?: DecimalNullableFilter<"ExtractionResultFlat"> | Decimal | DecimalJsLike | number | string | null
+    finishingFinalPrVal?: DecimalNullableFilter<"ExtractionResultFlat"> | Decimal | DecimalJsLike | number | string | null
     bodyArticle?: StringNullableFilter<"ExtractionResultFlat"> | string | null
     bodyArticleDescription?: StringNullableFilter<"ExtractionResultFlat"> | string | null
     fabricArticleNumber?: StringNullableFilter<"ExtractionResultFlat"> | string | null
@@ -94677,6 +95013,22 @@ export namespace Prisma {
     preciseRatio?: SortOrderInput | SortOrder
     preciseConsumptionKg?: SortOrderInput | SortOrder
     preciseConsumptionMeter?: SortOrderInput | SortOrder
+    cuttingBgtPrVal?: SortOrderInput | SortOrder
+    cuttingActPrVal?: SortOrderInput | SortOrder
+    cuttingVendorPrVal?: SortOrderInput | SortOrder
+    cuttingFinalPrVal?: SortOrderInput | SortOrder
+    stitchingBgtPrVal?: SortOrderInput | SortOrder
+    stitchingActPrVal?: SortOrderInput | SortOrder
+    stitchingVendorPrVal?: SortOrderInput | SortOrder
+    stitchingFinalPrVal?: SortOrderInput | SortOrder
+    ironingBgtPrVal?: SortOrderInput | SortOrder
+    ironingActPrVal?: SortOrderInput | SortOrder
+    ironingVendorPrVal?: SortOrderInput | SortOrder
+    ironingFinalPrVal?: SortOrderInput | SortOrder
+    finishingBgtPrVal?: SortOrderInput | SortOrder
+    finishingActPrVal?: SortOrderInput | SortOrder
+    finishingVendorPrVal?: SortOrderInput | SortOrder
+    finishingFinalPrVal?: SortOrderInput | SortOrder
     bodyArticle?: SortOrderInput | SortOrder
     bodyArticleDescription?: SortOrderInput | SortOrder
     fabricArticleNumber?: SortOrderInput | SortOrder
@@ -94831,6 +95183,22 @@ export namespace Prisma {
     preciseRatio?: DecimalNullableWithAggregatesFilter<"ExtractionResultFlat"> | Decimal | DecimalJsLike | number | string | null
     preciseConsumptionKg?: DecimalNullableWithAggregatesFilter<"ExtractionResultFlat"> | Decimal | DecimalJsLike | number | string | null
     preciseConsumptionMeter?: DecimalNullableWithAggregatesFilter<"ExtractionResultFlat"> | Decimal | DecimalJsLike | number | string | null
+    cuttingBgtPrVal?: DecimalNullableWithAggregatesFilter<"ExtractionResultFlat"> | Decimal | DecimalJsLike | number | string | null
+    cuttingActPrVal?: DecimalNullableWithAggregatesFilter<"ExtractionResultFlat"> | Decimal | DecimalJsLike | number | string | null
+    cuttingVendorPrVal?: DecimalNullableWithAggregatesFilter<"ExtractionResultFlat"> | Decimal | DecimalJsLike | number | string | null
+    cuttingFinalPrVal?: DecimalNullableWithAggregatesFilter<"ExtractionResultFlat"> | Decimal | DecimalJsLike | number | string | null
+    stitchingBgtPrVal?: DecimalNullableWithAggregatesFilter<"ExtractionResultFlat"> | Decimal | DecimalJsLike | number | string | null
+    stitchingActPrVal?: DecimalNullableWithAggregatesFilter<"ExtractionResultFlat"> | Decimal | DecimalJsLike | number | string | null
+    stitchingVendorPrVal?: DecimalNullableWithAggregatesFilter<"ExtractionResultFlat"> | Decimal | DecimalJsLike | number | string | null
+    stitchingFinalPrVal?: DecimalNullableWithAggregatesFilter<"ExtractionResultFlat"> | Decimal | DecimalJsLike | number | string | null
+    ironingBgtPrVal?: DecimalNullableWithAggregatesFilter<"ExtractionResultFlat"> | Decimal | DecimalJsLike | number | string | null
+    ironingActPrVal?: DecimalNullableWithAggregatesFilter<"ExtractionResultFlat"> | Decimal | DecimalJsLike | number | string | null
+    ironingVendorPrVal?: DecimalNullableWithAggregatesFilter<"ExtractionResultFlat"> | Decimal | DecimalJsLike | number | string | null
+    ironingFinalPrVal?: DecimalNullableWithAggregatesFilter<"ExtractionResultFlat"> | Decimal | DecimalJsLike | number | string | null
+    finishingBgtPrVal?: DecimalNullableWithAggregatesFilter<"ExtractionResultFlat"> | Decimal | DecimalJsLike | number | string | null
+    finishingActPrVal?: DecimalNullableWithAggregatesFilter<"ExtractionResultFlat"> | Decimal | DecimalJsLike | number | string | null
+    finishingVendorPrVal?: DecimalNullableWithAggregatesFilter<"ExtractionResultFlat"> | Decimal | DecimalJsLike | number | string | null
+    finishingFinalPrVal?: DecimalNullableWithAggregatesFilter<"ExtractionResultFlat"> | Decimal | DecimalJsLike | number | string | null
     bodyArticle?: StringNullableWithAggregatesFilter<"ExtractionResultFlat"> | string | null
     bodyArticleDescription?: StringNullableWithAggregatesFilter<"ExtractionResultFlat"> | string | null
     fabricArticleNumber?: StringNullableWithAggregatesFilter<"ExtractionResultFlat"> | string | null
@@ -103188,6 +103556,22 @@ export namespace Prisma {
     preciseRatio?: Decimal | DecimalJsLike | number | string | null
     preciseConsumptionKg?: Decimal | DecimalJsLike | number | string | null
     preciseConsumptionMeter?: Decimal | DecimalJsLike | number | string | null
+    cuttingBgtPrVal?: Decimal | DecimalJsLike | number | string | null
+    cuttingActPrVal?: Decimal | DecimalJsLike | number | string | null
+    cuttingVendorPrVal?: Decimal | DecimalJsLike | number | string | null
+    cuttingFinalPrVal?: Decimal | DecimalJsLike | number | string | null
+    stitchingBgtPrVal?: Decimal | DecimalJsLike | number | string | null
+    stitchingActPrVal?: Decimal | DecimalJsLike | number | string | null
+    stitchingVendorPrVal?: Decimal | DecimalJsLike | number | string | null
+    stitchingFinalPrVal?: Decimal | DecimalJsLike | number | string | null
+    ironingBgtPrVal?: Decimal | DecimalJsLike | number | string | null
+    ironingActPrVal?: Decimal | DecimalJsLike | number | string | null
+    ironingVendorPrVal?: Decimal | DecimalJsLike | number | string | null
+    ironingFinalPrVal?: Decimal | DecimalJsLike | number | string | null
+    finishingBgtPrVal?: Decimal | DecimalJsLike | number | string | null
+    finishingActPrVal?: Decimal | DecimalJsLike | number | string | null
+    finishingVendorPrVal?: Decimal | DecimalJsLike | number | string | null
+    finishingFinalPrVal?: Decimal | DecimalJsLike | number | string | null
     bodyArticle?: string | null
     bodyArticleDescription?: string | null
     fabricArticleNumber?: string | null
@@ -103336,6 +103720,22 @@ export namespace Prisma {
     preciseRatio?: Decimal | DecimalJsLike | number | string | null
     preciseConsumptionKg?: Decimal | DecimalJsLike | number | string | null
     preciseConsumptionMeter?: Decimal | DecimalJsLike | number | string | null
+    cuttingBgtPrVal?: Decimal | DecimalJsLike | number | string | null
+    cuttingActPrVal?: Decimal | DecimalJsLike | number | string | null
+    cuttingVendorPrVal?: Decimal | DecimalJsLike | number | string | null
+    cuttingFinalPrVal?: Decimal | DecimalJsLike | number | string | null
+    stitchingBgtPrVal?: Decimal | DecimalJsLike | number | string | null
+    stitchingActPrVal?: Decimal | DecimalJsLike | number | string | null
+    stitchingVendorPrVal?: Decimal | DecimalJsLike | number | string | null
+    stitchingFinalPrVal?: Decimal | DecimalJsLike | number | string | null
+    ironingBgtPrVal?: Decimal | DecimalJsLike | number | string | null
+    ironingActPrVal?: Decimal | DecimalJsLike | number | string | null
+    ironingVendorPrVal?: Decimal | DecimalJsLike | number | string | null
+    ironingFinalPrVal?: Decimal | DecimalJsLike | number | string | null
+    finishingBgtPrVal?: Decimal | DecimalJsLike | number | string | null
+    finishingActPrVal?: Decimal | DecimalJsLike | number | string | null
+    finishingVendorPrVal?: Decimal | DecimalJsLike | number | string | null
+    finishingFinalPrVal?: Decimal | DecimalJsLike | number | string | null
     bodyArticle?: string | null
     bodyArticleDescription?: string | null
     fabricArticleNumber?: string | null
@@ -103482,6 +103882,22 @@ export namespace Prisma {
     preciseRatio?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
     preciseConsumptionKg?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
     preciseConsumptionMeter?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    cuttingBgtPrVal?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    cuttingActPrVal?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    cuttingVendorPrVal?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    cuttingFinalPrVal?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    stitchingBgtPrVal?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    stitchingActPrVal?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    stitchingVendorPrVal?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    stitchingFinalPrVal?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    ironingBgtPrVal?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    ironingActPrVal?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    ironingVendorPrVal?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    ironingFinalPrVal?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    finishingBgtPrVal?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    finishingActPrVal?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    finishingVendorPrVal?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    finishingFinalPrVal?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
     bodyArticle?: NullableStringFieldUpdateOperationsInput | string | null
     bodyArticleDescription?: NullableStringFieldUpdateOperationsInput | string | null
     fabricArticleNumber?: NullableStringFieldUpdateOperationsInput | string | null
@@ -103630,6 +104046,22 @@ export namespace Prisma {
     preciseRatio?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
     preciseConsumptionKg?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
     preciseConsumptionMeter?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    cuttingBgtPrVal?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    cuttingActPrVal?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    cuttingVendorPrVal?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    cuttingFinalPrVal?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    stitchingBgtPrVal?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    stitchingActPrVal?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    stitchingVendorPrVal?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    stitchingFinalPrVal?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    ironingBgtPrVal?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    ironingActPrVal?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    ironingVendorPrVal?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    ironingFinalPrVal?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    finishingBgtPrVal?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    finishingActPrVal?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    finishingVendorPrVal?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    finishingFinalPrVal?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
     bodyArticle?: NullableStringFieldUpdateOperationsInput | string | null
     bodyArticleDescription?: NullableStringFieldUpdateOperationsInput | string | null
     fabricArticleNumber?: NullableStringFieldUpdateOperationsInput | string | null
@@ -103777,6 +104209,22 @@ export namespace Prisma {
     preciseRatio?: Decimal | DecimalJsLike | number | string | null
     preciseConsumptionKg?: Decimal | DecimalJsLike | number | string | null
     preciseConsumptionMeter?: Decimal | DecimalJsLike | number | string | null
+    cuttingBgtPrVal?: Decimal | DecimalJsLike | number | string | null
+    cuttingActPrVal?: Decimal | DecimalJsLike | number | string | null
+    cuttingVendorPrVal?: Decimal | DecimalJsLike | number | string | null
+    cuttingFinalPrVal?: Decimal | DecimalJsLike | number | string | null
+    stitchingBgtPrVal?: Decimal | DecimalJsLike | number | string | null
+    stitchingActPrVal?: Decimal | DecimalJsLike | number | string | null
+    stitchingVendorPrVal?: Decimal | DecimalJsLike | number | string | null
+    stitchingFinalPrVal?: Decimal | DecimalJsLike | number | string | null
+    ironingBgtPrVal?: Decimal | DecimalJsLike | number | string | null
+    ironingActPrVal?: Decimal | DecimalJsLike | number | string | null
+    ironingVendorPrVal?: Decimal | DecimalJsLike | number | string | null
+    ironingFinalPrVal?: Decimal | DecimalJsLike | number | string | null
+    finishingBgtPrVal?: Decimal | DecimalJsLike | number | string | null
+    finishingActPrVal?: Decimal | DecimalJsLike | number | string | null
+    finishingVendorPrVal?: Decimal | DecimalJsLike | number | string | null
+    finishingFinalPrVal?: Decimal | DecimalJsLike | number | string | null
     bodyArticle?: string | null
     bodyArticleDescription?: string | null
     fabricArticleNumber?: string | null
@@ -103922,6 +104370,22 @@ export namespace Prisma {
     preciseRatio?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
     preciseConsumptionKg?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
     preciseConsumptionMeter?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    cuttingBgtPrVal?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    cuttingActPrVal?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    cuttingVendorPrVal?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    cuttingFinalPrVal?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    stitchingBgtPrVal?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    stitchingActPrVal?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    stitchingVendorPrVal?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    stitchingFinalPrVal?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    ironingBgtPrVal?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    ironingActPrVal?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    ironingVendorPrVal?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    ironingFinalPrVal?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    finishingBgtPrVal?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    finishingActPrVal?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    finishingVendorPrVal?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    finishingFinalPrVal?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
     bodyArticle?: NullableStringFieldUpdateOperationsInput | string | null
     bodyArticleDescription?: NullableStringFieldUpdateOperationsInput | string | null
     fabricArticleNumber?: NullableStringFieldUpdateOperationsInput | string | null
@@ -104067,6 +104531,22 @@ export namespace Prisma {
     preciseRatio?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
     preciseConsumptionKg?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
     preciseConsumptionMeter?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    cuttingBgtPrVal?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    cuttingActPrVal?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    cuttingVendorPrVal?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    cuttingFinalPrVal?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    stitchingBgtPrVal?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    stitchingActPrVal?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    stitchingVendorPrVal?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    stitchingFinalPrVal?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    ironingBgtPrVal?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    ironingActPrVal?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    ironingVendorPrVal?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    ironingFinalPrVal?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    finishingBgtPrVal?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    finishingActPrVal?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    finishingVendorPrVal?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    finishingFinalPrVal?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
     bodyArticle?: NullableStringFieldUpdateOperationsInput | string | null
     bodyArticleDescription?: NullableStringFieldUpdateOperationsInput | string | null
     fabricArticleNumber?: NullableStringFieldUpdateOperationsInput | string | null
@@ -114157,6 +114637,22 @@ export namespace Prisma {
     preciseRatio?: SortOrder
     preciseConsumptionKg?: SortOrder
     preciseConsumptionMeter?: SortOrder
+    cuttingBgtPrVal?: SortOrder
+    cuttingActPrVal?: SortOrder
+    cuttingVendorPrVal?: SortOrder
+    cuttingFinalPrVal?: SortOrder
+    stitchingBgtPrVal?: SortOrder
+    stitchingActPrVal?: SortOrder
+    stitchingVendorPrVal?: SortOrder
+    stitchingFinalPrVal?: SortOrder
+    ironingBgtPrVal?: SortOrder
+    ironingActPrVal?: SortOrder
+    ironingVendorPrVal?: SortOrder
+    ironingFinalPrVal?: SortOrder
+    finishingBgtPrVal?: SortOrder
+    finishingActPrVal?: SortOrder
+    finishingVendorPrVal?: SortOrder
+    finishingFinalPrVal?: SortOrder
     bodyArticle?: SortOrder
     bodyArticleDescription?: SortOrder
     fabricArticleNumber?: SortOrder
@@ -114218,6 +114714,22 @@ export namespace Prisma {
     preciseRatio?: SortOrder
     preciseConsumptionKg?: SortOrder
     preciseConsumptionMeter?: SortOrder
+    cuttingBgtPrVal?: SortOrder
+    cuttingActPrVal?: SortOrder
+    cuttingVendorPrVal?: SortOrder
+    cuttingFinalPrVal?: SortOrder
+    stitchingBgtPrVal?: SortOrder
+    stitchingActPrVal?: SortOrder
+    stitchingVendorPrVal?: SortOrder
+    stitchingFinalPrVal?: SortOrder
+    ironingBgtPrVal?: SortOrder
+    ironingActPrVal?: SortOrder
+    ironingVendorPrVal?: SortOrder
+    ironingFinalPrVal?: SortOrder
+    finishingBgtPrVal?: SortOrder
+    finishingActPrVal?: SortOrder
+    finishingVendorPrVal?: SortOrder
+    finishingFinalPrVal?: SortOrder
     mrp?: SortOrder
     approvedBy?: SortOrder
   }
@@ -114329,6 +114841,22 @@ export namespace Prisma {
     preciseRatio?: SortOrder
     preciseConsumptionKg?: SortOrder
     preciseConsumptionMeter?: SortOrder
+    cuttingBgtPrVal?: SortOrder
+    cuttingActPrVal?: SortOrder
+    cuttingVendorPrVal?: SortOrder
+    cuttingFinalPrVal?: SortOrder
+    stitchingBgtPrVal?: SortOrder
+    stitchingActPrVal?: SortOrder
+    stitchingVendorPrVal?: SortOrder
+    stitchingFinalPrVal?: SortOrder
+    ironingBgtPrVal?: SortOrder
+    ironingActPrVal?: SortOrder
+    ironingVendorPrVal?: SortOrder
+    ironingFinalPrVal?: SortOrder
+    finishingBgtPrVal?: SortOrder
+    finishingActPrVal?: SortOrder
+    finishingVendorPrVal?: SortOrder
+    finishingFinalPrVal?: SortOrder
     bodyArticle?: SortOrder
     bodyArticleDescription?: SortOrder
     fabricArticleNumber?: SortOrder
@@ -114474,6 +115002,22 @@ export namespace Prisma {
     preciseRatio?: SortOrder
     preciseConsumptionKg?: SortOrder
     preciseConsumptionMeter?: SortOrder
+    cuttingBgtPrVal?: SortOrder
+    cuttingActPrVal?: SortOrder
+    cuttingVendorPrVal?: SortOrder
+    cuttingFinalPrVal?: SortOrder
+    stitchingBgtPrVal?: SortOrder
+    stitchingActPrVal?: SortOrder
+    stitchingVendorPrVal?: SortOrder
+    stitchingFinalPrVal?: SortOrder
+    ironingBgtPrVal?: SortOrder
+    ironingActPrVal?: SortOrder
+    ironingVendorPrVal?: SortOrder
+    ironingFinalPrVal?: SortOrder
+    finishingBgtPrVal?: SortOrder
+    finishingActPrVal?: SortOrder
+    finishingVendorPrVal?: SortOrder
+    finishingFinalPrVal?: SortOrder
     bodyArticle?: SortOrder
     bodyArticleDescription?: SortOrder
     fabricArticleNumber?: SortOrder
@@ -114534,6 +115078,22 @@ export namespace Prisma {
     preciseRatio?: SortOrder
     preciseConsumptionKg?: SortOrder
     preciseConsumptionMeter?: SortOrder
+    cuttingBgtPrVal?: SortOrder
+    cuttingActPrVal?: SortOrder
+    cuttingVendorPrVal?: SortOrder
+    cuttingFinalPrVal?: SortOrder
+    stitchingBgtPrVal?: SortOrder
+    stitchingActPrVal?: SortOrder
+    stitchingVendorPrVal?: SortOrder
+    stitchingFinalPrVal?: SortOrder
+    ironingBgtPrVal?: SortOrder
+    ironingActPrVal?: SortOrder
+    ironingVendorPrVal?: SortOrder
+    ironingFinalPrVal?: SortOrder
+    finishingBgtPrVal?: SortOrder
+    finishingActPrVal?: SortOrder
+    finishingVendorPrVal?: SortOrder
+    finishingFinalPrVal?: SortOrder
     mrp?: SortOrder
     approvedBy?: SortOrder
   }
@@ -123302,6 +123862,22 @@ export namespace Prisma {
     preciseRatio?: Decimal | DecimalJsLike | number | string | null
     preciseConsumptionKg?: Decimal | DecimalJsLike | number | string | null
     preciseConsumptionMeter?: Decimal | DecimalJsLike | number | string | null
+    cuttingBgtPrVal?: Decimal | DecimalJsLike | number | string | null
+    cuttingActPrVal?: Decimal | DecimalJsLike | number | string | null
+    cuttingVendorPrVal?: Decimal | DecimalJsLike | number | string | null
+    cuttingFinalPrVal?: Decimal | DecimalJsLike | number | string | null
+    stitchingBgtPrVal?: Decimal | DecimalJsLike | number | string | null
+    stitchingActPrVal?: Decimal | DecimalJsLike | number | string | null
+    stitchingVendorPrVal?: Decimal | DecimalJsLike | number | string | null
+    stitchingFinalPrVal?: Decimal | DecimalJsLike | number | string | null
+    ironingBgtPrVal?: Decimal | DecimalJsLike | number | string | null
+    ironingActPrVal?: Decimal | DecimalJsLike | number | string | null
+    ironingVendorPrVal?: Decimal | DecimalJsLike | number | string | null
+    ironingFinalPrVal?: Decimal | DecimalJsLike | number | string | null
+    finishingBgtPrVal?: Decimal | DecimalJsLike | number | string | null
+    finishingActPrVal?: Decimal | DecimalJsLike | number | string | null
+    finishingVendorPrVal?: Decimal | DecimalJsLike | number | string | null
+    finishingFinalPrVal?: Decimal | DecimalJsLike | number | string | null
     bodyArticle?: string | null
     bodyArticleDescription?: string | null
     fabricArticleNumber?: string | null
@@ -123448,6 +124024,22 @@ export namespace Prisma {
     preciseRatio?: Decimal | DecimalJsLike | number | string | null
     preciseConsumptionKg?: Decimal | DecimalJsLike | number | string | null
     preciseConsumptionMeter?: Decimal | DecimalJsLike | number | string | null
+    cuttingBgtPrVal?: Decimal | DecimalJsLike | number | string | null
+    cuttingActPrVal?: Decimal | DecimalJsLike | number | string | null
+    cuttingVendorPrVal?: Decimal | DecimalJsLike | number | string | null
+    cuttingFinalPrVal?: Decimal | DecimalJsLike | number | string | null
+    stitchingBgtPrVal?: Decimal | DecimalJsLike | number | string | null
+    stitchingActPrVal?: Decimal | DecimalJsLike | number | string | null
+    stitchingVendorPrVal?: Decimal | DecimalJsLike | number | string | null
+    stitchingFinalPrVal?: Decimal | DecimalJsLike | number | string | null
+    ironingBgtPrVal?: Decimal | DecimalJsLike | number | string | null
+    ironingActPrVal?: Decimal | DecimalJsLike | number | string | null
+    ironingVendorPrVal?: Decimal | DecimalJsLike | number | string | null
+    ironingFinalPrVal?: Decimal | DecimalJsLike | number | string | null
+    finishingBgtPrVal?: Decimal | DecimalJsLike | number | string | null
+    finishingActPrVal?: Decimal | DecimalJsLike | number | string | null
+    finishingVendorPrVal?: Decimal | DecimalJsLike | number | string | null
+    finishingFinalPrVal?: Decimal | DecimalJsLike | number | string | null
     bodyArticle?: string | null
     bodyArticleDescription?: string | null
     fabricArticleNumber?: string | null
@@ -123720,6 +124312,22 @@ export namespace Prisma {
     preciseRatio?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
     preciseConsumptionKg?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
     preciseConsumptionMeter?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    cuttingBgtPrVal?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    cuttingActPrVal?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    cuttingVendorPrVal?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    cuttingFinalPrVal?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    stitchingBgtPrVal?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    stitchingActPrVal?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    stitchingVendorPrVal?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    stitchingFinalPrVal?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    ironingBgtPrVal?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    ironingActPrVal?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    ironingVendorPrVal?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    ironingFinalPrVal?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    finishingBgtPrVal?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    finishingActPrVal?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    finishingVendorPrVal?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    finishingFinalPrVal?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
     bodyArticle?: NullableStringFieldUpdateOperationsInput | string | null
     bodyArticleDescription?: NullableStringFieldUpdateOperationsInput | string | null
     fabricArticleNumber?: NullableStringFieldUpdateOperationsInput | string | null
@@ -123866,6 +124474,22 @@ export namespace Prisma {
     preciseRatio?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
     preciseConsumptionKg?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
     preciseConsumptionMeter?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    cuttingBgtPrVal?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    cuttingActPrVal?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    cuttingVendorPrVal?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    cuttingFinalPrVal?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    stitchingBgtPrVal?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    stitchingActPrVal?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    stitchingVendorPrVal?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    stitchingFinalPrVal?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    ironingBgtPrVal?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    ironingActPrVal?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    ironingVendorPrVal?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    ironingFinalPrVal?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    finishingBgtPrVal?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    finishingActPrVal?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    finishingVendorPrVal?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    finishingFinalPrVal?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
     bodyArticle?: NullableStringFieldUpdateOperationsInput | string | null
     bodyArticleDescription?: NullableStringFieldUpdateOperationsInput | string | null
     fabricArticleNumber?: NullableStringFieldUpdateOperationsInput | string | null
@@ -124858,6 +125482,22 @@ export namespace Prisma {
     preciseRatio?: Decimal | DecimalJsLike | number | string | null
     preciseConsumptionKg?: Decimal | DecimalJsLike | number | string | null
     preciseConsumptionMeter?: Decimal | DecimalJsLike | number | string | null
+    cuttingBgtPrVal?: Decimal | DecimalJsLike | number | string | null
+    cuttingActPrVal?: Decimal | DecimalJsLike | number | string | null
+    cuttingVendorPrVal?: Decimal | DecimalJsLike | number | string | null
+    cuttingFinalPrVal?: Decimal | DecimalJsLike | number | string | null
+    stitchingBgtPrVal?: Decimal | DecimalJsLike | number | string | null
+    stitchingActPrVal?: Decimal | DecimalJsLike | number | string | null
+    stitchingVendorPrVal?: Decimal | DecimalJsLike | number | string | null
+    stitchingFinalPrVal?: Decimal | DecimalJsLike | number | string | null
+    ironingBgtPrVal?: Decimal | DecimalJsLike | number | string | null
+    ironingActPrVal?: Decimal | DecimalJsLike | number | string | null
+    ironingVendorPrVal?: Decimal | DecimalJsLike | number | string | null
+    ironingFinalPrVal?: Decimal | DecimalJsLike | number | string | null
+    finishingBgtPrVal?: Decimal | DecimalJsLike | number | string | null
+    finishingActPrVal?: Decimal | DecimalJsLike | number | string | null
+    finishingVendorPrVal?: Decimal | DecimalJsLike | number | string | null
+    finishingFinalPrVal?: Decimal | DecimalJsLike | number | string | null
     bodyArticle?: string | null
     bodyArticleDescription?: string | null
     fabricArticleNumber?: string | null
@@ -125005,6 +125645,22 @@ export namespace Prisma {
     preciseRatio?: Decimal | DecimalJsLike | number | string | null
     preciseConsumptionKg?: Decimal | DecimalJsLike | number | string | null
     preciseConsumptionMeter?: Decimal | DecimalJsLike | number | string | null
+    cuttingBgtPrVal?: Decimal | DecimalJsLike | number | string | null
+    cuttingActPrVal?: Decimal | DecimalJsLike | number | string | null
+    cuttingVendorPrVal?: Decimal | DecimalJsLike | number | string | null
+    cuttingFinalPrVal?: Decimal | DecimalJsLike | number | string | null
+    stitchingBgtPrVal?: Decimal | DecimalJsLike | number | string | null
+    stitchingActPrVal?: Decimal | DecimalJsLike | number | string | null
+    stitchingVendorPrVal?: Decimal | DecimalJsLike | number | string | null
+    stitchingFinalPrVal?: Decimal | DecimalJsLike | number | string | null
+    ironingBgtPrVal?: Decimal | DecimalJsLike | number | string | null
+    ironingActPrVal?: Decimal | DecimalJsLike | number | string | null
+    ironingVendorPrVal?: Decimal | DecimalJsLike | number | string | null
+    ironingFinalPrVal?: Decimal | DecimalJsLike | number | string | null
+    finishingBgtPrVal?: Decimal | DecimalJsLike | number | string | null
+    finishingActPrVal?: Decimal | DecimalJsLike | number | string | null
+    finishingVendorPrVal?: Decimal | DecimalJsLike | number | string | null
+    finishingFinalPrVal?: Decimal | DecimalJsLike | number | string | null
     bodyArticle?: string | null
     bodyArticleDescription?: string | null
     fabricArticleNumber?: string | null
@@ -125281,6 +125937,22 @@ export namespace Prisma {
     preciseRatio?: DecimalNullableFilter<"ExtractionResultFlat"> | Decimal | DecimalJsLike | number | string | null
     preciseConsumptionKg?: DecimalNullableFilter<"ExtractionResultFlat"> | Decimal | DecimalJsLike | number | string | null
     preciseConsumptionMeter?: DecimalNullableFilter<"ExtractionResultFlat"> | Decimal | DecimalJsLike | number | string | null
+    cuttingBgtPrVal?: DecimalNullableFilter<"ExtractionResultFlat"> | Decimal | DecimalJsLike | number | string | null
+    cuttingActPrVal?: DecimalNullableFilter<"ExtractionResultFlat"> | Decimal | DecimalJsLike | number | string | null
+    cuttingVendorPrVal?: DecimalNullableFilter<"ExtractionResultFlat"> | Decimal | DecimalJsLike | number | string | null
+    cuttingFinalPrVal?: DecimalNullableFilter<"ExtractionResultFlat"> | Decimal | DecimalJsLike | number | string | null
+    stitchingBgtPrVal?: DecimalNullableFilter<"ExtractionResultFlat"> | Decimal | DecimalJsLike | number | string | null
+    stitchingActPrVal?: DecimalNullableFilter<"ExtractionResultFlat"> | Decimal | DecimalJsLike | number | string | null
+    stitchingVendorPrVal?: DecimalNullableFilter<"ExtractionResultFlat"> | Decimal | DecimalJsLike | number | string | null
+    stitchingFinalPrVal?: DecimalNullableFilter<"ExtractionResultFlat"> | Decimal | DecimalJsLike | number | string | null
+    ironingBgtPrVal?: DecimalNullableFilter<"ExtractionResultFlat"> | Decimal | DecimalJsLike | number | string | null
+    ironingActPrVal?: DecimalNullableFilter<"ExtractionResultFlat"> | Decimal | DecimalJsLike | number | string | null
+    ironingVendorPrVal?: DecimalNullableFilter<"ExtractionResultFlat"> | Decimal | DecimalJsLike | number | string | null
+    ironingFinalPrVal?: DecimalNullableFilter<"ExtractionResultFlat"> | Decimal | DecimalJsLike | number | string | null
+    finishingBgtPrVal?: DecimalNullableFilter<"ExtractionResultFlat"> | Decimal | DecimalJsLike | number | string | null
+    finishingActPrVal?: DecimalNullableFilter<"ExtractionResultFlat"> | Decimal | DecimalJsLike | number | string | null
+    finishingVendorPrVal?: DecimalNullableFilter<"ExtractionResultFlat"> | Decimal | DecimalJsLike | number | string | null
+    finishingFinalPrVal?: DecimalNullableFilter<"ExtractionResultFlat"> | Decimal | DecimalJsLike | number | string | null
     bodyArticle?: StringNullableFilter<"ExtractionResultFlat"> | string | null
     bodyArticleDescription?: StringNullableFilter<"ExtractionResultFlat"> | string | null
     fabricArticleNumber?: StringNullableFilter<"ExtractionResultFlat"> | string | null
@@ -126853,6 +127525,22 @@ export namespace Prisma {
     preciseRatio?: Decimal | DecimalJsLike | number | string | null
     preciseConsumptionKg?: Decimal | DecimalJsLike | number | string | null
     preciseConsumptionMeter?: Decimal | DecimalJsLike | number | string | null
+    cuttingBgtPrVal?: Decimal | DecimalJsLike | number | string | null
+    cuttingActPrVal?: Decimal | DecimalJsLike | number | string | null
+    cuttingVendorPrVal?: Decimal | DecimalJsLike | number | string | null
+    cuttingFinalPrVal?: Decimal | DecimalJsLike | number | string | null
+    stitchingBgtPrVal?: Decimal | DecimalJsLike | number | string | null
+    stitchingActPrVal?: Decimal | DecimalJsLike | number | string | null
+    stitchingVendorPrVal?: Decimal | DecimalJsLike | number | string | null
+    stitchingFinalPrVal?: Decimal | DecimalJsLike | number | string | null
+    ironingBgtPrVal?: Decimal | DecimalJsLike | number | string | null
+    ironingActPrVal?: Decimal | DecimalJsLike | number | string | null
+    ironingVendorPrVal?: Decimal | DecimalJsLike | number | string | null
+    ironingFinalPrVal?: Decimal | DecimalJsLike | number | string | null
+    finishingBgtPrVal?: Decimal | DecimalJsLike | number | string | null
+    finishingActPrVal?: Decimal | DecimalJsLike | number | string | null
+    finishingVendorPrVal?: Decimal | DecimalJsLike | number | string | null
+    finishingFinalPrVal?: Decimal | DecimalJsLike | number | string | null
     bodyArticle?: string | null
     bodyArticleDescription?: string | null
     fabricArticleNumber?: string | null
@@ -127000,6 +127688,22 @@ export namespace Prisma {
     preciseRatio?: Decimal | DecimalJsLike | number | string | null
     preciseConsumptionKg?: Decimal | DecimalJsLike | number | string | null
     preciseConsumptionMeter?: Decimal | DecimalJsLike | number | string | null
+    cuttingBgtPrVal?: Decimal | DecimalJsLike | number | string | null
+    cuttingActPrVal?: Decimal | DecimalJsLike | number | string | null
+    cuttingVendorPrVal?: Decimal | DecimalJsLike | number | string | null
+    cuttingFinalPrVal?: Decimal | DecimalJsLike | number | string | null
+    stitchingBgtPrVal?: Decimal | DecimalJsLike | number | string | null
+    stitchingActPrVal?: Decimal | DecimalJsLike | number | string | null
+    stitchingVendorPrVal?: Decimal | DecimalJsLike | number | string | null
+    stitchingFinalPrVal?: Decimal | DecimalJsLike | number | string | null
+    ironingBgtPrVal?: Decimal | DecimalJsLike | number | string | null
+    ironingActPrVal?: Decimal | DecimalJsLike | number | string | null
+    ironingVendorPrVal?: Decimal | DecimalJsLike | number | string | null
+    ironingFinalPrVal?: Decimal | DecimalJsLike | number | string | null
+    finishingBgtPrVal?: Decimal | DecimalJsLike | number | string | null
+    finishingActPrVal?: Decimal | DecimalJsLike | number | string | null
+    finishingVendorPrVal?: Decimal | DecimalJsLike | number | string | null
+    finishingFinalPrVal?: Decimal | DecimalJsLike | number | string | null
     bodyArticle?: string | null
     bodyArticleDescription?: string | null
     fabricArticleNumber?: string | null
@@ -127198,6 +127902,22 @@ export namespace Prisma {
     preciseRatio?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
     preciseConsumptionKg?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
     preciseConsumptionMeter?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    cuttingBgtPrVal?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    cuttingActPrVal?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    cuttingVendorPrVal?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    cuttingFinalPrVal?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    stitchingBgtPrVal?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    stitchingActPrVal?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    stitchingVendorPrVal?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    stitchingFinalPrVal?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    ironingBgtPrVal?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    ironingActPrVal?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    ironingVendorPrVal?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    ironingFinalPrVal?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    finishingBgtPrVal?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    finishingActPrVal?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    finishingVendorPrVal?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    finishingFinalPrVal?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
     bodyArticle?: NullableStringFieldUpdateOperationsInput | string | null
     bodyArticleDescription?: NullableStringFieldUpdateOperationsInput | string | null
     fabricArticleNumber?: NullableStringFieldUpdateOperationsInput | string | null
@@ -127345,6 +128065,22 @@ export namespace Prisma {
     preciseRatio?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
     preciseConsumptionKg?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
     preciseConsumptionMeter?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    cuttingBgtPrVal?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    cuttingActPrVal?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    cuttingVendorPrVal?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    cuttingFinalPrVal?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    stitchingBgtPrVal?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    stitchingActPrVal?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    stitchingVendorPrVal?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    stitchingFinalPrVal?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    ironingBgtPrVal?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    ironingActPrVal?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    ironingVendorPrVal?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    ironingFinalPrVal?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    finishingBgtPrVal?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    finishingActPrVal?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    finishingVendorPrVal?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    finishingFinalPrVal?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
     bodyArticle?: NullableStringFieldUpdateOperationsInput | string | null
     bodyArticleDescription?: NullableStringFieldUpdateOperationsInput | string | null
     fabricArticleNumber?: NullableStringFieldUpdateOperationsInput | string | null
@@ -128388,6 +129124,22 @@ export namespace Prisma {
     preciseRatio?: Decimal | DecimalJsLike | number | string | null
     preciseConsumptionKg?: Decimal | DecimalJsLike | number | string | null
     preciseConsumptionMeter?: Decimal | DecimalJsLike | number | string | null
+    cuttingBgtPrVal?: Decimal | DecimalJsLike | number | string | null
+    cuttingActPrVal?: Decimal | DecimalJsLike | number | string | null
+    cuttingVendorPrVal?: Decimal | DecimalJsLike | number | string | null
+    cuttingFinalPrVal?: Decimal | DecimalJsLike | number | string | null
+    stitchingBgtPrVal?: Decimal | DecimalJsLike | number | string | null
+    stitchingActPrVal?: Decimal | DecimalJsLike | number | string | null
+    stitchingVendorPrVal?: Decimal | DecimalJsLike | number | string | null
+    stitchingFinalPrVal?: Decimal | DecimalJsLike | number | string | null
+    ironingBgtPrVal?: Decimal | DecimalJsLike | number | string | null
+    ironingActPrVal?: Decimal | DecimalJsLike | number | string | null
+    ironingVendorPrVal?: Decimal | DecimalJsLike | number | string | null
+    ironingFinalPrVal?: Decimal | DecimalJsLike | number | string | null
+    finishingBgtPrVal?: Decimal | DecimalJsLike | number | string | null
+    finishingActPrVal?: Decimal | DecimalJsLike | number | string | null
+    finishingVendorPrVal?: Decimal | DecimalJsLike | number | string | null
+    finishingFinalPrVal?: Decimal | DecimalJsLike | number | string | null
     bodyArticle?: string | null
     bodyArticleDescription?: string | null
     fabricArticleNumber?: string | null
@@ -128694,6 +129446,22 @@ export namespace Prisma {
     preciseRatio?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
     preciseConsumptionKg?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
     preciseConsumptionMeter?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    cuttingBgtPrVal?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    cuttingActPrVal?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    cuttingVendorPrVal?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    cuttingFinalPrVal?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    stitchingBgtPrVal?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    stitchingActPrVal?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    stitchingVendorPrVal?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    stitchingFinalPrVal?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    ironingBgtPrVal?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    ironingActPrVal?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    ironingVendorPrVal?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    ironingFinalPrVal?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    finishingBgtPrVal?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    finishingActPrVal?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    finishingVendorPrVal?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    finishingFinalPrVal?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
     bodyArticle?: NullableStringFieldUpdateOperationsInput | string | null
     bodyArticleDescription?: NullableStringFieldUpdateOperationsInput | string | null
     fabricArticleNumber?: NullableStringFieldUpdateOperationsInput | string | null
@@ -128841,6 +129609,22 @@ export namespace Prisma {
     preciseRatio?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
     preciseConsumptionKg?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
     preciseConsumptionMeter?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    cuttingBgtPrVal?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    cuttingActPrVal?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    cuttingVendorPrVal?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    cuttingFinalPrVal?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    stitchingBgtPrVal?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    stitchingActPrVal?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    stitchingVendorPrVal?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    stitchingFinalPrVal?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    ironingBgtPrVal?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    ironingActPrVal?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    ironingVendorPrVal?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    ironingFinalPrVal?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    finishingBgtPrVal?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    finishingActPrVal?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    finishingVendorPrVal?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    finishingFinalPrVal?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
     bodyArticle?: NullableStringFieldUpdateOperationsInput | string | null
     bodyArticleDescription?: NullableStringFieldUpdateOperationsInput | string | null
     fabricArticleNumber?: NullableStringFieldUpdateOperationsInput | string | null
@@ -128987,6 +129771,22 @@ export namespace Prisma {
     preciseRatio?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
     preciseConsumptionKg?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
     preciseConsumptionMeter?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    cuttingBgtPrVal?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    cuttingActPrVal?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    cuttingVendorPrVal?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    cuttingFinalPrVal?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    stitchingBgtPrVal?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    stitchingActPrVal?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    stitchingVendorPrVal?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    stitchingFinalPrVal?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    ironingBgtPrVal?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    ironingActPrVal?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    ironingVendorPrVal?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    ironingFinalPrVal?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    finishingBgtPrVal?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    finishingActPrVal?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    finishingVendorPrVal?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    finishingFinalPrVal?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
     bodyArticle?: NullableStringFieldUpdateOperationsInput | string | null
     bodyArticleDescription?: NullableStringFieldUpdateOperationsInput | string | null
     fabricArticleNumber?: NullableStringFieldUpdateOperationsInput | string | null
