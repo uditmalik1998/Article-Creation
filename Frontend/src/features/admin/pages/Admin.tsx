@@ -87,6 +87,16 @@ interface SizeMasterMeta {
   skipped?: number;
 }
 
+interface SetMcMasterMeta {
+  uploadedAt?: string;
+  fileName?: string;
+  total?: number;
+  sets?: number;
+  activeSets?: number;
+  parts?: number;
+  missingHsn?: number;
+}
+
 interface ColorMasterMeta {
   uploadedAt?: string;
   fileName?: string;
@@ -297,6 +307,10 @@ export default function Admin() {
   const [sizeMasterUploading, setSizeMasterUploading] = useState(false);
   const [sizeMasterProgress, setSizeMasterProgress] = useState<number>(0);
   const sizeFileRef = useRef<HTMLInputElement | null>(null);
+  const [setMcMasterMeta, setSetMcMasterMeta] = useState<SetMcMasterMeta | null>(null);
+  const [setMcMasterStatusLoading, setSetMcMasterStatusLoading] = useState(false);
+  const [setMcMasterUploading, setSetMcMasterUploading] = useState(false);
+  const setMcFileRef = useRef<HTMLInputElement | null>(null);
 
   // Color Master (color_master)
   const [colorMasterMeta, setColorMasterMeta] = useState<ColorMasterMeta | null>(null);
@@ -1185,6 +1199,67 @@ export default function Admin() {
       setSizeMasterUploading(false);
       setTimeout(() => setSizeMasterProgress(0), 1500);
       if (sizeFileRef.current) sizeFileRef.current.value = '';
+    }
+  };
+
+  // ─────────────────────────────── Set MC Master ───────────────────────────────
+  const loadSetMcMasterStatus = useCallback(async () => {
+    setSetMcMasterStatusLoading(true);
+    try {
+      const token = localStorage.getItem('authToken');
+      const res = await fetch(`${APP_CONFIG.api.baseURL}/admin/set-mc-master/status`, {
+        headers: token ? { Authorization: `Bearer ${token}` } : {},
+      });
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.error || 'Failed to load Set MC Master status');
+      setSetMcMasterMeta(data.data);
+    } catch (err: any) {
+      message.error(err?.message || 'Failed to load Set MC Master status');
+    } finally {
+      setSetMcMasterStatusLoading(false);
+    }
+  }, []);
+
+  const downloadSetMcMasterFile = (path: 'template' | 'download', filename: string) => {
+    const token = localStorage.getItem('authToken');
+    return fetch(`${APP_CONFIG.api.baseURL}/admin/set-mc-master/${path}`, { headers: token ? { Authorization: `Bearer ${token}` } : {} })
+      .then((r) => {
+        if (!r.ok) throw new Error('Download failed');
+        return r.blob();
+      })
+      .then((blob) => {
+        const a = document.createElement('a');
+        a.href = URL.createObjectURL(blob);
+        a.download = filename;
+        a.click();
+      })
+      .catch(() => message.error('Failed to download the Set MC Master'));
+  };
+
+  const handleSetMcMasterUpload = async (file: File) => {
+    setSetMcMasterUploading(true);
+    try {
+      const token = localStorage.getItem('authToken');
+      const formData = new FormData();
+      formData.append('file', file);
+      const res = await fetch(`${APP_CONFIG.api.baseURL}/admin/set-mc-master/upload`, {
+        method: 'POST',
+        headers: token ? { Authorization: `Bearer ${token}` } : {},
+        body: formData,
+      });
+      const data = await res.json();
+      if (!res.ok) {
+        // A rejected file lists its problems (row numbers); nothing was saved.
+        const problems: string[] = Array.isArray(data.problems) ? data.problems : [];
+        throw new Error([data.error || 'Upload failed', ...problems.slice(0, 5)].join(' — '));
+      }
+      message.success(data.message);
+      setSetMcMasterMeta(data.data);
+    } catch (err: any) {
+      message.error(err?.message || 'Upload failed', 12);
+    } finally {
+      setSetMcMasterUploading(false);
+      if (setMcFileRef.current) setMcFileRef.current.value = '';
     }
   };
 
@@ -2517,6 +2592,7 @@ export default function Admin() {
     loadMajCatGridStatus();
     loadMandatoryGridStatus();
     loadSizeMasterStatus();
+    loadSetMcMasterStatus();
     loadColorMasterStatus();
     loadFabricArticleDataStatus();
     loadFabricArticleMasterStatus();
@@ -2536,7 +2612,7 @@ export default function Admin() {
     loadBasicTrimMasterStatus();
     loadPreciseFabricArticleStatus();
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [loadVendorStatus, loadMajCatGridStatus, loadMandatoryGridStatus, loadSizeMasterStatus, loadColorMasterStatus, loadFabricArticleDataStatus, loadFabricArticleMasterStatus, loadBodyArticleDataStatus, loadBroaderMenuStatus, loadSegmentMasterStatus, loadBasicAccessoriesStatus, loadCmpCostMasterStatus, loadNationalGridStatus, loadHierarchyExcelStatus, loadPipelineStatus, loadFabricRawStatus, loadGmRawStatus, loadBodyFabConsStatus, loadPreciseBodyArticleStatus, loadPreciseTrimMasterStatus, loadBasicTrimMasterStatus, loadPreciseFabricArticleStatus]);
+  }, [loadVendorStatus, loadMajCatGridStatus, loadMandatoryGridStatus, loadSizeMasterStatus, loadSetMcMasterStatus, loadColorMasterStatus, loadFabricArticleDataStatus, loadFabricArticleMasterStatus, loadBodyArticleDataStatus, loadBroaderMenuStatus, loadSegmentMasterStatus, loadBasicAccessoriesStatus, loadCmpCostMasterStatus, loadNationalGridStatus, loadHierarchyExcelStatus, loadPipelineStatus, loadFabricRawStatus, loadGmRawStatus, loadBodyFabConsStatus, loadPreciseBodyArticleStatus, loadPreciseTrimMasterStatus, loadBasicTrimMasterStatus, loadPreciseFabricArticleStatus]);
 
   const loadData = async () => {
     setLoading(true);
@@ -3178,6 +3254,79 @@ export default function Admin() {
                   </div>
 
                 </>
+              }
+            />
+            <MasterDataCard
+              title="Set MC Master"
+              description="SAP S- MCs of set articles (parent + allowed parts)"
+              rows={setMcMasterMeta ? (setMcMasterMeta.total ?? 0) : null}
+              lastUpload={setMcMasterMeta?.uploadedAt ?? null}
+              loading={setMcMasterStatusLoading}
+              busy={setMcMasterUploading}
+              onDownload={() => downloadSetMcMasterFile('download', `SET_MC_MASTER_${new Date().toISOString().slice(0, 10)}.xlsx`)}
+              onTemplate={() => downloadSetMcMasterFile('template', 'SET_MC_MASTER_TEMPLATE.xlsx')}
+              onRefresh={loadSetMcMasterStatus}
+              details={
+                setMcMasterMeta && (setMcMasterMeta.total ?? 0) > 0 ? (
+                  <Descriptions bordered>
+                    <Descriptions.Item label="Set Categories">
+                      <Badge variant="info">{(setMcMasterMeta.activeSets ?? 0).toLocaleString()} active / {(setMcMasterMeta.sets ?? 0).toLocaleString()}</Badge>
+                    </Descriptions.Item>
+                    <Descriptions.Item label="Allowed Parts">
+                      <Badge variant="secondary">{(setMcMasterMeta.parts ?? 0).toLocaleString()}</Badge>
+                    </Descriptions.Item>
+                    <Descriptions.Item label="Active rows without HSN">
+                      <Badge variant={(setMcMasterMeta.missingHsn ?? 0) > 0 ? 'warning' : 'success'}>
+                        {(setMcMasterMeta.missingHsn ?? 0).toLocaleString()}
+                      </Badge>
+                    </Descriptions.Item>
+                  </Descriptions>
+                ) : (
+                  <Alert
+                    type="warning"
+                    showIcon
+                    message="No Set MC Master uploaded yet"
+                    description="Until it is uploaded no category is a set: set articles cannot be linked or submitted."
+                  />
+                )
+              }
+              upload={
+                <div className="rounded-md border border-border p-4">
+                  <div className="mb-1 font-semibold">Upload Set MC Master Excel</div>
+                  <div className="mb-3 text-xs text-muted-foreground">
+                    Sheet <strong>SET_MC_MASTER</strong>, headers in row 3, data from row 5 — SET_MAJ_CAT, ROW_TYPE (PARENT / PART),
+                    PART_POSITION, PART_MAJ_CAT, S_MC_CODE, S_MC_DES, DIV, SUB_DIV, HSN_CODE, STATUS (ACT / INACT).
+                    Replaces the entire table; a file with any invalid row is rejected.
+                  </div>
+                  <input
+                    ref={setMcFileRef}
+                    type="file"
+                    accept=".xlsx,.xls"
+                    className="hidden"
+                    onChange={(e) => {
+                      const file = e.target.files?.[0];
+                      if (file) handleSetMcMasterUpload(file);
+                    }}
+                  />
+                  {setMcMasterUploading ? (
+                    <div className="text-[13px] text-slate-600 dark:text-slate-300">
+                      <RefreshCw className="mr-1.5 inline-block h-3.5 w-3.5 animate-spin" />
+                      Checking the file & replacing the table...
+                    </div>
+                  ) : (
+                    <button
+                      type="button"
+                      onClick={() => setMcFileRef.current?.click()}
+                      className="flex w-full flex-col items-center justify-center rounded-md border-2 border-dashed border-border bg-muted/30 px-4 py-6 transition-colors hover:border-slate-400 hover:bg-slate-50 dark:hover:bg-slate-500/10"
+                    >
+                      <Inbox className="mb-2 h-8 w-8 text-slate-600 dark:text-slate-300" />
+                      <p className="text-[13px]">
+                        Click to upload <strong>.xlsx</strong> file
+                      </p>
+                      <p className="text-[11px] text-muted-foreground">Only Excel files. Max 50 MB.</p>
+                    </button>
+                  )}
+                </div>
               }
             />
             <MasterDataCard

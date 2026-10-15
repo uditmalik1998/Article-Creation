@@ -5,6 +5,7 @@
 import { Router, Request, Response, NextFunction } from 'express';
 import * as adminController from '../controllers/adminController';
 import * as expenseAccessController from '../controllers/expenseAccessController';
+import * as setMcMasterController from '../controllers/setMcMasterController';
 import * as expenseAuditLogController from '../controllers/expenseAuditLogController';
 import { hierarchyService } from '../services/hierarchyService';
 import { asyncHandler } from '../middleware/asyncHandler';
@@ -194,6 +195,14 @@ router.get('/size-master/status', h(adminController.getSizeMasterStatus));
 router.get('/size-master/template', h(adminController.downloadSizeMasterTemplate));
 router.get('/size-master/download', h(adminController.downloadSizeMasterData));
 router.post('/size-master/upload', excelUpload.single('file'), h(adminController.uploadSizeMaster));
+
+// ═══════════════════════════════════════════════════════
+// SET MC MASTER (ADMIN) — set_mc_master (SAP S- MCs of set articles)
+// ═══════════════════════════════════════════════════════
+router.get('/set-mc-master/status', h(setMcMasterController.getSetMcMasterStatus));
+router.get('/set-mc-master/template', h(setMcMasterController.downloadSetMcMasterTemplate));
+router.get('/set-mc-master/download', h(setMcMasterController.downloadSetMcMasterData));
+router.post('/set-mc-master/upload', excelUpload.single('file'), h(setMcMasterController.uploadSetMcMaster));
 
 // ═══════════════════════════════════════════════════════
 // COLOR MASTER (ADMIN) — color_master

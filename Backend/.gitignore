@@ -237,3 +237,5 @@ dev.json
 
 
 *.md
+# Prisma engine download leftovers
+src/generated/prisma/*.tmp*
