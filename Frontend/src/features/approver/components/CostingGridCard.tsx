@@ -46,6 +46,8 @@ export interface CostingGridConfig {
   costFields?: Record<string, CostFieldSet>;
   /** DB field recording which tab was saved (multi-tab cards). */
   tabField?: string;
+  /** row → spec columns shown read-only (no attribute or DB field behind them). */
+  readOnlySpec?: Record<string, SpecCol[]>;
 }
 
 type CostFieldSet = { autoBgt: string; rough: string; vdr: string; fin: string };
@@ -94,6 +96,7 @@ export const VADD_CONFIG: CostingGridConfig = {
     EMB: { type: 'embroidery', style: 'embroideryType', c3: 'embPlacement' }, // M_EMB_TYPE, M_EMBROIDERY_STYLE, M_EMB_PLACEMENT
     WASHING: { type: 'wash' },                                                // M_WASH
   },
+  readOnlySpec: { WASHING: ['style', 'c3'] },
   grid: 'grid grid-cols-[150px_130px_minmax(0,1.3fr)_minmax(0,1fr)_minmax(0,1.4fr)_88px_92px_92px_100px]',
   costFields: {
     PRINT:   { autoBgt: 'printAutoBgt',   rough: 'printRoughV2',   vdr: 'printVendorCost',   fin: 'printFinalCost' },
@@ -459,8 +462,10 @@ const CostingGridCard: React.FC<CostingGridCardProps> = ({
         />
       );
     }
+    // Cells with no spec storage (other-block rows, config.readOnlySpec) are read-only.
+    const readOnly = locked || !!other?.rows.includes(row) || !!config.readOnlySpec?.[row]?.includes(col);
     return (
-      <TextCell value={localVal(row, col)} disabled={locked} placeholder="Enter" onChange={(v) => setLocalVal(row, col, v)} />
+      <TextCell value={localVal(row, col)} disabled={readOnly} placeholder="Enter" onChange={(v) => setLocalVal(row, col, v)} />
     );
   };
 

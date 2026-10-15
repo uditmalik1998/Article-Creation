@@ -1850,16 +1850,14 @@ export class ApproverController {
         }
     }
 
-    // Precise Costing export — exact NEW-RAM SIR (360°) format.
-    // Column layout (1-indexed ExcelJS / A-V):
-    //  A=MAJ_CAT  B=SSN  C=FG_ART_NO.  D=ART_DESC.  E=  F=PIC HL
-    //  G=MATERIAL TYPE  H=MATERIAL_MC  I=ART. NO.  J=ART-ATT. HL
-    //  K=ART. DES  L=PIC HL  M=UOM  N=TTL QTY  O=RATE  P=WST %
-    //  Q=PR PC CONS.  R=VNDR PR PC COST  S=V2 PR PC COST  T=RATIO  U=MARGIN %  V=REMARKS
+    // Precise Costing export — one block per FG article, laid out like the
+    // "OUT FORMAT- RAM SIR" Sheet2: article header, cost summary, then a
+    // material table (FAB / B TRIM / PKG. COST / VAL. ADD. / BODY). AUTO-BGT and
+    // ROUGH-V2 come from the saved costing cards; VDR PR PC COST and FINAL are
+    // left blank for the user. Totals and DIFF (= FINAL − ROUGH-V2) are formulas.
     static async preciseCostingExport(req: Request, res: Response) {
         // Phase 1 — fetch all data before touching the response stream
         let fgArticles: any[];
-        let fabricMap: Map<string, any>;
         try {
             const where = ApproverController.buildExportWhere(req);
             fgArticles = await prisma.extractionResultFlat.findMany({
@@ -1876,40 +1874,28 @@ export class ApproverController {
                     fabricArticleDescription: true,
                     bodyArticle: true,
                     bodyArticleDescription: true,
-                    autoBgt: true, roughV2: true, vendorFabricRate: true, finalCost: true,
-                    roughRatio: true, roughConsumptionKg: true, roughConsumptionMeter: true,
-                    preciseRatio: true, preciseConsumptionKg: true, preciseConsumptionMeter: true,
-                    cuttingBgtPrVal: true, cuttingActPrVal: true, cuttingVendorPrVal: true, cuttingFinalPrVal: true,
-                    stitchingBgtPrVal: true, stitchingActPrVal: true, stitchingVendorPrVal: true, stitchingFinalPrVal: true,
-                    ironingBgtPrVal: true, ironingActPrVal: true, ironingVendorPrVal: true, ironingFinalPrVal: true,
-                    finishingBgtPrVal: true, finishingActPrVal: true, finishingVendorPrVal: true, finishingFinalPrVal: true,
-                    bTrimType: true,
-                    mBtnAutoBgt: true, mBtnRoughV2: true, mBtnVdrCost: true, mBtnFinalCost: true,
-                    dcAutoBgt: true, dcRoughV2: true, dcVdrCost: true, dcFinalCost: true,
-                    zipAutoBgt: true, zipRoughV2: true, zipVdrCost: true, zipFinalCost: true,
-                    patchAutoBgt: true, patchRoughV2: true, patchVdrCost: true, patchFinalCost: true,
-                    hTrfAutoBgt: true, hTrfRoughV2: true, hTrfVdrCost: true, hTrfFinalCost: true,
-                    elasticAutoBgt: true, elasticRoughV2: true, elasticVdrCost: true, elasticFinalCost: true,
-                    fusingAutoBgt: true, fusingRoughV2: true, fusingVdrCost: true, fusingFinalCost: true,
-                    badgeAutoBgt: true, badgeRoughV2: true, badgeVdrCost: true, badgeFinalCost: true,
-                    rivetAutoBgt: true, rivetRoughV2: true, rivetVdrCost: true, rivetFinalCost: true,
-                    tapeAutoBgt: true, tapeRoughV2: true, tapeVdrCost: true, tapeFinalCost: true,
-                    otherAutoBgt: true, otherRoughV2: true, otherVdrCost: true, otherFinalCost: true,
-                    printAutoBgt: true, printRoughV2: true, printVendorCost: true, printFinalCost: true,
-                    embAutoBgt: true, embRoughV2: true, embVendorCost: true, embFinalCost: true,
-                    washingAutoBgt: true, washingRoughV2: true, washingVendorCost: true, washingFinalCost: true,
-                    pkgCostType: true, boppNetPrice: true, ctnNetPrice: true, barcodeNetPrice: true,
+                    cuttingBgtPrVal: true, cuttingActPrVal: true,
+                    stitchingBgtPrVal: true, stitchingActPrVal: true,
+                    ironingBgtPrVal: true, ironingActPrVal: true,
+                    finishingBgtPrVal: true, finishingActPrVal: true,
+                    mBtnAutoBgt: true, mBtnRoughV2: true,
+                    dcAutoBgt: true, dcRoughV2: true,
+                    zipAutoBgt: true, zipRoughV2: true,
+                    patchAutoBgt: true, patchRoughV2: true,
+                    hTrfAutoBgt: true, hTrfRoughV2: true,
+                    elasticAutoBgt: true, elasticRoughV2: true,
+                    fusingAutoBgt: true, fusingRoughV2: true,
+                    badgeAutoBgt: true, badgeRoughV2: true,
+                    rivetAutoBgt: true, rivetRoughV2: true,
+                    tapeAutoBgt: true, tapeRoughV2: true,
+                    otherAutoBgt: true, otherRoughV2: true,
+                    printAutoBgt: true, printRoughV2: true,
+                    embAutoBgt: true, embRoughV2: true,
+                    washingAutoBgt: true, washingRoughV2: true,
+                    boppNetPrice: true, ctnNetPrice: true, barcodeNetPrice: true,
                     kimbleNetPrice: true, taftaNetPrice: true, threadNetPrice: true,
                 },
             });
-            const fabricNums = [...new Set(fgArticles.map((a: any) => a.fabricArticleNumber).filter(Boolean) as string[])];
-            const fabricRows = fabricNums.length > 0
-                ? await prisma.fabricArticleData.findMany({
-                    where: { fabricArticleNumber: { in: fabricNums } },
-                    select: { fabricArticleNumber: true, v2FabricRate: true },
-                })
-                : [];
-            fabricMap = new Map(fabricRows.map(r => [r.fabricArticleNumber!, r as any]));
         } catch (err) {
             console.error('[preciseCostingExport] DB error', err);
             return res.status(500).json({ error: 'Failed to generate precise costing report' });
@@ -1923,201 +1909,175 @@ export class ApproverController {
             res.setHeader('Content-Disposition', `attachment; filename="Precise_Costing_${new Date().toISOString().slice(0, 10)}.xlsx"`);
 
             const wb: any = new (ExcelJS as any).stream.xlsx.WorkbookWriter({ stream: res, useStyles: true, useSharedStrings: true });
-            const ws: any = wb.addWorksheet('NEW-RAM SIR');
+            const ws: any = wb.addWorksheet('PRECISE COSTING');
 
-            // Column widths must be declared before any rows in streaming mode
+            // A..Q — widths must be declared before any rows in streaming mode
             ws.columns = [
-                { width: 5 }, { width: 5 }, { width: 5 }, { width: 5 }, { width: 5 }, { width: 5 },
-                { width: 14 }, { width: 16 }, { width: 16 }, { width: 10 }, { width: 32 }, { width: 8 },
-                { width: 6 }, { width: 8 }, { width: 10 }, { width: 8 }, { width: 12 }, { width: 14 },
-                { width: 14 }, { width: 10 }, { width: 10 }, { width: 16 },
+                { width: 14 }, { width: 22 }, { width: 16 }, { width: 32 }, { width: 7 }, { width: 8 },
+                { width: 8 }, { width: 7 }, { width: 10 }, { width: 11 }, { width: 11 }, { width: 11 },
+                { width: 15 }, { width: 11 }, { width: 10 }, { width: 8 }, { width: 16 },
             ];
 
-            // Sparse 22-element array: index 0=A … 21=V
-            const sparse = (map: Record<number, any>): any[] => {
-                const arr: any[] = new Array(22).fill(null);
-                Object.entries(map).forEach(([k, v]) => { arr[Number(k)] = v; });
-                return arr;
-            };
-
-            // Add a row, apply optional styles, then commit it to the stream (frees memory immediately)
-            const addRow = (data: any[], styleFn?: (row: any) => void): void => {
-                const row = ws.addRow(data);
-                if (styleFn) styleFn(row);
-                row.commit();
-            };
-
-            // Returns a style function that paints cols G-V (1-indexed 7-22) with a solid fill
-            const painter = (argb: string, bold = false, white = false) => (row: any) => {
-                for (let c = 7; c <= 22; c++) {
-                    const cell = row.getCell(c);
-                    cell.fill = { type: 'pattern', pattern: 'solid', fgColor: { argb } };
-                    if (bold || white) cell.font = { bold, color: white ? { argb: 'FFFFFFFF' } : undefined };
-                }
-            };
-
-            const toN = (v: any) => (v == null ? 0 : Number(v));
-            const N   = (v: any) => { const n = Number(v); return (v == null || n === 0) ? null : n; };
-
             const DARK_BLUE  = 'FF1F4E79';
-            const NAVY       = 'FF17375E';
             const LIGHT_BLUE = 'FFD6E4F0';
             const PURPLE     = 'FFE8DAEF';
             const AMBER      = 'FFFFF2CC';
             const LT_GREEN   = 'FFE2EFDA';
+            const GREY       = 'FFF2F2F2';
+            const COLS = 17; // A..Q
 
+            const num = (v: any) => (v == null || v === '' ? null : Number(v));
+            const fill = (argb: string) => ({ type: 'pattern', pattern: 'solid', fgColor: { argb } });
+
+            // Writes a row (A=index 0) and returns its 1-based row number.
+            const addRow = (data: any[], style?: { fill?: string; bold?: boolean; white?: boolean; from?: number; to?: number }): number => {
+                const row = ws.addRow(data);
+                if (style) {
+                    const from = style.from ?? 1, to = style.to ?? COLS;
+                    for (let c = from; c <= to; c++) {
+                        const cell = row.getCell(c);
+                        if (style.fill) cell.fill = fill(style.fill);
+                        if (style.bold || style.white) cell.font = { bold: !!style.bold, color: style.white ? { argb: 'FFFFFFFF' } : undefined };
+                    }
+                }
+                for (let c = 11; c <= 15; c++) row.getCell(c).numFmt = '0.00';
+                const n = row.number;
+                row.commit();
+                return n;
+            };
+            const blank = () => addRow([]);
+
+            // Material row: A..Q, with K/L values and DIFF (O) = FINAL − ROUGH-V2 once FINAL is filled.
+            // rowNo is predicted (addRow returns it) so the DIFF formula can reference its own row.
+            let nextRow = 0;
+            const matRow = (r: {
+                type: string; mc: string; artNo?: any; artDesc?: any; uom?: string; qty?: any;
+                dash?: boolean; k?: any; l?: any; kFormula?: string; lFormula?: string;
+            }, style?: { fill?: string; bold?: boolean }) => {
+                const rn = nextRow;
+                const d = r.dash ? '-' : null;
+                const k = r.kFormula ? { formula: r.kFormula } : r.k;
+                const l = r.lFormula ? { formula: r.lFormula } : r.l;
+                const n = addRow([
+                    r.type, r.mc, r.artNo ?? null, r.artDesc ?? null, r.uom ?? null, r.qty ?? null,
+                    null, d, d, d, k ?? null, l ?? null, null, null,
+                    { formula: `IF(N${rn}="","",N${rn}-L${rn})` }, null, null,
+                ], style);
+                nextRow = n + 1;
+                return n;
+            };
+
+            // Keep nextRow in step with every write.
+            const track = (n: number) => { nextRow = n + 1; return n; };
+
+            const BTRIM_ROWS: [string, string | null][] = [
+                ['BTN', 'mBtn'], ['PATCH', 'patch'], ['ZIP', 'zip'], ['DC', 'dc'], ['H_TRF', 'hTrf'],
+                ['OTHER', 'other'], ['ADJUSTER', null], ['BADGE', 'badge'], ['BROTCH', null], ['BUCKLE', null],
+                ['ELASTIC', 'elastic'], ['EYELETS', null], ['FUSING', 'fusing'], ['HANGING D-RING', null],
+                ['HOOK', null], ['LABEL', null], ['LACE', null], ['POCKETTING FABRIC', null],
+                ['POCKETTING READYMADE', null], ['RIVETS', 'rivet'], ['SANTA', null], ['STOPPER', null],
+                ['TAG', null], ['TAPE', 'tape'], ['TASSELS', null],
+            ];
+            const PKG_ROWS: [string, string][] = [
+                ['BOPP', 'boppNetPrice'], ['CTN', 'ctnNetPrice'], ['BARCODE', 'barcodeNetPrice'],
+                ['KIMBLE', 'kimbleNetPrice'], ['TAFTA', 'taftaNetPrice'], ['THREAD', 'threadNetPrice'],
+            ];
+            const VADD_ROWS: [string, string][] = [['WASH', 'washing'], ['EMB', 'emb'], ['PRINTING', 'print']];
+            const BODY_ROWS: [string, string][] = [
+                ['CUTTING', 'cutting'], ['STITCHING', 'stitching'], ['IRONING', 'ironing'], ['FINISHING', 'finishing'],
+            ];
             const MAT_HDR = [
-                'MATERIAL TYPE', 'MATERIAL_MC', 'ART. NO.', 'ART-ATT. HL', 'ART. DES', 'PIC_HL',
-                'UOM', '', 'RATE', 'WST %', 'PR PC CONS.', 'VDR PR PC COST', 'V2 PR PC COST',
-                'DIFF', 'RATIO', 'REMARKS',
+                'MATERIAL TYPE', 'MATERIAL_MC', 'ART. NO.', 'ART. DES', 'UOM', 'TTL QTY', 'RATE', 'WST %',
+                'FAB WIDTH', 'PR PC CONS.', 'AUTO -BGT', 'ROUGH-V2', 'VDR PR PC COST', 'FINAL', 'DIFF', 'RATIO', 'REMARKS',
             ];
 
-            // Global title
-            addRow(sparse({ 6: 'Detailed 360 Degree Format' }), (row) => {
-                row.getCell(7).font = { bold: true, size: 13 };
-            });
+            track(addRow([null, 'Detailed 360 Degree Format'], { bold: true, from: 2, to: 2 }));
 
             for (const a of fgArticles) {
-                const fabData  = a.fabricArticleNumber ? fabricMap.get(a.fabricArticleNumber) : null;
-                const sapNo    = a.sapArticleId || a.articleNumber || '';
-                const mrp      = toN(a.mrp);
-                const fabCons  = 0;  // removed from extraction_results_flat
-                const vdrRate  = toN(a.vendorFabricRate);
-                const v2Rate   = toN(fabData?.v2FabricRate);
-                const fabVdr   = fabCons > 0 && vdrRate > 0 ? +(fabCons * vdrRate * 1.15).toFixed(2) : 0;
-                const fabV2    = fabCons > 0 && v2Rate  > 0 ? +(fabCons * v2Rate  * 1.15).toFixed(2) : 0;
-                const cmtp     = 0;  // removed from extraction_results_flat
-                const cmp      = 0;  // removed from extraction_results_flat
-                const valAdd   = 0;
-                const v2Cost   = +(fabV2  + cmp + cmtp + valAdd).toFixed(2);
-                const vdrCost  = +(fabVdr + cmp + cmtp + valAdd).toFixed(2);
-                const margin   = mrp > 0 ? (mrp - v2Cost)  / mrp : 0;
-                const vdrMargn = mrp > 0 ? (mrp - vdrCost) / mrp : 0;
-                const matTtl   = +(fabV2 + cmp + cmtp).toFixed(2);
+                track(blank());
+                track(blank());
 
-                addRow([]);
+                // Article header
+                track(addRow(['FG-MAJ', 'FG-ARTICLE', 'ART DESC', 'VDR_NM'], { fill: DARK_BLUE, bold: true, white: true, from: 1, to: 4 }));
+                track(addRow([a.majorCategory || '', a.sapArticleId || a.articleNumber || '', a.articleDescription || '', a.vendorName || '']));
+                track(blank());
 
-                // Article header label row (dark blue)
-                addRow(sparse({
-                    6: 'FG MAJOR CATEG', 7: 'FG ARTICLE NUM', 8: 'FG ARTICLE DESC',
-                    9: 'IMAGE #', 10: 'VENDOR NAME',
-                }), painter(DARK_BLUE, true, true));
+                // Cost summary — values point at the material table's total row,
+                // which sits 5 rows below the summary value row.
+                track(addRow(['MRP', 'AUTO -V2', 'ROUGH-V2', 'VDR PR PC COST', 'FINAL'], { fill: AMBER, bold: true, from: 1, to: 5 }));
+                const sumValRow = nextRow;
+                const totRow = sumValRow + 4;
+                const sv = ws.addRow([
+                    num(a.mrp),
+                    { formula: `K${totRow}` }, { formula: `L${totRow}` }, { formula: `M${totRow}` }, { formula: `N${totRow}` },
+                ]);
+                for (let c = 1; c <= 5; c++) sv.getCell(c).numFmt = '0.00';
+                track(sv.number);
+                sv.commit();
 
-                // Article header value row
-                addRow(sparse({
-                    6: a.majorCategory      || '',
-                    7: sapNo,
-                    8: a.articleDescription || '',
-                    10: a.vendorName        || '',
-                }));
+                track(blank());
+                track(addRow([null, null, null, null, null, null, null, null, null, null, 'COST'], { bold: true, from: 11, to: 11 }));
+                track(addRow(MAT_HDR, { fill: DARK_BLUE, bold: true, white: true }));
 
-                addRow([]);
+                // Total row — rows are predicted: FAB starts 2 rows after it.
+                const firstMat = totRow + 2;
+                // FAB(1) + blank + BTRIM + blank + PKG + blank + VADD + blank = last cost row before BODY
+                const lastNonBody = firstMat + 1 + 1 + BTRIM_ROWS.length + 1 + PKG_ROWS.length + 1 + VADD_ROWS.length - 1;
+                const cmpRow = lastNonBody + 2;
+                const sumCol = (c: string) => `SUM(${c}${firstMat}:${c}${lastNonBody})+${c}${cmpRow}`;
+                const tr = ws.addRow([
+                    'TOTAL', null, null, null, null, null, null, null, null, null,
+                    { formula: sumCol('K') }, { formula: sumCol('L') }, { formula: sumCol('M') }, { formula: sumCol('N') },
+                    { formula: `IF(N${totRow}=0,"",N${totRow}-L${totRow})` },
+                ]);
+                for (let c = 1; c <= COLS; c++) {
+                    tr.getCell(c).fill = fill(GREY);
+                    tr.getCell(c).font = { bold: true };
+                }
+                for (let c = 11; c <= 15; c++) tr.getCell(c).numFmt = '0.00';
+                if (tr.number !== totRow) console.warn('[preciseCostingExport] total row drift', tr.number, totRow);
+                track(tr.number);
+                tr.commit();
+                track(blank());
 
-                // Cost summary — label at G (idx 6), value at H (idx 7)
-                const costRow = (label: string, val: any, argb = '', pct = false) => {
-                    addRow(sparse({ 6: label, 7: val }), (row) => {
-                        if (argb) painter(argb)(row);
-                        if (pct && val != null) row.getCell(8).numFmt = '0.00%';
+                // FAB — not included in costing
+                matRow({
+                    type: 'FAB', mc: 'FAB_MC', artNo: a.fabricArticleNumber || null, artDesc: a.fabricArticleDescription || null,
+                    uom: 'KG', k: 0, l: 0,
+                }, { fill: LIGHT_BLUE });
+                track(blank());
+
+                for (const [name, key] of BTRIM_ROWS) {
+                    matRow({
+                        type: 'B TRIM', mc: name, artDesc: name, uom: 'EA', qty: 1, dash: true,
+                        k: key ? num(a[`${key}AutoBgt`]) : null,
+                        l: key ? num(a[`${key}RoughV2`]) : null,
                     });
-                };
-                costRow('MRP',          N(mrp),      AMBER);
-                costRow('V2 PURCHASE',  N(v2Cost),   LT_GREEN);
-                costRow('PRODUCT',      N(v2Cost));
-                costRow('VDR_MRGN',     N(vdrMargn), '', true);
-                costRow('MATERIAL TTL', N(matTtl),   LIGHT_BLUE);
-                costRow('MARGIN',       N(margin),   '', true);
-
-                addRow([]);
-
-                // Material column header row (dark blue)
-                const matHdrArr: any[] = new Array(22).fill(null);
-                MAT_HDR.forEach((h, i) => { matHdrArr[6 + i] = h || null; });
-                addRow(matHdrArr, (row) => {
-                    painter(DARK_BLUE, true, true)(row);
-                    row.height = 30;
-                    for (let c = 7; c <= 22; c++) {
-                        row.getCell(c).alignment = { horizontal: 'center', vertical: 'middle', wrapText: true };
-                    }
-                });
-
-                addRow([]);
-                addRow(sparse({ 6: 'UPPER' }), painter(NAVY, true, true));
-                addRow([]);
-
-                // UPPER FABRIC row 1 (with real data)
-                addRow(sparse({
-                    6: 'FABRIC', 7: 'FAB_MC',
-                    8:  a.fabricArticleNumber      || null,
-                    10: a.fabricArticleDescription || null,
-                    12: 'KG',
-                    14: N(vdrRate),
-                    15: a.fabricArticleNumber ? 0.15 : null,
-                    16: N(fabCons),
-                    17: N(fabVdr),
-                    18: N(fabV2),
-                    19: (fabVdr && fabV2) ? +(fabVdr - fabV2).toFixed(2) : null,
-                }), (row) => {
-                    painter(LIGHT_BLUE)(row);
-                    if (a.fabricArticleNumber) row.getCell(16).numFmt = '0.00%';
-                });
-
-                // UPPER FABRIC row 2 (empty placeholder)
-                addRow(sparse({ 6: 'FABRIC', 7: 'FAB_MC', 12: 'KG' }), painter(LIGHT_BLUE));
-
-                addRow([]);
-                addRow(sparse({ 6: 'STICH.ACC', 7: 'THREAD', 12: 'M' }));
-                addRow([]);
-                for (const mc of ['HEAT TRANSFER', 'DRAWCORD', 'LABEL', 'TAPE', 'TAG', 'EYELET']) {
-                    addRow(sparse({ 6: 'VA_ACC', 7: mc, 12: 'EA' }));
                 }
-                addRow([]);
-                for (let i = 0; i < 3; i++) addRow(sparse({ 6: 'FNSH ACC.', 7: 'PKG_ACC', 12: 'EA' }));
-                addRow([]);
-                for (const mc of ['WASH', 'EMB', 'PRINTING']) addRow(sparse({ 6: 'PROCESSINNG', 7: mc }));
-                addRow([]);
+                track(blank());
 
-                // BODY row
-                addRow(sparse({
-                    6: 'BODY', 7: 'CMTP_COST',
-                    8:  a.bodyArticle            || null,
-                    10: a.bodyArticleDescription || null,
-                    12: 'EA',
-                    16: 1,
-                    17: N(cmtp),
-                    18: N(cmp),
-                    19: (cmtp && cmp) ? +(cmtp - cmp).toFixed(2) : null,
-                }), painter(PURPLE));
-
-                // MARGIN row
-                addRow(sparse({ 6: 'MARGIN', 7: 'MARGIN', 17: N(vdrMargn), 18: N(margin) }), (row) => {
-                    if (vdrMargn) row.getCell(18).numFmt = '0.00%';
-                    if (margin)   row.getCell(19).numFmt = '0.00%';
-                });
-
-                addRow([]);
-                addRow([]);
-                addRow(sparse({ 6: 'LOWER' }), painter(NAVY, true, true));
-                addRow([]);
-
-                // LOWER FABRIC rows (zeros)
-                for (let i = 0; i < 2; i++) {
-                    addRow(sparse({ 6: 'FABRIC', 7: 'FAB_MC', 12: 'KG', 14: 0, 15: 0, 16: 0, 17: 0, 18: 0, 19: 0 }), painter(LIGHT_BLUE));
+                for (const [name, field] of PKG_ROWS) {
+                    const rate = num(a[field]);
+                    matRow({ type: 'PKG. COST', mc: name, artDesc: name, uom: 'EA', dash: true, k: rate, l: rate }, { fill: AMBER });
                 }
-                addRow([]);
-                addRow(sparse({ 6: 'STICH.ACC', 7: 'THREAD', 12: 'M', 17: 0, 18: 0, 19: 0 }));
-                addRow([]);
-                for (const mc of ['HEAT TRANSFER', 'DRAWCORD', 'LABEL', 'TAPE', 'TAG', 'EYELET']) {
-                    addRow(sparse({ 6: 'VA_ACC', 7: mc, 12: 'EA', 14: 0, 16: 0, 17: 0, 18: 0, 19: 0 }));
+                track(blank());
+
+                for (const [name, key] of VADD_ROWS) {
+                    matRow({ type: 'VAL. ADD.', mc: name, k: num(a[`${key}AutoBgt`]), l: num(a[`${key}RoughV2`]) }, { fill: LT_GREEN });
                 }
-                addRow([]);
-                for (let i = 0; i < 3; i++) {
-                    addRow(sparse({ 6: 'FNSH ACC.', 7: 'PKG_ACC', 12: 'EA', 14: 0, 16: 0, 17: 0, 18: 0, 19: 0 }));
+                track(blank());
+
+                // BODY — CMP COST row totals the four process rows below it
+                const procFirst = cmpRow + 1;
+                const procLast = cmpRow + BODY_ROWS.length;
+                const cmpN = matRow({
+                    type: 'BODY', mc: 'CMP COST', artNo: a.bodyArticle || null, artDesc: a.bodyArticleDescription || null, uom: 'EA',
+                    kFormula: `SUM(K${procFirst}:K${procLast})`, lFormula: `SUM(L${procFirst}:L${procLast})`,
+                }, { fill: PURPLE, bold: true });
+                if (cmpN !== cmpRow) console.warn('[preciseCostingExport] cmp row drift', cmpN, cmpRow);
+                for (const [name, key] of BODY_ROWS) {
+                    matRow({ type: 'BODY', mc: name, k: num(a[`${key}BgtPrVal`]), l: num(a[`${key}ActPrVal`]) }, { fill: PURPLE });
                 }
-                addRow([]);
-                for (const mc of ['WASH', 'EMB', 'PRINTING']) addRow(sparse({ 6: 'PROCESSINNG', 7: mc }));
-                addRow([]);
-                addRow(sparse({ 6: 'BODY', 7: 'CMTP_COST', 12: 'EA', 16: 0, 17: 0, 18: 0, 19: 0 }), painter(PURPLE));
-                addRow(sparse({ 6: 'FACTORY OVERHEAD', 7: 'FACTORY OVERHEAD', 17: 0, 18: 0, 19: 0 }));
             }
 
             await ws.commit();
