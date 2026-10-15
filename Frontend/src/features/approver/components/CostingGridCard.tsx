@@ -505,7 +505,7 @@ const CostingGridCard: React.FC<CostingGridCardProps> = ({
           <button
             type="button"
             onClick={onToggleCollapse}
-            className="flex items-center gap-1 px-2 py-1.5 text-[10px] font-bold uppercase tracking-wider transition-colors hover:brightness-95"
+            className="flex flex-1 items-center gap-1 self-stretch px-2 py-1.5 text-left text-[10px] font-bold uppercase tracking-wider transition-colors hover:brightness-95"
             style={{ color: style.fg }}
           >
             {icon}
@@ -513,6 +513,11 @@ const CostingGridCard: React.FC<CostingGridCardProps> = ({
           </button>
           {tabSave && tabs.length === 1 && !collapsed && (
             <div className="flex items-center gap-2">
+              {dirty && (
+                <span className="text-[10.5px] font-medium" style={{ color: style.fg, opacity: 0.8 }}>
+                  Unsaved changes
+                </span>
+              )}
               <button
                 type="button"
                 onClick={handleSaveTab}
@@ -522,18 +527,13 @@ const CostingGridCard: React.FC<CostingGridCardProps> = ({
                 <Save className="h-3 w-3" />
                 Save
               </button>
-              {dirty && (
-                <span className="text-[10.5px] font-medium" style={{ color: style.fg, opacity: 0.8 }}>
-                  Unsaved changes
-                </span>
-              )}
             </div>
           )}
           <button
             type="button"
             onClick={onToggleCollapse}
             aria-label={collapsed ? 'Expand' : 'Collapse'}
-            className="flex flex-1 items-center justify-end self-stretch px-2 py-1.5 transition-colors hover:brightness-95"
+            className="flex items-center self-stretch px-2 py-1.5 transition-colors hover:brightness-95"
           >
             {collapsed ? (
               <ChevronDown className="h-3 w-3" style={{ color: style.fg }} />

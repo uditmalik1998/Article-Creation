@@ -4625,6 +4625,12 @@ const ArticleCard = React.memo(
                       collapsed={isGroupCollapsed('PKG')}
                       onToggleCollapse={() => toggleGroupCollapse('PKG')}
                       locked={isLocked}
+                      loadSavedRecord={loadFreshItem}
+                      onSaveTab={(updates) => {
+                        setLocalValues((prev) => ({ ...prev, ...updates }));
+                        if (isModifyMode) setPendingChanges((prev) => ({ ...prev, ...updates }));
+                        else onSave({ ...item, ...updates } as any, updates);
+                      }}
                     />
                   )}
 
