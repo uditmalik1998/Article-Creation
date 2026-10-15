@@ -5841,7 +5841,20 @@ const CMP_HEADER_ROW = 2;
 const CMP_FIRST_DATA_ROW = 3;
 const CMP_SHEET_NAME = 'CMP COST';
 
-type CmpCostRow = { div: string | null; subDiv: string | null; majCat: string; cmpCost: number | null };
+type CmpCostRow = {
+  div: string | null;
+  subDiv: string | null;
+  majCat: string;
+  cuttingSam: number | null;
+  cuttingVal: number | null;
+  stitchingSam: number | null;
+  stitchingVal: number | null;
+  ironingSam: number | null;
+  ironingVal: number | null;
+  finishingSam: number | null;
+  finishingVal: number | null;
+  cmpCost: number | null;
+};
 
 /**
  * Writes the sheet — used for both the blank template (a single example row)
@@ -5856,17 +5869,31 @@ function buildCmpCostMasterSheet(wb: any, rows: CmpCostRow[]): void {
     cell.alignment = { horizontal: 'center' };
   };
 
-  // Row 1 — title, matching the source pivot's own layout (no blank row after it).
+  // Row 1 — title matching the source pivot layout.
   const titleRow = ws.addRow(['Average of TOTAL CMP COST']);
   blue(titleRow.getCell(1));
 
-  // Row 2 — header.
-  const headerRow = ws.addRow(['DIV', 'SUB_DIV', 'MAJ_CAT', 'Total']);
+  // Row 2 — headers.
+  const headerRow = ws.addRow([
+    'DIV', 'SUB_DIV', 'MAJ_CAT',
+    'CUTTING SAM', 'CUTTING VAL',
+    'STITCHING SAM', 'STITCHING VAL',
+    'IRONING SAM', 'IRONING VAL',
+    'FINISHING SAM', 'FINISHING VAL',
+    'CMP COST',
+  ]);
   headerRow.eachCell((cell: any) => blue(cell));
 
   // Data rows.
   for (const r of rows) {
-    ws.addRow([r.div ?? '', r.subDiv ?? '', r.majCat, r.cmpCost ?? '']);
+    ws.addRow([
+      r.div ?? '', r.subDiv ?? '', r.majCat,
+      r.cuttingSam ?? '', r.cuttingVal ?? '',
+      r.stitchingSam ?? '', r.stitchingVal ?? '',
+      r.ironingSam ?? '', r.ironingVal ?? '',
+      r.finishingSam ?? '', r.finishingVal ?? '',
+      r.cmpCost ?? '',
+    ]);
   }
 
   const noteRowNo = CMP_FIRST_DATA_ROW + rows.length + 1;
@@ -5875,14 +5902,21 @@ function buildCmpCostMasterSheet(wb: any, rows: CmpCostRow[]): void {
     'MANDATORY: figures are AVERAGE CMP costs by major category — have your costing team verify before relying on these for a specific article.';
   noteRow.getCell(1).font = { bold: true, size: 10, color: { argb: 'FF9C0006' } };
   noteRow.getCell(1).fill = { type: 'pattern', pattern: 'solid', fgColor: { argb: 'FFFFF3CD' } };
-  ws.mergeCells(`A${noteRowNo}:D${noteRowNo}`);
+  ws.mergeCells(`A${noteRowNo}:L${noteRowNo}`);
   const note2Row = ws.getRow(noteRowNo + 1);
   note2Row.getCell(1).value =
     'Rows are matched by DIV + SUB_DIV + MAJ_CAT together — the same major category under a different sub-division is a separate row, not a duplicate.';
   note2Row.getCell(1).font = { italic: true, size: 10 };
-  ws.mergeCells(`A${noteRowNo + 1}:D${noteRowNo + 1}`);
+  ws.mergeCells(`A${noteRowNo + 1}:L${noteRowNo + 1}`);
 
-  ws.columns = [{ width: 14 }, { width: 16 }, { width: 26 }, { width: 14 }];
+  ws.columns = [
+    { width: 14 }, { width: 16 }, { width: 26 },
+    { width: 14 }, { width: 14 },
+    { width: 16 }, { width: 14 },
+    { width: 14 }, { width: 14 },
+    { width: 16 }, { width: 16 },
+    { width: 14 },
+  ];
   ws.views = [{ state: 'frozen', xSplit: 0, ySplit: CMP_HEADER_ROW }];
 }
 
@@ -5924,7 +5958,14 @@ export const getCmpCostMasterStatus = async (_req: Request, res: Response): Prom
  */
 export const downloadCmpCostMasterTemplate = async (_req: Request, res: Response): Promise<void> => {
   try {
-    const example: CmpCostRow = { div: 'KIDS', subDiv: 'IB', majCat: 'IB_BERMUDA', cmpCost: 46.73 };
+    const example: CmpCostRow = {
+      div: 'KIDS', subDiv: 'IB', majCat: 'IB_BERMUDA',
+      cuttingSam: 2.5, cuttingVal: 3.75,
+      stitchingSam: 18.0, stitchingVal: 27.0,
+      ironingSam: 1.2, ironingVal: 1.8,
+      finishingSam: 0.8, finishingVal: 1.2,
+      cmpCost: 46.73,
+    };
     const wb = buildCmpCostMasterWorkbook([example]);
     res.setHeader('Content-Type', 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');
     res.setHeader('Content-Disposition', 'attachment; filename="CMP_COST_MASTER_TEMPLATE.xlsx"');
@@ -5946,6 +5987,14 @@ export const exportCmpCostMaster = async (_req: Request, res: Response): Promise
       div: m.div,
       subDiv: m.subDiv,
       majCat: m.majCat,
+      cuttingSam: m.cuttingSam === null ? null : Number(m.cuttingSam),
+      cuttingVal: m.cuttingVal === null ? null : Number(m.cuttingVal),
+      stitchingSam: m.stitchingSam === null ? null : Number(m.stitchingSam),
+      stitchingVal: m.stitchingVal === null ? null : Number(m.stitchingVal),
+      ironingSam: m.ironingSam === null ? null : Number(m.ironingSam),
+      ironingVal: m.ironingVal === null ? null : Number(m.ironingVal),
+      finishingSam: m.finishingSam === null ? null : Number(m.finishingSam),
+      finishingVal: m.finishingVal === null ? null : Number(m.finishingVal),
       cmpCost: m.cmpCost === null ? null : Number(m.cmpCost),
     }));
     const wb = buildCmpCostMasterWorkbook(rows);
@@ -6003,13 +6052,23 @@ export const uploadCmpCostMaster = async (req: Request, res: Response): Promise<
       }
     }
 
-    let cDiv = 1, cSubDiv = 2, cMajCat = 3, cCost = 4;
+    let cDiv = 1, cSubDiv = 2, cMajCat = 3;
+    let cCuttingSam = 4, cCuttingVal = 5, cStitchingSam = 6, cStitchingVal = 7;
+    let cIroningSam = 8, cIroningVal = 9, cFinishingSam = 10, cFinishingVal = 11, cCost = 12;
     const hdr = ws.getRow(headerRowNo);
-    for (let c = 1; c <= 8; c++) {
+    for (let c = 1; c <= 14; c++) {
       const h = cellStr(hdr, c).toUpperCase().replace(/[-_ ]/g, '');
       if (h === 'DIV' || h === 'DIVISION') cDiv = c;
       else if (h.includes('SUBDIV')) cSubDiv = c;
       else if (h.includes('MAJCAT') || h === 'MC') cMajCat = c;
+      else if (h === 'CUTTINGSAM') cCuttingSam = c;
+      else if (h === 'CUTTINGVAL') cCuttingVal = c;
+      else if (h === 'STITCHINGSAM') cStitchingSam = c;
+      else if (h === 'STITCHINGVAL') cStitchingVal = c;
+      else if (h === 'IRONINGSAM') cIroningSam = c;
+      else if (h === 'IRONINGVAL') cIroningVal = c;
+      else if (h === 'FINISHINGSAM') cFinishingSam = c;
+      else if (h === 'FINISHINGVAL') cFinishingVal = c;
       else if (h === 'TOTAL' || h.includes('CMPCOST') || h === 'CMP') cCost = c;
     }
 
@@ -6017,6 +6076,12 @@ export const uploadCmpCostMaster = async (req: Request, res: Response): Promise<
       if (v === null || v === undefined || v === '') return null;
       const n = Number(v);
       return Number.isFinite(n) ? Number(n.toFixed(4)) : null;
+    };
+
+    const cellNum = (row: any, c: number): number | null => {
+      let v = row.getCell(c).value;
+      if (v && typeof v === 'object' && 'result' in v) v = (v as any).result;
+      return numOf(v);
     };
 
     const rowsByKey = new Map<string, CmpCostRow>();
@@ -6029,18 +6094,27 @@ export const uploadCmpCostMaster = async (req: Request, res: Response): Promise<
       // across the full width — a real major category is a single code, never
       // a sentence, and never part of a merged range.
       if (!majCat || row.getCell(cMajCat).isMerged || /\s/.test(majCat) || majCat.length > 100) {
-        if (majCat) skipped++;
+        skipped++;
         continue;
       }
 
       const div = cellStr(row, cDiv) || null;
       const subDiv = cellStr(row, cSubDiv) || null;
-      let costRaw = row.getCell(cCost).value;
-      if (costRaw && typeof costRaw === 'object' && 'result' in costRaw) costRaw = (costRaw as any).result;
-      const cmpCost = numOf(costRaw);
+      const cmpCost = cellNum(row, cCost);
 
       const key = `${(div ?? '').toUpperCase()}|${(subDiv ?? '').toUpperCase()}|${majCat.toUpperCase()}`;
-      rowsByKey.set(key, { div, subDiv, majCat, cmpCost });
+      rowsByKey.set(key, {
+        div, subDiv, majCat,
+        cuttingSam: cellNum(row, cCuttingSam),
+        cuttingVal: cellNum(row, cCuttingVal),
+        stitchingSam: cellNum(row, cStitchingSam),
+        stitchingVal: cellNum(row, cStitchingVal),
+        ironingSam: cellNum(row, cIroningSam),
+        ironingVal: cellNum(row, cIroningVal),
+        finishingSam: cellNum(row, cFinishingSam),
+        finishingVal: cellNum(row, cFinishingVal),
+        cmpCost,
+      });
     }
 
     const records = [...rowsByKey.values()];
@@ -6053,18 +6127,43 @@ export const uploadCmpCostMaster = async (req: Request, res: Response): Promise<
     const CHUNK = 200;
     for (let i = 0; i < records.length; i += CHUNK) {
       const batch = records.slice(i, i + CHUNK);
-      const values = batch.map((r) => Prisma.sql`(${r.majCat}, ${r.div}, ${r.subDiv}, ${r.cmpCost}, ${now}, ${now})`);
+      const values = batch.map((r) => Prisma.sql`(
+        ${r.majCat}, ${r.div}, ${r.subDiv},
+        ${r.cuttingSam}, ${r.cuttingVal},
+        ${r.stitchingSam}, ${r.stitchingVal},
+        ${r.ironingSam}, ${r.ironingVal},
+        ${r.finishingSam}, ${r.finishingVal},
+        ${r.cmpCost}, ${now}, ${now}
+      )`);
       await prisma.$executeRaw`
-        INSERT INTO rough_cmp_cost_master (maj_cat, div, sub_div, cmp_cost, created_at, updated_at)
+        INSERT INTO rough_cmp_cost_master (
+          maj_cat, div, sub_div,
+          cutting_sam, cutting_val,
+          stitching_sam, stitching_val,
+          ironing_sam, ironing_val,
+          finishing_sam, finishing_val,
+          cmp_cost, created_at, updated_at
+        )
         VALUES ${Prisma.join(values)}
         ON CONFLICT (div, sub_div, maj_cat) DO UPDATE SET
-          cmp_cost   = EXCLUDED.cmp_cost,
-          updated_at = EXCLUDED.updated_at
+          cutting_sam   = EXCLUDED.cutting_sam,
+          cutting_val   = EXCLUDED.cutting_val,
+          stitching_sam = EXCLUDED.stitching_sam,
+          stitching_val = EXCLUDED.stitching_val,
+          ironing_sam   = EXCLUDED.ironing_sam,
+          ironing_val   = EXCLUDED.ironing_val,
+          finishing_sam = EXCLUDED.finishing_sam,
+          finishing_val = EXCLUDED.finishing_val,
+          cmp_cost      = EXCLUDED.cmp_cost,
+          updated_at    = EXCLUDED.updated_at
       `;
     }
 
     const total = await prisma.roughCmpCostMaster.count();
-    const categories = (await prisma.roughCmpCostMaster.findMany({ distinct: ['majCat'], select: { majCat: true } })).length;
+    const [catRow] = await prisma.$queryRaw<[{ categories: bigint }]>`
+      SELECT COUNT(DISTINCT maj_cat)::bigint AS categories FROM rough_cmp_cost_master
+    `;
+    const categories = Number(catRow.categories);
 
     console.log(`[CmpCostMaster] Upserted ${records.length} rows (${skipped} skipped)`);
 
@@ -6314,6 +6413,229 @@ export const uploadPreciseTrimMaster = async (req: Request, res: Response): Prom
     });
   } catch (error: any) {
     console.error('[PreciseTrimMaster] Upload error:', error);
+    res.status(500).json({ success: false, error: error.message });
+  }
+};
+
+// ═══════════════════════════════════════════════════════
+// BASIC TRIM MASTER (basic_trim_master)
+//
+// BT-1 trim costs per SAP attribute name and type.
+// Template / Download Data / Upload all speak the same four-column layout
+// (ATTRIBUTE_NAME, TYPE, BT-1, BT-2), so a file downloaded here can be
+// edited and uploaded straight back. The source Excel ("BASIC TRIMS 2 TYPE
+// COSTING") only provides BT-1; BT-2 is nullable and defaults to null.
+// Upload upserts by (attribute_name, type).
+// ═══════════════════════════════════════════════════════
+
+const BTM_SHEET_NAME = 'BASIC TRIM MASTER';
+
+type BasicTrimRow = { attributeName: string; type: string; bt1: number | null; bt2: number | null };
+
+function buildBasicTrimMasterSheet(wb: any, rows: BasicTrimRow[]): void {
+  const ws = wb.addWorksheet(BTM_SHEET_NAME);
+
+  const blue = (cell: any) => {
+    cell.font = { bold: true, color: { argb: 'FFFFFFFF' } };
+    cell.fill = { type: 'pattern', pattern: 'solid', fgColor: { argb: 'FF1565C0' } };
+    cell.alignment = { horizontal: 'center' };
+  };
+
+  const headerRow = ws.addRow(['ATTRIBUTE_NAME', 'TYPE', 'BT-1', 'BT-2']);
+  headerRow.eachCell((cell: any) => blue(cell));
+
+  for (const r of rows) {
+    ws.addRow([r.attributeName, r.type, r.bt1 ?? '', r.bt2 ?? '']);
+  }
+
+  ws.columns = [{ width: 26 }, { width: 28 }, { width: 14 }, { width: 14 }];
+  ws.views = [{ state: 'frozen', xSplit: 0, ySplit: 1 }];
+}
+
+function buildBasicTrimMasterWorkbook(rows: BasicTrimRow[]): any {
+  const ExcelJS = require('exceljs');
+  const wb = new ExcelJS.Workbook();
+  buildBasicTrimMasterSheet(wb, rows);
+  return wb;
+}
+
+/** GET /admin/basic-trim-master/status */
+export const getBasicTrimMasterStatus = async (_req: Request, res: Response): Promise<void> => {
+  try {
+    const rows = await prisma.$queryRaw<{ total: bigint; attributes: bigint; last_updated: Date | null }[]>`
+      SELECT COUNT(*)::bigint AS total,
+             COUNT(DISTINCT attribute_name)::bigint AS attributes,
+             MAX(updated_at) AS last_updated
+      FROM basic_trim_master
+    `;
+    const r = rows[0] ?? { total: 0n, attributes: 0n, last_updated: null };
+    res.json({
+      success: true,
+      data: {
+        total: Number(r.total),
+        attributes: Number(r.attributes),
+        lastUpdated: r.last_updated ? r.last_updated.toISOString() : null,
+      },
+    });
+  } catch (error: any) {
+    console.error('[BasicTrimMaster] Status error:', error);
+    res.status(500).json({ success: false, error: error.message });
+  }
+};
+
+/** GET /admin/basic-trim-master/template */
+export const downloadBasicTrimMasterTemplate = async (_req: Request, res: Response): Promise<void> => {
+  try {
+    const example: BasicTrimRow = { attributeName: 'M_BTN_TYPE', type: 'DYE_CAST_BTN', bt1: 2.5, bt2: null };
+    const wb = buildBasicTrimMasterWorkbook([example]);
+    res.setHeader('Content-Type', 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');
+    res.setHeader('Content-Disposition', 'attachment; filename="BASIC_TRIM_MASTER_TEMPLATE.xlsx"');
+    await wb.xlsx.write(res);
+    res.end();
+  } catch (error: any) {
+    console.error('[BasicTrimMaster] Template error:', error);
+    res.status(500).json({ success: false, error: error.message });
+  }
+};
+
+/** GET /admin/basic-trim-master/export — every stored row, same layout. */
+export const exportBasicTrimMaster = async (_req: Request, res: Response): Promise<void> => {
+  try {
+    const masters = await prisma.basicTrimMaster.findMany({
+      orderBy: [{ attributeName: 'asc' }, { type: 'asc' }],
+    });
+    const rows: BasicTrimRow[] = masters.map((m) => ({
+      attributeName: m.attributeName,
+      type: m.type,
+      bt1: m.bt1 === null ? null : Number(m.bt1),
+      bt2: m.bt2 === null ? null : Number(m.bt2),
+    }));
+    const wb = buildBasicTrimMasterWorkbook(rows);
+    res.setHeader('Content-Type', 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');
+    res.setHeader('Content-Disposition', 'attachment; filename="BASIC_TRIM_MASTER_EXPORT.xlsx"');
+    await wb.xlsx.write(res);
+    res.end();
+  } catch (error: any) {
+    console.error('[BasicTrimMaster] Export error:', error);
+    res.status(500).json({ success: false, error: error.message });
+  }
+};
+
+/**
+ * POST /admin/basic-trim-master/upload
+ * Upserts by (attribute_name, type).
+ * Source Excel has headers in row 3, col 1 empty, data from row 4.
+ */
+export const uploadBasicTrimMaster = async (req: Request, res: Response): Promise<void> => {
+  try {
+    if (!req.file) {
+      res.status(400).json({ success: false, error: 'No file uploaded. Send a .xlsx file as "file" field.' });
+      return;
+    }
+
+    const ExcelJS = (await import('exceljs')).default;
+    const wb = new ExcelJS.Workbook();
+    await wb.xlsx.load(req.file.buffer as any);
+
+    const ws = wb.getWorksheet(BTM_SHEET_NAME) ?? wb.worksheets[0];
+    if (!ws) {
+      res.status(400).json({ success: false, error: 'No worksheets found in the uploaded Excel file.' });
+      return;
+    }
+
+    const cellStr = (row: any, c: number): string => {
+      let v = row.getCell(c).value;
+      if (v && typeof v === 'object' && 'richText' in v) return (v as any).richText.map((t: any) => t.text).join('').trim();
+      if (v && typeof v === 'object' && 'result' in v) v = (v as any).result;
+      if (v && typeof v === 'object' && 'text' in v) v = (v as any).text;
+      return v == null ? '' : String(v).trim();
+    };
+
+    const numOf = (v: unknown): number | null => {
+      if (v === null || v === undefined || v === '') return null;
+      const n = Number(v);
+      return Number.isFinite(n) ? Number(n.toFixed(4)) : null;
+    };
+
+    const cellNum = (row: any, c: number): number | null => {
+      let v = row.getCell(c).value;
+      if (v && typeof v === 'object' && 'result' in v) v = (v as any).result;
+      return numOf(v);
+    };
+
+    // Auto-detect header row — looks for ATTRIBUTE and TYPE in first 5 rows
+    let headerRowNo = 1;
+    for (let r = 1; r <= Math.min(5, ws.rowCount); r++) {
+      const row = ws.getRow(r);
+      const line = [1, 2, 3, 4, 5].map((c) => cellStr(row, c).toUpperCase()).join(' ');
+      if ((line.includes('ATTRIBUTE') || line.includes('ATTR')) && line.includes('TYPE')) {
+        headerRowNo = r;
+        break;
+      }
+    }
+
+    // Default column indices match the source Excel layout (col 1 empty)
+    let cAttr = 2, cType = 3, cBt1 = 4, cBt2 = 5;
+    const hdr = ws.getRow(headerRowNo);
+    for (let c = 1; c <= 8; c++) {
+      const h = cellStr(hdr, c).toUpperCase().replace(/[-_ ]/g, '');
+      if (h.includes('ATTRIBUTE') || h === 'ATTR' || h === 'ATTRNAME') cAttr = c;
+      else if (h === 'TYPE') cType = c;
+      else if (h === 'BT1') cBt1 = c;
+      else if (h === 'BT2') cBt2 = c;
+    }
+
+    const rowsByKey = new Map<string, BasicTrimRow>();
+    let skipped = 0;
+
+    for (let r = headerRowNo + 1; r <= ws.rowCount; r++) {
+      const row = ws.getRow(r);
+      const attributeName = cellStr(row, cAttr);
+      const type = cellStr(row, cType);
+      if (!attributeName || !type || attributeName === '-' || type === '-') {
+        skipped++;
+        continue;
+      }
+      const key = `${attributeName.toUpperCase()}|${type.toUpperCase()}`;
+      rowsByKey.set(key, { attributeName, type, bt1: cellNum(row, cBt1), bt2: cellNum(row, cBt2) });
+    }
+
+    const records = [...rowsByKey.values()];
+    if (records.length === 0) {
+      res.status(400).json({ success: false, error: 'No valid rows found in the Excel file.' });
+      return;
+    }
+
+    const now = new Date();
+    const CHUNK = 200;
+    for (let i = 0; i < records.length; i += CHUNK) {
+      const batch = records.slice(i, i + CHUNK);
+      const values = batch.map((r) => Prisma.sql`(${r.attributeName}, ${r.type}, ${r.bt1}, ${r.bt2}, ${now}, ${now})`);
+      await prisma.$executeRaw`
+        INSERT INTO basic_trim_master (attribute_name, type, bt_1, bt_2, created_at, updated_at)
+        VALUES ${Prisma.join(values)}
+        ON CONFLICT (attribute_name, type) DO UPDATE SET
+          bt_1       = EXCLUDED.bt_1,
+          bt_2       = EXCLUDED.bt_2,
+          updated_at = EXCLUDED.updated_at
+      `;
+    }
+
+    const total = await prisma.basicTrimMaster.count();
+    const [attrRow] = await prisma.$queryRaw<[{ attributes: bigint }]>`
+      SELECT COUNT(DISTINCT attribute_name)::bigint AS attributes FROM basic_trim_master
+    `;
+    const attributes = Number(attrRow.attributes);
+
+    console.log(`[BasicTrimMaster] Upserted ${records.length} rows (${skipped} skipped)`);
+
+    res.json({
+      success: true,
+      message: `Basic Trim Master updated: ${records.length} rows${skipped > 0 ? `, ${skipped} rows skipped` : ''}.`,
+      data: { total, attributes, skipped, lastUpdated: now.toISOString() },
+    });
+  } catch (error: any) {
+    console.error('[BasicTrimMaster] Upload error:', error);
     res.status(500).json({ success: false, error: error.message });
   }
 };
@@ -7060,9 +7382,6 @@ const BODY_ARTICLE_DATA_COLUMNS = [
   { key: 'mBodyStyle', column: 'm_body_style', header: 'M_BODY_STYLE', type: 'text', maxLength: 100 },
   { key: 'mLength', column: 'm_length', header: 'M_LENGTH', type: 'text', maxLength: 100 },
   { key: 'mSet', column: 'm_set', header: 'M_SET', type: 'text', maxLength: 100 },
-  { key: 'cmtpCost', column: 'cmtp_cost', header: 'CMTP_COST', type: 'number' },
-  { key: 'cmpCost', column: 'cmp_cost', header: 'CMP_COST', type: 'number' },
-  { key: 'fabCons', column: 'fab_cons', header: 'FAB_CONS', type: 'number' },
   { key: 'width', column: 'width', header: 'WIDTH', type: 'number' },
 ] as const;
 
@@ -7547,7 +7866,7 @@ const BODY_ARTICLE_DATA_EXPORT_COLUMN_ORDER = [
   'm_collar_type', 'm_collar_style', 'm_neck_type', 'm_neck_style', 'm_placket',
   'm_blt_type', 'm_blt_style', 'm_sleeves_main_style', 'm_sleeve_fold', 'm_btm_fold',
   'm_no_of_pocket', 'm_pocket', 'm_extra_pocket', 'm_fit', 'm_body_style', 'm_length', 'm_set',
-  'cmtp_cost', 'cmp_cost', 'fab_cost', 'fab_cons', 'width',
+  'width',
   'approval_status', 'approved_at', 'approved_by', 'sap_sync_status', 'sap_sync_message',
   'user_name', 'created_at', 'updated_at',
 ];
@@ -8465,10 +8784,6 @@ export const EXPENSE_TABLE_REGISTRY: Record<string, ExpenseTableConfig> = {
       { key: 'mBodyStyle', label: 'Body Style' },
       { key: 'mLength', label: 'Length' },
       { key: 'mSet', label: 'Set' },
-      { key: 'cmtpCost', label: 'CMTP Cost', align: 'right' },
-      { key: 'cmpCost', label: 'CMP Cost', align: 'right' },
-      { key: 'fabCost', label: 'Fab Cost', align: 'right' },
-      { key: 'fabCons', label: 'Fab Cons', align: 'right' },
       { key: 'width', label: 'Width', align: 'right' },
       { key: 'approvalStatus', label: 'Approval Status', editable: false },
       { key: 'approvedAt', label: 'Approved At', type: 'date', editable: false },
@@ -8648,6 +8963,27 @@ export const EXPENSE_TABLE_REGISTRY: Record<string, ExpenseTableConfig> = {
     displayColumns: ['attributeName', 'type'],
     defaultSort: { field: 'attributeName', dir: 'asc' },
   },
+  'basic-trim-master': {
+    kind: 'prisma',
+    delegateName: 'basicTrimMaster',
+    idColumn: 'id',
+    idIsNumeric: true,
+    allowCreate: true,
+    allowDelete: true,
+    requiredOnCreate: ['attributeName', 'type'],
+    columns: [
+      { key: 'id', label: 'ID', editable: false },
+      { key: 'attributeName', label: 'Attribute Name' },
+      { key: 'type', label: 'Type' },
+      { key: 'bt1', label: 'BT-1', align: 'right' },
+      { key: 'bt2', label: 'BT-2', align: 'right' },
+      { key: 'createdAt', label: 'Created At', editable: false },
+      { key: 'updatedAt', label: 'Updated At', editable: false },
+    ],
+    searchColumns: ['attributeName', 'type'],
+    displayColumns: ['attributeName', 'type'],
+    defaultSort: { field: 'attributeName', dir: 'asc' },
+  },
   'cmp-cost-master': {
     kind: 'prisma',
     delegateName: 'roughCmpCostMaster',
@@ -8661,6 +8997,14 @@ export const EXPENSE_TABLE_REGISTRY: Record<string, ExpenseTableConfig> = {
       { key: 'div', label: 'Division' },
       { key: 'subDiv', label: 'Sub Division' },
       { key: 'majCat', label: 'Major Category' },
+      { key: 'cuttingSam', label: 'Cutting SAM', align: 'right' },
+      { key: 'cuttingVal', label: 'Cutting Val', align: 'right' },
+      { key: 'stitchingSam', label: 'Stitching SAM', align: 'right' },
+      { key: 'stitchingVal', label: 'Stitching Val', align: 'right' },
+      { key: 'ironingSam', label: 'Ironing SAM', align: 'right' },
+      { key: 'ironingVal', label: 'Ironing Val', align: 'right' },
+      { key: 'finishingSam', label: 'Finishing SAM', align: 'right' },
+      { key: 'finishingVal', label: 'Finishing Val', align: 'right' },
       { key: 'cmpCost', label: 'CMP Cost (Rs/pc)', align: 'right' },
       { key: 'createdAt', label: 'Created At', editable: false },
       { key: 'updatedAt', label: 'Updated At', editable: false },
@@ -9263,19 +9607,24 @@ export const uploadBodyFabricConsumption = async (req: Request, res: Response): 
     const seen = new Set<string>();
     let skipped = 0;
 
-    // Rows 1-3 empty, row 4 = headers, data from row 5 (matches both the
-    // generated template and the real source workbook's layout).
-    // Columns: A=DIV(1), B=SUB DIV(2), C=MAJ CAT(3), D=FAB_WIDTH(4), FAB CONSUMPTION and GSM detected by header text.
-    let fabConsCol = 35; // default: column 35 (AI) = index 34 in 0-based
-    let gsmCol = 36;     // default: column 36 (AJ) = index 35 in 0-based
-    const headerRow = ws.getRow(4);
-    for (let c = 1; c <= 50; c++) {
-      const h = cell(headerRow, c).toUpperCase().replace(/\s+/g, ' ');
-      if (h === 'FAB CONSUMPTION') fabConsCol = c;
-      if (h === 'GSM') gsmCol = c;
+    // Auto-detect header row (row 1 in new 6-col format, row 4 in legacy 36-col format).
+    // FAB CONSUMPTION and GSM are found by scanning header text so both formats work.
+    // FAB_WIDTH may carry an inch mark suffix (e.g. "56\"") — stripped before parsing.
+    let headerRowNum = 1;
+    let fabConsCol = 5; // default for 6-col format
+    let gsmCol = 6;
+    for (let r = 1; r <= Math.min(ws.rowCount, 10); r++) {
+      const hr = ws.getRow(r);
+      for (let c = 1; c <= 50; c++) {
+        const h = cell(hr, c).toUpperCase().replace(/\s+/g, ' ');
+        if (h === 'FAB CONSUMPTION') { fabConsCol = c; headerRowNum = r; }
+        if (h === 'GSM') gsmCol = c;
+      }
+      if (fabConsCol !== 5 || gsmCol !== 6) break; // found
     }
+    const dataStartRow = headerRowNum + 1;
 
-    for (let r = 5; r <= ws.rowCount; r++) {
+    for (let r = dataStartRow; r <= ws.rowCount; r++) {
       const row = ws.getRow(r);
       const div    = cell(row, 1);
       const sub    = cell(row, 2);
@@ -9287,7 +9636,9 @@ export const uploadBodyFabricConsumption = async (req: Request, res: Response): 
       if (!majCat && !div && !widthRaw) { skipped++; continue; }
       if (!majCat) { skipped++; continue; }
 
-      const fabWidth = widthRaw !== '' ? parseFloat(widthRaw) : null;
+      // Strip inch mark (") before parsing — source format uses e.g. "56\""
+      const widthNum = widthRaw !== '' ? parseFloat(widthRaw.replace(/"/g, '')) : null;
+      const fabWidth = widthNum !== null && !isNaN(widthNum) ? widthNum : null;
       const fabCons  = consRaw  !== '' ? parseFloat(consRaw)  : null;
       const gsm      = gsmRaw   !== '' ? parseFloat(gsmRaw)   : null;
 
@@ -9296,12 +9647,12 @@ export const uploadBodyFabricConsumption = async (req: Request, res: Response): 
       seen.add(key);
 
       rows.push({
-        division:      div  || null,
-        sub_division:  sub  || null,
-        major_category: majCat,
-        fab_width:     fabWidth !== null && !isNaN(fabWidth) ? fabWidth : null,
+        division:        div   || null,
+        sub_division:    sub   || null,
+        major_category:  majCat,
+        fab_width:       fabWidth,
         fab_consumption: fabCons !== null && !isNaN(fabCons) ? fabCons : null,
-        gsm:           gsm !== null && !isNaN(gsm) ? gsm : null,
+        gsm:             gsm    !== null && !isNaN(gsm)      ? gsm     : null,
       });
     }
 
@@ -9335,30 +9686,13 @@ export const uploadBodyFabricConsumption = async (req: Request, res: Response): 
   }
 };
 
-// All 36 columns in the source Excel (sheet "summary", headers at row 4).
-// The uploader only reads cols 0-3 (DIV/SUB DIV/MAJ CAT/FAB_WIDTH) and the
-// last two cols (FAB CONSUMPTION, GSM). The 30 size/age columns in between
-// are ignored on import but must be present in the template so re-uploading works.
-const FAB_CONS_HEADERS = [
-  'DIV', 'SUB DIV', 'MAJ CAT', 'FAB_WIDTH',
-  'M_06_12', 'M_12_18', 'M_18_24',
-  'YR_02_03', 'YR_04_05', 'YR_06_07', 'YR_08_09', 'YR_10_11',
-  'YR_12_13', 'YR_14_15', 'YR_14', 'YR_15', 'YR_16', 'YR_17',
-  'S', 'M', 'L', 'XL', 'XXL', 'XXXL', 'XXXXL',
-  'S_26', 'S_28', 'S_30', 'S_38', 'S_32', 'S_34', 'S_36',
-  'M_00_03', 'M_03_06',
-  'FAB CONSUMPTION', 'GSM',
-];
+// 6 columns only — the 30 size/age columns are always empty and not stored.
+const FAB_CONS_HEADERS = ['DIV', 'SUB DIV', 'MAJ CAT', 'FAB_WIDTH', 'FAB CONSUMPTION', 'GSM'];
 
 function buildFabConsSheet(wb: any, dataRows: any[]): any {
   const ws = wb.addWorksheet('summary');
 
-  // Rows 1-3 empty (matching source file where data range starts at row 4)
-  ws.addRow([]);
-  ws.addRow([]);
-  ws.addRow([]);
-
-  // Row 4 — headers
+  // Row 1 — headers (no blank rows above)
   const headerRow = ws.addRow(FAB_CONS_HEADERS);
   headerRow.eachCell((cell: any) => {
     cell.font = { bold: true, color: { argb: 'FFFFFFFF' } };
@@ -9366,17 +9700,11 @@ function buildFabConsSheet(wb: any, dataRows: any[]): any {
     cell.alignment = { horizontal: 'center' };
   });
 
-  // Rows 5-6 empty
-  ws.addRow([]);
-  ws.addRow([]);
-
-  // Data
+  // Data starts at row 2
   for (const row of dataRows) ws.addRow(row);
 
-  // Column widths
   ws.columns = [
     { width: 12 }, { width: 14 }, { width: 26 }, { width: 12 },
-    ...Array(30).fill({ width: 10 }),
     { width: 18 }, { width: 10 },
   ];
 
@@ -9385,17 +9713,19 @@ function buildFabConsSheet(wb: any, dataRows: any[]): any {
 
 /**
  * GET /api/admin/body-fabric-consumption/template
- * Downloads a blank Excel template matching the source upload format exactly
- * (sheet "summary", 36 columns, headers at row 4, no data rows).
+ * Downloads an Excel template matching the source upload format exactly
+ * (sheet "summary", 36 columns, headers at row 4, one example data row at row 5).
  */
 export const downloadBodyFabricConsumptionTemplate = async (_req: Request, res: Response): Promise<void> => {
   try {
     const ExcelJS = require('exceljs');
     const wb = new ExcelJS.Workbook();
-    buildFabConsSheet(wb, []);
+    // One example row: DIV, SUB DIV, MAJ CAT, FAB_WIDTH, FAB CONSUMPTION, GSM
+    const exampleRow = ['KIDS', 'KI', 'IB_BERMUDA', '56"', 0.3, 280];
+    buildFabConsSheet(wb, [exampleRow]);
 
     res.setHeader('Content-Type', 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');
-    res.setHeader('Content-Disposition', 'attachment; filename="FAB_CONSUMPTION_MASTER_TEMPLATE.xlsx"');
+    res.setHeader('Content-Disposition', 'attachment; filename="ROUGH-FAB_CONSUMPTION_MASTER_TEMPLATE.xlsx"');
     await wb.xlsx.write(res);
     res.end();
   } catch (error: any) {
@@ -9420,22 +9750,20 @@ export const downloadBodyFabricConsumptionData = async (_req: Request, res: Resp
       ORDER BY division, sub_division, major_category, fab_width
     `;
 
-    // Build a 36-element array per row: A-D filled, E-AH blank, AI = fab_consumption, AJ = gsm
-    const dataRows = dbRows.map((r) => {
-      const row: any[] = new Array(36).fill('');
-      row[0]  = r.division ?? '';
-      row[1]  = r.sub_division ?? '';
-      row[2]  = r.major_category ?? '';
-      row[3]  = r.fab_width != null ? Number(r.fab_width) : '';
-      row[34] = r.fab_consumption != null ? Number(r.fab_consumption) : '';
-      row[35] = r.gsm != null ? Number(r.gsm) : '';
-      return row;
-    });
+    // 6-column rows: DIV, SUB DIV, MAJ CAT, FAB_WIDTH, FAB CONSUMPTION, GSM
+    const dataRows = dbRows.map((r) => [
+      r.division      ?? '',
+      r.sub_division  ?? '',
+      r.major_category ?? '',
+      r.fab_width     != null ? `${Number(r.fab_width)}"` : '',
+      r.fab_consumption != null ? Number(r.fab_consumption) : '',
+      r.gsm           != null ? Number(r.gsm) : '',
+    ]);
 
     const wb = new ExcelJS.Workbook();
     buildFabConsSheet(wb, dataRows);
 
-    const filename = `FAB_CONSUMPTION_MASTER_${new Date().toISOString().slice(0, 10)}.xlsx`;
+    const filename = `ROUGH-FAB_CONSUMPTION_MASTER_${new Date().toISOString().slice(0, 10)}.xlsx`;
     res.setHeader('Content-Type', 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');
     res.setHeader('Content-Disposition', `attachment; filename="${filename}"`);
     await wb.xlsx.write(res);

@@ -36,6 +36,7 @@ export class EnhancedExtractionController {
     subDepartment?: string;
     presentationsType?: string;
     designNumber?: string;
+    majorCategory?: string;
     watcherFields?: {
       division?: string;
       vendorName?: string;
@@ -65,7 +66,7 @@ export class EnhancedExtractionController {
         return Array.from(tokens);
       };
 
-      const { image, schema, categoryName, resolvedCategoryCode, userId, result, originalFilename, folderName, department, subDepartment, presentationsType, designNumber } = params;
+      const { image, schema, categoryName, resolvedCategoryCode, userId, result, originalFilename, folderName, department, subDepartment, presentationsType, designNumber, majorCategory } = params;
 
       const extractVendorCodeFromMetadata = (metadata: any): string | null => {
         if (!metadata || typeof metadata !== 'object') return null;
@@ -233,7 +234,9 @@ export class EnhancedExtractionController {
         const v = a ? (a.schemaValue ?? a.rawValue ?? null) : null;
         return v != null && String(v).trim() !== '' ? String(v).trim() : null;
       })();
-      const majorMetaValue = (result.extractedMetadata as any)?.majorCategory
+      // A major category the user picked before upload wins over anything extracted.
+      const majorMetaValue = majorCategory
+        ?? (result.extractedMetadata as any)?.majorCategory
         ?? (result.extractedMetadata as any)?.major_category
         ?? majorFromAttrs
         ?? null;
@@ -544,11 +547,12 @@ export class EnhancedExtractionController {
       // When the user explicitly passed department/subDepartment in the request
       // (from the Simplified Extraction Page), apply them as authoritative overrides
       // on the flat record so they win over any VLM-extracted or JSON-fallback values.
-      if (!watcherFields && flatId && (params.department || params.subDepartment)) {
+      if (!watcherFields && flatId && (params.department || params.subDepartment || params.majorCategory)) {
         try {
           const scopeOverrides: Record<string, any> = {};
           if (params.department)     scopeOverrides.division    = params.department;
           if (params.subDepartment)  scopeOverrides.subDivision = params.subDepartment;
+          if (params.majorCategory)  scopeOverrides.majorCategory = params.majorCategory;
           if (Object.keys(scopeOverrides).length > 0) {
             await prisma.extractionResultFlat.update({
               where: { id: flatId },
@@ -892,6 +896,7 @@ export class EnhancedExtractionController {
         folderName, // Optional: vendor code source from uploaded folder
         presentationsType, // Optional: e.g. 'FG Article', 'Fabric Article'
         designNumber, // Optional: batch-level design number supplied by user
+        majorCategory, // Optional: major category picked before upload (Simplified Extraction Page)
       }: ExtractionRequest & {
         department?: string;
         subDepartment?: string;
@@ -901,6 +906,7 @@ export class EnhancedExtractionController {
         folderName?: string;
         presentationsType?: string;
         designNumber?: string;
+        majorCategory?: string;
       } = req.body;
 
       // RBAC: Enforce Division/SubDivision for Creators
@@ -1028,6 +1034,20 @@ export class EnhancedExtractionController {
         ? fileName.split(/[\\/]/).pop() || fileName
         : undefined)?.replace(/\.[^/.]+$/, '');
 
+      // The user's pre-upload major category replaces the extracted one, so the
+      // persisted job, the flat row and the response all carry the same value.
+      const chosenMajorCategory = typeof majorCategory === 'string' ? majorCategory.trim() : '';
+      if (chosenMajorCategory && result?.attributes) {
+        (result.attributes as any).major_category = {
+          rawValue: chosenMajorCategory,
+          schemaValue: chosenMajorCategory,
+          isNewDiscovery: false,
+          visualConfidence: 100,
+          mappingConfidence: 100,
+          reasoning: 'Selected by user before upload',
+        };
+      }
+
       const persistence = await this.persistExtractionJob({
         image: imagePath,
         schema,
@@ -1040,6 +1060,7 @@ export class EnhancedExtractionController {
         subDepartment: enforcedSubDepartment,
         presentationsType: presentationsType || 'FG Article',
         designNumber: designNumber?.trim() || undefined,
+        majorCategory: chosenMajorCategory || undefined,
       });
 
       res.json({

@@ -279,7 +279,8 @@ export function DataTable<T = any>({
           minWidth: typeof scroll?.x === 'number' ? scroll.x : scroll?.x,
         }}
       >
-        <TableHeader className={sticky ? 'sticky top-0 z-10 bg-background' : undefined}>
+        {/* z-30 so frozen (fixed, z-20) body cells slide under the sticky header. */}
+        <TableHeader className={sticky ? 'sticky top-0 z-30 bg-background' : undefined}>
             <TableRow>
               {columns.map((col, ci) => {
                 const width = getColumnWidth(col, ci);

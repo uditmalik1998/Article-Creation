@@ -103,9 +103,15 @@ router.get('/fabric-article-data/rough-v2-rate', h(ApproverController.getRoughV2
 // Body article data search — returns up to 10 matching body_article_data rows by number or description
 // (an exact Body Article Number match is always included even if outside the top 10)
 router.get('/body-article-data/search',     h(ApproverController.searchBodyArticleData));
-router.get('/precise-body-article/search', h(ApproverController.searchPreciseBodyArticle));
-router.get('/body-fabric-consumption',     h(ApproverController.getBodyFabricConsumption));
-router.get('/body-fabric-consumption/gsm', h(ApproverController.getFabricGsmByMajorCategory));
+router.get('/precise-body-article/search',   h(ApproverController.searchPreciseBodyArticle));
+router.get('/precise-body-article/by-width', h(ApproverController.getPreciseConsumptionByWidth));
+router.get('/precise-body-article/cmp-data', h(ApproverController.getPreciseBodyArticleCmpData));
+
+// basic_trim_master lookup — AUTO-BGT / ROUGH-V2 auto-fill for B TRIM card
+router.get('/basic-trim-master/lookup', h(ApproverController.getBasicTrimMasterLookup));
+router.get('/body-fabric-consumption',          h(ApproverController.getBodyFabricConsumption));
+router.get('/body-fabric-consumption/by-width', h(ApproverController.getBodyFabricConsumptionByWidth));
+router.get('/body-fabric-consumption/gsm',      h(ApproverController.getFabricGsmByMajorCategory));
 router.get('/rough-cmp-cost',           h(ApproverController.getRoughCmpCost));
 
 // Create body article from FG article — copies Body & Construction fields into body_article_data

@@ -176,6 +176,13 @@ interface PreciseTrimMasterMeta {
   lastUpdated?: string;
 }
 
+interface BasicTrimMasterMeta {
+  total?: number;
+  attributes?: number;
+  skipped?: number;
+  lastUpdated?: string;
+}
+
 interface SegmentMasterMeta {
   total?: number;
   categories?: number;
@@ -216,8 +223,8 @@ interface HierarchyUploadResult {
   preview?: { divisions: string[]; subDivisions: string[]; majorCategories: string[] };
 }
 
-/** Master-data upload cards on this page (Attributes, GM, Fabric & body, Costs, Hierarchy). */
-const MASTER_DATA_COUNT = 18;
+/** Master-data upload cards on this page (Attributes 7, GM 2, Fabric & body 5, Precise 4, Costs 2, Hierarchy & menus 2). */
+const MASTER_DATA_COUNT = 22;
 
 interface PipelineStatusData {
   PENDING: number;
@@ -365,6 +372,13 @@ export default function Admin() {
   const [preciseTrimMasterUploading, setPreciseTrimMasterUploading] = useState(false);
   const [preciseTrimMasterProgress, setPreciseTrimMasterProgress] = useState<number>(0);
   const preciseTrimMasterFileRef = useRef<HTMLInputElement | null>(null);
+
+  // Basic Trim Master (basic_trim_master)
+  const [basicTrimMasterMeta, setBasicTrimMasterMeta] = useState<BasicTrimMasterMeta | null>(null);
+  const [basicTrimMasterStatusLoading, setBasicTrimMasterStatusLoading] = useState(false);
+  const [basicTrimMasterUploading, setBasicTrimMasterUploading] = useState(false);
+  const [basicTrimMasterProgress, setBasicTrimMasterProgress] = useState<number>(0);
+  const basicTrimMasterFileRef = useRef<HTMLInputElement | null>(null);
 
   // National Grid Master
   const [nationalGridTotal, setNationalGridTotal] = useState<number | null>(null);
@@ -1860,6 +1874,68 @@ export default function Admin() {
     }
   };
 
+  // ─────────────────────────────── Basic Trim Master ───────────────────────────────
+  const loadBasicTrimMasterStatus = useCallback(async () => {
+    setBasicTrimMasterStatusLoading(true);
+    try {
+      const token = localStorage.getItem('authToken');
+      const res = await fetch(`${APP_CONFIG.api.baseURL}/admin/basic-trim-master/status`, {
+        headers: token ? { Authorization: `Bearer ${token}` } : {},
+      });
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.error || 'Failed to load basic trim master status');
+      setBasicTrimMasterMeta(data.data);
+    } catch (err: any) {
+      message.error(err?.message || 'Failed to load basic trim master status');
+    } finally {
+      setBasicTrimMasterStatusLoading(false);
+    }
+  }, []);
+
+  const downloadBasicTrimMasterFile = (kind: 'template' | 'export') => {
+    const token = localStorage.getItem('authToken');
+    const url = `${APP_CONFIG.api.baseURL}/admin/basic-trim-master/${kind}`;
+    return fetch(url, { headers: token ? { Authorization: `Bearer ${token}` } : {} })
+      .then((r) => r.blob())
+      .then((blob) => {
+        const a = document.createElement('a');
+        a.href = URL.createObjectURL(blob);
+        a.download = kind === 'template' ? 'BASIC_TRIM_MASTER_TEMPLATE.xlsx' : 'BASIC_TRIM_MASTER_EXPORT.xlsx';
+        a.click();
+      })
+      .catch(() => message.error(kind === 'template' ? 'Failed to download template' : 'Failed to export basic trim master'));
+  };
+
+  const handleBasicTrimMasterUpload = async (file: File) => {
+    setBasicTrimMasterUploading(true);
+    setBasicTrimMasterProgress(0);
+    try {
+      const token = localStorage.getItem('authToken');
+      const formData = new FormData();
+      formData.append('file', file);
+      const progressInterval = setInterval(() => {
+        setBasicTrimMasterProgress((prev) => Math.min(prev + 5, 90));
+      }, 500);
+      const res = await fetch(`${APP_CONFIG.api.baseURL}/admin/basic-trim-master/upload`, {
+        method: 'POST',
+        headers: token ? { Authorization: `Bearer ${token}` } : {},
+        body: formData,
+      });
+      clearInterval(progressInterval);
+      setBasicTrimMasterProgress(100);
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.error || 'Upload failed');
+      message.success(data.message);
+      setBasicTrimMasterMeta(data.data);
+    } catch (err: any) {
+      message.error(err?.message || 'Upload failed');
+    } finally {
+      setBasicTrimMasterUploading(false);
+      setTimeout(() => setBasicTrimMasterProgress(0), 1500);
+      if (basicTrimMasterFileRef.current) basicTrimMasterFileRef.current.value = '';
+    }
+  };
+
   // ─────────────────────────────── National Grid Master ───────────────────────────────
   const downloadNationalGridData = () => {
     const token = localStorage.getItem('authToken');
@@ -2076,7 +2152,7 @@ export default function Admin() {
       .then((blob) => {
         const a = document.createElement('a');
         a.href = URL.createObjectURL(blob);
-        a.download = 'FAB_CONSUMPTION_MASTER_TEMPLATE.xlsx';
+        a.download = 'ROUGH-FAB_CONSUMPTION_MASTER_TEMPLATE.xlsx';
         a.click();
       })
       .catch(() => message.error('Failed to download template'));
@@ -2094,7 +2170,7 @@ export default function Admin() {
         const today = new Date().toISOString().slice(0, 10);
         const a = document.createElement('a');
         a.href = URL.createObjectURL(blob);
-        a.download = `FAB_CONSUMPTION_MASTER_${today}.xlsx`;
+        a.download = `ROUGH-FAB_CONSUMPTION_MASTER_${today}.xlsx`;
         a.click();
       })
       .catch(() => message.error('Failed to download body fabric consumption data'));
@@ -2533,9 +2609,10 @@ export default function Admin() {
     loadBodyFabConsStatus();
     loadPreciseBodyArticleStatus();
     loadPreciseTrimMasterStatus();
+    loadBasicTrimMasterStatus();
     loadPreciseFabricArticleStatus();
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [loadVendorStatus, loadMajCatGridStatus, loadMandatoryGridStatus, loadSizeMasterStatus, loadSetMcMasterStatus, loadColorMasterStatus, loadFabricArticleDataStatus, loadFabricArticleMasterStatus, loadBodyArticleDataStatus, loadBroaderMenuStatus, loadSegmentMasterStatus, loadBasicAccessoriesStatus, loadCmpCostMasterStatus, loadNationalGridStatus, loadHierarchyExcelStatus, loadPipelineStatus, loadFabricRawStatus, loadGmRawStatus, loadBodyFabConsStatus, loadPreciseBodyArticleStatus, loadPreciseTrimMasterStatus, loadPreciseFabricArticleStatus]);
+  }, [loadVendorStatus, loadMajCatGridStatus, loadMandatoryGridStatus, loadSizeMasterStatus, loadSetMcMasterStatus, loadColorMasterStatus, loadFabricArticleDataStatus, loadFabricArticleMasterStatus, loadBodyArticleDataStatus, loadBroaderMenuStatus, loadSegmentMasterStatus, loadBasicAccessoriesStatus, loadCmpCostMasterStatus, loadNationalGridStatus, loadHierarchyExcelStatus, loadPipelineStatus, loadFabricRawStatus, loadGmRawStatus, loadBodyFabConsStatus, loadPreciseBodyArticleStatus, loadPreciseTrimMasterStatus, loadBasicTrimMasterStatus, loadPreciseFabricArticleStatus]);
 
   const loadData = async () => {
     setLoading(true);
@@ -3890,7 +3967,7 @@ export default function Admin() {
               }
             />
           </MasterGroup>
-          <MasterGroup title="Fabric & body" count={4} notUploaded={((fabricArticleDataMeta ? (fabricArticleDataMeta.total ?? 0) : null) === 0 ? 1 : 0) + ((fabricArticleMasterMeta ? (fabricArticleMasterMeta.total ?? 0) : null) === 0 ? 1 : 0) + ((bodyFabConsTotal ? bodyFabConsTotal.total : null) === 0 ? 1 : 0) + ((bodyArticleDataMeta ? (bodyArticleDataMeta.total ?? 0) : null) === 0 ? 1 : 0)}>
+          <MasterGroup title="Fabric & body" count={5} notUploaded={((fabricArticleDataMeta ? (fabricArticleDataMeta.total ?? 0) : null) === 0 ? 1 : 0) + ((fabricArticleMasterMeta ? (fabricArticleMasterMeta.total ?? 0) : null) === 0 ? 1 : 0) + ((bodyFabConsTotal ? bodyFabConsTotal.total : null) === 0 ? 1 : 0) + ((bodyArticleDataMeta ? (bodyArticleDataMeta.total ?? 0) : null) === 0 ? 1 : 0) + ((cmpCostMasterMeta ? (cmpCostMasterMeta.total ?? 0) : null) === 0 ? 1 : 0)}>
             <MasterDataCard
               title="Fabric Article Data"
               description="Bulk Insert"
@@ -4090,7 +4167,7 @@ export default function Admin() {
               }
             />
             <MasterDataCard
-              title="Body Fabric Consumption"
+              title="Rough Body Fabric Consumption"
               rows={bodyFabConsTotal ? bodyFabConsTotal.total : null}
               loading={bodyFabConsStatusLoading}
               busy={bodyFabConsUploading}
@@ -4112,8 +4189,8 @@ export default function Admin() {
                     <Alert
                       type="warning"
                       showIcon
-                      message="No body fabric consumption data loaded"
-                      description="Upload FAB CONSUMPTION MASTER Excel. Reads columns: DIV, SUB DIV, MAJ CAT, FAB_WIDTH, FAB CONSUMPTION, GSM. All other columns are ignored. Replaces the entire table."
+                      message="No rough body fabric consumption data loaded"
+                      description="Upload ROUGH-FAB CONSUMPTION MASTER Excel. Reads columns: DIV, SUB DIV, MAJ CAT, FAB_WIDTH, FAB CONSUMPTION, GSM. All other columns are ignored. Replaces the entire table."
                     />
                   )}
 
@@ -4281,8 +4358,97 @@ export default function Admin() {
                 </>
               }
             />
+            <MasterDataCard
+              title="Rough CMP Cost Master"
+              description="SAM Breakdown &amp; CMP Cost per Major Category"
+              rows={cmpCostMasterMeta ? (cmpCostMasterMeta.total ?? 0) : null}
+              lastUpload={cmpCostMasterMeta?.lastUpdated ?? null}
+              loading={cmpCostMasterStatusLoading}
+              busy={cmpCostMasterUploading}
+              onView={() => navigate('/admin/expense/cmp-cost-master')}
+              onDownload={() => downloadCmpCostMasterFile('export')}
+              onTemplate={() => downloadCmpCostMasterFile('template')}
+              onRefresh={loadCmpCostMasterStatus}
+              details={
+                <>
+                  {cmpCostMasterMeta && (cmpCostMasterMeta.total ?? 0) > 0 ? (
+                    <Descriptions bordered>
+                      {cmpCostMasterMeta.lastUpdated && (
+                        <Descriptions.Item label="Last Updated">
+                          {new Date(cmpCostMasterMeta.lastUpdated).toLocaleString('en-IN', {
+                            timeZone: 'Asia/Kolkata', dateStyle: 'medium', timeStyle: 'short',
+                          }) + ' IST'}
+                        </Descriptions.Item>
+                      )}
+                      <Descriptions.Item label="Major Categories">
+                        <Badge variant="info">{(cmpCostMasterMeta.categories ?? 0).toLocaleString()}</Badge>
+                      </Descriptions.Item>
+                      <Descriptions.Item label="Total Rows">
+                        <Badge variant="success">{(cmpCostMasterMeta.total ?? 0).toLocaleString()}</Badge>
+                      </Descriptions.Item>
+                      {cmpCostMasterMeta.skipped != null && (cmpCostMasterMeta.skipped ?? 0) > 0 && (
+                        <Descriptions.Item label="Rows Skipped">
+                          <Badge variant="warning">{(cmpCostMasterMeta.skipped ?? 0).toLocaleString()}</Badge>
+                        </Descriptions.Item>
+                      )}
+                    </Descriptions>
+                  ) : (
+                    <Alert
+                      type="warning"
+                      showIcon
+                      message="No Rough CMP cost master data"
+                      description="Upload the Rough CMP Cost Excel (row 1 = title, row 2 = headers: DIV, SUB_DIV, MAJ_CAT, CUTTING SAM, CUTTING VAL, STITCHING SAM, STITCHING VAL, IRONING SAM, IRONING VAL, FINISHING SAM, FINISHING VAL, CMP COST). Upserts by DIV + SUB_DIV + MAJ_CAT."
+                    />
+                  )}
+                </>
+              }
+              upload={
+                <>
+                  <div className="rounded-md border border-border p-4">
+                    <div className="mb-1 font-semibold">Upload Rough CMP Cost Master Excel</div>
+                    <div className="mb-3 text-xs text-muted-foreground">
+                      Row 1: title. Row 2: headers (<strong>DIV, SUB_DIV, MAJ_CAT, CUTTING SAM, CUTTING VAL, STITCHING SAM, STITCHING VAL, IRONING SAM, IRONING VAL, FINISHING SAM, FINISHING VAL, CMP COST</strong>). Row 3+: data.{' '}
+                      <strong>Upserts by DIV + SUB_DIV + MAJ_CAT</strong> — combinations not in the file are left untouched.
+                    </div>
+
+                    <input
+                      ref={cmpCostMasterFileRef}
+                      type="file"
+                      accept=".xlsx,.xls"
+                      className="hidden"
+                      onChange={(e) => {
+                        const file = e.target.files?.[0];
+                        if (file) handleCmpCostMasterUpload(file);
+                      }}
+                    />
+
+                    {cmpCostMasterUploading ? (
+                      <div>
+                        <div className="mb-2 text-[13px] text-slate-600 dark:text-slate-300">
+                          <RefreshCw className="mr-1.5 inline-block h-3.5 w-3.5 animate-spin" />
+                          Parsing Excel &amp; updating CMP costs...
+                        </div>
+                        <Progress value={cmpCostMasterProgress} />
+                      </div>
+                    ) : (
+                      <button
+                        type="button"
+                        onClick={() => cmpCostMasterFileRef.current?.click()}
+                        className="flex w-full flex-col items-center justify-center rounded-md border-2 border-dashed border-border bg-muted/30 px-4 py-6 transition-colors hover:border-slate-400 hover:bg-slate-50 dark:hover:bg-slate-500/10"
+                      >
+                        <Inbox className="mb-2 h-8 w-8 text-slate-600 dark:text-slate-300" />
+                        <p className="text-[13px]">
+                          Click to upload <strong>.xlsx</strong> file
+                        </p>
+                        <p className="text-[11px] text-muted-foreground">Only Excel files. Max 50 MB.</p>
+                      </button>
+                    )}
+                  </div>
+                </>
+              }
+            />
           </MasterGroup>
-          <MasterGroup title="Precise" count={3} notUploaded={((preciseBodyArticleTotal ? preciseBodyArticleTotal.total : null) === 0 ? 1 : 0) + ((preciseTrimMasterMeta ? (preciseTrimMasterMeta.total ?? 0) : null) === 0 ? 1 : 0) + ((preciseFabricArticleMeta ? preciseFabricArticleMeta.total : null) === 0 ? 1 : 0)}>
+          <MasterGroup title="Precise" count={4} notUploaded={((preciseBodyArticleTotal ? preciseBodyArticleTotal.total : null) === 0 ? 1 : 0) + ((preciseTrimMasterMeta ? (preciseTrimMasterMeta.total ?? 0) : null) === 0 ? 1 : 0) + ((basicTrimMasterMeta ? (basicTrimMasterMeta.total ?? 0) : null) === 0 ? 1 : 0) + ((preciseFabricArticleMeta ? preciseFabricArticleMeta.total : null) === 0 ? 1 : 0)}>
             <MasterDataCard
               title="Precise Body Article Data"
               rows={preciseBodyArticleTotal ? preciseBodyArticleTotal.total : null}
@@ -4449,6 +4615,95 @@ export default function Admin() {
               }
             />
             <MasterDataCard
+              title="Precise Basic Trim Master"
+              description="BT-1 / BT-2 Trim Costs per Attribute &amp; Type"
+              rows={basicTrimMasterMeta ? (basicTrimMasterMeta.total ?? 0) : null}
+              lastUpload={basicTrimMasterMeta?.lastUpdated ?? null}
+              loading={basicTrimMasterStatusLoading}
+              busy={basicTrimMasterUploading}
+              onView={() => navigate('/admin/expense/basic-trim-master')}
+              onDownload={() => downloadBasicTrimMasterFile('export')}
+              onTemplate={() => downloadBasicTrimMasterFile('template')}
+              onRefresh={loadBasicTrimMasterStatus}
+              details={
+                <>
+                  {basicTrimMasterMeta && (basicTrimMasterMeta.total ?? 0) > 0 ? (
+                    <Descriptions bordered>
+                      {basicTrimMasterMeta.lastUpdated && (
+                        <Descriptions.Item label="Last Updated">
+                          {new Date(basicTrimMasterMeta.lastUpdated).toLocaleString('en-IN', {
+                            dateStyle: 'medium', timeStyle: 'short',
+                          })}
+                        </Descriptions.Item>
+                      )}
+                      <Descriptions.Item label="Attribute Names">
+                        <Badge variant="info">{(basicTrimMasterMeta.attributes ?? 0).toLocaleString()}</Badge>
+                      </Descriptions.Item>
+                      <Descriptions.Item label="Total Rows">
+                        <Badge variant="success">{(basicTrimMasterMeta.total ?? 0).toLocaleString()}</Badge>
+                      </Descriptions.Item>
+                      {basicTrimMasterMeta.skipped != null && (basicTrimMasterMeta.skipped ?? 0) > 0 && (
+                        <Descriptions.Item label="Skipped">
+                          <Badge variant="warning">{(basicTrimMasterMeta.skipped ?? 0).toLocaleString()}</Badge>
+                        </Descriptions.Item>
+                      )}
+                    </Descriptions>
+                  ) : (
+                    <Alert
+                      type="warning"
+                      showIcon
+                      message="No basic trim master data loaded"
+                      description="Upload an Excel with columns: ATTRIBUTE_NAME, TYPE, BT-1, BT-2. Row 3 = headers, data from row 4. Upserts by (ATTRIBUTE_NAME, TYPE)."
+                    />
+                  )}
+                </>
+              }
+              upload={
+                <>
+                  <div className="rounded-md border border-border p-4">
+                    <div className="mb-1 font-semibold">Upload Basic Trim Master Excel</div>
+                    <div className="mb-3 text-xs text-muted-foreground">
+                      Row 3: headers (<strong>ATTRIBUTE NAME, TYPE, BT-1</strong>). Row 4+: data.{' '}
+                      <strong>Upserts by (ATTRIBUTE_NAME + TYPE)</strong> — existing rows are updated, new rows are inserted.
+                    </div>
+
+                    <input
+                      ref={basicTrimMasterFileRef}
+                      type="file"
+                      accept=".xlsx,.xls"
+                      className="hidden"
+                      onChange={(e) => {
+                        const file = e.target.files?.[0];
+                        if (file) handleBasicTrimMasterUpload(file);
+                      }}
+                    />
+
+                    {basicTrimMasterUploading ? (
+                      <div>
+                        <div className="mb-2 text-[13px] text-slate-600 dark:text-slate-300">
+                          <RefreshCw className="mr-1.5 inline-block h-3.5 w-3.5 animate-spin" />
+                          Uploading &amp; upserting rows...
+                        </div>
+                        <Progress value={basicTrimMasterProgress} />
+                      </div>
+                    ) : (
+                      <button
+                        type="button"
+                        onClick={() => basicTrimMasterFileRef.current?.click()}
+                        className="flex w-full flex-col items-center justify-center rounded-md border-2 border-dashed border-border bg-muted/30 px-4 py-6 transition-colors hover:border-slate-400 hover:bg-slate-50 dark:hover:bg-slate-500/10"
+                      >
+                        <Inbox className="mb-2 h-8 w-8 text-slate-600 dark:text-slate-300" />
+                        <p className="text-[13px]">
+                          Click to upload <strong>.xlsx</strong> file
+                        </p>
+                        <p className="text-[11px] text-muted-foreground">Only Excel files. Max 50 MB.</p>
+                      </button>
+                    )}
+                  </div>
+                </>
+              }
+            />
+            <MasterDataCard
               title="Precise Fabric Article Data"
               rows={preciseFabricArticleMeta ? preciseFabricArticleMeta.total : null}
               lastUpload={preciseFabricArticleMeta?.lastUpdated ?? null}
@@ -4530,7 +4785,7 @@ export default function Admin() {
               }
             />
           </MasterGroup>
-          <MasterGroup title="Costs" count={3} notUploaded={((vaacTotal ? vaacTotal.total : null) === 0 ? 1 : 0) + ((basicAccessoriesMeta ? (basicAccessoriesMeta.total ?? 0) : null) === 0 ? 1 : 0) + ((cmpCostMasterMeta ? (cmpCostMasterMeta.total ?? 0) : null) === 0 ? 1 : 0)}>
+          <MasterGroup title="Costs" count={2} notUploaded={((vaacTotal ? vaacTotal.total : null) === 0 ? 1 : 0) + ((basicAccessoriesMeta ? (basicAccessoriesMeta.total ?? 0) : null) === 0 ? 1 : 0)}>
             <MasterDataCard
               title="Value Addition Accessories Cost"
               rows={vaacTotal ? vaacTotal.total : null}
@@ -4695,97 +4950,6 @@ export default function Admin() {
                       <button
                         type="button"
                         onClick={() => basicAccessoriesFileRef.current?.click()}
-                        className="flex w-full flex-col items-center justify-center rounded-md border-2 border-dashed border-border bg-muted/30 px-4 py-6 transition-colors hover:border-slate-400 hover:bg-slate-50 dark:hover:bg-slate-500/10"
-                      >
-                        <Inbox className="mb-2 h-8 w-8 text-slate-600 dark:text-slate-300" />
-                        <p className="text-[13px]">
-                          Click to upload <strong>.xlsx</strong> file
-                        </p>
-                        <p className="text-[11px] text-muted-foreground">Only Excel files. Max 50 MB.</p>
-                      </button>
-                    )}
-                  </div>
-
-                </>
-              }
-            />
-            <MasterDataCard
-              title="CMP Cost Master"
-              description="Rough CMP Cost per Major Category"
-              rows={cmpCostMasterMeta ? (cmpCostMasterMeta.total ?? 0) : null}
-              lastUpload={cmpCostMasterMeta?.lastUpdated ?? null}
-              loading={cmpCostMasterStatusLoading}
-              busy={cmpCostMasterUploading}
-              onView={() => navigate('/admin/expense/cmp-cost-master')}
-              onDownload={() => downloadCmpCostMasterFile('export')}
-              onTemplate={() => downloadCmpCostMasterFile('template')}
-              onRefresh={loadCmpCostMasterStatus}
-              details={
-                <>
-                  {cmpCostMasterMeta && (cmpCostMasterMeta.total ?? 0) > 0 ? (
-                    <Descriptions bordered>
-                      {cmpCostMasterMeta.lastUpdated && (
-                        <Descriptions.Item label="Last Updated">
-                          {new Date(cmpCostMasterMeta.lastUpdated).toLocaleString('en-IN', {
-                            timeZone: 'Asia/Kolkata', dateStyle: 'medium', timeStyle: 'short',
-                          }) + ' IST'}
-                        </Descriptions.Item>
-                      )}
-                      <Descriptions.Item label="Major Categories">
-                        <Badge variant="info">{(cmpCostMasterMeta.categories ?? 0).toLocaleString()}</Badge>
-                      </Descriptions.Item>
-                      <Descriptions.Item label="Total Rows">
-                        <Badge variant="success">{(cmpCostMasterMeta.total ?? 0).toLocaleString()}</Badge>
-                      </Descriptions.Item>
-                      {cmpCostMasterMeta.skipped != null && (cmpCostMasterMeta.skipped ?? 0) > 0 && (
-                        <Descriptions.Item label="Rows Skipped">
-                          <Badge variant="warning">{(cmpCostMasterMeta.skipped ?? 0).toLocaleString()}</Badge>
-                        </Descriptions.Item>
-                      )}
-                    </Descriptions>
-                  ) : (
-                    <Alert
-                      type="warning"
-                      showIcon
-                      message="No CMP cost master data"
-                      description="Upload the CMP Cost Excel (columns: DIV, SUB_DIV, MAJ_CAT, Total). Auto-fills a Body Article's CMP Cost on the New Article page when a pending article of that major category has none of its own yet."
-                    />
-                  )}
-
-                </>
-              }
-              upload={
-                <>
-                  <div className="rounded-md border border-border p-4">
-                    <div className="mb-1 font-semibold">Upload CMP Cost Master Excel</div>
-                    <div className="mb-3 text-xs text-muted-foreground">
-                      Columns: <strong>DIV, SUB_DIV, MAJ_CAT, Total</strong>. Download the template for the exact layout.{' '}
-                      <strong>Upserts by DIV + SUB_DIV + MAJ_CAT</strong> — combinations not in the file are left untouched.
-                    </div>
-
-                    <input
-                      ref={cmpCostMasterFileRef}
-                      type="file"
-                      accept=".xlsx,.xls"
-                      className="hidden"
-                      onChange={(e) => {
-                        const file = e.target.files?.[0];
-                        if (file) handleCmpCostMasterUpload(file);
-                      }}
-                    />
-
-                    {cmpCostMasterUploading ? (
-                      <div>
-                        <div className="mb-2 text-[13px] text-slate-600 dark:text-slate-300">
-                          <RefreshCw className="mr-1.5 inline-block h-3.5 w-3.5 animate-spin" />
-                          Parsing Excel &amp; updating CMP costs...
-                        </div>
-                        <Progress value={cmpCostMasterProgress} />
-                      </div>
-                    ) : (
-                      <button
-                        type="button"
-                        onClick={() => cmpCostMasterFileRef.current?.click()}
                         className="flex w-full flex-col items-center justify-center rounded-md border-2 border-dashed border-border bg-muted/30 px-4 py-6 transition-colors hover:border-slate-400 hover:bg-slate-50 dark:hover:bg-slate-500/10"
                       >
                         <Inbox className="mb-2 h-8 w-8 text-slate-600 dark:text-slate-300" />

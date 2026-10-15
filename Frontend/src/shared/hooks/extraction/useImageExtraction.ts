@@ -165,6 +165,7 @@ export const useImageExtraction = () => {
       metadata?: {
         vendorName?: string;
         designNumber?: string;
+        majorCategory?: string;
         pptNumber?: string;
         costPrice?: number;
         sellingPrice?: number;
@@ -203,10 +204,10 @@ export const useImageExtraction = () => {
         console.log(`🔍 Frontend Extraction - Discovery Enabled: ${discoveryEnabled}, Category: ${categoryName}, Code: ${categoryCode}, Has Metadata: ${!!metadata}`);
 
         // Use category-based extraction only when metadata contains fields beyond
-        // designNumber — designNumber alone is passed via the legacy path to avoid
+        // designNumber/majorCategory — those alone go via the legacy path to avoid
         // triggering a DB category lookup (e.g. 'MENS-MU' is not a category code).
         const hasRichMetadata = metadata != null && Object.keys(metadata).some(
-          k => k !== 'designNumber' && (metadata as Record<string, unknown>)[k] != null
+          k => k !== 'designNumber' && k !== 'majorCategory' && (metadata as Record<string, unknown>)[k] != null
         );
         let result: EnhancedExtractionResult;
         if (categoryCode && hasRichMetadata) {
@@ -241,6 +242,7 @@ export const useImageExtraction = () => {
             ...(legacyScope.subDivision ? { subDepartment:  legacyScope.subDivision } : {}),
             ...(presentationsType       ? { presentationsType }                      : {}),
             ...(metadata?.designNumber  ? { designNumber: metadata.designNumber }    : {}),
+            ...(metadata?.majorCategory ? { majorCategory: metadata.majorCategory }  : {}),
           });
         }
 

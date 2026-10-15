@@ -16,10 +16,12 @@ import { ARTICLE_DESCRIPTION_SOURCE_FIELDS, buildArticleDescription } from '../u
 import { getExcludedDescriptionFields } from '../utils/categoryFieldVisibility';
 import { getSegmentByCategoryAndMrp } from '../utils/segmentRangeMapper';
 
-// Parent value = sum of children.
+// Parent value = sum of children. Every name must be a column of ExtractionResultFlat
+// (tests/comboFieldsExist.test.ts checks it): these are written with prisma.update, which
+// rejects an unknown field. cmtpCost / cmpCost / fabCost / valueAddCost / valueAddProcessCost
+// were dropped from the model (15-Oct cost refactor on main).
 export const COMBO_SUMMED_FIELDS = [
-    'rate', 'mrp', 'cmtpCost', 'cmpCost', 'fabCost',
-    'valueAddCost', 'valueAddProcessCost', 'vendorFabricRate',
+    'rate', 'mrp', 'vendorFabricRate',
 ] as const;
 
 // Parent value = primary (Top) child's value.
@@ -28,7 +30,6 @@ export const COMBO_MIRRORED_FIELDS = [
     'yarn1', 'yarn2', 'fabricMainMvgr', 'weave', 'weaveFullForm', 'composition', 'finish', 'gsm',
     'macroMvgr', 'macroMvgrFullForm', 'mainMvgr', 'mainMvgrFullForm', 'mFab2', 'mFab2FullForm',
     'shade', 'weight', 'lycra', 'fCount', 'fConstruction', 'fOunce', 'fWidth', 'fabDiv', 'fabVdr',
-    'fabCons', 'width',
     // Body
     'size', 'neck', 'neckDetails', 'collar', 'collarStyle', 'placket', 'sleeve', 'sleeveFold', 'mSet',
     'bottomFold', 'frontOpenStyle', 'pocketType', 'noOfPocket', 'extraPocket', 'fit', 'pattern', 'length',
@@ -39,7 +40,6 @@ export const COMBO_MIRRORED_FIELDS = [
     'embroidery', 'embroideryType', 'embPlacement', 'wash',
     // Business attributes
     'ageGroup', 'articleFashionType', 'articleDimension', 'mNoOfSize', 'mNoOfClr', 'impAtrbt2',
-    'valueAddAccCostType',
     // Fabric / body article references
     'fabricArticleNumber', 'fabricArticleDescription', 'bodyArticle', 'bodyArticleDescription',
 ] as const;

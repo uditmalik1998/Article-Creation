@@ -13,6 +13,7 @@ export interface BackendExtractionRequest {
   folderName?: string; // Folder name for vendor code derivation
   presentationsType?: string;
   designNumber?: string; // Batch-level design number applied to all images
+  majorCategory?: string; // Major category picked before upload; overrides the extracted one
 }
 
 export interface BackendExtractionResponse {

@@ -223,3 +223,27 @@ Three buttons appear on approved articles in the card view:
 > These routes are **NOT registered** in `Backend/src/routes/approver.ts` as of 2026-05-02.  
 > Clicking these buttons will return 404.  
 > See [[13 - Pending Issues]] — this is the top priority fix.
+
+### FG left rail — Image / Article Information / Reference & Vendor (2026-10-14, design "Option A · Ink headers")
+
+FG Article tab pages only (`!allowGroups` in `ApproverArticleList.tsx`); GM/Fabric/Body pages keep the old left rail.
+- All three cards use the ink header (`CARD_THEME`, same as the attribute cards) via `renderInkCardHeader`. Image card: "1 / 1" pill, always-visible expand button, image file name under the photo.
+- **Article Information** and **Reference & Vendor** are collapsible and **closed by default** (`openLeftCards` state, per article view; not tied to Collapse All). While closed the header shows a summary: Info → "92% · Medium 22/51"; Reference & Vendor → "N required empty" (orange) if vendor code/name are missing, otherwise the vendor name.
+- Info rows: label/value grid; AI confidence as a dark pill; levels coloured slate (High) / orange (Medium) / red (Low).
+- Reference & Vendor fields: label stacked above a full-width value (mono for major category and descriptions), "Click to fill" in grey italics, required-empty in orange. Editing behaviour (`renderHeaderField`) unchanged.
+
+### CMP COST card — `features/approver/components/CmpCostCard.tsx` (2026-10-14, design "Option A · full matrix")
+
+FG Article tab pages only (`!allowGroups && !isBodyArticle`). No tab of its own: it shows whenever the **BODY** tab is selected, full width, after the PKG COST slot and before ROUGH CONSUMPTION (`showCmpCard`). Collapsible with key `CMP` (follows Collapse All).
+- One table: rows CUTTING / STITCHING / IRONING / FINISHING × stages BGT / ACT / VENDOR / FINAL (FINAL group in the dark ink colour) × SAM / SAM VAL / PR VAL.
+- CUTTING has no SAM / SAM VAL (shown "—"); every other cell is a numeric input with placeholder "Req.". Locked articles show the cells disabled.
+- No total row and no total in the header (user removed both from the design).
+- Values are **UI-only local state**, like PKG COST — nothing is saved yet.
+
+### Fabric Article pages — same left rail + FAB card (2026-10-14)
+
+`fabric-article/components/FabricArticleList.tsx` is a separate copy of the FG list, so the FG design was ported there:
+- Left rail: Article Image / Article Information / Reference & Vendor with ink headers (`renderInkCardHeader`), stacked Reference & Vendor fields, slate/orange/red levels. Info and Reference are collapsible but **open by default** on Fabric pages (`openLeftCards` starts with both). Article ID row kept for non-SRM items; SRM items show only Category + Created (as before).
+- "FABRIC AND CONSTRUCTION" card renamed **FAB** and given the ink theme (`CARD_THEME`); same 14 attributes + Fabric Article No./Desc. No AUTO-BGT / ROUGH-V2 / VENDOR COST / FINAL COST rows and no Create Fabric Article button (FG-only).
+- BOM card switched from yellow to the ink header.
+
