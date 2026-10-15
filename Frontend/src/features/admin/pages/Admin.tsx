@@ -97,6 +97,14 @@ interface SetMcMasterMeta {
   missingHsn?: number;
 }
 
+interface GmSizeMasterMeta {
+  uploadedAt?: string;
+  fileName?: string;
+  total?: number;
+  categories?: number;
+  divisions?: number;
+}
+
 interface ColorMasterMeta {
   uploadedAt?: string;
   fileName?: string;
@@ -216,8 +224,8 @@ interface HierarchyUploadResult {
   preview?: { divisions: string[]; subDivisions: string[]; majorCategories: string[] };
 }
 
-/** Master-data upload cards on this page (Attributes 7, GM 2, Fabric & body 5, Precise 3, Costs 2, Hierarchy & menus 2). */
-const MASTER_DATA_COUNT = 21;
+/** Master-data upload cards on this page (Attributes 7, GM 3, Fabric & body 5, Precise 3, Costs 2, Hierarchy & menus 2). */
+const MASTER_DATA_COUNT = 22;
 
 interface PipelineStatusData {
   PENDING: number;
@@ -304,6 +312,13 @@ export default function Admin() {
   const [setMcMasterStatusLoading, setSetMcMasterStatusLoading] = useState(false);
   const [setMcMasterUploading, setSetMcMasterUploading] = useState(false);
   const setMcFileRef = useRef<HTMLInputElement | null>(null);
+
+  // GM Size Master (gm_size_master)
+  const [gmSizeMasterMeta, setGmSizeMasterMeta] = useState<GmSizeMasterMeta | null>(null);
+  const [gmSizeMasterStatusLoading, setGmSizeMasterStatusLoading] = useState(false);
+  const [gmSizeMasterUploading, setGmSizeMasterUploading] = useState(false);
+  const [gmSizeMasterProgress, setGmSizeMasterProgress] = useState<number>(0);
+  const gmSizeMasterFileRef = useRef<HTMLInputElement | null>(null);
 
   // Color Master (color_master)
   const [colorMasterMeta, setColorMasterMeta] = useState<ColorMasterMeta | null>(null);
@@ -1246,6 +1261,57 @@ export default function Admin() {
     } finally {
       setSetMcMasterUploading(false);
       if (setMcFileRef.current) setMcFileRef.current.value = '';
+    }
+  };
+
+  // ─────────────────────────────── GM Size Master ─────────────────────────────
+  const loadGmSizeMasterStatus = useCallback(async () => {
+    setGmSizeMasterStatusLoading(true);
+    try {
+      const token = localStorage.getItem('authToken');
+      const res = await fetch(`${APP_CONFIG.api.baseURL}/admin/gm-size-master/status`, {
+        headers: token ? { Authorization: `Bearer ${token}` } : {},
+      });
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.error || 'Failed to load GM size master status');
+      setGmSizeMasterMeta(data.data);
+    } catch (err: any) {
+      message.error(err?.message || 'Failed to load GM size master status');
+    } finally {
+      setGmSizeMasterStatusLoading(false);
+    }
+  }, []);
+
+  const handleGmSizeMasterUpload = async (file: File) => {
+    setGmSizeMasterUploading(true);
+    setGmSizeMasterProgress(0);
+    try {
+      const token = localStorage.getItem('authToken');
+      const formData = new FormData();
+      formData.append('file', file);
+      const progressInterval = setInterval(() => {
+        setGmSizeMasterProgress((prev) => Math.min(prev + 8, 90));
+      }, 400);
+      const res = await fetch(`${APP_CONFIG.api.baseURL}/admin/gm-size-master/upload`, {
+        method: 'POST',
+        headers: token ? { Authorization: `Bearer ${token}` } : {},
+        body: formData,
+      });
+      clearInterval(progressInterval);
+      setGmSizeMasterProgress(100);
+      const data = await res.json();
+      if (!res.ok) {
+        const problems: string[] = Array.isArray(data.problems) ? data.problems : [];
+        throw new Error([data.error || 'Upload failed', ...problems.slice(0, 5)].join(' — '));
+      }
+      message.success(data.message);
+      setGmSizeMasterMeta(data.data);
+    } catch (err: any) {
+      message.error(err?.message || 'Upload failed');
+    } finally {
+      setGmSizeMasterUploading(false);
+      setTimeout(() => setGmSizeMasterProgress(0), 1500);
+      if (gmSizeMasterFileRef.current) gmSizeMasterFileRef.current.value = '';
     }
   };
 
@@ -2517,6 +2583,7 @@ export default function Admin() {
     loadMandatoryGridStatus();
     loadSizeMasterStatus();
     loadSetMcMasterStatus();
+    loadGmSizeMasterStatus();
     loadColorMasterStatus();
     loadFabricArticleDataStatus();
     loadFabricArticleMasterStatus();
@@ -2535,7 +2602,7 @@ export default function Admin() {
     loadBasicTrimMasterStatus();
     loadPreciseFabricArticleStatus();
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [loadVendorStatus, loadMajCatGridStatus, loadMandatoryGridStatus, loadSizeMasterStatus, loadSetMcMasterStatus, loadColorMasterStatus, loadFabricArticleDataStatus, loadFabricArticleMasterStatus, loadBodyArticleDataStatus, loadBroaderMenuStatus, loadSegmentMasterStatus, loadBasicAccessoriesStatus, loadCmpCostMasterStatus, loadNationalGridStatus, loadHierarchyExcelStatus, loadPipelineStatus, loadFabricRawStatus, loadGmRawStatus, loadBodyFabConsStatus, loadPreciseBodyArticleStatus, loadBasicTrimMasterStatus, loadPreciseFabricArticleStatus]);
+  }, [loadVendorStatus, loadMajCatGridStatus, loadMandatoryGridStatus, loadSizeMasterStatus, loadSetMcMasterStatus, loadGmSizeMasterStatus, loadColorMasterStatus, loadFabricArticleDataStatus, loadFabricArticleMasterStatus, loadBodyArticleDataStatus, loadBroaderMenuStatus, loadSegmentMasterStatus, loadBasicAccessoriesStatus, loadCmpCostMasterStatus, loadNationalGridStatus, loadHierarchyExcelStatus, loadPipelineStatus, loadFabricRawStatus, loadGmRawStatus, loadBodyFabConsStatus, loadPreciseBodyArticleStatus, loadBasicTrimMasterStatus, loadPreciseFabricArticleStatus]);
 
   const loadData = async () => {
     setLoading(true);
@@ -3694,7 +3761,7 @@ export default function Admin() {
               }
             />
           </MasterGroup>
-          <MasterGroup title="GM" count={2} notUploaded={((gmMctMeta ? (gmMctMeta.totalRows ?? 0) : null) === 0 ? 1 : 0) + ((gmGridMeta ? (gmGridMeta.totalRows ?? gmGridMeta.totalValues ?? 0) : null) === 0 ? 1 : 0)}>
+          <MasterGroup title="GM" count={3} notUploaded={((gmMctMeta ? (gmMctMeta.totalRows ?? 0) : null) === 0 ? 1 : 0) + ((gmGridMeta ? (gmGridMeta.totalRows ?? gmGridMeta.totalValues ?? 0) : null) === 0 ? 1 : 0) + ((gmSizeMasterMeta ? (gmSizeMasterMeta.total ?? 0) : null) === 0 ? 1 : 0)}>
             <MasterDataCard
               title="GM Major Category Details"
               rows={gmMctMeta ? (gmMctMeta.totalRows ?? 0) : null}
@@ -3886,6 +3953,110 @@ export default function Admin() {
                     )}
                   </div>
 
+                </>
+              }
+            />
+            <MasterDataCard
+              title="GM Size Master"
+              rows={gmSizeMasterMeta ? (gmSizeMasterMeta.total ?? 0) : null}
+              lastUpload={gmSizeMasterMeta?.uploadedAt ?? null}
+              loading={gmSizeMasterStatusLoading}
+              busy={gmSizeMasterUploading}
+              onDownload={() => {
+                const token = localStorage.getItem('authToken');
+                fetch(`${APP_CONFIG.api.baseURL}/admin/gm-size-master/download`, {
+                  headers: token ? { Authorization: `Bearer ${token}` } : {},
+                }).then((r) => r.blob()).then((blob) => {
+                  const a = document.createElement('a');
+                  a.href = URL.createObjectURL(blob);
+                  a.download = `GM_SIZE_MASTER_${new Date().toISOString().slice(0, 10)}.xlsx`;
+                  a.click();
+                }).catch(() => message.error('Failed to download GM size master data'));
+              }}
+              onTemplate={() => {
+                const token = localStorage.getItem('authToken');
+                fetch(`${APP_CONFIG.api.baseURL}/admin/gm-size-master/template`, {
+                  headers: token ? { Authorization: `Bearer ${token}` } : {},
+                }).then((r) => r.blob()).then((blob) => {
+                  const a = document.createElement('a');
+                  a.href = URL.createObjectURL(blob);
+                  a.download = 'GM_SIZE_MASTER_TEMPLATE.xlsx';
+                  a.click();
+                }).catch(() => message.error('Failed to download template'));
+              }}
+              onRefresh={loadGmSizeMasterStatus}
+              details={
+                <>
+                  {gmSizeMasterMeta && (gmSizeMasterMeta.total ?? 0) > 0 ? (
+                    <Descriptions bordered>
+                      <Descriptions.Item label="Last Upload">
+                        {gmSizeMasterMeta.uploadedAt
+                          ? new Date(gmSizeMasterMeta.uploadedAt).toLocaleString('en-IN', {
+                              timeZone: 'Asia/Kolkata', dateStyle: 'medium', timeStyle: 'short',
+                            }) + ' IST'
+                          : <span className="text-muted-foreground">Unknown</span>}
+                      </Descriptions.Item>
+                      <Descriptions.Item label="File">
+                        <span className="font-mono text-xs">{gmSizeMasterMeta.fileName || '—'}</span>
+                      </Descriptions.Item>
+                      <Descriptions.Item label="Total Sizes">
+                        <Badge variant="success">{(gmSizeMasterMeta.total ?? 0).toLocaleString()}</Badge>
+                      </Descriptions.Item>
+                      <Descriptions.Item label="Major Categories">
+                        <Badge variant="info">{(gmSizeMasterMeta.categories ?? 0).toLocaleString()}</Badge>
+                      </Descriptions.Item>
+                      <Descriptions.Item label="Divisions">
+                        <Badge variant="secondary">{(gmSizeMasterMeta.divisions ?? 0).toLocaleString()}</Badge>
+                      </Descriptions.Item>
+                    </Descriptions>
+                  ) : (
+                    <Alert
+                      type="warning"
+                      showIcon
+                      message="No GM size master uploaded yet"
+                      description="Upload the GM Size Master Excel to define valid sizes per GM major category."
+                    />
+                  )}
+                </>
+              }
+              upload={
+                <>
+                  <div className="rounded-md border border-border p-4">
+                    <div className="mb-1 font-semibold">Upload GM Size Master Excel</div>
+                    <div className="mb-3 text-xs text-muted-foreground">
+                      Sheet: <strong>SIZE MASTER</strong>. Columns: SEG, DIV, SUB-DIV, MAJCAT (required), MAJOR_CATEGORY_STATUS, SIZE (required). Headers row 3, data from row 6. Upload replaces the entire table.
+                    </div>
+                    <input
+                      ref={gmSizeMasterFileRef}
+                      type="file"
+                      accept=".xlsx,.xls"
+                      className="hidden"
+                      onChange={(e) => {
+                        const file = e.target.files?.[0];
+                        if (file) handleGmSizeMasterUpload(file);
+                      }}
+                    />
+                    {gmSizeMasterUploading ? (
+                      <div>
+                        <div className="mb-2 text-[13px] text-slate-600 dark:text-slate-300">
+                          <RefreshCw className="mr-1.5 inline-block h-3.5 w-3.5 animate-spin" />
+                          Uploading…
+                        </div>
+                        <Progress value={gmSizeMasterProgress} />
+                        <div className="mt-1 text-[11px] text-muted-foreground">{gmSizeMasterProgress}% complete</div>
+                      </div>
+                    ) : (
+                      <button
+                        type="button"
+                        onClick={() => gmSizeMasterFileRef.current?.click()}
+                        className="flex w-full flex-col items-center justify-center rounded-md border-2 border-dashed border-border bg-muted/30 px-4 py-6 transition-colors hover:border-slate-400 hover:bg-slate-50 dark:hover:bg-slate-500/10"
+                      >
+                        <Inbox className="mb-2 h-8 w-8 text-slate-600 dark:text-slate-300" />
+                        <p className="text-[13px]">Click to upload <strong>.xlsx</strong> file</p>
+                        <p className="text-[11px] text-muted-foreground">Only Excel files. Max 50 MB.</p>
+                      </button>
+                    )}
+                  </div>
                 </>
               }
             />

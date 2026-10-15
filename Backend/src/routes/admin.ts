@@ -6,6 +6,7 @@ import { Router, Request, Response, NextFunction } from 'express';
 import * as adminController from '../controllers/adminController';
 import * as expenseAccessController from '../controllers/expenseAccessController';
 import * as setMcMasterController from '../controllers/setMcMasterController';
+import * as gmSizeMasterController from '../controllers/gmSizeMasterController';
 import * as expenseAuditLogController from '../controllers/expenseAuditLogController';
 import { hierarchyService } from '../services/hierarchyService';
 import { asyncHandler } from '../middleware/asyncHandler';
@@ -203,6 +204,12 @@ router.get('/set-mc-master/status', h(setMcMasterController.getSetMcMasterStatus
 router.get('/set-mc-master/template', h(setMcMasterController.downloadSetMcMasterTemplate));
 router.get('/set-mc-master/download', h(setMcMasterController.downloadSetMcMasterData));
 router.post('/set-mc-master/upload', excelUpload.single('file'), h(setMcMasterController.uploadSetMcMaster));
+
+router.get('/gm-size-master/status',   h(gmSizeMasterController.getGmSizeMasterStatus));
+router.get('/gm-size-master/template', h(gmSizeMasterController.downloadGmSizeMasterTemplate));
+router.get('/gm-size-master/download', h(gmSizeMasterController.downloadGmSizeMasterData));
+router.post('/gm-size-master/upload',  excelUpload.single('file'), h(gmSizeMasterController.uploadGmSizeMaster));
+router.get('/gm-size-master/sizes',    h(gmSizeMasterController.getGmSizes));
 
 // ═══════════════════════════════════════════════════════
 // COLOR MASTER (ADMIN) — color_master

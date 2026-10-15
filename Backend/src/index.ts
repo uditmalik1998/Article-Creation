@@ -514,6 +514,28 @@ app.use(errorHandler);
       console.log('[FabricRaw Cron] Disabled — ENABLE_CRON is not "true" and NODE_ENV is not "production".');
     }
 
+    // gm_raw_data → gm article processing cron. Same shape as fabricRawTick.
+    const gmRawTick = () => {
+      if (isGmRawRunning()) {
+        console.log('[GmRaw Cron] Skipped — previous run still in progress');
+        return;
+      }
+      runGmRawDataProcessing('CRON')
+        .then(r => {
+          if (r.claimed > 0) {
+            console.log(`[GmRaw Cron] ✅ claimed:${r.claimed} completed:${r.completed} failed:${r.failed}`);
+          }
+        })
+        .catch(err => console.error('[GmRaw Cron] ❌ Unhandled error:', err?.message));
+    };
+
+    if (cronEnabled) {
+      setTimeout(gmRawTick, 12000); // 12s delay — after fabric tick at 8s
+      setInterval(gmRawTick, 5 * 60_000);
+    } else {
+      console.log('[GmRaw Cron] Disabled — ENABLE_CRON is not "true" and NODE_ENV is not "production".');
+    }
+
     // Approval → SAP sync worker. After Save & Submit, the article is approved +
     // queued (sapSyncStatus=PENDING); this worker creates it in SAP in the
     // background so the UI never blocks. Runs every 30s (configurable); the
