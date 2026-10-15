@@ -237,15 +237,6 @@ router.get('/cmp-cost-master/export', h(adminController.exportCmpCostMaster));
 router.post('/cmp-cost-master/upload', excelUpload.single('file'), h(adminController.uploadCmpCostMaster));
 
 // ═══════════════════════════════════════════════════════
-// PRECISE TRIM MASTER (precise_trim_master)
-// ═══════════════════════════════════════════════════════
-router.get('/precise-trim-master/lookup', h(adminController.lookupPreciseTrimMaster));
-router.get('/precise-trim-master/status', h(adminController.getPreciseTrimMasterStatus));
-router.get('/precise-trim-master/template', h(adminController.downloadPreciseTrimMasterTemplate));
-router.get('/precise-trim-master/export', h(adminController.exportPreciseTrimMaster));
-router.post('/precise-trim-master/upload', excelUpload.single('file'), h(adminController.uploadPreciseTrimMaster));
-
-// ═══════════════════════════════════════════════════════
 // BASIC TRIM MASTER (basic_trim_master)
 // ═══════════════════════════════════════════════════════
 router.get('/basic-trim-master/status', h(adminController.getBasicTrimMasterStatus));

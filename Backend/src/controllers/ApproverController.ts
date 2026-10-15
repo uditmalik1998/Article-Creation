@@ -5198,9 +5198,27 @@ export class ApproverController {
 
     // basic_trim_master lookup — returns bt_1 / bt_2 for a given attribute_name + type combination.
     // Used by the B TRIM card to auto-fill AUTO-BGT and ROUGH-V2 when a spec value is selected.
+    // Without `type`, returns every type for the attribute in one call: { found, rows: [{ type, bt1, bt2 }] }
+    // (used for the OTHER ACC rows, attribute "OTHER BASIC TRIM").
     static getBasicTrimMasterLookup = async (req: Request, res: Response) => {
         const attributeName = String(req.query.attributeName ?? '').trim();
         const type          = String(req.query.type          ?? '').trim();
+        if (attributeName && !type) {
+            const rows = await prisma.$queryRaw<{ type: string; bt_1: string | null; bt_2: string | null }[]>`
+                SELECT type, bt_1, bt_2
+                FROM basic_trim_master
+                WHERE TRIM(LOWER(attribute_name)) = TRIM(LOWER(${attributeName}))
+                ORDER BY type
+            `;
+            return res.json({
+                found: rows.length > 0,
+                rows: rows.map((r) => ({
+                    type: r.type,
+                    bt1: r.bt_1 != null ? Number(r.bt_1) : null,
+                    bt2: r.bt_2 != null ? Number(r.bt_2) : null,
+                })),
+            });
+        }
         if (!attributeName || !type) return res.json({ found: false, bt1: null, bt2: null });
 
         const row = await prisma.$queryRaw<{ bt_1: string | null; bt_2: string | null }[]>`
@@ -5282,6 +5300,11 @@ export class ApproverController {
             if (!activeAttrs.has(col)) continue;
             const val = String(req.query[col] ?? '').trim();
             if (!val) continue;
+            // '-' = the article has no value for this attribute → match rows where it's empty too.
+            if (/^-+$/.test(val)) {
+                sql += ` AND TRIM(COALESCE(${col}, '')) IN ('', '-')`;
+                continue;
+            }
             sql += ` AND TRIM(LOWER(COALESCE(${col}, ''))) = TRIM(LOWER($${idx}))`;
             params.push(val);
             idx++;
