@@ -161,6 +161,24 @@ export interface ApproverItem {
   preciseRatio: number | string | null;
   preciseConsumptionKg: number | string | null;
   preciseConsumptionMeter: number | string | null;
+  mcDescription: string | null;
+  variantWeight: string | null;
+  cuttingBgtPrVal: number | string | null;
+  cuttingActPrVal: number | string | null;
+  cuttingVendorPrVal: number | string | null;
+  cuttingFinalPrVal: number | string | null;
+  stitchingBgtPrVal: number | string | null;
+  stitchingActPrVal: number | string | null;
+  stitchingVendorPrVal: number | string | null;
+  stitchingFinalPrVal: number | string | null;
+  ironingBgtPrVal: number | string | null;
+  ironingActPrVal: number | string | null;
+  ironingVendorPrVal: number | string | null;
+  ironingFinalPrVal: number | string | null;
+  finishingBgtPrVal: number | string | null;
+  finishingActPrVal: number | string | null;
+  finishingVendorPrVal: number | string | null;
+  finishingFinalPrVal: number | string | null;
 }
 
 interface EditableCellProps {
