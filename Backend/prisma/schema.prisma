@@ -1981,11 +1981,6 @@ model BodyArticleData {
   bodyArticleType          String?   @map("body_article_type")        @db.VarChar(100)
   designNumber             String?   @map("design_number")            @db.VarChar(100)
 
-  // Cost fields
-  cmtpCost                 Decimal?  @map("cmtp_cost")       @db.Decimal(10, 2)
-  cmpCost                  Decimal?  @map("cmp_cost")        @db.Decimal(10, 2)
-  fabCost                  Decimal?  @map("fab_cost")        @db.Decimal(10, 2)
-  fabCons                  Decimal?  @map("fab_cons")        @db.Decimal(10, 2)
   width                    Decimal?  @map("width")           @db.Decimal(10, 2)
   roughCmpCost             Decimal?  @map("rough_cmp_cost")    @db.Decimal(10, 2)
   bodyConsumptionType      String?   @map("body_consumption_type")    @db.VarChar(20)

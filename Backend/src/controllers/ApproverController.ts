@@ -1572,7 +1572,7 @@ export class ApproverController {
             const bodyRows = bodyNums.length > 0
                 ? await prisma.bodyArticleData.findMany({
                     where: { bodyArticleNumber: { in: bodyNums } },
-                    select: { bodyArticleNumber: true, consumptionKg: true, consumptionMeter: true, cmpCost: true, majorCategory: true },
+                    select: { bodyArticleNumber: true, consumptionKg: true, consumptionMeter: true, majorCategory: true },
                 })
                 : [];
             const bodyMap = new Map(bodyRows.map(r => [r.bodyArticleNumber!, r]));
@@ -1652,7 +1652,7 @@ export class ApproverController {
                 const basicTrim = bodyData?.majorCategory
                     ? trimCostByMajCat.get(bodyData.majorCategory.trim().toUpperCase()) ?? null
                     : null;
-                const cmpCost = toNum(bodyData?.cmpCost);
+                const cmpCost: number | null = null;
                 const fgValAdd = 0;
                 const fgProcessCost = 0;
 
@@ -4805,9 +4805,6 @@ export class ApproverController {
             mSleevesMainStyle: r.m_sleeves_main_style, mSleeveFold: r.m_sleeve_fold, mBtmFold: r.m_btm_fold,
             mNoOfPocket:  r.m_no_of_pocket, mPocket:      r.m_pocket,       mExtraPocket: r.m_extra_pocket,
             mFit:         r.m_fit,          mBodyStyle:   r.m_body_style,   mLength: r.m_length, mSet: r.m_set,
-            cmtpCost:     r.cmtp_cost  != null ? Number(r.cmtp_cost)  : null,
-            cmpCost:      r.cmp_cost   != null ? Number(r.cmp_cost)   : null,
-            fabCons:      r.fab_cons   != null ? Number(r.fab_cons)   : null,
             width:        r.width      != null ? Number(r.width)      : null,
         }));
 
@@ -5098,7 +5095,6 @@ export class ApproverController {
                 mNoOfPocket: true, mPocket: true, mExtraPocket: true,
                 mFit: true, mBodyStyle: true, mLength: true, mSet: true,
                 bodyArticleNumber: true, bodyArticleDescription: true,
-                cmtpCost: true, cmpCost: true, fabCost: true, fabCons: true,
                 width: true, roughCmpCost: true,
                 bodyConsumptionType: true, gsm: true, ratio: true, consumptionKg: true, consumptionMeter: true,
                 preciseWidth: true, preciseGsm: true, preciseRatio: true, preciseConsumptionKg: true, preciseConsumptionMeter: true,
@@ -5155,10 +5151,6 @@ export class ApproverController {
             bodyArticle:              r.bodyArticleNumber ?? null,
             bodyArticleDescription:   r.bodyArticleDescription ?? null,
             designNumber:             r.designNumber ?? null,
-            cmtpCost:                 r.cmtpCost != null ? Number(r.cmtpCost) : null,
-            cmpCost:                  r.cmpCost  != null ? Number(r.cmpCost)  : null,
-            fabCost:                  r.fabCost  != null ? Number(r.fabCost)  : null,
-            fabCons:                  r.fabCons  != null ? Number(r.fabCons)  : null,
             bodyWidth:                r.width    != null ? Number(r.width)    : null,
             roughCmpCost:             r.roughCmpCost     != null ? Number(r.roughCmpCost)     : null,
             bodyConsumptionType:      r.bodyConsumptionType ?? null,
@@ -5205,9 +5197,6 @@ export class ApproverController {
         length:               'mLength',
         bodyArticle:          'bodyArticleNumber',
         bodyArticleDescription: 'bodyArticleDescription',
-        cmtpCost:             'cmtpCost',
-        cmpCost:              'cmpCost',
-        fabCons:              'fabCons',
         fWidth:               'width',
         width:                'width',
         roughCmpCost:         'roughCmpCost',
@@ -5278,9 +5267,6 @@ export class ApproverController {
             mSet: r.mSet ?? null,
             bodyArticle: r.bodyArticleNumber ?? null,
             bodyArticleDescription: r.bodyArticleDescription ?? null,
-            cmtpCost: r.cmtpCost ?? null,
-            cmpCost: r.cmpCost ?? null,
-            fabCons: r.fabCons ?? null,
             fWidth: r.width ?? null,
             width: r.width ?? null,
             roughCmpCost:        r.roughCmpCost ?? null,

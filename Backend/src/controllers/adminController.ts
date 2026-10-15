@@ -7382,9 +7382,6 @@ const BODY_ARTICLE_DATA_COLUMNS = [
   { key: 'mBodyStyle', column: 'm_body_style', header: 'M_BODY_STYLE', type: 'text', maxLength: 100 },
   { key: 'mLength', column: 'm_length', header: 'M_LENGTH', type: 'text', maxLength: 100 },
   { key: 'mSet', column: 'm_set', header: 'M_SET', type: 'text', maxLength: 100 },
-  { key: 'cmtpCost', column: 'cmtp_cost', header: 'CMTP_COST', type: 'number' },
-  { key: 'cmpCost', column: 'cmp_cost', header: 'CMP_COST', type: 'number' },
-  { key: 'fabCons', column: 'fab_cons', header: 'FAB_CONS', type: 'number' },
   { key: 'width', column: 'width', header: 'WIDTH', type: 'number' },
 ] as const;
 
@@ -8787,10 +8784,6 @@ export const EXPENSE_TABLE_REGISTRY: Record<string, ExpenseTableConfig> = {
       { key: 'mBodyStyle', label: 'Body Style' },
       { key: 'mLength', label: 'Length' },
       { key: 'mSet', label: 'Set' },
-      { key: 'cmtpCost', label: 'CMTP Cost', align: 'right' },
-      { key: 'cmpCost', label: 'CMP Cost', align: 'right' },
-      { key: 'fabCost', label: 'Fab Cost', align: 'right' },
-      { key: 'fabCons', label: 'Fab Cons', align: 'right' },
       { key: 'width', label: 'Width', align: 'right' },
       { key: 'approvalStatus', label: 'Approval Status', editable: false },
       { key: 'approvedAt', label: 'Approved At', type: 'date', editable: false },
