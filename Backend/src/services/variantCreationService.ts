@@ -122,6 +122,7 @@ export async function addColorVariants(
 ): Promise<number> {
   const generic = await prisma.extractionResultFlat.findUnique({ where: { id: genericId } });
   if (!generic) return 0;
+  // Set parts get variants too, from their own category's sizes.
 
   if (!generic.majorCategory) throw new Error('No Major Category found on this article — cannot create variants.');
   const allowedSizes = await getSizesForMajCat(generic.majorCategory);

@@ -555,6 +555,10 @@ export interface ApproverArticleListProps {
   allowGroups?: string[];
   /** When true, hides the "Create Body Article" button (used by BodyArticleList). */
   hideCreateBody?: boolean;
+  /** When true, cards are display-only (e.g. a combo/set parent derived from its pieces). */
+  readOnly?: boolean;
+  /** Set parent: take attribute visibility / required fields from this category (its Top part). */
+  attributeMajorCategory?: string;
   serverPagination: {
     total: number;
     current: number;
@@ -589,6 +593,8 @@ const ArticleCard = React.memo(
     pathType,
     allowGroups,
     hideCreateBody,
+    readOnly,
+    attributeMajorCategory,
   }: {
     item: ApproverItem;
     isSelected: boolean;
@@ -605,6 +611,8 @@ const ArticleCard = React.memo(
     pathType?: 'old' | 'new' | 'rejected' | 'created' | 'failed';
     allowGroups?: string[];
     hideCreateBody?: boolean;
+    readOnly?: boolean;
+    attributeMajorCategory?: string;
   }) => {
     const [showVariants, setShowVariants] = useState(true);
     const [imgModalOpen, setImgModalOpen] = useState(false);
@@ -888,6 +896,14 @@ const ArticleCard = React.memo(
       return normalizeMajorCategory(raw, item.division);
       // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [localValues['majorCategory'], item.majorCategory, item.division]);
+
+    // A set (parent) article shows and requires the attributes of its Top part,
+    // whose values it mirrors — not its own set category's grid, which also
+    // carries lower-garment fields (e.g. M_BLT_STYLE).
+    const attrMajCat = useMemo(
+      () => (attributeMajorCategory ? normalizeMajorCategory(attributeMajorCategory, item.division) : effectiveMajCat),
+      [attributeMajorCategory, item.division, effectiveMajCat],
+    );
 
     // Segment ranges for the current major category — auto-filled when MRP or MC changes
     const [segmentRanges, setSegmentRanges] = useState<SegmentRange[]>([]);
@@ -1408,7 +1424,7 @@ const ArticleCard = React.memo(
     // graceful fallback so the card doesn't look broken.
     type AttrValue = { shortForm: string; fullForm: string };
     const { visibleAttrs, mandatoryKeys } = useMemo(() => {
-      if (!effectiveMajCat) return { visibleAttrs: [], mandatoryKeys: new Set<string>() };
+      if (!attrMajCat) return { visibleAttrs: [], mandatoryKeys: new Set<string>() };
 
       const visible: Array<{
         field: string;
@@ -1431,8 +1447,8 @@ const ArticleCard = React.memo(
       // Uses direct category key-existence checks — reliable regardless of field name variations.
       const catHasAnyGridData =
         gridsReady &&
-        ((mandatoryGridReady && isMajCatInMandatoryGrid(effectiveMajCat)) ||
-          (gridReady && isMajCatInGrid(effectiveMajCat)));
+        ((mandatoryGridReady && isMajCatInMandatoryGrid(attrMajCat)) ||
+          (gridReady && isMajCatInGrid(attrMajCat)));
 
       for (const af of attributeFields) {
         // BOM-only fields never appear in attribute groups
@@ -1451,7 +1467,7 @@ const ArticleCard = React.memo(
             gridsReady &&
             !!catHasAnyGridData &&
             mandatoryGridReady &&
-            sapKeys.some((sk) => isMandatoryGridFieldActive(effectiveMajCat, sk) === true);
+            sapKeys.some((sk) => isMandatoryGridFieldActive(attrMajCat, sk) === true);
           const isMandatory = af.mandatory === true || gridMandatory;
           if (isMandatory) mandatory.add(af.schemaKey);
           visible.push({
@@ -1495,7 +1511,7 @@ const ArticleCard = React.memo(
           : null;
 
         // Garment grid fallback (used for FG articles and Body Article when national grid has no entry)
-        const gridOnlyVals = gridExcelAttr ? getMajCatGridEntry(effectiveMajCat, gridExcelAttr) : null;
+        const gridOnlyVals = gridExcelAttr ? getMajCatGridEntry(attrMajCat, gridExcelAttr) : null;
 
         const values: AttrValue[] = nationalVals
           ? nationalVals.map((v) => ({ shortForm: v.code, fullForm: v.fullForm }))
@@ -1507,12 +1523,12 @@ const ArticleCard = React.memo(
           const sapKeys = SCHEMA_KEY_TO_ALL_SAP_KEYS[af.schemaKey] ?? [];
           const isActiveMandatory =
             mandatoryGridReady &&
-            sapKeys.some((sk) => isMandatoryGridFieldActive(effectiveMajCat, sk) === true);
+            sapKeys.some((sk) => isMandatoryGridFieldActive(attrMajCat, sk) === true);
 
           const excelAttr = SCHEMA_KEY_TO_EXCEL_ATTR[af.schemaKey];
           // Attribute visibility always driven by maj_cat_grid_values (same as FG articles)
           const hasDropdownValues =
-            gridReady && excelAttr ? (getMajCatGridEntry(effectiveMajCat, excelAttr)?.length ?? 0) > 0 : false;
+            gridReady && excelAttr ? (getMajCatGridEntry(attrMajCat, excelAttr)?.length ?? 0) > 0 : false;
 
           const forceMandatory = af.mandatory === true;
           if (isActiveMandatory || forceMandatory) {
@@ -1583,7 +1599,7 @@ const ArticleCard = React.memo(
 
       return { visibleAttrs: visible, mandatoryKeys: mandatory };
       // eslint-disable-next-line react-hooks/exhaustive-deps
-    }, [effectiveMajCat, cacheReady, catConfigReady, gridReady, mandatoryGridReady, attributeFields, localValues, nationalGrid, nationalGridReady, allowGroups]);
+    }, [attrMajCat, cacheReady, catConfigReady, gridReady, mandatoryGridReady, attributeFields, localValues, nationalGrid, nationalGridReady, allowGroups]);
 
     const [editingField, setEditingField] = useState<string | null>(null);
 
@@ -1795,10 +1811,10 @@ const ArticleCard = React.memo(
     // APPROVED/REJECTED articles are normally read-only. EXCEPTION: on the
     // Created page (modify mode) we keep them editable so the user can stage
     // changes and push them to SAP via the "Modify" button.
-    const isLocked = (item.approvalStatus === 'APPROVED' || item.approvalStatus === 'REJECTED') && !isModifyMode;
+    const isLocked = readOnly || ((item.approvalStatus === 'APPROVED' || item.approvalStatus === 'REJECTED') && !isModifyMode);
     // Body articles on the Created page: consumption sections (Rough + Precise) stay editable
     // even though the article is APPROVED — no SAP re-sync needed for these local fields.
-    const isBodyCreatedPage = isBodyArticle && pathType === 'created';
+    const isBodyCreatedPage = !readOnly && isBodyArticle && pathType === 'created';
     const status = getDisplayStatus(item);
 
     // Created-article identity/price fields are LOCKED even in modify mode — they
@@ -5129,6 +5145,8 @@ export const ApproverArticleList: React.FC<ApproverArticleListProps> = ({
   pathType,
   allowGroups,
   hideCreateBody,
+  readOnly,
+  attributeMajorCategory,
   serverPagination,
 }) => {
   const [cardGroups, setCardGroups] = useState<CardGroup[]>(() => {
@@ -5218,6 +5236,8 @@ export const ApproverArticleList: React.FC<ApproverArticleListProps> = ({
           pathType={pathType}
           allowGroups={allowGroups}
           hideCreateBody={hideCreateBody}
+          readOnly={readOnly}
+          attributeMajorCategory={attributeMajorCategory}
         />
       ))}
     </div>

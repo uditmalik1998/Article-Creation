@@ -161,6 +161,9 @@ export interface ApproverItem {
   preciseRatio: number | string | null;
   preciseConsumptionKg: number | string | null;
   preciseConsumptionMeter: number | string | null;
+  comboRole?: 'NONE' | 'PARENT' | 'CHILD';
+  comboParentId?: string | null;
+  comboChildOrder?: number | null;
   cuttingBgtPrVal: number | string | null;
   cuttingActPrVal: number | string | null;
   cuttingVendorPrVal: number | string | null;
