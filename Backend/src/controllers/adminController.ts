@@ -7382,9 +7382,6 @@ const BODY_ARTICLE_DATA_COLUMNS = [
   { key: 'mBodyStyle', column: 'm_body_style', header: 'M_BODY_STYLE', type: 'text', maxLength: 100 },
   { key: 'mLength', column: 'm_length', header: 'M_LENGTH', type: 'text', maxLength: 100 },
   { key: 'mSet', column: 'm_set', header: 'M_SET', type: 'text', maxLength: 100 },
-  { key: 'cmtpCost', column: 'cmtp_cost', header: 'CMTP_COST', type: 'number' },
-  { key: 'cmpCost', column: 'cmp_cost', header: 'CMP_COST', type: 'number' },
-  { key: 'fabCons', column: 'fab_cons', header: 'FAB_CONS', type: 'number' },
   { key: 'width', column: 'width', header: 'WIDTH', type: 'number' },
 ] as const;
 
@@ -7869,7 +7866,7 @@ const BODY_ARTICLE_DATA_EXPORT_COLUMN_ORDER = [
   'm_collar_type', 'm_collar_style', 'm_neck_type', 'm_neck_style', 'm_placket',
   'm_blt_type', 'm_blt_style', 'm_sleeves_main_style', 'm_sleeve_fold', 'm_btm_fold',
   'm_no_of_pocket', 'm_pocket', 'm_extra_pocket', 'm_fit', 'm_body_style', 'm_length', 'm_set',
-  'cmtp_cost', 'cmp_cost', 'fab_cost', 'fab_cons', 'width',
+  'width',
   'approval_status', 'approved_at', 'approved_by', 'sap_sync_status', 'sap_sync_message',
   'user_name', 'created_at', 'updated_at',
 ];
@@ -8787,10 +8784,6 @@ export const EXPENSE_TABLE_REGISTRY: Record<string, ExpenseTableConfig> = {
       { key: 'mBodyStyle', label: 'Body Style' },
       { key: 'mLength', label: 'Length' },
       { key: 'mSet', label: 'Set' },
-      { key: 'cmtpCost', label: 'CMTP Cost', align: 'right' },
-      { key: 'cmpCost', label: 'CMP Cost', align: 'right' },
-      { key: 'fabCost', label: 'Fab Cost', align: 'right' },
-      { key: 'fabCons', label: 'Fab Cons', align: 'right' },
       { key: 'width', label: 'Width', align: 'right' },
       { key: 'approvalStatus', label: 'Approval Status', editable: false },
       { key: 'approvedAt', label: 'Approved At', type: 'date', editable: false },

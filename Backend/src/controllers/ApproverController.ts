@@ -51,10 +51,15 @@ const ITEM_UPDATE_ALLOWED_FIELDS = [
     'vendorCode', 'mrp', 'mcCode', 'segment', 'season',
     'hsnTaxCode', 'articleDescription', 'fashionGrid', 'year', 'articleType',
     // Body article cost fields
-    'fabCost', 'fWidth',
+    'fWidth',
     'autoBgt', 'roughV2', 'vendorFabricRate', 'finalCost',
     'roughRatio', 'roughConsumptionKg', 'roughConsumptionMeter',
     'preciseRatio', 'preciseConsumptionKg', 'preciseConsumptionMeter',
+    // CMP Cost PR VAL per process × scenario
+    'cuttingBgtPrVal', 'cuttingActPrVal', 'cuttingVendorPrVal', 'cuttingFinalPrVal',
+    'stitchingBgtPrVal', 'stitchingActPrVal', 'stitchingVendorPrVal', 'stitchingFinalPrVal',
+    'ironingBgtPrVal', 'ironingActPrVal', 'ironingVendorPrVal', 'ironingFinalPrVal',
+    'finishingBgtPrVal', 'finishingActPrVal', 'finishingVendorPrVal', 'finishingFinalPrVal',
     // Card footer fields (fabric/body article builder)
     'fabricArticleNumber', 'fabricArticleDescription',
     'bodyArticle', 'bodyArticleDescription',
@@ -1012,6 +1017,10 @@ export class ApproverController {
                     autoBgt: true, roughV2: true, vendorFabricRate: true, finalCost: true,
                     roughRatio: true, roughConsumptionKg: true, roughConsumptionMeter: true,
                     preciseRatio: true, preciseConsumptionKg: true, preciseConsumptionMeter: true,
+                    cuttingBgtPrVal: true, cuttingActPrVal: true, cuttingVendorPrVal: true, cuttingFinalPrVal: true,
+                    stitchingBgtPrVal: true, stitchingActPrVal: true, stitchingVendorPrVal: true, stitchingFinalPrVal: true,
+                    ironingBgtPrVal: true, ironingActPrVal: true, ironingVendorPrVal: true, ironingFinalPrVal: true,
+                    finishingBgtPrVal: true, finishingActPrVal: true, finishingVendorPrVal: true, finishingFinalPrVal: true,
                     // Article reference fields
                     bodyArticle: true,
                     bodyArticleDescription: true,
@@ -1328,6 +1337,10 @@ export class ApproverController {
                     autoBgt: true, roughV2: true, vendorFabricRate: true, finalCost: true,
                     roughRatio: true, roughConsumptionKg: true, roughConsumptionMeter: true,
                     preciseRatio: true, preciseConsumptionKg: true, preciseConsumptionMeter: true,
+                    cuttingBgtPrVal: true, cuttingActPrVal: true, cuttingVendorPrVal: true, cuttingFinalPrVal: true,
+                    stitchingBgtPrVal: true, stitchingActPrVal: true, stitchingVendorPrVal: true, stitchingFinalPrVal: true,
+                    ironingBgtPrVal: true, ironingActPrVal: true, ironingVendorPrVal: true, ironingFinalPrVal: true,
+                    finishingBgtPrVal: true, finishingActPrVal: true, finishingVendorPrVal: true, finishingFinalPrVal: true,
                     // BODY extras
                     collarStyle: true,
                     sleeveFold: true, mSet: true,
@@ -1562,6 +1575,10 @@ export class ApproverController {
                     autoBgt: true, roughV2: true, vendorFabricRate: true, finalCost: true,
                     roughRatio: true, roughConsumptionKg: true, roughConsumptionMeter: true,
                     preciseRatio: true, preciseConsumptionKg: true, preciseConsumptionMeter: true,
+                    cuttingBgtPrVal: true, cuttingActPrVal: true, cuttingVendorPrVal: true, cuttingFinalPrVal: true,
+                    stitchingBgtPrVal: true, stitchingActPrVal: true, stitchingVendorPrVal: true, stitchingFinalPrVal: true,
+                    ironingBgtPrVal: true, ironingActPrVal: true, ironingVendorPrVal: true, ironingFinalPrVal: true,
+                    finishingBgtPrVal: true, finishingActPrVal: true, finishingVendorPrVal: true, finishingFinalPrVal: true,
                     approvedAt: true,
                     approver: { select: { name: true } },
                 },
@@ -1572,7 +1589,7 @@ export class ApproverController {
             const bodyRows = bodyNums.length > 0
                 ? await prisma.bodyArticleData.findMany({
                     where: { bodyArticleNumber: { in: bodyNums } },
-                    select: { bodyArticleNumber: true, consumptionKg: true, consumptionMeter: true, cmpCost: true, majorCategory: true },
+                    select: { bodyArticleNumber: true, consumptionKg: true, consumptionMeter: true, majorCategory: true },
                 })
                 : [];
             const bodyMap = new Map(bodyRows.map(r => [r.bodyArticleNumber!, r]));
@@ -1652,7 +1669,7 @@ export class ApproverController {
                 const basicTrim = bodyData?.majorCategory
                     ? trimCostByMajCat.get(bodyData.majorCategory.trim().toUpperCase()) ?? null
                     : null;
-                const cmpCost = toNum(bodyData?.cmpCost);
+                const cmpCost: number | null = null;
                 const fgValAdd = 0;
                 const fgProcessCost = 0;
 
@@ -1791,6 +1808,10 @@ export class ApproverController {
                     autoBgt: true, roughV2: true, vendorFabricRate: true, finalCost: true,
                     roughRatio: true, roughConsumptionKg: true, roughConsumptionMeter: true,
                     preciseRatio: true, preciseConsumptionKg: true, preciseConsumptionMeter: true,
+                    cuttingBgtPrVal: true, cuttingActPrVal: true, cuttingVendorPrVal: true, cuttingFinalPrVal: true,
+                    stitchingBgtPrVal: true, stitchingActPrVal: true, stitchingVendorPrVal: true, stitchingFinalPrVal: true,
+                    ironingBgtPrVal: true, ironingActPrVal: true, ironingVendorPrVal: true, ironingFinalPrVal: true,
+                    finishingBgtPrVal: true, finishingActPrVal: true, finishingVendorPrVal: true, finishingFinalPrVal: true,
                 },
             });
             const fabricNums = [...new Set(fgArticles.map((a: any) => a.fabricArticleNumber).filter(Boolean) as string[])];
@@ -2094,10 +2115,13 @@ export class ApproverController {
                     attrArticleNums: true, mvgrBrandVendor: true,
                     isGeneric: true, genericArticleId: true, variantSize: true, variantColor: true,
                     approvedBy: true, approvedAt: true,
-                    fabCost: true,
                     autoBgt: true, roughV2: true, vendorFabricRate: true, finalCost: true,
                     roughRatio: true, roughConsumptionKg: true, roughConsumptionMeter: true,
                     preciseRatio: true, preciseConsumptionKg: true, preciseConsumptionMeter: true,
+                    cuttingBgtPrVal: true, cuttingActPrVal: true, cuttingVendorPrVal: true, cuttingFinalPrVal: true,
+                    stitchingBgtPrVal: true, stitchingActPrVal: true, stitchingVendorPrVal: true, stitchingFinalPrVal: true,
+                    ironingBgtPrVal: true, ironingActPrVal: true, ironingVendorPrVal: true, ironingFinalPrVal: true,
+                    finishingBgtPrVal: true, finishingActPrVal: true, finishingVendorPrVal: true, finishingFinalPrVal: true,
                     mcDescription: true,
                     approver: { select: { name: true, email: true } },
                 },
@@ -2897,6 +2921,10 @@ export class ApproverController {
                     autoBgt: true, roughV2: true, vendorFabricRate: true, finalCost: true,
                     roughRatio: true, roughConsumptionKg: true, roughConsumptionMeter: true,
                     preciseRatio: true, preciseConsumptionKg: true, preciseConsumptionMeter: true,
+                    cuttingBgtPrVal: true, cuttingActPrVal: true, cuttingVendorPrVal: true, cuttingFinalPrVal: true,
+                    stitchingBgtPrVal: true, stitchingActPrVal: true, stitchingVendorPrVal: true, stitchingFinalPrVal: true,
+                    ironingBgtPrVal: true, ironingActPrVal: true, ironingVendorPrVal: true, ironingFinalPrVal: true,
+                    finishingBgtPrVal: true, finishingActPrVal: true, finishingVendorPrVal: true, finishingFinalPrVal: true,
                     mcCode: true, hsnTaxCode: true, articleDescription: true, fashionGrid: true,
                     season: true, year: true, articleType: true, referenceArticleNumber: true,
                     referenceArticleDescription: true, imageUrl: true, imageName: true,
@@ -4805,9 +4833,6 @@ export class ApproverController {
             mSleevesMainStyle: r.m_sleeves_main_style, mSleeveFold: r.m_sleeve_fold, mBtmFold: r.m_btm_fold,
             mNoOfPocket:  r.m_no_of_pocket, mPocket:      r.m_pocket,       mExtraPocket: r.m_extra_pocket,
             mFit:         r.m_fit,          mBodyStyle:   r.m_body_style,   mLength: r.m_length, mSet: r.m_set,
-            cmtpCost:     r.cmtp_cost  != null ? Number(r.cmtp_cost)  : null,
-            cmpCost:      r.cmp_cost   != null ? Number(r.cmp_cost)   : null,
-            fabCons:      r.fab_cons   != null ? Number(r.fab_cons)   : null,
             width:        r.width      != null ? Number(r.width)      : null,
         }));
 
@@ -5098,7 +5123,6 @@ export class ApproverController {
                 mNoOfPocket: true, mPocket: true, mExtraPocket: true,
                 mFit: true, mBodyStyle: true, mLength: true, mSet: true,
                 bodyArticleNumber: true, bodyArticleDescription: true,
-                cmtpCost: true, cmpCost: true, fabCost: true, fabCons: true,
                 width: true, roughCmpCost: true,
                 bodyConsumptionType: true, gsm: true, ratio: true, consumptionKg: true, consumptionMeter: true,
                 preciseWidth: true, preciseGsm: true, preciseRatio: true, preciseConsumptionKg: true, preciseConsumptionMeter: true,
@@ -5155,10 +5179,6 @@ export class ApproverController {
             bodyArticle:              r.bodyArticleNumber ?? null,
             bodyArticleDescription:   r.bodyArticleDescription ?? null,
             designNumber:             r.designNumber ?? null,
-            cmtpCost:                 r.cmtpCost != null ? Number(r.cmtpCost) : null,
-            cmpCost:                  r.cmpCost  != null ? Number(r.cmpCost)  : null,
-            fabCost:                  r.fabCost  != null ? Number(r.fabCost)  : null,
-            fabCons:                  r.fabCons  != null ? Number(r.fabCons)  : null,
             bodyWidth:                r.width    != null ? Number(r.width)    : null,
             roughCmpCost:             r.roughCmpCost     != null ? Number(r.roughCmpCost)     : null,
             bodyConsumptionType:      r.bodyConsumptionType ?? null,
@@ -5172,6 +5192,10 @@ export class ApproverController {
             preciseConsumptionKg:     r.preciseConsumptionKg    != null ? Number(r.preciseConsumptionKg)    : null,
             preciseConsumptionMeter:  r.preciseConsumptionMeter != null ? Number(r.preciseConsumptionMeter) : null,
             // Fields not in body_article_data — nulled out
+            cuttingBgtPrVal: null, cuttingActPrVal: null, cuttingVendorPrVal: null, cuttingFinalPrVal: null,
+            stitchingBgtPrVal: null, stitchingActPrVal: null, stitchingVendorPrVal: null, stitchingFinalPrVal: null,
+            ironingBgtPrVal: null, ironingActPrVal: null, ironingVendorPrVal: null, ironingFinalPrVal: null,
+            finishingBgtPrVal: null, finishingActPrVal: null, finishingVendorPrVal: null, finishingFinalPrVal: null,
             pptNumber: null, source: null, rate: null, mrp: null,
             size: null, colour: null, fabricMainMvgr: null, composition: null,
             wash: null, referenceArticleNumber: null, referenceArticleDescription: null,
@@ -5205,9 +5229,6 @@ export class ApproverController {
         length:               'mLength',
         bodyArticle:          'bodyArticleNumber',
         bodyArticleDescription: 'bodyArticleDescription',
-        cmtpCost:             'cmtpCost',
-        cmpCost:              'cmpCost',
-        fabCons:              'fabCons',
         fWidth:               'width',
         width:                'width',
         roughCmpCost:         'roughCmpCost',
@@ -5278,9 +5299,6 @@ export class ApproverController {
             mSet: r.mSet ?? null,
             bodyArticle: r.bodyArticleNumber ?? null,
             bodyArticleDescription: r.bodyArticleDescription ?? null,
-            cmtpCost: r.cmtpCost ?? null,
-            cmpCost: r.cmpCost ?? null,
-            fabCons: r.fabCons ?? null,
             fWidth: r.width ?? null,
             width: r.width ?? null,
             roughCmpCost:        r.roughCmpCost ?? null,
@@ -6123,6 +6141,10 @@ export class ApproverController {
                 autoBgt: true, roughV2: true, vendorFabricRate: true, finalCost: true,
                 roughRatio: true, roughConsumptionKg: true, roughConsumptionMeter: true,
                 preciseRatio: true, preciseConsumptionKg: true, preciseConsumptionMeter: true,
+                cuttingBgtPrVal: true, cuttingActPrVal: true, cuttingVendorPrVal: true, cuttingFinalPrVal: true,
+                stitchingBgtPrVal: true, stitchingActPrVal: true, stitchingVendorPrVal: true, stitchingFinalPrVal: true,
+                ironingBgtPrVal: true, ironingActPrVal: true, ironingVendorPrVal: true, ironingFinalPrVal: true,
+                finishingBgtPrVal: true, finishingActPrVal: true, finishingVendorPrVal: true, finishingFinalPrVal: true,
                 mrp: true, segment: true,
                 articleFashionType: true,
                 fabDiv: true, yarn1: true,

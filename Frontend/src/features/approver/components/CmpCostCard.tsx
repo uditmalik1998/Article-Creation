@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { ChevronDown, ChevronUp, Scissors } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { TextCell } from './CostingGridCard';
@@ -6,8 +6,8 @@ import { CARD_THEME } from './cardTheme';
 
 // ─── CMP COST card (FG articles, shown with the BODY tab) ─────────────────────
 // One matrix: process rows × (BGT | ACT | VENDOR | FINAL) × (SAM | SAM VAL | PR VAL).
-// CUTTING has no SAM / SAM VAL — only PR VAL. No SAP attribute backs these
-// cells, so every value is UI-only local state for now (like PKG COST).
+// CUTTING has no SAM / SAM VAL — only PR VAL.
+// PR VAL cells are persisted to extraction_results_flat; SAM/SAM VAL are UI-only.
 
 const PROCESSES = ['CUTTING', 'STITCHING', 'IRONING', 'FINISHING'] as const;
 const STAGES = ['BGT', 'ACT', 'VENDOR', 'FINAL'] as const;
@@ -16,37 +16,94 @@ const MEASURES = ['SAM', 'SAM VAL', 'PR VAL'] as const;
 const isNotApplicable = (process: string, measure: string) => process === 'CUTTING' && measure !== 'PR VAL';
 const cellKey = (process: string, stage: string, measure: string) => `${process}|${stage}|${measure}`;
 
-// First column of each stage group gets a divider; FINAL is the dark group.
+// Maps PR VAL cell keys → ApproverItem field names (also used as the update key sent to onSave).
+export const PR_VAL_FIELD: Record<string, string> = {
+  'CUTTING|BGT|PR VAL':      'cuttingBgtPrVal',
+  'CUTTING|ACT|PR VAL':      'cuttingActPrVal',
+  'CUTTING|VENDOR|PR VAL':   'cuttingVendorPrVal',
+  'CUTTING|FINAL|PR VAL':    'cuttingFinalPrVal',
+  'STITCHING|BGT|PR VAL':    'stitchingBgtPrVal',
+  'STITCHING|ACT|PR VAL':    'stitchingActPrVal',
+  'STITCHING|VENDOR|PR VAL': 'stitchingVendorPrVal',
+  'STITCHING|FINAL|PR VAL':  'stitchingFinalPrVal',
+  'IRONING|BGT|PR VAL':      'ironingBgtPrVal',
+  'IRONING|ACT|PR VAL':      'ironingActPrVal',
+  'IRONING|VENDOR|PR VAL':   'ironingVendorPrVal',
+  'IRONING|FINAL|PR VAL':    'ironingFinalPrVal',
+  'FINISHING|BGT|PR VAL':    'finishingBgtPrVal',
+  'FINISHING|ACT|PR VAL':    'finishingActPrVal',
+  'FINISHING|VENDOR|PR VAL': 'finishingVendorPrVal',
+  'FINISHING|FINAL|PR VAL':  'finishingFinalPrVal',
+};
+
 const groupEdge = (stageIdx: number, measureIdx: number) =>
   cn(measureIdx === 0 && (STAGES[stageIdx] === 'FINAL' ? 'border-l-2 border-l-slate-800' : 'border-l-2 border-l-slate-300'));
 
 interface CmpCostCardProps {
   collapsed: boolean;
   onToggleCollapse: () => void;
-  /** Read-only article (approved/rejected outside modify mode). */
   locked: boolean;
-  /** ACT column values auto-filled from precise_body_article_consumption on body article selection. */
+  /** ACT PR VAL auto-filled from precise_body_article_consumption. Presets only apply if no saved value exists. */
   actPreset?: Record<string, string>;
-  /** BGT column values auto-filled from rough_cmp_cost_master by major category. */
+  /** BGT PR VAL auto-filled from rough_cmp_cost_master by major category. Presets only apply if no saved value exists. */
   bgtPreset?: Record<string, string>;
+  /** Persisted PR VAL values loaded from the article record. Keyed by cell key, e.g. 'CUTTING|BGT|PR VAL'. */
+  savedPrVals?: Record<string, string>;
+  /** Called when a PR VAL cell changes. `field` is the ApproverItem field name, `value` is the new string value. */
+  onPrValChange?: (field: string, value: string) => void;
 }
 
-const CmpCostCard: React.FC<CmpCostCardProps> = ({ collapsed, onToggleCollapse, locked, actPreset, bgtPreset }) => {
+const CmpCostCard: React.FC<CmpCostCardProps> = ({
+  collapsed,
+  onToggleCollapse,
+  locked,
+  actPreset,
+  bgtPreset,
+  savedPrVals,
+  onPrValChange,
+}) => {
   const style = CARD_THEME;
-  // UI-only values keyed by "PROCESS|STAGE|MEASURE".
   const [values, setValues] = useState<Record<string, string>>({});
 
-  // Merge incoming BGT preset whenever major category changes.
+  // Initialize from saved DB values on mount / when the article changes.
+  // Only apply non-empty saved values so preset-filled cells aren't wiped when
+  // a sibling PR VAL is saved (item updates → savedPrVals recomputes with nulls for others).
   useEffect(() => {
-    if (!bgtPreset || Object.keys(bgtPreset).length === 0) return;
-    setValues((prev) => ({ ...prev, ...bgtPreset }));
+    if (!savedPrVals) return;
+    setValues((prev) => {
+      const next = { ...prev };
+      for (const [k, v] of Object.entries(savedPrVals)) {
+        if (v !== '') next[k] = v;
+      }
+      return next;
+    });
+  }, [savedPrVals]);
+
+  // Presets arrive already resolved by the parent: PR VALs saved in the DB win over master
+  // values, so every non-empty preset value is applied as-is.
+  useEffect(() => {
+    if (!bgtPreset) return;
+    setValues((prev) => {
+      const next = { ...prev };
+      for (const [k, v] of Object.entries(bgtPreset)) if (v !== '') next[k] = v;
+      return next;
+    });
   }, [bgtPreset]);
 
-  // Merge incoming ACT preset whenever body article changes.
   useEffect(() => {
-    if (!actPreset || Object.keys(actPreset).length === 0) return;
-    setValues((prev) => ({ ...prev, ...actPreset }));
+    if (!actPreset) return;
+    setValues((prev) => {
+      const next = { ...prev };
+      for (const [k, v] of Object.entries(actPreset)) if (v !== '') next[k] = v;
+      return next;
+    });
   }, [actPreset]);
+
+  const handleChange = useCallback((key: string, v: string) => {
+    setValues((prev) => ({ ...prev, [key]: v }));
+    const field = PR_VAL_FIELD[key];
+    if (field && onPrValChange) onPrValChange(field, v);
+  }, [onPrValChange]);
 
   return (
     <div className="col-span-full overflow-hidden rounded-lg border-2 bg-white shadow-[var(--shadow-sm)]" style={{ borderColor: style.border }}>
@@ -108,6 +165,7 @@ const CmpCostCard: React.FC<CmpCostCardProps> = ({ collapsed, onToggleCollapse, 
                     {STAGES.map((stage, si) =>
                       MEASURES.map((measure, mi) => {
                         const key = cellKey(process, stage, measure);
+                        const isPrVal = measure === 'PR VAL';
                         return (
                           <td key={key} className={cn('px-1 py-1', groupEdge(si, mi), stage === 'FINAL' && 'bg-slate-50')}>
                             {isNotApplicable(process, measure) ? (
@@ -115,10 +173,10 @@ const CmpCostCard: React.FC<CmpCostCardProps> = ({ collapsed, onToggleCollapse, 
                             ) : (
                               <TextCell
                                 value={values[key] ?? ''}
-                                disabled={locked}
+                                disabled={locked || (!isPrVal && false)}
                                 numeric
                                 placeholder="Req."
-                                onChange={(v) => setValues((prev) => ({ ...prev, [key]: v }))}
+                                onChange={(v) => handleChange(key, v)}
                               />
                             )}
                           </td>
