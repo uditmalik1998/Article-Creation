@@ -7866,7 +7866,7 @@ const BODY_ARTICLE_DATA_EXPORT_COLUMN_ORDER = [
   'm_collar_type', 'm_collar_style', 'm_neck_type', 'm_neck_style', 'm_placket',
   'm_blt_type', 'm_blt_style', 'm_sleeves_main_style', 'm_sleeve_fold', 'm_btm_fold',
   'm_no_of_pocket', 'm_pocket', 'm_extra_pocket', 'm_fit', 'm_body_style', 'm_length', 'm_set',
-  'cmtp_cost', 'cmp_cost', 'fab_cost', 'fab_cons', 'width',
+  'width',
   'approval_status', 'approved_at', 'approved_by', 'sap_sync_status', 'sap_sync_message',
   'user_name', 'created_at', 'updated_at',
 ];

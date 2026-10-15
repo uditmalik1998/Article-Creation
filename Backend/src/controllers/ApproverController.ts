@@ -51,7 +51,7 @@ const ITEM_UPDATE_ALLOWED_FIELDS = [
     'vendorCode', 'mrp', 'mcCode', 'segment', 'season',
     'hsnTaxCode', 'articleDescription', 'fashionGrid', 'year', 'articleType',
     // Body article cost fields
-    'fabCost', 'fWidth',
+    'fWidth',
     'autoBgt', 'roughV2', 'vendorFabricRate', 'finalCost',
     'roughRatio', 'roughConsumptionKg', 'roughConsumptionMeter',
     'preciseRatio', 'preciseConsumptionKg', 'preciseConsumptionMeter',
@@ -2115,7 +2115,6 @@ export class ApproverController {
                     attrArticleNums: true, mvgrBrandVendor: true,
                     isGeneric: true, genericArticleId: true, variantSize: true, variantColor: true,
                     approvedBy: true, approvedAt: true,
-                    fabCost: true,
                     autoBgt: true, roughV2: true, vendorFabricRate: true, finalCost: true,
                     roughRatio: true, roughConsumptionKg: true, roughConsumptionMeter: true,
                     preciseRatio: true, preciseConsumptionKg: true, preciseConsumptionMeter: true,
