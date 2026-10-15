@@ -1,4 +1,4 @@
-import React, { useCallback, useEffect, useRef, useState } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import { ChevronDown, ChevronRight, ChevronUp, Save, Search, X } from 'lucide-react';
 import { Input, Popover, PopoverContent, PopoverTrigger } from '@/shared/components/ui-tw';
 import { cn } from '@/lib/utils';
@@ -46,6 +46,8 @@ export interface CostingGridConfig {
   costFields?: Record<string, CostFieldSet>;
   /** DB field recording which tab was saved (multi-tab cards). */
   tabField?: string;
+  /** basic_trim_master attribute_name whose types match the other-block row names (row = type). */
+  otherMasterAttr?: string;
   /** row → spec columns shown read-only (no attribute or DB field behind them). */
   readOnlySpec?: Record<string, SpecCol[]>;
 }
@@ -59,6 +61,7 @@ export const BTRIM_CONFIG: CostingGridConfig = {
   tabs: ['BT-01', 'BT-02'],
   fixedRows: ['M_BTN', 'DC', 'ZIP', 'PATCH', 'H-TRF'],
   other: { label: 'OTHER ACC', rows: ['ELASTIC', 'FUSING', 'BADGE', 'RIVET', 'TAPE', 'OTHER'] },
+  otherMasterAttr: 'OTHER BASIC TRIM',
   // M_BTN_TYPE values (POLY_BTN, KUNDI_BTN…) are button styles, so they sit
   // in the STYLE column; the button size (e.g. 26L) is TYPE.
   cellMap: {
@@ -124,8 +127,6 @@ interface CostingGridCardProps {
   locked: boolean;
   /** Any other attrs in this group that the table doesn't cover. */
   extraRows?: React.ReactNode;
-  /** When true, each spec-cell change triggers a precise_trim_master lookup (by attribute name + value) and fills AUTO-BGT. */
-  enablePreciseTrimLookup?: boolean;
   /** Reads the article fresh from the DB (the parent's copy can be stale). Needed for cost sync. */
   loadSavedRecord?: () => Promise<Record<string, unknown> | null>;
   /** Save button: persists the current tab's spec fields + costs (config.costFields) + bTrimType. */
@@ -264,7 +265,6 @@ const CostingGridCard: React.FC<CostingGridCardProps> = ({
   isFieldLocked,
   locked,
   extraRows,
-  enablePreciseTrimLookup,
   loadSavedRecord,
   onSaveTab,
 }) => {
@@ -282,40 +282,20 @@ const CostingGridCard: React.FC<CostingGridCardProps> = ({
   const [dirty, setDirty] = useState(false);
   const [savedTab, setSavedTab] = useState<string | null>(null);
   const basicTrimFetchedRef = useRef<Record<string, string>>({});
+  // Other-block master fill: tabs already handled, and the fetched master (one call per mount).
+  const otherFilledTabsRef = useRef<Set<string>>(new Set());
+  const otherMasterRef = useRef<Record<string, { bt1: string; bt2: string }> | null>(null);
 
   const setTabVal = (t: string, row: string, col: Col, v: string) =>
     setLocal((prev) => ({ ...prev, [t]: { ...prev[t], [row]: { ...prev[t]?.[row], [col]: v } } }));
 
-  // Lookup result → the picked tab's AUTO-BGT (and ROUGH-V2 for basic_trim_master).
+  // basic_trim_master result → the picked tab's AUTO-BGT (and ROUGH-V2).
   const applyLookup = (row: string, r: { bt1: string; bt2: string }, tabIdx: number, withRough: boolean) => {
     const t = tabs[tabIdx];
     const v = tabIdx === 0 ? r.bt1 : r.bt2;
     setTabVal(t, row, 'auto', v);
     if (withRough) setTabVal(t, row, 'rough', v);
   };
-
-  // attributeName = SAP field from cellMap (e.g. "drawcord" for M_DC_STYLE), value = selected shortForm
-  const lookupPreciseTrim = useCallback(async (row: string, attributeName: string, value: string, tabIdx: number) => {
-    if (!enablePreciseTrimLookup || !attributeName || !value) return;
-    setAutoBgtLoading((prev) => ({ ...prev, [row]: true }));
-    try {
-      const token = localStorage.getItem('authToken');
-      const url = `${APP_CONFIG.api.baseURL}/admin/precise-trim-master/lookup?attributeName=${encodeURIComponent(attributeName)}&type=${encodeURIComponent(value)}`;
-      const res = await fetch(url, { headers: token ? { Authorization: `Bearer ${token}` } : {} });
-      const data = await res.json();
-      if (data.success && data.data) {
-        applyLookup(row, {
-          bt1: data.data.bt1 !== null ? String(data.data.bt1) : '',
-          bt2: data.data.bt2 !== null ? String(data.data.bt2) : '',
-        }, tabIdx, false);
-      }
-    } catch {
-      // silent — AUTO-BGT just stays as-is
-    } finally {
-      setAutoBgtLoading((prev) => ({ ...prev, [row]: false }));
-    }
-  // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [enablePreciseTrimLookup]);
 
   // basic_trim_master lookup by attribute_name + type value → { bt1, bt2 } or null.
   const fetchBasicTrim = async (row: string, attributeName: string, value: string) => {
@@ -332,6 +312,59 @@ const CostingGridCard: React.FC<CostingGridCardProps> = ({
     } finally {
       setAutoBgtLoading((prev) => ({ ...prev, [row]: false }));
     }
+  };
+
+  // Every type of one basic_trim_master attribute → { TYPE: { bt1, bt2 } }, or null on failure.
+  const fetchBasicTrimAll = async (attributeName: string) => {
+    try {
+      const token = localStorage.getItem('authToken');
+      const url = `${APP_CONFIG.api.baseURL}/approver/basic-trim-master/lookup?attributeName=${encodeURIComponent(attributeName)}`;
+      const res = await fetch(url, { headers: token ? { Authorization: `Bearer ${token}` } : {} });
+      const data: { found: boolean; rows?: { type: string; bt1: number | null; bt2: number | null }[] } = await res.json();
+      if (!data.found || !data.rows) return null;
+      return Object.fromEntries(
+        data.rows.map((r) => [
+          r.type.trim().toUpperCase(),
+          { bt1: r.bt1 != null ? String(r.bt1) : '', bt2: r.bt2 != null ? String(r.bt2) : '' },
+        ]),
+      ) as Record<string, { bt1: string; bt2: string }>;
+    } catch {
+      return null;
+    }
+  };
+
+  // Fills other-block rows on tab `tb` from config.otherMasterAttr (row name = type):
+  // AUTO-BGT always for the given rows, ROUGH-V2 only where empty. Returns true if anything was set.
+  const fillOtherFromMaster = async (
+    tb: string,
+    rowsToFill: string[],
+    current: (row: string) => RowState | undefined,
+  ): Promise<boolean> => {
+    if (!config.otherMasterAttr) return false;
+    if (!otherMasterRef.current) otherMasterRef.current = await fetchBasicTrimAll(config.otherMasterAttr);
+    const master = otherMasterRef.current;
+    if (!master) return false;
+    const idx = tabs.indexOf(tb);
+    let filled = false;
+    for (const row of rowsToFill) {
+      const m = master[row.toUpperCase()];
+      const v = m ? (idx === 0 ? m.bt1 : m.bt2) : '';
+      if (!v) continue;
+      setTabVal(tb, row, 'auto', v);
+      if (!current(row)?.rough) setTabVal(tb, row, 'rough', v);
+      filled = true;
+    }
+    return filled;
+  };
+
+  // Switching to a tab: the first visit to a tab without loaded values pulls the
+  // other-block AUTO-BGT / ROUGH-V2 from the master. The saved tab keeps its DB values.
+  const selectTab = (tb: string) => {
+    setTab(tb);
+    if (!tabSave || !other || !config.otherMasterAttr || otherFilledTabsRef.current.has(tb)) return;
+    otherFilledTabsRef.current.add(tb);
+    const missing = other.rows.filter((row) => !local[tb]?.[row]?.auto);
+    if (missing.length > 0) void fillOtherFromMaster(tb, missing, (row) => local[tb]?.[row]);
   };
 
   const lookupBasicTrim = async (row: string, attributeName: string, value: string, tabIdx: number) => {
@@ -379,6 +412,15 @@ const CostingGridCard: React.FC<CostingGridCardProps> = ({
         };
       }
       setLocal({ [t]: rows });
+
+      // Other-block rows on the opened tab: hit the master only if some row's AUTO-BGT is
+      // null in the DB, and fill just those rows. Other tabs are filled when first opened.
+      otherFilledTabsRef.current.add(t);
+      if (other && config.otherMasterAttr) {
+        const missing = other.rows.filter((row) => !rows[row]?.auto);
+        if (missing.length > 0 && (await fillOtherFromMaster(t, missing, (row) => rows[row]))) setDirty(true);
+        if (cancelled) return;
+      }
 
       for (const row of Object.keys(costFields!)) {
         if (rows[row].auto && rows[row].rough) continue;
@@ -455,7 +497,6 @@ const CostingGridCard: React.FC<CostingGridCardProps> = ({
           onPick={(v) => {
             if (toSap) onSave(a.field, v); else setLocalVal(row, col, v ?? '');
             const tabIdx = tabs.indexOf(tab);
-            if (v) lookupPreciseTrim(row, a.field, v, tabIdx);
             const btAttr = BASIC_TRIM_LOOKUP[row]?.[col];
             if (v && btAttr) lookupBasicTrim(row, btAttr, v, tabIdx);
           }}
@@ -565,7 +606,7 @@ const CostingGridCard: React.FC<CostingGridCardProps> = ({
                     type="button"
                     role="tab"
                     aria-selected={active}
-                    onClick={() => setTab(t)}
+                    onClick={() => selectTab(t)}
                     className={cn(
                       'flex h-8 items-center gap-1.5 px-3 text-[11.5px] font-bold tracking-wide transition-colors',
                       active ? 'rounded-t-md bg-white text-slate-900 shadow-[inset_0_-2px_0_#1e293b]' : 'opacity-80 hover:opacity-100',
