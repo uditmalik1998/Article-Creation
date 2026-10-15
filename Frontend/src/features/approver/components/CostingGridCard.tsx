@@ -13,11 +13,11 @@ import { APP_CONFIG } from '../../../constants/app/config';
 // Cells that map to an existing SAP attribute (config.cellMap) are dropdowns
 // of that attribute's allowed values on every tab. Persistence: only the
 // FIRST tab's mapped cells are saved — through the card's normal handleSave,
-// so SAP sync is unchanged — V. ADD works this way.
-// B TRIM (config.costFields + onSaveTab) instead keeps every tab's values local
-// and saves only on the Save button: the current tab's spec fields, costs and
-// bTrimType. On load the saved tab opens with its DB values; the other is empty.
-// Other-block rows stay UI-only.
+// so SAP sync is unchanged (used when a card has no costFields / onSaveTab).
+// B TRIM and V. ADD (config.costFields + onSaveTab) instead keep every tab's
+// values local and save only on the Save button: the current tab's spec fields,
+// costs and, for multi-tab cards, config.tabField. On load the saved tab opens
+// with its DB values; any other tab is empty. Other-block rows stay UI-only.
 
 type AttrValue = { shortForm: string; fullForm?: string | null };
 export type CostingGridAttr = { field: string; label: string; values: AttrValue[] };
@@ -43,6 +43,8 @@ export interface CostingGridConfig {
   grid: string;
   /** row → DB fields for the first tab's costing cells. Rows not listed stay UI-only. */
   costFields?: Record<string, CostFieldSet>;
+  /** DB field recording which tab was saved (multi-tab cards). */
+  tabField?: string;
 }
 
 type CostFieldSet = { autoBgt: string; rough: string; vdr: string; fin: string };
@@ -64,6 +66,7 @@ export const BTRIM_CONFIG: CostingGridConfig = {
     'H-TRF': { type: 'htrfType', style: 'htrfStyle' },    // M_HTRF_TYPE, M_HTRF_STYLE
   },
   grid: 'grid grid-cols-[150px_110px_minmax(0,1.3fr)_90px_minmax(0,1.5fr)_88px_92px_92px_100px]',
+  tabField: 'bTrimType',
   costFields: {
     M_BTN:   { autoBgt: 'mBtnAutoBgt',  rough: 'mBtnRoughV2',  vdr: 'mBtnVdrCost',  fin: 'mBtnFinalCost' },
     DC:      { autoBgt: 'dcAutoBgt',    rough: 'dcRoughV2',    vdr: 'dcVdrCost',    fin: 'dcFinalCost' },
@@ -85,6 +88,11 @@ export const VADD_CONFIG: CostingGridConfig = {
     WASHING: { type: 'wash' },                                                // M_WASH
   },
   grid: 'grid grid-cols-[150px_130px_minmax(0,1.3fr)_minmax(0,1fr)_minmax(0,1.4fr)_88px_92px_92px_100px]',
+  costFields: {
+    PRINT:   { autoBgt: 'printAutoBgt',   rough: 'printRoughV2',   vdr: 'printVendorCost',   fin: 'printFinalCost' },
+    EMB:     { autoBgt: 'embAutoBgt',     rough: 'embRoughV2',     vdr: 'embVendorCost',     fin: 'embFinalCost' },
+    WASHING: { autoBgt: 'washingAutoBgt', rough: 'washingRoughV2', vdr: 'washingVendorCost', fin: 'washingFinalCost' },
+  },
 };
 
 /** Item fields a config's table covers (the rest of the group renders as normal rows). */
@@ -337,7 +345,7 @@ const CostingGridCard: React.FC<CostingGridCardProps> = ({
       if (!rec || cancelled) return;
       const str = (v: unknown) => (v == null || v === '' ? '' : String(v).trim());
       const num = (v: unknown) => (v == null || v === '' ? '' : String(Number(v)));
-      const recTab = str(rec.bTrimType);
+      const recTab = config.tabField ? str(rec[config.tabField]) : '';
       const t = tabs.includes(recTab) ? recTab : tabs[0];
       const tIdx = tabs.indexOf(t);
       setTab(t);
@@ -407,7 +415,7 @@ const CostingGridCard: React.FC<CostingGridCardProps> = ({
 
   const handleSaveTab = () => {
     if (!tabSave) return;
-    const updates: Record<string, string | null> = { bTrimType: tab };
+    const updates: Record<string, string | null> = config.tabField ? { [config.tabField]: tab } : {};
     for (const [row, map] of Object.entries(cellMap)) {
       for (const [col, field] of Object.entries(map) as [SpecCol, string][]) {
         if (!boundAttr(row, col) || isFieldLocked(field)) continue;
@@ -493,21 +501,47 @@ const CostingGridCard: React.FC<CostingGridCardProps> = ({
     <div className="col-span-full overflow-hidden rounded-lg border-2 bg-white shadow-[var(--shadow-sm)]" style={{ borderColor: style.border }}>
       {/* Header: title + collapse, then underline tabs (when more than one) */}
       <div className="border-b-2" style={{ background: style.bg, borderColor: style.bg }}>
-        <button
-          type="button"
-          onClick={onToggleCollapse}
-          className="flex w-full items-center justify-between px-2 py-1.5 transition-colors hover:brightness-95"
-        >
-          <span className="flex items-center gap-1 text-[10px] font-bold uppercase tracking-wider" style={{ color: style.fg }}>
+        <div className="flex items-center">
+          <button
+            type="button"
+            onClick={onToggleCollapse}
+            className="flex items-center gap-1 px-2 py-1.5 text-[10px] font-bold uppercase tracking-wider transition-colors hover:brightness-95"
+            style={{ color: style.fg }}
+          >
             {icon}
             {config.title}
-          </span>
-          {collapsed ? (
-            <ChevronDown className="h-3 w-3" style={{ color: style.fg }} />
-          ) : (
-            <ChevronUp className="h-3 w-3" style={{ color: style.fg }} />
+          </button>
+          {tabSave && tabs.length === 1 && !collapsed && (
+            <div className="flex items-center gap-2">
+              <button
+                type="button"
+                onClick={handleSaveTab}
+                disabled={locked}
+                className="flex h-6 items-center gap-1 rounded-md bg-white px-2.5 text-[11px] font-bold text-slate-900 transition-colors hover:bg-slate-100 disabled:cursor-not-allowed disabled:opacity-50"
+              >
+                <Save className="h-3 w-3" />
+                Save
+              </button>
+              {dirty && (
+                <span className="text-[10.5px] font-medium" style={{ color: style.fg, opacity: 0.8 }}>
+                  Unsaved changes
+                </span>
+              )}
+            </div>
           )}
-        </button>
+          <button
+            type="button"
+            onClick={onToggleCollapse}
+            aria-label={collapsed ? 'Expand' : 'Collapse'}
+            className="flex flex-1 items-center justify-end self-stretch px-2 py-1.5 transition-colors hover:brightness-95"
+          >
+            {collapsed ? (
+              <ChevronDown className="h-3 w-3" style={{ color: style.fg }} />
+            ) : (
+              <ChevronUp className="h-3 w-3" style={{ color: style.fg }} />
+            )}
+          </button>
+        </div>
         {!collapsed && tabs.length > 1 && (
           <div className="flex items-end justify-between gap-2 px-2">
             <div role="tablist" className="flex gap-1">
