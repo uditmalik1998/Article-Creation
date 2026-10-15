@@ -161,8 +161,6 @@ export interface ApproverItem {
   preciseRatio: number | string | null;
   preciseConsumptionKg: number | string | null;
   preciseConsumptionMeter: number | string | null;
-  mcDescription: string | null;
-  variantWeight: string | null;
   cuttingBgtPrVal: number | string | null;
   cuttingActPrVal: number | string | null;
   cuttingVendorPrVal: number | string | null;
