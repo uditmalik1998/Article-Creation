@@ -17,7 +17,8 @@ import { APP_CONFIG } from '../../../constants/app/config';
 // B TRIM and V. ADD (config.costFields + onSaveTab) instead keep every tab's
 // values local and save only on the Save button: the current tab's spec fields,
 // costs and, for multi-tab cards, config.tabField. On load the saved tab opens
-// with its DB values; any other tab is empty. Other-block rows stay UI-only.
+// with its DB values; any other tab is empty. Other-block rows save their costs
+// (if listed in costFields); their spec cells are UI-only.
 
 type AttrValue = { shortForm: string; fullForm?: string | null };
 export type CostingGridAttr = { field: string; label: string; values: AttrValue[] };
@@ -73,6 +74,12 @@ export const BTRIM_CONFIG: CostingGridConfig = {
     ZIP:     { autoBgt: 'zipAutoBgt',   rough: 'zipRoughV2',   vdr: 'zipVdrCost',   fin: 'zipFinalCost' },
     PATCH:   { autoBgt: 'patchAutoBgt', rough: 'patchRoughV2', vdr: 'patchVdrCost', fin: 'patchFinalCost' },
     'H-TRF': { autoBgt: 'hTrfAutoBgt',  rough: 'hTrfRoughV2',  vdr: 'hTrfVdrCost',  fin: 'hTrfFinalCost' },
+    ELASTIC: { autoBgt: 'elasticAutoBgt', rough: 'elasticRoughV2', vdr: 'elasticVdrCost', fin: 'elasticFinalCost' },
+    FUSING:  { autoBgt: 'fusingAutoBgt',  rough: 'fusingRoughV2',  vdr: 'fusingVdrCost',  fin: 'fusingFinalCost' },
+    BADGE:   { autoBgt: 'badgeAutoBgt',   rough: 'badgeRoughV2',   vdr: 'badgeVdrCost',   fin: 'badgeFinalCost' },
+    RIVET:   { autoBgt: 'rivetAutoBgt',   rough: 'rivetRoughV2',   vdr: 'rivetVdrCost',   fin: 'rivetFinalCost' },
+    TAPE:    { autoBgt: 'tapeAutoBgt',    rough: 'tapeRoughV2',    vdr: 'tapeVdrCost',    fin: 'tapeFinalCost' },
+    OTHER:   { autoBgt: 'otherAutoBgt',   rough: 'otherRoughV2',   vdr: 'otherVdrCost',   fin: 'otherFinalCost' },
   },
 };
 

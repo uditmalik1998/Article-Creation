@@ -17414,6 +17414,30 @@ export namespace Prisma {
     hTrfRoughV2: Decimal | null
     hTrfVdrCost: Decimal | null
     hTrfFinalCost: Decimal | null
+    elasticAutoBgt: Decimal | null
+    elasticRoughV2: Decimal | null
+    elasticVdrCost: Decimal | null
+    elasticFinalCost: Decimal | null
+    fusingAutoBgt: Decimal | null
+    fusingRoughV2: Decimal | null
+    fusingVdrCost: Decimal | null
+    fusingFinalCost: Decimal | null
+    badgeAutoBgt: Decimal | null
+    badgeRoughV2: Decimal | null
+    badgeVdrCost: Decimal | null
+    badgeFinalCost: Decimal | null
+    rivetAutoBgt: Decimal | null
+    rivetRoughV2: Decimal | null
+    rivetVdrCost: Decimal | null
+    rivetFinalCost: Decimal | null
+    tapeAutoBgt: Decimal | null
+    tapeRoughV2: Decimal | null
+    tapeVdrCost: Decimal | null
+    tapeFinalCost: Decimal | null
+    otherAutoBgt: Decimal | null
+    otherRoughV2: Decimal | null
+    otherVdrCost: Decimal | null
+    otherFinalCost: Decimal | null
     printAutoBgt: Decimal | null
     printRoughV2: Decimal | null
     printVendorCost: Decimal | null
@@ -17493,6 +17517,30 @@ export namespace Prisma {
     hTrfRoughV2: Decimal | null
     hTrfVdrCost: Decimal | null
     hTrfFinalCost: Decimal | null
+    elasticAutoBgt: Decimal | null
+    elasticRoughV2: Decimal | null
+    elasticVdrCost: Decimal | null
+    elasticFinalCost: Decimal | null
+    fusingAutoBgt: Decimal | null
+    fusingRoughV2: Decimal | null
+    fusingVdrCost: Decimal | null
+    fusingFinalCost: Decimal | null
+    badgeAutoBgt: Decimal | null
+    badgeRoughV2: Decimal | null
+    badgeVdrCost: Decimal | null
+    badgeFinalCost: Decimal | null
+    rivetAutoBgt: Decimal | null
+    rivetRoughV2: Decimal | null
+    rivetVdrCost: Decimal | null
+    rivetFinalCost: Decimal | null
+    tapeAutoBgt: Decimal | null
+    tapeRoughV2: Decimal | null
+    tapeVdrCost: Decimal | null
+    tapeFinalCost: Decimal | null
+    otherAutoBgt: Decimal | null
+    otherRoughV2: Decimal | null
+    otherVdrCost: Decimal | null
+    otherFinalCost: Decimal | null
     printAutoBgt: Decimal | null
     printRoughV2: Decimal | null
     printVendorCost: Decimal | null
@@ -17658,6 +17706,30 @@ export namespace Prisma {
     hTrfRoughV2: Decimal | null
     hTrfVdrCost: Decimal | null
     hTrfFinalCost: Decimal | null
+    elasticAutoBgt: Decimal | null
+    elasticRoughV2: Decimal | null
+    elasticVdrCost: Decimal | null
+    elasticFinalCost: Decimal | null
+    fusingAutoBgt: Decimal | null
+    fusingRoughV2: Decimal | null
+    fusingVdrCost: Decimal | null
+    fusingFinalCost: Decimal | null
+    badgeAutoBgt: Decimal | null
+    badgeRoughV2: Decimal | null
+    badgeVdrCost: Decimal | null
+    badgeFinalCost: Decimal | null
+    rivetAutoBgt: Decimal | null
+    rivetRoughV2: Decimal | null
+    rivetVdrCost: Decimal | null
+    rivetFinalCost: Decimal | null
+    tapeAutoBgt: Decimal | null
+    tapeRoughV2: Decimal | null
+    tapeVdrCost: Decimal | null
+    tapeFinalCost: Decimal | null
+    otherAutoBgt: Decimal | null
+    otherRoughV2: Decimal | null
+    otherVdrCost: Decimal | null
+    otherFinalCost: Decimal | null
     printAutoBgt: Decimal | null
     printRoughV2: Decimal | null
     printVendorCost: Decimal | null
@@ -17858,6 +17930,30 @@ export namespace Prisma {
     hTrfRoughV2: Decimal | null
     hTrfVdrCost: Decimal | null
     hTrfFinalCost: Decimal | null
+    elasticAutoBgt: Decimal | null
+    elasticRoughV2: Decimal | null
+    elasticVdrCost: Decimal | null
+    elasticFinalCost: Decimal | null
+    fusingAutoBgt: Decimal | null
+    fusingRoughV2: Decimal | null
+    fusingVdrCost: Decimal | null
+    fusingFinalCost: Decimal | null
+    badgeAutoBgt: Decimal | null
+    badgeRoughV2: Decimal | null
+    badgeVdrCost: Decimal | null
+    badgeFinalCost: Decimal | null
+    rivetAutoBgt: Decimal | null
+    rivetRoughV2: Decimal | null
+    rivetVdrCost: Decimal | null
+    rivetFinalCost: Decimal | null
+    tapeAutoBgt: Decimal | null
+    tapeRoughV2: Decimal | null
+    tapeVdrCost: Decimal | null
+    tapeFinalCost: Decimal | null
+    otherAutoBgt: Decimal | null
+    otherRoughV2: Decimal | null
+    otherVdrCost: Decimal | null
+    otherFinalCost: Decimal | null
     printAutoBgt: Decimal | null
     printRoughV2: Decimal | null
     printVendorCost: Decimal | null
@@ -18058,6 +18154,30 @@ export namespace Prisma {
     hTrfRoughV2: number
     hTrfVdrCost: number
     hTrfFinalCost: number
+    elasticAutoBgt: number
+    elasticRoughV2: number
+    elasticVdrCost: number
+    elasticFinalCost: number
+    fusingAutoBgt: number
+    fusingRoughV2: number
+    fusingVdrCost: number
+    fusingFinalCost: number
+    badgeAutoBgt: number
+    badgeRoughV2: number
+    badgeVdrCost: number
+    badgeFinalCost: number
+    rivetAutoBgt: number
+    rivetRoughV2: number
+    rivetVdrCost: number
+    rivetFinalCost: number
+    tapeAutoBgt: number
+    tapeRoughV2: number
+    tapeVdrCost: number
+    tapeFinalCost: number
+    otherAutoBgt: number
+    otherRoughV2: number
+    otherVdrCost: number
+    otherFinalCost: number
     printAutoBgt: number
     printRoughV2: number
     printVendorCost: number
@@ -18175,6 +18295,30 @@ export namespace Prisma {
     hTrfRoughV2?: true
     hTrfVdrCost?: true
     hTrfFinalCost?: true
+    elasticAutoBgt?: true
+    elasticRoughV2?: true
+    elasticVdrCost?: true
+    elasticFinalCost?: true
+    fusingAutoBgt?: true
+    fusingRoughV2?: true
+    fusingVdrCost?: true
+    fusingFinalCost?: true
+    badgeAutoBgt?: true
+    badgeRoughV2?: true
+    badgeVdrCost?: true
+    badgeFinalCost?: true
+    rivetAutoBgt?: true
+    rivetRoughV2?: true
+    rivetVdrCost?: true
+    rivetFinalCost?: true
+    tapeAutoBgt?: true
+    tapeRoughV2?: true
+    tapeVdrCost?: true
+    tapeFinalCost?: true
+    otherAutoBgt?: true
+    otherRoughV2?: true
+    otherVdrCost?: true
+    otherFinalCost?: true
     printAutoBgt?: true
     printRoughV2?: true
     printVendorCost?: true
@@ -18254,6 +18398,30 @@ export namespace Prisma {
     hTrfRoughV2?: true
     hTrfVdrCost?: true
     hTrfFinalCost?: true
+    elasticAutoBgt?: true
+    elasticRoughV2?: true
+    elasticVdrCost?: true
+    elasticFinalCost?: true
+    fusingAutoBgt?: true
+    fusingRoughV2?: true
+    fusingVdrCost?: true
+    fusingFinalCost?: true
+    badgeAutoBgt?: true
+    badgeRoughV2?: true
+    badgeVdrCost?: true
+    badgeFinalCost?: true
+    rivetAutoBgt?: true
+    rivetRoughV2?: true
+    rivetVdrCost?: true
+    rivetFinalCost?: true
+    tapeAutoBgt?: true
+    tapeRoughV2?: true
+    tapeVdrCost?: true
+    tapeFinalCost?: true
+    otherAutoBgt?: true
+    otherRoughV2?: true
+    otherVdrCost?: true
+    otherFinalCost?: true
     printAutoBgt?: true
     printRoughV2?: true
     printVendorCost?: true
@@ -18419,6 +18587,30 @@ export namespace Prisma {
     hTrfRoughV2?: true
     hTrfVdrCost?: true
     hTrfFinalCost?: true
+    elasticAutoBgt?: true
+    elasticRoughV2?: true
+    elasticVdrCost?: true
+    elasticFinalCost?: true
+    fusingAutoBgt?: true
+    fusingRoughV2?: true
+    fusingVdrCost?: true
+    fusingFinalCost?: true
+    badgeAutoBgt?: true
+    badgeRoughV2?: true
+    badgeVdrCost?: true
+    badgeFinalCost?: true
+    rivetAutoBgt?: true
+    rivetRoughV2?: true
+    rivetVdrCost?: true
+    rivetFinalCost?: true
+    tapeAutoBgt?: true
+    tapeRoughV2?: true
+    tapeVdrCost?: true
+    tapeFinalCost?: true
+    otherAutoBgt?: true
+    otherRoughV2?: true
+    otherVdrCost?: true
+    otherFinalCost?: true
     printAutoBgt?: true
     printRoughV2?: true
     printVendorCost?: true
@@ -18619,6 +18811,30 @@ export namespace Prisma {
     hTrfRoughV2?: true
     hTrfVdrCost?: true
     hTrfFinalCost?: true
+    elasticAutoBgt?: true
+    elasticRoughV2?: true
+    elasticVdrCost?: true
+    elasticFinalCost?: true
+    fusingAutoBgt?: true
+    fusingRoughV2?: true
+    fusingVdrCost?: true
+    fusingFinalCost?: true
+    badgeAutoBgt?: true
+    badgeRoughV2?: true
+    badgeVdrCost?: true
+    badgeFinalCost?: true
+    rivetAutoBgt?: true
+    rivetRoughV2?: true
+    rivetVdrCost?: true
+    rivetFinalCost?: true
+    tapeAutoBgt?: true
+    tapeRoughV2?: true
+    tapeVdrCost?: true
+    tapeFinalCost?: true
+    otherAutoBgt?: true
+    otherRoughV2?: true
+    otherVdrCost?: true
+    otherFinalCost?: true
     printAutoBgt?: true
     printRoughV2?: true
     printVendorCost?: true
@@ -18819,6 +19035,30 @@ export namespace Prisma {
     hTrfRoughV2?: true
     hTrfVdrCost?: true
     hTrfFinalCost?: true
+    elasticAutoBgt?: true
+    elasticRoughV2?: true
+    elasticVdrCost?: true
+    elasticFinalCost?: true
+    fusingAutoBgt?: true
+    fusingRoughV2?: true
+    fusingVdrCost?: true
+    fusingFinalCost?: true
+    badgeAutoBgt?: true
+    badgeRoughV2?: true
+    badgeVdrCost?: true
+    badgeFinalCost?: true
+    rivetAutoBgt?: true
+    rivetRoughV2?: true
+    rivetVdrCost?: true
+    rivetFinalCost?: true
+    tapeAutoBgt?: true
+    tapeRoughV2?: true
+    tapeVdrCost?: true
+    tapeFinalCost?: true
+    otherAutoBgt?: true
+    otherRoughV2?: true
+    otherVdrCost?: true
+    otherFinalCost?: true
     printAutoBgt?: true
     printRoughV2?: true
     printVendorCost?: true
@@ -19107,6 +19347,30 @@ export namespace Prisma {
     hTrfRoughV2: Decimal | null
     hTrfVdrCost: Decimal | null
     hTrfFinalCost: Decimal | null
+    elasticAutoBgt: Decimal | null
+    elasticRoughV2: Decimal | null
+    elasticVdrCost: Decimal | null
+    elasticFinalCost: Decimal | null
+    fusingAutoBgt: Decimal | null
+    fusingRoughV2: Decimal | null
+    fusingVdrCost: Decimal | null
+    fusingFinalCost: Decimal | null
+    badgeAutoBgt: Decimal | null
+    badgeRoughV2: Decimal | null
+    badgeVdrCost: Decimal | null
+    badgeFinalCost: Decimal | null
+    rivetAutoBgt: Decimal | null
+    rivetRoughV2: Decimal | null
+    rivetVdrCost: Decimal | null
+    rivetFinalCost: Decimal | null
+    tapeAutoBgt: Decimal | null
+    tapeRoughV2: Decimal | null
+    tapeVdrCost: Decimal | null
+    tapeFinalCost: Decimal | null
+    otherAutoBgt: Decimal | null
+    otherRoughV2: Decimal | null
+    otherVdrCost: Decimal | null
+    otherFinalCost: Decimal | null
     printAutoBgt: Decimal | null
     printRoughV2: Decimal | null
     printVendorCost: Decimal | null
@@ -19327,6 +19591,30 @@ export namespace Prisma {
     hTrfRoughV2?: boolean
     hTrfVdrCost?: boolean
     hTrfFinalCost?: boolean
+    elasticAutoBgt?: boolean
+    elasticRoughV2?: boolean
+    elasticVdrCost?: boolean
+    elasticFinalCost?: boolean
+    fusingAutoBgt?: boolean
+    fusingRoughV2?: boolean
+    fusingVdrCost?: boolean
+    fusingFinalCost?: boolean
+    badgeAutoBgt?: boolean
+    badgeRoughV2?: boolean
+    badgeVdrCost?: boolean
+    badgeFinalCost?: boolean
+    rivetAutoBgt?: boolean
+    rivetRoughV2?: boolean
+    rivetVdrCost?: boolean
+    rivetFinalCost?: boolean
+    tapeAutoBgt?: boolean
+    tapeRoughV2?: boolean
+    tapeVdrCost?: boolean
+    tapeFinalCost?: boolean
+    otherAutoBgt?: boolean
+    otherRoughV2?: boolean
+    otherVdrCost?: boolean
+    otherFinalCost?: boolean
     printAutoBgt?: boolean
     printRoughV2?: boolean
     printVendorCost?: boolean
@@ -19532,6 +19820,30 @@ export namespace Prisma {
     hTrfRoughV2?: boolean
     hTrfVdrCost?: boolean
     hTrfFinalCost?: boolean
+    elasticAutoBgt?: boolean
+    elasticRoughV2?: boolean
+    elasticVdrCost?: boolean
+    elasticFinalCost?: boolean
+    fusingAutoBgt?: boolean
+    fusingRoughV2?: boolean
+    fusingVdrCost?: boolean
+    fusingFinalCost?: boolean
+    badgeAutoBgt?: boolean
+    badgeRoughV2?: boolean
+    badgeVdrCost?: boolean
+    badgeFinalCost?: boolean
+    rivetAutoBgt?: boolean
+    rivetRoughV2?: boolean
+    rivetVdrCost?: boolean
+    rivetFinalCost?: boolean
+    tapeAutoBgt?: boolean
+    tapeRoughV2?: boolean
+    tapeVdrCost?: boolean
+    tapeFinalCost?: boolean
+    otherAutoBgt?: boolean
+    otherRoughV2?: boolean
+    otherVdrCost?: boolean
+    otherFinalCost?: boolean
     printAutoBgt?: boolean
     printRoughV2?: boolean
     printVendorCost?: boolean
@@ -19735,6 +20047,30 @@ export namespace Prisma {
     hTrfRoughV2?: boolean
     hTrfVdrCost?: boolean
     hTrfFinalCost?: boolean
+    elasticAutoBgt?: boolean
+    elasticRoughV2?: boolean
+    elasticVdrCost?: boolean
+    elasticFinalCost?: boolean
+    fusingAutoBgt?: boolean
+    fusingRoughV2?: boolean
+    fusingVdrCost?: boolean
+    fusingFinalCost?: boolean
+    badgeAutoBgt?: boolean
+    badgeRoughV2?: boolean
+    badgeVdrCost?: boolean
+    badgeFinalCost?: boolean
+    rivetAutoBgt?: boolean
+    rivetRoughV2?: boolean
+    rivetVdrCost?: boolean
+    rivetFinalCost?: boolean
+    tapeAutoBgt?: boolean
+    tapeRoughV2?: boolean
+    tapeVdrCost?: boolean
+    tapeFinalCost?: boolean
+    otherAutoBgt?: boolean
+    otherRoughV2?: boolean
+    otherVdrCost?: boolean
+    otherFinalCost?: boolean
     printAutoBgt?: boolean
     printRoughV2?: boolean
     printVendorCost?: boolean
@@ -19938,6 +20274,30 @@ export namespace Prisma {
     hTrfRoughV2?: boolean
     hTrfVdrCost?: boolean
     hTrfFinalCost?: boolean
+    elasticAutoBgt?: boolean
+    elasticRoughV2?: boolean
+    elasticVdrCost?: boolean
+    elasticFinalCost?: boolean
+    fusingAutoBgt?: boolean
+    fusingRoughV2?: boolean
+    fusingVdrCost?: boolean
+    fusingFinalCost?: boolean
+    badgeAutoBgt?: boolean
+    badgeRoughV2?: boolean
+    badgeVdrCost?: boolean
+    badgeFinalCost?: boolean
+    rivetAutoBgt?: boolean
+    rivetRoughV2?: boolean
+    rivetVdrCost?: boolean
+    rivetFinalCost?: boolean
+    tapeAutoBgt?: boolean
+    tapeRoughV2?: boolean
+    tapeVdrCost?: boolean
+    tapeFinalCost?: boolean
+    otherAutoBgt?: boolean
+    otherRoughV2?: boolean
+    otherVdrCost?: boolean
+    otherFinalCost?: boolean
     printAutoBgt?: boolean
     printRoughV2?: boolean
     printVendorCost?: boolean
@@ -19996,7 +20356,7 @@ export namespace Prisma {
     imageExtractionRawData?: boolean
   }
 
-  export type ExtractionResultFlatOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<"id" | "jobId" | "imageName" | "imageUrl" | "articleNumber" | "extractionStatus" | "aiModel" | "avgConfidence" | "processingTimeMs" | "totalAttributes" | "extractedCount" | "inputTokens" | "outputTokens" | "totalTokens" | "apiCost" | "userId" | "userName" | "extractionDate" | "createdAt" | "updatedAt" | "majorCategory" | "vendorName" | "designNumber" | "pptNumber" | "rate" | "size" | "yarn1" | "yarn2" | "fabricMainMvgr" | "weave" | "weaveFullForm" | "composition" | "finish" | "gsm" | "macroMvgr" | "macroMvgrFullForm" | "mainMvgr" | "mainMvgrFullForm" | "mFab2" | "mFab2FullForm" | "shade" | "weight" | "lycra" | "neck" | "neckDetails" | "collar" | "placket" | "sleeve" | "bottomFold" | "frontOpenStyle" | "pocketType" | "fit" | "pattern" | "length" | "colour" | "secondaryColour" | "drawcord" | "button" | "zipper" | "zipColour" | "printType" | "printStyle" | "printPlacement" | "patches" | "patchesType" | "embroidery" | "embroideryType" | "wash" | "fatherBelt" | "childBelt" | "division" | "subDivision" | "referenceArticleNumber" | "referenceArticleDescription" | "collarStyle" | "sleeveFold" | "mSet" | "noOfPocket" | "extraPocket" | "dcShape" | "btnColour" | "fCount" | "fConstruction" | "fOunce" | "fWidth" | "fabDiv" | "fabVdr" | "htrfType" | "htrfStyle" | "embPlacement" | "ageGroup" | "mNoOfSize" | "mNoOfClr" | "articleFashionType" | "articleDimension" | "autoBgt" | "roughV2" | "vendorFabricRate" | "finalCost" | "roughRatio" | "roughConsumptionKg" | "roughConsumptionMeter" | "preciseRatio" | "preciseConsumptionKg" | "preciseConsumptionMeter" | "cuttingBgtPrVal" | "cuttingActPrVal" | "cuttingVendorPrVal" | "cuttingFinalPrVal" | "stitchingBgtPrVal" | "stitchingActPrVal" | "stitchingVendorPrVal" | "stitchingFinalPrVal" | "ironingBgtPrVal" | "ironingActPrVal" | "ironingVendorPrVal" | "ironingFinalPrVal" | "finishingBgtPrVal" | "finishingActPrVal" | "finishingVendorPrVal" | "finishingFinalPrVal" | "bTrimType" | "mBtnAutoBgt" | "mBtnRoughV2" | "mBtnVdrCost" | "mBtnFinalCost" | "dcAutoBgt" | "dcRoughV2" | "dcVdrCost" | "dcFinalCost" | "zipAutoBgt" | "zipRoughV2" | "zipVdrCost" | "zipFinalCost" | "patchAutoBgt" | "patchRoughV2" | "patchVdrCost" | "patchFinalCost" | "hTrfAutoBgt" | "hTrfRoughV2" | "hTrfVdrCost" | "hTrfFinalCost" | "printAutoBgt" | "printRoughV2" | "printVendorCost" | "printFinalCost" | "embAutoBgt" | "embRoughV2" | "embVendorCost" | "embFinalCost" | "washingAutoBgt" | "washingRoughV2" | "washingVendorCost" | "washingFinalCost" | "pkgCostType" | "boppNetPrice" | "ctnNetPrice" | "barcodeNetPrice" | "kimbleNetPrice" | "taftaNetPrice" | "threadNetPrice" | "bodyArticle" | "bodyArticleDescription" | "fabricArticleNumber" | "fabricArticleDescription" | "attrArticleNums" | "mvgrBrandVendor" | "mcDescription" | "vendorCode" | "mrp" | "impAtrbt2" | "mcCode" | "segment" | "season" | "hsnTaxCode" | "articleDescription" | "fashionGrid" | "year" | "articleType" | "presentationsType" | "approvalStatus" | "pdStatus" | "approvedBy" | "approvedAt" | "source" | "imageUncPath" | "isOldArticle" | "isGeneric" | "genericArticleId" | "variantSize" | "variantColor" | "variantWeight" | "sapSyncStatus" | "sapArticleId" | "sapSyncMessage" | "srmOriginalDesignNumber" | "srmUniqueId" | "imageExtractionRawData", ExtArgs["result"]["extractionResultFlat"]>
+  export type ExtractionResultFlatOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<"id" | "jobId" | "imageName" | "imageUrl" | "articleNumber" | "extractionStatus" | "aiModel" | "avgConfidence" | "processingTimeMs" | "totalAttributes" | "extractedCount" | "inputTokens" | "outputTokens" | "totalTokens" | "apiCost" | "userId" | "userName" | "extractionDate" | "createdAt" | "updatedAt" | "majorCategory" | "vendorName" | "designNumber" | "pptNumber" | "rate" | "size" | "yarn1" | "yarn2" | "fabricMainMvgr" | "weave" | "weaveFullForm" | "composition" | "finish" | "gsm" | "macroMvgr" | "macroMvgrFullForm" | "mainMvgr" | "mainMvgrFullForm" | "mFab2" | "mFab2FullForm" | "shade" | "weight" | "lycra" | "neck" | "neckDetails" | "collar" | "placket" | "sleeve" | "bottomFold" | "frontOpenStyle" | "pocketType" | "fit" | "pattern" | "length" | "colour" | "secondaryColour" | "drawcord" | "button" | "zipper" | "zipColour" | "printType" | "printStyle" | "printPlacement" | "patches" | "patchesType" | "embroidery" | "embroideryType" | "wash" | "fatherBelt" | "childBelt" | "division" | "subDivision" | "referenceArticleNumber" | "referenceArticleDescription" | "collarStyle" | "sleeveFold" | "mSet" | "noOfPocket" | "extraPocket" | "dcShape" | "btnColour" | "fCount" | "fConstruction" | "fOunce" | "fWidth" | "fabDiv" | "fabVdr" | "htrfType" | "htrfStyle" | "embPlacement" | "ageGroup" | "mNoOfSize" | "mNoOfClr" | "articleFashionType" | "articleDimension" | "autoBgt" | "roughV2" | "vendorFabricRate" | "finalCost" | "roughRatio" | "roughConsumptionKg" | "roughConsumptionMeter" | "preciseRatio" | "preciseConsumptionKg" | "preciseConsumptionMeter" | "cuttingBgtPrVal" | "cuttingActPrVal" | "cuttingVendorPrVal" | "cuttingFinalPrVal" | "stitchingBgtPrVal" | "stitchingActPrVal" | "stitchingVendorPrVal" | "stitchingFinalPrVal" | "ironingBgtPrVal" | "ironingActPrVal" | "ironingVendorPrVal" | "ironingFinalPrVal" | "finishingBgtPrVal" | "finishingActPrVal" | "finishingVendorPrVal" | "finishingFinalPrVal" | "bTrimType" | "mBtnAutoBgt" | "mBtnRoughV2" | "mBtnVdrCost" | "mBtnFinalCost" | "dcAutoBgt" | "dcRoughV2" | "dcVdrCost" | "dcFinalCost" | "zipAutoBgt" | "zipRoughV2" | "zipVdrCost" | "zipFinalCost" | "patchAutoBgt" | "patchRoughV2" | "patchVdrCost" | "patchFinalCost" | "hTrfAutoBgt" | "hTrfRoughV2" | "hTrfVdrCost" | "hTrfFinalCost" | "elasticAutoBgt" | "elasticRoughV2" | "elasticVdrCost" | "elasticFinalCost" | "fusingAutoBgt" | "fusingRoughV2" | "fusingVdrCost" | "fusingFinalCost" | "badgeAutoBgt" | "badgeRoughV2" | "badgeVdrCost" | "badgeFinalCost" | "rivetAutoBgt" | "rivetRoughV2" | "rivetVdrCost" | "rivetFinalCost" | "tapeAutoBgt" | "tapeRoughV2" | "tapeVdrCost" | "tapeFinalCost" | "otherAutoBgt" | "otherRoughV2" | "otherVdrCost" | "otherFinalCost" | "printAutoBgt" | "printRoughV2" | "printVendorCost" | "printFinalCost" | "embAutoBgt" | "embRoughV2" | "embVendorCost" | "embFinalCost" | "washingAutoBgt" | "washingRoughV2" | "washingVendorCost" | "washingFinalCost" | "pkgCostType" | "boppNetPrice" | "ctnNetPrice" | "barcodeNetPrice" | "kimbleNetPrice" | "taftaNetPrice" | "threadNetPrice" | "bodyArticle" | "bodyArticleDescription" | "fabricArticleNumber" | "fabricArticleDescription" | "attrArticleNums" | "mvgrBrandVendor" | "mcDescription" | "vendorCode" | "mrp" | "impAtrbt2" | "mcCode" | "segment" | "season" | "hsnTaxCode" | "articleDescription" | "fashionGrid" | "year" | "articleType" | "presentationsType" | "approvalStatus" | "pdStatus" | "approvedBy" | "approvedAt" | "source" | "imageUncPath" | "isOldArticle" | "isGeneric" | "genericArticleId" | "variantSize" | "variantColor" | "variantWeight" | "sapSyncStatus" | "sapArticleId" | "sapSyncMessage" | "srmOriginalDesignNumber" | "srmUniqueId" | "imageExtractionRawData", ExtArgs["result"]["extractionResultFlat"]>
   export type ExtractionResultFlatInclude<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
     approver?: boolean | ExtractionResultFlat$approverArgs<ExtArgs>
     job?: boolean | ExtractionResultFlat$jobArgs<ExtArgs>
@@ -20162,6 +20522,30 @@ export namespace Prisma {
       hTrfRoughV2: Prisma.Decimal | null
       hTrfVdrCost: Prisma.Decimal | null
       hTrfFinalCost: Prisma.Decimal | null
+      elasticAutoBgt: Prisma.Decimal | null
+      elasticRoughV2: Prisma.Decimal | null
+      elasticVdrCost: Prisma.Decimal | null
+      elasticFinalCost: Prisma.Decimal | null
+      fusingAutoBgt: Prisma.Decimal | null
+      fusingRoughV2: Prisma.Decimal | null
+      fusingVdrCost: Prisma.Decimal | null
+      fusingFinalCost: Prisma.Decimal | null
+      badgeAutoBgt: Prisma.Decimal | null
+      badgeRoughV2: Prisma.Decimal | null
+      badgeVdrCost: Prisma.Decimal | null
+      badgeFinalCost: Prisma.Decimal | null
+      rivetAutoBgt: Prisma.Decimal | null
+      rivetRoughV2: Prisma.Decimal | null
+      rivetVdrCost: Prisma.Decimal | null
+      rivetFinalCost: Prisma.Decimal | null
+      tapeAutoBgt: Prisma.Decimal | null
+      tapeRoughV2: Prisma.Decimal | null
+      tapeVdrCost: Prisma.Decimal | null
+      tapeFinalCost: Prisma.Decimal | null
+      otherAutoBgt: Prisma.Decimal | null
+      otherRoughV2: Prisma.Decimal | null
+      otherVdrCost: Prisma.Decimal | null
+      otherFinalCost: Prisma.Decimal | null
       printAutoBgt: Prisma.Decimal | null
       printRoughV2: Prisma.Decimal | null
       printVendorCost: Prisma.Decimal | null
@@ -20786,6 +21170,30 @@ export namespace Prisma {
     readonly hTrfRoughV2: FieldRef<"ExtractionResultFlat", 'Decimal'>
     readonly hTrfVdrCost: FieldRef<"ExtractionResultFlat", 'Decimal'>
     readonly hTrfFinalCost: FieldRef<"ExtractionResultFlat", 'Decimal'>
+    readonly elasticAutoBgt: FieldRef<"ExtractionResultFlat", 'Decimal'>
+    readonly elasticRoughV2: FieldRef<"ExtractionResultFlat", 'Decimal'>
+    readonly elasticVdrCost: FieldRef<"ExtractionResultFlat", 'Decimal'>
+    readonly elasticFinalCost: FieldRef<"ExtractionResultFlat", 'Decimal'>
+    readonly fusingAutoBgt: FieldRef<"ExtractionResultFlat", 'Decimal'>
+    readonly fusingRoughV2: FieldRef<"ExtractionResultFlat", 'Decimal'>
+    readonly fusingVdrCost: FieldRef<"ExtractionResultFlat", 'Decimal'>
+    readonly fusingFinalCost: FieldRef<"ExtractionResultFlat", 'Decimal'>
+    readonly badgeAutoBgt: FieldRef<"ExtractionResultFlat", 'Decimal'>
+    readonly badgeRoughV2: FieldRef<"ExtractionResultFlat", 'Decimal'>
+    readonly badgeVdrCost: FieldRef<"ExtractionResultFlat", 'Decimal'>
+    readonly badgeFinalCost: FieldRef<"ExtractionResultFlat", 'Decimal'>
+    readonly rivetAutoBgt: FieldRef<"ExtractionResultFlat", 'Decimal'>
+    readonly rivetRoughV2: FieldRef<"ExtractionResultFlat", 'Decimal'>
+    readonly rivetVdrCost: FieldRef<"ExtractionResultFlat", 'Decimal'>
+    readonly rivetFinalCost: FieldRef<"ExtractionResultFlat", 'Decimal'>
+    readonly tapeAutoBgt: FieldRef<"ExtractionResultFlat", 'Decimal'>
+    readonly tapeRoughV2: FieldRef<"ExtractionResultFlat", 'Decimal'>
+    readonly tapeVdrCost: FieldRef<"ExtractionResultFlat", 'Decimal'>
+    readonly tapeFinalCost: FieldRef<"ExtractionResultFlat", 'Decimal'>
+    readonly otherAutoBgt: FieldRef<"ExtractionResultFlat", 'Decimal'>
+    readonly otherRoughV2: FieldRef<"ExtractionResultFlat", 'Decimal'>
+    readonly otherVdrCost: FieldRef<"ExtractionResultFlat", 'Decimal'>
+    readonly otherFinalCost: FieldRef<"ExtractionResultFlat", 'Decimal'>
     readonly printAutoBgt: FieldRef<"ExtractionResultFlat", 'Decimal'>
     readonly printRoughV2: FieldRef<"ExtractionResultFlat", 'Decimal'>
     readonly printVendorCost: FieldRef<"ExtractionResultFlat", 'Decimal'>
@@ -90899,6 +91307,30 @@ export namespace Prisma {
     hTrfRoughV2: 'hTrfRoughV2',
     hTrfVdrCost: 'hTrfVdrCost',
     hTrfFinalCost: 'hTrfFinalCost',
+    elasticAutoBgt: 'elasticAutoBgt',
+    elasticRoughV2: 'elasticRoughV2',
+    elasticVdrCost: 'elasticVdrCost',
+    elasticFinalCost: 'elasticFinalCost',
+    fusingAutoBgt: 'fusingAutoBgt',
+    fusingRoughV2: 'fusingRoughV2',
+    fusingVdrCost: 'fusingVdrCost',
+    fusingFinalCost: 'fusingFinalCost',
+    badgeAutoBgt: 'badgeAutoBgt',
+    badgeRoughV2: 'badgeRoughV2',
+    badgeVdrCost: 'badgeVdrCost',
+    badgeFinalCost: 'badgeFinalCost',
+    rivetAutoBgt: 'rivetAutoBgt',
+    rivetRoughV2: 'rivetRoughV2',
+    rivetVdrCost: 'rivetVdrCost',
+    rivetFinalCost: 'rivetFinalCost',
+    tapeAutoBgt: 'tapeAutoBgt',
+    tapeRoughV2: 'tapeRoughV2',
+    tapeVdrCost: 'tapeVdrCost',
+    tapeFinalCost: 'tapeFinalCost',
+    otherAutoBgt: 'otherAutoBgt',
+    otherRoughV2: 'otherRoughV2',
+    otherVdrCost: 'otherVdrCost',
+    otherFinalCost: 'otherFinalCost',
     printAutoBgt: 'printAutoBgt',
     printRoughV2: 'printRoughV2',
     printVendorCost: 'printVendorCost',
@@ -94958,6 +95390,30 @@ export namespace Prisma {
     hTrfRoughV2?: DecimalNullableFilter<"ExtractionResultFlat"> | Decimal | DecimalJsLike | number | string | null
     hTrfVdrCost?: DecimalNullableFilter<"ExtractionResultFlat"> | Decimal | DecimalJsLike | number | string | null
     hTrfFinalCost?: DecimalNullableFilter<"ExtractionResultFlat"> | Decimal | DecimalJsLike | number | string | null
+    elasticAutoBgt?: DecimalNullableFilter<"ExtractionResultFlat"> | Decimal | DecimalJsLike | number | string | null
+    elasticRoughV2?: DecimalNullableFilter<"ExtractionResultFlat"> | Decimal | DecimalJsLike | number | string | null
+    elasticVdrCost?: DecimalNullableFilter<"ExtractionResultFlat"> | Decimal | DecimalJsLike | number | string | null
+    elasticFinalCost?: DecimalNullableFilter<"ExtractionResultFlat"> | Decimal | DecimalJsLike | number | string | null
+    fusingAutoBgt?: DecimalNullableFilter<"ExtractionResultFlat"> | Decimal | DecimalJsLike | number | string | null
+    fusingRoughV2?: DecimalNullableFilter<"ExtractionResultFlat"> | Decimal | DecimalJsLike | number | string | null
+    fusingVdrCost?: DecimalNullableFilter<"ExtractionResultFlat"> | Decimal | DecimalJsLike | number | string | null
+    fusingFinalCost?: DecimalNullableFilter<"ExtractionResultFlat"> | Decimal | DecimalJsLike | number | string | null
+    badgeAutoBgt?: DecimalNullableFilter<"ExtractionResultFlat"> | Decimal | DecimalJsLike | number | string | null
+    badgeRoughV2?: DecimalNullableFilter<"ExtractionResultFlat"> | Decimal | DecimalJsLike | number | string | null
+    badgeVdrCost?: DecimalNullableFilter<"ExtractionResultFlat"> | Decimal | DecimalJsLike | number | string | null
+    badgeFinalCost?: DecimalNullableFilter<"ExtractionResultFlat"> | Decimal | DecimalJsLike | number | string | null
+    rivetAutoBgt?: DecimalNullableFilter<"ExtractionResultFlat"> | Decimal | DecimalJsLike | number | string | null
+    rivetRoughV2?: DecimalNullableFilter<"ExtractionResultFlat"> | Decimal | DecimalJsLike | number | string | null
+    rivetVdrCost?: DecimalNullableFilter<"ExtractionResultFlat"> | Decimal | DecimalJsLike | number | string | null
+    rivetFinalCost?: DecimalNullableFilter<"ExtractionResultFlat"> | Decimal | DecimalJsLike | number | string | null
+    tapeAutoBgt?: DecimalNullableFilter<"ExtractionResultFlat"> | Decimal | DecimalJsLike | number | string | null
+    tapeRoughV2?: DecimalNullableFilter<"ExtractionResultFlat"> | Decimal | DecimalJsLike | number | string | null
+    tapeVdrCost?: DecimalNullableFilter<"ExtractionResultFlat"> | Decimal | DecimalJsLike | number | string | null
+    tapeFinalCost?: DecimalNullableFilter<"ExtractionResultFlat"> | Decimal | DecimalJsLike | number | string | null
+    otherAutoBgt?: DecimalNullableFilter<"ExtractionResultFlat"> | Decimal | DecimalJsLike | number | string | null
+    otherRoughV2?: DecimalNullableFilter<"ExtractionResultFlat"> | Decimal | DecimalJsLike | number | string | null
+    otherVdrCost?: DecimalNullableFilter<"ExtractionResultFlat"> | Decimal | DecimalJsLike | number | string | null
+    otherFinalCost?: DecimalNullableFilter<"ExtractionResultFlat"> | Decimal | DecimalJsLike | number | string | null
     printAutoBgt?: DecimalNullableFilter<"ExtractionResultFlat"> | Decimal | DecimalJsLike | number | string | null
     printRoughV2?: DecimalNullableFilter<"ExtractionResultFlat"> | Decimal | DecimalJsLike | number | string | null
     printVendorCost?: DecimalNullableFilter<"ExtractionResultFlat"> | Decimal | DecimalJsLike | number | string | null
@@ -95162,6 +95618,30 @@ export namespace Prisma {
     hTrfRoughV2?: SortOrderInput | SortOrder
     hTrfVdrCost?: SortOrderInput | SortOrder
     hTrfFinalCost?: SortOrderInput | SortOrder
+    elasticAutoBgt?: SortOrderInput | SortOrder
+    elasticRoughV2?: SortOrderInput | SortOrder
+    elasticVdrCost?: SortOrderInput | SortOrder
+    elasticFinalCost?: SortOrderInput | SortOrder
+    fusingAutoBgt?: SortOrderInput | SortOrder
+    fusingRoughV2?: SortOrderInput | SortOrder
+    fusingVdrCost?: SortOrderInput | SortOrder
+    fusingFinalCost?: SortOrderInput | SortOrder
+    badgeAutoBgt?: SortOrderInput | SortOrder
+    badgeRoughV2?: SortOrderInput | SortOrder
+    badgeVdrCost?: SortOrderInput | SortOrder
+    badgeFinalCost?: SortOrderInput | SortOrder
+    rivetAutoBgt?: SortOrderInput | SortOrder
+    rivetRoughV2?: SortOrderInput | SortOrder
+    rivetVdrCost?: SortOrderInput | SortOrder
+    rivetFinalCost?: SortOrderInput | SortOrder
+    tapeAutoBgt?: SortOrderInput | SortOrder
+    tapeRoughV2?: SortOrderInput | SortOrder
+    tapeVdrCost?: SortOrderInput | SortOrder
+    tapeFinalCost?: SortOrderInput | SortOrder
+    otherAutoBgt?: SortOrderInput | SortOrder
+    otherRoughV2?: SortOrderInput | SortOrder
+    otherVdrCost?: SortOrderInput | SortOrder
+    otherFinalCost?: SortOrderInput | SortOrder
     printAutoBgt?: SortOrderInput | SortOrder
     printRoughV2?: SortOrderInput | SortOrder
     printVendorCost?: SortOrderInput | SortOrder
@@ -95371,6 +95851,30 @@ export namespace Prisma {
     hTrfRoughV2?: DecimalNullableFilter<"ExtractionResultFlat"> | Decimal | DecimalJsLike | number | string | null
     hTrfVdrCost?: DecimalNullableFilter<"ExtractionResultFlat"> | Decimal | DecimalJsLike | number | string | null
     hTrfFinalCost?: DecimalNullableFilter<"ExtractionResultFlat"> | Decimal | DecimalJsLike | number | string | null
+    elasticAutoBgt?: DecimalNullableFilter<"ExtractionResultFlat"> | Decimal | DecimalJsLike | number | string | null
+    elasticRoughV2?: DecimalNullableFilter<"ExtractionResultFlat"> | Decimal | DecimalJsLike | number | string | null
+    elasticVdrCost?: DecimalNullableFilter<"ExtractionResultFlat"> | Decimal | DecimalJsLike | number | string | null
+    elasticFinalCost?: DecimalNullableFilter<"ExtractionResultFlat"> | Decimal | DecimalJsLike | number | string | null
+    fusingAutoBgt?: DecimalNullableFilter<"ExtractionResultFlat"> | Decimal | DecimalJsLike | number | string | null
+    fusingRoughV2?: DecimalNullableFilter<"ExtractionResultFlat"> | Decimal | DecimalJsLike | number | string | null
+    fusingVdrCost?: DecimalNullableFilter<"ExtractionResultFlat"> | Decimal | DecimalJsLike | number | string | null
+    fusingFinalCost?: DecimalNullableFilter<"ExtractionResultFlat"> | Decimal | DecimalJsLike | number | string | null
+    badgeAutoBgt?: DecimalNullableFilter<"ExtractionResultFlat"> | Decimal | DecimalJsLike | number | string | null
+    badgeRoughV2?: DecimalNullableFilter<"ExtractionResultFlat"> | Decimal | DecimalJsLike | number | string | null
+    badgeVdrCost?: DecimalNullableFilter<"ExtractionResultFlat"> | Decimal | DecimalJsLike | number | string | null
+    badgeFinalCost?: DecimalNullableFilter<"ExtractionResultFlat"> | Decimal | DecimalJsLike | number | string | null
+    rivetAutoBgt?: DecimalNullableFilter<"ExtractionResultFlat"> | Decimal | DecimalJsLike | number | string | null
+    rivetRoughV2?: DecimalNullableFilter<"ExtractionResultFlat"> | Decimal | DecimalJsLike | number | string | null
+    rivetVdrCost?: DecimalNullableFilter<"ExtractionResultFlat"> | Decimal | DecimalJsLike | number | string | null
+    rivetFinalCost?: DecimalNullableFilter<"ExtractionResultFlat"> | Decimal | DecimalJsLike | number | string | null
+    tapeAutoBgt?: DecimalNullableFilter<"ExtractionResultFlat"> | Decimal | DecimalJsLike | number | string | null
+    tapeRoughV2?: DecimalNullableFilter<"ExtractionResultFlat"> | Decimal | DecimalJsLike | number | string | null
+    tapeVdrCost?: DecimalNullableFilter<"ExtractionResultFlat"> | Decimal | DecimalJsLike | number | string | null
+    tapeFinalCost?: DecimalNullableFilter<"ExtractionResultFlat"> | Decimal | DecimalJsLike | number | string | null
+    otherAutoBgt?: DecimalNullableFilter<"ExtractionResultFlat"> | Decimal | DecimalJsLike | number | string | null
+    otherRoughV2?: DecimalNullableFilter<"ExtractionResultFlat"> | Decimal | DecimalJsLike | number | string | null
+    otherVdrCost?: DecimalNullableFilter<"ExtractionResultFlat"> | Decimal | DecimalJsLike | number | string | null
+    otherFinalCost?: DecimalNullableFilter<"ExtractionResultFlat"> | Decimal | DecimalJsLike | number | string | null
     printAutoBgt?: DecimalNullableFilter<"ExtractionResultFlat"> | Decimal | DecimalJsLike | number | string | null
     printRoughV2?: DecimalNullableFilter<"ExtractionResultFlat"> | Decimal | DecimalJsLike | number | string | null
     printVendorCost?: DecimalNullableFilter<"ExtractionResultFlat"> | Decimal | DecimalJsLike | number | string | null
@@ -95574,6 +96078,30 @@ export namespace Prisma {
     hTrfRoughV2?: SortOrderInput | SortOrder
     hTrfVdrCost?: SortOrderInput | SortOrder
     hTrfFinalCost?: SortOrderInput | SortOrder
+    elasticAutoBgt?: SortOrderInput | SortOrder
+    elasticRoughV2?: SortOrderInput | SortOrder
+    elasticVdrCost?: SortOrderInput | SortOrder
+    elasticFinalCost?: SortOrderInput | SortOrder
+    fusingAutoBgt?: SortOrderInput | SortOrder
+    fusingRoughV2?: SortOrderInput | SortOrder
+    fusingVdrCost?: SortOrderInput | SortOrder
+    fusingFinalCost?: SortOrderInput | SortOrder
+    badgeAutoBgt?: SortOrderInput | SortOrder
+    badgeRoughV2?: SortOrderInput | SortOrder
+    badgeVdrCost?: SortOrderInput | SortOrder
+    badgeFinalCost?: SortOrderInput | SortOrder
+    rivetAutoBgt?: SortOrderInput | SortOrder
+    rivetRoughV2?: SortOrderInput | SortOrder
+    rivetVdrCost?: SortOrderInput | SortOrder
+    rivetFinalCost?: SortOrderInput | SortOrder
+    tapeAutoBgt?: SortOrderInput | SortOrder
+    tapeRoughV2?: SortOrderInput | SortOrder
+    tapeVdrCost?: SortOrderInput | SortOrder
+    tapeFinalCost?: SortOrderInput | SortOrder
+    otherAutoBgt?: SortOrderInput | SortOrder
+    otherRoughV2?: SortOrderInput | SortOrder
+    otherVdrCost?: SortOrderInput | SortOrder
+    otherFinalCost?: SortOrderInput | SortOrder
     printAutoBgt?: SortOrderInput | SortOrder
     printRoughV2?: SortOrderInput | SortOrder
     printVendorCost?: SortOrderInput | SortOrder
@@ -95783,6 +96311,30 @@ export namespace Prisma {
     hTrfRoughV2?: DecimalNullableWithAggregatesFilter<"ExtractionResultFlat"> | Decimal | DecimalJsLike | number | string | null
     hTrfVdrCost?: DecimalNullableWithAggregatesFilter<"ExtractionResultFlat"> | Decimal | DecimalJsLike | number | string | null
     hTrfFinalCost?: DecimalNullableWithAggregatesFilter<"ExtractionResultFlat"> | Decimal | DecimalJsLike | number | string | null
+    elasticAutoBgt?: DecimalNullableWithAggregatesFilter<"ExtractionResultFlat"> | Decimal | DecimalJsLike | number | string | null
+    elasticRoughV2?: DecimalNullableWithAggregatesFilter<"ExtractionResultFlat"> | Decimal | DecimalJsLike | number | string | null
+    elasticVdrCost?: DecimalNullableWithAggregatesFilter<"ExtractionResultFlat"> | Decimal | DecimalJsLike | number | string | null
+    elasticFinalCost?: DecimalNullableWithAggregatesFilter<"ExtractionResultFlat"> | Decimal | DecimalJsLike | number | string | null
+    fusingAutoBgt?: DecimalNullableWithAggregatesFilter<"ExtractionResultFlat"> | Decimal | DecimalJsLike | number | string | null
+    fusingRoughV2?: DecimalNullableWithAggregatesFilter<"ExtractionResultFlat"> | Decimal | DecimalJsLike | number | string | null
+    fusingVdrCost?: DecimalNullableWithAggregatesFilter<"ExtractionResultFlat"> | Decimal | DecimalJsLike | number | string | null
+    fusingFinalCost?: DecimalNullableWithAggregatesFilter<"ExtractionResultFlat"> | Decimal | DecimalJsLike | number | string | null
+    badgeAutoBgt?: DecimalNullableWithAggregatesFilter<"ExtractionResultFlat"> | Decimal | DecimalJsLike | number | string | null
+    badgeRoughV2?: DecimalNullableWithAggregatesFilter<"ExtractionResultFlat"> | Decimal | DecimalJsLike | number | string | null
+    badgeVdrCost?: DecimalNullableWithAggregatesFilter<"ExtractionResultFlat"> | Decimal | DecimalJsLike | number | string | null
+    badgeFinalCost?: DecimalNullableWithAggregatesFilter<"ExtractionResultFlat"> | Decimal | DecimalJsLike | number | string | null
+    rivetAutoBgt?: DecimalNullableWithAggregatesFilter<"ExtractionResultFlat"> | Decimal | DecimalJsLike | number | string | null
+    rivetRoughV2?: DecimalNullableWithAggregatesFilter<"ExtractionResultFlat"> | Decimal | DecimalJsLike | number | string | null
+    rivetVdrCost?: DecimalNullableWithAggregatesFilter<"ExtractionResultFlat"> | Decimal | DecimalJsLike | number | string | null
+    rivetFinalCost?: DecimalNullableWithAggregatesFilter<"ExtractionResultFlat"> | Decimal | DecimalJsLike | number | string | null
+    tapeAutoBgt?: DecimalNullableWithAggregatesFilter<"ExtractionResultFlat"> | Decimal | DecimalJsLike | number | string | null
+    tapeRoughV2?: DecimalNullableWithAggregatesFilter<"ExtractionResultFlat"> | Decimal | DecimalJsLike | number | string | null
+    tapeVdrCost?: DecimalNullableWithAggregatesFilter<"ExtractionResultFlat"> | Decimal | DecimalJsLike | number | string | null
+    tapeFinalCost?: DecimalNullableWithAggregatesFilter<"ExtractionResultFlat"> | Decimal | DecimalJsLike | number | string | null
+    otherAutoBgt?: DecimalNullableWithAggregatesFilter<"ExtractionResultFlat"> | Decimal | DecimalJsLike | number | string | null
+    otherRoughV2?: DecimalNullableWithAggregatesFilter<"ExtractionResultFlat"> | Decimal | DecimalJsLike | number | string | null
+    otherVdrCost?: DecimalNullableWithAggregatesFilter<"ExtractionResultFlat"> | Decimal | DecimalJsLike | number | string | null
+    otherFinalCost?: DecimalNullableWithAggregatesFilter<"ExtractionResultFlat"> | Decimal | DecimalJsLike | number | string | null
     printAutoBgt?: DecimalNullableWithAggregatesFilter<"ExtractionResultFlat"> | Decimal | DecimalJsLike | number | string | null
     printRoughV2?: DecimalNullableWithAggregatesFilter<"ExtractionResultFlat"> | Decimal | DecimalJsLike | number | string | null
     printVendorCost?: DecimalNullableWithAggregatesFilter<"ExtractionResultFlat"> | Decimal | DecimalJsLike | number | string | null
@@ -104115,6 +104667,30 @@ export namespace Prisma {
     hTrfRoughV2?: Decimal | DecimalJsLike | number | string | null
     hTrfVdrCost?: Decimal | DecimalJsLike | number | string | null
     hTrfFinalCost?: Decimal | DecimalJsLike | number | string | null
+    elasticAutoBgt?: Decimal | DecimalJsLike | number | string | null
+    elasticRoughV2?: Decimal | DecimalJsLike | number | string | null
+    elasticVdrCost?: Decimal | DecimalJsLike | number | string | null
+    elasticFinalCost?: Decimal | DecimalJsLike | number | string | null
+    fusingAutoBgt?: Decimal | DecimalJsLike | number | string | null
+    fusingRoughV2?: Decimal | DecimalJsLike | number | string | null
+    fusingVdrCost?: Decimal | DecimalJsLike | number | string | null
+    fusingFinalCost?: Decimal | DecimalJsLike | number | string | null
+    badgeAutoBgt?: Decimal | DecimalJsLike | number | string | null
+    badgeRoughV2?: Decimal | DecimalJsLike | number | string | null
+    badgeVdrCost?: Decimal | DecimalJsLike | number | string | null
+    badgeFinalCost?: Decimal | DecimalJsLike | number | string | null
+    rivetAutoBgt?: Decimal | DecimalJsLike | number | string | null
+    rivetRoughV2?: Decimal | DecimalJsLike | number | string | null
+    rivetVdrCost?: Decimal | DecimalJsLike | number | string | null
+    rivetFinalCost?: Decimal | DecimalJsLike | number | string | null
+    tapeAutoBgt?: Decimal | DecimalJsLike | number | string | null
+    tapeRoughV2?: Decimal | DecimalJsLike | number | string | null
+    tapeVdrCost?: Decimal | DecimalJsLike | number | string | null
+    tapeFinalCost?: Decimal | DecimalJsLike | number | string | null
+    otherAutoBgt?: Decimal | DecimalJsLike | number | string | null
+    otherRoughV2?: Decimal | DecimalJsLike | number | string | null
+    otherVdrCost?: Decimal | DecimalJsLike | number | string | null
+    otherFinalCost?: Decimal | DecimalJsLike | number | string | null
     printAutoBgt?: Decimal | DecimalJsLike | number | string | null
     printRoughV2?: Decimal | DecimalJsLike | number | string | null
     printVendorCost?: Decimal | DecimalJsLike | number | string | null
@@ -104318,6 +104894,30 @@ export namespace Prisma {
     hTrfRoughV2?: Decimal | DecimalJsLike | number | string | null
     hTrfVdrCost?: Decimal | DecimalJsLike | number | string | null
     hTrfFinalCost?: Decimal | DecimalJsLike | number | string | null
+    elasticAutoBgt?: Decimal | DecimalJsLike | number | string | null
+    elasticRoughV2?: Decimal | DecimalJsLike | number | string | null
+    elasticVdrCost?: Decimal | DecimalJsLike | number | string | null
+    elasticFinalCost?: Decimal | DecimalJsLike | number | string | null
+    fusingAutoBgt?: Decimal | DecimalJsLike | number | string | null
+    fusingRoughV2?: Decimal | DecimalJsLike | number | string | null
+    fusingVdrCost?: Decimal | DecimalJsLike | number | string | null
+    fusingFinalCost?: Decimal | DecimalJsLike | number | string | null
+    badgeAutoBgt?: Decimal | DecimalJsLike | number | string | null
+    badgeRoughV2?: Decimal | DecimalJsLike | number | string | null
+    badgeVdrCost?: Decimal | DecimalJsLike | number | string | null
+    badgeFinalCost?: Decimal | DecimalJsLike | number | string | null
+    rivetAutoBgt?: Decimal | DecimalJsLike | number | string | null
+    rivetRoughV2?: Decimal | DecimalJsLike | number | string | null
+    rivetVdrCost?: Decimal | DecimalJsLike | number | string | null
+    rivetFinalCost?: Decimal | DecimalJsLike | number | string | null
+    tapeAutoBgt?: Decimal | DecimalJsLike | number | string | null
+    tapeRoughV2?: Decimal | DecimalJsLike | number | string | null
+    tapeVdrCost?: Decimal | DecimalJsLike | number | string | null
+    tapeFinalCost?: Decimal | DecimalJsLike | number | string | null
+    otherAutoBgt?: Decimal | DecimalJsLike | number | string | null
+    otherRoughV2?: Decimal | DecimalJsLike | number | string | null
+    otherVdrCost?: Decimal | DecimalJsLike | number | string | null
+    otherFinalCost?: Decimal | DecimalJsLike | number | string | null
     printAutoBgt?: Decimal | DecimalJsLike | number | string | null
     printRoughV2?: Decimal | DecimalJsLike | number | string | null
     printVendorCost?: Decimal | DecimalJsLike | number | string | null
@@ -104519,6 +105119,30 @@ export namespace Prisma {
     hTrfRoughV2?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
     hTrfVdrCost?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
     hTrfFinalCost?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    elasticAutoBgt?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    elasticRoughV2?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    elasticVdrCost?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    elasticFinalCost?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    fusingAutoBgt?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    fusingRoughV2?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    fusingVdrCost?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    fusingFinalCost?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    badgeAutoBgt?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    badgeRoughV2?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    badgeVdrCost?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    badgeFinalCost?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    rivetAutoBgt?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    rivetRoughV2?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    rivetVdrCost?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    rivetFinalCost?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    tapeAutoBgt?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    tapeRoughV2?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    tapeVdrCost?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    tapeFinalCost?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    otherAutoBgt?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    otherRoughV2?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    otherVdrCost?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    otherFinalCost?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
     printAutoBgt?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
     printRoughV2?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
     printVendorCost?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
@@ -104722,6 +105346,30 @@ export namespace Prisma {
     hTrfRoughV2?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
     hTrfVdrCost?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
     hTrfFinalCost?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    elasticAutoBgt?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    elasticRoughV2?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    elasticVdrCost?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    elasticFinalCost?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    fusingAutoBgt?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    fusingRoughV2?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    fusingVdrCost?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    fusingFinalCost?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    badgeAutoBgt?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    badgeRoughV2?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    badgeVdrCost?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    badgeFinalCost?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    rivetAutoBgt?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    rivetRoughV2?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    rivetVdrCost?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    rivetFinalCost?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    tapeAutoBgt?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    tapeRoughV2?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    tapeVdrCost?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    tapeFinalCost?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    otherAutoBgt?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    otherRoughV2?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    otherVdrCost?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    otherFinalCost?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
     printAutoBgt?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
     printRoughV2?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
     printVendorCost?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
@@ -104924,6 +105572,30 @@ export namespace Prisma {
     hTrfRoughV2?: Decimal | DecimalJsLike | number | string | null
     hTrfVdrCost?: Decimal | DecimalJsLike | number | string | null
     hTrfFinalCost?: Decimal | DecimalJsLike | number | string | null
+    elasticAutoBgt?: Decimal | DecimalJsLike | number | string | null
+    elasticRoughV2?: Decimal | DecimalJsLike | number | string | null
+    elasticVdrCost?: Decimal | DecimalJsLike | number | string | null
+    elasticFinalCost?: Decimal | DecimalJsLike | number | string | null
+    fusingAutoBgt?: Decimal | DecimalJsLike | number | string | null
+    fusingRoughV2?: Decimal | DecimalJsLike | number | string | null
+    fusingVdrCost?: Decimal | DecimalJsLike | number | string | null
+    fusingFinalCost?: Decimal | DecimalJsLike | number | string | null
+    badgeAutoBgt?: Decimal | DecimalJsLike | number | string | null
+    badgeRoughV2?: Decimal | DecimalJsLike | number | string | null
+    badgeVdrCost?: Decimal | DecimalJsLike | number | string | null
+    badgeFinalCost?: Decimal | DecimalJsLike | number | string | null
+    rivetAutoBgt?: Decimal | DecimalJsLike | number | string | null
+    rivetRoughV2?: Decimal | DecimalJsLike | number | string | null
+    rivetVdrCost?: Decimal | DecimalJsLike | number | string | null
+    rivetFinalCost?: Decimal | DecimalJsLike | number | string | null
+    tapeAutoBgt?: Decimal | DecimalJsLike | number | string | null
+    tapeRoughV2?: Decimal | DecimalJsLike | number | string | null
+    tapeVdrCost?: Decimal | DecimalJsLike | number | string | null
+    tapeFinalCost?: Decimal | DecimalJsLike | number | string | null
+    otherAutoBgt?: Decimal | DecimalJsLike | number | string | null
+    otherRoughV2?: Decimal | DecimalJsLike | number | string | null
+    otherVdrCost?: Decimal | DecimalJsLike | number | string | null
+    otherFinalCost?: Decimal | DecimalJsLike | number | string | null
     printAutoBgt?: Decimal | DecimalJsLike | number | string | null
     printRoughV2?: Decimal | DecimalJsLike | number | string | null
     printVendorCost?: Decimal | DecimalJsLike | number | string | null
@@ -105124,6 +105796,30 @@ export namespace Prisma {
     hTrfRoughV2?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
     hTrfVdrCost?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
     hTrfFinalCost?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    elasticAutoBgt?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    elasticRoughV2?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    elasticVdrCost?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    elasticFinalCost?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    fusingAutoBgt?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    fusingRoughV2?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    fusingVdrCost?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    fusingFinalCost?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    badgeAutoBgt?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    badgeRoughV2?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    badgeVdrCost?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    badgeFinalCost?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    rivetAutoBgt?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    rivetRoughV2?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    rivetVdrCost?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    rivetFinalCost?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    tapeAutoBgt?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    tapeRoughV2?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    tapeVdrCost?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    tapeFinalCost?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    otherAutoBgt?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    otherRoughV2?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    otherVdrCost?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    otherFinalCost?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
     printAutoBgt?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
     printRoughV2?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
     printVendorCost?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
@@ -105324,6 +106020,30 @@ export namespace Prisma {
     hTrfRoughV2?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
     hTrfVdrCost?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
     hTrfFinalCost?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    elasticAutoBgt?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    elasticRoughV2?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    elasticVdrCost?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    elasticFinalCost?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    fusingAutoBgt?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    fusingRoughV2?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    fusingVdrCost?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    fusingFinalCost?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    badgeAutoBgt?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    badgeRoughV2?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    badgeVdrCost?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    badgeFinalCost?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    rivetAutoBgt?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    rivetRoughV2?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    rivetVdrCost?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    rivetFinalCost?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    tapeAutoBgt?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    tapeRoughV2?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    tapeVdrCost?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    tapeFinalCost?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    otherAutoBgt?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    otherRoughV2?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    otherVdrCost?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    otherFinalCost?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
     printAutoBgt?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
     printRoughV2?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
     printVendorCost?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
@@ -115357,6 +116077,30 @@ export namespace Prisma {
     hTrfRoughV2?: SortOrder
     hTrfVdrCost?: SortOrder
     hTrfFinalCost?: SortOrder
+    elasticAutoBgt?: SortOrder
+    elasticRoughV2?: SortOrder
+    elasticVdrCost?: SortOrder
+    elasticFinalCost?: SortOrder
+    fusingAutoBgt?: SortOrder
+    fusingRoughV2?: SortOrder
+    fusingVdrCost?: SortOrder
+    fusingFinalCost?: SortOrder
+    badgeAutoBgt?: SortOrder
+    badgeRoughV2?: SortOrder
+    badgeVdrCost?: SortOrder
+    badgeFinalCost?: SortOrder
+    rivetAutoBgt?: SortOrder
+    rivetRoughV2?: SortOrder
+    rivetVdrCost?: SortOrder
+    rivetFinalCost?: SortOrder
+    tapeAutoBgt?: SortOrder
+    tapeRoughV2?: SortOrder
+    tapeVdrCost?: SortOrder
+    tapeFinalCost?: SortOrder
+    otherAutoBgt?: SortOrder
+    otherRoughV2?: SortOrder
+    otherVdrCost?: SortOrder
+    otherFinalCost?: SortOrder
     printAutoBgt?: SortOrder
     printRoughV2?: SortOrder
     printVendorCost?: SortOrder
@@ -115472,6 +116216,30 @@ export namespace Prisma {
     hTrfRoughV2?: SortOrder
     hTrfVdrCost?: SortOrder
     hTrfFinalCost?: SortOrder
+    elasticAutoBgt?: SortOrder
+    elasticRoughV2?: SortOrder
+    elasticVdrCost?: SortOrder
+    elasticFinalCost?: SortOrder
+    fusingAutoBgt?: SortOrder
+    fusingRoughV2?: SortOrder
+    fusingVdrCost?: SortOrder
+    fusingFinalCost?: SortOrder
+    badgeAutoBgt?: SortOrder
+    badgeRoughV2?: SortOrder
+    badgeVdrCost?: SortOrder
+    badgeFinalCost?: SortOrder
+    rivetAutoBgt?: SortOrder
+    rivetRoughV2?: SortOrder
+    rivetVdrCost?: SortOrder
+    rivetFinalCost?: SortOrder
+    tapeAutoBgt?: SortOrder
+    tapeRoughV2?: SortOrder
+    tapeVdrCost?: SortOrder
+    tapeFinalCost?: SortOrder
+    otherAutoBgt?: SortOrder
+    otherRoughV2?: SortOrder
+    otherVdrCost?: SortOrder
+    otherFinalCost?: SortOrder
     printAutoBgt?: SortOrder
     printRoughV2?: SortOrder
     printVendorCost?: SortOrder
@@ -115637,6 +116405,30 @@ export namespace Prisma {
     hTrfRoughV2?: SortOrder
     hTrfVdrCost?: SortOrder
     hTrfFinalCost?: SortOrder
+    elasticAutoBgt?: SortOrder
+    elasticRoughV2?: SortOrder
+    elasticVdrCost?: SortOrder
+    elasticFinalCost?: SortOrder
+    fusingAutoBgt?: SortOrder
+    fusingRoughV2?: SortOrder
+    fusingVdrCost?: SortOrder
+    fusingFinalCost?: SortOrder
+    badgeAutoBgt?: SortOrder
+    badgeRoughV2?: SortOrder
+    badgeVdrCost?: SortOrder
+    badgeFinalCost?: SortOrder
+    rivetAutoBgt?: SortOrder
+    rivetRoughV2?: SortOrder
+    rivetVdrCost?: SortOrder
+    rivetFinalCost?: SortOrder
+    tapeAutoBgt?: SortOrder
+    tapeRoughV2?: SortOrder
+    tapeVdrCost?: SortOrder
+    tapeFinalCost?: SortOrder
+    otherAutoBgt?: SortOrder
+    otherRoughV2?: SortOrder
+    otherVdrCost?: SortOrder
+    otherFinalCost?: SortOrder
     printAutoBgt?: SortOrder
     printRoughV2?: SortOrder
     printVendorCost?: SortOrder
@@ -115837,6 +116629,30 @@ export namespace Prisma {
     hTrfRoughV2?: SortOrder
     hTrfVdrCost?: SortOrder
     hTrfFinalCost?: SortOrder
+    elasticAutoBgt?: SortOrder
+    elasticRoughV2?: SortOrder
+    elasticVdrCost?: SortOrder
+    elasticFinalCost?: SortOrder
+    fusingAutoBgt?: SortOrder
+    fusingRoughV2?: SortOrder
+    fusingVdrCost?: SortOrder
+    fusingFinalCost?: SortOrder
+    badgeAutoBgt?: SortOrder
+    badgeRoughV2?: SortOrder
+    badgeVdrCost?: SortOrder
+    badgeFinalCost?: SortOrder
+    rivetAutoBgt?: SortOrder
+    rivetRoughV2?: SortOrder
+    rivetVdrCost?: SortOrder
+    rivetFinalCost?: SortOrder
+    tapeAutoBgt?: SortOrder
+    tapeRoughV2?: SortOrder
+    tapeVdrCost?: SortOrder
+    tapeFinalCost?: SortOrder
+    otherAutoBgt?: SortOrder
+    otherRoughV2?: SortOrder
+    otherVdrCost?: SortOrder
+    otherFinalCost?: SortOrder
     printAutoBgt?: SortOrder
     printRoughV2?: SortOrder
     printVendorCost?: SortOrder
@@ -115951,6 +116767,30 @@ export namespace Prisma {
     hTrfRoughV2?: SortOrder
     hTrfVdrCost?: SortOrder
     hTrfFinalCost?: SortOrder
+    elasticAutoBgt?: SortOrder
+    elasticRoughV2?: SortOrder
+    elasticVdrCost?: SortOrder
+    elasticFinalCost?: SortOrder
+    fusingAutoBgt?: SortOrder
+    fusingRoughV2?: SortOrder
+    fusingVdrCost?: SortOrder
+    fusingFinalCost?: SortOrder
+    badgeAutoBgt?: SortOrder
+    badgeRoughV2?: SortOrder
+    badgeVdrCost?: SortOrder
+    badgeFinalCost?: SortOrder
+    rivetAutoBgt?: SortOrder
+    rivetRoughV2?: SortOrder
+    rivetVdrCost?: SortOrder
+    rivetFinalCost?: SortOrder
+    tapeAutoBgt?: SortOrder
+    tapeRoughV2?: SortOrder
+    tapeVdrCost?: SortOrder
+    tapeFinalCost?: SortOrder
+    otherAutoBgt?: SortOrder
+    otherRoughV2?: SortOrder
+    otherVdrCost?: SortOrder
+    otherFinalCost?: SortOrder
     printAutoBgt?: SortOrder
     printRoughV2?: SortOrder
     printVendorCost?: SortOrder
@@ -124693,6 +125533,30 @@ export namespace Prisma {
     hTrfRoughV2?: Decimal | DecimalJsLike | number | string | null
     hTrfVdrCost?: Decimal | DecimalJsLike | number | string | null
     hTrfFinalCost?: Decimal | DecimalJsLike | number | string | null
+    elasticAutoBgt?: Decimal | DecimalJsLike | number | string | null
+    elasticRoughV2?: Decimal | DecimalJsLike | number | string | null
+    elasticVdrCost?: Decimal | DecimalJsLike | number | string | null
+    elasticFinalCost?: Decimal | DecimalJsLike | number | string | null
+    fusingAutoBgt?: Decimal | DecimalJsLike | number | string | null
+    fusingRoughV2?: Decimal | DecimalJsLike | number | string | null
+    fusingVdrCost?: Decimal | DecimalJsLike | number | string | null
+    fusingFinalCost?: Decimal | DecimalJsLike | number | string | null
+    badgeAutoBgt?: Decimal | DecimalJsLike | number | string | null
+    badgeRoughV2?: Decimal | DecimalJsLike | number | string | null
+    badgeVdrCost?: Decimal | DecimalJsLike | number | string | null
+    badgeFinalCost?: Decimal | DecimalJsLike | number | string | null
+    rivetAutoBgt?: Decimal | DecimalJsLike | number | string | null
+    rivetRoughV2?: Decimal | DecimalJsLike | number | string | null
+    rivetVdrCost?: Decimal | DecimalJsLike | number | string | null
+    rivetFinalCost?: Decimal | DecimalJsLike | number | string | null
+    tapeAutoBgt?: Decimal | DecimalJsLike | number | string | null
+    tapeRoughV2?: Decimal | DecimalJsLike | number | string | null
+    tapeVdrCost?: Decimal | DecimalJsLike | number | string | null
+    tapeFinalCost?: Decimal | DecimalJsLike | number | string | null
+    otherAutoBgt?: Decimal | DecimalJsLike | number | string | null
+    otherRoughV2?: Decimal | DecimalJsLike | number | string | null
+    otherVdrCost?: Decimal | DecimalJsLike | number | string | null
+    otherFinalCost?: Decimal | DecimalJsLike | number | string | null
     printAutoBgt?: Decimal | DecimalJsLike | number | string | null
     printRoughV2?: Decimal | DecimalJsLike | number | string | null
     printVendorCost?: Decimal | DecimalJsLike | number | string | null
@@ -124894,6 +125758,30 @@ export namespace Prisma {
     hTrfRoughV2?: Decimal | DecimalJsLike | number | string | null
     hTrfVdrCost?: Decimal | DecimalJsLike | number | string | null
     hTrfFinalCost?: Decimal | DecimalJsLike | number | string | null
+    elasticAutoBgt?: Decimal | DecimalJsLike | number | string | null
+    elasticRoughV2?: Decimal | DecimalJsLike | number | string | null
+    elasticVdrCost?: Decimal | DecimalJsLike | number | string | null
+    elasticFinalCost?: Decimal | DecimalJsLike | number | string | null
+    fusingAutoBgt?: Decimal | DecimalJsLike | number | string | null
+    fusingRoughV2?: Decimal | DecimalJsLike | number | string | null
+    fusingVdrCost?: Decimal | DecimalJsLike | number | string | null
+    fusingFinalCost?: Decimal | DecimalJsLike | number | string | null
+    badgeAutoBgt?: Decimal | DecimalJsLike | number | string | null
+    badgeRoughV2?: Decimal | DecimalJsLike | number | string | null
+    badgeVdrCost?: Decimal | DecimalJsLike | number | string | null
+    badgeFinalCost?: Decimal | DecimalJsLike | number | string | null
+    rivetAutoBgt?: Decimal | DecimalJsLike | number | string | null
+    rivetRoughV2?: Decimal | DecimalJsLike | number | string | null
+    rivetVdrCost?: Decimal | DecimalJsLike | number | string | null
+    rivetFinalCost?: Decimal | DecimalJsLike | number | string | null
+    tapeAutoBgt?: Decimal | DecimalJsLike | number | string | null
+    tapeRoughV2?: Decimal | DecimalJsLike | number | string | null
+    tapeVdrCost?: Decimal | DecimalJsLike | number | string | null
+    tapeFinalCost?: Decimal | DecimalJsLike | number | string | null
+    otherAutoBgt?: Decimal | DecimalJsLike | number | string | null
+    otherRoughV2?: Decimal | DecimalJsLike | number | string | null
+    otherVdrCost?: Decimal | DecimalJsLike | number | string | null
+    otherFinalCost?: Decimal | DecimalJsLike | number | string | null
     printAutoBgt?: Decimal | DecimalJsLike | number | string | null
     printRoughV2?: Decimal | DecimalJsLike | number | string | null
     printVendorCost?: Decimal | DecimalJsLike | number | string | null
@@ -125221,6 +126109,30 @@ export namespace Prisma {
     hTrfRoughV2?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
     hTrfVdrCost?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
     hTrfFinalCost?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    elasticAutoBgt?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    elasticRoughV2?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    elasticVdrCost?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    elasticFinalCost?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    fusingAutoBgt?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    fusingRoughV2?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    fusingVdrCost?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    fusingFinalCost?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    badgeAutoBgt?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    badgeRoughV2?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    badgeVdrCost?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    badgeFinalCost?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    rivetAutoBgt?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    rivetRoughV2?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    rivetVdrCost?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    rivetFinalCost?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    tapeAutoBgt?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    tapeRoughV2?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    tapeVdrCost?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    tapeFinalCost?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    otherAutoBgt?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    otherRoughV2?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    otherVdrCost?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    otherFinalCost?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
     printAutoBgt?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
     printRoughV2?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
     printVendorCost?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
@@ -125422,6 +126334,30 @@ export namespace Prisma {
     hTrfRoughV2?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
     hTrfVdrCost?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
     hTrfFinalCost?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    elasticAutoBgt?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    elasticRoughV2?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    elasticVdrCost?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    elasticFinalCost?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    fusingAutoBgt?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    fusingRoughV2?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    fusingVdrCost?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    fusingFinalCost?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    badgeAutoBgt?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    badgeRoughV2?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    badgeVdrCost?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    badgeFinalCost?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    rivetAutoBgt?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    rivetRoughV2?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    rivetVdrCost?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    rivetFinalCost?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    tapeAutoBgt?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    tapeRoughV2?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    tapeVdrCost?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    tapeFinalCost?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    otherAutoBgt?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    otherRoughV2?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    otherVdrCost?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    otherFinalCost?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
     printAutoBgt?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
     printRoughV2?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
     printVendorCost?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
@@ -126469,6 +127405,30 @@ export namespace Prisma {
     hTrfRoughV2?: Decimal | DecimalJsLike | number | string | null
     hTrfVdrCost?: Decimal | DecimalJsLike | number | string | null
     hTrfFinalCost?: Decimal | DecimalJsLike | number | string | null
+    elasticAutoBgt?: Decimal | DecimalJsLike | number | string | null
+    elasticRoughV2?: Decimal | DecimalJsLike | number | string | null
+    elasticVdrCost?: Decimal | DecimalJsLike | number | string | null
+    elasticFinalCost?: Decimal | DecimalJsLike | number | string | null
+    fusingAutoBgt?: Decimal | DecimalJsLike | number | string | null
+    fusingRoughV2?: Decimal | DecimalJsLike | number | string | null
+    fusingVdrCost?: Decimal | DecimalJsLike | number | string | null
+    fusingFinalCost?: Decimal | DecimalJsLike | number | string | null
+    badgeAutoBgt?: Decimal | DecimalJsLike | number | string | null
+    badgeRoughV2?: Decimal | DecimalJsLike | number | string | null
+    badgeVdrCost?: Decimal | DecimalJsLike | number | string | null
+    badgeFinalCost?: Decimal | DecimalJsLike | number | string | null
+    rivetAutoBgt?: Decimal | DecimalJsLike | number | string | null
+    rivetRoughV2?: Decimal | DecimalJsLike | number | string | null
+    rivetVdrCost?: Decimal | DecimalJsLike | number | string | null
+    rivetFinalCost?: Decimal | DecimalJsLike | number | string | null
+    tapeAutoBgt?: Decimal | DecimalJsLike | number | string | null
+    tapeRoughV2?: Decimal | DecimalJsLike | number | string | null
+    tapeVdrCost?: Decimal | DecimalJsLike | number | string | null
+    tapeFinalCost?: Decimal | DecimalJsLike | number | string | null
+    otherAutoBgt?: Decimal | DecimalJsLike | number | string | null
+    otherRoughV2?: Decimal | DecimalJsLike | number | string | null
+    otherVdrCost?: Decimal | DecimalJsLike | number | string | null
+    otherFinalCost?: Decimal | DecimalJsLike | number | string | null
     printAutoBgt?: Decimal | DecimalJsLike | number | string | null
     printRoughV2?: Decimal | DecimalJsLike | number | string | null
     printVendorCost?: Decimal | DecimalJsLike | number | string | null
@@ -126671,6 +127631,30 @@ export namespace Prisma {
     hTrfRoughV2?: Decimal | DecimalJsLike | number | string | null
     hTrfVdrCost?: Decimal | DecimalJsLike | number | string | null
     hTrfFinalCost?: Decimal | DecimalJsLike | number | string | null
+    elasticAutoBgt?: Decimal | DecimalJsLike | number | string | null
+    elasticRoughV2?: Decimal | DecimalJsLike | number | string | null
+    elasticVdrCost?: Decimal | DecimalJsLike | number | string | null
+    elasticFinalCost?: Decimal | DecimalJsLike | number | string | null
+    fusingAutoBgt?: Decimal | DecimalJsLike | number | string | null
+    fusingRoughV2?: Decimal | DecimalJsLike | number | string | null
+    fusingVdrCost?: Decimal | DecimalJsLike | number | string | null
+    fusingFinalCost?: Decimal | DecimalJsLike | number | string | null
+    badgeAutoBgt?: Decimal | DecimalJsLike | number | string | null
+    badgeRoughV2?: Decimal | DecimalJsLike | number | string | null
+    badgeVdrCost?: Decimal | DecimalJsLike | number | string | null
+    badgeFinalCost?: Decimal | DecimalJsLike | number | string | null
+    rivetAutoBgt?: Decimal | DecimalJsLike | number | string | null
+    rivetRoughV2?: Decimal | DecimalJsLike | number | string | null
+    rivetVdrCost?: Decimal | DecimalJsLike | number | string | null
+    rivetFinalCost?: Decimal | DecimalJsLike | number | string | null
+    tapeAutoBgt?: Decimal | DecimalJsLike | number | string | null
+    tapeRoughV2?: Decimal | DecimalJsLike | number | string | null
+    tapeVdrCost?: Decimal | DecimalJsLike | number | string | null
+    tapeFinalCost?: Decimal | DecimalJsLike | number | string | null
+    otherAutoBgt?: Decimal | DecimalJsLike | number | string | null
+    otherRoughV2?: Decimal | DecimalJsLike | number | string | null
+    otherVdrCost?: Decimal | DecimalJsLike | number | string | null
+    otherFinalCost?: Decimal | DecimalJsLike | number | string | null
     printAutoBgt?: Decimal | DecimalJsLike | number | string | null
     printRoughV2?: Decimal | DecimalJsLike | number | string | null
     printVendorCost?: Decimal | DecimalJsLike | number | string | null
@@ -127002,6 +127986,30 @@ export namespace Prisma {
     hTrfRoughV2?: DecimalNullableFilter<"ExtractionResultFlat"> | Decimal | DecimalJsLike | number | string | null
     hTrfVdrCost?: DecimalNullableFilter<"ExtractionResultFlat"> | Decimal | DecimalJsLike | number | string | null
     hTrfFinalCost?: DecimalNullableFilter<"ExtractionResultFlat"> | Decimal | DecimalJsLike | number | string | null
+    elasticAutoBgt?: DecimalNullableFilter<"ExtractionResultFlat"> | Decimal | DecimalJsLike | number | string | null
+    elasticRoughV2?: DecimalNullableFilter<"ExtractionResultFlat"> | Decimal | DecimalJsLike | number | string | null
+    elasticVdrCost?: DecimalNullableFilter<"ExtractionResultFlat"> | Decimal | DecimalJsLike | number | string | null
+    elasticFinalCost?: DecimalNullableFilter<"ExtractionResultFlat"> | Decimal | DecimalJsLike | number | string | null
+    fusingAutoBgt?: DecimalNullableFilter<"ExtractionResultFlat"> | Decimal | DecimalJsLike | number | string | null
+    fusingRoughV2?: DecimalNullableFilter<"ExtractionResultFlat"> | Decimal | DecimalJsLike | number | string | null
+    fusingVdrCost?: DecimalNullableFilter<"ExtractionResultFlat"> | Decimal | DecimalJsLike | number | string | null
+    fusingFinalCost?: DecimalNullableFilter<"ExtractionResultFlat"> | Decimal | DecimalJsLike | number | string | null
+    badgeAutoBgt?: DecimalNullableFilter<"ExtractionResultFlat"> | Decimal | DecimalJsLike | number | string | null
+    badgeRoughV2?: DecimalNullableFilter<"ExtractionResultFlat"> | Decimal | DecimalJsLike | number | string | null
+    badgeVdrCost?: DecimalNullableFilter<"ExtractionResultFlat"> | Decimal | DecimalJsLike | number | string | null
+    badgeFinalCost?: DecimalNullableFilter<"ExtractionResultFlat"> | Decimal | DecimalJsLike | number | string | null
+    rivetAutoBgt?: DecimalNullableFilter<"ExtractionResultFlat"> | Decimal | DecimalJsLike | number | string | null
+    rivetRoughV2?: DecimalNullableFilter<"ExtractionResultFlat"> | Decimal | DecimalJsLike | number | string | null
+    rivetVdrCost?: DecimalNullableFilter<"ExtractionResultFlat"> | Decimal | DecimalJsLike | number | string | null
+    rivetFinalCost?: DecimalNullableFilter<"ExtractionResultFlat"> | Decimal | DecimalJsLike | number | string | null
+    tapeAutoBgt?: DecimalNullableFilter<"ExtractionResultFlat"> | Decimal | DecimalJsLike | number | string | null
+    tapeRoughV2?: DecimalNullableFilter<"ExtractionResultFlat"> | Decimal | DecimalJsLike | number | string | null
+    tapeVdrCost?: DecimalNullableFilter<"ExtractionResultFlat"> | Decimal | DecimalJsLike | number | string | null
+    tapeFinalCost?: DecimalNullableFilter<"ExtractionResultFlat"> | Decimal | DecimalJsLike | number | string | null
+    otherAutoBgt?: DecimalNullableFilter<"ExtractionResultFlat"> | Decimal | DecimalJsLike | number | string | null
+    otherRoughV2?: DecimalNullableFilter<"ExtractionResultFlat"> | Decimal | DecimalJsLike | number | string | null
+    otherVdrCost?: DecimalNullableFilter<"ExtractionResultFlat"> | Decimal | DecimalJsLike | number | string | null
+    otherFinalCost?: DecimalNullableFilter<"ExtractionResultFlat"> | Decimal | DecimalJsLike | number | string | null
     printAutoBgt?: DecimalNullableFilter<"ExtractionResultFlat"> | Decimal | DecimalJsLike | number | string | null
     printRoughV2?: DecimalNullableFilter<"ExtractionResultFlat"> | Decimal | DecimalJsLike | number | string | null
     printVendorCost?: DecimalNullableFilter<"ExtractionResultFlat"> | Decimal | DecimalJsLike | number | string | null
@@ -128629,6 +129637,30 @@ export namespace Prisma {
     hTrfRoughV2?: Decimal | DecimalJsLike | number | string | null
     hTrfVdrCost?: Decimal | DecimalJsLike | number | string | null
     hTrfFinalCost?: Decimal | DecimalJsLike | number | string | null
+    elasticAutoBgt?: Decimal | DecimalJsLike | number | string | null
+    elasticRoughV2?: Decimal | DecimalJsLike | number | string | null
+    elasticVdrCost?: Decimal | DecimalJsLike | number | string | null
+    elasticFinalCost?: Decimal | DecimalJsLike | number | string | null
+    fusingAutoBgt?: Decimal | DecimalJsLike | number | string | null
+    fusingRoughV2?: Decimal | DecimalJsLike | number | string | null
+    fusingVdrCost?: Decimal | DecimalJsLike | number | string | null
+    fusingFinalCost?: Decimal | DecimalJsLike | number | string | null
+    badgeAutoBgt?: Decimal | DecimalJsLike | number | string | null
+    badgeRoughV2?: Decimal | DecimalJsLike | number | string | null
+    badgeVdrCost?: Decimal | DecimalJsLike | number | string | null
+    badgeFinalCost?: Decimal | DecimalJsLike | number | string | null
+    rivetAutoBgt?: Decimal | DecimalJsLike | number | string | null
+    rivetRoughV2?: Decimal | DecimalJsLike | number | string | null
+    rivetVdrCost?: Decimal | DecimalJsLike | number | string | null
+    rivetFinalCost?: Decimal | DecimalJsLike | number | string | null
+    tapeAutoBgt?: Decimal | DecimalJsLike | number | string | null
+    tapeRoughV2?: Decimal | DecimalJsLike | number | string | null
+    tapeVdrCost?: Decimal | DecimalJsLike | number | string | null
+    tapeFinalCost?: Decimal | DecimalJsLike | number | string | null
+    otherAutoBgt?: Decimal | DecimalJsLike | number | string | null
+    otherRoughV2?: Decimal | DecimalJsLike | number | string | null
+    otherVdrCost?: Decimal | DecimalJsLike | number | string | null
+    otherFinalCost?: Decimal | DecimalJsLike | number | string | null
     printAutoBgt?: Decimal | DecimalJsLike | number | string | null
     printRoughV2?: Decimal | DecimalJsLike | number | string | null
     printVendorCost?: Decimal | DecimalJsLike | number | string | null
@@ -128831,6 +129863,30 @@ export namespace Prisma {
     hTrfRoughV2?: Decimal | DecimalJsLike | number | string | null
     hTrfVdrCost?: Decimal | DecimalJsLike | number | string | null
     hTrfFinalCost?: Decimal | DecimalJsLike | number | string | null
+    elasticAutoBgt?: Decimal | DecimalJsLike | number | string | null
+    elasticRoughV2?: Decimal | DecimalJsLike | number | string | null
+    elasticVdrCost?: Decimal | DecimalJsLike | number | string | null
+    elasticFinalCost?: Decimal | DecimalJsLike | number | string | null
+    fusingAutoBgt?: Decimal | DecimalJsLike | number | string | null
+    fusingRoughV2?: Decimal | DecimalJsLike | number | string | null
+    fusingVdrCost?: Decimal | DecimalJsLike | number | string | null
+    fusingFinalCost?: Decimal | DecimalJsLike | number | string | null
+    badgeAutoBgt?: Decimal | DecimalJsLike | number | string | null
+    badgeRoughV2?: Decimal | DecimalJsLike | number | string | null
+    badgeVdrCost?: Decimal | DecimalJsLike | number | string | null
+    badgeFinalCost?: Decimal | DecimalJsLike | number | string | null
+    rivetAutoBgt?: Decimal | DecimalJsLike | number | string | null
+    rivetRoughV2?: Decimal | DecimalJsLike | number | string | null
+    rivetVdrCost?: Decimal | DecimalJsLike | number | string | null
+    rivetFinalCost?: Decimal | DecimalJsLike | number | string | null
+    tapeAutoBgt?: Decimal | DecimalJsLike | number | string | null
+    tapeRoughV2?: Decimal | DecimalJsLike | number | string | null
+    tapeVdrCost?: Decimal | DecimalJsLike | number | string | null
+    tapeFinalCost?: Decimal | DecimalJsLike | number | string | null
+    otherAutoBgt?: Decimal | DecimalJsLike | number | string | null
+    otherRoughV2?: Decimal | DecimalJsLike | number | string | null
+    otherVdrCost?: Decimal | DecimalJsLike | number | string | null
+    otherFinalCost?: Decimal | DecimalJsLike | number | string | null
     printAutoBgt?: Decimal | DecimalJsLike | number | string | null
     printRoughV2?: Decimal | DecimalJsLike | number | string | null
     printVendorCost?: Decimal | DecimalJsLike | number | string | null
@@ -129084,6 +130140,30 @@ export namespace Prisma {
     hTrfRoughV2?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
     hTrfVdrCost?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
     hTrfFinalCost?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    elasticAutoBgt?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    elasticRoughV2?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    elasticVdrCost?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    elasticFinalCost?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    fusingAutoBgt?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    fusingRoughV2?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    fusingVdrCost?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    fusingFinalCost?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    badgeAutoBgt?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    badgeRoughV2?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    badgeVdrCost?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    badgeFinalCost?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    rivetAutoBgt?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    rivetRoughV2?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    rivetVdrCost?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    rivetFinalCost?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    tapeAutoBgt?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    tapeRoughV2?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    tapeVdrCost?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    tapeFinalCost?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    otherAutoBgt?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    otherRoughV2?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    otherVdrCost?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    otherFinalCost?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
     printAutoBgt?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
     printRoughV2?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
     printVendorCost?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
@@ -129286,6 +130366,30 @@ export namespace Prisma {
     hTrfRoughV2?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
     hTrfVdrCost?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
     hTrfFinalCost?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    elasticAutoBgt?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    elasticRoughV2?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    elasticVdrCost?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    elasticFinalCost?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    fusingAutoBgt?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    fusingRoughV2?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    fusingVdrCost?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    fusingFinalCost?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    badgeAutoBgt?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    badgeRoughV2?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    badgeVdrCost?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    badgeFinalCost?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    rivetAutoBgt?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    rivetRoughV2?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    rivetVdrCost?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    rivetFinalCost?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    tapeAutoBgt?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    tapeRoughV2?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    tapeVdrCost?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    tapeFinalCost?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    otherAutoBgt?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    otherRoughV2?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    otherVdrCost?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    otherFinalCost?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
     printAutoBgt?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
     printRoughV2?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
     printVendorCost?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
@@ -130384,6 +131488,30 @@ export namespace Prisma {
     hTrfRoughV2?: Decimal | DecimalJsLike | number | string | null
     hTrfVdrCost?: Decimal | DecimalJsLike | number | string | null
     hTrfFinalCost?: Decimal | DecimalJsLike | number | string | null
+    elasticAutoBgt?: Decimal | DecimalJsLike | number | string | null
+    elasticRoughV2?: Decimal | DecimalJsLike | number | string | null
+    elasticVdrCost?: Decimal | DecimalJsLike | number | string | null
+    elasticFinalCost?: Decimal | DecimalJsLike | number | string | null
+    fusingAutoBgt?: Decimal | DecimalJsLike | number | string | null
+    fusingRoughV2?: Decimal | DecimalJsLike | number | string | null
+    fusingVdrCost?: Decimal | DecimalJsLike | number | string | null
+    fusingFinalCost?: Decimal | DecimalJsLike | number | string | null
+    badgeAutoBgt?: Decimal | DecimalJsLike | number | string | null
+    badgeRoughV2?: Decimal | DecimalJsLike | number | string | null
+    badgeVdrCost?: Decimal | DecimalJsLike | number | string | null
+    badgeFinalCost?: Decimal | DecimalJsLike | number | string | null
+    rivetAutoBgt?: Decimal | DecimalJsLike | number | string | null
+    rivetRoughV2?: Decimal | DecimalJsLike | number | string | null
+    rivetVdrCost?: Decimal | DecimalJsLike | number | string | null
+    rivetFinalCost?: Decimal | DecimalJsLike | number | string | null
+    tapeAutoBgt?: Decimal | DecimalJsLike | number | string | null
+    tapeRoughV2?: Decimal | DecimalJsLike | number | string | null
+    tapeVdrCost?: Decimal | DecimalJsLike | number | string | null
+    tapeFinalCost?: Decimal | DecimalJsLike | number | string | null
+    otherAutoBgt?: Decimal | DecimalJsLike | number | string | null
+    otherRoughV2?: Decimal | DecimalJsLike | number | string | null
+    otherVdrCost?: Decimal | DecimalJsLike | number | string | null
+    otherFinalCost?: Decimal | DecimalJsLike | number | string | null
     printAutoBgt?: Decimal | DecimalJsLike | number | string | null
     printRoughV2?: Decimal | DecimalJsLike | number | string | null
     printVendorCost?: Decimal | DecimalJsLike | number | string | null
@@ -130745,6 +131873,30 @@ export namespace Prisma {
     hTrfRoughV2?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
     hTrfVdrCost?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
     hTrfFinalCost?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    elasticAutoBgt?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    elasticRoughV2?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    elasticVdrCost?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    elasticFinalCost?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    fusingAutoBgt?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    fusingRoughV2?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    fusingVdrCost?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    fusingFinalCost?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    badgeAutoBgt?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    badgeRoughV2?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    badgeVdrCost?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    badgeFinalCost?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    rivetAutoBgt?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    rivetRoughV2?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    rivetVdrCost?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    rivetFinalCost?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    tapeAutoBgt?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    tapeRoughV2?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    tapeVdrCost?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    tapeFinalCost?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    otherAutoBgt?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    otherRoughV2?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    otherVdrCost?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    otherFinalCost?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
     printAutoBgt?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
     printRoughV2?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
     printVendorCost?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
@@ -130947,6 +132099,30 @@ export namespace Prisma {
     hTrfRoughV2?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
     hTrfVdrCost?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
     hTrfFinalCost?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    elasticAutoBgt?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    elasticRoughV2?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    elasticVdrCost?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    elasticFinalCost?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    fusingAutoBgt?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    fusingRoughV2?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    fusingVdrCost?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    fusingFinalCost?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    badgeAutoBgt?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    badgeRoughV2?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    badgeVdrCost?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    badgeFinalCost?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    rivetAutoBgt?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    rivetRoughV2?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    rivetVdrCost?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    rivetFinalCost?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    tapeAutoBgt?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    tapeRoughV2?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    tapeVdrCost?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    tapeFinalCost?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    otherAutoBgt?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    otherRoughV2?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    otherVdrCost?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    otherFinalCost?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
     printAutoBgt?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
     printRoughV2?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
     printVendorCost?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
@@ -131148,6 +132324,30 @@ export namespace Prisma {
     hTrfRoughV2?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
     hTrfVdrCost?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
     hTrfFinalCost?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    elasticAutoBgt?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    elasticRoughV2?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    elasticVdrCost?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    elasticFinalCost?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    fusingAutoBgt?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    fusingRoughV2?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    fusingVdrCost?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    fusingFinalCost?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    badgeAutoBgt?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    badgeRoughV2?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    badgeVdrCost?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    badgeFinalCost?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    rivetAutoBgt?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    rivetRoughV2?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    rivetVdrCost?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    rivetFinalCost?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    tapeAutoBgt?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    tapeRoughV2?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    tapeVdrCost?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    tapeFinalCost?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    otherAutoBgt?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    otherRoughV2?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    otherVdrCost?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    otherFinalCost?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
     printAutoBgt?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
     printRoughV2?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
     printVendorCost?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
