@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useCallback } from 'react';
-import { ChevronDown, ChevronUp, Scissors } from 'lucide-react';
+import { ChevronDown, ChevronUp, Save, Scissors } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { TextCell } from './CostingGridCard';
 import { CARD_THEME } from './cardTheme';
@@ -7,7 +7,8 @@ import { CARD_THEME } from './cardTheme';
 // ─── CMP COST card (FG articles, shown with the BODY tab) ─────────────────────
 // One matrix: process rows × (BGT | ACT | VENDOR | FINAL) × (SAM | SAM VAL | PR VAL).
 // CUTTING has no SAM / SAM VAL — only PR VAL.
-// PR VAL cells are persisted to extraction_results_flat; SAM/SAM VAL are UI-only.
+// PR VAL cells are saved to extraction_results_flat only when Save is clicked;
+// SAM/SAM VAL are UI-only.
 
 const PROCESSES = ['CUTTING', 'STITCHING', 'IRONING', 'FINISHING'] as const;
 const STAGES = ['BGT', 'ACT', 'VENDOR', 'FINAL'] as const;
@@ -49,8 +50,10 @@ interface CmpCostCardProps {
   bgtPreset?: Record<string, string>;
   /** Persisted PR VAL values loaded from the article record. Keyed by cell key, e.g. 'CUTTING|BGT|PR VAL'. */
   savedPrVals?: Record<string, string>;
-  /** Called when a PR VAL cell changes. `field` is the ApproverItem field name, `value` is the new string value. */
-  onPrValChange?: (field: string, value: string) => void;
+  /** Save button: receives every PR VAL field (ApproverItem names) with its current value. */
+  onSave?: (updates: Record<string, string | null>) => void;
+  /** Presets filled PR VALs that aren't in the DB yet — shown as unsaved. */
+  hasUnsavedPreset?: boolean;
 }
 
 const CmpCostCard: React.FC<CmpCostCardProps> = ({
@@ -60,10 +63,12 @@ const CmpCostCard: React.FC<CmpCostCardProps> = ({
   actPreset,
   bgtPreset,
   savedPrVals,
-  onPrValChange,
+  onSave,
+  hasUnsavedPreset,
 }) => {
   const style = CARD_THEME;
   const [values, setValues] = useState<Record<string, string>>({});
+  const [dirty, setDirty] = useState(false);
 
   // Initialize from saved DB values on mount / when the article changes.
   // Only apply non-empty saved values so preset-filled cells aren't wiped when
@@ -101,25 +106,57 @@ const CmpCostCard: React.FC<CmpCostCardProps> = ({
 
   const handleChange = useCallback((key: string, v: string) => {
     setValues((prev) => ({ ...prev, [key]: v }));
-    const field = PR_VAL_FIELD[key];
-    if (field && onPrValChange) onPrValChange(field, v);
-  }, [onPrValChange]);
+    if (PR_VAL_FIELD[key]) setDirty(true);
+  }, []);
+
+  const handleSave = () => {
+    if (!onSave) return;
+    const updates: Record<string, string | null> = {};
+    for (const [key, field] of Object.entries(PR_VAL_FIELD)) updates[field] = values[key] || null;
+    onSave(updates);
+    setDirty(false);
+  };
+  const unsaved = dirty || !!hasUnsavedPreset;
 
   return (
     <div className="col-span-full overflow-hidden rounded-lg border-2 bg-white shadow-[var(--shadow-sm)]" style={{ borderColor: style.border }}>
-      <button
-        type="button"
-        onClick={onToggleCollapse}
-        aria-expanded={!collapsed}
-        className="flex w-full items-center justify-between border-b-2 px-2 py-1.5 transition-colors hover:brightness-110"
-        style={{ background: style.bg, borderColor: style.bg, color: style.fg }}
-      >
-        <span className="flex items-center gap-1 text-[10px] font-bold uppercase tracking-wider">
+      <div className="flex items-center border-b-2" style={{ background: style.bg, borderColor: style.bg, color: style.fg }}>
+        <button
+          type="button"
+          onClick={onToggleCollapse}
+          aria-expanded={!collapsed}
+          className="flex flex-1 items-center gap-1 self-stretch px-2 py-1.5 text-left text-[10px] font-bold uppercase tracking-wider transition-colors hover:brightness-110"
+        >
           <Scissors className="h-3.5 w-3.5" />
           CMP COST
-        </span>
-        {collapsed ? <ChevronDown className="h-3 w-3" /> : <ChevronUp className="h-3 w-3" />}
-      </button>
+        </button>
+        {onSave && !collapsed && (
+          <div className="flex items-center gap-2">
+            {unsaved && (
+              <span className="text-[10.5px] font-medium" style={{ opacity: 0.8 }}>
+                Unsaved changes
+              </span>
+            )}
+            <button
+              type="button"
+              onClick={handleSave}
+              disabled={locked}
+              className="flex h-6 items-center gap-1 rounded-md bg-white px-2.5 text-[11px] font-bold text-slate-900 transition-colors hover:bg-slate-100 disabled:cursor-not-allowed disabled:opacity-50"
+            >
+              <Save className="h-3 w-3" />
+              Save
+            </button>
+          </div>
+        )}
+        <button
+          type="button"
+          onClick={onToggleCollapse}
+          aria-label={collapsed ? 'Expand' : 'Collapse'}
+          className="flex items-center self-stretch px-2 py-1.5 transition-colors hover:brightness-110"
+        >
+          {collapsed ? <ChevronDown className="h-3 w-3" /> : <ChevronUp className="h-3 w-3" />}
+        </button>
+      </div>
 
       {!collapsed && (
         <>
