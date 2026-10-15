@@ -1,5 +1,5 @@
-import React, { useCallback, useRef, useState } from 'react';
-import { ChevronDown, ChevronRight, ChevronUp, Search, X } from 'lucide-react';
+import React, { useCallback, useEffect, useRef, useState } from 'react';
+import { ChevronDown, ChevronRight, ChevronUp, Save, Search, X } from 'lucide-react';
 import { Input, Popover, PopoverContent, PopoverTrigger } from '@/shared/components/ui-tw';
 import { cn } from '@/lib/utils';
 import { APP_CONFIG } from '../../../constants/app/config';
@@ -13,15 +13,17 @@ import { APP_CONFIG } from '../../../constants/app/config';
 // Cells that map to an existing SAP attribute (config.cellMap) are dropdowns
 // of that attribute's allowed values on every tab. Persistence: only the
 // FIRST tab's mapped cells are saved — through the card's normal handleSave,
-// so SAP sync is unchanged. Every other cell (other tabs' picks, other-block
-// rows, costs, unmapped cells) is UI-only local state for now — nothing is
-// written to the DB.
+// so SAP sync is unchanged — V. ADD works this way.
+// B TRIM (config.costFields + onSaveTab) instead keeps every tab's values local
+// and saves only on the Save button: the current tab's spec fields, costs and
+// bTrimType. On load the saved tab opens with its DB values; the other is empty.
+// Other-block rows stay UI-only.
 
 type AttrValue = { shortForm: string; fullForm?: string | null };
 export type CostingGridAttr = { field: string; label: string; values: AttrValue[] };
 
 type SpecCol = 'type' | 'style' | 'c3';
-type Col = SpecCol | 'rough' | 'vdr' | 'fin';
+type Col = SpecCol | 'auto' | 'rough' | 'vdr' | 'fin';
 type RowState = Partial<Record<Col, string>>;
 
 export interface CostingGridConfig {
@@ -39,7 +41,11 @@ export interface CostingGridConfig {
   cellMap: Record<string, Partial<Record<SpecCol, string>>>;
   /** Tailwind grid template (literal class so Tailwind picks it up). */
   grid: string;
+  /** row → DB fields for the first tab's costing cells. Rows not listed stay UI-only. */
+  costFields?: Record<string, CostFieldSet>;
 }
+
+type CostFieldSet = { autoBgt: string; rough: string; vdr: string; fin: string };
 
 export const BTRIM_CONFIG: CostingGridConfig = {
   title: 'B TRIM',
@@ -58,6 +64,13 @@ export const BTRIM_CONFIG: CostingGridConfig = {
     'H-TRF': { type: 'htrfType', style: 'htrfStyle' },    // M_HTRF_TYPE, M_HTRF_STYLE
   },
   grid: 'grid grid-cols-[150px_110px_minmax(0,1.3fr)_90px_minmax(0,1.5fr)_88px_92px_92px_100px]',
+  costFields: {
+    M_BTN:   { autoBgt: 'mBtnAutoBgt',  rough: 'mBtnRoughV2',  vdr: 'mBtnVdrCost',  fin: 'mBtnFinalCost' },
+    DC:      { autoBgt: 'dcAutoBgt',    rough: 'dcRoughV2',    vdr: 'dcVdrCost',    fin: 'dcFinalCost' },
+    ZIP:     { autoBgt: 'zipAutoBgt',   rough: 'zipRoughV2',   vdr: 'zipVdrCost',   fin: 'zipFinalCost' },
+    PATCH:   { autoBgt: 'patchAutoBgt', rough: 'patchRoughV2', vdr: 'patchVdrCost', fin: 'patchFinalCost' },
+    'H-TRF': { autoBgt: 'hTrfAutoBgt',  rough: 'hTrfRoughV2',  vdr: 'hTrfVdrCost',  fin: 'hTrfFinalCost' },
+  },
 };
 
 export const VADD_CONFIG: CostingGridConfig = {
@@ -95,6 +108,10 @@ interface CostingGridCardProps {
   extraRows?: React.ReactNode;
   /** When true, each spec-cell change triggers a precise_trim_master lookup (by attribute name + value) and fills AUTO-BGT. */
   enablePreciseTrimLookup?: boolean;
+  /** Reads the article fresh from the DB (the parent's copy can be stale). Needed for cost sync. */
+  loadSavedRecord?: () => Promise<Record<string, unknown> | null>;
+  /** Save button: persists the current tab's spec fields + costs (config.costFields) + bTrimType. */
+  onSaveTab?: (updates: Record<string, string | null>) => void;
 }
 
 const SelectCell: React.FC<{
@@ -230,20 +247,37 @@ const CostingGridCard: React.FC<CostingGridCardProps> = ({
   locked,
   extraRows,
   enablePreciseTrimLookup,
+  loadSavedRecord,
+  onSaveTab,
 }) => {
   const { grid: GRID, tabs, fixedRows, other, cellMap } = config;
+  const costFields = config.costFields;
+  // Tab-save mode (B TRIM): every tab keeps its own values; Save writes the current
+  // tab's specs + costs and records it in bTrimType. Otherwise (V. ADD) the first
+  // tab's spec cells save to SAP as soon as they're picked.
+  const tabSave = !!costFields && !!onSaveTab && !!loadSavedRecord;
   const [tab, setTab] = useState<string>(tabs[0]);
   const [otherOpen, setOtherOpen] = useState(false);
-  // UI-only values: local[tab][row][col]
+  // local[tab][row][col] — 'auto' holds that tab's AUTO-BGT
   const [local, setLocal] = useState<Record<string, Record<string, RowState>>>({});
-  // AUTO-BGT: row → { bt1, bt2 } — populated by both precise_trim_master and basic_trim_master lookups
-  const [autoBgt, setAutoBgt] = useState<Record<string, { bt1: string; bt2: string }>>({});
   const [autoBgtLoading, setAutoBgtLoading] = useState<Record<string, boolean>>({});
-  // Track last lookup key (row:value) to avoid duplicate fetches
+  const [dirty, setDirty] = useState(false);
+  const [savedTab, setSavedTab] = useState<string | null>(null);
   const basicTrimFetchedRef = useRef<Record<string, string>>({});
 
+  const setTabVal = (t: string, row: string, col: Col, v: string) =>
+    setLocal((prev) => ({ ...prev, [t]: { ...prev[t], [row]: { ...prev[t]?.[row], [col]: v } } }));
+
+  // Lookup result → the picked tab's AUTO-BGT (and ROUGH-V2 for basic_trim_master).
+  const applyLookup = (row: string, r: { bt1: string; bt2: string }, tabIdx: number, withRough: boolean) => {
+    const t = tabs[tabIdx];
+    const v = tabIdx === 0 ? r.bt1 : r.bt2;
+    setTabVal(t, row, 'auto', v);
+    if (withRough) setTabVal(t, row, 'rough', v);
+  };
+
   // attributeName = SAP field from cellMap (e.g. "drawcord" for M_DC_STYLE), value = selected shortForm
-  const lookupPreciseTrim = useCallback(async (row: string, attributeName: string, value: string) => {
+  const lookupPreciseTrim = useCallback(async (row: string, attributeName: string, value: string, tabIdx: number) => {
     if (!enablePreciseTrimLookup || !attributeName || !value) return;
     setAutoBgtLoading((prev) => ({ ...prev, [row]: true }));
     try {
@@ -252,54 +286,101 @@ const CostingGridCard: React.FC<CostingGridCardProps> = ({
       const res = await fetch(url, { headers: token ? { Authorization: `Bearer ${token}` } : {} });
       const data = await res.json();
       if (data.success && data.data) {
-        setAutoBgt((prev) => ({
-          ...prev,
-          [row]: {
-            bt1: data.data.bt1 !== null ? String(data.data.bt1) : '',
-            bt2: data.data.bt2 !== null ? String(data.data.bt2) : '',
-          },
-        }));
+        applyLookup(row, {
+          bt1: data.data.bt1 !== null ? String(data.data.bt1) : '',
+          bt2: data.data.bt2 !== null ? String(data.data.bt2) : '',
+        }, tabIdx, false);
       }
     } catch {
       // silent — AUTO-BGT just stays as-is
     } finally {
       setAutoBgtLoading((prev) => ({ ...prev, [row]: false }));
     }
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [enablePreciseTrimLookup]);
 
-  // Lookup from basic_trim_master by attribute_name + type value.
-  // Sets AUTO-BGT and pre-fills ROUGH-V2 for both tabs simultaneously.
-  const lookupBasicTrim = useCallback(async (row: string, attributeName: string, value: string) => {
-    if (!attributeName || !value) return;
-    const key = `${row}:${value}`;
-    if (basicTrimFetchedRef.current[row] === key) return;
-    basicTrimFetchedRef.current[row] = key;
+  // basic_trim_master lookup by attribute_name + type value → { bt1, bt2 } or null.
+  const fetchBasicTrim = async (row: string, attributeName: string, value: string) => {
     setAutoBgtLoading((prev) => ({ ...prev, [row]: true }));
     try {
       const token = localStorage.getItem('authToken');
       const url = `${APP_CONFIG.api.baseURL}/approver/basic-trim-master/lookup?attributeName=${encodeURIComponent(attributeName)}&type=${encodeURIComponent(value)}`;
       const res = await fetch(url, { headers: token ? { Authorization: `Bearer ${token}` } : {} });
       const data: { found: boolean; bt1: number | null; bt2: number | null } = await res.json();
-      if (!data.found) return;
-      const bt1Str = data.bt1 != null ? String(data.bt1) : '';
-      const bt2Str = data.bt2 != null ? String(data.bt2) : '';
-      // Set AUTO-BGT state
-      setAutoBgt((prev) => ({ ...prev, [row]: { bt1: bt1Str, bt2: bt2Str } }));
-      // Pre-fill ROUGH-V2 for both tabs so switching tabs shows the right value
-      setLocal((prev) => {
-        const next = { ...prev };
-        tabs.forEach((t, i) => {
-          const val = i === 0 ? bt1Str : bt2Str;
-          next[t] = { ...next[t], [row]: { ...next[t]?.[row], rough: val } };
-        });
-        return next;
-      });
+      if (!data.found) return null;
+      return { bt1: data.bt1 != null ? String(data.bt1) : '', bt2: data.bt2 != null ? String(data.bt2) : '' };
     } catch {
-      // silent
+      return null;
     } finally {
       setAutoBgtLoading((prev) => ({ ...prev, [row]: false }));
     }
-  }, [tabs]);
+  };
+
+  const lookupBasicTrim = async (row: string, attributeName: string, value: string, tabIdx: number) => {
+    if (!attributeName || !value) return;
+    const key = `${tabIdx}:${value}`;
+    if (basicTrimFetchedRef.current[row] === key) return;
+    basicTrimFetchedRef.current[row] = key;
+    const r = await fetchBasicTrim(row, attributeName, value);
+    if (r) applyLookup(row, r, tabIdx, true);
+  };
+
+  // On mount (tab-save mode): read the article fresh from the DB (the parent's copy
+  // can be stale), open the saved tab and fill it with the saved specs + costs. The
+  // other tab starts empty. Rows with a spec but no saved AUTO-BGT / ROUGH-V2 get
+  // them looked up — shown as unsaved until the user clicks Save.
+  useEffect(() => {
+    if (!tabSave) return;
+    let cancelled = false;
+    (async () => {
+      const rec = await loadSavedRecord!();
+      if (!rec || cancelled) return;
+      const str = (v: unknown) => (v == null || v === '' ? '' : String(v).trim());
+      const num = (v: unknown) => (v == null || v === '' ? '' : String(Number(v)));
+      const recTab = str(rec.bTrimType);
+      const t = tabs.includes(recTab) ? recTab : tabs[0];
+      const tIdx = tabs.indexOf(t);
+      setTab(t);
+      setSavedTab(recTab && tabs.includes(recTab) ? recTab : null);
+
+      const rows: Record<string, RowState> = {};
+      for (const [row, map] of Object.entries(cellMap)) {
+        rows[row] = {};
+        for (const [col, field] of Object.entries(map) as [SpecCol, string][]) {
+          const v = str(rec[field]);
+          if (v) rows[row][col] = v;
+        }
+      }
+      for (const [row, f] of Object.entries(costFields!)) {
+        rows[row] = {
+          ...rows[row],
+          auto: num(rec[f.autoBgt]),
+          rough: num(rec[f.rough]),
+          vdr: num(rec[f.vdr]),
+          fin: num(rec[f.fin]),
+        };
+      }
+      setLocal({ [t]: rows });
+
+      for (const row of Object.keys(costFields!)) {
+        if (rows[row].auto && rows[row].rough) continue;
+        const lookupCol = (Object.keys(BASIC_TRIM_LOOKUP[row] ?? {}) as SpecCol[])[0];
+        const btAttr = lookupCol ? BASIC_TRIM_LOOKUP[row]![lookupCol] : undefined;
+        const spec = lookupCol ? rows[row][lookupCol] ?? '' : '';
+        if (!btAttr || !spec) continue;
+        basicTrimFetchedRef.current[row] = `${tIdx}:${spec}`;
+        const r = await fetchBasicTrim(row, btAttr, spec);
+        if (!r || cancelled) continue;
+        const v = tIdx === 0 ? r.bt1 : r.bt2;
+        if (!v) continue;
+        if (!rows[row].auto) setTabVal(t, row, 'auto', v);
+        if (!rows[row].rough) setTabVal(t, row, 'rough', v);
+        setDirty(true);
+      }
+    })();
+    return () => { cancelled = true; };
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   const attrByField = new Map(attrs.map((a) => [a.field, a]));
 
@@ -310,19 +391,38 @@ const CostingGridCard: React.FC<CostingGridCardProps> = ({
     const field = cellMap[row]?.[col];
     return field ? attrByField.get(field) ?? null : null;
   };
-  // Only the first tab reads/writes the SAP field; other tabs keep picks in local state.
-  const savesToSap = (row: string, col: Col) => tab === tabs[0] && !!boundAttr(row, col);
+  // Immediate-save mode only: the first tab reads/writes the SAP field directly.
+  const savesToSap = (row: string, col: Col) => !tabSave && tab === tabs[0] && !!boundAttr(row, col);
 
   const localVal = (row: string, col: Col) => local[tab]?.[row]?.[col] ?? '';
-  const setLocalVal = (row: string, col: Col, v: string) =>
-    setLocal((prev) => ({
-      ...prev,
-      [tab]: { ...prev[tab], [row]: { ...prev[tab]?.[row], [col]: v } },
-    }));
+  const setLocalVal = (row: string, col: Col, v: string) => {
+    setTabVal(tab, row, col, v);
+    setDirty(true);
+  };
 
   const cellVal = (row: string, col: Col): string => {
     const a = boundAttr(row, col);
     return savesToSap(row, col) && a ? (getValue(a.field) ?? '').trim() : localVal(row, col).trim();
+  };
+
+  const handleSaveTab = () => {
+    if (!tabSave) return;
+    const updates: Record<string, string | null> = { bTrimType: tab };
+    for (const [row, map] of Object.entries(cellMap)) {
+      for (const [col, field] of Object.entries(map) as [SpecCol, string][]) {
+        if (!boundAttr(row, col) || isFieldLocked(field)) continue;
+        updates[field] = localVal(row, col).trim() || null;
+      }
+    }
+    for (const [row, f] of Object.entries(costFields!)) {
+      updates[f.autoBgt] = localVal(row, 'auto') || null;
+      updates[f.rough] = localVal(row, 'rough') || null;
+      updates[f.vdr] = localVal(row, 'vdr') || null;
+      updates[f.fin] = localVal(row, 'fin') || null;
+    }
+    onSaveTab!(updates);
+    setSavedTab(tab);
+    setDirty(false);
   };
 
   const renderSpecCell = (row: string, col: SpecCol) => {
@@ -333,12 +433,13 @@ const CostingGridCard: React.FC<CostingGridCardProps> = ({
         <SelectCell
           value={toSap ? getValue(a.field) : localVal(row, col)}
           options={a.values ?? []}
-          disabled={toSap ? isFieldLocked(a.field) : locked}
+          disabled={toSap ? isFieldLocked(a.field) : locked || (tabSave && isFieldLocked(a.field))}
           onPick={(v) => {
             if (toSap) onSave(a.field, v); else setLocalVal(row, col, v ?? '');
-            if (v) lookupPreciseTrim(row, a.field, v);
+            const tabIdx = tabs.indexOf(tab);
+            if (v) lookupPreciseTrim(row, a.field, v, tabIdx);
             const btAttr = BASIC_TRIM_LOOKUP[row]?.[col];
-            if (v && btAttr) lookupBasicTrim(row, btAttr, v);
+            if (v && btAttr) lookupBasicTrim(row, btAttr, v, tabIdx);
           }}
         />
       );
@@ -355,8 +456,7 @@ const CostingGridCard: React.FC<CostingGridCardProps> = ({
     // DESC is auto-built: STYLE-TYPE (e.g. KUNDI_BTN-26L)
     const desc = [cellVal(row, 'style'), cellVal(row, 'type')].filter((p) => p && !/^-+$/.test(p)).join('-');
     const tabIdx = tabs.indexOf(tab);
-    const bgt = autoBgt[row];
-    const autoBgtVal = bgt ? (tabIdx === 0 ? bgt.bt1 : bgt.bt2) : '';
+    const autoBgtVal = localVal(row, 'auto');
     const bgtLoading = autoBgtLoading[row];
     return (
       <div key={row} className={cn(GRID, 'items-center', !last && 'border-b border-slate-100')}>
@@ -372,7 +472,7 @@ const CostingGridCard: React.FC<CostingGridCardProps> = ({
             'px-2.5 py-1.5 text-right font-mono text-[11px]',
             bgtLoading ? 'text-slate-300' : autoBgtVal ? 'font-semibold text-slate-900' : 'text-slate-400',
           )}
-          title={autoBgtVal ? `AUTO-BGT from precise_trim_master (BT-${tabIdx + 1})` : 'Auto budget — select a spec value'}
+          title={autoBgtVal ? `AUTO-BGT (BT-${tabIdx + 1})` : 'Auto budget — select a spec value'}
         >
           {bgtLoading ? '…' : autoBgtVal || '—'}
         </div>
@@ -409,26 +509,57 @@ const CostingGridCard: React.FC<CostingGridCardProps> = ({
           )}
         </button>
         {!collapsed && tabs.length > 1 && (
-          <div role="tablist" className="flex gap-1 px-2">
-            {tabs.map((t) => {
-              const active = tab === t;
-              return (
+          <div className="flex items-end justify-between gap-2 px-2">
+            <div role="tablist" className="flex gap-1">
+              {tabs.map((t) => {
+                const active = tab === t;
+                return (
+                  <button
+                    key={t}
+                    type="button"
+                    role="tab"
+                    aria-selected={active}
+                    onClick={() => setTab(t)}
+                    className={cn(
+                      'flex h-8 items-center gap-1.5 px-3 text-[11.5px] font-bold tracking-wide transition-colors',
+                      active ? 'rounded-t-md bg-white text-slate-900 shadow-[inset_0_-2px_0_#1e293b]' : 'opacity-80 hover:opacity-100',
+                    )}
+                    style={active ? undefined : { color: style.fg }}
+                  >
+                    {t}
+                    {tabSave && savedTab === t && (
+                      <span
+                        className={cn(
+                          'rounded px-1 py-px text-[9px] font-semibold tracking-wider',
+                          active ? 'bg-slate-200 text-slate-700' : 'bg-white/20',
+                        )}
+                        title="This tab's values are the ones saved"
+                      >
+                        SAVED
+                      </span>
+                    )}
+                  </button>
+                );
+              })}
+            </div>
+            {tabSave && (
+              <div className="flex items-center gap-2 pb-1">
+                {dirty && (
+                  <span className="text-[10.5px] font-medium" style={{ color: style.fg, opacity: 0.8 }}>
+                    Unsaved changes
+                  </span>
+                )}
                 <button
-                  key={t}
                   type="button"
-                  role="tab"
-                  aria-selected={active}
-                  onClick={() => setTab(t)}
-                  className={cn(
-                    'flex h-8 items-center gap-1 px-3 text-[11.5px] font-bold tracking-wide transition-colors',
-                    active ? 'rounded-t-md bg-white text-slate-900 shadow-[inset_0_-2px_0_#1e293b]' : 'opacity-80 hover:opacity-100',
-                  )}
-                  style={active ? undefined : { color: style.fg }}
+                  onClick={handleSaveTab}
+                  disabled={locked}
+                  className="flex h-7 items-center gap-1.5 rounded-md bg-white px-3 text-[11.5px] font-bold text-slate-900 transition-colors hover:bg-slate-100 disabled:cursor-not-allowed disabled:opacity-50"
                 >
-                  {t}
+                  <Save className="h-3.5 w-3.5" />
+                  Save {tab}
                 </button>
-              );
-            })}
+              </div>
+            )}
           </div>
         )}
       </div>

@@ -985,14 +985,22 @@ const ArticleCard = React.memo(
     // `item` can be stale (the detail page restores it from navigation state on reload),
     // so read the stage's PR VALs straight from the DB before deciding anything.
     // Returns cell key → saved value ('' when null in DB).
-    const fetchDbPrVals = async (stage: 'BGT' | 'ACT'): Promise<Record<string, string> | null> => {
+    const loadFreshItem = async (): Promise<Record<string, unknown> | null> => {
       try {
         const token = localStorage.getItem('authToken');
         const r = await fetch(`${APP_CONFIG.api.baseURL}/approver/items/${item.id}`, {
           headers: { Authorization: `Bearer ${token}` },
         });
-        if (!r.ok) return null;
-        const fresh = await r.json();
+        return r.ok ? await r.json() : null;
+      } catch {
+        return null;
+      }
+    };
+
+    const fetchDbPrVals = async (stage: 'BGT' | 'ACT'): Promise<Record<string, string> | null> => {
+      try {
+        const fresh = await loadFreshItem();
+        if (!fresh) return null;
         const out: Record<string, string> = {};
         for (const p of ['CUTTING', 'STITCHING', 'IRONING', 'FINISHING']) {
           const key = `${p}|${stage}|PR VAL`;
@@ -3316,6 +3324,12 @@ const ArticleCard = React.memo(
                             .filter((a) => !gridCfg.fields.has(a.field) && !FG_CARD_HIDDEN_SCHEMA_KEYS.has(a.schemaKey))
                             .map((a) => renderAttributeRow(a))}
                           enablePreciseTrimLookup={g.group === 'VA ACC.'}
+                          loadSavedRecord={g.group === 'VA ACC.' ? loadFreshItem : undefined}
+                          onSaveTab={g.group === 'VA ACC.' ? (updates) => {
+                            setLocalValues((prev) => ({ ...prev, ...updates }));
+                            if (isModifyMode) setPendingChanges((prev) => ({ ...prev, ...updates }));
+                            else onSave({ ...item, ...updates } as any, updates);
+                          } : undefined}
                         />
                       );
                     }
