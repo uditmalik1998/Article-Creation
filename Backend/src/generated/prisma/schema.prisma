@@ -319,7 +319,6 @@ model ExtractionResultFlat {
   articleDimension   String? @map("article_dimension") @db.VarChar(100)
 
   // ===== BODY ARTICLE COST FIELDS =====
-  fabCost                  Decimal? @map("fab_cost") @db.Decimal(10, 2)
   autoBgt                  Decimal? @map("auto_bgt") @db.Decimal(10, 2)
   roughV2                  Decimal? @map("rough_v2") @db.Decimal(10, 2)
   vendorFabricRate         Decimal? @map("vendor_fabric_rate") @db.Decimal(10, 2)

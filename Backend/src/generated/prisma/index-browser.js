@@ -347,7 +347,6 @@ exports.Prisma.ExtractionResultFlatScalarFieldEnum = {
   mNoOfClr: 'mNoOfClr',
   articleFashionType: 'articleFashionType',
   articleDimension: 'articleDimension',
-  fabCost: 'fabCost',
   autoBgt: 'autoBgt',
   roughV2: 'roughV2',
   vendorFabricRate: 'vendorFabricRate',

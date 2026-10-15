@@ -17,7 +17,7 @@ const isNotApplicable = (process: string, measure: string) => process === 'CUTTI
 const cellKey = (process: string, stage: string, measure: string) => `${process}|${stage}|${measure}`;
 
 // Maps PR VAL cell keys → ApproverItem field names (also used as the update key sent to onSave).
-const PR_VAL_FIELD: Record<string, string> = {
+export const PR_VAL_FIELD: Record<string, string> = {
   'CUTTING|BGT|PR VAL':      'cuttingBgtPrVal',
   'CUTTING|ACT|PR VAL':      'cuttingActPrVal',
   'CUTTING|VENDOR|PR VAL':   'cuttingVendorPrVal',
@@ -66,33 +66,35 @@ const CmpCostCard: React.FC<CmpCostCardProps> = ({
   const [values, setValues] = useState<Record<string, string>>({});
 
   // Initialize from saved DB values on mount / when the article changes.
+  // Only apply non-empty saved values so preset-filled cells aren't wiped when
+  // a sibling PR VAL is saved (item updates → savedPrVals recomputes with nulls for others).
   useEffect(() => {
     if (!savedPrVals) return;
-    setValues((prev) => ({ ...prev, ...savedPrVals }));
-  }, [savedPrVals]);
-
-  // Merge BGT preset — only for PR VAL cells that have no saved value yet.
-  useEffect(() => {
-    if (!bgtPreset || Object.keys(bgtPreset).length === 0) return;
     setValues((prev) => {
       const next = { ...prev };
-      for (const [k, v] of Object.entries(bgtPreset)) {
-        if (k.endsWith('|PR VAL') && !next[k]) next[k] = v;
-        else if (!k.endsWith('|PR VAL')) next[k] = v; // SAM/SAM VAL — always apply
+      for (const [k, v] of Object.entries(savedPrVals)) {
+        if (v !== '') next[k] = v;
       }
+      return next;
+    });
+  }, [savedPrVals]);
+
+  // Presets arrive already resolved by the parent: PR VALs saved in the DB win over master
+  // values, so every non-empty preset value is applied as-is.
+  useEffect(() => {
+    if (!bgtPreset) return;
+    setValues((prev) => {
+      const next = { ...prev };
+      for (const [k, v] of Object.entries(bgtPreset)) if (v !== '') next[k] = v;
       return next;
     });
   }, [bgtPreset]);
 
-  // Merge ACT preset — same rule.
   useEffect(() => {
-    if (!actPreset || Object.keys(actPreset).length === 0) return;
+    if (!actPreset) return;
     setValues((prev) => {
       const next = { ...prev };
-      for (const [k, v] of Object.entries(actPreset)) {
-        if (k.endsWith('|PR VAL') && !next[k]) next[k] = v;
-        else if (!k.endsWith('|PR VAL')) next[k] = v;
-      }
+      for (const [k, v] of Object.entries(actPreset)) if (v !== '') next[k] = v;
       return next;
     });
   }, [actPreset]);

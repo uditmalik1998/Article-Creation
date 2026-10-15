@@ -52,7 +52,7 @@ import { useDragToPan } from '@/shared/hooks/ui/useDragToPan';
 import type { ApproverItem, MasterAttribute } from './ApproverTable';
 import CostingGridCard, { BTRIM_CONFIG, VADD_CONFIG, gridFields } from './CostingGridCard';
 import PkgCostCard from './PkgCostCard';
-import CmpCostCard from './CmpCostCard';
+import CmpCostCard, { PR_VAL_FIELD } from './CmpCostCard';
 import { CARD_ACTION_BTN, CARD_THEME } from './cardTheme';
 
 // FG cards rendered as a costing grid instead of the numbered attribute list.
@@ -982,35 +982,139 @@ const ArticleCard = React.memo(
       else onSave({ ...item, ...updates } as any, updates, { silent: true });
     };
 
-    // Fetch CMP cost SAM data from precise_body_article_consumption and build the ACT preset.
-    const fetchCmpActData = (bodyArticleNumber: string) => {
-      const token = localStorage.getItem('authToken');
-      fetch(
-        `${APP_CONFIG.api.baseURL}/approver/precise-body-article/cmp-data?microBodyArticleNumber=${encodeURIComponent(bodyArticleNumber)}`,
-        { headers: { Authorization: `Bearer ${token}` } },
-      )
-        .then((r) => r.json())
-        .then((d: { found: boolean; cuttingValue: number | null; stitchingSam: number | null; samVal: number | null; ironingSam: number | null; finishingSam: number | null }) => {
-          if (!d.found) return;
-          const fmt = (v: number | null) => (v != null ? String(v) : '');
-          const stSam = d.stitchingSam ?? 0;
-          const stVal = d.samVal ?? 0;
-          const irSam = d.ironingSam ?? 0;
-          const finSam = d.finishingSam ?? 0;
-          setCmpActPreset({
-            'CUTTING|ACT|PR VAL':    fmt(d.cuttingValue),
-            'STITCHING|ACT|SAM':     fmt(d.stitchingSam),
-            'STITCHING|ACT|SAM VAL': fmt(d.samVal),
-            'STITCHING|ACT|PR VAL':  stSam && stVal ? (stSam * stVal).toFixed(4) : '',
-            'IRONING|ACT|SAM':       fmt(d.ironingSam),
-            'IRONING|ACT|SAM VAL':   '2.5',
-            'IRONING|ACT|PR VAL':    irSam ? (irSam * 2.5).toFixed(4) : '',
-            'FINISHING|ACT|SAM':     fmt(d.finishingSam),
-            'FINISHING|ACT|SAM VAL': '3',
-            'FINISHING|ACT|PR VAL':  finSam ? (finSam * 3).toFixed(4) : '',
-          });
-        })
-        .catch(() => {});
+    // `item` can be stale (the detail page restores it from navigation state on reload),
+    // so read the stage's PR VALs straight from the DB before deciding anything.
+    // Returns cell key → saved value ('' when null in DB).
+    const fetchDbPrVals = async (stage: 'BGT' | 'ACT'): Promise<Record<string, string> | null> => {
+      try {
+        const token = localStorage.getItem('authToken');
+        const r = await fetch(`${APP_CONFIG.api.baseURL}/approver/items/${item.id}`, {
+          headers: { Authorization: `Bearer ${token}` },
+        });
+        if (!r.ok) return null;
+        const fresh = await r.json();
+        const out: Record<string, string> = {};
+        for (const p of ['CUTTING', 'STITCHING', 'IRONING', 'FINISHING']) {
+          const key = `${p}|${stage}|PR VAL`;
+          const v = fresh[PR_VAL_FIELD[key]];
+          out[key] = v != null && v !== '' ? String(Number(v)) : '';
+        }
+        return out;
+      } catch {
+        return null;
+      }
+    };
+
+    // Shows DB values in the card, then fills + saves only the PR VALs that are null in the DB.
+    const applyCmpPreset = (
+      preset: Record<string, string>,
+      dbVals: Record<string, string>,
+      setPreset: (p: Record<string, string>) => void,
+    ) => {
+      const updates: Record<string, string> = {};
+      const merged = { ...preset };
+      for (const [key, dbV] of Object.entries(dbVals)) {
+        if (dbV !== '') merged[key] = dbV;
+        else if (preset[key]) updates[PR_VAL_FIELD[key]] = preset[key];
+      }
+      setPreset(merged);
+      if (Object.keys(updates).length === 0) return;
+      if (isModifyMode) setPendingChanges((prev) => ({ ...prev, ...updates }));
+      else onSave({ ...item, ...updates } as any, updates, { silent: true });
+    };
+
+    // Runs the preset API only when at least one of the stage's PR VALs is null in the DB.
+    const loadCmpStage = async (
+      stage: 'BGT' | 'ACT',
+      fetchPreset: () => Promise<Record<string, string> | null>,
+      setPreset: (p: Record<string, string>) => void,
+    ) => {
+      const dbVals = await fetchDbPrVals(stage);
+      if (!dbVals) return;
+      if (Object.values(dbVals).every((v) => v !== '')) {
+        setPreset(dbVals);
+        return;
+      }
+      const preset = await fetchPreset();
+      if (preset) applyCmpPreset(preset, dbVals, setPreset);
+    };
+
+    // ACT preset from precise_body_article_consumption (by body article).
+    const fetchCmpActPreset = async (bodyArticleNumber: string): Promise<Record<string, string> | null> => {
+      try {
+        const token = localStorage.getItem('authToken');
+        const r = await fetch(
+          `${APP_CONFIG.api.baseURL}/approver/precise-body-article/cmp-data?microBodyArticleNumber=${encodeURIComponent(bodyArticleNumber)}`,
+          { headers: { Authorization: `Bearer ${token}` } },
+        );
+        const d: { found: boolean; cuttingValue: number | null; stitchingSam: number | null; samVal: number | null; ironingSam: number | null; finishingSam: number | null } = await r.json();
+        if (!d.found) return null;
+        const fmt = (v: number | null) => (v != null ? String(v) : '');
+        const stSam = d.stitchingSam ?? 0;
+        const stVal = d.samVal ?? 0;
+        const irSam = d.ironingSam ?? 0;
+        const finSam = d.finishingSam ?? 0;
+        return {
+          'CUTTING|ACT|PR VAL':    fmt(d.cuttingValue),
+          'STITCHING|ACT|SAM':     fmt(d.stitchingSam),
+          'STITCHING|ACT|SAM VAL': fmt(d.samVal),
+          'STITCHING|ACT|PR VAL':  stSam && stVal ? (stSam * stVal).toFixed(4) : '',
+          'IRONING|ACT|SAM':       fmt(d.ironingSam),
+          'IRONING|ACT|SAM VAL':   '2.5',
+          'IRONING|ACT|PR VAL':    irSam ? (irSam * 2.5).toFixed(4) : '',
+          'FINISHING|ACT|SAM':     fmt(d.finishingSam),
+          'FINISHING|ACT|SAM VAL': '3',
+          'FINISHING|ACT|PR VAL':  finSam ? (finSam * 3).toFixed(4) : '',
+        };
+      } catch {
+        return null;
+      }
+    };
+
+    // BGT preset from rough_cmp_cost_master (by major category).
+    const fetchCmpBgtPreset = async (majCat: string): Promise<Record<string, string> | null> => {
+      try {
+        const token = localStorage.getItem('authToken');
+        const r = await fetch(
+          `${APP_CONFIG.api.baseURL}/approver/rough-cmp-cost?majorCategory=${encodeURIComponent(majCat)}`,
+          { headers: { Authorization: `Bearer ${token}` } },
+        );
+        const d: {
+          cmpCost: number | null;
+          cuttingSam: number | null; cuttingVal: number | null;
+          stitchingSam: number | null; stitchingVal: number | null;
+          ironingSam: number | null; ironingVal: number | null;
+          finishingSam: number | null; finishingVal: number | null;
+        } = await r.json();
+        if (!d.cuttingVal && !d.stitchingSam && !d.ironingSam && !d.finishingSam) return null;
+        const fmt = (v: number | null) => (v != null ? String(v) : '');
+        const rate = (val: number | null, sam: number | null) =>
+          val != null && sam != null && sam !== 0 ? (val / sam).toFixed(4) : '';
+        return {
+          'CUTTING|BGT|PR VAL':    fmt(d.cuttingVal),
+          'STITCHING|BGT|SAM':     fmt(d.stitchingSam),
+          'STITCHING|BGT|SAM VAL': rate(d.stitchingVal, d.stitchingSam),
+          'STITCHING|BGT|PR VAL':  fmt(d.stitchingVal),
+          'IRONING|BGT|SAM':       fmt(d.ironingSam),
+          'IRONING|BGT|SAM VAL':   rate(d.ironingVal, d.ironingSam),
+          'IRONING|BGT|PR VAL':    fmt(d.ironingVal),
+          'FINISHING|BGT|SAM':     fmt(d.finishingSam),
+          'FINISHING|BGT|SAM VAL': rate(d.finishingVal, d.finishingSam),
+          'FINISHING|BGT|PR VAL':  fmt(d.finishingVal),
+        };
+      } catch {
+        return null;
+      }
+    };
+
+    // User explicitly picked a new body article — its ACT values replace the saved ones.
+    const refreshCmpAct = async (bodyArticleNumber: string) => {
+      const preset = await fetchCmpActPreset(bodyArticleNumber);
+      if (!preset) return;
+      const allEmpty = Object.fromEntries(
+        ['CUTTING', 'STITCHING', 'IRONING', 'FINISHING'].map((p) => [`${p}|ACT|PR VAL`, '']),
+      );
+      applyCmpPreset(preset, allEmpty, setCmpActPreset);
     };
 
     // Auto-fill CMP ACT column when body article number is set or changes.
@@ -1020,7 +1124,7 @@ const ArticleCard = React.memo(
       if (isBodyArticle || !currentBodyArticle) return;
       if (cmpActFetchedRef.current === currentBodyArticle) return;
       cmpActFetchedRef.current = currentBodyArticle;
-      fetchCmpActData(currentBodyArticle);
+      loadCmpStage('ACT', () => fetchCmpActPreset(currentBodyArticle), setCmpActPreset);
     // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [currentBodyArticle, isBodyArticle]);
 
@@ -1031,37 +1135,7 @@ const ArticleCard = React.memo(
       if (isBodyArticle || !effectiveMajCat) return;
       if (cmpBgtFetchedRef.current === effectiveMajCat) return;
       cmpBgtFetchedRef.current = effectiveMajCat;
-      const token = localStorage.getItem('authToken');
-      fetch(
-        `${APP_CONFIG.api.baseURL}/approver/rough-cmp-cost?majorCategory=${encodeURIComponent(effectiveMajCat)}`,
-        { headers: { Authorization: `Bearer ${token}` } },
-      )
-        .then((r) => r.json())
-        .then((d: {
-          cmpCost: number | null;
-          cuttingSam: number | null; cuttingVal: number | null;
-          stitchingSam: number | null; stitchingVal: number | null;
-          ironingSam: number | null; ironingVal: number | null;
-          finishingSam: number | null; finishingVal: number | null;
-        }) => {
-          if (!d.cuttingVal && !d.stitchingSam && !d.ironingSam && !d.finishingSam) return;
-          const fmt = (v: number | null) => (v != null ? String(v) : '');
-          const rate = (val: number | null, sam: number | null) =>
-            val != null && sam != null && sam !== 0 ? (val / sam).toFixed(4) : '';
-          setCmpBgtPreset({
-            'CUTTING|BGT|PR VAL':    fmt(d.cuttingVal),
-            'STITCHING|BGT|SAM':     fmt(d.stitchingSam),
-            'STITCHING|BGT|SAM VAL': rate(d.stitchingVal, d.stitchingSam),
-            'STITCHING|BGT|PR VAL':  fmt(d.stitchingVal),
-            'IRONING|BGT|SAM':       fmt(d.ironingSam),
-            'IRONING|BGT|SAM VAL':   rate(d.ironingVal, d.ironingSam),
-            'IRONING|BGT|PR VAL':    fmt(d.ironingVal),
-            'FINISHING|BGT|SAM':     fmt(d.finishingSam),
-            'FINISHING|BGT|SAM VAL': rate(d.finishingVal, d.finishingSam),
-            'FINISHING|BGT|PR VAL':  fmt(d.finishingVal),
-          });
-        })
-        .catch(() => {});
+      loadCmpStage('BGT', () => fetchCmpBgtPreset(effectiveMajCat), setCmpBgtPreset);
       // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [isBodyArticle, effectiveMajCat]);
 
@@ -3922,7 +3996,7 @@ const ArticleCard = React.memo(
                                   setPreciseBodySearched(false);
                                   if (r.microBodyArticleNumber) {
                                     cmpActFetchedRef.current = r.microBodyArticleNumber;
-                                    fetchCmpActData(r.microBodyArticleNumber);
+                                    refreshCmpAct(r.microBodyArticleNumber);
                                   }
                                   if (isModifyMode) {
                                     setPendingChanges((prev) => ({ ...prev, ...updates }));
@@ -3957,7 +4031,7 @@ const ArticleCard = React.memo(
                                   setPreciseBodyNoSearched(false);
                                   if (r.microBodyArticleNumber) {
                                     cmpActFetchedRef.current = r.microBodyArticleNumber;
-                                    fetchCmpActData(r.microBodyArticleNumber);
+                                    refreshCmpAct(r.microBodyArticleNumber);
                                   }
                                   if (isModifyMode) {
                                     setPendingChanges((prev) => ({ ...prev, ...updates }));
