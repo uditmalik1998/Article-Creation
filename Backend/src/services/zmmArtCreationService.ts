@@ -12,6 +12,7 @@ import { SapSyncItemResult } from './sapSyncService';
 import { mapWithConcurrency } from '../utils/concurrency';
 import { PrismaClient } from '../generated/prisma';
 import { FLAT_TO_RFC } from '../data/flatToRfcMap';
+import { setMcForArticle } from './setMcMasterService';
 
 const prisma = new PrismaClient();
 
@@ -424,8 +425,22 @@ async function buildRfcPayload(
         if (mcRow?.hsnCode) payload['HSN_CODE'] = mcRow.hsnCode;
     }
 
+    // Set articles go to SAP under their S- MC from the Set MC Master: the parent
+    // under its set MC, a part under its S- MC within its set. A set article with
+    // no S- MC is never sent with a normal MC.
+    const setMc = await setMcForArticle(item);
+    if (setMc && 'error' in setMc) throw new SetMcMissingError(setMc.error);
+    if (setMc) {
+        payload['MC_CD'] = setMc.mcCode;
+        if (setMc.hsnCode) payload['HSN_CODE'] = setMc.hsnCode;
+        if (setMc.subDiv) payload['SUB_DIV'] = setMc.subDiv;
+    }
+
     return payload;
 }
+
+/** A set article (parent or part) has no S- MC in the Set MC Master. */
+export class SetMcMissingError extends Error {}
 
 /**
  * Build the patch-bulk `Changes` payload for a MODIFY operation.
@@ -615,7 +630,14 @@ export async function syncArticlesToSapViaRfc(
         }
 
         // ── 2. Build payload (filtered by card visibility: mandatory + optional grids) ──
-        const payload = await buildRfcPayload(item, mandatoryGrid, majCatVisible);
+        let payload: Record<string, string>;
+        try {
+            payload = await buildRfcPayload(item, mandatoryGrid, majCatVisible);
+        } catch (err) {
+            if (!(err instanceof SetMcMissingError)) throw err;
+            console.warn(`[ZMM_RFC] ⏭️  Skipping flat_id=${item.id} — ${err.message}`);
+            return { id: item.id, success: false, message: err.message };
+        }
 
         console.log(`\n========== [ZMM_RFC] FULL PAYLOAD for flat_id=${item.id} ==========`);
         console.log(`API URL : ${ZMM_RFC_URL}`);

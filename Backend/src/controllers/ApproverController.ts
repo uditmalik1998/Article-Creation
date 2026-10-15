@@ -20,7 +20,7 @@ import { prismaClient as prisma } from '../utils/prisma';
 import { syncGenericToVariants, addColorVariants, getSizesForMajCat, isSizeAllowed } from '../services/variantCreationService';
 import { hasVendorCode, isValidVendorCode, normalizeVendorCode } from '../utils/vendorCode';
 import { mirror360FlatUpdate } from '../utils/mirror360Flat';
-import { isComboMajorCategory } from '../config/comboMajorCategories';
+import { getSetMcIndex, setProblems } from '../services/setMcMasterService';
 import { linkComboGroupForRow, recomputeComboParent, syncSetsFromRaw, COMBO_PARENT_DERIVED_FIELDS } from '../services/comboLinkService';
 
 // Fields a client is allowed to update / modify on an article. Shared by
@@ -2800,8 +2800,8 @@ export class ApproverController {
         const { parentId } = req.params;
         const parent = await prisma.extractionResultFlat.findUnique({ where: { id: parentId } });
         if (!parent) return res.status(404).json({ error: 'Parent article not found' });
-        if (!isComboMajorCategory(parent.majorCategory)) {
-            return res.status(400).json({ error: `Major category "${parent.majorCategory ?? ''}" is not enabled for combo/set articles.` });
+        if (!(await getSetMcIndex()).isSetCategory(parent.majorCategory)) {
+            return res.status(400).json({ error: `Major category "${parent.majorCategory ?? ''}" is not an active set category in the Set MC Master.` });
         }
         if (parent.approvalStatus !== 'PENDING') {
             return res.status(400).json({ error: 'This combo article has already been submitted — cannot add more children.' });
@@ -2886,18 +2886,52 @@ export class ApproverController {
                     if (r.comboRole === 'PARENT') parentIds.add(r.id);
                     else if (r.comboParentId) parentIds.add(r.comboParentId);
                 }
+                // A set is created in SAP under the S- MCs of the Set MC Master: the
+                // parent under its set MC, each part under its S- MC within that set.
+                // Every set is checked before anything is approved.
+                const setIndex = await getSetMcIndex();
+                const setProblemList: string[] = [];
+                const setMcWrites: { id: string; mcCode: string; hsnCode: string | null }[] = [];
                 for (const parentId of parentIds) {
+                    const parent = await prisma.extractionResultFlat.findUnique({
+                        where: { id: parentId },
+                        select: { majorCategory: true, designNumber: true, approvalStatus: true },
+                    });
                     const children = await prisma.extractionResultFlat.findMany({
                         where: { comboParentId: parentId, comboRole: 'CHILD' },
-                        select: { id: true },
+                        select: { id: true, majorCategory: true, designNumber: true },
                     });
                     if (children.length === 0) {
                         return res.status(422).json({ error: 'COMBO_WITHOUT_CHILDREN', detail: 'This set article has no parts linked yet.' });
+                    }
+                    if (parent?.approvalStatus === 'PENDING') {
+                        const problems = setProblems(
+                            setIndex,
+                            parent.majorCategory,
+                            children.map((c) => ({ label: c.designNumber || c.majorCategory || c.id, majorCategory: c.majorCategory })),
+                        );
+                        if (problems.length > 0) {
+                            setProblemList.push(...problems.map((p) => `${parent.designNumber || parentId}: ${p}`));
+                        } else {
+                            const setMc = setIndex.parentMc(parent.majorCategory)!;
+                            setMcWrites.push({ id: parentId, mcCode: setMc.mcCode, hsnCode: setMc.hsnCode });
+                            for (const c of children) {
+                                const partMc = setIndex.partMc(parent.majorCategory, c.majorCategory)!;
+                                setMcWrites.push({ id: c.id, mcCode: partMc.mcCode, hsnCode: partMc.hsnCode });
+                            }
+                        }
                     }
                     await recomputeComboParent(parentId);
                     for (const id of [parentId, ...children.map((c) => c.id)]) {
                         if (!ids.includes(id)) ids.push(id);
                     }
+                }
+                if (setProblemList.length > 0) {
+                    return res.status(422).json({ error: 'SET_MC_MISSING', detail: setProblemList.join('; '), problems: setProblemList });
+                }
+                // Show the S- MC on the article itself (the SAP payload derives it again).
+                for (const w of setMcWrites) {
+                    await prisma.extractionResultFlat.update({ where: { id: w.id }, data: { mcCode: w.mcCode, hsnTaxCode: w.hsnCode } });
                 }
             }
 
@@ -2909,8 +2943,8 @@ export class ApproverController {
             // colour but its Major Category has no sizes configured, block with a
             // clear message since no variants could be created.
             const genericsToVariant = await prisma.extractionResultFlat.findMany({
-                // Set pieces (CHILD) get no variants — colour × size variants are for the whole set (the parent).
-                where: { id: { in: ids }, isGeneric: true, comboRole: { not: 'CHILD' } },
+                // Set parents and set parts both get colour × size variants (each from its own category's sizes).
+                where: { id: { in: ids }, isGeneric: true },
                 select: { id: true, colour: true, majorCategory: true, articleNumber: true, imageName: true },
             });
             for (const g of genericsToVariant) {
@@ -3011,7 +3045,7 @@ export class ApproverController {
             if (approvedGenericIds.length > 0) {
                 prisma.extractionResultFlat.findMany({
                     where: { id: { in: approvedGenericIds } },
-                    select: { id: true, majorCategory: true, ...Object.fromEntries(FLAT_TO_RFC.map((m) => [m.flat, true])) } as any,
+                    select: { id: true, majorCategory: true, comboRole: true, comboParentId: true, ...Object.fromEntries(FLAT_TO_RFC.map((m) => [m.flat, true])) } as any,
                 })
                     .then((rows) => previewRfcPayloads(rows as any))
                     .catch((e: any) => console.error('[ZMM_RFC preview] failed:', e?.message));
@@ -3073,6 +3107,8 @@ export class ApproverController {
                     colour: true, variantSize: true, variantColor: true,
                     attrArticleNums: true, source: true, createdAt: true,
                     srmUniqueId: true,
+                    // set articles: buildRfcPayload sends their S- MC (Set MC Master)
+                    comboRole: true, comboParentId: true,
                     approver: { select: { name: true } },
                 }
             });

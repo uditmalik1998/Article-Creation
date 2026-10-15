@@ -12,7 +12,7 @@
  */
 
 import { prismaClient as prisma } from '../src/utils/prisma';
-import { isComboMajorCategory, COMBO_MAJOR_CATEGORIES } from '../src/config/comboMajorCategories';
+import { getSetMcIndex } from '../src/services/setMcMasterService';
 import { linkComboGroup } from '../src/services/comboLinkService';
 
 const isDryRun = process.argv.includes('--dry-run');
@@ -21,17 +21,18 @@ const dropTemplateChildren = process.argv.includes('--drop-template-children');
 async function run() {
     console.log(`🔗 Backfill combo links (dry run: ${isDryRun ? 'yes' : 'no'})`);
 
+    const setIndex = await getSetMcIndex();
     const candidates = await prisma.extractionResultFlat.findMany({
         where: {
             isGeneric: true,
             approvalStatus: 'PENDING',
             pptNumber: { not: null },
             srmOriginalDesignNumber: { not: null },
-            OR: COMBO_MAJOR_CATEGORIES.map((c) => ({ majorCategory: { contains: c, mode: 'insensitive' as const } })),
+            majorCategory: { in: setIndex.setCategories(), mode: 'insensitive' },
         },
         select: { id: true, pptNumber: true, srmOriginalDesignNumber: true, majorCategory: true },
     });
-    const parents = candidates.filter((c) => isComboMajorCategory(c.majorCategory));
+    const parents = candidates.filter((c) => setIndex.isSetCategory(c.majorCategory));
     console.log(`Found ${parents.length} candidate set article(s)`);
 
     if (dropTemplateChildren) {

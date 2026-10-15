@@ -59,7 +59,6 @@ export async function createVariantsForGeneric(genericId: string): Promise<void>
     const generic = await prisma.extractionResultFlat.findUnique({ where: { id: genericId } });
     if (!generic || !generic.majorCategory) return;
     if (!generic.isGeneric) return;
-    if (generic.comboRole === 'CHILD') return; // set pieces never get variants
 
     const sizes = await getSizesForMajCat(generic.majorCategory);
     if (sizes.length === 0) {
@@ -123,8 +122,7 @@ export async function addColorVariants(
 ): Promise<number> {
   const generic = await prisma.extractionResultFlat.findUnique({ where: { id: genericId } });
   if (!generic) return 0;
-  // Set pieces (children) never get variants — only the parent set does.
-  if (generic.comboRole === 'CHILD') return 0;
+  // Set parts get variants too, from their own category's sizes.
 
   if (!generic.majorCategory) throw new Error('No Major Category found on this article — cannot create variants.');
   const allowedSizes = await getSizesForMajCat(generic.majorCategory);

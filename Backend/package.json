@@ -13,6 +13,7 @@
     "lint": "tsc --noEmit",
     "test:handoff": "node --require ts-node/register/transpile-only --test tests/poWiseHandoffService.test.ts",
     "test:grid-contribution": "node --require ts-node/register/transpile-only --test tests/gridContributionService.test.ts",
+    "test:set-mc": "node --require ts-node/register/transpile-only --test tests/setMcMasterService.test.ts",
     "clean": "rm -rf dist",
     "db:generate": "prisma generate",
     "db:push": "prisma db push",

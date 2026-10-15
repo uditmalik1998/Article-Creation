@@ -54,7 +54,6 @@ import {
 } from '../../../services/articleConfigService';
 import { formatDivisionLabel } from '../../../shared/utils/ui/formatters';
 import { variantCreatingIds } from '../../fabric-article/variantCreationState';
-import { isComboMajorCategory } from '../../../data/comboMajorCategories';
 
 // ─── History field display labels (camelCase → human label) ──────────────────
 const FIELD_LABELS: Record<string, string> = {
@@ -427,6 +426,16 @@ export default function ArticleDetailPage({
       .then(r => r.json()).then(data => { if (Array.isArray(data)) setAttributes(data); }).catch(() => {});
   }, []);
 
+  // Active set categories of the Set MC Master (a set's own photo before it is linked as PARENT).
+  const [setCategories, setSetCategories] = useState<Set<string>>(new Set());
+  useEffect(() => {
+    const token = localStorage.getItem('authToken');
+    fetch(`${APP_CONFIG.api.baseURL}/approver/set-categories`, { headers: { Authorization: `Bearer ${token}` } })
+      .then(r => r.json())
+      .then(res => { if (Array.isArray(res?.data)) setSetCategories(new Set(res.data as string[])); })
+      .catch(() => {});
+  }, []);
+
   // Fetch by ID when opened directly (no navigation state)
   useEffect(() => {
     if (navState?.items?.length) { setLoadingItem(false); return; }
@@ -470,7 +479,8 @@ export default function ArticleDetailPage({
   const batchSize = items.length;
   const isFirstArticle = currentIndex === 0;
   const isLastArticle = currentIndex >= items.length - 1;
-  const isComboItem = currentItem?.comboRole === 'PARENT' || isComboMajorCategory(currentItem?.majorCategory);
+  const isComboItem = currentItem?.comboRole === 'PARENT'
+    || setCategories.has((currentItem?.majorCategory ?? '').trim().toUpperCase());
 
   function getBasePath() {
     if (pathType === 'old') return `${baseRoute}/old-articles`;

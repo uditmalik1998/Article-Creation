@@ -10,7 +10,7 @@
  */
 import { Prisma } from '../generated/prisma';
 import { prismaClient as prisma } from '../utils/prisma';
-import { isComboMajorCategory } from '../config/comboMajorCategories';
+import { getSetMcIndex } from './setMcMasterService';
 import { sortComboChildren } from '../config/comboChildTemplates';
 import { ARTICLE_DESCRIPTION_SOURCE_FIELDS, buildArticleDescription } from '../utils/articleDescriptionBuilder';
 import { getExcludedDescriptionFields } from '../utils/categoryFieldVisibility';
@@ -70,7 +70,8 @@ export async function linkComboGroup(pptNumber?: string | null, designNumber?: s
         select: { id: true, majorCategory: true, createdAt: true, comboRole: true, comboParentId: true, comboChildOrder: true, approvalStatus: true, setRole: true },
     });
 
-    const parents = rows.filter((r) => isComboMajorCategory(r.majorCategory));
+    const setIndex = await getSetMcIndex();
+    const parents = rows.filter((r) => setIndex.isSetCategory(r.majorCategory));
     if (parents.length !== 1) {
         if (parents.length > 1) console.warn(`[Combo] ${pptNumber}/${designNumber}: ${parents.length} set rows — ambiguous, not linking`);
         return null;
@@ -87,6 +88,12 @@ async function linkSetGroup(pptNumber: string, setGroupId: string): Promise<stri
     const parents = rows.filter((r) => r.setRole === 'PARENT');
     if (parents.length !== 1) {
         console.warn(`[Combo] ${pptNumber}/set ${setGroupId}: ${parents.length} PARENT photo(s) — need exactly one, not linking`);
+        return null;
+    }
+    // Only an ACT set category of the Set MC Master is a set; anything else
+    // (e.g. a deactivated category) stays as normal articles.
+    if (parents[0].approvalStatus === 'PENDING' && !(await getSetMcIndex()).isSetCategory(parents[0].majorCategory)) {
+        console.warn(`[Combo] ${pptNumber}/set ${setGroupId}: ${parents[0].majorCategory ?? '(no category)'} is not an active set category — not linking`);
         return null;
     }
     return applyComboLinks(`${pptNumber}/set ${setGroupId}`, parents[0], rows.filter((r) => r.id !== parents[0].id));
