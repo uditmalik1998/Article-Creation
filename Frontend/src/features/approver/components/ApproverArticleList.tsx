@@ -631,6 +631,7 @@ const ArticleCard = React.memo(
     const [fabNoLoading, setFabNoLoading] = useState(false);
     const [cmpActPreset, setCmpActPreset] = useState<Record<string, string>>({});
     const [cmpBgtPreset, setCmpBgtPreset] = useState<Record<string, string>>({});
+    const [cmpPresetUnsaved, setCmpPresetUnsaved] = useState(false);
     const cmpSavedPrVals = useMemo<Record<string, string>>(() => {
       const fmt = (v: unknown) => (v != null && v !== '' ? String(v) : '');
       return {
@@ -1013,22 +1014,21 @@ const ArticleCard = React.memo(
       }
     };
 
-    // Shows DB values in the card, then fills + saves only the PR VALs that are null in the DB.
+    // Shows DB values in the card and fills only the PR VALs that are null in the DB.
+    // Nothing is saved here — filled values wait for the card's Save button.
     const applyCmpPreset = (
       preset: Record<string, string>,
       dbVals: Record<string, string>,
       setPreset: (p: Record<string, string>) => void,
     ) => {
-      const updates: Record<string, string> = {};
+      let filled = false;
       const merged = { ...preset };
       for (const [key, dbV] of Object.entries(dbVals)) {
         if (dbV !== '') merged[key] = dbV;
-        else if (preset[key]) updates[PR_VAL_FIELD[key]] = preset[key];
+        else if (preset[key]) filled = true;
       }
       setPreset(merged);
-      if (Object.keys(updates).length === 0) return;
-      if (isModifyMode) setPendingChanges((prev) => ({ ...prev, ...updates }));
-      else onSave({ ...item, ...updates } as any, updates, { silent: true });
+      if (filled) setCmpPresetUnsaved(true);
     };
 
     // Runs the preset API only when at least one of the stage's PR VALs is null in the DB.
@@ -4643,13 +4643,12 @@ const ArticleCard = React.memo(
                       bgtPreset={cmpBgtPreset}
                       actPreset={cmpActPreset}
                       savedPrVals={cmpSavedPrVals}
-                      onPrValChange={(field, value) => {
-                        const updates = { [field]: value };
-                        if (isModifyMode) {
-                          setPendingChanges((prev) => ({ ...prev, ...updates }));
-                        } else {
-                          onSave({ ...item, ...updates } as any, updates);
-                        }
+                      hasUnsavedPreset={cmpPresetUnsaved}
+                      onSave={(updates) => {
+                        setLocalValues((prev) => ({ ...prev, ...updates }));
+                        if (isModifyMode) setPendingChanges((prev) => ({ ...prev, ...updates }));
+                        else onSave({ ...item, ...updates } as any, updates);
+                        setCmpPresetUnsaved(false);
                       }}
                     />
                   )}
