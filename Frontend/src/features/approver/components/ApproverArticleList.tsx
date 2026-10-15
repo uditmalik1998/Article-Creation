@@ -1318,7 +1318,8 @@ const ArticleCard = React.memo(
       const bodyArticleNo = String(
         (localValues['bodyArticle'] !== undefined ? localValues['bodyArticle'] : (item as any).bodyArticle) ?? '',
       ).trim();
-      const preciseUrl = new URL(`${APP_CONFIG.api.baseURL}/approver/precise-body-article/by-width`);
+      // Base is needed in production, where baseURL is the relative '/api'.
+      const preciseUrl = new URL(`${APP_CONFIG.api.baseURL}/approver/precise-body-article/by-width`, window.location.origin);
       preciseUrl.searchParams.set('majorCategory', effectiveMajCat);
       preciseUrl.searchParams.set('fabWidth', currentFWidth);
       if (bodyArticleNo) preciseUrl.searchParams.set('microBodyArticleNumber', bodyArticleNo);
@@ -3340,12 +3341,12 @@ const ArticleCard = React.memo(
                             .filter((a) => !gridCfg.fields.has(a.field) && !FG_CARD_HIDDEN_SCHEMA_KEYS.has(a.schemaKey))
                             .map((a) => renderAttributeRow(a))}
                           enablePreciseTrimLookup={g.group === 'VA ACC.'}
-                          loadSavedRecord={g.group === 'VA ACC.' ? loadFreshItem : undefined}
-                          onSaveTab={g.group === 'VA ACC.' ? (updates) => {
+                          loadSavedRecord={loadFreshItem}
+                          onSaveTab={(updates) => {
                             setLocalValues((prev) => ({ ...prev, ...updates }));
                             if (isModifyMode) setPendingChanges((prev) => ({ ...prev, ...updates }));
                             else onSave({ ...item, ...updates } as any, updates);
-                          } : undefined}
+                          }}
                         />
                       );
                     }
@@ -4640,6 +4641,12 @@ const ArticleCard = React.memo(
                       collapsed={isGroupCollapsed('PKG')}
                       onToggleCollapse={() => toggleGroupCollapse('PKG')}
                       locked={isLocked}
+                      loadSavedRecord={loadFreshItem}
+                      onSaveTab={(updates) => {
+                        setLocalValues((prev) => ({ ...prev, ...updates }));
+                        if (isModifyMode) setPendingChanges((prev) => ({ ...prev, ...updates }));
+                        else onSave({ ...item, ...updates } as any, updates);
+                      }}
                     />
                   )}
 

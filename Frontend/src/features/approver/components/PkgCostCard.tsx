@@ -1,5 +1,5 @@
-import React, { useState } from 'react';
-import { ChevronDown, ChevronUp, Package } from 'lucide-react';
+import React, { useEffect, useState } from 'react';
+import { ChevronDown, ChevronUp, Package, Save } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { TextCell } from './CostingGridCard';
 import { CARD_THEME } from './cardTheme';
@@ -7,46 +7,97 @@ import { CARD_THEME } from './cardTheme';
 // ─── PKG COST card (FG articles) ──────────────────────────────────────────────
 // PKG-1 / PKG-2 tabs, each a table of
 //   MAT. DESC | ARTICLE NO | ARTICLE DESC | NET RATE
-// with fixed material rows. No SAP attribute backs these cells, so every
-// value is UI-only local state for now — nothing is written to the DB.
+// with fixed material rows. The Save button stores the current tab's NET RATEs
+// and the tab itself (pkgCostType) in extraction_results_flat. On load the saved
+// tab opens with its DB rates; the other tab shows the default rates.
+// ARTICLE NO / ARTICLE DESC are UI-only.
 
 const TABS = ['PKG-1', 'PKG-2'] as const;
-const ROWS = ['BOPP', 'CTN', 'BARCODE', 'KIMBLE', 'TAG', 'THREAD'] as const;
+const ROWS = ['BOPP', 'CTN', 'BARCODE', 'KIMBLE', 'TAFTA', 'THREAD'] as const;
+type Row = typeof ROWS[number];
 type Col = 'artNo' | 'artDesc' | 'rate';
+type LocalState = Record<string, Record<string, Partial<Record<Col, string>>>>;
 
-// Default NET RATE per tab per material row.
-const DEFAULT_RATES: Record<typeof TABS[number], Record<typeof ROWS[number], string>> = {
-  'PKG-1': { BOPP: '1.1', CTN: '2', BARCODE: '1', KIMBLE: '0.5', TAG: '1.5', THREAD: '3' },
-  'PKG-2': { BOPP: '1.45', CTN: '26', BARCODE: '1.3', KIMBLE: '0.65', TAG: '1.95', THREAD: '3.9' },
+const RATE_FIELD: Record<Row, string> = {
+  BOPP: 'boppNetPrice',
+  CTN: 'ctnNetPrice',
+  BARCODE: 'barcodeNetPrice',
+  KIMBLE: 'kimbleNetPrice',
+  TAFTA: 'taftaNetPrice',
+  THREAD: 'threadNetPrice',
 };
 
-const INITIAL_LOCAL: Record<string, Record<string, Partial<Record<Col, string>>>> = {
+// Default NET RATE per tab per material row.
+const DEFAULT_RATES: Record<typeof TABS[number], Record<Row, string>> = {
+  'PKG-1': { BOPP: '1.1', CTN: '2', BARCODE: '1', KIMBLE: '0.5', TAFTA: '1.5', THREAD: '3' },
+  'PKG-2': { BOPP: '1.45', CTN: '26', BARCODE: '1.3', KIMBLE: '0.65', TAFTA: '1.95', THREAD: '3.9' },
+};
+
+const INITIAL_LOCAL: LocalState = {
   'PKG-1': Object.fromEntries(ROWS.map((r) => [r, { rate: DEFAULT_RATES['PKG-1'][r] }])),
   'PKG-2': Object.fromEntries(ROWS.map((r) => [r, { rate: DEFAULT_RATES['PKG-2'][r] }])),
 };
 
 const GRID = 'grid grid-cols-[150px_minmax(0,1fr)_minmax(0,2fr)_120px]';
 
-
 interface PkgCostCardProps {
   collapsed: boolean;
   onToggleCollapse: () => void;
   /** Read-only article (approved/rejected outside modify mode). */
   locked: boolean;
+  /** Reads the article fresh from the DB (the parent's copy can be stale). */
+  loadSavedRecord?: () => Promise<Record<string, unknown> | null>;
+  /** Save button: persists the current tab's net prices + pkgCostType. */
+  onSaveTab?: (updates: Record<string, string | null>) => void;
 }
 
-const PkgCostCard: React.FC<PkgCostCardProps> = ({ collapsed, onToggleCollapse, locked }) => {
+const PkgCostCard: React.FC<PkgCostCardProps> = ({ collapsed, onToggleCollapse, locked, loadSavedRecord, onSaveTab }) => {
   const style = CARD_THEME;
   const [tab, setTab] = useState<string>(TABS[0]);
-  // UI-only values: local[tab][row][col]
-  const [local, setLocal] = useState<Record<string, Record<string, Partial<Record<Col, string>>>>>(INITIAL_LOCAL);
+  const [local, setLocal] = useState<LocalState>(INITIAL_LOCAL);
+  const [dirty, setDirty] = useState(false);
+  const [savedTab, setSavedTab] = useState<string | null>(null);
+
+  useEffect(() => {
+    if (!loadSavedRecord) return;
+    let cancelled = false;
+    loadSavedRecord().then((rec) => {
+      if (!rec || cancelled) return;
+      const t = String(rec.pkgCostType ?? '').trim();
+      if (!(TABS as readonly string[]).includes(t)) return;
+      setTab(t);
+      setSavedTab(t);
+      setLocal((prev) => ({
+        ...prev,
+        [t]: Object.fromEntries(
+          ROWS.map((r) => {
+            const v = rec[RATE_FIELD[r]];
+            return [r, { ...prev[t]?.[r], rate: v == null || v === '' ? '' : String(Number(v)) }];
+          }),
+        ),
+      }));
+    });
+    return () => { cancelled = true; };
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   const val = (row: string, col: Col) => local[tab]?.[row]?.[col] ?? '';
-  const setVal = (row: string, col: Col, v: string) =>
+  const setVal = (row: string, col: Col, v: string) => {
     setLocal((prev) => ({
       ...prev,
       [tab]: { ...prev[tab], [row]: { ...prev[tab]?.[row], [col]: v } },
     }));
+    if (col === 'rate') setDirty(true);
+  };
+
+  const handleSave = () => {
+    if (!onSaveTab) return;
+    const updates: Record<string, string | null> = { pkgCostType: tab };
+    for (const r of ROWS) updates[RATE_FIELD[r]] = val(r, 'rate') || null;
+    onSaveTab(updates);
+    setSavedTab(tab);
+    setDirty(false);
+  };
 
   const total = ROWS.reduce((sum, r) => sum + (parseFloat(val(r, 'rate')) || 0), 0);
 
@@ -69,26 +120,57 @@ const PkgCostCard: React.FC<PkgCostCardProps> = ({ collapsed, onToggleCollapse, 
           )}
         </button>
         {!collapsed && (
-          <div role="tablist" className="flex gap-1 px-2">
-            {TABS.map((t) => {
-              const active = tab === t;
-              return (
+          <div className="flex items-end justify-between gap-2 px-2">
+            <div role="tablist" className="flex gap-1">
+              {TABS.map((t) => {
+                const active = tab === t;
+                return (
+                  <button
+                    key={t}
+                    type="button"
+                    role="tab"
+                    aria-selected={active}
+                    onClick={() => setTab(t)}
+                    className={cn(
+                      'flex h-8 items-center gap-1.5 px-3 text-[11.5px] font-bold tracking-wide transition-colors',
+                      active ? 'rounded-t-md bg-white text-slate-900 shadow-[inset_0_-2px_0_#1e293b]' : 'opacity-80 hover:opacity-100',
+                    )}
+                    style={active ? undefined : { color: style.fg }}
+                  >
+                    {t}
+                    {savedTab === t && (
+                      <span
+                        className={cn(
+                          'rounded px-1 py-px text-[9px] font-semibold tracking-wider',
+                          active ? 'bg-slate-200 text-slate-700' : 'bg-white/20',
+                        )}
+                        title="This tab's values are the ones saved"
+                      >
+                        SAVED
+                      </span>
+                    )}
+                  </button>
+                );
+              })}
+            </div>
+            {onSaveTab && (
+              <div className="flex items-center gap-2 pb-1">
+                {dirty && (
+                  <span className="text-[10.5px] font-medium" style={{ color: style.fg, opacity: 0.8 }}>
+                    Unsaved changes
+                  </span>
+                )}
                 <button
-                  key={t}
                   type="button"
-                  role="tab"
-                  aria-selected={active}
-                  onClick={() => setTab(t)}
-                  className={cn(
-                    'flex h-8 items-center px-3 text-[11.5px] font-bold tracking-wide transition-colors',
-                    active ? 'rounded-t-md bg-white text-slate-900 shadow-[inset_0_-2px_0_#1e293b]' : 'opacity-80 hover:opacity-100',
-                  )}
-                  style={active ? undefined : { color: style.fg }}
+                  onClick={handleSave}
+                  disabled={locked}
+                  className="flex h-7 items-center gap-1.5 rounded-md bg-white px-3 text-[11.5px] font-bold text-slate-900 transition-colors hover:bg-slate-100 disabled:cursor-not-allowed disabled:opacity-50"
                 >
-                  {t}
+                  <Save className="h-3.5 w-3.5" />
+                  Save {tab}
                 </button>
-              );
-            })}
+              </div>
+            )}
           </div>
         )}
       </div>

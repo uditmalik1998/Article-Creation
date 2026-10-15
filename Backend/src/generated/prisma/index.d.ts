@@ -17436,6 +17436,24 @@ export namespace Prisma {
     hTrfRoughV2: Decimal | null
     hTrfVdrCost: Decimal | null
     hTrfFinalCost: Decimal | null
+    printAutoBgt: Decimal | null
+    printRoughV2: Decimal | null
+    printVendorCost: Decimal | null
+    printFinalCost: Decimal | null
+    embAutoBgt: Decimal | null
+    embRoughV2: Decimal | null
+    embVendorCost: Decimal | null
+    embFinalCost: Decimal | null
+    washingAutoBgt: Decimal | null
+    washingRoughV2: Decimal | null
+    washingVendorCost: Decimal | null
+    washingFinalCost: Decimal | null
+    boppNetPrice: Decimal | null
+    ctnNetPrice: Decimal | null
+    barcodeNetPrice: Decimal | null
+    kimbleNetPrice: Decimal | null
+    taftaNetPrice: Decimal | null
+    threadNetPrice: Decimal | null
     mrp: Decimal | null
     approvedBy: number | null
     comboChildOrder: number | null
@@ -17498,6 +17516,24 @@ export namespace Prisma {
     hTrfRoughV2: Decimal | null
     hTrfVdrCost: Decimal | null
     hTrfFinalCost: Decimal | null
+    printAutoBgt: Decimal | null
+    printRoughV2: Decimal | null
+    printVendorCost: Decimal | null
+    printFinalCost: Decimal | null
+    embAutoBgt: Decimal | null
+    embRoughV2: Decimal | null
+    embVendorCost: Decimal | null
+    embFinalCost: Decimal | null
+    washingAutoBgt: Decimal | null
+    washingRoughV2: Decimal | null
+    washingVendorCost: Decimal | null
+    washingFinalCost: Decimal | null
+    boppNetPrice: Decimal | null
+    ctnNetPrice: Decimal | null
+    barcodeNetPrice: Decimal | null
+    kimbleNetPrice: Decimal | null
+    taftaNetPrice: Decimal | null
+    threadNetPrice: Decimal | null
     mrp: Decimal | null
     approvedBy: number | null
     comboChildOrder: number | null
@@ -17646,6 +17682,25 @@ export namespace Prisma {
     hTrfRoughV2: Decimal | null
     hTrfVdrCost: Decimal | null
     hTrfFinalCost: Decimal | null
+    printAutoBgt: Decimal | null
+    printRoughV2: Decimal | null
+    printVendorCost: Decimal | null
+    printFinalCost: Decimal | null
+    embAutoBgt: Decimal | null
+    embRoughV2: Decimal | null
+    embVendorCost: Decimal | null
+    embFinalCost: Decimal | null
+    washingAutoBgt: Decimal | null
+    washingRoughV2: Decimal | null
+    washingVendorCost: Decimal | null
+    washingFinalCost: Decimal | null
+    pkgCostType: string | null
+    boppNetPrice: Decimal | null
+    ctnNetPrice: Decimal | null
+    barcodeNetPrice: Decimal | null
+    kimbleNetPrice: Decimal | null
+    taftaNetPrice: Decimal | null
+    threadNetPrice: Decimal | null
     bodyArticle: string | null
     bodyArticleDescription: string | null
     fabricArticleNumber: string | null
@@ -17833,6 +17888,25 @@ export namespace Prisma {
     hTrfRoughV2: Decimal | null
     hTrfVdrCost: Decimal | null
     hTrfFinalCost: Decimal | null
+    printAutoBgt: Decimal | null
+    printRoughV2: Decimal | null
+    printVendorCost: Decimal | null
+    printFinalCost: Decimal | null
+    embAutoBgt: Decimal | null
+    embRoughV2: Decimal | null
+    embVendorCost: Decimal | null
+    embFinalCost: Decimal | null
+    washingAutoBgt: Decimal | null
+    washingRoughV2: Decimal | null
+    washingVendorCost: Decimal | null
+    washingFinalCost: Decimal | null
+    pkgCostType: string | null
+    boppNetPrice: Decimal | null
+    ctnNetPrice: Decimal | null
+    barcodeNetPrice: Decimal | null
+    kimbleNetPrice: Decimal | null
+    taftaNetPrice: Decimal | null
+    threadNetPrice: Decimal | null
     bodyArticle: string | null
     bodyArticleDescription: string | null
     fabricArticleNumber: string | null
@@ -18020,6 +18094,25 @@ export namespace Prisma {
     hTrfRoughV2: number
     hTrfVdrCost: number
     hTrfFinalCost: number
+    printAutoBgt: number
+    printRoughV2: number
+    printVendorCost: number
+    printFinalCost: number
+    embAutoBgt: number
+    embRoughV2: number
+    embVendorCost: number
+    embFinalCost: number
+    washingAutoBgt: number
+    washingRoughV2: number
+    washingVendorCost: number
+    washingFinalCost: number
+    pkgCostType: number
+    boppNetPrice: number
+    ctnNetPrice: number
+    barcodeNetPrice: number
+    kimbleNetPrice: number
+    taftaNetPrice: number
+    threadNetPrice: number
     bodyArticle: number
     bodyArticleDescription: number
     fabricArticleNumber: number
@@ -18124,6 +18217,24 @@ export namespace Prisma {
     hTrfRoughV2?: true
     hTrfVdrCost?: true
     hTrfFinalCost?: true
+    printAutoBgt?: true
+    printRoughV2?: true
+    printVendorCost?: true
+    printFinalCost?: true
+    embAutoBgt?: true
+    embRoughV2?: true
+    embVendorCost?: true
+    embFinalCost?: true
+    washingAutoBgt?: true
+    washingRoughV2?: true
+    washingVendorCost?: true
+    washingFinalCost?: true
+    boppNetPrice?: true
+    ctnNetPrice?: true
+    barcodeNetPrice?: true
+    kimbleNetPrice?: true
+    taftaNetPrice?: true
+    threadNetPrice?: true
     mrp?: true
     approvedBy?: true
     comboChildOrder?: true
@@ -18186,6 +18297,24 @@ export namespace Prisma {
     hTrfRoughV2?: true
     hTrfVdrCost?: true
     hTrfFinalCost?: true
+    printAutoBgt?: true
+    printRoughV2?: true
+    printVendorCost?: true
+    printFinalCost?: true
+    embAutoBgt?: true
+    embRoughV2?: true
+    embVendorCost?: true
+    embFinalCost?: true
+    washingAutoBgt?: true
+    washingRoughV2?: true
+    washingVendorCost?: true
+    washingFinalCost?: true
+    boppNetPrice?: true
+    ctnNetPrice?: true
+    barcodeNetPrice?: true
+    kimbleNetPrice?: true
+    taftaNetPrice?: true
+    threadNetPrice?: true
     mrp?: true
     approvedBy?: true
     comboChildOrder?: true
@@ -18334,6 +18463,25 @@ export namespace Prisma {
     hTrfRoughV2?: true
     hTrfVdrCost?: true
     hTrfFinalCost?: true
+    printAutoBgt?: true
+    printRoughV2?: true
+    printVendorCost?: true
+    printFinalCost?: true
+    embAutoBgt?: true
+    embRoughV2?: true
+    embVendorCost?: true
+    embFinalCost?: true
+    washingAutoBgt?: true
+    washingRoughV2?: true
+    washingVendorCost?: true
+    washingFinalCost?: true
+    pkgCostType?: true
+    boppNetPrice?: true
+    ctnNetPrice?: true
+    barcodeNetPrice?: true
+    kimbleNetPrice?: true
+    taftaNetPrice?: true
+    threadNetPrice?: true
     bodyArticle?: true
     bodyArticleDescription?: true
     fabricArticleNumber?: true
@@ -18521,6 +18669,25 @@ export namespace Prisma {
     hTrfRoughV2?: true
     hTrfVdrCost?: true
     hTrfFinalCost?: true
+    printAutoBgt?: true
+    printRoughV2?: true
+    printVendorCost?: true
+    printFinalCost?: true
+    embAutoBgt?: true
+    embRoughV2?: true
+    embVendorCost?: true
+    embFinalCost?: true
+    washingAutoBgt?: true
+    washingRoughV2?: true
+    washingVendorCost?: true
+    washingFinalCost?: true
+    pkgCostType?: true
+    boppNetPrice?: true
+    ctnNetPrice?: true
+    barcodeNetPrice?: true
+    kimbleNetPrice?: true
+    taftaNetPrice?: true
+    threadNetPrice?: true
     bodyArticle?: true
     bodyArticleDescription?: true
     fabricArticleNumber?: true
@@ -18708,6 +18875,25 @@ export namespace Prisma {
     hTrfRoughV2?: true
     hTrfVdrCost?: true
     hTrfFinalCost?: true
+    printAutoBgt?: true
+    printRoughV2?: true
+    printVendorCost?: true
+    printFinalCost?: true
+    embAutoBgt?: true
+    embRoughV2?: true
+    embVendorCost?: true
+    embFinalCost?: true
+    washingAutoBgt?: true
+    washingRoughV2?: true
+    washingVendorCost?: true
+    washingFinalCost?: true
+    pkgCostType?: true
+    boppNetPrice?: true
+    ctnNetPrice?: true
+    barcodeNetPrice?: true
+    kimbleNetPrice?: true
+    taftaNetPrice?: true
+    threadNetPrice?: true
     bodyArticle?: true
     bodyArticleDescription?: true
     fabricArticleNumber?: true
@@ -18983,6 +19169,25 @@ export namespace Prisma {
     hTrfRoughV2: Decimal | null
     hTrfVdrCost: Decimal | null
     hTrfFinalCost: Decimal | null
+    printAutoBgt: Decimal | null
+    printRoughV2: Decimal | null
+    printVendorCost: Decimal | null
+    printFinalCost: Decimal | null
+    embAutoBgt: Decimal | null
+    embRoughV2: Decimal | null
+    embVendorCost: Decimal | null
+    embFinalCost: Decimal | null
+    washingAutoBgt: Decimal | null
+    washingRoughV2: Decimal | null
+    washingVendorCost: Decimal | null
+    washingFinalCost: Decimal | null
+    pkgCostType: string | null
+    boppNetPrice: Decimal | null
+    ctnNetPrice: Decimal | null
+    barcodeNetPrice: Decimal | null
+    kimbleNetPrice: Decimal | null
+    taftaNetPrice: Decimal | null
+    threadNetPrice: Decimal | null
     bodyArticle: string | null
     bodyArticleDescription: string | null
     fabricArticleNumber: string | null
@@ -19190,6 +19395,25 @@ export namespace Prisma {
     hTrfRoughV2?: boolean
     hTrfVdrCost?: boolean
     hTrfFinalCost?: boolean
+    printAutoBgt?: boolean
+    printRoughV2?: boolean
+    printVendorCost?: boolean
+    printFinalCost?: boolean
+    embAutoBgt?: boolean
+    embRoughV2?: boolean
+    embVendorCost?: boolean
+    embFinalCost?: boolean
+    washingAutoBgt?: boolean
+    washingRoughV2?: boolean
+    washingVendorCost?: boolean
+    washingFinalCost?: boolean
+    pkgCostType?: boolean
+    boppNetPrice?: boolean
+    ctnNetPrice?: boolean
+    barcodeNetPrice?: boolean
+    kimbleNetPrice?: boolean
+    taftaNetPrice?: boolean
+    threadNetPrice?: boolean
     bodyArticle?: boolean
     bodyArticleDescription?: boolean
     fabricArticleNumber?: boolean
@@ -19384,6 +19608,25 @@ export namespace Prisma {
     hTrfRoughV2?: boolean
     hTrfVdrCost?: boolean
     hTrfFinalCost?: boolean
+    printAutoBgt?: boolean
+    printRoughV2?: boolean
+    printVendorCost?: boolean
+    printFinalCost?: boolean
+    embAutoBgt?: boolean
+    embRoughV2?: boolean
+    embVendorCost?: boolean
+    embFinalCost?: boolean
+    washingAutoBgt?: boolean
+    washingRoughV2?: boolean
+    washingVendorCost?: boolean
+    washingFinalCost?: boolean
+    pkgCostType?: boolean
+    boppNetPrice?: boolean
+    ctnNetPrice?: boolean
+    barcodeNetPrice?: boolean
+    kimbleNetPrice?: boolean
+    taftaNetPrice?: boolean
+    threadNetPrice?: boolean
     bodyArticle?: boolean
     bodyArticleDescription?: boolean
     fabricArticleNumber?: boolean
@@ -19575,6 +19818,25 @@ export namespace Prisma {
     hTrfRoughV2?: boolean
     hTrfVdrCost?: boolean
     hTrfFinalCost?: boolean
+    printAutoBgt?: boolean
+    printRoughV2?: boolean
+    printVendorCost?: boolean
+    printFinalCost?: boolean
+    embAutoBgt?: boolean
+    embRoughV2?: boolean
+    embVendorCost?: boolean
+    embFinalCost?: boolean
+    washingAutoBgt?: boolean
+    washingRoughV2?: boolean
+    washingVendorCost?: boolean
+    washingFinalCost?: boolean
+    pkgCostType?: boolean
+    boppNetPrice?: boolean
+    ctnNetPrice?: boolean
+    barcodeNetPrice?: boolean
+    kimbleNetPrice?: boolean
+    taftaNetPrice?: boolean
+    threadNetPrice?: boolean
     bodyArticle?: boolean
     bodyArticleDescription?: boolean
     fabricArticleNumber?: boolean
@@ -19766,6 +20028,25 @@ export namespace Prisma {
     hTrfRoughV2?: boolean
     hTrfVdrCost?: boolean
     hTrfFinalCost?: boolean
+    printAutoBgt?: boolean
+    printRoughV2?: boolean
+    printVendorCost?: boolean
+    printFinalCost?: boolean
+    embAutoBgt?: boolean
+    embRoughV2?: boolean
+    embVendorCost?: boolean
+    embFinalCost?: boolean
+    washingAutoBgt?: boolean
+    washingRoughV2?: boolean
+    washingVendorCost?: boolean
+    washingFinalCost?: boolean
+    pkgCostType?: boolean
+    boppNetPrice?: boolean
+    ctnNetPrice?: boolean
+    barcodeNetPrice?: boolean
+    kimbleNetPrice?: boolean
+    taftaNetPrice?: boolean
+    threadNetPrice?: boolean
     bodyArticle?: boolean
     bodyArticleDescription?: boolean
     fabricArticleNumber?: boolean
@@ -19811,7 +20092,7 @@ export namespace Prisma {
     imageExtractionRawData?: boolean
   }
 
-  export type ExtractionResultFlatOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<"id" | "jobId" | "imageName" | "imageUrl" | "articleNumber" | "extractionStatus" | "aiModel" | "avgConfidence" | "processingTimeMs" | "totalAttributes" | "extractedCount" | "inputTokens" | "outputTokens" | "totalTokens" | "apiCost" | "userId" | "userName" | "extractionDate" | "createdAt" | "updatedAt" | "majorCategory" | "vendorName" | "designNumber" | "pptNumber" | "rate" | "size" | "yarn1" | "yarn2" | "fabricMainMvgr" | "weave" | "weaveFullForm" | "composition" | "finish" | "gsm" | "macroMvgr" | "macroMvgrFullForm" | "mainMvgr" | "mainMvgrFullForm" | "mFab2" | "mFab2FullForm" | "shade" | "weight" | "lycra" | "neck" | "neckDetails" | "collar" | "placket" | "sleeve" | "bottomFold" | "frontOpenStyle" | "pocketType" | "fit" | "pattern" | "length" | "colour" | "secondaryColour" | "drawcord" | "button" | "zipper" | "zipColour" | "printType" | "printStyle" | "printPlacement" | "patches" | "patchesType" | "embroidery" | "embroideryType" | "wash" | "fatherBelt" | "childBelt" | "division" | "subDivision" | "referenceArticleNumber" | "referenceArticleDescription" | "collarStyle" | "sleeveFold" | "mSet" | "noOfPocket" | "extraPocket" | "dcShape" | "btnColour" | "fCount" | "fConstruction" | "fOunce" | "fWidth" | "fabDiv" | "fabVdr" | "htrfType" | "htrfStyle" | "embPlacement" | "ageGroup" | "mNoOfSize" | "mNoOfClr" | "articleFashionType" | "articleDimension" | "autoBgt" | "roughV2" | "vendorFabricRate" | "finalCost" | "roughRatio" | "roughConsumptionKg" | "roughConsumptionMeter" | "preciseRatio" | "preciseConsumptionKg" | "preciseConsumptionMeter" | "cuttingBgtPrVal" | "cuttingActPrVal" | "cuttingVendorPrVal" | "cuttingFinalPrVal" | "stitchingBgtPrVal" | "stitchingActPrVal" | "stitchingVendorPrVal" | "stitchingFinalPrVal" | "ironingBgtPrVal" | "ironingActPrVal" | "ironingVendorPrVal" | "ironingFinalPrVal" | "finishingBgtPrVal" | "finishingActPrVal" | "finishingVendorPrVal" | "finishingFinalPrVal" | "bTrimType" | "mBtnAutoBgt" | "mBtnRoughV2" | "mBtnVdrCost" | "mBtnFinalCost" | "dcAutoBgt" | "dcRoughV2" | "dcVdrCost" | "dcFinalCost" | "zipAutoBgt" | "zipRoughV2" | "zipVdrCost" | "zipFinalCost" | "patchAutoBgt" | "patchRoughV2" | "patchVdrCost" | "patchFinalCost" | "hTrfAutoBgt" | "hTrfRoughV2" | "hTrfVdrCost" | "hTrfFinalCost" | "bodyArticle" | "bodyArticleDescription" | "fabricArticleNumber" | "fabricArticleDescription" | "attrArticleNums" | "mvgrBrandVendor" | "mcDescription" | "vendorCode" | "mrp" | "impAtrbt2" | "mcCode" | "segment" | "season" | "hsnTaxCode" | "articleDescription" | "fashionGrid" | "year" | "articleType" | "presentationsType" | "approvalStatus" | "pdStatus" | "approvedBy" | "approvedAt" | "source" | "imageUncPath" | "isOldArticle" | "isGeneric" | "genericArticleId" | "variantSize" | "variantColor" | "variantWeight" | "comboRole" | "comboParentId" | "comboChildOrder" | "setGroupId" | "setRole" | "setName" | "sapSyncStatus" | "sapArticleId" | "sapSyncMessage" | "srmOriginalDesignNumber" | "srmUniqueId" | "imageExtractionRawData", ExtArgs["result"]["extractionResultFlat"]>
+  export type ExtractionResultFlatOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<"id" | "jobId" | "imageName" | "imageUrl" | "articleNumber" | "extractionStatus" | "aiModel" | "avgConfidence" | "processingTimeMs" | "totalAttributes" | "extractedCount" | "inputTokens" | "outputTokens" | "totalTokens" | "apiCost" | "userId" | "userName" | "extractionDate" | "createdAt" | "updatedAt" | "majorCategory" | "vendorName" | "designNumber" | "pptNumber" | "rate" | "size" | "yarn1" | "yarn2" | "fabricMainMvgr" | "weave" | "weaveFullForm" | "composition" | "finish" | "gsm" | "macroMvgr" | "macroMvgrFullForm" | "mainMvgr" | "mainMvgrFullForm" | "mFab2" | "mFab2FullForm" | "shade" | "weight" | "lycra" | "neck" | "neckDetails" | "collar" | "placket" | "sleeve" | "bottomFold" | "frontOpenStyle" | "pocketType" | "fit" | "pattern" | "length" | "colour" | "secondaryColour" | "drawcord" | "button" | "zipper" | "zipColour" | "printType" | "printStyle" | "printPlacement" | "patches" | "patchesType" | "embroidery" | "embroideryType" | "wash" | "fatherBelt" | "childBelt" | "division" | "subDivision" | "referenceArticleNumber" | "referenceArticleDescription" | "collarStyle" | "sleeveFold" | "mSet" | "noOfPocket" | "extraPocket" | "dcShape" | "btnColour" | "fCount" | "fConstruction" | "fOunce" | "fWidth" | "fabDiv" | "fabVdr" | "htrfType" | "htrfStyle" | "embPlacement" | "ageGroup" | "mNoOfSize" | "mNoOfClr" | "articleFashionType" | "articleDimension" | "autoBgt" | "roughV2" | "vendorFabricRate" | "finalCost" | "roughRatio" | "roughConsumptionKg" | "roughConsumptionMeter" | "preciseRatio" | "preciseConsumptionKg" | "preciseConsumptionMeter" | "cuttingBgtPrVal" | "cuttingActPrVal" | "cuttingVendorPrVal" | "cuttingFinalPrVal" | "stitchingBgtPrVal" | "stitchingActPrVal" | "stitchingVendorPrVal" | "stitchingFinalPrVal" | "ironingBgtPrVal" | "ironingActPrVal" | "ironingVendorPrVal" | "ironingFinalPrVal" | "finishingBgtPrVal" | "finishingActPrVal" | "finishingVendorPrVal" | "finishingFinalPrVal" | "bTrimType" | "mBtnAutoBgt" | "mBtnRoughV2" | "mBtnVdrCost" | "mBtnFinalCost" | "dcAutoBgt" | "dcRoughV2" | "dcVdrCost" | "dcFinalCost" | "zipAutoBgt" | "zipRoughV2" | "zipVdrCost" | "zipFinalCost" | "patchAutoBgt" | "patchRoughV2" | "patchVdrCost" | "patchFinalCost" | "hTrfAutoBgt" | "hTrfRoughV2" | "hTrfVdrCost" | "hTrfFinalCost" | "printAutoBgt" | "printRoughV2" | "printVendorCost" | "printFinalCost" | "embAutoBgt" | "embRoughV2" | "embVendorCost" | "embFinalCost" | "washingAutoBgt" | "washingRoughV2" | "washingVendorCost" | "washingFinalCost" | "pkgCostType" | "boppNetPrice" | "ctnNetPrice" | "barcodeNetPrice" | "kimbleNetPrice" | "taftaNetPrice" | "threadNetPrice" | "bodyArticle" | "bodyArticleDescription" | "fabricArticleNumber" | "fabricArticleDescription" | "attrArticleNums" | "mvgrBrandVendor" | "mcDescription" | "vendorCode" | "mrp" | "impAtrbt2" | "mcCode" | "segment" | "season" | "hsnTaxCode" | "articleDescription" | "fashionGrid" | "year" | "articleType" | "presentationsType" | "approvalStatus" | "pdStatus" | "approvedBy" | "approvedAt" | "source" | "imageUncPath" | "isOldArticle" | "isGeneric" | "genericArticleId" | "variantSize" | "variantColor" | "variantWeight" | "comboRole" | "comboParentId" | "comboChildOrder" | "setGroupId" | "setRole" | "setName" | "sapSyncStatus" | "sapArticleId" | "sapSyncMessage" | "srmOriginalDesignNumber" | "srmUniqueId" | "imageExtractionRawData", ExtArgs["result"]["extractionResultFlat"]>
   export type ExtractionResultFlatInclude<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
     approver?: boolean | ExtractionResultFlat$approverArgs<ExtArgs>
     comboParent?: boolean | ExtractionResultFlat$comboParentArgs<ExtArgs>
@@ -19983,6 +20264,25 @@ export namespace Prisma {
       hTrfRoughV2: Prisma.Decimal | null
       hTrfVdrCost: Prisma.Decimal | null
       hTrfFinalCost: Prisma.Decimal | null
+      printAutoBgt: Prisma.Decimal | null
+      printRoughV2: Prisma.Decimal | null
+      printVendorCost: Prisma.Decimal | null
+      printFinalCost: Prisma.Decimal | null
+      embAutoBgt: Prisma.Decimal | null
+      embRoughV2: Prisma.Decimal | null
+      embVendorCost: Prisma.Decimal | null
+      embFinalCost: Prisma.Decimal | null
+      washingAutoBgt: Prisma.Decimal | null
+      washingRoughV2: Prisma.Decimal | null
+      washingVendorCost: Prisma.Decimal | null
+      washingFinalCost: Prisma.Decimal | null
+      pkgCostType: string | null
+      boppNetPrice: Prisma.Decimal | null
+      ctnNetPrice: Prisma.Decimal | null
+      barcodeNetPrice: Prisma.Decimal | null
+      kimbleNetPrice: Prisma.Decimal | null
+      taftaNetPrice: Prisma.Decimal | null
+      threadNetPrice: Prisma.Decimal | null
       bodyArticle: string | null
       bodyArticleDescription: string | null
       fabricArticleNumber: string | null
@@ -20596,6 +20896,25 @@ export namespace Prisma {
     readonly hTrfRoughV2: FieldRef<"ExtractionResultFlat", 'Decimal'>
     readonly hTrfVdrCost: FieldRef<"ExtractionResultFlat", 'Decimal'>
     readonly hTrfFinalCost: FieldRef<"ExtractionResultFlat", 'Decimal'>
+    readonly printAutoBgt: FieldRef<"ExtractionResultFlat", 'Decimal'>
+    readonly printRoughV2: FieldRef<"ExtractionResultFlat", 'Decimal'>
+    readonly printVendorCost: FieldRef<"ExtractionResultFlat", 'Decimal'>
+    readonly printFinalCost: FieldRef<"ExtractionResultFlat", 'Decimal'>
+    readonly embAutoBgt: FieldRef<"ExtractionResultFlat", 'Decimal'>
+    readonly embRoughV2: FieldRef<"ExtractionResultFlat", 'Decimal'>
+    readonly embVendorCost: FieldRef<"ExtractionResultFlat", 'Decimal'>
+    readonly embFinalCost: FieldRef<"ExtractionResultFlat", 'Decimal'>
+    readonly washingAutoBgt: FieldRef<"ExtractionResultFlat", 'Decimal'>
+    readonly washingRoughV2: FieldRef<"ExtractionResultFlat", 'Decimal'>
+    readonly washingVendorCost: FieldRef<"ExtractionResultFlat", 'Decimal'>
+    readonly washingFinalCost: FieldRef<"ExtractionResultFlat", 'Decimal'>
+    readonly pkgCostType: FieldRef<"ExtractionResultFlat", 'String'>
+    readonly boppNetPrice: FieldRef<"ExtractionResultFlat", 'Decimal'>
+    readonly ctnNetPrice: FieldRef<"ExtractionResultFlat", 'Decimal'>
+    readonly barcodeNetPrice: FieldRef<"ExtractionResultFlat", 'Decimal'>
+    readonly kimbleNetPrice: FieldRef<"ExtractionResultFlat", 'Decimal'>
+    readonly taftaNetPrice: FieldRef<"ExtractionResultFlat", 'Decimal'>
+    readonly threadNetPrice: FieldRef<"ExtractionResultFlat", 'Decimal'>
     readonly bodyArticle: FieldRef<"ExtractionResultFlat", 'String'>
     readonly bodyArticleDescription: FieldRef<"ExtractionResultFlat", 'String'>
     readonly fabricArticleNumber: FieldRef<"ExtractionResultFlat", 'String'>
@@ -90778,6 +91097,25 @@ export namespace Prisma {
     hTrfRoughV2: 'hTrfRoughV2',
     hTrfVdrCost: 'hTrfVdrCost',
     hTrfFinalCost: 'hTrfFinalCost',
+    printAutoBgt: 'printAutoBgt',
+    printRoughV2: 'printRoughV2',
+    printVendorCost: 'printVendorCost',
+    printFinalCost: 'printFinalCost',
+    embAutoBgt: 'embAutoBgt',
+    embRoughV2: 'embRoughV2',
+    embVendorCost: 'embVendorCost',
+    embFinalCost: 'embFinalCost',
+    washingAutoBgt: 'washingAutoBgt',
+    washingRoughV2: 'washingRoughV2',
+    washingVendorCost: 'washingVendorCost',
+    washingFinalCost: 'washingFinalCost',
+    pkgCostType: 'pkgCostType',
+    boppNetPrice: 'boppNetPrice',
+    ctnNetPrice: 'ctnNetPrice',
+    barcodeNetPrice: 'barcodeNetPrice',
+    kimbleNetPrice: 'kimbleNetPrice',
+    taftaNetPrice: 'taftaNetPrice',
+    threadNetPrice: 'threadNetPrice',
     bodyArticle: 'bodyArticle',
     bodyArticleDescription: 'bodyArticleDescription',
     fabricArticleNumber: 'fabricArticleNumber',
@@ -92470,6 +92808,7 @@ export namespace Prisma {
     articleFashionType: 'articleFashionType',
     articleDimension: 'articleDimension',
     bTrimType: 'bTrimType',
+    pkgCostType: 'pkgCostType',
     bodyArticle: 'bodyArticle',
     bodyArticleDescription: 'bodyArticleDescription',
     fabricArticleNumber: 'fabricArticleNumber',
@@ -94847,6 +95186,25 @@ export namespace Prisma {
     hTrfRoughV2?: DecimalNullableFilter<"ExtractionResultFlat"> | Decimal | DecimalJsLike | number | string | null
     hTrfVdrCost?: DecimalNullableFilter<"ExtractionResultFlat"> | Decimal | DecimalJsLike | number | string | null
     hTrfFinalCost?: DecimalNullableFilter<"ExtractionResultFlat"> | Decimal | DecimalJsLike | number | string | null
+    printAutoBgt?: DecimalNullableFilter<"ExtractionResultFlat"> | Decimal | DecimalJsLike | number | string | null
+    printRoughV2?: DecimalNullableFilter<"ExtractionResultFlat"> | Decimal | DecimalJsLike | number | string | null
+    printVendorCost?: DecimalNullableFilter<"ExtractionResultFlat"> | Decimal | DecimalJsLike | number | string | null
+    printFinalCost?: DecimalNullableFilter<"ExtractionResultFlat"> | Decimal | DecimalJsLike | number | string | null
+    embAutoBgt?: DecimalNullableFilter<"ExtractionResultFlat"> | Decimal | DecimalJsLike | number | string | null
+    embRoughV2?: DecimalNullableFilter<"ExtractionResultFlat"> | Decimal | DecimalJsLike | number | string | null
+    embVendorCost?: DecimalNullableFilter<"ExtractionResultFlat"> | Decimal | DecimalJsLike | number | string | null
+    embFinalCost?: DecimalNullableFilter<"ExtractionResultFlat"> | Decimal | DecimalJsLike | number | string | null
+    washingAutoBgt?: DecimalNullableFilter<"ExtractionResultFlat"> | Decimal | DecimalJsLike | number | string | null
+    washingRoughV2?: DecimalNullableFilter<"ExtractionResultFlat"> | Decimal | DecimalJsLike | number | string | null
+    washingVendorCost?: DecimalNullableFilter<"ExtractionResultFlat"> | Decimal | DecimalJsLike | number | string | null
+    washingFinalCost?: DecimalNullableFilter<"ExtractionResultFlat"> | Decimal | DecimalJsLike | number | string | null
+    pkgCostType?: StringNullableFilter<"ExtractionResultFlat"> | string | null
+    boppNetPrice?: DecimalNullableFilter<"ExtractionResultFlat"> | Decimal | DecimalJsLike | number | string | null
+    ctnNetPrice?: DecimalNullableFilter<"ExtractionResultFlat"> | Decimal | DecimalJsLike | number | string | null
+    barcodeNetPrice?: DecimalNullableFilter<"ExtractionResultFlat"> | Decimal | DecimalJsLike | number | string | null
+    kimbleNetPrice?: DecimalNullableFilter<"ExtractionResultFlat"> | Decimal | DecimalJsLike | number | string | null
+    taftaNetPrice?: DecimalNullableFilter<"ExtractionResultFlat"> | Decimal | DecimalJsLike | number | string | null
+    threadNetPrice?: DecimalNullableFilter<"ExtractionResultFlat"> | Decimal | DecimalJsLike | number | string | null
     bodyArticle?: StringNullableFilter<"ExtractionResultFlat"> | string | null
     bodyArticleDescription?: StringNullableFilter<"ExtractionResultFlat"> | string | null
     fabricArticleNumber?: StringNullableFilter<"ExtractionResultFlat"> | string | null
@@ -95040,6 +95398,25 @@ export namespace Prisma {
     hTrfRoughV2?: SortOrderInput | SortOrder
     hTrfVdrCost?: SortOrderInput | SortOrder
     hTrfFinalCost?: SortOrderInput | SortOrder
+    printAutoBgt?: SortOrderInput | SortOrder
+    printRoughV2?: SortOrderInput | SortOrder
+    printVendorCost?: SortOrderInput | SortOrder
+    printFinalCost?: SortOrderInput | SortOrder
+    embAutoBgt?: SortOrderInput | SortOrder
+    embRoughV2?: SortOrderInput | SortOrder
+    embVendorCost?: SortOrderInput | SortOrder
+    embFinalCost?: SortOrderInput | SortOrder
+    washingAutoBgt?: SortOrderInput | SortOrder
+    washingRoughV2?: SortOrderInput | SortOrder
+    washingVendorCost?: SortOrderInput | SortOrder
+    washingFinalCost?: SortOrderInput | SortOrder
+    pkgCostType?: SortOrderInput | SortOrder
+    boppNetPrice?: SortOrderInput | SortOrder
+    ctnNetPrice?: SortOrderInput | SortOrder
+    barcodeNetPrice?: SortOrderInput | SortOrder
+    kimbleNetPrice?: SortOrderInput | SortOrder
+    taftaNetPrice?: SortOrderInput | SortOrder
+    threadNetPrice?: SortOrderInput | SortOrder
     bodyArticle?: SortOrderInput | SortOrder
     bodyArticleDescription?: SortOrderInput | SortOrder
     fabricArticleNumber?: SortOrderInput | SortOrder
@@ -95238,6 +95615,25 @@ export namespace Prisma {
     hTrfRoughV2?: DecimalNullableFilter<"ExtractionResultFlat"> | Decimal | DecimalJsLike | number | string | null
     hTrfVdrCost?: DecimalNullableFilter<"ExtractionResultFlat"> | Decimal | DecimalJsLike | number | string | null
     hTrfFinalCost?: DecimalNullableFilter<"ExtractionResultFlat"> | Decimal | DecimalJsLike | number | string | null
+    printAutoBgt?: DecimalNullableFilter<"ExtractionResultFlat"> | Decimal | DecimalJsLike | number | string | null
+    printRoughV2?: DecimalNullableFilter<"ExtractionResultFlat"> | Decimal | DecimalJsLike | number | string | null
+    printVendorCost?: DecimalNullableFilter<"ExtractionResultFlat"> | Decimal | DecimalJsLike | number | string | null
+    printFinalCost?: DecimalNullableFilter<"ExtractionResultFlat"> | Decimal | DecimalJsLike | number | string | null
+    embAutoBgt?: DecimalNullableFilter<"ExtractionResultFlat"> | Decimal | DecimalJsLike | number | string | null
+    embRoughV2?: DecimalNullableFilter<"ExtractionResultFlat"> | Decimal | DecimalJsLike | number | string | null
+    embVendorCost?: DecimalNullableFilter<"ExtractionResultFlat"> | Decimal | DecimalJsLike | number | string | null
+    embFinalCost?: DecimalNullableFilter<"ExtractionResultFlat"> | Decimal | DecimalJsLike | number | string | null
+    washingAutoBgt?: DecimalNullableFilter<"ExtractionResultFlat"> | Decimal | DecimalJsLike | number | string | null
+    washingRoughV2?: DecimalNullableFilter<"ExtractionResultFlat"> | Decimal | DecimalJsLike | number | string | null
+    washingVendorCost?: DecimalNullableFilter<"ExtractionResultFlat"> | Decimal | DecimalJsLike | number | string | null
+    washingFinalCost?: DecimalNullableFilter<"ExtractionResultFlat"> | Decimal | DecimalJsLike | number | string | null
+    pkgCostType?: StringNullableFilter<"ExtractionResultFlat"> | string | null
+    boppNetPrice?: DecimalNullableFilter<"ExtractionResultFlat"> | Decimal | DecimalJsLike | number | string | null
+    ctnNetPrice?: DecimalNullableFilter<"ExtractionResultFlat"> | Decimal | DecimalJsLike | number | string | null
+    barcodeNetPrice?: DecimalNullableFilter<"ExtractionResultFlat"> | Decimal | DecimalJsLike | number | string | null
+    kimbleNetPrice?: DecimalNullableFilter<"ExtractionResultFlat"> | Decimal | DecimalJsLike | number | string | null
+    taftaNetPrice?: DecimalNullableFilter<"ExtractionResultFlat"> | Decimal | DecimalJsLike | number | string | null
+    threadNetPrice?: DecimalNullableFilter<"ExtractionResultFlat"> | Decimal | DecimalJsLike | number | string | null
     bodyArticle?: StringNullableFilter<"ExtractionResultFlat"> | string | null
     bodyArticleDescription?: StringNullableFilter<"ExtractionResultFlat"> | string | null
     fabricArticleNumber?: StringNullableFilter<"ExtractionResultFlat"> | string | null
@@ -95430,6 +95826,25 @@ export namespace Prisma {
     hTrfRoughV2?: SortOrderInput | SortOrder
     hTrfVdrCost?: SortOrderInput | SortOrder
     hTrfFinalCost?: SortOrderInput | SortOrder
+    printAutoBgt?: SortOrderInput | SortOrder
+    printRoughV2?: SortOrderInput | SortOrder
+    printVendorCost?: SortOrderInput | SortOrder
+    printFinalCost?: SortOrderInput | SortOrder
+    embAutoBgt?: SortOrderInput | SortOrder
+    embRoughV2?: SortOrderInput | SortOrder
+    embVendorCost?: SortOrderInput | SortOrder
+    embFinalCost?: SortOrderInput | SortOrder
+    washingAutoBgt?: SortOrderInput | SortOrder
+    washingRoughV2?: SortOrderInput | SortOrder
+    washingVendorCost?: SortOrderInput | SortOrder
+    washingFinalCost?: SortOrderInput | SortOrder
+    pkgCostType?: SortOrderInput | SortOrder
+    boppNetPrice?: SortOrderInput | SortOrder
+    ctnNetPrice?: SortOrderInput | SortOrder
+    barcodeNetPrice?: SortOrderInput | SortOrder
+    kimbleNetPrice?: SortOrderInput | SortOrder
+    taftaNetPrice?: SortOrderInput | SortOrder
+    threadNetPrice?: SortOrderInput | SortOrder
     bodyArticle?: SortOrderInput | SortOrder
     bodyArticleDescription?: SortOrderInput | SortOrder
     fabricArticleNumber?: SortOrderInput | SortOrder
@@ -95626,6 +96041,25 @@ export namespace Prisma {
     hTrfRoughV2?: DecimalNullableWithAggregatesFilter<"ExtractionResultFlat"> | Decimal | DecimalJsLike | number | string | null
     hTrfVdrCost?: DecimalNullableWithAggregatesFilter<"ExtractionResultFlat"> | Decimal | DecimalJsLike | number | string | null
     hTrfFinalCost?: DecimalNullableWithAggregatesFilter<"ExtractionResultFlat"> | Decimal | DecimalJsLike | number | string | null
+    printAutoBgt?: DecimalNullableWithAggregatesFilter<"ExtractionResultFlat"> | Decimal | DecimalJsLike | number | string | null
+    printRoughV2?: DecimalNullableWithAggregatesFilter<"ExtractionResultFlat"> | Decimal | DecimalJsLike | number | string | null
+    printVendorCost?: DecimalNullableWithAggregatesFilter<"ExtractionResultFlat"> | Decimal | DecimalJsLike | number | string | null
+    printFinalCost?: DecimalNullableWithAggregatesFilter<"ExtractionResultFlat"> | Decimal | DecimalJsLike | number | string | null
+    embAutoBgt?: DecimalNullableWithAggregatesFilter<"ExtractionResultFlat"> | Decimal | DecimalJsLike | number | string | null
+    embRoughV2?: DecimalNullableWithAggregatesFilter<"ExtractionResultFlat"> | Decimal | DecimalJsLike | number | string | null
+    embVendorCost?: DecimalNullableWithAggregatesFilter<"ExtractionResultFlat"> | Decimal | DecimalJsLike | number | string | null
+    embFinalCost?: DecimalNullableWithAggregatesFilter<"ExtractionResultFlat"> | Decimal | DecimalJsLike | number | string | null
+    washingAutoBgt?: DecimalNullableWithAggregatesFilter<"ExtractionResultFlat"> | Decimal | DecimalJsLike | number | string | null
+    washingRoughV2?: DecimalNullableWithAggregatesFilter<"ExtractionResultFlat"> | Decimal | DecimalJsLike | number | string | null
+    washingVendorCost?: DecimalNullableWithAggregatesFilter<"ExtractionResultFlat"> | Decimal | DecimalJsLike | number | string | null
+    washingFinalCost?: DecimalNullableWithAggregatesFilter<"ExtractionResultFlat"> | Decimal | DecimalJsLike | number | string | null
+    pkgCostType?: StringNullableWithAggregatesFilter<"ExtractionResultFlat"> | string | null
+    boppNetPrice?: DecimalNullableWithAggregatesFilter<"ExtractionResultFlat"> | Decimal | DecimalJsLike | number | string | null
+    ctnNetPrice?: DecimalNullableWithAggregatesFilter<"ExtractionResultFlat"> | Decimal | DecimalJsLike | number | string | null
+    barcodeNetPrice?: DecimalNullableWithAggregatesFilter<"ExtractionResultFlat"> | Decimal | DecimalJsLike | number | string | null
+    kimbleNetPrice?: DecimalNullableWithAggregatesFilter<"ExtractionResultFlat"> | Decimal | DecimalJsLike | number | string | null
+    taftaNetPrice?: DecimalNullableWithAggregatesFilter<"ExtractionResultFlat"> | Decimal | DecimalJsLike | number | string | null
+    threadNetPrice?: DecimalNullableWithAggregatesFilter<"ExtractionResultFlat"> | Decimal | DecimalJsLike | number | string | null
     bodyArticle?: StringNullableWithAggregatesFilter<"ExtractionResultFlat"> | string | null
     bodyArticleDescription?: StringNullableWithAggregatesFilter<"ExtractionResultFlat"> | string | null
     fabricArticleNumber?: StringNullableWithAggregatesFilter<"ExtractionResultFlat"> | string | null
@@ -103960,6 +104394,25 @@ export namespace Prisma {
     hTrfRoughV2?: Decimal | DecimalJsLike | number | string | null
     hTrfVdrCost?: Decimal | DecimalJsLike | number | string | null
     hTrfFinalCost?: Decimal | DecimalJsLike | number | string | null
+    printAutoBgt?: Decimal | DecimalJsLike | number | string | null
+    printRoughV2?: Decimal | DecimalJsLike | number | string | null
+    printVendorCost?: Decimal | DecimalJsLike | number | string | null
+    printFinalCost?: Decimal | DecimalJsLike | number | string | null
+    embAutoBgt?: Decimal | DecimalJsLike | number | string | null
+    embRoughV2?: Decimal | DecimalJsLike | number | string | null
+    embVendorCost?: Decimal | DecimalJsLike | number | string | null
+    embFinalCost?: Decimal | DecimalJsLike | number | string | null
+    washingAutoBgt?: Decimal | DecimalJsLike | number | string | null
+    washingRoughV2?: Decimal | DecimalJsLike | number | string | null
+    washingVendorCost?: Decimal | DecimalJsLike | number | string | null
+    washingFinalCost?: Decimal | DecimalJsLike | number | string | null
+    pkgCostType?: string | null
+    boppNetPrice?: Decimal | DecimalJsLike | number | string | null
+    ctnNetPrice?: Decimal | DecimalJsLike | number | string | null
+    barcodeNetPrice?: Decimal | DecimalJsLike | number | string | null
+    kimbleNetPrice?: Decimal | DecimalJsLike | number | string | null
+    taftaNetPrice?: Decimal | DecimalJsLike | number | string | null
+    threadNetPrice?: Decimal | DecimalJsLike | number | string | null
     bodyArticle?: string | null
     bodyArticleDescription?: string | null
     fabricArticleNumber?: string | null
@@ -104151,6 +104604,25 @@ export namespace Prisma {
     hTrfRoughV2?: Decimal | DecimalJsLike | number | string | null
     hTrfVdrCost?: Decimal | DecimalJsLike | number | string | null
     hTrfFinalCost?: Decimal | DecimalJsLike | number | string | null
+    printAutoBgt?: Decimal | DecimalJsLike | number | string | null
+    printRoughV2?: Decimal | DecimalJsLike | number | string | null
+    printVendorCost?: Decimal | DecimalJsLike | number | string | null
+    printFinalCost?: Decimal | DecimalJsLike | number | string | null
+    embAutoBgt?: Decimal | DecimalJsLike | number | string | null
+    embRoughV2?: Decimal | DecimalJsLike | number | string | null
+    embVendorCost?: Decimal | DecimalJsLike | number | string | null
+    embFinalCost?: Decimal | DecimalJsLike | number | string | null
+    washingAutoBgt?: Decimal | DecimalJsLike | number | string | null
+    washingRoughV2?: Decimal | DecimalJsLike | number | string | null
+    washingVendorCost?: Decimal | DecimalJsLike | number | string | null
+    washingFinalCost?: Decimal | DecimalJsLike | number | string | null
+    pkgCostType?: string | null
+    boppNetPrice?: Decimal | DecimalJsLike | number | string | null
+    ctnNetPrice?: Decimal | DecimalJsLike | number | string | null
+    barcodeNetPrice?: Decimal | DecimalJsLike | number | string | null
+    kimbleNetPrice?: Decimal | DecimalJsLike | number | string | null
+    taftaNetPrice?: Decimal | DecimalJsLike | number | string | null
+    threadNetPrice?: Decimal | DecimalJsLike | number | string | null
     bodyArticle?: string | null
     bodyArticleDescription?: string | null
     fabricArticleNumber?: string | null
@@ -104340,6 +104812,25 @@ export namespace Prisma {
     hTrfRoughV2?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
     hTrfVdrCost?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
     hTrfFinalCost?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    printAutoBgt?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    printRoughV2?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    printVendorCost?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    printFinalCost?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    embAutoBgt?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    embRoughV2?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    embVendorCost?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    embFinalCost?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    washingAutoBgt?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    washingRoughV2?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    washingVendorCost?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    washingFinalCost?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    pkgCostType?: NullableStringFieldUpdateOperationsInput | string | null
+    boppNetPrice?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    ctnNetPrice?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    barcodeNetPrice?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    kimbleNetPrice?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    taftaNetPrice?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    threadNetPrice?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
     bodyArticle?: NullableStringFieldUpdateOperationsInput | string | null
     bodyArticleDescription?: NullableStringFieldUpdateOperationsInput | string | null
     fabricArticleNumber?: NullableStringFieldUpdateOperationsInput | string | null
@@ -104531,6 +105022,25 @@ export namespace Prisma {
     hTrfRoughV2?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
     hTrfVdrCost?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
     hTrfFinalCost?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    printAutoBgt?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    printRoughV2?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    printVendorCost?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    printFinalCost?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    embAutoBgt?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    embRoughV2?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    embVendorCost?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    embFinalCost?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    washingAutoBgt?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    washingRoughV2?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    washingVendorCost?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    washingFinalCost?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    pkgCostType?: NullableStringFieldUpdateOperationsInput | string | null
+    boppNetPrice?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    ctnNetPrice?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    barcodeNetPrice?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    kimbleNetPrice?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    taftaNetPrice?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    threadNetPrice?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
     bodyArticle?: NullableStringFieldUpdateOperationsInput | string | null
     bodyArticleDescription?: NullableStringFieldUpdateOperationsInput | string | null
     fabricArticleNumber?: NullableStringFieldUpdateOperationsInput | string | null
@@ -104721,6 +105231,25 @@ export namespace Prisma {
     hTrfRoughV2?: Decimal | DecimalJsLike | number | string | null
     hTrfVdrCost?: Decimal | DecimalJsLike | number | string | null
     hTrfFinalCost?: Decimal | DecimalJsLike | number | string | null
+    printAutoBgt?: Decimal | DecimalJsLike | number | string | null
+    printRoughV2?: Decimal | DecimalJsLike | number | string | null
+    printVendorCost?: Decimal | DecimalJsLike | number | string | null
+    printFinalCost?: Decimal | DecimalJsLike | number | string | null
+    embAutoBgt?: Decimal | DecimalJsLike | number | string | null
+    embRoughV2?: Decimal | DecimalJsLike | number | string | null
+    embVendorCost?: Decimal | DecimalJsLike | number | string | null
+    embFinalCost?: Decimal | DecimalJsLike | number | string | null
+    washingAutoBgt?: Decimal | DecimalJsLike | number | string | null
+    washingRoughV2?: Decimal | DecimalJsLike | number | string | null
+    washingVendorCost?: Decimal | DecimalJsLike | number | string | null
+    washingFinalCost?: Decimal | DecimalJsLike | number | string | null
+    pkgCostType?: string | null
+    boppNetPrice?: Decimal | DecimalJsLike | number | string | null
+    ctnNetPrice?: Decimal | DecimalJsLike | number | string | null
+    barcodeNetPrice?: Decimal | DecimalJsLike | number | string | null
+    kimbleNetPrice?: Decimal | DecimalJsLike | number | string | null
+    taftaNetPrice?: Decimal | DecimalJsLike | number | string | null
+    threadNetPrice?: Decimal | DecimalJsLike | number | string | null
     bodyArticle?: string | null
     bodyArticleDescription?: string | null
     fabricArticleNumber?: string | null
@@ -104908,6 +105437,25 @@ export namespace Prisma {
     hTrfRoughV2?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
     hTrfVdrCost?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
     hTrfFinalCost?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    printAutoBgt?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    printRoughV2?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    printVendorCost?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    printFinalCost?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    embAutoBgt?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    embRoughV2?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    embVendorCost?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    embFinalCost?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    washingAutoBgt?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    washingRoughV2?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    washingVendorCost?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    washingFinalCost?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    pkgCostType?: NullableStringFieldUpdateOperationsInput | string | null
+    boppNetPrice?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    ctnNetPrice?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    barcodeNetPrice?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    kimbleNetPrice?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    taftaNetPrice?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    threadNetPrice?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
     bodyArticle?: NullableStringFieldUpdateOperationsInput | string | null
     bodyArticleDescription?: NullableStringFieldUpdateOperationsInput | string | null
     fabricArticleNumber?: NullableStringFieldUpdateOperationsInput | string | null
@@ -105094,6 +105642,25 @@ export namespace Prisma {
     hTrfRoughV2?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
     hTrfVdrCost?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
     hTrfFinalCost?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    printAutoBgt?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    printRoughV2?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    printVendorCost?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    printFinalCost?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    embAutoBgt?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    embRoughV2?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    embVendorCost?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    embFinalCost?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    washingAutoBgt?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    washingRoughV2?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    washingVendorCost?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    washingFinalCost?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    pkgCostType?: NullableStringFieldUpdateOperationsInput | string | null
+    boppNetPrice?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    ctnNetPrice?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    barcodeNetPrice?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    kimbleNetPrice?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    taftaNetPrice?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    threadNetPrice?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
     bodyArticle?: NullableStringFieldUpdateOperationsInput | string | null
     bodyArticleDescription?: NullableStringFieldUpdateOperationsInput | string | null
     fabricArticleNumber?: NullableStringFieldUpdateOperationsInput | string | null
@@ -115152,6 +115719,25 @@ export namespace Prisma {
     hTrfRoughV2?: SortOrder
     hTrfVdrCost?: SortOrder
     hTrfFinalCost?: SortOrder
+    printAutoBgt?: SortOrder
+    printRoughV2?: SortOrder
+    printVendorCost?: SortOrder
+    printFinalCost?: SortOrder
+    embAutoBgt?: SortOrder
+    embRoughV2?: SortOrder
+    embVendorCost?: SortOrder
+    embFinalCost?: SortOrder
+    washingAutoBgt?: SortOrder
+    washingRoughV2?: SortOrder
+    washingVendorCost?: SortOrder
+    washingFinalCost?: SortOrder
+    pkgCostType?: SortOrder
+    boppNetPrice?: SortOrder
+    ctnNetPrice?: SortOrder
+    barcodeNetPrice?: SortOrder
+    kimbleNetPrice?: SortOrder
+    taftaNetPrice?: SortOrder
+    threadNetPrice?: SortOrder
     bodyArticle?: SortOrder
     bodyArticleDescription?: SortOrder
     fabricArticleNumber?: SortOrder
@@ -115254,6 +115840,24 @@ export namespace Prisma {
     hTrfRoughV2?: SortOrder
     hTrfVdrCost?: SortOrder
     hTrfFinalCost?: SortOrder
+    printAutoBgt?: SortOrder
+    printRoughV2?: SortOrder
+    printVendorCost?: SortOrder
+    printFinalCost?: SortOrder
+    embAutoBgt?: SortOrder
+    embRoughV2?: SortOrder
+    embVendorCost?: SortOrder
+    embFinalCost?: SortOrder
+    washingAutoBgt?: SortOrder
+    washingRoughV2?: SortOrder
+    washingVendorCost?: SortOrder
+    washingFinalCost?: SortOrder
+    boppNetPrice?: SortOrder
+    ctnNetPrice?: SortOrder
+    barcodeNetPrice?: SortOrder
+    kimbleNetPrice?: SortOrder
+    taftaNetPrice?: SortOrder
+    threadNetPrice?: SortOrder
     mrp?: SortOrder
     approvedBy?: SortOrder
     comboChildOrder?: SortOrder
@@ -115402,6 +116006,25 @@ export namespace Prisma {
     hTrfRoughV2?: SortOrder
     hTrfVdrCost?: SortOrder
     hTrfFinalCost?: SortOrder
+    printAutoBgt?: SortOrder
+    printRoughV2?: SortOrder
+    printVendorCost?: SortOrder
+    printFinalCost?: SortOrder
+    embAutoBgt?: SortOrder
+    embRoughV2?: SortOrder
+    embVendorCost?: SortOrder
+    embFinalCost?: SortOrder
+    washingAutoBgt?: SortOrder
+    washingRoughV2?: SortOrder
+    washingVendorCost?: SortOrder
+    washingFinalCost?: SortOrder
+    pkgCostType?: SortOrder
+    boppNetPrice?: SortOrder
+    ctnNetPrice?: SortOrder
+    barcodeNetPrice?: SortOrder
+    kimbleNetPrice?: SortOrder
+    taftaNetPrice?: SortOrder
+    threadNetPrice?: SortOrder
     bodyArticle?: SortOrder
     bodyArticleDescription?: SortOrder
     fabricArticleNumber?: SortOrder
@@ -115589,6 +116212,25 @@ export namespace Prisma {
     hTrfRoughV2?: SortOrder
     hTrfVdrCost?: SortOrder
     hTrfFinalCost?: SortOrder
+    printAutoBgt?: SortOrder
+    printRoughV2?: SortOrder
+    printVendorCost?: SortOrder
+    printFinalCost?: SortOrder
+    embAutoBgt?: SortOrder
+    embRoughV2?: SortOrder
+    embVendorCost?: SortOrder
+    embFinalCost?: SortOrder
+    washingAutoBgt?: SortOrder
+    washingRoughV2?: SortOrder
+    washingVendorCost?: SortOrder
+    washingFinalCost?: SortOrder
+    pkgCostType?: SortOrder
+    boppNetPrice?: SortOrder
+    ctnNetPrice?: SortOrder
+    barcodeNetPrice?: SortOrder
+    kimbleNetPrice?: SortOrder
+    taftaNetPrice?: SortOrder
+    threadNetPrice?: SortOrder
     bodyArticle?: SortOrder
     bodyArticleDescription?: SortOrder
     fabricArticleNumber?: SortOrder
@@ -115690,6 +116332,24 @@ export namespace Prisma {
     hTrfRoughV2?: SortOrder
     hTrfVdrCost?: SortOrder
     hTrfFinalCost?: SortOrder
+    printAutoBgt?: SortOrder
+    printRoughV2?: SortOrder
+    printVendorCost?: SortOrder
+    printFinalCost?: SortOrder
+    embAutoBgt?: SortOrder
+    embRoughV2?: SortOrder
+    embVendorCost?: SortOrder
+    embFinalCost?: SortOrder
+    washingAutoBgt?: SortOrder
+    washingRoughV2?: SortOrder
+    washingVendorCost?: SortOrder
+    washingFinalCost?: SortOrder
+    boppNetPrice?: SortOrder
+    ctnNetPrice?: SortOrder
+    barcodeNetPrice?: SortOrder
+    kimbleNetPrice?: SortOrder
+    taftaNetPrice?: SortOrder
+    threadNetPrice?: SortOrder
     mrp?: SortOrder
     approvedBy?: SortOrder
     comboChildOrder?: SortOrder
@@ -124503,6 +125163,25 @@ export namespace Prisma {
     hTrfRoughV2?: Decimal | DecimalJsLike | number | string | null
     hTrfVdrCost?: Decimal | DecimalJsLike | number | string | null
     hTrfFinalCost?: Decimal | DecimalJsLike | number | string | null
+    printAutoBgt?: Decimal | DecimalJsLike | number | string | null
+    printRoughV2?: Decimal | DecimalJsLike | number | string | null
+    printVendorCost?: Decimal | DecimalJsLike | number | string | null
+    printFinalCost?: Decimal | DecimalJsLike | number | string | null
+    embAutoBgt?: Decimal | DecimalJsLike | number | string | null
+    embRoughV2?: Decimal | DecimalJsLike | number | string | null
+    embVendorCost?: Decimal | DecimalJsLike | number | string | null
+    embFinalCost?: Decimal | DecimalJsLike | number | string | null
+    washingAutoBgt?: Decimal | DecimalJsLike | number | string | null
+    washingRoughV2?: Decimal | DecimalJsLike | number | string | null
+    washingVendorCost?: Decimal | DecimalJsLike | number | string | null
+    washingFinalCost?: Decimal | DecimalJsLike | number | string | null
+    pkgCostType?: string | null
+    boppNetPrice?: Decimal | DecimalJsLike | number | string | null
+    ctnNetPrice?: Decimal | DecimalJsLike | number | string | null
+    barcodeNetPrice?: Decimal | DecimalJsLike | number | string | null
+    kimbleNetPrice?: Decimal | DecimalJsLike | number | string | null
+    taftaNetPrice?: Decimal | DecimalJsLike | number | string | null
+    threadNetPrice?: Decimal | DecimalJsLike | number | string | null
     bodyArticle?: string | null
     bodyArticleDescription?: string | null
     fabricArticleNumber?: string | null
@@ -124692,6 +125371,25 @@ export namespace Prisma {
     hTrfRoughV2?: Decimal | DecimalJsLike | number | string | null
     hTrfVdrCost?: Decimal | DecimalJsLike | number | string | null
     hTrfFinalCost?: Decimal | DecimalJsLike | number | string | null
+    printAutoBgt?: Decimal | DecimalJsLike | number | string | null
+    printRoughV2?: Decimal | DecimalJsLike | number | string | null
+    printVendorCost?: Decimal | DecimalJsLike | number | string | null
+    printFinalCost?: Decimal | DecimalJsLike | number | string | null
+    embAutoBgt?: Decimal | DecimalJsLike | number | string | null
+    embRoughV2?: Decimal | DecimalJsLike | number | string | null
+    embVendorCost?: Decimal | DecimalJsLike | number | string | null
+    embFinalCost?: Decimal | DecimalJsLike | number | string | null
+    washingAutoBgt?: Decimal | DecimalJsLike | number | string | null
+    washingRoughV2?: Decimal | DecimalJsLike | number | string | null
+    washingVendorCost?: Decimal | DecimalJsLike | number | string | null
+    washingFinalCost?: Decimal | DecimalJsLike | number | string | null
+    pkgCostType?: string | null
+    boppNetPrice?: Decimal | DecimalJsLike | number | string | null
+    ctnNetPrice?: Decimal | DecimalJsLike | number | string | null
+    barcodeNetPrice?: Decimal | DecimalJsLike | number | string | null
+    kimbleNetPrice?: Decimal | DecimalJsLike | number | string | null
+    taftaNetPrice?: Decimal | DecimalJsLike | number | string | null
+    threadNetPrice?: Decimal | DecimalJsLike | number | string | null
     bodyArticle?: string | null
     bodyArticleDescription?: string | null
     fabricArticleNumber?: string | null
@@ -125007,6 +125705,25 @@ export namespace Prisma {
     hTrfRoughV2?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
     hTrfVdrCost?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
     hTrfFinalCost?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    printAutoBgt?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    printRoughV2?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    printVendorCost?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    printFinalCost?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    embAutoBgt?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    embRoughV2?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    embVendorCost?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    embFinalCost?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    washingAutoBgt?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    washingRoughV2?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    washingVendorCost?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    washingFinalCost?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    pkgCostType?: NullableStringFieldUpdateOperationsInput | string | null
+    boppNetPrice?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    ctnNetPrice?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    barcodeNetPrice?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    kimbleNetPrice?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    taftaNetPrice?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    threadNetPrice?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
     bodyArticle?: NullableStringFieldUpdateOperationsInput | string | null
     bodyArticleDescription?: NullableStringFieldUpdateOperationsInput | string | null
     fabricArticleNumber?: NullableStringFieldUpdateOperationsInput | string | null
@@ -125196,6 +125913,25 @@ export namespace Prisma {
     hTrfRoughV2?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
     hTrfVdrCost?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
     hTrfFinalCost?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    printAutoBgt?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    printRoughV2?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    printVendorCost?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    printFinalCost?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    embAutoBgt?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    embRoughV2?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    embVendorCost?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    embFinalCost?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    washingAutoBgt?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    washingRoughV2?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    washingVendorCost?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    washingFinalCost?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    pkgCostType?: NullableStringFieldUpdateOperationsInput | string | null
+    boppNetPrice?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    ctnNetPrice?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    barcodeNetPrice?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    kimbleNetPrice?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    taftaNetPrice?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    threadNetPrice?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
     bodyArticle?: NullableStringFieldUpdateOperationsInput | string | null
     bodyArticleDescription?: NullableStringFieldUpdateOperationsInput | string | null
     fabricArticleNumber?: NullableStringFieldUpdateOperationsInput | string | null
@@ -125825,6 +126561,25 @@ export namespace Prisma {
     hTrfRoughV2?: Decimal | DecimalJsLike | number | string | null
     hTrfVdrCost?: Decimal | DecimalJsLike | number | string | null
     hTrfFinalCost?: Decimal | DecimalJsLike | number | string | null
+    printAutoBgt?: Decimal | DecimalJsLike | number | string | null
+    printRoughV2?: Decimal | DecimalJsLike | number | string | null
+    printVendorCost?: Decimal | DecimalJsLike | number | string | null
+    printFinalCost?: Decimal | DecimalJsLike | number | string | null
+    embAutoBgt?: Decimal | DecimalJsLike | number | string | null
+    embRoughV2?: Decimal | DecimalJsLike | number | string | null
+    embVendorCost?: Decimal | DecimalJsLike | number | string | null
+    embFinalCost?: Decimal | DecimalJsLike | number | string | null
+    washingAutoBgt?: Decimal | DecimalJsLike | number | string | null
+    washingRoughV2?: Decimal | DecimalJsLike | number | string | null
+    washingVendorCost?: Decimal | DecimalJsLike | number | string | null
+    washingFinalCost?: Decimal | DecimalJsLike | number | string | null
+    pkgCostType?: string | null
+    boppNetPrice?: Decimal | DecimalJsLike | number | string | null
+    ctnNetPrice?: Decimal | DecimalJsLike | number | string | null
+    barcodeNetPrice?: Decimal | DecimalJsLike | number | string | null
+    kimbleNetPrice?: Decimal | DecimalJsLike | number | string | null
+    taftaNetPrice?: Decimal | DecimalJsLike | number | string | null
+    threadNetPrice?: Decimal | DecimalJsLike | number | string | null
     bodyArticle?: string | null
     bodyArticleDescription?: string | null
     fabricArticleNumber?: string | null
@@ -126015,6 +126770,25 @@ export namespace Prisma {
     hTrfRoughV2?: Decimal | DecimalJsLike | number | string | null
     hTrfVdrCost?: Decimal | DecimalJsLike | number | string | null
     hTrfFinalCost?: Decimal | DecimalJsLike | number | string | null
+    printAutoBgt?: Decimal | DecimalJsLike | number | string | null
+    printRoughV2?: Decimal | DecimalJsLike | number | string | null
+    printVendorCost?: Decimal | DecimalJsLike | number | string | null
+    printFinalCost?: Decimal | DecimalJsLike | number | string | null
+    embAutoBgt?: Decimal | DecimalJsLike | number | string | null
+    embRoughV2?: Decimal | DecimalJsLike | number | string | null
+    embVendorCost?: Decimal | DecimalJsLike | number | string | null
+    embFinalCost?: Decimal | DecimalJsLike | number | string | null
+    washingAutoBgt?: Decimal | DecimalJsLike | number | string | null
+    washingRoughV2?: Decimal | DecimalJsLike | number | string | null
+    washingVendorCost?: Decimal | DecimalJsLike | number | string | null
+    washingFinalCost?: Decimal | DecimalJsLike | number | string | null
+    pkgCostType?: string | null
+    boppNetPrice?: Decimal | DecimalJsLike | number | string | null
+    ctnNetPrice?: Decimal | DecimalJsLike | number | string | null
+    barcodeNetPrice?: Decimal | DecimalJsLike | number | string | null
+    kimbleNetPrice?: Decimal | DecimalJsLike | number | string | null
+    taftaNetPrice?: Decimal | DecimalJsLike | number | string | null
+    threadNetPrice?: Decimal | DecimalJsLike | number | string | null
     bodyArticle?: string | null
     bodyArticleDescription?: string | null
     fabricArticleNumber?: string | null
@@ -126208,6 +126982,25 @@ export namespace Prisma {
     hTrfRoughV2?: Decimal | DecimalJsLike | number | string | null
     hTrfVdrCost?: Decimal | DecimalJsLike | number | string | null
     hTrfFinalCost?: Decimal | DecimalJsLike | number | string | null
+    printAutoBgt?: Decimal | DecimalJsLike | number | string | null
+    printRoughV2?: Decimal | DecimalJsLike | number | string | null
+    printVendorCost?: Decimal | DecimalJsLike | number | string | null
+    printFinalCost?: Decimal | DecimalJsLike | number | string | null
+    embAutoBgt?: Decimal | DecimalJsLike | number | string | null
+    embRoughV2?: Decimal | DecimalJsLike | number | string | null
+    embVendorCost?: Decimal | DecimalJsLike | number | string | null
+    embFinalCost?: Decimal | DecimalJsLike | number | string | null
+    washingAutoBgt?: Decimal | DecimalJsLike | number | string | null
+    washingRoughV2?: Decimal | DecimalJsLike | number | string | null
+    washingVendorCost?: Decimal | DecimalJsLike | number | string | null
+    washingFinalCost?: Decimal | DecimalJsLike | number | string | null
+    pkgCostType?: string | null
+    boppNetPrice?: Decimal | DecimalJsLike | number | string | null
+    ctnNetPrice?: Decimal | DecimalJsLike | number | string | null
+    barcodeNetPrice?: Decimal | DecimalJsLike | number | string | null
+    kimbleNetPrice?: Decimal | DecimalJsLike | number | string | null
+    taftaNetPrice?: Decimal | DecimalJsLike | number | string | null
+    threadNetPrice?: Decimal | DecimalJsLike | number | string | null
     bodyArticle?: string | null
     bodyArticleDescription?: string | null
     fabricArticleNumber?: string | null
@@ -126398,6 +127191,25 @@ export namespace Prisma {
     hTrfRoughV2?: Decimal | DecimalJsLike | number | string | null
     hTrfVdrCost?: Decimal | DecimalJsLike | number | string | null
     hTrfFinalCost?: Decimal | DecimalJsLike | number | string | null
+    printAutoBgt?: Decimal | DecimalJsLike | number | string | null
+    printRoughV2?: Decimal | DecimalJsLike | number | string | null
+    printVendorCost?: Decimal | DecimalJsLike | number | string | null
+    printFinalCost?: Decimal | DecimalJsLike | number | string | null
+    embAutoBgt?: Decimal | DecimalJsLike | number | string | null
+    embRoughV2?: Decimal | DecimalJsLike | number | string | null
+    embVendorCost?: Decimal | DecimalJsLike | number | string | null
+    embFinalCost?: Decimal | DecimalJsLike | number | string | null
+    washingAutoBgt?: Decimal | DecimalJsLike | number | string | null
+    washingRoughV2?: Decimal | DecimalJsLike | number | string | null
+    washingVendorCost?: Decimal | DecimalJsLike | number | string | null
+    washingFinalCost?: Decimal | DecimalJsLike | number | string | null
+    pkgCostType?: string | null
+    boppNetPrice?: Decimal | DecimalJsLike | number | string | null
+    ctnNetPrice?: Decimal | DecimalJsLike | number | string | null
+    barcodeNetPrice?: Decimal | DecimalJsLike | number | string | null
+    kimbleNetPrice?: Decimal | DecimalJsLike | number | string | null
+    taftaNetPrice?: Decimal | DecimalJsLike | number | string | null
+    threadNetPrice?: Decimal | DecimalJsLike | number | string | null
     bodyArticle?: string | null
     bodyArticleDescription?: string | null
     fabricArticleNumber?: string | null
@@ -126746,6 +127558,25 @@ export namespace Prisma {
     hTrfRoughV2?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
     hTrfVdrCost?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
     hTrfFinalCost?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    printAutoBgt?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    printRoughV2?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    printVendorCost?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    printFinalCost?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    embAutoBgt?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    embRoughV2?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    embVendorCost?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    embFinalCost?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    washingAutoBgt?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    washingRoughV2?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    washingVendorCost?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    washingFinalCost?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    pkgCostType?: NullableStringFieldUpdateOperationsInput | string | null
+    boppNetPrice?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    ctnNetPrice?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    barcodeNetPrice?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    kimbleNetPrice?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    taftaNetPrice?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    threadNetPrice?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
     bodyArticle?: NullableStringFieldUpdateOperationsInput | string | null
     bodyArticleDescription?: NullableStringFieldUpdateOperationsInput | string | null
     fabricArticleNumber?: NullableStringFieldUpdateOperationsInput | string | null
@@ -126936,6 +127767,25 @@ export namespace Prisma {
     hTrfRoughV2?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
     hTrfVdrCost?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
     hTrfFinalCost?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    printAutoBgt?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    printRoughV2?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    printVendorCost?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    printFinalCost?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    embAutoBgt?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    embRoughV2?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    embVendorCost?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    embFinalCost?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    washingAutoBgt?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    washingRoughV2?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    washingVendorCost?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    washingFinalCost?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    pkgCostType?: NullableStringFieldUpdateOperationsInput | string | null
+    boppNetPrice?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    ctnNetPrice?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    barcodeNetPrice?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    kimbleNetPrice?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    taftaNetPrice?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    threadNetPrice?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
     bodyArticle?: NullableStringFieldUpdateOperationsInput | string | null
     bodyArticleDescription?: NullableStringFieldUpdateOperationsInput | string | null
     fabricArticleNumber?: NullableStringFieldUpdateOperationsInput | string | null
@@ -127144,6 +127994,25 @@ export namespace Prisma {
     hTrfRoughV2?: DecimalNullableFilter<"ExtractionResultFlat"> | Decimal | DecimalJsLike | number | string | null
     hTrfVdrCost?: DecimalNullableFilter<"ExtractionResultFlat"> | Decimal | DecimalJsLike | number | string | null
     hTrfFinalCost?: DecimalNullableFilter<"ExtractionResultFlat"> | Decimal | DecimalJsLike | number | string | null
+    printAutoBgt?: DecimalNullableFilter<"ExtractionResultFlat"> | Decimal | DecimalJsLike | number | string | null
+    printRoughV2?: DecimalNullableFilter<"ExtractionResultFlat"> | Decimal | DecimalJsLike | number | string | null
+    printVendorCost?: DecimalNullableFilter<"ExtractionResultFlat"> | Decimal | DecimalJsLike | number | string | null
+    printFinalCost?: DecimalNullableFilter<"ExtractionResultFlat"> | Decimal | DecimalJsLike | number | string | null
+    embAutoBgt?: DecimalNullableFilter<"ExtractionResultFlat"> | Decimal | DecimalJsLike | number | string | null
+    embRoughV2?: DecimalNullableFilter<"ExtractionResultFlat"> | Decimal | DecimalJsLike | number | string | null
+    embVendorCost?: DecimalNullableFilter<"ExtractionResultFlat"> | Decimal | DecimalJsLike | number | string | null
+    embFinalCost?: DecimalNullableFilter<"ExtractionResultFlat"> | Decimal | DecimalJsLike | number | string | null
+    washingAutoBgt?: DecimalNullableFilter<"ExtractionResultFlat"> | Decimal | DecimalJsLike | number | string | null
+    washingRoughV2?: DecimalNullableFilter<"ExtractionResultFlat"> | Decimal | DecimalJsLike | number | string | null
+    washingVendorCost?: DecimalNullableFilter<"ExtractionResultFlat"> | Decimal | DecimalJsLike | number | string | null
+    washingFinalCost?: DecimalNullableFilter<"ExtractionResultFlat"> | Decimal | DecimalJsLike | number | string | null
+    pkgCostType?: StringNullableFilter<"ExtractionResultFlat"> | string | null
+    boppNetPrice?: DecimalNullableFilter<"ExtractionResultFlat"> | Decimal | DecimalJsLike | number | string | null
+    ctnNetPrice?: DecimalNullableFilter<"ExtractionResultFlat"> | Decimal | DecimalJsLike | number | string | null
+    barcodeNetPrice?: DecimalNullableFilter<"ExtractionResultFlat"> | Decimal | DecimalJsLike | number | string | null
+    kimbleNetPrice?: DecimalNullableFilter<"ExtractionResultFlat"> | Decimal | DecimalJsLike | number | string | null
+    taftaNetPrice?: DecimalNullableFilter<"ExtractionResultFlat"> | Decimal | DecimalJsLike | number | string | null
+    threadNetPrice?: DecimalNullableFilter<"ExtractionResultFlat"> | Decimal | DecimalJsLike | number | string | null
     bodyArticle?: StringNullableFilter<"ExtractionResultFlat"> | string | null
     bodyArticleDescription?: StringNullableFilter<"ExtractionResultFlat"> | string | null
     fabricArticleNumber?: StringNullableFilter<"ExtractionResultFlat"> | string | null
@@ -127598,6 +128467,25 @@ export namespace Prisma {
     hTrfRoughV2?: Decimal | DecimalJsLike | number | string | null
     hTrfVdrCost?: Decimal | DecimalJsLike | number | string | null
     hTrfFinalCost?: Decimal | DecimalJsLike | number | string | null
+    printAutoBgt?: Decimal | DecimalJsLike | number | string | null
+    printRoughV2?: Decimal | DecimalJsLike | number | string | null
+    printVendorCost?: Decimal | DecimalJsLike | number | string | null
+    printFinalCost?: Decimal | DecimalJsLike | number | string | null
+    embAutoBgt?: Decimal | DecimalJsLike | number | string | null
+    embRoughV2?: Decimal | DecimalJsLike | number | string | null
+    embVendorCost?: Decimal | DecimalJsLike | number | string | null
+    embFinalCost?: Decimal | DecimalJsLike | number | string | null
+    washingAutoBgt?: Decimal | DecimalJsLike | number | string | null
+    washingRoughV2?: Decimal | DecimalJsLike | number | string | null
+    washingVendorCost?: Decimal | DecimalJsLike | number | string | null
+    washingFinalCost?: Decimal | DecimalJsLike | number | string | null
+    pkgCostType?: string | null
+    boppNetPrice?: Decimal | DecimalJsLike | number | string | null
+    ctnNetPrice?: Decimal | DecimalJsLike | number | string | null
+    barcodeNetPrice?: Decimal | DecimalJsLike | number | string | null
+    kimbleNetPrice?: Decimal | DecimalJsLike | number | string | null
+    taftaNetPrice?: Decimal | DecimalJsLike | number | string | null
+    threadNetPrice?: Decimal | DecimalJsLike | number | string | null
     bodyArticle?: string | null
     bodyArticleDescription?: string | null
     fabricArticleNumber?: string | null
@@ -127788,6 +128676,25 @@ export namespace Prisma {
     hTrfRoughV2?: Decimal | DecimalJsLike | number | string | null
     hTrfVdrCost?: Decimal | DecimalJsLike | number | string | null
     hTrfFinalCost?: Decimal | DecimalJsLike | number | string | null
+    printAutoBgt?: Decimal | DecimalJsLike | number | string | null
+    printRoughV2?: Decimal | DecimalJsLike | number | string | null
+    printVendorCost?: Decimal | DecimalJsLike | number | string | null
+    printFinalCost?: Decimal | DecimalJsLike | number | string | null
+    embAutoBgt?: Decimal | DecimalJsLike | number | string | null
+    embRoughV2?: Decimal | DecimalJsLike | number | string | null
+    embVendorCost?: Decimal | DecimalJsLike | number | string | null
+    embFinalCost?: Decimal | DecimalJsLike | number | string | null
+    washingAutoBgt?: Decimal | DecimalJsLike | number | string | null
+    washingRoughV2?: Decimal | DecimalJsLike | number | string | null
+    washingVendorCost?: Decimal | DecimalJsLike | number | string | null
+    washingFinalCost?: Decimal | DecimalJsLike | number | string | null
+    pkgCostType?: string | null
+    boppNetPrice?: Decimal | DecimalJsLike | number | string | null
+    ctnNetPrice?: Decimal | DecimalJsLike | number | string | null
+    barcodeNetPrice?: Decimal | DecimalJsLike | number | string | null
+    kimbleNetPrice?: Decimal | DecimalJsLike | number | string | null
+    taftaNetPrice?: Decimal | DecimalJsLike | number | string | null
+    threadNetPrice?: Decimal | DecimalJsLike | number | string | null
     bodyArticle?: string | null
     bodyArticleDescription?: string | null
     fabricArticleNumber?: string | null
@@ -129530,6 +130437,25 @@ export namespace Prisma {
     hTrfRoughV2?: Decimal | DecimalJsLike | number | string | null
     hTrfVdrCost?: Decimal | DecimalJsLike | number | string | null
     hTrfFinalCost?: Decimal | DecimalJsLike | number | string | null
+    printAutoBgt?: Decimal | DecimalJsLike | number | string | null
+    printRoughV2?: Decimal | DecimalJsLike | number | string | null
+    printVendorCost?: Decimal | DecimalJsLike | number | string | null
+    printFinalCost?: Decimal | DecimalJsLike | number | string | null
+    embAutoBgt?: Decimal | DecimalJsLike | number | string | null
+    embRoughV2?: Decimal | DecimalJsLike | number | string | null
+    embVendorCost?: Decimal | DecimalJsLike | number | string | null
+    embFinalCost?: Decimal | DecimalJsLike | number | string | null
+    washingAutoBgt?: Decimal | DecimalJsLike | number | string | null
+    washingRoughV2?: Decimal | DecimalJsLike | number | string | null
+    washingVendorCost?: Decimal | DecimalJsLike | number | string | null
+    washingFinalCost?: Decimal | DecimalJsLike | number | string | null
+    pkgCostType?: string | null
+    boppNetPrice?: Decimal | DecimalJsLike | number | string | null
+    ctnNetPrice?: Decimal | DecimalJsLike | number | string | null
+    barcodeNetPrice?: Decimal | DecimalJsLike | number | string | null
+    kimbleNetPrice?: Decimal | DecimalJsLike | number | string | null
+    taftaNetPrice?: Decimal | DecimalJsLike | number | string | null
+    threadNetPrice?: Decimal | DecimalJsLike | number | string | null
     bodyArticle?: string | null
     bodyArticleDescription?: string | null
     fabricArticleNumber?: string | null
@@ -129720,6 +130646,25 @@ export namespace Prisma {
     hTrfRoughV2?: Decimal | DecimalJsLike | number | string | null
     hTrfVdrCost?: Decimal | DecimalJsLike | number | string | null
     hTrfFinalCost?: Decimal | DecimalJsLike | number | string | null
+    printAutoBgt?: Decimal | DecimalJsLike | number | string | null
+    printRoughV2?: Decimal | DecimalJsLike | number | string | null
+    printVendorCost?: Decimal | DecimalJsLike | number | string | null
+    printFinalCost?: Decimal | DecimalJsLike | number | string | null
+    embAutoBgt?: Decimal | DecimalJsLike | number | string | null
+    embRoughV2?: Decimal | DecimalJsLike | number | string | null
+    embVendorCost?: Decimal | DecimalJsLike | number | string | null
+    embFinalCost?: Decimal | DecimalJsLike | number | string | null
+    washingAutoBgt?: Decimal | DecimalJsLike | number | string | null
+    washingRoughV2?: Decimal | DecimalJsLike | number | string | null
+    washingVendorCost?: Decimal | DecimalJsLike | number | string | null
+    washingFinalCost?: Decimal | DecimalJsLike | number | string | null
+    pkgCostType?: string | null
+    boppNetPrice?: Decimal | DecimalJsLike | number | string | null
+    ctnNetPrice?: Decimal | DecimalJsLike | number | string | null
+    barcodeNetPrice?: Decimal | DecimalJsLike | number | string | null
+    kimbleNetPrice?: Decimal | DecimalJsLike | number | string | null
+    taftaNetPrice?: Decimal | DecimalJsLike | number | string | null
+    threadNetPrice?: Decimal | DecimalJsLike | number | string | null
     bodyArticle?: string | null
     bodyArticleDescription?: string | null
     fabricArticleNumber?: string | null
@@ -129961,6 +130906,25 @@ export namespace Prisma {
     hTrfRoughV2?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
     hTrfVdrCost?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
     hTrfFinalCost?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    printAutoBgt?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    printRoughV2?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    printVendorCost?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    printFinalCost?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    embAutoBgt?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    embRoughV2?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    embVendorCost?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    embFinalCost?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    washingAutoBgt?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    washingRoughV2?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    washingVendorCost?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    washingFinalCost?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    pkgCostType?: NullableStringFieldUpdateOperationsInput | string | null
+    boppNetPrice?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    ctnNetPrice?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    barcodeNetPrice?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    kimbleNetPrice?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    taftaNetPrice?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    threadNetPrice?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
     bodyArticle?: NullableStringFieldUpdateOperationsInput | string | null
     bodyArticleDescription?: NullableStringFieldUpdateOperationsInput | string | null
     fabricArticleNumber?: NullableStringFieldUpdateOperationsInput | string | null
@@ -130151,6 +131115,25 @@ export namespace Prisma {
     hTrfRoughV2?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
     hTrfVdrCost?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
     hTrfFinalCost?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    printAutoBgt?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    printRoughV2?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    printVendorCost?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    printFinalCost?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    embAutoBgt?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    embRoughV2?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    embVendorCost?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    embFinalCost?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    washingAutoBgt?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    washingRoughV2?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    washingVendorCost?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    washingFinalCost?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    pkgCostType?: NullableStringFieldUpdateOperationsInput | string | null
+    boppNetPrice?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    ctnNetPrice?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    barcodeNetPrice?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    kimbleNetPrice?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    taftaNetPrice?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    threadNetPrice?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
     bodyArticle?: NullableStringFieldUpdateOperationsInput | string | null
     bodyArticleDescription?: NullableStringFieldUpdateOperationsInput | string | null
     fabricArticleNumber?: NullableStringFieldUpdateOperationsInput | string | null
@@ -131144,6 +132127,25 @@ export namespace Prisma {
     hTrfRoughV2?: Decimal | DecimalJsLike | number | string | null
     hTrfVdrCost?: Decimal | DecimalJsLike | number | string | null
     hTrfFinalCost?: Decimal | DecimalJsLike | number | string | null
+    printAutoBgt?: Decimal | DecimalJsLike | number | string | null
+    printRoughV2?: Decimal | DecimalJsLike | number | string | null
+    printVendorCost?: Decimal | DecimalJsLike | number | string | null
+    printFinalCost?: Decimal | DecimalJsLike | number | string | null
+    embAutoBgt?: Decimal | DecimalJsLike | number | string | null
+    embRoughV2?: Decimal | DecimalJsLike | number | string | null
+    embVendorCost?: Decimal | DecimalJsLike | number | string | null
+    embFinalCost?: Decimal | DecimalJsLike | number | string | null
+    washingAutoBgt?: Decimal | DecimalJsLike | number | string | null
+    washingRoughV2?: Decimal | DecimalJsLike | number | string | null
+    washingVendorCost?: Decimal | DecimalJsLike | number | string | null
+    washingFinalCost?: Decimal | DecimalJsLike | number | string | null
+    pkgCostType?: string | null
+    boppNetPrice?: Decimal | DecimalJsLike | number | string | null
+    ctnNetPrice?: Decimal | DecimalJsLike | number | string | null
+    barcodeNetPrice?: Decimal | DecimalJsLike | number | string | null
+    kimbleNetPrice?: Decimal | DecimalJsLike | number | string | null
+    taftaNetPrice?: Decimal | DecimalJsLike | number | string | null
+    threadNetPrice?: Decimal | DecimalJsLike | number | string | null
     bodyArticle?: string | null
     bodyArticleDescription?: string | null
     fabricArticleNumber?: string | null
@@ -131340,6 +132342,25 @@ export namespace Prisma {
     hTrfRoughV2?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
     hTrfVdrCost?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
     hTrfFinalCost?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    printAutoBgt?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    printRoughV2?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    printVendorCost?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    printFinalCost?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    embAutoBgt?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    embRoughV2?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    embVendorCost?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    embFinalCost?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    washingAutoBgt?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    washingRoughV2?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    washingVendorCost?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    washingFinalCost?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    pkgCostType?: NullableStringFieldUpdateOperationsInput | string | null
+    boppNetPrice?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    ctnNetPrice?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    barcodeNetPrice?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    kimbleNetPrice?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    taftaNetPrice?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    threadNetPrice?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
     bodyArticle?: NullableStringFieldUpdateOperationsInput | string | null
     bodyArticleDescription?: NullableStringFieldUpdateOperationsInput | string | null
     fabricArticleNumber?: NullableStringFieldUpdateOperationsInput | string | null
@@ -131530,6 +132551,25 @@ export namespace Prisma {
     hTrfRoughV2?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
     hTrfVdrCost?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
     hTrfFinalCost?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    printAutoBgt?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    printRoughV2?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    printVendorCost?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    printFinalCost?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    embAutoBgt?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    embRoughV2?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    embVendorCost?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    embFinalCost?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    washingAutoBgt?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    washingRoughV2?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    washingVendorCost?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    washingFinalCost?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    pkgCostType?: NullableStringFieldUpdateOperationsInput | string | null
+    boppNetPrice?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    ctnNetPrice?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    barcodeNetPrice?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    kimbleNetPrice?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    taftaNetPrice?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    threadNetPrice?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
     bodyArticle?: NullableStringFieldUpdateOperationsInput | string | null
     bodyArticleDescription?: NullableStringFieldUpdateOperationsInput | string | null
     fabricArticleNumber?: NullableStringFieldUpdateOperationsInput | string | null
@@ -131719,6 +132759,25 @@ export namespace Prisma {
     hTrfRoughV2?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
     hTrfVdrCost?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
     hTrfFinalCost?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    printAutoBgt?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    printRoughV2?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    printVendorCost?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    printFinalCost?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    embAutoBgt?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    embRoughV2?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    embVendorCost?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    embFinalCost?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    washingAutoBgt?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    washingRoughV2?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    washingVendorCost?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    washingFinalCost?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    pkgCostType?: NullableStringFieldUpdateOperationsInput | string | null
+    boppNetPrice?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    ctnNetPrice?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    barcodeNetPrice?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    kimbleNetPrice?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    taftaNetPrice?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    threadNetPrice?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
     bodyArticle?: NullableStringFieldUpdateOperationsInput | string | null
     bodyArticleDescription?: NullableStringFieldUpdateOperationsInput | string | null
     fabricArticleNumber?: NullableStringFieldUpdateOperationsInput | string | null
@@ -131989,6 +133048,25 @@ export namespace Prisma {
     hTrfRoughV2?: Decimal | DecimalJsLike | number | string | null
     hTrfVdrCost?: Decimal | DecimalJsLike | number | string | null
     hTrfFinalCost?: Decimal | DecimalJsLike | number | string | null
+    printAutoBgt?: Decimal | DecimalJsLike | number | string | null
+    printRoughV2?: Decimal | DecimalJsLike | number | string | null
+    printVendorCost?: Decimal | DecimalJsLike | number | string | null
+    printFinalCost?: Decimal | DecimalJsLike | number | string | null
+    embAutoBgt?: Decimal | DecimalJsLike | number | string | null
+    embRoughV2?: Decimal | DecimalJsLike | number | string | null
+    embVendorCost?: Decimal | DecimalJsLike | number | string | null
+    embFinalCost?: Decimal | DecimalJsLike | number | string | null
+    washingAutoBgt?: Decimal | DecimalJsLike | number | string | null
+    washingRoughV2?: Decimal | DecimalJsLike | number | string | null
+    washingVendorCost?: Decimal | DecimalJsLike | number | string | null
+    washingFinalCost?: Decimal | DecimalJsLike | number | string | null
+    pkgCostType?: string | null
+    boppNetPrice?: Decimal | DecimalJsLike | number | string | null
+    ctnNetPrice?: Decimal | DecimalJsLike | number | string | null
+    barcodeNetPrice?: Decimal | DecimalJsLike | number | string | null
+    kimbleNetPrice?: Decimal | DecimalJsLike | number | string | null
+    taftaNetPrice?: Decimal | DecimalJsLike | number | string | null
+    threadNetPrice?: Decimal | DecimalJsLike | number | string | null
     bodyArticle?: string | null
     bodyArticleDescription?: string | null
     fabricArticleNumber?: string | null
@@ -132337,6 +133415,25 @@ export namespace Prisma {
     hTrfRoughV2?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
     hTrfVdrCost?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
     hTrfFinalCost?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    printAutoBgt?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    printRoughV2?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    printVendorCost?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    printFinalCost?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    embAutoBgt?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    embRoughV2?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    embVendorCost?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    embFinalCost?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    washingAutoBgt?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    washingRoughV2?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    washingVendorCost?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    washingFinalCost?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    pkgCostType?: NullableStringFieldUpdateOperationsInput | string | null
+    boppNetPrice?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    ctnNetPrice?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    barcodeNetPrice?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    kimbleNetPrice?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    taftaNetPrice?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    threadNetPrice?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
     bodyArticle?: NullableStringFieldUpdateOperationsInput | string | null
     bodyArticleDescription?: NullableStringFieldUpdateOperationsInput | string | null
     fabricArticleNumber?: NullableStringFieldUpdateOperationsInput | string | null
@@ -132527,6 +133624,25 @@ export namespace Prisma {
     hTrfRoughV2?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
     hTrfVdrCost?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
     hTrfFinalCost?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    printAutoBgt?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    printRoughV2?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    printVendorCost?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    printFinalCost?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    embAutoBgt?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    embRoughV2?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    embVendorCost?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    embFinalCost?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    washingAutoBgt?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    washingRoughV2?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    washingVendorCost?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    washingFinalCost?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    pkgCostType?: NullableStringFieldUpdateOperationsInput | string | null
+    boppNetPrice?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    ctnNetPrice?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    barcodeNetPrice?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    kimbleNetPrice?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    taftaNetPrice?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    threadNetPrice?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
     bodyArticle?: NullableStringFieldUpdateOperationsInput | string | null
     bodyArticleDescription?: NullableStringFieldUpdateOperationsInput | string | null
     fabricArticleNumber?: NullableStringFieldUpdateOperationsInput | string | null
@@ -132716,6 +133832,25 @@ export namespace Prisma {
     hTrfRoughV2?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
     hTrfVdrCost?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
     hTrfFinalCost?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    printAutoBgt?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    printRoughV2?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    printVendorCost?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    printFinalCost?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    embAutoBgt?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    embRoughV2?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    embVendorCost?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    embFinalCost?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    washingAutoBgt?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    washingRoughV2?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    washingVendorCost?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    washingFinalCost?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    pkgCostType?: NullableStringFieldUpdateOperationsInput | string | null
+    boppNetPrice?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    ctnNetPrice?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    barcodeNetPrice?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    kimbleNetPrice?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    taftaNetPrice?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    threadNetPrice?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
     bodyArticle?: NullableStringFieldUpdateOperationsInput | string | null
     bodyArticleDescription?: NullableStringFieldUpdateOperationsInput | string | null
     fabricArticleNumber?: NullableStringFieldUpdateOperationsInput | string | null
