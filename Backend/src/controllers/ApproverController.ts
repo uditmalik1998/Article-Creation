@@ -4178,7 +4178,7 @@ export class ApproverController {
     static async addColor(req: Request, res: Response) {
         try {
             const { id } = req.params;
-            const { color, colors, sizes, colorImages } = req.body;
+            const { color, colors, sizes, sizesByColor, colorImages } = req.body;
             // Accept either colors[] (new) or color string (legacy)
             const colorList: string[] = Array.isArray(colors)
                 ? colors.map((c: string) => c.trim().toUpperCase()).filter(Boolean)
@@ -4206,28 +4206,42 @@ export class ApproverController {
 
             // Manual mode: validate requested sizes against the Major Category's
             // allowed sizes (maj_cat_sizes). Reject the whole request on any invalid size.
+            // `sizesByColor` ({ COLOR: [sizes] }) picks sizes per color and wins over
+            // the global `sizes` list for that color.
+            const perColorSizes: Record<string, string[]> = {};
+            if (sizesByColor && typeof sizesByColor === 'object') {
+                for (const [k, v] of Object.entries(sizesByColor)) {
+                    if (!Array.isArray(v)) continue;
+                    const list = v.map((s) => String(s).trim()).filter(Boolean);
+                    if (list.length > 0) perColorSizes[k.trim().toUpperCase()] = list;
+                }
+            }
+            const requestedSizes = [
+                ...(Array.isArray(sizes) ? sizes.map((s: string) => String(s).trim()).filter(Boolean) : []),
+                ...Object.values(perColorSizes).flat(),
+            ];
             let sizesOverride: string[] | undefined;
-            if (Array.isArray(sizes) && sizes.length > 0) {
+            if (requestedSizes.length > 0) {
                 const generic = await prisma.extractionResultFlat.findUnique({
                     where: { id }, select: { majorCategory: true },
                 });
                 const allowed = await getSizesForMajCat(generic?.majorCategory || '');
                 const allowedUpper = new Set(allowed.map((s) => s.trim().toUpperCase()));
-                const invalid = sizes
-                    .map((s: string) => String(s).trim())
-                    .filter((s: string) => s && !allowedUpper.has(s.toUpperCase()));
+                const invalid = [...new Set(requestedSizes.filter((s) => !allowedUpper.has(s.toUpperCase())))];
                 if (invalid.length > 0) {
                     return res.status(422).json({
                         error: 'INVALID_SIZE_FOR_CATEGORY',
                         detail: `Size(s) not allowed for category '${generic?.majorCategory ?? ''}': ${invalid.join(', ')}.`,
                     });
                 }
-                sizesOverride = sizes.map((s: string) => String(s).trim()).filter(Boolean);
+                if (Array.isArray(sizes) && sizes.length > 0) {
+                    sizesOverride = sizes.map((s: string) => String(s).trim()).filter(Boolean);
+                }
             }
 
             let totalCreated = 0;
             for (const c of colorList) {
-                totalCreated += await addColorVariants(id, c, sizesOverride, imageByColor[c]);
+                totalCreated += await addColorVariants(id, c, perColorSizes[c] ?? sizesOverride, imageByColor[c]);
             }
             return res.json({ message: `Created ${totalCreated} color variants`, count: totalCreated });
         } catch (err: any) {
@@ -4855,6 +4869,146 @@ export class ApproverController {
         const row = await prisma.gmArticleData.findUnique({ where: { id } });
         if (!row) return res.status(404).json({ error: 'Item not found' });
         return res.json(ApproverController.gmArticleDataRowToItem(row));
+    };
+
+    // ── GM variants (gm_variants_article_data: one row per size × color) ──────
+
+    // Valid sizes for a GM major category, from gm_size_master (ACT and T-ACT rows).
+    private static async gmSizesForMajCat(majCat: string): Promise<string[]> {
+        if (!majCat.trim()) return [];
+        // Raw query: gm_size_master is read the same way in gmSizeMasterController.
+        const rows = await prisma.$queryRaw<{ size: string }[]>`
+            SELECT size FROM public.gm_size_master
+            WHERE UPPER(TRIM(maj_cat)) = UPPER(${majCat.trim()})
+            ORDER BY id ASC`;
+        const seen = new Set<string>();
+        return rows
+            .map((r) => r.size.trim())
+            .filter((s) => s && !seen.has(s.toUpperCase()) && seen.add(s.toUpperCase()));
+    }
+
+    // GET /api/approver/gm-sizes-for-majcat/:majCat
+    static getGmSizesForMajCat = async (req: Request, res: Response) => {
+        const sizes = await ApproverController.gmSizesForMajCat(req.params.majCat || '');
+        return res.json({ majCat: req.params.majCat, sizes, count: sizes.length });
+    };
+
+    private static gmVariantRowToItem(r: any) {
+        return { ...ApproverController.fabricVariantRowToItem(r), variantSize: r.variantSize ?? null };
+    }
+
+    // GET /api/approver/gm-articles/:genericId/variants
+    static getGmArticleVariants = async (req: Request, res: Response) => {
+        const rows = await prisma.gmVariantArticleData.findMany({
+            where: { genericArticleId: req.params.genericId },
+            orderBy: [{ variantColor: 'asc' }, { createdAt: 'asc' }],
+        });
+        return res.json({ data: rows.map((r) => ApproverController.gmVariantRowToItem(r)) });
+    };
+
+    // POST /api/approver/gm-articles/:genericId/variants
+    // Body: { colors: string[], sizesByColor: { COLOR: string[] }, colorImages: { COLOR: url } }
+    // Creates one row per color × size; existing (size, color) pairs are skipped.
+    static addGmArticleVariants = async (req: Request, res: Response) => {
+        const { genericId } = req.params;
+        const { colors, sizesByColor, colorImages } = req.body as {
+            colors?: string[];
+            sizesByColor?: Record<string, string[]>;
+            colorImages?: Record<string, string>;
+        };
+        const colorList = Array.isArray(colors) ? colors.map((c) => String(c).trim()).filter(Boolean) : [];
+        if (colorList.length === 0) return res.status(400).json({ error: 'colors array is required' });
+
+        const parent = await prisma.gmArticleData.findUnique({ where: { id: genericId } });
+        if (!parent) return res.status(404).json({ error: 'GM article not found' });
+
+        const allowed = await ApproverController.gmSizesForMajCat(parent.majorCategory || '');
+        if (allowed.length === 0) {
+            return res.status(422).json({
+                error: 'NO_SIZES_FOR_CATEGORY',
+                detail: `No sizes are defined for '${parent.majorCategory ?? ''}' in the GM Size Master.`,
+            });
+        }
+        const allowedByUpper = new Map(allowed.map((s) => [s.toUpperCase(), s]));
+
+        const imageByColor: Record<string, string> = {};
+        for (const [k, v] of Object.entries(colorImages ?? {})) {
+            if (typeof v === 'string' && v.trim()) imageByColor[k.trim().toUpperCase()] = v.trim();
+        }
+        const missingImg = colorList.filter((c) => !imageByColor[c.toUpperCase()]);
+        if (missingImg.length > 0) {
+            return res.status(422).json({ error: 'IMAGE_REQUIRED', detail: `An image is required for each color. Missing: ${missingImg.join(', ')}.` });
+        }
+
+        // Per-color sizes (default: every allowed size); reject unknown sizes.
+        const plan: { color: string; sizes: string[] }[] = [];
+        const invalid = new Set<string>();
+        for (const color of colorList) {
+            const requested = sizesByColor?.[color] ?? sizesByColor?.[color.toUpperCase()];
+            const list = Array.isArray(requested) && requested.length > 0 ? requested : allowed;
+            const sizes: string[] = [];
+            for (const raw of list) {
+                const s = allowedByUpper.get(String(raw).trim().toUpperCase());
+                if (s) sizes.push(s);
+                else invalid.add(String(raw).trim());
+            }
+            plan.push({ color, sizes: [...new Set(sizes)] });
+        }
+        if (invalid.size > 0) {
+            return res.status(422).json({
+                error: 'INVALID_SIZE_FOR_CATEGORY',
+                detail: `Size(s) not allowed for '${parent.majorCategory ?? ''}': ${[...invalid].join(', ')}.`,
+            });
+        }
+
+        const existing = await prisma.gmVariantArticleData.findMany({
+            where: { genericArticleId: genericId },
+            select: { variantColor: true, variantSize: true },
+        });
+        const existingPairs = new Set(
+            existing.map((e) => `${(e.variantSize ?? '').toUpperCase()}||${(e.variantColor ?? '').toUpperCase()}`),
+        );
+
+        const toCreate = plan.flatMap(({ color, sizes }) =>
+            sizes
+                .filter((size) => !existingPairs.has(`${size.toUpperCase()}||${color.toUpperCase()}`))
+                .map((size) => ({ color, size })),
+        );
+        if (toCreate.length === 0) return res.status(409).json({ error: 'All selected size × color variants already exist' });
+
+        const rows = await prisma.$transaction(
+            toCreate.map(({ color, size }) =>
+                prisma.gmVariantArticleData.create({
+                    data: {
+                        genericArticleId:     genericId,
+                        genericArticleNumber: parent.gmArticleNumber ?? null,
+                        variantColor:         color,
+                        variantSize:          size,
+                        division:             parent.division ?? null,
+                        subDivision:          parent.subDivision ?? null,
+                        majorCategory:        parent.majorCategory ?? null,
+                        mcDescription:        parent.mcDescription ?? null,
+                        vendorName:           parent.vendorName ?? null,
+                        vendorCode:           parent.vendorCode ?? null,
+                        designNumber:         parent.designNumber ?? null,
+                        mrp:                  parent.mrp ?? null,
+                        rate:                 parent.rate ?? null,
+                        imageUrl:             imageByColor[color.toUpperCase()] ?? parent.imageUrl ?? null,
+                        userName:             parent.userName ?? null,
+                    },
+                }),
+            ),
+        );
+        return res.status(201).json({ count: rows.length, created: rows.map((r) => ApproverController.gmVariantRowToItem(r)) });
+    };
+
+    // DELETE /api/approver/gm-article-variant/:id — not allowed once approved.
+    static deleteGmArticleVariant = async (req: Request, res: Response) => {
+        const existing = await prisma.gmVariantArticleData.findUnique({ where: { id: req.params.id } });
+        if (!existing) return res.status(404).json({ error: 'Variant not found' });
+        if (existing.approvalStatus === 'APPROVED') return res.status(403).json({ error: 'Cannot delete an approved variant' });
+        await prisma.gmVariantArticleData.delete({ where: { id: req.params.id } });
+        return res.json({ success: true });
     };
 
     // Returns ordered description format rows for a given GM major category.

@@ -4,12 +4,6 @@ import {
   Badge,
   Button,
   DataTable,
-  Dialog,
-  DialogContent,
-  DialogFooter,
-  DialogHeader,
-  DialogTitle,
-  MultiSelect,
   Popconfirm,
   Spinner,
   Tooltip,
@@ -17,14 +11,17 @@ import {
 } from '@/shared/components/ui-tw';
 import { message } from '@/lib/message';
 import { APP_CONFIG } from '../../../constants/app/config';
+import GMAddColorModal from './GMAddColorModal';
 
 // ─── Types ────────────────────────────────────────────────────────────────────
 
+// Rows of gm_variants_article_data (one per size × color).
 interface FabricVariant {
   id: string;
   genericArticleId: string | null;
   genericArticleNumber: string | null;
   variantColor: string | null;
+  variantSize: string | null;
   variantArticleNumber: string | null;
   vendorName: string | null;
   vendorCode: string | null;
@@ -43,217 +40,21 @@ interface GMArticleVariantSubTableProps {
   pathType?: string;
 }
 
-// ─── Add Color Modal ──────────────────────────────────────────────────────────
-
-const AddColorModal: React.FC<{
-  open: boolean;
-  genericId: string;
-  existingColors: string[];
-  onClose: () => void;
-  onAdded: () => void;
-}> = ({ open, genericId, existingColors, onClose, onAdded }) => {
-  const [selectedColors, setSelectedColors] = useState<string[]>([]);
-  const [masterColors, setMasterColors] = useState<{ code: string; name: string }[]>([]);
-  const [step, setStep] = useState<1 | 2>(1);
-  const [colorImages, setColorImages] = useState<Record<string, string>>({});
-  const [uploading, setUploading] = useState<Record<string, boolean>>({});
-  const [saving, setSaving] = useState(false);
-
-  useEffect(() => {
-    if (!open) {
-      setSelectedColors([]);
-      setStep(1);
-      setColorImages({});
-      setUploading({});
-      return;
-    }
-    const token = localStorage.getItem('authToken');
-    fetch(`${APP_CONFIG.api.baseURL}/approver/colors`, {
-      headers: token ? { Authorization: `Bearer ${token}` } : {},
-    })
-      .then((r) => (r.ok ? r.json() : { colors: [] }))
-      .then((d) => setMasterColors(Array.isArray(d?.colors) ? d.colors : []))
-      .catch(() => setMasterColors([]));
-  }, [open]);
-
-  const colorLabel = (code: string) => {
-    const m = masterColors.find((c) => c.code.toUpperCase() === code.toUpperCase());
-    return m ? `${m.name} - ${m.code}` : code;
-  };
-
-  const uploadColorImage = async (code: string, file: File) => {
-    setUploading((u) => ({ ...u, [code]: true }));
-    try {
-      const token = localStorage.getItem('authToken');
-      const fd = new FormData();
-      fd.append('image', file);
-      const r = await fetch(`${APP_CONFIG.api.baseURL}/approver/upload-image`, {
-        method: 'POST',
-        headers: token ? { Authorization: `Bearer ${token}` } : {},
-        body: fd,
-      });
-      if (!r.ok) throw new Error('Upload failed');
-      const d = await r.json();
-      setColorImages((m) => ({ ...m, [code]: d.url }));
-    } catch {
-      message.error(`Failed to upload image for ${code}`);
-    } finally {
-      setUploading((u) => ({ ...u, [code]: false }));
-    }
-  };
-
-  const anyUploading = Object.values(uploading).some(Boolean);
-  const allImagesReady = selectedColors.length > 0 && selectedColors.every((c) => !!colorImages[c]);
-
-  const handleAdd = async () => {
-    if (!allImagesReady) { message.warning('Upload an image for every color'); return; }
-    setSaving(true);
-    try {
-      const token = localStorage.getItem('authToken');
-      const res = await fetch(`${APP_CONFIG.api.baseURL}/approver/fabric-article-data/${genericId}/variants`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` },
-        body: JSON.stringify({ colors: selectedColors, colorImages }),
-      });
-      if (!res.ok) {
-        const d = await res.json().catch(() => null);
-        throw new Error(d?.error || 'Failed to add colors');
-      }
-      const result = await res.json();
-      message.success(`${result.count} variant${result.count !== 1 ? 's' : ''} created`);
-      onAdded();
-      onClose();
-    } catch (err) {
-      message.error(err instanceof Error ? err.message : 'Failed to add colors');
-    } finally {
-      setSaving(false);
-    }
-  };
-
-  const isColorDisabled = (code: string) =>
-    existingColors.some((ec) => ec.toUpperCase() === code.toUpperCase());
-
-  const options = masterColors.map((c) => ({
-    value: c.code,
-    label: `${c.name} - ${c.code}`,
-    disabled: isColorDisabled(c.code),
-  }));
-
-  return (
-    <Dialog open={open} onOpenChange={(o) => !o && onClose()}>
-      <DialogContent className="max-w-[480px]">
-        <DialogHeader>
-          <DialogTitle>Add Color Variants</DialogTitle>
-        </DialogHeader>
-
-        {step === 1 && (
-          <>
-            <p className="text-sm text-muted-foreground">
-              Select one or more colors. One variant will be created per color.
-            </p>
-            <MultiSelect
-              options={options}
-              value={selectedColors}
-              onChange={setSelectedColors}
-              placeholder="Select colors…"
-              searchable
-              searchPlaceholder="Search colors…"
-            />
-            {existingColors.length > 0 && (
-              <p className="text-xs text-muted-foreground">
-                Already added: {existingColors.join(', ')}
-              </p>
-            )}
-          </>
-        )}
-
-        {step === 2 && (
-          <div className="space-y-3">
-            <p className="text-sm text-muted-foreground">
-              Upload an image for each color.
-            </p>
-            <div className="flex max-h-[50vh] flex-col gap-2 overflow-y-auto">
-              {selectedColors.map((code) => {
-                const url = colorImages[code];
-                const busy = uploading[code];
-                return (
-                  <div key={code} className="flex items-center gap-3 rounded-md border border-border p-2">
-                    <div className="h-12 w-12 shrink-0 overflow-hidden rounded bg-muted">
-                      {url ? (
-                        <img src={url} alt={code} className="h-full w-full object-cover" />
-                      ) : (
-                        <div className="flex h-full w-full items-center justify-center text-[9px] text-muted-foreground">
-                          No image
-                        </div>
-                      )}
-                    </div>
-                    <div className="min-w-0 flex-1">
-                      <div className="truncate text-[13px] font-medium">{colorLabel(code)}</div>
-                      <div className={'text-[11px] ' + (busy ? 'text-muted-foreground' : url ? 'text-emerald-600' : 'text-rose-600')}>
-                        {busy ? 'Uploading…' : url ? 'Image uploaded' : 'Required'}
-                      </div>
-                    </div>
-                    <label className="shrink-0 cursor-pointer rounded-md border border-input bg-background px-2.5 py-1 text-[12px] hover:bg-muted">
-                      {url ? 'Replace' : 'Upload'}
-                      <input
-                        type="file"
-                        accept="image/png,image/jpeg,image/jpg,image/webp"
-                        className="hidden"
-                        disabled={busy}
-                        onChange={(e) => {
-                          const f = e.target.files?.[0];
-                          if (f) uploadColorImage(code, f);
-                          e.target.value = '';
-                        }}
-                      />
-                    </label>
-                  </div>
-                );
-              })}
-            </div>
-          </div>
-        )}
-
-        <DialogFooter>
-          {step === 1 ? (
-            <>
-              <Button variant="outline" onClick={onClose}>Cancel</Button>
-              <Button onClick={() => { if (selectedColors.length === 0) { message.warning('Select at least one color'); return; } setStep(2); }} disabled={selectedColors.length === 0}>
-                Next
-              </Button>
-            </>
-          ) : (
-            <>
-              <Button variant="outline" onClick={() => setStep(1)} disabled={saving || anyUploading}>
-                Back
-              </Button>
-              <Button onClick={handleAdd} disabled={saving || anyUploading || !allImagesReady}>
-                {saving ? 'Adding…' : 'Add Colors'}
-              </Button>
-            </>
-          )}
-        </DialogFooter>
-      </DialogContent>
-    </Dialog>
-  );
-};
-
 // ─── Main Component ───────────────────────────────────────────────────────────
 
 const GMArticleVariantSubTable: React.FC<GMArticleVariantSubTableProps> = ({
   genericId,
-  pathType,
+  genericRecord,
 }) => {
   const [variants, setVariants] = useState<FabricVariant[]>([]);
   const [loading, setLoading] = useState(false);
   const [addOpen, setAddOpen] = useState(false);
-  const [retrying, setRetrying] = useState(false);
 
   const fetchVariants = useCallback(async () => {
     setLoading(true);
     try {
       const token = localStorage.getItem('authToken');
-      const res = await fetch(`${APP_CONFIG.api.baseURL}/approver/fabric-article-data/${genericId}/variants`, {
+      const res = await fetch(`${APP_CONFIG.api.baseURL}/approver/gm-articles/${genericId}/variants`, {
         headers: { Authorization: `Bearer ${token}` },
       });
       if (!res.ok) throw new Error('Failed to load variants');
@@ -271,7 +72,7 @@ const GMArticleVariantSubTable: React.FC<GMArticleVariantSubTableProps> = ({
   const handleDelete = useCallback(async (id: string) => {
     try {
       const token = localStorage.getItem('authToken');
-      const res = await fetch(`${APP_CONFIG.api.baseURL}/approver/fabric-article-variant/${id}`, {
+      const res = await fetch(`${APP_CONFIG.api.baseURL}/approver/gm-article-variant/${id}`, {
         method: 'DELETE',
         headers: { Authorization: `Bearer ${token}` },
       });
@@ -286,8 +87,10 @@ const GMArticleVariantSubTable: React.FC<GMArticleVariantSubTableProps> = ({
     }
   }, [fetchVariants]);
 
-  const existingColors = Array.from(
-    new Set(variants.map((v) => v.variantColor).filter((c): c is string => Boolean(c)))
+  const existingPairs = new Set(
+    variants
+      .filter((v) => v.variantSize && v.variantColor)
+      .map((v) => `${String(v.variantSize).trim().toUpperCase()}||${String(v.variantColor).trim().toUpperCase()}`),
   );
 
   const columns: DataTableColumn<FabricVariant>[] = [
@@ -298,6 +101,13 @@ const GMArticleVariantSubTable: React.FC<GMArticleVariantSubTableProps> = ({
       width: 140,
       render: (v: string | null) =>
         v ? <Badge variant="info">{v}</Badge> : <span className="text-muted-foreground">—</span>,
+    },
+    {
+      title: 'Size',
+      dataIndex: 'variantSize',
+      key: 'variantSize',
+      width: 80,
+      render: (v: string | null) => (v ? <strong className="text-xs">{v}</strong> : <span className="text-muted-foreground">—</span>),
     },
     {
       title: 'Image',
@@ -408,39 +218,11 @@ const GMArticleVariantSubTable: React.FC<GMArticleVariantSubTableProps> = ({
     );
   }
 
-  const handleRetry = async () => {
-    setRetrying(true);
-    try {
-      const token = localStorage.getItem('authToken');
-      const res = await fetch(`${APP_CONFIG.api.baseURL}/approver/fabric-article-data/${genericId}/retry-variants`, {
-        method: 'POST',
-        headers: { Authorization: `Bearer ${token}` },
-      });
-      const d = await res.json();
-      if (!res.ok) throw new Error(d?.error || 'Retry failed');
-      message.success(d.message || `${d.synced} synced, ${d.failed} failed`);
-      fetchVariants();
-    } catch (err) {
-      message.error(err instanceof Error ? err.message : 'Retry failed');
-    } finally {
-      setRetrying(false);
-    }
-  };
-
-  const failedOrUnsyncedCount = variants.filter(
-    (v) => v.sapSyncStatus === 'FAILED' || (v.approvalStatus !== 'APPROVED' && !v.variantArticleNumber),
-  ).length;
-
   return (
     <div className="rounded-md bg-muted/30 p-4">
       <div className="mb-2 flex items-center justify-between">
         <strong className="text-[13px]">Color Variants ({variants.length})</strong>
         <div className="flex items-center gap-2">
-          {failedOrUnsyncedCount > 0 && (
-            <Button size="sm" variant="destructive" disabled={retrying} onClick={handleRetry}>
-              {retrying ? 'Retrying…' : `Retry to SAP (${failedOrUnsyncedCount})`}
-            </Button>
-          )}
           <Button size="sm" variant="outline" onClick={() => setAddOpen(true)}>
             <Plus />
             Add Color
@@ -463,10 +245,12 @@ const GMArticleVariantSubTable: React.FC<GMArticleVariantSubTableProps> = ({
         />
       )}
 
-      <AddColorModal
+      <GMAddColorModal
         open={addOpen}
         genericId={genericId}
-        existingColors={existingColors}
+        majorCategory={genericRecord.majorCategory || ''}
+        existingPairs={existingPairs}
+        attributes={[]}
         onClose={() => setAddOpen(false)}
         onAdded={fetchVariants}
       />
