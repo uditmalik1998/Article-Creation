@@ -54,6 +54,7 @@ import {
 } from '../../../services/articleConfigService';
 import { formatDivisionLabel } from '../../../shared/utils/ui/formatters';
 import { variantCreatingIds } from '../../fabric-article/variantCreationState';
+import { CARD_THEME } from '../components/cardTheme';
 
 // ─── History field display labels (camelCase → human label) ──────────────────
 const FIELD_LABELS: Record<string, string> = {
@@ -96,14 +97,10 @@ const FIELD_LABELS: Record<string, string> = {
 // ─── Helpers ─────────────────────────────────────────────────────────────────
 
 // Cost fields summed from a set's pieces into the set article (see Backend comboLinkService).
+// cmtpCost / cmpCost / fabCost / valueAddCost / valueAddProcessCost no longer exist on the article.
 const COMBO_COST_COLUMNS: { field: string; label: string }[] = [
   { field: 'rate', label: 'Rate' },
   { field: 'mrp', label: 'MRP' },
-  { field: 'cmtpCost', label: 'CMTP' },
-  { field: 'cmpCost', label: 'CMP' },
-  { field: 'fabCost', label: 'Fab Cost' },
-  { field: 'valueAddCost', label: 'VA Acc' },
-  { field: 'valueAddProcessCost', label: 'VA Proc' },
   { field: 'vendorFabricRate', label: 'Vendor Fab Rate' },
 ];
 const formatComboCost = (v: unknown) => {
@@ -1405,70 +1402,73 @@ export default function ArticleDetailPage({
         </div>
       </div>
 
-      {/* Combo/Set article — one tab per piece (Kurti Set, Baba Suit, ...) */}
+      {/* Combo/Set article — one tab per piece (Kurti Set, Baba Suit, ...). Same slate card style
+          as the other cards on this page (slate header bar, slate outline, white body: cardTheme.ts). */}
       {!loadingItem && isComboItem && currentItem && (
-        <div className="mb-2 rounded-xl border border-amber-200 bg-amber-50/60 p-2">
-          <div className="flex flex-wrap items-center gap-1.5">
-            <span className="mr-1 flex items-center gap-1.5 text-[12px] font-semibold text-amber-900">
+        <div className="mb-2 overflow-hidden rounded-xl border bg-white" style={{ borderColor: CARD_THEME.border }}>
+          <div className="flex flex-wrap items-center gap-1.5 px-3 py-2" style={{ background: CARD_THEME.bg, color: CARD_THEME.fg }}>
+            <span className="mr-1 flex items-center gap-1.5 text-[10.5px] font-bold uppercase tracking-[0.08em]">
               <PackagePlus className="h-4 w-4" /> Set Article
             </span>
             {[{ id: 'parent', item: currentItem, label: `${currentItem.majorCategory || 'Set'} (Summary)` },
               ...comboChildren.map((c, i) => ({ id: c.id, item: c, label: `${c.majorCategory || 'Part'}${i === 0 ? ' · Top' : ''}` }))]
               .map(({ id: tabId, item: tabItem, label }) => (
                 <button key={tabId} type="button" onClick={() => setComboTab(tabId)}
-                  className={`flex items-center gap-1.5 rounded-md border px-2.5 py-1 text-[12px] font-medium ${comboTab === tabId ? 'border-amber-500 bg-white text-amber-900 shadow-sm' : 'border-transparent text-amber-800 hover:bg-white/60'}`}>
-                  <span className={`h-1.5 w-1.5 rounded-full ${tabItem.sapSyncStatus === 'SYNCED' ? 'bg-emerald-500' : tabItem.sapSyncStatus === 'FAILED' ? 'bg-rose-500' : tabItem.approvalStatus === 'APPROVED' ? 'bg-amber-500' : 'bg-slate-300'}`} />
+                  className={`flex items-center gap-1.5 rounded-md px-2.5 py-1 text-[12px] font-medium transition-colors ${comboTab === tabId ? 'bg-white text-slate-900 shadow-sm' : 'text-slate-200 hover:bg-white/10'}`}>
+                  <span className={`h-1.5 w-1.5 rounded-full ${tabItem.sapSyncStatus === 'SYNCED' ? 'bg-emerald-500' : tabItem.sapSyncStatus === 'FAILED' ? 'bg-rose-500' : tabItem.approvalStatus === 'APPROVED' ? 'bg-amber-400' : 'bg-slate-400'}`} />
                   {label}
                 </button>
               ))}
-            {comboLoading && <Loader2 className="h-3.5 w-3.5 animate-spin text-amber-700" />}
+            {comboLoading && <Loader2 className="h-3.5 w-3.5 animate-spin text-slate-300" />}
             <div className="ml-auto flex items-center gap-1.5">
               {activeComboChild && !(activeComboChild as any).srmOriginalDesignNumber && activeComboChild.approvalStatus === 'PENDING' && (
-                <Button size="sm" variant="ghost" onClick={() => removeComboChild(activeComboChild.id)} className="h-7 px-2 text-[12px] text-rose-600 hover:bg-rose-50">
+                <Button size="sm" variant="ghost" onClick={() => removeComboChild(activeComboChild.id)} className="h-7 px-2 text-[12px] text-rose-300 hover:bg-white/10 hover:text-rose-200">
                   <Trash2 className="h-3.5 w-3.5" /> Remove part
                 </Button>
               )}
-              <Button size="sm" variant="outline" onClick={addComboChild} disabled={currentItem.approvalStatus !== 'PENDING'} className="h-7 px-2.5 text-[12px]">
+              <Button size="sm" variant="outline" onClick={addComboChild} disabled={currentItem.approvalStatus !== 'PENDING'} className="h-7 border-white/30 bg-transparent px-2.5 text-[12px] text-slate-50 hover:bg-white/10 hover:text-white disabled:opacity-40">
                 <Plus className="h-3.5 w-3.5" /> Add part
               </Button>
             </div>
           </div>
 
           {comboTab === 'parent' && (
-            comboChildren.length === 0 ? (
-              <div className="mt-2 rounded-md border border-dashed border-amber-300 bg-white/50 px-3 py-3 text-center text-[12px] text-amber-700">
-                {comboLoading ? 'Loading parts…' : 'No parts linked yet — the parts uploaded with this set in SRM are linked automatically. Use "Add part" if one is missing.'}
-              </div>
-            ) : (
-              <div className="mt-2 overflow-x-auto rounded-md border border-amber-200 bg-white">
-                <table className="w-full text-[12px]">
-                  <thead className="bg-amber-50 text-amber-900">
-                    <tr>
-                      <th className="px-2 py-1 text-left font-semibold">Part</th>
-                      {COMBO_COST_COLUMNS.map(c => <th key={c.field} className="px-2 py-1 text-right font-semibold">{c.label}</th>)}
-                      <th className="px-2 py-1 text-left font-semibold">SAP</th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    {comboChildren.map((c, i) => (
-                      <tr key={c.id} className="cursor-pointer border-t border-amber-100 hover:bg-amber-50/50" onClick={() => setComboTab(c.id)}>
-                        <td className="px-2 py-1 font-medium text-slate-800">{c.majorCategory || 'Part'}{i === 0 && <span className="ml-1 text-[10px] text-amber-600">(Top — attributes shown on set)</span>}</td>
-                        {COMBO_COST_COLUMNS.map(col => <td key={col.field} className="px-2 py-1 text-right tabular-nums">{formatComboCost((c as any)[col.field])}</td>)}
-                        <td className="px-2 py-1 text-slate-600">{c.sapArticleId || (c.sapSyncStatus === 'FAILED' ? 'Failed' : c.approvalStatus === 'APPROVED' ? 'Creating…' : '—')}</td>
-                      </tr>
-                    ))}
-                    <tr className="border-t-2 border-amber-300 bg-amber-50/70 font-semibold text-amber-900">
-                      <td className="px-2 py-1">Set total</td>
-                      {COMBO_COST_COLUMNS.map(col => <td key={col.field} className="px-2 py-1 text-right tabular-nums">{formatComboCost((currentItem as any)[col.field])}</td>)}
-                      <td className="px-2 py-1">{currentItem.sapArticleId || '—'}</td>
-                    </tr>
-                  </tbody>
-                </table>
-                <div className="border-t border-amber-100 px-2 py-1 text-[11px] text-amber-700">
-                  The set card below is read-only: costs are the sum of the parts and attributes come from the Top part. Edit them on each part's tab. Save &amp; Submit creates every part in SAP, then the set.
+            <div className="p-2">
+              {comboChildren.length === 0 ? (
+                <div className="rounded-md border border-dashed border-slate-300 bg-slate-50 px-3 py-3 text-center text-[12px] text-slate-600">
+                  {comboLoading ? 'Loading parts…' : 'No parts linked yet — the parts uploaded with this set in SRM are linked automatically. Use "Add part" if one is missing.'}
                 </div>
-              </div>
-            )
+              ) : (
+                <div className="overflow-x-auto rounded-md border border-slate-200 bg-white">
+                  <table className="w-full text-[12px]">
+                    <thead className="bg-slate-100 text-slate-700">
+                      <tr>
+                        <th className="px-2 py-1 text-left font-semibold">Part</th>
+                        {COMBO_COST_COLUMNS.map(c => <th key={c.field} className="px-2 py-1 text-right font-semibold">{c.label}</th>)}
+                        <th className="px-2 py-1 text-left font-semibold">SAP</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {comboChildren.map((c, i) => (
+                        <tr key={c.id} className="cursor-pointer border-t border-slate-100 hover:bg-slate-50" onClick={() => setComboTab(c.id)}>
+                          <td className="px-2 py-1 font-medium text-slate-800">{c.majorCategory || 'Part'}{i === 0 && <span className="ml-1 text-[10px] text-slate-500">(Top — attributes shown on set)</span>}</td>
+                          {COMBO_COST_COLUMNS.map(col => <td key={col.field} className="px-2 py-1 text-right tabular-nums">{formatComboCost((c as any)[col.field])}</td>)}
+                          <td className="px-2 py-1 text-slate-600">{c.sapArticleId || (c.sapSyncStatus === 'FAILED' ? 'Failed' : c.approvalStatus === 'APPROVED' ? 'Creating…' : '—')}</td>
+                        </tr>
+                      ))}
+                      <tr className="border-t-2 border-slate-300 bg-slate-100 font-semibold text-slate-900">
+                        <td className="px-2 py-1">Set total</td>
+                        {COMBO_COST_COLUMNS.map(col => <td key={col.field} className="px-2 py-1 text-right tabular-nums">{formatComboCost((currentItem as any)[col.field])}</td>)}
+                        <td className="px-2 py-1">{currentItem.sapArticleId || '—'}</td>
+                      </tr>
+                    </tbody>
+                  </table>
+                  <div className="border-t border-slate-100 px-2 py-1 text-[11px] text-slate-500">
+                    The set card below is read-only: costs are the sum of the parts and attributes come from the Top part. Edit them on each part's tab. Save &amp; Submit creates every part in SAP, then the set.
+                  </div>
+                </div>
+              )}
+            </div>
           )}
         </div>
       )}
