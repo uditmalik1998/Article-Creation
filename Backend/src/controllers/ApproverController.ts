@@ -12,6 +12,7 @@ import { FLAT_TO_RFC, FLAT_TO_SAP_KEY } from '../data/flatToRfcMap';
 import { randomUUID } from 'crypto';
 import { validateAgainstNationalGrid } from '../services/nationalGridValidation';
 import { syncVariantsToSapViaRfc } from '../services/zmmVarArtCreationService';
+import { syncGmVariantsToSap, type GmVariantSyncSummary } from '../services/zmmGMVarArtCreationService';
 import { buildHandoffArticle, sendHandoffToPoWise } from '../services/poWiseHandoffService';
 import { storageService, type WatermarkLabel } from '../services/storageService';
 import { ARTICLE_DESCRIPTION_SOURCE_FIELDS, buildArticleDescription } from '../utils/articleDescriptionBuilder';
@@ -1892,6 +1893,7 @@ export class ApproverController {
                     vendorName: true,
                     fabricArticleNumber: true,
                     fabricArticleDescription: true,
+                    autoBgt: true, roughV2: true, vendorFabricRate: true, finalCost: true,
                     bodyArticle: true,
                     bodyArticleDescription: true,
                     cuttingBgtPrVal: true, cuttingActPrVal: true,
@@ -1972,7 +1974,7 @@ export class ApproverController {
             let nextRow = 0;
             const matRow = (r: {
                 type: string; mc: string; artNo?: any; artDesc?: any; uom?: string; qty?: any;
-                dash?: boolean; k?: any; l?: any; kFormula?: string; lFormula?: string;
+                dash?: boolean; k?: any; l?: any; m?: any; n?: any; kFormula?: string; lFormula?: string;
             }, style?: { fill?: string; bold?: boolean }) => {
                 const rn = nextRow;
                 const d = r.dash ? '-' : null;
@@ -1980,7 +1982,7 @@ export class ApproverController {
                 const l = r.lFormula ? { formula: r.lFormula } : r.l;
                 const n = addRow([
                     r.type, r.mc, r.artNo ?? null, r.artDesc ?? null, r.uom ?? null, r.qty ?? null,
-                    null, d, d, d, k ?? null, l ?? null, null, null,
+                    null, d, d, d, k ?? null, l ?? null, r.m ?? null, r.n ?? null,
                     { formula: `IF(N${rn}="","",N${rn}-L${rn})` }, null, null,
                 ], style);
                 nextRow = n + 1;
@@ -2060,10 +2062,11 @@ export class ApproverController {
                 tr.commit();
                 track(blank());
 
-                // FAB — not included in costing
+                // FAB — the Fab card's AUTO-BGT / ROUGH-V2 / VENDOR COST / FINAL COST
                 matRow({
                     type: 'FAB', mc: 'FAB_MC', artNo: a.fabricArticleNumber || null, artDesc: a.fabricArticleDescription || null,
-                    uom: 'KG', k: 0, l: 0,
+                    uom: 'KG',
+                    k: num(a.autoBgt), l: num(a.roughV2), m: num(a.vendorFabricRate), n: num(a.finalCost),
                 }, { fill: LIGHT_BLUE });
                 track(blank());
 
@@ -6837,8 +6840,43 @@ export class ApproverController {
             return;
         }
         const { submitGmArticles } = await import('../services/zmmGMArtCreationService');
-        const result = await submitGmArticles(ids);
-        const allOk = result.results.every(r => r.success);
-        res.status(allOk ? 200 : 207).json(result);
+        const result = await submitGmArticles(ids, (req as any).user?.name ?? null);
+
+        // Then create their colour × size variants in SAP (ZMM_VAR_ART_CRT_V8), like FG.
+        const createdIds = result.results.filter(r => r.success).map(r => r.id);
+        let variants: GmVariantSyncSummary | null = null;
+        if (createdIds.length > 0) {
+            try {
+                const userId = (req as any).user?.id;
+                variants = await syncGmVariantsToSap(createdIds, userId ? Number(userId) : null);
+            } catch (err: any) {
+                console.error('[GM_VARIANTS] Variant sync after submit failed:', err?.message);
+            }
+        }
+
+        const allOk = result.results.every(r => r.success) && (!variants || variants.failed === 0);
+        res.status(allOk ? 200 : 207).json({ ...result, variants });
+    };
+
+    // POST /api/approver/gm-articles/:genericId/retry-variants
+    // Re-sends GM variants without an article number (FAILED / NOT_SYNCED / PENDING).
+    static retryGmArticleVariants = async (req: Request, res: Response) => {
+        const { genericId } = req.params;
+        const generic = await prisma.gmArticleData.findUnique({
+            where: { id: genericId },
+            select: { id: true, gmArticleNumber: true },
+        });
+        if (!generic) return res.status(404).json({ error: 'GM article not found' });
+        if (!generic.gmArticleNumber) {
+            return res.status(400).json({ error: 'Generic article is not created in SAP yet — submit it first' });
+        }
+        const userId = (req as any).user?.id;
+        const summary = await syncGmVariantsToSap([genericId], userId ? Number(userId) : null);
+        const total = summary.synced + summary.failed;
+        return res.json({
+            message: total === 0 ? 'No variants need SAP sync' : `${summary.synced} synced, ${summary.failed} failed`,
+            synced: summary.synced,
+            failed: summary.failed,
+        });
     };
 }

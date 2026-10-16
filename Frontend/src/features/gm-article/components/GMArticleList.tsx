@@ -77,8 +77,7 @@ import { getImageUrl } from '../../../shared/utils/common/helpers';
 import { APP_CONFIG } from '../../../constants/app/config';
 import { formatDivisionLabel } from '../../../shared/utils/ui/formatters';
 import { SIMPLIFIED_HIERARCHY } from '../../extraction/components/SimplifiedCategorySelector';
-import GMVariantSubTable from './GMVariantSubTable';
-import GMArticleVariantSubTable from './GMArticleVariantSubTable';
+import GMVariantTable from './GMVariantTable';
 
 // Module-level BOM cache (shared across card instances)
 const bomCache = new Map<string, Promise<Record<string, Record<string, string>>>>();
@@ -1877,17 +1876,7 @@ const ArticleCard = React.memo(
               </button>
               {showVariants && (
                 <div className="border-t border-slate-100">
-                  {item.source === 'SRM' ? (
-                    <GMArticleVariantSubTable genericId={item.id} genericRecord={item} pathType={pathType} />
-                  ) : (
-                    <GMVariantSubTable
-                      genericId={item.id}
-                      genericRecord={item}
-                      attributes={attributes}
-                      onRefresh={onRefresh}
-                      pathType={pathType}
-                    />
-                  )}
+                  <GMVariantTable genericId={item.id} genericRecord={item} pathType={pathType} onRefresh={onRefresh} />
                 </div>
               )}
             </section>

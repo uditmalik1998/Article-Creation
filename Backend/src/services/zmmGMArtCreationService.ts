@@ -6,6 +6,7 @@
  */
 
 import { prismaClient as prisma } from '../utils/prisma';
+import { storageService, type WatermarkLabel } from './storageService';
 
 const SAP_RFC_PROXY_URL = (process.env.SAP_RFC_PROXY_URL || 'https://sap-api.v2retail.net').replace(/\/$/, '');
 const SAP_RFC_KEY       = process.env.SAP_RFC_KEY       || 'v2-rfc-proxy-2026';
@@ -153,7 +154,7 @@ function buildImData(
     };
 }
 
-export async function submitGmArticles(ids: string[]): Promise<{
+export async function submitGmArticles(ids: string[], approverName?: string | null): Promise<{
     results: { id: string; success: boolean; sapArticleNumber?: string; message?: string }[];
 }> {
     const rows = await prisma.gmArticleData.findMany({
@@ -270,6 +271,41 @@ export async function submitGmArticles(ids: string[]): Promise<{
                     approvedAt:       success ? new Date() : undefined,
                 },
             });
+
+            // Like FG: copy the image to the article-master bucket as <SAP no>.<ext>,
+            // stamped with the watermark label, and store the new URL.
+            if (success && sapNumber && currentRow.imageUrl) {
+                try {
+                    const labelData: WatermarkLabel = {
+                        article_number: sapNumber,
+                        presentation_no: currentRow.pptNumber ?? null,
+                        vendor_code: currentRow.vendorCode ?? null,
+                        vendor_name: currentRow.vendorName ?? null,
+                        division: currentRow.division ?? null,
+                        sub_division: currentRow.subDivision ?? null,
+                        major_category: majCat || null,
+                        design_number: currentRow.designNumber ?? null,
+                        mc_code: mcCd,
+                        hsn_tax_code: hsnCode,
+                        season: currentRow.gmSeason ?? null,
+                        rate: currentRow.rate != null ? Number(currentRow.rate) : null,
+                        mrp: currentRow.mrp != null ? Number(currentRow.mrp) : null,
+                        approved_by: approverName ?? null,
+                    };
+                    const upload = await storageService.uploadApprovedImageFromSourceUrl(
+                        String(currentRow.imageUrl),
+                        sapNumber,
+                        labelData,
+                    );
+                    await prisma.gmArticleData.update({ where: { id: row.id }, data: { imageUrl: upload.url } });
+                } catch (imgErr: any) {
+                    console.error(`[ZMM_ART_CRT_V3] Approved image upload failed for id=${row.id}:`, imgErr?.message);
+                    await prisma.gmArticleData.update({
+                        where: { id: row.id },
+                        data: { sapSyncMessage: `${msg} | Approved image upload failed: ${imgErr?.message || 'unknown error'}` },
+                    });
+                }
+            }
 
             return {
                 id: row.id,

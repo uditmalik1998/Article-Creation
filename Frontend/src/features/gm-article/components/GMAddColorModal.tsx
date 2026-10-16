@@ -10,9 +10,8 @@ import type { MasterAttribute } from './GMArticleTable';
 // 1 · Colors  → pick one or more colors (searchable list)
 // 2 · Sizes   → per color, every size is ticked by default; untick what you don't need
 // 3 · Images  → one image per color, applied to all of its sizes
-// Submits { colors, sizesByColor, colorImages }:
-//   source 'gm'   → gm_variants_article_data (sizes from gm_size_master)   — GM Article pages
-//   source 'flat' → FG flat variants (sizes from maj_cat_sizes) via /items/:id/add-color
+// Submits { colors, sizesByColor, colorImages } to gm_variants_article_data
+// (sizes from gm_size_master).
 
 const FALLBACK_COLORS = ['BLACK', 'WHITE', 'RED', 'NAVY', 'GREY', 'BLUE', 'GREEN'];
 const STEPS = ['Colors', 'Sizes', 'Images'] as const;
@@ -26,8 +25,6 @@ interface GMAddColorModalProps {
   attributes: MasterAttribute[];
   onClose: () => void;
   onAdded: () => void;
-  /** Which variant table to write to; defaults to the GM table. */
-  source?: 'gm' | 'flat';
 }
 
 type ColorOption = { value: string; label: string };
@@ -42,10 +39,9 @@ const GMAddColorModal: React.FC<GMAddColorModalProps> = ({
   attributes,
   onClose,
   onAdded,
-  source = 'gm',
 }) => {
-  const sizesPath = source === 'gm' ? 'gm-sizes-for-majcat' : 'sizes-for-majcat';
-  const submitPath = source === 'gm' ? `gm-articles/${genericId}/variants` : `items/${genericId}/add-color`;
+  const sizesPath = 'gm-sizes-for-majcat';
+  const submitPath = `gm-articles/${genericId}/variants`;
   const [step, setStep] = useState<1 | 2 | 3>(1);
   const [search, setSearch] = useState('');
   const [masterColors, setMasterColors] = useState<{ code: string; name: string }[]>([]);
@@ -255,7 +251,7 @@ const GMAddColorModal: React.FC<GMAddColorModalProps> = ({
             <p className="m-0 text-[13px] text-slate-600">All sizes are ticked. Untick any size you don't want for a color.</p>
             {sizes.length === 0 && (
               <div className="rounded-lg border border-orange-300 bg-orange-50 px-3 py-2 text-xs text-orange-800">
-                No sizes are set up for {majorCategory || 'this major category'}. Add them in the {source === 'gm' ? 'GM Size Master' : 'Size Master'} (Admin).
+                No sizes are set up for {majorCategory || 'this major category'}. Add them in the GM Size Master (Admin).
               </div>
             )}
             <div className="flex max-h-[50vh] flex-col gap-2.5 overflow-y-auto">
