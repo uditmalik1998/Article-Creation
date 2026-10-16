@@ -9,7 +9,6 @@ async function main() {
     // But to be safe and thorough with any loose records:
     await prisma.categoryAttribute.deleteMany({});
     await prisma.extractionResultFlat.deleteMany({});
-    await prisma.extractionResult.deleteMany({});
     await prisma.extractionJob.deleteMany({});
     await prisma.category.deleteMany({});
     await prisma.subDepartment.deleteMany({});

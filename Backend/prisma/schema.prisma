@@ -102,7 +102,6 @@ model MasterAttribute {
   updatedAt           DateTime                @updatedAt @map("updated_at")
   allowedValues       AttributeAllowedValue[]
   categoryAttributes  CategoryAttribute[]
-  extractions         ExtractionResult[]
 
   @@index([key])
   @@index([type])
@@ -124,7 +123,6 @@ model AttributeAllowedValue {
   createdAt      DateTime           @default(now()) @map("created_at")
   updatedAt      DateTime           @updatedAt @map("updated_at")
   attribute      MasterAttribute    @relation(fields: [attributeId], references: [id], onDelete: Cascade)
-  matchedResults ExtractionResult[]
 
   @@unique([attributeId, shortForm])
   @@index([attributeId, isActive])
@@ -180,7 +178,6 @@ model ExtractionJob {
   outputTokens     Int?                  @map("output_tokens")
   category         Category              @relation(fields: [categoryId], references: [id])
   user             User?                 @relation(fields: [userId], references: [id])
-  results          ExtractionResult[]
   flatResult       ExtractionResultFlat?
 
   @@index([userId])
@@ -188,33 +185,6 @@ model ExtractionJob {
   @@index([status])
   @@index([createdAt])
   @@map("extraction_jobs")
-  @@schema("public")
-}
-
-/// Extraction Result: Individual attribute extraction results
-model ExtractionResult {
-  id                String                 @id @default(uuid())
-  jobId             String                 @map("job_id")
-  attributeId       Int                    @map("attribute_id")
-  rawValue          String?                @map("raw_value") @db.VarChar(500)
-  matchedValueId    Int?                   @map("matched_value_id")
-  finalValue        String?                @map("final_value") @db.VarChar(500)
-  confidence        Decimal?               @db.Decimal(5, 2)
-  extractionMethod  String?                @map("extraction_method") @db.VarChar(50)
-  alternativeValues Json?                  @map("alternative_values")
-  isVerified        Boolean                @default(false) @map("is_verified")
-  verifiedBy        Int?                   @map("verified_by")
-  verifiedAt        DateTime?              @map("verified_at")
-  createdAt         DateTime               @default(now()) @map("created_at")
-  attribute         MasterAttribute        @relation(fields: [attributeId], references: [id])
-  job               ExtractionJob          @relation(fields: [jobId], references: [id], onDelete: Cascade)
-  matchedValue      AttributeAllowedValue? @relation(fields: [matchedValueId], references: [id])
-  verifier          User?                  @relation("UserVerifications", fields: [verifiedBy], references: [id])
-
-  @@index([jobId])
-  @@index([attributeId])
-  @@index([confidence])
-  @@map("extraction_results")
   @@schema("public")
 }
 
@@ -625,7 +595,6 @@ model User {
   apiKeys        ApiKey[]
   costSummary    CostSummary?
   extractionJobs ExtractionJob[]
-  verifications  ExtractionResult[] @relation("UserVerifications")
   approvedItems  ExtractionResultFlat[] @relation("ApproverRelation")
 
   @@index([email])

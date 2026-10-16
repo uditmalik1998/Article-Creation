@@ -12,9 +12,6 @@ async function main() {
     console.log(' - Deleting Extraction Results (Flat)...');
     await prisma.extractionResultFlat.deleteMany({});
 
-    console.log(' - Deleting Extraction Results...');
-    await prisma.extractionResult.deleteMany({});
-
     console.log(' - Deleting Extraction Jobs...');
     await prisma.extractionJob.deleteMany({});
 

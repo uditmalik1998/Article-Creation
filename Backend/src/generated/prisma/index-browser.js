@@ -235,22 +235,6 @@ exports.Prisma.ExtractionJobScalarFieldEnum = {
   outputTokens: 'outputTokens'
 };
 
-exports.Prisma.ExtractionResultScalarFieldEnum = {
-  id: 'id',
-  jobId: 'jobId',
-  attributeId: 'attributeId',
-  rawValue: 'rawValue',
-  matchedValueId: 'matchedValueId',
-  finalValue: 'finalValue',
-  confidence: 'confidence',
-  extractionMethod: 'extractionMethod',
-  alternativeValues: 'alternativeValues',
-  isVerified: 'isVerified',
-  verifiedBy: 'verifiedBy',
-  verifiedAt: 'verifiedAt',
-  createdAt: 'createdAt'
-};
-
 exports.Prisma.ExtractionResultFlatScalarFieldEnum = {
   id: 'id',
   jobId: 'jobId',
@@ -1744,6 +1728,17 @@ exports.Prisma.PreciseBodyArticleConsumptionScalarFieldEnum = {
   updatedAt: 'updatedAt'
 };
 
+exports.Prisma.GmSizeMasterScalarFieldEnum = {
+  id: 'id',
+  seg: 'seg',
+  div: 'div',
+  subDiv: 'subDiv',
+  majCat: 'majCat',
+  status: 'status',
+  size: 'size',
+  createdAt: 'createdAt'
+};
+
 exports.Prisma.SortOrder = {
   asc: 'asc',
   desc: 'desc'
@@ -1825,14 +1820,6 @@ exports.Prisma.ExtractionJobOrderByRelevanceFieldEnum = {
   notes: 'notes',
   aiModel: 'aiModel',
   errorMessage: 'errorMessage'
-};
-
-exports.Prisma.ExtractionResultOrderByRelevanceFieldEnum = {
-  id: 'id',
-  jobId: 'jobId',
-  rawValue: 'rawValue',
-  finalValue: 'finalValue',
-  extractionMethod: 'extractionMethod'
 };
 
 exports.Prisma.ExtractionResultFlatOrderByRelevanceFieldEnum = {
@@ -2818,6 +2805,15 @@ exports.Prisma.PreciseBodyArticleConsumptionOrderByRelevanceFieldEnum = {
   mFit: 'mFit',
   bodyStyle: 'bodyStyle'
 };
+
+exports.Prisma.GmSizeMasterOrderByRelevanceFieldEnum = {
+  seg: 'seg',
+  div: 'div',
+  subDiv: 'subDiv',
+  majCat: 'majCat',
+  status: 'status',
+  size: 'size'
+};
 exports.GarmentType = exports.$Enums.GarmentType = {
   UPPER: 'UPPER',
   LOWER: 'LOWER',
@@ -2938,7 +2934,6 @@ exports.Prisma.ModelName = {
   AttributeAllowedValue: 'AttributeAllowedValue',
   CategoryAttribute: 'CategoryAttribute',
   ExtractionJob: 'ExtractionJob',
-  ExtractionResult: 'ExtractionResult',
   ExtractionResultFlat: 'ExtractionResultFlat',
   ModelGenerationResult: 'ModelGenerationResult',
   ModelImageApproval: 'ModelImageApproval',
@@ -2994,7 +2989,8 @@ exports.Prisma.ModelName = {
   ExpenseAuditLog: 'ExpenseAuditLog',
   BodyArticleDescriptionFormate: 'BodyArticleDescriptionFormate',
   GmArticleDescriptionFormate: 'GmArticleDescriptionFormate',
-  PreciseBodyArticleConsumption: 'PreciseBodyArticleConsumption'
+  PreciseBodyArticleConsumption: 'PreciseBodyArticleConsumption',
+  GmSizeMaster: 'GmSizeMaster'
 };
 
 /**
