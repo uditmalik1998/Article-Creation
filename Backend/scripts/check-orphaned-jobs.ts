@@ -6,15 +6,13 @@ async function checkData() {
     try {
         console.log('📊 Checking database counts...\n');
 
-        const [jobsCount, flatCount, resultsCount] = await Promise.all([
+        const [jobsCount, flatCount] = await Promise.all([
             prisma.extractionJob.count(),
             prisma.extractionResultFlat.count(),
-            prisma.extractionResult.count()
         ]);
 
         console.log(`Extraction Jobs: ${jobsCount}`);
-        console.log(`Flat Results: ${flatCount}`);
-        console.log(`Extraction Results: ${resultsCount}\n`);
+        console.log(`Flat Results: ${flatCount}\n`);
 
         if (jobsCount > flatCount) {
             console.log('⚠️  There are orphaned extraction jobs!');

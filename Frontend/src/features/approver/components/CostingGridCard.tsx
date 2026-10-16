@@ -54,13 +54,26 @@ export interface CostingGridConfig {
 
 type CostFieldSet = { autoBgt: string; rough: string; vdr: string; fin: string };
 
+// row → field prefix, e.g. HOOK → hookAutoBgt / hookRoughV2 / hookVdrCost / hookFinalCost
+const otherAccCostFields = (prefixes: Record<string, string>): Record<string, CostFieldSet> =>
+  Object.fromEntries(Object.entries(prefixes).map(([row, p]) => [
+    row, { autoBgt: `${p}AutoBgt`, rough: `${p}RoughV2`, vdr: `${p}VdrCost`, fin: `${p}FinalCost` },
+  ]));
+
 export const BTRIM_CONFIG: CostingGridConfig = {
   title: 'B TRIM',
   itemLabel: 'BT DESCRIPTION',
   c3Label: 'CLR',
   tabs: ['BT-01', 'BT-02'],
   fixedRows: ['M_BTN', 'DC', 'ZIP', 'PATCH', 'H-TRF'],
-  other: { label: 'OTHER ACC', rows: ['ELASTIC', 'FUSING', 'BADGE', 'RIVET', 'TAPE', 'OTHER'] },
+  other: {
+    label: 'OTHER ACC',
+    rows: [
+      'ADJUSTER', 'BADGE', 'BROTCH', 'BUCKLE', 'ELASTIC', 'EYELETS', 'FUSING', 'HANGING D-RING',
+      'HOOK', 'LABEL', 'LACE', 'POCKETTING FABRIC', 'POCKETTING READYMADE', 'RIVET', 'SANTA',
+      'STOPPER', 'TAG', 'TAPE', 'TASSELS', 'OTHER',
+    ],
+  },
   otherMasterAttr: 'OTHER BASIC TRIM',
   // M_BTN_TYPE values (POLY_BTN, KUNDI_BTN…) are button styles, so they sit
   // in the STYLE column; the button size (e.g. 26L) is TYPE.
@@ -85,6 +98,12 @@ export const BTRIM_CONFIG: CostingGridConfig = {
     RIVET:   { autoBgt: 'rivetAutoBgt',   rough: 'rivetRoughV2',   vdr: 'rivetVdrCost',   fin: 'rivetFinalCost' },
     TAPE:    { autoBgt: 'tapeAutoBgt',    rough: 'tapeRoughV2',    vdr: 'tapeVdrCost',    fin: 'tapeFinalCost' },
     OTHER:   { autoBgt: 'otherAutoBgt',   rough: 'otherRoughV2',   vdr: 'otherVdrCost',   fin: 'otherFinalCost' },
+    ...otherAccCostFields({
+      ADJUSTER: 'adjuster', BROTCH: 'brotch', BUCKLE: 'buckle', EYELETS: 'eyelets',
+      'HANGING D-RING': 'hangingDRing', HOOK: 'hook', LABEL: 'label', LACE: 'lace',
+      'POCKETTING FABRIC': 'pockettingFabric', 'POCKETTING READYMADE': 'pockettingReadymade',
+      SANTA: 'santa', STOPPER: 'stopper', TAG: 'tag', TASSELS: 'tassels',
+    }),
   },
 };
 

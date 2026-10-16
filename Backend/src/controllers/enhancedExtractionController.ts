@@ -375,24 +375,11 @@ export class EnhancedExtractionController {
         },
       });
 
-      if (attributeEntries.length > 0) {
-        await prisma.extractionResult.createMany({
-          data: attributeEntries.map((entry) => ({
-            jobId: job.id,
-            attributeId: entry.attributeId,
-            rawValue: entry.rawValue,
-            finalValue: entry.finalValue,
-            confidence: entry.confidence as any,
-            extractionMethod: entry.extractionMethod,
-          })),
-        });
-      }
-
-      // Flatten to flat table for fast querying
+      // Flatten to flat table for fast querying (from the in-memory attribute values)
       let flatId: string | null = null;
       try {
         const { flatteningService } = await import('../services/flatteningService');
-        await flatteningService.flattenExtractionResults(job.id);
+        await flatteningService.flattenExtractionResults(job.id, attributeEntries);
         const flatRow = await prisma.extractionResultFlat.findUnique({
           where: { jobId: job.id },
           select: { id: true, gsm: true, weight: true }
@@ -401,7 +388,7 @@ export class EnhancedExtractionController {
 
         // Direct backfill for gsm and weight — these schema keys (gsm, weight) may not
         // match any MasterAttribute in the DB (which uses GRAM_PER_SQUARE_METER, OUNCE, etc.)
-        // so ExtractionResult records aren't saved for them, leaving the flat row with nulls.
+        // so no attribute entry exists for them, leaving the flat row with nulls.
         // Read them directly from result.attributes and fill in any gaps.
         if (flatId) {
           const attrs = result.attributes || {};

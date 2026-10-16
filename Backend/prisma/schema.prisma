@@ -102,7 +102,6 @@ model MasterAttribute {
   updatedAt           DateTime                @updatedAt @map("updated_at")
   allowedValues       AttributeAllowedValue[]
   categoryAttributes  CategoryAttribute[]
-  extractions         ExtractionResult[]
 
   @@index([key])
   @@index([type])
@@ -124,7 +123,6 @@ model AttributeAllowedValue {
   createdAt      DateTime           @default(now()) @map("created_at")
   updatedAt      DateTime           @updatedAt @map("updated_at")
   attribute      MasterAttribute    @relation(fields: [attributeId], references: [id], onDelete: Cascade)
-  matchedResults ExtractionResult[]
 
   @@unique([attributeId, shortForm])
   @@index([attributeId, isActive])
@@ -180,7 +178,6 @@ model ExtractionJob {
   outputTokens     Int?                  @map("output_tokens")
   category         Category              @relation(fields: [categoryId], references: [id])
   user             User?                 @relation(fields: [userId], references: [id])
-  results          ExtractionResult[]
   flatResult       ExtractionResultFlat?
 
   @@index([userId])
@@ -188,33 +185,6 @@ model ExtractionJob {
   @@index([status])
   @@index([createdAt])
   @@map("extraction_jobs")
-  @@schema("public")
-}
-
-/// Extraction Result: Individual attribute extraction results
-model ExtractionResult {
-  id                String                 @id @default(uuid())
-  jobId             String                 @map("job_id")
-  attributeId       Int                    @map("attribute_id")
-  rawValue          String?                @map("raw_value") @db.VarChar(500)
-  matchedValueId    Int?                   @map("matched_value_id")
-  finalValue        String?                @map("final_value") @db.VarChar(500)
-  confidence        Decimal?               @db.Decimal(5, 2)
-  extractionMethod  String?                @map("extraction_method") @db.VarChar(50)
-  alternativeValues Json?                  @map("alternative_values")
-  isVerified        Boolean                @default(false) @map("is_verified")
-  verifiedBy        Int?                   @map("verified_by")
-  verifiedAt        DateTime?              @map("verified_at")
-  createdAt         DateTime               @default(now()) @map("created_at")
-  attribute         MasterAttribute        @relation(fields: [attributeId], references: [id])
-  job               ExtractionJob          @relation(fields: [jobId], references: [id], onDelete: Cascade)
-  matchedValue      AttributeAllowedValue? @relation(fields: [matchedValueId], references: [id])
-  verifier          User?                  @relation("UserVerifications", fields: [verifiedBy], references: [id])
-
-  @@index([jobId])
-  @@index([attributeId])
-  @@index([confidence])
-  @@map("extraction_results")
   @@schema("public")
 }
 
@@ -392,6 +362,62 @@ model ExtractionResultFlat {
   otherRoughV2                Decimal?      @map("other_rough_v2")             @db.Decimal(10, 2)
   otherVdrCost                Decimal?      @map("other_vdr_cost")             @db.Decimal(10, 2)
   otherFinalCost              Decimal?      @map("other_final_cost")           @db.Decimal(10, 2)
+  adjusterAutoBgt             Decimal?      @map("adjuster_auto_bgt")              @db.Decimal(10, 2)
+  adjusterRoughV2             Decimal?      @map("adjuster_rough_v2")              @db.Decimal(10, 2)
+  adjusterVdrCost             Decimal?      @map("adjuster_vdr_cost")              @db.Decimal(10, 2)
+  adjusterFinalCost           Decimal?      @map("adjuster_final_cost")            @db.Decimal(10, 2)
+  brotchAutoBgt               Decimal?      @map("brotch_auto_bgt")                @db.Decimal(10, 2)
+  brotchRoughV2               Decimal?      @map("brotch_rough_v2")                @db.Decimal(10, 2)
+  brotchVdrCost               Decimal?      @map("brotch_vdr_cost")                @db.Decimal(10, 2)
+  brotchFinalCost             Decimal?      @map("brotch_final_cost")              @db.Decimal(10, 2)
+  buckleAutoBgt               Decimal?      @map("buckle_auto_bgt")                @db.Decimal(10, 2)
+  buckleRoughV2               Decimal?      @map("buckle_rough_v2")                @db.Decimal(10, 2)
+  buckleVdrCost               Decimal?      @map("buckle_vdr_cost")                @db.Decimal(10, 2)
+  buckleFinalCost             Decimal?      @map("buckle_final_cost")              @db.Decimal(10, 2)
+  eyeletsAutoBgt              Decimal?      @map("eyelets_auto_bgt")               @db.Decimal(10, 2)
+  eyeletsRoughV2              Decimal?      @map("eyelets_rough_v2")               @db.Decimal(10, 2)
+  eyeletsVdrCost              Decimal?      @map("eyelets_vdr_cost")               @db.Decimal(10, 2)
+  eyeletsFinalCost            Decimal?      @map("eyelets_final_cost")             @db.Decimal(10, 2)
+  hangingDRingAutoBgt         Decimal?      @map("hanging_d_ring_auto_bgt")        @db.Decimal(10, 2)
+  hangingDRingRoughV2         Decimal?      @map("hanging_d_ring_rough_v2")        @db.Decimal(10, 2)
+  hangingDRingVdrCost         Decimal?      @map("hanging_d_ring_vdr_cost")        @db.Decimal(10, 2)
+  hangingDRingFinalCost       Decimal?      @map("hanging_d_ring_final_cost")      @db.Decimal(10, 2)
+  hookAutoBgt                 Decimal?      @map("hook_auto_bgt")                  @db.Decimal(10, 2)
+  hookRoughV2                 Decimal?      @map("hook_rough_v2")                  @db.Decimal(10, 2)
+  hookVdrCost                 Decimal?      @map("hook_vdr_cost")                  @db.Decimal(10, 2)
+  hookFinalCost               Decimal?      @map("hook_final_cost")                @db.Decimal(10, 2)
+  labelAutoBgt                Decimal?      @map("label_auto_bgt")                 @db.Decimal(10, 2)
+  labelRoughV2                Decimal?      @map("label_rough_v2")                 @db.Decimal(10, 2)
+  labelVdrCost                Decimal?      @map("label_vdr_cost")                 @db.Decimal(10, 2)
+  labelFinalCost              Decimal?      @map("label_final_cost")               @db.Decimal(10, 2)
+  laceAutoBgt                 Decimal?      @map("lace_auto_bgt")                  @db.Decimal(10, 2)
+  laceRoughV2                 Decimal?      @map("lace_rough_v2")                  @db.Decimal(10, 2)
+  laceVdrCost                 Decimal?      @map("lace_vdr_cost")                  @db.Decimal(10, 2)
+  laceFinalCost               Decimal?      @map("lace_final_cost")                @db.Decimal(10, 2)
+  pockettingFabricAutoBgt     Decimal?      @map("pocketting_fabric_auto_bgt")     @db.Decimal(10, 2)
+  pockettingFabricRoughV2     Decimal?      @map("pocketting_fabric_rough_v2")     @db.Decimal(10, 2)
+  pockettingFabricVdrCost     Decimal?      @map("pocketting_fabric_vdr_cost")     @db.Decimal(10, 2)
+  pockettingFabricFinalCost   Decimal?      @map("pocketting_fabric_final_cost")   @db.Decimal(10, 2)
+  pockettingReadymadeAutoBgt  Decimal?      @map("pocketting_readymade_auto_bgt")  @db.Decimal(10, 2)
+  pockettingReadymadeRoughV2  Decimal?      @map("pocketting_readymade_rough_v2")  @db.Decimal(10, 2)
+  pockettingReadymadeVdrCost  Decimal?      @map("pocketting_readymade_vdr_cost")  @db.Decimal(10, 2)
+  pockettingReadymadeFinalCost Decimal?     @map("pocketting_readymade_final_cost") @db.Decimal(10, 2)
+  santaAutoBgt                Decimal?      @map("santa_auto_bgt")                 @db.Decimal(10, 2)
+  santaRoughV2                Decimal?      @map("santa_rough_v2")                 @db.Decimal(10, 2)
+  santaVdrCost                Decimal?      @map("santa_vdr_cost")                 @db.Decimal(10, 2)
+  santaFinalCost              Decimal?      @map("santa_final_cost")               @db.Decimal(10, 2)
+  stopperAutoBgt              Decimal?      @map("stopper_auto_bgt")               @db.Decimal(10, 2)
+  stopperRoughV2              Decimal?      @map("stopper_rough_v2")               @db.Decimal(10, 2)
+  stopperVdrCost              Decimal?      @map("stopper_vdr_cost")               @db.Decimal(10, 2)
+  stopperFinalCost            Decimal?      @map("stopper_final_cost")             @db.Decimal(10, 2)
+  tagAutoBgt                  Decimal?      @map("tag_auto_bgt")                   @db.Decimal(10, 2)
+  tagRoughV2                  Decimal?      @map("tag_rough_v2")                   @db.Decimal(10, 2)
+  tagVdrCost                  Decimal?      @map("tag_vdr_cost")                   @db.Decimal(10, 2)
+  tagFinalCost                Decimal?      @map("tag_final_cost")                 @db.Decimal(10, 2)
+  tasselsAutoBgt              Decimal?      @map("tassels_auto_bgt")               @db.Decimal(10, 2)
+  tasselsRoughV2              Decimal?      @map("tassels_rough_v2")               @db.Decimal(10, 2)
+  tasselsVdrCost              Decimal?      @map("tassels_vdr_cost")               @db.Decimal(10, 2)
+  tasselsFinalCost            Decimal?      @map("tassels_final_cost")             @db.Decimal(10, 2)
   // ===== V. ADD COSTING (per item) =====
   printAutoBgt                Decimal?      @map("print_auto_bgt")             @db.Decimal(10, 2)
   printRoughV2                Decimal?      @map("print_rough_v2")             @db.Decimal(10, 2)
@@ -625,7 +651,6 @@ model User {
   apiKeys        ApiKey[]
   costSummary    CostSummary?
   extractionJobs ExtractionJob[]
-  verifications  ExtractionResult[] @relation("UserVerifications")
   approvedItems  ExtractionResultFlat[] @relation("ApproverRelation")
 
   @@index([email])

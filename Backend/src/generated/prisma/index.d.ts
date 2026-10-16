@@ -49,11 +49,6 @@ export type CategoryAttribute = $Result.DefaultSelection<Prisma.$CategoryAttribu
  */
 export type ExtractionJob = $Result.DefaultSelection<Prisma.$ExtractionJobPayload>
 /**
- * Model ExtractionResult
- * Extraction Result: Individual attribute extraction results
- */
-export type ExtractionResult = $Result.DefaultSelection<Prisma.$ExtractionResultPayload>
-/**
  * Model ExtractionResultFlat
  * Extraction Result Flat: Denormalized table for fast querying and Excel export
  */
@@ -408,6 +403,11 @@ export type GmArticleDescriptionFormate = $Result.DefaultSelection<Prisma.$GmArt
  * 
  */
 export type PreciseBodyArticleConsumption = $Result.DefaultSelection<Prisma.$PreciseBodyArticleConsumptionPayload>
+/**
+ * Model GmSizeMaster
+ * 
+ */
+export type GmSizeMaster = $Result.DefaultSelection<Prisma.$GmSizeMasterPayload>
 
 /**
  * Enums
@@ -818,16 +818,6 @@ export class PrismaClient<
     * ```
     */
   get extractionJob(): Prisma.ExtractionJobDelegate<ExtArgs, ClientOptions>;
-
-  /**
-   * `prisma.extractionResult`: Exposes CRUD operations for the **ExtractionResult** model.
-    * Example usage:
-    * ```ts
-    * // Fetch zero or more ExtractionResults
-    * const extractionResults = await prisma.extractionResult.findMany()
-    * ```
-    */
-  get extractionResult(): Prisma.ExtractionResultDelegate<ExtArgs, ClientOptions>;
 
   /**
    * `prisma.extractionResultFlat`: Exposes CRUD operations for the **ExtractionResultFlat** model.
@@ -1388,6 +1378,16 @@ export class PrismaClient<
     * ```
     */
   get preciseBodyArticleConsumption(): Prisma.PreciseBodyArticleConsumptionDelegate<ExtArgs, ClientOptions>;
+
+  /**
+   * `prisma.gmSizeMaster`: Exposes CRUD operations for the **GmSizeMaster** model.
+    * Example usage:
+    * ```ts
+    * // Fetch zero or more GmSizeMasters
+    * const gmSizeMasters = await prisma.gmSizeMaster.findMany()
+    * ```
+    */
+  get gmSizeMaster(): Prisma.GmSizeMasterDelegate<ExtArgs, ClientOptions>;
 }
 
 export namespace Prisma {
@@ -1835,7 +1835,6 @@ export namespace Prisma {
     AttributeAllowedValue: 'AttributeAllowedValue',
     CategoryAttribute: 'CategoryAttribute',
     ExtractionJob: 'ExtractionJob',
-    ExtractionResult: 'ExtractionResult',
     ExtractionResultFlat: 'ExtractionResultFlat',
     ModelGenerationResult: 'ModelGenerationResult',
     ModelImageApproval: 'ModelImageApproval',
@@ -1891,7 +1890,8 @@ export namespace Prisma {
     ExpenseAuditLog: 'ExpenseAuditLog',
     BodyArticleDescriptionFormate: 'BodyArticleDescriptionFormate',
     GmArticleDescriptionFormate: 'GmArticleDescriptionFormate',
-    PreciseBodyArticleConsumption: 'PreciseBodyArticleConsumption'
+    PreciseBodyArticleConsumption: 'PreciseBodyArticleConsumption',
+    GmSizeMaster: 'GmSizeMaster'
   };
 
   export type ModelName = (typeof ModelName)[keyof typeof ModelName]
@@ -1910,7 +1910,7 @@ export namespace Prisma {
       omit: GlobalOmitOptions
     }
     meta: {
-      modelProps: "department" | "subDepartment" | "category" | "masterAttribute" | "attributeAllowedValue" | "categoryAttribute" | "extractionJob" | "extractionResult" | "extractionResultFlat" | "modelGenerationResult" | "modelImageApproval" | "mvgrLookup" | "masterVendorDetail" | "user" | "auditLog" | "apiKey" | "changeHistory" | "costSummary" | "article360" | "articleFab" | "articleBody" | "articleVaAcc" | "articleVaPrcs" | "articleBom" | "sapFieldConfig" | "sapAttributeValue" | "article360Flat" | "rawArticle" | "fabricRawData" | "gmRawData" | "srmSyncRun" | "srmSyncRunItem" | "poolBJob" | "poolBBatch" | "nationalGridMaster" | "broaderMenu" | "majorCatMaster" | "fabricArticleMaster" | "fabricMajCatGridValue" | "modifyLog" | "fabricArticleData" | "preciseFabricArticleData" | "gmArticleData" | "gmVariantArticleData" | "fgVariantArticleData" | "fabricVariantArticleData" | "valueAdditionAccessoriesCost" | "bodyArticleData" | "referenceArticleData" | "bodyFabricConsumption" | "roughCmpCostMaster" | "basicTrimMaster" | "basicTrimCostMaster" | "preciseTrimMaster" | "basicTrimCostComponent" | "majorCategoryDetails" | "expenseApprovalStage" | "gridContributionAssignment" | "expenseChangeRequest" | "expenseAccessGrant" | "expenseAuditLog" | "bodyArticleDescriptionFormate" | "gmArticleDescriptionFormate" | "preciseBodyArticleConsumption"
+      modelProps: "department" | "subDepartment" | "category" | "masterAttribute" | "attributeAllowedValue" | "categoryAttribute" | "extractionJob" | "extractionResultFlat" | "modelGenerationResult" | "modelImageApproval" | "mvgrLookup" | "masterVendorDetail" | "user" | "auditLog" | "apiKey" | "changeHistory" | "costSummary" | "article360" | "articleFab" | "articleBody" | "articleVaAcc" | "articleVaPrcs" | "articleBom" | "sapFieldConfig" | "sapAttributeValue" | "article360Flat" | "rawArticle" | "fabricRawData" | "gmRawData" | "srmSyncRun" | "srmSyncRunItem" | "poolBJob" | "poolBBatch" | "nationalGridMaster" | "broaderMenu" | "majorCatMaster" | "fabricArticleMaster" | "fabricMajCatGridValue" | "modifyLog" | "fabricArticleData" | "preciseFabricArticleData" | "gmArticleData" | "gmVariantArticleData" | "fgVariantArticleData" | "fabricVariantArticleData" | "valueAdditionAccessoriesCost" | "bodyArticleData" | "referenceArticleData" | "bodyFabricConsumption" | "roughCmpCostMaster" | "basicTrimMaster" | "basicTrimCostMaster" | "preciseTrimMaster" | "basicTrimCostComponent" | "majorCategoryDetails" | "expenseApprovalStage" | "gridContributionAssignment" | "expenseChangeRequest" | "expenseAccessGrant" | "expenseAuditLog" | "bodyArticleDescriptionFormate" | "gmArticleDescriptionFormate" | "preciseBodyArticleConsumption" | "gmSizeMaster"
       txIsolationLevel: Prisma.TransactionIsolationLevel
     }
     model: {
@@ -2429,80 +2429,6 @@ export namespace Prisma {
           count: {
             args: Prisma.ExtractionJobCountArgs<ExtArgs>
             result: $Utils.Optional<ExtractionJobCountAggregateOutputType> | number
-          }
-        }
-      }
-      ExtractionResult: {
-        payload: Prisma.$ExtractionResultPayload<ExtArgs>
-        fields: Prisma.ExtractionResultFieldRefs
-        operations: {
-          findUnique: {
-            args: Prisma.ExtractionResultFindUniqueArgs<ExtArgs>
-            result: $Utils.PayloadToResult<Prisma.$ExtractionResultPayload> | null
-          }
-          findUniqueOrThrow: {
-            args: Prisma.ExtractionResultFindUniqueOrThrowArgs<ExtArgs>
-            result: $Utils.PayloadToResult<Prisma.$ExtractionResultPayload>
-          }
-          findFirst: {
-            args: Prisma.ExtractionResultFindFirstArgs<ExtArgs>
-            result: $Utils.PayloadToResult<Prisma.$ExtractionResultPayload> | null
-          }
-          findFirstOrThrow: {
-            args: Prisma.ExtractionResultFindFirstOrThrowArgs<ExtArgs>
-            result: $Utils.PayloadToResult<Prisma.$ExtractionResultPayload>
-          }
-          findMany: {
-            args: Prisma.ExtractionResultFindManyArgs<ExtArgs>
-            result: $Utils.PayloadToResult<Prisma.$ExtractionResultPayload>[]
-          }
-          create: {
-            args: Prisma.ExtractionResultCreateArgs<ExtArgs>
-            result: $Utils.PayloadToResult<Prisma.$ExtractionResultPayload>
-          }
-          createMany: {
-            args: Prisma.ExtractionResultCreateManyArgs<ExtArgs>
-            result: BatchPayload
-          }
-          createManyAndReturn: {
-            args: Prisma.ExtractionResultCreateManyAndReturnArgs<ExtArgs>
-            result: $Utils.PayloadToResult<Prisma.$ExtractionResultPayload>[]
-          }
-          delete: {
-            args: Prisma.ExtractionResultDeleteArgs<ExtArgs>
-            result: $Utils.PayloadToResult<Prisma.$ExtractionResultPayload>
-          }
-          update: {
-            args: Prisma.ExtractionResultUpdateArgs<ExtArgs>
-            result: $Utils.PayloadToResult<Prisma.$ExtractionResultPayload>
-          }
-          deleteMany: {
-            args: Prisma.ExtractionResultDeleteManyArgs<ExtArgs>
-            result: BatchPayload
-          }
-          updateMany: {
-            args: Prisma.ExtractionResultUpdateManyArgs<ExtArgs>
-            result: BatchPayload
-          }
-          updateManyAndReturn: {
-            args: Prisma.ExtractionResultUpdateManyAndReturnArgs<ExtArgs>
-            result: $Utils.PayloadToResult<Prisma.$ExtractionResultPayload>[]
-          }
-          upsert: {
-            args: Prisma.ExtractionResultUpsertArgs<ExtArgs>
-            result: $Utils.PayloadToResult<Prisma.$ExtractionResultPayload>
-          }
-          aggregate: {
-            args: Prisma.ExtractionResultAggregateArgs<ExtArgs>
-            result: $Utils.Optional<AggregateExtractionResult>
-          }
-          groupBy: {
-            args: Prisma.ExtractionResultGroupByArgs<ExtArgs>
-            result: $Utils.Optional<ExtractionResultGroupByOutputType>[]
-          }
-          count: {
-            args: Prisma.ExtractionResultCountArgs<ExtArgs>
-            result: $Utils.Optional<ExtractionResultCountAggregateOutputType> | number
           }
         }
       }
@@ -6650,6 +6576,80 @@ export namespace Prisma {
           }
         }
       }
+      GmSizeMaster: {
+        payload: Prisma.$GmSizeMasterPayload<ExtArgs>
+        fields: Prisma.GmSizeMasterFieldRefs
+        operations: {
+          findUnique: {
+            args: Prisma.GmSizeMasterFindUniqueArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$GmSizeMasterPayload> | null
+          }
+          findUniqueOrThrow: {
+            args: Prisma.GmSizeMasterFindUniqueOrThrowArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$GmSizeMasterPayload>
+          }
+          findFirst: {
+            args: Prisma.GmSizeMasterFindFirstArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$GmSizeMasterPayload> | null
+          }
+          findFirstOrThrow: {
+            args: Prisma.GmSizeMasterFindFirstOrThrowArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$GmSizeMasterPayload>
+          }
+          findMany: {
+            args: Prisma.GmSizeMasterFindManyArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$GmSizeMasterPayload>[]
+          }
+          create: {
+            args: Prisma.GmSizeMasterCreateArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$GmSizeMasterPayload>
+          }
+          createMany: {
+            args: Prisma.GmSizeMasterCreateManyArgs<ExtArgs>
+            result: BatchPayload
+          }
+          createManyAndReturn: {
+            args: Prisma.GmSizeMasterCreateManyAndReturnArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$GmSizeMasterPayload>[]
+          }
+          delete: {
+            args: Prisma.GmSizeMasterDeleteArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$GmSizeMasterPayload>
+          }
+          update: {
+            args: Prisma.GmSizeMasterUpdateArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$GmSizeMasterPayload>
+          }
+          deleteMany: {
+            args: Prisma.GmSizeMasterDeleteManyArgs<ExtArgs>
+            result: BatchPayload
+          }
+          updateMany: {
+            args: Prisma.GmSizeMasterUpdateManyArgs<ExtArgs>
+            result: BatchPayload
+          }
+          updateManyAndReturn: {
+            args: Prisma.GmSizeMasterUpdateManyAndReturnArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$GmSizeMasterPayload>[]
+          }
+          upsert: {
+            args: Prisma.GmSizeMasterUpsertArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$GmSizeMasterPayload>
+          }
+          aggregate: {
+            args: Prisma.GmSizeMasterAggregateArgs<ExtArgs>
+            result: $Utils.Optional<AggregateGmSizeMaster>
+          }
+          groupBy: {
+            args: Prisma.GmSizeMasterGroupByArgs<ExtArgs>
+            result: $Utils.Optional<GmSizeMasterGroupByOutputType>[]
+          }
+          count: {
+            args: Prisma.GmSizeMasterCountArgs<ExtArgs>
+            result: $Utils.Optional<GmSizeMasterCountAggregateOutputType> | number
+          }
+        }
+      }
     }
   } & {
     other: {
@@ -6749,7 +6749,6 @@ export namespace Prisma {
     attributeAllowedValue?: AttributeAllowedValueOmit
     categoryAttribute?: CategoryAttributeOmit
     extractionJob?: ExtractionJobOmit
-    extractionResult?: ExtractionResultOmit
     extractionResultFlat?: ExtractionResultFlatOmit
     modelGenerationResult?: ModelGenerationResultOmit
     modelImageApproval?: ModelImageApprovalOmit
@@ -6806,6 +6805,7 @@ export namespace Prisma {
     bodyArticleDescriptionFormate?: BodyArticleDescriptionFormateOmit
     gmArticleDescriptionFormate?: GmArticleDescriptionFormateOmit
     preciseBodyArticleConsumption?: PreciseBodyArticleConsumptionOmit
+    gmSizeMaster?: GmSizeMasterOmit
   }
 
   /* Types for Logging */
@@ -6990,13 +6990,11 @@ export namespace Prisma {
   export type MasterAttributeCountOutputType = {
     allowedValues: number
     categoryAttributes: number
-    extractions: number
   }
 
   export type MasterAttributeCountOutputTypeSelect<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
     allowedValues?: boolean | MasterAttributeCountOutputTypeCountAllowedValuesArgs
     categoryAttributes?: boolean | MasterAttributeCountOutputTypeCountCategoryAttributesArgs
-    extractions?: boolean | MasterAttributeCountOutputTypeCountExtractionsArgs
   }
 
   // Custom InputTypes
@@ -7022,75 +7020,6 @@ export namespace Prisma {
    */
   export type MasterAttributeCountOutputTypeCountCategoryAttributesArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
     where?: CategoryAttributeWhereInput
-  }
-
-  /**
-   * MasterAttributeCountOutputType without action
-   */
-  export type MasterAttributeCountOutputTypeCountExtractionsArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
-    where?: ExtractionResultWhereInput
-  }
-
-
-  /**
-   * Count Type AttributeAllowedValueCountOutputType
-   */
-
-  export type AttributeAllowedValueCountOutputType = {
-    matchedResults: number
-  }
-
-  export type AttributeAllowedValueCountOutputTypeSelect<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
-    matchedResults?: boolean | AttributeAllowedValueCountOutputTypeCountMatchedResultsArgs
-  }
-
-  // Custom InputTypes
-  /**
-   * AttributeAllowedValueCountOutputType without action
-   */
-  export type AttributeAllowedValueCountOutputTypeDefaultArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
-    /**
-     * Select specific fields to fetch from the AttributeAllowedValueCountOutputType
-     */
-    select?: AttributeAllowedValueCountOutputTypeSelect<ExtArgs> | null
-  }
-
-  /**
-   * AttributeAllowedValueCountOutputType without action
-   */
-  export type AttributeAllowedValueCountOutputTypeCountMatchedResultsArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
-    where?: ExtractionResultWhereInput
-  }
-
-
-  /**
-   * Count Type ExtractionJobCountOutputType
-   */
-
-  export type ExtractionJobCountOutputType = {
-    results: number
-  }
-
-  export type ExtractionJobCountOutputTypeSelect<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
-    results?: boolean | ExtractionJobCountOutputTypeCountResultsArgs
-  }
-
-  // Custom InputTypes
-  /**
-   * ExtractionJobCountOutputType without action
-   */
-  export type ExtractionJobCountOutputTypeDefaultArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
-    /**
-     * Select specific fields to fetch from the ExtractionJobCountOutputType
-     */
-    select?: ExtractionJobCountOutputTypeSelect<ExtArgs> | null
-  }
-
-  /**
-   * ExtractionJobCountOutputType without action
-   */
-  export type ExtractionJobCountOutputTypeCountResultsArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
-    where?: ExtractionResultWhereInput
   }
 
 
@@ -7141,14 +7070,12 @@ export namespace Prisma {
   export type UserCountOutputType = {
     apiKeys: number
     extractionJobs: number
-    verifications: number
     approvedItems: number
   }
 
   export type UserCountOutputTypeSelect<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
     apiKeys?: boolean | UserCountOutputTypeCountApiKeysArgs
     extractionJobs?: boolean | UserCountOutputTypeCountExtractionJobsArgs
-    verifications?: boolean | UserCountOutputTypeCountVerificationsArgs
     approvedItems?: boolean | UserCountOutputTypeCountApprovedItemsArgs
   }
 
@@ -7175,13 +7102,6 @@ export namespace Prisma {
    */
   export type UserCountOutputTypeCountExtractionJobsArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
     where?: ExtractionJobWhereInput
-  }
-
-  /**
-   * UserCountOutputType without action
-   */
-  export type UserCountOutputTypeCountVerificationsArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
-    where?: ExtractionResultWhereInput
   }
 
   /**
@@ -11256,7 +11176,6 @@ export namespace Prisma {
     updatedAt?: boolean
     allowedValues?: boolean | MasterAttribute$allowedValuesArgs<ExtArgs>
     categoryAttributes?: boolean | MasterAttribute$categoryAttributesArgs<ExtArgs>
-    extractions?: boolean | MasterAttribute$extractionsArgs<ExtArgs>
     _count?: boolean | MasterAttributeCountOutputTypeDefaultArgs<ExtArgs>
   }, ExtArgs["result"]["masterAttribute"]>
 
@@ -11336,7 +11255,6 @@ export namespace Prisma {
   export type MasterAttributeInclude<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
     allowedValues?: boolean | MasterAttribute$allowedValuesArgs<ExtArgs>
     categoryAttributes?: boolean | MasterAttribute$categoryAttributesArgs<ExtArgs>
-    extractions?: boolean | MasterAttribute$extractionsArgs<ExtArgs>
     _count?: boolean | MasterAttributeCountOutputTypeDefaultArgs<ExtArgs>
   }
   export type MasterAttributeIncludeCreateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {}
@@ -11347,7 +11265,6 @@ export namespace Prisma {
     objects: {
       allowedValues: Prisma.$AttributeAllowedValuePayload<ExtArgs>[]
       categoryAttributes: Prisma.$CategoryAttributePayload<ExtArgs>[]
-      extractions: Prisma.$ExtractionResultPayload<ExtArgs>[]
     }
     scalars: $Extensions.GetPayloadResult<{
       id: number
@@ -11767,7 +11684,6 @@ export namespace Prisma {
     readonly [Symbol.toStringTag]: "PrismaPromise"
     allowedValues<T extends MasterAttribute$allowedValuesArgs<ExtArgs> = {}>(args?: Subset<T, MasterAttribute$allowedValuesArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$AttributeAllowedValuePayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
     categoryAttributes<T extends MasterAttribute$categoryAttributesArgs<ExtArgs> = {}>(args?: Subset<T, MasterAttribute$categoryAttributesArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$CategoryAttributePayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
-    extractions<T extends MasterAttribute$extractionsArgs<ExtArgs> = {}>(args?: Subset<T, MasterAttribute$extractionsArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$ExtractionResultPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
     /**
      * Attaches callbacks for the resolution and/or rejection of the Promise.
      * @param onfulfilled The callback to execute when the Promise is resolved.
@@ -12254,30 +12170,6 @@ export namespace Prisma {
   }
 
   /**
-   * MasterAttribute.extractions
-   */
-  export type MasterAttribute$extractionsArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
-    /**
-     * Select specific fields to fetch from the ExtractionResult
-     */
-    select?: ExtractionResultSelect<ExtArgs> | null
-    /**
-     * Omit specific fields from the ExtractionResult
-     */
-    omit?: ExtractionResultOmit<ExtArgs> | null
-    /**
-     * Choose, which related nodes to fetch as well
-     */
-    include?: ExtractionResultInclude<ExtArgs> | null
-    where?: ExtractionResultWhereInput
-    orderBy?: ExtractionResultOrderByWithRelationInput | ExtractionResultOrderByWithRelationInput[]
-    cursor?: ExtractionResultWhereUniqueInput
-    take?: number
-    skip?: number
-    distinct?: ExtractionResultScalarFieldEnum | ExtractionResultScalarFieldEnum[]
-  }
-
-  /**
    * MasterAttribute without action
    */
   export type MasterAttributeDefaultArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
@@ -12531,8 +12423,6 @@ export namespace Prisma {
     createdAt?: boolean
     updatedAt?: boolean
     attribute?: boolean | MasterAttributeDefaultArgs<ExtArgs>
-    matchedResults?: boolean | AttributeAllowedValue$matchedResultsArgs<ExtArgs>
-    _count?: boolean | AttributeAllowedValueCountOutputTypeDefaultArgs<ExtArgs>
   }, ExtArgs["result"]["attributeAllowedValue"]>
 
   export type AttributeAllowedValueSelectCreateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
@@ -12576,8 +12466,6 @@ export namespace Prisma {
   export type AttributeAllowedValueOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<"id" | "attributeId" | "shortForm" | "fullForm" | "aliases" | "displayOrder" | "isActive" | "createdAt" | "updatedAt", ExtArgs["result"]["attributeAllowedValue"]>
   export type AttributeAllowedValueInclude<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
     attribute?: boolean | MasterAttributeDefaultArgs<ExtArgs>
-    matchedResults?: boolean | AttributeAllowedValue$matchedResultsArgs<ExtArgs>
-    _count?: boolean | AttributeAllowedValueCountOutputTypeDefaultArgs<ExtArgs>
   }
   export type AttributeAllowedValueIncludeCreateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
     attribute?: boolean | MasterAttributeDefaultArgs<ExtArgs>
@@ -12590,7 +12478,6 @@ export namespace Prisma {
     name: "AttributeAllowedValue"
     objects: {
       attribute: Prisma.$MasterAttributePayload<ExtArgs>
-      matchedResults: Prisma.$ExtractionResultPayload<ExtArgs>[]
     }
     scalars: $Extensions.GetPayloadResult<{
       id: number
@@ -12997,7 +12884,6 @@ export namespace Prisma {
   export interface Prisma__AttributeAllowedValueClient<T, Null = never, ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs, GlobalOmitOptions = {}> extends Prisma.PrismaPromise<T> {
     readonly [Symbol.toStringTag]: "PrismaPromise"
     attribute<T extends MasterAttributeDefaultArgs<ExtArgs> = {}>(args?: Subset<T, MasterAttributeDefaultArgs<ExtArgs>>): Prisma__MasterAttributeClient<$Result.GetResult<Prisma.$MasterAttributePayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | Null, Null, ExtArgs, GlobalOmitOptions>
-    matchedResults<T extends AttributeAllowedValue$matchedResultsArgs<ExtArgs> = {}>(args?: Subset<T, AttributeAllowedValue$matchedResultsArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$ExtractionResultPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
     /**
      * Attaches callbacks for the resolution and/or rejection of the Promise.
      * @param onfulfilled The callback to execute when the Promise is resolved.
@@ -13429,30 +13315,6 @@ export namespace Prisma {
      * Limit how many AttributeAllowedValues to delete.
      */
     limit?: number
-  }
-
-  /**
-   * AttributeAllowedValue.matchedResults
-   */
-  export type AttributeAllowedValue$matchedResultsArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
-    /**
-     * Select specific fields to fetch from the ExtractionResult
-     */
-    select?: ExtractionResultSelect<ExtArgs> | null
-    /**
-     * Omit specific fields from the ExtractionResult
-     */
-    omit?: ExtractionResultOmit<ExtArgs> | null
-    /**
-     * Choose, which related nodes to fetch as well
-     */
-    include?: ExtractionResultInclude<ExtArgs> | null
-    where?: ExtractionResultWhereInput
-    orderBy?: ExtractionResultOrderByWithRelationInput | ExtractionResultOrderByWithRelationInput[]
-    cursor?: ExtractionResultWhereUniqueInput
-    take?: number
-    skip?: number
-    distinct?: ExtractionResultScalarFieldEnum | ExtractionResultScalarFieldEnum[]
   }
 
   /**
@@ -15034,9 +14896,7 @@ export namespace Prisma {
     outputTokens?: boolean
     category?: boolean | CategoryDefaultArgs<ExtArgs>
     user?: boolean | ExtractionJob$userArgs<ExtArgs>
-    results?: boolean | ExtractionJob$resultsArgs<ExtArgs>
     flatResult?: boolean | ExtractionJob$flatResultArgs<ExtArgs>
-    _count?: boolean | ExtractionJobCountOutputTypeDefaultArgs<ExtArgs>
   }, ExtArgs["result"]["extractionJob"]>
 
   export type ExtractionJobSelectCreateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
@@ -15128,9 +14988,7 @@ export namespace Prisma {
   export type ExtractionJobInclude<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
     category?: boolean | CategoryDefaultArgs<ExtArgs>
     user?: boolean | ExtractionJob$userArgs<ExtArgs>
-    results?: boolean | ExtractionJob$resultsArgs<ExtArgs>
     flatResult?: boolean | ExtractionJob$flatResultArgs<ExtArgs>
-    _count?: boolean | ExtractionJobCountOutputTypeDefaultArgs<ExtArgs>
   }
   export type ExtractionJobIncludeCreateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
     category?: boolean | CategoryDefaultArgs<ExtArgs>
@@ -15146,7 +15004,6 @@ export namespace Prisma {
     objects: {
       category: Prisma.$CategoryPayload<ExtArgs>
       user: Prisma.$UserPayload<ExtArgs> | null
-      results: Prisma.$ExtractionResultPayload<ExtArgs>[]
       flatResult: Prisma.$ExtractionResultFlatPayload<ExtArgs> | null
     }
     scalars: $Extensions.GetPayloadResult<{
@@ -15570,7 +15427,6 @@ export namespace Prisma {
     readonly [Symbol.toStringTag]: "PrismaPromise"
     category<T extends CategoryDefaultArgs<ExtArgs> = {}>(args?: Subset<T, CategoryDefaultArgs<ExtArgs>>): Prisma__CategoryClient<$Result.GetResult<Prisma.$CategoryPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | Null, Null, ExtArgs, GlobalOmitOptions>
     user<T extends ExtractionJob$userArgs<ExtArgs> = {}>(args?: Subset<T, ExtractionJob$userArgs<ExtArgs>>): Prisma__UserClient<$Result.GetResult<Prisma.$UserPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
-    results<T extends ExtractionJob$resultsArgs<ExtArgs> = {}>(args?: Subset<T, ExtractionJob$resultsArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$ExtractionResultPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
     flatResult<T extends ExtractionJob$flatResultArgs<ExtArgs> = {}>(args?: Subset<T, ExtractionJob$flatResultArgs<ExtArgs>>): Prisma__ExtractionResultFlatClient<$Result.GetResult<Prisma.$ExtractionResultFlatPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
     /**
      * Attaches callbacks for the resolution and/or rejection of the Promise.
@@ -16040,30 +15896,6 @@ export namespace Prisma {
   }
 
   /**
-   * ExtractionJob.results
-   */
-  export type ExtractionJob$resultsArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
-    /**
-     * Select specific fields to fetch from the ExtractionResult
-     */
-    select?: ExtractionResultSelect<ExtArgs> | null
-    /**
-     * Omit specific fields from the ExtractionResult
-     */
-    omit?: ExtractionResultOmit<ExtArgs> | null
-    /**
-     * Choose, which related nodes to fetch as well
-     */
-    include?: ExtractionResultInclude<ExtArgs> | null
-    where?: ExtractionResultWhereInput
-    orderBy?: ExtractionResultOrderByWithRelationInput | ExtractionResultOrderByWithRelationInput[]
-    cursor?: ExtractionResultWhereUniqueInput
-    take?: number
-    skip?: number
-    distinct?: ExtractionResultScalarFieldEnum | ExtractionResultScalarFieldEnum[]
-  }
-
-  /**
    * ExtractionJob.flatResult
    */
   export type ExtractionJob$flatResultArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
@@ -16098,1272 +15930,6 @@ export namespace Prisma {
      * Choose, which related nodes to fetch as well
      */
     include?: ExtractionJobInclude<ExtArgs> | null
-  }
-
-
-  /**
-   * Model ExtractionResult
-   */
-
-  export type AggregateExtractionResult = {
-    _count: ExtractionResultCountAggregateOutputType | null
-    _avg: ExtractionResultAvgAggregateOutputType | null
-    _sum: ExtractionResultSumAggregateOutputType | null
-    _min: ExtractionResultMinAggregateOutputType | null
-    _max: ExtractionResultMaxAggregateOutputType | null
-  }
-
-  export type ExtractionResultAvgAggregateOutputType = {
-    attributeId: number | null
-    matchedValueId: number | null
-    confidence: Decimal | null
-    verifiedBy: number | null
-  }
-
-  export type ExtractionResultSumAggregateOutputType = {
-    attributeId: number | null
-    matchedValueId: number | null
-    confidence: Decimal | null
-    verifiedBy: number | null
-  }
-
-  export type ExtractionResultMinAggregateOutputType = {
-    id: string | null
-    jobId: string | null
-    attributeId: number | null
-    rawValue: string | null
-    matchedValueId: number | null
-    finalValue: string | null
-    confidence: Decimal | null
-    extractionMethod: string | null
-    isVerified: boolean | null
-    verifiedBy: number | null
-    verifiedAt: Date | null
-    createdAt: Date | null
-  }
-
-  export type ExtractionResultMaxAggregateOutputType = {
-    id: string | null
-    jobId: string | null
-    attributeId: number | null
-    rawValue: string | null
-    matchedValueId: number | null
-    finalValue: string | null
-    confidence: Decimal | null
-    extractionMethod: string | null
-    isVerified: boolean | null
-    verifiedBy: number | null
-    verifiedAt: Date | null
-    createdAt: Date | null
-  }
-
-  export type ExtractionResultCountAggregateOutputType = {
-    id: number
-    jobId: number
-    attributeId: number
-    rawValue: number
-    matchedValueId: number
-    finalValue: number
-    confidence: number
-    extractionMethod: number
-    alternativeValues: number
-    isVerified: number
-    verifiedBy: number
-    verifiedAt: number
-    createdAt: number
-    _all: number
-  }
-
-
-  export type ExtractionResultAvgAggregateInputType = {
-    attributeId?: true
-    matchedValueId?: true
-    confidence?: true
-    verifiedBy?: true
-  }
-
-  export type ExtractionResultSumAggregateInputType = {
-    attributeId?: true
-    matchedValueId?: true
-    confidence?: true
-    verifiedBy?: true
-  }
-
-  export type ExtractionResultMinAggregateInputType = {
-    id?: true
-    jobId?: true
-    attributeId?: true
-    rawValue?: true
-    matchedValueId?: true
-    finalValue?: true
-    confidence?: true
-    extractionMethod?: true
-    isVerified?: true
-    verifiedBy?: true
-    verifiedAt?: true
-    createdAt?: true
-  }
-
-  export type ExtractionResultMaxAggregateInputType = {
-    id?: true
-    jobId?: true
-    attributeId?: true
-    rawValue?: true
-    matchedValueId?: true
-    finalValue?: true
-    confidence?: true
-    extractionMethod?: true
-    isVerified?: true
-    verifiedBy?: true
-    verifiedAt?: true
-    createdAt?: true
-  }
-
-  export type ExtractionResultCountAggregateInputType = {
-    id?: true
-    jobId?: true
-    attributeId?: true
-    rawValue?: true
-    matchedValueId?: true
-    finalValue?: true
-    confidence?: true
-    extractionMethod?: true
-    alternativeValues?: true
-    isVerified?: true
-    verifiedBy?: true
-    verifiedAt?: true
-    createdAt?: true
-    _all?: true
-  }
-
-  export type ExtractionResultAggregateArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
-    /**
-     * Filter which ExtractionResult to aggregate.
-     */
-    where?: ExtractionResultWhereInput
-    /**
-     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
-     * 
-     * Determine the order of ExtractionResults to fetch.
-     */
-    orderBy?: ExtractionResultOrderByWithRelationInput | ExtractionResultOrderByWithRelationInput[]
-    /**
-     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
-     * 
-     * Sets the start position
-     */
-    cursor?: ExtractionResultWhereUniqueInput
-    /**
-     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
-     * 
-     * Take `±n` ExtractionResults from the position of the cursor.
-     */
-    take?: number
-    /**
-     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
-     * 
-     * Skip the first `n` ExtractionResults.
-     */
-    skip?: number
-    /**
-     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
-     * 
-     * Count returned ExtractionResults
-    **/
-    _count?: true | ExtractionResultCountAggregateInputType
-    /**
-     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
-     * 
-     * Select which fields to average
-    **/
-    _avg?: ExtractionResultAvgAggregateInputType
-    /**
-     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
-     * 
-     * Select which fields to sum
-    **/
-    _sum?: ExtractionResultSumAggregateInputType
-    /**
-     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
-     * 
-     * Select which fields to find the minimum value
-    **/
-    _min?: ExtractionResultMinAggregateInputType
-    /**
-     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
-     * 
-     * Select which fields to find the maximum value
-    **/
-    _max?: ExtractionResultMaxAggregateInputType
-  }
-
-  export type GetExtractionResultAggregateType<T extends ExtractionResultAggregateArgs> = {
-        [P in keyof T & keyof AggregateExtractionResult]: P extends '_count' | 'count'
-      ? T[P] extends true
-        ? number
-        : GetScalarType<T[P], AggregateExtractionResult[P]>
-      : GetScalarType<T[P], AggregateExtractionResult[P]>
-  }
-
-
-
-
-  export type ExtractionResultGroupByArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
-    where?: ExtractionResultWhereInput
-    orderBy?: ExtractionResultOrderByWithAggregationInput | ExtractionResultOrderByWithAggregationInput[]
-    by: ExtractionResultScalarFieldEnum[] | ExtractionResultScalarFieldEnum
-    having?: ExtractionResultScalarWhereWithAggregatesInput
-    take?: number
-    skip?: number
-    _count?: ExtractionResultCountAggregateInputType | true
-    _avg?: ExtractionResultAvgAggregateInputType
-    _sum?: ExtractionResultSumAggregateInputType
-    _min?: ExtractionResultMinAggregateInputType
-    _max?: ExtractionResultMaxAggregateInputType
-  }
-
-  export type ExtractionResultGroupByOutputType = {
-    id: string
-    jobId: string
-    attributeId: number
-    rawValue: string | null
-    matchedValueId: number | null
-    finalValue: string | null
-    confidence: Decimal | null
-    extractionMethod: string | null
-    alternativeValues: JsonValue | null
-    isVerified: boolean
-    verifiedBy: number | null
-    verifiedAt: Date | null
-    createdAt: Date
-    _count: ExtractionResultCountAggregateOutputType | null
-    _avg: ExtractionResultAvgAggregateOutputType | null
-    _sum: ExtractionResultSumAggregateOutputType | null
-    _min: ExtractionResultMinAggregateOutputType | null
-    _max: ExtractionResultMaxAggregateOutputType | null
-  }
-
-  type GetExtractionResultGroupByPayload<T extends ExtractionResultGroupByArgs> = Prisma.PrismaPromise<
-    Array<
-      PickEnumerable<ExtractionResultGroupByOutputType, T['by']> &
-        {
-          [P in ((keyof T) & (keyof ExtractionResultGroupByOutputType))]: P extends '_count'
-            ? T[P] extends boolean
-              ? number
-              : GetScalarType<T[P], ExtractionResultGroupByOutputType[P]>
-            : GetScalarType<T[P], ExtractionResultGroupByOutputType[P]>
-        }
-      >
-    >
-
-
-  export type ExtractionResultSelect<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
-    id?: boolean
-    jobId?: boolean
-    attributeId?: boolean
-    rawValue?: boolean
-    matchedValueId?: boolean
-    finalValue?: boolean
-    confidence?: boolean
-    extractionMethod?: boolean
-    alternativeValues?: boolean
-    isVerified?: boolean
-    verifiedBy?: boolean
-    verifiedAt?: boolean
-    createdAt?: boolean
-    attribute?: boolean | MasterAttributeDefaultArgs<ExtArgs>
-    job?: boolean | ExtractionJobDefaultArgs<ExtArgs>
-    matchedValue?: boolean | ExtractionResult$matchedValueArgs<ExtArgs>
-    verifier?: boolean | ExtractionResult$verifierArgs<ExtArgs>
-  }, ExtArgs["result"]["extractionResult"]>
-
-  export type ExtractionResultSelectCreateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
-    id?: boolean
-    jobId?: boolean
-    attributeId?: boolean
-    rawValue?: boolean
-    matchedValueId?: boolean
-    finalValue?: boolean
-    confidence?: boolean
-    extractionMethod?: boolean
-    alternativeValues?: boolean
-    isVerified?: boolean
-    verifiedBy?: boolean
-    verifiedAt?: boolean
-    createdAt?: boolean
-    attribute?: boolean | MasterAttributeDefaultArgs<ExtArgs>
-    job?: boolean | ExtractionJobDefaultArgs<ExtArgs>
-    matchedValue?: boolean | ExtractionResult$matchedValueArgs<ExtArgs>
-    verifier?: boolean | ExtractionResult$verifierArgs<ExtArgs>
-  }, ExtArgs["result"]["extractionResult"]>
-
-  export type ExtractionResultSelectUpdateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
-    id?: boolean
-    jobId?: boolean
-    attributeId?: boolean
-    rawValue?: boolean
-    matchedValueId?: boolean
-    finalValue?: boolean
-    confidence?: boolean
-    extractionMethod?: boolean
-    alternativeValues?: boolean
-    isVerified?: boolean
-    verifiedBy?: boolean
-    verifiedAt?: boolean
-    createdAt?: boolean
-    attribute?: boolean | MasterAttributeDefaultArgs<ExtArgs>
-    job?: boolean | ExtractionJobDefaultArgs<ExtArgs>
-    matchedValue?: boolean | ExtractionResult$matchedValueArgs<ExtArgs>
-    verifier?: boolean | ExtractionResult$verifierArgs<ExtArgs>
-  }, ExtArgs["result"]["extractionResult"]>
-
-  export type ExtractionResultSelectScalar = {
-    id?: boolean
-    jobId?: boolean
-    attributeId?: boolean
-    rawValue?: boolean
-    matchedValueId?: boolean
-    finalValue?: boolean
-    confidence?: boolean
-    extractionMethod?: boolean
-    alternativeValues?: boolean
-    isVerified?: boolean
-    verifiedBy?: boolean
-    verifiedAt?: boolean
-    createdAt?: boolean
-  }
-
-  export type ExtractionResultOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<"id" | "jobId" | "attributeId" | "rawValue" | "matchedValueId" | "finalValue" | "confidence" | "extractionMethod" | "alternativeValues" | "isVerified" | "verifiedBy" | "verifiedAt" | "createdAt", ExtArgs["result"]["extractionResult"]>
-  export type ExtractionResultInclude<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
-    attribute?: boolean | MasterAttributeDefaultArgs<ExtArgs>
-    job?: boolean | ExtractionJobDefaultArgs<ExtArgs>
-    matchedValue?: boolean | ExtractionResult$matchedValueArgs<ExtArgs>
-    verifier?: boolean | ExtractionResult$verifierArgs<ExtArgs>
-  }
-  export type ExtractionResultIncludeCreateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
-    attribute?: boolean | MasterAttributeDefaultArgs<ExtArgs>
-    job?: boolean | ExtractionJobDefaultArgs<ExtArgs>
-    matchedValue?: boolean | ExtractionResult$matchedValueArgs<ExtArgs>
-    verifier?: boolean | ExtractionResult$verifierArgs<ExtArgs>
-  }
-  export type ExtractionResultIncludeUpdateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
-    attribute?: boolean | MasterAttributeDefaultArgs<ExtArgs>
-    job?: boolean | ExtractionJobDefaultArgs<ExtArgs>
-    matchedValue?: boolean | ExtractionResult$matchedValueArgs<ExtArgs>
-    verifier?: boolean | ExtractionResult$verifierArgs<ExtArgs>
-  }
-
-  export type $ExtractionResultPayload<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
-    name: "ExtractionResult"
-    objects: {
-      attribute: Prisma.$MasterAttributePayload<ExtArgs>
-      job: Prisma.$ExtractionJobPayload<ExtArgs>
-      matchedValue: Prisma.$AttributeAllowedValuePayload<ExtArgs> | null
-      verifier: Prisma.$UserPayload<ExtArgs> | null
-    }
-    scalars: $Extensions.GetPayloadResult<{
-      id: string
-      jobId: string
-      attributeId: number
-      rawValue: string | null
-      matchedValueId: number | null
-      finalValue: string | null
-      confidence: Prisma.Decimal | null
-      extractionMethod: string | null
-      alternativeValues: Prisma.JsonValue | null
-      isVerified: boolean
-      verifiedBy: number | null
-      verifiedAt: Date | null
-      createdAt: Date
-    }, ExtArgs["result"]["extractionResult"]>
-    composites: {}
-  }
-
-  type ExtractionResultGetPayload<S extends boolean | null | undefined | ExtractionResultDefaultArgs> = $Result.GetResult<Prisma.$ExtractionResultPayload, S>
-
-  type ExtractionResultCountArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> =
-    Omit<ExtractionResultFindManyArgs, 'select' | 'include' | 'distinct' | 'omit'> & {
-      select?: ExtractionResultCountAggregateInputType | true
-    }
-
-  export interface ExtractionResultDelegate<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs, GlobalOmitOptions = {}> {
-    [K: symbol]: { types: Prisma.TypeMap<ExtArgs>['model']['ExtractionResult'], meta: { name: 'ExtractionResult' } }
-    /**
-     * Find zero or one ExtractionResult that matches the filter.
-     * @param {ExtractionResultFindUniqueArgs} args - Arguments to find a ExtractionResult
-     * @example
-     * // Get one ExtractionResult
-     * const extractionResult = await prisma.extractionResult.findUnique({
-     *   where: {
-     *     // ... provide filter here
-     *   }
-     * })
-     */
-    findUnique<T extends ExtractionResultFindUniqueArgs>(args: SelectSubset<T, ExtractionResultFindUniqueArgs<ExtArgs>>): Prisma__ExtractionResultClient<$Result.GetResult<Prisma.$ExtractionResultPayload<ExtArgs>, T, "findUnique", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
-
-    /**
-     * Find one ExtractionResult that matches the filter or throw an error with `error.code='P2025'`
-     * if no matches were found.
-     * @param {ExtractionResultFindUniqueOrThrowArgs} args - Arguments to find a ExtractionResult
-     * @example
-     * // Get one ExtractionResult
-     * const extractionResult = await prisma.extractionResult.findUniqueOrThrow({
-     *   where: {
-     *     // ... provide filter here
-     *   }
-     * })
-     */
-    findUniqueOrThrow<T extends ExtractionResultFindUniqueOrThrowArgs>(args: SelectSubset<T, ExtractionResultFindUniqueOrThrowArgs<ExtArgs>>): Prisma__ExtractionResultClient<$Result.GetResult<Prisma.$ExtractionResultPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
-
-    /**
-     * Find the first ExtractionResult that matches the filter.
-     * Note, that providing `undefined` is treated as the value not being there.
-     * Read more here: https://pris.ly/d/null-undefined
-     * @param {ExtractionResultFindFirstArgs} args - Arguments to find a ExtractionResult
-     * @example
-     * // Get one ExtractionResult
-     * const extractionResult = await prisma.extractionResult.findFirst({
-     *   where: {
-     *     // ... provide filter here
-     *   }
-     * })
-     */
-    findFirst<T extends ExtractionResultFindFirstArgs>(args?: SelectSubset<T, ExtractionResultFindFirstArgs<ExtArgs>>): Prisma__ExtractionResultClient<$Result.GetResult<Prisma.$ExtractionResultPayload<ExtArgs>, T, "findFirst", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
-
-    /**
-     * Find the first ExtractionResult that matches the filter or
-     * throw `PrismaKnownClientError` with `P2025` code if no matches were found.
-     * Note, that providing `undefined` is treated as the value not being there.
-     * Read more here: https://pris.ly/d/null-undefined
-     * @param {ExtractionResultFindFirstOrThrowArgs} args - Arguments to find a ExtractionResult
-     * @example
-     * // Get one ExtractionResult
-     * const extractionResult = await prisma.extractionResult.findFirstOrThrow({
-     *   where: {
-     *     // ... provide filter here
-     *   }
-     * })
-     */
-    findFirstOrThrow<T extends ExtractionResultFindFirstOrThrowArgs>(args?: SelectSubset<T, ExtractionResultFindFirstOrThrowArgs<ExtArgs>>): Prisma__ExtractionResultClient<$Result.GetResult<Prisma.$ExtractionResultPayload<ExtArgs>, T, "findFirstOrThrow", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
-
-    /**
-     * Find zero or more ExtractionResults that matches the filter.
-     * Note, that providing `undefined` is treated as the value not being there.
-     * Read more here: https://pris.ly/d/null-undefined
-     * @param {ExtractionResultFindManyArgs} args - Arguments to filter and select certain fields only.
-     * @example
-     * // Get all ExtractionResults
-     * const extractionResults = await prisma.extractionResult.findMany()
-     * 
-     * // Get first 10 ExtractionResults
-     * const extractionResults = await prisma.extractionResult.findMany({ take: 10 })
-     * 
-     * // Only select the `id`
-     * const extractionResultWithIdOnly = await prisma.extractionResult.findMany({ select: { id: true } })
-     * 
-     */
-    findMany<T extends ExtractionResultFindManyArgs>(args?: SelectSubset<T, ExtractionResultFindManyArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$ExtractionResultPayload<ExtArgs>, T, "findMany", GlobalOmitOptions>>
-
-    /**
-     * Create a ExtractionResult.
-     * @param {ExtractionResultCreateArgs} args - Arguments to create a ExtractionResult.
-     * @example
-     * // Create one ExtractionResult
-     * const ExtractionResult = await prisma.extractionResult.create({
-     *   data: {
-     *     // ... data to create a ExtractionResult
-     *   }
-     * })
-     * 
-     */
-    create<T extends ExtractionResultCreateArgs>(args: SelectSubset<T, ExtractionResultCreateArgs<ExtArgs>>): Prisma__ExtractionResultClient<$Result.GetResult<Prisma.$ExtractionResultPayload<ExtArgs>, T, "create", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
-
-    /**
-     * Create many ExtractionResults.
-     * @param {ExtractionResultCreateManyArgs} args - Arguments to create many ExtractionResults.
-     * @example
-     * // Create many ExtractionResults
-     * const extractionResult = await prisma.extractionResult.createMany({
-     *   data: [
-     *     // ... provide data here
-     *   ]
-     * })
-     *     
-     */
-    createMany<T extends ExtractionResultCreateManyArgs>(args?: SelectSubset<T, ExtractionResultCreateManyArgs<ExtArgs>>): Prisma.PrismaPromise<BatchPayload>
-
-    /**
-     * Create many ExtractionResults and returns the data saved in the database.
-     * @param {ExtractionResultCreateManyAndReturnArgs} args - Arguments to create many ExtractionResults.
-     * @example
-     * // Create many ExtractionResults
-     * const extractionResult = await prisma.extractionResult.createManyAndReturn({
-     *   data: [
-     *     // ... provide data here
-     *   ]
-     * })
-     * 
-     * // Create many ExtractionResults and only return the `id`
-     * const extractionResultWithIdOnly = await prisma.extractionResult.createManyAndReturn({
-     *   select: { id: true },
-     *   data: [
-     *     // ... provide data here
-     *   ]
-     * })
-     * Note, that providing `undefined` is treated as the value not being there.
-     * Read more here: https://pris.ly/d/null-undefined
-     * 
-     */
-    createManyAndReturn<T extends ExtractionResultCreateManyAndReturnArgs>(args?: SelectSubset<T, ExtractionResultCreateManyAndReturnArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$ExtractionResultPayload<ExtArgs>, T, "createManyAndReturn", GlobalOmitOptions>>
-
-    /**
-     * Delete a ExtractionResult.
-     * @param {ExtractionResultDeleteArgs} args - Arguments to delete one ExtractionResult.
-     * @example
-     * // Delete one ExtractionResult
-     * const ExtractionResult = await prisma.extractionResult.delete({
-     *   where: {
-     *     // ... filter to delete one ExtractionResult
-     *   }
-     * })
-     * 
-     */
-    delete<T extends ExtractionResultDeleteArgs>(args: SelectSubset<T, ExtractionResultDeleteArgs<ExtArgs>>): Prisma__ExtractionResultClient<$Result.GetResult<Prisma.$ExtractionResultPayload<ExtArgs>, T, "delete", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
-
-    /**
-     * Update one ExtractionResult.
-     * @param {ExtractionResultUpdateArgs} args - Arguments to update one ExtractionResult.
-     * @example
-     * // Update one ExtractionResult
-     * const extractionResult = await prisma.extractionResult.update({
-     *   where: {
-     *     // ... provide filter here
-     *   },
-     *   data: {
-     *     // ... provide data here
-     *   }
-     * })
-     * 
-     */
-    update<T extends ExtractionResultUpdateArgs>(args: SelectSubset<T, ExtractionResultUpdateArgs<ExtArgs>>): Prisma__ExtractionResultClient<$Result.GetResult<Prisma.$ExtractionResultPayload<ExtArgs>, T, "update", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
-
-    /**
-     * Delete zero or more ExtractionResults.
-     * @param {ExtractionResultDeleteManyArgs} args - Arguments to filter ExtractionResults to delete.
-     * @example
-     * // Delete a few ExtractionResults
-     * const { count } = await prisma.extractionResult.deleteMany({
-     *   where: {
-     *     // ... provide filter here
-     *   }
-     * })
-     * 
-     */
-    deleteMany<T extends ExtractionResultDeleteManyArgs>(args?: SelectSubset<T, ExtractionResultDeleteManyArgs<ExtArgs>>): Prisma.PrismaPromise<BatchPayload>
-
-    /**
-     * Update zero or more ExtractionResults.
-     * Note, that providing `undefined` is treated as the value not being there.
-     * Read more here: https://pris.ly/d/null-undefined
-     * @param {ExtractionResultUpdateManyArgs} args - Arguments to update one or more rows.
-     * @example
-     * // Update many ExtractionResults
-     * const extractionResult = await prisma.extractionResult.updateMany({
-     *   where: {
-     *     // ... provide filter here
-     *   },
-     *   data: {
-     *     // ... provide data here
-     *   }
-     * })
-     * 
-     */
-    updateMany<T extends ExtractionResultUpdateManyArgs>(args: SelectSubset<T, ExtractionResultUpdateManyArgs<ExtArgs>>): Prisma.PrismaPromise<BatchPayload>
-
-    /**
-     * Update zero or more ExtractionResults and returns the data updated in the database.
-     * @param {ExtractionResultUpdateManyAndReturnArgs} args - Arguments to update many ExtractionResults.
-     * @example
-     * // Update many ExtractionResults
-     * const extractionResult = await prisma.extractionResult.updateManyAndReturn({
-     *   where: {
-     *     // ... provide filter here
-     *   },
-     *   data: [
-     *     // ... provide data here
-     *   ]
-     * })
-     * 
-     * // Update zero or more ExtractionResults and only return the `id`
-     * const extractionResultWithIdOnly = await prisma.extractionResult.updateManyAndReturn({
-     *   select: { id: true },
-     *   where: {
-     *     // ... provide filter here
-     *   },
-     *   data: [
-     *     // ... provide data here
-     *   ]
-     * })
-     * Note, that providing `undefined` is treated as the value not being there.
-     * Read more here: https://pris.ly/d/null-undefined
-     * 
-     */
-    updateManyAndReturn<T extends ExtractionResultUpdateManyAndReturnArgs>(args: SelectSubset<T, ExtractionResultUpdateManyAndReturnArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$ExtractionResultPayload<ExtArgs>, T, "updateManyAndReturn", GlobalOmitOptions>>
-
-    /**
-     * Create or update one ExtractionResult.
-     * @param {ExtractionResultUpsertArgs} args - Arguments to update or create a ExtractionResult.
-     * @example
-     * // Update or create a ExtractionResult
-     * const extractionResult = await prisma.extractionResult.upsert({
-     *   create: {
-     *     // ... data to create a ExtractionResult
-     *   },
-     *   update: {
-     *     // ... in case it already exists, update
-     *   },
-     *   where: {
-     *     // ... the filter for the ExtractionResult we want to update
-     *   }
-     * })
-     */
-    upsert<T extends ExtractionResultUpsertArgs>(args: SelectSubset<T, ExtractionResultUpsertArgs<ExtArgs>>): Prisma__ExtractionResultClient<$Result.GetResult<Prisma.$ExtractionResultPayload<ExtArgs>, T, "upsert", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
-
-
-    /**
-     * Count the number of ExtractionResults.
-     * Note, that providing `undefined` is treated as the value not being there.
-     * Read more here: https://pris.ly/d/null-undefined
-     * @param {ExtractionResultCountArgs} args - Arguments to filter ExtractionResults to count.
-     * @example
-     * // Count the number of ExtractionResults
-     * const count = await prisma.extractionResult.count({
-     *   where: {
-     *     // ... the filter for the ExtractionResults we want to count
-     *   }
-     * })
-    **/
-    count<T extends ExtractionResultCountArgs>(
-      args?: Subset<T, ExtractionResultCountArgs>,
-    ): Prisma.PrismaPromise<
-      T extends $Utils.Record<'select', any>
-        ? T['select'] extends true
-          ? number
-          : GetScalarType<T['select'], ExtractionResultCountAggregateOutputType>
-        : number
-    >
-
-    /**
-     * Allows you to perform aggregations operations on a ExtractionResult.
-     * Note, that providing `undefined` is treated as the value not being there.
-     * Read more here: https://pris.ly/d/null-undefined
-     * @param {ExtractionResultAggregateArgs} args - Select which aggregations you would like to apply and on what fields.
-     * @example
-     * // Ordered by age ascending
-     * // Where email contains prisma.io
-     * // Limited to the 10 users
-     * const aggregations = await prisma.user.aggregate({
-     *   _avg: {
-     *     age: true,
-     *   },
-     *   where: {
-     *     email: {
-     *       contains: "prisma.io",
-     *     },
-     *   },
-     *   orderBy: {
-     *     age: "asc",
-     *   },
-     *   take: 10,
-     * })
-    **/
-    aggregate<T extends ExtractionResultAggregateArgs>(args: Subset<T, ExtractionResultAggregateArgs>): Prisma.PrismaPromise<GetExtractionResultAggregateType<T>>
-
-    /**
-     * Group by ExtractionResult.
-     * Note, that providing `undefined` is treated as the value not being there.
-     * Read more here: https://pris.ly/d/null-undefined
-     * @param {ExtractionResultGroupByArgs} args - Group by arguments.
-     * @example
-     * // Group by city, order by createdAt, get count
-     * const result = await prisma.user.groupBy({
-     *   by: ['city', 'createdAt'],
-     *   orderBy: {
-     *     createdAt: true
-     *   },
-     *   _count: {
-     *     _all: true
-     *   },
-     * })
-     * 
-    **/
-    groupBy<
-      T extends ExtractionResultGroupByArgs,
-      HasSelectOrTake extends Or<
-        Extends<'skip', Keys<T>>,
-        Extends<'take', Keys<T>>
-      >,
-      OrderByArg extends True extends HasSelectOrTake
-        ? { orderBy: ExtractionResultGroupByArgs['orderBy'] }
-        : { orderBy?: ExtractionResultGroupByArgs['orderBy'] },
-      OrderFields extends ExcludeUnderscoreKeys<Keys<MaybeTupleToUnion<T['orderBy']>>>,
-      ByFields extends MaybeTupleToUnion<T['by']>,
-      ByValid extends Has<ByFields, OrderFields>,
-      HavingFields extends GetHavingFields<T['having']>,
-      HavingValid extends Has<ByFields, HavingFields>,
-      ByEmpty extends T['by'] extends never[] ? True : False,
-      InputErrors extends ByEmpty extends True
-      ? `Error: "by" must not be empty.`
-      : HavingValid extends False
-      ? {
-          [P in HavingFields]: P extends ByFields
-            ? never
-            : P extends string
-            ? `Error: Field "${P}" used in "having" needs to be provided in "by".`
-            : [
-                Error,
-                'Field ',
-                P,
-                ` in "having" needs to be provided in "by"`,
-              ]
-        }[HavingFields]
-      : 'take' extends Keys<T>
-      ? 'orderBy' extends Keys<T>
-        ? ByValid extends True
-          ? {}
-          : {
-              [P in OrderFields]: P extends ByFields
-                ? never
-                : `Error: Field "${P}" in "orderBy" needs to be provided in "by"`
-            }[OrderFields]
-        : 'Error: If you provide "take", you also need to provide "orderBy"'
-      : 'skip' extends Keys<T>
-      ? 'orderBy' extends Keys<T>
-        ? ByValid extends True
-          ? {}
-          : {
-              [P in OrderFields]: P extends ByFields
-                ? never
-                : `Error: Field "${P}" in "orderBy" needs to be provided in "by"`
-            }[OrderFields]
-        : 'Error: If you provide "skip", you also need to provide "orderBy"'
-      : ByValid extends True
-      ? {}
-      : {
-          [P in OrderFields]: P extends ByFields
-            ? never
-            : `Error: Field "${P}" in "orderBy" needs to be provided in "by"`
-        }[OrderFields]
-    >(args: SubsetIntersection<T, ExtractionResultGroupByArgs, OrderByArg> & InputErrors): {} extends InputErrors ? GetExtractionResultGroupByPayload<T> : Prisma.PrismaPromise<InputErrors>
-  /**
-   * Fields of the ExtractionResult model
-   */
-  readonly fields: ExtractionResultFieldRefs;
-  }
-
-  /**
-   * The delegate class that acts as a "Promise-like" for ExtractionResult.
-   * Why is this prefixed with `Prisma__`?
-   * Because we want to prevent naming conflicts as mentioned in
-   * https://github.com/prisma/prisma-client-js/issues/707
-   */
-  export interface Prisma__ExtractionResultClient<T, Null = never, ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs, GlobalOmitOptions = {}> extends Prisma.PrismaPromise<T> {
-    readonly [Symbol.toStringTag]: "PrismaPromise"
-    attribute<T extends MasterAttributeDefaultArgs<ExtArgs> = {}>(args?: Subset<T, MasterAttributeDefaultArgs<ExtArgs>>): Prisma__MasterAttributeClient<$Result.GetResult<Prisma.$MasterAttributePayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | Null, Null, ExtArgs, GlobalOmitOptions>
-    job<T extends ExtractionJobDefaultArgs<ExtArgs> = {}>(args?: Subset<T, ExtractionJobDefaultArgs<ExtArgs>>): Prisma__ExtractionJobClient<$Result.GetResult<Prisma.$ExtractionJobPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | Null, Null, ExtArgs, GlobalOmitOptions>
-    matchedValue<T extends ExtractionResult$matchedValueArgs<ExtArgs> = {}>(args?: Subset<T, ExtractionResult$matchedValueArgs<ExtArgs>>): Prisma__AttributeAllowedValueClient<$Result.GetResult<Prisma.$AttributeAllowedValuePayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
-    verifier<T extends ExtractionResult$verifierArgs<ExtArgs> = {}>(args?: Subset<T, ExtractionResult$verifierArgs<ExtArgs>>): Prisma__UserClient<$Result.GetResult<Prisma.$UserPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
-    /**
-     * Attaches callbacks for the resolution and/or rejection of the Promise.
-     * @param onfulfilled The callback to execute when the Promise is resolved.
-     * @param onrejected The callback to execute when the Promise is rejected.
-     * @returns A Promise for the completion of which ever callback is executed.
-     */
-    then<TResult1 = T, TResult2 = never>(onfulfilled?: ((value: T) => TResult1 | PromiseLike<TResult1>) | undefined | null, onrejected?: ((reason: any) => TResult2 | PromiseLike<TResult2>) | undefined | null): $Utils.JsPromise<TResult1 | TResult2>
-    /**
-     * Attaches a callback for only the rejection of the Promise.
-     * @param onrejected The callback to execute when the Promise is rejected.
-     * @returns A Promise for the completion of the callback.
-     */
-    catch<TResult = never>(onrejected?: ((reason: any) => TResult | PromiseLike<TResult>) | undefined | null): $Utils.JsPromise<T | TResult>
-    /**
-     * Attaches a callback that is invoked when the Promise is settled (fulfilled or rejected). The
-     * resolved value cannot be modified from the callback.
-     * @param onfinally The callback to execute when the Promise is settled (fulfilled or rejected).
-     * @returns A Promise for the completion of the callback.
-     */
-    finally(onfinally?: (() => void) | undefined | null): $Utils.JsPromise<T>
-  }
-
-
-
-
-  /**
-   * Fields of the ExtractionResult model
-   */
-  interface ExtractionResultFieldRefs {
-    readonly id: FieldRef<"ExtractionResult", 'String'>
-    readonly jobId: FieldRef<"ExtractionResult", 'String'>
-    readonly attributeId: FieldRef<"ExtractionResult", 'Int'>
-    readonly rawValue: FieldRef<"ExtractionResult", 'String'>
-    readonly matchedValueId: FieldRef<"ExtractionResult", 'Int'>
-    readonly finalValue: FieldRef<"ExtractionResult", 'String'>
-    readonly confidence: FieldRef<"ExtractionResult", 'Decimal'>
-    readonly extractionMethod: FieldRef<"ExtractionResult", 'String'>
-    readonly alternativeValues: FieldRef<"ExtractionResult", 'Json'>
-    readonly isVerified: FieldRef<"ExtractionResult", 'Boolean'>
-    readonly verifiedBy: FieldRef<"ExtractionResult", 'Int'>
-    readonly verifiedAt: FieldRef<"ExtractionResult", 'DateTime'>
-    readonly createdAt: FieldRef<"ExtractionResult", 'DateTime'>
-  }
-    
-
-  // Custom InputTypes
-  /**
-   * ExtractionResult findUnique
-   */
-  export type ExtractionResultFindUniqueArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
-    /**
-     * Select specific fields to fetch from the ExtractionResult
-     */
-    select?: ExtractionResultSelect<ExtArgs> | null
-    /**
-     * Omit specific fields from the ExtractionResult
-     */
-    omit?: ExtractionResultOmit<ExtArgs> | null
-    /**
-     * Choose, which related nodes to fetch as well
-     */
-    include?: ExtractionResultInclude<ExtArgs> | null
-    /**
-     * Filter, which ExtractionResult to fetch.
-     */
-    where: ExtractionResultWhereUniqueInput
-  }
-
-  /**
-   * ExtractionResult findUniqueOrThrow
-   */
-  export type ExtractionResultFindUniqueOrThrowArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
-    /**
-     * Select specific fields to fetch from the ExtractionResult
-     */
-    select?: ExtractionResultSelect<ExtArgs> | null
-    /**
-     * Omit specific fields from the ExtractionResult
-     */
-    omit?: ExtractionResultOmit<ExtArgs> | null
-    /**
-     * Choose, which related nodes to fetch as well
-     */
-    include?: ExtractionResultInclude<ExtArgs> | null
-    /**
-     * Filter, which ExtractionResult to fetch.
-     */
-    where: ExtractionResultWhereUniqueInput
-  }
-
-  /**
-   * ExtractionResult findFirst
-   */
-  export type ExtractionResultFindFirstArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
-    /**
-     * Select specific fields to fetch from the ExtractionResult
-     */
-    select?: ExtractionResultSelect<ExtArgs> | null
-    /**
-     * Omit specific fields from the ExtractionResult
-     */
-    omit?: ExtractionResultOmit<ExtArgs> | null
-    /**
-     * Choose, which related nodes to fetch as well
-     */
-    include?: ExtractionResultInclude<ExtArgs> | null
-    /**
-     * Filter, which ExtractionResult to fetch.
-     */
-    where?: ExtractionResultWhereInput
-    /**
-     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
-     * 
-     * Determine the order of ExtractionResults to fetch.
-     */
-    orderBy?: ExtractionResultOrderByWithRelationInput | ExtractionResultOrderByWithRelationInput[]
-    /**
-     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
-     * 
-     * Sets the position for searching for ExtractionResults.
-     */
-    cursor?: ExtractionResultWhereUniqueInput
-    /**
-     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
-     * 
-     * Take `±n` ExtractionResults from the position of the cursor.
-     */
-    take?: number
-    /**
-     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
-     * 
-     * Skip the first `n` ExtractionResults.
-     */
-    skip?: number
-    /**
-     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/distinct Distinct Docs}
-     * 
-     * Filter by unique combinations of ExtractionResults.
-     */
-    distinct?: ExtractionResultScalarFieldEnum | ExtractionResultScalarFieldEnum[]
-  }
-
-  /**
-   * ExtractionResult findFirstOrThrow
-   */
-  export type ExtractionResultFindFirstOrThrowArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
-    /**
-     * Select specific fields to fetch from the ExtractionResult
-     */
-    select?: ExtractionResultSelect<ExtArgs> | null
-    /**
-     * Omit specific fields from the ExtractionResult
-     */
-    omit?: ExtractionResultOmit<ExtArgs> | null
-    /**
-     * Choose, which related nodes to fetch as well
-     */
-    include?: ExtractionResultInclude<ExtArgs> | null
-    /**
-     * Filter, which ExtractionResult to fetch.
-     */
-    where?: ExtractionResultWhereInput
-    /**
-     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
-     * 
-     * Determine the order of ExtractionResults to fetch.
-     */
-    orderBy?: ExtractionResultOrderByWithRelationInput | ExtractionResultOrderByWithRelationInput[]
-    /**
-     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
-     * 
-     * Sets the position for searching for ExtractionResults.
-     */
-    cursor?: ExtractionResultWhereUniqueInput
-    /**
-     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
-     * 
-     * Take `±n` ExtractionResults from the position of the cursor.
-     */
-    take?: number
-    /**
-     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
-     * 
-     * Skip the first `n` ExtractionResults.
-     */
-    skip?: number
-    /**
-     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/distinct Distinct Docs}
-     * 
-     * Filter by unique combinations of ExtractionResults.
-     */
-    distinct?: ExtractionResultScalarFieldEnum | ExtractionResultScalarFieldEnum[]
-  }
-
-  /**
-   * ExtractionResult findMany
-   */
-  export type ExtractionResultFindManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
-    /**
-     * Select specific fields to fetch from the ExtractionResult
-     */
-    select?: ExtractionResultSelect<ExtArgs> | null
-    /**
-     * Omit specific fields from the ExtractionResult
-     */
-    omit?: ExtractionResultOmit<ExtArgs> | null
-    /**
-     * Choose, which related nodes to fetch as well
-     */
-    include?: ExtractionResultInclude<ExtArgs> | null
-    /**
-     * Filter, which ExtractionResults to fetch.
-     */
-    where?: ExtractionResultWhereInput
-    /**
-     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
-     * 
-     * Determine the order of ExtractionResults to fetch.
-     */
-    orderBy?: ExtractionResultOrderByWithRelationInput | ExtractionResultOrderByWithRelationInput[]
-    /**
-     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
-     * 
-     * Sets the position for listing ExtractionResults.
-     */
-    cursor?: ExtractionResultWhereUniqueInput
-    /**
-     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
-     * 
-     * Take `±n` ExtractionResults from the position of the cursor.
-     */
-    take?: number
-    /**
-     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
-     * 
-     * Skip the first `n` ExtractionResults.
-     */
-    skip?: number
-    distinct?: ExtractionResultScalarFieldEnum | ExtractionResultScalarFieldEnum[]
-  }
-
-  /**
-   * ExtractionResult create
-   */
-  export type ExtractionResultCreateArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
-    /**
-     * Select specific fields to fetch from the ExtractionResult
-     */
-    select?: ExtractionResultSelect<ExtArgs> | null
-    /**
-     * Omit specific fields from the ExtractionResult
-     */
-    omit?: ExtractionResultOmit<ExtArgs> | null
-    /**
-     * Choose, which related nodes to fetch as well
-     */
-    include?: ExtractionResultInclude<ExtArgs> | null
-    /**
-     * The data needed to create a ExtractionResult.
-     */
-    data: XOR<ExtractionResultCreateInput, ExtractionResultUncheckedCreateInput>
-  }
-
-  /**
-   * ExtractionResult createMany
-   */
-  export type ExtractionResultCreateManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
-    /**
-     * The data used to create many ExtractionResults.
-     */
-    data: ExtractionResultCreateManyInput | ExtractionResultCreateManyInput[]
-    skipDuplicates?: boolean
-  }
-
-  /**
-   * ExtractionResult createManyAndReturn
-   */
-  export type ExtractionResultCreateManyAndReturnArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
-    /**
-     * Select specific fields to fetch from the ExtractionResult
-     */
-    select?: ExtractionResultSelectCreateManyAndReturn<ExtArgs> | null
-    /**
-     * Omit specific fields from the ExtractionResult
-     */
-    omit?: ExtractionResultOmit<ExtArgs> | null
-    /**
-     * The data used to create many ExtractionResults.
-     */
-    data: ExtractionResultCreateManyInput | ExtractionResultCreateManyInput[]
-    skipDuplicates?: boolean
-    /**
-     * Choose, which related nodes to fetch as well
-     */
-    include?: ExtractionResultIncludeCreateManyAndReturn<ExtArgs> | null
-  }
-
-  /**
-   * ExtractionResult update
-   */
-  export type ExtractionResultUpdateArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
-    /**
-     * Select specific fields to fetch from the ExtractionResult
-     */
-    select?: ExtractionResultSelect<ExtArgs> | null
-    /**
-     * Omit specific fields from the ExtractionResult
-     */
-    omit?: ExtractionResultOmit<ExtArgs> | null
-    /**
-     * Choose, which related nodes to fetch as well
-     */
-    include?: ExtractionResultInclude<ExtArgs> | null
-    /**
-     * The data needed to update a ExtractionResult.
-     */
-    data: XOR<ExtractionResultUpdateInput, ExtractionResultUncheckedUpdateInput>
-    /**
-     * Choose, which ExtractionResult to update.
-     */
-    where: ExtractionResultWhereUniqueInput
-  }
-
-  /**
-   * ExtractionResult updateMany
-   */
-  export type ExtractionResultUpdateManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
-    /**
-     * The data used to update ExtractionResults.
-     */
-    data: XOR<ExtractionResultUpdateManyMutationInput, ExtractionResultUncheckedUpdateManyInput>
-    /**
-     * Filter which ExtractionResults to update
-     */
-    where?: ExtractionResultWhereInput
-    /**
-     * Limit how many ExtractionResults to update.
-     */
-    limit?: number
-  }
-
-  /**
-   * ExtractionResult updateManyAndReturn
-   */
-  export type ExtractionResultUpdateManyAndReturnArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
-    /**
-     * Select specific fields to fetch from the ExtractionResult
-     */
-    select?: ExtractionResultSelectUpdateManyAndReturn<ExtArgs> | null
-    /**
-     * Omit specific fields from the ExtractionResult
-     */
-    omit?: ExtractionResultOmit<ExtArgs> | null
-    /**
-     * The data used to update ExtractionResults.
-     */
-    data: XOR<ExtractionResultUpdateManyMutationInput, ExtractionResultUncheckedUpdateManyInput>
-    /**
-     * Filter which ExtractionResults to update
-     */
-    where?: ExtractionResultWhereInput
-    /**
-     * Limit how many ExtractionResults to update.
-     */
-    limit?: number
-    /**
-     * Choose, which related nodes to fetch as well
-     */
-    include?: ExtractionResultIncludeUpdateManyAndReturn<ExtArgs> | null
-  }
-
-  /**
-   * ExtractionResult upsert
-   */
-  export type ExtractionResultUpsertArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
-    /**
-     * Select specific fields to fetch from the ExtractionResult
-     */
-    select?: ExtractionResultSelect<ExtArgs> | null
-    /**
-     * Omit specific fields from the ExtractionResult
-     */
-    omit?: ExtractionResultOmit<ExtArgs> | null
-    /**
-     * Choose, which related nodes to fetch as well
-     */
-    include?: ExtractionResultInclude<ExtArgs> | null
-    /**
-     * The filter to search for the ExtractionResult to update in case it exists.
-     */
-    where: ExtractionResultWhereUniqueInput
-    /**
-     * In case the ExtractionResult found by the `where` argument doesn't exist, create a new ExtractionResult with this data.
-     */
-    create: XOR<ExtractionResultCreateInput, ExtractionResultUncheckedCreateInput>
-    /**
-     * In case the ExtractionResult was found with the provided `where` argument, update it with this data.
-     */
-    update: XOR<ExtractionResultUpdateInput, ExtractionResultUncheckedUpdateInput>
-  }
-
-  /**
-   * ExtractionResult delete
-   */
-  export type ExtractionResultDeleteArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
-    /**
-     * Select specific fields to fetch from the ExtractionResult
-     */
-    select?: ExtractionResultSelect<ExtArgs> | null
-    /**
-     * Omit specific fields from the ExtractionResult
-     */
-    omit?: ExtractionResultOmit<ExtArgs> | null
-    /**
-     * Choose, which related nodes to fetch as well
-     */
-    include?: ExtractionResultInclude<ExtArgs> | null
-    /**
-     * Filter which ExtractionResult to delete.
-     */
-    where: ExtractionResultWhereUniqueInput
-  }
-
-  /**
-   * ExtractionResult deleteMany
-   */
-  export type ExtractionResultDeleteManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
-    /**
-     * Filter which ExtractionResults to delete
-     */
-    where?: ExtractionResultWhereInput
-    /**
-     * Limit how many ExtractionResults to delete.
-     */
-    limit?: number
-  }
-
-  /**
-   * ExtractionResult.matchedValue
-   */
-  export type ExtractionResult$matchedValueArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
-    /**
-     * Select specific fields to fetch from the AttributeAllowedValue
-     */
-    select?: AttributeAllowedValueSelect<ExtArgs> | null
-    /**
-     * Omit specific fields from the AttributeAllowedValue
-     */
-    omit?: AttributeAllowedValueOmit<ExtArgs> | null
-    /**
-     * Choose, which related nodes to fetch as well
-     */
-    include?: AttributeAllowedValueInclude<ExtArgs> | null
-    where?: AttributeAllowedValueWhereInput
-  }
-
-  /**
-   * ExtractionResult.verifier
-   */
-  export type ExtractionResult$verifierArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
-    /**
-     * Select specific fields to fetch from the User
-     */
-    select?: UserSelect<ExtArgs> | null
-    /**
-     * Omit specific fields from the User
-     */
-    omit?: UserOmit<ExtArgs> | null
-    /**
-     * Choose, which related nodes to fetch as well
-     */
-    include?: UserInclude<ExtArgs> | null
-    where?: UserWhereInput
-  }
-
-  /**
-   * ExtractionResult without action
-   */
-  export type ExtractionResultDefaultArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
-    /**
-     * Select specific fields to fetch from the ExtractionResult
-     */
-    select?: ExtractionResultSelect<ExtArgs> | null
-    /**
-     * Omit specific fields from the ExtractionResult
-     */
-    omit?: ExtractionResultOmit<ExtArgs> | null
-    /**
-     * Choose, which related nodes to fetch as well
-     */
-    include?: ExtractionResultInclude<ExtArgs> | null
   }
 
 
@@ -17460,6 +16026,62 @@ export namespace Prisma {
     otherRoughV2: Decimal | null
     otherVdrCost: Decimal | null
     otherFinalCost: Decimal | null
+    adjusterAutoBgt: Decimal | null
+    adjusterRoughV2: Decimal | null
+    adjusterVdrCost: Decimal | null
+    adjusterFinalCost: Decimal | null
+    brotchAutoBgt: Decimal | null
+    brotchRoughV2: Decimal | null
+    brotchVdrCost: Decimal | null
+    brotchFinalCost: Decimal | null
+    buckleAutoBgt: Decimal | null
+    buckleRoughV2: Decimal | null
+    buckleVdrCost: Decimal | null
+    buckleFinalCost: Decimal | null
+    eyeletsAutoBgt: Decimal | null
+    eyeletsRoughV2: Decimal | null
+    eyeletsVdrCost: Decimal | null
+    eyeletsFinalCost: Decimal | null
+    hangingDRingAutoBgt: Decimal | null
+    hangingDRingRoughV2: Decimal | null
+    hangingDRingVdrCost: Decimal | null
+    hangingDRingFinalCost: Decimal | null
+    hookAutoBgt: Decimal | null
+    hookRoughV2: Decimal | null
+    hookVdrCost: Decimal | null
+    hookFinalCost: Decimal | null
+    labelAutoBgt: Decimal | null
+    labelRoughV2: Decimal | null
+    labelVdrCost: Decimal | null
+    labelFinalCost: Decimal | null
+    laceAutoBgt: Decimal | null
+    laceRoughV2: Decimal | null
+    laceVdrCost: Decimal | null
+    laceFinalCost: Decimal | null
+    pockettingFabricAutoBgt: Decimal | null
+    pockettingFabricRoughV2: Decimal | null
+    pockettingFabricVdrCost: Decimal | null
+    pockettingFabricFinalCost: Decimal | null
+    pockettingReadymadeAutoBgt: Decimal | null
+    pockettingReadymadeRoughV2: Decimal | null
+    pockettingReadymadeVdrCost: Decimal | null
+    pockettingReadymadeFinalCost: Decimal | null
+    santaAutoBgt: Decimal | null
+    santaRoughV2: Decimal | null
+    santaVdrCost: Decimal | null
+    santaFinalCost: Decimal | null
+    stopperAutoBgt: Decimal | null
+    stopperRoughV2: Decimal | null
+    stopperVdrCost: Decimal | null
+    stopperFinalCost: Decimal | null
+    tagAutoBgt: Decimal | null
+    tagRoughV2: Decimal | null
+    tagVdrCost: Decimal | null
+    tagFinalCost: Decimal | null
+    tasselsAutoBgt: Decimal | null
+    tasselsRoughV2: Decimal | null
+    tasselsVdrCost: Decimal | null
+    tasselsFinalCost: Decimal | null
     printAutoBgt: Decimal | null
     printRoughV2: Decimal | null
     printVendorCost: Decimal | null
@@ -17564,6 +16186,62 @@ export namespace Prisma {
     otherRoughV2: Decimal | null
     otherVdrCost: Decimal | null
     otherFinalCost: Decimal | null
+    adjusterAutoBgt: Decimal | null
+    adjusterRoughV2: Decimal | null
+    adjusterVdrCost: Decimal | null
+    adjusterFinalCost: Decimal | null
+    brotchAutoBgt: Decimal | null
+    brotchRoughV2: Decimal | null
+    brotchVdrCost: Decimal | null
+    brotchFinalCost: Decimal | null
+    buckleAutoBgt: Decimal | null
+    buckleRoughV2: Decimal | null
+    buckleVdrCost: Decimal | null
+    buckleFinalCost: Decimal | null
+    eyeletsAutoBgt: Decimal | null
+    eyeletsRoughV2: Decimal | null
+    eyeletsVdrCost: Decimal | null
+    eyeletsFinalCost: Decimal | null
+    hangingDRingAutoBgt: Decimal | null
+    hangingDRingRoughV2: Decimal | null
+    hangingDRingVdrCost: Decimal | null
+    hangingDRingFinalCost: Decimal | null
+    hookAutoBgt: Decimal | null
+    hookRoughV2: Decimal | null
+    hookVdrCost: Decimal | null
+    hookFinalCost: Decimal | null
+    labelAutoBgt: Decimal | null
+    labelRoughV2: Decimal | null
+    labelVdrCost: Decimal | null
+    labelFinalCost: Decimal | null
+    laceAutoBgt: Decimal | null
+    laceRoughV2: Decimal | null
+    laceVdrCost: Decimal | null
+    laceFinalCost: Decimal | null
+    pockettingFabricAutoBgt: Decimal | null
+    pockettingFabricRoughV2: Decimal | null
+    pockettingFabricVdrCost: Decimal | null
+    pockettingFabricFinalCost: Decimal | null
+    pockettingReadymadeAutoBgt: Decimal | null
+    pockettingReadymadeRoughV2: Decimal | null
+    pockettingReadymadeVdrCost: Decimal | null
+    pockettingReadymadeFinalCost: Decimal | null
+    santaAutoBgt: Decimal | null
+    santaRoughV2: Decimal | null
+    santaVdrCost: Decimal | null
+    santaFinalCost: Decimal | null
+    stopperAutoBgt: Decimal | null
+    stopperRoughV2: Decimal | null
+    stopperVdrCost: Decimal | null
+    stopperFinalCost: Decimal | null
+    tagAutoBgt: Decimal | null
+    tagRoughV2: Decimal | null
+    tagVdrCost: Decimal | null
+    tagFinalCost: Decimal | null
+    tasselsAutoBgt: Decimal | null
+    tasselsRoughV2: Decimal | null
+    tasselsVdrCost: Decimal | null
+    tasselsFinalCost: Decimal | null
     printAutoBgt: Decimal | null
     printRoughV2: Decimal | null
     printVendorCost: Decimal | null
@@ -17754,6 +16432,62 @@ export namespace Prisma {
     otherRoughV2: Decimal | null
     otherVdrCost: Decimal | null
     otherFinalCost: Decimal | null
+    adjusterAutoBgt: Decimal | null
+    adjusterRoughV2: Decimal | null
+    adjusterVdrCost: Decimal | null
+    adjusterFinalCost: Decimal | null
+    brotchAutoBgt: Decimal | null
+    brotchRoughV2: Decimal | null
+    brotchVdrCost: Decimal | null
+    brotchFinalCost: Decimal | null
+    buckleAutoBgt: Decimal | null
+    buckleRoughV2: Decimal | null
+    buckleVdrCost: Decimal | null
+    buckleFinalCost: Decimal | null
+    eyeletsAutoBgt: Decimal | null
+    eyeletsRoughV2: Decimal | null
+    eyeletsVdrCost: Decimal | null
+    eyeletsFinalCost: Decimal | null
+    hangingDRingAutoBgt: Decimal | null
+    hangingDRingRoughV2: Decimal | null
+    hangingDRingVdrCost: Decimal | null
+    hangingDRingFinalCost: Decimal | null
+    hookAutoBgt: Decimal | null
+    hookRoughV2: Decimal | null
+    hookVdrCost: Decimal | null
+    hookFinalCost: Decimal | null
+    labelAutoBgt: Decimal | null
+    labelRoughV2: Decimal | null
+    labelVdrCost: Decimal | null
+    labelFinalCost: Decimal | null
+    laceAutoBgt: Decimal | null
+    laceRoughV2: Decimal | null
+    laceVdrCost: Decimal | null
+    laceFinalCost: Decimal | null
+    pockettingFabricAutoBgt: Decimal | null
+    pockettingFabricRoughV2: Decimal | null
+    pockettingFabricVdrCost: Decimal | null
+    pockettingFabricFinalCost: Decimal | null
+    pockettingReadymadeAutoBgt: Decimal | null
+    pockettingReadymadeRoughV2: Decimal | null
+    pockettingReadymadeVdrCost: Decimal | null
+    pockettingReadymadeFinalCost: Decimal | null
+    santaAutoBgt: Decimal | null
+    santaRoughV2: Decimal | null
+    santaVdrCost: Decimal | null
+    santaFinalCost: Decimal | null
+    stopperAutoBgt: Decimal | null
+    stopperRoughV2: Decimal | null
+    stopperVdrCost: Decimal | null
+    stopperFinalCost: Decimal | null
+    tagAutoBgt: Decimal | null
+    tagRoughV2: Decimal | null
+    tagVdrCost: Decimal | null
+    tagFinalCost: Decimal | null
+    tasselsAutoBgt: Decimal | null
+    tasselsRoughV2: Decimal | null
+    tasselsVdrCost: Decimal | null
+    tasselsFinalCost: Decimal | null
     printAutoBgt: Decimal | null
     printRoughV2: Decimal | null
     printVendorCost: Decimal | null
@@ -17984,6 +16718,62 @@ export namespace Prisma {
     otherRoughV2: Decimal | null
     otherVdrCost: Decimal | null
     otherFinalCost: Decimal | null
+    adjusterAutoBgt: Decimal | null
+    adjusterRoughV2: Decimal | null
+    adjusterVdrCost: Decimal | null
+    adjusterFinalCost: Decimal | null
+    brotchAutoBgt: Decimal | null
+    brotchRoughV2: Decimal | null
+    brotchVdrCost: Decimal | null
+    brotchFinalCost: Decimal | null
+    buckleAutoBgt: Decimal | null
+    buckleRoughV2: Decimal | null
+    buckleVdrCost: Decimal | null
+    buckleFinalCost: Decimal | null
+    eyeletsAutoBgt: Decimal | null
+    eyeletsRoughV2: Decimal | null
+    eyeletsVdrCost: Decimal | null
+    eyeletsFinalCost: Decimal | null
+    hangingDRingAutoBgt: Decimal | null
+    hangingDRingRoughV2: Decimal | null
+    hangingDRingVdrCost: Decimal | null
+    hangingDRingFinalCost: Decimal | null
+    hookAutoBgt: Decimal | null
+    hookRoughV2: Decimal | null
+    hookVdrCost: Decimal | null
+    hookFinalCost: Decimal | null
+    labelAutoBgt: Decimal | null
+    labelRoughV2: Decimal | null
+    labelVdrCost: Decimal | null
+    labelFinalCost: Decimal | null
+    laceAutoBgt: Decimal | null
+    laceRoughV2: Decimal | null
+    laceVdrCost: Decimal | null
+    laceFinalCost: Decimal | null
+    pockettingFabricAutoBgt: Decimal | null
+    pockettingFabricRoughV2: Decimal | null
+    pockettingFabricVdrCost: Decimal | null
+    pockettingFabricFinalCost: Decimal | null
+    pockettingReadymadeAutoBgt: Decimal | null
+    pockettingReadymadeRoughV2: Decimal | null
+    pockettingReadymadeVdrCost: Decimal | null
+    pockettingReadymadeFinalCost: Decimal | null
+    santaAutoBgt: Decimal | null
+    santaRoughV2: Decimal | null
+    santaVdrCost: Decimal | null
+    santaFinalCost: Decimal | null
+    stopperAutoBgt: Decimal | null
+    stopperRoughV2: Decimal | null
+    stopperVdrCost: Decimal | null
+    stopperFinalCost: Decimal | null
+    tagAutoBgt: Decimal | null
+    tagRoughV2: Decimal | null
+    tagVdrCost: Decimal | null
+    tagFinalCost: Decimal | null
+    tasselsAutoBgt: Decimal | null
+    tasselsRoughV2: Decimal | null
+    tasselsVdrCost: Decimal | null
+    tasselsFinalCost: Decimal | null
     printAutoBgt: Decimal | null
     printRoughV2: Decimal | null
     printVendorCost: Decimal | null
@@ -18214,6 +17004,62 @@ export namespace Prisma {
     otherRoughV2: number
     otherVdrCost: number
     otherFinalCost: number
+    adjusterAutoBgt: number
+    adjusterRoughV2: number
+    adjusterVdrCost: number
+    adjusterFinalCost: number
+    brotchAutoBgt: number
+    brotchRoughV2: number
+    brotchVdrCost: number
+    brotchFinalCost: number
+    buckleAutoBgt: number
+    buckleRoughV2: number
+    buckleVdrCost: number
+    buckleFinalCost: number
+    eyeletsAutoBgt: number
+    eyeletsRoughV2: number
+    eyeletsVdrCost: number
+    eyeletsFinalCost: number
+    hangingDRingAutoBgt: number
+    hangingDRingRoughV2: number
+    hangingDRingVdrCost: number
+    hangingDRingFinalCost: number
+    hookAutoBgt: number
+    hookRoughV2: number
+    hookVdrCost: number
+    hookFinalCost: number
+    labelAutoBgt: number
+    labelRoughV2: number
+    labelVdrCost: number
+    labelFinalCost: number
+    laceAutoBgt: number
+    laceRoughV2: number
+    laceVdrCost: number
+    laceFinalCost: number
+    pockettingFabricAutoBgt: number
+    pockettingFabricRoughV2: number
+    pockettingFabricVdrCost: number
+    pockettingFabricFinalCost: number
+    pockettingReadymadeAutoBgt: number
+    pockettingReadymadeRoughV2: number
+    pockettingReadymadeVdrCost: number
+    pockettingReadymadeFinalCost: number
+    santaAutoBgt: number
+    santaRoughV2: number
+    santaVdrCost: number
+    santaFinalCost: number
+    stopperAutoBgt: number
+    stopperRoughV2: number
+    stopperVdrCost: number
+    stopperFinalCost: number
+    tagAutoBgt: number
+    tagRoughV2: number
+    tagVdrCost: number
+    tagFinalCost: number
+    tasselsAutoBgt: number
+    tasselsRoughV2: number
+    tasselsVdrCost: number
+    tasselsFinalCost: number
     printAutoBgt: number
     printRoughV2: number
     printVendorCost: number
@@ -18361,6 +17207,62 @@ export namespace Prisma {
     otherRoughV2?: true
     otherVdrCost?: true
     otherFinalCost?: true
+    adjusterAutoBgt?: true
+    adjusterRoughV2?: true
+    adjusterVdrCost?: true
+    adjusterFinalCost?: true
+    brotchAutoBgt?: true
+    brotchRoughV2?: true
+    brotchVdrCost?: true
+    brotchFinalCost?: true
+    buckleAutoBgt?: true
+    buckleRoughV2?: true
+    buckleVdrCost?: true
+    buckleFinalCost?: true
+    eyeletsAutoBgt?: true
+    eyeletsRoughV2?: true
+    eyeletsVdrCost?: true
+    eyeletsFinalCost?: true
+    hangingDRingAutoBgt?: true
+    hangingDRingRoughV2?: true
+    hangingDRingVdrCost?: true
+    hangingDRingFinalCost?: true
+    hookAutoBgt?: true
+    hookRoughV2?: true
+    hookVdrCost?: true
+    hookFinalCost?: true
+    labelAutoBgt?: true
+    labelRoughV2?: true
+    labelVdrCost?: true
+    labelFinalCost?: true
+    laceAutoBgt?: true
+    laceRoughV2?: true
+    laceVdrCost?: true
+    laceFinalCost?: true
+    pockettingFabricAutoBgt?: true
+    pockettingFabricRoughV2?: true
+    pockettingFabricVdrCost?: true
+    pockettingFabricFinalCost?: true
+    pockettingReadymadeAutoBgt?: true
+    pockettingReadymadeRoughV2?: true
+    pockettingReadymadeVdrCost?: true
+    pockettingReadymadeFinalCost?: true
+    santaAutoBgt?: true
+    santaRoughV2?: true
+    santaVdrCost?: true
+    santaFinalCost?: true
+    stopperAutoBgt?: true
+    stopperRoughV2?: true
+    stopperVdrCost?: true
+    stopperFinalCost?: true
+    tagAutoBgt?: true
+    tagRoughV2?: true
+    tagVdrCost?: true
+    tagFinalCost?: true
+    tasselsAutoBgt?: true
+    tasselsRoughV2?: true
+    tasselsVdrCost?: true
+    tasselsFinalCost?: true
     printAutoBgt?: true
     printRoughV2?: true
     printVendorCost?: true
@@ -18465,6 +17367,62 @@ export namespace Prisma {
     otherRoughV2?: true
     otherVdrCost?: true
     otherFinalCost?: true
+    adjusterAutoBgt?: true
+    adjusterRoughV2?: true
+    adjusterVdrCost?: true
+    adjusterFinalCost?: true
+    brotchAutoBgt?: true
+    brotchRoughV2?: true
+    brotchVdrCost?: true
+    brotchFinalCost?: true
+    buckleAutoBgt?: true
+    buckleRoughV2?: true
+    buckleVdrCost?: true
+    buckleFinalCost?: true
+    eyeletsAutoBgt?: true
+    eyeletsRoughV2?: true
+    eyeletsVdrCost?: true
+    eyeletsFinalCost?: true
+    hangingDRingAutoBgt?: true
+    hangingDRingRoughV2?: true
+    hangingDRingVdrCost?: true
+    hangingDRingFinalCost?: true
+    hookAutoBgt?: true
+    hookRoughV2?: true
+    hookVdrCost?: true
+    hookFinalCost?: true
+    labelAutoBgt?: true
+    labelRoughV2?: true
+    labelVdrCost?: true
+    labelFinalCost?: true
+    laceAutoBgt?: true
+    laceRoughV2?: true
+    laceVdrCost?: true
+    laceFinalCost?: true
+    pockettingFabricAutoBgt?: true
+    pockettingFabricRoughV2?: true
+    pockettingFabricVdrCost?: true
+    pockettingFabricFinalCost?: true
+    pockettingReadymadeAutoBgt?: true
+    pockettingReadymadeRoughV2?: true
+    pockettingReadymadeVdrCost?: true
+    pockettingReadymadeFinalCost?: true
+    santaAutoBgt?: true
+    santaRoughV2?: true
+    santaVdrCost?: true
+    santaFinalCost?: true
+    stopperAutoBgt?: true
+    stopperRoughV2?: true
+    stopperVdrCost?: true
+    stopperFinalCost?: true
+    tagAutoBgt?: true
+    tagRoughV2?: true
+    tagVdrCost?: true
+    tagFinalCost?: true
+    tasselsAutoBgt?: true
+    tasselsRoughV2?: true
+    tasselsVdrCost?: true
+    tasselsFinalCost?: true
     printAutoBgt?: true
     printRoughV2?: true
     printVendorCost?: true
@@ -18655,6 +17613,62 @@ export namespace Prisma {
     otherRoughV2?: true
     otherVdrCost?: true
     otherFinalCost?: true
+    adjusterAutoBgt?: true
+    adjusterRoughV2?: true
+    adjusterVdrCost?: true
+    adjusterFinalCost?: true
+    brotchAutoBgt?: true
+    brotchRoughV2?: true
+    brotchVdrCost?: true
+    brotchFinalCost?: true
+    buckleAutoBgt?: true
+    buckleRoughV2?: true
+    buckleVdrCost?: true
+    buckleFinalCost?: true
+    eyeletsAutoBgt?: true
+    eyeletsRoughV2?: true
+    eyeletsVdrCost?: true
+    eyeletsFinalCost?: true
+    hangingDRingAutoBgt?: true
+    hangingDRingRoughV2?: true
+    hangingDRingVdrCost?: true
+    hangingDRingFinalCost?: true
+    hookAutoBgt?: true
+    hookRoughV2?: true
+    hookVdrCost?: true
+    hookFinalCost?: true
+    labelAutoBgt?: true
+    labelRoughV2?: true
+    labelVdrCost?: true
+    labelFinalCost?: true
+    laceAutoBgt?: true
+    laceRoughV2?: true
+    laceVdrCost?: true
+    laceFinalCost?: true
+    pockettingFabricAutoBgt?: true
+    pockettingFabricRoughV2?: true
+    pockettingFabricVdrCost?: true
+    pockettingFabricFinalCost?: true
+    pockettingReadymadeAutoBgt?: true
+    pockettingReadymadeRoughV2?: true
+    pockettingReadymadeVdrCost?: true
+    pockettingReadymadeFinalCost?: true
+    santaAutoBgt?: true
+    santaRoughV2?: true
+    santaVdrCost?: true
+    santaFinalCost?: true
+    stopperAutoBgt?: true
+    stopperRoughV2?: true
+    stopperVdrCost?: true
+    stopperFinalCost?: true
+    tagAutoBgt?: true
+    tagRoughV2?: true
+    tagVdrCost?: true
+    tagFinalCost?: true
+    tasselsAutoBgt?: true
+    tasselsRoughV2?: true
+    tasselsVdrCost?: true
+    tasselsFinalCost?: true
     printAutoBgt?: true
     printRoughV2?: true
     printVendorCost?: true
@@ -18885,6 +17899,62 @@ export namespace Prisma {
     otherRoughV2?: true
     otherVdrCost?: true
     otherFinalCost?: true
+    adjusterAutoBgt?: true
+    adjusterRoughV2?: true
+    adjusterVdrCost?: true
+    adjusterFinalCost?: true
+    brotchAutoBgt?: true
+    brotchRoughV2?: true
+    brotchVdrCost?: true
+    brotchFinalCost?: true
+    buckleAutoBgt?: true
+    buckleRoughV2?: true
+    buckleVdrCost?: true
+    buckleFinalCost?: true
+    eyeletsAutoBgt?: true
+    eyeletsRoughV2?: true
+    eyeletsVdrCost?: true
+    eyeletsFinalCost?: true
+    hangingDRingAutoBgt?: true
+    hangingDRingRoughV2?: true
+    hangingDRingVdrCost?: true
+    hangingDRingFinalCost?: true
+    hookAutoBgt?: true
+    hookRoughV2?: true
+    hookVdrCost?: true
+    hookFinalCost?: true
+    labelAutoBgt?: true
+    labelRoughV2?: true
+    labelVdrCost?: true
+    labelFinalCost?: true
+    laceAutoBgt?: true
+    laceRoughV2?: true
+    laceVdrCost?: true
+    laceFinalCost?: true
+    pockettingFabricAutoBgt?: true
+    pockettingFabricRoughV2?: true
+    pockettingFabricVdrCost?: true
+    pockettingFabricFinalCost?: true
+    pockettingReadymadeAutoBgt?: true
+    pockettingReadymadeRoughV2?: true
+    pockettingReadymadeVdrCost?: true
+    pockettingReadymadeFinalCost?: true
+    santaAutoBgt?: true
+    santaRoughV2?: true
+    santaVdrCost?: true
+    santaFinalCost?: true
+    stopperAutoBgt?: true
+    stopperRoughV2?: true
+    stopperVdrCost?: true
+    stopperFinalCost?: true
+    tagAutoBgt?: true
+    tagRoughV2?: true
+    tagVdrCost?: true
+    tagFinalCost?: true
+    tasselsAutoBgt?: true
+    tasselsRoughV2?: true
+    tasselsVdrCost?: true
+    tasselsFinalCost?: true
     printAutoBgt?: true
     printRoughV2?: true
     printVendorCost?: true
@@ -19115,6 +18185,62 @@ export namespace Prisma {
     otherRoughV2?: true
     otherVdrCost?: true
     otherFinalCost?: true
+    adjusterAutoBgt?: true
+    adjusterRoughV2?: true
+    adjusterVdrCost?: true
+    adjusterFinalCost?: true
+    brotchAutoBgt?: true
+    brotchRoughV2?: true
+    brotchVdrCost?: true
+    brotchFinalCost?: true
+    buckleAutoBgt?: true
+    buckleRoughV2?: true
+    buckleVdrCost?: true
+    buckleFinalCost?: true
+    eyeletsAutoBgt?: true
+    eyeletsRoughV2?: true
+    eyeletsVdrCost?: true
+    eyeletsFinalCost?: true
+    hangingDRingAutoBgt?: true
+    hangingDRingRoughV2?: true
+    hangingDRingVdrCost?: true
+    hangingDRingFinalCost?: true
+    hookAutoBgt?: true
+    hookRoughV2?: true
+    hookVdrCost?: true
+    hookFinalCost?: true
+    labelAutoBgt?: true
+    labelRoughV2?: true
+    labelVdrCost?: true
+    labelFinalCost?: true
+    laceAutoBgt?: true
+    laceRoughV2?: true
+    laceVdrCost?: true
+    laceFinalCost?: true
+    pockettingFabricAutoBgt?: true
+    pockettingFabricRoughV2?: true
+    pockettingFabricVdrCost?: true
+    pockettingFabricFinalCost?: true
+    pockettingReadymadeAutoBgt?: true
+    pockettingReadymadeRoughV2?: true
+    pockettingReadymadeVdrCost?: true
+    pockettingReadymadeFinalCost?: true
+    santaAutoBgt?: true
+    santaRoughV2?: true
+    santaVdrCost?: true
+    santaFinalCost?: true
+    stopperAutoBgt?: true
+    stopperRoughV2?: true
+    stopperVdrCost?: true
+    stopperFinalCost?: true
+    tagAutoBgt?: true
+    tagRoughV2?: true
+    tagVdrCost?: true
+    tagFinalCost?: true
+    tasselsAutoBgt?: true
+    tasselsRoughV2?: true
+    tasselsVdrCost?: true
+    tasselsFinalCost?: true
     printAutoBgt?: true
     printRoughV2?: true
     printVendorCost?: true
@@ -19433,6 +18559,62 @@ export namespace Prisma {
     otherRoughV2: Decimal | null
     otherVdrCost: Decimal | null
     otherFinalCost: Decimal | null
+    adjusterAutoBgt: Decimal | null
+    adjusterRoughV2: Decimal | null
+    adjusterVdrCost: Decimal | null
+    adjusterFinalCost: Decimal | null
+    brotchAutoBgt: Decimal | null
+    brotchRoughV2: Decimal | null
+    brotchVdrCost: Decimal | null
+    brotchFinalCost: Decimal | null
+    buckleAutoBgt: Decimal | null
+    buckleRoughV2: Decimal | null
+    buckleVdrCost: Decimal | null
+    buckleFinalCost: Decimal | null
+    eyeletsAutoBgt: Decimal | null
+    eyeletsRoughV2: Decimal | null
+    eyeletsVdrCost: Decimal | null
+    eyeletsFinalCost: Decimal | null
+    hangingDRingAutoBgt: Decimal | null
+    hangingDRingRoughV2: Decimal | null
+    hangingDRingVdrCost: Decimal | null
+    hangingDRingFinalCost: Decimal | null
+    hookAutoBgt: Decimal | null
+    hookRoughV2: Decimal | null
+    hookVdrCost: Decimal | null
+    hookFinalCost: Decimal | null
+    labelAutoBgt: Decimal | null
+    labelRoughV2: Decimal | null
+    labelVdrCost: Decimal | null
+    labelFinalCost: Decimal | null
+    laceAutoBgt: Decimal | null
+    laceRoughV2: Decimal | null
+    laceVdrCost: Decimal | null
+    laceFinalCost: Decimal | null
+    pockettingFabricAutoBgt: Decimal | null
+    pockettingFabricRoughV2: Decimal | null
+    pockettingFabricVdrCost: Decimal | null
+    pockettingFabricFinalCost: Decimal | null
+    pockettingReadymadeAutoBgt: Decimal | null
+    pockettingReadymadeRoughV2: Decimal | null
+    pockettingReadymadeVdrCost: Decimal | null
+    pockettingReadymadeFinalCost: Decimal | null
+    santaAutoBgt: Decimal | null
+    santaRoughV2: Decimal | null
+    santaVdrCost: Decimal | null
+    santaFinalCost: Decimal | null
+    stopperAutoBgt: Decimal | null
+    stopperRoughV2: Decimal | null
+    stopperVdrCost: Decimal | null
+    stopperFinalCost: Decimal | null
+    tagAutoBgt: Decimal | null
+    tagRoughV2: Decimal | null
+    tagVdrCost: Decimal | null
+    tagFinalCost: Decimal | null
+    tasselsAutoBgt: Decimal | null
+    tasselsRoughV2: Decimal | null
+    tasselsVdrCost: Decimal | null
+    tasselsFinalCost: Decimal | null
     printAutoBgt: Decimal | null
     printRoughV2: Decimal | null
     printVendorCost: Decimal | null
@@ -19683,6 +18865,62 @@ export namespace Prisma {
     otherRoughV2?: boolean
     otherVdrCost?: boolean
     otherFinalCost?: boolean
+    adjusterAutoBgt?: boolean
+    adjusterRoughV2?: boolean
+    adjusterVdrCost?: boolean
+    adjusterFinalCost?: boolean
+    brotchAutoBgt?: boolean
+    brotchRoughV2?: boolean
+    brotchVdrCost?: boolean
+    brotchFinalCost?: boolean
+    buckleAutoBgt?: boolean
+    buckleRoughV2?: boolean
+    buckleVdrCost?: boolean
+    buckleFinalCost?: boolean
+    eyeletsAutoBgt?: boolean
+    eyeletsRoughV2?: boolean
+    eyeletsVdrCost?: boolean
+    eyeletsFinalCost?: boolean
+    hangingDRingAutoBgt?: boolean
+    hangingDRingRoughV2?: boolean
+    hangingDRingVdrCost?: boolean
+    hangingDRingFinalCost?: boolean
+    hookAutoBgt?: boolean
+    hookRoughV2?: boolean
+    hookVdrCost?: boolean
+    hookFinalCost?: boolean
+    labelAutoBgt?: boolean
+    labelRoughV2?: boolean
+    labelVdrCost?: boolean
+    labelFinalCost?: boolean
+    laceAutoBgt?: boolean
+    laceRoughV2?: boolean
+    laceVdrCost?: boolean
+    laceFinalCost?: boolean
+    pockettingFabricAutoBgt?: boolean
+    pockettingFabricRoughV2?: boolean
+    pockettingFabricVdrCost?: boolean
+    pockettingFabricFinalCost?: boolean
+    pockettingReadymadeAutoBgt?: boolean
+    pockettingReadymadeRoughV2?: boolean
+    pockettingReadymadeVdrCost?: boolean
+    pockettingReadymadeFinalCost?: boolean
+    santaAutoBgt?: boolean
+    santaRoughV2?: boolean
+    santaVdrCost?: boolean
+    santaFinalCost?: boolean
+    stopperAutoBgt?: boolean
+    stopperRoughV2?: boolean
+    stopperVdrCost?: boolean
+    stopperFinalCost?: boolean
+    tagAutoBgt?: boolean
+    tagRoughV2?: boolean
+    tagVdrCost?: boolean
+    tagFinalCost?: boolean
+    tasselsAutoBgt?: boolean
+    tasselsRoughV2?: boolean
+    tasselsVdrCost?: boolean
+    tasselsFinalCost?: boolean
     printAutoBgt?: boolean
     printRoughV2?: boolean
     printVendorCost?: boolean
@@ -19920,6 +19158,62 @@ export namespace Prisma {
     otherRoughV2?: boolean
     otherVdrCost?: boolean
     otherFinalCost?: boolean
+    adjusterAutoBgt?: boolean
+    adjusterRoughV2?: boolean
+    adjusterVdrCost?: boolean
+    adjusterFinalCost?: boolean
+    brotchAutoBgt?: boolean
+    brotchRoughV2?: boolean
+    brotchVdrCost?: boolean
+    brotchFinalCost?: boolean
+    buckleAutoBgt?: boolean
+    buckleRoughV2?: boolean
+    buckleVdrCost?: boolean
+    buckleFinalCost?: boolean
+    eyeletsAutoBgt?: boolean
+    eyeletsRoughV2?: boolean
+    eyeletsVdrCost?: boolean
+    eyeletsFinalCost?: boolean
+    hangingDRingAutoBgt?: boolean
+    hangingDRingRoughV2?: boolean
+    hangingDRingVdrCost?: boolean
+    hangingDRingFinalCost?: boolean
+    hookAutoBgt?: boolean
+    hookRoughV2?: boolean
+    hookVdrCost?: boolean
+    hookFinalCost?: boolean
+    labelAutoBgt?: boolean
+    labelRoughV2?: boolean
+    labelVdrCost?: boolean
+    labelFinalCost?: boolean
+    laceAutoBgt?: boolean
+    laceRoughV2?: boolean
+    laceVdrCost?: boolean
+    laceFinalCost?: boolean
+    pockettingFabricAutoBgt?: boolean
+    pockettingFabricRoughV2?: boolean
+    pockettingFabricVdrCost?: boolean
+    pockettingFabricFinalCost?: boolean
+    pockettingReadymadeAutoBgt?: boolean
+    pockettingReadymadeRoughV2?: boolean
+    pockettingReadymadeVdrCost?: boolean
+    pockettingReadymadeFinalCost?: boolean
+    santaAutoBgt?: boolean
+    santaRoughV2?: boolean
+    santaVdrCost?: boolean
+    santaFinalCost?: boolean
+    stopperAutoBgt?: boolean
+    stopperRoughV2?: boolean
+    stopperVdrCost?: boolean
+    stopperFinalCost?: boolean
+    tagAutoBgt?: boolean
+    tagRoughV2?: boolean
+    tagVdrCost?: boolean
+    tagFinalCost?: boolean
+    tasselsAutoBgt?: boolean
+    tasselsRoughV2?: boolean
+    tasselsVdrCost?: boolean
+    tasselsFinalCost?: boolean
     printAutoBgt?: boolean
     printRoughV2?: boolean
     printVendorCost?: boolean
@@ -20154,6 +19448,62 @@ export namespace Prisma {
     otherRoughV2?: boolean
     otherVdrCost?: boolean
     otherFinalCost?: boolean
+    adjusterAutoBgt?: boolean
+    adjusterRoughV2?: boolean
+    adjusterVdrCost?: boolean
+    adjusterFinalCost?: boolean
+    brotchAutoBgt?: boolean
+    brotchRoughV2?: boolean
+    brotchVdrCost?: boolean
+    brotchFinalCost?: boolean
+    buckleAutoBgt?: boolean
+    buckleRoughV2?: boolean
+    buckleVdrCost?: boolean
+    buckleFinalCost?: boolean
+    eyeletsAutoBgt?: boolean
+    eyeletsRoughV2?: boolean
+    eyeletsVdrCost?: boolean
+    eyeletsFinalCost?: boolean
+    hangingDRingAutoBgt?: boolean
+    hangingDRingRoughV2?: boolean
+    hangingDRingVdrCost?: boolean
+    hangingDRingFinalCost?: boolean
+    hookAutoBgt?: boolean
+    hookRoughV2?: boolean
+    hookVdrCost?: boolean
+    hookFinalCost?: boolean
+    labelAutoBgt?: boolean
+    labelRoughV2?: boolean
+    labelVdrCost?: boolean
+    labelFinalCost?: boolean
+    laceAutoBgt?: boolean
+    laceRoughV2?: boolean
+    laceVdrCost?: boolean
+    laceFinalCost?: boolean
+    pockettingFabricAutoBgt?: boolean
+    pockettingFabricRoughV2?: boolean
+    pockettingFabricVdrCost?: boolean
+    pockettingFabricFinalCost?: boolean
+    pockettingReadymadeAutoBgt?: boolean
+    pockettingReadymadeRoughV2?: boolean
+    pockettingReadymadeVdrCost?: boolean
+    pockettingReadymadeFinalCost?: boolean
+    santaAutoBgt?: boolean
+    santaRoughV2?: boolean
+    santaVdrCost?: boolean
+    santaFinalCost?: boolean
+    stopperAutoBgt?: boolean
+    stopperRoughV2?: boolean
+    stopperVdrCost?: boolean
+    stopperFinalCost?: boolean
+    tagAutoBgt?: boolean
+    tagRoughV2?: boolean
+    tagVdrCost?: boolean
+    tagFinalCost?: boolean
+    tasselsAutoBgt?: boolean
+    tasselsRoughV2?: boolean
+    tasselsVdrCost?: boolean
+    tasselsFinalCost?: boolean
     printAutoBgt?: boolean
     printRoughV2?: boolean
     printVendorCost?: boolean
@@ -20388,6 +19738,62 @@ export namespace Prisma {
     otherRoughV2?: boolean
     otherVdrCost?: boolean
     otherFinalCost?: boolean
+    adjusterAutoBgt?: boolean
+    adjusterRoughV2?: boolean
+    adjusterVdrCost?: boolean
+    adjusterFinalCost?: boolean
+    brotchAutoBgt?: boolean
+    brotchRoughV2?: boolean
+    brotchVdrCost?: boolean
+    brotchFinalCost?: boolean
+    buckleAutoBgt?: boolean
+    buckleRoughV2?: boolean
+    buckleVdrCost?: boolean
+    buckleFinalCost?: boolean
+    eyeletsAutoBgt?: boolean
+    eyeletsRoughV2?: boolean
+    eyeletsVdrCost?: boolean
+    eyeletsFinalCost?: boolean
+    hangingDRingAutoBgt?: boolean
+    hangingDRingRoughV2?: boolean
+    hangingDRingVdrCost?: boolean
+    hangingDRingFinalCost?: boolean
+    hookAutoBgt?: boolean
+    hookRoughV2?: boolean
+    hookVdrCost?: boolean
+    hookFinalCost?: boolean
+    labelAutoBgt?: boolean
+    labelRoughV2?: boolean
+    labelVdrCost?: boolean
+    labelFinalCost?: boolean
+    laceAutoBgt?: boolean
+    laceRoughV2?: boolean
+    laceVdrCost?: boolean
+    laceFinalCost?: boolean
+    pockettingFabricAutoBgt?: boolean
+    pockettingFabricRoughV2?: boolean
+    pockettingFabricVdrCost?: boolean
+    pockettingFabricFinalCost?: boolean
+    pockettingReadymadeAutoBgt?: boolean
+    pockettingReadymadeRoughV2?: boolean
+    pockettingReadymadeVdrCost?: boolean
+    pockettingReadymadeFinalCost?: boolean
+    santaAutoBgt?: boolean
+    santaRoughV2?: boolean
+    santaVdrCost?: boolean
+    santaFinalCost?: boolean
+    stopperAutoBgt?: boolean
+    stopperRoughV2?: boolean
+    stopperVdrCost?: boolean
+    stopperFinalCost?: boolean
+    tagAutoBgt?: boolean
+    tagRoughV2?: boolean
+    tagVdrCost?: boolean
+    tagFinalCost?: boolean
+    tasselsAutoBgt?: boolean
+    tasselsRoughV2?: boolean
+    tasselsVdrCost?: boolean
+    tasselsFinalCost?: boolean
     printAutoBgt?: boolean
     printRoughV2?: boolean
     printVendorCost?: boolean
@@ -20452,7 +19858,7 @@ export namespace Prisma {
     imageExtractionRawData?: boolean
   }
 
-  export type ExtractionResultFlatOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<"id" | "jobId" | "imageName" | "imageUrl" | "articleNumber" | "extractionStatus" | "aiModel" | "avgConfidence" | "processingTimeMs" | "totalAttributes" | "extractedCount" | "inputTokens" | "outputTokens" | "totalTokens" | "apiCost" | "userId" | "userName" | "extractionDate" | "createdAt" | "updatedAt" | "majorCategory" | "vendorName" | "designNumber" | "pptNumber" | "rate" | "size" | "yarn1" | "yarn2" | "fabricMainMvgr" | "weave" | "weaveFullForm" | "composition" | "finish" | "gsm" | "macroMvgr" | "macroMvgrFullForm" | "mainMvgr" | "mainMvgrFullForm" | "mFab2" | "mFab2FullForm" | "shade" | "weight" | "lycra" | "neck" | "neckDetails" | "collar" | "placket" | "sleeve" | "bottomFold" | "frontOpenStyle" | "pocketType" | "fit" | "pattern" | "length" | "colour" | "secondaryColour" | "drawcord" | "button" | "zipper" | "zipColour" | "printType" | "printStyle" | "printPlacement" | "patches" | "patchesType" | "embroidery" | "embroideryType" | "wash" | "fatherBelt" | "childBelt" | "division" | "subDivision" | "referenceArticleNumber" | "referenceArticleDescription" | "collarStyle" | "sleeveFold" | "mSet" | "noOfPocket" | "extraPocket" | "dcShape" | "btnColour" | "fCount" | "fConstruction" | "fOunce" | "fWidth" | "fabDiv" | "fabVdr" | "htrfType" | "htrfStyle" | "embPlacement" | "ageGroup" | "mNoOfSize" | "mNoOfClr" | "articleFashionType" | "articleDimension" | "autoBgt" | "roughV2" | "vendorFabricRate" | "finalCost" | "roughRatio" | "roughConsumptionKg" | "roughConsumptionMeter" | "preciseRatio" | "preciseConsumptionKg" | "preciseConsumptionMeter" | "cuttingBgtPrVal" | "cuttingActPrVal" | "cuttingVendorPrVal" | "cuttingFinalPrVal" | "stitchingBgtPrVal" | "stitchingActPrVal" | "stitchingVendorPrVal" | "stitchingFinalPrVal" | "ironingBgtPrVal" | "ironingActPrVal" | "ironingVendorPrVal" | "ironingFinalPrVal" | "finishingBgtPrVal" | "finishingActPrVal" | "finishingVendorPrVal" | "finishingFinalPrVal" | "bTrimType" | "mBtnAutoBgt" | "mBtnRoughV2" | "mBtnVdrCost" | "mBtnFinalCost" | "dcAutoBgt" | "dcRoughV2" | "dcVdrCost" | "dcFinalCost" | "zipAutoBgt" | "zipRoughV2" | "zipVdrCost" | "zipFinalCost" | "patchAutoBgt" | "patchRoughV2" | "patchVdrCost" | "patchFinalCost" | "hTrfAutoBgt" | "hTrfRoughV2" | "hTrfVdrCost" | "hTrfFinalCost" | "elasticAutoBgt" | "elasticRoughV2" | "elasticVdrCost" | "elasticFinalCost" | "fusingAutoBgt" | "fusingRoughV2" | "fusingVdrCost" | "fusingFinalCost" | "badgeAutoBgt" | "badgeRoughV2" | "badgeVdrCost" | "badgeFinalCost" | "rivetAutoBgt" | "rivetRoughV2" | "rivetVdrCost" | "rivetFinalCost" | "tapeAutoBgt" | "tapeRoughV2" | "tapeVdrCost" | "tapeFinalCost" | "otherAutoBgt" | "otherRoughV2" | "otherVdrCost" | "otherFinalCost" | "printAutoBgt" | "printRoughV2" | "printVendorCost" | "printFinalCost" | "embAutoBgt" | "embRoughV2" | "embVendorCost" | "embFinalCost" | "washingAutoBgt" | "washingRoughV2" | "washingVendorCost" | "washingFinalCost" | "pkgCostType" | "boppNetPrice" | "ctnNetPrice" | "barcodeNetPrice" | "kimbleNetPrice" | "taftaNetPrice" | "threadNetPrice" | "bodyArticle" | "bodyArticleDescription" | "fabricArticleNumber" | "fabricArticleDescription" | "attrArticleNums" | "mvgrBrandVendor" | "mcDescription" | "vendorCode" | "mrp" | "impAtrbt2" | "mcCode" | "segment" | "season" | "hsnTaxCode" | "articleDescription" | "fashionGrid" | "year" | "articleType" | "presentationsType" | "approvalStatus" | "pdStatus" | "approvedBy" | "approvedAt" | "source" | "imageUncPath" | "isOldArticle" | "isGeneric" | "genericArticleId" | "variantSize" | "variantColor" | "variantWeight" | "comboRole" | "comboParentId" | "comboChildOrder" | "setGroupId" | "setRole" | "setName" | "sapSyncStatus" | "sapArticleId" | "sapSyncMessage" | "srmOriginalDesignNumber" | "srmUniqueId" | "imageExtractionRawData", ExtArgs["result"]["extractionResultFlat"]>
+  export type ExtractionResultFlatOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<"id" | "jobId" | "imageName" | "imageUrl" | "articleNumber" | "extractionStatus" | "aiModel" | "avgConfidence" | "processingTimeMs" | "totalAttributes" | "extractedCount" | "inputTokens" | "outputTokens" | "totalTokens" | "apiCost" | "userId" | "userName" | "extractionDate" | "createdAt" | "updatedAt" | "majorCategory" | "vendorName" | "designNumber" | "pptNumber" | "rate" | "size" | "yarn1" | "yarn2" | "fabricMainMvgr" | "weave" | "weaveFullForm" | "composition" | "finish" | "gsm" | "macroMvgr" | "macroMvgrFullForm" | "mainMvgr" | "mainMvgrFullForm" | "mFab2" | "mFab2FullForm" | "shade" | "weight" | "lycra" | "neck" | "neckDetails" | "collar" | "placket" | "sleeve" | "bottomFold" | "frontOpenStyle" | "pocketType" | "fit" | "pattern" | "length" | "colour" | "secondaryColour" | "drawcord" | "button" | "zipper" | "zipColour" | "printType" | "printStyle" | "printPlacement" | "patches" | "patchesType" | "embroidery" | "embroideryType" | "wash" | "fatherBelt" | "childBelt" | "division" | "subDivision" | "referenceArticleNumber" | "referenceArticleDescription" | "collarStyle" | "sleeveFold" | "mSet" | "noOfPocket" | "extraPocket" | "dcShape" | "btnColour" | "fCount" | "fConstruction" | "fOunce" | "fWidth" | "fabDiv" | "fabVdr" | "htrfType" | "htrfStyle" | "embPlacement" | "ageGroup" | "mNoOfSize" | "mNoOfClr" | "articleFashionType" | "articleDimension" | "autoBgt" | "roughV2" | "vendorFabricRate" | "finalCost" | "roughRatio" | "roughConsumptionKg" | "roughConsumptionMeter" | "preciseRatio" | "preciseConsumptionKg" | "preciseConsumptionMeter" | "cuttingBgtPrVal" | "cuttingActPrVal" | "cuttingVendorPrVal" | "cuttingFinalPrVal" | "stitchingBgtPrVal" | "stitchingActPrVal" | "stitchingVendorPrVal" | "stitchingFinalPrVal" | "ironingBgtPrVal" | "ironingActPrVal" | "ironingVendorPrVal" | "ironingFinalPrVal" | "finishingBgtPrVal" | "finishingActPrVal" | "finishingVendorPrVal" | "finishingFinalPrVal" | "bTrimType" | "mBtnAutoBgt" | "mBtnRoughV2" | "mBtnVdrCost" | "mBtnFinalCost" | "dcAutoBgt" | "dcRoughV2" | "dcVdrCost" | "dcFinalCost" | "zipAutoBgt" | "zipRoughV2" | "zipVdrCost" | "zipFinalCost" | "patchAutoBgt" | "patchRoughV2" | "patchVdrCost" | "patchFinalCost" | "hTrfAutoBgt" | "hTrfRoughV2" | "hTrfVdrCost" | "hTrfFinalCost" | "elasticAutoBgt" | "elasticRoughV2" | "elasticVdrCost" | "elasticFinalCost" | "fusingAutoBgt" | "fusingRoughV2" | "fusingVdrCost" | "fusingFinalCost" | "badgeAutoBgt" | "badgeRoughV2" | "badgeVdrCost" | "badgeFinalCost" | "rivetAutoBgt" | "rivetRoughV2" | "rivetVdrCost" | "rivetFinalCost" | "tapeAutoBgt" | "tapeRoughV2" | "tapeVdrCost" | "tapeFinalCost" | "otherAutoBgt" | "otherRoughV2" | "otherVdrCost" | "otherFinalCost" | "adjusterAutoBgt" | "adjusterRoughV2" | "adjusterVdrCost" | "adjusterFinalCost" | "brotchAutoBgt" | "brotchRoughV2" | "brotchVdrCost" | "brotchFinalCost" | "buckleAutoBgt" | "buckleRoughV2" | "buckleVdrCost" | "buckleFinalCost" | "eyeletsAutoBgt" | "eyeletsRoughV2" | "eyeletsVdrCost" | "eyeletsFinalCost" | "hangingDRingAutoBgt" | "hangingDRingRoughV2" | "hangingDRingVdrCost" | "hangingDRingFinalCost" | "hookAutoBgt" | "hookRoughV2" | "hookVdrCost" | "hookFinalCost" | "labelAutoBgt" | "labelRoughV2" | "labelVdrCost" | "labelFinalCost" | "laceAutoBgt" | "laceRoughV2" | "laceVdrCost" | "laceFinalCost" | "pockettingFabricAutoBgt" | "pockettingFabricRoughV2" | "pockettingFabricVdrCost" | "pockettingFabricFinalCost" | "pockettingReadymadeAutoBgt" | "pockettingReadymadeRoughV2" | "pockettingReadymadeVdrCost" | "pockettingReadymadeFinalCost" | "santaAutoBgt" | "santaRoughV2" | "santaVdrCost" | "santaFinalCost" | "stopperAutoBgt" | "stopperRoughV2" | "stopperVdrCost" | "stopperFinalCost" | "tagAutoBgt" | "tagRoughV2" | "tagVdrCost" | "tagFinalCost" | "tasselsAutoBgt" | "tasselsRoughV2" | "tasselsVdrCost" | "tasselsFinalCost" | "printAutoBgt" | "printRoughV2" | "printVendorCost" | "printFinalCost" | "embAutoBgt" | "embRoughV2" | "embVendorCost" | "embFinalCost" | "washingAutoBgt" | "washingRoughV2" | "washingVendorCost" | "washingFinalCost" | "pkgCostType" | "boppNetPrice" | "ctnNetPrice" | "barcodeNetPrice" | "kimbleNetPrice" | "taftaNetPrice" | "threadNetPrice" | "bodyArticle" | "bodyArticleDescription" | "fabricArticleNumber" | "fabricArticleDescription" | "attrArticleNums" | "mvgrBrandVendor" | "mcDescription" | "vendorCode" | "mrp" | "impAtrbt2" | "mcCode" | "segment" | "season" | "hsnTaxCode" | "articleDescription" | "fashionGrid" | "year" | "articleType" | "presentationsType" | "approvalStatus" | "pdStatus" | "approvedBy" | "approvedAt" | "source" | "imageUncPath" | "isOldArticle" | "isGeneric" | "genericArticleId" | "variantSize" | "variantColor" | "variantWeight" | "comboRole" | "comboParentId" | "comboChildOrder" | "setGroupId" | "setRole" | "setName" | "sapSyncStatus" | "sapArticleId" | "sapSyncMessage" | "srmOriginalDesignNumber" | "srmUniqueId" | "imageExtractionRawData", ExtArgs["result"]["extractionResultFlat"]>
   export type ExtractionResultFlatInclude<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
     approver?: boolean | ExtractionResultFlat$approverArgs<ExtArgs>
     comboParent?: boolean | ExtractionResultFlat$comboParentArgs<ExtArgs>
@@ -20648,6 +20054,62 @@ export namespace Prisma {
       otherRoughV2: Prisma.Decimal | null
       otherVdrCost: Prisma.Decimal | null
       otherFinalCost: Prisma.Decimal | null
+      adjusterAutoBgt: Prisma.Decimal | null
+      adjusterRoughV2: Prisma.Decimal | null
+      adjusterVdrCost: Prisma.Decimal | null
+      adjusterFinalCost: Prisma.Decimal | null
+      brotchAutoBgt: Prisma.Decimal | null
+      brotchRoughV2: Prisma.Decimal | null
+      brotchVdrCost: Prisma.Decimal | null
+      brotchFinalCost: Prisma.Decimal | null
+      buckleAutoBgt: Prisma.Decimal | null
+      buckleRoughV2: Prisma.Decimal | null
+      buckleVdrCost: Prisma.Decimal | null
+      buckleFinalCost: Prisma.Decimal | null
+      eyeletsAutoBgt: Prisma.Decimal | null
+      eyeletsRoughV2: Prisma.Decimal | null
+      eyeletsVdrCost: Prisma.Decimal | null
+      eyeletsFinalCost: Prisma.Decimal | null
+      hangingDRingAutoBgt: Prisma.Decimal | null
+      hangingDRingRoughV2: Prisma.Decimal | null
+      hangingDRingVdrCost: Prisma.Decimal | null
+      hangingDRingFinalCost: Prisma.Decimal | null
+      hookAutoBgt: Prisma.Decimal | null
+      hookRoughV2: Prisma.Decimal | null
+      hookVdrCost: Prisma.Decimal | null
+      hookFinalCost: Prisma.Decimal | null
+      labelAutoBgt: Prisma.Decimal | null
+      labelRoughV2: Prisma.Decimal | null
+      labelVdrCost: Prisma.Decimal | null
+      labelFinalCost: Prisma.Decimal | null
+      laceAutoBgt: Prisma.Decimal | null
+      laceRoughV2: Prisma.Decimal | null
+      laceVdrCost: Prisma.Decimal | null
+      laceFinalCost: Prisma.Decimal | null
+      pockettingFabricAutoBgt: Prisma.Decimal | null
+      pockettingFabricRoughV2: Prisma.Decimal | null
+      pockettingFabricVdrCost: Prisma.Decimal | null
+      pockettingFabricFinalCost: Prisma.Decimal | null
+      pockettingReadymadeAutoBgt: Prisma.Decimal | null
+      pockettingReadymadeRoughV2: Prisma.Decimal | null
+      pockettingReadymadeVdrCost: Prisma.Decimal | null
+      pockettingReadymadeFinalCost: Prisma.Decimal | null
+      santaAutoBgt: Prisma.Decimal | null
+      santaRoughV2: Prisma.Decimal | null
+      santaVdrCost: Prisma.Decimal | null
+      santaFinalCost: Prisma.Decimal | null
+      stopperAutoBgt: Prisma.Decimal | null
+      stopperRoughV2: Prisma.Decimal | null
+      stopperVdrCost: Prisma.Decimal | null
+      stopperFinalCost: Prisma.Decimal | null
+      tagAutoBgt: Prisma.Decimal | null
+      tagRoughV2: Prisma.Decimal | null
+      tagVdrCost: Prisma.Decimal | null
+      tagFinalCost: Prisma.Decimal | null
+      tasselsAutoBgt: Prisma.Decimal | null
+      tasselsRoughV2: Prisma.Decimal | null
+      tasselsVdrCost: Prisma.Decimal | null
+      tasselsFinalCost: Prisma.Decimal | null
       printAutoBgt: Prisma.Decimal | null
       printRoughV2: Prisma.Decimal | null
       printVendorCost: Prisma.Decimal | null
@@ -21304,6 +20766,62 @@ export namespace Prisma {
     readonly otherRoughV2: FieldRef<"ExtractionResultFlat", 'Decimal'>
     readonly otherVdrCost: FieldRef<"ExtractionResultFlat", 'Decimal'>
     readonly otherFinalCost: FieldRef<"ExtractionResultFlat", 'Decimal'>
+    readonly adjusterAutoBgt: FieldRef<"ExtractionResultFlat", 'Decimal'>
+    readonly adjusterRoughV2: FieldRef<"ExtractionResultFlat", 'Decimal'>
+    readonly adjusterVdrCost: FieldRef<"ExtractionResultFlat", 'Decimal'>
+    readonly adjusterFinalCost: FieldRef<"ExtractionResultFlat", 'Decimal'>
+    readonly brotchAutoBgt: FieldRef<"ExtractionResultFlat", 'Decimal'>
+    readonly brotchRoughV2: FieldRef<"ExtractionResultFlat", 'Decimal'>
+    readonly brotchVdrCost: FieldRef<"ExtractionResultFlat", 'Decimal'>
+    readonly brotchFinalCost: FieldRef<"ExtractionResultFlat", 'Decimal'>
+    readonly buckleAutoBgt: FieldRef<"ExtractionResultFlat", 'Decimal'>
+    readonly buckleRoughV2: FieldRef<"ExtractionResultFlat", 'Decimal'>
+    readonly buckleVdrCost: FieldRef<"ExtractionResultFlat", 'Decimal'>
+    readonly buckleFinalCost: FieldRef<"ExtractionResultFlat", 'Decimal'>
+    readonly eyeletsAutoBgt: FieldRef<"ExtractionResultFlat", 'Decimal'>
+    readonly eyeletsRoughV2: FieldRef<"ExtractionResultFlat", 'Decimal'>
+    readonly eyeletsVdrCost: FieldRef<"ExtractionResultFlat", 'Decimal'>
+    readonly eyeletsFinalCost: FieldRef<"ExtractionResultFlat", 'Decimal'>
+    readonly hangingDRingAutoBgt: FieldRef<"ExtractionResultFlat", 'Decimal'>
+    readonly hangingDRingRoughV2: FieldRef<"ExtractionResultFlat", 'Decimal'>
+    readonly hangingDRingVdrCost: FieldRef<"ExtractionResultFlat", 'Decimal'>
+    readonly hangingDRingFinalCost: FieldRef<"ExtractionResultFlat", 'Decimal'>
+    readonly hookAutoBgt: FieldRef<"ExtractionResultFlat", 'Decimal'>
+    readonly hookRoughV2: FieldRef<"ExtractionResultFlat", 'Decimal'>
+    readonly hookVdrCost: FieldRef<"ExtractionResultFlat", 'Decimal'>
+    readonly hookFinalCost: FieldRef<"ExtractionResultFlat", 'Decimal'>
+    readonly labelAutoBgt: FieldRef<"ExtractionResultFlat", 'Decimal'>
+    readonly labelRoughV2: FieldRef<"ExtractionResultFlat", 'Decimal'>
+    readonly labelVdrCost: FieldRef<"ExtractionResultFlat", 'Decimal'>
+    readonly labelFinalCost: FieldRef<"ExtractionResultFlat", 'Decimal'>
+    readonly laceAutoBgt: FieldRef<"ExtractionResultFlat", 'Decimal'>
+    readonly laceRoughV2: FieldRef<"ExtractionResultFlat", 'Decimal'>
+    readonly laceVdrCost: FieldRef<"ExtractionResultFlat", 'Decimal'>
+    readonly laceFinalCost: FieldRef<"ExtractionResultFlat", 'Decimal'>
+    readonly pockettingFabricAutoBgt: FieldRef<"ExtractionResultFlat", 'Decimal'>
+    readonly pockettingFabricRoughV2: FieldRef<"ExtractionResultFlat", 'Decimal'>
+    readonly pockettingFabricVdrCost: FieldRef<"ExtractionResultFlat", 'Decimal'>
+    readonly pockettingFabricFinalCost: FieldRef<"ExtractionResultFlat", 'Decimal'>
+    readonly pockettingReadymadeAutoBgt: FieldRef<"ExtractionResultFlat", 'Decimal'>
+    readonly pockettingReadymadeRoughV2: FieldRef<"ExtractionResultFlat", 'Decimal'>
+    readonly pockettingReadymadeVdrCost: FieldRef<"ExtractionResultFlat", 'Decimal'>
+    readonly pockettingReadymadeFinalCost: FieldRef<"ExtractionResultFlat", 'Decimal'>
+    readonly santaAutoBgt: FieldRef<"ExtractionResultFlat", 'Decimal'>
+    readonly santaRoughV2: FieldRef<"ExtractionResultFlat", 'Decimal'>
+    readonly santaVdrCost: FieldRef<"ExtractionResultFlat", 'Decimal'>
+    readonly santaFinalCost: FieldRef<"ExtractionResultFlat", 'Decimal'>
+    readonly stopperAutoBgt: FieldRef<"ExtractionResultFlat", 'Decimal'>
+    readonly stopperRoughV2: FieldRef<"ExtractionResultFlat", 'Decimal'>
+    readonly stopperVdrCost: FieldRef<"ExtractionResultFlat", 'Decimal'>
+    readonly stopperFinalCost: FieldRef<"ExtractionResultFlat", 'Decimal'>
+    readonly tagAutoBgt: FieldRef<"ExtractionResultFlat", 'Decimal'>
+    readonly tagRoughV2: FieldRef<"ExtractionResultFlat", 'Decimal'>
+    readonly tagVdrCost: FieldRef<"ExtractionResultFlat", 'Decimal'>
+    readonly tagFinalCost: FieldRef<"ExtractionResultFlat", 'Decimal'>
+    readonly tasselsAutoBgt: FieldRef<"ExtractionResultFlat", 'Decimal'>
+    readonly tasselsRoughV2: FieldRef<"ExtractionResultFlat", 'Decimal'>
+    readonly tasselsVdrCost: FieldRef<"ExtractionResultFlat", 'Decimal'>
+    readonly tasselsFinalCost: FieldRef<"ExtractionResultFlat", 'Decimal'>
     readonly printAutoBgt: FieldRef<"ExtractionResultFlat", 'Decimal'>
     readonly printRoughV2: FieldRef<"ExtractionResultFlat", 'Decimal'>
     readonly printVendorCost: FieldRef<"ExtractionResultFlat", 'Decimal'>
@@ -26513,7 +26031,6 @@ export namespace Prisma {
     apiKeys?: boolean | User$apiKeysArgs<ExtArgs>
     costSummary?: boolean | User$costSummaryArgs<ExtArgs>
     extractionJobs?: boolean | User$extractionJobsArgs<ExtArgs>
-    verifications?: boolean | User$verificationsArgs<ExtArgs>
     approvedItems?: boolean | User$approvedItemsArgs<ExtArgs>
     _count?: boolean | UserCountOutputTypeDefaultArgs<ExtArgs>
   }, ExtArgs["result"]["user"]>
@@ -26568,7 +26085,6 @@ export namespace Prisma {
     apiKeys?: boolean | User$apiKeysArgs<ExtArgs>
     costSummary?: boolean | User$costSummaryArgs<ExtArgs>
     extractionJobs?: boolean | User$extractionJobsArgs<ExtArgs>
-    verifications?: boolean | User$verificationsArgs<ExtArgs>
     approvedItems?: boolean | User$approvedItemsArgs<ExtArgs>
     _count?: boolean | UserCountOutputTypeDefaultArgs<ExtArgs>
   }
@@ -26581,7 +26097,6 @@ export namespace Prisma {
       apiKeys: Prisma.$ApiKeyPayload<ExtArgs>[]
       costSummary: Prisma.$CostSummaryPayload<ExtArgs> | null
       extractionJobs: Prisma.$ExtractionJobPayload<ExtArgs>[]
-      verifications: Prisma.$ExtractionResultPayload<ExtArgs>[]
       approvedItems: Prisma.$ExtractionResultFlatPayload<ExtArgs>[]
     }
     scalars: $Extensions.GetPayloadResult<{
@@ -27003,7 +26518,6 @@ export namespace Prisma {
     apiKeys<T extends User$apiKeysArgs<ExtArgs> = {}>(args?: Subset<T, User$apiKeysArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$ApiKeyPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
     costSummary<T extends User$costSummaryArgs<ExtArgs> = {}>(args?: Subset<T, User$costSummaryArgs<ExtArgs>>): Prisma__CostSummaryClient<$Result.GetResult<Prisma.$CostSummaryPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
     extractionJobs<T extends User$extractionJobsArgs<ExtArgs> = {}>(args?: Subset<T, User$extractionJobsArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$ExtractionJobPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
-    verifications<T extends User$verificationsArgs<ExtArgs> = {}>(args?: Subset<T, User$verificationsArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$ExtractionResultPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
     approvedItems<T extends User$approvedItemsArgs<ExtArgs> = {}>(args?: Subset<T, User$approvedItemsArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$ExtractionResultFlatPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
     /**
      * Attaches callbacks for the resolution and/or rejection of the Promise.
@@ -27498,30 +27012,6 @@ export namespace Prisma {
     take?: number
     skip?: number
     distinct?: ExtractionJobScalarFieldEnum | ExtractionJobScalarFieldEnum[]
-  }
-
-  /**
-   * User.verifications
-   */
-  export type User$verificationsArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
-    /**
-     * Select specific fields to fetch from the ExtractionResult
-     */
-    select?: ExtractionResultSelect<ExtArgs> | null
-    /**
-     * Omit specific fields from the ExtractionResult
-     */
-    omit?: ExtractionResultOmit<ExtArgs> | null
-    /**
-     * Choose, which related nodes to fetch as well
-     */
-    include?: ExtractionResultInclude<ExtArgs> | null
-    where?: ExtractionResultWhereInput
-    orderBy?: ExtractionResultOrderByWithRelationInput | ExtractionResultOrderByWithRelationInput[]
-    cursor?: ExtractionResultWhereUniqueInput
-    take?: number
-    skip?: number
-    distinct?: ExtractionResultScalarFieldEnum | ExtractionResultScalarFieldEnum[]
   }
 
   /**
@@ -91194,6 +90684,1074 @@ export namespace Prisma {
 
 
   /**
+   * Model GmSizeMaster
+   */
+
+  export type AggregateGmSizeMaster = {
+    _count: GmSizeMasterCountAggregateOutputType | null
+    _avg: GmSizeMasterAvgAggregateOutputType | null
+    _sum: GmSizeMasterSumAggregateOutputType | null
+    _min: GmSizeMasterMinAggregateOutputType | null
+    _max: GmSizeMasterMaxAggregateOutputType | null
+  }
+
+  export type GmSizeMasterAvgAggregateOutputType = {
+    id: number | null
+  }
+
+  export type GmSizeMasterSumAggregateOutputType = {
+    id: number | null
+  }
+
+  export type GmSizeMasterMinAggregateOutputType = {
+    id: number | null
+    seg: string | null
+    div: string | null
+    subDiv: string | null
+    majCat: string | null
+    status: string | null
+    size: string | null
+    createdAt: Date | null
+  }
+
+  export type GmSizeMasterMaxAggregateOutputType = {
+    id: number | null
+    seg: string | null
+    div: string | null
+    subDiv: string | null
+    majCat: string | null
+    status: string | null
+    size: string | null
+    createdAt: Date | null
+  }
+
+  export type GmSizeMasterCountAggregateOutputType = {
+    id: number
+    seg: number
+    div: number
+    subDiv: number
+    majCat: number
+    status: number
+    size: number
+    createdAt: number
+    _all: number
+  }
+
+
+  export type GmSizeMasterAvgAggregateInputType = {
+    id?: true
+  }
+
+  export type GmSizeMasterSumAggregateInputType = {
+    id?: true
+  }
+
+  export type GmSizeMasterMinAggregateInputType = {
+    id?: true
+    seg?: true
+    div?: true
+    subDiv?: true
+    majCat?: true
+    status?: true
+    size?: true
+    createdAt?: true
+  }
+
+  export type GmSizeMasterMaxAggregateInputType = {
+    id?: true
+    seg?: true
+    div?: true
+    subDiv?: true
+    majCat?: true
+    status?: true
+    size?: true
+    createdAt?: true
+  }
+
+  export type GmSizeMasterCountAggregateInputType = {
+    id?: true
+    seg?: true
+    div?: true
+    subDiv?: true
+    majCat?: true
+    status?: true
+    size?: true
+    createdAt?: true
+    _all?: true
+  }
+
+  export type GmSizeMasterAggregateArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Filter which GmSizeMaster to aggregate.
+     */
+    where?: GmSizeMasterWhereInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
+     * 
+     * Determine the order of GmSizeMasters to fetch.
+     */
+    orderBy?: GmSizeMasterOrderByWithRelationInput | GmSizeMasterOrderByWithRelationInput[]
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
+     * 
+     * Sets the start position
+     */
+    cursor?: GmSizeMasterWhereUniqueInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Take `±n` GmSizeMasters from the position of the cursor.
+     */
+    take?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Skip the first `n` GmSizeMasters.
+     */
+    skip?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     * 
+     * Count returned GmSizeMasters
+    **/
+    _count?: true | GmSizeMasterCountAggregateInputType
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     * 
+     * Select which fields to average
+    **/
+    _avg?: GmSizeMasterAvgAggregateInputType
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     * 
+     * Select which fields to sum
+    **/
+    _sum?: GmSizeMasterSumAggregateInputType
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     * 
+     * Select which fields to find the minimum value
+    **/
+    _min?: GmSizeMasterMinAggregateInputType
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     * 
+     * Select which fields to find the maximum value
+    **/
+    _max?: GmSizeMasterMaxAggregateInputType
+  }
+
+  export type GetGmSizeMasterAggregateType<T extends GmSizeMasterAggregateArgs> = {
+        [P in keyof T & keyof AggregateGmSizeMaster]: P extends '_count' | 'count'
+      ? T[P] extends true
+        ? number
+        : GetScalarType<T[P], AggregateGmSizeMaster[P]>
+      : GetScalarType<T[P], AggregateGmSizeMaster[P]>
+  }
+
+
+
+
+  export type GmSizeMasterGroupByArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    where?: GmSizeMasterWhereInput
+    orderBy?: GmSizeMasterOrderByWithAggregationInput | GmSizeMasterOrderByWithAggregationInput[]
+    by: GmSizeMasterScalarFieldEnum[] | GmSizeMasterScalarFieldEnum
+    having?: GmSizeMasterScalarWhereWithAggregatesInput
+    take?: number
+    skip?: number
+    _count?: GmSizeMasterCountAggregateInputType | true
+    _avg?: GmSizeMasterAvgAggregateInputType
+    _sum?: GmSizeMasterSumAggregateInputType
+    _min?: GmSizeMasterMinAggregateInputType
+    _max?: GmSizeMasterMaxAggregateInputType
+  }
+
+  export type GmSizeMasterGroupByOutputType = {
+    id: number
+    seg: string | null
+    div: string | null
+    subDiv: string | null
+    majCat: string
+    status: string | null
+    size: string
+    createdAt: Date
+    _count: GmSizeMasterCountAggregateOutputType | null
+    _avg: GmSizeMasterAvgAggregateOutputType | null
+    _sum: GmSizeMasterSumAggregateOutputType | null
+    _min: GmSizeMasterMinAggregateOutputType | null
+    _max: GmSizeMasterMaxAggregateOutputType | null
+  }
+
+  type GetGmSizeMasterGroupByPayload<T extends GmSizeMasterGroupByArgs> = Prisma.PrismaPromise<
+    Array<
+      PickEnumerable<GmSizeMasterGroupByOutputType, T['by']> &
+        {
+          [P in ((keyof T) & (keyof GmSizeMasterGroupByOutputType))]: P extends '_count'
+            ? T[P] extends boolean
+              ? number
+              : GetScalarType<T[P], GmSizeMasterGroupByOutputType[P]>
+            : GetScalarType<T[P], GmSizeMasterGroupByOutputType[P]>
+        }
+      >
+    >
+
+
+  export type GmSizeMasterSelect<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
+    id?: boolean
+    seg?: boolean
+    div?: boolean
+    subDiv?: boolean
+    majCat?: boolean
+    status?: boolean
+    size?: boolean
+    createdAt?: boolean
+  }, ExtArgs["result"]["gmSizeMaster"]>
+
+  export type GmSizeMasterSelectCreateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
+    id?: boolean
+    seg?: boolean
+    div?: boolean
+    subDiv?: boolean
+    majCat?: boolean
+    status?: boolean
+    size?: boolean
+    createdAt?: boolean
+  }, ExtArgs["result"]["gmSizeMaster"]>
+
+  export type GmSizeMasterSelectUpdateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
+    id?: boolean
+    seg?: boolean
+    div?: boolean
+    subDiv?: boolean
+    majCat?: boolean
+    status?: boolean
+    size?: boolean
+    createdAt?: boolean
+  }, ExtArgs["result"]["gmSizeMaster"]>
+
+  export type GmSizeMasterSelectScalar = {
+    id?: boolean
+    seg?: boolean
+    div?: boolean
+    subDiv?: boolean
+    majCat?: boolean
+    status?: boolean
+    size?: boolean
+    createdAt?: boolean
+  }
+
+  export type GmSizeMasterOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<"id" | "seg" | "div" | "subDiv" | "majCat" | "status" | "size" | "createdAt", ExtArgs["result"]["gmSizeMaster"]>
+
+  export type $GmSizeMasterPayload<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    name: "GmSizeMaster"
+    objects: {}
+    scalars: $Extensions.GetPayloadResult<{
+      id: number
+      seg: string | null
+      div: string | null
+      subDiv: string | null
+      majCat: string
+      status: string | null
+      size: string
+      createdAt: Date
+    }, ExtArgs["result"]["gmSizeMaster"]>
+    composites: {}
+  }
+
+  type GmSizeMasterGetPayload<S extends boolean | null | undefined | GmSizeMasterDefaultArgs> = $Result.GetResult<Prisma.$GmSizeMasterPayload, S>
+
+  type GmSizeMasterCountArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> =
+    Omit<GmSizeMasterFindManyArgs, 'select' | 'include' | 'distinct' | 'omit'> & {
+      select?: GmSizeMasterCountAggregateInputType | true
+    }
+
+  export interface GmSizeMasterDelegate<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs, GlobalOmitOptions = {}> {
+    [K: symbol]: { types: Prisma.TypeMap<ExtArgs>['model']['GmSizeMaster'], meta: { name: 'GmSizeMaster' } }
+    /**
+     * Find zero or one GmSizeMaster that matches the filter.
+     * @param {GmSizeMasterFindUniqueArgs} args - Arguments to find a GmSizeMaster
+     * @example
+     * // Get one GmSizeMaster
+     * const gmSizeMaster = await prisma.gmSizeMaster.findUnique({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     */
+    findUnique<T extends GmSizeMasterFindUniqueArgs>(args: SelectSubset<T, GmSizeMasterFindUniqueArgs<ExtArgs>>): Prisma__GmSizeMasterClient<$Result.GetResult<Prisma.$GmSizeMasterPayload<ExtArgs>, T, "findUnique", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Find one GmSizeMaster that matches the filter or throw an error with `error.code='P2025'`
+     * if no matches were found.
+     * @param {GmSizeMasterFindUniqueOrThrowArgs} args - Arguments to find a GmSizeMaster
+     * @example
+     * // Get one GmSizeMaster
+     * const gmSizeMaster = await prisma.gmSizeMaster.findUniqueOrThrow({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     */
+    findUniqueOrThrow<T extends GmSizeMasterFindUniqueOrThrowArgs>(args: SelectSubset<T, GmSizeMasterFindUniqueOrThrowArgs<ExtArgs>>): Prisma__GmSizeMasterClient<$Result.GetResult<Prisma.$GmSizeMasterPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Find the first GmSizeMaster that matches the filter.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {GmSizeMasterFindFirstArgs} args - Arguments to find a GmSizeMaster
+     * @example
+     * // Get one GmSizeMaster
+     * const gmSizeMaster = await prisma.gmSizeMaster.findFirst({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     */
+    findFirst<T extends GmSizeMasterFindFirstArgs>(args?: SelectSubset<T, GmSizeMasterFindFirstArgs<ExtArgs>>): Prisma__GmSizeMasterClient<$Result.GetResult<Prisma.$GmSizeMasterPayload<ExtArgs>, T, "findFirst", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Find the first GmSizeMaster that matches the filter or
+     * throw `PrismaKnownClientError` with `P2025` code if no matches were found.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {GmSizeMasterFindFirstOrThrowArgs} args - Arguments to find a GmSizeMaster
+     * @example
+     * // Get one GmSizeMaster
+     * const gmSizeMaster = await prisma.gmSizeMaster.findFirstOrThrow({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     */
+    findFirstOrThrow<T extends GmSizeMasterFindFirstOrThrowArgs>(args?: SelectSubset<T, GmSizeMasterFindFirstOrThrowArgs<ExtArgs>>): Prisma__GmSizeMasterClient<$Result.GetResult<Prisma.$GmSizeMasterPayload<ExtArgs>, T, "findFirstOrThrow", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Find zero or more GmSizeMasters that matches the filter.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {GmSizeMasterFindManyArgs} args - Arguments to filter and select certain fields only.
+     * @example
+     * // Get all GmSizeMasters
+     * const gmSizeMasters = await prisma.gmSizeMaster.findMany()
+     * 
+     * // Get first 10 GmSizeMasters
+     * const gmSizeMasters = await prisma.gmSizeMaster.findMany({ take: 10 })
+     * 
+     * // Only select the `id`
+     * const gmSizeMasterWithIdOnly = await prisma.gmSizeMaster.findMany({ select: { id: true } })
+     * 
+     */
+    findMany<T extends GmSizeMasterFindManyArgs>(args?: SelectSubset<T, GmSizeMasterFindManyArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$GmSizeMasterPayload<ExtArgs>, T, "findMany", GlobalOmitOptions>>
+
+    /**
+     * Create a GmSizeMaster.
+     * @param {GmSizeMasterCreateArgs} args - Arguments to create a GmSizeMaster.
+     * @example
+     * // Create one GmSizeMaster
+     * const GmSizeMaster = await prisma.gmSizeMaster.create({
+     *   data: {
+     *     // ... data to create a GmSizeMaster
+     *   }
+     * })
+     * 
+     */
+    create<T extends GmSizeMasterCreateArgs>(args: SelectSubset<T, GmSizeMasterCreateArgs<ExtArgs>>): Prisma__GmSizeMasterClient<$Result.GetResult<Prisma.$GmSizeMasterPayload<ExtArgs>, T, "create", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Create many GmSizeMasters.
+     * @param {GmSizeMasterCreateManyArgs} args - Arguments to create many GmSizeMasters.
+     * @example
+     * // Create many GmSizeMasters
+     * const gmSizeMaster = await prisma.gmSizeMaster.createMany({
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     *     
+     */
+    createMany<T extends GmSizeMasterCreateManyArgs>(args?: SelectSubset<T, GmSizeMasterCreateManyArgs<ExtArgs>>): Prisma.PrismaPromise<BatchPayload>
+
+    /**
+     * Create many GmSizeMasters and returns the data saved in the database.
+     * @param {GmSizeMasterCreateManyAndReturnArgs} args - Arguments to create many GmSizeMasters.
+     * @example
+     * // Create many GmSizeMasters
+     * const gmSizeMaster = await prisma.gmSizeMaster.createManyAndReturn({
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     * 
+     * // Create many GmSizeMasters and only return the `id`
+     * const gmSizeMasterWithIdOnly = await prisma.gmSizeMaster.createManyAndReturn({
+     *   select: { id: true },
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * 
+     */
+    createManyAndReturn<T extends GmSizeMasterCreateManyAndReturnArgs>(args?: SelectSubset<T, GmSizeMasterCreateManyAndReturnArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$GmSizeMasterPayload<ExtArgs>, T, "createManyAndReturn", GlobalOmitOptions>>
+
+    /**
+     * Delete a GmSizeMaster.
+     * @param {GmSizeMasterDeleteArgs} args - Arguments to delete one GmSizeMaster.
+     * @example
+     * // Delete one GmSizeMaster
+     * const GmSizeMaster = await prisma.gmSizeMaster.delete({
+     *   where: {
+     *     // ... filter to delete one GmSizeMaster
+     *   }
+     * })
+     * 
+     */
+    delete<T extends GmSizeMasterDeleteArgs>(args: SelectSubset<T, GmSizeMasterDeleteArgs<ExtArgs>>): Prisma__GmSizeMasterClient<$Result.GetResult<Prisma.$GmSizeMasterPayload<ExtArgs>, T, "delete", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Update one GmSizeMaster.
+     * @param {GmSizeMasterUpdateArgs} args - Arguments to update one GmSizeMaster.
+     * @example
+     * // Update one GmSizeMaster
+     * const gmSizeMaster = await prisma.gmSizeMaster.update({
+     *   where: {
+     *     // ... provide filter here
+     *   },
+     *   data: {
+     *     // ... provide data here
+     *   }
+     * })
+     * 
+     */
+    update<T extends GmSizeMasterUpdateArgs>(args: SelectSubset<T, GmSizeMasterUpdateArgs<ExtArgs>>): Prisma__GmSizeMasterClient<$Result.GetResult<Prisma.$GmSizeMasterPayload<ExtArgs>, T, "update", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Delete zero or more GmSizeMasters.
+     * @param {GmSizeMasterDeleteManyArgs} args - Arguments to filter GmSizeMasters to delete.
+     * @example
+     * // Delete a few GmSizeMasters
+     * const { count } = await prisma.gmSizeMaster.deleteMany({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     * 
+     */
+    deleteMany<T extends GmSizeMasterDeleteManyArgs>(args?: SelectSubset<T, GmSizeMasterDeleteManyArgs<ExtArgs>>): Prisma.PrismaPromise<BatchPayload>
+
+    /**
+     * Update zero or more GmSizeMasters.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {GmSizeMasterUpdateManyArgs} args - Arguments to update one or more rows.
+     * @example
+     * // Update many GmSizeMasters
+     * const gmSizeMaster = await prisma.gmSizeMaster.updateMany({
+     *   where: {
+     *     // ... provide filter here
+     *   },
+     *   data: {
+     *     // ... provide data here
+     *   }
+     * })
+     * 
+     */
+    updateMany<T extends GmSizeMasterUpdateManyArgs>(args: SelectSubset<T, GmSizeMasterUpdateManyArgs<ExtArgs>>): Prisma.PrismaPromise<BatchPayload>
+
+    /**
+     * Update zero or more GmSizeMasters and returns the data updated in the database.
+     * @param {GmSizeMasterUpdateManyAndReturnArgs} args - Arguments to update many GmSizeMasters.
+     * @example
+     * // Update many GmSizeMasters
+     * const gmSizeMaster = await prisma.gmSizeMaster.updateManyAndReturn({
+     *   where: {
+     *     // ... provide filter here
+     *   },
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     * 
+     * // Update zero or more GmSizeMasters and only return the `id`
+     * const gmSizeMasterWithIdOnly = await prisma.gmSizeMaster.updateManyAndReturn({
+     *   select: { id: true },
+     *   where: {
+     *     // ... provide filter here
+     *   },
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * 
+     */
+    updateManyAndReturn<T extends GmSizeMasterUpdateManyAndReturnArgs>(args: SelectSubset<T, GmSizeMasterUpdateManyAndReturnArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$GmSizeMasterPayload<ExtArgs>, T, "updateManyAndReturn", GlobalOmitOptions>>
+
+    /**
+     * Create or update one GmSizeMaster.
+     * @param {GmSizeMasterUpsertArgs} args - Arguments to update or create a GmSizeMaster.
+     * @example
+     * // Update or create a GmSizeMaster
+     * const gmSizeMaster = await prisma.gmSizeMaster.upsert({
+     *   create: {
+     *     // ... data to create a GmSizeMaster
+     *   },
+     *   update: {
+     *     // ... in case it already exists, update
+     *   },
+     *   where: {
+     *     // ... the filter for the GmSizeMaster we want to update
+     *   }
+     * })
+     */
+    upsert<T extends GmSizeMasterUpsertArgs>(args: SelectSubset<T, GmSizeMasterUpsertArgs<ExtArgs>>): Prisma__GmSizeMasterClient<$Result.GetResult<Prisma.$GmSizeMasterPayload<ExtArgs>, T, "upsert", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+
+    /**
+     * Count the number of GmSizeMasters.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {GmSizeMasterCountArgs} args - Arguments to filter GmSizeMasters to count.
+     * @example
+     * // Count the number of GmSizeMasters
+     * const count = await prisma.gmSizeMaster.count({
+     *   where: {
+     *     // ... the filter for the GmSizeMasters we want to count
+     *   }
+     * })
+    **/
+    count<T extends GmSizeMasterCountArgs>(
+      args?: Subset<T, GmSizeMasterCountArgs>,
+    ): Prisma.PrismaPromise<
+      T extends $Utils.Record<'select', any>
+        ? T['select'] extends true
+          ? number
+          : GetScalarType<T['select'], GmSizeMasterCountAggregateOutputType>
+        : number
+    >
+
+    /**
+     * Allows you to perform aggregations operations on a GmSizeMaster.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {GmSizeMasterAggregateArgs} args - Select which aggregations you would like to apply and on what fields.
+     * @example
+     * // Ordered by age ascending
+     * // Where email contains prisma.io
+     * // Limited to the 10 users
+     * const aggregations = await prisma.user.aggregate({
+     *   _avg: {
+     *     age: true,
+     *   },
+     *   where: {
+     *     email: {
+     *       contains: "prisma.io",
+     *     },
+     *   },
+     *   orderBy: {
+     *     age: "asc",
+     *   },
+     *   take: 10,
+     * })
+    **/
+    aggregate<T extends GmSizeMasterAggregateArgs>(args: Subset<T, GmSizeMasterAggregateArgs>): Prisma.PrismaPromise<GetGmSizeMasterAggregateType<T>>
+
+    /**
+     * Group by GmSizeMaster.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {GmSizeMasterGroupByArgs} args - Group by arguments.
+     * @example
+     * // Group by city, order by createdAt, get count
+     * const result = await prisma.user.groupBy({
+     *   by: ['city', 'createdAt'],
+     *   orderBy: {
+     *     createdAt: true
+     *   },
+     *   _count: {
+     *     _all: true
+     *   },
+     * })
+     * 
+    **/
+    groupBy<
+      T extends GmSizeMasterGroupByArgs,
+      HasSelectOrTake extends Or<
+        Extends<'skip', Keys<T>>,
+        Extends<'take', Keys<T>>
+      >,
+      OrderByArg extends True extends HasSelectOrTake
+        ? { orderBy: GmSizeMasterGroupByArgs['orderBy'] }
+        : { orderBy?: GmSizeMasterGroupByArgs['orderBy'] },
+      OrderFields extends ExcludeUnderscoreKeys<Keys<MaybeTupleToUnion<T['orderBy']>>>,
+      ByFields extends MaybeTupleToUnion<T['by']>,
+      ByValid extends Has<ByFields, OrderFields>,
+      HavingFields extends GetHavingFields<T['having']>,
+      HavingValid extends Has<ByFields, HavingFields>,
+      ByEmpty extends T['by'] extends never[] ? True : False,
+      InputErrors extends ByEmpty extends True
+      ? `Error: "by" must not be empty.`
+      : HavingValid extends False
+      ? {
+          [P in HavingFields]: P extends ByFields
+            ? never
+            : P extends string
+            ? `Error: Field "${P}" used in "having" needs to be provided in "by".`
+            : [
+                Error,
+                'Field ',
+                P,
+                ` in "having" needs to be provided in "by"`,
+              ]
+        }[HavingFields]
+      : 'take' extends Keys<T>
+      ? 'orderBy' extends Keys<T>
+        ? ByValid extends True
+          ? {}
+          : {
+              [P in OrderFields]: P extends ByFields
+                ? never
+                : `Error: Field "${P}" in "orderBy" needs to be provided in "by"`
+            }[OrderFields]
+        : 'Error: If you provide "take", you also need to provide "orderBy"'
+      : 'skip' extends Keys<T>
+      ? 'orderBy' extends Keys<T>
+        ? ByValid extends True
+          ? {}
+          : {
+              [P in OrderFields]: P extends ByFields
+                ? never
+                : `Error: Field "${P}" in "orderBy" needs to be provided in "by"`
+            }[OrderFields]
+        : 'Error: If you provide "skip", you also need to provide "orderBy"'
+      : ByValid extends True
+      ? {}
+      : {
+          [P in OrderFields]: P extends ByFields
+            ? never
+            : `Error: Field "${P}" in "orderBy" needs to be provided in "by"`
+        }[OrderFields]
+    >(args: SubsetIntersection<T, GmSizeMasterGroupByArgs, OrderByArg> & InputErrors): {} extends InputErrors ? GetGmSizeMasterGroupByPayload<T> : Prisma.PrismaPromise<InputErrors>
+  /**
+   * Fields of the GmSizeMaster model
+   */
+  readonly fields: GmSizeMasterFieldRefs;
+  }
+
+  /**
+   * The delegate class that acts as a "Promise-like" for GmSizeMaster.
+   * Why is this prefixed with `Prisma__`?
+   * Because we want to prevent naming conflicts as mentioned in
+   * https://github.com/prisma/prisma-client-js/issues/707
+   */
+  export interface Prisma__GmSizeMasterClient<T, Null = never, ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs, GlobalOmitOptions = {}> extends Prisma.PrismaPromise<T> {
+    readonly [Symbol.toStringTag]: "PrismaPromise"
+    /**
+     * Attaches callbacks for the resolution and/or rejection of the Promise.
+     * @param onfulfilled The callback to execute when the Promise is resolved.
+     * @param onrejected The callback to execute when the Promise is rejected.
+     * @returns A Promise for the completion of which ever callback is executed.
+     */
+    then<TResult1 = T, TResult2 = never>(onfulfilled?: ((value: T) => TResult1 | PromiseLike<TResult1>) | undefined | null, onrejected?: ((reason: any) => TResult2 | PromiseLike<TResult2>) | undefined | null): $Utils.JsPromise<TResult1 | TResult2>
+    /**
+     * Attaches a callback for only the rejection of the Promise.
+     * @param onrejected The callback to execute when the Promise is rejected.
+     * @returns A Promise for the completion of the callback.
+     */
+    catch<TResult = never>(onrejected?: ((reason: any) => TResult | PromiseLike<TResult>) | undefined | null): $Utils.JsPromise<T | TResult>
+    /**
+     * Attaches a callback that is invoked when the Promise is settled (fulfilled or rejected). The
+     * resolved value cannot be modified from the callback.
+     * @param onfinally The callback to execute when the Promise is settled (fulfilled or rejected).
+     * @returns A Promise for the completion of the callback.
+     */
+    finally(onfinally?: (() => void) | undefined | null): $Utils.JsPromise<T>
+  }
+
+
+
+
+  /**
+   * Fields of the GmSizeMaster model
+   */
+  interface GmSizeMasterFieldRefs {
+    readonly id: FieldRef<"GmSizeMaster", 'Int'>
+    readonly seg: FieldRef<"GmSizeMaster", 'String'>
+    readonly div: FieldRef<"GmSizeMaster", 'String'>
+    readonly subDiv: FieldRef<"GmSizeMaster", 'String'>
+    readonly majCat: FieldRef<"GmSizeMaster", 'String'>
+    readonly status: FieldRef<"GmSizeMaster", 'String'>
+    readonly size: FieldRef<"GmSizeMaster", 'String'>
+    readonly createdAt: FieldRef<"GmSizeMaster", 'DateTime'>
+  }
+    
+
+  // Custom InputTypes
+  /**
+   * GmSizeMaster findUnique
+   */
+  export type GmSizeMasterFindUniqueArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the GmSizeMaster
+     */
+    select?: GmSizeMasterSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the GmSizeMaster
+     */
+    omit?: GmSizeMasterOmit<ExtArgs> | null
+    /**
+     * Filter, which GmSizeMaster to fetch.
+     */
+    where: GmSizeMasterWhereUniqueInput
+  }
+
+  /**
+   * GmSizeMaster findUniqueOrThrow
+   */
+  export type GmSizeMasterFindUniqueOrThrowArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the GmSizeMaster
+     */
+    select?: GmSizeMasterSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the GmSizeMaster
+     */
+    omit?: GmSizeMasterOmit<ExtArgs> | null
+    /**
+     * Filter, which GmSizeMaster to fetch.
+     */
+    where: GmSizeMasterWhereUniqueInput
+  }
+
+  /**
+   * GmSizeMaster findFirst
+   */
+  export type GmSizeMasterFindFirstArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the GmSizeMaster
+     */
+    select?: GmSizeMasterSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the GmSizeMaster
+     */
+    omit?: GmSizeMasterOmit<ExtArgs> | null
+    /**
+     * Filter, which GmSizeMaster to fetch.
+     */
+    where?: GmSizeMasterWhereInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
+     * 
+     * Determine the order of GmSizeMasters to fetch.
+     */
+    orderBy?: GmSizeMasterOrderByWithRelationInput | GmSizeMasterOrderByWithRelationInput[]
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
+     * 
+     * Sets the position for searching for GmSizeMasters.
+     */
+    cursor?: GmSizeMasterWhereUniqueInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Take `±n` GmSizeMasters from the position of the cursor.
+     */
+    take?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Skip the first `n` GmSizeMasters.
+     */
+    skip?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/distinct Distinct Docs}
+     * 
+     * Filter by unique combinations of GmSizeMasters.
+     */
+    distinct?: GmSizeMasterScalarFieldEnum | GmSizeMasterScalarFieldEnum[]
+  }
+
+  /**
+   * GmSizeMaster findFirstOrThrow
+   */
+  export type GmSizeMasterFindFirstOrThrowArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the GmSizeMaster
+     */
+    select?: GmSizeMasterSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the GmSizeMaster
+     */
+    omit?: GmSizeMasterOmit<ExtArgs> | null
+    /**
+     * Filter, which GmSizeMaster to fetch.
+     */
+    where?: GmSizeMasterWhereInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
+     * 
+     * Determine the order of GmSizeMasters to fetch.
+     */
+    orderBy?: GmSizeMasterOrderByWithRelationInput | GmSizeMasterOrderByWithRelationInput[]
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
+     * 
+     * Sets the position for searching for GmSizeMasters.
+     */
+    cursor?: GmSizeMasterWhereUniqueInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Take `±n` GmSizeMasters from the position of the cursor.
+     */
+    take?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Skip the first `n` GmSizeMasters.
+     */
+    skip?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/distinct Distinct Docs}
+     * 
+     * Filter by unique combinations of GmSizeMasters.
+     */
+    distinct?: GmSizeMasterScalarFieldEnum | GmSizeMasterScalarFieldEnum[]
+  }
+
+  /**
+   * GmSizeMaster findMany
+   */
+  export type GmSizeMasterFindManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the GmSizeMaster
+     */
+    select?: GmSizeMasterSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the GmSizeMaster
+     */
+    omit?: GmSizeMasterOmit<ExtArgs> | null
+    /**
+     * Filter, which GmSizeMasters to fetch.
+     */
+    where?: GmSizeMasterWhereInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
+     * 
+     * Determine the order of GmSizeMasters to fetch.
+     */
+    orderBy?: GmSizeMasterOrderByWithRelationInput | GmSizeMasterOrderByWithRelationInput[]
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
+     * 
+     * Sets the position for listing GmSizeMasters.
+     */
+    cursor?: GmSizeMasterWhereUniqueInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Take `±n` GmSizeMasters from the position of the cursor.
+     */
+    take?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Skip the first `n` GmSizeMasters.
+     */
+    skip?: number
+    distinct?: GmSizeMasterScalarFieldEnum | GmSizeMasterScalarFieldEnum[]
+  }
+
+  /**
+   * GmSizeMaster create
+   */
+  export type GmSizeMasterCreateArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the GmSizeMaster
+     */
+    select?: GmSizeMasterSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the GmSizeMaster
+     */
+    omit?: GmSizeMasterOmit<ExtArgs> | null
+    /**
+     * The data needed to create a GmSizeMaster.
+     */
+    data: XOR<GmSizeMasterCreateInput, GmSizeMasterUncheckedCreateInput>
+  }
+
+  /**
+   * GmSizeMaster createMany
+   */
+  export type GmSizeMasterCreateManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * The data used to create many GmSizeMasters.
+     */
+    data: GmSizeMasterCreateManyInput | GmSizeMasterCreateManyInput[]
+    skipDuplicates?: boolean
+  }
+
+  /**
+   * GmSizeMaster createManyAndReturn
+   */
+  export type GmSizeMasterCreateManyAndReturnArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the GmSizeMaster
+     */
+    select?: GmSizeMasterSelectCreateManyAndReturn<ExtArgs> | null
+    /**
+     * Omit specific fields from the GmSizeMaster
+     */
+    omit?: GmSizeMasterOmit<ExtArgs> | null
+    /**
+     * The data used to create many GmSizeMasters.
+     */
+    data: GmSizeMasterCreateManyInput | GmSizeMasterCreateManyInput[]
+    skipDuplicates?: boolean
+  }
+
+  /**
+   * GmSizeMaster update
+   */
+  export type GmSizeMasterUpdateArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the GmSizeMaster
+     */
+    select?: GmSizeMasterSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the GmSizeMaster
+     */
+    omit?: GmSizeMasterOmit<ExtArgs> | null
+    /**
+     * The data needed to update a GmSizeMaster.
+     */
+    data: XOR<GmSizeMasterUpdateInput, GmSizeMasterUncheckedUpdateInput>
+    /**
+     * Choose, which GmSizeMaster to update.
+     */
+    where: GmSizeMasterWhereUniqueInput
+  }
+
+  /**
+   * GmSizeMaster updateMany
+   */
+  export type GmSizeMasterUpdateManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * The data used to update GmSizeMasters.
+     */
+    data: XOR<GmSizeMasterUpdateManyMutationInput, GmSizeMasterUncheckedUpdateManyInput>
+    /**
+     * Filter which GmSizeMasters to update
+     */
+    where?: GmSizeMasterWhereInput
+    /**
+     * Limit how many GmSizeMasters to update.
+     */
+    limit?: number
+  }
+
+  /**
+   * GmSizeMaster updateManyAndReturn
+   */
+  export type GmSizeMasterUpdateManyAndReturnArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the GmSizeMaster
+     */
+    select?: GmSizeMasterSelectUpdateManyAndReturn<ExtArgs> | null
+    /**
+     * Omit specific fields from the GmSizeMaster
+     */
+    omit?: GmSizeMasterOmit<ExtArgs> | null
+    /**
+     * The data used to update GmSizeMasters.
+     */
+    data: XOR<GmSizeMasterUpdateManyMutationInput, GmSizeMasterUncheckedUpdateManyInput>
+    /**
+     * Filter which GmSizeMasters to update
+     */
+    where?: GmSizeMasterWhereInput
+    /**
+     * Limit how many GmSizeMasters to update.
+     */
+    limit?: number
+  }
+
+  /**
+   * GmSizeMaster upsert
+   */
+  export type GmSizeMasterUpsertArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the GmSizeMaster
+     */
+    select?: GmSizeMasterSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the GmSizeMaster
+     */
+    omit?: GmSizeMasterOmit<ExtArgs> | null
+    /**
+     * The filter to search for the GmSizeMaster to update in case it exists.
+     */
+    where: GmSizeMasterWhereUniqueInput
+    /**
+     * In case the GmSizeMaster found by the `where` argument doesn't exist, create a new GmSizeMaster with this data.
+     */
+    create: XOR<GmSizeMasterCreateInput, GmSizeMasterUncheckedCreateInput>
+    /**
+     * In case the GmSizeMaster was found with the provided `where` argument, update it with this data.
+     */
+    update: XOR<GmSizeMasterUpdateInput, GmSizeMasterUncheckedUpdateInput>
+  }
+
+  /**
+   * GmSizeMaster delete
+   */
+  export type GmSizeMasterDeleteArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the GmSizeMaster
+     */
+    select?: GmSizeMasterSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the GmSizeMaster
+     */
+    omit?: GmSizeMasterOmit<ExtArgs> | null
+    /**
+     * Filter which GmSizeMaster to delete.
+     */
+    where: GmSizeMasterWhereUniqueInput
+  }
+
+  /**
+   * GmSizeMaster deleteMany
+   */
+  export type GmSizeMasterDeleteManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Filter which GmSizeMasters to delete
+     */
+    where?: GmSizeMasterWhereInput
+    /**
+     * Limit how many GmSizeMasters to delete.
+     */
+    limit?: number
+  }
+
+  /**
+   * GmSizeMaster without action
+   */
+  export type GmSizeMasterDefaultArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the GmSizeMaster
+     */
+    select?: GmSizeMasterSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the GmSizeMaster
+     */
+    omit?: GmSizeMasterOmit<ExtArgs> | null
+  }
+
+
+  /**
    * Enums
    */
 
@@ -91341,25 +91899,6 @@ export namespace Prisma {
   };
 
   export type ExtractionJobScalarFieldEnum = (typeof ExtractionJobScalarFieldEnum)[keyof typeof ExtractionJobScalarFieldEnum]
-
-
-  export const ExtractionResultScalarFieldEnum: {
-    id: 'id',
-    jobId: 'jobId',
-    attributeId: 'attributeId',
-    rawValue: 'rawValue',
-    matchedValueId: 'matchedValueId',
-    finalValue: 'finalValue',
-    confidence: 'confidence',
-    extractionMethod: 'extractionMethod',
-    alternativeValues: 'alternativeValues',
-    isVerified: 'isVerified',
-    verifiedBy: 'verifiedBy',
-    verifiedAt: 'verifiedAt',
-    createdAt: 'createdAt'
-  };
-
-  export type ExtractionResultScalarFieldEnum = (typeof ExtractionResultScalarFieldEnum)[keyof typeof ExtractionResultScalarFieldEnum]
 
 
   export const ExtractionResultFlatScalarFieldEnum: {
@@ -91529,6 +92068,62 @@ export namespace Prisma {
     otherRoughV2: 'otherRoughV2',
     otherVdrCost: 'otherVdrCost',
     otherFinalCost: 'otherFinalCost',
+    adjusterAutoBgt: 'adjusterAutoBgt',
+    adjusterRoughV2: 'adjusterRoughV2',
+    adjusterVdrCost: 'adjusterVdrCost',
+    adjusterFinalCost: 'adjusterFinalCost',
+    brotchAutoBgt: 'brotchAutoBgt',
+    brotchRoughV2: 'brotchRoughV2',
+    brotchVdrCost: 'brotchVdrCost',
+    brotchFinalCost: 'brotchFinalCost',
+    buckleAutoBgt: 'buckleAutoBgt',
+    buckleRoughV2: 'buckleRoughV2',
+    buckleVdrCost: 'buckleVdrCost',
+    buckleFinalCost: 'buckleFinalCost',
+    eyeletsAutoBgt: 'eyeletsAutoBgt',
+    eyeletsRoughV2: 'eyeletsRoughV2',
+    eyeletsVdrCost: 'eyeletsVdrCost',
+    eyeletsFinalCost: 'eyeletsFinalCost',
+    hangingDRingAutoBgt: 'hangingDRingAutoBgt',
+    hangingDRingRoughV2: 'hangingDRingRoughV2',
+    hangingDRingVdrCost: 'hangingDRingVdrCost',
+    hangingDRingFinalCost: 'hangingDRingFinalCost',
+    hookAutoBgt: 'hookAutoBgt',
+    hookRoughV2: 'hookRoughV2',
+    hookVdrCost: 'hookVdrCost',
+    hookFinalCost: 'hookFinalCost',
+    labelAutoBgt: 'labelAutoBgt',
+    labelRoughV2: 'labelRoughV2',
+    labelVdrCost: 'labelVdrCost',
+    labelFinalCost: 'labelFinalCost',
+    laceAutoBgt: 'laceAutoBgt',
+    laceRoughV2: 'laceRoughV2',
+    laceVdrCost: 'laceVdrCost',
+    laceFinalCost: 'laceFinalCost',
+    pockettingFabricAutoBgt: 'pockettingFabricAutoBgt',
+    pockettingFabricRoughV2: 'pockettingFabricRoughV2',
+    pockettingFabricVdrCost: 'pockettingFabricVdrCost',
+    pockettingFabricFinalCost: 'pockettingFabricFinalCost',
+    pockettingReadymadeAutoBgt: 'pockettingReadymadeAutoBgt',
+    pockettingReadymadeRoughV2: 'pockettingReadymadeRoughV2',
+    pockettingReadymadeVdrCost: 'pockettingReadymadeVdrCost',
+    pockettingReadymadeFinalCost: 'pockettingReadymadeFinalCost',
+    santaAutoBgt: 'santaAutoBgt',
+    santaRoughV2: 'santaRoughV2',
+    santaVdrCost: 'santaVdrCost',
+    santaFinalCost: 'santaFinalCost',
+    stopperAutoBgt: 'stopperAutoBgt',
+    stopperRoughV2: 'stopperRoughV2',
+    stopperVdrCost: 'stopperVdrCost',
+    stopperFinalCost: 'stopperFinalCost',
+    tagAutoBgt: 'tagAutoBgt',
+    tagRoughV2: 'tagRoughV2',
+    tagVdrCost: 'tagVdrCost',
+    tagFinalCost: 'tagFinalCost',
+    tasselsAutoBgt: 'tasselsAutoBgt',
+    tasselsRoughV2: 'tasselsRoughV2',
+    tasselsVdrCost: 'tasselsVdrCost',
+    tasselsFinalCost: 'tasselsFinalCost',
     printAutoBgt: 'printAutoBgt',
     printRoughV2: 'printRoughV2',
     printVendorCost: 'printVendorCost',
@@ -93023,6 +93618,20 @@ export namespace Prisma {
   export type PreciseBodyArticleConsumptionScalarFieldEnum = (typeof PreciseBodyArticleConsumptionScalarFieldEnum)[keyof typeof PreciseBodyArticleConsumptionScalarFieldEnum]
 
 
+  export const GmSizeMasterScalarFieldEnum: {
+    id: 'id',
+    seg: 'seg',
+    div: 'div',
+    subDiv: 'subDiv',
+    majCat: 'majCat',
+    status: 'status',
+    size: 'size',
+    createdAt: 'createdAt'
+  };
+
+  export type GmSizeMasterScalarFieldEnum = (typeof GmSizeMasterScalarFieldEnum)[keyof typeof GmSizeMasterScalarFieldEnum]
+
+
   export const SortOrder: {
     asc: 'asc',
     desc: 'desc'
@@ -93143,17 +93752,6 @@ export namespace Prisma {
   };
 
   export type ExtractionJobOrderByRelevanceFieldEnum = (typeof ExtractionJobOrderByRelevanceFieldEnum)[keyof typeof ExtractionJobOrderByRelevanceFieldEnum]
-
-
-  export const ExtractionResultOrderByRelevanceFieldEnum: {
-    id: 'id',
-    jobId: 'jobId',
-    rawValue: 'rawValue',
-    finalValue: 'finalValue',
-    extractionMethod: 'extractionMethod'
-  };
-
-  export type ExtractionResultOrderByRelevanceFieldEnum = (typeof ExtractionResultOrderByRelevanceFieldEnum)[keyof typeof ExtractionResultOrderByRelevanceFieldEnum]
 
 
   export const ExtractionResultFlatOrderByRelevanceFieldEnum: {
@@ -94308,6 +94906,18 @@ export namespace Prisma {
   export type PreciseBodyArticleConsumptionOrderByRelevanceFieldEnum = (typeof PreciseBodyArticleConsumptionOrderByRelevanceFieldEnum)[keyof typeof PreciseBodyArticleConsumptionOrderByRelevanceFieldEnum]
 
 
+  export const GmSizeMasterOrderByRelevanceFieldEnum: {
+    seg: 'seg',
+    div: 'div',
+    subDiv: 'subDiv',
+    majCat: 'majCat',
+    status: 'status',
+    size: 'size'
+  };
+
+  export type GmSizeMasterOrderByRelevanceFieldEnum = (typeof GmSizeMasterOrderByRelevanceFieldEnum)[keyof typeof GmSizeMasterOrderByRelevanceFieldEnum]
+
+
   /**
    * Field references
    */
@@ -94922,7 +95532,6 @@ export namespace Prisma {
     updatedAt?: DateTimeFilter<"MasterAttribute"> | Date | string
     allowedValues?: AttributeAllowedValueListRelationFilter
     categoryAttributes?: CategoryAttributeListRelationFilter
-    extractions?: ExtractionResultListRelationFilter
   }
 
   export type MasterAttributeOrderByWithRelationInput = {
@@ -94949,7 +95558,6 @@ export namespace Prisma {
     updatedAt?: SortOrder
     allowedValues?: AttributeAllowedValueOrderByRelationAggregateInput
     categoryAttributes?: CategoryAttributeOrderByRelationAggregateInput
-    extractions?: ExtractionResultOrderByRelationAggregateInput
     _relevance?: MasterAttributeOrderByRelevanceInput
   }
 
@@ -94980,7 +95588,6 @@ export namespace Prisma {
     updatedAt?: DateTimeFilter<"MasterAttribute"> | Date | string
     allowedValues?: AttributeAllowedValueListRelationFilter
     categoryAttributes?: CategoryAttributeListRelationFilter
-    extractions?: ExtractionResultListRelationFilter
   }, "id" | "key">
 
   export type MasterAttributeOrderByWithAggregationInput = {
@@ -95053,7 +95660,6 @@ export namespace Prisma {
     createdAt?: DateTimeFilter<"AttributeAllowedValue"> | Date | string
     updatedAt?: DateTimeFilter<"AttributeAllowedValue"> | Date | string
     attribute?: XOR<MasterAttributeScalarRelationFilter, MasterAttributeWhereInput>
-    matchedResults?: ExtractionResultListRelationFilter
   }
 
   export type AttributeAllowedValueOrderByWithRelationInput = {
@@ -95067,7 +95673,6 @@ export namespace Prisma {
     createdAt?: SortOrder
     updatedAt?: SortOrder
     attribute?: MasterAttributeOrderByWithRelationInput
-    matchedResults?: ExtractionResultOrderByRelationAggregateInput
     _relevance?: AttributeAllowedValueOrderByRelevanceInput
   }
 
@@ -95086,7 +95691,6 @@ export namespace Prisma {
     createdAt?: DateTimeFilter<"AttributeAllowedValue"> | Date | string
     updatedAt?: DateTimeFilter<"AttributeAllowedValue"> | Date | string
     attribute?: XOR<MasterAttributeScalarRelationFilter, MasterAttributeWhereInput>
-    matchedResults?: ExtractionResultListRelationFilter
   }, "id" | "attributeId_shortForm">
 
   export type AttributeAllowedValueOrderByWithAggregationInput = {
@@ -95233,7 +95837,6 @@ export namespace Prisma {
     outputTokens?: IntNullableFilter<"ExtractionJob"> | number | null
     category?: XOR<CategoryScalarRelationFilter, CategoryWhereInput>
     user?: XOR<UserNullableScalarRelationFilter, UserWhereInput> | null
-    results?: ExtractionResultListRelationFilter
     flatResult?: XOR<ExtractionResultFlatNullableScalarRelationFilter, ExtractionResultFlatWhereInput> | null
   }
 
@@ -95264,7 +95867,6 @@ export namespace Prisma {
     outputTokens?: SortOrderInput | SortOrder
     category?: CategoryOrderByWithRelationInput
     user?: UserOrderByWithRelationInput
-    results?: ExtractionResultOrderByRelationAggregateInput
     flatResult?: ExtractionResultFlatOrderByWithRelationInput
     _relevance?: ExtractionJobOrderByRelevanceInput
   }
@@ -95299,7 +95901,6 @@ export namespace Prisma {
     outputTokens?: IntNullableFilter<"ExtractionJob"> | number | null
     category?: XOR<CategoryScalarRelationFilter, CategoryWhereInput>
     user?: XOR<UserNullableScalarRelationFilter, UserWhereInput> | null
-    results?: ExtractionResultListRelationFilter
     flatResult?: XOR<ExtractionResultFlatNullableScalarRelationFilter, ExtractionResultFlatWhereInput> | null
   }, "id">
 
@@ -95363,113 +95964,6 @@ export namespace Prisma {
     apiCost?: DecimalNullableWithAggregatesFilter<"ExtractionJob"> | Decimal | DecimalJsLike | number | string | null
     inputTokens?: IntNullableWithAggregatesFilter<"ExtractionJob"> | number | null
     outputTokens?: IntNullableWithAggregatesFilter<"ExtractionJob"> | number | null
-  }
-
-  export type ExtractionResultWhereInput = {
-    AND?: ExtractionResultWhereInput | ExtractionResultWhereInput[]
-    OR?: ExtractionResultWhereInput[]
-    NOT?: ExtractionResultWhereInput | ExtractionResultWhereInput[]
-    id?: StringFilter<"ExtractionResult"> | string
-    jobId?: StringFilter<"ExtractionResult"> | string
-    attributeId?: IntFilter<"ExtractionResult"> | number
-    rawValue?: StringNullableFilter<"ExtractionResult"> | string | null
-    matchedValueId?: IntNullableFilter<"ExtractionResult"> | number | null
-    finalValue?: StringNullableFilter<"ExtractionResult"> | string | null
-    confidence?: DecimalNullableFilter<"ExtractionResult"> | Decimal | DecimalJsLike | number | string | null
-    extractionMethod?: StringNullableFilter<"ExtractionResult"> | string | null
-    alternativeValues?: JsonNullableFilter<"ExtractionResult">
-    isVerified?: BoolFilter<"ExtractionResult"> | boolean
-    verifiedBy?: IntNullableFilter<"ExtractionResult"> | number | null
-    verifiedAt?: DateTimeNullableFilter<"ExtractionResult"> | Date | string | null
-    createdAt?: DateTimeFilter<"ExtractionResult"> | Date | string
-    attribute?: XOR<MasterAttributeScalarRelationFilter, MasterAttributeWhereInput>
-    job?: XOR<ExtractionJobScalarRelationFilter, ExtractionJobWhereInput>
-    matchedValue?: XOR<AttributeAllowedValueNullableScalarRelationFilter, AttributeAllowedValueWhereInput> | null
-    verifier?: XOR<UserNullableScalarRelationFilter, UserWhereInput> | null
-  }
-
-  export type ExtractionResultOrderByWithRelationInput = {
-    id?: SortOrder
-    jobId?: SortOrder
-    attributeId?: SortOrder
-    rawValue?: SortOrderInput | SortOrder
-    matchedValueId?: SortOrderInput | SortOrder
-    finalValue?: SortOrderInput | SortOrder
-    confidence?: SortOrderInput | SortOrder
-    extractionMethod?: SortOrderInput | SortOrder
-    alternativeValues?: SortOrderInput | SortOrder
-    isVerified?: SortOrder
-    verifiedBy?: SortOrderInput | SortOrder
-    verifiedAt?: SortOrderInput | SortOrder
-    createdAt?: SortOrder
-    attribute?: MasterAttributeOrderByWithRelationInput
-    job?: ExtractionJobOrderByWithRelationInput
-    matchedValue?: AttributeAllowedValueOrderByWithRelationInput
-    verifier?: UserOrderByWithRelationInput
-    _relevance?: ExtractionResultOrderByRelevanceInput
-  }
-
-  export type ExtractionResultWhereUniqueInput = Prisma.AtLeast<{
-    id?: string
-    AND?: ExtractionResultWhereInput | ExtractionResultWhereInput[]
-    OR?: ExtractionResultWhereInput[]
-    NOT?: ExtractionResultWhereInput | ExtractionResultWhereInput[]
-    jobId?: StringFilter<"ExtractionResult"> | string
-    attributeId?: IntFilter<"ExtractionResult"> | number
-    rawValue?: StringNullableFilter<"ExtractionResult"> | string | null
-    matchedValueId?: IntNullableFilter<"ExtractionResult"> | number | null
-    finalValue?: StringNullableFilter<"ExtractionResult"> | string | null
-    confidence?: DecimalNullableFilter<"ExtractionResult"> | Decimal | DecimalJsLike | number | string | null
-    extractionMethod?: StringNullableFilter<"ExtractionResult"> | string | null
-    alternativeValues?: JsonNullableFilter<"ExtractionResult">
-    isVerified?: BoolFilter<"ExtractionResult"> | boolean
-    verifiedBy?: IntNullableFilter<"ExtractionResult"> | number | null
-    verifiedAt?: DateTimeNullableFilter<"ExtractionResult"> | Date | string | null
-    createdAt?: DateTimeFilter<"ExtractionResult"> | Date | string
-    attribute?: XOR<MasterAttributeScalarRelationFilter, MasterAttributeWhereInput>
-    job?: XOR<ExtractionJobScalarRelationFilter, ExtractionJobWhereInput>
-    matchedValue?: XOR<AttributeAllowedValueNullableScalarRelationFilter, AttributeAllowedValueWhereInput> | null
-    verifier?: XOR<UserNullableScalarRelationFilter, UserWhereInput> | null
-  }, "id">
-
-  export type ExtractionResultOrderByWithAggregationInput = {
-    id?: SortOrder
-    jobId?: SortOrder
-    attributeId?: SortOrder
-    rawValue?: SortOrderInput | SortOrder
-    matchedValueId?: SortOrderInput | SortOrder
-    finalValue?: SortOrderInput | SortOrder
-    confidence?: SortOrderInput | SortOrder
-    extractionMethod?: SortOrderInput | SortOrder
-    alternativeValues?: SortOrderInput | SortOrder
-    isVerified?: SortOrder
-    verifiedBy?: SortOrderInput | SortOrder
-    verifiedAt?: SortOrderInput | SortOrder
-    createdAt?: SortOrder
-    _count?: ExtractionResultCountOrderByAggregateInput
-    _avg?: ExtractionResultAvgOrderByAggregateInput
-    _max?: ExtractionResultMaxOrderByAggregateInput
-    _min?: ExtractionResultMinOrderByAggregateInput
-    _sum?: ExtractionResultSumOrderByAggregateInput
-  }
-
-  export type ExtractionResultScalarWhereWithAggregatesInput = {
-    AND?: ExtractionResultScalarWhereWithAggregatesInput | ExtractionResultScalarWhereWithAggregatesInput[]
-    OR?: ExtractionResultScalarWhereWithAggregatesInput[]
-    NOT?: ExtractionResultScalarWhereWithAggregatesInput | ExtractionResultScalarWhereWithAggregatesInput[]
-    id?: StringWithAggregatesFilter<"ExtractionResult"> | string
-    jobId?: StringWithAggregatesFilter<"ExtractionResult"> | string
-    attributeId?: IntWithAggregatesFilter<"ExtractionResult"> | number
-    rawValue?: StringNullableWithAggregatesFilter<"ExtractionResult"> | string | null
-    matchedValueId?: IntNullableWithAggregatesFilter<"ExtractionResult"> | number | null
-    finalValue?: StringNullableWithAggregatesFilter<"ExtractionResult"> | string | null
-    confidence?: DecimalNullableWithAggregatesFilter<"ExtractionResult"> | Decimal | DecimalJsLike | number | string | null
-    extractionMethod?: StringNullableWithAggregatesFilter<"ExtractionResult"> | string | null
-    alternativeValues?: JsonNullableWithAggregatesFilter<"ExtractionResult">
-    isVerified?: BoolWithAggregatesFilter<"ExtractionResult"> | boolean
-    verifiedBy?: IntNullableWithAggregatesFilter<"ExtractionResult"> | number | null
-    verifiedAt?: DateTimeNullableWithAggregatesFilter<"ExtractionResult"> | Date | string | null
-    createdAt?: DateTimeWithAggregatesFilter<"ExtractionResult"> | Date | string
   }
 
   export type ExtractionResultFlatWhereInput = {
@@ -95642,6 +96136,62 @@ export namespace Prisma {
     otherRoughV2?: DecimalNullableFilter<"ExtractionResultFlat"> | Decimal | DecimalJsLike | number | string | null
     otherVdrCost?: DecimalNullableFilter<"ExtractionResultFlat"> | Decimal | DecimalJsLike | number | string | null
     otherFinalCost?: DecimalNullableFilter<"ExtractionResultFlat"> | Decimal | DecimalJsLike | number | string | null
+    adjusterAutoBgt?: DecimalNullableFilter<"ExtractionResultFlat"> | Decimal | DecimalJsLike | number | string | null
+    adjusterRoughV2?: DecimalNullableFilter<"ExtractionResultFlat"> | Decimal | DecimalJsLike | number | string | null
+    adjusterVdrCost?: DecimalNullableFilter<"ExtractionResultFlat"> | Decimal | DecimalJsLike | number | string | null
+    adjusterFinalCost?: DecimalNullableFilter<"ExtractionResultFlat"> | Decimal | DecimalJsLike | number | string | null
+    brotchAutoBgt?: DecimalNullableFilter<"ExtractionResultFlat"> | Decimal | DecimalJsLike | number | string | null
+    brotchRoughV2?: DecimalNullableFilter<"ExtractionResultFlat"> | Decimal | DecimalJsLike | number | string | null
+    brotchVdrCost?: DecimalNullableFilter<"ExtractionResultFlat"> | Decimal | DecimalJsLike | number | string | null
+    brotchFinalCost?: DecimalNullableFilter<"ExtractionResultFlat"> | Decimal | DecimalJsLike | number | string | null
+    buckleAutoBgt?: DecimalNullableFilter<"ExtractionResultFlat"> | Decimal | DecimalJsLike | number | string | null
+    buckleRoughV2?: DecimalNullableFilter<"ExtractionResultFlat"> | Decimal | DecimalJsLike | number | string | null
+    buckleVdrCost?: DecimalNullableFilter<"ExtractionResultFlat"> | Decimal | DecimalJsLike | number | string | null
+    buckleFinalCost?: DecimalNullableFilter<"ExtractionResultFlat"> | Decimal | DecimalJsLike | number | string | null
+    eyeletsAutoBgt?: DecimalNullableFilter<"ExtractionResultFlat"> | Decimal | DecimalJsLike | number | string | null
+    eyeletsRoughV2?: DecimalNullableFilter<"ExtractionResultFlat"> | Decimal | DecimalJsLike | number | string | null
+    eyeletsVdrCost?: DecimalNullableFilter<"ExtractionResultFlat"> | Decimal | DecimalJsLike | number | string | null
+    eyeletsFinalCost?: DecimalNullableFilter<"ExtractionResultFlat"> | Decimal | DecimalJsLike | number | string | null
+    hangingDRingAutoBgt?: DecimalNullableFilter<"ExtractionResultFlat"> | Decimal | DecimalJsLike | number | string | null
+    hangingDRingRoughV2?: DecimalNullableFilter<"ExtractionResultFlat"> | Decimal | DecimalJsLike | number | string | null
+    hangingDRingVdrCost?: DecimalNullableFilter<"ExtractionResultFlat"> | Decimal | DecimalJsLike | number | string | null
+    hangingDRingFinalCost?: DecimalNullableFilter<"ExtractionResultFlat"> | Decimal | DecimalJsLike | number | string | null
+    hookAutoBgt?: DecimalNullableFilter<"ExtractionResultFlat"> | Decimal | DecimalJsLike | number | string | null
+    hookRoughV2?: DecimalNullableFilter<"ExtractionResultFlat"> | Decimal | DecimalJsLike | number | string | null
+    hookVdrCost?: DecimalNullableFilter<"ExtractionResultFlat"> | Decimal | DecimalJsLike | number | string | null
+    hookFinalCost?: DecimalNullableFilter<"ExtractionResultFlat"> | Decimal | DecimalJsLike | number | string | null
+    labelAutoBgt?: DecimalNullableFilter<"ExtractionResultFlat"> | Decimal | DecimalJsLike | number | string | null
+    labelRoughV2?: DecimalNullableFilter<"ExtractionResultFlat"> | Decimal | DecimalJsLike | number | string | null
+    labelVdrCost?: DecimalNullableFilter<"ExtractionResultFlat"> | Decimal | DecimalJsLike | number | string | null
+    labelFinalCost?: DecimalNullableFilter<"ExtractionResultFlat"> | Decimal | DecimalJsLike | number | string | null
+    laceAutoBgt?: DecimalNullableFilter<"ExtractionResultFlat"> | Decimal | DecimalJsLike | number | string | null
+    laceRoughV2?: DecimalNullableFilter<"ExtractionResultFlat"> | Decimal | DecimalJsLike | number | string | null
+    laceVdrCost?: DecimalNullableFilter<"ExtractionResultFlat"> | Decimal | DecimalJsLike | number | string | null
+    laceFinalCost?: DecimalNullableFilter<"ExtractionResultFlat"> | Decimal | DecimalJsLike | number | string | null
+    pockettingFabricAutoBgt?: DecimalNullableFilter<"ExtractionResultFlat"> | Decimal | DecimalJsLike | number | string | null
+    pockettingFabricRoughV2?: DecimalNullableFilter<"ExtractionResultFlat"> | Decimal | DecimalJsLike | number | string | null
+    pockettingFabricVdrCost?: DecimalNullableFilter<"ExtractionResultFlat"> | Decimal | DecimalJsLike | number | string | null
+    pockettingFabricFinalCost?: DecimalNullableFilter<"ExtractionResultFlat"> | Decimal | DecimalJsLike | number | string | null
+    pockettingReadymadeAutoBgt?: DecimalNullableFilter<"ExtractionResultFlat"> | Decimal | DecimalJsLike | number | string | null
+    pockettingReadymadeRoughV2?: DecimalNullableFilter<"ExtractionResultFlat"> | Decimal | DecimalJsLike | number | string | null
+    pockettingReadymadeVdrCost?: DecimalNullableFilter<"ExtractionResultFlat"> | Decimal | DecimalJsLike | number | string | null
+    pockettingReadymadeFinalCost?: DecimalNullableFilter<"ExtractionResultFlat"> | Decimal | DecimalJsLike | number | string | null
+    santaAutoBgt?: DecimalNullableFilter<"ExtractionResultFlat"> | Decimal | DecimalJsLike | number | string | null
+    santaRoughV2?: DecimalNullableFilter<"ExtractionResultFlat"> | Decimal | DecimalJsLike | number | string | null
+    santaVdrCost?: DecimalNullableFilter<"ExtractionResultFlat"> | Decimal | DecimalJsLike | number | string | null
+    santaFinalCost?: DecimalNullableFilter<"ExtractionResultFlat"> | Decimal | DecimalJsLike | number | string | null
+    stopperAutoBgt?: DecimalNullableFilter<"ExtractionResultFlat"> | Decimal | DecimalJsLike | number | string | null
+    stopperRoughV2?: DecimalNullableFilter<"ExtractionResultFlat"> | Decimal | DecimalJsLike | number | string | null
+    stopperVdrCost?: DecimalNullableFilter<"ExtractionResultFlat"> | Decimal | DecimalJsLike | number | string | null
+    stopperFinalCost?: DecimalNullableFilter<"ExtractionResultFlat"> | Decimal | DecimalJsLike | number | string | null
+    tagAutoBgt?: DecimalNullableFilter<"ExtractionResultFlat"> | Decimal | DecimalJsLike | number | string | null
+    tagRoughV2?: DecimalNullableFilter<"ExtractionResultFlat"> | Decimal | DecimalJsLike | number | string | null
+    tagVdrCost?: DecimalNullableFilter<"ExtractionResultFlat"> | Decimal | DecimalJsLike | number | string | null
+    tagFinalCost?: DecimalNullableFilter<"ExtractionResultFlat"> | Decimal | DecimalJsLike | number | string | null
+    tasselsAutoBgt?: DecimalNullableFilter<"ExtractionResultFlat"> | Decimal | DecimalJsLike | number | string | null
+    tasselsRoughV2?: DecimalNullableFilter<"ExtractionResultFlat"> | Decimal | DecimalJsLike | number | string | null
+    tasselsVdrCost?: DecimalNullableFilter<"ExtractionResultFlat"> | Decimal | DecimalJsLike | number | string | null
+    tasselsFinalCost?: DecimalNullableFilter<"ExtractionResultFlat"> | Decimal | DecimalJsLike | number | string | null
     printAutoBgt?: DecimalNullableFilter<"ExtractionResultFlat"> | Decimal | DecimalJsLike | number | string | null
     printRoughV2?: DecimalNullableFilter<"ExtractionResultFlat"> | Decimal | DecimalJsLike | number | string | null
     printVendorCost?: DecimalNullableFilter<"ExtractionResultFlat"> | Decimal | DecimalJsLike | number | string | null
@@ -95878,6 +96428,62 @@ export namespace Prisma {
     otherRoughV2?: SortOrderInput | SortOrder
     otherVdrCost?: SortOrderInput | SortOrder
     otherFinalCost?: SortOrderInput | SortOrder
+    adjusterAutoBgt?: SortOrderInput | SortOrder
+    adjusterRoughV2?: SortOrderInput | SortOrder
+    adjusterVdrCost?: SortOrderInput | SortOrder
+    adjusterFinalCost?: SortOrderInput | SortOrder
+    brotchAutoBgt?: SortOrderInput | SortOrder
+    brotchRoughV2?: SortOrderInput | SortOrder
+    brotchVdrCost?: SortOrderInput | SortOrder
+    brotchFinalCost?: SortOrderInput | SortOrder
+    buckleAutoBgt?: SortOrderInput | SortOrder
+    buckleRoughV2?: SortOrderInput | SortOrder
+    buckleVdrCost?: SortOrderInput | SortOrder
+    buckleFinalCost?: SortOrderInput | SortOrder
+    eyeletsAutoBgt?: SortOrderInput | SortOrder
+    eyeletsRoughV2?: SortOrderInput | SortOrder
+    eyeletsVdrCost?: SortOrderInput | SortOrder
+    eyeletsFinalCost?: SortOrderInput | SortOrder
+    hangingDRingAutoBgt?: SortOrderInput | SortOrder
+    hangingDRingRoughV2?: SortOrderInput | SortOrder
+    hangingDRingVdrCost?: SortOrderInput | SortOrder
+    hangingDRingFinalCost?: SortOrderInput | SortOrder
+    hookAutoBgt?: SortOrderInput | SortOrder
+    hookRoughV2?: SortOrderInput | SortOrder
+    hookVdrCost?: SortOrderInput | SortOrder
+    hookFinalCost?: SortOrderInput | SortOrder
+    labelAutoBgt?: SortOrderInput | SortOrder
+    labelRoughV2?: SortOrderInput | SortOrder
+    labelVdrCost?: SortOrderInput | SortOrder
+    labelFinalCost?: SortOrderInput | SortOrder
+    laceAutoBgt?: SortOrderInput | SortOrder
+    laceRoughV2?: SortOrderInput | SortOrder
+    laceVdrCost?: SortOrderInput | SortOrder
+    laceFinalCost?: SortOrderInput | SortOrder
+    pockettingFabricAutoBgt?: SortOrderInput | SortOrder
+    pockettingFabricRoughV2?: SortOrderInput | SortOrder
+    pockettingFabricVdrCost?: SortOrderInput | SortOrder
+    pockettingFabricFinalCost?: SortOrderInput | SortOrder
+    pockettingReadymadeAutoBgt?: SortOrderInput | SortOrder
+    pockettingReadymadeRoughV2?: SortOrderInput | SortOrder
+    pockettingReadymadeVdrCost?: SortOrderInput | SortOrder
+    pockettingReadymadeFinalCost?: SortOrderInput | SortOrder
+    santaAutoBgt?: SortOrderInput | SortOrder
+    santaRoughV2?: SortOrderInput | SortOrder
+    santaVdrCost?: SortOrderInput | SortOrder
+    santaFinalCost?: SortOrderInput | SortOrder
+    stopperAutoBgt?: SortOrderInput | SortOrder
+    stopperRoughV2?: SortOrderInput | SortOrder
+    stopperVdrCost?: SortOrderInput | SortOrder
+    stopperFinalCost?: SortOrderInput | SortOrder
+    tagAutoBgt?: SortOrderInput | SortOrder
+    tagRoughV2?: SortOrderInput | SortOrder
+    tagVdrCost?: SortOrderInput | SortOrder
+    tagFinalCost?: SortOrderInput | SortOrder
+    tasselsAutoBgt?: SortOrderInput | SortOrder
+    tasselsRoughV2?: SortOrderInput | SortOrder
+    tasselsVdrCost?: SortOrderInput | SortOrder
+    tasselsFinalCost?: SortOrderInput | SortOrder
     printAutoBgt?: SortOrderInput | SortOrder
     printRoughV2?: SortOrderInput | SortOrder
     printVendorCost?: SortOrderInput | SortOrder
@@ -96119,6 +96725,62 @@ export namespace Prisma {
     otherRoughV2?: DecimalNullableFilter<"ExtractionResultFlat"> | Decimal | DecimalJsLike | number | string | null
     otherVdrCost?: DecimalNullableFilter<"ExtractionResultFlat"> | Decimal | DecimalJsLike | number | string | null
     otherFinalCost?: DecimalNullableFilter<"ExtractionResultFlat"> | Decimal | DecimalJsLike | number | string | null
+    adjusterAutoBgt?: DecimalNullableFilter<"ExtractionResultFlat"> | Decimal | DecimalJsLike | number | string | null
+    adjusterRoughV2?: DecimalNullableFilter<"ExtractionResultFlat"> | Decimal | DecimalJsLike | number | string | null
+    adjusterVdrCost?: DecimalNullableFilter<"ExtractionResultFlat"> | Decimal | DecimalJsLike | number | string | null
+    adjusterFinalCost?: DecimalNullableFilter<"ExtractionResultFlat"> | Decimal | DecimalJsLike | number | string | null
+    brotchAutoBgt?: DecimalNullableFilter<"ExtractionResultFlat"> | Decimal | DecimalJsLike | number | string | null
+    brotchRoughV2?: DecimalNullableFilter<"ExtractionResultFlat"> | Decimal | DecimalJsLike | number | string | null
+    brotchVdrCost?: DecimalNullableFilter<"ExtractionResultFlat"> | Decimal | DecimalJsLike | number | string | null
+    brotchFinalCost?: DecimalNullableFilter<"ExtractionResultFlat"> | Decimal | DecimalJsLike | number | string | null
+    buckleAutoBgt?: DecimalNullableFilter<"ExtractionResultFlat"> | Decimal | DecimalJsLike | number | string | null
+    buckleRoughV2?: DecimalNullableFilter<"ExtractionResultFlat"> | Decimal | DecimalJsLike | number | string | null
+    buckleVdrCost?: DecimalNullableFilter<"ExtractionResultFlat"> | Decimal | DecimalJsLike | number | string | null
+    buckleFinalCost?: DecimalNullableFilter<"ExtractionResultFlat"> | Decimal | DecimalJsLike | number | string | null
+    eyeletsAutoBgt?: DecimalNullableFilter<"ExtractionResultFlat"> | Decimal | DecimalJsLike | number | string | null
+    eyeletsRoughV2?: DecimalNullableFilter<"ExtractionResultFlat"> | Decimal | DecimalJsLike | number | string | null
+    eyeletsVdrCost?: DecimalNullableFilter<"ExtractionResultFlat"> | Decimal | DecimalJsLike | number | string | null
+    eyeletsFinalCost?: DecimalNullableFilter<"ExtractionResultFlat"> | Decimal | DecimalJsLike | number | string | null
+    hangingDRingAutoBgt?: DecimalNullableFilter<"ExtractionResultFlat"> | Decimal | DecimalJsLike | number | string | null
+    hangingDRingRoughV2?: DecimalNullableFilter<"ExtractionResultFlat"> | Decimal | DecimalJsLike | number | string | null
+    hangingDRingVdrCost?: DecimalNullableFilter<"ExtractionResultFlat"> | Decimal | DecimalJsLike | number | string | null
+    hangingDRingFinalCost?: DecimalNullableFilter<"ExtractionResultFlat"> | Decimal | DecimalJsLike | number | string | null
+    hookAutoBgt?: DecimalNullableFilter<"ExtractionResultFlat"> | Decimal | DecimalJsLike | number | string | null
+    hookRoughV2?: DecimalNullableFilter<"ExtractionResultFlat"> | Decimal | DecimalJsLike | number | string | null
+    hookVdrCost?: DecimalNullableFilter<"ExtractionResultFlat"> | Decimal | DecimalJsLike | number | string | null
+    hookFinalCost?: DecimalNullableFilter<"ExtractionResultFlat"> | Decimal | DecimalJsLike | number | string | null
+    labelAutoBgt?: DecimalNullableFilter<"ExtractionResultFlat"> | Decimal | DecimalJsLike | number | string | null
+    labelRoughV2?: DecimalNullableFilter<"ExtractionResultFlat"> | Decimal | DecimalJsLike | number | string | null
+    labelVdrCost?: DecimalNullableFilter<"ExtractionResultFlat"> | Decimal | DecimalJsLike | number | string | null
+    labelFinalCost?: DecimalNullableFilter<"ExtractionResultFlat"> | Decimal | DecimalJsLike | number | string | null
+    laceAutoBgt?: DecimalNullableFilter<"ExtractionResultFlat"> | Decimal | DecimalJsLike | number | string | null
+    laceRoughV2?: DecimalNullableFilter<"ExtractionResultFlat"> | Decimal | DecimalJsLike | number | string | null
+    laceVdrCost?: DecimalNullableFilter<"ExtractionResultFlat"> | Decimal | DecimalJsLike | number | string | null
+    laceFinalCost?: DecimalNullableFilter<"ExtractionResultFlat"> | Decimal | DecimalJsLike | number | string | null
+    pockettingFabricAutoBgt?: DecimalNullableFilter<"ExtractionResultFlat"> | Decimal | DecimalJsLike | number | string | null
+    pockettingFabricRoughV2?: DecimalNullableFilter<"ExtractionResultFlat"> | Decimal | DecimalJsLike | number | string | null
+    pockettingFabricVdrCost?: DecimalNullableFilter<"ExtractionResultFlat"> | Decimal | DecimalJsLike | number | string | null
+    pockettingFabricFinalCost?: DecimalNullableFilter<"ExtractionResultFlat"> | Decimal | DecimalJsLike | number | string | null
+    pockettingReadymadeAutoBgt?: DecimalNullableFilter<"ExtractionResultFlat"> | Decimal | DecimalJsLike | number | string | null
+    pockettingReadymadeRoughV2?: DecimalNullableFilter<"ExtractionResultFlat"> | Decimal | DecimalJsLike | number | string | null
+    pockettingReadymadeVdrCost?: DecimalNullableFilter<"ExtractionResultFlat"> | Decimal | DecimalJsLike | number | string | null
+    pockettingReadymadeFinalCost?: DecimalNullableFilter<"ExtractionResultFlat"> | Decimal | DecimalJsLike | number | string | null
+    santaAutoBgt?: DecimalNullableFilter<"ExtractionResultFlat"> | Decimal | DecimalJsLike | number | string | null
+    santaRoughV2?: DecimalNullableFilter<"ExtractionResultFlat"> | Decimal | DecimalJsLike | number | string | null
+    santaVdrCost?: DecimalNullableFilter<"ExtractionResultFlat"> | Decimal | DecimalJsLike | number | string | null
+    santaFinalCost?: DecimalNullableFilter<"ExtractionResultFlat"> | Decimal | DecimalJsLike | number | string | null
+    stopperAutoBgt?: DecimalNullableFilter<"ExtractionResultFlat"> | Decimal | DecimalJsLike | number | string | null
+    stopperRoughV2?: DecimalNullableFilter<"ExtractionResultFlat"> | Decimal | DecimalJsLike | number | string | null
+    stopperVdrCost?: DecimalNullableFilter<"ExtractionResultFlat"> | Decimal | DecimalJsLike | number | string | null
+    stopperFinalCost?: DecimalNullableFilter<"ExtractionResultFlat"> | Decimal | DecimalJsLike | number | string | null
+    tagAutoBgt?: DecimalNullableFilter<"ExtractionResultFlat"> | Decimal | DecimalJsLike | number | string | null
+    tagRoughV2?: DecimalNullableFilter<"ExtractionResultFlat"> | Decimal | DecimalJsLike | number | string | null
+    tagVdrCost?: DecimalNullableFilter<"ExtractionResultFlat"> | Decimal | DecimalJsLike | number | string | null
+    tagFinalCost?: DecimalNullableFilter<"ExtractionResultFlat"> | Decimal | DecimalJsLike | number | string | null
+    tasselsAutoBgt?: DecimalNullableFilter<"ExtractionResultFlat"> | Decimal | DecimalJsLike | number | string | null
+    tasselsRoughV2?: DecimalNullableFilter<"ExtractionResultFlat"> | Decimal | DecimalJsLike | number | string | null
+    tasselsVdrCost?: DecimalNullableFilter<"ExtractionResultFlat"> | Decimal | DecimalJsLike | number | string | null
+    tasselsFinalCost?: DecimalNullableFilter<"ExtractionResultFlat"> | Decimal | DecimalJsLike | number | string | null
     printAutoBgt?: DecimalNullableFilter<"ExtractionResultFlat"> | Decimal | DecimalJsLike | number | string | null
     printRoughV2?: DecimalNullableFilter<"ExtractionResultFlat"> | Decimal | DecimalJsLike | number | string | null
     printVendorCost?: DecimalNullableFilter<"ExtractionResultFlat"> | Decimal | DecimalJsLike | number | string | null
@@ -96354,6 +97016,62 @@ export namespace Prisma {
     otherRoughV2?: SortOrderInput | SortOrder
     otherVdrCost?: SortOrderInput | SortOrder
     otherFinalCost?: SortOrderInput | SortOrder
+    adjusterAutoBgt?: SortOrderInput | SortOrder
+    adjusterRoughV2?: SortOrderInput | SortOrder
+    adjusterVdrCost?: SortOrderInput | SortOrder
+    adjusterFinalCost?: SortOrderInput | SortOrder
+    brotchAutoBgt?: SortOrderInput | SortOrder
+    brotchRoughV2?: SortOrderInput | SortOrder
+    brotchVdrCost?: SortOrderInput | SortOrder
+    brotchFinalCost?: SortOrderInput | SortOrder
+    buckleAutoBgt?: SortOrderInput | SortOrder
+    buckleRoughV2?: SortOrderInput | SortOrder
+    buckleVdrCost?: SortOrderInput | SortOrder
+    buckleFinalCost?: SortOrderInput | SortOrder
+    eyeletsAutoBgt?: SortOrderInput | SortOrder
+    eyeletsRoughV2?: SortOrderInput | SortOrder
+    eyeletsVdrCost?: SortOrderInput | SortOrder
+    eyeletsFinalCost?: SortOrderInput | SortOrder
+    hangingDRingAutoBgt?: SortOrderInput | SortOrder
+    hangingDRingRoughV2?: SortOrderInput | SortOrder
+    hangingDRingVdrCost?: SortOrderInput | SortOrder
+    hangingDRingFinalCost?: SortOrderInput | SortOrder
+    hookAutoBgt?: SortOrderInput | SortOrder
+    hookRoughV2?: SortOrderInput | SortOrder
+    hookVdrCost?: SortOrderInput | SortOrder
+    hookFinalCost?: SortOrderInput | SortOrder
+    labelAutoBgt?: SortOrderInput | SortOrder
+    labelRoughV2?: SortOrderInput | SortOrder
+    labelVdrCost?: SortOrderInput | SortOrder
+    labelFinalCost?: SortOrderInput | SortOrder
+    laceAutoBgt?: SortOrderInput | SortOrder
+    laceRoughV2?: SortOrderInput | SortOrder
+    laceVdrCost?: SortOrderInput | SortOrder
+    laceFinalCost?: SortOrderInput | SortOrder
+    pockettingFabricAutoBgt?: SortOrderInput | SortOrder
+    pockettingFabricRoughV2?: SortOrderInput | SortOrder
+    pockettingFabricVdrCost?: SortOrderInput | SortOrder
+    pockettingFabricFinalCost?: SortOrderInput | SortOrder
+    pockettingReadymadeAutoBgt?: SortOrderInput | SortOrder
+    pockettingReadymadeRoughV2?: SortOrderInput | SortOrder
+    pockettingReadymadeVdrCost?: SortOrderInput | SortOrder
+    pockettingReadymadeFinalCost?: SortOrderInput | SortOrder
+    santaAutoBgt?: SortOrderInput | SortOrder
+    santaRoughV2?: SortOrderInput | SortOrder
+    santaVdrCost?: SortOrderInput | SortOrder
+    santaFinalCost?: SortOrderInput | SortOrder
+    stopperAutoBgt?: SortOrderInput | SortOrder
+    stopperRoughV2?: SortOrderInput | SortOrder
+    stopperVdrCost?: SortOrderInput | SortOrder
+    stopperFinalCost?: SortOrderInput | SortOrder
+    tagAutoBgt?: SortOrderInput | SortOrder
+    tagRoughV2?: SortOrderInput | SortOrder
+    tagVdrCost?: SortOrderInput | SortOrder
+    tagFinalCost?: SortOrderInput | SortOrder
+    tasselsAutoBgt?: SortOrderInput | SortOrder
+    tasselsRoughV2?: SortOrderInput | SortOrder
+    tasselsVdrCost?: SortOrderInput | SortOrder
+    tasselsFinalCost?: SortOrderInput | SortOrder
     printAutoBgt?: SortOrderInput | SortOrder
     printRoughV2?: SortOrderInput | SortOrder
     printVendorCost?: SortOrderInput | SortOrder
@@ -96593,6 +97311,62 @@ export namespace Prisma {
     otherRoughV2?: DecimalNullableWithAggregatesFilter<"ExtractionResultFlat"> | Decimal | DecimalJsLike | number | string | null
     otherVdrCost?: DecimalNullableWithAggregatesFilter<"ExtractionResultFlat"> | Decimal | DecimalJsLike | number | string | null
     otherFinalCost?: DecimalNullableWithAggregatesFilter<"ExtractionResultFlat"> | Decimal | DecimalJsLike | number | string | null
+    adjusterAutoBgt?: DecimalNullableWithAggregatesFilter<"ExtractionResultFlat"> | Decimal | DecimalJsLike | number | string | null
+    adjusterRoughV2?: DecimalNullableWithAggregatesFilter<"ExtractionResultFlat"> | Decimal | DecimalJsLike | number | string | null
+    adjusterVdrCost?: DecimalNullableWithAggregatesFilter<"ExtractionResultFlat"> | Decimal | DecimalJsLike | number | string | null
+    adjusterFinalCost?: DecimalNullableWithAggregatesFilter<"ExtractionResultFlat"> | Decimal | DecimalJsLike | number | string | null
+    brotchAutoBgt?: DecimalNullableWithAggregatesFilter<"ExtractionResultFlat"> | Decimal | DecimalJsLike | number | string | null
+    brotchRoughV2?: DecimalNullableWithAggregatesFilter<"ExtractionResultFlat"> | Decimal | DecimalJsLike | number | string | null
+    brotchVdrCost?: DecimalNullableWithAggregatesFilter<"ExtractionResultFlat"> | Decimal | DecimalJsLike | number | string | null
+    brotchFinalCost?: DecimalNullableWithAggregatesFilter<"ExtractionResultFlat"> | Decimal | DecimalJsLike | number | string | null
+    buckleAutoBgt?: DecimalNullableWithAggregatesFilter<"ExtractionResultFlat"> | Decimal | DecimalJsLike | number | string | null
+    buckleRoughV2?: DecimalNullableWithAggregatesFilter<"ExtractionResultFlat"> | Decimal | DecimalJsLike | number | string | null
+    buckleVdrCost?: DecimalNullableWithAggregatesFilter<"ExtractionResultFlat"> | Decimal | DecimalJsLike | number | string | null
+    buckleFinalCost?: DecimalNullableWithAggregatesFilter<"ExtractionResultFlat"> | Decimal | DecimalJsLike | number | string | null
+    eyeletsAutoBgt?: DecimalNullableWithAggregatesFilter<"ExtractionResultFlat"> | Decimal | DecimalJsLike | number | string | null
+    eyeletsRoughV2?: DecimalNullableWithAggregatesFilter<"ExtractionResultFlat"> | Decimal | DecimalJsLike | number | string | null
+    eyeletsVdrCost?: DecimalNullableWithAggregatesFilter<"ExtractionResultFlat"> | Decimal | DecimalJsLike | number | string | null
+    eyeletsFinalCost?: DecimalNullableWithAggregatesFilter<"ExtractionResultFlat"> | Decimal | DecimalJsLike | number | string | null
+    hangingDRingAutoBgt?: DecimalNullableWithAggregatesFilter<"ExtractionResultFlat"> | Decimal | DecimalJsLike | number | string | null
+    hangingDRingRoughV2?: DecimalNullableWithAggregatesFilter<"ExtractionResultFlat"> | Decimal | DecimalJsLike | number | string | null
+    hangingDRingVdrCost?: DecimalNullableWithAggregatesFilter<"ExtractionResultFlat"> | Decimal | DecimalJsLike | number | string | null
+    hangingDRingFinalCost?: DecimalNullableWithAggregatesFilter<"ExtractionResultFlat"> | Decimal | DecimalJsLike | number | string | null
+    hookAutoBgt?: DecimalNullableWithAggregatesFilter<"ExtractionResultFlat"> | Decimal | DecimalJsLike | number | string | null
+    hookRoughV2?: DecimalNullableWithAggregatesFilter<"ExtractionResultFlat"> | Decimal | DecimalJsLike | number | string | null
+    hookVdrCost?: DecimalNullableWithAggregatesFilter<"ExtractionResultFlat"> | Decimal | DecimalJsLike | number | string | null
+    hookFinalCost?: DecimalNullableWithAggregatesFilter<"ExtractionResultFlat"> | Decimal | DecimalJsLike | number | string | null
+    labelAutoBgt?: DecimalNullableWithAggregatesFilter<"ExtractionResultFlat"> | Decimal | DecimalJsLike | number | string | null
+    labelRoughV2?: DecimalNullableWithAggregatesFilter<"ExtractionResultFlat"> | Decimal | DecimalJsLike | number | string | null
+    labelVdrCost?: DecimalNullableWithAggregatesFilter<"ExtractionResultFlat"> | Decimal | DecimalJsLike | number | string | null
+    labelFinalCost?: DecimalNullableWithAggregatesFilter<"ExtractionResultFlat"> | Decimal | DecimalJsLike | number | string | null
+    laceAutoBgt?: DecimalNullableWithAggregatesFilter<"ExtractionResultFlat"> | Decimal | DecimalJsLike | number | string | null
+    laceRoughV2?: DecimalNullableWithAggregatesFilter<"ExtractionResultFlat"> | Decimal | DecimalJsLike | number | string | null
+    laceVdrCost?: DecimalNullableWithAggregatesFilter<"ExtractionResultFlat"> | Decimal | DecimalJsLike | number | string | null
+    laceFinalCost?: DecimalNullableWithAggregatesFilter<"ExtractionResultFlat"> | Decimal | DecimalJsLike | number | string | null
+    pockettingFabricAutoBgt?: DecimalNullableWithAggregatesFilter<"ExtractionResultFlat"> | Decimal | DecimalJsLike | number | string | null
+    pockettingFabricRoughV2?: DecimalNullableWithAggregatesFilter<"ExtractionResultFlat"> | Decimal | DecimalJsLike | number | string | null
+    pockettingFabricVdrCost?: DecimalNullableWithAggregatesFilter<"ExtractionResultFlat"> | Decimal | DecimalJsLike | number | string | null
+    pockettingFabricFinalCost?: DecimalNullableWithAggregatesFilter<"ExtractionResultFlat"> | Decimal | DecimalJsLike | number | string | null
+    pockettingReadymadeAutoBgt?: DecimalNullableWithAggregatesFilter<"ExtractionResultFlat"> | Decimal | DecimalJsLike | number | string | null
+    pockettingReadymadeRoughV2?: DecimalNullableWithAggregatesFilter<"ExtractionResultFlat"> | Decimal | DecimalJsLike | number | string | null
+    pockettingReadymadeVdrCost?: DecimalNullableWithAggregatesFilter<"ExtractionResultFlat"> | Decimal | DecimalJsLike | number | string | null
+    pockettingReadymadeFinalCost?: DecimalNullableWithAggregatesFilter<"ExtractionResultFlat"> | Decimal | DecimalJsLike | number | string | null
+    santaAutoBgt?: DecimalNullableWithAggregatesFilter<"ExtractionResultFlat"> | Decimal | DecimalJsLike | number | string | null
+    santaRoughV2?: DecimalNullableWithAggregatesFilter<"ExtractionResultFlat"> | Decimal | DecimalJsLike | number | string | null
+    santaVdrCost?: DecimalNullableWithAggregatesFilter<"ExtractionResultFlat"> | Decimal | DecimalJsLike | number | string | null
+    santaFinalCost?: DecimalNullableWithAggregatesFilter<"ExtractionResultFlat"> | Decimal | DecimalJsLike | number | string | null
+    stopperAutoBgt?: DecimalNullableWithAggregatesFilter<"ExtractionResultFlat"> | Decimal | DecimalJsLike | number | string | null
+    stopperRoughV2?: DecimalNullableWithAggregatesFilter<"ExtractionResultFlat"> | Decimal | DecimalJsLike | number | string | null
+    stopperVdrCost?: DecimalNullableWithAggregatesFilter<"ExtractionResultFlat"> | Decimal | DecimalJsLike | number | string | null
+    stopperFinalCost?: DecimalNullableWithAggregatesFilter<"ExtractionResultFlat"> | Decimal | DecimalJsLike | number | string | null
+    tagAutoBgt?: DecimalNullableWithAggregatesFilter<"ExtractionResultFlat"> | Decimal | DecimalJsLike | number | string | null
+    tagRoughV2?: DecimalNullableWithAggregatesFilter<"ExtractionResultFlat"> | Decimal | DecimalJsLike | number | string | null
+    tagVdrCost?: DecimalNullableWithAggregatesFilter<"ExtractionResultFlat"> | Decimal | DecimalJsLike | number | string | null
+    tagFinalCost?: DecimalNullableWithAggregatesFilter<"ExtractionResultFlat"> | Decimal | DecimalJsLike | number | string | null
+    tasselsAutoBgt?: DecimalNullableWithAggregatesFilter<"ExtractionResultFlat"> | Decimal | DecimalJsLike | number | string | null
+    tasselsRoughV2?: DecimalNullableWithAggregatesFilter<"ExtractionResultFlat"> | Decimal | DecimalJsLike | number | string | null
+    tasselsVdrCost?: DecimalNullableWithAggregatesFilter<"ExtractionResultFlat"> | Decimal | DecimalJsLike | number | string | null
+    tasselsFinalCost?: DecimalNullableWithAggregatesFilter<"ExtractionResultFlat"> | Decimal | DecimalJsLike | number | string | null
     printAutoBgt?: DecimalNullableWithAggregatesFilter<"ExtractionResultFlat"> | Decimal | DecimalJsLike | number | string | null
     printRoughV2?: DecimalNullableWithAggregatesFilter<"ExtractionResultFlat"> | Decimal | DecimalJsLike | number | string | null
     printVendorCost?: DecimalNullableWithAggregatesFilter<"ExtractionResultFlat"> | Decimal | DecimalJsLike | number | string | null
@@ -96993,7 +97767,6 @@ export namespace Prisma {
     apiKeys?: ApiKeyListRelationFilter
     costSummary?: XOR<CostSummaryNullableScalarRelationFilter, CostSummaryWhereInput> | null
     extractionJobs?: ExtractionJobListRelationFilter
-    verifications?: ExtractionResultListRelationFilter
     approvedItems?: ExtractionResultFlatListRelationFilter
   }
 
@@ -97013,7 +97786,6 @@ export namespace Prisma {
     apiKeys?: ApiKeyOrderByRelationAggregateInput
     costSummary?: CostSummaryOrderByWithRelationInput
     extractionJobs?: ExtractionJobOrderByRelationAggregateInput
-    verifications?: ExtractionResultOrderByRelationAggregateInput
     approvedItems?: ExtractionResultFlatOrderByRelationAggregateInput
     _relevance?: UserOrderByRelevanceInput
   }
@@ -97037,7 +97809,6 @@ export namespace Prisma {
     apiKeys?: ApiKeyListRelationFilter
     costSummary?: XOR<CostSummaryNullableScalarRelationFilter, CostSummaryWhereInput> | null
     extractionJobs?: ExtractionJobListRelationFilter
-    verifications?: ExtractionResultListRelationFilter
     approvedItems?: ExtractionResultFlatListRelationFilter
   }, "id" | "email">
 
@@ -103876,6 +104647,76 @@ export namespace Prisma {
     updatedAt?: DateTimeWithAggregatesFilter<"PreciseBodyArticleConsumption"> | Date | string
   }
 
+  export type GmSizeMasterWhereInput = {
+    AND?: GmSizeMasterWhereInput | GmSizeMasterWhereInput[]
+    OR?: GmSizeMasterWhereInput[]
+    NOT?: GmSizeMasterWhereInput | GmSizeMasterWhereInput[]
+    id?: IntFilter<"GmSizeMaster"> | number
+    seg?: StringNullableFilter<"GmSizeMaster"> | string | null
+    div?: StringNullableFilter<"GmSizeMaster"> | string | null
+    subDiv?: StringNullableFilter<"GmSizeMaster"> | string | null
+    majCat?: StringFilter<"GmSizeMaster"> | string
+    status?: StringNullableFilter<"GmSizeMaster"> | string | null
+    size?: StringFilter<"GmSizeMaster"> | string
+    createdAt?: DateTimeFilter<"GmSizeMaster"> | Date | string
+  }
+
+  export type GmSizeMasterOrderByWithRelationInput = {
+    id?: SortOrder
+    seg?: SortOrderInput | SortOrder
+    div?: SortOrderInput | SortOrder
+    subDiv?: SortOrderInput | SortOrder
+    majCat?: SortOrder
+    status?: SortOrderInput | SortOrder
+    size?: SortOrder
+    createdAt?: SortOrder
+    _relevance?: GmSizeMasterOrderByRelevanceInput
+  }
+
+  export type GmSizeMasterWhereUniqueInput = Prisma.AtLeast<{
+    id?: number
+    AND?: GmSizeMasterWhereInput | GmSizeMasterWhereInput[]
+    OR?: GmSizeMasterWhereInput[]
+    NOT?: GmSizeMasterWhereInput | GmSizeMasterWhereInput[]
+    seg?: StringNullableFilter<"GmSizeMaster"> | string | null
+    div?: StringNullableFilter<"GmSizeMaster"> | string | null
+    subDiv?: StringNullableFilter<"GmSizeMaster"> | string | null
+    majCat?: StringFilter<"GmSizeMaster"> | string
+    status?: StringNullableFilter<"GmSizeMaster"> | string | null
+    size?: StringFilter<"GmSizeMaster"> | string
+    createdAt?: DateTimeFilter<"GmSizeMaster"> | Date | string
+  }, "id">
+
+  export type GmSizeMasterOrderByWithAggregationInput = {
+    id?: SortOrder
+    seg?: SortOrderInput | SortOrder
+    div?: SortOrderInput | SortOrder
+    subDiv?: SortOrderInput | SortOrder
+    majCat?: SortOrder
+    status?: SortOrderInput | SortOrder
+    size?: SortOrder
+    createdAt?: SortOrder
+    _count?: GmSizeMasterCountOrderByAggregateInput
+    _avg?: GmSizeMasterAvgOrderByAggregateInput
+    _max?: GmSizeMasterMaxOrderByAggregateInput
+    _min?: GmSizeMasterMinOrderByAggregateInput
+    _sum?: GmSizeMasterSumOrderByAggregateInput
+  }
+
+  export type GmSizeMasterScalarWhereWithAggregatesInput = {
+    AND?: GmSizeMasterScalarWhereWithAggregatesInput | GmSizeMasterScalarWhereWithAggregatesInput[]
+    OR?: GmSizeMasterScalarWhereWithAggregatesInput[]
+    NOT?: GmSizeMasterScalarWhereWithAggregatesInput | GmSizeMasterScalarWhereWithAggregatesInput[]
+    id?: IntWithAggregatesFilter<"GmSizeMaster"> | number
+    seg?: StringNullableWithAggregatesFilter<"GmSizeMaster"> | string | null
+    div?: StringNullableWithAggregatesFilter<"GmSizeMaster"> | string | null
+    subDiv?: StringNullableWithAggregatesFilter<"GmSizeMaster"> | string | null
+    majCat?: StringWithAggregatesFilter<"GmSizeMaster"> | string
+    status?: StringNullableWithAggregatesFilter<"GmSizeMaster"> | string | null
+    size?: StringWithAggregatesFilter<"GmSizeMaster"> | string
+    createdAt?: DateTimeWithAggregatesFilter<"GmSizeMaster"> | Date | string
+  }
+
   export type DepartmentCreateInput = {
     code: string
     name: string
@@ -104184,7 +105025,6 @@ export namespace Prisma {
     updatedAt?: Date | string
     allowedValues?: AttributeAllowedValueCreateNestedManyWithoutAttributeInput
     categoryAttributes?: CategoryAttributeCreateNestedManyWithoutAttributeInput
-    extractions?: ExtractionResultCreateNestedManyWithoutAttributeInput
   }
 
   export type MasterAttributeUncheckedCreateInput = {
@@ -104211,7 +105051,6 @@ export namespace Prisma {
     updatedAt?: Date | string
     allowedValues?: AttributeAllowedValueUncheckedCreateNestedManyWithoutAttributeInput
     categoryAttributes?: CategoryAttributeUncheckedCreateNestedManyWithoutAttributeInput
-    extractions?: ExtractionResultUncheckedCreateNestedManyWithoutAttributeInput
   }
 
   export type MasterAttributeUpdateInput = {
@@ -104237,7 +105076,6 @@ export namespace Prisma {
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     allowedValues?: AttributeAllowedValueUpdateManyWithoutAttributeNestedInput
     categoryAttributes?: CategoryAttributeUpdateManyWithoutAttributeNestedInput
-    extractions?: ExtractionResultUpdateManyWithoutAttributeNestedInput
   }
 
   export type MasterAttributeUncheckedUpdateInput = {
@@ -104264,7 +105102,6 @@ export namespace Prisma {
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     allowedValues?: AttributeAllowedValueUncheckedUpdateManyWithoutAttributeNestedInput
     categoryAttributes?: CategoryAttributeUncheckedUpdateManyWithoutAttributeNestedInput
-    extractions?: ExtractionResultUncheckedUpdateManyWithoutAttributeNestedInput
   }
 
   export type MasterAttributeCreateManyInput = {
@@ -104347,7 +105184,6 @@ export namespace Prisma {
     createdAt?: Date | string
     updatedAt?: Date | string
     attribute: MasterAttributeCreateNestedOneWithoutAllowedValuesInput
-    matchedResults?: ExtractionResultCreateNestedManyWithoutMatchedValueInput
   }
 
   export type AttributeAllowedValueUncheckedCreateInput = {
@@ -104360,7 +105196,6 @@ export namespace Prisma {
     isActive?: boolean
     createdAt?: Date | string
     updatedAt?: Date | string
-    matchedResults?: ExtractionResultUncheckedCreateNestedManyWithoutMatchedValueInput
   }
 
   export type AttributeAllowedValueUpdateInput = {
@@ -104372,7 +105207,6 @@ export namespace Prisma {
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     attribute?: MasterAttributeUpdateOneRequiredWithoutAllowedValuesNestedInput
-    matchedResults?: ExtractionResultUpdateManyWithoutMatchedValueNestedInput
   }
 
   export type AttributeAllowedValueUncheckedUpdateInput = {
@@ -104385,7 +105219,6 @@ export namespace Prisma {
     isActive?: BoolFieldUpdateOperationsInput | boolean
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
-    matchedResults?: ExtractionResultUncheckedUpdateManyWithoutMatchedValueNestedInput
   }
 
   export type AttributeAllowedValueCreateManyInput = {
@@ -104526,7 +105359,6 @@ export namespace Prisma {
     outputTokens?: number | null
     category: CategoryCreateNestedOneWithoutExtractionsInput
     user?: UserCreateNestedOneWithoutExtractionJobsInput
-    results?: ExtractionResultCreateNestedManyWithoutJobInput
     flatResult?: ExtractionResultFlatCreateNestedOneWithoutJobInput
   }
 
@@ -104555,7 +105387,6 @@ export namespace Prisma {
     apiCost?: Decimal | DecimalJsLike | number | string | null
     inputTokens?: number | null
     outputTokens?: number | null
-    results?: ExtractionResultUncheckedCreateNestedManyWithoutJobInput
     flatResult?: ExtractionResultFlatUncheckedCreateNestedOneWithoutJobInput
   }
 
@@ -104584,7 +105415,6 @@ export namespace Prisma {
     outputTokens?: NullableIntFieldUpdateOperationsInput | number | null
     category?: CategoryUpdateOneRequiredWithoutExtractionsNestedInput
     user?: UserUpdateOneWithoutExtractionJobsNestedInput
-    results?: ExtractionResultUpdateManyWithoutJobNestedInput
     flatResult?: ExtractionResultFlatUpdateOneWithoutJobNestedInput
   }
 
@@ -104613,7 +105443,6 @@ export namespace Prisma {
     apiCost?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
     inputTokens?: NullableIntFieldUpdateOperationsInput | number | null
     outputTokens?: NullableIntFieldUpdateOperationsInput | number | null
-    results?: ExtractionResultUncheckedUpdateManyWithoutJobNestedInput
     flatResult?: ExtractionResultFlatUncheckedUpdateOneWithoutJobNestedInput
   }
 
@@ -104694,114 +105523,6 @@ export namespace Prisma {
     apiCost?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
     inputTokens?: NullableIntFieldUpdateOperationsInput | number | null
     outputTokens?: NullableIntFieldUpdateOperationsInput | number | null
-  }
-
-  export type ExtractionResultCreateInput = {
-    id?: string
-    rawValue?: string | null
-    finalValue?: string | null
-    confidence?: Decimal | DecimalJsLike | number | string | null
-    extractionMethod?: string | null
-    alternativeValues?: NullableJsonNullValueInput | InputJsonValue
-    isVerified?: boolean
-    verifiedAt?: Date | string | null
-    createdAt?: Date | string
-    attribute: MasterAttributeCreateNestedOneWithoutExtractionsInput
-    job: ExtractionJobCreateNestedOneWithoutResultsInput
-    matchedValue?: AttributeAllowedValueCreateNestedOneWithoutMatchedResultsInput
-    verifier?: UserCreateNestedOneWithoutVerificationsInput
-  }
-
-  export type ExtractionResultUncheckedCreateInput = {
-    id?: string
-    jobId: string
-    attributeId: number
-    rawValue?: string | null
-    matchedValueId?: number | null
-    finalValue?: string | null
-    confidence?: Decimal | DecimalJsLike | number | string | null
-    extractionMethod?: string | null
-    alternativeValues?: NullableJsonNullValueInput | InputJsonValue
-    isVerified?: boolean
-    verifiedBy?: number | null
-    verifiedAt?: Date | string | null
-    createdAt?: Date | string
-  }
-
-  export type ExtractionResultUpdateInput = {
-    id?: StringFieldUpdateOperationsInput | string
-    rawValue?: NullableStringFieldUpdateOperationsInput | string | null
-    finalValue?: NullableStringFieldUpdateOperationsInput | string | null
-    confidence?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
-    extractionMethod?: NullableStringFieldUpdateOperationsInput | string | null
-    alternativeValues?: NullableJsonNullValueInput | InputJsonValue
-    isVerified?: BoolFieldUpdateOperationsInput | boolean
-    verifiedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
-    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
-    attribute?: MasterAttributeUpdateOneRequiredWithoutExtractionsNestedInput
-    job?: ExtractionJobUpdateOneRequiredWithoutResultsNestedInput
-    matchedValue?: AttributeAllowedValueUpdateOneWithoutMatchedResultsNestedInput
-    verifier?: UserUpdateOneWithoutVerificationsNestedInput
-  }
-
-  export type ExtractionResultUncheckedUpdateInput = {
-    id?: StringFieldUpdateOperationsInput | string
-    jobId?: StringFieldUpdateOperationsInput | string
-    attributeId?: IntFieldUpdateOperationsInput | number
-    rawValue?: NullableStringFieldUpdateOperationsInput | string | null
-    matchedValueId?: NullableIntFieldUpdateOperationsInput | number | null
-    finalValue?: NullableStringFieldUpdateOperationsInput | string | null
-    confidence?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
-    extractionMethod?: NullableStringFieldUpdateOperationsInput | string | null
-    alternativeValues?: NullableJsonNullValueInput | InputJsonValue
-    isVerified?: BoolFieldUpdateOperationsInput | boolean
-    verifiedBy?: NullableIntFieldUpdateOperationsInput | number | null
-    verifiedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
-    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
-  }
-
-  export type ExtractionResultCreateManyInput = {
-    id?: string
-    jobId: string
-    attributeId: number
-    rawValue?: string | null
-    matchedValueId?: number | null
-    finalValue?: string | null
-    confidence?: Decimal | DecimalJsLike | number | string | null
-    extractionMethod?: string | null
-    alternativeValues?: NullableJsonNullValueInput | InputJsonValue
-    isVerified?: boolean
-    verifiedBy?: number | null
-    verifiedAt?: Date | string | null
-    createdAt?: Date | string
-  }
-
-  export type ExtractionResultUpdateManyMutationInput = {
-    id?: StringFieldUpdateOperationsInput | string
-    rawValue?: NullableStringFieldUpdateOperationsInput | string | null
-    finalValue?: NullableStringFieldUpdateOperationsInput | string | null
-    confidence?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
-    extractionMethod?: NullableStringFieldUpdateOperationsInput | string | null
-    alternativeValues?: NullableJsonNullValueInput | InputJsonValue
-    isVerified?: BoolFieldUpdateOperationsInput | boolean
-    verifiedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
-    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
-  }
-
-  export type ExtractionResultUncheckedUpdateManyInput = {
-    id?: StringFieldUpdateOperationsInput | string
-    jobId?: StringFieldUpdateOperationsInput | string
-    attributeId?: IntFieldUpdateOperationsInput | number
-    rawValue?: NullableStringFieldUpdateOperationsInput | string | null
-    matchedValueId?: NullableIntFieldUpdateOperationsInput | number | null
-    finalValue?: NullableStringFieldUpdateOperationsInput | string | null
-    confidence?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
-    extractionMethod?: NullableStringFieldUpdateOperationsInput | string | null
-    alternativeValues?: NullableJsonNullValueInput | InputJsonValue
-    isVerified?: BoolFieldUpdateOperationsInput | boolean
-    verifiedBy?: NullableIntFieldUpdateOperationsInput | number | null
-    verifiedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
-    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
   }
 
   export type ExtractionResultFlatCreateInput = {
@@ -104970,6 +105691,62 @@ export namespace Prisma {
     otherRoughV2?: Decimal | DecimalJsLike | number | string | null
     otherVdrCost?: Decimal | DecimalJsLike | number | string | null
     otherFinalCost?: Decimal | DecimalJsLike | number | string | null
+    adjusterAutoBgt?: Decimal | DecimalJsLike | number | string | null
+    adjusterRoughV2?: Decimal | DecimalJsLike | number | string | null
+    adjusterVdrCost?: Decimal | DecimalJsLike | number | string | null
+    adjusterFinalCost?: Decimal | DecimalJsLike | number | string | null
+    brotchAutoBgt?: Decimal | DecimalJsLike | number | string | null
+    brotchRoughV2?: Decimal | DecimalJsLike | number | string | null
+    brotchVdrCost?: Decimal | DecimalJsLike | number | string | null
+    brotchFinalCost?: Decimal | DecimalJsLike | number | string | null
+    buckleAutoBgt?: Decimal | DecimalJsLike | number | string | null
+    buckleRoughV2?: Decimal | DecimalJsLike | number | string | null
+    buckleVdrCost?: Decimal | DecimalJsLike | number | string | null
+    buckleFinalCost?: Decimal | DecimalJsLike | number | string | null
+    eyeletsAutoBgt?: Decimal | DecimalJsLike | number | string | null
+    eyeletsRoughV2?: Decimal | DecimalJsLike | number | string | null
+    eyeletsVdrCost?: Decimal | DecimalJsLike | number | string | null
+    eyeletsFinalCost?: Decimal | DecimalJsLike | number | string | null
+    hangingDRingAutoBgt?: Decimal | DecimalJsLike | number | string | null
+    hangingDRingRoughV2?: Decimal | DecimalJsLike | number | string | null
+    hangingDRingVdrCost?: Decimal | DecimalJsLike | number | string | null
+    hangingDRingFinalCost?: Decimal | DecimalJsLike | number | string | null
+    hookAutoBgt?: Decimal | DecimalJsLike | number | string | null
+    hookRoughV2?: Decimal | DecimalJsLike | number | string | null
+    hookVdrCost?: Decimal | DecimalJsLike | number | string | null
+    hookFinalCost?: Decimal | DecimalJsLike | number | string | null
+    labelAutoBgt?: Decimal | DecimalJsLike | number | string | null
+    labelRoughV2?: Decimal | DecimalJsLike | number | string | null
+    labelVdrCost?: Decimal | DecimalJsLike | number | string | null
+    labelFinalCost?: Decimal | DecimalJsLike | number | string | null
+    laceAutoBgt?: Decimal | DecimalJsLike | number | string | null
+    laceRoughV2?: Decimal | DecimalJsLike | number | string | null
+    laceVdrCost?: Decimal | DecimalJsLike | number | string | null
+    laceFinalCost?: Decimal | DecimalJsLike | number | string | null
+    pockettingFabricAutoBgt?: Decimal | DecimalJsLike | number | string | null
+    pockettingFabricRoughV2?: Decimal | DecimalJsLike | number | string | null
+    pockettingFabricVdrCost?: Decimal | DecimalJsLike | number | string | null
+    pockettingFabricFinalCost?: Decimal | DecimalJsLike | number | string | null
+    pockettingReadymadeAutoBgt?: Decimal | DecimalJsLike | number | string | null
+    pockettingReadymadeRoughV2?: Decimal | DecimalJsLike | number | string | null
+    pockettingReadymadeVdrCost?: Decimal | DecimalJsLike | number | string | null
+    pockettingReadymadeFinalCost?: Decimal | DecimalJsLike | number | string | null
+    santaAutoBgt?: Decimal | DecimalJsLike | number | string | null
+    santaRoughV2?: Decimal | DecimalJsLike | number | string | null
+    santaVdrCost?: Decimal | DecimalJsLike | number | string | null
+    santaFinalCost?: Decimal | DecimalJsLike | number | string | null
+    stopperAutoBgt?: Decimal | DecimalJsLike | number | string | null
+    stopperRoughV2?: Decimal | DecimalJsLike | number | string | null
+    stopperVdrCost?: Decimal | DecimalJsLike | number | string | null
+    stopperFinalCost?: Decimal | DecimalJsLike | number | string | null
+    tagAutoBgt?: Decimal | DecimalJsLike | number | string | null
+    tagRoughV2?: Decimal | DecimalJsLike | number | string | null
+    tagVdrCost?: Decimal | DecimalJsLike | number | string | null
+    tagFinalCost?: Decimal | DecimalJsLike | number | string | null
+    tasselsAutoBgt?: Decimal | DecimalJsLike | number | string | null
+    tasselsRoughV2?: Decimal | DecimalJsLike | number | string | null
+    tasselsVdrCost?: Decimal | DecimalJsLike | number | string | null
+    tasselsFinalCost?: Decimal | DecimalJsLike | number | string | null
     printAutoBgt?: Decimal | DecimalJsLike | number | string | null
     printRoughV2?: Decimal | DecimalJsLike | number | string | null
     printVendorCost?: Decimal | DecimalJsLike | number | string | null
@@ -105204,6 +105981,62 @@ export namespace Prisma {
     otherRoughV2?: Decimal | DecimalJsLike | number | string | null
     otherVdrCost?: Decimal | DecimalJsLike | number | string | null
     otherFinalCost?: Decimal | DecimalJsLike | number | string | null
+    adjusterAutoBgt?: Decimal | DecimalJsLike | number | string | null
+    adjusterRoughV2?: Decimal | DecimalJsLike | number | string | null
+    adjusterVdrCost?: Decimal | DecimalJsLike | number | string | null
+    adjusterFinalCost?: Decimal | DecimalJsLike | number | string | null
+    brotchAutoBgt?: Decimal | DecimalJsLike | number | string | null
+    brotchRoughV2?: Decimal | DecimalJsLike | number | string | null
+    brotchVdrCost?: Decimal | DecimalJsLike | number | string | null
+    brotchFinalCost?: Decimal | DecimalJsLike | number | string | null
+    buckleAutoBgt?: Decimal | DecimalJsLike | number | string | null
+    buckleRoughV2?: Decimal | DecimalJsLike | number | string | null
+    buckleVdrCost?: Decimal | DecimalJsLike | number | string | null
+    buckleFinalCost?: Decimal | DecimalJsLike | number | string | null
+    eyeletsAutoBgt?: Decimal | DecimalJsLike | number | string | null
+    eyeletsRoughV2?: Decimal | DecimalJsLike | number | string | null
+    eyeletsVdrCost?: Decimal | DecimalJsLike | number | string | null
+    eyeletsFinalCost?: Decimal | DecimalJsLike | number | string | null
+    hangingDRingAutoBgt?: Decimal | DecimalJsLike | number | string | null
+    hangingDRingRoughV2?: Decimal | DecimalJsLike | number | string | null
+    hangingDRingVdrCost?: Decimal | DecimalJsLike | number | string | null
+    hangingDRingFinalCost?: Decimal | DecimalJsLike | number | string | null
+    hookAutoBgt?: Decimal | DecimalJsLike | number | string | null
+    hookRoughV2?: Decimal | DecimalJsLike | number | string | null
+    hookVdrCost?: Decimal | DecimalJsLike | number | string | null
+    hookFinalCost?: Decimal | DecimalJsLike | number | string | null
+    labelAutoBgt?: Decimal | DecimalJsLike | number | string | null
+    labelRoughV2?: Decimal | DecimalJsLike | number | string | null
+    labelVdrCost?: Decimal | DecimalJsLike | number | string | null
+    labelFinalCost?: Decimal | DecimalJsLike | number | string | null
+    laceAutoBgt?: Decimal | DecimalJsLike | number | string | null
+    laceRoughV2?: Decimal | DecimalJsLike | number | string | null
+    laceVdrCost?: Decimal | DecimalJsLike | number | string | null
+    laceFinalCost?: Decimal | DecimalJsLike | number | string | null
+    pockettingFabricAutoBgt?: Decimal | DecimalJsLike | number | string | null
+    pockettingFabricRoughV2?: Decimal | DecimalJsLike | number | string | null
+    pockettingFabricVdrCost?: Decimal | DecimalJsLike | number | string | null
+    pockettingFabricFinalCost?: Decimal | DecimalJsLike | number | string | null
+    pockettingReadymadeAutoBgt?: Decimal | DecimalJsLike | number | string | null
+    pockettingReadymadeRoughV2?: Decimal | DecimalJsLike | number | string | null
+    pockettingReadymadeVdrCost?: Decimal | DecimalJsLike | number | string | null
+    pockettingReadymadeFinalCost?: Decimal | DecimalJsLike | number | string | null
+    santaAutoBgt?: Decimal | DecimalJsLike | number | string | null
+    santaRoughV2?: Decimal | DecimalJsLike | number | string | null
+    santaVdrCost?: Decimal | DecimalJsLike | number | string | null
+    santaFinalCost?: Decimal | DecimalJsLike | number | string | null
+    stopperAutoBgt?: Decimal | DecimalJsLike | number | string | null
+    stopperRoughV2?: Decimal | DecimalJsLike | number | string | null
+    stopperVdrCost?: Decimal | DecimalJsLike | number | string | null
+    stopperFinalCost?: Decimal | DecimalJsLike | number | string | null
+    tagAutoBgt?: Decimal | DecimalJsLike | number | string | null
+    tagRoughV2?: Decimal | DecimalJsLike | number | string | null
+    tagVdrCost?: Decimal | DecimalJsLike | number | string | null
+    tagFinalCost?: Decimal | DecimalJsLike | number | string | null
+    tasselsAutoBgt?: Decimal | DecimalJsLike | number | string | null
+    tasselsRoughV2?: Decimal | DecimalJsLike | number | string | null
+    tasselsVdrCost?: Decimal | DecimalJsLike | number | string | null
+    tasselsFinalCost?: Decimal | DecimalJsLike | number | string | null
     printAutoBgt?: Decimal | DecimalJsLike | number | string | null
     printRoughV2?: Decimal | DecimalJsLike | number | string | null
     printVendorCost?: Decimal | DecimalJsLike | number | string | null
@@ -105436,6 +106269,62 @@ export namespace Prisma {
     otherRoughV2?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
     otherVdrCost?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
     otherFinalCost?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    adjusterAutoBgt?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    adjusterRoughV2?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    adjusterVdrCost?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    adjusterFinalCost?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    brotchAutoBgt?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    brotchRoughV2?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    brotchVdrCost?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    brotchFinalCost?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    buckleAutoBgt?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    buckleRoughV2?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    buckleVdrCost?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    buckleFinalCost?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    eyeletsAutoBgt?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    eyeletsRoughV2?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    eyeletsVdrCost?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    eyeletsFinalCost?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    hangingDRingAutoBgt?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    hangingDRingRoughV2?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    hangingDRingVdrCost?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    hangingDRingFinalCost?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    hookAutoBgt?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    hookRoughV2?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    hookVdrCost?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    hookFinalCost?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    labelAutoBgt?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    labelRoughV2?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    labelVdrCost?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    labelFinalCost?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    laceAutoBgt?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    laceRoughV2?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    laceVdrCost?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    laceFinalCost?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    pockettingFabricAutoBgt?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    pockettingFabricRoughV2?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    pockettingFabricVdrCost?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    pockettingFabricFinalCost?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    pockettingReadymadeAutoBgt?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    pockettingReadymadeRoughV2?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    pockettingReadymadeVdrCost?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    pockettingReadymadeFinalCost?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    santaAutoBgt?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    santaRoughV2?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    santaVdrCost?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    santaFinalCost?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    stopperAutoBgt?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    stopperRoughV2?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    stopperVdrCost?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    stopperFinalCost?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    tagAutoBgt?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    tagRoughV2?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    tagVdrCost?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    tagFinalCost?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    tasselsAutoBgt?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    tasselsRoughV2?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    tasselsVdrCost?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    tasselsFinalCost?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
     printAutoBgt?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
     printRoughV2?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
     printVendorCost?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
@@ -105670,6 +106559,62 @@ export namespace Prisma {
     otherRoughV2?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
     otherVdrCost?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
     otherFinalCost?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    adjusterAutoBgt?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    adjusterRoughV2?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    adjusterVdrCost?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    adjusterFinalCost?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    brotchAutoBgt?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    brotchRoughV2?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    brotchVdrCost?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    brotchFinalCost?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    buckleAutoBgt?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    buckleRoughV2?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    buckleVdrCost?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    buckleFinalCost?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    eyeletsAutoBgt?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    eyeletsRoughV2?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    eyeletsVdrCost?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    eyeletsFinalCost?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    hangingDRingAutoBgt?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    hangingDRingRoughV2?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    hangingDRingVdrCost?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    hangingDRingFinalCost?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    hookAutoBgt?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    hookRoughV2?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    hookVdrCost?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    hookFinalCost?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    labelAutoBgt?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    labelRoughV2?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    labelVdrCost?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    labelFinalCost?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    laceAutoBgt?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    laceRoughV2?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    laceVdrCost?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    laceFinalCost?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    pockettingFabricAutoBgt?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    pockettingFabricRoughV2?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    pockettingFabricVdrCost?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    pockettingFabricFinalCost?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    pockettingReadymadeAutoBgt?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    pockettingReadymadeRoughV2?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    pockettingReadymadeVdrCost?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    pockettingReadymadeFinalCost?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    santaAutoBgt?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    santaRoughV2?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    santaVdrCost?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    santaFinalCost?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    stopperAutoBgt?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    stopperRoughV2?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    stopperVdrCost?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    stopperFinalCost?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    tagAutoBgt?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    tagRoughV2?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    tagVdrCost?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    tagFinalCost?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    tasselsAutoBgt?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    tasselsRoughV2?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    tasselsVdrCost?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    tasselsFinalCost?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
     printAutoBgt?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
     printRoughV2?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
     printVendorCost?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
@@ -105903,6 +106848,62 @@ export namespace Prisma {
     otherRoughV2?: Decimal | DecimalJsLike | number | string | null
     otherVdrCost?: Decimal | DecimalJsLike | number | string | null
     otherFinalCost?: Decimal | DecimalJsLike | number | string | null
+    adjusterAutoBgt?: Decimal | DecimalJsLike | number | string | null
+    adjusterRoughV2?: Decimal | DecimalJsLike | number | string | null
+    adjusterVdrCost?: Decimal | DecimalJsLike | number | string | null
+    adjusterFinalCost?: Decimal | DecimalJsLike | number | string | null
+    brotchAutoBgt?: Decimal | DecimalJsLike | number | string | null
+    brotchRoughV2?: Decimal | DecimalJsLike | number | string | null
+    brotchVdrCost?: Decimal | DecimalJsLike | number | string | null
+    brotchFinalCost?: Decimal | DecimalJsLike | number | string | null
+    buckleAutoBgt?: Decimal | DecimalJsLike | number | string | null
+    buckleRoughV2?: Decimal | DecimalJsLike | number | string | null
+    buckleVdrCost?: Decimal | DecimalJsLike | number | string | null
+    buckleFinalCost?: Decimal | DecimalJsLike | number | string | null
+    eyeletsAutoBgt?: Decimal | DecimalJsLike | number | string | null
+    eyeletsRoughV2?: Decimal | DecimalJsLike | number | string | null
+    eyeletsVdrCost?: Decimal | DecimalJsLike | number | string | null
+    eyeletsFinalCost?: Decimal | DecimalJsLike | number | string | null
+    hangingDRingAutoBgt?: Decimal | DecimalJsLike | number | string | null
+    hangingDRingRoughV2?: Decimal | DecimalJsLike | number | string | null
+    hangingDRingVdrCost?: Decimal | DecimalJsLike | number | string | null
+    hangingDRingFinalCost?: Decimal | DecimalJsLike | number | string | null
+    hookAutoBgt?: Decimal | DecimalJsLike | number | string | null
+    hookRoughV2?: Decimal | DecimalJsLike | number | string | null
+    hookVdrCost?: Decimal | DecimalJsLike | number | string | null
+    hookFinalCost?: Decimal | DecimalJsLike | number | string | null
+    labelAutoBgt?: Decimal | DecimalJsLike | number | string | null
+    labelRoughV2?: Decimal | DecimalJsLike | number | string | null
+    labelVdrCost?: Decimal | DecimalJsLike | number | string | null
+    labelFinalCost?: Decimal | DecimalJsLike | number | string | null
+    laceAutoBgt?: Decimal | DecimalJsLike | number | string | null
+    laceRoughV2?: Decimal | DecimalJsLike | number | string | null
+    laceVdrCost?: Decimal | DecimalJsLike | number | string | null
+    laceFinalCost?: Decimal | DecimalJsLike | number | string | null
+    pockettingFabricAutoBgt?: Decimal | DecimalJsLike | number | string | null
+    pockettingFabricRoughV2?: Decimal | DecimalJsLike | number | string | null
+    pockettingFabricVdrCost?: Decimal | DecimalJsLike | number | string | null
+    pockettingFabricFinalCost?: Decimal | DecimalJsLike | number | string | null
+    pockettingReadymadeAutoBgt?: Decimal | DecimalJsLike | number | string | null
+    pockettingReadymadeRoughV2?: Decimal | DecimalJsLike | number | string | null
+    pockettingReadymadeVdrCost?: Decimal | DecimalJsLike | number | string | null
+    pockettingReadymadeFinalCost?: Decimal | DecimalJsLike | number | string | null
+    santaAutoBgt?: Decimal | DecimalJsLike | number | string | null
+    santaRoughV2?: Decimal | DecimalJsLike | number | string | null
+    santaVdrCost?: Decimal | DecimalJsLike | number | string | null
+    santaFinalCost?: Decimal | DecimalJsLike | number | string | null
+    stopperAutoBgt?: Decimal | DecimalJsLike | number | string | null
+    stopperRoughV2?: Decimal | DecimalJsLike | number | string | null
+    stopperVdrCost?: Decimal | DecimalJsLike | number | string | null
+    stopperFinalCost?: Decimal | DecimalJsLike | number | string | null
+    tagAutoBgt?: Decimal | DecimalJsLike | number | string | null
+    tagRoughV2?: Decimal | DecimalJsLike | number | string | null
+    tagVdrCost?: Decimal | DecimalJsLike | number | string | null
+    tagFinalCost?: Decimal | DecimalJsLike | number | string | null
+    tasselsAutoBgt?: Decimal | DecimalJsLike | number | string | null
+    tasselsRoughV2?: Decimal | DecimalJsLike | number | string | null
+    tasselsVdrCost?: Decimal | DecimalJsLike | number | string | null
+    tasselsFinalCost?: Decimal | DecimalJsLike | number | string | null
     printAutoBgt?: Decimal | DecimalJsLike | number | string | null
     printRoughV2?: Decimal | DecimalJsLike | number | string | null
     printVendorCost?: Decimal | DecimalJsLike | number | string | null
@@ -106133,6 +107134,62 @@ export namespace Prisma {
     otherRoughV2?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
     otherVdrCost?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
     otherFinalCost?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    adjusterAutoBgt?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    adjusterRoughV2?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    adjusterVdrCost?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    adjusterFinalCost?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    brotchAutoBgt?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    brotchRoughV2?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    brotchVdrCost?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    brotchFinalCost?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    buckleAutoBgt?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    buckleRoughV2?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    buckleVdrCost?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    buckleFinalCost?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    eyeletsAutoBgt?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    eyeletsRoughV2?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    eyeletsVdrCost?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    eyeletsFinalCost?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    hangingDRingAutoBgt?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    hangingDRingRoughV2?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    hangingDRingVdrCost?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    hangingDRingFinalCost?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    hookAutoBgt?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    hookRoughV2?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    hookVdrCost?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    hookFinalCost?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    labelAutoBgt?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    labelRoughV2?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    labelVdrCost?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    labelFinalCost?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    laceAutoBgt?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    laceRoughV2?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    laceVdrCost?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    laceFinalCost?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    pockettingFabricAutoBgt?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    pockettingFabricRoughV2?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    pockettingFabricVdrCost?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    pockettingFabricFinalCost?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    pockettingReadymadeAutoBgt?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    pockettingReadymadeRoughV2?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    pockettingReadymadeVdrCost?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    pockettingReadymadeFinalCost?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    santaAutoBgt?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    santaRoughV2?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    santaVdrCost?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    santaFinalCost?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    stopperAutoBgt?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    stopperRoughV2?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    stopperVdrCost?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    stopperFinalCost?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    tagAutoBgt?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    tagRoughV2?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    tagVdrCost?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    tagFinalCost?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    tasselsAutoBgt?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    tasselsRoughV2?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    tasselsVdrCost?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    tasselsFinalCost?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
     printAutoBgt?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
     printRoughV2?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
     printVendorCost?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
@@ -106362,6 +107419,62 @@ export namespace Prisma {
     otherRoughV2?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
     otherVdrCost?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
     otherFinalCost?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    adjusterAutoBgt?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    adjusterRoughV2?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    adjusterVdrCost?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    adjusterFinalCost?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    brotchAutoBgt?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    brotchRoughV2?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    brotchVdrCost?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    brotchFinalCost?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    buckleAutoBgt?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    buckleRoughV2?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    buckleVdrCost?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    buckleFinalCost?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    eyeletsAutoBgt?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    eyeletsRoughV2?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    eyeletsVdrCost?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    eyeletsFinalCost?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    hangingDRingAutoBgt?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    hangingDRingRoughV2?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    hangingDRingVdrCost?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    hangingDRingFinalCost?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    hookAutoBgt?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    hookRoughV2?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    hookVdrCost?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    hookFinalCost?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    labelAutoBgt?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    labelRoughV2?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    labelVdrCost?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    labelFinalCost?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    laceAutoBgt?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    laceRoughV2?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    laceVdrCost?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    laceFinalCost?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    pockettingFabricAutoBgt?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    pockettingFabricRoughV2?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    pockettingFabricVdrCost?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    pockettingFabricFinalCost?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    pockettingReadymadeAutoBgt?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    pockettingReadymadeRoughV2?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    pockettingReadymadeVdrCost?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    pockettingReadymadeFinalCost?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    santaAutoBgt?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    santaRoughV2?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    santaVdrCost?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    santaFinalCost?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    stopperAutoBgt?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    stopperRoughV2?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    stopperVdrCost?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    stopperFinalCost?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    tagAutoBgt?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    tagRoughV2?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    tagVdrCost?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    tagFinalCost?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    tasselsAutoBgt?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    tasselsRoughV2?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    tasselsVdrCost?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    tasselsFinalCost?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
     printAutoBgt?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
     printRoughV2?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
     printVendorCost?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
@@ -106792,7 +107905,6 @@ export namespace Prisma {
     apiKeys?: ApiKeyCreateNestedManyWithoutUserInput
     costSummary?: CostSummaryCreateNestedOneWithoutUserInput
     extractionJobs?: ExtractionJobCreateNestedManyWithoutUserInput
-    verifications?: ExtractionResultCreateNestedManyWithoutVerifierInput
     approvedItems?: ExtractionResultFlatCreateNestedManyWithoutApproverInput
   }
 
@@ -106812,7 +107924,6 @@ export namespace Prisma {
     apiKeys?: ApiKeyUncheckedCreateNestedManyWithoutUserInput
     costSummary?: CostSummaryUncheckedCreateNestedOneWithoutUserInput
     extractionJobs?: ExtractionJobUncheckedCreateNestedManyWithoutUserInput
-    verifications?: ExtractionResultUncheckedCreateNestedManyWithoutVerifierInput
     approvedItems?: ExtractionResultFlatUncheckedCreateNestedManyWithoutApproverInput
   }
 
@@ -106831,7 +107942,6 @@ export namespace Prisma {
     apiKeys?: ApiKeyUpdateManyWithoutUserNestedInput
     costSummary?: CostSummaryUpdateOneWithoutUserNestedInput
     extractionJobs?: ExtractionJobUpdateManyWithoutUserNestedInput
-    verifications?: ExtractionResultUpdateManyWithoutVerifierNestedInput
     approvedItems?: ExtractionResultFlatUpdateManyWithoutApproverNestedInput
   }
 
@@ -106851,7 +107961,6 @@ export namespace Prisma {
     apiKeys?: ApiKeyUncheckedUpdateManyWithoutUserNestedInput
     costSummary?: CostSummaryUncheckedUpdateOneWithoutUserNestedInput
     extractionJobs?: ExtractionJobUncheckedUpdateManyWithoutUserNestedInput
-    verifications?: ExtractionResultUncheckedUpdateManyWithoutVerifierNestedInput
     approvedItems?: ExtractionResultFlatUncheckedUpdateManyWithoutApproverNestedInput
   }
 
@@ -115217,6 +116326,80 @@ export namespace Prisma {
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
   }
 
+  export type GmSizeMasterCreateInput = {
+    seg?: string | null
+    div?: string | null
+    subDiv?: string | null
+    majCat: string
+    status?: string | null
+    size: string
+    createdAt?: Date | string
+  }
+
+  export type GmSizeMasterUncheckedCreateInput = {
+    id?: number
+    seg?: string | null
+    div?: string | null
+    subDiv?: string | null
+    majCat: string
+    status?: string | null
+    size: string
+    createdAt?: Date | string
+  }
+
+  export type GmSizeMasterUpdateInput = {
+    seg?: NullableStringFieldUpdateOperationsInput | string | null
+    div?: NullableStringFieldUpdateOperationsInput | string | null
+    subDiv?: NullableStringFieldUpdateOperationsInput | string | null
+    majCat?: StringFieldUpdateOperationsInput | string
+    status?: NullableStringFieldUpdateOperationsInput | string | null
+    size?: StringFieldUpdateOperationsInput | string
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+  }
+
+  export type GmSizeMasterUncheckedUpdateInput = {
+    id?: IntFieldUpdateOperationsInput | number
+    seg?: NullableStringFieldUpdateOperationsInput | string | null
+    div?: NullableStringFieldUpdateOperationsInput | string | null
+    subDiv?: NullableStringFieldUpdateOperationsInput | string | null
+    majCat?: StringFieldUpdateOperationsInput | string
+    status?: NullableStringFieldUpdateOperationsInput | string | null
+    size?: StringFieldUpdateOperationsInput | string
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+  }
+
+  export type GmSizeMasterCreateManyInput = {
+    id?: number
+    seg?: string | null
+    div?: string | null
+    subDiv?: string | null
+    majCat: string
+    status?: string | null
+    size: string
+    createdAt?: Date | string
+  }
+
+  export type GmSizeMasterUpdateManyMutationInput = {
+    seg?: NullableStringFieldUpdateOperationsInput | string | null
+    div?: NullableStringFieldUpdateOperationsInput | string | null
+    subDiv?: NullableStringFieldUpdateOperationsInput | string | null
+    majCat?: StringFieldUpdateOperationsInput | string
+    status?: NullableStringFieldUpdateOperationsInput | string | null
+    size?: StringFieldUpdateOperationsInput | string
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+  }
+
+  export type GmSizeMasterUncheckedUpdateManyInput = {
+    id?: IntFieldUpdateOperationsInput | number
+    seg?: NullableStringFieldUpdateOperationsInput | string | null
+    div?: NullableStringFieldUpdateOperationsInput | string | null
+    subDiv?: NullableStringFieldUpdateOperationsInput | string | null
+    majCat?: StringFieldUpdateOperationsInput | string
+    status?: NullableStringFieldUpdateOperationsInput | string | null
+    size?: StringFieldUpdateOperationsInput | string
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+  }
+
   export type IntFilter<$PrismaModel = never> = {
     equals?: number | IntFieldRefInput<$PrismaModel>
     in?: number[] | ListIntFieldRefInput<$PrismaModel>
@@ -115648,17 +116831,7 @@ export namespace Prisma {
     none?: AttributeAllowedValueWhereInput
   }
 
-  export type ExtractionResultListRelationFilter = {
-    every?: ExtractionResultWhereInput
-    some?: ExtractionResultWhereInput
-    none?: ExtractionResultWhereInput
-  }
-
   export type AttributeAllowedValueOrderByRelationAggregateInput = {
-    _count?: SortOrder
-  }
-
-  export type ExtractionResultOrderByRelationAggregateInput = {
     _count?: SortOrder
   }
 
@@ -116161,82 +117334,6 @@ export namespace Prisma {
     _max?: NestedDateTimeNullableFilter<$PrismaModel>
   }
 
-  export type ExtractionJobScalarRelationFilter = {
-    is?: ExtractionJobWhereInput
-    isNot?: ExtractionJobWhereInput
-  }
-
-  export type AttributeAllowedValueNullableScalarRelationFilter = {
-    is?: AttributeAllowedValueWhereInput | null
-    isNot?: AttributeAllowedValueWhereInput | null
-  }
-
-  export type ExtractionResultOrderByRelevanceInput = {
-    fields: ExtractionResultOrderByRelevanceFieldEnum | ExtractionResultOrderByRelevanceFieldEnum[]
-    sort: SortOrder
-    search: string
-  }
-
-  export type ExtractionResultCountOrderByAggregateInput = {
-    id?: SortOrder
-    jobId?: SortOrder
-    attributeId?: SortOrder
-    rawValue?: SortOrder
-    matchedValueId?: SortOrder
-    finalValue?: SortOrder
-    confidence?: SortOrder
-    extractionMethod?: SortOrder
-    alternativeValues?: SortOrder
-    isVerified?: SortOrder
-    verifiedBy?: SortOrder
-    verifiedAt?: SortOrder
-    createdAt?: SortOrder
-  }
-
-  export type ExtractionResultAvgOrderByAggregateInput = {
-    attributeId?: SortOrder
-    matchedValueId?: SortOrder
-    confidence?: SortOrder
-    verifiedBy?: SortOrder
-  }
-
-  export type ExtractionResultMaxOrderByAggregateInput = {
-    id?: SortOrder
-    jobId?: SortOrder
-    attributeId?: SortOrder
-    rawValue?: SortOrder
-    matchedValueId?: SortOrder
-    finalValue?: SortOrder
-    confidence?: SortOrder
-    extractionMethod?: SortOrder
-    isVerified?: SortOrder
-    verifiedBy?: SortOrder
-    verifiedAt?: SortOrder
-    createdAt?: SortOrder
-  }
-
-  export type ExtractionResultMinOrderByAggregateInput = {
-    id?: SortOrder
-    jobId?: SortOrder
-    attributeId?: SortOrder
-    rawValue?: SortOrder
-    matchedValueId?: SortOrder
-    finalValue?: SortOrder
-    confidence?: SortOrder
-    extractionMethod?: SortOrder
-    isVerified?: SortOrder
-    verifiedBy?: SortOrder
-    verifiedAt?: SortOrder
-    createdAt?: SortOrder
-  }
-
-  export type ExtractionResultSumOrderByAggregateInput = {
-    attributeId?: SortOrder
-    matchedValueId?: SortOrder
-    confidence?: SortOrder
-    verifiedBy?: SortOrder
-  }
-
   export type EnumApprovalStatusFilter<$PrismaModel = never> = {
     equals?: $Enums.ApprovalStatus | EnumApprovalStatusFieldRefInput<$PrismaModel>
     in?: $Enums.ApprovalStatus[] | ListEnumApprovalStatusFieldRefInput<$PrismaModel>
@@ -116463,6 +117560,62 @@ export namespace Prisma {
     otherRoughV2?: SortOrder
     otherVdrCost?: SortOrder
     otherFinalCost?: SortOrder
+    adjusterAutoBgt?: SortOrder
+    adjusterRoughV2?: SortOrder
+    adjusterVdrCost?: SortOrder
+    adjusterFinalCost?: SortOrder
+    brotchAutoBgt?: SortOrder
+    brotchRoughV2?: SortOrder
+    brotchVdrCost?: SortOrder
+    brotchFinalCost?: SortOrder
+    buckleAutoBgt?: SortOrder
+    buckleRoughV2?: SortOrder
+    buckleVdrCost?: SortOrder
+    buckleFinalCost?: SortOrder
+    eyeletsAutoBgt?: SortOrder
+    eyeletsRoughV2?: SortOrder
+    eyeletsVdrCost?: SortOrder
+    eyeletsFinalCost?: SortOrder
+    hangingDRingAutoBgt?: SortOrder
+    hangingDRingRoughV2?: SortOrder
+    hangingDRingVdrCost?: SortOrder
+    hangingDRingFinalCost?: SortOrder
+    hookAutoBgt?: SortOrder
+    hookRoughV2?: SortOrder
+    hookVdrCost?: SortOrder
+    hookFinalCost?: SortOrder
+    labelAutoBgt?: SortOrder
+    labelRoughV2?: SortOrder
+    labelVdrCost?: SortOrder
+    labelFinalCost?: SortOrder
+    laceAutoBgt?: SortOrder
+    laceRoughV2?: SortOrder
+    laceVdrCost?: SortOrder
+    laceFinalCost?: SortOrder
+    pockettingFabricAutoBgt?: SortOrder
+    pockettingFabricRoughV2?: SortOrder
+    pockettingFabricVdrCost?: SortOrder
+    pockettingFabricFinalCost?: SortOrder
+    pockettingReadymadeAutoBgt?: SortOrder
+    pockettingReadymadeRoughV2?: SortOrder
+    pockettingReadymadeVdrCost?: SortOrder
+    pockettingReadymadeFinalCost?: SortOrder
+    santaAutoBgt?: SortOrder
+    santaRoughV2?: SortOrder
+    santaVdrCost?: SortOrder
+    santaFinalCost?: SortOrder
+    stopperAutoBgt?: SortOrder
+    stopperRoughV2?: SortOrder
+    stopperVdrCost?: SortOrder
+    stopperFinalCost?: SortOrder
+    tagAutoBgt?: SortOrder
+    tagRoughV2?: SortOrder
+    tagVdrCost?: SortOrder
+    tagFinalCost?: SortOrder
+    tasselsAutoBgt?: SortOrder
+    tasselsRoughV2?: SortOrder
+    tasselsVdrCost?: SortOrder
+    tasselsFinalCost?: SortOrder
     printAutoBgt?: SortOrder
     printRoughV2?: SortOrder
     printVendorCost?: SortOrder
@@ -116608,6 +117761,62 @@ export namespace Prisma {
     otherRoughV2?: SortOrder
     otherVdrCost?: SortOrder
     otherFinalCost?: SortOrder
+    adjusterAutoBgt?: SortOrder
+    adjusterRoughV2?: SortOrder
+    adjusterVdrCost?: SortOrder
+    adjusterFinalCost?: SortOrder
+    brotchAutoBgt?: SortOrder
+    brotchRoughV2?: SortOrder
+    brotchVdrCost?: SortOrder
+    brotchFinalCost?: SortOrder
+    buckleAutoBgt?: SortOrder
+    buckleRoughV2?: SortOrder
+    buckleVdrCost?: SortOrder
+    buckleFinalCost?: SortOrder
+    eyeletsAutoBgt?: SortOrder
+    eyeletsRoughV2?: SortOrder
+    eyeletsVdrCost?: SortOrder
+    eyeletsFinalCost?: SortOrder
+    hangingDRingAutoBgt?: SortOrder
+    hangingDRingRoughV2?: SortOrder
+    hangingDRingVdrCost?: SortOrder
+    hangingDRingFinalCost?: SortOrder
+    hookAutoBgt?: SortOrder
+    hookRoughV2?: SortOrder
+    hookVdrCost?: SortOrder
+    hookFinalCost?: SortOrder
+    labelAutoBgt?: SortOrder
+    labelRoughV2?: SortOrder
+    labelVdrCost?: SortOrder
+    labelFinalCost?: SortOrder
+    laceAutoBgt?: SortOrder
+    laceRoughV2?: SortOrder
+    laceVdrCost?: SortOrder
+    laceFinalCost?: SortOrder
+    pockettingFabricAutoBgt?: SortOrder
+    pockettingFabricRoughV2?: SortOrder
+    pockettingFabricVdrCost?: SortOrder
+    pockettingFabricFinalCost?: SortOrder
+    pockettingReadymadeAutoBgt?: SortOrder
+    pockettingReadymadeRoughV2?: SortOrder
+    pockettingReadymadeVdrCost?: SortOrder
+    pockettingReadymadeFinalCost?: SortOrder
+    santaAutoBgt?: SortOrder
+    santaRoughV2?: SortOrder
+    santaVdrCost?: SortOrder
+    santaFinalCost?: SortOrder
+    stopperAutoBgt?: SortOrder
+    stopperRoughV2?: SortOrder
+    stopperVdrCost?: SortOrder
+    stopperFinalCost?: SortOrder
+    tagAutoBgt?: SortOrder
+    tagRoughV2?: SortOrder
+    tagVdrCost?: SortOrder
+    tagFinalCost?: SortOrder
+    tasselsAutoBgt?: SortOrder
+    tasselsRoughV2?: SortOrder
+    tasselsVdrCost?: SortOrder
+    tasselsFinalCost?: SortOrder
     printAutoBgt?: SortOrder
     printRoughV2?: SortOrder
     printVendorCost?: SortOrder
@@ -116798,6 +118007,62 @@ export namespace Prisma {
     otherRoughV2?: SortOrder
     otherVdrCost?: SortOrder
     otherFinalCost?: SortOrder
+    adjusterAutoBgt?: SortOrder
+    adjusterRoughV2?: SortOrder
+    adjusterVdrCost?: SortOrder
+    adjusterFinalCost?: SortOrder
+    brotchAutoBgt?: SortOrder
+    brotchRoughV2?: SortOrder
+    brotchVdrCost?: SortOrder
+    brotchFinalCost?: SortOrder
+    buckleAutoBgt?: SortOrder
+    buckleRoughV2?: SortOrder
+    buckleVdrCost?: SortOrder
+    buckleFinalCost?: SortOrder
+    eyeletsAutoBgt?: SortOrder
+    eyeletsRoughV2?: SortOrder
+    eyeletsVdrCost?: SortOrder
+    eyeletsFinalCost?: SortOrder
+    hangingDRingAutoBgt?: SortOrder
+    hangingDRingRoughV2?: SortOrder
+    hangingDRingVdrCost?: SortOrder
+    hangingDRingFinalCost?: SortOrder
+    hookAutoBgt?: SortOrder
+    hookRoughV2?: SortOrder
+    hookVdrCost?: SortOrder
+    hookFinalCost?: SortOrder
+    labelAutoBgt?: SortOrder
+    labelRoughV2?: SortOrder
+    labelVdrCost?: SortOrder
+    labelFinalCost?: SortOrder
+    laceAutoBgt?: SortOrder
+    laceRoughV2?: SortOrder
+    laceVdrCost?: SortOrder
+    laceFinalCost?: SortOrder
+    pockettingFabricAutoBgt?: SortOrder
+    pockettingFabricRoughV2?: SortOrder
+    pockettingFabricVdrCost?: SortOrder
+    pockettingFabricFinalCost?: SortOrder
+    pockettingReadymadeAutoBgt?: SortOrder
+    pockettingReadymadeRoughV2?: SortOrder
+    pockettingReadymadeVdrCost?: SortOrder
+    pockettingReadymadeFinalCost?: SortOrder
+    santaAutoBgt?: SortOrder
+    santaRoughV2?: SortOrder
+    santaVdrCost?: SortOrder
+    santaFinalCost?: SortOrder
+    stopperAutoBgt?: SortOrder
+    stopperRoughV2?: SortOrder
+    stopperVdrCost?: SortOrder
+    stopperFinalCost?: SortOrder
+    tagAutoBgt?: SortOrder
+    tagRoughV2?: SortOrder
+    tagVdrCost?: SortOrder
+    tagFinalCost?: SortOrder
+    tasselsAutoBgt?: SortOrder
+    tasselsRoughV2?: SortOrder
+    tasselsVdrCost?: SortOrder
+    tasselsFinalCost?: SortOrder
     printAutoBgt?: SortOrder
     printRoughV2?: SortOrder
     printVendorCost?: SortOrder
@@ -117028,6 +118293,62 @@ export namespace Prisma {
     otherRoughV2?: SortOrder
     otherVdrCost?: SortOrder
     otherFinalCost?: SortOrder
+    adjusterAutoBgt?: SortOrder
+    adjusterRoughV2?: SortOrder
+    adjusterVdrCost?: SortOrder
+    adjusterFinalCost?: SortOrder
+    brotchAutoBgt?: SortOrder
+    brotchRoughV2?: SortOrder
+    brotchVdrCost?: SortOrder
+    brotchFinalCost?: SortOrder
+    buckleAutoBgt?: SortOrder
+    buckleRoughV2?: SortOrder
+    buckleVdrCost?: SortOrder
+    buckleFinalCost?: SortOrder
+    eyeletsAutoBgt?: SortOrder
+    eyeletsRoughV2?: SortOrder
+    eyeletsVdrCost?: SortOrder
+    eyeletsFinalCost?: SortOrder
+    hangingDRingAutoBgt?: SortOrder
+    hangingDRingRoughV2?: SortOrder
+    hangingDRingVdrCost?: SortOrder
+    hangingDRingFinalCost?: SortOrder
+    hookAutoBgt?: SortOrder
+    hookRoughV2?: SortOrder
+    hookVdrCost?: SortOrder
+    hookFinalCost?: SortOrder
+    labelAutoBgt?: SortOrder
+    labelRoughV2?: SortOrder
+    labelVdrCost?: SortOrder
+    labelFinalCost?: SortOrder
+    laceAutoBgt?: SortOrder
+    laceRoughV2?: SortOrder
+    laceVdrCost?: SortOrder
+    laceFinalCost?: SortOrder
+    pockettingFabricAutoBgt?: SortOrder
+    pockettingFabricRoughV2?: SortOrder
+    pockettingFabricVdrCost?: SortOrder
+    pockettingFabricFinalCost?: SortOrder
+    pockettingReadymadeAutoBgt?: SortOrder
+    pockettingReadymadeRoughV2?: SortOrder
+    pockettingReadymadeVdrCost?: SortOrder
+    pockettingReadymadeFinalCost?: SortOrder
+    santaAutoBgt?: SortOrder
+    santaRoughV2?: SortOrder
+    santaVdrCost?: SortOrder
+    santaFinalCost?: SortOrder
+    stopperAutoBgt?: SortOrder
+    stopperRoughV2?: SortOrder
+    stopperVdrCost?: SortOrder
+    stopperFinalCost?: SortOrder
+    tagAutoBgt?: SortOrder
+    tagRoughV2?: SortOrder
+    tagVdrCost?: SortOrder
+    tagFinalCost?: SortOrder
+    tasselsAutoBgt?: SortOrder
+    tasselsRoughV2?: SortOrder
+    tasselsVdrCost?: SortOrder
+    tasselsFinalCost?: SortOrder
     printAutoBgt?: SortOrder
     printRoughV2?: SortOrder
     printVendorCost?: SortOrder
@@ -117172,6 +118493,62 @@ export namespace Prisma {
     otherRoughV2?: SortOrder
     otherVdrCost?: SortOrder
     otherFinalCost?: SortOrder
+    adjusterAutoBgt?: SortOrder
+    adjusterRoughV2?: SortOrder
+    adjusterVdrCost?: SortOrder
+    adjusterFinalCost?: SortOrder
+    brotchAutoBgt?: SortOrder
+    brotchRoughV2?: SortOrder
+    brotchVdrCost?: SortOrder
+    brotchFinalCost?: SortOrder
+    buckleAutoBgt?: SortOrder
+    buckleRoughV2?: SortOrder
+    buckleVdrCost?: SortOrder
+    buckleFinalCost?: SortOrder
+    eyeletsAutoBgt?: SortOrder
+    eyeletsRoughV2?: SortOrder
+    eyeletsVdrCost?: SortOrder
+    eyeletsFinalCost?: SortOrder
+    hangingDRingAutoBgt?: SortOrder
+    hangingDRingRoughV2?: SortOrder
+    hangingDRingVdrCost?: SortOrder
+    hangingDRingFinalCost?: SortOrder
+    hookAutoBgt?: SortOrder
+    hookRoughV2?: SortOrder
+    hookVdrCost?: SortOrder
+    hookFinalCost?: SortOrder
+    labelAutoBgt?: SortOrder
+    labelRoughV2?: SortOrder
+    labelVdrCost?: SortOrder
+    labelFinalCost?: SortOrder
+    laceAutoBgt?: SortOrder
+    laceRoughV2?: SortOrder
+    laceVdrCost?: SortOrder
+    laceFinalCost?: SortOrder
+    pockettingFabricAutoBgt?: SortOrder
+    pockettingFabricRoughV2?: SortOrder
+    pockettingFabricVdrCost?: SortOrder
+    pockettingFabricFinalCost?: SortOrder
+    pockettingReadymadeAutoBgt?: SortOrder
+    pockettingReadymadeRoughV2?: SortOrder
+    pockettingReadymadeVdrCost?: SortOrder
+    pockettingReadymadeFinalCost?: SortOrder
+    santaAutoBgt?: SortOrder
+    santaRoughV2?: SortOrder
+    santaVdrCost?: SortOrder
+    santaFinalCost?: SortOrder
+    stopperAutoBgt?: SortOrder
+    stopperRoughV2?: SortOrder
+    stopperVdrCost?: SortOrder
+    stopperFinalCost?: SortOrder
+    tagAutoBgt?: SortOrder
+    tagRoughV2?: SortOrder
+    tagVdrCost?: SortOrder
+    tagFinalCost?: SortOrder
+    tasselsAutoBgt?: SortOrder
+    tasselsRoughV2?: SortOrder
+    tasselsVdrCost?: SortOrder
+    tasselsFinalCost?: SortOrder
     printAutoBgt?: SortOrder
     printRoughV2?: SortOrder
     printVendorCost?: SortOrder
@@ -122556,6 +123933,53 @@ export namespace Prisma {
     width96?: SortOrder
   }
 
+  export type GmSizeMasterOrderByRelevanceInput = {
+    fields: GmSizeMasterOrderByRelevanceFieldEnum | GmSizeMasterOrderByRelevanceFieldEnum[]
+    sort: SortOrder
+    search: string
+  }
+
+  export type GmSizeMasterCountOrderByAggregateInput = {
+    id?: SortOrder
+    seg?: SortOrder
+    div?: SortOrder
+    subDiv?: SortOrder
+    majCat?: SortOrder
+    status?: SortOrder
+    size?: SortOrder
+    createdAt?: SortOrder
+  }
+
+  export type GmSizeMasterAvgOrderByAggregateInput = {
+    id?: SortOrder
+  }
+
+  export type GmSizeMasterMaxOrderByAggregateInput = {
+    id?: SortOrder
+    seg?: SortOrder
+    div?: SortOrder
+    subDiv?: SortOrder
+    majCat?: SortOrder
+    status?: SortOrder
+    size?: SortOrder
+    createdAt?: SortOrder
+  }
+
+  export type GmSizeMasterMinOrderByAggregateInput = {
+    id?: SortOrder
+    seg?: SortOrder
+    div?: SortOrder
+    subDiv?: SortOrder
+    majCat?: SortOrder
+    status?: SortOrder
+    size?: SortOrder
+    createdAt?: SortOrder
+  }
+
+  export type GmSizeMasterSumOrderByAggregateInput = {
+    id?: SortOrder
+  }
+
   export type SubDepartmentCreateNestedManyWithoutDepartmentInput = {
     create?: XOR<SubDepartmentCreateWithoutDepartmentInput, SubDepartmentUncheckedCreateWithoutDepartmentInput> | SubDepartmentCreateWithoutDepartmentInput[] | SubDepartmentUncheckedCreateWithoutDepartmentInput[]
     connectOrCreate?: SubDepartmentCreateOrConnectWithoutDepartmentInput | SubDepartmentCreateOrConnectWithoutDepartmentInput[]
@@ -122794,13 +124218,6 @@ export namespace Prisma {
     connect?: CategoryAttributeWhereUniqueInput | CategoryAttributeWhereUniqueInput[]
   }
 
-  export type ExtractionResultCreateNestedManyWithoutAttributeInput = {
-    create?: XOR<ExtractionResultCreateWithoutAttributeInput, ExtractionResultUncheckedCreateWithoutAttributeInput> | ExtractionResultCreateWithoutAttributeInput[] | ExtractionResultUncheckedCreateWithoutAttributeInput[]
-    connectOrCreate?: ExtractionResultCreateOrConnectWithoutAttributeInput | ExtractionResultCreateOrConnectWithoutAttributeInput[]
-    createMany?: ExtractionResultCreateManyAttributeInputEnvelope
-    connect?: ExtractionResultWhereUniqueInput | ExtractionResultWhereUniqueInput[]
-  }
-
   export type AttributeAllowedValueUncheckedCreateNestedManyWithoutAttributeInput = {
     create?: XOR<AttributeAllowedValueCreateWithoutAttributeInput, AttributeAllowedValueUncheckedCreateWithoutAttributeInput> | AttributeAllowedValueCreateWithoutAttributeInput[] | AttributeAllowedValueUncheckedCreateWithoutAttributeInput[]
     connectOrCreate?: AttributeAllowedValueCreateOrConnectWithoutAttributeInput | AttributeAllowedValueCreateOrConnectWithoutAttributeInput[]
@@ -122813,13 +124230,6 @@ export namespace Prisma {
     connectOrCreate?: CategoryAttributeCreateOrConnectWithoutAttributeInput | CategoryAttributeCreateOrConnectWithoutAttributeInput[]
     createMany?: CategoryAttributeCreateManyAttributeInputEnvelope
     connect?: CategoryAttributeWhereUniqueInput | CategoryAttributeWhereUniqueInput[]
-  }
-
-  export type ExtractionResultUncheckedCreateNestedManyWithoutAttributeInput = {
-    create?: XOR<ExtractionResultCreateWithoutAttributeInput, ExtractionResultUncheckedCreateWithoutAttributeInput> | ExtractionResultCreateWithoutAttributeInput[] | ExtractionResultUncheckedCreateWithoutAttributeInput[]
-    connectOrCreate?: ExtractionResultCreateOrConnectWithoutAttributeInput | ExtractionResultCreateOrConnectWithoutAttributeInput[]
-    createMany?: ExtractionResultCreateManyAttributeInputEnvelope
-    connect?: ExtractionResultWhereUniqueInput | ExtractionResultWhereUniqueInput[]
   }
 
   export type EnumAttributeTypeFieldUpdateOperationsInput = {
@@ -122862,20 +124272,6 @@ export namespace Prisma {
     deleteMany?: CategoryAttributeScalarWhereInput | CategoryAttributeScalarWhereInput[]
   }
 
-  export type ExtractionResultUpdateManyWithoutAttributeNestedInput = {
-    create?: XOR<ExtractionResultCreateWithoutAttributeInput, ExtractionResultUncheckedCreateWithoutAttributeInput> | ExtractionResultCreateWithoutAttributeInput[] | ExtractionResultUncheckedCreateWithoutAttributeInput[]
-    connectOrCreate?: ExtractionResultCreateOrConnectWithoutAttributeInput | ExtractionResultCreateOrConnectWithoutAttributeInput[]
-    upsert?: ExtractionResultUpsertWithWhereUniqueWithoutAttributeInput | ExtractionResultUpsertWithWhereUniqueWithoutAttributeInput[]
-    createMany?: ExtractionResultCreateManyAttributeInputEnvelope
-    set?: ExtractionResultWhereUniqueInput | ExtractionResultWhereUniqueInput[]
-    disconnect?: ExtractionResultWhereUniqueInput | ExtractionResultWhereUniqueInput[]
-    delete?: ExtractionResultWhereUniqueInput | ExtractionResultWhereUniqueInput[]
-    connect?: ExtractionResultWhereUniqueInput | ExtractionResultWhereUniqueInput[]
-    update?: ExtractionResultUpdateWithWhereUniqueWithoutAttributeInput | ExtractionResultUpdateWithWhereUniqueWithoutAttributeInput[]
-    updateMany?: ExtractionResultUpdateManyWithWhereWithoutAttributeInput | ExtractionResultUpdateManyWithWhereWithoutAttributeInput[]
-    deleteMany?: ExtractionResultScalarWhereInput | ExtractionResultScalarWhereInput[]
-  }
-
   export type AttributeAllowedValueUncheckedUpdateManyWithoutAttributeNestedInput = {
     create?: XOR<AttributeAllowedValueCreateWithoutAttributeInput, AttributeAllowedValueUncheckedCreateWithoutAttributeInput> | AttributeAllowedValueCreateWithoutAttributeInput[] | AttributeAllowedValueUncheckedCreateWithoutAttributeInput[]
     connectOrCreate?: AttributeAllowedValueCreateOrConnectWithoutAttributeInput | AttributeAllowedValueCreateOrConnectWithoutAttributeInput[]
@@ -122904,20 +124300,6 @@ export namespace Prisma {
     deleteMany?: CategoryAttributeScalarWhereInput | CategoryAttributeScalarWhereInput[]
   }
 
-  export type ExtractionResultUncheckedUpdateManyWithoutAttributeNestedInput = {
-    create?: XOR<ExtractionResultCreateWithoutAttributeInput, ExtractionResultUncheckedCreateWithoutAttributeInput> | ExtractionResultCreateWithoutAttributeInput[] | ExtractionResultUncheckedCreateWithoutAttributeInput[]
-    connectOrCreate?: ExtractionResultCreateOrConnectWithoutAttributeInput | ExtractionResultCreateOrConnectWithoutAttributeInput[]
-    upsert?: ExtractionResultUpsertWithWhereUniqueWithoutAttributeInput | ExtractionResultUpsertWithWhereUniqueWithoutAttributeInput[]
-    createMany?: ExtractionResultCreateManyAttributeInputEnvelope
-    set?: ExtractionResultWhereUniqueInput | ExtractionResultWhereUniqueInput[]
-    disconnect?: ExtractionResultWhereUniqueInput | ExtractionResultWhereUniqueInput[]
-    delete?: ExtractionResultWhereUniqueInput | ExtractionResultWhereUniqueInput[]
-    connect?: ExtractionResultWhereUniqueInput | ExtractionResultWhereUniqueInput[]
-    update?: ExtractionResultUpdateWithWhereUniqueWithoutAttributeInput | ExtractionResultUpdateWithWhereUniqueWithoutAttributeInput[]
-    updateMany?: ExtractionResultUpdateManyWithWhereWithoutAttributeInput | ExtractionResultUpdateManyWithWhereWithoutAttributeInput[]
-    deleteMany?: ExtractionResultScalarWhereInput | ExtractionResultScalarWhereInput[]
-  }
-
   export type AttributeAllowedValueCreatealiasesInput = {
     set: string[]
   }
@@ -122926,20 +124308,6 @@ export namespace Prisma {
     create?: XOR<MasterAttributeCreateWithoutAllowedValuesInput, MasterAttributeUncheckedCreateWithoutAllowedValuesInput>
     connectOrCreate?: MasterAttributeCreateOrConnectWithoutAllowedValuesInput
     connect?: MasterAttributeWhereUniqueInput
-  }
-
-  export type ExtractionResultCreateNestedManyWithoutMatchedValueInput = {
-    create?: XOR<ExtractionResultCreateWithoutMatchedValueInput, ExtractionResultUncheckedCreateWithoutMatchedValueInput> | ExtractionResultCreateWithoutMatchedValueInput[] | ExtractionResultUncheckedCreateWithoutMatchedValueInput[]
-    connectOrCreate?: ExtractionResultCreateOrConnectWithoutMatchedValueInput | ExtractionResultCreateOrConnectWithoutMatchedValueInput[]
-    createMany?: ExtractionResultCreateManyMatchedValueInputEnvelope
-    connect?: ExtractionResultWhereUniqueInput | ExtractionResultWhereUniqueInput[]
-  }
-
-  export type ExtractionResultUncheckedCreateNestedManyWithoutMatchedValueInput = {
-    create?: XOR<ExtractionResultCreateWithoutMatchedValueInput, ExtractionResultUncheckedCreateWithoutMatchedValueInput> | ExtractionResultCreateWithoutMatchedValueInput[] | ExtractionResultUncheckedCreateWithoutMatchedValueInput[]
-    connectOrCreate?: ExtractionResultCreateOrConnectWithoutMatchedValueInput | ExtractionResultCreateOrConnectWithoutMatchedValueInput[]
-    createMany?: ExtractionResultCreateManyMatchedValueInputEnvelope
-    connect?: ExtractionResultWhereUniqueInput | ExtractionResultWhereUniqueInput[]
   }
 
   export type AttributeAllowedValueUpdatealiasesInput = {
@@ -122953,34 +124321,6 @@ export namespace Prisma {
     upsert?: MasterAttributeUpsertWithoutAllowedValuesInput
     connect?: MasterAttributeWhereUniqueInput
     update?: XOR<XOR<MasterAttributeUpdateToOneWithWhereWithoutAllowedValuesInput, MasterAttributeUpdateWithoutAllowedValuesInput>, MasterAttributeUncheckedUpdateWithoutAllowedValuesInput>
-  }
-
-  export type ExtractionResultUpdateManyWithoutMatchedValueNestedInput = {
-    create?: XOR<ExtractionResultCreateWithoutMatchedValueInput, ExtractionResultUncheckedCreateWithoutMatchedValueInput> | ExtractionResultCreateWithoutMatchedValueInput[] | ExtractionResultUncheckedCreateWithoutMatchedValueInput[]
-    connectOrCreate?: ExtractionResultCreateOrConnectWithoutMatchedValueInput | ExtractionResultCreateOrConnectWithoutMatchedValueInput[]
-    upsert?: ExtractionResultUpsertWithWhereUniqueWithoutMatchedValueInput | ExtractionResultUpsertWithWhereUniqueWithoutMatchedValueInput[]
-    createMany?: ExtractionResultCreateManyMatchedValueInputEnvelope
-    set?: ExtractionResultWhereUniqueInput | ExtractionResultWhereUniqueInput[]
-    disconnect?: ExtractionResultWhereUniqueInput | ExtractionResultWhereUniqueInput[]
-    delete?: ExtractionResultWhereUniqueInput | ExtractionResultWhereUniqueInput[]
-    connect?: ExtractionResultWhereUniqueInput | ExtractionResultWhereUniqueInput[]
-    update?: ExtractionResultUpdateWithWhereUniqueWithoutMatchedValueInput | ExtractionResultUpdateWithWhereUniqueWithoutMatchedValueInput[]
-    updateMany?: ExtractionResultUpdateManyWithWhereWithoutMatchedValueInput | ExtractionResultUpdateManyWithWhereWithoutMatchedValueInput[]
-    deleteMany?: ExtractionResultScalarWhereInput | ExtractionResultScalarWhereInput[]
-  }
-
-  export type ExtractionResultUncheckedUpdateManyWithoutMatchedValueNestedInput = {
-    create?: XOR<ExtractionResultCreateWithoutMatchedValueInput, ExtractionResultUncheckedCreateWithoutMatchedValueInput> | ExtractionResultCreateWithoutMatchedValueInput[] | ExtractionResultUncheckedCreateWithoutMatchedValueInput[]
-    connectOrCreate?: ExtractionResultCreateOrConnectWithoutMatchedValueInput | ExtractionResultCreateOrConnectWithoutMatchedValueInput[]
-    upsert?: ExtractionResultUpsertWithWhereUniqueWithoutMatchedValueInput | ExtractionResultUpsertWithWhereUniqueWithoutMatchedValueInput[]
-    createMany?: ExtractionResultCreateManyMatchedValueInputEnvelope
-    set?: ExtractionResultWhereUniqueInput | ExtractionResultWhereUniqueInput[]
-    disconnect?: ExtractionResultWhereUniqueInput | ExtractionResultWhereUniqueInput[]
-    delete?: ExtractionResultWhereUniqueInput | ExtractionResultWhereUniqueInput[]
-    connect?: ExtractionResultWhereUniqueInput | ExtractionResultWhereUniqueInput[]
-    update?: ExtractionResultUpdateWithWhereUniqueWithoutMatchedValueInput | ExtractionResultUpdateWithWhereUniqueWithoutMatchedValueInput[]
-    updateMany?: ExtractionResultUpdateManyWithWhereWithoutMatchedValueInput | ExtractionResultUpdateManyWithWhereWithoutMatchedValueInput[]
-    deleteMany?: ExtractionResultScalarWhereInput | ExtractionResultScalarWhereInput[]
   }
 
   export type MasterAttributeCreateNestedOneWithoutCategoryAttributesInput = {
@@ -123023,24 +124363,10 @@ export namespace Prisma {
     connect?: UserWhereUniqueInput
   }
 
-  export type ExtractionResultCreateNestedManyWithoutJobInput = {
-    create?: XOR<ExtractionResultCreateWithoutJobInput, ExtractionResultUncheckedCreateWithoutJobInput> | ExtractionResultCreateWithoutJobInput[] | ExtractionResultUncheckedCreateWithoutJobInput[]
-    connectOrCreate?: ExtractionResultCreateOrConnectWithoutJobInput | ExtractionResultCreateOrConnectWithoutJobInput[]
-    createMany?: ExtractionResultCreateManyJobInputEnvelope
-    connect?: ExtractionResultWhereUniqueInput | ExtractionResultWhereUniqueInput[]
-  }
-
   export type ExtractionResultFlatCreateNestedOneWithoutJobInput = {
     create?: XOR<ExtractionResultFlatCreateWithoutJobInput, ExtractionResultFlatUncheckedCreateWithoutJobInput>
     connectOrCreate?: ExtractionResultFlatCreateOrConnectWithoutJobInput
     connect?: ExtractionResultFlatWhereUniqueInput
-  }
-
-  export type ExtractionResultUncheckedCreateNestedManyWithoutJobInput = {
-    create?: XOR<ExtractionResultCreateWithoutJobInput, ExtractionResultUncheckedCreateWithoutJobInput> | ExtractionResultCreateWithoutJobInput[] | ExtractionResultUncheckedCreateWithoutJobInput[]
-    connectOrCreate?: ExtractionResultCreateOrConnectWithoutJobInput | ExtractionResultCreateOrConnectWithoutJobInput[]
-    createMany?: ExtractionResultCreateManyJobInputEnvelope
-    connect?: ExtractionResultWhereUniqueInput | ExtractionResultWhereUniqueInput[]
   }
 
   export type ExtractionResultFlatUncheckedCreateNestedOneWithoutJobInput = {
@@ -123091,20 +124417,6 @@ export namespace Prisma {
     update?: XOR<XOR<UserUpdateToOneWithWhereWithoutExtractionJobsInput, UserUpdateWithoutExtractionJobsInput>, UserUncheckedUpdateWithoutExtractionJobsInput>
   }
 
-  export type ExtractionResultUpdateManyWithoutJobNestedInput = {
-    create?: XOR<ExtractionResultCreateWithoutJobInput, ExtractionResultUncheckedCreateWithoutJobInput> | ExtractionResultCreateWithoutJobInput[] | ExtractionResultUncheckedCreateWithoutJobInput[]
-    connectOrCreate?: ExtractionResultCreateOrConnectWithoutJobInput | ExtractionResultCreateOrConnectWithoutJobInput[]
-    upsert?: ExtractionResultUpsertWithWhereUniqueWithoutJobInput | ExtractionResultUpsertWithWhereUniqueWithoutJobInput[]
-    createMany?: ExtractionResultCreateManyJobInputEnvelope
-    set?: ExtractionResultWhereUniqueInput | ExtractionResultWhereUniqueInput[]
-    disconnect?: ExtractionResultWhereUniqueInput | ExtractionResultWhereUniqueInput[]
-    delete?: ExtractionResultWhereUniqueInput | ExtractionResultWhereUniqueInput[]
-    connect?: ExtractionResultWhereUniqueInput | ExtractionResultWhereUniqueInput[]
-    update?: ExtractionResultUpdateWithWhereUniqueWithoutJobInput | ExtractionResultUpdateWithWhereUniqueWithoutJobInput[]
-    updateMany?: ExtractionResultUpdateManyWithWhereWithoutJobInput | ExtractionResultUpdateManyWithWhereWithoutJobInput[]
-    deleteMany?: ExtractionResultScalarWhereInput | ExtractionResultScalarWhereInput[]
-  }
-
   export type ExtractionResultFlatUpdateOneWithoutJobNestedInput = {
     create?: XOR<ExtractionResultFlatCreateWithoutJobInput, ExtractionResultFlatUncheckedCreateWithoutJobInput>
     connectOrCreate?: ExtractionResultFlatCreateOrConnectWithoutJobInput
@@ -123115,20 +124427,6 @@ export namespace Prisma {
     update?: XOR<XOR<ExtractionResultFlatUpdateToOneWithWhereWithoutJobInput, ExtractionResultFlatUpdateWithoutJobInput>, ExtractionResultFlatUncheckedUpdateWithoutJobInput>
   }
 
-  export type ExtractionResultUncheckedUpdateManyWithoutJobNestedInput = {
-    create?: XOR<ExtractionResultCreateWithoutJobInput, ExtractionResultUncheckedCreateWithoutJobInput> | ExtractionResultCreateWithoutJobInput[] | ExtractionResultUncheckedCreateWithoutJobInput[]
-    connectOrCreate?: ExtractionResultCreateOrConnectWithoutJobInput | ExtractionResultCreateOrConnectWithoutJobInput[]
-    upsert?: ExtractionResultUpsertWithWhereUniqueWithoutJobInput | ExtractionResultUpsertWithWhereUniqueWithoutJobInput[]
-    createMany?: ExtractionResultCreateManyJobInputEnvelope
-    set?: ExtractionResultWhereUniqueInput | ExtractionResultWhereUniqueInput[]
-    disconnect?: ExtractionResultWhereUniqueInput | ExtractionResultWhereUniqueInput[]
-    delete?: ExtractionResultWhereUniqueInput | ExtractionResultWhereUniqueInput[]
-    connect?: ExtractionResultWhereUniqueInput | ExtractionResultWhereUniqueInput[]
-    update?: ExtractionResultUpdateWithWhereUniqueWithoutJobInput | ExtractionResultUpdateWithWhereUniqueWithoutJobInput[]
-    updateMany?: ExtractionResultUpdateManyWithWhereWithoutJobInput | ExtractionResultUpdateManyWithWhereWithoutJobInput[]
-    deleteMany?: ExtractionResultScalarWhereInput | ExtractionResultScalarWhereInput[]
-  }
-
   export type ExtractionResultFlatUncheckedUpdateOneWithoutJobNestedInput = {
     create?: XOR<ExtractionResultFlatCreateWithoutJobInput, ExtractionResultFlatUncheckedCreateWithoutJobInput>
     connectOrCreate?: ExtractionResultFlatCreateOrConnectWithoutJobInput
@@ -123137,66 +124435,6 @@ export namespace Prisma {
     delete?: ExtractionResultFlatWhereInput | boolean
     connect?: ExtractionResultFlatWhereUniqueInput
     update?: XOR<XOR<ExtractionResultFlatUpdateToOneWithWhereWithoutJobInput, ExtractionResultFlatUpdateWithoutJobInput>, ExtractionResultFlatUncheckedUpdateWithoutJobInput>
-  }
-
-  export type MasterAttributeCreateNestedOneWithoutExtractionsInput = {
-    create?: XOR<MasterAttributeCreateWithoutExtractionsInput, MasterAttributeUncheckedCreateWithoutExtractionsInput>
-    connectOrCreate?: MasterAttributeCreateOrConnectWithoutExtractionsInput
-    connect?: MasterAttributeWhereUniqueInput
-  }
-
-  export type ExtractionJobCreateNestedOneWithoutResultsInput = {
-    create?: XOR<ExtractionJobCreateWithoutResultsInput, ExtractionJobUncheckedCreateWithoutResultsInput>
-    connectOrCreate?: ExtractionJobCreateOrConnectWithoutResultsInput
-    connect?: ExtractionJobWhereUniqueInput
-  }
-
-  export type AttributeAllowedValueCreateNestedOneWithoutMatchedResultsInput = {
-    create?: XOR<AttributeAllowedValueCreateWithoutMatchedResultsInput, AttributeAllowedValueUncheckedCreateWithoutMatchedResultsInput>
-    connectOrCreate?: AttributeAllowedValueCreateOrConnectWithoutMatchedResultsInput
-    connect?: AttributeAllowedValueWhereUniqueInput
-  }
-
-  export type UserCreateNestedOneWithoutVerificationsInput = {
-    create?: XOR<UserCreateWithoutVerificationsInput, UserUncheckedCreateWithoutVerificationsInput>
-    connectOrCreate?: UserCreateOrConnectWithoutVerificationsInput
-    connect?: UserWhereUniqueInput
-  }
-
-  export type MasterAttributeUpdateOneRequiredWithoutExtractionsNestedInput = {
-    create?: XOR<MasterAttributeCreateWithoutExtractionsInput, MasterAttributeUncheckedCreateWithoutExtractionsInput>
-    connectOrCreate?: MasterAttributeCreateOrConnectWithoutExtractionsInput
-    upsert?: MasterAttributeUpsertWithoutExtractionsInput
-    connect?: MasterAttributeWhereUniqueInput
-    update?: XOR<XOR<MasterAttributeUpdateToOneWithWhereWithoutExtractionsInput, MasterAttributeUpdateWithoutExtractionsInput>, MasterAttributeUncheckedUpdateWithoutExtractionsInput>
-  }
-
-  export type ExtractionJobUpdateOneRequiredWithoutResultsNestedInput = {
-    create?: XOR<ExtractionJobCreateWithoutResultsInput, ExtractionJobUncheckedCreateWithoutResultsInput>
-    connectOrCreate?: ExtractionJobCreateOrConnectWithoutResultsInput
-    upsert?: ExtractionJobUpsertWithoutResultsInput
-    connect?: ExtractionJobWhereUniqueInput
-    update?: XOR<XOR<ExtractionJobUpdateToOneWithWhereWithoutResultsInput, ExtractionJobUpdateWithoutResultsInput>, ExtractionJobUncheckedUpdateWithoutResultsInput>
-  }
-
-  export type AttributeAllowedValueUpdateOneWithoutMatchedResultsNestedInput = {
-    create?: XOR<AttributeAllowedValueCreateWithoutMatchedResultsInput, AttributeAllowedValueUncheckedCreateWithoutMatchedResultsInput>
-    connectOrCreate?: AttributeAllowedValueCreateOrConnectWithoutMatchedResultsInput
-    upsert?: AttributeAllowedValueUpsertWithoutMatchedResultsInput
-    disconnect?: AttributeAllowedValueWhereInput | boolean
-    delete?: AttributeAllowedValueWhereInput | boolean
-    connect?: AttributeAllowedValueWhereUniqueInput
-    update?: XOR<XOR<AttributeAllowedValueUpdateToOneWithWhereWithoutMatchedResultsInput, AttributeAllowedValueUpdateWithoutMatchedResultsInput>, AttributeAllowedValueUncheckedUpdateWithoutMatchedResultsInput>
-  }
-
-  export type UserUpdateOneWithoutVerificationsNestedInput = {
-    create?: XOR<UserCreateWithoutVerificationsInput, UserUncheckedCreateWithoutVerificationsInput>
-    connectOrCreate?: UserCreateOrConnectWithoutVerificationsInput
-    upsert?: UserUpsertWithoutVerificationsInput
-    disconnect?: UserWhereInput | boolean
-    delete?: UserWhereInput | boolean
-    connect?: UserWhereUniqueInput
-    update?: XOR<XOR<UserUpdateToOneWithWhereWithoutVerificationsInput, UserUpdateWithoutVerificationsInput>, UserUncheckedUpdateWithoutVerificationsInput>
   }
 
   export type UserCreateNestedOneWithoutApprovedItemsInput = {
@@ -123367,13 +124605,6 @@ export namespace Prisma {
     connect?: ExtractionJobWhereUniqueInput | ExtractionJobWhereUniqueInput[]
   }
 
-  export type ExtractionResultCreateNestedManyWithoutVerifierInput = {
-    create?: XOR<ExtractionResultCreateWithoutVerifierInput, ExtractionResultUncheckedCreateWithoutVerifierInput> | ExtractionResultCreateWithoutVerifierInput[] | ExtractionResultUncheckedCreateWithoutVerifierInput[]
-    connectOrCreate?: ExtractionResultCreateOrConnectWithoutVerifierInput | ExtractionResultCreateOrConnectWithoutVerifierInput[]
-    createMany?: ExtractionResultCreateManyVerifierInputEnvelope
-    connect?: ExtractionResultWhereUniqueInput | ExtractionResultWhereUniqueInput[]
-  }
-
   export type ExtractionResultFlatCreateNestedManyWithoutApproverInput = {
     create?: XOR<ExtractionResultFlatCreateWithoutApproverInput, ExtractionResultFlatUncheckedCreateWithoutApproverInput> | ExtractionResultFlatCreateWithoutApproverInput[] | ExtractionResultFlatUncheckedCreateWithoutApproverInput[]
     connectOrCreate?: ExtractionResultFlatCreateOrConnectWithoutApproverInput | ExtractionResultFlatCreateOrConnectWithoutApproverInput[]
@@ -123399,13 +124630,6 @@ export namespace Prisma {
     connectOrCreate?: ExtractionJobCreateOrConnectWithoutUserInput | ExtractionJobCreateOrConnectWithoutUserInput[]
     createMany?: ExtractionJobCreateManyUserInputEnvelope
     connect?: ExtractionJobWhereUniqueInput | ExtractionJobWhereUniqueInput[]
-  }
-
-  export type ExtractionResultUncheckedCreateNestedManyWithoutVerifierInput = {
-    create?: XOR<ExtractionResultCreateWithoutVerifierInput, ExtractionResultUncheckedCreateWithoutVerifierInput> | ExtractionResultCreateWithoutVerifierInput[] | ExtractionResultUncheckedCreateWithoutVerifierInput[]
-    connectOrCreate?: ExtractionResultCreateOrConnectWithoutVerifierInput | ExtractionResultCreateOrConnectWithoutVerifierInput[]
-    createMany?: ExtractionResultCreateManyVerifierInputEnvelope
-    connect?: ExtractionResultWhereUniqueInput | ExtractionResultWhereUniqueInput[]
   }
 
   export type ExtractionResultFlatUncheckedCreateNestedManyWithoutApproverInput = {
@@ -123455,20 +124679,6 @@ export namespace Prisma {
     update?: ExtractionJobUpdateWithWhereUniqueWithoutUserInput | ExtractionJobUpdateWithWhereUniqueWithoutUserInput[]
     updateMany?: ExtractionJobUpdateManyWithWhereWithoutUserInput | ExtractionJobUpdateManyWithWhereWithoutUserInput[]
     deleteMany?: ExtractionJobScalarWhereInput | ExtractionJobScalarWhereInput[]
-  }
-
-  export type ExtractionResultUpdateManyWithoutVerifierNestedInput = {
-    create?: XOR<ExtractionResultCreateWithoutVerifierInput, ExtractionResultUncheckedCreateWithoutVerifierInput> | ExtractionResultCreateWithoutVerifierInput[] | ExtractionResultUncheckedCreateWithoutVerifierInput[]
-    connectOrCreate?: ExtractionResultCreateOrConnectWithoutVerifierInput | ExtractionResultCreateOrConnectWithoutVerifierInput[]
-    upsert?: ExtractionResultUpsertWithWhereUniqueWithoutVerifierInput | ExtractionResultUpsertWithWhereUniqueWithoutVerifierInput[]
-    createMany?: ExtractionResultCreateManyVerifierInputEnvelope
-    set?: ExtractionResultWhereUniqueInput | ExtractionResultWhereUniqueInput[]
-    disconnect?: ExtractionResultWhereUniqueInput | ExtractionResultWhereUniqueInput[]
-    delete?: ExtractionResultWhereUniqueInput | ExtractionResultWhereUniqueInput[]
-    connect?: ExtractionResultWhereUniqueInput | ExtractionResultWhereUniqueInput[]
-    update?: ExtractionResultUpdateWithWhereUniqueWithoutVerifierInput | ExtractionResultUpdateWithWhereUniqueWithoutVerifierInput[]
-    updateMany?: ExtractionResultUpdateManyWithWhereWithoutVerifierInput | ExtractionResultUpdateManyWithWhereWithoutVerifierInput[]
-    deleteMany?: ExtractionResultScalarWhereInput | ExtractionResultScalarWhereInput[]
   }
 
   export type ExtractionResultFlatUpdateManyWithoutApproverNestedInput = {
@@ -123521,20 +124731,6 @@ export namespace Prisma {
     update?: ExtractionJobUpdateWithWhereUniqueWithoutUserInput | ExtractionJobUpdateWithWhereUniqueWithoutUserInput[]
     updateMany?: ExtractionJobUpdateManyWithWhereWithoutUserInput | ExtractionJobUpdateManyWithWhereWithoutUserInput[]
     deleteMany?: ExtractionJobScalarWhereInput | ExtractionJobScalarWhereInput[]
-  }
-
-  export type ExtractionResultUncheckedUpdateManyWithoutVerifierNestedInput = {
-    create?: XOR<ExtractionResultCreateWithoutVerifierInput, ExtractionResultUncheckedCreateWithoutVerifierInput> | ExtractionResultCreateWithoutVerifierInput[] | ExtractionResultUncheckedCreateWithoutVerifierInput[]
-    connectOrCreate?: ExtractionResultCreateOrConnectWithoutVerifierInput | ExtractionResultCreateOrConnectWithoutVerifierInput[]
-    upsert?: ExtractionResultUpsertWithWhereUniqueWithoutVerifierInput | ExtractionResultUpsertWithWhereUniqueWithoutVerifierInput[]
-    createMany?: ExtractionResultCreateManyVerifierInputEnvelope
-    set?: ExtractionResultWhereUniqueInput | ExtractionResultWhereUniqueInput[]
-    disconnect?: ExtractionResultWhereUniqueInput | ExtractionResultWhereUniqueInput[]
-    delete?: ExtractionResultWhereUniqueInput | ExtractionResultWhereUniqueInput[]
-    connect?: ExtractionResultWhereUniqueInput | ExtractionResultWhereUniqueInput[]
-    update?: ExtractionResultUpdateWithWhereUniqueWithoutVerifierInput | ExtractionResultUpdateWithWhereUniqueWithoutVerifierInput[]
-    updateMany?: ExtractionResultUpdateManyWithWhereWithoutVerifierInput | ExtractionResultUpdateManyWithWhereWithoutVerifierInput[]
-    deleteMany?: ExtractionResultScalarWhereInput | ExtractionResultScalarWhereInput[]
   }
 
   export type ExtractionResultFlatUncheckedUpdateManyWithoutApproverNestedInput = {
@@ -125022,7 +126218,6 @@ export namespace Prisma {
     inputTokens?: number | null
     outputTokens?: number | null
     user?: UserCreateNestedOneWithoutExtractionJobsInput
-    results?: ExtractionResultCreateNestedManyWithoutJobInput
     flatResult?: ExtractionResultFlatCreateNestedOneWithoutJobInput
   }
 
@@ -125050,7 +126245,6 @@ export namespace Prisma {
     apiCost?: Decimal | DecimalJsLike | number | string | null
     inputTokens?: number | null
     outputTokens?: number | null
-    results?: ExtractionResultUncheckedCreateNestedManyWithoutJobInput
     flatResult?: ExtractionResultFlatUncheckedCreateNestedOneWithoutJobInput
   }
 
@@ -125183,7 +126377,6 @@ export namespace Prisma {
     isActive?: boolean
     createdAt?: Date | string
     updatedAt?: Date | string
-    matchedResults?: ExtractionResultCreateNestedManyWithoutMatchedValueInput
   }
 
   export type AttributeAllowedValueUncheckedCreateWithoutAttributeInput = {
@@ -125195,7 +126388,6 @@ export namespace Prisma {
     isActive?: boolean
     createdAt?: Date | string
     updatedAt?: Date | string
-    matchedResults?: ExtractionResultUncheckedCreateNestedManyWithoutMatchedValueInput
   }
 
   export type AttributeAllowedValueCreateOrConnectWithoutAttributeInput = {
@@ -125236,46 +126428,6 @@ export namespace Prisma {
 
   export type CategoryAttributeCreateManyAttributeInputEnvelope = {
     data: CategoryAttributeCreateManyAttributeInput | CategoryAttributeCreateManyAttributeInput[]
-    skipDuplicates?: boolean
-  }
-
-  export type ExtractionResultCreateWithoutAttributeInput = {
-    id?: string
-    rawValue?: string | null
-    finalValue?: string | null
-    confidence?: Decimal | DecimalJsLike | number | string | null
-    extractionMethod?: string | null
-    alternativeValues?: NullableJsonNullValueInput | InputJsonValue
-    isVerified?: boolean
-    verifiedAt?: Date | string | null
-    createdAt?: Date | string
-    job: ExtractionJobCreateNestedOneWithoutResultsInput
-    matchedValue?: AttributeAllowedValueCreateNestedOneWithoutMatchedResultsInput
-    verifier?: UserCreateNestedOneWithoutVerificationsInput
-  }
-
-  export type ExtractionResultUncheckedCreateWithoutAttributeInput = {
-    id?: string
-    jobId: string
-    rawValue?: string | null
-    matchedValueId?: number | null
-    finalValue?: string | null
-    confidence?: Decimal | DecimalJsLike | number | string | null
-    extractionMethod?: string | null
-    alternativeValues?: NullableJsonNullValueInput | InputJsonValue
-    isVerified?: boolean
-    verifiedBy?: number | null
-    verifiedAt?: Date | string | null
-    createdAt?: Date | string
-  }
-
-  export type ExtractionResultCreateOrConnectWithoutAttributeInput = {
-    where: ExtractionResultWhereUniqueInput
-    create: XOR<ExtractionResultCreateWithoutAttributeInput, ExtractionResultUncheckedCreateWithoutAttributeInput>
-  }
-
-  export type ExtractionResultCreateManyAttributeInputEnvelope = {
-    data: ExtractionResultCreateManyAttributeInput | ExtractionResultCreateManyAttributeInput[]
     skipDuplicates?: boolean
   }
 
@@ -125326,41 +126478,6 @@ export namespace Prisma {
     data: XOR<CategoryAttributeUpdateManyMutationInput, CategoryAttributeUncheckedUpdateManyWithoutAttributeInput>
   }
 
-  export type ExtractionResultUpsertWithWhereUniqueWithoutAttributeInput = {
-    where: ExtractionResultWhereUniqueInput
-    update: XOR<ExtractionResultUpdateWithoutAttributeInput, ExtractionResultUncheckedUpdateWithoutAttributeInput>
-    create: XOR<ExtractionResultCreateWithoutAttributeInput, ExtractionResultUncheckedCreateWithoutAttributeInput>
-  }
-
-  export type ExtractionResultUpdateWithWhereUniqueWithoutAttributeInput = {
-    where: ExtractionResultWhereUniqueInput
-    data: XOR<ExtractionResultUpdateWithoutAttributeInput, ExtractionResultUncheckedUpdateWithoutAttributeInput>
-  }
-
-  export type ExtractionResultUpdateManyWithWhereWithoutAttributeInput = {
-    where: ExtractionResultScalarWhereInput
-    data: XOR<ExtractionResultUpdateManyMutationInput, ExtractionResultUncheckedUpdateManyWithoutAttributeInput>
-  }
-
-  export type ExtractionResultScalarWhereInput = {
-    AND?: ExtractionResultScalarWhereInput | ExtractionResultScalarWhereInput[]
-    OR?: ExtractionResultScalarWhereInput[]
-    NOT?: ExtractionResultScalarWhereInput | ExtractionResultScalarWhereInput[]
-    id?: StringFilter<"ExtractionResult"> | string
-    jobId?: StringFilter<"ExtractionResult"> | string
-    attributeId?: IntFilter<"ExtractionResult"> | number
-    rawValue?: StringNullableFilter<"ExtractionResult"> | string | null
-    matchedValueId?: IntNullableFilter<"ExtractionResult"> | number | null
-    finalValue?: StringNullableFilter<"ExtractionResult"> | string | null
-    confidence?: DecimalNullableFilter<"ExtractionResult"> | Decimal | DecimalJsLike | number | string | null
-    extractionMethod?: StringNullableFilter<"ExtractionResult"> | string | null
-    alternativeValues?: JsonNullableFilter<"ExtractionResult">
-    isVerified?: BoolFilter<"ExtractionResult"> | boolean
-    verifiedBy?: IntNullableFilter<"ExtractionResult"> | number | null
-    verifiedAt?: DateTimeNullableFilter<"ExtractionResult"> | Date | string | null
-    createdAt?: DateTimeFilter<"ExtractionResult"> | Date | string
-  }
-
   export type MasterAttributeCreateWithoutAllowedValuesInput = {
     key: string
     label: string
@@ -125383,7 +126500,6 @@ export namespace Prisma {
     createdAt?: Date | string
     updatedAt?: Date | string
     categoryAttributes?: CategoryAttributeCreateNestedManyWithoutAttributeInput
-    extractions?: ExtractionResultCreateNestedManyWithoutAttributeInput
   }
 
   export type MasterAttributeUncheckedCreateWithoutAllowedValuesInput = {
@@ -125409,52 +126525,11 @@ export namespace Prisma {
     createdAt?: Date | string
     updatedAt?: Date | string
     categoryAttributes?: CategoryAttributeUncheckedCreateNestedManyWithoutAttributeInput
-    extractions?: ExtractionResultUncheckedCreateNestedManyWithoutAttributeInput
   }
 
   export type MasterAttributeCreateOrConnectWithoutAllowedValuesInput = {
     where: MasterAttributeWhereUniqueInput
     create: XOR<MasterAttributeCreateWithoutAllowedValuesInput, MasterAttributeUncheckedCreateWithoutAllowedValuesInput>
-  }
-
-  export type ExtractionResultCreateWithoutMatchedValueInput = {
-    id?: string
-    rawValue?: string | null
-    finalValue?: string | null
-    confidence?: Decimal | DecimalJsLike | number | string | null
-    extractionMethod?: string | null
-    alternativeValues?: NullableJsonNullValueInput | InputJsonValue
-    isVerified?: boolean
-    verifiedAt?: Date | string | null
-    createdAt?: Date | string
-    attribute: MasterAttributeCreateNestedOneWithoutExtractionsInput
-    job: ExtractionJobCreateNestedOneWithoutResultsInput
-    verifier?: UserCreateNestedOneWithoutVerificationsInput
-  }
-
-  export type ExtractionResultUncheckedCreateWithoutMatchedValueInput = {
-    id?: string
-    jobId: string
-    attributeId: number
-    rawValue?: string | null
-    finalValue?: string | null
-    confidence?: Decimal | DecimalJsLike | number | string | null
-    extractionMethod?: string | null
-    alternativeValues?: NullableJsonNullValueInput | InputJsonValue
-    isVerified?: boolean
-    verifiedBy?: number | null
-    verifiedAt?: Date | string | null
-    createdAt?: Date | string
-  }
-
-  export type ExtractionResultCreateOrConnectWithoutMatchedValueInput = {
-    where: ExtractionResultWhereUniqueInput
-    create: XOR<ExtractionResultCreateWithoutMatchedValueInput, ExtractionResultUncheckedCreateWithoutMatchedValueInput>
-  }
-
-  export type ExtractionResultCreateManyMatchedValueInputEnvelope = {
-    data: ExtractionResultCreateManyMatchedValueInput | ExtractionResultCreateManyMatchedValueInput[]
-    skipDuplicates?: boolean
   }
 
   export type MasterAttributeUpsertWithoutAllowedValuesInput = {
@@ -125490,7 +126565,6 @@ export namespace Prisma {
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     categoryAttributes?: CategoryAttributeUpdateManyWithoutAttributeNestedInput
-    extractions?: ExtractionResultUpdateManyWithoutAttributeNestedInput
   }
 
   export type MasterAttributeUncheckedUpdateWithoutAllowedValuesInput = {
@@ -125516,23 +126590,6 @@ export namespace Prisma {
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     categoryAttributes?: CategoryAttributeUncheckedUpdateManyWithoutAttributeNestedInput
-    extractions?: ExtractionResultUncheckedUpdateManyWithoutAttributeNestedInput
-  }
-
-  export type ExtractionResultUpsertWithWhereUniqueWithoutMatchedValueInput = {
-    where: ExtractionResultWhereUniqueInput
-    update: XOR<ExtractionResultUpdateWithoutMatchedValueInput, ExtractionResultUncheckedUpdateWithoutMatchedValueInput>
-    create: XOR<ExtractionResultCreateWithoutMatchedValueInput, ExtractionResultUncheckedCreateWithoutMatchedValueInput>
-  }
-
-  export type ExtractionResultUpdateWithWhereUniqueWithoutMatchedValueInput = {
-    where: ExtractionResultWhereUniqueInput
-    data: XOR<ExtractionResultUpdateWithoutMatchedValueInput, ExtractionResultUncheckedUpdateWithoutMatchedValueInput>
-  }
-
-  export type ExtractionResultUpdateManyWithWhereWithoutMatchedValueInput = {
-    where: ExtractionResultScalarWhereInput
-    data: XOR<ExtractionResultUpdateManyMutationInput, ExtractionResultUncheckedUpdateManyWithoutMatchedValueInput>
   }
 
   export type MasterAttributeCreateWithoutCategoryAttributesInput = {
@@ -125557,7 +126614,6 @@ export namespace Prisma {
     createdAt?: Date | string
     updatedAt?: Date | string
     allowedValues?: AttributeAllowedValueCreateNestedManyWithoutAttributeInput
-    extractions?: ExtractionResultCreateNestedManyWithoutAttributeInput
   }
 
   export type MasterAttributeUncheckedCreateWithoutCategoryAttributesInput = {
@@ -125583,7 +126639,6 @@ export namespace Prisma {
     createdAt?: Date | string
     updatedAt?: Date | string
     allowedValues?: AttributeAllowedValueUncheckedCreateNestedManyWithoutAttributeInput
-    extractions?: ExtractionResultUncheckedCreateNestedManyWithoutAttributeInput
   }
 
   export type MasterAttributeCreateOrConnectWithoutCategoryAttributesInput = {
@@ -125664,7 +126719,6 @@ export namespace Prisma {
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     allowedValues?: AttributeAllowedValueUpdateManyWithoutAttributeNestedInput
-    extractions?: ExtractionResultUpdateManyWithoutAttributeNestedInput
   }
 
   export type MasterAttributeUncheckedUpdateWithoutCategoryAttributesInput = {
@@ -125690,7 +126744,6 @@ export namespace Prisma {
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     allowedValues?: AttributeAllowedValueUncheckedUpdateManyWithoutAttributeNestedInput
-    extractions?: ExtractionResultUncheckedUpdateManyWithoutAttributeNestedInput
   }
 
   export type CategoryUpsertWithoutAttributesInput = {
@@ -125793,7 +126846,6 @@ export namespace Prisma {
     updatedAt?: Date | string
     apiKeys?: ApiKeyCreateNestedManyWithoutUserInput
     costSummary?: CostSummaryCreateNestedOneWithoutUserInput
-    verifications?: ExtractionResultCreateNestedManyWithoutVerifierInput
     approvedItems?: ExtractionResultFlatCreateNestedManyWithoutApproverInput
   }
 
@@ -125812,53 +126864,12 @@ export namespace Prisma {
     updatedAt?: Date | string
     apiKeys?: ApiKeyUncheckedCreateNestedManyWithoutUserInput
     costSummary?: CostSummaryUncheckedCreateNestedOneWithoutUserInput
-    verifications?: ExtractionResultUncheckedCreateNestedManyWithoutVerifierInput
     approvedItems?: ExtractionResultFlatUncheckedCreateNestedManyWithoutApproverInput
   }
 
   export type UserCreateOrConnectWithoutExtractionJobsInput = {
     where: UserWhereUniqueInput
     create: XOR<UserCreateWithoutExtractionJobsInput, UserUncheckedCreateWithoutExtractionJobsInput>
-  }
-
-  export type ExtractionResultCreateWithoutJobInput = {
-    id?: string
-    rawValue?: string | null
-    finalValue?: string | null
-    confidence?: Decimal | DecimalJsLike | number | string | null
-    extractionMethod?: string | null
-    alternativeValues?: NullableJsonNullValueInput | InputJsonValue
-    isVerified?: boolean
-    verifiedAt?: Date | string | null
-    createdAt?: Date | string
-    attribute: MasterAttributeCreateNestedOneWithoutExtractionsInput
-    matchedValue?: AttributeAllowedValueCreateNestedOneWithoutMatchedResultsInput
-    verifier?: UserCreateNestedOneWithoutVerificationsInput
-  }
-
-  export type ExtractionResultUncheckedCreateWithoutJobInput = {
-    id?: string
-    attributeId: number
-    rawValue?: string | null
-    matchedValueId?: number | null
-    finalValue?: string | null
-    confidence?: Decimal | DecimalJsLike | number | string | null
-    extractionMethod?: string | null
-    alternativeValues?: NullableJsonNullValueInput | InputJsonValue
-    isVerified?: boolean
-    verifiedBy?: number | null
-    verifiedAt?: Date | string | null
-    createdAt?: Date | string
-  }
-
-  export type ExtractionResultCreateOrConnectWithoutJobInput = {
-    where: ExtractionResultWhereUniqueInput
-    create: XOR<ExtractionResultCreateWithoutJobInput, ExtractionResultUncheckedCreateWithoutJobInput>
-  }
-
-  export type ExtractionResultCreateManyJobInputEnvelope = {
-    data: ExtractionResultCreateManyJobInput | ExtractionResultCreateManyJobInput[]
-    skipDuplicates?: boolean
   }
 
   export type ExtractionResultFlatCreateWithoutJobInput = {
@@ -126027,6 +127038,62 @@ export namespace Prisma {
     otherRoughV2?: Decimal | DecimalJsLike | number | string | null
     otherVdrCost?: Decimal | DecimalJsLike | number | string | null
     otherFinalCost?: Decimal | DecimalJsLike | number | string | null
+    adjusterAutoBgt?: Decimal | DecimalJsLike | number | string | null
+    adjusterRoughV2?: Decimal | DecimalJsLike | number | string | null
+    adjusterVdrCost?: Decimal | DecimalJsLike | number | string | null
+    adjusterFinalCost?: Decimal | DecimalJsLike | number | string | null
+    brotchAutoBgt?: Decimal | DecimalJsLike | number | string | null
+    brotchRoughV2?: Decimal | DecimalJsLike | number | string | null
+    brotchVdrCost?: Decimal | DecimalJsLike | number | string | null
+    brotchFinalCost?: Decimal | DecimalJsLike | number | string | null
+    buckleAutoBgt?: Decimal | DecimalJsLike | number | string | null
+    buckleRoughV2?: Decimal | DecimalJsLike | number | string | null
+    buckleVdrCost?: Decimal | DecimalJsLike | number | string | null
+    buckleFinalCost?: Decimal | DecimalJsLike | number | string | null
+    eyeletsAutoBgt?: Decimal | DecimalJsLike | number | string | null
+    eyeletsRoughV2?: Decimal | DecimalJsLike | number | string | null
+    eyeletsVdrCost?: Decimal | DecimalJsLike | number | string | null
+    eyeletsFinalCost?: Decimal | DecimalJsLike | number | string | null
+    hangingDRingAutoBgt?: Decimal | DecimalJsLike | number | string | null
+    hangingDRingRoughV2?: Decimal | DecimalJsLike | number | string | null
+    hangingDRingVdrCost?: Decimal | DecimalJsLike | number | string | null
+    hangingDRingFinalCost?: Decimal | DecimalJsLike | number | string | null
+    hookAutoBgt?: Decimal | DecimalJsLike | number | string | null
+    hookRoughV2?: Decimal | DecimalJsLike | number | string | null
+    hookVdrCost?: Decimal | DecimalJsLike | number | string | null
+    hookFinalCost?: Decimal | DecimalJsLike | number | string | null
+    labelAutoBgt?: Decimal | DecimalJsLike | number | string | null
+    labelRoughV2?: Decimal | DecimalJsLike | number | string | null
+    labelVdrCost?: Decimal | DecimalJsLike | number | string | null
+    labelFinalCost?: Decimal | DecimalJsLike | number | string | null
+    laceAutoBgt?: Decimal | DecimalJsLike | number | string | null
+    laceRoughV2?: Decimal | DecimalJsLike | number | string | null
+    laceVdrCost?: Decimal | DecimalJsLike | number | string | null
+    laceFinalCost?: Decimal | DecimalJsLike | number | string | null
+    pockettingFabricAutoBgt?: Decimal | DecimalJsLike | number | string | null
+    pockettingFabricRoughV2?: Decimal | DecimalJsLike | number | string | null
+    pockettingFabricVdrCost?: Decimal | DecimalJsLike | number | string | null
+    pockettingFabricFinalCost?: Decimal | DecimalJsLike | number | string | null
+    pockettingReadymadeAutoBgt?: Decimal | DecimalJsLike | number | string | null
+    pockettingReadymadeRoughV2?: Decimal | DecimalJsLike | number | string | null
+    pockettingReadymadeVdrCost?: Decimal | DecimalJsLike | number | string | null
+    pockettingReadymadeFinalCost?: Decimal | DecimalJsLike | number | string | null
+    santaAutoBgt?: Decimal | DecimalJsLike | number | string | null
+    santaRoughV2?: Decimal | DecimalJsLike | number | string | null
+    santaVdrCost?: Decimal | DecimalJsLike | number | string | null
+    santaFinalCost?: Decimal | DecimalJsLike | number | string | null
+    stopperAutoBgt?: Decimal | DecimalJsLike | number | string | null
+    stopperRoughV2?: Decimal | DecimalJsLike | number | string | null
+    stopperVdrCost?: Decimal | DecimalJsLike | number | string | null
+    stopperFinalCost?: Decimal | DecimalJsLike | number | string | null
+    tagAutoBgt?: Decimal | DecimalJsLike | number | string | null
+    tagRoughV2?: Decimal | DecimalJsLike | number | string | null
+    tagVdrCost?: Decimal | DecimalJsLike | number | string | null
+    tagFinalCost?: Decimal | DecimalJsLike | number | string | null
+    tasselsAutoBgt?: Decimal | DecimalJsLike | number | string | null
+    tasselsRoughV2?: Decimal | DecimalJsLike | number | string | null
+    tasselsVdrCost?: Decimal | DecimalJsLike | number | string | null
+    tasselsFinalCost?: Decimal | DecimalJsLike | number | string | null
     printAutoBgt?: Decimal | DecimalJsLike | number | string | null
     printRoughV2?: Decimal | DecimalJsLike | number | string | null
     printVendorCost?: Decimal | DecimalJsLike | number | string | null
@@ -126259,6 +127326,62 @@ export namespace Prisma {
     otherRoughV2?: Decimal | DecimalJsLike | number | string | null
     otherVdrCost?: Decimal | DecimalJsLike | number | string | null
     otherFinalCost?: Decimal | DecimalJsLike | number | string | null
+    adjusterAutoBgt?: Decimal | DecimalJsLike | number | string | null
+    adjusterRoughV2?: Decimal | DecimalJsLike | number | string | null
+    adjusterVdrCost?: Decimal | DecimalJsLike | number | string | null
+    adjusterFinalCost?: Decimal | DecimalJsLike | number | string | null
+    brotchAutoBgt?: Decimal | DecimalJsLike | number | string | null
+    brotchRoughV2?: Decimal | DecimalJsLike | number | string | null
+    brotchVdrCost?: Decimal | DecimalJsLike | number | string | null
+    brotchFinalCost?: Decimal | DecimalJsLike | number | string | null
+    buckleAutoBgt?: Decimal | DecimalJsLike | number | string | null
+    buckleRoughV2?: Decimal | DecimalJsLike | number | string | null
+    buckleVdrCost?: Decimal | DecimalJsLike | number | string | null
+    buckleFinalCost?: Decimal | DecimalJsLike | number | string | null
+    eyeletsAutoBgt?: Decimal | DecimalJsLike | number | string | null
+    eyeletsRoughV2?: Decimal | DecimalJsLike | number | string | null
+    eyeletsVdrCost?: Decimal | DecimalJsLike | number | string | null
+    eyeletsFinalCost?: Decimal | DecimalJsLike | number | string | null
+    hangingDRingAutoBgt?: Decimal | DecimalJsLike | number | string | null
+    hangingDRingRoughV2?: Decimal | DecimalJsLike | number | string | null
+    hangingDRingVdrCost?: Decimal | DecimalJsLike | number | string | null
+    hangingDRingFinalCost?: Decimal | DecimalJsLike | number | string | null
+    hookAutoBgt?: Decimal | DecimalJsLike | number | string | null
+    hookRoughV2?: Decimal | DecimalJsLike | number | string | null
+    hookVdrCost?: Decimal | DecimalJsLike | number | string | null
+    hookFinalCost?: Decimal | DecimalJsLike | number | string | null
+    labelAutoBgt?: Decimal | DecimalJsLike | number | string | null
+    labelRoughV2?: Decimal | DecimalJsLike | number | string | null
+    labelVdrCost?: Decimal | DecimalJsLike | number | string | null
+    labelFinalCost?: Decimal | DecimalJsLike | number | string | null
+    laceAutoBgt?: Decimal | DecimalJsLike | number | string | null
+    laceRoughV2?: Decimal | DecimalJsLike | number | string | null
+    laceVdrCost?: Decimal | DecimalJsLike | number | string | null
+    laceFinalCost?: Decimal | DecimalJsLike | number | string | null
+    pockettingFabricAutoBgt?: Decimal | DecimalJsLike | number | string | null
+    pockettingFabricRoughV2?: Decimal | DecimalJsLike | number | string | null
+    pockettingFabricVdrCost?: Decimal | DecimalJsLike | number | string | null
+    pockettingFabricFinalCost?: Decimal | DecimalJsLike | number | string | null
+    pockettingReadymadeAutoBgt?: Decimal | DecimalJsLike | number | string | null
+    pockettingReadymadeRoughV2?: Decimal | DecimalJsLike | number | string | null
+    pockettingReadymadeVdrCost?: Decimal | DecimalJsLike | number | string | null
+    pockettingReadymadeFinalCost?: Decimal | DecimalJsLike | number | string | null
+    santaAutoBgt?: Decimal | DecimalJsLike | number | string | null
+    santaRoughV2?: Decimal | DecimalJsLike | number | string | null
+    santaVdrCost?: Decimal | DecimalJsLike | number | string | null
+    santaFinalCost?: Decimal | DecimalJsLike | number | string | null
+    stopperAutoBgt?: Decimal | DecimalJsLike | number | string | null
+    stopperRoughV2?: Decimal | DecimalJsLike | number | string | null
+    stopperVdrCost?: Decimal | DecimalJsLike | number | string | null
+    stopperFinalCost?: Decimal | DecimalJsLike | number | string | null
+    tagAutoBgt?: Decimal | DecimalJsLike | number | string | null
+    tagRoughV2?: Decimal | DecimalJsLike | number | string | null
+    tagVdrCost?: Decimal | DecimalJsLike | number | string | null
+    tagFinalCost?: Decimal | DecimalJsLike | number | string | null
+    tasselsAutoBgt?: Decimal | DecimalJsLike | number | string | null
+    tasselsRoughV2?: Decimal | DecimalJsLike | number | string | null
+    tasselsVdrCost?: Decimal | DecimalJsLike | number | string | null
+    tasselsFinalCost?: Decimal | DecimalJsLike | number | string | null
     printAutoBgt?: Decimal | DecimalJsLike | number | string | null
     printRoughV2?: Decimal | DecimalJsLike | number | string | null
     printVendorCost?: Decimal | DecimalJsLike | number | string | null
@@ -126401,7 +127524,6 @@ export namespace Prisma {
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     apiKeys?: ApiKeyUpdateManyWithoutUserNestedInput
     costSummary?: CostSummaryUpdateOneWithoutUserNestedInput
-    verifications?: ExtractionResultUpdateManyWithoutVerifierNestedInput
     approvedItems?: ExtractionResultFlatUpdateManyWithoutApproverNestedInput
   }
 
@@ -126420,24 +127542,7 @@ export namespace Prisma {
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     apiKeys?: ApiKeyUncheckedUpdateManyWithoutUserNestedInput
     costSummary?: CostSummaryUncheckedUpdateOneWithoutUserNestedInput
-    verifications?: ExtractionResultUncheckedUpdateManyWithoutVerifierNestedInput
     approvedItems?: ExtractionResultFlatUncheckedUpdateManyWithoutApproverNestedInput
-  }
-
-  export type ExtractionResultUpsertWithWhereUniqueWithoutJobInput = {
-    where: ExtractionResultWhereUniqueInput
-    update: XOR<ExtractionResultUpdateWithoutJobInput, ExtractionResultUncheckedUpdateWithoutJobInput>
-    create: XOR<ExtractionResultCreateWithoutJobInput, ExtractionResultUncheckedCreateWithoutJobInput>
-  }
-
-  export type ExtractionResultUpdateWithWhereUniqueWithoutJobInput = {
-    where: ExtractionResultWhereUniqueInput
-    data: XOR<ExtractionResultUpdateWithoutJobInput, ExtractionResultUncheckedUpdateWithoutJobInput>
-  }
-
-  export type ExtractionResultUpdateManyWithWhereWithoutJobInput = {
-    where: ExtractionResultScalarWhereInput
-    data: XOR<ExtractionResultUpdateManyMutationInput, ExtractionResultUncheckedUpdateManyWithoutJobInput>
   }
 
   export type ExtractionResultFlatUpsertWithoutJobInput = {
@@ -126617,6 +127722,62 @@ export namespace Prisma {
     otherRoughV2?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
     otherVdrCost?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
     otherFinalCost?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    adjusterAutoBgt?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    adjusterRoughV2?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    adjusterVdrCost?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    adjusterFinalCost?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    brotchAutoBgt?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    brotchRoughV2?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    brotchVdrCost?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    brotchFinalCost?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    buckleAutoBgt?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    buckleRoughV2?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    buckleVdrCost?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    buckleFinalCost?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    eyeletsAutoBgt?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    eyeletsRoughV2?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    eyeletsVdrCost?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    eyeletsFinalCost?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    hangingDRingAutoBgt?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    hangingDRingRoughV2?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    hangingDRingVdrCost?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    hangingDRingFinalCost?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    hookAutoBgt?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    hookRoughV2?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    hookVdrCost?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    hookFinalCost?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    labelAutoBgt?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    labelRoughV2?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    labelVdrCost?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    labelFinalCost?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    laceAutoBgt?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    laceRoughV2?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    laceVdrCost?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    laceFinalCost?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    pockettingFabricAutoBgt?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    pockettingFabricRoughV2?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    pockettingFabricVdrCost?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    pockettingFabricFinalCost?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    pockettingReadymadeAutoBgt?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    pockettingReadymadeRoughV2?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    pockettingReadymadeVdrCost?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    pockettingReadymadeFinalCost?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    santaAutoBgt?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    santaRoughV2?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    santaVdrCost?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    santaFinalCost?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    stopperAutoBgt?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    stopperRoughV2?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    stopperVdrCost?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    stopperFinalCost?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    tagAutoBgt?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    tagRoughV2?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    tagVdrCost?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    tagFinalCost?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    tasselsAutoBgt?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    tasselsRoughV2?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    tasselsVdrCost?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    tasselsFinalCost?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
     printAutoBgt?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
     printRoughV2?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
     printVendorCost?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
@@ -126849,6 +128010,62 @@ export namespace Prisma {
     otherRoughV2?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
     otherVdrCost?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
     otherFinalCost?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    adjusterAutoBgt?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    adjusterRoughV2?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    adjusterVdrCost?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    adjusterFinalCost?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    brotchAutoBgt?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    brotchRoughV2?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    brotchVdrCost?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    brotchFinalCost?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    buckleAutoBgt?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    buckleRoughV2?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    buckleVdrCost?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    buckleFinalCost?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    eyeletsAutoBgt?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    eyeletsRoughV2?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    eyeletsVdrCost?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    eyeletsFinalCost?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    hangingDRingAutoBgt?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    hangingDRingRoughV2?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    hangingDRingVdrCost?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    hangingDRingFinalCost?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    hookAutoBgt?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    hookRoughV2?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    hookVdrCost?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    hookFinalCost?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    labelAutoBgt?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    labelRoughV2?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    labelVdrCost?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    labelFinalCost?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    laceAutoBgt?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    laceRoughV2?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    laceVdrCost?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    laceFinalCost?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    pockettingFabricAutoBgt?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    pockettingFabricRoughV2?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    pockettingFabricVdrCost?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    pockettingFabricFinalCost?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    pockettingReadymadeAutoBgt?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    pockettingReadymadeRoughV2?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    pockettingReadymadeVdrCost?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    pockettingReadymadeFinalCost?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    santaAutoBgt?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    santaRoughV2?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    santaVdrCost?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    santaFinalCost?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    stopperAutoBgt?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    stopperRoughV2?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    stopperVdrCost?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    stopperFinalCost?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    tagAutoBgt?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    tagRoughV2?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    tagVdrCost?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    tagFinalCost?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    tasselsAutoBgt?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    tasselsRoughV2?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    tasselsVdrCost?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    tasselsFinalCost?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
     printAutoBgt?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
     printRoughV2?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
     printVendorCost?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
@@ -126915,404 +128132,6 @@ export namespace Prisma {
     srmSyncRunItems?: SrmSyncRunItemUncheckedUpdateManyWithoutFlatNestedInput
   }
 
-  export type MasterAttributeCreateWithoutExtractionsInput = {
-    key: string
-    label: string
-    fullForm?: string | null
-    type?: $Enums.AttributeType
-    category?: string | null
-    description?: string | null
-    isRequired?: boolean
-    displayOrder?: number
-    isActive?: boolean
-    aiExtractable?: boolean
-    visibleFromDistance?: boolean
-    extractionPriority?: number
-    confidenceThreshold?: Decimal | DecimalJsLike | number | string
-    hasRangeDetection?: boolean
-    rangeType?: string | null
-    rangeConfig?: NullableJsonNullValueInput | InputJsonValue
-    validationRules?: NullableJsonNullValueInput | InputJsonValue
-    group?: string | null
-    createdAt?: Date | string
-    updatedAt?: Date | string
-    allowedValues?: AttributeAllowedValueCreateNestedManyWithoutAttributeInput
-    categoryAttributes?: CategoryAttributeCreateNestedManyWithoutAttributeInput
-  }
-
-  export type MasterAttributeUncheckedCreateWithoutExtractionsInput = {
-    id?: number
-    key: string
-    label: string
-    fullForm?: string | null
-    type?: $Enums.AttributeType
-    category?: string | null
-    description?: string | null
-    isRequired?: boolean
-    displayOrder?: number
-    isActive?: boolean
-    aiExtractable?: boolean
-    visibleFromDistance?: boolean
-    extractionPriority?: number
-    confidenceThreshold?: Decimal | DecimalJsLike | number | string
-    hasRangeDetection?: boolean
-    rangeType?: string | null
-    rangeConfig?: NullableJsonNullValueInput | InputJsonValue
-    validationRules?: NullableJsonNullValueInput | InputJsonValue
-    group?: string | null
-    createdAt?: Date | string
-    updatedAt?: Date | string
-    allowedValues?: AttributeAllowedValueUncheckedCreateNestedManyWithoutAttributeInput
-    categoryAttributes?: CategoryAttributeUncheckedCreateNestedManyWithoutAttributeInput
-  }
-
-  export type MasterAttributeCreateOrConnectWithoutExtractionsInput = {
-    where: MasterAttributeWhereUniqueInput
-    create: XOR<MasterAttributeCreateWithoutExtractionsInput, MasterAttributeUncheckedCreateWithoutExtractionsInput>
-  }
-
-  export type ExtractionJobCreateWithoutResultsInput = {
-    id?: string
-    imageUrl: string
-    imageHash?: string | null
-    vendorName?: string | null
-    designNumber?: string | null
-    costPrice?: Decimal | DecimalJsLike | number | string | null
-    sellingPrice?: Decimal | DecimalJsLike | number | string | null
-    notes?: string | null
-    status?: $Enums.ExtractionStatus
-    aiModel?: string | null
-    processingTimeMs?: number | null
-    tokensUsed?: number | null
-    errorMessage?: string | null
-    totalAttributes?: number | null
-    extractedCount?: number | null
-    avgConfidence?: Decimal | DecimalJsLike | number | string | null
-    createdAt?: Date | string
-    completedAt?: Date | string | null
-    updatedAt?: Date | string
-    apiCost?: Decimal | DecimalJsLike | number | string | null
-    inputTokens?: number | null
-    outputTokens?: number | null
-    category: CategoryCreateNestedOneWithoutExtractionsInput
-    user?: UserCreateNestedOneWithoutExtractionJobsInput
-    flatResult?: ExtractionResultFlatCreateNestedOneWithoutJobInput
-  }
-
-  export type ExtractionJobUncheckedCreateWithoutResultsInput = {
-    id?: string
-    userId?: number | null
-    categoryId: number
-    imageUrl: string
-    imageHash?: string | null
-    vendorName?: string | null
-    designNumber?: string | null
-    costPrice?: Decimal | DecimalJsLike | number | string | null
-    sellingPrice?: Decimal | DecimalJsLike | number | string | null
-    notes?: string | null
-    status?: $Enums.ExtractionStatus
-    aiModel?: string | null
-    processingTimeMs?: number | null
-    tokensUsed?: number | null
-    errorMessage?: string | null
-    totalAttributes?: number | null
-    extractedCount?: number | null
-    avgConfidence?: Decimal | DecimalJsLike | number | string | null
-    createdAt?: Date | string
-    completedAt?: Date | string | null
-    updatedAt?: Date | string
-    apiCost?: Decimal | DecimalJsLike | number | string | null
-    inputTokens?: number | null
-    outputTokens?: number | null
-    flatResult?: ExtractionResultFlatUncheckedCreateNestedOneWithoutJobInput
-  }
-
-  export type ExtractionJobCreateOrConnectWithoutResultsInput = {
-    where: ExtractionJobWhereUniqueInput
-    create: XOR<ExtractionJobCreateWithoutResultsInput, ExtractionJobUncheckedCreateWithoutResultsInput>
-  }
-
-  export type AttributeAllowedValueCreateWithoutMatchedResultsInput = {
-    shortForm: string
-    fullForm: string
-    aliases?: AttributeAllowedValueCreatealiasesInput | string[]
-    displayOrder?: number
-    isActive?: boolean
-    createdAt?: Date | string
-    updatedAt?: Date | string
-    attribute: MasterAttributeCreateNestedOneWithoutAllowedValuesInput
-  }
-
-  export type AttributeAllowedValueUncheckedCreateWithoutMatchedResultsInput = {
-    id?: number
-    attributeId: number
-    shortForm: string
-    fullForm: string
-    aliases?: AttributeAllowedValueCreatealiasesInput | string[]
-    displayOrder?: number
-    isActive?: boolean
-    createdAt?: Date | string
-    updatedAt?: Date | string
-  }
-
-  export type AttributeAllowedValueCreateOrConnectWithoutMatchedResultsInput = {
-    where: AttributeAllowedValueWhereUniqueInput
-    create: XOR<AttributeAllowedValueCreateWithoutMatchedResultsInput, AttributeAllowedValueUncheckedCreateWithoutMatchedResultsInput>
-  }
-
-  export type UserCreateWithoutVerificationsInput = {
-    email: string
-    password: string
-    name: string
-    role?: $Enums.UserRole
-    division?: string | null
-    subDivision?: string | null
-    businessDivision?: string | null
-    isActive?: boolean
-    lastLogin?: Date | string | null
-    createdAt?: Date | string
-    updatedAt?: Date | string
-    apiKeys?: ApiKeyCreateNestedManyWithoutUserInput
-    costSummary?: CostSummaryCreateNestedOneWithoutUserInput
-    extractionJobs?: ExtractionJobCreateNestedManyWithoutUserInput
-    approvedItems?: ExtractionResultFlatCreateNestedManyWithoutApproverInput
-  }
-
-  export type UserUncheckedCreateWithoutVerificationsInput = {
-    id?: number
-    email: string
-    password: string
-    name: string
-    role?: $Enums.UserRole
-    division?: string | null
-    subDivision?: string | null
-    businessDivision?: string | null
-    isActive?: boolean
-    lastLogin?: Date | string | null
-    createdAt?: Date | string
-    updatedAt?: Date | string
-    apiKeys?: ApiKeyUncheckedCreateNestedManyWithoutUserInput
-    costSummary?: CostSummaryUncheckedCreateNestedOneWithoutUserInput
-    extractionJobs?: ExtractionJobUncheckedCreateNestedManyWithoutUserInput
-    approvedItems?: ExtractionResultFlatUncheckedCreateNestedManyWithoutApproverInput
-  }
-
-  export type UserCreateOrConnectWithoutVerificationsInput = {
-    where: UserWhereUniqueInput
-    create: XOR<UserCreateWithoutVerificationsInput, UserUncheckedCreateWithoutVerificationsInput>
-  }
-
-  export type MasterAttributeUpsertWithoutExtractionsInput = {
-    update: XOR<MasterAttributeUpdateWithoutExtractionsInput, MasterAttributeUncheckedUpdateWithoutExtractionsInput>
-    create: XOR<MasterAttributeCreateWithoutExtractionsInput, MasterAttributeUncheckedCreateWithoutExtractionsInput>
-    where?: MasterAttributeWhereInput
-  }
-
-  export type MasterAttributeUpdateToOneWithWhereWithoutExtractionsInput = {
-    where?: MasterAttributeWhereInput
-    data: XOR<MasterAttributeUpdateWithoutExtractionsInput, MasterAttributeUncheckedUpdateWithoutExtractionsInput>
-  }
-
-  export type MasterAttributeUpdateWithoutExtractionsInput = {
-    key?: StringFieldUpdateOperationsInput | string
-    label?: StringFieldUpdateOperationsInput | string
-    fullForm?: NullableStringFieldUpdateOperationsInput | string | null
-    type?: EnumAttributeTypeFieldUpdateOperationsInput | $Enums.AttributeType
-    category?: NullableStringFieldUpdateOperationsInput | string | null
-    description?: NullableStringFieldUpdateOperationsInput | string | null
-    isRequired?: BoolFieldUpdateOperationsInput | boolean
-    displayOrder?: IntFieldUpdateOperationsInput | number
-    isActive?: BoolFieldUpdateOperationsInput | boolean
-    aiExtractable?: BoolFieldUpdateOperationsInput | boolean
-    visibleFromDistance?: BoolFieldUpdateOperationsInput | boolean
-    extractionPriority?: IntFieldUpdateOperationsInput | number
-    confidenceThreshold?: DecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string
-    hasRangeDetection?: BoolFieldUpdateOperationsInput | boolean
-    rangeType?: NullableStringFieldUpdateOperationsInput | string | null
-    rangeConfig?: NullableJsonNullValueInput | InputJsonValue
-    validationRules?: NullableJsonNullValueInput | InputJsonValue
-    group?: NullableStringFieldUpdateOperationsInput | string | null
-    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
-    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
-    allowedValues?: AttributeAllowedValueUpdateManyWithoutAttributeNestedInput
-    categoryAttributes?: CategoryAttributeUpdateManyWithoutAttributeNestedInput
-  }
-
-  export type MasterAttributeUncheckedUpdateWithoutExtractionsInput = {
-    id?: IntFieldUpdateOperationsInput | number
-    key?: StringFieldUpdateOperationsInput | string
-    label?: StringFieldUpdateOperationsInput | string
-    fullForm?: NullableStringFieldUpdateOperationsInput | string | null
-    type?: EnumAttributeTypeFieldUpdateOperationsInput | $Enums.AttributeType
-    category?: NullableStringFieldUpdateOperationsInput | string | null
-    description?: NullableStringFieldUpdateOperationsInput | string | null
-    isRequired?: BoolFieldUpdateOperationsInput | boolean
-    displayOrder?: IntFieldUpdateOperationsInput | number
-    isActive?: BoolFieldUpdateOperationsInput | boolean
-    aiExtractable?: BoolFieldUpdateOperationsInput | boolean
-    visibleFromDistance?: BoolFieldUpdateOperationsInput | boolean
-    extractionPriority?: IntFieldUpdateOperationsInput | number
-    confidenceThreshold?: DecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string
-    hasRangeDetection?: BoolFieldUpdateOperationsInput | boolean
-    rangeType?: NullableStringFieldUpdateOperationsInput | string | null
-    rangeConfig?: NullableJsonNullValueInput | InputJsonValue
-    validationRules?: NullableJsonNullValueInput | InputJsonValue
-    group?: NullableStringFieldUpdateOperationsInput | string | null
-    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
-    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
-    allowedValues?: AttributeAllowedValueUncheckedUpdateManyWithoutAttributeNestedInput
-    categoryAttributes?: CategoryAttributeUncheckedUpdateManyWithoutAttributeNestedInput
-  }
-
-  export type ExtractionJobUpsertWithoutResultsInput = {
-    update: XOR<ExtractionJobUpdateWithoutResultsInput, ExtractionJobUncheckedUpdateWithoutResultsInput>
-    create: XOR<ExtractionJobCreateWithoutResultsInput, ExtractionJobUncheckedCreateWithoutResultsInput>
-    where?: ExtractionJobWhereInput
-  }
-
-  export type ExtractionJobUpdateToOneWithWhereWithoutResultsInput = {
-    where?: ExtractionJobWhereInput
-    data: XOR<ExtractionJobUpdateWithoutResultsInput, ExtractionJobUncheckedUpdateWithoutResultsInput>
-  }
-
-  export type ExtractionJobUpdateWithoutResultsInput = {
-    id?: StringFieldUpdateOperationsInput | string
-    imageUrl?: StringFieldUpdateOperationsInput | string
-    imageHash?: NullableStringFieldUpdateOperationsInput | string | null
-    vendorName?: NullableStringFieldUpdateOperationsInput | string | null
-    designNumber?: NullableStringFieldUpdateOperationsInput | string | null
-    costPrice?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
-    sellingPrice?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
-    notes?: NullableStringFieldUpdateOperationsInput | string | null
-    status?: EnumExtractionStatusFieldUpdateOperationsInput | $Enums.ExtractionStatus
-    aiModel?: NullableStringFieldUpdateOperationsInput | string | null
-    processingTimeMs?: NullableIntFieldUpdateOperationsInput | number | null
-    tokensUsed?: NullableIntFieldUpdateOperationsInput | number | null
-    errorMessage?: NullableStringFieldUpdateOperationsInput | string | null
-    totalAttributes?: NullableIntFieldUpdateOperationsInput | number | null
-    extractedCount?: NullableIntFieldUpdateOperationsInput | number | null
-    avgConfidence?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
-    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
-    completedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
-    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
-    apiCost?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
-    inputTokens?: NullableIntFieldUpdateOperationsInput | number | null
-    outputTokens?: NullableIntFieldUpdateOperationsInput | number | null
-    category?: CategoryUpdateOneRequiredWithoutExtractionsNestedInput
-    user?: UserUpdateOneWithoutExtractionJobsNestedInput
-    flatResult?: ExtractionResultFlatUpdateOneWithoutJobNestedInput
-  }
-
-  export type ExtractionJobUncheckedUpdateWithoutResultsInput = {
-    id?: StringFieldUpdateOperationsInput | string
-    userId?: NullableIntFieldUpdateOperationsInput | number | null
-    categoryId?: IntFieldUpdateOperationsInput | number
-    imageUrl?: StringFieldUpdateOperationsInput | string
-    imageHash?: NullableStringFieldUpdateOperationsInput | string | null
-    vendorName?: NullableStringFieldUpdateOperationsInput | string | null
-    designNumber?: NullableStringFieldUpdateOperationsInput | string | null
-    costPrice?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
-    sellingPrice?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
-    notes?: NullableStringFieldUpdateOperationsInput | string | null
-    status?: EnumExtractionStatusFieldUpdateOperationsInput | $Enums.ExtractionStatus
-    aiModel?: NullableStringFieldUpdateOperationsInput | string | null
-    processingTimeMs?: NullableIntFieldUpdateOperationsInput | number | null
-    tokensUsed?: NullableIntFieldUpdateOperationsInput | number | null
-    errorMessage?: NullableStringFieldUpdateOperationsInput | string | null
-    totalAttributes?: NullableIntFieldUpdateOperationsInput | number | null
-    extractedCount?: NullableIntFieldUpdateOperationsInput | number | null
-    avgConfidence?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
-    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
-    completedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
-    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
-    apiCost?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
-    inputTokens?: NullableIntFieldUpdateOperationsInput | number | null
-    outputTokens?: NullableIntFieldUpdateOperationsInput | number | null
-    flatResult?: ExtractionResultFlatUncheckedUpdateOneWithoutJobNestedInput
-  }
-
-  export type AttributeAllowedValueUpsertWithoutMatchedResultsInput = {
-    update: XOR<AttributeAllowedValueUpdateWithoutMatchedResultsInput, AttributeAllowedValueUncheckedUpdateWithoutMatchedResultsInput>
-    create: XOR<AttributeAllowedValueCreateWithoutMatchedResultsInput, AttributeAllowedValueUncheckedCreateWithoutMatchedResultsInput>
-    where?: AttributeAllowedValueWhereInput
-  }
-
-  export type AttributeAllowedValueUpdateToOneWithWhereWithoutMatchedResultsInput = {
-    where?: AttributeAllowedValueWhereInput
-    data: XOR<AttributeAllowedValueUpdateWithoutMatchedResultsInput, AttributeAllowedValueUncheckedUpdateWithoutMatchedResultsInput>
-  }
-
-  export type AttributeAllowedValueUpdateWithoutMatchedResultsInput = {
-    shortForm?: StringFieldUpdateOperationsInput | string
-    fullForm?: StringFieldUpdateOperationsInput | string
-    aliases?: AttributeAllowedValueUpdatealiasesInput | string[]
-    displayOrder?: IntFieldUpdateOperationsInput | number
-    isActive?: BoolFieldUpdateOperationsInput | boolean
-    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
-    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
-    attribute?: MasterAttributeUpdateOneRequiredWithoutAllowedValuesNestedInput
-  }
-
-  export type AttributeAllowedValueUncheckedUpdateWithoutMatchedResultsInput = {
-    id?: IntFieldUpdateOperationsInput | number
-    attributeId?: IntFieldUpdateOperationsInput | number
-    shortForm?: StringFieldUpdateOperationsInput | string
-    fullForm?: StringFieldUpdateOperationsInput | string
-    aliases?: AttributeAllowedValueUpdatealiasesInput | string[]
-    displayOrder?: IntFieldUpdateOperationsInput | number
-    isActive?: BoolFieldUpdateOperationsInput | boolean
-    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
-    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
-  }
-
-  export type UserUpsertWithoutVerificationsInput = {
-    update: XOR<UserUpdateWithoutVerificationsInput, UserUncheckedUpdateWithoutVerificationsInput>
-    create: XOR<UserCreateWithoutVerificationsInput, UserUncheckedCreateWithoutVerificationsInput>
-    where?: UserWhereInput
-  }
-
-  export type UserUpdateToOneWithWhereWithoutVerificationsInput = {
-    where?: UserWhereInput
-    data: XOR<UserUpdateWithoutVerificationsInput, UserUncheckedUpdateWithoutVerificationsInput>
-  }
-
-  export type UserUpdateWithoutVerificationsInput = {
-    email?: StringFieldUpdateOperationsInput | string
-    password?: StringFieldUpdateOperationsInput | string
-    name?: StringFieldUpdateOperationsInput | string
-    role?: EnumUserRoleFieldUpdateOperationsInput | $Enums.UserRole
-    division?: NullableStringFieldUpdateOperationsInput | string | null
-    subDivision?: NullableStringFieldUpdateOperationsInput | string | null
-    businessDivision?: NullableStringFieldUpdateOperationsInput | string | null
-    isActive?: BoolFieldUpdateOperationsInput | boolean
-    lastLogin?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
-    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
-    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
-    apiKeys?: ApiKeyUpdateManyWithoutUserNestedInput
-    costSummary?: CostSummaryUpdateOneWithoutUserNestedInput
-    extractionJobs?: ExtractionJobUpdateManyWithoutUserNestedInput
-    approvedItems?: ExtractionResultFlatUpdateManyWithoutApproverNestedInput
-  }
-
-  export type UserUncheckedUpdateWithoutVerificationsInput = {
-    id?: IntFieldUpdateOperationsInput | number
-    email?: StringFieldUpdateOperationsInput | string
-    password?: StringFieldUpdateOperationsInput | string
-    name?: StringFieldUpdateOperationsInput | string
-    role?: EnumUserRoleFieldUpdateOperationsInput | $Enums.UserRole
-    division?: NullableStringFieldUpdateOperationsInput | string | null
-    subDivision?: NullableStringFieldUpdateOperationsInput | string | null
-    businessDivision?: NullableStringFieldUpdateOperationsInput | string | null
-    isActive?: BoolFieldUpdateOperationsInput | boolean
-    lastLogin?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
-    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
-    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
-    apiKeys?: ApiKeyUncheckedUpdateManyWithoutUserNestedInput
-    costSummary?: CostSummaryUncheckedUpdateOneWithoutUserNestedInput
-    extractionJobs?: ExtractionJobUncheckedUpdateManyWithoutUserNestedInput
-    approvedItems?: ExtractionResultFlatUncheckedUpdateManyWithoutApproverNestedInput
-  }
-
   export type UserCreateWithoutApprovedItemsInput = {
     email: string
     password: string
@@ -127328,7 +128147,6 @@ export namespace Prisma {
     apiKeys?: ApiKeyCreateNestedManyWithoutUserInput
     costSummary?: CostSummaryCreateNestedOneWithoutUserInput
     extractionJobs?: ExtractionJobCreateNestedManyWithoutUserInput
-    verifications?: ExtractionResultCreateNestedManyWithoutVerifierInput
   }
 
   export type UserUncheckedCreateWithoutApprovedItemsInput = {
@@ -127347,7 +128165,6 @@ export namespace Prisma {
     apiKeys?: ApiKeyUncheckedCreateNestedManyWithoutUserInput
     costSummary?: CostSummaryUncheckedCreateNestedOneWithoutUserInput
     extractionJobs?: ExtractionJobUncheckedCreateNestedManyWithoutUserInput
-    verifications?: ExtractionResultUncheckedCreateNestedManyWithoutVerifierInput
   }
 
   export type UserCreateOrConnectWithoutApprovedItemsInput = {
@@ -127521,6 +128338,62 @@ export namespace Prisma {
     otherRoughV2?: Decimal | DecimalJsLike | number | string | null
     otherVdrCost?: Decimal | DecimalJsLike | number | string | null
     otherFinalCost?: Decimal | DecimalJsLike | number | string | null
+    adjusterAutoBgt?: Decimal | DecimalJsLike | number | string | null
+    adjusterRoughV2?: Decimal | DecimalJsLike | number | string | null
+    adjusterVdrCost?: Decimal | DecimalJsLike | number | string | null
+    adjusterFinalCost?: Decimal | DecimalJsLike | number | string | null
+    brotchAutoBgt?: Decimal | DecimalJsLike | number | string | null
+    brotchRoughV2?: Decimal | DecimalJsLike | number | string | null
+    brotchVdrCost?: Decimal | DecimalJsLike | number | string | null
+    brotchFinalCost?: Decimal | DecimalJsLike | number | string | null
+    buckleAutoBgt?: Decimal | DecimalJsLike | number | string | null
+    buckleRoughV2?: Decimal | DecimalJsLike | number | string | null
+    buckleVdrCost?: Decimal | DecimalJsLike | number | string | null
+    buckleFinalCost?: Decimal | DecimalJsLike | number | string | null
+    eyeletsAutoBgt?: Decimal | DecimalJsLike | number | string | null
+    eyeletsRoughV2?: Decimal | DecimalJsLike | number | string | null
+    eyeletsVdrCost?: Decimal | DecimalJsLike | number | string | null
+    eyeletsFinalCost?: Decimal | DecimalJsLike | number | string | null
+    hangingDRingAutoBgt?: Decimal | DecimalJsLike | number | string | null
+    hangingDRingRoughV2?: Decimal | DecimalJsLike | number | string | null
+    hangingDRingVdrCost?: Decimal | DecimalJsLike | number | string | null
+    hangingDRingFinalCost?: Decimal | DecimalJsLike | number | string | null
+    hookAutoBgt?: Decimal | DecimalJsLike | number | string | null
+    hookRoughV2?: Decimal | DecimalJsLike | number | string | null
+    hookVdrCost?: Decimal | DecimalJsLike | number | string | null
+    hookFinalCost?: Decimal | DecimalJsLike | number | string | null
+    labelAutoBgt?: Decimal | DecimalJsLike | number | string | null
+    labelRoughV2?: Decimal | DecimalJsLike | number | string | null
+    labelVdrCost?: Decimal | DecimalJsLike | number | string | null
+    labelFinalCost?: Decimal | DecimalJsLike | number | string | null
+    laceAutoBgt?: Decimal | DecimalJsLike | number | string | null
+    laceRoughV2?: Decimal | DecimalJsLike | number | string | null
+    laceVdrCost?: Decimal | DecimalJsLike | number | string | null
+    laceFinalCost?: Decimal | DecimalJsLike | number | string | null
+    pockettingFabricAutoBgt?: Decimal | DecimalJsLike | number | string | null
+    pockettingFabricRoughV2?: Decimal | DecimalJsLike | number | string | null
+    pockettingFabricVdrCost?: Decimal | DecimalJsLike | number | string | null
+    pockettingFabricFinalCost?: Decimal | DecimalJsLike | number | string | null
+    pockettingReadymadeAutoBgt?: Decimal | DecimalJsLike | number | string | null
+    pockettingReadymadeRoughV2?: Decimal | DecimalJsLike | number | string | null
+    pockettingReadymadeVdrCost?: Decimal | DecimalJsLike | number | string | null
+    pockettingReadymadeFinalCost?: Decimal | DecimalJsLike | number | string | null
+    santaAutoBgt?: Decimal | DecimalJsLike | number | string | null
+    santaRoughV2?: Decimal | DecimalJsLike | number | string | null
+    santaVdrCost?: Decimal | DecimalJsLike | number | string | null
+    santaFinalCost?: Decimal | DecimalJsLike | number | string | null
+    stopperAutoBgt?: Decimal | DecimalJsLike | number | string | null
+    stopperRoughV2?: Decimal | DecimalJsLike | number | string | null
+    stopperVdrCost?: Decimal | DecimalJsLike | number | string | null
+    stopperFinalCost?: Decimal | DecimalJsLike | number | string | null
+    tagAutoBgt?: Decimal | DecimalJsLike | number | string | null
+    tagRoughV2?: Decimal | DecimalJsLike | number | string | null
+    tagVdrCost?: Decimal | DecimalJsLike | number | string | null
+    tagFinalCost?: Decimal | DecimalJsLike | number | string | null
+    tasselsAutoBgt?: Decimal | DecimalJsLike | number | string | null
+    tasselsRoughV2?: Decimal | DecimalJsLike | number | string | null
+    tasselsVdrCost?: Decimal | DecimalJsLike | number | string | null
+    tasselsFinalCost?: Decimal | DecimalJsLike | number | string | null
     printAutoBgt?: Decimal | DecimalJsLike | number | string | null
     printRoughV2?: Decimal | DecimalJsLike | number | string | null
     printVendorCost?: Decimal | DecimalJsLike | number | string | null
@@ -127754,6 +128627,62 @@ export namespace Prisma {
     otherRoughV2?: Decimal | DecimalJsLike | number | string | null
     otherVdrCost?: Decimal | DecimalJsLike | number | string | null
     otherFinalCost?: Decimal | DecimalJsLike | number | string | null
+    adjusterAutoBgt?: Decimal | DecimalJsLike | number | string | null
+    adjusterRoughV2?: Decimal | DecimalJsLike | number | string | null
+    adjusterVdrCost?: Decimal | DecimalJsLike | number | string | null
+    adjusterFinalCost?: Decimal | DecimalJsLike | number | string | null
+    brotchAutoBgt?: Decimal | DecimalJsLike | number | string | null
+    brotchRoughV2?: Decimal | DecimalJsLike | number | string | null
+    brotchVdrCost?: Decimal | DecimalJsLike | number | string | null
+    brotchFinalCost?: Decimal | DecimalJsLike | number | string | null
+    buckleAutoBgt?: Decimal | DecimalJsLike | number | string | null
+    buckleRoughV2?: Decimal | DecimalJsLike | number | string | null
+    buckleVdrCost?: Decimal | DecimalJsLike | number | string | null
+    buckleFinalCost?: Decimal | DecimalJsLike | number | string | null
+    eyeletsAutoBgt?: Decimal | DecimalJsLike | number | string | null
+    eyeletsRoughV2?: Decimal | DecimalJsLike | number | string | null
+    eyeletsVdrCost?: Decimal | DecimalJsLike | number | string | null
+    eyeletsFinalCost?: Decimal | DecimalJsLike | number | string | null
+    hangingDRingAutoBgt?: Decimal | DecimalJsLike | number | string | null
+    hangingDRingRoughV2?: Decimal | DecimalJsLike | number | string | null
+    hangingDRingVdrCost?: Decimal | DecimalJsLike | number | string | null
+    hangingDRingFinalCost?: Decimal | DecimalJsLike | number | string | null
+    hookAutoBgt?: Decimal | DecimalJsLike | number | string | null
+    hookRoughV2?: Decimal | DecimalJsLike | number | string | null
+    hookVdrCost?: Decimal | DecimalJsLike | number | string | null
+    hookFinalCost?: Decimal | DecimalJsLike | number | string | null
+    labelAutoBgt?: Decimal | DecimalJsLike | number | string | null
+    labelRoughV2?: Decimal | DecimalJsLike | number | string | null
+    labelVdrCost?: Decimal | DecimalJsLike | number | string | null
+    labelFinalCost?: Decimal | DecimalJsLike | number | string | null
+    laceAutoBgt?: Decimal | DecimalJsLike | number | string | null
+    laceRoughV2?: Decimal | DecimalJsLike | number | string | null
+    laceVdrCost?: Decimal | DecimalJsLike | number | string | null
+    laceFinalCost?: Decimal | DecimalJsLike | number | string | null
+    pockettingFabricAutoBgt?: Decimal | DecimalJsLike | number | string | null
+    pockettingFabricRoughV2?: Decimal | DecimalJsLike | number | string | null
+    pockettingFabricVdrCost?: Decimal | DecimalJsLike | number | string | null
+    pockettingFabricFinalCost?: Decimal | DecimalJsLike | number | string | null
+    pockettingReadymadeAutoBgt?: Decimal | DecimalJsLike | number | string | null
+    pockettingReadymadeRoughV2?: Decimal | DecimalJsLike | number | string | null
+    pockettingReadymadeVdrCost?: Decimal | DecimalJsLike | number | string | null
+    pockettingReadymadeFinalCost?: Decimal | DecimalJsLike | number | string | null
+    santaAutoBgt?: Decimal | DecimalJsLike | number | string | null
+    santaRoughV2?: Decimal | DecimalJsLike | number | string | null
+    santaVdrCost?: Decimal | DecimalJsLike | number | string | null
+    santaFinalCost?: Decimal | DecimalJsLike | number | string | null
+    stopperAutoBgt?: Decimal | DecimalJsLike | number | string | null
+    stopperRoughV2?: Decimal | DecimalJsLike | number | string | null
+    stopperVdrCost?: Decimal | DecimalJsLike | number | string | null
+    stopperFinalCost?: Decimal | DecimalJsLike | number | string | null
+    tagAutoBgt?: Decimal | DecimalJsLike | number | string | null
+    tagRoughV2?: Decimal | DecimalJsLike | number | string | null
+    tagVdrCost?: Decimal | DecimalJsLike | number | string | null
+    tagFinalCost?: Decimal | DecimalJsLike | number | string | null
+    tasselsAutoBgt?: Decimal | DecimalJsLike | number | string | null
+    tasselsRoughV2?: Decimal | DecimalJsLike | number | string | null
+    tasselsVdrCost?: Decimal | DecimalJsLike | number | string | null
+    tasselsFinalCost?: Decimal | DecimalJsLike | number | string | null
     printAutoBgt?: Decimal | DecimalJsLike | number | string | null
     printRoughV2?: Decimal | DecimalJsLike | number | string | null
     printVendorCost?: Decimal | DecimalJsLike | number | string | null
@@ -127990,6 +128919,62 @@ export namespace Prisma {
     otherRoughV2?: Decimal | DecimalJsLike | number | string | null
     otherVdrCost?: Decimal | DecimalJsLike | number | string | null
     otherFinalCost?: Decimal | DecimalJsLike | number | string | null
+    adjusterAutoBgt?: Decimal | DecimalJsLike | number | string | null
+    adjusterRoughV2?: Decimal | DecimalJsLike | number | string | null
+    adjusterVdrCost?: Decimal | DecimalJsLike | number | string | null
+    adjusterFinalCost?: Decimal | DecimalJsLike | number | string | null
+    brotchAutoBgt?: Decimal | DecimalJsLike | number | string | null
+    brotchRoughV2?: Decimal | DecimalJsLike | number | string | null
+    brotchVdrCost?: Decimal | DecimalJsLike | number | string | null
+    brotchFinalCost?: Decimal | DecimalJsLike | number | string | null
+    buckleAutoBgt?: Decimal | DecimalJsLike | number | string | null
+    buckleRoughV2?: Decimal | DecimalJsLike | number | string | null
+    buckleVdrCost?: Decimal | DecimalJsLike | number | string | null
+    buckleFinalCost?: Decimal | DecimalJsLike | number | string | null
+    eyeletsAutoBgt?: Decimal | DecimalJsLike | number | string | null
+    eyeletsRoughV2?: Decimal | DecimalJsLike | number | string | null
+    eyeletsVdrCost?: Decimal | DecimalJsLike | number | string | null
+    eyeletsFinalCost?: Decimal | DecimalJsLike | number | string | null
+    hangingDRingAutoBgt?: Decimal | DecimalJsLike | number | string | null
+    hangingDRingRoughV2?: Decimal | DecimalJsLike | number | string | null
+    hangingDRingVdrCost?: Decimal | DecimalJsLike | number | string | null
+    hangingDRingFinalCost?: Decimal | DecimalJsLike | number | string | null
+    hookAutoBgt?: Decimal | DecimalJsLike | number | string | null
+    hookRoughV2?: Decimal | DecimalJsLike | number | string | null
+    hookVdrCost?: Decimal | DecimalJsLike | number | string | null
+    hookFinalCost?: Decimal | DecimalJsLike | number | string | null
+    labelAutoBgt?: Decimal | DecimalJsLike | number | string | null
+    labelRoughV2?: Decimal | DecimalJsLike | number | string | null
+    labelVdrCost?: Decimal | DecimalJsLike | number | string | null
+    labelFinalCost?: Decimal | DecimalJsLike | number | string | null
+    laceAutoBgt?: Decimal | DecimalJsLike | number | string | null
+    laceRoughV2?: Decimal | DecimalJsLike | number | string | null
+    laceVdrCost?: Decimal | DecimalJsLike | number | string | null
+    laceFinalCost?: Decimal | DecimalJsLike | number | string | null
+    pockettingFabricAutoBgt?: Decimal | DecimalJsLike | number | string | null
+    pockettingFabricRoughV2?: Decimal | DecimalJsLike | number | string | null
+    pockettingFabricVdrCost?: Decimal | DecimalJsLike | number | string | null
+    pockettingFabricFinalCost?: Decimal | DecimalJsLike | number | string | null
+    pockettingReadymadeAutoBgt?: Decimal | DecimalJsLike | number | string | null
+    pockettingReadymadeRoughV2?: Decimal | DecimalJsLike | number | string | null
+    pockettingReadymadeVdrCost?: Decimal | DecimalJsLike | number | string | null
+    pockettingReadymadeFinalCost?: Decimal | DecimalJsLike | number | string | null
+    santaAutoBgt?: Decimal | DecimalJsLike | number | string | null
+    santaRoughV2?: Decimal | DecimalJsLike | number | string | null
+    santaVdrCost?: Decimal | DecimalJsLike | number | string | null
+    santaFinalCost?: Decimal | DecimalJsLike | number | string | null
+    stopperAutoBgt?: Decimal | DecimalJsLike | number | string | null
+    stopperRoughV2?: Decimal | DecimalJsLike | number | string | null
+    stopperVdrCost?: Decimal | DecimalJsLike | number | string | null
+    stopperFinalCost?: Decimal | DecimalJsLike | number | string | null
+    tagAutoBgt?: Decimal | DecimalJsLike | number | string | null
+    tagRoughV2?: Decimal | DecimalJsLike | number | string | null
+    tagVdrCost?: Decimal | DecimalJsLike | number | string | null
+    tagFinalCost?: Decimal | DecimalJsLike | number | string | null
+    tasselsAutoBgt?: Decimal | DecimalJsLike | number | string | null
+    tasselsRoughV2?: Decimal | DecimalJsLike | number | string | null
+    tasselsVdrCost?: Decimal | DecimalJsLike | number | string | null
+    tasselsFinalCost?: Decimal | DecimalJsLike | number | string | null
     printAutoBgt?: Decimal | DecimalJsLike | number | string | null
     printRoughV2?: Decimal | DecimalJsLike | number | string | null
     printVendorCost?: Decimal | DecimalJsLike | number | string | null
@@ -128223,6 +129208,62 @@ export namespace Prisma {
     otherRoughV2?: Decimal | DecimalJsLike | number | string | null
     otherVdrCost?: Decimal | DecimalJsLike | number | string | null
     otherFinalCost?: Decimal | DecimalJsLike | number | string | null
+    adjusterAutoBgt?: Decimal | DecimalJsLike | number | string | null
+    adjusterRoughV2?: Decimal | DecimalJsLike | number | string | null
+    adjusterVdrCost?: Decimal | DecimalJsLike | number | string | null
+    adjusterFinalCost?: Decimal | DecimalJsLike | number | string | null
+    brotchAutoBgt?: Decimal | DecimalJsLike | number | string | null
+    brotchRoughV2?: Decimal | DecimalJsLike | number | string | null
+    brotchVdrCost?: Decimal | DecimalJsLike | number | string | null
+    brotchFinalCost?: Decimal | DecimalJsLike | number | string | null
+    buckleAutoBgt?: Decimal | DecimalJsLike | number | string | null
+    buckleRoughV2?: Decimal | DecimalJsLike | number | string | null
+    buckleVdrCost?: Decimal | DecimalJsLike | number | string | null
+    buckleFinalCost?: Decimal | DecimalJsLike | number | string | null
+    eyeletsAutoBgt?: Decimal | DecimalJsLike | number | string | null
+    eyeletsRoughV2?: Decimal | DecimalJsLike | number | string | null
+    eyeletsVdrCost?: Decimal | DecimalJsLike | number | string | null
+    eyeletsFinalCost?: Decimal | DecimalJsLike | number | string | null
+    hangingDRingAutoBgt?: Decimal | DecimalJsLike | number | string | null
+    hangingDRingRoughV2?: Decimal | DecimalJsLike | number | string | null
+    hangingDRingVdrCost?: Decimal | DecimalJsLike | number | string | null
+    hangingDRingFinalCost?: Decimal | DecimalJsLike | number | string | null
+    hookAutoBgt?: Decimal | DecimalJsLike | number | string | null
+    hookRoughV2?: Decimal | DecimalJsLike | number | string | null
+    hookVdrCost?: Decimal | DecimalJsLike | number | string | null
+    hookFinalCost?: Decimal | DecimalJsLike | number | string | null
+    labelAutoBgt?: Decimal | DecimalJsLike | number | string | null
+    labelRoughV2?: Decimal | DecimalJsLike | number | string | null
+    labelVdrCost?: Decimal | DecimalJsLike | number | string | null
+    labelFinalCost?: Decimal | DecimalJsLike | number | string | null
+    laceAutoBgt?: Decimal | DecimalJsLike | number | string | null
+    laceRoughV2?: Decimal | DecimalJsLike | number | string | null
+    laceVdrCost?: Decimal | DecimalJsLike | number | string | null
+    laceFinalCost?: Decimal | DecimalJsLike | number | string | null
+    pockettingFabricAutoBgt?: Decimal | DecimalJsLike | number | string | null
+    pockettingFabricRoughV2?: Decimal | DecimalJsLike | number | string | null
+    pockettingFabricVdrCost?: Decimal | DecimalJsLike | number | string | null
+    pockettingFabricFinalCost?: Decimal | DecimalJsLike | number | string | null
+    pockettingReadymadeAutoBgt?: Decimal | DecimalJsLike | number | string | null
+    pockettingReadymadeRoughV2?: Decimal | DecimalJsLike | number | string | null
+    pockettingReadymadeVdrCost?: Decimal | DecimalJsLike | number | string | null
+    pockettingReadymadeFinalCost?: Decimal | DecimalJsLike | number | string | null
+    santaAutoBgt?: Decimal | DecimalJsLike | number | string | null
+    santaRoughV2?: Decimal | DecimalJsLike | number | string | null
+    santaVdrCost?: Decimal | DecimalJsLike | number | string | null
+    santaFinalCost?: Decimal | DecimalJsLike | number | string | null
+    stopperAutoBgt?: Decimal | DecimalJsLike | number | string | null
+    stopperRoughV2?: Decimal | DecimalJsLike | number | string | null
+    stopperVdrCost?: Decimal | DecimalJsLike | number | string | null
+    stopperFinalCost?: Decimal | DecimalJsLike | number | string | null
+    tagAutoBgt?: Decimal | DecimalJsLike | number | string | null
+    tagRoughV2?: Decimal | DecimalJsLike | number | string | null
+    tagVdrCost?: Decimal | DecimalJsLike | number | string | null
+    tagFinalCost?: Decimal | DecimalJsLike | number | string | null
+    tasselsAutoBgt?: Decimal | DecimalJsLike | number | string | null
+    tasselsRoughV2?: Decimal | DecimalJsLike | number | string | null
+    tasselsVdrCost?: Decimal | DecimalJsLike | number | string | null
+    tasselsFinalCost?: Decimal | DecimalJsLike | number | string | null
     printAutoBgt?: Decimal | DecimalJsLike | number | string | null
     printRoughV2?: Decimal | DecimalJsLike | number | string | null
     printVendorCost?: Decimal | DecimalJsLike | number | string | null
@@ -128323,7 +129364,6 @@ export namespace Prisma {
     outputTokens?: number | null
     category: CategoryCreateNestedOneWithoutExtractionsInput
     user?: UserCreateNestedOneWithoutExtractionJobsInput
-    results?: ExtractionResultCreateNestedManyWithoutJobInput
   }
 
   export type ExtractionJobUncheckedCreateWithoutFlatResultInput = {
@@ -128351,7 +129391,6 @@ export namespace Prisma {
     apiCost?: Decimal | DecimalJsLike | number | string | null
     inputTokens?: number | null
     outputTokens?: number | null
-    results?: ExtractionResultUncheckedCreateNestedManyWithoutJobInput
   }
 
   export type ExtractionJobCreateOrConnectWithoutFlatResultInput = {
@@ -128415,7 +129454,6 @@ export namespace Prisma {
     apiKeys?: ApiKeyUpdateManyWithoutUserNestedInput
     costSummary?: CostSummaryUpdateOneWithoutUserNestedInput
     extractionJobs?: ExtractionJobUpdateManyWithoutUserNestedInput
-    verifications?: ExtractionResultUpdateManyWithoutVerifierNestedInput
   }
 
   export type UserUncheckedUpdateWithoutApprovedItemsInput = {
@@ -128434,7 +129472,6 @@ export namespace Prisma {
     apiKeys?: ApiKeyUncheckedUpdateManyWithoutUserNestedInput
     costSummary?: CostSummaryUncheckedUpdateOneWithoutUserNestedInput
     extractionJobs?: ExtractionJobUncheckedUpdateManyWithoutUserNestedInput
-    verifications?: ExtractionResultUncheckedUpdateManyWithoutVerifierNestedInput
   }
 
   export type ExtractionResultFlatUpsertWithoutComboChildrenInput = {
@@ -128614,6 +129651,62 @@ export namespace Prisma {
     otherRoughV2?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
     otherVdrCost?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
     otherFinalCost?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    adjusterAutoBgt?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    adjusterRoughV2?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    adjusterVdrCost?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    adjusterFinalCost?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    brotchAutoBgt?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    brotchRoughV2?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    brotchVdrCost?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    brotchFinalCost?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    buckleAutoBgt?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    buckleRoughV2?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    buckleVdrCost?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    buckleFinalCost?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    eyeletsAutoBgt?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    eyeletsRoughV2?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    eyeletsVdrCost?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    eyeletsFinalCost?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    hangingDRingAutoBgt?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    hangingDRingRoughV2?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    hangingDRingVdrCost?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    hangingDRingFinalCost?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    hookAutoBgt?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    hookRoughV2?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    hookVdrCost?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    hookFinalCost?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    labelAutoBgt?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    labelRoughV2?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    labelVdrCost?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    labelFinalCost?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    laceAutoBgt?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    laceRoughV2?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    laceVdrCost?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    laceFinalCost?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    pockettingFabricAutoBgt?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    pockettingFabricRoughV2?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    pockettingFabricVdrCost?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    pockettingFabricFinalCost?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    pockettingReadymadeAutoBgt?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    pockettingReadymadeRoughV2?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    pockettingReadymadeVdrCost?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    pockettingReadymadeFinalCost?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    santaAutoBgt?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    santaRoughV2?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    santaVdrCost?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    santaFinalCost?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    stopperAutoBgt?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    stopperRoughV2?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    stopperVdrCost?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    stopperFinalCost?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    tagAutoBgt?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    tagRoughV2?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    tagVdrCost?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    tagFinalCost?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    tasselsAutoBgt?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    tasselsRoughV2?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    tasselsVdrCost?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    tasselsFinalCost?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
     printAutoBgt?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
     printRoughV2?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
     printVendorCost?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
@@ -128847,6 +129940,62 @@ export namespace Prisma {
     otherRoughV2?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
     otherVdrCost?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
     otherFinalCost?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    adjusterAutoBgt?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    adjusterRoughV2?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    adjusterVdrCost?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    adjusterFinalCost?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    brotchAutoBgt?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    brotchRoughV2?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    brotchVdrCost?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    brotchFinalCost?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    buckleAutoBgt?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    buckleRoughV2?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    buckleVdrCost?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    buckleFinalCost?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    eyeletsAutoBgt?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    eyeletsRoughV2?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    eyeletsVdrCost?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    eyeletsFinalCost?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    hangingDRingAutoBgt?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    hangingDRingRoughV2?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    hangingDRingVdrCost?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    hangingDRingFinalCost?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    hookAutoBgt?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    hookRoughV2?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    hookVdrCost?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    hookFinalCost?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    labelAutoBgt?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    labelRoughV2?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    labelVdrCost?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    labelFinalCost?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    laceAutoBgt?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    laceRoughV2?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    laceVdrCost?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    laceFinalCost?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    pockettingFabricAutoBgt?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    pockettingFabricRoughV2?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    pockettingFabricVdrCost?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    pockettingFabricFinalCost?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    pockettingReadymadeAutoBgt?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    pockettingReadymadeRoughV2?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    pockettingReadymadeVdrCost?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    pockettingReadymadeFinalCost?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    santaAutoBgt?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    santaRoughV2?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    santaVdrCost?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    santaFinalCost?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    stopperAutoBgt?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    stopperRoughV2?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    stopperVdrCost?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    stopperFinalCost?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    tagAutoBgt?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    tagRoughV2?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    tagVdrCost?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    tagFinalCost?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    tasselsAutoBgt?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    tasselsRoughV2?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    tasselsVdrCost?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    tasselsFinalCost?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
     printAutoBgt?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
     printRoughV2?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
     printVendorCost?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
@@ -129098,6 +130247,62 @@ export namespace Prisma {
     otherRoughV2?: DecimalNullableFilter<"ExtractionResultFlat"> | Decimal | DecimalJsLike | number | string | null
     otherVdrCost?: DecimalNullableFilter<"ExtractionResultFlat"> | Decimal | DecimalJsLike | number | string | null
     otherFinalCost?: DecimalNullableFilter<"ExtractionResultFlat"> | Decimal | DecimalJsLike | number | string | null
+    adjusterAutoBgt?: DecimalNullableFilter<"ExtractionResultFlat"> | Decimal | DecimalJsLike | number | string | null
+    adjusterRoughV2?: DecimalNullableFilter<"ExtractionResultFlat"> | Decimal | DecimalJsLike | number | string | null
+    adjusterVdrCost?: DecimalNullableFilter<"ExtractionResultFlat"> | Decimal | DecimalJsLike | number | string | null
+    adjusterFinalCost?: DecimalNullableFilter<"ExtractionResultFlat"> | Decimal | DecimalJsLike | number | string | null
+    brotchAutoBgt?: DecimalNullableFilter<"ExtractionResultFlat"> | Decimal | DecimalJsLike | number | string | null
+    brotchRoughV2?: DecimalNullableFilter<"ExtractionResultFlat"> | Decimal | DecimalJsLike | number | string | null
+    brotchVdrCost?: DecimalNullableFilter<"ExtractionResultFlat"> | Decimal | DecimalJsLike | number | string | null
+    brotchFinalCost?: DecimalNullableFilter<"ExtractionResultFlat"> | Decimal | DecimalJsLike | number | string | null
+    buckleAutoBgt?: DecimalNullableFilter<"ExtractionResultFlat"> | Decimal | DecimalJsLike | number | string | null
+    buckleRoughV2?: DecimalNullableFilter<"ExtractionResultFlat"> | Decimal | DecimalJsLike | number | string | null
+    buckleVdrCost?: DecimalNullableFilter<"ExtractionResultFlat"> | Decimal | DecimalJsLike | number | string | null
+    buckleFinalCost?: DecimalNullableFilter<"ExtractionResultFlat"> | Decimal | DecimalJsLike | number | string | null
+    eyeletsAutoBgt?: DecimalNullableFilter<"ExtractionResultFlat"> | Decimal | DecimalJsLike | number | string | null
+    eyeletsRoughV2?: DecimalNullableFilter<"ExtractionResultFlat"> | Decimal | DecimalJsLike | number | string | null
+    eyeletsVdrCost?: DecimalNullableFilter<"ExtractionResultFlat"> | Decimal | DecimalJsLike | number | string | null
+    eyeletsFinalCost?: DecimalNullableFilter<"ExtractionResultFlat"> | Decimal | DecimalJsLike | number | string | null
+    hangingDRingAutoBgt?: DecimalNullableFilter<"ExtractionResultFlat"> | Decimal | DecimalJsLike | number | string | null
+    hangingDRingRoughV2?: DecimalNullableFilter<"ExtractionResultFlat"> | Decimal | DecimalJsLike | number | string | null
+    hangingDRingVdrCost?: DecimalNullableFilter<"ExtractionResultFlat"> | Decimal | DecimalJsLike | number | string | null
+    hangingDRingFinalCost?: DecimalNullableFilter<"ExtractionResultFlat"> | Decimal | DecimalJsLike | number | string | null
+    hookAutoBgt?: DecimalNullableFilter<"ExtractionResultFlat"> | Decimal | DecimalJsLike | number | string | null
+    hookRoughV2?: DecimalNullableFilter<"ExtractionResultFlat"> | Decimal | DecimalJsLike | number | string | null
+    hookVdrCost?: DecimalNullableFilter<"ExtractionResultFlat"> | Decimal | DecimalJsLike | number | string | null
+    hookFinalCost?: DecimalNullableFilter<"ExtractionResultFlat"> | Decimal | DecimalJsLike | number | string | null
+    labelAutoBgt?: DecimalNullableFilter<"ExtractionResultFlat"> | Decimal | DecimalJsLike | number | string | null
+    labelRoughV2?: DecimalNullableFilter<"ExtractionResultFlat"> | Decimal | DecimalJsLike | number | string | null
+    labelVdrCost?: DecimalNullableFilter<"ExtractionResultFlat"> | Decimal | DecimalJsLike | number | string | null
+    labelFinalCost?: DecimalNullableFilter<"ExtractionResultFlat"> | Decimal | DecimalJsLike | number | string | null
+    laceAutoBgt?: DecimalNullableFilter<"ExtractionResultFlat"> | Decimal | DecimalJsLike | number | string | null
+    laceRoughV2?: DecimalNullableFilter<"ExtractionResultFlat"> | Decimal | DecimalJsLike | number | string | null
+    laceVdrCost?: DecimalNullableFilter<"ExtractionResultFlat"> | Decimal | DecimalJsLike | number | string | null
+    laceFinalCost?: DecimalNullableFilter<"ExtractionResultFlat"> | Decimal | DecimalJsLike | number | string | null
+    pockettingFabricAutoBgt?: DecimalNullableFilter<"ExtractionResultFlat"> | Decimal | DecimalJsLike | number | string | null
+    pockettingFabricRoughV2?: DecimalNullableFilter<"ExtractionResultFlat"> | Decimal | DecimalJsLike | number | string | null
+    pockettingFabricVdrCost?: DecimalNullableFilter<"ExtractionResultFlat"> | Decimal | DecimalJsLike | number | string | null
+    pockettingFabricFinalCost?: DecimalNullableFilter<"ExtractionResultFlat"> | Decimal | DecimalJsLike | number | string | null
+    pockettingReadymadeAutoBgt?: DecimalNullableFilter<"ExtractionResultFlat"> | Decimal | DecimalJsLike | number | string | null
+    pockettingReadymadeRoughV2?: DecimalNullableFilter<"ExtractionResultFlat"> | Decimal | DecimalJsLike | number | string | null
+    pockettingReadymadeVdrCost?: DecimalNullableFilter<"ExtractionResultFlat"> | Decimal | DecimalJsLike | number | string | null
+    pockettingReadymadeFinalCost?: DecimalNullableFilter<"ExtractionResultFlat"> | Decimal | DecimalJsLike | number | string | null
+    santaAutoBgt?: DecimalNullableFilter<"ExtractionResultFlat"> | Decimal | DecimalJsLike | number | string | null
+    santaRoughV2?: DecimalNullableFilter<"ExtractionResultFlat"> | Decimal | DecimalJsLike | number | string | null
+    santaVdrCost?: DecimalNullableFilter<"ExtractionResultFlat"> | Decimal | DecimalJsLike | number | string | null
+    santaFinalCost?: DecimalNullableFilter<"ExtractionResultFlat"> | Decimal | DecimalJsLike | number | string | null
+    stopperAutoBgt?: DecimalNullableFilter<"ExtractionResultFlat"> | Decimal | DecimalJsLike | number | string | null
+    stopperRoughV2?: DecimalNullableFilter<"ExtractionResultFlat"> | Decimal | DecimalJsLike | number | string | null
+    stopperVdrCost?: DecimalNullableFilter<"ExtractionResultFlat"> | Decimal | DecimalJsLike | number | string | null
+    stopperFinalCost?: DecimalNullableFilter<"ExtractionResultFlat"> | Decimal | DecimalJsLike | number | string | null
+    tagAutoBgt?: DecimalNullableFilter<"ExtractionResultFlat"> | Decimal | DecimalJsLike | number | string | null
+    tagRoughV2?: DecimalNullableFilter<"ExtractionResultFlat"> | Decimal | DecimalJsLike | number | string | null
+    tagVdrCost?: DecimalNullableFilter<"ExtractionResultFlat"> | Decimal | DecimalJsLike | number | string | null
+    tagFinalCost?: DecimalNullableFilter<"ExtractionResultFlat"> | Decimal | DecimalJsLike | number | string | null
+    tasselsAutoBgt?: DecimalNullableFilter<"ExtractionResultFlat"> | Decimal | DecimalJsLike | number | string | null
+    tasselsRoughV2?: DecimalNullableFilter<"ExtractionResultFlat"> | Decimal | DecimalJsLike | number | string | null
+    tasselsVdrCost?: DecimalNullableFilter<"ExtractionResultFlat"> | Decimal | DecimalJsLike | number | string | null
+    tasselsFinalCost?: DecimalNullableFilter<"ExtractionResultFlat"> | Decimal | DecimalJsLike | number | string | null
     printAutoBgt?: DecimalNullableFilter<"ExtractionResultFlat"> | Decimal | DecimalJsLike | number | string | null
     printRoughV2?: DecimalNullableFilter<"ExtractionResultFlat"> | Decimal | DecimalJsLike | number | string | null
     printVendorCost?: DecimalNullableFilter<"ExtractionResultFlat"> | Decimal | DecimalJsLike | number | string | null
@@ -129198,7 +130403,6 @@ export namespace Prisma {
     outputTokens?: NullableIntFieldUpdateOperationsInput | number | null
     category?: CategoryUpdateOneRequiredWithoutExtractionsNestedInput
     user?: UserUpdateOneWithoutExtractionJobsNestedInput
-    results?: ExtractionResultUpdateManyWithoutJobNestedInput
   }
 
   export type ExtractionJobUncheckedUpdateWithoutFlatResultInput = {
@@ -129226,7 +130430,6 @@ export namespace Prisma {
     apiCost?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
     inputTokens?: NullableIntFieldUpdateOperationsInput | number | null
     outputTokens?: NullableIntFieldUpdateOperationsInput | number | null
-    results?: ExtractionResultUncheckedUpdateManyWithoutJobNestedInput
   }
 
   export type SrmSyncRunItemUpsertWithWhereUniqueWithoutFlatInput = {
@@ -129347,7 +130550,6 @@ export namespace Prisma {
     inputTokens?: number | null
     outputTokens?: number | null
     category: CategoryCreateNestedOneWithoutExtractionsInput
-    results?: ExtractionResultCreateNestedManyWithoutJobInput
     flatResult?: ExtractionResultFlatCreateNestedOneWithoutJobInput
   }
 
@@ -129375,7 +130577,6 @@ export namespace Prisma {
     apiCost?: Decimal | DecimalJsLike | number | string | null
     inputTokens?: number | null
     outputTokens?: number | null
-    results?: ExtractionResultUncheckedCreateNestedManyWithoutJobInput
     flatResult?: ExtractionResultFlatUncheckedCreateNestedOneWithoutJobInput
   }
 
@@ -129386,46 +130587,6 @@ export namespace Prisma {
 
   export type ExtractionJobCreateManyUserInputEnvelope = {
     data: ExtractionJobCreateManyUserInput | ExtractionJobCreateManyUserInput[]
-    skipDuplicates?: boolean
-  }
-
-  export type ExtractionResultCreateWithoutVerifierInput = {
-    id?: string
-    rawValue?: string | null
-    finalValue?: string | null
-    confidence?: Decimal | DecimalJsLike | number | string | null
-    extractionMethod?: string | null
-    alternativeValues?: NullableJsonNullValueInput | InputJsonValue
-    isVerified?: boolean
-    verifiedAt?: Date | string | null
-    createdAt?: Date | string
-    attribute: MasterAttributeCreateNestedOneWithoutExtractionsInput
-    job: ExtractionJobCreateNestedOneWithoutResultsInput
-    matchedValue?: AttributeAllowedValueCreateNestedOneWithoutMatchedResultsInput
-  }
-
-  export type ExtractionResultUncheckedCreateWithoutVerifierInput = {
-    id?: string
-    jobId: string
-    attributeId: number
-    rawValue?: string | null
-    matchedValueId?: number | null
-    finalValue?: string | null
-    confidence?: Decimal | DecimalJsLike | number | string | null
-    extractionMethod?: string | null
-    alternativeValues?: NullableJsonNullValueInput | InputJsonValue
-    isVerified?: boolean
-    verifiedAt?: Date | string | null
-    createdAt?: Date | string
-  }
-
-  export type ExtractionResultCreateOrConnectWithoutVerifierInput = {
-    where: ExtractionResultWhereUniqueInput
-    create: XOR<ExtractionResultCreateWithoutVerifierInput, ExtractionResultUncheckedCreateWithoutVerifierInput>
-  }
-
-  export type ExtractionResultCreateManyVerifierInputEnvelope = {
-    data: ExtractionResultCreateManyVerifierInput | ExtractionResultCreateManyVerifierInput[]
     skipDuplicates?: boolean
   }
 
@@ -129595,6 +130756,62 @@ export namespace Prisma {
     otherRoughV2?: Decimal | DecimalJsLike | number | string | null
     otherVdrCost?: Decimal | DecimalJsLike | number | string | null
     otherFinalCost?: Decimal | DecimalJsLike | number | string | null
+    adjusterAutoBgt?: Decimal | DecimalJsLike | number | string | null
+    adjusterRoughV2?: Decimal | DecimalJsLike | number | string | null
+    adjusterVdrCost?: Decimal | DecimalJsLike | number | string | null
+    adjusterFinalCost?: Decimal | DecimalJsLike | number | string | null
+    brotchAutoBgt?: Decimal | DecimalJsLike | number | string | null
+    brotchRoughV2?: Decimal | DecimalJsLike | number | string | null
+    brotchVdrCost?: Decimal | DecimalJsLike | number | string | null
+    brotchFinalCost?: Decimal | DecimalJsLike | number | string | null
+    buckleAutoBgt?: Decimal | DecimalJsLike | number | string | null
+    buckleRoughV2?: Decimal | DecimalJsLike | number | string | null
+    buckleVdrCost?: Decimal | DecimalJsLike | number | string | null
+    buckleFinalCost?: Decimal | DecimalJsLike | number | string | null
+    eyeletsAutoBgt?: Decimal | DecimalJsLike | number | string | null
+    eyeletsRoughV2?: Decimal | DecimalJsLike | number | string | null
+    eyeletsVdrCost?: Decimal | DecimalJsLike | number | string | null
+    eyeletsFinalCost?: Decimal | DecimalJsLike | number | string | null
+    hangingDRingAutoBgt?: Decimal | DecimalJsLike | number | string | null
+    hangingDRingRoughV2?: Decimal | DecimalJsLike | number | string | null
+    hangingDRingVdrCost?: Decimal | DecimalJsLike | number | string | null
+    hangingDRingFinalCost?: Decimal | DecimalJsLike | number | string | null
+    hookAutoBgt?: Decimal | DecimalJsLike | number | string | null
+    hookRoughV2?: Decimal | DecimalJsLike | number | string | null
+    hookVdrCost?: Decimal | DecimalJsLike | number | string | null
+    hookFinalCost?: Decimal | DecimalJsLike | number | string | null
+    labelAutoBgt?: Decimal | DecimalJsLike | number | string | null
+    labelRoughV2?: Decimal | DecimalJsLike | number | string | null
+    labelVdrCost?: Decimal | DecimalJsLike | number | string | null
+    labelFinalCost?: Decimal | DecimalJsLike | number | string | null
+    laceAutoBgt?: Decimal | DecimalJsLike | number | string | null
+    laceRoughV2?: Decimal | DecimalJsLike | number | string | null
+    laceVdrCost?: Decimal | DecimalJsLike | number | string | null
+    laceFinalCost?: Decimal | DecimalJsLike | number | string | null
+    pockettingFabricAutoBgt?: Decimal | DecimalJsLike | number | string | null
+    pockettingFabricRoughV2?: Decimal | DecimalJsLike | number | string | null
+    pockettingFabricVdrCost?: Decimal | DecimalJsLike | number | string | null
+    pockettingFabricFinalCost?: Decimal | DecimalJsLike | number | string | null
+    pockettingReadymadeAutoBgt?: Decimal | DecimalJsLike | number | string | null
+    pockettingReadymadeRoughV2?: Decimal | DecimalJsLike | number | string | null
+    pockettingReadymadeVdrCost?: Decimal | DecimalJsLike | number | string | null
+    pockettingReadymadeFinalCost?: Decimal | DecimalJsLike | number | string | null
+    santaAutoBgt?: Decimal | DecimalJsLike | number | string | null
+    santaRoughV2?: Decimal | DecimalJsLike | number | string | null
+    santaVdrCost?: Decimal | DecimalJsLike | number | string | null
+    santaFinalCost?: Decimal | DecimalJsLike | number | string | null
+    stopperAutoBgt?: Decimal | DecimalJsLike | number | string | null
+    stopperRoughV2?: Decimal | DecimalJsLike | number | string | null
+    stopperVdrCost?: Decimal | DecimalJsLike | number | string | null
+    stopperFinalCost?: Decimal | DecimalJsLike | number | string | null
+    tagAutoBgt?: Decimal | DecimalJsLike | number | string | null
+    tagRoughV2?: Decimal | DecimalJsLike | number | string | null
+    tagVdrCost?: Decimal | DecimalJsLike | number | string | null
+    tagFinalCost?: Decimal | DecimalJsLike | number | string | null
+    tasselsAutoBgt?: Decimal | DecimalJsLike | number | string | null
+    tasselsRoughV2?: Decimal | DecimalJsLike | number | string | null
+    tasselsVdrCost?: Decimal | DecimalJsLike | number | string | null
+    tasselsFinalCost?: Decimal | DecimalJsLike | number | string | null
     printAutoBgt?: Decimal | DecimalJsLike | number | string | null
     printRoughV2?: Decimal | DecimalJsLike | number | string | null
     printVendorCost?: Decimal | DecimalJsLike | number | string | null
@@ -129828,6 +131045,62 @@ export namespace Prisma {
     otherRoughV2?: Decimal | DecimalJsLike | number | string | null
     otherVdrCost?: Decimal | DecimalJsLike | number | string | null
     otherFinalCost?: Decimal | DecimalJsLike | number | string | null
+    adjusterAutoBgt?: Decimal | DecimalJsLike | number | string | null
+    adjusterRoughV2?: Decimal | DecimalJsLike | number | string | null
+    adjusterVdrCost?: Decimal | DecimalJsLike | number | string | null
+    adjusterFinalCost?: Decimal | DecimalJsLike | number | string | null
+    brotchAutoBgt?: Decimal | DecimalJsLike | number | string | null
+    brotchRoughV2?: Decimal | DecimalJsLike | number | string | null
+    brotchVdrCost?: Decimal | DecimalJsLike | number | string | null
+    brotchFinalCost?: Decimal | DecimalJsLike | number | string | null
+    buckleAutoBgt?: Decimal | DecimalJsLike | number | string | null
+    buckleRoughV2?: Decimal | DecimalJsLike | number | string | null
+    buckleVdrCost?: Decimal | DecimalJsLike | number | string | null
+    buckleFinalCost?: Decimal | DecimalJsLike | number | string | null
+    eyeletsAutoBgt?: Decimal | DecimalJsLike | number | string | null
+    eyeletsRoughV2?: Decimal | DecimalJsLike | number | string | null
+    eyeletsVdrCost?: Decimal | DecimalJsLike | number | string | null
+    eyeletsFinalCost?: Decimal | DecimalJsLike | number | string | null
+    hangingDRingAutoBgt?: Decimal | DecimalJsLike | number | string | null
+    hangingDRingRoughV2?: Decimal | DecimalJsLike | number | string | null
+    hangingDRingVdrCost?: Decimal | DecimalJsLike | number | string | null
+    hangingDRingFinalCost?: Decimal | DecimalJsLike | number | string | null
+    hookAutoBgt?: Decimal | DecimalJsLike | number | string | null
+    hookRoughV2?: Decimal | DecimalJsLike | number | string | null
+    hookVdrCost?: Decimal | DecimalJsLike | number | string | null
+    hookFinalCost?: Decimal | DecimalJsLike | number | string | null
+    labelAutoBgt?: Decimal | DecimalJsLike | number | string | null
+    labelRoughV2?: Decimal | DecimalJsLike | number | string | null
+    labelVdrCost?: Decimal | DecimalJsLike | number | string | null
+    labelFinalCost?: Decimal | DecimalJsLike | number | string | null
+    laceAutoBgt?: Decimal | DecimalJsLike | number | string | null
+    laceRoughV2?: Decimal | DecimalJsLike | number | string | null
+    laceVdrCost?: Decimal | DecimalJsLike | number | string | null
+    laceFinalCost?: Decimal | DecimalJsLike | number | string | null
+    pockettingFabricAutoBgt?: Decimal | DecimalJsLike | number | string | null
+    pockettingFabricRoughV2?: Decimal | DecimalJsLike | number | string | null
+    pockettingFabricVdrCost?: Decimal | DecimalJsLike | number | string | null
+    pockettingFabricFinalCost?: Decimal | DecimalJsLike | number | string | null
+    pockettingReadymadeAutoBgt?: Decimal | DecimalJsLike | number | string | null
+    pockettingReadymadeRoughV2?: Decimal | DecimalJsLike | number | string | null
+    pockettingReadymadeVdrCost?: Decimal | DecimalJsLike | number | string | null
+    pockettingReadymadeFinalCost?: Decimal | DecimalJsLike | number | string | null
+    santaAutoBgt?: Decimal | DecimalJsLike | number | string | null
+    santaRoughV2?: Decimal | DecimalJsLike | number | string | null
+    santaVdrCost?: Decimal | DecimalJsLike | number | string | null
+    santaFinalCost?: Decimal | DecimalJsLike | number | string | null
+    stopperAutoBgt?: Decimal | DecimalJsLike | number | string | null
+    stopperRoughV2?: Decimal | DecimalJsLike | number | string | null
+    stopperVdrCost?: Decimal | DecimalJsLike | number | string | null
+    stopperFinalCost?: Decimal | DecimalJsLike | number | string | null
+    tagAutoBgt?: Decimal | DecimalJsLike | number | string | null
+    tagRoughV2?: Decimal | DecimalJsLike | number | string | null
+    tagVdrCost?: Decimal | DecimalJsLike | number | string | null
+    tagFinalCost?: Decimal | DecimalJsLike | number | string | null
+    tasselsAutoBgt?: Decimal | DecimalJsLike | number | string | null
+    tasselsRoughV2?: Decimal | DecimalJsLike | number | string | null
+    tasselsVdrCost?: Decimal | DecimalJsLike | number | string | null
+    tasselsFinalCost?: Decimal | DecimalJsLike | number | string | null
     printAutoBgt?: Decimal | DecimalJsLike | number | string | null
     printRoughV2?: Decimal | DecimalJsLike | number | string | null
     printVendorCost?: Decimal | DecimalJsLike | number | string | null
@@ -129988,22 +131261,6 @@ export namespace Prisma {
     data: XOR<ExtractionJobUpdateManyMutationInput, ExtractionJobUncheckedUpdateManyWithoutUserInput>
   }
 
-  export type ExtractionResultUpsertWithWhereUniqueWithoutVerifierInput = {
-    where: ExtractionResultWhereUniqueInput
-    update: XOR<ExtractionResultUpdateWithoutVerifierInput, ExtractionResultUncheckedUpdateWithoutVerifierInput>
-    create: XOR<ExtractionResultCreateWithoutVerifierInput, ExtractionResultUncheckedCreateWithoutVerifierInput>
-  }
-
-  export type ExtractionResultUpdateWithWhereUniqueWithoutVerifierInput = {
-    where: ExtractionResultWhereUniqueInput
-    data: XOR<ExtractionResultUpdateWithoutVerifierInput, ExtractionResultUncheckedUpdateWithoutVerifierInput>
-  }
-
-  export type ExtractionResultUpdateManyWithWhereWithoutVerifierInput = {
-    where: ExtractionResultScalarWhereInput
-    data: XOR<ExtractionResultUpdateManyMutationInput, ExtractionResultUncheckedUpdateManyWithoutVerifierInput>
-  }
-
   export type ExtractionResultFlatUpsertWithWhereUniqueWithoutApproverInput = {
     where: ExtractionResultFlatWhereUniqueInput
     update: XOR<ExtractionResultFlatUpdateWithoutApproverInput, ExtractionResultFlatUncheckedUpdateWithoutApproverInput>
@@ -130034,7 +131291,6 @@ export namespace Prisma {
     updatedAt?: Date | string
     costSummary?: CostSummaryCreateNestedOneWithoutUserInput
     extractionJobs?: ExtractionJobCreateNestedManyWithoutUserInput
-    verifications?: ExtractionResultCreateNestedManyWithoutVerifierInput
     approvedItems?: ExtractionResultFlatCreateNestedManyWithoutApproverInput
   }
 
@@ -130053,7 +131309,6 @@ export namespace Prisma {
     updatedAt?: Date | string
     costSummary?: CostSummaryUncheckedCreateNestedOneWithoutUserInput
     extractionJobs?: ExtractionJobUncheckedCreateNestedManyWithoutUserInput
-    verifications?: ExtractionResultUncheckedCreateNestedManyWithoutVerifierInput
     approvedItems?: ExtractionResultFlatUncheckedCreateNestedManyWithoutApproverInput
   }
 
@@ -130087,7 +131342,6 @@ export namespace Prisma {
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     costSummary?: CostSummaryUpdateOneWithoutUserNestedInput
     extractionJobs?: ExtractionJobUpdateManyWithoutUserNestedInput
-    verifications?: ExtractionResultUpdateManyWithoutVerifierNestedInput
     approvedItems?: ExtractionResultFlatUpdateManyWithoutApproverNestedInput
   }
 
@@ -130106,7 +131360,6 @@ export namespace Prisma {
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     costSummary?: CostSummaryUncheckedUpdateOneWithoutUserNestedInput
     extractionJobs?: ExtractionJobUncheckedUpdateManyWithoutUserNestedInput
-    verifications?: ExtractionResultUncheckedUpdateManyWithoutVerifierNestedInput
     approvedItems?: ExtractionResultFlatUncheckedUpdateManyWithoutApproverNestedInput
   }
 
@@ -130124,7 +131377,6 @@ export namespace Prisma {
     updatedAt?: Date | string
     apiKeys?: ApiKeyCreateNestedManyWithoutUserInput
     extractionJobs?: ExtractionJobCreateNestedManyWithoutUserInput
-    verifications?: ExtractionResultCreateNestedManyWithoutVerifierInput
     approvedItems?: ExtractionResultFlatCreateNestedManyWithoutApproverInput
   }
 
@@ -130143,7 +131395,6 @@ export namespace Prisma {
     updatedAt?: Date | string
     apiKeys?: ApiKeyUncheckedCreateNestedManyWithoutUserInput
     extractionJobs?: ExtractionJobUncheckedCreateNestedManyWithoutUserInput
-    verifications?: ExtractionResultUncheckedCreateNestedManyWithoutVerifierInput
     approvedItems?: ExtractionResultFlatUncheckedCreateNestedManyWithoutApproverInput
   }
 
@@ -130177,7 +131428,6 @@ export namespace Prisma {
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     apiKeys?: ApiKeyUpdateManyWithoutUserNestedInput
     extractionJobs?: ExtractionJobUpdateManyWithoutUserNestedInput
-    verifications?: ExtractionResultUpdateManyWithoutVerifierNestedInput
     approvedItems?: ExtractionResultFlatUpdateManyWithoutApproverNestedInput
   }
 
@@ -130196,7 +131446,6 @@ export namespace Prisma {
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     apiKeys?: ApiKeyUncheckedUpdateManyWithoutUserNestedInput
     extractionJobs?: ExtractionJobUncheckedUpdateManyWithoutUserNestedInput
-    verifications?: ExtractionResultUncheckedUpdateManyWithoutVerifierNestedInput
     approvedItems?: ExtractionResultFlatUncheckedUpdateManyWithoutApproverNestedInput
   }
 
@@ -131613,6 +132862,62 @@ export namespace Prisma {
     otherRoughV2?: Decimal | DecimalJsLike | number | string | null
     otherVdrCost?: Decimal | DecimalJsLike | number | string | null
     otherFinalCost?: Decimal | DecimalJsLike | number | string | null
+    adjusterAutoBgt?: Decimal | DecimalJsLike | number | string | null
+    adjusterRoughV2?: Decimal | DecimalJsLike | number | string | null
+    adjusterVdrCost?: Decimal | DecimalJsLike | number | string | null
+    adjusterFinalCost?: Decimal | DecimalJsLike | number | string | null
+    brotchAutoBgt?: Decimal | DecimalJsLike | number | string | null
+    brotchRoughV2?: Decimal | DecimalJsLike | number | string | null
+    brotchVdrCost?: Decimal | DecimalJsLike | number | string | null
+    brotchFinalCost?: Decimal | DecimalJsLike | number | string | null
+    buckleAutoBgt?: Decimal | DecimalJsLike | number | string | null
+    buckleRoughV2?: Decimal | DecimalJsLike | number | string | null
+    buckleVdrCost?: Decimal | DecimalJsLike | number | string | null
+    buckleFinalCost?: Decimal | DecimalJsLike | number | string | null
+    eyeletsAutoBgt?: Decimal | DecimalJsLike | number | string | null
+    eyeletsRoughV2?: Decimal | DecimalJsLike | number | string | null
+    eyeletsVdrCost?: Decimal | DecimalJsLike | number | string | null
+    eyeletsFinalCost?: Decimal | DecimalJsLike | number | string | null
+    hangingDRingAutoBgt?: Decimal | DecimalJsLike | number | string | null
+    hangingDRingRoughV2?: Decimal | DecimalJsLike | number | string | null
+    hangingDRingVdrCost?: Decimal | DecimalJsLike | number | string | null
+    hangingDRingFinalCost?: Decimal | DecimalJsLike | number | string | null
+    hookAutoBgt?: Decimal | DecimalJsLike | number | string | null
+    hookRoughV2?: Decimal | DecimalJsLike | number | string | null
+    hookVdrCost?: Decimal | DecimalJsLike | number | string | null
+    hookFinalCost?: Decimal | DecimalJsLike | number | string | null
+    labelAutoBgt?: Decimal | DecimalJsLike | number | string | null
+    labelRoughV2?: Decimal | DecimalJsLike | number | string | null
+    labelVdrCost?: Decimal | DecimalJsLike | number | string | null
+    labelFinalCost?: Decimal | DecimalJsLike | number | string | null
+    laceAutoBgt?: Decimal | DecimalJsLike | number | string | null
+    laceRoughV2?: Decimal | DecimalJsLike | number | string | null
+    laceVdrCost?: Decimal | DecimalJsLike | number | string | null
+    laceFinalCost?: Decimal | DecimalJsLike | number | string | null
+    pockettingFabricAutoBgt?: Decimal | DecimalJsLike | number | string | null
+    pockettingFabricRoughV2?: Decimal | DecimalJsLike | number | string | null
+    pockettingFabricVdrCost?: Decimal | DecimalJsLike | number | string | null
+    pockettingFabricFinalCost?: Decimal | DecimalJsLike | number | string | null
+    pockettingReadymadeAutoBgt?: Decimal | DecimalJsLike | number | string | null
+    pockettingReadymadeRoughV2?: Decimal | DecimalJsLike | number | string | null
+    pockettingReadymadeVdrCost?: Decimal | DecimalJsLike | number | string | null
+    pockettingReadymadeFinalCost?: Decimal | DecimalJsLike | number | string | null
+    santaAutoBgt?: Decimal | DecimalJsLike | number | string | null
+    santaRoughV2?: Decimal | DecimalJsLike | number | string | null
+    santaVdrCost?: Decimal | DecimalJsLike | number | string | null
+    santaFinalCost?: Decimal | DecimalJsLike | number | string | null
+    stopperAutoBgt?: Decimal | DecimalJsLike | number | string | null
+    stopperRoughV2?: Decimal | DecimalJsLike | number | string | null
+    stopperVdrCost?: Decimal | DecimalJsLike | number | string | null
+    stopperFinalCost?: Decimal | DecimalJsLike | number | string | null
+    tagAutoBgt?: Decimal | DecimalJsLike | number | string | null
+    tagRoughV2?: Decimal | DecimalJsLike | number | string | null
+    tagVdrCost?: Decimal | DecimalJsLike | number | string | null
+    tagFinalCost?: Decimal | DecimalJsLike | number | string | null
+    tasselsAutoBgt?: Decimal | DecimalJsLike | number | string | null
+    tasselsRoughV2?: Decimal | DecimalJsLike | number | string | null
+    tasselsVdrCost?: Decimal | DecimalJsLike | number | string | null
+    tasselsFinalCost?: Decimal | DecimalJsLike | number | string | null
     printAutoBgt?: Decimal | DecimalJsLike | number | string | null
     printRoughV2?: Decimal | DecimalJsLike | number | string | null
     printVendorCost?: Decimal | DecimalJsLike | number | string | null
@@ -131846,6 +133151,62 @@ export namespace Prisma {
     otherRoughV2?: Decimal | DecimalJsLike | number | string | null
     otherVdrCost?: Decimal | DecimalJsLike | number | string | null
     otherFinalCost?: Decimal | DecimalJsLike | number | string | null
+    adjusterAutoBgt?: Decimal | DecimalJsLike | number | string | null
+    adjusterRoughV2?: Decimal | DecimalJsLike | number | string | null
+    adjusterVdrCost?: Decimal | DecimalJsLike | number | string | null
+    adjusterFinalCost?: Decimal | DecimalJsLike | number | string | null
+    brotchAutoBgt?: Decimal | DecimalJsLike | number | string | null
+    brotchRoughV2?: Decimal | DecimalJsLike | number | string | null
+    brotchVdrCost?: Decimal | DecimalJsLike | number | string | null
+    brotchFinalCost?: Decimal | DecimalJsLike | number | string | null
+    buckleAutoBgt?: Decimal | DecimalJsLike | number | string | null
+    buckleRoughV2?: Decimal | DecimalJsLike | number | string | null
+    buckleVdrCost?: Decimal | DecimalJsLike | number | string | null
+    buckleFinalCost?: Decimal | DecimalJsLike | number | string | null
+    eyeletsAutoBgt?: Decimal | DecimalJsLike | number | string | null
+    eyeletsRoughV2?: Decimal | DecimalJsLike | number | string | null
+    eyeletsVdrCost?: Decimal | DecimalJsLike | number | string | null
+    eyeletsFinalCost?: Decimal | DecimalJsLike | number | string | null
+    hangingDRingAutoBgt?: Decimal | DecimalJsLike | number | string | null
+    hangingDRingRoughV2?: Decimal | DecimalJsLike | number | string | null
+    hangingDRingVdrCost?: Decimal | DecimalJsLike | number | string | null
+    hangingDRingFinalCost?: Decimal | DecimalJsLike | number | string | null
+    hookAutoBgt?: Decimal | DecimalJsLike | number | string | null
+    hookRoughV2?: Decimal | DecimalJsLike | number | string | null
+    hookVdrCost?: Decimal | DecimalJsLike | number | string | null
+    hookFinalCost?: Decimal | DecimalJsLike | number | string | null
+    labelAutoBgt?: Decimal | DecimalJsLike | number | string | null
+    labelRoughV2?: Decimal | DecimalJsLike | number | string | null
+    labelVdrCost?: Decimal | DecimalJsLike | number | string | null
+    labelFinalCost?: Decimal | DecimalJsLike | number | string | null
+    laceAutoBgt?: Decimal | DecimalJsLike | number | string | null
+    laceRoughV2?: Decimal | DecimalJsLike | number | string | null
+    laceVdrCost?: Decimal | DecimalJsLike | number | string | null
+    laceFinalCost?: Decimal | DecimalJsLike | number | string | null
+    pockettingFabricAutoBgt?: Decimal | DecimalJsLike | number | string | null
+    pockettingFabricRoughV2?: Decimal | DecimalJsLike | number | string | null
+    pockettingFabricVdrCost?: Decimal | DecimalJsLike | number | string | null
+    pockettingFabricFinalCost?: Decimal | DecimalJsLike | number | string | null
+    pockettingReadymadeAutoBgt?: Decimal | DecimalJsLike | number | string | null
+    pockettingReadymadeRoughV2?: Decimal | DecimalJsLike | number | string | null
+    pockettingReadymadeVdrCost?: Decimal | DecimalJsLike | number | string | null
+    pockettingReadymadeFinalCost?: Decimal | DecimalJsLike | number | string | null
+    santaAutoBgt?: Decimal | DecimalJsLike | number | string | null
+    santaRoughV2?: Decimal | DecimalJsLike | number | string | null
+    santaVdrCost?: Decimal | DecimalJsLike | number | string | null
+    santaFinalCost?: Decimal | DecimalJsLike | number | string | null
+    stopperAutoBgt?: Decimal | DecimalJsLike | number | string | null
+    stopperRoughV2?: Decimal | DecimalJsLike | number | string | null
+    stopperVdrCost?: Decimal | DecimalJsLike | number | string | null
+    stopperFinalCost?: Decimal | DecimalJsLike | number | string | null
+    tagAutoBgt?: Decimal | DecimalJsLike | number | string | null
+    tagRoughV2?: Decimal | DecimalJsLike | number | string | null
+    tagVdrCost?: Decimal | DecimalJsLike | number | string | null
+    tagFinalCost?: Decimal | DecimalJsLike | number | string | null
+    tasselsAutoBgt?: Decimal | DecimalJsLike | number | string | null
+    tasselsRoughV2?: Decimal | DecimalJsLike | number | string | null
+    tasselsVdrCost?: Decimal | DecimalJsLike | number | string | null
+    tasselsFinalCost?: Decimal | DecimalJsLike | number | string | null
     printAutoBgt?: Decimal | DecimalJsLike | number | string | null
     printRoughV2?: Decimal | DecimalJsLike | number | string | null
     printVendorCost?: Decimal | DecimalJsLike | number | string | null
@@ -132130,6 +133491,62 @@ export namespace Prisma {
     otherRoughV2?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
     otherVdrCost?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
     otherFinalCost?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    adjusterAutoBgt?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    adjusterRoughV2?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    adjusterVdrCost?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    adjusterFinalCost?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    brotchAutoBgt?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    brotchRoughV2?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    brotchVdrCost?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    brotchFinalCost?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    buckleAutoBgt?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    buckleRoughV2?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    buckleVdrCost?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    buckleFinalCost?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    eyeletsAutoBgt?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    eyeletsRoughV2?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    eyeletsVdrCost?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    eyeletsFinalCost?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    hangingDRingAutoBgt?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    hangingDRingRoughV2?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    hangingDRingVdrCost?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    hangingDRingFinalCost?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    hookAutoBgt?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    hookRoughV2?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    hookVdrCost?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    hookFinalCost?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    labelAutoBgt?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    labelRoughV2?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    labelVdrCost?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    labelFinalCost?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    laceAutoBgt?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    laceRoughV2?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    laceVdrCost?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    laceFinalCost?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    pockettingFabricAutoBgt?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    pockettingFabricRoughV2?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    pockettingFabricVdrCost?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    pockettingFabricFinalCost?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    pockettingReadymadeAutoBgt?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    pockettingReadymadeRoughV2?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    pockettingReadymadeVdrCost?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    pockettingReadymadeFinalCost?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    santaAutoBgt?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    santaRoughV2?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    santaVdrCost?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    santaFinalCost?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    stopperAutoBgt?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    stopperRoughV2?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    stopperVdrCost?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    stopperFinalCost?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    tagAutoBgt?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    tagRoughV2?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    tagVdrCost?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    tagFinalCost?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    tasselsAutoBgt?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    tasselsRoughV2?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    tasselsVdrCost?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    tasselsFinalCost?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
     printAutoBgt?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
     printRoughV2?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
     printVendorCost?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
@@ -132363,6 +133780,62 @@ export namespace Prisma {
     otherRoughV2?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
     otherVdrCost?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
     otherFinalCost?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    adjusterAutoBgt?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    adjusterRoughV2?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    adjusterVdrCost?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    adjusterFinalCost?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    brotchAutoBgt?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    brotchRoughV2?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    brotchVdrCost?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    brotchFinalCost?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    buckleAutoBgt?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    buckleRoughV2?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    buckleVdrCost?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    buckleFinalCost?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    eyeletsAutoBgt?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    eyeletsRoughV2?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    eyeletsVdrCost?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    eyeletsFinalCost?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    hangingDRingAutoBgt?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    hangingDRingRoughV2?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    hangingDRingVdrCost?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    hangingDRingFinalCost?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    hookAutoBgt?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    hookRoughV2?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    hookVdrCost?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    hookFinalCost?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    labelAutoBgt?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    labelRoughV2?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    labelVdrCost?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    labelFinalCost?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    laceAutoBgt?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    laceRoughV2?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    laceVdrCost?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    laceFinalCost?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    pockettingFabricAutoBgt?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    pockettingFabricRoughV2?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    pockettingFabricVdrCost?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    pockettingFabricFinalCost?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    pockettingReadymadeAutoBgt?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    pockettingReadymadeRoughV2?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    pockettingReadymadeVdrCost?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    pockettingReadymadeFinalCost?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    santaAutoBgt?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    santaRoughV2?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    santaVdrCost?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    santaFinalCost?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    stopperAutoBgt?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    stopperRoughV2?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    stopperVdrCost?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    stopperFinalCost?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    tagAutoBgt?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    tagRoughV2?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    tagVdrCost?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    tagFinalCost?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    tasselsAutoBgt?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    tasselsRoughV2?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    tasselsVdrCost?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    tasselsFinalCost?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
     printAutoBgt?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
     printRoughV2?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
     printVendorCost?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
@@ -132906,7 +134379,6 @@ export namespace Prisma {
     inputTokens?: NullableIntFieldUpdateOperationsInput | number | null
     outputTokens?: NullableIntFieldUpdateOperationsInput | number | null
     user?: UserUpdateOneWithoutExtractionJobsNestedInput
-    results?: ExtractionResultUpdateManyWithoutJobNestedInput
     flatResult?: ExtractionResultFlatUpdateOneWithoutJobNestedInput
   }
 
@@ -132934,7 +134406,6 @@ export namespace Prisma {
     apiCost?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
     inputTokens?: NullableIntFieldUpdateOperationsInput | number | null
     outputTokens?: NullableIntFieldUpdateOperationsInput | number | null
-    results?: ExtractionResultUncheckedUpdateManyWithoutJobNestedInput
     flatResult?: ExtractionResultFlatUncheckedUpdateOneWithoutJobNestedInput
   }
 
@@ -132986,21 +134457,6 @@ export namespace Prisma {
     updatedAt?: Date | string
   }
 
-  export type ExtractionResultCreateManyAttributeInput = {
-    id?: string
-    jobId: string
-    rawValue?: string | null
-    matchedValueId?: number | null
-    finalValue?: string | null
-    confidence?: Decimal | DecimalJsLike | number | string | null
-    extractionMethod?: string | null
-    alternativeValues?: NullableJsonNullValueInput | InputJsonValue
-    isVerified?: boolean
-    verifiedBy?: number | null
-    verifiedAt?: Date | string | null
-    createdAt?: Date | string
-  }
-
   export type AttributeAllowedValueUpdateWithoutAttributeInput = {
     shortForm?: StringFieldUpdateOperationsInput | string
     fullForm?: StringFieldUpdateOperationsInput | string
@@ -133009,7 +134465,6 @@ export namespace Prisma {
     isActive?: BoolFieldUpdateOperationsInput | boolean
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
-    matchedResults?: ExtractionResultUpdateManyWithoutMatchedValueNestedInput
   }
 
   export type AttributeAllowedValueUncheckedUpdateWithoutAttributeInput = {
@@ -133021,7 +134476,6 @@ export namespace Prisma {
     isActive?: BoolFieldUpdateOperationsInput | boolean
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
-    matchedResults?: ExtractionResultUncheckedUpdateManyWithoutMatchedValueNestedInput
   }
 
   export type AttributeAllowedValueUncheckedUpdateManyWithoutAttributeInput = {
@@ -133065,171 +134519,6 @@ export namespace Prisma {
     defaultValue?: NullableStringFieldUpdateOperationsInput | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
-  }
-
-  export type ExtractionResultUpdateWithoutAttributeInput = {
-    id?: StringFieldUpdateOperationsInput | string
-    rawValue?: NullableStringFieldUpdateOperationsInput | string | null
-    finalValue?: NullableStringFieldUpdateOperationsInput | string | null
-    confidence?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
-    extractionMethod?: NullableStringFieldUpdateOperationsInput | string | null
-    alternativeValues?: NullableJsonNullValueInput | InputJsonValue
-    isVerified?: BoolFieldUpdateOperationsInput | boolean
-    verifiedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
-    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
-    job?: ExtractionJobUpdateOneRequiredWithoutResultsNestedInput
-    matchedValue?: AttributeAllowedValueUpdateOneWithoutMatchedResultsNestedInput
-    verifier?: UserUpdateOneWithoutVerificationsNestedInput
-  }
-
-  export type ExtractionResultUncheckedUpdateWithoutAttributeInput = {
-    id?: StringFieldUpdateOperationsInput | string
-    jobId?: StringFieldUpdateOperationsInput | string
-    rawValue?: NullableStringFieldUpdateOperationsInput | string | null
-    matchedValueId?: NullableIntFieldUpdateOperationsInput | number | null
-    finalValue?: NullableStringFieldUpdateOperationsInput | string | null
-    confidence?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
-    extractionMethod?: NullableStringFieldUpdateOperationsInput | string | null
-    alternativeValues?: NullableJsonNullValueInput | InputJsonValue
-    isVerified?: BoolFieldUpdateOperationsInput | boolean
-    verifiedBy?: NullableIntFieldUpdateOperationsInput | number | null
-    verifiedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
-    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
-  }
-
-  export type ExtractionResultUncheckedUpdateManyWithoutAttributeInput = {
-    id?: StringFieldUpdateOperationsInput | string
-    jobId?: StringFieldUpdateOperationsInput | string
-    rawValue?: NullableStringFieldUpdateOperationsInput | string | null
-    matchedValueId?: NullableIntFieldUpdateOperationsInput | number | null
-    finalValue?: NullableStringFieldUpdateOperationsInput | string | null
-    confidence?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
-    extractionMethod?: NullableStringFieldUpdateOperationsInput | string | null
-    alternativeValues?: NullableJsonNullValueInput | InputJsonValue
-    isVerified?: BoolFieldUpdateOperationsInput | boolean
-    verifiedBy?: NullableIntFieldUpdateOperationsInput | number | null
-    verifiedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
-    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
-  }
-
-  export type ExtractionResultCreateManyMatchedValueInput = {
-    id?: string
-    jobId: string
-    attributeId: number
-    rawValue?: string | null
-    finalValue?: string | null
-    confidence?: Decimal | DecimalJsLike | number | string | null
-    extractionMethod?: string | null
-    alternativeValues?: NullableJsonNullValueInput | InputJsonValue
-    isVerified?: boolean
-    verifiedBy?: number | null
-    verifiedAt?: Date | string | null
-    createdAt?: Date | string
-  }
-
-  export type ExtractionResultUpdateWithoutMatchedValueInput = {
-    id?: StringFieldUpdateOperationsInput | string
-    rawValue?: NullableStringFieldUpdateOperationsInput | string | null
-    finalValue?: NullableStringFieldUpdateOperationsInput | string | null
-    confidence?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
-    extractionMethod?: NullableStringFieldUpdateOperationsInput | string | null
-    alternativeValues?: NullableJsonNullValueInput | InputJsonValue
-    isVerified?: BoolFieldUpdateOperationsInput | boolean
-    verifiedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
-    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
-    attribute?: MasterAttributeUpdateOneRequiredWithoutExtractionsNestedInput
-    job?: ExtractionJobUpdateOneRequiredWithoutResultsNestedInput
-    verifier?: UserUpdateOneWithoutVerificationsNestedInput
-  }
-
-  export type ExtractionResultUncheckedUpdateWithoutMatchedValueInput = {
-    id?: StringFieldUpdateOperationsInput | string
-    jobId?: StringFieldUpdateOperationsInput | string
-    attributeId?: IntFieldUpdateOperationsInput | number
-    rawValue?: NullableStringFieldUpdateOperationsInput | string | null
-    finalValue?: NullableStringFieldUpdateOperationsInput | string | null
-    confidence?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
-    extractionMethod?: NullableStringFieldUpdateOperationsInput | string | null
-    alternativeValues?: NullableJsonNullValueInput | InputJsonValue
-    isVerified?: BoolFieldUpdateOperationsInput | boolean
-    verifiedBy?: NullableIntFieldUpdateOperationsInput | number | null
-    verifiedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
-    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
-  }
-
-  export type ExtractionResultUncheckedUpdateManyWithoutMatchedValueInput = {
-    id?: StringFieldUpdateOperationsInput | string
-    jobId?: StringFieldUpdateOperationsInput | string
-    attributeId?: IntFieldUpdateOperationsInput | number
-    rawValue?: NullableStringFieldUpdateOperationsInput | string | null
-    finalValue?: NullableStringFieldUpdateOperationsInput | string | null
-    confidence?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
-    extractionMethod?: NullableStringFieldUpdateOperationsInput | string | null
-    alternativeValues?: NullableJsonNullValueInput | InputJsonValue
-    isVerified?: BoolFieldUpdateOperationsInput | boolean
-    verifiedBy?: NullableIntFieldUpdateOperationsInput | number | null
-    verifiedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
-    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
-  }
-
-  export type ExtractionResultCreateManyJobInput = {
-    id?: string
-    attributeId: number
-    rawValue?: string | null
-    matchedValueId?: number | null
-    finalValue?: string | null
-    confidence?: Decimal | DecimalJsLike | number | string | null
-    extractionMethod?: string | null
-    alternativeValues?: NullableJsonNullValueInput | InputJsonValue
-    isVerified?: boolean
-    verifiedBy?: number | null
-    verifiedAt?: Date | string | null
-    createdAt?: Date | string
-  }
-
-  export type ExtractionResultUpdateWithoutJobInput = {
-    id?: StringFieldUpdateOperationsInput | string
-    rawValue?: NullableStringFieldUpdateOperationsInput | string | null
-    finalValue?: NullableStringFieldUpdateOperationsInput | string | null
-    confidence?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
-    extractionMethod?: NullableStringFieldUpdateOperationsInput | string | null
-    alternativeValues?: NullableJsonNullValueInput | InputJsonValue
-    isVerified?: BoolFieldUpdateOperationsInput | boolean
-    verifiedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
-    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
-    attribute?: MasterAttributeUpdateOneRequiredWithoutExtractionsNestedInput
-    matchedValue?: AttributeAllowedValueUpdateOneWithoutMatchedResultsNestedInput
-    verifier?: UserUpdateOneWithoutVerificationsNestedInput
-  }
-
-  export type ExtractionResultUncheckedUpdateWithoutJobInput = {
-    id?: StringFieldUpdateOperationsInput | string
-    attributeId?: IntFieldUpdateOperationsInput | number
-    rawValue?: NullableStringFieldUpdateOperationsInput | string | null
-    matchedValueId?: NullableIntFieldUpdateOperationsInput | number | null
-    finalValue?: NullableStringFieldUpdateOperationsInput | string | null
-    confidence?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
-    extractionMethod?: NullableStringFieldUpdateOperationsInput | string | null
-    alternativeValues?: NullableJsonNullValueInput | InputJsonValue
-    isVerified?: BoolFieldUpdateOperationsInput | boolean
-    verifiedBy?: NullableIntFieldUpdateOperationsInput | number | null
-    verifiedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
-    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
-  }
-
-  export type ExtractionResultUncheckedUpdateManyWithoutJobInput = {
-    id?: StringFieldUpdateOperationsInput | string
-    attributeId?: IntFieldUpdateOperationsInput | number
-    rawValue?: NullableStringFieldUpdateOperationsInput | string | null
-    matchedValueId?: NullableIntFieldUpdateOperationsInput | number | null
-    finalValue?: NullableStringFieldUpdateOperationsInput | string | null
-    confidence?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
-    extractionMethod?: NullableStringFieldUpdateOperationsInput | string | null
-    alternativeValues?: NullableJsonNullValueInput | InputJsonValue
-    isVerified?: BoolFieldUpdateOperationsInput | boolean
-    verifiedBy?: NullableIntFieldUpdateOperationsInput | number | null
-    verifiedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
-    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
   }
 
   export type ExtractionResultFlatCreateManyComboParentInput = {
@@ -133399,6 +134688,62 @@ export namespace Prisma {
     otherRoughV2?: Decimal | DecimalJsLike | number | string | null
     otherVdrCost?: Decimal | DecimalJsLike | number | string | null
     otherFinalCost?: Decimal | DecimalJsLike | number | string | null
+    adjusterAutoBgt?: Decimal | DecimalJsLike | number | string | null
+    adjusterRoughV2?: Decimal | DecimalJsLike | number | string | null
+    adjusterVdrCost?: Decimal | DecimalJsLike | number | string | null
+    adjusterFinalCost?: Decimal | DecimalJsLike | number | string | null
+    brotchAutoBgt?: Decimal | DecimalJsLike | number | string | null
+    brotchRoughV2?: Decimal | DecimalJsLike | number | string | null
+    brotchVdrCost?: Decimal | DecimalJsLike | number | string | null
+    brotchFinalCost?: Decimal | DecimalJsLike | number | string | null
+    buckleAutoBgt?: Decimal | DecimalJsLike | number | string | null
+    buckleRoughV2?: Decimal | DecimalJsLike | number | string | null
+    buckleVdrCost?: Decimal | DecimalJsLike | number | string | null
+    buckleFinalCost?: Decimal | DecimalJsLike | number | string | null
+    eyeletsAutoBgt?: Decimal | DecimalJsLike | number | string | null
+    eyeletsRoughV2?: Decimal | DecimalJsLike | number | string | null
+    eyeletsVdrCost?: Decimal | DecimalJsLike | number | string | null
+    eyeletsFinalCost?: Decimal | DecimalJsLike | number | string | null
+    hangingDRingAutoBgt?: Decimal | DecimalJsLike | number | string | null
+    hangingDRingRoughV2?: Decimal | DecimalJsLike | number | string | null
+    hangingDRingVdrCost?: Decimal | DecimalJsLike | number | string | null
+    hangingDRingFinalCost?: Decimal | DecimalJsLike | number | string | null
+    hookAutoBgt?: Decimal | DecimalJsLike | number | string | null
+    hookRoughV2?: Decimal | DecimalJsLike | number | string | null
+    hookVdrCost?: Decimal | DecimalJsLike | number | string | null
+    hookFinalCost?: Decimal | DecimalJsLike | number | string | null
+    labelAutoBgt?: Decimal | DecimalJsLike | number | string | null
+    labelRoughV2?: Decimal | DecimalJsLike | number | string | null
+    labelVdrCost?: Decimal | DecimalJsLike | number | string | null
+    labelFinalCost?: Decimal | DecimalJsLike | number | string | null
+    laceAutoBgt?: Decimal | DecimalJsLike | number | string | null
+    laceRoughV2?: Decimal | DecimalJsLike | number | string | null
+    laceVdrCost?: Decimal | DecimalJsLike | number | string | null
+    laceFinalCost?: Decimal | DecimalJsLike | number | string | null
+    pockettingFabricAutoBgt?: Decimal | DecimalJsLike | number | string | null
+    pockettingFabricRoughV2?: Decimal | DecimalJsLike | number | string | null
+    pockettingFabricVdrCost?: Decimal | DecimalJsLike | number | string | null
+    pockettingFabricFinalCost?: Decimal | DecimalJsLike | number | string | null
+    pockettingReadymadeAutoBgt?: Decimal | DecimalJsLike | number | string | null
+    pockettingReadymadeRoughV2?: Decimal | DecimalJsLike | number | string | null
+    pockettingReadymadeVdrCost?: Decimal | DecimalJsLike | number | string | null
+    pockettingReadymadeFinalCost?: Decimal | DecimalJsLike | number | string | null
+    santaAutoBgt?: Decimal | DecimalJsLike | number | string | null
+    santaRoughV2?: Decimal | DecimalJsLike | number | string | null
+    santaVdrCost?: Decimal | DecimalJsLike | number | string | null
+    santaFinalCost?: Decimal | DecimalJsLike | number | string | null
+    stopperAutoBgt?: Decimal | DecimalJsLike | number | string | null
+    stopperRoughV2?: Decimal | DecimalJsLike | number | string | null
+    stopperVdrCost?: Decimal | DecimalJsLike | number | string | null
+    stopperFinalCost?: Decimal | DecimalJsLike | number | string | null
+    tagAutoBgt?: Decimal | DecimalJsLike | number | string | null
+    tagRoughV2?: Decimal | DecimalJsLike | number | string | null
+    tagVdrCost?: Decimal | DecimalJsLike | number | string | null
+    tagFinalCost?: Decimal | DecimalJsLike | number | string | null
+    tasselsAutoBgt?: Decimal | DecimalJsLike | number | string | null
+    tasselsRoughV2?: Decimal | DecimalJsLike | number | string | null
+    tasselsVdrCost?: Decimal | DecimalJsLike | number | string | null
+    tasselsFinalCost?: Decimal | DecimalJsLike | number | string | null
     printAutoBgt?: Decimal | DecimalJsLike | number | string | null
     printRoughV2?: Decimal | DecimalJsLike | number | string | null
     printVendorCost?: Decimal | DecimalJsLike | number | string | null
@@ -133638,6 +134983,62 @@ export namespace Prisma {
     otherRoughV2?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
     otherVdrCost?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
     otherFinalCost?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    adjusterAutoBgt?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    adjusterRoughV2?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    adjusterVdrCost?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    adjusterFinalCost?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    brotchAutoBgt?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    brotchRoughV2?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    brotchVdrCost?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    brotchFinalCost?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    buckleAutoBgt?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    buckleRoughV2?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    buckleVdrCost?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    buckleFinalCost?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    eyeletsAutoBgt?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    eyeletsRoughV2?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    eyeletsVdrCost?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    eyeletsFinalCost?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    hangingDRingAutoBgt?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    hangingDRingRoughV2?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    hangingDRingVdrCost?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    hangingDRingFinalCost?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    hookAutoBgt?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    hookRoughV2?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    hookVdrCost?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    hookFinalCost?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    labelAutoBgt?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    labelRoughV2?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    labelVdrCost?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    labelFinalCost?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    laceAutoBgt?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    laceRoughV2?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    laceVdrCost?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    laceFinalCost?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    pockettingFabricAutoBgt?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    pockettingFabricRoughV2?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    pockettingFabricVdrCost?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    pockettingFabricFinalCost?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    pockettingReadymadeAutoBgt?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    pockettingReadymadeRoughV2?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    pockettingReadymadeVdrCost?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    pockettingReadymadeFinalCost?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    santaAutoBgt?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    santaRoughV2?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    santaVdrCost?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    santaFinalCost?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    stopperAutoBgt?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    stopperRoughV2?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    stopperVdrCost?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    stopperFinalCost?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    tagAutoBgt?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    tagRoughV2?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    tagVdrCost?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    tagFinalCost?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    tasselsAutoBgt?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    tasselsRoughV2?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    tasselsVdrCost?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    tasselsFinalCost?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
     printAutoBgt?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
     printRoughV2?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
     printVendorCost?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
@@ -133871,6 +135272,62 @@ export namespace Prisma {
     otherRoughV2?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
     otherVdrCost?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
     otherFinalCost?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    adjusterAutoBgt?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    adjusterRoughV2?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    adjusterVdrCost?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    adjusterFinalCost?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    brotchAutoBgt?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    brotchRoughV2?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    brotchVdrCost?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    brotchFinalCost?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    buckleAutoBgt?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    buckleRoughV2?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    buckleVdrCost?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    buckleFinalCost?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    eyeletsAutoBgt?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    eyeletsRoughV2?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    eyeletsVdrCost?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    eyeletsFinalCost?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    hangingDRingAutoBgt?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    hangingDRingRoughV2?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    hangingDRingVdrCost?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    hangingDRingFinalCost?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    hookAutoBgt?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    hookRoughV2?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    hookVdrCost?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    hookFinalCost?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    labelAutoBgt?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    labelRoughV2?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    labelVdrCost?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    labelFinalCost?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    laceAutoBgt?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    laceRoughV2?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    laceVdrCost?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    laceFinalCost?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    pockettingFabricAutoBgt?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    pockettingFabricRoughV2?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    pockettingFabricVdrCost?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    pockettingFabricFinalCost?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    pockettingReadymadeAutoBgt?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    pockettingReadymadeRoughV2?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    pockettingReadymadeVdrCost?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    pockettingReadymadeFinalCost?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    santaAutoBgt?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    santaRoughV2?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    santaVdrCost?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    santaFinalCost?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    stopperAutoBgt?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    stopperRoughV2?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    stopperVdrCost?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    stopperFinalCost?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    tagAutoBgt?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    tagRoughV2?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    tagVdrCost?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    tagFinalCost?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    tasselsAutoBgt?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    tasselsRoughV2?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    tasselsVdrCost?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    tasselsFinalCost?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
     printAutoBgt?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
     printRoughV2?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
     printVendorCost?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
@@ -134103,6 +135560,62 @@ export namespace Prisma {
     otherRoughV2?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
     otherVdrCost?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
     otherFinalCost?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    adjusterAutoBgt?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    adjusterRoughV2?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    adjusterVdrCost?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    adjusterFinalCost?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    brotchAutoBgt?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    brotchRoughV2?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    brotchVdrCost?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    brotchFinalCost?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    buckleAutoBgt?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    buckleRoughV2?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    buckleVdrCost?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    buckleFinalCost?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    eyeletsAutoBgt?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    eyeletsRoughV2?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    eyeletsVdrCost?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    eyeletsFinalCost?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    hangingDRingAutoBgt?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    hangingDRingRoughV2?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    hangingDRingVdrCost?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    hangingDRingFinalCost?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    hookAutoBgt?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    hookRoughV2?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    hookVdrCost?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    hookFinalCost?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    labelAutoBgt?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    labelRoughV2?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    labelVdrCost?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    labelFinalCost?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    laceAutoBgt?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    laceRoughV2?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    laceVdrCost?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    laceFinalCost?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    pockettingFabricAutoBgt?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    pockettingFabricRoughV2?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    pockettingFabricVdrCost?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    pockettingFabricFinalCost?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    pockettingReadymadeAutoBgt?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    pockettingReadymadeRoughV2?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    pockettingReadymadeVdrCost?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    pockettingReadymadeFinalCost?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    santaAutoBgt?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    santaRoughV2?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    santaVdrCost?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    santaFinalCost?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    stopperAutoBgt?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    stopperRoughV2?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    stopperVdrCost?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    stopperFinalCost?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    tagAutoBgt?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    tagRoughV2?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    tagVdrCost?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    tagFinalCost?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    tasselsAutoBgt?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    tasselsRoughV2?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    tasselsVdrCost?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    tasselsFinalCost?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
     printAutoBgt?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
     printRoughV2?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
     printVendorCost?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
@@ -134232,21 +135745,6 @@ export namespace Prisma {
     apiCost?: Decimal | DecimalJsLike | number | string | null
     inputTokens?: number | null
     outputTokens?: number | null
-  }
-
-  export type ExtractionResultCreateManyVerifierInput = {
-    id?: string
-    jobId: string
-    attributeId: number
-    rawValue?: string | null
-    matchedValueId?: number | null
-    finalValue?: string | null
-    confidence?: Decimal | DecimalJsLike | number | string | null
-    extractionMethod?: string | null
-    alternativeValues?: NullableJsonNullValueInput | InputJsonValue
-    isVerified?: boolean
-    verifiedAt?: Date | string | null
-    createdAt?: Date | string
   }
 
   export type ExtractionResultFlatCreateManyApproverInput = {
@@ -134416,6 +135914,62 @@ export namespace Prisma {
     otherRoughV2?: Decimal | DecimalJsLike | number | string | null
     otherVdrCost?: Decimal | DecimalJsLike | number | string | null
     otherFinalCost?: Decimal | DecimalJsLike | number | string | null
+    adjusterAutoBgt?: Decimal | DecimalJsLike | number | string | null
+    adjusterRoughV2?: Decimal | DecimalJsLike | number | string | null
+    adjusterVdrCost?: Decimal | DecimalJsLike | number | string | null
+    adjusterFinalCost?: Decimal | DecimalJsLike | number | string | null
+    brotchAutoBgt?: Decimal | DecimalJsLike | number | string | null
+    brotchRoughV2?: Decimal | DecimalJsLike | number | string | null
+    brotchVdrCost?: Decimal | DecimalJsLike | number | string | null
+    brotchFinalCost?: Decimal | DecimalJsLike | number | string | null
+    buckleAutoBgt?: Decimal | DecimalJsLike | number | string | null
+    buckleRoughV2?: Decimal | DecimalJsLike | number | string | null
+    buckleVdrCost?: Decimal | DecimalJsLike | number | string | null
+    buckleFinalCost?: Decimal | DecimalJsLike | number | string | null
+    eyeletsAutoBgt?: Decimal | DecimalJsLike | number | string | null
+    eyeletsRoughV2?: Decimal | DecimalJsLike | number | string | null
+    eyeletsVdrCost?: Decimal | DecimalJsLike | number | string | null
+    eyeletsFinalCost?: Decimal | DecimalJsLike | number | string | null
+    hangingDRingAutoBgt?: Decimal | DecimalJsLike | number | string | null
+    hangingDRingRoughV2?: Decimal | DecimalJsLike | number | string | null
+    hangingDRingVdrCost?: Decimal | DecimalJsLike | number | string | null
+    hangingDRingFinalCost?: Decimal | DecimalJsLike | number | string | null
+    hookAutoBgt?: Decimal | DecimalJsLike | number | string | null
+    hookRoughV2?: Decimal | DecimalJsLike | number | string | null
+    hookVdrCost?: Decimal | DecimalJsLike | number | string | null
+    hookFinalCost?: Decimal | DecimalJsLike | number | string | null
+    labelAutoBgt?: Decimal | DecimalJsLike | number | string | null
+    labelRoughV2?: Decimal | DecimalJsLike | number | string | null
+    labelVdrCost?: Decimal | DecimalJsLike | number | string | null
+    labelFinalCost?: Decimal | DecimalJsLike | number | string | null
+    laceAutoBgt?: Decimal | DecimalJsLike | number | string | null
+    laceRoughV2?: Decimal | DecimalJsLike | number | string | null
+    laceVdrCost?: Decimal | DecimalJsLike | number | string | null
+    laceFinalCost?: Decimal | DecimalJsLike | number | string | null
+    pockettingFabricAutoBgt?: Decimal | DecimalJsLike | number | string | null
+    pockettingFabricRoughV2?: Decimal | DecimalJsLike | number | string | null
+    pockettingFabricVdrCost?: Decimal | DecimalJsLike | number | string | null
+    pockettingFabricFinalCost?: Decimal | DecimalJsLike | number | string | null
+    pockettingReadymadeAutoBgt?: Decimal | DecimalJsLike | number | string | null
+    pockettingReadymadeRoughV2?: Decimal | DecimalJsLike | number | string | null
+    pockettingReadymadeVdrCost?: Decimal | DecimalJsLike | number | string | null
+    pockettingReadymadeFinalCost?: Decimal | DecimalJsLike | number | string | null
+    santaAutoBgt?: Decimal | DecimalJsLike | number | string | null
+    santaRoughV2?: Decimal | DecimalJsLike | number | string | null
+    santaVdrCost?: Decimal | DecimalJsLike | number | string | null
+    santaFinalCost?: Decimal | DecimalJsLike | number | string | null
+    stopperAutoBgt?: Decimal | DecimalJsLike | number | string | null
+    stopperRoughV2?: Decimal | DecimalJsLike | number | string | null
+    stopperVdrCost?: Decimal | DecimalJsLike | number | string | null
+    stopperFinalCost?: Decimal | DecimalJsLike | number | string | null
+    tagAutoBgt?: Decimal | DecimalJsLike | number | string | null
+    tagRoughV2?: Decimal | DecimalJsLike | number | string | null
+    tagVdrCost?: Decimal | DecimalJsLike | number | string | null
+    tagFinalCost?: Decimal | DecimalJsLike | number | string | null
+    tasselsAutoBgt?: Decimal | DecimalJsLike | number | string | null
+    tasselsRoughV2?: Decimal | DecimalJsLike | number | string | null
+    tasselsVdrCost?: Decimal | DecimalJsLike | number | string | null
+    tasselsFinalCost?: Decimal | DecimalJsLike | number | string | null
     printAutoBgt?: Decimal | DecimalJsLike | number | string | null
     printRoughV2?: Decimal | DecimalJsLike | number | string | null
     printVendorCost?: Decimal | DecimalJsLike | number | string | null
@@ -134538,7 +136092,6 @@ export namespace Prisma {
     inputTokens?: NullableIntFieldUpdateOperationsInput | number | null
     outputTokens?: NullableIntFieldUpdateOperationsInput | number | null
     category?: CategoryUpdateOneRequiredWithoutExtractionsNestedInput
-    results?: ExtractionResultUpdateManyWithoutJobNestedInput
     flatResult?: ExtractionResultFlatUpdateOneWithoutJobNestedInput
   }
 
@@ -134566,7 +136119,6 @@ export namespace Prisma {
     apiCost?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
     inputTokens?: NullableIntFieldUpdateOperationsInput | number | null
     outputTokens?: NullableIntFieldUpdateOperationsInput | number | null
-    results?: ExtractionResultUncheckedUpdateManyWithoutJobNestedInput
     flatResult?: ExtractionResultFlatUncheckedUpdateOneWithoutJobNestedInput
   }
 
@@ -134594,51 +136146,6 @@ export namespace Prisma {
     apiCost?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
     inputTokens?: NullableIntFieldUpdateOperationsInput | number | null
     outputTokens?: NullableIntFieldUpdateOperationsInput | number | null
-  }
-
-  export type ExtractionResultUpdateWithoutVerifierInput = {
-    id?: StringFieldUpdateOperationsInput | string
-    rawValue?: NullableStringFieldUpdateOperationsInput | string | null
-    finalValue?: NullableStringFieldUpdateOperationsInput | string | null
-    confidence?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
-    extractionMethod?: NullableStringFieldUpdateOperationsInput | string | null
-    alternativeValues?: NullableJsonNullValueInput | InputJsonValue
-    isVerified?: BoolFieldUpdateOperationsInput | boolean
-    verifiedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
-    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
-    attribute?: MasterAttributeUpdateOneRequiredWithoutExtractionsNestedInput
-    job?: ExtractionJobUpdateOneRequiredWithoutResultsNestedInput
-    matchedValue?: AttributeAllowedValueUpdateOneWithoutMatchedResultsNestedInput
-  }
-
-  export type ExtractionResultUncheckedUpdateWithoutVerifierInput = {
-    id?: StringFieldUpdateOperationsInput | string
-    jobId?: StringFieldUpdateOperationsInput | string
-    attributeId?: IntFieldUpdateOperationsInput | number
-    rawValue?: NullableStringFieldUpdateOperationsInput | string | null
-    matchedValueId?: NullableIntFieldUpdateOperationsInput | number | null
-    finalValue?: NullableStringFieldUpdateOperationsInput | string | null
-    confidence?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
-    extractionMethod?: NullableStringFieldUpdateOperationsInput | string | null
-    alternativeValues?: NullableJsonNullValueInput | InputJsonValue
-    isVerified?: BoolFieldUpdateOperationsInput | boolean
-    verifiedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
-    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
-  }
-
-  export type ExtractionResultUncheckedUpdateManyWithoutVerifierInput = {
-    id?: StringFieldUpdateOperationsInput | string
-    jobId?: StringFieldUpdateOperationsInput | string
-    attributeId?: IntFieldUpdateOperationsInput | number
-    rawValue?: NullableStringFieldUpdateOperationsInput | string | null
-    matchedValueId?: NullableIntFieldUpdateOperationsInput | number | null
-    finalValue?: NullableStringFieldUpdateOperationsInput | string | null
-    confidence?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
-    extractionMethod?: NullableStringFieldUpdateOperationsInput | string | null
-    alternativeValues?: NullableJsonNullValueInput | InputJsonValue
-    isVerified?: BoolFieldUpdateOperationsInput | boolean
-    verifiedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
-    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
   }
 
   export type ExtractionResultFlatUpdateWithoutApproverInput = {
@@ -134807,6 +136314,62 @@ export namespace Prisma {
     otherRoughV2?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
     otherVdrCost?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
     otherFinalCost?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    adjusterAutoBgt?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    adjusterRoughV2?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    adjusterVdrCost?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    adjusterFinalCost?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    brotchAutoBgt?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    brotchRoughV2?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    brotchVdrCost?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    brotchFinalCost?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    buckleAutoBgt?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    buckleRoughV2?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    buckleVdrCost?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    buckleFinalCost?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    eyeletsAutoBgt?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    eyeletsRoughV2?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    eyeletsVdrCost?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    eyeletsFinalCost?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    hangingDRingAutoBgt?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    hangingDRingRoughV2?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    hangingDRingVdrCost?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    hangingDRingFinalCost?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    hookAutoBgt?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    hookRoughV2?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    hookVdrCost?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    hookFinalCost?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    labelAutoBgt?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    labelRoughV2?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    labelVdrCost?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    labelFinalCost?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    laceAutoBgt?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    laceRoughV2?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    laceVdrCost?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    laceFinalCost?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    pockettingFabricAutoBgt?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    pockettingFabricRoughV2?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    pockettingFabricVdrCost?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    pockettingFabricFinalCost?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    pockettingReadymadeAutoBgt?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    pockettingReadymadeRoughV2?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    pockettingReadymadeVdrCost?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    pockettingReadymadeFinalCost?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    santaAutoBgt?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    santaRoughV2?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    santaVdrCost?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    santaFinalCost?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    stopperAutoBgt?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    stopperRoughV2?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    stopperVdrCost?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    stopperFinalCost?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    tagAutoBgt?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    tagRoughV2?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    tagVdrCost?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    tagFinalCost?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    tasselsAutoBgt?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    tasselsRoughV2?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    tasselsVdrCost?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    tasselsFinalCost?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
     printAutoBgt?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
     printRoughV2?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
     printVendorCost?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
@@ -135040,6 +136603,62 @@ export namespace Prisma {
     otherRoughV2?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
     otherVdrCost?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
     otherFinalCost?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    adjusterAutoBgt?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    adjusterRoughV2?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    adjusterVdrCost?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    adjusterFinalCost?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    brotchAutoBgt?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    brotchRoughV2?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    brotchVdrCost?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    brotchFinalCost?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    buckleAutoBgt?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    buckleRoughV2?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    buckleVdrCost?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    buckleFinalCost?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    eyeletsAutoBgt?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    eyeletsRoughV2?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    eyeletsVdrCost?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    eyeletsFinalCost?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    hangingDRingAutoBgt?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    hangingDRingRoughV2?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    hangingDRingVdrCost?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    hangingDRingFinalCost?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    hookAutoBgt?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    hookRoughV2?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    hookVdrCost?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    hookFinalCost?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    labelAutoBgt?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    labelRoughV2?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    labelVdrCost?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    labelFinalCost?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    laceAutoBgt?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    laceRoughV2?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    laceVdrCost?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    laceFinalCost?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    pockettingFabricAutoBgt?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    pockettingFabricRoughV2?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    pockettingFabricVdrCost?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    pockettingFabricFinalCost?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    pockettingReadymadeAutoBgt?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    pockettingReadymadeRoughV2?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    pockettingReadymadeVdrCost?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    pockettingReadymadeFinalCost?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    santaAutoBgt?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    santaRoughV2?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    santaVdrCost?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    santaFinalCost?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    stopperAutoBgt?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    stopperRoughV2?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    stopperVdrCost?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    stopperFinalCost?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    tagAutoBgt?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    tagRoughV2?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    tagVdrCost?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    tagFinalCost?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    tasselsAutoBgt?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    tasselsRoughV2?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    tasselsVdrCost?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    tasselsFinalCost?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
     printAutoBgt?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
     printRoughV2?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
     printVendorCost?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
@@ -135272,6 +136891,62 @@ export namespace Prisma {
     otherRoughV2?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
     otherVdrCost?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
     otherFinalCost?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    adjusterAutoBgt?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    adjusterRoughV2?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    adjusterVdrCost?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    adjusterFinalCost?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    brotchAutoBgt?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    brotchRoughV2?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    brotchVdrCost?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    brotchFinalCost?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    buckleAutoBgt?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    buckleRoughV2?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    buckleVdrCost?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    buckleFinalCost?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    eyeletsAutoBgt?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    eyeletsRoughV2?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    eyeletsVdrCost?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    eyeletsFinalCost?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    hangingDRingAutoBgt?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    hangingDRingRoughV2?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    hangingDRingVdrCost?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    hangingDRingFinalCost?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    hookAutoBgt?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    hookRoughV2?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    hookVdrCost?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    hookFinalCost?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    labelAutoBgt?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    labelRoughV2?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    labelVdrCost?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    labelFinalCost?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    laceAutoBgt?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    laceRoughV2?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    laceVdrCost?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    laceFinalCost?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    pockettingFabricAutoBgt?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    pockettingFabricRoughV2?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    pockettingFabricVdrCost?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    pockettingFabricFinalCost?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    pockettingReadymadeAutoBgt?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    pockettingReadymadeRoughV2?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    pockettingReadymadeVdrCost?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    pockettingReadymadeFinalCost?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    santaAutoBgt?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    santaRoughV2?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    santaVdrCost?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    santaFinalCost?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    stopperAutoBgt?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    stopperRoughV2?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    stopperVdrCost?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    stopperFinalCost?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    tagAutoBgt?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    tagRoughV2?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    tagVdrCost?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    tagFinalCost?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    tasselsAutoBgt?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    tasselsRoughV2?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    tasselsVdrCost?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    tasselsFinalCost?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
     printAutoBgt?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
     printRoughV2?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
     printVendorCost?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null

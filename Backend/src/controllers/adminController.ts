@@ -1111,15 +1111,6 @@ export const getAllExtractions = async (req: Request, res: Response): Promise<vo
             }
           },
           user: { select: { id: true, name: true, email: true, role: true } },
-          results: {
-            select: {
-              id: true,
-              rawValue: true,
-              finalValue: true,
-              confidence: true,
-              attribute: { select: { key: true, label: true } }
-            }
-          }
         }
       }),
       prisma.extractionJob.count()

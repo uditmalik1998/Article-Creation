@@ -73,7 +73,6 @@ async function main() {
 
     // Step 2: Clear existing data (optional - comment out to preserve)
     console.log('🗑️  Step 2/7: Clearing existing data...');
-    await prisma.extractionResult.deleteMany({});
     await prisma.extractionJob.deleteMany({});
     await prisma.categoryAttribute.deleteMany({});
     await prisma.attributeAllowedValue.deleteMany({});

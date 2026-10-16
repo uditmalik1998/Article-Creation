@@ -27,13 +27,17 @@ export class FlatteningService {
     }
 
     /**
-     * Flatten extraction job results into the flat table for fast querying
+     * Build the flat-table row for an extraction job from its extracted
+     * attribute values (passed in memory — they are no longer stored per
+     * attribute in a separate table).
      */
-    async flattenExtractionResults(jobId: string): Promise<void> {
+    async flattenExtractionResults(
+        jobId: string,
+        entries: { attributeId: number; rawValue?: string | null; finalValue?: string | null }[],
+    ): Promise<void> {
         const job = await prisma.extractionJob.findUnique({
             where: { id: jobId },
             include: {
-                results: { include: { attribute: true } },
                 category: {
                     include: {
                         subDepartment: {
@@ -55,7 +59,17 @@ export class FlatteningService {
             select: { vendorCode: true }
         });
 
-        const flatData = await this.mapToFlatStructure(job, existingFlat?.vendorCode || null);
+        // Attribute id → key, to address the values by key below.
+        const attrIds = [...new Set(entries.map((e) => e.attributeId))];
+        const attrs = attrIds.length > 0
+            ? await prisma.masterAttribute.findMany({ where: { id: { in: attrIds } }, select: { id: true, key: true } })
+            : [];
+        const keyById = new Map(attrs.map((a) => [a.id, a.key]));
+        const results = entries
+            .filter((e) => keyById.has(e.attributeId))
+            .map((e) => ({ ...e, attribute: { key: keyById.get(e.attributeId)! } }));
+
+        const flatData = await this.mapToFlatStructure({ ...job, results }, existingFlat?.vendorCode || null);
 
         // Upsert to flat table (create or update)
         const flatRecord = await prisma.extractionResultFlat.upsert({
@@ -418,29 +432,6 @@ export class FlatteningService {
         );
     }
 
-    /**
-     * Batch flatten multiple extraction jobs
-     */
-    async flattenMultipleJobs(jobIds: string[]): Promise<void> {
-        console.log(`🔄 Flattening ${jobIds.length} extraction jobs...`);
-
-        let successCount = 0;
-        let errorCount = 0;
-
-        for (const jobId of jobIds) {
-            try {
-                await this.flattenExtractionResults(jobId);
-                successCount++;
-            } catch (error) {
-                console.error(`❌ Error flattening job ${jobId}:`, error);
-                errorCount++;
-            }
-        }
-
-        console.log(`\n📊 Flattening Summary:`);
-        console.log(`   ✅ Success: ${successCount}`);
-        console.log(`   ❌ Errors: ${errorCount}`);
-    }
 }
 
 export const flatteningService = new FlatteningService();

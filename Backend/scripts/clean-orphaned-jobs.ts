@@ -36,14 +36,6 @@ async function cleanOrphanedJobs() {
 
         console.log('\n🗑️  Deleting orphaned jobs...');
 
-        // Delete orphaned extraction results first
-        const deletedResults = await prisma.extractionResult.deleteMany({
-            where: {
-                jobId: { in: orphanedJobs.map(j => j.id) }
-            }
-        });
-        console.log(`   Deleted ${deletedResults.count} orphaned extraction results`);
-
         // Delete orphaned jobs
         const deletedJobs = await prisma.extractionJob.deleteMany({
             where: {
