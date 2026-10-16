@@ -748,6 +748,7 @@ export class ApproverController {
                 userDiv: !isUnscoped ? req.user?.division : undefined,
                 userSubDiv: !isUnscoped ? req.user?.subDivision : undefined,
                 status, division, subDivision, majorCategory, startDate, endDate, search, page, limit, pathType, source, presentationsType, groupBy,
+                sapSyncStatus: req.query.sapSyncStatus,
             });
             const cached = ApproverController.itemsCache.get(cacheKey);
             if (cached && cached.expiresAt > Date.now()) {
@@ -1262,6 +1263,13 @@ export class ApproverController {
             };
         }
 
+        // ?ids=a,b,c — only the cards selected on the page (Rough / Precise Costing).
+        const ids = String(req.query.ids || '').split(',').map((s) => s.trim()).filter(Boolean);
+        if (ids.length > 0) {
+            where.AND = where.AND || [];
+            where.AND.push({ id: { in: ids } });
+        }
+
         // Text search — pushed into AND so it never overrides path/status filters
         if (search) {
             const searchTerm = search as string;
@@ -1579,6 +1587,7 @@ export class ApproverController {
             });
 
             const genericIds = generics.map((g: any) => g.id);
+            const genericById = new Map<string, any>(generics.map((g: any) => [g.id, g]));
 
             // Fetch SAP-created variants (own article number present), chunked to bound the IN clause.
             const variantsByGeneric = new Map<string, any[]>();
@@ -1600,6 +1609,45 @@ export class ApproverController {
                     const key = (v as any).genericArticleId as string;
                     if (!variantsByGeneric.has(key)) variantsByGeneric.set(key, []);
                     variantsByGeneric.get(key)!.push(v);
+                }
+
+                // Current variant table (fg_variants_article_data). It only holds the
+                // variant's own fields, so the row inherits the generic's attributes.
+                const fgVs = await prisma.fgVariantArticleData.findMany({
+                    where: {
+                        genericArticleId: { in: chunk },
+                        variantArticleNumber: { not: null },
+                        NOT: { variantArticleNumber: '' },
+                    },
+                    orderBy: [{ variantColor: 'asc' }, { variantSize: 'asc' }],
+                });
+                for (const fv of fgVs) {
+                    const key = fv.genericArticleId as string;
+                    const g = genericById.get(key);
+                    if (!g) continue;
+                    if (!variantsByGeneric.has(key)) variantsByGeneric.set(key, []);
+                    variantsByGeneric.get(key)!.push({
+                        ...g,
+                        id: fv.id,
+                        genericArticleId: key,
+                        articleNumber: fv.variantArticleNumber,
+                        sapArticleId: fv.variantArticleNumber,
+                        variantSize: fv.variantSize,
+                        variantColor: fv.variantColor,
+                        division: fv.division ?? g.division,
+                        subDivision: fv.subDivision ?? g.subDivision,
+                        majorCategory: fv.majorCategory ?? g.majorCategory,
+                        vendorName: fv.vendorName ?? g.vendorName,
+                        vendorCode: fv.vendorCode ?? g.vendorCode,
+                        designNumber: fv.designNumber ?? g.designNumber,
+                        rate: fv.rate ?? g.rate,
+                        mrp: fv.mrp ?? g.mrp,
+                        approvalStatus: fv.approvalStatus,
+                        sapSyncStatus: fv.sapSyncStatus,
+                        approvedAt: fv.approvedAt ?? g.approvedAt,
+                        createdAt: fv.createdAt,
+                        updatedAt: fv.updatedAt,
+                    });
                 }
             }
 
@@ -1894,6 +1942,7 @@ export class ApproverController {
                     fabricArticleNumber: true,
                     fabricArticleDescription: true,
                     autoBgt: true, roughV2: true, vendorFabricRate: true, finalCost: true,
+                    fWidth: true, preciseConsumptionKg: true, roughConsumptionKg: true,
                     bodyArticle: true,
                     bodyArticleDescription: true,
                     cuttingBgtPrVal: true, cuttingActPrVal: true,
@@ -2062,12 +2111,27 @@ export class ApproverController {
                 tr.commit();
                 track(blank());
 
-                // FAB — the Fab card's AUTO-BGT / ROUGH-V2 / VENDOR COST / FINAL COST
-                matRow({
-                    type: 'FAB', mc: 'FAB_MC', artNo: a.fabricArticleNumber || null, artDesc: a.fabricArticleDescription || null,
-                    uom: 'KG',
-                    k: num(a.autoBgt), l: num(a.roughV2), m: num(a.vendorFabricRate), n: num(a.finalCost),
-                }, { fill: LIGHT_BLUE });
+                // FAB — RATE = Fab card VENDOR COST, WST % = 4, FAB WIDTH = M_WIDTH as a
+                // number (38" → 38), PR PC CONS. = precise consumption (else rough).
+                // AUTO-BGT / ROUGH-V2 / VDR = (rate × cons) × (100 + WST%) / 100,
+                // with the Fab card's AUTO-BGT / ROUGH-V2 / RATE cell. FINAL left blank.
+                {
+                    const fr = nextRow;
+                    const widthNum = parseInt(String(a.fWidth ?? '').replace(/[^0-9.]/g, ''), 10);
+                    const cons = num(a.preciseConsumptionKg) ?? num(a.roughConsumptionKg);
+                    const autoBgt = num(a.autoBgt);
+                    const roughV2 = num(a.roughV2);
+                    const wst = (rate: string) => ({ formula: `+(${rate}*J${fr})*(100+H${fr})/100` });
+                    track(addRow([
+                        'FAB', 'FAB_MC', a.fabricArticleNumber || null, a.fabricArticleDescription || null, 'KG', null,
+                        num(a.vendorFabricRate), 4, Number.isNaN(widthNum) ? null : widthNum, cons,
+                        autoBgt != null ? wst(String(autoBgt)) : null,
+                        roughV2 != null ? wst(String(roughV2)) : null,
+                        wst(`G${fr}`),
+                        null,
+                        { formula: `IF(N${fr}="","",N${fr}-L${fr})` }, null, null,
+                    ], { fill: LIGHT_BLUE }));
+                }
                 track(blank());
 
                 for (const [name, key] of BTRIM_ROWS) {

@@ -15,7 +15,6 @@ import {
   BarChart3,
   Globe,
   User,
-  AlertTriangle,
   Upload,
   ClipboardList,
   Bell,
@@ -192,7 +191,6 @@ export const AppSidebar: React.FC<AppSidebarProps> = ({ collapsed, onCollapsedCh
         { key: '/approver/old-articles', Icon: History, label: 'Old articles' },
         { key: '/approver/rejected', Icon: XCircle, label: 'Rejected' },
         { key: '/approver/created', Icon: CheckCircle2, label: 'Created' },
-        { key: '/approver/failed', Icon: AlertTriangle, label: 'Failed Creations' },
       ],
     });
   }
@@ -305,6 +303,11 @@ export const AppSidebar: React.FC<AppSidebarProps> = ({ collapsed, onCollapsedCh
 
   const isPathActive = (key: string) => location.pathname === key || location.pathname.startsWith(key + '/');
 
+  // Within a group only the most specific match is active, so /approver/created
+  // highlights "Created" and not also "New articles" (/approver).
+  const isChildActive = (key: string, siblings: { key: string }[]) =>
+    isPathActive(key) && !siblings.some((s) => s.key.length > key.length && isPathActive(s.key));
+
   // Auto-open the group containing the active path
   useEffect(() => {
     const next: Record<string, boolean> = {};
@@ -364,7 +367,7 @@ export const AppSidebar: React.FC<AppSidebarProps> = ({ collapsed, onCollapsedCh
                 </div>
                 <ul className="flex flex-col gap-0.5">
                   {item.children.map((c) => {
-                    const active = isPathActive(c.key);
+                    const active = isChildActive(c.key, item.children);
                     return (
                       <li key={c.key}>
                         <button
@@ -415,7 +418,7 @@ export const AppSidebar: React.FC<AppSidebarProps> = ({ collapsed, onCollapsedCh
           {isOpen && (
             <ul className="mb-1 ml-[20px] mt-0.5 flex flex-col gap-0.5 border-l border-slate-200 pl-2.5 dark:border-slate-700">
               {item.children.map((c) => {
-                const active = isPathActive(c.key);
+                const active = isChildActive(c.key, item.children);
                 return (
                   <li key={c.key}>
                     <button

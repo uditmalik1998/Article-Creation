@@ -343,7 +343,7 @@ export interface DetailNavigationState {
   currentIndex: number;
   currentPage: number;
   totalCount: number;
-  pathType?: 'old' | 'new' | 'rejected' | 'created' | 'failed';
+  pathType?: 'old' | 'new' | 'rejected' | 'created';
   filters: DetailFilters;
   listPage?: number;
 }
@@ -367,7 +367,6 @@ export default function ArticleDetailPage({
     location.pathname.startsWith(`${baseRoute}/old-articles`) ? 'old'
     : location.pathname.startsWith(`${baseRoute}/rejected`) ? 'rejected'
     : location.pathname.startsWith(`${baseRoute}/created`) ? 'created'
-    : location.pathname.startsWith(`${baseRoute}/failed`) ? 'failed'
     : location.pathname.startsWith(baseRoute) ? 'new'
     : undefined;
   const pathType = navState?.pathType ?? pathFromUrl;
@@ -483,7 +482,6 @@ export default function ArticleDetailPage({
     if (pathType === 'old') return `${baseRoute}/old-articles`;
     if (pathType === 'rejected') return `${baseRoute}/rejected`;
     if (pathType === 'created') return `${baseRoute}/created`;
-    if (pathType === 'failed') return `${baseRoute}/failed`;
     return baseRoute;
   }
 
